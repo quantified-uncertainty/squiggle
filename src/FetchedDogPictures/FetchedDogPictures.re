@@ -13,7 +13,7 @@ let make = () => {
   // reasonml.github.io/reason-react/docs/en/components#hooks for more info
   React.useEffect0(() => {
     Js.Promise.(
-      fetch("https://dog.ceo/api/breeds/image/random/3")
+      fetch("https://dog.ceo/api/breeds/image/random/2")
       |> then_(response => response##json())
       |> then_(jsonResponse => {
            setState(_previousState => LoadedDogs(jsonResponse##message));

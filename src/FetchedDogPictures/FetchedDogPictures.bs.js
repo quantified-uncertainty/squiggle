@@ -11,7 +11,7 @@ function FetchedDogPictures(Props) {
   var setState = match[1];
   var state = match[0];
   React.useEffect((function () {
-          fetch("https://dog.ceo/api/breeds/image/random/3").then((function (response) {
+          fetch("https://dog.ceo/api/breeds/image/random/2").then((function (response) {
                       return response.json();
                     })).then((function (jsonResponse) {
                     Curry._1(setState, (function (_previousState) {
