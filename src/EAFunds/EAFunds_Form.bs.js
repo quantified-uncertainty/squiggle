@@ -126,7 +126,15 @@ function EAFunds_Form(Props) {
                     }), React.createElement(Antd_Radio.make, {
                       value: "Payouts",
                       children: "Payouts"
-                    })), foundGroup !== undefined && foundProperty !== undefined ? EAFunds_Model$ProbExample.run(foundGroup[/* group */0], year, foundProperty) : "");
+                    })), foundGroup !== undefined && foundProperty !== undefined ? EAFunds_Model$ProbExample.run(foundGroup[/* group */0], year, foundProperty) : "", React.createElement("table", {
+                  className: "table-auto"
+                }, React.createElement("thead", undefined, React.createElement("tr", undefined, React.createElement("th", {
+                              className: "px-4 py-2 border"
+                            }, "sdfsdf"), React.createElement("th", {
+                              className: "px-4 py-2 border"
+                            }, "sdfsdf"), React.createElement("th", {
+                              className: "px-4 py-2 border"
+                            }, "sdfsdf"))), React.createElement("tbody", undefined)));
 }
 
 var make = EAFunds_Form;

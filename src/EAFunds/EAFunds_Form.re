@@ -62,5 +62,21 @@ let make = () => {
        }
      )
      |> ReasonReact.string}
+    <table className="table-auto">
+      <thead>
+        <tr>
+          <th className="px-4 py-2 border">
+            {"sdfsdf" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border">
+            {"sdfsdf" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border">
+            {"sdfsdf" |> ReasonReact.string}
+          </th>
+        </tr>
+      </thead>
+      <tbody />
+    </table>
   </>;
 };

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "build": "bsb -make-world",
+    "build:style": "tailwind build src/styles/index.css -o src/styles/tailwind.css",
     "start": "bsb -make-world -w -ws _ ",
     "clean": "bsb -clean-world",
     "parcel": "parcel ./src/index.html --public-url / --no-autoinstall -- watch",
@@ -18,6 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "antd": "^3.26.8",
+    "autoprefixer": "^9.7.4",
     "bs-ant-design-alt": "^2.0.0-alpha.32",
     "bs-moment": "^0.4.5",
     "bs-reform": "9.7.1",
@@ -25,6 +27,7 @@
     "less": "^3.10.3",
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-less-js-enabled": "^1.0.2",
+    "postcss-cli": "^7.1.0",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "reason-react": ">=0.7.0",
@@ -33,6 +36,7 @@
   "devDependencies": {
     "bs-platform": "^5.0.6",
     "bsb-js": "^1.1.7",
-    "moduleserve": "^0.9.0"
+    "moduleserve": "^0.9.0",
+    "tailwindcss": "^1.2.0"
   }
 }
