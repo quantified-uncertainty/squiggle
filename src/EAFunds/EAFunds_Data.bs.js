@@ -36,7 +36,7 @@ var funds = /* array */[
     /* existingPayouts */10.0
   ],
   /* record */[
-    /* group : Fund */[/* ANIMAL_WELFARE */0],
+    /* group : All */0,
     /* name */"All",
     /* existingDonations */undefined,
     /* existingPayouts */undefined

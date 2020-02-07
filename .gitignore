@@ -2,6 +2,12 @@
 .merlin
 .bsb.lock
 npm-debug.log
-/lib/bs/
 /node_modules/
-/bundleOutput/
+.cache
+.cache/*
+dist
+lib/*
+*.cache
+build
+yarn-error.log
+*.bs.js

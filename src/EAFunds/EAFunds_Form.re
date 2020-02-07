@@ -14,41 +14,43 @@ module Form = ReForm.Make(FormConfig);
 let handleChange = (handleChange, event) =>
   handleChange(ReactEvent.Form.target(event)##value);
 
-module FieldString = {
-  [@react.component]
-  let make = (~field, ~label) => {
-    <Form.Field
-      field=FormConfig.Group
-      render={({handleChange, value}) =>
-        <Antd.Form.Item
-          label={"Question Type" |> ReasonReact.string}
-          required=true
-          help={
-            "Number example: 'How many inches of rain will there be tomorrow?' Binary example: 'Will it rain tomorrow?'"
-            |> ReasonReact.string
-          }>
-          <Antd.Radio.Group
-            value
-            defaultValue=value
-            onChange={Helpers.handleChange(handleChange)}>
-            <Antd.Radio value="FLOAT">
-              {"Number" |> ReasonReact.string}
-            </Antd.Radio>
-            <Antd.Radio value="PERCENTAGE">
-              {"Binary" |> ReasonReact.string}
-            </Antd.Radio>
-          </Antd.Radio.Group>
-        </Antd.Form.Item>
-      }
-    />;
-  };
-};
-
 [@react.component]
 let make = () => {
-  <Antd.Input
-    // </Antd.Radio.Group>;
-    // <Antd.Radio.Group value=group onChange={handleChange(r => setText(r))}>
-    // let (group, setText) = React.useState(() => "");
-  />;
+  let (group, setGroup) = React.useState(() => "Animal Welfare Fund");
+  let (year, setYear) = React.useState(() => 0.3);
+  let (property, setProperty) = React.useState(() => "Donations");
+  let foundGroup = Belt.Array.getBy(EAFunds_Data.funds, r => r.name === group);
+  let foundProperty =
+    switch (property) {
+    | "Donations" => Some(DONATIONS)
+    | "Payouts" => Some(PAYOUTS)
+    | _ => None
+    };
+  <>
+    <Antd.Radio.Group value=group onChange={handleChange(r => setGroup(r))}>
+      {EAFunds_Data.funds
+       |> Array.map(f =>
+            <Antd.Radio value={f.name}>
+              {f.name |> ReasonReact.string}
+            </Antd.Radio>
+          )
+       |> ReasonReact.array}
+    </Antd.Radio.Group>
+    <Antd.Radio.Group
+      value=property onChange={handleChange(r => setProperty(r))}>
+      <Antd.Radio value="Donations">
+        {"Donations" |> ReasonReact.string}
+      </Antd.Radio>
+      <Antd.Radio value="Payouts">
+        {"Payouts" |> ReasonReact.string}
+      </Antd.Radio>
+    </Antd.Radio.Group>
+    {(
+       switch (foundGroup, foundProperty) {
+       | (Some(g), Some(f)) => EAFunds_Model.run(g.group, 2029., f)
+       | _ => ""
+       }
+     )
+     |> ReasonReact.string}
+  </>;
 };

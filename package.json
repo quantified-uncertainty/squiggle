@@ -19,9 +19,12 @@
   "dependencies": {
     "antd": "^3.26.8",
     "bs-ant-design-alt": "^2.0.0-alpha.32",
+    "bs-moment": "^0.4.5",
     "bs-reform": "9.7.1",
     "lenses-ppx": "4.0.0",
+    "less": "^3.10.3",
     "parcel-bundler": "^1.12.4",
+    "parcel-plugin-less-js-enabled": "^1.0.2",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "reason-react": ">=0.7.0",
@@ -29,6 +32,7 @@
   },
   "devDependencies": {
     "bs-platform": "^5.0.6",
+    "bsb-js": "^1.1.7",
     "moduleserve": "^0.9.0"
   }
 }

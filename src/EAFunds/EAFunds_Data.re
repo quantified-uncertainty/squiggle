@@ -51,5 +51,5 @@ let funds = [|
     Some(4000.0),
     Some(10.0),
   ),
-  makeFundWithInfo("All", Fund(ANIMAL_WELFARE), None, None),
+  makeFundWithInfo("All", All, None, None),
 |];
