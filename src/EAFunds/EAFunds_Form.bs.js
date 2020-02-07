@@ -5,55 +5,8 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var Antd_Radio = require("bs-ant-design-alt/src/Antd_Radio.js");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
-var ReForm$BsReform = require("bs-reform/src/ReForm.bs.js");
 var EAFunds_Data$ProbExample = require("./EAFunds_Data.bs.js");
 var EAFunds_Model$ProbExample = require("./EAFunds_Model.bs.js");
-
-function get(state, field) {
-  switch (field) {
-    case /* Group */0 :
-        return state[/* group */0];
-    case /* Year */1 :
-        return state[/* year */1];
-    case /* Parameter */2 :
-        return state[/* parameter */2];
-    
-  }
-}
-
-function set(state, field, value) {
-  switch (field) {
-    case /* Group */0 :
-        return /* record */[
-                /* group */value,
-                /* year */state[/* year */1],
-                /* parameter */state[/* parameter */2]
-              ];
-    case /* Year */1 :
-        return /* record */[
-                /* group */state[/* group */0],
-                /* year */value,
-                /* parameter */state[/* parameter */2]
-              ];
-    case /* Parameter */2 :
-        return /* record */[
-                /* group */state[/* group */0],
-                /* year */state[/* year */1],
-                /* parameter */value
-              ];
-    
-  }
-}
-
-var FormConfig = {
-  get: get,
-  set: set
-};
-
-var Form = ReForm$BsReform.Make({
-      set: set,
-      get: get
-    });
 
 function handleChange(handleChange$1, $$event) {
   return Curry._1(handleChange$1, $$event.target.value);
@@ -126,21 +79,11 @@ function EAFunds_Form(Props) {
                     }), React.createElement(Antd_Radio.make, {
                       value: "Payouts",
                       children: "Payouts"
-                    })), foundGroup !== undefined && foundProperty !== undefined ? EAFunds_Model$ProbExample.run(foundGroup[/* group */0], year, foundProperty) : "", React.createElement("table", {
-                  className: "table-auto"
-                }, React.createElement("thead", undefined, React.createElement("tr", undefined, React.createElement("th", {
-                              className: "px-4 py-2 border"
-                            }, "sdfsdf"), React.createElement("th", {
-                              className: "px-4 py-2 border"
-                            }, "sdfsdf"), React.createElement("th", {
-                              className: "px-4 py-2 border"
-                            }, "sdfsdf"))), React.createElement("tbody", undefined)));
+                    })), foundGroup !== undefined && foundProperty !== undefined ? EAFunds_Model$ProbExample.run(foundGroup[/* group */0], year, foundProperty) : "");
 }
 
 var make = EAFunds_Form;
 
-exports.FormConfig = FormConfig;
-exports.Form = Form;
 exports.handleChange = handleChange;
 exports.make = make;
-/* Form Not a pure module */
+/* react Not a pure module */

@@ -1,15 +1,4 @@
-open BsReform;
 open EAFunds_Data;
-
-module FormConfig = [%lenses
-  type state = {
-    group: string,
-    year: float,
-    parameter: string,
-  }
-];
-
-module Form = ReForm.Make(FormConfig);
 
 let handleChange = (handleChange, event) =>
   handleChange(ReactEvent.Form.target(event)##value);
@@ -62,21 +51,5 @@ let make = () => {
        }
      )
      |> ReasonReact.string}
-    <table className="table-auto">
-      <thead>
-        <tr>
-          <th className="px-4 py-2 border">
-            {"sdfsdf" |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border">
-            {"sdfsdf" |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border">
-            {"sdfsdf" |> ReasonReact.string}
-          </th>
-        </tr>
-      </thead>
-      <tbody />
-    </table>
   </>;
 };
