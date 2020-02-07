@@ -1,4 +1,4 @@
-let response = EAFunds.calculate(Fund(GLOBAL_HEALTH), 2029., DONATIONS);
+let response = EAFunds_Model.run(Fund(GLOBAL_HEALTH), 2029., DONATIONS);
 
 [@react.component]
 let make = () => {

@@ -1,11 +1,11 @@
 {
-  "name": "reason-react-examples",
+  "name": "probExample",
   "reason": {
     "react-jsx": 3
   },
   "sources": {
-    "dir" : "src",
-    "subdirs" : true
+    "dir": "src",
+    "subdirs": true
   },
   "bsc-flags": ["-bs-super-errors", "-bs-no-version-header"],
   "package-specs": [{
@@ -15,7 +15,13 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
-    "reason-react"
+    "bs-ant-design-alt",
+    "reason-react",
+    "bs-reform",
+    "reschema"
   ],
-  "refmt": 3
+  "refmt": 3,
+  "ppx-flags": [
+    "lenses-ppx/ppx"
+  ],
 }

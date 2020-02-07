@@ -27,4 +27,4 @@ let makeContainer = text => {
   content;
 };
 
-ReactDOMRe.render(<Funds />, makeContainer("Reason Using JS Using Reason"));
+ReactDOMRe.render(<EAFunds_Form />, makeContainer("Funds Calculation"));

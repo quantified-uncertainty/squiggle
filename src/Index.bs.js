@@ -2,14 +2,14 @@
 
 var React = require("react");
 var ReactDom = require("react-dom");
-var Funds$ReasonReactExamples = require("./Funds.bs.js");
-var ExampleStyles$ReasonReactExamples = require("./ExampleStyles.bs.js");
+var EAFunds_Form$ProbExample = require("./EAFunds/EAFunds_Form.bs.js");
+var ExampleStyles$ProbExample = require("./ExampleStyles.bs.js");
 
 var style = document.createElement("style");
 
 document.head.appendChild(style);
 
-style.innerHTML = ExampleStyles$ReasonReactExamples.style;
+style.innerHTML = ExampleStyles$ProbExample.style;
 
 function makeContainer(text) {
   var container = document.createElement("div");
@@ -25,7 +25,7 @@ function makeContainer(text) {
   return content;
 }
 
-ReactDom.render(React.createElement(Funds$ReasonReactExamples.make, { }), makeContainer("Reason Using JS Using Reason"));
+ReactDom.render(React.createElement(EAFunds_Form$ProbExample.make, { }), makeContainer("Funds Calculation"));
 
 exports.style = style;
 exports.makeContainer = makeContainer;

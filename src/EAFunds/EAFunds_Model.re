@@ -1,16 +1,4 @@
-type fund =
-  | ANIMAL_WELFARE
-  | GLOBAL_HEALTH
-  | LONG_TERM_FUTURE
-  | META;
-
-type group =
-  | Fund(fund)
-  | All;
-
-type parameter =
-  | DONATIONS
-  | PAYOUTS;
+open EAFunds_Data;
 
 type yearlyNumericDiff = {
   meanDiff: float,
@@ -54,7 +42,7 @@ module PayoutsIfAround = {
   };
 };
 
-let calculate = (group: group, year: float, parameter: parameter) => {
+let run = (group: group, year: float, parameter: parameter) => {
   PayoutsIfAround.(
     calculateDifference(
       currentValue(group, parameter),
@@ -62,4 +50,12 @@ let calculate = (group: group, year: float, parameter: parameter) => {
       yearlyMeanGrowthRateIfNotClosed(group),
     )
   );
+};
+
+module Model = {
+  type params = {
+    groups: array(fundWithInfo),
+    year: float,
+    parameters: array(parameter),
+  };
 };

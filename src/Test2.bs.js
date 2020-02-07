@@ -24,12 +24,12 @@ function sharesOutstanding(price, marketCap) {
 }
 
 function run(company, year, param, otherSettings) {
-  var match = company.currentPrice;
-  var match$1 = company.marketCap;
+  var match = company[/* currentPrice */1];
+  var match$1 = company[/* marketCap */2];
   switch (param) {
     case /* SHARE_PRICE */0 :
         if (match !== undefined && year > 2019 && year < 2030) {
-          var diffYears = year - otherSettings.currentYear | 0;
+          var diffYears = year - otherSettings[/* currentYear */0] | 0;
           return normal(match, diffYears * 0.1);
         } else {
           return ;
@@ -44,7 +44,7 @@ function run(company, year, param, otherSettings) {
         }
     case /* MARKET_CAP */2 :
         if (match$1 !== undefined && year > 2019 && year < 2030) {
-          var diffYears$1 = year - otherSettings.currentYear | 0;
+          var diffYears$1 = year - otherSettings[/* currentYear */0] | 0;
           return normal(match$1, diffYears$1 * 0.1);
         } else {
           return ;

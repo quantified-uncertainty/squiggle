@@ -5,6 +5,7 @@
     "build": "bsb -make-world",
     "start": "bsb -make-world -w -ws _ ",
     "clean": "bsb -clean-world",
+    "parcel": "parcel ./src/index.html --public-url / --no-autoinstall -- watch",
     "server": "moduleserve ./ --port 8000",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,12 +17,18 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "antd": "^3.26.8",
+    "bs-ant-design-alt": "^2.0.0-alpha.32",
+    "bs-reform": "9.7.1",
+    "lenses-ppx": "4.0.0",
+    "parcel-bundler": "^1.12.4",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
-    "reason-react": ">=0.7.0"
+    "reason-react": ">=0.7.0",
+    "reschema": "^1.3.0"
   },
   "devDependencies": {
-    "bs-platform": "^7.1.0",
+    "bs-platform": "^5.0.6",
     "moduleserve": "^0.9.0"
   }
 }

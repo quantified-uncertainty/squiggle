@@ -1,23 +1,23 @@
 'use strict';
 
-var Math$ReasonReactExamples = require("./Math.bs.js");
+var Math$ProbExample = require("../Math.bs.js");
 
 function yearDiff(year) {
   return year - 2020.0;
 }
 
 function yearlyMeanGrowthRateIfNotClosed(group) {
-  return {
-          meanDiff: 1.1,
-          stdDiff: 1.1
-        };
+  return /* record */[
+          /* meanDiff */1.1,
+          /* stdDiff */1.1
+        ];
 }
 
 function calculateDifference(currentValue, yearInQuestion, y) {
   var yearDiff = yearInQuestion - 2020.0;
-  var meanDiff = Math.pow(y.meanDiff, yearDiff);
-  var stdDevDiff = Math.pow(y.meanDiff, yearDiff);
-  return Math$ReasonReactExamples.normal(currentValue * meanDiff, 0.2 * stdDevDiff);
+  var meanDiff = Math.pow(y[/* meanDiff */0], yearDiff);
+  var stdDevDiff = Math.pow(y[/* meanDiff */0], yearDiff);
+  return Math$ProbExample.normal(currentValue * meanDiff, 0.2 * stdDevDiff);
 }
 
 function currentValue(group, parameter) {
@@ -63,13 +63,16 @@ var PayoutsIfAround = {
   currentValue: currentValue
 };
 
-function calculate(group, year, parameter) {
-  return calculateDifference(currentValue(group, parameter), year, {
-              meanDiff: 1.1,
-              stdDiff: 1.1
-            });
+function run(group, year, parameter) {
+  return calculateDifference(currentValue(group, parameter), year, /* record */[
+              /* meanDiff */1.1,
+              /* stdDiff */1.1
+            ]);
 }
 
+var Model = { };
+
 exports.PayoutsIfAround = PayoutsIfAround;
-exports.calculate = calculate;
+exports.run = run;
+exports.Model = Model;
 /* No side effect */
