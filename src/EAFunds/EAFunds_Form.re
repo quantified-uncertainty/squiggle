@@ -17,7 +17,7 @@ let handleChange = (handleChange, event) =>
 [@react.component]
 let make = () => {
   let (group, setGroup) = React.useState(() => "Animal Welfare Fund");
-  let (year, setYear) = React.useState(() => 0.3);
+  let (year, setYear) = React.useState(() => 2021.);
   let (property, setProperty) = React.useState(() => "Donations");
   let foundGroup = Belt.Array.getBy(EAFunds_Data.funds, r => r.name === group);
   let foundProperty =
@@ -27,6 +27,16 @@ let make = () => {
     | _ => None
     };
   <>
+    <input
+      type_="number"
+      value={year |> Js.Float.toString}
+      onChange={handleChange(r =>
+        switch (Js.Float.fromString(r)) {
+        | r when r >= 2020.0 && r <= 2050.0 => setYear(_ => r)
+        | _ => ()
+        }
+      )}
+    />
     <Antd.Radio.Group value=group onChange={handleChange(r => setGroup(r))}>
       {EAFunds_Data.funds
        |> Array.map(f =>
@@ -47,7 +57,7 @@ let make = () => {
     </Antd.Radio.Group>
     {(
        switch (foundGroup, foundProperty) {
-       | (Some(g), Some(f)) => EAFunds_Model.run(g.group, 2029., f)
+       | (Some(g), Some(f)) => EAFunds_Model.run(g.group, year, f)
        | _ => ""
        }
      )
