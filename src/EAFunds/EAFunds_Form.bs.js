@@ -12,24 +12,64 @@ function handleChange(handleChange$1, $$event) {
   return Curry._1(handleChange$1, $$event.target.value);
 }
 
+function get(state, field) {
+  switch (field) {
+    case /* Group */0 :
+        return state[/* group */0];
+    case /* Year */1 :
+        return state[/* year */1];
+    case /* Output */2 :
+        return state[/* output */2];
+    
+  }
+}
+
+function set(state, field, value) {
+  switch (field) {
+    case /* Group */0 :
+        return /* record */[
+                /* group */value,
+                /* year */state[/* year */1],
+                /* output */state[/* output */2]
+              ];
+    case /* Year */1 :
+        return /* record */[
+                /* group */state[/* group */0],
+                /* year */value,
+                /* output */state[/* output */2]
+              ];
+    case /* Output */2 :
+        return /* record */[
+                /* group */state[/* group */0],
+                /* year */state[/* year */1],
+                /* output */value
+              ];
+    
+  }
+}
+
+var Form = {
+  get: get,
+  set: set
+};
+
 function EAFunds_Form(Props) {
   var match = React.useState((function () {
-          return "Animal Welfare Fund";
+          return /* record */[
+                  /* group */"Animal Welfare Fund",
+                  /* year */2021,
+                  /* output */"Donations"
+                ];
         }));
-  var setGroup = match[1];
-  var group = match[0];
+  var setForm = match[1];
+  var form = match[0];
   var match$1 = React.useState((function () {
-          return 2021;
-        }));
-  var setYear = match$1[1];
-  var year = match$1[0];
-  var match$2 = React.useState((function () {
           return "Donations";
         }));
-  var setProperty = match$2[1];
-  var property = match$2[0];
+  var setProperty = match$1[1];
+  var property = match$1[0];
   var foundGroup = Belt_Array.getBy(EAFunds_Data$ProbExample.funds, (function (r) {
-          return r[/* name */1] === group;
+          return r[/* name */1] === form[/* group */0];
         }));
   var foundProperty;
   switch (property) {
@@ -44,22 +84,25 @@ function EAFunds_Form(Props) {
   }
   return React.createElement(React.Fragment, undefined, React.createElement("input", {
                   type: "number",
-                  value: year.toString(),
+                  value: form[/* year */1].toString(),
                   onChange: (function (param) {
                       var r = param.target.value;
                       var r$1 = Number(r);
                       if (r$1 >= 2020.0 && r$1 <= 2050.0) {
-                        return Curry._1(setYear, (function (param) {
-                                      return r$1;
+                        return Curry._1(setForm, (function (param) {
+                                      return set(form, /* Year */1, r$1);
                                     }));
                       } else {
                         return /* () */0;
                       }
                     })
                 }), React.createElement(Antd_Radio.Group.make, {
-                  value: group,
+                  value: form[/* group */0],
                   onChange: (function (param) {
-                      return Curry._1(setGroup, param.target.value);
+                      var r = param.target.value;
+                      return Curry._1(setForm, (function (param) {
+                                    return set(form, /* Group */0, r);
+                                  }));
                     }),
                   children: $$Array.map((function (f) {
                           return React.createElement(Antd_Radio.make, {
@@ -79,11 +122,12 @@ function EAFunds_Form(Props) {
                     }), React.createElement(Antd_Radio.make, {
                       value: "Payouts",
                       children: "Payouts"
-                    })), foundGroup !== undefined && foundProperty !== undefined ? EAFunds_Model$ProbExample.run(foundGroup[/* group */0], year, foundProperty) : "");
+                    })), foundGroup !== undefined && foundProperty !== undefined ? EAFunds_Model$ProbExample.run(foundGroup[/* group */0], form[/* year */1], foundProperty) : "");
 }
 
 var make = EAFunds_Form;
 
 exports.handleChange = handleChange;
+exports.Form = Form;
 exports.make = make;
 /* react Not a pure module */

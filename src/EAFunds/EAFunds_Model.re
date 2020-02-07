@@ -22,13 +22,13 @@ module PayoutsIfAround = {
     Math.normal(currentValue *. meanDiff, firstYearStdDev *. stdDevDiff);
   };
 
-  let rec currentValue = (group: group, parameter) => {
+  let rec currentValue = (group: group, output) => {
     let sum = (): float =>
-      currentValue(Fund(ANIMAL_WELFARE), parameter)
-      +. currentValue(Fund(GLOBAL_HEALTH), parameter)
-      +. currentValue(Fund(LONG_TERM_FUTURE), parameter)
-      +. currentValue(Fund(META), parameter);
-    switch (group, parameter) {
+      currentValue(Fund(ANIMAL_WELFARE), output)
+      +. currentValue(Fund(GLOBAL_HEALTH), output)
+      +. currentValue(Fund(LONG_TERM_FUTURE), output)
+      +. currentValue(Fund(META), output);
+    switch (group, output) {
     | (Fund(ANIMAL_WELFARE), DONATIONS) => 300000.0
     | (Fund(ANIMAL_WELFARE), PAYOUTS) => 2300000.0
     | (Fund(GLOBAL_HEALTH), DONATIONS) => 1000000.0
@@ -42,10 +42,10 @@ module PayoutsIfAround = {
   };
 };
 
-let run = (group: group, year: float, parameter: parameter) => {
+let run = (group: group, year: float, output: output) => {
   PayoutsIfAround.(
     calculateDifference(
-      currentValue(group, parameter),
+      currentValue(group, output),
       year,
       yearlyMeanGrowthRateIfNotClosed(group),
     )
@@ -56,6 +56,6 @@ module Model = {
   type params = {
     groups: array(fundWithInfo),
     year: float,
-    parameters: array(parameter),
+    outputs: array(output),
   };
 };

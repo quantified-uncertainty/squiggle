@@ -8,7 +8,7 @@ type group =
   | Fund(fund)
   | All;
 
-type parameter =
+type output =
   | DONATIONS
   | PAYOUTS;
 

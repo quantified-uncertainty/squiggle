@@ -1,15 +1,4 @@
-open BsReform;
 open EAFunds_Data;
-
-module FormConfig = [%lenses
-  type state = {
-    group: string,
-    year: float,
-    parameter: string,
-  }
-];
-
-module Form = ReForm.Make(FormConfig);
 
 let handleChange = (handleChange, event) =>
   handleChange(ReactEvent.Form.target(event)##value);
@@ -18,6 +7,7 @@ let handleChange = (handleChange, event) =>
 let make = () => {
   let (year, setYear) = React.useState(() => 2021.);
   <>
+    <h1> {"EA Funds Forecasting Model 0.1" |> ReasonReact.string} </h1>
     <input
       type_="number"
       value={year |> Js.Float.toString}

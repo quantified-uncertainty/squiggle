@@ -20,29 +20,29 @@ function calculateDifference(currentValue, yearInQuestion, y) {
   return Math$ProbExample.normal(currentValue * meanDiff, 0.2 * stdDevDiff);
 }
 
-function currentValue(group, parameter) {
+function currentValue(group, output) {
   if (group) {
     switch (group[0]) {
       case /* ANIMAL_WELFARE */0 :
-          if (parameter) {
+          if (output) {
             return 2300000.0;
           } else {
             return 300000.0;
           }
       case /* GLOBAL_HEALTH */1 :
-          if (parameter) {
+          if (output) {
             return 500000.0;
           } else {
             return 1000000.0;
           }
       case /* LONG_TERM_FUTURE */2 :
-          if (parameter) {
+          if (output) {
             return 120000.0;
           } else {
             return 600000.0;
           }
       case /* META */3 :
-          if (parameter) {
+          if (output) {
             return 830000.0;
           } else {
             return 9300000.0;
@@ -50,7 +50,7 @@ function currentValue(group, parameter) {
       
     }
   } else {
-    return currentValue(/* Fund */[/* ANIMAL_WELFARE */0], parameter) + currentValue(/* Fund */[/* GLOBAL_HEALTH */1], parameter) + currentValue(/* Fund */[/* LONG_TERM_FUTURE */2], parameter) + currentValue(/* Fund */[/* META */3], parameter);
+    return currentValue(/* Fund */[/* ANIMAL_WELFARE */0], output) + currentValue(/* Fund */[/* GLOBAL_HEALTH */1], output) + currentValue(/* Fund */[/* LONG_TERM_FUTURE */2], output) + currentValue(/* Fund */[/* META */3], output);
   }
 }
 
@@ -63,8 +63,8 @@ var PayoutsIfAround = {
   currentValue: currentValue
 };
 
-function run(group, year, parameter) {
-  return calculateDifference(currentValue(group, parameter), year, /* record */[
+function run(group, year, output) {
+  return calculateDifference(currentValue(group, output), year, /* record */[
               /* meanDiff */1.1,
               /* stdDiff */1.1
             ]);
