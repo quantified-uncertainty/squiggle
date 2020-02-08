@@ -37,8 +37,15 @@ module Input = {
   type parameterType =
     | Year(IOTypes.withDefaultMinMax(float))
     | SingleChoice(IOTypes.singleChoice)
-    | FloatPoint
-    | FloatCdf;
+    | FloatPoint;
+
+  let toInput = (p: parameterType) =>
+    switch (p) {
+    | Year(r) => r.default->Belt.Option.map(p => InputTypes.Year(p))
+    | SingleChoice(r) =>
+      r.default->Belt.Option.map(p => InputTypes.SingleChoice(p))
+    | FloatPoint => None
+    };
 
   type parameter = {
     id: string,
@@ -56,6 +63,33 @@ module Input = {
     id,
     name,
     parameterType,
+  };
+
+  module Form = {
+    let handleChange = (handleChange, event) =>
+      handleChange(ReactEvent.Form.target(event)##value);
+    [@react.component]
+    let make =
+        (~parameter: parameter, ~value: option(InputTypes.t), ~onChange) => {
+      switch (parameter.parameterType, value) {
+      | (Year(_), Some(Year(r))) =>
+        <input
+          type_="number"
+          value={r |> Js.Float.toString}
+          onChange={handleChange(r =>
+            switch (Js.Float.fromString(r)) {
+            | r => onChange(_ => Some(InputTypes.Year(r)))
+            }
+          )}
+        />
+      | (FloatPoint, Some(FloatPoint(r))) =>
+        <input type_="number" value={r |> Js.Float.toString} />
+      | (Year(_), _)
+      | (FloatPoint, _) => <input type_="number" value="" />
+      | (SingleChoice(_), _) =>
+        <div> {"Single Choice" |> ReasonReact.string} </div>
+      };
+    };
   };
 };
 
@@ -99,6 +133,34 @@ let gatherInputs = (m: model, a: list(InputTypes.withName)) => {
     [InputTypes.getName(a, "output")],
   ]
   |> List.flatten;
+};
+
+module MS = Belt.Map.String;
+
+type modelMaps = {
+  assumptions: MS.t((Input.parameter, option(InputTypes.t))),
+  inputs: MS.t((Input.parameter, option(InputTypes.t))),
+  output: (Output.parameter, option(InputTypes.t)),
+};
+
+let toMaps = (m: model): modelMaps => {
+  assumptions:
+    MS.fromArray(
+      m.assumptions
+      |> List.map((r: Input.parameter) =>
+           (r.id, (r, Input.toInput(r.parameterType)))
+         )
+      |> Array.of_list,
+    ),
+  inputs:
+    MS.fromArray(
+      m.inputs
+      |> List.map((r: Input.parameter) =>
+           (r.id, (r, Input.toInput(r.parameterType)))
+         )
+      |> Array.of_list,
+    ),
+  output: (Output.make(~name="Payouts", ~parameterType=FloatCdf, ()), None),
 };
 
 type modelParams = {
