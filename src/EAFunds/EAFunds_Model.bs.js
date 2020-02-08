@@ -1,6 +1,10 @@
 'use strict';
 
+var Block = require("bs-platform/lib/js/block.js");
+var Curry = require("bs-platform/lib/js/curry.js");
+var CamlinternalOO = require("bs-platform/lib/js/camlinternalOO.js");
 var Math$ProbExample = require("../Math.bs.js");
+var Model$ProbExample = require("../Model.bs.js");
 
 function yearDiff(year) {
   return year - 2020.0;
@@ -70,9 +74,102 @@ function run(group, year, output) {
             ]);
 }
 
-var Model = { };
+var model_002 = /* assumptions : :: */[
+  Model$ProbExample.Input.make("Yearly Growth Rate", /* FloatPoint */0, undefined, /* () */0),
+  /* :: */[
+    Model$ProbExample.Input.currentYear,
+    /* [] */0
+  ]
+];
+
+var model_003 = /* inputs : :: */[
+  Model$ProbExample.Input.make("Fund", /* SingleChoice */Block.__(1, [/* record */[
+            /* options : :: */[
+              /* tuple */[
+                "Animal Welfare Fund",
+                "animal"
+              ],
+              /* :: */[
+                /* tuple */[
+                  "Global Health Fund",
+                  "globalHealth"
+                ],
+                /* :: */[
+                  /* tuple */[
+                    "Long Term Future Fund",
+                    "longTerm"
+                  ],
+                  /* :: */[
+                    /* tuple */[
+                      "Meta Fund",
+                      "metaFund"
+                    ],
+                    /* :: */[
+                      /* tuple */[
+                        "Total",
+                        "total"
+                      ],
+                      /* [] */0
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            /* default */"total"
+          ]]), undefined, /* () */0),
+  /* :: */[
+    Model$ProbExample.Input.make("Year", /* Year */Block.__(0, [/* record */[
+              /* default */2030.0,
+              /* min */2020.0,
+              /* max */2050.0
+            ]]), undefined, /* () */0),
+    /* [] */0
+  ]
+];
+
+var model_004 = /* outputs : :: */[
+  Model$ProbExample.Output.make("Payments", /* FloatCdf */2, undefined, /* () */0),
+  /* :: */[
+    Model$ProbExample.Output.make("Payouts", /* FloatCdf */2, undefined, /* () */0),
+    /* [] */0
+  ]
+];
+
+var model = /* record */[
+  /* name */"Calculate the payments and payouts of EA Funds based on existing data.",
+  /* author */"George Harrison",
+  model_002,
+  model_003,
+  model_004
+];
+
+var class_tables = [
+  0,
+  0,
+  0
+];
+
+function run$1(a, i) {
+  if (!class_tables[0]) {
+    var $$class = CamlinternalOO.create_table(0);
+    var env = CamlinternalOO.new_variable($$class, "");
+    var env_init = function (env$1) {
+      var self = CamlinternalOO.create_object_opt(0, $$class);
+      self[env] = env$1;
+      return self;
+    };
+    CamlinternalOO.init_class($$class);
+    class_tables[0] = env_init;
+  }
+  return Curry._1(class_tables[0], 0);
+}
+
+var Interface = {
+  model: model,
+  run: run$1
+};
 
 exports.PayoutsIfAround = PayoutsIfAround;
 exports.run = run;
-exports.Model = Model;
-/* No side effect */
+exports.Interface = Interface;
+/* model Not a pure module */

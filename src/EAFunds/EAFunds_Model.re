@@ -52,10 +52,47 @@ let run = (group: group, year: float, output: output) => {
   );
 };
 
-module Model = {
-  type params = {
-    groups: array(fundWithInfo),
-    year: float,
-    outputs: array(output),
+module Interface = {
+  open Model;
+  let model = {
+    name: "Calculate the payments and payouts of EA Funds based on existing data.",
+    author: "George Harrison",
+    assumptions: [
+      Input.make(~name="Yearly Growth Rate", ~parameterType=FloatPoint, ()),
+      Input.currentYear,
+    ],
+    inputs: [
+      Input.make(
+        ~name="Fund",
+        ~parameterType=
+          SingleChoice({
+            default: Some("total"),
+            options: [
+              ("Animal Welfare Fund", "animal"),
+              ("Global Health Fund", "globalHealth"),
+              ("Long Term Future Fund", "longTerm"),
+              ("Meta Fund", "metaFund"),
+              ("Total", "total"),
+            ],
+          }),
+        (),
+      ),
+      Input.make(
+        ~name="Year",
+        ~parameterType=
+          Year({
+            default: Some(2030.0),
+            min: Some(2020.0),
+            max: Some(2050.0),
+          }),
+        (),
+      ),
+    ],
+    outputs: [
+      Output.make(~name="Payments", ~parameterType=FloatCdf, ()),
+      Output.make(~name="Payouts", ~parameterType=FloatCdf, ()),
+    ],
   };
+
+  let run = (a, i) => {};
 };
