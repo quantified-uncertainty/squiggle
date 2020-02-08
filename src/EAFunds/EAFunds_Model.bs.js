@@ -1,8 +1,6 @@
 'use strict';
 
 var Block = require("bs-platform/lib/js/block.js");
-var Curry = require("bs-platform/lib/js/curry.js");
-var CamlinternalOO = require("bs-platform/lib/js/camlinternalOO.js");
 var Math$ProbExample = require("../Math.bs.js");
 var Model$ProbExample = require("../Model.bs.js");
 
@@ -67,11 +65,11 @@ var PayoutsIfAround = {
   currentValue: currentValue
 };
 
-function run(group, year, output) {
-  return calculateDifference(currentValue(group, output), year, /* record */[
-              /* meanDiff */1.1,
-              /* stdDiff */1.1
-            ]);
+function go(group, year, output) {
+  return /* FloatCdf */Block.__(3, [calculateDifference(currentValue(group, output), year, /* record */[
+                  /* meanDiff */1.1,
+                  /* stdDiff */1.1
+                ])]);
 }
 
 var model_002 = /* assumptions : :: */[
@@ -102,12 +100,12 @@ var model_003 = /* inputs : :: */[
                   /* :: */[
                     /* tuple */[
                       "Meta Fund",
-                      "metaFund"
+                      "meta"
                     ],
                     /* :: */[
                       /* tuple */[
-                        "Total",
-                        "total"
+                        "All",
+                        "all"
                       ],
                       /* [] */0
                     ]
@@ -140,36 +138,71 @@ var model = /* record */[
   /* author */"George Harrison",
   model_002,
   model_003,
-  model_004
+  model_004,
+  /* outputConfig : Single */0
 ];
 
-var class_tables = [
-  0,
-  0,
-  0
-];
-
-function run$1(a, i) {
-  if (!class_tables[0]) {
-    var $$class = CamlinternalOO.create_table(0);
-    var env = CamlinternalOO.new_variable($$class, "");
-    var env_init = function (env$1) {
-      var self = CamlinternalOO.create_object_opt(0, $$class);
-      self[env] = env$1;
-      return self;
-    };
-    CamlinternalOO.init_class($$class);
-    class_tables[0] = env_init;
+function convertChoice(s) {
+  switch (s) {
+    case "animal" :
+        return /* Fund */[/* ANIMAL_WELFARE */0];
+    case "globalHealth" :
+        return /* Fund */[/* GLOBAL_HEALTH */1];
+    case "longTerm" :
+        return /* Fund */[/* LONG_TERM_FUTURE */2];
+    case "meta" :
+        return /* Fund */[/* META */3];
+    default:
+      return /* All */0;
   }
-  return Curry._1(class_tables[0], 0);
+}
+
+function run(p) {
+  var match = p[/* assumptions */0];
+  var match$1 = p[/* inputs */1];
+  if (match) {
+    var match$2 = match[0];
+    if (match$2 !== undefined) {
+      var match$3 = match$2;
+      if (match$3.tag) {
+        return ;
+      } else {
+        var match$4 = match[1];
+        if (match$4) {
+          var match$5 = match$4[0];
+          if (match$5 !== undefined && !(match$5.tag || match$4[1] || !match$1)) {
+            var match$6 = match$1[0];
+            if (match$6 !== undefined) {
+              var match$7 = match$6;
+              if (match$7.tag === /* SingleChoice */1 && !match$1[1]) {
+                return go(convertChoice(match$7[0]), match$3[0], /* DONATIONS */0);
+              } else {
+                return ;
+              }
+            } else {
+              return ;
+            }
+          } else {
+            return ;
+          }
+        } else {
+          return ;
+        }
+      }
+    } else {
+      return ;
+    }
+  }
+  
 }
 
 var Interface = {
   model: model,
-  run: run$1
+  convertChoice: convertChoice,
+  run: run
 };
 
 exports.PayoutsIfAround = PayoutsIfAround;
-exports.run = run;
+exports.go = go;
 exports.Interface = Interface;
 /* model Not a pure module */

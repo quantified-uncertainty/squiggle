@@ -42,18 +42,21 @@ module PayoutsIfAround = {
   };
 };
 
-let run = (group: group, year: float, output: output) => {
+let go = (group: group, year: float, output: output) => {
   PayoutsIfAround.(
-    calculateDifference(
-      currentValue(group, output),
-      year,
-      yearlyMeanGrowthRateIfNotClosed(group),
+    Model.InputTypes.FloatCdf(
+      calculateDifference(
+        currentValue(group, output),
+        year,
+        yearlyMeanGrowthRateIfNotClosed(group),
+      ),
     )
   );
 };
 
 module Interface = {
   open Model;
+
   let model = {
     name: "Calculate the payments and payouts of EA Funds based on existing data.",
     author: "George Harrison",
@@ -71,8 +74,8 @@ module Interface = {
               ("Animal Welfare Fund", "animal"),
               ("Global Health Fund", "globalHealth"),
               ("Long Term Future Fund", "longTerm"),
-              ("Meta Fund", "metaFund"),
-              ("Total", "total"),
+              ("Meta Fund", "meta"),
+              ("All", "all"),
             ],
           }),
         (),
@@ -92,7 +95,26 @@ module Interface = {
       Output.make(~name="Payments", ~parameterType=FloatCdf, ()),
       Output.make(~name="Payouts", ~parameterType=FloatCdf, ()),
     ],
+    outputConfig: Single,
   };
 
-  let run = (a, i) => {};
+  let convertChoice = (s: string) =>
+    switch (s) {
+    | "animal" => Fund(ANIMAL_WELFARE)
+    | "globalHealth" => Fund(GLOBAL_HEALTH)
+    | "longTerm" => Fund(LONG_TERM_FUTURE)
+    | "meta" => Fund(META)
+    | _ => All
+    };
+
+  let run = (p: Model.modelParams) => {
+    switch (p.assumptions, p.inputs) {
+    | (
+        [Some(Year(intendedYear)), Some(Year(currentYear))],
+        [Some(SingleChoice(fund))],
+      ) =>
+      Some(go(convertChoice(fund), intendedYear, DONATIONS))
+    | _ => None
+    };
+  };
 };

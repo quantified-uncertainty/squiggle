@@ -34,11 +34,13 @@ let make = () => {
                   {r.name |> ReasonReact.string}
                 </th>
                 <th className="px-4 py-2 border font-normal">
-                  {EAFunds_Model.run(r.group, year, DONATIONS)
+                  {EAFunds_Model.go(r.group, year, DONATIONS)
+                   |> Model.InputTypes.to_string
                    |> ReasonReact.string}
                 </th>
                 <th className="px-4 py-2 border font-normal">
-                  {EAFunds_Model.run(r.group, year, PAYOUTS)
+                  {EAFunds_Model.go(r.group, year, PAYOUTS)
+                   |> Model.InputTypes.to_string
                    |> ReasonReact.string}
                 </th>
               </tr>
