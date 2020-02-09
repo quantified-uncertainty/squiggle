@@ -2,8 +2,8 @@
 
 var React = require("react");
 var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
-var Prop$ProbExample = require("./Prop.bs.js");
-var EAFunds_Model$ProbExample = require("./EAFunds/EAFunds_Model.bs.js");
+var Prop$ProbExample = require("./lib/Prop.bs.js");
+var EAFunds_Model$ProbExample = require("./Models/EAFunds/EAFunds_Model.bs.js");
 
 ((import('./styles/index.css')));
 

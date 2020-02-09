@@ -26,7 +26,8 @@ type otherSettings = {currentYear: int};
 
 let sharesOutstanding = (price, marketCap) =>
   switch (price, marketCap) {
-  | (Some(price), Some(marketCap)) => Some(Math.divide(marketCap, price))
+  | (Some(price), Some(marketCap)) =>
+    Some(FloatCdf.divide(marketCap, price))
   | _ => None
   };
 
@@ -41,11 +42,11 @@ let rec run =
   | (SHARE_PRICE, year, Some(price), _) when year > 2019 && year < 2030 =>
     let diffYears = year - otherSettings.currentYear;
     let diffPerYear = 0.1;
-    Some(Math.normal(price, float_of_int(diffYears) *. diffPerYear));
+    Some(FloatCdf.normal(price, float_of_int(diffYears) *. diffPerYear));
   | (MARKET_CAP, year, _, Some(price)) when year > 2019 && year < 2030 =>
     let diffYears = year - otherSettings.currentYear;
     let diffPerYear = 0.1;
-    Some(Math.normal(price, float_of_int(diffYears) *. diffPerYear));
+    Some(FloatCdf.normal(price, float_of_int(diffYears) *. diffPerYear));
   | (SHARES_OUTSTANDING, year, _, _) when year > 2019 && year < 2030 =>
     let price = run(company, year, SHARE_PRICE, otherSettings);
     let marketCap = run(company, year, MARKET_CAP, otherSettings);

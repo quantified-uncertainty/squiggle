@@ -19,7 +19,7 @@ module PayoutsIfAround = {
     let yearDiff = yearDiff(yearInQuestion);
     let meanDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
     let stdDevDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
-    Math.normal(currentValue *. meanDiff, firstYearStdDev *. stdDevDiff);
+    FloatCdf.normal(currentValue *. meanDiff, firstYearStdDev *. stdDevDiff);
   };
 
   let rec currentValue = (group: group, output) => {
