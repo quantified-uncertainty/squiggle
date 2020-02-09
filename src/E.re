@@ -18,6 +18,7 @@ module O = {
   let bind = Rationale.Option.bind;
   let default = Rationale.Option.default;
   let isSome = Rationale.Option.isSome;
+  let isNone = Rationale.Option.isNone;
   let toExn = Rationale.Option.toExn;
   let some = Rationale.Option.some;
   let firstSome = Rationale.Option.firstSome;

@@ -54,19 +54,20 @@ module ValueMap = {
   let get = MS.get;
   let keys = MS.keysToArray;
   let map = MS.map;
-  let fromArray = MS.fromArray;
-  let values = t => t |> MS.valuesToArray;
+  let fromArray = (r): t => MS.fromArray(r);
+  let values = (t: t) => t |> MS.valuesToArray;
   let update = MS.update;
   let toArray = MS.toArray;
   let fromOptionalMap = (t: MS.t(option(Value.t))): t =>
     MS.keep(t, (_, d) => E.O.isSome(d))
     ->MS.map(d => E.O.toExn("This should not have happened", d));
+  let fromOptionalArray = (r): t => MS.fromArray(r) |> fromOptionalMap;
 };
 
 module TypeWithMetadata = {
   // TODO: Figure out a better name for assumptionType
   type assumptionType =
-    | INPUT
+    | PRIMARY_INPUT
     | ASSUMPTION;
 
   type t = {
@@ -77,7 +78,7 @@ module TypeWithMetadata = {
     assumptionType,
   };
 
-  type ts = list(t);
+  type ts = array(t);
 
   // TODO: Change default here
   let currentYear = {
@@ -89,20 +90,19 @@ module TypeWithMetadata = {
   };
 
   let make =
-      (~name, ~type_, ~id=name, ~description=None, ~assumptionType=INPUT, ()) => {
+      (
+        ~name,
+        ~type_,
+        ~id=name,
+        ~description=None,
+        ~assumptionType=PRIMARY_INPUT,
+        (),
+      ) => {
     id,
     name,
     type_,
     description,
     assumptionType,
-  };
-
-  let toValueMap = (ts: ts) => {
-    ts
-    ->Array.of_list
-    ->Belt.Array.map((b: t) => (b.name, Type.default(b.type_)))
-    ->ValueMap.fromArray
-    ->ValueMap.fromOptionalMap;
   };
 };
 
@@ -110,39 +110,45 @@ module Model = {
   type t = {
     name: string,
     author: string,
-    inputTypes: list(TypeWithMetadata.t),
-    ouputTypes: list(TypeWithMetadata.t),
+    inputTypes: array(TypeWithMetadata.t),
+    outputTypes: array(TypeWithMetadata.t),
   };
-  type inputValues = {
-    inputs: ValueMap.t,
-    outputSelection: string,
+
+  module InputTypes = {
+    let keys = (t: t) =>
+      t.inputTypes |> E.A.fmap((r: TypeWithMetadata.t) => r.name);
   };
-  type outputValues = ValueMap.t;
+};
+
+module Combo = {
+  type combo = {
+    model: Model.t,
+    inputValues: ValueMap.t,
+    outputValues: ValueMap.t,
+  };
 
   module InputValues = {
-    let defaults = (t: t): inputValues => {
-      inputs: t.inputTypes |> TypeWithMetadata.toValueMap,
-      outputSelection: "",
-    };
-    // TODO: This should probably come with a validation or something.
-    let updateInputs =
+    let defaults = (t: Model.t) =>
+      t.inputTypes
+      |> E.A.fmap((o: TypeWithMetadata.t) =>
+           (o.name, Type.default(o.type_))
+         )
+      |> ValueMap.fromOptionalArray;
+
+    let isValid = (t: combo) =>
+      t.model
+      |> Model.InputTypes.keys
+      |> E.A.fmap(ValueMap.get(t.inputValues))
+      |> Belt.Array.some(_, E.O.isNone);
+
+    let update =
         (
-          t: t,
-          inputValues: inputValues,
+          t: combo,
           key: string,
           onUpdate: option(Value.t) => option(Value.t),
-        ) => {
-      ValueMap.update(inputValues.inputs, key, onUpdate);
-    };
+        ) =>
+      ValueMap.update(t.inputValues, key, onUpdate);
   };
 
-  let run = (inputs: inputValues, f) => f(inputs);
-};
-
-module InputValues = {
-  type t = Model.inputValues;
-};
-
-module OutputValues = {
-  type t = ValueMap.t;
+  let run = (t: combo, f): ValueMap.t => f(t.inputValues);
 };
