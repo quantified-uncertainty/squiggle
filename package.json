@@ -7,6 +7,7 @@
     "start": "bsb -make-world -w -ws _ ",
     "clean": "bsb -clean-world",
     "parcel": "parcel ./src/index.html --public-url / --no-autoinstall -- watch",
+    "parcel-build": "parcel build ./src/index.html --no-source-maps --no-autoinstall",
     "server": "moduleserve ./ --port 8000",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
