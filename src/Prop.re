@@ -48,6 +48,21 @@ module Type = {
     };
 };
 
+module ValueMap = {
+  module MS = Belt.Map.String;
+  type t = MS.t(Value.t);
+  let get = MS.get;
+  let keys = MS.keysToArray;
+  let map = MS.map;
+  let fromArray = MS.fromArray;
+  let values = t => t |> MS.valuesToArray;
+  let update = MS.update;
+  let toArray = MS.toArray;
+  let fromOptionalMap = (t: MS.t(option(Value.t))): t =>
+    MS.keep(t, (_, d) => E.O.isSome(d))
+    ->MS.map(d => E.O.toExn("This should not have happened", d));
+};
+
 module TypeWithMetadata = {
   // TODO: Figure out a better name for assumptionType
   type assumptionType =
@@ -61,6 +76,8 @@ module TypeWithMetadata = {
     type_: Type.t,
     assumptionType,
   };
+
+  type ts = list(t);
 
   // TODO: Change default here
   let currentYear = {
@@ -79,44 +96,14 @@ module TypeWithMetadata = {
     description,
     assumptionType,
   };
-};
 
-module ValueMap = {
-  module MS = Belt.Map.String;
-  module Combination = {
-    type t = {
-      typeWithMetadata: TypeWithMetadata.t,
-      value: option(Value.t),
-    };
-    let make = (typeWithMetadata, value) => {typeWithMetadata, value};
-    let makeWithDefaults = typeWithMetadata => {
-      typeWithMetadata,
-      value: Type.default(typeWithMetadata.type_),
-    };
+  let toValueMap = (ts: ts) => {
+    ts
+    ->Array.of_list
+    ->Belt.Array.map((b: t) => (b.name, Type.default(b.type_)))
+    ->ValueMap.fromArray
+    ->ValueMap.fromOptionalMap;
   };
-  type t = MS.t(Combination.t);
-  let get = MS.get;
-  let keys = MS.keysToArray;
-  let map = MS.map;
-  let fromArray = MS.fromArray;
-  let values = t =>
-    t |> MS.valuesToArray |> Array.map((r: Combination.t) => r.value);
-  let types = t =>
-    t
-    |> MS.valuesToArray
-    |> Array.map((r: Combination.t) => r.typeWithMetadata);
-
-  let fromTypesWithMetadata = (c: array(TypeWithMetadata.t)) =>
-    c->Belt.Array.map((b: TypeWithMetadata.t) =>
-      (b.name, Combination.makeWithDefaults(b))
-    )
-    |> fromArray;
-
-  let getValue = (t: t, key: MS.key) =>
-    t->MS.get(key)->Belt.Option.flatMap(r => r.value);
-
-  let getType = (t: t, key: MS.key) =>
-    t->MS.get(key)->Belt.Option.map(r => r.typeWithMetadata);
 };
 
 module Model = {
@@ -132,9 +119,21 @@ module Model = {
   };
   type outputValues = ValueMap.t;
 
-  let toInputDefaults = (t: t): inputValues => {
-    inputs: t.inputTypes |> Array.of_list |> ValueMap.fromTypesWithMetadata,
-    outputSelection: "",
+  module InputValues = {
+    let defaults = (t: t): inputValues => {
+      inputs: t.inputTypes |> TypeWithMetadata.toValueMap,
+      outputSelection: "",
+    };
+    // TODO: This should probably come with a validation or something.
+    let updateInputs =
+        (
+          t: t,
+          inputValues: inputValues,
+          key: string,
+          onUpdate: option(Value.t) => option(Value.t),
+        ) => {
+      ValueMap.update(inputValues.inputs, key, onUpdate);
+    };
   };
 
   let run = (inputs: inputValues, f) => f(inputs);
@@ -142,7 +141,6 @@ module Model = {
 
 module InputValues = {
   type t = Model.inputValues;
-  let update = (t, str, newValue) => t |> 
 };
 
 module OutputValues = {

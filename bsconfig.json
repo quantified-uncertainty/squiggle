@@ -18,6 +18,8 @@
     "bs-ant-design-alt",
     "reason-react",
     "bs-reform",
+    "rationale",
+    "bs-moment",
     "reschema"
   ],
   "refmt": 3,
