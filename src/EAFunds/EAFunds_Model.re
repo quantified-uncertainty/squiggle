@@ -44,7 +44,7 @@ module PayoutsIfAround = {
 
 let go = (group: group, year: float, output: output) => {
   PayoutsIfAround.(
-    Model.InputTypes.FloatCdf(
+    Prop.Value.FloatCdf(
       calculateDifference(
         currentValue(group, output),
         year,
@@ -55,34 +55,30 @@ let go = (group: group, year: float, output: output) => {
 };
 
 module Interface = {
-  open Model;
+  open Prop;
 
-  let model = {
+  let model: Model.t = {
     name: "Calculate the payments and payouts of EA Funds based on existing data.",
     author: "George Harrison",
-    assumptions: [
-      Input.make(~name="Yearly Growth Rate", ~parameterType=FloatPoint, ()),
-      Input.currentYear,
-    ],
-    inputs: [
-      Input.make(
+    inputTypes: [|
+      TypeWithMetadata.make(
         ~name="Fund",
-        ~parameterType=
-          SingleChoice({
+        ~type_=
+          SelectSingle({
             default: Some("total"),
             options: [
-              ("Animal Welfare Fund", "animal"),
-              ("Global Health Fund", "globalHealth"),
-              ("Long Term Future Fund", "longTerm"),
-              ("Meta Fund", "meta"),
-              ("All", "all"),
+              {name: "Animal Welfare Fund", id: "animal"},
+              {name: "Global Health Fund", id: "globalHealth"},
+              {name: "Long Term Future Fund", id: "longTerm"},
+              {name: "Meta Fund", id: "longterm"},
+              {name: "All", id: "all"},
             ],
           }),
         (),
       ),
-      Input.make(
+      TypeWithMetadata.make(
         ~name="Year",
-        ~parameterType=
+        ~type_=
           Year({
             default: Some(2030.0),
             min: Some(2020.0),
@@ -90,12 +86,8 @@ module Interface = {
           }),
         (),
       ),
-    ],
-    outputs: [
-      Output.make(~name="Payments", ~parameterType=FloatCdf, ()),
-      Output.make(~name="Payouts", ~parameterType=FloatCdf, ()),
-    ],
-    outputConfig: Single,
+    |],
+    outputTypes: [||],
   };
 
   let convertChoice = (s: string) =>
@@ -107,14 +99,17 @@ module Interface = {
     | _ => All
     };
 
-  let run = (p: Model.modelParams) => {
-    switch (p.assumptions, p.inputs) {
-    | (
-        [Some(Year(intendedYear)), Some(Year(currentYear))],
-        [Some(SingleChoice(fund))],
-      ) =>
+  let run = (p: Combo.t) => {
+    let get = Prop.ValueMap.get(p.inputValues);
+    switch (get("Fund"), get("Year")) {
+    | (Some(SelectSingle(fund)), Some(FloatPoint(intendedYear))) =>
       Some(go(convertChoice(fund), intendedYear, DONATIONS))
     | _ => None
     };
+  };
+
+  module Form = {
+    [@react.component]
+    let make = () => <Prop.ModelForm combo={Prop.Combo.fromModel(model)} />;
   };
 };

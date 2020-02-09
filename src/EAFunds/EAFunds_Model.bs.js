@@ -1,8 +1,10 @@
 'use strict';
 
 var Block = require("bs-platform/lib/js/block.js");
+var Curry = require("bs-platform/lib/js/curry.js");
+var React = require("react");
 var Math$ProbExample = require("../Math.bs.js");
-var Model$ProbExample = require("../Model.bs.js");
+var Prop$ProbExample = require("../Prop.bs.js");
 
 function yearDiff(year) {
   return year - 2020.0;
@@ -66,46 +68,38 @@ var PayoutsIfAround = {
 };
 
 function go(group, year, output) {
-  return /* FloatCdf */Block.__(3, [calculateDifference(currentValue(group, output), year, /* record */[
+  return /* FloatCdf */Block.__(2, [calculateDifference(currentValue(group, output), year, /* record */[
                   /* meanDiff */1.1,
                   /* stdDiff */1.1
                 ])]);
 }
 
-var model_002 = /* assumptions : :: */[
-  Model$ProbExample.Input.make("Yearly Growth Rate", /* FloatPoint */0, undefined, /* () */0),
-  /* :: */[
-    Model$ProbExample.Input.currentYear,
-    /* [] */0
-  ]
-];
-
-var model_003 = /* inputs : :: */[
-  Model$ProbExample.Input.make("Fund", /* SingleChoice */Block.__(1, [/* record */[
+var model_002 = /* inputTypes : array */[
+  Prop$ProbExample.TypeWithMetadata.make("Fund", /* SelectSingle */Block.__(0, [/* record */[
             /* options : :: */[
-              /* tuple */[
-                "Animal Welfare Fund",
-                "animal"
+              /* record */[
+                /* id */"animal",
+                /* name */"Animal Welfare Fund"
               ],
               /* :: */[
-                /* tuple */[
-                  "Global Health Fund",
-                  "globalHealth"
+                /* record */[
+                  /* id */"globalHealth",
+                  /* name */"Global Health Fund"
                 ],
                 /* :: */[
-                  /* tuple */[
-                    "Long Term Future Fund",
-                    "longTerm"
+                  /* record */[
+                    /* id */"longTerm",
+                    /* name */"Long Term Future Fund"
                   ],
                   /* :: */[
-                    /* tuple */[
-                      "Meta Fund",
-                      "meta"
+                    /* record */[
+                      /* id */"longterm",
+                      /* name */"Meta Fund"
                     ],
                     /* :: */[
-                      /* tuple */[
-                        "All",
-                        "all"
+                      /* record */[
+                        /* id */"all",
+                        /* name */"All"
                       ],
                       /* [] */0
                     ]
@@ -114,32 +108,21 @@ var model_003 = /* inputs : :: */[
               ]
             ],
             /* default */"total"
-          ]]), undefined, /* () */0),
-  /* :: */[
-    Model$ProbExample.Input.make("Year", /* Year */Block.__(0, [/* record */[
-              /* default */2030.0,
-              /* min */2020.0,
-              /* max */2050.0
-            ]]), undefined, /* () */0),
-    /* [] */0
-  ]
+          ]]), undefined, undefined, undefined, /* () */0),
+  Prop$ProbExample.TypeWithMetadata.make("Year", /* Year */Block.__(2, [/* record */[
+            /* default */2030.0,
+            /* min */2020.0,
+            /* max */2050.0
+          ]]), undefined, undefined, undefined, /* () */0)
 ];
 
-var model_004 = /* outputs : :: */[
-  Model$ProbExample.Output.make("Payments", /* FloatCdf */2, undefined, /* () */0),
-  /* :: */[
-    Model$ProbExample.Output.make("Payouts", /* FloatCdf */2, undefined, /* () */0),
-    /* [] */0
-  ]
-];
+var model_003 = /* outputTypes : array */[];
 
 var model = /* record */[
   /* name */"Calculate the payments and payouts of EA Funds based on existing data.",
   /* author */"George Harrison",
   model_002,
-  model_003,
-  model_004,
-  /* outputConfig : Single */0
+  model_003
 ];
 
 function convertChoice(s) {
@@ -158,48 +141,54 @@ function convertChoice(s) {
 }
 
 function run(p) {
-  var match = p[/* assumptions */0];
-  var match$1 = p[/* inputs */1];
-  if (match) {
-    var match$2 = match[0];
-    if (match$2 !== undefined) {
-      var match$3 = match$2;
-      if (match$3.tag) {
-        return ;
-      } else {
-        var match$4 = match[1];
-        if (match$4) {
-          var match$5 = match$4[0];
-          if (match$5 !== undefined && !(match$5.tag || match$4[1] || !match$1)) {
-            var match$6 = match$1[0];
-            if (match$6 !== undefined) {
-              var match$7 = match$6;
-              if (match$7.tag === /* SingleChoice */1 && !match$1[1]) {
-                return go(convertChoice(match$7[0]), match$3[0], /* DONATIONS */0);
-              } else {
-                return ;
-              }
-            } else {
-              return ;
+  var partial_arg = p[/* inputValues */1];
+  var partial_arg$1 = Prop$ProbExample.ValueMap.get;
+  var get = function (param) {
+    return partial_arg$1(partial_arg, param);
+  };
+  var match = Curry._1(get, "Fund");
+  var match$1 = Curry._1(get, "Year");
+  if (match !== undefined) {
+    var match$2 = match;
+    switch (match$2.tag | 0) {
+      case /* SelectSingle */0 :
+          if (match$1 !== undefined) {
+            var match$3 = match$1;
+            switch (match$3.tag | 0) {
+              case /* FloatPoint */1 :
+                  return go(convertChoice(match$2[0]), match$3[0], /* DONATIONS */0);
+              case /* SelectSingle */0 :
+              case /* FloatCdf */2 :
+                  return ;
+              
             }
           } else {
             return ;
           }
-        } else {
+      case /* FloatPoint */1 :
+      case /* FloatCdf */2 :
           return ;
-        }
-      }
-    } else {
-      return ;
+      
     }
   }
   
 }
 
+function EAFunds_Model$Interface$Form(Props) {
+  return React.createElement(Prop$ProbExample.ModelForm.make, {
+              combo: Prop$ProbExample.Combo.fromModel(model)
+            });
+}
+
+var Form = {
+  make: EAFunds_Model$Interface$Form
+};
+
 var Interface = {
   model: model,
   convertChoice: convertChoice,
-  run: run
+  run: run,
+  Form: Form
 };
 
 exports.PayoutsIfAround = PayoutsIfAround;

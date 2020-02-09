@@ -51,12 +51,12 @@ module Type = {
 module ValueMap = {
   module MS = Belt.Map.String;
   type t = MS.t(Value.t);
-  let get = MS.get;
+  let get = (t: t, s) => MS.get(t, s);
   let keys = MS.keysToArray;
   let map = MS.map;
   let fromArray = (r): t => MS.fromArray(r);
   let values = (t: t) => t |> MS.valuesToArray;
-  let update = MS.update;
+  let update = (t, k, v) => MS.update(t, k, _ => v);
   let toArray = MS.toArray;
   let fromOptionalMap = (t: MS.t(option(Value.t))): t =>
     MS.keep(t, (_, d) => E.O.isSome(d))
@@ -121,7 +121,7 @@ module Model = {
 };
 
 module Combo = {
-  type combo = {
+  type t = {
     model: Model.t,
     inputValues: ValueMap.t,
     outputValues: ValueMap.t,
@@ -135,20 +135,90 @@ module Combo = {
          )
       |> ValueMap.fromOptionalArray;
 
-    let isValid = (t: combo) =>
+    let isValid = t =>
       t.model
       |> Model.InputTypes.keys
       |> E.A.fmap(ValueMap.get(t.inputValues))
       |> Belt.Array.some(_, E.O.isNone);
 
-    let update =
-        (
-          t: combo,
-          key: string,
-          onUpdate: option(Value.t) => option(Value.t),
-        ) =>
+    let update = (t, key: string, onUpdate: option(Value.t)) =>
       ValueMap.update(t.inputValues, key, onUpdate);
   };
 
-  let run = (t: combo, f): ValueMap.t => f(t.inputValues);
+  let updateInputValue = (t, k, u) => {
+    ...t,
+    inputValues: InputValues.update(t, k, u),
+  };
+
+  let inputTypeValuePairs = (t: t) =>
+    t.model.inputTypes
+    |> E.A.fmap((i: TypeWithMetadata.t) =>
+         (i, ValueMap.get(t.inputValues, i.id))
+       );
+
+  let fromModel = (t: Model.t) => {
+    model: t,
+    inputValues: InputValues.defaults(t),
+    outputValues: InputValues.defaults(t),
+  };
+
+  let run = (t: t, f): ValueMap.t => f(t.inputValues);
+};
+
+module ValueForm = {
+  let handleChange = (handleChange, event) =>
+    handleChange(ReactEvent.Form.target(event)##value);
+  type onChange = option(Value.t) => unit;
+
+  [@react.component]
+  let make =
+      (
+        ~type_: TypeWithMetadata.t,
+        ~value: option(Value.t),
+        ~onChange: onChange,
+      ) => {
+    switch (type_.type_, value) {
+    | (Year(_), Some(FloatPoint(r))) =>
+      <input
+        type_="number"
+        value={r |> Js.Float.toString}
+        onChange={handleChange(r =>
+          switch (Js.Float.fromString(r)) {
+          | r => onChange(Some(Value.FloatPoint(r)))
+          }
+        )}
+      />
+    | (FloatPoint(_), Some(FloatPoint(r))) =>
+      <input type_="number" value={r |> Js.Float.toString} />
+    | (Year(_), _)
+    | (FloatPoint(_), _) => <input type_="number" value="" />
+    | (SelectSingle(_), _) =>
+      <div> {"Single Choice" |> ReasonReact.string} </div>
+    };
+  };
+};
+
+module ModelForm = {
+  let handleChange = (handleChange, event) =>
+    handleChange(ReactEvent.Form.target(event)##value);
+
+  [@react.component]
+  let make = (~combo: Combo.t) => {
+    let (combo, setCombo) = React.useState(() => combo);
+    <div>
+      {Combo.inputTypeValuePairs(combo)
+       |> E.A.fmap(((type_, value)) =>
+            <ValueForm
+              type_
+              value
+              onChange={newValue =>
+                setCombo(_ =>
+                  Combo.updateInputValue(combo, type_.id, newValue)
+                )
+              }
+            />
+          )
+       |> ReasonReact.array}
+    </div>;
+  };
 };
