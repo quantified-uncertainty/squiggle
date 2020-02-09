@@ -115,6 +115,12 @@ module Model = {
     author: string,
     inputTypes: array(TypeWithMetadata.t),
     outputTypes: array(TypeWithMetadata.t),
+    run: combo => option(Value.t),
+  }
+  and combo = {
+    model: t,
+    inputValues: ValueMap.t,
+    outputValues: ValueMap.t,
   };
 
   module InputTypes = {
@@ -124,11 +130,7 @@ module Model = {
 };
 
 module Combo = {
-  type t = {
-    model: Model.t,
-    inputValues: ValueMap.t,
-    outputValues: ValueMap.t,
-  };
+  type t = Model.combo;
 
   module InputValues = {
     let defaults = (t: Model.t) =>
@@ -136,17 +138,17 @@ module Combo = {
       |> E.A.fmap((o: TypeWithMetadata.t) => (o.id, Type.default(o.type_)))
       |> ValueMap.fromOptionalArray;
 
-    let isValid = t =>
+    let isValid = (t: t) =>
       t.model
       |> Model.InputTypes.keys
       |> E.A.fmap(ValueMap.get(t.inputValues))
       |> Belt.Array.some(_, E.O.isNone);
 
-    let update = (t, key: string, onUpdate: option(Value.t)) =>
+    let update = (t: t, key: string, onUpdate: option(Value.t)) =>
       ValueMap.update(t.inputValues, key, onUpdate);
   };
 
-  let updateInputValue = (t, k, u) => {
+  let updateInputValue = (t: t, k, u) => {
     ...t,
     inputValues: InputValues.update(t, k, u),
   };
@@ -157,7 +159,7 @@ module Combo = {
          (i, ValueMap.get(t.inputValues, i.id))
        );
 
-  let fromModel = (t: Model.t) => {
+  let fromModel = (t: Model.t): t => {
     model: t,
     inputValues: InputValues.defaults(t),
     outputValues: InputValues.defaults(t),
@@ -236,8 +238,8 @@ module ModelForm = {
     handleChange(ReactEvent.Form.target(event)##value);
 
   [@react.component]
-  let make = (~combo: Combo.t, ~runModel: Combo.t => option(Value.t)) => {
-    let formState = makeHelpers(combo);
+  let make = (~model: Model.t) => {
+    let formState = makeHelpers(Combo.fromModel(model));
     <div>
       {Combo.inputTypeValuePairs(formState.combo)
        |> E.A.fmap(((type_, value)) =>
@@ -251,7 +253,7 @@ module ModelForm = {
             />
           )
        |> ReasonReact.array}
-      {runModel(formState.combo)
+      {model.run(formState.combo)
        |> E.O.fmap(Value.to_string)
        |> E.O.default("")
        |> ReasonReact.string}

@@ -57,6 +57,34 @@ let go = (group: group, year: float, output: output) => {
 module Interface = {
   open Prop;
 
+  let convertChoice = (s: string) =>
+    switch (s) {
+    | "animal" => Fund(ANIMAL_WELFARE)
+    | "globalHealth" => Fund(GLOBAL_HEALTH)
+    | "longTerm" => Fund(LONG_TERM_FUTURE)
+    | "meta" => Fund(META)
+    | _ => All
+    };
+
+  let convertOutput = (s: string) =>
+    switch (s) {
+    | "donations" => DONATIONS
+    | _ => PAYOUTS
+    };
+
+  let run = (p: Combo.t) => {
+    let get = Prop.ValueMap.get(p.inputValues);
+    switch (get("Fund"), get("Year"), get("Output")) {
+    | (
+        Some(SelectSingle(fund)),
+        Some(FloatPoint(intendedYear)),
+        Some(SelectSingle(output)),
+      ) =>
+      Some(go(convertChoice(fund), intendedYear, convertOutput(output)))
+    | _ => None
+    };
+  };
+
   let model: Model.t = {
     name: "Calculate the payments and payouts of EA Funds based on existing data.",
     author: "George Harrison",
@@ -87,31 +115,20 @@ module Interface = {
         (),
       ),
       TypeWithMetadata.currentYear,
+      TypeWithMetadata.make(
+        ~name="Output",
+        ~type_=
+          SelectSingle({
+            default: Some("Output"),
+            options: [
+              {name: "Donations", id: "donations"},
+              {name: "Funding", id: "funding"},
+            ],
+          }),
+        (),
+      ),
     |],
     outputTypes: [||],
-  };
-
-  let convertChoice = (s: string) =>
-    switch (s) {
-    | "animal" => Fund(ANIMAL_WELFARE)
-    | "globalHealth" => Fund(GLOBAL_HEALTH)
-    | "longTerm" => Fund(LONG_TERM_FUTURE)
-    | "meta" => Fund(META)
-    | _ => All
-    };
-
-  let run = (p: Combo.t) => {
-    let get = Prop.ValueMap.get(p.inputValues);
-    switch (get("Fund"), get("Year")) {
-    | (Some(SelectSingle(fund)), Some(FloatPoint(intendedYear))) =>
-      Some(go(convertChoice(fund), intendedYear, DONATIONS))
-    | _ => None
-    };
-  };
-
-  module Form = {
-    [@react.component]
-    let make = () =>
-      <Prop.ModelForm combo={Prop.Combo.fromModel(model)} runModel=run />;
+    run,
   };
 };

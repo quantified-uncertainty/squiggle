@@ -1,2 +1,5 @@
 [%bs.raw {|import('./styles/index.css')|}];
-ReactDOMRe.renderToElementWithId(<EAFunds_Model.Interface.Form />, "app");
+ReactDOMRe.renderToElementWithId(
+  <Prop.ModelForm model=EAFunds_Model.Interface.model />,
+  "app",
+);

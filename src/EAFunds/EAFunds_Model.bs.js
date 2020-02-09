@@ -2,7 +2,6 @@
 
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
-var React = require("react");
 var Math$ProbExample = require("../Math.bs.js");
 var Prop$ProbExample = require("../Prop.bs.js");
 
@@ -74,6 +73,76 @@ function go(group, year, output) {
                 ])]);
 }
 
+function convertChoice(s) {
+  switch (s) {
+    case "animal" :
+        return /* Fund */[/* ANIMAL_WELFARE */0];
+    case "globalHealth" :
+        return /* Fund */[/* GLOBAL_HEALTH */1];
+    case "longTerm" :
+        return /* Fund */[/* LONG_TERM_FUTURE */2];
+    case "meta" :
+        return /* Fund */[/* META */3];
+    default:
+      return /* All */0;
+  }
+}
+
+function convertOutput(s) {
+  if (s === "donations") {
+    return /* DONATIONS */0;
+  } else {
+    return /* PAYOUTS */1;
+  }
+}
+
+function run(p) {
+  var partial_arg = p[/* inputValues */1];
+  var partial_arg$1 = Prop$ProbExample.ValueMap.get;
+  var get = function (param) {
+    return partial_arg$1(partial_arg, param);
+  };
+  var match = Curry._1(get, "Fund");
+  var match$1 = Curry._1(get, "Year");
+  var match$2 = Curry._1(get, "Output");
+  if (match !== undefined) {
+    var match$3 = match;
+    switch (match$3.tag | 0) {
+      case /* SelectSingle */0 :
+          if (match$1 !== undefined) {
+            var match$4 = match$1;
+            switch (match$4.tag | 0) {
+              case /* FloatPoint */1 :
+                  if (match$2 !== undefined) {
+                    var match$5 = match$2;
+                    switch (match$5.tag | 0) {
+                      case /* SelectSingle */0 :
+                          return go(convertChoice(match$3[0]), match$4[0], convertOutput(match$5[0]));
+                      case /* FloatPoint */1 :
+                      case /* FloatCdf */2 :
+                          return ;
+                      
+                    }
+                  } else {
+                    return ;
+                  }
+              case /* SelectSingle */0 :
+              case /* FloatCdf */2 :
+                  return ;
+              
+            }
+          } else {
+            return ;
+          }
+      case /* FloatPoint */1 :
+      case /* FloatCdf */2 :
+          return ;
+      
+    }
+  }
+  
+}
+
 var model_002 = /* inputTypes : array */[
   Prop$ProbExample.TypeWithMetadata.make("Fund", /* SelectSingle */Block.__(0, [/* record */[
             /* options : :: */[
@@ -114,7 +183,23 @@ var model_002 = /* inputTypes : array */[
             /* min */2020.0,
             /* max */2050.0
           ]]), undefined, undefined, undefined, /* () */0),
-  Prop$ProbExample.TypeWithMetadata.currentYear
+  Prop$ProbExample.TypeWithMetadata.currentYear,
+  Prop$ProbExample.TypeWithMetadata.make("Output", /* SelectSingle */Block.__(0, [/* record */[
+            /* options : :: */[
+              /* record */[
+                /* id */"donations",
+                /* name */"Donations"
+              ],
+              /* :: */[
+                /* record */[
+                  /* id */"funding",
+                  /* name */"Funding"
+                ],
+                /* [] */0
+              ]
+            ],
+            /* default */"Output"
+          ]]), undefined, undefined, undefined, /* () */0)
 ];
 
 var model_003 = /* outputTypes : array */[];
@@ -123,74 +208,15 @@ var model = /* record */[
   /* name */"Calculate the payments and payouts of EA Funds based on existing data.",
   /* author */"George Harrison",
   model_002,
-  model_003
+  model_003,
+  /* run */run
 ];
 
-function convertChoice(s) {
-  switch (s) {
-    case "animal" :
-        return /* Fund */[/* ANIMAL_WELFARE */0];
-    case "globalHealth" :
-        return /* Fund */[/* GLOBAL_HEALTH */1];
-    case "longTerm" :
-        return /* Fund */[/* LONG_TERM_FUTURE */2];
-    case "meta" :
-        return /* Fund */[/* META */3];
-    default:
-      return /* All */0;
-  }
-}
-
-function run(p) {
-  var partial_arg = p[/* inputValues */1];
-  var partial_arg$1 = Prop$ProbExample.ValueMap.get;
-  var get = function (param) {
-    return partial_arg$1(partial_arg, param);
-  };
-  var match = Curry._1(get, "Fund");
-  var match$1 = Curry._1(get, "Year");
-  if (match !== undefined) {
-    var match$2 = match;
-    switch (match$2.tag | 0) {
-      case /* SelectSingle */0 :
-          if (match$1 !== undefined) {
-            var match$3 = match$1;
-            switch (match$3.tag | 0) {
-              case /* FloatPoint */1 :
-                  return go(convertChoice(match$2[0]), match$3[0], /* DONATIONS */0);
-              case /* SelectSingle */0 :
-              case /* FloatCdf */2 :
-                  return ;
-              
-            }
-          } else {
-            return ;
-          }
-      case /* FloatPoint */1 :
-      case /* FloatCdf */2 :
-          return ;
-      
-    }
-  }
-  
-}
-
-function EAFunds_Model$Interface$Form(Props) {
-  return React.createElement(Prop$ProbExample.ModelForm.make, {
-              combo: Prop$ProbExample.Combo.fromModel(model),
-              runModel: run
-            });
-}
-
-var Form = {
-  make: EAFunds_Model$Interface$Form
-};
-
 var Interface = {
-  model: model,
   convertChoice: convertChoice,
+  convertOutput: convertOutput,
   run: run,
-  Form: Form
+  model: model
 };
 
 exports.PayoutsIfAround = PayoutsIfAround;
