@@ -86,6 +86,7 @@ module Interface = {
           }),
         (),
       ),
+      TypeWithMetadata.currentYear,
     |],
     outputTypes: [||],
   };
@@ -110,6 +111,7 @@ module Interface = {
 
   module Form = {
     [@react.component]
-    let make = () => <Prop.ModelForm combo={Prop.Combo.fromModel(model)} />;
+    let make = () =>
+      <Prop.ModelForm combo={Prop.Combo.fromModel(model)} runModel=run />;
   };
 };

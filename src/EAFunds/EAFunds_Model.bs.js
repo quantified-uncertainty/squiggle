@@ -113,7 +113,8 @@ var model_002 = /* inputTypes : array */[
             /* default */2030.0,
             /* min */2020.0,
             /* max */2050.0
-          ]]), undefined, undefined, undefined, /* () */0)
+          ]]), undefined, undefined, undefined, /* () */0),
+  Prop$ProbExample.TypeWithMetadata.currentYear
 ];
 
 var model_003 = /* outputTypes : array */[];
@@ -176,7 +177,8 @@ function run(p) {
 
 function EAFunds_Model$Interface$Form(Props) {
   return React.createElement(Prop$ProbExample.ModelForm.make, {
-              combo: Prop$ProbExample.Combo.fromModel(model)
+              combo: Prop$ProbExample.Combo.fromModel(model),
+              runModel: run
             });
 }
 

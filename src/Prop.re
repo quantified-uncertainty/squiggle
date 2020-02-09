@@ -41,9 +41,9 @@ module Type = {
   let default = (t: t) =>
     switch (t) {
     | Year(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
+    | FloatPoint(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | SelectSingle(r) =>
       r.default->Belt.Option.map(p => Value.SelectSingle(p))
-    | FloatPoint(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | FloatCdf => None
     };
 };
@@ -80,15 +80,6 @@ module TypeWithMetadata = {
 
   type ts = array(t);
 
-  // TODO: Change default here
-  let currentYear = {
-    id: "currentyear",
-    name: "Current Year",
-    description: None,
-    type_: FloatPoint({default: None, min: None, max: None}),
-    assumptionType: ASSUMPTION,
-  };
-
   let make =
       (
         ~name,
@@ -104,6 +95,18 @@ module TypeWithMetadata = {
     description,
     assumptionType,
   };
+
+  // TODO: Change default here
+  let currentYear =
+    make(
+      ~id="currentYear",
+      ~name="Current Year",
+      ~description=None,
+      ~type_=
+        Year({default: Some(2050.), min: Some(2020.0), max: Some(2050.0)}),
+      ~assumptionType=ASSUMPTION,
+      (),
+    );
 };
 
 module Model = {
@@ -116,7 +119,7 @@ module Model = {
 
   module InputTypes = {
     let keys = (t: t) =>
-      t.inputTypes |> E.A.fmap((r: TypeWithMetadata.t) => r.name);
+      t.inputTypes |> E.A.fmap((r: TypeWithMetadata.t) => r.id);
   };
 };
 
@@ -130,9 +133,7 @@ module Combo = {
   module InputValues = {
     let defaults = (t: Model.t) =>
       t.inputTypes
-      |> E.A.fmap((o: TypeWithMetadata.t) =>
-           (o.name, Type.default(o.type_))
-         )
+      |> E.A.fmap((o: TypeWithMetadata.t) => (o.id, Type.default(o.type_)))
       |> ValueMap.fromOptionalArray;
 
     let isValid = t =>
@@ -189,13 +190,45 @@ module ValueForm = {
         )}
       />
     | (FloatPoint(_), Some(FloatPoint(r))) =>
-      <input type_="number" value={r |> Js.Float.toString} />
+      <input
+        type_="number"
+        value={r |> Js.Float.toString}
+        onChange={handleChange(r =>
+          switch (Js.Float.fromString(r)) {
+          | r => onChange(Some(Value.FloatPoint(r)))
+          }
+        )}
+      />
     | (Year(_), _)
     | (FloatPoint(_), _) => <input type_="number" value="" />
-    | (SelectSingle(_), _) =>
-      <div> {"Single Choice" |> ReasonReact.string} </div>
+    | (SelectSingle(t), Some(SelectSingle(r))) =>
+      <select
+        defaultValue=r
+        onChange={handleChange(l => onChange(Some(Value.SelectSingle(l))))}>
+        {t.options
+         |> E.A.of_list
+         |> E.A.fmap((l: Type.selectOption) =>
+              <option value={l.id} key={l.id}>
+                {l.name |> ReasonReact.string}
+              </option>
+            )
+         |> ReasonReact.array}
+      </select>
     };
   };
+};
+
+type formState = {
+  combo: Combo.t,
+  setCombo: (Combo.t => Combo.t) => unit,
+  setInputValue: (Combo.t, string, option(Value.t)) => unit,
+};
+
+let makeHelpers = (combo): formState => {
+  let (combo, setCombo) = React.useState(() => combo);
+  let setInputValue = (combo, id, newValue) =>
+    setCombo(_ => Combo.updateInputValue(combo, id, newValue));
+  {combo, setCombo, setInputValue};
 };
 
 module ModelForm = {
@@ -203,22 +236,25 @@ module ModelForm = {
     handleChange(ReactEvent.Form.target(event)##value);
 
   [@react.component]
-  let make = (~combo: Combo.t) => {
-    let (combo, setCombo) = React.useState(() => combo);
+  let make = (~combo: Combo.t, ~runModel: Combo.t => option(Value.t)) => {
+    let formState = makeHelpers(combo);
     <div>
-      {Combo.inputTypeValuePairs(combo)
+      {Combo.inputTypeValuePairs(formState.combo)
        |> E.A.fmap(((type_, value)) =>
             <ValueForm
+              key={type_.id}
               type_
               value
               onChange={newValue =>
-                setCombo(_ =>
-                  Combo.updateInputValue(combo, type_.id, newValue)
-                )
+                formState.setInputValue(formState.combo, type_.id, newValue)
               }
             />
           )
        |> ReasonReact.array}
+      {runModel(formState.combo)
+       |> E.O.fmap(Value.to_string)
+       |> E.O.default("")
+       |> ReasonReact.string}
     </div>;
   };
 };
