@@ -1,6 +1,7 @@
 module Value = {
   type t =
     | SelectSingle(string)
+    | DateTime(MomentRe.Moment.t)
     | FloatPoint(float)
     | FloatCdf(string);
 
@@ -8,6 +9,7 @@ module Value = {
     switch (t) {
     | SelectSingle(r) => r
     | FloatCdf(r) => r
+    | DateTime(r) => r |> MomentRe.Moment.defaultFormat
     | FloatPoint(r) => r |> Js.Float.toFixed
     };
   };
@@ -35,6 +37,7 @@ module Type = {
   type t =
     | SelectSingle(selectSingle)
     | FloatPoint(withDefaultMinMax(float))
+    | DateTime(withDefaultMinMax(MomentRe.Moment.t))
     | Year(withDefaultMinMax(float))
     | FloatCdf;
 
@@ -42,6 +45,7 @@ module Type = {
     switch (t) {
     | Year(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | FloatPoint(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
+    | DateTime(r) => r.default->Belt.Option.map(p => Value.DateTime(p))
     | SelectSingle(r) =>
       r.default->Belt.Option.map(p => Value.SelectSingle(p))
     | FloatCdf => None
@@ -96,14 +100,17 @@ module TypeWithMetadata = {
     assumptionType,
   };
 
-  // TODO: Change default here
   let currentYear =
     make(
       ~id="currentYear",
       ~name="Current Year",
       ~description=None,
       ~type_=
-        Year({default: Some(2050.), min: Some(2020.0), max: Some(2050.0)}),
+        DateTime({
+          default: Some(MomentRe.momentNow()),
+          min: Some(MomentRe.momentNow()),
+          max: Some(MomentRe.momentNow()),
+        }),
       ~assumptionType=ASSUMPTION,
       (),
     );
@@ -112,7 +119,9 @@ module TypeWithMetadata = {
 module Model = {
   type t = {
     name: string,
+    description: string,
     author: string,
+    version: string,
     inputTypes: array(TypeWithMetadata.t),
     outputTypes: array(TypeWithMetadata.t),
     run: combo => option(Value.t),
@@ -166,97 +175,4 @@ module Combo = {
   };
 
   let run = (t: t, f): ValueMap.t => f(t.inputValues);
-};
-
-module ValueForm = {
-  let handleChange = (handleChange, event) =>
-    handleChange(ReactEvent.Form.target(event)##value);
-  type onChange = option(Value.t) => unit;
-
-  [@react.component]
-  let make =
-      (
-        ~type_: TypeWithMetadata.t,
-        ~value: option(Value.t),
-        ~onChange: onChange,
-      ) => {
-    switch (type_.type_, value) {
-    | (Year(_), Some(FloatPoint(r))) =>
-      <input
-        type_="number"
-        value={r |> Js.Float.toString}
-        onChange={handleChange(r =>
-          switch (Js.Float.fromString(r)) {
-          | r => onChange(Some(Value.FloatPoint(r)))
-          }
-        )}
-      />
-    | (FloatPoint(_), Some(FloatPoint(r))) =>
-      <input
-        type_="number"
-        value={r |> Js.Float.toString}
-        onChange={handleChange(r =>
-          switch (Js.Float.fromString(r)) {
-          | r => onChange(Some(Value.FloatPoint(r)))
-          }
-        )}
-      />
-    | (Year(_), _)
-    | (FloatPoint(_), _) => <input type_="number" value="" />
-    | (SelectSingle(t), Some(SelectSingle(r))) =>
-      <select
-        defaultValue=r
-        onChange={handleChange(l => onChange(Some(Value.SelectSingle(l))))}>
-        {t.options
-         |> E.A.of_list
-         |> E.A.fmap((l: Type.selectOption) =>
-              <option value={l.id} key={l.id}>
-                {l.name |> ReasonReact.string}
-              </option>
-            )
-         |> ReasonReact.array}
-      </select>
-    };
-  };
-};
-
-type formState = {
-  combo: Combo.t,
-  setCombo: (Combo.t => Combo.t) => unit,
-  setInputValue: (Combo.t, string, option(Value.t)) => unit,
-};
-
-let makeHelpers = (combo): formState => {
-  let (combo, setCombo) = React.useState(() => combo);
-  let setInputValue = (combo, id, newValue) =>
-    setCombo(_ => Combo.updateInputValue(combo, id, newValue));
-  {combo, setCombo, setInputValue};
-};
-
-module ModelForm = {
-  let handleChange = (handleChange, event) =>
-    handleChange(ReactEvent.Form.target(event)##value);
-
-  [@react.component]
-  let make = (~model: Model.t) => {
-    let formState = makeHelpers(Combo.fromModel(model));
-    <div>
-      {Combo.inputTypeValuePairs(formState.combo)
-       |> E.A.fmap(((type_, value)) =>
-            <ValueForm
-              key={type_.id}
-              type_
-              value
-              onChange={newValue =>
-                formState.setInputValue(formState.combo, type_.id, newValue)
-              }
-            />
-          )
-       |> ReasonReact.array}
-      {model.run(formState.combo)
-       |> E.O.fmap(Value.to_string)
-       |> E.O.default("")
-       |> ReasonReact.string}
-    </div>;
-  };
 };
