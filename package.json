@@ -1,6 +1,7 @@
 {
   "name": "probtest",
   "version": "0.1.0",
+  "homepage": "https://foretold-app.github.io/estiband/",
   "scripts": {
     "build": "bsb -make-world",
     "build:style": "tailwind build src/styles/index.css -o src/styles/tailwind.css",
@@ -9,6 +10,8 @@
     "parcel": "parcel ./src/index.html --public-url / --no-autoinstall -- watch",
     "parcel-build": "parcel build ./src/index.html --no-source-maps --no-autoinstall",
     "server": "moduleserve ./ --port 8000",
+    "predeploy": "parcel build ./src/index.html --no-source-maps --no-autoinstall",
+    "deploy": "gh-pages -d dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -39,6 +42,7 @@
   "devDependencies": {
     "bs-platform": "^5.0.6",
     "bsb-js": "^1.1.7",
+    "gh-pages": "^2.2.0",
     "moduleserve": "^0.9.0",
     "tailwindcss": "^1.2.0"
   }
