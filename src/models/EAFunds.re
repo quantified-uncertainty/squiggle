@@ -11,7 +11,11 @@ module Data = {
 
   type output =
     | DONATIONS
+    | CHANCE_OF_EXISTENCE
     | PAYOUTS;
+
+  type conditionals =
+    | WORLD_CATASTROPHE;
 
   type fundWithInfo = {
     group,
@@ -93,6 +97,7 @@ module Model = {
     | (Fund(META), DONATIONS) => 9300000.0
     | (Fund(META), PAYOUTS) => 830000.0
     | (All, _) => sum()
+    | (_, CHANCE_OF_EXISTENCE) => 0.0
     };
   };
   let make =
@@ -102,14 +107,21 @@ module Model = {
         currentDateTime: MomentRe.Moment.t,
         output: output,
       ) => {
-    Prop.Value.FloatCdf(
-      calculateDifference(
-        currentValue(group, output),
-        dateTime,
-        currentDateTime,
-        yearlyMeanGrowthRateIfNotClosed(group),
-      ),
-    );
+    switch (output) {
+    | DONATIONS
+    | PAYOUTS =>
+      Prop.Value.FloatCdf(
+        calculateDifference(
+          currentValue(group, output),
+          dateTime,
+          currentDateTime,
+          yearlyMeanGrowthRateIfNotClosed(group),
+        ),
+      )
+    | CHANCE_OF_EXISTENCE =>
+      let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
+      Prop.Value.Probability((100. -. yearDiff) /. 100.);
+    };
   };
 };
 
@@ -126,6 +138,7 @@ module Interface = {
   let outputFromString = (s: string) =>
     switch (s) {
     | "donations" => DONATIONS
+    | "exists" => CHANCE_OF_EXISTENCE
     | _ => PAYOUTS
     };
 
@@ -136,6 +149,7 @@ module Interface = {
         Some(DateTime(intendedYear)),
         Some(DateTime(currentYear)),
         Some(SelectSingle(output)),
+        Some(BinaryConditional(r)),
       |] =>
       choiceFromString(fund)
       |> E.O.fmap(fund =>
@@ -206,10 +220,17 @@ module Interface = {
             SelectSingle({
               default: Some("Output"),
               options: [
-                {name: "Donations", id: "donations"},
-                {name: "Funding", id: "funding"},
+                {name: "Donations | Exists", id: "donations"},
+                {name: "Funding | Exists", id: "funding"},
+                {name: "Exists", id: "exists"},
               ],
             }),
+          (),
+        ),
+        TypeWithMetadata.make(
+          ~name="Conditional on World Ending",
+          ~id="worldEnd",
+          ~type_=BinaryConditional,
           (),
         ),
       |],

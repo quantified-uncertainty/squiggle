@@ -1,14 +1,25 @@
 module Value = {
+  type binaryConditional =
+    | Selected(bool)
+    | Unselected;
   type t =
+    | BinaryConditional(binaryConditional)
     | SelectSingle(string)
     | DateTime(MomentRe.Moment.t)
     | FloatPoint(float)
+    | Probability(float)
     | FloatCdf(string);
 
   let to_string = (t: t) => {
     switch (t) {
+    | BinaryConditional(binaryConditional) =>
+      switch (binaryConditional) {
+      | Selected(r) => r ? "True" : "False"
+      | Unselected => ""
+      }
     | SelectSingle(r) => r
     | FloatCdf(r) => r
+    | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat
     | FloatPoint(r) => r |> Js.Float.toFixed
     };
@@ -34,17 +45,23 @@ module Type = {
     max: option('a),
   };
 
+  type withDefault('a) = {default: option('a)};
+
   type t =
+    | BinaryConditional
     | SelectSingle(selectSingle)
     | FloatPoint(withDefaultMinMax(float))
+    | Probability(withDefault(float))
     | DateTime(withDefaultMinMax(MomentRe.Moment.t))
     | Year(withDefaultMinMax(float))
     | FloatCdf;
 
   let default = (t: t) =>
     switch (t) {
+    | BinaryConditional => Some(Value.BinaryConditional(Unselected))
     | Year(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | FloatPoint(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
+    | Probability(r) => r.default->Belt.Option.map(p => Value.Probability(p))
     | DateTime(r) => r.default->Belt.Option.map(p => Value.DateTime(p))
     | SelectSingle(r) =>
       r.default->Belt.Option.map(p => Value.SelectSingle(p))
