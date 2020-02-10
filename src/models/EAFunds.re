@@ -115,43 +115,37 @@ module Model = {
 
 module Interface = {
   open Data;
-  let convertChoice = (s: string) =>
-    switch (s) {
-    | "animal" => Fund(ANIMAL_WELFARE)
-    | "globalHealth" => Fund(GLOBAL_HEALTH)
-    | "longTerm" => Fund(LONG_TERM_FUTURE)
-    | "meta" => Fund(META)
-    | _ => All
-    };
 
-  let convertOutput = (s: string) =>
+  let fundKey = "Fund";
+  let dayKey = "Day";
+  let outputKey = "Output";
+
+  let choiceFromString = (s: string) =>
+    funds |> E.A.getBy(_, r => r.name == s);
+
+  let outputFromString = (s: string) =>
     switch (s) {
     | "donations" => DONATIONS
     | _ => PAYOUTS
     };
 
   let run = (p: Prop.Combo.t) => {
-    let get = Prop.ValueMap.get(p.inputValues);
-    switch (
-      get("Fund"),
-      get("Day"),
-      get(Prop.TypeWithMetadata.currentYear.id),
-      get("Output"),
-    ) {
-    | (
+    switch (Prop.Combo.InputValues.toValueArray(p)) {
+    | [|
         Some(SelectSingle(fund)),
         Some(DateTime(intendedYear)),
         Some(DateTime(currentYear)),
         Some(SelectSingle(output)),
-      ) =>
-      Some(
-        Model.make(
-          convertChoice(fund),
-          intendedYear,
-          currentYear,
-          convertOutput(output),
-        ),
-      )
+      |] =>
+      choiceFromString(fund)
+      |> E.O.fmap(fund =>
+           Model.make(
+             fund.group,
+             intendedYear,
+             currentYear,
+             outputFromString(output),
+           )
+         )
     | _ => None
     };
   };
@@ -164,22 +158,21 @@ module Interface = {
       author: "Ozzie Gooen",
       inputTypes: [|
         TypeWithMetadata.make(
-          ~name="Fund",
+          ~name=fundKey,
           ~type_=
             SelectSingle({
-              default: Some("total"),
-              options: [
-                {name: "Animal Welfare Fund", id: "animal"},
-                {name: "Global Health Fund", id: "globalHealth"},
-                {name: "Long Term Future Fund", id: "longTerm"},
-                {name: "Meta Fund", id: "longterm"},
-                {name: "All", id: "all"},
-              ],
+              default: Some(Array.unsafe_get(Data.funds, 0).name),
+              options:
+                Data.funds
+                |> E.A.fmap((r) =>
+                     ({name: r.name, id: r.name}: Prop.Type.selectOption)
+                   )
+                |> Array.to_list,
             }),
           (),
         ),
         TypeWithMetadata.make(
-          ~name="Day",
+          ~name=dayKey,
           ~type_=
             DateTime({
               default:
@@ -208,7 +201,7 @@ module Interface = {
         ),
         TypeWithMetadata.currentYear,
         TypeWithMetadata.make(
-          ~name="Output",
+          ~name=outputKey,
           ~type_=
             SelectSingle({
               default: Some("Output"),

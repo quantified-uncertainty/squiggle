@@ -155,6 +155,13 @@ module Combo = {
 
     let update = (t: t, key: string, onUpdate: option(Value.t)) =>
       ValueMap.update(t.inputValues, key, onUpdate);
+
+    let toValueArray = (t: t) => {
+      t.model.inputTypes
+      |> E.A.fmap((r: TypeWithMetadata.t) =>
+           ValueMap.get(t.inputValues, r.id)
+         );
+    };
   };
 
   let updateInputValue = (t: t, k, u) => {
