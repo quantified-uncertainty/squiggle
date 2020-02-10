@@ -1,7 +1,7 @@
 module Model = {
   let make = (dateTime: MomentRe.Moment.t, currentDateTime: MomentRe.Moment.t) => {
     let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
-    Prop.Value.Probability((100. -. yearDiff) /. 100.);
+    Prop.Value.Probability(0.001 *. yearDiff);
   };
 };
 
@@ -19,7 +19,7 @@ module Interface = {
   let model: Prop.Model.t =
     Prop.{
       name: "Global Catastrophe",
-      description: "The chances of catastrophe per year in the future.",
+      description: "The chances of having at least one catastrophe per year in the future, assuming no other catastrophe until then.",
       version: "1.0.0",
       author: "Ozzie Gooen",
       inputTypes: [|
