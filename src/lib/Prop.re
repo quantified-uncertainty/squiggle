@@ -2,12 +2,20 @@ module Value = {
   type binaryConditional =
     | Selected(bool)
     | Unselected;
+
+  type conditional = {
+    statement: string,
+    truthValue: bool,
+  };
+
   type t =
     | BinaryConditional(binaryConditional)
     | SelectSingle(string)
     | DateTime(MomentRe.Moment.t)
     | FloatPoint(float)
     | Probability(float)
+    | Conditional(conditional)
+    | ConditionalArray(array(conditional))
     | FloatCdf(string);
 
   let to_string = (t: t) => {
@@ -36,6 +44,8 @@ module Value = {
       )
       |> ReasonReact.string
     | SelectSingle(r) => r |> ReasonReact.string
+    | ConditionalArray(r) => "Array" |> ReasonReact.string
+    | Conditional(r) => r.statement |> ReasonReact.string
     | FloatCdf(r) =>
       let cdf: Types.distribution =
         CdfLibrary.Distribution.fromString(r, 2000);
@@ -65,6 +75,16 @@ module Type = {
     default: option(string),
   };
 
+  type conditionals = {
+    defaults: array(Value.conditional),
+    options: array(string),
+  };
+
+  let makeConditionals = (defaults, options): conditionals => {
+    defaults,
+    options,
+  };
+
   type floatPoint = {validatations: list(float => bool)};
 
   type withDefaultMinMax('a) = {
@@ -82,11 +102,13 @@ module Type = {
     | Probability(withDefault(float))
     | DateTime(withDefaultMinMax(MomentRe.Moment.t))
     | Year(withDefaultMinMax(float))
+    | Conditionals(conditionals)
     | FloatCdf;
 
   let default = (t: t) =>
     switch (t) {
     | BinaryConditional => Some(Value.BinaryConditional(Unselected))
+    | Conditionals(s) => Some(Value.ConditionalArray(s.defaults))
     | Year(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | FloatPoint(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | Probability(r) => r.default->Belt.Option.map(p => Value.Probability(p))

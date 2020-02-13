@@ -152,7 +152,6 @@ module Interface = {
         Some(DateTime(intendedYear)),
         Some(DateTime(currentYear)),
         Some(SelectSingle(output)),
-        Some(BinaryConditional(r)),
       |] =>
       choiceFromString(fund)
       |> E.O.fmap(fund =>
@@ -230,14 +229,16 @@ module Interface = {
             }),
           (),
         ),
-        TypeWithMetadata.make(
-          ~name="Conditional on World Ending",
-          ~id="worldEnd",
-          ~type_=BinaryConditional,
-          (),
-        ),
       |],
       outputTypes: [||],
       run,
     };
-};
+} /* )*/;
+// TypeWithMetadata.make(
+//   ~name="Conditional on World Ending",
+//   ~id="worldEnd",
+//   ~type_=
+//     Conditionals(
+//       Prop.Type.makeConditionals([||], [|"Foo", "Bar", "Char"|]),
+//     ),
+//   (),

@@ -1,4 +1,9 @@
 module Model = {
+  let foo = {
+    let bar = 2.0;
+    ();
+  };
+
   let make = (dateTime: MomentRe.Moment.t, currentDateTime: MomentRe.Moment.t) => {
     let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
     Prop.Value.Probability(0.001 *. yearDiff);
