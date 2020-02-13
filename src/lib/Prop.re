@@ -40,10 +40,7 @@ module Value = {
       let cdf: Types.distribution =
         CdfLibrary.Distribution.fromString(r, 2000);
       <>
-        <ForetoldComponents.CdfChart__Large
-          cdf={Types.toComponentsDist(cdf)}
-          width={Some(400)}
-        />
+        <Chart data={cdf |> CdfLibrary.Distribution.toPdf |> Types.toJs} />
         {r |> ReasonReact.string}
       </>;
     | Probability(r) =>

@@ -44,7 +44,6 @@ const toPdf = (values, sampleCount, min, max) => {
 };
 
 let run = (text, sampleCount, inputs=[], min=false, max=false) => {
-    console.log(text);
     let [_error, item] = Guesstimator.parse({ text: "=" + text });
     const { parsedInput } = item;
     const { guesstimateType } = parsedInput;
