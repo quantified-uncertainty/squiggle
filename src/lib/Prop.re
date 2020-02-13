@@ -30,6 +30,9 @@ module Value = {
     | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat
     | FloatPoint(r) => r |> Js.Float.toFixed
+    | Conditional(r) => r.name
+    | ConditionalArray(r) =>
+      r |> E.A.fmap(r => r.name) |> Js.Array.joinWith(",")
     };
   };
 

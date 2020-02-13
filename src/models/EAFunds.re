@@ -152,6 +152,7 @@ module Interface = {
         Some(DateTime(intendedYear)),
         Some(DateTime(currentYear)),
         Some(SelectSingle(output)),
+        _,
       |] =>
       choiceFromString(fund)
       |> E.O.fmap(fund =>
@@ -230,11 +231,14 @@ module Interface = {
           (),
         ),
         TypeWithMetadata.make(
-          ~name="Conditional on World Ending",
-          ~id="worldEnd",
+          ~name="Conditionals",
+          ~id="conditionals",
           ~type_=
             Conditionals(
-              Prop.Type.makeConditionals([||], [|"Foo", "Bar", "Char"|]),
+              Prop.Type.makeConditionals(
+                [||],
+                [|"Global Existential Event"|],
+              ),
             ),
           (),
         ),

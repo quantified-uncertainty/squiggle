@@ -59,7 +59,7 @@ let make =
               className="max-w-sm rounded overflow-hidden shadow-sm py-1 px-2 rounded mb-3 bg-gray-200">
               {r |> ReasonReact.string}
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded"
+                className="bg-blue-500 hover:bg-blue-700 text-white py-0 px-1 rounded"
                 onClick={e => {
                   ReactEvent.Synthetic.preventDefault(e);
                   onChange(
@@ -77,10 +77,10 @@ let make =
                   );
                   ();
                 }}>
-                {"true" |> ReasonReact.string}
+                {"True" |> ReasonReact.string}
               </button>
               <button
-                className="hover:bg-red-700 text-white py-1 px-2 rounded bg-red-500"
+                className="hover:bg-red-700 text-white py-0 px-1 rounded bg-red-500"
                 onClick={e => {
                   ReactEvent.Synthetic.preventDefault(e);
                   onChange(
@@ -97,7 +97,7 @@ let make =
                     ),
                   );
                 }}>
-                {"false" |> ReasonReact.string}
+                {"False" |> ReasonReact.string}
               </button>
             </div>
           )
