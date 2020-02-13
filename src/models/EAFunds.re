@@ -166,8 +166,8 @@ module Interface = {
 
   let model: Prop.Model.t =
     Prop.{
-      name: "EA Funds: Donations & Payouts",
-      description: "Calculate the payments and payouts of EA Funds based on existing data.",
+      name: "CEA Funds: Donations & Payouts",
+      description: "Calculate the payments and payouts of CEA Funds based on existing data.",
       version: "1.0.0",
       author: "Ozzie Gooen",
       inputTypes: [|

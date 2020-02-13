@@ -120,7 +120,7 @@ module TypeWithMetadata = {
   let currentYear =
     make(
       ~id="currentYear",
-      ~name="Current Year",
+      ~name="Current Day",
       ~description=None,
       ~type_=
         DateTime({

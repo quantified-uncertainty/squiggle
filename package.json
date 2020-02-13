@@ -22,6 +22,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@foretold/cdf": "^1.0.14",
+    "@foretold/guesstimator": "^1.0.10",
     "antd": "3.17.0",
     "autoprefixer": "^9.7.4",
     "bs-ant-design-alt": "2.0.0-alpha.31",
