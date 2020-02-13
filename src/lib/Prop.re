@@ -4,7 +4,7 @@ module Value = {
     | Unselected;
 
   type conditional = {
-    statement: string,
+    name: string,
     truthValue: bool,
   };
 
@@ -45,7 +45,7 @@ module Value = {
       |> ReasonReact.string
     | SelectSingle(r) => r |> ReasonReact.string
     | ConditionalArray(r) => "Array" |> ReasonReact.string
-    | Conditional(r) => r.statement |> ReasonReact.string
+    | Conditional(r) => r.name |> ReasonReact.string
     | FloatCdf(r) =>
       let cdf: Types.distribution =
         CdfLibrary.Distribution.fromString(r, 2000);

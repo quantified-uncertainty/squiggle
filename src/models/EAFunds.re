@@ -229,16 +229,17 @@ module Interface = {
             }),
           (),
         ),
+        TypeWithMetadata.make(
+          ~name="Conditional on World Ending",
+          ~id="worldEnd",
+          ~type_=
+            Conditionals(
+              Prop.Type.makeConditionals([||], [|"Foo", "Bar", "Char"|]),
+            ),
+          (),
+        ),
       |],
       outputTypes: [||],
       run,
     };
-} /* )*/;
-// TypeWithMetadata.make(
-//   ~name="Conditional on World Ending",
-//   ~id="worldEnd",
-//   ~type_=
-//     Conditionals(
-//       Prop.Type.makeConditionals([||], [|"Foo", "Bar", "Char"|]),
-//     ),
-//   (),
+};

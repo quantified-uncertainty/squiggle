@@ -3,6 +3,26 @@ let handleChange = (handleChange, event) =>
   handleChange(ReactEvent.Form.target(event)##value);
 type onChange = option(Value.t) => unit;
 
+module ConditionalReducer = {
+  type action =
+    | ADD_OR_UPDATE_CONDITIONAL(Value.conditional)
+    | REMOVE_CONDITIONAL(Value.conditional);
+
+  let reducer = (items: array(Value.conditional), action: action) =>
+    switch (action) {
+    | ADD_OR_UPDATE_CONDITIONAL(conditional) =>
+      items->E.A.hasBy(c => c.name == conditional.name)
+        ? items
+          |> E.A.fmap((r: Value.conditional) =>
+               r.name == conditional.name ? conditional : r
+             )
+        : E.A.append(items, [|conditional|])
+    | REMOVE_CONDITIONAL(conditional) =>
+      items
+      |> E.A.filter((c: Value.conditional) => c.name != conditional.name)
+    };
+};
+
 [@react.component]
 let make =
     (
@@ -11,7 +31,80 @@ let make =
       ~onChange: onChange,
     ) => {
   switch (type_.type_, value) {
-  | (Conditionals(_), r) => "sdfsdf" |> ReasonReact.string
+  | (Conditionals(l), Some(ConditionalArray(n))) =>
+    <div>
+      {n
+       |> E.A.fmap((r: Value.conditional) =>
+            <div
+              onClick={_ =>
+                onChange(
+                  Some(
+                    Value.ConditionalArray(
+                      ConditionalReducer.reducer(
+                        n,
+                        REMOVE_CONDITIONAL({name: r.name, truthValue: true}),
+                      ),
+                    ),
+                  ),
+                )
+              }>
+              {r.name |> ReasonReact.string}
+              {(r.truthValue ? "TRUE" : "FALSE") |> ReasonReact.string}
+            </div>
+          )
+       |> ReasonReact.array}
+      {l.options
+       |> E.A.fmap(r =>
+            <div
+              className="max-w-sm rounded overflow-hidden shadow-sm py-1 px-2 rounded mb-3 bg-gray-200">
+              {r |> ReasonReact.string}
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded"
+                onClick={e => {
+                  ReactEvent.Synthetic.preventDefault(e);
+                  onChange(
+                    Some(
+                      Value.ConditionalArray(
+                        ConditionalReducer.reducer(
+                          n,
+                          ADD_OR_UPDATE_CONDITIONAL({
+                            name: r,
+                            truthValue: true,
+                          }),
+                        ),
+                      ),
+                    ),
+                  );
+                  ();
+                }}>
+                {"true" |> ReasonReact.string}
+              </button>
+              <button
+                className="hover:bg-red-700 text-white py-1 px-2 rounded bg-red-500"
+                onClick={e => {
+                  ReactEvent.Synthetic.preventDefault(e);
+                  onChange(
+                    Some(
+                      Value.ConditionalArray(
+                        ConditionalReducer.reducer(
+                          n,
+                          ADD_OR_UPDATE_CONDITIONAL({
+                            name: r,
+                            truthValue: false,
+                          }),
+                        ),
+                      ),
+                    ),
+                  );
+                }}>
+                {"false" |> ReasonReact.string}
+              </button>
+            </div>
+          )
+       |> ReasonReact.array}
+    </div>
+  | (Conditionals(l), _) =>
+    l.options |> E.A.fmap(r => r |> ReasonReact.string) |> ReasonReact.array
   | (Year(_), Some(FloatPoint(r))) =>
     <input
       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
