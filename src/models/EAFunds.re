@@ -78,7 +78,10 @@ module Model = {
     let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
     let meanDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
     let stdDevDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
-    FloatCdf.normal(currentValue *. meanDiff, firstYearStdDev *. stdDevDiff);
+    FloatCdf.logNormal(
+      currentValue *. meanDiff,
+      firstYearStdDev *. stdDevDiff,
+    );
   };
 
   let rec currentValue = (group: group, output) => {

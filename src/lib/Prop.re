@@ -18,10 +18,7 @@ module Value = {
       | Unselected => ""
       }
     | SelectSingle(r) => r
-    | FloatCdf(r) =>
-      let foo: Types.distribution =
-        CdfLibrary.Distribution.fromString(r, 100);
-      r;
+    | FloatCdf(r) => r
     | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat
     | FloatPoint(r) => r |> Js.Float.toFixed
@@ -41,7 +38,7 @@ module Value = {
     | SelectSingle(r) => r |> ReasonReact.string
     | FloatCdf(r) =>
       let cdf: Types.distribution =
-        CdfLibrary.Distribution.fromString(r, 100);
+        CdfLibrary.Distribution.fromString(r, 1000);
       <>
         <ForetoldComponents.CdfChart__Large
           cdf={Types.toComponentsDist(cdf)}
