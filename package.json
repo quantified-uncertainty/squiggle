@@ -28,6 +28,7 @@
     "antd": "3.17.0",
     "autoprefixer": "^9.7.4",
     "bs-ant-design-alt": "2.0.0-alpha.31",
+    "bs-css": "^11.0.0",
     "bs-moment": "0.4.4",
     "bs-reform": "9.7.1",
     "lenses-ppx": "4.0.0",

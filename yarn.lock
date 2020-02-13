@@ -1955,7 +1955,7 @@ bs-ant-design-alt@2.0.0-alpha.31:
     bs-moment "^0.4.4"
     re-classnames "^4.0.0"
 
-bs-css@11.0.0:
+bs-css@11.0.0, bs-css@^11.0.0:
   version "11.0.0"
   resolved "https://registry.yarnpkg.com/bs-css/-/bs-css-11.0.0.tgz#6ed1726d7c06aa584d255d1cf23240a2acc0aa07"
   integrity sha512-bpSwj1VvmWNMoJ5qnsHMQC+Mj0zjL9iwcOhl5ipP7Hfr7v+ZyKqjSMaMK+L1EdukuCp0rJmRD2I/MbS4BHnMmQ==
