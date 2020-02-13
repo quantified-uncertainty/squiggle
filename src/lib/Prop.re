@@ -38,7 +38,7 @@ module Value = {
     | SelectSingle(r) => r |> ReasonReact.string
     | FloatCdf(r) =>
       let cdf: Types.distribution =
-        CdfLibrary.Distribution.fromString(r, 1000);
+        CdfLibrary.Distribution.fromString(r, 2000);
       <>
         <ForetoldComponents.CdfChart__Large
           cdf={Types.toComponentsDist(cdf)}
