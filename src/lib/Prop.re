@@ -18,10 +18,41 @@ module Value = {
       | Unselected => ""
       }
     | SelectSingle(r) => r
-    | FloatCdf(r) => r
+    | FloatCdf(r) =>
+      let foo: Types.distribution =
+        CdfLibrary.Distribution.fromString(r, 100);
+      r;
     | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat
     | FloatPoint(r) => r |> Js.Float.toFixed
+    };
+  };
+
+  let display = (t: t) => {
+    switch (t) {
+    | BinaryConditional(binaryConditional) =>
+      (
+        switch (binaryConditional) {
+        | Selected(r) => r ? "True" : "False"
+        | Unselected => ""
+        }
+      )
+      |> ReasonReact.string
+    | SelectSingle(r) => r |> ReasonReact.string
+    | FloatCdf(r) =>
+      let cdf: Types.distribution =
+        CdfLibrary.Distribution.fromString(r, 100);
+      <>
+        <ForetoldComponents.CdfChart__Large
+          cdf={Types.toComponentsDist(cdf)}
+          width={Some(400)}
+        />
+        {r |> ReasonReact.string}
+      </>;
+    | Probability(r) =>
+      (r *. 100. |> Js.Float.toFixed) ++ "%" |> ReasonReact.string
+    | DateTime(r) => r |> MomentRe.Moment.defaultFormat |> ReasonReact.string
+    | FloatPoint(r) => r |> Js.Float.toFixed |> ReasonReact.string
     };
   };
 };

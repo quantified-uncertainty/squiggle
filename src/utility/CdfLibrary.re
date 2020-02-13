@@ -14,26 +14,26 @@ module JS = {
 
   let doAsDist = (f, d: Types.distribution) => d |> distToJs |> f |> jsToDist;
 
-  [@bs.module "./CdfLibraryImporter.js"]
+  [@bs.module "./CdfLibrary.js"]
   external cdfToPdf: distJs => distJs = "cdfToPdf";
 
-  [@bs.module "./CdfLibraryImporter.js"]
+  [@bs.module "./CdfLibrary.js"]
   external pdfToCdf: distJs => distJs = "pdfToCdf";
 
-  [@bs.module "./CdfLibraryImporter.js"]
+  [@bs.module "./CdfLibrary.js"]
   external findY: (float, distJs) => float = "findY";
 
-  [@bs.module "./CdfLibraryImporter.js"]
+  [@bs.module "./CdfLibrary.js"]
   external findX: (float, distJs) => float = "findX";
 
-  [@bs.module "./CdfLibraryImporter.js"]
+  [@bs.module "./CdfLibrary.js"]
   external integral: distJs => float = "integral";
 
-  [@bs.module "./CdfLibraryImporter.js"]
+  [@bs.module "./CdfLibrary.js"]
   external differentialEntropy: (int, distJs) => distJs =
     "differentialEntropy";
 
-  [@bs.module "./CdfLibraryImporter.js"]
+  [@bs.module "./CdfLibrary.js"]
   external scoreNonMarketCdfCdf: (int, distJs, distJs, float) => distJs =
     "scoreNonMarketCdfCdf";
 

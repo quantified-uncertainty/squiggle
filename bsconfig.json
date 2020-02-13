@@ -15,6 +15,7 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
+    "@foretold/components",
     "bs-ant-design-alt",
     "reason-react",
     "bs-reform",
@@ -25,5 +26,5 @@
   "refmt": 3,
   "ppx-flags": [
     "lenses-ppx/ppx"
-  ],
+  ]
 }

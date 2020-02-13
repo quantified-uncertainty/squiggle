@@ -51,10 +51,7 @@ module ModelForm = {
             )
          |> ReasonReact.array}
         <div className="bg-green-100 p-2 rounded-sm mt-6 text-lg">
-          {model.run(formState.combo)
-           |> E.O.fmap(Value.to_string)
-           |> E.O.default("")
-           |> ReasonReact.string}
+          {model.run(formState.combo) |> E.O.React.fmapOrNull(Value.display)}
         </div>
       </form>
     </div>;
