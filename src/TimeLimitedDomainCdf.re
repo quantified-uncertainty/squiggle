@@ -10,45 +10,75 @@ type timeUnit = [
   | `years
 ];
 
+type timeVector = {
+  zero: MomentRe.Moment.t,
+  unit: timeUnit,
+};
+
+type timePoint = {
+  timeVector,
+  value: float,
+};
+
+module TimePoint = {
+  let fromTimeVector = (timeVector, value): timePoint => {timeVector, value};
+
+  let toMoment = (timePoint: timePoint) => {
+    timePoint.timeVector.zero
+    |> MomentRe.Moment.add(
+         ~duration=
+           MomentRe.duration(timePoint.value, timePoint.timeVector.unit),
+       );
+  };
+
+  let fromMoment = (timeVector: timeVector, moment: MomentRe.Moment.t) =>
+    MomentRe.diff(timeVector.zero, moment, timeVector.unit);
+};
+
+module RelativeTimePoint = {
+  type timeInVector =
+    | Time(MomentRe.Moment.t)
+    | XValue(float);
+
+  let toTime = (timeVector: timeVector, timeInVector: timeInVector) =>
+    switch (timeInVector) {
+    | Time(r) => r
+    | XValue(r) =>
+      timeVector.zero
+      |> MomentRe.Moment.add(~duration=MomentRe.duration(r, timeVector.unit))
+    };
+
+  let _timeToX = (time, timeStart, timeUnit) =>
+    MomentRe.diff(timeStart, time, timeUnit);
+
+  let toXValue = (timeVector: timeVector, timeInVector: timeInVector) =>
+    switch (timeInVector) {
+    | Time(r) => _timeToX(r, timeVector.zero, timeVector.unit)
+    | XValue(r) => r
+    };
+};
+
 type t = {
-  timeUnit,
-  timeStart: MomentRe.Moment.t,
+  timeVector,
   limitedDomainCdf: LimitedDomainCdf.t,
 };
 
-module XSpecification = {
-  type xSpecification =
-    | Time(MomentRe.Moment.t)
-    | DifferenceFromStart(float, timeUnit)
-    | CdfXCoordinate(float);
-
-  let toTime = (t: t, xSpecification: xSpecification) =>
-    switch (xSpecification) {
-    | Time(r) => r
-    | DifferenceFromStart(r, unit) =>
-      t.timeStart
-      |> MomentRe.Moment.add(~duration=MomentRe.duration(r, unit))
-    | CdfXCoordinate(r) =>
-      t.timeStart
-      |> MomentRe.Moment.add(~duration=MomentRe.duration(r, t.timeUnit))
+let make =
+    (
+      ~timeVector: timeVector,
+      ~distribution: Types.distribution,
+      ~probabilityAtMaxX: float,
+      ~maxX: [ | `time(MomentRe.Moment.t) | `x(float)],
+    )
+    : t => {
+  let domainMaxX =
+    switch (maxX) {
+    | `time(m) => TimePoint.fromMoment(timeVector, m)
+    | `x(r) => r
     };
-
-  let rec toCdfXCoordinate = (t: t, xSpecification: xSpecification) =>
-    switch (xSpecification) {
-    | Time(r) => MomentRe.diff(t.timeStart, r, t.timeUnit)
-    | DifferenceFromStart(r, unit) =>
-      let newTime = toTime(t, DifferenceFromStart(r, unit));
-      toCdfXCoordinate(t, Time(newTime));
-    | CdfXCoordinate(r) => r
-    };
-
-  let fromDifference = (~t: t, ~duration: float, ~unit=t.timeUnit, ()) =>
-    Time(
-      MomentRe.Moment.add(
-        ~duration=MomentRe.duration(duration, unit),
-        t.timeStart,
-      ),
-    );
+  let limitedDomainCdf =
+    LimitedDomainCdf.fromCdf(distribution, domainMaxX, probabilityAtMaxX);
+  {timeVector, limitedDomainCdf};
 };
 
 let probabilityBeforeDomainMax = (t: t) =>
@@ -57,18 +87,19 @@ let probabilityBeforeDomainMax = (t: t) =>
 let domainMaxX = (t: t) =>
   LimitedDomainCdf.probabilityBeforeDomainMax(t.limitedDomainCdf);
 
-let probability = (t: t, x: XSpecification.xSpecification) =>
-  LimitedDomainCdf.probability(
-    t.limitedDomainCdf,
-    XSpecification.toCdfXCoordinate(t, x),
-  );
+let probability = (t: t, m: MomentRe.Moment.t) => {
+  RelativeTimePoint.toXValue(t.timeVector, Time(m))
+  |> LimitedDomainCdf.probability(t.limitedDomainCdf);
+};
 
 let probabilityInverse = (t: t, y: float) =>
-  XSpecification.CdfXCoordinate(
-    LimitedDomainCdf.probabilityInverse(t.limitedDomainCdf, y),
-  );
+  LimitedDomainCdf.probabilityInverse(t.limitedDomainCdf, y)
+  |> (r => RelativeTimePoint.toTime(t.timeVector, XValue(r)));
+
+let cumulativeProbability = (t: t, m: MomentRe.Moment.t) =>
+  RelativeTimePoint.toXValue(t.timeVector, Time(m))
+  |> LimitedDomainCdf.cumulativeProbability(t.limitedDomainCdf);
 
 let cumulativeProbabilityInverse = (t: t, y: float) =>
-  XSpecification.CdfXCoordinate(
-    LimitedDomainCdf.cumulativeProbabilityInverse(t.limitedDomainCdf, y),
-  );
+  LimitedDomainCdf.cumulativeProbabilityInverse(t.limitedDomainCdf, y)
+  |> (r => RelativeTimePoint.toTime(t.timeVector, XValue(r)));

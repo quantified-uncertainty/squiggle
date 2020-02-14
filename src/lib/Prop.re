@@ -15,6 +15,7 @@ module Value = {
     | FloatPoint(float)
     | Probability(float)
     | Conditional(conditional)
+    | TimeLimitedDomainCdf(TimeLimitedDomainCdf.t)
     | ConditionalArray(array(conditional))
     | FloatCdf(string);
 
@@ -27,6 +28,7 @@ module Value = {
       }
     | SelectSingle(r) => r
     | FloatCdf(r) => r
+    | TimeLimitedDomainCdf(_) => ""
     | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat
     | FloatPoint(r) => r |> Js.Float.toFixed
@@ -49,6 +51,9 @@ module Value = {
     | SelectSingle(r) => r |> ReasonReact.string
     | ConditionalArray(r) => "Array" |> ReasonReact.string
     | Conditional(r) => r.name |> ReasonReact.string
+    | TimeLimitedDomainCdf(r) =>
+      let cdf: Types.distribution = r.limitedDomainCdf.distribution;
+      <> <Chart height=100 data={cdf |> Types.toJs} /> </>;
     | FloatCdf(r) =>
       let cdf: Types.distribution =
         CdfLibrary.Distribution.fromString(r, 2000);

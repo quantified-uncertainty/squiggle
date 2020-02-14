@@ -3,6 +3,8 @@ type t = {
   domainMaxX: float,
 };
 
+let make = (~distribution, ~domainMaxX): t => {distribution, domainMaxX};
+
 let fromCdf = (cdf: Types.cdf, domainMaxX: float, probabilityAtMaxX: float) => {
   let distribution: Types.distribution = {
     xs: cdf.xs,
