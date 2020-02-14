@@ -19,8 +19,6 @@ let _lastElement = (a: array('a)) =>
 
 let probabilityBeforeDomainMax = (t: t) => _lastElement(t.distribution.ys);
 
-let chanceByX = (t: t) => t.distribution;
-
 let domainMaxX = (t: t) => t.domainMaxX;
 
 let probabilityDistribution = (t: t) =>
@@ -29,5 +27,11 @@ let probabilityDistribution = (t: t) =>
 let probability = (t: t, xPoint: float) =>
   CdfLibrary.Distribution.findY(xPoint, probabilityDistribution(t));
 
+let probabilityInverse = (t: t, yPoint: float) =>
+  CdfLibrary.Distribution.findX(yPoint, probabilityDistribution(t));
+
 let cumulativeProbability = (t: t, xPoint: float) =>
   CdfLibrary.Distribution.findY(xPoint, t.distribution);
+
+let cumulativeProbabilityInverse = (t: t, yPoint: float) =>
+  CdfLibrary.Distribution.findX(yPoint, t.distribution);
