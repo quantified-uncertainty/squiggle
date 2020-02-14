@@ -16,6 +16,9 @@ module Value = {
     | Probability(float)
     | Conditional(conditional)
     | TimeLimitedDomainCdf(TimeLimitedDomainCdf.t)
+    | TimeLimitedDomainCdfLazy(
+        (string => Types.distribution) => TimeLimitedDomainCdf.t,
+      )
     | ConditionalArray(array(conditional))
     | FloatCdf(string);
 
@@ -29,6 +32,7 @@ module Value = {
     | SelectSingle(r) => r
     | FloatCdf(r) => r
     | TimeLimitedDomainCdf(_) => ""
+    | TimeLimitedDomainCdfLazy(_) => ""
     | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat
     | FloatPoint(r) => r |> Js.Float.toFixed
@@ -51,6 +55,10 @@ module Value = {
     | SelectSingle(r) => r |> ReasonReact.string
     | ConditionalArray(r) => "Array" |> ReasonReact.string
     | Conditional(r) => r.name |> ReasonReact.string
+    | TimeLimitedDomainCdfLazy(r) =>
+      let timeLimited = r(CdfLibrary.Distribution.fromString(_, 1000));
+      let cdf = timeLimited.limitedDomainCdf.distribution;
+      <> <Chart height=100 data={cdf |> Types.toJs} /> </>;
     | TimeLimitedDomainCdf(r) =>
       let cdf: Types.distribution = r.limitedDomainCdf.distribution;
       <> <Chart height=100 data={cdf |> Types.toJs} /> </>;

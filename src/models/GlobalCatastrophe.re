@@ -1,15 +1,13 @@
 module Model = {
   let make = (currentDateTime: MomentRe.Moment.t) => {
-    let yearsFromNow = "normal(50,30)";
-    let dist = CdfLibrary.Distribution.fromString(yearsFromNow, 1000);
-    let timeLimitedDomain =
+    let lazyDistribution = r =>
       TimeLimitedDomainCdf.make(
         ~timeVector={zero: currentDateTime, unit: `years},
-        ~distribution=dist,
+        ~distribution=r("normal(50,30)"),
         ~probabilityAtMaxX=0.7,
         ~maxX=`x(200.),
       );
-    Prop.Value.TimeLimitedDomainCdf(timeLimitedDomain);
+    Prop.Value.TimeLimitedDomainCdfLazy(lazyDistribution);
   };
 };
 
