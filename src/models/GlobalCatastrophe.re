@@ -1,13 +1,14 @@
 module Model = {
   let make = (currentDateTime: MomentRe.Moment.t) => {
-    let lazyDistribution = r =>
-      TimeLimitedDomainCdf.make(
-        ~timeVector={zero: currentDateTime, unit: `years},
-        ~distribution=r(FloatCdf.logNormal(20., 3.)),
-        ~probabilityAtMaxX=0.7,
-        ~maxX=`x(200.),
+    let genericDistribution =
+      GenericDistribution.make(
+        ~generationSource=GuesstimatorString(FloatCdf.logNormal(20., 3.)),
+        ~probabilityType=Cdf,
+        ~domain=RightLimited({xPoint: 200., excludingProbabilityMass: 0.3}),
+        ~unit=Time({zero: currentDateTime, unit: `years}),
+        (),
       );
-    Prop.Value.TimeLimitedDomainCdfLazy(lazyDistribution);
+    Prop.Value.GenericDistribution(genericDistribution);
   };
 };
 

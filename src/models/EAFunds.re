@@ -113,14 +113,22 @@ module Model = {
     switch (output) {
     | DONATIONS
     | PAYOUTS =>
-      Prop.Value.FloatCdf(
+      let difference =
         calculateDifference(
           currentValue(group, output),
           dateTime,
           currentDateTime,
           yearlyMeanGrowthRateIfNotClosed(group),
-        ),
-      )
+        );
+      let genericDistribution =
+        GenericDistribution.make(
+          ~generationSource=GuesstimatorString(difference),
+          ~probabilityType=Cdf,
+          ~domain=Complete,
+          ~unit=Unspecified,
+          (),
+        );
+      Prop.Value.GenericDistribution(genericDistribution);
     | CHANCE_OF_EXISTENCE =>
       let lazyDistribution = r =>
         TimeLimitedDomainCdf.make(

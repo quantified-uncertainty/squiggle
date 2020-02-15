@@ -15,6 +15,7 @@ module Value = {
     | FloatPoint(float)
     | Probability(float)
     | Conditional(conditional)
+    | GenericDistribution(DistributionTypes.genericDistribution)
     | TimeLimitedDomainCdf(TimeLimitedDomainCdf.t)
     | TimeLimitedDomainCdfLazy(
         (string => Types.ContinuousDistribution.t) => TimeLimitedDomainCdf.t,
@@ -31,6 +32,7 @@ module Value = {
       }
     | SelectSingle(r) => r
     | FloatCdf(r) => r
+    | GenericDistribution(_) => ""
     | TimeLimitedDomainCdf(_) => ""
     | TimeLimitedDomainCdfLazy(_) => ""
     | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
@@ -55,41 +57,29 @@ module Value = {
     | SelectSingle(r) => r |> ReasonReact.string
     | ConditionalArray(r) => "Array" |> ReasonReact.string
     | Conditional(r) => r.name |> ReasonReact.string
-    | TimeLimitedDomainCdfLazy(r) => <div />
-    //   let timeLimited = r(CdfLibrary.Distribution.fromString(_, 1000));
-    //   let cdf = timeLimited.limitedDomainCdf.distribution;
-    //   <>
-    //     <Chart height=100 data={cdf |> Types.ContinuousDistribution.toJs} />
-    //     <Chart
-    //       height=100
-    //       data={
-    //         cdf
-    //         |> CdfLibrary.Distribution.toPdf
-    //         |> Types.ContinuousDistribution.toJs
-    //       }
-    //     />
-    //     {FloatCdf.logNormal(50., 20.) |> ReasonReact.string}
-    //   </>;
+    | GenericDistribution(r) =>
+      let newDistribution =
+        GenericDistribution.renderIfNeeded(~sampleCount=1000, r);
+      switch (newDistribution) {
+      | Some({generationSource: Shape(Mixed({continuous: n}))}) =>
+        <div>
+          <Chart height=100 data={n |> Shape.Continuous.toJs} />
+          <Chart
+            height=100
+            data={n |> Shape.Continuous.toCdf |> Shape.Continuous.toJs}
+          />
+        </div>
+      | None => "Something went wrong" |> ReasonReact.string
+      | _ => <div />
+      };
+    | TimeLimitedDomainCdfLazy(_) => <div />
     | TimeLimitedDomainCdf(r) =>
       let cdf: Types.ContinuousDistribution.t =
         r.limitedDomainCdf.distribution;
       <>
         <Chart height=100 data={cdf |> Types.ContinuousDistribution.toJs} />
       </>;
-    | FloatCdf(r) => <div />
-    // let cdf: Types.MixedDistribution.t =
-    //   CdfLibrary.Distribution.fromString(r, 2000);
-    // <>
-    //   <Chart
-    //     height=100
-    //     data={
-    //       cdf
-    //       |> CdfLibrary.Distribution.toPdf
-    //       |> Types.ContinuousDistribution.toJs
-    //     }
-    //   />
-    //   {r |> ReasonReact.string}
-    // </>;
+    | FloatCdf(_) => <div />
     | Probability(r) =>
       (r *. 100. |> Js.Float.toFixed) ++ "%" |> ReasonReact.string
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat |> ReasonReact.string
