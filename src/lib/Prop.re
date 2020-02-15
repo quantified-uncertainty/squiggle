@@ -58,7 +58,14 @@ module Value = {
     | TimeLimitedDomainCdfLazy(r) =>
       let timeLimited = r(CdfLibrary.Distribution.fromString(_, 1000));
       let cdf = timeLimited.limitedDomainCdf.distribution;
-      <> <Chart height=100 data={cdf |> Types.toJs} /> </>;
+      <>
+        <Chart height=100 data={cdf |> Types.toJs} />
+        <Chart
+          height=100
+          data={cdf |> CdfLibrary.Distribution.toPdf |> Types.toJs}
+        />
+        {FloatCdf.logNormal(50., 20.) |> ReasonReact.string}
+      </>;
     | TimeLimitedDomainCdf(r) =>
       let cdf: Types.distribution = r.limitedDomainCdf.distribution;
       <> <Chart height=100 data={cdf |> Types.toJs} /> </>;

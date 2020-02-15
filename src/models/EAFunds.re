@@ -122,8 +122,14 @@ module Model = {
         ),
       )
     | CHANCE_OF_EXISTENCE =>
-      let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
-      Prop.Value.Probability((100. -. yearDiff) /. 100.);
+      let lazyDistribution = r =>
+        TimeLimitedDomainCdf.make(
+          ~timeVector={zero: currentDateTime, unit: `years},
+          ~distribution=r(FloatCdf.logNormal(10., 2.)),
+          ~probabilityAtMaxX=0.7,
+          ~maxX=`x(200.),
+        );
+      Prop.Value.TimeLimitedDomainCdfLazy(lazyDistribution);
     };
   };
 };

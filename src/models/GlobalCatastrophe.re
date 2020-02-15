@@ -3,7 +3,7 @@ module Model = {
     let lazyDistribution = r =>
       TimeLimitedDomainCdf.make(
         ~timeVector={zero: currentDateTime, unit: `years},
-        ~distribution=r("normal(50,30)"),
+        ~distribution=r(FloatCdf.logNormal(20., 3.)),
         ~probabilityAtMaxX=0.7,
         ~maxX=`x(200.),
       );
