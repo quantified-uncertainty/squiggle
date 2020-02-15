@@ -55,41 +55,41 @@ module Value = {
     | SelectSingle(r) => r |> ReasonReact.string
     | ConditionalArray(r) => "Array" |> ReasonReact.string
     | Conditional(r) => r.name |> ReasonReact.string
-    | TimeLimitedDomainCdfLazy(r) =>
-      let timeLimited = r(CdfLibrary.Distribution.fromString(_, 1000));
-      let cdf = timeLimited.limitedDomainCdf.distribution;
-      <>
-        <Chart height=100 data={cdf |> Types.ContinuousDistribution.toJs} />
-        <Chart
-          height=100
-          data={
-            cdf
-            |> CdfLibrary.Distribution.toPdf
-            |> Types.ContinuousDistribution.toJs
-          }
-        />
-        {FloatCdf.logNormal(50., 20.) |> ReasonReact.string}
-      </>;
+    | TimeLimitedDomainCdfLazy(r) => <div />
+    //   let timeLimited = r(CdfLibrary.Distribution.fromString(_, 1000));
+    //   let cdf = timeLimited.limitedDomainCdf.distribution;
+    //   <>
+    //     <Chart height=100 data={cdf |> Types.ContinuousDistribution.toJs} />
+    //     <Chart
+    //       height=100
+    //       data={
+    //         cdf
+    //         |> CdfLibrary.Distribution.toPdf
+    //         |> Types.ContinuousDistribution.toJs
+    //       }
+    //     />
+    //     {FloatCdf.logNormal(50., 20.) |> ReasonReact.string}
+    //   </>;
     | TimeLimitedDomainCdf(r) =>
       let cdf: Types.ContinuousDistribution.t =
         r.limitedDomainCdf.distribution;
       <>
         <Chart height=100 data={cdf |> Types.ContinuousDistribution.toJs} />
       </>;
-    | FloatCdf(r) =>
-      let cdf: Types.ContinuousDistribution.t =
-        CdfLibrary.Distribution.fromString(r, 2000);
-      <>
-        <Chart
-          height=100
-          data={
-            cdf
-            |> CdfLibrary.Distribution.toPdf
-            |> Types.ContinuousDistribution.toJs
-          }
-        />
-        {r |> ReasonReact.string}
-      </>;
+    | FloatCdf(r) => <div />
+    // let cdf: Types.MixedDistribution.t =
+    //   CdfLibrary.Distribution.fromString(r, 2000);
+    // <>
+    //   <Chart
+    //     height=100
+    //     data={
+    //       cdf
+    //       |> CdfLibrary.Distribution.toPdf
+    //       |> Types.ContinuousDistribution.toJs
+    //     }
+    //   />
+    //   {r |> ReasonReact.string}
+    // </>;
     | Probability(r) =>
       (r *. 100. |> Js.Float.toFixed) ++ "%" |> ReasonReact.string
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat |> ReasonReact.string

@@ -33,14 +33,19 @@ const ratioSize = samples => {
   return minMaxRatio(minValue, maxValue);
 };
 
+
 const toPdf = (values, sampleCount, min, max) => {
-  const samples = new Samples(values);
+  let duplicateSamples = _(values).groupBy().pickBy(x => x.length > 1).keys().value();
+  let totalLength = _.size(values);
+  let frequencies = duplicateSamples.map(s => ({value: parseFloat(s), percentage: totalLength/_(values).filter(x => x ==s).size()}));
+  let continuousSamples = _.difference(values, frequencies.map(f => f.value));
+  const samples = new Samples(continuousSamples);
 
   const ratioSize$ = ratioSize(samples);
   const width = ratioSize$ === 'SMALL' ? 20 : 1;
 
   const cdf = samples.toCdf({ size: sampleCount, width, min, max });
-  return {ys:cdf.ys, xs:cdf.xs};
+  return {continuous:{ys:cdf.ys, xs:cdf.xs}, discrete: {xs: frequencies.map(f => f.value), ys: frequencies.map(f => f.percentage)}};
 };
 
 let run = (text, sampleCount, inputs=[], min=false, max=false) => {

@@ -59,7 +59,7 @@ module DiscreteDistribution = {
 };
 
 module MixedDistribution = {
-  type distribution = {
+  type t = {
     discrete: DiscreteDistribution.t,
     continuous: ContinuousDistribution.t,
   };

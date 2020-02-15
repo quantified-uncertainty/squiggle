@@ -39,8 +39,35 @@ module JS = {
   external scoreNonMarketCdfCdf: (int, distJs, distJs, float) => distJs =
     "scoreNonMarketCdfCdf";
 
-  [@bs.module "./GuesstimatorLibrary.js"]
-  external toGuesstimator: (string, int) => distJs = "run";
+  module Guesstimator = {
+    [@bs.deriving abstract]
+    type discrete = {
+      xs: array(float),
+      ys: array(float),
+    };
+
+    let jsToDistDiscrete = (d: discrete): Types.DiscreteDistribution.t => {
+      xs: xsGet(d),
+      ys: ysGet(d),
+    };
+
+    [@bs.deriving abstract]
+    type combined = {
+      continuous: distJs,
+      discrete,
+    };
+
+    let toContinous = (r: combined) => continuousGet(r) |> jsToDist;
+    let toDiscrete = (r: combined): Types.DiscreteDistribution.t =>
+      discreteGet(r) |> jsToDistDiscrete;
+    let toMixed = (r: combined): Types.MixedDistribution.t => {
+      discrete: toDiscrete(r),
+      continuous: toContinous(r),
+    };
+
+    [@bs.module "./GuesstimatorLibrary.js"]
+    external toGuesstimator: (string, int) => combined = "run";
+  };
 };
 
 module Distribution = {
@@ -49,7 +76,8 @@ module Distribution = {
   let findX = (y, dist) => dist |> JS.distToJs |> JS.findX(y);
   let findY = (x, dist) => dist |> JS.distToJs |> JS.findY(x);
   let fromString = (str: string, sampleCount: int) =>
-    JS.toGuesstimator(str, sampleCount) |> JS.jsToDist;
+    JS.Guesstimator.toGuesstimator(str, sampleCount)
+    |> JS.Guesstimator.toMixed;
   let integral = dist => dist |> JS.distToJs |> JS.integral;
   let differentialEntropy = (maxCalculationLength, dist) =>
     dist
