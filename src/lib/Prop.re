@@ -17,7 +17,7 @@ module Value = {
     | Conditional(conditional)
     | TimeLimitedDomainCdf(TimeLimitedDomainCdf.t)
     | TimeLimitedDomainCdfLazy(
-        (string => Types.distribution) => TimeLimitedDomainCdf.t,
+        (string => Types.ContinuousDistribution.t) => TimeLimitedDomainCdf.t,
       )
     | ConditionalArray(array(conditional))
     | FloatCdf(string);
@@ -59,23 +59,34 @@ module Value = {
       let timeLimited = r(CdfLibrary.Distribution.fromString(_, 1000));
       let cdf = timeLimited.limitedDomainCdf.distribution;
       <>
-        <Chart height=100 data={cdf |> Types.toJs} />
+        <Chart height=100 data={cdf |> Types.ContinuousDistribution.toJs} />
         <Chart
           height=100
-          data={cdf |> CdfLibrary.Distribution.toPdf |> Types.toJs}
+          data={
+            cdf
+            |> CdfLibrary.Distribution.toPdf
+            |> Types.ContinuousDistribution.toJs
+          }
         />
         {FloatCdf.logNormal(50., 20.) |> ReasonReact.string}
       </>;
     | TimeLimitedDomainCdf(r) =>
-      let cdf: Types.distribution = r.limitedDomainCdf.distribution;
-      <> <Chart height=100 data={cdf |> Types.toJs} /> </>;
+      let cdf: Types.ContinuousDistribution.t =
+        r.limitedDomainCdf.distribution;
+      <>
+        <Chart height=100 data={cdf |> Types.ContinuousDistribution.toJs} />
+      </>;
     | FloatCdf(r) =>
-      let cdf: Types.distribution =
+      let cdf: Types.ContinuousDistribution.t =
         CdfLibrary.Distribution.fromString(r, 2000);
       <>
         <Chart
           height=100
-          data={cdf |> CdfLibrary.Distribution.toPdf |> Types.toJs}
+          data={
+            cdf
+            |> CdfLibrary.Distribution.toPdf
+            |> Types.ContinuousDistribution.toJs
+          }
         />
         {r |> ReasonReact.string}
       </>;

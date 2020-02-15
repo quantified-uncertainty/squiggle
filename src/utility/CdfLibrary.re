@@ -5,14 +5,16 @@ module JS = {
     ys: array(float),
   };
 
-  let distToJs = (d: Types.distribution) => distJs(~xs=d.xs, ~ys=d.ys);
+  let distToJs = (d: Types.ContinuousDistribution.t) =>
+    distJs(~xs=d.xs, ~ys=d.ys);
 
-  let jsToDist = (d: distJs): Types.distribution => {
+  let jsToDist = (d: distJs): Types.ContinuousDistribution.t => {
     xs: xsGet(d),
     ys: ysGet(d),
   };
 
-  let doAsDist = (f, d: Types.distribution) => d |> distToJs |> f |> jsToDist;
+  let doAsDist = (f, d: Types.ContinuousDistribution.t) =>
+    d |> distToJs |> f |> jsToDist;
 
   [@bs.module "./CdfLibrary.js"]
   external cdfToPdf: distJs => distJs = "cdfToPdf";

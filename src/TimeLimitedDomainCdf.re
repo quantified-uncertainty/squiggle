@@ -66,7 +66,7 @@ type t = {
 let make =
     (
       ~timeVector: timeVector,
-      ~distribution: Types.distribution,
+      ~distribution: Types.ContinuousDistribution.t,
       ~probabilityAtMaxX: float,
       ~maxX: [ | `time(MomentRe.Moment.t) | `x(float)],
     )

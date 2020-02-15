@@ -1,12 +1,17 @@
 type t = {
-  distribution: Types.distribution,
+  distribution: Types.ContinuousDistribution.t,
   domainMaxX: float,
 };
 
 let make = (~distribution, ~domainMaxX): t => {distribution, domainMaxX};
 
-let fromCdf = (cdf: Types.cdf, domainMaxX: float, probabilityAtMaxX: float) => {
-  let distribution: Types.distribution = {
+let fromCdf =
+    (
+      cdf: Types.ContinuousDistribution.t,
+      domainMaxX: float,
+      probabilityAtMaxX: float,
+    ) => {
+  let distribution: Types.ContinuousDistribution.t = {
     xs: cdf.xs,
     ys: cdf.ys |> E.A.fmap(r => r *. probabilityAtMaxX),
   };

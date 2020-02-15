@@ -1,38 +1,29 @@
-type distribution = {
-  xs: array(float),
-  ys: array(float),
-};
-
-let toJs = (t: distribution) => {
-  {"xs": t.xs, "ys": t.ys};
-};
-
-let toComponentsDist = (d: distribution): ForetoldComponents.Types.Dist.t => {
-  xs: d.xs,
-  ys: d.ys,
-};
-
-type pdf = distribution;
-type cdf = distribution;
-
-let foo = (b: pdf) => 3.9;
-let bar: cdf = {xs: [||], ys: [||]};
-
-let cc = foo(bar);
-
-module LimitedDomainCdf = {
+module ContinuousDistribution = {
   type t = {
-    distribution,
-    domainMaxX: float,
+    xs: array(float),
+    ys: array(float),
   };
 
-  let fromCdf = (cdf: cdf, domainMaxX: float, probabilityAtMaxX: float) => {
-    let distribution: distribution = {
-      xs: cdf.xs,
-      ys: cdf.ys |> E.A.fmap(r => r *. probabilityAtMaxX),
-    };
-    {distribution, domainMaxX};
+  let toJs = (t: t) => {
+    {"xs": t.xs, "ys": t.ys};
   };
+
+  let toComponentsDist = (d: t): ForetoldComponents.Types.Dist.t => {
+    xs: d.xs,
+    ys: d.ys,
+  };
+
+  type pdf = t;
+  type cdf = t;
+};
+
+module DiscreteDistribution = {
+  type t = {
+    xs: array(float),
+    ys: array(float),
+  };
+
+  let fromArray = (xs, ys) => {xs, ys};
 
   let _lastElement = (a: array('a)) =>
     switch (Belt.Array.size(a)) {
@@ -40,15 +31,36 @@ module LimitedDomainCdf = {
     | n => Belt.Array.get(a, n)
     };
 
-  let probabilityBeforeDomainMax = (t: t) => _lastElement(t.distribution.ys);
+  let derivative = (p: t) => {
+    let (xs, ys) =
+      Belt.Array.zip(p.xs, p.ys)
+      ->Belt.Array.reduce([||], (items, (x, y)) =>
+          switch (_lastElement(items)) {
+          | Some((_, yLast)) => [|(x, y -. yLast)|]
+          | None => [|(x, y)|]
+          }
+        )
+      |> Belt.Array.unzip;
+    fromArray(xs, ys);
+  };
 
-  let chanceByX = (t: t) => t.distribution;
+  let integral = (p: t) => {
+    let (xs, ys) =
+      Belt.Array.zip(p.xs, p.ys)
+      ->Belt.Array.reduce([||], (items, (x, y)) =>
+          switch (_lastElement(items)) {
+          | Some((_, yLast)) => [|(x, y +. yLast)|]
+          | None => [|(x, y)|]
+          }
+        )
+      |> Belt.Array.unzip;
+    fromArray(xs, ys);
+  };
+};
 
-  let domainMaxX = (t: t) => t.domainMaxX;
-  // let probabilityDistribution = (t: t) =>
-  //   t.distribution |> CdfLibrary.Distribution.toPdf;
-  // let probability = (t: t, xPoint: float) =>
-  //   CdfLibrary.Distribution.findY(xPoint, probabilityDistribution(t));
-  // let cumulativeProbability = (t: t, xPoint: float) =>
-  //   CdfLibrary.Distribution.findY(xPoint, t.distribution);
+module MixedDistribution = {
+  type distribution = {
+    discrete: DiscreteDistribution.t,
+    continuous: ContinuousDistribution.t,
+  };
 };
