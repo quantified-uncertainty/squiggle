@@ -37,15 +37,21 @@ const ratioSize = samples => {
 const toPdf = (values, sampleCount, min, max) => {
   let duplicateSamples = _(values).groupBy().pickBy(x => x.length > 1).keys().value();
   let totalLength = _.size(values);
-  let frequencies = duplicateSamples.map(s => ({value: parseFloat(s), percentage: totalLength/_(values).filter(x => x ==s).size()}));
+  let frequencies = duplicateSamples.map(s => ({value: parseFloat(s), percentage: _(values).filter(x => x ==s).size()/totalLength}));
   let continuousSamples = _.difference(values, frequencies.map(f => f.value));
-  const samples = new Samples(continuousSamples);
 
-  const ratioSize$ = ratioSize(samples);
-  const width = ratioSize$ === 'SMALL' ? 20 : 1;
+  let discrete = {xs: frequencies.map(f => f.value), ys: frequencies.map(f => f.percentage)};
+  let continuous = {ys: [], xs: []};
+  if (continuousSamples.length > 1){
+    const samples = new Samples(continuousSamples);
 
-  const cdf = samples.toCdf({ size: sampleCount, width, min, max });
-  return {continuous:{ys:cdf.ys, xs:cdf.xs}, discrete: {xs: frequencies.map(f => f.value), ys: frequencies.map(f => f.percentage)}};
+    const ratioSize$ = ratioSize(samples);
+    const width = ratioSize$ === 'SMALL' ? 20 : 1;
+
+    const cdf = samples.toCdf({ size: sampleCount, width, min, max });
+    continuous = cdf;
+  }
+  return {continuous, discrete};
 };
 
 let run = (text, sampleCount, inputs=[], min=false, max=false) => {
@@ -63,10 +69,14 @@ let run = (text, sampleCount, inputs=[], min=false, max=false) => {
     const values = _.filter(value.values, _.isFinite);
 
     let update;
+    let blankResponse = {
+      continuous: {ys: [], xs: []},
+      discrete: {ys: [], xs: []}
+    };
     if (values.length === 0) {
-      update = {xs: [], ys: []};
+      update = blankResponse;
     } else if (values.length === 1) {
-      update = {xs: [], ys: []};
+      update = blankResponse;
     } else {
       update = toPdf(values, sampleCount, min, max);
     }

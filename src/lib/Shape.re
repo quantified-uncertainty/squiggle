@@ -45,6 +45,18 @@ module Discrete = {
       |> Belt.Array.unzip;
     fromArrays(xs, ys);
   };
+
+  let render = (t: t) =>
+    Belt.Array.zip(t.xs, t.ys)
+    |> E.A.fmap(((x, y)) =>
+         <div>
+           {E.Float.toFixed(x)
+            ++ "---"
+            ++ E.Float.with3DigitsPrecision(y *. 100.)
+            |> ReasonReact.string}
+         </div>
+       )
+    |> ReasonReact.array;
 };
 
 module Mixed = {
