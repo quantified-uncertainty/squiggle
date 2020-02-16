@@ -38,12 +38,22 @@ module Discrete = {
       Belt.Array.zip(p.xs, p.ys)
       ->Belt.Array.reduce([||], (items, (x, y)) =>
           switch (_lastElement(items)) {
-          | Some((_, yLast)) => [|(x, y +. yLast)|]
+          | Some((_, yLast)) => E.A.append(items, [|(x, y +. yLast)|])
           | None => [|(x, y)|]
           }
         )
       |> Belt.Array.unzip;
     fromArrays(xs, ys);
+  };
+
+  let ySum = (t: t) => {
+    E.A.fold_left((a, b) => a +. b, 0., t.ys);
+  };
+
+  let scaleYToTotal = (totalDesired, t: t): t => {
+    let currentSum = ySum(t);
+    let difference = totalDesired /. currentSum;
+    {xs: t.xs, ys: t.ys |> E.A.fmap(y => y *. difference)};
   };
 
   let render = (t: t) =>
@@ -109,11 +119,11 @@ module Mixed = {
       | {
           continuous: ADDS_TO_1,
           discrete: ADDS_TO_CORRECT_PROBABILITY,
-          discreteProbabilityMass: Some(r),
+          discreteProbabilityMass: None,
         } =>
-        Some(
-          make(~continuous, ~discrete, ~discreteProbabilityMassFraction=r),
-        )
+        let discreteProbabilityMassFraction = Discrete.ySum(discrete);
+        let discrete = Discrete.scaleYToTotal(1.0, discrete);
+        Some(make(~continuous, ~discrete, ~discreteProbabilityMassFraction));
       | _ => None
       };
   };

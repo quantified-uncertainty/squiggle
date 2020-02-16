@@ -61,10 +61,19 @@ module Value = {
       let newDistribution =
         GenericDistribution.renderIfNeeded(~sampleCount=1000, r);
       switch (newDistribution) {
-      | Some({generationSource: Shape(Mixed({continuous: n, discrete: d}))}) =>
+      | Some({
+          generationSource:
+            Shape(
+              Mixed({
+                continuous: n,
+                discrete: d,
+                discreteProbabilityMassFraction: f,
+              }),
+            ),
+        }) =>
         <div>
           <Chart height=100 data={n |> Shape.Continuous.toJs} />
-          {Shape.Discrete.render(d)}
+          {d |> Shape.Discrete.scaleYToTotal(f) |> Shape.Discrete.render}
         </div>
       | None => "Something went wrong" |> ReasonReact.string
       | _ => <div />

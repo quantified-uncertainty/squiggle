@@ -28,7 +28,7 @@ module Internals = {
     let assumptions: Shape.Mixed.Builder.assumptions = {
       continuous: ADDS_TO_1,
       discrete: ADDS_TO_CORRECT_PROBABILITY,
-      discreteProbabilityMass: Some(0.3),
+      discreteProbabilityMass: None,
     };
     Shape.Mixed.Builder.build(
       ~continuous=toContinous(r),
