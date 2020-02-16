@@ -78,7 +78,7 @@ module Model = {
     let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
     let meanDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
     let stdDevDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
-    FloatCdf.logNormal(
+    GuesstimatorDist.logNormal(
       currentValue *. meanDiff,
       firstYearStdDev *. stdDevDiff,
     );
