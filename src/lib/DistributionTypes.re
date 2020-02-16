@@ -9,15 +9,13 @@ type domain =
   | RightLimited(domainLimit)
   | LeftAndRightLimited(domainLimit, domainLimit);
 
-type continuousShape = {
+type xyShape = {
   xs: array(float),
   ys: array(float),
 };
+type continuousShape = xyShape;
 
-type discreteShape = {
-  xs: array(float),
-  ys: array(float),
-};
+type discreteShape = xyShape;
 
 type mixedShape = {
   continuous: continuousShape,

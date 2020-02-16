@@ -16,10 +16,6 @@ module Value = {
     | Probability(float)
     | Conditional(conditional)
     | GenericDistribution(DistributionTypes.genericDistribution)
-    | TimeLimitedDomainCdf(TimeLimitedDomainCdf.t)
-    | TimeLimitedDomainCdfLazy(
-        (string => Types.ContinuousDistribution.t) => TimeLimitedDomainCdf.t,
-      )
     | ConditionalArray(array(conditional))
     | FloatCdf(string);
 
@@ -33,8 +29,6 @@ module Value = {
     | SelectSingle(r) => r
     | FloatCdf(r) => r
     | GenericDistribution(_) => ""
-    | TimeLimitedDomainCdf(_) => ""
-    | TimeLimitedDomainCdfLazy(_) => ""
     | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
     | DateTime(r) => r |> MomentRe.Moment.defaultFormat
     | FloatPoint(r) => r |> Js.Float.toFixed
@@ -78,13 +72,6 @@ module Value = {
       | None => "Something went wrong" |> ReasonReact.string
       | _ => <div />
       };
-    | TimeLimitedDomainCdfLazy(_) => <div />
-    | TimeLimitedDomainCdf(r) =>
-      let cdf: Types.ContinuousDistribution.t =
-        r.limitedDomainCdf.distribution;
-      <>
-        <Chart height=100 data={cdf |> Types.ContinuousDistribution.toJs} />
-      </>;
     | FloatCdf(_) => <div />
     | Probability(r) =>
       (r *. 100. |> Js.Float.toFixed) ++ "%" |> ReasonReact.string

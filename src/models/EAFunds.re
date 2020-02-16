@@ -129,15 +129,7 @@ module Model = {
           (),
         );
       Prop.Value.GenericDistribution(genericDistribution);
-    | CHANCE_OF_EXISTENCE =>
-      let lazyDistribution = r =>
-        TimeLimitedDomainCdf.make(
-          ~timeVector={zero: currentDateTime, unit: `years},
-          ~distribution=r(FloatCdf.logNormal(10., 2.)),
-          ~probabilityAtMaxX=0.7,
-          ~maxX=`x(200.),
-        );
-      Prop.Value.TimeLimitedDomainCdfLazy(lazyDistribution);
+    | CHANCE_OF_EXISTENCE => Prop.Value.Probability(0.3)
     };
   };
 };

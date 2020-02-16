@@ -25,12 +25,12 @@ module Internals = {
   external toCombinedFormat: (string, int) => combined = "run";
 
   let toMixedShape = (r: combined): option(DistributionTypes.mixedShape) => {
-    let assumptions: Shape.Mixed.Builder.assumptions = {
+    let assumptions: MixedShapeBuilder.assumptions = {
       continuous: ADDS_TO_1,
       discrete: ADDS_TO_CORRECT_PROBABILITY,
       discreteProbabilityMass: None,
     };
-    Shape.Mixed.Builder.build(
+    MixedShapeBuilder.build(
       ~continuous=toContinous(r),
       ~discrete=toDiscrete(r),
       ~assumptions,

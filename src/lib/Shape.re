@@ -1,10 +1,46 @@
 open DistributionTypes;
 
-module Continuous = {
-  let fromArrays = (xs, ys): continuousShape => {xs, ys};
-  let toJs = (t: continuousShape) => {
+let _lastElement = (a: array('a)) =>
+  switch (Belt.Array.size(a)) {
+  | 0 => None
+  | n => Belt.Array.get(a, n)
+  };
+
+module XYShape = {
+  type t = xyShape;
+
+  let toJs = (t: t) => {
     {"xs": t.xs, "ys": t.ys};
   };
+
+  let fmap = (t: t, y): t => {xs: t.xs, ys: t.ys |> E.A.fmap(y)};
+  let yFold = (fn, t: t) => {
+    E.A.fold_left(fn, 0., t.ys);
+  };
+  let ySum = yFold((a, b) => a +. b);
+
+  let fromArrays = (xs, ys): t => {xs, ys};
+
+  let transverse = (fn, p: t) => {
+    let (xs, ys) =
+      Belt.Array.zip(p.xs, p.ys)
+      ->Belt.Array.reduce([||], (items, (x, y)) =>
+          switch (_lastElement(items)) {
+          | Some((_, yLast)) => [|(x, fn(y, yLast))|]
+          | None => [|(x, y)|]
+          }
+        )
+      |> Belt.Array.unzip;
+    fromArrays(xs, ys);
+  };
+
+  let derivative = transverse((aCurrent, aLast) => aCurrent -. aLast);
+  let integral = transverse((aCurrent, aLast) => aCurrent +. aLast);
+};
+
+module Continuous = {
+  let fromArrays = XYShape.fromArrays;
+  let toJs = XYShape.toJs;
   let toPdf = CdfLibrary.Distribution.toPdf;
   let toCdf = CdfLibrary.Distribution.toCdf;
   let findX = CdfLibrary.Distribution.findX;
@@ -13,47 +49,14 @@ module Continuous = {
 
 module Discrete = {
   type t = discreteShape;
-  let fromArrays = (xs, ys): discreteShape => {xs, ys};
-  let _lastElement = (a: array('a)) =>
-    switch (Belt.Array.size(a)) {
-    | 0 => None
-    | n => Belt.Array.get(a, n)
-    };
-
-  let derivative = (p: t) => {
-    let (xs, ys) =
-      Belt.Array.zip(p.xs, p.ys)
-      ->Belt.Array.reduce([||], (items, (x, y)) =>
-          switch (_lastElement(items)) {
-          | Some((_, yLast)) => [|(x, y -. yLast)|]
-          | None => [|(x, y)|]
-          }
-        )
-      |> Belt.Array.unzip;
-    fromArrays(xs, ys);
-  };
-
-  let integral = (p: t) => {
-    let (xs, ys) =
-      Belt.Array.zip(p.xs, p.ys)
-      ->Belt.Array.reduce([||], (items, (x, y)) =>
-          switch (_lastElement(items)) {
-          | Some((_, yLast)) => E.A.append(items, [|(x, y +. yLast)|])
-          | None => [|(x, y)|]
-          }
-        )
-      |> Belt.Array.unzip;
-    fromArrays(xs, ys);
-  };
-
-  let ySum = (t: t) => {
-    E.A.fold_left((a, b) => a +. b, 0., t.ys);
-  };
+  let fromArrays = XYShape.fromArrays;
+  let toJs = XYShape.toJs;
+  let ySum = XYShape.ySum;
+  let zip = t => Belt.Array.zip(t.xs, t.ys);
 
   let scaleYToTotal = (totalDesired, t: t): t => {
-    let currentSum = ySum(t);
-    let difference = totalDesired /. currentSum;
-    {xs: t.xs, ys: t.ys |> E.A.fmap(y => y *. difference)};
+    let difference = totalDesired /. ySum(t);
+    XYShape.fmap(t, y => y *. difference);
   };
 
   let render = (t: t) =>
@@ -67,6 +70,12 @@ module Discrete = {
          </div>
        )
     |> ReasonReact.array;
+
+  let findY = (x: float, t: t) =>
+    switch (E.A.getBy(zip(t), ((ix, _)) => ix == x)) {
+    | Some((_, y)) => y
+    | None => 0.
+    };
 };
 
 module Mixed = {
@@ -74,57 +83,5 @@ module Mixed = {
     continuous,
     discrete,
     discreteProbabilityMassFraction,
-  };
-
-  module Builder = {
-    type assumption =
-      | ADDS_TO_1
-      | ADDS_TO_CORRECT_PROBABILITY;
-    type assumptions = {
-      continuous: assumption,
-      discrete: assumption,
-      discreteProbabilityMass: option(float),
-    };
-    let build = (~continuous, ~discrete, ~assumptions) =>
-      switch (assumptions) {
-      | {
-          continuous: ADDS_TO_CORRECT_PROBABILITY,
-          discrete: ADDS_TO_CORRECT_PROBABILITY,
-          discreteProbabilityMass: Some(r),
-        } =>
-        // TODO: Fix this, it's wrong :(
-        Some(
-          make(~continuous, ~discrete, ~discreteProbabilityMassFraction=r),
-        )
-      | {
-          continuous: ADDS_TO_1,
-          discrete: ADDS_TO_1,
-          discreteProbabilityMass: Some(r),
-        } =>
-        Some(
-          make(~continuous, ~discrete, ~discreteProbabilityMassFraction=r),
-        )
-      | {
-          continuous: ADDS_TO_1,
-          discrete: ADDS_TO_1,
-          discreteProbabilityMass: None,
-        } =>
-        None
-      | {
-          continuous: ADDS_TO_CORRECT_PROBABILITY,
-          discrete: ADDS_TO_1,
-          discreteProbabilityMass: None,
-        } =>
-        None
-      | {
-          continuous: ADDS_TO_1,
-          discrete: ADDS_TO_CORRECT_PROBABILITY,
-          discreteProbabilityMass: None,
-        } =>
-        let discreteProbabilityMassFraction = Discrete.ySum(discrete);
-        let discrete = Discrete.scaleYToTotal(1.0, discrete);
-        Some(make(~continuous, ~discrete, ~discreteProbabilityMassFraction));
-      | _ => None
-      };
   };
 };
