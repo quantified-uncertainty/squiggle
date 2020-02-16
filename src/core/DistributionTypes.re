@@ -13,8 +13,8 @@ type xyShape = {
   xs: array(float),
   ys: array(float),
 };
-type continuousShape = xyShape;
 
+type continuousShape = xyShape;
 type discreteShape = xyShape;
 
 type mixedShape = {
