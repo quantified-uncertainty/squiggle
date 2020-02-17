@@ -85,3 +85,10 @@ module Mixed = {
     discreteProbabilityMassFraction,
   };
 };
+
+module DomainMixed = {
+  type t = {
+    mixedShape,
+    domain,
+  };
+};

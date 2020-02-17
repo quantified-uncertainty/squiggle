@@ -49,7 +49,7 @@ let make =
                 )
               }>
               {r.name |> ReasonReact.string}
-              {(r.truthValue ? "TRUE" : "FALSE") |> ReasonReact.string}
+              {(r.truthValue ? " = True" : " = False") |> ReasonReact.string}
             </div>
           )
        |> ReasonReact.array}
@@ -77,7 +77,7 @@ let make =
                   );
                   ();
                 }}>
-                {"True" |> ReasonReact.string}
+                {"=True" |> ReasonReact.string}
               </button>
               <button
                 className="hover:bg-red-700 text-white py-0 px-1 rounded bg-red-500"
@@ -97,7 +97,7 @@ let make =
                     ),
                   );
                 }}>
-                {"False" |> ReasonReact.string}
+                {"=False" |> ReasonReact.string}
               </button>
             </div>
           )
