@@ -13,6 +13,39 @@ let makeHelpers = (combo): formState => {
   {combo, setCombo, setInputValue};
 };
 
+let propValue = (t: Prop.Value.t) => {
+  switch (t) {
+  | SelectSingle(r) => r |> ReasonReact.string
+  | ConditionalArray(r) => "Array" |> ReasonReact.string
+  | GenericDistribution(r) =>
+    let newDistribution =
+      GenericDistribution.renderIfNeeded(~sampleCount=1000, r);
+    switch (newDistribution) {
+    | Some({
+        generationSource:
+          Shape(
+            Mixed({
+              continuous: n,
+              discrete: d,
+              discreteProbabilityMassFraction: f,
+            }),
+          ),
+      }) =>
+      <div>
+        <Chart height=100 data={n |> Shape.Continuous.toJs} />
+        {d |> Shape.Discrete.scaleYToTotal(f) |> Shape.Discrete.render}
+      </div>
+    | None => "Something went wrong" |> ReasonReact.string
+    | _ => <div />
+    };
+  | FloatCdf(_) => <div />
+  | Probability(r) =>
+    (r *. 100. |> Js.Float.toFixed) ++ "%" |> ReasonReact.string
+  | DateTime(r) => r |> MomentRe.Moment.defaultFormat |> ReasonReact.string
+  | FloatPoint(r) => r |> Js.Float.toFixed |> ReasonReact.string
+  };
+};
+
 module ModelForm = {
   let handleChange = (handleChange, event) =>
     handleChange(ReactEvent.Form.target(event)##value);
@@ -51,7 +84,7 @@ module ModelForm = {
             )
          |> ReasonReact.array}
         <div className="bg-green-100 p-2 rounded-sm mt-6 text-lg">
-          {model.run(formState.combo) |> E.O.React.fmapOrNull(Value.display)}
+          {model.run(formState.combo) |> E.O.React.fmapOrNull(propValue)}
         </div>
       </form>
     </div>;

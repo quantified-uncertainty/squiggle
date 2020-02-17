@@ -1,84 +1,88 @@
 module Value = {
-  type binaryConditional =
-    | Selected(bool)
-    | Unselected;
-
   type conditional = {
     name: string,
     truthValue: bool,
   };
 
   type t =
-    | BinaryConditional(binaryConditional)
     | SelectSingle(string)
     | DateTime(MomentRe.Moment.t)
     | FloatPoint(float)
     | Probability(float)
-    | Conditional(conditional)
     | GenericDistribution(DistributionTypes.genericDistribution)
     | ConditionalArray(array(conditional))
     | FloatCdf(string);
+};
 
-  let to_string = (t: t) => {
-    switch (t) {
-    | BinaryConditional(binaryConditional) =>
-      switch (binaryConditional) {
-      | Selected(r) => r ? "True" : "False"
-      | Unselected => ""
-      }
-    | SelectSingle(r) => r
-    | FloatCdf(r) => r
-    | GenericDistribution(_) => ""
-    | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
-    | DateTime(r) => r |> MomentRe.Moment.defaultFormat
-    | FloatPoint(r) => r |> Js.Float.toFixed
-    | Conditional(r) => r.name
-    | ConditionalArray(r) =>
-      r |> E.A.fmap(r => r.name) |> Js.Array.joinWith(",")
-    };
+module ValueCombination = {
+  type pointsToEvenlySample = int;
+
+  type dateTimeRange = {
+    startTime: MomentRe.Moment.t,
+    endTime: MomentRe.Moment.t,
+    pointsWithin: int,
   };
 
-  let display = (t: t) => {
-    switch (t) {
-    | BinaryConditional(binaryConditional) =>
-      (
-        switch (binaryConditional) {
-        | Selected(r) => r ? "True" : "False"
-        | Unselected => ""
-        }
+  type floatPointRange = {
+    startTime: float,
+    endTime: float,
+    pointsWithin: int,
+  };
+
+  type range('a) = {
+    beginning: 'a,
+    ending: 'a,
+    pointsToEvenlySample,
+  };
+
+  type t =
+    | SelectSingle
+    | DateTime(range(MomentRe.Moment.t))
+    | FloatPoint(range(MomentRe.Moment.t))
+    | Probability(pointsToEvenlySample);
+};
+
+module ValueCluster = {
+  type conditional = {
+    name: string,
+    truthValue: bool,
+  };
+
+  type pointsToEvenlySample = int;
+
+  type dateTimeRange = {
+    startTime: MomentRe.Moment.t,
+    endTime: MomentRe.Moment.t,
+    pointsWithin: int,
+  };
+
+  type floatPointRange = {
+    startTime: float,
+    endTime: float,
+    pointsWithin: int,
+  };
+
+  type range('a) = {
+    beginning: 'a,
+    ending: 'a,
+    pointsToEvenlySample,
+  };
+
+  type t =
+    | SelectSingle([ | `combination | `item(string)])
+    | DateTime(
+        [
+          | `combination(range(MomentRe.Moment.t))
+          | `item(MomentRe.Moment.t)
+        ],
       )
-      |> ReasonReact.string
-    | SelectSingle(r) => r |> ReasonReact.string
-    | ConditionalArray(r) => "Array" |> ReasonReact.string
-    | Conditional(r) => r.name |> ReasonReact.string
-    | GenericDistribution(r) =>
-      let newDistribution =
-        GenericDistribution.renderIfNeeded(~sampleCount=1000, r);
-      switch (newDistribution) {
-      | Some({
-          generationSource:
-            Shape(
-              Mixed({
-                continuous: n,
-                discrete: d,
-                discreteProbabilityMassFraction: f,
-              }),
-            ),
-        }) =>
-        <div>
-          <Chart height=100 data={n |> Shape.Continuous.toJs} />
-          {d |> Shape.Discrete.scaleYToTotal(f) |> Shape.Discrete.render}
-        </div>
-      | None => "Something went wrong" |> ReasonReact.string
-      | _ => <div />
-      };
-    | FloatCdf(_) => <div />
-    | Probability(r) =>
-      (r *. 100. |> Js.Float.toFixed) ++ "%" |> ReasonReact.string
-    | DateTime(r) => r |> MomentRe.Moment.defaultFormat |> ReasonReact.string
-    | FloatPoint(r) => r |> Js.Float.toFixed |> ReasonReact.string
-    };
-  };
+    | FloatPoint(
+        [ | `combination(range(MomentRe.Moment.t)) | `item(string)],
+      )
+    | Probability([ | `item(string)])
+    | GenericDistribution([ | `item(DistributionTypes.genericDistribution)])
+    | ConditionalArray([ | `item(array(conditional))])
+    | FloatCdf([ | `item(string)]);
 };
 
 module Type = {
@@ -113,7 +117,6 @@ module Type = {
   type withDefault('a) = {default: option('a)};
 
   type t =
-    | BinaryConditional
     | SelectSingle(selectSingle)
     | FloatPoint(withDefaultMinMax(float))
     | Probability(withDefault(float))
@@ -124,7 +127,6 @@ module Type = {
 
   let default = (t: t) =>
     switch (t) {
-    | BinaryConditional => Some(Value.BinaryConditional(Unselected))
     | Conditionals(s) => Some(Value.ConditionalArray(s.defaults))
     | Year(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | FloatPoint(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
@@ -147,6 +149,22 @@ module ValueMap = {
   let update = (t, k, v) => MS.update(t, k, _ => v);
   let toArray = MS.toArray;
   let fromOptionalMap = (t: MS.t(option(Value.t))): t =>
+    MS.keep(t, (_, d) => E.O.isSome(d))
+    ->MS.map(d => E.O.toExn("This should not have happened", d));
+  let fromOptionalArray = (r): t => MS.fromArray(r) |> fromOptionalMap;
+};
+
+module ValueClusterMap = {
+  module MS = Belt.Map.String;
+  type t = MS.t(ValueCluster.t);
+  let get = (t: t, s) => MS.get(t, s);
+  let keys = MS.keysToArray;
+  let map = MS.map;
+  let fromArray = (r): t => MS.fromArray(r);
+  let values = (t: t) => t |> MS.valuesToArray;
+  let update = (t, k, v) => MS.update(t, k, _ => v);
+  let toArray = MS.toArray;
+  let fromOptionalMap = (t: MS.t(option(ValueCluster.t))): t =>
     MS.keep(t, (_, d) => E.O.isSome(d))
     ->MS.map(d => E.O.toExn("This should not have happened", d));
   let fromOptionalArray = (r): t => MS.fromArray(r) |> fromOptionalMap;

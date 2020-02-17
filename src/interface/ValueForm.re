@@ -127,36 +127,6 @@ let make =
         }
       )}
     />
-  | (BinaryConditional, Some(BinaryConditional(r))) =>
-    switch (r) {
-    | Unselected =>
-      <div
-        onClick={_ => onChange(Some(BinaryConditional(Selected(true))))}>
-        {"Select" |> ReasonReact.string}
-      </div>
-    | Selected(true) =>
-      <div>
-        {"YES!" |> ReasonReact.string}
-        <div
-          onClick={_ => onChange(Some(BinaryConditional(Selected(false))))}>
-          {"No" |> ReasonReact.string}
-        </div>
-        <div onClick={_ => onChange(Some(BinaryConditional(Unselected)))}>
-          {"Deselect" |> ReasonReact.string}
-        </div>
-      </div>
-    | Selected(false) =>
-      <div>
-        {"NO!" |> ReasonReact.string}
-        <div
-          onClick={_ => onChange(Some(BinaryConditional(Selected(true))))}>
-          {"Yes" |> ReasonReact.string}
-        </div>
-        <div onClick={_ => onChange(Some(BinaryConditional(Unselected)))}>
-          {"Deselect" |> ReasonReact.string}
-        </div>
-      </div>
-    }
   | (Year(_), _)
   | (FloatPoint(_), _) => <input type_="number" value="" />
   | (SelectSingle(t), Some(SelectSingle(r))) =>
