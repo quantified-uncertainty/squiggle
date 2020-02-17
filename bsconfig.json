@@ -3,10 +3,16 @@
   "reason": {
     "react-jsx": 3
   },
-  "sources": {
-    "dir": "src",
-    "subdirs": true
-  },
+  "sources": [{
+      "dir": "src",
+      "subdirs": true
+    },
+    {
+      "dir": "showcase",
+      "type": "dev",
+      "subdirs": true
+    }
+  ],
   "bsc-flags": ["-bs-super-errors", "-bs-no-version-header"],
   "package-specs": [{
     "module": "commonjs",

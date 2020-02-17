@@ -38,7 +38,7 @@ module JS = {
 
 module Distribution = {
   let toPdf = dist => dist |> JS.doAsDist(JS.cdfToPdf);
-  let toCdf = dist => dist |> JS.doAsDist(JS.cdfToPdf);
+  let toCdf = dist => dist |> JS.doAsDist(JS.pdfToCdf);
   let findX = (y, dist) => dist |> JS.distToJs |> JS.findX(y);
   let findY = (x, dist) => dist |> JS.distToJs |> JS.findY(x);
   let integral = dist => dist |> JS.distToJs |> JS.integral;

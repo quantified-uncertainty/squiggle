@@ -1,5 +1,6 @@
 const {
     Cdf,
+    Pdf,
     ContinuousDistribution,
     ContinuousDistributionCombination,
     scoringFunctions,

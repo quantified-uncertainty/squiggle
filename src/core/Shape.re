@@ -3,7 +3,7 @@ open DistributionTypes;
 let _lastElement = (a: array('a)) =>
   switch (Belt.Array.size(a)) {
   | 0 => None
-  | n => Belt.Array.get(a, n)
+  | n => Belt.Array.get(a, n - 1)
   };
 
 module XYShape = {
@@ -28,7 +28,8 @@ module XYShape = {
       Belt.Array.zip(p.xs, p.ys)
       ->Belt.Array.reduce([||], (items, (x, y)) =>
           switch (_lastElement(items)) {
-          | Some((_, yLast)) => [|(x, fn(y, yLast))|]
+          | Some((_, yLast)) =>
+            Belt.Array.concat(items, [|(x, fn(y, yLast))|])
           | None => [|(x, y)|]
           }
         )
