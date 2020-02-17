@@ -23,7 +23,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@foretold/cdf": "^1.0.14",
+    "@foretold/cdf": "^1.0.15",
     "@foretold/components": "^0.0.3",
     "@foretold/guesstimator": "^1.0.10",
     "antd": "3.17.0",

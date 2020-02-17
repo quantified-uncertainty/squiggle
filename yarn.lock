@@ -997,10 +997,10 @@
     lodash "4.17.15"
     pdfast "0.2.0"
 
-"@foretold/cdf@^1.0.14":
-  version "1.0.14"
-  resolved "https://registry.yarnpkg.com/@foretold/cdf/-/cdf-1.0.14.tgz#a6b77a1fa211e3b5b8b3f75fbe1979499287eb89"
-  integrity sha512-Dfo9g2lJbNmJNL8dYnUjmrnOlTQXWJaadys0iuSxO2UNF0Y60RdRIllESviy/Qx2Pbzrkds5E7M4DncpMNPu8Q==
+"@foretold/cdf@^1.0.15":
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/@foretold/cdf/-/cdf-1.0.15.tgz#69ce4755158693e3d325e7be10d0aa9cdb465730"
+  integrity sha512-I7GhFQd4HaFd+tGD1IJ0W8xvFp2YiJdcFiXSCq9vYQZWWy+Npi4QOYsMoDJyoUTvOlVba4ARa/pDKPD2hn+uuQ==
   dependencies:
     lodash "4.17.15"
     parcel "1.12.3"
