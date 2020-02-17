@@ -103,13 +103,19 @@ module Model = {
     | (_, CHANCE_OF_EXISTENCE) => 0.0
     };
   };
+
+  let xRisk = conditionals =>
+    Prop.Value.ConditionalArray.get(conditionals, "Global Existential Event");
+
   let make =
       (
         group: group,
         dateTime: MomentRe.Moment.t,
         currentDateTime: MomentRe.Moment.t,
         output: output,
+        conditionals: array(Prop.Value.conditional),
       ) => {
+    let xRisk = xRisk(conditionals);
     switch (output) {
     | DONATIONS
     | PAYOUTS =>
@@ -120,16 +126,37 @@ module Model = {
           currentDateTime,
           yearlyMeanGrowthRateIfNotClosed(group),
         );
+      let str =
+        switch (xRisk) {
+        | Some({truthValue: true}) => "0"
+        | Some({truthValue: false}) => difference
+        | None => "uniform(0,1) > .3 ? " ++ difference ++ ": 0"
+        };
       let genericDistribution =
         GenericDistribution.make(
-          ~generationSource=GuesstimatorString(difference),
+          ~generationSource=GuesstimatorString(str),
           ~probabilityType=Cdf,
           ~domain=Complete,
           ~unit=Unspecified,
           (),
         );
       Prop.Value.GenericDistribution(genericDistribution);
-    | CHANCE_OF_EXISTENCE => Prop.Value.Probability(0.3)
+    | CHANCE_OF_EXISTENCE =>
+      Prop.Value.GenericDistribution(
+        GenericDistribution.make(
+          ~generationSource=
+            GuesstimatorString(
+              GuesstimatorDist.min(
+                GlobalCatastrophe.guesstimatorString,
+                GuesstimatorDist.logNormal(40., 4.),
+              ),
+            ),
+          ~probabilityType=Cdf,
+          ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
+          ~unit=Time({zero: currentDateTime, unit: `years}),
+          (),
+        ),
+      )
     };
   };
 };
@@ -158,7 +185,7 @@ module Interface = {
         Some(DateTime(intendedYear)),
         Some(DateTime(currentYear)),
         Some(SelectSingle(output)),
-        _,
+        Some(ConditionalArray(conditionals)),
       |] =>
       choiceFromString(fund)
       |> E.O.fmap(fund =>
@@ -167,6 +194,7 @@ module Interface = {
              intendedYear,
              currentYear,
              outputFromString(output),
+             conditionals,
            )
          )
     | _ => None
@@ -229,9 +257,9 @@ module Interface = {
             SelectSingle({
               default: Some("Output"),
               options: [
-                {name: "Donations | Exists", id: "donations"},
-                {name: "Funding | Exists", id: "funding"},
-                {name: "Exists", id: "exists"},
+                {name: "Donations", id: "donations"},
+                {name: "Funding", id: "funding"},
+                {name: "Closing", id: "exists"},
               ],
             }),
           (),

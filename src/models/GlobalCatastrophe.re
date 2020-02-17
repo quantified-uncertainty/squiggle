@@ -1,9 +1,10 @@
+let guesstimatorString = GuesstimatorDist.logNormal(20., 3.);
+
 module Model = {
   let make = (currentDateTime: MomentRe.Moment.t) => {
     let genericDistribution =
       GenericDistribution.make(
-        ~generationSource=
-          GuesstimatorString(GuesstimatorDist.logNormal(20., 3.)),
+        ~generationSource=GuesstimatorString(guesstimatorString),
         ~probabilityType=Cdf,
         ~domain=RightLimited({xPoint: 200., excludingProbabilityMass: 0.3}),
         ~unit=Time({zero: currentDateTime, unit: `years}),

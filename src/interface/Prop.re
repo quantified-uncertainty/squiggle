@@ -12,6 +12,11 @@ module Value = {
     | GenericDistribution(DistributionTypes.genericDistribution)
     | ConditionalArray(array(conditional))
     | FloatCdf(string);
+
+  module ConditionalArray = {
+    let get = (conditionals: array(conditional), name: string) =>
+      Belt.Array.getBy(conditionals, (c: conditional) => c.name == name);
+  };
 };
 
 module ValueCombination = {

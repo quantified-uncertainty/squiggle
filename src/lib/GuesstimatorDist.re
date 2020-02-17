@@ -18,3 +18,4 @@ let logNormal = (mean: float, std: float) => {
 };
 
 let divide = (str1: string, str2: string) => {j|$(str1)/$(str2)|j};
+let min = (str1: string, str2: string) => {j|min($(str1),$(str2))|j};

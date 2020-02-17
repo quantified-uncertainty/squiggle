@@ -14,9 +14,11 @@ module XYShape = {
   };
 
   let fmap = (t: t, y): t => {xs: t.xs, ys: t.ys |> E.A.fmap(y)};
+
   let yFold = (fn, t: t) => {
     E.A.fold_left(fn, 0., t.ys);
   };
+
   let ySum = yFold((a, b) => a +. b);
 
   let fromArrays = (xs, ys): t => {xs, ys};
@@ -34,8 +36,8 @@ module XYShape = {
     fromArrays(xs, ys);
   };
 
-  let derivative = transverse((aCurrent, aLast) => aCurrent -. aLast);
   let integral = transverse((aCurrent, aLast) => aCurrent +. aLast);
+  let derivative = transverse((aCurrent, aLast) => aCurrent -. aLast);
 };
 
 module Continuous = {
@@ -83,6 +85,16 @@ module Mixed = {
     continuous,
     discrete,
     discreteProbabilityMassFraction,
+  };
+
+  type yPdfPoint = {
+    continuous: float,
+    discrete: float,
+  };
+
+  let getY = (t: DistributionTypes.mixedShape, x: float): yPdfPoint => {
+    continuous: Continuous.findY(x, t.continuous),
+    discrete: Discrete.findY(x, t.discrete),
   };
 };
 
