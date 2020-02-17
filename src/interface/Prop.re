@@ -226,7 +226,7 @@ module Model = {
     version: string,
     inputTypes: array(TypeWithMetadata.t),
     outputTypes: array(TypeWithMetadata.t),
-    run: combo => option(Value.t),
+    run: array(option(Value.t)) => option(Value.t),
   }
   and combo = {
     model: t,
@@ -237,11 +237,14 @@ module Model = {
   module InputTypes = {
     let keys = (t: t) =>
       t.inputTypes |> E.A.fmap((r: TypeWithMetadata.t) => r.id);
+
+    let getBy = (t: t, fn) => t.inputTypes |> E.A.getBy(_, fn);
   };
 };
 
 module Combo = {
   type t = Model.combo;
+  type valueArray = array(option(Value.t));
 
   module InputValues = {
     let defaults = (t: Model.t) =>
@@ -258,10 +261,10 @@ module Combo = {
     let update = (t: t, key: string, onUpdate: option(Value.t)) =>
       ValueMap.update(t.inputValues, key, onUpdate);
 
-    let toValueArray = (t: t) => {
+    let toValueArray = (t: t): valueArray => {
       t.model.inputTypes
       |> E.A.fmap((r: TypeWithMetadata.t) =>
-           ValueMap.get(t.inputValues, r.id)
+           t.inputValues->ValueMap.get(r.id)
          );
     };
   };

@@ -16,8 +16,8 @@ module Model = {
 module Interface = {
   let dayKey = "Day";
 
-  let run = (p: Prop.Combo.t) => {
-    switch (Prop.Combo.InputValues.toValueArray(p)) {
+  let run = (p: array(option(Prop.Value.t))) => {
+    switch (p) {
     | [|Some(DateTime(currentYear))|] => Some(Model.make(currentYear))
     | _ => None
     };

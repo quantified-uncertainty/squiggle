@@ -151,8 +151,8 @@ module Interface = {
     | _ => PAYOUTS
     };
 
-  let run = (p: Prop.Combo.t) => {
-    switch (Prop.Combo.InputValues.toValueArray(p)) {
+  let run = (p: array(option(Prop.Value.t))) => {
+    switch (p) {
     | [|
         Some(SelectSingle(fund)),
         Some(DateTime(intendedYear)),
