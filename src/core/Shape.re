@@ -25,6 +25,7 @@ module XYShape = {
 
   let ySum = yFold((a, b) => a +. b);
 
+  let fromArray = ((xs, ys)): t => {xs, ys};
   let fromArrays = (xs, ys): t => {xs, ys};
 
   let transverse = (fn, p: t) => {
@@ -33,7 +34,8 @@ module XYShape = {
       ->Belt.Array.reduce([||], (items, (x, y)) =>
           switch (_lastElement(items)) {
           | Some((_, yLast)) =>
-            Belt.Array.concat(items, [|(x, fn(y, yLast))|])
+            Js.log3(y, yLast, fn(y, yLast));
+            Belt.Array.concat(items, [|(x, fn(y, yLast))|]);
           | None => [|(x, y)|]
           }
         )
@@ -41,19 +43,68 @@ module XYShape = {
     fromArrays(xs, ys);
   };
 
+  type zippedRange = ((float, float), (float, float));
+
+  let inRanges = (fn, t: t) => {
+    let ranges: Belt.Result.t(array(zippedRange), string) =
+      Belt.Array.zip(t.xs, t.ys) |> E.A.toRanges;
+    ranges |> E.R.toOption |> E.O.fmap(fn);
+  };
+
+  let sum = Belt.Array.reduce(_, 0., (a, b) => a +. b);
+
+  let volume = {
+    let assumeLastY = (((lastX, lastY), (nextX, _)): zippedRange) =>
+      (nextX -. lastX) *. lastY;
+
+    inRanges((inRanges: array(zippedRange)) =>
+      Belt.Array.map(inRanges, assumeLastY) |> sum
+    );
+  };
+
+  let volumeTriangle = {
+    let assumeLastY = (((lastX, lastY), (nextX, nextY)): zippedRange) =>
+      (nextX -. lastX) *. (lastY -. nextY) /. 2.;
+
+    inRanges((inRanges: array(zippedRange)) =>
+      Belt.Array.map(inRanges, assumeLastY) |> sum
+    );
+  };
+
+  let volum2 = {
+    let assumeLastY = (((lastX, lastY), (nextX, _)): zippedRange) => (
+      nextX,
+      (nextX -. lastX) *. lastY,
+    );
+
+    inRanges((inRanges: array(zippedRange)) =>
+      Belt.Array.map(inRanges, assumeLastY) |> Belt.Array.unzip |> fromArray
+    );
+  };
+
+  let diff = {
+    let assumeLastY = (((lastX, lastY), (nextX, _)): zippedRange) => (
+      nextX,
+      (lastY -. lastY) /. (nextX -. lastX),
+    );
+
+    inRanges((inRanges: array(zippedRange)) =>
+      Belt.Array.map(inRanges, assumeLastY) |> Belt.Array.unzip |> fromArray
+    );
+  };
   let getY = (t: t, x: float) => x;
+  let findY = (t: t, x: float) => x;
 
   let integral = transverse((aCurrent, aLast) => aCurrent +. aLast);
   let derivative = transverse((aCurrent, aLast) => aCurrent -. aLast);
-
-  let massWithin = (t: t, left: pointInRange, right: pointInRange) => {
-    switch (left, right) {
-    | (Unbounded, Unbounded) => t |> ySum
-    | (Unbounded, X(f)) => t |> integral |> getY(_, f)
-    | (X(f), Unbounded) => ySum(t) -. getY(integral(t), f)
-    | (X(l), X(r)) => getY(integral(t), r) -. getY(integral(t), l)
-    };
-  };
+  // let massWithin = (t: t, left: pointInRange, right: pointInRange) => {
+  //   switch (left, right) {
+  //   | (Unbounded, Unbounded) => t |> ySum
+  //   | (Unbounded, X(f)) => t |> integral |> getY(t, 3.0)
+  //   | (X(f), Unbounded) => ySum(t) -. getY(integral(t), f)
+  //   | (X(l), X(r)) => getY(integral(t), r) -. getY(integral(t), l)
+  //   };
+  // };
 };
 
 module Continuous = {
