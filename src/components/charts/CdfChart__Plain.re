@@ -21,6 +21,7 @@ let make =
       ~data,
       ~minX=?,
       ~maxX=?,
+      ~scale=?,
       ~height=200,
       ~color=`hex("111"),
       ~onHover: float => unit,
@@ -30,6 +31,7 @@ let make =
       height
       ?minX
       ?maxX
+      ?scale
       marginBottom=50
       marginTop=0
       onHover

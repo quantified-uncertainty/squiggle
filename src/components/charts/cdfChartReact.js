@@ -14,13 +14,6 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/**
- * Example input:
- * {
- * xs: [50,100,300,400,500,600],
- * ys: [0.1, 0.4, 0.6, 0.7,0.8, 0.9]}
- * }
- */
 function CdfChart(props) {
   const id = "chart-" + getRandomInt(0, 100000);
   const [sized, { width }] = useSize(() => {
@@ -47,6 +40,7 @@ function CdfChart(props) {
       .showVerticalLine(props.showVerticalLine)
       .container("#" + id)
       .data({ primary: props.primaryDistribution })
+      .scale('linear')
       .render();
   });
 

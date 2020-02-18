@@ -76,6 +76,11 @@ class Chartigo {
     return this;
   }
 
+  scale(scale) {
+    this.attrs.scale = scale;
+    return this;
+  }
+
   onHover(onHover) {
     this.attrs.onHover = onHover;
     return this;

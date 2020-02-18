@@ -1,6 +1,6 @@
 module Continuous = {
   [@react.component]
-  let make = (~data) => {
+  let make = (~data, ~unit) => {
     let (x, setX) = React.useState(() => 0.);
     let chart =
       React.useMemo1(
@@ -51,6 +51,7 @@ module Continuous = {
 let make = (~dist) => {
   switch ((dist: option(DistributionTypes.genericDistribution))) {
   | Some({
+      unit,
       generationSource:
         Shape(
           Mixed({
@@ -61,7 +62,7 @@ let make = (~dist) => {
         ),
     }) =>
     <div>
-      <Continuous data={n |> Shape.Continuous.toPdf} />
+      <Continuous data={n |> Shape.Continuous.toPdf} unit />
       {d |> Shape.Discrete.scaleYToTotal(f) |> Shape.Discrete.render}
     </div>
   | _ => <div />

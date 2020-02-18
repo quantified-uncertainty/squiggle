@@ -20,6 +20,7 @@ let make =
       ~minX=?,
       ~onHover=(f: float) => (),
       ~primaryDistribution=?,
+      ~scale=?,
       ~children=[||],
     ) =>
   ReasonReact.wrapJsForReason(
@@ -36,6 +37,7 @@ let make =
         ~maxX?,
         ~minX?,
         ~primaryDistribution?,
+        ~scale?,
         (),
       ),
     children,
