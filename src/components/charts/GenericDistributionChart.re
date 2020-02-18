@@ -60,14 +60,10 @@ let make = (~dist) => {
           }),
         ),
     }) =>
-    Js.log2("n", n);
-    Js.log2("d", d);
-    Js.log2("f", f);
-    Js.log2("dist", dist);
     <div>
       <Continuous data={n |> Shape.Continuous.toPdf} />
       {d |> Shape.Discrete.scaleYToTotal(f) |> Shape.Discrete.render}
-    </div>;
+    </div>
   | _ => <div />
   };
 };

@@ -1,8 +1,6 @@
 const d3 = require('d3');
 const moment = require('moment');
 
-const format = ts => moment(ts).format("dddd, MMMM Do YYYY, h:mm:ss a");
-
 d3.selection.prototype.patternify = function patternify(params) {
   const selector = params.selector;
   const elementTag = params.tag;
@@ -55,6 +53,7 @@ class Chartigo {
     this.dataPoints = null;
     this.mouseover = this.mouseover.bind(this);
     this.mouseout = this.mouseout.bind(this);
+    this.formatDates = this.formatDates.bind(this);
   }
 
   svgWidth(svgWidth) {
@@ -127,7 +126,6 @@ class Chartigo {
     return this;
   }
 
-
   /**
    * @param key
    * @returns {[]}
@@ -176,10 +174,11 @@ class Chartigo {
 
     if (attrs.scale === 'linear') {
       this.xScale = d3.scaleLinear()
-        .domain([
-          attrs.minX || xMin,
-          attrs.maxX || xMax
-        ])
+        .domain([attrs.minX || xMin, attrs.maxX || xMax])
+        .range([0, calc.chartWidth]);
+    } else if (attrs.scale === 'time') {
+      this.xScale = d3.scaleLinear()
+        .domain([new Date(2012, 0, 1), new Date(2020, 0, 31)])
         .range([0, calc.chartWidth]);
     } else {
       this.xScale = d3.scaleLog()
@@ -195,15 +194,27 @@ class Chartigo {
       .domain([yMin, yMax])
       .range([calc.chartHeight, 0]);
 
-    const xDateScale3 = d3.scaleLinear()
-      .domain([new Date(2012, 0, 1), new Date(2020, 0, 31)])
-      .range([0, calc.chartWidth]);
-
     // Axis generator.
-    const xAxis = d3.axisBottom()
-      .scale(xDateScale3)
-      .ticks(5)
-      .tickFormat(format);
+    if (attrs.scale === 'time') {
+      this.xAxis = d3.axisBottom()
+        .scale(this.xScale)
+        .ticks(5)
+        .tickFormat(this.formatDates);
+    } else {
+      this.xAxis = d3.axisBottom(this.xScale)
+        .ticks(3)
+        .tickFormat(d => {
+          if (Math.abs(d) < 1) {
+            return d3.format(".2")(d);
+          } else if (xMin > 1000 && xMax < 3000) {
+            // Condition which identifies years; 2019, 2020, 2021.
+            return d3.format(".0")(d);
+          } else {
+            const prefix = d3.formatPrefix(".0", d);
+            return prefix(d).replace("G", "B");
+          }
+        });
+    }
 
     // Line generator.
     const line = d3.line()
@@ -233,14 +244,14 @@ class Chartigo {
     // Add axis.
     this.chart.patternify({ tag: 'g', selector: 'axis' })
       .attr('transform', 'translate(' + 0 + ',' + calc.chartHeight + ')')
-      .call(xAxis);
+      .call(this.xAxis);
 
     // Draw area.
     this.chart
       .patternify({
         tag: 'path',
         selector: 'area-path',
-        data: this.dataPoints
+        data: this.dataPoints,
       })
       .attr('d', area)
       .attr('fill', (d, i) => areaColor(i))
@@ -252,21 +263,19 @@ class Chartigo {
         .patternify({
           tag: 'path',
           selector: 'line-path',
-          data: this.dataPoints
+          data: this.dataPoints,
         })
         .attr('d', line)
         .attr('id', (d, i) => 'line-' + (i + 1))
-        .attr('opacity', (d, i) => {
-          return i === 0 ? 0.7 : 1
-        })
+        .attr('opacity', (d, i) => i === 0 ? 0.7 : 1)
         .attr('fill', 'none');
     }
 
     if (attrs.showVerticalLine) {
       this.chart
         .patternify({ tag: 'line', selector: 'v-line' })
-        .attr('x1', xScale(attrs.verticalLine))
-        .attr('x2', xScale(attrs.verticalLine))
+        .attr('x1', this.xScale(attrs.verticalLine))
+        .attr('x2', this.xScale(attrs.verticalLine))
         .attr('y1', 0)
         .attr('y2', calc.chartHeight)
         .attr('stroke-width', 1.5)
@@ -330,6 +339,10 @@ class Chartigo {
 
   mouseout() {
     this.hoverLine.attr('opacity', 0)
+  }
+
+  formatDates(ts) {
+    return moment(ts).format("dddd, MMMM Do YYYY, h:mm:ss a");
   }
 }
 
