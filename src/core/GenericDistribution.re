@@ -31,4 +31,17 @@ let renderIfNeeded =
        );
   | Shape(_) => Some(t)
   };
-};
+} /* }*/;
+
+// let getTimeY =
+//     (t: genericDistribution, point: TimeTypes.RelativeTimePoint.timeInVector) => {
+//   switch (t) {
+//   | {
+//       generationSource: Shape(shape),
+//       probabilityType: Pdf,
+//       unit: Time(timeVector),
+//     } =>
+//     TimeTypes.RelativeTimePoint.toXValue(timeVector, point)
+//     |> E.O.fmap(x => Shape.Mixed.getY(t, x))
+//   | _ => 2.0
+//   };

@@ -7,13 +7,14 @@ let data: DistributionTypes.xyShape = {
 
 let mixedDist =
   GenericDistribution.make(
-    ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
+    ~generationSource=
+      GuesstimatorString("mm(uniform(10,12), normal(5,1), [.5,.5])"),
     ~probabilityType=Pdf,
     ~domain=Complete,
     ~unit=Unspecified,
     (),
   )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=3000);
+  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
 
 let timeDist =
   GenericDistribution.make(
@@ -23,7 +24,7 @@ let timeDist =
     ~unit=Time({zero: MomentRe.momentNow(), unit: `years}),
     (),
   )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=3000);
+  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
 
 let domainLimitedDist =
   GenericDistribution.make(
@@ -33,7 +34,7 @@ let domainLimitedDist =
     ~unit=Unspecified,
     (),
   )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=3000);
+  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
 
 let distributions = () =>
   <div>

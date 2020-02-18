@@ -6,6 +6,10 @@ let _lastElement = (a: array('a)) =>
   | n => Belt.Array.get(a, n - 1)
   };
 
+type pointInRange =
+  | Unbounded
+  | X(float);
+
 module XYShape = {
   type t = xyShape;
 
@@ -37,8 +41,19 @@ module XYShape = {
     fromArrays(xs, ys);
   };
 
+  let getY = (t: t, x: float) => x;
+
   let integral = transverse((aCurrent, aLast) => aCurrent +. aLast);
   let derivative = transverse((aCurrent, aLast) => aCurrent -. aLast);
+
+  let massWithin = (t: t, left: pointInRange, right: pointInRange) => {
+    switch (left, right) {
+    | (Unbounded, Unbounded) => t |> ySum
+    | (Unbounded, X(f)) => t |> integral |> getY(_, f)
+    | (X(f), Unbounded) => ySum(t) -. getY(integral(t), f)
+    | (X(l), X(r)) => getY(integral(t), r) -. getY(integral(t), l)
+    };
+  };
 };
 
 module Continuous = {
@@ -97,6 +112,25 @@ module Mixed = {
     continuous: Continuous.findY(x, t.continuous),
     discrete: Discrete.findY(x, t.discrete),
   };
+};
+
+module Any = {
+  type t = DistributionTypes.pointsType;
+
+  let x = (t: t, x: float) =>
+    switch (t) {
+    | Mixed(m) => `mixed(Mixed.getY(m, x))
+    | Discrete(discreteShape) => `discrete(Discrete.findY(x, discreteShape))
+    | Continuous(continuousShape) =>
+      `continuous(Continuous.findY(x, continuousShape))
+    };
+
+  let massInRange = (t: t, left: pointInRange, right: pointInRange) =>
+    switch (t) {
+    | Mixed(m) => 3.0
+    | Discrete(discreteShape) => 2.0
+    | Continuous(continuousShape) => 3.0
+    };
 };
 
 module DomainMixed = {

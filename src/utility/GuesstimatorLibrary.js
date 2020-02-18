@@ -48,8 +48,8 @@ const toPdf = (values, sampleCount, min, max) => {
     const ratioSize$ = ratioSize(samples);
     const width = ratioSize$ === 'SMALL' ? 20 : 1;
 
-    const cdf = samples.toCdf({ size: sampleCount, width, min, max });
-    continuous = cdf;
+    const pdf = samples.toPdf({ size: sampleCount, width, min, max });
+    continuous = pdf;
   }
   return {continuous, discrete};
 };

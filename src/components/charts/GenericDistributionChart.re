@@ -61,7 +61,8 @@ let make = (~dist) => {
         ),
     }) =>
     <div>
-      <Continuous data={n |> Shape.Continuous.toPdf} />
+      <Continuous data=n />
+      <Continuous data={n |> Shape.XYShape.integral} />
       {d |> Shape.Discrete.scaleYToTotal(f) |> Shape.Discrete.render}
     </div>
   | _ => <div />
