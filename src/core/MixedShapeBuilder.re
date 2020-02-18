@@ -1,11 +1,13 @@
 type assumption =
   | ADDS_TO_1
   | ADDS_TO_CORRECT_PROBABILITY;
+
 type assumptions = {
   continuous: assumption,
   discrete: assumption,
   discreteProbabilityMass: option(float),
 };
+
 let build = (~continuous, ~discrete, ~assumptions) =>
   switch (assumptions) {
   | {
@@ -21,6 +23,7 @@ let build = (~continuous, ~discrete, ~assumptions) =>
         ~discreteProbabilityMassFraction=r,
       ),
     )
+
   | {
       continuous: ADDS_TO_1,
       discrete: ADDS_TO_1,
@@ -33,18 +36,21 @@ let build = (~continuous, ~discrete, ~assumptions) =>
         ~discreteProbabilityMassFraction=r,
       ),
     )
+
   | {
       continuous: ADDS_TO_1,
       discrete: ADDS_TO_1,
       discreteProbabilityMass: None,
     } =>
     None
+
   | {
       continuous: ADDS_TO_CORRECT_PROBABILITY,
       discrete: ADDS_TO_1,
       discreteProbabilityMass: None,
     } =>
     None
+
   | {
       continuous: ADDS_TO_1,
       discrete: ADDS_TO_CORRECT_PROBABILITY,
