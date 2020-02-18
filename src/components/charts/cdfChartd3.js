@@ -171,33 +171,29 @@ class Chartigo {
     this.dataPoints = [this.getDatapoints('primary')];
 
     // Scales.
-    let xScale;
-
     const xMin = d3.min(attrs.data.primary.xs);
     const xMax = d3.max(attrs.data.primary.xs);
 
     if (attrs.scale === 'linear') {
-      xScale = d3.scaleLinear()
+      this.xScale = d3.scaleLinear()
         .domain([
           attrs.minX || xMin,
           attrs.maxX || xMax
         ])
         .range([0, calc.chartWidth]);
     } else {
-      xScale = d3.scaleLog()
+      this.xScale = d3.scaleLog()
         .base(attrs.logBase)
         .domain([attrs.minX, attrs.maxX])
         .range([0, calc.chartWidth]);
     }
-    this.xScale = xScale;
 
     const yMin = d3.min(attrs.data.primary.ys);
     const yMax = d3.max(attrs.data.primary.ys);
 
-    const yScale = d3.scaleLinear()
+    this.yScale = d3.scaleLinear()
       .domain([yMin, yMax])
       .range([calc.chartHeight, 0]);
-
 
     const xDateScale3 = d3.scaleLinear()
       .domain([new Date(2012, 0, 1), new Date(2020, 0, 31)])
@@ -211,22 +207,12 @@ class Chartigo {
 
     // Line generator.
     const line = d3.line()
-      .x(function (d, i) {
-        console.log("d", d, "i", i);
-        return xScale(d.x);
-      })
-      .y(function (d, i) {
-        console.log("d", d, "i", i);
-        return yScale(d.y);
-      });
+      .x(d => this.xScale(d.x))
+      .y(d => this.yScale(d.y));
 
     const area = d3.area()
-      .x(function (d) {
-        return xScale(d.x);
-      })
-      .y1(function (d) {
-        return yScale(d.y);
-      })
+      .x(d => this.xScale(d.x))
+      .y1(d => this.yScale(d.y))
       .y0(calc.chartHeight);
 
     // Add svg.
