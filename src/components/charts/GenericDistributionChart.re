@@ -35,7 +35,11 @@ module Continuous = {
                |> ReasonReact.string}
             </th>
             <th className="px-4 py-2 border ">
-              {Shape.Continuous.findY(x, Shape.XYShape.integral(data))
+              {Shape.Continuous.findY(
+                 x,
+                 Shape.XYShape.Range.integrateWithTriangles(data)
+                 |> E.O.toExt(""),
+               )
                |> E.Float.with2DigitsPrecision
                |> ReasonReact.string}
             </th>
@@ -62,7 +66,34 @@ let make = (~dist) => {
     }) =>
     <div>
       <Continuous data=n />
-      <Continuous data={n |> Shape.XYShape.integral} />
+      <Continuous
+        data={
+          n
+          |> Shape.XYShape.Range.integrateWithTriangles
+          |> E.O.toExt("")
+          |> Shape.XYShape.scaleCdfTo
+        }
+      />
+      <Continuous
+        data={
+          n
+          |> Shape.XYShape.Range.integrateWithTriangles
+          |> E.O.toExt("")
+          |> Shape.XYShape.Range.derivative
+          |> E.O.toExt("")
+        }
+      />
+      <Continuous
+        data={
+          n
+          |> Shape.XYShape.Range.integrateWithTriangles
+          |> E.O.toExt("")
+          |> Shape.XYShape.Range.derivative
+          |> E.O.toExt("")
+          |> Shape.XYShape.Range.integrateWithTriangles
+          |> E.O.toExt("")
+        }
+      />
       {d |> Shape.Discrete.scaleYToTotal(f) |> Shape.Discrete.render}
     </div>
   | _ => <div />

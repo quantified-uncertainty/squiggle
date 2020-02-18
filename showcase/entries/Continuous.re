@@ -8,7 +8,9 @@ let data: DistributionTypes.xyShape = {
 let mixedDist =
   GenericDistribution.make(
     ~generationSource=
-      GuesstimatorString("mm(uniform(10,12), normal(5,1), [.5,.5])"),
+      GuesstimatorString(
+        "mm(floor(uniform(40, 50)), normal(50,10), [.5,.5])",
+      ),
     ~probabilityType=Pdf,
     ~domain=Complete,
     ~unit=Unspecified,
@@ -42,14 +44,14 @@ let distributions = () =>
       <h2> {"Basic Mixed Distribution" |> ReasonReact.string} </h2>
       <GenericDistributionChart dist=mixedDist />
     </div>
-    <div>
-      <h2> {"Time Distribution" |> ReasonReact.string} </h2>
-      <GenericDistributionChart dist=timeDist />
-    </div>
-    <div>
-      <h2> {"Domain Limited Distribution" |> ReasonReact.string} </h2>
-      <GenericDistributionChart dist=domainLimitedDist />
-    </div>
   </div>;
+// <div>
+//   <h2> {"Time Distribution" |> ReasonReact.string} </h2>
+//   <GenericDistributionChart dist=timeDist />
+// </div>
+// <div>
+//   <h2> {"Domain Limited Distribution" |> ReasonReact.string} </h2>
+//   <GenericDistributionChart dist=domainLimitedDist />
+// </div>
 
 let entry = EntryTypes.(entry(~title="Pdf", ~render=distributions));
