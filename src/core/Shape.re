@@ -191,7 +191,7 @@ module Mixed = {
   };
 
   let getYIntegral =
-      (t: DistributionTypes.mixedShape, x: float): option(float) => {
+      (x: float, t: DistributionTypes.mixedShape): option(float) => {
     let c = t.continuous |> Continuous.findIntegralY(x);
     let d = Discrete.findIntegralY(x, t.discrete);
     switch (c, d) {
@@ -199,6 +199,10 @@ module Mixed = {
     | _ => None
     };
   };
+  //Do the math to add these distributions together
+  // let integral =
+  //     (x: float, t: DistributionTypes.mixedShape): option(XYShape.t) => {
+  // };
 };
 
 module Any = {

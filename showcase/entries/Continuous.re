@@ -9,7 +9,7 @@ let mixedDist =
   GenericDistribution.make(
     ~generationSource=
       GuesstimatorString(
-        "mm(floor(uniform(40, 50)), normal(50,10), [.5,.5])",
+        "mm(floor(uniform(20, 30)), normal(50,10), [.5,.5])",
       ),
     ~probabilityType=Pdf,
     ~domain=Complete,
