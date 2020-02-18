@@ -78,7 +78,10 @@ module Model = {
     let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
     let meanDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
     let stdDevDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
-    FloatCdf.normal(currentValue *. meanDiff, firstYearStdDev *. stdDevDiff);
+    GuesstimatorDist.logNormal(
+      currentValue *. meanDiff,
+      firstYearStdDev *. stdDevDiff,
+    );
   };
 
   let rec currentValue = (group: group, output) => {
@@ -100,27 +103,60 @@ module Model = {
     | (_, CHANCE_OF_EXISTENCE) => 0.0
     };
   };
+
+  let xRisk = conditionals =>
+    Prop.Value.ConditionalArray.get(conditionals, "Global Existential Event");
+
   let make =
       (
         group: group,
         dateTime: MomentRe.Moment.t,
         currentDateTime: MomentRe.Moment.t,
         output: output,
+        conditionals: array(Prop.Value.conditional),
       ) => {
+    let xRisk = xRisk(conditionals);
     switch (output) {
     | DONATIONS
     | PAYOUTS =>
-      Prop.Value.FloatCdf(
+      let difference =
         calculateDifference(
           currentValue(group, output),
           dateTime,
           currentDateTime,
           yearlyMeanGrowthRateIfNotClosed(group),
+        );
+      let str =
+        switch (xRisk) {
+        | Some({truthValue: true}) => "0"
+        | Some({truthValue: false}) => difference
+        | None => "uniform(0,1) > .3 ? " ++ difference ++ ": 0"
+        };
+      let genericDistribution =
+        GenericDistribution.make(
+          ~generationSource=GuesstimatorString(str),
+          ~probabilityType=Cdf,
+          ~domain=Complete,
+          ~unit=Unspecified,
+          (),
+        );
+      Prop.Value.GenericDistribution(genericDistribution);
+    | CHANCE_OF_EXISTENCE =>
+      Prop.Value.GenericDistribution(
+        GenericDistribution.make(
+          ~generationSource=
+            GuesstimatorString(
+              GuesstimatorDist.min(
+                GlobalCatastrophe.guesstimatorString,
+                GuesstimatorDist.logNormal(40., 4.),
+              ),
+            ),
+          ~probabilityType=Cdf,
+          ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
+          ~unit=Time({zero: currentDateTime, unit: `years}),
+          (),
         ),
       )
-    | CHANCE_OF_EXISTENCE =>
-      let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
-      Prop.Value.Probability((100. -. yearDiff) /. 100.);
     };
   };
 };
@@ -142,14 +178,14 @@ module Interface = {
     | _ => PAYOUTS
     };
 
-  let run = (p: Prop.Combo.t) => {
-    switch (Prop.Combo.InputValues.toValueArray(p)) {
+  let run = (p: array(option(Prop.Value.t))) => {
+    switch (p) {
     | [|
         Some(SelectSingle(fund)),
         Some(DateTime(intendedYear)),
         Some(DateTime(currentYear)),
         Some(SelectSingle(output)),
-        Some(BinaryConditional(r)),
+        Some(ConditionalArray(conditionals)),
       |] =>
       choiceFromString(fund)
       |> E.O.fmap(fund =>
@@ -158,6 +194,7 @@ module Interface = {
              intendedYear,
              currentYear,
              outputFromString(output),
+             conditionals,
            )
          )
     | _ => None
@@ -166,8 +203,8 @@ module Interface = {
 
   let model: Prop.Model.t =
     Prop.{
-      name: "EA Funds: Donations & Payouts",
-      description: "Calculate the payments and payouts of EA Funds based on existing data.",
+      name: "CEA Funds: Donations & Payouts",
+      description: "Calculate the payments and payouts of CEA Funds based on existing data.",
       version: "1.0.0",
       author: "Ozzie Gooen",
       inputTypes: [|
@@ -220,17 +257,23 @@ module Interface = {
             SelectSingle({
               default: Some("Output"),
               options: [
-                {name: "Donations | Exists", id: "donations"},
-                {name: "Funding | Exists", id: "funding"},
-                {name: "Exists", id: "exists"},
+                {name: "Donations", id: "donations"},
+                {name: "Funding", id: "funding"},
+                {name: "Closing", id: "exists"},
               ],
             }),
           (),
         ),
         TypeWithMetadata.make(
-          ~name="Conditional on World Ending",
-          ~id="worldEnd",
-          ~type_=BinaryConditional,
+          ~name="Conditionals",
+          ~id="conditionals",
+          ~type_=
+            Conditionals(
+              Prop.Type.makeConditionals(
+                [||],
+                [|"Global Existential Event"|],
+              ),
+            ),
           (),
         ),
       |],

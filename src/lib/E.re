@@ -211,6 +211,7 @@ module A = {
   let unsafe_get = Array.unsafe_get;
   let get = Belt.Array.get;
   let getBy = Belt.Array.getBy;
+  let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> O.isSome;
   let fold_left = Array.fold_left;
   let fold_right = Array.fold_right;
   let concatMany = Belt.Array.concatMany;

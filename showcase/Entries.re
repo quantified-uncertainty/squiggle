@@ -1,0 +1,1 @@
+let entries = EntryTypes.[Continuous.entry];

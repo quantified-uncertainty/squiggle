@@ -1,29 +1,93 @@
 module Value = {
-  type binaryConditional =
-    | Selected(bool)
-    | Unselected;
+  type conditional = {
+    name: string,
+    truthValue: bool,
+  };
+
   type t =
-    | BinaryConditional(binaryConditional)
     | SelectSingle(string)
     | DateTime(MomentRe.Moment.t)
     | FloatPoint(float)
     | Probability(float)
+    | GenericDistribution(DistributionTypes.genericDistribution)
+    | ConditionalArray(array(conditional))
     | FloatCdf(string);
 
-  let to_string = (t: t) => {
-    switch (t) {
-    | BinaryConditional(binaryConditional) =>
-      switch (binaryConditional) {
-      | Selected(r) => r ? "True" : "False"
-      | Unselected => ""
-      }
-    | SelectSingle(r) => r
-    | FloatCdf(r) => r
-    | Probability(r) => (r *. 100. |> Js.Float.toFixed) ++ "%"
-    | DateTime(r) => r |> MomentRe.Moment.defaultFormat
-    | FloatPoint(r) => r |> Js.Float.toFixed
-    };
+  module ConditionalArray = {
+    let get = (conditionals: array(conditional), name: string) =>
+      Belt.Array.getBy(conditionals, (c: conditional) => c.name == name);
   };
+};
+
+module ValueCombination = {
+  type pointsToEvenlySample = int;
+
+  type dateTimeRange = {
+    startTime: MomentRe.Moment.t,
+    endTime: MomentRe.Moment.t,
+    pointsWithin: int,
+  };
+
+  type floatPointRange = {
+    startTime: float,
+    endTime: float,
+    pointsWithin: int,
+  };
+
+  type range('a) = {
+    beginning: 'a,
+    ending: 'a,
+    pointsToEvenlySample,
+  };
+
+  type t =
+    | SelectSingle
+    | DateTime(range(MomentRe.Moment.t))
+    | FloatPoint(range(MomentRe.Moment.t))
+    | Probability(pointsToEvenlySample);
+};
+
+module ValueCluster = {
+  type conditional = {
+    name: string,
+    truthValue: bool,
+  };
+
+  type pointsToEvenlySample = int;
+
+  type dateTimeRange = {
+    startTime: MomentRe.Moment.t,
+    endTime: MomentRe.Moment.t,
+    pointsWithin: int,
+  };
+
+  type floatPointRange = {
+    startTime: float,
+    endTime: float,
+    pointsWithin: int,
+  };
+
+  type range('a) = {
+    beginning: 'a,
+    ending: 'a,
+    pointsToEvenlySample,
+  };
+
+  type t =
+    | SelectSingle([ | `combination | `item(string)])
+    | DateTime(
+        [
+          | `combination(range(MomentRe.Moment.t))
+          | `item(MomentRe.Moment.t)
+        ],
+      )
+    | FloatPoint(
+        [ | `combination(range(MomentRe.Moment.t)) | `item(string)],
+      )
+    | Probability([ | `item(string)])
+    | GenericDistribution([ | `item(DistributionTypes.genericDistribution)])
+    | ConditionalArray([ | `item(array(conditional))])
+    | FloatCdf([ | `item(string)]);
 };
 
 module Type = {
@@ -37,6 +101,16 @@ module Type = {
     default: option(string),
   };
 
+  type conditionals = {
+    defaults: array(Value.conditional),
+    options: array(string),
+  };
+
+  let makeConditionals = (defaults, options): conditionals => {
+    defaults,
+    options,
+  };
+
   type floatPoint = {validatations: list(float => bool)};
 
   type withDefaultMinMax('a) = {
@@ -48,17 +122,17 @@ module Type = {
   type withDefault('a) = {default: option('a)};
 
   type t =
-    | BinaryConditional
     | SelectSingle(selectSingle)
     | FloatPoint(withDefaultMinMax(float))
     | Probability(withDefault(float))
     | DateTime(withDefaultMinMax(MomentRe.Moment.t))
     | Year(withDefaultMinMax(float))
+    | Conditionals(conditionals)
     | FloatCdf;
 
   let default = (t: t) =>
     switch (t) {
-    | BinaryConditional => Some(Value.BinaryConditional(Unselected))
+    | Conditionals(s) => Some(Value.ConditionalArray(s.defaults))
     | Year(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | FloatPoint(r) => r.default->Belt.Option.map(p => Value.FloatPoint(p))
     | Probability(r) => r.default->Belt.Option.map(p => Value.Probability(p))
@@ -80,6 +154,22 @@ module ValueMap = {
   let update = (t, k, v) => MS.update(t, k, _ => v);
   let toArray = MS.toArray;
   let fromOptionalMap = (t: MS.t(option(Value.t))): t =>
+    MS.keep(t, (_, d) => E.O.isSome(d))
+    ->MS.map(d => E.O.toExn("This should not have happened", d));
+  let fromOptionalArray = (r): t => MS.fromArray(r) |> fromOptionalMap;
+};
+
+module ValueClusterMap = {
+  module MS = Belt.Map.String;
+  type t = MS.t(ValueCluster.t);
+  let get = (t: t, s) => MS.get(t, s);
+  let keys = MS.keysToArray;
+  let map = MS.map;
+  let fromArray = (r): t => MS.fromArray(r);
+  let values = (t: t) => t |> MS.valuesToArray;
+  let update = (t, k, v) => MS.update(t, k, _ => v);
+  let toArray = MS.toArray;
+  let fromOptionalMap = (t: MS.t(option(ValueCluster.t))): t =>
     MS.keep(t, (_, d) => E.O.isSome(d))
     ->MS.map(d => E.O.toExn("This should not have happened", d));
   let fromOptionalArray = (r): t => MS.fromArray(r) |> fromOptionalMap;
@@ -120,7 +210,7 @@ module TypeWithMetadata = {
   let currentYear =
     make(
       ~id="currentYear",
-      ~name="Current Year",
+      ~name="Current Day",
       ~description=None,
       ~type_=
         DateTime({
@@ -141,7 +231,7 @@ module Model = {
     version: string,
     inputTypes: array(TypeWithMetadata.t),
     outputTypes: array(TypeWithMetadata.t),
-    run: combo => option(Value.t),
+    run: array(option(Value.t)) => option(Value.t),
   }
   and combo = {
     model: t,
@@ -152,11 +242,14 @@ module Model = {
   module InputTypes = {
     let keys = (t: t) =>
       t.inputTypes |> E.A.fmap((r: TypeWithMetadata.t) => r.id);
+
+    let getBy = (t: t, fn) => t.inputTypes |> E.A.getBy(_, fn);
   };
 };
 
 module Combo = {
   type t = Model.combo;
+  type valueArray = array(option(Value.t));
 
   module InputValues = {
     let defaults = (t: Model.t) =>
@@ -173,10 +266,10 @@ module Combo = {
     let update = (t: t, key: string, onUpdate: option(Value.t)) =>
       ValueMap.update(t.inputValues, key, onUpdate);
 
-    let toValueArray = (t: t) => {
+    let toValueArray = (t: t): valueArray => {
       t.model.inputTypes
       |> E.A.fmap((r: TypeWithMetadata.t) =>
-           ValueMap.get(t.inputValues, r.id)
+           t.inputValues->ValueMap.get(r.id)
          );
     };
   };

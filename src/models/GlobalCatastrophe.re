@@ -1,17 +1,25 @@
+let guesstimatorString = GuesstimatorDist.logNormal(20., 3.);
+
 module Model = {
-  let make = (dateTime: MomentRe.Moment.t, currentDateTime: MomentRe.Moment.t) => {
-    let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
-    Prop.Value.Probability(0.001 *. yearDiff);
+  let make = (currentDateTime: MomentRe.Moment.t) => {
+    let genericDistribution =
+      GenericDistribution.make(
+        ~generationSource=GuesstimatorString(guesstimatorString),
+        ~probabilityType=Cdf,
+        ~domain=RightLimited({xPoint: 200., excludingProbabilityMass: 0.3}),
+        ~unit=Time({zero: currentDateTime, unit: `years}),
+        (),
+      );
+    Prop.Value.GenericDistribution(genericDistribution);
   };
 };
 
 module Interface = {
   let dayKey = "Day";
 
-  let run = (p: Prop.Combo.t) => {
-    switch (Prop.Combo.InputValues.toValueArray(p)) {
-    | [|Some(DateTime(intendedYear)), Some(DateTime(currentYear))|] =>
-      Some(Model.make(intendedYear, currentYear))
+  let run = (p: array(option(Prop.Value.t))) => {
+    switch (p) {
+    | [|Some(DateTime(currentYear))|] => Some(Model.make(currentYear))
     | _ => None
     };
   };
@@ -22,37 +30,7 @@ module Interface = {
       description: "The chances of having at least one catastrophe per year in the future, assuming no other catastrophe until then.",
       version: "1.0.0",
       author: "Ozzie Gooen",
-      inputTypes: [|
-        TypeWithMetadata.make(
-          ~name=dayKey,
-          ~type_=
-            DateTime({
-              default:
-                Some(
-                  MomentRe.Moment.add(
-                    ~duration=MomentRe.duration(5., `years),
-                    MomentRe.momentNow(),
-                  ),
-                ),
-              min:
-                Some(
-                  MomentRe.Moment.subtract(
-                    ~duration=MomentRe.duration(20., `years),
-                    MomentRe.momentNow(),
-                  ),
-                ),
-              max:
-                Some(
-                  MomentRe.Moment.add(
-                    ~duration=MomentRe.duration(20., `years),
-                    MomentRe.momentNow(),
-                  ),
-                ),
-            }),
-          (),
-        ),
-        TypeWithMetadata.currentYear,
-      |],
+      inputTypes: [|TypeWithMetadata.currentYear|],
       outputTypes: [||],
       run,
     };

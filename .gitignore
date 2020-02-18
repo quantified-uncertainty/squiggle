@@ -11,3 +11,5 @@ lib/*
 build
 yarn-error.log
 *.bs.js
+# Local Netlify folder
+.netlify
