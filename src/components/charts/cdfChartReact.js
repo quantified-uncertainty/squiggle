@@ -46,7 +46,8 @@ function CdfChart(props) {
       .verticalLine(props.verticalLine)
       .showVerticalLine(props.showVerticalLine)
       .container("#" + id)
-      .data({ primary: props.primaryDistribution }).render();
+      .data({ primary: props.primaryDistribution })
+      .render();
   });
 
   const style = !!props.width ? { width: props.width + "px" } : {};

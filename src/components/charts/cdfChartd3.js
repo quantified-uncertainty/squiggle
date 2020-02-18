@@ -1,37 +1,156 @@
-import * as d3 from 'd3';
+const d3 = require('d3');
+const moment = require('moment');
 
-function chart() {
-  // Id for event handlings.
-  const attrs = {
-    id: 'ID' + Math.floor(Math.random() * 1000000),
-    svgWidth: 400,
-    svgHeight: 400,
+const format = ts => moment(ts).format("dddd, MMMM Do YYYY, h:mm:ss a");
 
-    marginTop: 5,
-    marginBottom: 5,
-    marginRight: 50,
-    marginLeft: 5,
+d3.selection.prototype.patternify = function patternify(params) {
+  const selector = params.selector;
+  const elementTag = params.tag;
+  const data = params.data || [selector];
 
-    container: 'body',
-    minX: false,
-    maxX: false,
-    scale: 'linear',
-    showDistributionLines: true,
-    areaColors: ['#E1E5EC', '#E1E5EC'],
-    logBase: 10,
-    verticalLine: 110,
-    showVerticalLine: true,
-    data: null,
-    onHover: (e) => {
-    },
-  };
-
-  function main() {
-    const container = d3.select(attrs.container);
-
-    if (container.node() === null) {
-      return;
+  // Pattern in action.
+  const selection = this.selectAll('.' + selector).data(data, (d, i) => {
+    if (typeof d === 'object' && d.id) {
+      return d.id;
     }
+    return i;
+  });
+
+  selection.exit().remove();
+
+  return selection
+    .enter()
+    .append(elementTag)
+    .merge(selection)
+    .attr('class', selector);
+};
+
+class Chartigo {
+
+  constructor() {
+    this.attrs = {
+      svgWidth: 400,
+      svgHeight: 400,
+
+      marginTop: 5,
+      marginBottom: 5,
+      marginRight: 50,
+      marginLeft: 5,
+
+      container: 'body',
+      minX: false,
+      maxX: false,
+      scale: 'linear',
+      showDistributionLines: true,
+      areaColors: ['#E1E5EC', '#E1E5EC'],
+      logBase: 10,
+      verticalLine: 110,
+      showVerticalLine: true,
+      data: null,
+      onHover: (e) => {
+      },
+    };
+    this.hoverLine = null;
+    this.xScale = null;
+    this.dataPoints = null;
+    this.mouseover = this.mouseover.bind(this);
+    this.mouseout = this.mouseout.bind(this);
+  }
+
+  svgWidth(svgWidth) {
+    this.attrs.svgWidth = svgWidth;
+    return this;
+  }
+
+  svgHeight(height) {
+    this.attrs.svgHeight = height;
+    return this;
+  }
+
+  maxX(maxX) {
+    this.attrs.maxX = maxX;
+    return this;
+  }
+
+  minX(minX) {
+    this.attrs.minX = minX;
+    return this;
+  }
+
+  onHover(onHover) {
+    this.attrs.onHover = onHover;
+    return this;
+  }
+
+  marginBottom(marginBottom) {
+    this.attrs.marginBottom = marginBottom;
+    return this;
+  }
+
+  marginLeft(marginLeft) {
+    this.attrs.marginLeft = marginLeft;
+    return this;
+  }
+
+  marginRight(marginRight) {
+    this.attrs.marginRight = marginRight;
+    return this;
+  }
+
+  marginTop(marginTop) {
+    this.attrs.marginTop = marginTop;
+    return this;
+  }
+
+  showDistributionLines(showDistributionLines) {
+    this.attrs.showDistributionLines = showDistributionLines;
+    return this;
+  }
+
+  verticalLine(verticalLine) {
+    this.attrs.verticalLine = verticalLine;
+    return this;
+  }
+
+  showVerticalLine(showVerticalLine) {
+    this.attrs.showVerticalLine = showVerticalLine;
+    return this;
+  }
+
+  container(container) {
+    this.attrs.container = container;
+    return this;
+  }
+
+  data(data) {
+    this.attrs.data = data;
+    return this;
+  }
+
+
+  /**
+   * @param key
+   * @returns {[]}
+   */
+  getDatapoints(key) {
+    const dt = [];
+    const data = this.attrs.data[key];
+    const len = data.xs.length;
+
+    for (let i = 0; i < len; i++) {
+      dt.push({
+        x: data.xs[i],
+        y: data.ys[i]
+      })
+    }
+
+    return dt;
+  }
+
+  render() {
+    const attrs = this.attrs;
+    const container = d3.select(attrs.container);
+    if (container.node() === null) return;
 
     const containerRect = container.node().getBoundingClientRect();
     if (containerRect.width > 0) {
@@ -49,7 +168,7 @@ function chart() {
 
     const areaColor = d3.scaleOrdinal().range(attrs.areaColors);
 
-    const dataPoints = [getDatapoints('primary')];
+    this.dataPoints = [this.getDatapoints('primary')];
 
     // Scales.
     let xScale;
@@ -70,6 +189,7 @@ function chart() {
         .domain([attrs.minX, attrs.maxX])
         .range([0, calc.chartWidth]);
     }
+    this.xScale = xScale;
 
     const yMin = d3.min(attrs.data.primary.ys);
     const yMax = d3.max(attrs.data.primary.ys);
@@ -78,36 +198,33 @@ function chart() {
       .domain([yMin, yMax])
       .range([calc.chartHeight, 0]);
 
+
+    const xDateScale3 = d3.scaleLinear()
+      .domain([new Date(2012, 0, 1), new Date(2020, 0, 31)])
+      .range([0, calc.chartWidth]);
+
     // Axis generator.
-    const xAxis = d3.axisBottom(xScale)
-      .ticks(3)
-      .tickFormat(d => {
-        if (Math.abs(d) < 1) {
-          return d3.format(".2")(d);
-        } else if (xMin > 1000 && xMax < 3000) {
-          // Condition which identifies years; 2019, 2020, 2021.
-          return d3.format(".0")(d);
-        } else {
-          const prefix = d3.formatPrefix(".0", d);
-          const output = prefix(d);
-          return output.replace("G", "B");
-        }
-      });
+    const xAxis = d3.axisBottom()
+      .scale(xDateScale3)
+      .ticks(5)
+      .tickFormat(format);
 
     // Line generator.
     const line = d3.line()
       .x(function (d, i) {
+        console.log("d", d, "i", i);
         return xScale(d.x);
       })
       .y(function (d, i) {
+        console.log("d", d, "i", i);
         return yScale(d.y);
       });
 
     const area = d3.area()
-      .x(function (d, i) {
+      .x(function (d) {
         return xScale(d.x);
       })
-      .y1(function (d, i) {
+      .y1(function (d) {
         return yScale(d.y);
       })
       .y0(calc.chartHeight);
@@ -120,7 +237,7 @@ function chart() {
       .attr('pointer-events', 'none');
 
     // Add container g element.
-    const chart = svg
+    this.chart = svg
       .patternify({ tag: 'g', selector: 'chart' })
       .attr(
         'transform',
@@ -128,16 +245,16 @@ function chart() {
       );
 
     // Add axis.
-    chart.patternify({ tag: 'g', selector: 'axis' })
+    this.chart.patternify({ tag: 'g', selector: 'axis' })
       .attr('transform', 'translate(' + 0 + ',' + calc.chartHeight + ')')
       .call(xAxis);
 
     // Draw area.
-    chart
+    this.chart
       .patternify({
         tag: 'path',
         selector: 'area-path',
-        data: dataPoints
+        data: this.dataPoints
       })
       .attr('d', area)
       .attr('fill', (d, i) => areaColor(i))
@@ -145,11 +262,11 @@ function chart() {
 
     // Draw line.
     if (attrs.showDistributionLines) {
-      chart
+      this.chart
         .patternify({
           tag: 'path',
           selector: 'line-path',
-          data: dataPoints
+          data: this.dataPoints
         })
         .attr('d', line)
         .attr('id', (d, i) => 'line-' + (i + 1))
@@ -160,7 +277,8 @@ function chart() {
     }
 
     if (attrs.showVerticalLine) {
-      chart.patternify({ tag: 'line', selector: 'v-line' })
+      this.chart
+        .patternify({ tag: 'line', selector: 'v-line' })
         .attr('x1', xScale(attrs.verticalLine))
         .attr('x2', xScale(attrs.verticalLine))
         .attr('y1', 0)
@@ -170,7 +288,8 @@ function chart() {
         .attr('stroke', 'steelblue');
     }
 
-    const hoverLine = chart.patternify({ tag: 'line', selector: 'hover-line' })
+    this.hoverLine = this.chart
+      .patternify({ tag: 'line', selector: 'hover-line' })
       .attr('x1', 0)
       .attr('x2', 0)
       .attr('y1', 0)
@@ -181,116 +300,55 @@ function chart() {
       .attr('stroke', '#22313F');
 
     // Add drawing rectangle.
-    chart.patternify({ tag: 'rect', selector: 'mouse-rect' })
+    const thi$ = this;
+    this.chart
+      .patternify({ tag: 'rect', selector: 'mouse-rect' })
       .attr('width', calc.chartWidth)
       .attr('height', calc.chartHeight)
       .attr('fill', 'transparent')
       .attr('pointer-events', 'all')
-      .on('mouseover', mouseover)
-      .on('mousemove', mouseover)
-      .on('mouseout', mouseout);
+      .on('mouseover', function () {
+        thi$.mouseover(this);
+      })
+      .on('mousemove', function () {
+        thi$.mouseover(this);
+      })
+      .on('mouseout', this.mouseout);
 
-    function mouseover() {
-      const mouse = d3.mouse(this);
+    return this;
+  }
 
-      hoverLine.attr('opacity', 1)
-        .attr('x1', mouse[0])
-        .attr('x2', mouse[0]);
+  mouseover(constructor) {
+    const mouse = d3.mouse(constructor);
+    this.hoverLine.attr('opacity', 1)
+      .attr('x1', mouse[0])
+      .attr('x2', mouse[0]);
 
-      const range = [
-        xScale(dataPoints[dataPoints.length - 1][0].x),
-        xScale(
-          dataPoints
-            [dataPoints.length - 1]
-            [dataPoints[dataPoints.length - 1].length - 1].x,
-        ),
-      ];
+    const xValue = this.xScale.invert(mouse[0]).toFixed(2);
 
-      const xValue = xScale.invert(mouse[0]).toFixed(2);
+    const range = [
+      this.xScale(this.dataPoints[this.dataPoints.length - 1][0].x),
+      this.xScale(
+        this.dataPoints
+          [this.dataPoints.length - 1]
+          [this.dataPoints[this.dataPoints.length - 1].length - 1].x,
+      ),
+    ];
 
-      if (mouse[0] > range[0] && mouse[0] < range[1]) {
-        attrs.onHover(xValue);
-      } else {
-        attrs.onHover(0.0);
-      }
-    }
-
-    function mouseout() {
-      hoverLine.attr('opacity', 0)
-    }
-
-    /**
-     * @param key
-     * @returns {[]}
-     */
-    function getDatapoints(key) {
-      const dt = [];
-      const data = attrs.data[key];
-      const len = data.xs.length;
-
-      for (let i = 0; i < len; i++) {
-        dt.push({
-          x: data.xs[i],
-          y: data.ys[i]
-        })
-      }
-
-      return dt;
+    if (mouse[0] > range[0] && mouse[0] < range[1]) {
+      this.attrs.onHover(xValue);
+    } else {
+      this.attrs.onHover(0.0);
     }
   }
 
-  d3.selection.prototype.patternify = function patternify(params) {
-    const container = this;
-    const selector = params.selector;
-    const elementTag = params.tag;
-    const data = params.data || [selector];
+  mouseout() {
+    this.hoverLine.attr('opacity', 0)
+  }
+}
 
-    // Pattern in action.
-    const selection = container.selectAll('.' + selector).data(data, (d, i) => {
-      if (typeof d === 'object') {
-        if (d.id) {
-          return d.id;
-        }
-      }
-      return i;
-    });
-
-    selection.exit().remove();
-    const selection2 = selection.enter().append(elementTag).merge(selection);
-    selection2.attr('class', selector);
-    return selection2;
-  };
-
-  // @todo: Do not do like that.
-  // @todo: Dynamic keys functions.
-  // @todo: Attach variables to main function.
-  Object.keys(attrs).forEach((key) => {
-    main[key] = function (_) {
-      if (!arguments.length) {
-        return attrs[key];
-      }
-      attrs[key] = _;
-      return main;
-    };
-  });
-
-  // Set attrs as property.
-  main.attrs = attrs;
-
-  // Exposed update functions.
-  main.data = function data(value) {
-    if (!arguments.length) return attrs.data;
-    attrs.data = value;
-    return main;
-  };
-
-  // Run visual.
-  main.render = function render() {
-    main();
-    return main;
-  };
-
-  return main;
+function chart() {
+  return new Chartigo();
 }
 
 export default chart;
