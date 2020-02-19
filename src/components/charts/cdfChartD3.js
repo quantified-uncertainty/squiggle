@@ -241,7 +241,7 @@ export class CdfChartD3 {
 
     // Draw area.
     this.chart
-      .createObjectsByData({
+      .createObjectsWithData({
         tag: 'path',
         selector: 'area-path',
         data: this.dataPoints,
@@ -253,7 +253,7 @@ export class CdfChartD3 {
     // Draw line.
     if (attrs.showDistributionLines) {
       this.chart
-        .createObjectsByData({
+        .createObjectsWithData({
           tag: 'path',
           selector: 'line-path',
           data: this.dataPoints,
@@ -375,23 +375,31 @@ export class CdfChartD3 {
  */
 d3.selection.prototype.createObject = function createObject(params) {
   const selector = params.selector;
-  const elementTag = params.tag;
-  return this.insert(elementTag).attr('class', selector);
+  const tag = params.tag;
+  return this.insert(tag).attr('class', selector);
 };
 
 /**
+ * @example:
+ * This call example
+ * createObjectsByData({
+ *   tag: 'path',
+ *   selector: 'line-path',
+ *   data: this.dataPoints,
+ * })
+ * will create a new tag "<path class="line-path">1,2,3</path>".
  * @docs: https://github.com/d3/d3-selection
  * @param params
  * @returns {*}
  */
-d3.selection.prototype.createObjectsByData = function createObjectsByData(params) {
+d3.selection.prototype.createObjectsWithData = function createObjectsWithData(params) {
   const selector = params.selector;
-  const elementTag = params.tag;
+  const tag = params.tag;
   const data = params.data;
 
   return this.selectAll('.' + selector)
     .data(data)
     .enter()
-    .insert(elementTag)
+    .insert(tag)
     .attr('class', selector);
 };
