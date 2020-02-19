@@ -120,7 +120,7 @@ export class CdfChartD3 {
    * @param key
    * @returns {[]}
    */
-  getDatapoints(key) {
+  getDataPoints(key) {
     const dt = [];
     const data = this.attrs.data[key];
     const len = data.xs.length;
@@ -135,7 +135,10 @@ export class CdfChartD3 {
   render() {
     const attrs = this.attrs;
     const container = d3.select(attrs.container);
-    if (container.node() === null) return;
+    if (container.node() === null) {
+      console.error('Container for D3 is not defined.');
+      return;
+    }
 
     // Sets the width from the DOM element.
     const containerRect = container.node().getBoundingClientRect();
@@ -151,7 +154,7 @@ export class CdfChartD3 {
     calc.chartHeight = attrs.svgHeight - attrs.marginBottom - attrs.marginTop;
 
     const areaColorRange = d3.scaleOrdinal().range(attrs.areaColors);
-    this.dataPoints = [this.getDatapoints('primary')];
+    this.dataPoints = [this.getDataPoints('primary')];
 
     // Scales.
     const xMin = d3.min(attrs.data.primary.xs);
