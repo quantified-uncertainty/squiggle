@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSize } from 'react-use';
 
-import chart from './cdfChartd3';
+import chart from './cdfChartD3';
 
 /**
  * @param min
@@ -14,8 +14,16 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * @param props
+ * @returns {*}
+ * @constructor
+ */
 function CdfChart(props) {
   const id = "chart-" + getRandomInt(0, 100000);
+  const scale = props.scale || 'linear';
+  const style = !!props.width ? { width: props.width + "px" } : {};
+
   const [sized, { width }] = useSize(() => {
     return React.createElement("div", {
       key: "resizable-div",
@@ -40,12 +48,9 @@ function CdfChart(props) {
       .showVerticalLine(props.showVerticalLine)
       .container("#" + id)
       .data({ primary: props.primaryDistribution })
-      .scale('linear')
+      .scale(scale)
       .render();
   });
-
-  const style = !!props.width ? { width: props.width + "px" } : {};
-  const key = id;
 
   return React.createElement("div", {
     style: {
@@ -54,7 +59,7 @@ function CdfChart(props) {
     },
   }, [
     sized,
-    React.createElement("div", { id, style, key }),
+    React.createElement("div", { id, style, key: id }),
   ]);
 }
 
