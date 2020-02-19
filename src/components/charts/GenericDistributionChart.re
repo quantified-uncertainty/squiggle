@@ -31,7 +31,7 @@ module Mixed = {
               {x |> E.Float.toString |> ReasonReact.string}
             </th>
             <th className="px-4 py-2 border ">
-              {Shape.Mixed.getYIntegral(x, data)
+              {Shape.Mixed.findYIntegral(x, data)
                |> E.O.fmap(E.Float.with2DigitsPrecision)
                |> E.O.default("")
                |> ReasonReact.string}

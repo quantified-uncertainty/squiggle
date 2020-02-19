@@ -99,14 +99,6 @@ module XYShape = {
   let findY = CdfLibrary.Distribution.findY;
   let findX = CdfLibrary.Distribution.findX;
 };
-// let massWithin = (t: t, left: pointInRange, right: pointInRange) => {
-//   switch (left, right) {
-//   | (Unbounded, Unbounded) => t |> ySum
-//   | (Unbounded, X(f)) => t |> integral |> getY(t, 3.0)
-//   | (X(f), Unbounded) => ySum(t) -. getY(integral(t), f)
-//   | (X(l), X(r)) => getY(integral(t), r) -. getY(integral(t), l)
-//   };
-// };
 
 module Continuous = {
   let fromArrays = XYShape.fromArrays;
@@ -182,13 +174,13 @@ module Mixed = {
     discreteProbabilityMassFraction: float,
   };
 
-  let getY = (t: DistributionTypes.mixedShape, x: float): yPdfPoint => {
+  let findY = (t: DistributionTypes.mixedShape, x: float): yPdfPoint => {
     continuous: Continuous.findY(x, t.continuous) |> E.O.some,
     discrete: Discrete.findY(x, t.discrete) |> E.O.some,
     discreteProbabilityMassFraction: t.discreteProbabilityMassFraction,
   };
 
-  let getYIntegral =
+  let findYIntegral =
       (x: float, t: DistributionTypes.mixedShape): option(float) => {
     let c = t.continuous |> Continuous.findIntegralY(x);
     let d = Discrete.findIntegralY(x, t.discrete);
@@ -208,7 +200,7 @@ module Any = {
 
   let y = (t: t, x: float) =>
     switch (t) {
-    | Mixed(m) => `mixed(Mixed.getY(m, x))
+    | Mixed(m) => `mixed(Mixed.findY(m, x))
     | Discrete(discreteShape) => `discrete(Discrete.findY(x, discreteShape))
     | Continuous(continuousShape) =>
       `continuous(Continuous.findY(x, continuousShape))
@@ -216,7 +208,7 @@ module Any = {
 
   let yIntegral = (t: t, x: float) =>
     switch (t) {
-    | Mixed(m) => `mixed(Mixed.getYIntegral(x, m))
+    | Mixed(m) => `mixed(Mixed.findYIntegral(x, m))
     | Discrete(discreteShape) =>
       `discrete(Discrete.findIntegralY(x, discreteShape))
     | Continuous(continuousShape) =>
