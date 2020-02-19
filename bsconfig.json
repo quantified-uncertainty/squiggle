@@ -11,6 +11,11 @@
       "dir": "showcase",
       "type": "dev",
       "subdirs": true
+    },
+    {
+      "dir": "__tests__",
+      "type": "dev",
+      "subdirs": true
     }
   ],
   "bsc-flags": ["-bs-super-errors", "-bs-no-version-header"],
@@ -21,6 +26,7 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
+    "@glennsl/bs-jest",
     "@foretold/components",
     "bs-ant-design-alt",
     "reason-react",

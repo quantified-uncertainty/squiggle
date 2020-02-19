@@ -19,50 +19,103 @@ module XYShape = {
 
   let fmap = (t: t, y): t => {xs: t.xs, ys: t.ys |> E.A.fmap(y)};
 
+  let scaleCdfTo = (~scaleTo=1., t: t) =>
+    switch (_lastElement(t.ys)) {
+    | Some(n) =>
+      let scaleBy = scaleTo /. n;
+      fmap(t, r => r *. scaleBy);
+    | None => t
+    };
+
   let yFold = (fn, t: t) => {
     E.A.fold_left(fn, 0., t.ys);
   };
 
   let ySum = yFold((a, b) => a +. b);
 
+  let fromArray = ((xs, ys)): t => {xs, ys};
   let fromArrays = (xs, ys): t => {xs, ys};
 
-  let transverse = (fn, p: t) => {
-    let (xs, ys) =
-      Belt.Array.zip(p.xs, p.ys)
-      ->Belt.Array.reduce([||], (items, (x, y)) =>
-          switch (_lastElement(items)) {
-          | Some((_, yLast)) =>
-            Belt.Array.concat(items, [|(x, fn(y, yLast))|])
-          | None => [|(x, y)|]
-          }
-        )
-      |> Belt.Array.unzip;
-    fromArrays(xs, ys);
+  let _transverse = fn =>
+    Belt.Array.reduce(_, [||], (items, (x, y)) =>
+      switch (_lastElement(items)) {
+      | Some((xLast, yLast)) =>
+        Belt.Array.concat(items, [|(x, fn(y, yLast))|])
+      | None => [|(x, y)|]
+      }
+    );
+
+  let _transverseShape = (fn, p: t) => {
+    Belt.Array.zip(p.xs, p.ys)
+    |> _transverse(fn)
+    |> Belt.Array.unzip
+    |> fromArray;
   };
 
-  let getY = (t: t, x: float) => x;
+  let accumulateYs = _transverseShape((aCurrent, aLast) => aCurrent +. aLast);
+  let subtractYs = _transverseShape((aCurrent, aLast) => aCurrent -. aLast);
 
-  let integral = transverse((aCurrent, aLast) => aCurrent +. aLast);
-  let derivative = transverse((aCurrent, aLast) => aCurrent -. aLast);
+  module Range = {
+    // ((lastX, lastY), (nextX, nextY))
+    type zippedRange = ((float, float), (float, float));
 
-  let massWithin = (t: t, left: pointInRange, right: pointInRange) => {
-    switch (left, right) {
-    | (Unbounded, Unbounded) => t |> ySum
-    | (Unbounded, X(f)) => t |> integral |> getY(_, f)
-    | (X(f), Unbounded) => ySum(t) -. getY(integral(t), f)
-    | (X(l), X(r)) => getY(integral(t), r) -. getY(integral(t), l)
+    let floatSum = Belt.Array.reduce(_, 0., (a, b) => a +. b);
+    let toT = r => r |> Belt.Array.unzip |> fromArray;
+    let nextX = ((_, (nextX, _)): zippedRange) => nextX;
+
+    let rangeAreaAssumingSteps =
+        (((lastX, lastY), (nextX, _)): zippedRange) =>
+      (nextX -. lastX) *. lastY;
+
+    let rangeAreaAssumingTriangles =
+        (((lastX, lastY), (nextX, nextY)): zippedRange) =>
+      (nextX -. lastX) *. (lastY +. nextY) /. 2.;
+
+    let delta_y_over_delta_x =
+        (((lastX, lastY), (nextX, nextY)): zippedRange) =>
+      (nextY -. lastY) /. (nextX -. lastX);
+
+    let inRanges = (mapper, reducer, t: t) => {
+      Belt.Array.zip(t.xs, t.ys)
+      |> E.A.toRanges
+      |> E.R.toOption
+      |> E.O.fmap(r => r |> Belt.Array.map(_, mapper) |> reducer);
     };
+
+    let mapYsBasedOnRanges = fn => inRanges(r => (nextX(r), fn(r)), toT);
+
+    let toStepFn = z => mapYsBasedOnRanges(rangeAreaAssumingSteps, z);
+
+    let integrateWithSteps = z =>
+      mapYsBasedOnRanges(rangeAreaAssumingSteps, z) |> E.O.fmap(accumulateYs);
+
+    let integrateWithTriangles = z =>
+      mapYsBasedOnRanges(rangeAreaAssumingTriangles, z)
+      |> E.O.fmap(accumulateYs);
+
+    let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);
   };
+
+  let findY = CdfLibrary.Distribution.findY;
+  let findX = CdfLibrary.Distribution.findX;
 };
+// let massWithin = (t: t, left: pointInRange, right: pointInRange) => {
+//   switch (left, right) {
+//   | (Unbounded, Unbounded) => t |> ySum
+//   | (Unbounded, X(f)) => t |> integral |> getY(t, 3.0)
+//   | (X(f), Unbounded) => ySum(t) -. getY(integral(t), f)
+//   | (X(l), X(r)) => getY(integral(t), r) -. getY(integral(t), l)
+//   };
+// };
 
 module Continuous = {
   let fromArrays = XYShape.fromArrays;
   let toJs = XYShape.toJs;
-  let toPdf = CdfLibrary.Distribution.toPdf;
-  let toCdf = CdfLibrary.Distribution.toCdf;
+  let toPdf = XYShape.Range.derivative;
+  let toCdf = XYShape.Range.integrateWithTriangles;
   let findX = CdfLibrary.Distribution.findX;
   let findY = CdfLibrary.Distribution.findY;
+  let findIntegralY = (f, r) => r |> toCdf |> E.O.fmap(findY(f));
 };
 
 module Discrete = {
@@ -94,6 +147,18 @@ module Discrete = {
     | Some((_, y)) => y
     | None => 0.
     };
+
+  let integrate = XYShape.accumulateYs;
+  let derivative = XYShape.subtractYs;
+
+  let findIntegralY = (f, t: t) =>
+    t
+    |> XYShape.Range.toStepFn
+    |> E.O.fmap(XYShape.accumulateYs)
+    |> E.O.fmap(CdfLibrary.Distribution.findY(f));
+
+  let findX = (f, t: t) =>
+    t |> XYShape.Range.toStepFn |> E.O.fmap(CdfLibrary.Distribution.findX(f));
 };
 
 module Mixed = {
@@ -103,15 +168,41 @@ module Mixed = {
     discreteProbabilityMassFraction,
   };
 
+  let mixedMultiply =
+      (
+        t: DistributionTypes.mixedShape,
+        continuousComponent,
+        discreteComponent,
+      ) => {
+    let diffFn = t.discreteProbabilityMassFraction;
+    continuousComponent *. (1.0 -. diffFn) +. discreteComponent *. diffFn;
+  };
+
   type yPdfPoint = {
-    continuous: float,
-    discrete: float,
+    continuous: option(float),
+    discrete: option(float),
+    discreteProbabilityMassFraction: float,
   };
 
   let getY = (t: DistributionTypes.mixedShape, x: float): yPdfPoint => {
-    continuous: Continuous.findY(x, t.continuous),
-    discrete: Discrete.findY(x, t.discrete),
+    continuous: Continuous.findY(x, t.continuous) |> E.O.some,
+    discrete: Discrete.findY(x, t.discrete) |> E.O.some,
+    discreteProbabilityMassFraction: t.discreteProbabilityMassFraction,
   };
+
+  let getYIntegral =
+      (x: float, t: DistributionTypes.mixedShape): option(float) => {
+    let c = t.continuous |> Continuous.findIntegralY(x);
+    let d = Discrete.findIntegralY(x, t.discrete);
+    switch (c, d) {
+    | (Some(c), Some(d)) => Some(mixedMultiply(t, c, d))
+    | _ => None
+    };
+  };
+  //Do the math to add these distributions together
+  // let integral =
+  //     (x: float, t: DistributionTypes.mixedShape): option(XYShape.t) => {
+  // };
 };
 
 module Any = {
@@ -123,13 +214,6 @@ module Any = {
     | Discrete(discreteShape) => `discrete(Discrete.findY(x, discreteShape))
     | Continuous(continuousShape) =>
       `continuous(Continuous.findY(x, continuousShape))
-    };
-
-  let massInRange = (t: t, left: pointInRange, right: pointInRange) =>
-    switch (t) {
-    | Mixed(m) => 3.0
-    | Discrete(discreteShape) => 2.0
-    | Continuous(continuousShape) => 3.0
     };
 };
 
