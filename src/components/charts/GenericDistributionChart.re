@@ -2,16 +2,19 @@ module Continuous = {
   [@react.component]
   let make = (~data, ~unit) => {
     let (x, setX) = React.useState(() => 0.);
+    let timeScale = unit |> DistributionTypes.DistributionUnit.toJson;
     let chart =
       React.useMemo1(
         () =>
           <CdfChart__Plain
             data
+            timeScale
             color={`hex("333")}
             onHover={r => setX(_ => r)}
           />,
         [|data|],
       );
+
     <div>
       chart
       <table className="table-auto">

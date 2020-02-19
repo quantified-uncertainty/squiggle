@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSize } from 'react-use';
 
-import chart from './cdfChartD3';
+import { CdfChartD3 } from './cdfChartD3';
 
 /**
  * @param min
@@ -19,8 +19,9 @@ function getRandomInt(min, max) {
  * @returns {*}
  * @constructor
  */
-function CdfChart(props) {
-  const id = "chart-" + getRandomInt(0, 100000);
+function CdfChartReact(props) {
+  const containerRef = React.createRef();
+  const key = "cdf-chart-react-" + getRandomInt(0, 1000);
   const scale = props.scale || 'linear';
   const style = !!props.width ? { width: props.width + "px" } : {};
 
@@ -33,7 +34,7 @@ function CdfChart(props) {
   });
 
   useEffect(() => {
-    chart()
+    new CdfChartD3()
       .svgWidth(width)
       .svgHeight(props.height)
       .maxX(props.maxX)
@@ -46,9 +47,10 @@ function CdfChart(props) {
       .showDistributionLines(props.showDistributionLines)
       .verticalLine(props.verticalLine)
       .showVerticalLine(props.showVerticalLine)
-      .container("#" + id)
+      .container(containerRef.current)
       .data({ primary: props.primaryDistribution })
       .scale(scale)
+      .timeScale(props.timeScale)
       .render();
   });
 
@@ -59,8 +61,12 @@ function CdfChart(props) {
     },
   }, [
     sized,
-    React.createElement("div", { id, style, key: id }),
+    React.createElement("div", {
+      key,
+      style,
+      ref: containerRef,
+    }),
   ]);
 }
 
-export default CdfChart;
+export default CdfChartReact;

@@ -47,3 +47,14 @@ type genericDistribution = {
   domain,
   unit: distributionUnit,
 };
+
+module DistributionUnit = {
+  let toJson = (distributionUnit: distributionUnit) =>
+    switch (distributionUnit) {
+    | Time({zero, unit}) =>
+      Js.Null.fromOption(
+        Some({"zero": zero, "unit": unit |> TimeTypes.TimeUnit.toString}),
+      )
+    | _ => Js.Null.fromOption(None)
+    };
+};

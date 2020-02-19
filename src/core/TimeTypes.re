@@ -20,6 +20,21 @@ type timePoint = {
   value: float,
 };
 
+module TimeUnit = {
+  let toString = (timeUnit: timeUnit) =>
+    switch (timeUnit) {
+    | `days => "days"
+    | `hours => "hours"
+    | `milliseconds => "milliseconds"
+    | `minutes => "minutes"
+    | `months => "months"
+    | `quarters => "quarters"
+    | `seconds => "seconds"
+    | `weeks => "weeks"
+    | `years => "years"
+    };
+};
+
 module TimePoint = {
   let fromTimeVector = (timeVector, value): timePoint => {timeVector, value};
 

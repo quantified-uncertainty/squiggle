@@ -1,7 +1,8 @@
+const _ = require('lodash');
 const d3 = require('d3');
 const moment = require('moment');
 
-class Chart {
+export class CdfChartD3 {
 
   constructor() {
     this.attrs = {
@@ -13,10 +14,11 @@ class Chart {
       marginRight: 50,
       marginLeft: 5,
 
-      container: 'body',
+      container: null,
       minX: false,
       maxX: false,
       scale: 'linear',
+      timeScale: null,
       showDistributionLines: true,
       areaColors: ['#E1E5EC', '#E1E5EC'],
       logBase: 10,
@@ -28,6 +30,7 @@ class Chart {
     };
     this.hoverLine = null;
     this.xScale = null;
+    this.xScaleTime = null;
     this.dataPoints = null;
     this.mouseover = this.mouseover.bind(this);
     this.mouseout = this.mouseout.bind(this);
@@ -56,6 +59,11 @@ class Chart {
 
   scale(scale) {
     this.attrs.scale = scale;
+    return this;
+  }
+
+  timeScale(timeScale) {
+    this.attrs.timeScale = timeScale;
     return this;
   }
 
@@ -119,10 +127,7 @@ class Chart {
     const len = data.xs.length;
 
     for (let i = 0; i < len; i++) {
-      dt.push({
-        x: data.xs[i],
-        y: data.ys[i]
-      })
+      dt.push({ x: data.xs[i], y: data.ys[i] });
     }
 
     return dt;
@@ -133,6 +138,7 @@ class Chart {
     const container = d3.select(attrs.container);
     if (container.node() === null) return;
 
+    // Sets the width from the DOM element.
     const containerRect = container.node().getBoundingClientRect();
     if (containerRect.width > 0) {
       attrs.svgWidth = containerRect.width;
@@ -159,10 +165,6 @@ class Chart {
       this.xScale = d3.scaleLinear()
         .domain([attrs.minX || xMin, attrs.maxX || xMax])
         .range([0, calc.chartWidth]);
-    } else if (attrs.scale === 'time') {
-      this.xScale = d3.scaleLinear()
-        .domain([new Date(2012, 0, 1), new Date(2020, 0, 31)])
-        .range([0, calc.chartWidth]);
     } else {
       this.xScale = d3.scaleLog()
         .base(attrs.logBase)
@@ -178,9 +180,17 @@ class Chart {
       .range([calc.chartHeight, 0]);
 
     // Axis generator.
-    if (attrs.scale === 'time') {
+    if (!!this.attrs.timeScale) {
+      const zero = _.get(this.attrs.timeScale, 'zero', moment());
+      const unit = _.get(this.attrs.timeScale, 'unit', null);
+      const length = zero.clone().add('year', 5);
+
+      this.xScaleTime = d3.scaleLinear()
+        .domain([zero.toDate(), length.toDate()])
+        .range([0, calc.chartWidth]);
+
       this.xAxis = d3.axisBottom()
-        .scale(this.xScale)
+        .scale(this.xScaleTime)
         .ticks(5)
         .tickFormat(this.formatDates);
     } else {
@@ -329,16 +339,16 @@ class Chart {
   }
 }
 
-
 d3.selection.prototype.patternify = function patternify(params) {
   const selector = params.selector;
   const elementTag = params.tag;
   const data = params.data || [selector];
 
-  const selection = this.selectAll('.' + selector).data(data, (d, i) => {
-    if (typeof d === 'object' && d.id) return d.id;
-    return i;
-  });
+  const selection = this.selectAll('.' + selector)
+    .data(data, (d, i) => {
+      if (typeof d === 'object' && d.id) return d.id;
+      return i;
+    });
 
   selection.exit().remove();
 
@@ -348,9 +358,3 @@ d3.selection.prototype.patternify = function patternify(params) {
     .merge(selection)
     .attr('class', selector);
 };
-
-function chart() {
-  return new Chart();
-}
-
-export default chart;
