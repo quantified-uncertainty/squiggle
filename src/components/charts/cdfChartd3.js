@@ -1,29 +1,7 @@
 const d3 = require('d3');
 const moment = require('moment');
 
-d3.selection.prototype.patternify = function patternify(params) {
-  const selector = params.selector;
-  const elementTag = params.tag;
-  const data = params.data || [selector];
-
-  // Pattern in action.
-  const selection = this.selectAll('.' + selector).data(data, (d, i) => {
-    if (typeof d === 'object' && d.id) {
-      return d.id;
-    }
-    return i;
-  });
-
-  selection.exit().remove();
-
-  return selection
-    .enter()
-    .append(elementTag)
-    .merge(selection)
-    .attr('class', selector);
-};
-
-class Chartigo {
+class Chart {
 
   constructor() {
     this.attrs = {
@@ -351,8 +329,28 @@ class Chartigo {
   }
 }
 
+
+d3.selection.prototype.patternify = function patternify(params) {
+  const selector = params.selector;
+  const elementTag = params.tag;
+  const data = params.data || [selector];
+
+  const selection = this.selectAll('.' + selector).data(data, (d, i) => {
+    if (typeof d === 'object' && d.id) return d.id;
+    return i;
+  });
+
+  selection.exit().remove();
+
+  return selection
+    .enter()
+    .append(elementTag)
+    .merge(selection)
+    .attr('class', selector);
+};
+
 function chart() {
-  return new Chartigo();
+  return new Chart();
 }
 
 export default chart;
