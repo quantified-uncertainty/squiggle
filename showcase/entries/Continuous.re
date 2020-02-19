@@ -1,5 +1,3 @@
-open ForetoldComponents.Base;
-
 let data: DistributionTypes.xyShape = {
   xs: [|1., 10., 10., 200., 250., 292., 330.|],
   ys: [|0.0, 0.0, 0.1, 0.3, 0.5, 0.2, 0.1|],
@@ -13,7 +11,7 @@ let mixedDist =
       ),
     ~probabilityType=Pdf,
     ~domain=Complete,
-    ~unit=Unspecified,
+    ~unit=UnspecifiedDistribution,
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
@@ -23,7 +21,7 @@ let timeDist =
     ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
     ~probabilityType=Pdf,
     ~domain=Complete,
-    ~unit=Time({zero: MomentRe.momentNow(), unit: `years}),
+    ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
@@ -33,7 +31,7 @@ let domainLimitedDist =
     ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
     ~probabilityType=Pdf,
     ~domain=RightLimited({xPoint: 6.0, excludingProbabilityMass: 0.3}),
-    ~unit=Unspecified,
+    ~unit=UnspecifiedDistribution,
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=1000);

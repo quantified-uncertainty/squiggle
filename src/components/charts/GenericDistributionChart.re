@@ -1,17 +1,22 @@
 module Continuous = {
   [@react.component]
-  let make = (~data) => {
+  let make = (~data, ~
+  
+  ) => {
     let (x, setX) = React.useState(() => 0.);
+    let timeScale = unit |> DistributionTypes.DistributionUnit.toJson;
     let chart =
       React.useMemo1(
         () =>
           <CdfChart__Plain
             data
+            timeScale
             color={`hex("333")}
             onHover={r => setX(_ => r)}
           />,
         [|data|],
       );
+
     <div>
       chart
       <table className="table-auto">
@@ -100,6 +105,7 @@ module Mixed = {
 let make = (~dist) => {
   switch ((dist: option(DistributionTypes.genericDistribution))) {
   | Some({
+      unit,
       generationSource:
         Shape(
           Mixed({
@@ -110,8 +116,9 @@ let make = (~dist) => {
         ),
     }) =>
     <div>
-      <Continuous data=n />
+      <Continuous data={n |> Shape.Continuous.toPdf} unit />
       <Continuous
+        unit
         data={
           n
           |> Shape.XYShape.Range.integrateWithTriangles
@@ -133,6 +140,7 @@ let make = (~dist) => {
         }
       />
       <Continuous
+        unit
         data={
           n
           |> Shape.XYShape.Range.integrateWithTriangles

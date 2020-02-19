@@ -11,15 +11,17 @@ type primaryDistribution = {
 let make =
     (
       ~height=?,
-      ~verticalLine=?,
-      ~showVerticalLine=?,
       ~marginBottom=?,
       ~marginTop=?,
-      ~showDistributionLines=?,
       ~maxX=?,
       ~minX=?,
       ~onHover=(f: float) => (),
       ~primaryDistribution=?,
+      ~scale=?,
+      ~showDistributionLines=?,
+      ~showVerticalLine=?,
+      ~timeScale=?,
+      ~verticalLine=?,
       ~children=[||],
     ) =>
   ReasonReact.wrapJsForReason(
@@ -27,15 +29,17 @@ let make =
     ~props=
       makeProps(
         ~height?,
-        ~verticalLine?,
         ~marginBottom?,
         ~marginTop?,
-        ~onHover,
-        ~showVerticalLine?,
-        ~showDistributionLines?,
         ~maxX?,
         ~minX?,
+        ~onHover,
         ~primaryDistribution?,
+        ~scale?,
+        ~showDistributionLines?,
+        ~showVerticalLine?,
+        ~timeScale?,
+        ~verticalLine?,
         (),
       ),
     children,

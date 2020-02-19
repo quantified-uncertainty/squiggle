@@ -18,24 +18,28 @@ module Styles = {
 [@react.component]
 let make =
     (
-      ~data,
-      ~minX=?,
-      ~maxX=?,
-      ~height=200,
       ~color=`hex("111"),
+      ~data,
+      ~height=200,
+      ~maxX=?,
+      ~minX=?,
       ~onHover: float => unit,
+      ~scale=?,
+      ~timeScale=?,
     ) => {
   <div className={Styles.graph(color)}>
     <CdfChart__Base
-      height
-      ?minX
       ?maxX
+      ?minX
+      ?scale
+      ?timeScale
+      height
       marginBottom=50
       marginTop=0
       onHover
-      showVerticalLine=false
-      showDistributionLines=false
       primaryDistribution={data |> Shape.XYShape.toJs}
+      showDistributionLines=false
+      showVerticalLine=false
     />
   </div>;
 };

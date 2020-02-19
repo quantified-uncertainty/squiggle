@@ -7,7 +7,7 @@ module Model = {
         ~generationSource=GuesstimatorString(guesstimatorString),
         ~probabilityType=Cdf,
         ~domain=RightLimited({xPoint: 200., excludingProbabilityMass: 0.3}),
-        ~unit=Time({zero: currentDateTime, unit: `years}),
+        ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
         (),
       );
     Prop.Value.GenericDistribution(genericDistribution);

@@ -33,8 +33,8 @@ type generationSource =
   | Shape(pointsType);
 
 type distributionUnit =
-  | Unspecified
-  | Time(TimeTypes.timeVector);
+  | UnspecifiedDistribution
+  | TimeDistribution(TimeTypes.timeVector);
 
 type probabilityType =
   | Cdf
@@ -46,4 +46,15 @@ type genericDistribution = {
   probabilityType,
   domain,
   unit: distributionUnit,
+};
+
+module DistributionUnit = {
+  let toJson = (distributionUnit: distributionUnit) =>
+    switch (distributionUnit) {
+    | TimeDistribution({zero, unit}) =>
+      Js.Null.fromOption(
+        Some({"zero": zero, "unit": unit |> TimeTypes.TimeUnit.toString}),
+      )
+    | _ => Js.Null.fromOption(None)
+    };
 };
