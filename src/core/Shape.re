@@ -108,6 +108,12 @@ module Continuous = {
   let findX = CdfLibrary.Distribution.findX;
   let findY = CdfLibrary.Distribution.findY;
   let findIntegralY = (f, r) => r |> toCdf |> E.O.fmap(findY(f));
+
+  let normalizeCdf = (continuousShape: continuousShape) =>
+    continuousShape |> XYShape.scaleCdfTo(~scaleTo=1.0);
+
+  let normalizePdf = (continuousShape: continuousShape) =>
+    continuousShape |> toCdf |> E.O.fmap(normalizeCdf) |> E.O.bind(_, toPdf);
 };
 
 module Discrete = {
@@ -208,11 +214,11 @@ module Any = {
 
   let yIntegral = (t: t, x: float) =>
     switch (t) {
-    | Mixed(m) => `mixed(Mixed.findYIntegral(x, m))
+    | Mixed(m) => Mixed.findYIntegral(x, m)
     | Discrete(discreteShape) =>
-      `discrete(Discrete.findIntegralY(x, discreteShape))
+      Discrete.findIntegralY(x, discreteShape) |> E.O.some
     | Continuous(continuousShape) =>
-      `continuous(Continuous.findIntegralY(x, continuousShape))
+      Continuous.findIntegralY(x, continuousShape)
     };
 };
 

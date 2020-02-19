@@ -48,6 +48,12 @@ type genericDistribution = {
   unit: distributionUnit,
 };
 
+let shape = ({generationSource}: genericDistribution) =>
+  switch (generationSource) {
+  | GuesstimatorString(_) => None
+  | Shape(pointsType) => Some(pointsType)
+  };
+
 module DistributionUnit = {
   let toJson = (distributionUnit: distributionUnit) =>
     switch (distributionUnit) {

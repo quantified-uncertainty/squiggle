@@ -39,13 +39,13 @@ let domainLimitedDist =
 let distributions = () =>
   <div>
     <div>
-
-        <h2> {"Basic Mixed Distribution" |> ReasonReact.string} </h2>
-        <GenericDistributionChart dist=timeDist />
-        <h2> {"Simple Continuous" |> ReasonReact.string} </h2>
-      </div>
-      // <GenericDistributionChart dist=mixedDist />
+      <h2> {"Basic Mixed Distribution" |> ReasonReact.string} </h2>
+      {timeDist
+       |> E.O.React.fmapOrNull(dist => <GenericDistributionChart dist />)}
+      <h2> {"Simple Continuous" |> ReasonReact.string} </h2>
+    </div>
   </div>;
+// <GenericDistributionChart dist=mixedDist />
 // <div>
 //   <h2> {"Time Distribution" |> ReasonReact.string} </h2>
 //   <GenericDistributionChart dist=timeDist />
