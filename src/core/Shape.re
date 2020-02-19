@@ -17,6 +17,8 @@ module XYShape = {
     {"xs": t.xs, "ys": t.ys};
   };
 
+  let zip = t => Belt.Array.zip(t.xs, t.ys);
+
   let fmap = (t: t, y): t => {xs: t.xs, ys: t.ys |> E.A.fmap(y)};
 
   let scaleCdfTo = (~scaleTo=1., t: t) =>
@@ -84,8 +86,6 @@ module XYShape = {
 
     let mapYsBasedOnRanges = fn => inRanges(r => (nextX(r), fn(r)), toT);
 
-    let toStepFn = z => mapYsBasedOnRanges(rangeAreaAssumingSteps, z);
-
     let integrateWithSteps = z =>
       mapYsBasedOnRanges(rangeAreaAssumingSteps, z) |> E.O.fmap(accumulateYs);
 
@@ -142,23 +142,21 @@ module Discrete = {
        )
     |> ReasonReact.array;
 
-  let findY = (x: float, t: t) =>
-    switch (E.A.getBy(zip(t), ((ix, _)) => ix == x)) {
-    | Some((_, y)) => y
-    | None => 0.
-    };
-
   let integrate = XYShape.accumulateYs;
   let derivative = XYShape.subtractYs;
 
-  let findIntegralY = (f, t: t) =>
-    t
-    |> XYShape.Range.toStepFn
-    |> E.O.fmap(XYShape.accumulateYs)
-    |> E.O.fmap(CdfLibrary.Distribution.findY(f));
+  // TODO: This has a clear bug where it returns the Y value of the first item,
+  // even if X is less than the X of the first item.
+  let findIntegralY = (f, t: t) => {
+    t |> XYShape.accumulateYs |> CdfLibrary.Distribution.findY(f);
+  };
 
-  let findX = (f, t: t) =>
-    t |> XYShape.Range.toStepFn |> E.O.fmap(CdfLibrary.Distribution.findX(f));
+  let findY = (f, t: t) => {
+    Belt.Array.zip(t.xs, t.ys)
+    |> E.A.getBy(_, ((x, _)) => x == f)
+    |> E.O.fmap(((_, y)) => y)
+    |> E.O.default(0.);
+  };
 };
 
 module Mixed = {
@@ -195,7 +193,7 @@ module Mixed = {
     let c = t.continuous |> Continuous.findIntegralY(x);
     let d = Discrete.findIntegralY(x, t.discrete);
     switch (c, d) {
-    | (Some(c), Some(d)) => Some(mixedMultiply(t, c, d))
+    | (Some(c), d) => Some(mixedMultiply(t, c, d))
     | _ => None
     };
   };
@@ -208,12 +206,21 @@ module Mixed = {
 module Any = {
   type t = DistributionTypes.pointsType;
 
-  let x = (t: t, x: float) =>
+  let y = (t: t, x: float) =>
     switch (t) {
     | Mixed(m) => `mixed(Mixed.getY(m, x))
     | Discrete(discreteShape) => `discrete(Discrete.findY(x, discreteShape))
     | Continuous(continuousShape) =>
       `continuous(Continuous.findY(x, continuousShape))
+    };
+
+  let yIntegral = (t: t, x: float) =>
+    switch (t) {
+    | Mixed(m) => `mixed(Mixed.getYIntegral(x, m))
+    | Discrete(discreteShape) =>
+      `discrete(Discrete.findIntegralY(x, discreteShape))
+    | Continuous(continuousShape) =>
+      `continuous(Continuous.findIntegralY(x, continuousShape))
     };
 };
 

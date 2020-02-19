@@ -20,7 +20,6 @@ module Mixed = {
         <thead>
           <tr>
             <th className="px-4 py-2"> {"X Point" |> ReasonReact.string} </th>
-            <th className="px-4 py-2"> {"Y Pount" |> ReasonReact.string} </th>
             <th className="px-4 py-2">
               {"Y Integral to Point" |> ReasonReact.string}
             </th>
@@ -41,6 +40,9 @@ module Mixed = {
         </tbody>
       </table>
       <div />
+      {data.discrete
+       |> Shape.Discrete.scaleYToTotal(data.discreteProbabilityMassFraction)
+       |> Shape.Discrete.render}
     </div>;
   };
 };
