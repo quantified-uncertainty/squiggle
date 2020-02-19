@@ -144,16 +144,13 @@ export class CdfChartD3 {
     }
 
     // Calculated properties.
-    // id for event handlings.
     const calc = {};
-    calc.id = 'ID' + Math.floor(Math.random() * 1000000);
     calc.chartLeftMargin = attrs.marginLeft;
     calc.chartTopMargin = attrs.marginTop;
     calc.chartWidth = attrs.svgWidth - attrs.marginRight - attrs.marginLeft;
     calc.chartHeight = attrs.svgHeight - attrs.marginBottom - attrs.marginTop;
 
-    const areaColor = d3.scaleOrdinal().range(attrs.areaColors);
-
+    const areaColorRange = d3.scaleOrdinal().range(attrs.areaColors);
     this.dataPoints = [this.getDatapoints('primary')];
 
     // Scales.
@@ -209,7 +206,7 @@ export class CdfChartD3 {
         });
     }
 
-    // Line generator.
+    // Objects.
     const line = d3.line()
       .x(d => this.xScale(d.x))
       .y(d => this.yScale(d.y));
@@ -247,7 +244,7 @@ export class CdfChartD3 {
         data: this.dataPoints,
       })
       .attr('d', area)
-      .attr('fill', (d, i) => areaColor(i))
+      .attr('fill', (d, i) => areaColorRange(i))
       .attr('opacity', (d, i) => i === 0 ? 0.7 : 0.5);
 
     // Draw line.
@@ -368,6 +365,11 @@ export class CdfChartD3 {
   }
 }
 
+/**
+ * @todo: To rework it somehow.
+ * @param params
+ * @returns {*}
+ */
 d3.selection.prototype.patternify = function patternify(params) {
   const selector = params.selector;
   const elementTag = params.tag;
