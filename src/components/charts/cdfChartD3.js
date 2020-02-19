@@ -221,27 +221,27 @@ export class CdfChartD3 {
 
     // Add svg.
     const svg = container
-      .patternify({ tag: 'svg', selector: 'svg-chart-container' })
+      .createObject({ tag: 'svg', selector: 'svg-chart-container' })
       .attr('width', "100%")
       .attr('height', attrs.svgHeight)
       .attr('pointer-events', 'none');
 
     // Add container g element.
     this.chart = svg
-      .patternify({ tag: 'g', selector: 'chart' })
+      .createObject({ tag: 'g', selector: 'chart' })
       .attr(
         'transform',
         'translate(' + calc.chartLeftMargin + ',' + calc.chartTopMargin + ')',
       );
 
     // Add axis.
-    this.chart.patternify({ tag: 'g', selector: 'axis' })
+    this.chart.createObject({ tag: 'g', selector: 'axis' })
       .attr('transform', 'translate(' + 0 + ',' + calc.chartHeight + ')')
       .call(this.xAxis);
 
     // Draw area.
     this.chart
-      .patternify({
+      .createObjectsByData({
         tag: 'path',
         selector: 'area-path',
         data: this.dataPoints,
@@ -253,7 +253,7 @@ export class CdfChartD3 {
     // Draw line.
     if (attrs.showDistributionLines) {
       this.chart
-        .patternify({
+        .createObjectsByData({
           tag: 'path',
           selector: 'line-path',
           data: this.dataPoints,
@@ -266,7 +266,7 @@ export class CdfChartD3 {
 
     if (attrs.showVerticalLine) {
       this.chart
-        .patternify({ tag: 'line', selector: 'v-line' })
+        .createObject({ tag: 'line', selector: 'v-line' })
         .attr('x1', this.xScale(attrs.verticalLine))
         .attr('x2', this.xScale(attrs.verticalLine))
         .attr('y1', 0)
@@ -277,7 +277,7 @@ export class CdfChartD3 {
     }
 
     this.hoverLine = this.chart
-      .patternify({ tag: 'line', selector: 'hover-line' })
+      .createObject({ tag: 'line', selector: 'hover-line' })
       .attr('x1', 0)
       .attr('x2', 0)
       .attr('y1', 0)
@@ -290,7 +290,7 @@ export class CdfChartD3 {
     // Add drawing rectangle.
     const thi$ = this;
     this.chart
-      .patternify({ tag: 'rect', selector: 'mouse-rect' })
+      .createObject({ tag: 'rect', selector: 'mouse-rect' })
       .attr('width', calc.chartWidth)
       .attr('height', calc.chartHeight)
       .attr('fill', 'transparent')
@@ -369,26 +369,29 @@ export class CdfChartD3 {
 }
 
 /**
- * @todo: To rework it somehow.
+ * @docs: https://github.com/d3/d3-selection
  * @param params
  * @returns {*}
  */
-d3.selection.prototype.patternify = function patternify(params) {
+d3.selection.prototype.createObject = function createObject(params) {
   const selector = params.selector;
   const elementTag = params.tag;
-  const data = params.data || [selector];
+  return this.insert(elementTag).attr('class', selector);
+};
 
-  const selection = this.selectAll('.' + selector)
-    .data(data, (d, i) => {
-      if (typeof d === 'object' && d.id) return d.id;
-      return i;
-    });
+/**
+ * @docs: https://github.com/d3/d3-selection
+ * @param params
+ * @returns {*}
+ */
+d3.selection.prototype.createObjectsByData = function createObjectsByData(params) {
+  const selector = params.selector;
+  const elementTag = params.tag;
+  const data = params.data;
 
-  selection.exit().remove();
-
-  return selection
+  return this.selectAll('.' + selector)
+    .data(data)
     .enter()
-    .append(elementTag)
-    .merge(selection)
+    .insert(elementTag)
     .attr('class', selector);
 };
