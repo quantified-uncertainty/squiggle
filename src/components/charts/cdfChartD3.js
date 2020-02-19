@@ -30,7 +30,6 @@ export class CdfChartD3 {
     };
     this.hoverLine = null;
     this.xScale = null;
-    this.xScaleTime = null;
     this.dataPoints = null;
     this.mouseover = this.mouseover.bind(this);
     this.mouseout = this.mouseout.bind(this);
@@ -182,16 +181,17 @@ export class CdfChartD3 {
     // Axis generator.
     if (!!this.attrs.timeScale) {
       const zero = _.get(this.attrs.timeScale, 'zero', moment());
-      const unit = _.get(this.attrs.timeScale, 'unit', null);
-      const length = zero.clone().add('year', 5);
+      const step = _.get(this.attrs.timeScale, 'step', 'years');
+      const length = _.get(this.attrs.timeScale, 'length', moment());
 
-      this.xScaleTime = d3.scaleLinear()
+      const xScaleTime = d3.scaleTime()
         .domain([zero.toDate(), length.toDate()])
+        .nice()
         .range([0, calc.chartWidth]);
 
       this.xAxis = d3.axisBottom()
-        .scale(this.xScaleTime)
-        .ticks(5)
+        .scale(xScaleTime)
+        .ticks(this.getTimeTicksByStr(step))
         .tickFormat(this.formatDates);
     } else {
       this.xAxis = d3.axisBottom(this.xScale)
@@ -335,7 +335,36 @@ export class CdfChartD3 {
   }
 
   formatDates(ts) {
-    return moment(ts).format("dddd, MMMM Do YYYY, h:mm:ss a");
+    return moment(ts).format("MMMM Do YYYY");
+  }
+
+  /**
+   * @param {string} step
+   * @returns {*}
+   */
+  getTimeTicksByStr(step) {
+    switch (step) {
+      case "months":
+        return d3.timeMonth.every(1);
+      case "quarters":
+        return d3.timeMonth.every(3);
+      case "hours":
+        return d3.timeHour.every(1);
+      case "days":
+        return d3.timeDay.every(1);
+      case "seconds":
+        return d3.timeSecond.every(1);
+      case "years":
+        return d3.timeYear.every(1);
+      case "minutes":
+        return d3.timeMinute.every(1);
+      case "weeks":
+        return d3.timeWeek.every(1);
+      case "milliseconds":
+        return d3.timeMillisecond.every(1);
+      default:
+        return d3.timeYear.every(1);
+    }
   }
 }
 
