@@ -12,7 +12,8 @@ type timeUnit = [
 
 type timeVector = {
   zero: MomentRe.Moment.t,
-  unit: timeUnit,
+  length: MomentRe.Moment.t,
+  step: timeUnit,
 };
 
 type timePoint = {
@@ -42,12 +43,12 @@ module TimePoint = {
     timePoint.timeVector.zero
     |> MomentRe.Moment.add(
          ~duration=
-           MomentRe.duration(timePoint.value, timePoint.timeVector.unit),
+           MomentRe.duration(timePoint.value, timePoint.timeVector.step),
        );
   };
 
   let fromMoment = (timeVector: timeVector, moment: MomentRe.Moment.t) =>
-    MomentRe.diff(timeVector.zero, moment, timeVector.unit);
+    MomentRe.diff(timeVector.zero, moment, timeVector.step);
 };
 
 module RelativeTimePoint = {
@@ -60,7 +61,7 @@ module RelativeTimePoint = {
     | Time(r) => r
     | XValue(r) =>
       timeVector.zero
-      |> MomentRe.Moment.add(~duration=MomentRe.duration(r, timeVector.unit))
+      |> MomentRe.Moment.add(~duration=MomentRe.duration(r, timeVector.step))
     };
 
   let _timeToX = (time, timeStart, timeUnit) =>
@@ -68,7 +69,7 @@ module RelativeTimePoint = {
 
   let toXValue = (timeVector: timeVector, timeInVector: timeInVector) =>
     switch (timeInVector) {
-    | Time(r) => _timeToX(r, timeVector.zero, timeVector.unit)
+    | Time(r) => _timeToX(r, timeVector.zero, timeVector.step)
     | XValue(r) => r
     };
 };

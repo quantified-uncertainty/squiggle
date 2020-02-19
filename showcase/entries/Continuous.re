@@ -8,7 +8,7 @@ let mixedDist =
     ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
     ~probabilityType=Pdf,
     ~domain=Complete,
-    ~unit=Unspecified,
+    ~unit=UnspecifiedDistribution,
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=3000);
@@ -18,7 +18,16 @@ let timeDist =
     ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
     ~probabilityType=Pdf,
     ~domain=Complete,
-    ~unit=Time({zero: MomentRe.momentNow(), unit: `years}),
+    ~unit=
+      TimeDistribution({
+        zero: MomentRe.momentNow(),
+        step: `years,
+        length:
+          MomentRe.Moment.add(
+            ~duration=MomentRe.duration(5., `years),
+            MomentRe.momentNow(),
+          ),
+      }),
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=3000);
@@ -28,7 +37,7 @@ let domainLimitedDist =
     ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
     ~probabilityType=Pdf,
     ~domain=RightLimited({xPoint: 6.0, excludingProbabilityMass: 0.3}),
-    ~unit=Unspecified,
+    ~unit=UnspecifiedDistribution,
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=3000);

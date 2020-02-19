@@ -221,6 +221,21 @@ module TypeWithMetadata = {
       ~assumptionType=ASSUMPTION,
       (),
     );
+
+  let nextTenYears =
+    make(
+      ~id="nextTenYears",
+      ~name="Next Ten Years",
+      ~description=None,
+      ~type_=
+        DateTime({
+          default: Some(MomentRe.momentNow()),
+          min: Some(MomentRe.momentNow()),
+          max: Some(MomentRe.momentNow()),
+        }),
+      ~assumptionType=ASSUMPTION,
+      (),
+    );
 };
 
 module Model = {

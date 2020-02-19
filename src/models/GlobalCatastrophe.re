@@ -7,7 +7,12 @@ module Model = {
         ~generationSource=GuesstimatorString(guesstimatorString),
         ~probabilityType=Cdf,
         ~domain=RightLimited({xPoint: 200., excludingProbabilityMass: 0.3}),
-        ~unit=Time({zero: currentDateTime, unit: `years}),
+        ~unit=
+          TimeDistribution({
+            zero: currentDateTime,
+            step: `years,
+            length: currentDateTime,
+          }),
         (),
       );
     Prop.Value.GenericDistribution(genericDistribution);
@@ -30,7 +35,7 @@ module Interface = {
       description: "The chances of having at least one catastrophe per year in the future, assuming no other catastrophe until then.",
       version: "1.0.0",
       author: "Ozzie Gooen",
-      inputTypes: [|TypeWithMetadata.currentYear|],
+      inputTypes: [|TypeWithMetadata.nextTenYears|],
       outputTypes: [||],
       run,
     };

@@ -5,7 +5,7 @@ let make =
       ~generationSource,
       ~probabilityType=Pdf,
       ~domain=Complete,
-      ~unit=Unspecified,
+      ~unit=UnspecifiedDistribution,
       (),
     )
     : genericDistribution => {

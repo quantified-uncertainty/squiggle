@@ -137,10 +137,11 @@ module Model = {
           ~generationSource=GuesstimatorString(str),
           ~probabilityType=Cdf,
           ~domain=Complete,
-          ~unit=Unspecified,
+          ~unit=UnspecifiedDistribution,
           (),
         );
       Prop.Value.GenericDistribution(genericDistribution);
+
     | CHANCE_OF_EXISTENCE =>
       Prop.Value.GenericDistribution(
         GenericDistribution.make(
@@ -153,7 +154,12 @@ module Model = {
             ),
           ~probabilityType=Cdf,
           ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
-          ~unit=Time({zero: currentDateTime, unit: `years}),
+          ~unit=
+            TimeDistribution({
+              zero: currentDateTime,
+              step: `years,
+              length: currentDateTime,
+            }),
           (),
         ),
       )
