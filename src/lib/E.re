@@ -114,6 +114,11 @@ module R = {
   let id = e => e |> result(U.id, U.id);
   let fmap = Rationale.Result.fmap;
   let bind = Rationale.Result.bind;
+  let toOption = (e: Belt.Result.t('a, 'b)) =>
+    switch (e) {
+    | Ok(r) => Some(r)
+    | Error(_) => None
+    };
 };
 
 let safe_fn_of_string = (fn, s: string): option('a) =>
@@ -217,6 +222,20 @@ module A = {
   let concatMany = Belt.Array.concatMany;
   let keepMap = Belt.Array.keepMap;
   let stableSortBy = Belt.SortArray.stableSortBy;
+  let toRanges = (a: array('a)) =>
+    switch (a |> Belt.Array.length) {
+    | 0
+    | 1 => Belt.Result.Error("Must be at least 2 elements")
+    | n =>
+      Belt.Array.makeBy(n - 1, r => r)
+      |> Belt.Array.map(_, index =>
+           (
+             Belt.Array.getUnsafe(a, index),
+             Belt.Array.getUnsafe(a, index + 1),
+           )
+         )
+      |> Rationale.Result.return
+    };
 
   let asList = (f: list('a) => list('a), r: array('a)) =>
     r |> to_list |> f |> of_list;

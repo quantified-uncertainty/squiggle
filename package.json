@@ -13,7 +13,10 @@
     "server": "moduleserve ./ --port 8000",
     "predeploy": "parcel build ./src/index.html --no-source-maps --no-autoinstall",
     "deploy": "gh-pages -d dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:ci": "yarn jest",
+    "watch:test": "jest --watchAll",
+    "watch:s": "yarn jest -- Converter_test --watch"
   },
   "keywords": [
     "BuckleScript",
@@ -26,13 +29,16 @@
     "@foretold/cdf": "^1.0.15",
     "@foretold/components": "^0.0.3",
     "@foretold/guesstimator": "^1.0.10",
+    "@glennsl/bs-jest": "^0.4.9",
     "antd": "3.17.0",
     "autoprefixer": "^9.7.4",
+    "babel-jest": "^25.1.0",
     "bs-ant-design-alt": "2.0.0-alpha.31",
     "bs-css": "^11.0.0",
     "bs-moment": "0.4.4",
     "bs-reform": "9.7.1",
     "d3": "^5.15.0",
+    "jest": "^25.1.0",
     "lenses-ppx": "4.0.0",
     "less": "^3.10.3",
     "lodash": "^4.17.15",
