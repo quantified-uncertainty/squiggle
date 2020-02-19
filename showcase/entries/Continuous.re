@@ -5,13 +5,16 @@ let data: DistributionTypes.xyShape = {
 
 let mixedDist =
   GenericDistribution.make(
-    ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
+    ~generationSource=
+      GuesstimatorString(
+        "mm(floor(uniform(20, 30)), normal(50,10), [.5,.5])",
+      ),
     ~probabilityType=Pdf,
     ~domain=Complete,
     ~unit=UnspecifiedDistribution,
     (),
   )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=3000);
+  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
 
 let timeDist =
   GenericDistribution.make(
@@ -21,7 +24,7 @@ let timeDist =
     ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
     (),
   )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=3000);
+  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
 
 let domainLimitedDist =
   GenericDistribution.make(
@@ -31,7 +34,7 @@ let domainLimitedDist =
     ~unit=UnspecifiedDistribution,
     (),
   )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=3000);
+  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
 
 let distributions = () =>
   <div>
@@ -39,14 +42,14 @@ let distributions = () =>
       <h2> {"Basic Mixed Distribution" |> ReasonReact.string} </h2>
       <GenericDistributionChart dist=mixedDist />
     </div>
-    <div>
-      <h2> {"Time Distribution" |> ReasonReact.string} </h2>
-      <GenericDistributionChart dist=timeDist />
-    </div>
-    <div>
-      <h2> {"Domain Limited Distribution" |> ReasonReact.string} </h2>
-      <GenericDistributionChart dist=domainLimitedDist />
-    </div>
   </div>;
+// <div>
+//   <h2> {"Time Distribution" |> ReasonReact.string} </h2>
+//   <GenericDistributionChart dist=timeDist />
+// </div>
+// <div>
+//   <h2> {"Domain Limited Distribution" |> ReasonReact.string} </h2>
+//   <GenericDistributionChart dist=domainLimitedDist />
+// </div>
 
 let entry = EntryTypes.(entry(~title="Pdf", ~render=distributions));

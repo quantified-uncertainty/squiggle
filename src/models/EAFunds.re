@@ -126,12 +126,14 @@ module Model = {
           currentDateTime,
           yearlyMeanGrowthRateIfNotClosed(group),
         );
+
       let str =
         switch (xRisk) {
         | Some({truthValue: true}) => "0"
         | Some({truthValue: false}) => difference
         | None => "uniform(0,1) > .3 ? " ++ difference ++ ": 0"
         };
+
       let genericDistribution =
         GenericDistribution.make(
           ~generationSource=GuesstimatorString(str),
