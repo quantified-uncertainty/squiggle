@@ -40,6 +40,8 @@ let distributions = () =>
   <div>
     <div>
       <h2> {"Basic Mixed Distribution" |> ReasonReact.string} </h2>
+      <GenericDistributionChart dist=timeDist />
+      <h2> {"Simple Continuous" |> ReasonReact.string} </h2>
       <GenericDistributionChart dist=mixedDist />
     </div>
   </div>;
