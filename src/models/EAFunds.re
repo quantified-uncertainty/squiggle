@@ -154,12 +154,7 @@ module Model = {
             ),
           ~probabilityType=Cdf,
           ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
-          ~unit=
-            TimeDistribution({
-              zero: currentDateTime,
-              step: `years,
-              length: currentDateTime,
-            }),
+          ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
           (),
         ),
       )

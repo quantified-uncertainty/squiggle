@@ -51,13 +51,9 @@ type genericDistribution = {
 module DistributionUnit = {
   let toJson = (distributionUnit: distributionUnit) =>
     switch (distributionUnit) {
-    | TimeDistribution({zero, step, length}) =>
+    | TimeDistribution({zero, unit}) =>
       Js.Null.fromOption(
-        Some({
-          "zero": zero,
-          "step": step |> TimeTypes.TimeUnit.toString,
-          "length": length,
-        }),
+        Some({"zero": zero, "unit": unit |> TimeTypes.TimeUnit.toString}),
       )
     | _ => Js.Null.fromOption(None)
     };

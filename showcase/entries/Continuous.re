@@ -18,16 +18,7 @@ let timeDist =
     ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
     ~probabilityType=Pdf,
     ~domain=Complete,
-    ~unit=
-      TimeDistribution({
-        zero: MomentRe.momentNow(),
-        step: `years,
-        length:
-          MomentRe.Moment.add(
-            ~duration=MomentRe.duration(5., `years),
-            MomentRe.momentNow(),
-          ),
-      }),
+    ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=3000);

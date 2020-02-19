@@ -181,17 +181,19 @@ export class CdfChartD3 {
     // Axis generator.
     if (!!this.attrs.timeScale) {
       const zero = _.get(this.attrs.timeScale, 'zero', moment());
-      const step = _.get(this.attrs.timeScale, 'step', 'years');
-      const length = _.get(this.attrs.timeScale, 'length', moment());
+      const unit = _.get(this.attrs.timeScale, 'unit', 'years');
+      const diff = Math.abs(xMax - xMin);
+      const left = zero.clone().add(xMin, unit);
+      const right = left.clone().add(diff, unit);
 
       const xScaleTime = d3.scaleTime()
-        .domain([zero.toDate(), length.toDate()])
+        .domain([left.toDate(), right.toDate()])
         .nice()
         .range([0, calc.chartWidth]);
 
       this.xAxis = d3.axisBottom()
         .scale(xScaleTime)
-        .ticks(this.getTimeTicksByStr(step))
+        .ticks(this.getTimeTicksByStr(unit))
         .tickFormat(this.formatDates);
     } else {
       this.xAxis = d3.axisBottom(this.xScale)
@@ -339,11 +341,11 @@ export class CdfChartD3 {
   }
 
   /**
-   * @param {string} step
+   * @param {string} unit
    * @returns {*}
    */
-  getTimeTicksByStr(step) {
-    switch (step) {
+  getTimeTicksByStr(unit) {
+    switch (unit) {
       case "months":
         return d3.timeMonth.every(1);
       case "quarters":
