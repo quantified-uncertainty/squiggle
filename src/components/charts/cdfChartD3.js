@@ -28,9 +28,16 @@ export class CdfChartD3 {
       onHover: (e) => {
       },
     };
+    this.calc = {};
+
+    this.chart = null;
+    this.svg = null;
+    this._container = null;
+
     this.hoverLine = null;
     this.xScale = null;
     this.dataPoints = null;
+
     this.mouseover = this.mouseover.bind(this);
     this.mouseout = this.mouseout.bind(this);
     this.formatDates = this.formatDates.bind(this);
@@ -116,67 +123,65 @@ export class CdfChartD3 {
     return this;
   }
 
-  /**
-   * @param key
-   * @returns {[]}
-   */
-  getDataPoints(key) {
-    const dt = [];
-    const data = this.attrs.data[key];
-    const len = data.xs.length;
-
-    for (let i = 0; i < len; i++) {
-      dt.push({ x: data.xs[i], y: data.ys[i] });
-    }
-
-    return dt;
-  }
-
   render() {
-    const attrs = this.attrs;
-    const container = d3.select(attrs.container);
-    if (container.node() === null) {
+    this._container = d3.select(this.attrs.container);
+    if (this._container.node() === null) {
       console.error('Container for D3 is not defined.');
       return;
     }
-
     // Sets the width from the DOM element.
-    const containerRect = container.node().getBoundingClientRect();
+    const containerRect = this._container.node().getBoundingClientRect();
     if (containerRect.width > 0) {
-      attrs.svgWidth = containerRect.width;
+      this.attrs.svgWidth = containerRect.width;
     }
 
     // Calculated properties.
-    const calc = {};
-    calc.chartLeftMargin = attrs.marginLeft;
-    calc.chartTopMargin = attrs.marginTop;
-    calc.chartWidth = attrs.svgWidth - attrs.marginRight - attrs.marginLeft;
-    calc.chartHeight = attrs.svgHeight - attrs.marginBottom - attrs.marginTop;
+    this.calc.chartLeftMargin = this.attrs.marginLeft;
+    this.calc.chartTopMargin = this.attrs.marginTop;
+    this.calc.chartWidth = this.attrs.svgWidth - this.attrs.marginRight - this.attrs.marginLeft;
+    this.calc.chartHeight = this.attrs.svgHeight - this.attrs.marginBottom - this.attrs.marginTop;
 
-    const areaColorRange = d3.scaleOrdinal().range(attrs.areaColors);
+    // Add svg.
+    this.svg = this._container
+      .createObject({ tag: 'svg', selector: 'svg-chart-container' })
+      .attr('width', "100%")
+      .attr('height', this.attrs.svgHeight)
+      .attr('pointer-events', 'none');
+
+    // Add container g element.
+    this.chart = this.svg
+      .createObject({ tag: 'g', selector: 'chart' })
+      .attr(
+        'transform',
+        'translate(' + this.calc.chartLeftMargin + ',' + this.calc.chartTopMargin + ')',
+      );
+
+    // A
+
+    const areaColorRange = d3.scaleOrdinal().range(this.attrs.areaColors);
     this.dataPoints = [this.getDataPoints('primary')];
 
     // Scales.
-    const xMin = d3.min(attrs.data.primary.xs);
-    const xMax = d3.max(attrs.data.primary.xs);
+    const xMin = d3.min(this.attrs.data.primary.xs);
+    const xMax = d3.max(this.attrs.data.primary.xs);
 
-    if (attrs.scale === 'linear') {
+    if (this.attrs.scale === 'linear') {
       this.xScale = d3.scaleLinear()
-        .domain([attrs.minX || xMin, attrs.maxX || xMax])
-        .range([0, calc.chartWidth]);
+        .domain([this.attrs.minX || xMin, this.attrs.maxX || xMax])
+        .range([0, this.calc.chartWidth]);
     } else {
       this.xScale = d3.scaleLog()
-        .base(attrs.logBase)
-        .domain([attrs.minX, attrs.maxX])
-        .range([0, calc.chartWidth]);
+        .base(this.attrs.logBase)
+        .domain([this.attrs.minX, this.attrs.maxX])
+        .range([0, this.calc.chartWidth]);
     }
 
-    const yMin = d3.min(attrs.data.primary.ys);
-    const yMax = d3.max(attrs.data.primary.ys);
+    const yMin = d3.min(this.attrs.data.primary.ys);
+    const yMax = d3.max(this.attrs.data.primary.ys);
 
     this.yScale = d3.scaleLinear()
       .domain([yMin, yMax])
-      .range([calc.chartHeight, 0]);
+      .range([this.calc.chartHeight, 0]);
 
     // Axis generator.
     if (!!this.attrs.timeScale) {
@@ -189,7 +194,7 @@ export class CdfChartD3 {
       const xScaleTime = d3.scaleTime()
         .domain([left.toDate(), right.toDate()])
         .nice()
-        .range([0, calc.chartWidth]);
+        .range([0, this.calc.chartWidth]);
 
       this.xAxis = d3.axisBottom()
         .scale(xScaleTime)
@@ -219,26 +224,11 @@ export class CdfChartD3 {
     const area = d3.area()
       .x(d => this.xScale(d.x))
       .y1(d => this.yScale(d.y))
-      .y0(calc.chartHeight);
-
-    // Add svg.
-    const svg = container
-      .createObject({ tag: 'svg', selector: 'svg-chart-container' })
-      .attr('width', "100%")
-      .attr('height', attrs.svgHeight)
-      .attr('pointer-events', 'none');
-
-    // Add container g element.
-    this.chart = svg
-      .createObject({ tag: 'g', selector: 'chart' })
-      .attr(
-        'transform',
-        'translate(' + calc.chartLeftMargin + ',' + calc.chartTopMargin + ')',
-      );
+      .y0(this.calc.chartHeight);
 
     // Add axis.
     this.chart.createObject({ tag: 'g', selector: 'axis' })
-      .attr('transform', 'translate(' + 0 + ',' + calc.chartHeight + ')')
+      .attr('transform', 'translate(' + 0 + ',' + this.calc.chartHeight + ')')
       .call(this.xAxis);
 
     // Draw area.
@@ -253,7 +243,7 @@ export class CdfChartD3 {
       .attr('opacity', (d, i) => i === 0 ? 0.7 : 0.5);
 
     // Draw line.
-    if (attrs.showDistributionLines) {
+    if (this.attrs.showDistributionLines) {
       this.chart
         .createObjectsWithData({
           tag: 'path',
@@ -266,13 +256,13 @@ export class CdfChartD3 {
         .attr('fill', 'none');
     }
 
-    if (attrs.showVerticalLine) {
+    if (this.attrs.showVerticalLine) {
       this.chart
         .createObject({ tag: 'line', selector: 'v-line' })
-        .attr('x1', this.xScale(attrs.verticalLine))
-        .attr('x2', this.xScale(attrs.verticalLine))
+        .attr('x1', this.xScale(this.attrs.verticalLine))
+        .attr('x2', this.xScale(this.attrs.verticalLine))
         .attr('y1', 0)
-        .attr('y2', calc.chartHeight)
+        .attr('y2', this.calc.chartHeight)
         .attr('stroke-width', 1.5)
         .attr('stroke-dasharray', '6 6')
         .attr('stroke', 'steelblue');
@@ -283,7 +273,7 @@ export class CdfChartD3 {
       .attr('x1', 0)
       .attr('x2', 0)
       .attr('y1', 0)
-      .attr('y2', calc.chartHeight)
+      .attr('y2', this.calc.chartHeight)
       .attr('opacity', 0)
       .attr('stroke-width', 1.5)
       .attr('stroke-dasharray', '6 6')
@@ -293,8 +283,8 @@ export class CdfChartD3 {
     const thi$ = this;
     this.chart
       .createObject({ tag: 'rect', selector: 'mouse-rect' })
-      .attr('width', calc.chartWidth)
-      .attr('height', calc.chartHeight)
+      .attr('width', this.calc.chartWidth)
+      .attr('height', this.calc.chartHeight)
       .attr('fill', 'transparent')
       .attr('pointer-events', 'all')
       .on('mouseover', function () {
@@ -304,6 +294,8 @@ export class CdfChartD3 {
         thi$.mouseover(this);
       })
       .on('mouseout', this.mouseout);
+
+    // B
 
     return this;
   }
@@ -367,6 +359,22 @@ export class CdfChartD3 {
       default:
         return d3.timeYear.every(1);
     }
+  }
+
+  /**
+   * @param key
+   * @returns {[]}
+   */
+  getDataPoints(key) {
+    const dt = [];
+    const data = this.attrs.data[key];
+    const len = data.xs.length;
+
+    for (let i = 0; i < len; i++) {
+      dt.push({ x: data.xs[i], y: data.ys[i] });
+    }
+
+    return dt;
   }
 }
 
