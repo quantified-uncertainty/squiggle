@@ -21,19 +21,10 @@ let propValue = (t: Prop.Value.t) => {
     let newDistribution =
       GenericDistribution.renderIfNeeded(~sampleCount=1000, r);
     switch (newDistribution) {
-    | Some({
-        generationSource:
-          Shape(
-            Mixed({
-              continuous: n,
-              discrete: d,
-              discreteProbabilityMassFraction: f,
-            }),
-          ),
-      }) =>
+    | Some(distribution) =>
       <div>
-        <Chart height=100 data={n |> Shape.Continuous.toJs} />
-        {d |> Shape.Discrete.scaleYToTotal(f) |> Shape.Discrete.render}
+        {GenericDistribution.normalize(distribution)
+         |> E.O.React.fmapOrNull(dist => <GenericDistributionChart dist />)}
       </div>
     | None => "Something went wrong" |> ReasonReact.string
     | _ => <div />

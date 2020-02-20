@@ -6,7 +6,8 @@ let data: DistributionTypes.xyShape = {
 // "mm(floor(uniform(30,35)), normal(50,20), [.25,.5])",
 let timeDist =
   GenericDistribution.make(
-    ~generationSource=GuesstimatorString("floor(normal(30,3))"),
+    ~generationSource=
+      GuesstimatorString("mm(floor(normal(30,3)), normal(39,1), [.5,.5])"),
     ~probabilityType=Pdf,
     ~domain=Complete,
     ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `days}),
@@ -24,14 +25,5 @@ let distributions = () =>
       <h2> {"Simple Continuous" |> ReasonReact.string} </h2>
     </div>
   </div>;
-// <GenericDistributionChart dist=mixedDist />
-// <div>
-//   <h2> {"Time Distribution" |> ReasonReact.string} </h2>
-//   <GenericDistributionChart dist=timeDist />
-// </div>
-// <div>
-//   <h2> {"Domain Limited Distribution" |> ReasonReact.string} </h2>
-//   <GenericDistributionChart dist=domainLimitedDist />
-// </div>
 
 let entry = EntryTypes.(entry(~title="Pdf", ~render=distributions));

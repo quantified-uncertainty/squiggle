@@ -197,8 +197,9 @@ module Mixed = {
   let minX = (t: DistributionTypes.mixedShape) =>
     min(t.continuous |> Continuous.minX, t.discrete |> Discrete.minX);
 
-  let maxX = (t: DistributionTypes.mixedShape) =>
-    min(t.continuous |> Continuous.maxX, t.discrete |> Discrete.maxX);
+  let maxX = (t: DistributionTypes.mixedShape) => {
+    max(t.continuous |> Continuous.maxX, t.discrete |> Discrete.maxX);
+  };
 
   let mixedMultiply =
       (
