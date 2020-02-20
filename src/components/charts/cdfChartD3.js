@@ -232,7 +232,7 @@ export class CdfChartD3 {
       .y0(this.calc.chartHeight);
 
     // Add axis.
-    this.chart.createObject({ tag: 'g', selector: 'xAxis' })
+    this.chart.createObject({ tag: 'g', selector: 'x-axis' })
       .attr('transform', 'translate(0,' + this.calc.chartHeight + ')')
       .call(this.xAxis);
 
@@ -316,9 +316,9 @@ export class CdfChartD3 {
         .padding(1);
 
       this.chart.append("g")
+        .attr("class", 'lollipops-x-axis')
         .attr("transform", "translate(0," + this.calc.chartHeight + ")")
-        .call(d3.axisBottom(x))
-        .selectAll("text");
+        .call(d3.axisBottom(x));
 
       // Add Y axis
       const y = d3.scaleLinear()
@@ -326,6 +326,7 @@ export class CdfChartD3 {
         .range([this.calc.chartHeight, 0]);
 
       this.chart.append("g")
+        .attr("class", 'lollipops-y-axis')
         .attr("transform", "translate(" + this.calc.chartWidth + ",0)")
         .call(d3.axisLeft(y));
 
@@ -334,22 +335,21 @@ export class CdfChartD3 {
         .data(data)
         .enter()
         .append("line")
+        .attr("class", 'lollipops-line')
         .attr("x1", d => x(d.x))
         .attr("x2", d => x(d.x))
         .attr("y1", d => y(d.y))
-        .attr("y2", y(0))
-        .attr("stroke", "red");
+        .attr("y2", y(0));
 
       // Circles
       this.chart.selectAll("lollipops-circle")
         .data(data)
         .enter()
         .append("circle")
+        .attr("class", 'lollipops-circle')
         .attr("cx", d => x(d.x))
         .attr("cy", d => y(d.y))
-        .attr("r", "4")
-        .style("fill", "yellow")
-        .attr("stroke", "green");
+        .attr("r", "4");
     }
     return this;
   }
