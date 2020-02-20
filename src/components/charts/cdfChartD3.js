@@ -156,8 +156,12 @@ export class CdfChartD3 {
         'translate(' + this.calc.chartLeftMargin + ',' + this.calc.chartTopMargin + ')',
       );
 
-    const distributionChart = this.addDistributionChart();
-    this.addLollipopsChart(distributionChart);
+    if(this.hasDate('primary')){
+      const distributionChart = this.addDistributionChart();
+      if(this.hasDate('discrete')) {
+        this.addLollipopsChart(distributionChart);
+      }
+    }
     return this;
   }
 
@@ -406,8 +410,8 @@ export class CdfChartD3 {
   }
 
   /**
-   * @param key
-   * @returns {[]}
+   * @param {name} key
+   * @returns {{x: number[], y: number[]}}
    */
   getDataPoints(key) {
     const dt = [];
@@ -421,11 +425,22 @@ export class CdfChartD3 {
 
     return dt;
   }
+
+  /**
+   * @param {string} key
+   * @returns {boolean}
+   */
+  hasDate(key) {
+    const data = _.get(this.attrs.data, key);
+    return !!data;
+  }
 }
 
 /**
  * @docs: https://github.com/d3/d3-selection
- * @param params
+ * @param {object} params
+ * @param {string} params.selector
+ * @param {string} params.tag
  * @returns {*}
  */
 d3.selection.prototype.createObject = function createObject(params) {
@@ -436,7 +451,10 @@ d3.selection.prototype.createObject = function createObject(params) {
 
 /**
  * @docs: https://github.com/d3/d3-selection
- * @param params
+ * @param {object} params
+ * @param {string} params.selector
+ * @param {string} params.tag
+ * @param {*[]} params.data
  * @returns {*}
  */
 d3.selection.prototype.createObjectsWithData = function createObjectsWithData(params) {
