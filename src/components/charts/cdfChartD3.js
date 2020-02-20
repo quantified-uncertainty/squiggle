@@ -26,7 +26,7 @@ export class CdfChartD3 {
       verticalLine: 110,
       showVerticalLine: true,
       data: {
-        primary: null,
+        continuous: null,
         discrete: null,
       },
       onHover: (e) => {
@@ -165,7 +165,7 @@ export class CdfChartD3 {
         'translate(' + this.calc.chartLeftMargin + ',' + this.calc.chartTopMargin + ')',
       );
 
-    if(this.hasDate('primary')){
+    if(this.hasDate('continuous')){
       const distributionChart = this.addDistributionChart();
       if(this.hasDate('discrete')) {
         this.addLollipopsChart(distributionChart);
@@ -176,13 +176,13 @@ export class CdfChartD3 {
 
   addDistributionChart() {
     const areaColorRange = d3.scaleOrdinal().range(this.attrs.areaColors);
-    const dataPoints = [this.getDataPoints('primary')];
+    const dataPoints = [this.getDataPoints('continuous')];
 
     // Boundaries.
-    const xMin = this.attrs.minX || d3.min(this.attrs.data.primary.xs);
-    const xMax = this.attrs.maxX || d3.max(this.attrs.data.primary.xs);
-    const yMin = d3.min(this.attrs.data.primary.ys);
-    const yMax = d3.max(this.attrs.data.primary.ys);
+    const xMin = this.attrs.minX || d3.min(this.attrs.data.continuous.xs) | d3.min(this.attrs.data.discrete.xs);
+    const xMax = this.attrs.maxX || d3.max(this.attrs.data.continuous.xs) | d3.max(this.attrs.data.discrete.xs);
+    const yMin = d3.min(this.attrs.data.continuous.ys);
+    const yMax = d3.max(this.attrs.data.continuous.ys);
 
     // Scales.
     let xScale = null;

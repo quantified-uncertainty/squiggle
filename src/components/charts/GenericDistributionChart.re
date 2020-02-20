@@ -7,7 +7,7 @@ module Mixed = {
       React.useMemo1(
         () =>
           <CdfChart__Plain
-            primaryDistribution={data.continuous}
+            continuous={data.continuous}
             discrete={data.discrete}
             color={`hex("333")}
             timeScale
@@ -99,18 +99,15 @@ module Shapee = {
       Shape.Any.maxX(shape);
     };
     <div>
-      {continuous
-       |> E.O.React.fmapOrNull(continuous =>
-            <CdfChart__Plain
-              primaryDistribution=continuous
-              minX
-              maxX
-              ?discrete
-              color={`hex("333")}
-              onHover
-              timeScale
-            />
-          )}
+      <CdfChart__Plain
+        minX
+        maxX
+        ?discrete
+        ?continuous
+        color={`hex("333")}
+        onHover
+        timeScale
+      />
       {discrete |> E.O.React.fmapOrNull(Shape.Discrete.render)}
     </div>;
   };

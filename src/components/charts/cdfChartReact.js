@@ -50,7 +50,7 @@ function CdfChartReact(props) {
       .showVerticalLine(props.showVerticalLine)
       .container(containerRef.current)
       .data({
-        primary: props.primaryDistribution,
+        continuous: props.continuous,
         discrete: props.discrete,
       })
       .scale(scale)

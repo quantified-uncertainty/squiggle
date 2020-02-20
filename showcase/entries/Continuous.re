@@ -3,36 +3,13 @@ let data: DistributionTypes.xyShape = {
   ys: [|0.0, 0.0, 0.1, 0.3, 0.5, 0.2, 0.1|],
 };
 
-let mixedDist =
-  GenericDistribution.make(
-    ~generationSource=
-      GuesstimatorString(
-        "mm(floor(uniform(20, 30)), normal(50,10), [.5,.5])",
-      ),
-    ~probabilityType=Pdf,
-    ~domain=Complete,
-    ~unit=UnspecifiedDistribution,
-    (),
-  )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
-
 // "mm(floor(uniform(30,35)), normal(50,20), [.25,.5])",
 let timeDist =
   GenericDistribution.make(
-    ~generationSource=GuesstimatorString("floor(normal(30,2))"),
+    ~generationSource=GuesstimatorString("floor(normal(30,3))"),
     ~probabilityType=Pdf,
     ~domain=Complete,
     ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `days}),
-    (),
-  )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
-
-let domainLimitedDist =
-  GenericDistribution.make(
-    ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
-    ~probabilityType=Pdf,
-    ~domain=RightLimited({xPoint: 6.0, excludingProbabilityMass: 0.3}),
-    ~unit=UnspecifiedDistribution,
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=1000);

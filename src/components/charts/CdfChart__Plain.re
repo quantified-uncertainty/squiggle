@@ -32,7 +32,7 @@ let make =
       ~maxX=?,
       ~minX=?,
       ~onHover: float => unit,
-      ~primaryDistribution=?,
+      ~continuous=?,
       ~scale=?,
       ~showDistributionLines=false,
       ~showDistributionYAxis=false,
@@ -45,14 +45,12 @@ let make =
       ?minX
       ?scale
       ?timeScale
-      discrete={discrete |> E.O.fmap(d => d |> Shape.Discrete.toJs)}
+      discrete={discrete |> E.O.fmap(Shape.Discrete.toJs)}
       height
       marginBottom=50
       marginTop=0
       onHover
-      primaryDistribution={
-        primaryDistribution |> E.O.fmap(pd => pd |> Shape.XYShape.toJs)
-      }
+      continuous={continuous |> E.O.fmap(Shape.XYShape.toJs)}
       showDistributionLines
       showDistributionYAxis
       showVerticalLine

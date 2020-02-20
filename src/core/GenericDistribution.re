@@ -35,7 +35,6 @@ let renderIfNeeded =
       | _ => None
       };
 
-    Js.log(newShape);
     newShape
     |> E.O.fmap((shape: DistributionTypes.pointsType) =>
          make(
