@@ -27,13 +27,16 @@ module Styles = {
 let make =
     (
       ~color=`hex("111"),
-      ~primaryDistribution=?,
       ~discrete=?,
       ~height=200,
       ~maxX=?,
       ~minX=?,
       ~onHover: float => unit,
+      ~primaryDistribution=?,
       ~scale=?,
+      ~showDistributionLines=false,
+      ~showDistributionYAxis=false,
+      ~showVerticalLine=false,
       ~timeScale=?,
     ) => {
   <div className={Styles.graph(color)}>
@@ -42,6 +45,7 @@ let make =
       ?minX
       ?scale
       ?timeScale
+      discrete={discrete |> E.O.fmap(d => d |> Shape.Discrete.toJs)}
       height
       marginBottom=50
       marginTop=0
@@ -49,9 +53,9 @@ let make =
       primaryDistribution={
         primaryDistribution |> E.O.fmap(pd => pd |> Shape.XYShape.toJs)
       }
-      discrete={discrete |> E.O.fmap(d => d |> Shape.Discrete.toJs)}
-      showDistributionLines=false
-      showVerticalLine=false
+      showDistributionLines
+      showDistributionYAxis
+      showVerticalLine
     />
   </div>;
 };

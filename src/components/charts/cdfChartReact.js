@@ -45,6 +45,7 @@ function CdfChartReact(props) {
       .marginRight(5)
       .marginTop(5)
       .showDistributionLines(props.showDistributionLines)
+      .showDistributionYAxis(props.showDistributionYAxis)
       .verticalLine(props.verticalLine)
       .showVerticalLine(props.showVerticalLine)
       .container(containerRef.current)

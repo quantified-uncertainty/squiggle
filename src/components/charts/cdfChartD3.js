@@ -20,11 +20,15 @@ export class CdfChartD3 {
       scale: 'linear',
       timeScale: null,
       showDistributionLines: true,
+      showDistributionYAxis: false,
       areaColors: ['#E1E5EC', '#E1E5EC'],
       logBase: 10,
       verticalLine: 110,
       showVerticalLine: true,
-      data: null,
+      data: {
+        primary: null,
+        discrete: null,
+      },
       onHover: (e) => {
       },
     };
@@ -100,6 +104,11 @@ export class CdfChartD3 {
 
   showDistributionLines(showDistributionLines) {
     this.attrs.showDistributionLines = showDistributionLines;
+    return this;
+  }
+
+  showDistributionYAxis(showDistributionYAxis) {
+    this.attrs.showDistributionYAxis = showDistributionYAxis;
     return this;
   }
 
@@ -243,8 +252,10 @@ export class CdfChartD3 {
       .attr('transform', 'translate(0,' + this.calc.chartHeight + ')')
       .call(xAxis);
 
-    this.chart.createObject({ tag: 'g', selector: 'y-axis' })
-      .call(yAxis);
+    if (this.attrs.showDistributionYAxis) {
+      this.chart.createObject({ tag: 'g', selector: 'y-axis' })
+        .call(yAxis);
+    }
 
     // Draw area.
     this.chart

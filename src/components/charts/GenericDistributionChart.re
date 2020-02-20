@@ -16,6 +16,7 @@ module Mixed = {
             color={`hex("333")}
             timeScale
             onHover={r => setX(_ => r)}
+            showDistributionYAxis=true
           />,
         [|data|],
       );
