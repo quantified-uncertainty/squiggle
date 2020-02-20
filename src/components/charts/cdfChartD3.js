@@ -28,7 +28,12 @@ export class CdfChartD3 {
       onHover: (e) => {
       },
     };
-    this.calc = {};
+    this.calc = {
+      chartLeftMargin: null,
+      chartTopMargin: null,
+      chartWidth: null,
+      chartHeight: null,
+    };
 
     this.chart = null;
     this.svg = null;
@@ -295,8 +300,59 @@ export class CdfChartD3 {
       })
       .on('mouseout', this.mouseout);
 
-    // B
+    // Lollipops
+    {
+      const data = [
+        { Country: "United States", Value: "12394" },
+        { Country: "Ry", Value: "1000" },
+        { Country: "Dy", Value: "5000" },
+      ];
 
+      // X axis
+      const x = d3.scaleBand()
+        .range([0, this.calc.chartWidth])
+        .domain(data.map(function (d) {
+          return d.Country;
+        }))
+        .padding(1);
+
+      this.svg.append("g")
+        .attr("transform", "translate(0," + this.calc.chartHeight + ")")
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
+
+      // Add Y axis
+      const y = d3.scaleLinear()
+        .domain([0, 13000])
+        .range([this.calc.chartHeight, 0]);
+
+      this.svg.append("g")
+        .call(d3.axisLeft(y));
+
+      // Lines
+      this.svg.selectAll("lollipops-line")
+        .data(data)
+        .enter()
+        .append("line")
+        .attr("x1", d => x(d.Country))
+        .attr("x2", d => x(d.Country))
+        .attr("y1", d => y(d.Value))
+        .attr("y2", y(0))
+        .attr("stroke", "red");
+
+      // Circles
+      this.svg.selectAll("lollipops-circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", d => x(d.Country))
+        .attr("cy", d => y(d.Value))
+        .attr("r", "4")
+        .style("fill", "yellow")
+        .attr("stroke", "green");
+    }
     return this;
   }
 
