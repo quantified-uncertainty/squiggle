@@ -7,11 +7,12 @@ module Mixed = {
       React.useMemo1(
         () =>
           <CdfChart__Plain
-            data={
+            primaryDistribution={
               data.continuous
               |> Shape.Continuous.normalizePdf
               |> E.O.toExt("")
             }
+            discrete={data.discrete}
             color={`hex("333")}
             timeScale
             onHover={r => setX(_ => r)}
@@ -70,7 +71,12 @@ module Cont = {
   let make = (~continuous, ~onHover, ~timeScale) => {
     let chart =
       React.useMemo1(
-        () => <CdfChart__Plain data=continuous color={`hex("333")} onHover />,
+        () =>
+          <CdfChart__Plain
+            primaryDistribution=continuous
+            color={`hex("333")}
+            onHover
+          />,
         [|continuous|],
       );
     chart;

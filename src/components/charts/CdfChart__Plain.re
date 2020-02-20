@@ -27,7 +27,8 @@ module Styles = {
 let make =
     (
       ~color=`hex("111"),
-      ~data,
+      ~primaryDistribution=?,
+      ~discrete=?,
       ~height=200,
       ~maxX=?,
       ~minX=?,
@@ -45,7 +46,10 @@ let make =
       marginBottom=50
       marginTop=0
       onHover
-      primaryDistribution={data |> Shape.XYShape.toJs}
+      primaryDistribution={
+        primaryDistribution |> E.O.fmap(pd => pd |> Shape.XYShape.toJs)
+      }
+      discrete={discrete |> E.O.fmap(d => d |> Shape.Discrete.toJs)}
       showDistributionLines=false
       showVerticalLine=false
     />
