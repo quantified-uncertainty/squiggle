@@ -18,7 +18,10 @@ let mixedDist =
 
 let timeDist =
   GenericDistribution.make(
-    ~generationSource=GuesstimatorString("mm(3, normal(5,1), [.5,.5])"),
+    ~generationSource=
+      GuesstimatorString(
+        "mm(floor(uniform(40, 50)), normal(50,10), [.5,.5])",
+      ),
     ~probabilityType=Pdf,
     ~domain=Complete,
     ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
@@ -41,6 +44,7 @@ let distributions = () =>
     <div>
       <h2> {"Basic Mixed Distribution" |> ReasonReact.string} </h2>
       {timeDist
+       |> E.O.bind(_, GenericDistribution.normalize)
        |> E.O.React.fmapOrNull(dist => <GenericDistributionChart dist />)}
       <h2> {"Simple Continuous" |> ReasonReact.string} </h2>
     </div>

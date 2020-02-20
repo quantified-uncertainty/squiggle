@@ -398,25 +398,25 @@ export class CdfChartD3 {
   getTimeTicksByStr(unit) {
     switch (unit) {
       case "months":
-        return d3.timeMonth.every(1);
+        return d3.timeMonth.every(4);
       case "quarters":
         return d3.timeMonth.every(3);
       case "hours":
-        return d3.timeHour.every(1);
+        return d3.timeHour.every(10);
       case "days":
-        return d3.timeDay.every(1);
+        return d3.timeDay.every(7);
       case "seconds":
-        return d3.timeSecond.every(1);
+        return d3.timeSecond.every(10);
       case "years":
-        return d3.timeYear.every(1);
+        return d3.timeYear.every(10);
       case "minutes":
-        return d3.timeMinute.every(1);
+        return d3.timeMinute.every(10);
       case "weeks":
-        return d3.timeWeek.every(1);
+        return d3.timeWeek.every(10);
       case "milliseconds":
-        return d3.timeMillisecond.every(1);
+        return d3.timeMillisecond.every(10);
       default:
-        return d3.timeYear.every(1);
+        return d3.timeYear.every(10);
     }
   }
 

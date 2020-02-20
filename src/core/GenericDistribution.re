@@ -68,10 +68,12 @@ let normalizePdf = (t: DistributionTypes.pointsType) => {
   };
 };
 
-let normalize = (t: genericDistribution): genericDistribution => {
+let normalize = (t: genericDistribution): option(genericDistribution) => {
   switch (t.generationSource) {
-  | Shape(shape) => t
-  | GuesstimatorString(_) => t
+  | Shape(shape) =>
+    normalizePdf(shape)
+    |> E.O.fmap(shape => {...t, generationSource: Shape(shape)})
+  | GuesstimatorString(_) => Some(t)
   };
 };
 

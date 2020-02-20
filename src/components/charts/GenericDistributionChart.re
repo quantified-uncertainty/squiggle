@@ -7,11 +7,7 @@ module Mixed = {
       React.useMemo1(
         () =>
           <CdfChart__Plain
-            primaryDistribution={
-              data.continuous
-              |> Shape.Continuous.normalizePdf
-              |> E.O.toExt("")
-            }
+            primaryDistribution={data.continuous}
             discrete={data.discrete}
             color={`hex("333")}
             timeScale
@@ -77,6 +73,7 @@ module Cont = {
             primaryDistribution=continuous
             color={`hex("333")}
             onHover
+            timeScale
           />,
         [|continuous|],
       );
@@ -129,9 +126,7 @@ module GenericDist = {
               {x |> E.Float.toString |> ReasonReact.string}
             </th>
             <th className="px-4 py-2 border ">
-              {genericDistribution
-               |> DistributionTypes.shape
-               |> E.O.bind(_, r => Shape.Any.yIntegral(r, x))
+              {genericDistribution->GenericDistribution.yIntegral(x)
                |> E.O.fmap(E.Float.with2DigitsPrecision)
                |> E.O.default("")
                |> ReasonReact.string}
@@ -147,34 +142,8 @@ module GenericDist = {
 [@react.component]
 let make = (~dist) => {
   switch ((dist: DistributionTypes.genericDistribution)) {
-  | {
-      unit,
-      generationSource:
-        Shape(
-          Mixed({
-            continuous: n,
-            discrete: d,
-            discreteProbabilityMassFraction: f,
-          }),
-        ),
-    } =>
-    <div>
-      <GenericDist genericDistribution=dist />
-      <Mixed
-        unit
-        data={
-          continuous:
-            n
-            |> Shape.XYShape.Range.integrateWithTriangles
-            |> E.O.toExt("")
-            |> Shape.XYShape.scaleCdfTo
-            |> Shape.Continuous.toPdf
-            |> E.O.toExt(""),
-          discrete: d,
-          discreteProbabilityMassFraction: f,
-        }
-      />
-    </div>
+  | {generationSource: Shape(_)} =>
+    <div> <GenericDist genericDistribution=dist /> </div>
   | _ => <div />
   };
 };
