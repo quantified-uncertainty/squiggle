@@ -156,8 +156,8 @@ export class CdfChartD3 {
         'translate(' + this.calc.chartLeftMargin + ',' + this.calc.chartTopMargin + ')',
       );
 
-    this.addDistributionChart();
-    this.addLollipopsChart();
+    const distributionChart = this.addDistributionChart();
+    this.addLollipopsChart(distributionChart);
     return this;
   }
 
@@ -172,18 +172,19 @@ export class CdfChartD3 {
     const yMax = d3.max(this.attrs.data.primary.ys);
 
     // Scales.
+    let xScale = null;
     if (this.attrs.scale === 'linear') {
-      this.xScale = d3.scaleLinear()
+      xScale = d3.scaleLinear()
         .domain([xMin, xMax])
         .range([0, this.calc.chartWidth]);
     } else {
-      this.xScale = d3.scaleLog()
+      xScale = d3.scaleLog()
         .base(this.attrs.logBase)
         .domain([xMin, xMax])
         .range([0, this.calc.chartWidth]);
     }
 
-    this.yScale = d3.scaleLinear()
+    const yScale = d3.scaleLinear()
       .domain([yMin, yMax])
       .range([this.calc.chartHeight, 0]);
 
@@ -206,7 +207,7 @@ export class CdfChartD3 {
         .ticks(this.getTimeTicksByStr(unit))
         .tickFormat(this.formatDates);
     } else {
-      xAxis = d3.axisBottom(this.xScale)
+      xAxis = d3.axisBottom(xScale)
         .ticks(3)
         .tickFormat(d => {
           if (Math.abs(d) < 1) {
@@ -221,16 +222,16 @@ export class CdfChartD3 {
         });
     }
 
-    const yAxis = d3.axisRight(this.yScale);
+    const yAxis = d3.axisRight(yScale);
 
     // Objects.
     const line = d3.line()
-      .x(d => this.xScale(d.x))
-      .y(d => this.yScale(d.y));
+      .x(d => xScale(d.x))
+      .y(d => yScale(d.y));
 
     const area = d3.area()
-      .x(d => this.xScale(d.x))
-      .y1(d => this.yScale(d.y))
+      .x(d => xScale(d.x))
+      .y1(d => yScale(d.y))
       .y0(this.calc.chartHeight);
 
     // Add axis.
@@ -269,8 +270,8 @@ export class CdfChartD3 {
     if (this.attrs.showVerticalLine) {
       this.chart
         .createObject({ tag: 'line', selector: 'v-line' })
-        .attr('x1', this.xScale(this.attrs.verticalLine))
-        .attr('x2', this.xScale(this.attrs.verticalLine))
+        .attr('x1', xScale(this.attrs.verticalLine))
+        .attr('x2', xScale(this.attrs.verticalLine))
         .attr('y1', 0)
         .attr('y2', this.calc.chartHeight)
         .attr('stroke-width', 1.5)
@@ -293,8 +294,8 @@ export class CdfChartD3 {
     {
       const context = this;
       const range = [
-        this.xScale(dataPoints[dataPoints.length - 1][0].x),
-        this.xScale(
+        xScale(dataPoints[dataPoints.length - 1][0].x),
+        xScale(
           dataPoints
             [dataPoints.length - 1]
             [dataPoints[dataPoints.length - 1].length - 1].x,
@@ -305,7 +306,7 @@ export class CdfChartD3 {
         const mouse = d3.mouse(this);
         hoverLine.attr('opacity', 1).attr('x1', mouse[0]).attr('x2', mouse[0]);
         const xValue = mouse[0] > range[0] && mouse[0] < range[1]
-          ? context.xScale.invert(mouse[0]).toFixed(2)
+          ? xScale.invert(mouse[0]).toFixed(2)
           : 0;
         context.attrs.onHover(xValue);
       }
@@ -324,30 +325,25 @@ export class CdfChartD3 {
         .on('mousemove', mouseover)
         .on('mouseout', mouseout);
     }
+
+    return { xScale, yScale };
   }
 
-  addLollipopsChart() {
-    const data = [
-      { x: 3, y: 10 },
-      { x: 5, y: 30 },
-      { x: 7.5, y: 50 },
-    ];
-    const xs = [3, 5, 7.5];
+  addLollipopsChart(distributionChart) {
+    const data = this.getDataPoints('discrete');
+    const ys = data.map(item => item.y);
+    const yMin = d3.min(ys);
+    const yMax = d3.max(ys);
 
     // X axis
-    const x = d3.scaleBand()
-      .range([0, this.calc.chartWidth])
-      .domain(xs)
-      .padding(1);
-
     this.chart.append("g")
       .attr("class", 'lollipops-x-axis')
       .attr("transform", "translate(0," + this.calc.chartHeight + ")")
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(distributionChart.xScale));
 
     // Y axis
     const y = d3.scaleLinear()
-      .domain([0, 50])
+      .domain([yMin, yMax])
       .range([this.calc.chartHeight, 0]);
 
     this.chart.append("g")
@@ -361,8 +357,8 @@ export class CdfChartD3 {
       .enter()
       .append("line")
       .attr("class", 'lollipops-line')
-      .attr("x1", d => x(d.x))
-      .attr("x2", d => x(d.x))
+      .attr("x1", d => distributionChart.xScale(d.x))
+      .attr("x2", d => distributionChart.xScale(d.x))
       .attr("y1", d => y(d.y))
       .attr("y2", y(0));
 
@@ -372,7 +368,7 @@ export class CdfChartD3 {
       .enter()
       .append("circle")
       .attr("class", 'lollipops-circle')
-      .attr("cx", d => x(d.x))
+      .attr("cx", d => distributionChart.xScale(d.x))
       .attr("cy", d => y(d.y))
       .attr("r", "4");
   }
@@ -416,7 +412,8 @@ export class CdfChartD3 {
    */
   getDataPoints(key) {
     const dt = [];
-    const data = this.attrs.data[key];
+    const emptyShape = { xs: [], ys: [] };
+    const data = _.get(this.attrs.data, key, emptyShape);
     const len = data.xs.length;
 
     for (let i = 0; i < len; i++) {
