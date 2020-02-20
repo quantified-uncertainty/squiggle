@@ -1,8 +1,3 @@
-let data: DistributionTypes.xyShape = {
-  xs: [|1., 10., 10., 200., 250., 292., 330.|],
-  ys: [|0.0, 0.0, 0.1, 0.3, 0.5, 0.2, 0.1|],
-};
-
 // "mm(floor(uniform(30,35)), normal(50,20), [.25,.5])",
 let timeDist =
   GenericDistribution.make(

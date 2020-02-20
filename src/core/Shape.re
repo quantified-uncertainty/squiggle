@@ -283,11 +283,39 @@ module Any = {
     | Continuous(continuous) =>
       Continuous.toCdf(continuous) |> E.O.fmap(e => Continuous(e))
     };
-};
 
-module DomainMixed = {
-  type t = {
-    mixedShape,
-    domain,
+  let discreteComponent = (t: t) =>
+    switch (t) {
+    | Mixed({discrete}) => Some(discrete)
+    | Discrete(d) => Some(d)
+    | Continuous(_) => None
+    };
+
+  let continuousComponent = (t: t) =>
+    switch (t) {
+    | Mixed({continuous}) => Some(continuous)
+    | Continuous(c) => Some(c)
+    | Discrete(_) => None
+    };
+
+  let scaledContinuousComponent = (t: t): option(continuousShape) => {
+    switch (t) {
+    | Mixed({continuous, discreteProbabilityMassFraction}) =>
+      Continuous.scalePdf(
+        ~scaleTo=1.0 -. discreteProbabilityMassFraction,
+        continuous,
+      )
+    | Discrete(_) => None
+    | Continuous(c) => Some(c)
+    };
+  };
+
+  let scaledDiscreteComponent = (t: t): option(discreteShape) => {
+    switch (t) {
+    | Mixed({discrete, discreteProbabilityMassFraction}) =>
+      Some(Discrete.scaleYToTotal(discreteProbabilityMassFraction, discrete))
+    | Discrete(d) => Some(d)
+    | Continuous(_) => None
+    };
   };
 };

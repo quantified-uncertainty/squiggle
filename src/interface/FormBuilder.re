@@ -19,7 +19,7 @@ let propValue = (t: Prop.Value.t) => {
   | ConditionalArray(r) => "Array" |> ReasonReact.string
   | GenericDistribution(r) =>
     let newDistribution =
-      GenericDistribution.renderIfNeeded(~sampleCount=1000, r);
+      GenericDistribution.renderIfNeeded(~sampleCount=2000, r);
     switch (newDistribution) {
     | Some(distribution) =>
       <div>

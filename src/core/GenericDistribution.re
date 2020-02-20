@@ -1,5 +1,33 @@
 open DistributionTypes;
 
+module Domain = {
+  let excludedProbabilityMass = (t: DistributionTypes.domain) => {
+    switch (t) {
+    | Complete => 1.0
+    | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
+    | RightLimited({excludingProbabilityMass}) => excludingProbabilityMass
+    | LeftAndRightLimited(
+        {excludingProbabilityMass: l},
+        {excludingProbabilityMass: r},
+      ) =>
+      l +. r
+    };
+  };
+
+  let initialProbabilityMass = (t: DistributionTypes.domain) => {
+    switch (t) {
+    | Complete
+    | RightLimited(_) => 0.0
+    | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
+    | LeftAndRightLimited({excludingProbabilityMass}, _) => excludingProbabilityMass
+    };
+  };
+
+  let normalizeProbabilityMass = (t: DistributionTypes.domain) => {
+    1. /. excludedProbabilityMass(t);
+  };
+};
+
 let make =
     (
       ~generationSource,
@@ -92,35 +120,9 @@ let normalize = (t: genericDistribution): option(genericDistribution) => {
   };
 };
 
-let excludedProbabilityMass = (t: DistributionTypes.domain) => {
-  switch (t) {
-  | Complete => 1.0
-  | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
-  | RightLimited({excludingProbabilityMass}) => excludingProbabilityMass
-  | LeftAndRightLimited(
-      {excludingProbabilityMass: l},
-      {excludingProbabilityMass: r},
-    ) =>
-    l +. r
-  };
-};
-
-let initialProbabilityMass = (t: DistributionTypes.domain) => {
-  switch (t) {
-  | Complete
-  | RightLimited(_) => 0.0
-  | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
-  | LeftAndRightLimited({excludingProbabilityMass}, _) => excludingProbabilityMass
-  };
-};
-
-let normalizeProbabilityMass = (t: DistributionTypes.domain) => {
-  1. /. excludedProbabilityMass(t);
-};
-
 let yIntegral = (t: DistributionTypes.genericDistribution, x) => {
-  let addInitialMass = n => n +. initialProbabilityMass(t.domain);
-  let normalize = n => n *. normalizeProbabilityMass(t.domain);
+  let addInitialMass = n => n +. Domain.initialProbabilityMass(t.domain);
+  let normalize = n => n *. Domain.normalizeProbabilityMass(t.domain);
   switch (t) {
   | {generationSource: Shape(shape)} =>
     Shape.Any.yIntegral(shape, x)
@@ -130,16 +132,16 @@ let yIntegral = (t: DistributionTypes.genericDistribution, x) => {
   };
 };
 
+// TODO: This obviously needs to be fleshed out a lot.
 let integrate = (t: DistributionTypes.genericDistribution) => {
   switch (t) {
   | {probabilityType: Pdf, generationSource: Shape(shape), domain, unit} =>
     Some({
       generationSource: Shape(shape),
-      probabilityType: Cdf,
+      probabilityType: Pdf,
       domain,
       unit,
     })
-  | {probabilityType: Cdf, generationSource, domain, unit} => None
   | _ => None
   };
 };

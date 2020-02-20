@@ -46,7 +46,7 @@ const toPdf = (values, sampleCount, min, max) => {
     const samples = new Samples(continuousSamples);
 
     const ratioSize$ = ratioSize(samples);
-    const width = ratioSize$ === 'SMALL' ? 20 : 1;
+    const width = ratioSize$ === 'SMALL' ? 100 : 1;
 
     const pdf = samples.toPdf({ size: sampleCount, width, min, max });
     continuous = pdf;

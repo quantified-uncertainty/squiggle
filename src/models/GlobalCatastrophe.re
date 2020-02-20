@@ -1,4 +1,4 @@
-let guesstimatorString = GuesstimatorDist.logNormal(20., 3.);
+let guesstimatorString = "mm(10 to 30, floor(20 to 25), [.5,.5])";
 
 module Model = {
   let make = (currentDateTime: MomentRe.Moment.t) => {
