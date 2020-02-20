@@ -107,7 +107,9 @@ module Continuous = {
   let toCdf = XYShape.Range.integrateWithTriangles;
   let findX = CdfLibrary.Distribution.findX;
   let findY = CdfLibrary.Distribution.findY;
-  let findIntegralY = (f, r) => r |> toCdf |> E.O.fmap(findY(f));
+  let findIntegralY = (f, r) => {
+    r |> toCdf |> E.O.fmap(findY(f));
+  };
 
   let normalizeCdf = (continuousShape: continuousShape) =>
     continuousShape |> XYShape.scaleCdfTo(~scaleTo=1.0);
