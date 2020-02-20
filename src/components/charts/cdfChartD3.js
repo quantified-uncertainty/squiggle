@@ -221,6 +221,8 @@ export class CdfChartD3 {
         });
     }
 
+    this.yAxis = d3.axisRight(this.yScale);
+
     // Objects.
     const line = d3.line()
       .x(d => this.xScale(d.x))
@@ -235,6 +237,9 @@ export class CdfChartD3 {
     this.chart.createObject({ tag: 'g', selector: 'x-axis' })
       .attr('transform', 'translate(0,' + this.calc.chartHeight + ')')
       .call(this.xAxis);
+
+    this.chart.createObject({ tag: 'g', selector: 'y-axis' })
+      .call(this.yAxis);
 
     // Draw area.
     this.chart
@@ -320,7 +325,7 @@ export class CdfChartD3 {
         .attr("transform", "translate(0," + this.calc.chartHeight + ")")
         .call(d3.axisBottom(x));
 
-      // Add Y axis
+      // Y axis
       const y = d3.scaleLinear()
         .domain([0, 50])
         .range([this.calc.chartHeight, 0]);
