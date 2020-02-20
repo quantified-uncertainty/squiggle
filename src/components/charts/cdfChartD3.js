@@ -161,8 +161,12 @@ export class CdfChartD3 {
         'translate(' + this.calc.chartLeftMargin + ',' + this.calc.chartTopMargin + ')',
       );
 
-    // A
+    this.addDistributionChart();
+    this.addLollipopsChart();
+    return this;
+  }
 
+  addDistributionChart() {
     const areaColorRange = d3.scaleOrdinal().range(this.attrs.areaColors);
     this.dataPoints = [this.getDataPoints('primary')];
 
@@ -304,59 +308,57 @@ export class CdfChartD3 {
         thi$.mouseover(this);
       })
       .on('mouseout', this.mouseout);
+  }
 
-    // Lollipops
-    {
-      const data = [
-        {x: 3, y: 10},
-        {x: 5, y: 30},
-        {x: 7.5, y: 50},
-      ];
-      const xs = [3, 5, 7.5];
+  addLollipopsChart() {
+    const data = [
+      { x: 3, y: 10 },
+      { x: 5, y: 30 },
+      { x: 7.5, y: 50 },
+    ];
+    const xs = [3, 5, 7.5];
 
-      // X axis
-      const x = d3.scaleBand()
-        .range([0, this.calc.chartWidth])
-        .domain(xs)
-        .padding(1);
+    // X axis
+    const x = d3.scaleBand()
+      .range([0, this.calc.chartWidth])
+      .domain(xs)
+      .padding(1);
 
-      this.chart.append("g")
-        .attr("class", 'lollipops-x-axis')
-        .attr("transform", "translate(0," + this.calc.chartHeight + ")")
-        .call(d3.axisBottom(x));
+    this.chart.append("g")
+      .attr("class", 'lollipops-x-axis')
+      .attr("transform", "translate(0," + this.calc.chartHeight + ")")
+      .call(d3.axisBottom(x));
 
-      // Y axis
-      const y = d3.scaleLinear()
-        .domain([0, 50])
-        .range([this.calc.chartHeight, 0]);
+    // Y axis
+    const y = d3.scaleLinear()
+      .domain([0, 50])
+      .range([this.calc.chartHeight, 0]);
 
-      this.chart.append("g")
-        .attr("class", 'lollipops-y-axis')
-        .attr("transform", "translate(" + this.calc.chartWidth + ",0)")
-        .call(d3.axisLeft(y));
+    this.chart.append("g")
+      .attr("class", 'lollipops-y-axis')
+      .attr("transform", "translate(" + this.calc.chartWidth + ",0)")
+      .call(d3.axisLeft(y));
 
-      // Lines
-      this.chart.selectAll("lollipops-line")
-        .data(data)
-        .enter()
-        .append("line")
-        .attr("class", 'lollipops-line')
-        .attr("x1", d => x(d.x))
-        .attr("x2", d => x(d.x))
-        .attr("y1", d => y(d.y))
-        .attr("y2", y(0));
+    // Lines
+    this.chart.selectAll("lollipops-line")
+      .data(data)
+      .enter()
+      .append("line")
+      .attr("class", 'lollipops-line')
+      .attr("x1", d => x(d.x))
+      .attr("x2", d => x(d.x))
+      .attr("y1", d => y(d.y))
+      .attr("y2", y(0));
 
-      // Circles
-      this.chart.selectAll("lollipops-circle")
-        .data(data)
-        .enter()
-        .append("circle")
-        .attr("class", 'lollipops-circle')
-        .attr("cx", d => x(d.x))
-        .attr("cy", d => y(d.y))
-        .attr("r", "4");
-    }
-    return this;
+    // Circles
+    this.chart.selectAll("lollipops-circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("class", 'lollipops-circle')
+      .attr("cx", d => x(d.x))
+      .attr("cy", d => y(d.y))
+      .attr("r", "4");
   }
 
   mouseover(constructor) {
