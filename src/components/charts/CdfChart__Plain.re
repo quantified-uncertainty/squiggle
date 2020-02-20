@@ -7,11 +7,19 @@ module Styles = {
   let graph = chartColor =>
     style([
       position(`relative),
-      selector(".axis", [fontSize(`px(9))]),
-      selector(".domain", [display(`none)]),
-      selector(".tick line", [display(`none)]),
-      selector(".tick text", [color(`hex("bfcad4"))]),
+      selector(".x-axis", [fontSize(`px(9))]),
+      selector(".x-axis .domain", [display(`none)]),
+      selector(".x-axis .tick line", [display(`none)]),
+      selector(".x-axis .tick text", [color(`hex("bfcad4"))]),
       selector(".chart .area-path", [SVG.fill(chartColor)]),
+      selector(".lollipops-line", [SVG.stroke(`hex("bfcad4"))]),
+      selector(
+        ".lollipops-circle",
+        [SVG.stroke(`hex("bfcad4")), SVG.fill(`hex("bfcad4"))],
+      ),
+      selector(".lollipops-x-axis .domain", [display(`none)]),
+      selector(".lollipops-x-axis .tick line", [display(`none)]),
+      selector(".lollipops-x-axis .tick text", [display(`none)]),
     ]);
 };
 
@@ -19,12 +27,16 @@ module Styles = {
 let make =
     (
       ~color=`hex("111"),
-      ~data,
+      ~discrete=?,
       ~height=200,
       ~maxX=?,
       ~minX=?,
       ~onHover: float => unit,
+      ~primaryDistribution=?,
       ~scale=?,
+      ~showDistributionLines=false,
+      ~showDistributionYAxis=false,
+      ~showVerticalLine=false,
       ~timeScale=?,
     ) => {
   <div className={Styles.graph(color)}>
@@ -33,13 +45,17 @@ let make =
       ?minX
       ?scale
       ?timeScale
+      discrete={discrete |> E.O.fmap(d => d |> Shape.Discrete.toJs)}
       height
       marginBottom=50
       marginTop=0
       onHover
-      primaryDistribution={data |> Shape.XYShape.toJs}
-      showDistributionLines=false
-      showVerticalLine=false
+      primaryDistribution={
+        primaryDistribution |> E.O.fmap(pd => pd |> Shape.XYShape.toJs)
+      }
+      showDistributionLines
+      showDistributionYAxis
+      showVerticalLine
     />
   </div>;
 };

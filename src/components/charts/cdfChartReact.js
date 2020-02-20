@@ -45,10 +45,14 @@ function CdfChartReact(props) {
       .marginRight(5)
       .marginTop(5)
       .showDistributionLines(props.showDistributionLines)
+      .showDistributionYAxis(props.showDistributionYAxis)
       .verticalLine(props.verticalLine)
       .showVerticalLine(props.showVerticalLine)
       .container(containerRef.current)
-      .data({ primary: props.primaryDistribution })
+      .data({
+        primary: props.primaryDistribution,
+        discrete: props.discrete,
+      })
       .scale(scale)
       .timeScale(props.timeScale)
       .render();
