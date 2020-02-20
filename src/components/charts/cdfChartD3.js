@@ -28,6 +28,7 @@ export class CdfChartD3 {
       onHover: (e) => {
       },
     };
+
     this.calc = {
       chartLeftMargin: null,
       chartTopMargin: null,
@@ -39,12 +40,6 @@ export class CdfChartD3 {
     this.svg = null;
     this._container = null;
 
-    this.hoverLine = null;
-    this.xScale = null;
-    this.dataPoints = null;
-
-    this.mouseover = this.mouseover.bind(this);
-    this.mouseout = this.mouseout.bind(this);
     this.formatDates = this.formatDates.bind(this);
   }
 
@@ -168,31 +163,32 @@ export class CdfChartD3 {
 
   addDistributionChart() {
     const areaColorRange = d3.scaleOrdinal().range(this.attrs.areaColors);
-    this.dataPoints = [this.getDataPoints('primary')];
+    const dataPoints = [this.getDataPoints('primary')];
+
+    // Boundaries.
+    const xMin = this.attrs.minX || d3.min(this.attrs.data.primary.xs);
+    const xMax = this.attrs.maxX || d3.max(this.attrs.data.primary.xs);
+    const yMin = d3.min(this.attrs.data.primary.ys);
+    const yMax = d3.max(this.attrs.data.primary.ys);
 
     // Scales.
-    const xMin = d3.min(this.attrs.data.primary.xs);
-    const xMax = d3.max(this.attrs.data.primary.xs);
-
     if (this.attrs.scale === 'linear') {
       this.xScale = d3.scaleLinear()
-        .domain([this.attrs.minX || xMin, this.attrs.maxX || xMax])
+        .domain([xMin, xMax])
         .range([0, this.calc.chartWidth]);
     } else {
       this.xScale = d3.scaleLog()
         .base(this.attrs.logBase)
-        .domain([this.attrs.minX, this.attrs.maxX])
+        .domain([xMin, xMax])
         .range([0, this.calc.chartWidth]);
     }
-
-    const yMin = d3.min(this.attrs.data.primary.ys);
-    const yMax = d3.max(this.attrs.data.primary.ys);
 
     this.yScale = d3.scaleLinear()
       .domain([yMin, yMax])
       .range([this.calc.chartHeight, 0]);
 
     // Axis generator.
+    let xAxis = null;
     if (!!this.attrs.timeScale) {
       const zero = _.get(this.attrs.timeScale, 'zero', moment());
       const unit = _.get(this.attrs.timeScale, 'unit', 'years');
@@ -205,12 +201,12 @@ export class CdfChartD3 {
         .nice()
         .range([0, this.calc.chartWidth]);
 
-      this.xAxis = d3.axisBottom()
+      xAxis = d3.axisBottom()
         .scale(xScaleTime)
         .ticks(this.getTimeTicksByStr(unit))
         .tickFormat(this.formatDates);
     } else {
-      this.xAxis = d3.axisBottom(this.xScale)
+      xAxis = d3.axisBottom(this.xScale)
         .ticks(3)
         .tickFormat(d => {
           if (Math.abs(d) < 1) {
@@ -225,7 +221,7 @@ export class CdfChartD3 {
         });
     }
 
-    this.yAxis = d3.axisRight(this.yScale);
+    const yAxis = d3.axisRight(this.yScale);
 
     // Objects.
     const line = d3.line()
@@ -240,17 +236,17 @@ export class CdfChartD3 {
     // Add axis.
     this.chart.createObject({ tag: 'g', selector: 'x-axis' })
       .attr('transform', 'translate(0,' + this.calc.chartHeight + ')')
-      .call(this.xAxis);
+      .call(xAxis);
 
     this.chart.createObject({ tag: 'g', selector: 'y-axis' })
-      .call(this.yAxis);
+      .call(yAxis);
 
     // Draw area.
     this.chart
       .createObjectsWithData({
         tag: 'path',
         selector: 'area-path',
-        data: this.dataPoints,
+        data: dataPoints,
       })
       .attr('d', area)
       .attr('fill', (d, i) => areaColorRange(i))
@@ -262,7 +258,7 @@ export class CdfChartD3 {
         .createObjectsWithData({
           tag: 'path',
           selector: 'line-path',
-          data: this.dataPoints,
+          data: dataPoints,
         })
         .attr('d', line)
         .attr('id', (d, i) => 'line-' + (i + 1))
@@ -282,7 +278,7 @@ export class CdfChartD3 {
         .attr('stroke', 'steelblue');
     }
 
-    this.hoverLine = this.chart
+    const hoverLine = this.chart
       .createObject({ tag: 'line', selector: 'hover-line' })
       .attr('x1', 0)
       .attr('x2', 0)
@@ -294,20 +290,40 @@ export class CdfChartD3 {
       .attr('stroke', '#22313F');
 
     // Add drawing rectangle.
-    const thi$ = this;
-    this.chart
-      .createObject({ tag: 'rect', selector: 'mouse-rect' })
-      .attr('width', this.calc.chartWidth)
-      .attr('height', this.calc.chartHeight)
-      .attr('fill', 'transparent')
-      .attr('pointer-events', 'all')
-      .on('mouseover', function () {
-        thi$.mouseover(this);
-      })
-      .on('mousemove', function () {
-        thi$.mouseover(this);
-      })
-      .on('mouseout', this.mouseout);
+    {
+      const context = this;
+      const range = [
+        this.xScale(dataPoints[dataPoints.length - 1][0].x),
+        this.xScale(
+          dataPoints
+            [dataPoints.length - 1]
+            [dataPoints[dataPoints.length - 1].length - 1].x,
+        ),
+      ];
+
+      function mouseover() {
+        const mouse = d3.mouse(this);
+        hoverLine.attr('opacity', 1).attr('x1', mouse[0]).attr('x2', mouse[0]);
+        const xValue = mouse[0] > range[0] && mouse[0] < range[1]
+          ? context.xScale.invert(mouse[0]).toFixed(2)
+          : 0;
+        context.attrs.onHover(xValue);
+      }
+
+      function mouseout() {
+        hoverLine.attr('opacity', 0)
+      }
+
+      this.chart
+        .createObject({ tag: 'rect', selector: 'mouse-rect' })
+        .attr('width', this.calc.chartWidth)
+        .attr('height', this.calc.chartHeight)
+        .attr('fill', 'transparent')
+        .attr('pointer-events', 'all')
+        .on('mouseover', mouseover)
+        .on('mousemove', mouseover)
+        .on('mouseout', mouseout);
+    }
   }
 
   addLollipopsChart() {
@@ -359,34 +375,6 @@ export class CdfChartD3 {
       .attr("cx", d => x(d.x))
       .attr("cy", d => y(d.y))
       .attr("r", "4");
-  }
-
-  mouseover(constructor) {
-    const mouse = d3.mouse(constructor);
-    this.hoverLine.attr('opacity', 1)
-      .attr('x1', mouse[0])
-      .attr('x2', mouse[0]);
-
-    const xValue = this.xScale.invert(mouse[0]).toFixed(2);
-
-    const range = [
-      this.xScale(this.dataPoints[this.dataPoints.length - 1][0].x),
-      this.xScale(
-        this.dataPoints
-          [this.dataPoints.length - 1]
-          [this.dataPoints[this.dataPoints.length - 1].length - 1].x,
-      ),
-    ];
-
-    if (mouse[0] > range[0] && mouse[0] < range[1]) {
-      this.attrs.onHover(xValue);
-    } else {
-      this.attrs.onHover(0.0);
-    }
-  }
-
-  mouseout() {
-    this.hoverLine.attr('opacity', 0)
   }
 
   formatDates(ts) {
@@ -451,14 +439,6 @@ d3.selection.prototype.createObject = function createObject(params) {
 };
 
 /**
- * @example:
- * This call example
- * createObjectsByData({
- *   tag: 'path',
- *   selector: 'line-path',
- *   data: this.dataPoints,
- * })
- * will create a new tag "<path class="line-path">1,2,3</path>".
  * @docs: https://github.com/d3/d3-selection
  * @param params
  * @returns {*}
