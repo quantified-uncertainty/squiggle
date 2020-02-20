@@ -7,10 +7,12 @@ module Mixed = {
       React.useMemo1(
         () =>
           <CdfChart__Plain
-            data={data.continuous}
+            primaryDistribution={data.continuous}
+            discrete={data.discrete}
             color={`hex("333")}
             timeScale
             onHover={r => setX(_ => r)}
+            showDistributionYAxis=true
           />,
         [|data|],
       );
@@ -68,7 +70,7 @@ module Cont = {
       React.useMemo1(
         () =>
           <CdfChart__Plain
-            data=continuous
+            primaryDistribution=continuous
             color={`hex("333")}
             onHover
             timeScale

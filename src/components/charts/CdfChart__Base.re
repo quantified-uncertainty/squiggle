@@ -1,11 +1,19 @@
 [@bs.module "./cdfChartReact.js"]
 external cdfChart: ReasonReact.reactClass = "default";
 
-type primaryDistribution = {
-  .
-  "xs": array(float),
-  "ys": array(float),
-};
+type primaryDistribution =
+  option({
+    .
+    "xs": array(float),
+    "ys": array(float),
+  });
+
+type discrete =
+  option({
+    .
+    "xs": array(float),
+    "ys": array(float),
+  });
 
 [@react.component]
 let make =
@@ -17,8 +25,10 @@ let make =
       ~minX=?,
       ~onHover=(f: float) => (),
       ~primaryDistribution=?,
+      ~discrete=?,
       ~scale=?,
       ~showDistributionLines=?,
+      ~showDistributionYAxis=?,
       ~showVerticalLine=?,
       ~timeScale=?,
       ~verticalLine=?,
@@ -35,8 +45,10 @@ let make =
         ~minX?,
         ~onHover,
         ~primaryDistribution?,
+        ~discrete?,
         ~scale?,
         ~showDistributionLines?,
+        ~showDistributionYAxis?,
         ~showVerticalLine?,
         ~timeScale?,
         ~verticalLine?,

@@ -2,11 +2,19 @@ module Styles = {
   open Css;
   let graph = chartColor =>
     style([
-      selector(".axis", [fontSize(`px(9))]),
-      selector(".domain", [display(`none)]),
-      selector(".tick line", [display(`none)]),
-      selector(".tick text", [color(`hex("bfcad4"))]),
+      selector(".x-axis", [fontSize(`px(9))]),
+      selector(".x-axis .domain", [display(`none)]),
+      selector(".x-axis .tick line", [display(`none)]),
+      selector(".x-axis .tick text", [color(`hex("bfcad4"))]),
       selector(".chart .area-path", [SVG.fill(chartColor)]),
+      selector(".lollipops-line", [SVG.stroke(`hex("bfcad4"))]),
+      selector(
+        ".lollipops-circle",
+        [SVG.stroke(`hex("bfcad4")), SVG.fill(`hex("bfcad4"))],
+      ),
+      selector(".lollipops-x-axis .domain", [display(`none)]),
+      selector(".lollipops-x-axis .tick line", [display(`none)]),
+      selector(".lollipops-x-axis .tick text", [display(`none)]),
     ]);
 };
 
