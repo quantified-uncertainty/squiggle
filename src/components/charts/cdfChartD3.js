@@ -332,7 +332,6 @@ export class CdfChartD3 {
   addLollipopsChart(distributionChart) {
     const data = this.getDataPoints('discrete');
     const ys = data.map(item => item.y);
-    const yMin = d3.min(ys);
     const yMax = d3.max(ys);
 
     // X axis
@@ -343,7 +342,7 @@ export class CdfChartD3 {
 
     // Y axis
     const yScale = d3.scaleLinear()
-      .domain([yMin, yMax])
+      .domain([0, yMax])
       .range([this.calc.chartHeight, 0]);
 
     this.chart.append("g")
