@@ -17,6 +17,10 @@ module XYShape = {
     {"xs": t.xs, "ys": t.ys};
   };
 
+  let minX = (t: t) => t.xs |> E.A.get(_, 0);
+  // TODO: Check if this actually gets the last element, I'm not sure it does.
+  let maxX = (t: t) => t.xs |> (r => E.A.get(r, E.A.length(r) - 1));
+
   let zip = t => Belt.Array.zip(t.xs, t.ys);
 
   let fmap = (t: t, y): t => {xs: t.xs, ys: t.ys |> E.A.fmap(y)};
@@ -101,6 +105,8 @@ module XYShape = {
 };
 
 module Continuous = {
+  let minX = XYShape.minX;
+  let maxX = XYShape.maxX;
   let fromArrays = XYShape.fromArrays;
   let toJs = XYShape.toJs;
   let toPdf = XYShape.Range.derivative;
@@ -114,11 +120,16 @@ module Continuous = {
   let normalizeCdf = (continuousShape: continuousShape) =>
     continuousShape |> XYShape.scaleCdfTo(~scaleTo=1.0);
 
-  let normalizePdf = (continuousShape: continuousShape) =>
-    continuousShape |> toCdf |> E.O.fmap(normalizeCdf) |> E.O.bind(_, toPdf);
+  let scalePdf = (~scaleTo=1.0, continuousShape: continuousShape) =>
+    continuousShape
+    |> toCdf
+    |> E.O.fmap(XYShape.scaleCdfTo(~scaleTo))
+    |> E.O.bind(_, toPdf);
 };
 
 module Discrete = {
+  let minX = XYShape.minX;
+  let maxX = XYShape.maxX;
   type t = discreteShape;
   let fromArrays = XYShape.fromArrays;
   let toJs = XYShape.toJs;
@@ -147,6 +158,7 @@ module Discrete = {
 
   // TODO: This has a clear bug where it returns the Y value of the first item,
   // even if X is less than the X of the first item.
+  // It has a second bug that it assumes things are triangular, instead of interpolating via steps.
   let findIntegralY = (f, t: t) => {
     t |> XYShape.accumulateYs |> CdfLibrary.Distribution.findY(f);
   };
@@ -159,12 +171,34 @@ module Discrete = {
   };
 };
 
+let min = (f1: option(float), f2: option(float)) =>
+  switch (f1, f2) {
+  | (Some(f1), Some(f2)) => Some(f1 < f2 ? f1 : f2)
+  | (Some(f1), None) => Some(f1)
+  | (None, Some(f2)) => Some(f2)
+  | (None, None) => None
+  };
+
+let max = (f1: option(float), f2: option(float)) =>
+  switch (f1, f2) {
+  | (Some(f1), Some(f2)) => Some(f1 > f2 ? f1 : f2)
+  | (Some(f1), None) => Some(f1)
+  | (None, Some(f2)) => Some(f2)
+  | (None, None) => None
+  };
+
 module Mixed = {
   let make = (~continuous, ~discrete, ~discreteProbabilityMassFraction) => {
     continuous,
     discrete,
     discreteProbabilityMassFraction,
   };
+
+  let minX = (t: DistributionTypes.mixedShape) =>
+    min(t.continuous |> Continuous.minX, t.discrete |> Discrete.minX);
+
+  let maxX = (t: DistributionTypes.mixedShape) =>
+    min(t.continuous |> Continuous.maxX, t.discrete |> Discrete.maxX);
 
   let mixedMultiply =
       (
@@ -197,10 +231,6 @@ module Mixed = {
     | _ => None
     };
   };
-  //Do the math to add these distributions together
-  // let integral =
-  //     (x: float, t: DistributionTypes.mixedShape): option(XYShape.t) => {
-  // };
 };
 
 module Any = {
@@ -221,6 +251,20 @@ module Any = {
       Discrete.findIntegralY(x, discreteShape) |> E.O.some
     | Continuous(continuousShape) =>
       Continuous.findIntegralY(x, continuousShape)
+    };
+
+  let minX = (t: t) =>
+    switch (t) {
+    | Mixed(m) => Mixed.minX(m)
+    | Discrete(discreteShape) => Discrete.minX(discreteShape)
+    | Continuous(continuousShape) => Continuous.minX(continuousShape)
+    };
+
+  let maxX = (t: t) =>
+    switch (t) {
+    | Mixed(m) => Mixed.maxX(m)
+    | Discrete(discreteShape) => Discrete.maxX(discreteShape)
+    | Continuous(continuousShape) => Continuous.maxX(continuousShape)
     };
 
   // TODO: This is wrong. The discrete component should be made continuous when integrating.

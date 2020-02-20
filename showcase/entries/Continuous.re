@@ -16,15 +16,13 @@ let mixedDist =
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
 
+// "mm(floor(uniform(30,35)), normal(50,20), [.25,.5])",
 let timeDist =
   GenericDistribution.make(
-    ~generationSource=
-      GuesstimatorString(
-        "mm(floor(uniform(40, 50)), normal(50,10), [.5,.5])",
-      ),
+    ~generationSource=GuesstimatorString("floor(normal(30,2))"),
     ~probabilityType=Pdf,
     ~domain=Complete,
-    ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
+    ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `days}),
     (),
   )
   |> GenericDistribution.renderIfNeeded(~sampleCount=1000);

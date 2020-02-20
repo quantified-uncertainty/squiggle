@@ -20,10 +20,26 @@ let renderIfNeeded =
   switch (t.generationSource) {
   | GuesstimatorString(s) =>
     let shape = Guesstimator.stringToMixedShape(~string=s, ~sampleCount, ());
-    shape
-    |> E.O.fmap((shape: DistributionTypes.mixedShape) =>
+    let newShape =
+      switch (shape) {
+      | Some({
+          continuous: {xs: [||], ys: [||]},
+          discrete: {xs: [||], ys: [||]},
+        }) =>
+        None
+      | Some({continuous, discrete: {xs: [||], ys: [||]}}) =>
+        Some(Continuous(continuous))
+      | Some({continuous: {xs: [||], ys: [||]}, discrete}) =>
+        Some(Discrete(discrete))
+      | Some(shape) => Some(Mixed(shape))
+      | _ => None
+      };
+
+    Js.log(newShape);
+    newShape
+    |> E.O.fmap((shape: DistributionTypes.pointsType) =>
          make(
-           ~generationSource=Shape(Mixed(shape)),
+           ~generationSource=Shape(shape),
            ~probabilityType=Cdf,
            ~domain=t.domain,
            ~unit=t.unit,
@@ -52,7 +68,7 @@ let normalizePdf = (t: DistributionTypes.pointsType) => {
   switch (t) {
   | Mixed({continuous, discrete, discreteProbabilityMassFraction}) =>
     continuous
-    |> Shape.Continuous.normalizePdf
+    |> Shape.Continuous.scalePdf(~scaleTo=1.0)
     |> E.O.fmap(r =>
          Mixed({
            continuous: r,
@@ -63,7 +79,7 @@ let normalizePdf = (t: DistributionTypes.pointsType) => {
   | Discrete(d) => Some(Discrete(d |> Shape.Discrete.scaleYToTotal(1.0)))
   | Continuous(continuousShape) =>
     continuousShape
-    |> Shape.Continuous.normalizePdf
+    |> Shape.Continuous.scalePdf(~scaleTo=1.0)
     |> E.O.fmap(r => Continuous(r))
   };
 };

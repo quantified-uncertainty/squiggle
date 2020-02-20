@@ -63,38 +63,55 @@ let continuousComponent = (p: DistributionTypes.pointsType) =>
   | Continuous(c) => Some(c)
   };
 
-module Cont = {
-  [@react.component]
-  let make = (~continuous, ~onHover, ~timeScale) => {
-    let chart =
-      React.useMemo1(
-        () =>
-          <CdfChart__Plain
-            primaryDistribution=continuous
-            color={`hex("333")}
-            onHover
-            timeScale
-          />,
-        [|continuous|],
-      );
-    chart;
+let discreteScaleFactor = (p: DistributionTypes.pointsType) =>
+  switch (p) {
+  | Mixed(mixedShape) => Some(mixedShape.discreteProbabilityMassFraction)
+  | Discrete(_) => None
+  | Continuous(_) => None
   };
-};
 
 module Shapee = {
   [@react.component]
   let make = (~shape: DistributionTypes.pointsType, ~timeScale, ~onHover) => {
-    let continuous = continuousComponent(shape);
-    let discrete = discreteComponent(shape);
+    let discreteScaleFactor = shape |> discreteScaleFactor;
+    let continuous =
+      continuousComponent(shape)
+      |> E.O.bind(
+           _,
+           Shape.Continuous.scalePdf(
+             ~scaleTo=
+               discreteScaleFactor
+               |> E.O.fmap(r => 1. -. r)
+               |> E.O.default(1.0),
+           ),
+         );
+    let discrete =
+      discreteComponent(shape)
+      |> E.O.fmap(
+           Shape.Discrete.scaleYToTotal(
+             discreteScaleFactor |> E.O.default(1.0),
+           ),
+         );
+    let minX = {
+      Shape.Any.minX(shape);
+    };
+    let maxX = {
+      Shape.Any.maxX(shape);
+    };
     <div>
       {continuous
        |> E.O.React.fmapOrNull(continuous =>
-            <Cont continuous onHover timeScale />
+            <CdfChart__Plain
+              primaryDistribution=continuous
+              minX
+              maxX
+              ?discrete
+              color={`hex("333")}
+              onHover
+              timeScale
+            />
           )}
-      {discrete
-       |> E.O.React.fmapOrNull(r =>
-            r |> Shape.Discrete.scaleYToTotal(0.3) |> Shape.Discrete.render
-          )}
+      {discrete |> E.O.React.fmapOrNull(Shape.Discrete.render)}
     </div>;
   };
 };
@@ -105,12 +122,19 @@ module GenericDist = {
     let (x, setX) = React.useState(() => 0.);
     let timeScale =
       genericDistribution.unit |> DistributionTypes.DistributionUnit.toJson;
+    let chart =
+      React.useMemo1(
+        () => {
+          genericDistribution
+          |> DistributionTypes.shape
+          |> E.O.React.fmapOrNull(shape => {
+               <Shapee shape timeScale onHover={r => setX(_ => r)} />
+             })
+        },
+        [|genericDistribution|],
+      );
     <div>
-      {genericDistribution
-       |> DistributionTypes.shape
-       |> E.O.React.fmapOrNull(shape => {
-            <Shapee shape timeScale onHover={r => setX(_ => r)} />
-          })}
+      chart
       <table className="table-auto">
         <thead>
           <tr>
