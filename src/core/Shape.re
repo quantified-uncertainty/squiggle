@@ -222,6 +222,22 @@ module Any = {
     | Continuous(continuousShape) =>
       Continuous.findIntegralY(x, continuousShape)
     };
+
+  // TODO: This is wrong. The discrete component should be made continuous when integrating.
+  let pdfToCdf = (t: t) =>
+    switch (t) {
+    | Mixed({continuous, discrete, discreteProbabilityMassFraction}) =>
+      Some(
+        Mixed({
+          continuous: Continuous.toCdf(continuous) |> E.O.toExt(""),
+          discrete: discrete |> Discrete.integrate,
+          discreteProbabilityMassFraction,
+        }),
+      )
+    | Discrete(discrete) => Some(Continuous(discrete |> Discrete.integrate))
+    | Continuous(continuous) =>
+      Continuous.toCdf(continuous) |> E.O.fmap(e => Continuous(e))
+    };
 };
 
 module DomainMixed = {
