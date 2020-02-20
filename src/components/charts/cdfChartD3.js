@@ -342,14 +342,14 @@ export class CdfChartD3 {
       .call(d3.axisBottom(distributionChart.xScale));
 
     // Y axis
-    const y = d3.scaleLinear()
+    const yScale = d3.scaleLinear()
       .domain([yMin, yMax])
       .range([this.calc.chartHeight, 0]);
 
     this.chart.append("g")
       .attr("class", 'lollipops-y-axis')
       .attr("transform", "translate(" + this.calc.chartWidth + ",0)")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(yScale));
 
     // Lines
     this.chart.selectAll("lollipops-line")
@@ -359,8 +359,8 @@ export class CdfChartD3 {
       .attr("class", 'lollipops-line')
       .attr("x1", d => distributionChart.xScale(d.x))
       .attr("x2", d => distributionChart.xScale(d.x))
-      .attr("y1", d => y(d.y))
-      .attr("y2", y(0));
+      .attr("y1", d => yScale(d.y))
+      .attr("y2", yScale(0));
 
     // Circles
     this.chart.selectAll("lollipops-circle")
@@ -369,7 +369,7 @@ export class CdfChartD3 {
       .append("circle")
       .attr("class", 'lollipops-circle')
       .attr("cx", d => distributionChart.xScale(d.x))
-      .attr("cy", d => y(d.y))
+      .attr("cy", d => yScale(d.y))
       .attr("r", "4");
   }
 
