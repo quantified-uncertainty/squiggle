@@ -1,12 +1,35 @@
 open Jest;
 open Expect;
 
+exception ShapeWrong(string);
 describe("CDF", () => {
-  module CDF =
-    CDFunctor.Make({
-      let shape: DistributionTypes.xyShape =
-        CDFunctor.order({xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]});
-    });
+  test("raise - w/o order", () => {
+    expect(() => {
+      module CDF =
+        CDFunctor.Make({
+          let shape: DistributionTypes.xyShape = {
+            xs: [|10., 4., 8.|],
+            ys: [|8., 9., 2.|],
+          };
+        });
+      ();
+    })
+    |> toThrow
+  });
+  test("raise - with order", () => {
+    expect(() => {
+      module CDF =
+        CDFunctor.Make({
+          let shape: DistributionTypes.xyShape = {
+            xs: [|1., 4., 8.|],
+            ys: [|8., 9., 2.|],
+          };
+        });
+      ();
+    })
+    |> not_
+    |> toThrow
+  });
   test("order#1", () => {
     let a = CDFunctor.order({xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]});
     let b: DistributionTypes.xyShape = {

@@ -23,4 +23,9 @@ module Make = (Config: Config) => {
   if (!validateSize()) {
     raise(ShapeWrong("Arrays of \"xs\" and \"ys\" have different sizes."));
   };
+  if (!Belt.SortArray.isSorted(Config.shape.xs, (a, b) => a > b ? 1 : (-1))) {
+    raise(ShapeWrong("Arrays of \"xs\" and \"ys\" have different sizes."));
+  };
+
+  1;
 };

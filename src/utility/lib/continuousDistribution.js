@@ -3,6 +3,7 @@ const { interpolate, range, min, max } = require('./functions');
 
 class ContinuousDistribution {
   /**
+   * @Done
    * @param {number[]} xs
    * @param {number[]} ys
    */
@@ -20,6 +21,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * @Done
    * Order them to make sure that xs are increasing
    * @param {number[]} xs
    * @param {number[]} ys
