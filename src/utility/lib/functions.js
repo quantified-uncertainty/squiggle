@@ -1,4 +1,5 @@
 /**
+ * @Done
  * @param {number} xMin
  * @param {number} xMax
  * @param {number} yMin
@@ -50,6 +51,7 @@ function range(min, max, n) {
 }
 
 /**
+ * @Done
  * @param {number[]} arr
  * @return {number}
  */
@@ -58,6 +60,7 @@ function sum(arr) {
 }
 
 /**
+ * @Done
  * @param {number[]} arr
  * @return {number}
  */
@@ -66,6 +69,7 @@ function mean(arr) {
 }
 
 /**
+ * @Done
  * @param {number[]} arr
  * @return {number}
  */
@@ -80,6 +84,7 @@ function min(arr) {
 }
 
 /**
+ * @Done
  * @param {number[]} arr
  * @return {number}
  */
