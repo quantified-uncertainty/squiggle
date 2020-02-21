@@ -108,6 +108,7 @@ function random(min, max) {
 }
 
 /**
+ * @Done
  * @param {number} from
  * @param {number} to
  * @return {number[]}
@@ -119,6 +120,7 @@ function up(from, to) {
 }
 
 /**
+ * @Done
  * @param {number} from
  * @param {number} to
  * @return {number[]}
