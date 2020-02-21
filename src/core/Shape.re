@@ -234,7 +234,7 @@ module Mixed = {
   };
 };
 
-module Any = {
+module PointsType = {
   type t = DistributionTypes.pointsType;
 
   let y = (t: t, x: float) =>
@@ -316,6 +316,40 @@ module Any = {
       Some(Discrete.scaleYToTotal(discreteProbabilityMassFraction, discrete))
     | Discrete(d) => Some(d)
     | Continuous(_) => None
+    };
+  };
+
+  let normalizeCdf = (t: DistributionTypes.pointsType) => {
+    switch (t) {
+    | Mixed({continuous, discrete, discreteProbabilityMassFraction}) =>
+      Mixed({
+        continuous: continuous |> Continuous.normalizeCdf,
+        discrete: discrete |> Discrete.scaleYToTotal(1.0),
+        discreteProbabilityMassFraction,
+      })
+    | Discrete(d) => Discrete(d |> Discrete.scaleYToTotal(1.0))
+    | Continuous(continuousShape) =>
+      Continuous(Continuous.normalizeCdf(continuousShape))
+    };
+  };
+
+  let normalizePdf = (t: DistributionTypes.pointsType) => {
+    switch (t) {
+    | Mixed({continuous, discrete, discreteProbabilityMassFraction}) =>
+      continuous
+      |> Continuous.scalePdf(~scaleTo=1.0)
+      |> E.O.fmap(r =>
+           Mixed({
+             continuous: r,
+             discrete: discrete |> Discrete.scaleYToTotal(1.0),
+             discreteProbabilityMassFraction,
+           })
+         )
+    | Discrete(d) => Some(Discrete(d |> Discrete.scaleYToTotal(1.0)))
+    | Continuous(continuousShape) =>
+      continuousShape
+      |> Continuous.scalePdf(~scaleTo=1.0)
+      |> E.O.fmap(r => Continuous(r))
     };
   };
 };

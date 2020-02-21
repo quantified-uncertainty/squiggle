@@ -107,6 +107,21 @@ module Model = {
   let xRisk = conditionals =>
     Prop.Value.ConditionalArray.get(conditionals, "Global Existential Event");
 
+  // TODO: Fixe number that integral is calculated for
+  let getGlobalCatastropheChance = dateTime => {
+    let model = GlobalCatastrophe.Model.make(dateTime);
+    switch (model) {
+    | Prop.Value.GenericDistribution(genericDistribution) =>
+      GenericDistribution.renderIfNeeded(
+        ~sampleCount=1000,
+        genericDistribution,
+      )
+      |> E.O.bind(_, GenericDistribution.normalize)
+      |> E.O.bind(_, GenericDistribution.yIntegral(_, 18.0))
+    | _ => None
+    };
+  };
+
   let make =
       (
         group: group,
@@ -131,7 +146,14 @@ module Model = {
         switch (xRisk) {
         | Some({truthValue: true}) => "0"
         | Some({truthValue: false}) => difference
-        | None => "uniform(0,1) > .3 ? " ++ difference ++ ": 0"
+        | None =>
+          let foo =
+            getGlobalCatastropheChance(dateTime)
+            |> E.O.fmap(E.Float.with2DigitsPrecision)
+            |> E.O.fmap((r: string) =>
+                 "uniform(0,1) > " ++ r ++ " ? " ++ difference ++ ": 0"
+               );
+          foo |> E.O.default("");
         };
 
       let genericDistribution =

@@ -1,12 +1,12 @@
 module Shapee = {
   [@react.component]
   let make = (~shape: DistributionTypes.pointsType, ~timeScale, ~onHover) => {
-    let discrete = Shape.Any.scaledDiscreteComponent(shape);
-    let continuous = Shape.Any.scaledContinuousComponent(shape);
+    let discrete = Shape.PointsType.scaledDiscreteComponent(shape);
+    let continuous = Shape.PointsType.scaledContinuousComponent(shape);
     <div>
       <CdfChart__Plain
-        minX={Shape.Any.minX(shape)}
-        maxX={Shape.Any.maxX(shape)}
+        minX={Shape.PointsType.minX(shape)}
+        maxX={Shape.PointsType.maxX(shape)}
         ?discrete
         ?continuous
         color={`hex("333")}
