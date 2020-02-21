@@ -23,14 +23,26 @@ type mixedShape = {
   discreteProbabilityMassFraction: float,
 };
 
-type pointsType =
-  | Mixed(mixedShape)
-  | Discrete(discreteShape)
-  | Continuous(continuousShape);
+type shapeMonad('a, 'b, 'c) =
+  | Mixed('a)
+  | Discrete('b)
+  | Continuous('c);
+
+type shape = shapeMonad(mixedShape, discreteShape, continuousShape);
+
+module ShapeMonad = {
+  let fmap =
+      (t: shapeMonad('a, 'b, 'c), (fn1, fn2, fn3)): shapeMonad('d, 'e, 'f) =>
+    switch (t) {
+    | Mixed(m) => Mixed(fn1(m))
+    | Discrete(m) => Discrete(fn2(m))
+    | Continuous(m) => Continuous(fn3(m))
+    };
+};
 
 type generationSource =
   | GuesstimatorString(string)
-  | Shape(pointsType);
+  | Shape(shape);
 
 type distributionUnit =
   | UnspecifiedDistribution
@@ -48,11 +60,30 @@ type genericDistribution = {
   unit: distributionUnit,
 };
 
-let shape = ({generationSource}: genericDistribution) =>
+let shapee = ({generationSource}: genericDistribution) =>
   switch (generationSource) {
   | GuesstimatorString(_) => None
   | Shape(pointsType) => Some(pointsType)
   };
+
+type pdfCdfCombo = {
+  pdf: shape,
+  cdf: continuousShape,
+};
+
+type complexPower = {
+  shape,
+  integralCache: continuousShape,
+  domain: domainLimit,
+  unit: distributionUnit,
+};
+
+let update = (~shape=?, ~integralCache=?, ~domain=?, ~unit=?, t: complexPower) => {
+  shape: E.O.default(t.shape, shape),
+  integralCache: E.O.default(t.integralCache, integralCache),
+  domain: E.O.default(t.domain, domain),
+  unit: E.O.default(t.unit, unit),
+};
 
 module DistributionUnit = {
   let toJson = (distributionUnit: distributionUnit) =>

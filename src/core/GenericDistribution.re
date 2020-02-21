@@ -43,36 +43,22 @@ let make =
   unit,
 };
 
+//TODO: The fact that it is a CDF is really something you find later, this can't be chosen until GuesstimatorToString happens.
 let renderIfNeeded =
     (~sampleCount=1000, t: genericDistribution): option(genericDistribution) => {
   switch (t.generationSource) {
   | GuesstimatorString(s) =>
-    let shape = Guesstimator.stringToMixedShape(~string=s, ~sampleCount, ());
-    let newShape =
-      switch (shape) {
-      | Some({
-          continuous: {xs: [||], ys: [||]},
-          discrete: {xs: [||], ys: [||]},
-        }) =>
-        None
-      | Some({continuous, discrete: {xs: [||], ys: [||]}}) =>
-        Some(Continuous(continuous))
-      | Some({continuous: {xs: [||], ys: [||]}, discrete}) =>
-        Some(Discrete(discrete))
-      | Some(shape) => Some(Mixed(shape))
-      | _ => None
-      };
-
-    newShape
-    |> E.O.fmap((shape: DistributionTypes.pointsType) =>
+    Guesstimator.stringToMixedShape(~string=s, ~sampleCount, ())
+    |> E.O.bind(_, Shape.Mixed.clean)
+    |> E.O.fmap((shape: DistributionTypes.shape) =>
          make(
            ~generationSource=Shape(shape),
-           ~probabilityType=Cdf,
+           ~probabilityType=Pdf,
            ~domain=t.domain,
            ~unit=t.unit,
            (),
          )
-       );
+       )
   | Shape(_) => Some(t)
   };
 };
@@ -80,7 +66,7 @@ let renderIfNeeded =
 let normalize = (t: genericDistribution): option(genericDistribution) => {
   switch (t.generationSource) {
   | Shape(shape) =>
-    Shape.PointsType.normalizePdf(shape)
+    Shape.T.Pdf.normalize(shape)
     |> E.O.fmap(shape => {...t, generationSource: Shape(shape)})
   | GuesstimatorString(_) => Some(t)
   };
@@ -91,7 +77,7 @@ let yIntegral = (t: DistributionTypes.genericDistribution, x) => {
   let normalize = n => n *. Domain.normalizeProbabilityMass(t.domain);
   switch (t) {
   | {generationSource: Shape(shape)} =>
-    Shape.PointsType.yIntegral(shape, x)
+    Shape.T.yIntegral(shape, x)
     |> E.O.fmap(addInitialMass)
     |> E.O.fmap(normalize)
   | _ => None

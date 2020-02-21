@@ -25,6 +25,7 @@ module Internals = {
   [@bs.module "./GuesstimatorLibrary.js"]
   external toCombinedFormat: (string, int) => combined = "run";
 
+  // todo: Format to correct mass, also normalize the pdf.
   let toMixedShape = (r: combined): option(DistributionTypes.mixedShape) => {
     let assumptions: MixedShapeBuilder.assumptions = {
       continuous: ADDS_TO_1,

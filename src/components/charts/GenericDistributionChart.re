@@ -1,12 +1,12 @@
 module Shapee = {
   [@react.component]
-  let make = (~shape: DistributionTypes.pointsType, ~timeScale, ~onHover) => {
-    let discrete = Shape.PointsType.scaledDiscreteComponent(shape);
-    let continuous = Shape.PointsType.scaledContinuousComponent(shape);
+  let make = (~shape: DistributionTypes.shape, ~timeScale, ~onHover) => {
+    let discrete = Shape.T.scaledDiscreteComponent(shape);
+    let continuous = Shape.T.scaledContinuousComponent(shape);
     <div>
       <CdfChart__Plain
-        minX={Shape.PointsType.minX(shape)}
-        maxX={Shape.PointsType.maxX(shape)}
+        minX={Shape.T.minX(shape)}
+        maxX={Shape.T.maxX(shape)}
         ?discrete
         ?continuous
         color={`hex("333")}
@@ -28,7 +28,7 @@ module GenericDist = {
       React.useMemo1(
         () => {
           genericDistribution
-          |> DistributionTypes.shape
+          |> DistributionTypes.shapee
           |> E.O.React.fmapOrNull(shape => {
                <Shapee shape timeScale onHover={r => setX(_ => r)} />
              })
