@@ -7,12 +7,6 @@ class ContinuousDistribution {
    * @param {number[]} ys
    */
   constructor(xs, ys) {
-    if (!_.isArray(xs)) {
-      throw new Error('XS should be an array.');
-    }
-    if (!_.isArray(ys)) {
-      throw new Error('YS should be an array.');
-    }
     if (!this.validateHasLength(xs)) {
       throw new Error('You need at least one element.');
     }
