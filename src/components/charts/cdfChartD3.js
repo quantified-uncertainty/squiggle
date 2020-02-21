@@ -179,8 +179,8 @@ export class CdfChartD3 {
     const dataPoints = [this.getDataPoints('continuous')];
 
     // Boundaries.
-    const xMin = this.attrs.minX || d3.min(this.attrs.data.continuous.xs) | d3.min(this.attrs.data.discrete.xs);
-    const xMax = this.attrs.maxX || d3.max(this.attrs.data.continuous.xs) | d3.max(this.attrs.data.discrete.xs);
+    const xMin = this.attrs.minX || d3.min(this.attrs.data.continuous.xs) || d3.min(this.attrs.data.discrete.xs);
+    const xMax = this.attrs.maxX || d3.max(this.attrs.data.continuous.xs) || d3.max(this.attrs.data.discrete.xs);
     const yMin = d3.min(this.attrs.data.continuous.ys);
     const yMax = d3.max(this.attrs.data.continuous.ys);
 
