@@ -5,7 +5,7 @@ exception ShapeWrong(string);
 let order = (shape: DistributionTypes.xyShape): DistributionTypes.xyShape => {
   let xy =
     shape.xs
-    |> Array.mapi((i, x) => [x, shape.ys[i]])
+    |> Array.mapi((i, x) => [x, shape.ys |> Array.get(_, i)])
     |> Belt.SortArray.stableSortBy(_, ([a, _], [b, _]) => a > b ? 1 : (-1));
   {
     xs: xy |> Array.map(([x, _]) => x),
@@ -26,6 +26,8 @@ module Make = (Config: Config) => {
   if (!Belt.SortArray.isSorted(Config.shape.xs, (a, b) => a > b ? 1 : (-1))) {
     raise(ShapeWrong("Arrays of \"xs\" and \"ys\" have different sizes."));
   };
-
+  let minX = () => Config.shape.xs |> Array.get(_, 0);
+  let maxX = () =>
+    Config.shape.xs |> Array.get(_, Array.length(Config.shape.xs) - 1);
   1;
 };

@@ -42,6 +42,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * @Done
    * @param {number[]} xs
    * @param {number[]} ys
    * @return {boolean}
@@ -51,6 +52,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * @Done
    * @param xs
    * @returns {boolean}
    */
@@ -59,6 +61,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * @Done
    * @returns {number}
    */
   minX() {
@@ -66,6 +69,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * @Done
    * @returns {number}
    */
   maxX() {
