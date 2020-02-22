@@ -14,9 +14,24 @@ type xyShape = {
   ys: array(float),
 };
 
-type contintinuousInterpolationStrategy = [ | `Stepwise | `Interpolated];
+type interpolationMethod = [ | `Stepwise | `Linear];
 
-type continuousShape = xyShape;
+type continuousShape = {
+  shape: xyShape,
+  interpolation: interpolationMethod,
+};
+
+module ContinuousShape = {
+  type t = continuousShape;
+  let shape = (t: t) => t.shape;
+  let interpolation = (t: t) => t.interpolation;
+  let make = (shape, interpolation) => {shape, interpolation};
+  let shapeMap = ({shape, interpolation}: t, fn) => {
+    shape: fn(shape),
+    interpolation,
+  };
+};
+
 type discreteShape = xyShape;
 
 type mixedShape = {

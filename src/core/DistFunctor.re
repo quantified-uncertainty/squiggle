@@ -22,12 +22,19 @@ type yPoint =
   | Continuous(float)
   | Discrete(float);
 
-let yPointCont = (y: yPoint) =>
-  switch (y) {
-  | Continuous(f) => f
-  | Mixed({continuous}) => continuous
-  | _ => 0.0
-  };
+module YPoint = {
+  type t = yPoint;
+  let toContinuousValue = (t: t) =>
+    switch (t) {
+    | Continuous(f) => f
+    | Mixed({continuous}) => continuous
+    | _ => 0.0
+    };
+  let makeContinuous = (f: float): t => Continuous(f);
+  let makeDiscrete = (f: float): t => Discrete(f);
+  let makeMixed = (c: float, d: float): t =>
+    Mixed({continuous: c, discrete: d});
+};
 
 module type dist = {
   type t;
@@ -64,19 +71,31 @@ module Continuous =
   Dist({
     type t = DistributionTypes.continuousShape;
     type integral = DistributionTypes.continuousShape;
+    let shape = (t: t) => t.shape;
     let integral = (~cache, t) =>
-      t |> Shape.XYShape.Range.integrateWithTriangles |> E.O.toExt("");
+      cache
+      |> E.O.default(
+           t
+           |> shape
+           |> Shape.XYShape.Range.integrateWithTriangles
+           |> E.O.toExt("")
+           |> Shape.Continuous.fromShape,
+         );
     //   This seems wrong, we really want the ending bit, I'd assume
     let integralSum = (~cache, t) =>
-      t |> integral(~cache) |> Shape.XYShape.ySum;
-    let minX = Shape.XYShape.minX;
-    let maxX = Shape.XYShape.maxX;
-    let pointwiseFmap = Shape.XYShape.pointwiseMap;
+      t |> integral(~cache) |> shape |> Shape.XYShape.ySum;
+    let minX = (t: t) => t |> shape |> Shape.XYShape.minX;
+    let maxX = (t: t) => t |> shape |> Shape.XYShape.maxX;
+    let pointwiseFmap = (fn, t: t) =>
+      t
+      |> shape
+      |> Shape.XYShape.pointwiseMap(fn)
+      |> Shape.Continuous.fromShape;
     let shape = (t: t): DistributionTypes.shape => Continuous(t);
     let xToY = (f, t) =>
-      CdfLibrary.Distribution.findY(f, t) |> (e => Continuous(e));
+      Shape.Continuous.findY(f, t) |> YPoint.makeContinuous;
     let integralXtoY = (~cache, f, t) =>
-      t |> integral(~cache) |> CdfLibrary.Distribution.findY(f);
+      t |> integral(~cache) |> Shape.Continuous.findY(f);
   });
 
 module Discrete =
@@ -109,7 +128,8 @@ module Mixed =
         (f, {discrete, continuous, discreteProbabilityMassFraction}: t) =>
       Mixed({
         continuous:
-          CdfLibrary.Distribution.findY(f, continuous)
+          Continuous.xToY(f, continuous)
+          |> YPoint.toContinuousValue
           |> (e => e *. (1. -. discreteProbabilityMassFraction)),
         discrete:
           Shape.Discrete.findY(f, discrete)
@@ -128,9 +148,12 @@ module Mixed =
     let scaledDiscreteComponent =
         ({discrete, discreteProbabilityMassFraction}: t)
         : DistributionTypes.continuousShape =>
-      Discrete.pointwiseFmap(
-        f => f *. discreteProbabilityMassFraction,
-        discrete,
+      Shape.Continuous.make(
+        Discrete.pointwiseFmap(
+          f => f *. discreteProbabilityMassFraction,
+          discrete,
+        ),
+        `Stepwise,
       );
 
     // TODO: Add these two directly, once interpolation is added.
@@ -173,7 +196,9 @@ module Mixed =
         (fn, {discrete, continuous, discreteProbabilityMassFraction}: t): t => {
       {
         discrete: Shape.XYShape.pointwiseMap(fn, discrete),
-        continuous: Shape.XYShape.pointwiseMap(fn, continuous),
+        continuous:
+          continuous
+          |> Shape.Continuous.shapeMap(Shape.XYShape.pointwiseMap(fn)),
         discreteProbabilityMassFraction,
       };
     };
@@ -244,11 +269,11 @@ module WithMetadata =
     let pointwiseFmap = (fn, {shape, _} as t: t): t =>
       fromShape(Shape.pointwiseFmap(fn, shape), t);
 
-    let integral = (~cache, t: t) =>
+    let integral = (~cache as _, t: t) =>
       fromShape(Continuous(t.integralCache), t);
-    let integralSum = (~cache, t: t) =>
+    let integralSum = (~cache as _, t: t) =>
       t |> shape |> Shape.Integral.sum(~cache=Some(t.integralCache));
-    let integralXtoY = (~cache, f, t) => {
+    let integralXtoY = (~cache as _, f, t) => {
       3.0;
     };
   });

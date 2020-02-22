@@ -11,15 +11,14 @@ let step: DistributionTypes.xyShape = {
   ys: [|8., 17., 19.|],
 };
 
-open Shape;
+open Shape /* )*/;
 
-describe("Shape", () =>
-  describe("XYShape", () => {
-    test("#ySum", () =>
-      expect(XYShape.ySum(shape)) |> toEqual(19.0)
-    );
-    test("#yFOo", () =>
-      expect(Discrete.integrate(shape)) |> toEqual(step)
-    );
-  })
-);
+// describe("Shape", () =>
+//   describe("XYShape", () => {
+//     test("#ySum", () =>
+//       expect(XYShape.ySum(shape)) |> toEqual(19.0)
+//     );
+//     test("#yFOo", () =>
+//       expect(Discrete.integrate(shape)) |> toEqual(step)
+//     );
+//   })

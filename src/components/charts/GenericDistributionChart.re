@@ -1,20 +1,22 @@
 module Shapee = {
   [@react.component]
   let make = (~shape: DistributionTypes.shape, ~timeScale, ~onHover) => {
-    let discrete = Shape.T.scaledDiscreteComponent(shape);
-    let continuous = Shape.T.scaledContinuousComponent(shape);
-    <div>
-      <CdfChart__Plain
-        minX={Shape.T.minX(shape)}
-        maxX={Shape.T.maxX(shape)}
-        ?discrete
-        ?continuous
-        color={`hex("333")}
-        onHover
-        timeScale
-      />
-      {discrete |> E.O.React.fmapOrNull(Shape.Discrete.render)}
-    </div>;
+    <div
+      // let discrete = Shape.T.scaledDiscreteComponent(shape);
+      // let continuous = Shape.T.scaledContinuousComponent(shape);
+      // <div>
+      //   <CdfChart__Plain
+      //     minX={Shape.T.minX(shape)}
+      //     maxX={Shape.T.maxX(shape)}
+      //     ?discrete
+      //     ?continuous
+      //     color={`hex("333")}
+      //     onHover
+      //     timeScale
+      //   />
+      //   {discrete |> E.O.React.fmapOrNull(Shape.Discrete.render)}
+      // </div>;
+    />;
   };
 };
 

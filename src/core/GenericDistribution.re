@@ -65,9 +65,7 @@ let renderIfNeeded =
 
 let normalize = (t: genericDistribution): option(genericDistribution) => {
   switch (t.generationSource) {
-  | Shape(shape) =>
-    Shape.T.Pdf.normalize(shape)
-    |> E.O.fmap(shape => {...t, generationSource: Shape(shape)})
+  | Shape(shape) => Some({...t, generationSource: Shape(shape)})
   | GuesstimatorString(_) => Some(t)
   };
 };

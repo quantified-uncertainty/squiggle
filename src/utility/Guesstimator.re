@@ -16,10 +16,10 @@ module Internals = {
     discrete,
   };
 
-  let toContinous = (r: combined): DistributionTypes.continuousShape =>
-    continuousGet(r) |> CdfLibrary.JS.jsToDist;
+  let toContinous = (r: combined) =>
+    continuousGet(r) |> CdfLibrary.JS.jsToDist |> Shape.Continuous.fromShape;
 
-  let toDiscrete = (r: combined): DistributionTypes.discreteShape =>
+  let toDiscrete = (r: combined): DistributionTypes.xyShape =>
     discreteGet(r) |> jsToDistDiscrete;
 
   [@bs.module "./GuesstimatorLibrary.js"]
