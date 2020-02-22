@@ -6,18 +6,20 @@ type pointInRange =
 
 module Continuous = {
   type t = continuousShape;
-  let shape = (t: t) => t.shape;
-  let getShape = (t: t) => t.shape;
+  let xyShape = (t: t) => t.xyShape;
+  let getShape = (t: t) => t.xyShape;
   let interpolation = (t: t) => t.interpolation;
-  let make = (shape, interpolation) => {shape, interpolation};
-  let fromShape = shape => make(shape, `Linear);
-  let shapeMap = (fn, {shape, interpolation}: t) => {
-    shape: fn(shape),
+  let make = (xyShape, interpolation): t => {xyShape, interpolation};
+  let fromShape = xyShape => make(xyShape, `Linear);
+  let shapeMap = (fn, {xyShape, interpolation}: t): t => {
+    xyShape: fn(xyShape),
     interpolation,
   };
-  let oShapeMap = (fn, {shape, interpolation}: t) =>
-    fn(shape) |> E.O.fmap(shape => {shape, interpolation});
-  let shapeFn = (fn, t: t) => t |> shape |> fn;
+  let oShapeMap =
+      (fn, {xyShape, interpolation}: t)
+      : option(DistributionTypes.continuousShape) =>
+    fn(xyShape) |> E.O.fmap(xyShape => make(xyShape, interpolation));
+  let shapeFn = (fn, t: t) => t |> xyShape |> fn;
   let minX = shapeFn(XYShape.minX);
   let maxX = shapeFn(XYShape.maxX);
   let findX = y => shapeFn(CdfLibrary.Distribution.findX(y));
@@ -29,15 +31,18 @@ module Continuous = {
   let findIntegralY = (f, t) => {
     t
     |> toCdf
-    |> E.O.fmap(shape)
+    |> E.O.fmap(xyShape)
     |> E.O.fmap(CdfLibrary.Distribution.findY(f));
   };
   let normalizeCdf = (continuousShape: continuousShape) =>
-    continuousShape |> shape |> XYShape.scaleCdfTo(~scaleTo=1.0) |> fromShape;
+    continuousShape
+    |> xyShape
+    |> XYShape.scaleCdfTo(~scaleTo=1.0)
+    |> fromShape;
   let scalePdf = (~scaleTo=1.0, continuousShape: continuousShape) => {
     switch (toCdf(continuousShape)) {
-    | Some({shape}) =>
-      XYShape.scaleCdfTo(~scaleTo, shape)
+    | Some({xyShape}) =>
+      XYShape.scaleCdfTo(~scaleTo, xyShape)
       |> XYShape.Range.derivative
       |> E.O.fmap(fromShape)
     | _ => None
@@ -162,14 +167,14 @@ module Mixed = {
   let clean = (t: DistributionTypes.mixedShape) =>
     switch (t) {
     | {
-        continuous: {shape: {xs: [||], ys: [||]}},
+        continuous: {xyShape: {xs: [||], ys: [||]}},
         discrete: {xs: [||], ys: [||]},
       } =>
       None
     | {discrete: {xs: [|_|], ys: [|_|]}} => None
     | {continuous, discrete: {xs: [||], ys: [||]}} =>
       Some(Continuous(continuous))
-    | {continuous: {shape: {xs: [||], ys: [||]}}, discrete} =>
+    | {continuous: {xyShape: {xs: [||], ys: [||]}}, discrete} =>
       Some(Discrete(discrete))
     | shape => Some(Mixed(shape))
     };

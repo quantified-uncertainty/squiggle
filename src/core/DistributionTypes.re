@@ -17,19 +17,8 @@ type xyShape = {
 type interpolationMethod = [ | `Stepwise | `Linear];
 
 type continuousShape = {
-  shape: xyShape,
+  xyShape,
   interpolation: interpolationMethod,
-};
-
-module ContinuousShape = {
-  type t = continuousShape;
-  let shape = (t: t) => t.shape;
-  let interpolation = (t: t) => t.interpolation;
-  let make = (shape, interpolation) => {shape, interpolation};
-  let shapeMap = ({shape, interpolation}: t, fn) => {
-    shape: fn(shape),
-    interpolation,
-  };
 };
 
 type discreteShape = xyShape;
@@ -111,4 +100,29 @@ module DistributionUnit = {
       )
     | _ => Js.Null.fromOption(None)
     };
+};
+
+type mixedPoint = {
+  continuous: float,
+  discrete: float,
+};
+
+module MixedPoint = {
+  type t = mixedPoint;
+  let toContinuousValue = (t: t) => t.continuous;
+  let toDiscreteValue = (t: t) => t.discrete;
+  let makeContinuous = (continuous: float): t => {continuous, discrete: 0.0};
+  let makeDiscrete = (discrete: float): t => {continuous: 0.0, discrete};
+
+  let fmap = (fn, t: t) => {
+    continuous: fn(t.continuous),
+    discrete: fn(t.discrete),
+  };
+
+  let combine2 = (fn, c: t, d: t): t => {
+    continuous: fn(c.continuous, d.continuous),
+    discrete: fn(c.discrete, d.discrete),
+  };
+
+  let add = combine2((a, b) => a +. b);
 };
