@@ -66,29 +66,12 @@ type genericDistribution = {
   unit: distributionUnit,
 };
 
-let shapee = ({generationSource}: genericDistribution) =>
-  switch (generationSource) {
-  | GuesstimatorString(_) => None
-  | Shape(pointsType) => Some(pointsType)
-  };
-
-type pdfCdfCombo = {
-  pdf: shape,
-  cdf: continuousShape,
-};
-
 type complexPower = {
   shape,
+  domain,
   integralCache: continuousShape,
-  domain: domainLimit,
   unit: distributionUnit,
-};
-
-let update = (~shape=?, ~integralCache=?, ~domain=?, ~unit=?, t: complexPower) => {
-  shape: E.O.default(t.shape, shape),
-  integralCache: E.O.default(t.integralCache, integralCache),
-  domain: E.O.default(t.domain, domain),
-  unit: E.O.default(t.unit, unit),
+  guesstimatorString: option(string),
 };
 
 module DistributionUnit = {
@@ -100,6 +83,34 @@ module DistributionUnit = {
       )
     | _ => Js.Null.fromOption(None)
     };
+};
+
+module Domain = {
+  let excludedProbabilityMass = (t: domain) => {
+    switch (t) {
+    | Complete => 1.0
+    | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
+    | RightLimited({excludingProbabilityMass}) => excludingProbabilityMass
+    | LeftAndRightLimited(
+        {excludingProbabilityMass: l},
+        {excludingProbabilityMass: r},
+      ) =>
+      l +. r
+    };
+  };
+
+  let initialProbabilityMass = (t: domain) => {
+    switch (t) {
+    | Complete
+    | RightLimited(_) => 0.0
+    | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
+    | LeftAndRightLimited({excludingProbabilityMass}, _) => excludingProbabilityMass
+    };
+  };
+
+  let normalizeProbabilityMass = (t: domain) => {
+    1. /. excludedProbabilityMass(t);
+  };
 };
 
 type mixedPoint = {

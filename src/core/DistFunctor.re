@@ -324,7 +324,7 @@ module Shape = {
         );
       };
       let maxX = (t: t) =>
-        mapToAll(t, (Mixed.T.minX, Discrete.T.minX, Continuous.T.minX));
+        mapToAll(t, (Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX));
       let pointwiseFmap = (fn, t: t) =>
         fmap(
           t,
@@ -337,7 +337,36 @@ module Shape = {
     });
 };
 
-module WithMetadata = {
+module ComplexPower = {
+  open DistributionTypes;
+  let make =
+      (
+        ~shape,
+        ~guesstimatorString,
+        ~domain=Complete,
+        ~unit=UnspecifiedDistribution,
+        (),
+      )
+      : complexPower => {
+    let integral = Shape.T.Integral.get(~cache=None, shape);
+    {shape, domain, integralCache: integral, unit, guesstimatorString};
+  };
+  let update =
+      (
+        ~shape=?,
+        ~integralCache=?,
+        ~domain=?,
+        ~unit=?,
+        ~guesstimatorString=?,
+        t: complexPower,
+      ) => {
+    shape: E.O.default(t.shape, shape),
+    integralCache: E.O.default(t.integralCache, integralCache),
+    domain: E.O.default(t.domain, domain),
+    unit: E.O.default(t.unit, unit),
+    guesstimatorString: E.O.default(t.guesstimatorString, guesstimatorString),
+  };
+
   module T =
     Dist({
       type t = DistributionTypes.complexPower;
@@ -350,7 +379,7 @@ module WithMetadata = {
       let xToY = f => shapeFn(Shape.T.xToY(f));
       let minX = shapeFn(Shape.T.minX);
       let maxX = shapeFn(Shape.T.maxX);
-      let fromShape = (shape, t): t => DistributionTypes.update(~shape, t);
+      let fromShape = (shape, t): t => update(~shape, t);
       // todo: adjust for limit
       let pointwiseFmap = (fn, {shape, _} as t: t): t =>
         fromShape(Shape.T.pointwiseFmap(fn, shape), t);

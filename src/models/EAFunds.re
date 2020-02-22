@@ -112,12 +112,11 @@ module Model = {
     let model = GlobalCatastrophe.Model.make(dateTime);
     switch (model) {
     | Prop.Value.GenericDistribution(genericDistribution) =>
-      GenericDistribution.renderIfNeeded(
-        ~sampleCount=1000,
-        genericDistribution,
-      )
-      |> E.O.bind(_, GenericDistribution.normalize)
-      |> E.O.bind(_, GenericDistribution.yIntegral(_, 18.0))
+      genericDistribution
+      |> GenericDistribution.toComplexPower(~sampleCount=1000)
+      |> E.O.fmap(
+           DistFunctor.ComplexPower.T.Integral.xToY(~cache=None, 18.0),
+         )
     | _ => None
     };
   };

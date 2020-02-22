@@ -8,15 +8,16 @@ let timeDist =
     ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `days}),
     (),
   )
-  |> GenericDistribution.renderIfNeeded(~sampleCount=1000);
+  |> GenericDistribution.toComplexPower(~sampleCount=1000);
 
 let distributions = () =>
   <div>
     <div>
       <h2> {"Basic Mixed Distribution" |> ReasonReact.string} </h2>
       {timeDist
-       |> E.O.bind(_, GenericDistribution.normalize)
-       |> E.O.React.fmapOrNull(dist => <GenericDistributionChart dist />)}
+       |> E.O.React.fmapOrNull(complexPower =>
+            <ComplexPowerChart complexPower />
+          )}
       <h2> {"Simple Continuous" |> ReasonReact.string} </h2>
     </div>
   </div>;

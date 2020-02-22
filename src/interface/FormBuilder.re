@@ -19,15 +19,11 @@ let propValue = (t: Prop.Value.t) => {
   | ConditionalArray(r) => "Array" |> ReasonReact.string
   | GenericDistribution(r) =>
     let newDistribution =
-      GenericDistribution.renderIfNeeded(~sampleCount=2000, r);
+      GenericDistribution.toComplexPower(~sampleCount=1000, r);
     switch (newDistribution) {
     | Some(distribution) =>
-      <div>
-        {GenericDistribution.normalize(distribution)
-         |> E.O.React.fmapOrNull(dist => <GenericDistributionChart dist />)}
-      </div>
+      <div> <ComplexPowerChart complexPower=distribution /> </div>
     | None => "Something went wrong" |> ReasonReact.string
-    | _ => <div />
     };
   | FloatCdf(_) => <div />
   | Probability(r) =>
