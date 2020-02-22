@@ -14,6 +14,8 @@ type xyShape = {
   ys: array(float),
 };
 
+type contintinuousInterpolationStrategy = [ | `Stepwise | `Interpolated];
+
 type continuousShape = xyShape;
 type discreteShape = xyShape;
 

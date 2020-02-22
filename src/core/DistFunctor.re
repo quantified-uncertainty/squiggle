@@ -22,6 +22,13 @@ type yPoint =
   | Continuous(float)
   | Discrete(float);
 
+let yPointCont = (y: yPoint) =>
+  switch (y) {
+  | Continuous(f) => f
+  | Mixed({continuous}) => continuous
+  | _ => 0.0
+  };
+
 module type dist = {
   type t;
   type integral;
@@ -29,10 +36,10 @@ module type dist = {
   let maxX: t => option(float);
   let pointwiseFmap: (float => float, t) => t;
   let xToY: (float, t) => yPoint;
-  let xToIntegralY: (float, t) => float;
+  let xToIntegralY: (~cache: option(integral), float, t) => float;
   let shape: t => DistributionTypes.shape;
-  let integral: t => integral;
-  let integralSum: t => float;
+  let integral: (~cache: option(integral), t) => integral;
+  let integralSum: (~cache: option(integral), t) => float;
 };
 
 module Dist = (T: dist) => {
@@ -52,32 +59,34 @@ module Continuous =
   Dist({
     type t = DistributionTypes.continuousShape;
     type integral = DistributionTypes.continuousShape;
-    let integral = t =>
+    let integral = (~cache, t) =>
       t |> Shape.XYShape.Range.integrateWithTriangles |> E.O.toExt("");
-    let integralSum = t => t |> integral |> Shape.XYShape.ySum;
+    //   This seems wrong, we really want the ending bit, I'd assume
+    let integralSum = (~cache, t) =>
+      t |> integral(~cache) |> Shape.XYShape.ySum;
     let minX = Shape.XYShape.minX;
     let maxX = Shape.XYShape.maxX;
     let pointwiseFmap = Shape.XYShape.pointwiseMap;
     let shape = (t: t): DistributionTypes.shape => Continuous(t);
     let xToY = (f, t) =>
       CdfLibrary.Distribution.findY(f, t) |> (e => Continuous(e));
-    let xToIntegralY = (f, t) =>
-      t |> integral |> CdfLibrary.Distribution.findY(f);
+    let xToIntegralY = (~cache, f, t) =>
+      t |> integral(~cache) |> CdfLibrary.Distribution.findY(f);
   });
 
 module Discrete =
   Dist({
     type t = DistributionTypes.discreteShape;
     type integral = DistributionTypes.continuousShape;
-    let integral = t => t |> Shape.Discrete.integrate;
-    let integralSum = t => t |> Shape.XYShape.ySum;
+    let integral = (~cache, t) => t |> Shape.Discrete.integrate;
+    let integralSum = (~cache, t) => t |> Shape.XYShape.ySum;
     let minX = Shape.XYShape.minX;
     let maxX = Shape.XYShape.maxX;
     let pointwiseFmap = Shape.XYShape.pointwiseMap;
     let shape = (t: t): DistributionTypes.shape => Discrete(t);
     let xToY = (f, t) =>
       CdfLibrary.Distribution.findY(f, t) |> (e => Discrete(e));
-    let xToIntegralY = (f, t) =>
+    let xToIntegralY = (~cache, f, t) =>
       t |> Shape.XYShape.accumulateYs |> CdfLibrary.Distribution.findY(f);
   });
 
@@ -119,24 +128,35 @@ module Mixed =
       );
 
     // TODO: Add these two directly, once interpolation is added.
-    let integral = t => {
+    let integral = (~cache, t) => {
       //   let cont = scaledContinuousComponent(t);
       //   let discrete = scaledDiscreteComponent(t);
-      scaledContinuousComponent(t) |> E.O.toExt("");
+      switch (cache) {
+      | Some(cache) => cache
+      | None => scaledContinuousComponent(t) |> E.O.toExt("")
+      };
     };
 
     let integralSum =
-        ({discrete, continuous, discreteProbabilityMassFraction}: t) => {
-      Discrete.integralSum(discrete)
-      *. discreteProbabilityMassFraction
-      +. Continuous.integralSum(continuous)
-      *. (1.0 -. discreteProbabilityMassFraction);
+        (~cache, {discrete, continuous, discreteProbabilityMassFraction}: t) => {
+      switch (cache) {
+      | Some(cache) => 3.0
+      | None =>
+        Discrete.integralSum(~cache=None, discrete)
+        *. discreteProbabilityMassFraction
+        +. Continuous.integralSum(~cache=None, continuous)
+        *. (1.0 -. discreteProbabilityMassFraction)
+      };
     };
 
     let xToIntegralY =
-        (f, {discrete, continuous, discreteProbabilityMassFraction}: t) => {
-      let cont = Continuous.xToIntegralY(f, continuous);
-      let discrete = Discrete.xToIntegralY(f, discrete);
+        (
+          ~cache,
+          f,
+          {discrete, continuous, discreteProbabilityMassFraction}: t,
+        ) => {
+      let cont = Continuous.xToIntegralY(~cache, f, continuous);
+      let discrete = Discrete.xToIntegralY(~cache, f, discrete);
       discrete
       *. discreteProbabilityMassFraction
       +. cont
@@ -165,23 +185,31 @@ module Shape =
     let shape = (t: t) => t;
     let minX = (t: t) =>
       Shape.T.mapToAll(t, (Mixed.minX, Discrete.minX, Continuous.minX));
-    let integral = (t: t) =>
-      Shape.T.mapToAll(
-        t,
-        (Mixed.integral, Discrete.integral, Continuous.integral),
-      );
-    let integralSum = (t: t) =>
-      Shape.T.mapToAll(
-        t,
-        (Mixed.integralSum, Discrete.integralSum, Continuous.integralSum),
-      );
-    let xToIntegralY = (f, t) => {
+    let integral = (~cache, t: t) =>
       Shape.T.mapToAll(
         t,
         (
-          Mixed.xToIntegralY(f),
-          Discrete.xToIntegralY(f),
-          Continuous.xToIntegralY(f),
+          Mixed.integral(~cache),
+          Discrete.integral(~cache),
+          Continuous.integral(~cache),
+        ),
+      );
+    let integralSum = (~cache, t: t) =>
+      Shape.T.mapToAll(
+        t,
+        (
+          Mixed.integralSum(~cache),
+          Discrete.integralSum(~cache),
+          Continuous.integralSum(~cache),
+        ),
+      );
+    let xToIntegralY = (~cache, f, t) => {
+      Shape.T.mapToAll(
+        t,
+        (
+          Mixed.xToIntegralY(~cache, f),
+          Discrete.xToIntegralY(~cache, f),
+          Continuous.xToIntegralY(~cache, f),
         ),
       );
     };
@@ -210,9 +238,11 @@ module WithMetadata =
     let pointwiseFmap = (fn, {shape, _} as t: t): t =>
       fromShape(Shape.pointwiseFmap(fn, shape), t);
 
-    let integral = (t: t) => fromShape(Continuous(t.integralCache), t);
-    let integralSum = (t: t) => t |> shape |> Shape.integralSum;
-    let xToIntegralY = (f, t) => {
+    let integral = (~cache, t: t) =>
+      fromShape(Continuous(t.integralCache), t);
+    let integralSum = (~cache, t: t) =>
+      t |> shape |> Shape.integralSum(~cache=Some(t.integralCache));
+    let xToIntegralY = (~cache, f, t) => {
       3.0;
     };
   });
