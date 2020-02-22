@@ -77,18 +77,28 @@ module Continuous = {
       : option(DistributionTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(xyShape => make(xyShape, interpolation));
 
+  let toLinear = (t: t): t =>
+    switch (t) {
+    | {interpolation: `Stepwise, xyShape} => {
+        interpolation: `Linear,
+        xyShape: xyShape |> XYShape.Range.stepsToContinuous |> E.O.toExt(""),
+      }
+    | {interpolation: `Linear, _} => t
+    };
+
   module T =
     Dist({
       type t = DistributionTypes.continuousShape;
       type integral = DistributionTypes.continuousShape;
       let shapeFn = (fn, t: t) => t |> xyShape |> fn;
+      // TODO: Obviously fix this, it's terrible
       let integral = (~cache, t) =>
         cache
         |> E.O.default(
              t
              |> xyShape
              |> XYShape.Range.integrateWithTriangles
-             |> E.O.toExt("")
+             |> E.O.toExt("Error1")
              |> fromShape,
            );
       //   This seems wrong, we really want the ending bit, I'd assume
@@ -118,7 +128,16 @@ module Discrete = {
       type integral = DistributionTypes.continuousShape;
       let integral = (~cache, t) =>
         cache
-        |> E.O.default(t |> XYShape.accumulateYs |> Continuous.fromShape);
+        |> E.O.default(
+             {
+               Continuous.make(
+                 XYShape.accumulateYs(t)
+                 |> XYShape.Range.stepsToContinuous
+                 |> E.O.toExt("ERROR"),
+                 `Stepwise,
+               );
+             },
+           );
       let integralSum = (~cache, t) => t |> XYShape.ySum;
       let minX = XYShape.minX;
       let maxX = XYShape.maxX;
@@ -197,26 +216,42 @@ module Mixed = {
         DistributionTypes.MixedPoint.add(c, d);
       };
 
-      let toScaledContinuous =
-          ({continuous, discreteProbabilityMassFraction}: t) =>
-        Some(
-          continuous
-          |> Continuous.T.scaleBy(
-               ~scale=1.0 -. discreteProbabilityMassFraction,
-             ),
-        );
+      let scaleContinuous =
+          ({discreteProbabilityMassFraction}: t, continuous) =>
+        continuous
+        |> Continuous.T.scaleBy(~scale=1.0 -. discreteProbabilityMassFraction);
 
-      let toScaledDiscrete = ({discrete, discreteProbabilityMassFraction}: t) =>
-        Some(
-          discrete
-          |> Discrete.T.scaleBy(~scale=discreteProbabilityMassFraction),
-        );
+      let scaleDiscrete = ({discreteProbabilityMassFraction}: t, disrete) =>
+        disrete |> Discrete.T.scaleBy(~scale=discreteProbabilityMassFraction);
+
+      let toScaledContinuous = ({continuous} as t: t) =>
+        Some(scaleContinuous(t, continuous));
+
+      let toScaledDiscrete = ({discrete} as t: t) =>
+        Some(scaleDiscrete(t, discrete));
 
       // TODO: Add these two directly, once interpolation is added.
-      let integral = (~cache, t) => {
-        //   let cont = scaledContinuousComponent(t);
-        //   let discrete = scaledDiscreteComponent(t);
-        cache |> E.O.toExt("");
+      let integral =
+          (
+            ~cache,
+            {continuous, discrete, discreteProbabilityMassFraction} as t: t,
+          ) => {
+        cache
+        |> E.O.default(
+             {
+               let cont =
+                 continuous
+                 |> Continuous.T.Integral.get(~cache=None)
+                 |> scaleContinuous(t);
+               let dist =
+                 discrete
+                 |> Discrete.T.Integral.get(~cache=None)
+                 |> Continuous.T.scaleBy(
+                      ~scale=discreteProbabilityMassFraction,
+                    );
+               dist;
+             },
+           );
       };
 
       let integralSum =
@@ -323,7 +358,7 @@ module Shape = {
         );
       let minX = (t: t) =>
         mapToAll(t, (Mixed.T.minX, Discrete.T.minX, Continuous.T.minX));
-      let integral = (~cache, t: t) =>
+      let integral = (~cache, t: t) => {
         mapToAll(
           t,
           (
@@ -332,6 +367,7 @@ module Shape = {
             Continuous.T.Integral.get(~cache),
           ),
         );
+      };
       let integralSum = (~cache, t: t) =>
         mapToAll(
           t,

@@ -14,6 +14,11 @@ type xyShape = {
   ys: array(float),
 };
 
+let foo = {xs: [|1., 2., 5.|], ys: [|1., 2., 3.|]};
+let answer = {xs: [|1., 2., 2., 5., 5.|], ys: [|1., 1., 2., 2., 3.|]};
+
+let toStepwise = (xyShape: xyShape) => {};
+
 type interpolationMethod = [ | `Stepwise | `Linear];
 
 type continuousShape = {

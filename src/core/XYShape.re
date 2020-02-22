@@ -19,7 +19,23 @@ let zip = t => Belt.Array.zip(t.xs, t.ys);
 
 let fmap = (t: t, y): t => {xs: t.xs, ys: t.ys |> E.A.fmap(y)};
 
+let fromArray = ((xs, ys)): t => {xs, ys};
+let fromArrays = (xs, ys): t => {xs, ys};
 let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
+
+let intersperce = (t1: t, t2: t) => {
+  let foo: ref(array((float, float))) = ref([||]);
+  let t1 = zip(t1);
+  let t2 = zip(t2);
+
+  Belt.Array.forEachWithIndex(t1, (i, item) => {
+    switch (Belt.Array.get(t2, i)) {
+    | Some(r) => foo := E.A.append(foo^, [|item, r|])
+    | None => foo := E.A.append(foo^, [|item|])
+    }
+  });
+  foo^ |> Belt.Array.unzip |> fromArray;
+};
 
 let scaleCdfTo = (~scaleTo=1., t: t) =>
   switch (_lastElement(t.ys)) {
@@ -34,9 +50,6 @@ let yFold = (fn, t: t) => {
 };
 
 let ySum = yFold((a, b) => a +. b);
-
-let fromArray = ((xs, ys)): t => {xs, ys};
-let fromArrays = (xs, ys): t => {xs, ys};
 
 let _transverse = fn =>
   Belt.Array.reduce(_, [||], (items, (x, y)) =>
@@ -68,6 +81,12 @@ module Range = {
   let rangeAreaAssumingSteps = (((lastX, lastY), (nextX, _)): zippedRange) =>
     (nextX -. lastX) *. lastY;
 
+  let rangePointAssumingSteps =
+      (((lastX, lastY), (nextX, nextY)): zippedRange) => (
+    nextX,
+    lastY,
+  );
+
   let rangeAreaAssumingTriangles =
       (((lastX, lastY), (nextX, nextY)): zippedRange) =>
     (nextX -. lastX) *. (lastY +. nextY) /. 2.;
@@ -93,6 +112,15 @@ module Range = {
     |> E.O.fmap(accumulateYs);
 
   let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);
+
+  let stepsToContinuous = t =>
+    Belt.Array.zip(t.xs, t.ys)
+    |> E.A.toRanges
+    |> E.R.toOption
+    |> E.O.fmap(r => r |> Belt.Array.map(_, rangePointAssumingSteps))
+    |> E.O.fmap(Belt.Array.unzip)
+    |> E.O.fmap(fromArray)
+    |> E.O.fmap(intersperce(t));
 };
 
 let findY = CdfLibrary.Distribution.findY;

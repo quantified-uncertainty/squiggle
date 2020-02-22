@@ -15,8 +15,7 @@ let make =
   unit,
 };
 
-let toComplexPower =
-    (~sampleCount, t: genericDistribution): option(complexPower) => {
+let toComplexPower = (~sampleCount, t: genericDistribution) => {
   let shape =
     switch (t.generationSource) {
     | GuesstimatorString(s) =>
