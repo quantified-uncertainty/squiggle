@@ -23,6 +23,8 @@ module type dist = {
   let toShape: t => DistributionTypes.shape;
   let toContinuous: t => option(DistributionTypes.continuousShape);
   let toDiscrete: t => option(DistributionTypes.discreteShape);
+  let toScaledContinuous: t => option(DistributionTypes.continuousShape);
+  let toScaledDiscrete: t => option(DistributionTypes.discreteShape);
 
   type integral;
   let integral: (~cache: option(integral), t) => integral;
@@ -40,6 +42,8 @@ module Dist = (T: dist) => {
   let toShape = T.toShape;
   let toContinuous = T.toContinuous;
   let toDiscrete = T.toDiscrete;
+  let toScaledContinuous = T.toScaledContinuous;
+  let toScaledDiscrete = T.toScaledDiscrete;
   let scaleBy = (~scale=1.0, t: t) =>
     t |> pointwiseFmap((r: float) => r *. scale);
 
@@ -102,6 +106,8 @@ module Continuous = {
         t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
       let toContinuous = t => Some(t);
       let toDiscrete = _ => None;
+      let toScaledContinuous = t => Some(t);
+      let toScaledDiscrete = _ => None;
     });
 };
 
@@ -120,6 +126,8 @@ module Discrete = {
       let toShape = (t: t): DistributionTypes.shape => Discrete(t);
       let toContinuous = _ => None;
       let toDiscrete = t => Some(t);
+      let toScaledContinuous = t => None;
+      let toScaledDiscrete = t => Some(t);
       let xToY = (f, t) =>
         CdfLibrary.Distribution.findY(f, t)
         |> DistributionTypes.MixedPoint.makeDiscrete;
@@ -154,6 +162,14 @@ module Mixed = {
     };
   };
 
+  let scaleDiscrete =
+      ({discreteProbabilityMassFraction}: DistributionTypes.mixedShape, f) =>
+    f *. discreteProbabilityMassFraction;
+
+  let scaleContinuous =
+      ({discreteProbabilityMassFraction}: DistributionTypes.mixedShape, f) =>
+    f *. (1.0 -. discreteProbabilityMassFraction);
+
   module T =
     Dist({
       type t = DistributionTypes.mixedShape;
@@ -166,47 +182,41 @@ module Mixed = {
       let toContinuous = ({continuous}: t) => Some(continuous);
       let toDiscrete = ({discrete}: t) => Some(discrete);
       let xToY =
-          (f, {discrete, continuous, discreteProbabilityMassFraction}: t) => {
+          (
+            f,
+            {discrete, continuous, discreteProbabilityMassFraction} as t: t,
+          ) => {
         let c =
           continuous
           |> Continuous.T.xToY(f)
-          |> DistributionTypes.MixedPoint.fmap(e =>
-               e *. (1. -. discreteProbabilityMassFraction)
-             );
+          |> DistributionTypes.MixedPoint.fmap(scaleContinuous(t));
         let d =
           discrete
           |> Discrete.T.xToY(f)
-          |> DistributionTypes.MixedPoint.fmap(e =>
-               e *. discreteProbabilityMassFraction
-             );
+          |> DistributionTypes.MixedPoint.fmap(scaleDiscrete(t));
         DistributionTypes.MixedPoint.add(c, d);
       };
 
-      // todo: FixMe
-      let scaledContinuousComponent =
-          ({continuous, discreteProbabilityMassFraction}: t)
-          : option(DistributionTypes.continuousShape) =>
-        Some(continuous);
+      let toScaledContinuous =
+          ({continuous, discreteProbabilityMassFraction}: t) =>
+        Some(
+          continuous
+          |> Continuous.T.scaleBy(
+               ~scale=1.0 -. discreteProbabilityMassFraction,
+             ),
+        );
 
-      let scaledDiscreteComponent =
-          ({discrete, discreteProbabilityMassFraction}: t)
-          : DistributionTypes.continuousShape =>
-        Continuous.make(
-          Discrete.T.pointwiseFmap(
-            f => f *. discreteProbabilityMassFraction,
-            discrete,
-          ),
-          `Stepwise,
+      let toScaledDiscrete = ({discrete, discreteProbabilityMassFraction}: t) =>
+        Some(
+          discrete
+          |> Discrete.T.scaleBy(~scale=discreteProbabilityMassFraction),
         );
 
       // TODO: Add these two directly, once interpolation is added.
       let integral = (~cache, t) => {
         //   let cont = scaledContinuousComponent(t);
         //   let discrete = scaledDiscreteComponent(t);
-        switch (cache) {
-        | Some(cache) => cache
-        | None => scaledContinuousComponent(t) |> E.O.toExt("")
-        };
+        cache |> E.O.toExt("");
       };
 
       let integralSum =
@@ -293,6 +303,24 @@ module Shape = {
             Continuous.T.toDiscrete,
           ),
         );
+      let toScaledDiscrete = (t: t) =>
+        mapToAll(
+          t,
+          (
+            Mixed.T.toScaledDiscrete,
+            Discrete.T.toScaledDiscrete,
+            Continuous.T.toScaledDiscrete,
+          ),
+        );
+      let toScaledContinuous = (t: t) =>
+        mapToAll(
+          t,
+          (
+            Mixed.T.toScaledContinuous,
+            Discrete.T.toScaledContinuous,
+            Continuous.T.toScaledContinuous,
+          ),
+        );
       let minX = (t: t) =>
         mapToAll(t, (Mixed.T.minX, Discrete.T.minX, Continuous.T.minX));
       let integral = (~cache, t: t) =>
@@ -375,6 +403,9 @@ module ComplexPower = {
       let shapeFn = (fn, t: t) => t |> toShape |> fn;
       let toContinuous = shapeFn(Shape.T.toContinuous);
       let toDiscrete = shapeFn(Shape.T.toDiscrete);
+      // todo: Adjust for total mass.
+      let toScaledContinuous = shapeFn(Shape.T.toContinuous);
+      let toScaledDiscrete = shapeFn(Shape.T.toScaledDiscrete);
       // todo: adjust for limit, and the fact that total mass is lower.
       let xToY = f => shapeFn(Shape.T.xToY(f));
       let minX = shapeFn(Shape.T.minX);
