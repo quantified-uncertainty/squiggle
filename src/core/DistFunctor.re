@@ -49,6 +49,12 @@ module Dist = (T: dist) => {
     let xToY = T.integralXtoY;
     let sum = T.integralSum;
   };
+
+  //   This is suboptimal because it could get the cache but doesn't here.
+  let scaleToIntegralSum = (~intendedSum=1.0, t: t) => {
+    let scale = intendedSum /. Integral.sum(~cache=None, t);
+    scaleBy(~scale, t);
+  };
 };
 
 module Continuous = {
@@ -123,6 +129,31 @@ module Discrete = {
 };
 
 module Mixed = {
+  let make =
+      (~continuous, ~discrete, ~discreteProbabilityMassFraction)
+      : DistributionTypes.mixedShape => {
+    continuous,
+    discrete,
+    discreteProbabilityMassFraction,
+  };
+
+  let clean =
+      (t: DistributionTypes.mixedShape): option(DistributionTypes.shape) => {
+    switch (t) {
+    | {
+        continuous: {xyShape: {xs: [||], ys: [||]}},
+        discrete: {xs: [||], ys: [||]},
+      } =>
+      None
+    | {discrete: {xs: [|_|], ys: [|_|]}} => None
+    | {continuous, discrete: {xs: [||], ys: [||]}} =>
+      Some(Continuous(continuous))
+    | {continuous: {xyShape: {xs: [||], ys: [||]}}, discrete} =>
+      Some(Discrete(discrete))
+    | shape => Some(Mixed(shape))
+    };
+  };
+
   module T =
     Dist({
       type t = DistributionTypes.mixedShape;
@@ -312,24 +343,24 @@ module WithMetadata = {
       type t = DistributionTypes.complexPower;
       type integral = DistributionTypes.complexPower;
       let toShape = ({shape, _}: t) => shape;
-      let toContinuous = (t: t) => t |> toShape |> Shape.T.toContinuous;
-      let toDiscrete = (t: t) => t |> toShape |> Shape.T.toDiscrete;
+      let shapeFn = (fn, t: t) => t |> toShape |> fn;
+      let toContinuous = shapeFn(Shape.T.toContinuous);
+      let toDiscrete = shapeFn(Shape.T.toDiscrete);
       // todo: adjust for limit, and the fact that total mass is lower.
-      let xToY = (f, t: t) => t |> toShape |> Shape.T.xToY(f);
-      let minX = (t: t) => t |> toShape |> Shape.T.minX;
-      let maxX = (t: t) => t |> toShape |> Shape.T.maxX;
+      let xToY = f => shapeFn(Shape.T.xToY(f));
+      let minX = shapeFn(Shape.T.minX);
+      let maxX = shapeFn(Shape.T.maxX);
       let fromShape = (shape, t): t => DistributionTypes.update(~shape, t);
       // todo: adjust for limit
       let pointwiseFmap = (fn, {shape, _} as t: t): t =>
         fromShape(Shape.T.pointwiseFmap(fn, shape), t);
-
       let integral = (~cache as _, t: t) =>
         fromShape(Continuous(t.integralCache), t);
       let integralSum = (~cache as _, t: t) =>
-        t |> toShape |> Shape.T.Integral.sum(~cache=Some(t.integralCache));
+        Shape.T.Integral.sum(~cache=Some(t.integralCache), toShape(t));
       //   TODO: Fix this below, obviously. Adjust for limit.
-      let integralXtoY = (~cache as _, f, t) => {
-        1337.0;
+      let integralXtoY = (~cache as _, f, t: t) => {
+        Shape.T.Integral.xToY(~cache=Some(t.integralCache), f, toShape(t));
       };
     });
 };

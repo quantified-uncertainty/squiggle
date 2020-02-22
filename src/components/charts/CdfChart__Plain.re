@@ -45,7 +45,7 @@ let make =
       ?minX
       ?scale
       ?timeScale
-      discrete={discrete |> E.O.fmap(Shape.Discrete.toJs)}
+      discrete={discrete |> E.O.fmap(XYShape.toJs)}
       height
       marginBottom=50
       marginTop=0

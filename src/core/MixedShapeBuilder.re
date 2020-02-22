@@ -17,7 +17,7 @@ let build = (~continuous, ~discrete, ~assumptions) =>
     } =>
     // TODO: Fix this, it's wrong :(
     Some(
-      Shape.Mixed.make(
+      DistFunctor.Mixed.make(
         ~continuous,
         ~discrete,
         ~discreteProbabilityMassFraction=r,
@@ -30,7 +30,7 @@ let build = (~continuous, ~discrete, ~assumptions) =>
       discreteProbabilityMass: Some(r),
     } =>
     Some(
-      Shape.Mixed.make(
+      DistFunctor.Mixed.make(
         ~continuous,
         ~discrete,
         ~discreteProbabilityMassFraction=r,
@@ -56,10 +56,12 @@ let build = (~continuous, ~discrete, ~assumptions) =>
       discrete: ADDS_TO_CORRECT_PROBABILITY,
       discreteProbabilityMass: None,
     } =>
-    let discreteProbabilityMassFraction = Shape.Discrete.ySum(discrete);
-    let discrete = Shape.Discrete.scaleYToTotal(1.0, discrete);
+    let discreteProbabilityMassFraction =
+      DistFunctor.Discrete.T.Integral.sum(~cache=None, discrete);
+    let discrete =
+      DistFunctor.Discrete.T.scaleToIntegralSum(~intendedSum=1.0, discrete);
     Some(
-      Shape.Mixed.make(
+      DistFunctor.Mixed.make(
         ~continuous,
         ~discrete,
         ~discreteProbabilityMassFraction,

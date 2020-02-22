@@ -49,7 +49,7 @@ let renderIfNeeded =
   switch (t.generationSource) {
   | GuesstimatorString(s) =>
     Guesstimator.stringToMixedShape(~string=s, ~sampleCount, ())
-    |> E.O.bind(_, Shape.Mixed.clean)
+    |> E.O.bind(_, DistFunctor.Mixed.clean)
     |> E.O.fmap((shape: DistributionTypes.shape) =>
          make(
            ~generationSource=Shape(shape),
@@ -71,13 +71,9 @@ let normalize = (t: genericDistribution): option(genericDistribution) => {
 };
 
 let yIntegral = (t: DistributionTypes.genericDistribution, x) => {
-  let addInitialMass = n => n +. Domain.initialProbabilityMass(t.domain);
-  let normalize = n => n *. Domain.normalizeProbabilityMass(t.domain);
   switch (t) {
   | {generationSource: Shape(shape)} =>
-    Shape.T.yIntegral(shape, x)
-    |> E.O.fmap(addInitialMass)
-    |> E.O.fmap(normalize)
+    Some(DistFunctor.Shape.T.Integral.xToY(~cache=None, x, shape))
   | _ => None
   };
 };

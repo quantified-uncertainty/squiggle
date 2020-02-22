@@ -115,11 +115,11 @@ let max = (f1: option(float), f2: option(float)) =>
   };
 
 module Mixed = {
-  let make = (~continuous, ~discrete, ~discreteProbabilityMassFraction) => {
-    continuous,
-    discrete,
-    discreteProbabilityMassFraction,
-  };
+  // let make = (~continuous, ~discrete, ~discreteProbabilityMassFraction) => {
+  //   continuous,
+  //   discrete,
+  //   discreteProbabilityMassFraction,
+  // };
 
   let minX = (t: DistributionTypes.mixedShape) =>
     min(t.continuous |> Continuous.minX, t.discrete |> Discrete.minX);
@@ -163,193 +163,135 @@ module Mixed = {
     | _ => None
     };
   };
+} /* }*/;
 
-  let clean = (t: DistributionTypes.mixedShape) =>
-    switch (t) {
-    | {
-        continuous: {xyShape: {xs: [||], ys: [||]}},
-        discrete: {xs: [||], ys: [||]},
-      } =>
-      None
-    | {discrete: {xs: [|_|], ys: [|_|]}} => None
-    | {continuous, discrete: {xs: [||], ys: [||]}} =>
-      Some(Continuous(continuous))
-    | {continuous: {xyShape: {xs: [||], ys: [||]}}, discrete} =>
-      Some(Discrete(discrete))
-    | shape => Some(Mixed(shape))
-    };
-};
+// module T = {
+//   type t = DistributionTypes.shape;
 
-module T = {
-  type t = DistributionTypes.shape;
+//   let y = (t: t, x: float) =>
+//     switch (t) {
+//     | Mixed(m) => `mixed(Mixed.findY(m, x))
+//     | Discrete(discreteShape) => `discrete(Discrete.findY(x, discreteShape))
+//     | Continuous(continuousShape) =>
+//       `continuous(Continuous.findY(x, continuousShape))
+//     };
 
-  let y = (t: t, x: float) =>
-    switch (t) {
-    | Mixed(m) => `mixed(Mixed.findY(m, x))
-    | Discrete(discreteShape) => `discrete(Discrete.findY(x, discreteShape))
-    | Continuous(continuousShape) =>
-      `continuous(Continuous.findY(x, continuousShape))
-    };
+//   let yIntegral = (t: t, x: float) =>
+//     switch (t) {
+//     | Mixed(m) => Mixed.findYIntegral(x, m)
+//     | Discrete(discreteShape) =>
+//       Discrete.findIntegralY(x, discreteShape) |> E.O.some
+//     | Continuous(continuousShape) =>
+//       Continuous.findIntegralY(x, continuousShape)
+//     };
 
-  let yIntegral = (t: t, x: float) =>
-    switch (t) {
-    | Mixed(m) => Mixed.findYIntegral(x, m)
-    | Discrete(discreteShape) =>
-      Discrete.findIntegralY(x, discreteShape) |> E.O.some
-    | Continuous(continuousShape) =>
-      Continuous.findIntegralY(x, continuousShape)
-    };
+//   let minX = (t: t) =>
+//     switch (t) {
+//     | Mixed(m) => Mixed.minX(m)
+//     | Discrete(discreteShape) => Discrete.minX(discreteShape)
+//     | Continuous(continuousShape) => Continuous.minX(continuousShape)
+//     };
 
-  let minX = (t: t) =>
-    switch (t) {
-    | Mixed(m) => Mixed.minX(m)
-    | Discrete(discreteShape) => Discrete.minX(discreteShape)
-    | Continuous(continuousShape) => Continuous.minX(continuousShape)
-    };
+//   let maxX = (t: t) =>
+//     switch (t) {
+//     | Mixed(m) => Mixed.maxX(m)
+//     | Discrete(discreteShape) => Discrete.maxX(discreteShape)
+//     | Continuous(continuousShape) => Continuous.maxX(continuousShape)
+//     };
 
-  let maxX = (t: t) =>
-    switch (t) {
-    | Mixed(m) => Mixed.maxX(m)
-    | Discrete(discreteShape) => Discrete.maxX(discreteShape)
-    | Continuous(continuousShape) => Continuous.maxX(continuousShape)
-    };
+//   let discreteComponent = (t: t) =>
+//     switch (t) {
+//     | Mixed({discrete}) => Some(discrete)
+//     | Discrete(d) => Some(d)
+//     | Continuous(_) => None
+//     };
 
-  let discreteComponent = (t: t) =>
-    switch (t) {
-    | Mixed({discrete}) => Some(discrete)
-    | Discrete(d) => Some(d)
-    | Continuous(_) => None
-    };
+//   let continuousComponent = (t: t) =>
+//     switch (t) {
+//     | Mixed({continuous}) => Some(continuous)
+//     | Continuous(c) => Some(c)
+//     | Discrete(_) => None
+//     };
+//   // let scaledContinuousComponent = (t: t): option(continuousShape) => {
+//   //   switch (t) {
+//   //   | Mixed({continuous, discreteProbabilityMassFraction}) =>
+//   //     Continuous.scalePdf(
+//   //       ~scaleTo=1.0 -. discreteProbabilityMassFraction,
+//   //       continuous,
+//   //     )
+//   //   | Discrete(_) => None
+//   //   | Continuous(c) => Some(c)
+//   //   };
+//   // };
+//   // let scaledDiscreteComponent = (t: t): option(discreteShape) => {
+//   //   switch (t) {
+//   //   | Mixed({discrete, discreteProbabilityMassFraction}) =>
+//   //     Some(Discrete.scaleYToTotal(discreteProbabilityMassFraction, discrete))
+//   //   | Discrete(d) => Some(d)
+//   //   | Continuous(_) => None
+//   //   };
+//   // };
+//   // let pointwiseFmap = (fn, t: t): shape =>
+//   //   switch (t) {
+//   //   | Mixed({discrete, continuous, discreteProbabilityMassFraction}) =>
+//   //     Mixed({
+//   //       continuous: XYShape.pointwiseMap(fn, continuous),
+//   //       discrete: XYShape.pointwiseMap(fn, discrete),
+//   //       discreteProbabilityMassFraction,
+//   //     })
+//   //   | Discrete(x) => Discrete(XYShape.pointwiseMap(fn, x))
+//   //   | Continuous(x) => Continuous(XYShape.pointwiseMap(fn, x))
+//   //   };
+//   // module Cdf = {
+//   //   let normalizeCdf = (t: DistributionTypes.shape) => {
+//   //     switch (t) {
+//   //     | Mixed({continuous, discrete, discreteProbabilityMassFraction}) =>
+//   //       Mixed({
+//   //         continuous: continuous |> Continuous.normalizeCdf,
+//   //         discrete: discrete |> Discrete.scaleYToTotal(1.0),
+//   //         discreteProbabilityMassFraction,
+//   //       })
+//   //     | Discrete(d) => Discrete(d |> Discrete.scaleYToTotal(1.0))
+//   //     | Continuous(continuousShape) =>
+//   //       Continuous(Continuous.normalizeCdf(continuousShape))
+//   //     };
+//   //   };
+//   // };
+// };
 
-  let continuousComponent = (t: t) =>
-    switch (t) {
-    | Mixed({continuous}) => Some(continuous)
-    | Continuous(c) => Some(c)
-    | Discrete(_) => None
-    };
+// module PdfCdfShape = {
+//   type t = pdfCdfCombo;
+//   let pdf = (t: t) =>
+//     switch (t.pdf) {
+//     | Mixed(pdf) => Mixed(pdf)
+//     | Discrete(pdf) => Discrete(pdf)
+//     | Continuous(pdf) => Continuous(pdf)
+//     };
+//   let cdf = (t: t) => t.cdf;
+// };
 
-  // let scaledContinuousComponent = (t: t): option(continuousShape) => {
-  //   switch (t) {
-  //   | Mixed({continuous, discreteProbabilityMassFraction}) =>
-  //     Continuous.scalePdf(
-  //       ~scaleTo=1.0 -. discreteProbabilityMassFraction,
-  //       continuous,
-  //     )
-  //   | Discrete(_) => None
-  //   | Continuous(c) => Some(c)
-  //   };
-  // };
+// type distributionUnit =
+//   | UnspecifiedDistribution
+//   | TimeDistribution(TimeTypes.timeVector);
 
-  // let scaledDiscreteComponent = (t: t): option(discreteShape) => {
-  //   switch (t) {
-  //   | Mixed({discrete, discreteProbabilityMassFraction}) =>
-  //     Some(Discrete.scaleYToTotal(discreteProbabilityMassFraction, discrete))
-  //   | Discrete(d) => Some(d)
-  //   | Continuous(_) => None
-  //   };
-  // };
+// type withLimitedDomain = {
+//   domain,
+//   dist: pdfCdfCombo,
+// };
 
-  // let pointwiseFmap = (fn, t: t): shape =>
-  //   switch (t) {
-  //   | Mixed({discrete, continuous, discreteProbabilityMassFraction}) =>
-  //     Mixed({
-  //       continuous: XYShape.pointwiseMap(fn, continuous),
-  //       discrete: XYShape.pointwiseMap(fn, discrete),
-  //       discreteProbabilityMassFraction,
-  //     })
-  //   | Discrete(x) => Discrete(XYShape.pointwiseMap(fn, x))
-  //   | Continuous(x) => Continuous(XYShape.pointwiseMap(fn, x))
-  //   };
+// module WithLimitedDomain = {
+//   type t = withLimitedDomain;
+//   let dist = (t: t) => t.dist;
+//   let pdf = (t: t) => PdfCdfShape.pdf(t.dist);
+//   let cdf = (t: t) => PdfCdfShape.cdf(t.dist);
+//   // TODO: This is bad, obviously needs to be fixed.
+//   let distScaleFactor = (t: t) => 3.0;
+//   // let scaledPdfShape = (scaleFactor, t: t) =>
+//   //   t |> pdf |> T.pointwiseFmap(r => r *. scaleFactor);
+//   // let scaledCdfShape = (scaleFactor, t: t) =>
+//   //   t |> cdf |> XYShape.pointwiseMap(r => r *. scaleFactor);
+// };
 
-  // module Cdf = {
-  //   let normalizeCdf = (t: DistributionTypes.shape) => {
-  //     switch (t) {
-  //     | Mixed({continuous, discrete, discreteProbabilityMassFraction}) =>
-  //       Mixed({
-  //         continuous: continuous |> Continuous.normalizeCdf,
-  //         discrete: discrete |> Discrete.scaleYToTotal(1.0),
-  //         discreteProbabilityMassFraction,
-  //       })
-  //     | Discrete(d) => Discrete(d |> Discrete.scaleYToTotal(1.0))
-  //     | Continuous(continuousShape) =>
-  //       Continuous(Continuous.normalizeCdf(continuousShape))
-  //     };
-  //   };
-  // };
-
-  module Pdf = {
-    // TODO: This is wrong. The discrete component should be made continuous when integrating.
-    // let toCdf = (t: t) =>
-    //   switch (t) {
-    //   | Mixed({continuous, discrete, discreteProbabilityMassFraction}) =>
-    //     Some(
-    //       Mixed({
-    //         continuous: Continuous.toCdf(continuous) |> E.O.toExt(""),
-    //         discrete: discrete |> Discrete.integrate,
-    //         discreteProbabilityMassFraction,
-    //       }),
-    //     )
-    //   | Discrete(discrete) =>
-    //     Some(Continuous(discrete |> Discrete.integrate))
-    //   | Continuous(continuous) =>
-    //     Continuous.toCdf(continuous) |> E.O.fmap(e => Continuous(e))
-    //   };
-    // let normalize = (t: DistributionTypes.shape): option(shape) => {
-    //   switch (t) {
-    //   | Mixed({continuous, discrete, discreteProbabilityMassFraction}) =>
-    //     continuous
-    //     |> Continuous.scalePdf(~scaleTo=1.0)
-    //     |> E.O.fmap(r =>
-    //          Mixed({
-    //            continuous: r,
-    //            discrete: discrete |> Discrete.scaleYToTotal(1.0),
-    //            discreteProbabilityMassFraction,
-    //          })
-    //        )
-    //   | Discrete(d) => Some(Discrete(d |> Discrete.scaleYToTotal(1.0)))
-    //   | Continuous(continuousShape) =>
-    //     continuousShape
-    //     |> Continuous.scalePdf(~scaleTo=1.0)
-    //     |> E.O.fmap(r => Continuous(r))
-    //   };
-    // };
-  };
-};
-
-module PdfCdfShape = {
-  type t = pdfCdfCombo;
-  let pdf = (t: t) =>
-    switch (t.pdf) {
-    | Mixed(pdf) => Mixed(pdf)
-    | Discrete(pdf) => Discrete(pdf)
-    | Continuous(pdf) => Continuous(pdf)
-    };
-  let cdf = (t: t) => t.cdf;
-};
-
-type distributionUnit =
-  | UnspecifiedDistribution
-  | TimeDistribution(TimeTypes.timeVector);
-
-type withLimitedDomain = {
-  domain,
-  dist: pdfCdfCombo,
-};
-
-module WithLimitedDomain = {
-  type t = withLimitedDomain;
-  let dist = (t: t) => t.dist;
-  let pdf = (t: t) => PdfCdfShape.pdf(t.dist);
-  let cdf = (t: t) => PdfCdfShape.cdf(t.dist);
-  // TODO: This is bad, obviously needs to be fixed.
-  let distScaleFactor = (t: t) => 3.0;
-  // let scaledPdfShape = (scaleFactor, t: t) =>
-  //   t |> pdf |> T.pointwiseFmap(r => r *. scaleFactor);
-  // let scaledCdfShape = (scaleFactor, t: t) =>
-  //   t |> cdf |> XYShape.pointwiseMap(r => r *. scaleFactor);
-};
-
-type withTimeVector = {
-  timeVector: TimeTypes.timeVector,
-  dist: withLimitedDomain,
-};
+// type withTimeVector = {
+//   timeVector: TimeTypes.timeVector,
+//   dist: withLimitedDomain,
