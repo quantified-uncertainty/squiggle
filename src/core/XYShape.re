@@ -1,0 +1,99 @@
+open DistributionTypes;
+let _lastElement = (a: array('a)) =>
+  switch (Belt.Array.size(a)) {
+  | 0 => None
+  | n => Belt.Array.get(a, n - 1)
+  };
+
+type t = xyShape;
+
+let toJs = (t: t) => {
+  {"xs": t.xs, "ys": t.ys};
+};
+
+let minX = (t: t) => t.xs |> E.A.get(_, 0);
+// TODO: Check if this actually gets the last element, I'm not sure it does.
+let maxX = (t: t) => t.xs |> (r => E.A.get(r, E.A.length(r) - 1));
+
+let zip = t => Belt.Array.zip(t.xs, t.ys);
+
+let fmap = (t: t, y): t => {xs: t.xs, ys: t.ys |> E.A.fmap(y)};
+
+let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
+
+let scaleCdfTo = (~scaleTo=1., t: t) =>
+  switch (_lastElement(t.ys)) {
+  | Some(n) =>
+    let scaleBy = scaleTo /. n;
+    fmap(t, r => r *. scaleBy);
+  | None => t
+  };
+
+let yFold = (fn, t: t) => {
+  E.A.fold_left(fn, 0., t.ys);
+};
+
+let ySum = yFold((a, b) => a +. b);
+
+let fromArray = ((xs, ys)): t => {xs, ys};
+let fromArrays = (xs, ys): t => {xs, ys};
+
+let _transverse = fn =>
+  Belt.Array.reduce(_, [||], (items, (x, y)) =>
+    switch (_lastElement(items)) {
+    | Some((xLast, yLast)) =>
+      Belt.Array.concat(items, [|(x, fn(y, yLast))|])
+    | None => [|(x, y)|]
+    }
+  );
+
+let _transverseShape = (fn, p: t) => {
+  Belt.Array.zip(p.xs, p.ys)
+  |> _transverse(fn)
+  |> Belt.Array.unzip
+  |> fromArray;
+};
+
+let accumulateYs = _transverseShape((aCurrent, aLast) => aCurrent +. aLast);
+let subtractYs = _transverseShape((aCurrent, aLast) => aCurrent -. aLast);
+
+module Range = {
+  // ((lastX, lastY), (nextX, nextY))
+  type zippedRange = ((float, float), (float, float));
+
+  let floatSum = Belt.Array.reduce(_, 0., (a, b) => a +. b);
+  let toT = r => r |> Belt.Array.unzip |> fromArray;
+  let nextX = ((_, (nextX, _)): zippedRange) => nextX;
+
+  let rangeAreaAssumingSteps = (((lastX, lastY), (nextX, _)): zippedRange) =>
+    (nextX -. lastX) *. lastY;
+
+  let rangeAreaAssumingTriangles =
+      (((lastX, lastY), (nextX, nextY)): zippedRange) =>
+    (nextX -. lastX) *. (lastY +. nextY) /. 2.;
+
+  let delta_y_over_delta_x =
+      (((lastX, lastY), (nextX, nextY)): zippedRange) =>
+    (nextY -. lastY) /. (nextX -. lastX);
+
+  let inRanges = (mapper, reducer, t: t) => {
+    Belt.Array.zip(t.xs, t.ys)
+    |> E.A.toRanges
+    |> E.R.toOption
+    |> E.O.fmap(r => r |> Belt.Array.map(_, mapper) |> reducer);
+  };
+
+  let mapYsBasedOnRanges = fn => inRanges(r => (nextX(r), fn(r)), toT);
+
+  let integrateWithSteps = z =>
+    mapYsBasedOnRanges(rangeAreaAssumingSteps, z) |> E.O.fmap(accumulateYs);
+
+  let integrateWithTriangles = z =>
+    mapYsBasedOnRanges(rangeAreaAssumingTriangles, z)
+    |> E.O.fmap(accumulateYs);
+
+  let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);
+};
+
+let findY = CdfLibrary.Distribution.findY;
+let findX = CdfLibrary.Distribution.findX;

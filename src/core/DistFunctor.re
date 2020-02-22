@@ -14,26 +14,29 @@ let max = (f1: option(float), f2: option(float)) =>
   | (None, None) => None
   };
 
-type yPoint =
-  | Mixed({
-      continuous: float,
-      discrete: float,
-    })
-  | Continuous(float)
-  | Discrete(float);
+type mixedPoint = {
+  continuous: float,
+  discrete: float,
+};
 
-module YPoint = {
-  type t = yPoint;
-  let toContinuousValue = (t: t) =>
-    switch (t) {
-    | Continuous(f) => f
-    | Mixed({continuous}) => continuous
-    | _ => 0.0
-    };
-  let makeContinuous = (f: float): t => Continuous(f);
-  let makeDiscrete = (f: float): t => Discrete(f);
-  let makeMixed = (c: float, d: float): t =>
-    Mixed({continuous: c, discrete: d});
+module MixedPoint = {
+  type t = mixedPoint;
+  let toContinuousValue = (t: t) => t.continuous;
+  let toDiscreteValue = (t: t) => t.discrete;
+  let makeContinuous = (continuous: float): t => {continuous, discrete: 0.0};
+  let makeDiscrete = (discrete: float): t => {continuous: 0.0, discrete};
+
+  let fmap = (fn, t: t) => {
+    continuous: fn(t.continuous),
+    discrete: fn(t.discrete),
+  };
+
+  let combine2 = (fn, c: t, d: t): t => {
+    continuous: fn(c.continuous, d.continuous),
+    discrete: fn(c.discrete, d.discrete),
+  };
+
+  let add = combine2((a, b) => a +. b);
 };
 
 module type dist = {
@@ -41,7 +44,7 @@ module type dist = {
   let minX: t => option(float);
   let maxX: t => option(float);
   let pointwiseFmap: (float => float, t) => t;
-  let xToY: (float, t) => yPoint;
+  let xToY: (float, t) => mixedPoint;
   let shape: t => DistributionTypes.shape;
 
   type integral;
@@ -71,31 +74,33 @@ module Continuous =
   Dist({
     type t = DistributionTypes.continuousShape;
     type integral = DistributionTypes.continuousShape;
+    let make = (shape, interpolation): t => {shape, interpolation};
+    let fromShape = shape => make(shape, `Linear);
+    let shape = (t: t) => t.shape;
+    let shapeFn = (fn, t: t) => t |> shape |> fn;
     let shape = (t: t) => t.shape;
     let integral = (~cache, t) =>
       cache
       |> E.O.default(
            t
            |> shape
-           |> Shape.XYShape.Range.integrateWithTriangles
+           |> XYShape.Range.integrateWithTriangles
            |> E.O.toExt("")
-           |> Shape.Continuous.fromShape,
+           |> fromShape,
          );
     //   This seems wrong, we really want the ending bit, I'd assume
     let integralSum = (~cache, t) =>
-      t |> integral(~cache) |> shape |> Shape.XYShape.ySum;
-    let minX = (t: t) => t |> shape |> Shape.XYShape.minX;
-    let maxX = (t: t) => t |> shape |> Shape.XYShape.maxX;
+      t |> integral(~cache) |> shape |> XYShape.ySum;
+    let minX = shapeFn(XYShape.minX);
+    let maxX = shapeFn(XYShape.maxX);
     let pointwiseFmap = (fn, t: t) =>
-      t
-      |> shape
-      |> Shape.XYShape.pointwiseMap(fn)
-      |> Shape.Continuous.fromShape;
+      t |> shape |> XYShape.pointwiseMap(fn) |> fromShape;
     let shape = (t: t): DistributionTypes.shape => Continuous(t);
     let xToY = (f, t) =>
-      Shape.Continuous.findY(f, t) |> YPoint.makeContinuous;
+      shapeFn(CdfLibrary.Distribution.findY(f), t)
+      |> MixedPoint.makeContinuous;
     let integralXtoY = (~cache, f, t) =>
-      t |> integral(~cache) |> Shape.Continuous.findY(f);
+      t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
   });
 
 module Discrete =
@@ -103,16 +108,17 @@ module Discrete =
     type t = DistributionTypes.discreteShape;
     type integral = DistributionTypes.continuousShape;
     let integral = (~cache, t) =>
-      cache |> E.O.default(t |> Shape.Discrete.integrate);
-    let integralSum = (~cache, t) => t |> Shape.XYShape.ySum;
-    let minX = Shape.XYShape.minX;
-    let maxX = Shape.XYShape.maxX;
-    let pointwiseFmap = Shape.XYShape.pointwiseMap;
+      cache
+      |> E.O.default(t |> XYShape.accumulateYs |> Shape.Continuous.fromShape);
+    let integralSum = (~cache, t) => t |> XYShape.ySum;
+    let minX = XYShape.minX;
+    let maxX = XYShape.maxX;
+    let pointwiseFmap = XYShape.pointwiseMap;
     let shape = (t: t): DistributionTypes.shape => Discrete(t);
     let xToY = (f, t) =>
-      CdfLibrary.Distribution.findY(f, t) |> (e => Discrete(e));
+      CdfLibrary.Distribution.findY(f, t) |> MixedPoint.makeDiscrete;
     let integralXtoY = (~cache, f, t) =>
-      t |> Shape.XYShape.accumulateYs |> CdfLibrary.Distribution.findY(f);
+      t |> XYShape.accumulateYs |> CdfLibrary.Distribution.findY(f);
   });
 
 module Mixed =
@@ -125,16 +131,17 @@ module Mixed =
       max(Continuous.maxX(continuous), Discrete.maxX(discrete));
     let shape = (t: t): DistributionTypes.shape => Mixed(t);
     let xToY =
-        (f, {discrete, continuous, discreteProbabilityMassFraction}: t) =>
-      Mixed({
-        continuous:
-          Continuous.xToY(f, continuous)
-          |> YPoint.toContinuousValue
-          |> (e => e *. (1. -. discreteProbabilityMassFraction)),
-        discrete:
-          Shape.Discrete.findY(f, discrete)
-          |> (e => e *. discreteProbabilityMassFraction),
-      });
+        (f, {discrete, continuous, discreteProbabilityMassFraction}: t) => {
+      let c =
+        continuous
+        |> Continuous.xToY(f)
+        |> MixedPoint.fmap(e => e *. (1. -. discreteProbabilityMassFraction));
+      let d =
+        discrete
+        |> Discrete.xToY(f)
+        |> MixedPoint.fmap(e => e *. discreteProbabilityMassFraction);
+      MixedPoint.add(c, d);
+    };
 
     let scaledContinuousComponent =
         ({continuous, discreteProbabilityMassFraction}: t)
@@ -195,10 +202,8 @@ module Mixed =
     let pointwiseFmap =
         (fn, {discrete, continuous, discreteProbabilityMassFraction}: t): t => {
       {
-        discrete: Shape.XYShape.pointwiseMap(fn, discrete),
-        continuous:
-          continuous
-          |> Shape.Continuous.shapeMap(Shape.XYShape.pointwiseMap(fn)),
+        discrete: Discrete.pointwiseFmap(fn, discrete),
+        continuous: Continuous.pointwiseFmap(fn, continuous),
         discreteProbabilityMassFraction,
       };
     };
@@ -208,16 +213,28 @@ module Shape =
   Dist({
     type t = DistributionTypes.shape;
     type integral = DistributionTypes.continuousShape;
+
+    let mapToAll = (t: t, (fn1, fn2, fn3)) =>
+      switch (t) {
+      | Mixed(m) => fn1(m)
+      | Discrete(m) => fn2(m)
+      | Continuous(m) => fn3(m)
+      };
+
+    let fmap = (t: t, (fn1, fn2, fn3)): t =>
+      switch (t) {
+      | Mixed(m) => Mixed(fn1(m))
+      | Discrete(m) => Discrete(fn2(m))
+      | Continuous(m) => Continuous(fn3(m))
+      };
+
     let xToY = (f, t) =>
-      Shape.T.mapToAll(
-        t,
-        (Mixed.xToY(f), Discrete.xToY(f), Continuous.xToY(f)),
-      );
+      mapToAll(t, (Mixed.xToY(f), Discrete.xToY(f), Continuous.xToY(f)));
     let shape = (t: t) => t;
     let minX = (t: t) =>
-      Shape.T.mapToAll(t, (Mixed.minX, Discrete.minX, Continuous.minX));
+      mapToAll(t, (Mixed.minX, Discrete.minX, Continuous.minX));
     let integral = (~cache, t: t) =>
-      Shape.T.mapToAll(
+      mapToAll(
         t,
         (
           Mixed.Integral.get(~cache),
@@ -226,7 +243,7 @@ module Shape =
         ),
       );
     let integralSum = (~cache, t: t) =>
-      Shape.T.mapToAll(
+      mapToAll(
         t,
         (
           Mixed.Integral.sum(~cache),
@@ -235,7 +252,7 @@ module Shape =
         ),
       );
     let integralXtoY = (~cache, f, t) => {
-      Shape.T.mapToAll(
+      mapToAll(
         t,
         (
           Mixed.Integral.xToY(~cache, f),
@@ -245,9 +262,9 @@ module Shape =
       );
     };
     let maxX = (t: t) =>
-      Shape.T.mapToAll(t, (Mixed.minX, Discrete.minX, Continuous.minX));
+      mapToAll(t, (Mixed.minX, Discrete.minX, Continuous.minX));
     let pointwiseFmap = (fn, t: t) =>
-      Shape.T.fmap(
+      fmap(
         t,
         (
           Mixed.pointwiseFmap(fn),
@@ -273,7 +290,8 @@ module WithMetadata =
       fromShape(Continuous(t.integralCache), t);
     let integralSum = (~cache as _, t: t) =>
       t |> shape |> Shape.Integral.sum(~cache=Some(t.integralCache));
+    //   TODO: Fix this below, obviously.
     let integralXtoY = (~cache as _, f, t) => {
-      3.0;
+      1337.0;
     };
   });

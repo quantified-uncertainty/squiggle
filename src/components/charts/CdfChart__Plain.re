@@ -50,7 +50,7 @@ let make =
       marginBottom=50
       marginTop=0
       onHover
-      continuous={continuous |> E.O.fmap(Shape.XYShape.toJs)}
+      continuous={continuous |> E.O.fmap(XYShape.toJs)}
       showDistributionLines
       showDistributionYAxis
       showVerticalLine
