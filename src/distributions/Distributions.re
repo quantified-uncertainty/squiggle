@@ -122,6 +122,8 @@ module Continuous = {
     });
 };
 
+//  |> XYShape.Range.stepsToContinuous
+//  |> E.O.toExt("ERROR"),
 module Discrete = {
   module T =
     Dist({
@@ -133,12 +135,7 @@ module Discrete = {
         cache
         |> E.O.default(
              {
-               Continuous.make(
-                 XYShape.accumulateYs(t)
-                 |> XYShape.Range.stepsToContinuous
-                 |> E.O.toExt("ERROR"),
-                 `Stepwise,
-               );
+               Continuous.make(XYShape.accumulateYs(t), `Stepwise);
              },
            );
       //  todo: Fix this with last element
@@ -151,13 +148,19 @@ module Discrete = {
       let toDiscrete = t => Some(t);
       let toScaledContinuous = _ => None;
       let toScaledDiscrete = t => Some(t);
-      //  todo: Fix this with code that work find recent value and use that instead.
-      let xToY = (f, t) =>
-        CdfLibrary.Distribution.findY(f, t)
+
+      let xToY = (f, t) => {
+        XYShape.getBy(t, ((x, _)) => x == f)
+        |> E.O.fmap(((_, y)) => y)
+        |> E.O.default(0.0)
         |> DistTypes.MixedPoint.makeDiscrete;
+      };
       //  todo: This should use cache and/or same code as above. FindingY is more complex, should use interpolationType.
       let integralXtoY = (~cache, f, t) =>
-        t |> XYShape.accumulateYs |> CdfLibrary.Distribution.findY(f);
+        t
+        |> integral(~cache)
+        |> Continuous.getShape
+        |> CdfLibrary.Distribution.findY(f);
     });
 };
 

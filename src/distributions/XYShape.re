@@ -1,29 +1,31 @@
 open DistTypes;
-let _lastElement = (a: array('a)) =>
-  switch (Belt.Array.size(a)) {
-  | 0 => None
-  | n => Belt.Array.get(a, n - 1)
-  };
 
 type t = xyShape;
 
 let toJs = (t: t) => {
   {"xs": t.xs, "ys": t.ys};
 };
-
-let minX = (t: t) => t.xs |> E.A.get(_, 0);
-// TODO: Check if this actually gets the last element, I'm not sure it does.
-let maxX = (t: t) => t.xs |> (r => E.A.get(r, E.A.length(r) - 1));
+let minX = (t: t) => t.xs |> E.A.first;
+let maxX = (t: t) => t.xs |> E.A.last;
+let first = (t: t) =>
+  switch (t.xs |> E.A.first, t.ys |> E.A.first) {
+  | (Some(x), Some(y)) => Some((x, y))
+  | _ => None
+  };
+let last = (t: t) =>
+  switch (t.xs |> E.A.last, t.ys |> E.A.last) {
+  | (Some(x), Some(y)) => Some((x, y))
+  | _ => None
+  };
 
 let zip = t => Belt.Array.zip(t.xs, t.ys);
-
-let fmap = (t: t, y): t => {xs: t.xs, ys: t.ys |> E.A.fmap(y)};
-
+let getBy = (t: t, fn) => t |> zip |> Belt.Array.getBy(_, fn);
+let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
 let fromArray = ((xs, ys)): t => {xs, ys};
 let fromArrays = (xs, ys): t => {xs, ys};
-let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
 
-let compare = (a: float, b: float) => a > b ? 1 : (-1);
+// todo: maybe not needed?
+// let comparePoint = (a: float, b: float) => a > b ? 1 : (-1);
 
 let comparePoints = ((x1: float, y1: float), (x2: float, y2: float)) =>
   switch (x1 == x2, y1 == y2) {
@@ -32,6 +34,7 @@ let comparePoints = ((x1: float, y1: float), (x2: float, y2: float)) =>
   | (true, true) => (-1)
   };
 
+// todo: This is broken :(
 let combine = (t1: t, t2: t) => {
   let totalLength = E.A.length(t1.xs) + E.A.length(t2.xs);
   let array = Belt.Array.concat(zip(t1), zip(t2));
@@ -53,14 +56,6 @@ let intersperce = (t1: t, t2: t) => {
   items^ |> Belt.Array.unzip |> fromArray;
 };
 
-let scaleCdfTo = (~scaleTo=1., t: t) =>
-  switch (_lastElement(t.ys)) {
-  | Some(n) =>
-    let scaleBy = scaleTo /. n;
-    fmap(t, r => r *. scaleBy);
-  | None => t
-  };
-
 let yFold = (fn, t: t) => {
   E.A.fold_left(fn, 0., t.ys);
 };
@@ -69,9 +64,8 @@ let ySum = yFold((a, b) => a +. b);
 
 let _transverse = fn =>
   Belt.Array.reduce(_, [||], (items, (x, y)) =>
-    switch (_lastElement(items)) {
-    | Some((xLast, yLast)) =>
-      Belt.Array.concat(items, [|(x, fn(y, yLast))|])
+    switch (E.A.last(items)) {
+    | Some((_, yLast)) => Belt.Array.concat(items, [|(x, fn(y, yLast))|])
     | None => [|(x, y)|]
     }
   );
@@ -89,6 +83,7 @@ let subtractYs = _transverseShape((aCurrent, aLast) => aCurrent -. aLast);
 let findY = CdfLibrary.Distribution.findY;
 let findX = CdfLibrary.Distribution.findX;
 
+// I'm really not sure this part is actually what we want at this point.
 module Range = {
   // ((lastX, lastY), (nextX, nextY))
   type zippedRange = ((float, float), (float, float));

@@ -122,7 +122,7 @@ module R = {
 };
 
 let safe_fn_of_string = (fn, s: string): option('a) =>
-  try (Some(fn(s))) {
+  try(Some(fn(s))) {
   | _ => None
   };
 
@@ -216,6 +216,8 @@ module A = {
   let unsafe_get = Array.unsafe_get;
   let get = Belt.Array.get;
   let getBy = Belt.Array.getBy;
+  let last = a => get(a, length(a) - 1);
+  let first = get(_, 0);
   let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> O.isSome;
   let fold_left = Array.fold_left;
   let fold_right = Array.fold_right;
@@ -294,28 +296,4 @@ module JsArray = {
          Rationale.Option.toExn("Warning: This should not have happened"),
        );
   let filter = Js.Array.filter;
-};
-
-module NonZeroInt = {
-  type t = int;
-  let make = (i: int) => i < 0 ? None : Some(i);
-  let fmap = (fn, a: t) => make(fn(a));
-  let increment = fmap(I.increment);
-  let decrement = fmap(I.decrement);
-};
-
-module BoundedInt = {
-  type t = int;
-  let make = (i: int, limit: int) => {
-    let lessThan0 = r => r < 0;
-    let greaterThanLimit = r => r > limit;
-    if (lessThan0(i) || greaterThanLimit(i)) {
-      None;
-    } else {
-      Some(i);
-    };
-  };
-  let fmap = (fn, a: t, l) => make(fn(a), l);
-  let increment = fmap(I.increment);
-  let decrement = fmap(I.decrement);
 };
