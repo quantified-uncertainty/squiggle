@@ -19,7 +19,7 @@ module Internals = {
   let toContinous = (r: combined) =>
     continuousGet(r)
     |> CdfLibrary.JS.jsToDist
-    |> DistFunctor.Continuous.fromShape;
+    |> Distributions.Continuous.fromShape;
 
   let toDiscrete = (r: combined): DistributionTypes.xyShape =>
     discreteGet(r) |> jsToDistDiscrete;

@@ -456,7 +456,6 @@ module DistPlus = {
            );
       };
 
-      // todo: adjust for limit, and the fact that total mass is lower.
       let xToY = (f, t: t) =>
         t
         |> toShape

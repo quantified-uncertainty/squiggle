@@ -1,10 +1,12 @@
 module DistPlusChart = {
   [@react.component]
   let make = (~distPlus: DistributionTypes.distPlus, ~onHover) => {
-    open DistFunctor.DistPlus;
+    open Distributions.DistPlus;
     let discrete = distPlus |> T.toDiscrete;
     let continuous =
-      distPlus |> T.toContinuous |> E.O.fmap(DistFunctor.Continuous.getShape);
+      distPlus
+      |> T.toContinuous
+      |> E.O.fmap(Distributions.Continuous.getShape);
     let minX = T.minX(distPlus);
     let maxX = T.maxX(distPlus);
     let timeScale = distPlus.unit |> DistributionTypes.DistributionUnit.toJson;
@@ -23,13 +25,14 @@ module DistPlusChart = {
 module IntegralChart = {
   [@react.component]
   let make = (~distPlus: DistributionTypes.distPlus, ~onHover) => {
-    open DistFunctor.DistPlus;
-    let integral = DistFunctor.DistPlus.T.Integral.get(~cache=None, distPlus);
+    open Distributions.DistPlus;
+    let integral =
+      Distributions.DistPlus.T.Integral.get(~cache=None, distPlus);
     let continuous =
       integral
       |> T.toContinuous
-      |> E.O.fmap(DistFunctor.Continuous.toLinear)
-      |> E.O.fmap(DistFunctor.Continuous.getShape);
+      |> E.O.fmap(Distributions.Continuous.toLinear)
+      |> E.O.fmap(Distributions.Continuous.getShape);
     let minX = T.minX(integral);
     let maxX = T.maxX(integral);
     let timeScale = distPlus.unit |> DistributionTypes.DistributionUnit.toJson;
@@ -76,7 +79,7 @@ let make = (~distPlus: DistributionTypes.distPlus) => {
           </th>
           <th className="px-4 py-2 border ">
             {distPlus
-             |> DistFunctor.DistPlus.T.Integral.xToY(~cache=None, x)
+             |> Distributions.DistPlus.T.Integral.xToY(~cache=None, x)
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
           </th>

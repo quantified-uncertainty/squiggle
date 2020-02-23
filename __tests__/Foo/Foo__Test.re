@@ -9,9 +9,7 @@ let shape: DistributionTypes.xyShape = {
 let step: DistributionTypes.xyShape = {
   xs: [|1., 4., 8.|],
   ys: [|8., 17., 19.|],
-};
-
-open Shape /* )*/;
+} /*   }*/;
 
 // describe("Shape", () =>
 //   describe("XYShape", () => {
@@ -21,4 +19,3 @@ open Shape /* )*/;
 //     test("#yFOo", () =>
 //       expect(Discrete.integrate(shape)) |> toEqual(step)
 //     );
-//   })

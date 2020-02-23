@@ -114,7 +114,7 @@ module Model = {
     | Prop.Value.DistPlusIngredients(distPlusIngredients) =>
       distPlusIngredients
       |> DistPlusIngredients.toDistPlus(~sampleCount=1000)
-      |> E.O.fmap(DistFunctor.DistPlus.T.Integral.xToY(~cache=None, 18.0))
+      |> E.O.fmap(Distributions.DistPlus.T.Integral.xToY(~cache=None, 18.0))
     | _ => None
     };
   };

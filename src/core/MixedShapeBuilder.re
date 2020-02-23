@@ -17,7 +17,7 @@ let build = (~continuous, ~discrete, ~assumptions) =>
     } =>
     // TODO: Fix this, it's wrong :(
     Some(
-      DistFunctor.Mixed.make(
+      Distributions.Mixed.make(
         ~continuous,
         ~discrete,
         ~discreteProbabilityMassFraction=r,
@@ -30,7 +30,7 @@ let build = (~continuous, ~discrete, ~assumptions) =>
       discreteProbabilityMass: Some(r),
     } =>
     Some(
-      DistFunctor.Mixed.make(
+      Distributions.Mixed.make(
         ~continuous,
         ~discrete,
         ~discreteProbabilityMassFraction=r,
@@ -57,11 +57,11 @@ let build = (~continuous, ~discrete, ~assumptions) =>
       discreteProbabilityMass: None,
     } =>
     let discreteProbabilityMassFraction =
-      DistFunctor.Discrete.T.Integral.sum(~cache=None, discrete);
+      Distributions.Discrete.T.Integral.sum(~cache=None, discrete);
     let discrete =
-      DistFunctor.Discrete.T.scaleToIntegralSum(~intendedSum=1.0, discrete);
+      Distributions.Discrete.T.scaleToIntegralSum(~intendedSum=1.0, discrete);
     Some(
-      DistFunctor.Mixed.make(
+      Distributions.Mixed.make(
         ~continuous,
         ~discrete,
         ~discreteProbabilityMassFraction,

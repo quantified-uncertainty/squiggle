@@ -15,10 +15,10 @@ let toDistPlus = (~sampleCount, t: distPlusIngredients) => {
       ~sampleCount,
       (),
     )
-    |> E.O.bind(_, DistFunctor.Mixed.clean);
+    |> E.O.bind(_, Distributions.Mixed.clean);
   shape
   |> E.O.fmap(shape =>
-       DistFunctor.DistPlus.make(
+       Distributions.DistPlus.make(
          ~shape,
          ~domain=t.domain,
          ~unit=t.unit,
