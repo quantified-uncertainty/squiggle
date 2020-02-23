@@ -2,6 +2,7 @@ module DistPlusChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
     open Distributions.DistPlus;
+    // todo: Change to scaledContinuous and scaledDiscrete
     let discrete = distPlus |> T.toDiscrete;
     let continuous =
       distPlus
