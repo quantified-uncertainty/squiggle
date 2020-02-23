@@ -388,7 +388,7 @@ module Shape = {
     });
 };
 
-module ComplexPower = {
+module DistPlus = {
   open DistributionTypes;
   let make =
       (
@@ -398,7 +398,7 @@ module ComplexPower = {
         ~unit=UnspecifiedDistribution,
         (),
       )
-      : complexPower => {
+      : distPlus => {
     let integral = Shape.T.Integral.get(~cache=None, shape);
     {shape, domain, integralCache: integral, unit, guesstimatorString};
   };
@@ -409,7 +409,7 @@ module ComplexPower = {
         ~domain=?,
         ~unit=?,
         ~guesstimatorString=?,
-        t: complexPower,
+        t: distPlus,
       ) => {
     shape: E.O.default(t.shape, shape),
     integralCache: E.O.default(t.integralCache, integralCache),
@@ -420,8 +420,8 @@ module ComplexPower = {
 
   module T =
     Dist({
-      type t = DistributionTypes.complexPower;
-      type integral = DistributionTypes.complexPower;
+      type t = DistributionTypes.distPlus;
+      type integral = DistributionTypes.distPlus;
       let toShape = ({shape, _}: t) => shape;
       let shapeFn = (fn, t: t) => t |> toShape |> fn;
       let toContinuous = shapeFn(Shape.T.toContinuous);

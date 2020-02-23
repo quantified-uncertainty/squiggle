@@ -1,16 +1,13 @@
-module ComplexPowerChart = {
+module DistPlusChart = {
   [@react.component]
-  let make = (~complexPower: DistributionTypes.complexPower, ~onHover) => {
-    open DistFunctor.ComplexPower;
-    let discrete = complexPower |> T.toDiscrete;
+  let make = (~distPlus: DistributionTypes.distPlus, ~onHover) => {
+    open DistFunctor.DistPlus;
+    let discrete = distPlus |> T.toDiscrete;
     let continuous =
-      complexPower
-      |> T.toContinuous
-      |> E.O.fmap(DistFunctor.Continuous.getShape);
-    let minX = T.minX(complexPower);
-    let maxX = T.maxX(complexPower);
-    let timeScale =
-      complexPower.unit |> DistributionTypes.DistributionUnit.toJson;
+      distPlus |> T.toContinuous |> E.O.fmap(DistFunctor.Continuous.getShape);
+    let minX = T.minX(distPlus);
+    let maxX = T.maxX(distPlus);
+    let timeScale = distPlus.unit |> DistributionTypes.DistributionUnit.toJson;
     <CdfChart__Plain
       minX
       maxX
@@ -25,10 +22,9 @@ module ComplexPowerChart = {
 
 module IntegralChart = {
   [@react.component]
-  let make = (~complexPower: DistributionTypes.complexPower, ~onHover) => {
-    open DistFunctor.ComplexPower;
-    let integral =
-      DistFunctor.ComplexPower.T.Integral.get(~cache=None, complexPower);
+  let make = (~distPlus: DistributionTypes.distPlus, ~onHover) => {
+    open DistFunctor.DistPlus;
+    let integral = DistFunctor.DistPlus.T.Integral.get(~cache=None, distPlus);
     let continuous =
       integral
       |> T.toContinuous
@@ -36,8 +32,7 @@ module IntegralChart = {
       |> E.O.fmap(DistFunctor.Continuous.getShape);
     let minX = T.minX(integral);
     let maxX = T.maxX(integral);
-    let timeScale =
-      complexPower.unit |> DistributionTypes.DistributionUnit.toJson;
+    let timeScale = distPlus.unit |> DistributionTypes.DistributionUnit.toJson;
     <CdfChart__Plain
       minX
       maxX
@@ -50,17 +45,17 @@ module IntegralChart = {
 };
 
 [@react.component]
-let make = (~complexPower: DistributionTypes.complexPower) => {
+let make = (~distPlus: DistributionTypes.distPlus) => {
   let (x, setX) = React.useState(() => 0.);
   let chart =
     React.useMemo1(
-      () => {<ComplexPowerChart complexPower onHover={r => {setX(_ => r)}} />},
-      [|complexPower|],
+      () => {<DistPlusChart distPlus onHover={r => {setX(_ => r)}} />},
+      [|distPlus|],
     );
   let chart2 =
     React.useMemo1(
-      () => {<IntegralChart complexPower onHover={r => {setX(_ => r)}} />},
-      [|complexPower|],
+      () => {<IntegralChart distPlus onHover={r => {setX(_ => r)}} />},
+      [|distPlus|],
     );
   <div>
     chart
@@ -80,8 +75,8 @@ let make = (~complexPower: DistributionTypes.complexPower) => {
             {x |> E.Float.toString |> ReasonReact.string}
           </th>
           <th className="px-4 py-2 border ">
-            {complexPower
-             |> DistFunctor.ComplexPower.T.Integral.xToY(~cache=None, x)
+            {distPlus
+             |> DistFunctor.DistPlus.T.Integral.xToY(~cache=None, x)
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
           </th>

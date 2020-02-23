@@ -111,12 +111,10 @@ module Model = {
   let getGlobalCatastropheChance = dateTime => {
     let model = GlobalCatastrophe.Model.make(dateTime);
     switch (model) {
-    | Prop.Value.GenericDistribution(genericDistribution) =>
-      genericDistribution
-      |> GenericDistribution.toComplexPower(~sampleCount=1000)
-      |> E.O.fmap(
-           DistFunctor.ComplexPower.T.Integral.xToY(~cache=None, 18.0),
-         )
+    | Prop.Value.DistPlusIngredients(distPlusIngredients) =>
+      distPlusIngredients
+      |> DistPlusIngredients.toDistPlus(~sampleCount=1000)
+      |> E.O.fmap(DistFunctor.DistPlus.T.Integral.xToY(~cache=None, 18.0))
     | _ => None
     };
   };
@@ -155,24 +153,22 @@ module Model = {
           foo |> E.O.default("");
         };
 
-      let genericDistribution =
-        GenericDistribution.make(
-          ~generationSource=GuesstimatorString(str),
+      let distPlusIngredients =
+        DistPlusIngredients.make(
+          ~guesstimatorString=str,
           ~domain=Complete,
           ~unit=UnspecifiedDistribution,
           (),
         );
-      Prop.Value.GenericDistribution(genericDistribution);
+      Prop.Value.DistPlusIngredients(distPlusIngredients);
 
     | CHANCE_OF_EXISTENCE =>
-      Prop.Value.GenericDistribution(
-        GenericDistribution.make(
-          ~generationSource=
-            GuesstimatorString(
-              GuesstimatorDist.min(
-                GlobalCatastrophe.guesstimatorString,
-                GuesstimatorDist.logNormal(40., 4.),
-              ),
+      Prop.Value.DistPlusIngredients(
+        DistPlusIngredients.make(
+          ~guesstimatorString=
+            GuesstimatorDist.min(
+              GlobalCatastrophe.guesstimatorString,
+              GuesstimatorDist.logNormal(40., 4.),
             ),
           ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
           ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),

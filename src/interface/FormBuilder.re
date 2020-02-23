@@ -17,12 +17,12 @@ let propValue = (t: Prop.Value.t) => {
   switch (t) {
   | SelectSingle(r) => r |> ReasonReact.string
   | ConditionalArray(r) => "Array" |> ReasonReact.string
-  | GenericDistribution(r) =>
+  | DistPlusIngredients(r) =>
     let newDistribution =
-      GenericDistribution.toComplexPower(~sampleCount=1000, r);
+      DistPlusIngredients.toDistPlus(~sampleCount=1000, r);
     switch (newDistribution) {
     | Some(distribution) =>
-      <div> <ComplexPowerChart complexPower=distribution /> </div>
+      <div> <DistPlusChart distPlus=distribution /> </div>
     | None => "Something went wrong" |> ReasonReact.string
     };
   | FloatCdf(_) => <div />

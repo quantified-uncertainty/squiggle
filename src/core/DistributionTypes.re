@@ -52,18 +52,18 @@ type distributionUnit =
   | UnspecifiedDistribution
   | TimeDistribution(TimeTypes.timeVector);
 
-type genericDistribution = {
-  generationSource,
-  domain,
-  unit: distributionUnit,
-};
-
-type complexPower = {
+type distPlus = {
   shape,
   domain,
   integralCache: continuousShape,
   unit: distributionUnit,
   guesstimatorString: option(string),
+};
+
+type distPlusIngredients = {
+  guesstimatorString: string,
+  domain,
+  unit: distributionUnit,
 };
 
 module DistributionUnit = {
