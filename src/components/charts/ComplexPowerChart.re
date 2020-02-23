@@ -23,11 +23,6 @@ module ComplexPowerChart = {
   };
 };
 
-let bar: DistributionTypes.xyShape = {
-  ys: [|0.5, 0.8, 0.4, 1.0, 2.0|],
-  xs: [|0.0, 1., 2., 5., 8.|],
-};
-
 module IntegralChart = {
   [@react.component]
   let make = (~complexPower: DistributionTypes.complexPower, ~onHover) => {

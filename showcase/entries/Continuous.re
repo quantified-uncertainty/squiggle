@@ -3,7 +3,6 @@ let timeDist =
   GenericDistribution.make(
     ~generationSource=
       GuesstimatorString("mm(floor(normal(30,2)), normal(39,1), [.5,.5])"),
-    ~probabilityType=Pdf,
     ~domain=Complete,
     ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `days}),
     (),

@@ -158,7 +158,6 @@ module Model = {
       let genericDistribution =
         GenericDistribution.make(
           ~generationSource=GuesstimatorString(str),
-          ~probabilityType=Cdf,
           ~domain=Complete,
           ~unit=UnspecifiedDistribution,
           (),
@@ -175,7 +174,6 @@ module Model = {
                 GuesstimatorDist.logNormal(40., 4.),
               ),
             ),
-          ~probabilityType=Cdf,
           ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
           ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
           (),

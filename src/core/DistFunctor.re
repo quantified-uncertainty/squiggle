@@ -109,6 +109,7 @@ module Continuous = {
       let pointwiseFmap = (fn, t: t) =>
         t |> xyShape |> XYShape.pointwiseMap(fn) |> fromShape;
       let toShape = (t: t): DistributionTypes.shape => Continuous(t);
+      // TODO: When Roman's PR comes in, fix this bit.
       let xToY = (f, t) =>
         shapeFn(CdfLibrary.Distribution.findY(f), t)
         |> DistributionTypes.MixedPoint.makeContinuous;
@@ -181,11 +182,11 @@ module Mixed = {
     };
   };
 
-  let scaleDiscrete =
+  let scaleDiscreteFn =
       ({discreteProbabilityMassFraction}: DistributionTypes.mixedShape, f) =>
     f *. discreteProbabilityMassFraction;
 
-  let scaleContinuous =
+  let scaleContinuousFn =
       ({discreteProbabilityMassFraction}: DistributionTypes.mixedShape, f) =>
     f *. (1.0 -. discreteProbabilityMassFraction);
 
@@ -200,19 +201,15 @@ module Mixed = {
       let toShape = (t: t): DistributionTypes.shape => Mixed(t);
       let toContinuous = ({continuous}: t) => Some(continuous);
       let toDiscrete = ({discrete}: t) => Some(discrete);
-      let xToY =
-          (
-            f,
-            {discrete, continuous, discreteProbabilityMassFraction} as t: t,
-          ) => {
+      let xToY = (f, {discrete, continuous} as t: t) => {
         let c =
           continuous
           |> Continuous.T.xToY(f)
-          |> DistributionTypes.MixedPoint.fmap(scaleContinuous(t));
+          |> DistributionTypes.MixedPoint.fmap(scaleContinuousFn(t));
         let d =
           discrete
           |> Discrete.T.xToY(f)
-          |> DistributionTypes.MixedPoint.fmap(scaleDiscrete(t));
+          |> DistributionTypes.MixedPoint.fmap(scaleDiscreteFn(t));
         DistributionTypes.MixedPoint.add(c, d);
       };
 
@@ -254,33 +251,23 @@ module Mixed = {
            );
       };
 
-      let integralSum =
-          (
-            ~cache,
-            {discrete, continuous, discreteProbabilityMassFraction}: t,
-          ) => {
+      // todo: Get last element of actual sum.
+      let integralSum = (~cache, {discrete, continuous} as t: t) => {
         switch (cache) {
         | Some(cache) => 3.0
         | None =>
-          Discrete.T.Integral.sum(~cache=None, discrete)
-          *. discreteProbabilityMassFraction
-          +. Continuous.T.Integral.sum(~cache=None, continuous)
-          *. (1.0 -. discreteProbabilityMassFraction)
+          scaleDiscreteFn(t, Discrete.T.Integral.sum(~cache=None, discrete))
+          +. scaleContinuousFn(
+               t,
+               Continuous.T.Integral.sum(~cache=None, continuous),
+             )
         };
       };
 
-      let integralXtoY =
-          (
-            ~cache,
-            f,
-            {discrete, continuous, discreteProbabilityMassFraction}: t,
-          ) => {
+      let integralXtoY = (~cache, f, {discrete, continuous} as t: t) => {
         let cont = Continuous.T.Integral.xToY(~cache, f, continuous);
         let discrete = Discrete.T.Integral.xToY(~cache, f, discrete);
-        discrete
-        *. discreteProbabilityMassFraction
-        +. cont
-        *. (1.0 -. discreteProbabilityMassFraction);
+        scaleDiscreteFn(t, discrete) +. scaleContinuousFn(t, cont);
       };
 
       let pointwiseFmap =
@@ -440,20 +427,57 @@ module ComplexPower = {
       let toContinuous = shapeFn(Shape.T.toContinuous);
       let toDiscrete = shapeFn(Shape.T.toDiscrete);
       // todo: Adjust for total mass.
-      let toScaledContinuous = shapeFn(Shape.T.toContinuous);
-      let toScaledDiscrete = shapeFn(Shape.T.toScaledDiscrete);
+
+      let domainIncludedProbabilityMass = (t: t) =>
+        Domain.includedProbabilityMass(t.domain);
+
+      let domainIncludedProbabilityMassAdjustment = (t: t, f) =>
+        f *. Domain.includedProbabilityMass(t.domain);
+
+      let toScaledContinuous = (t: t) => {
+        t
+        |> toShape
+        |> Shape.T.toScaledContinuous
+        |> E.O.fmap(
+             Continuous.T.pointwiseFmap(r =>
+               r *. domainIncludedProbabilityMass(t)
+             ),
+           );
+      };
+
+      let toScaledDiscrete = (t: t) => {
+        t
+        |> toShape
+        |> Shape.T.toScaledDiscrete
+        |> E.O.fmap(
+             Discrete.T.pointwiseFmap(
+               domainIncludedProbabilityMassAdjustment(t),
+             ),
+           );
+      };
+
       // todo: adjust for limit, and the fact that total mass is lower.
-      let xToY = f => shapeFn(Shape.T.xToY(f));
+      let xToY = (f, t: t) =>
+        t
+        |> toShape
+        |> Shape.T.xToY(f)
+        |> MixedPoint.fmap(domainIncludedProbabilityMassAdjustment(t));
+
       let minX = shapeFn(Shape.T.minX);
       let maxX = shapeFn(Shape.T.maxX);
-      let fromShape = (shape, t): t => update(~shape, t);
-      // todo: adjust for limit
+      let fromShape = (t, shape): t => update(~shape, t);
+
+      // todo: adjust for limit, maybe?
       let pointwiseFmap = (fn, {shape, _} as t: t): t =>
-        fromShape(Shape.T.pointwiseFmap(fn, shape), t);
+        Shape.T.pointwiseFmap(fn, shape) |> fromShape(t);
+
+      // This bit is kind of akward, could probably use rethinking.
       let integral = (~cache as _, t: t) =>
-        fromShape(Continuous(t.integralCache), t);
+        fromShape(t, Continuous(t.integralCache));
+
       let integralSum = (~cache as _, t: t) =>
         Shape.T.Integral.sum(~cache=Some(t.integralCache), toShape(t));
+
       //   TODO: Fix this below, obviously. Adjust for limit.
       let integralXtoY = (~cache as _, f, t: t) => {
         Shape.T.Integral.xToY(~cache=Some(t.integralCache), f, toShape(t));

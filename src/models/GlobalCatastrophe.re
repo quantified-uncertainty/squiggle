@@ -5,7 +5,6 @@ module Model = {
     let genericDistribution =
       GenericDistribution.make(
         ~generationSource=GuesstimatorString(guesstimatorString),
-        ~probabilityType=Cdf,
         ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
         (),
       );

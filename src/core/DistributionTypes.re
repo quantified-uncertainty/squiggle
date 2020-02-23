@@ -14,16 +14,9 @@ type xyShape = {
   ys: array(float),
 };
 
-let foo = {xs: [|1., 2., 5.|], ys: [|1., 2., 3.|]};
-let answer = {xs: [|1., 2., 2., 5., 5.|], ys: [|1., 1., 2., 2., 3.|]};
-
-let toStepwise = (xyShape: xyShape) => {};
-
-type interpolationMethod = [ | `Stepwise | `Linear];
-
 type continuousShape = {
   xyShape,
-  interpolation: interpolationMethod,
+  interpolation: [ | `Stepwise | `Linear],
 };
 
 type discreteShape = xyShape;
@@ -59,14 +52,8 @@ type distributionUnit =
   | UnspecifiedDistribution
   | TimeDistribution(TimeTypes.timeVector);
 
-type probabilityType =
-  | Cdf
-  | Pdf
-  | Arbitrary;
-
 type genericDistribution = {
   generationSource,
-  probabilityType,
   domain,
   unit: distributionUnit,
 };
@@ -103,6 +90,9 @@ module Domain = {
       l +. r
     };
   };
+
+  let includedProbabilityMass = (t: domain) =>
+    1.0 -. excludedProbabilityMass(t);
 
   let initialProbabilityMass = (t: domain) => {
     switch (t) {

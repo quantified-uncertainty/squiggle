@@ -1,16 +1,9 @@
 open DistributionTypes;
 
 let make =
-    (
-      ~generationSource,
-      ~probabilityType=Pdf,
-      ~domain=Complete,
-      ~unit=UnspecifiedDistribution,
-      (),
-    )
+    (~generationSource, ~domain=Complete, ~unit=UnspecifiedDistribution, ())
     : genericDistribution => {
   generationSource,
-  probabilityType,
   domain,
   unit,
 };
