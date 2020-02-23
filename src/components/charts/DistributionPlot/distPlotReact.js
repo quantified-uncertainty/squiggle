@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSize } from 'react-use';
-import { CdfChartD3 } from './cdfChartD3';
+import { CdfChartD3 } from './distPlotD3';
 
 /**
  * @param min

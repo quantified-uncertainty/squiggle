@@ -74,7 +74,7 @@ module Continuous = {
   };
   let oShapeMap =
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
-    fn(xyShape) |> E.O.fmap(xyShape => make(xyShape, interpolation));
+    fn(xyShape) |> E.O.fmap(make(_, interpolation));
 
   let toLinear = (t: t): t =>
     switch (t) {
@@ -90,7 +90,8 @@ module Continuous = {
       type t = DistTypes.continuousShape;
       type integral = DistTypes.continuousShape;
       let shapeFn = (fn, t: t) => t |> xyShape |> fn;
-      // TODO: Obviously fix this, it's terrible
+      // TODO: Obviously fix this, it's terrible. Use interpolation method here.
+      // TODO: Steps could be 1 value, interpolation needs at least 2.
       let integral = (~cache, t) =>
         cache
         |> E.O.default(
@@ -108,7 +109,7 @@ module Continuous = {
       let pointwiseFmap = (fn, t: t) =>
         t |> xyShape |> XYShape.pointwiseMap(fn) |> fromShape;
       let toShape = (t: t): DistTypes.shape => Continuous(t);
-      // TODO: When Roman's PR comes in, fix this bit.
+      // TODO: When Roman's PR comes in, fix this bit. This depends on interpolation, obviously.
       let xToY = (f, t) =>
         shapeFn(CdfLibrary.Distribution.findY(f), t)
         |> DistTypes.MixedPoint.makeContinuous;
@@ -126,6 +127,8 @@ module Discrete = {
     Dist({
       type t = DistTypes.discreteShape;
       type integral = DistTypes.continuousShape;
+      // todo: test this. Remove "stepstoContinuos-move elsewhere"
+      // todo: Make sure this works fine with one value. This is important for step functionality.
       let integral = (~cache, t) =>
         cache
         |> E.O.default(
@@ -138,6 +141,7 @@ module Discrete = {
                );
              },
            );
+      //  todo: Fix this with last element
       let integralSum = (~cache, t) => t |> XYShape.ySum;
       let minX = XYShape.minX;
       let maxX = XYShape.maxX;
@@ -145,17 +149,20 @@ module Discrete = {
       let toShape = (t: t): DistTypes.shape => Discrete(t);
       let toContinuous = _ => None;
       let toDiscrete = t => Some(t);
-      let toScaledContinuous = t => None;
+      let toScaledContinuous = _ => None;
       let toScaledDiscrete = t => Some(t);
+      //  todo: Fix this with code that work find recent value and use that instead.
       let xToY = (f, t) =>
         CdfLibrary.Distribution.findY(f, t)
         |> DistTypes.MixedPoint.makeDiscrete;
+      //  todo: This should use cache and/or same code as above. FindingY is more complex, should use interpolationType.
       let integralXtoY = (~cache, f, t) =>
         t |> XYShape.accumulateYs |> CdfLibrary.Distribution.findY(f);
     });
 };
 
 module Mixed = {
+  type t = DistTypes.mixedShape;
   let make =
       (~continuous, ~discrete, ~discreteProbabilityMassFraction)
       : DistTypes.mixedShape => {
@@ -171,7 +178,8 @@ module Mixed = {
         discrete: {xs: [||], ys: [||]},
       } =>
       None
-    | {discrete: {xs: [|_|], ys: [|_|]}} => None
+    | {continuous, discrete: {xs: [|_|], ys: [|_|]}} =>
+      Some(Continuous(continuous))
     | {continuous, discrete: {xs: [||], ys: [||]}} =>
       Some(Continuous(continuous))
     | {continuous: {xyShape: {xs: [||], ys: [||]}}, discrete} =>
@@ -180,6 +188,7 @@ module Mixed = {
     };
   };
 
+  // todo: Put into scaling module
   let scaleDiscreteFn =
       ({discreteProbabilityMassFraction}: DistTypes.mixedShape, f) =>
     f *. discreteProbabilityMassFraction;
@@ -187,6 +196,13 @@ module Mixed = {
   let scaleContinuousFn =
       ({discreteProbabilityMassFraction}: DistTypes.mixedShape, f) =>
     f *. (1.0 -. discreteProbabilityMassFraction);
+
+  let scaleContinuous = ({discreteProbabilityMassFraction}: t, continuous) =>
+    continuous
+    |> Continuous.T.scaleBy(~scale=1.0 -. discreteProbabilityMassFraction);
+
+  let scaleDiscrete = ({discreteProbabilityMassFraction}: t, disrete) =>
+    disrete |> Discrete.T.scaleBy(~scale=discreteProbabilityMassFraction);
 
   module T =
     Dist({
@@ -211,14 +227,6 @@ module Mixed = {
         DistTypes.MixedPoint.add(c, d);
       };
 
-      let scaleContinuous =
-          ({discreteProbabilityMassFraction}: t, continuous) =>
-        continuous
-        |> Continuous.T.scaleBy(~scale=1.0 -. discreteProbabilityMassFraction);
-
-      let scaleDiscrete = ({discreteProbabilityMassFraction}: t, disrete) =>
-        disrete |> Discrete.T.scaleBy(~scale=discreteProbabilityMassFraction);
-
       let toScaledContinuous = ({continuous} as t: t) =>
         Some(scaleContinuous(t, continuous));
 
@@ -241,10 +249,17 @@ module Mixed = {
                let dist =
                  discrete
                  |> Discrete.T.Integral.get(~cache=None)
+                 |> Continuous.toLinear
                  |> Continuous.T.scaleBy(
                       ~scale=discreteProbabilityMassFraction,
                     );
-               dist;
+               Continuous.make(
+                 XYShape.combine(
+                   Continuous.getShape(cont),
+                   Continuous.getShape(dist),
+                 ),
+                 `Linear,
+               );
              },
            );
       };
@@ -268,6 +283,7 @@ module Mixed = {
         scaleDiscreteFn(t, discrete) +. scaleContinuousFn(t, cont);
       };
 
+      // TODO: This functionality is kinda weird, because it seems to assume the cdf adds to 1.0 elsewhere, which wouldn't happen here.
       let pointwiseFmap =
           (fn, {discrete, continuous, discreteProbabilityMassFraction}: t): t => {
         {
@@ -285,6 +301,8 @@ module Shape = {
       type t = DistTypes.shape;
       type integral = DistTypes.continuousShape;
 
+      // todo: change order of arguments so t goes last.
+      // todo: Think of other name here?
       let mapToAll = (t: t, (fn1, fn2, fn3)) =>
         switch (t) {
         | Mixed(m) => fn1(m)
@@ -388,6 +406,9 @@ module Shape = {
 
 module DistPlus = {
   open DistTypes;
+
+  type t = DistTypes.distPlus;
+
   let make =
       (
         ~shape,
@@ -396,10 +417,11 @@ module DistPlus = {
         ~unit=UnspecifiedDistribution,
         (),
       )
-      : distPlus => {
+      : t => {
     let integral = Shape.T.Integral.get(~cache=None, shape);
     {shape, domain, integralCache: integral, unit, guesstimatorString};
   };
+
   let update =
       (
         ~shape=?,
@@ -407,7 +429,7 @@ module DistPlus = {
         ~domain=?,
         ~unit=?,
         ~guesstimatorString=?,
-        t: distPlus,
+        t: t,
       ) => {
     shape: E.O.default(t.shape, shape),
     integralCache: E.O.default(t.integralCache, integralCache),
@@ -416,29 +438,32 @@ module DistPlus = {
     guesstimatorString: E.O.default(t.guesstimatorString, guesstimatorString),
   };
 
+  let domainIncludedProbabilityMass = (t: t) =>
+    Domain.includedProbabilityMass(t.domain);
+
+  let domainIncludedProbabilityMassAdjustment = (t: t, f) =>
+    f *. Domain.includedProbabilityMass(t.domain);
+
+  let toShape = ({shape, _}: t) => shape;
+
+  let shapeFn = (fn, {shape}: t) => fn(shape);
+
   module T =
     Dist({
       type t = DistTypes.distPlus;
       type integral = DistTypes.distPlus;
-      let toShape = ({shape, _}: t) => shape;
-      let shapeFn = (fn, t: t) => t |> toShape |> fn;
+      let toShape = toShape;
       let toContinuous = shapeFn(Shape.T.toContinuous);
       let toDiscrete = shapeFn(Shape.T.toDiscrete);
       // todo: Adjust for total mass.
-
-      let domainIncludedProbabilityMass = (t: t) =>
-        Domain.includedProbabilityMass(t.domain);
-
-      let domainIncludedProbabilityMassAdjustment = (t: t, f) =>
-        f *. Domain.includedProbabilityMass(t.domain);
 
       let toScaledContinuous = (t: t) => {
         t
         |> toShape
         |> Shape.T.toScaledContinuous
         |> E.O.fmap(
-             Continuous.T.pointwiseFmap(r =>
-               r *. domainIncludedProbabilityMass(t)
+             Continuous.T.pointwiseFmap(
+               domainIncludedProbabilityMassAdjustment(t),
              ),
            );
       };
@@ -475,9 +500,41 @@ module DistPlus = {
       let integralSum = (~cache as _, t: t) =>
         Shape.T.Integral.sum(~cache=Some(t.integralCache), toShape(t));
 
-      //   TODO: Fix this below, obviously. Adjust for limit.
+      //   TODO: Fix this below, obviously. Adjust for limits
       let integralXtoY = (~cache as _, f, t: t) => {
         Shape.T.Integral.xToY(~cache=Some(t.integralCache), f, toShape(t));
       };
     });
+};
+
+module DistPlusTime = {
+  open DistTypes;
+  open DistPlus;
+
+  type t = DistTypes.distPlus;
+
+  let unitToJson = ({unit}: t) => unit |> DistTypes.DistributionUnit.toJson;
+
+  let timeVector = ({unit}: t) =>
+    switch (unit) {
+    | TimeDistribution(timeVector) => Some(timeVector)
+    | UnspecifiedDistribution => None
+    };
+
+  let timeInVectorToX = (f: TimeTypes.timeInVector, t: t) => {
+    let timeVector = t |> timeVector;
+    timeVector |> E.O.fmap(TimeTypes.RelativeTimePoint.toXValue(_, f));
+  };
+
+  let xToY = (f: TimeTypes.timeInVector, t: t) => {
+    timeInVectorToX(f, t) |> E.O.fmap(DistPlus.T.xToY(_, t));
+  };
+
+  module Integral = {
+    include DistPlus.T.Integral;
+    let xToY = (~cache as _, f: TimeTypes.timeInVector, t: t) => {
+      timeInVectorToX(f, t)
+      |> E.O.fmap(x => DistPlus.T.Integral.xToY(~cache=None, x, t));
+    };
+  };
 };

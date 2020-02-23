@@ -23,6 +23,22 @@ let fromArray = ((xs, ys)): t => {xs, ys};
 let fromArrays = (xs, ys): t => {xs, ys};
 let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
 
+let compare = (a: float, b: float) => a > b ? 1 : (-1);
+
+let comparePoints = ((x1: float, y1: float), (x2: float, y2: float)) =>
+  switch (x1 == x2, y1 == y2) {
+  | (false, _) => compare(x1, x2)
+  | (true, false) => compare(y1, y2)
+  | (true, true) => (-1)
+  };
+
+let combine = (t1: t, t2: t) => {
+  let totalLength = E.A.length(t1.xs) + E.A.length(t2.xs);
+  let array = Belt.Array.concat(zip(t1), zip(t2));
+  Array.sort(comparePoints, array);
+  array |> Belt.Array.unzip |> fromArray;
+};
+
 let intersperce = (t1: t, t2: t) => {
   let items: ref(array((float, float))) = ref([||]);
   let t1 = zip(t1);

@@ -50,11 +50,11 @@ module TimePoint = {
     MomentRe.diff(timeVector.zero, moment, timeVector.unit);
 };
 
-module RelativeTimePoint = {
-  type timeInVector =
-    | Time(MomentRe.Moment.t)
-    | XValue(float);
+type timeInVector =
+  | Time(MomentRe.Moment.t)
+  | XValue(float);
 
+module RelativeTimePoint = {
   let toTime = (timeVector: timeVector, timeInVector: timeInVector) =>
     switch (timeInVector) {
     | Time(r) => r

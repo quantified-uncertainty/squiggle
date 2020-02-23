@@ -109,14 +109,20 @@ module Model = {
 
   // TODO: Fixe number that integral is calculated for
   let getGlobalCatastropheChance = dateTime => {
-    let model = GlobalCatastrophe.Model.make(dateTime);
-    switch (model) {
-    | Prop.Value.DistPlusIngredients(distPlusIngredients) =>
-      distPlusIngredients
-      |> DistPlusIngredients.toDistPlus(~sampleCount=1000)
-      |> E.O.fmap(Distributions.DistPlus.T.Integral.xToY(~cache=None, 18.0))
-    | _ => None
-    };
+    GlobalCatastrophe.makeI(MomentRe.momentNow())
+    |> DistPlusIngredients.toDistPlus(~sampleCount=1000)
+    |> E.O.bind(
+         _,
+         t => {
+           let foo =
+             Distributions.DistPlusTime.Integral.xToY(
+               ~cache=None,
+               Time(dateTime),
+               t,
+             );
+           Some(0.5);
+         },
+       );
   };
 
   let make =

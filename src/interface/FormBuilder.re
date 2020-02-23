@@ -22,7 +22,7 @@ let propValue = (t: Prop.Value.t) => {
       DistPlusIngredients.toDistPlus(~sampleCount=1000, r);
     switch (newDistribution) {
     | Some(distribution) =>
-      <div> <DistPlusChart distPlus=distribution /> </div>
+      <div> <DistPlusPlot distPlus=distribution /> </div>
     | None => "Something went wrong" |> ReasonReact.string
     };
   | FloatCdf(_) => <div />

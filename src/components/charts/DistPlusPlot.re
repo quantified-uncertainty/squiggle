@@ -10,7 +10,7 @@ module DistPlusChart = {
     let minX = T.minX(distPlus);
     let maxX = T.maxX(distPlus);
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
-    <DistributionChart
+    <DistributionPlot
       minX
       maxX
       ?discrete
@@ -31,12 +31,11 @@ module IntegralChart = {
     let continuous =
       integral
       |> T.toContinuous
-      |> E.O.fmap(Distributions.Continuous.toLinear)
       |> E.O.fmap(Distributions.Continuous.getShape);
     let minX = T.minX(integral);
     let maxX = T.maxX(integral);
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
-    <DistributionChart
+    <DistributionPlot
       minX
       maxX
       ?continuous

@@ -8,7 +8,7 @@ let make =
   unit,
 };
 
-let toDistPlus = (~sampleCount, t: distPlusIngredients) => {
+let toDistPlus = (~sampleCount, t: distPlusIngredients): option(distPlus) => {
   let shape =
     Guesstimator.stringToMixedShape(
       ~string=t.guesstimatorString,

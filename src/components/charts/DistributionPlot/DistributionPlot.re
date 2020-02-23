@@ -1,6 +1,6 @@
-module RawChart = {
-  [@bs.module "./cdfChartReact.js"]
-  external cdfChart: ReasonReact.reactClass = "default";
+module RawPlot = {
+  [@bs.module "./distPlotReact.js"]
+  external plot: ReasonReact.reactClass = "default";
 
   type primaryDistribution =
     option({
@@ -36,7 +36,7 @@ module RawChart = {
         ~children=[||],
       ) =>
     ReasonReact.wrapJsForReason(
-      ~reactClass=cdfChart,
+      ~reactClass=plot,
       ~props=
         makeProps(
           ~height?,
@@ -102,7 +102,7 @@ let make =
       ~timeScale=?,
     ) => {
   <div className={Styles.graph(color)}>
-    <RawChart
+    <RawPlot
       ?maxX
       ?minX
       ?scale
