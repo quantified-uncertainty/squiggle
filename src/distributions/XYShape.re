@@ -18,8 +18,36 @@ let last = (t: t) =>
   | _ => None
   };
 
+let unsafeFirst = (t: t) => first(t) |> E.O.toExn("Unsafe operation");
+let unsafeLast = (t: t) => last(t) |> E.O.toExn("Unsafe operation");
+
 let zip = t => Belt.Array.zip(t.xs, t.ys);
 let getBy = (t: t, fn) => t |> zip |> Belt.Array.getBy(_, fn);
+
+let firstPairAtOrBeforeValue = (xValue, t: t) => {
+  let zipped = zip(t);
+  let firstIndex =
+    zipped |> Belt.Array.getIndexBy(_, ((x, y)) => x > xValue);
+  let previousIndex =
+    switch (firstIndex) {
+    | None => Some(Array.length(zipped) - 1)
+    | Some(0) => None
+    | Some(n) => Some(n - 1)
+    };
+  previousIndex |> Belt.Option.flatMap(_, Belt.Array.get(zipped));
+};
+
+module XtoY = {
+  let ifAtX = (f, t: t) =>
+    getBy(t, ((x, _)) => x == f) |> E.O.fmap(((_, y)) => y);
+
+  let stepwise = (f, t: t) =>
+    firstPairAtOrBeforeValue(f, t) |> E.O.fmap(((_, y)) => y);
+
+  // TODO: When Roman's PR comes in, fix this bit. This depends on interpolation, obviously.
+  let linear = (f, t: t) => t |> CdfLibrary.Distribution.findY(f);
+};
+
 let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
 let fromArray = ((xs, ys)): t => {xs, ys};
 let fromArrays = (xs, ys): t => {xs, ys};
@@ -109,21 +137,24 @@ module Range = {
       (((lastX, lastY), (nextX, nextY)): zippedRange) =>
     (nextY -. lastY) /. (nextX -. lastX);
 
-  let inRanges = (mapper, reducer, t: t) => {
+  let mapYsBasedOnRanges = (fn, t) =>
     Belt.Array.zip(t.xs, t.ys)
     |> E.A.toRanges
     |> E.R.toOption
-    |> E.O.fmap(r => r |> Belt.Array.map(_, mapper) |> reducer);
-  };
+    |> E.O.fmap(r => r |> Belt.Array.map(_, r => (nextX(r), fn(r))));
 
-  let mapYsBasedOnRanges = fn => inRanges(r => (nextX(r), fn(r)), toT);
-
-  let integrateWithSteps = z =>
-    mapYsBasedOnRanges(rangeAreaAssumingSteps, z) |> E.O.fmap(accumulateYs);
-
-  let integrateWithTriangles = z =>
-    mapYsBasedOnRanges(rangeAreaAssumingTriangles, z)
+  let integrateWithTriangles = z => {
+    let rangeItems = mapYsBasedOnRanges(rangeAreaAssumingTriangles, z);
+    (
+      switch (rangeItems, z |> first) {
+      | (Some(r), Some((firstX, _))) =>
+        Some(Belt.Array.concat([|(firstX, 0.0)|], r))
+      | _ => None
+      }
+    )
+    |> E.O.fmap(toT)
     |> E.O.fmap(accumulateYs);
+  };
 
   let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);
 

@@ -60,6 +60,12 @@ let make = (~distPlus: DistTypes.distPlus) => {
       () => {<IntegralChart distPlus onHover={r => {setX(_ => r)}} />},
       [|distPlus|],
     );
+  // Js.log4(
+  //   "distPlus",
+  //   x,
+  //   distPlus,
+  //   distPlus |> Distributions.DistPlus.T.xToY(x),
+  // );
   <div>
     chart
     chart2
@@ -67,6 +73,12 @@ let make = (~distPlus: DistTypes.distPlus) => {
       <thead>
         <tr>
           <th className="px-4 py-2"> {"X Point" |> ReasonReact.string} </th>
+          <th className="px-4 py-2">
+            {"Discrete Value" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2">
+            {"Continuous Value" |> ReasonReact.string}
+          </th>
           <th className="px-4 py-2">
             {"Y Integral to Point" |> ReasonReact.string}
           </th>
@@ -76,6 +88,20 @@ let make = (~distPlus: DistTypes.distPlus) => {
         <tr>
           <th className="px-4 py-2 border ">
             {x |> E.Float.toString |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.xToY(x)
+             |> DistTypes.MixedPoint.toDiscreteValue
+             |> E.Float.with2DigitsPrecision
+             |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.xToY(x)
+             |> DistTypes.MixedPoint.toContinuousValue
+             |> E.Float.with2DigitsPrecision
+             |> ReasonReact.string}
           </th>
           <th className="px-4 py-2 border ">
             {distPlus

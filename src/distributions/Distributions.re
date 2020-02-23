@@ -54,7 +54,7 @@ module Dist = (T: dist) => {
     let sum = T.integralSum;
   };
 
-  //   This is suboptimal because it could get the cache but doesn't here.
+  // This is suboptimal because it could get the cache but doesn't here.
   let scaleToIntegralSum = (~intendedSum=1.0, t: t) => {
     let scale = intendedSum /. Integral.sum(~cache=None, t);
     scaleBy(~scale, t);
@@ -90,8 +90,9 @@ module Continuous = {
       type t = DistTypes.continuousShape;
       type integral = DistTypes.continuousShape;
       let shapeFn = (fn, t: t) => t |> xyShape |> fn;
-      // TODO: Obviously fix this, it's terrible. Use interpolation method here.
+      // TODO: Obviously fix this, it's terrible. Use interpolation param to do appropriate interpolation.
       // TODO: Steps could be 1 value, interpolation needs at least 2.
+      // TODO: integrateWithTriangles should return (x0, 0.0) as the first item.
       let integral = (~cache, t) =>
         cache
         |> E.O.default(
@@ -103,16 +104,28 @@ module Continuous = {
            );
       //   This seems wrong, we really want the ending bit, I'd assume
       let integralSum = (~cache, t) =>
-        t |> integral(~cache) |> xyShape |> XYShape.ySum;
+        t
+        |> integral(~cache)
+        |> xyShape
+        |> XYShape.unsafeLast
+        |> (((_, y)) => y);
       let minX = shapeFn(XYShape.minX);
       let maxX = shapeFn(XYShape.maxX);
       let pointwiseFmap = (fn, t: t) =>
         t |> xyShape |> XYShape.pointwiseMap(fn) |> fromShape;
       let toShape = (t: t): DistTypes.shape => Continuous(t);
-      // TODO: When Roman's PR comes in, fix this bit. This depends on interpolation, obviously.
-      let xToY = (f, t) =>
-        shapeFn(CdfLibrary.Distribution.findY(f), t)
-        |> DistTypes.MixedPoint.makeContinuous;
+      let xToY = (f, {interpolation, xyShape}: t) =>
+        switch (interpolation) {
+        | `Stepwise =>
+          xyShape
+          |> XYShape.XtoY.stepwise(f)
+          |> E.O.default(0.0)
+          |> DistTypes.MixedPoint.makeContinuous
+        | `Linear =>
+          xyShape
+          |> XYShape.XtoY.linear(f)
+          |> DistTypes.MixedPoint.makeContinuous
+        };
       let integralXtoY = (~cache, f, t) =>
         t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
       let toContinuous = t => Some(t);
@@ -138,7 +151,6 @@ module Discrete = {
                Continuous.make(XYShape.accumulateYs(t), `Stepwise);
              },
            );
-      //  todo: Fix this with last element
       let integralSum = (~cache, t) => t |> XYShape.ySum;
       let minX = XYShape.minX;
       let maxX = XYShape.maxX;
@@ -150,8 +162,7 @@ module Discrete = {
       let toScaledDiscrete = t => Some(t);
 
       let xToY = (f, t) => {
-        XYShape.getBy(t, ((x, _)) => x == f)
-        |> E.O.fmap(((_, y)) => y)
+        XYShape.XtoY.ifAtX(f, t)
         |> E.O.default(0.0)
         |> DistTypes.MixedPoint.makeDiscrete;
       };
