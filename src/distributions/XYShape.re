@@ -1,4 +1,4 @@
-open DistributionTypes;
+open DistTypes;
 let _lastElement = (a: array('a)) =>
   switch (Belt.Array.size(a)) {
   | 0 => None
@@ -24,17 +24,17 @@ let fromArrays = (xs, ys): t => {xs, ys};
 let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
 
 let intersperce = (t1: t, t2: t) => {
-  let foo: ref(array((float, float))) = ref([||]);
+  let items: ref(array((float, float))) = ref([||]);
   let t1 = zip(t1);
   let t2 = zip(t2);
 
   Belt.Array.forEachWithIndex(t1, (i, item) => {
     switch (Belt.Array.get(t2, i)) {
-    | Some(r) => foo := E.A.append(foo^, [|item, r|])
-    | None => foo := E.A.append(foo^, [|item|])
+    | Some(r) => items := E.A.append(items^, [|item, r|])
+    | None => items := E.A.append(items^, [|item|])
     }
   });
-  foo^ |> Belt.Array.unzip |> fromArray;
+  items^ |> Belt.Array.unzip |> fromArray;
 };
 
 let scaleCdfTo = (~scaleTo=1., t: t) =>
@@ -69,6 +69,9 @@ let _transverseShape = (fn, p: t) => {
 
 let accumulateYs = _transverseShape((aCurrent, aLast) => aCurrent +. aLast);
 let subtractYs = _transverseShape((aCurrent, aLast) => aCurrent -. aLast);
+
+let findY = CdfLibrary.Distribution.findY;
+let findX = CdfLibrary.Distribution.findX;
 
 module Range = {
   // ((lastX, lastY), (nextX, nextY))
@@ -122,6 +125,3 @@ module Range = {
     |> E.O.fmap(fromArray)
     |> E.O.fmap(intersperce(t));
 };
-
-let findY = CdfLibrary.Distribution.findY;
-let findX = CdfLibrary.Distribution.findX;

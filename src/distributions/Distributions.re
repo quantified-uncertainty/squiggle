@@ -19,12 +19,12 @@ module type dist = {
   let minX: t => option(float);
   let maxX: t => option(float);
   let pointwiseFmap: (float => float, t) => t;
-  let xToY: (float, t) => DistributionTypes.mixedPoint;
-  let toShape: t => DistributionTypes.shape;
-  let toContinuous: t => option(DistributionTypes.continuousShape);
-  let toDiscrete: t => option(DistributionTypes.discreteShape);
-  let toScaledContinuous: t => option(DistributionTypes.continuousShape);
-  let toScaledDiscrete: t => option(DistributionTypes.discreteShape);
+  let xToY: (float, t) => DistTypes.mixedPoint;
+  let toShape: t => DistTypes.shape;
+  let toContinuous: t => option(DistTypes.continuousShape);
+  let toDiscrete: t => option(DistTypes.discreteShape);
+  let toScaledContinuous: t => option(DistTypes.continuousShape);
+  let toScaledDiscrete: t => option(DistTypes.discreteShape);
 
   type integral;
   let integral: (~cache: option(integral), t) => integral;
@@ -62,7 +62,7 @@ module Dist = (T: dist) => {
 };
 
 module Continuous = {
-  type t = DistributionTypes.continuousShape;
+  type t = DistTypes.continuousShape;
   let xyShape = (t: t) => t.xyShape;
   let getShape = (t: t) => t.xyShape;
   let interpolation = (t: t) => t.interpolation;
@@ -73,8 +73,7 @@ module Continuous = {
     interpolation,
   };
   let oShapeMap =
-      (fn, {xyShape, interpolation}: t)
-      : option(DistributionTypes.continuousShape) =>
+      (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(xyShape => make(xyShape, interpolation));
 
   let toLinear = (t: t): t =>
@@ -88,8 +87,8 @@ module Continuous = {
 
   module T =
     Dist({
-      type t = DistributionTypes.continuousShape;
-      type integral = DistributionTypes.continuousShape;
+      type t = DistTypes.continuousShape;
+      type integral = DistTypes.continuousShape;
       let shapeFn = (fn, t: t) => t |> xyShape |> fn;
       // TODO: Obviously fix this, it's terrible
       let integral = (~cache, t) =>
@@ -108,11 +107,11 @@ module Continuous = {
       let maxX = shapeFn(XYShape.maxX);
       let pointwiseFmap = (fn, t: t) =>
         t |> xyShape |> XYShape.pointwiseMap(fn) |> fromShape;
-      let toShape = (t: t): DistributionTypes.shape => Continuous(t);
+      let toShape = (t: t): DistTypes.shape => Continuous(t);
       // TODO: When Roman's PR comes in, fix this bit.
       let xToY = (f, t) =>
         shapeFn(CdfLibrary.Distribution.findY(f), t)
-        |> DistributionTypes.MixedPoint.makeContinuous;
+        |> DistTypes.MixedPoint.makeContinuous;
       let integralXtoY = (~cache, f, t) =>
         t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
       let toContinuous = t => Some(t);
@@ -125,8 +124,8 @@ module Continuous = {
 module Discrete = {
   module T =
     Dist({
-      type t = DistributionTypes.discreteShape;
-      type integral = DistributionTypes.continuousShape;
+      type t = DistTypes.discreteShape;
+      type integral = DistTypes.continuousShape;
       let integral = (~cache, t) =>
         cache
         |> E.O.default(
@@ -143,14 +142,14 @@ module Discrete = {
       let minX = XYShape.minX;
       let maxX = XYShape.maxX;
       let pointwiseFmap = XYShape.pointwiseMap;
-      let toShape = (t: t): DistributionTypes.shape => Discrete(t);
+      let toShape = (t: t): DistTypes.shape => Discrete(t);
       let toContinuous = _ => None;
       let toDiscrete = t => Some(t);
       let toScaledContinuous = t => None;
       let toScaledDiscrete = t => Some(t);
       let xToY = (f, t) =>
         CdfLibrary.Distribution.findY(f, t)
-        |> DistributionTypes.MixedPoint.makeDiscrete;
+        |> DistTypes.MixedPoint.makeDiscrete;
       let integralXtoY = (~cache, f, t) =>
         t |> XYShape.accumulateYs |> CdfLibrary.Distribution.findY(f);
     });
@@ -159,14 +158,13 @@ module Discrete = {
 module Mixed = {
   let make =
       (~continuous, ~discrete, ~discreteProbabilityMassFraction)
-      : DistributionTypes.mixedShape => {
+      : DistTypes.mixedShape => {
     continuous,
     discrete,
     discreteProbabilityMassFraction,
   };
 
-  let clean =
-      (t: DistributionTypes.mixedShape): option(DistributionTypes.shape) => {
+  let clean = (t: DistTypes.mixedShape): option(DistTypes.shape) => {
     switch (t) {
     | {
         continuous: {xyShape: {xs: [||], ys: [||]}},
@@ -183,34 +181,34 @@ module Mixed = {
   };
 
   let scaleDiscreteFn =
-      ({discreteProbabilityMassFraction}: DistributionTypes.mixedShape, f) =>
+      ({discreteProbabilityMassFraction}: DistTypes.mixedShape, f) =>
     f *. discreteProbabilityMassFraction;
 
   let scaleContinuousFn =
-      ({discreteProbabilityMassFraction}: DistributionTypes.mixedShape, f) =>
+      ({discreteProbabilityMassFraction}: DistTypes.mixedShape, f) =>
     f *. (1.0 -. discreteProbabilityMassFraction);
 
   module T =
     Dist({
-      type t = DistributionTypes.mixedShape;
-      type integral = DistributionTypes.continuousShape;
+      type t = DistTypes.mixedShape;
+      type integral = DistTypes.continuousShape;
       let minX = ({continuous, discrete}: t) =>
         min(Continuous.T.minX(continuous), Discrete.T.minX(discrete));
       let maxX = ({continuous, discrete}: t) =>
         max(Continuous.T.maxX(continuous), Discrete.T.maxX(discrete));
-      let toShape = (t: t): DistributionTypes.shape => Mixed(t);
+      let toShape = (t: t): DistTypes.shape => Mixed(t);
       let toContinuous = ({continuous}: t) => Some(continuous);
       let toDiscrete = ({discrete}: t) => Some(discrete);
       let xToY = (f, {discrete, continuous} as t: t) => {
         let c =
           continuous
           |> Continuous.T.xToY(f)
-          |> DistributionTypes.MixedPoint.fmap(scaleContinuousFn(t));
+          |> DistTypes.MixedPoint.fmap(scaleContinuousFn(t));
         let d =
           discrete
           |> Discrete.T.xToY(f)
-          |> DistributionTypes.MixedPoint.fmap(scaleDiscreteFn(t));
-        DistributionTypes.MixedPoint.add(c, d);
+          |> DistTypes.MixedPoint.fmap(scaleDiscreteFn(t));
+        DistTypes.MixedPoint.add(c, d);
       };
 
       let scaleContinuous =
@@ -284,8 +282,8 @@ module Mixed = {
 module Shape = {
   module T =
     Dist({
-      type t = DistributionTypes.shape;
-      type integral = DistributionTypes.continuousShape;
+      type t = DistTypes.shape;
+      type integral = DistTypes.continuousShape;
 
       let mapToAll = (t: t, (fn1, fn2, fn3)) =>
         switch (t) {
@@ -389,7 +387,7 @@ module Shape = {
 };
 
 module DistPlus = {
-  open DistributionTypes;
+  open DistTypes;
   let make =
       (
         ~shape,
@@ -420,8 +418,8 @@ module DistPlus = {
 
   module T =
     Dist({
-      type t = DistributionTypes.distPlus;
-      type integral = DistributionTypes.distPlus;
+      type t = DistTypes.distPlus;
+      type integral = DistTypes.distPlus;
       let toShape = ({shape, _}: t) => shape;
       let shapeFn = (fn, t: t) => t |> toShape |> fn;
       let toContinuous = shapeFn(Shape.T.toContinuous);

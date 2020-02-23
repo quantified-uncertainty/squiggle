@@ -5,7 +5,7 @@ module Internals = {
     ys: array(float),
   };
 
-  let jsToDistDiscrete = (d: discrete): DistributionTypes.discreteShape => {
+  let jsToDistDiscrete = (d: discrete): DistTypes.discreteShape => {
     xs: xsGet(d),
     ys: ysGet(d),
   };
@@ -21,14 +21,14 @@ module Internals = {
     |> CdfLibrary.JS.jsToDist
     |> Distributions.Continuous.fromShape;
 
-  let toDiscrete = (r: combined): DistributionTypes.xyShape =>
+  let toDiscrete = (r: combined): DistTypes.xyShape =>
     discreteGet(r) |> jsToDistDiscrete;
 
   [@bs.module "./GuesstimatorLibrary.js"]
   external toCombinedFormat: (string, int) => combined = "run";
 
   // todo: Format to correct mass, also normalize the pdf.
-  let toMixedShape = (r: combined): option(DistributionTypes.mixedShape) => {
+  let toMixedShape = (r: combined): option(DistTypes.mixedShape) => {
     let assumptions: MixedShapeBuilder.assumptions = {
       continuous: ADDS_TO_1,
       discrete: ADDS_TO_CORRECT_PROBABILITY,

@@ -1,15 +1,12 @@
 open Jest;
 open Expect;
 
-let shape: DistributionTypes.xyShape = {
-  xs: [|1., 4., 8.|],
-  ys: [|8., 9., 2.|],
-};
+let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 
-let step: DistributionTypes.xyShape = {
+let step: DistTypes.xyShape = {
   xs: [|1., 4., 8.|],
   ys: [|8., 17., 19.|],
-} /*   }*/;
+} /*   }*/ /*     )*/;
 
 // describe("Shape", () =>
 //   describe("XYShape", () => {
@@ -18,4 +15,3 @@ let step: DistributionTypes.xyShape = {
 //     );
 //     test("#yFOo", () =>
 //       expect(Discrete.integrate(shape)) |> toEqual(step)
-//     );

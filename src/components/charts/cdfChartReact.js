@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useSize } from 'react-use';
-
 import { CdfChartD3 } from './cdfChartD3';
 
 /**

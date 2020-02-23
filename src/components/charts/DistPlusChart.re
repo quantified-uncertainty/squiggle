@@ -1,6 +1,6 @@
 module DistPlusChart = {
   [@react.component]
-  let make = (~distPlus: DistributionTypes.distPlus, ~onHover) => {
+  let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
     open Distributions.DistPlus;
     let discrete = distPlus |> T.toDiscrete;
     let continuous =
@@ -9,8 +9,8 @@ module DistPlusChart = {
       |> E.O.fmap(Distributions.Continuous.getShape);
     let minX = T.minX(distPlus);
     let maxX = T.maxX(distPlus);
-    let timeScale = distPlus.unit |> DistributionTypes.DistributionUnit.toJson;
-    <CdfChart__Plain
+    let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
+    <DistributionChart
       minX
       maxX
       ?discrete
@@ -24,7 +24,7 @@ module DistPlusChart = {
 
 module IntegralChart = {
   [@react.component]
-  let make = (~distPlus: DistributionTypes.distPlus, ~onHover) => {
+  let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
     open Distributions.DistPlus;
     let integral =
       Distributions.DistPlus.T.Integral.get(~cache=None, distPlus);
@@ -35,8 +35,8 @@ module IntegralChart = {
       |> E.O.fmap(Distributions.Continuous.getShape);
     let minX = T.minX(integral);
     let maxX = T.maxX(integral);
-    let timeScale = distPlus.unit |> DistributionTypes.DistributionUnit.toJson;
-    <CdfChart__Plain
+    let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
+    <DistributionChart
       minX
       maxX
       ?continuous
@@ -48,7 +48,7 @@ module IntegralChart = {
 };
 
 [@react.component]
-let make = (~distPlus: DistributionTypes.distPlus) => {
+let make = (~distPlus: DistTypes.distPlus) => {
   let (x, setX) = React.useState(() => 0.);
   let chart =
     React.useMemo1(

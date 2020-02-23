@@ -1,4 +1,4 @@
-open DistributionTypes;
+open DistTypes;
 
 let make =
     (~guesstimatorString, ~domain=Complete, ~unit=UnspecifiedDistribution, ())
