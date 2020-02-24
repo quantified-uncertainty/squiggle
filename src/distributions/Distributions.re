@@ -101,7 +101,7 @@ module Continuous = {
         switch (interpolation) {
         | `Stepwise =>
           xyShape
-          |> XYShape.XtoY.stepwise(f)
+          |> XYShape.XtoY.stepwiseIncremental(f)
           |> E.O.default(0.0)
           |> DistTypes.MixedPoint.makeContinuous
         | `Linear =>
@@ -109,6 +109,14 @@ module Continuous = {
           |> XYShape.XtoY.linear(f)
           |> DistTypes.MixedPoint.makeContinuous
         };
+
+      // let combineWithFn = (t1: t, t2: t, fn: (float, float) => float) => {
+      //   switch(t1, t2){
+      //     | ({interpolation: `Stepwise}, {interpolation: `Stepwise}) => 3.0
+      //     | ({interpolation: `Linear}, {interpolation: `Linear}) => 3.0
+      //   }
+      // };
+
       let integral = (~cache, t) =>
         cache
         |> E.O.default(
@@ -148,7 +156,7 @@ module Discrete = {
       let toScaledDiscrete = t => Some(t);
 
       let xToY = (f, t) => {
-        XYShape.XtoY.ifAtX(f, t)
+        XYShape.XtoY.stepwiseIfAtX(f, t)
         |> E.O.default(0.0)
         |> DistTypes.MixedPoint.makeDiscrete;
       };
@@ -254,9 +262,11 @@ module Mixed = {
                       ~scale=discreteProbabilityMassFraction,
                     );
                Continuous.make(
-                 XYShape.combine(
+                 XYShape.Combine.combineLinear(
                    Continuous.getShape(cont),
                    Continuous.getShape(dist),
+                   (a, b) =>
+                   a +. b
                  ),
                  `Linear,
                );

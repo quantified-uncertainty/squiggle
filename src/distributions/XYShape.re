@@ -5,15 +5,21 @@ type t = xyShape;
 let toJs = (t: t) => {
   {"xs": t.xs, "ys": t.ys};
 };
-let minX = (t: t) => t.xs |> E.A.first;
-let maxX = (t: t) => t.xs |> E.A.last;
-let first = (t: t) =>
-  switch (t.xs |> E.A.first, t.ys |> E.A.first) {
+let xs = (t: t) => t.xs;
+let minX = (t: t) => t |> xs |> E.A.first;
+let maxX = (t: t) => t |> xs |> E.A.last;
+let xTotalRange = (t: t) =>
+  switch (minX(t), maxX(t)) {
+  | (Some(min), Some(max)) => Some(max -. min)
+  | _ => None
+  };
+let first = ({xs, ys}: t) =>
+  switch (xs |> E.A.first, ys |> E.A.first) {
   | (Some(x), Some(y)) => Some((x, y))
   | _ => None
   };
-let last = (t: t) =>
-  switch (t.xs |> E.A.last, t.ys |> E.A.last) {
+let last = ({xs, ys}: t) =>
+  switch (xs |> E.A.last, ys |> E.A.last) {
   | (Some(x), Some(y)) => Some((x, y))
   | _ => None
   };
@@ -21,7 +27,7 @@ let last = (t: t) =>
 let unsafeFirst = (t: t) => first(t) |> E.O.toExn("Unsafe operation");
 let unsafeLast = (t: t) => last(t) |> E.O.toExn("Unsafe operation");
 
-let zip = t => Belt.Array.zip(t.xs, t.ys);
+let zip = ({xs, ys}: t) => Belt.Array.zip(xs, ys);
 let getBy = (t: t, fn) => t |> zip |> Belt.Array.getBy(_, fn);
 
 let firstPairAtOrBeforeValue = (xValue, t: t) => {
@@ -38,19 +44,63 @@ let firstPairAtOrBeforeValue = (xValue, t: t) => {
 };
 
 module XtoY = {
-  let ifAtX = (f, t: t) =>
-    getBy(t, ((x, _)) => x == f) |> E.O.fmap(((_, y)) => y);
-
-  let stepwise = (f, t: t) =>
+  let stepwiseIncremental = (f, t: t) =>
     firstPairAtOrBeforeValue(f, t) |> E.O.fmap(((_, y)) => y);
+
+  let stepwiseIfAtX = (f, t: t) =>
+    getBy(t, ((x, _)) => x == f) |> E.O.fmap(((_, y)) => y);
 
   // TODO: When Roman's PR comes in, fix this bit. This depends on interpolation, obviously.
   let linear = (f, t: t) => t |> CdfLibrary.Distribution.findY(f);
 };
 
 let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
+let xMap = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys};
 let fromArray = ((xs, ys)): t => {xs, ys};
 let fromArrays = (xs, ys): t => {xs, ys};
+
+module Combine = {
+  let combineLinear = (t1: t, t2: t, fn: (float, float) => float) => {
+    let allXs = Belt.Array.concat(xs(t1), xs(t2));
+    allXs |> Array.sort(compare);
+    let allYs =
+      allXs
+      |> E.A.fmap(x => {
+           let y1 = XtoY.linear(x, t1);
+           let y2 = XtoY.linear(x, t2);
+           fn(y1, y2);
+         });
+    fromArrays(allXs, allYs);
+  };
+
+  let combineStepwise =
+      (t1: t, t2: t, fn: (option(float), option(float)) => float) => {
+    let allXs = Belt.Array.concat(xs(t1), xs(t2));
+    allXs |> Array.sort(compare);
+    let allYs =
+      allXs
+      |> E.A.fmap(x => {
+           let y1 = XtoY.stepwiseIncremental(x, t1);
+           let y2 = XtoY.stepwiseIncremental(x, t2);
+           fn(y1, y2);
+         });
+    fromArrays(allXs, allYs);
+  };
+
+  let combineIfAtX =
+      (t1: t, t2: t, fn: (option(float), option(float)) => float) => {
+    let allXs = Belt.Array.concat(xs(t1), xs(t2));
+    allXs |> Array.sort(compare);
+    let allYs =
+      allXs
+      |> E.A.fmap(x => {
+           let y1 = XtoY.stepwiseIfAtX(x, t1);
+           let y2 = XtoY.stepwiseIfAtX(x, t2);
+           fn(y1, y2);
+         });
+    fromArrays(allXs, allYs);
+  };
+};
 
 // todo: maybe not needed?
 // let comparePoint = (a: float, b: float) => a > b ? 1 : (-1);
@@ -155,12 +205,19 @@ module Range = {
 
   let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);
 
-  let stepsToContinuous = t =>
-    Belt.Array.zip(t.xs, t.ys)
-    |> E.A.toRanges
-    |> E.R.toOption
-    |> E.O.fmap(r => r |> Belt.Array.map(_, rangePointAssumingSteps))
-    |> E.O.fmap(Belt.Array.unzip)
-    |> E.O.fmap(fromArray)
-    |> E.O.fmap(intersperce(t));
+  // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
+  let stepsToContinuous = t => {
+    let diff = xTotalRange(t) |> E.O.fmap(r => r *. 0.00001);
+    switch (diff, E.A.toRanges(Belt.Array.zip(t.xs, t.ys))) {
+    | (Some(diff), Ok(items)) =>
+      Some(
+        items
+        |> Belt.Array.map(_, rangePointAssumingSteps)
+        |> Belt.Array.unzip
+        |> fromArray
+        |> intersperce(t |> xMap(e => e +. diff)),
+      )
+    | _ => None
+    };
+  };
 };

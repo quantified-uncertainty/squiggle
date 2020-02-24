@@ -79,7 +79,10 @@ describe("Shape", () => {
           make({xs: [|1., 4., 8.|], ys: [|0.1, 5., 1.0|]}, `Stepwise);
         continuous |> toLinear |> getShape;
       },
-      {xs: [|1.0, 4.0, 4.0, 8.0, 8.0|], ys: [|0.1, 0.1, 5.0, 5.0, 1.0|]},
+      {
+        xs: [|1.00007, 4.0, 4.00007, 8.0, 8.00007|],
+        ys: [|0.1, 0.1, 5.0, 5.0, 1.0|],
+      },
     );
     makeTest(
       "integralXToY",
@@ -251,13 +254,20 @@ describe("Shape", () => {
       T.Integral.get(~cache=None, mixed),
       Distributions.Continuous.make(
         {
-          xs: [|1., 3., 4., 4., 7., 8., 8., 14.|],
-          ys: [|0.15, 0.0, 0.15, 0.4, 0.13986013986013987, 0.4, 0.5, 0.5|],
+          xs: [|1.00007, 3., 4., 4.00007, 7., 8., 8.00007, 14.|],
+          ys: [|
+            0.15,
+            0.15,
+            0.18496503496503497,
+            0.4349674825174825,
+            0.5398601398601399,
+            0.5913086913086913,
+            0.6913122927072927,
+            1.0,
+          |],
         },
         `Linear,
       ),
     );
-    // makeTest("integralXToY", T.Integral.xToY(~cache=None, 6.0, mixed), 0.9);
-    // makeTest("integralSum", T.Integral.sum(~cache=None, mixed), 1.0);
   });
 });

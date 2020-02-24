@@ -12,7 +12,11 @@ let distributions = () =>
   <div>
     <div>
       <h2> {"Basic Mixed Distribution" |> ReasonReact.string} </h2>
-      {timeDist |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)}
+      {timeDist
+       |> E.O.fmap(
+            Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0),
+          )
+       |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)}
       <h2> {"Simple Continuous" |> ReasonReact.string} </h2>
     </div>
   </div>;
