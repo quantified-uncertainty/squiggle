@@ -32,6 +32,7 @@ module IntegralChart = {
     let continuous =
       integral
       |> T.toContinuous
+      |> E.O.bind(_, Distributions.Continuous.toLinear)
       |> E.O.fmap(Distributions.Continuous.getShape);
     let minX = T.minX(integral);
     let maxX = T.maxX(integral);

@@ -18,8 +18,7 @@ let toDistPlus =
       ~outputXYPoints,
       (),
     );
-  Js.log2("Line 21 with shape:", shape);
-  let ss =
+  let distPlus =
     shape
     |> E.O.fmap(
          Distributions.DistPlus.make(
@@ -29,6 +28,9 @@ let toDistPlus =
            ~guesstimatorString=None,
            (),
          ),
+       )
+    |> E.O.fmap(
+         Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0),
        );
-  ss;
+  distPlus;
 };
