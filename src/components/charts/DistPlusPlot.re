@@ -28,15 +28,16 @@ module IntegralChart = {
   let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
     open Distributions.DistPlus;
     let integral =
-      Distributions.DistPlus.T.Integral.get(~cache=None, distPlus);
+      Distributions.DistPlus.T.toShape(distPlus)
+      |> Distributions.Shape.T.Integral.get(~cache=None);
     let continuous =
       integral
-      |> T.toContinuous
-      |> E.O.bind(_, Distributions.Continuous.toLinear)
+      |> Distributions.Continuous.toLinear
       |> E.O.fmap(Distributions.Continuous.getShape);
-    let minX = T.minX(integral);
-    let maxX = T.maxX(integral);
+    let minX = integral |> Distributions.Continuous.T.minX;
+    let maxX = integral |> Distributions.Continuous.T.maxX;
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
+    Js.log3("HIHI", continuous, distPlus);
     <DistributionPlot
       minX
       maxX

@@ -504,7 +504,7 @@ module DistPlus = {
       let fromShape = (t, shape): t => update(~shape, t);
 
       // This bit is kind of akward, could probably use rethinking.
-      let integral = (~cache as _, t: t) =>
+      let integral = (~cache, t: t) =>
         updateShape(Continuous(t.integralCache), t);
 
       // todo: adjust for limit, maybe?

@@ -129,6 +129,8 @@ export class CdfChartD3 {
 
   data(data) {
     this.attrs.data = data;
+    this.attrs.data.continuous = data.continuous || {xs: [], ys: []};
+    this.attrs.data.discrete = data.discrete || {xs: [], ys: []};
     return this;
   }
 
@@ -308,14 +310,6 @@ export class CdfChartD3 {
     // Add drawing rectangle.
     {
       const context = this;
-      const range = [
-        xScale(dataPoints[dataPoints.length - 1][0].x),
-        xScale(
-          dataPoints
-            [dataPoints.length - 1]
-            [dataPoints[dataPoints.length - 1].length - 1].x,
-        ),
-      ];
 
       function mouseover() {
         const mouse = d3.mouse(this);
