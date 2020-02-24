@@ -47,8 +47,9 @@ module XtoY = {
   let stepwiseIncremental = (f, t: t) =>
     firstPairAtOrBeforeValue(f, t) |> E.O.fmap(((_, y)) => y);
 
-  let stepwiseIfAtX = (f, t: t) =>
-    getBy(t, ((x, _)) => x == f) |> E.O.fmap(((_, y)) => y);
+  let stepwiseIfAtX = (f: float, t: t) => {
+    getBy(t, ((x: float, _)) => {x == f}) |> E.O.fmap(((_, y)) => y);
+  };
 
   // TODO: When Roman's PR comes in, fix this bit. This depends on interpolation, obviously.
   let linear = (f, t: t) => t |> CdfLibrary.Distribution.findY(f);
@@ -208,16 +209,28 @@ module Range = {
   // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
   let stepsToContinuous = t => {
     let diff = xTotalRange(t) |> E.O.fmap(r => r *. 0.00001);
-    switch (diff, E.A.toRanges(Belt.Array.zip(t.xs, t.ys))) {
-    | (Some(diff), Ok(items)) =>
-      Some(
-        items
-        |> Belt.Array.map(_, rangePointAssumingSteps)
-        |> Belt.Array.unzip
-        |> fromArray
-        |> intersperce(t |> xMap(e => e +. diff)),
-      )
-    | _ => None
-    };
+    let items =
+      switch (diff, E.A.toRanges(Belt.Array.zip(t.xs, t.ys))) {
+      | (Some(diff), Ok(items)) =>
+        Some(
+          items
+          |> Belt.Array.map(_, rangePointAssumingSteps)
+          |> Belt.Array.unzip
+          |> fromArray
+          |> intersperce(t |> xMap(e => e +. diff)),
+        )
+      | _ => Some(t)
+      };
+    let bar = items |> E.O.fmap(zip) |> E.O.bind(_, E.A.get(_, 0));
+    let items =
+      switch (items, bar) {
+      | (Some(items), Some((0.0, _))) => Some(items)
+      | (Some(items), Some((firstX, _))) =>
+        let all = E.A.append([|(firstX, 0.0)|], items |> zip);
+        let foo = all |> Belt.Array.unzip |> fromArray;
+        Some(foo);
+      | _ => None
+      };
+    items;
   };
 };

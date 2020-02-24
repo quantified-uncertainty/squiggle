@@ -103,9 +103,16 @@ let make = (~distPlus: DistTypes.distPlus) => {
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
           </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.sum(~cache=None)
+             |> E.Float.with2DigitsPrecision
+             |> ReasonReact.string}
+          </th>
         </tr>
       </tbody>
     </table>
     <div />
   </div>;
+  // chart
 };

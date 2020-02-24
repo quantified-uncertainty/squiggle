@@ -96,6 +96,18 @@ const {
     let cdf = new Cdf(xs, ys);
     return cdf.findY(x);
   }
+
+  /**
+   *
+   * @param x
+   * @param xs
+   * @param ys
+   * @returns {number[]}
+   */
+  function convertToNewLength(n, { xs, ys }) {
+    let dist = new ContinuousDistribution(xs, ys);
+    return dist.convertToNewLength(n);
+  }
   
   /**
    *
@@ -153,6 +165,7 @@ const {
     pdfToCdf,
     findY,
     findX,
+    convertToNewLength,
     mean,
     scoreNonMarketCdfCdf,
     differentialEntropy,

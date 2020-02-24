@@ -8,6 +8,29 @@ type assumptions = {
   discreteProbabilityMass: option(float),
 };
 
+let buildSimple = (~continuous, ~discrete): option(DistTypes.shape) => {
+  let cLength =
+    continuous |> Distributions.Continuous.getShape |> XYShape.xs |> E.A.length;
+  let dLength = discrete |> XYShape.xs |> E.A.length;
+  switch (cLength, dLength) {
+  | (0 | 1, 0) => None
+  | (0 | 1, _) => Some(Discrete(discrete))
+  | (_, 0) => Some(Continuous(continuous))
+  | (_, _) =>
+    let discreteProbabilityMassFraction =
+      Distributions.Discrete.T.Integral.sum(~cache=None, discrete);
+    let discrete =
+      Distributions.Discrete.T.scaleToIntegralSum(~intendedSum=1.0, discrete);
+    let foobar =
+      Distributions.Mixed.make(
+        ~continuous,
+        ~discrete,
+        ~discreteProbabilityMassFraction,
+      )
+      |> Distributions.Mixed.clean;
+    foobar;
+  };
+};
 let build = (~continuous, ~discrete, ~assumptions) =>
   switch (assumptions) {
   | {

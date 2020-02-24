@@ -34,7 +34,7 @@ const ratioSize = samples => {
 };
 
 
-const toPdf = (values, sampleCount, min, max) => {
+const toPdf = (values, outputResolutionCount, min, max) => {
   let duplicateSamples = _(values).groupBy().pickBy(x => x.length > 1).keys().value();
   let totalLength = _.size(values);
   let frequencies = duplicateSamples.map(s => ({value: parseFloat(s), percentage: _(values).filter(x => x ==s).size()/totalLength}));
@@ -48,13 +48,13 @@ const toPdf = (values, sampleCount, min, max) => {
     const ratioSize$ = ratioSize(samples);
     const width = ratioSize$ === 'SMALL' ? 100 : 1;
 
-    const pdf = samples.toPdf({ size: sampleCount, width, min, max });
+    const pdf = samples.toPdf({ size: outputResolutionCount, width, min, max });
     continuous = pdf;
   }
   return {continuous, discrete};
 };
 
-let run = (text, sampleCount, inputs=[], min=false, max=false) => {
+let run = (text, sampleCount, outputResolutionCount, inputs=[], min=false, max=false) => {
     let [_error, item] = Guesstimator.parse({ text: "=" + text });
     const { parsedInput } = item;
     const { guesstimateType } = parsedInput;
@@ -78,7 +78,7 @@ let run = (text, sampleCount, inputs=[], min=false, max=false) => {
     } else if (values.length === 1) {
       update = blankResponse;
     } else {
-      update = toPdf(values, sampleCount, min, max);
+      update = toPdf(values, outputResolutionCount, min, max);
     }
     return update;
 }

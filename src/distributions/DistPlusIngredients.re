@@ -8,22 +8,27 @@ let make =
   unit,
 };
 
-let toDistPlus = (~sampleCount, t: distPlusIngredients): option(distPlus) => {
+let toDistPlus =
+    (~sampleCount=1000, ~outputXYPoints=1000, t: distPlusIngredients)
+    : option(distPlus) => {
   let shape =
     Guesstimator.stringToMixedShape(
       ~string=t.guesstimatorString,
       ~sampleCount,
+      ~outputXYPoints,
       (),
-    )
-    |> E.O.bind(_, Distributions.Mixed.clean);
-  shape
-  |> E.O.fmap(shape =>
-       Distributions.DistPlus.make(
-         ~shape,
-         ~domain=t.domain,
-         ~unit=t.unit,
-         ~guesstimatorString=None,
-         (),
-       )
-     );
+    );
+  Js.log2("Line 21 with shape:", shape);
+  let ss =
+    shape
+    |> E.O.fmap(
+         Distributions.DistPlus.make(
+           ~shape=_,
+           ~domain=t.domain,
+           ~unit=t.unit,
+           ~guesstimatorString=None,
+           (),
+         ),
+       );
+  ss;
 };

@@ -32,9 +32,18 @@ module JS = {
   [@bs.module "./CdfLibrary.js"]
   external differentialEntropy: (int, distJs) => distJs =
     "differentialEntropy";
+
+  [@bs.module "./CdfLibrary.js"]
+  external convertToNewLength: (int, distJs) => distJs = "convertToNewLength";
 };
 
 module Distribution = {
+  let convertToNewLength = (int, {xs, _} as dist: DistTypes.xyShape) =>
+    switch (E.A.length(xs)) {
+    | 0
+    | 1 => dist
+    | _ => dist |> JS.doAsDist(JS.convertToNewLength(int))
+    };
   let toPdf = dist => dist |> JS.doAsDist(JS.cdfToPdf);
   let toCdf = dist => dist |> JS.doAsDist(JS.pdfToCdf);
   let findX = (y, dist) => dist |> JS.distToJs |> JS.findX(y);

@@ -16,6 +16,7 @@ module Internals = {
     discrete,
   };
 
+  // todo: Force to be fewer samples
   let toContinous = (r: combined) =>
     continuousGet(r)
     |> CdfLibrary.JS.jsToDist
@@ -25,22 +26,24 @@ module Internals = {
     discreteGet(r) |> jsToDistDiscrete;
 
   [@bs.module "./GuesstimatorLibrary.js"]
-  external toCombinedFormat: (string, int) => combined = "run";
+  external toCombinedFormat: (string, int, int) => combined = "run";
 
   // todo: Format to correct mass, also normalize the pdf.
-  let toMixedShape = (r: combined): option(DistTypes.mixedShape) => {
-    let assumptions: MixedShapeBuilder.assumptions = {
-      continuous: ADDS_TO_1,
-      discrete: ADDS_TO_CORRECT_PROBABILITY,
-      discreteProbabilityMass: None,
-    };
-    MixedShapeBuilder.build(
-      ~continuous=toContinous(r),
-      ~discrete=toDiscrete(r),
-      ~assumptions,
-    );
+  let toMixedShape = (r: combined): option(DistTypes.shape) => {
+    let continuous =
+      toContinous(r) |> Distributions.Continuous.convertToNewLength(100);
+    let discrete = toDiscrete(r);
+    // let continuousProb =
+    //   cont |> Distributions.Continuous.T.Integral.sum(~cache=None);
+    // let discreteProb =
+    //   d |> Distributions.Discrete.T.Integral.sum(~cache=None);
+
+    let foo = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
+    foo;
   };
 };
 
-let stringToMixedShape = (~string, ~sampleCount=1000, ()) =>
-  Internals.toCombinedFormat(string, sampleCount) |> Internals.toMixedShape;
+let stringToMixedShape =
+    (~string, ~sampleCount=1000, ~outputXYPoints=1000, ()) =>
+  Internals.toCombinedFormat(string, sampleCount, outputXYPoints)
+  |> Internals.toMixedShape;

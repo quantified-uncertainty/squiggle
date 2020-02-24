@@ -3,10 +3,14 @@ open Expect;
 
 let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 
-let makeTest = (str, item1, item2) =>
-  test(str, () =>
-    expect(item1) |> toEqual(item2)
-  );
+let makeTest = (~only=false, str, item1, item2) =>
+  only
+    ? Only.test(str, () =>
+        expect(item1) |> toEqual(item2)
+      )
+    : test(str, () =>
+        expect(item1) |> toEqual(item2)
+      );
 
 describe("Shape", () => {
   describe("Continuous", () => {
@@ -77,12 +81,20 @@ describe("Shape", () => {
       {
         let continuous =
           make({xs: [|1., 4., 8.|], ys: [|0.1, 5., 1.0|]}, `Stepwise);
-        continuous |> toLinear |> getShape;
+        continuous |> toLinear |> E.O.fmap(getShape);
       },
+      Some({
+        xs: [|1.00007, 1.00007, 4.0, 4.00007, 8.0, 8.00007|],
+        ys: [|0.0, 0.1, 0.1, 5.0, 5.0, 1.0|],
+      }),
+    );
+    makeTest(
+      "toLinear",
       {
-        xs: [|1.00007, 4.0, 4.00007, 8.0, 8.00007|],
-        ys: [|0.1, 0.1, 5.0, 5.0, 1.0|],
+        let continuous = make({xs: [|0.0|], ys: [|0.3|]}, `Stepwise);
+        continuous |> toLinear |> E.O.fmap(getShape);
       },
+      Some({xs: [|0.0|], ys: [|0.3|]}),
     );
     makeTest(
       "integralXToY",
@@ -99,7 +111,13 @@ describe("Shape", () => {
       T.Integral.xToY(~cache=None, 100.0, continuous),
       47.5,
     );
-    makeTest("integralSum", T.Integral.sum(~cache=None, continuous), 47.5);
+    makeTest(
+      "integralEndY",
+      continuous
+      |> T.scaleToIntegralSum(~intendedSum=1.0)
+      |> T.Integral.sum(~cache=None),
+      1.0,
+    );
   });
 
   describe("Discrete", () => {
@@ -166,7 +184,7 @@ describe("Shape", () => {
       T.Integral.xToY(~cache=None, 6.0, discrete),
       0.9,
     );
-    makeTest("integralSum", T.Integral.sum(~cache=None, discrete), 1.0);
+    makeTest("integralEndY", T.Integral.sum(~cache=None, discrete), 1.0);
   });
 
   describe("Mixed", () => {
@@ -229,6 +247,7 @@ describe("Shape", () => {
       T.xToY(7., mixed),
       {discrete: 0.0, continuous: 0.04095904095904096},
     );
+    makeTest("integralEndY", T.Integral.sum(~cache=None, mixed), 1.0);
     makeTest(
       "scaleBy",
       T.scaleBy(~scale=2.0, mixed),
@@ -254,9 +273,10 @@ describe("Shape", () => {
       T.Integral.get(~cache=None, mixed),
       Distributions.Continuous.make(
         {
-          xs: [|1.00007, 3., 4., 4.00007, 7., 8., 8.00007, 14.|],
+          xs: [|1.00007, 1.00007, 3., 4., 4.00007, 7., 8., 8.00007, 14.|],
           ys: [|
-            0.15,
+            0.0,
+            0.0,
             0.15,
             0.18496503496503497,
             0.4349674825174825,
@@ -267,6 +287,78 @@ describe("Shape", () => {
           |],
         },
         `Linear,
+      ),
+    );
+  });
+
+  describe("Mixed", () => {
+    open Distributions.DistPlus;
+    let discrete: DistTypes.xyShape = {
+      xs: [|1., 4., 8.|],
+      ys: [|0.3, 0.5, 0.2|],
+    };
+    let continuous =
+      Distributions.Continuous.make(
+        {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
+        `Linear,
+      )
+      |> Distributions.Continuous.T.scaleToIntegralSum(~intendedSum=1.0);
+    let mixed =
+      MixedShapeBuilder.build(
+        ~continuous,
+        ~discrete,
+        ~assumptions={
+          continuous: ADDS_TO_CORRECT_PROBABILITY,
+          discrete: ADDS_TO_CORRECT_PROBABILITY,
+          discreteProbabilityMass: Some(0.5),
+        },
+      )
+      |> E.O.toExn("");
+    let distPlus =
+      Distributions.DistPlus.make(
+        ~shape=Mixed(mixed),
+        ~guesstimatorString=None,
+        (),
+      );
+    makeTest("minX", T.minX(distPlus), Some(1.0));
+    makeTest("maxX", T.maxX(distPlus), Some(14.0));
+    makeTest(
+      "xToY at 4.0",
+      T.xToY(4., distPlus),
+      {discrete: 0.25, continuous: 0.03196803196803197},
+    );
+    makeTest(
+      "xToY at 0.0",
+      T.xToY(0., distPlus),
+      {discrete: 0.0, continuous: 0.028971028971028972},
+    );
+    makeTest(
+      "xToY at 5.0",
+      T.xToY(7., distPlus),
+      {discrete: 0.0, continuous: 0.04095904095904096},
+    );
+    makeTest("integralEndY", T.Integral.sum(~cache=None, distPlus), 1.0);
+    makeTest(
+      "integral",
+      T.Integral.get(~cache=None, distPlus) |> T.toContinuous,
+      Some(
+        Distributions.Continuous.make(
+          {
+            xs: [|1.00007, 1.00007, 3., 4., 4.00007, 7., 8., 8.00007, 14.|],
+            ys: [|
+              0.0,
+              0.0,
+              0.15,
+              0.18496503496503497,
+              0.4349674825174825,
+              0.5398601398601399,
+              0.5913086913086913,
+              0.6913122927072927,
+              1.0,
+            |],
+          },
+          `Linear,
+        ),
       ),
     );
   });

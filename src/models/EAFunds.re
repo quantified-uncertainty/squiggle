@@ -151,7 +151,8 @@ module Model = {
         | Some({truthValue: false}) => difference
         | None =>
           let foo =
-            getGlobalCatastropheChance(dateTime)
+            // getGlobalCatastropheChance(dateTime)
+            Some(0.5)
             |> E.O.fmap(E.Float.with2DigitsPrecision)
             |> E.O.fmap((r: string) =>
                  "uniform(0,1) > " ++ r ++ " ? " ++ difference ++ ": 0"
@@ -177,7 +178,6 @@ module Model = {
               GuesstimatorDist.logNormal(40., 4.),
             ),
           ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
-          ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
           (),
         ),
       )

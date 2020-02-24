@@ -28,7 +28,7 @@ module type dist = {
 
   type integral;
   let integral: (~cache: option(integral), t) => integral;
-  let integralSum: (~cache: option(integral), t) => float;
+  let integralEndY: (~cache: option(integral), t) => float;
   let integralXtoY: (~cache: option(integral), float, t) => float;
 };
 
@@ -37,6 +37,11 @@ module Dist = (T: dist) => {
   type integral = T.integral;
   let minX = T.minX;
   let maxX = T.maxX;
+  let xTotalRange = (t: t) =>
+    switch (minX(t), maxX(t)) {
+    | (Some(min), Some(max)) => Some(max -. min)
+    | _ => None
+    };
   let pointwiseFmap = T.pointwiseFmap;
   let xToY = T.xToY;
   let toShape = T.toShape;
@@ -51,7 +56,7 @@ module Dist = (T: dist) => {
     type t = T.integral;
     let get = T.integral;
     let xToY = T.integralXtoY;
-    let sum = T.integralSum;
+    let sum = T.integralEndY;
   };
 
   // This is suboptimal because it could get the cache but doesn't here.
@@ -78,20 +83,24 @@ module Continuous = {
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(make(_, interpolation));
 
-  let toLinear = (t: t): t =>
+  let toLinear = (t: t): option(t) => {
     switch (t) {
-    | {interpolation: `Stepwise, xyShape} => {
-        interpolation: `Linear,
-        xyShape: xyShape |> XYShape.Range.stepsToContinuous |> E.O.toExt(""),
-      }
-    | {interpolation: `Linear, _} => t
+    | {interpolation: `Stepwise, xyShape} =>
+      xyShape
+      |> XYShape.Range.stepsToContinuous
+      |> E.O.fmap(xyShape => make(xyShape, `Linear))
+    | {interpolation: `Linear, _} => Some(t)
     };
+  };
+  let shapeFn = (fn, t: t) => t |> xyShape |> fn;
+
+  let convertToNewLength = i =>
+    shapeMap(CdfLibrary.Distribution.convertToNewLength(i));
 
   module T =
     Dist({
       type t = DistTypes.continuousShape;
       type integral = DistTypes.continuousShape;
-      let shapeFn = (fn, t: t) => t |> xyShape |> fn;
       let minX = shapeFn(XYShape.minX);
       let maxX = shapeFn(XYShape.maxX);
       let pointwiseFmap = (fn, t: t) =>
@@ -126,7 +135,7 @@ module Continuous = {
              |> E.O.toExt("This should not have happened")
              |> fromShape,
            );
-      let integralSum = (~cache, t) => t |> integral(~cache) |> lastY;
+      let integralEndY = (~cache, t) => t |> integral(~cache) |> lastY;
       let integralXtoY = (~cache, f, t) =>
         t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
       let toContinuous = t => Some(t);
@@ -144,7 +153,7 @@ module Discrete = {
       let integral = (~cache, t) =>
         cache
         |> E.O.default(Continuous.make(XYShape.accumulateYs(t), `Stepwise));
-      let integralSum = (~cache, t) =>
+      let integralEndY = (~cache, t) =>
         t |> integral(~cache) |> Continuous.lastY;
       let minX = XYShape.minX;
       let maxX = XYShape.maxX;
@@ -186,8 +195,6 @@ module Mixed = {
         discrete: {xs: [||], ys: [||]},
       } =>
       None
-    | {continuous, discrete: {xs: [|_|], ys: [|_|]}} =>
-      Some(Continuous(continuous))
     | {continuous, discrete: {xs: [||], ys: [||]}} =>
       Some(Continuous(continuous))
     | {continuous: {xyShape: {xs: [||], ys: [||]}}, discrete} =>
@@ -241,7 +248,6 @@ module Mixed = {
       let toScaledDiscrete = ({discrete} as t: t) =>
         Some(scaleDiscrete(t, discrete));
 
-      // TODO: Add these two directly, once interpolation is added.
       let integral =
           (
             ~cache,
@@ -258,6 +264,7 @@ module Mixed = {
                  discrete
                  |> Discrete.T.Integral.get(~cache=None)
                  |> Continuous.toLinear
+                 |> E.O.toExn("")
                  |> Continuous.T.scaleBy(
                       ~scale=discreteProbabilityMassFraction,
                     );
@@ -274,17 +281,8 @@ module Mixed = {
            );
       };
 
-      // todo: Get last element of actual sum.
-      let integralSum = (~cache, {discrete, continuous} as t: t) => {
-        switch (cache) {
-        | Some(cache) => 3.0
-        | None =>
-          scaleDiscreteFn(t, Discrete.T.Integral.sum(~cache=None, discrete))
-          +. scaleContinuousFn(
-               t,
-               Continuous.T.Integral.sum(~cache=None, continuous),
-             )
-        };
+      let integralEndY = (~cache, t: t) => {
+        integral(~cache, t) |> Continuous.lastY;
       };
 
       let integralXtoY = (~cache, f, {discrete, continuous} as t: t) => {
@@ -381,7 +379,7 @@ module Shape = {
           ),
         );
       };
-      let integralSum = (~cache, t: t) =>
+      let integralEndY = (~cache, t: t) =>
         mapToAll(
           t,
           (
@@ -419,6 +417,7 @@ module DistPlus = {
 
   type t = DistTypes.distPlus;
 
+  let shapeIntegral = shape => Shape.T.Integral.get(~cache=None, shape);
   let make =
       (
         ~shape,
@@ -428,7 +427,7 @@ module DistPlus = {
         (),
       )
       : t => {
-    let integral = Shape.T.Integral.get(~cache=None, shape);
+    let integral = shapeIntegral(shape);
     {shape, domain, integralCache: integral, unit, guesstimatorString};
   };
 
@@ -446,6 +445,11 @@ module DistPlus = {
     domain: E.O.default(t.domain, domain),
     unit: E.O.default(t.unit, unit),
     guesstimatorString: E.O.default(t.guesstimatorString, guesstimatorString),
+  };
+
+  let updateShape = (shape, t) => {
+    let integralCache = shapeIntegral(shape);
+    update(~shape, ~integralCache, t);
   };
 
   let domainIncludedProbabilityMass = (t: t) =>
@@ -499,15 +503,15 @@ module DistPlus = {
       let maxX = shapeFn(Shape.T.maxX);
       let fromShape = (t, shape): t => update(~shape, t);
 
-      // todo: adjust for limit, maybe?
-      let pointwiseFmap = (fn, {shape, _} as t: t): t =>
-        Shape.T.pointwiseFmap(fn, shape) |> fromShape(t);
-
       // This bit is kind of akward, could probably use rethinking.
       let integral = (~cache as _, t: t) =>
-        fromShape(t, Continuous(t.integralCache));
+        updateShape(Continuous(t.integralCache), t);
 
-      let integralSum = (~cache as _, t: t) =>
+      // todo: adjust for limit, maybe?
+      let pointwiseFmap = (fn, {shape, _} as t: t): t =>
+        Shape.T.pointwiseFmap(fn, shape) |> updateShape(_, t);
+
+      let integralEndY = (~cache as _, t: t) =>
         Shape.T.Integral.sum(~cache=Some(t.integralCache), toShape(t));
 
       //   TODO: Fix this below, obviously. Adjust for limits

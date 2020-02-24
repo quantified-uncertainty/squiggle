@@ -80,7 +80,7 @@ module DistributionUnit = {
 module Domain = {
   let excludedProbabilityMass = (t: domain) => {
     switch (t) {
-    | Complete => 1.0
+    | Complete => 0.0
     | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
     | RightLimited({excludingProbabilityMass}) => excludingProbabilityMass
     | LeftAndRightLimited(
