@@ -120,9 +120,6 @@ module Range = {
   let toT = r => r |> Belt.Array.unzip |> fromArray;
   let nextX = ((_, (nextX, _)): zippedRange) => nextX;
 
-  let rangeAreaAssumingSteps = (((lastX, lastY), (nextX, _)): zippedRange) =>
-    (nextX -. lastX) *. lastY;
-
   let rangePointAssumingSteps =
       (((lastX, lastY), (nextX, nextY)): zippedRange) => (
     nextX,

@@ -320,9 +320,9 @@ export class CdfChartD3 {
       function mouseover() {
         const mouse = d3.mouse(this);
         hoverLine.attr('opacity', 1).attr('x1', mouse[0]).attr('x2', mouse[0]);
-        const xValue = mouse[0] > range[0] && mouse[0] < range[1]
-          ? xScale.invert(mouse[0]).toFixed(2)
-          : 0;
+        const xValue = xScale.invert(mouse[0]).toFixed(2);
+        // This used to be here, but doesn't seem important
+        // const xValue = (mouse[0] > range[0] && mouse[0] < range[1]) ? : 0;
         context.attrs.onHover(xValue);
       }
 

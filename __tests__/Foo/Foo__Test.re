@@ -73,6 +73,15 @@ describe("Shape", () => {
       {xs: [|1.0, 4.0, 8.0|], ys: [|0.0, 25.5, 47.5|]},
     );
     makeTest(
+      "toLinear",
+      {
+        let continuous =
+          make({xs: [|1., 4., 8.|], ys: [|0.1, 5., 1.0|]}, `Stepwise);
+        continuous |> toLinear |> getShape;
+      },
+      {xs: [|1.0, 4.0, 4.0, 8.0, 8.0|], ys: [|0.1, 0.1, 5.0, 5.0, 1.0|]},
+    );
+    makeTest(
       "integralXToY",
       T.Integral.xToY(~cache=None, 0.0, continuous),
       0.0,
@@ -155,5 +164,100 @@ describe("Shape", () => {
       0.9,
     );
     makeTest("integralSum", T.Integral.sum(~cache=None, discrete), 1.0);
+  });
+
+  describe("Mixed", () => {
+    open Distributions.Mixed;
+    let discrete: DistTypes.xyShape = {
+      xs: [|1., 4., 8.|],
+      ys: [|0.3, 0.5, 0.2|],
+    };
+    let continuous =
+      Distributions.Continuous.make(
+        {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
+        `Linear,
+      )
+      |> Distributions.Continuous.T.scaleToIntegralSum(~intendedSum=1.0);
+    let mixed =
+      MixedShapeBuilder.build(
+        ~continuous,
+        ~discrete,
+        ~assumptions={
+          continuous: ADDS_TO_CORRECT_PROBABILITY,
+          discrete: ADDS_TO_CORRECT_PROBABILITY,
+          discreteProbabilityMass: Some(0.5),
+        },
+      )
+      |> E.O.toExn("");
+    makeTest("minX", T.minX(mixed), Some(1.0));
+    makeTest("maxX", T.maxX(mixed), Some(14.0));
+    makeTest(
+      "pointwiseFmap",
+      T.pointwiseFmap(r => r *. 2.0, mixed),
+      Distributions.Mixed.make(
+        ~continuous=
+          Distributions.Continuous.make(
+            {
+              xs: [|3., 7., 14.|],
+              ys: [|
+                0.11588411588411589,
+                0.16383616383616384,
+                0.24775224775224775,
+              |],
+            },
+            `Linear,
+          ),
+        ~discrete={xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]},
+        ~discreteProbabilityMassFraction=0.5,
+      ),
+    );
+    makeTest(
+      "xToY at 4.0",
+      T.xToY(4., mixed),
+      {discrete: 0.25, continuous: 0.03196803196803197},
+    );
+    makeTest(
+      "xToY at 0.0",
+      T.xToY(0., mixed),
+      {discrete: 0.0, continuous: 0.028971028971028972},
+    );
+    makeTest(
+      "xToY at 5.0",
+      T.xToY(7., mixed),
+      {discrete: 0.0, continuous: 0.04095904095904096},
+    );
+    makeTest(
+      "scaleBy",
+      T.scaleBy(~scale=2.0, mixed),
+      Distributions.Mixed.make(
+        ~continuous=
+          Distributions.Continuous.make(
+            {
+              xs: [|3., 7., 14.|],
+              ys: [|
+                0.11588411588411589,
+                0.16383616383616384,
+                0.24775224775224775,
+              |],
+            },
+            `Linear,
+          ),
+        ~discrete={xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]},
+        ~discreteProbabilityMassFraction=0.5,
+      ),
+    );
+    makeTest(
+      "integral",
+      T.Integral.get(~cache=None, mixed),
+      Distributions.Continuous.make(
+        {
+          xs: [|1., 3., 4., 4., 7., 8., 8., 14.|],
+          ys: [|0.15, 0.0, 0.15, 0.4, 0.13986013986013987, 0.4, 0.5, 0.5|],
+        },
+        `Linear,
+      ),
+    );
+    // makeTest("integralXToY", T.Integral.xToY(~cache=None, 6.0, mixed), 0.9);
+    // makeTest("integralSum", T.Integral.sum(~cache=None, mixed), 1.0);
   });
 });

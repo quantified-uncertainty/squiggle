@@ -60,12 +60,12 @@ let make = (~distPlus: DistTypes.distPlus) => {
       () => {<IntegralChart distPlus onHover={r => {setX(_ => r)}} />},
       [|distPlus|],
     );
-  // Js.log4(
-  //   "distPlus",
-  //   x,
-  //   distPlus,
-  //   distPlus |> Distributions.DistPlus.T.xToY(x),
-  // );
+  Js.log4(
+    "distPlus",
+    x,
+    distPlus,
+    distPlus |> Distributions.DistPlus.T.xToY(x),
+  );
   <div>
     chart
     chart2

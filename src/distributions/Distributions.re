@@ -72,6 +72,8 @@ module Continuous = {
     xyShape: fn(xyShape),
     interpolation,
   };
+  let lastY = (t: t) =>
+    t |> xyShape |> XYShape.unsafeLast |> (((_, y)) => y);
   let oShapeMap =
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(make(_, interpolation));
@@ -90,25 +92,6 @@ module Continuous = {
       type t = DistTypes.continuousShape;
       type integral = DistTypes.continuousShape;
       let shapeFn = (fn, t: t) => t |> xyShape |> fn;
-      // TODO: Obviously fix this, it's terrible. Use interpolation param to do appropriate interpolation.
-      // TODO: Steps could be 1 value, interpolation needs at least 2.
-      // TODO: integrateWithTriangles should return (x0, 0.0) as the first item.
-      let integral = (~cache, t) =>
-        cache
-        |> E.O.default(
-             t
-             |> xyShape
-             |> XYShape.Range.integrateWithTriangles
-             |> E.O.toExt("Error1")
-             |> fromShape,
-           );
-      //   This seems wrong, we really want the ending bit, I'd assume
-      let integralSum = (~cache, t) =>
-        t
-        |> integral(~cache)
-        |> xyShape
-        |> XYShape.unsafeLast
-        |> (((_, y)) => y);
       let minX = shapeFn(XYShape.minX);
       let maxX = shapeFn(XYShape.maxX);
       let pointwiseFmap = (fn, t: t) =>
@@ -126,6 +109,16 @@ module Continuous = {
           |> XYShape.XtoY.linear(f)
           |> DistTypes.MixedPoint.makeContinuous
         };
+      let integral = (~cache, t) =>
+        cache
+        |> E.O.default(
+             t
+             |> xyShape
+             |> XYShape.Range.integrateWithTriangles
+             |> E.O.toExt("This should not have happened")
+             |> fromShape,
+           );
+      let integralSum = (~cache, t) => t |> integral(~cache) |> lastY;
       let integralXtoY = (~cache, f, t) =>
         t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
       let toContinuous = t => Some(t);
@@ -135,23 +128,16 @@ module Continuous = {
     });
 };
 
-//  |> XYShape.Range.stepsToContinuous
-//  |> E.O.toExt("ERROR"),
 module Discrete = {
   module T =
     Dist({
       type t = DistTypes.discreteShape;
       type integral = DistTypes.continuousShape;
-      // todo: test this. Remove "stepstoContinuos-move elsewhere"
-      // todo: Make sure this works fine with one value. This is important for step functionality.
       let integral = (~cache, t) =>
         cache
-        |> E.O.default(
-             {
-               Continuous.make(XYShape.accumulateYs(t), `Stepwise);
-             },
-           );
-      let integralSum = (~cache, t) => t |> XYShape.ySum;
+        |> E.O.default(Continuous.make(XYShape.accumulateYs(t), `Stepwise));
+      let integralSum = (~cache, t) =>
+        t |> integral(~cache) |> Continuous.lastY;
       let minX = XYShape.minX;
       let maxX = XYShape.maxX;
       let pointwiseFmap = XYShape.pointwiseMap;
