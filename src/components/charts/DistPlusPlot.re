@@ -77,6 +77,9 @@ let make = (~distPlus: DistTypes.distPlus) => {
           <th className="px-4 py-2">
             {"Y Integral to Point" |> ReasonReact.string}
           </th>
+          <th className="px-4 py-2">
+            {"Y Integral Total" |> ReasonReact.string}
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -104,10 +107,71 @@ let make = (~distPlus: DistTypes.distPlus) => {
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
           </th>
+        </tr>
+      </tbody>
+    </table>
+    <table className="table-auto">
+      <thead>
+        <tr>
+          <th className="px-4 py-2">
+            {"Y Integral Total" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2">
+            {"Continuous Total" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2">
+            {"Scaled Continuous Total" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2">
+            {"Discrete Total" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2">
+            {"Scaled Discrete Total" |> ReasonReact.string}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
           <th className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.Integral.sum(~cache=None)
              |> E.Float.with2DigitsPrecision
+             |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.toContinuous
+             |> E.O.fmap(
+                  Distributions.Continuous.T.Integral.sum(~cache=None),
+                )
+             |> E.O.fmap(E.Float.with2DigitsPrecision)
+             |> E.O.default("")
+             |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.toScaledContinuous
+             |> E.O.fmap(
+                  Distributions.Continuous.T.Integral.sum(~cache=None),
+                )
+             |> E.O.fmap(E.Float.with2DigitsPrecision)
+             |> E.O.default("")
+             |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.toDiscrete
+             |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
+             |> E.O.fmap(E.Float.with2DigitsPrecision)
+             |> E.O.default("")
+             |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.toScaledDiscrete
+             |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
+             |> E.O.fmap(E.Float.with2DigitsPrecision)
+             |> E.O.default("")
              |> ReasonReact.string}
           </th>
         </tr>

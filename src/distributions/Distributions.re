@@ -191,21 +191,6 @@ module Mixed = {
     discreteProbabilityMassFraction,
   };
 
-  let clean = (t: DistTypes.mixedShape): option(DistTypes.shape) => {
-    switch (t) {
-    | {
-        continuous: {xyShape: {xs: [||], ys: [||]}},
-        discrete: {xs: [||], ys: [||]},
-      } =>
-      None
-    | {continuous, discrete: {xs: [||], ys: [||]}} =>
-      Some(Continuous(continuous))
-    | {continuous: {xyShape: {xs: [||], ys: [||]}}, discrete} =>
-      Some(Discrete(discrete))
-    | shape => Some(Mixed(shape))
-    };
-  };
-
   // todo: Put into scaling module
   let scaleDiscreteFn =
       ({discreteProbabilityMassFraction}: DistTypes.mixedShape, f) =>

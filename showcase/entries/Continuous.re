@@ -24,7 +24,7 @@ let distributions = () =>
       <h2> {"Single-Discrete" |> ReasonReact.string} </h2>
       {setup(
          DistPlusIngredients.make(
-           ~guesstimatorString="mm(5 to 20, floor(normal(20,2)), [.5, .05])",
+           ~guesstimatorString="mm(5 to 20, floor(normal(20,2)), [.5, .5])",
            ~domain=Complete,
            (),
          ),
