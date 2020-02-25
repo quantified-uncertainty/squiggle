@@ -70,14 +70,14 @@ module Model = {
   };
 
   let yearlyMeanGrowthRateIfNotClosed = (group: group): yearlyNumericDiff => {
-    {meanDiff: 1.1, stdDiff: 1.1};
+    {meanDiff: 1.1, stdDiff: 1.08};
   };
 
   let calculateDifference =
       (currentValue, dateTime, currentDateTime, y: yearlyNumericDiff) => {
     let yearDiff = MomentRe.diff(dateTime, currentDateTime, `days) /. 365.;
     let meanDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
-    let stdDevDiff = Js.Math.pow_float(~base=y.meanDiff, ~exp=yearDiff);
+    let stdDevDiff = Js.Math.pow_float(~base=y.stdDiff, ~exp=yearDiff);
     GuesstimatorDist.logNormal(
       currentValue *. meanDiff,
       firstYearStdDev *. stdDevDiff,
@@ -163,8 +163,9 @@ module Model = {
           ~guesstimatorString=
             GuesstimatorDist.min(
               GlobalCatastrophe.guesstimatorString,
-              GuesstimatorDist.logNormal(40., 4.),
+              GuesstimatorDist.logNormal(20., 2.),
             ),
+          ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
           ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
           (),
         ),
