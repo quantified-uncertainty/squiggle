@@ -38,7 +38,7 @@ module Make = (Config: Config) => {
     let firstHigherIndex = Belt.Array.getIndexBy(xs, e => e >= x);
     switch (firstHigherIndex) {
     | None => maxY()
-    | Some(1) => minY()
+    | Some(0) => minY()
     | Some(firstHigherIndex) =>
       let lowerOrEqualIndex =
         firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
@@ -60,7 +60,7 @@ module Make = (Config: Config) => {
     let firstHigherIndex = Belt.Array.getIndexBy(ys, e => e >= y);
     switch (firstHigherIndex) {
     | None => maxX()
-    | Some(1) => minX()
+    | Some(0) => minX()
     | Some(firstHigherIndex) =>
       let lowerOrEqualIndex =
         firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
