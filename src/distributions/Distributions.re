@@ -127,14 +127,15 @@ module Continuous = {
       // };
 
       let integral = (~cache, t) =>
-        cache
-        |> E.O.default(
-             t
-             |> xyShape
-             |> XYShape.Range.integrateWithTriangles
-             |> E.O.toExt("This should not have happened")
-             |> fromShape,
-           );
+        switch (cache) {
+        | Some(cache) => cache
+        | None =>
+          t
+          |> xyShape
+          |> XYShape.Range.integrateWithTriangles
+          |> E.O.toExt("This should not have happened")
+          |> fromShape
+        };
       let integralEndY = (~cache, t) => t |> integral(~cache) |> lastY;
       let integralXtoY = (~cache, f, t) =>
         t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
@@ -151,8 +152,10 @@ module Discrete = {
       type t = DistTypes.discreteShape;
       type integral = DistTypes.continuousShape;
       let integral = (~cache, t) =>
-        cache
-        |> E.O.default(Continuous.make(XYShape.accumulateYs(t), `Stepwise));
+        switch (cache) {
+        | Some(c) => c
+        | None => Continuous.make(XYShape.accumulateYs(t), `Stepwise)
+        };
       let integralEndY = (~cache, t) =>
         t |> integral(~cache) |> Continuous.lastY;
       let minX = XYShape.minX;
@@ -253,32 +256,27 @@ module Mixed = {
             ~cache,
             {continuous, discrete, discreteProbabilityMassFraction} as t: t,
           ) => {
-        cache
-        |> E.O.default(
-             {
-               let cont =
-                 continuous
-                 |> Continuous.T.Integral.get(~cache=None)
-                 |> scaleContinuous(t);
-               let dist =
-                 discrete
-                 |> Discrete.T.Integral.get(~cache=None)
-                 |> Continuous.toLinear
-                 |> E.O.toExn("")
-                 |> Continuous.T.scaleBy(
-                      ~scale=discreteProbabilityMassFraction,
-                    );
-               Continuous.make(
-                 XYShape.Combine.combineLinear(
-                   Continuous.getShape(cont),
-                   Continuous.getShape(dist),
-                   (a, b) =>
-                   a +. b
-                 ),
-                 `Linear,
-               );
-             },
-           );
+        switch (cache) {
+        | Some(cache) => cache
+        | None =>
+          let cont =
+            continuous
+            |> Continuous.T.Integral.get(~cache=None)
+            |> scaleContinuous(t);
+          let dist =
+            discrete
+            |> Discrete.T.Integral.get(~cache=None)
+            |> Continuous.toLinear
+            |> E.O.toExn("")
+            |> Continuous.T.scaleBy(~scale=discreteProbabilityMassFraction);
+          Continuous.make(
+            XYShape.Combine.combineLinear(
+              Continuous.getShape(cont), Continuous.getShape(dist), (a, b) =>
+              a +. b
+            ),
+            `Linear,
+          );
+        };
       };
 
       let integralEndY = (~cache, t: t) => {

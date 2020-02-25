@@ -29,9 +29,15 @@ module Internals = {
   external toCombinedFormat: (string, int, int) => combined = "run";
 
   // todo: Format to correct mass, also normalize the pdf.
-  let toMixedShape = (r: combined): option(DistTypes.shape) => {
+  let toMixedShape =
+      (~truncateTo=Some(500), r: combined): option(DistTypes.shape) => {
+    let continuous = toContinous(r);
     let continuous =
-      toContinous(r) |> Distributions.Continuous.convertToNewLength(100);
+      switch (truncateTo) {
+      | Some(t) =>
+        continuous |> Distributions.Continuous.convertToNewLength(t)
+      | None => continuous
+      };
     let discrete = toDiscrete(r);
     // let continuousProb =
     //   cont |> Distributions.Continuous.T.Integral.sum(~cache=None);
@@ -44,6 +50,12 @@ module Internals = {
 };
 
 let stringToMixedShape =
-    (~string, ~sampleCount=1000, ~outputXYPoints=1000, ()) =>
+    (
+      ~string,
+      ~sampleCount=1000,
+      ~outputXYPoints=1000,
+      ~truncateTo=Some(500),
+      (),
+    ) =>
   Internals.toCombinedFormat(string, sampleCount, outputXYPoints)
-  |> Internals.toMixedShape;
+  |> Internals.toMixedShape(~truncateTo);

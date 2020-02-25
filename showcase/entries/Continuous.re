@@ -3,7 +3,7 @@
 
 let timeDist =
   DistPlusIngredients.make(
-    ~guesstimatorString="mm(floor(10 to 15), 10 to 11, [.9,.1])",
+    ~guesstimatorString="(floor(10 to 15))",
     ~domain=Complete,
     ~unit=
       DistTypes.TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
@@ -12,7 +12,11 @@ let timeDist =
 
 let setup = dist =>
   dist
-  |> DistPlusIngredients.toDistPlus(~sampleCount=5000, ~outputXYPoints=1000);
+  |> DistPlusIngredients.toDistPlus(
+       ~sampleCount=10000,
+       ~outputXYPoints=2000,
+       ~truncateTo=Some(1000),
+     );
 
 let distributions = () =>
   <div>
@@ -20,7 +24,7 @@ let distributions = () =>
       <h2> {"Single-Discrete" |> ReasonReact.string} </h2>
       {setup(
          DistPlusIngredients.make(
-           ~guesstimatorString="8 to 12, [.5,.5])",
+           ~guesstimatorString="mm(5 to 20, floor(normal(20,2)), [.5, .05])",
            ~domain=Complete,
            (),
          ),

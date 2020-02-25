@@ -1,4 +1,4 @@
-let guesstimatorString = "floor(10 to 20)";
+let guesstimatorString = "normal(40,10)";
 
 let makeI = (currentDateTime: MomentRe.Moment.t) => {
   DistPlusIngredients.make(

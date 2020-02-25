@@ -37,7 +37,6 @@ module IntegralChart = {
     let minX = integral |> Distributions.Continuous.T.minX;
     let maxX = integral |> Distributions.Continuous.T.maxX;
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
-    Js.log3("HIHI", continuous, distPlus);
     <DistributionPlot
       minX
       maxX

@@ -42,7 +42,7 @@ const toPdf = (values, outputResolutionCount, min, max) => {
 
   let discrete = {xs: frequencies.map(f => f.value), ys: frequencies.map(f => f.percentage)};
   let continuous = {ys: [], xs: []};
-  if (continuousSamples.length > 1){
+  if (continuousSamples.length > 20){
     const samples = new Samples(continuousSamples);
 
     const ratioSize$ = ratioSize(samples);
