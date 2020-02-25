@@ -14,20 +14,46 @@ let order = (shape: DistTypes.xyShape): DistTypes.xyShape => {
 };
 
 module Make = (Config: Config) => {
-  let validateHasLength = (): bool => Array.length(Config.shape.xs) > 0;
-  let validateSize = (): bool =>
-    Array.length(Config.shape.xs) == Array.length(Config.shape.ys);
+  let xs = Config.shape.xs;
+  let ys = Config.shape.ys;
+  let get = Array.get;
+
+  let validateHasLength = (): bool => Array.length(xs) > 0;
+  let validateSize = (): bool => Array.length(xs) == Array.length(ys);
   if (!validateHasLength()) {
     raise(ShapeWrong("You need at least one element."));
   };
   if (!validateSize()) {
     raise(ShapeWrong("Arrays of \"xs\" and \"ys\" have different sizes."));
   };
-  if (!Belt.SortArray.isSorted(Config.shape.xs, (a, b) => a > b ? 1 : (-1))) {
+  if (!Belt.SortArray.isSorted(xs, (a, b) => a > b ? 1 : (-1))) {
     raise(ShapeWrong("Arrays of \"xs\" and \"ys\" have different sizes."));
   };
-  let minX = () => Config.shape.xs |> Array.get(_, 0);
-  let maxX = () =>
-    Config.shape.xs |> Array.get(_, Array.length(Config.shape.xs) - 1);
+  let minX = () => xs |> get(_, 0);
+  let maxX = () => xs |> get(_, Array.length(xs) - 1);
+  let minY = () => ys |> get(_, 0);
+  let maxY = () => ys |> get(_, Array.length(ys) - 1);
+  let findY = x => {
+    let firstHigherIndex = Belt.Array.getIndexBy(xs, e => e > x);
+    switch (firstHigherIndex) {
+    | None => maxY()
+    | Some(1) => minY()
+    | Some(firstHigherIndex) =>
+      let lowerOrEqualIndex =
+        firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
+      let needsInterpolation = get(xs, lowerOrEqualIndex) != x;
+      if (needsInterpolation) {
+        Functions.interpolate(
+          get(xs, lowerOrEqualIndex),
+          get(xs, firstHigherIndex),
+          get(ys, lowerOrEqualIndex),
+          get(ys, firstHigherIndex),
+          x,
+        );
+      } else {
+        ys[lowerOrEqualIndex];
+      };
+    };
+  };
   1;
 };

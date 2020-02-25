@@ -86,8 +86,10 @@ class ContinuousDistribution {
     let firstHigherIndex = this.xs.findIndex(X => X >= x);
     if (firstHigherIndex < 0) return this.ys[this.ys.length - 1];
     if (firstHigherIndex === 0) return this.ys[0];
+
     let lowerOrEqualIndex = firstHigherIndex - 1;
     if (lowerOrEqualIndex < 0) lowerOrEqualIndex = 0;
+
     let needsInterpolation = this.xs[lowerOrEqualIndex] !== x;
     if (needsInterpolation) {
       return interpolate(
