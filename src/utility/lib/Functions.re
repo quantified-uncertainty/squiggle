@@ -8,7 +8,6 @@ let interpolate =
   yMin *. minProportion +. yMax *. maxProportion;
 };
 
-// @todo: To test!
 let sum = Belt.Array.reduce(_, 0., (i, j) => i +. j);
 let mean = a => sum(a) /. (Array.length(a) |> float_of_int);
 let min = a => Belt.Array.reduce(a, a[0], (i, j) => i < j ? i : j);
