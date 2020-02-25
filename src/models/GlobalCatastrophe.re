@@ -1,15 +1,21 @@
-let guesstimatorString = "20 to 80";
+let guesstimatorString = "floor(10 to 20)";
 
+let makeI = (currentDateTime: MomentRe.Moment.t) => {
+  DistPlusIngredients.make(
+    ~guesstimatorString,
+    ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
+    (),
+  );
+};
 module Model = {
   let make = (currentDateTime: MomentRe.Moment.t) => {
-    let genericDistribution =
-      GenericDistribution.make(
-        ~generationSource=GuesstimatorString(guesstimatorString),
-        ~probabilityType=Cdf,
+    let distPlusIngredients =
+      DistPlusIngredients.make(
+        ~guesstimatorString,
         ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
         (),
       );
-    Prop.Value.GenericDistribution(genericDistribution);
+    Prop.Value.DistPlusIngredients(distPlusIngredients);
   };
 };
 

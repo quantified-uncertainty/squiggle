@@ -26,11 +26,10 @@ let buildIds = entries => {
     f.id = curPath ++ "/" ++ genId(f.title, curPath);
     HS.set(entriesByPath, f.id, FolderEntry(f));
     f.children
-    |> E.L.iter(e =>
-         switch (e) {
+    |> E.L.iter(
+         fun
          | CompEntry(c) => processEntry(c, f.id)
-         | FolderEntry(f) => processFolder(f, f.id)
-         }
+         | FolderEntry(f) => processFolder(f, f.id),
        );
   }
   and processEntry = (c: compEntry, curPath) => {
@@ -38,11 +37,10 @@ let buildIds = entries => {
     HS.set(entriesByPath, c.id, CompEntry(c));
   };
   entries
-  |> E.L.iter(e =>
-       switch (e) {
+  |> E.L.iter(
+       fun
        | CompEntry(c) => processEntry(c, "")
-       | FolderEntry(f) => processFolder(f, "")
-       }
+       | FolderEntry(f) => processFolder(f, ""),
      );
 };
 

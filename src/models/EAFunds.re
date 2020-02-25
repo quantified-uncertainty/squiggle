@@ -109,17 +109,20 @@ module Model = {
 
   // TODO: Fixe number that integral is calculated for
   let getGlobalCatastropheChance = dateTime => {
-    let model = GlobalCatastrophe.Model.make(dateTime);
-    switch (model) {
-    | Prop.Value.GenericDistribution(genericDistribution) =>
-      GenericDistribution.renderIfNeeded(
-        ~sampleCount=1000,
-        genericDistribution,
-      )
-      |> E.O.bind(_, GenericDistribution.normalize)
-      |> E.O.bind(_, GenericDistribution.yIntegral(_, 18.0))
-    | _ => None
-    };
+    GlobalCatastrophe.makeI(MomentRe.momentNow())
+    |> DistPlusIngredients.toDistPlus(~sampleCount=1000)
+    |> E.O.bind(
+         _,
+         t => {
+           let foo =
+             Distributions.DistPlusTime.Integral.xToY(
+               ~cache=None,
+               Time(dateTime),
+               t,
+             );
+           Some(0.5);
+         },
+       );
   };
 
   let make =
@@ -148,7 +151,8 @@ module Model = {
         | Some({truthValue: false}) => difference
         | None =>
           let foo =
-            getGlobalCatastropheChance(dateTime)
+            // getGlobalCatastropheChance(dateTime)
+            Some(0.5)
             |> E.O.fmap(E.Float.with2DigitsPrecision)
             |> E.O.fmap((r: string) =>
                  "uniform(0,1) > " ++ r ++ " ? " ++ difference ++ ": 0"
@@ -156,29 +160,24 @@ module Model = {
           foo |> E.O.default("");
         };
 
-      let genericDistribution =
-        GenericDistribution.make(
-          ~generationSource=GuesstimatorString(str),
-          ~probabilityType=Cdf,
+      let distPlusIngredients =
+        DistPlusIngredients.make(
+          ~guesstimatorString=str,
           ~domain=Complete,
           ~unit=UnspecifiedDistribution,
           (),
         );
-      Prop.Value.GenericDistribution(genericDistribution);
+      Prop.Value.DistPlusIngredients(distPlusIngredients);
 
     | CHANCE_OF_EXISTENCE =>
-      Prop.Value.GenericDistribution(
-        GenericDistribution.make(
-          ~generationSource=
-            GuesstimatorString(
-              GuesstimatorDist.min(
-                GlobalCatastrophe.guesstimatorString,
-                GuesstimatorDist.logNormal(40., 4.),
-              ),
+      Prop.Value.DistPlusIngredients(
+        DistPlusIngredients.make(
+          ~guesstimatorString=
+            GuesstimatorDist.min(
+              GlobalCatastrophe.guesstimatorString,
+              GuesstimatorDist.logNormal(40., 4.),
             ),
-          ~probabilityType=Cdf,
           ~domain=RightLimited({xPoint: 100., excludingProbabilityMass: 0.3}),
-          ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
           (),
         ),
       )

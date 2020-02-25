@@ -129,6 +129,8 @@ export class CdfChartD3 {
 
   data(data) {
     this.attrs.data = data;
+    this.attrs.data.continuous = data.continuous || {xs: [], ys: []};
+    this.attrs.data.discrete = data.discrete || {xs: [], ys: []};
     return this;
   }
 
@@ -308,21 +310,13 @@ export class CdfChartD3 {
     // Add drawing rectangle.
     {
       const context = this;
-      const range = [
-        xScale(dataPoints[dataPoints.length - 1][0].x),
-        xScale(
-          dataPoints
-            [dataPoints.length - 1]
-            [dataPoints[dataPoints.length - 1].length - 1].x,
-        ),
-      ];
 
       function mouseover() {
         const mouse = d3.mouse(this);
         hoverLine.attr('opacity', 1).attr('x1', mouse[0]).attr('x2', mouse[0]);
-        const xValue = mouse[0] > range[0] && mouse[0] < range[1]
-          ? xScale.invert(mouse[0]).toFixed(2)
-          : 0;
+        const xValue = xScale.invert(mouse[0]);
+        // This used to be here, but doesn't seem important
+        // const xValue = (mouse[0] > range[0] && mouse[0] < range[1]) ? : 0;
         context.attrs.onHover(xValue);
       }
 

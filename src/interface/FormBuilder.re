@@ -17,17 +17,13 @@ let propValue = (t: Prop.Value.t) => {
   switch (t) {
   | SelectSingle(r) => r |> ReasonReact.string
   | ConditionalArray(r) => "Array" |> ReasonReact.string
-  | GenericDistribution(r) =>
+  | DistPlusIngredients(r) =>
     let newDistribution =
-      GenericDistribution.renderIfNeeded(~sampleCount=2000, r);
+      DistPlusIngredients.toDistPlus(~sampleCount=1000, r);
     switch (newDistribution) {
     | Some(distribution) =>
-      <div>
-        {GenericDistribution.normalize(distribution)
-         |> E.O.React.fmapOrNull(dist => <GenericDistributionChart dist />)}
-      </div>
+      <div> <DistPlusPlot distPlus=distribution /> </div>
     | None => "Something went wrong" |> ReasonReact.string
-    | _ => <div />
     };
   | FloatCdf(_) => <div />
   | Probability(r) =>

@@ -1,3 +1,65 @@
+module RawPlot = {
+  [@bs.module "./distPlotReact.js"]
+  external plot: ReasonReact.reactClass = "default";
+
+  type primaryDistribution =
+    option({
+      .
+      "xs": array(float),
+      "ys": array(float),
+    });
+
+  type discrete =
+    option({
+      .
+      "xs": array(float),
+      "ys": array(float),
+    });
+
+  [@react.component]
+  let make =
+      (
+        ~height=?,
+        ~marginBottom=?,
+        ~marginTop=?,
+        ~maxX=?,
+        ~minX=?,
+        ~onHover=(f: float) => (),
+        ~continuous=?,
+        ~discrete=?,
+        ~scale=?,
+        ~showDistributionLines=?,
+        ~showDistributionYAxis=?,
+        ~showVerticalLine=?,
+        ~timeScale=?,
+        ~verticalLine=?,
+        ~children=[||],
+      ) =>
+    ReasonReact.wrapJsForReason(
+      ~reactClass=plot,
+      ~props=
+        makeProps(
+          ~height?,
+          ~marginBottom?,
+          ~marginTop?,
+          ~maxX?,
+          ~minX?,
+          ~onHover,
+          ~continuous?,
+          ~discrete?,
+          ~scale?,
+          ~showDistributionLines?,
+          ~showDistributionYAxis?,
+          ~showVerticalLine?,
+          ~timeScale?,
+          ~verticalLine?,
+          (),
+        ),
+      children,
+    )
+    |> ReasonReact.element;
+};
+
 module Styles = {
   open Css;
   let textOverlay = style([position(`absolute)]);
@@ -40,17 +102,17 @@ let make =
       ~timeScale=?,
     ) => {
   <div className={Styles.graph(color)}>
-    <CdfChart__Base
+    <RawPlot
       ?maxX
       ?minX
       ?scale
       ?timeScale
-      discrete={discrete |> E.O.fmap(Shape.Discrete.toJs)}
+      discrete={discrete |> E.O.fmap(XYShape.toJs)}
       height
       marginBottom=50
       marginTop=0
       onHover
-      continuous={continuous |> E.O.fmap(Shape.XYShape.toJs)}
+      continuous={continuous |> E.O.fmap(XYShape.toJs)}
       showDistributionLines
       showDistributionYAxis
       showVerticalLine
