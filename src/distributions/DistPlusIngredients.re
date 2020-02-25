@@ -11,8 +11,8 @@ let make =
 let toDistPlus =
     (
       ~sampleCount=2000,
-      ~outputXYPoints=2000,
-      ~truncateTo=Some(100),
+      ~outputXYPoints=1500,
+      ~truncateTo=Some(300),
       t: distPlusIngredients,
     )
     : option(distPlus) => {

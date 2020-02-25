@@ -120,7 +120,7 @@ module MixedPoint = {
   let makeContinuous = (continuous: float): t => {continuous, discrete: 0.0};
   let makeDiscrete = (discrete: float): t => {continuous: 0.0, discrete};
 
-  let fmap = (fn, t: t) => {
+  let fmap = (fn: float => float, t: t) => {
     continuous: fn(t.continuous),
     discrete: fn(t.discrete),
   };

@@ -4,7 +4,7 @@
 let timeDist =
   DistPlusIngredients.make(
     ~guesstimatorString="(floor(10 to 15))",
-    ~domain=Complete,
+    ~domain=RightLimited({xPoint: 50.0, excludingProbabilityMass: 0.3}),
     ~unit=
       DistTypes.TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
     (),
@@ -25,7 +25,8 @@ let distributions = () =>
       {setup(
          DistPlusIngredients.make(
            ~guesstimatorString="mm(5 to 20, floor(normal(20,2)), [.5, .5])",
-           ~domain=Complete,
+           ~domain=
+             RightLimited({xPoint: 50.0, excludingProbabilityMass: 0.3}),
            (),
          ),
        )

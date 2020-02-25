@@ -2,11 +2,10 @@ module DistPlusChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
     open Distributions.DistPlus;
-    // todo: Change to scaledContinuous and scaledDiscrete
-    let discrete = distPlus |> T.toDiscrete;
+    let discrete = distPlus |> T.toScaledDiscrete;
     let continuous =
       distPlus
-      |> T.toContinuous
+      |> T.toScaledContinuous
       |> E.O.fmap(Distributions.Continuous.getShape);
     let minX = T.minX(distPlus);
     let maxX = T.maxX(distPlus);
@@ -40,6 +39,7 @@ module IntegralChart = {
     <DistributionPlot
       minX
       maxX
+      height=100
       ?continuous
       color={`hex("333")}
       timeScale
@@ -107,15 +107,18 @@ let make = (~distPlus: DistTypes.distPlus) => {
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
           </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.sum(~cache=None)
+             |> E.Float.with2DigitsPrecision
+             |> ReasonReact.string}
+          </th>
         </tr>
       </tbody>
     </table>
     <table className="table-auto">
       <thead>
         <tr>
-          <th className="px-4 py-2">
-            {"Y Integral Total" |> ReasonReact.string}
-          </th>
           <th className="px-4 py-2">
             {"Continuous Total" |> ReasonReact.string}
           </th>
@@ -132,12 +135,6 @@ let make = (~distPlus: DistTypes.distPlus) => {
       </thead>
       <tbody>
         <tr>
-          <th className="px-4 py-2 border ">
-            {distPlus
-             |> Distributions.DistPlus.T.Integral.sum(~cache=None)
-             |> E.Float.with2DigitsPrecision
-             |> ReasonReact.string}
-          </th>
           <th className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.toContinuous

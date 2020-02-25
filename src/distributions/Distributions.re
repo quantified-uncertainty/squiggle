@@ -202,10 +202,15 @@ module Mixed = {
 
   let scaleContinuous = ({discreteProbabilityMassFraction}: t, continuous) =>
     continuous
-    |> Continuous.T.scaleBy(~scale=1.0 -. discreteProbabilityMassFraction);
+    |> Continuous.T.scaleToIntegralSum(
+         ~intendedSum=1.0 -. discreteProbabilityMassFraction,
+       );
 
   let scaleDiscrete = ({discreteProbabilityMassFraction}: t, disrete) =>
-    disrete |> Discrete.T.scaleBy(~scale=discreteProbabilityMassFraction);
+    disrete
+    |> Discrete.T.scaleToIntegralSum(
+         ~intendedSum=discreteProbabilityMassFraction,
+       );
 
   module T =
     Dist({
@@ -239,28 +244,46 @@ module Mixed = {
       let integral =
           (
             ~cache,
-            {continuous, discrete, discreteProbabilityMassFraction} as t: t,
+            {continuous, discrete, discreteProbabilityMassFraction}: t,
           ) => {
         switch (cache) {
         | Some(cache) => cache
         | None =>
+          let scaleContinuousBy =
+            (1.0 -. discreteProbabilityMassFraction)
+            /. (continuous |> Continuous.T.Integral.sum(~cache=None));
+
+          let scaleDiscreteBy =
+            discreteProbabilityMassFraction
+            /. (
+              discrete
+              |> Discrete.T.Integral.get(~cache=None)
+              |> Continuous.toLinear
+              |> E.O.fmap(Continuous.lastY)
+              |> E.O.toExn("")
+            );
+
           let cont =
             continuous
             |> Continuous.T.Integral.get(~cache=None)
-            |> scaleContinuous(t);
+            |> Continuous.T.scaleBy(~scale=scaleContinuousBy);
+
           let dist =
             discrete
             |> Discrete.T.Integral.get(~cache=None)
             |> Continuous.toLinear
             |> E.O.toExn("")
-            |> Continuous.T.scaleBy(~scale=discreteProbabilityMassFraction);
-          Continuous.make(
-            XYShape.Combine.combineLinear(
-              Continuous.getShape(cont), Continuous.getShape(dist), (a, b) =>
-              a +. b
-            ),
-            `Linear,
-          );
+            |> Continuous.T.scaleBy(~scale=scaleDiscreteBy);
+
+          let result =
+            Continuous.make(
+              XYShape.Combine.combineLinear(
+                Continuous.getShape(cont), Continuous.getShape(dist), (a, b) =>
+                a +. b
+              ),
+              `Linear,
+            );
+          result;
         };
       };
 
@@ -484,7 +507,6 @@ module DistPlus = {
 
       let minX = shapeFn(Shape.T.minX);
       let maxX = shapeFn(Shape.T.maxX);
-      let fromShape = (t, shape): t => update(~shape, t);
 
       // This bit is kind of akward, could probably use rethinking.
       let integral = (~cache, t: t) =>
@@ -499,14 +521,14 @@ module DistPlus = {
 
       //   TODO: Fix this below, obviously. Adjust for limits
       let integralXtoY = (~cache as _, f, t: t) => {
-        Shape.T.Integral.xToY(~cache=Some(t.integralCache), f, toShape(t));
+        Shape.T.Integral.xToY(~cache=Some(t.integralCache), f, toShape(t))
+        |> domainIncludedProbabilityMassAdjustment(t);
       };
     });
 };
 
 module DistPlusTime = {
   open DistTypes;
-  open DistPlus;
 
   type t = DistTypes.distPlus;
 
@@ -529,7 +551,7 @@ module DistPlusTime = {
 
   module Integral = {
     include DistPlus.T.Integral;
-    let xToY = (~cache as _, f: TimeTypes.timeInVector, t: t) => {
+    let xToY = (f: TimeTypes.timeInVector, t: t) => {
       timeInVectorToX(f, t)
       |> E.O.fmap(x => DistPlus.T.Integral.xToY(~cache=None, x, t));
     };

@@ -110,19 +110,8 @@ module Model = {
   // TODO: Fixe number that integral is calculated for
   let getGlobalCatastropheChance = dateTime => {
     GlobalCatastrophe.makeI(MomentRe.momentNow())
-    |> DistPlusIngredients.toDistPlus(~sampleCount=1000)
-    |> E.O.bind(
-         _,
-         t => {
-           let foo =
-             Distributions.DistPlusTime.Integral.xToY(
-               ~cache=None,
-               Time(dateTime),
-               t,
-             );
-           Some(0.5);
-         },
-       );
+    |> DistPlusIngredients.toDistPlus
+    |> E.O.bind(_, Distributions.DistPlusTime.Integral.xToY(Time(dateTime)));
   };
 
   let make =
@@ -151,8 +140,7 @@ module Model = {
         | Some({truthValue: false}) => difference
         | None =>
           let foo =
-            // getGlobalCatastropheChance(dateTime)
-            Some(0.5)
+            getGlobalCatastropheChance(dateTime)
             |> E.O.fmap(E.Float.with2DigitsPrecision)
             |> E.O.fmap((r: string) =>
                  "uniform(0,1) > " ++ r ++ " ? " ++ difference ++ ": 0"
