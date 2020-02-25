@@ -216,8 +216,9 @@ module Mixed = {
     Dist({
       type t = DistTypes.mixedShape;
       type integral = DistTypes.continuousShape;
-      let minX = ({continuous, discrete}: t) =>
+      let minX = ({continuous, discrete}: t) => {
         min(Continuous.T.minX(continuous), Discrete.T.minX(discrete));
+      };
       let maxX = ({continuous, discrete}: t) =>
         max(Continuous.T.maxX(continuous), Discrete.T.maxX(discrete));
       let toShape = (t: t): DistTypes.shape => Mixed(t);

@@ -7,7 +7,13 @@ module DistPlusChart = {
       distPlus
       |> T.toScaledContinuous
       |> E.O.fmap(Distributions.Continuous.getShape);
-    let minX = T.minX(distPlus);
+    let range = T.xTotalRange(distPlus);
+    let minX =
+      switch (T.minX(distPlus), range) {
+      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
+      | _ => None
+      };
+
     let maxX = T.maxX(distPlus);
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     <DistributionPlot

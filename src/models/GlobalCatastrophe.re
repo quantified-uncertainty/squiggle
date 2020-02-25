@@ -1,21 +1,16 @@
-let guesstimatorString = "normal(40,10)";
+let guesstimatorString = "uniform(1, 100)";
 
 let makeI = (currentDateTime: MomentRe.Moment.t) => {
   DistPlusIngredients.make(
     ~guesstimatorString,
     ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
+    ~domain=RightLimited({xPoint: 300.0, excludingProbabilityMass: 0.3}),
     (),
   );
 };
 module Model = {
   let make = (currentDateTime: MomentRe.Moment.t) => {
-    let distPlusIngredients =
-      DistPlusIngredients.make(
-        ~guesstimatorString,
-        ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
-        (),
-      );
-    Prop.Value.DistPlusIngredients(distPlusIngredients);
+    Prop.Value.DistPlusIngredients(makeI(currentDateTime));
   };
 };
 

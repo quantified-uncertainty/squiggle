@@ -52,8 +52,8 @@ module Internals = {
 let stringToMixedShape =
     (
       ~string,
-      ~sampleCount=1000,
-      ~outputXYPoints=1000,
+      ~sampleCount=3000,
+      ~outputXYPoints=3000,
       ~truncateTo=Some(500),
       (),
     ) =>

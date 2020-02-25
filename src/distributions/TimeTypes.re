@@ -63,8 +63,9 @@ module RelativeTimePoint = {
       |> MomentRe.Moment.add(~duration=MomentRe.duration(r, timeVector.unit))
     };
 
-  let _timeToX = (time, timeStart, timeUnit) =>
-    MomentRe.diff(timeStart, time, timeUnit);
+  let _timeToX = (time, timeStart, timeUnit) => {
+    MomentRe.diff(time, timeStart, timeUnit);
+  };
 
   let toXValue = (timeVector: timeVector, timeInVector: timeInVector) =>
     switch (timeInVector) {
