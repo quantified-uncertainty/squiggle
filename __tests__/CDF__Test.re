@@ -59,23 +59,45 @@ describe("CDF", () => {
       CDF.Make({
         let shape = CDF.order({xs: [|1., 2., 3.|], ys: [|5., 6., 7.|]});
       });
-    test("findY#1", () => {
+    test("#1", () => {
       expect(Dist.findY(1.)) |> toEqual(5.)
     });
-    test("findY#2", () => {
+    test("#2", () => {
       expect(Dist.findY(1.5)) |> toEqual(5.5)
     });
-    test("findY#3", () => {
+    test("#3", () => {
       expect(Dist.findY(3.)) |> toEqual(7.)
     });
-    test("findY#4", () => {
+    test("#4", () => {
       expect(Dist.findY(4.)) |> toEqual(7.)
     });
-    test("findY#5", () => {
+    test("#5", () => {
       expect(Dist.findY(15.)) |> toEqual(7.)
     });
-    test("findY#6", () => {
+    test("#6", () => {
       expect(Dist.findY(-1.)) |> toEqual(5.)
+    });
+  });
+
+  describe("findX", () => {
+    module Dist =
+      CDF.Make({
+        let shape = CDF.order({xs: [|1., 2., 3.|], ys: [|5., 6., 7.|]});
+      });
+    test("#1", () => {
+      expect(Dist.findX(5.)) |> toEqual(1.)
+    });
+    test("#2", () => {
+      expect(Dist.findX(7.)) |> toEqual(3.)
+    });
+    test("#3", () => {
+      expect(Dist.findX(5.5)) |> toEqual(1.5)
+    });
+    test("#4", () => {
+      expect(Dist.findX(8.)) |> toEqual(3.)
+    });
+    test("#5", () => {
+      expect(Dist.findX(4.)) |> toEqual(1.)
     });
   });
 });
