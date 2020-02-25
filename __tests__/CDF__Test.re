@@ -54,4 +54,18 @@ describe("CDF", () => {
       });
     expect(Dist.maxX()) |> toEqual(20.);
   });
+  test("findY#1", () => {
+    module Dist =
+      CDF.Make({
+        let shape = CDF.order({xs: [|1., 2., 3.|], ys: [|5., 6., 7.|]});
+      });
+    expect(Dist.findY(1.)) |> toEqual(5.);
+  });
+  test("findY#2", () => {
+    module Dist =
+      CDF.Make({
+        let shape = CDF.order({xs: [|1., 2., 3.|], ys: [|5., 6., 7.|]});
+      });
+    expect(Dist.findY(1.5)) |> toEqual(5.5);
+  });
 });
