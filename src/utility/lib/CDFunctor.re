@@ -34,8 +34,8 @@ module Make = (Config: Config) => {
   let maxX = () => get(xs, len(xs) - 1);
   let minY = () => get(ys, 0);
   let maxY = () => get(ys, len(ys) - 1);
-  let findY = x => {
-    let firstHigherIndex = Belt.Array.getIndexBy(xs, e => e > x);
+  let findY = (x: float): float => {
+    let firstHigherIndex = Belt.Array.getIndexBy(xs, e => e >= x);
     switch (firstHigherIndex) {
     | None => maxY()
     | Some(1) => minY()
@@ -53,6 +53,28 @@ module Make = (Config: Config) => {
         );
       } else {
         ys[lowerOrEqualIndex];
+      };
+    };
+  };
+  let findX = (y: float): float => {
+    let firstHigherIndex = Belt.Array.getIndexBy(ys, e => e >= y);
+    switch (firstHigherIndex) {
+    | None => maxX()
+    | Some(1) => minX()
+    | Some(firstHigherIndex) =>
+      let lowerOrEqualIndex =
+        firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
+      let needsInterpolation = get(ys, lowerOrEqualIndex) != y;
+      if (needsInterpolation) {
+        Functions.interpolate(
+          get(ys, lowerOrEqualIndex),
+          get(ys, firstHigherIndex),
+          get(xs, lowerOrEqualIndex),
+          get(xs, firstHigherIndex),
+          y,
+        );
+      } else {
+        xs[lowerOrEqualIndex];
       };
     };
   };
