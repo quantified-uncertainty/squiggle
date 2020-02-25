@@ -144,7 +144,7 @@ describe("CDF", () => {
     });
   });
 
-  // @todo
+  // @todo: Should each test expect 70.?
   describe("sample", () => {
     open Functions;
     let xs = up(1, 9);
