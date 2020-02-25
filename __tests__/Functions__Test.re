@@ -50,4 +50,14 @@ describe("Functions", () => {
   test("mean#3", () => {
     expect(Functions.mean([|1., 2., 3., (-2.), (-10.)|])) |> toEqual(-1.2)
   });
+  test("min#1", () => {
+    expect(Functions.min([|1., 2., 3.|])) |> toEqual(1.)
+  });
+  test("min#2", () => {
+    expect(Functions.min([|(-1.), (-2.), 0., 20.|])) |> toEqual(-2.)
+  });
+  test("min#3", () => {
+    expect(Functions.min([|(-1.), (-2.), 0., 20., (-2.2)|]))
+    |> toEqual(-2.2)
+  });
 });
