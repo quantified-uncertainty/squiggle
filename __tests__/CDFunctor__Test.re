@@ -7,7 +7,7 @@ describe("CDF", () => {
     expect(() => {
       module CDF =
         CDFunctor.Make({
-          let shape: DistributionTypes.xyShape = {
+          let shape: DistTypes.xyShape = {
             xs: [|10., 4., 8.|],
             ys: [|8., 9., 2.|],
           };
@@ -20,7 +20,7 @@ describe("CDF", () => {
     expect(() => {
       module CDF =
         CDFunctor.Make({
-          let shape: DistributionTypes.xyShape = {
+          let shape: DistTypes.xyShape = {
             xs: [|1., 4., 8.|],
             ys: [|8., 9., 2.|],
           };
@@ -32,24 +32,18 @@ describe("CDF", () => {
   });
   test("order#1", () => {
     let a = CDFunctor.order({xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]});
-    let b: DistributionTypes.xyShape = {
-      xs: [|1., 4., 8.|],
-      ys: [|8., 9., 2.|],
-    };
+    let b: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
     expect(a) |> toEqual(b);
   });
   test("order#2", () => {
     let a = CDFunctor.order({xs: [|10., 5., 12.|], ys: [|8., 9., 2.|]});
-    let b: DistributionTypes.xyShape = {
-      xs: [|5., 10., 12.|],
-      ys: [|9., 8., 2.|],
-    };
+    let b: DistTypes.xyShape = {xs: [|5., 10., 12.|], ys: [|9., 8., 2.|]};
     expect(a) |> toEqual(b);
   });
   test("minX", () => {
     module CDF =
       CDFunctor.Make({
-        let shape: DistributionTypes.xyShape =
+        let shape: DistTypes.xyShape =
           CDFunctor.order({xs: [|20., 4., 8.|], ys: [|8., 9., 2.|]});
       });
     expect(CDF.minX()) |> toEqual(4.);
@@ -57,7 +51,7 @@ describe("CDF", () => {
   test("maxX", () => {
     module CDF =
       CDFunctor.Make({
-        let shape: DistributionTypes.xyShape =
+        let shape: DistTypes.xyShape =
           CDFunctor.order({xs: [|20., 4., 8.|], ys: [|8., 9., 2.|]});
       });
     expect(CDF.maxX()) |> toEqual(20.);

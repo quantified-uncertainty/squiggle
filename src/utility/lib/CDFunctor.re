@@ -1,8 +1,8 @@
-module type Config = {let shape: DistributionTypes.xyShape;};
+module type Config = {let shape: DistTypes.xyShape;};
 
 exception ShapeWrong(string);
 
-let order = (shape: DistributionTypes.xyShape): DistributionTypes.xyShape => {
+let order = (shape: DistTypes.xyShape): DistTypes.xyShape => {
   let xy =
     shape.xs
     |> Array.mapi((i, x) => [x, shape.ys |> Array.get(_, i)])
