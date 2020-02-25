@@ -24,7 +24,8 @@ let range = (min: float, max: float, n: int): array(float) => {
   | _ when n < 0 => raise(RangeWrong("n is less then zero"))
   | _ when min > max => raise(RangeWrong("Min values is less then max"))
   | _ =>
-    let diff = max -. min;
-    Belt.Array.makeBy(n, i => float_of_int(i) *. diff);
+    let diff = (max -. min) /. Belt.Float.fromInt(n - 1);
+    Belt.Array.makeBy(n, i => {min +. Belt.Float.fromInt(i) *. diff});
   };
 };
+let random = Js.Math.random_int;

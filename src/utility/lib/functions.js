@@ -100,6 +100,7 @@ function max(arr) {
 }
 
 /**
+ * @Done
  * @param {number} min
  * @param {number} max
  * @return {number}
