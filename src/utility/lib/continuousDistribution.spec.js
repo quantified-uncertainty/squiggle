@@ -66,45 +66,45 @@ describe('ContinuousDistribution Class', () => {
 
   describe('integral()', () => {
     it('with regular inputs', () => {
-      const xs = [0,1,2,4];
+      const xs = [0, 1, 2, 4];
       const ys = [0.0, 1.0, 2.0, 2.0];
       const cdf = new ContinuousDistribution(xs, ys);
       const integral = cdf.integral();
       expect(integral).toEqual(6);
     });
     it('with an infinity', () => {
-      const xs = [0,1,2,4];
+      const xs = [0, 1, 2, 4];
       const ys = [0.0, 1.0, Infinity, 2.0];
       const cdf = new ContinuousDistribution(xs, ys);
       const integral = cdf.integral();
       expect(integral).toEqual(Infinity);
     });
     it('with negative infinity', () => {
-      const xs = [0,1,2,4];
+      const xs = [0, 1, 2, 4];
       const ys = [0.0, 1.0, -Infinity, 2.0];
       const cdf = new ContinuousDistribution(xs, ys);
       const integral = cdf.integral();
       expect(integral).toEqual(-Infinity);
     });
     it('with both positive and negative infinities', () => {
-      const xs = [0,1,2,4];
+      const xs = [0, 1, 2, 4];
       const ys = [0.0, 1.0, -Infinity, Infinity];
       const cdf = new ContinuousDistribution(xs, ys);
       const integral = cdf.integral();
       expect(integral).toEqual(NaN);
     });
     it('with a NaN and filterOutNaNs set to false', () => {
-      const xs = [0,1,2,4];
+      const xs = [0, 1, 2, 4];
       const ys = [0.0, 1.0, 2.0, NaN];
       const cdf = new ContinuousDistribution(xs, ys);
-      const integral = cdf.integral({filterOutNaNs: false});
+      const integral = cdf.integral({ filterOutNaNs: false });
       expect(integral).toEqual(NaN);
     });
     it('with a NaN and filterOutNaNs set to true', () => {
-      const xs = [0,1,2,4];
+      const xs = [0, 1, 2, 4];
       const ys = [0.0, 1.0, 2.0, NaN];
       const cdf = new ContinuousDistribution(xs, ys);
-      const integral = cdf.integral({filterOutNaNs: true});
+      const integral = cdf.integral({ filterOutNaNs: true });
       expect(integral).toEqual(2);
     });
   })

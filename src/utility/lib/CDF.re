@@ -90,5 +90,18 @@ module Make = (Config: Config) => {
   let sampleSingle = (): float => Js.Math.random() |> findY;
   let sample = (size: int): array(float) =>
     Belt.Array.makeBy(size, i => sampleSingle());
-  1;
+  let integral = () => {
+    Belt.Array.reduceWithIndex(ys, 0., (integral, y, i) => {
+      switch (i) {
+      | 0 => integral
+      | _ =>
+        let thisY = y;
+        let lastY = get(ys, i - 1);
+        let thisX = get(xs, i);
+        let lastX = get(xs, i - 1);
+        let sectionInterval = (thisY +. lastY) /. 2. *. (thisX -. lastX);
+        integral +. sectionInterval;
+      }
+    });
+  };
 };

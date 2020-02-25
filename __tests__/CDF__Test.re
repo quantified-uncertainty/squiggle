@@ -165,4 +165,15 @@ describe("CDF", () => {
       expect(xs2[2]) |> toBe(70.)
     });
   });
+
+  describe("integral", () => {
+    module Dist =
+      CDF.Make({
+        let shape =
+          CDF.order({xs: [|0., 1., 2., 4.|], ys: [|0.0, 1.0, 2.0, 2.0|]});
+      });
+    test("with regular inputs", () => {
+      expect(Dist.integral()) |> toBe(6.)
+    });
+  });
 });
