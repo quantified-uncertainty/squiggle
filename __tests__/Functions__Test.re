@@ -60,4 +60,13 @@ describe("Functions", () => {
     expect(Functions.min([|(-1.), (-2.), 0., 20., (-2.2)|]))
     |> toEqual(-2.2)
   });
+  test("max#1", () => {
+    expect(Functions.max([|1., 2., 3.|])) |> toEqual(3.)
+  });
+  test("max#2", () => {
+    expect(Functions.max([|(-1.), (-2.), 0., 20.|])) |> toEqual(20.)
+  });
+  test("max#3", () => {
+    expect(Functions.max([|(-1.), (-2.), 0., (-2.2)|])) |> toEqual(0.)
+  });
 });

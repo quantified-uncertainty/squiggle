@@ -12,7 +12,7 @@ let interpolate =
 let sum = Belt.Array.reduce(_, 0., (i, j) => i +. j);
 let mean = a => sum(a) /. (Array.length(a) |> float_of_int);
 let min = a => Belt.Array.reduce(a, a[0], (i, j) => i < j ? i : j);
-let max = Belt.Array.reduce(_, 0., (i, j) => i > j ? i : j);
+let max = a => Belt.Array.reduce(a, a[0], (i, j) => i > j ? i : j);
 let up = (a, b) => Array.make(b - a, a) |> Array.mapi((i, c) => c + i);
 let down = (a, b) => Array.make(a - b, a) |> Array.mapi((i, c) => c - i);
 let range = (min: float, max: float, n: int): array(float) => {
