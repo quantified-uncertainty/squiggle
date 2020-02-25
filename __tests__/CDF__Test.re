@@ -143,4 +143,26 @@ describe("CDF", () => {
       expect(Dist2.ys) |> toEqual([|50., 54., 58.|])
     });
   });
+
+  // @todo
+  describe("sample", () => {
+    open Functions;
+    let xs = up(1, 9);
+    let ys = up(70, 78);
+    module Dist =
+      CDF.Make({
+        let shape = CDF.order({xs, ys});
+      });
+
+    let xs2 = Dist.sample(3);
+    test("#1", () => {
+      expect(xs2[0]) |> toBe(70.)
+    });
+    test("#2", () => {
+      expect(xs2[1]) |> toBe(70.)
+    });
+    test("#3", () => {
+      expect(xs2[2]) |> toBe(70.)
+    });
+  });
 });
