@@ -41,4 +41,13 @@ describe("Functions", () => {
   test("range#8", () => {
     expect(Functions.range(1., 1., 3)) |> toEqual([|1., 1., 1.|])
   });
+  test("mean#1", () => {
+    expect(Functions.mean([|1., 2., 3.|])) |> toEqual(2.)
+  });
+  test("mean#2", () => {
+    expect(Functions.mean([|1., 2., 3., (-2.)|])) |> toEqual(1.)
+  });
+  test("mean#3", () => {
+    expect(Functions.mean([|1., 2., 3., (-2.), (-10.)|])) |> toEqual(-1.2)
+  });
 });
