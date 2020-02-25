@@ -76,15 +76,17 @@ describe("Functions", () => {
     expect(Functions.random(1, 5)) |> toBeGreaterThanOrEqual(1)
   });
   test("up#1", () => {
-    expect(Functions.up(1, 5)) |> toEqual([|1, 2, 3, 4, 5|])
+    expect(Functions.up(1, 5)) |> toEqual([|1., 2., 3., 4., 5.|])
   });
   test("up#2", () => {
-    expect(Functions.up(-1, 5)) |> toEqual([|(-1), 0, 1, 2, 3, 4, 5|])
+    expect(Functions.up(-1, 5))
+    |> toEqual([|(-1.), 0., 1., 2., 3., 4., 5.|])
   });
   test("down#1", () => {
-    expect(Functions.down(5, 1)) |> toEqual([|5, 4, 3, 2, 1|])
+    expect(Functions.down(5, 1)) |> toEqual([|5., 4., 3., 2., 1.|])
   });
   test("down#2", () => {
-    expect(Functions.down(5, -1)) |> toEqual([|5, 4, 3, 2, 1, 0, (-1)|])
+    expect(Functions.down(5, -1))
+    |> toEqual([|5., 4., 3., 2., 1., 0., (-1.)|])
   });
 });

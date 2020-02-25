@@ -78,5 +78,17 @@ module Make = (Config: Config) => {
       };
     };
   };
+  let convertWithAlternativeXs = (newXs: array(float)): DistTypes.xyShape => {
+    let newYs = Belt.Array.map(newXs, findY);
+    {xs: newXs, ys: newYs};
+  };
+  let convertToNewLength = (newLength: int): DistTypes.xyShape => {
+    Functions.(
+      range(min(xs), max(xs), newLength) |> convertWithAlternativeXs
+    );
+  };
+  let sampleSingle = (): float => Js.Math.random() |> findY;
+  let sample = (size: int): array(float) =>
+    Belt.Array.makeBy(size, i => sampleSingle());
   1;
 };

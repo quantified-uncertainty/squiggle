@@ -136,6 +136,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * @Done
    * @param {number[]} xs
    * @return {ContinuousDistribution}
    */
@@ -145,6 +146,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * Done
    * @param {number} newLength
    * @return {ContinuousDistribution}
    */
@@ -154,6 +156,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * @Done
    * @return {number}
    */
   sampleSingle() {
@@ -162,6 +165,7 @@ class ContinuousDistribution {
   }
 
   /**
+   * @Done
    * Poduce n samples, using ``sampleSingle`` for each.
    * @param size
    * @return {number[]}

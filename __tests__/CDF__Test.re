@@ -100,4 +100,47 @@ describe("CDF", () => {
       expect(Dist.findX(4.)) |> toEqual(1.)
     });
   });
+
+  describe("convertWithAlternativeXs", () => {
+    open Functions;
+    let xs = up(1, 9);
+    let ys = up(20, 28);
+    module Dist =
+      CDF.Make({
+        let shape = CDF.order({xs, ys});
+      });
+
+    let xs2 = up(3, 7);
+    module Dist2 =
+      CDF.Make({
+        let shape = Dist.convertWithAlternativeXs(xs2);
+      });
+
+    test("#1", () => {
+      expect(Dist2.xs) |> toEqual([|3., 4., 5., 6., 7.|])
+    });
+    test("#2", () => {
+      expect(Dist2.ys) |> toEqual([|22., 23., 24., 25., 26.|])
+    });
+  });
+
+  describe("convertToNewLength", () => {
+    open Functions;
+    let xs = up(1, 9);
+    let ys = up(50, 58);
+    module Dist =
+      CDF.Make({
+        let shape = CDF.order({xs, ys});
+      });
+    module Dist2 =
+      CDF.Make({
+        let shape = Dist.convertToNewLength(3);
+      });
+    test("#1", () => {
+      expect(Dist2.xs) |> toEqual([|1., 5., 9.|])
+    });
+    test("#2", () => {
+      expect(Dist2.ys) |> toEqual([|50., 54., 58.|])
+    });
+  });
 });
