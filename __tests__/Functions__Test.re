@@ -69,4 +69,22 @@ describe("Functions", () => {
   test("max#3", () => {
     expect(Functions.max([|(-1.), (-2.), 0., (-2.2)|])) |> toEqual(0.)
   });
+  test("random#1", () => {
+    expect(Functions.random(1, 5)) |> toBeLessThanOrEqual(5)
+  });
+  test("random#2", () => {
+    expect(Functions.random(1, 5)) |> toBeGreaterThanOrEqual(1)
+  });
+  test("up#1", () => {
+    expect(Functions.up(1, 5)) |> toEqual([|1, 2, 3, 4, 5|])
+  });
+  test("up#2", () => {
+    expect(Functions.up(-1, 5)) |> toEqual([|(-1), 0, 1, 2, 3, 4, 5|])
+  });
+  test("down#1", () => {
+    expect(Functions.down(5, 1)) |> toEqual([|5, 4, 3, 2, 1|])
+  });
+  test("down#2", () => {
+    expect(Functions.down(5, -1)) |> toEqual([|5, 4, 3, 2, 1, 0, (-1)|])
+  });
 });
