@@ -5,8 +5,8 @@ exception ShapeWrong(string);
 describe("CDF", () => {
   test("raise - w/o order", () => {
     expect(() => {
-      module CDF =
-        CDFunctor.Make({
+      module Cdf =
+        CDF.Make({
           let shape: DistTypes.xyShape = {
             xs: [|10., 4., 8.|],
             ys: [|8., 9., 2.|],
@@ -18,8 +18,8 @@ describe("CDF", () => {
   });
   test("raise - with order", () => {
     expect(() => {
-      module CDF =
-        CDFunctor.Make({
+      module Cdf =
+        CDF.Make({
           let shape: DistTypes.xyShape = {
             xs: [|1., 4., 8.|],
             ys: [|8., 9., 2.|],
@@ -31,29 +31,27 @@ describe("CDF", () => {
     |> toThrow
   });
   test("order#1", () => {
-    let a = CDFunctor.order({xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]});
+    let a = CDF.order({xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]});
     let b: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
     expect(a) |> toEqual(b);
   });
   test("order#2", () => {
-    let a = CDFunctor.order({xs: [|10., 5., 12.|], ys: [|8., 9., 2.|]});
+    let a = CDF.order({xs: [|10., 5., 12.|], ys: [|8., 9., 2.|]});
     let b: DistTypes.xyShape = {xs: [|5., 10., 12.|], ys: [|9., 8., 2.|]};
     expect(a) |> toEqual(b);
   });
   test("minX", () => {
-    module CDF =
-      CDFunctor.Make({
-        let shape: DistTypes.xyShape =
-          CDFunctor.order({xs: [|20., 4., 8.|], ys: [|8., 9., 2.|]});
+    module Dist =
+      CDF.Make({
+        let shape = CDF.order({xs: [|20., 4., 8.|], ys: [|8., 9., 2.|]});
       });
-    expect(CDF.minX()) |> toEqual(4.);
+    expect(Dist.minX()) |> toEqual(4.);
   });
   test("maxX", () => {
-    module CDF =
-      CDFunctor.Make({
-        let shape: DistTypes.xyShape =
-          CDFunctor.order({xs: [|20., 4., 8.|], ys: [|8., 9., 2.|]});
+    module Dist =
+      CDF.Make({
+        let shape = CDF.order({xs: [|20., 4., 8.|], ys: [|8., 9., 2.|]});
       });
-    expect(CDF.maxX()) |> toEqual(20.);
+    expect(Dist.maxX()) |> toEqual(20.);
   });
 });
