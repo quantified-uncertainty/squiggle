@@ -17,9 +17,10 @@ module Make = (Config: Config) => {
   let xs = Config.shape.xs;
   let ys = Config.shape.ys;
   let get = Array.get;
+  let len = Array.length;
 
-  let validateHasLength = (): bool => Array.length(xs) > 0;
-  let validateSize = (): bool => Array.length(xs) == Array.length(ys);
+  let validateHasLength = (): bool => len(xs) > 0;
+  let validateSize = (): bool => len(xs) == len(ys);
   if (!validateHasLength()) {
     raise(ShapeWrong("You need at least one element."));
   };
@@ -29,10 +30,10 @@ module Make = (Config: Config) => {
   if (!Belt.SortArray.isSorted(xs, (a, b) => a > b ? 1 : (-1))) {
     raise(ShapeWrong("Arrays of \"xs\" and \"ys\" have different sizes."));
   };
-  let minX = () => xs |> get(_, 0);
-  let maxX = () => xs |> get(_, Array.length(xs) - 1);
-  let minY = () => ys |> get(_, 0);
-  let maxY = () => ys |> get(_, Array.length(ys) - 1);
+  let minX = () => get(xs, 0);
+  let maxX = () => get(xs, len(xs) - 1);
+  let minY = () => get(ys, 0);
+  let maxY = () => get(ys, len(ys) - 1);
   let findY = x => {
     let firstHigherIndex = Belt.Array.getIndexBy(xs, e => e > x);
     switch (firstHigherIndex) {
