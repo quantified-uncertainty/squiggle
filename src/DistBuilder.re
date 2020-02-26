@@ -36,6 +36,12 @@ module FieldString = {
   };
 };
 
+module Styles = {
+  open Css;
+  let row =
+    style([display(`flex), selector("div > div", [flex(`num(1.))])]);
+};
+
 module FieldFloat = {
   [@react.component]
   let make = (~field, ~label) => {
@@ -84,98 +90,112 @@ let make = () => {
         field=FormConfig.GuesstimatorString
         label="GuesstimatorString"
       />
-      <Form.Field
-        field=FormConfig.DomainType
-        render={({handleChange, value}) =>
-          <Antd.Form.Item label={"Domain Type" |> E.ste}>
-            <Antd.Select value onChange={e => e |> handleChange}>
-              <Antd.Select.Option value="Complete">
-                {"Complete" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="LeftLimited">
-                {"LeftLimited" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="RightLimited">
-                {"RightLimited" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="LeftAndRightLimited">
-                {"LeftAndRightLimited" |> E.ste}
-              </Antd.Select.Option>
-            </Antd.Select>
-          </Antd.Form.Item>
-        }
-      />
-      <FieldString field=FormConfig.XPoint label="xPoint" />
-      <FieldString
-        field=FormConfig.ExcludingProbabilityMass
-        label="excludingProbabilityMass"
-      />
-      <Form.Field
-        field=FormConfig.UnitType
-        render={({handleChange, value}) =>
-          <Antd.Form.Item label={"Zero Type" |> E.ste}>
-            <Antd.Select value onChange={e => e |> handleChange}>
-              <Antd.Select.Option value="UnspecifiedDistribution">
-                {"UnspecifiedDistribution" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="TimeDistribution">
-                {"TimeDistribution" |> E.ste}
-              </Antd.Select.Option>
-            </Antd.Select>
-          </Antd.Form.Item>
-        }
-      />
-      <Form.Field
-        field=FormConfig.Zero
-        render={({handleChange, value}) =>
-          <Antd.Form.Item label={"Zero" |> E.ste}>
-            <Antd_DatePicker
-              value
-              onChange={e => {
-                e |> handleChange;
+      <div className=Styles.row>
+        <div>
+          <Form.Field
+            field=FormConfig.DomainType
+            render={({handleChange, value}) =>
+              <Antd.Form.Item label={"Domain Type" |> E.ste}>
+                <Antd.Select value onChange={e => e |> handleChange}>
+                  <Antd.Select.Option value="Complete">
+                    {"Complete" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="LeftLimited">
+                    {"LeftLimited" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="RightLimited">
+                    {"RightLimited" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="LeftAndRightLimited">
+                    {"LeftAndRightLimited" |> E.ste}
+                  </Antd.Select.Option>
+                </Antd.Select>
+              </Antd.Form.Item>
+            }
+          />
+        </div>
+        <div> <FieldString field=FormConfig.XPoint label="xPoint" /> </div>
+        <div>
+          <FieldString
+            field=FormConfig.ExcludingProbabilityMass
+            label="excludingProbabilityMass"
+          />
+        </div>
+      </div>
+      <div className=Styles.row>
+        <div>
+          <Form.Field
+            field=FormConfig.UnitType
+            render={({handleChange, value}) =>
+              <Antd.Form.Item label={"Zero Type" |> E.ste}>
+                <Antd.Select value onChange={e => e |> handleChange}>
+                  <Antd.Select.Option value="UnspecifiedDistribution">
+                    {"UnspecifiedDistribution" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="TimeDistribution">
+                    {"TimeDistribution" |> E.ste}
+                  </Antd.Select.Option>
+                </Antd.Select>
+              </Antd.Form.Item>
+            }
+          />
+        </div>
+        <div>
+          <Form.Field
+            field=FormConfig.Zero
+            render={({handleChange, value}) =>
+              <Antd.Form.Item label={"Zero" |> E.ste}>
+                <Antd_DatePicker
+                  value
+                  onChange={e => {
+                    e |> handleChange;
 
-                _ => ();
-              }}
-            />
-          </Antd.Form.Item>
-        }
-      />
-      <Form.Field
-        field=FormConfig.Unit
-        render={({handleChange, value}) =>
-          <Antd.Form.Item label={"Unit" |> E.ste}>
-            <Antd.Select value onChange={e => e |> handleChange}>
-              <Antd.Select.Option value="days">
-                {"days" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="hours">
-                {"hours" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="milliseconds">
-                {"milliseconds" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="minutes">
-                {"minutes" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="months">
-                {"months" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="quarters">
-                {"quarters" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="seconds">
-                {"seconds" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="weeks">
-                {"weeks" |> E.ste}
-              </Antd.Select.Option>
-              <Antd.Select.Option value="years">
-                {"years" |> E.ste}
-              </Antd.Select.Option>
-            </Antd.Select>
-          </Antd.Form.Item>
-        }
-      />
+                    _ => ();
+                  }}
+                />
+              </Antd.Form.Item>
+            }
+          />
+        </div>
+        <div>
+          <Form.Field
+            field=FormConfig.Unit
+            render={({handleChange, value}) =>
+              <Antd.Form.Item label={"Unit" |> E.ste}>
+                <Antd.Select value onChange={e => e |> handleChange}>
+                  <Antd.Select.Option value="days">
+                    {"days" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="hours">
+                    {"hours" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="milliseconds">
+                    {"milliseconds" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="minutes">
+                    {"minutes" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="months">
+                    {"months" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="quarters">
+                    {"quarters" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="seconds">
+                    {"seconds" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="weeks">
+                    {"weeks" |> E.ste}
+                  </Antd.Select.Option>
+                  <Antd.Select.Option value="years">
+                    {"years" |> E.ste}
+                  </Antd.Select.Option>
+                </Antd.Select>
+              </Antd.Form.Item>
+            }
+          />
+        </div>
+      </div>
       <Antd.Form.Item>
         {reform.state.formState == Submitting
            ? "Loading" |> E.ste
