@@ -33,6 +33,20 @@ module TimeUnit = {
     | `weeks => "weeks"
     | `years => "years"
     };
+
+  let ofString = (timeUnit: string) =>
+    switch (timeUnit) {
+    | "days" => `days
+    | "hours" => `hours
+    | "milliseconds" => `milliseconds
+    | "minutes" => `minutes
+    | "months" => `months
+    | "quarters" => `quarters
+    | "seconds" => `seconds
+    | "weeks" => `weeks
+    | "years" => `years
+    | _ => Js.Exn.raiseError("TimeUnit is unknown")
+    };
 };
 
 module TimePoint = {
