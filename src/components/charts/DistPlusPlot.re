@@ -19,6 +19,7 @@ module DistPlusChart = {
     <DistributionPlot
       minX
       maxX
+      height=120
       ?discrete
       ?continuous
       color={`hex("333")}
@@ -50,7 +51,7 @@ module IntegralChart = {
     <DistributionPlot
       minX
       maxX
-      height=100
+      height=80
       ?continuous
       color={`hex("333")}
       timeScale

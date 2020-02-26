@@ -221,6 +221,21 @@ module TypeWithMetadata = {
       ~assumptionType=ASSUMPTION,
       (),
     );
+
+  let age =
+    make(
+      ~id="age",
+      ~name="Current Age",
+      ~description=None,
+      ~type_=
+        FloatPoint({
+          default: Some(40.0),
+          min: Some(0.0),
+          max: Some(100.0),
+        }),
+      ~assumptionType=PRIMARY_INPUT,
+      (),
+    );
 };
 
 module Model = {

@@ -49,7 +49,7 @@ module ModelForm = {
   let make = (~model: Model.t) => {
     let formState = makeHelpers(Combo.fromModel(model));
     <div>
-      <form
+      <div
         className="bg-white rounded px-8 pt-6 pb-8 mb-4 mt-6 border-gray-200 border-solid border-2">
         <h1 className="text-gray-800 text-xl font-bold">
           {model.name |> ReasonReact.string}
@@ -82,7 +82,7 @@ module ModelForm = {
           {model.run(Prop.Combo.InputValues.toValueArray(formState.combo))
            |> E.O.React.fmapOrNull(propValue)}
         </div>
-      </form>
+      </div>
     </div>;
   };
 };
