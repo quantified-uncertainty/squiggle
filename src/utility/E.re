@@ -297,3 +297,5 @@ module JsArray = {
        );
   let filter = Js.Array.filter;
 };
+
+let ste = React.string;
