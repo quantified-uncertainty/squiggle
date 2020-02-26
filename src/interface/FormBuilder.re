@@ -64,7 +64,6 @@ module ModelForm = {
                   {type_.name |> ReasonReact.string}
                 </label>
                 <ValueForm
-                  key={type_.id}
                   type_
                   value
                   onChange={newValue =>

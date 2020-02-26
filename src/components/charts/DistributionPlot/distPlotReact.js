@@ -50,8 +50,8 @@ function CdfChartReact(props) {
       .set('container', containerRef.current)
       .set('scale', scale)
       .set('timeScale', props.timeScale)
-      .set('yMaxContinuousDomainFactor', 1)
-      .set('yMaxDiscreteDomainFactor', 1)
+      .set('yMaxContinuousDomainFactor', props.yMaxContinuousDomainFactor)
+      .set('yMaxDiscreteDomainFactor', props.yMaxDiscreteDomainFactor)
       .data({
         continuous: props.continuous,
         discrete: props.discrete,

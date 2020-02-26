@@ -26,7 +26,7 @@ let distributions = () =>
       {setup(
          DistPlusIngredients.make(
            ~guesstimatorString=
-             "uniform(0,1) > 0.036 ? lognormal(6.652, -0.41): 0",
+             "uniform(0,1) > 0.3 ? lognormal(6.652, -0.41): 0",
            ~domain=
              RightLimited({xPoint: 50.0, excludingProbabilityMass: 0.3}),
            (),

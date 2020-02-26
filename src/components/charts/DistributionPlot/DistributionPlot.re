@@ -24,6 +24,8 @@ module RawPlot = {
         ~marginTop=?,
         ~maxX=?,
         ~minX=?,
+        ~yMaxContinuousDomainFactor=?,
+        ~yMaxDiscreteDomainFactor=?,
         ~onHover=(f: float) => (),
         ~continuous=?,
         ~discrete=?,
@@ -44,6 +46,8 @@ module RawPlot = {
           ~marginTop?,
           ~maxX?,
           ~minX?,
+          ~yMaxContinuousDomainFactor?,
+          ~yMaxDiscreteDomainFactor?,
           ~onHover,
           ~continuous?,
           ~discrete?,
@@ -93,6 +97,8 @@ let make =
       ~height=200,
       ~maxX=?,
       ~minX=?,
+      ~yMaxDiscreteDomainFactor=?,
+      ~yMaxContinuousDomainFactor=?,
       ~onHover: float => unit,
       ~continuous=?,
       ~scale=?,
@@ -105,6 +111,8 @@ let make =
     <RawPlot
       ?maxX
       ?minX
+      ?yMaxDiscreteDomainFactor
+      ?yMaxContinuousDomainFactor
       ?scale
       ?timeScale
       discrete={discrete |> E.O.fmap(XYShape.toJs)}

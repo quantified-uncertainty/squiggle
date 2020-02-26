@@ -1,3 +1,15 @@
+let adjustBoth = discreteProbabilityMass => {
+  let yMaxDiscreteDomainFactor = discreteProbabilityMass;
+  let yMaxContinuousDomainFactor = 1.0 -. discreteProbabilityMass;
+  let yMax =
+    yMaxDiscreteDomainFactor > yMaxContinuousDomainFactor
+      ? yMaxDiscreteDomainFactor : yMaxContinuousDomainFactor;
+  (
+    1.0 /. (yMaxDiscreteDomainFactor /. yMax),
+    1.0 /. (yMaxContinuousDomainFactor /. yMax),
+  );
+};
+
 module DistPlusChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
@@ -16,9 +28,15 @@ module DistPlusChart = {
 
     let maxX = T.maxX(distPlus);
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
+    let toDiscreteProbabilityMass =
+      distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
+    let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
+      adjustBoth(toDiscreteProbabilityMass);
     <DistributionPlot
       minX
       maxX
+      yMaxDiscreteDomainFactor
+      yMaxContinuousDomainFactor
       height=120
       ?discrete
       ?continuous

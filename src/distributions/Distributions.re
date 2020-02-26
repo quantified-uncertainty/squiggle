@@ -25,6 +25,7 @@ module type dist = {
   let toDiscrete: t => option(DistTypes.discreteShape);
   let toScaledContinuous: t => option(DistTypes.continuousShape);
   let toScaledDiscrete: t => option(DistTypes.discreteShape);
+  let toDiscreteProbabilityMass: t => float;
 
   type integral;
   let integral: (~cache: option(integral), t) => integral;
@@ -45,6 +46,7 @@ module Dist = (T: dist) => {
   let pointwiseFmap = T.pointwiseFmap;
   let xToY = T.xToY;
   let toShape = T.toShape;
+  let toDiscreteProbabilityMass = T.toDiscreteProbabilityMass;
   let toContinuous = T.toContinuous;
   let toDiscrete = T.toDiscrete;
   let toScaledContinuous = T.toScaledContinuous;
@@ -103,6 +105,7 @@ module Continuous = {
       type integral = DistTypes.continuousShape;
       let minX = shapeFn(XYShape.minX);
       let maxX = shapeFn(XYShape.maxX);
+      let toDiscreteProbabilityMass = t => 0.0;
       let pointwiseFmap = (fn, t: t) =>
         t |> xyShape |> XYShape.pointwiseMap(fn) |> fromShape;
       let toShape = (t: t): DistTypes.shape => Continuous(t);
@@ -160,6 +163,7 @@ module Discrete = {
         t |> integral(~cache) |> Continuous.lastY;
       let minX = XYShape.minX;
       let maxX = XYShape.maxX;
+      let toDiscreteProbabilityMass = t => 1.0;
       let pointwiseFmap = XYShape.pointwiseMap;
       let toShape = (t: t): DistTypes.shape => Discrete(t);
       let toContinuous = _ => None;
@@ -224,6 +228,7 @@ module Mixed = {
       let toShape = (t: t): DistTypes.shape => Mixed(t);
       let toContinuous = ({continuous}: t) => Some(continuous);
       let toDiscrete = ({discrete}: t) => Some(discrete);
+      let toDiscreteProbabilityMass = ({discreteProbabilityMassFraction}: t) => discreteProbabilityMassFraction;
       let xToY = (f, {discrete, continuous} as t: t) => {
         let c =
           continuous
@@ -356,6 +361,17 @@ module Shape = {
             Continuous.T.toDiscrete,
           ),
         );
+
+      let toDiscreteProbabilityMass = (t: t) =>
+        mapToAll(
+          t,
+          (
+            Mixed.T.toDiscreteProbabilityMass,
+            Discrete.T.toDiscreteProbabilityMass,
+            Continuous.T.toDiscreteProbabilityMass,
+          ),
+        );
+
       let toScaledDiscrete = (t: t) =>
         mapToAll(
           t,
@@ -508,6 +524,8 @@ module DistPlus = {
 
       let minX = shapeFn(Shape.T.minX);
       let maxX = shapeFn(Shape.T.maxX);
+      let toDiscreteProbabilityMass =
+        shapeFn(Shape.T.toDiscreteProbabilityMass);
 
       // This bit is kind of akward, could probably use rethinking.
       let integral = (~cache, t: t) =>
