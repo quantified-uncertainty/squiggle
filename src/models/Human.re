@@ -1,4 +1,5 @@
-let guesstimatorString = age => GuesstimatorDist.normal(80.0 -. age, 2.);
+let guesstimatorString = age =>
+  GuesstimatorDist.normal(72.0 -. age, 5.0 -. age *. 0.01);
 
 let makeI = (age: float) => {
   DistPlusIngredients.make(
@@ -29,6 +30,7 @@ module Interface = {
     Prop.{
       name: "Death Time",
       id: "human-lifespan",
+      fileName: "Human.re",
       description: "When will you die?",
       version: "1.0.0",
       author: "Ozzie Gooen",

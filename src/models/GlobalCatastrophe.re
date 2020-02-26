@@ -28,6 +28,7 @@ module Interface = {
     Prop.{
       name: "Global Catastrophe",
       id: "global-catastrophe",
+      fileName: "GlobalCatastrophe.re",
       description: "The chances of having at least one catastrophe per year in the future, assuming no other catastrophe until then.",
       version: "1.0.0",
       author: "Ozzie Gooen",

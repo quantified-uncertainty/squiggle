@@ -56,6 +56,13 @@ module ModelForm = {
         </h1>
         <p> {model.description |> ReasonReact.string} </p>
         <p> {model.author |> ReasonReact.string} </p>
+        <ForetoldComponents.Link
+          href={
+            "https://github.com/foretold-app/estiband/blob/master/src/models/"
+            ++ model.fileName
+          }>
+          {"Model Code" |> ReasonReact.string}
+        </ForetoldComponents.Link>
         {Combo.inputTypeValuePairs(formState.combo)
          |> E.A.fmap(((type_: TypeWithMetadata.t, value)) =>
               <div className="box-border">
