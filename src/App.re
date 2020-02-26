@@ -1,13 +1,13 @@
 type route =
   | Model(string)
-  | FormBuilder
+  | DistBuilder
   | Home
   | NotFound;
 
 let routeToPath = route =>
   switch (route) {
   | Model(modelId) => "/m/" ++ modelId
-  | FormBuilder => "/form-builder"
+  | DistBuilder => "/dist-builder"
   | Home => "/"
   | _ => "/"
   };
@@ -73,8 +73,8 @@ module Menu = {
             </Item>
           })
        |> ReasonReact.array}
-      <Item href={routeToPath(FormBuilder)} key="form-builder">
-        {"Form Builder" |> E.ste}
+      <Item href={routeToPath(DistBuilder)} key="dist-builder">
+        {"Dist Builder" |> E.ste}
       </Item>
     </div>;
   };
@@ -87,7 +87,7 @@ let make = () => {
   let routing =
     switch (url.path) {
     | ["m", modelId] => Model(modelId)
-    | ["form-builder"] => FormBuilder
+    | ["dist-builder"] => DistBuilder
     | [] => Home
     | _ => NotFound
     };
@@ -100,7 +100,7 @@ let make = () => {
        | Some(model) => <FormBuilder.ModelForm model key=id />
        | None => <div> {"Page is not found" |> E.ste} </div>
        }
-     | FormBuilder => <div> {"Form Builder" |> E.ste} </div>
+     | DistBuilder => <DistBuilder />
      | Home => <div> {"Welcome" |> E.ste} </div>
      | _ => <div> {"Page is not found" |> E.ste} </div>
      }}
