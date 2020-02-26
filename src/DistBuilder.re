@@ -6,7 +6,9 @@ module FormConfig = [%lenses
     //
     domainType: string, // Complete, LeftLimited(...), RightLimited(...), LeftAndRightLimited(..., ...)
     xPoint: string,
+    xPoint2: string,
     excludingProbabilityMass: string,
+    excludingProbabilityMass2: string,
     //
     unitType: string, // UnspecifiedDistribution, TimeDistribution(zero, unit)
     zero: MomentRe.Moment.t,
@@ -73,6 +75,8 @@ let make = () => {
         guesstimatorString: "mm(5 to 20, floor(normal(20,2)), [.5, .5])",
         domainType: "Complete",
         xPoint: "50.0",
+        xPoint2: "60.0",
+        excludingProbabilityMass2: "0.5",
         excludingProbabilityMass: "0.3",
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
@@ -109,9 +113,9 @@ let make = () => {
             reform.state.values.excludingProbabilityMass |> float_of_string,
         },
         {
-          xPoint: reform.state.values.xPoint |> float_of_string,
+          xPoint: reform.state.values.xPoint2 |> float_of_string,
           excludingProbabilityMass:
-            reform.state.values.excludingProbabilityMass |> float_of_string,
+            reform.state.values.excludingProbabilityMass2 |> float_of_string,
         },
       )
     | _ => Js.Exn.raiseError("domain is unknown")
@@ -162,24 +166,35 @@ let make = () => {
                         {"Complete" |> E.ste}
                       </Antd.Select.Option>
                       <Antd.Select.Option value="LeftLimited">
-                        {"LeftLimited" |> E.ste}
+                        {"Left Limited" |> E.ste}
                       </Antd.Select.Option>
                       <Antd.Select.Option value="RightLimited">
-                        {"RightLimited" |> E.ste}
+                        {"Right Limited" |> E.ste}
                       </Antd.Select.Option>
                       <Antd.Select.Option value="LeftAndRightLimited">
-                        {"LeftAndRightLimited" |> E.ste}
+                        {"Left And Right Limited" |> E.ste}
                       </Antd.Select.Option>
                     </Antd.Select>
                   </Antd.Form.Item>
                 }
               />
             </div>
-            <div> <FieldString field=FormConfig.XPoint label="xPoint" /> </div>
+            <div>
+              <FieldString field=FormConfig.XPoint label="X-point" />
+            </div>
             <div>
               <FieldString
                 field=FormConfig.ExcludingProbabilityMass
-                label="excludingProbabilityMass"
+                label="Excluding Probability Mass"
+              />
+            </div>
+            <div>
+              <FieldString field=FormConfig.XPoint2 label="X-point (2)" />
+            </div>
+            <div>
+              <FieldString
+                field=FormConfig.ExcludingProbabilityMass2
+                label="Excluding Probability Mass (2)"
               />
             </div>
           </div>
@@ -191,10 +206,10 @@ let make = () => {
                   <Antd.Form.Item label={"Zero Type" |> E.ste}>
                     <Antd.Select value onChange={e => e |> handleChange}>
                       <Antd.Select.Option value="UnspecifiedDistribution">
-                        {"UnspecifiedDistribution" |> E.ste}
+                        {"Unspecified Distribution" |> E.ste}
                       </Antd.Select.Option>
                       <Antd.Select.Option value="TimeDistribution">
-                        {"TimeDistribution" |> E.ste}
+                        {"Time Distribution" |> E.ste}
                       </Antd.Select.Option>
                     </Antd.Select>
                   </Antd.Form.Item>
@@ -210,7 +225,6 @@ let make = () => {
                       value
                       onChange={e => {
                         e |> handleChange;
-
                         _ => ();
                       }}
                     />
