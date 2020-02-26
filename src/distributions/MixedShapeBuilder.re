@@ -21,16 +21,21 @@ let buildSimple = (~continuous, ~discrete): option(DistTypes.shape) => {
       Distributions.Discrete.T.Integral.sum(~cache=None, discrete);
     let discrete =
       Distributions.Discrete.T.scaleToIntegralSum(~intendedSum=1.0, discrete);
-    let foobar =
+    let continuous =
+      Distributions.Continuous.T.scaleToIntegralSum(
+        ~intendedSum=1.0,
+        continuous,
+      );
+    let mixedDist =
       Distributions.Mixed.make(
         ~continuous,
         ~discrete,
         ~discreteProbabilityMassFraction,
-      )
-      |> Distributions.Mixed.clean;
-    foobar;
+      );
+    Some(Mixed(mixedDist));
   };
 };
+
 let build = (~continuous, ~discrete, ~assumptions) =>
   switch (assumptions) {
   | {

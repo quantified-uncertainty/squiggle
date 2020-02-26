@@ -9,13 +9,19 @@ let make =
 };
 
 let toDistPlus =
-    (~sampleCount=1000, ~outputXYPoints=1000, t: distPlusIngredients)
+    (
+      ~sampleCount=2000,
+      ~outputXYPoints=1500,
+      ~truncateTo=Some(300),
+      t: distPlusIngredients,
+    )
     : option(distPlus) => {
   let shape =
     Guesstimator.stringToMixedShape(
       ~string=t.guesstimatorString,
       ~sampleCount,
       ~outputXYPoints,
+      ~truncateTo,
       (),
     );
   let distPlus =

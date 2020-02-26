@@ -17,12 +17,20 @@ let propValue = (t: Prop.Value.t) => {
   switch (t) {
   | SelectSingle(r) => r |> ReasonReact.string
   | ConditionalArray(r) => "Array" |> ReasonReact.string
-  | DistPlusIngredients(r) =>
+  | DistPlusIngredients((r: DistTypes.distPlusIngredients)) =>
     let newDistribution =
-      DistPlusIngredients.toDistPlus(~sampleCount=1000, r);
+      DistPlusIngredients.toDistPlus(
+        ~sampleCount=2000,
+        ~outputXYPoints=2000,
+        ~truncateTo=Some(100),
+        r,
+      );
     switch (newDistribution) {
     | Some(distribution) =>
-      <div> <DistPlusPlot distPlus=distribution /> </div>
+      <div>
+        <DistPlusPlot distPlus=distribution />
+        {r.guesstimatorString |> ReasonReact.string}
+      </div>
     | None => "Something went wrong" |> ReasonReact.string
     };
   | FloatCdf(_) => <div />

@@ -2,13 +2,18 @@ module DistPlusChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
     open Distributions.DistPlus;
-    // todo: Change to scaledContinuous and scaledDiscrete
-    let discrete = distPlus |> T.toDiscrete;
+    let discrete = distPlus |> T.toScaledDiscrete;
     let continuous =
       distPlus
-      |> T.toContinuous
+      |> T.toScaledContinuous
       |> E.O.fmap(Distributions.Continuous.getShape);
-    let minX = T.minX(distPlus);
+    let range = T.xTotalRange(distPlus);
+    let minX =
+      switch (T.minX(distPlus), range) {
+      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
+      | _ => None
+      };
+
     let maxX = T.maxX(distPlus);
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     <DistributionPlot
@@ -34,13 +39,18 @@ module IntegralChart = {
       integral
       |> Distributions.Continuous.toLinear
       |> E.O.fmap(Distributions.Continuous.getShape);
-    let minX = integral |> Distributions.Continuous.T.minX;
+    let range = T.xTotalRange(distPlus);
+    let minX =
+      switch (T.minX(distPlus), range) {
+      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
+      | _ => None
+      };
     let maxX = integral |> Distributions.Continuous.T.maxX;
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
-    Js.log3("HIHI", continuous, distPlus);
     <DistributionPlot
       minX
       maxX
+      height=100
       ?continuous
       color={`hex("333")}
       timeScale
@@ -78,6 +88,9 @@ let make = (~distPlus: DistTypes.distPlus) => {
           <th className="px-4 py-2">
             {"Y Integral to Point" |> ReasonReact.string}
           </th>
+          <th className="px-4 py-2">
+            {"Y Integral Total" |> ReasonReact.string}
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -109,6 +122,64 @@ let make = (~distPlus: DistTypes.distPlus) => {
             {distPlus
              |> Distributions.DistPlus.T.Integral.sum(~cache=None)
              |> E.Float.with2DigitsPrecision
+             |> ReasonReact.string}
+          </th>
+        </tr>
+      </tbody>
+    </table>
+    <table className="table-auto">
+      <thead>
+        <tr>
+          <th className="px-4 py-2">
+            {"Continuous Total" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2">
+            {"Scaled Continuous Total" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2">
+            {"Discrete Total" |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2">
+            {"Scaled Discrete Total" |> ReasonReact.string}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.toContinuous
+             |> E.O.fmap(
+                  Distributions.Continuous.T.Integral.sum(~cache=None),
+                )
+             |> E.O.fmap(E.Float.with2DigitsPrecision)
+             |> E.O.default("")
+             |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.toScaledContinuous
+             |> E.O.fmap(
+                  Distributions.Continuous.T.Integral.sum(~cache=None),
+                )
+             |> E.O.fmap(E.Float.with2DigitsPrecision)
+             |> E.O.default("")
+             |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.toDiscrete
+             |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
+             |> E.O.fmap(E.Float.with2DigitsPrecision)
+             |> E.O.default("")
+             |> ReasonReact.string}
+          </th>
+          <th className="px-4 py-2 border ">
+            {distPlus
+             |> Distributions.DistPlus.T.toScaledDiscrete
+             |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
+             |> E.O.fmap(E.Float.with2DigitsPrecision)
+             |> E.O.default("")
              |> ReasonReact.string}
           </th>
         </tr>

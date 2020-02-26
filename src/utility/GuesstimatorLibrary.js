@@ -13,9 +13,9 @@ const minMaxRatio = (minValue, maxValue) => {
     return 'SMALL';
   }
   const ratio = maxValue / minValue;
-  if (ratio < 100000) {
+  if (ratio < 10000) {
     return 'SMALL';
-  } else if (ratio < 10000000) {
+  } else if (ratio < 1000000) {
     return 'MEDIUM';
   } else {
     return 'LARGE';
@@ -42,11 +42,11 @@ const toPdf = (values, outputResolutionCount, min, max) => {
 
   let discrete = {xs: frequencies.map(f => f.value), ys: frequencies.map(f => f.percentage)};
   let continuous = {ys: [], xs: []};
-  if (continuousSamples.length > 1){
+  if (continuousSamples.length > 20){
     const samples = new Samples(continuousSamples);
 
     const ratioSize$ = ratioSize(samples);
-    const width = ratioSize$ === 'SMALL' ? 100 : 1;
+    const width = ratioSize$ === 'SMALL' ? 60 : 1;
 
     const pdf = samples.toPdf({ size: outputResolutionCount, width, min, max });
     continuous = pdf;
