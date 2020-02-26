@@ -242,6 +242,7 @@ module Model = {
   type t = {
     name: string,
     id: string,
+    fileName: string,
     description: string,
     author: string,
     version: string,

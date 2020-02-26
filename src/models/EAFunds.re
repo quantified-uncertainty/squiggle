@@ -220,6 +220,7 @@ module Interface = {
       name: "EA Funds: Donations & Payouts",
       description: "Calculate the payments and payouts of CEA Funds based on existing data.",
       version: "1.0.0",
+      fileName: "EAFunds.re",
       author: "Ozzie Gooen",
       inputTypes: [|
         TypeWithMetadata.make(
