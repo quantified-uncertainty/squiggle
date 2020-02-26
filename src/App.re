@@ -10,6 +10,15 @@ let routeToPath = route =>
   | _ => "/"
   };
 
+module Models = {
+  let all = [|
+    EAFunds.Interface.model,
+    GlobalCatastrophe.Interface.model,
+    Human.Interface.model,
+  |];
+  let getById = id => E.A.getBy(all, r => r.id == id);
+};
+
 module Menu = {
   module Styles = {
     open Css;
@@ -55,12 +64,13 @@ module Menu = {
   let make = () => {
     <div className=Styles.menu>
       <Item href={routeToPath(Home)} key="home"> {"Home" |> E.ste} </Item>
-      <Item href={routeToPath(Model("1"))} key="ea-funds">
-        {"EA Funds" |> E.ste}
-      </Item>
-      <Item href={routeToPath(Model("2"))} key="gc">
-        {"Global Catastrophe" |> E.ste}
-      </Item>
+      {Models.all
+       |> E.A.fmap((model: Prop.Model.t) => {
+            <Item href={routeToPath(Model(model.id))} key="ea-funds">
+              {model.name |> E.ste}
+            </Item>
+          })
+       |> ReasonReact.array}
     </div>;
   };
 };
@@ -79,9 +89,11 @@ let make = () => {
   <div className="w-full max-w-screen-xl mx-auto px-6">
     <Menu />
     {switch (routing) {
-     | Model("1") => <FormBuilder.ModelForm model=EAFunds.Interface.model />
-     | Model("2") =>
-       <FormBuilder.ModelForm model=GlobalCatastrophe.Interface.model />
+     | Model(n) =>
+       switch (Models.getById(n)) {
+       | Some(model) => <FormBuilder.ModelForm model />
+       | None => <div> {"Page is not found" |> E.ste} </div>
+       }
      | Home => <div> {"Welcome" |> E.ste} </div>
      | _ => <div> {"Page is not found" |> E.ste} </div>
      }}

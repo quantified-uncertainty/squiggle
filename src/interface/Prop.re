@@ -241,6 +241,7 @@ module TypeWithMetadata = {
 module Model = {
   type t = {
     name: string,
+    id: string,
     description: string,
     author: string,
     version: string,

@@ -28,6 +28,7 @@ module Interface = {
   let model: Prop.Model.t =
     Prop.{
       name: "Death Time",
+      id: "human-lifespan",
       description: "When will you die?",
       version: "1.0.0",
       author: "Ozzie Gooen",
