@@ -1,11 +1,13 @@
 type route =
   | Model(string)
+  | FormBuilder
   | Home
   | NotFound;
 
 let routeToPath = route =>
   switch (route) {
-  | Model(i) => "/m/" ++ i
+  | Model(modelId) => "/m/" ++ modelId
+  | FormBuilder => "/form-builder"
   | Home => "/"
   | _ => "/"
   };
@@ -66,11 +68,14 @@ module Menu = {
       <Item href={routeToPath(Home)} key="home"> {"Home" |> E.ste} </Item>
       {Models.all
        |> E.A.fmap((model: Prop.Model.t) => {
-            <Item href={routeToPath(Model(model.id))} key="ea-funds">
+            <Item href={routeToPath(Model(model.id))} key={model.id}>
               {model.name |> E.ste}
             </Item>
           })
        |> ReasonReact.array}
+      <Item href={routeToPath(FormBuilder)} key="form-builder">
+        {"Form Builder" |> E.ste}
+      </Item>
     </div>;
   };
 };
@@ -82,6 +87,7 @@ let make = () => {
   let routing =
     switch (url.path) {
     | ["m", modelId] => Model(modelId)
+    | ["form-builder"] => FormBuilder
     | [] => Home
     | _ => NotFound
     };
@@ -89,11 +95,12 @@ let make = () => {
   <div className="w-full max-w-screen-xl mx-auto px-6">
     <Menu />
     {switch (routing) {
-     | Model(n) =>
-       switch (Models.getById(n)) {
-       | Some(model) => <FormBuilder.ModelForm model />
+     | Model(id) =>
+       switch (Models.getById(id)) {
+       | Some(model) => <FormBuilder.ModelForm model key=id />
        | None => <div> {"Page is not found" |> E.ste} </div>
        }
+     | FormBuilder => <div> {"Form Builder" |> E.ste} </div>
      | Home => <div> {"Welcome" |> E.ste} </div>
      | _ => <div> {"Page is not found" |> E.ste} </div>
      }}
