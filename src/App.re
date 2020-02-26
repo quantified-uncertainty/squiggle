@@ -1,13 +1,11 @@
 type route =
-  | EAFunds
-  | GlobalCatastrophe
+  | Model(string)
   | Home
   | NotFound;
 
 let routeToPath = route =>
   switch (route) {
-  | EAFunds => "/ea-funds"
-  | GlobalCatastrophe => "/global-catastrophe"
+  | Model(i) => "/m/" ++ i
   | Home => "/"
   | _ => "/"
   };
@@ -57,10 +55,10 @@ module Menu = {
   let make = () => {
     <div className=Styles.menu>
       <Item href={routeToPath(Home)} key="home"> {"Home" |> E.ste} </Item>
-      <Item href={routeToPath(EAFunds)} key="ea-funds">
+      <Item href={routeToPath(Model("1"))} key="ea-funds">
         {"EA Funds" |> E.ste}
       </Item>
-      <Item href={routeToPath(GlobalCatastrophe)} key="gc">
+      <Item href={routeToPath(Model("2"))} key="gc">
         {"Global Catastrophe" |> E.ste}
       </Item>
     </div>;
@@ -73,8 +71,7 @@ let make = () => {
 
   let routing =
     switch (url.path) {
-    | ["ea-funds"] => EAFunds
-    | ["global-catastrophe"] => GlobalCatastrophe
+    | ["m", modelId] => Model(modelId)
     | [] => Home
     | _ => NotFound
     };
@@ -82,8 +79,8 @@ let make = () => {
   <div className="w-full max-w-screen-xl mx-auto px-6">
     <Menu />
     {switch (routing) {
-     | EAFunds => <FormBuilder.ModelForm model=EAFunds.Interface.model />
-     | GlobalCatastrophe =>
+     | Model("1") => <FormBuilder.ModelForm model=EAFunds.Interface.model />
+     | Model("2") =>
        <FormBuilder.ModelForm model=GlobalCatastrophe.Interface.model />
      | Home => <div> {"Welcome" |> E.ste} </div>
      | _ => <div> {"Page is not found" |> E.ste} </div>
