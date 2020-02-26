@@ -129,8 +129,14 @@ export class CdfChartD3 {
 
   data(data) {
     this.attrs.data = data;
-    this.attrs.data.continuous = data.continuous || {xs: [], ys: []};
-    this.attrs.data.discrete = data.discrete || {xs: [], ys: []};
+    this.attrs.data.continuous = data.continuous || {
+      xs: [],
+      ys: [],
+    };
+    this.attrs.data.discrete = data.discrete || {
+      xs: [],
+      ys: [],
+    };
     return this;
   }
 
@@ -149,8 +155,12 @@ export class CdfChartD3 {
     // Calculated properties.
     this.calc.chartLeftMargin = this.attrs.marginLeft;
     this.calc.chartTopMargin = this.attrs.marginTop;
-    this.calc.chartWidth = this.attrs.svgWidth - this.attrs.marginRight - this.attrs.marginLeft;
-    this.calc.chartHeight = this.attrs.svgHeight - this.attrs.marginBottom - this.attrs.marginTop;
+    this.calc.chartWidth = this.attrs.svgWidth
+      - this.attrs.marginRight
+      - this.attrs.marginLeft;
+    this.calc.chartHeight = this.attrs.svgHeight
+      - this.attrs.marginBottom
+      - this.attrs.marginTop;
 
     // Add svg.
     this.svg = this._container
@@ -159,17 +169,17 @@ export class CdfChartD3 {
       .attr('height', this.attrs.svgHeight)
       .attr('pointer-events', 'none');
 
-    // Add container g element.
+    // Add container "g" (empty) element.
     this.chart = this.svg
       .createObject({ tag: 'g', selector: 'chart' })
       .attr(
         'transform',
-        'translate(' + this.calc.chartLeftMargin + ',' + this.calc.chartTopMargin + ')',
+        `translate(${this.calc.chartLeftMargin}, ${this.calc.chartTopMargin})`,
       );
 
-    if(this.hasDate('continuous')){
+    if (this.hasDate('continuous')) {
       const distributionChart = this.addDistributionChart();
-      if(this.hasDate('discrete')) {
+      if (this.hasDate('discrete')) {
         this.addLollipopsChart(distributionChart);
       }
     }
@@ -186,32 +196,36 @@ export class CdfChartD3 {
     const yMin = d3.min(this.attrs.data.continuous.ys);
     const yMax = d3.max(this.attrs.data.continuous.ys);
 
-    // Scales.
-    let xScale = null;
-    if (this.attrs.scale === 'linear') {
-      xScale = d3.scaleLinear()
-        .domain([xMin, xMax])
-        .range([0, this.calc.chartWidth]);
-    } else {
-      xScale = d3.scaleLog()
-        .base(this.attrs.logBase)
-        .domain([xMin, xMax])
-        .range([0, this.calc.chartWidth]);
-    }
+    // X-domains.
+    const xMinDomain = xMin;
+    const xMaxDomain = xMax;
 
+    // X-scale.
+    let xScale = this.attrs.scale === 'linear'
+      ? d3.scaleLinear()
+        .domain([xMinDomain, xMaxDomain])
+        .range([0, this.calc.chartWidth])
+      : d3.scaleLog()
+        .base(this.attrs.logBase)
+        .domain([xMinDomain, xMaxDomain])
+        .range([0, this.calc.chartWidth]);
+
+    // Y-scale.
     const yScale = d3.scaleLinear()
       .domain([yMin, yMax])
       .range([this.calc.chartHeight, 0]);
 
-    // Axis generator.
+    // X-axis.
     let xAxis = null;
     if (!!this.attrs.timeScale) {
-      const zero = _.get(this.attrs.timeScale, 'zero', moment());
-      const unit = _.get(this.attrs.timeScale, 'unit', 'years');
+      // Calculates the projection on X-axis.
+      const zero = _.get(this.attrs, 'timeScale.zero', moment());
+      const unit = _.get(this.attrs, 'timeScale.unit', 'years');
       const diff = Math.abs(xMax - xMin);
       const left = zero.clone().add(xMin, unit);
       const right = left.clone().add(diff, unit);
 
+      // X-time-scale.
       const xScaleTime = d3.scaleTime()
         .domain([left.toDate(), right.toDate()])
         .nice()
@@ -237,6 +251,7 @@ export class CdfChartD3 {
         });
     }
 
+    // Y-axis.
     const yAxis = d3.axisRight(yScale);
 
     // Objects.
@@ -250,12 +265,14 @@ export class CdfChartD3 {
       .y0(this.calc.chartHeight);
 
     // Add axis.
-    this.chart.createObject({ tag: 'g', selector: 'x-axis' })
-      .attr('transform', 'translate(0,' + this.calc.chartHeight + ')')
+    this.chart
+      .createObject({ tag: 'g', selector: 'x-axis' })
+      .attr('transform', `translate(0, ${this.calc.chartHeight})`)
       .call(xAxis);
 
     if (this.attrs.showDistributionYAxis) {
-      this.chart.createObject({ tag: 'g', selector: 'y-axis' })
+      this.chart
+        .createObject({ tag: 'g', selector: 'y-axis' })
         .call(yAxis);
     }
 
@@ -313,15 +330,16 @@ export class CdfChartD3 {
 
       function mouseover() {
         const mouse = d3.mouse(this);
-        hoverLine.attr('opacity', 1).attr('x1', mouse[0]).attr('x2', mouse[0]);
+        hoverLine
+          .attr('opacity', 1)
+          .attr('x1', mouse[0])
+          .attr('x2', mouse[0]);
         const xValue = xScale.invert(mouse[0]);
-        // This used to be here, but doesn't seem important
-        // const xValue = (mouse[0] > range[0] && mouse[0] < range[1]) ? : 0;
         context.attrs.onHover(xValue);
       }
 
       function mouseout() {
-        hoverLine.attr('opacity', 0)
+        hoverLine.attr('opacity', 0);
       }
 
       this.chart
@@ -338,49 +356,64 @@ export class CdfChartD3 {
     return { xScale, yScale };
   }
 
+  /**
+   * @param {object} distributionChart
+   * @param {object} distributionChart.xScale
+   * @param {object} distributionChart.yScale
+   */
   addLollipopsChart(distributionChart) {
     const data = this.getDataPoints('discrete');
-    const ys = data.map(item => item.y);
-    const yMax = d3.max(ys);
 
-    // X axis
-    this.chart.append("g")
-      .attr("class", 'lollipops-x-axis')
-      .attr("transform", "translate(0," + this.calc.chartHeight + ")")
+    const _yMin = d3.min(this.attrs.data.discrete.ys);
+    const yMax = d3.max(this.attrs.data.discrete.ys);
+
+    // X axis.
+    this.chart.append('g')
+      .attr('class', 'lollipops-x-axis')
+      .attr('transform', `translate(0, ${this.calc.chartHeight})`)
       .call(d3.axisBottom(distributionChart.xScale));
 
-    // Y axis
+    // Y-domain.
+    const yMinDomain = 0;
+    const yMaxDomain = yMax * 2;
+
+    // Y-scale.
     const yScale = d3.scaleLinear()
-      .domain([0, yMax])
+      .domain([yMinDomain, yMaxDomain])
       .range([this.calc.chartHeight, 0]);
 
-    this.chart.append("g")
-      .attr("class", 'lollipops-y-axis')
-      .attr("transform", "translate(" + this.calc.chartWidth + ",0)")
+    // Adds "g" for an y-axis.
+    this.chart.append('g')
+      .attr('class', 'lollipops-y-axis')
+      .attr('transform', `translate(${this.calc.chartWidth}, 0)`)
       .call(d3.axisLeft(yScale));
 
-    // Lines
-    this.chart.selectAll("lollipops-line")
+    // Lines.
+    this.chart.selectAll('lollipops-line')
       .data(data)
       .enter()
-      .append("line")
-      .attr("class", 'lollipops-line')
-      .attr("x1", d => distributionChart.xScale(d.x))
-      .attr("x2", d => distributionChart.xScale(d.x))
-      .attr("y1", d => yScale(d.y))
-      .attr("y2", yScale(0));
+      .append('line')
+      .attr('class', 'lollipops-line')
+      .attr('x1', d => distributionChart.xScale(d.x))
+      .attr('x2', d => distributionChart.xScale(d.x))
+      .attr('y1', d => yScale(d.y))
+      .attr('y2', yScale(0));
 
-    // Circles
-    this.chart.selectAll("lollipops-circle")
+    // Circles.
+    this.chart.selectAll('lollipops-circle')
       .data(data)
       .enter()
-      .append("circle")
-      .attr("class", 'lollipops-circle')
-      .attr("cx", d => distributionChart.xScale(d.x))
-      .attr("cy", d => yScale(d.y))
-      .attr("r", "4");
+      .append('circle')
+      .attr('class', 'lollipops-circle')
+      .attr('cx', d => distributionChart.xScale(d.x))
+      .attr('cy', d => yScale(d.y))
+      .attr('r', '4');
   }
 
+  /**
+   * @param ts
+   * @returns {string}
+   */
   formatDates(ts) {
     return moment(ts).format("MMMM Do YYYY");
   }
@@ -436,8 +469,8 @@ export class CdfChartD3 {
    * @returns {boolean}
    */
   hasDate(key) {
-    const data = _.get(this.attrs.data, key);
-    return !!data;
+    const xs = _.get(this.attrs, ['data', key, 'xs']);
+    return !!_.size(xs);
   }
 }
 
