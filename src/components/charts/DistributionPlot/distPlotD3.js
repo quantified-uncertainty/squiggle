@@ -29,6 +29,9 @@ export class CdfChartD3 {
         continuous: null,
         discrete: null,
       },
+      yMaxContinuousDomainFactor: 1,
+      yMaxDiscreteDomainFactor: 1,
+      options: {},
       onHover: (e) => {
       },
     };
@@ -47,83 +50,8 @@ export class CdfChartD3 {
     this.formatDates = this.formatDates.bind(this);
   }
 
-  svgWidth(svgWidth) {
-    this.attrs.svgWidth = svgWidth;
-    return this;
-  }
-
-  svgHeight(height) {
-    this.attrs.svgHeight = height;
-    return this;
-  }
-
-  maxX(maxX) {
-    this.attrs.maxX = maxX;
-    return this;
-  }
-
-  minX(minX) {
-    this.attrs.minX = minX;
-    return this;
-  }
-
-  scale(scale) {
-    this.attrs.scale = scale;
-    return this;
-  }
-
-  timeScale(timeScale) {
-    this.attrs.timeScale = timeScale;
-    return this;
-  }
-
-  onHover(onHover) {
-    this.attrs.onHover = onHover;
-    return this;
-  }
-
-  marginBottom(marginBottom) {
-    this.attrs.marginBottom = marginBottom;
-    return this;
-  }
-
-  marginLeft(marginLeft) {
-    this.attrs.marginLeft = marginLeft;
-    return this;
-  }
-
-  marginRight(marginRight) {
-    this.attrs.marginRight = marginRight;
-    return this;
-  }
-
-  marginTop(marginTop) {
-    this.attrs.marginTop = marginTop;
-    return this;
-  }
-
-  showDistributionLines(showDistributionLines) {
-    this.attrs.showDistributionLines = showDistributionLines;
-    return this;
-  }
-
-  showDistributionYAxis(showDistributionYAxis) {
-    this.attrs.showDistributionYAxis = showDistributionYAxis;
-    return this;
-  }
-
-  verticalLine(verticalLine) {
-    this.attrs.verticalLine = verticalLine;
-    return this;
-  }
-
-  showVerticalLine(showVerticalLine) {
-    this.attrs.showVerticalLine = showVerticalLine;
-    return this;
-  }
-
-  container(container) {
-    this.attrs.container = container;
+  set(name, value) {
+    _.set(this.attrs, [name], value);
     return this;
   }
 
@@ -197,8 +125,11 @@ export class CdfChartD3 {
     const yMax = d3.max(this.attrs.data.continuous.ys);
 
     // X-domains.
+    const yMaxDomainFactor = _.get(this.attrs, 'yMaxContinuousDomainFactor', 1);
     const xMinDomain = xMin;
     const xMaxDomain = xMax;
+    const yMinDomain = yMin;
+    const yMaxDomain = yMax * yMaxDomainFactor;
 
     // X-scale.
     let xScale = this.attrs.scale === 'linear'
@@ -212,7 +143,7 @@ export class CdfChartD3 {
 
     // Y-scale.
     const yScale = d3.scaleLinear()
-      .domain([yMin, yMax])
+      .domain([yMinDomain, yMaxDomain])
       .range([this.calc.chartHeight, 0]);
 
     // X-axis.
@@ -374,8 +305,9 @@ export class CdfChartD3 {
       .call(d3.axisBottom(distributionChart.xScale));
 
     // Y-domain.
+    const yMaxDomainFactor = _.get(this.attrs, 'yMaxDiscreteDomainFactor', 1);
     const yMinDomain = 0;
-    const yMaxDomain = yMax * 2;
+    const yMaxDomain = yMax * yMaxDomainFactor;
 
     // Y-scale.
     const yScale = d3.scaleLinear()

@@ -34,26 +34,28 @@ function CdfChartReact(props) {
 
   useEffect(() => {
     new CdfChartD3()
-      .svgWidth(width)
-      .svgHeight(props.height)
-      .maxX(props.maxX)
-      .minX(props.minX)
-      .onHover(props.onHover)
-      .marginBottom(props.marginBottom || 15)
-      .marginLeft(30)
-      .marginRight(30)
-      .marginTop(5)
-      .showDistributionLines(props.showDistributionLines)
-      .showDistributionYAxis(props.showDistributionYAxis)
-      .verticalLine(props.verticalLine)
-      .showVerticalLine(props.showVerticalLine)
-      .container(containerRef.current)
+      .set('svgWidth', width)
+      .set('svgHeight', props.height)
+      .set('maxX', props.maxX)
+      .set('minX', props.minX)
+      .set('onHover', props.onHover)
+      .set('marginBottom',props.marginBottom || 15)
+      .set('marginLeft', 30)
+      .set('marginRight', 30)
+      .set('marginTop', 5)
+      .set('showDistributionLines', props.showDistributionLines)
+      .set('showDistributionYAxis', props.showDistributionYAxis)
+      .set('verticalLine', props.verticalLine)
+      .set('showVerticalLine', props.showVerticalLine)
+      .set('container', containerRef.current)
+      .set('scale', scale)
+      .set('timeScale', props.timeScale)
+      .set('yMaxContinuousDomainFactor', 1)
+      .set('yMaxDiscreteDomainFactor', 1)
       .data({
         continuous: props.continuous,
         discrete: props.discrete,
       })
-      .scale(scale)
-      .timeScale(props.timeScale)
       .render();
   });
 
