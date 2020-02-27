@@ -299,3 +299,4 @@ module JsArray = {
 };
 
 let ste = React.string;
+let showIf = (cond, comp) => cond ? comp : ReasonReact.null;
