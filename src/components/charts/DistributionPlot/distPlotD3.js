@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const d3 = require('d3');
 const moment = require('moment');
+require('./styles.css');
 
 /**
  * @todo: To rename as "DistPlotD3".
@@ -356,10 +357,7 @@ export class CdfChartD3 {
       .attr('x1', d => distributionChart.xScale(d.x))
       .attr('x2', d => distributionChart.xScale(d.x))
       .attr('y1', d => yScale(d.y))
-      .attr('y2', yScale(0))
-      .attr('pointer-events', 'all')
-      .on("mouseover", showTooltip)
-      .on("mouseout", hideTooltip);
+      .attr('y2', yScale(0));
 
     // Define the div for the tooltip
     const tooltip = this._container.append("div")
@@ -375,10 +373,22 @@ export class CdfChartD3 {
       .attr('id', d => 'lollipops-circle-' + d.id)
       .attr('cx', d => distributionChart.xScale(d.x))
       .attr('cy', d => yScale(d.y))
-      .attr('r', '4')
+      .attr('r', '4');
+
+    // Rectangles.
+    this.chart.selectAll('lollipops-rectangle')
+      .data(data)
+      .enter()
+      .append('rect')
+      .attr('width', 30)
+      .attr('height', this.calc.chartHeight)
+      .attr('x', d => distributionChart.xScale(d.x) - 15)
+      .attr('y', 0)
+      .attr('opacity', 0)
       .attr('pointer-events', 'all')
       .on("mouseover", showTooltip)
-      .on("mouseout", hideTooltip);
+      .on("mouseout", hideTooltip)
+    ;
   }
 
   /**
