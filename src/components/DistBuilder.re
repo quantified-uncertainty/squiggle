@@ -66,7 +66,7 @@ module FieldNumber = {
 
 module FieldFloat = {
   [@react.component]
-  let make = (~field, ~label) => {
+  let make = (~field, ~label, ~className=Css.style([])) => {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
@@ -78,6 +78,7 @@ module FieldFloat = {
               ();
             }}
             onBlur={_ => validate()}
+            className
           />
         </Antd.Form.Item>
       }
@@ -110,6 +111,20 @@ module Styles = {
   let form = style([backgroundColor(hex("eee")), padding(em(1.))]);
   let dist = style([padding(em(1.))]);
   let spacer = style([marginTop(em(1.))]);
+  let groupA =
+    style([
+      selector(
+        ".ant-input-number-input",
+        [backgroundColor(hex("fff7db"))],
+      ),
+    ]);
+  let groupB =
+    style([
+      selector(
+        ".ant-input-number-input",
+        [backgroundColor(hex("eaf4ff"))],
+      ),
+    ]);
 };
 
 module DemoDist = {
@@ -150,7 +165,7 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         guesstimatorString: "mm(5 to 20, floor(normal(20,2)), [.5, .5])",
-        domainType: "Complete",
+        domainType: "LeftLimited",
         xPoint: 50.0,
         xPoint2: 60.0,
         excludingProbabilityMass2: 0.5,
@@ -296,31 +311,57 @@ let make = () => {
                 }
               />
             </Col>
-            <Col span=4>
-              <FieldFloat field=FormConfig.XPoint label="X-point" />
-            </Col>
-            <Col span=4>
-              <FieldFloat
-                field=FormConfig.ExcludingProbabilityMass
-                label="Excluding Probability Mass"
-              />
-            </Col>
-            <Col span=4>
-              <FieldFloat field=FormConfig.XPoint2 label="X-point (2)" />
-            </Col>
-            <Col span=4>
-              <FieldFloat
-                field=FormConfig.ExcludingProbabilityMass2
-                label="Excluding Probability Mass (2)"
-              />
-            </Col>
+            {<>
+               <Col span=4>
+                 <FieldFloat
+                   field=FormConfig.XPoint
+                   label="X-point"
+                   className=Styles.groupA
+                 />
+               </Col>
+               <Col span=4>
+                 <FieldFloat
+                   field=FormConfig.ExcludingProbabilityMass
+                   label="Excluding Probability Mass"
+                   className=Styles.groupA
+                 />
+               </Col>
+             </>
+             |> E.showIf(
+                  E.L.contains(
+                    reform.state.values.domainType,
+                    ["LeftLimited", "RightLimited", "LeftAndRightLimited"],
+                  ),
+                )}
+            {<>
+               <Col span=4>
+                 <FieldFloat
+                   field=FormConfig.XPoint2
+                   label="X-point (2)"
+                   className=Styles.groupB
+                 />
+               </Col>
+               <Col span=4>
+                 <FieldFloat
+                   field=FormConfig.ExcludingProbabilityMass2
+                   label="Excluding Probability Mass (2)"
+                   className=Styles.groupB
+                 />
+               </Col>
+             </>
+             |> E.showIf(
+                  E.L.contains(
+                    reform.state.values.domainType,
+                    ["LeftAndRightLimited"],
+                  ),
+                )}
           </Row>
           <Row _type=`flex className=Styles.rows>
             <Col span=4>
               <Form.Field
                 field=FormConfig.UnitType
                 render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Zero Type" |> E.ste}>
+                  <Antd.Form.Item label={"Unit Type" |> E.ste}>
                     <Antd.Select value onChange={e => e |> handleChange}>
                       <Antd.Select.Option value="UnspecifiedDistribution">
                         {"Unspecified Distribution" |> E.ste}
@@ -337,7 +378,7 @@ let make = () => {
               <Form.Field
                 field=FormConfig.Zero
                 render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Zero" |> E.ste}>
+                  <Antd.Form.Item label={"Zero Point" |> E.ste}>
                     <Antd_DatePicker
                       value
                       onChange={e => {
@@ -350,9 +391,41 @@ let make = () => {
               />
             </Col>
             <Col span=4>
-              <FieldFloat
-                field=FormConfig.ExcludingProbabilityMass
-                label="Excluding Probability Mass"
+              <Form.Field
+                field=FormConfig.Unit
+                render={({handleChange, value}) =>
+                  <Antd.Form.Item label={"Unit" |> E.ste}>
+                    <Antd.Select value onChange={e => e |> handleChange}>
+                      <Antd.Select.Option value="days">
+                        {"Days" |> E.ste}
+                      </Antd.Select.Option>
+                      <Antd.Select.Option value="hours">
+                        {"Hours" |> E.ste}
+                      </Antd.Select.Option>
+                      <Antd.Select.Option value="milliseconds">
+                        {"Milliseconds" |> E.ste}
+                      </Antd.Select.Option>
+                      <Antd.Select.Option value="minutes">
+                        {"Minutes" |> E.ste}
+                      </Antd.Select.Option>
+                      <Antd.Select.Option value="months">
+                        {"Months" |> E.ste}
+                      </Antd.Select.Option>
+                      <Antd.Select.Option value="quarters">
+                        {"Quarters" |> E.ste}
+                      </Antd.Select.Option>
+                      <Antd.Select.Option value="seconds">
+                        {"Seconds" |> E.ste}
+                      </Antd.Select.Option>
+                      <Antd.Select.Option value="weeks">
+                        {"Weeks" |> E.ste}
+                      </Antd.Select.Option>
+                      <Antd.Select.Option value="years">
+                        {"Years" |> E.ste}
+                      </Antd.Select.Option>
+                    </Antd.Select>
+                  </Antd.Form.Item>
+                }
               />
             </Col>
           </Row>
