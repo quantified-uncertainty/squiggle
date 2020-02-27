@@ -76,7 +76,7 @@ module Styles = {
       selector(".x-axis", [fontSize(`px(9))]),
       selector(".x-axis .domain", [display(`none)]),
       selector(".x-axis .tick line", [display(`none)]),
-      selector(".x-axis .tick text", [color(`hex("bfcad4"))]),
+      selector(".x-axis .tick text", [color(`hex("7a8998"))]),
       selector(".chart .area-path", [SVG.fill(chartColor)]),
       selector(".lollipops-line", [SVG.stroke(`hex("bfcad4"))]),
       selector(

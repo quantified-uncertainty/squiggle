@@ -40,7 +40,7 @@ module DistPlusChart = {
       height=120
       ?discrete
       ?continuous
-      color={`hex("333")}
+      color={`hex("5f6b7e")}
       onHover
       timeScale
     />;
@@ -71,7 +71,7 @@ module IntegralChart = {
       maxX
       height=80
       ?continuous
-      color={`hex("333")}
+      color={`hex("5f6b7e")}
       timeScale
       onHover
     />;
@@ -94,78 +94,78 @@ let make = (~distPlus: DistTypes.distPlus) => {
   <div>
     chart
     chart2
-    <table className="table-auto">
+    <table className="table-auto text-sm">
       <thead>
         <tr>
-          <th className="px-4 py-2"> {"X Point" |> ReasonReact.string} </th>
-          <th className="px-4 py-2">
+          <td className="px-4 py-2 "> {"X Point" |> ReasonReact.string} </td>
+          <td className="px-4 py-2">
             {"Discrete Value" |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2">
+          </td>
+          <td className="px-4 py-2">
             {"Continuous Value" |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2">
+          </td>
+          <td className="px-4 py-2">
             {"Y Integral to Point" |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2">
+          </td>
+          <td className="px-4 py-2">
             {"Y Integral Total" |> ReasonReact.string}
-          </th>
+          </td>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <th className="px-4 py-2 border ">
+          <td className="px-4 py-2 border">
             {x |> E.Float.toString |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border ">
+          </td>
+          <td className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.xToY(x)
              |> DistTypes.MixedPoint.toDiscreteValue
              |> Js.Float.toPrecisionWithPrecision(_, ~digits=7)
              |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border ">
+          </td>
+          <td className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.xToY(x)
              |> DistTypes.MixedPoint.toContinuousValue
              |> Js.Float.toPrecisionWithPrecision(_, ~digits=7)
              |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border ">
+          </td>
+          <td className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.Integral.xToY(~cache=None, x)
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border ">
+          </td>
+          <td className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.Integral.sum(~cache=None)
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
-          </th>
+          </td>
         </tr>
       </tbody>
     </table>
-    <table className="table-auto">
+    <table className="table-auto text-sm">
       <thead>
         <tr>
-          <th className="px-4 py-2">
+          <td className="px-4 py-2">
             {"Continuous Total" |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2">
+          </td>
+          <td className="px-4 py-2">
             {"Scaled Continuous Total" |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2">
+          </td>
+          <td className="px-4 py-2">
             {"Discrete Total" |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2">
+          </td>
+          <td className="px-4 py-2">
             {"Scaled Discrete Total" |> ReasonReact.string}
-          </th>
+          </td>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <th className="px-4 py-2 border ">
+          <td className="px-4 py-2 border">
             {distPlus
              |> Distributions.DistPlus.T.toContinuous
              |> E.O.fmap(
@@ -174,8 +174,8 @@ let make = (~distPlus: DistTypes.distPlus) => {
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
              |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border ">
+          </td>
+          <td className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.toScaledContinuous
              |> E.O.fmap(
@@ -184,23 +184,23 @@ let make = (~distPlus: DistTypes.distPlus) => {
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
              |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border ">
+          </td>
+          <td className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.toDiscrete
              |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
              |> ReasonReact.string}
-          </th>
-          <th className="px-4 py-2 border ">
+          </td>
+          <td className="px-4 py-2 border ">
             {distPlus
              |> Distributions.DistPlus.T.toScaledDiscrete
              |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
              |> ReasonReact.string}
-          </th>
+          </td>
         </tr>
       </tbody>
     </table>
