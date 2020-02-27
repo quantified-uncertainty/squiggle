@@ -97,11 +97,11 @@ export class CdfChartD3 {
     // Add svg.
     this.svg = this._container
       .createObject({ tag: 'svg', selector: 'svg-chart-container' })
-      .attr('width', "100%")
+      .attr('width', '100%')
       .attr('height', this.attrs.svgHeight)
       .attr('pointer-events', 'none');
 
-    // Add container "g" (empty) element.
+    // Add container 'g' (empty) element.
     this.chart = this.svg
       .createObject({ tag: 'g', selector: 'chart' })
       .attr(
@@ -175,13 +175,13 @@ export class CdfChartD3 {
         .ticks(3)
         .tickFormat(d => {
           if (Math.abs(d) < 1) {
-            return d3.format(".2")(d);
+            return d3.format('.2')(d);
           } else if (xMin > 1000 && xMax < 3000) {
             // Condition which identifies years; 2019, 2020, 2021.
-            return d3.format(".0")(d);
+            return d3.format('.0')(d);
           } else {
-            const prefix = d3.formatPrefix(".0", d);
-            return prefix(d).replace("G", "B");
+            const prefix = d3.formatPrefix('.0', d);
+            return prefix(d).replace('G', 'B');
           }
         });
     }
@@ -318,7 +318,7 @@ export class CdfChartD3 {
       .domain([yMinDomain, yMaxDomain])
       .range([this.calc.chartHeight, 0]);
 
-    // Adds "g" for an y-axis.
+    // Adds 'g' for an y-axis.
     this.chart.append('g')
       .attr('class', 'lollipops-y-axis')
       .attr('transform', `translate(${this.calc.chartWidth}, 0)`)
@@ -331,10 +331,10 @@ export class CdfChartD3 {
         .classed('lollipops-circle-mouseover', true)
         .attr('r', 6);
       tooltip.transition()
-        .style("opacity", .9);
+        .style('opacity', .9);
       tooltip.html(`X: ${d.x}, Y: ${d.y}`)
-        .style("left", (distributionChart.xScale(d.x) + 60) + "px")
-        .style("top", yScale(d.y) + "px");
+        .style('left', (distributionChart.xScale(d.x) + 60) + 'px')
+        .style('top', yScale(d.y) + 'px');
     }
 
     function hideTooltip(d) {
@@ -344,7 +344,7 @@ export class CdfChartD3 {
         .classed('lollipops-circle-mouseover', false)
         .attr('r', 4);
       tooltip.transition()
-        .style("opacity", 0);
+        .style('opacity', 0);
     }
 
     // Lines.
@@ -360,9 +360,9 @@ export class CdfChartD3 {
       .attr('y2', yScale(0));
 
     // Define the div for the tooltip
-    const tooltip = this._container.append("div")
-      .attr("class", "lollipop-tooltip")
-      .style("opacity", 0);
+    const tooltip = this._container.append('div')
+      .attr('class', 'lollipop-tooltip')
+      .style('opacity', 0);
 
     // Circles.
     this.chart.selectAll('lollipops-circle')
@@ -386,8 +386,8 @@ export class CdfChartD3 {
       .attr('y', 0)
       .attr('opacity', 0)
       .attr('pointer-events', 'all')
-      .on("mouseover", showTooltip)
-      .on("mouseout", hideTooltip)
+      .on('mouseover', showTooltip)
+      .on('mouseout', hideTooltip)
     ;
   }
 
@@ -396,7 +396,7 @@ export class CdfChartD3 {
    * @returns {string}
    */
   formatDates(ts) {
-    return moment(ts).format("MMMM Do YYYY");
+    return moment(ts).format('MMMM Do YYYY');
   }
 
   /**
@@ -405,23 +405,23 @@ export class CdfChartD3 {
    */
   getTimeTicksByStr(unit) {
     switch (unit) {
-      case "months":
+      case 'months':
         return d3.timeMonth.every(4);
-      case "quarters":
+      case 'quarters':
         return d3.timeMonth.every(3);
-      case "hours":
+      case 'hours':
         return d3.timeHour.every(10);
-      case "days":
+      case 'days':
         return d3.timeDay.every(7);
-      case "seconds":
+      case 'seconds':
         return d3.timeSecond.every(10);
-      case "years":
+      case 'years':
         return d3.timeYear.every(10);
-      case "minutes":
+      case 'minutes':
         return d3.timeMinute.every(10);
-      case "weeks":
+      case 'weeks':
         return d3.timeWeek.every(10);
-      case "milliseconds":
+      case 'milliseconds':
         return d3.timeMillisecond.every(10);
       default:
         return d3.timeYear.every(10);
