@@ -1,4 +1,5 @@
 open BsReform;
+open Antd.Grid;
 
 module FormConfig = [%lenses
   type state = {
@@ -40,10 +41,20 @@ module FieldString = {
 
 module Styles = {
   open Css;
-  let row =
-    style([display(`flex), selector("div > div", [flex(`num(1.))])]);
+  let rows =
+    style([
+      selector(
+        ">.ant-col:first-child",
+        [paddingLeft(em(0.25)), paddingRight(em(0.125))],
+      ),
+      selector(
+        ">.ant-col:last-child",
+        [paddingLeft(em(0.125)), paddingRight(em(0.25))],
+      ),
+    ]);
   let form = style([backgroundColor(hex("eee")), padding(em(1.))]);
-  let spacer = style([marginTop(em(3.))]);
+  let dist = style([padding(em(1.))]);
+  let spacer = style([marginTop(em(1.))]);
 };
 
 module FieldFloat = {
@@ -61,6 +72,26 @@ module FieldFloat = {
         </Antd.Form.Item>
       }
     />;
+  };
+};
+
+module DemoDist = {
+  [@react.component]
+  let make = (~guesstimatorString, ~domain, ~unit) => {
+    <Antd.Card title={"Distribution" |> E.ste}>
+      <div className=Styles.spacer />
+      <div>
+        <div>
+          {DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
+           |> DistPlusIngredients.toDistPlus(
+                ~sampleCount=10000,
+                ~outputXYPoints=2000,
+                ~truncateTo=Some(1000),
+              )
+           |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)}
+        </div>
+      </div>
+    </Antd.Card>;
   };
 };
 
@@ -134,29 +165,36 @@ let make = () => {
 
   let guesstimatorString = reform.state.values.guesstimatorString;
 
+  let demoDist =
+    React.useMemo1(
+      () => {<DemoDist guesstimatorString domain unit />},
+      [|
+        reform.state.values.guesstimatorString,
+        reform.state.values.domainType,
+        reform.state.values.xPoint,
+        reform.state.values.xPoint2,
+        reform.state.values.xPoint2,
+        reform.state.values.excludingProbabilityMass,
+        reform.state.values.excludingProbabilityMass2,
+        reform.state.values.unitType,
+        reform.state.values.zero |> E.M.format(E.M.format_standard),
+        reform.state.values.unit,
+      |],
+    );
+
   <div>
     <div className=Styles.spacer />
-    <div>
-      <div>
-        {DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
-         |> DistPlusIngredients.toDistPlus(
-              ~sampleCount=10000,
-              ~outputXYPoints=2000,
-              ~truncateTo=Some(1000),
-            )
-         |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)}
-      </div>
-    </div>
+    demoDist
     <div className=Styles.spacer />
-    <div className=Styles.form>
+    <Antd.Card title={"Distribution Form" |> E.ste}>
       <Form.Provider value=reform>
         <Antd.Form onSubmit>
           <FieldString
             field=FormConfig.GuesstimatorString
             label="Guesstimator String"
           />
-          <div className=Styles.row>
-            <div>
+          <Row _type=`flex>
+            <Col span=4>
               <Form.Field
                 field=FormConfig.DomainType
                 render={({handleChange, value}) =>
@@ -178,28 +216,36 @@ let make = () => {
                   </Antd.Form.Item>
                 }
               />
-            </div>
-            <div>
-              <FieldString field=FormConfig.XPoint label="X-point" />
-            </div>
-            <div>
-              <FieldString
-                field=FormConfig.ExcludingProbabilityMass
-                label="Excluding Probability Mass"
-              />
-            </div>
-            <div>
-              <FieldString field=FormConfig.XPoint2 label="X-point (2)" />
-            </div>
-            <div>
-              <FieldString
-                field=FormConfig.ExcludingProbabilityMass2
-                label="Excluding Probability Mass (2)"
-              />
-            </div>
-          </div>
-          <div className=Styles.row>
-            <div>
+            </Col>
+            <Col span=10>
+              <Row _type=`flex className=Styles.rows>
+                <Col span=12>
+                  <FieldString field=FormConfig.XPoint label="X-point" />
+                </Col>
+                <Col span=12>
+                  <FieldString
+                    field=FormConfig.ExcludingProbabilityMass
+                    label="Excluding Probability Mass"
+                  />
+                </Col>
+              </Row>
+            </Col>
+            <Col span=10>
+              <Row _type=`flex className=Styles.rows>
+                <Col span=12>
+                  <FieldString field=FormConfig.XPoint2 label="X-point (2)" />
+                </Col>
+                <Col span=12>
+                  <FieldString
+                    field=FormConfig.ExcludingProbabilityMass2
+                    label="Excluding Probability Mass (2)"
+                  />
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+          <Row _type=`flex>
+            <Col span=4>
               <Form.Field
                 field=FormConfig.UnitType
                 render={({handleChange, value}) =>
@@ -215,64 +261,37 @@ let make = () => {
                   </Antd.Form.Item>
                 }
               />
-            </div>
-            <div>
-              <Form.Field
-                field=FormConfig.Zero
-                render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Zero" |> E.ste}>
-                    <Antd_DatePicker
-                      value
-                      onChange={e => {
-                        e |> handleChange;
-                        _ => ();
-                      }}
-                    />
-                  </Antd.Form.Item>
-                }
-              />
-            </div>
-            <div>
-              <Form.Field
-                field=FormConfig.Unit
-                render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Unit" |> E.ste}>
-                    <Antd.Select value onChange={e => e |> handleChange}>
-                      <Antd.Select.Option value="days">
-                        {"days" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="hours">
-                        {"hours" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="milliseconds">
-                        {"milliseconds" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="minutes">
-                        {"minutes" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="months">
-                        {"months" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="quarters">
-                        {"quarters" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="seconds">
-                        {"seconds" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="weeks">
-                        {"weeks" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="years">
-                        {"years" |> E.ste}
-                      </Antd.Select.Option>
-                    </Antd.Select>
-                  </Antd.Form.Item>
-                }
-              />
-            </div>
-          </div>
+            </Col>
+            <Col span=10>
+              <Row _type=`flex className=Styles.rows>
+                <Col span=12>
+                  <Form.Field
+                    field=FormConfig.Zero
+                    render={({handleChange, value}) =>
+                      <Antd.Form.Item label={"Zero" |> E.ste}>
+                        <Antd_DatePicker
+                          value
+                          onChange={e => {
+                            e |> handleChange;
+                            _ => ();
+                          }}
+                        />
+                      </Antd.Form.Item>
+                    }
+                  />
+                </Col>
+                <Col span=12>
+                  <FieldString
+                    field=FormConfig.ExcludingProbabilityMass
+                    label="Excluding Probability Mass"
+                  />
+                </Col>
+              </Row>
+            </Col>
+            <Col span=10 />
+          </Row>
         </Antd.Form>
       </Form.Provider>
-    </div>
+    </Antd.Card>
   </div>;
 };
