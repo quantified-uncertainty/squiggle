@@ -2,6 +2,9 @@ const _ = require('lodash');
 const d3 = require('d3');
 const moment = require('moment');
 
+/**
+ * @todo: To rename as "DistPlotD3".
+ */
 export class CdfChartD3 {
 
   constructor() {
@@ -320,16 +323,48 @@ export class CdfChartD3 {
       .attr('transform', `translate(${this.calc.chartWidth}, 0)`)
       .call(d3.axisLeft(yScale));
 
+    function showTooltip(d) {
+      d3.select('#lollipops-line-' + d.id)
+        .classed('lollipops-line-mouseover', true);
+      d3.select('#lollipops-circle-' + d.id)
+        .classed('lollipops-circle-mouseover', true)
+        .attr('r', 6);
+      tooltip.transition()
+        .style("opacity", .9);
+      tooltip.html(`X: ${d.x}, Y: ${d.y}`)
+        .style("left", (distributionChart.xScale(d.x) + 60) + "px")
+        .style("top", yScale(d.y) + "px");
+    }
+
+    function hideTooltip(d) {
+      d3.select('#lollipops-line-' + d.id)
+        .classed('lollipops-line-mouseover', false);
+      d3.select('#lollipops-circle-' + d.id)
+        .classed('lollipops-circle-mouseover', false)
+        .attr('r', 4);
+      tooltip.transition()
+        .style("opacity", 0);
+    }
+
     // Lines.
     this.chart.selectAll('lollipops-line')
       .data(data)
       .enter()
       .append('line')
       .attr('class', 'lollipops-line')
+      .attr('id', d => 'lollipops-line-' + d.id)
       .attr('x1', d => distributionChart.xScale(d.x))
       .attr('x2', d => distributionChart.xScale(d.x))
       .attr('y1', d => yScale(d.y))
-      .attr('y2', yScale(0));
+      .attr('y2', yScale(0))
+      .attr('pointer-events', 'all')
+      .on("mouseover", showTooltip)
+      .on("mouseout", hideTooltip);
+
+    // Define the div for the tooltip
+    const tooltip = this._container.append("div")
+      .attr("class", "lollipop-tooltip")
+      .style("opacity", 0);
 
     // Circles.
     this.chart.selectAll('lollipops-circle')
@@ -337,9 +372,13 @@ export class CdfChartD3 {
       .enter()
       .append('circle')
       .attr('class', 'lollipops-circle')
+      .attr('id', d => 'lollipops-circle-' + d.id)
       .attr('cx', d => distributionChart.xScale(d.x))
       .attr('cy', d => yScale(d.y))
-      .attr('r', '4');
+      .attr('r', '4')
+      .attr('pointer-events', 'all')
+      .on("mouseover", showTooltip)
+      .on("mouseout", hideTooltip);
   }
 
   /**
@@ -390,7 +429,7 @@ export class CdfChartD3 {
     const len = data.xs.length;
 
     for (let i = 0; i < len; i++) {
-      dt.push({ x: data.xs[i], y: data.ys[i] });
+      dt.push({ x: data.xs[i], y: data.ys[i], id: i });
     }
 
     return dt;

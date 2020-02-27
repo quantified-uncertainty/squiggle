@@ -14,6 +14,7 @@ function getRandomInt(min, max) {
 }
 
 /**
+ * @todo: To rename as "DistPlotReact".
  * @param props
  * @returns {*}
  * @constructor
