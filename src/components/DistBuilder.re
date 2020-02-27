@@ -280,7 +280,7 @@ let make = () => {
       <Form.Provider value=reform>
         <Antd.Form onSubmit>
           <Row _type=`flex className=Styles.rows>
-            <Col span=8>
+            <Col span=12>
               <FieldString
                 field=FormConfig.GuesstimatorString
                 label="Guesstimator String"
