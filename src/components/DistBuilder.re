@@ -103,7 +103,10 @@ module Styles = {
       ),
     ]);
   let parent =
-    style([selector(".ant-input-number", [width(`percent(100.))])]);
+    style([
+      selector(".ant-input-number", [width(`percent(100.))]),
+      selector(".anticon", [verticalAlign(`zero)]),
+    ]);
   let form = style([backgroundColor(hex("eee")), padding(em(1.))]);
   let dist = style([padding(em(1.))]);
   let spacer = style([marginTop(em(1.))]);
@@ -139,6 +142,7 @@ module DemoDist = {
 
 [@react.component]
 let make = () => {
+  let (reloader, setRealoader) = React.useState(() => 1);
   let reform =
     Form.use(
       ~validationStrategy=OnDemand,
@@ -237,14 +241,27 @@ let make = () => {
         reform.state.values.sampleCount |> string_of_int,
         reform.state.values.outputXYPoints |> string_of_int,
         reform.state.values.truncateTo |> string_of_int,
+        reloader |> string_of_int,
       |],
     );
+
+  let onRealod = _ => {
+    setRealoader(_ => reloader + 1);
+  };
 
   <div className=Styles.parent>
     <div className=Styles.spacer />
     demoDist
     <div className=Styles.spacer />
-    <Antd.Card title={"Distribution Form" |> E.ste}>
+    <Antd.Card
+      title={"Distribution Form" |> E.ste}
+      extra={
+        <Antd.Button
+          icon=Antd.IconName.reload
+          shape=`circle
+          onClick=onRealod
+        />
+      }>
       <Form.Provider value=reform>
         <Antd.Form onSubmit>
           <Row _type=`flex className=Styles.rows>
@@ -353,6 +370,10 @@ let make = () => {
               <FieldNumber field=FormConfig.TruncateTo label="Truncate To" />
             </Col>
           </Row>
+          <Antd.Button
+            _type=`primary icon=Antd.IconName.reload onClick=onRealod>
+            {"Update Distribution" |> E.ste}
+          </Antd.Button>
         </Antd.Form>
       </Form.Provider>
     </Antd.Card>
