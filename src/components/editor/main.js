@@ -267,11 +267,13 @@ function get_grid_transform(distr_string) {
     arg_strings.push("x_" + i.toString());
   }
   let compiled = math.compile(distr_string);
+
   function grid_transform(x) {
     let kv_pairs = arg_strings.map((val, idx) => [val, x[idx]]);
     let args_obj = Object.fromEntries(new Map(kv_pairs));
     return compiled.evaluate(args_obj);
   }
+
   return grid_transform;
 }
 

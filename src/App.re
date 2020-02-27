@@ -1,6 +1,7 @@
 type route =
   | Model(string)
   | DistBuilder
+  | DistBuilder2
   | Home
   | NotFound;
 
@@ -8,6 +9,7 @@ let routeToPath = route =>
   switch (route) {
   | Model(modelId) => "/m/" ++ modelId
   | DistBuilder => "/dist-builder"
+  | DistBuilder2 => "/dist-builder2"
   | Home => "/"
   | _ => "/"
   };
@@ -76,6 +78,9 @@ module Menu = {
       <Item href={routeToPath(DistBuilder)} key="dist-builder">
         {"Dist Builder" |> E.ste}
       </Item>
+      <Item href={routeToPath(DistBuilder2)} key="dist-builder">
+        {"Dist Builder 2" |> E.ste}
+      </Item>
     </div>;
   };
 };
@@ -88,6 +93,7 @@ let make = () => {
     switch (url.path) {
     | ["m", modelId] => Model(modelId)
     | ["dist-builder"] => DistBuilder
+    | ["dist-builder2"] => DistBuilder2
     | [] => Home
     | _ => NotFound
     };
@@ -101,6 +107,7 @@ let make = () => {
        | None => <div> {"Page is not found" |> E.ste} </div>
        }
      | DistBuilder => <DistBuilder />
+     | DistBuilder2 => <DistBuilder2 />
      | Home => <div> {"Welcome" |> E.ste} </div>
      | _ => <div> {"Page is not found" |> E.ste} </div>
      }}

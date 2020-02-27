@@ -82,9 +82,11 @@ class BaseDistributionBinned {
     let args_str = args.toString() + ")";
     let substr = this.name + ".pdf(x, " + args_str;
     let compiled = math.compile(substr);
+
     function pdf_func(x) {
       return compiled.evaluate({ x: x });
     }
+
     let mc_compiled = math.compile(this.name + ".sample(" + args_str);
     let kv_pairs = this.param_names.map((val, idx) => [val, args[idx]]);
     let params = Object.fromEntries(new Map(kv_pairs));
@@ -97,12 +99,14 @@ class NormalDistributionBinned extends BaseDistributionBinned {
     this.name = "normal";
     this.param_names = ["mean", "std"];
   }
+
   get_bounds() {
     return [
       this.params.mean - 4 * this.params.std,
       this.params.mean + 4 * this.params.std
     ];
   }
+
   bin() {
     return this._adabin(this.params.std);
   }
@@ -114,9 +118,11 @@ class UniformDistributionBinned extends BaseDistributionBinned {
     this.param_names = ["start_point", "end_point"];
     this.num_bins = 200;
   }
+
   get_bounds() {
     return [this.params.start_point, this.params.end_point];
   }
+
   bin() {
     let divider_pts = evenly_spaced_grid(
       this.params.start_point,
@@ -152,6 +158,7 @@ class LogNormalDistributionBinned extends BaseDistributionBinned {
     }
     return largest_buffer[n - 1];
   }
+
   get_bounds() {
     let samples = Array(this.n_bounds_samples)
       .fill(0)
@@ -161,6 +168,7 @@ class LogNormalDistributionBinned extends BaseDistributionBinned {
       this._nth_largest(samples, this.n_largest_bound_sample)
     ];
   }
+
   bin() {
     return this._adabin();
   }
