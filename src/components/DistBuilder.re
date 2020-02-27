@@ -195,8 +195,9 @@ let make = () => {
       })
     | "RightLimited" =>
       RightLimited({
-        xPoint: reform.state.values.xPoint,
-        excludingProbabilityMass: reform.state.values.excludingProbabilityMass,
+        xPoint: reform.state.values.xPoint2,
+        excludingProbabilityMass:
+          reform.state.values.excludingProbabilityMass2,
       })
     | "LeftAndRightLimited" =>
       LeftAndRightLimited(
@@ -315,14 +316,14 @@ let make = () => {
                <Col span=4>
                  <FieldFloat
                    field=FormConfig.XPoint
-                   label="X-point"
+                   label="Left X-point"
                    className=Styles.groupA
                  />
                </Col>
                <Col span=4>
                  <FieldFloat
                    field=FormConfig.ExcludingProbabilityMass
-                   label="Excluding Probability Mass"
+                   label="Left Excluding Probability Mass"
                    className=Styles.groupA
                  />
                </Col>
@@ -330,21 +331,21 @@ let make = () => {
              |> E.showIf(
                   E.L.contains(
                     reform.state.values.domainType,
-                    ["LeftLimited", "RightLimited", "LeftAndRightLimited"],
+                    ["LeftLimited", "LeftAndRightLimited"],
                   ),
                 )}
             {<>
                <Col span=4>
                  <FieldFloat
                    field=FormConfig.XPoint2
-                   label="X-point (2)"
+                   label="Right X-point"
                    className=Styles.groupB
                  />
                </Col>
                <Col span=4>
                  <FieldFloat
                    field=FormConfig.ExcludingProbabilityMass2
-                   label="Excluding Probability Mass (2)"
+                   label="Right Excluding Probability Mass"
                    className=Styles.groupB
                  />
                </Col>
@@ -352,7 +353,7 @@ let make = () => {
              |> E.showIf(
                   E.L.contains(
                     reform.state.values.domainType,
-                    ["LeftAndRightLimited"],
+                    ["RightLimited", "LeftAndRightLimited"],
                   ),
                 )}
           </Row>
