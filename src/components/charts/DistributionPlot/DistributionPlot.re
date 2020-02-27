@@ -86,6 +86,21 @@ module Styles = {
       selector(".lollipops-x-axis .domain", [display(`none)]),
       selector(".lollipops-x-axis .tick line", [display(`none)]),
       selector(".lollipops-x-axis .tick text", [display(`none)]),
+      selector(
+        ".lollipop-tooltip",
+        [
+          position(`absolute),
+          textAlign(`center),
+          padding(px(2)),
+          backgroundColor(hex("bfcad4")),
+          borderRadius(px(3)),
+        ],
+      ),
+      selector(
+        ".lollipops-circle-mouseover",
+        [SVG.fill(hex("ffa500")), SVG.stroke(`hex("fff"))],
+      ),
+      selector(".lollipops-line-mouseover", [SVG.stroke(`hex("ffa500"))]),
     ]);
 };
 
