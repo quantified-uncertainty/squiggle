@@ -114,7 +114,7 @@ let make =
       ~minX=?,
       ~yMaxDiscreteDomainFactor=?,
       ~yMaxContinuousDomainFactor=?,
-      ~onHover: float => unit,
+      ~onHover: float => unit=_ => (),
       ~continuous=?,
       ~scale=?,
       ~showDistributionLines=false,
