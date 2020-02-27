@@ -140,9 +140,9 @@ let make = () => {
       <div>
         {DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
          |> DistPlusIngredients.toDistPlus(
-              ~sampleCount=10000,
-              ~outputXYPoints=2000,
-              ~truncateTo=Some(1000),
+              ~sampleCount=1000,
+              ~outputXYPoints=1000,
+              ~truncateTo=Some(100),
             )
          |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)}
       </div>
