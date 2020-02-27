@@ -6,14 +6,18 @@ module FormConfig = [%lenses
     guesstimatorString: string,
     //
     domainType: string, // Complete, LeftLimited(...), RightLimited(...), LeftAndRightLimited(..., ...)
-    xPoint: string,
-    xPoint2: string,
-    excludingProbabilityMass: string,
-    excludingProbabilityMass2: string,
+    xPoint: float,
+    xPoint2: float,
+    excludingProbabilityMass: float,
+    excludingProbabilityMass2: float,
     //
     unitType: string, // UnspecifiedDistribution, TimeDistribution(zero, unit)
     zero: MomentRe.Moment.t,
     unit: string,
+    //
+    sampleCount: int,
+    outputXYPoints: int,
+    truncateTo: int,
   }
 ];
 
@@ -39,6 +43,48 @@ module FieldString = {
   };
 };
 
+module FieldNumber = {
+  [@react.component]
+  let make = (~field, ~label) => {
+    <Form.Field
+      field
+      render={({handleChange, error, value, validate}) =>
+        <Antd.Form.Item label={label |> E.ste}>
+          <Antd.InputNumber
+            value
+            onChange={e => {
+              e |> handleChange;
+              ();
+            }}
+            onBlur={_ => validate()}
+          />
+        </Antd.Form.Item>
+      }
+    />;
+  };
+};
+
+module FieldFloat = {
+  [@react.component]
+  let make = (~field, ~label) => {
+    <Form.Field
+      field
+      render={({handleChange, error, value, validate}) =>
+        <Antd.Form.Item label={label |> E.ste}>
+          <Antd.InputFloat
+            value
+            onChange={e => {
+              e |> handleChange;
+              ();
+            }}
+            onBlur={_ => validate()}
+          />
+        </Antd.Form.Item>
+      }
+    />;
+  };
+};
+
 module Styles = {
   open Css;
   let rows =
@@ -51,42 +97,38 @@ module Styles = {
         ">.ant-col:last-child",
         [paddingLeft(em(0.125)), paddingRight(em(0.25))],
       ),
+      selector(
+        ">.ant-col:not(:first-child):not(:last-child)",
+        [paddingLeft(em(0.125)), paddingRight(em(0.125))],
+      ),
     ]);
+  let parent =
+    style([selector(".ant-input-number", [width(`percent(100.))])]);
   let form = style([backgroundColor(hex("eee")), padding(em(1.))]);
   let dist = style([padding(em(1.))]);
   let spacer = style([marginTop(em(1.))]);
 };
 
-module FieldFloat = {
-  [@react.component]
-  let make = (~field, ~label) => {
-    <Form.Field
-      field
-      render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> E.ste}>
-          <Antd.Input
-            value
-            onChange={BsReform.Helpers.handleChange(handleChange)}
-            onBlur={_ => validate()}
-          />
-        </Antd.Form.Item>
-      }
-    />;
-  };
-};
-
 module DemoDist = {
   [@react.component]
-  let make = (~guesstimatorString, ~domain, ~unit) => {
+  let make =
+      (
+        ~guesstimatorString,
+        ~domain,
+        ~unit,
+        ~sampleCount,
+        ~outputXYPoints,
+        ~truncateTo,
+      ) => {
     <Antd.Card title={"Distribution" |> E.ste}>
       <div className=Styles.spacer />
       <div>
         <div>
           {DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
            |> DistPlusIngredients.toDistPlus(
-                ~sampleCount=10000,
-                ~outputXYPoints=2000,
-                ~truncateTo=Some(1000),
+                ~sampleCount,
+                ~outputXYPoints,
+                ~truncateTo,
               )
            |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)}
         </div>
@@ -105,13 +147,16 @@ let make = () => {
       ~initialState={
         guesstimatorString: "mm(5 to 20, floor(normal(20,2)), [.5, .5])",
         domainType: "Complete",
-        xPoint: "50.0",
-        xPoint2: "60.0",
-        excludingProbabilityMass2: "0.5",
-        excludingProbabilityMass: "0.3",
+        xPoint: 50.0,
+        xPoint2: 60.0,
+        excludingProbabilityMass2: 0.5,
+        excludingProbabilityMass: 0.3,
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
+        sampleCount: 10000,
+        outputXYPoints: 2000,
+        truncateTo: 1000,
       },
       (),
     );
@@ -126,27 +171,25 @@ let make = () => {
     | "Complete" => DistTypes.Complete
     | "LeftLimited" =>
       LeftLimited({
-        xPoint: reform.state.values.xPoint |> float_of_string,
-        excludingProbabilityMass:
-          reform.state.values.excludingProbabilityMass |> float_of_string,
+        xPoint: reform.state.values.xPoint,
+        excludingProbabilityMass: reform.state.values.excludingProbabilityMass,
       })
     | "RightLimited" =>
       RightLimited({
-        xPoint: reform.state.values.xPoint |> float_of_string,
-        excludingProbabilityMass:
-          reform.state.values.excludingProbabilityMass |> float_of_string,
+        xPoint: reform.state.values.xPoint,
+        excludingProbabilityMass: reform.state.values.excludingProbabilityMass,
       })
     | "LeftAndRightLimited" =>
       LeftAndRightLimited(
         {
-          xPoint: reform.state.values.xPoint |> float_of_string,
+          xPoint: reform.state.values.xPoint,
           excludingProbabilityMass:
-            reform.state.values.excludingProbabilityMass |> float_of_string,
+            reform.state.values.excludingProbabilityMass,
         },
         {
-          xPoint: reform.state.values.xPoint2 |> float_of_string,
+          xPoint: reform.state.values.xPoint2,
           excludingProbabilityMass:
-            reform.state.values.excludingProbabilityMass2 |> float_of_string,
+            reform.state.values.excludingProbabilityMass2,
         },
       )
     | _ => Js.Exn.raiseError("domain is unknown")
@@ -164,36 +207,55 @@ let make = () => {
     };
 
   let guesstimatorString = reform.state.values.guesstimatorString;
+  let sampleCount = reform.state.values.sampleCount;
+  let outputXYPoints = reform.state.values.outputXYPoints;
+  let truncateTo = reform.state.values.truncateTo |> E.O.some;
 
   let demoDist =
     React.useMemo1(
-      () => {<DemoDist guesstimatorString domain unit />},
+      () => {
+        <DemoDist
+          guesstimatorString
+          domain
+          unit
+          sampleCount
+          outputXYPoints
+          truncateTo
+        />
+      },
       [|
         reform.state.values.guesstimatorString,
         reform.state.values.domainType,
-        reform.state.values.xPoint,
-        reform.state.values.xPoint2,
-        reform.state.values.xPoint2,
-        reform.state.values.excludingProbabilityMass,
-        reform.state.values.excludingProbabilityMass2,
+        reform.state.values.xPoint |> string_of_float,
+        reform.state.values.xPoint2 |> string_of_float,
+        reform.state.values.xPoint2 |> string_of_float,
+        reform.state.values.excludingProbabilityMass |> string_of_float,
+        reform.state.values.excludingProbabilityMass2 |> string_of_float,
         reform.state.values.unitType,
         reform.state.values.zero |> E.M.format(E.M.format_standard),
         reform.state.values.unit,
+        reform.state.values.sampleCount |> string_of_int,
+        reform.state.values.outputXYPoints |> string_of_int,
+        reform.state.values.truncateTo |> string_of_int,
       |],
     );
 
-  <div>
+  <div className=Styles.parent>
     <div className=Styles.spacer />
     demoDist
     <div className=Styles.spacer />
     <Antd.Card title={"Distribution Form" |> E.ste}>
       <Form.Provider value=reform>
         <Antd.Form onSubmit>
-          <FieldString
-            field=FormConfig.GuesstimatorString
-            label="Guesstimator String"
-          />
-          <Row _type=`flex>
+          <Row _type=`flex className=Styles.rows>
+            <Col span=8>
+              <FieldString
+                field=FormConfig.GuesstimatorString
+                label="Guesstimator String"
+              />
+            </Col>
+          </Row>
+          <Row _type=`flex className=Styles.rows>
             <Col span=4>
               <Form.Field
                 field=FormConfig.DomainType
@@ -217,34 +279,26 @@ let make = () => {
                 }
               />
             </Col>
-            <Col span=10>
-              <Row _type=`flex className=Styles.rows>
-                <Col span=12>
-                  <FieldString field=FormConfig.XPoint label="X-point" />
-                </Col>
-                <Col span=12>
-                  <FieldString
-                    field=FormConfig.ExcludingProbabilityMass
-                    label="Excluding Probability Mass"
-                  />
-                </Col>
-              </Row>
+            <Col span=4>
+              <FieldFloat field=FormConfig.XPoint label="X-point" />
             </Col>
-            <Col span=10>
-              <Row _type=`flex className=Styles.rows>
-                <Col span=12>
-                  <FieldString field=FormConfig.XPoint2 label="X-point (2)" />
-                </Col>
-                <Col span=12>
-                  <FieldString
-                    field=FormConfig.ExcludingProbabilityMass2
-                    label="Excluding Probability Mass (2)"
-                  />
-                </Col>
-              </Row>
+            <Col span=4>
+              <FieldFloat
+                field=FormConfig.ExcludingProbabilityMass
+                label="Excluding Probability Mass"
+              />
+            </Col>
+            <Col span=4>
+              <FieldFloat field=FormConfig.XPoint2 label="X-point (2)" />
+            </Col>
+            <Col span=4>
+              <FieldFloat
+                field=FormConfig.ExcludingProbabilityMass2
+                label="Excluding Probability Mass (2)"
+              />
             </Col>
           </Row>
-          <Row _type=`flex>
+          <Row _type=`flex className=Styles.rows>
             <Col span=4>
               <Form.Field
                 field=FormConfig.UnitType
@@ -262,36 +316,46 @@ let make = () => {
                 }
               />
             </Col>
-            <Col span=10>
-              <Row _type=`flex className=Styles.rows>
-                <Col span=12>
-                  <Form.Field
-                    field=FormConfig.Zero
-                    render={({handleChange, value}) =>
-                      <Antd.Form.Item label={"Zero" |> E.ste}>
-                        <Antd_DatePicker
-                          value
-                          onChange={e => {
-                            e |> handleChange;
-                            _ => ();
-                          }}
-                        />
-                      </Antd.Form.Item>
-                    }
-                  />
-                </Col>
-                <Col span=12>
-                  <FieldString
-                    field=FormConfig.ExcludingProbabilityMass
-                    label="Excluding Probability Mass"
-                  />
-                </Col>
-              </Row>
+            <Col span=4>
+              <Form.Field
+                field=FormConfig.Zero
+                render={({handleChange, value}) =>
+                  <Antd.Form.Item label={"Zero" |> E.ste}>
+                    <Antd_DatePicker
+                      value
+                      onChange={e => {
+                        e |> handleChange;
+                        _ => ();
+                      }}
+                    />
+                  </Antd.Form.Item>
+                }
+              />
             </Col>
-            <Col span=10 />
+            <Col span=4>
+              <FieldFloat
+                field=FormConfig.ExcludingProbabilityMass
+                label="Excluding Probability Mass"
+              />
+            </Col>
+          </Row>
+          <Row _type=`flex className=Styles.rows>
+            <Col span=4>
+              <FieldNumber field=FormConfig.SampleCount label="Sample Count" />
+            </Col>
+            <Col span=4>
+              <FieldNumber
+                field=FormConfig.OutputXYPoints
+                label="Output XY-points"
+              />
+            </Col>
+            <Col span=4>
+              <FieldNumber field=FormConfig.TruncateTo label="Truncate To" />
+            </Col>
           </Row>
         </Antd.Form>
       </Form.Provider>
     </Antd.Card>
+    <div className=Styles.spacer />
   </div>;
 };
