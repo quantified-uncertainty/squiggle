@@ -337,11 +337,14 @@ export class CdfChartD3 {
       .domain([yMinDomain, yMaxDomain])
       .range([this.calc.chartHeight, 0]);
 
+    const yTicks = Math.floor(this.calc.chartHeight / 20);
+    const yAxis = d3.axisLeft(yScale).ticks(yTicks);
+
     // Adds 'g' for an y-axis.
     this.chart.append('g')
       .attr('class', 'lollipops-y-axis')
       .attr('transform', `translate(${this.calc.chartWidth}, 0)`)
-      .call(d3.axisLeft(yScale));
+      .call(yAxis);
 
     function showTooltip(d) {
       d3.select('#lollipops-line-' + d.id)
