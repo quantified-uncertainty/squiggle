@@ -375,60 +375,68 @@ let make = () => {
                 }
               />
             </Col>
-            <Col span=4>
-              <Form.Field
-                field=FormConfig.Zero
-                render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Zero Point" |> E.ste}>
-                    <Antd_DatePicker
-                      value
-                      onChange={e => {
-                        e |> handleChange;
-                        _ => ();
-                      }}
-                    />
-                  </Antd.Form.Item>
-                }
-              />
-            </Col>
-            <Col span=4>
-              <Form.Field
-                field=FormConfig.Unit
-                render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Unit" |> E.ste}>
-                    <Antd.Select value onChange={e => e |> handleChange}>
-                      <Antd.Select.Option value="days">
-                        {"Days" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="hours">
-                        {"Hours" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="milliseconds">
-                        {"Milliseconds" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="minutes">
-                        {"Minutes" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="months">
-                        {"Months" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="quarters">
-                        {"Quarters" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="seconds">
-                        {"Seconds" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="weeks">
-                        {"Weeks" |> E.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="years">
-                        {"Years" |> E.ste}
-                      </Antd.Select.Option>
-                    </Antd.Select>
-                  </Antd.Form.Item>
-                }
-              />
-            </Col>
+            {<>
+               <Col span=4>
+                 <Form.Field
+                   field=FormConfig.Zero
+                   render={({handleChange, value}) =>
+                     <Antd.Form.Item label={"Zero Point" |> E.ste}>
+                       <Antd_DatePicker
+                         value
+                         onChange={e => {
+                           e |> handleChange;
+                           _ => ();
+                         }}
+                       />
+                     </Antd.Form.Item>
+                   }
+                 />
+               </Col>
+               <Col span=4>
+                 <Form.Field
+                   field=FormConfig.Unit
+                   render={({handleChange, value}) =>
+                     <Antd.Form.Item label={"Unit" |> E.ste}>
+                       <Antd.Select value onChange={e => e |> handleChange}>
+                         <Antd.Select.Option value="days">
+                           {"Days" |> E.ste}
+                         </Antd.Select.Option>
+                         <Antd.Select.Option value="hours">
+                           {"Hours" |> E.ste}
+                         </Antd.Select.Option>
+                         <Antd.Select.Option value="milliseconds">
+                           {"Milliseconds" |> E.ste}
+                         </Antd.Select.Option>
+                         <Antd.Select.Option value="minutes">
+                           {"Minutes" |> E.ste}
+                         </Antd.Select.Option>
+                         <Antd.Select.Option value="months">
+                           {"Months" |> E.ste}
+                         </Antd.Select.Option>
+                         <Antd.Select.Option value="quarters">
+                           {"Quarters" |> E.ste}
+                         </Antd.Select.Option>
+                         <Antd.Select.Option value="seconds">
+                           {"Seconds" |> E.ste}
+                         </Antd.Select.Option>
+                         <Antd.Select.Option value="weeks">
+                           {"Weeks" |> E.ste}
+                         </Antd.Select.Option>
+                         <Antd.Select.Option value="years">
+                           {"Years" |> E.ste}
+                         </Antd.Select.Option>
+                       </Antd.Select>
+                     </Antd.Form.Item>
+                   }
+                 />
+               </Col>
+             </>
+             |> E.showIf(
+                  E.L.contains(
+                    reform.state.values.unitType,
+                    ["TimeDistribution"],
+                  ),
+                )}
           </Row>
           <Row _type=`flex className=Styles.rows>
             <Col span=4>

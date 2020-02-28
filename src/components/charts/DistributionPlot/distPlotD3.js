@@ -109,22 +109,28 @@ export class CdfChartD3 {
         `translate(${this.calc.chartLeftMargin}, ${this.calc.chartTopMargin})`,
       );
 
+    const common = this.getCommonThings();
     if (this.hasDate('continuous')) {
-      const distributionChart = this.addDistributionChart();
-      if (this.hasDate('discrete')) {
-        this.addLollipopsChart(distributionChart);
-      }
+      this.addDistributionChart(common);
+    }
+    if (this.hasDate('discrete')) {
+      this.addLollipopsChart(common);
     }
     return this;
   }
 
-  addDistributionChart() {
-    const areaColorRange = d3.scaleOrdinal().range(this.attrs.areaColors);
-    const dataPoints = [this.getDataPoints('continuous')];
-
+  /**
+   * @returns {*}
+   */
+  getCommonThings() {
     // Boundaries.
-    const xMin = this.attrs.minX || d3.min(this.attrs.data.continuous.xs) || d3.min(this.attrs.data.discrete.xs);
-    const xMax = this.attrs.maxX || d3.max(this.attrs.data.continuous.xs) || d3.max(this.attrs.data.discrete.xs);
+    const xMin = this.attrs.minX
+      || d3.min(this.attrs.data.continuous.xs)
+      || d3.min(this.attrs.data.discrete.xs);
+    const xMax = this.attrs.maxX
+      || d3.max(this.attrs.data.continuous.xs)
+      || d3.max(this.attrs.data.discrete.xs);
+
     const yMin = d3.min(this.attrs.data.continuous.ys);
     const yMax = d3.max(this.attrs.data.continuous.ys);
 
@@ -149,6 +155,21 @@ export class CdfChartD3 {
     const yScale = d3.scaleLinear()
       .domain([yMinDomain, yMaxDomain])
       .range([this.calc.chartHeight, 0]);
+
+    return {
+      xMin, xMax,
+      xScale, yScale,
+    };
+  }
+
+  /**
+   * @param common
+   */
+  addDistributionChart(common) {
+    const areaColorRange = d3.scaleOrdinal().range(this.attrs.areaColors);
+    const dataPoints = [this.getDataPoints('continuous')];
+
+    const { xMin, xMax,  xScale, yScale  } = common;
 
     // X-axis.
     let xAxis = null;
@@ -287,16 +308,14 @@ export class CdfChartD3 {
         .on('mousemove', mouseover)
         .on('mouseout', mouseout);
     }
-
-    return { xScale, yScale };
   }
 
   /**
-   * @param {object} distributionChart
-   * @param {object} distributionChart.xScale
-   * @param {object} distributionChart.yScale
+   * @param {object} common
+   * @param {object} common.xScale
+   * @param {object} common.yScale
    */
-  addLollipopsChart(distributionChart) {
+  addLollipopsChart(common) {
     const data = this.getDataPoints('discrete');
 
     const _yMin = d3.min(this.attrs.data.discrete.ys);
@@ -306,7 +325,7 @@ export class CdfChartD3 {
     this.chart.append('g')
       .attr('class', 'lollipops-x-axis')
       .attr('transform', `translate(0, ${this.calc.chartHeight})`)
-      .call(d3.axisBottom(distributionChart.xScale));
+      .call(d3.axisBottom(common.xScale));
 
     // Y-domain.
     const yMaxDomainFactor = _.get(this.attrs, 'yMaxDiscreteDomainFactor', 1);
@@ -333,7 +352,7 @@ export class CdfChartD3 {
       tooltip.transition()
         .style('opacity', .9);
       tooltip.html(`X: ${d.x}, Y: ${d.y}`)
-        .style('left', (distributionChart.xScale(d.x) + 60) + 'px')
+        .style('left', (common.xScale(d.x) + 60) + 'px')
         .style('top', yScale(d.y) + 'px');
     }
 
@@ -354,8 +373,8 @@ export class CdfChartD3 {
       .append('line')
       .attr('class', 'lollipops-line')
       .attr('id', d => 'lollipops-line-' + d.id)
-      .attr('x1', d => distributionChart.xScale(d.x))
-      .attr('x2', d => distributionChart.xScale(d.x))
+      .attr('x1', d => common.xScale(d.x))
+      .attr('x2', d => common.xScale(d.x))
       .attr('y1', d => yScale(d.y))
       .attr('y2', yScale(0));
 
@@ -371,7 +390,7 @@ export class CdfChartD3 {
       .append('circle')
       .attr('class', 'lollipops-circle')
       .attr('id', d => 'lollipops-circle-' + d.id)
-      .attr('cx', d => distributionChart.xScale(d.x))
+      .attr('cx', d => common.xScale(d.x))
       .attr('cy', d => yScale(d.y))
       .attr('r', '4');
 
@@ -382,7 +401,7 @@ export class CdfChartD3 {
       .append('rect')
       .attr('width', 30)
       .attr('height', this.calc.chartHeight)
-      .attr('x', d => distributionChart.xScale(d.x) - 15)
+      .attr('x', d => common.xScale(d.x) - 15)
       .attr('y', 0)
       .attr('opacity', 0)
       .attr('pointer-events', 'all')
@@ -439,7 +458,10 @@ export class CdfChartD3 {
     const len = data.xs.length;
 
     for (let i = 0; i < len; i++) {
-      dt.push({ x: data.xs[i], y: data.ys[i], id: i });
+      const x = data.xs[i];
+      const y = data.ys[i];
+      const id = i;
+      dt.push({ x, y, id });
     }
 
     return dt;

@@ -34,8 +34,7 @@ module Styles = {
 module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString: string) => {
-    let (ys, xs) =
-      DistEditor.getPdfFromUserInput("normal(1, 1)  / normal(10, 1)");
+    let (ys, xs) = DistEditor.getPdfFromUserInput(guesstimatorString);
     let continuous: DistTypes.xyShape = {xs, ys};
     <Antd.Card title={"Distribution" |> E.ste}>
       <div className=Styles.spacer />
