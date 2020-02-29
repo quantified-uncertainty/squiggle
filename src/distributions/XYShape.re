@@ -156,6 +156,9 @@ let _transverseShape = (fn, p: t) => {
   |> fromArray;
 };
 
+let filter = (fn, t: t) =>
+  t |> zip |> E.A.filter(fn) |> Belt.Array.unzip |> fromArray;
+
 let accumulateYs = _transverseShape((aCurrent, aLast) => aCurrent +. aLast);
 let subtractYs = _transverseShape((aCurrent, aLast) => aCurrent -. aLast);
 
