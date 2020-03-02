@@ -430,7 +430,10 @@ export class CdfChartD3 {
       case 'months':
         return d3.timeMonth.every(4);
       case 'quarters':
-        return d3.timeMonth.every(3);
+        // It is temporary solution, but it works
+        // if the difference between edge dates is not
+        // much more than 10 units.
+        return d3.timeMonth.every(12);
       case 'hours':
         return d3.timeHour.every(10);
       case 'days':
