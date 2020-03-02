@@ -21,30 +21,28 @@ let propValue = (t: Prop.Value.t) => {
     let newDistribution =
       DistPlusIngredients.toDistPlus(
         ~sampleCount=2000,
-        ~outputXYPoints=2000,
-        ~truncateTo=Some(100),
+        ~outputXYPoints=1000,
+        ~truncateTo=Some(500),
         r,
       );
     switch (newDistribution) {
     | Some(distribution) =>
-      <div>
-        <DistPlusPlot distPlus=distribution />
-        <input
-          readOnly=true
-          className="shadow appearance-none border w-1/3 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          value={r.guesstimatorString}
-        />
-        <select
-          defaultValue="years"
-          readOnly=true
-          className="appearance-none w-32 bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-          <option> {"years" |> ReasonReact.string} </option>
-        </select>
-        <div
-          className="w-1/3 border w-1/2 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white">
-          {"30 to infinity, 80% mass" |> ReasonReact.string}
-        </div>
-      </div>
+      <div> <DistPlusPlot distPlus=distribution /> </div>
+    // <input
+    //   readOnly=true
+    //   className="shadow appearance-none border w-1/3 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+    //   value={r.guesstimatorString}
+    // />
+    // <select
+    //   defaultValue="years"
+    //   readOnly=true
+    //   className="appearance-none w-32 bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+    //   <option> {"years" |> ReasonReact.string} </option>
+    // </select>
+    // <div
+    //   className="w-1/3 border w-1/2 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white">
+    //   {"30 to infinity, 80% mass" |> ReasonReact.string}
+    // </div>
     | None => "Something went wrong" |> ReasonReact.string
     };
   | FloatCdf(_) => <div />

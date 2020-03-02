@@ -165,7 +165,7 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         guesstimatorString: "mm(5 to 20, floor(normal(20,2)), [.5, .5])",
-        domainType: "LeftLimited",
+        domainType: "Complete",
         xPoint: 50.0,
         xPoint2: 60.0,
         excludingProbabilityMass2: 0.5,

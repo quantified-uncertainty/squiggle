@@ -21,7 +21,8 @@ module Interface = {
 
   let run = (p: array(option(Prop.Value.t))) => {
     switch (p) {
-    | [|Some(FloatPoint(age))|] => Some(Model.make(age))
+    | [|Some(FloatPoint(age)), Some(SelectSingle(sex))|] =>
+      Some(Model.make(age))
     | _ => None
     };
   };
@@ -34,7 +35,7 @@ module Interface = {
       description: "When will you die?",
       version: "1.0.0",
       author: "Ozzie Gooen",
-      inputTypes: [|TypeWithMetadata.age|],
+      inputTypes: [|TypeWithMetadata.age, TypeWithMetadata.sex|],
       outputTypes: [||],
       run,
     };

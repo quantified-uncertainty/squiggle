@@ -236,6 +236,23 @@ module TypeWithMetadata = {
       ~assumptionType=PRIMARY_INPUT,
       (),
     );
+
+  let sex =
+    make(
+      ~id="sex",
+      ~name="Sex",
+      ~description=None,
+      ~type_=
+        SelectSingle({
+          options: [
+            {id: "male", name: "Male"},
+            {id: "female", name: "Female"},
+          ],
+          default: Some("female"),
+        }),
+      ~assumptionType=PRIMARY_INPUT,
+      (),
+    );
 };
 
 module Model = {
