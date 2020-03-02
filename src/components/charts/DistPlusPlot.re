@@ -1,99 +1,5 @@
-let adjustBoth = discreteProbabilityMass => {
-  let yMaxDiscreteDomainFactor = discreteProbabilityMass;
-  let yMaxContinuousDomainFactor = 1.0 -. discreteProbabilityMass;
-  let yMax =
-    yMaxDiscreteDomainFactor > yMaxContinuousDomainFactor
-      ? yMaxDiscreteDomainFactor : yMaxContinuousDomainFactor;
-  (
-    1.0 /. (yMaxDiscreteDomainFactor /. yMax),
-    1.0 /. (yMaxContinuousDomainFactor /. yMax),
-  );
-};
-
-module DistPlusChart = {
-  [@react.component]
-  let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
-    open Distributions.DistPlus;
-    let discrete = distPlus |> T.toScaledDiscrete;
-    let continuous =
-      distPlus
-      |> T.toScaledContinuous
-      |> E.O.fmap(Distributions.Continuous.getShape);
-    let range = T.xTotalRange(distPlus);
-    let minX =
-      switch (T.minX(distPlus), range) {
-      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
-      | _ => None
-      };
-
-    let maxX = T.maxX(distPlus);
-    let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
-    let toDiscreteProbabilityMass =
-      distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
-    let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
-      adjustBoth(toDiscreteProbabilityMass);
-    <DistributionPlot
-      minX
-      maxX
-      yMaxDiscreteDomainFactor
-      yMaxContinuousDomainFactor
-      height=120
-      ?discrete
-      ?continuous
-      color={`hex("5f6b7e")}
-      onHover
-      timeScale
-    />;
-  };
-};
-
-module IntegralChart = {
-  [@react.component]
-  let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
-    open Distributions.DistPlus;
-    let integral =
-      Distributions.DistPlus.T.toShape(distPlus)
-      |> Distributions.Shape.T.Integral.get(~cache=None);
-    let continuous =
-      integral
-      |> Distributions.Continuous.toLinear
-      |> E.O.fmap(Distributions.Continuous.getShape);
-    let range = T.xTotalRange(distPlus);
-    let minX =
-      switch (T.minX(distPlus), range) {
-      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
-      | _ => None
-      };
-    let maxX = integral |> Distributions.Continuous.T.maxX;
-    let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
-    <DistributionPlot
-      minX
-      maxX
-      height=80
-      ?continuous
-      color={`hex("5f6b7e")}
-      timeScale
-      onHover
-    />;
-  };
-};
-
-[@react.component]
-let make = (~distPlus: DistTypes.distPlus) => {
-  let (x, setX) = React.useState(() => 0.);
-  let chart =
-    React.useMemo1(
-      () => {<DistPlusChart distPlus onHover={r => {setX(_ => r)}} />},
-      [|distPlus|],
-    );
-  let chart2 =
-    React.useMemo1(
-      () => {<IntegralChart distPlus onHover={r => {setX(_ => r)}} />},
-      [|distPlus|],
-    );
+let table = (distPlus, x) => {
   <div>
-    chart
-    chart2
     <table className="table-auto text-sm">
       <thead>
         <tr>
@@ -204,7 +110,102 @@ let make = (~distPlus: DistTypes.distPlus) => {
         </tr>
       </tbody>
     </table>
-    <div />
   </div>;
+};
+
+let adjustBoth = discreteProbabilityMass => {
+  let yMaxDiscreteDomainFactor = discreteProbabilityMass;
+  let yMaxContinuousDomainFactor = 1.0 -. discreteProbabilityMass;
+  let yMax =
+    yMaxDiscreteDomainFactor > yMaxContinuousDomainFactor
+      ? yMaxDiscreteDomainFactor : yMaxContinuousDomainFactor;
+  (
+    1.0 /. (yMaxDiscreteDomainFactor /. yMax),
+    1.0 /. (yMaxContinuousDomainFactor /. yMax),
+  );
+};
+
+module DistPlusChart = {
+  [@react.component]
+  let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
+    open Distributions.DistPlus;
+    let discrete = distPlus |> T.toScaledDiscrete;
+    let continuous =
+      distPlus
+      |> T.toScaledContinuous
+      |> E.O.fmap(Distributions.Continuous.getShape);
+    let range = T.xTotalRange(distPlus);
+    let minX =
+      switch (T.minX(distPlus), range) {
+      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
+      | _ => None
+      };
+
+    let maxX = T.maxX(distPlus);
+    let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
+    let toDiscreteProbabilityMass =
+      distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
+    let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
+      adjustBoth(toDiscreteProbabilityMass);
+    <DistributionPlot
+      minX
+      maxX
+      yMaxDiscreteDomainFactor
+      yMaxContinuousDomainFactor
+      height=120
+      ?discrete
+      ?continuous
+      color={`hex("5f6b7e")}
+      onHover
+      timeScale
+    />;
+  };
+};
+
+module IntegralChart = {
+  [@react.component]
+  let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
+    open Distributions.DistPlus;
+    let integral =
+      Distributions.DistPlus.T.toShape(distPlus)
+      |> Distributions.Shape.T.Integral.get(~cache=None);
+    let continuous =
+      integral
+      |> Distributions.Continuous.toLinear
+      |> E.O.fmap(Distributions.Continuous.getShape);
+    let range = T.xTotalRange(distPlus);
+    let minX =
+      switch (T.minX(distPlus), range) {
+      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
+      | _ => None
+      };
+    let maxX = integral |> Distributions.Continuous.T.maxX;
+    let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
+    <DistributionPlot
+      minX
+      maxX
+      height=80
+      ?continuous
+      color={`hex("5f6b7e")}
+      timeScale
+      onHover
+    />;
+  };
+};
+
+[@react.component]
+let make = (~distPlus: DistTypes.distPlus) => {
+  let (x, setX) = React.useState(() => 0.);
+  let chart =
+    React.useMemo1(
+      () => {<DistPlusChart distPlus onHover={r => {setX(_ => r)}} />},
+      [|distPlus|],
+    );
+  let chart2 =
+    React.useMemo1(
+      () => {<IntegralChart distPlus onHover={r => {setX(_ => r)}} />},
+      [|distPlus|],
+    );
+  <div> chart chart2 {table(distPlus, x)} </div>;
   // chart
 };
