@@ -169,7 +169,7 @@ export class CdfChartD3 {
     const areaColorRange = d3.scaleOrdinal().range(this.attrs.areaColors);
     const dataPoints = [this.getDataPoints('continuous')];
 
-    const { xMin, xMax,  xScale, yScale  } = common;
+    const { xMin, xMax, xScale, yScale } = common;
 
     // X-axis.
     let xAxis = null;
@@ -403,9 +403,9 @@ export class CdfChartD3 {
       .enter()
       .append('rect')
       .attr('width', 30)
-      .attr('height', this.calc.chartHeight)
+      .attr('height', d => this.calc.chartHeight - yScale(d.y) + 10)
       .attr('x', d => common.xScale(d.x) - 15)
-      .attr('y', 0)
+      .attr('y', d => yScale(d.y) - 10)
       .attr('opacity', 0)
       .attr('pointer-events', 'all')
       .on('mouseover', showTooltip)
