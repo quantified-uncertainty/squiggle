@@ -1,5 +1,5 @@
-import { Guesstimator } from '@foretold/guesstimator';
-import { Samples } from '@foretold/cdf';
+import { Guesstimator } from '@foretold/guesstimator/src';
+import { Samples } from '@foretold/cdf/lib/samples';
 import _ from 'lodash';
 
 /**
