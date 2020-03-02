@@ -124,9 +124,14 @@ export class CdfChartD3 {
    */
   getCommonThings() {
     // Boundaries.
-    const xMin = this.attrs.minX
-      || d3.min(this.attrs.data.continuous.xs)
-      || d3.min(this.attrs.data.discrete.xs);
+    // @todo: To fix code construction.
+    const xMin = this.attrs.scale === 'linear' ?
+      (this.attrs.minX
+        || d3.min(this.attrs.data.continuous.xs)
+        || d3.min(this.attrs.data.discrete.xs))
+      : ((this.attrs.minX > 0 ? this.attrs.minX : undefined)
+        || d3.min(this.attrs.data.continuous.xs.filter(i => i > 0))
+        || d3.min(this.attrs.data.discrete.xs.filter(i => i > 0)));
     const xMax = this.attrs.maxX
       || d3.max(this.attrs.data.continuous.xs)
       || d3.max(this.attrs.data.discrete.xs);
@@ -142,7 +147,7 @@ export class CdfChartD3 {
     const yMaxDomain = yMax * yMaxDomainFactor;
 
     // X-scale.
-    let xScale = this.attrs.scale === 'linear'
+    const xScale = this.attrs.scale === 'linear'
       ? d3.scaleLinear()
         .domain([xMinDomain, xMaxDomain])
         .range([0, this.calc.chartWidth])
@@ -211,14 +216,6 @@ export class CdfChartD3 {
     const yAxis = d3.axisRight(yScale);
 
     // Objects.
-    const line = d3.line()
-      .x(d => xScale(d.x))
-      .y(d => yScale(d.y));
-
-    const area = d3.area()
-      .x(d => xScale(d.x))
-      .y1(d => yScale(d.y))
-      .y0(this.calc.chartHeight);
 
     // Add axis.
     this.chart
@@ -233,6 +230,11 @@ export class CdfChartD3 {
     }
 
     // Draw area.
+    const area = d3.area()
+      .x(d => xScale(d.x))
+      .y1(d => yScale(d.y))
+      .y0(this.calc.chartHeight);
+
     this.chart
       .createObjectsWithData({
         tag: 'path',
@@ -245,6 +247,10 @@ export class CdfChartD3 {
 
     // Draw line.
     if (this.attrs.showDistributionLines) {
+      const line = d3.line()
+        .x(d => xScale(d.x))
+        .y(d => yScale(d.y));
+
       this.chart
         .createObjectsWithData({
           tag: 'path',
@@ -467,7 +473,9 @@ export class CdfChartD3 {
       const x = data.xs[i];
       const y = data.ys[i];
       const id = i;
-      dt.push({ x, y, id });
+      if (x > 0) {
+        dt.push({ x, y, id });
+      }
     }
 
     return dt;
