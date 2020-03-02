@@ -169,7 +169,7 @@ export class CdfChartD3 {
     const areaColorRange = d3.scaleOrdinal().range(this.attrs.areaColors);
     const dataPoints = [this.getDataPoints('continuous')];
 
-    const { xMin, xMax,  xScale, yScale  } = common;
+    const { xMin, xMax, xScale, yScale } = common;
 
     // X-axis.
     let xAxis = null;
@@ -337,11 +337,14 @@ export class CdfChartD3 {
       .domain([yMinDomain, yMaxDomain])
       .range([this.calc.chartHeight, 0]);
 
+    const yTicks = Math.floor(this.calc.chartHeight / 20);
+    const yAxis = d3.axisLeft(yScale).ticks(yTicks);
+
     // Adds 'g' for an y-axis.
     this.chart.append('g')
       .attr('class', 'lollipops-y-axis')
       .attr('transform', `translate(${this.calc.chartWidth}, 0)`)
-      .call(d3.axisLeft(yScale));
+      .call(yAxis);
 
     function showTooltip(d) {
       d3.select('#lollipops-line-' + d.id)
@@ -400,9 +403,9 @@ export class CdfChartD3 {
       .enter()
       .append('rect')
       .attr('width', 30)
-      .attr('height', this.calc.chartHeight)
+      .attr('height', d => this.calc.chartHeight - yScale(d.y) + 10)
       .attr('x', d => common.xScale(d.x) - 15)
-      .attr('y', 0)
+      .attr('y', d => yScale(d.y) - 10)
       .attr('opacity', 0)
       .attr('pointer-events', 'all')
       .on('mouseover', showTooltip)
@@ -427,7 +430,10 @@ export class CdfChartD3 {
       case 'months':
         return d3.timeMonth.every(4);
       case 'quarters':
-        return d3.timeMonth.every(3);
+        // It is temporary solution, but it works
+        // if the difference between edge dates is not
+        // much more than 10 units.
+        return d3.timeMonth.every(12);
       case 'hours':
         return d3.timeHour.every(10);
       case 'days':

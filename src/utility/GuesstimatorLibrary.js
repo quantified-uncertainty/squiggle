@@ -34,15 +34,29 @@ const ratioSize = samples => {
 };
 
 
+/**
+ * @param values
+ * @param outputResolutionCount
+ * @param min
+ * @param max
+ * @returns {{discrete: {ys: *, xs: *}, continuous: {ys: [], xs: []}}}
+ */
 const toPdf = (values, outputResolutionCount, min, max) => {
   let duplicateSamples = _(values).groupBy().pickBy(x => x.length > 1).keys().value();
   let totalLength = _.size(values);
-  let frequencies = duplicateSamples.map(s => ({value: parseFloat(s), percentage: _(values).filter(x => x ==s).size()/totalLength}));
+  let frequencies = duplicateSamples.map(s => ({
+    value: parseFloat(s),
+    percentage: _(values).filter(x => x == s).size() / totalLength
+  }));
   let continuousSamples = _.difference(values, frequencies.map(f => f.value));
 
-  let discrete = {xs: frequencies.map(f => f.value), ys: frequencies.map(f => f.percentage)};
-  let continuous = {ys: [], xs: []};
-  if (continuousSamples.length > 20){
+  let discrete = {
+    xs: frequencies.map(f => f.value),
+    ys: frequencies.map(f => f.percentage)
+  };
+  let continuous = { ys: [], xs: [] };
+
+  if (continuousSamples.length > 20) {
     const samples = new Samples(continuousSamples);
 
     const ratioSize$ = ratioSize(samples);
@@ -51,37 +65,52 @@ const toPdf = (values, outputResolutionCount, min, max) => {
     const pdf = samples.toPdf({ size: outputResolutionCount, width, min, max });
     continuous = pdf;
   }
-  return {continuous, discrete};
+
+  return { continuous, discrete };
 };
 
-let run = (text, sampleCount, outputResolutionCount, inputs=[], min=false, max=false) => {
-    let [_error, item] = Guesstimator.parse({ text: "=" + text });
-    const { parsedInput } = item;
-    const { guesstimateType } = parsedInput;
+/**
+ * @param text
+ * @param sampleCount
+ * @param outputResolutionCount
+ * @param inputs
+ * @param min
+ * @param max
+ * @returns {{discrete: {ys: *, xs: *}, continuous: {ys: *[], xs: *[]}}}
+ */
+const run = (
+  text,
+  sampleCount,
+  outputResolutionCount,
+  inputs = [],
+  min = false,
+  max = false,
+) => {
+  const [_error, item] = Guesstimator.parse({ text: "=" + text });
+  const { parsedInput } = item;
 
-    const guesstimator = new Guesstimator({ parsedInput });
-    const value = guesstimator.sample(
-      sampleCount,
-      inputs,
-    );
-    const samplerType = guesstimator.samplerType();
+  const guesstimator = new Guesstimator({ parsedInput });
+  const value = guesstimator.sample(
+    sampleCount,
+    inputs,
+  );
 
-    const values = _.filter(value.values, _.isFinite);
+  const values = _.filter(value.values, _.isFinite);
 
-    let update;
-    let blankResponse = {
-      continuous: {ys: [], xs: []},
-      discrete: {ys: [], xs: []}
-    };
-    if (values.length === 0) {
-      update = blankResponse;
-    } else if (values.length === 1) {
-      update = blankResponse;
-    } else {
-      update = toPdf(values, outputResolutionCount, min, max);
-    }
-    return update;
-}
+  let update;
+  let blankResponse = {
+    continuous: { ys: [], xs: [] },
+    discrete: { ys: [], xs: [] }
+  };
+  if (values.length === 0) {
+    update = blankResponse;
+  } else if (values.length === 1) {
+    update = blankResponse;
+  } else {
+    update = toPdf(values, outputResolutionCount, min, max);
+  }
+  return update;
+};
 
 module.exports = {
   run,
