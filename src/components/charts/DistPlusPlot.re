@@ -158,19 +158,21 @@ module DistPlusChart = {
       distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
       adjustBoth(toDiscreteProbabilityMass);
-    <DistributionPlot
-      scale={state.log ? "log" : "linear"}
-      minX
-      maxX
-      yMaxDiscreteDomainFactor
-      yMaxContinuousDomainFactor
-      height={state.height}
-      ?discrete
-      ?continuous
-      color={`hex("5f6b7e")}
-      onHover
-      timeScale
-    />;
+    <div className=Css.(style([minHeight(`px(state.height))]))>
+      <DistributionPlot
+        scale={state.log ? "log" : "linear"}
+        minX
+        maxX
+        yMaxDiscreteDomainFactor
+        yMaxContinuousDomainFactor
+        height={state.height}
+        ?discrete
+        ?continuous
+        color={`hex("5f6b7e")}
+        onHover
+        timeScale
+      />
+    </div>;
   };
 };
 
@@ -216,7 +218,7 @@ let make = (~distPlus: DistTypes.distPlus) => {
         | CHANGE_HEIGHT(height) => {...state, height}
         | CHANGE_SHOW_STATS => {...state, showStats: !state.showStats}
         },
-      {log: true, height: 120, showStats: false},
+      {log: false, height: 80, showStats: false},
     );
   let chart =
     React.useMemo2(
@@ -238,7 +240,12 @@ let make = (~distPlus: DistTypes.distPlus) => {
     <div onClick={_ => dispatch(CHANGE_HEIGHT(state.height + 40))}>
       {"HightPlus" |> ReasonReact.string}
     </div>
-    <div onClick={_ => dispatch(CHANGE_HEIGHT(state.height - 40))}>
+    <div
+      onClick={_ =>
+        dispatch(
+          CHANGE_HEIGHT(state.height < 81 ? state.height : state.height - 40),
+        )
+      }>
       {"HightMinus" |> ReasonReact.string}
     </div>
     chart

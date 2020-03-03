@@ -34,6 +34,7 @@ function CdfChartReact(props) {
   });
 
   useEffect(() => {
+    try {
     new CdfChartD3()
       .set('svgWidth', width)
       .set('svgHeight', props.height)
@@ -58,6 +59,10 @@ function CdfChartReact(props) {
         discrete: props.discrete,
       })
       .render();
+    }
+    catch(e) {
+      console.error("distPlotD3 Error: ", e)
+    }
   });
 
   return React.createElement("div", {

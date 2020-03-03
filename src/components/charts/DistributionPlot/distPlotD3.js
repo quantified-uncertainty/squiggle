@@ -407,7 +407,7 @@ export class CdfChartD3 {
         .attr('r', 6);
       tooltip.transition()
         .style('opacity', .9);
-      tooltip.html(`X: ${d.x}, Y: ${d.y}`)
+      tooltip.html(`x: ${d.x}, y: ${(d.y * 100).toFixed(1)}%`)
         .style('left', (common.xScale(d.x) + 60) + 'px')
         .style('top', yScale(d.y) + 'px');
     }
