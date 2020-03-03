@@ -124,7 +124,6 @@ export class CdfChartD3 {
    */
   getCommonThings() {
     // Boundaries.
-    // @todo: To fix code construction.
     const xMin = this.attrs.scale === 'linear' ?
       (this.attrs.minX
         || d3.min(this.attrs.data.continuous.xs)
@@ -138,6 +137,11 @@ export class CdfChartD3 {
 
     const yMin = d3.min(this.attrs.data.continuous.ys);
     const yMax = d3.max(this.attrs.data.continuous.ys);
+
+    if (!_.isFinite(xMin)) console.error('xMin is undefined');
+    if (!_.isFinite(xMax)) console.error('xMax is undefined');
+    if (!_.isFinite(yMin)) console.error('yMin is undefined');
+    if (!_.isFinite(yMax)) console.error('yMax is undefined');
 
     // X-domains.
     const yMaxDomainFactor = _.get(this.attrs, 'yMaxContinuousDomainFactor', 1);
@@ -214,8 +218,6 @@ export class CdfChartD3 {
 
     // Y-axis.
     const yAxis = d3.axisRight(yScale);
-
-    // Objects.
 
     // Add axis.
     this.chart
