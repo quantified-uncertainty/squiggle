@@ -177,10 +177,13 @@ module JsDate = {
 /* List */
 module L = {
   let fmap = List.map;
+  let get = Belt.List.get;
   let toArray = Array.of_list;
   let fmapi = List.mapi;
   let concat = List.concat;
   let append = List.append;
+  let drop = Rationale.RList.drop;
+  let remove = Rationale.RList.remove;
   let find = List.find;
   let filter = List.filter;
   let for_all = List.for_all;

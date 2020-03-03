@@ -1,15 +1,4 @@
-type state = {
-  log: bool,
-  showStats: bool,
-  showParams: bool,
-  height: int,
-};
-
-type action =
-  | CHANGE_LOG
-  | CHANGE_SHOW_STATS
-  | CHANGE_SHOW_PARAMS
-  | CHANGE_HEIGHT(int);
+open DistPlusPlotReducer;
 
 let showAsForm = (distPlus: DistTypes.distPlus) => {
   <div>
@@ -146,7 +135,7 @@ let adjustBoth = discreteProbabilityMass => {
 
 module DistPlusChart = {
   [@react.component]
-  let make = (~distPlus: DistTypes.distPlus, ~state: state, ~onHover) => {
+  let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
     open Distributions.DistPlus;
     let discrete = distPlus |> T.toScaledDiscrete;
     let continuous =
@@ -166,27 +155,25 @@ module DistPlusChart = {
       distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
       adjustBoth(toDiscreteProbabilityMass);
-    <div className=Css.(style([minHeight(`px(state.height))]))>
-      <DistributionPlot
-        scale={state.log ? "log" : "linear"}
-        minX
-        maxX
-        yMaxDiscreteDomainFactor
-        yMaxContinuousDomainFactor
-        height={state.height}
-        ?discrete
-        ?continuous
-        color={`hex("5f6b7e")}
-        onHover
-        timeScale
-      />
-    </div>;
+    <DistributionPlot
+      scale={config.log ? "log" : "linear"}
+      height={DistPlusPlotReducer.heightToPix(config.height)}
+      minX
+      maxX
+      yMaxDiscreteDomainFactor
+      yMaxContinuousDomainFactor
+      ?discrete
+      ?continuous
+      color={`hex("5f6b7e")}
+      onHover
+      timeScale
+    />;
   };
 };
 
 module IntegralChart = {
   [@react.component]
-  let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
+  let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
     open Distributions.DistPlus;
     let integral =
       Distributions.DistPlus.T.toShape(distPlus)
@@ -204,14 +191,38 @@ module IntegralChart = {
     let maxX = integral |> Distributions.Continuous.T.maxX;
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     <DistributionPlot
+      scale={config.log ? "log" : "linear"}
+      height={DistPlusPlotReducer.heightToPix(config.height)}
       minX
       maxX
-      height=80
       ?continuous
       color={`hex("5f6b7e")}
       timeScale
       onHover
     />;
+  };
+};
+
+module Chart = {
+  [@react.component]
+  let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
+    let chart =
+      React.useMemo2(
+        () => {
+          config.isCumulative
+            ? <IntegralChart distPlus config onHover />
+            : <DistPlusChart distPlus config onHover />
+        },
+        (distPlus, config),
+      );
+    <div
+      className=Css.(
+        style([
+          minHeight(`px(DistPlusPlotReducer.heightToPix(config.height))),
+        ])
+      )>
+      chart
+    </div>;
   };
 };
 
@@ -221,58 +232,65 @@ let button = "bg-gray-300 hover:bg-gray-500 text-grey-darkest text-xs px-4 py-1"
 let make = (~distPlus: DistTypes.distPlus) => {
   let (x, setX) = React.useState(() => 0.);
   let (state, dispatch) =
-    React.useReducer(
-      (state: state, action: action) =>
-        switch (action) {
-        | CHANGE_LOG => {...state, log: !state.log}
-        | CHANGE_HEIGHT(height) => {...state, height}
-        | CHANGE_SHOW_STATS => {...state, showStats: !state.showStats}
-        | CHANGE_SHOW_PARAMS => {...state, showParams: !state.showParams}
-        },
-      {log: false, height: 80, showStats: false, showParams: false},
-    );
-  let chart =
-    React.useMemo2(
-      () => {<DistPlusChart distPlus state onHover={r => {setX(_ => r)}} />},
-      (distPlus, state),
-    );
-  let chart2 =
-    React.useMemo1(
-      () => {<IntegralChart distPlus onHover={r => {setX(_ => r)}} />},
-      [|distPlus|],
-    );
+    React.useReducer(DistPlusPlotReducer.reducer, DistPlusPlotReducer.init);
   <div>
-    chart
-    chart2
+    {state.distributions
+     |> E.L.fmapi((index, config) =>
+          <div className="flex">
+            <div className="w-4/5">
+              <Chart distPlus config onHover={r => {setX(_ => r)}} />
+            </div>
+            <div className="w-1/5">
+              <div className="opacity-50 hover:opacity-100">
+                <button
+                  className=button
+                  onClick={_ => dispatch(CHANGE_LOG(index))}>
+                  {(state.log ? "log" : "linear") |> ReasonReact.string}
+                </button>
+                <button
+                  className=button
+                  onClick={_ =>
+                    dispatch(
+                      CHANGE_IS_CUMULATIVE(index, !config.isCumulative),
+                    )
+                  }>
+                  {(config.isCumulative ? "cdf" : "pdf") |> ReasonReact.string}
+                </button>
+                <button
+                  className=button
+                  onClick={_ => dispatch(HEIGHT_INCREMENT(index))}>
+                  {"Expand" |> ReasonReact.string}
+                </button>
+                <button
+                  className=button
+                  onClick={_ => dispatch(HEIGHT_DECREMENT(index))}>
+                  {"Compress" |> ReasonReact.string}
+                </button>
+                {index != 0
+                   ? <button
+                       className=button
+                       onClick={_ => dispatch(REMOVE_DIST(index))}>
+                       {"Remove" |> ReasonReact.string}
+                     </button>
+                   : ReasonReact.null}
+              </div>
+            </div>
+          </div>
+        )
+     |> E.L.toArray
+     |> ReasonReact.array}
     <div className="inline-flex opacity-50 hover:opacity-100">
-      <button className=button onClick={_ => dispatch(CHANGE_LOG)}>
-        {(state.log ? "x-Linear" : "x-Log") |> ReasonReact.string}
-      </button>
       <button className=button onClick={_ => dispatch(CHANGE_SHOW_STATS)}>
         {"Stats" |> ReasonReact.string}
       </button>
       <button className=button onClick={_ => dispatch(CHANGE_SHOW_PARAMS)}>
         {"Params" |> ReasonReact.string}
       </button>
-      <button
-        className=button
-        onClick={_ => dispatch(CHANGE_HEIGHT(state.height + 40))}>
-        {"Expand" |> ReasonReact.string}
-      </button>
-      <button
-        className=button
-        onClick={_ =>
-          dispatch(
-            CHANGE_HEIGHT(
-              state.height < 81 ? state.height : state.height - 40,
-            ),
-          )
-        }>
-        {"Compress" |> ReasonReact.string}
+      <button className=button onClick={_ => dispatch(ADD_DIST)}>
+        {"Add" |> ReasonReact.string}
       </button>
     </div>
     {state.showParams ? showAsForm(distPlus) : ReasonReact.null}
     {state.showStats ? table(distPlus, x) : ReasonReact.null}
   </div>;
-  // chart
 };
