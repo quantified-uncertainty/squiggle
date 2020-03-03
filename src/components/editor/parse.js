@@ -1,6 +1,7 @@
-// Functions for parsing/processing user input strings are here
 const _math = require("mathjs");
 const math = _math.create(_math.all);
+
+// Functions for parsing/processing user input strings are here
 
 const DISTR_REGEXS = [
   /beta\(/g,
@@ -10,6 +11,11 @@ const DISTR_REGEXS = [
   /uniform\(/g
 ];
 
+/**
+ *
+ * @param user_input_string
+ * @returns {{mm_args_string: string, outer_string: string}}
+ */
 function parse_initial_string(user_input_string) {
   let outer_output_string = "";
   let mm_args_string = "";
@@ -42,6 +48,10 @@ function parse_initial_string(user_input_string) {
   };
 }
 
+/**
+ * @param mm_args_string
+ * @returns {{distrs: [], weights: string}}
+ */
 function separate_mm_args(mm_args_string) {
   if (mm_args_string.endsWith(",")) {
     mm_args_string = mm_args_string.slice(0, -1);
@@ -68,6 +78,10 @@ function separate_mm_args(mm_args_string) {
   };
 }
 
+/**
+ * @param distr_string
+ * @returns {[]}
+ */
 function get_distr_substrings(distr_string) {
   let substrings = [];
   for (let regex of DISTR_REGEXS) {
@@ -92,6 +106,10 @@ function get_distr_substrings(distr_string) {
   return substrings;
 }
 
+/**
+ * @param substr
+ * @returns {(string|*)[]}
+ */
 function get_distr_name_and_args(substr) {
   let distr_name = "";
   let args_str = "";

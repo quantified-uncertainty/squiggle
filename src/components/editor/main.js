@@ -1,15 +1,18 @@
-// The main algorithmic work is done by functions in this module.
-// It also contains the main function, taking the user's string
-// and returning pdf values and x's.
+const _math = require("mathjs");
+const bst = require("binary-search-tree");
 
 const distrs = require("./distribution.js").distrs;
 const parse = require("./parse.js");
-const _math = require("mathjs");
 const math = _math.create(_math.all);
-const bst = require("binary-search-tree");
 
 const NUM_MC_SAMPLES = 300;
 const OUTPUT_GRID_NUMEL = 300;
+
+/**
+ * The main algorithmic work is done by functions in this module.
+ * It also contains the main function, taking the user's string
+ * and returning pdf values and x's.
+ */
 
 /**
  * @param start
@@ -24,22 +27,23 @@ function evenly_spaced_grid(start, stop, numel) {
 }
 
 /**
+ * Takes an array of strings like "normal(0, 1)" and
+ * returns the corresponding distribution objects
  * @param substrings
  * @returns {*}
  */
 function get_distributions(substrings) {
-  // Takes an array of strings like "normal(0, 1)" and
-  // returns the corresponding distribution objects
   let names_and_args = substrings.map(parse.get_distr_name_and_args);
   let pdfs = names_and_args.map(x => new distrs[x[0]](x[1]));
   return pdfs;
 }
 
-// update the binary search tree with bin points of
-// deterministic_pdf transformed by tansform func
-// (transfrom func can be a stocahstic func with parameters
-// sampled from mc_distrs)
 /**
+ * update the binary search tree with bin points of
+ * deterministic_pdf transformed by tansform func
+ * (transfrom func can be a stocahstic func with parameters
+ * sampled from mc_distrs)
+ *
  * @param transform_func
  * @param deterministic_pdf
  * @param mc_distrs
@@ -116,10 +120,11 @@ function update_transformed_divider_points_bst(
   return [start_pt, end_pt];
 }
 
-// Take the binary search tree with transformed bin points,
-// and an array of pdf values associated with the bins,
-// and return a pdf over an evenly spaced grid
 /**
+ * Take the binary search tree with transformed bin points,
+ * and an array of pdf values associated with the bins,
+ * and return a pdf over an evenly spaced grid
+ *
  * @param pdf_vals
  * @param bst_pts_and_idxs
  * @param output_grid
@@ -177,13 +182,14 @@ function get_final_pdf(pdf_vals, bst_pts_and_idxs, output_grid) {
   return final_pdf_vals;
 }
 
-// Entrypoint. Pass user input strings to this function,
-// get the corresponding pdf values and input points back.
-// If the pdf requires monte carlo (it contains a between-distr function)
-// we first determing which distr to have deterministic
-// and which to sample from. This is decided based on which
-// choice gives the least variance.
 /**
+ * Entrypoint. Pass user input strings to this function,
+ * get the corresponding pdf values and input points back.
+ * If the pdf requires monte carlo (it contains a between-distr function)
+ * we first determing which distr to have deterministic
+ * and which to sample from. This is decided based on which
+ * choice gives the least variance.
+ *
  * @param user_input_string
  * @returns {([]|*[])[]}
  */
@@ -261,10 +267,11 @@ function pluck_from_array(array, idx) {
   return [array[idx], array.slice(0, idx).concat(array.slice(idx + 1))];
 }
 
-// If distr_string requires MC, try all possible
-// choices for the deterministic distribution,
-// and pick the one with the least variance.
 /**
+ * If distr_string requires MC, try all possible
+ * choices for the deterministic distribution,
+ * and pick the one with the least variance.
+ *
  * @param distr_string
  * @returns {(*|*[])[]|*[]}
  */
