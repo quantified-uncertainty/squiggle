@@ -46,13 +46,13 @@ function CdfChartReact(props) {
       .set('marginTop', 5)
       .set('showDistributionLines', props.showDistributionLines)
       .set('showDistributionYAxis', props.showDistributionYAxis)
-      .set('verticalLine', props.verticalLine)
+      .set('verticalLine', props.verticalLine || 110)
       .set('showVerticalLine', props.showVerticalLine)
       .set('container', containerRef.current)
       .set('scale', scale)
       .set('timeScale', props.timeScale)
-      .set('yMaxContinuousDomainFactor', props.yMaxContinuousDomainFactor)
-      .set('yMaxDiscreteDomainFactor', props.yMaxDiscreteDomainFactor)
+      .set('yMaxContinuousDomainFactor', props.yMaxContinuousDomainFactor || 1)
+      .set('yMaxDiscreteDomainFactor', props.yMaxDiscreteDomainFactor || 1)
       .data({
         continuous: props.continuous,
         discrete: props.discrete,

@@ -38,7 +38,7 @@ module DemoDist = {
     let continuous: DistTypes.xyShape = {xs, ys};
     <Antd.Card title={"Distribution" |> E.ste}>
       <div className=Styles.spacer />
-      <DistributionPlot height=200 continuous />
+      <DistributionPlot continuous />
     </Antd.Card>;
   };
 };
