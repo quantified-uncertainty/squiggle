@@ -34,11 +34,15 @@ module Styles = {
 module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString: string) => {
-    let (ys, xs) = DistEditor.getPdfFromUserInput(guesstimatorString);
+    let (ys, xs, isEmpty) =
+      DistEditor.getPdfFromUserInput(guesstimatorString);
     let continuous: DistTypes.xyShape = {xs, ys};
     <Antd.Card title={"Distribution" |> E.ste}>
       <div className=Styles.spacer />
-      <DistributionPlot continuous />
+      {isEmpty
+         ? "Nothing to show. Try to change the distribution description."
+           |> E.ste
+         : <DistributionPlot continuous />}
     </Antd.Card>;
   };
 };

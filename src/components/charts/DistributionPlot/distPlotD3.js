@@ -68,14 +68,18 @@ export class CdfChartD3 {
    * @returns {CdfChartD3}
    */
   data(data) {
+    const continuousXs = _.get(data, 'continuous.xs', []);
+    const continuousYs = _.get(data, 'continuous.ys', []);
+    const discreteXs = _.get(data, 'discrete.xs', []);
+    const discreteYs = _.get(data, 'discrete.ys', []);
     this.attrs.data = data;
-    this.attrs.data.continuous = data.continuous || {
-      xs: [],
-      ys: [],
+    this.attrs.data.continuous = {
+      xs: continuousXs,
+      ys: continuousYs,
     };
-    this.attrs.data.discrete = data.discrete || {
-      xs: [],
-      ys: [],
+    this.attrs.data.discrete = {
+      xs: discreteXs,
+      ys: discreteYs,
     };
     return this;
   }
