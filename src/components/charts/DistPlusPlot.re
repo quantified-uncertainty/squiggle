@@ -1,3 +1,14 @@
+type state = {
+  log: bool,
+  showStats: bool,
+  height: int,
+};
+
+type action =
+  | CHANGE_LOG
+  | CHANGE_SHOW_STATS
+  | CHANGE_HEIGHT(int);
+
 let table = (distPlus, x) => {
   <div>
     <table className="table-auto text-sm">
@@ -127,7 +138,7 @@ let adjustBoth = discreteProbabilityMass => {
 
 module DistPlusChart = {
   [@react.component]
-  let make = (~distPlus: DistTypes.distPlus, ~onHover) => {
+  let make = (~distPlus: DistTypes.distPlus, ~state: state, ~onHover) => {
     open Distributions.DistPlus;
     let discrete = distPlus |> T.toScaledDiscrete;
     let continuous =
@@ -148,11 +159,12 @@ module DistPlusChart = {
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
       adjustBoth(toDiscreteProbabilityMass);
     <DistributionPlot
+      scale={state.log ? "log" : "linear"}
       minX
       maxX
       yMaxDiscreteDomainFactor
       yMaxContinuousDomainFactor
-      height=120
+      height={state.height}
       ?discrete
       ?continuous
       color={`hex("5f6b7e")}
@@ -196,16 +208,42 @@ module IntegralChart = {
 [@react.component]
 let make = (~distPlus: DistTypes.distPlus) => {
   let (x, setX) = React.useState(() => 0.);
+  let (state, dispatch) =
+    React.useReducer(
+      (state: state, action: action) =>
+        switch (action) {
+        | CHANGE_LOG => {...state, log: !state.log}
+        | CHANGE_HEIGHT(height) => {...state, height}
+        | CHANGE_SHOW_STATS => {...state, showStats: !state.showStats}
+        },
+      {log: true, height: 120, showStats: false},
+    );
   let chart =
-    React.useMemo1(
-      () => {<DistPlusChart distPlus onHover={r => {setX(_ => r)}} />},
-      [|distPlus|],
+    React.useMemo2(
+      () => {<DistPlusChart distPlus state onHover={r => {setX(_ => r)}} />},
+      (distPlus, state),
     );
   let chart2 =
     React.useMemo1(
       () => {<IntegralChart distPlus onHover={r => {setX(_ => r)}} />},
       [|distPlus|],
     );
-  <div> chart chart2 {table(distPlus, x)} </div>;
+  <div>
+    <div onClick={_ => dispatch(CHANGE_LOG)}>
+      {(state.log ? "true" : "False") |> ReasonReact.string}
+    </div>
+    <div onClick={_ => dispatch(CHANGE_SHOW_STATS)}>
+      {"Stats" |> ReasonReact.string}
+    </div>
+    <div onClick={_ => dispatch(CHANGE_HEIGHT(state.height + 40))}>
+      {"HightPlus" |> ReasonReact.string}
+    </div>
+    <div onClick={_ => dispatch(CHANGE_HEIGHT(state.height - 40))}>
+      {"HightMinus" |> ReasonReact.string}
+    </div>
+    chart
+    chart2
+    {state.showStats ? table(distPlus, x) : ReasonReact.null}
+  </div>;
   // chart
 };
