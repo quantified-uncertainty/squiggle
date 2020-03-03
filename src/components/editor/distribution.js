@@ -1,10 +1,13 @@
-// This module defines an abstract BinnedDistribution class, which
-// should be implemented for each distribution. You need to decide
-// how to bin the distribution (use _adabin unless there's a nicer
-// way for your distr) and how to choose the distribution's support.
 const _math = require("mathjs");
 const math = _math.create(_math.all);
 const jStat = require("jstat");
+
+/**
+ * This module defines an abstract BinnedDistribution class, which
+ * should be implemented for each distribution. You need to decide
+ * how to bin the distribution (use _adabin unless there's a nicer
+ * way for your distr) and how to choose the distribution's support.
+ */
 
 math.import({
   normal: jStat.normal,
@@ -14,6 +17,9 @@ math.import({
 });
 
 class BaseDistributionBinned {
+  /**
+   * @param args
+   */
   constructor(args) {
     this._set_props();
     this.max_bin_size = 0.5;
@@ -30,11 +36,18 @@ class BaseDistributionBinned {
     [this.pdf_vals, this.divider_pts] = this.bin();
   }
 
+  /**
+   * this is hacky but class properties aren't always supported
+   * @private
+   */
   _set_props() {
-    // this is hacky but class properties aren't always supported
     throw new Error("NotImplementedError");
   }
 
+  /**
+   * @returns {(number[]|[*])[]}
+   * @private
+   */
   _adabin() {
     let point = this.start_point;
     let vals = [this.pdf_func(point)];
@@ -78,6 +91,10 @@ class BaseDistributionBinned {
     throw new Error("NotImplementedError");
   }
 
+  /**
+   * @param args
+   * @returns {(any|(function(*=): *))[]}
+   */
   get_params_and_pdf_func(args) {
     let args_str = args.toString() + ")";
     let substr = this.name + ".pdf(x, " + args_str;
@@ -95,11 +112,17 @@ class BaseDistributionBinned {
 }
 
 class NormalDistributionBinned extends BaseDistributionBinned {
+  /**
+   * @private
+   */
   _set_props() {
     this.name = "normal";
     this.param_names = ["mean", "std"];
   }
 
+  /**
+   * @returns {(number|*)[]}
+   */
   get_bounds() {
     return [
       this.params.mean - 4 * this.params.std,
@@ -107,22 +130,34 @@ class NormalDistributionBinned extends BaseDistributionBinned {
     ];
   }
 
+  /**
+   * @returns {[[*], [*]]}
+   */
   bin() {
     return this._adabin(this.params.std);
   }
 }
 
 class UniformDistributionBinned extends BaseDistributionBinned {
+  /**
+   * @private
+   */
   _set_props() {
     this.name = "uniform";
     this.param_names = ["start_point", "end_point"];
     this.num_bins = 200;
   }
 
+  /**
+   * @returns {*[]}
+   */
   get_bounds() {
     return [this.params.start_point, this.params.end_point];
   }
 
+  /**
+   * @returns {(*[])[]}
+   */
   bin() {
     let divider_pts = evenly_spaced_grid(
       this.params.start_point,
@@ -138,6 +173,9 @@ class UniformDistributionBinned extends BaseDistributionBinned {
 }
 
 class LogNormalDistributionBinned extends BaseDistributionBinned {
+  /**
+   * @private
+   */
   _set_props() {
     this.name = "lognormal";
     this.param_names = ["normal_mean", "normal_std"];
@@ -145,6 +183,12 @@ class LogNormalDistributionBinned extends BaseDistributionBinned {
     this.n_largest_bound_sample = 10;
   }
 
+  /**
+   * @param samples
+   * @param n
+   * @returns {any}
+   * @private
+   */
   _nth_largest(samples, n) {
     var largest_buffer = Array(n).fill(-Infinity);
     for (const sample of samples) {
@@ -159,6 +203,9 @@ class LogNormalDistributionBinned extends BaseDistributionBinned {
     return largest_buffer[n - 1];
   }
 
+  /**
+   * @returns {(*|any)[]}
+   */
   get_bounds() {
     let samples = Array(this.n_bounds_samples)
       .fill(0)
@@ -169,11 +216,20 @@ class LogNormalDistributionBinned extends BaseDistributionBinned {
     ];
   }
 
+  /**
+   * @returns {[[*], [*]]}
+   */
   bin() {
     return this._adabin();
   }
 }
 
+/**
+ * @param start
+ * @param stop
+ * @param numel
+ * @returns {*[]}
+ */
 function evenly_spaced_grid(start, stop, numel) {
   return Array(numel)
     .fill(0)

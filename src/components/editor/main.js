@@ -1,30 +1,57 @@
-// The main algorithmic work is done by functions in this module.
-// It also contains the main function, taking the user's string
-// and returning pdf values and x's.
+const _math = require("mathjs");
+const bst = require("binary-search-tree");
 
 const distrs = require("./distribution.js").distrs;
 const parse = require("./parse.js");
-const _math = require("mathjs");
 const math = _math.create(_math.all);
-const bst = require("binary-search-tree");
 
 const NUM_MC_SAMPLES = 300;
 const OUTPUT_GRID_NUMEL = 300;
 
+/**
+ * The main algorithmic work is done by functions in this module.
+ * It also contains the main function, taking the user's string
+ * and returning pdf values and x's.
+ */
+
+/**
+ * @param start
+ * @param stop
+ * @param numel
+ * @returns {*[]}
+ */
 function evenly_spaced_grid(start, stop, numel) {
   return Array(numel)
     .fill(0)
     .map((_, idx) => start + (idx / numel) * (stop - start));
 }
 
+/**
+ * Takes an array of strings like "normal(0, 1)" and
+ * returns the corresponding distribution objects
+ * @param substrings
+ * @returns {*}
+ */
 function get_distributions(substrings) {
-  // Takes an array of strings like "normal(0, 1)" and
-  // returns the corresponding distribution objects
   let names_and_args = substrings.map(parse.get_distr_name_and_args);
   let pdfs = names_and_args.map(x => new distrs[x[0]](x[1]));
   return pdfs;
 }
 
+/**
+ * update the binary search tree with bin points of
+ * deterministic_pdf transformed by tansform func
+ * (transfrom func can be a stocahstic func with parameters
+ * sampled from mc_distrs)
+ *
+ * @param transform_func
+ * @param deterministic_pdf
+ * @param mc_distrs
+ * @param track_idx
+ * @param num_mc_samples
+ * @param bst_pts_and_idxs
+ * @returns {(number)[]}
+ */
 function update_transformed_divider_points_bst(
   transform_func,
   deterministic_pdf,
@@ -33,10 +60,6 @@ function update_transformed_divider_points_bst(
   num_mc_samples,
   bst_pts_and_idxs
 ) {
-  // update the binary search tree with bin points of
-  // deterministic_pdf transformed by tansform func
-  // (transfrom func can be a stocahstic func with parameters
-  // sampled from mc_distrs)
   var transformed_pts = [];
   var pdf_inner_idxs = [];
   var factors = [];
@@ -97,10 +120,17 @@ function update_transformed_divider_points_bst(
   return [start_pt, end_pt];
 }
 
+/**
+ * Take the binary search tree with transformed bin points,
+ * and an array of pdf values associated with the bins,
+ * and return a pdf over an evenly spaced grid
+ *
+ * @param pdf_vals
+ * @param bst_pts_and_idxs
+ * @param output_grid
+ * @returns {[]}
+ */
 function get_final_pdf(pdf_vals, bst_pts_and_idxs, output_grid) {
-  // Take the binary search tree with transformed bin points,
-  // and an array of pdf values associated with the bins,
-  // and return a pdf over an evenly spaced grid
   var offset = output_grid[1] / 2 - output_grid[0] / 2;
   var active_intervals = new Map();
   var active_endpoints = new bst.AVLTree();
@@ -152,47 +182,66 @@ function get_final_pdf(pdf_vals, bst_pts_and_idxs, output_grid) {
   return final_pdf_vals;
 }
 
+/**
+ * Entrypoint. Pass user input strings to this function,
+ * get the corresponding pdf values and input points back.
+ * If the pdf requires monte carlo (it contains a between-distr function)
+ * we first determing which distr to have deterministic
+ * and which to sample from. This is decided based on which
+ * choice gives the least variance.
+ *
+ * @param user_input_string
+ * @returns {([]|*[])[]}
+ */
 function get_pdf_from_user_input(user_input_string) {
-  // Entrypoint. Pass user input strings to this function,
-  // get the corresponding pdf values and input points back.
-  // If the pdf requires monte carlo (it contains a between-distr function)
-  // we first determing which distr to have deterministic
-  // and whih to sample from. This is decided based on which
-  // choice gives the least variance.
-  let parsed = parse.parse_initial_string(user_input_string);
-  let mm_args = parse.separate_mm_args(parsed.mm_args_string);
-  const is_mm = mm_args.distrs.length > 0;
-  let tree = new bst.AVLTree();
-  let possible_start_pts = [];
-  let possible_end_pts = [];
-  let all_vals = [];
-  let weights = is_mm ? math.compile(mm_args.weights).evaluate()._data : [1];
-  let weights_sum = weights.reduce((a, b) => a + b);
-  weights = weights.map(x => x / weights_sum);
-  let n_iters = is_mm ? mm_args.distrs.length : 1;
-  for (let i = 0; i < n_iters; ++i) {
-    let distr_string = is_mm ? mm_args.distrs[i] : parsed.outer_string;
-    var [deterministic_pdf, mc_distrs] = choose_pdf_func(distr_string);
-    var grid_transform = get_grid_transform(distr_string);
-    var [start_pt, end_pt] = update_transformed_divider_points_bst(
-      grid_transform,
-      deterministic_pdf,
-      mc_distrs,
-      i,
-      NUM_MC_SAMPLES,
-      tree
-    );
-    possible_start_pts.push(start_pt);
-    possible_end_pts.push(end_pt);
-    all_vals.push(deterministic_pdf.pdf_vals.map(x => x * weights[i]));
+  try{
+    let parsed = parse.parse_initial_string(user_input_string);
+    let mm_args = parse.separate_mm_args(parsed.mm_args_string);
+
+    const is_mm = mm_args.distrs.length > 0;
+    if (!parsed.outer_string) return [[], [], true];
+
+    let tree = new bst.AVLTree();
+    let possible_start_pts = [];
+    let possible_end_pts = [];
+    let all_vals = [];
+    let weights = is_mm ? math.compile(mm_args.weights).evaluate()._data : [1];
+    let weights_sum = weights.reduce((a, b) => a + b);
+    weights = weights.map(x => x / weights_sum);
+    let n_iters = is_mm ? mm_args.distrs.length : 1;
+
+    for (let i = 0; i < n_iters; ++i) {
+      let distr_string = is_mm ? mm_args.distrs[i] : parsed.outer_string;
+      var [deterministic_pdf, mc_distrs] = choose_pdf_func(distr_string);
+      var grid_transform = get_grid_transform(distr_string);
+      var [start_pt, end_pt] = update_transformed_divider_points_bst(
+        grid_transform,
+        deterministic_pdf,
+        mc_distrs,
+        i,
+        NUM_MC_SAMPLES,
+        tree
+      );
+      possible_start_pts.push(start_pt);
+      possible_end_pts.push(end_pt);
+      all_vals.push(deterministic_pdf.pdf_vals.map(x => x * weights[i]));
+    }
+
+    start_pt = Math.min(...possible_start_pts);
+    end_pt = Math.max(...possible_end_pts);
+
+    let output_grid = evenly_spaced_grid(start_pt, end_pt, OUTPUT_GRID_NUMEL);
+    let final_pdf_vals = get_final_pdf(all_vals, tree, output_grid);
+    return [final_pdf_vals, output_grid, false];
+  } catch (e) {
+    return [[], [], true];
   }
-  start_pt = Math.min(...possible_start_pts);
-  end_pt = Math.max(...possible_end_pts);
-  let output_grid = evenly_spaced_grid(start_pt, end_pt, OUTPUT_GRID_NUMEL);
-  let final_pdf_vals = get_final_pdf(all_vals, tree, output_grid);
-  return [final_pdf_vals, output_grid];
 }
 
+/**
+ * @param vals
+ * @returns {number}
+ */
 function variance(vals) {
   var vari = 0;
   for (let i = 0; i < vals[0].length; ++i) {
@@ -209,14 +258,24 @@ function variance(vals) {
   return vari;
 }
 
+/**
+ * @param array
+ * @param idx
+ * @returns {*[]}
+ */
 function pluck_from_array(array, idx) {
   return [array[idx], array.slice(0, idx).concat(array.slice(idx + 1))];
 }
 
+/**
+ * If distr_string requires MC, try all possible
+ * choices for the deterministic distribution,
+ * and pick the one with the least variance.
+ *
+ * @param distr_string
+ * @returns {(*|*[])[]|*[]}
+ */
 function choose_pdf_func(distr_string) {
-  // If distr_string requires MC, try all possible
-  // choices for the deterministic distribution,
-  // and pick the one with the least variance.
   var variances = [];
   let transform_func = get_grid_transform(distr_string);
   let substrings = parse.get_distr_substrings(distr_string);
@@ -259,6 +318,10 @@ function choose_pdf_func(distr_string) {
   return [pdfs[best_idx], mc_distrs];
 }
 
+/**
+ * @param distr_string
+ * @returns {function(*): *}
+ */
 function get_grid_transform(distr_string) {
   let substrings = parse.get_distr_substrings(distr_string);
   let arg_strings = [];
