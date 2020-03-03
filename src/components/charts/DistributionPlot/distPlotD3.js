@@ -475,9 +475,7 @@ export class CdfChartD3 {
       const x = data.xs[i];
       const y = data.ys[i];
       const id = i;
-      if (x > 0) {
-        dt.push({ x, y, id });
-      }
+      dt.push({ x, y, id });
     }
 
     return dt;

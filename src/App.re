@@ -78,7 +78,7 @@ module Menu = {
       <Item href={routeToPath(DistBuilder)} key="dist-builder">
         {"Dist Builder" |> E.ste}
       </Item>
-      <Item href={routeToPath(DistBuilder2)} key="dist-builder">
+      <Item href={routeToPath(DistBuilder2)} key="dist-builder-2">
         {"Dist Builder 2" |> E.ste}
       </Item>
     </div>;
