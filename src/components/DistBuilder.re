@@ -45,18 +45,20 @@ module FieldString = {
 
 module FieldNumber = {
   [@react.component]
-  let make = (~field, ~label) => {
+  let make = (~field, ~label, ~min=0) => {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
         <Antd.Form.Item label={label |> E.ste}>
           <Antd.InputNumber
             value
-            onChange={e => {
-              e |> handleChange;
-              ();
-            }}
+            onChange=handleChange
+            min
             onBlur={_ => validate()}
+            parser={str => {
+              let a = str |> Js.Float.fromString |> int_of_float;
+              a < min ? min : a;
+            }}
           />
         </Antd.Form.Item>
       }
@@ -66,19 +68,22 @@ module FieldNumber = {
 
 module FieldFloat = {
   [@react.component]
-  let make = (~field, ~label, ~className=Css.style([])) => {
+  let make =
+      (~field, ~label, ~className=Css.style([]), ~min=0., ~precision=2) => {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
         <Antd.Form.Item label={label |> E.ste}>
           <Antd.InputFloat
             value
-            onChange={e => {
-              e |> handleChange;
-              ();
-            }}
+            precision
+            onChange=handleChange
             onBlur={_ => validate()}
             className
+            parser={str => {
+              let a = str |> Js.Float.fromString;
+              Js.Float.isNaN(a) ? min : a;
+            }}
           />
         </Antd.Form.Item>
       }
@@ -440,16 +445,25 @@ let make = () => {
           </Row>
           <Row _type=`flex className=Styles.rows>
             <Col span=4>
-              <FieldNumber field=FormConfig.SampleCount label="Sample Count" />
+              <FieldNumber
+                field=FormConfig.SampleCount
+                label="Sample Count"
+                min=100
+              />
             </Col>
             <Col span=4>
               <FieldNumber
                 field=FormConfig.OutputXYPoints
                 label="Output XY-points"
+                min=100
               />
             </Col>
             <Col span=4>
-              <FieldNumber field=FormConfig.TruncateTo label="Truncate To" />
+              <FieldNumber
+                field=FormConfig.TruncateTo
+                label="Truncate To"
+                min=10
+              />
             </Col>
           </Row>
           <Antd.Button
