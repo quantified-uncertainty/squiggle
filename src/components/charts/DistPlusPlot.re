@@ -1,13 +1,21 @@
 type state = {
   log: bool,
   showStats: bool,
+  showParams: bool,
   height: int,
 };
 
 type action =
   | CHANGE_LOG
   | CHANGE_SHOW_STATS
+  | CHANGE_SHOW_PARAMS
   | CHANGE_HEIGHT(int);
+
+let showAsForm = (distPlus: DistTypes.distPlus) => {
+  <div>
+    <Antd.Input value={distPlus.guesstimatorString |> E.O.default("")} />
+  </div>;
+};
 
 let table = (distPlus, x) => {
   <div>
@@ -207,6 +215,8 @@ module IntegralChart = {
   };
 };
 
+let button = "bg-gray-300 hover:bg-gray-500 text-grey-darkest text-xs px-4 py-1";
+
 [@react.component]
 let make = (~distPlus: DistTypes.distPlus) => {
   let (x, setX) = React.useState(() => 0.);
@@ -217,8 +227,9 @@ let make = (~distPlus: DistTypes.distPlus) => {
         | CHANGE_LOG => {...state, log: !state.log}
         | CHANGE_HEIGHT(height) => {...state, height}
         | CHANGE_SHOW_STATS => {...state, showStats: !state.showStats}
+        | CHANGE_SHOW_PARAMS => {...state, showParams: !state.showParams}
         },
-      {log: false, height: 80, showStats: false},
+      {log: false, height: 80, showStats: false, showParams: false},
     );
   let chart =
     React.useMemo2(
@@ -231,25 +242,36 @@ let make = (~distPlus: DistTypes.distPlus) => {
       [|distPlus|],
     );
   <div>
-    <div onClick={_ => dispatch(CHANGE_LOG)}>
-      {(state.log ? "true" : "False") |> ReasonReact.string}
-    </div>
-    <div onClick={_ => dispatch(CHANGE_SHOW_STATS)}>
-      {"Stats" |> ReasonReact.string}
-    </div>
-    <div onClick={_ => dispatch(CHANGE_HEIGHT(state.height + 40))}>
-      {"HightPlus" |> ReasonReact.string}
-    </div>
-    <div
-      onClick={_ =>
-        dispatch(
-          CHANGE_HEIGHT(state.height < 81 ? state.height : state.height - 40),
-        )
-      }>
-      {"HightMinus" |> ReasonReact.string}
-    </div>
     chart
     chart2
+    <div className="inline-flex opacity-50 hover:opacity-100">
+      <button className=button onClick={_ => dispatch(CHANGE_LOG)}>
+        {(state.log ? "x-Linear" : "x-Log") |> ReasonReact.string}
+      </button>
+      <button className=button onClick={_ => dispatch(CHANGE_SHOW_STATS)}>
+        {"Stats" |> ReasonReact.string}
+      </button>
+      <button className=button onClick={_ => dispatch(CHANGE_SHOW_PARAMS)}>
+        {"Params" |> ReasonReact.string}
+      </button>
+      <button
+        className=button
+        onClick={_ => dispatch(CHANGE_HEIGHT(state.height + 40))}>
+        {"Expand" |> ReasonReact.string}
+      </button>
+      <button
+        className=button
+        onClick={_ =>
+          dispatch(
+            CHANGE_HEIGHT(
+              state.height < 81 ? state.height : state.height - 40,
+            ),
+          )
+        }>
+        {"Compress" |> ReasonReact.string}
+      </button>
+    </div>
+    {state.showParams ? showAsForm(distPlus) : ReasonReact.null}
     {state.showStats ? table(distPlus, x) : ReasonReact.null}
   </div>;
   // chart

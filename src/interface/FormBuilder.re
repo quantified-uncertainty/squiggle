@@ -20,8 +20,8 @@ let propValue = (t: Prop.Value.t) => {
   | DistPlusIngredients((r: DistTypes.distPlusIngredients)) =>
     let newDistribution =
       DistPlusIngredients.toDistPlus(
-        ~sampleCount=2000,
-        ~outputXYPoints=1000,
+        ~sampleCount=1000,
+        ~outputXYPoints=2000,
         ~truncateTo=Some(500),
         r,
       );

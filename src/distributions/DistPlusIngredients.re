@@ -31,7 +31,7 @@ let toDistPlus =
            ~shape=_,
            ~domain=t.domain,
            ~unit=t.unit,
-           ~guesstimatorString=None,
+           ~guesstimatorString=Some(t.guesstimatorString),
            (),
          ),
        )
