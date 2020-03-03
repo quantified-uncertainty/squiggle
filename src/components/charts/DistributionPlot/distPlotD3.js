@@ -12,15 +12,14 @@ export class CdfChartD3 {
     this.attrs = {
       svgWidth: 400,
       svgHeight: 400,
-
       marginTop: 5,
       marginBottom: 5,
       marginRight: 50,
       marginLeft: 5,
 
       container: null,
-      minX: false,
-      maxX: false,
+      minX: null,
+      maxX: null,
       scale: 'linear',
       timeScale: null,
       showDistributionLines: true,
@@ -54,11 +53,20 @@ export class CdfChartD3 {
     this.formatDates = this.formatDates.bind(this);
   }
 
+  /**
+   * @param {string} name
+   * @param value
+   * @returns {CdfChartD3}
+   */
   set(name, value) {
     _.set(this.attrs, [name], value);
     return this;
   }
 
+  /**
+   * @param data
+   * @returns {CdfChartD3}
+   */
   data(data) {
     this.attrs.data = data;
     this.attrs.data.continuous = data.continuous || {
@@ -78,6 +86,42 @@ export class CdfChartD3 {
       console.error('Container for D3 is not defined.');
       return;
     }
+
+    if (!['log', 'linear'].includes(this.attrs.scale)) {
+      console.error('Scale should be either "log" or "linear".');
+      return;
+    }
+
+    // Log Scale.
+    if (this.attrs.scale === 'log') {
+      this.logFilter('continuous');
+      this.logFilter('discrete');
+    }
+    if (
+      this.attrs.scale === 'log'
+      && this.attrs.minX !== null
+      && this.attrs.minX < 0
+    ) {
+      console.warn('minX should be positive.');
+      this.attrs.minX = undefined;
+    }
+
+    // Fields.
+    const fields = [
+      'marginLeft', 'marginRight',
+      'marginTop', 'marginBottom',
+      'svgWidth', 'svgHeight',
+      'yMaxContinuousDomainFactor',
+      'yMaxDiscreteDomainFactor',
+      'logBase',
+    ];
+    for (const field of fields) {
+      if (!_.isNumber(this.attrs[field])) {
+        console.error(`${field} should be a number.`);
+        return;
+      }
+    }
+
     // Sets the width from the DOM element.
     const containerRect = this._container.node().getBoundingClientRect();
     if (containerRect.width > 0) {
@@ -124,13 +168,9 @@ export class CdfChartD3 {
    */
   getCommonThings() {
     // Boundaries.
-    const xMin = this.attrs.scale === 'linear' ?
-      (this.attrs.minX
-        || d3.min(this.attrs.data.continuous.xs)
-        || d3.min(this.attrs.data.discrete.xs))
-      : (this.attrs.minX > 0 ? this.attrs.minX : undefined)
-        || d3.min(this.attrs.data.continuous.xs.filter(i => i > 0))
-        || d3.min(this.attrs.data.discrete.xs.filter(i => i > 0));
+    const xMin = this.attrs.minX
+      || d3.min(this.attrs.data.continuous.xs)
+      || d3.min(this.attrs.data.discrete.xs);
     const xMax = this.attrs.maxX
       || d3.max(this.attrs.data.continuous.xs)
       || d3.max(this.attrs.data.discrete.xs);
@@ -138,10 +178,11 @@ export class CdfChartD3 {
     const yMin = d3.min(this.attrs.data.continuous.ys);
     const yMax = d3.max(this.attrs.data.continuous.ys);
 
-    if (!_.isFinite(xMin)) console.error('xMin is undefined');
-    if (!_.isFinite(xMax)) console.error('xMax is undefined');
-    if (!_.isFinite(yMin)) console.error('yMin is undefined');
-    if (!_.isFinite(yMax)) console.error('yMax is undefined');
+    // Errors.
+    if (!_.isFinite(xMin)) return console.error('xMin is undefined');
+    if (!_.isFinite(xMax)) return console.error('xMax is undefined');
+    if (!_.isFinite(yMin)) return console.error('yMin is undefined');
+    if (!_.isFinite(yMax)) return console.error('yMax is undefined');
 
     // X-domains.
     const yMaxDomainFactor = _.get(this.attrs, 'yMaxContinuousDomainFactor', 1);
@@ -462,7 +503,7 @@ export class CdfChartD3 {
   }
 
   /**
-   * @param {name} key
+   * @param {string} key
    * @returns {{x: number[], y: number[]}}
    */
   getDataPoints(key) {
@@ -479,6 +520,29 @@ export class CdfChartD3 {
     }
 
     return dt;
+  }
+
+  /**
+   * @param {string} key
+   * @returns {{x: number[], y: number[]}}
+   */
+  logFilter(key) {
+    const xs = [];
+    const ys = [];
+    const emptyShape = { xs: [], ys: [] };
+    const data = _.get(this.attrs.data, key, emptyShape);
+
+    for (let i = 0, len = data.xs.length; i < len; i++) {
+      const x = data.xs[i];
+      const y = data.ys[i];
+      if (x > 0) {
+        xs.push(x);
+        ys.push(y);
+      }
+    }
+
+    _.set(this.attrs.data, [key, 'xs'], xs);
+    _.set(this.attrs.data, [key, 'ys'], ys);
   }
 
   /**
