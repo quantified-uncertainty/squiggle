@@ -128,9 +128,9 @@ export class CdfChartD3 {
       (this.attrs.minX
         || d3.min(this.attrs.data.continuous.xs)
         || d3.min(this.attrs.data.discrete.xs))
-      : ((this.attrs.minX > 0 ? this.attrs.minX : undefined)
+      : (this.attrs.minX > 0 ? this.attrs.minX : undefined)
         || d3.min(this.attrs.data.continuous.xs.filter(i => i > 0))
-        || d3.min(this.attrs.data.discrete.xs.filter(i => i > 0)));
+        || d3.min(this.attrs.data.discrete.xs.filter(i => i > 0));
     const xMax = this.attrs.maxX
       || d3.max(this.attrs.data.continuous.xs)
       || d3.max(this.attrs.data.discrete.xs);
