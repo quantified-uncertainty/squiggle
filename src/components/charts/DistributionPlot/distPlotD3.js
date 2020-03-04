@@ -4,6 +4,14 @@ const moment = require('moment');
 require('./styles.css');
 
 /**
+ * @param arr
+ * @returns {*}
+ */
+function exists(arr) {
+  return arr.find(num => _.isFinite(num));
+}
+
+/**
  * @todo: To rename as "DistPlotD3".
  */
 export class CdfChartD3 {
@@ -178,15 +186,27 @@ export class CdfChartD3 {
    */
   getCommonThings() {
     // Boundaries.
-    const xMin = this.attrs.minX
-      || d3.min(this.attrs.data.continuous.xs)
-      || d3.min(this.attrs.data.discrete.xs);
-    const xMax = this.attrs.maxX
-      || d3.max(this.attrs.data.continuous.xs)
-      || d3.max(this.attrs.data.discrete.xs);
+    const xMin = exists([
+      this.attrs.minX,
+      d3.min(this.attrs.data.continuous.xs),
+      d3.min(this.attrs.data.discrete.xs),
+    ]);
+    const xMax = exists([
+      this.attrs.maxX,
+      d3.max(this.attrs.data.continuous.xs),
+      d3.max(this.attrs.data.discrete.xs),
+    ]);
 
-    const yMin = d3.min(this.attrs.data.continuous.ys);
-    const yMax = d3.max(this.attrs.data.continuous.ys);
+    const yMin = exists([
+      this.attrs.minY,
+      d3.min(this.attrs.data.continuous.ys),
+      d3.min(this.attrs.data.discrete.ys),
+    ]);
+    const yMax = exists([
+      this.attrs.maxY,
+      d3.max(this.attrs.data.continuous.ys),
+      d3.max(this.attrs.data.discrete.ys),
+    ]);
 
     // Errors.
     if (!_.isFinite(xMin)) throw new Error('xMin is undefined');
