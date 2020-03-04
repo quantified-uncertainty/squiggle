@@ -17,11 +17,33 @@ let timeDist =
 let setup = dist =>
   dist
   |> DistPlusIngredients.toDistPlus(
-       ~sampleCount=10000,
-       ~outputXYPoints=2000,
+       ~sampleCount=2000,
+       ~outputXYPoints=1000,
        ~truncateTo=Some(1000),
      )
   |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />);
+
+let simpleExample = (name, guesstimatorString) =>
+  <>
+    <h3 className="text-gray-600 text-lg font-bold">
+      {name |> ReasonReact.string}
+    </h3>
+    {setup(DistPlusIngredients.make(~guesstimatorString, ()))}
+  </>;
+
+let timeExample = (name, guesstimatorString) =>
+  <>
+    <h3 className="text-gray-600 text-lg font-bold">
+      {name |> ReasonReact.string}
+    </h3>
+    {setup(
+       DistPlusIngredients.make(
+         ~guesstimatorString,
+         ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
+         (),
+       ),
+     )}
+  </>;
 
 let distributions = () =>
   <div>
@@ -29,57 +51,44 @@ let distributions = () =>
       <h2 className="text-gray-800 text-xl font-bold">
         {"Initial Section" |> ReasonReact.string}
       </h2>
-      <h3 className="text-gray-600 text-lg font-bold">
-        {"Continuous" |> ReasonReact.string}
-      </h3>
-      {setup(DistPlusIngredients.make(~guesstimatorString="5 to 20", ()))}
-      <h3 className="text-gray-600 text-lg font-bold">
-        {"Discrete" |> ReasonReact.string}
-      </h3>
-      {setup(
-         DistPlusIngredients.make(~guesstimatorString="floor(10 to 20)", ()),
+      {simpleExample("Continuous", "5 to 20")}
+      {simpleExample("Continuous, wide range", "1 to 1000000")}
+      {simpleExample("Continuous, tiny values", "0.000000001 to 0.00000001")}
+      {simpleExample(
+         "Continuous large values",
+         "50000000000 to 2000000000000",
        )}
-      <h3 className="text-gray-600 text-lg font-bold">
-        {"Mixed" |> ReasonReact.string}
-      </h3>
-      {setup(
-         DistPlusIngredients.make(
-           ~guesstimatorString="mm(5 to 20, floor(20 to 30), [.5,.5])",
-           (),
-         ),
+      {simpleExample("Discrete", "floor(10 to 20)")}
+      {simpleExample("Discrete, wide range", "floor(10 to 200000)")}
+      {simpleExample("Mixed", "mm(5 to 20, floor(20 to 30), [.5,.5])")}
+      {simpleExample("Mixed, Early-Discrete Point", "mm(1, 5 to 20, [.5,.5])")}
+      {simpleExample(
+         "Mixed, Single-Discrete Point",
+         "mm(5, 5 to 20, [.5,.5])",
+       )}
+      {simpleExample(
+         "Mixed, Two-Discrete Points",
+         "mm(0,10, 5 to 20, [.5,.5,.5])",
        )}
       <h2 className="text-gray-800 text-xl font-bold">
         {"Over Time" |> ReasonReact.string}
       </h2>
-      <h3 className="text-gray-600 text-lg font-bold">
-        {"Continuous" |> ReasonReact.string}
-      </h3>
-      {setup(
-         DistPlusIngredients.make(
-           ~guesstimatorString="5 to 20",
-           ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
-           (),
-         ),
+      {timeExample("Continuous", "5 to 20")}
+      {timeExample("Continuous Over Long Period", "500 to 200000")}
+      {timeExample("Continuous Over Short Period", "0.0001 to 0.001")}
+      {timeExample(
+         "Continuous Over Very Long Period",
+         "500 to 20000000000000",
        )}
-      <h3 className="text-gray-600 text-lg font-bold">
-        {"Discrete" |> ReasonReact.string}
-      </h3>
-      {setup(
-         DistPlusIngredients.make(
-           ~guesstimatorString="floor(10 to 20)",
-           ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
-           (),
-         ),
+      {timeExample("Discrete", "floor(5 to 20)")}
+      {timeExample("Mixed", "mm(5 to 20, floor(5 to 20), [.5,.5])")}
+      {timeExample(
+         "Mixed Over Long Period",
+         "mm(500 to 2000, floor(50 to 2000), [.5,.5])",
        )}
-      <h3 className="text-gray-600 text-lg font-bold">
-        {"Mixed" |> ReasonReact.string}
-      </h3>
-      {setup(
-         DistPlusIngredients.make(
-           ~guesstimatorString="mm(5 to 20, floor(20 to 30), [.5,.5])",
-           ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
-           (),
-         ),
+      {timeExample(
+         "Mixed Over Very Long Period",
+         "mm(500 to 200000, floor(50 to 200000), [.5,.5])",
        )}
     </div>
   </div>;
