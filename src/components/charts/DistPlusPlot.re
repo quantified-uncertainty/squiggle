@@ -156,7 +156,8 @@ module DistPlusChart = {
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
       adjustBoth(toDiscreteProbabilityMass);
     <DistributionPlot
-      scale={config.log ? "log" : "linear"}
+      xScale={config.xLog ? "log" : "linear"}
+      yScale={config.yLog ? "log" : "linear"}
       height={DistPlusPlotReducer.heightToPix(config.height)}
       minX
       maxX
@@ -191,7 +192,8 @@ module IntegralChart = {
     let maxX = integral |> Distributions.Continuous.T.maxX;
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     <DistributionPlot
-      scale={config.log ? "log" : "linear"}
+      xScale={config.xLog ? "log" : "linear"}
+      yScale={config.yLog ? "log" : "linear"}
       height={DistPlusPlotReducer.heightToPix(config.height)}
       minX
       maxX
@@ -244,8 +246,13 @@ let make = (~distPlus: DistTypes.distPlus) => {
               <div className="opacity-50 hover:opacity-100">
                 <button
                   className=button
-                  onClick={_ => dispatch(CHANGE_LOG(index))}>
-                  {(config.log ? "x-log" : "x-linear") |> ReasonReact.string}
+                  onClick={_ => dispatch(CHANGE_X_LOG(index))}>
+                  {(config.xLog ? "x-log" : "x-linear") |> ReasonReact.string}
+                </button>
+                <button
+                  className=button
+                  onClick={_ => dispatch(CHANGE_Y_LOG(index))}>
+                  {(config.yLog ? "y-log" : "y-linear") |> ReasonReact.string}
                 </button>
                 <button
                   className=button
