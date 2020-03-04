@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSize } from 'react-use';
-import { CdfChartD3 } from './distPlotD3';
+import { DistPlotD3 } from './distPlotD3';
 
 /**
  * @param min
@@ -14,12 +14,11 @@ function getRandomInt(min, max) {
 }
 
 /**
- * @todo: To rename as "DistPlotReact".
  * @param props
  * @returns {*}
  * @constructor
  */
-function CdfChartReact(props) {
+function DistPlotReact(props) {
   const containerRef = React.createRef();
   const key = "cdf-chart-react-" + getRandomInt(0, 1000);
   const scale = props.scale || 'linear';
@@ -35,7 +34,7 @@ function CdfChartReact(props) {
 
   useEffect(() => {
     try {
-      new CdfChartD3()
+      new DistPlotD3()
         .set('svgWidth', width)
         .set('svgHeight', props.height)
         .set('maxX', props.maxX)
@@ -79,4 +78,4 @@ function CdfChartReact(props) {
   ]);
 }
 
-export default CdfChartReact;
+export default DistPlotReact;

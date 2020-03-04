@@ -11,10 +11,7 @@ function exists(arr) {
   return arr.find(num => _.isFinite(num));
 }
 
-/**
- * @todo: To rename as "DistPlotD3".
- */
-export class CdfChartD3 {
+export class DistPlotD3 {
 
   constructor() {
     this.attrs = {
