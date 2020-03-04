@@ -163,6 +163,7 @@ export class CdfChartD3 {
         this.addLollipopsChart(common);
       }
     } catch (e) {
+      this._container.selectAll("*").remove();
       throw e;
     }
     return this;

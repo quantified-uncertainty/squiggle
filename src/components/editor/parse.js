@@ -3,6 +3,7 @@ const math = _math.create(_math.all);
 
 // Functions for parsing/processing user input strings are here
 
+// @todo: Do not use objects.
 const DISTR_REGEXS = [
   /beta\(/g,
   /(log)?normal\(/g,
@@ -12,7 +13,6 @@ const DISTR_REGEXS = [
 ];
 
 /**
- *
  * @param user_input_string
  * @returns {{mm_args_string: string, outer_string: string}}
  */
@@ -20,6 +20,7 @@ function parse_initial_string(user_input_string) {
   let outer_output_string = "";
   let mm_args_string = "";
   let idx = 0;
+
   while (idx < user_input_string.length) {
     if (
       user_input_string.substring(idx - 11, idx) === "multimodal(" ||
@@ -42,6 +43,7 @@ function parse_initial_string(user_input_string) {
       idx += 1;
     }
   }
+
   return {
     outer_string: outer_output_string,
     mm_args_string: mm_args_string

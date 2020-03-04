@@ -117,13 +117,19 @@ module DemoDist = {
       <div>
         {switch (domain, unit, options) {
          | (Some(domain), Some(unit), Some(options)) =>
-           DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
-           |> DistPlusIngredients.toDistPlus(
-                ~sampleCount=options.sampleCount,
-                ~outputXYPoints=options.outputXYPoints,
-                ~truncateTo=options.truncateTo,
-              )
-           |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)
+           let distPlus =
+             DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
+             |> DistPlusIngredients.toDistPlus(
+                  ~sampleCount=options.sampleCount,
+                  ~outputXYPoints=options.outputXYPoints,
+                  ~truncateTo=options.truncateTo,
+                );
+           switch (distPlus) {
+           | Some(distPlus) => <DistPlusPlot distPlus />
+           | _ =>
+             "Correct Guesstimator string input to show a distribution."
+             |> E.ste
+           };
          | _ =>
            "Nothing to show. Try to change the distribution description."
            |> E.ste
