@@ -6,20 +6,26 @@ module FormConfig = [%lenses
     guesstimatorString: string,
     //
     domainType: string, // Complete, LeftLimited(...), RightLimited(...), LeftAndRightLimited(..., ...)
-    xPoint: float,
-    xPoint2: float,
-    excludingProbabilityMass: float,
-    excludingProbabilityMass2: float,
+    xPoint: string,
+    xPoint2: string,
+    excludingProbabilityMass: string,
+    excludingProbabilityMass2: string,
     //
     unitType: string, // UnspecifiedDistribution, TimeDistribution(zero, unit)
     zero: MomentRe.Moment.t,
     unit: string,
     //
-    sampleCount: int,
-    outputXYPoints: int,
-    truncateTo: int,
+    sampleCount: string,
+    outputXYPoints: string,
+    truncateTo: string,
   }
 ];
+
+type options = {
+  sampleCount: int,
+  outputXYPoints: int,
+  truncateTo: option(int),
+};
 
 module Form = ReForm.Make(FormConfig);
 
@@ -43,47 +49,18 @@ module FieldString = {
   };
 };
 
-module FieldNumber = {
-  [@react.component]
-  let make = (~field, ~label, ~min=0) => {
-    <Form.Field
-      field
-      render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> E.ste}>
-          <Antd.InputNumber
-            value
-            onChange=handleChange
-            min
-            onBlur={_ => validate()}
-            parser={str => {
-              let a = str |> Js.Float.fromString |> int_of_float;
-              a < min ? min : a;
-            }}
-          />
-        </Antd.Form.Item>
-      }
-    />;
-  };
-};
-
 module FieldFloat = {
   [@react.component]
-  let make =
-      (~field, ~label, ~className=Css.style([]), ~min=0., ~precision=2) => {
+  let make = (~field, ~label, ~className=Css.style([])) => {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
         <Antd.Form.Item label={label |> E.ste}>
-          <Antd.InputFloat
+          <Antd.Input
             value
-            precision
-            onChange=handleChange
+            onChange={BsReform.Helpers.handleChange(handleChange)}
             onBlur={_ => validate()}
             className
-            parser={str => {
-              let a = str |> Js.Float.fromString;
-              Js.Float.isNaN(a) ? min : a;
-            }}
           />
         </Antd.Form.Item>
       }
@@ -134,27 +111,23 @@ module Styles = {
 
 module DemoDist = {
   [@react.component]
-  let make =
-      (
-        ~guesstimatorString,
-        ~domain,
-        ~unit,
-        ~sampleCount,
-        ~outputXYPoints,
-        ~truncateTo,
-      ) => {
+  let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
     <Antd.Card title={"Distribution" |> E.ste}>
       <div className=Styles.spacer />
       <div>
-        <div>
-          {DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
+        {switch (domain, unit, options) {
+         | (Some(domain), Some(unit), Some(options)) =>
+           DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
            |> DistPlusIngredients.toDistPlus(
-                ~sampleCount,
-                ~outputXYPoints,
-                ~truncateTo,
+                ~sampleCount=options.sampleCount,
+                ~outputXYPoints=options.outputXYPoints,
+                ~truncateTo=options.truncateTo,
               )
-           |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)}
-        </div>
+           |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)
+         | _ =>
+           "Nothing to show. Try to change the distribution description."
+           |> E.ste
+         }}
       </div>
     </Antd.Card>;
   };
@@ -171,16 +144,16 @@ let make = () => {
       ~initialState={
         guesstimatorString: "mm(5 to 20, floor(normal(20,2)), [.5, .5])",
         domainType: "Complete",
-        xPoint: 50.0,
-        xPoint2: 60.0,
-        excludingProbabilityMass2: 0.5,
-        excludingProbabilityMass: 0.3,
+        xPoint: "50.0",
+        xPoint2: "60.0",
+        excludingProbabilityMass2: "0.5",
+        excludingProbabilityMass: "0.3",
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
-        sampleCount: 1000,
-        outputXYPoints: 2000,
-        truncateTo: 500,
+        sampleCount: "1000",
+        outputXYPoints: "2000",
+        truncateTo: "500",
       },
       (),
     );
@@ -190,78 +163,98 @@ let make = () => {
     reform.submit();
   };
 
+  let xPoint = reform.state.values.xPoint |> Js.Float.fromString;
+  let xPoint2 = reform.state.values.xPoint2 |> Js.Float.fromString;
+  let excludingProbabilityMass =
+    reform.state.values.excludingProbabilityMass |> Js.Float.fromString;
+  let excludingProbabilityMass2 =
+    reform.state.values.excludingProbabilityMass2 |> Js.Float.fromString;
+
+  let zero = reform.state.values.zero;
+  let unit = reform.state.values.unit;
+
+  let domainType = reform.state.values.domainType;
+  let unitType = reform.state.values.unitType;
+
+  let guesstimatorString = reform.state.values.guesstimatorString;
+  let sampleCount = reform.state.values.sampleCount |> Js.Float.fromString;
+  let outputXYPoints =
+    reform.state.values.outputXYPoints |> Js.Float.fromString;
+  let truncateTo = reform.state.values.truncateTo |> Js.Float.fromString;
+
   let domain =
-    switch (reform.state.values.domainType) {
-    | "Complete" => DistTypes.Complete
-    | "LeftLimited" =>
-      LeftLimited({
-        xPoint: reform.state.values.xPoint,
-        excludingProbabilityMass: reform.state.values.excludingProbabilityMass,
-      })
-    | "RightLimited" =>
-      RightLimited({
-        xPoint: reform.state.values.xPoint2,
-        excludingProbabilityMass:
-          reform.state.values.excludingProbabilityMass2,
-      })
-    | "LeftAndRightLimited" =>
-      LeftAndRightLimited(
-        {
-          xPoint: reform.state.values.xPoint,
-          excludingProbabilityMass:
-            reform.state.values.excludingProbabilityMass,
-        },
-        {
-          xPoint: reform.state.values.xPoint2,
-          excludingProbabilityMass:
-            reform.state.values.excludingProbabilityMass2,
-        },
+    switch (domainType) {
+    | "Complete" => Some(DistTypes.Complete)
+    | "LeftLimited"
+        when
+          !Js.Float.isNaN(xPoint)
+          && !Js.Float.isNaN(excludingProbabilityMass) =>
+      Some(LeftLimited({xPoint, excludingProbabilityMass}))
+    | "RightLimited"
+        when
+          !Js.Float.isNaN(xPoint2)
+          && !Js.Float.isNaN(excludingProbabilityMass2) =>
+      Some(RightLimited({xPoint, excludingProbabilityMass}))
+    | "LeftAndRightLimited"
+        when
+          !Js.Float.isNaN(xPoint)
+          && !Js.Float.isNaN(excludingProbabilityMass)
+          && !Js.Float.isNaN(xPoint2)
+          && !Js.Float.isNaN(excludingProbabilityMass2) =>
+      Some(
+        LeftAndRightLimited(
+          {xPoint, excludingProbabilityMass},
+          {xPoint, excludingProbabilityMass},
+        ),
       )
-    | _ => Js.Exn.raiseError("domain is unknown")
+    | _ => None
     };
 
   let unit =
-    switch (reform.state.values.unitType) {
-    | "UnspecifiedDistribution" => DistTypes.UnspecifiedDistribution
+    switch (unitType) {
+    | "UnspecifiedDistribution" => Some(DistTypes.UnspecifiedDistribution)
     | "TimeDistribution" =>
-      TimeDistribution({
-        zero: reform.state.values.zero,
-        unit: reform.state.values.unit |> TimeTypes.TimeUnit.ofString,
-      })
-    | _ => Js.Exn.raiseError("unit is unknown")
+      Some(
+        TimeDistribution({zero, unit: unit |> TimeTypes.TimeUnit.ofString}),
+      )
+    | _ => None
     };
 
-  let guesstimatorString = reform.state.values.guesstimatorString;
-  let sampleCount = reform.state.values.sampleCount;
-  let outputXYPoints = reform.state.values.outputXYPoints;
-  let truncateTo = reform.state.values.truncateTo |> E.O.some;
+  let options =
+    switch (sampleCount, outputXYPoints, truncateTo) {
+    | (_, _, _)
+        when
+          !Js.Float.isNaN(sampleCount)
+          && !Js.Float.isNaN(outputXYPoints)
+          && !Js.Float.isNaN(truncateTo)
+          && sampleCount > 10.
+          && outputXYPoints > 10.
+          && truncateTo > 10. =>
+      Some({
+        sampleCount: sampleCount |> int_of_float,
+        outputXYPoints: outputXYPoints |> int_of_float,
+        truncateTo: truncateTo |> int_of_float |> E.O.some,
+      })
+    | _ => None
+    };
 
   let demoDist =
     React.useMemo1(
-      () => {
-        <DemoDist
-          guesstimatorString
-          domain
-          unit
-          sampleCount
-          outputXYPoints
-          truncateTo
-        />
-      },
+      () => <DemoDist guesstimatorString domain unit options />,
       [|
         reform.state.values.guesstimatorString,
         reform.state.values.domainType,
-        reform.state.values.xPoint |> string_of_float,
-        reform.state.values.xPoint2 |> string_of_float,
-        reform.state.values.xPoint2 |> string_of_float,
-        reform.state.values.excludingProbabilityMass |> string_of_float,
-        reform.state.values.excludingProbabilityMass2 |> string_of_float,
+        reform.state.values.xPoint,
+        reform.state.values.xPoint2,
+        reform.state.values.xPoint2,
+        reform.state.values.excludingProbabilityMass,
+        reform.state.values.excludingProbabilityMass2,
         reform.state.values.unitType,
         reform.state.values.zero |> E.M.format(E.M.format_standard),
         reform.state.values.unit,
-        reform.state.values.sampleCount |> string_of_int,
-        reform.state.values.outputXYPoints |> string_of_int,
-        reform.state.values.truncateTo |> string_of_int,
+        reform.state.values.sampleCount,
+        reform.state.values.outputXYPoints,
+        reform.state.values.truncateTo,
         reloader |> string_of_int,
       |],
     );
@@ -445,25 +438,16 @@ let make = () => {
           </Row>
           <Row _type=`flex className=Styles.rows>
             <Col span=4>
-              <FieldNumber
-                field=FormConfig.SampleCount
-                label="Sample Count"
-                min=100
-              />
+              <FieldFloat field=FormConfig.SampleCount label="Sample Count" />
             </Col>
             <Col span=4>
-              <FieldNumber
+              <FieldFloat
                 field=FormConfig.OutputXYPoints
                 label="Output XY-points"
-                min=100
               />
             </Col>
             <Col span=4>
-              <FieldNumber
-                field=FormConfig.TruncateTo
-                label="Truncate To"
-                min=10
-              />
+              <FieldFloat field=FormConfig.TruncateTo label="Truncate To" />
             </Col>
           </Row>
           <Antd.Button
