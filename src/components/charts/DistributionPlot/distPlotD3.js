@@ -405,10 +405,12 @@ export class CdfChartD3 {
       .attr('transform', `translate(${this.calc.chartWidth}, 0)`)
       .call(yAxis);
 
+    const thi$ = this;
+
     function showTooltip(d) {
-      d3.select('#lollipops-line-' + d.id)
+      thi$.chart.select('.lollipops-line-' + d.id)
         .classed('lollipops-line-mouseover', true);
-      d3.select('#lollipops-circle-' + d.id)
+      thi$.chart.select('.lollipops-circle-' + d.id)
         .classed('lollipops-circle-mouseover', true)
         .attr('r', 6);
       tooltip.transition()
@@ -419,9 +421,9 @@ export class CdfChartD3 {
     }
 
     function hideTooltip(d) {
-      d3.select('#lollipops-line-' + d.id)
+      thi$.chart.select('.lollipops-line-' + d.id)
         .classed('lollipops-line-mouseover', false);
-      d3.select('#lollipops-circle-' + d.id)
+      thi$.chart.select('.lollipops-circle-' + d.id)
         .classed('lollipops-circle-mouseover', false)
         .attr('r', 4);
       tooltip.transition()
@@ -434,7 +436,7 @@ export class CdfChartD3 {
       .enter()
       .append('line')
       .attr('class', 'lollipops-line')
-      .attr('id', d => 'lollipops-line-' + d.id)
+      .attr('class', d => 'lollipops-line lollipops-line-' + d.id)
       .attr('x1', d => common.xScale(d.x))
       .attr('x2', d => common.xScale(d.x))
       .attr('y1', d => yScale(d.y))
@@ -450,8 +452,7 @@ export class CdfChartD3 {
       .data(data)
       .enter()
       .append('circle')
-      .attr('class', 'lollipops-circle')
-      .attr('id', d => 'lollipops-circle-' + d.id)
+      .attr('class', d => 'lollipops-circle lollipops-circle-' + d.id)
       .attr('cx', d => common.xScale(d.x))
       .attr('cy', d => yScale(d.y))
       .attr('r', '4');
