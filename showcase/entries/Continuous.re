@@ -56,16 +56,16 @@ let distributions = () =>
       {simpleExample("Continuous, tiny values", "0.000000001 to 0.00000001")}
       {simpleExample(
          "Continuous large values",
-         "50000000000 to 2000000000000",
+         "50000000000000 to 200000000000000000",
        )}
       {simpleExample("Discrete", "floor(10 to 20)")}
+      {simpleExample(
+         "Discrete and below 0, normal(10,30)",
+         "floor(normal(10,30))",
+       )}
       {simpleExample("Discrete, wide range", "floor(10 to 200000)")}
       {simpleExample("Mixed", "mm(5 to 20, floor(20 to 30), [.5,.5])")}
       {simpleExample("Mixed, Early-Discrete Point", "mm(1, 5 to 20, [.5,.5])")}
-      {simpleExample(
-         "Mixed, Single-Discrete Point",
-         "mm(5, 5 to 20, [.5,.5])",
-       )}
       {simpleExample(
          "Mixed, Two-Discrete Points",
          "mm(0,10, 5 to 20, [.5,.5,.5])",
@@ -82,14 +82,6 @@ let distributions = () =>
        )}
       {timeExample("Discrete", "floor(5 to 20)")}
       {timeExample("Mixed", "mm(5 to 20, floor(5 to 20), [.5,.5])")}
-      {timeExample(
-         "Mixed Over Long Period",
-         "mm(500 to 2000, floor(50 to 2000), [.5,.5])",
-       )}
-      {timeExample(
-         "Mixed Over Very Long Period",
-         "mm(500 to 200000, floor(50 to 200000), [.5,.5])",
-       )}
     </div>
   </div>;
 
