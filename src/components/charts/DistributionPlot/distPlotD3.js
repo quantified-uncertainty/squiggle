@@ -74,7 +74,7 @@ export class DistPlotD3 {
   /**
    * @param {string} name
    * @param value
-   * @returns {CdfChartD3}
+   * @returns {DistPlotD3}
    */
   set(name, value) {
     _.set(this.attrs, [name], value);
@@ -83,7 +83,7 @@ export class DistPlotD3 {
 
   /**
    * @param data
-   * @returns {CdfChartD3}
+   * @returns {DistPlotD3}
    */
   data(data) {
     const continuousXs = _.get(data, 'continuous.xs', []);
@@ -439,7 +439,7 @@ export class DistPlotD3 {
     // Y-domain.
     const yMinDomainFactor = _.get(this.attrs, 'yMinDiscreteDomainFactor', 1);
     const yMaxDomainFactor = _.get(this.attrs, 'yMaxDiscreteDomainFactor', 1);
-    const yMinDomain = 0 * yMinDomainFactor;
+    const yMinDomain = yMin * yMinDomainFactor;
     const yMaxDomain = yMax * yMaxDomainFactor;
 
     // Y-scale.
@@ -497,7 +497,7 @@ export class DistPlotD3 {
       .attr('x1', d => common.xScale(d.x))
       .attr('x2', d => common.xScale(d.x))
       .attr('y1', d => yScale(d.y))
-      .attr('y2', yScale(0));
+      .attr('y2', yScale(yMin));
 
     // Define the div for the tooltip
     const tooltip = this._container.append('div')
@@ -592,6 +592,7 @@ export class DistPlotD3 {
 
   /**
    * @param {string} key
+   * @param {function} pred
    * @returns {{x: number[], y: number[]}}
    */
   logFilter(key, pred) {
