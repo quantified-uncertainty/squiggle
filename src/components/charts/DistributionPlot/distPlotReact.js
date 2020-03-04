@@ -50,8 +50,8 @@ function CdfChartReact(props) {
         .set('verticalLine', props.verticalLine || 110)
         .set('showVerticalLine', props.showVerticalLine)
         .set('container', containerRef.current)
-        .set('scale', scale)
-        .set('timeScale', props.timeScale)
+        .set('xScaleType', scale)
+        .set('xScaleTimeOptions', props.timeScale)
         .set('yMaxContinuousDomainFactor', props.yMaxContinuousDomainFactor || 1)
         .set('yMaxDiscreteDomainFactor', props.yMaxDiscreteDomainFactor || 1)
         .data({
