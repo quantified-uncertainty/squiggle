@@ -29,7 +29,8 @@ module RawPlot = {
         ~onHover=(f: float) => (),
         ~continuous=?,
         ~discrete=?,
-        ~scale=?,
+        ~xScale=?,
+        ~yScale=?,
         ~showDistributionLines=?,
         ~showDistributionYAxis=?,
         ~showVerticalLine=?,
@@ -51,7 +52,8 @@ module RawPlot = {
           ~onHover,
           ~continuous?,
           ~discrete?,
-          ~scale?,
+          ~xScale?,
+          ~yScale?,
           ~showDistributionLines?,
           ~showDistributionYAxis?,
           ~showVerticalLine?,
@@ -116,7 +118,8 @@ let make =
       ~yMaxContinuousDomainFactor=?,
       ~onHover: float => unit=_ => (),
       ~continuous=?,
-      ~scale=?,
+      ~xScale=?,
+      ~yScale=?,
       ~showDistributionLines=false,
       ~showDistributionYAxis=false,
       ~showVerticalLine=false,
@@ -128,7 +131,8 @@ let make =
       ?minX
       ?yMaxDiscreteDomainFactor
       ?yMaxContinuousDomainFactor
-      ?scale
+      ?xScale
+      ?yScale
       ?timeScale
       discrete={discrete |> E.O.fmap(XYShape.toJs)}
       height

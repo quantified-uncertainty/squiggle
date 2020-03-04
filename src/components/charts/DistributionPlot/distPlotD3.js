@@ -32,11 +32,20 @@ export class DistPlotD3 {
       xScaleLogBase: 10,
 
       // Y
+      minY: null,
+      maxY: null,
+      yScaleType: 'linear',
+      yScaleTimeOptions: null,
+      yScaleLogBase: 10,
+
+      xMinContinuousDomainFactor: 1,
+      xMaxContinuousDomainFactor: 1,
       yMaxContinuousDomainFactor: 1,
       yMaxDiscreteDomainFactor: 1,
-      showDistributionYAxis: false,
 
+      showDistributionYAxis: false,
       showDistributionLines: true,
+
       areaColors: ['#E1E5EC', '#E1E5EC'],
       verticalLine: 110,
       showVerticalLine: true,
@@ -102,11 +111,18 @@ export class DistPlotD3 {
     if (!['log', 'linear'].includes(this.attrs.xScaleType)) {
       throw new Error('X-scale type should be either "log" or "linear".');
     }
+    if (!['log', 'linear'].includes(this.attrs.yScaleType)) {
+      throw new Error('Y-scale type should be either "log" or "linear".');
+    }
 
     // Log Scale.
     if (this.attrs.xScaleType === 'log') {
-      this.logFilter('continuous');
-      this.logFilter('discrete');
+      this.logFilter('continuous', (x, y) => x > 0);
+      this.logFilter('discrete', (x, y) => x > 0);
+    }
+    if (this.attrs.yScaleType === 'log') {
+      this.logFilter('continuous', (x, y) => y > 0);
+      this.logFilter('discrete', (x, y) => y > 0);
     }
     if (
       this.attrs.xScaleType === 'log'
@@ -116,6 +132,14 @@ export class DistPlotD3 {
       console.warn('minX should be positive.');
       this.attrs.minX = undefined;
     }
+    if (
+      this.attrs.yScaleType === 'log'
+      && this.attrs.minY !== null
+      && this.attrs.minY < 0
+    ) {
+      console.warn('minY should be positive.');
+      this.attrs.minY = undefined;
+    }
 
     // Fields.
     const fields = [
@@ -124,7 +148,7 @@ export class DistPlotD3 {
       'svgWidth', 'svgHeight',
       'yMaxContinuousDomainFactor',
       'yMaxDiscreteDomainFactor',
-      'xScaleLogBase',
+      'xScaleLogBase', 'yScaleLogBase',
     ];
     for (const field of fields) {
       if (!_.isNumber(this.attrs[field])) {
@@ -212,10 +236,14 @@ export class DistPlotD3 {
     if (!_.isFinite(yMax)) throw new Error('yMax is undefined');
 
     // X-domains.
+    const xMinDomainFactor = _.get(this.attrs, 'xMinContinuousDomainFactor', 1);
+    const xMaxDomainFactor = _.get(this.attrs, 'xMaxContinuousDomainFactor', 1);
+    const yMinDomainFactor = _.get(this.attrs, 'yMinContinuousDomainFactor', 1);
     const yMaxDomainFactor = _.get(this.attrs, 'yMaxContinuousDomainFactor', 1);
-    const xMinDomain = xMin;
-    const xMaxDomain = xMax;
-    const yMinDomain = yMin;
+
+    const xMinDomain = xMin * xMinDomainFactor;
+    const xMaxDomain = xMax * xMaxDomainFactor;
+    const yMinDomain = yMin * yMinDomainFactor;
     const yMaxDomain = yMax * yMaxDomainFactor;
 
     // X-scale.
@@ -229,9 +257,14 @@ export class DistPlotD3 {
         .range([0, this.calc.chartWidth]);
 
     // Y-scale.
-    const yScale = d3.scaleLinear()
-      .domain([yMinDomain, yMaxDomain])
-      .range([this.calc.chartHeight, 0]);
+    const yScale = this.attrs.yScaleType === 'linear'
+      ? d3.scaleLinear()
+        .domain([yMinDomain, yMaxDomain])
+        .range([this.calc.chartHeight, 0])
+      : d3.scaleLog()
+        .base(this.attrs.yScaleLogBase)
+        .domain([yMinDomain, yMaxDomain])
+        .range([this.calc.chartHeight, 0]);
 
     return {
       xMin, xMax,
@@ -394,7 +427,7 @@ export class DistPlotD3 {
   addLollipopsChart(common) {
     const data = this.getDataPoints('discrete');
 
-    const _yMin = d3.min(this.attrs.data.discrete.ys);
+    const yMin = d3.min(this.attrs.data.discrete.ys);
     const yMax = d3.max(this.attrs.data.discrete.ys);
 
     // X axis.
@@ -404,15 +437,22 @@ export class DistPlotD3 {
       .call(d3.axisBottom(common.xScale));
 
     // Y-domain.
+    const yMinDomainFactor = _.get(this.attrs, 'yMinDiscreteDomainFactor', 1);
     const yMaxDomainFactor = _.get(this.attrs, 'yMaxDiscreteDomainFactor', 1);
-    const yMinDomain = 0;
+    const yMinDomain = 0 * yMinDomainFactor;
     const yMaxDomain = yMax * yMaxDomainFactor;
 
     // Y-scale.
-    const yScale = d3.scaleLinear()
-      .domain([yMinDomain, yMaxDomain])
-      .range([this.calc.chartHeight, 0]);
+    const yScale = this.attrs.yScaleType === 'linear'
+      ? d3.scaleLinear()
+        .domain([yMinDomain, yMaxDomain])
+        .range([this.calc.chartHeight, 0])
+      : d3.scaleLog()
+        .base(this.attrs.yScaleLogBase)
+        .domain([yMinDomain, yMaxDomain])
+        .range([this.calc.chartHeight, 0]);
 
+    //
     const yTicks = Math.floor(this.calc.chartHeight / 20);
     const yAxis = d3.axisLeft(yScale).ticks(yTicks);
 
@@ -554,7 +594,7 @@ export class DistPlotD3 {
    * @param {string} key
    * @returns {{x: number[], y: number[]}}
    */
-  logFilter(key) {
+  logFilter(key, pred) {
     const xs = [];
     const ys = [];
     const emptyShape = { xs: [], ys: [] };
@@ -563,7 +603,7 @@ export class DistPlotD3 {
     for (let i = 0, len = data.xs.length; i < len; i++) {
       const x = data.xs[i];
       const y = data.ys[i];
-      if (x > 0) {
+      if (pred(x, y)) {
         xs.push(x);
         ys.push(y);
       }
