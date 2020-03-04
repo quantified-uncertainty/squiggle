@@ -18,23 +18,27 @@ export class CdfChartD3 {
       marginLeft: 5,
 
       container: null,
+
+      // X
       minX: null,
       maxX: null,
-      scale: 'linear',
-      timeScale: null,
-      showDistributionLines: true,
+      xScaleType: 'linear',
+      xScaleTimeOptions: null,
+      xScaleLogBase: 10,
+
+      // Y
+      yMaxContinuousDomainFactor: 1,
+      yMaxDiscreteDomainFactor: 1,
       showDistributionYAxis: false,
+
+      showDistributionLines: true,
       areaColors: ['#E1E5EC', '#E1E5EC'],
-      logBase: 10,
       verticalLine: 110,
       showVerticalLine: true,
       data: {
         continuous: null,
         discrete: null,
       },
-      yMaxContinuousDomainFactor: 1,
-      yMaxDiscreteDomainFactor: 1,
-      options: {},
       onHover: (e) => {
       },
     };
@@ -90,17 +94,17 @@ export class CdfChartD3 {
       throw new Error('Container for D3 is not defined.');
     }
 
-    if (!['log', 'linear'].includes(this.attrs.scale)) {
-      throw new Error('Scale should be either "log" or "linear".');
+    if (!['log', 'linear'].includes(this.attrs.xScaleType)) {
+      throw new Error('X-scale type should be either "log" or "linear".');
     }
 
     // Log Scale.
-    if (this.attrs.scale === 'log') {
+    if (this.attrs.xScaleType === 'log') {
       this.logFilter('continuous');
       this.logFilter('discrete');
     }
     if (
-      this.attrs.scale === 'log'
+      this.attrs.xScaleType === 'log'
       && this.attrs.minX !== null
       && this.attrs.minX < 0
     ) {
@@ -115,7 +119,7 @@ export class CdfChartD3 {
       'svgWidth', 'svgHeight',
       'yMaxContinuousDomainFactor',
       'yMaxDiscreteDomainFactor',
-      'logBase',
+      'xScaleLogBase',
     ];
     for (const field of fields) {
       if (!_.isNumber(this.attrs[field])) {
@@ -198,12 +202,12 @@ export class CdfChartD3 {
     const yMaxDomain = yMax * yMaxDomainFactor;
 
     // X-scale.
-    const xScale = this.attrs.scale === 'linear'
+    const xScale = this.attrs.xScaleType === 'linear'
       ? d3.scaleLinear()
         .domain([xMinDomain, xMaxDomain])
         .range([0, this.calc.chartWidth])
       : d3.scaleLog()
-        .base(this.attrs.logBase)
+        .base(this.attrs.xScaleLogBase)
         .domain([xMinDomain, xMaxDomain])
         .range([0, this.calc.chartWidth]);
 
@@ -229,10 +233,10 @@ export class CdfChartD3 {
 
     // X-axis.
     let xAxis = null;
-    if (!!this.attrs.timeScale) {
+    if (!!this.attrs.xScaleTimeOptions) {
       // Calculates the projection on X-axis.
-      const zero = _.get(this.attrs, 'timeScale.zero', moment());
-      const unit = _.get(this.attrs, 'timeScale.unit', 'years');
+      const zero = _.get(this.attrs, 'xScaleTimeOptions.zero', moment());
+      const unit = _.get(this.attrs, 'xScaleTimeOptions.unit', 'years');
       const diff = Math.abs(xMax - xMin);
       const left = zero.clone().add(xMin, unit);
       const right = left.clone().add(diff, unit);
