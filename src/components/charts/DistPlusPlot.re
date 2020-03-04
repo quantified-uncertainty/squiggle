@@ -245,7 +245,7 @@ let make = (~distPlus: DistTypes.distPlus) => {
                 <button
                   className=button
                   onClick={_ => dispatch(CHANGE_LOG(index))}>
-                  {(state.log ? "log" : "linear") |> ReasonReact.string}
+                  {(config.log ? "x-log" : "x-linear") |> ReasonReact.string}
                 </button>
                 <button
                   className=button
@@ -259,18 +259,18 @@ let make = (~distPlus: DistTypes.distPlus) => {
                 <button
                   className=button
                   onClick={_ => dispatch(HEIGHT_INCREMENT(index))}>
-                  {"Expand" |> ReasonReact.string}
+                  {"expand" |> ReasonReact.string}
                 </button>
                 <button
                   className=button
                   onClick={_ => dispatch(HEIGHT_DECREMENT(index))}>
-                  {"Compress" |> ReasonReact.string}
+                  {"shrink" |> ReasonReact.string}
                 </button>
                 {index != 0
                    ? <button
                        className=button
                        onClick={_ => dispatch(REMOVE_DIST(index))}>
-                       {"Remove" |> ReasonReact.string}
+                       {"remove" |> ReasonReact.string}
                      </button>
                    : ReasonReact.null}
               </div>

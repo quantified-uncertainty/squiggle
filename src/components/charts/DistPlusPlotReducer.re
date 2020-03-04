@@ -5,7 +5,6 @@ type chartConfig = {
 };
 
 type state = {
-  log: bool,
   showStats: bool,
   showParams: bool,
   distributions: list(chartConfig),
@@ -87,7 +86,6 @@ let reducer = (state: state, action: action) =>
   };
 
 let init = {
-  log: false,
   showStats: false,
   showParams: false,
   distributions: [
