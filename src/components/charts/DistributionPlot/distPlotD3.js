@@ -87,13 +87,11 @@ export class CdfChartD3 {
   render() {
     this._container = d3.select(this.attrs.container);
     if (this._container.node() === null) {
-      console.error('Container for D3 is not defined.');
-      return;
+      throw new Error('Container for D3 is not defined.');
     }
 
     if (!['log', 'linear'].includes(this.attrs.scale)) {
-      console.error('Scale should be either "log" or "linear".');
-      return;
+      throw new Error('Scale should be either "log" or "linear".');
     }
 
     // Log Scale.
@@ -121,8 +119,7 @@ export class CdfChartD3 {
     ];
     for (const field of fields) {
       if (!_.isNumber(this.attrs[field])) {
-        console.error(`${field} should be a number.`);
-        return;
+        throw new Error(`${field} should be a number.`);
       }
     }
 
@@ -157,12 +154,17 @@ export class CdfChartD3 {
         `translate(${this.calc.chartLeftMargin}, ${this.calc.chartTopMargin})`,
       );
 
-    const common = this.getCommonThings();
-    if (this.hasDate('continuous')) {
-      this.addDistributionChart(common);
-    }
-    if (this.hasDate('discrete')) {
-      this.addLollipopsChart(common);
+    try {
+      const common = this.getCommonThings();
+      if (this.hasDate('continuous')) {
+        this.addDistributionChart(common);
+      }
+      if (this.hasDate('discrete')) {
+        this.addLollipopsChart(common);
+      }
+    } catch (e) {
+      this._container.selectAll("*").remove();
+      throw e;
     }
     return this;
   }
@@ -183,10 +185,10 @@ export class CdfChartD3 {
     const yMax = d3.max(this.attrs.data.continuous.ys);
 
     // Errors.
-    if (!_.isFinite(xMin)) return console.error('xMin is undefined');
-    if (!_.isFinite(xMax)) return console.error('xMax is undefined');
-    if (!_.isFinite(yMin)) return console.error('yMin is undefined');
-    if (!_.isFinite(yMax)) return console.error('yMax is undefined');
+    if (!_.isFinite(xMin)) throw new Error('xMin is undefined');
+    if (!_.isFinite(xMax)) throw new Error('xMax is undefined');
+    if (!_.isFinite(yMin)) throw new Error('yMin is undefined');
+    if (!_.isFinite(yMax)) throw new Error('yMax is undefined');
 
     // X-domains.
     const yMaxDomainFactor = _.get(this.attrs, 'yMaxContinuousDomainFactor', 1);

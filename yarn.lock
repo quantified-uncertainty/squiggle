@@ -2488,10 +2488,10 @@ browserslist@^4.0.0, browserslist@^4.1.0, browserslist@^4.3.4, browserslist@^4.8
     electron-to-chromium "^1.3.341"
     node-releases "^1.1.47"
 
-bs-ant-design-alt@2.0.0-alpha.31:
-  version "2.0.0-alpha.31"
-  resolved "https://registry.yarnpkg.com/bs-ant-design-alt/-/bs-ant-design-alt-2.0.0-alpha.31.tgz#425003babaf47eefdc81cb392d9f224bc18c651a"
-  integrity sha512-N0wmBksjgyQ4ioLi6L/gTt8852ghrmdYOBvs7onckEQ/O86eYRbKSMGL8cqMvUYJLB3IxKXSS89cssApqzGpTw==
+bs-ant-design-alt@2.0.0-alpha.33:
+  version "2.0.0-alpha.33"
+  resolved "https://registry.yarnpkg.com/bs-ant-design-alt/-/bs-ant-design-alt-2.0.0-alpha.33.tgz#13dc94f4fe4e7525485515cca2d2eae298940045"
+  integrity sha512-C+REAjuxExzQnPP5KySwNd8Pizs0VGnrrF/6YlraErWr/Bjf3fqn6and3UXyHqi+DAj15IxY6e7lkaghQgO0eA==
   dependencies:
     antd "3.17.0"
     bs-moment "^0.4.4"

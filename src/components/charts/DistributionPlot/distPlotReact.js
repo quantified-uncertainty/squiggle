@@ -35,32 +35,31 @@ function CdfChartReact(props) {
 
   useEffect(() => {
     try {
-    new CdfChartD3()
-      .set('svgWidth', width)
-      .set('svgHeight', props.height)
-      .set('maxX', props.maxX)
-      .set('minX', props.minX)
-      .set('onHover', props.onHover)
-      .set('marginBottom',props.marginBottom || 15)
-      .set('marginLeft', 30)
-      .set('marginRight', 30)
-      .set('marginTop', 5)
-      .set('showDistributionLines', props.showDistributionLines)
-      .set('showDistributionYAxis', props.showDistributionYAxis)
-      .set('verticalLine', props.verticalLine || 110)
-      .set('showVerticalLine', props.showVerticalLine)
-      .set('container', containerRef.current)
-      .set('scale', scale)
-      .set('timeScale', props.timeScale)
-      .set('yMaxContinuousDomainFactor', props.yMaxContinuousDomainFactor || 1)
-      .set('yMaxDiscreteDomainFactor', props.yMaxDiscreteDomainFactor || 1)
-      .data({
-        continuous: props.continuous,
-        discrete: props.discrete,
-      })
-      .render();
-    }
-    catch(e) {
+      new CdfChartD3()
+        .set('svgWidth', width)
+        .set('svgHeight', props.height)
+        .set('maxX', props.maxX)
+        .set('minX', props.minX)
+        .set('onHover', props.onHover)
+        .set('marginBottom', props.marginBottom || 15)
+        .set('marginLeft', 30)
+        .set('marginRight', 30)
+        .set('marginTop', 5)
+        .set('showDistributionLines', props.showDistributionLines)
+        .set('showDistributionYAxis', props.showDistributionYAxis)
+        .set('verticalLine', props.verticalLine || 110)
+        .set('showVerticalLine', props.showVerticalLine)
+        .set('container', containerRef.current)
+        .set('scale', scale)
+        .set('timeScale', props.timeScale)
+        .set('yMaxContinuousDomainFactor', props.yMaxContinuousDomainFactor || 1)
+        .set('yMaxDiscreteDomainFactor', props.yMaxDiscreteDomainFactor || 1)
+        .data({
+          continuous: props.continuous,
+          discrete: props.discrete,
+        })
+        .render();
+    } catch (e) {
       console.error("distPlotD3 Error: ", e)
     }
   });

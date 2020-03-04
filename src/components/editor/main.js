@@ -135,6 +135,7 @@ function get_final_pdf(pdf_vals, bst_pts_and_idxs, output_grid) {
   var active_intervals = new Map();
   var active_endpoints = new bst.AVLTree();
   var final_pdf_vals = [];
+
   for (
     let out_grid_idx = 0;
     out_grid_idx < output_grid.length;
@@ -179,7 +180,17 @@ function get_final_pdf(pdf_vals, bst_pts_and_idxs, output_grid) {
       active_intervals.delete(interval_idx);
     }
   }
+
   return final_pdf_vals;
+}
+
+/**
+ * @param {string} str
+ * @param {string} char
+ * @returns {number}
+ */
+function get_count_of_chars(str, char) {
+  return str.split(char).length - 1;
 }
 
 /**
@@ -194,12 +205,19 @@ function get_final_pdf(pdf_vals, bst_pts_and_idxs, output_grid) {
  * @returns {([]|*[])[]}
  */
 function get_pdf_from_user_input(user_input_string) {
-  try{
+  try {
+    const count_opened_bracket = get_count_of_chars(user_input_string, '(');
+    const count_closed_bracket = get_count_of_chars(user_input_string, ')');
+    if (count_opened_bracket !== count_closed_bracket) {
+      throw new Error('Count of brackets are not equal.');
+    }
+
     let parsed = parse.parse_initial_string(user_input_string);
     let mm_args = parse.separate_mm_args(parsed.mm_args_string);
-
     const is_mm = mm_args.distrs.length > 0;
-    if (!parsed.outer_string) return [[], [], true];
+    if (!parsed.outer_string) {
+      throw new Error('Parse string is empty.');
+    }
 
     let tree = new bst.AVLTree();
     let possible_start_pts = [];
@@ -232,6 +250,7 @@ function get_pdf_from_user_input(user_input_string) {
 
     let output_grid = evenly_spaced_grid(start_pt, end_pt, OUTPUT_GRID_NUMEL);
     let final_pdf_vals = get_final_pdf(all_vals, tree, output_grid);
+
     return [final_pdf_vals, output_grid, false];
   } catch (e) {
     return [[], [], true];
