@@ -20,22 +20,67 @@ let setup = dist =>
        ~sampleCount=10000,
        ~outputXYPoints=2000,
        ~truncateTo=Some(1000),
-     );
+     )
+  |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />);
 
 let distributions = () =>
   <div>
     <div>
-      <h2> {"Single-Discrete" |> ReasonReact.string} </h2>
+      <h2 className="text-gray-800 text-xl font-bold">
+        {"Initial Section" |> ReasonReact.string}
+      </h2>
+      <h3 className="text-gray-600 text-lg font-bold">
+        {"Continuous" |> ReasonReact.string}
+      </h3>
+      {setup(DistPlusIngredients.make(~guesstimatorString="5 to 20", ()))}
+      <h3 className="text-gray-600 text-lg font-bold">
+        {"Discrete" |> ReasonReact.string}
+      </h3>
+      {setup(
+         DistPlusIngredients.make(~guesstimatorString="floor(10 to 20)", ()),
+       )}
+      <h3 className="text-gray-600 text-lg font-bold">
+        {"Mixed" |> ReasonReact.string}
+      </h3>
       {setup(
          DistPlusIngredients.make(
-           ~guesstimatorString=
-             "uniform(0,1) > 0.3 ? lognormal(6.652, -0.41): 0",
-           ~domain=
-             RightLimited({xPoint: 50.0, excludingProbabilityMass: 0.3}),
+           ~guesstimatorString="mm(5 to 20, floor(20 to 30), [.5,.5])",
            (),
          ),
-       )
-       |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />)}
+       )}
+      <h2 className="text-gray-800 text-xl font-bold">
+        {"Over Time" |> ReasonReact.string}
+      </h2>
+      <h3 className="text-gray-600 text-lg font-bold">
+        {"Continuous" |> ReasonReact.string}
+      </h3>
+      {setup(
+         DistPlusIngredients.make(
+           ~guesstimatorString="5 to 20",
+           ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
+           (),
+         ),
+       )}
+      <h3 className="text-gray-600 text-lg font-bold">
+        {"Discrete" |> ReasonReact.string}
+      </h3>
+      {setup(
+         DistPlusIngredients.make(
+           ~guesstimatorString="floor(10 to 20)",
+           ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
+           (),
+         ),
+       )}
+      <h3 className="text-gray-600 text-lg font-bold">
+        {"Mixed" |> ReasonReact.string}
+      </h3>
+      {setup(
+         DistPlusIngredients.make(
+           ~guesstimatorString="mm(5 to 20, floor(20 to 30), [.5,.5])",
+           ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
+           (),
+         ),
+       )}
     </div>
   </div>;
 
