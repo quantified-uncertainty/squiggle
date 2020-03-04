@@ -21,7 +21,6 @@ function getRandomInt(min, max) {
 function DistPlotReact(props) {
   const containerRef = React.createRef();
   const key = "cdf-chart-react-" + getRandomInt(0, 1000);
-  const scale = props.scale || 'linear';
   const style = !!props.width ? { width: props.width + "px" } : {};
 
   const [sized, { width }] = useSize(() => {
@@ -49,7 +48,8 @@ function DistPlotReact(props) {
         .set('verticalLine', props.verticalLine || 110)
         .set('showVerticalLine', props.showVerticalLine)
         .set('container', containerRef.current)
-        .set('xScaleType', scale)
+        .set('xScaleType', props.xScale || 'linear')
+        .set('yScaleType', props.yScale || 'linear')
         .set('xScaleTimeOptions', props.timeScale)
         .set('yMaxContinuousDomainFactor', props.yMaxContinuousDomainFactor || 1)
         .set('yMaxDiscreteDomainFactor', props.yMaxDiscreteDomainFactor || 1)

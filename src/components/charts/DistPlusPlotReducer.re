@@ -1,5 +1,6 @@
 type chartConfig = {
-  log: bool,
+  xLog: bool,
+  yLog: bool,
   isCumulative: bool,
   height: int,
 };
@@ -15,7 +16,8 @@ type action =
   | CHANGE_SHOW_PARAMS
   | REMOVE_DIST(int)
   | ADD_DIST
-  | CHANGE_LOG(int)
+  | CHANGE_X_LOG(int)
+  | CHANGE_Y_LOG(int)
   | CHANGE_IS_CUMULATIVE(int, bool)
   | HEIGHT_INCREMENT(int)
   | HEIGHT_DECREMENT(int);
@@ -42,7 +44,6 @@ let heightToPix =
   | _ => 140;
 
 let distributionReducer = (index, state: list(chartConfig), action) => {
-  Js.log3(index, action, state);
   switch (action, E.L.get(state, index)) {
   | (HEIGHT_INCREMENT(_), Some(dist)) =>
     E.L.update(
@@ -58,18 +59,24 @@ let distributionReducer = (index, state: list(chartConfig), action) => {
     )
   | (CHANGE_IS_CUMULATIVE(_, isCumulative), Some(dist)) =>
     E.L.update({...dist, isCumulative}, index, state)
-  | (CHANGE_LOG(_), Some(dist)) =>
-    E.L.update({...dist, log: !dist.log}, index, state)
+  | (CHANGE_X_LOG(_), Some(dist)) =>
+    E.L.update({...dist, xLog: !dist.xLog}, index, state)
+  | (CHANGE_Y_LOG(_), Some(dist)) =>
+    E.L.update({...dist, yLog: !dist.yLog}, index, state)
   | (REMOVE_DIST(_), Some(_)) => E.L.remove(index, 1, state)
   | (ADD_DIST, Some(_)) =>
-    E.L.append(state, [{log: false, isCumulative: false, height: 2}])
+    E.L.append(
+      state,
+      [{yLog: false, xLog: false, isCumulative: false, height: 2}],
+    )
   | _ => state
   };
 };
 
 let reducer = (state: state, action: action) =>
   switch (action) {
-  | CHANGE_LOG(i)
+  | CHANGE_X_LOG(i)
+  | CHANGE_Y_LOG(i)
   | CHANGE_IS_CUMULATIVE(i, _)
   | HEIGHT_DECREMENT(i)
   | REMOVE_DIST(i)
@@ -89,7 +96,7 @@ let init = {
   showStats: false,
   showParams: false,
   distributions: [
-    {log: false, isCumulative: false, height: 2},
-    {log: false, isCumulative: true, height: 1},
+    {yLog: false, xLog: false, isCumulative: false, height: 2},
+    {yLog: false, xLog: false, isCumulative: true, height: 1},
   ],
 };
