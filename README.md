@@ -1,4 +1,4 @@
-# Estiband
+# WideDomain
 
 This is an experimental app / library for writing estimation functions in ReasonML.
 
