@@ -82,7 +82,7 @@ module Continuous = {
     interpolation,
   };
   let lastY = (t: t) =>
-    t |> xyShape |> XYShape.unsafeLast |> (((_, y)) => y);
+    t |> xyShape |> XYShape.T.unsafeLast |> (((_, y)) => y);
   let oShapeMap =
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(make(_, interpolation));
@@ -105,22 +105,22 @@ module Continuous = {
     Dist({
       type t = DistTypes.continuousShape;
       type integral = DistTypes.continuousShape;
-      let minX = shapeFn(XYShape.minX);
-      let maxX = shapeFn(XYShape.maxX);
+      let minX = shapeFn(XYShape.T.minX);
+      let maxX = shapeFn(XYShape.T.maxX);
       let toDiscreteProbabilityMass = _ => 0.0;
       let pointwiseFmap = (fn, t: t) =>
-        t |> xyShape |> XYShape.pointwiseMap(fn) |> fromShape;
+        t |> xyShape |> XYShape.T.pointwiseMap(fn) |> fromShape;
       let toShape = (t: t): DistTypes.shape => Continuous(t);
       let xToY = (f, {interpolation, xyShape}: t) =>
         switch (interpolation) {
         | `Stepwise =>
           xyShape
-          |> XYShape.XtoY.stepwiseIncremental(f)
+          |> XYShape.T.XtoY.stepwiseIncremental(f)
           |> E.O.default(0.0)
           |> DistTypes.MixedPoint.makeContinuous
         | `Linear =>
           xyShape
-          |> XYShape.XtoY.linear(f)
+          |> XYShape.T.XtoY.linear(f)
           |> DistTypes.MixedPoint.makeContinuous
         };
 
@@ -161,14 +161,14 @@ module Discrete = {
       let integral = (~cache, t) =>
         switch (cache) {
         | Some(c) => c
-        | None => Continuous.make(XYShape.accumulateYs(t), `Stepwise)
+        | None => Continuous.make(XYShape.T.accumulateYs(t), `Stepwise)
         };
       let integralEndY = (~cache, t) =>
         t |> integral(~cache) |> Continuous.lastY;
-      let minX = XYShape.minX;
-      let maxX = XYShape.maxX;
+      let minX = XYShape.T.minX;
+      let maxX = XYShape.T.maxX;
       let toDiscreteProbabilityMass = t => 1.0;
-      let pointwiseFmap = XYShape.pointwiseMap;
+      let pointwiseFmap = XYShape.T.pointwiseMap;
       let toShape = (t: t): DistTypes.shape => Discrete(t);
       let toContinuous = _ => None;
       let toDiscrete = t => Some(t);
@@ -176,7 +176,7 @@ module Discrete = {
       let toScaledDiscrete = t => Some(t);
 
       let xToY = (f, t) => {
-        XYShape.XtoY.stepwiseIfAtX(f, t)
+        XYShape.T.XtoY.stepwiseIfAtX(f, t)
         |> E.O.default(0.0)
         |> DistTypes.MixedPoint.makeDiscrete;
       };
@@ -294,7 +294,7 @@ module Mixed = {
 
           let result =
             Continuous.make(
-              XYShape.Combine.combineLinear(
+              XYShape.T.Combine.combineLinear(
                 Continuous.getShape(cont), Continuous.getShape(dist), (a, b) =>
                 a +. b
               ),
