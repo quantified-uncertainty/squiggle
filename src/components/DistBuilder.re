@@ -148,7 +148,7 @@ let make = () => {
       ~schema,
       ~onSubmit=({state}) => {None},
       ~initialState={
-        guesstimatorString: "mm(5 to 20, floor(normal(20,2)), [.5, .5])",
+        guesstimatorString: "50 to 50000",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
@@ -157,9 +157,9 @@ let make = () => {
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
-        sampleCount: "1000",
-        outputXYPoints: "2000",
-        truncateTo: "500",
+        sampleCount: "10000",
+        outputXYPoints: "5000",
+        truncateTo: "1000",
       },
       (),
     );

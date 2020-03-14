@@ -26,7 +26,14 @@ module Internals = {
     discreteGet(r) |> jsToDistDiscrete;
 
   [@bs.module "./GuesstimatorLibrary.js"]
-  external toCombinedFormat: (string, int, int) => combined = "run";
+  external toCombinedFormat: (string, int, int, int) => combined = "run";
+
+  [@bs.module "./GuesstimatorLibrary.js"]
+  external stringToSamples: (string, int) => array(float) = "stringToSamples";
+
+  [@bs.module "./GuesstimatorLibrary.js"]
+  external samplesToContinuousPdf: (array(float), int, int) => array(float) =
+    "samplesToContinuousPdf";
 
   // todo: Format to correct mass, also normalize the pdf.
   let toMixedShape =
@@ -44,8 +51,8 @@ module Internals = {
     // let discreteProb =
     //   d |> Distributions.Discrete.T.Integral.sum(~cache=None);
 
-    let foo = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
-    foo;
+    let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
+    shape;
   };
 };
 
@@ -54,8 +61,9 @@ let stringToMixedShape =
       ~string,
       ~sampleCount=3000,
       ~outputXYPoints=3000,
+      ~width=3000,
       ~truncateTo=Some(500),
       (),
     ) =>
-  Internals.toCombinedFormat(string, sampleCount, outputXYPoints)
+  Internals.toCombinedFormat(string, sampleCount, outputXYPoints, width)
   |> Internals.toMixedShape(~truncateTo);
