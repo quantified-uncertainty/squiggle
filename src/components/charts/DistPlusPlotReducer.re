@@ -7,6 +7,7 @@ type chartConfig = {
 
 type state = {
   showStats: bool,
+  showPercentiles: bool,
   showParams: bool,
   distributions: list(chartConfig),
 };
@@ -14,6 +15,7 @@ type state = {
 type action =
   | CHANGE_SHOW_STATS
   | CHANGE_SHOW_PARAMS
+  | CHANGE_SHOW_PERCENTILES
   | REMOVE_DIST(int)
   | ADD_DIST
   | CHANGE_X_LOG(int)
@@ -90,11 +92,16 @@ let reducer = (state: state, action: action) =>
     }
   | CHANGE_SHOW_STATS => {...state, showStats: !state.showStats}
   | CHANGE_SHOW_PARAMS => {...state, showParams: !state.showParams}
+  | CHANGE_SHOW_PERCENTILES => {
+      ...state,
+      showPercentiles: !state.showPercentiles,
+    }
   };
 
 let init = {
   showStats: false,
   showParams: false,
+  showPercentiles: true,
   distributions: [
     {yLog: false, xLog: false, isCumulative: false, height: 2},
     {yLog: false, xLog: false, isCumulative: true, height: 1},

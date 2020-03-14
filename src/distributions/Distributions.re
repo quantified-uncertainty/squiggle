@@ -31,6 +31,7 @@ module type dist = {
   let integral: (~cache: option(integral), t) => integral;
   let integralEndY: (~cache: option(integral), t) => float;
   let integralXtoY: (~cache: option(integral), float, t) => float;
+  let integralYtoX: (~cache: option(integral), float, t) => float;
 };
 
 module Dist = (T: dist) => {
@@ -58,6 +59,7 @@ module Dist = (T: dist) => {
     type t = T.integral;
     let get = T.integral;
     let xToY = T.integralXtoY;
+    let yToX = T.integralYtoX;
     let sum = T.integralEndY;
   };
 
@@ -105,7 +107,7 @@ module Continuous = {
       type integral = DistTypes.continuousShape;
       let minX = shapeFn(XYShape.minX);
       let maxX = shapeFn(XYShape.maxX);
-      let toDiscreteProbabilityMass = t => 0.0;
+      let toDiscreteProbabilityMass = _ => 0.0;
       let pointwiseFmap = (fn, t: t) =>
         t |> xyShape |> XYShape.pointwiseMap(fn) |> fromShape;
       let toShape = (t: t): DistTypes.shape => Continuous(t);
@@ -142,6 +144,8 @@ module Continuous = {
       let integralEndY = (~cache, t) => t |> integral(~cache) |> lastY;
       let integralXtoY = (~cache, f, t) =>
         t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
+      let integralYtoX = (~cache, f, t) =>
+        t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findX(f));
       let toContinuous = t => Some(t);
       let toDiscrete = _ => None;
       let toScaledContinuous = t => Some(t);
@@ -176,12 +180,19 @@ module Discrete = {
         |> E.O.default(0.0)
         |> DistTypes.MixedPoint.makeDiscrete;
       };
+
       //  todo: This should use cache and/or same code as above. FindingY is more complex, should use interpolationType.
       let integralXtoY = (~cache, f, t) =>
         t
         |> integral(~cache)
         |> Continuous.getShape
         |> CdfLibrary.Distribution.findY(f);
+
+      let integralYtoX = (~cache, f, t) =>
+        t
+        |> integral(~cache)
+        |> Continuous.getShape
+        |> CdfLibrary.Distribution.findX(f);
     });
 };
 
@@ -297,10 +308,18 @@ module Mixed = {
         integral(~cache, t) |> Continuous.lastY;
       };
 
-      let integralXtoY = (~cache, f, {discrete, continuous} as t: t) => {
-        let cont = Continuous.T.Integral.xToY(~cache, f, continuous);
-        let discrete = Discrete.T.Integral.xToY(~cache, f, discrete);
-        scaleDiscreteFn(t, discrete) +. scaleContinuousFn(t, cont);
+      let integralXtoY = (~cache, f, t) => {
+        t
+        |> integral(~cache)
+        |> Continuous.getShape
+        |> CdfLibrary.Distribution.findX(f);
+      };
+
+      let integralYtoX = (~cache, f, t) => {
+        t
+        |> integral(~cache)
+        |> Continuous.getShape
+        |> CdfLibrary.Distribution.findY(f);
       };
 
       // TODO: This functionality is kinda weird, because it seems to assume the cdf adds to 1.0 elsewhere, which wouldn't happen here.
@@ -418,6 +437,16 @@ module Shape = {
             Mixed.T.Integral.xToY(~cache, f),
             Discrete.T.Integral.xToY(~cache, f),
             Continuous.T.Integral.xToY(~cache, f),
+          ),
+        );
+      };
+      let integralYtoX = (~cache, f, t) => {
+        mapToAll(
+          t,
+          (
+            Mixed.T.Integral.yToX(~cache, f),
+            Discrete.T.Integral.yToX(~cache, f),
+            Continuous.T.Integral.yToX(~cache, f),
           ),
         );
       };
@@ -542,6 +571,11 @@ module DistPlus = {
       let integralXtoY = (~cache as _, f, t: t) => {
         Shape.T.Integral.xToY(~cache=Some(t.integralCache), f, toShape(t))
         |> domainIncludedProbabilityMassAdjustment(t);
+      };
+
+      // TODO: This part is broken when there is a limit, if this is supposed to be taken into account.
+      let integralYtoX = (~cache as _, f, t: t) => {
+        Shape.T.Integral.yToX(~cache=Some(t.integralCache), f, toShape(t));
       };
     });
 };

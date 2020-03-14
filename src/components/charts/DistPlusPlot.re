@@ -6,6 +6,9 @@ let showAsForm = (distPlus: DistTypes.distPlus) => {
   </div>;
 };
 
+let showFloat = (~precision=3, number) =>
+  <ForetoldComponents.NumberShower number precision />;
+
 let table = (distPlus, x) => {
   <div>
     <table className="table-auto text-sm">
@@ -119,6 +122,60 @@ let table = (distPlus, x) => {
       </tbody>
     </table>
   </div>;
+};
+let percentiles = distPlus => {
+  <table className="table-auto text-sm">
+    <thead>
+      <tr>
+        <td className="px-4 py-2"> {"1" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"5" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"25" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"50" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"75" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"95" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"99" |> ReasonReact.string} </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.01)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.05)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.25)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.5)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.75)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.95)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99)
+           |> showFloat}
+        </td>
+      </tr>
+    </tbody>
+  </table>;
 };
 
 let adjustBoth = discreteProbabilityMass => {
@@ -287,8 +344,12 @@ let make = (~distPlus: DistTypes.distPlus) => {
      |> E.L.toArray
      |> ReasonReact.array}
     <div className="inline-flex opacity-50 hover:opacity-100">
+      <button
+        className=button onClick={_ => dispatch(CHANGE_SHOW_PERCENTILES)}>
+        {"Percentiles" |> ReasonReact.string}
+      </button>
       <button className=button onClick={_ => dispatch(CHANGE_SHOW_STATS)}>
-        {"Stats" |> ReasonReact.string}
+        {"Debug Stats" |> ReasonReact.string}
       </button>
       <button className=button onClick={_ => dispatch(CHANGE_SHOW_PARAMS)}>
         {"Params" |> ReasonReact.string}
@@ -299,5 +360,6 @@ let make = (~distPlus: DistTypes.distPlus) => {
     </div>
     {state.showParams ? showAsForm(distPlus) : ReasonReact.null}
     {state.showStats ? table(distPlus, x) : ReasonReact.null}
+    {state.showPercentiles ? percentiles(distPlus) : ReasonReact.null}
   </div>;
 };
