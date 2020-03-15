@@ -64,6 +64,14 @@ module T = {
   let fromZippedArray = (is: array((float, float))): t =>
     is |> Belt.Array.unzip |> fromArray;
 
+  module Zipped = {
+    type zipped = array((float, float));
+    let sortByY = (t: zipped) =>
+      t |> E.A.stableSortBy(_, ((_, y1), (_, y2)) => y1 > y2 ? 1 : 0);
+    let sortByX = (t: zipped) =>
+      t |> E.A.stableSortBy(_, ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0);
+  };
+
   module Combine = {
     let combineLinear = (t1: t, t2: t, fn: (float, float) => float) => {
       let allXs = Belt.Array.concat(xs(t1), xs(t2));
