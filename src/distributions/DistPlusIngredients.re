@@ -16,6 +16,13 @@ let toDistPlus =
       t: distPlusIngredients,
     )
     : option(distPlus) => {
+  let test =
+    Guesstimator.toMixed(
+      t.guesstimatorString,
+      sampleCount,
+      outputXYPoints,
+      30,
+    );
   let shape =
     Guesstimator.stringToMixedShape(
       ~string=t.guesstimatorString,

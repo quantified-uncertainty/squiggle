@@ -3,6 +3,7 @@ const {
 } = require("@foretold/cdf/lib/samples");
 const _ = require("lodash");
 const { Guesstimator } = require('@foretold/guesstimator/src');
+const pdfast = require('pdfast');
 
 /**
  * @param values
@@ -89,10 +90,7 @@ const stringToSamples = (
   sampleCount,
   inputs = [],
 ) => {
-  const [_error, item] = Guesstimator.parse({ text });
-  if (_error){
-    return []
-  }
+  const [_error, item] = Guesstimator.parse({ text:"=" + text });
   const { parsedInput } = item;
 
   const guesstimator = new Guesstimator({ parsedInput });
@@ -106,15 +104,16 @@ const stringToSamples = (
 
 const samplesToContinuousPdf = (
   samples,
-  outputResolutionCount,
+  size,
   width,
   min = false,
   max = false,
 ) => {
-  const values = _.filter(samples, _.isFinite);
-  const _samples = new Samples(values);
-  const pdf = _samples.toPdf({ size: outputResolutionCount, width, min, max });
-  return pdf;
+  let _samples = _.filter(samples, _.isFinite);
+  if (_.isFinite(min)) { _samples = _.filter(_samples, r => r > min) };
+  if (_.isFinite(max)) { _samples = _.filter(_samples, r => r < max) };
+  let pdf = pdfast.create(_samples, { size, width });
+  return {xs: pdf.map(r => r.x), ys: pdf.map(r => r.x)};
 };
 
 module.exports = {

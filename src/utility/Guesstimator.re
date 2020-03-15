@@ -32,7 +32,8 @@ module Internals = {
   external stringToSamples: (string, int) => array(float) = "stringToSamples";
 
   [@bs.module "./GuesstimatorLibrary.js"]
-  external samplesToContinuousPdf: (array(float), int, int) => array(float) =
+  external samplesToContinuousPdf:
+    (array(float), int, int) => CdfLibrary.JS.distJs =
     "samplesToContinuousPdf";
 
   // todo: Format to correct mass, also normalize the pdf.
@@ -67,3 +68,30 @@ let stringToMixedShape =
     ) =>
   Internals.toCombinedFormat(string, sampleCount, outputXYPoints, width)
   |> Internals.toMixedShape(~truncateTo);
+
+let toMixed = (string, sampleCount, returnLength, width) => {
+  let samples = Internals.stringToSamples(string, sampleCount);
+  let length = samples |> E.A.length;
+  Array.sort(compare, samples);
+  let items =
+    E.A.uniq(samples)
+    |> E.A.fmap(r => (r, samples |> E.A.filter(n => n == r) |> E.A.length));
+  let (discretePart, continuousPart) =
+    Belt.Array.partition(items, ((_, count)) => count > 1);
+  let discrete: DistTypes.xyShape =
+    discretePart
+    |> E.A.fmap(((x, count)) =>
+         (x, float_of_int(count) /. float_of_int(length))
+       )
+    |> XYShape.T.fromZippedArray;
+  let pdf: DistTypes.xyShape =
+    continuousPart |> E.A.length > 20
+      ? {
+        Internals.samplesToContinuousPdf(samples, returnLength, width)
+        |> CdfLibrary.JS.jsToDist;
+      }
+      : {xs: [||], ys: [||]};
+  let continuous = pdf |> Distributions.Continuous.fromShape;
+  let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
+  shape;
+};

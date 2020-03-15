@@ -157,9 +157,9 @@ let make = () => {
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
-        sampleCount: "10000",
-        outputXYPoints: "5000",
-        truncateTo: "1000",
+        sampleCount: "1000",
+        outputXYPoints: "1000",
+        truncateTo: "500",
       },
       (),
     );

@@ -61,6 +61,8 @@ module T = {
   let xMap = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys};
   let fromArray = ((xs, ys)): t => {xs, ys};
   let fromArrays = (xs, ys): t => {xs, ys};
+  let fromZippedArray = (is: array((float, float))): t =>
+    is |> Belt.Array.unzip |> fromArray;
 
   module Combine = {
     let combineLinear = (t1: t, t2: t, fn: (float, float) => float) => {
