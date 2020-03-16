@@ -138,7 +138,6 @@ module J = {
   let fromNumber = Js.Json.number;
 
   module O = {
-
     let fromString = (str: string) =>
       switch (str) {
       | "" => None
@@ -285,6 +284,18 @@ module A = {
       let forceOpen = (r: array(Belt.Result.t('a, 'b))): array('a) =>
         r |> Belt.Array.map(_, r => Belt.Result.getExn(r));
       bringErrorUp |> Belt.Result.map(_, forceOpen);
+    };
+  };
+
+  module Sorted = {
+    let binarySearchFirstElementGreaterIndex = (ar: array('a), el: 'a) => {
+      let el = Belt.SortArray.binarySearchBy(ar, el, compare);
+      let el = el < 0 ? el * (-1) - 1 : el;
+      switch (el) {
+      | e when e >= length(ar) => `overMax
+      | e when e == 0 => `underMin
+      | e => `firstHigher(e)
+      };
     };
   };
 };

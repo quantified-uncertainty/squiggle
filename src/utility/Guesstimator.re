@@ -131,7 +131,7 @@ let toMixed =
       ~cuttoff=0.995,
       (),
     ) => {
-  let truncateTo = None;
+  // let truncateTo = None;
   let start = Js.Date.now();
   let timeMessage = message => Js.log2(message, Js.Date.now() -. start);
   timeMessage("Starting");

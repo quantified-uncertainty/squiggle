@@ -112,8 +112,7 @@ module Continuous = {
       let toDiscreteProbabilityMass = _ => 0.0;
       let pointwiseFmap = (fn, t: t) =>
         t |> xyShape |> XYShape.T.pointwiseMap(fn) |> fromShape;
-      let truncate = i =>
-        shapeMap(CdfLibrary.Distribution.convertToNewLength(i));
+      let truncate = i => shapeMap(XYShape.T.convertToNewLength(i));
       let toShape = (t: t): DistTypes.shape => Continuous(t);
       let xToY = (f, {interpolation, xyShape}: t) =>
         switch (interpolation) {

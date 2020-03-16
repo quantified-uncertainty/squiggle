@@ -50,7 +50,33 @@ module T = {
 
   let findY = (x: float, t: t): float => {
     // todo: change getIndexBy to realize it's sorted
-    // Belt.SortArray.binarySearchBy
+    let firstHigherIndex =
+      E.A.Sorted.binarySearchFirstElementGreaterIndex(xs(t), x);
+    let n =
+      switch (firstHigherIndex) {
+      | `overMax => maxY(t) |> E.O.default(0.0)
+      | `underMin => minY(t) |> E.O.default(0.0)
+      | `firstHigher(firstHigherIndex) =>
+        let lowerOrEqualIndex =
+          firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
+        let needsInterpolation = xs(t)[lowerOrEqualIndex] != x;
+        if (needsInterpolation) {
+          Functions.interpolate(
+            xs(t)[lowerOrEqualIndex],
+            xs(t)[firstHigherIndex],
+            ys(t)[lowerOrEqualIndex],
+            ys(t)[firstHigherIndex],
+            x,
+          );
+        } else {
+          ys(t)[lowerOrEqualIndex];
+        };
+      };
+    n;
+  };
+
+  let findYA = (x: float, t: t): float => {
+    // todo: change getIndexBy to realize it's sorted
     let firstHigherIndex = Belt.Array.getIndexBy(xs(t), e => e >= x);
     switch (firstHigherIndex) {
     | None => maxY(t) |> E.O.default(0.0)
@@ -75,25 +101,39 @@ module T = {
 
   let findX = (y: float, t: t): float => {
     let firstHigherIndex = Belt.Array.getIndexBy(ys(t), e => e >= y);
-    switch (firstHigherIndex) {
-    | None => maxX(t) |> E.O.default(0.0)
-    | Some(0) => minX(t) |> E.O.default(0.0)
-    | Some(firstHigherIndex) =>
-      let lowerOrEqualIndex =
-        firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
-      let needsInterpolation = ys(t)[lowerOrEqualIndex] != y;
-      if (needsInterpolation) {
-        Functions.interpolate(
-          ys(t)[lowerOrEqualIndex],
-          ys(t)[firstHigherIndex],
-          ys(t)[lowerOrEqualIndex],
-          ys(t)[firstHigherIndex],
-          y,
-        );
-      } else {
-        xs(t)[lowerOrEqualIndex];
+    let f: float =
+      switch (firstHigherIndex) {
+      | None => maxX(t) |> E.O.default(0.0)
+      | Some(0) => minX(t) |> E.O.default(0.0)
+      | Some(firstHigherIndex) =>
+        let lowerOrEqualIndex =
+          firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
+        let needsInterpolation = ys(t)[lowerOrEqualIndex] != y;
+        if (needsInterpolation) {
+          Functions.interpolate(
+            ys(t)[lowerOrEqualIndex],
+            ys(t)[firstHigherIndex],
+            ys(t)[lowerOrEqualIndex],
+            ys(t)[firstHigherIndex],
+            y,
+          );
+        } else {
+          xs(t)[lowerOrEqualIndex];
+        };
       };
-    };
+    f;
+  };
+
+  let convertWithAlternativeXs = (newXs: array(float), t: t): t => {
+    let newYs = Belt.Array.map(newXs, f => findY(f, t));
+    {xs: newXs, ys: newYs};
+  };
+
+  let convertToNewLength = (newLength: int, t: t): DistTypes.xyShape => {
+    Functions.(
+      range(min(xs(t)), max(xs(t)), newLength)
+      |> convertWithAlternativeXs(_, t)
+    );
   };
 
   module XtoY = {

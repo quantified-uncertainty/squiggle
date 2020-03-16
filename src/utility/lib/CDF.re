@@ -35,11 +35,12 @@ module Make = (Config: Config) => {
   let minY = () => get(ys, 0);
   let maxY = () => get(ys, len(ys) - 1);
   let findY = (x: float): float => {
-    let firstHigherIndex = Belt.Array.getIndexBy(xs, e => e >= x);
+    let firstHigherIndex =
+      E.A.Sorted.binarySearchFirstElementGreaterIndex(xs, x);
     switch (firstHigherIndex) {
-    | None => maxY()
-    | Some(0) => minY()
-    | Some(firstHigherIndex) =>
+    | `overMax => maxY()
+    | `underMin => minY()
+    | `firstHigher(firstHigherIndex) =>
       let lowerOrEqualIndex =
         firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
       let needsInterpolation = get(xs, lowerOrEqualIndex) != x;
@@ -57,11 +58,12 @@ module Make = (Config: Config) => {
     };
   };
   let findX = (y: float): float => {
-    let firstHigherIndex = Belt.Array.getIndexBy(ys, e => e >= y);
+    let firstHigherIndex =
+      E.A.Sorted.binarySearchFirstElementGreaterIndex(ys, y);
     switch (firstHigherIndex) {
-    | None => maxX()
-    | Some(0) => minX()
-    | Some(firstHigherIndex) =>
+    | `overMax => maxX()
+    | `underMin => minX()
+    | `firstHigher(firstHigherIndex) =>
       let lowerOrEqualIndex =
         firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
       let needsInterpolation = get(ys, lowerOrEqualIndex) != y;
