@@ -173,6 +173,21 @@ let percentiles = distPlus => {
            |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99)
            |> showFloat}
         </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.999)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.9999)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99999)
+           |> showFloat}
+        </td>
       </tr>
     </tbody>
   </table>;

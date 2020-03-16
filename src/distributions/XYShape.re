@@ -8,8 +8,11 @@ module T = {
     {"xs": t.xs, "ys": t.ys};
   };
   let xs = (t: t) => t.xs;
+  let ys = (t: t) => t.ys;
   let minX = (t: t) => t |> xs |> E.A.first;
   let maxX = (t: t) => t |> xs |> E.A.last;
+  let minY = (t: t) => t |> ys |> E.A.first;
+  let maxY = (t: t) => t |> ys |> E.A.last;
   let xTotalRange = (t: t) =>
     switch (minX(t), maxX(t)) {
     | (Some(min), Some(max)) => Some(max -. min)
@@ -45,6 +48,31 @@ module T = {
     previousIndex |> Belt.Option.flatMap(_, Belt.Array.get(zipped));
   };
 
+  let findY = (x: float, t: t): float => {
+    let firstHigherIndex = Belt.Array.getIndexBy(xs(t), e => e >= x);
+    switch (firstHigherIndex) {
+    | None => maxY(t) |> E.O.default(0.0)
+    | Some(0) => minY(t) |> E.O.default(0.0)
+    | Some(firstHigherIndex) =>
+      let lowerOrEqualIndex =
+        firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
+      let needsInterpolation = xs(t)[lowerOrEqualIndex] != x;
+      if (needsInterpolation) {
+        Functions.interpolate(
+          xs(t)[lowerOrEqualIndex],
+          xs(t)[firstHigherIndex],
+          ys(t)[lowerOrEqualIndex],
+          ys(t)[firstHigherIndex],
+          x,
+        );
+      } else {
+        ys(t)[lowerOrEqualIndex];
+      };
+    };
+  };
+
+  let findX = CdfLibrary.Distribution.findX;
+
   module XtoY = {
     let stepwiseIncremental = (f, t: t) =>
       firstPairAtOrBeforeValue(f, t) |> E.O.fmap(((_, y)) => y);
@@ -54,7 +82,7 @@ module T = {
     };
 
     // TODO: When Roman's PR comes in, fix this bit. This depends on interpolation, obviously.
-    let linear = (f, t: t) => t |> CdfLibrary.Distribution.findY(f);
+    let linear = (f, t: t) => t |> findY(f);
   };
 
   let pointwiseMap = (fn, t: t): t => {xs: t.xs, ys: t.ys |> E.A.fmap(fn)};
@@ -173,9 +201,6 @@ module T = {
 
   let accumulateYs = _transverseShape((aCurrent, aLast) => aCurrent +. aLast);
   let subtractYs = _transverseShape((aCurrent, aLast) => aCurrent -. aLast);
-
-  let findY = CdfLibrary.Distribution.findY;
-  let findX = CdfLibrary.Distribution.findX;
 };
 
 // I'm really not sure this part is actually what we want at this point.
