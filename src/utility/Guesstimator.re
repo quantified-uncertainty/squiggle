@@ -104,7 +104,6 @@ module KDE = {
       part2Data
       |> Internals.samplesToContinuousPdf(_, part2XYPoints, 3)
       |> CdfLibrary.JS.jsToDist;
-    Js.log4(partitionAt, part1XYPoints, part1, part2);
     let opp = 1.0 -. cuttoff;
     // let result =
     //   XYShape.T.Combine.combineLinear(
@@ -141,7 +140,6 @@ let toMixed =
 
   let length = samples |> E.A.length;
   Array.fast_sort(compare, samples);
-  Js.log2("SORTED?", samples);
   // let items =
   //   E.A.uniq(samples)
   //   |> E.A.fmap(r => (r, samples |> E.A.filter(n => n == r) |> E.A.length));
@@ -158,8 +156,8 @@ let toMixed =
   let pdf: DistTypes.xyShape =
     continuousPart |> E.A.length > 20
       ? {
-        samples |> KDE.inGroups(_, outputXYPoints, kernelWidth, ~cuttoff, ());
-                                                                    // samples |> KDE.normalSampling(_, outputXYPoints, kernelWidth);
+        // samples |> KDE.inGroups(_, outputXYPoints, kernelWidth, ~cuttoff, ());
+        samples |> KDE.normalSampling(_, outputXYPoints, kernelWidth);
       }
       : {xs: [||], ys: [||]};
   timeMessage("Finished pdf");

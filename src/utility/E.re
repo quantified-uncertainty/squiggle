@@ -134,12 +134,10 @@ module S = {
 
 module J = {
   let toString = Js.Json.decodeString ||> O.default("");
-  let toMoment = toString ||> MomentRe.moment;
   let fromString = Js.Json.string;
   let fromNumber = Js.Json.number;
 
   module O = {
-    let toMoment = O.fmap(toMoment);
 
     let fromString = (str: string) =>
       switch (str) {

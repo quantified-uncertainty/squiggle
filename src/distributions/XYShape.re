@@ -49,6 +49,8 @@ module T = {
   };
 
   let findY = (x: float, t: t): float => {
+    // todo: change getIndexBy to realize it's sorted
+    // Belt.SortArray.binarySearchBy
     let firstHigherIndex = Belt.Array.getIndexBy(xs(t), e => e >= x);
     switch (firstHigherIndex) {
     | None => maxY(t) |> E.O.default(0.0)
@@ -71,7 +73,28 @@ module T = {
     };
   };
 
-  let findX = CdfLibrary.Distribution.findX;
+  let findX = (y: float, t: t): float => {
+    let firstHigherIndex = Belt.Array.getIndexBy(ys(t), e => e >= y);
+    switch (firstHigherIndex) {
+    | None => maxX(t) |> E.O.default(0.0)
+    | Some(0) => minX(t) |> E.O.default(0.0)
+    | Some(firstHigherIndex) =>
+      let lowerOrEqualIndex =
+        firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
+      let needsInterpolation = ys(t)[lowerOrEqualIndex] != y;
+      if (needsInterpolation) {
+        Functions.interpolate(
+          ys(t)[lowerOrEqualIndex],
+          ys(t)[firstHigherIndex],
+          ys(t)[lowerOrEqualIndex],
+          ys(t)[firstHigherIndex],
+          y,
+        );
+      } else {
+        xs(t)[lowerOrEqualIndex];
+      };
+    };
+  };
 
   module XtoY = {
     let stepwiseIncremental = (f, t: t) =>
@@ -180,6 +203,38 @@ module T = {
 
   let ySum = yFold((a, b) => a +. b);
 
+  let _transverseSimple = fn =>
+    Belt.Array.reduce(_, [||], (items, y) =>
+      switch (E.A.last(items)) {
+      | Some(yLast) => Belt.Array.concat(items, [|fn(y, yLast)|])
+      | None => [|y|]
+      }
+    );
+
+  let _transverse2 = (fn, items) => {
+    let length = items |> E.A.length;
+    let empty = Belt.Array.make(length, items |> E.A.unsafe_get(_, 0));
+    Belt.Array.forEachWithIndex(
+      items,
+      (index, element) => {
+        let item =
+          switch (index) {
+          | 0 => element
+          | index => fn(element, E.A.unsafe_get(empty, index - 1))
+          };
+        let _ = Belt.Array.set(empty, index, item);
+        ();
+      },
+    );
+    empty;
+  };
+
+  let _transverseB = (fn, items) => {
+    let (xs, ys) = items |> Belt.Array.unzip;
+    let newYs = _transverse2(fn, ys);
+    Belt.Array.zip(xs, newYs);
+  };
+
   let _transverse = fn =>
     Belt.Array.reduce(_, [||], (items, (x, y)) =>
       switch (E.A.last(items)) {
@@ -191,7 +246,7 @@ module T = {
 
   let _transverseShape = (fn, p: t) => {
     Belt.Array.zip(p.xs, p.ys)
-    |> _transverse(fn)
+    |> _transverseB(fn)
     |> Belt.Array.unzip
     |> fromArray;
   };

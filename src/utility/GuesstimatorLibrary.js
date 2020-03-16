@@ -90,15 +90,18 @@ const stringToSamples = (
   sampleCount,
   inputs = [],
 ) => {
-  const [_error, item] = Guesstimator.parse({ text:"=" + text });
-  const { parsedInput } = item;
+  const [_error, { parsedInput, parsedError }] = Guesstimator.parse({ text:"=" + text });
 
   const guesstimator = new Guesstimator({ parsedInput });
-  const value = guesstimator.sample(
+  const {values, errors} = guesstimator.sample(
     sampleCount,
     inputs,
   );
-  return value.values
+  if (errors.length > 0){
+    return []
+  } else {
+    return values
+  }
 };
 
 

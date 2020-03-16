@@ -248,9 +248,7 @@ module IntegralChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
     open Distributions.DistPlus;
-    let integral =
-      Distributions.DistPlus.T.toShape(distPlus)
-      |> Distributions.Shape.T.Integral.get(~cache=None);
+    let integral = distPlus.integralCache;
     let continuous =
       integral
       |> Distributions.Continuous.toLinear

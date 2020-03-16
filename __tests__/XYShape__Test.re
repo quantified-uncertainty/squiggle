@@ -39,5 +39,15 @@ describe("XYShapes", () => {
       XYShape.logScorePoint(30, shape1, shape3),
       Some(210.3721280423322),
     );
-  })
+  });
+  describe("transverse", () => {
+    makeTest(
+      "When very different",
+      XYShape.T._transverse2(
+        (aCurrent, aLast) => aCurrent +. aLast,
+        [|1.0, 2.0, 3.0, 4.0|],
+      ),
+      [|1.0, 3.0, 6.0, 10.0|],
+    )
+  });
 });

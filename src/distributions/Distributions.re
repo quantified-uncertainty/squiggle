@@ -147,9 +147,9 @@ module Continuous = {
         };
       let integralEndY = (~cache, t) => t |> integral(~cache) |> lastY;
       let integralXtoY = (~cache, f, t) =>
-        t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
+        t |> integral(~cache) |> shapeFn(XYShape.T.findY(f));
       let integralYtoX = (~cache, f, t) =>
-        t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findX(f));
+        t |> integral(~cache) |> shapeFn(XYShape.T.findX(f));
       let toContinuous = t => Some(t);
       let toDiscrete = _ => None;
       let toScaledContinuous = t => Some(t);
@@ -202,16 +202,10 @@ module Discrete = {
 
       //  todo: This should use cache and/or same code as above. FindingY is more complex, should use interpolationType.
       let integralXtoY = (~cache, f, t) =>
-        t
-        |> integral(~cache)
-        |> Continuous.getShape
-        |> CdfLibrary.Distribution.findY(f);
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
 
       let integralYtoX = (~cache, f, t) =>
-        t
-        |> integral(~cache)
-        |> Continuous.getShape
-        |> CdfLibrary.Distribution.findX(f);
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findX(f);
     });
 };
 
@@ -354,17 +348,11 @@ module Mixed = {
       };
 
       let integralXtoY = (~cache, f, t) => {
-        t
-        |> integral(~cache)
-        |> Continuous.getShape
-        |> CdfLibrary.Distribution.findX(f);
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findX(f);
       };
 
       let integralYtoX = (~cache, f, t) => {
-        t
-        |> integral(~cache)
-        |> Continuous.getShape
-        |> CdfLibrary.Distribution.findY(f);
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
       };
 
       // TODO: This functionality is kinda weird, because it seems to assume the cdf adds to 1.0 elsewhere, which wouldn't happen here.
