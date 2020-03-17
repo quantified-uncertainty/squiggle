@@ -121,6 +121,63 @@ module KDE = {
   };
 };
 
+module FloatFloatMap = {
+  module Id =
+    Belt.Id.MakeComparable({
+      type t = float;
+      let cmp: (float, float) => int = Pervasives.compare;
+    });
+
+  type t = Belt.MutableMap.t(Id.t, float, Id.identity);
+
+  let fromArray = (ar: array((float, float))) =>
+    Belt.MutableMap.fromArray(ar, ~id=(module Id));
+  let toArray = (t: t) => Belt.MutableMap.toArray(t);
+  let empty = () => Belt.MutableMap.make(~id=(module Id));
+  let increment = (el, t: t) =>
+    Belt.MutableMap.update(
+      t,
+      el,
+      fun
+      | Some(n) => Some(n +. 1.0)
+      | None => Some(1.0),
+    );
+
+  let get = (el, t: t) => Belt.MutableMap.get(t, el);
+  let fmap = (fn, t: t) => Belt.MutableMap.map(t, fn);
+};
+
+let split = (sortedArray: array(float)) => {
+  let continuous = [||];
+  let discrete = FloatFloatMap.empty();
+  Belt.Array.forEachWithIndex(
+    sortedArray,
+    (index, element) => {
+      let maxIndex = (sortedArray |> Array.length) - 1;
+      let possiblySimilarElements =
+        (
+          switch (index) {
+          | 0 => [|index + 1|]
+          | n when n == maxIndex => [|index - 1|]
+          | _ => [|index - 1, index + 1|]
+          }
+        )
+        |> Belt.Array.map(_, r => sortedArray[r]);
+      let hasSimilarElement =
+        Belt.Array.some(possiblySimilarElements, r => r == element);
+      hasSimilarElement
+        ? FloatFloatMap.increment(element, discrete)
+        : {
+          let _ = Js.Array.push(element, continuous);
+          ();
+        };
+      ();
+    },
+  );
+
+  (continuous, discrete);
+};
+
 let toMixed =
     (
       ~string,
@@ -140,18 +197,12 @@ let toMixed =
 
   let length = samples |> E.A.length;
   Array.fast_sort(compare, samples);
-  // let items =
-  //   E.A.uniq(samples)
-  //   |> E.A.fmap(r => (r, samples |> E.A.filter(n => n == r) |> E.A.length));
-  // let (discretePart, continuousPart) =
-  //   Belt.Array.partition(items, ((_, count)) => count > 1);
-  let discretePart = [||];
-  let continuousPart = samples;
+  let (continuousPart, disc) = split(samples);
+  let lengthFloat = float_of_int(length);
   let discrete: DistTypes.xyShape =
-    discretePart
-    |> E.A.fmap(((x, count)) =>
-         (x, float_of_int(count) /. float_of_int(length))
-       )
+    disc
+    |> FloatFloatMap.fmap(r => r /. lengthFloat)
+    |> FloatFloatMap.toArray
     |> XYShape.T.fromZippedArray;
   let pdf: DistTypes.xyShape =
     continuousPart |> E.A.length > 20
@@ -171,6 +222,5 @@ let toMixed =
     | (None, Some(shape)) => Some(shape)
     | _ => None
     };
-  timeMessage("Finished truncation");
   shape;
 };

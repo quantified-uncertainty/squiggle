@@ -347,11 +347,11 @@ module Mixed = {
       };
 
       let integralXtoY = (~cache, f, t) => {
-        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findX(f);
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
       };
 
       let integralYtoX = (~cache, f, t) => {
-        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findX(f);
       };
 
       // TODO: This functionality is kinda weird, because it seems to assume the cdf adds to 1.0 elsewhere, which wouldn't happen here.

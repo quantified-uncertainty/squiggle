@@ -151,7 +151,7 @@ let make = () => {
       ~schema,
       ~onSubmit=({state}) => {None},
       ~initialState={
-        guesstimatorString: "40 to 50",
+        guesstimatorString: "mm(40 to 80, floor(50 to 80), [.5,.5])",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
@@ -162,7 +162,7 @@ let make = () => {
         unit: "days",
         sampleCount: "10000",
         outputXYPoints: "500",
-        truncateTo: "100",
+        truncateTo: "0",
         kernelWidth: "5",
       },
       (),
@@ -239,12 +239,13 @@ let make = () => {
           && !Js.Float.isNaN(outputXYPoints)
           && !Js.Float.isNaN(truncateTo)
           && sampleCount > 10.
-          && outputXYPoints > 10.
-          && truncateTo > 10. =>
+          && outputXYPoints > 10. =>
       Some({
         sampleCount: sampleCount |> int_of_float,
         outputXYPoints: outputXYPoints |> int_of_float,
-        truncateTo: truncateTo |> int_of_float |> E.O.some,
+        truncateTo:
+          int_of_float(truncateTo) > 0
+            ? Some(int_of_float(truncateTo)) : None,
         kernelWidth: kernelWidth |> int_of_float,
       })
     | _ => None

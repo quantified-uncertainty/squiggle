@@ -215,13 +215,21 @@ module DistPlusChart = {
       |> T.toScaledContinuous
       |> E.O.fmap(Distributions.Continuous.getShape);
     let range = T.xTotalRange(distPlus);
+
+    // We subtract a bit from the range to make sure that it fits. Maybe this should be done in d3 instead.
     let minX =
-      switch (T.minX(distPlus), range) {
-      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
+      switch (
+        distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.01),
+        range,
+      ) {
+      | (min, Some(range)) => Some(min -. range *. 0.001)
       | _ => None
       };
 
-    let maxX = T.maxX(distPlus);
+    let maxX = {
+      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99);
+    };
+
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     let toDiscreteProbabilityMass =
       distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
