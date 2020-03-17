@@ -1,38 +1,9 @@
-import { Guesstimator } from '@foretold/guesstimator/src';
-import { Samples } from '@foretold/cdf/lib/samples';
-import _ from 'lodash';
-
-/**
- *
- * @param {number} minValue
- * @param {number} maxValue
- * @returns {string}
- */
-const minMaxRatio = (minValue, maxValue) => {
-  if (minValue === 0 || maxValue === 0) {
-    return 'SMALL';
-  }
-  const ratio = maxValue / minValue;
-  if (ratio < 10000) {
-    return 'SMALL';
-  } else if (ratio < 1000000) {
-    return 'MEDIUM';
-  } else {
-    return 'LARGE';
-  }
-};
-
-/**
- * @param samples
- * @return {string}
- */
-const ratioSize = samples => {
-  samples.sort();
-  const minValue = samples.getPercentile(2);
-  const maxValue = samples.getPercentile(98);
-  return minMaxRatio(minValue, maxValue);
-};
-
+const {
+  Samples,
+} = require("@foretold/cdf/lib/samples");
+const _ = require("lodash");
+const { Guesstimator } = require('@foretold/guesstimator/src');
+const pdfast = require('pdfast');
 
 /**
  * @param values
@@ -41,7 +12,7 @@ const ratioSize = samples => {
  * @param max
  * @returns {{discrete: {ys: *, xs: *}, continuous: {ys: [], xs: []}}}
  */
-const toPdf = (values, outputResolutionCount, min, max) => {
+const toPdf = (values, outputResolutionCount, width, min, max) => {
   let duplicateSamples = _(values).groupBy().pickBy(x => x.length > 1).keys().value();
   let totalLength = _.size(values);
   let frequencies = duplicateSamples.map(s => ({
@@ -57,12 +28,13 @@ const toPdf = (values, outputResolutionCount, min, max) => {
   let continuous = { ys: [], xs: [] };
 
   if (continuousSamples.length > 20) {
-    const samples = new Samples(continuousSamples);
+    // let c = continuousSamples.map( r => (Math.log2(r)) * 1000);
+    let c = continuousSamples;
+    const samples = new Samples(c);
 
-    const ratioSize$ = ratioSize(samples);
-    const width = ratioSize$ === 'SMALL' ? 60 : 1;
-
+    
     const pdf = samples.toPdf({ size: outputResolutionCount, width, min, max });
+    // continuous = {xs: pdf.xs.map(r => Math.pow(2,r/1000)), ys: pdf.ys};
     continuous = pdf;
   }
 
@@ -82,6 +54,7 @@ const run = (
   text,
   sampleCount,
   outputResolutionCount,
+  width,
   inputs = [],
   min = false,
   max = false,
@@ -107,11 +80,47 @@ const run = (
   } else if (values.length === 1) {
     update = blankResponse;
   } else {
-    update = toPdf(values, outputResolutionCount, min, max);
+    update = toPdf(values, outputResolutionCount, width, min, max);
   }
   return update;
 };
 
+const stringToSamples = (
+  text,
+  sampleCount,
+  inputs = [],
+) => {
+  const [_error, { parsedInput, parsedError }] = Guesstimator.parse({ text:"=" + text });
+
+  const guesstimator = new Guesstimator({ parsedInput });
+  const {values, errors} = guesstimator.sample(
+    sampleCount,
+    inputs,
+  );
+  if (errors.length > 0){
+    return []
+  } else {
+    return values
+  }
+};
+
+
+const samplesToContinuousPdf = (
+  samples,
+  size,
+  width,
+  min = false,
+  max = false,
+) => {
+  let _samples = _.filter(samples, _.isFinite);
+  if (_.isFinite(min)) { _samples = _.filter(_samples, r => r > min) };
+  if (_.isFinite(max)) { _samples = _.filter(_samples, r => r < max) };
+  let pdf = pdfast.create(_samples, { size, width });
+  return {xs: pdf.map(r => r.x), ys: pdf.map(r => r.y)};
+};
+
 module.exports = {
   run,
+  stringToSamples,
+  samplesToContinuousPdf
 };

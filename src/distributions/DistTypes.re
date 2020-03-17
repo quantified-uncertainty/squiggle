@@ -106,6 +106,34 @@ module Domain = {
   let normalizeProbabilityMass = (t: domain) => {
     1. /. excludedProbabilityMass(t);
   };
+
+  let yPointToSubYPoint = (t: domain, yPoint) => {
+    switch (t) {
+    | Complete => Some(yPoint)
+    | LeftLimited({excludingProbabilityMass})
+        when yPoint < excludingProbabilityMass =>
+      None
+    | LeftLimited({excludingProbabilityMass})
+        when yPoint >= excludingProbabilityMass =>
+      Some(
+        (yPoint -. excludingProbabilityMass) /. includedProbabilityMass(t),
+      )
+    | RightLimited({excludingProbabilityMass})
+        when yPoint > 1. -. excludingProbabilityMass =>
+      None
+    | RightLimited({excludingProbabilityMass})
+        when yPoint <= 1. -. excludingProbabilityMass =>
+      Some(yPoint /. includedProbabilityMass(t))
+    | LeftAndRightLimited({excludingProbabilityMass: l}, _) when yPoint < l =>
+      None
+    | LeftAndRightLimited(_, {excludingProbabilityMass: r})
+        when yPoint > 1.0 -. r =>
+      None
+    | LeftAndRightLimited({excludingProbabilityMass: l}, _) =>
+      Some((yPoint -. l) /. includedProbabilityMass(t))
+    | _ => None
+    };
+  };
 };
 
 type mixedPoint = {

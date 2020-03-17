@@ -6,6 +6,9 @@ let showAsForm = (distPlus: DistTypes.distPlus) => {
   </div>;
 };
 
+let showFloat = (~precision=3, number) =>
+  <ForetoldComponents.NumberShower number precision />;
+
 let table = (distPlus, x) => {
   <div>
     <table className="table-auto text-sm">
@@ -120,6 +123,75 @@ let table = (distPlus, x) => {
     </table>
   </div>;
 };
+let percentiles = distPlus => {
+  <table className="table-auto text-sm">
+    <thead>
+      <tr>
+        <td className="px-4 py-2"> {"1" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"5" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"25" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"50" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"75" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"95" |> ReasonReact.string} </td>
+        <td className="px-4 py-2"> {"99" |> ReasonReact.string} </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.01)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.05)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.25)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.5)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.75)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.95)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.999)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.9999)
+           |> showFloat}
+        </td>
+        <td className="px-4 py-2 border">
+          {distPlus
+           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99999)
+           |> showFloat}
+        </td>
+      </tr>
+    </tbody>
+  </table>;
+};
 
 let adjustBoth = discreteProbabilityMass => {
   let yMaxDiscreteDomainFactor = discreteProbabilityMass;
@@ -143,13 +215,21 @@ module DistPlusChart = {
       |> T.toScaledContinuous
       |> E.O.fmap(Distributions.Continuous.getShape);
     let range = T.xTotalRange(distPlus);
+
+    // We subtract a bit from the range to make sure that it fits. Maybe this should be done in d3 instead.
     let minX =
-      switch (T.minX(distPlus), range) {
-      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
+      switch (
+        distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.01),
+        range,
+      ) {
+      | (min, Some(range)) => Some(min -. range *. 0.001)
       | _ => None
       };
 
-    let maxX = T.maxX(distPlus);
+    let maxX = {
+      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99);
+    };
+
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     let toDiscreteProbabilityMass =
       distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
@@ -176,9 +256,7 @@ module IntegralChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
     open Distributions.DistPlus;
-    let integral =
-      Distributions.DistPlus.T.toShape(distPlus)
-      |> Distributions.Shape.T.Integral.get(~cache=None);
+    let integral = distPlus.integralCache;
     let continuous =
       integral
       |> Distributions.Continuous.toLinear
@@ -287,8 +365,12 @@ let make = (~distPlus: DistTypes.distPlus) => {
      |> E.L.toArray
      |> ReasonReact.array}
     <div className="inline-flex opacity-50 hover:opacity-100">
+      <button
+        className=button onClick={_ => dispatch(CHANGE_SHOW_PERCENTILES)}>
+        {"Percentiles" |> ReasonReact.string}
+      </button>
       <button className=button onClick={_ => dispatch(CHANGE_SHOW_STATS)}>
-        {"Stats" |> ReasonReact.string}
+        {"Debug Stats" |> ReasonReact.string}
       </button>
       <button className=button onClick={_ => dispatch(CHANGE_SHOW_PARAMS)}>
         {"Params" |> ReasonReact.string}
@@ -299,5 +381,6 @@ let make = (~distPlus: DistTypes.distPlus) => {
     </div>
     {state.showParams ? showAsForm(distPlus) : ReasonReact.null}
     {state.showStats ? table(distPlus, x) : ReasonReact.null}
+    {state.showPercentiles ? percentiles(distPlus) : ReasonReact.null}
   </div>;
 };

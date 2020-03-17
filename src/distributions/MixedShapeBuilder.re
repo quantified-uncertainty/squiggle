@@ -10,8 +10,11 @@ type assumptions = {
 
 let buildSimple = (~continuous, ~discrete): option(DistTypes.shape) => {
   let cLength =
-    continuous |> Distributions.Continuous.getShape |> XYShape.xs |> E.A.length;
-  let dLength = discrete |> XYShape.xs |> E.A.length;
+    continuous
+    |> Distributions.Continuous.getShape
+    |> XYShape.T.xs
+    |> E.A.length;
+  let dLength = discrete |> XYShape.T.xs |> E.A.length;
   switch (cLength, dLength) {
   | (0 | 1, 0) => None
   | (0 | 1, _) => Some(Discrete(discrete))

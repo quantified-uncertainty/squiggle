@@ -134,12 +134,12 @@ let make =
       ?xScale
       ?yScale
       ?timeScale
-      discrete={discrete |> E.O.fmap(XYShape.toJs)}
+      discrete={discrete |> E.O.fmap(XYShape.T.toJs)}
       height
       marginBottom=50
       marginTop=0
       onHover
-      continuous={continuous |> E.O.fmap(XYShape.toJs)}
+      continuous={continuous |> E.O.fmap(XYShape.T.toJs)}
       showDistributionLines
       showDistributionYAxis
       showVerticalLine

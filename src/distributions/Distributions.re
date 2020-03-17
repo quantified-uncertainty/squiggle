@@ -19,6 +19,7 @@ module type dist = {
   let minX: t => option(float);
   let maxX: t => option(float);
   let pointwiseFmap: (float => float, t) => t;
+  let truncate: (int, t) => t;
   let xToY: (float, t) => DistTypes.mixedPoint;
   let toShape: t => DistTypes.shape;
   let toContinuous: t => option(DistTypes.continuousShape);
@@ -31,6 +32,7 @@ module type dist = {
   let integral: (~cache: option(integral), t) => integral;
   let integralEndY: (~cache: option(integral), t) => float;
   let integralXtoY: (~cache: option(integral), float, t) => float;
+  let integralYtoX: (~cache: option(integral), float, t) => float;
 };
 
 module Dist = (T: dist) => {
@@ -45,6 +47,7 @@ module Dist = (T: dist) => {
     };
   let pointwiseFmap = T.pointwiseFmap;
   let xToY = T.xToY;
+  let truncate = T.truncate;
   let toShape = T.toShape;
   let toDiscreteProbabilityMass = T.toDiscreteProbabilityMass;
   let toContinuous = T.toContinuous;
@@ -58,6 +61,7 @@ module Dist = (T: dist) => {
     type t = T.integral;
     let get = T.integral;
     let xToY = T.integralXtoY;
+    let yToX = T.integralYtoX;
     let sum = T.integralEndY;
   };
 
@@ -80,7 +84,7 @@ module Continuous = {
     interpolation,
   };
   let lastY = (t: t) =>
-    t |> xyShape |> XYShape.unsafeLast |> (((_, y)) => y);
+    t |> xyShape |> XYShape.T.unsafeLast |> (((_, y)) => y);
   let oShapeMap =
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(make(_, interpolation));
@@ -103,22 +107,23 @@ module Continuous = {
     Dist({
       type t = DistTypes.continuousShape;
       type integral = DistTypes.continuousShape;
-      let minX = shapeFn(XYShape.minX);
-      let maxX = shapeFn(XYShape.maxX);
-      let toDiscreteProbabilityMass = t => 0.0;
+      let minX = shapeFn(XYShape.T.minX);
+      let maxX = shapeFn(XYShape.T.maxX);
+      let toDiscreteProbabilityMass = _ => 0.0;
       let pointwiseFmap = (fn, t: t) =>
-        t |> xyShape |> XYShape.pointwiseMap(fn) |> fromShape;
+        t |> xyShape |> XYShape.T.pointwiseMap(fn) |> fromShape;
+      let truncate = i => shapeMap(XYShape.T.convertToNewLength(i));
       let toShape = (t: t): DistTypes.shape => Continuous(t);
       let xToY = (f, {interpolation, xyShape}: t) =>
         switch (interpolation) {
         | `Stepwise =>
           xyShape
-          |> XYShape.XtoY.stepwiseIncremental(f)
+          |> XYShape.T.XtoY.stepwiseIncremental(f)
           |> E.O.default(0.0)
           |> DistTypes.MixedPoint.makeContinuous
         | `Linear =>
           xyShape
-          |> XYShape.XtoY.linear(f)
+          |> XYShape.T.XtoY.linear(f)
           |> DistTypes.MixedPoint.makeContinuous
         };
 
@@ -141,7 +146,9 @@ module Continuous = {
         };
       let integralEndY = (~cache, t) => t |> integral(~cache) |> lastY;
       let integralXtoY = (~cache, f, t) =>
-        t |> integral(~cache) |> shapeFn(CdfLibrary.Distribution.findY(f));
+        t |> integral(~cache) |> shapeFn(XYShape.T.findY(f));
+      let integralYtoX = (~cache, f, t) =>
+        t |> integral(~cache) |> shapeFn(XYShape.T.findX(f));
       let toContinuous = t => Some(t);
       let toDiscrete = _ => None;
       let toScaledContinuous = t => Some(t);
@@ -150,6 +157,14 @@ module Continuous = {
 };
 
 module Discrete = {
+  let sortedByY = (t: DistTypes.discreteShape) =>
+    t
+    |> XYShape.T.zip
+    |> E.A.stableSortBy(_, ((_, y1), (_, y2)) => y1 > y2 ? 1 : 0);
+  let sortedByX = (t: DistTypes.discreteShape) =>
+    t
+    |> XYShape.T.zip
+    |> E.A.stableSortBy(_, ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0);
   module T =
     Dist({
       type t = DistTypes.discreteShape;
@@ -157,31 +172,39 @@ module Discrete = {
       let integral = (~cache, t) =>
         switch (cache) {
         | Some(c) => c
-        | None => Continuous.make(XYShape.accumulateYs(t), `Stepwise)
+        | None => Continuous.make(XYShape.T.accumulateYs(t), `Stepwise)
         };
       let integralEndY = (~cache, t) =>
         t |> integral(~cache) |> Continuous.lastY;
-      let minX = XYShape.minX;
-      let maxX = XYShape.maxX;
+      let minX = XYShape.T.minX;
+      let maxX = XYShape.T.maxX;
       let toDiscreteProbabilityMass = t => 1.0;
-      let pointwiseFmap = XYShape.pointwiseMap;
+      let pointwiseFmap = XYShape.T.pointwiseMap;
       let toShape = (t: t): DistTypes.shape => Discrete(t);
       let toContinuous = _ => None;
       let toDiscrete = t => Some(t);
       let toScaledContinuous = _ => None;
       let toScaledDiscrete = t => Some(t);
+      let truncate = (i, t: t): DistTypes.discreteShape =>
+        t
+        |> XYShape.T.zip
+        |> XYShape.T.Zipped.sortByY
+        |> Belt.Array.slice(_, ~offset=0, ~len=i)
+        |> XYShape.T.Zipped.sortByX
+        |> XYShape.T.fromZippedArray;
 
       let xToY = (f, t) => {
-        XYShape.XtoY.stepwiseIfAtX(f, t)
+        XYShape.T.XtoY.stepwiseIfAtX(f, t)
         |> E.O.default(0.0)
         |> DistTypes.MixedPoint.makeDiscrete;
       };
+
       //  todo: This should use cache and/or same code as above. FindingY is more complex, should use interpolationType.
       let integralXtoY = (~cache, f, t) =>
-        t
-        |> integral(~cache)
-        |> Continuous.getShape
-        |> CdfLibrary.Distribution.findY(f);
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
+
+      let integralYtoX = (~cache, f, t) =>
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findX(f);
     });
 };
 
@@ -241,6 +264,32 @@ module Mixed = {
         DistTypes.MixedPoint.add(c, d);
       };
 
+      let truncate =
+          (
+            count,
+            {discrete, continuous, discreteProbabilityMassFraction} as t: t,
+          )
+          : t => {
+        {
+          discrete:
+            Discrete.T.truncate(
+              int_of_float(
+                float_of_int(count) *. discreteProbabilityMassFraction,
+              ),
+              discrete,
+            ),
+          continuous:
+            Continuous.T.truncate(
+              int_of_float(
+                float_of_int(count)
+                *. (1.0 -. discreteProbabilityMassFraction),
+              ),
+              continuous,
+            ),
+          discreteProbabilityMassFraction,
+        };
+      };
+
       let toScaledContinuous = ({continuous} as t: t) =>
         Some(scaleContinuous(t, continuous));
 
@@ -283,7 +332,7 @@ module Mixed = {
 
           let result =
             Continuous.make(
-              XYShape.Combine.combineLinear(
+              XYShape.T.Combine.combineLinear(
                 Continuous.getShape(cont), Continuous.getShape(dist), (a, b) =>
                 a +. b
               ),
@@ -297,10 +346,12 @@ module Mixed = {
         integral(~cache, t) |> Continuous.lastY;
       };
 
-      let integralXtoY = (~cache, f, {discrete, continuous} as t: t) => {
-        let cont = Continuous.T.Integral.xToY(~cache, f, continuous);
-        let discrete = Discrete.T.Integral.xToY(~cache, f, discrete);
-        scaleDiscreteFn(t, discrete) +. scaleContinuousFn(t, cont);
+      let integralXtoY = (~cache, f, t) => {
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
+      };
+
+      let integralYtoX = (~cache, f, t) => {
+        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findX(f);
       };
 
       // TODO: This functionality is kinda weird, because it seems to assume the cdf adds to 1.0 elsewhere, which wouldn't happen here.
@@ -362,6 +413,16 @@ module Shape = {
           ),
         );
 
+      let truncate = (i, t: t) =>
+        fmap(
+          t,
+          (
+            Mixed.T.truncate(i),
+            Discrete.T.truncate(i),
+            Continuous.T.truncate(i),
+          ),
+        );
+
       let toDiscreteProbabilityMass = (t: t) =>
         mapToAll(
           t,
@@ -418,6 +479,16 @@ module Shape = {
             Mixed.T.Integral.xToY(~cache, f),
             Discrete.T.Integral.xToY(~cache, f),
             Continuous.T.Integral.xToY(~cache, f),
+          ),
+        );
+      };
+      let integralYtoX = (~cache, f, t) => {
+        mapToAll(
+          t,
+          (
+            Mixed.T.Integral.yToX(~cache, f),
+            Discrete.T.Integral.yToX(~cache, f),
+            Continuous.T.Integral.yToX(~cache, f),
           ),
         );
       };
@@ -531,6 +602,8 @@ module DistPlus = {
       let integral = (~cache, t: t) =>
         updateShape(Continuous(t.integralCache), t);
 
+      let truncate = (i, t) =>
+        updateShape(t |> toShape |> Shape.T.truncate(i), t);
       // todo: adjust for limit, maybe?
       let pointwiseFmap = (fn, {shape, _} as t: t): t =>
         Shape.T.pointwiseFmap(fn, shape) |> updateShape(_, t);
@@ -542,6 +615,11 @@ module DistPlus = {
       let integralXtoY = (~cache as _, f, t: t) => {
         Shape.T.Integral.xToY(~cache=Some(t.integralCache), f, toShape(t))
         |> domainIncludedProbabilityMassAdjustment(t);
+      };
+
+      // TODO: This part is broken when there is a limit, if this is supposed to be taken into account.
+      let integralYtoX = (~cache as _, f, t: t) => {
+        Shape.T.Integral.yToX(~cache=Some(t.integralCache), f, toShape(t));
       };
     });
 };

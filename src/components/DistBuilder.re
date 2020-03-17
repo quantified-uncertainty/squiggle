@@ -18,6 +18,7 @@ module FormConfig = [%lenses
     sampleCount: string,
     outputXYPoints: string,
     truncateTo: string,
+    kernelWidth: string,
   }
 ];
 
@@ -25,6 +26,7 @@ type options = {
   sampleCount: int,
   outputXYPoints: int,
   truncateTo: option(int),
+  kernelWidth: int,
 };
 
 module Form = ReForm.Make(FormConfig);
@@ -123,6 +125,7 @@ module DemoDist = {
                   ~sampleCount=options.sampleCount,
                   ~outputXYPoints=options.outputXYPoints,
                   ~truncateTo=options.truncateTo,
+                  ~kernelWidth=options.kernelWidth,
                 );
            switch (distPlus) {
            | Some(distPlus) => <DistPlusPlot distPlus />
@@ -148,7 +151,7 @@ let make = () => {
       ~schema,
       ~onSubmit=({state}) => {None},
       ~initialState={
-        guesstimatorString: "mm(5 to 20, floor(normal(20,2)), [.5, .5])",
+        guesstimatorString: "mm(40 to 80, floor(50 to 80), [.5,.5])",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
@@ -157,9 +160,10 @@ let make = () => {
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
-        sampleCount: "1000",
-        outputXYPoints: "2000",
-        truncateTo: "500",
+        sampleCount: "10000",
+        outputXYPoints: "500",
+        truncateTo: "0",
+        kernelWidth: "5",
       },
       (),
     );
@@ -187,6 +191,7 @@ let make = () => {
   let outputXYPoints =
     reform.state.values.outputXYPoints |> Js.Float.fromString;
   let truncateTo = reform.state.values.truncateTo |> Js.Float.fromString;
+  let kernelWidth = reform.state.values.kernelWidth |> Js.Float.fromString;
 
   let domain =
     switch (domainType) {
@@ -234,12 +239,14 @@ let make = () => {
           && !Js.Float.isNaN(outputXYPoints)
           && !Js.Float.isNaN(truncateTo)
           && sampleCount > 10.
-          && outputXYPoints > 10.
-          && truncateTo > 10. =>
+          && outputXYPoints > 10. =>
       Some({
         sampleCount: sampleCount |> int_of_float,
         outputXYPoints: outputXYPoints |> int_of_float,
-        truncateTo: truncateTo |> int_of_float |> E.O.some,
+        truncateTo:
+          int_of_float(truncateTo) > 0
+            ? Some(int_of_float(truncateTo)) : None,
+        kernelWidth: kernelWidth |> int_of_float,
       })
     | _ => None
     };
@@ -261,6 +268,7 @@ let make = () => {
         reform.state.values.sampleCount,
         reform.state.values.outputXYPoints,
         reform.state.values.truncateTo,
+        reform.state.values.kernelWidth,
         reloader |> string_of_int,
       |],
     );
@@ -454,6 +462,9 @@ let make = () => {
             </Col>
             <Col span=4>
               <FieldFloat field=FormConfig.TruncateTo label="Truncate To" />
+            </Col>
+            <Col span=4>
+              <FieldFloat field=FormConfig.KernelWidth label="Kernel Width" />
             </Col>
           </Row>
           <Antd.Button
