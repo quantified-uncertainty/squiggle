@@ -207,6 +207,7 @@ module T = {
     array |> Belt.Array.unzip |> fromArray;
   };
 
+  // TODO: I'd bet this is pretty slow
   let intersperce = (t1: t, t2: t) => {
     let items: ref(array((float, float))) = ref([||]);
     let t1 = zip(t1);
@@ -315,17 +316,21 @@ module Range = {
     |> E.R.toOption
     |> E.O.fmap(r => r |> Belt.Array.map(_, r => (nextX(r), fn(r))));
 
-  let integrateWithTriangles = z => {
-    let rangeItems = mapYsBasedOnRanges(rangeAreaAssumingTriangles, z);
-    (
-      switch (rangeItems, z |> T.first) {
-      | (Some(r), Some((firstX, _))) =>
-        Some(Belt.Array.concat([|(firstX, 0.0)|], r))
-      | _ => None
-      }
-    )
-    |> E.O.fmap(toT)
-    |> E.O.fmap(T.accumulateYs);
+  let integrateWithTriangles = ({xs, ys}) => {
+    let length = E.A.length(xs);
+    let cumulativeY = Belt.Array.make(length, 0.0);
+    let _ = Belt.Array.set(cumulativeY, 0, 0.0);
+    for (x in 0 to E.A.length(xs) - 2) {
+      let area =
+        rangeAreaAssumingTriangles((
+          (xs[x], ys[x]),
+          (xs[x + 1], ys[x + 1]),
+        ));
+      let cumulative = area +. cumulativeY[x];
+      let _ = Belt.Array.set(cumulativeY, x + 1, cumulative);
+      ();
+    };
+    Some({xs, ys: cumulativeY});
   };
 
   let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);

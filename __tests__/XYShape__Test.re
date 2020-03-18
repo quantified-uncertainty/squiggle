@@ -50,4 +50,14 @@ describe("XYShapes", () => {
       [|1.0, 3.0, 6.0, 10.0|],
     )
   });
+  describe("integrateWithTriangles", () => {
+    makeTest(
+      "integrates correctly",
+      XYShape.Range.integrateWithTriangles(shape1),
+      Some({
+        xs: [|1., 4., 8.|],
+        ys: [|0.0, 0.9000000000000001, 3.3000000000000007|],
+      }),
+    )
+  });
 });
