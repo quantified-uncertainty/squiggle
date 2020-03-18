@@ -35,39 +35,7 @@ module Internals = {
   external samplesToContinuousPdf:
     (array(float), int, int) => CdfLibrary.JS.distJs =
     "samplesToContinuousPdf";
-
-  // todo: Format to correct mass, also normalize the pdf.
-  let toMixedShape =
-      (~truncateTo=Some(500), r: combined): option(DistTypes.shape) => {
-    let continuous = toContinous(r);
-    let continuous =
-      switch (truncateTo) {
-      | Some(t) =>
-        continuous |> Distributions.Continuous.convertToNewLength(t)
-      | None => continuous
-      };
-    let discrete = toDiscrete(r);
-    // let continuousProb =
-    //   cont |> Distributions.Continuous.T.Integral.sum(~cache=None);
-    // let discreteProb =
-    //   d |> Distributions.Discrete.T.Integral.sum(~cache=None);
-
-    let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
-    shape;
-  };
 };
-
-let stringToMixedShape =
-    (
-      ~string,
-      ~sampleCount=3000,
-      ~outputXYPoints=3000,
-      ~width=10,
-      ~truncateTo=Some(500),
-      (),
-    ) =>
-  Internals.toCombinedFormat(string, sampleCount, outputXYPoints, width)
-  |> Internals.toMixedShape(~truncateTo);
 
 module KDE = {
   let normalSampling = (samples, outputXYPoints, kernelWidth) => {

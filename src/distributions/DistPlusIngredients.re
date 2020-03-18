@@ -25,6 +25,9 @@ let toDistPlus =
       ~kernelWidth,
       (),
     );
+  // TODO:
+  // Truncate before resizing.
+  // Faster sort
   let distPlus =
     shape
     |> E.O.fmap(

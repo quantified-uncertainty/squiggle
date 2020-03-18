@@ -146,10 +146,11 @@ module T = {
       t |> E.A.stableSortBy(_, ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0);
   };
 
+  // TODO: Use faster sort at least, geese.
   module Combine = {
     let combineLinear = (t1: t, t2: t, fn: (float, float) => float) => {
       let allXs = Belt.Array.concat(xs(t1), xs(t2));
-      allXs |> Array.sort(compare);
+      allXs |> Array.fast_sort(compare);
       let allYs =
         allXs
         |> E.A.fmap(x => {
@@ -163,7 +164,7 @@ module T = {
     let combineStepwise =
         (t1: t, t2: t, fn: (option(float), option(float)) => float) => {
       let allXs = Belt.Array.concat(xs(t1), xs(t2));
-      allXs |> Array.sort(compare);
+      allXs |> Array.fast_sort(compare);
       let allYs =
         allXs
         |> E.A.fmap(x => {
@@ -177,7 +178,7 @@ module T = {
     let combineIfAtX =
         (t1: t, t2: t, fn: (option(float), option(float)) => float) => {
       let allXs = Belt.Array.concat(xs(t1), xs(t2));
-      allXs |> Array.sort(compare);
+      allXs |> Array.fast_sort(compare);
       let allYs =
         allXs
         |> E.A.fmap(x => {
@@ -202,7 +203,7 @@ module T = {
   // todo: This is broken :(
   let combine = (t1: t, t2: t) => {
     let array = Belt.Array.concat(zip(t1), zip(t2));
-    Array.sort(comparePoints, array);
+    Array.fast_sort(comparePoints, array);
     array |> Belt.Array.unzip |> fromArray;
   };
 

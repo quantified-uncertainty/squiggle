@@ -54,6 +54,8 @@ module Dist = (T: dist) => {
   let toDiscrete = T.toDiscrete;
   let toScaledContinuous = T.toScaledContinuous;
   let toScaledDiscrete = T.toScaledDiscrete;
+
+  // TODO: Move this to each class, have use integral to produce integral in DistPlus class.
   let scaleBy = (~scale=1.0, t: t) =>
     t |> pointwiseFmap((r: float) => r *. scale);
 
@@ -66,8 +68,9 @@ module Dist = (T: dist) => {
   };
 
   // This is suboptimal because it could get the cache but doesn't here.
-  let scaleToIntegralSum = (~intendedSum=1.0, t: t) => {
-    let scale = intendedSum /. Integral.sum(~cache=None, t);
+  let scaleToIntegralSum =
+      (~cache: option(integral)=None, ~intendedSum=1.0, t: t) => {
+    let scale = intendedSum /. Integral.sum(~cache, t);
     scaleBy(~scale, t);
   };
 };
@@ -99,9 +102,6 @@ module Continuous = {
     };
   };
   let shapeFn = (fn, t: t) => t |> xyShape |> fn;
-
-  let convertToNewLength = i =>
-    shapeMap(CdfLibrary.Distribution.convertToNewLength(i));
 
   module T =
     Dist({
@@ -207,7 +207,6 @@ module Discrete = {
         |> DistTypes.MixedPoint.makeDiscrete;
       };
 
-      //  todo: This should use cache and/or same code as above. FindingY is more complex, should use interpolationType.
       let integralXtoY = (~cache, f, t) =>
         t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
 
@@ -231,10 +230,12 @@ module Mixed = {
       ({discreteProbabilityMassFraction}: DistTypes.mixedShape, f) =>
     f *. discreteProbabilityMassFraction;
 
+  //TODO: Warning: This currently computes the integral, which is expensive.
   let scaleContinuousFn =
       ({discreteProbabilityMassFraction}: DistTypes.mixedShape, f) =>
     f *. (1.0 -. discreteProbabilityMassFraction);
 
+  //TODO: Warning: This currently computes the integral, which is expensive.
   let scaleContinuous = ({discreteProbabilityMassFraction}: t, continuous) =>
     continuous
     |> Continuous.T.scaleToIntegralSum(
@@ -607,7 +608,7 @@ module DistPlus = {
       let toDiscreteProbabilityMass =
         shapeFn(Shape.T.toDiscreteProbabilityMass);
 
-      // This bit is kind of akward, could probably use rethinking.
+      // This bit is kind of awkward, could probably use rethinking.
       let integral = (~cache, t: t) =>
         updateShape(Continuous(t.integralCache), t);
 
