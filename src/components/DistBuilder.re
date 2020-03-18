@@ -151,7 +151,7 @@ let make = () => {
       ~schema,
       ~onSubmit=({state}) => {None},
       ~initialState={
-        guesstimatorString: "mm(40 to 80, floor(50 to 80), [.5,.5])",
+        guesstimatorString: "40 to 8000",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
@@ -162,7 +162,7 @@ let make = () => {
         unit: "days",
         sampleCount: "10000",
         outputXYPoints: "500",
-        truncateTo: "0",
+        truncateTo: "100",
         kernelWidth: "5",
       },
       (),

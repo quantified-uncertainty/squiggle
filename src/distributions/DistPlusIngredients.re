@@ -23,7 +23,6 @@ let toDistPlus =
       ~sampleCount,
       ~outputXYPoints,
       ~kernelWidth,
-      ~truncateTo,
       (),
     );
   let distPlus =
@@ -40,5 +39,9 @@ let toDistPlus =
     |> E.O.fmap(
          Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0),
        );
-  distPlus;
+  switch (truncateTo, distPlus) {
+  | (Some(t), Some(d)) => Some(d |> Distributions.DistPlus.T.truncate(t))
+  | (None, Some(d)) => Some(d)
+  | _ => None
+  };
 };

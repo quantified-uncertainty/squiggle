@@ -112,6 +112,13 @@ module T = {
     );
   };
 
+  let convertToNewLengthByProbabilityMass =
+      (newLength: int, integral: t, t: t): DistTypes.xyShape => {
+    Functions.range(0.0, 1.0, newLength)
+    |> E.A.fmap(findX(_, integral))
+    |> convertWithAlternativeXs(_, t);
+  };
+
   module XtoY = {
     let stepwiseIncremental = (f, t: t) =>
       firstPairAtOrBeforeValue(f, t) |> E.O.fmap(((_, y)) => y);

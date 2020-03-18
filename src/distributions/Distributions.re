@@ -16,10 +16,10 @@ let max = (f1: option(float), f2: option(float)) =>
 
 module type dist = {
   type t;
+  type integral;
   let minX: t => option(float);
   let maxX: t => option(float);
   let pointwiseFmap: (float => float, t) => t;
-  let truncate: (int, t) => t;
   let xToY: (float, t) => DistTypes.mixedPoint;
   let toShape: t => DistTypes.shape;
   let toContinuous: t => option(DistTypes.continuousShape);
@@ -27,8 +27,8 @@ module type dist = {
   let toScaledContinuous: t => option(DistTypes.continuousShape);
   let toScaledDiscrete: t => option(DistTypes.discreteShape);
   let toDiscreteProbabilityMass: t => float;
+  let truncate: (~cache: option(integral)=?, int, t) => t;
 
-  type integral;
   let integral: (~cache: option(integral), t) => integral;
   let integralEndY: (~cache: option(integral), t) => float;
   let integralXtoY: (~cache: option(integral), float, t) => float;
@@ -112,7 +112,6 @@ module Continuous = {
       let toDiscreteProbabilityMass = _ => 0.0;
       let pointwiseFmap = (fn, t: t) =>
         t |> xyShape |> XYShape.T.pointwiseMap(fn) |> fromShape;
-      let truncate = i => shapeMap(XYShape.T.convertToNewLength(i));
       let toShape = (t: t): DistTypes.shape => Continuous(t);
       let xToY = (f, {interpolation, xyShape}: t) =>
         switch (interpolation) {
@@ -144,6 +143,14 @@ module Continuous = {
           |> E.O.toExt("This should not have happened")
           |> fromShape
         };
+      let truncate = (~cache=None, i, t) =>
+        t
+        |> shapeMap(
+             XYShape.T.convertToNewLengthByProbabilityMass(
+               i,
+               integral(~cache, t).xyShape,
+             ),
+           );
       let integralEndY = (~cache, t) => t |> integral(~cache) |> lastY;
       let integralXtoY = (~cache, f, t) =>
         t |> integral(~cache) |> shapeFn(XYShape.T.findY(f));
@@ -185,7 +192,7 @@ module Discrete = {
       let toDiscrete = t => Some(t);
       let toScaledContinuous = _ => None;
       let toScaledDiscrete = t => Some(t);
-      let truncate = (i, t: t): DistTypes.discreteShape =>
+      let truncate = (~cache=None, i, t: t): DistTypes.discreteShape =>
         t
         |> XYShape.T.zip
         |> XYShape.T.Zipped.sortByY
@@ -267,6 +274,7 @@ module Mixed = {
 
       let truncate =
           (
+            ~cache=None,
             count,
             {discrete, continuous, discreteProbabilityMassFraction} as t: t,
           )
@@ -414,7 +422,7 @@ module Shape = {
           ),
         );
 
-      let truncate = (i, t: t) =>
+      let truncate = (~cache=None, i, t: t) =>
         fmap(
           t,
           (
@@ -603,7 +611,7 @@ module DistPlus = {
       let integral = (~cache, t: t) =>
         updateShape(Continuous(t.integralCache), t);
 
-      let truncate = (i, t) =>
+      let truncate = (~cache=None, i, t) =>
         updateShape(t |> toShape |> Shape.T.truncate(i), t);
       // todo: adjust for limit, maybe?
       let pointwiseFmap = (fn, {shape, _} as t: t): t =>

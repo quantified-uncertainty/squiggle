@@ -184,11 +184,9 @@ let toMixed =
       ~sampleCount=3000,
       ~outputXYPoints=3000,
       ~kernelWidth=10,
-      ~truncateTo=Some(500),
       ~cuttoff=0.995,
       (),
     ) => {
-  // let truncateTo = None;
   let start = Js.Date.now();
   let timeMessage = message => Js.log2(message, Js.Date.now() -. start);
   timeMessage("Starting");
@@ -215,12 +213,5 @@ let toMixed =
   let continuous = pdf |> Distributions.Continuous.fromShape;
   let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
   timeMessage("Finished shape");
-  let shape =
-    switch (truncateTo, shape) {
-    | (Some(trunctate), Some(shape)) =>
-      Some(shape |> Distributions.Shape.T.truncate(trunctate))
-    | (None, Some(shape)) => Some(shape)
-    | _ => None
-    };
   shape;
 };
