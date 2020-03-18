@@ -189,6 +189,7 @@ module Discrete = {
         t
         |> XYShape.T.zip
         |> XYShape.T.Zipped.sortByY
+        |> Belt.Array.reverse
         |> Belt.Array.slice(_, ~offset=0, ~len=i)
         |> XYShape.T.Zipped.sortByX
         |> XYShape.T.fromZippedArray;
