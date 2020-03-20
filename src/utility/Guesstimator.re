@@ -115,6 +115,7 @@ module FloatFloatMap = {
   let fmap = (fn, t: t) => Belt.MutableMap.map(t, fn);
 };
 
+// todo: Figure out some way of doing this without creating a new array.
 let split = (sortedArray: array(float)) => {
   let continuous = [||];
   let discrete = FloatFloatMap.empty();

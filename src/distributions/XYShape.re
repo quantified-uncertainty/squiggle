@@ -306,6 +306,12 @@ module Range = {
       (((lastX, lastY), (nextX, nextY)): zippedRange) =>
     (nextX -. lastX) *. (lastY +. nextY) /. 2.;
 
+  //Todo: figure out how to without making new array.
+  let rangeAreaAssumingTrapezoids =
+      (((lastX, lastY), (nextX, nextY)): zippedRange) =>
+    (nextX -. lastX)
+    *. (Js.Math.min_float(lastY, nextY) +. (lastY +. nextY) /. 2.);
+
   let delta_y_over_delta_x =
       (((lastX, lastY), (nextX, nextY)): zippedRange) =>
     (nextY -. lastY) /. (nextX -. lastX);
@@ -316,18 +322,18 @@ module Range = {
     |> E.R.toOption
     |> E.O.fmap(r => r |> Belt.Array.map(_, r => (nextX(r), fn(r))));
 
+  // This code is messy, in part because I'm trying to make things easy on garbage collection here.
+  // It's using triangles instead of trapezoids right now.
   let integrateWithTriangles = ({xs, ys}) => {
     let length = E.A.length(xs);
     let cumulativeY = Belt.Array.make(length, 0.0);
     let _ = Belt.Array.set(cumulativeY, 0, 0.0);
     for (x in 0 to E.A.length(xs) - 2) {
-      let area =
-        rangeAreaAssumingTriangles((
-          (xs[x], ys[x]),
-          (xs[x + 1], ys[x + 1]),
-        ));
-      let cumulative = area +. cumulativeY[x];
-      let _ = Belt.Array.set(cumulativeY, x + 1, cumulative);
+      Belt.Array.set(
+        cumulativeY,
+        x + 1,
+        (xs[x + 1] -. xs[x]) *. ((ys[x] +. ys[x + 1]) /. 2.) +. cumulativeY[x],
+      );
       ();
     };
     Some({xs, ys: cumulativeY});

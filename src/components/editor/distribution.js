@@ -179,7 +179,7 @@ class LogNormalDistributionBinned extends BaseDistributionBinned {
   _set_props() {
     this.name = "lognormal";
     this.param_names = ["normal_mean", "normal_std"];
-    this.n_bounds_samples = 1000;
+    this.n_bounds_samples = 100;
     this.n_largest_bound_sample = 10;
   }
 
