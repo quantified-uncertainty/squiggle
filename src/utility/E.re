@@ -1,5 +1,31 @@
 open Rationale.Function.Infix;
 
+module FloatFloatMap = {
+  module Id =
+    Belt.Id.MakeComparable({
+      type t = float;
+      let cmp: (float, float) => int = Pervasives.compare;
+    });
+
+  type t = Belt.MutableMap.t(Id.t, float, Id.identity);
+
+  let fromArray = (ar: array((float, float))) =>
+    Belt.MutableMap.fromArray(ar, ~id=(module Id));
+  let toArray = (t: t) => Belt.MutableMap.toArray(t);
+  let empty = () => Belt.MutableMap.make(~id=(module Id));
+  let increment = (el, t: t) =>
+    Belt.MutableMap.update(
+      t,
+      el,
+      fun
+      | Some(n) => Some(n +. 1.0)
+      | None => Some(1.0),
+    );
+
+  let get = (el, t: t) => Belt.MutableMap.get(t, el);
+  let fmap = (fn, t: t) => Belt.MutableMap.map(t, fn);
+};
+
 /* Utils */
 module U = {
   let isEqual = (a, b) => a == b;
@@ -296,6 +322,39 @@ module A = {
       | e when e == 0 => `underMin
       | e => `firstHigher(e)
       };
+    };
+  };
+
+  module Floats = {
+    let split = (sortedArray: array(float)) => {
+      let continuous = [||];
+      let discrete = FloatFloatMap.empty();
+      Belt.Array.forEachWithIndex(
+        sortedArray,
+        (index, element) => {
+          let maxIndex = (sortedArray |> Array.length) - 1;
+          let possiblySimilarElements =
+            (
+              switch (index) {
+              | 0 => [|index + 1|]
+              | n when n == maxIndex => [|index - 1|]
+              | _ => [|index - 1, index + 1|]
+              }
+            )
+            |> Belt.Array.map(_, r => sortedArray[r]);
+          let hasSimilarElement =
+            Belt.Array.some(possiblySimilarElements, r => r == element);
+          hasSimilarElement
+            ? FloatFloatMap.increment(element, discrete)
+            : {
+              let _ = Js.Array.push(element, continuous);
+              ();
+            };
+          ();
+        },
+      );
+
+      (continuous, discrete);
     };
   };
 };
