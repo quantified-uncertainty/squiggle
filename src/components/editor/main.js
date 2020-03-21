@@ -5,8 +5,8 @@ const distrs = require("./distribution.js").distrs;
 const parse = require("./parse.js");
 const math = _math.create(_math.all);
 
-const NUM_MC_SAMPLES = 300;
-const OUTPUT_GRID_NUMEL = 300;
+const NUM_MC_SAMPLES = 3000;
+const OUTPUT_GRID_NUMEL = 3000;
 
 /**
  * The main algorithmic work is done by functions in this module.

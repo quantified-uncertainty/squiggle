@@ -22,11 +22,11 @@ class BaseDistributionBinned {
    */
   constructor(args) {
     this._set_props();
-    this.max_bin_size = 0.5;
+    this.max_bin_size = 0.005;
     this.min_bin_size = 0;
-    this.increment = 0.001;
-    this.desired_delta = 0.01;
-    this.start_bin_size = 0.01;
+    this.increment = 0.0001;
+    this.desired_delta = 0.0001;
+    this.start_bin_size = 0.0001;
 
     [this.params, this.pdf_func, this.sample] = this.get_params_and_pdf_func(
       args
@@ -179,7 +179,7 @@ class LogNormalDistributionBinned extends BaseDistributionBinned {
   _set_props() {
     this.name = "lognormal";
     this.param_names = ["normal_mean", "normal_std"];
-    this.n_bounds_samples = 100;
+    this.n_bounds_samples = 10000;
     this.n_largest_bound_sample = 10;
   }
 

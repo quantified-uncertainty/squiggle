@@ -36,13 +36,25 @@ module DemoDist = {
   let make = (~guesstimatorString: string) => {
     let (ys, xs, isEmpty) =
       DistEditor.getPdfFromUserInput(guesstimatorString);
-    let continuous: DistTypes.xyShape = {xs, ys};
+    let inside =
+      isEmpty
+        ? "Nothing to show" |> E.ste
+        : {
+          let distPlus =
+            Distributions.DistPlus.make(
+              ~shape=
+                Continuous(Distributions.Continuous.fromShape({xs, ys})),
+              ~domain=Complete,
+              ~unit=UnspecifiedDistribution,
+              ~guesstimatorString=None,
+              (),
+            )
+            |> Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0);
+          <DistPlusPlot distPlus />;
+        };
     <Antd.Card title={"Distribution" |> E.ste}>
       <div className=Styles.spacer />
-      {isEmpty
-         ? "Nothing to show. Try to change the distribution description."
-           |> E.ste
-         : <DistributionPlot continuous />}
+      inside
     </Antd.Card>;
   };
 };
@@ -54,7 +66,7 @@ let make = () => {
       ~validationStrategy=OnDemand,
       ~schema,
       ~onSubmit=({state}) => {None},
-      ~initialState={guesstimatorString: "normal(1, 1)  / normal(10, 1)"},
+      ~initialState={guesstimatorString: "lognormal(6.1, 1)"},
       (),
     );
 
