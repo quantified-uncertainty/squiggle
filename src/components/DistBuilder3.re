@@ -37,13 +37,13 @@ module DemoDist = {
     let parsed1 = MathJsParser.fromString(guesstimatorString);
     let shape =
       switch (parsed1) {
-      | Ok(r) => Some(Jstat.toShape(10000, r))
+      | Ok(r) => Some(SymbolicDist.toShape(10000, r))
       | _ => None
       };
 
     let str =
       switch (parsed1) {
-      | Ok(r) => Jstat.toString(r)
+      | Ok(r) => SymbolicDist.toString(r)
       | Error(e) => e
       };
 
