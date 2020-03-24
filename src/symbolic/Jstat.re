@@ -102,15 +102,15 @@ module Mixed = {
 
   let min = dist =>
     switch (dist) {
-    | `Normal(n) => Normal.inv(0.01, n)
-    | `Lognormal(n) => Lognormal.inv(0.01, n)
+    | `Normal(n) => Normal.inv(0.0001, n)
+    | `Lognormal(n) => Lognormal.inv(0.0001, n)
     | `Uniform({low}) => low
     };
 
   let max = dist =>
     switch (dist) {
-    | `Normal(n) => Normal.inv(0.99, n)
-    | `Lognormal(n) => Lognormal.inv(0.99, n)
+    | `Normal(n) => Normal.inv(0.9999, n)
+    | `Lognormal(n) => Lognormal.inv(0.9999, n)
     | `Uniform({high}) => high
     };
 
@@ -121,7 +121,7 @@ module Mixed = {
       switch (xSelection) {
       | `Linear => Functions.range(min(dist), max(dist), sampleCount)
       | `ByWeight =>
-        Functions.range(0.001, 0.999, sampleCount)
+        Functions.range(0.00001, 0.99999, sampleCount)
         |> E.A.fmap(x => inv(x, dist))
       };
     let ys = xs |> E.A.fmap(r => pdf(r, dist));
@@ -151,7 +151,7 @@ module PointwiseAddDistributionsWeighted = {
     dists |> E.A.fmap(d => d |> fst |> Mixed.min) |> Functions.min;
 
   let max = (dists: t) =>
-    dists |> E.A.fmap(d => d |> fst |> Mixed.min) |> Functions.min;
+    dists |> E.A.fmap(d => d |> fst |> Mixed.max) |> Functions.max;
 
   let toShape = (dists: t, sampleCount: int) => {
     let xs = Functions.range(min(dists), max(dists), sampleCount);
@@ -181,3 +181,9 @@ let toString = (r: bigDist) =>
     | `PointwiseCombination(d) =>
       PointwiseAddDistributionsWeighted.toString(d)
   );
+
+let toShape = n =>
+  fun
+  | `Dist(d) => Mixed.toShape(~xSelection=`ByWeight, d, n)
+  | `PointwiseCombination(d) =>
+    PointwiseAddDistributionsWeighted.toShape(d, n);
