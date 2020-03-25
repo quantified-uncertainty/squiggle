@@ -235,12 +235,6 @@ module DistPlusChart = {
       distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99);
     };
 
-    Js.log3(
-      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.0001),
-      minX,
-      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.98),
-    );
-
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     let toDiscreteProbabilityMass =
       distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;

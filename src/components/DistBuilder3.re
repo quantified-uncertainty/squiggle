@@ -77,7 +77,7 @@ let make = () => {
       ~validationStrategy=OnDemand,
       ~schema,
       ~onSubmit=({state}) => {None},
-      ~initialState={guesstimatorString: "lognormal(6.1, 3)"},
+      ~initialState={guesstimatorString: "mm(1 to 10000)"},
       (),
     );
 

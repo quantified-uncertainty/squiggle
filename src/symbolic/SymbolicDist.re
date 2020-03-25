@@ -132,15 +132,19 @@ module GenericSimple = {
     | `Uniform({high}) => high
     };
 
+  let interpolateXs =
+      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
+    switch (xSelection) {
+    | `Linear => Functions.range(min(dist), max(dist), sampleCount)
+    | `ByWeight =>
+      Functions.range(minCdfValue, maxCdfValue, sampleCount)
+      |> E.A.fmap(x => inv(x, dist))
+    };
+  };
+
   let toShape =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
-    let xs =
-      switch (xSelection) {
-      | `Linear => Functions.range(min(dist), max(dist), sampleCount)
-      | `ByWeight =>
-        Functions.range(minCdfValue, maxCdfValue, sampleCount)
-        |> E.A.fmap(x => inv(x, dist))
-      };
+    let xs = interpolateXs(~xSelection, dist, sampleCount);
     let ys = xs |> E.A.fmap(r => pdf(r, dist));
     XYShape.T.fromArrays(xs, ys);
   };
@@ -166,7 +170,19 @@ module PointwiseAddDistributionsWeighted = {
     dists |> E.A.fmap(d => d |> fst |> GenericSimple.max) |> Functions.max;
 
   let toShape = (dists: t, sampleCount: int) => {
-    let xs = Functions.range(min(dists), max(dists), sampleCount);
+    let xs =
+      dists
+      |> E.A.fmap(r =>
+           r
+           |> fst
+           |> GenericSimple.interpolateXs(
+                ~xSelection=`ByWeight,
+                _,
+                sampleCount / (dists |> E.A.length),
+              )
+         )
+      |> E.A.concatMany;
+    xs |> Array.fast_sort(compare);
     let ys = xs |> E.A.fmap(pdf(dists));
     XYShape.T.fromArrays(xs, ys);
   };
@@ -176,7 +192,13 @@ module PointwiseAddDistributionsWeighted = {
       dists
       |> E.A.fmap(d => GenericSimple.toString(fst(d)))
       |> Js.Array.joinWith(",");
-    {j|multimodal($distString)|j};
+    let weights =
+      dists
+      |> E.A.fmap(d =>
+           snd(d) |> Js.Float.toPrecisionWithPrecision(~digits=2)
+         )
+      |> Js.Array.joinWith(",");
+    {j|multimodal($distString, [$weights])|j};
   };
 };
 

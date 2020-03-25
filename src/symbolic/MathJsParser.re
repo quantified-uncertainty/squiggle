@@ -107,9 +107,11 @@ module MathAdtToDistDst = {
 
   let to_: array(arg) => result(SymbolicDist.bigDist, string) =
     fun
-    | [|Value(low), Value(high)|] => {
+    | [|Value(low), Value(high)|] when low < high => {
         Ok(`Simple(SymbolicDist.Lognormal.from90PercentCI(low, high)));
       }
+    | [|Value(_), Value(_)|] =>
+      Error("Low value must be less than high value.")
     | _ => Error("Wrong number of variables in lognormal distribution");
 
   let uniform: array(arg) => result(SymbolicDist.bigDist, string) =
@@ -122,7 +124,11 @@ module MathAdtToDistDst = {
     | [|Value(alpha), Value(beta)|] => Ok(`Simple(`Beta({alpha, beta})))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let multiModal = (args: array(result(SymbolicDist.bigDist, string))) => {
+  let multiModal =
+      (
+        args: array(result(SymbolicDist.bigDist, string)),
+        weights: array(float),
+      ) => {
     let dists =
       args
       |> E.A.fmap(
@@ -135,7 +141,9 @@ module MathAdtToDistDst = {
     | 0 => Error("Multimodals need at least one input")
     | _ =>
       dists
-      |> E.A.fmap(r => (r, 1.0))
+      |> E.A.fmapi((index, item) =>
+           (item, weights |> E.A.get(_, index) |> E.O.default(1.0))
+         )
       |> (r => Ok(`PointwiseCombination(r)))
     };
   };
@@ -151,9 +159,25 @@ module MathAdtToDistDst = {
       | Fn({name: "to", args}) => to_(args)
       | Fn({name: "mm", args}) => {
           let dists = args |> E.A.fmap(functionParser);
-          multiModal(dists);
+          let weights =
+            args
+            |> E.A.last
+            |> E.O.bind(
+                 _,
+                 fun
+                 | Array(values) => Some(values)
+                 | _ => None,
+               )
+            |> E.A.O.defaultEmpty
+            |> E.A.fmap(
+                 fun
+                 | Value(r) => Some(r)
+                 | _ => None,
+               )
+            |> E.A.O.concatSomes;
+          multiModal(dists, weights);
         }
-      | Fn({name}) => Error(name ++ ": name not found")
+      | Fn({name}) => Error(name ++ ": function not supported")
       | _ => Error("This type not currently supported")
     );
 
