@@ -91,7 +91,7 @@ module T = {
   // todo: Figure out some way of doing this without having to integrate so many times.
   let toShape = (~samples: t, ~outputXYPoints=3000, ~kernelWidth=10, ()) => {
     Array.fast_sort(compare, samples);
-    let (continuousPart, discretePart) = E.A.Floats.split(samples);
+    let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples);
     let length = samples |> E.A.length;
     let lengthFloat = float_of_int(length);
     let discrete: DistTypes.xyShape =

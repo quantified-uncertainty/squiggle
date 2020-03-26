@@ -43,7 +43,7 @@ describe("XYShapes", () => {
   describe("transverse", () => {
     makeTest(
       "When very different",
-      XYShape.T._transverse2(
+      XYShape.T.Transversal._transverse(
         (aCurrent, aLast) => aCurrent +. aLast,
         [|1.0, 2.0, 3.0, 4.0|],
       ),

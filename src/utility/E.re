@@ -249,6 +249,12 @@ module A = {
   let fold_right = Array.fold_right;
   let concatMany = Belt.Array.concatMany;
   let keepMap = Belt.Array.keepMap;
+  let min = a =>
+    get(a, 0)
+    |> O.fmap(first => Belt.Array.reduce(a, first, (i, j) => i < j ? i : j));
+  let max = a =>
+    get(a, 0)
+    |> O.fmap(first => Belt.Array.reduce(a, first, (i, j) => i > j ? i : j));
   let stableSortBy = Belt.SortArray.stableSortBy;
   let toRanges = (a: array('a)) =>
     switch (a |> Belt.Array.length) {
@@ -269,6 +275,19 @@ module A = {
     r |> to_list |> f |> of_list;
   /* TODO: Is there a better way of doing this? */
   let uniq = r => asList(L.uniq, r);
+
+  //intersperse([1,2,3], [10,11,12]) => [1,10,2,11,3,12]
+  let intersperse = (a: array('a), b: array('a)) => {
+    let items: ref(array('a)) = ref([||]);
+
+    Belt.Array.forEachWithIndex(a, (i, item) => {
+      switch (Belt.Array.get(b, i)) {
+      | Some(r) => items := append(items^, [|item, r|])
+      | None => items := append(items^, [|item|])
+      }
+    });
+    items^;
+  };
 
   // @todo: Is -1 still the indicator that this is false (as is true with
   // @todo: js findIndex)? Wasn't sure.
@@ -314,6 +333,13 @@ module A = {
   };
 
   module Sorted = {
+    let min = first;
+    let max = last;
+    let range = (~min=min, ~max=max, a) =>
+      switch (min(a), max(a)) {
+      | (Some(min), Some(max)) => Some(max -. min)
+      | _ => None
+      };
     let binarySearchFirstElementGreaterIndex = (ar: array('a), el: 'a) => {
       let el = Belt.SortArray.binarySearchBy(ar, el, compare);
       let el = el < 0 ? el * (-1) - 1 : el;
@@ -323,38 +349,76 @@ module A = {
       | e => `firstHigher(e)
       };
     };
+
+    let concat = (t1: array('a), t2: array('a)) => {
+      let ts = Belt.Array.concat(t1, t2);
+      ts |> Array.fast_sort(compare);
+      ts;
+    };
+
+    module Floats = {
+      let makeIncrementalUp = (a, b) =>
+        Array.make(b - a + 1, a)
+        |> Array.mapi((i, c) => c + i)
+        |> Belt.Array.map(_, float_of_int);
+
+      let makeIncrementalDown = (a, b) =>
+        Array.make(a - b + 1, a)
+        |> Array.mapi((i, c) => c - i)
+        |> Belt.Array.map(_, float_of_int);
+
+      let split = (sortedArray: array(float)) => {
+        let continuous = [||];
+        let discrete = FloatFloatMap.empty();
+        Belt.Array.forEachWithIndex(
+          sortedArray,
+          (index, element) => {
+            let maxIndex = (sortedArray |> Array.length) - 1;
+            let possiblySimilarElements =
+              (
+                switch (index) {
+                | 0 => [|index + 1|]
+                | n when n == maxIndex => [|index - 1|]
+                | _ => [|index - 1, index + 1|]
+                }
+              )
+              |> Belt.Array.map(_, r => sortedArray[r]);
+            let hasSimilarElement =
+              Belt.Array.some(possiblySimilarElements, r => r == element);
+            hasSimilarElement
+              ? FloatFloatMap.increment(element, discrete)
+              : {
+                let _ = Js.Array.push(element, continuous);
+                ();
+              };
+            ();
+          },
+        );
+
+        (continuous, discrete);
+      };
+    };
   };
 
   module Floats = {
-    let split = (sortedArray: array(float)) => {
-      let continuous = [||];
-      let discrete = FloatFloatMap.empty();
-      Belt.Array.forEachWithIndex(
-        sortedArray,
-        (index, element) => {
-          let maxIndex = (sortedArray |> Array.length) - 1;
-          let possiblySimilarElements =
-            (
-              switch (index) {
-              | 0 => [|index + 1|]
-              | n when n == maxIndex => [|index - 1|]
-              | _ => [|index - 1, index + 1|]
-              }
-            )
-            |> Belt.Array.map(_, r => sortedArray[r]);
-          let hasSimilarElement =
-            Belt.Array.some(possiblySimilarElements, r => r == element);
-          hasSimilarElement
-            ? FloatFloatMap.increment(element, discrete)
-            : {
-              let _ = Js.Array.push(element, continuous);
-              ();
-            };
-          ();
-        },
-      );
+    let sum = Belt.Array.reduce(_, 0., (i, j) => i +. j);
+    let mean = a => sum(a) /. (Array.length(a) |> float_of_int);
+    let random = Js.Math.random_int;
 
-      (continuous, discrete);
+    exception RangeError(string);
+    let range = (min: float, max: float, n: int): array(float) => {
+      switch (n) {
+      | 0 => [||]
+      | 1 => [|min|]
+      | 2 => [|min, max|]
+      | _ when min == max => Belt.Array.make(n, min)
+      | _ when n < 0 => raise(RangeError("n must be greater than 0"))
+      | _ when min > max =>
+        raise(RangeError("Min value is less then max value"))
+      | _ =>
+        let diff = (max -. min) /. Belt.Float.fromInt(n - 1);
+        Belt.Array.makeBy(n, i => {min +. Belt.Float.fromInt(i) *. diff});
+      };
     };
   };
 };

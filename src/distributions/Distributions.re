@@ -87,7 +87,7 @@ module Continuous = {
     interpolation,
   };
   let lastY = (t: t) =>
-    t |> xyShape |> XYShape.T.unsafeLast |> (((_, y)) => y);
+    t |> xyShape |> XYShape.T.Pairs.unsafeLast |> (((_, y)) => y);
   let oShapeMap =
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(make(_, interpolation));
@@ -146,16 +146,16 @@ module Continuous = {
       let truncate = (~cache=None, i, t) =>
         t
         |> shapeMap(
-             XYShape.T.convertToNewLengthByProbabilityMass(
+             XYShape.T.XsConversion.proportionByProbabilityMass(
                i,
                integral(~cache, t).xyShape,
              ),
            );
       let integralEndY = (~cache, t) => t |> integral(~cache) |> lastY;
       let integralXtoY = (~cache, f, t) =>
-        t |> integral(~cache) |> shapeFn(XYShape.T.findY(f));
+        t |> integral(~cache) |> shapeFn(XYShape.T.XtoY.linear(f));
       let integralYtoX = (~cache, f, t) =>
-        t |> integral(~cache) |> shapeFn(XYShape.T.findX(f));
+        t |> integral(~cache) |> shapeFn(XYShape.T.YtoX.linear(f));
       let toContinuous = t => Some(t);
       let toDiscrete = _ => None;
       let toScaledContinuous = t => Some(t);
@@ -208,10 +208,16 @@ module Discrete = {
       };
 
       let integralXtoY = (~cache, f, t) =>
-        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
+        t
+        |> integral(~cache)
+        |> Continuous.getShape
+        |> XYShape.T.XtoY.linear(f);
 
       let integralYtoX = (~cache, f, t) =>
-        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findX(f);
+        t
+        |> integral(~cache)
+        |> Continuous.getShape
+        |> XYShape.T.YtoX.linear(f);
     });
 };
 
@@ -357,11 +363,17 @@ module Mixed = {
       };
 
       let integralXtoY = (~cache, f, t) => {
-        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findY(f);
+        t
+        |> integral(~cache)
+        |> Continuous.getShape
+        |> XYShape.T.XtoY.linear(f);
       };
 
       let integralYtoX = (~cache, f, t) => {
-        t |> integral(~cache) |> Continuous.getShape |> XYShape.T.findX(f);
+        t
+        |> integral(~cache)
+        |> Continuous.getShape
+        |> XYShape.T.YtoX.linear(f);
       };
 
       // TODO: This functionality is kinda weird, because it seems to assume the cdf adds to 1.0 elsewhere, which wouldn't happen here.

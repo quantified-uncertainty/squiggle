@@ -94,7 +94,7 @@ module Lognormal = {
   let from90PercentCI = (low, high) => {
     let logLow = Js.Math.log(low);
     let logHigh = Js.Math.log(high);
-    let mu = Functions.mean([|logLow, logHigh|]);
+    let mu = E.A.Floats.mean([|logLow, logHigh|]);
     let sigma = (logHigh -. logLow) /. (2.0 *. 1.645);
     `Lognormal({mu, sigma});
   };
@@ -189,9 +189,9 @@ module GenericSimple = {
   let interpolateXs =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
     switch (xSelection) {
-    | `Linear => Functions.range(min(dist), max(dist), sampleCount)
+    | `Linear => E.A.Floats.range(min(dist), max(dist), sampleCount)
     | `ByWeight =>
-      Functions.range(minCdfValue, maxCdfValue, sampleCount)
+      E.A.Floats.range(minCdfValue, maxCdfValue, sampleCount)
       |> E.A.fmap(x => inv(x, dist))
     };
   };
@@ -208,20 +208,20 @@ module PointwiseAddDistributionsWeighted = {
   type t = pointwiseAdd;
 
   let normalizeWeights = (dists: t) => {
-    let total = dists |> E.A.fmap(snd) |> Functions.sum;
+    let total = dists |> E.A.fmap(snd) |> E.A.Floats.sum;
     dists |> E.A.fmap(((a, b)) => (a, b /. total));
   };
 
   let pdf = (dists: t, x: float) =>
     dists
     |> E.A.fmap(((e, w)) => GenericSimple.pdf(x, e) *. w)
-    |> Functions.sum;
+    |> E.A.Floats.sum;
 
   let min = (dists: t) =>
-    dists |> E.A.fmap(d => d |> fst |> GenericSimple.min) |> Functions.min;
+    dists |> E.A.fmap(d => d |> fst |> GenericSimple.min) |> E.A.min;
 
   let max = (dists: t) =>
-    dists |> E.A.fmap(d => d |> fst |> GenericSimple.max) |> Functions.max;
+    dists |> E.A.fmap(d => d |> fst |> GenericSimple.max) |> E.A.max;
 
   let toShape = (dists: t, sampleCount: int) => {
     let xs =
