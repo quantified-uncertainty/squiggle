@@ -25,7 +25,7 @@ class BaseDistributionBinned {
     this.max_bin_size = 0.005;
     this.min_bin_size = 0;
     this.increment = 0.0001;
-    this.desired_delta = 0.0001;
+    this.desired_delta = 0.001;
     this.start_bin_size = 0.0001;
 
     [this.params, this.pdf_func, this.sample] = this.get_params_and_pdf_func(
@@ -44,6 +44,8 @@ class BaseDistributionBinned {
     throw new Error("NotImplementedError");
   }
 
+
+  //Adaptive binning. Specify a desired change in density to get adjusted bin sizes.
   /**
    * @returns {(number[]|[*])[]}
    * @private

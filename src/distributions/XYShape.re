@@ -200,13 +200,6 @@ module T = {
     | (true, true) => (-1)
     };
 
-  // todo: This is broken :(
-  let combine = (t1: t, t2: t) => {
-    let array = Belt.Array.concat(zip(t1), zip(t2));
-    Array.fast_sort(comparePoints, array);
-    array |> Belt.Array.unzip |> fromArray;
-  };
-
   // TODO: I'd bet this is pretty slow
   let intersperce = (t1: t, t2: t) => {
     let items: ref(array((float, float))) = ref([||]);

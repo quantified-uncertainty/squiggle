@@ -3,7 +3,8 @@
   "reason": {
     "react-jsx": 3
   },
-  "sources": [{
+  "sources": [
+    {
       "dir": "src",
       "subdirs": true
     },
@@ -19,14 +20,17 @@
     }
   ],
   "bsc-flags": ["-bs-super-errors", "-bs-no-version-header"],
-  "package-specs": [{
-    "module": "commonjs",
-    "in-source": true
-  }],
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": true
+    }
+  ],
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
     "@glennsl/bs-jest",
+    "@glennsl/bs-json",
     "@foretold/components",
     "bs-ant-design-alt",
     "reason-react",
@@ -37,7 +41,5 @@
     "reschema"
   ],
   "refmt": 3,
-  "ppx-flags": [
-    "lenses-ppx/ppx"
-  ]
+  "ppx-flags": ["lenses-ppx/ppx"]
 }

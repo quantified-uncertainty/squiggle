@@ -8,6 +8,7 @@ const math = _math.create(_math.all);
 const NUM_MC_SAMPLES = 3000;
 const OUTPUT_GRID_NUMEL = 3000;
 
+
 /**
  * The main algorithmic work is done by functions in this module.
  * It also contains the main function, taking the user's string
@@ -290,6 +291,7 @@ function pluck_from_array(array, idx) {
  * If distr_string requires MC, try all possible
  * choices for the deterministic distribution,
  * and pick the one with the least variance.
+ * It's much better to sample from a normal than a lognormal.
  *
  * @param distr_string
  * @returns {(*|*[])[]|*[]}

@@ -216,15 +216,20 @@ module DistPlusChart = {
       |> E.O.fmap(Distributions.Continuous.getShape);
     let range = T.xTotalRange(distPlus);
 
-    // We subtract a bit from the range to make sure that it fits. Maybe this should be done in d3 instead.
-    let minX =
-      switch (
-        distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.01),
-        range,
-      ) {
-      | (min, Some(range)) => Some(min -. range *. 0.001)
-      | _ => None
-      };
+    // // We subtract a bit from the range to make sure that it fits. Maybe this should be done in d3 instead.
+    // let minX =
+    //   switch (
+    //     distPlus
+    //     |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.0001),
+    //     range,
+    //   ) {
+    //   | (min, Some(range)) => Some(min -. range *. 0.001)
+    //   | _ => None
+    //   };
+
+    let minX = {
+      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.00001);
+    };
 
     let maxX = {
       distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99);
