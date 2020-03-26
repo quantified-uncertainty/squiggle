@@ -48,10 +48,10 @@ type triangular = {
   [@bs.meth] "inv": (float, float, float, float) => float,
   [@bs.meth] "sample": (float, float, float) => float,
 };
-[@bs.module "jStat"] external normal: normal = "normal";
-[@bs.module "jStat"] external lognormal: lognormal = "lognormal";
-[@bs.module "jStat"] external uniform: uniform = "uniform";
-[@bs.module "jStat"] external beta: beta = "beta";
-[@bs.module "jStat"] external exponential: exponential = "exponential";
-[@bs.module "jStat"] external cauchy: cauchy = "cauchy";
-[@bs.module "jStat"] external triangular: triangular = "triangular";
+[@bs.module "jstat"] external normal: normal = "normal";
+[@bs.module "jstat"] external lognormal: lognormal = "lognormal";
+[@bs.module "jstat"] external uniform: uniform = "uniform";
+[@bs.module "jstat"] external beta: beta = "beta";
+[@bs.module "jstat"] external exponential: exponential = "exponential";
+[@bs.module "jstat"] external cauchy: cauchy = "cauchy";
+[@bs.module "jstat"] external triangular: triangular = "triangular";
