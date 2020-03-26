@@ -18,16 +18,56 @@ type beta = {
   beta: float,
 };
 
+type exponential = {rate: float};
+
+type cauchy = {
+  local: float,
+  scale: float,
+};
+
+type triangular = {
+  low: float,
+  medium: float,
+  high: float,
+};
+
 type dist = [
   | `Normal(normal)
   | `Beta(beta)
   | `Lognormal(lognormal)
   | `Uniform(uniform)
+  | `Exponential(exponential)
+  | `Cauchy(cauchy)
+  | `Triangular(triangular)
 ];
 
 type pointwiseAdd = array((dist, float));
 
 type bigDist = [ | `Simple(dist) | `PointwiseCombination(pointwiseAdd)];
+
+module Exponential = {
+  type t = exponential;
+  let pdf = (x, t: t) => Jstat.exponential##pdf(x, t.rate);
+  let inv = (p, t: t) => Jstat.exponential##inv(p, t.rate);
+  let sample = (t: t) => Jstat.exponential##sample(t.rate);
+  let toString = ({rate}: t) => {j|Exponential($rate)|j};
+};
+
+module Cauchy = {
+  type t = cauchy;
+  let pdf = (x, t: t) => Jstat.cauchy##pdf(x, t.local, t.scale);
+  let inv = (p, t: t) => Jstat.cauchy##inv(p, t.local, t.scale);
+  let sample = (t: t) => Jstat.cauchy##sample(t.local, t.scale);
+  let toString = ({local, scale}: t) => {j|Cauchy($local, $scale)|j};
+};
+
+module Triangular = {
+  type t = triangular;
+  let pdf = (x, t: t) => Jstat.triangular##pdf(x, t.low, t.high, t.medium);
+  let inv = (p, t: t) => Jstat.triangular##inv(p, t.low, t.high, t.medium);
+  let sample = (t: t) => Jstat.triangular##sample(t.low, t.high, t.medium);
+  let toString = ({low, medium, high}: t) => {j|Triangular($low, $medium, $high)|j};
+};
 
 module Normal = {
   type t = normal;
@@ -87,6 +127,9 @@ module GenericSimple = {
   let pdf = (x, dist) =>
     switch (dist) {
     | `Normal(n) => Normal.pdf(x, n)
+    | `Triangular(n) => Triangular.pdf(x, n)
+    | `Exponential(n) => Exponential.pdf(x, n)
+    | `Cauchy(n) => Cauchy.pdf(x, n)
     | `Lognormal(n) => Lognormal.pdf(x, n)
     | `Uniform(n) => Uniform.pdf(x, n)
     | `Beta(n) => Beta.pdf(x, n)
@@ -95,42 +138,53 @@ module GenericSimple = {
   let inv = (x, dist) =>
     switch (dist) {
     | `Normal(n) => Normal.inv(x, n)
+    | `Triangular(n) => Triangular.inv(x, n)
+    | `Exponential(n) => Exponential.inv(x, n)
+    | `Cauchy(n) => Cauchy.inv(x, n)
     | `Lognormal(n) => Lognormal.inv(x, n)
     | `Uniform(n) => Uniform.inv(x, n)
     | `Beta(n) => Beta.inv(x, n)
     };
 
-  let sample = dist =>
-    switch (dist) {
+  let sample: dist => float =
+    fun
     | `Normal(n) => Normal.sample(n)
+    | `Triangular(n) => Triangular.sample(n)
+    | `Exponential(n) => Exponential.sample(n)
+    | `Cauchy(n) => Cauchy.sample(n)
     | `Lognormal(n) => Lognormal.sample(n)
     | `Uniform(n) => Uniform.sample(n)
-    | `Beta(n) => Beta.sample(n)
-    };
+    | `Beta(n) => Beta.sample(n);
 
-  let toString = dist =>
-    switch (dist) {
+  let toString: dist => string =
+    fun
+    | `Triangular(n) => Triangular.toString(n)
+    | `Exponential(n) => Exponential.toString(n)
+    | `Cauchy(n) => Cauchy.toString(n)
     | `Normal(n) => Normal.toString(n)
     | `Lognormal(n) => Lognormal.toString(n)
     | `Uniform(n) => Uniform.toString(n)
-    | `Beta(n) => Beta.toString(n)
-    };
+    | `Beta(n) => Beta.toString(n);
 
-  let min = dist =>
-    switch (dist) {
+  let min: dist => float =
+    fun
+    | `Triangular({low}) => low
+    | `Exponential(n) => Exponential.inv(minCdfValue, n)
+    | `Cauchy(n) => Cauchy.inv(minCdfValue, n)
     | `Normal(n) => Normal.inv(minCdfValue, n)
     | `Lognormal(n) => Lognormal.inv(minCdfValue, n)
     | `Uniform({low}) => low
-    | `Beta(n) => Beta.inv(minCdfValue, n)
-    };
+    | `Beta(n) => Beta.inv(minCdfValue, n);
 
-  let max = dist =>
-    switch (dist) {
+  let max: dist => float =
+    fun
+    | `Triangular(n) => n.high
+    | `Exponential(n) => Exponential.inv(maxCdfValue, n)
+    | `Cauchy(n) => Cauchy.inv(maxCdfValue, n)
     | `Normal(n) => Normal.inv(maxCdfValue, n)
     | `Lognormal(n) => Lognormal.inv(maxCdfValue, n)
     | `Beta(n) => Beta.inv(maxCdfValue, n)
-    | `Uniform({high}) => high
-    };
+    | `Uniform({high}) => high;
 
   let interpolateXs =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {

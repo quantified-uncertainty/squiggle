@@ -27,7 +27,31 @@ type beta = {
   [@bs.meth] "inv": (float, float, float) => float,
   [@bs.meth] "sample": (float, float) => float,
 };
+type exponential = {
+  .
+  [@bs.meth] "pdf": (float, float) => float,
+  [@bs.meth] "cdf": (float, float) => float,
+  [@bs.meth] "inv": (float, float) => float,
+  [@bs.meth] "sample": float => float,
+};
+type cauchy = {
+  .
+  [@bs.meth] "pdf": (float, float, float) => float,
+  [@bs.meth] "cdf": (float, float, float) => float,
+  [@bs.meth] "inv": (float, float, float) => float,
+  [@bs.meth] "sample": (float, float) => float,
+};
+type triangular = {
+  .
+  [@bs.meth] "pdf": (float, float, float, float) => float,
+  [@bs.meth] "cdf": (float, float, float, float) => float,
+  [@bs.meth] "inv": (float, float, float, float) => float,
+  [@bs.meth] "sample": (float, float, float) => float,
+};
 [@bs.module "jStat"] external normal: normal = "normal";
 [@bs.module "jStat"] external lognormal: lognormal = "lognormal";
 [@bs.module "jStat"] external uniform: uniform = "uniform";
 [@bs.module "jStat"] external beta: beta = "beta";
+[@bs.module "jStat"] external exponential: exponential = "exponential";
+[@bs.module "jStat"] external cauchy: cauchy = "cauchy";
+[@bs.module "jStat"] external triangular: triangular = "triangular";

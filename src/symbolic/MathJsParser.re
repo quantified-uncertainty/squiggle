@@ -124,6 +124,23 @@ module MathAdtToDistDst = {
     | [|Value(alpha), Value(beta)|] => Ok(`Simple(`Beta({alpha, beta})))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
+  let exponential: array(arg) => result(SymbolicDist.bigDist, string) =
+    fun
+    | [|Value(rate)|] => Ok(`Simple(`Exponential({rate: rate})))
+    | _ => Error("Wrong number of variables in Exponential distribution");
+
+  let cauchy: array(arg) => result(SymbolicDist.bigDist, string) =
+    fun
+    | [|Value(local), Value(scale)|] =>
+      Ok(`Simple(`Cauchy({local, scale})))
+    | _ => Error("Wrong number of variables in cauchy distribution");
+
+  let triangular: array(arg) => result(SymbolicDist.bigDist, string) =
+    fun
+    | [|Value(low), Value(medium), Value(high)|] =>
+      Ok(`Simple(`Triangular({low, medium, high})))
+    | _ => Error("Wrong number of variables in triangle distribution");
+
   let multiModal =
       (
         args: array(result(SymbolicDist.bigDist, string)),
@@ -157,6 +174,9 @@ module MathAdtToDistDst = {
       | Fn({name: "uniform", args}) => uniform(args)
       | Fn({name: "beta", args}) => beta(args)
       | Fn({name: "to", args}) => to_(args)
+      | Fn({name: "exponential", args}) => exponential(args)
+      | Fn({name: "cauchy", args}) => cauchy(args)
+      | Fn({name: "triangular", args}) => triangular(args)
       | Fn({name: "mm", args}) => {
           let dists = args |> E.A.fmap(functionParser);
           let weights =
