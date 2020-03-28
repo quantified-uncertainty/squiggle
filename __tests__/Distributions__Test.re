@@ -15,7 +15,7 @@ let makeTest = (~only=false, str, item1, item2) =>
 describe("Shape", () => {
   describe("Continuous", () => {
     open Distributions.Continuous;
-    let continuous = make(shape, `Linear);
+    let continuous = make(`Linear, shape);
     makeTest("minX", T.minX(continuous), 1.0);
     makeTest("maxX", T.maxX(continuous), 8.0);
     makeTest(
@@ -48,7 +48,7 @@ describe("Shape", () => {
         );
       });
       describe("when Stepwise", () => {
-        let continuous = make(shape, `Stepwise);
+        let continuous = make(`Stepwise, shape);
         makeTest(
           "at 4.0",
           T.xToY(4., continuous),
@@ -80,7 +80,7 @@ describe("Shape", () => {
       "toLinear",
       {
         let continuous =
-          make({xs: [|1., 4., 8.|], ys: [|0.1, 5., 1.0|]}, `Stepwise);
+          make(`Stepwise, {xs: [|1., 4., 8.|], ys: [|0.1, 5., 1.0|]});
         continuous |> toLinear |> E.O.fmap(getShape);
       },
       Some({
@@ -91,7 +91,7 @@ describe("Shape", () => {
     makeTest(
       "toLinear",
       {
-        let continuous = make({xs: [|0.0|], ys: [|0.3|]}, `Stepwise);
+        let continuous = make(`Stepwise, {xs: [|0.0|], ys: [|0.3|]});
         continuous |> toLinear |> E.O.fmap(getShape);
       },
       Some({xs: [|0.0|], ys: [|0.3|]}),
@@ -170,14 +170,14 @@ describe("Shape", () => {
       "integral",
       T.Integral.get(~cache=None, discrete),
       Distributions.Continuous.make(
-        {xs: [|1., 4., 8.|], ys: [|0.3, 0.8, 1.0|]},
         `Stepwise,
+        {xs: [|1., 4., 8.|], ys: [|0.3, 0.8, 1.0|]},
       ),
     );
     makeTest(
       "integral with 1 element",
       T.Integral.get(~cache=None, {xs: [|0.0|], ys: [|1.0|]}),
-      Distributions.Continuous.make({xs: [|0.0|], ys: [|1.0|]}, `Stepwise),
+      Distributions.Continuous.make(`Stepwise, {xs: [|0.0|], ys: [|1.0|]}),
     );
     makeTest(
       "integralXToY",
@@ -195,8 +195,8 @@ describe("Shape", () => {
     };
     let continuous =
       Distributions.Continuous.make(
-        {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
         `Linear,
+        {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
       )
       |> Distributions.Continuous.T.scaleToIntegralSum(~intendedSum=1.0);
     let mixed =
@@ -218,6 +218,7 @@ describe("Shape", () => {
       Distributions.Mixed.make(
         ~continuous=
           Distributions.Continuous.make(
+            `Linear,
             {
               xs: [|3., 7., 14.|],
               ys: [|
@@ -226,7 +227,6 @@ describe("Shape", () => {
                 0.24775224775224775,
               |],
             },
-            `Linear,
           ),
         ~discrete={xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]},
         ~discreteProbabilityMassFraction=0.5,
@@ -254,6 +254,7 @@ describe("Shape", () => {
       Distributions.Mixed.make(
         ~continuous=
           Distributions.Continuous.make(
+            `Linear,
             {
               xs: [|3., 7., 14.|],
               ys: [|
@@ -262,7 +263,6 @@ describe("Shape", () => {
                 0.24775224775224775,
               |],
             },
-            `Linear,
           ),
         ~discrete={xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]},
         ~discreteProbabilityMassFraction=0.5,
@@ -272,6 +272,7 @@ describe("Shape", () => {
       "integral",
       T.Integral.get(~cache=None, mixed),
       Distributions.Continuous.make(
+        `Linear,
         {
           xs: [|1.00007, 1.00007, 3., 4., 4.00007, 7., 8., 8.00007, 14.|],
           ys: [|
@@ -286,7 +287,6 @@ describe("Shape", () => {
             1.0,
           |],
         },
-        `Linear,
       ),
     );
   });
@@ -299,8 +299,8 @@ describe("Shape", () => {
     };
     let continuous =
       Distributions.Continuous.make(
-        {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
         `Linear,
+        {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
       )
       |> Distributions.Continuous.T.scaleToIntegralSum(~intendedSum=1.0);
     let mixed =
@@ -343,6 +343,7 @@ describe("Shape", () => {
       T.Integral.get(~cache=None, distPlus) |> T.toContinuous,
       Some(
         Distributions.Continuous.make(
+          `Linear,
           {
             xs: [|1.00007, 1.00007, 3., 4., 4.00007, 7., 8., 8.00007, 14.|],
             ys: [|
@@ -357,7 +358,6 @@ describe("Shape", () => {
               1.0,
             |],
           },
-          `Linear,
         ),
       ),
     );

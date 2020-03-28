@@ -58,8 +58,7 @@ module Continuous = {
   type t = DistTypes.continuousShape;
   let getShape = (t: t) => t.xyShape;
   let interpolation = (t: t) => t.interpolation;
-  let make = (xyShape, interpolation): t => {xyShape, interpolation};
-  let fromShape = xyShape => make(xyShape, `Linear);
+  let make = (interpolation, xyShape): t => {xyShape, interpolation};
   let shapeMap = (fn, {xyShape, interpolation}: t): t => {
     xyShape: fn(xyShape),
     interpolation,
@@ -67,14 +66,12 @@ module Continuous = {
   let lastY = (t: t) => t |> getShape |> XYShape.T.lastY;
   let oShapeMap =
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
-    fn(xyShape) |> E.O.fmap(make(_, interpolation));
+    fn(xyShape) |> E.O.fmap(make(interpolation));
 
   let toLinear = (t: t): option(t) => {
     switch (t) {
     | {interpolation: `Stepwise, xyShape} =>
-      xyShape
-      |> XYShape.Range.stepsToContinuous
-      |> E.O.fmap(xyShape => make(xyShape, `Linear))
+      xyShape |> XYShape.Range.stepsToContinuous |> E.O.fmap(make(`Linear))
     | {interpolation: `Linear, _} => Some(t)
     };
   };
@@ -84,24 +81,23 @@ module Continuous = {
     Dist({
       type t = DistTypes.continuousShape;
       type integral = DistTypes.continuousShape;
-      let minX = shapeFn(r => r |> XYShape.T.minX);
-      let maxX = shapeFn(r => r |> XYShape.T.maxX);
+      let minX = shapeFn(XYShape.T.minX);
+      let maxX = shapeFn(XYShape.T.maxX);
       let toDiscreteProbabilityMass = _ => 0.0;
-      let mapY = (fn, t: t) =>
-        t |> getShape |> XYShape.T.mapY(fn) |> fromShape;
+      let mapY = fn => shapeMap(XYShape.T.mapY(fn));
       let toShape = (t: t): DistTypes.shape => Continuous(t);
-      let xToY = (f, {interpolation, xyShape}: t) =>
-        switch (interpolation) {
-        | `Stepwise =>
-          xyShape
-          |> XYShape.XtoY.stepwiseIncremental(f)
-          |> E.O.default(0.0)
-          |> DistTypes.MixedPoint.makeContinuous
-        | `Linear =>
-          xyShape
-          |> XYShape.XtoY.linear(f)
-          |> DistTypes.MixedPoint.makeContinuous
-        };
+      let xToY = (f, {interpolation, xyShape}: t) => {
+        (
+          switch (interpolation) {
+          | `Stepwise =>
+            xyShape
+            |> XYShape.XtoY.stepwiseIncremental(f)
+            |> E.O.default(0.0)
+          | `Linear => xyShape |> XYShape.XtoY.linear(f)
+          }
+        )
+        |> DistTypes.MixedPoint.makeContinuous;
+      };
 
       // let combineWithFn = (t1: t, t2: t, fn: (float, float) => float) => {
       //   switch(t1, t2){
@@ -110,6 +106,7 @@ module Continuous = {
       //   }
       // };
 
+      // TODO: This should work with stepwise plots.
       let integral = (~cache, t) =>
         switch (cache) {
         | Some(cache) => cache
@@ -118,13 +115,13 @@ module Continuous = {
           |> getShape
           |> XYShape.Range.integrateWithTriangles
           |> E.O.toExt("This should not have happened")
-          |> fromShape
+          |> make(`Linear)
         };
-      let truncate = (~cache=None, i, t) =>
+      let truncate = (~cache=None, length, t) =>
         t
         |> shapeMap(
              XYShape.XsConversion.proportionByProbabilityMass(
-               i,
+               length,
                integral(~cache, t).xyShape,
              ),
            );
@@ -156,7 +153,7 @@ module Discrete = {
       let integral = (~cache, t) =>
         switch (cache) {
         | Some(c) => c
-        | None => Continuous.make(XYShape.T.accumulateYs((+.), t), `Stepwise)
+        | None => Continuous.make(`Stepwise, XYShape.T.accumulateYs((+.), t))
         };
       let integralEndY = (~cache, t) =>
         t |> integral(~cache) |> Continuous.lastY;
@@ -325,12 +322,12 @@ module Mixed = {
 
           let result =
             Continuous.make(
+              `Linear,
               XYShape.Combine.combineLinear(
                 ~fn=(a, b) => a +. b,
                 Continuous.getShape(cont),
                 Continuous.getShape(dist),
               ),
-              `Linear,
             );
           result;
         };

@@ -105,7 +105,7 @@ module T = {
           samples |> KDE.normalSampling(_, outputXYPoints, kernelWidth);
         }
         : {xs: [||], ys: [||]};
-    let continuous = pdf |> Distributions.Continuous.fromShape;
+    let continuous = pdf |> Distributions.Continuous.make(`Linear);
     let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
     shape;
   };

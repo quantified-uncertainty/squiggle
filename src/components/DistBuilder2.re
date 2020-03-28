@@ -43,7 +43,9 @@ module DemoDist = {
           let distPlus =
             Distributions.DistPlus.make(
               ~shape=
-                Continuous(Distributions.Continuous.fromShape({xs, ys})),
+                Continuous(
+                  Distributions.Continuous.make(`Linear, {xs, ys}),
+                ),
               ~domain=Complete,
               ~unit=UnspecifiedDistribution,
               ~guesstimatorString=None,
