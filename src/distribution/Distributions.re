@@ -139,13 +139,9 @@ module Continuous = {
 
 module Discrete = {
   let sortedByY = (t: DistTypes.discreteShape) =>
-    t
-    |> XYShape.T.zip
-    |> E.A.stableSortBy(_, ((_, y1), (_, y2)) => y1 > y2 ? 1 : 0);
+    t |> XYShape.T.zip |> XYShape.Zipped.sortByY;
   let sortedByX = (t: DistTypes.discreteShape) =>
-    t
-    |> XYShape.T.zip
-    |> E.A.stableSortBy(_, ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0);
+    t |> XYShape.T.zip |> XYShape.Zipped.sortByX;
   module T =
     Dist({
       type t = DistTypes.discreteShape;
@@ -159,7 +155,7 @@ module Discrete = {
         t |> integral(~cache) |> Continuous.lastY;
       let minX = XYShape.T.minX;
       let maxX = XYShape.T.maxX;
-      let toDiscreteProbabilityMass = t => 1.0;
+      let toDiscreteProbabilityMass = _ => 1.0;
       let mapY = XYShape.T.mapY;
       let toShape = (t: t): DistTypes.shape => Discrete(t);
       let toContinuous = _ => None;
@@ -195,6 +191,7 @@ module Discrete = {
     });
 };
 
+// TODO: I think this shouldn't assume continuous/discrete are normalized to 1.0, and thus should not need the discreteProbabilityMassFraction being separate.
 module Mixed = {
   type t = DistTypes.mixedShape;
   let make =
@@ -253,11 +250,12 @@ module Mixed = {
         DistTypes.MixedPoint.add(c, d);
       };
 
+      // Warning: It's not clear how to update the discreteProbabilityMassFraction, so this may create small errors.
       let truncate =
           (
             ~cache=None,
             count,
-            {discrete, continuous, discreteProbabilityMassFraction} as t: t,
+            {discrete, continuous, discreteProbabilityMassFraction}: t,
           )
           : t => {
         {
@@ -324,7 +322,7 @@ module Mixed = {
             Continuous.make(
               `Linear,
               XYShape.Combine.combineLinear(
-                ~fn=(a, b) => a +. b,
+                ~fn=(+.),
                 Continuous.getShape(cont),
                 Continuous.getShape(dist),
               ),
@@ -351,7 +349,7 @@ module Mixed = {
         |> XYShape.YtoX.linear(f);
       };
 
-      // TODO: This functionality is kinda weird, because it seems to assume the cdf adds to 1.0 elsewhere, which wouldn't happen here.
+      // TODO: This part really needs to be rethought, I'm quite sure this is just broken. Mapping Ys would change the desired discreteProbabilityMassFraction.
       let mapY =
           (fn, {discrete, continuous, discreteProbabilityMassFraction}: t): t => {
         {
@@ -369,133 +367,101 @@ module Shape = {
       type t = DistTypes.shape;
       type integral = DistTypes.continuousShape;
 
-      // todo: change order of arguments so t goes last.
-      // todo: Think of other name here?
-      let mapToAll = (t: t, (fn1, fn2, fn3)) =>
+      let mapToAll = ((fn1, fn2, fn3), t: t) =>
         switch (t) {
         | Mixed(m) => fn1(m)
         | Discrete(m) => fn2(m)
         | Continuous(m) => fn3(m)
         };
 
-      let fmap = (t: t, (fn1, fn2, fn3)): t =>
+      let fmap = ((fn1, fn2, fn3), t: t): t =>
         switch (t) {
         | Mixed(m) => Mixed(fn1(m))
         | Discrete(m) => Discrete(fn2(m))
         | Continuous(m) => Continuous(fn3(m))
         };
 
-      let xToY = (f, t) =>
-        mapToAll(
-          t,
-          (Mixed.T.xToY(f), Discrete.T.xToY(f), Continuous.T.xToY(f)),
-        );
+      let xToY = f =>
+        mapToAll((
+          Mixed.T.xToY(f),
+          Discrete.T.xToY(f),
+          Continuous.T.xToY(f),
+        ));
       let toShape = (t: t) => t;
-      let toContinuous = (t: t) =>
-        mapToAll(
-          t,
-          (
-            Mixed.T.toContinuous,
-            Discrete.T.toContinuous,
-            Continuous.T.toContinuous,
-          ),
-        );
-      let toDiscrete = (t: t) =>
-        mapToAll(
-          t,
-          (
-            Mixed.T.toDiscrete,
-            Discrete.T.toDiscrete,
-            Continuous.T.toDiscrete,
-          ),
-        );
+      let toContinuous =
+        mapToAll((
+          Mixed.T.toContinuous,
+          Discrete.T.toContinuous,
+          Continuous.T.toContinuous,
+        ));
+      let toDiscrete =
+        mapToAll((
+          Mixed.T.toDiscrete,
+          Discrete.T.toDiscrete,
+          Continuous.T.toDiscrete,
+        ));
 
-      let truncate = (~cache=None, i, t: t) =>
-        fmap(
-          t,
-          (
-            Mixed.T.truncate(i),
-            Discrete.T.truncate(i),
-            Continuous.T.truncate(i),
-          ),
-        );
+      let truncate = (~cache=None, i) =>
+        fmap((
+          Mixed.T.truncate(i),
+          Discrete.T.truncate(i),
+          Continuous.T.truncate(i),
+        ));
 
-      let toDiscreteProbabilityMass = (t: t) =>
-        mapToAll(
-          t,
-          (
-            Mixed.T.toDiscreteProbabilityMass,
-            Discrete.T.toDiscreteProbabilityMass,
-            Continuous.T.toDiscreteProbabilityMass,
-          ),
-        );
+      let toDiscreteProbabilityMass =
+        mapToAll((
+          Mixed.T.toDiscreteProbabilityMass,
+          Discrete.T.toDiscreteProbabilityMass,
+          Continuous.T.toDiscreteProbabilityMass,
+        ));
 
-      let toScaledDiscrete = (t: t) =>
-        mapToAll(
-          t,
-          (
-            Mixed.T.toScaledDiscrete,
-            Discrete.T.toScaledDiscrete,
-            Continuous.T.toScaledDiscrete,
-          ),
-        );
-      let toScaledContinuous = (t: t) =>
-        mapToAll(
-          t,
-          (
-            Mixed.T.toScaledContinuous,
-            Discrete.T.toScaledContinuous,
-            Continuous.T.toScaledContinuous,
-          ),
-        );
-      let minX = (t: t) =>
-        mapToAll(t, (Mixed.T.minX, Discrete.T.minX, Continuous.T.minX));
-      let integral = (~cache, t: t) => {
-        mapToAll(
-          t,
-          (
-            Mixed.T.Integral.get(~cache),
-            Discrete.T.Integral.get(~cache),
-            Continuous.T.Integral.get(~cache),
-          ),
-        );
+      let toScaledDiscrete =
+        mapToAll((
+          Mixed.T.toScaledDiscrete,
+          Discrete.T.toScaledDiscrete,
+          Continuous.T.toScaledDiscrete,
+        ));
+      let toScaledContinuous =
+        mapToAll((
+          Mixed.T.toScaledContinuous,
+          Discrete.T.toScaledContinuous,
+          Continuous.T.toScaledContinuous,
+        ));
+      let minX = mapToAll((Mixed.T.minX, Discrete.T.minX, Continuous.T.minX));
+      let integral = (~cache) => {
+        mapToAll((
+          Mixed.T.Integral.get(~cache),
+          Discrete.T.Integral.get(~cache),
+          Continuous.T.Integral.get(~cache),
+        ));
       };
-      let integralEndY = (~cache, t: t) =>
-        mapToAll(
-          t,
-          (
-            Mixed.T.Integral.sum(~cache),
-            Discrete.T.Integral.sum(~cache),
-            Continuous.T.Integral.sum(~cache),
-          ),
-        );
-      let integralXtoY = (~cache, f, t) => {
-        mapToAll(
-          t,
-          (
-            Mixed.T.Integral.xToY(~cache, f),
-            Discrete.T.Integral.xToY(~cache, f),
-            Continuous.T.Integral.xToY(~cache, f),
-          ),
-        );
+      let integralEndY = (~cache) =>
+        mapToAll((
+          Mixed.T.Integral.sum(~cache),
+          Discrete.T.Integral.sum(~cache),
+          Continuous.T.Integral.sum(~cache),
+        ));
+      let integralXtoY = (~cache, f) => {
+        mapToAll((
+          Mixed.T.Integral.xToY(~cache, f),
+          Discrete.T.Integral.xToY(~cache, f),
+          Continuous.T.Integral.xToY(~cache, f),
+        ));
       };
-      let integralYtoX = (~cache, f, t) => {
-        mapToAll(
-          t,
-          (
-            Mixed.T.Integral.yToX(~cache, f),
-            Discrete.T.Integral.yToX(~cache, f),
-            Continuous.T.Integral.yToX(~cache, f),
-          ),
-        );
+      let integralYtoX = (~cache, f) => {
+        mapToAll((
+          Mixed.T.Integral.yToX(~cache, f),
+          Discrete.T.Integral.yToX(~cache, f),
+          Continuous.T.Integral.yToX(~cache, f),
+        ));
       };
-      let maxX = (t: t) =>
-        mapToAll(t, (Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX));
-      let mapY = (fn, t: t) =>
-        fmap(
-          t,
-          (Mixed.T.mapY(fn), Discrete.T.mapY(fn), Continuous.T.mapY(fn)),
-        );
+      let maxX = mapToAll((Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX));
+      let mapY = fn =>
+        fmap((
+          Mixed.T.mapY(fn),
+          Discrete.T.mapY(fn),
+          Continuous.T.mapY(fn),
+        ));
     });
 };
 
