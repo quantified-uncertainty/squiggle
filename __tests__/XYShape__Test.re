@@ -40,16 +40,16 @@ describe("XYShapes", () => {
       Some(210.3721280423322),
     );
   });
-  describe("transverse", () => {
-    makeTest(
-      "When very different",
-      XYShape.T.Transversal._transverse(
-        (aCurrent, aLast) => aCurrent +. aLast,
-        [|1.0, 2.0, 3.0, 4.0|],
-      ),
-      [|1.0, 3.0, 6.0, 10.0|],
-    )
-  });
+  // describe("transverse", () => {
+  //   makeTest(
+  //     "When very different",
+  //     XYShape.Transversal._transverse(
+  //       (aCurrent, aLast) => aCurrent +. aLast,
+  //       [|1.0, 2.0, 3.0, 4.0|],
+  //     ),
+  //     [|1.0, 3.0, 6.0, 10.0|],
+  //   )
+  // });
   describe("integrateWithTriangles", () => {
     makeTest(
       "integrates correctly",

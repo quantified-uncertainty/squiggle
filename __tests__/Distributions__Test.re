@@ -19,8 +19,8 @@ describe("Shape", () => {
     makeTest("minX", T.minX(continuous), Some(1.0));
     makeTest("maxX", T.maxX(continuous), Some(8.0));
     makeTest(
-      "pointwiseFmap",
-      T.pointwiseFmap(r => r *. 2.0, continuous) |> getShape |> (r => r.ys),
+      "mapY",
+      T.mapY(r => r *. 2.0, continuous) |> getShape |> (r => r.ys),
       [|16., 18.0, 4.0|],
     );
     describe("xToY", () => {
@@ -130,8 +130,8 @@ describe("Shape", () => {
     makeTest("minX", T.minX(discrete), Some(1.0));
     makeTest("maxX", T.maxX(discrete), Some(8.0));
     makeTest(
-      "pointwiseFmap",
-      T.pointwiseFmap(r => r *. 2.0, discrete) |> (r => r.ys),
+      "mapY",
+      T.mapY(r => r *. 2.0, discrete) |> (r => r.ys),
       [|0.6, 1.0, 0.4|],
     );
     makeTest(
@@ -213,8 +213,8 @@ describe("Shape", () => {
     makeTest("minX", T.minX(mixed), Some(1.0));
     makeTest("maxX", T.maxX(mixed), Some(14.0));
     makeTest(
-      "pointwiseFmap",
-      T.pointwiseFmap(r => r *. 2.0, mixed),
+      "mapY",
+      T.mapY(r => r *. 2.0, mixed),
       Distributions.Mixed.make(
         ~continuous=
           Distributions.Continuous.make(

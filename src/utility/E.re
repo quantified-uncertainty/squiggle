@@ -76,6 +76,17 @@ module O = {
     | None => Error(error)
     };
 
+  let compare = (compare, f1: option(float), f2: option(float)) =>
+    switch (f1, f2) {
+    | (Some(f1), Some(f2)) => Some(compare(f1, f2) ? f1 : f2)
+    | (Some(f1), None) => Some(f1)
+    | (None, Some(f2)) => Some(f2)
+    | (None, None) => None
+    };
+
+  let min = compare((<));
+  let max = compare((>));
+
   module React = {
     let defaultNull = default(ReasonReact.null);
     let fmapOrNull = fn => fmap(fn) ||> default(ReasonReact.null);
@@ -289,6 +300,26 @@ module A = {
     items^;
   };
 
+  // This is like map, but
+  //accumulate((a,b) => a + b, [1,2,3]) => [1, 3, 5]
+  let accumulate = (fn: ('a, 'a) => 'a, items: array('a)) => {
+    let length = items |> length;
+    let empty = Belt.Array.make(length, items |> unsafe_get(_, 0));
+    Belt.Array.forEachWithIndex(
+      items,
+      (index, element) => {
+        let item =
+          switch (index) {
+          | 0 => element
+          | index => fn(element, unsafe_get(empty, index - 1))
+          };
+        let _ = Belt.Array.set(empty, index, item);
+        ();
+      },
+    );
+    empty;
+  };
+
   // @todo: Is -1 still the indicator that this is false (as is true with
   // @todo: js findIndex)? Wasn't sure.
   let findIndex = (e, i) =>
@@ -352,6 +383,12 @@ module A = {
 
     let concat = (t1: array('a), t2: array('a)) => {
       let ts = Belt.Array.concat(t1, t2);
+      ts |> Array.fast_sort(compare);
+      ts;
+    };
+
+    let concatMany = (t1: array(array('a))) => {
+      let ts = Belt.Array.concatMany(t1);
       ts |> Array.fast_sort(compare);
       ts;
     };
