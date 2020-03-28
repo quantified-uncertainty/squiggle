@@ -267,11 +267,7 @@ module IntegralChart = {
       |> Distributions.Continuous.toLinear
       |> E.O.fmap(Distributions.Continuous.getShape);
     let range = T.xTotalRange(distPlus);
-    let minX =
-      switch (T.minX(distPlus), range) {
-      | (Some(min), Some(range)) => Some(min -. range *. 0.001)
-      | _ => None
-      };
+    let minX = T.minX(distPlus) -. range *. 0.001;
     let maxX = integral |> Distributions.Continuous.T.maxX;
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     <DistributionPlot

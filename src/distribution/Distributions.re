@@ -1,8 +1,8 @@
 module type dist = {
   type t;
   type integral;
-  let minX: t => option(float);
-  let maxX: t => option(float);
+  let minX: t => float;
+  let maxX: t => float;
   let mapY: (float => float, t) => t;
   let xToY: (float, t) => DistTypes.mixedPoint;
   let toShape: t => DistTypes.shape;
@@ -24,11 +24,7 @@ module Dist = (T: dist) => {
   type integral = T.integral;
   let minX = T.minX;
   let maxX = T.maxX;
-  let xTotalRange = (t: t) =>
-    switch (minX(t), maxX(t)) {
-    | (Some(min), Some(max)) => Some(max -. min)
-    | _ => None
-    };
+  let xTotalRange = (t: t) => maxX(t) -. minX(t);
   let mapY = T.mapY;
   let xToY = T.xToY;
   let truncate = T.truncate;
@@ -60,7 +56,6 @@ module Dist = (T: dist) => {
 
 module Continuous = {
   type t = DistTypes.continuousShape;
-  let xyShape = (t: t) => t.xyShape;
   let getShape = (t: t) => t.xyShape;
   let interpolation = (t: t) => t.interpolation;
   let make = (xyShape, interpolation): t => {xyShape, interpolation};
@@ -69,8 +64,7 @@ module Continuous = {
     xyShape: fn(xyShape),
     interpolation,
   };
-  let lastY = (t: t) =>
-    t |> xyShape |> XYShape.Pairs.unsafeLast |> (((_, y)) => y);
+  let lastY = (t: t) => t |> getShape |> XYShape.T.lastY;
   let oShapeMap =
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(make(_, interpolation));
@@ -84,17 +78,17 @@ module Continuous = {
     | {interpolation: `Linear, _} => Some(t)
     };
   };
-  let shapeFn = (fn, t: t) => t |> xyShape |> fn;
+  let shapeFn = (fn, t: t) => t |> getShape |> fn;
 
   module T =
     Dist({
       type t = DistTypes.continuousShape;
       type integral = DistTypes.continuousShape;
-      let minX = shapeFn(XYShape.T.minX);
-      let maxX = shapeFn(XYShape.T.maxX);
+      let minX = shapeFn(r => r |> XYShape.T.minX);
+      let maxX = shapeFn(r => r |> XYShape.T.maxX);
       let toDiscreteProbabilityMass = _ => 0.0;
       let mapY = (fn, t: t) =>
-        t |> xyShape |> XYShape.T.mapY(fn) |> fromShape;
+        t |> getShape |> XYShape.T.mapY(fn) |> fromShape;
       let toShape = (t: t): DistTypes.shape => Continuous(t);
       let xToY = (f, {interpolation, xyShape}: t) =>
         switch (interpolation) {
@@ -121,7 +115,7 @@ module Continuous = {
         | Some(cache) => cache
         | None =>
           t
-          |> xyShape
+          |> getShape
           |> XYShape.Range.integrateWithTriangles
           |> E.O.toExt("This should not have happened")
           |> fromShape

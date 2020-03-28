@@ -16,8 +16,8 @@ describe("Shape", () => {
   describe("Continuous", () => {
     open Distributions.Continuous;
     let continuous = make(shape, `Linear);
-    makeTest("minX", T.minX(continuous), Some(1.0));
-    makeTest("maxX", T.maxX(continuous), Some(8.0));
+    makeTest("minX", T.minX(continuous), 1.0);
+    makeTest("maxX", T.maxX(continuous), 8.0);
     makeTest(
       "mapY",
       T.mapY(r => r *. 2.0, continuous) |> getShape |> (r => r.ys),
@@ -127,8 +127,8 @@ describe("Shape", () => {
       ys: [|0.3, 0.5, 0.2|],
     };
     let discrete = shape;
-    makeTest("minX", T.minX(discrete), Some(1.0));
-    makeTest("maxX", T.maxX(discrete), Some(8.0));
+    makeTest("minX", T.minX(discrete), 1.0);
+    makeTest("maxX", T.maxX(discrete), 8.0);
     makeTest(
       "mapY",
       T.mapY(r => r *. 2.0, discrete) |> (r => r.ys),
@@ -210,8 +210,8 @@ describe("Shape", () => {
         },
       )
       |> E.O.toExn("");
-    makeTest("minX", T.minX(mixed), Some(1.0));
-    makeTest("maxX", T.maxX(mixed), Some(14.0));
+    makeTest("minX", T.minX(mixed), 1.0);
+    makeTest("maxX", T.maxX(mixed), 14.0);
     makeTest(
       "mapY",
       T.mapY(r => r *. 2.0, mixed),
@@ -320,8 +320,8 @@ describe("Shape", () => {
         ~guesstimatorString=None,
         (),
       );
-    makeTest("minX", T.minX(distPlus), Some(1.0));
-    makeTest("maxX", T.maxX(distPlus), Some(14.0));
+    makeTest("minX", T.minX(distPlus), 1.0);
+    makeTest("maxX", T.maxX(distPlus), 14.0);
     makeTest(
       "xToY at 4.0",
       T.xToY(4., distPlus),

@@ -8,16 +8,19 @@ let interpolate =
   yMin *. minProportion +. yMax *. maxProportion;
 };
 
+// TODO: Make sure that shapes cannot be empty.
+let extImp = E.O.toExt("Should not be possible");
+
 module T = {
   type t = xyShape;
   type ts = array(xyShape);
   let xs = (t: t) => t.xs;
   let ys = (t: t) => t.ys;
-  let minX = (t: t) => t |> xs |> E.A.Sorted.min;
-  let maxX = (t: t) => t |> xs |> E.A.Sorted.max;
-  let minY = (t: t) => t |> ys |> E.A.Sorted.min;
-  let maxY = (t: t) => t |> ys |> E.A.Sorted.max;
-  let xTotalRange = (t: t) => t |> xs |> E.A.Sorted.range;
+  let minX = (t: t) => t |> xs |> E.A.Sorted.min |> extImp;
+  let maxX = (t: t) => t |> xs |> E.A.Sorted.max |> extImp;
+  let firstY = (t: t) => t |> ys |> E.A.first |> extImp;
+  let lastY = (t: t) => t |> ys |> E.A.last |> extImp;
+  let xTotalRange = (t: t) => maxX(t) -. minX(t);
   let mapX = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys};
   let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(fn, t.ys)};
   let zip = ({xs, ys}: t) => Belt.Array.zip(xs, ys);
@@ -29,11 +32,7 @@ module T = {
   let fromZippedArray = (pairs: array((float, float))): t =>
     pairs |> Belt.Array.unzip |> fromArray;
   let equallyDividedXs = (t: t, newLength) => {
-    E.A.Floats.range(
-      minX(t) |> E.O.toExt("Unsafe"),
-      maxX(t) |> E.O.toExt("Unsafe"),
-      newLength,
-    );
+    E.A.Floats.range(minX(t), maxX(t), newLength);
   };
   let toJs = (t: t) => {
     {"xs": t.xs, "ys": t.ys};
@@ -42,18 +41,8 @@ module T = {
 
 module Ts = {
   type t = T.ts;
-  let minX = (t: t) =>
-    t
-    |> E.A.fmap(T.minX)
-    |> E.A.O.concatSomes
-    |> E.A.min
-    |> E.O.toExt("Unsafe");
-  let maxX = (t: t) =>
-    t
-    |> E.A.fmap(T.maxX)
-    |> E.A.O.concatSomes
-    |> E.A.max
-    |> E.O.toExt("Unsafe");
+  let minX = (t: t) => t |> E.A.fmap(T.minX) |> E.A.min |> extImp;
+  let maxX = (t: t) => t |> E.A.fmap(T.maxX) |> E.A.max |> extImp;
   let equallyDividedXs = (t: t, newLength) => {
     E.A.Floats.range(minX(t), maxX(t), newLength);
   };
@@ -63,19 +52,8 @@ module Ts = {
 module Pairs = {
   let x = fst;
   let y = snd;
-  let first = (t: T.t) =>
-    switch (T.minX(t), T.minY(t)) {
-    | (Some(x), Some(y)) => Some((x, y))
-    | _ => None
-    };
-  let last = (t: T.t) =>
-    switch (T.maxX(t), T.maxY(t)) {
-    | (Some(x), Some(y)) => Some((x, y))
-    | _ => None
-    };
-
-  let unsafeFirst = (t: T.t) => first(t) |> E.O.toExn("Unsafe operation");
-  let unsafeLast = (t: T.t) => last(t) |> E.O.toExn("Unsafe operation");
+  let first = (t: T.t) => (T.minX(t), T.firstY(t));
+  let last = (t: T.t) => (T.maxX(t), T.lastY(t));
 
   let getBy = (t: T.t, fn) => t |> T.zip |> E.A.getBy(_, fn);
 
@@ -99,8 +77,8 @@ module YtoX = {
       E.A.Sorted.binarySearchFirstElementGreaterIndex(T.ys(t), y);
     let foundX =
       switch (firstHigherIndex) {
-      | `overMax => T.maxX(t) |> E.O.default(0.0)
-      | `underMin => T.minX(t) |> E.O.default(0.0)
+      | `overMax => T.maxX(t)
+      | `underMin => T.minX(t)
       | `firstHigher(firstHigherIndex) =>
         let lowerOrEqualIndex =
           firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
@@ -135,8 +113,8 @@ module XtoY = {
       E.A.Sorted.binarySearchFirstElementGreaterIndex(T.xs(t), x);
     let n =
       switch (firstHigherIndex) {
-      | `overMax => T.maxY(t) |> E.O.default(0.0)
-      | `underMin => T.minY(t) |> E.O.default(0.0)
+      | `overMax => T.lastY(t)
+      | `underMin => T.firstY(t)
       | `firstHigher(firstHigherIndex) =>
         let lowerOrEqualIndex =
           firstHigherIndex - 1 < 0 ? 0 : firstHigherIndex - 1;
@@ -180,10 +158,10 @@ module XsConversion = {
 
 module Zipped = {
   type zipped = array((float, float));
-  let sortByY = (t: zipped) =>
-    t |> E.A.stableSortBy(_, ((_, y1), (_, y2)) => y1 > y2 ? 1 : 0);
-  let sortByX = (t: zipped) =>
-    t |> E.A.stableSortBy(_, ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0);
+  let compareYs = ((_, y1), (_, y2)) => y1 > y2 ? 1 : 0;
+  let compareXs = ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0;
+  let sortByY = (t: zipped) => t |> E.A.stableSortBy(_, compareYs);
+  let sortByX = (t: zipped) => t |> E.A.stableSortBy(_, compareXs);
 };
 
 module Combine = {
@@ -282,10 +260,10 @@ module Range = {
 
   // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
   let stepsToContinuous = t => {
-    let diff = T.xTotalRange(t) |> E.O.fmap(r => r *. 0.00001);
+    let diff = T.xTotalRange(t) |> (r => r *. 0.00001);
     let items =
-      switch (diff, E.A.toRanges(Belt.Array.zip(t.xs, t.ys))) {
-      | (Some(diff), Ok(items)) =>
+      switch (E.A.toRanges(Belt.Array.zip(t.xs, t.ys))) {
+      | Ok(items) =>
         Some(
           items
           |> Belt.Array.map(_, rangePointAssumingSteps)
@@ -321,5 +299,5 @@ let logScorePoint = (sampleCount, t1, t2) =>
   )
   |> Range.integrateWithTriangles
   |> E.O.fmap(T.accumulateYs((+.)))
-  |> E.O.bind(_, Pairs.last)
+  |> E.O.fmap(Pairs.last)
   |> E.O.fmap(Pairs.y);

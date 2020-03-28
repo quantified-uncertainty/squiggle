@@ -215,7 +215,6 @@ module L = {
   let toArray = Array.of_list;
   let fmapi = List.mapi;
   let concat = List.concat;
-  let append = List.append;
   let drop = Rationale.RList.drop;
   let remove = Rationale.RList.remove;
   let find = List.find;
