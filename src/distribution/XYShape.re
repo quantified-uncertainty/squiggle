@@ -13,6 +13,7 @@ let extImp = E.O.toExt("Should not be possible");
 
 module T = {
   type t = xyShape;
+  let toXyShape = (t: t): xyShape => t;
   type ts = array(xyShape);
   let xs = (t: t) => t.xs;
   let ys = (t: t) => t.ys;

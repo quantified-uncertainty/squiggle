@@ -55,3 +55,18 @@ type triangular = {
 [@bs.module "jstat"] external exponential: exponential = "exponential";
 [@bs.module "jstat"] external cauchy: cauchy = "cauchy";
 [@bs.module "jstat"] external triangular: triangular = "triangular";
+
+[@bs.module "jstat"] external sum: array(float) => float = "sum";
+[@bs.module "jstat"] external product: array(float) => float = "product";
+[@bs.module "jstat"] external min: array(float) => float = "min";
+[@bs.module "jstat"] external max: array(float) => float = "max";
+[@bs.module "jstat"] external mean: array(float) => float = "mean";
+[@bs.module "jstat"] external geomean: array(float) => float = "geomean";
+[@bs.module "jstat"] external mode: array(float) => float = "mode";
+[@bs.module "jstat"] external variance: array(float) => float = "variance";
+[@bs.module "jstat"] external deviation: array(float) => float = "deviation";
+[@bs.module "jstat"] external stdev: array(float) => float = "stdev";
+[@bs.module "jstat"]
+external quantiles: (array(float), array(float)) => float = "quantiles";
+[@bs.module "jstat"]
+external percentile: (array(float), array(float)) => float = "percentile";
