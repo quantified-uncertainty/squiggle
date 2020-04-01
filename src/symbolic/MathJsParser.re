@@ -177,6 +177,7 @@ module MathAdtToDistDst = {
       | Fn({name: "exponential", args}) => exponential(args)
       | Fn({name: "cauchy", args}) => cauchy(args)
       | Fn({name: "triangular", args}) => triangular(args)
+      | Value(f) => Ok(`Simple(`Float(f)))
       | Fn({name: "mm", args}) => {
           let dists = args |> E.A.fmap(functionParser);
           let weights =
@@ -195,6 +196,7 @@ module MathAdtToDistDst = {
                  | _ => None,
                )
             |> E.A.O.concatSomes;
+          Js.log3("Making dists", dists, weights);
           multiModal(dists, weights);
         }
       | Fn({name}) => Error(name ++ ": function not supported")

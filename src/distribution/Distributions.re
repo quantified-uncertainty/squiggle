@@ -142,6 +142,12 @@ module Discrete = {
     t |> XYShape.T.zip |> XYShape.Zipped.sortByY;
   let sortedByX = (t: DistTypes.discreteShape) =>
     t |> XYShape.T.zip |> XYShape.Zipped.sortByX;
+  let empty = XYShape.T.empty;
+  let combine = (fn, t1: DistTypes.discreteShape, t2: DistTypes.discreteShape): DistTypes.discreteShape => {
+    XYShape.Combine.combine(~xsSelection=ALL_XS, ~xToYSelection=XYShape.XtoY.stepwiseIfAtX, ~fn, t1, t2) 
+  }
+  let _default0 = ((fn, a,b) => fn(E.O.default(0.0, a), E.O.default(0.0, b)));
+  let reduce = (fn, items) => items |> E.A.fold_left(combine(_default0((fn))), empty);
   module T =
     Dist({
       type t = DistTypes.discreteShape;

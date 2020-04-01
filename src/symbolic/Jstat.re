@@ -48,6 +48,32 @@ type triangular = {
   [@bs.meth] "inv": (float, float, float, float) => float,
   [@bs.meth] "sample": (float, float, float) => float,
 };
+
+// Pareto doesn't have sample for some reason
+type pareto = {
+  .
+  [@bs.meth] "pdf": (float, float, float) => float,
+  [@bs.meth] "cdf": (float, float, float) => float,
+  [@bs.meth] "inv": (float, float, float) => float,
+};
+type poisson = {
+  .
+  [@bs.meth] "pdf": (float, float) => float,
+  [@bs.meth] "cdf": (float, float) => float,
+  [@bs.meth] "sample": float => float,
+};
+type weibull = {
+  .
+  [@bs.meth] "pdf": (float, float, float) => float,
+  [@bs.meth] "cdf": (float, float, float) => float,
+  [@bs.meth] "inv": (float, float, float) => float,
+  [@bs.meth] "sample": (float, float) => float,
+};
+type binomial = {
+  .
+  [@bs.meth] "pdf": (float, float, float) => float,
+  [@bs.meth] "cdf": (float, float, float) => float,
+};
 [@bs.module "jstat"] external normal: normal = "normal";
 [@bs.module "jstat"] external lognormal: lognormal = "lognormal";
 [@bs.module "jstat"] external uniform: uniform = "uniform";
@@ -55,6 +81,10 @@ type triangular = {
 [@bs.module "jstat"] external exponential: exponential = "exponential";
 [@bs.module "jstat"] external cauchy: cauchy = "cauchy";
 [@bs.module "jstat"] external triangular: triangular = "triangular";
+[@bs.module "jstat"] external poisson: poisson = "poisson";
+[@bs.module "jstat"] external pareto: pareto = "pareto";
+[@bs.module "jstat"] external weibull: weibull = "weibull";
+[@bs.module "jstat"] external binomial: binomial = "binomial";
 
 [@bs.module "jstat"] external sum: array(float) => float = "sum";
 [@bs.module "jstat"] external product: array(float) => float = "product";

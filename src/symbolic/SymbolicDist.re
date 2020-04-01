@@ -31,6 +31,8 @@ type triangular = {
   high: float,
 };
 
+type contType = [ | `Continuous | `Discrete];
+
 type dist = [
   | `Normal(normal)
   | `Beta(beta)
@@ -39,6 +41,7 @@ type dist = [
   | `Exponential(exponential)
   | `Cauchy(cauchy)
   | `Triangular(triangular)
+  | `Float(float)
 ];
 
 type pointwiseAdd = array((dist, float));
@@ -51,6 +54,7 @@ module Exponential = {
   let inv = (p, t: t) => Jstat.exponential##inv(p, t.rate);
   let sample = (t: t) => Jstat.exponential##sample(t.rate);
   let toString = ({rate}: t) => {j|Exponential($rate)|j};
+  let contType: contType = `Continuous;
 };
 
 module Cauchy = {
@@ -59,6 +63,7 @@ module Cauchy = {
   let inv = (p, t: t) => Jstat.cauchy##inv(p, t.local, t.scale);
   let sample = (t: t) => Jstat.cauchy##sample(t.local, t.scale);
   let toString = ({local, scale}: t) => {j|Cauchy($local, $scale)|j};
+  let contType: contType = `Continuous;
 };
 
 module Triangular = {
@@ -67,6 +72,7 @@ module Triangular = {
   let inv = (p, t: t) => Jstat.triangular##inv(p, t.low, t.high, t.medium);
   let sample = (t: t) => Jstat.triangular##sample(t.low, t.high, t.medium);
   let toString = ({low, medium, high}: t) => {j|Triangular($low, $medium, $high)|j};
+  let contType: contType = `Continuous;
 };
 
 module Normal = {
@@ -75,6 +81,7 @@ module Normal = {
   let inv = (p, t: t) => Jstat.normal##inv(p, t.mean, t.stdev);
   let sample = (t: t) => Jstat.normal##sample(t.mean, t.stdev);
   let toString = ({mean, stdev}: t) => {j|Normal($mean,$stdev)|j};
+  let contType: contType = `Continuous;
 };
 
 module Beta = {
@@ -83,6 +90,7 @@ module Beta = {
   let inv = (p, t: t) => Jstat.beta##inv(p, t.alpha, t.beta);
   let sample = (t: t) => Jstat.beta##sample(t.alpha, t.beta);
   let toString = ({alpha, beta}: t) => {j|Beta($alpha,$beta)|j};
+  let contType: contType = `Continuous;
 };
 
 module Lognormal = {
@@ -91,6 +99,7 @@ module Lognormal = {
   let inv = (p, t: t) => Jstat.lognormal##inv(p, t.mu, t.sigma);
   let sample = (t: t) => Jstat.lognormal##sample(t.mu, t.sigma);
   let toString = ({mu, sigma}: t) => {j|Lognormal($mu,$sigma)|j};
+  let contType: contType = `Continuous;
   let from90PercentCI = (low, high) => {
     let logLow = Js.Math.log(low);
     let logHigh = Js.Math.log(high);
@@ -118,6 +127,16 @@ module Uniform = {
   let inv = (p, t: t) => Jstat.uniform##inv(p, t.low, t.high);
   let sample = (t: t) => Jstat.uniform##sample(t.low, t.high);
   let toString = ({low, high}: t) => {j|Uniform($low,$high)|j};
+  let contType: contType = `Continuous;
+};
+
+module Float = {
+  type t = float;
+  let pdf = (x, t: t) => x == t ? 1.0 : 0.0;
+  let inv = (p, t: t) => p < t ? 0.0 : 1.0;
+  let sample = (t: t) => t;
+  let toString = Js.Float.toString;
+  let contType: contType = `Discrete;
 };
 
 module GenericSimple = {
@@ -133,6 +152,19 @@ module GenericSimple = {
     | `Lognormal(n) => Lognormal.pdf(x, n)
     | `Uniform(n) => Uniform.pdf(x, n)
     | `Beta(n) => Beta.pdf(x, n)
+    | `Float(n) => Float.pdf(x, n)
+    };
+
+  let contType = (dist:dist):contType =>
+    switch (dist) {
+    | `Normal(_) => Normal.contType
+    | `Triangular(_) => Triangular.contType
+    | `Exponential(_) => Exponential.contType
+    | `Cauchy(_) => Cauchy.contType
+    | `Lognormal(_) => Lognormal.contType
+    | `Uniform(_) => Uniform.contType
+    | `Beta(_) => Beta.contType
+    | `Float(_) => Float.contType
     };
 
   let inv = (x, dist) =>
@@ -144,6 +176,7 @@ module GenericSimple = {
     | `Lognormal(n) => Lognormal.inv(x, n)
     | `Uniform(n) => Uniform.inv(x, n)
     | `Beta(n) => Beta.inv(x, n)
+    | `Float(n) => Float.inv(x, n)
     };
 
   let sample: dist => float =
@@ -154,7 +187,8 @@ module GenericSimple = {
     | `Cauchy(n) => Cauchy.sample(n)
     | `Lognormal(n) => Lognormal.sample(n)
     | `Uniform(n) => Uniform.sample(n)
-    | `Beta(n) => Beta.sample(n);
+    | `Beta(n) => Beta.sample(n)
+    | `Float(n) => Float.sample(n);
 
   let toString: dist => string =
     fun
@@ -164,7 +198,8 @@ module GenericSimple = {
     | `Normal(n) => Normal.toString(n)
     | `Lognormal(n) => Lognormal.toString(n)
     | `Uniform(n) => Uniform.toString(n)
-    | `Beta(n) => Beta.toString(n);
+    | `Beta(n) => Beta.toString(n)
+    | `Float(n) => Float.toString(n);
 
   let min: dist => float =
     fun
@@ -174,7 +209,8 @@ module GenericSimple = {
     | `Normal(n) => Normal.inv(minCdfValue, n)
     | `Lognormal(n) => Lognormal.inv(minCdfValue, n)
     | `Uniform({low}) => low
-    | `Beta(n) => Beta.inv(minCdfValue, n);
+    | `Beta(n) => Beta.inv(minCdfValue, n)
+    | `Float(n) => n;
 
   let max: dist => float =
     fun
@@ -184,7 +220,8 @@ module GenericSimple = {
     | `Normal(n) => Normal.inv(maxCdfValue, n)
     | `Lognormal(n) => Lognormal.inv(maxCdfValue, n)
     | `Beta(n) => Beta.inv(maxCdfValue, n)
-    | `Uniform({high}) => high;
+    | `Uniform({high}) => high
+    | `Float(n) => n;
 
   let interpolateXs =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
@@ -197,10 +234,13 @@ module GenericSimple = {
   };
 
   let toShape =
-      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
+      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount)
+      : DistTypes.shape => {
     let xs = interpolateXs(~xSelection, dist, sampleCount);
     let ys = xs |> E.A.fmap(r => pdf(r, dist));
-    XYShape.T.fromArrays(xs, ys);
+    XYShape.T.fromArrays(xs, ys)
+    |> Distributions.Continuous.make(`Linear, _)
+    |> Distributions.Continuous.T.toShape;
   };
 };
 
@@ -212,7 +252,7 @@ module PointwiseAddDistributionsWeighted = {
     dists |> E.A.fmap(((a, b)) => (a, b /. total));
   };
 
-  let pdf = (dists: t, x: float) =>
+  let pdf = (x: float, dists: t) =>
     dists
     |> E.A.fmap(((e, w)) => GenericSimple.pdf(x, e) *. w)
     |> E.A.Floats.sum;
@@ -223,7 +263,17 @@ module PointwiseAddDistributionsWeighted = {
   let max = (dists: t) =>
     dists |> E.A.fmap(d => d |> fst |> GenericSimple.max) |> E.A.max;
 
-  let toShape = (dists: t, sampleCount: int) => {
+  let discreteShape = (dists:t, sampleCount: int) => {
+    let discrete = dists |> E.A.fmap((((r,e)) => r |> fun
+      | `Float(r) => Some((r,e))
+      | _ => None
+    )) |> E.A.O.concatSomes
+    |> E.A.fmap(((x, y)):DistTypes.xyShape => ({xs: [|x|], ys: [|y|]}))
+    |> Distributions.Discrete.reduce((+.))
+    discrete
+  }
+
+  let continuousShape = (dists:t, sampleCount: int) => {
     let xs =
       dists
       |> E.A.fmap(r =>
@@ -237,8 +287,17 @@ module PointwiseAddDistributionsWeighted = {
          )
       |> E.A.concatMany;
     xs |> Array.fast_sort(compare);
-    let ys = xs |> E.A.fmap(pdf(dists));
-    XYShape.T.fromArrays(xs, ys);
+    let ys = xs |> E.A.fmap(pdf(_, dists));
+    XYShape.T.fromArrays(xs, ys)
+    |> Distributions.Continuous.make(`Linear, _)
+  }
+
+  let toShape = (dists: t, sampleCount: int) => {
+    let normalized = normalizeWeights(dists);
+    let continuous = normalized |> E.A.filter(((r,_)) => GenericSimple.contType(r) == `Continuous) |> continuousShape(_, sampleCount);
+    let discrete = normalized |> E.A.filter(((r,_)) => GenericSimple.contType(r) == `Discrete) |> discreteShape(_, sampleCount);
+    let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
+    shape |> E.O.toExt("")
   };
 
   let toString = (dists: t) => {

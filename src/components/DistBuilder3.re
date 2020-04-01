@@ -52,8 +52,7 @@ module DemoDist = {
       |> E.O.fmap(shape => {
            let distPlus =
              Distributions.DistPlus.make(
-               ~shape=
-                 Continuous(Distributions.Continuous.make(`Linear, shape)),
+               ~shape,
                ~domain=Complete,
                ~unit=UnspecifiedDistribution,
                ~guesstimatorString=None,

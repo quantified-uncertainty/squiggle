@@ -17,6 +17,7 @@ module T = {
   type ts = array(xyShape);
   let xs = (t: t) => t.xs;
   let ys = (t: t) => t.ys;
+  let empty = ({xs: [||], ys: [||]});
   let minX = (t: t) => t |> xs |> E.A.Sorted.min |> extImp;
   let maxX = (t: t) => t |> xs |> E.A.Sorted.max |> extImp;
   let firstY = (t: t) => t |> ys |> E.A.first |> extImp;
@@ -169,11 +170,6 @@ module Combine = {
   type xsSelection =
     | ALL_XS
     | XS_EVENLY_DIVIDED(int);
-
-  type xToYSelection =
-    | LINEAR
-    | STEPWISE_INCREMENTAL
-    | STEPWISE_IF_AT_X;
 
   let combine =
       (
