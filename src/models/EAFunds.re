@@ -35,26 +35,26 @@ module Data = {
     makeFundWithInfo(
       "Animal Welfare Fund",
       Fund(ANIMAL_WELFARE),
-      Some(4000.0),
-      Some(10.0),
+      Some(400000.0),
+      Some(100000.0),
     ),
     makeFundWithInfo(
       "Global Health Fund",
       Fund(GLOBAL_HEALTH),
-      Some(4000.0),
-      Some(10.0),
+      Some(400000.0),
+      Some(100000.0),
     ),
     makeFundWithInfo(
       "Long Term Future Fund",
       Fund(LONG_TERM_FUTURE),
-      Some(4000.0),
-      Some(10.0),
+      Some(400000.0),
+      Some(100000.0),
     ),
     makeFundWithInfo(
       "Meta Fund",
       Fund(ANIMAL_WELFARE),
-      Some(4000.0),
-      Some(10.0),
+      Some(400000.0),
+      Some(100000.0),
     ),
     makeFundWithInfo("All", All, None, None),
   |];
@@ -63,14 +63,14 @@ module Data = {
 module Model = {
   open Data;
   let currentYear = 2020.;
-  let firstYearStdDev = 0.2;
+  let firstYearStdDev = 400000.;
   type yearlyNumericDiff = {
     meanDiff: float,
     stdDiff: float,
   };
 
   let yearlyMeanGrowthRateIfNotClosed = (group: group): yearlyNumericDiff => {
-    {meanDiff: 1.1, stdDiff: 1.08};
+    {meanDiff: 1.1, stdDiff: 1.2};
   };
 
   let calculateDifference =
@@ -141,10 +141,12 @@ module Model = {
         | None =>
           let foo =
             getGlobalCatastropheChance(dateTime)
-            |> E.O.fmap(E.Float.with2DigitsPrecision)
-            |> E.O.fmap((r: string) =>
-                 "uniform(0,1) > " ++ r ++ " ? " ++ difference ++ ": 0"
-               );
+            |> E.O.fmap(r => {
+                 let chance = r;
+                 let opposite = 1.0 -. r;
+                 let reg = difference;
+                 {j|mm(0, $reg, [$chance, $opposite])|j};
+               });
           foo |> E.O.default("");
         };
 

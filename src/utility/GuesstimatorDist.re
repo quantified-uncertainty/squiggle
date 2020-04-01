@@ -10,9 +10,9 @@ let normal = (mean: float, std: float) =>
 let logNormal = (mean: float, std: float) => {
   Js.Float.(
     {
-      let nMean = toPrecisionWithPrecision(Js.Math.log10(mean), ~digits=4);
-      let nStd = toPrecisionWithPrecision(Js.Math.log10(std), ~digits=2);
-      {j|lognormal($(nMean), $(nStd))|j};
+      let nMean = toPrecisionWithPrecision(mean, ~digits=4);
+      let nStd = toPrecisionWithPrecision(std, ~digits=2);
+      {j|lognormal({mean: $(nMean), stdev: $(nStd)})|j};
     }
   );
 };
