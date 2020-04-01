@@ -32,6 +32,7 @@ module MathJsonToMathJsAdt = {
       | "ConstantNode" =>
         optional(field("value", Json.Decode.float), j)
         |> E.O.fmap(r => Value(r))
+      | "ParenthesisNode" => j |> field("content", run)
       | "ObjectNode" =>
         let properties = j |> field("properties", dict(run));
         Js.Dict.entries(properties)
@@ -71,6 +72,8 @@ module MathAdtToDistDst = {
       fun
       | Fn({name: "multiply", args: [|Value(f), Symbol(s)|]}) =>
         Value(transformWithSymbol(f, s))
+      | Fn({name: "unaryMinus", args: [|Value(f)|]}) =>
+        Value(-1.0 *. f)
       | Fn({name, args}) => Fn({name, args: args |> E.A.fmap(run)})
       | Array(args) => Array(args |> E.A.fmap(run))
       | Symbol(s) => Symbol(s)
@@ -109,6 +112,9 @@ module MathAdtToDistDst = {
     fun
     | [|Value(low), Value(high)|] when low < high => {
         Ok(`Simple(SymbolicDist.Lognormal.from90PercentCI(low, high)));
+      }
+    | [|Value(low), _|] when low <= 0.0 => {
+      Error("Low value cannot be less than 0.")
       }
     | [|Value(_), Value(_)|] =>
       Error("Low value must be less than high value.")
@@ -208,7 +214,7 @@ module MathAdtToDistDst = {
     |> (
       fun
       | Fn(_) => functionParser(r)
-      | Value(_) => Error("Top level can't be value")
+      | Value(r) => Ok(`Simple(`Float(r)))
       | Array(_) => Error("Array not valid as top level")
       | Symbol(_) => Error("Symbol not valid as top level")
       | Object(_) => Error("Object not valid as top level")
