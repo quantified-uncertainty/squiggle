@@ -156,14 +156,17 @@ module MathAdtToDistDst = {
       args
       |> E.A.fmap(
            fun
-           | Ok(`Simple(n)) => Some(n)
-           | _ => None,
+           | Ok(`Simple(n)) => Ok(n)
+           | Error(e) => Error(e)
+           | _ => Error("Type not supported"),
          )
-      |> E.A.O.concatSomes;
-    switch (dists |> E.A.length) {
-    | 0 => Error("Multimodals need at least one input")
+    let firstWithError = dists |> Belt.Array.getBy(_, Belt.Result.isError);
+    let withoutErrors = dists |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
+    switch (firstWithError ) {
+    | (Some(Error(e))) => Error(e)
+    | (None) when (withoutErrors |> E.A.length == 0) => Error("Multimodals need at least one input")
     | _ =>
-      dists
+      withoutErrors
       |> E.A.fmapi((index, item) =>
            (item, weights |> E.A.get(_, index) |> E.O.default(1.0))
          )

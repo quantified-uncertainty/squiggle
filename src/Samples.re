@@ -100,9 +100,9 @@ module T = {
       |> E.FloatFloatMap.toArray
       |> XYShape.T.fromZippedArray;
     let pdf: DistTypes.xyShape =
-      continuousPart |> E.A.length > 20
+      continuousPart |> E.A.length > 5
         ? {
-          samples |> KDE.normalSampling(_, outputXYPoints, kernelWidth);
+          continuousPart |> KDE.normalSampling(_, outputXYPoints, kernelWidth);
         }
         : {xs: [||], ys: [||]};
     let continuous = pdf |> Distributions.Continuous.make(`Linear);
