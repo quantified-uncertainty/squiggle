@@ -72,8 +72,7 @@ module MathAdtToDistDst = {
       fun
       | Fn({name: "multiply", args: [|Value(f), Symbol(s)|]}) =>
         Value(transformWithSymbol(f, s))
-      | Fn({name: "unaryMinus", args: [|Value(f)|]}) =>
-        Value(-1.0 *. f)
+      | Fn({name: "unaryMinus", args: [|Value(f)|]}) => Value((-1.0) *. f)
       | Fn({name, args}) => Fn({name, args: args |> E.A.fmap(run)})
       | Array(args) => Array(args |> E.A.fmap(run))
       | Symbol(s) => Symbol(s)
@@ -114,7 +113,7 @@ module MathAdtToDistDst = {
         Ok(`Simple(SymbolicDist.Lognormal.from90PercentCI(low, high)));
       }
     | [|Value(low), _|] when low <= 0.0 => {
-      Error("Low value cannot be less than 0.")
+        Error("Low value cannot be less than 0.");
       }
     | [|Value(_), Value(_)|] =>
       Error("Low value must be less than high value.")
@@ -150,21 +149,23 @@ module MathAdtToDistDst = {
   let multiModal =
       (
         args: array(result(SymbolicDist.bigDist, string)),
-        weights: array(float),
+        weights: option(array(float)),
       ) => {
+    let weights = weights |> E.O.default([||]);
     let dists =
       args
       |> E.A.fmap(
            fun
            | Ok(`Simple(n)) => Ok(n)
            | Error(e) => Error(e)
-           | _ => Error("Type not supported"),
-         )
+           | Ok(k) => Error(SymbolicDist.toString(k)),
+         );
     let firstWithError = dists |> Belt.Array.getBy(_, Belt.Result.isError);
     let withoutErrors = dists |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
-    switch (firstWithError ) {
-    | (Some(Error(e))) => Error(e)
-    | (None) when (withoutErrors |> E.A.length == 0) => Error("Multimodals need at least one input")
+    switch (firstWithError) {
+    | Some(Error(e)) => Error(e)
+    | None when withoutErrors |> E.A.length == 0 =>
+      Error("Multimodals need at least one input")
     | _ =>
       withoutErrors
       |> E.A.fmapi((index, item) =>
@@ -188,7 +189,6 @@ module MathAdtToDistDst = {
       | Fn({name: "triangular", args}) => triangular(args)
       | Value(f) => Ok(`Simple(`Float(f)))
       | Fn({name: "mm", args}) => {
-          let dists = args |> E.A.fmap(functionParser);
           let weights =
             args
             |> E.A.last
@@ -198,18 +198,26 @@ module MathAdtToDistDst = {
                  | Array(values) => Some(values)
                  | _ => None,
                )
-            |> E.A.O.defaultEmpty
-            |> E.A.fmap(
-                 fun
-                 | Value(r) => Some(r)
-                 | _ => None,
-               )
-            |> E.A.O.concatSomes;
-          Js.log3("Making dists", dists, weights);
+            |> E.O.fmap(o =>
+                 o
+                 |> E.A.fmap(
+                      fun
+                      | Value(r) => Some(r)
+                      | _ => None,
+                    )
+                 |> E.A.O.concatSomes
+               );
+          let possibleDists =
+            E.O.isSome(weights)
+              ? Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1)
+              : args;
+          let dists = possibleDists |> E.A.fmap(functionParser);
           multiModal(dists, weights);
         }
       | Fn({name}) => Error(name ++ ": function not supported")
-      | _ => Error("This type not currently supported")
+      | _ => {
+          Error("This type not currently supported");
+        }
     );
 
   let topLevel = (r): result(SymbolicDist.bigDist, string) =>
