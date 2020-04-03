@@ -97,6 +97,8 @@ type binomial = {
 [@bs.module "jstat"] external deviation: array(float) => float = "deviation";
 [@bs.module "jstat"] external stdev: array(float) => float = "stdev";
 [@bs.module "jstat"]
-external quantiles: (array(float), array(float)) => float = "quantiles";
+external quartiles: (array(float)) => array(float) = "quartiles";
 [@bs.module "jstat"]
-external percentile: (array(float), array(float)) => float = "percentile";
+external quantiles: (array(float), array(float)) => array(float) = "quantiles";
+[@bs.module "jstat"]
+external percentile: (array(float), float, bool) => float = "percentile";

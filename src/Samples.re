@@ -89,11 +89,10 @@ module T = {
   };
 
   let kde = (~samples, ~outputXYPoints) => {
-    let width = Science.nrd0(samples);
+    let width = Bandwidth.nrd0(samples);
     let xyPointRange = E.A.Sorted.range(samples) |> E.O.default(0.0);
     let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints);
     let kernelWidth = int_of_float(Jstat.max([|(width /. xyPointWidth), 1.0 |]));
-    Js.log4(samples, width, xyPointWidth, kernelWidth);
     KDE.normalSampling(samples, outputXYPoints, kernelWidth);
   };
 
