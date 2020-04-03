@@ -47,7 +47,7 @@
     "lenses-ppx": "5.1.0",
     "less": "3.10.3",
     "lodash": "4.17.15",
-    "mathjs": "6.6.0",
+    "mathjs": "5.10.3",
     "moduleserve": "0.9.1",
     "moment": "2.24.0",
     "parcel-bundler": "1.12.4",
