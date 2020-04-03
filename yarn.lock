@@ -8579,7 +8579,7 @@ scheduler@^0.19.0:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
 
-science@1.9.3:
+science@^1.9.3:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/science/-/science-1.9.3.tgz#ec89bac44aeff2e5a2d749aa496f377089903dd4"
   integrity sha1-7Im6xErv8uWi10mqSW83cImQPdQ=

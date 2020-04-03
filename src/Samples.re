@@ -88,6 +88,15 @@ module T = {
     (continuous, discrete);
   };
 
+  let kde = (~samples, ~outputXYPoints) => {
+    let width = Science.nrd0(samples);
+    let xyPointRange = E.A.Sorted.range(samples) |> E.O.default(0.0);
+    let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints);
+    let kernelWidth = int_of_float(Jstat.max([|(width /. xyPointWidth), 1.0 |]));
+    Js.log4(samples, width, xyPointWidth, kernelWidth);
+    KDE.normalSampling(samples, outputXYPoints, kernelWidth);
+  };
+
   // todo: Figure out some way of doing this without having to integrate so many times.
   let toShape = (~samples: t, ~outputXYPoints=3000, ~kernelWidth=10, ()) => {
     Array.fast_sort(compare, samples);
@@ -102,7 +111,7 @@ module T = {
     let pdf: DistTypes.xyShape =
       continuousPart |> E.A.length > 5
         ? {
-          continuousPart |> KDE.normalSampling(_, outputXYPoints, kernelWidth);
+          continuousPart |> kde(~samples=_, ~outputXYPoints)
         }
         : {xs: [||], ys: [||]};
     let continuous = pdf |> Distributions.Continuous.make(`Linear);
