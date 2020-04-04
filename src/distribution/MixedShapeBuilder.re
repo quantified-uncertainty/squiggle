@@ -8,7 +8,8 @@ type assumptions = {
   discreteProbabilityMass: option(float),
 };
 
-let buildSimple = (~continuous, ~discrete): option(DistTypes.shape) => {
+let buildSimple = (~continuous: option(DistTypes.continuousShape), ~discrete): option(DistTypes.shape) => {
+  let continuous = continuous |> E.O.default(Distributions.Continuous.make(`Linear, {xs: [||], ys: [||]}))
   let cLength =
     continuous
     |> Distributions.Continuous.getShape

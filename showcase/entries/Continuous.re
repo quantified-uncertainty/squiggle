@@ -15,12 +15,8 @@ let timeDist =
   );
 
 let setup = dist =>
-  dist
-  |> DistPlusIngredients.toDistPlus(
-       ~sampleCount=2000,
-       ~outputXYPoints=1000,
-       ~truncateTo=Some(1000),
-     )
+  RenderTypes.DistPlus.make(~distPlusIngredients=dist,())
+  |> DistPlusIngredients.toDistPlus
   |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />);
 
 let simpleExample = (name, guesstimatorString) =>

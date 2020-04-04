@@ -15,41 +15,34 @@ let applyTruncation = (truncateTo, distPlus) =>
   | _ => None
   };
 
+      // ~samplingInputs=RenderTypes.Sampling.Inputs.empty,
+      // ~truncateTo: option(int),
+      // t: distPlusIngredients,
+//Make truncation optional
 let toDistPlus =
     (
-      ~sampleCount=2000,
-      ~outputXYPoints=1500,
-      ~truncateTo=Some(300),
-      ~kernelWidth=5,
-      t: distPlusIngredients,
+      inputs:RenderTypes.DistPlus.inputs
     )
     : option(distPlus) => {
   let toDist = shape =>
     Distributions.DistPlus.make(
       ~shape,
-      ~domain=t.domain,
-      ~unit=t.unit,
-      ~guesstimatorString=Some(t.guesstimatorString),
+      ~domain=inputs.distPlusIngredients.domain,
+      ~unit=inputs.distPlusIngredients.unit,
+      ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),
       (),
     )
     |> Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0);
-  let parsed1 = MathJsParser.fromString(t.guesstimatorString);
   let shape =
-    switch (parsed1) {
-    | Ok(r) =>
-      let shape = SymbolicDist.toShape(truncateTo |> E.O.default(10000), r);
-      Some(shape |> toDist);
-    | _ =>
-      let fewSamples = Guesstimator.stringToSamples(t.guesstimatorString, 10);
-      if (fewSamples |> E.A.length > 0) {
-        let samples =
-          Guesstimator.stringToSamples(t.guesstimatorString, sampleCount);
-        let shape =
-          Samples.T.toShape(~samples, ~outputXYPoints, ~kernelWidth, ());
-        shape |> E.O.fmap(toDist) |> applyTruncation(truncateTo);
-      } else {
-        None;
-      };
-    };
-    shape;
+    GuesstimatorToShape.run(
+      ~renderingInputs={
+        guesstimatorString: inputs.distPlusIngredients.guesstimatorString,
+        shapeLength: inputs.recommendedLength,
+      },
+      ~samplingInputs=inputs.samplingInputs,
+    )
+    |> GuesstimatorToShape.getShape;
+  //TODO: Apply truncation
+  let foo = shape |> E.O.fmap(toDist);
+  foo;
 };

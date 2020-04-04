@@ -245,6 +245,5 @@ let fromString = str => {
       }
     );
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
-  Js.log4("fromString", mathJsToJson, mathJsParse, value);
   value;
 };

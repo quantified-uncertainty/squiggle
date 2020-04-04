@@ -26,7 +26,7 @@ type options = {
   sampleCount: int,
   outputXYPoints: int,
   truncateTo: option(int),
-  kernelWidth: int,
+  kernelWidth: option(float),
 };
 
 module Form = ReForm.Make(FormConfig);
@@ -111,6 +111,13 @@ module Styles = {
     ]);
 };
 
+type inputs = {
+  samplingInputs: RenderTypes.Sampling.inputs,
+  guesstimatorString: string,
+  length: int,
+  shouldTruncateSampledDistribution: int,
+};
+
 module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
@@ -119,14 +126,24 @@ module DemoDist = {
       <div>
         {switch (domain, unit, options) {
          | (Some(domain), Some(unit), Some(options)) =>
-           let distPlus =
-             DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
-             |> DistPlusIngredients.toDistPlus(
-                  ~sampleCount=options.sampleCount,
-                  ~outputXYPoints=options.outputXYPoints,
-                  ~truncateTo=options.truncateTo,
-                  ~kernelWidth=options.kernelWidth,
-                );
+           let distPlusIngredients =
+             DistPlusIngredients.make(
+               ~guesstimatorString,
+               ~domain,
+               ~unit,
+               (),
+             );
+           let inputs =
+             RenderTypes.DistPlus.make(
+               ~samplingInputs={
+                 sampleCount: Some(options.sampleCount),
+                 outputXYPoints: Some(options.outputXYPoints),
+                 kernelWidth: options.kernelWidth,
+               },
+               ~distPlusIngredients,
+               (),
+             );
+           let distPlus = DistPlusIngredients.toDistPlus(inputs);
            switch (distPlus) {
            | Some(distPlus) => <DistPlusPlot distPlus />
            | _ =>
@@ -160,9 +177,9 @@ let make = () => {
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
-        sampleCount: "10000",
-        outputXYPoints: "500",
-        truncateTo: "100",
+        sampleCount: "30000",
+        outputXYPoints: "10000",
+        truncateTo: "1000",
         kernelWidth: "5",
       },
       (),
@@ -246,7 +263,7 @@ let make = () => {
         truncateTo:
           int_of_float(truncateTo) > 0
             ? Some(int_of_float(truncateTo)) : None,
-        kernelWidth: kernelWidth |> int_of_float,
+        kernelWidth: kernelWidth == 0.0 ? None : Some(kernelWidth),
       })
     | _ => None
     };

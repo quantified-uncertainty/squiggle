@@ -22,6 +22,7 @@ module KDE = {
     |> JS.jsToDist;
   };
 
+  // Note: This was an experiment, but it didn't actually work that well.
   let inGroups = (samples, outputXYPoints, kernelWidth, ~cuttoff=0.9, ()) => {
     let partitionAt =
       samples
@@ -88,33 +89,94 @@ module T = {
     (continuous, discrete);
   };
 
-  let kde = (~samples, ~outputXYPoints) => {
-    let width = Bandwidth.nrd0(samples);
+  let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
     let xyPointRange = E.A.Sorted.range(samples) |> E.O.default(0.0);
     let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints);
-    let kernelWidth = int_of_float(Jstat.max([|(width /. xyPointWidth), 1.0 |]));
-    KDE.normalSampling(samples, outputXYPoints, kernelWidth);
+    xWidth /. xyPointWidth;
+  };
+
+  let formatUnitWidth = w => Jstat.max([|w, 1.0|]) |> int_of_float;
+
+  let suggestedUnitWidth = (samples, outputXYPoints) => {
+    let suggestedXWidth = Bandwidth.nrd0(samples);
+    xWidthToUnitWidth(samples, outputXYPoints, suggestedXWidth);
+  };
+
+  let kde = (~samples, ~outputXYPoints, width) => {
+    KDE.normalSampling(samples, outputXYPoints, width);
   };
 
   // todo: Figure out some way of doing this without having to integrate so many times.
-  let toShape = (~samples: t, ~outputXYPoints=3000, ~kernelWidth=10, ()) => {
+  let toShape =
+      (~samples: t, ~samplingInputs: RenderTypes.Sampling.Inputs.fInputs, ()) => {
     Array.fast_sort(compare, samples);
     let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples);
-    let length = samples |> E.A.length;
-    let lengthFloat = float_of_int(length);
+    let length = samples |> E.A.length |> float_of_int;
     let discrete: DistTypes.xyShape =
       discretePart
-      |> E.FloatFloatMap.fmap(r => r /. lengthFloat)
+      |> E.FloatFloatMap.fmap(r => r /. length)
       |> E.FloatFloatMap.toArray
       |> XYShape.T.fromZippedArray;
-    let pdf: DistTypes.xyShape =
+
+    let pdf =
       continuousPart |> E.A.length > 5
         ? {
-          continuousPart |> kde(~samples=_, ~outputXYPoints)
+          let _suggestedXWidth = Bandwidth.nrd0(continuousPart);
+          let _suggestedUnitWidth =
+            suggestedUnitWidth(continuousPart, samplingInputs.outputXYPoints);
+          let usedWidth =
+            samplingInputs.kernelWidth |> E.O.default(_suggestedXWidth);
+          let usedUnitWidth =
+            xWidthToUnitWidth(
+              samples,
+              samplingInputs.outputXYPoints,
+              usedWidth,
+            );
+          let foo: RenderTypes.Sampling.samplingStats = {
+            sampleCount: samplingInputs.sampleCount,
+            outputXYPoints: samplingInputs.outputXYPoints,
+            bandwidthXSuggested: _suggestedXWidth,
+            bandwidthUnitSuggested: _suggestedUnitWidth,
+            bandwidthXImplemented: usedWidth,
+            bandwidthUnitImplemented: usedUnitWidth,
+          };
+          continuousPart
+          |> kde(
+               ~samples=_,
+               ~outputXYPoints=samplingInputs.outputXYPoints,
+               formatUnitWidth(usedUnitWidth),
+             )
+          |> Distributions.Continuous.make(`Linear)
+          |> (r => Some((r, foo)));
         }
-        : {xs: [||], ys: [||]};
-    let continuous = pdf |> Distributions.Continuous.make(`Linear);
-    let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
-    shape;
+        : None;
+    let shape =
+      MixedShapeBuilder.buildSimple(
+        ~continuous=pdf |> E.O.fmap(fst),
+        ~discrete,
+      );
+    let samplesParse: RenderTypes.Sampling.outputs = {
+      continuousParseParams: pdf |> E.O.fmap(snd),
+      shape,
+    };
+    samplesParse;
+  };
+
+  let fromGuesstimatorString =
+      (
+        ~guesstimatorString,
+        ~samplingInputs=RenderTypes.Sampling.Inputs.empty,
+        (),
+      ) => {
+    let hasValidSamples =
+      Guesstimator.stringToSamples(guesstimatorString, 10) |> E.A.length > 0;
+    let samplingInputs = RenderTypes.Sampling.Inputs.toF(samplingInputs);
+    switch (hasValidSamples) {
+    | false => None
+    | true =>
+      let samples =
+        Guesstimator.stringToSamples(guesstimatorString, samplingInputs.sampleCount);
+      Some(toShape(~samples, ~samplingInputs, ()));
+    };
   };
 };

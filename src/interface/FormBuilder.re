@@ -19,12 +19,8 @@ let propValue = (t: Prop.Value.t) => {
   | ConditionalArray(r) => "Array" |> ReasonReact.string
   | DistPlusIngredients((r: DistTypes.distPlusIngredients)) =>
     let newDistribution =
-      DistPlusIngredients.toDistPlus(
-        ~sampleCount=1000,
-        ~outputXYPoints=2000,
-        ~truncateTo=Some(500),
-        r,
-      );
+    RenderTypes.DistPlus.make(~distPlusIngredients=r, ~recommendedLength=1000, ~shouldTruncate=true,())
+    |> DistPlusIngredients.toDistPlus
     switch (newDistribution) {
     | Some(distribution) =>
       <div> <DistPlusPlot distPlus=distribution /> </div>
