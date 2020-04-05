@@ -1,14 +1,17 @@
 let truncateIfShould =
     (
       {recommendedLength, shouldTruncate}: RenderTypes.DistPlusRenderer.inputs,
-      {sampling:shape}: RenderTypes.ShapeRenderer.Combined.outputs,
+      outputs: RenderTypes.ShapeRenderer.Combined.outputs,
       dist,
     ) => {
-  (shouldTruncate && (shape |> E.O.isSome))
+  shouldTruncate
+  && RenderTypes.ShapeRenderer.Combined.methodUsed(outputs) == `Sampling
     ? dist |> Distributions.DistPlus.T.truncate(recommendedLength) : dist;
 };
 
-let run = (inputs: RenderTypes.DistPlusRenderer.inputs): RenderTypes.DistPlusRenderer.outputs => {
+let run =
+    (inputs: RenderTypes.DistPlusRenderer.inputs)
+    : RenderTypes.DistPlusRenderer.outputs => {
   let toDist = shape =>
     Distributions.DistPlus.make(
       ~shape,
@@ -25,9 +28,9 @@ let run = (inputs: RenderTypes.DistPlusRenderer.inputs): RenderTypes.DistPlusRen
       symbolicInputs: {
         length: inputs.recommendedLength,
       },
-    })
-  let shape = outputs |> RenderTypes.ShapeRenderer.Combined.getShape
+    });
+  let shape = outputs |> RenderTypes.ShapeRenderer.Combined.getShape;
   let dist =
     shape |> E.O.fmap(toDist) |> E.O.fmap(truncateIfShould(inputs, outputs));
-  RenderTypes.DistPlusRenderer.Outputs.make(outputs, dist)
+  RenderTypes.DistPlusRenderer.Outputs.make(outputs, dist);
 };

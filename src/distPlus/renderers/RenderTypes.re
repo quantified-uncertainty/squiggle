@@ -59,6 +59,11 @@ module ShapeRenderer = {
       symbolic: option(Belt.Result.t(Symbolic.outputs, string)),
       sampling: option(Sampling.outputs),
     };
+    let methodUsed = ({symbolic, sampling}:outputs) => switch(symbolic, sampling){
+      | (Some(Ok(_)), _) => `Symbolic
+      | (None, Some({shape: Some(_)})) => `Sampling
+      | _ => `None
+    }
     let getShape = (r: outputs) =>
       switch (r.symbolic, r.sampling) {
       | (Some(Ok({shape})), _) => Some(shape)
