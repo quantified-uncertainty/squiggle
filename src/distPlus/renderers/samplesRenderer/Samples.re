@@ -10,7 +10,7 @@ module JS = {
     ys: ysGet(d),
   };
 
-  [@bs.module "./utility/KdeLibrary.js"]
+  [@bs.module "./KdeLibrary.js"]
   external samplesToContinuousPdf: (array(float), int, int) => distJs =
     "samplesToContinuousPdf";
 };
@@ -106,9 +106,8 @@ module T = {
     KDE.normalSampling(samples, outputXYPoints, width);
   };
 
-  // todo: Figure out some way of doing this without having to integrate so many times.
   let toShape =
-      (~samples: t, ~samplingInputs: RenderTypes.Sampling.Inputs.fInputs, ()) => {
+      (~samples: t, ~samplingInputs: RenderTypes.ShapeRenderer.Sampling.Inputs.fInputs, ()) => {
     Array.fast_sort(compare, samples);
     let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples);
     let length = samples |> E.A.length |> float_of_int;
@@ -132,7 +131,7 @@ module T = {
               samplingInputs.outputXYPoints,
               usedWidth,
             );
-          let foo: RenderTypes.Sampling.samplingStats = {
+          let foo: RenderTypes.ShapeRenderer.Sampling.samplingStats = {
             sampleCount: samplingInputs.sampleCount,
             outputXYPoints: samplingInputs.outputXYPoints,
             bandwidthXSuggested: _suggestedXWidth,
@@ -155,7 +154,7 @@ module T = {
         ~continuous=pdf |> E.O.fmap(fst),
         ~discrete,
       );
-    let samplesParse: RenderTypes.Sampling.outputs = {
+    let samplesParse: RenderTypes.ShapeRenderer.Sampling.outputs = {
       continuousParseParams: pdf |> E.O.fmap(snd),
       shape,
     };
@@ -165,12 +164,12 @@ module T = {
   let fromGuesstimatorString =
       (
         ~guesstimatorString,
-        ~samplingInputs=RenderTypes.Sampling.Inputs.empty,
+        ~samplingInputs=RenderTypes.ShapeRenderer.Sampling.Inputs.empty,
         (),
       ) => {
     let hasValidSamples =
       Guesstimator.stringToSamples(guesstimatorString, 10) |> E.A.length > 0;
-    let samplingInputs = RenderTypes.Sampling.Inputs.toF(samplingInputs);
+    let samplingInputs = RenderTypes.ShapeRenderer.Sampling.Inputs.toF(samplingInputs);
     switch (hasValidSamples) {
     | false => None
     | true =>

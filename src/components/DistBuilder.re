@@ -112,7 +112,7 @@ module Styles = {
 };
 
 type inputs = {
-  samplingInputs: RenderTypes.Sampling.inputs,
+  samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
   guesstimatorString: string,
   length: int,
   shouldTruncateSampledDistribution: int,
@@ -134,7 +134,7 @@ module DemoDist = {
                (),
              );
            let inputs =
-             RenderTypes.DistPlus.make(
+             RenderTypes.DistPlusRenderer.make(
                ~samplingInputs={
                  sampleCount: Some(options.sampleCount),
                  outputXYPoints: Some(options.outputXYPoints),

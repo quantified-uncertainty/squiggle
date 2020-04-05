@@ -1,3 +1,5 @@
+// todo: rename to SymbolicParser
+
 module MathJsonToMathJsAdt = {
   type arg =
     | Symbol(string)

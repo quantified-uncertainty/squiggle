@@ -40,6 +40,8 @@ let buildSimple = (~continuous: option(DistTypes.continuousShape), ~discrete): o
   };
 };
 
+
+// TODO: Delete, only being used in tests
 let build = (~continuous, ~discrete, ~assumptions) =>
   switch (assumptions) {
   | {

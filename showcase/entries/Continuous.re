@@ -15,7 +15,7 @@ let timeDist =
   );
 
 let setup = dist =>
-  RenderTypes.DistPlus.make(~distPlusIngredients=dist,())
+  RenderTypes.DistPlusRenderer.make(~distPlusIngredients=dist,())
   |> DistPlusIngredients.toDistPlus
   |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />);
 
