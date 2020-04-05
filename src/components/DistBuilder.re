@@ -26,7 +26,7 @@ type options = {
   sampleCount: int,
   outputXYPoints: int,
   truncateTo: option(int),
-  kernelWidth: int,
+  kernelWidth: option(float),
 };
 
 module Form = ReForm.Make(FormConfig);
@@ -111,6 +111,13 @@ module Styles = {
     ]);
 };
 
+type inputs = {
+  samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
+  guesstimatorString: string,
+  length: int,
+  shouldTruncateSampledDistribution: int,
+};
+
 module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
@@ -119,15 +126,27 @@ module DemoDist = {
       <div>
         {switch (domain, unit, options) {
          | (Some(domain), Some(unit), Some(options)) =>
-           let distPlus =
-             DistPlusIngredients.make(~guesstimatorString, ~domain, ~unit, ())
-             |> DistPlusIngredients.toDistPlus(
-                  ~sampleCount=options.sampleCount,
-                  ~outputXYPoints=options.outputXYPoints,
-                  ~truncateTo=options.truncateTo,
-                  ~kernelWidth=options.kernelWidth,
-                );
-           switch (distPlus) {
+           let distPlusIngredients =
+             RenderTypes.DistPlusRenderer.Ingredients.make(
+               ~guesstimatorString,
+               ~domain,
+               ~unit,
+               (),
+             );
+           let inputs =
+             RenderTypes.DistPlusRenderer.make(
+               ~samplingInputs={
+                 sampleCount: Some(options.sampleCount),
+                 outputXYPoints: Some(options.outputXYPoints),
+                 kernelWidth: options.kernelWidth,
+               },
+               ~distPlusIngredients,
+               ~shouldTruncate=options.truncateTo |> E.O.isSome,
+               ~recommendedLength=options.truncateTo |> E.O.default(10000),
+               (),
+             );
+           let response = DistPlusRenderer.run(inputs);
+           switch (RenderTypes.DistPlusRenderer.Outputs.distplus(response)) {
            | Some(distPlus) => <DistPlusPlot distPlus />
            | _ =>
              "Correct Guesstimator string input to show a distribution."
@@ -160,9 +179,9 @@ let make = () => {
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
-        sampleCount: "10000",
-        outputXYPoints: "500",
-        truncateTo: "100",
+        sampleCount: "30000",
+        outputXYPoints: "10000",
+        truncateTo: "1000",
         kernelWidth: "5",
       },
       (),
@@ -246,7 +265,7 @@ let make = () => {
         truncateTo:
           int_of_float(truncateTo) > 0
             ? Some(int_of_float(truncateTo)) : None,
-        kernelWidth: kernelWidth |> int_of_float,
+        kernelWidth: kernelWidth == 0.0 ? None : Some(kernelWidth),
       })
     | _ => None
     };

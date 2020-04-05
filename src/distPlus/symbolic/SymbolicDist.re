@@ -296,7 +296,7 @@ module PointwiseAddDistributionsWeighted = {
     let normalized = normalizeWeights(dists);
     let continuous = normalized |> E.A.filter(((r,_)) => GenericSimple.contType(r) == `Continuous) |> continuousShape(_, sampleCount);
     let discrete = normalized |> E.A.filter(((r,_)) => GenericSimple.contType(r) == `Discrete) |> discreteShape(_, sampleCount);
-    let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
+    let shape = MixedShapeBuilder.buildSimple(~continuous=Some(continuous), ~discrete);
     shape |> E.O.toExt("")
   };
 

@@ -110,7 +110,9 @@ module Model = {
   // TODO: Fixe number that integral is calculated for
   let getGlobalCatastropheChance = dateTime => {
     GlobalCatastrophe.makeI(MomentRe.momentNow())
-    |> DistPlusIngredients.toDistPlus
+    |> RenderTypes.DistPlusRenderer.make(~distPlusIngredients=_, ())
+    |> DistPlusRenderer.run
+    |> RenderTypes.DistPlusRenderer.Outputs.distplus
     |> E.O.bind(_, Distributions.DistPlusTime.Integral.xToY(Time(dateTime)));
   };
 
@@ -151,7 +153,7 @@ module Model = {
         };
 
       let distPlusIngredients =
-        DistPlusIngredients.make(
+        RenderTypes.DistPlusRenderer.Ingredients.make(
           ~guesstimatorString=str,
           ~domain=Complete,
           ~unit=UnspecifiedDistribution,
@@ -161,7 +163,7 @@ module Model = {
 
     | CHANCE_OF_EXISTENCE =>
       Prop.Value.DistPlusIngredients(
-        DistPlusIngredients.make(
+        RenderTypes.DistPlusRenderer.Ingredients.make(
           ~guesstimatorString=
             GuesstimatorDist.min(
               GlobalCatastrophe.guesstimatorString,
