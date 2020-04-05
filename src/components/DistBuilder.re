@@ -127,7 +127,7 @@ module DemoDist = {
         {switch (domain, unit, options) {
          | (Some(domain), Some(unit), Some(options)) =>
            let distPlusIngredients =
-             DistPlusIngredients.make(
+             RenderTypes.DistPlusRenderer.Ingredients.make(
                ~guesstimatorString,
                ~domain,
                ~unit,
@@ -141,10 +141,12 @@ module DemoDist = {
                  kernelWidth: options.kernelWidth,
                },
                ~distPlusIngredients,
+               ~shouldTruncate=options.truncateTo |> E.O.isSome,
+               ~recommendedLength=options.truncateTo |> E.O.default(10000),
                (),
              );
-           let distPlus = DistPlusIngredients.toDistPlus(inputs);
-           switch (distPlus) {
+           let response = DistPlusRenderer.run(inputs);
+           switch (RenderTypes.DistPlusRenderer.Outputs.distplus(response)) {
            | Some(distPlus) => <DistPlusPlot distPlus />
            | _ =>
              "Correct Guesstimator string input to show a distribution."

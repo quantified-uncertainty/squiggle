@@ -59,17 +59,42 @@ module ShapeRenderer = {
       symbolic: option(Belt.Result.t(Symbolic.outputs, string)),
       sampling: option(Sampling.outputs),
     };
+    let getShape = (r: outputs) =>
+      switch (r.symbolic, r.sampling) {
+      | (Some(Ok({shape})), _) => Some(shape)
+      | (_, Some({shape})) => shape
+      | _ => None
+      };
   };
 };
 
 module DistPlusRenderer = {
   let defaultRecommendedLength = 10000;
   let defaultShouldTruncate = true;
+  type ingredients = {
+    guesstimatorString: string,
+    domain: DistTypes.domain,
+    unit: DistTypes.distributionUnit,
+  };
   type inputs = {
-    distPlusIngredients: DistTypes.distPlusIngredients,
+    distPlusIngredients: ingredients,
     samplingInputs: ShapeRenderer.Sampling.inputs,
     recommendedLength: int,
     shouldTruncate: bool,
+  };
+  module Ingredients = {
+    let make =
+        (
+          ~guesstimatorString,
+          ~domain=DistTypes.Complete,
+          ~unit=DistTypes.UnspecifiedDistribution,
+          (),
+        )
+        : ingredients => {
+      guesstimatorString,
+      domain,
+      unit,
+    };
   };
   let make =
       (
@@ -85,4 +110,13 @@ module DistPlusRenderer = {
     recommendedLength,
     shouldTruncate,
   };
+  type outputs = {
+    shapeRenderOutputs: ShapeRenderer.Combined.outputs,
+    distPlus: option(DistTypes.distPlus)
+  }
+  module Outputs = {
+    let distplus = (t:outputs) => t.distPlus
+    let shapeRenderOutputs = (t:outputs) => t.shapeRenderOutputs
+    let make = (shapeRenderOutputs, distPlus) => {shapeRenderOutputs, distPlus};
+  }
 };

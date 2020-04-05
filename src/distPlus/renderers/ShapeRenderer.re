@@ -4,13 +4,6 @@ let runSymbolic =
       graph |> E.R.fmap(g => RenderTypes.ShapeRenderer.Symbolic.make(g, SymbolicDist.toShape(length,g)))
     }
   
-let getShape = (r: RenderTypes.ShapeRenderer.Combined.outputs) =>
-  switch (r.symbolic, r.sampling) {
-  | (Some(Ok({shape})), _) => Some(shape)
-  | (_, Some({shape})) => shape
-  | _ => None
-  };
-
 let run =
     (
       inputs: RenderTypes.ShapeRenderer.Combined.inputs
@@ -19,8 +12,8 @@ let run =
   let symbolic = runSymbolic(inputs.guesstimatorString, inputs.symbolicInputs.length);
   let sampling =
     switch (symbolic) {
-    | Ok(r) => None
-    | Error(r) =>
+    | Ok(_) => None
+    | Error(_) =>
       Samples.T.fromGuesstimatorString(
         ~guesstimatorString=inputs.guesstimatorString,
         ~samplingInputs=inputs.samplingInputs,

@@ -60,12 +60,6 @@ type distPlus = {
   guesstimatorString: option(string),
 };
 
-type distPlusIngredients = {
-  guesstimatorString: string,
-  domain,
-  unit: distributionUnit,
-};
-
 module DistributionUnit = {
   let toJson = (distributionUnit: distributionUnit) =>
     switch (distributionUnit) {
