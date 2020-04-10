@@ -70,6 +70,13 @@ module Menu = {
   let make = () => {
     <div className=Styles.menu>
       <Item href={routeToPath(Home)} key="home"> {"Home" |> E.ste} </Item>
+      {Models.all
+       |> E.A.fmap((model: Prop.Model.t) => {
+            <Item href={routeToPath(Model(model.id))} key={model.id}>
+              {model.name |> E.ste}
+            </Item>
+          })
+       |> ReasonReact.array}
       <Item href={routeToPath(DistBuilder)} key="dist-builder">
         {"Dist Builder" |> E.ste}
       </Item>
@@ -108,7 +115,7 @@ let make = () => {
      | DistBuilder => <DistBuilder />
      | DistBuilder2 => <DistBuilder2 />
      | DistBuilder3 => <DistBuilder3 />
-     | Home => <Home />
+     | Home => <div> {"Welcome" |> E.ste} </div>
      | _ => <div> {"Page is not found" |> E.ste} </div>
      }}
   </div>;
