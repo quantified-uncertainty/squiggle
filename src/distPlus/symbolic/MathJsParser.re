@@ -177,6 +177,28 @@ module MathAdtToDistDst = {
     };
   };
 
+  let arrayParser = (args:array(arg)):result(SymbolicDist.bigDist, string) => {
+    let samples = args
+    |> E.A.fmap(
+          fun
+          | Value(n) => Some(n)
+          | _ => None
+        )
+    |> E.A.O.concatSomes
+    let outputs = Samples.T.fromSamples(samples);
+    let pdf = outputs.shape |> E.O.bind(_,Distributions.Shape.T.toContinuous)
+    let shape = pdf |> E.O.fmap(pdf => {
+      let _pdf = Distributions.Continuous.T.scaleToIntegralSum(~cache=None, ~intendedSum=1.0, pdf);
+      let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
+      SymbolicDist.ContinuousShape.make(_pdf, cdf)
+    })
+    switch(shape){
+      | Some(s) => Ok(`Simple(`ContinuousShape(s)))
+      | None => Error("Rendering did not work")
+    }
+  }
+
+
   let rec functionParser = (r): result(SymbolicDist.bigDist, string) =>
     r
     |> (
@@ -228,7 +250,7 @@ module MathAdtToDistDst = {
       fun
       | Fn(_) => functionParser(r)
       | Value(r) => Ok(`Simple(`Float(r)))
-      | Array(_) => Error("Array not valid as top level")
+      | Array(r) => arrayParser(r)
       | Symbol(_) => Error("Symbol not valid as top level")
       | Object(_) => Error("Object not valid as top level")
     );

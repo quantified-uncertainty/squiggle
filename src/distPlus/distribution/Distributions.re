@@ -24,6 +24,7 @@ module Dist = (T: dist) => {
   type integral = T.integral;
   let minX = T.minX;
   let maxX = T.maxX;
+  let integral = T.integral;
   let xTotalRange = (t: t) => maxX(t) -. minX(t);
   let mapY = T.mapY;
   let xToY = T.xToY;
@@ -244,6 +245,7 @@ module Mixed = {
       let toContinuous = ({continuous}: t) => Some(continuous);
       let toDiscrete = ({discrete}: t) => Some(discrete);
       let toDiscreteProbabilityMass = ({discreteProbabilityMassFraction}: t) => discreteProbabilityMassFraction;
+
       let xToY = (f, {discrete, continuous} as t: t) => {
         let c =
           continuous

@@ -107,7 +107,11 @@ module T = {
   };
 
   let toShape =
-      (~samples: t, ~samplingInputs: RenderTypes.ShapeRenderer.Sampling.Inputs.fInputs, ()) => {
+      (
+        ~samples: t,
+        ~samplingInputs: RenderTypes.ShapeRenderer.Sampling.Inputs.fInputs,
+        (),
+      ) => {
     Array.fast_sort(compare, samples);
     let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples);
     let length = samples |> E.A.length |> float_of_int;
@@ -161,6 +165,16 @@ module T = {
     samplesParse;
   };
 
+  let fromSamples =
+      (
+        ~samplingInputs=RenderTypes.ShapeRenderer.Sampling.Inputs.empty,
+        samples,
+      ) => {
+    let samplingInputs =
+      RenderTypes.ShapeRenderer.Sampling.Inputs.toF(samplingInputs);
+    toShape(~samples, ~samplingInputs, ());
+  };
+
   let fromGuesstimatorString =
       (
         ~guesstimatorString,
@@ -169,13 +183,17 @@ module T = {
       ) => {
     let hasValidSamples =
       Guesstimator.stringToSamples(guesstimatorString, 10) |> E.A.length > 0;
-    let samplingInputs = RenderTypes.ShapeRenderer.Sampling.Inputs.toF(samplingInputs);
+    let _samplingInputs =
+      RenderTypes.ShapeRenderer.Sampling.Inputs.toF(samplingInputs);
     switch (hasValidSamples) {
     | false => None
     | true =>
       let samples =
-        Guesstimator.stringToSamples(guesstimatorString, samplingInputs.sampleCount);
-      Some(toShape(~samples, ~samplingInputs, ()));
+        Guesstimator.stringToSamples(
+          guesstimatorString,
+          _samplingInputs.sampleCount,
+        );
+      Some(fromSamples(~samplingInputs, samples));
     };
   };
 };
