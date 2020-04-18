@@ -259,6 +259,9 @@ module A = {
   let fold_right = Array.fold_right;
   let concatMany = Belt.Array.concatMany;
   let keepMap = Belt.Array.keepMap;
+  let init = Array.init;
+  let reduce = Belt.Array.reduce;
+  let reducei = Belt.Array.reduceWithIndex;
   let min = a =>
     get(a, 0)
     |> O.fmap(first => Belt.Array.reduce(a, first, (i, j) => i < j ? i : j));
