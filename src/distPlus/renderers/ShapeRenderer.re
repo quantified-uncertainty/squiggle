@@ -2,7 +2,7 @@
 // "3 4 5 3 2 1 " -> "[3,4,5,3,2,1]""
 let formatMessyArray = str => {
   let split = Js.String.splitByRe([%re "/\\n|\\r|\\s/"], str);
-  if (E.A.length(split) > 6) {
+  if (E.A.length(split) > 20) {
     let inner = split |> Js.Array.joinWith(",");
     {j|[$inner]|j};
   } else {
