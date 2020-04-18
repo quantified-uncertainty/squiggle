@@ -104,7 +104,7 @@ module Continuous = {
         )
         |> DistTypes.MixedPoint.makeContinuous;
       };
-    
+
       // let combineWithFn = (t1: t, t2: t, fn: (float, float) => float) => {
       //   switch(t1, t2){
       //     | ({interpolation: `Stepwise}, {interpolation: `Stepwise}) => 3.0
@@ -141,8 +141,22 @@ module Continuous = {
       let toScaledContinuous = t => Some(t);
       let toScaledDiscrete = _ => None;
 
-      let getMean = (t: t) => XYShape.Analysis.integrateContinuousShape(t);
-      let getVariance = (t: t): float => XYShape.Analysis.getVarianceDangerously(t, getMean, XYShape.Analysis.getMeanOfSquaresContinuousShape);
+      let getMean = (t: t) => {
+        let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 2.0 /. 2.0;
+        let indefiniteIntegralLinear = (p, a, b) =>
+          a *. p ** 2.0 /. 2.0 +. b *. p ** 3.0 /. 3.0;
+        XYShape.Analysis.integrateContinuousShape(
+          ~indefiniteIntegralStepwise,
+          ~indefiniteIntegralLinear,
+          t,
+        );
+      };
+      let getVariance = (t: t): float =>
+        XYShape.Analysis.getVarianceDangerously(
+          t,
+          getMean,
+          XYShape.Analysis.getMeanOfSquaresContinuousShape,
+        );
     });
 };
 
@@ -215,13 +229,14 @@ module Discrete = {
         |> Continuous.getShape
         |> XYShape.YtoX.linear(f);
 
-      let getMean = (t: t): float => E.A.reducei(t.xs, 0.0, (acc, x, i) => acc +. x*. t.ys[i]);
+      let getMean = (t: t): float =>
+        E.A.reducei(t.xs, 0.0, (acc, x, i) => acc +. x *. t.ys[i]);
       let getVariance = (t: t): float => {
-        let getMeanOfSquares = t => getMean(XYShape.Analysis.squareXYShape(t));
+        let getMeanOfSquares = t =>
+          getMean(XYShape.Analysis.squareXYShape(t));
         XYShape.Analysis.getVarianceDangerously(t, getMean, getMeanOfSquares);
       };
     });
-
 };
 
 // TODO: I think this shouldn't assume continuous/discrete are normalized to 1.0, and thus should not need the discreteProbabilityMassFraction being separate.
@@ -393,27 +408,38 @@ module Mixed = {
         };
       };
 
-      let getMean = (t: t) : float => {
-        let discreteProbabilityMassFraction = t.discreteProbabilityMassFraction;
-        let mean = switch(discreteProbabilityMassFraction){
-          | 1.0 => Discrete.T.getMean(t.discrete);
-          | 0.0 => Continuous.T.getMean(t.continuous);
-          | _ => (Discrete.T.getMean(t.discrete) *. discreteProbabilityMassFraction)
-            +. (Continuous.T.getMean(t.continuous) *. (1.0 -. discreteProbabilityMassFraction))
+      let getMean = (t: t): float => {
+        let discreteProbabilityMassFraction =
+          t.discreteProbabilityMassFraction;
+        switch (discreteProbabilityMassFraction) {
+        | 1.0 => Discrete.T.getMean(t.discrete)
+        | 0.0 => Continuous.T.getMean(t.continuous)
+        | _ =>
+          Discrete.T.getMean(t.discrete)
+          *. discreteProbabilityMassFraction
+          +. Continuous.T.getMean(t.continuous)
+          *. (1.0 -. discreteProbabilityMassFraction)
         };
-        mean;
       };
 
-      let getVariance = (t: t) : float => {
-        let discreteProbabilityMassFraction = t.discreteProbabilityMassFraction;
+      let getVariance = (t: t): float => {
+        let discreteProbabilityMassFraction =
+          t.discreteProbabilityMassFraction;
         let getMeanOfSquares = (t: t) => {
-          Discrete.T.getMean(XYShape.Analysis.squareXYShape(t.discrete))*.t.discreteProbabilityMassFraction
-          +. XYShape.Analysis.getMeanOfSquaresContinuousShape(t.continuous)*.(1.0 -. t.discreteProbabilityMassFraction)
+          Discrete.T.getMean(XYShape.Analysis.squareXYShape(t.discrete))
+          *. t.discreteProbabilityMassFraction
+          +. XYShape.Analysis.getMeanOfSquaresContinuousShape(t.continuous)
+          *. (1.0 -. t.discreteProbabilityMassFraction);
         };
-        switch(discreteProbabilityMassFraction){
-          | 1.0 => Discrete.T.getVariance(t.discrete);
-          | 0.0 => Continuous.T.getVariance(t.continuous);
-          | _ => XYShape.Analysis.getVarianceDangerously(t, getMean, getMeanOfSquares);
+        switch (discreteProbabilityMassFraction) {
+        | 1.0 => Discrete.T.getVariance(t.discrete)
+        | 0.0 => Continuous.T.getVariance(t.continuous)
+        | _ =>
+          XYShape.Analysis.getVarianceDangerously(
+            t,
+            getMean,
+            getMeanOfSquares,
+          )
         };
       };
     });
@@ -520,18 +546,20 @@ module Shape = {
           Discrete.T.mapY(fn),
           Continuous.T.mapY(fn),
         ));
-      
-      let getMean = (t: t): float => switch (t) {
-        | Mixed(m) => Mixed.T.getMean(m);
-        | Discrete(m) => Discrete.T.getMean(m);
-        | Continuous(m) => Continuous.T.getMean(m);
-      };
 
-      let getVariance = (t: t): float => switch (t) {
-        | Mixed(m) => Mixed.T.getVariance(m);
-        | Discrete(m) => Discrete.T.getVariance(m);
-        | Continuous(m) => Continuous.T.getVariance(m);
-      };
+      let getMean = (t: t): float =>
+        switch (t) {
+        | Mixed(m) => Mixed.T.getMean(m)
+        | Discrete(m) => Discrete.T.getMean(m)
+        | Continuous(m) => Continuous.T.getMean(m)
+        };
+
+      let getVariance = (t: t): float =>
+        switch (t) {
+        | Mixed(m) => Mixed.T.getVariance(m)
+        | Discrete(m) => Discrete.T.getVariance(m)
+        | Continuous(m) => Continuous.T.getVariance(m)
+        };
     });
 };
 

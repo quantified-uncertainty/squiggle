@@ -17,7 +17,7 @@ module T = {
   type ts = array(xyShape);
   let xs = (t: t) => t.xs;
   let ys = (t: t) => t.ys;
-  let empty = ({xs: [||], ys: [||]});
+  let empty = {xs: [||], ys: [||]};
   let minX = (t: t) => t |> xs |> E.A.Sorted.min |> extImp;
   let maxX = (t: t) => t |> xs |> E.A.Sorted.max |> extImp;
   let firstY = (t: t) => t |> ys |> E.A.first |> extImp;
@@ -299,55 +299,62 @@ let logScorePoint = (sampleCount, t1, t2) =>
   |> E.O.fmap(Pairs.last)
   |> E.O.fmap(Pairs.y);
 
-
-module Analysis = { 
-  let integrateContinuousShape = (
-    ~indefiniteIntegralStepwise = (p,h1) => (h1*.(p**2.0)/. 2.0), 
-    ~indefiniteIntegralLinear = (p, a, b) => (a *. (p ** 2.0) /.2.0) +. (b *. (p**3.0) /. 3.0),
-    t: DistTypes.continuousShape
-    ): float => {
+module Analysis = {
+  let integrateContinuousShape =
+      (
+        ~indefiniteIntegralStepwise=(p, h1) => h1 *. p,
+        ~indefiniteIntegralLinear=(p, a, b) => a *. p +. b *. p ** 2.0 /. 2.0,
+        t: DistTypes.continuousShape,
+      )
+      : float => {
     let xs = t.xyShape.xs;
     let ys = t.xyShape.ys;
 
-    E.A.reducei(xs, 0.0, (acc, _x, i) => {          
-      let areaUnderIntegral = switch(t.interpolation, i){
-        | (_, 0) => 0.0;
-        | (`Stepwise, _) => indefiniteIntegralStepwise(xs[i],ys[i-1]) 
-          -. indefiniteIntegralStepwise(xs[i-1],ys[i-1]);
-        | (`Linear, _) => {
-          let x1 = xs[i-1];
-          let x2 = xs[i];
-          let h1 = ys[i-1];
-          let h2 = ys[i];
-          let b = (h1 -. h2 ) /. (x1 -.x2)
-          let a = h1 -. b *.x1;
-          indefiniteIntegralLinear(x2, a, b) -. indefiniteIntegralLinear(x1, a, b);
+    E.A.reducei(
+      xs,
+      0.0,
+      (acc, _x, i) => {
+        let areaUnderIntegral =
+          switch (t.interpolation, i) {
+          | (_, 0) => 0.0
+          | (`Stepwise, _) =>
+            indefiniteIntegralStepwise(xs[i], ys[i - 1])
+            -. indefiniteIntegralStepwise(xs[i - 1], ys[i - 1])
+          | (`Linear, _) =>
+            let x1 = xs[i - 1];
+            let x2 = xs[i];
+            let h1 = ys[i - 1];
+            let h2 = ys[i];
+            let b = (h1 -. h2) /. (x1 -. x2);
+            let a = h1 -. b *. x1;
+            indefiniteIntegralLinear(x2, a, b)
+            -. indefiniteIntegralLinear(x1, a, b);
           };
-      };
-      acc +. areaUnderIntegral;
-    });
+        acc +. areaUnderIntegral;
+      },
+    );
   };
-  let getVarianceDangerously =  (
-    t: 't, 
-    getMean: ('t => float), 
-    getMeanOfSquares: ('t => float), 
-  ): float => {
-
-    let meanSquared = getMean(t)**2.0; 
-    let meanOfSquares = getMeanOfSquares(t);
-
-    meanOfSquares -. meanSquared;
-  };
-  
-  let squareXYShape = t: DistTypes.xyShape => {...t, xs: E.A.fmap(x => x**2.0, t.xs)};
 
   let getMeanOfSquaresContinuousShape = (t: DistTypes.continuousShape) => {
-    let indefiniteIntegralLinear = (p, a, b) => (a *. (p ** 3.0) /.3.0) +. (b *. (p**4.0) /. 4.0);
-    let indefiniteIntegralStepwise = (p,h1) => h1*.(p**3.0)/. 3.0;  
+    let indefiniteIntegralLinear = (p, a, b) =>
+      a *. p ** 3.0 /. 3.0 +. b *. p ** 4.0 /. 4.0;
+    let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 3.0 /. 3.0;
     integrateContinuousShape(
       ~indefiniteIntegralStepwise,
       ~indefiniteIntegralLinear,
-      t
+      t,
     );
-  }
+  };
+
+  let getVarianceDangerously =
+      (t: 't, getMean: 't => float, getMeanOfSquares: 't => float): float => {
+    let meanSquared = getMean(t) ** 2.0;
+    let meanOfSquares = getMeanOfSquares(t);
+    meanOfSquares -. meanSquared;
+  };
+
+  let squareXYShape = (t): DistTypes.xyShape => {
+    ...t,
+    xs: E.A.fmap(x => x ** 2.0, t.xs),
+  };
 };

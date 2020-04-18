@@ -13,16 +13,15 @@ let makeTest = (~only=false, str, item1, item2) =>
       );
 
 let makeTestCloseEquality = (~only=false, str, item1, item2, ~digits) =>
-only
-  ? Only.test(str, () =>
-      expect(item1) |> toBeSoCloseTo(item2, ~digits)
-    )
-  : test(str, () =>
-      expect(item1) |> toBeSoCloseTo(item2, ~digits)
-    );
+  only
+    ? Only.test(str, () =>
+        expect(item1) |> toBeSoCloseTo(item2, ~digits)
+      )
+    : test(str, () =>
+        expect(item1) |> toBeSoCloseTo(item2, ~digits)
+      );
 
 describe("Shape", () => {
-  
   describe("Continuous", () => {
     open Distributions.Continuous;
     let continuous = make(`Linear, shape);
@@ -129,7 +128,7 @@ describe("Shape", () => {
       1.0,
     );
   });
-  
+
   describe("Discrete", () => {
     open Distributions.Discrete;
     let shape: DistTypes.xyShape = {
@@ -195,7 +194,13 @@ describe("Shape", () => {
       0.9,
     );
     makeTest("integralEndY", T.Integral.sum(~cache=None, discrete), 1.0);
-
+    makeTest("mean", T.getMean(discrete), 3.9);
+    makeTestCloseEquality(
+      "variance",
+      T.getVariance(discrete),
+      5.89,
+      ~digits=7,
+    );
   });
 
   describe("Mixed", () => {
@@ -300,7 +305,6 @@ describe("Shape", () => {
         },
       ),
     );
-  
   });
 
   describe("Distplus", () => {
@@ -380,33 +384,36 @@ describe("Shape", () => {
     let stdev = 4.0;
     let variance = stdev ** 2.0;
     let numSamples = 10000;
-
     open Distributions.Shape;
-    let normal: SymbolicDist.dist = `Normal({ mean, stdev});
+    let normal: SymbolicDist.dist = `Normal({mean, stdev});
     let normalShape = SymbolicDist.GenericSimple.toShape(normal, numSamples);
     let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
-    let lognormalShape = SymbolicDist.GenericSimple.toShape(lognormal, numSamples);
+    let lognormalShape =
+      SymbolicDist.GenericSimple.toShape(lognormal, numSamples);
 
     makeTestCloseEquality(
       "Mean of a normal",
-      T.getMean(normalShape), 
-      mean, 
-      ~digits=2);
+      T.getMean(normalShape),
+      mean,
+      ~digits=2,
+    );
     makeTestCloseEquality(
-      "Variance of a normal", 
-      T.getVariance(normalShape), 
-      variance, 
-      ~digits=1);
+      "Variance of a normal",
+      T.getVariance(normalShape),
+      variance,
+      ~digits=1,
+    );
     makeTestCloseEquality(
-      "Mean of a lognormal", 
-      T.getMean(lognormalShape), 
-      mean, 
-      ~digits=2);
+      "Mean of a lognormal",
+      T.getMean(lognormalShape),
+      mean,
+      ~digits=2,
+    );
     makeTestCloseEquality(
-      "Variance of a lognormal", 
-      T.getVariance(lognormalShape), 
-      variance, 
-      ~digits=0);
+      "Variance of a lognormal",
+      T.getVariance(lognormalShape),
+      variance,
+      ~digits=0,
+    );
   });
-
 });
