@@ -347,14 +347,11 @@ module Analysis = {
   };
 
   let getVarianceDangerously =
-      (t: 't, getMean: 't => float, getMeanOfSquares: 't => float): float => {
-    let meanSquared = getMean(t) ** 2.0;
+      (t: 't, mean: 't => float, getMeanOfSquares: 't => float): float => {
+    let meanSquared = mean(t) ** 2.0;
     let meanOfSquares = getMeanOfSquares(t);
     meanOfSquares -. meanSquared;
   };
 
-  let squareXYShape = (t): DistTypes.xyShape => {
-    ...t,
-    xs: E.A.fmap(x => x ** 2.0, t.xs),
-  };
+  let squareXYShape = T.mapX(x => x ** 2.0)
 };

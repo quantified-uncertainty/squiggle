@@ -194,10 +194,10 @@ describe("Shape", () => {
       0.9,
     );
     makeTest("integralEndY", T.Integral.sum(~cache=None, discrete), 1.0);
-    makeTest("mean", T.getMean(discrete), 3.9);
+    makeTest("mean", T.mean(discrete), 3.9);
     makeTestCloseEquality(
       "variance",
-      T.getVariance(discrete),
+      T.variance(discrete),
       5.89,
       ~digits=7,
     );
@@ -393,25 +393,25 @@ describe("Shape", () => {
 
     makeTestCloseEquality(
       "Mean of a normal",
-      T.getMean(normalShape),
+      T.mean(normalShape),
       mean,
       ~digits=2,
     );
     makeTestCloseEquality(
       "Variance of a normal",
-      T.getVariance(normalShape),
+      T.variance(normalShape),
       variance,
       ~digits=1,
     );
     makeTestCloseEquality(
       "Mean of a lognormal",
-      T.getMean(lognormalShape),
+      T.mean(lognormalShape),
       mean,
       ~digits=2,
     );
     makeTestCloseEquality(
       "Variance of a lognormal",
-      T.getVariance(lognormalShape),
+      T.variance(lognormalShape),
       variance,
       ~digits=0,
     );

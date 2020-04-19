@@ -124,73 +124,87 @@ let table = (distPlus, x) => {
   </div>;
 };
 let percentiles = distPlus => {
-  <table className="table-auto text-sm">
-    <thead>
-      <tr>
-        <td className="px-4 py-2"> {"1" |> ReasonReact.string} </td>
-        <td className="px-4 py-2"> {"5" |> ReasonReact.string} </td>
-        <td className="px-4 py-2"> {"25" |> ReasonReact.string} </td>
-        <td className="px-4 py-2"> {"50" |> ReasonReact.string} </td>
-        <td className="px-4 py-2"> {"75" |> ReasonReact.string} </td>
-        <td className="px-4 py-2"> {"95" |> ReasonReact.string} </td>
-        <td className="px-4 py-2"> {"99" |> ReasonReact.string} </td>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.01)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.05)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.25)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.5)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.75)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.95)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.999)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.9999)
-           |> showFloat}
-        </td>
-        <td className="px-4 py-2 border">
-          {distPlus
-           |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99999)
-           |> showFloat}
-        </td>
-      </tr>
-    </tbody>
-  </table>;
+  <div>
+    <table className="table-auto text-sm">
+      <thead>
+        <tr>
+          <td className="px-4 py-2"> {"1" |> ReasonReact.string} </td>
+          <td className="px-4 py-2"> {"5" |> ReasonReact.string} </td>
+          <td className="px-4 py-2"> {"25" |> ReasonReact.string} </td>
+          <td className="px-4 py-2"> {"50" |> ReasonReact.string} </td>
+          <td className="px-4 py-2"> {"75" |> ReasonReact.string} </td>
+          <td className="px-4 py-2"> {"95" |> ReasonReact.string} </td>
+          <td className="px-4 py-2"> {"99" |> ReasonReact.string} </td>
+          <td className="px-4 py-2"> {"99.999" |> ReasonReact.string} </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td className="px-4 py-2 border">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.01)
+             |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.05)
+             |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.25)
+             |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.5)
+             |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.75)
+             |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.95)
+             |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99)
+             |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
+            {distPlus
+             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99999)
+             |> showFloat}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table className="table-auto text-sm">
+      <thead>
+        <tr>
+          <td className="px-4 py-2"> {"mean" |> ReasonReact.string} </td>
+          <td className="px-4 py-2">
+            {"standard deviation" |> ReasonReact.string}
+          </td>
+          <td className="px-4 py-2"> {"variance" |> ReasonReact.string} </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td className="px-4 py-2 border">
+            {distPlus |> Distributions.DistPlus.T.mean |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
+            {distPlus |> Distributions.DistPlus.T.variance |> showFloat}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>;
 };
 
 let adjustBoth = discreteProbabilityMass => {
