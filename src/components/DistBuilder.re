@@ -170,7 +170,7 @@ let make = () => {
       ~schema,
       ~onSubmit=({state}) => {None},
       ~initialState={
-        guesstimatorString: "40 to 8000",
+        guesstimatorString: "mm(normal(10, 2), uniform(16, 20), normal(15,1))",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
