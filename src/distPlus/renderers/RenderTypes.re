@@ -61,7 +61,7 @@ module ShapeRenderer = {
     };
     let methodUsed = ({symbolic, sampling}:outputs) => switch(symbolic, sampling){
       | (Some(Ok(_)), _) => `Symbolic
-      | (None, Some({shape: Some(_)})) => `Sampling
+      | (_, Some({shape: Some(_)})) => `Sampling
       | _ => `None
     }
     let getShape = (r: outputs) =>

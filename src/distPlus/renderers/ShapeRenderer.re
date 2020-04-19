@@ -1,4 +1,4 @@
-// This transforms an array intesperced with spaces or newlines with a normally formatted one.
+// This transforms an array intersperced with spaces or newlines with a normally formatted one.
 // "3 4 5 3 2 1 " -> "[3,4,5,3,2,1]""
 let formatMessyArray = str => {
   let split = Js.String.splitByRe([%re "/\\n|\\r|\\s/"], str);

@@ -146,6 +146,7 @@ module DemoDist = {
                (),
              );
            let response = DistPlusRenderer.run(inputs);
+           Js.log(response);
            switch (RenderTypes.DistPlusRenderer.Outputs.distplus(response)) {
            | Some(distPlus) => <DistPlusPlot distPlus />
            | _ =>

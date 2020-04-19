@@ -4,9 +4,10 @@ let truncateIfShould =
       outputs: RenderTypes.ShapeRenderer.Combined.outputs,
       dist,
     ) => {
+      let willTruncate = 
   shouldTruncate
-  && RenderTypes.ShapeRenderer.Combined.methodUsed(outputs) == `Sampling
-    ? dist |> Distributions.DistPlus.T.truncate(recommendedLength) : dist;
+  && RenderTypes.ShapeRenderer.Combined.methodUsed(outputs) == `Sampling;
+    willTruncate ? dist |> Distributions.DistPlus.T.truncate(recommendedLength) : dist;
 };
 
 let run =
