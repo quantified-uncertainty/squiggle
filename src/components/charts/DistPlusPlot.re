@@ -200,6 +200,9 @@ let percentiles = distPlus => {
             {distPlus |> Distributions.DistPlus.T.mean |> showFloat}
           </td>
           <td className="px-4 py-2 border">
+            {distPlus |> Distributions.DistPlus.T.variance |> (r => r ** 0.5) |> showFloat}
+          </td>
+          <td className="px-4 py-2 border">
             {distPlus |> Distributions.DistPlus.T.variance |> showFloat}
           </td>
         </tr>
