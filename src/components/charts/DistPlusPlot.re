@@ -264,7 +264,7 @@ module DistPlusChart = {
       yMaxContinuousDomainFactor
       ?discrete
       ?continuous
-      color={`hex("5f6b7e")}
+      color={`hex("1894d6")}
       onHover
       timeScale
     />;
@@ -291,7 +291,7 @@ module IntegralChart = {
       minX
       maxX
       ?continuous
-      color={`hex("5f6b7e")}
+      color={`hex("1894d6")}
       timeScale
       onHover
     />;

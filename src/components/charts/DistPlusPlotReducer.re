@@ -30,10 +30,12 @@ let changeHeight = (currentHeight, foo: [ | `increment | `decrement]) =>
   | (2, `decrement) => 1
   | (3, `decrement) => 2
   | (4, `decrement) => 3
+  | (5, `decrement) => 4
   | (1, `increment) => 2
   | (2, `increment) => 3
   | (3, `increment) => 4
-  | (4, `increment) => 4
+  | (4, `increment) => 5
+  | (5, `increment) => 5
   | _ => 1
   };
 
@@ -43,6 +45,7 @@ let heightToPix =
   | 2 => 140
   | 3 => 240
   | 4 => 340
+  | 5 => 440
   | _ => 140;
 
 let distributionReducer = (index, state: list(chartConfig), action) => {
@@ -69,7 +72,7 @@ let distributionReducer = (index, state: list(chartConfig), action) => {
   | (ADD_DIST, Some(_)) =>
     E.L.append(
       state,
-      [{yLog: false, xLog: false, isCumulative: false, height: 2}],
+      [{yLog: false, xLog: false, isCumulative: false, height: 4}],
     )
   | _ => state
   };
@@ -103,7 +106,6 @@ let init = {
   showParams: false,
   showPercentiles: true,
   distributions: [
-    {yLog: false, xLog: false, isCumulative: false, height: 2},
-    {yLog: false, xLog: false, isCumulative: true, height: 1},
+    {yLog: false, xLog: false, isCumulative: false, height: 4},
   ],
 };
