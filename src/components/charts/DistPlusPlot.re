@@ -1,4 +1,5 @@
 open DistPlusPlotReducer;
+let plotBlue = `hex("1860ad");
 
 let showAsForm = (distPlus: DistTypes.distPlus) => {
   <div>
@@ -264,7 +265,7 @@ module DistPlusChart = {
       yMaxContinuousDomainFactor
       ?discrete
       ?continuous
-      color={`hex("1894d6")}
+      color=plotBlue
       onHover
       timeScale
     />;
@@ -280,9 +281,13 @@ module IntegralChart = {
       integral
       |> Distributions.Continuous.toLinear
       |> E.O.fmap(Distributions.Continuous.getShape);
-    let range = T.xTotalRange(distPlus);
-    let minX = T.minX(distPlus) -. range *. 0.001;
-    let maxX = integral |> Distributions.Continuous.T.maxX;
+    let minX = {
+      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.00001);
+    };
+
+    let maxX = {
+      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99);
+    };
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     <DistributionPlot
       xScale={config.xLog ? "log" : "linear"}
@@ -291,7 +296,7 @@ module IntegralChart = {
       minX
       maxX
       ?continuous
-      color={`hex("1894d6")}
+      color=plotBlue
       timeScale
       onHover
     />;

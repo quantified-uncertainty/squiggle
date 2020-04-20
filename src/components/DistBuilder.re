@@ -171,7 +171,7 @@ let make = () => {
       ~schema,
       ~onSubmit=({state}) => {None},
       ~initialState={
-        guesstimatorString: "mm(normal(10, 2), uniform(16, 20), normal(15,1))",
+        guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
@@ -313,7 +313,7 @@ let make = () => {
       <Form.Provider value=reform>
         <Antd.Form onSubmit>
           <Row _type=`flex className=Styles.rows>
-            <Col span=12>
+            <Col span=24>
               <FieldString
                 field=FormConfig.GuesstimatorString
                 label="Guesstimator String"
