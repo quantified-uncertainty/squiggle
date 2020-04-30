@@ -31,7 +31,10 @@ type triangular = {
   high: float,
 };
 
-type continuousShape = {pdf: DistTypes.continuousShape, cdf: DistTypes.continuousShape}
+type continuousShape = {
+  pdf: DistTypes.continuousShape,
+  cdf: DistTypes.continuousShape,
+};
 
 type contType = [ | `Continuous | `Discrete];
 
@@ -53,12 +56,14 @@ type bigDist = [ | `Simple(dist) | `PointwiseCombination(pointwiseAdd)];
 
 module ContinuousShape = {
   type t = continuousShape;
-  let make = (pdf, cdf):t => ({pdf, cdf});
-  let pdf = (x, t: t) => Distributions.Continuous.T.xToY(x,t.pdf).continuous
-  let inv = (p, t: t) => Distributions.Continuous.T.xToY(p,t.pdf).continuous
+  let make = (pdf, cdf): t => {pdf, cdf};
+  let pdf = (x, t: t) =>
+    Distributions.Continuous.T.xToY(x, t.pdf).continuous;
+  let inv = (p, t: t) =>
+    Distributions.Continuous.T.xToY(p, t.pdf).continuous;
   // TODO: Fix the sampling, to have it work correctly.
-  let sample = (t:t) => 3.0;
-  let toString = (t) => {j|CustomContinuousShape|j};
+  let sample = (t: t) => 3.0;
+  let toString = t => {j|CustomContinuousShape|j};
   let contType: contType = `Continuous;
 };
 
@@ -92,6 +97,12 @@ module Triangular = {
 module Normal = {
   type t = normal;
   let pdf = (x, t: t) => Jstat.normal##pdf(x, t.mean, t.stdev);
+
+  let from90PercentCI = (low, high) => {
+    let mean = E.A.Floats.mean([|low, high|]);
+    let stdev = (high -. low) /. 1.645;
+    `Normal({mean, stdev});
+  };
   let inv = (p, t: t) => Jstat.normal##inv(p, t.mean, t.stdev);
   let sample = (t: t) => Jstat.normal##sample(t.mean, t.stdev);
   let toString = ({mean, stdev}: t) => {j|Normal($mean,$stdev)|j};
@@ -167,10 +178,10 @@ module GenericSimple = {
     | `Uniform(n) => Uniform.pdf(x, n)
     | `Beta(n) => Beta.pdf(x, n)
     | `Float(n) => Float.pdf(x, n)
-    | `ContinuousShape(n) => ContinuousShape.pdf(x,n)
+    | `ContinuousShape(n) => ContinuousShape.pdf(x, n)
     };
 
-  let contType = (dist:dist):contType =>
+  let contType = (dist: dist): contType =>
     switch (dist) {
     | `Normal(_) => Normal.contType
     | `Triangular(_) => Triangular.contType
@@ -193,7 +204,7 @@ module GenericSimple = {
     | `Uniform(n) => Uniform.inv(x, n)
     | `Beta(n) => Beta.inv(x, n)
     | `Float(n) => Float.inv(x, n)
-    | `ContinuousShape(n) => ContinuousShape.inv(x,n)
+    | `ContinuousShape(n) => ContinuousShape.inv(x, n)
     };
 
   let sample: dist => float =
@@ -206,7 +217,7 @@ module GenericSimple = {
     | `Uniform(n) => Uniform.sample(n)
     | `Beta(n) => Beta.sample(n)
     | `Float(n) => Float.sample(n)
-    | `ContinuousShape(n) => ContinuousShape.sample(n)
+    | `ContinuousShape(n) => ContinuousShape.sample(n);
 
   let toString: dist => string =
     fun
@@ -218,7 +229,7 @@ module GenericSimple = {
     | `Uniform(n) => Uniform.toString(n)
     | `Beta(n) => Beta.toString(n)
     | `Float(n) => Float.toString(n)
-    | `ContinuousShape(n) => ContinuousShape.toString(n)
+    | `ContinuousShape(n) => ContinuousShape.toString(n);
 
   let min: dist => float =
     fun
@@ -229,7 +240,7 @@ module GenericSimple = {
     | `Lognormal(n) => Lognormal.inv(minCdfValue, n)
     | `Uniform({low}) => low
     | `Beta(n) => Beta.inv(minCdfValue, n)
-    | `ContinuousShape(n) => ContinuousShape.inv(minCdfValue,n)
+    | `ContinuousShape(n) => ContinuousShape.inv(minCdfValue, n)
     | `Float(n) => n;
 
   let max: dist => float =
@@ -240,7 +251,7 @@ module GenericSimple = {
     | `Normal(n) => Normal.inv(maxCdfValue, n)
     | `Lognormal(n) => Lognormal.inv(maxCdfValue, n)
     | `Beta(n) => Beta.inv(maxCdfValue, n)
-    | `ContinuousShape(n) => ContinuousShape.inv(maxCdfValue,n)
+    | `ContinuousShape(n) => ContinuousShape.inv(maxCdfValue, n)
     | `Uniform({high}) => high
     | `Float(n) => n;
 
@@ -257,16 +268,15 @@ module GenericSimple = {
   let toShape =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount)
       : DistTypes.shape => {
-        switch(dist){
-          | `ContinuousShape(n) => n.pdf |> Distributions.Continuous.T.toShape
-          | dist => {
-              let xs = interpolateXs(~xSelection, dist, sampleCount);
-              let ys = xs |> E.A.fmap(r => pdf(r, dist));
-              XYShape.T.fromArrays(xs, ys)
-              |> Distributions.Continuous.make(`Linear, _)
-              |> Distributions.Continuous.T.toShape;
-          }
-        }
+    switch (dist) {
+    | `ContinuousShape(n) => n.pdf |> Distributions.Continuous.T.toShape
+    | dist =>
+      let xs = interpolateXs(~xSelection, dist, sampleCount);
+      let ys = xs |> E.A.fmap(r => pdf(r, dist));
+      XYShape.T.fromArrays(xs, ys)
+      |> Distributions.Continuous.make(`Linear, _)
+      |> Distributions.Continuous.T.toShape;
+    };
   };
 };
 
@@ -289,17 +299,26 @@ module PointwiseAddDistributionsWeighted = {
   let max = (dists: t) =>
     dists |> E.A.fmap(d => d |> fst |> GenericSimple.max) |> E.A.max;
 
-  let discreteShape = (dists:t, sampleCount: int) => {
-    let discrete = dists |> E.A.fmap((((r,e)) => r |> fun
-      | `Float(r) => Some((r,e))
-      | _ => None
-    )) |> E.A.O.concatSomes
-    |> E.A.fmap(((x, y)):DistTypes.xyShape => ({xs: [|x|], ys: [|y|]}))
-    |> Distributions.Discrete.reduce((+.))
-    discrete
-  }
+  let discreteShape = (dists: t, sampleCount: int) => {
+    let discrete =
+      dists
+      |> E.A.fmap(((r, e)) =>
+           r
+           |> (
+             fun
+             | `Float(r) => Some((r, e))
+             | _ => None
+           )
+         )
+      |> E.A.O.concatSomes
+      |> E.A.fmap(((x, y)) =>
+           ({xs: [|x|], ys: [|y|]}: DistTypes.xyShape)
+         )
+      |> Distributions.Discrete.reduce((+.));
+    discrete;
+  };
 
-  let continuousShape = (dists:t, sampleCount: int) => {
+  let continuousShape = (dists: t, sampleCount: int) => {
     let xs =
       dists
       |> E.A.fmap(r =>
@@ -314,16 +333,22 @@ module PointwiseAddDistributionsWeighted = {
       |> E.A.concatMany;
     xs |> Array.fast_sort(compare);
     let ys = xs |> E.A.fmap(pdf(_, dists));
-    XYShape.T.fromArrays(xs, ys)
-    |> Distributions.Continuous.make(`Linear, _)
-  }
+    XYShape.T.fromArrays(xs, ys) |> Distributions.Continuous.make(`Linear, _);
+  };
 
   let toShape = (dists: t, sampleCount: int) => {
     let normalized = normalizeWeights(dists);
-    let continuous = normalized |> E.A.filter(((r,_)) => GenericSimple.contType(r) == `Continuous) |> continuousShape(_, sampleCount);
-    let discrete = normalized |> E.A.filter(((r,_)) => GenericSimple.contType(r) == `Discrete) |> discreteShape(_, sampleCount);
-    let shape = MixedShapeBuilder.buildSimple(~continuous=Some(continuous), ~discrete);
-    shape |> E.O.toExt("")
+    let continuous =
+      normalized
+      |> E.A.filter(((r, _)) => GenericSimple.contType(r) == `Continuous)
+      |> continuousShape(_, sampleCount);
+    let discrete =
+      normalized
+      |> E.A.filter(((r, _)) => GenericSimple.contType(r) == `Discrete)
+      |> discreteShape(_, sampleCount);
+    let shape =
+      MixedShapeBuilder.buildSimple(~continuous=Some(continuous), ~discrete);
+    shape |> E.O.toExt("");
   };
 
   let toString = (dists: t) => {
