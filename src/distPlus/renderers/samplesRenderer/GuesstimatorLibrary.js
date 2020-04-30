@@ -1,22 +1,34 @@
 const _ = require("lodash");
-const { Guesstimator } = require('@foretold/guesstimator/src');
+const {
+  Guesstimator
+} = require('@foretold/guesstimator/src');
 
 const stringToSamples = (
   text,
   sampleCount,
   inputs = [],
 ) => {
-  const [_error, { parsedInput, parsedError }] = Guesstimator.parse({ text:"=" + text });
+  const [_error, {
+    parsedInput,
+    parsedError
+  }] = Guesstimator.parse({
+    text: "=" + text
+  });
 
-  const guesstimator = new Guesstimator({ parsedInput });
-  const {values, errors} = guesstimator.sample(
+  const guesstimator = new Guesstimator({
+    parsedInput
+  });
+  const {
+    values,
+    errors
+  } = guesstimator.sample(
     sampleCount,
     inputs,
   );
-  if (errors.length > 0){
+  if (errors.length > 0) {
     return []
   } else {
-    return values
+    return _.filter(values, _.isFinite)
   }
 };
 
