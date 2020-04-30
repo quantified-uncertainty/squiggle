@@ -69,15 +69,15 @@ module Menu = {
   [@react.component]
   let make = () => {
     <div className=Styles.menu>
-      <Item href={routeToPath(Home)} key="home"> {"Home" |> E.ste} </Item>
+      <Item href={routeToPath(Home)} key="home"> {"Home" |> R.ste} </Item>
       <Item href={routeToPath(DistBuilder)} key="dist-builder">
-        {"Dist Builder" |> E.ste}
+        {"Dist Builder" |> R.ste}
       </Item>
       <Item href={routeToPath(DistBuilder2)} key="dist-builder-2">
-        {"Dist Builder 2" |> E.ste}
+        {"Dist Builder 2" |> R.ste}
       </Item>
       <Item href={routeToPath(DistBuilder3)} key="dist-builder-3">
-        {"Dist Builder 3" |> E.ste}
+        {"Dist Builder 3" |> R.ste}
       </Item>
     </div>;
   };
@@ -103,13 +103,13 @@ let make = () => {
      | Model(id) =>
        switch (Models.getById(id)) {
        | Some(model) => <FormBuilder.ModelForm model key=id />
-       | None => <div> {"Page is not found" |> E.ste} </div>
+       | None => <div> {"Page is not found" |> R.ste} </div>
        }
      | DistBuilder => <DistBuilder />
      | DistBuilder2 => <DistBuilder2 />
      | DistBuilder3 => <DistBuilder3 />
      | Home => <Home />
-     | _ => <div> {"Page is not found" |> E.ste} </div>
+     | _ => <div> {"Page is not found" |> R.ste} </div>
      }}
   </div>;
 };

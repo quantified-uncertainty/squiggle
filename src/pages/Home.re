@@ -45,9 +45,9 @@ module Table = {
           </a>
         </div>
         <div className={TableStyles.col(~f=3.0, ())}>
-          {model.description |> E.ste}
+          {model.description |> R.ste}
         </div>
-        <div className={TableStyles.col()}> {model.author |> E.ste} </div>
+        <div className={TableStyles.col()}> {model.author |> R.ste} </div>
       </div>;
     };
   };
@@ -56,11 +56,11 @@ module Table = {
     [@react.component]
     let make = () => {
       <div className=TableStyles.row>
-        <div className={TableStyles.col()}> {"Name" |> E.ste} </div>
+        <div className={TableStyles.col()}> {"Name" |> R.ste} </div>
         <div className={TableStyles.col(~f=3.0, ())}>
-          {"Description" |> E.ste}
+          {"Description" |> R.ste}
         </div>
-        <div className={TableStyles.col()}> {"Author" |> E.ste} </div>
+        <div className={TableStyles.col()}> {"Author" |> R.ste} </div>
       </div>;
     };
   };
@@ -68,11 +68,11 @@ module Table = {
   [@react.component]
   let make = () => {
     <>
-      <h3 className=Styles.h3> {"Probability Models" |> E.ste} </h3>
+      <h3 className=Styles.h3> {"Probability Models" |> R.ste} </h3>
       <ColumnsTitles />
       {Models.all
        |> E.A.fmap((model: Prop.Model.t) => {
-            <Item model key={model.id}> {model.name |> E.ste} </Item>
+            <Item model key={model.id}> {model.name |> R.ste} </Item>
           })
        |> ReasonReact.array}
     </>;

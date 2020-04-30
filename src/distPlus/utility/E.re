@@ -86,12 +86,6 @@ module O = {
 
   let min = compare((<));
   let max = compare((>));
-
-  module React = {
-    let defaultNull = default(ReasonReact.null);
-    let fmapOrNull = fn => fmap(fn) ||> default(ReasonReact.null);
-    let flatten = default(ReasonReact.null);
-  };
 };
 
 /* Functions */
@@ -248,7 +242,7 @@ module A = {
   let of_list = Array.of_list;
   let length = Array.length;
   let append = Array.append;
-  let empty = [||];
+  // let empty = [||];
   let unsafe_get = Array.unsafe_get;
   let get = Belt.Array.get;
   let getBy = Belt.Array.getBy;
@@ -471,6 +465,3 @@ module JsArray = {
        );
   let filter = Js.Array.filter;
 };
-
-let ste = React.string;
-let showIf = (cond, comp) => cond ? comp : ReasonReact.null;

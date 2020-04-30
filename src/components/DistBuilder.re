@@ -39,7 +39,7 @@ module FieldString = {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> E.ste}>
+        <Antd.Form.Item label={label |> R.ste}>
           <Antd.Input
             value
             onChange={BsReform.Helpers.handleChange(handleChange)}
@@ -57,7 +57,7 @@ module FieldFloat = {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> E.ste}>
+        <Antd.Form.Item label={label |> R.ste}>
           <Antd.Input
             value
             onChange={BsReform.Helpers.handleChange(handleChange)}
@@ -121,7 +121,7 @@ type inputs = {
 module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
-    <Antd.Card title={"Distribution" |> E.ste}>
+    <Antd.Card title={"Distribution" |> R.ste}>
       <div className=Styles.spacer />
       <div>
         {switch (domain, unit, options) {
@@ -151,11 +151,11 @@ module DemoDist = {
            | Some(distPlus) => <DistPlusPlot distPlus />
            | _ =>
              "Correct Guesstimator string input to show a distribution."
-             |> E.ste
+             |> R.ste
            };
          | _ =>
            "Nothing to show. Try to change the distribution description."
-           |> E.ste
+           |> R.ste
          }}
       </div>
     </Antd.Card>;
@@ -302,7 +302,7 @@ let make = () => {
     demoDist
     <div className=Styles.spacer />
     <Antd.Card
-      title={"Distribution Form" |> E.ste}
+      title={"Distribution Form" |> R.ste}
       extra={
         <Antd.Button
           icon=Antd.IconName.reload
@@ -325,19 +325,19 @@ let make = () => {
               <Form.Field
                 field=FormConfig.DomainType
                 render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Domain Type" |> E.ste}>
+                  <Antd.Form.Item label={"Domain Type" |> R.ste}>
                     <Antd.Select value onChange={e => e |> handleChange}>
                       <Antd.Select.Option value="Complete">
-                        {"Complete" |> E.ste}
+                        {"Complete" |> R.ste}
                       </Antd.Select.Option>
                       <Antd.Select.Option value="LeftLimited">
-                        {"Left Limited" |> E.ste}
+                        {"Left Limited" |> R.ste}
                       </Antd.Select.Option>
                       <Antd.Select.Option value="RightLimited">
-                        {"Right Limited" |> E.ste}
+                        {"Right Limited" |> R.ste}
                       </Antd.Select.Option>
                       <Antd.Select.Option value="LeftAndRightLimited">
-                        {"Left And Right Limited" |> E.ste}
+                        {"Left And Right Limited" |> R.ste}
                       </Antd.Select.Option>
                     </Antd.Select>
                   </Antd.Form.Item>
@@ -360,7 +360,7 @@ let make = () => {
                  />
                </Col>
              </>
-             |> E.showIf(
+             |> R.showIf(
                   E.L.contains(
                     reform.state.values.domainType,
                     ["LeftLimited", "LeftAndRightLimited"],
@@ -382,7 +382,7 @@ let make = () => {
                  />
                </Col>
              </>
-             |> E.showIf(
+             |> R.showIf(
                   E.L.contains(
                     reform.state.values.domainType,
                     ["RightLimited", "LeftAndRightLimited"],
@@ -394,13 +394,13 @@ let make = () => {
               <Form.Field
                 field=FormConfig.UnitType
                 render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Unit Type" |> E.ste}>
+                  <Antd.Form.Item label={"Unit Type" |> R.ste}>
                     <Antd.Select value onChange={e => e |> handleChange}>
                       <Antd.Select.Option value="UnspecifiedDistribution">
-                        {"Unspecified Distribution" |> E.ste}
+                        {"Unspecified Distribution" |> R.ste}
                       </Antd.Select.Option>
                       <Antd.Select.Option value="TimeDistribution">
-                        {"Time Distribution" |> E.ste}
+                        {"Time Distribution" |> R.ste}
                       </Antd.Select.Option>
                     </Antd.Select>
                   </Antd.Form.Item>
@@ -412,7 +412,7 @@ let make = () => {
                  <Form.Field
                    field=FormConfig.Zero
                    render={({handleChange, value}) =>
-                     <Antd.Form.Item label={"Zero Point" |> E.ste}>
+                     <Antd.Form.Item label={"Zero Point" |> R.ste}>
                        <Antd_DatePicker
                          value
                          onChange={e => {
@@ -428,34 +428,34 @@ let make = () => {
                  <Form.Field
                    field=FormConfig.Unit
                    render={({handleChange, value}) =>
-                     <Antd.Form.Item label={"Unit" |> E.ste}>
+                     <Antd.Form.Item label={"Unit" |> R.ste}>
                        <Antd.Select value onChange={e => e |> handleChange}>
                          <Antd.Select.Option value="days">
-                           {"Days" |> E.ste}
+                           {"Days" |> R.ste}
                          </Antd.Select.Option>
                          <Antd.Select.Option value="hours">
-                           {"Hours" |> E.ste}
+                           {"Hours" |> R.ste}
                          </Antd.Select.Option>
                          <Antd.Select.Option value="milliseconds">
-                           {"Milliseconds" |> E.ste}
+                           {"Milliseconds" |> R.ste}
                          </Antd.Select.Option>
                          <Antd.Select.Option value="minutes">
-                           {"Minutes" |> E.ste}
+                           {"Minutes" |> R.ste}
                          </Antd.Select.Option>
                          <Antd.Select.Option value="months">
-                           {"Months" |> E.ste}
+                           {"Months" |> R.ste}
                          </Antd.Select.Option>
                          <Antd.Select.Option value="quarters">
-                           {"Quarters" |> E.ste}
+                           {"Quarters" |> R.ste}
                          </Antd.Select.Option>
                          <Antd.Select.Option value="seconds">
-                           {"Seconds" |> E.ste}
+                           {"Seconds" |> R.ste}
                          </Antd.Select.Option>
                          <Antd.Select.Option value="weeks">
-                           {"Weeks" |> E.ste}
+                           {"Weeks" |> R.ste}
                          </Antd.Select.Option>
                          <Antd.Select.Option value="years">
-                           {"Years" |> E.ste}
+                           {"Years" |> R.ste}
                          </Antd.Select.Option>
                        </Antd.Select>
                      </Antd.Form.Item>
@@ -463,7 +463,7 @@ let make = () => {
                  />
                </Col>
              </>
-             |> E.showIf(
+             |> R.showIf(
                   E.L.contains(
                     reform.state.values.unitType,
                     ["TimeDistribution"],
@@ -489,7 +489,7 @@ let make = () => {
           </Row>
           <Antd.Button
             _type=`primary icon=Antd.IconName.reload onClick=onRealod>
-            {"Update Distribution" |> E.ste}
+            {"Update Distribution" |> R.ste}
           </Antd.Button>
         </Antd.Form>
       </Form.Provider>

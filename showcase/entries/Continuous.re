@@ -20,7 +20,7 @@ let setup = dist =>
   RenderTypes.DistPlusRenderer.make(~distPlusIngredients=dist,())
   |> DistPlusRenderer.run
   |> RenderTypes.DistPlusRenderer.Outputs.distplus
-  |> E.O.React.fmapOrNull(distPlus => <DistPlusPlot distPlus />);
+  |> R.O.fmapOrNull(distPlus => <DistPlusPlot distPlus />);
 
 let simpleExample = (name, guesstimatorString) =>
   <>

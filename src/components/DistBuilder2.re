@@ -13,7 +13,7 @@ module FieldString = {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> E.ste}>
+        <Antd.Form.Item label={label |> R.ste}>
           <Antd.Input
             value
             onChange={BsReform.Helpers.handleChange(handleChange)}
@@ -38,7 +38,7 @@ module DemoDist = {
       DistEditor.getPdfFromUserInput(guesstimatorString);
     let inside =
       isEmpty
-        ? "Nothing to show" |> E.ste
+        ? "Nothing to show" |> R.ste
         : {
           let distPlus =
             Distributions.DistPlus.make(
@@ -54,7 +54,7 @@ module DemoDist = {
             |> Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0);
           <DistPlusPlot distPlus />;
         };
-    <Antd.Card title={"Distribution" |> E.ste}>
+    <Antd.Card title={"Distribution" |> R.ste}>
       <div className=Styles.spacer />
       inside
     </Antd.Card>;
@@ -86,7 +86,7 @@ let make = () => {
     <div className=Styles.spacer />
     demoDist
     <div className=Styles.spacer />
-    <Antd.Card title={"Distribution Form" |> E.ste}>
+    <Antd.Card title={"Distribution Form" |> R.ste}>
       <Form.Provider value=reform>
         <Antd.Form>
           <Row _type=`flex>

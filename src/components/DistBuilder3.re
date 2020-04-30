@@ -13,7 +13,7 @@ module FieldString = {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> E.ste}>
+        <Antd.Form.Item label={label |> R.ste}>
           <Antd.Input
             value
             onChange={BsReform.Helpers.handleChange(handleChange)}
@@ -62,7 +62,7 @@ module DemoDist = {
            <DistPlusPlot distPlus />;
          })
       |> E.O.default(ReasonReact.null);
-    <Antd.Card title={"Distribution" |> E.ste}>
+    <Antd.Card title={"Distribution" |> R.ste}>
       <div className=Styles.spacer />
       inside
       {str |> ReasonReact.string}
@@ -95,7 +95,7 @@ let make = () => {
     <div className=Styles.spacer />
     demoDist
     <div className=Styles.spacer />
-    <Antd.Card title={"Distribution Form" |> E.ste}>
+    <Antd.Card title={"Distribution Form" |> R.ste}>
       <Form.Provider value=reform>
         <Antd.Form>
           <Row _type=`flex>

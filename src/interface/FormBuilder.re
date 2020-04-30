@@ -100,7 +100,7 @@ module ModelForm = {
          |> ReasonReact.array}
         <div className="bg-green-100 p-2 rounded-sm mt-6 text-lg">
           {model.run(Prop.Combo.InputValues.toValueArray(formState.combo))
-           |> E.O.React.fmapOrNull(propValue)}
+           |> R.O.fmapOrNull(propValue)}
         </div>
       </div>
     </div>;
