@@ -1,5 +1,4 @@
 module Types = {
-
   type rectangle = {
     // Ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
     left: int,
@@ -35,24 +34,31 @@ module Types = {
     xValues: array(float),
   };
 
-  type formElements = {
+  type foretoldFormElements = {
     measurableId: string,
     token: string,
     comment: string,
   };
 
+  type distributionLimits = {
+    lower: float,
+    upper: float,
+  };
+
   type canvasState = {
-    isMouseDown: bool,
-    lastMousePosition: option(canvasPoint),
     canvasShape: option(canvasShape),
+    lastMousePosition: option(canvasPoint),
+    isMouseDown: bool,
     readyToRender: bool,
-    formElements,
-    hasJustBeenSent: bool,
+    hasJustBeenSentToForetold: bool,
+    limitsHaveJustBeenUpdated: bool,
+    foretoldFormElements,
+    distributionLimits,
   };
 };
 
 module CanvasContext = {
-  type t = Types.webapi; 
+  type t = Types.webapi;
 
   /* Externals */
   [@bs.send]
@@ -101,22 +107,25 @@ module CanvasContext = {
 
 module Convert = {
   /*
-  - In this module, the fundamental unit for the canvas shape is the distance vector from the (0,0) point at the upper leftmost corner of the screen.
-    - For some drawing functions, this is instead from the (0,0) point at the upper leftmost corner of the canvas element. This is irrelevant in this module.
-  - The fundamental unit for a probability distribution is an x coordinate and its corresponding y probability density
-  */
+   - In this module, the fundamental unit for the canvas shape is the distance vector from the (0,0) point at the upper leftmost corner of the screen.
+     - For some drawing functions, this is instead from the (0,0) point at the upper leftmost corner of the canvas element. This is irrelevant in this module.
+   - The fundamental unit for a probability distribution is an x coordinate and its corresponding y probability density
+   */
 
   let xyShapeToCanvasShape =
       (~xyShape: Types.xyShape, ~canvasElement: Dom.element) => {
     let xs = xyShape.xs;
     let ys = xyShape.ys;
-    let rectangle: Types.rectangle = CanvasContext.getBoundingClientRect(canvasElement);
+    let rectangle: Types.rectangle =
+      CanvasContext.getBoundingClientRect(canvasElement);
     let lengthX = E.A.length(xs);
 
     let minX = xs[0];
     let maxX = xs[lengthX - 1];
     let ratioXs =
-      float_of_int(rectangle.width) *. CanvasContext.paddingRatioX /. (maxX -. minX);
+      float_of_int(rectangle.width)
+      *. CanvasContext.paddingRatioX
+      /. (maxX -. minX);
     let ws =
       E.A.fmap(
         x =>
@@ -129,9 +138,12 @@ module Convert = {
         xs,
       );
 
-    let minY = 0.; 
+    let minY = 0.;
     let maxY = E.A.reduce(ys, 0., (x, y) => x > y ? x : y);
-    let ratioYs = float_of_int(rectangle.height) *. CanvasContext.paddingRatioY /. (maxY -. minY);
+    let ratioYs =
+      float_of_int(rectangle.height)
+      *. CanvasContext.paddingRatioY
+      /. (maxY -. minY);
     let hs =
       E.A.fmap(
         y =>
@@ -151,11 +163,15 @@ module Convert = {
       : Types.continuousShape => {
     let xs = canvasShape.xValues;
     let hs = canvasShape.hs;
-    let rectangle: Types.rectangle = CanvasContext.getBoundingClientRect(canvasElement);
+    let rectangle: Types.rectangle =
+      CanvasContext.getBoundingClientRect(canvasElement);
     let bottom = float_of_int(rectangle.bottom);
 
     let ysRelative =
-      E.A.fmap(h => bottom -. h +. CanvasContext.paddingFactorY(rectangle.height), hs);
+      E.A.fmap(
+        h => bottom -. h +. CanvasContext.paddingFactorY(rectangle.height),
+        hs,
+      );
     let xyShape: Types.xyShape = {xs, ys: ysRelative};
     let continuousShape: Types.continuousShape = {
       xyShape,
@@ -196,7 +212,6 @@ module Convert = {
 };
 
 module Draw = {
-
   let line =
       (
         canvasElement: Dom.element,
@@ -218,7 +233,8 @@ module Draw = {
   let canvasPlot =
       (canvasElement: Dom.element, canvasShape: Types.canvasShape) => {
     let context = CanvasContext.getContext2d(canvasElement);
-    let rectangle: Types.rectangle = CanvasContext.getBoundingClientRect(canvasElement);
+    let rectangle: Types.rectangle =
+      CanvasContext.getBoundingClientRect(canvasElement);
 
     /* Some useful reference points */
     let paddingFactorX = CanvasContext.paddingFactorX(rectangle.width);
@@ -252,36 +268,45 @@ module Draw = {
 
     /* Draw a line between every two adjacent points */
     let length = Array.length(canvasShape.ws);
+    let windowScrollY: float = [%raw "window.scrollY"];
     CanvasContext.setStrokeStyle(context, String, "#5680cc");
     CanvasContext.lineWidth(context, 4.);
 
     for (i in 1 to length - 1) {
       let point0 = Convert.getPoint(canvasShape, i - 1);
       let point1 = Convert.getPoint(canvasShape, i);
+
+      let point0 = {...point0, h: point0.h -. windowScrollY};
+      let point1 = {...point1, h: point1.h -. windowScrollY};
       line(canvasElement, ~point0, ~point1);
     };
 
     /* Draws the expected value line */
-    let continuousShape =
-      Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
-    let mean = Distributions.Continuous.T.mean(continuousShape);
-    let variance = Distributions.Continuous.T.variance(continuousShape);
-    let meanLocation =
-      Convert.findClosestInOrderedArrayDangerously(mean, canvasShape.xValues);
-    let meanLocationCanvasX = canvasShape.ws[meanLocation];
-    let meanLocationCanvasY = canvasShape.hs[meanLocation];
-    CanvasContext.beginPath(context);
-    CanvasContext.setStrokeStyle(context, String, "#5680cc");
-    CanvasContext.setLineDash(context, [|5, 10|]);
+    // Removed on the grounds that it didn't play nice with changes in limits.
+    /*
+          let continuousShape =
+            Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
+          let mean = Distributions.Continuous.T.mean(continuousShape);
+          let variance = Distributions.Continuous.T.variance(continuousShape);
+          let meanLocation =
+            Convert.findClosestInOrderedArrayDangerously(mean, canvasShape.xValues);
+          let meanLocationCanvasX = canvasShape.ws[meanLocation];
+          let meanLocationCanvasY = canvasShape.hs[meanLocation];
+          CanvasContext.beginPath(context);
+          CanvasContext.setStrokeStyle(context, String, "#5680cc");
+          CanvasContext.setLineDash(context, [|5, 10|]);
 
-    line(
-      canvasElement,
-      ~point0={w: meanLocationCanvasX, h: p00.h},
-      ~point1={w: meanLocationCanvasX, h: meanLocationCanvasY},
-    );
-    CanvasContext.stroke(context);
-    CanvasContext.setLineDash(context, [||]);
-
+          line(
+            canvasElement,
+            ~point0={w: meanLocationCanvasX, h: p00.h},
+            ~point1={
+              w: meanLocationCanvasX,
+              h: meanLocationCanvasY -. windowScrollY,
+            },
+          );
+          CanvasContext.stroke(context);
+          CanvasContext.setLineDash(context, [||]);
+     */
     /* draws lines parallel to x axis + factors to help w/ precise drawing. */
     CanvasContext.beginPath(context);
     CanvasContext.setStrokeStyle(context, String, "#CCC");
@@ -318,19 +343,19 @@ module Draw = {
     /* draw units along the x axis */
     CanvasContext.font(context, "16px Roboto");
     CanvasContext.lineWidth(context, 2.0);
-    let numUnits = 10;
+    let numIntervals = 10;
     let width = float_of_int(rectangle.width);
     let height = float_of_int(rectangle.height);
     let xMin = canvasShape.xValues[0];
     let xMax = canvasShape.xValues[length - 1];
-    let xSpan = (xMax -. xMin) /. float_of_int(numUnits);
+    let xSpan = (xMax -. xMin) /. float_of_int(numIntervals - 1);
 
-    for (i in 0 to numUnits - 1) {
+    for (i in 0 to numIntervals - 1) {
       let x =
         float_of_int(rectangle.left)
         +. width
         *. float_of_int(i)
-        /. float_of_int(numUnits);
+        /. float_of_int(numIntervals);
       let dashValue = xMin +. xSpan *. float_of_int(i);
       CanvasContext.fillText(
         Js.Float.toFixedWithPrecision(dashValue, ~digits=2),
@@ -340,7 +365,10 @@ module Draw = {
       );
       line(
         canvasElement,
-        ~point0={w: x +. CanvasContext.paddingFactorX(rectangle.width), h: p00.h},
+        ~point0={
+          w: x +. CanvasContext.paddingFactorX(rectangle.width),
+          h: p00.h,
+        },
         ~point1={
           w: x +. CanvasContext.paddingFactorX(rectangle.width),
           h: p00.h +. 10.0,
@@ -350,9 +378,8 @@ module Draw = {
   };
 
   let initialDistribution = (canvasElement: Dom.element, setState) => {
-
-    let mean = 10.0;
-    let stdev = 4.0;
+    let mean = 50.0;
+    let stdev = 20.0;
     let numSamples = 3000;
 
     let normal: SymbolicDist.dist = `Normal({mean, stdev});
@@ -363,24 +390,29 @@ module Draw = {
       | Discrete(_) => {xs: [||], ys: [||]}
       | Continuous(m) => Distributions.Continuous.getShape(m)
       };
-    
+
     /* // To use a lognormal instead:
-    let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
-    let lognormalShape =
-      SymbolicDist.GenericSimple.toShape(lognormal, numSamples);
-    let lognormalXYShape: Types.xyShape =
-      switch (lognormalShape) {
-      | Mixed(_) => {xs: [||], ys: [||]}
-      | Discrete(_) => {xs: [||], ys: [||]}
-      | Continuous(m) => Distributions.Continuous.getShape(m)
-      };
-    */
+       let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
+       let lognormalShape =
+         SymbolicDist.GenericSimple.toShape(lognormal, numSamples);
+       let lognormalXYShape: Types.xyShape =
+         switch (lognormalShape) {
+         | Mixed(_) => {xs: [||], ys: [||]}
+         | Discrete(_) => {xs: [||], ys: [||]}
+         | Continuous(m) => Distributions.Continuous.getShape(m)
+         };
+       */
 
     let canvasShape = Convert.xyShapeToCanvasShape(~xyShape, ~canvasElement);
     /* let continuousShapeBack =
-      Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
-    */
+         Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
+       */
 
+    let windowScrollY: float = [%raw "window.scrollY"];
+    let canvasShape = {
+      ...canvasShape,
+      hs: E.A.fmap(h => h +. windowScrollY, canvasShape.hs),
+    };
     setState((state: Types.canvasState) => {
       {...state, canvasShape: Some(canvasShape)}
     });
@@ -443,20 +475,25 @@ module State = {
   type t = Types.canvasState;
 
   let initialState: t = {
-    isMouseDown: false,
-    lastMousePosition: None,
     canvasShape: None,
+    lastMousePosition: None,
+    isMouseDown: false,
     readyToRender: false,
-    hasJustBeenSent: false,
-    formElements: {
+    hasJustBeenSentToForetold: false,
+    limitsHaveJustBeenUpdated: false,
+    foretoldFormElements: {
       measurableId: "",
       token: "",
       comment: "",
     },
+    distributionLimits: {
+      lower: 0.0,
+      upper: 1000.0,
+    },
   };
 
-  let updateMousePosition = (~point: Types.canvasPoint, ~setState) =>{
-    setState((state: t) => ({...state, lastMousePosition: Some(point)}));
+  let updateMousePosition = (~point: Types.canvasPoint, ~setState) => {
+    setState((state: t) => {...state, lastMousePosition: Some(point)});
   };
 
   let onMouseMovement =
@@ -466,14 +503,15 @@ module State = {
         ~state: t,
         ~setState,
       ) => {
-
     /* Helper functions and objects*/
     let x = ReactEvent.Mouse.clientX(event);
     let y = ReactEvent.Mouse.clientY(event);
 
+    let windowScrollY: float = [%raw "window.scrollY"];
+
     let point1: Types.canvasPoint = {
       w: float_of_int(x),
-      h: float_of_int(y),
+      h: float_of_int(y) +. windowScrollY,
     };
 
     let pointIsInBetween =
@@ -484,7 +522,6 @@ module State = {
       let x2 = c.w;
       x0 < x2 && x2 < x1 || x1 < x2 && x2 < x0;
     };
-    
 
     /* If all conditions are met, update the distribution */
     let updateDistWithMouseMovement =
@@ -494,12 +531,12 @@ module State = {
           ~canvasShape: Types.canvasShape,
         ) => {
       /*
-        The mouse moves across the screen, and we get a series of (x,y) positions.
-        We know where the mouse last was
-        we update everything between the last (x,y) position and the new (x,y), using linear interpolation
-        Note that we only want to update & iterate over the parts of the canvas which are changed by the mouse movement
-        (otherwise, things might be too slow)
-        */
+       The mouse moves across the screen, and we get a series of (x,y) positions.
+       We know where the mouse last was
+       we update everything between the last (x,y) position and the new (x,y), using linear interpolation
+       Note that we only want to update & iterate over the parts of the canvas which are changed by the mouse movement
+       (otherwise, things might be too slow)
+       */
 
       let slope = (point1.h -. point0.h) /. (point1.w -. point0.w);
       let pos0 =
@@ -539,20 +576,22 @@ module State = {
     let validateYCoordinates =
         (~point: Types.canvasPoint, ~rectangle: Types.rectangle) => {
       switch (
-        /* 
-        - If we also validate the xs, this produces a jaded user experience around the edges. 
-        - Instead, we will also update the first and last points in the updateDistWithMouseMovement, with the findClosestInOrderedArrayDangerously function, even when the x is outside the padding zone
-        - When we send the distribution to foretold, we'll get rid of the first and last points.  
-        */
-        /* 
-        point.w >= float_of_int(rectangle.left)
-        +. CanvasContext.paddingFactorX(rectangle.width),
-        point.w <= float_of_int(rectangle.right)
-        -. CanvasContext.paddingFactorX(rectangle.width),
-        */  
-        point.h >= float_of_int(rectangle.top)
+        /*
+         - If we also validate the xs, this produces a jaded user experience around the edges.
+         - Instead, we will also update the first and last points in the updateDistWithMouseMovement, with the findClosestInOrderedArrayDangerously function, even when the x is outside the padding zone
+         - When we send the distribution to foretold, we'll get rid of the first and last points.
+         */
+        /*
+         point.w >= float_of_int(rectangle.left)
+         +. CanvasContext.paddingFactorX(rectangle.width),
+         point.w <= float_of_int(rectangle.right)
+         -. CanvasContext.paddingFactorX(rectangle.width),
+         */
+        point.h
+        -. windowScrollY >= float_of_int(rectangle.top)
         +. CanvasContext.paddingFactorY(rectangle.height),
-        point.h <= float_of_int(rectangle.bottom)
+        point.h
+        -. windowScrollY <= float_of_int(rectangle.bottom)
         -. CanvasContext.paddingFactorY(rectangle.height),
       ) {
       | (true, true) => true
@@ -567,8 +606,8 @@ module State = {
         validateYCoordinates(~point=point1, ~rectangle),
       ) {
       | (true, true) =>
-        let newCanvasShape = updateDistWithMouseMovement(~point0, ~point1, ~canvasShape);
-        state.readyToRender ? Draw.canvasPlot(canvasElement, newCanvasShape) : ();
+        let newCanvasShape =
+          updateDistWithMouseMovement(~point0, ~point1, ~canvasShape);
         setState((state: t) => {
           {
             ...state,
@@ -577,10 +616,13 @@ module State = {
             readyToRender: false,
           }
         });
+        state.readyToRender
+          ? Draw.canvasPlot(canvasElement, newCanvasShape) : ();
+
       | (false, true) => updateMousePosition(~point=point1, ~setState)
       | (_, false) => ()
       };
-    }
+    };
 
     switch (
       potentialCanvas,
@@ -588,11 +630,12 @@ module State = {
       state.isMouseDown,
       state.lastMousePosition,
     ) {
-    | (Some(canvasElement), Some(canvasShape), true, Some(point0)) => 
-      decideWithCanvas(~canvasElement, ~canvasShape, ~point0);
+    | (Some(canvasElement), Some(canvasShape), true, Some(point0)) =>
+      decideWithCanvas(~canvasElement, ~canvasShape, ~point0)
     | (Some(canvasElement), _, true, None) =>
       let rectangle = CanvasContext.getBoundingClientRect(canvasElement);
-      validateYCoordinates(~point=point1, ~rectangle) ? updateMousePosition(~point=point1, ~setState) : ();
+      validateYCoordinates(~point=point1, ~rectangle)
+        ? updateMousePosition(~point=point1, ~setState) : ();
     | _ => ()
     };
   };
@@ -603,7 +646,7 @@ module State = {
     });
   };
 
-  let onSubmitForm =
+  let onSubmitForetoldForm =
       (
         ~state: Types.canvasState,
         ~potentialCanvasElement: option(Dom.element),
@@ -615,8 +658,7 @@ module State = {
     | (None, _) => ()
     | (_, None) => ()
     | (Some(canvasShape), Some(canvasElement)) =>
-    
-    let pdf =
+      let pdf =
         Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
 
       /* create a cdf from a pdf */
@@ -626,32 +668,86 @@ module State = {
           ~intendedSum=1.0,
           pdf,
         );
-      let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf); 
+      let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
       let xs = [||];
       let ys = [||];
-      for (i in 1 to 999) { 
+      for (i in 1 to 999) {
         /*
-        - see comment in validateYCoordinates as to why this starts at 1.
-        - foretold accepts distributions with up to 1000 points.
-        */
+         - see comment in validateYCoordinates as to why this starts at 1.
+         - foretold accepts distributions with up to 1000 points.
+         */
         let j = i * 3;
         Js.Array.push(cdf.xyShape.xs[j], xs);
         Js.Array.push(cdf.xyShape.ys[j], ys);
+
+        ();
       };
+
       ForetoldAPI.predict(
-        ~measurableId=state.formElements.measurableId,
-        ~token=state.formElements.token,
-        ~comment=state.formElements.comment,
+        ~measurableId=state.foretoldFormElements.measurableId,
+        ~token=state.foretoldFormElements.token,
+        ~comment=state.foretoldFormElements.comment,
         ~xs,
         ~ys,
       );
-      setState((state: t) => {...state, hasJustBeenSent: true});
+
+      setState((state: t) => {...state, hasJustBeenSentToForetold: true});
       Js.Global.setTimeout(
         () => {
-          setState((state: t) => {...state, hasJustBeenSent: false});
+          setState((state: t) =>
+            {...state, hasJustBeenSentToForetold: false}
+          )
         },
         5000,
       );
+
+      ();
+    };
+    ();
+  };
+
+  let onSubmitLimitsForm =
+      (
+        ~state: Types.canvasState,
+        ~potentialCanvasElement: option(Dom.element),
+        ~setState,
+      ) => {
+    let potentialCanvasShape = state.canvasShape;
+
+    switch (potentialCanvasShape, potentialCanvasElement) {
+    | (None, _) => ()
+    | (_, None) => ()
+    | (Some(canvasShape), Some(canvasElement)) =>
+      let xValues = canvasShape.xValues;
+      let length = Array.length(xValues);
+      let xMin = xValues[0];
+      let xMax = xValues[length - 1];
+      let lower = state.distributionLimits.lower;
+      let upper = state.distributionLimits.upper;
+
+      let slope = (upper -. lower) /. (xMax -. xMin);
+      let delta = lower -. slope *. xMin;
+
+      let xValues = E.A.fmap(x => delta +. x *. slope, xValues);
+      let newCanvasShape = {...canvasShape, xValues};
+      setState((state: t) =>
+        {
+          ...state,
+          canvasShape: Some(newCanvasShape),
+          limitsHaveJustBeenUpdated: true,
+        }
+      );
+      Draw.canvasPlot(canvasElement, newCanvasShape);
+
+      Js.Global.setTimeout(
+        () => {
+          setState((state: t) =>
+            {...state, limitsHaveJustBeenUpdated: false}
+          )
+        },
+        5000,
+      );
+
       ();
     };
     ();
@@ -666,7 +762,6 @@ module Styles = {
 
 [@react.component]
 let make = () => {
-
   let canvasRef: React.Ref.t(option(Dom.element)) = React.useRef(None); // should morally live inside the state, but this is tricky.
   let (state, setState) = React.useState(() => State.initialState);
 
@@ -684,7 +779,7 @@ let make = () => {
     None;
   });
 
-  /* Render the current distribution every 40ms, while the mouse is moving and changing it */
+  /* Render the current distribution every 30ms, while the mouse is moving and changing it */
   React.useEffect0(() => {
     let runningInterval =
       Js.Global.setInterval(
@@ -693,14 +788,14 @@ let make = () => {
             {...state, readyToRender: true}
           })
         },
-        40,
+        30,
       );
     Some(() => Js.Global.clearInterval(runningInterval));
   });
 
   <Antd.Card title={"Distribution Drawer" |> R.ste}>
     <div className=Styles.spacer />
-    <p>{"Click to begin drawing, click to stop drawing" |> R.ste}</p>
+    <p> {"Click to begin drawing, click to stop drawing" |> R.ste} </p>
     <canvas
       width="1000"
       height="700"
@@ -722,13 +817,88 @@ let make = () => {
     <br />
     <br />
     <br />
+    <Antd.Card title={"Update upper and lower limits" |> R.ste}>
+      <form
+        id="update-limits"
+        onSubmit={(e: ReactEvent.Form.t): unit => {
+          ReactEvent.Form.preventDefault(e);
+          /* code to run on submit */
+          State.onSubmitLimitsForm(
+            ~state,
+            ~potentialCanvasElement=React.Ref.current(canvasRef),
+            ~setState,
+          );
+          ();
+        }}>
+        <div>
+          <label> {"Lower:  " |> R.ste} </label>
+          <input
+            type_="number"
+            id="lowerlimit"
+            name="lowerlimit"
+            value={Js.Float.toString(state.distributionLimits.lower)}
+            placeholder="a number. f.ex., 0"
+            required=true
+            step=0.001
+            onChange={event => {
+              let value = ReactEvent.Form.target(event)##value;
+              setState((state: Types.canvasState) => {
+                {
+                  ...state,
+                  distributionLimits: {
+                    ...state.distributionLimits,
+                    lower: value,
+                  },
+                }
+              });
+            }}
+          />
+        </div>
+        <br />
+        <div>
+          <label> {"Upper:  " |> R.ste} </label>
+          <input
+            type_="number"
+            id="upperlimit"
+            name="upperlimit"
+            value={Js.Float.toString(state.distributionLimits.upper)}
+            placeholder="a number. f.ex., 100"
+            required=true
+            step=0.001
+            onChange={event => {
+              let value = ReactEvent.Form.target(event)##value;
+              setState((state: Types.canvasState) => {
+                {
+                  ...state,
+                  distributionLimits: {
+                    ...state.distributionLimits,
+                    upper: value,
+                  },
+                }
+              });
+            }}
+          />
+        </div>
+        <br />
+        <button type_="submit" id="updatelimits">
+          {"Update limits" |> R.ste}
+        </button>
+        <br />
+        <p hidden={!state.limitsHaveJustBeenUpdated}>
+          {"Updated!" |> R.ste}
+        </p>
+      </form>
+    </Antd.Card>
+    <br />
+    <br />
+    <br />
     <Antd.Card title={"Send to foretold" |> R.ste}>
       <form
         id="send-to-foretold"
         onSubmit={(e: ReactEvent.Form.t): unit => {
           ReactEvent.Form.preventDefault(e);
           /* code to run on submit */
-          State.onSubmitForm(
+          State.onSubmitForetoldForm(
             ~state,
             ~potentialCanvasElement=React.Ref.current(canvasRef),
             ~setState,
@@ -741,7 +911,7 @@ let make = () => {
             type_="text"
             id="measurableId"
             name="measurableId"
-            value={state.formElements.measurableId}
+            value={state.foretoldFormElements.measurableId}
             placeholder="The last bit in the url, after the m"
             required=true
             onChange={event => {
@@ -749,8 +919,8 @@ let make = () => {
               setState((state: Types.canvasState) => {
                 {
                   ...state,
-                  formElements: {
-                    ...state.formElements,
+                  foretoldFormElements: {
+                    ...state.foretoldFormElements,
                     measurableId: value,
                   },
                 }
@@ -765,7 +935,7 @@ let make = () => {
             type_="text"
             id="foretoldToken"
             name="foretoldToken"
-            value={state.formElements.token}
+            value={state.foretoldFormElements.token}
             placeholder="Profile -> Bots -> (New Bot) -> Token"
             required=true
             onChange={event => {
@@ -773,8 +943,8 @@ let make = () => {
               setState((state: Types.canvasState) => {
                 {
                   ...state,
-                  formElements: {
-                    ...state.formElements,
+                  foretoldFormElements: {
+                    ...state.foretoldFormElements,
                     token: value,
                   },
                 }
@@ -794,8 +964,8 @@ let make = () => {
             setState((state: Types.canvasState) => {
               {
                 ...state,
-                formElements: {
-                  ...state.formElements,
+                foretoldFormElements: {
+                  ...state.foretoldFormElements,
                   comment: value,
                 },
               }
@@ -807,7 +977,7 @@ let make = () => {
           {"Send to foretold" |> R.ste}
         </button>
         <br />
-        <p hidden={!state.hasJustBeenSent}> {"Sent!" |> R.ste} </p>
+        <p hidden={!state.hasJustBeenSentToForetold}> {"Sent!" |> R.ste} </p>
       </form>
     </Antd.Card>
   </Antd.Card>;
