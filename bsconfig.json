@@ -19,7 +19,11 @@
       "subdirs": true
     }
   ],
-  "bsc-flags": ["-bs-super-errors", "-bs-no-version-header", "-bs-g"],
+  "bsc-flags": [
+    "-bs-super-errors",
+    "-bs-no-version-header",
+    "-bs-g"
+  ],
   "package-specs": [
     {
       "module": "commonjs",
@@ -38,8 +42,12 @@
     "bs-css",
     "rationale",
     "bs-moment",
-    "reschema"
+    "reschema",
+    "bs-webapi",
+    "bs-fetch"
   ],
   "refmt": 3,
-  "ppx-flags": ["lenses-ppx/ppx"]
+  "ppx-flags": [
+    "lenses-ppx/ppx"
+  ]
 }
