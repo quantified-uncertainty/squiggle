@@ -161,24 +161,27 @@ module Convert = {
   let canvasShapeToContinuousShape =
       (~canvasShape: Types.canvasShape, ~canvasElement: Dom.element)
       : Types.continuousShape => {
+      
     let xs = canvasShape.xValues;
     let hs = canvasShape.hs;
     let rectangle: Types.rectangle =
       CanvasContext.getBoundingClientRect(canvasElement);
     let bottom = float_of_int(rectangle.bottom);
+    let paddingFactorY = CanvasContext.paddingFactorX(rectangle.height);
+    let windowScrollY: float = [%raw "window.scrollY"];
 
-    let ysRelative =
-      E.A.fmap(
-        h => bottom -. h +. CanvasContext.paddingFactorY(rectangle.height),
-        hs,
-      );
-    let xyShape: Types.xyShape = {xs, ys: ysRelative};
+    let y0Line = bottom+.windowScrollY-.paddingFactorY;
+    let ys = E.A.fmap( h => y0Line -. h, hs);
+    
+    let xyShape: Types.xyShape = {xs, ys};
     let continuousShape: Types.continuousShape = {
       xyShape,
       interpolation: `Linear,
     };
+    
     let integral = XYShape.Analysis.integrateContinuousShape(continuousShape);
-    let ys = E.A.fmap(y => y /. integral, ysRelative);
+    let ys = E.A.fmap(y => y /. integral, ys);
+    
     let continuousShape: Types.continuousShape = {
       xyShape: {
         xs,
@@ -343,6 +346,10 @@ module Draw = {
     /* draw units along the x axis */
     CanvasContext.font(context, "16px Roboto");
     CanvasContext.lineWidth(context, 2.0);
+
+    CanvasContext.font(context, "16px Roboto");
+    CanvasContext.lineWidth(context, 2.0);
+
     let numIntervals = 10;
     let width = float_of_int(rectangle.width);
     let height = float_of_int(rectangle.height);
@@ -378,8 +385,8 @@ module Draw = {
   };
 
   let initialDistribution = (canvasElement: Dom.element, setState) => {
-    let mean = 50.0;
-    let stdev = 20.0;
+    let mean = 100.0;
+    let stdev = 15.0;
     let numSamples = 3000;
 
     let normal: SymbolicDist.dist = `Normal({mean, stdev});
@@ -668,6 +675,7 @@ module State = {
           ~intendedSum=1.0,
           pdf,
         );
+      Js.log(_pdf);
       let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
       let xs = [||];
       let ys = [||];
