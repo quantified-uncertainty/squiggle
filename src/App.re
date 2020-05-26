@@ -3,6 +3,7 @@ type route =
   | DistBuilder
   | DistBuilder2
   | DistBuilder3
+  | Drawer
   | Home
   | NotFound;
 
@@ -12,6 +13,7 @@ let routeToPath = route =>
   | DistBuilder => "/dist-builder"
   | DistBuilder2 => "/dist-builder2"
   | DistBuilder3 => "/dist-builder3"
+  | Drawer => "/drawer"
   | Home => "/"
   | _ => "/"
   };
@@ -79,6 +81,10 @@ module Menu = {
       <Item href={routeToPath(DistBuilder3)} key="dist-builder-3">
         {"Dist Builder 3" |> R.ste}
       </Item>
+      <Item href={routeToPath(Drawer)} key="drawer">
+        {"Drawer" |> R.ste}
+      </Item>
+
     </div>;
   };
 };
@@ -93,6 +99,7 @@ let make = () => {
     | ["dist-builder"] => DistBuilder
     | ["dist-builder2"] => DistBuilder2
     | ["dist-builder3"] => DistBuilder3
+    | ["drawer"] => Drawer
     | [] => Home
     | _ => NotFound
     };
@@ -108,6 +115,7 @@ let make = () => {
      | DistBuilder => <DistBuilder />
      | DistBuilder2 => <DistBuilder2 />
      | DistBuilder3 => <DistBuilder3 />
+     | Drawer => <Drawer />
      | Home => <Home />
      | _ => <div> {"Page is not found" |> R.ste} </div>
      }}
