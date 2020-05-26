@@ -347,9 +347,6 @@ module Draw = {
     CanvasContext.font(context, "16px Roboto");
     CanvasContext.lineWidth(context, 2.0);
 
-    CanvasContext.font(context, "16px Roboto");
-    CanvasContext.lineWidth(context, 2.0);
-
     let numIntervals = 10;
     let width = float_of_int(rectangle.width);
     let height = float_of_int(rectangle.height);
@@ -675,7 +672,7 @@ module State = {
           ~intendedSum=1.0,
           pdf,
         );
-      Js.log(_pdf);
+
       let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
       let xs = [||];
       let ys = [||];
