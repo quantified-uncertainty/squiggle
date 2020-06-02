@@ -255,13 +255,31 @@ module GenericSimple = {
     | `Uniform({high}) => high
     | `Float(n) => n;
 
+
+  /* This function returns a list of x's at which to evaluate the overall distribution (for rendering).
+     This function is called separately for each individual distribution.
+
+     When called with xSelection=`Linear, this function will return (sampleCount) x's, evenly
+     distributed between the min and max of the distribution (whatever those are defined to be above).
+
+     When called with xSelection=`ByWeight, this function will distribute the x's such as to
+     match the cumulative shape of the distribution. This is slower but may give better results.
+  */
   let interpolateXs =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
+
     switch (xSelection) {
     | `Linear => E.A.Floats.range(min(dist), max(dist), sampleCount)
     | `ByWeight =>
-      E.A.Floats.range(minCdfValue, maxCdfValue, sampleCount)
-      |> E.A.fmap(x => inv(x, dist))
+      switch (dist) {
+      // In `ByWeight mode, uniform distributions get special treatment because we need two x's
+      // on either side for proper rendering (just left and right of the discontinuities).
+      | `Uniform(n) => E.A.of_list([n.low -. minCdfValue, n.low +. minCdfValue,
+                                    n.high -. minCdfValue, n.high +. minCdfValue])
+      | dist => 
+        let ys = E.A.Floats.range(minCdfValue, maxCdfValue, sampleCount)
+        ys |> E.A.fmap(y => inv(y, dist))
+      }
     };
   };
 
