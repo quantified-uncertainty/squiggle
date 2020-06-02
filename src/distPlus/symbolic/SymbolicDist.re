@@ -100,7 +100,7 @@ module Normal = {
 
   let from90PercentCI = (low, high) => {
     let mean = E.A.Floats.mean([|low, high|]);
-    let stdev = (high -. low) /. 1.645;
+    let stdev = (high -. low) /. (2. *. 1.644854);
     `Normal({mean, stdev});
   };
   let inv = (p, t: t) => Jstat.normal##inv(p, t.mean, t.stdev);
