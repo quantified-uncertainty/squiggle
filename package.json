@@ -36,7 +36,7 @@
     "bs-ant-design-alt": "2.0.0-alpha.33",
     "bs-css": "11.0.0",
     "bs-fetch": "^0.5.2",
-    "bs-moment": "0.4.4",
+    "bs-moment": "0.4.5",
     "bs-reform": "9.7.1",
     "bs-webapi": "^0.15.9",
     "bsb-js": "1.1.7",
@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@glennsl/bs-jest": "^0.5.1",
-    "bs-platform": "7.2.2",
+    "bs-platform": "7.3.2",
     "parcel-bundler": "1.12.4",
     "parcel-plugin-bundle-visualiser": "^1.2.0",
     "parcel-plugin-less-js-enabled": "1.0.2"
