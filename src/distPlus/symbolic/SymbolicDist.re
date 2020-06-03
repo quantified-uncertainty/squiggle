@@ -268,18 +268,16 @@ module GenericSimple = {
   let interpolateXs =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
 
-    switch (xSelection) {
-    | `Linear => E.A.Floats.range(min(dist), max(dist), sampleCount)
-    | `ByWeight =>
-      switch (dist) {
+    switch (xSelection, dist) {
+    | (`Linear, _) => E.A.Floats.range(min(dist), max(dist), sampleCount)
+    | (`ByWeight, `Uniform(n)) =>
       // In `ByWeight mode, uniform distributions get special treatment because we need two x's
       // on either side for proper rendering (just left and right of the discontinuities).
-      | `Uniform(n) => E.A.of_list([n.low -. minCdfValue, n.low +. minCdfValue,
-                                    n.high -. minCdfValue, n.high +. minCdfValue])
-      | dist => 
-        let ys = E.A.Floats.range(minCdfValue, maxCdfValue, sampleCount)
-        ys |> E.A.fmap(y => inv(y, dist))
-      }
+      let dx = 0.00001 *. (n.high -. n.low);
+      [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|]
+    | (`ByWeight, _) => 
+      let ys = E.A.Floats.range(minCdfValue, maxCdfValue, sampleCount)
+      ys |> E.A.fmap(y => inv(y, dist))
     };
   };
 
