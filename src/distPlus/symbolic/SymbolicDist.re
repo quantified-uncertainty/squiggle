@@ -100,7 +100,7 @@ module Normal = {
 
   let from90PercentCI = (low, high) => {
     let mean = E.A.Floats.mean([|low, high|]);
-    let stdev = (high -. low) /. 1.645;
+    let stdev = (high -. low) /. (2. *. 1.644854);
     `Normal({mean, stdev});
   };
   let inv = (p, t: t) => Jstat.normal##inv(p, t.mean, t.stdev);
@@ -255,13 +255,29 @@ module GenericSimple = {
     | `Uniform({high}) => high
     | `Float(n) => n;
 
+
+  /* This function returns a list of x's at which to evaluate the overall distribution (for rendering).
+     This function is called separately for each individual distribution.
+
+     When called with xSelection=`Linear, this function will return (sampleCount) x's, evenly
+     distributed between the min and max of the distribution (whatever those are defined to be above).
+
+     When called with xSelection=`ByWeight, this function will distribute the x's such as to
+     match the cumulative shape of the distribution. This is slower but may give better results.
+  */
   let interpolateXs =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
-    switch (xSelection) {
-    | `Linear => E.A.Floats.range(min(dist), max(dist), sampleCount)
-    | `ByWeight =>
-      E.A.Floats.range(minCdfValue, maxCdfValue, sampleCount)
-      |> E.A.fmap(x => inv(x, dist))
+
+    switch (xSelection, dist) {
+    | (`Linear, _) => E.A.Floats.range(min(dist), max(dist), sampleCount)
+    | (`ByWeight, `Uniform(n)) =>
+      // In `ByWeight mode, uniform distributions get special treatment because we need two x's
+      // on either side for proper rendering (just left and right of the discontinuities).
+      let dx = 0.00001 *. (n.high -. n.low);
+      [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|]
+    | (`ByWeight, _) => 
+      let ys = E.A.Floats.range(minCdfValue, maxCdfValue, sampleCount)
+      ys |> E.A.fmap(y => inv(y, dist))
     };
   };
 
