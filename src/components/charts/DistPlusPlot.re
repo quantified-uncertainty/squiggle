@@ -339,7 +339,7 @@ let make = (~distPlus: DistTypes.distPlus) => {
   <div>
     {state.distributions
      |> E.L.fmapi((index, config) =>
-          <div className="flex">
+          <div className="flex" key={string_of_int(index)}>
             <div className="w-4/5">
               <Chart distPlus config onHover={r => {setX(_ => r)}} />
             </div>

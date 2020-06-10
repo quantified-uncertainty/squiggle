@@ -263,11 +263,8 @@ module MathAdtToDistDst = {
       | Object(_) => Error("Object not valid as top level")
     );
 
-  let run = (r): result(SymbolicDist.bigDist, string) => {
-    let o = r |> MathAdtCleaner.run |> topLevel;
-    Js.log2("parser output", o);
-    o
-  };
+  let run = (r): result(SymbolicDist.bigDist, string) =>
+    r |> MathAdtCleaner.run |> topLevel;
 };
 
 let fromString = str => {
@@ -282,7 +279,6 @@ let fromString = str => {
   let mathJsToJson = Mathjs.parseMath(str);
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
-    Js.log2("parsed", r);
       switch (MathJsonToMathJsAdt.run(r)) {
       | Some(r) => Ok(r)
       | None => Error("MathJsParse Error")

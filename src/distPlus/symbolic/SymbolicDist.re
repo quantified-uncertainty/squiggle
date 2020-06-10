@@ -64,7 +64,7 @@ type dist = [
      - IndependentVariableProduct(WeightedDist, WeightedDist) [i.e. distribution product]
    */
 
-type weightedDist = (float, dist);
+/*type weightedDist = (float, dist);
 
 type bigDistTree =
   /* | DistLeaf(dist) */
@@ -79,7 +79,7 @@ let rec treeIntegral = item => {
   | PointwiseNormalizedDistSum(childTrees) =>
     childTrees |> E.A.fmap(treeIntegral) |> E.A.Floats.sum
   };
-};
+};*/
 
 /* bigDist can either be a single distribution, or a
    PointwiseCombination, i.e. an array of (dist, weight) tuples */
