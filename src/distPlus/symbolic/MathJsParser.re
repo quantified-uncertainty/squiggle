@@ -148,6 +148,10 @@ module MathAdtToDistDst = {
       Ok(`Simple(`Triangular({low, medium, high})))
     | _ => Error("Wrong number of variables in triangle distribution");
 
+  /*let add: array(arg) => result(SymbolicDist.bigDist, string) =
+    fun
+    | */
+
   let multiModal =
       (
         args: array(result(SymbolicDist.bigDist, string)),
@@ -158,22 +162,25 @@ module MathAdtToDistDst = {
       args
       |> E.A.fmap(
            fun
-           | Ok(`Simple(n)) => Ok(n)
+           | Ok(`Simple(d)) => Ok(`Simple(d))
+           | Ok(`PointwiseCombination(dists)) => Ok(`PointwiseCombination(dists))
            | Error(e) => Error(e)
-           | Ok(k) => Error(SymbolicDist.toString(k)),
+           | _ => Error("Unexpected dist")
          );
+
     let firstWithError = dists |> Belt.Array.getBy(_, Belt.Result.isError);
     let withoutErrors = dists |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
+
     switch (firstWithError) {
-    | Some(Error(e)) => Error(e)
-    | None when withoutErrors |> E.A.length == 0 =>
-      Error("Multimodals need at least one input")
-    | _ =>
-      withoutErrors
-      |> E.A.fmapi((index, item) =>
-           (item, weights |> E.A.get(_, index) |> E.O.default(1.0))
-         )
-      |> (r => Ok(`PointwiseCombination(r)))
+      | Some(Error(e)) => Error(e)
+      | None when withoutErrors |> E.A.length == 0 =>
+        Error("Multimodals need at least one input")
+      | _ =>
+        withoutErrors
+        |> E.A.fmapi((index, item) =>
+            (item, weights |> E.A.get(_, index) |> E.O.default(1.0))
+          )
+        |> (r => Ok(`PointwiseCombination(r)))
     };
   };
 
@@ -186,12 +193,12 @@ module MathAdtToDistDst = {
         )
     |> E.A.O.concatSomes
     let outputs = Samples.T.fromSamples(samples);
-    let pdf = outputs.shape |> E.O.bind(_,Distributions.Shape.T.toContinuous)
+    let pdf = outputs.shape |> E.O.bind(_,Distributions.Shape.T.toContinuous);
     let shape = pdf |> E.O.fmap(pdf => {
       let _pdf = Distributions.Continuous.T.scaleToIntegralSum(~cache=None, ~intendedSum=1.0, pdf);
       let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
       SymbolicDist.ContinuousShape.make(_pdf, cdf)
-    })
+    });
     switch(shape){
       | Some(s) => Ok(`Simple(`ContinuousShape(s)))
       | None => Error("Rendering did not work")
@@ -238,6 +245,7 @@ module MathAdtToDistDst = {
           let dists = possibleDists |> E.A.fmap(functionParser);
           multiModal(dists, weights);
         }
+      //| Fn({name: "add", args}) => add(args)
       | Fn({name}) => Error(name ++ ": function not supported")
       | _ => {
           Error("This type not currently supported");
@@ -255,19 +263,32 @@ module MathAdtToDistDst = {
       | Object(_) => Error("Object not valid as top level")
     );
 
-  let run = (r): result(SymbolicDist.bigDist, string) =>
-    r |> MathAdtCleaner.run |> topLevel;
+  let run = (r): result(SymbolicDist.bigDist, string) => {
+    let o = r |> MathAdtCleaner.run |> topLevel;
+    Js.log2("parser output", o);
+    o
+  };
 };
 
 let fromString = str => {
+  /* We feed the user-typed string into Mathjs.parseMath,
+     which returns a JSON with (hopefully) a single-element array.
+     This array element is the top-level node of a nested-object tree
+     representing the functions/arguments/values/etc. in the string.
+
+     The function MathJsonToMathJsAdt then recursively unpacks this JSON into a typed data structure we can use.
+     Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
+   */
   let mathJsToJson = Mathjs.parseMath(str);
   let mathJsParse =
-    E.R.bind(mathJsToJson, r =>
+    E.R.bind(mathJsToJson, r => {
+    Js.log2("parsed", r);
       switch (MathJsonToMathJsAdt.run(r)) {
       | Some(r) => Ok(r)
       | None => Error("MathJsParse Error")
       }
-    );
+});
+
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
   value;
 };
