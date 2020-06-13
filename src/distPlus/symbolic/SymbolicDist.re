@@ -410,6 +410,7 @@ module DistTree = {
         `Distribution(`Float(func(v1, v2)))
       }
 
+    | (`Distribution(`Normal(n2)), `Distribution(`Float(v1)), `AddOperation)
     | (`Distribution(`Float(v1)), `Distribution(`Normal(n2)), `AddOperation) => {
         let n: normal = {mean: v1 +. n2.mean, stdev: n2.stdev};
         `Distribution(`Normal(n))
@@ -419,6 +420,22 @@ module DistTree = {
         let n: normal = {mean: n1.mean +. n2.mean, stdev: sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)};
         `Distribution(`Normal(n));
       }
+
+    | (`Distribution(`Normal(n1)), `Distribution(`Normal(n2)), `SubtractOperation) => {
+        let n: normal = {mean: n1.mean -. n2.mean, stdev: sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)};
+        `Distribution(`Normal(n));
+      }
+
+    | (`Distribution(`Lognormal(l1)), `Distribution(`Lognormal(l2)), `MultiplyOperation) => {
+        let l: lognormal = {mu: l1.mu +. l2.mu, sigma: l1.sigma +. l2.sigma};
+        `Distribution(`Lognormal(l));
+      }
+
+    | (`Distribution(`Lognormal(l1)), `Distribution(`Lognormal(l2)), `DivideOperation) => {
+        let l: lognormal = {mu: l1.mu -. l2.mu, sigma: l1.sigma +. l2.sigma};
+        `Distribution(`Lognormal(l));
+      }
+
 
     /* General cases: convolve the XYShapes */
     | (`Distribution(d1), `Distribution(d2), _) => {
@@ -537,6 +554,9 @@ module DistTree = {
   let evaluateNormalize = (et: nodeResult, sampleCount: int) => {
     // just divide everything by the integral.
     switch (et) {
+    | `RenderedShape(sc, sd, 0.) => {
+        `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.)
+      }
     | `RenderedShape(sc, sd, i) => {
         // loop through all ys and divide them by i
         let normalize = (s: DistTypes.xyShape): DistTypes.xyShape => {xs: s.xs, ys: s.ys |> E.A.fmap(y => y /. i)};
