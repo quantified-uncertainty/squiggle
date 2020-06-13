@@ -50,41 +50,28 @@ type dist = [
   | `Float(float) // Dirac delta at x. Practically useful only in the context of multimodals.
 ];
 
-/* Build a tree.
+type integral = float;
+type cutoffX = float;
+type operation = [
+    | `AddOperation
+    | `SubtractOperation
+    | `MultiplyOperation
+    | `DivideOperation
+    | `ExponentiateOperation
+];
 
-     Multiple operations possible:
-
-     - PointwiseSum(Scalar, Scalar)
-     - PointwiseSum(WeightedDist, WeightedDist)
-     - PointwiseProduct(Scalar, Scalar)
-     - PointwiseProduct(Scalar, WeightedDist)
-     - PointwiseProduct(WeightedDist, WeightedDist)
-
-     - IndependentVariableSum(WeightedDist, WeightedDist) [i.e., convolution]
-     - IndependentVariableProduct(WeightedDist, WeightedDist) [i.e. distribution product]
-   */
-
-/*type weightedDist = (float, dist);
-
-type bigDistTree =
-  /* | DistLeaf(dist) */
-  /* | ScalarLeaf(float) */
-  /* | PointwiseScalarDistProduct(DistLeaf(d), ScalarLeaf(s)) */
-  | WeightedDistLeaf(weightedDist)
-  | PointwiseNormalizedDistSum(array(bigDistTree));
-
-let rec treeIntegral = item => {
-  switch (item) {
-  | WeightedDistLeaf((w, d)) => w
-  | PointwiseNormalizedDistSum(childTrees) =>
-    childTrees |> E.A.fmap(treeIntegral) |> E.A.Floats.sum
-  };
-};*/
-
-/* bigDist can either be a single distribution, or a
-   PointwiseCombination, i.e. an array of (dist, weight) tuples */
-type bigDist = [ | `Simple(dist) | `PointwiseCombination(pointwiseAdd)]
-and pointwiseAdd = array((bigDist, float));
+type distTree = [
+    | `Distribution(dist)
+    | `Combination(distTree, distTree, operation)
+    | `PointwiseSum(distTree, distTree)
+    | `PointwiseProduct(distTree, distTree)
+    | `VerticalScaling(distTree, distTree)
+    | `Normalize(distTree)
+    | `LeftTruncate(distTree, cutoffX)
+    | `RightTruncate(distTree, cutoffX)
+    | `Render(distTree)
+]
+and weightedDists = array((distTree, float));
 
 module ContinuousShape = {
   type t = continuousShape;
@@ -326,138 +313,331 @@ module GenericSimple = {
   };
 };
 
-module PointwiseAddDistributionsWeighted = {
-  type t = pointwiseAdd;
+module DistTree = {
+  type nodeResult = [
+    | `Distribution(dist)
+    // RenderedShape: continuous xyShape, discrete xyShape, total value.
+    | `RenderedShape(DistTypes.continuousShape, DistTypes.discreteShape, integral)
+  ];
 
-  let normalizeWeights = (weightedDists: t) => {
-    let total = weightedDists |> E.A.fmap(snd) |> E.A.Floats.sum;
-    weightedDists |> E.A.fmap(((d, w)) => (d, w /. total));
+  let evaluateDistribution = (d: dist): nodeResult => {
+    // certain distributions we may want to evaluate to RenderedShapes right away, e.g. discrete
+    `Distribution(d)
   };
 
-  let rec pdf = (x: float, weightedNormalizedDists: t) =>
-    weightedNormalizedDists
-    |> E.A.fmap(((d, w)) => {
-         switch (d) {
-         | `PointwiseCombination(ts) => pdf(x, ts) *. w
-         | `Simple(d) => GenericSimple.pdf(x, d) *. w
-         }
-       })
-    |> E.A.Floats.sum;
+  // This is a performance bottleneck!
+  // Using raw JS here so we can use native for loops and access array elements
+  // directly, without option checks.
+  let jsCombinationConvolve: (array(float), array(float), array(float), array(float), float => float => float) => (array(float), array(float)) = [%bs.raw
+  {|
+  function (s1xs, s1ys, s2xs, s2ys, func) {
+    const r = new Map();
 
-  // TODO: perhaps rename into minCdfX?
-  // TODO: how should nonexistent min values be handled? They should never happen
-  let rec min = (dists: t) =>
-    dists
-    |> E.A.fmap(((d, w)) => {
-         switch (d) {
-         | `PointwiseCombination(ts) => E.O.toExn("Dist has no min", min(ts))
-         | `Simple(d) => GenericSimple.min(d)
-         }
-       })
-    |> E.A.min;
+    // To convolve, add the xs and multiply the ys:
+    for (let i = 0; i < s1xs.length; i++) {
+      for (let j = 0; j < s2xs.length; j++) {
+        const x = func(s1xs[i], s2xs[j]);
+        const cv = r.get(x) | 0;
+        r.set(x, cv + s1ys[i] * s2ys[j]);   // add up the ys, if same x
+      }
+    }
 
-  // TODO: perhaps rename into minCdfX?
-  let rec max = (dists: t) =>
-    dists
-    |> E.A.fmap(((d, w)) => {
-         switch (d) {
-         | `PointwiseCombination(ts) => E.O.toExn("Dist has no max", max(ts))
-         | `Simple(d) => GenericSimple.max(d)
-         }
-       })
-    |> E.A.max;
+    const rxys = [...r.entries()];
+    rxys.sort(([x1, y1], [x2, y2]) => x1 - x2);
 
+    const rxs = new Array(rxys.length);
+    const rys = new Array(rxys.length);
 
-  /*let rec discreteShape = (dists: t, sampleCount: int) => {
-    let discrete =
-      dists
-      |> E.A.fmap(((x, w)) => {
-           switch (d) {
-           | `Float(d) => Some((d, w)) // if the distribution is just a number, then the weight is considered the y
-           | _ => None
-           }
-         })
-      |> E.A.O.concatSomes
-      |> E.A.fmap(((x, y)) =>
-           ({xs: [|x|], ys: [|y|]}: DistTypes.xyShape)
-         )
-      // take an array of xyShapes and combine them together
-      //*           r
-                     |> (
-                       fun
-                       | `Float(r) => Some((r, e))
-                       | _ => None
-                     )
-                   )*/
-      |> Distributions.Discrete.reduce((+.));
-    discrete;
-  };*/
+    for (let i = 0; i < rxys.length; i++) {
+      rxs[i] = rxys[i][0];
+      rys[i] = rxys[i][1];
+    }
 
+    return [rxs, rys];
+  }
+  |}];
 
-  let rec findContinuousXs = (dists: t, sampleCount: int) => {
-    // we need to go through the tree of distributions and, for the continuous ones, find the xs at which
-    // later, all distributions will get evaluated.
+  let funcFromOp = (op: operation) => {
+    switch (op) {
+    | `AddOperation => (+.)
+    | `SubtractOperation => (-.)
+    | `MultiplyOperation => (*.)
+    | `DivideOperation => (/.)
+    | `ExponentiateOperation => (**)
+    }
+  }
 
-    // we want to accumulate a set of xs.
-    let xs: array(float) =
-    dists
-    |> E.A.fold_left((accXs, (d, w)) => {
-          switch (d) {
-          | `Simple(t) when (GenericSimple.contType(t) == `Discrete) => accXs
-          | `Simple(d) => {
-              let xs = GenericSimple.interpolateXs(~xSelection=`ByWeight, d, sampleCount)
-
-              E.A.append(accXs, xs)
-            }
-          | `PointwiseCombination(ts) => {
-            let xs = findContinuousXs(ts, sampleCount);
-            E.A.append(accXs, xs)
-          }
-          }
-      }, [||]);
-    xs
+  let renderDistributionToXYShape = (d: dist, sampleCount: int): (DistTypes.continuousShape, DistTypes.discreteShape) => {
+    // render the distribution into an XY shape
+    switch (d) {
+    | `Float(v) => (Distributions.Continuous.empty, {xs: [|v|], ys: [|1.0|]})
+    | _ => {
+        let xs = GenericSimple.interpolateXs(~xSelection=`ByWeight, d, sampleCount);
+        let ys = xs |> E.A.fmap(x => GenericSimple.pdf(x, d));
+        (Distributions.Continuous.make(`Linear, {xs: xs, ys: ys}), XYShape.T.empty)
+      }
+    }
   };
 
-  /* Accumulate (accContShapes, accDistShapes), each of which is an array of {xs, ys} shapes. */
-  let rec accumulateContAndDiscShapes = (dists: t, continuousXs: array(float), currentWeight) => {
-    let normalized = normalizeWeights(dists);
+  let combinationDistributionOfXYShapes = (sc1: DistTypes.continuousShape, // continuous shape
+                                        sd1: DistTypes.discreteShape, // discrete shape
+                                        sc2: DistTypes.continuousShape,
+                                        sd2: DistTypes.discreteShape, func): (DistTypes.continuousShape, DistTypes.discreteShape) => {
 
-    normalized
-    |> E.A.fold_left(((accContShapes: array(DistTypes.xyShape), accDiscShapes: array(DistTypes.xyShape)), (d, w)) => {
-        switch (d) {
+    let (ccxs, ccys) = jsCombinationConvolve(sc1.xyShape.xs, sc1.xyShape.ys, sc2.xyShape.xs, sc2.xyShape.ys, func);
+    let (dcxs, dcys) = jsCombinationConvolve(sd1.xs, sd1.ys, sc2.xyShape.xs, sc2.xyShape.ys, func);
+    let (cdxs, cdys) = jsCombinationConvolve(sc1.xyShape.xs, sc1.xyShape.ys, sd2.xs, sd2.ys, func);
+    let (ddxs, ddys) = jsCombinationConvolve(sd1.xs, sd1.ys, sd2.xs, sd2.ys, func);
 
-        | `Simple(`Float(x)) => {
-            let ds: DistTypes.xyShape = {xs: [|x|], ys: [|w *. currentWeight|]};
-            (accContShapes, E.A.append(accDiscShapes, [|ds|]))
-          }
+    let ccxy = Distributions.Continuous.make(`Linear, {xs: ccxs, ys: ccys});
+    let dcxy = Distributions.Continuous.make(`Linear, {xs: dcxs, ys: dcys});
+    let cdxy = Distributions.Continuous.make(`Linear, {xs: cdxs, ys: cdys});
+    // the continuous parts are added up; only the discrete-discrete sum is discrete
+    let continuousShapeSum = Distributions.Continuous.reduce((+.), [|ccxy, dcxy, cdxy|]);
 
-        | `Simple(d) when (GenericSimple.contType(d) == `Continuous) => {
-            let ys = continuousXs |> E.A.fmap(x => GenericSimple.pdf(x, d) *. w *. currentWeight);
-            let cs = XYShape.T.fromArrays(continuousXs, ys);
+    let ddxy: DistTypes.discreteShape = {xs: cdxs, ys: cdys};
 
-            (E.A.append(accContShapes, [|cs|]), accDiscShapes)
-          }
+    (continuousShapeSum, ddxy)
+  };
 
-        | `Simple(d) => (accContShapes, accDiscShapes) // default -- should never happen
+  let evaluateCombinationDistribution = (et1: nodeResult, et2: nodeResult, op: operation, sampleCount: int) => {
+    /* return either a Distribution or a RenderedShape. Must integrate to 1. */
 
-        | `PointwiseCombination(ts) => {
-            let (cs, ds) = accumulateContAndDiscShapes(ts, continuousXs, w *. currentWeight);
-            (E.A.append(accContShapes, cs), E.A.append(accDiscShapes, ds))
-          }
+    let func = funcFromOp(op);
+    switch ((et1, et2, op)) {
+    /* Known cases: replace symbolic with symbolic distribution */
+    | (`Distribution(`Float(v1)), `Distribution(`Float(v2)), _) => {
+        `Distribution(`Float(func(v1, v2)))
+      }
+
+    | (`Distribution(`Float(v1)), `Distribution(`Normal(n2)), `AddOperation) => {
+        let n: normal = {mean: v1 +. n2.mean, stdev: n2.stdev};
+        `Distribution(`Normal(n))
+      }
+
+    | (`Distribution(`Normal(n1)), `Distribution(`Normal(n2)), `AddOperation) => {
+        let n: normal = {mean: n1.mean +. n2.mean, stdev: sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)};
+        `Distribution(`Normal(n));
+      }
+
+    /* General cases: convolve the XYShapes */
+    | (`Distribution(d1), `Distribution(d2), _) => {
+        let (sc1, sd1) = renderDistributionToXYShape(d1, sampleCount);
+        let (sc2, sd2) = renderDistributionToXYShape(d2, sampleCount);
+        let (sc, sd) = combinationDistributionOfXYShapes(sc1, sd1, sc2, sd2, func);
+        `RenderedShape(sc, sd, 1.0)
+    }
+    | (`Distribution(d1), `RenderedShape(sc2, sd2, i2), _) => {
+        let (sc1, sd1) = renderDistributionToXYShape(d1, sampleCount);
+        let (sc, sd) = combinationDistributionOfXYShapes(sc1, sd1, sc2, sd2, func);
+        `RenderedShape(sc, sd, i2)
+    }
+    | (`RenderedShape(sc1, sd1, i1), `Distribution(d2), _) => {
+        let (sc2, sd2) = renderDistributionToXYShape(d2, sampleCount);
+        let (sc, sd) = combinationDistributionOfXYShapes(sc1, sd1, sc2, sd2, func);
+        `RenderedShape(sc, sd, i1);
+      }
+    | (`RenderedShape(sc1, sd1, i1), `RenderedShape(sc2, sd2, i2), _) => {
+        // sum of two multimodals that have a continuous and discrete each.
+        let (sc, sd) = combinationDistributionOfXYShapes(sc1, sd1, sc2, sd2, func);
+
+        `RenderedShape(sc, sd, i1);
+      }
+    }
+  };
+
+  let evaluatePointwiseSum = (et1: nodeResult, et2: nodeResult, sampleCount: int) => {
+    switch ((et1, et2)) {
+    /* Known cases: */
+    | (`Distribution(`Float(v1)), `Distribution(`Float(v2))) => {
+        v1 == v2
+        ? `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.make({xs: [|v1|], ys: [|2.|]}), 2.)
+        : `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.) // TODO: add warning: shouldn't pointwise add scalars.
+    }
+    | (`Distribution(`Float(v1)), `Distribution(d2)) => {
+        let sd1: DistTypes.xyShape = {xs: [|v1|], ys: [|1.|]};
+        let (sc2, sd2) = renderDistributionToXYShape(d2, sampleCount);
+        `RenderedShape(sc2, Distributions.Discrete.reduce((+.), [|sd1, sd2|]), 2.)
+    }
+    | (`Distribution(d1), `Distribution(`Float(v2))) => {
+        let (sc1, sd1) = renderDistributionToXYShape(d1, sampleCount);
+        let sd2: DistTypes.xyShape = {xs: [|v2|], ys: [|1.|]};
+        `RenderedShape(sc1, Distributions.Discrete.reduce((+.), [|sd1, sd2|]), 2.)
+    }
+    | (`Distribution(d1), `Distribution(d2)) => {
+        let (sc1, sd1) = renderDistributionToXYShape(d1, sampleCount);
+        let (sc2, sd2) = renderDistributionToXYShape(d2, sampleCount);
+        `RenderedShape(Distributions.Continuous.reduce((+.), [|sc1, sc2|]), Distributions.Discrete.reduce((+.), [|sd1, sd2|]), 2.)
+    }
+    | (`Distribution(d1), `RenderedShape(sc2, sd2, i2))
+    | (`RenderedShape(sc2, sd2, i2), `Distribution(d1)) => {
+        let (sc1, sd1) = renderDistributionToXYShape(d1, sampleCount);
+        `RenderedShape(Distributions.Continuous.reduce((+.), [|sc1, sc2|]), Distributions.Discrete.reduce((+.), [|sd1, sd2|]), 1. +. i2)
+    }
+    | (`RenderedShape(sc1, sd1, i1), `RenderedShape(sc2, sd2, i2)) => {
+        Js.log3("Reducing continuous rr", sc1, sc2);
+        Js.log2("Continuous reduction:", Distributions.Continuous.reduce((+.), [|sc1, sc2|]));
+        Js.log2("Discrete reduction:", Distributions.Discrete.reduce((+.), [|sd1, sd2|]));
+        `RenderedShape(Distributions.Continuous.reduce((+.), [|sc1, sc2|]), Distributions.Discrete.reduce((+.), [|sd1, sd2|]), i1 +. i2)
+    }
+    }
+  };
+
+  let evaluatePointwiseProduct = (et1: nodeResult, et2: nodeResult, sampleCount: int) => {
+    switch ((et1, et2)) {
+    /* Known cases: */
+    | (`Distribution(`Float(v1)), `Distribution(`Float(v2))) => {
+        v1 == v2
+        ? `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.make({xs: [|v1|], ys: [|1.|]}), 1.)
+        : `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.) // TODO: add warning: shouldn't pointwise multiply scalars.
+    }
+    | (`Distribution(`Float(v1)), `Distribution(d2)) => {
+        // evaluate d2 at v1
+        let y = GenericSimple.pdf(v1, d2);
+        `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.make({xs: [|v1|], ys: [|y|]}), y)
+    }
+    | (`Distribution(d1), `Distribution(`Float(v2))) => {
+        // evaluate d1 at v2
+        let y = GenericSimple.pdf(v2, d1);
+        `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.make({xs: [|v2|], ys: [|y|]}), y)
+    }
+    | (`Distribution(`Normal(n1)), `Distribution(`Normal(n2))) => {
+        let mean = (n1.mean *. n2.stdev**2. +. n2.mean *. n1.stdev**2.) /. (n1.stdev**2. +. n2.stdev**2.);
+        let stdev = 1. /. ((1. /. n1.stdev**2.) +. (1. /. n2.stdev**2.));
+        let integral = 0; // TODO
+        `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.)
+    }
+    /* General cases */
+    | (`Distribution(d1), `Distribution(d2)) => {
+        // NOT IMPLEMENTED YET
+        // TODO: evaluate integral properly
+        let (sc1, sd1) = renderDistributionToXYShape(d1, sampleCount);
+        let (sc2, sd2) = renderDistributionToXYShape(d2, sampleCount);
+        `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.)
+    }
+    | (`Distribution(d1), `RenderedShape(sc2, sd2, i2)) => {
+        // NOT IMPLEMENTED YET
+        // TODO: evaluate integral properly
+        let (sc1, sd1) = renderDistributionToXYShape(d1, sampleCount);
+        `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.)
+    }
+    | (`RenderedShape(sc1, sd1, i1), `Distribution(d1)) => {
+        // NOT IMPLEMENTED YET
+        // TODO: evaluate integral properly
+        let (sc2, sd2) = renderDistributionToXYShape(d1, sampleCount);
+        `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.)
+    }
+    | (`RenderedShape(sc1, sd1, i1), `RenderedShape(sc2, sd2, i2)) => {
+        `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.)
+    }
+    }
+  };
+
+
+  let evaluateNormalize = (et: nodeResult, sampleCount: int) => {
+    // just divide everything by the integral.
+    switch (et) {
+    | `RenderedShape(sc, sd, i) => {
+        // loop through all ys and divide them by i
+        let normalize = (s: DistTypes.xyShape): DistTypes.xyShape => {xs: s.xs, ys: s.ys |> E.A.fmap(y => y /. i)};
+
+        let scn = sc |> Distributions.Continuous.shapeMap(normalize);
+        let sdn = sd |> normalize;
+
+        `RenderedShape(scn, sdn, 1.)
+    }
+    | `Distribution(d) => `Distribution(d) // any kind of atomic dist should already be normalized -- TODO: THIS IS ACTUALLY FALSE! E.g. pointwise product of normal * normal
+    }
+  };
+
+  let evaluateTruncate = (et: nodeResult, xc: cutoffX, compareFunc: (float, float) => bool, sampleCount: int) => {
+    let cut = (s: DistTypes.xyShape): DistTypes.xyShape => {
+      let (xs, ys) = s.ys
+        |> Belt.Array.zip(s.xs)
+        |> E.A.filter(((x, y)) => compareFunc(x, xc))
+        |> Belt.Array.unzip
+
+      let cutShape: DistTypes.xyShape = {xs, ys};
+      cutShape;
+    };
+
+    switch (et) {
+      | `Distribution(d) => {
+          let (sc, sd) = renderDistributionToXYShape(d, sampleCount);
+
+          let scc = sc |> Distributions.Continuous.shapeMap(cut);
+          let sdc = sd |> cut;
+
+          let newIntegral = 1.; // TODO
+
+          `RenderedShape(scc, sdc, newIntegral);
+      }
+      | `RenderedShape(sc, sd, i) => {
+          let scc = sc |> Distributions.Continuous.shapeMap(cut);
+          let sdc = sd |> cut;
+
+          let newIntegral = 1.; // TODO
+
+          `RenderedShape(scc, sdc, newIntegral);
+      }
+    }
+  };
+
+  let evaluateVerticalScaling = (et1: nodeResult, et2: nodeResult, sampleCount: int) => {
+    let scale = (i: float, s: DistTypes.xyShape): DistTypes.xyShape => {xs: s.xs, ys: s.ys |> E.A.fmap(y => y *. i)};
+
+    switch ((et1, et2)) {
+      | (`Distribution(`Float(v)), `Distribution(d))
+      | (`Distribution(d), `Distribution(`Float(v))) => {
+          let (sc, sd) = renderDistributionToXYShape(d, sampleCount);
+
+          let scc = sc |> Distributions.Continuous.shapeMap(scale(v));
+          let sdc = sd |> scale(v);
+
+          let newIntegral = v; // TODO
+
+          `RenderedShape(scc, sdc, newIntegral);
+      }
+      | (`Distribution(`Float(v)), `RenderedShape(sc, sd, i))
+      | (`RenderedShape(sc, sd, i), `Distribution(`Float(v))) => {
+          let scc = sc |> Distributions.Continuous.shapeMap(scale(v));
+          let sdc = sd |> scale(v);
+
+          let newIntegral = v; // TODO
+
+          `RenderedShape(scc, sdc, newIntegral);
         }
+      | _ => `RenderedShape(Distributions.Continuous.empty, Distributions.Discrete.empty, 0.) // TODO: give warning
+    }
+  }
 
-    }, ([||]: array(DistTypes.xyShape), [||]: array(DistTypes.xyShape)))
+  let renderNode = (et: nodeResult, sampleCount: int) => {
+    switch (et) {
+    | `Distribution(d) => {
+          let (sc, sd) = renderDistributionToXYShape(d, sampleCount);
+          `RenderedShape(sc, sd, 1.0);
+      }
+    | s => s
+    }
+  }
+
+  let rec evaluateNode = (treeNode: distTree, sampleCount: int): nodeResult => {
+    // returns either a new symbolic distribution
+    switch (treeNode) {
+    | `Distribution(d) => evaluateDistribution(d)
+    | `Combination(t1, t2, op) => evaluateCombinationDistribution(evaluateNode(t1, sampleCount), evaluateNode(t2, sampleCount), op, sampleCount)
+    | `PointwiseSum(t1, t2) => evaluatePointwiseSum(evaluateNode(t1, sampleCount), evaluateNode(t2, sampleCount), sampleCount)
+    | `PointwiseProduct(t1, t2) => evaluatePointwiseProduct(evaluateNode(t1, sampleCount), evaluateNode(t2, sampleCount), sampleCount)
+    | `VerticalScaling(t1, t2) => evaluateVerticalScaling(evaluateNode(t1, sampleCount), evaluateNode(t2, sampleCount), sampleCount)
+    | `Normalize(t) => evaluateNormalize(evaluateNode(t, sampleCount), sampleCount)
+    | `LeftTruncate(t, x) => evaluateTruncate(evaluateNode(t, sampleCount), x, (<=), sampleCount)
+    | `RightTruncate(t, x) => evaluateTruncate(evaluateNode(t, sampleCount), x, (>=), sampleCount)
+    | `Render(t) => renderNode(evaluateNode(t, sampleCount), sampleCount)
+    }
   };
 
-  /*
-      We will assume that each dist (of t) in the multimodal has a total of one.
-      We can therefore normalize the weights of the parts.
-
-      However, a multimodal can consist of both discrete and continuous shapes.
-      These need to be added and collected individually.
-    */
-  let toShape = (dists: t, sampleCount: int) => {
-    let continuousXs = findContinuousXs(dists, sampleCount);
+  let toShape = (treeNode: distTree, sampleCount: int) => {
+    /*let continuousXs = findContinuousXs(dists, sampleCount);
     continuousXs |> Array.fast_sort(compare);
 
     let (contShapes, distShapes) = accumulateContAndDiscShapes(dists, continuousXs, 1.0);
@@ -469,60 +649,42 @@ module PointwiseAddDistributionsWeighted = {
       }, {xs: continuousXs, ys: Array.make(Array.length(continuousXs), 0.0)})
     |> Distributions.Continuous.make(`Linear);
 
-    let combinedDiscrete = Distributions.Discrete.reduce((+.), distShapes)
+    let combinedDiscrete = Distributions.Discrete.reduce((+.), distShapes)*/
 
-    let shape = MixedShapeBuilder.buildSimple(~continuous=Some(combinedContinuous), ~discrete=combinedDiscrete);
+    let treeShape = evaluateNode(`Render(`Normalize(treeNode)), sampleCount);
+    switch (treeShape) {
+    | `Distribution(_) => E.O.toExn("No shape found!", None)
+    | `RenderedShape(sc, sd, _) => {
+      let shape = MixedShapeBuilder.buildSimple(~continuous=Some(sc), ~discrete=sd);
 
-    shape |> E.O.toExt("");
+      shape |> E.O.toExt("");
+    }
+    }
   };
 
-  let rec toString = (dists: t): string => {
-    let distString =
-      dists
-      |> E.A.fmap(((d, _)) =>
-           switch (d) {
-           | `Simple(d) => GenericSimple.toString(d)
-           | `PointwiseCombination(ts: t) => ts |> toString
-           }
-         )
-      |> Js.Array.joinWith(",");
+  let rec toString = (treeNode: distTree): string => {
+    let stringFromOp = op => switch (op) {
+      | `AddOperation => " + "
+      | `SubtractOperation => " - "
+      | `MultiplyOperation => " * "
+      | `DivideOperation => " / "
+      | `ExponentiateOperation => "^"
+    };
 
-    // mm(normal(0,1), normal(1,2)) => "multimodal(normal(0,1), normal(1,2), )
-
-    let weights =
-      dists
-      |> E.A.fmap(((_, w)) =>
-           Js.Float.toPrecisionWithPrecision(w, ~digits=2)
-         )
-      |> Js.Array.joinWith(",");
-
-    {j|multimodal($distString, [$weights])|j};
+    switch (treeNode) {
+    | `Distribution(d) => GenericSimple.toString(d)
+    | `Combination(t1, t2, op) => toString(t1) ++ stringFromOp(op) ++ toString(t2)
+    | `PointwiseSum(t1, t2) => toString(t1) ++ " .+ " ++ toString(t2)
+    | `PointwiseProduct(t1, t2) => toString(t1) ++ " .* " ++ toString(t2)
+    | `VerticalScaling(t1, t2) => toString(t1) ++ " @ " ++ toString(t2)
+    | `Normalize(t) => "normalize(" ++ toString(t) ++ ")"
+    | `LeftTruncate(t, x) => "leftTruncate(" ++ toString(t) ++ ", " ++ string_of_float(x) ++ ")"
+    | `RightTruncate(t, x) => "rightTruncate(" ++ toString(t) ++ ", " ++ string_of_float(x) ++ ")"
+    }
   };
 };
 
-// assume that recursive pointwiseNormalizedDistSums are the only type of operation there is.
-// in the original, it was a list of (dist, weight) tuples. Now, it's a tree of (dist, weight) tuples, just that every
-// dist can be either a GenericSimple or another PointwiseAdd.
+let toString = (treeNode: distTree) => DistTree.toString(treeNode)
 
-/*let toString = (r: bigDistTree) => {
-    switch (r) {
-      | WeightedDistLeaf((w, d)) => GenericWeighted.toString(w) // "normal "
-      | PointwiseNormalizedDistSum(childTrees) => childTrees |> E.A.fmap(toString) |> Js.Array.joinWith("")
-    }
-  }*/
-
-let toString = (r: bigDist) =>
-  // we need to recursively create the string representation of the tree.
-  r
-  |> (
-    fun
-    | `Simple(d) => GenericSimple.toString(d)
-    | `PointwiseCombination(d) =>
-      PointwiseAddDistributionsWeighted.toString(d)
-  );
-
-let toShape = n =>
-  fun
-  | `Simple(d) => GenericSimple.toShape(~xSelection=`ByWeight, d, n)
-  | `PointwiseCombination(d) =>
-    PointwiseAddDistributionsWeighted.toShape(d, n);
+let toShape = (sampleCount: int, treeNode: distTree) =>
+  DistTree.toShape(treeNode, sampleCount) //~xSelection=`ByWeight,

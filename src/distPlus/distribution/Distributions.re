@@ -74,6 +74,21 @@ module Continuous = {
       (fn, {xyShape, interpolation}: t): option(DistTypes.continuousShape) =>
     fn(xyShape) |> E.O.fmap(make(interpolation));
 
+  let empty: DistTypes.continuousShape = {xyShape: XYShape.T.empty, interpolation: `Linear};
+  let combine =
+      (fn, t1: DistTypes.continuousShape, t2: DistTypes.continuousShape)
+      : DistTypes.continuousShape => {
+    make(`Linear, XYShape.Combine.combine(
+      ~xsSelection=ALL_XS,
+      ~xToYSelection=XYShape.XtoY.linear,
+      ~fn,
+      t1.xyShape,
+      t2.xyShape,
+    ));
+  };
+  let reduce = (fn, items) =>
+    items |> E.A.fold_left(combine(fn), empty);
+
   let toLinear = (t: t): option(t) => {
     switch (t) {
     | {interpolation: `Stepwise, xyShape} =>
@@ -166,6 +181,7 @@ module Discrete = {
   let sortedByX = (t: DistTypes.discreteShape) =>
     t |> XYShape.T.zip |> XYShape.Zipped.sortByX;
   let empty = XYShape.T.empty;
+  let make = (s: DistTypes.discreteShape) => s;
   let combine =
       (fn, t1: DistTypes.discreteShape, t2: DistTypes.discreteShape)
       : DistTypes.discreteShape => {

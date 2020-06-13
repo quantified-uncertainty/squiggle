@@ -179,16 +179,25 @@ module Combine = {
         t1: T.t,
         t2: T.t,
       ) => {
-    let allXs =
-      switch (xsSelection) {
-      | ALL_XS => Ts.allXs([|t1, t2|])
-      | XS_EVENLY_DIVIDED(sampleCount) =>
-        Ts.equallyDividedXs([|t1, t2|], sampleCount)
-      };
 
-    let allYs =
-      allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)));
-    T.fromArrays(allXs, allYs);
+    switch ((E.A.length(t1.xs), E.A.length(t2.xs))) {
+    | (0, 0) => T.empty
+    | (0, _) => t2
+    | (_, 0) => t1
+    | (_, _) => {
+        let allXs =
+          switch (xsSelection) {
+          | ALL_XS => Ts.allXs([|t1, t2|])
+          | XS_EVENLY_DIVIDED(sampleCount) =>
+            Ts.equallyDividedXs([|t1, t2|], sampleCount)
+          };
+
+        let allYs =
+          allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)));
+
+        T.fromArrays(allXs, allYs);
+      }
+    }
   };
 
   let combineLinear = combine(~xToYSelection=XtoY.linear);

@@ -88,73 +88,69 @@ module MathAdtToDistDst = {
         );
   };
 
-  let normal: array(arg) => result(SymbolicDist.bigDist, string) =
+  let normal: array(arg) => result(SymbolicDist.distTree, string) =
     fun
     | [|Value(mean), Value(stdev)|] =>
-      Ok(`Simple(`Normal({mean, stdev})))
+      Ok(`Distribution(`Normal({mean, stdev})))
     | _ => Error("Wrong number of variables in normal distribution");
 
-  let lognormal: array(arg) => result(SymbolicDist.bigDist, string) =
+  let lognormal: array(arg) => result(SymbolicDist.distTree, string) =
     fun
-    | [|Value(mu), Value(sigma)|] => Ok(`Simple(`Lognormal({mu, sigma})))
+    | [|Value(mu), Value(sigma)|] => Ok(`Distribution(`Lognormal({mu, sigma})))
     | [|Object(o)|] => {
         let g = Js.Dict.get(o);
         switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
         | (Some(Value(mean)), Some(Value(stdev)), _, _) =>
-          Ok(`Simple(SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev)))
+          Ok(`Distribution(SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev)))
         | (_, _, Some(Value(mu)), Some(Value(sigma))) =>
-          Ok(`Simple(`Lognormal({mu, sigma})))
+          Ok(`Distribution(`Lognormal({mu, sigma})))
         | _ => Error("Lognormal distribution would need mean and stdev")
         };
       }
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let to_: array(arg) => result(SymbolicDist.bigDist, string) =
+  let to_: array(arg) => result(SymbolicDist.distTree, string) =
     fun
     | [|Value(low), Value(high)|] when low <= 0.0 && low < high=> {
-        Ok(`Simple(SymbolicDist.Normal.from90PercentCI(low, high)));
+        Ok(`Distribution(SymbolicDist.Normal.from90PercentCI(low, high)));
       }
     | [|Value(low), Value(high)|] when low < high => {
-        Ok(`Simple(SymbolicDist.Lognormal.from90PercentCI(low, high)));
+        Ok(`Distribution(SymbolicDist.Lognormal.from90PercentCI(low, high)));
       }
     | [|Value(_), Value(_)|] =>
       Error("Low value must be less than high value.")
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let uniform: array(arg) => result(SymbolicDist.bigDist, string) =
+  let uniform: array(arg) => result(SymbolicDist.distTree, string) =
     fun
-    | [|Value(low), Value(high)|] => Ok(`Simple(`Uniform({low, high})))
+    | [|Value(low), Value(high)|] => Ok(`Distribution(`Uniform({low, high})))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let beta: array(arg) => result(SymbolicDist.bigDist, string) =
+  let beta: array(arg) => result(SymbolicDist.distTree, string) =
     fun
-    | [|Value(alpha), Value(beta)|] => Ok(`Simple(`Beta({alpha, beta})))
+    | [|Value(alpha), Value(beta)|] => Ok(`Distribution(`Beta({alpha, beta})))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let exponential: array(arg) => result(SymbolicDist.bigDist, string) =
+  let exponential: array(arg) => result(SymbolicDist.distTree, string) =
     fun
-    | [|Value(rate)|] => Ok(`Simple(`Exponential({rate: rate})))
+    | [|Value(rate)|] => Ok(`Distribution(`Exponential({rate: rate})))
     | _ => Error("Wrong number of variables in Exponential distribution");
 
-  let cauchy: array(arg) => result(SymbolicDist.bigDist, string) =
+  let cauchy: array(arg) => result(SymbolicDist.distTree, string) =
     fun
     | [|Value(local), Value(scale)|] =>
-      Ok(`Simple(`Cauchy({local, scale})))
+      Ok(`Distribution(`Cauchy({local, scale})))
     | _ => Error("Wrong number of variables in cauchy distribution");
 
-  let triangular: array(arg) => result(SymbolicDist.bigDist, string) =
+  let triangular: array(arg) => result(SymbolicDist.distTree, string) =
     fun
     | [|Value(low), Value(medium), Value(high)|] =>
-      Ok(`Simple(`Triangular({low, medium, high})))
+      Ok(`Distribution(`Triangular({low, medium, high})))
     | _ => Error("Wrong number of variables in triangle distribution");
-
-  /*let add: array(arg) => result(SymbolicDist.bigDist, string) =
-    fun
-    | */
 
   let multiModal =
       (
-        args: array(result(SymbolicDist.bigDist, string)),
+        args: array(result(SymbolicDist.distTree, string)),
         weights: option(array(float)),
       ) => {
     let weights = weights |> E.O.default([||]);
@@ -162,8 +158,14 @@ module MathAdtToDistDst = {
       args
       |> E.A.fmap(
            fun
-           | Ok(`Simple(d)) => Ok(`Simple(d))
-           | Ok(`PointwiseCombination(dists)) => Ok(`PointwiseCombination(dists))
+           | Ok(`Distribution(d)) => Ok(`Distribution(d))
+           | Ok(`Combination(t1, t2, op)) => Ok(`Combination(t1, t2, op))
+           | Ok(`PointwiseSum(t1, t2)) => Ok(`PointwiseSum(t1, t2))
+           | Ok(`PointwiseProduct(t1, t2)) => Ok(`PointwiseProduct(t1, t2))
+           | Ok(`Normalize(t)) => Ok(`Normalize(t))
+           | Ok(`LeftTruncate(t, x)) => Ok(`LeftTruncate(t, x))
+           | Ok(`RightTruncate(t, x)) => Ok(`RightTruncate(t, x))
+           | Ok(`Render(t)) => Ok(`Render(t))
            | Error(e) => Error(e)
            | _ => Error("Unexpected dist")
          );
@@ -175,16 +177,26 @@ module MathAdtToDistDst = {
       | Some(Error(e)) => Error(e)
       | None when withoutErrors |> E.A.length == 0 =>
         Error("Multimodals need at least one input")
-      | _ =>
-        withoutErrors
-        |> E.A.fmapi((index, item) =>
-            (item, weights |> E.A.get(_, index) |> E.O.default(1.0))
-          )
-        |> (r => Ok(`PointwiseCombination(r)))
+      | _ => {
+        let components = withoutErrors
+        |> E.A.fmapi((index, t) => {
+            let w = weights |> E.A.get(_, index) |> E.O.default(1.0);
+
+            `VerticalScaling(t, `Distribution(`Float(w)))
+          });
+
+        let pointwiseSum = components
+        |> Js.Array.sliceFrom(1)
+        |> E.A.fold_left((acc, x) => {
+          `PointwiseSum(acc, x)
+          }, E.A.unsafe_get(components, 0))
+
+        Ok(`Normalize(pointwiseSum))
+      }
     };
   };
 
-  let arrayParser = (args:array(arg)):result(SymbolicDist.bigDist, string) => {
+  let arrayParser = (args:array(arg)):result(SymbolicDist.distTree, string) => {
     let samples = args
     |> E.A.fmap(
           fun
@@ -200,13 +212,13 @@ module MathAdtToDistDst = {
       SymbolicDist.ContinuousShape.make(_pdf, cdf)
     });
     switch(shape){
-      | Some(s) => Ok(`Simple(`ContinuousShape(s)))
+      | Some(s) => Ok(`Distribution(`ContinuousShape(s)))
       | None => Error("Rendering did not work")
     }
   }
 
 
-  let rec functionParser = (r): result(SymbolicDist.bigDist, string) =>
+  let rec functionParser = (r): result(SymbolicDist.distTree, string) =>
     r
     |> (
       fun
@@ -218,7 +230,7 @@ module MathAdtToDistDst = {
       | Fn({name: "exponential", args}) => exponential(args)
       | Fn({name: "cauchy", args}) => cauchy(args)
       | Fn({name: "triangular", args}) => triangular(args)
-      | Value(f) => Ok(`Simple(`Float(f)))
+      | Value(f) => Ok(`Distribution(`Float(f)))
       | Fn({name: "mm", args}) => {
           let weights =
             args
@@ -245,25 +257,54 @@ module MathAdtToDistDst = {
           let dists = possibleDists |> E.A.fmap(functionParser);
           multiModal(dists, weights);
         }
-      //| Fn({name: "add", args}) => add(args)
+
+      | Fn({name: "add", args}) => {
+          args
+          |> E.A.fmap(functionParser)
+          |> (fun
+              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `AddOperation))
+              | _ => Error("Addition needs two operands"))
+      }
+      | Fn({name: "subtract", args}) => {
+          args
+          |> E.A.fmap(functionParser)
+          |> (fun
+              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `SubtractOperation))
+              | _ => Error("Subtraction needs two operands"))
+      }
+      | Fn({name: "multiply", args}) => {
+          args
+          |> E.A.fmap(functionParser)
+          |> (fun
+              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `MultiplyOperation))
+              | _ => Error("Multiplication needs two operands"))
+      }
+      | Fn({name: "divide", args}) => {
+          args
+          |> E.A.fmap(functionParser)
+          |> (fun
+              | [|Ok(l), Ok(`Distribution(`Float(0.0)))|] => Error("Division by zero")
+              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `DivideOperation))
+              | _ => Error("Division needs two operands"))
+      }
       | Fn({name}) => Error(name ++ ": function not supported")
       | _ => {
           Error("This type not currently supported");
         }
     );
 
-  let topLevel = (r): result(SymbolicDist.bigDist, string) =>
+  let topLevel = (r): result(SymbolicDist.distTree, string) =>
     r
     |> (
       fun
       | Fn(_) => functionParser(r)
-      | Value(r) => Ok(`Simple(`Float(r)))
+      | Value(r) => Ok(`Distribution(`Float(r)))
       | Array(r) => arrayParser(r)
       | Symbol(_) => Error("Symbol not valid as top level")
       | Object(_) => Error("Object not valid as top level")
     );
 
-  let run = (r): result(SymbolicDist.bigDist, string) =>
+  let run = (r): result(SymbolicDist.distTree, string) =>
     r |> MathAdtCleaner.run |> topLevel;
 };
 
