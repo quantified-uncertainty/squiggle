@@ -197,6 +197,7 @@ module MathAdtToDistDst = {
   };
 
   let arrayParser = (args:array(arg)):result(SymbolicDist.distTree, string) => {
+    Js.log2("SAMPLING NOW!", args);
     let samples = args
     |> E.A.fmap(
           fun
@@ -286,6 +287,27 @@ module MathAdtToDistDst = {
               | [|Ok(l), Ok(`Distribution(`Float(0.0)))|] => Error("Division by zero")
               | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `DivideOperation))
               | _ => Error("Division needs two operands"))
+      }
+      | Fn({name: "pow", args}) => {
+          args
+          |> E.A.fmap(functionParser)
+          |> (fun
+              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `ExponentiateOperation))
+              | _ => Error("Exponentiations needs two operands"))
+      }
+      | Fn({name: "leftTruncate", args}) => {
+          args
+          |> E.A.fmap(functionParser)
+          |> (fun
+              | [|Ok(l), Ok(`Distribution(`Float(r)))|] => Ok(`LeftTruncate(l, r))
+              | _ => Error("leftTruncate needs two arguments: the expression and the cutoff"))
+      }
+      | Fn({name: "rightTruncate", args}) => {
+          args
+          |> E.A.fmap(functionParser)
+          |> (fun
+              | [|Ok(l), Ok(`Distribution(`Float(r)))|] => Ok(`RightTruncate(l, r))
+              | _ => Error("rightTruncate needs two arguments: the expression and the cutoff"))
       }
       | Fn({name}) => Error(name ++ ": function not supported")
       | _ => {
