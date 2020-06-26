@@ -17,14 +17,18 @@ type xyShape = {
 type continuousShape = {
   xyShape,
   interpolation: [ | `Stepwise | `Linear],
+  knownIntegralSum: option(float),
 };
 
-type discreteShape = xyShape;
+type discreteShape = {
+  xyShape,
+  knownIntegralSum: option(float),
+};
 
 type mixedShape = {
   continuous: continuousShape,
   discrete: discreteShape,
-  discreteProbabilityMassFraction: float,
+//  discreteProbabilityMassFraction: float,
 };
 
 type shapeMonad('a, 'b, 'c) =

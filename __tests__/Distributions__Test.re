@@ -386,10 +386,9 @@ describe("Shape", () => {
     let numSamples = 10000;
     open Distributions.Shape;
     let normal: SymbolicDist.dist = `Normal({mean, stdev});
-    let normalShape = SymbolicDist.GenericSimple.toShape(normal, numSamples);
+    let normalShape = TreeNode.toShape(numSamples, normal);
     let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
-    let lognormalShape =
-      SymbolicDist.GenericSimple.toShape(lognormal, numSamples);
+    let lognormalShape = TreeNode.toShape(numSamples, lognormal);
 
     makeTestCloseEquality(
       "Mean of a normal",

@@ -37,7 +37,7 @@ module DemoDist = {
     let parsed1 = MathJsParser.fromString(guesstimatorString);
     let shape =
       switch (parsed1) {
-      | Ok(r) => Some(SymbolicDist.toShape(10000, r))
+      | Ok(r) => Some(TreeNode.toShape(10000, r))
       | _ => None
       };
 

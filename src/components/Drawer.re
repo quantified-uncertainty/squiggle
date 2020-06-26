@@ -177,6 +177,7 @@ module Convert = {
     let continuousShape: Types.continuousShape = {
       xyShape,
       interpolation: `Linear,
+      knownIntegralSum: None,
     };
     
     let integral = XYShape.Analysis.integrateContinuousShape(continuousShape);
@@ -188,6 +189,7 @@ module Convert = {
         ys,
       },
       interpolation: `Linear,
+      knownIntegralSum: Some(1.0),
     };
     continuousShape;
   };
@@ -387,7 +389,7 @@ module Draw = {
     let numSamples = 3000;
 
     let normal: SymbolicDist.dist = `Normal({mean, stdev});
-    let normalShape = SymbolicDist.GenericSimple.toShape(normal, numSamples);
+    let normalShape = TreeNode.toShape(numSamples, `DistData(`Symbolic(normal)));
     let xyShape: Types.xyShape =
       switch (normalShape) {
       | Mixed(_) => {xs: [||], ys: [||]}
@@ -667,9 +669,7 @@ module State = {
 
       /* create a cdf from a pdf */
       let _pdf =
-        Distributions.Continuous.T.scaleToIntegralSum(
-          ~cache=None,
-          ~intendedSum=1.0,
+        Distributions.Continuous.T.normalize(
           pdf,
         );
 

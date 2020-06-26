@@ -17,6 +17,7 @@ module T = {
   type ts = array(xyShape);
   let xs = (t: t) => t.xs;
   let ys = (t: t) => t.ys;
+  let length = (t: t) => E.A.length(t.xs);
   let empty = {xs: [||], ys: [||]};
   let minX = (t: t) => t |> xs |> E.A.Sorted.min |> extImp;
   let maxX = (t: t) => t |> xs |> E.A.Sorted.max |> extImp;
@@ -154,7 +155,9 @@ module XsConversion = {
 
   let proportionByProbabilityMass =
       (newLength: int, integral: T.t, t: T.t): T.t => {
-    equallyDivideXByMass(newLength, integral) |> _replaceWithXs(_, t);
+    integral
+    |> equallyDivideXByMass(newLength) // creates a new set of xs at evenly spaced percentiles
+    |> _replaceWithXs(_, t); // linearly interpolates new ys for the new xs
   };
 };
 
@@ -164,6 +167,7 @@ module Zipped = {
   let compareXs = ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0;
   let sortByY = (t: zipped) => t |> E.A.stableSortBy(_, compareYs);
   let sortByX = (t: zipped) => t |> E.A.stableSortBy(_, compareXs);
+  let filterByX = (testFn: (float => bool), t: zipped) => t |> E.A.filter(((x, _)) => testFn(x));
 };
 
 module Combine = {
@@ -253,8 +257,8 @@ module Range = {
         Belt.Array.set(
           cumulativeY,
           x + 1,
-          (xs[x + 1] -. xs[x])
-          *. ((ys[x] +. ys[x + 1]) /. 2.)
+          (xs[x + 1] -. xs[x])  // dx
+          *. ((ys[x] +. ys[x + 1]) /. 2.) // (1/2) * (avgY)
           +. cumulativeY[x],
         );
       ();

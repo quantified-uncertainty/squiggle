@@ -95,7 +95,7 @@ let table = (distPlus, x) => {
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-             |> Distributions.DistPlus.T.toScaledContinuous
+             |> Distributions.DistPlus.T.normalizedToContinuous
              |> E.O.fmap(
                   Distributions.Continuous.T.Integral.sum(~cache=None),
                 )
@@ -113,7 +113,7 @@ let table = (distPlus, x) => {
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-             |> Distributions.DistPlus.T.toScaledDiscrete
+             |> Distributions.DistPlus.T.normalizedToDiscrete
              |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
@@ -211,15 +211,13 @@ let percentiles = distPlus => {
   </div>;
 };
 
-let adjustBoth = discreteProbabilityMass => {
-  let yMaxDiscreteDomainFactor = discreteProbabilityMass;
-  let yMaxContinuousDomainFactor = 1.0 -. discreteProbabilityMass;
-  let yMax =
-    yMaxDiscreteDomainFactor > yMaxContinuousDomainFactor
-      ? yMaxDiscreteDomainFactor : yMaxContinuousDomainFactor;
+let adjustBoth = discreteProbabilityMassFraction => {
+  let yMaxDiscreteDomainFactor = discreteProbabilityMassFraction;
+  let yMaxContinuousDomainFactor = 1.0 -. discreteProbabilityMassFraction;
+  let yMax = (yMaxDiscreteDomainFactor > 0.5 ? yMaxDiscreteDomainFactor : yMaxContinuousDomainFactor);
   (
-    1.0 /. (yMaxDiscreteDomainFactor /. yMax),
-    1.0 /. (yMaxContinuousDomainFactor /. yMax),
+    yMax /. yMaxDiscreteDomainFactor,
+    yMax /. yMaxContinuousDomainFactor,
   );
 };
 
@@ -227,10 +225,10 @@ module DistPlusChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
     open Distributions.DistPlus;
-    let discrete = distPlus |> T.toScaledDiscrete;
+    let discrete = distPlus |> T.normalizedToDiscrete |> E.O.fmap(Distributions.Discrete.getShape);
     let continuous =
       distPlus
-      |> T.toScaledContinuous
+      |> T.normalizedToContinuous
       |> E.O.fmap(Distributions.Continuous.getShape);
     let range = T.xTotalRange(distPlus);
 
@@ -254,10 +252,10 @@ module DistPlusChart = {
     };
 
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
-    let toDiscreteProbabilityMass =
-      distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
+    let discreteProbabilityMassFraction =
+      distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMassFraction;
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
-      adjustBoth(toDiscreteProbabilityMass);
+      adjustBoth(discreteProbabilityMassFraction);
     <DistributionPlot
       xScale={config.xLog ? "log" : "linear"}
       yScale={config.yLog ? "log" : "linear"}
