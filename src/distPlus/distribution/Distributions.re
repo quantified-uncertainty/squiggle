@@ -173,10 +173,6 @@ module Continuous = {
       ();
     };
 
-    Js.log2("Previous xyshape:", t |> getShape);
-    Js.log2("new pointmasssex", pointMassesX);
-    Js.log2("new pointmasssey", pointMassesY);
-
     {
       xyShape: {
         xs: pointMassesX,
@@ -364,7 +360,14 @@ module Continuous = {
     let t1d = downsampleIfTooLarge(t1);
     let t2d = downsampleIfTooLarge(t2);
 
-    convolveWithDiscrete(~downsample=false, fn, t1, toDiscretePointMasses(t2));
+    let t1m = toDiscretePointMasses(t1);
+    let t2m = toDiscretePointMasses(t2);
+
+    // then convolve the two as discrete distributions
+    let c = Discrete.convolve(fn, t1m, t2m);
+
+    // then convert back to an approximate pdf
+    // TODO: find an efficient way to do this (kernel densities? trapezoids?)
   };
 };
 
