@@ -283,11 +283,11 @@ module GenericDistFunctions = {
     (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, n) => {
     switch (xSelection, dist) {
     | (`Linear, _) => E.A.Floats.range(min(dist), max(dist), n)
-    | (`ByWeight, `Uniform(n)) =>
+/*    | (`ByWeight, `Uniform(n)) =>
     // In `ByWeight mode, uniform distributions get special treatment because we need two x's
     // on either side for proper rendering (just left and right of the discontinuities).
       let dx = 0.00001 *. (n.high -. n.low);
-      [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|];
+      [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|]; */
     | (`ByWeight, _) =>
       let ys = E.A.Floats.range(minCdfValue, maxCdfValue, n);
       ys |> E.A.fmap(y => inv(y, dist));

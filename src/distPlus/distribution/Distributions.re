@@ -154,6 +154,7 @@ module Continuous = {
   // This is essentially like integrateWithTriangles, without the accumulation.
   let toDiscretePointMasses = (t: t): DistTypes.discreteShape => {
     let tl = t |> getShape |> XYShape.T.length;
+    let pointMassesX: array(float) = Belt.Array.make(tl - 1, 0.0);
     let pointMassesY: array(float) = Belt.Array.make(tl - 1, 0.0);
     let {xs, ys}: XYShape.T.t = t |> getShape;
     for (x in 0 to E.A.length(xs) - 2) {
@@ -163,74 +164,23 @@ module Continuous = {
           x,
           (xs[x + 1] -. xs[x]) *. ((ys[x] +. ys[x + 1]) /. 2.),
         ); // = dx * (1/2) * (avgY)
+      let _ =
+        Belt.Array.set(
+          pointMassesX,
+          x,
+          (xs[x] +. xs[x + 1]) /. 2.,
+        ); // midpoints
       ();
     };
 
     {
       xyShape: {
-        xs,
+        xs: pointMassesX,
         ys: pointMassesY,
       },
       knownIntegralSum: t.knownIntegralSum,
     };
   };
-
-  /* Performs a discrete convolution between two continuous distributions A and B.
-   * It is an extremely good idea to downsample the distributions beforehand,
-   * because the number of samples in the convolution can be up to length(A) * length(B).
-   *
-   * Conventional convolution uses fn = (+.), but we also allow other operations to combine the xs.
-   *
-   * In practice, the convolution works by multiplying the ys for each possible combo of points of
-   * the two shapes. This creates a new shape for each point of A. These new shapes are then combined
-   * linearly. This may not always be the most efficient way, but it is probably the most robust for now.
-   *
-   * In the future, it may be possible to use a non-uniform fast Fourier transform instead (although only for addition).
-   */
-  let convolveWithDiscrete = (fn, t1: t, t2: DistTypes.discreteShape) => {
-    let t1s = t1 |> getShape;
-    let t2s = t2.xyShape; // would like to use Discrete.getShape here, but current file structure doesn't allow for that
-    let t1n = t1s |> XYShape.T.length;
-    let t2n = t2s |> XYShape.T.length;
-
-    let outXYShapes: array(array((float, float))) =
-      Belt.Array.makeUninitializedUnsafe(t1n);
-
-    for (i in 0 to t1n - 1) {
-      // create a new distribution
-      let dxyShape: array((float, float)) =
-        Belt.Array.makeUninitializedUnsafe(t2n);
-      for (j in 0 to t2n - 1) {
-        let _ =
-          Belt.Array.set(
-            dxyShape,
-            j,
-            (fn(t1s.xs[i], t2s.xs[j]), t1s.ys[i] *. t2s.ys[j]),
-          );
-        ();
-      };
-      let _ = Belt.Array.set(outXYShapes, i, dxyShape);
-      ();
-    };
-
-    let combinedIntegralSum =
-      switch (t1.knownIntegralSum, t2.knownIntegralSum) {
-      | (None, _)
-      | (_, None) => None
-      | (Some(s1), Some(s2)) => Some(s1 *. s2)
-      };
-
-    outXYShapes
-    |> E.A.fmap(s => {
-         let xyShape = XYShape.T.fromZippedArray(s);
-         make(`Linear, xyShape, None);
-       })
-    |> reduce((+.))
-    |> updateKnownIntegralSum(combinedIntegralSum);
-  };
-
-  let convolve = (fn, t1: t, t2: t) =>
-    convolveWithDiscrete(fn, t1, toDiscretePointMasses(t2));
 
   let mapY = (~knownIntegralSumFn=previousKnownIntegralSum => None, fn, t: t) => {
     let u = E.O.bind(_, knownIntegralSumFn);
@@ -350,6 +300,69 @@ module Continuous = {
           XYShape.Analysis.getMeanOfSquaresContinuousShape,
         );
     });
+
+
+  /* Performs a discrete convolution between two continuous distributions A and B.
+   * It is an extremely good idea to downsample the distributions beforehand,
+   * because the number of samples in the convolution can be up to length(A) * length(B).
+   *
+   * Conventional convolution uses fn = (+.), but we also allow other operations to combine the xs.
+   *
+   * In practice, the convolution works by multiplying the ys for each possible combo of points of
+   * the two shapes. This creates a new shape for each point of A. These new shapes are then combined
+   * linearly. This may not always be the most efficient way, but it is probably the most robust for now.
+   *
+   * In the future, it may be possible to use a non-uniform fast Fourier transform instead (although only for addition).
+   */
+  let convolveWithDiscrete = (~downsample=false, fn, t1: t, t2: DistTypes.discreteShape) => {
+    let t1s = t1 |> getShape;
+    let t2s = t2.xyShape; // would like to use Discrete.getShape here, but current file structure doesn't allow for that
+    let t1n = t1s |> XYShape.T.length;
+    let t2n = t2s |> XYShape.T.length;
+
+    let outXYShapes: array(array((float, float))) =
+      Belt.Array.makeUninitializedUnsafe(t1n);
+
+    for (i in 0 to t1n - 1) {
+      // create a new distribution
+      let dxyShape: array((float, float)) =
+        Belt.Array.makeUninitializedUnsafe(t2n);
+      for (j in 0 to t2n - 1) {
+        let _ =
+          Belt.Array.set(
+            dxyShape,
+            j,
+            (fn(t1s.xs[i], t2s.xs[j]), t1s.ys[i] *. t2s.ys[j]),
+          );
+        ();
+      };
+
+      let _ = Belt.Array.set(outXYShapes, i, dxyShape);
+      ();
+    };
+
+    let combinedIntegralSum = Common.combineIntegralSums((a, b) => Some(a *. b), t1.knownIntegralSum, t2.knownIntegralSum);
+
+    outXYShapes
+    |> E.A.fmap(s => {
+         let xyShape = XYShape.T.fromZippedArray(s);
+         make(`Linear, xyShape, None);
+       })
+    |> reduce((+.))
+    |> updateKnownIntegralSum(combinedIntegralSum);
+  };
+
+  let convolve = (~downsample=false, fn, t1: t, t2: t) => {
+    let downsampleIfTooLarge = (t: t) => {
+      let sqtl = sqrt(float_of_int(t |> getShape |> XYShape.T.length));
+      sqtl > 10. && downsample ? T.downsample(int_of_float(sqtl), t) : t;
+    };
+
+    let t1d = downsampleIfTooLarge(t1);
+    let t2d = downsampleIfTooLarge(t2);
+
+    convolveWithDiscrete(~downsample=false, fn, t1, toDiscretePointMasses(t2));
+  };
 };
 
 module Discrete = {
@@ -489,17 +502,23 @@ module Discrete = {
       let downsample = (~cache=None, i, t: t): t => {
         // It's not clear how to downsample a set of discrete points in a meaningful way.
         // The best we can do is to clip off the smallest values.
-        let clippedShape =
-          t
-          |> getShape
-          |> XYShape.T.zip
-          |> XYShape.Zipped.sortByY
-          |> Belt.Array.reverse
-          |> Belt.Array.slice(_, ~offset=0, ~len=i)
-          |> XYShape.Zipped.sortByX
-          |> XYShape.T.fromZippedArray;
+        let currentLength = t |> getShape |> XYShape.T.length;
 
-        make(clippedShape, None); // if someone needs the sum, they'll have to recompute it
+        if (i < currentLength) {
+          let clippedShape =
+            t
+            |> getShape
+            |> XYShape.T.zip
+            |> XYShape.Zipped.sortByY
+            |> Belt.Array.reverse
+            |> Belt.Array.slice(_, ~offset=0, ~len=i)
+            |> XYShape.Zipped.sortByX
+            |> XYShape.T.fromZippedArray;
+
+          make(clippedShape, None); // if someone needs the sum, they'll have to recompute it
+        } else {
+          t;
+        }
       };
 
       let truncate =
@@ -663,6 +682,8 @@ module Mixed = {
           Continuous.T.Integral.sum(~cache=None, continuous);
         let totalIntegralSum = discreteIntegralSum +. continuousIntegralSum;
 
+        // TODO: figure out what to do when the totalIntegralSum is zero.
+
         let downsampledDiscrete =
           Discrete.T.downsample(
             int_of_float(
@@ -811,17 +832,16 @@ module Mixed = {
       };
     });
 
-  let convolve = (fn: (float, float) => float, t1: t, t2: t): t => {
+  let convolve = (~downsample=false, fn: (float, float) => float, t1: t, t2: t): t => {
     // Discrete convolution can cause a huge increase in the number of samples,
     // so we'll first downsample.
 
     // An alternative (to be explored in the future) may be to first perform the full convolution and then to downsample the result;
     // to use non-uniform fast Fourier transforms (for addition only), add web workers or gpu.js, etc. ...
 
-    // TODO: make this optional or customizable
     let downsampleIfTooLarge = (t: t) => {
       let sqtl = sqrt(float_of_int(totalLength(t)));
-      sqtl > 10. ? T.downsample(int_of_float(sqtl), t) : t;
+      sqtl > 10. && downsample ? T.downsample(int_of_float(sqtl), t) : t;
     };
 
     let t1d = downsampleIfTooLarge(t1);
@@ -830,11 +850,11 @@ module Mixed = {
     // continuous (*) continuous => continuous, but also
     // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:
     let ccConvResult =
-      Continuous.convolve(fn, t1d.continuous, t2d.continuous);
+      Continuous.convolve(~downsample=false, fn, t1d.continuous, t2d.continuous);
     let dcConvResult =
-      Continuous.convolveWithDiscrete(fn, t2d.continuous, t1d.discrete);
+      Continuous.convolveWithDiscrete(~downsample=false, fn, t2d.continuous, t1d.discrete);
     let cdConvResult =
-      Continuous.convolveWithDiscrete(fn, t1d.continuous, t2d.discrete);
+      Continuous.convolveWithDiscrete(~downsample=false, fn, t1d.continuous, t2d.discrete);
     let continuousConvResult =
       Continuous.reduce((+.), [|ccConvResult, dcConvResult, cdConvResult|]);
 
@@ -870,7 +890,13 @@ module Shape = {
     ));
 
   let convolve = (fn, t1: t, t2: t): t => {
-    Mixed(Mixed.convolve(fn, toMixed(t1), toMixed(t2)));
+    switch ((t1, t2)) {
+    | (Continuous(m1), Continuous(m2)) => DistTypes.Continuous(Continuous.convolve(~downsample=true, fn, m1, m2))
+    | (Discrete(m1), Discrete(m2)) => DistTypes.Discrete(Discrete.convolve(fn, m1, m2))
+    | (m1, m2) => {
+        DistTypes.Mixed(Mixed.convolve(~downsample=true, fn, toMixed(m1), toMixed(m2)))
+      }
+    };
   };
 
   let combine = (~knownIntegralSumsFn=(_, _) => None, fn, t1: t, t2: t) =>

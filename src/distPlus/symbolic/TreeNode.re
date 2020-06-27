@@ -55,6 +55,52 @@ module TreeNode = {
   type t = treeNode;
   type simplifier = treeNode => result(treeNode, string);
 
+  let rec toString = (t: t): string => {
+    let stringFromStandardOperation =
+      fun
+      | `Add => " + "
+      | `Subtract => " - "
+      | `Multiply => " * "
+      | `Divide => " / "
+      | `Exponentiate => "^";
+
+    let stringFromPointwiseOperation =
+      fun
+      | `Add => " .+ "
+      | `Multiply => " .* ";
+
+    let stringFromFloatFromDistOperation =
+        fun
+        | `Pdf(f) => "pdf(x=$f, "
+        | `Inv(f) => "inv(c=$f, "
+        | `Sample => "sample("
+        | `Mean => "mean(";
+
+
+    switch (t) {
+    | `DistData(`Symbolic(d)) =>
+      SymbolicDist.GenericDistFunctions.toString(d)
+    | `DistData(`RenderedShape(s)) => "[shape]"
+    | `Operation(`StandardOperation(op, t1, t2)) =>
+      toString(t1) ++ stringFromStandardOperation(op) ++ toString(t2)
+    | `Operation(`PointwiseOperation(op, t1, t2)) =>
+      toString(t1) ++ stringFromPointwiseOperation(op) ++ toString(t2)
+    | `Operation(`ScaleOperation(_scaleOp, t, scaleBy)) =>
+      toString(t) ++ " @ " ++ toString(scaleBy)
+    | `Operation(`Normalize(t)) => "normalize(" ++ toString(t) ++ ")"
+    | `Operation(`FloatFromDist(floatFromDistOp, t)) => stringFromFloatFromDistOperation(floatFromDistOp) ++ toString(t) ++ ")"
+    | `Operation(`Truncate(lc, rc, t)) =>
+      "truncate("
+      ++ toString(t)
+      ++ ", "
+      ++ E.O.dimap(Js.Float.toString, () => "-inf", lc)
+      ++ ", "
+      ++ E.O.dimap(Js.Float.toString, () => "inf", rc)
+      ++ ")"
+    | `Operation(`Render(t)) => toString(t)
+    };
+  };
+
   /* The following modules encapsulate everything we can do with
    * different kinds of operations. */
 
@@ -482,52 +528,6 @@ module TreeNode = {
     | `Operation(op) => operationToDistData(sampleCount, op)
     };
   };
-
-  let rec toString = (t: t): string => {
-    let stringFromStandardOperation =
-      fun
-      | `Add => " + "
-      | `Subtract => " - "
-      | `Multiply => " * "
-      | `Divide => " / "
-      | `Exponentiate => "^";
-
-    let stringFromPointwiseOperation =
-      fun
-      | `Add => " .+ "
-      | `Multiply => " .* ";
-
-    let stringFromFloatFromDistOperation =
-        fun
-        | `Pdf(f) => "pdf(x=$f, "
-        | `Inv(f) => "inv(c=$f, "
-        | `Sample => "sample("
-        | `Mean => "mean(";
-
-
-    switch (t) {
-    | `DistData(`Symbolic(d)) =>
-      SymbolicDist.GenericDistFunctions.toString(d)
-    | `DistData(`RenderedShape(s)) => "[shape]"
-    | `Operation(`StandardOperation(op, t1, t2)) =>
-      toString(t1) ++ stringFromStandardOperation(op) ++ toString(t2)
-    | `Operation(`PointwiseOperation(op, t1, t2)) =>
-      toString(t1) ++ stringFromPointwiseOperation(op) ++ toString(t2)
-    | `Operation(`ScaleOperation(_scaleOp, t, scaleBy)) =>
-      toString(t) ++ " @ " ++ toString(scaleBy)
-    | `Operation(`Normalize(t)) => "normalize(" ++ toString(t) ++ ")"
-    | `Operation(`FloatFromDist(floatFromDistOp, t)) => stringFromFloatFromDistOperation(floatFromDistOp) ++ toString(t) ++ ")"
-    | `Operation(`Truncate(lc, rc, t)) =>
-      "truncate("
-      ++ toString(t)
-      ++ ", "
-      ++ E.O.dimap(Js.Float.toString, () => "-inf", lc)
-      ++ ", "
-      ++ E.O.dimap(Js.Float.toString, () => "inf", rc)
-      ++ ")"
-    | `Operation(`Render(t)) => toString(t)
-    };
-  };
 };
 
 let toShape = (sampleCount: int, treeNode: treeNode) => {
@@ -539,7 +539,7 @@ let toShape = (sampleCount: int, treeNode: treeNode) => {
     let continuous = Distributions.Shape.T.toContinuous(rs);
     let discrete = Distributions.Shape.T.toDiscrete(rs);
     let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
-    shape |> E.O.toExt("");
+    shape |> E.O.toExt("Could not build final shape.");
   | Ok(_) => E.O.toExn("Rendering failed.", None)
   | Error(message) => E.O.toExn("No shape found, error: " ++ message, None)
   };

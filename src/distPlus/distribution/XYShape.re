@@ -9,7 +9,7 @@ let interpolate =
 };
 
 // TODO: Make sure that shapes cannot be empty.
-let extImp = E.O.toExt("Should not be possible");
+let extImp = E.O.toExt("Tried to perform an operation on an empty XYShape.");
 
 module T = {
   type t = xyShape;
