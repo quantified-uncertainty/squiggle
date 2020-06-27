@@ -22,7 +22,7 @@ let propValue = (t: Prop.Value.t) => {
       RenderTypes.DistPlusRenderer.make(
         ~distPlusIngredients=r,
         ~recommendedLength=10000,
-        ~shouldTruncate=true,
+        ~shouldDownsample=true,
         (),
       )
       |> DistPlusRenderer.run

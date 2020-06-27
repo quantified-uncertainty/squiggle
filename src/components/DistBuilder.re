@@ -17,7 +17,7 @@ module FormConfig = [%lenses
     //
     sampleCount: string,
     outputXYPoints: string,
-    truncateTo: string,
+    downsampleTo: string,
     kernelWidth: string,
   }
 ];
@@ -25,7 +25,7 @@ module FormConfig = [%lenses
 type options = {
   sampleCount: int,
   outputXYPoints: int,
-  truncateTo: option(int),
+  downsampleTo: option(int),
   kernelWidth: option(float),
 };
 
@@ -115,7 +115,7 @@ type inputs = {
   samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
   guesstimatorString: string,
   length: int,
-  shouldTruncateSampledDistribution: int,
+  shouldDownsampleSampledDistribution: int,
 };
 
 module DemoDist = {
@@ -141,8 +141,8 @@ module DemoDist = {
                  kernelWidth: options.kernelWidth,
                },
                ~distPlusIngredients,
-               ~shouldTruncate=options.truncateTo |> E.O.isSome,
-               ~recommendedLength=options.truncateTo |> E.O.default(10000),
+               ~shouldDownsample=options.downsampleTo |> E.O.isSome,
+               ~recommendedLength=options.downsampleTo |> E.O.default(10000),
                (),
              );
            let response = DistPlusRenderer.run(inputs);
@@ -182,7 +182,7 @@ let make = () => {
         unit: "days",
         sampleCount: "30000",
         outputXYPoints: "10000",
-        truncateTo: "1000",
+        downsampleTo: "1000",
         kernelWidth: "5",
       },
       (),
@@ -210,7 +210,7 @@ let make = () => {
   let sampleCount = reform.state.values.sampleCount |> Js.Float.fromString;
   let outputXYPoints =
     reform.state.values.outputXYPoints |> Js.Float.fromString;
-  let truncateTo = reform.state.values.truncateTo |> Js.Float.fromString;
+  let downsampleTo = reform.state.values.downsampleTo |> Js.Float.fromString;
   let kernelWidth = reform.state.values.kernelWidth |> Js.Float.fromString;
 
   let domain =
@@ -252,20 +252,20 @@ let make = () => {
     };
 
   let options =
-    switch (sampleCount, outputXYPoints, truncateTo) {
+    switch (sampleCount, outputXYPoints, downsampleTo) {
     | (_, _, _)
         when
           !Js.Float.isNaN(sampleCount)
           && !Js.Float.isNaN(outputXYPoints)
-          && !Js.Float.isNaN(truncateTo)
+          && !Js.Float.isNaN(downsampleTo)
           && sampleCount > 10.
           && outputXYPoints > 10. =>
       Some({
         sampleCount: sampleCount |> int_of_float,
         outputXYPoints: outputXYPoints |> int_of_float,
-        truncateTo:
-          int_of_float(truncateTo) > 0
-            ? Some(int_of_float(truncateTo)) : None,
+        downsampleTo:
+          int_of_float(downsampleTo) > 0
+            ? Some(int_of_float(downsampleTo)) : None,
         kernelWidth: kernelWidth == 0.0 ? None : Some(kernelWidth),
       })
     | _ => None
@@ -287,7 +287,7 @@ let make = () => {
         reform.state.values.unit,
         reform.state.values.sampleCount,
         reform.state.values.outputXYPoints,
-        reform.state.values.truncateTo,
+        reform.state.values.downsampleTo,
         reform.state.values.kernelWidth,
         reloader |> string_of_int,
       |],
@@ -481,7 +481,7 @@ let make = () => {
               />
             </Col>
             <Col span=4>
-              <FieldFloat field=FormConfig.TruncateTo label="Truncate To" />
+              <FieldFloat field=FormConfig.DownsampleTo label="Downsample To" />
             </Col>
             <Col span=4>
               <FieldFloat field=FormConfig.KernelWidth label="Kernel Width" />

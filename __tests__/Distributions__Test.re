@@ -24,7 +24,7 @@ let makeTestCloseEquality = (~only=false, str, item1, item2, ~digits) =>
 describe("Shape", () => {
   describe("Continuous", () => {
     open Distributions.Continuous;
-    let continuous = make(`Linear, shape);
+    let continuous = make(`Linear, shape, None);
     makeTest("minX", T.minX(continuous), 1.0);
     makeTest("maxX", T.maxX(continuous), 8.0);
     makeTest(
@@ -57,7 +57,7 @@ describe("Shape", () => {
         );
       });
       describe("when Stepwise", () => {
-        let continuous = make(`Stepwise, shape);
+        let continuous = make(`Stepwise, shape, None);
         makeTest(
           "at 4.0",
           T.xToY(4., continuous),
@@ -89,7 +89,7 @@ describe("Shape", () => {
       "toLinear",
       {
         let continuous =
-          make(`Stepwise, {xs: [|1., 4., 8.|], ys: [|0.1, 5., 1.0|]});
+          make(`Stepwise, {xs: [|1., 4., 8.|], ys: [|0.1, 5., 1.0|]}, None);
         continuous |> toLinear |> E.O.fmap(getShape);
       },
       Some({
@@ -100,7 +100,7 @@ describe("Shape", () => {
     makeTest(
       "toLinear",
       {
-        let continuous = make(`Stepwise, {xs: [|0.0|], ys: [|0.3|]});
+        let continuous = make(`Stepwise, {xs: [|0.0|], ys: [|0.3|]}, None);
         continuous |> toLinear |> E.O.fmap(getShape);
       },
       Some({xs: [|0.0|], ys: [|0.3|]}),
@@ -123,7 +123,7 @@ describe("Shape", () => {
     makeTest(
       "integralEndY",
       continuous
-      |> T.scaleToIntegralSum(~intendedSum=1.0)
+      |> T.normalize //scaleToIntegralSum(~intendedSum=1.0)
       |> T.Integral.sum(~cache=None),
       1.0,
     );
@@ -135,12 +135,12 @@ describe("Shape", () => {
       xs: [|1., 4., 8.|],
       ys: [|0.3, 0.5, 0.2|],
     };
-    let discrete = shape;
+    let discrete = make(shape, None);
     makeTest("minX", T.minX(discrete), 1.0);
     makeTest("maxX", T.maxX(discrete), 8.0);
     makeTest(
       "mapY",
-      T.mapY(r => r *. 2.0, discrete) |> (r => r.ys),
+      T.mapY(r => r *. 2.0, discrete) |> (r => getShape(r).ys),
       [|0.6, 1.0, 0.4|],
     );
     makeTest(
@@ -160,19 +160,22 @@ describe("Shape", () => {
     );
     makeTest(
       "scaleBy",
-      T.scaleBy(~scale=4.0, discrete),
-      {xs: [|1., 4., 8.|], ys: [|1.2, 2.0, 0.8|]},
+      scaleBy(~scale=4.0, discrete),
+      make({xs: [|1., 4., 8.|], ys: [|1.2, 2.0, 0.8|]}, None),
     );
     makeTest(
-      "scaleToIntegralSum",
-      T.scaleToIntegralSum(~intendedSum=4.0, discrete),
-      {xs: [|1., 4., 8.|], ys: [|1.2, 2.0, 0.8|]},
+      "normalize, then scale by 4.0",
+      discrete
+      |> T.normalize
+      |> scaleBy(~scale=4.0),
+      make({xs: [|1., 4., 8.|], ys: [|1.2, 2.0, 0.8|]}, None),
     );
     makeTest(
       "scaleToIntegralSum: back and forth",
       discrete
-      |> T.scaleToIntegralSum(~intendedSum=4.0)
-      |> T.scaleToIntegralSum(~intendedSum=1.0),
+      |> T.normalize
+      |> scaleBy(~scale=4.0)
+      |> T.normalize,
       discrete,
     );
     makeTest(
@@ -181,12 +184,13 @@ describe("Shape", () => {
       Distributions.Continuous.make(
         `Stepwise,
         {xs: [|1., 4., 8.|], ys: [|0.3, 0.8, 1.0|]},
+        None
       ),
     );
     makeTest(
       "integral with 1 element",
-      T.Integral.get(~cache=None, {xs: [|0.0|], ys: [|1.0|]}),
-      Distributions.Continuous.make(`Stepwise, {xs: [|0.0|], ys: [|1.0|]}),
+      T.Integral.get(~cache=None, Distributions.Discrete.make({xs: [|0.0|], ys: [|1.0|]}, None)),
+      Distributions.Continuous.make(`Stepwise, {xs: [|0.0|], ys: [|1.0|]}, None),
     );
     makeTest(
       "integralXToY",
@@ -205,27 +209,22 @@ describe("Shape", () => {
 
   describe("Mixed", () => {
     open Distributions.Mixed;
-    let discrete: DistTypes.xyShape = {
+    let discreteShape: DistTypes.xyShape = {
       xs: [|1., 4., 8.|],
       ys: [|0.3, 0.5, 0.2|],
     };
+    let discrete = Distributions.Discrete.make(discreteShape, None);
     let continuous =
       Distributions.Continuous.make(
         `Linear,
         {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
+        None
       )
-      |> Distributions.Continuous.T.scaleToIntegralSum(~intendedSum=1.0);
-    let mixed =
-      MixedShapeBuilder.build(
+      |> Distributions.Continuous.T.normalize; //scaleToIntegralSum(~intendedSum=1.0);
+    let mixed = Distributions.Mixed.make(
         ~continuous,
         ~discrete,
-        ~assumptions={
-          continuous: ADDS_TO_CORRECT_PROBABILITY,
-          discrete: ADDS_TO_CORRECT_PROBABILITY,
-          discreteProbabilityMass: Some(0.5),
-        },
-      )
-      |> E.O.toExn("");
+      );
     makeTest("minX", T.minX(mixed), 1.0);
     makeTest("maxX", T.maxX(mixed), 14.0);
     makeTest(
@@ -243,9 +242,9 @@ describe("Shape", () => {
                 0.24775224775224775,
               |],
             },
+            None
           ),
-        ~discrete={xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]},
-        ~discreteProbabilityMassFraction=0.5,
+        ~discrete=Distributions.Discrete.make({xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]}, None)
       ),
     );
     makeTest(
@@ -266,7 +265,7 @@ describe("Shape", () => {
     makeTest("integralEndY", T.Integral.sum(~cache=None, mixed), 1.0);
     makeTest(
       "scaleBy",
-      T.scaleBy(~scale=2.0, mixed),
+      Distributions.Mixed.scaleBy(~scale=2.0, mixed),
       Distributions.Mixed.make(
         ~continuous=
           Distributions.Continuous.make(
@@ -279,9 +278,9 @@ describe("Shape", () => {
                 0.24775224775224775,
               |],
             },
+            None
           ),
-        ~discrete={xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]},
-        ~discreteProbabilityMassFraction=0.5,
+        ~discrete=Distributions.Discrete.make({xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]}, None),
       ),
     );
     makeTest(
@@ -302,34 +301,31 @@ describe("Shape", () => {
             0.6913122927072927,
             1.0,
           |],
-        },
+      },
+      None,
       ),
     );
   });
 
   describe("Distplus", () => {
     open Distributions.DistPlus;
-    let discrete: DistTypes.xyShape = {
+    let discreteShape: DistTypes.xyShape = {
       xs: [|1., 4., 8.|],
       ys: [|0.3, 0.5, 0.2|],
     };
+    let discrete = Distributions.Discrete.make(discreteShape, None);
     let continuous =
       Distributions.Continuous.make(
         `Linear,
         {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
+        None
       )
-      |> Distributions.Continuous.T.scaleToIntegralSum(~intendedSum=1.0);
+      |> Distributions.Continuous.T.normalize; //scaleToIntegralSum(~intendedSum=1.0);
     let mixed =
-      MixedShapeBuilder.build(
+      Distributions.Mixed.make(
         ~continuous,
         ~discrete,
-        ~assumptions={
-          continuous: ADDS_TO_CORRECT_PROBABILITY,
-          discrete: ADDS_TO_CORRECT_PROBABILITY,
-          discreteProbabilityMass: Some(0.5),
-        },
-      )
-      |> E.O.toExn("");
+      );
     let distPlus =
       Distributions.DistPlus.make(
         ~shape=Mixed(mixed),
@@ -374,6 +370,7 @@ describe("Shape", () => {
               1.0,
             |],
           },
+          None,
         ),
       ),
     );
@@ -386,9 +383,9 @@ describe("Shape", () => {
     let numSamples = 10000;
     open Distributions.Shape;
     let normal: SymbolicDist.dist = `Normal({mean, stdev});
-    let normalShape = TreeNode.toShape(numSamples, normal);
+    let normalShape = TreeNode.toShape(numSamples, `DistData(`Symbolic(normal)));
     let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
-    let lognormalShape = TreeNode.toShape(numSamples, lognormal);
+    let lognormalShape = TreeNode.toShape(numSamples, `DistData(`Symbolic(lognormal)));
 
     makeTestCloseEquality(
       "Mean of a normal",

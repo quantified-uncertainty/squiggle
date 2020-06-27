@@ -43,7 +43,7 @@ module DemoDist = {
 
     let str =
       switch (parsed1) {
-      | Ok(r) => SymbolicDist.toString(r)
+      | Ok(r) => TreeNode.toString(r)
       | Error(e) => e
       };
 
@@ -58,7 +58,7 @@ module DemoDist = {
                ~guesstimatorString=None,
                (),
              )
-             |> Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0);
+             |> Distributions.DistPlus.T.normalize;
            <DistPlusPlot distPlus />;
          })
       |> E.O.default(ReasonReact.null);

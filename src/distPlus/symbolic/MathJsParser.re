@@ -154,16 +154,17 @@ module MathAdtToDistDst = {
         weights: option(array(float)),
       ) => {
     let weights = weights |> E.O.default([||]);
-    let dists =
+
+    /*let dists:  =
       args
       |> E.A.fmap(
            fun
           | Ok(a) => a
           | Error(e) => Error(e)
-          );
+          );*/
 
-    let firstWithError = dists |> Belt.Array.getBy(_, Belt.Result.isError);
-    let withoutErrors = dists |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
+    let firstWithError = args |> Belt.Array.getBy(_, Belt.Result.isError);
+    let withoutErrors = args |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
 
     switch (firstWithError) {
       | Some(Error(e)) => Error(e)
@@ -174,16 +175,16 @@ module MathAdtToDistDst = {
         |> E.A.fmapi((index, t) => {
             let w = weights |> E.A.get(_, index) |> E.O.default(1.0);
 
-            `Operation(`ScaleBy(`Multiply, t, `DistData(`Symbolic(`Float(w)))))
+            `Operation(`ScaleOperation(`Multiply, t, `DistData(`Symbolic(`Float(w)))))
           });
 
         let pointwiseSum = components
         |> Js.Array.sliceFrom(1)
         |> E.A.fold_left((acc, x) => {
-          `PointwiseSum(acc, x)
+          `Operation(`PointwiseOperation(`Add, acc, x))
           }, E.A.unsafe_get(components, 0))
 
-        Ok(`Normalize(pointwiseSum))
+        Ok(`Operation(`Normalize(pointwiseSum)))
       }
     };
   };
@@ -254,21 +255,21 @@ module MathAdtToDistDst = {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `AddOperation))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Add, l, r)))
               | _ => Error("Addition needs two operands"))
       }
       | Fn({name: "subtract", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `SubtractOperation))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Subtract, l, r)))
               | _ => Error("Subtraction needs two operands"))
       }
       | Fn({name: "multiply", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `MultiplyOperation))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Multiply, l, r)))
               | _ => Error("Multiplication needs two operands"))
       }
       | Fn({name: "divide", args}) => {
@@ -276,28 +277,37 @@ module MathAdtToDistDst = {
           |> E.A.fmap(functionParser)
           |> (fun
               | [|Ok(l), Ok(`DistData(`Symbolic(`Float(0.0))))|] => Error("Division by zero")
-              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `DivideOperation))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Divide, l, r)))
               | _ => Error("Division needs two operands"))
       }
       | Fn({name: "pow", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Combination(l, r, `ExponentiateOperation))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Exponentiate, l, r)))
+              | _ => Error("Division needs two operands")
               | _ => Error("Exponentiations needs two operands"))
       }
       | Fn({name: "leftTruncate", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(`DistData(`Symbolic(`Float(r))))|] => Ok(`LeftTruncate(l, r))
+              | [|Ok(d), Ok(`DistData(`Symbolic(`Float(lc))))|] => Ok(`Operation(`Truncate(Some(lc), None, d)))
               | _ => Error("leftTruncate needs two arguments: the expression and the cutoff"))
       }
       | Fn({name: "rightTruncate", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(`DistData(`Symbolic(`Float(r))))|] => Ok(`RightTruncate(l, r))
+              | [|Ok(d), Ok(`DistData(`Symbolic(`Float(rc))))|] => Ok(`Operation(`Truncate(None, Some(rc), d)))
+              | _ => Error("rightTruncate needs two arguments: the expression and the cutoff"))
+      }
+      | Fn({name: "truncate", args}) => {
+          args
+          |> E.A.fmap(functionParser)
+          |> (fun
+              | [|Ok(d), Ok(`DistData(`Symbolic(`Float(lc)))), Ok(`DistData(`Symbolic(`Float(rc))))|] => Ok(`Operation(`Truncate(Some(lc), Some(rc), d)))
+              // TODO: allow on-the-fly evaluations of FloatFromDists to be used as cutoff arguments here.
               | _ => Error("rightTruncate needs two arguments: the expression and the cutoff"))
       }
       | Fn({name}) => Error(name ++ ": function not supported")

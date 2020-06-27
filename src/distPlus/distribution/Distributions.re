@@ -3,7 +3,8 @@ module type dist = {
   type integral;
   let minX: t => float;
   let maxX: t => float;
-  let mapY: (~knownIntegralSumFn: float => option(float)=?, float => float, t) => t;
+  let mapY:
+    (~knownIntegralSumFn: float => option(float)=?, float => float, t) => t;
   let xToY: (float, t) => DistTypes.mixedPoint;
   let toShape: t => DistTypes.shape;
   let toContinuous: t => option(DistTypes.continuousShape);
@@ -13,6 +14,7 @@ module type dist = {
   let normalizedToDiscrete: t => option(DistTypes.discreteShape);
   let toDiscreteProbabilityMassFraction: t => float;
   let downsample: (~cache: option(integral)=?, int, t) => t;
+  let truncate: (option(float), option(float), t) => t;
 
   let integral: (~cache: option(integral), t) => integral;
   let integralEndY: (~cache: option(integral), t) => float;
@@ -38,6 +40,7 @@ module Dist = (T: dist) => {
   let toContinuous = T.toContinuous;
   let toDiscrete = T.toDiscrete;
   let normalize = T.normalize;
+  let truncate = T.truncate;
   let normalizedToContinuous = T.normalizedToContinuous;
   let normalizedToDiscrete = T.normalizedToDiscrete;
   let mean = T.mean;
@@ -52,7 +55,22 @@ module Dist = (T: dist) => {
   };
 };
 
-module Continuous {
+module Common = {
+  let combineIntegralSums =
+      (
+        combineFn: (float, float) => option(float),
+        t1KnownIntegralSum: option(float),
+        t2KnownIntegralSum: option(float),
+      ) => {
+    switch (t1KnownIntegralSum, t2KnownIntegralSum) {
+    | (None, _)
+    | (_, None) => None
+    | (Some(s1), Some(s2)) => combineFn(s1, s2)
+    };
+  };
+};
+
+module Continuous = {
   type t = DistTypes.continuousShape;
   let getShape = (t: t) => t.xyShape;
   let interpolation = (t: t) => t.interpolation;
@@ -78,17 +96,21 @@ module Continuous {
     knownIntegralSum: Some(0.0),
   };
   let combine =
-      (fn, t1: DistTypes.continuousShape, t2: DistTypes.continuousShape)
+      (
+        ~knownIntegralSumsFn,
+        fn,
+        t1: DistTypes.continuousShape,
+        t2: DistTypes.continuousShape,
+      )
       : DistTypes.continuousShape => {
-
     // If we're adding the distributions, and we know the total of each, then we
     // can just sum them up. Otherwise, all bets are off.
     let combinedIntegralSum =
-      switch (fn, t1.knownIntegralSum, t2.knownIntegralSum) {
-      | (_, None, _)
-      | (_, _, None) => None
-      | ((+.), Some(s1), Some(s2)) => Some(s1 +. s2)
-      };
+      Common.combineIntegralSums(
+        knownIntegralSumsFn,
+        t1.knownIntegralSum,
+        t2.knownIntegralSum,
+      );
 
     make(
       `Linear,
@@ -102,7 +124,6 @@ module Continuous {
       combinedIntegralSum,
     );
   };
-  let reduce = (fn, items) => items |> E.A.fold_left(combine(fn), empty);
 
   let toLinear = (t: t): option(t) => {
     switch (t) {
@@ -114,7 +135,19 @@ module Continuous {
     };
   };
   let shapeFn = (fn, t: t) => t |> getShape |> fn;
-  let updateKnownIntegralSum = (knownIntegralSum, t: t): t => ({...t, knownIntegralSum});
+  let updateKnownIntegralSum = (knownIntegralSum, t: t): t => {
+    ...t,
+    knownIntegralSum,
+  };
+
+  let reduce =
+      (
+        ~knownIntegralSumsFn: (float, float) => option(float)=(_, _) => None,
+        fn,
+        continuousShapes,
+      ) =>
+    continuousShapes
+    |> E.A.fold_left(combine(~knownIntegralSumsFn, fn), empty);
 
   // Contracts every point in the continuous xyShape into a single dirac-Delta-like point,
   // using the centerpoints between adjacent xs and the area under each trapezoid.
@@ -128,11 +161,18 @@ module Continuous {
         Belt.Array.set(
           pointMassesY,
           x,
-          (xs[x + 1] -. xs[x]) *. ((ys[x] +. ys[x + 1]) /. 2.)); // = dx * (1/2) * (avgY)
+          (xs[x + 1] -. xs[x]) *. ((ys[x] +. ys[x + 1]) /. 2.),
+        ); // = dx * (1/2) * (avgY)
       ();
     };
 
-    {xyShape: {xs: xs, ys: pointMassesY}, knownIntegralSum: t.knownIntegralSum};
+    {
+      xyShape: {
+        xs,
+        ys: pointMassesY,
+      },
+      knownIntegralSum: t.knownIntegralSum,
+    };
   };
 
   /* Performs a discrete convolution between two continuous distributions A and B.
@@ -153,18 +193,25 @@ module Continuous {
     let t1n = t1s |> XYShape.T.length;
     let t2n = t2s |> XYShape.T.length;
 
-    let outXYShapes: array(array((float, float))) = Belt.Array.makeUninitializedUnsafe(t1n);
+    let outXYShapes: array(array((float, float))) =
+      Belt.Array.makeUninitializedUnsafe(t1n);
 
     for (i in 0 to t1n - 1) {
       // create a new distribution
-      let dxyShape: array((float, float)) = Belt.Array.makeUninitializedUnsafe(t2n);
+      let dxyShape: array((float, float)) =
+        Belt.Array.makeUninitializedUnsafe(t2n);
       for (j in 0 to t2n - 1) {
-        let _ = Belt.Array.set(dxyShape, j, (fn(t1s.xs[i], t2s.xs[j]), t1s.ys[i] *. t2s.ys[j]));
+        let _ =
+          Belt.Array.set(
+            dxyShape,
+            j,
+            (fn(t1s.xs[i], t2s.xs[j]), t1s.ys[i] *. t2s.ys[j]),
+          );
         ();
-      }
+      };
       let _ = Belt.Array.set(outXYShapes, i, dxyShape);
       ();
-    }
+    };
 
     let combinedIntegralSum =
       switch (t1.knownIntegralSum, t2.knownIntegralSum) {
@@ -175,9 +222,9 @@ module Continuous {
 
     outXYShapes
     |> E.A.fmap(s => {
-          let xyShape = XYShape.T.fromZippedArray(s);
-          make(`Linear, xyShape, None);
-        })
+         let xyShape = XYShape.T.fromZippedArray(s);
+         make(`Linear, xyShape, None);
+       })
     |> reduce((+.))
     |> updateKnownIntegralSum(combinedIntegralSum);
   };
@@ -185,34 +232,21 @@ module Continuous {
   let convolve = (fn, t1: t, t2: t) =>
     convolveWithDiscrete(fn, t1, toDiscretePointMasses(t2));
 
-  let mapY = (~knownIntegralSumFn=(previousKnownIntegralSum => None), fn, t: t) => {
+  let mapY = (~knownIntegralSumFn=previousKnownIntegralSum => None, fn, t: t) => {
     let u = E.O.bind(_, knownIntegralSumFn);
     let yMapFn = shapeMap(XYShape.T.mapY(fn));
 
     t |> yMapFn |> updateKnownIntegralSum(u(t.knownIntegralSum));
   };
 
-  let scaleBy = (~scale=1.0, ~knownIntegralSum=None, t: t): t =>
-    t |> mapY((r: float) => r *. scale) |> updateKnownIntegralSum(knownIntegralSum);
-
-  let truncate = (leftCutoff: option(float), rightCutoff: option(float), t: t) => {
-    let truncatedZippedPairs =
-      t
-      |> getShape
-      |> XYShape.T.zip
-      |> XYShape.Zipped.filterByX(x => x >= E.O.default(neg_infinity, leftCutoff) || x <= E.O.default(infinity, rightCutoff));
-
-    let eps = (t |> getShape |> XYShape.T.xTotalRange) *. 0.0001;
-
-    let leftNewPoint = leftCutoff |> E.O.dimap(lc => [| (lc -. eps, 0.) |], _ => [||]);
-    let rightNewPoint = rightCutoff |> E.O.dimap(rc => [| (rc +. eps, 0.) |], _ => [||]);
-
-    let truncatedZippedPairsWithNewPoints =
-      E.A.concatMany([| leftNewPoint, truncatedZippedPairs, rightNewPoint |]);
-    let truncatedShape = XYShape.T.fromZippedArray(truncatedZippedPairsWithNewPoints);
-   
-    make(`Linear, truncatedShape, None);
+  let scaleBy = (~scale=1.0, t: t): t => {
+    t
+    |> mapY((r: float) => r *. scale)
+    |> updateKnownIntegralSum(
+         E.O.bind(t.knownIntegralSum, v => Some(scale *. v)),
+       );
   };
+
 
   module T =
     Dist({
@@ -236,12 +270,31 @@ module Continuous {
         |> DistTypes.MixedPoint.makeContinuous;
       };
 
-      // let combineWithFn = (t1: t, t2: t, fn: (float, float) => float) => {
-      //   switch(t1, t2){
-      //     | ({interpolation: `Stepwise}, {interpolation: `Stepwise}) => 3.0
-      //     | ({interpolation: `Linear}, {interpolation: `Linear}) => 3.0
-      //   }
-      // };
+      let truncate =
+          (leftCutoff: option(float), rightCutoff: option(float), t: t) => {
+        let truncatedZippedPairs =
+          t
+          |> getShape
+          |> XYShape.T.zip
+          |> XYShape.Zipped.filterByX(x =>
+              x >= E.O.default(neg_infinity, leftCutoff)
+              || x <= E.O.default(infinity, rightCutoff)
+            );
+
+        let eps = (t |> getShape |> XYShape.T.xTotalRange) *. 0.0001;
+
+        let leftNewPoint =
+          leftCutoff |> E.O.dimap(lc => [|(lc -. eps, 0.)|], _ => [||]);
+        let rightNewPoint =
+          rightCutoff |> E.O.dimap(rc => [|(rc +. eps, 0.)|], _ => [||]);
+
+        let truncatedZippedPairsWithNewPoints =
+          E.A.concatMany([|leftNewPoint, truncatedZippedPairs, rightNewPoint|]);
+        let truncatedShape =
+          XYShape.T.fromZippedArray(truncatedZippedPairsWithNewPoints);
+
+        make(`Linear, truncatedShape, None);
+      };
 
       // TODO: This should work with stepwise plots.
       let integral = (~cache, t) =>
@@ -272,9 +325,9 @@ module Continuous {
       let toDiscrete = _ => None;
 
       let normalize = (t: t): t => {
-        let continuousIntegralSum = integralEndY(~cache=None, t);
-
-        scaleBy(~scale=(1. /. continuousIntegralSum), ~knownIntegralSum=Some(1.0), t);
+        t
+        |> scaleBy(~scale=1. /. integralEndY(~cache=None, t))
+        |> updateKnownIntegralSum(Some(1.0));
       };
 
       let normalizedToContinuous = t => Some(t); // TODO: this should be normalized
@@ -316,40 +369,41 @@ module Discrete = {
 
   let lastY = (t: t) => t |> getShape |> XYShape.T.lastY;
 
-  let combineIntegralSums = (combineFn: ((float, float) => option(float)), t1KnownIntegralSum: option(float), t2KnownIntegralSum: option(float)) => {
-    switch (t1KnownIntegralSum, t2KnownIntegralSum) {
-    | (None, _)
-    | (_, None) => None
-    | (Some(s1), Some(s2)) => combineFn(s1, s2)
-    };
-  };
-
-  let combine = (combineIntegralSumsFn, fn, t1: DistTypes.discreteShape, t2: DistTypes.discreteShape)
+  let combine =
+      (
+        ~knownIntegralSumsFn,
+        fn,
+        t1: DistTypes.discreteShape,
+        t2: DistTypes.discreteShape,
+      )
       : DistTypes.discreteShape => {
-
-    let combinedIntegralSum = combineIntegralSums(combineIntegralSumsFn, t1.knownIntegralSum, t2.knownIntegralSum);
+    let combinedIntegralSum =
+      Common.combineIntegralSums(
+        knownIntegralSumsFn,
+        t1.knownIntegralSum,
+        t2.knownIntegralSum,
+      );
 
     make(
       XYShape.Combine.combine(
         ~xsSelection=ALL_XS,
         ~xToYSelection=XYShape.XtoY.stepwiseIfAtX,
-        ~fn,  // stepwiseIfAtX returns option(float), so this fn needs to handle None, which is what the _default0 wrapper is for
+        ~fn=((a, b) => fn(E.O.default(0.0, a), E.O.default(0.0, b))), // stepwiseIfAtX returns option(float), so this fn needs to handle None
         t1.xyShape,
         t2.xyShape,
       ),
       combinedIntegralSum,
     );
   };
-  let _default0 = (fn, a, b) =>
-    fn(E.O.default(0.0, a), E.O.default(0.0, b));
-  let reduce = (fn, items) =>
-    items |> E.A.fold_left(combine((_, _) => None, _default0(fn)), empty);
-  // a special version of reduce that adds the results (which should be the most common case by far),
-  // and conveniently also adds the knownIntegralSums.
-  let reduceAdd = (fn, items) =>
-    items |> E.A.fold_left(combine((s1, s2) => Some(s1 +. s2), _default0((+.))), empty);
 
-  let updateKnownIntegralSum = (knownIntegralSum, t: t): t => ({...t, knownIntegralSum});
+  let reduce = (~knownIntegralSumsFn=(_, _) => None, fn, discreteShapes): DistTypes.discreteShape =>
+    discreteShapes
+    |> E.A.fold_left(combine(~knownIntegralSumsFn, fn), empty);
+
+  let updateKnownIntegralSum = (knownIntegralSum, t: t): t => {
+    ...t,
+    knownIntegralSum,
+  };
 
   let convolve = (fn, t1: t, t2: t) => {
     let t1s = t1 |> getShape;
@@ -357,7 +411,12 @@ module Discrete = {
     let t1n = t1s |> XYShape.T.length;
     let t2n = t2s |> XYShape.T.length;
 
-    let combinedIntegralSum = combineIntegralSums((s1, s2) => Some(s1 *. s2), t1.knownIntegralSum, t2.knownIntegralSum);
+    let combinedIntegralSum =
+      Common.combineIntegralSums(
+        (s1, s2) => Some(s1 *. s2),
+        t1.knownIntegralSum,
+        t2.knownIntegralSum,
+      );
 
     let xToYMap = E.FloatFloatMap.empty();
 
@@ -368,8 +427,8 @@ module Discrete = {
         let my = t1s.ys[i] *. t2s.ys[j];
         let _ = Belt.MutableMap.set(xToYMap, x, cv +. my);
         ();
-      }
-    }
+      };
+    };
 
     let rxys = xToYMap |> E.FloatFloatMap.toArray |> XYShape.Zipped.sortByX;
 
@@ -378,25 +437,19 @@ module Discrete = {
     make(convolvedShape, combinedIntegralSum);
   };
 
-  let mapY = (~knownIntegralSumFn=(previousKnownIntegralSum => None), fn, t: t) => {
+  let mapY = (~knownIntegralSumFn=previousKnownIntegralSum => None, fn, t: t) => {
     let u = E.O.bind(_, knownIntegralSumFn);
     let yMapFn = shapeMap(XYShape.T.mapY(fn));
 
     t |> yMapFn |> updateKnownIntegralSum(u(t.knownIntegralSum));
   };
 
-  let scaleBy = (~scale=1.0, ~knownIntegralSum=None, t: t): t =>
-    t |> mapY((r: float) => r *. scale) |> updateKnownIntegralSum(knownIntegralSum);
-
-  let truncate = (leftCutoff: option(float), rightCutoff: option(float), t: t) => {
-    let truncatedShape =
-      t
-      |> getShape
-      |> XYShape.T.zip
-      |> XYShape.Zipped.filterByX(x => x >= E.O.default(neg_infinity, leftCutoff) || x <= E.O.default(infinity, rightCutoff))
-      |> XYShape.T.fromZippedArray;
-
-    make(truncatedShape, None);
+  let scaleBy = (~scale=1.0, t: t): t => {
+    t
+    |> mapY((r: float) => r *. scale)
+    |> updateKnownIntegralSum(
+         E.O.bind(t.knownIntegralSum, v => Some(scale *. v)),
+       );
   };
 
   module T =
@@ -414,7 +467,8 @@ module Discrete = {
           )
         };
       let integralEndY = (~cache, t: t) =>
-        t.knownIntegralSum |> E.O.default(t |> integral(~cache) |> Continuous.lastY);
+        t.knownIntegralSum
+        |> E.O.default(t |> integral(~cache) |> Continuous.lastY);
       let minX = shapeFn(XYShape.T.minX);
       let maxX = shapeFn(XYShape.T.maxX);
       let toDiscreteProbabilityMassFraction = _ => 1.0;
@@ -424,9 +478,9 @@ module Discrete = {
       let toDiscrete = t => Some(t);
 
       let normalize = (t: t): t => {
-        let discreteIntegralSum = integralEndY(~cache=None, t);
-
-        scaleBy(~scale=(1. /. discreteIntegralSum), ~knownIntegralSum=Some(1.0), t);
+        t
+        |> scaleBy(~scale=1. /. integralEndY(~cache=None, t))
+        |> updateKnownIntegralSum(Some(1.0));
       };
 
       let normalizedToContinuous = _ => None;
@@ -446,6 +500,21 @@ module Discrete = {
           |> XYShape.T.fromZippedArray;
 
         make(clippedShape, None); // if someone needs the sum, they'll have to recompute it
+      };
+
+      let truncate =
+          (leftCutoff: option(float), rightCutoff: option(float), t: t): t => {
+        let truncatedShape =
+          t
+          |> getShape
+          |> XYShape.T.zip
+          |> XYShape.Zipped.filterByX(x =>
+              x >= E.O.default(neg_infinity, leftCutoff)
+              || x <= E.O.default(infinity, rightCutoff)
+            )
+          |> XYShape.T.fromZippedArray;
+
+        make(truncatedShape, None);
       };
 
       let xToY = (f, t) =>
@@ -477,53 +546,43 @@ module Discrete = {
         XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares);
       };
     });
-
 };
 
-// TODO: I think this shouldn't assume continuous/discrete are normalized to 1.0, and thus should not need the discreteProbabilityMassFraction being separate.
 module Mixed = {
   type t = DistTypes.mixedShape;
-  let make = (~continuous, ~discrete): t => {
-    continuous,
-    discrete,
-  };
+  let make = (~continuous, ~discrete): t => {continuous, discrete};
 
   let totalLength = (t: t): int => {
-    let continuousLength = t.continuous |> Continuous.getShape |> XYShape.T.length;
+    let continuousLength =
+      t.continuous |> Continuous.getShape |> XYShape.T.length;
     let discreteLength = t.discrete |> Discrete.getShape |> XYShape.T.length;
 
     continuousLength + discreteLength;
   };
 
-  // TODO: Put into scaling module
-  //let normalizeMixedPoint = (t, f) => f *. discreteProbabilityMassFraction;*/
+  let scaleBy = (~scale=1.0, {discrete, continuous}: t): t => {
+    let scaledDiscrete = Discrete.scaleBy(~scale, discrete);
+    let scaledContinuous = Continuous.scaleBy(~scale, continuous);
+    make(~discrete=scaledDiscrete, ~continuous=scaledContinuous);
+  };
 
-  //TODO: Warning: This currently computes the integral, which is expensive.
-  /*let scaleContinuousFn =
-      ({discreteProbabilityMassFraction}: DistTypes.mixedShape, f) =>
-    f *. (1.0 -. discreteProbabilityMassFraction); */
+  let toContinuous = ({continuous}: t) => Some(continuous);
+  let toDiscrete = ({discrete}: t) => Some(discrete);
 
-  //TODO: Warning: This currently computes the integral, which is expensive.
+  let combine = (~knownIntegralSumsFn, fn, t1: t, t2: t) => {
+    let reducedDiscrete =
+      [|t1, t2|]
+      |> E.A.fmap(toDiscrete)
+      |> E.A.O.concatSomes
+      |> Discrete.reduce(~knownIntegralSumsFn, fn);
 
-  // Normalizes to 1.0.
-  /*let scaleContinuous = ({discreteProbabilityMassFraction}: t, continuous) =>
-     // get only the continuous, and scale it to the respective
-      continuous
-      |> Continuous.T.scaleToIntegralSum(
-           ~intendedSum=1.0 -. discreteProbabilityMassFraction,
-         );
+    let reducedContinuous =
+      [|t1, t2|]
+      |> E.A.fmap(toContinuous)
+      |> E.A.O.concatSomes
+      |> Continuous.reduce(~knownIntegralSumsFn, fn);
 
-    let scaleDiscrete = ({discreteProbabilityMassFraction}: t, disrete) =>
-      disrete
-      |> Discrete.T.scaleToIntegralSum(
-           ~intendedSum=discreteProbabilityMassFraction,
-         );*/
-
-  let truncate = (leftCutoff: option(float), rightCutoff: option(float), {discrete, continuous}: t) => {
-    let truncatedDiscrete = Discrete.truncate(leftCutoff, rightCutoff, discrete);
-    let truncatedContinuous = Continuous.truncate(leftCutoff, rightCutoff, continuous);
-
-    make(~discrete=truncatedDiscrete, ~continuous=truncatedContinuous);
+    make(~discrete=reducedDiscrete, ~continuous=reducedContinuous);
   };
 
   module T =
@@ -536,19 +595,40 @@ module Mixed = {
       let maxX = ({continuous, discrete}: t) =>
         max(Continuous.T.maxX(continuous), Discrete.T.maxX(discrete));
       let toShape = (t: t): DistTypes.shape => Mixed(t);
-      let toContinuous = ({continuous}: t) => Some(continuous);
-      let toDiscrete = ({discrete}: t) => Some(discrete);
+
+      let toContinuous = toContinuous;
+      let toDiscrete = toDiscrete;
+
+      let truncate =
+          (
+            leftCutoff: option(float),
+            rightCutoff: option(float),
+            {discrete, continuous}: t,
+          ) => {
+        let truncatedContinuous = Continuous.T.truncate(leftCutoff, rightCutoff, continuous);
+        let truncatedDiscrete = Discrete.T.truncate(leftCutoff, rightCutoff, discrete);
+
+        make(~discrete=truncatedDiscrete, ~continuous=truncatedContinuous);
+      };
 
       let normalize = (t: t): t => {
-        let continuousIntegralSum = Continuous.T.Integral.sum(~cache=None, t.continuous);
-        let discreteIntegralSum = Discrete.T.Integral.sum(~cache=None, t.discrete);
+        let continuousIntegralSum =
+          Continuous.T.Integral.sum(~cache=None, t.continuous);
+        let discreteIntegralSum =
+          Discrete.T.Integral.sum(~cache=None, t.discrete);
         let totalIntegralSum = continuousIntegralSum +. discreteIntegralSum;
 
         let newContinuousSum = continuousIntegralSum /. totalIntegralSum;
         let newDiscreteSum = discreteIntegralSum /. totalIntegralSum;
 
-        let normalizedContinuous = Continuous.scaleBy(~scale=(1. /. newContinuousSum), ~knownIntegralSum=Some(newContinuousSum), t.continuous);
-        let normalizedDiscrete = Discrete.scaleBy(~scale=(1. /. newDiscreteSum), ~knownIntegralSum=Some(newDiscreteSum), t.discrete);
+        let normalizedContinuous =
+          t.continuous
+          |> Continuous.scaleBy(~scale=1. /. newContinuousSum)
+          |> Continuous.updateKnownIntegralSum(Some(newContinuousSum));
+        let normalizedDiscrete =
+          t.discrete
+          |> Discrete.scaleBy(~scale=1. /. newDiscreteSum)
+          |> Discrete.updateKnownIntegralSum(Some(newDiscreteSum));
 
         make(~continuous=normalizedContinuous, ~discrete=normalizedDiscrete);
       };
@@ -563,8 +643,10 @@ module Mixed = {
       };
 
       let toDiscreteProbabilityMassFraction = ({discrete, continuous}: t) => {
-        let discreteIntegralSum = Discrete.T.Integral.sum(~cache=None, discrete);
-        let continuousIntegralSum = Continuous.T.Integral.sum(~cache=None, continuous);
+        let discreteIntegralSum =
+          Discrete.T.Integral.sum(~cache=None, discrete);
+        let continuousIntegralSum =
+          Continuous.T.Integral.sum(~cache=None, continuous);
         let totalIntegralSum = discreteIntegralSum +. continuousIntegralSum;
 
         discreteIntegralSum /. totalIntegralSum;
@@ -575,20 +657,25 @@ module Mixed = {
         // The easiest way to do this is to simply go by the previous probability masses.
 
         // The cache really isn't helpful here, because we would need two separate caches
-        let discreteIntegralSum = Discrete.T.Integral.sum(~cache=None, discrete);
-        let continuousIntegralSum = Continuous.T.Integral.sum(~cache=None, continuous);
+        let discreteIntegralSum =
+          Discrete.T.Integral.sum(~cache=None, discrete);
+        let continuousIntegralSum =
+          Continuous.T.Integral.sum(~cache=None, continuous);
         let totalIntegralSum = discreteIntegralSum +. continuousIntegralSum;
 
         let downsampledDiscrete =
           Discrete.T.downsample(
-            int_of_float(float_of_int(count) *. (discreteIntegralSum /. totalIntegralSum)),
+            int_of_float(
+              float_of_int(count) *. (discreteIntegralSum /. totalIntegralSum),
+            ),
             discrete,
           );
 
         let downsampledContinuous =
           Continuous.T.downsample(
             int_of_float(
-              float_of_int(count) *. (continuousIntegralSum /. totalIntegralSum),
+              float_of_int(count)
+              *. (continuousIntegralSum /. totalIntegralSum),
             ),
             continuous,
           );
@@ -596,23 +683,20 @@ module Mixed = {
         {discrete: downsampledDiscrete, continuous: downsampledContinuous};
       };
 
-    let normalizedToContinuous = (t: t) =>
-      Some(normalize(t).continuous);
+      let normalizedToContinuous = (t: t) => Some(normalize(t).continuous);
 
-    let normalizedToDiscrete = ({discrete} as t: t) =>
-      Some(normalize(t).discrete);
+      let normalizedToDiscrete = ({discrete} as t: t) =>
+        Some(normalize(t).discrete);
 
-      let integral =
-          (
-            ~cache,
-            {continuous, discrete}: t,
-          ) => {
+      let integral = (~cache, {continuous, discrete}: t) => {
         switch (cache) {
         | Some(cache) => cache
-        | None => {
+        | None =>
           // note: if the underlying shapes aren't normalized, then these integrals won't be either!
-          let continuousIntegral = Continuous.T.Integral.get(~cache=None, continuous);
-          let discreteIntegral = Discrete.T.Integral.get(~cache=None, discrete);
+          let continuousIntegral =
+            Continuous.T.Integral.get(~cache=None, continuous);
+          let discreteIntegral =
+            Discrete.T.Integral.get(~cache=None, discrete);
 
           Continuous.make(
             `Linear,
@@ -623,7 +707,6 @@ module Mixed = {
             ),
             None,
           );
-        }
         };
       };
 
@@ -648,14 +731,26 @@ module Mixed = {
       // This pipes all ys (continuous and discrete) through fn.
       // If mapY is a linear operation, we might be able to update the knownIntegralSums as well;
       // if not, they'll be set to None.
-      let mapY = (~knownIntegralSumFn=(previousIntegralSum => None), fn, {discrete, continuous}: t): t => {
+      let mapY =
+          (
+            ~knownIntegralSumFn=previousIntegralSum => None,
+            fn,
+            {discrete, continuous}: t,
+          )
+          : t => {
         let u = E.O.bind(_, knownIntegralSumFn);
 
         let yMappedDiscrete =
-          discrete |> Discrete.T.mapY(fn) |> Discrete.updateKnownIntegralSum(u(discrete.knownIntegralSum));
+          discrete
+          |> Discrete.T.mapY(fn)
+          |> Discrete.updateKnownIntegralSum(u(discrete.knownIntegralSum));
 
         let yMappedContinuous =
-          continuous |> Continuous.T.mapY(fn) |> Continuous.updateKnownIntegralSum(u(continuous.knownIntegralSum));
+          continuous
+          |> Continuous.T.mapY(fn)
+          |> Continuous.updateKnownIntegralSum(
+               u(continuous.knownIntegralSum),
+             );
 
         {
           discrete: yMappedDiscrete,
@@ -668,34 +763,55 @@ module Mixed = {
         let continuousMean = Continuous.T.mean(continuous);
 
         // the combined mean is the weighted sum of the two:
-        let discreteIntegralSum = Discrete.T.Integral.sum(~cache=None, discrete);
-        let continuousIntegralSum = Continuous.T.Integral.sum(~cache=None, continuous);
+        let discreteIntegralSum =
+          Discrete.T.Integral.sum(~cache=None, discrete);
+        let continuousIntegralSum =
+          Continuous.T.Integral.sum(~cache=None, continuous);
         let totalIntegralSum = discreteIntegralSum +. continuousIntegralSum;
 
-        (discreteMean *. discreteIntegralSum +. continuousMean *. continuousIntegralSum) /. totalIntegralSum;
+        (
+          discreteMean
+          *. discreteIntegralSum
+          +. continuousMean
+          *. continuousIntegralSum
+        )
+        /. totalIntegralSum;
       };
 
       let variance = ({discrete, continuous} as t: t): float => {
         // the combined mean is the weighted sum of the two:
-        let discreteIntegralSum = Discrete.T.Integral.sum(~cache=None, discrete);
-        let continuousIntegralSum = Continuous.T.Integral.sum(~cache=None, continuous);
+        let discreteIntegralSum =
+          Discrete.T.Integral.sum(~cache=None, discrete);
+        let continuousIntegralSum =
+          Continuous.T.Integral.sum(~cache=None, continuous);
         let totalIntegralSum = discreteIntegralSum +. continuousIntegralSum;
 
         let getMeanOfSquares = ({discrete, continuous} as t: t) => {
-          let discreteMean = discrete |> Discrete.shapeMap(XYShape.Analysis.squareXYShape) |> Discrete.T.mean;
-          let continuousMean = continuous |> XYShape.Analysis.getMeanOfSquaresContinuousShape;
-          (discreteMean *. discreteIntegralSum +. continuousMean *. continuousIntegralSum) /. totalIntegralSum
+          let discreteMean =
+            discrete
+            |> Discrete.shapeMap(XYShape.Analysis.squareXYShape)
+            |> Discrete.T.mean;
+          let continuousMean =
+            continuous |> XYShape.Analysis.getMeanOfSquaresContinuousShape;
+          (
+            discreteMean
+            *. discreteIntegralSum
+            +. continuousMean
+            *. continuousIntegralSum
+          )
+          /. totalIntegralSum;
         };
 
         switch (discreteIntegralSum /. totalIntegralSum) {
         | 1.0 => Discrete.T.variance(discrete)
         | 0.0 => Continuous.T.variance(continuous)
-        | _ => XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
+        | _ =>
+          XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
         };
       };
     });
 
-  let convolve = (fn: ((float, float) => float), t1: t, t2: t): t => {
+  let convolve = (fn: (float, float) => float, t1: t, t2: t): t => {
     // Discrete convolution can cause a huge increase in the number of samples,
     // so we'll first downsample.
 
@@ -713,16 +829,21 @@ module Mixed = {
 
     // continuous (*) continuous => continuous, but also
     // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:
-    let ccConvResult = Continuous.convolve(fn, t1d.continuous, t2d.continuous);
-    let dcConvResult = Continuous.convolveWithDiscrete(fn, t2d.continuous, t1d.discrete);
-    let cdConvResult = Continuous.convolveWithDiscrete(fn, t1d.continuous, t2d.discrete);
-    let continuousConvResult = Continuous.reduce((+.), [|ccConvResult, dcConvResult, cdConvResult|]);
+    let ccConvResult =
+      Continuous.convolve(fn, t1d.continuous, t2d.continuous);
+    let dcConvResult =
+      Continuous.convolveWithDiscrete(fn, t2d.continuous, t1d.discrete);
+    let cdConvResult =
+      Continuous.convolveWithDiscrete(fn, t1d.continuous, t2d.discrete);
+    let continuousConvResult =
+      Continuous.reduce((+.), [|ccConvResult, dcConvResult, cdConvResult|]);
 
     // ... finally, discrete (*) discrete => discrete, obviously:
-    let discreteConvResult = Discrete.convolve(fn, t1d.discrete, t2d.discrete);
+    let discreteConvResult =
+      Discrete.convolve(fn, t1d.discrete, t2d.discrete);
 
     {discrete: discreteConvResult, continuous: continuousConvResult};
-  }
+  };
 };
 
 module Shape = {
@@ -741,42 +862,30 @@ module Shape = {
     | Continuous(m) => Continuous(fn3(m))
     };
 
-  let toMixed = mapToAll((
-    m => m,
-    d => Mixed.make(~discrete=d, ~continuous=Continuous.empty),
-    c => Mixed.make(~discrete=Discrete.empty, ~continuous=c),
-  ));
+  let toMixed =
+    mapToAll((
+      m => m,
+      d => Mixed.make(~discrete=d, ~continuous=Continuous.empty),
+      c => Mixed.make(~discrete=Discrete.empty, ~continuous=c),
+    ));
 
   let convolve = (fn, t1: t, t2: t): t => {
     Mixed(Mixed.convolve(fn, toMixed(t1), toMixed(t2)));
   };
 
-  let downsample = (~cache=None, i, t) =>
-    fmap((
-      Mixed.T.downsample(i),
-      Discrete.T.downsample(i),
-      Continuous.T.downsample(i),
-    ), t);
-
-  let normalize =
-    fmap((
-      Mixed.T.normalize,
-      Discrete.T.normalize,
-      Continuous.T.normalize,
-    ));
-
-  let truncate (leftCutoff, rightCutoff, t): t =
-    fmap((
-      Mixed.truncate(leftCutoff, rightCutoff),
-      Discrete.truncate(leftCutoff, rightCutoff),
-      Continuous.truncate(leftCutoff, rightCutoff),
-    ), t);
+  let combine = (~knownIntegralSumsFn=(_, _) => None, fn, t1: t, t2: t) =>
+    switch ((t1, t2)) {
+    | (Continuous(m1), Continuous(m2)) => DistTypes.Continuous(Continuous.combine(~knownIntegralSumsFn, fn, m1, m2))
+    | (Discrete(m1), Discrete(m2)) => DistTypes.Discrete(Discrete.combine(~knownIntegralSumsFn, fn, m1, m2))
+    | (m1, m2) => {
+        DistTypes.Mixed(Mixed.combine(~knownIntegralSumsFn, fn, toMixed(m1), toMixed(m2)))
+      }
+    };
 
   module T =
     Dist({
       type t = DistTypes.shape;
       type integral = DistTypes.continuousShape;
-
 
       let xToY = (f: float) =>
         mapToAll((
@@ -789,9 +898,31 @@ module Shape = {
 
       let toContinuous = t => None;
       let toDiscrete = t => None;
-    let downsample = (~cache=None, i, t) => t;
-    let toDiscreteProbabilityMassFraction = t => 0.0;
-    let normalize = t => t;
+
+
+      let downsample = (~cache=None, i, t) =>
+        fmap(
+          (
+            Mixed.T.downsample(i),
+            Discrete.T.downsample(i),
+            Continuous.T.downsample(i),
+          ),
+          t,
+        );
+
+      let truncate = (leftCutoff, rightCutoff, t): t =>
+        fmap(
+          (
+            Mixed.T.truncate(leftCutoff, rightCutoff),
+            Discrete.T.truncate(leftCutoff, rightCutoff),
+            Continuous.T.truncate(leftCutoff, rightCutoff),
+          ),
+          t,
+        );
+
+      let toDiscreteProbabilityMassFraction = t => 0.0;
+      let normalize =
+        fmap((Mixed.T.normalize, Discrete.T.normalize, Continuous.T.normalize));
       let toContinuous =
         mapToAll((
           Mixed.T.toContinuous,
@@ -853,7 +984,7 @@ module Shape = {
         ));
       };
       let maxX = mapToAll((Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX));
-      let mapY = (~knownIntegralSumFn=(previousIntegralSum => None), fn) =>
+      let mapY = (~knownIntegralSumFn=previousIntegralSum => None, fn) =>
         fmap((
           Mixed.T.mapY(~knownIntegralSumFn, fn),
           Discrete.T.mapY(~knownIntegralSumFn, fn),
@@ -935,12 +1066,16 @@ module DistPlus = {
       let toDiscrete = shapeFn(Shape.T.toDiscrete);
 
       let normalize = (t: t): t => {
-        let normalizedShape =
-          t |> toShape |> Shape.T.normalize;
+        let normalizedShape = t |> toShape |> Shape.T.normalize;
 
-          t |> updateShape(normalizedShape);
-
+        t |> updateShape(normalizedShape);
         // TODO: also adjust for domainIncludedProbabilityMass here.
+      };
+
+      let truncate = (leftCutoff, rightCutoff, t: t): t => {
+        let truncatedShape = t |> toShape |> Shape.T.truncate(leftCutoff, rightCutoff);
+
+        t |> updateShape(truncatedShape);
       };
 
       // TODO: replace this with
@@ -980,7 +1115,13 @@ module DistPlus = {
       let downsample = (~cache=None, i, t): t =>
         updateShape(t |> toShape |> Shape.T.downsample(i), t);
       // todo: adjust for limit, maybe?
-      let mapY = (~knownIntegralSumFn=(previousIntegralSum => None), fn, {shape, _} as t: t): t =>
+      let mapY =
+          (
+            ~knownIntegralSumFn=previousIntegralSum => None,
+            fn,
+            {shape, _} as t: t,
+          )
+          : t =>
         Shape.T.mapY(~knownIntegralSumFn, fn, shape) |> updateShape(_, t);
 
       let integralEndY = (~cache as _, t: t) =>

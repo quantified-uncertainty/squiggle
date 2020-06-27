@@ -1,68 +1,59 @@
 /* This module represents a tree node. */
 
-/* TreeNodes are either Data (i.e. symbolic or rendered distributions) or Operations. */
-type treeNode = [
-    | `DistData(distData)
-    | `Operation(operation)
-] and distData = [
+type distData = [
   | `Symbolic(SymbolicDist.dist)
   | `RenderedShape(DistTypes.shape)
-] and operation = [
-  // binary operations
-  | `StandardOperation(standardOperation, treeNode, treeNode)
-  | `PointwiseOperation(pointwiseOperation, treeNode, treeNode)
-  | `ScaleOperation(scaleOperation, treeNode, scaleBy)
-  // unary operations
-  | `Render(treeNode) // always evaluates to `DistData(`RenderedShape(...))
-  | `Truncate(leftCutoff, rightCutoff, treeNode)
-  | `Normalize(treeNode)
-  // direct evaluations of dists (e.g. cdf, sample)
-  | `FloatFromDist(distToFloatOperation, treeNode)
-] and standardOperation = [
+];
+
+type standardOperation = [
   | `Add
   | `Multiply
   | `Subtract
   | `Divide
   | `Exponentiate
-] and pointwiseOperation = [
-  | `Add
-  | `Multiply
-] and scaleOperation = [
-  | `Multiply
-  | `Log
+];
+type pointwiseOperation = [ | `Add | `Multiply];
+type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
+type distToFloatOperation = [ | `Pdf(float) | `Inv(float) | `Mean | `Sample];
+
+/* TreeNodes are either Data (i.e. symbolic or rendered distributions) or Operations. */
+type treeNode = [
+  | `DistData(distData) // a leaf node that describes a distribution
+  | `Operation(operation) // an operation on two child nodes
 ]
-and scaleBy = treeNode and leftCutoff = option(float) and rightCutoff = option(float)
-and distToFloatOperation = [
-  | `Pdf(float)
-  | `Cdf(float)
-  | `Inv(float)
-  | `Sample
+and operation = [
+  | // binary operations
+    `StandardOperation(
+      standardOperation,
+      treeNode,
+      treeNode,
+    )
+    // unary operations
+  | `PointwiseOperation(pointwiseOperation, treeNode, treeNode) // always evaluates to `DistData(`RenderedShape(...))
+  | `ScaleOperation(scaleOperation, treeNode, treeNode) // always evaluates to `DistData(`RenderedShape(...))
+  | `Render(treeNode) // always evaluates to `DistData(`RenderedShape(...))
+  | `Truncate // always evaluates to `DistData(`RenderedShape(...))
+(
+      option(float),
+      option(float),
+      treeNode,
+    ) // leftCutoff and rightCutoff
+  | `Normalize // always evaluates to `DistData(`RenderedShape(...))
+ // leftCutoff and rightCutoff
+(
+      treeNode,
+    )
+  | `FloatFromDist // always evaluates to `DistData(`RenderedShape(...))
+ // leftCutoff and rightCutoff
+(
+      distToFloatOperation,
+      treeNode,
+    )
 ];
 
 module TreeNode = {
   type t = treeNode;
   type simplifier = treeNode => result(treeNode, string);
-
-  type renderParams = {
-    operationToDistData: (int, operation) => result(t, string),
-    sampleCount: int,
-  }
-
-  let rec renderToShape = (renderParams, t: t): result(DistTypes.shape, string) => {
-    switch (t) {
-    | `DistData(`RenderedShape(s)) => Ok(s) // already a rendered shape, we're done here
-    | `DistData(`Symbolic(d)) =>
-      switch (d) {
-      | `Float(v) =>
-        Ok(Discrete(Distributions.Discrete.make({xs: [|v|], ys: [|1.0|]}, Some(1.0))));
-      | _ =>
-        let xs = SymbolicDist.GenericDistFunctions.interpolateXs(~xSelection=`ByWeight, d, renderParams.sampleCount);
-        let ys = xs |> E.A.fmap(x => SymbolicDist.GenericDistFunctions.pdf(x, d));
-        Ok(Continuous(Distributions.Continuous.make(`Linear, {xs, ys}, Some(1.0))));
-      }
-    | `Operation(op) => E.R.bind(renderParams.operationToDistData(renderParams.sampleCount, op), renderToShape(renderParams))
-    };
-  };
 
   /* The following modules encapsulate everything we can do with
    * different kinds of operations. */
@@ -154,207 +145,328 @@ module TreeNode = {
       };
     };
 
-    let evaluateNumerically = (standardOp, renderParams, t1, t2) => {
+    let evaluateNumerically = (standardOp, operationToDistData, t1, t2) => {
       let func = funcFromOp(standardOp);
 
-      // TODO: downsample the two shapes
-      let renderedShape1 = t1 |> renderToShape(renderParams);
-      let renderedShape2 = t2 |> renderToShape(renderParams);
+      // force rendering into shapes
+      let renderedShape1 = operationToDistData(`Render(t1));
+      let renderedShape2 = operationToDistData(`Render(t2));
 
-      // This will most likely require a mixed
-
-      switch ((renderedShape1, renderedShape2)) {
-        | (Error(e1), _) => Error(e1)
-        | (_, Error(e2)) => Error(e2)
-        | (Ok(s1), Ok(s2)) => Ok(`DistData(`RenderedShape(Distributions.Shape.convolve(func, s1, s2))))
+      switch (renderedShape1, renderedShape2) {
+      | (
+          Ok(`DistData(`RenderedShape(s1))),
+          Ok(`DistData(`RenderedShape(s2))),
+        ) =>
+        Ok(
+          `DistData(
+            `RenderedShape(Distributions.Shape.convolve(func, s1, s2)),
+          ),
+        )
+      | (Error(e1), _) => Error(e1)
+      | (_, Error(e2)) => Error(e2)
+      | _ => Error("Could not render shapes.")
       };
     };
 
     let evaluateToDistData =
-        (standardOp: standardOperation, renderParams, t1: t, t2: t): result(treeNode, string) =>
+        (standardOp: standardOperation, operationToDistData, t1: t, t2: t)
+        : result(treeNode, string) =>
       standardOp
       |> Simplify.attempt(_, t1, t2)
       |> E.R.bind(
            _,
            fun
            | `DistData(d) => Ok(`DistData(d)) // the analytical simplifaction worked, nice!
-           | `Operation(_) => // if not, run the convolution
-             evaluateNumerically(standardOp, renderParams, t1, t2),
+           | `Operation(_) =>
+             // if not, run the convolution
+             evaluateNumerically(standardOp, operationToDistData, t1, t2),
          );
   };
 
   module ScaleOperation = {
-    let rec mean = (renderParams, t: t): result(float, string) => {
-      switch (t) {
-      | `DistData(`RenderedShape(s)) => Ok(Distributions.Shape.T.mean(s))
-      | `DistData(`Symbolic(s)) => SymbolicDist.GenericDistFunctions.mean(s)
-          // evaluating the operation returns result(treeNode(distData)). We then want to make sure
-      | `Operation(op) => E.R.bind(renderParams.operationToDistData(renderParams.sampleCount, op), mean(renderParams))
-      }
-    };
-
     let fnFromOp =
       fun
-      | `Multiply => (*.)
-      | `Log => ((a, b) => ( log(a) /. log(b) ));
+      | `Multiply => ( *. )
+      | `Exponentiate => ( ** )
+      | `Log => ((a, b) => log(a) /. log(b));
 
     let knownIntegralSumFnFromOp =
       fun
-      | `Multiply => (a, b) => Some(a *. b)
+      | `Multiply => ((a, b) => Some(a *. b))
+      | `Exponentiate => ((_, _) => None)
       | `Log => ((_, _) => None);
 
-    let evaluateToDistData = (scaleOp, renderParams, t, scaleBy) => {
+    let evaluateToDistData = (scaleOp, operationToDistData, t, scaleBy) => {
+      // scaleBy has to be a single float, otherwise we'll return an error.
       let fn = fnFromOp(scaleOp);
       let knownIntegralSumFn = knownIntegralSumFnFromOp(scaleOp);
-      let renderedShape = t |> renderToShape(renderParams);
-      let scaleByMeanValue = mean(renderParams, scaleBy);
 
-      switch ((renderedShape, scaleByMeanValue)) {
+      let renderedShape = operationToDistData(`Render(t));
+
+      switch (renderedShape, scaleBy) {
       | (Error(e1), _) => Error(e1)
-      | (_, Error(e2)) => Error(e2)
-      | (Ok(rs), Ok(sm)) =>
-            Ok(`DistData(`RenderedShape(Distributions.Shape.T.mapY(~knownIntegralSumFn=knownIntegralSumFn(sm), fn(sm), rs))))
-      }
+      | (
+          Ok(`DistData(`RenderedShape(rs))),
+          `DistData(`Symbolic(`Float(sm))),
+        ) =>
+        Ok(
+          `DistData(
+            `RenderedShape(
+              Distributions.Shape.T.mapY(
+                ~knownIntegralSumFn=knownIntegralSumFn(sm),
+                fn(sm),
+                rs,
+              ),
+            ),
+          ),
+        )
+      | (_, _) => Error("Can only scale by float values.")
+      };
     };
   };
 
   module PointwiseOperation = {
-    let funcFromOp: (pointwiseOperation => ((float, float) => float)) =
-      fun
-      | `Add => (+.)
-      | `Multiply => ( *. );
+    let pointwiseAdd = (operationToDistData, t1, t2) => {
+        let renderedShape1 = operationToDistData(`Render(t1));
+        let renderedShape2 = operationToDistData(`Render(t2));
 
-    let evaluateToDistData = (pointwiseOp, renderParams, t1, t2) => {
-      let func = funcFromOp(pointwiseOp);
-      let renderedShape1 = t1 |> renderToShape(renderParams);
-      let renderedShape2 = t2 |> renderToShape(renderParams);
+      switch ((renderedShape1, renderedShape2)) {
+      | (Error(e1), _) => Error(e1)
+      | (_, Error(e2)) => Error(e2)
+      | (Ok(`DistData(`RenderedShape(rs1))), Ok(`DistData(`RenderedShape(rs2)))) => Ok(`DistData(`RenderedShape(Distributions.Shape.combine(~knownIntegralSumsFn=(a, b) => Some(a +. b), (+.), rs1, rs2))))
+      | _ => Error("Could not perform pointwise addition.")
+      };
+    };
 
-      // TODO: figure out integral, diff between pointwiseAdd and pointwiseProduct and other stuff
-      // Distributions.Shape.reduce(func, renderedShape1, renderedShape2);
+    let pointwiseMultiply = (operationToDistData, t1, t2) => {
+      // TODO: construct a function that we can easily sample from, to construct
+      // a RenderedShape. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
+      Error("Pointwise multiplication not yet supported.");
+    };
 
-      Error("Pointwise operations currently not supported.")
+    let evaluateToDistData = (pointwiseOp, operationToDistData, t1, t2) => {
+      switch (pointwiseOp) {
+      | `Add => pointwiseAdd(operationToDistData, t1, t2)
+      | `Multiply => pointwiseMultiply(operationToDistData, t1, t2)
+      }
     };
   };
 
   module Truncate = {
     module Simplify = {
-      let tryTruncatingNothing: simplifier = fun
-      | `Operation(`Truncate(None, None, `DistData(d))) => Ok(`DistData(d))
-      | t => Ok(t);
+      let tryTruncatingNothing: simplifier =
+        fun
+        | `Operation(`Truncate(None, None, `DistData(d))) =>
+          Ok(`DistData(d))
+        | t => Ok(t);
 
-      let tryTruncatingUniform: simplifier = fun
-      | `Operation(`Truncate(lc, rc, `DistData(`Symbolic(`Uniform(u))))) => {
-          // just create a new Uniform distribution
-          let newLow = max(E.O.default(neg_infinity, lc), u.low);
-          let newHigh = min(E.O.default(infinity, rc), u.high);
-          Ok(`DistData(`Symbolic(`Uniform({low: newLow, high: newHigh}))));
-        }
-      | t => Ok(t);
+      let tryTruncatingUniform: simplifier =
+        fun
+        | `Operation(`Truncate(lc, rc, `DistData(`Symbolic(`Uniform(u))))) => {
+            // just create a new Uniform distribution
+            let newLow = max(E.O.default(neg_infinity, lc), u.low);
+            let newHigh = min(E.O.default(infinity, rc), u.high);
+            Ok(
+              `DistData(`Symbolic(`Uniform({low: newLow, high: newHigh}))),
+            );
+          }
+        | t => Ok(t);
 
       let attempt = (leftCutoff, rightCutoff, t): result(treeNode, string) => {
-          let originalTreeNode = `Operation(`Truncate(leftCutoff, rightCutoff, t));
+        let originalTreeNode =
+          `Operation(`Truncate((leftCutoff, rightCutoff, t)));
 
-          originalTreeNode
-          |> tryTruncatingNothing
-          |> E.R.bind(_, tryTruncatingUniform);
+        originalTreeNode
+        |> tryTruncatingNothing
+        |> E.R.bind(_, tryTruncatingUniform);
       };
     };
 
-    let evaluateNumerically = (leftCutoff, rightCutoff, renderParams, t) => {
+    let evaluateNumerically =
+        (leftCutoff, rightCutoff, operationToDistData, t) => {
       // TODO: use named args in renderToShape; if we're lucky we can at least get the tail
       // of a distribution we otherwise wouldn't get at all
-      let renderedShape = t |> renderToShape(renderParams);
+      let renderedShape = operationToDistData(`Render(t));
 
-      E.R.bind(renderedShape, rs => {
-        let truncatedShape = rs |> Distributions.Shape.truncate(leftCutoff, rightCutoff);
+      switch (renderedShape) {
+      | Ok(`DistData(`RenderedShape(rs))) =>
+        let truncatedShape =
+          rs |> Distributions.Shape.T.truncate(leftCutoff, rightCutoff);
         Ok(`DistData(`RenderedShape(rs)));
-      });
+      | Error(e1) => Error(e1)
+      | _ => Error("Could not truncate distribution.")
+      };
     };
 
-    let evaluateToDistData = (leftCutoff: option(float), rightCutoff: option(float), renderParams, t: treeNode): result(treeNode, string) => {
+    let evaluateToDistData =
+        (
+          leftCutoff: option(float),
+          rightCutoff: option(float),
+          operationToDistData,
+          t: treeNode,
+        )
+        : result(treeNode, string) => {
       t
       |> Simplify.attempt(leftCutoff, rightCutoff)
       |> E.R.bind(
            _,
            fun
            | `DistData(d) => Ok(`DistData(d)) // the analytical simplifaction worked, nice!
-           | `Operation(_) => evaluateNumerically(leftCutoff, rightCutoff, renderParams, t),
+           | `Operation(_) =>
+             evaluateNumerically(
+               leftCutoff,
+               rightCutoff,
+               operationToDistData,
+               t,
+             ),
          ); // if not, run the convolution
-      };
+    };
   };
 
   module Normalize = {
-    let rec evaluateToDistData = (renderParams, t: treeNode): result(treeNode, string) => {
+    let rec evaluateToDistData =
+            (operationToDistData, t: treeNode): result(treeNode, string) => {
       switch (t) {
       | `DistData(`Symbolic(_)) => Ok(t)
-      | `DistData(`RenderedShape(s)) => {
-          let normalized = Distributions.Shape.normalize(s);
+      | `DistData(`RenderedShape(s)) =>
+        let normalized = Distributions.Shape.T.normalize(s);
         Ok(`DistData(`RenderedShape(normalized)));
-      }
-      | `Operation(op) => E.R.bind(renderParams.operationToDistData(renderParams.sampleCount, op), evaluateToDistData(renderParams))
-      }
-    }
+      | `Operation(op) =>
+        E.R.bind(
+          operationToDistData(op),
+          evaluateToDistData(operationToDistData),
+        )
+      };
+    };
   };
 
   module FloatFromDist = {
     let evaluateFromSymbolic = (distToFloatOp: distToFloatOperation, s) => {
-      let value = switch (distToFloatOp) {
-        | `Pdf(f) => SymbolicDist.GenericDistFunctions.pdf(f, s)
-        | `Cdf(f) => 0.0
-        | `Inv(f) => SymbolicDist.GenericDistFunctions.inv(f, s)
-        | `Sample => SymbolicDist.GenericDistFunctions.sample(s)
-      }
-      Ok(`DistData(`Symbolic(`Float(value))));
+      let value =
+        switch (distToFloatOp) {
+        | `Pdf(f) => Ok(SymbolicDist.GenericDistFunctions.pdf(f, s))
+        | `Inv(f) => Ok(SymbolicDist.GenericDistFunctions.inv(f, s))
+        | `Sample => Ok(SymbolicDist.GenericDistFunctions.sample(s))
+        | `Mean => SymbolicDist.GenericDistFunctions.mean(s)
+        };
+      E.R.bind(value, v => Ok(`DistData(`Symbolic(`Float(v)))));
     };
-    let evaluateFromRenderedShape = (distToFloatOp: distToFloatOperation, rs: DistTypes.shape): result(treeNode, string) => {
-      // evaluate the pdf, cdf, get sample, etc. from the renderedShape rs
-      // Should be a float like Ok(`DistData(`Symbolic(Float(0.0))));
-      Error("Float from dist is not yet implemented.");
+    let evaluateFromRenderedShape =
+        (distToFloatOp: distToFloatOperation, rs: DistTypes.shape)
+        : result(treeNode, string) => {
+      Ok(`DistData(`Symbolic(`Float(Distributions.Shape.T.mean(rs)))));
     };
-    let rec evaluateToDistData = (distToFloatOp: distToFloatOperation, renderParams, t: treeNode): result(treeNode, string) => {
+    let rec evaluateToDistData =
+            (
+              distToFloatOp: distToFloatOperation,
+              operationToDistData,
+              t: treeNode,
+            )
+            : result(treeNode, string) => {
       switch (t) {
       | `DistData(`Symbolic(s)) => evaluateFromSymbolic(distToFloatOp, s) // we want to evaluate the distToFloatOp on the symbolic dist
-      | `DistData(`RenderedShape(rs)) => evaluateFromRenderedShape(distToFloatOp, rs)
-      | `Operation(op) => E.R.bind(renderParams.operationToDistData(renderParams.sampleCount, op), evaluateToDistData(distToFloatOp, renderParams))
-      }
-    }
+      | `DistData(`RenderedShape(rs)) =>
+        evaluateFromRenderedShape(distToFloatOp, rs)
+      | `Operation(op) =>
+        E.R.bind(
+          operationToDistData(op),
+          evaluateToDistData(distToFloatOp, operationToDistData),
+        )
+      };
+    };
   };
 
   module Render = {
-    let evaluateToRenderedShape = (renderParams, t: treeNode): result(t, string) => {
-      E.R.bind(renderToShape(renderParams, t), rs => Ok(`DistData(`RenderedShape(rs))));
-    }
+    let rec evaluateToRenderedShape =
+        (operationToDistData: operation => result(t, string), sampleCount: int, t: treeNode)
+        : result(t, string) => {
+      switch (t) {
+      | `DistData(`RenderedShape(s)) => Ok(`DistData(`RenderedShape(s))) // already a rendered shape, we're done here
+      | `DistData(`Symbolic(d)) =>
+        switch (d) {
+        | `Float(v) =>
+          Ok(
+            `DistData(
+              `RenderedShape(
+                Discrete(
+                  Distributions.Discrete.make(
+                    {xs: [|v|], ys: [|1.0|]},
+                    Some(1.0),
+                  ),
+                ),
+              ),
+            ),
+          )
+        | _ =>
+          let xs =
+            SymbolicDist.GenericDistFunctions.interpolateXs(
+              ~xSelection=`ByWeight,
+              d,
+              sampleCount,
+            );
+          let ys =
+            xs |> E.A.fmap(x => SymbolicDist.GenericDistFunctions.pdf(x, d));
+          Ok(
+            `DistData(
+              `RenderedShape(
+                Continuous(
+                  Distributions.Continuous.make(
+                    `Linear,
+                    {xs, ys},
+                    Some(1.0),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+      | `Operation(op) =>
+        E.R.bind(
+          operationToDistData(op),
+          evaluateToRenderedShape(operationToDistData, sampleCount),
+        )
+      };
+    };
   };
 
   let rec operationToDistData =
-      (sampleCount: int, op: operation): result(t, string) => {
-
+          (sampleCount: int, op: operation): result(t, string) => {
     // the functions that convert the Operation nodes to DistData nodes need to
     // have a way to call this function on their children, if their children are themselves Operation nodes.
-
-    let renderParams: renderParams = {
-      operationToDistData: operationToDistData,
-      sampleCount: sampleCount,
-    };
-
     switch (op) {
     | `StandardOperation(standardOp, t1, t2) =>
       StandardOperation.evaluateToDistData(
-        standardOp, renderParams, t1, t2 // we want to give it the option to render or simply leave it as is
+        standardOp,
+        operationToDistData(sampleCount),
+        t1,
+        t2 // we want to give it the option to render or simply leave it as is
       )
     | `PointwiseOperation(pointwiseOp, t1, t2) =>
       PointwiseOperation.evaluateToDistData(
         pointwiseOp,
-        renderParams,
+        operationToDistData(sampleCount),
         t1,
         t2,
       )
     | `ScaleOperation(scaleOp, t, scaleBy) =>
-      ScaleOperation.evaluateToDistData(scaleOp, renderParams, t, scaleBy)
-    | `Truncate(leftCutoff, rightCutoff, t) => Truncate.evaluateToDistData(leftCutoff, rightCutoff, renderParams, t)
-    | `FloatFromDist(distToFloatOp, t) => FloatFromDist.evaluateToDistData(distToFloatOp, renderParams, t)
-    | `Normalize(t) => Normalize.evaluateToDistData(renderParams, t)
-    | `Render(t) => Render.evaluateToRenderedShape(renderParams, t)
+      ScaleOperation.evaluateToDistData(
+        scaleOp,
+        operationToDistData(sampleCount),
+        t,
+        scaleBy,
+      )
+    | `Truncate(leftCutoff, rightCutoff, t) =>
+      Truncate.evaluateToDistData(
+        leftCutoff,
+        rightCutoff,
+        operationToDistData(sampleCount),
+        t,
+      )
+    | `FloatFromDist(distToFloatOp, t) =>
+      FloatFromDist.evaluateToDistData(distToFloatOp, operationToDistData(sampleCount), t)
+    | `Normalize(t) => Normalize.evaluateToDistData(operationToDistData(sampleCount), t)
+    | `Render(t) =>
+      Render.evaluateToRenderedShape(operationToDistData(sampleCount), sampleCount, t)
     };
   };
 
@@ -372,7 +484,8 @@ module TreeNode = {
   };
 
   let rec toString = (t: t): string => {
-    let stringFromStandardOperation = fun
+    let stringFromStandardOperation =
+      fun
       | `Add => " + "
       | `Subtract => " - "
       | `Multiply => " * "
@@ -384,31 +497,53 @@ module TreeNode = {
       | `Add => " .+ "
       | `Multiply => " .* ";
 
+    let stringFromFloatFromDistOperation =
+        fun
+        | `Pdf(f) => "pdf(x=$f, "
+        | `Inv(f) => "inv(c=$f, "
+        | `Sample => "sample("
+        | `Mean => "mean(";
+
+
     switch (t) {
-    | `DistData(`Symbolic(d)) => SymbolicDist.GenericDistFunctions.toString(d)
+    | `DistData(`Symbolic(d)) =>
+      SymbolicDist.GenericDistFunctions.toString(d)
     | `DistData(`RenderedShape(s)) => "[shape]"
-    | `Operation(`StandardOperation(op, t1, t2)) => toString(t1) ++ stringFromStandardOperation(op) ++ toString(t2)
-    | `Operation(`PointwiseOperation(op, t1, t2)) => toString(t1) ++ stringFromPointwiseOperation(op) ++ toString(t2)
-    | `Operation(`ScaleOperation(_scaleOp, t, scaleBy)) => toString(t) ++ " @ " ++ toString(scaleBy)
+    | `Operation(`StandardOperation(op, t1, t2)) =>
+      toString(t1) ++ stringFromStandardOperation(op) ++ toString(t2)
+    | `Operation(`PointwiseOperation(op, t1, t2)) =>
+      toString(t1) ++ stringFromPointwiseOperation(op) ++ toString(t2)
+    | `Operation(`ScaleOperation(_scaleOp, t, scaleBy)) =>
+      toString(t) ++ " @ " ++ toString(scaleBy)
     | `Operation(`Normalize(t)) => "normalize(" ++ toString(t) ++ ")"
-    | `Operation(`Truncate(lc, rc, t)) => "truncate(" ++ toString(t) ++ ", " ++ E.O.dimap(string_of_float, () => "-inf", lc) ++ ", " ++ E.O.dimap(string_of_float, () => "inf", rc) ++ ")"
+    | `Operation(`FloatFromDist(floatFromDistOp, t)) => stringFromFloatFromDistOperation(floatFromDistOp) ++ toString(t) ++ ")"
+    | `Operation(`Truncate(lc, rc, t)) =>
+      "truncate("
+      ++ toString(t)
+      ++ ", "
+      ++ E.O.dimap(Js.Float.toString, () => "-inf", lc)
+      ++ ", "
+      ++ E.O.dimap(Js.Float.toString, () => "inf", rc)
+      ++ ")"
     | `Operation(`Render(t)) => toString(t)
-    }
+    };
   };
 };
 
 let toShape = (sampleCount: int, treeNode: treeNode) => {
-  let renderResult = TreeNode.toDistData(`Operation(`Render(treeNode)), sampleCount);
-
+  let renderResult =
+    TreeNode.toDistData(`Operation(`Render(treeNode)), sampleCount);
 
   switch (renderResult) {
-  | Ok(`DistData(`RenderedShape(rs))) => {
-      let continuous = Distributions.Shape.T.toContinuous(rs);
-      let discrete = Distributions.Shape.T.toDiscrete(rs);
-      let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
-      shape |> E.O.toExt("");
-    }
+  | Ok(`DistData(`RenderedShape(rs))) =>
+    let continuous = Distributions.Shape.T.toContinuous(rs);
+    let discrete = Distributions.Shape.T.toDiscrete(rs);
+    let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
+    shape |> E.O.toExt("");
   | Ok(_) => E.O.toExn("Rendering failed.", None)
-  | Error(message) => E.O.toExn("No shape found!", None)
-  }
+  | Error(message) => E.O.toExn("No shape found, error: " ++ message, None)
+  };
 };
+
+let toString = (treeNode: treeNode) =>
+  TreeNode.toString(treeNode);
