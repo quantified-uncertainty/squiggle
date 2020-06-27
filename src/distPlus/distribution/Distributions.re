@@ -173,6 +173,10 @@ module Continuous = {
       ();
     };
 
+    Js.log2("Previous xyshape:", t |> getShape);
+    Js.log2("new pointmasssex", pointMassesX);
+    Js.log2("new pointmasssey", pointMassesY);
+
     {
       xyShape: {
         xs: pointMassesX,
@@ -321,23 +325,22 @@ module Continuous = {
     let t2n = t2s |> XYShape.T.length;
 
     let outXYShapes: array(array((float, float))) =
-      Belt.Array.makeUninitializedUnsafe(t1n);
+      Belt.Array.makeUninitializedUnsafe(t2n);
 
-    for (i in 0 to t1n - 1) {
-      // create a new distribution
-      let dxyShape: array((float, float)) =
-        Belt.Array.makeUninitializedUnsafe(t2n);
-      for (j in 0 to t2n - 1) {
+    for (j in 0 to t2n - 1) { // for each one of the discrete points
+      // create a new distribution, as long as the original continuous one
+      let dxyShape: array((float, float)) = Belt.Array.makeUninitializedUnsafe(t1n);
+      for (i in 0 to t1n - 1) {
         let _ =
           Belt.Array.set(
             dxyShape,
-            j,
+            i,
             (fn(t1s.xs[i], t2s.xs[j]), t1s.ys[i] *. t2s.ys[j]),
           );
         ();
       };
 
-      let _ = Belt.Array.set(outXYShapes, i, dxyShape);
+      let _ = Belt.Array.set(outXYShapes, j, dxyShape);
       ();
     };
 
@@ -355,7 +358,7 @@ module Continuous = {
   let convolve = (~downsample=false, fn, t1: t, t2: t) => {
     let downsampleIfTooLarge = (t: t) => {
       let sqtl = sqrt(float_of_int(t |> getShape |> XYShape.T.length));
-      sqtl > 10. && downsample ? T.downsample(int_of_float(sqtl), t) : t;
+      sqtl > 10. && downsample && false ? T.downsample(int_of_float(sqtl), t) : t;
     };
 
     let t1d = downsampleIfTooLarge(t1);
