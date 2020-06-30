@@ -20,3 +20,6 @@ yarn run parcel
 ## Current Setup
 You can see a current version of this running online here:
 https://www.highlyspeculativeestimates.com/m/ea-funds
+
+## Expected future setup
+![setup](https://raw.githubusercontent.com/foretold-app/widedomain/master/Screen%20Shot%202020-06-30%20at%208.27.32%20AM.png)
