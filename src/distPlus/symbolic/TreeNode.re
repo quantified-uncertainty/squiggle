@@ -5,13 +5,6 @@ type distData = [
   | `RenderedShape(DistTypes.shape)
 ];
 
-type standardOperation = [
-  | `Add
-  | `Multiply
-  | `Subtract
-  | `Divide
-  | `Exponentiate
-];
 type pointwiseOperation = [ | `Add | `Multiply];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
 type distToFloatOperation = [ | `Pdf(float) | `Inv(float) | `Mean | `Sample];
@@ -23,14 +16,14 @@ type treeNode = [
 ]
 and operation = [
   | // binary operations
-    `StandardOperation(
-      standardOperation,
+    `AlgebraicCombination(
+      AlgebraicCombinations.algebraicOperation,
       treeNode,
       treeNode,
     )
     // unary operations
-  | `PointwiseOperation(pointwiseOperation, treeNode, treeNode) // always evaluates to `DistData(`RenderedShape(...))
-  | `ScaleOperation(scaleOperation, treeNode, treeNode) // always evaluates to `DistData(`RenderedShape(...))
+  | `PointwiseCombination(pointwiseOperation, treeNode, treeNode) // always evaluates to `DistData(`RenderedShape(...))
+  | `VerticalScaling(scaleOperation, treeNode, treeNode) // always evaluates to `DistData(`RenderedShape(...))
   | `Render(treeNode) // always evaluates to `DistData(`RenderedShape(...))
   | `Truncate // always evaluates to `DistData(`RenderedShape(...))
 (
@@ -56,15 +49,14 @@ module TreeNode = {
   type simplifier = treeNode => result(treeNode, string);
 
   let rec toString = (t: t): string => {
-    let stringFromStandardOperation =
+    let stringFromAlgebraicCombination =
       fun
       | `Add => " + "
       | `Subtract => " - "
       | `Multiply => " * "
       | `Divide => " / "
-      | `Exponentiate => "^";
 
-    let stringFromPointwiseOperation =
+    let stringFromPointwiseCombination =
       fun
       | `Add => " .+ "
       | `Multiply => " .* ";
@@ -81,11 +73,11 @@ module TreeNode = {
     | `DistData(`Symbolic(d)) =>
       SymbolicDist.GenericDistFunctions.toString(d)
     | `DistData(`RenderedShape(s)) => "[shape]"
-    | `Operation(`StandardOperation(op, t1, t2)) =>
-      toString(t1) ++ stringFromStandardOperation(op) ++ toString(t2)
-    | `Operation(`PointwiseOperation(op, t1, t2)) =>
-      toString(t1) ++ stringFromPointwiseOperation(op) ++ toString(t2)
-    | `Operation(`ScaleOperation(_scaleOp, t, scaleBy)) =>
+    | `Operation(`AlgebraicCombination(op, t1, t2)) =>
+      toString(t1) ++ stringFromAlgebraicCombination(op) ++ toString(t2)
+    | `Operation(`PointwiseCombination(op, t1, t2)) =>
+      toString(t1) ++ stringFromPointwiseCombination(op) ++ toString(t2)
+    | `Operation(`VerticalScaling(_scaleOp, t, scaleBy)) =>
       toString(t) ++ " @ " ++ toString(scaleBy)
     | `Operation(`Normalize(t)) => "normalize(" ++ toString(t) ++ ")"
     | `Operation(`FloatFromDist(floatFromDistOp, t)) => stringFromFloatFromDistOperation(floatFromDistOp) ++ toString(t) ++ ")"
@@ -108,20 +100,12 @@ module TreeNode = {
      of a new variable that is the result of the operation on A and B.
      For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
      In general, this is implemented via convolution. */
-  module StandardOperation = {
-    let funcFromOp: (standardOperation, float, float) => float =
-      fun
-      | `Add => (+.)
-      | `Subtract => (-.)
-      | `Multiply => ( *. )
-      | `Divide => (/.)
-      | `Exponentiate => ( ** );
-
-    module Simplify = {
+  module AlgebraicCombination = {
+    let simplify = (algebraicOp, t1: t, t2: t): result(treeNode, string) => {
       let tryCombiningFloats: simplifier =
         fun
         | `Operation(
-            `StandardOperation(
+            `AlgebraicCombination(
               `Divide,
               `DistData(`Symbolic(`Float(v1))),
               `DistData(`Symbolic(`Float(0.))),
@@ -129,13 +113,13 @@ module TreeNode = {
           ) =>
           Error("Cannot divide $v1 by zero.")
         | `Operation(
-            `StandardOperation(
-              standardOp,
+            `AlgebraicCombination(
+              algebraicOp,
               `DistData(`Symbolic(`Float(v1))),
               `DistData(`Symbolic(`Float(v2))),
             ),
           ) => {
-            let func = funcFromOp(standardOp);
+            let func = AlgebraicCombinations.operationToFn(algebraicOp);
             Ok(`DistData(`Symbolic(`Float(func(v1, v2)))));
           }
         | t => Ok(t);
@@ -143,7 +127,7 @@ module TreeNode = {
       let tryCombiningNormals: simplifier =
         fun
         | `Operation(
-            `StandardOperation(
+            `AlgebraicCombination(
               `Add,
               `DistData(`Symbolic(`Normal(n1))),
               `DistData(`Symbolic(`Normal(n2))),
@@ -151,7 +135,7 @@ module TreeNode = {
           ) =>
           Ok(`DistData(`Symbolic(SymbolicDist.Normal.add(n1, n2))))
         | `Operation(
-            `StandardOperation(
+            `AlgebraicCombination(
               `Subtract,
               `DistData(`Symbolic(`Normal(n1))),
               `DistData(`Symbolic(`Normal(n2))),
@@ -163,7 +147,7 @@ module TreeNode = {
       let tryCombiningLognormals: simplifier =
         fun
         | `Operation(
-            `StandardOperation(
+            `AlgebraicCombination(
               `Multiply,
               `DistData(`Symbolic(`Lognormal(l1))),
               `DistData(`Symbolic(`Lognormal(l2))),
@@ -171,7 +155,7 @@ module TreeNode = {
           ) =>
           Ok(`DistData(`Symbolic(SymbolicDist.Lognormal.multiply(l1, l2))))
         | `Operation(
-            `StandardOperation(
+            `AlgebraicCombination(
               `Divide,
               `DistData(`Symbolic(`Lognormal(l1))),
               `DistData(`Symbolic(`Lognormal(l2))),
@@ -180,20 +164,16 @@ module TreeNode = {
           Ok(`DistData(`Symbolic(SymbolicDist.Lognormal.divide(l1, l2))))
         | t => Ok(t);
 
-      let attempt = (standardOp, t1: t, t2: t): result(treeNode, string) => {
-        let originalTreeNode =
-          `Operation(`StandardOperation((standardOp, t1, t2)));
+      let originalTreeNode =
+          `Operation(`AlgebraicCombination((algebraicOp, t1, t2)));
 
-        originalTreeNode
-        |> tryCombiningFloats
-        |> E.R.bind(_, tryCombiningNormals)
-        |> E.R.bind(_, tryCombiningLognormals);
-      };
+      originalTreeNode
+      |> tryCombiningFloats
+      |> E.R.bind(_, tryCombiningNormals)
+      |> E.R.bind(_, tryCombiningLognormals);
     };
 
-    let evaluateNumerically = (standardOp, operationToDistData, t1, t2) => {
-      let func = funcFromOp(standardOp);
-
+    let evaluateNumerically = (algebraicOp, operationToDistData, t1, t2) => {
       // force rendering into shapes
       let renderedShape1 = operationToDistData(`Render(t1));
       let renderedShape2 = operationToDistData(`Render(t2));
@@ -205,7 +185,7 @@ module TreeNode = {
         ) =>
         Ok(
           `DistData(
-            `RenderedShape(Distributions.Shape.convolve(func, s1, s2)),
+            `RenderedShape(Distributions.Shape.combineAlgebraically(algebraicOp, s1, s2)),
           ),
         )
       | (Error(e1), _) => Error(e1)
@@ -215,21 +195,21 @@ module TreeNode = {
     };
 
     let evaluateToDistData =
-        (standardOp: standardOperation, operationToDistData, t1: t, t2: t)
+        (algebraicOp: AlgebraicCombinations.algebraicOperation, operationToDistData, t1: t, t2: t)
         : result(treeNode, string) =>
-      standardOp
-      |> Simplify.attempt(_, t1, t2)
+      algebraicOp
+      |> simplify(_, t1, t2)
       |> E.R.bind(
            _,
            fun
            | `DistData(d) => Ok(`DistData(d)) // the analytical simplifaction worked, nice!
            | `Operation(_) =>
              // if not, run the convolution
-             evaluateNumerically(standardOp, operationToDistData, t1, t2),
+             evaluateNumerically(algebraicOp, operationToDistData, t1, t2),
          );
   };
 
-  module ScaleOperation = {
+  module VerticalScaling = {
     let fnFromOp =
       fun
       | `Multiply => ( *. )
@@ -271,7 +251,7 @@ module TreeNode = {
     };
   };
 
-  module PointwiseOperation = {
+  module PointwiseCombination = {
     let pointwiseAdd = (operationToDistData, t1, t2) => {
         let renderedShape1 = operationToDistData(`Render(t1));
         let renderedShape2 = operationToDistData(`Render(t2));
@@ -279,7 +259,8 @@ module TreeNode = {
       switch ((renderedShape1, renderedShape2)) {
       | (Error(e1), _) => Error(e1)
       | (_, Error(e2)) => Error(e2)
-      | (Ok(`DistData(`RenderedShape(rs1))), Ok(`DistData(`RenderedShape(rs2)))) => Ok(`DistData(`RenderedShape(Distributions.Shape.combine(~knownIntegralSumsFn=(a, b) => Some(a +. b), (+.), rs1, rs2))))
+      | (Ok(`DistData(`RenderedShape(rs1))), Ok(`DistData(`RenderedShape(rs2)))) =>
+        Ok(`DistData(`RenderedShape(Distributions.Shape.combinePointwise(~knownIntegralSumsFn=(a, b) => Some(a +. b), (+.), rs1, rs2))))
       | _ => Error("Could not perform pointwise addition.")
       };
     };
@@ -397,10 +378,15 @@ module TreeNode = {
         };
       E.R.bind(value, v => Ok(`DistData(`Symbolic(`Float(v)))));
     };
-    let evaluateFromRenderedShape =
-        (distToFloatOp: distToFloatOperation, rs: DistTypes.shape)
-        : result(treeNode, string) => {
-      Ok(`DistData(`Symbolic(`Float(Distributions.Shape.T.mean(rs)))));
+    let evaluateFromRenderedShape = (distToFloatOp: distToFloatOperation, rs: DistTypes.shape) : result(treeNode, string) => {
+      let value =
+        switch (distToFloatOp) {
+        | `Pdf(f) => Ok(Distributions.Shape.pdf(f, rs))
+        | `Inv(f) => Ok(Distributions.Shape.inv(f, rs)) // TODO: this is tricky for discrete distributions, because they have a stepwise CDF
+        | `Sample => Ok(Distributions.Shape.sample(rs))
+        | `Mean => Ok(Distributions.Shape.T.mean(rs))
+        };
+      E.R.bind(value, v => Ok(`DistData(`Symbolic(`Float(v)))));
     };
     let rec evaluateToDistData =
             (
@@ -480,22 +466,22 @@ module TreeNode = {
     // the functions that convert the Operation nodes to DistData nodes need to
     // have a way to call this function on their children, if their children are themselves Operation nodes.
     switch (op) {
-    | `StandardOperation(standardOp, t1, t2) =>
-      StandardOperation.evaluateToDistData(
-        standardOp,
+    | `AlgebraicCombination(algebraicOp, t1, t2) =>
+      AlgebraicCombination.evaluateToDistData(
+        algebraicOp,
         operationToDistData(sampleCount),
         t1,
         t2 // we want to give it the option to render or simply leave it as is
       )
-    | `PointwiseOperation(pointwiseOp, t1, t2) =>
-      PointwiseOperation.evaluateToDistData(
+    | `PointwiseCombination(pointwiseOp, t1, t2) =>
+      PointwiseCombination.evaluateToDistData(
         pointwiseOp,
         operationToDistData(sampleCount),
         t1,
         t2,
       )
-    | `ScaleOperation(scaleOp, t, scaleBy) =>
-      ScaleOperation.evaluateToDistData(
+    | `VerticalScaling(scaleOp, t, scaleBy) =>
+      VerticalScaling.evaluateToDistData(
         scaleOp,
         operationToDistData(sampleCount),
         t,

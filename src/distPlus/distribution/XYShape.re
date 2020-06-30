@@ -170,7 +170,7 @@ module Zipped = {
   let filterByX = (testFn: (float => bool), t: zipped) => t |> E.A.filter(((x, _)) => testFn(x));
 };
 
-module Combine = {
+module PointwiseCombination = {
   type xsSelection =
     | ALL_XS
     | XS_EVENLY_DIVIDED(int);
@@ -278,7 +278,7 @@ module Range = {
           items
           |> Belt.Array.map(_, rangePointAssumingSteps)
           |> T.fromZippedArray
-          |> Combine.intersperse(t |> T.mapX(e => e +. diff)),
+          |> PointwiseCombination.intersperse(t |> T.mapX(e => e +. diff)),
         )
       | _ => Some(t)
       };
@@ -300,7 +300,7 @@ let pointLogScore = (prediction, answer) =>
   };
 
 let logScorePoint = (sampleCount, t1, t2) =>
-  Combine.combine(
+  PointwiseCombination.combine(
     ~xsSelection=XS_EVENLY_DIVIDED(sampleCount),
     ~xToYSelection=XtoY.linear,
     ~fn=pointLogScore,
@@ -328,6 +328,7 @@ module Analysis = {
       0.0,
       (acc, _x, i) => {
         let areaUnderIntegral =
+          // TODO Take this switch statement out of the loop body
           switch (t.interpolation, i) {
           | (_, 0) => 0.0
           | (`Stepwise, _) =>
@@ -336,12 +337,16 @@ module Analysis = {
           | (`Linear, _) =>
             let x1 = xs[i - 1];
             let x2 = xs[i];
-            let h1 = ys[i - 1];
-            let h2 = ys[i];
-            let b = (h1 -. h2) /. (x1 -. x2);
-            let a = h1 -. b *. x1;
-            indefiniteIntegralLinear(x2, a, b)
-            -. indefiniteIntegralLinear(x1, a, b);
+            if (x1 == x2) {
+              0.0
+            } else {
+              let h1 = ys[i - 1];
+              let h2 = ys[i];
+              let b = (h1 -. h2) /. (x1 -. x2);
+              let a = h1 -. b *. x1;
+              indefiniteIntegralLinear(x2, a, b)
+              -. indefiniteIntegralLinear(x1, a, b);
+            };
           };
         acc +. areaUnderIntegral;
       },

@@ -175,13 +175,13 @@ module MathAdtToDistDst = {
         |> E.A.fmapi((index, t) => {
             let w = weights |> E.A.get(_, index) |> E.O.default(1.0);
 
-            `Operation(`ScaleOperation(`Multiply, t, `DistData(`Symbolic(`Float(w)))))
+            `Operation(`VerticalScaling(`Multiply, t, `DistData(`Symbolic(`Float(w)))))
           });
 
         let pointwiseSum = components
         |> Js.Array.sliceFrom(1)
         |> E.A.fold_left((acc, x) => {
-          `Operation(`PointwiseOperation(`Add, acc, x))
+          `Operation(`PointwiseCombination(`Add, acc, x))
           }, E.A.unsafe_get(components, 0))
 
         Ok(`Operation(`Normalize(pointwiseSum)))
@@ -251,25 +251,31 @@ module MathAdtToDistDst = {
           multiModal(dists, weights);
         }
 
+      // TODO: wire up these FloatFromDist operations
+      | Fn({name: "mean", args}) => Error("mean(...) not yet implemented.")
+      | Fn({name: "inv", args}) => Error("inv(...) not yet implemented.")
+      | Fn({name: "sample", args}) => Error("sample(...) not yet implemented.")
+      | Fn({name: "pdf", args}) => Error("pdf(...) not yet implemented.")
+
       | Fn({name: "add", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Add, l, r)))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Add, l, r)))
               | _ => Error("Addition needs two operands"))
       }
       | Fn({name: "subtract", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Subtract, l, r)))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Subtract, l, r)))
               | _ => Error("Subtraction needs two operands"))
       }
       | Fn({name: "multiply", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Multiply, l, r)))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Multiply, l, r)))
               | _ => Error("Multiplication needs two operands"))
       }
       | Fn({name: "divide", args}) => {
@@ -277,16 +283,18 @@ module MathAdtToDistDst = {
           |> E.A.fmap(functionParser)
           |> (fun
               | [|Ok(l), Ok(`DistData(`Symbolic(`Float(0.0))))|] => Error("Division by zero")
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Divide, l, r)))
+              | [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Divide, l, r)))
               | _ => Error("Division needs two operands"))
       }
+      // TODO: Figure out how to implement meaningful exponentiation
       | Fn({name: "pow", args}) => {
           args
           |> E.A.fmap(functionParser)
           |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`StandardOperation(`Exponentiate, l, r)))
-              | _ => Error("Division needs two operands")
-              | _ => Error("Exponentiations needs two operands"))
+              //| [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Exponentiate, l, r)))
+              //| _ => Error("Exponentiations needs two operands"))
+              | _ => Error("Exponentiation is not yet supported.")
+              )
       }
       | Fn({name: "leftTruncate", args}) => {
           args
