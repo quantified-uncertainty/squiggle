@@ -1,27 +1,8 @@
-type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide];
-
 type pointMassesWithMoments = {
   n: int,
   masses: array(float),
   means: array(float),
   variances: array(float),
-};
-
-module Operation = {
-  type t = algebraicOperation;
-  let toFn: (t, float, float) => float =
-    fun
-    | `Add => (+.)
-    | `Subtract => (-.)
-    | `Multiply => ( *. )
-    | `Divide => (/.);
-
-  let toString =
-    fun
-    | `Add => " + "
-    | `Subtract => " - "
-    | `Multiply => " * "
-    | `Divide => " / ";
 };
 
 /* This function takes a continuous distribution and efficiently approximates it as
@@ -129,7 +110,7 @@ let toDiscretePointMassesFromTriangulars =
 };
 
 let combineShapesContinuousContinuous =
-    (op: algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
+    (op: SymbolicTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
     : DistTypes.xyShape => {
   let t1n = s1 |> XYShape.T.length;
   let t2n = s2 |> XYShape.T.length;

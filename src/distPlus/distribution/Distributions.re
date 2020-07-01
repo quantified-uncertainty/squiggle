@@ -149,7 +149,7 @@ module Continuous = {
     continuousShapes
     |> E.A.fold_left(combinePointwise(~knownIntegralSumsFn, fn), empty);
 
-  let mapY = (~knownIntegralSumFn=(_ => None), fn, t: t) => {
+  let mapY = (~knownIntegralSumFn=_ => None, fn, t: t) => {
     let u = E.O.bind(_, knownIntegralSumFn);
     let yMapFn = shapeMap(XYShape.T.mapY(fn));
 
@@ -163,7 +163,6 @@ module Continuous = {
          E.O.bind(t.knownIntegralSum, v => Some(scale *. v)),
        );
   };
-
 
   module T =
     Dist({
@@ -194,9 +193,9 @@ module Continuous = {
           |> getShape
           |> XYShape.T.zip
           |> XYShape.Zipped.filterByX(x =>
-              x >= E.O.default(neg_infinity, leftCutoff)
-              || x <= E.O.default(infinity, rightCutoff)
-            );
+               x >= E.O.default(neg_infinity, leftCutoff)
+               || x <= E.O.default(infinity, rightCutoff)
+             );
 
         let eps = (t |> getShape |> XYShape.T.xTotalRange) *. 0.0001;
 
@@ -206,7 +205,11 @@ module Continuous = {
           rightCutoff |> E.O.dimap(rc => [|(rc +. eps, 0.)|], _ => [||]);
 
         let truncatedZippedPairsWithNewPoints =
-          E.A.concatMany([|leftNewPoint, truncatedZippedPairs, rightNewPoint|]);
+          E.A.concatMany([|
+            leftNewPoint,
+            truncatedZippedPairs,
+            rightNewPoint,
+          |]);
         let truncatedShape =
           XYShape.T.fromZippedArray(truncatedZippedPairsWithNewPoints);
 
@@ -214,22 +217,20 @@ module Continuous = {
       };
 
       // TODO: This should work with stepwise plots.
-    let integral = (~cache, t) => {
-
-        if ((t |> getShape |> XYShape.T.length) > 0) {
-        switch (cache) {
-        | Some(cache) => cache
-        | None =>
-          t
-          |> getShape
-          |> XYShape.Range.integrateWithTriangles
-          |> E.O.toExt("This should not have happened")
-          |> make(`Linear, _, None)
-        };
+      let integral = (~cache, t) =>
+        if (t |> getShape |> XYShape.T.length > 0) {
+          switch (cache) {
+          | Some(cache) => cache
+          | None =>
+            t
+            |> getShape
+            |> XYShape.Range.integrateWithTriangles
+            |> E.O.toExt("This should not have happened")
+            |> make(`Linear, _, None)
+          };
         } else {
           make(`Linear, {xs: [|neg_infinity|], ys: [|0.0|]}, None);
-        }
-      };
+        };
 
       let downsample = (~cache=None, length, t): t =>
         t
@@ -276,23 +277,31 @@ module Continuous = {
         );
     });
 
-
   /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
      each discrete data point, and then adds them all together. */
-  let combineAlgebraicallyWithDiscrete = (~downsample=false, op: AlgebraicCombinations.algebraicOperation, t1: t, t2: DistTypes.discreteShape) => {
+  let combineAlgebraicallyWithDiscrete =
+      (
+        ~downsample=false,
+        op: SymbolicTypes.algebraicOperation,
+        t1: t,
+        t2: DistTypes.discreteShape,
+      ) => {
     let t1s = t1 |> getShape;
     let t2s = t2.xyShape; // would like to use Discrete.getShape here, but current file structure doesn't allow for that
     let t1n = t1s |> XYShape.T.length;
     let t2n = t2s |> XYShape.T.length;
 
-    let fn = AlgebraicCombinations.Operation.toFn(op);
+    let fn = SymbolicTypes.Algebraic.toFn(op);
 
     let outXYShapes: array(array((float, float))) =
       Belt.Array.makeUninitializedUnsafe(t2n);
 
-    for (j in 0 to t2n - 1) { // for each one of the discrete points
+    for (j in 0 to t2n - 1) {
+      // for each one of the discrete points
       // create a new distribution, as long as the original continuous one
-      let dxyShape: array((float, float)) = Belt.Array.makeUninitializedUnsafe(t1n);
+
+      let dxyShape: array((float, float)) =
+        Belt.Array.makeUninitializedUnsafe(t1n);
       for (i in 0 to t1n - 1) {
         let _ =
           Belt.Array.set(
@@ -307,7 +316,12 @@ module Continuous = {
       ();
     };
 
-    let combinedIntegralSum = Common.combineIntegralSums((a, b) => Some(a *. b), t1.knownIntegralSum, t2.knownIntegralSum);
+    let combinedIntegralSum =
+      Common.combineIntegralSums(
+        (a, b) => Some(a *. b),
+        t1.knownIntegralSum,
+        t2.knownIntegralSum,
+      );
 
     outXYShapes
     |> E.A.fmap(s => {
@@ -318,7 +332,13 @@ module Continuous = {
     |> updateKnownIntegralSum(combinedIntegralSum);
   };
 
-  let combineAlgebraically = (~downsample=false, op: AlgebraicCombinations.algebraicOperation, t1: t, t2: t) => {
+  let combineAlgebraically =
+      (
+        ~downsample=false,
+        op: SymbolicTypes.algebraicOperation,
+        t1: t,
+        t2: t,
+      ) => {
     let s1 = t1 |> getShape;
     let s2 = t2 |> getShape;
     let t1n = s1 |> XYShape.T.length;
@@ -326,8 +346,14 @@ module Continuous = {
     if (t1n == 0 || t2n == 0) {
       empty;
     } else {
-      let combinedShape = AlgebraicCombinations.combineShapesContinuousContinuous(op, s1, s2);
-      let combinedIntegralSum = Common.combineIntegralSums((a, b) => Some(a *. b), t1.knownIntegralSum, t2.knownIntegralSum);
+      let combinedShape =
+        AlgebraicCombinations.combineShapesContinuousContinuous(op, s1, s2);
+      let combinedIntegralSum =
+        Common.combineIntegralSums(
+          (a, b) => Some(a *. b),
+          t1.knownIntegralSum,
+          t2.knownIntegralSum,
+        );
       // return a new Continuous distribution
       make(`Linear, combinedShape, combinedIntegralSum);
     };
@@ -370,7 +396,7 @@ module Discrete = {
       XYShape.PointwiseCombination.combine(
         ~xsSelection=ALL_XS,
         ~xToYSelection=XYShape.XtoY.stepwiseIfAtX,
-        ~fn=((a, b) => fn(E.O.default(0.0, a), E.O.default(0.0, b))), // stepwiseIfAtX returns option(float), so this fn needs to handle None
+        ~fn=(a, b) => fn(E.O.default(0.0, a), E.O.default(0.0, b)), // stepwiseIfAtX returns option(float), so this fn needs to handle None
         t1.xyShape,
         t2.xyShape,
       ),
@@ -378,7 +404,9 @@ module Discrete = {
     );
   };
 
-  let reduce = (~knownIntegralSumsFn=(_, _) => None, fn, discreteShapes): DistTypes.discreteShape =>
+  let reduce =
+      (~knownIntegralSumsFn=(_, _) => None, fn, discreteShapes)
+      : DistTypes.discreteShape =>
     discreteShapes
     |> E.A.fold_left(combinePointwise(~knownIntegralSumsFn, fn), empty);
 
@@ -389,7 +417,8 @@ module Discrete = {
 
   /* This multiples all of the data points together and creates a new discrete distribution from the results.
      Data points at the same xs get added together. It may be a good idea to downsample t1 and t2 before and/or the result after. */
-  let combineAlgebraically = (op: AlgebraicCombinations.algebraicOperation, t1: t, t2: t) => {
+  let combineAlgebraically =
+      (op: SymbolicTypes.algebraicOperation, t1: t, t2: t) => {
     let t1s = t1 |> getShape;
     let t2s = t2 |> getShape;
     let t1n = t1s |> XYShape.T.length;
@@ -402,7 +431,7 @@ module Discrete = {
         t2.knownIntegralSum,
       );
 
-    let fn = AlgebraicCombinations.Operation.toFn(op);
+    let fn = SymbolicTypes.Algebraic.toFn(op);
     let xToYMap = E.FloatFloatMap.empty();
 
     for (i in 0 to t1n - 1) {
@@ -441,8 +470,8 @@ module Discrete = {
     Dist({
       type t = DistTypes.discreteShape;
       type integral = DistTypes.continuousShape;
-      let integral = (~cache, t) => {
-        if ((t |> getShape |> XYShape.T.length) > 0) {
+      let integral = (~cache, t) =>
+        if (t |> getShape |> XYShape.T.length > 0) {
           switch (cache) {
           | Some(c) => c
           | None =>
@@ -453,9 +482,13 @@ module Discrete = {
             )
           };
         } else {
-          Continuous.make(`Stepwise, {xs: [|neg_infinity|], ys: [|0.0|]}, None);
-        }};
-   
+          Continuous.make(
+            `Stepwise,
+            {xs: [|neg_infinity|], ys: [|0.0|]},
+            None,
+          );
+        };
+
       let integralEndY = (~cache, t: t) =>
         t.knownIntegralSum
         |> E.O.default(t |> integral(~cache) |> Continuous.lastY);
@@ -495,7 +528,7 @@ module Discrete = {
           make(clippedShape, None); // if someone needs the sum, they'll have to recompute it
         } else {
           t;
-        }
+        };
       };
 
       let truncate =
@@ -505,9 +538,9 @@ module Discrete = {
           |> getShape
           |> XYShape.T.zip
           |> XYShape.Zipped.filterByX(x =>
-              x >= E.O.default(neg_infinity, leftCutoff)
-              || x <= E.O.default(infinity, rightCutoff)
-            )
+               x >= E.O.default(neg_infinity, leftCutoff)
+               || x <= E.O.default(infinity, rightCutoff)
+             )
           |> XYShape.T.fromZippedArray;
 
         make(truncatedShape, None);
@@ -601,8 +634,10 @@ module Mixed = {
             rightCutoff: option(float),
             {discrete, continuous}: t,
           ) => {
-        let truncatedContinuous = Continuous.T.truncate(leftCutoff, rightCutoff, continuous);
-        let truncatedDiscrete = Discrete.T.truncate(leftCutoff, rightCutoff, discrete);
+        let truncatedContinuous =
+          Continuous.T.truncate(leftCutoff, rightCutoff, continuous);
+        let truncatedDiscrete =
+          Discrete.T.truncate(leftCutoff, rightCutoff, discrete);
 
         make(~discrete=truncatedDiscrete, ~continuous=truncatedContinuous);
       };
@@ -809,7 +844,14 @@ module Mixed = {
       };
     });
 
-  let combineAlgebraically = (~downsample=false, op: AlgebraicCombinations.algebraicOperation, t1: t, t2: t): t => {
+  let combineAlgebraically =
+      (
+        ~downsample=false,
+        op: SymbolicTypes.algebraicOperation,
+        t1: t,
+        t2: t,
+      )
+      : t => {
     // Discrete convolution can cause a huge increase in the number of samples,
     // so we'll first downsample.
 
@@ -827,11 +869,26 @@ module Mixed = {
     // continuous (*) continuous => continuous, but also
     // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:
     let ccConvResult =
-      Continuous.combineAlgebraically(~downsample=false, op, t1d.continuous, t2d.continuous);
+      Continuous.combineAlgebraically(
+        ~downsample=false,
+        op,
+        t1d.continuous,
+        t2d.continuous,
+      );
     let dcConvResult =
-      Continuous.combineAlgebraicallyWithDiscrete(~downsample=false, op, t2d.continuous, t1d.discrete);
+      Continuous.combineAlgebraicallyWithDiscrete(
+        ~downsample=false,
+        op,
+        t2d.continuous,
+        t1d.discrete,
+      );
     let cdConvResult =
-      Continuous.combineAlgebraicallyWithDiscrete(~downsample=false, op, t1d.continuous, t2d.discrete);
+      Continuous.combineAlgebraicallyWithDiscrete(
+        ~downsample=false,
+        op,
+        t1d.continuous,
+        t2d.discrete,
+      );
     let continuousConvResult =
       Continuous.reduce((+.), [|ccConvResult, dcConvResult, cdConvResult|]);
 
@@ -866,23 +923,47 @@ module Shape = {
       c => Mixed.make(~discrete=Discrete.empty, ~continuous=c),
     ));
 
-  let combineAlgebraically = (op: AlgebraicCombinations.algebraicOperation, t1: t, t2: t): t => {
-    switch ((t1, t2)) {
-    | (Continuous(m1), Continuous(m2)) => DistTypes.Continuous(Continuous.combineAlgebraically(~downsample=true, op, m1, m2))
-    | (Discrete(m1), Discrete(m2)) => DistTypes.Discrete(Discrete.combineAlgebraically(op, m1, m2))
-    | (m1, m2) => {
-        DistTypes.Mixed(Mixed.combineAlgebraically(~downsample=true, op, toMixed(m1), toMixed(m2)))
-      }
+  let combineAlgebraically =
+      (op: SymbolicTypes.algebraicOperation, t1: t, t2: t): t => {
+    switch (t1, t2) {
+    | (Continuous(m1), Continuous(m2)) =>
+      DistTypes.Continuous(
+        Continuous.combineAlgebraically(~downsample=true, op, m1, m2),
+      )
+    | (Discrete(m1), Discrete(m2)) =>
+      DistTypes.Discrete(Discrete.combineAlgebraically(op, m1, m2))
+    | (m1, m2) =>
+      DistTypes.Mixed(
+        Mixed.combineAlgebraically(
+          ~downsample=true,
+          op,
+          toMixed(m1),
+          toMixed(m2),
+        ),
+      )
     };
   };
 
-  let combinePointwise = (~knownIntegralSumsFn=(_, _) => None, fn, t1: t, t2: t) =>
-    switch ((t1, t2)) {
-    | (Continuous(m1), Continuous(m2)) => DistTypes.Continuous(Continuous.combinePointwise(~knownIntegralSumsFn, fn, m1, m2))
-    | (Discrete(m1), Discrete(m2)) => DistTypes.Discrete(Discrete.combinePointwise(~knownIntegralSumsFn, fn, m1, m2))
-    | (m1, m2) => {
-        DistTypes.Mixed(Mixed.combinePointwise(~knownIntegralSumsFn, fn, toMixed(m1), toMixed(m2)))
-      }
+  let combinePointwise =
+      (~knownIntegralSumsFn=(_, _) => None, fn, t1: t, t2: t) =>
+    switch (t1, t2) {
+    | (Continuous(m1), Continuous(m2)) =>
+      DistTypes.Continuous(
+        Continuous.combinePointwise(~knownIntegralSumsFn, fn, m1, m2),
+      )
+    | (Discrete(m1), Discrete(m2)) =>
+      DistTypes.Discrete(
+        Discrete.combinePointwise(~knownIntegralSumsFn, fn, m1, m2),
+      )
+    | (m1, m2) =>
+      DistTypes.Mixed(
+        Mixed.combinePointwise(
+          ~knownIntegralSumsFn,
+          fn,
+          toMixed(m1),
+          toMixed(m2),
+        ),
+      )
     };
 
   // TODO: implement these functions
@@ -915,7 +996,6 @@ module Shape = {
       let toContinuous = t => None;
       let toDiscrete = t => None;
 
-
       let downsample = (~cache=None, i, t) =>
         fmap(
           (
@@ -938,7 +1018,11 @@ module Shape = {
 
       let toDiscreteProbabilityMassFraction = t => 0.0;
       let normalize =
-        fmap((Mixed.T.normalize, Discrete.T.normalize, Continuous.T.normalize));
+        fmap((
+          Mixed.T.normalize,
+          Discrete.T.normalize,
+          Continuous.T.normalize,
+        ));
       let toContinuous =
         mapToAll((
           Mixed.T.toContinuous,
@@ -1089,7 +1173,8 @@ module DistPlus = {
       };
 
       let truncate = (leftCutoff, rightCutoff, t: t): t => {
-        let truncatedShape = t |> toShape |> Shape.T.truncate(leftCutoff, rightCutoff);
+        let truncatedShape =
+          t |> toShape |> Shape.T.truncate(leftCutoff, rightCutoff);
 
         t |> updateShape(truncatedShape);
       };
@@ -1153,9 +1238,9 @@ module DistPlus = {
       let integralYtoX = (~cache as _, f, t: t) => {
         Shape.T.Integral.yToX(~cache=Some(t.integralCache), f, toShape(t));
       };
-    let mean = (t: t) => {
-      Shape.T.mean(t.shape);
-    };
+      let mean = (t: t) => {
+        Shape.T.mean(t.shape);
+      };
       let variance = (t: t) => Shape.T.variance(t.shape);
     });
 };

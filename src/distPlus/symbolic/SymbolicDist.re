@@ -123,6 +123,12 @@ module Normal = {
     let stdev = 1. /. (1. /. n1.stdev ** 2. +. 1. /. n2.stdev ** 2.);
     `Normal({mean, stdev});
   };
+
+  let operate = (operation: SymbolicTypes.Algebraic.t, n1: t, n2: t) => switch(operation){
+    | `Add => Some(add(n1, n2))
+    | `Subtract => Some(subtract(n1, n2))
+    | _ => None
+  }
 };
 
 module Beta = {
@@ -171,6 +177,11 @@ module Lognormal = {
     let sigma = l1.sigma +. l2.sigma;
     `Lognormal({mu, sigma});
   };
+  let operate = (operation: SymbolicTypes.Algebraic.t, n1: t, n2: t) => switch(operation){
+    | `Multiply => Some(multiply(n1, n2))
+    | `Divide => Some(divide(n1, n2))
+    | _ => None
+  }
 };
 
 module Uniform = {
