@@ -96,12 +96,19 @@ module MathAdtToDistDst = {
 
   let lognormal: array(arg) => result(TreeNode.treeNode, string) =
     fun
-    | [|Value(mu), Value(sigma)|] => Ok(`DistData(`Symbolic(`Lognormal({mu, sigma}))))
+    | [|Value(mu), Value(sigma)|] =>
+      Ok(`DistData(`Symbolic(`Lognormal({mu, sigma}))))
     | [|Object(o)|] => {
         let g = Js.Dict.get(o);
         switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
         | (Some(Value(mean)), Some(Value(stdev)), _, _) =>
-          Ok(`DistData(`Symbolic(SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev))))
+          Ok(
+            `DistData(
+              `Symbolic(
+                SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev),
+              ),
+            ),
+          )
         | (_, _, Some(Value(mu)), Some(Value(sigma))) =>
           Ok(`DistData(`Symbolic(`Lognormal({mu, sigma}))))
         | _ => Error("Lognormal distribution would need mean and stdev")
@@ -111,11 +118,19 @@ module MathAdtToDistDst = {
 
   let to_: array(arg) => result(TreeNode.treeNode, string) =
     fun
-    | [|Value(low), Value(high)|] when low <= 0.0 && low < high=> {
-        Ok(`DistData(`Symbolic(SymbolicDist.Normal.from90PercentCI(low, high))));
+    | [|Value(low), Value(high)|] when low <= 0.0 && low < high => {
+        Ok(
+          `DistData(
+            `Symbolic(SymbolicDist.Normal.from90PercentCI(low, high)),
+          ),
+        );
       }
     | [|Value(low), Value(high)|] when low < high => {
-        Ok(`DistData(`Symbolic(SymbolicDist.Lognormal.from90PercentCI(low, high))));
+        Ok(
+          `DistData(
+            `Symbolic(SymbolicDist.Lognormal.from90PercentCI(low, high)),
+          ),
+        );
       }
     | [|Value(_), Value(_)|] =>
       Error("Low value must be less than high value.")
@@ -123,17 +138,20 @@ module MathAdtToDistDst = {
 
   let uniform: array(arg) => result(TreeNode.treeNode, string) =
     fun
-    | [|Value(low), Value(high)|] => Ok(`DistData(`Symbolic(`Uniform({low, high}))))
+    | [|Value(low), Value(high)|] =>
+      Ok(`DistData(`Symbolic(`Uniform({low, high}))))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
   let beta: array(arg) => result(TreeNode.treeNode, string) =
     fun
-    | [|Value(alpha), Value(beta)|] => Ok(`DistData(`Symbolic(`Beta({alpha, beta}))))
+    | [|Value(alpha), Value(beta)|] =>
+      Ok(`DistData(`Symbolic(`Beta({alpha, beta}))))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
   let exponential: array(arg) => result(TreeNode.treeNode, string) =
     fun
-    | [|Value(rate)|] => Ok(`DistData(`Symbolic(`Exponential({rate: rate}))))
+    | [|Value(rate)|] =>
+      Ok(`DistData(`Symbolic(`Exponential({rate: rate}))))
     | _ => Error("Wrong number of variables in Exponential distribution");
 
   let cauchy: array(arg) => result(TreeNode.treeNode, string) =
@@ -167,62 +185,133 @@ module MathAdtToDistDst = {
     let withoutErrors = args |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
 
     switch (firstWithError) {
-      | Some(Error(e)) => Error(e)
-      | None when withoutErrors |> E.A.length == 0 =>
-        Error("Multimodals need at least one input")
-      | _ => {
-        let components = withoutErrors
+    | Some(Error(e)) => Error(e)
+    | None when withoutErrors |> E.A.length == 0 =>
+      Error("Multimodals need at least one input")
+    | _ =>
+      let components =
+        withoutErrors
         |> E.A.fmapi((index, t) => {
-            let w = weights |> E.A.get(_, index) |> E.O.default(1.0);
+             let w = weights |> E.A.get(_, index) |> E.O.default(1.0);
 
-            `Operation(`VerticalScaling(`Multiply, t, `DistData(`Symbolic(`Float(w)))))
-          });
+             `Operation(
+               `VerticalScaling((
+                 `Multiply,
+                 t,
+                 `DistData(`Symbolic(`Float(w))),
+               )),
+             );
+           });
 
-        let pointwiseSum = components
+      let pointwiseSum =
+        components
         |> Js.Array.sliceFrom(1)
-        |> E.A.fold_left((acc, x) => {
-          `Operation(`PointwiseCombination(`Add, acc, x))
-          }, E.A.unsafe_get(components, 0))
+        |> E.A.fold_left(
+             (acc, x) => {
+               `Operation(`PointwiseCombination((`Add, acc, x)))
+             },
+             E.A.unsafe_get(components, 0),
+           );
 
-        Ok(`Operation(`Normalize(pointwiseSum)))
-      }
+      Ok(`Operation(`Normalize(pointwiseSum)));
     };
   };
 
-  let arrayParser = (args:array(arg)):result(TreeNode.treeNode, string) => {
-    let samples = args
-    |> E.A.fmap(
-          fun
-          | Value(n) => Some(n)
-          | _ => None
-        )
-    |> E.A.O.concatSomes
+  let arrayParser = (args: array(arg)): result(TreeNode.treeNode, string) => {
+    let samples =
+      args
+      |> E.A.fmap(
+           fun
+           | Value(n) => Some(n)
+           | _ => None,
+         )
+      |> E.A.O.concatSomes;
     let outputs = Samples.T.fromSamples(samples);
-    let pdf = outputs.shape |> E.O.bind(_,Distributions.Shape.T.toContinuous);
-    let shape = pdf |> E.O.fmap(pdf => {
-      let _pdf = Distributions.Continuous.T.normalize(pdf);
-      let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
-      SymbolicDist.ContinuousShape.make(_pdf, cdf)
-    });
-    switch(shape){
-      | Some(s) => Ok(`DistData(`Symbolic(`ContinuousShape(s))))
-      | None => Error("Rendering did not work")
-    }
-  }
+    let pdf =
+      outputs.shape |> E.O.bind(_, Distributions.Shape.T.toContinuous);
+    let shape =
+      pdf
+      |> E.O.fmap(pdf => {
+           let _pdf = Distributions.Continuous.T.normalize(pdf);
+           let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
+           SymbolicDist.ContinuousShape.make(_pdf, cdf);
+         });
+    switch (shape) {
+    | Some(s) => Ok(`DistData(`Symbolic(`ContinuousShape(s))))
+    | None => Error("Rendering did not work")
+    };
+  };
 
+  let toCombination = r => Ok(`Operation(`AlgebraicCombination(r)));
+  let operationParser =
+      (name: string, args: array(result(TreeNode.treeNode, string))) =>
+    switch (name, args) {
+    | ("add", [|Ok(l), Ok(r)|]) => toCombination((`Add, l, r))
+    | ("add", _) => Error("Addition needs two operands")
+    | ("subtract", [|Ok(l), Ok(r)|]) => toCombination((`Subtract, l, r))
+    | ("subtract", _) => Error("Subtraction needs two operands")
+    | ("multiply", [|Ok(l), Ok(r)|]) => toCombination((`Multiply, l, r))
+    | ("multiply", _) => Error("Multiplication needs two operands")
+    | ("divide", [|Ok(_), Ok(`DistData(`Symbolic(`Float(0.0))))|]) =>
+      Error("Division by zero")
+    | ("divide", [|Ok(l), Ok(r)|]) => toCombination((`Divide, l, r))
+    | ("divide", _) => Error("Division needs two operands")
+    | ("pow", _) => Error("Exponentiation is not yet supported.")
+    | ("leftTruncate", [|Ok(d), Ok(`DistData(`Symbolic(`Float(lc))))|]) =>
+      Ok(`Operation(`Truncate((Some(lc), None, d))))
+    | ("leftTruncate", _) =>
+      Error("leftTruncate needs two arguments: the expression and the cutoff")
+    | ("rightTruncate", [|Ok(d), Ok(`DistData(`Symbolic(`Float(rc))))|]) =>
+      Ok(`Operation(`Truncate((None, Some(rc), d))))
+    | ("rightTruncate", _) =>
+      Error(
+        "rightTruncate needs two arguments: the expression and the cutoff",
+      )
+    | (
+        "truncate",
+        [|
+          Ok(d),
+          Ok(`DistData(`Symbolic(`Float(lc)))),
+          Ok(`DistData(`Symbolic(`Float(rc)))),
+        |],
+      ) =>
+      Ok(`Operation(`Truncate((Some(lc), Some(rc), d))))
+    | ("truncate", _) =>
+      Error("truncate needs three arguments: the expression and both cutoffs")
+    | _ => Error("This type not currently supported")
+    };
 
-  let rec functionParser = (r): result(TreeNode.treeNode, string) =>
+  let rec functionParser = (r): result(TreeNode.treeNode, string) => {
+    let parseFunction = (name, args) => {
+      let parseArgs = () => args |> E.A.fmap(functionParser);
+      switch (name) {
+      | "normal" => normal(args)
+      | "lognormal" => lognormal(args)
+      | "uniform" => uniform(args)
+      | "beta" => beta(args)
+      | "to" => to_(args)
+      | "exponential" => exponential(args)
+      | "cauchy" => cauchy(args)
+      | "triangular" => triangular(args)
+      | "mean" => Error("mean(...) not yet implemented.")
+      | "inv" => Error("inv(...) not yet implemented.")
+      | "sample" => Error("sample(...) not yet implemented.")
+      | "pdf" => Error("pdf(...) not yet implemented.")
+      | "add"
+      | "subtract"
+      | "multiply"
+      | "divide"
+      | "pow"
+      | "leftTruncate"
+      | "rightTruncate"
+      | "truncate" => operationParser(name, parseArgs())
+      | n => Error(n ++ " is not currently supported")
+      };
+    };
+
     r
     |> (
       fun
-      | Fn({name: "normal", args}) => normal(args)
-      | Fn({name: "lognormal", args}) => lognormal(args)
-      | Fn({name: "uniform", args}) => uniform(args)
-      | Fn({name: "beta", args}) => beta(args)
-      | Fn({name: "to", args}) => to_(args)
-      | Fn({name: "exponential", args}) => exponential(args)
-      | Fn({name: "cauchy", args}) => cauchy(args)
-      | Fn({name: "triangular", args}) => triangular(args)
       | Value(f) => Ok(`DistData(`Symbolic(`Float(f))))
       | Fn({name: "mm", args}) => {
           let weights =
@@ -250,79 +339,12 @@ module MathAdtToDistDst = {
           let dists = possibleDists |> E.A.fmap(functionParser);
           multiModal(dists, weights);
         }
-
-      // TODO: wire up these FloatFromDist operations
-      | Fn({name: "mean", args}) => Error("mean(...) not yet implemented.")
-      | Fn({name: "inv", args}) => Error("inv(...) not yet implemented.")
-      | Fn({name: "sample", args}) => Error("sample(...) not yet implemented.")
-      | Fn({name: "pdf", args}) => Error("pdf(...) not yet implemented.")
-
-      | Fn({name: "add", args}) => {
-          args
-          |> E.A.fmap(functionParser)
-          |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Add, l, r)))
-              | _ => Error("Addition needs two operands"))
-      }
-      | Fn({name: "subtract", args}) => {
-          args
-          |> E.A.fmap(functionParser)
-          |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Subtract, l, r)))
-              | _ => Error("Subtraction needs two operands"))
-      }
-      | Fn({name: "multiply", args}) => {
-          args
-          |> E.A.fmap(functionParser)
-          |> (fun
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Multiply, l, r)))
-              | _ => Error("Multiplication needs two operands"))
-      }
-      | Fn({name: "divide", args}) => {
-          args
-          |> E.A.fmap(functionParser)
-          |> (fun
-              | [|Ok(l), Ok(`DistData(`Symbolic(`Float(0.0))))|] => Error("Division by zero")
-              | [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Divide, l, r)))
-              | _ => Error("Division needs two operands"))
-      }
-      // TODO: Figure out how to implement meaningful exponentiation
-      | Fn({name: "pow", args}) => {
-          args
-          |> E.A.fmap(functionParser)
-          |> (fun
-              //| [|Ok(l), Ok(r)|] => Ok(`Operation(`AlgebraicCombination(`Exponentiate, l, r)))
-              //| _ => Error("Exponentiations needs two operands"))
-              | _ => Error("Exponentiation is not yet supported.")
-              )
-      }
-      | Fn({name: "leftTruncate", args}) => {
-          args
-          |> E.A.fmap(functionParser)
-          |> (fun
-              | [|Ok(d), Ok(`DistData(`Symbolic(`Float(lc))))|] => Ok(`Operation(`Truncate(Some(lc), None, d)))
-              | _ => Error("leftTruncate needs two arguments: the expression and the cutoff"))
-      }
-      | Fn({name: "rightTruncate", args}) => {
-          args
-          |> E.A.fmap(functionParser)
-          |> (fun
-              | [|Ok(d), Ok(`DistData(`Symbolic(`Float(rc))))|] => Ok(`Operation(`Truncate(None, Some(rc), d)))
-              | _ => Error("rightTruncate needs two arguments: the expression and the cutoff"))
-      }
-      | Fn({name: "truncate", args}) => {
-          args
-          |> E.A.fmap(functionParser)
-          |> (fun
-              | [|Ok(d), Ok(`DistData(`Symbolic(`Float(lc)))), Ok(`DistData(`Symbolic(`Float(rc))))|] => Ok(`Operation(`Truncate(Some(lc), Some(rc), d)))
-              // TODO: allow on-the-fly evaluations of FloatFromDists to be used as cutoff arguments here.
-              | _ => Error("rightTruncate needs two arguments: the expression and the cutoff"))
-      }
-      | Fn({name}) => Error(name ++ ": function not supported")
+      | Fn({name: n, args}) => parseFunction(n, args)
       | _ => {
           Error("This type not currently supported");
         }
     );
+  };
 
   let topLevel = (r): result(TreeNode.treeNode, string) =>
     r
@@ -341,13 +363,13 @@ module MathAdtToDistDst = {
 
 let fromString = str => {
   /* We feed the user-typed string into Mathjs.parseMath,
-     which returns a JSON with (hopefully) a single-element array.
-     This array element is the top-level node of a nested-object tree
-     representing the functions/arguments/values/etc. in the string.
+       which returns a JSON with (hopefully) a single-element array.
+       This array element is the top-level node of a nested-object tree
+       representing the functions/arguments/values/etc. in the string.
 
-     The function MathJsonToMathJsAdt then recursively unpacks this JSON into a typed data structure we can use.
-     Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
-   */
+       The function MathJsonToMathJsAdt then recursively unpacks this JSON into a typed data structure we can use.
+       Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
+     */
   let mathJsToJson = Mathjs.parseMath(str);
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
@@ -355,7 +377,7 @@ let fromString = str => {
       | Some(r) => Ok(r)
       | None => Error("MathJsParse Error")
       }
-});
+    });
 
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
   value;

@@ -185,7 +185,6 @@ let combineShapesContinuousContinuous =
   let outputYs: array(float) = Belt.Array.make(200, 0.0);
   // now, for each of the outputYs, accumulate from a Gaussian kernel over each input point.
   for (i in 0 to E.A.length(outputXs) - 1) {
-    let x = outputXs[i];
     for (j in 0 to E.A.length(masses) - 1) {
       let dx = outputXs[i] -. means[j];
       let contribution =
