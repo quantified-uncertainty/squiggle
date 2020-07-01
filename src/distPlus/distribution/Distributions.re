@@ -285,7 +285,7 @@ module Continuous = {
     let t1n = t1s |> XYShape.T.length;
     let t2n = t2s |> XYShape.T.length;
 
-    let fn = AlgebraicCombinations.operationToFn(op);
+    let fn = AlgebraicCombinations.Operation.toFn(op);
 
     let outXYShapes: array(array((float, float))) =
       Belt.Array.makeUninitializedUnsafe(t2n);
@@ -402,7 +402,7 @@ module Discrete = {
         t2.knownIntegralSum,
       );
 
-    let fn = AlgebraicCombinations.operationToFn(op);
+    let fn = AlgebraicCombinations.Operation.toFn(op);
     let xToYMap = E.FloatFloatMap.empty();
 
     for (i in 0 to t1n - 1) {

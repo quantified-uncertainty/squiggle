@@ -36,7 +36,6 @@ type continuousShape = {
   cdf: DistTypes.continuousShape,
 };
 
-
 type dist = [
   | `Normal(normal)
   | `Beta(beta)
@@ -54,6 +53,7 @@ module ContinuousShape = {
   let make = (pdf, cdf): t => {pdf, cdf};
   let pdf = (x, t: t) =>
     Distributions.Continuous.T.xToY(x, t.pdf).continuous;
+  // TODO: pdf and inv are currently the same, this seems broken.
   let inv = (p, t: t) =>
     Distributions.Continuous.T.xToY(p, t.pdf).continuous;
   // TODO: Fix the sampling, to have it work correctly.
@@ -77,7 +77,7 @@ module Cauchy = {
   let pdf = (x, t: t) => Jstat.cauchy##pdf(x, t.local, t.scale);
   let inv = (p, t: t) => Jstat.cauchy##inv(p, t.local, t.scale);
   let sample = (t: t) => Jstat.cauchy##sample(t.local, t.scale);
-  let mean = (t: t) => Error("Cauchy distributions have no mean value.")
+  let mean = (_: t) => Error("Cauchy distributions have no mean value.");
   let toString = ({local, scale}: t) => {j|Cauchy($local, $scale)|j};
 };
 
@@ -117,8 +117,10 @@ module Normal = {
 
   // TODO: is this useful here at all? would need the integral as well ...
   let pointwiseProduct = (n1: t, n2: t) => {
-    let mean = (n1.mean *. n2.stdev**2. +. n2.mean *. n1.stdev**2.) /. (n1.stdev**2. +. n2.stdev**2.);
-    let stdev = 1. /. ((1. /. n1.stdev**2.) +. (1. /. n2.stdev**2.));
+    let mean =
+      (n1.mean *. n2.stdev ** 2. +. n2.mean *. n1.stdev ** 2.)
+      /. (n1.stdev ** 2. +. n2.stdev ** 2.);
+    let stdev = 1. /. (1. /. n1.stdev ** 2. +. 1. /. n2.stdev ** 2.);
     `Normal({mean, stdev});
   };
 };
@@ -162,12 +164,12 @@ module Lognormal = {
   let multiply = (l1, l2) => {
     let mu = l1.mu +. l2.mu;
     let sigma = l1.sigma +. l2.sigma;
-    `Lognormal({mu, sigma})
+    `Lognormal({mu, sigma});
   };
   let divide = (l1, l2) => {
     let mu = l1.mu -. l2.mu;
     let sigma = l1.sigma +. l2.sigma;
-    `Lognormal({mu, sigma})
+    `Lognormal({mu, sigma});
   };
 };
 
@@ -277,21 +279,20 @@ module GenericDistFunctions = {
     | `Beta(n) => Beta.mean(n)
     | `ContinuousShape(n) => ContinuousShape.mean(n)
     | `Uniform(n) => Uniform.mean(n)
-    | `Float(n) => Float.mean(n)
+    | `Float(n) => Float.mean(n);
 
   let interpolateXs =
-    (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, n) => {
+      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, n) => {
     switch (xSelection, dist) {
     | (`Linear, _) => E.A.Floats.range(min(dist), max(dist), n)
-/*    | (`ByWeight, `Uniform(n)) =>
-    // In `ByWeight mode, uniform distributions get special treatment because we need two x's
-    // on either side for proper rendering (just left and right of the discontinuities).
-      let dx = 0.00001 *. (n.high -. n.low);
-      [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|]; */
+    /*    | (`ByWeight, `Uniform(n)) =>
+          // In `ByWeight mode, uniform distributions get special treatment because we need two x's
+          // on either side for proper rendering (just left and right of the discontinuities).
+            let dx = 0.00001 *. (n.high -. n.low);
+            [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|]; */
     | (`ByWeight, _) =>
       let ys = E.A.Floats.range(minCdfValue, maxCdfValue, n);
       ys |> E.A.fmap(y => inv(y, dist));
     };
   };
 };
-

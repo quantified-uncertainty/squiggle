@@ -1,5 +1,6 @@
 /* This module represents a tree node. */
 
+// todo: Symbolic already has an arbitrary continuousShape option. It seems messy to have both.
 type distData = [
   | `Symbolic(SymbolicDist.dist)
   | `RenderedShape(DistTypes.shape)
@@ -46,7 +47,7 @@ and operation = [
 
 module TreeNode = {
   type t = treeNode;
-  type simplifier = treeNode => result(treeNode, string);
+  type tResult = treeNode => result(treeNode, string);
 
   let rec toString = (t: t): string => {
     let stringFromAlgebraicCombination =
@@ -63,16 +64,15 @@ module TreeNode = {
 
     let stringFromFloatFromDistOperation =
         fun
-        | `Pdf(f) => "pdf(x=$f, "
-        | `Inv(f) => "inv(c=$f, "
+        | `Pdf(f) => {j|pdf(x=$f, |j}
+        | `Inv(f) => {j|inv(x=$f, |j}
         | `Sample => "sample("
         | `Mean => "mean(";
-
 
     switch (t) {
     | `DistData(`Symbolic(d)) =>
       SymbolicDist.GenericDistFunctions.toString(d)
-    | `DistData(`RenderedShape(s)) => "[shape]"
+    | `DistData(`RenderedShape(_)) => "[shape]"
     | `Operation(`AlgebraicCombination(op, t1, t2)) =>
       toString(t1) ++ stringFromAlgebraicCombination(op) ++ toString(t2)
     | `Operation(`PointwiseCombination(op, t1, t2)) =>
@@ -102,12 +102,12 @@ module TreeNode = {
      In general, this is implemented via convolution. */
   module AlgebraicCombination = {
     let simplify = (algebraicOp, t1: t, t2: t): result(treeNode, string) => {
-      let tryCombiningFloats: simplifier =
+      let tryCombiningFloats: tResult =
         fun
         | `Operation(
             `AlgebraicCombination(
               `Divide,
-              `DistData(`Symbolic(`Float(v1))),
+              `DistData(`Symbolic(`Float(_))),
               `DistData(`Symbolic(`Float(0.))),
             ),
           ) =>
@@ -119,12 +119,12 @@ module TreeNode = {
               `DistData(`Symbolic(`Float(v2))),
             ),
           ) => {
-            let func = AlgebraicCombinations.operationToFn(algebraicOp);
+            let func = AlgebraicCombinations.Operation.toFn(algebraicOp);
             Ok(`DistData(`Symbolic(`Float(func(v1, v2)))));
           }
         | t => Ok(t);
 
-      let tryCombiningNormals: simplifier =
+      let tryCombiningNormals: tResult =
         fun
         | `Operation(
             `AlgebraicCombination(
@@ -144,7 +144,7 @@ module TreeNode = {
           Ok(`DistData(`Symbolic(SymbolicDist.Normal.subtract(n1, n2))))
         | t => Ok(t);
 
-      let tryCombiningLognormals: simplifier =
+      let tryCombiningLognormals: tResult =
         fun
         | `Operation(
             `AlgebraicCombination(
@@ -281,13 +281,13 @@ module TreeNode = {
 
   module Truncate = {
     module Simplify = {
-      let tryTruncatingNothing: simplifier =
+      let tryTruncatingNothing: tResult =
         fun
         | `Operation(`Truncate(None, None, `DistData(d))) =>
           Ok(`DistData(d))
         | t => Ok(t);
 
-      let tryTruncatingUniform: simplifier =
+      let tryTruncatingUniform: tResult =
         fun
         | `Operation(`Truncate(lc, rc, `DistData(`Symbolic(`Uniform(u))))) => {
             // just create a new Uniform distribution
@@ -508,7 +508,7 @@ module TreeNode = {
      but most often it will produce a RenderedShape.
      This function is used mainly to turn a parse tree into a single RenderedShape
      that can then be displayed to the user. */
-  let rec toDistData = (treeNode: t, sampleCount: int): result(t, string) => {
+  let toDistData = (treeNode: t, sampleCount: int): result(t, string) => {
     switch (treeNode) {
     | `DistData(d) => Ok(`DistData(d))
     | `Operation(op) => operationToDistData(sampleCount, op)
