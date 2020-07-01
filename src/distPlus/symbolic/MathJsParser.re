@@ -1,5 +1,3 @@
-// todo: rename to SymbolicParser
-
 module MathJsonToMathJsAdt = {
   type arg =
     | Symbol(string)
@@ -242,27 +240,26 @@ module MathAdtToDistDst = {
     };
   };
 
-  let toCombination = r => Ok(`Operation(`AlgebraicCombination(r)));
   let operationParser =
-      (name: string, args: array(result(TreeNode.treeNode, string))) =>
+      (name: string, args: array(result(TreeNode.treeNode, string))) => {
+    let toOkAlgebraic = r => Ok(`Operation(`AlgebraicCombination(r)));
+    let toOkTrunctate = r => Ok(`Operation(`Truncate(r)));
     switch (name, args) {
-    | ("add", [|Ok(l), Ok(r)|]) => toCombination((`Add, l, r))
+    | ("add", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Add, l, r))
     | ("add", _) => Error("Addition needs two operands")
-    | ("subtract", [|Ok(l), Ok(r)|]) => toCombination((`Subtract, l, r))
+    | ("subtract", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Subtract, l, r))
     | ("subtract", _) => Error("Subtraction needs two operands")
-    | ("multiply", [|Ok(l), Ok(r)|]) => toCombination((`Multiply, l, r))
+    | ("multiply", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Multiply, l, r))
     | ("multiply", _) => Error("Multiplication needs two operands")
-    | ("divide", [|Ok(_), Ok(`DistData(`Symbolic(`Float(0.0))))|]) =>
-      Error("Division by zero")
-    | ("divide", [|Ok(l), Ok(r)|]) => toCombination((`Divide, l, r))
+    | ("divide", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Divide, l, r))
     | ("divide", _) => Error("Division needs two operands")
     | ("pow", _) => Error("Exponentiation is not yet supported.")
     | ("leftTruncate", [|Ok(d), Ok(`DistData(`Symbolic(`Float(lc))))|]) =>
-      Ok(`Operation(`Truncate((Some(lc), None, d))))
+      toOkTrunctate((Some(lc), None, d))
     | ("leftTruncate", _) =>
       Error("leftTruncate needs two arguments: the expression and the cutoff")
     | ("rightTruncate", [|Ok(d), Ok(`DistData(`Symbolic(`Float(rc))))|]) =>
-      Ok(`Operation(`Truncate((None, Some(rc), d))))
+      toOkTrunctate((None, Some(rc), d))
     | ("rightTruncate", _) =>
       Error(
         "rightTruncate needs two arguments: the expression and the cutoff",
@@ -275,87 +272,80 @@ module MathAdtToDistDst = {
           Ok(`DistData(`Symbolic(`Float(rc)))),
         |],
       ) =>
-      Ok(`Operation(`Truncate((Some(lc), Some(rc), d))))
+      toOkTrunctate((Some(lc), Some(rc), d))
     | ("truncate", _) =>
       Error("truncate needs three arguments: the expression and both cutoffs")
     | _ => Error("This type not currently supported")
     };
-
-  let rec functionParser = (r): result(TreeNode.treeNode, string) => {
-    let parseFunction = (name, args) => {
-      let parseArgs = () => args |> E.A.fmap(functionParser);
-      switch (name) {
-      | "normal" => normal(args)
-      | "lognormal" => lognormal(args)
-      | "uniform" => uniform(args)
-      | "beta" => beta(args)
-      | "to" => to_(args)
-      | "exponential" => exponential(args)
-      | "cauchy" => cauchy(args)
-      | "triangular" => triangular(args)
-      | "mean" => Error("mean(...) not yet implemented.")
-      | "inv" => Error("inv(...) not yet implemented.")
-      | "sample" => Error("sample(...) not yet implemented.")
-      | "pdf" => Error("pdf(...) not yet implemented.")
-      | "add"
-      | "subtract"
-      | "multiply"
-      | "divide"
-      | "pow"
-      | "leftTruncate"
-      | "rightTruncate"
-      | "truncate" => operationParser(name, parseArgs())
-      | n => Error(n ++ " is not currently supported")
-      };
-    };
-
-    r
-    |> (
-      fun
-      | Value(f) => Ok(`DistData(`Symbolic(`Float(f))))
-      | Fn({name: "mm", args}) => {
-          let weights =
-            args
-            |> E.A.last
-            |> E.O.bind(
-                 _,
-                 fun
-                 | Array(values) => Some(values)
-                 | _ => None,
-               )
-            |> E.O.fmap(o =>
-                 o
-                 |> E.A.fmap(
-                      fun
-                      | Value(r) => Some(r)
-                      | _ => None,
-                    )
-                 |> E.A.O.concatSomes
-               );
-          let possibleDists =
-            E.O.isSome(weights)
-              ? Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1)
-              : args;
-          let dists = possibleDists |> E.A.fmap(functionParser);
-          multiModal(dists, weights);
-        }
-      | Fn({name: n, args}) => parseFunction(n, args)
-      | _ => {
-          Error("This type not currently supported");
-        }
-    );
   };
 
-  let topLevel = (r): result(TreeNode.treeNode, string) =>
-    r
-    |> (
-      fun
-      | Fn(_) => functionParser(r)
-      | Value(r) => Ok(`DistData(`Symbolic(`Float(r))))
-      | Array(r) => arrayParser(r)
-      | Symbol(_) => Error("Symbol not valid as top level")
-      | Object(_) => Error("Object not valid as top level")
-    );
+  let functionParser = (nodeParser, name, args) => {
+    let parseArgs = () => args |> E.A.fmap(nodeParser);
+    switch (name) {
+    | "normal" => normal(args)
+    | "lognormal" => lognormal(args)
+    | "uniform" => uniform(args)
+    | "beta" => beta(args)
+    | "to" => to_(args)
+    | "exponential" => exponential(args)
+    | "cauchy" => cauchy(args)
+    | "triangular" => triangular(args)
+    | "mm" =>
+      let weights =
+        args
+        |> E.A.last
+        |> E.O.bind(
+             _,
+             fun
+             | Array(values) => Some(values)
+             | _ => None,
+           )
+        |> E.O.fmap(o =>
+             o
+             |> E.A.fmap(
+                  fun
+                  | Value(r) => Some(r)
+                  | _ => None,
+                )
+             |> E.A.O.concatSomes
+           );
+      let possibleDists =
+        E.O.isSome(weights)
+          ? Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1)
+          : args;
+      let dists = possibleDists |> E.A.fmap(nodeParser);
+      multiModal(dists, weights);
+    | "add"
+    | "subtract"
+    | "multiply"
+    | "divide"
+    | "pow"
+    | "leftTruncate"
+    | "rightTruncate"
+    | "truncate" => operationParser(name, parseArgs())
+    | "mean" as n
+    | "inv" as n
+    | "sample" as n
+    | "pdf" as n
+    | n => Error(n ++ "(...) is not currently supported")
+    };
+  };
+
+  let rec nodeParser =
+    fun
+    | Value(f) => Ok(`DistData(`Symbolic(`Float(f))))
+    | Fn({name, args}) => functionParser(nodeParser, name, args)
+    | _ => {
+        Error("This type not currently supported");
+      };
+
+  let topLevel =
+    fun
+    | Array(r) => arrayParser(r)
+    | Value(_) as r => nodeParser(r)
+    | Fn(_) as r => nodeParser(r)
+    | Symbol(_) => Error("Symbol not valid as top level")
+    | Object(_) => Error("Object not valid as top level");
 
   let run = (r): result(TreeNode.treeNode, string) =>
     r |> MathAdtCleaner.run |> topLevel;
