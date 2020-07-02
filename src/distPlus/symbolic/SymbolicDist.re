@@ -300,4 +300,18 @@ module T = {
       |> E.O.dimap(r => `AnalyticalSolution(r), () => `NoSolution)
     | _ => `NoSolution
     };
+
+  let toShape = (sampleCount, d: symbolicDist): DistTypes.shape =>
+    switch (d) {
+    | `Float(v) =>
+      Discrete(
+        Distributions.Discrete.make({xs: [|v|], ys: [|1.0|]}, Some(1.0)),
+      )
+    | _ =>
+      let xs = interpolateXs(~xSelection=`ByWeight, d, sampleCount);
+      let ys = xs |> E.A.fmap(x => pdf(x, d));
+      Continuous(
+        Distributions.Continuous.make(`Linear, {xs, ys}, Some(1.0)),
+      );
+    };
 };

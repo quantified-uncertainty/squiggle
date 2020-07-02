@@ -102,16 +102,15 @@ module TreeNode = {
       };
     };
 
-    let evaluateToLeaf =
+    let toLeaf =
         (
-          algebraicOp: SymbolicTypes.algebraicOperation,
           operationToLeaf,
+          algebraicOp: SymbolicTypes.algebraicOperation,
           t1: t,
           t2: t,
         )
         : result(treeNode, string) =>
-      algebraicOp
-      |> toTreeNode(_, t1, t2)
+      toTreeNode(algebraicOp, t1, t2)
       |> tryAnalyticalSolution
       |> E.R.bind(
            _,
@@ -124,7 +123,7 @@ module TreeNode = {
   };
 
   module VerticalScaling = {
-    let evaluateToLeaf = (scaleOp, operationToLeaf, t, scaleBy) => {
+    let toLeaf = (operationToLeaf,scaleOp, t, scaleBy) => {
       // scaleBy has to be a single float, otherwise we'll return an error.
       let fn = SymbolicTypes.Scale.toFn(scaleOp);
       let knownIntegralSumFn =
@@ -183,7 +182,7 @@ module TreeNode = {
       );
     };
 
-    let evaluateToLeaf = (pointwiseOp, operationToLeaf, t1, t2) => {
+    let toLeaf = (operationToLeaf,pointwiseOp, t1, t2) => {
       switch (pointwiseOp) {
       | `Add => pointwiseAdd(operationToLeaf, t1, t2)
       | `Multiply => pointwiseMultiply(operationToLeaf, t1, t2)
@@ -235,11 +234,11 @@ module TreeNode = {
       };
     };
 
-    let evaluateToLeaf =
+    let toLeaf =
         (
+          operationToLeaf,
           leftCutoff: option(float),
           rightCutoff: option(float),
-          operationToLeaf,
           t: treeNode,
         )
         : result(treeNode, string) => {
@@ -256,15 +255,13 @@ module TreeNode = {
   };
 
   module Normalize = {
-    let rec evaluateToLeaf =
-            (operationToLeaf, t: treeNode): result(treeNode, string) => {
+    let rec toLeaf = (operationToLeaf, t: treeNode): result(treeNode, string) => {
       switch (t) {
-      | `Leaf(`SymbolicDist(_)) => Ok(t)
       | `Leaf(`RenderedDist(s)) =>
-        let normalized = Distributions.Shape.T.normalize(s);
-        Ok(`Leaf(`RenderedDist(normalized)));
+        Ok(`Leaf(`RenderedDist(Distributions.Shape.T.normalize(s))))
+      | `Leaf(`SymbolicDist(_)) => Ok(t)
       | `Operation(op) =>
-        E.R.bind(operationToLeaf(op), evaluateToLeaf(operationToLeaf))
+        operationToLeaf(op) |> E.R.bind(_, toLeaf(operationToLeaf))
       };
     };
   };
@@ -280,10 +277,10 @@ module TreeNode = {
       Distributions.Shape.operate(distToFloatOp, rs)
       |> (v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
     };
-    let rec evaluateToLeaf =
+    let rec toLeaf =
             (
-              distToFloatOp: distToFloatOperation,
               operationToLeaf,
+              distToFloatOp: distToFloatOperation,
               t: treeNode,
             )
             : result(treeNode, string) => {
@@ -294,14 +291,14 @@ module TreeNode = {
       | `Operation(op) =>
         E.R.bind(
           operationToLeaf(op),
-          evaluateToLeaf(distToFloatOp, operationToLeaf),
+          toLeaf(operationToLeaf,distToFloatOp),
         )
       };
     };
   };
 
   module Render = {
-    let rec evaluateToRenderedDist =
+    let rec toLeaf =
             (
               operationToLeaf: operation => result(t, string),
               sampleCount: int,
@@ -309,49 +306,13 @@ module TreeNode = {
             )
             : result(t, string) => {
       switch (t) {
-      | `Leaf(`RenderedDist(s)) => Ok(`Leaf(`RenderedDist(s))) // already a rendered shape, we're done here
       | `Leaf(`SymbolicDist(d)) =>
-        // todo: move to dist
-        switch (d) {
-        | `Float(v) =>
-          Ok(
-            `Leaf(
-              `RenderedDist(
-                Discrete(
-                  Distributions.Discrete.make(
-                    {xs: [|v|], ys: [|1.0|]},
-                    Some(1.0),
-                  ),
-                ),
-              ),
-            ),
-          )
-        | _ =>
-          let xs =
-            SymbolicDist.T.interpolateXs(
-              ~xSelection=`ByWeight,
-              d,
-              sampleCount,
-            );
-          let ys = xs |> E.A.fmap(x => SymbolicDist.T.pdf(x, d));
-          Ok(
-            `Leaf(
-              `RenderedDist(
-                Continuous(
-                  Distributions.Continuous.make(
-                    `Linear,
-                    {xs, ys},
-                    Some(1.0),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
+        Ok(`Leaf(`RenderedDist(SymbolicDist.T.toShape(sampleCount, d))))
+      | `Leaf(`RenderedDist(_)) as t => Ok(t) // already a rendered shape, we're done here
       | `Operation(op) =>
         E.R.bind(
           operationToLeaf(op),
-          evaluateToRenderedDist(operationToLeaf, sampleCount),
+          toLeaf(operationToLeaf, sampleCount),
         )
       };
     };
@@ -363,43 +324,38 @@ module TreeNode = {
     // have a way to call this function on their children, if their children are themselves Operation nodes.
     switch (op) {
     | `AlgebraicCombination(algebraicOp, t1, t2) =>
-      AlgebraicCombination.evaluateToLeaf(
-        algebraicOp,
+      AlgebraicCombination.toLeaf(
         operationToLeaf(sampleCount),
+        algebraicOp,
         t1,
         t2 // we want to give it the option to render or simply leave it as is
       )
     | `PointwiseCombination(pointwiseOp, t1, t2) =>
-      PointwiseCombination.evaluateToLeaf(
-        pointwiseOp,
+      PointwiseCombination.toLeaf(
         operationToLeaf(sampleCount),
+        pointwiseOp,
         t1,
         t2,
       )
     | `VerticalScaling(scaleOp, t, scaleBy) =>
-      VerticalScaling.evaluateToLeaf(
-        scaleOp,
+      VerticalScaling.toLeaf(
         operationToLeaf(sampleCount),
+        scaleOp,
         t,
         scaleBy,
       )
     | `Truncate(leftCutoff, rightCutoff, t) =>
-      Truncate.evaluateToLeaf(
+      Truncate.toLeaf(
+        operationToLeaf(sampleCount),
         leftCutoff,
         rightCutoff,
-        operationToLeaf(sampleCount),
         t,
       )
     | `FloatFromDist(distToFloatOp, t) =>
-      FloatFromDist.evaluateToLeaf(
-        distToFloatOp,
-        operationToLeaf(sampleCount),
-        t,
-      )
-    | `Normalize(t) =>
-      Normalize.evaluateToLeaf(operationToLeaf(sampleCount), t)
+      FloatFromDist.toLeaf(operationToLeaf(sampleCount),distToFloatOp, t)
+    | `Normalize(t) => Normalize.toLeaf(operationToLeaf(sampleCount), t)
     | `Render(t) =>
-      Render.evaluateToRenderedDist(
+      Render.toLeaf(
         operationToLeaf(sampleCount),
         sampleCount,
         t,
