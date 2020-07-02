@@ -123,7 +123,7 @@ module TreeNode = {
   };
 
   module VerticalScaling = {
-    let toLeaf = (operationToLeaf,scaleOp, t, scaleBy) => {
+    let toLeaf = (operationToLeaf, scaleOp, t, scaleBy) => {
       // scaleBy has to be a single float, otherwise we'll return an error.
       let fn = SymbolicTypes.Scale.toFn(scaleOp);
       let knownIntegralSumFn =
@@ -182,7 +182,7 @@ module TreeNode = {
       );
     };
 
-    let toLeaf = (operationToLeaf,pointwiseOp, t1, t2) => {
+    let toLeaf = (operationToLeaf, pointwiseOp, t1, t2) => {
       switch (pointwiseOp) {
       | `Add => pointwiseAdd(operationToLeaf, t1, t2)
       | `Multiply => pointwiseMultiply(operationToLeaf, t1, t2)
@@ -267,11 +267,11 @@ module TreeNode = {
   };
 
   module FloatFromDist = {
-    let evaluateFromSymbolic = (distToFloatOp: distToFloatOperation, s) => {
+    let symbolicToLeaf = (distToFloatOp: distToFloatOperation, s) => {
       SymbolicDist.T.operate(distToFloatOp, s)
       |> E.R.bind(_, v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
     };
-    let evaluateFromRenderedDist =
+    let renderedToLeaf =
         (distToFloatOp: distToFloatOperation, rs: DistTypes.shape)
         : result(treeNode, string) => {
       Distributions.Shape.operate(distToFloatOp, rs)
@@ -285,13 +285,12 @@ module TreeNode = {
             )
             : result(treeNode, string) => {
       switch (t) {
-      | `Leaf(`SymbolicDist(s)) => evaluateFromSymbolic(distToFloatOp, s) // we want to evaluate the distToFloatOp on the symbolic dist
-      | `Leaf(`RenderedDist(rs)) =>
-        evaluateFromRenderedDist(distToFloatOp, rs)
+      | `Leaf(`SymbolicDist(s)) => symbolicToLeaf(distToFloatOp, s) // we want to evaluate the distToFloatOp on the symbolic dist
+      | `Leaf(`RenderedDist(rs)) => renderedToLeaf(distToFloatOp, rs)
       | `Operation(op) =>
         E.R.bind(
           operationToLeaf(op),
-          toLeaf(operationToLeaf,distToFloatOp),
+          toLeaf(operationToLeaf, distToFloatOp),
         )
       };
     };
@@ -310,10 +309,7 @@ module TreeNode = {
         Ok(`Leaf(`RenderedDist(SymbolicDist.T.toShape(sampleCount, d))))
       | `Leaf(`RenderedDist(_)) as t => Ok(t) // already a rendered shape, we're done here
       | `Operation(op) =>
-        E.R.bind(
-          operationToLeaf(op),
-          toLeaf(operationToLeaf, sampleCount),
-        )
+        E.R.bind(operationToLeaf(op), toLeaf(operationToLeaf, sampleCount))
       };
     };
   };
@@ -352,14 +348,10 @@ module TreeNode = {
         t,
       )
     | `FloatFromDist(distToFloatOp, t) =>
-      FloatFromDist.toLeaf(operationToLeaf(sampleCount),distToFloatOp, t)
+      FloatFromDist.toLeaf(operationToLeaf(sampleCount), distToFloatOp, t)
     | `Normalize(t) => Normalize.toLeaf(operationToLeaf(sampleCount), t)
     | `Render(t) =>
-      Render.toLeaf(
-        operationToLeaf(sampleCount),
-        sampleCount,
-        t,
-      )
+      Render.toLeaf(operationToLeaf(sampleCount), sampleCount, t)
     };
   };
 
