@@ -58,9 +58,9 @@ module Scale = {
 
   let format = (operation: t, value, scaleBy) =>
     switch (operation) {
-    | `Multiply => {j|scaleMultiply($value, $scaleBy) |j}
-    | `Exponentiate => {j|ScaleExponentiate($value, $scaleBy) |j}
-    | `Log => {j|ScaleLog($value, $scaleBy) |j}
+    | `Multiply => {j|verticalMultiply($value, $scaleBy) |j}
+    | `Exponentiate => {j|verticalExponentiate($value, $scaleBy) |j}
+    | `Log => {j|verticalLog($value, $scaleBy) |j}
     };
 
   let toKnownIntegralSumFn =
