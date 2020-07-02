@@ -333,12 +333,7 @@ module Continuous = {
   };
 
   let combineAlgebraically =
-      (
-        ~downsample=false,
-        op: SymbolicTypes.algebraicOperation,
-        t1: t,
-        t2: t,
-      ) => {
+      (~downsample=false, op: SymbolicTypes.algebraicOperation, t1: t, t2: t) => {
     let s1 = t1 |> getShape;
     let s2 = t2 |> getShape;
     let t1n = s1 |> XYShape.T.length;
@@ -845,12 +840,7 @@ module Mixed = {
     });
 
   let combineAlgebraically =
-      (
-        ~downsample=false,
-        op: SymbolicTypes.algebraicOperation,
-        t1: t,
-        t2: t,
-      )
+      (~downsample=false, op: SymbolicTypes.algebraicOperation, t1: t, t2: t)
       : t => {
     // Discrete convolution can cause a huge increase in the number of samples,
     // so we'll first downsample.
@@ -1105,6 +1095,14 @@ module Shape = {
         | Continuous(m) => Continuous.T.variance(m)
         };
     });
+
+  let operate = (distToFloatOp: SymbolicTypes.distToFloatOperation, s) =>
+    switch (distToFloatOp) {
+    | `Pdf(f) => pdf(f, s)
+    | `Inv(f) => inv(f, s)
+    | `Sample => sample(s)
+    | `Mean => T.mean(s)
+    };
 };
 
 module DistPlus = {

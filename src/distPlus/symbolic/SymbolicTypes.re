@@ -48,6 +48,7 @@ type symbolicDist = [
   | `Float(float) // Dirac delta at x. Practically useful only in the context of multimodals.
 ];
 
+// todo: These operations are really applicable for all dists
 type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide];
 type pointwiseOperation = [ | `Add | `Multiply];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];

@@ -246,6 +246,14 @@ module T = {
     | `Uniform(n) => Uniform.mean(n)
     | `Float(n) => Float.mean(n);
 
+  let operate = (distToFloatOp: distToFloatOperation, s) =>
+    switch (distToFloatOp) {
+    | `Pdf(f) => Ok(pdf(f, s))
+    | `Inv(f) => Ok(inv(f, s))
+    | `Sample => Ok(sample(s))
+    | `Mean => mean(s)
+    };
+
   let interpolateXs =
       (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: symbolicDist, n) => {
     switch (xSelection, dist) {

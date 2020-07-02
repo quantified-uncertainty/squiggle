@@ -266,26 +266,14 @@ module TreeNode = {
 
   module FloatFromDist = {
     let evaluateFromSymbolic = (distToFloatOp: distToFloatOperation, s) => {
-      let value =
-        switch (distToFloatOp) {
-        | `Pdf(f) => Ok(SymbolicDist.T.pdf(f, s))
-        | `Inv(f) => Ok(SymbolicDist.T.inv(f, s))
-        | `Sample => Ok(SymbolicDist.T.sample(s))
-        | `Mean => SymbolicDist.T.mean(s)
-        };
-      E.R.bind(value, v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
+      SymbolicDist.T.operate(distToFloatOp, s)
+      |> E.R.bind(_, v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
     };
     let evaluateFromRenderedDist =
         (distToFloatOp: distToFloatOperation, rs: DistTypes.shape)
         : result(treeNode, string) => {
-      let value =
-        switch (distToFloatOp) {
-        | `Pdf(f) => Ok(Distributions.Shape.pdf(f, rs))
-        | `Inv(f) => Ok(Distributions.Shape.inv(f, rs)) // TODO: this is tricky for discrete distributions, because they have a stepwise CDF
-        | `Sample => Ok(Distributions.Shape.sample(rs))
-        | `Mean => Ok(Distributions.Shape.T.mean(rs))
-        };
-      E.R.bind(value, v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
+      Distributions.Shape.operate(distToFloatOp, rs)
+      |> (v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
     };
     let rec evaluateToLeaf =
             (
