@@ -18,6 +18,30 @@ and operation = [
   | `FloatFromDist(distToFloatOperation, treeNode)
 ];
 
+module Operation = {
+  type t = operation;
+  let toString = nodeToString =>
+    fun
+    | `AlgebraicCombination(op, t1, t2) =>
+      SymbolicTypes.Algebraic.format(op, nodeToString(t1), nodeToString(t2))
+    | `PointwiseCombination(op, t1, t2) =>
+      SymbolicTypes.Pointwise.format(op, nodeToString(t1), nodeToString(t2))
+    | `VerticalScaling(_scaleOp, t, scaleBy) =>
+      nodeToString(t) ++ " @ " ++ nodeToString(scaleBy)
+    | `Normalize(t) => "normalize(" ++ nodeToString(t) ++ ")"
+    | `FloatFromDist(floatFromDistOp, t) =>
+      SymbolicTypes.DistToFloat.format(floatFromDistOp, nodeToString(t))
+    | `Truncate(lc, rc, t) =>
+      "truncate("
+      ++ nodeToString(t)
+      ++ ", "
+      ++ E.O.dimap(Js.Float.toString, () => "-inf", lc)
+      ++ ", "
+      ++ E.O.dimap(Js.Float.toString, () => "inf", rc)
+      ++ ")"
+    | `Render(t) => nodeToString(t);
+};
+
 module TreeNode = {
   type t = treeNode;
   type tResult = treeNode => result(treeNode, string);
@@ -27,24 +51,7 @@ module TreeNode = {
     | `DistData(`Symbolic(d)) =>
       SymbolicDist.GenericDistFunctions.toString(d)
     | `DistData(`RenderedShape(_)) => "[shape]"
-    | `Operation(`AlgebraicCombination(op, t1, t2)) =>
-      SymbolicTypes.Algebraic.format(op, toString(t1), toString(t2))
-    | `Operation(`PointwiseCombination(op, t1, t2)) =>
-      SymbolicTypes.Pointwise.format(op, toString(t1), toString(t2))
-    | `Operation(`VerticalScaling(_scaleOp, t, scaleBy)) =>
-      toString(t) ++ " @ " ++ toString(scaleBy)
-    | `Operation(`Normalize(t)) => "normalize(" ++ toString(t) ++ ")"
-    | `Operation(`FloatFromDist(floatFromDistOp, t)) =>
-      SymbolicTypes.DistToFloat.format(floatFromDistOp, toString(t))
-    | `Operation(`Truncate(lc, rc, t)) =>
-      "truncate("
-      ++ toString(t)
-      ++ ", "
-      ++ E.O.dimap(Js.Float.toString, () => "-inf", lc)
-      ++ ", "
-      ++ E.O.dimap(Js.Float.toString, () => "inf", rc)
-      ++ ")"
-    | `Operation(`Render(t)) => toString(t);
+    | `Operation(op) => Operation.toString(toString, op);
 
   /* The following modules encapsulate everything we can do with
    * different kinds of operations. */
@@ -109,7 +116,7 @@ module TreeNode = {
       |> E.R.bind(_, tryCombiningLognormals);
     };
 
-  // todo: I don't like the name evaluateNumerically that much, if this renders and does it algebraically. It's tricky.
+    // todo: I don't like the name evaluateNumerically that much, if this renders and does it algebraically. It's tricky.
     let evaluateNumerically = (algebraicOp, operationToDistData, t1, t2) => {
       // force rendering into shapes
       let renderShape = r => operationToDistData(`Render(r));
@@ -155,7 +162,8 @@ module TreeNode = {
     let evaluateToDistData = (scaleOp, operationToDistData, t, scaleBy) => {
       // scaleBy has to be a single float, otherwise we'll return an error.
       let fn = SymbolicTypes.Scale.toFn(scaleOp);
-      let knownIntegralSumFn = SymbolicTypes.Scale.toKnownIntegralSumFn(scaleOp);
+      let knownIntegralSumFn =
+        SymbolicTypes.Scale.toKnownIntegralSumFn(scaleOp);
       let renderedShape = operationToDistData(`Render(t));
 
       switch (renderedShape, scaleBy) {
@@ -366,6 +374,7 @@ module TreeNode = {
       switch (t) {
       | `DistData(`RenderedShape(s)) => Ok(`DistData(`RenderedShape(s))) // already a rendered shape, we're done here
       | `DistData(`Symbolic(d)) =>
+        // todo: move to dist
         switch (d) {
         | `Float(v) =>
           Ok(
