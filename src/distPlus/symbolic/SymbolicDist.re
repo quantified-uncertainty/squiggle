@@ -1,52 +1,4 @@
-type normal = {
-  mean: float,
-  stdev: float,
-};
-
-type lognormal = {
-  mu: float,
-  sigma: float,
-};
-
-type uniform = {
-  low: float,
-  high: float,
-};
-
-type beta = {
-  alpha: float,
-  beta: float,
-};
-
-type exponential = {rate: float};
-
-type cauchy = {
-  local: float,
-  scale: float,
-};
-
-type triangular = {
-  low: float,
-  medium: float,
-  high: float,
-};
-
-type continuousShape = {
-  pdf: DistTypes.continuousShape,
-  cdf: DistTypes.continuousShape,
-};
-
-type dist = [
-  | `Normal(normal)
-  | `Beta(beta)
-  | `Lognormal(lognormal)
-  | `Uniform(uniform)
-  | `Exponential(exponential)
-  | `Cauchy(cauchy)
-  | `Triangular(triangular)
-  | `ContinuousShape(continuousShape)
-  | `Float(float) // Dirac delta at x. Practically useful only in the context of multimodals.
-];
+open SymbolicTypes;
 
 module ContinuousShape = {
   type t = continuousShape;
@@ -124,11 +76,12 @@ module Normal = {
     `Normal({mean, stdev});
   };
 
-  let operate = (operation: SymbolicTypes.Algebraic.t, n1: t, n2: t) => switch(operation){
+  let operate = (operation: SymbolicTypes.Algebraic.t, n1: t, n2: t) =>
+    switch (operation) {
     | `Add => Some(add(n1, n2))
     | `Subtract => Some(subtract(n1, n2))
     | _ => None
-  }
+    };
 };
 
 module Beta = {
@@ -177,11 +130,12 @@ module Lognormal = {
     let sigma = l1.sigma +. l2.sigma;
     `Lognormal({mu, sigma});
   };
-  let operate = (operation: SymbolicTypes.Algebraic.t, n1: t, n2: t) => switch(operation){
+  let operate = (operation: SymbolicTypes.Algebraic.t, n1: t, n2: t) =>
+    switch (operation) {
     | `Multiply => Some(multiply(n1, n2))
     | `Divide => Some(divide(n1, n2))
     | _ => None
-  }
+    };
 };
 
 module Uniform = {
@@ -202,7 +156,7 @@ module Float = {
   let toString = Js.Float.toString;
 };
 
-module GenericDistFunctions = {
+module T = {
   let minCdfValue = 0.0001;
   let maxCdfValue = 0.9999;
 
@@ -232,7 +186,7 @@ module GenericDistFunctions = {
     | `ContinuousShape(n) => ContinuousShape.inv(x, n)
     };
 
-  let sample: dist => float =
+  let sample: symbolicDist => float =
     fun
     | `Normal(n) => Normal.sample(n)
     | `Triangular(n) => Triangular.sample(n)
@@ -244,7 +198,7 @@ module GenericDistFunctions = {
     | `Float(n) => Float.sample(n)
     | `ContinuousShape(n) => ContinuousShape.sample(n);
 
-  let toString: dist => string =
+  let toString: symbolicDist => string =
     fun
     | `Triangular(n) => Triangular.toString(n)
     | `Exponential(n) => Exponential.toString(n)
@@ -256,7 +210,7 @@ module GenericDistFunctions = {
     | `Float(n) => Float.toString(n)
     | `ContinuousShape(n) => ContinuousShape.toString(n);
 
-  let min: dist => float =
+  let min: symbolicDist => float =
     fun
     | `Triangular({low}) => low
     | `Exponential(n) => Exponential.inv(minCdfValue, n)
@@ -268,7 +222,7 @@ module GenericDistFunctions = {
     | `ContinuousShape(n) => ContinuousShape.inv(minCdfValue, n)
     | `Float(n) => n;
 
-  let max: dist => float =
+  let max: symbolicDist => float =
     fun
     | `Triangular(n) => n.high
     | `Exponential(n) => Exponential.inv(maxCdfValue, n)
@@ -280,7 +234,7 @@ module GenericDistFunctions = {
     | `Uniform({high}) => high
     | `Float(n) => n;
 
-  let mean: dist => result(float, string) =
+  let mean: symbolicDist => result(float, string) =
     fun
     | `Triangular(n) => Triangular.mean(n)
     | `Exponential(n) => Exponential.mean(n)
@@ -293,7 +247,7 @@ module GenericDistFunctions = {
     | `Float(n) => Float.mean(n);
 
   let interpolateXs =
-      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, n) => {
+      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: symbolicDist, n) => {
     switch (xSelection, dist) {
     | (`Linear, _) => E.A.Floats.range(min(dist), max(dist), n)
     /*    | (`ByWeight, `Uniform(n)) =>
@@ -306,4 +260,36 @@ module GenericDistFunctions = {
       ys |> E.A.fmap(y => inv(y, dist));
     };
   };
+
+  /* This returns an optional that wraps a result. If the optional is None,
+     there is no valid analytic solution. If it Some, it
+     can still return an error if there is a serious problem,
+     like in the casea of a divide by 0.
+     */
+  type analyticalSolutionAttempt = [
+    | `AnalyticalSolution(SymbolicTypes.symbolicDist)
+    | `Error(string)
+    | `NoSolution
+  ];
+  let attemptAlgebraicOperation =
+      (
+        d1: symbolicDist,
+        d2: symbolicDist,
+        op: SymbolicTypes.algebraicOperation,
+      )
+      : analyticalSolutionAttempt =>
+    switch (d1, d2) {
+    | (`Float(v1), `Float(v2)) =>
+      switch (SymbolicTypes.Algebraic.applyFn(op, v1, v2)) {
+      | Ok(r) => `AnalyticalSolution(`Float(r))
+      | Error(n) => `Error(n)
+      }
+    | (`Normal(v1), `Normal(v2)) =>
+      Normal.operate(op, v1, v2)
+      |> E.O.dimap(r => `AnalyticalSolution(r), () => `NoSolution)
+    | (`Lognormal(v1), `Lognormal(v2)) =>
+      Lognormal.operate(op, v1, v2)
+      |> E.O.dimap(r => `AnalyticalSolution(r), () => `NoSolution)
+    | _ => `NoSolution
+    };
 };

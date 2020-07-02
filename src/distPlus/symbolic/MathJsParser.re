@@ -89,26 +89,26 @@ module MathAdtToDistDst = {
   let normal: array(arg) => result(TreeNode.treeNode, string) =
     fun
     | [|Value(mean), Value(stdev)|] =>
-      Ok(`DistData(`Symbolic(`Normal({mean, stdev}))))
+      Ok(`Leaf(`SymbolicDist(`Normal({mean, stdev}))))
     | _ => Error("Wrong number of variables in normal distribution");
 
   let lognormal: array(arg) => result(TreeNode.treeNode, string) =
     fun
     | [|Value(mu), Value(sigma)|] =>
-      Ok(`DistData(`Symbolic(`Lognormal({mu, sigma}))))
+      Ok(`Leaf(`SymbolicDist(`Lognormal({mu, sigma}))))
     | [|Object(o)|] => {
         let g = Js.Dict.get(o);
         switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
         | (Some(Value(mean)), Some(Value(stdev)), _, _) =>
           Ok(
-            `DistData(
-              `Symbolic(
+            `Leaf(
+              `SymbolicDist(
                 SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev),
               ),
             ),
           )
         | (_, _, Some(Value(mu)), Some(Value(sigma))) =>
-          Ok(`DistData(`Symbolic(`Lognormal({mu, sigma}))))
+          Ok(`Leaf(`SymbolicDist(`Lognormal({mu, sigma}))))
         | _ => Error("Lognormal distribution would need mean and stdev")
         };
       }
@@ -118,15 +118,15 @@ module MathAdtToDistDst = {
     fun
     | [|Value(low), Value(high)|] when low <= 0.0 && low < high => {
         Ok(
-          `DistData(
-            `Symbolic(SymbolicDist.Normal.from90PercentCI(low, high)),
+          `Leaf(
+            `SymbolicDist(SymbolicDist.Normal.from90PercentCI(low, high)),
           ),
         );
       }
     | [|Value(low), Value(high)|] when low < high => {
         Ok(
-          `DistData(
-            `Symbolic(SymbolicDist.Lognormal.from90PercentCI(low, high)),
+          `Leaf(
+            `SymbolicDist(SymbolicDist.Lognormal.from90PercentCI(low, high)),
           ),
         );
       }
@@ -137,31 +137,31 @@ module MathAdtToDistDst = {
   let uniform: array(arg) => result(TreeNode.treeNode, string) =
     fun
     | [|Value(low), Value(high)|] =>
-      Ok(`DistData(`Symbolic(`Uniform({low, high}))))
+      Ok(`Leaf(`SymbolicDist(`Uniform({low, high}))))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
   let beta: array(arg) => result(TreeNode.treeNode, string) =
     fun
     | [|Value(alpha), Value(beta)|] =>
-      Ok(`DistData(`Symbolic(`Beta({alpha, beta}))))
+      Ok(`Leaf(`SymbolicDist(`Beta({alpha, beta}))))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
   let exponential: array(arg) => result(TreeNode.treeNode, string) =
     fun
     | [|Value(rate)|] =>
-      Ok(`DistData(`Symbolic(`Exponential({rate: rate}))))
+      Ok(`Leaf(`SymbolicDist(`Exponential({rate: rate}))))
     | _ => Error("Wrong number of variables in Exponential distribution");
 
   let cauchy: array(arg) => result(TreeNode.treeNode, string) =
     fun
     | [|Value(local), Value(scale)|] =>
-      Ok(`DistData(`Symbolic(`Cauchy({local, scale}))))
+      Ok(`Leaf(`SymbolicDist(`Cauchy({local, scale}))))
     | _ => Error("Wrong number of variables in cauchy distribution");
 
   let triangular: array(arg) => result(TreeNode.treeNode, string) =
     fun
     | [|Value(low), Value(medium), Value(high)|] =>
-      Ok(`DistData(`Symbolic(`Triangular({low, medium, high}))))
+      Ok(`Leaf(`SymbolicDist(`Triangular({low, medium, high}))))
     | _ => Error("Wrong number of variables in triangle distribution");
 
   let multiModal =
@@ -196,7 +196,7 @@ module MathAdtToDistDst = {
                `VerticalScaling((
                  `Multiply,
                  t,
-                 `DistData(`Symbolic(`Float(w))),
+                 `Leaf(`SymbolicDist(`Float(w))),
                )),
              );
            });
@@ -235,7 +235,7 @@ module MathAdtToDistDst = {
            SymbolicDist.ContinuousShape.make(_pdf, cdf);
          });
     switch (shape) {
-    | Some(s) => Ok(`DistData(`Symbolic(`ContinuousShape(s))))
+    | Some(s) => Ok(`Leaf(`SymbolicDist(`ContinuousShape(s))))
     | None => Error("Rendering did not work")
     };
   };
@@ -254,11 +254,11 @@ module MathAdtToDistDst = {
     | ("divide", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Divide, l, r))
     | ("divide", _) => Error("Division needs two operands")
     | ("pow", _) => Error("Exponentiation is not yet supported.")
-    | ("leftTruncate", [|Ok(d), Ok(`DistData(`Symbolic(`Float(lc))))|]) =>
+    | ("leftTruncate", [|Ok(d), Ok(`Leaf(`SymbolicDist(`Float(lc))))|]) =>
       toOkTrunctate((Some(lc), None, d))
     | ("leftTruncate", _) =>
       Error("leftTruncate needs two arguments: the expression and the cutoff")
-    | ("rightTruncate", [|Ok(d), Ok(`DistData(`Symbolic(`Float(rc))))|]) =>
+    | ("rightTruncate", [|Ok(d), Ok(`Leaf(`SymbolicDist(`Float(rc))))|]) =>
       toOkTrunctate((None, Some(rc), d))
     | ("rightTruncate", _) =>
       Error(
@@ -268,8 +268,8 @@ module MathAdtToDistDst = {
         "truncate",
         [|
           Ok(d),
-          Ok(`DistData(`Symbolic(`Float(lc)))),
-          Ok(`DistData(`Symbolic(`Float(rc)))),
+          Ok(`Leaf(`SymbolicDist(`Float(lc)))),
+          Ok(`Leaf(`SymbolicDist(`Float(rc)))),
         |],
       ) =>
       toOkTrunctate((Some(lc), Some(rc), d))
@@ -333,7 +333,7 @@ module MathAdtToDistDst = {
 
   let rec nodeParser =
     fun
-    | Value(f) => Ok(`DistData(`Symbolic(`Float(f))))
+    | Value(f) => Ok(`Leaf(`SymbolicDist(`Float(f))))
     | Fn({name, args}) => functionParser(nodeParser, name, args)
     | _ => {
         Error("This type not currently supported");

@@ -1,7 +1,57 @@
+type normal = {
+  mean: float,
+  stdev: float,
+};
+
+type lognormal = {
+  mu: float,
+  sigma: float,
+};
+
+type uniform = {
+  low: float,
+  high: float,
+};
+
+type beta = {
+  alpha: float,
+  beta: float,
+};
+
+type exponential = {rate: float};
+
+type cauchy = {
+  local: float,
+  scale: float,
+};
+
+type triangular = {
+  low: float,
+  medium: float,
+  high: float,
+};
+
+type continuousShape = {
+  pdf: DistTypes.continuousShape,
+  cdf: DistTypes.continuousShape,
+};
+
+type symbolicDist = [
+  | `Normal(normal)
+  | `Beta(beta)
+  | `Lognormal(lognormal)
+  | `Uniform(uniform)
+  | `Exponential(exponential)
+  | `Cauchy(cauchy)
+  | `Triangular(triangular)
+  | `ContinuousShape(continuousShape)
+  | `Float(float) // Dirac delta at x. Practically useful only in the context of multimodals.
+];
+
+type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide];
 type pointwiseOperation = [ | `Add | `Multiply];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
 type distToFloatOperation = [ | `Pdf(float) | `Inv(float) | `Mean | `Sample];
-type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide];
 
 module Algebraic = {
   type t = algebraicOperation;

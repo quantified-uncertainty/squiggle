@@ -1,13 +1,12 @@
 /* This module represents a tree node. */
 open SymbolicTypes;
 
-// todo: Symbolic already has an arbitrary continuousShape option. It seems messy to have both.
-type distData = [
-  | `Symbolic(SymbolicDist.dist)
-  | `RenderedShape(DistTypes.shape)
+type leaf = [
+  | `SymbolicDist(SymbolicTypes.symbolicDist)
+  | `RenderedDist(DistTypes.shape)
 ];
 /* TreeNodes are either Data (i.e. symbolic or rendered distributions) or Operations. Operations always refer to two child nodes.*/
-type treeNode = [ | `DistData(distData) | `Operation(operation)]
+type treeNode = [ | `Leaf(leaf) | `Operation(operation)]
 and operation = [
   | `AlgebraicCombination(algebraicOperation, treeNode, treeNode)
   | `PointwiseCombination(pointwiseOperation, treeNode, treeNode)
@@ -48,9 +47,8 @@ module TreeNode = {
 
   let rec toString =
     fun
-    | `DistData(`Symbolic(d)) =>
-      SymbolicDist.GenericDistFunctions.toString(d)
-    | `DistData(`RenderedShape(_)) => "[shape]"
+    | `Leaf(`SymbolicDist(d)) => SymbolicDist.T.toString(d)
+    | `Leaf(`RenderedDist(_)) => "[shape]"
     | `Operation(op) => Operation.toString(toString, op);
 
   /* The following modules encapsulate everything we can do with
@@ -61,73 +59,34 @@ module TreeNode = {
      For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
      In general, this is implemented via convolution. */
   module AlgebraicCombination = {
-    let simplify = (algebraicOp, t1: t, t2: t): result(treeNode, string) => {
-      let tryCombiningFloats: tResult =
-        fun
-        | `Operation(
-            `AlgebraicCombination(
-              algebraicOp,
-              `DistData(`Symbolic(`Float(v1))),
-              `DistData(`Symbolic(`Float(v2))),
-            ),
-          ) =>
-          SymbolicTypes.Algebraic.applyFn(algebraicOp, v1, v2)
-          |> E.R.fmap(r => `DistData(`Symbolic(`Float(r))))
-        | t => Ok(t);
-
-      let optionToSymbolicResult = (t, o) =>
-        o
-        |> E.O.dimap(r => `DistData(`Symbolic(r)), () => t)
-        |> (r => Ok(r));
-
-      let tryCombiningNormals: tResult =
-        fun
-        | `Operation(
-            `AlgebraicCombination(
-              operation,
-              `DistData(`Symbolic(`Normal(n1))),
-              `DistData(`Symbolic(`Normal(n2))),
-            ),
-          ) as t =>
-          SymbolicDist.Normal.operate(operation, n1, n2)
-          |> optionToSymbolicResult(t)
-        | t => Ok(t);
-
-      let tryCombiningLognormals: tResult =
-        fun
-        | `Operation(
-            `AlgebraicCombination(
-              operation,
-              `DistData(`Symbolic(`Lognormal(n1))),
-              `DistData(`Symbolic(`Lognormal(n2))),
-            ),
-          ) as t =>
-          SymbolicDist.Lognormal.operate(operation, n1, n2)
-          |> optionToSymbolicResult(t)
-        | t => Ok(t);
-
-      let originalTreeNode =
-        `Operation(`AlgebraicCombination((algebraicOp, t1, t2)));
-
-      // Feedback: I like this pattern, kudos
-      originalTreeNode
-      |> tryCombiningFloats
-      |> E.R.bind(_, tryCombiningNormals)
-      |> E.R.bind(_, tryCombiningLognormals);
-    };
+    let toTreeNode = (op, t1, t2) =>
+      `Operation(`AlgebraicCombination((op, t1, t2)));
+    let tryAnalyticalSolution =
+      fun
+      | `Operation(
+          `AlgebraicCombination(
+            operation,
+            `Leaf(`SymbolicDist(d1)),
+            `Leaf(`SymbolicDist(d2)),
+          ),
+        ) as t =>
+        switch (SymbolicDist.T.attemptAlgebraicOperation(d1, d2, operation)) {
+        | `AnalyticalSolution(symbolicDist) =>
+          Ok(`Leaf(`SymbolicDist(symbolicDist)))
+        | `Error(er) => Error(er)
+        | `NoSolution => Ok(t)
+        }
+      | t => Ok(t);
 
     // todo: I don't like the name evaluateNumerically that much, if this renders and does it algebraically. It's tricky.
-    let evaluateNumerically = (algebraicOp, operationToDistData, t1, t2) => {
+    let evaluateNumerically = (algebraicOp, operationToLeaf, t1, t2) => {
       // force rendering into shapes
-      let renderShape = r => operationToDistData(`Render(r));
+      let renderShape = r => operationToLeaf(`Render(r));
       switch (renderShape(t1), renderShape(t2)) {
-      | (
-          Ok(`DistData(`RenderedShape(s1))),
-          Ok(`DistData(`RenderedShape(s2))),
-        ) =>
+      | (Ok(`Leaf(`RenderedDist(s1))), Ok(`Leaf(`RenderedDist(s2)))) =>
         Ok(
-          `DistData(
-            `RenderedShape(
+          `Leaf(
+            `RenderedDist(
               Distributions.Shape.combineAlgebraically(algebraicOp, s1, s2),
             ),
           ),
@@ -138,42 +97,40 @@ module TreeNode = {
       };
     };
 
-    let evaluateToDistData =
+    let evaluateToLeaf =
         (
           algebraicOp: SymbolicTypes.algebraicOperation,
-          operationToDistData,
+          operationToLeaf,
           t1: t,
           t2: t,
         )
         : result(treeNode, string) =>
       algebraicOp
-      |> simplify(_, t1, t2)
+      |> toTreeNode(_, t1, t2)
+      |> tryAnalyticalSolution
       |> E.R.bind(
            _,
            fun
-           | `DistData(d) => Ok(`DistData(d)) // the analytical simplifaction worked, nice!
+           | `Leaf(d) => Ok(`Leaf(d)) // the analytical simplifaction worked, nice!
            | `Operation(_) =>
              // if not, run the convolution
-             evaluateNumerically(algebraicOp, operationToDistData, t1, t2),
+             evaluateNumerically(algebraicOp, operationToLeaf, t1, t2),
          );
   };
 
   module VerticalScaling = {
-    let evaluateToDistData = (scaleOp, operationToDistData, t, scaleBy) => {
+    let evaluateToLeaf = (scaleOp, operationToLeaf, t, scaleBy) => {
       // scaleBy has to be a single float, otherwise we'll return an error.
       let fn = SymbolicTypes.Scale.toFn(scaleOp);
       let knownIntegralSumFn =
         SymbolicTypes.Scale.toKnownIntegralSumFn(scaleOp);
-      let renderedShape = operationToDistData(`Render(t));
+      let renderedShape = operationToLeaf(`Render(t));
 
       switch (renderedShape, scaleBy) {
-      | (
-          Ok(`DistData(`RenderedShape(rs))),
-          `DistData(`Symbolic(`Float(sm))),
-        ) =>
+      | (Ok(`Leaf(`RenderedDist(rs))), `Leaf(`SymbolicDist(`Float(sm)))) =>
         Ok(
-          `DistData(
-            `RenderedShape(
+          `Leaf(
+            `RenderedDist(
               Distributions.Shape.T.mapY(
                 ~knownIntegralSumFn=knownIntegralSumFn(sm),
                 fn(sm),
@@ -189,18 +146,15 @@ module TreeNode = {
   };
 
   module PointwiseCombination = {
-    let pointwiseAdd = (operationToDistData, t1, t2) => {
-      let renderedShape1 = operationToDistData(`Render(t1));
-      let renderedShape2 = operationToDistData(`Render(t2));
+    let pointwiseAdd = (operationToLeaf, t1, t2) => {
+      let renderedShape1 = operationToLeaf(`Render(t1));
+      let renderedShape2 = operationToLeaf(`Render(t2));
 
       switch (renderedShape1, renderedShape2) {
-      | (
-          Ok(`DistData(`RenderedShape(rs1))),
-          Ok(`DistData(`RenderedShape(rs2))),
-        ) =>
+      | (Ok(`Leaf(`RenderedDist(rs1))), Ok(`Leaf(`RenderedDist(rs2)))) =>
         Ok(
-          `DistData(
-            `RenderedShape(
+          `Leaf(
+            `RenderedDist(
               Distributions.Shape.combinePointwise(
                 ~knownIntegralSumsFn=(a, b) => Some(a +. b),
                 (+.),
@@ -216,18 +170,18 @@ module TreeNode = {
       };
     };
 
-    let pointwiseMultiply = (operationToDistData, t1, t2) => {
+    let pointwiseMultiply = (operationToLeaf, t1, t2) => {
       // TODO: construct a function that we can easily sample from, to construct
-      // a RenderedShape. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
+      // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
       Error(
         "Pointwise multiplication not yet supported.",
       );
     };
 
-    let evaluateToDistData = (pointwiseOp, operationToDistData, t1, t2) => {
+    let evaluateToLeaf = (pointwiseOp, operationToLeaf, t1, t2) => {
       switch (pointwiseOp) {
-      | `Add => pointwiseAdd(operationToDistData, t1, t2)
-      | `Multiply => pointwiseMultiply(operationToDistData, t1, t2)
+      | `Add => pointwiseAdd(operationToLeaf, t1, t2)
+      | `Multiply => pointwiseMultiply(operationToLeaf, t1, t2)
       };
     };
   };
@@ -236,18 +190,17 @@ module TreeNode = {
     module Simplify = {
       let tryTruncatingNothing: tResult =
         fun
-        | `Operation(`Truncate(None, None, `DistData(d))) =>
-          Ok(`DistData(d))
+        | `Operation(`Truncate(None, None, `Leaf(d))) => Ok(`Leaf(d))
         | t => Ok(t);
 
       let tryTruncatingUniform: tResult =
         fun
-        | `Operation(`Truncate(lc, rc, `DistData(`Symbolic(`Uniform(u))))) => {
+        | `Operation(`Truncate(lc, rc, `Leaf(`SymbolicDist(`Uniform(u))))) => {
             // just create a new Uniform distribution
             let newLow = max(E.O.default(neg_infinity, lc), u.low);
             let newHigh = min(E.O.default(infinity, rc), u.high);
             Ok(
-              `DistData(`Symbolic(`Uniform({low: newLow, high: newHigh}))),
+              `Leaf(`SymbolicDist(`Uniform({low: newLow, high: newHigh}))),
             );
           }
         | t => Ok(t);
@@ -262,27 +215,26 @@ module TreeNode = {
       };
     };
 
-    let evaluateNumerically =
-        (leftCutoff, rightCutoff, operationToDistData, t) => {
+    let evaluateNumerically = (leftCutoff, rightCutoff, operationToLeaf, t) => {
       // TODO: use named args in renderToShape; if we're lucky we can at least get the tail
       // of a distribution we otherwise wouldn't get at all
-      let renderedShape = operationToDistData(`Render(t));
+      let renderedShape = operationToLeaf(`Render(t));
 
       switch (renderedShape) {
-      | Ok(`DistData(`RenderedShape(rs))) =>
+      | Ok(`Leaf(`RenderedDist(rs))) =>
         let truncatedShape =
           rs |> Distributions.Shape.T.truncate(leftCutoff, rightCutoff);
-        Ok(`DistData(`RenderedShape(rs)));
+        Ok(`Leaf(`RenderedDist(rs)));
       | Error(e1) => Error(e1)
       | _ => Error("Could not truncate distribution.")
       };
     };
 
-    let evaluateToDistData =
+    let evaluateToLeaf =
         (
           leftCutoff: option(float),
           rightCutoff: option(float),
-          operationToDistData,
+          operationToLeaf,
           t: treeNode,
         )
         : result(treeNode, string) => {
@@ -291,31 +243,23 @@ module TreeNode = {
       |> E.R.bind(
            _,
            fun
-           | `DistData(d) => Ok(`DistData(d)) // the analytical simplifaction worked, nice!
+           | `Leaf(d) => Ok(`Leaf(d)) // the analytical simplifaction worked, nice!
            | `Operation(_) =>
-             evaluateNumerically(
-               leftCutoff,
-               rightCutoff,
-               operationToDistData,
-               t,
-             ),
+             evaluateNumerically(leftCutoff, rightCutoff, operationToLeaf, t),
          ); // if not, run the convolution
     };
   };
 
   module Normalize = {
-    let rec evaluateToDistData =
-            (operationToDistData, t: treeNode): result(treeNode, string) => {
+    let rec evaluateToLeaf =
+            (operationToLeaf, t: treeNode): result(treeNode, string) => {
       switch (t) {
-      | `DistData(`Symbolic(_)) => Ok(t)
-      | `DistData(`RenderedShape(s)) =>
+      | `Leaf(`SymbolicDist(_)) => Ok(t)
+      | `Leaf(`RenderedDist(s)) =>
         let normalized = Distributions.Shape.T.normalize(s);
-        Ok(`DistData(`RenderedShape(normalized)));
+        Ok(`Leaf(`RenderedDist(normalized)));
       | `Operation(op) =>
-        E.R.bind(
-          operationToDistData(op),
-          evaluateToDistData(operationToDistData),
-        )
+        E.R.bind(operationToLeaf(op), evaluateToLeaf(operationToLeaf))
       };
     };
   };
@@ -324,14 +268,14 @@ module TreeNode = {
     let evaluateFromSymbolic = (distToFloatOp: distToFloatOperation, s) => {
       let value =
         switch (distToFloatOp) {
-        | `Pdf(f) => Ok(SymbolicDist.GenericDistFunctions.pdf(f, s))
-        | `Inv(f) => Ok(SymbolicDist.GenericDistFunctions.inv(f, s))
-        | `Sample => Ok(SymbolicDist.GenericDistFunctions.sample(s))
-        | `Mean => SymbolicDist.GenericDistFunctions.mean(s)
+        | `Pdf(f) => Ok(SymbolicDist.T.pdf(f, s))
+        | `Inv(f) => Ok(SymbolicDist.T.inv(f, s))
+        | `Sample => Ok(SymbolicDist.T.sample(s))
+        | `Mean => SymbolicDist.T.mean(s)
         };
-      E.R.bind(value, v => Ok(`DistData(`Symbolic(`Float(v)))));
+      E.R.bind(value, v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
     };
-    let evaluateFromRenderedShape =
+    let evaluateFromRenderedDist =
         (distToFloatOp: distToFloatOperation, rs: DistTypes.shape)
         : result(treeNode, string) => {
       let value =
@@ -341,45 +285,45 @@ module TreeNode = {
         | `Sample => Ok(Distributions.Shape.sample(rs))
         | `Mean => Ok(Distributions.Shape.T.mean(rs))
         };
-      E.R.bind(value, v => Ok(`DistData(`Symbolic(`Float(v)))));
+      E.R.bind(value, v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
     };
-    let rec evaluateToDistData =
+    let rec evaluateToLeaf =
             (
               distToFloatOp: distToFloatOperation,
-              operationToDistData,
+              operationToLeaf,
               t: treeNode,
             )
             : result(treeNode, string) => {
       switch (t) {
-      | `DistData(`Symbolic(s)) => evaluateFromSymbolic(distToFloatOp, s) // we want to evaluate the distToFloatOp on the symbolic dist
-      | `DistData(`RenderedShape(rs)) =>
-        evaluateFromRenderedShape(distToFloatOp, rs)
+      | `Leaf(`SymbolicDist(s)) => evaluateFromSymbolic(distToFloatOp, s) // we want to evaluate the distToFloatOp on the symbolic dist
+      | `Leaf(`RenderedDist(rs)) =>
+        evaluateFromRenderedDist(distToFloatOp, rs)
       | `Operation(op) =>
         E.R.bind(
-          operationToDistData(op),
-          evaluateToDistData(distToFloatOp, operationToDistData),
+          operationToLeaf(op),
+          evaluateToLeaf(distToFloatOp, operationToLeaf),
         )
       };
     };
   };
 
   module Render = {
-    let rec evaluateToRenderedShape =
+    let rec evaluateToRenderedDist =
             (
-              operationToDistData: operation => result(t, string),
+              operationToLeaf: operation => result(t, string),
               sampleCount: int,
               t: treeNode,
             )
             : result(t, string) => {
       switch (t) {
-      | `DistData(`RenderedShape(s)) => Ok(`DistData(`RenderedShape(s))) // already a rendered shape, we're done here
-      | `DistData(`Symbolic(d)) =>
+      | `Leaf(`RenderedDist(s)) => Ok(`Leaf(`RenderedDist(s))) // already a rendered shape, we're done here
+      | `Leaf(`SymbolicDist(d)) =>
         // todo: move to dist
         switch (d) {
         | `Float(v) =>
           Ok(
-            `DistData(
-              `RenderedShape(
+            `Leaf(
+              `RenderedDist(
                 Discrete(
                   Distributions.Discrete.make(
                     {xs: [|v|], ys: [|1.0|]},
@@ -391,16 +335,15 @@ module TreeNode = {
           )
         | _ =>
           let xs =
-            SymbolicDist.GenericDistFunctions.interpolateXs(
+            SymbolicDist.T.interpolateXs(
               ~xSelection=`ByWeight,
               d,
               sampleCount,
             );
-          let ys =
-            xs |> E.A.fmap(x => SymbolicDist.GenericDistFunctions.pdf(x, d));
+          let ys = xs |> E.A.fmap(x => SymbolicDist.T.pdf(x, d));
           Ok(
-            `DistData(
-              `RenderedShape(
+            `Leaf(
+              `RenderedDist(
                 Continuous(
                   Distributions.Continuous.make(
                     `Linear,
@@ -414,57 +357,57 @@ module TreeNode = {
         }
       | `Operation(op) =>
         E.R.bind(
-          operationToDistData(op),
-          evaluateToRenderedShape(operationToDistData, sampleCount),
+          operationToLeaf(op),
+          evaluateToRenderedDist(operationToLeaf, sampleCount),
         )
       };
     };
   };
 
-  let rec operationToDistData =
+  let rec operationToLeaf =
           (sampleCount: int, op: operation): result(t, string) => {
-    // the functions that convert the Operation nodes to DistData nodes need to
+    // the functions that convert the Operation nodes to Leaf nodes need to
     // have a way to call this function on their children, if their children are themselves Operation nodes.
     switch (op) {
     | `AlgebraicCombination(algebraicOp, t1, t2) =>
-      AlgebraicCombination.evaluateToDistData(
+      AlgebraicCombination.evaluateToLeaf(
         algebraicOp,
-        operationToDistData(sampleCount),
+        operationToLeaf(sampleCount),
         t1,
         t2 // we want to give it the option to render or simply leave it as is
       )
     | `PointwiseCombination(pointwiseOp, t1, t2) =>
-      PointwiseCombination.evaluateToDistData(
+      PointwiseCombination.evaluateToLeaf(
         pointwiseOp,
-        operationToDistData(sampleCount),
+        operationToLeaf(sampleCount),
         t1,
         t2,
       )
     | `VerticalScaling(scaleOp, t, scaleBy) =>
-      VerticalScaling.evaluateToDistData(
+      VerticalScaling.evaluateToLeaf(
         scaleOp,
-        operationToDistData(sampleCount),
+        operationToLeaf(sampleCount),
         t,
         scaleBy,
       )
     | `Truncate(leftCutoff, rightCutoff, t) =>
-      Truncate.evaluateToDistData(
+      Truncate.evaluateToLeaf(
         leftCutoff,
         rightCutoff,
-        operationToDistData(sampleCount),
+        operationToLeaf(sampleCount),
         t,
       )
     | `FloatFromDist(distToFloatOp, t) =>
-      FloatFromDist.evaluateToDistData(
+      FloatFromDist.evaluateToLeaf(
         distToFloatOp,
-        operationToDistData(sampleCount),
+        operationToLeaf(sampleCount),
         t,
       )
     | `Normalize(t) =>
-      Normalize.evaluateToDistData(operationToDistData(sampleCount), t)
+      Normalize.evaluateToLeaf(operationToLeaf(sampleCount), t)
     | `Render(t) =>
-      Render.evaluateToRenderedShape(
-        operationToDistData(sampleCount),
+      Render.evaluateToRenderedDist(
+        operationToLeaf(sampleCount),
         sampleCount,
         t,
       )
@@ -474,23 +417,23 @@ module TreeNode = {
   /* This function recursively goes through the nodes of the parse tree,
      replacing each Operation node and its subtree with a Data node.
      Whenever possible, the replacement produces a new Symbolic Data node,
-     but most often it will produce a RenderedShape.
-     This function is used mainly to turn a parse tree into a single RenderedShape
+     but most often it will produce a RenderedDist.
+     This function is used mainly to turn a parse tree into a single RenderedDist
      that can then be displayed to the user. */
-  let toDistData = (treeNode: t, sampleCount: int): result(t, string) => {
+  let toLeaf = (treeNode: t, sampleCount: int): result(t, string) => {
     switch (treeNode) {
-    | `DistData(d) => Ok(`DistData(d))
-    | `Operation(op) => operationToDistData(sampleCount, op)
+    | `Leaf(d) => Ok(`Leaf(d))
+    | `Operation(op) => operationToLeaf(sampleCount, op)
     };
   };
 };
 
 let toShape = (sampleCount: int, treeNode: treeNode) => {
   let renderResult =
-    TreeNode.toDistData(`Operation(`Render(treeNode)), sampleCount);
+    TreeNode.toLeaf(`Operation(`Render(treeNode)), sampleCount);
 
   switch (renderResult) {
-  | Ok(`DistData(`RenderedShape(rs))) =>
+  | Ok(`Leaf(`RenderedDist(rs))) =>
     let continuous = Distributions.Shape.T.toContinuous(rs);
     let discrete = Distributions.Shape.T.toDiscrete(rs);
     let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);

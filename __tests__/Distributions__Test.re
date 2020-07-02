@@ -382,10 +382,10 @@ describe("Shape", () => {
     let variance = stdev ** 2.0;
     let numSamples = 10000;
     open Distributions.Shape;
-    let normal: SymbolicDist.dist = `Normal({mean, stdev});
-    let normalShape = TreeNode.toShape(numSamples, `DistData(`Symbolic(normal)));
+    let normal: SymbolicTypes.symbolicDist = `Normal({mean, stdev});
+    let normalShape = TreeNode.toShape(numSamples, `Leaf(`SymbolicDist(normal)));
     let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
-    let lognormalShape = TreeNode.toShape(numSamples, `DistData(`Symbolic(lognormal)));
+    let lognormalShape = TreeNode.toShape(numSamples, `Leaf(`SymbolicDist(lognormal)));
 
     makeTestCloseEquality(
       "Mean of a normal",
