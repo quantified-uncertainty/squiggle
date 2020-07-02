@@ -95,8 +95,8 @@ module DistToFloat = {
 
   let format = (operation, value) =>
     switch (operation) {
-    | `Pdf(f) => {j|pdf(x=$f,$value) |j}
-    | `Inv(f) => {j|inv(x=$f,$value) |j}
+    | `Pdf(f) => {j|pdf(x=$f,$value)|j}
+    | `Inv(f) => {j|inv(x=$f,$value)|j}
     | `Sample => "sample($value)"
     | `Mean => "mean($value)"
     };
@@ -109,6 +109,13 @@ module Scale = {
     | `Multiply => ( *. )
     | `Exponentiate => ( ** )
     | `Log => ((a, b) => log(a) /. log(b));
+
+  let format = (operation:t, value, scaleBy) =>
+    switch (operation) {
+    | `Multiply => {j|scaleMultiply($value, $scaleBy) |j}
+    | `Exponentiate => {j|ScaleExponentiate($value, $scaleBy) |j}
+    | `Log => {j|ScaleLog($value, $scaleBy) |j}
+    };
 
   let toKnownIntegralSumFn =
     fun

@@ -279,7 +279,7 @@ module T = {
     | `Error(string)
     | `NoSolution
   ];
-  let attemptAlgebraicOperation =
+  let attemptAnalyticalOperation =
       (
         d1: symbolicDist,
         d2: symbolicDist,

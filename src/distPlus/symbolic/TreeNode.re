@@ -5,6 +5,7 @@ type leaf = [
   | `SymbolicDist(SymbolicTypes.symbolicDist)
   | `RenderedDist(DistTypes.shape)
 ];
+
 /* TreeNodes are either Data (i.e. symbolic or rendered distributions) or Operations. Operations always refer to two child nodes.*/
 type treeNode = [ | `Leaf(leaf) | `Operation(operation)]
 and operation = [
@@ -19,25 +20,29 @@ and operation = [
 
 module Operation = {
   type t = operation;
+  let truncateToString =
+      (left: option(float), right: option(float), nodeToString) => {
+    let left = left |> E.O.dimap(Js.Float.toString, () => "-inf");
+    let right = right |> E.O.dimap(Js.Float.toString, () => "inf");
+    {j|truncate($nodeToString, $left, $right)|j};
+  };
+
   let toString = nodeToString =>
     fun
     | `AlgebraicCombination(op, t1, t2) =>
       SymbolicTypes.Algebraic.format(op, nodeToString(t1), nodeToString(t2))
     | `PointwiseCombination(op, t1, t2) =>
       SymbolicTypes.Pointwise.format(op, nodeToString(t1), nodeToString(t2))
-    | `VerticalScaling(_scaleOp, t, scaleBy) =>
-      nodeToString(t) ++ " @ " ++ nodeToString(scaleBy)
+    | `VerticalScaling(scaleOp, t, scaleBy) =>
+      SymbolicTypes.Scale.format(
+        scaleOp,
+        nodeToString(t),
+        nodeToString(scaleBy),
+      )
     | `Normalize(t) => "normalize(" ++ nodeToString(t) ++ ")"
     | `FloatFromDist(floatFromDistOp, t) =>
       SymbolicTypes.DistToFloat.format(floatFromDistOp, nodeToString(t))
-    | `Truncate(lc, rc, t) =>
-      "truncate("
-      ++ nodeToString(t)
-      ++ ", "
-      ++ E.O.dimap(Js.Float.toString, () => "-inf", lc)
-      ++ ", "
-      ++ E.O.dimap(Js.Float.toString, () => "inf", rc)
-      ++ ")"
+    | `Truncate(lc, rc, t) => truncateToString(lc, rc, nodeToString(t))
     | `Render(t) => nodeToString(t);
 };
 
@@ -70,7 +75,7 @@ module TreeNode = {
             `Leaf(`SymbolicDist(d2)),
           ),
         ) as t =>
-        switch (SymbolicDist.T.attemptAlgebraicOperation(d1, d2, operation)) {
+        switch (SymbolicDist.T.attemptAnalyticalOperation(d1, d2, operation)) {
         | `AnalyticalSolution(symbolicDist) =>
           Ok(`Leaf(`SymbolicDist(symbolicDist)))
         | `Error(er) => Error(er)
