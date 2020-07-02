@@ -84,4 +84,4 @@ let distributions = () =>
     </div>
   </div>;
 
-let entry = EntryTypes.(entry(~title="Pdf", ~render=distributions));
+let entry = EntryTypes.(entry(~title="Mixed Distributions", ~render=distributions));

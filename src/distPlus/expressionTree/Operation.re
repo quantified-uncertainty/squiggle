@@ -85,7 +85,7 @@ module T = {
       Pointwise.format(op, nodeToString(t1), nodeToString(t2))
     | `VerticalScaling(scaleOp, t, scaleBy) =>
       Scale.format(scaleOp, nodeToString(t), nodeToString(scaleBy))
-    | `Normalize(t) => "normalize(" ++ nodeToString(t) ++ ")"
+    | `Normalize(t) => "normalize(k" ++ nodeToString(t) ++ ")"
     | `FloatFromDist(floatFromDistOp, t) =>
       DistToFloat.format(floatFromDistOp, nodeToString(t))
     | `Truncate(lc, rc, t) => truncateToString(lc, rc, nodeToString(t))
