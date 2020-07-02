@@ -21,7 +21,7 @@ let runSymbolic = (guesstimatorString, length) => {
   |> E.R.fmap(g =>
        RenderTypes.ShapeRenderer.Symbolic.make(
          g,
-         TreeNode.toShape(length, g),
+         ExpressionTree.toShape(length, g),
        )
      );
 };

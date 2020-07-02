@@ -282,7 +282,7 @@ module Continuous = {
   let combineAlgebraicallyWithDiscrete =
       (
         ~downsample=false,
-        op: SymbolicTypes.algebraicOperation,
+        op: ExpressionTypes.algebraicOperation,
         t1: t,
         t2: DistTypes.discreteShape,
       ) => {
@@ -291,7 +291,7 @@ module Continuous = {
     let t1n = t1s |> XYShape.T.length;
     let t2n = t2s |> XYShape.T.length;
 
-    let fn = SymbolicTypes.Algebraic.toFn(op);
+    let fn = Operation.Algebraic.toFn(op);
 
     let outXYShapes: array(array((float, float))) =
       Belt.Array.makeUninitializedUnsafe(t2n);
@@ -333,7 +333,7 @@ module Continuous = {
   };
 
   let combineAlgebraically =
-      (~downsample=false, op: SymbolicTypes.algebraicOperation, t1: t, t2: t) => {
+      (~downsample=false, op: ExpressionTypes.algebraicOperation, t1: t, t2: t) => {
     let s1 = t1 |> getShape;
     let s2 = t2 |> getShape;
     let t1n = s1 |> XYShape.T.length;
@@ -413,7 +413,7 @@ module Discrete = {
   /* This multiples all of the data points together and creates a new discrete distribution from the results.
      Data points at the same xs get added together. It may be a good idea to downsample t1 and t2 before and/or the result after. */
   let combineAlgebraically =
-      (op: SymbolicTypes.algebraicOperation, t1: t, t2: t) => {
+      (op: ExpressionTypes.algebraicOperation, t1: t, t2: t) => {
     let t1s = t1 |> getShape;
     let t2s = t2 |> getShape;
     let t1n = t1s |> XYShape.T.length;
@@ -426,7 +426,7 @@ module Discrete = {
         t2.knownIntegralSum,
       );
 
-    let fn = SymbolicTypes.Algebraic.toFn(op);
+    let fn = Operation.Algebraic.toFn(op);
     let xToYMap = E.FloatFloatMap.empty();
 
     for (i in 0 to t1n - 1) {
@@ -840,7 +840,7 @@ module Mixed = {
     });
 
   let combineAlgebraically =
-      (~downsample=false, op: SymbolicTypes.algebraicOperation, t1: t, t2: t)
+      (~downsample=false, op: ExpressionTypes.algebraicOperation, t1: t, t2: t)
       : t => {
     // Discrete convolution can cause a huge increase in the number of samples,
     // so we'll first downsample.
@@ -914,7 +914,7 @@ module Shape = {
     ));
 
   let combineAlgebraically =
-      (op: SymbolicTypes.algebraicOperation, t1: t, t2: t): t => {
+      (op: ExpressionTypes.algebraicOperation, t1: t, t2: t): t => {
     switch (t1, t2) {
     | (Continuous(m1), Continuous(m2)) =>
       DistTypes.Continuous(
@@ -1096,7 +1096,7 @@ module Shape = {
         };
     });
 
-  let operate = (distToFloatOp: SymbolicTypes.distToFloatOperation, s) =>
+  let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s) =>
     switch (distToFloatOp) {
     | `Pdf(f) => pdf(f, s)
     | `Inv(f) => inv(f, s)

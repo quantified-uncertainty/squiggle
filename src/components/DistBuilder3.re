@@ -37,13 +37,13 @@ module DemoDist = {
     let parsed1 = MathJsParser.fromString(guesstimatorString);
     let shape =
       switch (parsed1) {
-      | Ok(r) => Some(TreeNode.toShape(10000, r))
+      | Ok(r) => Some(ExpressionTree.toShape(10000, r))
       | _ => None
       };
 
     let str =
       switch (parsed1) {
-      | Ok(r) => TreeNode.toString(r)
+      | Ok(r) => ExpressionTree.toString(r)
       | Error(e) => e
       };
 

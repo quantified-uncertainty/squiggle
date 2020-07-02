@@ -76,7 +76,7 @@ module Normal = {
     `Normal({mean, stdev});
   };
 
-  let operate = (operation: SymbolicTypes.Algebraic.t, n1: t, n2: t) =>
+  let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
     switch (operation) {
     | `Add => Some(add(n1, n2))
     | `Subtract => Some(subtract(n1, n2))
@@ -130,7 +130,7 @@ module Lognormal = {
     let sigma = l1.sigma +. l2.sigma;
     `Lognormal({mu, sigma});
   };
-  let operate = (operation: SymbolicTypes.Algebraic.t, n1: t, n2: t) =>
+  let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
     switch (operation) {
     | `Multiply => Some(multiply(n1, n2))
     | `Divide => Some(divide(n1, n2))
@@ -246,7 +246,7 @@ module T = {
     | `Uniform(n) => Uniform.mean(n)
     | `Float(n) => Float.mean(n);
 
-  let operate = (distToFloatOp: distToFloatOperation, s) =>
+  let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s) =>
     switch (distToFloatOp) {
     | `Pdf(f) => Ok(pdf(f, s))
     | `Inv(f) => Ok(inv(f, s))
@@ -283,12 +283,12 @@ module T = {
       (
         d1: symbolicDist,
         d2: symbolicDist,
-        op: SymbolicTypes.algebraicOperation,
+        op: ExpressionTypes.algebraicOperation,
       )
       : analyticalSolutionAttempt =>
     switch (d1, d2) {
     | (`Float(v1), `Float(v2)) =>
-      switch (SymbolicTypes.Algebraic.applyFn(op, v1, v2)) {
+      switch (Operation.Algebraic.applyFn(op, v1, v2)) {
       | Ok(r) => `AnalyticalSolution(`Float(r))
       | Error(n) => `Error(n)
       }

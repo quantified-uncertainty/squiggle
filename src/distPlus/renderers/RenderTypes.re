@@ -43,7 +43,7 @@ module ShapeRenderer = {
   module Symbolic = {
     type inputs = {length: int};
     type outputs = {
-      graph: TreeNode.treeNode,
+      graph: ExpressionTypes.ExpressionTree.node,
       shape: DistTypes.shape,
     };
     let make = (graph, shape) => {graph, shape};

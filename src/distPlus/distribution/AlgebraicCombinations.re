@@ -110,7 +110,7 @@ let toDiscretePointMassesFromTriangulars =
 };
 
 let combineShapesContinuousContinuous =
-    (op: SymbolicTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
+    (op: ExpressionTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
     : DistTypes.xyShape => {
   let t1n = s1 |> XYShape.T.length;
   let t2n = s2 |> XYShape.T.length;

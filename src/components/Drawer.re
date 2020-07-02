@@ -389,7 +389,7 @@ module Draw = {
     let numSamples = 3000;
 
     let normal: SymbolicTypes.symbolicDist = `Normal({mean, stdev});
-    let normalShape = TreeNode.toShape(numSamples, `Leaf(`SymbolicDist(normal)));
+    let normalShape = ExpressionTree.toShape(numSamples, `Leaf(`SymbolicDist(normal)));
     let xyShape: Types.xyShape =
       switch (normalShape) {
       | Mixed(_) => {xs: [||], ys: [||]}

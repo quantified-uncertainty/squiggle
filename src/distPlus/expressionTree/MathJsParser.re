@@ -86,13 +86,13 @@ module MathAdtToDistDst = {
         );
   };
 
-  let normal: array(arg) => result(TreeNode.treeNode, string) =
+  let normal: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(mean), Value(stdev)|] =>
       Ok(`Leaf(`SymbolicDist(`Normal({mean, stdev}))))
     | _ => Error("Wrong number of variables in normal distribution");
 
-  let lognormal: array(arg) => result(TreeNode.treeNode, string) =
+  let lognormal: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(mu), Value(sigma)|] =>
       Ok(`Leaf(`SymbolicDist(`Lognormal({mu, sigma}))))
@@ -114,7 +114,7 @@ module MathAdtToDistDst = {
       }
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let to_: array(arg) => result(TreeNode.treeNode, string) =
+  let to_: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(low), Value(high)|] when low <= 0.0 && low < high => {
         Ok(
@@ -134,31 +134,31 @@ module MathAdtToDistDst = {
       Error("Low value must be less than high value.")
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let uniform: array(arg) => result(TreeNode.treeNode, string) =
+  let uniform: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(low), Value(high)|] =>
       Ok(`Leaf(`SymbolicDist(`Uniform({low, high}))))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let beta: array(arg) => result(TreeNode.treeNode, string) =
+  let beta: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(alpha), Value(beta)|] =>
       Ok(`Leaf(`SymbolicDist(`Beta({alpha, beta}))))
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let exponential: array(arg) => result(TreeNode.treeNode, string) =
+  let exponential: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(rate)|] =>
       Ok(`Leaf(`SymbolicDist(`Exponential({rate: rate}))))
     | _ => Error("Wrong number of variables in Exponential distribution");
 
-  let cauchy: array(arg) => result(TreeNode.treeNode, string) =
+  let cauchy: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(local), Value(scale)|] =>
       Ok(`Leaf(`SymbolicDist(`Cauchy({local, scale}))))
     | _ => Error("Wrong number of variables in cauchy distribution");
 
-  let triangular: array(arg) => result(TreeNode.treeNode, string) =
+  let triangular: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(low), Value(medium), Value(high)|] =>
       Ok(`Leaf(`SymbolicDist(`Triangular({low, medium, high}))))
@@ -166,7 +166,7 @@ module MathAdtToDistDst = {
 
   let multiModal =
       (
-        args: array(result(TreeNode.treeNode, string)),
+        args: array(result(ExpressionTypes.ExpressionTree.node, string)),
         weights: option(array(float)),
       ) => {
     let weights = weights |> E.O.default([||]);
@@ -215,7 +215,7 @@ module MathAdtToDistDst = {
     };
   };
 
-  let arrayParser = (args: array(arg)): result(TreeNode.treeNode, string) => {
+  let arrayParser = (args: array(arg)): result(ExpressionTypes.ExpressionTree.node, string) => {
     let samples =
       args
       |> E.A.fmap(
@@ -241,7 +241,7 @@ module MathAdtToDistDst = {
   };
 
   let operationParser =
-      (name: string, args: array(result(TreeNode.treeNode, string))) => {
+      (name: string, args: array(result(ExpressionTypes.ExpressionTree.node, string))) => {
     let toOkAlgebraic = r => Ok(`Operation(`AlgebraicCombination(r)));
     let toOkTrunctate = r => Ok(`Operation(`Truncate(r)));
     switch (name, args) {
@@ -347,7 +347,7 @@ module MathAdtToDistDst = {
     | Symbol(_) => Error("Symbol not valid as top level")
     | Object(_) => Error("Object not valid as top level");
 
-  let run = (r): result(TreeNode.treeNode, string) =>
+  let run = (r): result(ExpressionTypes.ExpressionTree.node, string) =>
     r |> MathAdtCleaner.run |> topLevel;
 };
 
