@@ -3,22 +3,18 @@ type pointwiseOperation = [ | `Add | `Multiply];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
 type distToFloatOperation = [ | `Pdf(float) | `Inv(float) | `Mean | `Sample];
 
-type abstractOperation('a) = [
-  | `AlgebraicCombination(algebraicOperation, 'a, 'a)
-  | `PointwiseCombination(pointwiseOperation, 'a, 'a)
-  | `VerticalScaling(scaleOperation, 'a, 'a)
-  | `Render('a)
-  | `Truncate(option(float), option(float), 'a)
-  | `Normalize('a)
-  | `FloatFromDist(distToFloatOperation, 'a)
-];
-
 module ExpressionTree = {
-  type leaf = [
+  type node = [
+    // leaf nodes:
     | `SymbolicDist(SymbolicTypes.symbolicDist)
     | `RenderedDist(DistTypes.shape)
+    // operations:
+    | `AlgebraicCombination(algebraicOperation, node, node)
+    | `PointwiseCombination(pointwiseOperation, node, node)
+    | `VerticalScaling(scaleOperation, node, node)
+    | `Render(node)
+    | `Truncate(option(float), option(float), node)
+    | `Normalize(node)
+    | `FloatFromDist(distToFloatOperation, node)
   ];
-
-  type node = [ | `Leaf(leaf) | `Operation(operation)]
-  and operation = abstractOperation(node);
 };

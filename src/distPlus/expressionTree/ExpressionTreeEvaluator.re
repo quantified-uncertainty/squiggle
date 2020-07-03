@@ -1,91 +1,83 @@
-/* This module represents a tree node. */
 open ExpressionTypes;
 open ExpressionTypes.ExpressionTree;
 
 type t = node;
 type tResult = node => result(node, string);
 
+type renderParams = {
+  sampleCount: int,
+};
+
 /* Given two random variables A and B, this returns the distribution
    of a new variable that is the result of the operation on A and B.
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
    In general, this is implemented via convolution. */
 module AlgebraicCombination = {
-  let toTreeNode = (op, t1, t2) =>
-    `Operation(`AlgebraicCombination((op, t1, t2)));
-  let tryAnalyticalSolution =
-    fun
-    | `Operation(
-        `AlgebraicCombination(
-          operation,
-          `Leaf(`SymbolicDist(d1)),
-          `Leaf(`SymbolicDist(d2)),
-        ),
-      ) as t =>
-      switch (SymbolicDist.T.attemptAnalyticalOperation(d1, d2, operation)) {
-      | `AnalyticalSolution(symbolicDist) =>
-        Ok(`Leaf(`SymbolicDist(symbolicDist)))
+  let tryAnalyticalSimplification = (operation, t1: t, t2: t) =>
+    switch (operation, t1, t2) {
+    | (operation,
+          `SymbolicDist(d1),
+          `SymbolicDist(d2),
+        ) =>
+      switch (SymbolicDist.T.tryAnalyticalSimplification(d1, d2, operation)) {
+      | `AnalyticalSolution(symbolicDist) => Ok(`SymbolicDist(symbolicDist))
       | `Error(er) => Error(er)
-      | `NoSolution => Ok(t)
+      | `NoSolution => Ok(`AlgebraicCombination(operation, t1, t2))
       }
-    | t => Ok(t);
+    | _ => Ok(`AlgebraicCombination(operation, t1, t2))
+  };
 
-  // todo: I don't like the name evaluateNumerically that much, if this renders and does it algebraically. It's tricky.
-  let evaluateNumerically = (algebraicOp, operationToLeaf, t1, t2) => {
-    // force rendering into shapes
-    let renderShape = r => operationToLeaf(`Render(r));
+  let combineAsShapes = (toLeaf, renderParams, algebraicOp, t1, t2) => {
+    let renderShape = r => toLeaf(renderParams, `Render(r));
     switch (renderShape(t1), renderShape(t2)) {
-    | (Ok(`Leaf(`RenderedDist(s1))), Ok(`Leaf(`RenderedDist(s2)))) =>
+    | (Ok(`RenderedDist(s1)), Ok(`RenderedDist(s2))) =>
       Ok(
-        `Leaf(
           `RenderedDist(
             Distributions.Shape.combineAlgebraically(algebraicOp, s1, s2),
           ),
-        ),
       )
     | (Error(e1), _) => Error(e1)
     | (_, Error(e2)) => Error(e2)
-    | _ => Error("Could not render shapes.")
+    | _ => Error("Algebraic combination: rendering failed.")
     };
   };
 
-  let toLeaf =
+  let operationToLeaf =
       (
-        operationToLeaf,
+        toLeaf,
+        renderParams: renderParams,
         algebraicOp: ExpressionTypes.algebraicOperation,
         t1: t,
         t2: t,
       )
       : result(node, string) =>
-    toTreeNode(algebraicOp, t1, t2)
-    |> tryAnalyticalSolution
+
+    algebraicOp
+    |> tryAnalyticalSimplification(_, t1, t2)
     |> E.R.bind(
          _,
          fun
-         | `Leaf(d) => Ok(`Leaf(d)) // the analytical simplifaction worked, nice!
-         | `Operation(_) =>
-           // if not, run the convolution
-           evaluateNumerically(algebraicOp, operationToLeaf, t1, t2),
+        | `SymbolicDist(d) as t => Ok(t)
+        | _ => combineAsShapes(toLeaf, renderParams, algebraicOp, t1, t2)
        );
 };
 
 module VerticalScaling = {
-  let toLeaf = (operationToLeaf, scaleOp, t, scaleBy) => {
+  let operationToLeaf = (toLeaf, renderParams, scaleOp, t, scaleBy) => {
     // scaleBy has to be a single float, otherwise we'll return an error.
     let fn = Operation.Scale.toFn(scaleOp);
     let knownIntegralSumFn = Operation.Scale.toKnownIntegralSumFn(scaleOp);
-    let renderedShape = operationToLeaf(`Render(t));
+    let renderedShape = toLeaf(renderParams, `Render(t));
 
     switch (renderedShape, scaleBy) {
-    | (Ok(`Leaf(`RenderedDist(rs))), `Leaf(`SymbolicDist(`Float(sm)))) =>
+    | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(sm))) =>
       Ok(
-        `Leaf(
           `RenderedDist(
             Distributions.Shape.T.mapY(
               ~knownIntegralSumFn=knownIntegralSumFn(sm),
               fn(sm),
               rs,
             ),
-          ),
         ),
       )
     | (Error(e1), _) => Error(e1)
@@ -95,31 +87,27 @@ module VerticalScaling = {
 };
 
 module PointwiseCombination = {
-  let pointwiseAdd = (operationToLeaf, t1, t2) => {
-    let renderedShape1 = operationToLeaf(`Render(t1));
-    let renderedShape2 = operationToLeaf(`Render(t2));
-
-    switch (renderedShape1, renderedShape2) {
-    | (Ok(`Leaf(`RenderedDist(rs1))), Ok(`Leaf(`RenderedDist(rs2)))) =>
+  let pointwiseAdd = (toLeaf, renderParams, t1, t2) => {
+    let renderShape = r => toLeaf(renderParams, `Render(r));
+    switch (renderShape(t1), renderShape(t2)) {
+    | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
       Ok(
-        `Leaf(
-          `RenderedDist(
-            Distributions.Shape.combinePointwise(
-              ~knownIntegralSumsFn=(a, b) => Some(a +. b),
-              (+.),
-              rs1,
-              rs2,
-            ),
+        `RenderedDist(
+          Distributions.Shape.combinePointwise(
+            ~knownIntegralSumsFn=(a, b) => Some(a +. b),
+            (+.),
+            rs1,
+            rs2,
           ),
         ),
       )
     | (Error(e1), _) => Error(e1)
     | (_, Error(e2)) => Error(e2)
-    | _ => Error("Could not perform pointwise addition.")
+    | _ => Error("Pointwise combination: rendering failed.")
     };
   };
 
-  let pointwiseMultiply = (operationToLeaf, t1, t2) => {
+  let pointwiseMultiply = (toLeaf, renderParams, t1, t2) => {
     // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
     Error(
@@ -127,84 +115,72 @@ module PointwiseCombination = {
     );
   };
 
-  let toLeaf = (operationToLeaf, pointwiseOp, t1, t2) => {
+  let operationToLeaf = (toLeaf, renderParams, pointwiseOp, t1, t2) => {
     switch (pointwiseOp) {
-    | `Add => pointwiseAdd(operationToLeaf, t1, t2)
-    | `Multiply => pointwiseMultiply(operationToLeaf, t1, t2)
+    | `Add => pointwiseAdd(toLeaf, renderParams, t1, t2)
+    | `Multiply => pointwiseMultiply(toLeaf, renderParams, t1, t2)
     };
   };
 };
 
 module Truncate = {
-  module Simplify = {
-    let tryTruncatingNothing: tResult =
-      fun
-      | `Operation(`Truncate(None, None, `Leaf(d))) => Ok(`Leaf(d))
-      | t => Ok(t);
-
-    let tryTruncatingUniform: tResult =
-      fun
-      | `Operation(`Truncate(lc, rc, `Leaf(`SymbolicDist(`Uniform(u))))) => {
-          // just create a new Uniform distribution
-          let newLow = max(E.O.default(neg_infinity, lc), u.low);
-          let newHigh = min(E.O.default(infinity, rc), u.high);
-          Ok(`Leaf(`SymbolicDist(`Uniform({low: newLow, high: newHigh}))));
-        }
-      | t => Ok(t);
-
-    let attempt = (leftCutoff, rightCutoff, t): result(node, string) => {
-      let originalTreeNode =
-        `Operation(`Truncate((leftCutoff, rightCutoff, t)));
-
-      originalTreeNode
-      |> tryTruncatingNothing
-      |> E.R.bind(_, tryTruncatingUniform);
+  let trySimplification = (leftCutoff, rightCutoff, t) => {
+    switch (leftCutoff, rightCutoff, t) {
+    | (None, None, t) => Ok(t)
+    | (lc, rc, `SymbolicDist(`Uniform(u))) => {
+        // just create a new Uniform distribution
+        let nu: SymbolicTypes.uniform = u;
+        let newLow = max(E.O.default(neg_infinity, lc), nu.low);
+        let newHigh = min(E.O.default(infinity, rc), nu.high);
+        Ok(`SymbolicDist(`Uniform({low: newLow, high: newHigh})));
+      }
+    | (_, _, t) => Ok(t)
     };
   };
 
-  let evaluateNumerically = (leftCutoff, rightCutoff, operationToLeaf, t) => {
+  let truncateAsShape = (toLeaf, renderParams, leftCutoff, rightCutoff, t) => {
     // TODO: use named args in renderToShape; if we're lucky we can at least get the tail
     // of a distribution we otherwise wouldn't get at all
-    let renderedShape = operationToLeaf(`Render(t));
+    let renderedShape = toLeaf(renderParams, `Render(t));
 
     switch (renderedShape) {
-    | Ok(`Leaf(`RenderedDist(rs))) =>
+    | Ok(`RenderedDist(rs)) => {
       let truncatedShape =
         rs |> Distributions.Shape.T.truncate(leftCutoff, rightCutoff);
-      Ok(`Leaf(`RenderedDist(rs)));
+      Ok(`RenderedDist(rs));
+    }
     | Error(e1) => Error(e1)
     | _ => Error("Could not truncate distribution.")
     };
   };
 
-  let toLeaf =
-      (
-        operationToLeaf,
-        leftCutoff: option(float),
-        rightCutoff: option(float),
-        t: node,
-      )
-      : result(node, string) => {
+  let operationToLeaf =
+  (
+    toLeaf,
+      renderParams,
+    leftCutoff: option(float),
+    rightCutoff: option(float),
+    t: node,
+  )
+  : result(node, string) => {
     t
-    |> Simplify.attempt(leftCutoff, rightCutoff)
+    |> trySimplification(leftCutoff, rightCutoff)
     |> E.R.bind(
          _,
          fun
-         | `Leaf(d) => Ok(`Leaf(d)) // the analytical simplifaction worked, nice!
-         | `Operation(_) =>
-           evaluateNumerically(leftCutoff, rightCutoff, operationToLeaf, t),
-       ); // if not, run the convolution
+         | `SymbolicDist(d) as t => Ok(t)
+         | _ => truncateAsShape(toLeaf, renderParams, leftCutoff, rightCutoff, t),
+       );
   };
 };
 
 module Normalize = {
-  let rec toLeaf = (operationToLeaf, t: node): result(node, string) => {
+  let rec operationToLeaf = (toLeaf, renderParams, t: node): result(node, string) => {
     switch (t) {
-    | `Leaf(`RenderedDist(s)) =>
-      Ok(`Leaf(`RenderedDist(Distributions.Shape.T.normalize(s))))
-    | `Leaf(`SymbolicDist(_)) => Ok(t)
-    | `Operation(op) =>
-      operationToLeaf(op) |> E.R.bind(_, toLeaf(operationToLeaf))
+    | `RenderedDist(s) =>
+      Ok(`RenderedDist(Distributions.Shape.T.normalize(s)))
+    | `SymbolicDist(_) => Ok(t)
+    | _ => t |> toLeaf(renderParams) |> E.R.bind(_, operationToLeaf(toLeaf, renderParams))
     };
   };
 };
@@ -212,71 +188,39 @@ module Normalize = {
 module FloatFromDist = {
   let symbolicToLeaf = (distToFloatOp: distToFloatOperation, s) => {
     SymbolicDist.T.operate(distToFloatOp, s)
-    |> E.R.bind(_, v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
+    |> E.R.bind(_, v => Ok(`SymbolicDist(`Float(v))));
   };
   let renderedToLeaf =
       (distToFloatOp: distToFloatOperation, rs: DistTypes.shape)
       : result(node, string) => {
     Distributions.Shape.operate(distToFloatOp, rs)
-    |> (v => Ok(`Leaf(`SymbolicDist(`Float(v)))));
+    |> (v => Ok(`SymbolicDist(`Float(v))));
   };
-  let rec toLeaf =
-          (operationToLeaf, distToFloatOp: distToFloatOperation, t: node)
+  let rec operationToLeaf =
+          (toLeaf, renderParams, distToFloatOp: distToFloatOperation, t: node)
           : result(node, string) => {
     switch (t) {
-    | `Leaf(`SymbolicDist(s)) => symbolicToLeaf(distToFloatOp, s) // we want to evaluate the distToFloatOp on the symbolic dist
-    | `Leaf(`RenderedDist(rs)) => renderedToLeaf(distToFloatOp, rs)
-    | `Operation(op) =>
-      E.R.bind(operationToLeaf(op), toLeaf(operationToLeaf, distToFloatOp))
+    | `SymbolicDist(s) => symbolicToLeaf(distToFloatOp, s)
+    | `RenderedDist(rs) => renderedToLeaf(distToFloatOp, rs)
+    | _ => t |> toLeaf(renderParams) |> E.R.bind(_, operationToLeaf(toLeaf, renderParams, distToFloatOp))
     };
   };
 };
 
 module Render = {
-  let rec toLeaf =
+  let rec operationToLeaf =
           (
-            operationToLeaf: operation => result(t, string),
-            sampleCount: int,
+            toLeaf,
+            renderParams,
             t: node,
           )
           : result(t, string) => {
     switch (t) {
-    | `Leaf(`SymbolicDist(d)) =>
-      Ok(`Leaf(`RenderedDist(SymbolicDist.T.toShape(sampleCount, d))))
-    | `Leaf(`RenderedDist(_)) as t => Ok(t) // already a rendered shape, we're done here
-    | `Operation(op) =>
-      E.R.bind(operationToLeaf(op), toLeaf(operationToLeaf, sampleCount))
+    | `SymbolicDist(d) =>
+      Ok(`RenderedDist(SymbolicDist.T.toShape(renderParams.sampleCount, d)))
+    | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here
+    | _ => t |> toLeaf(renderParams) |> E.R.bind(_, operationToLeaf(toLeaf, renderParams))
     };
-  };
-};
-
-let rec operationToLeaf =
-        (sampleCount: int, op: operation): result(t, string) => {
-  // the functions that convert the Operation nodes to Leaf nodes need to
-  // have a way to call this function on their children, if their children are themselves Operation nodes.
-  switch (op) {
-  | `AlgebraicCombination(algebraicOp, t1, t2) =>
-    AlgebraicCombination.toLeaf(
-      operationToLeaf(sampleCount),
-      algebraicOp,
-      t1,
-      t2 // we want to give it the option to render or simply leave it as is
-    )
-  | `PointwiseCombination(pointwiseOp, t1, t2) =>
-    PointwiseCombination.toLeaf(
-      operationToLeaf(sampleCount),
-      pointwiseOp,
-      t1,
-      t2,
-    )
-  | `VerticalScaling(scaleOp, t, scaleBy) =>
-    VerticalScaling.toLeaf(operationToLeaf(sampleCount), scaleOp, t, scaleBy)
-  | `Truncate(leftCutoff, rightCutoff, t) =>
-    Truncate.toLeaf(operationToLeaf(sampleCount), leftCutoff, rightCutoff, t)
-  | `FloatFromDist(distToFloatOp, t) =>
-    FloatFromDist.toLeaf(operationToLeaf(sampleCount), distToFloatOp, t)
-  | `Normalize(t) => Normalize.toLeaf(operationToLeaf(sampleCount), t)
-  | `Render(t) => Render.toLeaf(operationToLeaf(sampleCount), sampleCount, t)
   };
 };
 
@@ -286,9 +230,37 @@ let rec operationToLeaf =
    but most often it will produce a RenderedDist.
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
-let toLeaf = (node: t, sampleCount: int): result(t, string) => {
+let rec toLeaf = (renderParams, node: t): result(t, string) => {
   switch (node) {
-  | `Leaf(d) => Ok(`Leaf(d))
-  | `Operation(op) => operationToLeaf(sampleCount, op)
+  // Leaf nodes just stay leaf nodes
+  | `SymbolicDist(_)
+  | `RenderedDist(_) => Ok(node)
+  // Operations need to be turned into leaves
+  | `AlgebraicCombination(algebraicOp, t1, t2) =>
+    AlgebraicCombination.operationToLeaf(
+      toLeaf,
+      renderParams,
+      algebraicOp,
+      t1,
+      t2
+    )
+  | `PointwiseCombination(pointwiseOp, t1, t2) =>
+    PointwiseCombination.operationToLeaf(
+      toLeaf,
+      renderParams,
+      pointwiseOp,
+      t1,
+      t2,
+    )
+  | `VerticalScaling(scaleOp, t, scaleBy) =>
+    VerticalScaling.operationToLeaf(
+    toLeaf, renderParams, scaleOp, t, scaleBy
+  )
+  | `Truncate(leftCutoff, rightCutoff, t) =>
+    Truncate.operationToLeaf(toLeaf, renderParams, leftCutoff, rightCutoff, t)
+  | `FloatFromDist(distToFloatOp, t) =>
+    FloatFromDist.operationToLeaf(toLeaf, renderParams, distToFloatOp, t)
+  | `Normalize(t) => Normalize.operationToLeaf(toLeaf, renderParams, t)
+  | `Render(t) => Render.operationToLeaf(toLeaf, renderParams, t)
   };
 };

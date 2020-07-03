@@ -89,5 +89,6 @@ module T = {
     | `FloatFromDist(floatFromDistOp, t) =>
       DistToFloat.format(floatFromDistOp, nodeToString(t))
     | `Truncate(lc, rc, t) => truncateToString(lc, rc, nodeToString(t))
-    | `Render(t) => nodeToString(t);
+    | `Render(t) => nodeToString(t)
+    | _ => ""; // SymbolicDist and RenderedDist are handled in ExpressionTree.toString.
 };

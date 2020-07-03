@@ -269,23 +269,23 @@ module T = {
     };
   };
 
-  /* This returns an optional that wraps a result. If the optional is None,
-     there is no valid analytic solution. If it Some, it
+  /* Calling e.g. "Normal.operate" returns an optional that wraps a result.
+     If the optional is None, there is no valid analytic solution. If it Some, it
      can still return an error if there is a serious problem,
-     like in the casea of a divide by 0.
+     like in the case of a divide by 0.
      */
-  type analyticalSolutionAttempt = [
+  type analyticalSimplificationResult = [
     | `AnalyticalSolution(SymbolicTypes.symbolicDist)
     | `Error(string)
     | `NoSolution
   ];
-  let attemptAnalyticalOperation =
+  let tryAnalyticalSimplification =
       (
         d1: symbolicDist,
         d2: symbolicDist,
         op: ExpressionTypes.algebraicOperation,
       )
-      : analyticalSolutionAttempt =>
+      : analyticalSimplificationResult =>
     switch (d1, d2) {
     | (`Float(v1), `Float(v2)) =>
       switch (Operation.Algebraic.applyFn(op, v1, v2)) {
