@@ -342,7 +342,7 @@ module Continuous = {
       empty;
     } else {
       let combinedShape =
-        ShapeConvolution.combineShapesContinuousContinuous(op, s1, s2);
+        AlgebraicShapeCombination.combineShapesContinuousContinuous(op, s1, s2);
       let combinedIntegralSum =
         Common.combineIntegralSums(
           (a, b) => Some(a *. b),
