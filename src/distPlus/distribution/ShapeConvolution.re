@@ -80,15 +80,20 @@ let toDiscretePointMassesFromTriangulars =
     {n: n - 2, masses, means, variances};
   } else {
     for (i in 1 to n - 2) {
+
+      // area of triangle = width * height / 2
       let _ =
         Belt.Array.set(
           masses,
           i - 1,
           (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.,
         );
+
+      // means of triangle = (a + b + c) / 3
       let _ =
         Belt.Array.set(means, i - 1, (xs[i - 1] +. xs[i] +. xs[i + 1]) /. 3.);
 
+      // variance of triangle = (a^2 + b^2 + c^2 - ab - ac - bc) / 18
       let _ =
         Belt.Array.set(
           variances,
@@ -118,7 +123,10 @@ let combineShapesContinuousContinuous =
   // if we add the two distributions, we should probably use normal filters.
   // if we multiply the two distributions, we should probably use lognormal filters.
   let t1m = toDiscretePointMassesFromTriangulars(s1);
-  let t2m = toDiscretePointMassesFromTriangulars(s2);
+  let t2m = switch (op) {
+    | `Divide => toDiscretePointMassesFromTriangulars(~inverse=true, s2)
+    | _ => toDiscretePointMassesFromTriangulars(~inverse=false, s2)
+  };
 
   let combineMeansFn =
     switch (op) {
@@ -134,7 +142,7 @@ let combineShapesContinuousContinuous =
     | `Add => ((v1, v2, m1, m2) => v1 +. v2)
     | `Subtract => ((v1, v2, m1, m2) => v1 +. v2)
     | `Multiply => (
-        (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m1 ** 2. +. v2 *. m1 ** 2.
+        (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
       )
     | `Divide => (
         (v1, vInv2, m1, mInv2) =>
@@ -142,6 +150,7 @@ let combineShapesContinuousContinuous =
       )
     };
 
+  // TODO: If operating on two positive-domain distributions, we should take that into account
   let outputMinX: ref(float) = ref(infinity);
   let outputMaxX: ref(float) = ref(neg_infinity);
   let masses: array(float) =
@@ -180,16 +189,18 @@ let combineShapesContinuousContinuous =
 
   // we now want to create a set of target points. For now, let's just evenly distribute 200 points between
   // between the outputMinX and outputMaxX
-  let outputXs: array(float) =
-    E.A.Floats.range(outputMinX^, outputMaxX^, 200);
-  let outputYs: array(float) = Belt.Array.make(200, 0.0);
+  let nOut = 300;
+  let outputXs: array(float) = E.A.Floats.range(outputMinX^, outputMaxX^, nOut);
+  let outputYs: array(float) = Belt.Array.make(nOut, 0.0);
   // now, for each of the outputYs, accumulate from a Gaussian kernel over each input point.
-  for (i in 0 to E.A.length(outputXs) - 1) {
-    for (j in 0 to E.A.length(masses) - 1) {
-      let dx = outputXs[i] -. means[j];
-      let contribution =
-        masses[j] *. exp(-. (dx ** 2.) /. (2. *. variances[j]));
-      let _ = Belt.Array.set(outputYs, i, outputYs[i] +. contribution);
+  for (j in 0 to E.A.length(masses) - 1) {
+    let _ = if (variances[j] > 0.) {
+      for (i in 0 to E.A.length(outputXs) - 1) {
+        let dx = outputXs[i] -. means[j];
+        let contribution = masses[j] *. exp(-. (dx ** 2.) /. (2. *. variances[j]));
+        let _ = Belt.Array.set(outputYs, i, outputYs[i] +. contribution);
+        ();
+      };
       ();
     };
     ();
