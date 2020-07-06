@@ -1,70 +1,18 @@
-type normal = {
-  mean: float,
-  stdev: float,
-};
-
-type lognormal = {
-  mu: float,
-  sigma: float,
-};
-
-type uniform = {
-  low: float,
-  high: float,
-};
-
-type beta = {
-  alpha: float,
-  beta: float,
-};
-
-type exponential = {rate: float};
-
-type cauchy = {
-  local: float,
-  scale: float,
-};
-
-type triangular = {
-  low: float,
-  medium: float,
-  high: float,
-};
-
-type continuousShape = {
-  pdf: DistTypes.continuousShape,
-  cdf: DistTypes.continuousShape,
-};
-
-type contType = [ | `Continuous | `Discrete];
-
-type dist = [
-  | `Normal(normal)
-  | `Beta(beta)
-  | `Lognormal(lognormal)
-  | `Uniform(uniform)
-  | `Exponential(exponential)
-  | `Cauchy(cauchy)
-  | `Triangular(triangular)
-  | `ContinuousShape(continuousShape)
-  | `Float(float)
-];
-
-type pointwiseAdd = array((dist, float));
-
-type bigDist = [ | `Simple(dist) | `PointwiseCombination(pointwiseAdd)];
+open SymbolicTypes;
 
 module ContinuousShape = {
   type t = continuousShape;
   let make = (pdf, cdf): t => {pdf, cdf};
   let pdf = (x, t: t) =>
     Distributions.Continuous.T.xToY(x, t.pdf).continuous;
+  // TODO: pdf and inv are currently the same, this seems broken.
   let inv = (p, t: t) =>
     Distributions.Continuous.T.xToY(p, t.pdf).continuous;
   // TODO: Fix the sampling, to have it work correctly.
   let sample = (t: t) => 3.0;
+  // TODO: Fix the mean, to have it work correctly.
+  let mean = (t: t) => Ok(0.0);
   let toString = t => {j|CustomContinuousShape|j};
-  let contType: contType = `Continuous;
 };
 
 module Exponential = {
@@ -72,8 +20,8 @@ module Exponential = {
   let pdf = (x, t: t) => Jstat.exponential##pdf(x, t.rate);
   let inv = (p, t: t) => Jstat.exponential##inv(p, t.rate);
   let sample = (t: t) => Jstat.exponential##sample(t.rate);
+  let mean = (t: t) => Ok(Jstat.exponential##mean(t.rate));
   let toString = ({rate}: t) => {j|Exponential($rate)|j};
-  let contType: contType = `Continuous;
 };
 
 module Cauchy = {
@@ -81,8 +29,8 @@ module Cauchy = {
   let pdf = (x, t: t) => Jstat.cauchy##pdf(x, t.local, t.scale);
   let inv = (p, t: t) => Jstat.cauchy##inv(p, t.local, t.scale);
   let sample = (t: t) => Jstat.cauchy##sample(t.local, t.scale);
+  let mean = (_: t) => Error("Cauchy distributions have no mean value.");
   let toString = ({local, scale}: t) => {j|Cauchy($local, $scale)|j};
-  let contType: contType = `Continuous;
 };
 
 module Triangular = {
@@ -90,8 +38,8 @@ module Triangular = {
   let pdf = (x, t: t) => Jstat.triangular##pdf(x, t.low, t.high, t.medium);
   let inv = (p, t: t) => Jstat.triangular##inv(p, t.low, t.high, t.medium);
   let sample = (t: t) => Jstat.triangular##sample(t.low, t.high, t.medium);
+  let mean = (t: t) => Ok(Jstat.triangular##mean(t.low, t.high, t.medium));
   let toString = ({low, medium, high}: t) => {j|Triangular($low, $medium, $high)|j};
-  let contType: contType = `Continuous;
 };
 
 module Normal = {
@@ -105,8 +53,35 @@ module Normal = {
   };
   let inv = (p, t: t) => Jstat.normal##inv(p, t.mean, t.stdev);
   let sample = (t: t) => Jstat.normal##sample(t.mean, t.stdev);
+  let mean = (t: t) => Ok(Jstat.normal##mean(t.mean, t.stdev));
   let toString = ({mean, stdev}: t) => {j|Normal($mean,$stdev)|j};
-  let contType: contType = `Continuous;
+
+  let add = (n1: t, n2: t) => {
+    let mean = n1.mean +. n2.mean;
+    let stdev = sqrt(n1.stdev ** 2. +. n2.stdev ** 2.);
+    `Normal({mean, stdev});
+  };
+  let subtract = (n1: t, n2: t) => {
+    let mean = n1.mean -. n2.mean;
+    let stdev = sqrt(n1.stdev ** 2. +. n2.stdev ** 2.);
+    `Normal({mean, stdev});
+  };
+
+  // TODO: is this useful here at all? would need the integral as well ...
+  let pointwiseProduct = (n1: t, n2: t) => {
+    let mean =
+      (n1.mean *. n2.stdev ** 2. +. n2.mean *. n1.stdev ** 2.)
+      /. (n1.stdev ** 2. +. n2.stdev ** 2.);
+    let stdev = 1. /. (1. /. n1.stdev ** 2. +. 1. /. n2.stdev ** 2.);
+    `Normal({mean, stdev});
+  };
+
+  let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
+    switch (operation) {
+    | `Add => Some(add(n1, n2))
+    | `Subtract => Some(subtract(n1, n2))
+    | _ => None
+    };
 };
 
 module Beta = {
@@ -114,17 +89,17 @@ module Beta = {
   let pdf = (x, t: t) => Jstat.beta##pdf(x, t.alpha, t.beta);
   let inv = (p, t: t) => Jstat.beta##inv(p, t.alpha, t.beta);
   let sample = (t: t) => Jstat.beta##sample(t.alpha, t.beta);
+  let mean = (t: t) => Ok(Jstat.beta##mean(t.alpha, t.beta));
   let toString = ({alpha, beta}: t) => {j|Beta($alpha,$beta)|j};
-  let contType: contType = `Continuous;
 };
 
 module Lognormal = {
   type t = lognormal;
   let pdf = (x, t: t) => Jstat.lognormal##pdf(x, t.mu, t.sigma);
   let inv = (p, t: t) => Jstat.lognormal##inv(p, t.mu, t.sigma);
+  let mean = (t: t) => Ok(Jstat.lognormal##mean(t.mu, t.sigma));
   let sample = (t: t) => Jstat.lognormal##sample(t.mu, t.sigma);
   let toString = ({mu, sigma}: t) => {j|Lognormal($mu,$sigma)|j};
-  let contType: contType = `Continuous;
   let from90PercentCI = (low, high) => {
     let logLow = Js.Math.log(low);
     let logHigh = Js.Math.log(high);
@@ -144,6 +119,23 @@ module Lognormal = {
       );
     `Lognormal({mu, sigma});
   };
+
+  let multiply = (l1, l2) => {
+    let mu = l1.mu +. l2.mu;
+    let sigma = l1.sigma +. l2.sigma;
+    `Lognormal({mu, sigma});
+  };
+  let divide = (l1, l2) => {
+    let mu = l1.mu -. l2.mu;
+    let sigma = l1.sigma +. l2.sigma;
+    `Lognormal({mu, sigma});
+  };
+  let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
+    switch (operation) {
+    | `Multiply => Some(multiply(n1, n2))
+    | `Divide => Some(divide(n1, n2))
+    | _ => None
+    };
 };
 
 module Uniform = {
@@ -151,20 +143,20 @@ module Uniform = {
   let pdf = (x, t: t) => Jstat.uniform##pdf(x, t.low, t.high);
   let inv = (p, t: t) => Jstat.uniform##inv(p, t.low, t.high);
   let sample = (t: t) => Jstat.uniform##sample(t.low, t.high);
+  let mean = (t: t) => Ok(Jstat.uniform##mean(t.low, t.high));
   let toString = ({low, high}: t) => {j|Uniform($low,$high)|j};
-  let contType: contType = `Continuous;
 };
 
 module Float = {
   type t = float;
   let pdf = (x, t: t) => x == t ? 1.0 : 0.0;
   let inv = (p, t: t) => p < t ? 0.0 : 1.0;
+  let mean = (t: t) => Ok(t);
   let sample = (t: t) => t;
   let toString = Js.Float.toString;
-  let contType: contType = `Discrete;
 };
 
-module GenericSimple = {
+module T = {
   let minCdfValue = 0.0001;
   let maxCdfValue = 0.9999;
 
@@ -181,19 +173,6 @@ module GenericSimple = {
     | `ContinuousShape(n) => ContinuousShape.pdf(x, n)
     };
 
-  let contType = (dist: dist): contType =>
-    switch (dist) {
-    | `Normal(_) => Normal.contType
-    | `Triangular(_) => Triangular.contType
-    | `Exponential(_) => Exponential.contType
-    | `Cauchy(_) => Cauchy.contType
-    | `Lognormal(_) => Lognormal.contType
-    | `Uniform(_) => Uniform.contType
-    | `Beta(_) => Beta.contType
-    | `Float(_) => Float.contType
-    | `ContinuousShape(_) => ContinuousShape.contType
-    };
-
   let inv = (x, dist) =>
     switch (dist) {
     | `Normal(n) => Normal.inv(x, n)
@@ -207,7 +186,7 @@ module GenericSimple = {
     | `ContinuousShape(n) => ContinuousShape.inv(x, n)
     };
 
-  let sample: dist => float =
+  let sample: symbolicDist => float =
     fun
     | `Normal(n) => Normal.sample(n)
     | `Triangular(n) => Triangular.sample(n)
@@ -219,7 +198,7 @@ module GenericSimple = {
     | `Float(n) => Float.sample(n)
     | `ContinuousShape(n) => ContinuousShape.sample(n);
 
-  let toString: dist => string =
+  let toString: symbolicDist => string =
     fun
     | `Triangular(n) => Triangular.toString(n)
     | `Exponential(n) => Exponential.toString(n)
@@ -231,7 +210,7 @@ module GenericSimple = {
     | `Float(n) => Float.toString(n)
     | `ContinuousShape(n) => ContinuousShape.toString(n);
 
-  let min: dist => float =
+  let min: symbolicDist => float =
     fun
     | `Triangular({low}) => low
     | `Exponential(n) => Exponential.inv(minCdfValue, n)
@@ -243,7 +222,7 @@ module GenericSimple = {
     | `ContinuousShape(n) => ContinuousShape.inv(minCdfValue, n)
     | `Float(n) => n;
 
-  let max: dist => float =
+  let max: symbolicDist => float =
     fun
     | `Triangular(n) => n.high
     | `Exponential(n) => Exponential.inv(maxCdfValue, n)
@@ -255,144 +234,84 @@ module GenericSimple = {
     | `Uniform({high}) => high
     | `Float(n) => n;
 
-
-  /* This function returns a list of x's at which to evaluate the overall distribution (for rendering).
-     This function is called separately for each individual distribution.
-
-     When called with xSelection=`Linear, this function will return (sampleCount) x's, evenly
-     distributed between the min and max of the distribution (whatever those are defined to be above).
-
-     When called with xSelection=`ByWeight, this function will distribute the x's such as to
-     match the cumulative shape of the distribution. This is slower but may give better results.
-  */
-  let interpolateXs =
-      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount) => {
-
-    switch (xSelection, dist) {
-    | (`Linear, _) => E.A.Floats.range(min(dist), max(dist), sampleCount)
-    | (`ByWeight, `Uniform(n)) =>
-      // In `ByWeight mode, uniform distributions get special treatment because we need two x's
-      // on either side for proper rendering (just left and right of the discontinuities).
-      let dx = 0.00001 *. (n.high -. n.low);
-      [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|]
-    | (`ByWeight, _) => 
-      let ys = E.A.Floats.range(minCdfValue, maxCdfValue, sampleCount)
-      ys |> E.A.fmap(y => inv(y, dist))
-    };
-  };
-
-  let toShape =
-      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: dist, sampleCount)
-      : DistTypes.shape => {
-    switch (dist) {
-    | `ContinuousShape(n) => n.pdf |> Distributions.Continuous.T.toShape
-    | dist =>
-      let xs = interpolateXs(~xSelection, dist, sampleCount);
-      let ys = xs |> E.A.fmap(r => pdf(r, dist));
-      XYShape.T.fromArrays(xs, ys)
-      |> Distributions.Continuous.make(`Linear, _)
-      |> Distributions.Continuous.T.toShape;
-    };
-  };
-};
-
-module PointwiseAddDistributionsWeighted = {
-  type t = pointwiseAdd;
-
-  let normalizeWeights = (dists: t) => {
-    let total = dists |> E.A.fmap(snd) |> E.A.Floats.sum;
-    dists |> E.A.fmap(((a, b)) => (a, b /. total));
-  };
-
-  let pdf = (x: float, dists: t) =>
-    dists
-    |> E.A.fmap(((e, w)) => GenericSimple.pdf(x, e) *. w)
-    |> E.A.Floats.sum;
-
-  let min = (dists: t) =>
-    dists |> E.A.fmap(d => d |> fst |> GenericSimple.min) |> E.A.min;
-
-  let max = (dists: t) =>
-    dists |> E.A.fmap(d => d |> fst |> GenericSimple.max) |> E.A.max;
-
-  let discreteShape = (dists: t, sampleCount: int) => {
-    let discrete =
-      dists
-      |> E.A.fmap(((r, e)) =>
-           r
-           |> (
-             fun
-             | `Float(r) => Some((r, e))
-             | _ => None
-           )
-         )
-      |> E.A.O.concatSomes
-      |> E.A.fmap(((x, y)) =>
-           ({xs: [|x|], ys: [|y|]}: DistTypes.xyShape)
-         )
-      |> Distributions.Discrete.reduce((+.));
-    discrete;
-  };
-
-  let continuousShape = (dists: t, sampleCount: int) => {
-    let xs =
-      dists
-      |> E.A.fmap(r =>
-           r
-           |> fst
-           |> GenericSimple.interpolateXs(
-                ~xSelection=`ByWeight,
-                _,
-                sampleCount / (dists |> E.A.length),
-              )
-         )
-      |> E.A.concatMany;
-    xs |> Array.fast_sort(compare);
-    let ys = xs |> E.A.fmap(pdf(_, dists));
-    XYShape.T.fromArrays(xs, ys) |> Distributions.Continuous.make(`Linear, _);
-  };
-
-  let toShape = (dists: t, sampleCount: int) => {
-    let normalized = normalizeWeights(dists);
-    let continuous =
-      normalized
-      |> E.A.filter(((r, _)) => GenericSimple.contType(r) == `Continuous)
-      |> continuousShape(_, sampleCount);
-    let discrete =
-      normalized
-      |> E.A.filter(((r, _)) => GenericSimple.contType(r) == `Discrete)
-      |> discreteShape(_, sampleCount);
-    let shape =
-      MixedShapeBuilder.buildSimple(~continuous=Some(continuous), ~discrete);
-    shape |> E.O.toExt("");
-  };
-
-  let toString = (dists: t) => {
-    let distString =
-      dists
-      |> E.A.fmap(d => GenericSimple.toString(fst(d)))
-      |> Js.Array.joinWith(",");
-    let weights =
-      dists
-      |> E.A.fmap(d =>
-           snd(d) |> Js.Float.toPrecisionWithPrecision(~digits=2)
-         )
-      |> Js.Array.joinWith(",");
-    {j|multimodal($distString, [$weights])|j};
-  };
-};
-
-let toString = (r: bigDist) =>
-  r
-  |> (
+  let mean: symbolicDist => result(float, string) =
     fun
-    | `Simple(d) => GenericSimple.toString(d)
-    | `PointwiseCombination(d) =>
-      PointwiseAddDistributionsWeighted.toString(d)
-  );
+    | `Triangular(n) => Triangular.mean(n)
+    | `Exponential(n) => Exponential.mean(n)
+    | `Cauchy(n) => Cauchy.mean(n)
+    | `Normal(n) => Normal.mean(n)
+    | `Lognormal(n) => Lognormal.mean(n)
+    | `Beta(n) => Beta.mean(n)
+    | `ContinuousShape(n) => ContinuousShape.mean(n)
+    | `Uniform(n) => Uniform.mean(n)
+    | `Float(n) => Float.mean(n);
 
-let toShape = n =>
-  fun
-  | `Simple(d) => GenericSimple.toShape(~xSelection=`ByWeight, d, n)
-  | `PointwiseCombination(d) =>
-    PointwiseAddDistributionsWeighted.toShape(d, n);
+  let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s) =>
+    switch (distToFloatOp) {
+    | `Pdf(f) => Ok(pdf(f, s))
+    | `Inv(f) => Ok(inv(f, s))
+    | `Sample => Ok(sample(s))
+    | `Mean => mean(s)
+    };
+
+  let interpolateXs =
+      (~xSelection: [ | `Linear | `ByWeight]=`Linear, dist: symbolicDist, n) => {
+    switch (xSelection, dist) {
+    | (`Linear, _) => E.A.Floats.range(min(dist), max(dist), n)
+    /*    | (`ByWeight, `Uniform(n)) =>
+          // In `ByWeight mode, uniform distributions get special treatment because we need two x's
+          // on either side for proper rendering (just left and right of the discontinuities).
+            let dx = 0.00001 *. (n.high -. n.low);
+            [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|]; */
+    | (`ByWeight, _) =>
+      let ys = E.A.Floats.range(minCdfValue, maxCdfValue, n);
+      ys |> E.A.fmap(y => inv(y, dist));
+    };
+  };
+
+  /* Calling e.g. "Normal.operate" returns an optional that wraps a result.
+     If the optional is None, there is no valid analytic solution. If it Some, it
+     can still return an error if there is a serious problem,
+     like in the case of a divide by 0.
+     */
+  type analyticalSimplificationResult = [
+    | `AnalyticalSolution(SymbolicTypes.symbolicDist)
+    | `Error(string)
+    | `NoSolution
+  ];
+  let tryAnalyticalSimplification =
+      (
+        d1: symbolicDist,
+        d2: symbolicDist,
+        op: ExpressionTypes.algebraicOperation,
+      )
+      : analyticalSimplificationResult =>
+    switch (d1, d2) {
+    | (`Float(v1), `Float(v2)) =>
+      switch (Operation.Algebraic.applyFn(op, v1, v2)) {
+      | Ok(r) => `AnalyticalSolution(`Float(r))
+      | Error(n) => `Error(n)
+      }
+    | (`Normal(v1), `Normal(v2)) =>
+      Normal.operate(op, v1, v2)
+      |> E.O.dimap(r => `AnalyticalSolution(r), () => `NoSolution)
+    | (`Lognormal(v1), `Lognormal(v2)) =>
+      Lognormal.operate(op, v1, v2)
+      |> E.O.dimap(r => `AnalyticalSolution(r), () => `NoSolution)
+    | _ => `NoSolution
+    };
+
+  let toShape = (sampleCount, d: symbolicDist): DistTypes.shape =>
+    switch (d) {
+    | `Float(v) =>
+      Discrete(
+        Distributions.Discrete.make({xs: [|v|], ys: [|1.0|]}, Some(1.0)),
+      )
+    | _ =>
+      let xs = interpolateXs(~xSelection=`ByWeight, d, sampleCount);
+      let ys = xs |> E.A.fmap(x => pdf(x, d));
+      Continuous(
+        Distributions.Continuous.make(`Linear, {xs, ys}, Some(1.0)),
+      );
+    };
+};

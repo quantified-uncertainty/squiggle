@@ -115,11 +115,12 @@ module T = {
     Array.fast_sort(compare, samples);
     let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples);
     let length = samples |> E.A.length |> float_of_int;
-    let discrete: DistTypes.xyShape =
+    let discrete: DistTypes.discreteShape =
       discretePart
       |> E.FloatFloatMap.fmap(r => r /. length)
       |> E.FloatFloatMap.toArray
-      |> XYShape.T.fromZippedArray;
+      |> XYShape.T.fromZippedArray
+      |> Distributions.Discrete.make(_, None);
 
     let pdf =
       continuousPart |> E.A.length > 5
@@ -149,14 +150,14 @@ module T = {
                ~outputXYPoints=samplingInputs.outputXYPoints,
                formatUnitWidth(usedUnitWidth),
              )
-          |> Distributions.Continuous.make(`Linear)
+          |> Distributions.Continuous.make(`Linear, _, None)
           |> (r => Some((r, foo)));
         }
         : None;
     let shape =
       MixedShapeBuilder.buildSimple(
         ~continuous=pdf |> E.O.fmap(fst),
-        ~discrete,
+        ~discrete=Some(discrete),
       );
     let samplesParse: RenderTypes.ShapeRenderer.Sampling.outputs = {
       continuousParseParams: pdf |> E.O.fmap(snd),

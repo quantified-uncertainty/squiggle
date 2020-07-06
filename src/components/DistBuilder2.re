@@ -44,14 +44,14 @@ module DemoDist = {
             Distributions.DistPlus.make(
               ~shape=
                 Continuous(
-                  Distributions.Continuous.make(`Linear, {xs, ys}),
+                  Distributions.Continuous.make(`Linear, {xs, ys}, None),
                 ),
               ~domain=Complete,
               ~unit=UnspecifiedDistribution,
               ~guesstimatorString=None,
               (),
             )
-            |> Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0);
+            |> Distributions.DistPlus.T.normalize;
           <DistPlusPlot distPlus />;
         };
     <Antd.Card title={"Distribution" |> R.ste}>

@@ -1,1 +1,1 @@
-let entries = EntryTypes.[Continuous.entry];
+let entries = EntryTypes.[Continuous.entry,ExpressionTreeExamples.entry];

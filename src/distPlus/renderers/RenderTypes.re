@@ -43,7 +43,7 @@ module ShapeRenderer = {
   module Symbolic = {
     type inputs = {length: int};
     type outputs = {
-      graph: SymbolicDist.bigDist,
+      graph: ExpressionTypes.ExpressionTree.node,
       shape: DistTypes.shape,
     };
     let make = (graph, shape) => {graph, shape};
@@ -75,7 +75,7 @@ module ShapeRenderer = {
 
 module DistPlusRenderer = {
   let defaultRecommendedLength = 10000;
-  let defaultShouldTruncate = true;
+  let defaultShouldDownsample = true;
   type ingredients = {
     guesstimatorString: string,
     domain: DistTypes.domain,
@@ -85,7 +85,7 @@ module DistPlusRenderer = {
     distPlusIngredients: ingredients,
     samplingInputs: ShapeRenderer.Sampling.inputs,
     recommendedLength: int,
-    shouldTruncate: bool,
+    shouldDownsample: bool,
   };
   module Ingredients = {
     let make =
@@ -105,7 +105,7 @@ module DistPlusRenderer = {
       (
         ~samplingInputs=ShapeRenderer.Sampling.Inputs.empty,
         ~recommendedLength=defaultRecommendedLength,
-        ~shouldTruncate=defaultShouldTruncate,
+        ~shouldDownsample=defaultShouldDownsample,
         ~distPlusIngredients,
         (),
       )
@@ -113,7 +113,7 @@ module DistPlusRenderer = {
     distPlusIngredients,
     samplingInputs,
     recommendedLength,
-    shouldTruncate,
+    shouldDownsample,
   };
   type outputs = {
     shapeRenderOutputs: ShapeRenderer.Combined.outputs,

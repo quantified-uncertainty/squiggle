@@ -37,13 +37,13 @@ module DemoDist = {
     let parsed1 = MathJsParser.fromString(guesstimatorString);
     let shape =
       switch (parsed1) {
-      | Ok(r) => Some(SymbolicDist.toShape(10000, r))
+      | Ok(r) => Some(ExpressionTree.toShape(10000, r))
       | _ => None
       };
 
     let str =
       switch (parsed1) {
-      | Ok(r) => SymbolicDist.toString(r)
+      | Ok(r) => ExpressionTree.toString(r)
       | Error(e) => e
       };
 
@@ -58,7 +58,7 @@ module DemoDist = {
                ~guesstimatorString=None,
                (),
              )
-             |> Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0);
+             |> Distributions.DistPlus.T.normalize;
            <DistPlusPlot distPlus />;
          })
       |> E.O.default(ReasonReact.null);

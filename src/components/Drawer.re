@@ -177,6 +177,7 @@ module Convert = {
     let continuousShape: Types.continuousShape = {
       xyShape,
       interpolation: `Linear,
+      knownIntegralSum: None,
     };
     
     let integral = XYShape.Analysis.integrateContinuousShape(continuousShape);
@@ -188,6 +189,7 @@ module Convert = {
         ys,
       },
       interpolation: `Linear,
+      knownIntegralSum: Some(1.0),
     };
     continuousShape;
   };
@@ -386,8 +388,8 @@ module Draw = {
     let stdev = 15.0;
     let numSamples = 3000;
 
-    let normal: SymbolicDist.dist = `Normal({mean, stdev});
-    let normalShape = SymbolicDist.GenericSimple.toShape(normal, numSamples);
+    let normal: SymbolicTypes.symbolicDist = `Normal({mean, stdev});
+    let normalShape = ExpressionTree.toShape(numSamples, `SymbolicDist(normal));
     let xyShape: Types.xyShape =
       switch (normalShape) {
       | Mixed(_) => {xs: [||], ys: [||]}
@@ -396,9 +398,9 @@ module Draw = {
       };
 
     /* // To use a lognormal instead:
-       let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
+       let lognormal = SymbolicTypes.Lognormal.fromMeanAndStdev(mean, stdev);
        let lognormalShape =
-         SymbolicDist.GenericSimple.toShape(lognormal, numSamples);
+         SymbolicTypes.GenericSimple.toShape(lognormal, numSamples);
        let lognormalXYShape: Types.xyShape =
          switch (lognormalShape) {
          | Mixed(_) => {xs: [||], ys: [||]}
@@ -667,9 +669,7 @@ module State = {
 
       /* create a cdf from a pdf */
       let _pdf =
-        Distributions.Continuous.T.scaleToIntegralSum(
-          ~cache=None,
-          ~intendedSum=1.0,
+        Distributions.Continuous.T.normalize(
           pdf,
         );
 

@@ -1,13 +1,13 @@
-let truncateIfShould =
+let downsampleIfShould =
     (
-      {recommendedLength, shouldTruncate}: RenderTypes.DistPlusRenderer.inputs,
+      {recommendedLength, shouldDownsample}: RenderTypes.DistPlusRenderer.inputs,
       outputs: RenderTypes.ShapeRenderer.Combined.outputs,
       dist,
     ) => {
-      let willTruncate = 
-  shouldTruncate
+      let willDownsample =
+  shouldDownsample
   && RenderTypes.ShapeRenderer.Combined.methodUsed(outputs) == `Sampling;
-    willTruncate ? dist |> Distributions.DistPlus.T.truncate(recommendedLength) : dist;
+    willDownsample ? dist |> Distributions.DistPlus.T.downsample(recommendedLength) : dist;
 };
 
 let run =
@@ -21,7 +21,7 @@ let run =
       ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),
       (),
     )
-    |> Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0);
+    |> Distributions.DistPlus.T.normalize;
   let outputs =
     ShapeRenderer.run({
       samplingInputs: inputs.samplingInputs,
@@ -32,6 +32,6 @@ let run =
     });
   let shape = outputs |> RenderTypes.ShapeRenderer.Combined.getShape;
   let dist =
-    shape |> E.O.fmap(toDist) |> E.O.fmap(truncateIfShould(inputs, outputs));
+    shape |> E.O.fmap(toDist) |> E.O.fmap(downsampleIfShould(inputs, outputs));
   RenderTypes.DistPlusRenderer.Outputs.make(outputs, dist);
 };

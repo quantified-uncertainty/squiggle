@@ -9,7 +9,7 @@ let interpolate =
 };
 
 // TODO: Make sure that shapes cannot be empty.
-let extImp = E.O.toExt("Should not be possible");
+let extImp = E.O.toExt("Tried to perform an operation on an empty XYShape.");
 
 module T = {
   type t = xyShape;
@@ -17,6 +17,7 @@ module T = {
   type ts = array(xyShape);
   let xs = (t: t) => t.xs;
   let ys = (t: t) => t.ys;
+  let length = (t: t) => E.A.length(t.xs);
   let empty = {xs: [||], ys: [||]};
   let minX = (t: t) => t |> xs |> E.A.Sorted.min |> extImp;
   let maxX = (t: t) => t |> xs |> E.A.Sorted.max |> extImp;
@@ -154,7 +155,9 @@ module XsConversion = {
 
   let proportionByProbabilityMass =
       (newLength: int, integral: T.t, t: T.t): T.t => {
-    equallyDivideXByMass(newLength, integral) |> _replaceWithXs(_, t);
+    integral
+    |> equallyDivideXByMass(newLength) // creates a new set of xs at evenly spaced percentiles
+    |> _replaceWithXs(_, t); // linearly interpolates new ys for the new xs
   };
 };
 
@@ -164,9 +167,10 @@ module Zipped = {
   let compareXs = ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0;
   let sortByY = (t: zipped) => t |> E.A.stableSortBy(_, compareYs);
   let sortByX = (t: zipped) => t |> E.A.stableSortBy(_, compareXs);
+  let filterByX = (testFn: (float => bool), t: zipped) => t |> E.A.filter(((x, _)) => testFn(x));
 };
 
-module Combine = {
+module PointwiseCombination = {
   type xsSelection =
     | ALL_XS
     | XS_EVENLY_DIVIDED(int);
@@ -179,16 +183,25 @@ module Combine = {
         t1: T.t,
         t2: T.t,
       ) => {
-    let allXs =
-      switch (xsSelection) {
-      | ALL_XS => Ts.allXs([|t1, t2|])
-      | XS_EVENLY_DIVIDED(sampleCount) =>
-        Ts.equallyDividedXs([|t1, t2|], sampleCount)
-      };
 
-    let allYs =
-      allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)));
-    T.fromArrays(allXs, allYs);
+    switch ((E.A.length(t1.xs), E.A.length(t2.xs))) {
+    | (0, 0) => T.empty
+    | (0, _) => t2
+    | (_, 0) => t1
+    | (_, _) => {
+        let allXs =
+          switch (xsSelection) {
+          | ALL_XS => Ts.allXs([|t1, t2|])
+          | XS_EVENLY_DIVIDED(sampleCount) =>
+            Ts.equallyDividedXs([|t1, t2|], sampleCount)
+          };
+
+        let allYs =
+          allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)));
+
+        T.fromArrays(allXs, allYs);
+      }
+    }
   };
 
   let combineLinear = combine(~xToYSelection=XtoY.linear);
@@ -244,8 +257,8 @@ module Range = {
         Belt.Array.set(
           cumulativeY,
           x + 1,
-          (xs[x + 1] -. xs[x])
-          *. ((ys[x] +. ys[x + 1]) /. 2.)
+          (xs[x + 1] -. xs[x])  // dx
+          *. ((ys[x] +. ys[x + 1]) /. 2.) // (1/2) * (avgY)
           +. cumulativeY[x],
         );
       ();
@@ -265,7 +278,7 @@ module Range = {
           items
           |> Belt.Array.map(_, rangePointAssumingSteps)
           |> T.fromZippedArray
-          |> Combine.intersperse(t |> T.mapX(e => e +. diff)),
+          |> PointwiseCombination.intersperse(t |> T.mapX(e => e +. diff)),
         )
       | _ => Some(t)
       };
@@ -287,7 +300,7 @@ let pointLogScore = (prediction, answer) =>
   };
 
 let logScorePoint = (sampleCount, t1, t2) =>
-  Combine.combine(
+  PointwiseCombination.combine(
     ~xsSelection=XS_EVENLY_DIVIDED(sampleCount),
     ~xToYSelection=XtoY.linear,
     ~fn=pointLogScore,
@@ -315,6 +328,7 @@ module Analysis = {
       0.0,
       (acc, _x, i) => {
         let areaUnderIntegral =
+          // TODO Take this switch statement out of the loop body
           switch (t.interpolation, i) {
           | (_, 0) => 0.0
           | (`Stepwise, _) =>
@@ -323,12 +337,16 @@ module Analysis = {
           | (`Linear, _) =>
             let x1 = xs[i - 1];
             let x2 = xs[i];
-            let h1 = ys[i - 1];
-            let h2 = ys[i];
-            let b = (h1 -. h2) /. (x1 -. x2);
-            let a = h1 -. b *. x1;
-            indefiniteIntegralLinear(x2, a, b)
-            -. indefiniteIntegralLinear(x1, a, b);
+            if (x1 == x2) {
+              0.0
+            } else {
+              let h1 = ys[i - 1];
+              let h2 = ys[i];
+              let b = (h1 -. h2) /. (x1 -. x2);
+              let a = h1 -. b *. x1;
+              indefiniteIntegralLinear(x2, a, b)
+              -. indefiniteIntegralLinear(x1, a, b);
+            };
           };
         acc +. areaUnderIntegral;
       },
