@@ -188,14 +188,13 @@ module Continuous = {
 
       let truncate =
           (leftCutoff: option(float), rightCutoff: option(float), t: t) => {
+        let lc = E.O.default(neg_infinity, leftCutoff);
+        let rc = E.O.default(infinity, rightCutoff);
         let truncatedZippedPairs =
           t
           |> getShape
           |> XYShape.T.zip
-          |> XYShape.Zipped.filterByX(x =>
-               x >= E.O.default(neg_infinity, leftCutoff)
-               || x <= E.O.default(infinity, rightCutoff)
-             );
+          |> XYShape.Zipped.filterByX(x => x >= lc && x <= rc);
 
         let eps = (t |> getShape |> XYShape.T.xTotalRange) *. 0.0001;
 
@@ -333,7 +332,12 @@ module Continuous = {
   };
 
   let combineAlgebraically =
-      (~downsample=false, op: ExpressionTypes.algebraicOperation, t1: t, t2: t) => {
+      (
+        ~downsample=false,
+        op: ExpressionTypes.algebraicOperation,
+        t1: t,
+        t2: t,
+      ) => {
     let s1 = t1 |> getShape;
     let s2 = t2 |> getShape;
     let t1n = s1 |> XYShape.T.length;
@@ -342,7 +346,11 @@ module Continuous = {
       empty;
     } else {
       let combinedShape =
-        AlgebraicShapeCombination.combineShapesContinuousContinuous(op, s1, s2);
+        AlgebraicShapeCombination.combineShapesContinuousContinuous(
+          op,
+          s1,
+          s2,
+        );
       let combinedIntegralSum =
         Common.combineIntegralSums(
           (a, b) => Some(a *. b),
@@ -840,7 +848,12 @@ module Mixed = {
     });
 
   let combineAlgebraically =
-      (~downsample=false, op: ExpressionTypes.algebraicOperation, t1: t, t2: t)
+      (
+        ~downsample=false,
+        op: ExpressionTypes.algebraicOperation,
+        t1: t,
+        t2: t,
+      )
       : t => {
     // Discrete convolution can cause a huge increase in the number of samples,
     // so we'll first downsample.

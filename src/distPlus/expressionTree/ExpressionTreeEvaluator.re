@@ -147,7 +147,7 @@ module Truncate = {
     | Ok(`RenderedDist(rs)) => {
       let truncatedShape =
         rs |> Distributions.Shape.T.truncate(leftCutoff, rightCutoff);
-      Ok(`RenderedDist(rs));
+      Ok(`RenderedDist(truncatedShape));
     }
     | Error(e1) => Error(e1)
     | _ => Error("Could not truncate distribution.")
