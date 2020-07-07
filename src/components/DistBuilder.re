@@ -171,7 +171,7 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
-        guesstimatorString: "uniform(1,2) * uniform(2, 3)", // , triangular(30, 40, 60)
+        guesstimatorString: "mm(normal(-5,1), normal(0, 1), normal(10, 1), normal(11, 1), normal(16, 1))", // , triangular(30, 40, 60)
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",

@@ -98,7 +98,7 @@ module Continuous = {
   let combinePointwise =
       (
         ~knownIntegralSumsFn,
-        fn,
+        fn: (float => float => float),
         t1: DistTypes.continuousShape,
         t2: DistTypes.continuousShape,
       )
@@ -112,18 +112,15 @@ module Continuous = {
         t2.knownIntegralSum,
       );
 
-    let res = make(
+    make(
       `Linear,
-      XYShape.PointwiseCombination.combine(
-        ~xsSelection=ALL_XS,
-        ~xToYSelection=XYShape.XtoY.linear,
-        ~fn,
+      XYShape.PointwiseCombination.combineLinear(
+        ~fn=(+.),
         t1.xyShape,
         t2.xyShape,
       ),
       combinedIntegralSum,
     );
-    res
   };
 
   let toLinear = (t: t): option(t) => {

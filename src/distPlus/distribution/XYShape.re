@@ -175,6 +175,62 @@ module PointwiseCombination = {
     | ALL_XS
     | XS_EVENLY_DIVIDED(int);
 
+  let combineLinear = [%raw {| // : (float => float => float, T.t, T.t) => T.t
+      // This function combines two xyShapes by looping through both of them simultaneously.
+      // It always moves on to the next smallest x, whether that's in the first or second input's xs,
+      // and interpolates the value on the other side, thus accumulating xs and ys.
+      // In this implementation (unlike in XtoY.linear above), values outside of a shape's xs are considered 0.0 (instead of firstY or lastY).
+      // This is written in raw JS because this can still be a bottleneck, and using refs for the i and j indices is quite painful.
+
+      function(fn, t1, t2) {
+        let t1n = t1.xs.length;
+        let t2n = t2.xs.length;
+        let outX = [];
+        let outY = [];
+        let i = -1;
+        let j = -1;
+        while (i <= t1n - 1 && j <= t2n - 1) {
+          let x, ya, yb;
+          if (j == t2n - 1 && i < t1n - 1 ||
+              t1.xs[i+1] < t2.xs[j+1]) { // if a has to catch up to b, or if b is already done
+            i++;
+
+            x = t1.xs[i];
+            ya = t1.ys[i];
+
+            let bFraction = (x - (t2.xs[j] || x)) / ((t2.xs[j+1] || x) - (t2.xs[j] || 0));
+            yb = (t2.ys[j] || 0) * (1-bFraction) + (t2.ys[j+1] || 0) * bFraction;
+          } else if (i == t1n - 1 && j < t2n - 1 ||
+                    t1.xs[i+1] > t2.xs[j+1]) { // if b has to catch up to a, or if a is already done
+            j++;
+
+            x = t2.xs[j];
+            yb = t2.ys[j];
+
+            let aFraction = (x - (t1.xs[i] || x)) / ((t1.xs[i+1] || x) - (t1.xs[i] || 0));
+            ya = (t1.ys[i] || 0) * (1-aFraction) + (t1.ys[i+1] || 0) * aFraction;
+          } else if (i < t1n - 1 && j < t2n && t1.xs[i+1] === t2.xs[j+1]) { // if they happen to be equal, move both ahead
+            i++;
+            j++;
+            x = t1.xs[i];
+            ya = t1.ys[i];
+            yb = t2.ys[j];
+          } else if (i === t1n - 1 && j === t2n - 1) {
+            // finished!
+            i = t1n;
+            j = t2n;
+            continue;
+          } else {
+            console.log("Error!", i, j);
+          }
+
+          outX.push(x);
+          outY.push(fn(ya, yb));
+        }
+        return {xs: outX, ys: outY};
+      }
+    |}];
+
   let combine =
       (
         ~xToYSelection: (float, T.t) => 'a,
@@ -204,7 +260,7 @@ module PointwiseCombination = {
     }
   };
 
-  let combineLinear = combine(~xToYSelection=XtoY.linear);
+  //let combineLinear = combine(~xToYSelection=XtoY.linear);
   let combineStepwise = combine(~xToYSelection=XtoY.stepwiseIncremental);
   let combineIfAtX = combine(~xToYSelection=XtoY.stepwiseIfAtX);
 

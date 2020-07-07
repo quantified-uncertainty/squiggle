@@ -168,11 +168,8 @@ module Normalize = {
   let rec operationToLeaf =
           (toLeaf, renderParams, t: node): result(node, string) => {
     switch (t) {
-    | `RenderedDist(s) => {
-      Js.log2("normed", Distributions.Shape.T.normalize(s));
-      //Js.log2("normed integral", Distributions.Shape.T.normalize(s)));
+    | `RenderedDist(s) =>
         Ok(`RenderedDist(Distributions.Shape.T.normalize(s)));
-        }
     | `SymbolicDist(_) => Ok(t)
     | _ =>
       t
