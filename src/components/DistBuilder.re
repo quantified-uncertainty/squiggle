@@ -146,7 +146,6 @@ module DemoDist = {
                (),
              );
            let response = DistPlusRenderer.run(inputs);
-           Js.log(response);
            switch (RenderTypes.DistPlusRenderer.Outputs.distplus(response)) {
            | Some(distPlus) => <DistPlusPlot distPlus />
            | _ =>
@@ -172,7 +171,7 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
-        guesstimatorString: "truncate(normal(100, 60), 50, 100)",
+        guesstimatorString: "uniform(1,2) * uniform(2, 3)", // , triangular(30, 40, 60)
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",

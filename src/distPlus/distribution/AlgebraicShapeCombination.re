@@ -139,8 +139,8 @@ let combineShapesContinuousContinuous =
   // converts the variances and means of the two inputs into the variance of the output
   let combineVariancesFn =
     switch (op) {
-    | `Add => ((v1, v2, m1, m2) => v1 +. v2)
-    | `Subtract => ((v1, v2, m1, m2) => v1 +. v2)
+    | `Add => ((v1, v2, _, _) => v1 +. v2)
+    | `Subtract => ((v1, v2, _, _) => v1 +. v2)
     | `Multiply => (
         (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
       )
@@ -176,8 +176,8 @@ let combineShapesContinuousContinuous =
       let _ = Belt.Array.set(means, k, mean);
       let _ = Belt.Array.set(variances, k, variance);
       // update bounds
-      let minX = mean -. variance *. 1.644854;
-      let maxX = mean +. variance *. 1.644854;
+      let minX = mean -. 2. *. sqrt(variance) *. 1.644854;
+      let maxX = mean +. 2. *. sqrt(variance) *. 1.644854;
       if (minX < outputMinX^) {
         outputMinX := minX;
       };
@@ -193,11 +193,11 @@ let combineShapesContinuousContinuous =
   let outputXs: array(float) = E.A.Floats.range(outputMinX^, outputMaxX^, nOut);
   let outputYs: array(float) = Belt.Array.make(nOut, 0.0);
   // now, for each of the outputYs, accumulate from a Gaussian kernel over each input point.
-  for (j in 0 to E.A.length(masses) - 1) {
-    let _ = if (variances[j] > 0.) {
-      for (i in 0 to E.A.length(outputXs) - 1) {
+  for (j in 0 to E.A.length(masses) - 1) { // go through all of the result points
+    let _ = if (variances[j] > 0. && masses[j] > 0.) {
+      for (i in 0 to E.A.length(outputXs) - 1) { // go through all of the target points
         let dx = outputXs[i] -. means[j];
-        let contribution = masses[j] *. exp(-. (dx ** 2.) /. (2. *. variances[j]));
+        let contribution = masses[j] *. exp(-. (dx ** 2.) /. (2. *. variances[j])) /. (sqrt(2. *. 3.14159276 *. variances[j]));
         let _ = Belt.Array.set(outputYs, i, outputYs[i] +. contribution);
         ();
       };

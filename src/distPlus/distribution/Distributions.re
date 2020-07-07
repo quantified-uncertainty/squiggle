@@ -112,7 +112,7 @@ module Continuous = {
         t2.knownIntegralSum,
       );
 
-    make(
+    let res = make(
       `Linear,
       XYShape.PointwiseCombination.combine(
         ~xsSelection=ALL_XS,
@@ -123,6 +123,7 @@ module Continuous = {
       ),
       combinedIntegralSum,
     );
+    res
   };
 
   let toLinear = (t: t): option(t) => {
@@ -219,7 +220,9 @@ module Continuous = {
       let integral = (~cache, t) =>
         if (t |> getShape |> XYShape.T.length > 0) {
           switch (cache) {
-          | Some(cache) => cache
+          | Some(cache) => {
+              cache;
+              }
           | None =>
             t
             |> getShape
@@ -243,7 +246,7 @@ module Continuous = {
         t.knownIntegralSum |> E.O.default(t |> integral(~cache) |> lastY);
       let integralXtoY = (~cache, f, t: t) =>
         t |> integral(~cache) |> shapeFn(XYShape.XtoY.linear(f));
-      let integralYtoX = (~cache, f, t: t) =>
+    let integralYtoX = (~cache, f, t: t) =>
         t |> integral(~cache) |> shapeFn(XYShape.YtoX.linear(f));
       let toContinuous = t => Some(t);
       let toDiscrete = _ => None;
@@ -254,7 +257,7 @@ module Continuous = {
         |> updateKnownIntegralSum(Some(1.0));
       };
 
-      let normalizedToContinuous = t => Some(t); // TODO: this should be normalized
+      let normalizedToContinuous = t => Some(t |> normalize);
       let normalizedToDiscrete = _ => None;
 
       let mean = (t: t) => {
@@ -1059,18 +1062,17 @@ module Shape = {
           Continuous.T.normalizedToContinuous,
         ));
       let minX = mapToAll((Mixed.T.minX, Discrete.T.minX, Continuous.T.minX));
-      let integral = (~cache) => {
+      let integral = (~cache) =>
         mapToAll((
-          Mixed.T.Integral.get(~cache),
-          Discrete.T.Integral.get(~cache),
-          Continuous.T.Integral.get(~cache),
+          Mixed.T.Integral.get(~cache=None),
+          Discrete.T.Integral.get(~cache=None),
+          Continuous.T.Integral.get(~cache=None),
         ));
-      };
       let integralEndY = (~cache) =>
         mapToAll((
-          Mixed.T.Integral.sum(~cache),
+          Mixed.T.Integral.sum(~cache=None),
           Discrete.T.Integral.sum(~cache),
-          Continuous.T.Integral.sum(~cache),
+          Continuous.T.Integral.sum(~cache=None),
         ));
       let integralXtoY = (~cache, f) => {
         mapToAll((
@@ -1178,7 +1180,6 @@ module DistPlus = {
 
       let normalize = (t: t): t => {
         let normalizedShape = t |> toShape |> Shape.T.normalize;
-
         t |> updateShape(normalizedShape);
         // TODO: also adjust for domainIncludedProbabilityMass here.
       };
@@ -1190,7 +1191,6 @@ module DistPlus = {
         t |> updateShape(truncatedShape);
       };
 
-      // TODO: replace this with
       let normalizedToContinuous = (t: t) => {
         t
         |> toShape
@@ -1236,8 +1236,10 @@ module DistPlus = {
           : t =>
         Shape.T.mapY(~knownIntegralSumFn, fn, shape) |> updateShape(_, t);
 
-      let integralEndY = (~cache as _, t: t) =>
+      // get the total of everything
+      let integralEndY = (~cache as _, t: t) => {
         Shape.T.Integral.sum(~cache=Some(t.integralCache), toShape(t));
+      }
 
       //   TODO: Fix this below, obviously. Adjust for limits
       let integralXtoY = (~cache as _, f, t: t) => {
@@ -1247,8 +1249,9 @@ module DistPlus = {
 
       // TODO: This part is broken when there is a limit, if this is supposed to be taken into account.
       let integralYtoX = (~cache as _, f, t: t) => {
-        Shape.T.Integral.yToX(~cache=Some(t.integralCache), f, toShape(t));
+        Shape.T.Integral.yToX(~cache=None, f, toShape(t));
       };
+
       let mean = (t: t) => {
         Shape.T.mean(t.shape);
       };
