@@ -47,3 +47,9 @@ type symbolicDist = [
   | `ContinuousShape(continuousShape)
   | `Float(float) // Dirac delta at x. Practically useful only in the context of multimodals.
 ];
+
+type analyticalSimplificationResult = [
+  | `AnalyticalSolution(symbolicDist)
+  | `Error(string)
+  | `NoSolution
+];

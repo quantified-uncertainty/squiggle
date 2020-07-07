@@ -18,3 +18,9 @@ module ExpressionTree = {
     | `FloatFromDist(distToFloatOperation, node)
   ];
 };
+
+type simplificationResult = [
+  | `Solution(ExpressionTree.node)
+  | `Error(string)
+  | `NoSolution
+];

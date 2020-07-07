@@ -118,16 +118,17 @@ module PointwiseCombination = {
 };
 
 module Truncate = {
-  let trySimplification = (leftCutoff, rightCutoff, t) => {
+  let trySimplification = (leftCutoff, rightCutoff, t): simplificationResult => {
     switch (leftCutoff, rightCutoff, t) {
-    | (None, None, t) => Ok(t)
+    | (None, None, t) => `Solution(t)
+    | (Some(lc), Some(rc), t) when lc > rc => `Error("Left truncation bound must be smaller than right bound.")
     | (lc, rc, `SymbolicDist(`Uniform(u))) =>
       // just create a new Uniform distribution
       let nu: SymbolicTypes.uniform = u;
       let newLow = max(E.O.default(neg_infinity, lc), nu.low);
       let newHigh = min(E.O.default(infinity, rc), nu.high);
-      Ok(`SymbolicDist(`Uniform({low: newLow, high: newHigh})));
-    | (_, _, t) => Ok(t)
+      `Solution(`SymbolicDist(`Uniform({low: newLow, high: newHigh})));
+    | _ => `NoSolution
     };
   };
 
@@ -135,7 +136,6 @@ module Truncate = {
     // TODO: use named args in renderToShape; if we're lucky we can at least get the tail
     // of a distribution we otherwise wouldn't get at all
     let renderedShape = toLeaf(renderParams, `Render(t));
-
     switch (renderedShape) {
     | Ok(`RenderedDist(rs)) =>
       let truncatedShape =
@@ -157,13 +157,10 @@ module Truncate = {
       : result(node, string) => {
     t
     |> trySimplification(leftCutoff, rightCutoff)
-    |> E.R.bind(
-         _,
-         fun
-         | `SymbolicDist(d) as t => Ok(t)
-         | _ =>
-           truncateAsShape(toLeaf, renderParams, leftCutoff, rightCutoff, t),
-       );
+    |> fun
+       | `Solution(t) => Ok(t)
+       | `Error(e) => Error(e)
+       | `NoSolution => truncateAsShape(toLeaf, renderParams, leftCutoff, rightCutoff, t);
   };
 };
 

@@ -274,11 +274,6 @@ module T = {
      can still return an error if there is a serious problem,
      like in the case of a divide by 0.
      */
-  type analyticalSimplificationResult = [
-    | `AnalyticalSolution(SymbolicTypes.symbolicDist)
-    | `Error(string)
-    | `NoSolution
-  ];
   let tryAnalyticalSimplification =
       (
         d1: symbolicDist,
