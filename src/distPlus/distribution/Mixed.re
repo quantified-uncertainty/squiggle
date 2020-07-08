@@ -231,7 +231,7 @@ module T =
         Continuous.T.Integral.sum(~cache=None, continuous);
       let totalIntegralSum = discreteIntegralSum +. continuousIntegralSum;
 
-      let getMeanOfSquares = ({discrete, continuous} as t: t) => {
+      let getMeanOfSquares = ({discrete, continuous}: t) => {
         let discreteMean =
           discrete
           |> Discrete.shapeMap(XYShape.Analysis.squareXYShape)

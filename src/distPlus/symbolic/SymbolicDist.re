@@ -1,20 +1,5 @@
 open SymbolicTypes;
 
-module ContinuousShape = {
-  type t = continuousShape;
-  let make = (pdf, cdf): t => {pdf, cdf};
-  let pdf = (x, t: t) =>
-    Continuous.T.xToY(x, t.pdf).continuous;
-  // TODO: pdf and inv are currently the same, this seems broken.
-  let inv = (p, t: t) =>
-    Continuous.T.xToY(p, t.pdf).continuous;
-  // TODO: Fix the sampling, to have it work correctly.
-  let sample = (t: t) => 3.0;
-  // TODO: Fix the mean, to have it work correctly.
-  let mean = (t: t) => Ok(0.0);
-  let toString = t => {j|CustomContinuousShape|j};
-};
-
 module Exponential = {
   type t = exponential;
   let pdf = (x, t: t) => Jstat.exponential##pdf(x, t.rate);
@@ -170,7 +155,6 @@ module T = {
     | `Uniform(n) => Uniform.pdf(x, n)
     | `Beta(n) => Beta.pdf(x, n)
     | `Float(n) => Float.pdf(x, n)
-    | `ContinuousShape(n) => ContinuousShape.pdf(x, n)
     };
 
   let inv = (x, dist) =>
@@ -183,7 +167,6 @@ module T = {
     | `Uniform(n) => Uniform.inv(x, n)
     | `Beta(n) => Beta.inv(x, n)
     | `Float(n) => Float.inv(x, n)
-    | `ContinuousShape(n) => ContinuousShape.inv(x, n)
     };
 
   let sample: symbolicDist => float =
@@ -196,7 +179,6 @@ module T = {
     | `Uniform(n) => Uniform.sample(n)
     | `Beta(n) => Beta.sample(n)
     | `Float(n) => Float.sample(n)
-    | `ContinuousShape(n) => ContinuousShape.sample(n);
 
   let toString: symbolicDist => string =
     fun
@@ -208,7 +190,6 @@ module T = {
     | `Uniform(n) => Uniform.toString(n)
     | `Beta(n) => Beta.toString(n)
     | `Float(n) => Float.toString(n)
-    | `ContinuousShape(n) => ContinuousShape.toString(n);
 
   let min: symbolicDist => float =
     fun
@@ -219,7 +200,6 @@ module T = {
     | `Lognormal(n) => Lognormal.inv(minCdfValue, n)
     | `Uniform({low}) => low
     | `Beta(n) => Beta.inv(minCdfValue, n)
-    | `ContinuousShape(n) => ContinuousShape.inv(minCdfValue, n)
     | `Float(n) => n;
 
   let max: symbolicDist => float =
@@ -230,7 +210,6 @@ module T = {
     | `Normal(n) => Normal.inv(maxCdfValue, n)
     | `Lognormal(n) => Lognormal.inv(maxCdfValue, n)
     | `Beta(n) => Beta.inv(maxCdfValue, n)
-    | `ContinuousShape(n) => ContinuousShape.inv(maxCdfValue, n)
     | `Uniform({high}) => high
     | `Float(n) => n;
 
@@ -242,7 +221,6 @@ module T = {
     | `Normal(n) => Normal.mean(n)
     | `Lognormal(n) => Lognormal.mean(n)
     | `Beta(n) => Beta.mean(n)
-    | `ContinuousShape(n) => ContinuousShape.mean(n)
     | `Uniform(n) => Uniform.mean(n)
     | `Float(n) => Float.mean(n);
 
