@@ -7,21 +7,21 @@ let downsampleIfShould =
       let willDownsample =
   shouldDownsample
   && RenderTypes.ShapeRenderer.Combined.methodUsed(outputs) == `Sampling;
-    willDownsample ? dist |> Distributions.DistPlus.T.downsample(recommendedLength) : dist;
+    willDownsample ? dist |> DistPlus.T.downsample(recommendedLength) : dist;
 };
 
 let run =
     (inputs: RenderTypes.DistPlusRenderer.inputs)
     : RenderTypes.DistPlusRenderer.outputs => {
   let toDist = shape =>
-    Distributions.DistPlus.make(
+    DistPlus.make(
       ~shape,
       ~domain=inputs.distPlusIngredients.domain,
       ~unit=inputs.distPlusIngredients.unit,
       ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),
       (),
     )
-    |> Distributions.DistPlus.T.normalize;
+    |> DistPlus.T.normalize;
   let outputs =
     ShapeRenderer.run({
       samplingInputs: inputs.samplingInputs,

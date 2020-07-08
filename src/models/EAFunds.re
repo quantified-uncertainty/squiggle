@@ -113,7 +113,7 @@ module Model = {
     |> RenderTypes.DistPlusRenderer.make(~distPlusIngredients=_, ())
     |> DistPlusRenderer.run
     |> RenderTypes.DistPlusRenderer.Outputs.distplus
-    |> E.O.bind(_, Distributions.DistPlusTime.Integral.xToY(Time(dateTime)));
+    |> E.O.bind(_, DistPlusTime.Integral.xToY(Time(dateTime)));
   };
 
   let make =

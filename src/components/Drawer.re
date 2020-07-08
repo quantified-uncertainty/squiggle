@@ -291,8 +291,8 @@ module Draw = {
     /*
           let continuousShape =
             Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
-          let mean = Distributions.Continuous.T.mean(continuousShape);
-          let variance = Distributions.Continuous.T.variance(continuousShape);
+          let mean = Continuous.T.mean(continuousShape);
+          let variance = Continuous.T.variance(continuousShape);
           let meanLocation =
             Convert.findClosestInOrderedArrayDangerously(mean, canvasShape.xValues);
           let meanLocationCanvasX = canvasShape.ws[meanLocation];
@@ -394,7 +394,7 @@ module Draw = {
       switch (normalShape) {
       | Mixed(_) => {xs: [||], ys: [||]}
       | Discrete(_) => {xs: [||], ys: [||]}
-      | Continuous(m) => Distributions.Continuous.getShape(m)
+      | Continuous(m) => Continuous.getShape(m)
       };
 
     /* // To use a lognormal instead:
@@ -405,7 +405,7 @@ module Draw = {
          switch (lognormalShape) {
          | Mixed(_) => {xs: [||], ys: [||]}
          | Discrete(_) => {xs: [||], ys: [||]}
-         | Continuous(m) => Distributions.Continuous.getShape(m)
+         | Continuous(m) => Continuous.getShape(m)
          };
        */
 
@@ -669,11 +669,11 @@ module State = {
 
       /* create a cdf from a pdf */
       let _pdf =
-        Distributions.Continuous.T.normalize(
+        Continuous.T.normalize(
           pdf,
         );
 
-      let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
+      let cdf = Continuous.T.integral(~cache=None, _pdf);
       let xs = [||];
       let ys = [||];
       for (i in 1 to 999) {
