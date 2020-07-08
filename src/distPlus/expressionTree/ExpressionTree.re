@@ -7,6 +7,7 @@ let toShape = (sampleCount: int, node: node) => {
 
   switch (renderResult) {
   | Ok(`RenderedDist(rs)) =>
+    // todo: Why is this here? It converts a mixed shape to a mixed shape.
     let continuous = Distributions.Shape.T.toContinuous(rs);
     let discrete = Distributions.Shape.T.toDiscrete(rs);
     let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);

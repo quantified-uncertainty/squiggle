@@ -121,7 +121,8 @@ module Truncate = {
   let trySimplification = (leftCutoff, rightCutoff, t): simplificationResult => {
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, t) => `Solution(t)
-    | (Some(lc), Some(rc), t) when lc > rc => `Error("Left truncation bound must be smaller than right bound.")
+    | (Some(lc), Some(rc), t) when lc > rc =>
+      `Error("Left truncation bound must be smaller than right bound.")
     | (lc, rc, `SymbolicDist(`Uniform(u))) =>
       // just create a new Uniform distribution
       let nu: SymbolicTypes.uniform = u;
@@ -157,10 +158,13 @@ module Truncate = {
       : result(node, string) => {
     t
     |> trySimplification(leftCutoff, rightCutoff)
-    |> fun
-       | `Solution(t) => Ok(t)
-       | `Error(e) => Error(e)
-       | `NoSolution => truncateAsShape(toLeaf, renderParams, leftCutoff, rightCutoff, t);
+    |> (
+      fun
+      | `Solution(t) => Ok(t)
+      | `Error(e) => Error(e)
+      | `NoSolution =>
+        truncateAsShape(toLeaf, renderParams, leftCutoff, rightCutoff, t)
+    );
   };
 };
 
@@ -169,7 +173,7 @@ module Normalize = {
           (toLeaf, renderParams, t: node): result(node, string) => {
     switch (t) {
     | `RenderedDist(s) =>
-        Ok(`RenderedDist(Distributions.Shape.T.normalize(s)));
+      Ok(`RenderedDist(Distributions.Shape.T.normalize(s)))
     | `SymbolicDist(_) => Ok(t)
     | _ =>
       t
