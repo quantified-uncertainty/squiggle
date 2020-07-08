@@ -29,7 +29,7 @@ module AlgebraicCombination = {
     | (Ok(`RenderedDist(s1)), Ok(`RenderedDist(s2))) =>
       Ok(
         `RenderedDist(
-          Distributions.Shape.combineAlgebraically(algebraicOp, s1, s2),
+          Shape.combineAlgebraically(algebraicOp, s1, s2),
         ),
       )
     | (Error(e1), _) => Error(e1)
@@ -68,7 +68,7 @@ module VerticalScaling = {
     | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(sm))) =>
       Ok(
         `RenderedDist(
-          Distributions.Shape.T.mapY(
+          Shape.T.mapY(
             ~knownIntegralSumFn=knownIntegralSumFn(sm),
             fn(sm),
             rs,
@@ -87,7 +87,7 @@ module PointwiseCombination = {
     | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
       Ok(
         `RenderedDist(
-          Distributions.Shape.combinePointwise(
+          Shape.combinePointwise(
             ~knownIntegralSumsFn=(a, b) => Some(a +. b),
             (+.),
             rs1,
@@ -141,7 +141,7 @@ module Truncate = {
     switch (render(evaluationParams, t)) {
     | Ok(`RenderedDist(rs)) =>
       let truncatedShape =
-        rs |> Distributions.Shape.T.truncate(leftCutoff, rightCutoff);
+        rs |> Shape.T.truncate(leftCutoff, rightCutoff);
       Ok(`RenderedDist(truncatedShape));
     | Error(e) => Error(e)
     | _ => Error("Could not truncate distribution.")
@@ -172,7 +172,7 @@ module Normalize = {
   let rec operationToLeaf = (evaluationParams, t: node): result(node, string) => {
     switch (t) {
     | `RenderedDist(s) =>
-      Ok(`RenderedDist(Distributions.Shape.T.normalize(s)))
+      Ok(`RenderedDist(Shape.T.normalize(s)))
     | `SymbolicDist(_) => Ok(t)
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     };
@@ -188,7 +188,7 @@ module FloatFromDist = {
       SymbolicDist.T.operate(distToFloatOp, s)
       |> E.R.bind(_, v => Ok(`SymbolicDist(`Float(v))))
     | `RenderedDist(rs) =>
-      Distributions.Shape.operate(distToFloatOp, rs)
+      Shape.operate(distToFloatOp, rs)
       |> (v => Ok(`SymbolicDist(`Float(v))))
     | _ =>
       t

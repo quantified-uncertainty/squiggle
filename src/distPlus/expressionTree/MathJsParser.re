@@ -217,12 +217,12 @@ module MathAdtToDistDst = {
       |> E.A.O.concatSomes;
     let outputs = Samples.T.fromSamples(samples);
     let pdf =
-      outputs.shape |> E.O.bind(_, Distributions.Shape.T.toContinuous);
+      outputs.shape |> E.O.bind(_, Shape.T.toContinuous);
     let shape =
       pdf
       |> E.O.fmap(pdf => {
-           let _pdf = Distributions.Continuous.T.normalize(pdf);
-           let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
+           let _pdf = Continuous.T.normalize(pdf);
+           let cdf = Continuous.T.integral(~cache=None, _pdf);
            SymbolicDist.ContinuousShape.make(_pdf, cdf);
          });
     switch (shape) {

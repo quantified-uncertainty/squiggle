@@ -120,7 +120,7 @@ module T = {
       |> E.FloatFloatMap.fmap(r => r /. length)
       |> E.FloatFloatMap.toArray
       |> XYShape.T.fromZippedArray
-      |> Distributions.Discrete.make(_, None);
+      |> Discrete.make(_, None);
 
     let pdf =
       continuousPart |> E.A.length > 5
@@ -150,7 +150,7 @@ module T = {
                ~outputXYPoints=samplingInputs.outputXYPoints,
                formatUnitWidth(usedUnitWidth),
              )
-          |> Distributions.Continuous.make(`Linear, _, None)
+          |> Continuous.make(`Linear, _, None)
           |> (r => Some((r, foo)));
         }
         : None;

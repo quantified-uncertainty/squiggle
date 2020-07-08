@@ -87,7 +87,7 @@ let table = (distPlus, x) => {
             {distPlus
              |> DistPlus.T.toContinuous
              |> E.O.fmap(
-                  Distributions.Continuous.T.Integral.sum(~cache=None),
+                  Continuous.T.Integral.sum(~cache=None),
                 )
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
@@ -97,7 +97,7 @@ let table = (distPlus, x) => {
             {distPlus
              |> DistPlus.T.normalizedToContinuous
              |> E.O.fmap(
-                  Distributions.Continuous.T.Integral.sum(~cache=None),
+                  Continuous.T.Integral.sum(~cache=None),
                 )
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
@@ -106,7 +106,7 @@ let table = (distPlus, x) => {
           <td className="px-4 py-2 border ">
             {distPlus
              |> DistPlus.T.toDiscrete
-             |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
+             |> E.O.fmap(Discrete.T.Integral.sum(~cache=None))
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
              |> ReasonReact.string}
@@ -114,7 +114,7 @@ let table = (distPlus, x) => {
           <td className="px-4 py-2 border ">
             {distPlus
              |> DistPlus.T.normalizedToDiscrete
-             |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
+             |> E.O.fmap(Discrete.T.Integral.sum(~cache=None))
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
              |> ReasonReact.string}
@@ -225,11 +225,11 @@ module DistPlusChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
     open DistPlus;
-    let discrete = distPlus |> T.normalizedToDiscrete |> E.O.fmap(Distributions.Discrete.getShape);
+    let discrete = distPlus |> T.normalizedToDiscrete |> E.O.fmap(Discrete.getShape);
     let continuous =
       distPlus
       |> T.normalizedToContinuous
-      |> E.O.fmap(Distributions.Continuous.getShape);
+      |> E.O.fmap(Continuous.getShape);
     let range = T.xTotalRange(distPlus);
 
     // // We subtract a bit from the range to make sure that it fits. Maybe this should be done in d3 instead.
@@ -280,8 +280,8 @@ module IntegralChart = {
     let integral = distPlus.integralCache;
     let continuous =
       integral
-      |> Distributions.Continuous.toLinear
-      |> E.O.fmap(Distributions.Continuous.getShape);
+      |> Continuous.toLinear
+      |> E.O.fmap(Continuous.getShape);
     let minX = {
       distPlus |> DistPlus.T.Integral.yToX(~cache=None, 0.00001);
     };

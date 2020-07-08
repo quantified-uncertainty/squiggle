@@ -23,7 +23,7 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 
 // describe("Shape", () => {
 //   describe("Continuous", () => {
-//     open Distributions.Continuous;
+//     open Continuous;
 //     let continuous = make(`Linear, shape, None);
 //     makeTest("minX", T.minX(continuous), 1.0);
 //     makeTest("maxX", T.maxX(continuous), 8.0);
@@ -130,7 +130,7 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //   });
 
 //   describe("Discrete", () => {
-//     open Distributions.Discrete;
+//     open Discrete;
 //     let shape: DistTypes.xyShape = {
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
@@ -181,7 +181,7 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //     makeTest(
 //       "integral",
 //       T.Integral.get(~cache=None, discrete),
-//       Distributions.Continuous.make(
+//       Continuous.make(
 //         `Stepwise,
 //         {xs: [|1., 4., 8.|], ys: [|0.3, 0.8, 1.0|]},
 //         None
@@ -189,8 +189,8 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //     );
 //     makeTest(
 //       "integral with 1 element",
-//       T.Integral.get(~cache=None, Distributions.Discrete.make({xs: [|0.0|], ys: [|1.0|]}, None)),
-//       Distributions.Continuous.make(`Stepwise, {xs: [|0.0|], ys: [|1.0|]}, None),
+//       T.Integral.get(~cache=None, Discrete.make({xs: [|0.0|], ys: [|1.0|]}, None)),
+//       Continuous.make(`Stepwise, {xs: [|0.0|], ys: [|1.0|]}, None),
 //     );
 //     makeTest(
 //       "integralXToY",
@@ -213,15 +213,15 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
 //     };
-//     let discrete = Distributions.Discrete.make(discreteShape, None);
+//     let discrete = Discrete.make(discreteShape, None);
 //     let continuous =
-//       Distributions.Continuous.make(
+//       Continuous.make(
 //         `Linear,
 //         {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
 //         None
 //       )
-//       |> Distributions.Continuous.T.normalize; //scaleToIntegralSum(~intendedSum=1.0);
-//     let mixed = Distributions.Mixed.make(
+//       |> Continuous.T.normalize; //scaleToIntegralSum(~intendedSum=1.0);
+//     let mixed = Mixed.make(
 //         ~continuous,
 //         ~discrete,
 //       );
@@ -230,9 +230,9 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //     makeTest(
 //       "mapY",
 //       T.mapY(r => r *. 2.0, mixed),
-//       Distributions.Mixed.make(
+//       Mixed.make(
 //         ~continuous=
-//           Distributions.Continuous.make(
+//           Continuous.make(
 //             `Linear,
 //             {
 //               xs: [|3., 7., 14.|],
@@ -244,7 +244,7 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //             },
 //             None
 //           ),
-//         ~discrete=Distributions.Discrete.make({xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]}, None)
+//         ~discrete=Discrete.make({xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]}, None)
 //       ),
 //     );
 //     makeTest(
@@ -265,10 +265,10 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //     makeTest("integralEndY", T.Integral.sum(~cache=None, mixed), 1.0);
 //     makeTest(
 //       "scaleBy",
-//       Distributions.Mixed.scaleBy(~scale=2.0, mixed),
-//       Distributions.Mixed.make(
+//       Mixed.scaleBy(~scale=2.0, mixed),
+//       Mixed.make(
 //         ~continuous=
-//           Distributions.Continuous.make(
+//           Continuous.make(
 //             `Linear,
 //             {
 //               xs: [|3., 7., 14.|],
@@ -280,13 +280,13 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //             },
 //             None
 //           ),
-//         ~discrete=Distributions.Discrete.make({xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]}, None),
+//         ~discrete=Discrete.make({xs: [|1., 4., 8.|], ys: [|0.6, 1.0, 0.4|]}, None),
 //       ),
 //     );
 //     makeTest(
 //       "integral",
 //       T.Integral.get(~cache=None, mixed),
-//       Distributions.Continuous.make(
+//       Continuous.make(
 //         `Linear,
 //         {
 //           xs: [|1.00007, 1.00007, 3., 4., 4.00007, 7., 8., 8.00007, 14.|],
@@ -313,16 +313,16 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
 //     };
-//     let discrete = Distributions.Discrete.make(discreteShape, None);
+//     let discrete = Discrete.make(discreteShape, None);
 //     let continuous =
-//       Distributions.Continuous.make(
+//       Continuous.make(
 //         `Linear,
 //         {xs: [|3., 7., 14.|], ys: [|0.058, 0.082, 0.124|]},
 //         None
 //       )
-//       |> Distributions.Continuous.T.normalize; //scaleToIntegralSum(~intendedSum=1.0);
+//       |> Continuous.T.normalize; //scaleToIntegralSum(~intendedSum=1.0);
 //     let mixed =
-//       Distributions.Mixed.make(
+//       Mixed.make(
 //         ~continuous,
 //         ~discrete,
 //       );
@@ -354,7 +354,7 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //       "integral",
 //       T.Integral.get(~cache=None, distPlus) |> T.toContinuous,
 //       Some(
-//         Distributions.Continuous.make(
+//         Continuous.make(
 //           `Linear,
 //           {
 //             xs: [|1.00007, 1.00007, 3., 4., 4.00007, 7., 8., 8.00007, 14.|],

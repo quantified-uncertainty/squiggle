@@ -3,7 +3,7 @@ open DistTypes;
 type t = DistTypes.distPlus;
 
 let shapeIntegral = shape =>
-  Distributions.Shape.T.Integral.get(~cache=None, shape);
+  Shape.T.Integral.get(~cache=None, shape);
 let make =
     (
       ~shape,
@@ -53,11 +53,11 @@ module T =
     type t = DistTypes.distPlus;
     type integral = DistTypes.distPlus;
     let toShape = toShape;
-    let toContinuous = shapeFn(Distributions.Shape.T.toContinuous);
-    let toDiscrete = shapeFn(Distributions.Shape.T.toDiscrete);
+    let toContinuous = shapeFn(Shape.T.toContinuous);
+    let toDiscrete = shapeFn(Shape.T.toDiscrete);
 
     let normalize = (t: t): t => {
-      let normalizedShape = t |> toShape |> Distributions.Shape.T.normalize;
+      let normalizedShape = t |> toShape |> Shape.T.normalize;
       t |> updateShape(normalizedShape);
       // TODO: also adjust for domainIncludedProbabilityMass here.
     };
@@ -66,7 +66,7 @@ module T =
       let truncatedShape =
         t
         |> toShape
-        |> Distributions.Shape.T.truncate(leftCutoff, rightCutoff);
+        |> Shape.T.truncate(leftCutoff, rightCutoff);
 
       t |> updateShape(truncatedShape);
     };
@@ -74,9 +74,9 @@ module T =
     let normalizedToContinuous = (t: t) => {
       t
       |> toShape
-      |> Distributions.Shape.T.normalizedToContinuous
+      |> Shape.T.normalizedToContinuous
       |> E.O.fmap(
-           Distributions.Continuous.T.mapY(
+           Continuous.T.mapY(
              domainIncludedProbabilityMassAdjustment(t),
            ),
          );
@@ -85,9 +85,9 @@ module T =
     let normalizedToDiscrete = (t: t) => {
       t
       |> toShape
-      |> Distributions.Shape.T.normalizedToDiscrete
+      |> Shape.T.normalizedToDiscrete
       |> E.O.fmap(
-           Distributions.Discrete.T.mapY(
+           Discrete.T.mapY(
              domainIncludedProbabilityMassAdjustment(t),
            ),
          );
@@ -96,20 +96,20 @@ module T =
     let xToY = (f, t: t) =>
       t
       |> toShape
-      |> Distributions.Shape.T.xToY(f)
+      |> Shape.T.xToY(f)
       |> MixedPoint.fmap(domainIncludedProbabilityMassAdjustment(t));
 
-    let minX = shapeFn(Distributions.Shape.T.minX);
-    let maxX = shapeFn(Distributions.Shape.T.maxX);
+    let minX = shapeFn(Shape.T.minX);
+    let maxX = shapeFn(Shape.T.maxX);
     let toDiscreteProbabilityMassFraction =
-      shapeFn(Distributions.Shape.T.toDiscreteProbabilityMassFraction);
+      shapeFn(Shape.T.toDiscreteProbabilityMassFraction);
 
     // This bit is kind of awkward, could probably use rethinking.
     let integral = (~cache, t: t) =>
       updateShape(Continuous(t.integralCache), t);
 
     let downsample = (~cache=None, i, t): t =>
-      updateShape(t |> toShape |> Distributions.Shape.T.downsample(i), t);
+      updateShape(t |> toShape |> Shape.T.downsample(i), t);
     // todo: adjust for limit, maybe?
     let mapY =
         (
@@ -118,12 +118,12 @@ module T =
           {shape, _} as t: t,
         )
         : t =>
-      Distributions.Shape.T.mapY(~knownIntegralSumFn, fn, shape)
+      Shape.T.mapY(~knownIntegralSumFn, fn, shape)
       |> updateShape(_, t);
 
     // get the total of everything
     let integralEndY = (~cache as _, t: t) => {
-      Distributions.Shape.T.Integral.sum(
+      Shape.T.Integral.sum(
         ~cache=Some(t.integralCache),
         toShape(t),
       );
@@ -131,7 +131,7 @@ module T =
 
     //   TODO: Fix this below, obviously. Adjust for limits
     let integralXtoY = (~cache as _, f, t: t) => {
-      Distributions.Shape.T.Integral.xToY(
+      Shape.T.Integral.xToY(
         ~cache=Some(t.integralCache),
         f,
         toShape(t),
@@ -141,11 +141,11 @@ module T =
 
     // TODO: This part is broken when there is a limit, if this is supposed to be taken into account.
     let integralYtoX = (~cache as _, f, t: t) => {
-      Distributions.Shape.T.Integral.yToX(~cache=None, f, toShape(t));
+      Shape.T.Integral.yToX(~cache=None, f, toShape(t));
     };
 
     let mean = (t: t) => {
-      Distributions.Shape.T.mean(t.shape);
+      Shape.T.mean(t.shape);
     };
-    let variance = (t: t) => Distributions.Shape.T.variance(t.shape);
+    let variance = (t: t) => Shape.T.variance(t.shape);
   });

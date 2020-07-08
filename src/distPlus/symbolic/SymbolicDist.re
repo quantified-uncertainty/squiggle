@@ -4,10 +4,10 @@ module ContinuousShape = {
   type t = continuousShape;
   let make = (pdf, cdf): t => {pdf, cdf};
   let pdf = (x, t: t) =>
-    Distributions.Continuous.T.xToY(x, t.pdf).continuous;
+    Continuous.T.xToY(x, t.pdf).continuous;
   // TODO: pdf and inv are currently the same, this seems broken.
   let inv = (p, t: t) =>
-    Distributions.Continuous.T.xToY(p, t.pdf).continuous;
+    Continuous.T.xToY(p, t.pdf).continuous;
   // TODO: Fix the sampling, to have it work correctly.
   let sample = (t: t) => 3.0;
   // TODO: Fix the mean, to have it work correctly.
@@ -300,13 +300,13 @@ module T = {
     switch (d) {
     | `Float(v) =>
       Discrete(
-        Distributions.Discrete.make({xs: [|v|], ys: [|1.0|]}, Some(1.0)),
+        Discrete.make({xs: [|v|], ys: [|1.0|]}, Some(1.0)),
       )
     | _ =>
       let xs = interpolateXs(~xSelection=`ByWeight, d, sampleCount);
       let ys = xs |> E.A.fmap(x => pdf(x, d));
       Continuous(
-        Distributions.Continuous.make(`Linear, {xs, ys}, Some(1.0)),
+        Continuous.make(`Linear, {xs, ys}, Some(1.0)),
       );
     };
 };

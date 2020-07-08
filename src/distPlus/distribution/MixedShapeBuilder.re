@@ -9,25 +9,25 @@ type assumptions = {
 };
 
 let buildSimple = (~continuous: option(DistTypes.continuousShape), ~discrete: option(DistTypes.discreteShape)): option(DistTypes.shape) => {
-  let continuous = continuous |> E.O.default(Distributions.Continuous.make(`Linear, {xs: [||], ys: [||]}, Some(0.0)));
-  let discrete = discrete |> E.O.default(Distributions.Discrete.make({xs: [||], ys: [||]}, Some(0.0)));
+  let continuous = continuous |> E.O.default(Continuous.make(`Linear, {xs: [||], ys: [||]}, Some(0.0)));
+  let discrete = discrete |> E.O.default(Discrete.make({xs: [||], ys: [||]}, Some(0.0)));
   let cLength =
     continuous
-    |> Distributions.Continuous.getShape
+    |> Continuous.getShape
     |> XYShape.T.xs
     |> E.A.length;
-  let dLength = discrete |> Distributions.Discrete.getShape |> XYShape.T.xs |> E.A.length;
+  let dLength = discrete |> Discrete.getShape |> XYShape.T.xs |> E.A.length;
   switch (cLength, dLength) {
   | (0 | 1, 0) => None
   | (0 | 1, _) => Some(Discrete(discrete))
   | (_, 0) => Some(Continuous(continuous))
   | (_, _) =>
     let discreteProbabilityMassFraction =
-      Distributions.Discrete.T.Integral.sum(~cache=None, discrete);
-    let discrete = Distributions.Discrete.T.normalize(discrete);
-    let continuous = Distributions.Continuous.T.normalize(continuous);
+      Discrete.T.Integral.sum(~cache=None, discrete);
+    let discrete = Discrete.T.normalize(discrete);
+    let continuous = Continuous.T.normalize(continuous);
     let mixedDist =
-      Distributions.Mixed.make(
+      Mixed.make(
         ~continuous,
         ~discrete
       );
