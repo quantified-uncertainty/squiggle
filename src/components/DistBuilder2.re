@@ -41,7 +41,7 @@ module DemoDist = {
         ? "Nothing to show" |> R.ste
         : {
           let distPlus =
-            Distributions.DistPlus.make(
+            DistPlus.make(
               ~shape=
                 Continuous(
                   Distributions.Continuous.make(`Linear, {xs, ys}, None),
@@ -51,7 +51,7 @@ module DemoDist = {
               ~guesstimatorString=None,
               (),
             )
-            |> Distributions.DistPlus.T.normalize;
+            |> DistPlus.T.normalize;
           <DistPlusPlot distPlus />;
         };
     <Antd.Card title={"Distribution" |> R.ste}>

@@ -51,14 +51,14 @@ module DemoDist = {
       shape
       |> E.O.fmap(shape => {
            let distPlus =
-             Distributions.DistPlus.make(
+             DistPlus.make(
                ~shape,
                ~domain=Complete,
                ~unit=UnspecifiedDistribution,
                ~guesstimatorString=None,
                (),
              )
-             |> Distributions.DistPlus.T.normalize;
+             |> DistPlus.T.normalize;
            <DistPlusPlot distPlus />;
          })
       |> E.O.default(ReasonReact.null);
