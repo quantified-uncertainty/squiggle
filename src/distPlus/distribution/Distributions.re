@@ -98,7 +98,7 @@ module Continuous = {
   let combinePointwise =
       (
         ~knownIntegralSumsFn,
-        fn: (float => float => float),
+        fn: (float, float) => float,
         t1: DistTypes.continuousShape,
         t2: DistTypes.continuousShape,
       )
@@ -217,9 +217,7 @@ module Continuous = {
       let integral = (~cache, t) =>
         if (t |> getShape |> XYShape.T.length > 0) {
           switch (cache) {
-          | Some(cache) => {
-              cache;
-              }
+          | Some(cache) => cache
           | None =>
             t
             |> getShape
@@ -243,7 +241,7 @@ module Continuous = {
         t.knownIntegralSum |> E.O.default(t |> integral(~cache) |> lastY);
       let integralXtoY = (~cache, f, t: t) =>
         t |> integral(~cache) |> shapeFn(XYShape.XtoY.linear(f));
-    let integralYtoX = (~cache, f, t: t) =>
+      let integralYtoX = (~cache, f, t: t) =>
         t |> integral(~cache) |> shapeFn(XYShape.YtoX.linear(f));
       let toContinuous = t => Some(t);
       let toDiscrete = _ => None;
@@ -1236,7 +1234,7 @@ module DistPlus = {
       // get the total of everything
       let integralEndY = (~cache as _, t: t) => {
         Shape.T.Integral.sum(~cache=Some(t.integralCache), toShape(t));
-      }
+      };
 
       //   TODO: Fix this below, obviously. Adjust for limits
       let integralXtoY = (~cache as _, f, t: t) => {

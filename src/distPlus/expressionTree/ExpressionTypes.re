@@ -16,11 +16,6 @@ module ExpressionTree = {
     | `FloatFromDist(distToFloatOperation, node)
   ];
 
-  type dist = [
-    | `SymbolicDist(SymbolicTypes.symbolicDist)
-    | `RenderedDist(DistTypes.shape)
-  ];
-
   type evaluationParams = {
     sampleCount: int,
     evaluateNode: (evaluationParams, node) => Belt.Result.t(node, string),
