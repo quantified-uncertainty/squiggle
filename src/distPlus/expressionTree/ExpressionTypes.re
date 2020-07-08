@@ -5,10 +5,8 @@ type distToFloatOperation = [ | `Pdf(float) | `Inv(float) | `Mean | `Sample];
 
 module ExpressionTree = {
   type node = [
-    // leaf nodes:
     | `SymbolicDist(SymbolicTypes.symbolicDist)
     | `RenderedDist(DistTypes.shape)
-    // operations:
     | `AlgebraicCombination(algebraicOperation, node, node)
     | `PointwiseCombination(pointwiseOperation, node, node)
     | `VerticalScaling(scaleOperation, node, node)
@@ -17,6 +15,22 @@ module ExpressionTree = {
     | `Normalize(node)
     | `FloatFromDist(distToFloatOperation, node)
   ];
+
+  type dist = [
+    | `SymbolicDist(SymbolicTypes.symbolicDist)
+    | `RenderedDist(DistTypes.shape)
+  ]
+
+  type evaluationParams = {
+    sampleCount: int,
+    evaluateNode: (evaluationParams, node) => Belt.Result.t(node, string),
+  };
+
+  let evaluateNode = (evaluationParams: evaluationParams) =>
+    evaluationParams.evaluateNode(evaluationParams);
+
+  let render = (evaluationParams: evaluationParams, r) =>
+    evaluateNode(evaluationParams, `Render(r));
 };
 
 type simplificationResult = [

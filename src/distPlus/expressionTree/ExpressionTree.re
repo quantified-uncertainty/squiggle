@@ -3,7 +3,7 @@ open ExpressionTypes.ExpressionTree;
 let toShape = (sampleCount: int, node: node) => {
   let renderResult =
     `Render(`Normalize(node))
-    |> ExpressionTreeEvaluator.toLeaf({sampleCount: sampleCount});
+    |> ExpressionTreeEvaluator.toLeaf({sampleCount: sampleCount, evaluateNode: ExpressionTreeEvaluator.toLeaf});
 
   switch (renderResult) {
   | Ok(`RenderedDist(rs)) =>
