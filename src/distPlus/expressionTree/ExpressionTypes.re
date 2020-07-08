@@ -19,7 +19,7 @@ module ExpressionTree = {
   type dist = [
     | `SymbolicDist(SymbolicTypes.symbolicDist)
     | `RenderedDist(DistTypes.shape)
-  ]
+  ];
 
   type evaluationParams = {
     sampleCount: int,
@@ -31,6 +31,9 @@ module ExpressionTree = {
 
   let render = (evaluationParams: evaluationParams, r) =>
     evaluateNode(evaluationParams, `Render(r));
+
+  let evaluateAndRetry = (evaluationParams, fn, node) =>
+    node |> evaluationParams.evaluateNode(evaluationParams) |> E.R.bind(_, fn(evaluationParams));
 };
 
 type simplificationResult = [

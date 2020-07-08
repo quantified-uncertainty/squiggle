@@ -174,10 +174,7 @@ module Normalize = {
     | `RenderedDist(s) =>
       Ok(`RenderedDist(Distributions.Shape.T.normalize(s)))
     | `SymbolicDist(_) => Ok(t)
-    | _ =>
-      t
-      |> evaluateNode(evaluationParams)
-      |> E.R.bind(_, operationToLeaf(evaluationParams))
+    | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     };
   };
 };
@@ -195,8 +192,9 @@ module FloatFromDist = {
       |> (v => Ok(`SymbolicDist(`Float(v))))
     | _ =>
       t
-      |> evaluateNode(evaluationParams)
-      |> E.R.bind(_, operationToLeaf(evaluationParams, distToFloatOp))
+      |> evaluateAndRetry(evaluationParams, r =>
+           operationToLeaf(r, distToFloatOp)
+         )
     };
   };
 };
@@ -212,10 +210,7 @@ module Render = {
         ),
       )
     | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here
-    | _ =>
-      t
-      |> evaluateNode(evaluationParams)
-      |> E.R.bind(_, operationToLeaf(evaluationParams))
+    | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     };
   };
 };
@@ -227,11 +222,11 @@ module Render = {
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
 let toLeaf =
-        (
-          evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
-          node: t,
-        )
-        : result(t, string) => {
+    (
+      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+      node: t,
+    )
+    : result(t, string) => {
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)
