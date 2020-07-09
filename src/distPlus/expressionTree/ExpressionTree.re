@@ -3,12 +3,13 @@ open ExpressionTypes.ExpressionTree;
 let toShape = (sampleCount: int, node: node) => {
   let renderResult =
     `Render(`Normalize(node))
-    |> ExpressionTreeEvaluator.toLeaf({sampleCount: sampleCount});
+    |> ExpressionTreeEvaluator.toLeaf({sampleCount: sampleCount, evaluateNode: ExpressionTreeEvaluator.toLeaf});
 
   switch (renderResult) {
   | Ok(`RenderedDist(rs)) =>
-    let continuous = Distributions.Shape.T.toContinuous(rs);
-    let discrete = Distributions.Shape.T.toDiscrete(rs);
+    // todo: Why is this here? It converts a mixed shape to a mixed shape.
+    let continuous = Shape.T.toContinuous(rs);
+    let discrete = Shape.T.toDiscrete(rs);
     let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
     shape |> E.O.toExt("Could not build final shape.");
   | Ok(_) => E.O.toExn("Rendering failed.", None)

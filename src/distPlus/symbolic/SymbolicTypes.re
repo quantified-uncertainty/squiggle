@@ -31,11 +31,6 @@ type triangular = {
   high: float,
 };
 
-type continuousShape = {
-  pdf: DistTypes.continuousShape,
-  cdf: DistTypes.continuousShape,
-};
-
 type symbolicDist = [
   | `Normal(normal)
   | `Beta(beta)
@@ -44,7 +39,6 @@ type symbolicDist = [
   | `Exponential(exponential)
   | `Cauchy(cauchy)
   | `Triangular(triangular)
-  | `ContinuousShape(continuousShape)
   | `Float(float) // Dirac delta at x. Practically useful only in the context of multimodals.
 ];
 

@@ -28,7 +28,6 @@ type discreteShape = {
 type mixedShape = {
   continuous: continuousShape,
   discrete: discreteShape,
-//  discreteProbabilityMassFraction: float,
 };
 
 type shapeMonad('a, 'b, 'c) =
