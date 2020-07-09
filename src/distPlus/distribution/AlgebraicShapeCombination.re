@@ -208,3 +208,175 @@ let combineShapesContinuousContinuous =
 
   {xs: outputXs, ys: outputYs};
 };
+
+let toDiscretePointMassesFromDiscrete = (s: DistTypes.xyShape): pointMassesWithMoments => {
+  let n = s |> XYShape.T.length;
+  let {xs, ys}: XYShape.T.t = s;
+  let n = E.A.length(xs);
+
+  let masses: array(float) = Belt.Array.makeUninitializedUnsafe(n); // doesn't include the fake first and last points
+  let means: array(float) = Belt.Array.makeUninitializedUnsafe(n);
+  let variances: array(float) = Belt.Array.makeUninitializedUnsafe(n);
+
+  for (i in 0 to n - 1) {
+    let _ =
+      Belt.Array.set(
+        masses,
+        i,
+        ys[i]
+      );
+
+    let _ =
+      Belt.Array.set(
+        means,
+        i,
+        xs[i]
+      );
+
+    let _ =
+      Belt.Array.set(
+        variances,
+        i,
+        0.0
+      );
+    ();
+  };
+
+  {n, masses, means, variances};
+};
+
+let combineShapesContinuousDiscreteAdd =
+    (op: ExpressionTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
+  : DistTypes.xyShape => {
+  let t1n = s1 |> XYShape.T.length;
+  let t2n = s2 |> XYShape.T.length;
+
+  // each x pair is added/subtracted
+  let fn = Operation.Algebraic.toFn(op);
+
+  let outXYShapes: array(array((float, float))) =
+    Belt.Array.makeUninitializedUnsafe(t2n);
+
+  for (j in 0 to t2n - 1) {
+    // for each one of the discrete points
+    // create a new distribution, as long as the original continuous one
+
+    let dxyShape: array((float, float)) =
+      Belt.Array.makeUninitializedUnsafe(t1n);
+    for (i in 0 to t1n - 1) {
+      let _ =
+        Belt.Array.set(
+          dxyShape,
+          i,
+          (fn(s1.xs[i], s2.xs[j]), s1.ys[i] *. s2.ys[j]),
+        );
+      ();
+    };
+
+    let _ = Belt.Array.set(outXYShapes, j, dxyShape);
+    ();
+  };
+
+  outXYShapes
+  |> E.A.fold_left(XYShape.PointwiseCombination.combineLinear((+.)), XYShape.T.empty);
+};
+
+let combineShapesContinuousDiscreteMultiply =
+    (op: ExpressionTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
+  : DistTypes.xyShape => {
+  let t1n = s1 |> XYShape.T.length;
+  let t2n = s2 |> XYShape.T.length;
+
+  let t1m = toDiscretePointMassesFromTriangulars(s1);
+  let t2m = toDiscretePointMassesFromDiscrete(s2);
+
+  let combineMeansFn =
+    switch (op) {
+    | `Add => ((m1, m2) => m1 +. m2)
+    | `Subtract => ((m1, m2) => m1 -. m2)
+    | `Multiply => ((m1, m2) => m1 *. m2)
+    | `Divide => ((m1, m2) => m1 /. m2)
+    };
+
+  let combineVariancesFn =
+    switch (op) {
+    | `Add
+    | `Subtract => ((v1, v2, _, _) => v1 +. v2)
+    | `Multiply
+    | `Divide => (
+        (v1, v2, m1, m2) => v1 *. m2 ** 2.
+      )
+    };
+
+  let outputMinX: ref(float) = ref(infinity);
+  let outputMaxX: ref(float) = ref(neg_infinity);
+  let masses: array(float) =
+    Belt.Array.makeUninitializedUnsafe(t1m.n * t2m.n);
+  let means: array(float) =
+    Belt.Array.makeUninitializedUnsafe(t1m.n * t2m.n);
+  let variances: array(float) =
+    Belt.Array.makeUninitializedUnsafe(t1m.n * t2m.n);
+  // then convolve the two sets of pointMassesWithMoments
+  for (i in 0 to t1m.n - 1) {
+    for (j in 0 to t2m.n - 1) {
+      let k = i * t2m.n + j;
+      let _ = Belt.Array.set(masses, k, t1m.masses[i] *. t2m.masses[j]);
+
+      let mean = combineMeansFn(t1m.means[i], t2m.means[j]);
+      let variance =
+        combineVariancesFn(
+          t1m.variances[i],
+          t2m.variances[j],
+          t1m.means[i],
+          t2m.means[j],
+        );
+      let _ = Belt.Array.set(means, k, mean);
+      let _ = Belt.Array.set(variances, k, variance);
+
+      // update bounds
+      let minX = mean -. 2. *. sqrt(variance) *. 1.644854;
+      let maxX = mean +. 2. *. sqrt(variance) *. 1.644854;
+      if (minX < outputMinX^) {
+        outputMinX := minX;
+      };
+      if (maxX > outputMaxX^) {
+        outputMaxX := maxX;
+      };
+    };
+  };
+  
+
+  // we now want to create a set of target points. For now, let's just evenly distribute 200 points between
+  // between the outputMinX and outputMaxX
+  let nOut = 300;
+  let outputXs: array(float) = E.A.Floats.range(outputMinX^, outputMaxX^, nOut);
+  let outputYs: array(float) = Belt.Array.make(nOut, 0.0);
+  // now, for each of the outputYs, accumulate from a Gaussian kernel over each input point.
+  for (j in 0 to E.A.length(masses) - 1) { // go through all of the result points
+    let _ = if (variances[j] > 0. && masses[j] > 0.) {
+      for (i in 0 to E.A.length(outputXs) - 1) { // go through all of the target points
+        let dx = outputXs[i] -. means[j];
+        let contribution = masses[j] *. exp(-. (dx ** 2.) /. (2. *. variances[j])) /. (sqrt(2. *. 3.14159276 *. variances[j]));
+        let _ = Belt.Array.set(outputYs, i, outputYs[i] +. contribution);
+        ();
+      };
+      ();
+    };
+    ();
+  };
+
+  {xs: outputXs, ys: outputYs};
+};
+
+let combineShapesContinuousDiscrete =
+    (op: ExpressionTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
+    : DistTypes.xyShape => {
+
+    switch (op) {
+    | `Add
+    | `Subtract => combineShapesContinuousDiscreteAdd(op, s1, s2);
+    | `Multiply
+    | `Divide => combineShapesContinuousDiscreteMultiply(op, s1, s2);
+    };
+
+};

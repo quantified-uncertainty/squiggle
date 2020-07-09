@@ -235,7 +235,7 @@ module Continuous = {
         t
         |> shapeMap(
              XYShape.XsConversion.proportionByProbabilityMass(
-               length,
+          length,
                integral(~cache, t).xyShape,
              ),
            );
@@ -280,60 +280,37 @@ module Continuous = {
      each discrete data point, and then adds them all together. */
   let combineAlgebraicallyWithDiscrete =
       (
-        ~downsample=false,
         op: ExpressionTypes.algebraicOperation,
         t1: t,
         t2: DistTypes.discreteShape,
       ) => {
-    let t1s = t1 |> getShape;
-    let t2s = t2.xyShape; // would like to use Discrete.getShape here, but current file structure doesn't allow for that
-    let t1n = t1s |> XYShape.T.length;
-    let t2n = t2s |> XYShape.T.length;
 
-    let fn = Operation.Algebraic.toFn(op);
-
-    let outXYShapes: array(array((float, float))) =
-      Belt.Array.makeUninitializedUnsafe(t2n);
-
-    for (j in 0 to t2n - 1) {
-      // for each one of the discrete points
-      // create a new distribution, as long as the original continuous one
-
-      let dxyShape: array((float, float)) =
-        Belt.Array.makeUninitializedUnsafe(t1n);
-      for (i in 0 to t1n - 1) {
-        let _ =
-          Belt.Array.set(
-            dxyShape,
-            i,
-            (fn(t1s.xs[i], t2s.xs[j]), t1s.ys[i] *. t2s.ys[j]),
-          );
-        ();
-      };
-
-      let _ = Belt.Array.set(outXYShapes, j, dxyShape);
-      ();
+    let s1 = t1 |> getShape;
+    let s2 = t2.xyShape;
+    let t1n = s1 |> XYShape.T.length;
+    let t2n = s2 |> XYShape.T.length;
+    if (t1n == 0 || t2n == 0) {
+      empty;
+    } else {
+      let combinedShape =
+        AlgebraicShapeCombination.combineShapesContinuousDiscrete(
+          op,
+          s1,
+          s2,
+        );
+      let combinedIntegralSum =
+        Common.combineIntegralSums(
+          (a, b) => Some(a *. b),
+          t1.knownIntegralSum,
+          t2.knownIntegralSum,
+        );
+      // return a new Continuous distribution
+      make(`Linear, combinedShape, combinedIntegralSum);
     };
-
-    let combinedIntegralSum =
-      Common.combineIntegralSums(
-        (a, b) => Some(a *. b),
-        t1.knownIntegralSum,
-        t2.knownIntegralSum,
-      );
-
-    outXYShapes
-    |> E.A.fmap(s => {
-         let xyShape = XYShape.T.fromZippedArray(s);
-         make(`Linear, xyShape, None);
-       })
-    |> reduce((+.))
-    |> updateKnownIntegralSum(combinedIntegralSum);
   };
 
   let combineAlgebraically =
       (
-        ~downsample=false,
         op: ExpressionTypes.algebraicOperation,
         t1: t,
         t2: t,
@@ -475,6 +452,7 @@ module Discrete = {
       type integral = DistTypes.continuousShape;
       let integral = (~cache, t) =>
         if (t |> getShape |> XYShape.T.length > 0) {
+          Js.log2("Integrating discrete shape", XYShape.T.accumulateYs((+.), getShape(t)));
           switch (cache) {
           | Some(c) => c
           | None =>
@@ -849,7 +827,6 @@ module Mixed = {
 
   let combineAlgebraically =
       (
-        ~downsample=false,
         op: ExpressionTypes.algebraicOperation,
         t1: t,
         t2: t,
@@ -861,33 +838,31 @@ module Mixed = {
     // An alternative (to be explored in the future) may be to first perform the full convolution and then to downsample the result;
     // to use non-uniform fast Fourier transforms (for addition only), add web workers or gpu.js, etc. ...
 
-    let downsampleIfTooLarge = (t: t) => {
-      let sqtl = sqrt(float_of_int(totalLength(t)));
-      sqtl > 10. && downsample ? T.downsample(int_of_float(sqtl), t) : t;
-    };
+    // we have to figure out where to downsample, and how to effectively
+    //let downsampleIfTooLarge = (t: t) => {
+    //  let sqtl = sqrt(float_of_int(totalLength(t)));
+    //  sqtl > 10 ? T.downsample(int_of_float(sqtl), t) : t;
+    //};
 
-    let t1d = downsampleIfTooLarge(t1);
-    let t2d = downsampleIfTooLarge(t2);
+    let t1d = t1; //downsampleIfTooLarge(t1);
+    let t2d = t2; //downsampleIfTooLarge(t2);
 
     // continuous (*) continuous => continuous, but also
     // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:
     let ccConvResult =
       Continuous.combineAlgebraically(
-        ~downsample=false,
         op,
         t1d.continuous,
         t2d.continuous,
       );
     let dcConvResult =
       Continuous.combineAlgebraicallyWithDiscrete(
-        ~downsample=false,
         op,
         t2d.continuous,
         t1d.discrete,
       );
     let cdConvResult =
       Continuous.combineAlgebraicallyWithDiscrete(
-        ~downsample=false,
         op,
         t1d.continuous,
         t2d.discrete,
@@ -931,14 +906,13 @@ module Shape = {
     switch (t1, t2) {
     | (Continuous(m1), Continuous(m2)) =>
       DistTypes.Continuous(
-        Continuous.combineAlgebraically(~downsample=true, op, m1, m2),
+        Continuous.combineAlgebraically(op, m1, m2),
       )
     | (Discrete(m1), Discrete(m2)) =>
       DistTypes.Discrete(Discrete.combineAlgebraically(op, m1, m2))
     | (m1, m2) =>
       DistTypes.Mixed(
         Mixed.combineAlgebraically(
-          ~downsample=true,
           op,
           toMixed(m1),
           toMixed(m2),
