@@ -27,14 +27,13 @@ let combineAlgebraically =
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     DistTypes.Continuous(
-      Continuous.combineAlgebraically(~downsample=true, op, m1, m2),
+      Continuous.combineAlgebraically(op, m1, m2),
     )
   | (Discrete(m1), Discrete(m2)) =>
     DistTypes.Discrete(Discrete.combineAlgebraically(op, m1, m2))
   | (m1, m2) =>
     DistTypes.Mixed(
       Mixed.combineAlgebraically(
-        ~downsample=true,
         op,
         toMixed(m1),
         toMixed(m2),

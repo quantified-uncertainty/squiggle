@@ -257,7 +257,7 @@ module T =
   });
 
 let combineAlgebraically =
-    (~downsample=false, op: ExpressionTypes.algebraicOperation, t1: t, t2: t)
+    (op: ExpressionTypes.algebraicOperation, t1: t, t2: t)
     : t => {
   // Discrete convolution can cause a huge increase in the number of samples,
   // so we'll first downsample.
@@ -265,33 +265,31 @@ let combineAlgebraically =
   // An alternative (to be explored in the future) may be to first perform the full convolution and then to downsample the result;
   // to use non-uniform fast Fourier transforms (for addition only), add web workers or gpu.js, etc. ...
 
-  let downsampleIfTooLarge = (t: t) => {
-    let sqtl = sqrt(float_of_int(totalLength(t)));
-    sqtl > 10. && downsample ? T.downsample(int_of_float(sqtl), t) : t;
-  };
+  // we have to figure out where to downsample, and how to effectively
+    //let downsampleIfTooLarge = (t: t) => {
+    //  let sqtl = sqrt(float_of_int(totalLength(t)));
+    //  sqtl > 10 ? T.downsample(int_of_float(sqtl), t) : t;
+    //};
 
-  let t1d = downsampleIfTooLarge(t1);
-  let t2d = downsampleIfTooLarge(t2);
+  let t1d = t1;
+  let t2d = t2;
 
   // continuous (*) continuous => continuous, but also
   // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:
   let ccConvResult =
     Continuous.combineAlgebraically(
-      ~downsample=false,
       op,
       t1d.continuous,
       t2d.continuous,
     );
   let dcConvResult =
     Continuous.combineAlgebraicallyWithDiscrete(
-      ~downsample=false,
       op,
       t2d.continuous,
       t1d.discrete,
     );
   let cdConvResult =
     Continuous.combineAlgebraicallyWithDiscrete(
-      ~downsample=false,
       op,
       t1d.continuous,
       t2d.discrete,
