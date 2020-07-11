@@ -29,6 +29,17 @@ module ExpressionTree = {
 
   let evaluateAndRetry = (evaluationParams, fn, node) =>
     node |> evaluationParams.evaluateNode(evaluationParams) |> E.R.bind(_, fn(evaluationParams));
+
+  let renderable = fun
+  | `SymbolicDist(_) => true
+  | `RenderedDist(_) => true
+  | _ => false;
+
+  let mapRenderable = (renderedFn, symFn, item: node) => switch(item) {
+  | `SymbolicDist(s) => Some(symFn(s))
+  | `RenderedDist(r) => Some(renderedFn(r))
+  | _ => None
+  }
 };
 
 type simplificationResult = [

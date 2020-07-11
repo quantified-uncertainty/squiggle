@@ -26,18 +26,12 @@ let combineAlgebraically =
     (op: ExpressionTypes.algebraicOperation, t1: t, t2: t): t => {
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
-    DistTypes.Continuous(
-      Continuous.combineAlgebraically(op, m1, m2),
-    )
+    DistTypes.Continuous(Continuous.combineAlgebraically(op, m1, m2))
   | (Discrete(m1), Discrete(m2)) =>
     DistTypes.Discrete(Discrete.combineAlgebraically(op, m1, m2))
   | (m1, m2) =>
     DistTypes.Mixed(
-      Mixed.combineAlgebraically(
-        op,
-        toMixed(m1),
-        toMixed(m2),
-      ),
+      Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2)),
     )
   };
 };
@@ -70,10 +64,6 @@ let pdf = (f: float, t: t): float => {
 };
 
 let inv = (f: float, t: t): float => {
-  0.0;
-};
-
-let sample = (t: t): float => {
   0.0;
 };
 
@@ -199,10 +189,30 @@ module T =
       };
   });
 
+let doN = (n, fn) => {
+  let items = Belt.Array.make(n, 0.0);
+  for (x in 0 to n - 1) {
+    let _ = Belt.Array.set(items, x, fn());
+    ();
+  };
+  items;
+};
+
+let sample = (cache, t: t): float => {
+  let randomItem = Random.float(1.);
+  let bar = T.Integral.yToX(~cache, randomItem, t);
+  bar;
+};
+
+let sampleNRendered = (n, dist) => {
+  let integralCache = T.Integral.get(~cache=None, dist);
+  doN(n, () => sample(Some(integralCache), dist));
+};
+
 let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s) =>
   switch (distToFloatOp) {
   | `Pdf(f) => pdf(f, s)
   | `Inv(f) => inv(f, s)
-  | `Sample => sample(s)
+  | `Sample => sample(None, s)
   | `Mean => T.mean(s)
   };
