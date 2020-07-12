@@ -40,16 +40,5 @@ let run =
     (inputs: RenderTypes.ShapeRenderer.Combined.inputs)
     : RenderTypes.ShapeRenderer.Combined.outputs => {
   let symbolic = runSymbolic(inputs);
-  let sampling =
-    switch (symbolic) {
-    | Ok(_) => None
-    | Error(_) =>
-      Samples.T.fromGuesstimatorString(
-        ~guesstimatorString=inputs.guesstimatorString,
-        ~samplingInputs=inputs.samplingInputs,
-        (),
-      )
-    };
-  Js.log3("IS SOME?", symbolic |> E.R.toOption |> E.O.isSome, symbolic);
-  {symbolic: Some(symbolic), sampling};
+  {symbolic: Some(symbolic), sampling: None};
 };
