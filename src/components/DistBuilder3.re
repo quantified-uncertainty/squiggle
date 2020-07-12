@@ -37,7 +37,14 @@ module DemoDist = {
     let parsed1 = MathJsParser.fromString(guesstimatorString);
     let shape =
       switch (parsed1) {
-      | Ok(r) => Some(ExpressionTree.toShape(10000, r))
+      | Ok(r) =>
+        Some(
+          ExpressionTree.toShape(
+            10000,
+            {sampleCount: 10000, outputXYPoints: 10000, kernelWidth: None},
+            r,
+          ),
+        )
       | _ => None
       };
 

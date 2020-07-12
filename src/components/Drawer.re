@@ -161,7 +161,6 @@ module Convert = {
   let canvasShapeToContinuousShape =
       (~canvasShape: Types.canvasShape, ~canvasElement: Dom.element)
       : Types.continuousShape => {
-      
     let xs = canvasShape.xValues;
     let hs = canvasShape.hs;
     let rectangle: Types.rectangle =
@@ -170,19 +169,19 @@ module Convert = {
     let paddingFactorY = CanvasContext.paddingFactorX(rectangle.height);
     let windowScrollY: float = [%raw "window.scrollY"];
 
-    let y0Line = bottom+.windowScrollY-.paddingFactorY;
-    let ys = E.A.fmap( h => y0Line -. h, hs);
-    
+    let y0Line = bottom +. windowScrollY -. paddingFactorY;
+    let ys = E.A.fmap(h => y0Line -. h, hs);
+
     let xyShape: Types.xyShape = {xs, ys};
     let continuousShape: Types.continuousShape = {
       xyShape,
       interpolation: `Linear,
       knownIntegralSum: None,
     };
-    
+
     let integral = XYShape.Analysis.integrateContinuousShape(continuousShape);
     let ys = E.A.fmap(y => y /. integral, ys);
-    
+
     let continuousShape: Types.continuousShape = {
       xyShape: {
         xs,
@@ -389,7 +388,12 @@ module Draw = {
     let numSamples = 3000;
 
     let normal: SymbolicTypes.symbolicDist = `Normal({mean, stdev});
-    let normalShape = ExpressionTree.toShape(numSamples, `SymbolicDist(normal));
+    let normalShape =
+      ExpressionTree.toShape(
+        numSamples,
+        {sampleCount: 10000, outputXYPoints: 10000, kernelWidth: None},
+        `SymbolicDist(normal),
+      );
     let xyShape: Types.xyShape =
       switch (normalShape) {
       | Mixed(_) => {xs: [||], ys: [||]}
@@ -668,10 +672,7 @@ module State = {
         Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
 
       /* create a cdf from a pdf */
-      let _pdf =
-        Continuous.T.normalize(
-          pdf,
-        );
+      let _pdf = Continuous.T.normalize(pdf);
 
       let cdf = Continuous.T.integral(~cache=None, _pdf);
       let xs = [||];

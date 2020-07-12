@@ -4,8 +4,6 @@ open ExpressionTypes.ExpressionTree;
 type t = node;
 type tResult = node => result(node, string);
 
-type renderParams = {sampleCount: int};
-
 /* Given two random variables A and B, this returns the distribution
    of a new variable that is the result of the operation on A and B.
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
@@ -51,15 +49,23 @@ module AlgebraicCombination = {
     |> E.R.bind(
          _,
          ((a, b)) => {
-           let samples = tryCombination(evaluationParams.sampleCount, algebraicOp, a, b);
+           let samples =
+             tryCombination(
+               evaluationParams.samplingInputs.sampleCount,
+               algebraicOp,
+               a,
+               b,
+             );
            let shape =
              samples
              |> E.O.fmap(
                   Samples.T.fromSamples(
                     ~samplingInputs={
-                      sampleCount: Some(evaluationParams.sampleCount),
-                      outputXYPoints: None,
-                      kernelWidth: None,
+                      sampleCount:
+                        Some(evaluationParams.samplingInputs.sampleCount),
+                      outputXYPoints:
+                        Some(evaluationParams.samplingInputs.outputXYPoints),
+                      kernelWidth: evaluationParams.samplingInputs.kernelWidth,
                     },
                   ),
                 )
@@ -235,7 +241,7 @@ module Render = {
     | `SymbolicDist(d) =>
       Ok(
         `RenderedDist(
-          SymbolicDist.T.toShape(evaluationParams.sampleCount, d),
+          SymbolicDist.T.toShape(evaluationParams.intendedShapeLength, d),
         ),
       )
     | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here

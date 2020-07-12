@@ -14,14 +14,24 @@ let formatString = str => {
   str |> formatMessyArray;
 };
 
-let runSymbolic = (guesstimatorString, length) => {
-  let str = formatString(guesstimatorString);
+let runSymbolic = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
+  let str = formatString(inputs.guesstimatorString);
   let graph = MathJsParser.fromString(str);
   graph
   |> E.R.fmap(g =>
        RenderTypes.ShapeRenderer.Symbolic.make(
          g,
-         ExpressionTree.toShape(length, g),
+         ExpressionTree.toShape(
+           inputs.symbolicInputs.length,
+           {
+             sampleCount:
+               inputs.samplingInputs.sampleCount |> E.O.default(10000),
+             outputXYPoints:
+               inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
+             kernelWidth: inputs.samplingInputs.kernelWidth,
+           },
+           g,
+         ),
        )
      );
 };
@@ -29,8 +39,7 @@ let runSymbolic = (guesstimatorString, length) => {
 let run =
     (inputs: RenderTypes.ShapeRenderer.Combined.inputs)
     : RenderTypes.ShapeRenderer.Combined.outputs => {
-  let symbolic =
-    runSymbolic(inputs.guesstimatorString, inputs.symbolicInputs.length);
+  let symbolic = runSymbolic(inputs);
   let sampling =
     switch (symbolic) {
     | Ok(_) => None
