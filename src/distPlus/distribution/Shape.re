@@ -29,6 +29,11 @@ let combineAlgebraically =
     DistTypes.Continuous(
       Continuous.combineAlgebraically(~downsample=true, op, m1, m2),
     )
+  | (Continuous(m1), Discrete(m2))
+  | (Discrete(m2), Continuous(m1)) =>
+    DistTypes.Continuous(
+      Continuous.combineAlgebraicallyWithDiscrete(~downsample=false, op, m1, m2),
+    )
   | (Discrete(m1), Discrete(m2)) =>
     DistTypes.Discrete(Discrete.combineAlgebraically(op, m1, m2))
   | (m1, m2) =>

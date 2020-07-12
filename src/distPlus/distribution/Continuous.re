@@ -208,48 +208,24 @@ let combineAlgebraicallyWithDiscrete =
     ) => {
   let t1s = t1 |> getShape;
   let t2s = t2.xyShape; // would like to use Discrete.getShape here, but current file structure doesn't allow for that
+
   let t1n = t1s |> XYShape.T.length;
   let t2n = t2s |> XYShape.T.length;
 
-  let fn = Operation.Algebraic.toFn(op);
+  if (t1n > 0 && t2n > 0) {
+    let combinedShape = AlgebraicShapeCombination.combineShapesContinuousDiscrete(op, t1s, t2s);
 
-  let outXYShapes: array(array((float, float))) =
-    Belt.Array.makeUninitializedUnsafe(t2n);
+    let combinedIntegralSum =
+      Common.combineIntegralSums(
+        (a, b) => Some(a *. b),
+        t1.knownIntegralSum,
+        t2.knownIntegralSum,
+      );
 
-  for (j in 0 to t2n - 1) {
-    // for each one of the discrete points
-    // create a new distribution, as long as the original continuous one
-
-    let dxyShape: array((float, float)) =
-      Belt.Array.makeUninitializedUnsafe(t1n);
-    for (i in 0 to t1n - 1) {
-      let _ =
-        Belt.Array.set(
-          dxyShape,
-          i,
-          (fn(t1s.xs[i], t2s.xs[j]), t1s.ys[i] *. t2s.ys[j]),
-        );
-      ();
-    };
-
-    let _ = Belt.Array.set(outXYShapes, j, dxyShape);
-    ();
-  };
-
-  let combinedIntegralSum =
-    Common.combineIntegralSums(
-      (a, b) => Some(a *. b),
-      t1.knownIntegralSum,
-      t2.knownIntegralSum,
-    );
-
-  outXYShapes
-  |> E.A.fmap(s => {
-       let xyShape = XYShape.T.fromZippedArray(s);
-       make(`Linear, xyShape, None);
-     })
-  |> reduce((+.))
-  |> updateKnownIntegralSum(combinedIntegralSum);
+    make(`Linear, combinedShape, combinedIntegralSum);
+  } else {
+    empty;
+  }
 };
 
 let combineAlgebraically =
