@@ -22,10 +22,6 @@ let buildSimple = (~continuous: option(DistTypes.continuousShape), ~discrete: op
   | (0 | 1, _) => Some(Discrete(discrete))
   | (_, 0) => Some(Continuous(continuous))
   | (_, _) =>
-    let discreteProbabilityMassFraction =
-      Discrete.T.Integral.sum(~cache=None, discrete);
-    let discrete = Discrete.T.normalize(discrete);
-    let continuous = Continuous.T.normalize(continuous);
     let mixedDist =
       Mixed.make(
         ~continuous,

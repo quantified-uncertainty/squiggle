@@ -65,6 +65,7 @@ module T =
     };
 
     let normalize = (t: t): t => {
+
       let continuousIntegralSum =
         Continuous.T.Integral.sum(~cache=None, t.continuous);
       let discreteIntegralSum =
@@ -76,11 +77,11 @@ module T =
 
       let normalizedContinuous =
         t.continuous
-        |> Continuous.scaleBy(~scale=1. /. newContinuousSum)
+        |> Continuous.scaleBy(~scale=newContinuousSum /. continuousIntegralSum)
         |> Continuous.updateKnownIntegralSum(Some(newContinuousSum));
       let normalizedDiscrete =
         t.discrete
-        |> Discrete.scaleBy(~scale=1. /. newDiscreteSum)
+        |> Discrete.scaleBy(~scale=newDiscreteSum /. discreteIntegralSum)
         |> Discrete.updateKnownIntegralSum(Some(newDiscreteSum));
 
       make(~continuous=normalizedContinuous, ~discrete=normalizedDiscrete);

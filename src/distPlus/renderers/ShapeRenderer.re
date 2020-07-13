@@ -41,6 +41,5 @@ let run =
         (),
       )
     };
-  Js.log3("IS SOME?", symbolic |> E.R.toOption |> E.O.isSome, symbolic);
   {symbolic: Some(symbolic), sampling};
 };
