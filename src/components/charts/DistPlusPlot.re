@@ -287,7 +287,7 @@ module IntegralChart = {
     };
 
     let maxX = {
-      distPlus |> DistPlus.T.Integral.yToX(~cache=None, 0.99);
+      distPlus |> DistPlus.T.Integral.yToX(~cache=None, 0.99999);
     };
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     <DistributionPlot

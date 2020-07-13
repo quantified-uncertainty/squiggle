@@ -33,9 +33,9 @@ let combinePointwise =
 
   make(
     XYShape.PointwiseCombination.combine(
-      ~xsSelection=ALL_XS,
-      ~xToYSelection=XYShape.XtoY.stepwiseIfAtX,
-      ~fn=(a, b) => fn(E.O.default(0.0, a), E.O.default(0.0, b)), // stepwiseIfAtX returns option(float), so this fn needs to handle None
+      (+.),
+      XYShape.XtoY.assumeZeroBetweenPoints,
+      XYShape.XtoY.assumeZeroBetweenPoints,
       t1.xyShape,
       t2.xyShape,
     ),
@@ -113,12 +113,18 @@ module T =
       if (t |> getShape |> XYShape.T.length > 0) {
         switch (cache) {
         | Some(c) => c
-        | None =>
-          Continuous.make(
-            `Stepwise,
-            XYShape.T.accumulateYs((+.), getShape(t)),
-            None,
-          )
+        | None => {
+            let ts = getShape(t);
+            // The first xy of this integral should always be the zero, to ensure nice plotting
+            let firstX = ts |> XYShape.T.minX;
+            let prependedZeroPoint: XYShape.T.t = {xs: [|firstX -. epsilon_float|], ys: [|0.|]};
+            let integralShape =
+              ts
+              |> XYShape.T.concat(prependedZeroPoint)
+              |> XYShape.T.accumulateYs((+.));
+
+            Continuous.make(`Stepwise, integralShape, None);
+          }
         };
       } else {
         Continuous.make(

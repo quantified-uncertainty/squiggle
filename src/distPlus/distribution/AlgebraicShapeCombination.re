@@ -304,5 +304,9 @@ let combineShapesContinuousDiscrete =
 
   outXYShapes
   |> E.A.fmap(XYShape.T.fromZippedArray)
-  |> E.A.fold_left(XYShape.PointwiseCombination.combineLinear((+.)), XYShape.T.empty);
+  |> E.A.fold_left(
+      XYShape.PointwiseCombination.combine((+.),
+                                           XYShape.XtoY.linearBetweenPointsExtrapolateZero,
+                                           XYShape.XtoY.linearBetweenPointsExtrapolateZero),
+      XYShape.T.empty);
 };

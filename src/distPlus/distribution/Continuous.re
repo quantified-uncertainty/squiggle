@@ -43,8 +43,10 @@ let combinePointwise =
 
   make(
     `Linear,
-    XYShape.PointwiseCombination.combineLinear(
-      ~fn=(+.),
+    XYShape.PointwiseCombination.combine(
+      (+.),
+      XYShape.XtoY.linearBetweenPointsExtrapolateZero,
+      XYShape.XtoY.linearBetweenPointsExtrapolateZero,
       t1.xyShape,
       t2.xyShape,
     ),

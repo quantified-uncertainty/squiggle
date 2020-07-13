@@ -32,6 +32,11 @@ module T = {
   let accumulateYs = (fn, p: t) => {
     fromArray((p.xs, E.A.accumulate(fn, p.ys)));
   };
+  let concat = (t1: t, t2: t) => {
+    let cxs = Array.concat([t1.xs, t2.xs]);
+    let cys = Array.concat([t1.ys, t2.ys]);
+    {xs: cxs, ys: cys};
+  };
   let fromZippedArray = (pairs: array((float, float))): t =>
     pairs |> Belt.Array.unzip |> fromArray;
   let equallyDividedXs = (t: t, newLength) => {
@@ -137,6 +142,61 @@ module XtoY = {
       };
     n;
   };
+
+  /* The extrapolators below can be used e.g. with PointwiseCombination.combine */
+  let linearBetweenPointsExtrapolateFlat = (t: T.t, leftIndex: int, x: float) => {
+    if (leftIndex < 0) {
+      t.ys[0];
+    } else if (leftIndex >= T.length(t) - 1) {
+      T.lastY(t);
+    } else {
+      let x1 = t.xs[leftIndex];
+      let x2 = t.xs[leftIndex + 1];
+      let y1 = t.ys[leftIndex];
+      let y2 = t.ys[leftIndex + 1];
+      let fraction = (x -. x1) /. (x2 -. x1);
+      y1 *. (1. -. fraction) +. y2 *. fraction;
+    }
+  };
+
+  let linearBetweenPointsExtrapolateZero = (t: T.t, leftIndex: int, x: float) => {
+    if (leftIndex < 0) {
+      0.0
+    } else if (leftIndex >= T.length(t) - 1) {
+      0.0
+    } else {
+      let x1 = t.xs[leftIndex];
+      let x2 = t.xs[leftIndex + 1];
+      let y1 = t.ys[leftIndex];
+      let y2 = t.ys[leftIndex + 1];
+      let fraction = (x -. x1) /. (x2 -. x1);
+      y1 *. (1. -. fraction) +. y2 *. fraction;
+    }
+  };
+
+  let stepwiseBetweenPointsExtrapolateFlat = (t: T.t, leftIndex: int, x: float) => {
+    if (leftIndex < 0) {
+      t.ys[0];
+    } else if (leftIndex >= T.length(t) - 1) {
+      T.lastY(t);
+    } else {
+      t.ys[leftIndex];
+    }
+  };
+
+  let stepwiseBetweenPointsExtrapolateZero = (t: T.t, leftIndex: int, x: float) => {
+    if (leftIndex < 0) {
+      0.0
+    } else if (leftIndex >= T.length(t) - 1) {
+      0.0
+    } else {
+      t.ys[leftIndex];
+    }
+  };
+
+  let assumeZeroBetweenPoints = (t: T.t, leftIndex: int, x: float) => {
+    0.0;
+  };
 };
 
 module XsConversion = {
@@ -171,24 +231,22 @@ module Zipped = {
 };
 
 module PointwiseCombination = {
-  type xsSelection =
-    | ALL_XS
-    | XS_EVENLY_DIVIDED(int);
 
-  let combineLinear = [%raw {| // : (float => float => float, T.t, T.t) => T.t
+  // t1Interpolator and t2Interpolator are functions from XYShape.XtoY, e.g. linearBetweenPointsExtrapolateFlat.
+  let combine = [%raw {| // : (float => float => float, T.t, T.t, bool) => T.t
       // This function combines two xyShapes by looping through both of them simultaneously.
       // It always moves on to the next smallest x, whether that's in the first or second input's xs,
       // and interpolates the value on the other side, thus accumulating xs and ys.
-      // In this implementation (unlike in XtoY.linear above), values outside of a shape's xs are considered 0.0 (instead of firstY or lastY).
       // This is written in raw JS because this can still be a bottleneck, and using refs for the i and j indices is quite painful.
 
-      function(fn, t1, t2) {
+      function(fn, t1Interpolator, t2Interpolator, t1, t2) {
         let t1n = t1.xs.length;
         let t2n = t2.xs.length;
         let outX = [];
         let outY = [];
         let i = -1;
         let j = -1;
+
         while (i <= t1n - 1 && j <= t2n - 1) {
           let x, ya, yb;
           if (j == t2n - 1 && i < t1n - 1 ||
@@ -198,8 +256,7 @@ module PointwiseCombination = {
             x = t1.xs[i];
             ya = t1.ys[i];
 
-            let bFraction = (x - (t2.xs[j] || x)) / ((t2.xs[j+1] || x) - (t2.xs[j] || 0));
-            yb = (t2.ys[j] || 0) * (1-bFraction) + (t2.ys[j+1] || 0) * bFraction;
+            yb = t2Interpolator(t2, j, x);
           } else if (i == t1n - 1 && j < t2n - 1 ||
                     t1.xs[i+1] > t2.xs[j+1]) { // if b has to catch up to a, or if a is already done
             j++;
@@ -207,8 +264,7 @@ module PointwiseCombination = {
             x = t2.xs[j];
             yb = t2.ys[j];
 
-            let aFraction = (x - (t1.xs[i] || x)) / ((t1.xs[i+1] || x) - (t1.xs[i] || 0));
-            ya = (t1.ys[i] || 0) * (1-aFraction) + (t1.ys[i+1] || 0) * aFraction;
+            ya = t1Interpolator(t1, i, x);
           } else if (i < t1n - 1 && j < t2n && t1.xs[i+1] === t2.xs[j+1]) { // if they happen to be equal, move both ahead
             i++;
             j++;
@@ -227,15 +283,16 @@ module PointwiseCombination = {
           outX.push(x);
           outY.push(fn(ya, yb));
         }
+
         return {xs: outX, ys: outY};
       }
     |}];
 
-  let combine =
+  let combineEvenXs =
       (
-        ~xToYSelection: (float, T.t) => 'a,
-        ~xsSelection=ALL_XS,
         ~fn,
+        ~xToYSelection,
+        sampleCount,
         t1: T.t,
         t2: T.t,
       ) => {
@@ -245,23 +302,14 @@ module PointwiseCombination = {
     | (0, _) => t2
     | (_, 0) => t1
     | (_, _) => {
-        let allXs =
-          switch (xsSelection) {
-          | ALL_XS => Ts.allXs([|t1, t2|])
-          | XS_EVENLY_DIVIDED(sampleCount) =>
-            Ts.equallyDividedXs([|t1, t2|], sampleCount)
-          };
+        let allXs = Ts.equallyDividedXs([|t1, t2|], sampleCount);
 
-        let allYs =
-          allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)));
+        let allYs = allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)));
 
         T.fromArrays(allXs, allYs);
       }
     }
   };
-
-  let combineStepwise = combine(~xToYSelection=XtoY.stepwiseIncremental);
-  let combineIfAtX = combine(~xToYSelection=XtoY.stepwiseIfAtX);
 
   // TODO: I'd bet this is pretty slow. Maybe it would be faster to intersperse Xs and Ys separately.
   let intersperse = (t1: T.t, t2: T.t) => {
@@ -355,10 +403,10 @@ let pointLogScore = (prediction, answer) =>
   };
 
 let logScorePoint = (sampleCount, t1, t2) =>
-  PointwiseCombination.combine(
-    ~xsSelection=XS_EVENLY_DIVIDED(sampleCount),
-    ~xToYSelection=XtoY.linear,
+  PointwiseCombination.combineEvenXs(
     ~fn=pointLogScore,
+    ~xToYSelection=XtoY.linear,
+    sampleCount,
     t1,
     t2,
   )

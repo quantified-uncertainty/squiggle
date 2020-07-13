@@ -147,15 +147,17 @@ module T =
       switch (cache) {
       | Some(cache) => cache
       | None =>
-        // note: if the underlying shapes aren't normalized, then these integrals won't be either!
+        // note: if the underlying shapes aren't normalized, then these integrals won't be either -- but that's the way it should be.
         let continuousIntegral =
           Continuous.T.Integral.get(~cache=None, continuous);
         let discreteIntegral = Discrete.T.Integral.get(~cache=None, discrete);
 
         Continuous.make(
           `Linear,
-          XYShape.PointwiseCombination.combineLinear(
-            ~fn=(+.),
+          XYShape.PointwiseCombination.combine(
+            (+.),
+            XYShape.XtoY.linearBetweenPointsExtrapolateFlat,
+            XYShape.XtoY.stepwiseBetweenPointsExtrapolateFlat,
             Continuous.getShape(continuousIntegral),
             Continuous.getShape(discreteIntegral),
           ),
