@@ -1,7 +1,7 @@
 type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide];
 type pointwiseOperation = [ | `Add | `Multiply];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
-type distToFloatOperation = [ | `Pdf(float) | `Inv(float) | `Mean | `Sample];
+type distToFloatOperation = [ | `Pdf(float) | `Cdf(float) | `Inv(float) | `Mean | `Sample];
 
 module ExpressionTree = {
   type node = [

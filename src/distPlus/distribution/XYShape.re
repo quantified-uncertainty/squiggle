@@ -260,7 +260,6 @@ module PointwiseCombination = {
     }
   };
 
-  //let combineLinear = combine(~xToYSelection=XtoY.linear);
   let combineStepwise = combine(~xToYSelection=XtoY.stepwiseIncremental);
   let combineIfAtX = combine(~xToYSelection=XtoY.stepwiseIfAtX);
 

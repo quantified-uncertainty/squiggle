@@ -70,19 +70,6 @@ let combinePointwise =
     )
   };
 
-// TODO: implement these functions
-let pdf = (f: float, t: t): float => {
-  0.0;
-};
-
-let inv = (f: float, t: t): float => {
-  0.0;
-};
-
-let sample = (t: t): float => {
-  0.0;
-};
-
 module T =
   Dist({
     type t = DistTypes.shape;
@@ -205,9 +192,23 @@ module T =
       };
   });
 
-let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s) =>
+let pdf = (f: float, t: t) => {
+  let mixedPoint: DistTypes.mixedPoint = T.xToY(f, t);
+  mixedPoint.continuous +. mixedPoint.discrete;
+};
+
+let inv = T.Integral.yToX(~cache=None);
+let cdf = T.Integral.xToY(~cache=None);
+
+let sample = (t: t): float => {
+  // this can go, already taken care of in Ozzie's sampling branch
+  0.0
+};
+
+let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s): float =>
   switch (distToFloatOp) {
   | `Pdf(f) => pdf(f, s)
+  | `Cdf(f) => pdf(f, s)
   | `Inv(f) => inv(f, s)
   | `Sample => sample(s)
   | `Mean => T.mean(s)

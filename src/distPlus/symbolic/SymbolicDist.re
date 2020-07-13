@@ -3,6 +3,7 @@ open SymbolicTypes;
 module Exponential = {
   type t = exponential;
   let pdf = (x, t: t) => Jstat.exponential##pdf(x, t.rate);
+  let cdf = (x, t: t) => Jstat.exponential##cdf(x, t.rate);
   let inv = (p, t: t) => Jstat.exponential##inv(p, t.rate);
   let sample = (t: t) => Jstat.exponential##sample(t.rate);
   let mean = (t: t) => Ok(Jstat.exponential##mean(t.rate));
@@ -12,6 +13,7 @@ module Exponential = {
 module Cauchy = {
   type t = cauchy;
   let pdf = (x, t: t) => Jstat.cauchy##pdf(x, t.local, t.scale);
+  let cdf = (x, t: t) => Jstat.cauchy##cdf(x, t.local, t.scale);
   let inv = (p, t: t) => Jstat.cauchy##inv(p, t.local, t.scale);
   let sample = (t: t) => Jstat.cauchy##sample(t.local, t.scale);
   let mean = (_: t) => Error("Cauchy distributions have no mean value.");
@@ -21,6 +23,7 @@ module Cauchy = {
 module Triangular = {
   type t = triangular;
   let pdf = (x, t: t) => Jstat.triangular##pdf(x, t.low, t.high, t.medium);
+  let cdf = (x, t: t) => Jstat.triangular##cdf(x, t.low, t.high, t.medium);
   let inv = (p, t: t) => Jstat.triangular##inv(p, t.low, t.high, t.medium);
   let sample = (t: t) => Jstat.triangular##sample(t.low, t.high, t.medium);
   let mean = (t: t) => Ok(Jstat.triangular##mean(t.low, t.high, t.medium));
@@ -30,6 +33,7 @@ module Triangular = {
 module Normal = {
   type t = normal;
   let pdf = (x, t: t) => Jstat.normal##pdf(x, t.mean, t.stdev);
+  let cdf = (x, t: t) => Jstat.normal##cdf(x, t.mean, t.stdev);
 
   let from90PercentCI = (low, high) => {
     let mean = E.A.Floats.mean([|low, high|]);
@@ -72,6 +76,7 @@ module Normal = {
 module Beta = {
   type t = beta;
   let pdf = (x, t: t) => Jstat.beta##pdf(x, t.alpha, t.beta);
+  let cdf = (x, t: t) => Jstat.beta##cdf(x, t.alpha, t.beta);
   let inv = (p, t: t) => Jstat.beta##inv(p, t.alpha, t.beta);
   let sample = (t: t) => Jstat.beta##sample(t.alpha, t.beta);
   let mean = (t: t) => Ok(Jstat.beta##mean(t.alpha, t.beta));
@@ -81,6 +86,7 @@ module Beta = {
 module Lognormal = {
   type t = lognormal;
   let pdf = (x, t: t) => Jstat.lognormal##pdf(x, t.mu, t.sigma);
+  let cdf = (x, t: t) => Jstat.lognormal##cdf(x, t.mu, t.sigma);
   let inv = (p, t: t) => Jstat.lognormal##inv(p, t.mu, t.sigma);
   let mean = (t: t) => Ok(Jstat.lognormal##mean(t.mu, t.sigma));
   let sample = (t: t) => Jstat.lognormal##sample(t.mu, t.sigma);
@@ -126,6 +132,7 @@ module Lognormal = {
 module Uniform = {
   type t = uniform;
   let pdf = (x, t: t) => Jstat.uniform##pdf(x, t.low, t.high);
+  let cdf = (x, t: t) => Jstat.uniform##cdf(x, t.low, t.high);
   let inv = (p, t: t) => Jstat.uniform##inv(p, t.low, t.high);
   let sample = (t: t) => Jstat.uniform##sample(t.low, t.high);
   let mean = (t: t) => Ok(Jstat.uniform##mean(t.low, t.high));
@@ -135,6 +142,7 @@ module Uniform = {
 module Float = {
   type t = float;
   let pdf = (x, t: t) => x == t ? 1.0 : 0.0;
+  let cdf = (x, t: t) => x >= t ? 1.0 : 0.0;
   let inv = (p, t: t) => p < t ? 0.0 : 1.0;
   let mean = (t: t) => Ok(t);
   let sample = (t: t) => t;
@@ -155,6 +163,18 @@ module T = {
     | `Uniform(n) => Uniform.pdf(x, n)
     | `Beta(n) => Beta.pdf(x, n)
     | `Float(n) => Float.pdf(x, n)
+    };
+
+  let cdf = (x, dist) =>
+    switch (dist) {
+    | `Normal(n) => Normal.cdf(x, n)
+    | `Triangular(n) => Triangular.cdf(x, n)
+    | `Exponential(n) => Exponential.cdf(x, n)
+    | `Cauchy(n) => Cauchy.cdf(x, n)
+    | `Lognormal(n) => Lognormal.cdf(x, n)
+    | `Uniform(n) => Uniform.cdf(x, n)
+    | `Beta(n) => Beta.cdf(x, n)
+    | `Float(n) => Float.cdf(x, n)
     };
 
   let inv = (x, dist) =>
@@ -226,6 +246,7 @@ module T = {
 
   let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s) =>
     switch (distToFloatOp) {
+    | `Cdf(f) => Ok(cdf(f, s))
     | `Pdf(f) => Ok(pdf(f, s))
     | `Inv(f) => Ok(inv(f, s))
     | `Sample => Ok(sample(s))

@@ -227,6 +227,7 @@ let toLeaf =
       node: t,
     )
     : result(t, string) => {
+  Js.log2("EVALUATION PARAMS", evaluationParams);
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)
