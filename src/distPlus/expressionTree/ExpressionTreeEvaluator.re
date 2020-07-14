@@ -4,8 +4,6 @@ open ExpressionTypes.ExpressionTree;
 type t = node;
 type tResult = node => result(node, string);
 
-type renderParams = {sampleCount: int};
-
 /* Given two random variables A and B, this returns the distribution
    of a new variable that is the result of the operation on A and B.
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
@@ -22,20 +20,62 @@ module AlgebraicCombination = {
     | _ => Ok(`AlgebraicCombination((operation, t1, t2)))
     };
 
-  let combineAsShapes =
-      (evaluationParams: evaluationParams, algebraicOp, t1, t2) => {
-    let renderShape = render(evaluationParams);
-    switch (renderShape(t1), renderShape(t2)) {
-    | (Ok(`RenderedDist(s1)), Ok(`RenderedDist(s2))) =>
-      Ok(
-        `RenderedDist(
-          Shape.combineAlgebraically(algebraicOp, s1, s2),
-        ),
+  let tryCombination = (n, algebraicOp, t1: node, t2: node) => {
+    let sampleN =
+      mapRenderable(Shape.sampleNRendered(n), SymbolicDist.T.sampleN(n));
+    switch (sampleN(t1), sampleN(t2)) {
+    | (Some(a), Some(b)) =>
+      Some(
+        Belt.Array.zip(a, b)
+        |> E.A.fmap(((a, b)) => Operation.Algebraic.toFn(algebraicOp, a, b)),
       )
-    | (Error(e1), _) => Error(e1)
-    | (_, Error(e2)) => Error(e2)
-    | _ => Error("Algebraic combination: rendering failed.")
+    | _ => None
     };
+  };
+
+  let renderIfNotRendered = (params, t) =>
+    !renderable(t)
+      ? switch (render(params, t)) {
+        | Ok(r) => Ok(r)
+        | Error(e) => Error(e)
+        }
+      : Ok(t);
+
+  let combineAsShapes =
+      (evaluationParams: evaluationParams, algebraicOp, t1: node, t2: node) => {
+    let i1 = renderIfNotRendered(evaluationParams, t1);
+    let i2 = renderIfNotRendered(evaluationParams, t2);
+    E.R.merge(i1, i2)
+    |> E.R.bind(
+         _,
+         ((a, b)) => {
+           let samples =
+             tryCombination(
+               evaluationParams.samplingInputs.sampleCount,
+               algebraicOp,
+               a,
+               b,
+             );
+           let shape =
+             samples
+             |> E.O.fmap(
+                  Samples.T.fromSamples(
+                    ~samplingInputs={
+                      sampleCount:
+                        Some(evaluationParams.samplingInputs.sampleCount),
+                      outputXYPoints:
+                        Some(evaluationParams.samplingInputs.outputXYPoints),
+                      kernelWidth: evaluationParams.samplingInputs.kernelWidth,
+                    },
+                  ),
+                )
+             |> E.O.bind(_, (r: RenderTypes.ShapeRenderer.Sampling.outputs) =>
+                  r.shape
+                )
+             |> E.O.toResult("No response");
+           shape |> E.R.fmap(r => `Normalize(`RenderedDist(r)));
+         },
+       );
   };
 
   let operationToLeaf =
@@ -125,11 +165,9 @@ module Truncate = {
     | (Some(lc), Some(rc), t) when lc > rc =>
       `Error("Left truncation bound must be smaller than right bound.")
     | (lc, rc, `SymbolicDist(`Uniform(u))) =>
-      // just create a new Uniform distribution
-      let nu: SymbolicTypes.uniform = u;
-      let newLow = max(E.O.default(neg_infinity, lc), nu.low);
-      let newHigh = min(E.O.default(infinity, rc), nu.high);
-      `Solution(`SymbolicDist(`Uniform({low: newLow, high: newHigh})));
+      `Solution(
+        `SymbolicDist(`Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))),
+      )
     | _ => `NoSolution
     };
   };
@@ -140,9 +178,7 @@ module Truncate = {
     // of a distribution we otherwise wouldn't get at all
     switch (render(evaluationParams, t)) {
     | Ok(`RenderedDist(rs)) =>
-      let truncatedShape =
-        rs |> Shape.T.truncate(leftCutoff, rightCutoff);
-      Ok(`RenderedDist(truncatedShape));
+      Ok(`RenderedDist(Shape.T.truncate(leftCutoff, rightCutoff, rs)))
     | Error(e) => Error(e)
     | _ => Error("Could not truncate distribution.")
     };
@@ -171,8 +207,7 @@ module Truncate = {
 module Normalize = {
   let rec operationToLeaf = (evaluationParams, t: node): result(node, string) => {
     switch (t) {
-    | `RenderedDist(s) =>
-      Ok(`RenderedDist(Shape.T.normalize(s)))
+    | `RenderedDist(s) => Ok(`RenderedDist(Shape.T.normalize(s)))
     | `SymbolicDist(_) => Ok(t)
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     };
@@ -206,7 +241,7 @@ module Render = {
     | `SymbolicDist(d) =>
       Ok(
         `RenderedDist(
-          SymbolicDist.T.toShape(evaluationParams.sampleCount, d),
+          SymbolicDist.T.toShape(evaluationParams.intendedShapeLength, d),
         ),
       )
     | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here

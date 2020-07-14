@@ -175,26 +175,4 @@ module T = {
       RenderTypes.ShapeRenderer.Sampling.Inputs.toF(samplingInputs);
     toShape(~samples, ~samplingInputs, ());
   };
-
-  let fromGuesstimatorString =
-      (
-        ~guesstimatorString,
-        ~samplingInputs=RenderTypes.ShapeRenderer.Sampling.Inputs.empty,
-        (),
-      ) => {
-    let hasValidSamples =
-      Guesstimator.stringToSamples(guesstimatorString, 10) |> E.A.length > 0;
-    let _samplingInputs =
-      RenderTypes.ShapeRenderer.Sampling.Inputs.toF(samplingInputs);
-    switch (hasValidSamples) {
-    | false => None
-    | true =>
-      let samples =
-        Guesstimator.stringToSamples(
-          guesstimatorString,
-          _samplingInputs.sampleCount,
-        );
-      Some(fromSamples(~samplingInputs, samples));
-    };
-  };
 };

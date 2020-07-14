@@ -16,8 +16,15 @@ module ExpressionTree = {
     | `FloatFromDist(distToFloatOperation, node)
   ];
 
-  type evaluationParams = {
+  type samplingInputs = {
     sampleCount: int,
+    outputXYPoints: int,
+    kernelWidth: option(float),
+  };
+
+  type evaluationParams = {
+    samplingInputs,
+    intendedShapeLength: int,
     evaluateNode: (evaluationParams, node) => Belt.Result.t(node, string),
   };
 
@@ -28,7 +35,22 @@ module ExpressionTree = {
     evaluateNode(evaluationParams, `Render(r));
 
   let evaluateAndRetry = (evaluationParams, fn, node) =>
-    node |> evaluationParams.evaluateNode(evaluationParams) |> E.R.bind(_, fn(evaluationParams));
+    node
+    |> evaluationParams.evaluateNode(evaluationParams)
+    |> E.R.bind(_, fn(evaluationParams));
+
+  let renderable =
+    fun
+    | `SymbolicDist(_) => true
+    | `RenderedDist(_) => true
+    | _ => false;
+
+  let mapRenderable = (renderedFn, symFn, item: node) =>
+    switch (item) {
+    | `SymbolicDist(s) => Some(symFn(s))
+    | `RenderedDist(r) => Some(renderedFn(r))
+    | _ => None
+    };
 };
 
 type simplificationResult = [
