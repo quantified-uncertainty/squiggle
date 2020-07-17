@@ -61,7 +61,8 @@ module VerticalScaling = {
       (evaluationParams: evaluationParams, scaleOp, t, scaleBy) => {
     // scaleBy has to be a single float, otherwise we'll return an error.
     let fn = Operation.Scale.toFn(scaleOp);
-    let knownIntegralSumFn = Operation.Scale.toKnownIntegralSumFn(scaleOp);
+    let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(scaleOp);
+    let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp);
     let renderedShape = render(evaluationParams, t);
 
     switch (renderedShape, scaleBy) {
@@ -69,7 +70,8 @@ module VerticalScaling = {
       Ok(
         `RenderedDist(
           Shape.T.mapY(
-            ~knownIntegralSumFn=knownIntegralSumFn(sm),
+            ~integralSumCacheFn=integralSumCacheFn(sm),
+            ~integralCacheFn=integralCacheFn(sm),
             fn(sm),
             rs,
           ),
@@ -82,13 +84,14 @@ module VerticalScaling = {
 };
 
 module PointwiseCombination = {
-  let pointwiseAdd = (evaluationParams: evaluationParams, t1, t2) => {
+  let pointwiseAdd = (evaluationParams: evaluationParams, t1: t, t2: t) => {
     switch (render(evaluationParams, t1), render(evaluationParams, t2)) {
     | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
       Ok(
         `RenderedDist(
           Shape.combinePointwise(
-            ~knownIntegralSumsFn=(a, b) => Some(a +. b),
+            ~integralSumCachesFn=(a, b) => Some(a +. b),
+            ~integralCachesFn=(a, b) => Some(Continuous.combinePointwise(~extrapolation=`UseOutermostPoints, (+.), a, b)),
             (+.),
             rs1,
             rs2,
@@ -101,7 +104,7 @@ module PointwiseCombination = {
     };
   };
 
-  let pointwiseMultiply = (evaluationParams: evaluationParams, t1, t2) => {
+  let pointwiseMultiply = (evaluationParams: evaluationParams, t1: t, t2: t) => {
     // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
     Error(
@@ -110,7 +113,7 @@ module PointwiseCombination = {
   };
 
   let operationToLeaf =
-      (evaluationParams: evaluationParams, pointwiseOp, t1, t2) => {
+      (evaluationParams: evaluationParams, pointwiseOp: pointwiseOperation, t1: t, t2: t) => {
     switch (pointwiseOp) {
     | `Add => pointwiseAdd(evaluationParams, t1, t2)
     | `Multiply => pointwiseMultiply(evaluationParams, t1, t2)
@@ -227,7 +230,6 @@ let toLeaf =
       node: t,
     )
     : result(t, string) => {
-  Js.log2("EVALUATION PARAMS", evaluationParams);
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)

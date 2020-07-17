@@ -14,20 +14,36 @@ type xyShape = {
   ys: array(float),
 };
 
+type interpolation = [
+    | `Stepwise
+    | `Linear
+];
+type extrapolation = [
+    | `UseZero
+    | `UseOutermostPoints
+];
+
+type interpolator = (xyShape, int, float) => float;
+
 type continuousShape = {
   xyShape,
-  interpolation: [ | `Stepwise | `Linear],
-  knownIntegralSum: option(float),
+  interpolation: interpolation,
+  integralSumCache: option(float),
+  integralCache: option(continuousShape),
 };
 
 type discreteShape = {
   xyShape,
-  knownIntegralSum: option(float),
+  /* interpolation is always `Discrete */
+  integralSumCache: option(float),
+  integralCache: option(continuousShape),
 };
 
 type mixedShape = {
   continuous: continuousShape,
   discrete: discreteShape,
+  integralSumCache: option(float),
+  integralCache: option(continuousShape),
 };
 
 type shapeMonad('a, 'b, 'c) =

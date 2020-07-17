@@ -44,7 +44,7 @@ module DemoDist = {
             DistPlus.make(
               ~shape=
                 Continuous(
-                  Continuous.make(`Linear, {xs, ys}, None),
+                  Continuous.make(`Linear, {xs, ys}, None, None),
                 ),
               ~domain=Complete,
               ~unit=UnspecifiedDistribution,

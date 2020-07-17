@@ -2,23 +2,25 @@ open Distributions;
 
 type t = DistTypes.discreteShape;
 
-let make = (xyShape, knownIntegralSum): t => {xyShape, knownIntegralSum};
-let shapeMap = (fn, {xyShape, knownIntegralSum}: t): t => {
+let make = (xyShape, integralSumCache, integralCache): t => {xyShape, integralSumCache, integralCache};
+let shapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): t => {
   xyShape: fn(xyShape),
-  knownIntegralSum,
+  integralSumCache,
+  integralCache
 };
 let getShape = (t: t) => t.xyShape;
-let oShapeMap = (fn, {xyShape, knownIntegralSum}: t): option(t) =>
-  fn(xyShape) |> E.O.fmap(make(_, knownIntegralSum));
+let oShapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): option(t) =>
+  fn(xyShape) |> E.O.fmap(make(_, integralSumCache, integralCache));
 
-let empty: t = {xyShape: XYShape.T.empty, knownIntegralSum: Some(0.0)};
+let empty: t = {xyShape: XYShape.T.empty, integralSumCache: Some(0.0), integralCache: None};
 let shapeFn = (fn, t: t) => t |> getShape |> fn;
 
 let lastY = (t: t) => t |> getShape |> XYShape.T.lastY;
 
 let combinePointwise =
     (
-      ~knownIntegralSumsFn,
+      ~integralSumCachesFn = (_, _) => None,
+      ~integralCachesFn: (DistTypes.continuousShape, DistTypes.continuousShape) => option(DistTypes.continuousShape) = (_, _) => None,
       fn,
       t1: DistTypes.discreteShape,
       t2: DistTypes.discreteShape,
@@ -26,38 +28,49 @@ let combinePointwise =
     : DistTypes.discreteShape => {
   let combinedIntegralSum =
     Common.combineIntegralSums(
-      knownIntegralSumsFn,
-      t1.knownIntegralSum,
-      t2.knownIntegralSum,
+      integralSumCachesFn,
+      t1.integralSumCache,
+      t2.integralSumCache,
     );
+
+  // TODO: does it ever make sense to pointwise combine the integrals here?
+  // It could be done for pointwise additions, but is that ever needed?
 
   make(
     XYShape.PointwiseCombination.combine(
       (+.),
-      XYShape.XtoY.assumeZeroBetweenPoints,
-      XYShape.XtoY.assumeZeroBetweenPoints,
+      XYShape.XtoY.discreteInterpolator,
+      XYShape.XtoY.discreteInterpolator,
       t1.xyShape,
       t2.xyShape,
     ),
     combinedIntegralSum,
+    None,
   );
 };
 
 let reduce =
-    (~knownIntegralSumsFn=(_, _) => None, fn, discreteShapes)
-    : DistTypes.discreteShape =>
+  (~integralSumCachesFn=(_, _) => None,
+   ~integralCachesFn=(_, _) => None,
+   fn, discreteShapes)
+  : DistTypes.discreteShape =>
   discreteShapes
-  |> E.A.fold_left(combinePointwise(~knownIntegralSumsFn, fn), empty);
+  |> E.A.fold_left(combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn), empty);
 
-let updateKnownIntegralSum = (knownIntegralSum, t: t): t => {
+let updateIntegralSumCache = (integralSumCache, t: t): t => {
   ...t,
-  knownIntegralSum,
+  integralSumCache,
+};
+
+let updateIntegralCache = (integralCache, t: t): t => {
+  ...t,
+  integralCache,
 };
 
 /* This multiples all of the data points together and creates a new discrete distribution from the results.
    Data points at the same xs get added together. It may be a good idea to downsample t1 and t2 before and/or the result after. */
 let combineAlgebraically =
-    (op: ExpressionTypes.algebraicOperation, t1: t, t2: t) => {
+    (op: ExpressionTypes.algebraicOperation, t1: t, t2: t): t => {
   let t1s = t1 |> getShape;
   let t2s = t2 |> getShape;
   let t1n = t1s |> XYShape.T.length;
@@ -66,8 +79,8 @@ let combineAlgebraically =
   let combinedIntegralSum =
     Common.combineIntegralSums(
       (s1, s2) => Some(s1 *. s2),
-      t1.knownIntegralSum,
-      t2.knownIntegralSum,
+      t1.integralSumCache,
+      t2.integralSumCache,
     );
 
   let fn = Operation.Algebraic.toFn(op);
@@ -87,31 +100,45 @@ let combineAlgebraically =
 
   let combinedShape = XYShape.T.fromZippedArray(rxys);
 
-  make(combinedShape, combinedIntegralSum);
+  make(combinedShape, combinedIntegralSum, None);
 };
 
-let mapY = (~knownIntegralSumFn=previousKnownIntegralSum => None, fn, t: t) => {
-  let u = E.O.bind(_, knownIntegralSumFn);
+let mapY = (~integralSumCacheFn=_ => None,
+            ~integralCacheFn=_ => None,
+            fn, t: t) => {
   let yMapFn = shapeMap(XYShape.T.mapY(fn));
 
-  t |> yMapFn |> updateKnownIntegralSum(u(t.knownIntegralSum));
+  t
+  |> yMapFn
+  |> updateIntegralSumCache(E.O.bind(t.integralSumCache, integralSumCacheFn))
+  |> updateIntegralCache(E.O.bind(t.integralCache, integralCacheFn));
 };
 
+
 let scaleBy = (~scale=1.0, t: t): t => {
+  let scaledIntegralSumCache = E.O.bind(t.integralSumCache, v => Some(scale *. v));
+  let scaledIntegralCache = E.O.bind(t.integralCache, v => Some(Continuous.scaleBy(~scale, v)));
+
   t
   |> mapY((r: float) => r *. scale)
-  |> updateKnownIntegralSum(
-       E.O.bind(t.knownIntegralSum, v => Some(scale *. v)),
-     );
+  |> updateIntegralSumCache(scaledIntegralSumCache)
+  |> updateIntegralCache(scaledIntegralCache)
 };
 
 module T =
   Dist({
     type t = DistTypes.discreteShape;
     type integral = DistTypes.continuousShape;
-    let integral = (~cache, t) =>
-      if (t |> getShape |> XYShape.T.length > 0) {
-        switch (cache) {
+    let integral = (t) =>
+      if (t |> getShape |> XYShape.T.isEmpty) {
+        Continuous.make(
+          `Stepwise,
+          {xs: [|neg_infinity|], ys: [|0.0|]},
+          None,
+          None,
+        );
+      } else {
+        switch (t.integralCache) {
         | Some(c) => c
         | None => {
             let ts = getShape(t);
@@ -123,20 +150,14 @@ module T =
               |> XYShape.T.concat(prependedZeroPoint)
               |> XYShape.T.accumulateYs((+.));
 
-            Continuous.make(`Stepwise, integralShape, None);
+            Continuous.make(`Stepwise, integralShape, None, None);
           }
         };
-      } else {
-        Continuous.make(
-          `Stepwise,
-          {xs: [|neg_infinity|], ys: [|0.0|]},
-          None,
-        );
       };
 
-    let integralEndY = (~cache, t: t) =>
-      t.knownIntegralSum
-      |> E.O.default(t |> integral(~cache) |> Continuous.lastY);
+    let integralEndY = (t: t) =>
+      t.integralSumCache
+      |> E.O.default(t |> integral |> Continuous.lastY);
     let minX = shapeFn(XYShape.T.minX);
     let maxX = shapeFn(XYShape.T.maxX);
     let toDiscreteProbabilityMassFraction = _ => 1.0;
@@ -147,14 +168,14 @@ module T =
 
     let normalize = (t: t): t => {
       t
-      |> scaleBy(~scale=1. /. integralEndY(~cache=None, t))
-      |> updateKnownIntegralSum(Some(1.0));
+      |> scaleBy(~scale=1. /. integralEndY(t))
+      |> updateIntegralSumCache(Some(1.0));
     };
 
     let normalizedToContinuous = _ => None;
     let normalizedToDiscrete = t => Some(t); // TODO: this should be normalized!
 
-    let downsample = (~cache=None, i, t: t): t => {
+    let downsample = (i, t: t): t => {
       // It's not clear how to downsample a set of discrete points in a meaningful way.
       // The best we can do is to clip off the smallest values.
       let currentLength = t |> getShape |> XYShape.T.length;
@@ -170,7 +191,7 @@ module T =
           |> XYShape.Zipped.sortByX
           |> XYShape.T.fromZippedArray;
 
-        make(clippedShape, None); // if someone needs the sum, they'll have to recompute it
+        make(clippedShape, None, None); // if someone needs the sum, they'll have to recompute it
       } else {
         t;
       };
@@ -188,7 +209,7 @@ module T =
            )
         |> XYShape.T.fromZippedArray;
 
-      make(truncatedShape, None);
+      make(truncatedShape, None, None);
     };
 
     let xToY = (f, t) =>
@@ -198,11 +219,11 @@ module T =
       |> E.O.default(0.0)
       |> DistTypes.MixedPoint.makeDiscrete;
 
-    let integralXtoY = (~cache, f, t) =>
-      t |> integral(~cache) |> Continuous.getShape |> XYShape.XtoY.linear(f);
+    let integralXtoY = (f, t) =>
+      t |> integral |> Continuous.getShape |> XYShape.XtoY.linear(f);
 
-    let integralYtoX = (~cache, f, t) =>
-      t |> integral(~cache) |> Continuous.getShape |> XYShape.YtoX.linear(f);
+    let integralYtoX = (f, t) =>
+      t |> integral |> Continuous.getShape |> XYShape.YtoX.linear(f);
 
     let mean = (t: t): float => {
       let s = getShape(t);

@@ -247,7 +247,7 @@ let toDiscretePointMassesFromDiscrete = (s: DistTypes.xyShape): pointMassesWithM
 
 let combineShapesContinuousDiscrete =
     (op: ExpressionTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
-    : DistTypes.xyShape => {
+    : array(DistTypes.xyShape) => {
 
   let t1n = s1 |> XYShape.T.length;
   let t2n = s2 |> XYShape.T.length;
@@ -303,10 +303,5 @@ let combineShapesContinuousDiscrete =
   };
 
   outXYShapes
-  |> E.A.fmap(XYShape.T.fromZippedArray)
-  |> E.A.fold_left(
-      XYShape.PointwiseCombination.combine((+.),
-                                           XYShape.XtoY.linearBetweenPointsExtrapolateZero,
-                                           XYShape.XtoY.linearBetweenPointsExtrapolateZero),
-      XYShape.T.empty);
+  |> E.A.fmap(XYShape.T.fromZippedArray);
 };

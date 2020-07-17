@@ -9,8 +9,8 @@ type assumptions = {
 };
 
 let buildSimple = (~continuous: option(DistTypes.continuousShape), ~discrete: option(DistTypes.discreteShape)): option(DistTypes.shape) => {
-  let continuous = continuous |> E.O.default(Continuous.make(`Linear, {xs: [||], ys: [||]}, Some(0.0)));
-  let discrete = discrete |> E.O.default(Discrete.make({xs: [||], ys: [||]}, Some(0.0)));
+  let continuous = continuous |> E.O.default(Continuous.make(`Linear, {xs: [||], ys: [||]}, Some(0.0), None));
+  let discrete = discrete |> E.O.default(Discrete.make({xs: [||], ys: [||]}, Some(0.0), None));
   let cLength =
     continuous
     |> Continuous.getShape
@@ -25,7 +25,9 @@ let buildSimple = (~continuous: option(DistTypes.continuousShape), ~discrete: op
     let mixedDist =
       Mixed.make(
         ~continuous,
-        ~discrete
+        ~discrete,
+        None,
+        None,
       );
     Some(Mixed(mixedDist));
   };

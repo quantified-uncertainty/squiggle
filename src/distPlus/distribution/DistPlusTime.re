@@ -23,6 +23,6 @@
     include DistPlus.T.Integral;
     let xToY = (f: TimeTypes.timeInVector, t: t) => {
       timeInVectorToX(f, t)
-      |> E.O.fmap(x => DistPlus.T.Integral.xToY(~cache=None, x, t));
+      |> E.O.fmap(x => DistPlus.T.Integral.xToY(x, t));
     };
   };

@@ -147,7 +147,10 @@ module DemoDist = {
              );
            let response = DistPlusRenderer.run(inputs);
            switch (RenderTypes.DistPlusRenderer.Outputs.distplus(response)) {
-           | Some(distPlus) => <DistPlusPlot distPlus />
+           | Some(distPlus) => {
+             let normalizedDistPlus = DistPlus.T.normalize(distPlus);
+             <DistPlusPlot distPlus={normalizedDistPlus} />;
+           }
            | _ =>
              "Correct Guesstimator string input to show a distribution."
              |> R.ste

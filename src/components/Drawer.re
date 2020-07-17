@@ -177,7 +177,8 @@ module Convert = {
     let continuousShape: Types.continuousShape = {
       xyShape,
       interpolation: `Linear,
-      knownIntegralSum: None,
+      integralSumCache: None,
+      integralCache: None,
     };
     
     let integral = XYShape.Analysis.integrateContinuousShape(continuousShape);
@@ -189,7 +190,8 @@ module Convert = {
         ys,
       },
       interpolation: `Linear,
-      knownIntegralSum: Some(1.0),
+      integralSumCache: Some(1.0),
+      integralCache: None,
     };
     continuousShape;
   };
@@ -673,7 +675,7 @@ module State = {
           pdf,
         );
 
-      let cdf = Continuous.T.integral(~cache=None, _pdf);
+      let cdf = Continuous.T.integral(_pdf);
       let xs = [||];
       let ys = [||];
       for (i in 1 to 999) {

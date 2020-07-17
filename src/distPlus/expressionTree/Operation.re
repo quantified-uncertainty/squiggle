@@ -64,9 +64,15 @@ module Scale = {
     | `Log => {j|verticalLog($value, $scaleBy) |j}
     };
 
-  let toKnownIntegralSumFn =
+  let toIntegralSumCacheFn =
     fun
     | `Multiply => ((a, b) => Some(a *. b))
+    | `Exponentiate => ((_, _) => None)
+    | `Log => ((_, _) => None);
+
+  let toIntegralCacheFn =
+    fun
+    | `Multiply => ((a, b) => None) // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
     | `Exponentiate => ((_, _) => None)
     | `Log => ((_, _) => None);
 };

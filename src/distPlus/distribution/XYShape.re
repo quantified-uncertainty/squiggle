@@ -19,6 +19,7 @@ module T = {
   let ys = (t: t) => t.ys;
   let length = (t: t) => E.A.length(t.xs);
   let empty = {xs: [||], ys: [||]};
+  let isEmpty = (t: t) => length(t) == 0;
   let minX = (t: t) => t |> xs |> E.A.Sorted.min |> extImp;
   let maxX = (t: t) => t |> xs |> E.A.Sorted.max |> extImp;
   let firstY = (t: t) => t |> ys |> E.A.first |> extImp;
@@ -143,60 +144,66 @@ module XtoY = {
     n;
   };
 
-  /* The extrapolators below can be used e.g. with PointwiseCombination.combine */
-  let linearBetweenPointsExtrapolateFlat = (t: T.t, leftIndex: int, x: float) => {
-    if (leftIndex < 0) {
-      t.ys[0];
-    } else if (leftIndex >= T.length(t) - 1) {
-      T.lastY(t);
-    } else {
-      let x1 = t.xs[leftIndex];
-      let x2 = t.xs[leftIndex + 1];
-      let y1 = t.ys[leftIndex];
-      let y2 = t.ys[leftIndex + 1];
-      let fraction = (x -. x1) /. (x2 -. x1);
-      y1 *. (1. -. fraction) +. y2 *. fraction;
+  /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
+     Interpolation can either be stepwise (using the value on the left) or linear. Extrapolation can be `UseZero or `UseOutermostPoints. */
+  let continuousInterpolator = (interpolation: DistTypes.interpolation, extrapolation: DistTypes.extrapolation): interpolator => {
+    switch (interpolation) {
+    | `Linear => switch (extrapolation) {
+      | `UseZero => (t: T.t, leftIndex: int, x: float) => {
+        if (leftIndex < 0) {
+          0.0
+        } else if (leftIndex >= T.length(t) - 1) {
+          0.0
+        } else {
+          let x1 = t.xs[leftIndex];
+          let x2 = t.xs[leftIndex + 1];
+          let y1 = t.ys[leftIndex];
+          let y2 = t.ys[leftIndex + 1];
+          let fraction = (x -. x1) /. (x2 -. x1);
+          y1 *. (1. -. fraction) +. y2 *. fraction;
+        };
+      }
+      | `UseOutermostPoints => (t: T.t, leftIndex: int, x: float) => {
+        if (leftIndex < 0) {
+          t.ys[0];
+        } else if (leftIndex >= T.length(t) - 1) {
+          T.lastY(t);
+        } else {
+          let x1 = t.xs[leftIndex];
+          let x2 = t.xs[leftIndex + 1];
+          let y1 = t.ys[leftIndex];
+          let y2 = t.ys[leftIndex + 1];
+          let fraction = (x -. x1) /. (x2 -. x1);
+          y1 *. (1. -. fraction) +. y2 *. fraction;
+        };
+      }
+    }
+    | `Stepwise => switch (extrapolation) {
+      | `UseZero => (t: T.t, leftIndex: int, x: float) => {
+        if (leftIndex < 0) {
+          0.0
+        } else if (leftIndex >= T.length(t) - 1) {
+          0.0
+        } else {
+          t.ys[leftIndex];
+        }
+      }
+      | `UseOutermostPoints => (t: T.t, leftIndex: int, x: float) => {
+        if (leftIndex < 0) {
+          t.ys[0];
+        } else if (leftIndex >= T.length(t) - 1) {
+          T.lastY(t);
+        } else {
+          t.ys[leftIndex];
+        }
+      }
+    }
     }
   };
 
-  let linearBetweenPointsExtrapolateZero = (t: T.t, leftIndex: int, x: float) => {
-    if (leftIndex < 0) {
-      0.0
-    } else if (leftIndex >= T.length(t) - 1) {
-      0.0
-    } else {
-      let x1 = t.xs[leftIndex];
-      let x2 = t.xs[leftIndex + 1];
-      let y1 = t.ys[leftIndex];
-      let y2 = t.ys[leftIndex + 1];
-      let fraction = (x -. x1) /. (x2 -. x1);
-      y1 *. (1. -. fraction) +. y2 *. fraction;
-    }
-  };
-
-  let stepwiseBetweenPointsExtrapolateFlat = (t: T.t, leftIndex: int, x: float) => {
-    if (leftIndex < 0) {
-      t.ys[0];
-    } else if (leftIndex >= T.length(t) - 1) {
-      T.lastY(t);
-    } else {
-      t.ys[leftIndex];
-    }
-  };
-
-  let stepwiseBetweenPointsExtrapolateZero = (t: T.t, leftIndex: int, x: float) => {
-    if (leftIndex < 0) {
-      0.0
-    } else if (leftIndex >= T.length(t) - 1) {
-      0.0
-    } else {
-      t.ys[leftIndex];
-    }
-  };
-
-  let assumeZeroBetweenPoints = (t: T.t, leftIndex: int, x: float) => {
-    0.0;
-  };
+  /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
+     For discrete distributions, the probability density between points is zero, so we just return zero here. */
+  let discreteInterpolator: interpolator = (t: T.t, leftIndex: int, x: float) => 0.0;
 };
 
 module XsConversion = {
@@ -370,6 +377,11 @@ module Range = {
   };
 
   let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);
+
+  let stepwiseToLinear = t => {
+    // adds points at the bottom of each step.
+    t;
+  };
 
   // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
   let stepsToContinuous = t => {
