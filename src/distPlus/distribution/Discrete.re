@@ -173,9 +173,6 @@ module T =
       |> updateIntegralSumCache(Some(1.0));
     };
 
-    let normalizedToContinuous = _ => None;
-    let normalizedToDiscrete = t => Some(t); // TODO: this should be normalized!
-
     let downsample = (i, t: t): t => {
       // It's not clear how to downsample a set of discrete points in a meaningful way.
       // The best we can do is to clip off the smallest values.

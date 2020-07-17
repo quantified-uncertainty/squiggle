@@ -135,11 +135,6 @@ module T =
       {...t, discrete: downsampledDiscrete, continuous: downsampledContinuous};
     };
 
-    let normalizedToContinuous = (t: t) => Some(normalize(t).continuous);
-
-    let normalizedToDiscrete = ({discrete} as t: t) =>
-      Some(normalize(t).discrete);
-
     let integral = (t: t) => {
       switch (t.integralCache) {
       | Some(cache) => cache

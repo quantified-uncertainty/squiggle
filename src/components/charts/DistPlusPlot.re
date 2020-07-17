@@ -190,6 +190,10 @@ let percentiles = distPlus => {
 let adjustBoth = discreteProbabilityMassFraction => {
   let yMaxDiscreteDomainFactor = discreteProbabilityMassFraction;
   let yMaxContinuousDomainFactor = 1.0 -. discreteProbabilityMassFraction;
+
+  // use the bigger proportion, such that whichever is the bigger proportion, the yMax is 1.
+
+
   let yMax = (yMaxDiscreteDomainFactor > 0.5 ? yMaxDiscreteDomainFactor : yMaxContinuousDomainFactor);
   (
     yMax /. yMaxDiscreteDomainFactor,
@@ -231,8 +235,10 @@ module DistPlusChart = {
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     let discreteProbabilityMassFraction =
       distPlus |> DistPlus.T.toDiscreteProbabilityMassFraction;
+
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
       adjustBoth(discreteProbabilityMassFraction);
+
     <DistributionPlot
       xScale={config.xLog ? "log" : "linear"}
       yScale={config.yLog ? "log" : "linear"}

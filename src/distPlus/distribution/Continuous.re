@@ -223,9 +223,6 @@ module T =
       |> updateIntegralSumCache(Some(1.0));
     };
 
-    let normalizedToContinuous = t => Some(t |> normalize);
-    let normalizedToDiscrete = _ => None;
-
     let mean = (t: t) => {
       let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 2.0 /. 2.0;
       let indefiniteIntegralLinear = (p, a, b) =>

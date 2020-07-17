@@ -69,30 +69,6 @@ module T =
       t |> updateShape(truncatedShape);
     };
 
-    // TODO: is this still needed?
-    let normalizedToContinuous = (t: t) => {
-      t
-      |> toShape
-      |> Shape.T.normalizedToContinuous
-      |> E.O.fmap(
-           Continuous.T.mapY(
-             domainIncludedProbabilityMassAdjustment(t),
-           ),
-         );
-    };
-
-    // TODO: is this still needed?
-    let normalizedToDiscrete = (t: t) => {
-      t
-      |> toShape
-      |> Shape.T.normalizedToDiscrete
-      |> E.O.fmap(
-           Discrete.T.mapY(
-             domainIncludedProbabilityMassAdjustment(t),
-           ),
-         );
-    };
-
     let xToY = (f, t: t) =>
       t
       |> toShape

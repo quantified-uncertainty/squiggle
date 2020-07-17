@@ -10,8 +10,6 @@ module type dist = {
   let toContinuous: t => option(DistTypes.continuousShape);
   let toDiscrete: t => option(DistTypes.discreteShape);
   let normalize: t => t;
-  let normalizedToContinuous: t => option(DistTypes.continuousShape);
-  let normalizedToDiscrete: t => option(DistTypes.discreteShape);
   let toDiscreteProbabilityMassFraction: t => float;
   let downsample: (int, t) => t;
   let truncate: (option(float), option(float), t) => t;
@@ -43,8 +41,6 @@ module Dist = (T: dist) => {
   let toDiscrete = T.toDiscrete;
   let normalize = T.normalize;
   let truncate = T.truncate;
-  let normalizedToContinuous = T.normalizedToContinuous;
-  let normalizedToDiscrete = T.normalizedToDiscrete;
   let mean = T.mean;
   let variance = T.variance;
 

@@ -148,18 +148,6 @@ module T =
         Continuous.T.toDiscreteProbabilityMassFraction,
       ));
 
-    let normalizedToDiscrete =
-      mapToAll((
-        Mixed.T.normalizedToDiscrete,
-        Discrete.T.normalizedToDiscrete,
-        Continuous.T.normalizedToDiscrete,
-      ));
-    let normalizedToContinuous =
-      mapToAll((
-        Mixed.T.normalizedToContinuous,
-        Discrete.T.normalizedToContinuous,
-        Continuous.T.normalizedToContinuous,
-      ));
     let minX = mapToAll((Mixed.T.minX, Discrete.T.minX, Continuous.T.minX));
     let integral =
       mapToAll((
