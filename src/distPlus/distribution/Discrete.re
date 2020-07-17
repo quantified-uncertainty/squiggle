@@ -203,7 +203,7 @@ module T =
         |> XYShape.T.zip
         |> XYShape.Zipped.filterByX(x =>
              x >= E.O.default(neg_infinity, leftCutoff)
-             || x <= E.O.default(infinity, rightCutoff)
+             && x <= E.O.default(infinity, rightCutoff)
            )
         |> XYShape.T.fromZippedArray;
 

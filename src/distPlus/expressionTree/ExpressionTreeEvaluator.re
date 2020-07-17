@@ -177,7 +177,7 @@ module Truncate = {
 
   let truncateAsShape =
       (evaluationParams: evaluationParams, leftCutoff, rightCutoff, t) => {
-    // TODO: use named args in renderToShape; if we're lucky we can at least get the tail
+    // TODO: use named args for xMin/xMax in renderToShape; if we're lucky we can at least get the tail
     // of a distribution we otherwise wouldn't get at all
     switch (render(evaluationParams, t)) {
     | Ok(`RenderedDist(rs)) =>

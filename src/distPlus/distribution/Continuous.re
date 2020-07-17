@@ -167,12 +167,10 @@ module T =
         |> XYShape.T.zip
         |> XYShape.Zipped.filterByX(x => x >= lc && x <= rc);
 
-      let eps = (t |> getShape |> XYShape.T.xTotalRange) *. 0.0001;
-
       let leftNewPoint =
-        leftCutoff |> E.O.dimap(lc => [|(lc -. eps, 0.)|], _ => [||]);
+        leftCutoff |> E.O.dimap(lc => [|(lc -. epsilon_float, 0.)|], _ => [||]);
       let rightNewPoint =
-        rightCutoff |> E.O.dimap(rc => [|(rc +. eps, 0.)|], _ => [||]);
+        rightCutoff |> E.O.dimap(rc => [|(rc +. epsilon_float, 0.)|], _ => [||]);
 
       let truncatedZippedPairsWithNewPoints =
         E.A.concatMany([|leftNewPoint, truncatedZippedPairs, rightNewPoint|]);
