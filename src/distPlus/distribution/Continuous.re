@@ -143,6 +143,7 @@ module T =
     let minX = shapeFn(XYShape.T.minX);
     let maxX = shapeFn(XYShape.T.maxX);
     let mapY = mapY;
+    let updateIntegralCache = updateIntegralCache;
     let toDiscreteProbabilityMassFraction = _ => 0.0;
     let toShape = (t: t): DistTypes.shape => Continuous(t);
     let xToY = (f, {interpolation, xyShape}: t) => {
@@ -283,7 +284,8 @@ let combineAlgebraicallyWithDiscrete =
   };
 };
 
-let combineAlgebraically = (op: ExpressionTypes.algebraicOperation, t1: t, t2: t) => {
+let combineAlgebraically =
+    (op: ExpressionTypes.algebraicOperation, t1: t, t2: t) => {
   let s1 = t1 |> getShape;
   let s2 = t2 |> getShape;
   let t1n = s1 |> XYShape.T.length;

@@ -16,6 +16,8 @@ module type dist = {
   let downsample: (int, t) => t;
   let truncate: (option(float), option(float), t) => t;
 
+  let updateIntegralCache: (option(DistTypes.continuousShape), t) => t;
+
   let integral: (t) => integral;
   let integralEndY: (t) => float;
   let integralXtoY: (float, t) => float;
@@ -45,6 +47,8 @@ module Dist = (T: dist) => {
   let normalizedToDiscrete = T.normalizedToDiscrete;
   let mean = T.mean;
   let variance = T.variance;
+
+  let updateIntegralCache = T.updateIntegralCache;
 
   module Integral = {
     type t = T.integral;

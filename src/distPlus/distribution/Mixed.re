@@ -22,6 +22,11 @@ let scaleBy = (~scale=1.0, t: t): t => {
 let toContinuous = ({continuous}: t) => Some(continuous);
 let toDiscrete = ({discrete}: t) => Some(discrete);
 
+let updateIntegralCache = (integralCache, t: t): t => {
+  ...t,
+  integralCache,
+};
+
 module T =
   Dist({
     type t = DistTypes.mixedShape;
@@ -32,6 +37,8 @@ module T =
     let maxX = ({continuous, discrete}: t) =>
       max(Continuous.T.maxX(continuous), Discrete.T.maxX(discrete));
     let toShape = (t: t): DistTypes.shape => Mixed(t);
+
+    let updateIntegralCache = updateIntegralCache;
 
     let toContinuous = toContinuous;
     let toDiscrete = toDiscrete;
@@ -257,15 +264,14 @@ let combineAlgebraically =
   // An alternative (to be explored in the future) may be to first perform the full convolution and then to downsample the result;
   // to use non-uniform fast Fourier transforms (for addition only), add web workers or gpu.js, etc. ...
 
-  // TODO: figure out when to downsample strategically. Could be an evaluationParam?
-  /*let downsampleIfTooLarge = (t: t) => {
-    let sqtl = sqrt(float_of_int(totalLength(t)));
-    sqtl > 10. && downsample ? T.downsample(int_of_float(sqtl), t) : t;
-  };
+  // we have to figure out where to downsample, and how to effectively
+    //let downsampleIfTooLarge = (t: t) => {
+    //  let sqtl = sqrt(float_of_int(totalLength(t)));
+    //  sqtl > 10 ? T.downsample(int_of_float(sqtl), t) : t;
+    //};
 
-  let t1d = downsampleIfTooLarge(t1);
-  let t2d = downsampleIfTooLarge(t2);
-  */
+  let t1d = t1;
+  let t2d = t2;
 
   // continuous (*) continuous => continuous, but also
   // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:

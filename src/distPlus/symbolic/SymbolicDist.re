@@ -137,6 +137,11 @@ module Uniform = {
   let sample = (t: t) => Jstat.uniform##sample(t.low, t.high);
   let mean = (t: t) => Ok(Jstat.uniform##mean(t.low, t.high));
   let toString = ({low, high}: t) => {j|Uniform($low,$high)|j};
+  let truncate = (low, high, t: t): t => {
+    let newLow = max(E.O.default(neg_infinity, low), t.low);
+    let newHigh = min(E.O.default(infinity, high), t.high);
+    {low: newLow, high: newHigh};
+  };
 };
 
 module Float = {
@@ -198,7 +203,20 @@ module T = {
     | `Lognormal(n) => Lognormal.sample(n)
     | `Uniform(n) => Uniform.sample(n)
     | `Beta(n) => Beta.sample(n)
-    | `Float(n) => Float.sample(n)
+    | `Float(n) => Float.sample(n);
+
+  let doN = (n, fn) => {
+    let items = Belt.Array.make(n, 0.0);
+    for (x in 0 to n - 1) {
+      let _ = Belt.Array.set(items, x, fn());
+      ();
+    };
+    items;
+  };
+
+  let sampleN = (n, dist) => {
+    doN(n, () => sample(dist));
+  };
 
   let toString: symbolicDist => string =
     fun
@@ -209,7 +227,7 @@ module T = {
     | `Lognormal(n) => Lognormal.toString(n)
     | `Uniform(n) => Uniform.toString(n)
     | `Beta(n) => Beta.toString(n)
-    | `Float(n) => Float.toString(n)
+    | `Float(n) => Float.toString(n);
 
   let min: symbolicDist => float =
     fun
@@ -258,10 +276,10 @@ module T = {
     switch (xSelection, dist) {
     | (`Linear, _) => E.A.Floats.range(min(dist), max(dist), n)
     | (`ByWeight, `Uniform(n)) =>
-          // In `ByWeight mode, uniform distributions get special treatment because we need two x's
-          // on either side for proper rendering (just left and right of the discontinuities).
-            let dx = 0.00001 *. (n.high -. n.low);
-            [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|];
+      // In `ByWeight mode, uniform distributions get special treatment because we need two x's
+      // on either side for proper rendering (just left and right of the discontinuities).
+      let dx = 0.00001 *. (n.high -. n.low);
+      [|n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx|];
     | (`ByWeight, _) =>
       let ys = E.A.Floats.range(minCdfValue, maxCdfValue, n);
       ys |> E.A.fmap(y => inv(y, dist));

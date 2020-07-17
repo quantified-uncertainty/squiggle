@@ -162,6 +162,7 @@ module T =
     let maxX = shapeFn(XYShape.T.maxX);
     let toDiscreteProbabilityMassFraction = _ => 1.0;
     let mapY = mapY;
+    let updateIntegralCache = updateIntegralCache;
     let toShape = (t: t): DistTypes.shape => Discrete(t);
     let toContinuous = _ => None;
     let toDiscrete = t => Some(t);

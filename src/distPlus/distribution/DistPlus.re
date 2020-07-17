@@ -33,7 +33,6 @@ let update =
 };
 
 let updateShape = (shape, t) => {
-  Js.log("Updating the shape, recalculating the integral");
   let integralCache = shapeIntegral(shape);
   update(~shape, ~integralCache, t);
 };
@@ -108,6 +107,9 @@ module T =
     // This bit is kind of awkward, could probably use rethinking.
     let integral = (t: t) =>
       updateShape(Continuous(t.integralCache), t);
+
+    let updateIntegralCache = (integralCache: option(DistTypes.continuousShape), t) =>
+      update(~integralCache=E.O.default(t.integralCache, integralCache), t);
 
     let downsample = (i, t): t =>
       updateShape(t |> toShape |> Shape.T.downsample(i), t);

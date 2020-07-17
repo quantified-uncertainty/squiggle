@@ -121,6 +121,13 @@ module T =
         Continuous.T.normalize
       ));
 
+    let updateIntegralCache = (integralCache, t: t): t =>
+      fmap((
+        Mixed.T.updateIntegralCache(integralCache),
+        Discrete.T.updateIntegralCache(integralCache),
+        Continuous.T.updateIntegralCache(integralCache),
+      ), t);
+
     let toContinuous =
       mapToAll((
         Mixed.T.toContinuous,
@@ -211,9 +218,26 @@ let pdf = (f: float, t: t) => {
 let inv = T.Integral.yToX;
 let cdf = T.Integral.xToY;
 
+let doN = (n, fn) => {
+  let items = Belt.Array.make(n, 0.0);
+  for (x in 0 to n - 1) {
+    let _ = Belt.Array.set(items, x, fn());
+    ();
+  };
+  items;
+};
+
 let sample = (t: t): float => {
-  // this can go, already taken care of in Ozzie's sampling branch
-  0.0
+  let randomItem = Random.float(1.);
+  let bar = t |> T.Integral.yToX(randomItem);
+  bar;
+};
+
+let sampleNRendered = (n, dist) => {
+  let integralCache = T.Integral.get(dist);
+  let distWithUpdatedIntegralCache = T.updateIntegralCache(Some(integralCache), dist);
+
+  doN(n, () => sample(distWithUpdatedIntegralCache));
 };
 
 let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s): float =>
