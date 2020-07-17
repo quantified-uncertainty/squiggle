@@ -378,13 +378,31 @@ module Range = {
 
   let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);
 
-  let stepwiseToLinear = t => {
+  let stepwiseToLinear = ({xs, ys}: T.t): T.t => {
     // adds points at the bottom of each step.
-    t;
+    let length = E.A.length(xs);
+    let newXs: array(float) = Belt.Array.makeUninitializedUnsafe(2 * length);
+    let newYs: array(float) = Belt.Array.makeUninitializedUnsafe(2 * length);
+
+    let _ = Belt.Array.set(newXs, 0, xs[0] -. epsilon_float);
+    let _ = Belt.Array.set(newYs, 0, 0.);
+    let _ = Belt.Array.set(newXs, 1, xs[0]);
+    let _ = Belt.Array.set(newYs, 1, ys[0]);
+
+    for (i in 1 to E.A.length(xs) - 1) {
+      let _ = Belt.Array.set(newXs, i * 2, xs[i] -. epsilon_float);
+      let _ = Belt.Array.set(newYs, i * 2, ys[i-1]);
+      let _ = Belt.Array.set(newXs, i * 2 + 1, xs[i]);
+      let _ = Belt.Array.set(newYs, i * 2 + 1, ys[i]);
+      ();
+    };
+
+    {xs: newXs, ys: newYs};
   };
 
-  // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
+  // TODO: I think this isn't needed by any functions anymore.
   let stepsToContinuous = t => {
+    // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
     let diff = T.xTotalRange(t) |> (r => r *. 0.00001);
     let items =
       switch (E.A.toRanges(Belt.Array.zip(t.xs, t.ys))) {
