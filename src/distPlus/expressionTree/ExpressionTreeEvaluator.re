@@ -20,7 +20,7 @@ module AlgebraicCombination = {
     | _ => Ok(`AlgebraicCombination((operation, t1, t2)))
     };
 
-  let tryCombination = (n, algebraicOp, t1: node, t2: node) => {
+  let combinationBySampling = (n, algebraicOp, t1: node, t2: node) => {
     let sampleN =
       mapRenderable(Shape.sampleNRendered(n), SymbolicDist.T.sampleN(n));
     switch (sampleN(t1), sampleN(t2)) {
@@ -33,24 +33,28 @@ module AlgebraicCombination = {
     };
   };
 
-  let renderIfNotRendered = (params, t) =>
-    !renderable(t)
-      ? switch (render(params, t)) {
-        | Ok(r) => Ok(r)
-        | Error(e) => Error(e)
-        }
-      : Ok(t);
+  let combinationByRendering =
+      (evaluationParams, algebraicOp, t1: node, t2: node)
+      : result(node, string) => {
+    E.R.merge(
+      renderAndGetShape(evaluationParams, t1),
+      renderAndGetShape(evaluationParams, t2),
+    )
+    |> E.R.fmap(((a, b)) =>
+         `RenderedDist(Shape.combineAlgebraically(algebraicOp, a, b))
+       );
+  };
 
-  let combineAsShapes =
+  let combineShapesUsingSampling =
       (evaluationParams: evaluationParams, algebraicOp, t1: node, t2: node) => {
-    let i1 = renderIfNotRendered(evaluationParams, t1);
-    let i2 = renderIfNotRendered(evaluationParams, t2);
+    let i1 = renderIfNotRenderable(evaluationParams, t1);
+    let i2 = renderIfNotRenderable(evaluationParams, t2);
     E.R.merge(i1, i2)
     |> E.R.bind(
          _,
          ((a, b)) => {
            let samples =
-             tryCombination(
+             combinationBySampling(
                evaluationParams.samplingInputs.sampleCount,
                algebraicOp,
                a,
@@ -92,7 +96,7 @@ module AlgebraicCombination = {
          _,
          fun
          | `SymbolicDist(d) as t => Ok(t)
-         | _ => combineAsShapes(evaluationParams, algebraicOp, t1, t2),
+         | _ => combinationByRendering(evaluationParams, algebraicOp, t1, t2),
        );
 };
 
@@ -131,7 +135,16 @@ module PointwiseCombination = {
         `RenderedDist(
           Shape.combinePointwise(
             ~integralSumCachesFn=(a, b) => Some(a +. b),
-            ~integralCachesFn=(a, b) => Some(Continuous.combinePointwise(~extrapolation=`UseOutermostPoints, (+.), a, b)),
+            ~integralCachesFn=
+              (a, b) =>
+                Some(
+                  Continuous.combinePointwise(
+                    ~extrapolation=`UseOutermostPoints,
+                    (+.),
+                    a,
+                    b,
+                  ),
+                ),
             (+.),
             rs1,
             rs2,
@@ -153,7 +166,12 @@ module PointwiseCombination = {
   };
 
   let operationToLeaf =
-      (evaluationParams: evaluationParams, pointwiseOp: pointwiseOperation, t1: t, t2: t) => {
+      (
+        evaluationParams: evaluationParams,
+        pointwiseOp: pointwiseOperation,
+        t1: t,
+        t2: t,
+      ) => {
     switch (pointwiseOp) {
     | `Add => pointwiseAdd(evaluationParams, t1, t2)
     | `Multiply => pointwiseMultiply(evaluationParams, t1, t2)
