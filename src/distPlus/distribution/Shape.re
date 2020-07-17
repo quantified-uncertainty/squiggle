@@ -27,24 +27,19 @@ let combineAlgebraically =
     (op: ExpressionTypes.algebraicOperation, t1: t, t2: t): t => {
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
-    DistTypes.Continuous(
-      Continuous.combineAlgebraically(op, m1, m2),
-    )
+    Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toShape;
   | (Continuous(m1), Discrete(m2))
   | (Discrete(m2), Continuous(m1)) =>
-    DistTypes.Continuous(
-      Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2),
-    )
+    Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2) |> Continuous.T.toShape
   | (Discrete(m1), Discrete(m2)) =>
-    DistTypes.Discrete(Discrete.combineAlgebraically(op, m1, m2))
+    Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toShape
   | (m1, m2) =>
-    DistTypes.Mixed(
-      Mixed.combineAlgebraically(
-        op,
-        toMixed(m1),
-        toMixed(m2),
-      ),
+    Mixed.combineAlgebraically(
+      op,
+      toMixed(m1),
+      toMixed(m2),
     )
+    |> Mixed.T.toShape
   };
 };
 
