@@ -25,11 +25,9 @@ let propValue = (t: Prop.Value.t) => {
         ~shouldDownsample=true,
         (),
       )
-      |> DistPlusRenderer.run
-      |> RenderTypes.DistPlusRenderer.Outputs.distplus;
+      |> DistPlusRenderer.run;
     switch (newDistribution) {
-    | Some(distribution) =>
-      <div> <DistPlusPlot distPlus=distribution /> </div>
+    | Ok(distribution) => <div> <DistPlusPlot distPlus=distribution /> </div>
     // <input
     //   readOnly=true
     //   className="shadow appearance-none border w-1/3 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -45,7 +43,7 @@ let propValue = (t: Prop.Value.t) => {
     //   className="w-1/3 border w-1/2 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white">
     //   {"30 to infinity, 80% mass" |> ReasonReact.string}
     // </div>
-    | None => "Something went wrong" |> ReasonReact.string
+    | Error(e) => e |> ReasonReact.string
     };
   | FloatCdf(_) => <div />
   | Probability(r) =>

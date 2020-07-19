@@ -146,14 +146,11 @@ module DemoDist = {
                (),
              );
            let response = DistPlusRenderer.run(inputs);
-           switch (RenderTypes.DistPlusRenderer.Outputs.distplus(response)) {
-           | Some(distPlus) => {
+           switch (response) {
+           | Ok(distPlus) =>
              let normalizedDistPlus = DistPlus.T.normalize(distPlus);
-             <DistPlusPlot distPlus={normalizedDistPlus} />;
-           }
-           | _ =>
-             "Correct Guesstimator string input to show a distribution."
-             |> R.ste
+             <DistPlusPlot distPlus=normalizedDistPlus />;
+           | Error(r) => r |> R.ste
            };
          | _ =>
            "Nothing to show. Try to change the distribution description."
@@ -484,7 +481,10 @@ let make = () => {
               />
             </Col>
             <Col span=4>
-              <FieldFloat field=FormConfig.DownsampleTo label="Downsample To" />
+              <FieldFloat
+                field=FormConfig.DownsampleTo
+                label="Downsample To"
+              />
             </Col>
             <Col span=4>
               <FieldFloat field=FormConfig.KernelWidth label="Kernel Width" />

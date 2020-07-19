@@ -32,6 +32,50 @@ module AlgebraicCombination = {
        );
   };
 
+  let choose = (t1: node, t2: node) => {
+    let dLength = (r: DistTypes.discreteShape) =>
+      r.xyShape |> XYShape.T.length;
+    switch (t1, t2) {
+    | (`RenderedDist(Continuous(_)), `RenderedDist(Continuous(_))) => `Sampling
+    | (`RenderedDist(Discrete(m1)), `RenderedDist(Discrete(m2)))
+        when dLength(m1) * dLength(m2) > 1000 => `Analytical
+    | (`RenderedDist(Discrete(_)), `RenderedDist(Discrete(_))) => `Sampling
+    | (`RenderedDist(Discrete(d)), `SymbolicDist(_))
+    | (`SymbolicDist(_), `RenderedDist(Discrete(d)))
+    | (`RenderedDist(Discrete(d)), `RenderedDist(Continuous(_)))
+    | (`RenderedDist(Continuous(_)), `RenderedDist(Discrete(d))) =>
+      dLength(d) > 10 ? `Sampling : `Analytical
+    | _ => `Sampling
+    };
+  };
+  let foo =
+      (evaluationParams, algebraicOp, t1: node, t2: node)
+      : result(node, string) => {
+    E.R.merge(
+      SamplingDistribution.renderIfIsNotSamplingDistribution(
+        evaluationParams,
+        t1,
+      ),
+      SamplingDistribution.renderIfIsNotSamplingDistribution(
+        evaluationParams,
+        t2,
+      ),
+    )
+    |> E.R.bind(_, ((a, b)) =>
+         switch (choose(a, b)) {
+         | `Sampling =>
+           SamplingDistribution.combineShapesUsingSampling(
+             evaluationParams,
+             algebraicOp,
+             a,
+             b,
+           )
+         | `Analytical =>
+           combinationByRendering(evaluationParams, algebraicOp, a, b)
+         }
+       );
+  };
+
   let operationToLeaf =
       (
         evaluationParams: evaluationParams,
@@ -45,8 +89,8 @@ module AlgebraicCombination = {
     |> E.R.bind(
          _,
          fun
-         | `SymbolicDist(d) as t => Ok(t)
-         | _ => combinationByRendering(evaluationParams, algebraicOp, t1, t2),
+         | `SymbolicDist(_) as t => Ok(t)
+         | _ => foo(evaluationParams, algebraicOp, t1, t2),
        );
 };
 

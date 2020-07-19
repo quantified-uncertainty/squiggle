@@ -6,7 +6,7 @@ let isSamplingDistribution: node => bool =
   | `RenderedDist(_) => true
   | _ => false;
 
-let renderIfIsNotSamplingDistribution = (params, t) =>
+let renderIfIsNotSamplingDistribution = (params, t): result(node, string) =>
   !isSamplingDistribution(t)
     ? switch (Render.render(params, t)) {
       | Ok(r) => Ok(r)
@@ -70,9 +70,7 @@ let combineShapesUsingSampling =
                   },
                 ),
               )
-           |> E.O.bind(_, (r: RenderTypes.ShapeRenderer.Sampling.outputs) =>
-                r.shape
-              )
+           |> E.O.bind(_, (r) => r.shape)
            |> E.O.toResult("No response");
          shape |> E.R.fmap(r => `Normalize(`RenderedDist(r)));
        },

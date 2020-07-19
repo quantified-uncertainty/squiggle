@@ -36,9 +36,6 @@ let runSymbolic = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
      );
 };
 
-let run =
-    (inputs: RenderTypes.ShapeRenderer.Combined.inputs)
-    : RenderTypes.ShapeRenderer.Combined.outputs => {
-  let symbolic = runSymbolic(inputs);
-  {symbolic: Some(symbolic), sampling: None};
+let run = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
+  runSymbolic(inputs);
 };
