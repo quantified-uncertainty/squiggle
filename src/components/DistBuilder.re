@@ -142,7 +142,7 @@ module DemoDist = {
                },
                ~distPlusIngredients,
                ~shouldDownsample=options.downsampleTo |> E.O.isSome,
-               ~recommendedLength=options.downsampleTo |> E.O.default(100),
+               ~recommendedLength=options.downsampleTo |> E.O.default(1000),
                (),
              );
            let response = DistPlusRenderer.run(inputs);

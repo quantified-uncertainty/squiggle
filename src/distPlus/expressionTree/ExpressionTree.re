@@ -10,14 +10,9 @@ let toShape = (intendedShapeLength: int, samplingInputs, node: node) => {
        });
 
   switch (renderResult) {
-  | Ok(`RenderedDist(rs)) =>
-    // todo: Why is this here? It converts a mixed shape to a mixed shape.
-    let continuous = Shape.T.toContinuous(rs);
-    let discrete = Shape.T.toDiscrete(rs);
-    let shape = MixedShapeBuilder.buildSimple(~continuous, ~discrete);
-    shape |> E.O.toExt("Could not build final shape.");
-  | Ok(_) => E.O.toExn("Rendering failed.", None)
-  | Error(message) => E.O.toExn("No shape found, error: " ++ message, None)
+  | Ok(`RenderedDist(shape)) => Ok(shape)
+  | Ok(_) => Error("Rendering failed.")
+  | Error(e) => Error(e)
   };
 };
 
