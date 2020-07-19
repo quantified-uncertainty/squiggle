@@ -110,7 +110,11 @@ let toDiscretePointMassesFromTriangulars =
 };
 
 let combineShapesContinuousContinuous =
-    (op: ExpressionTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
+    (
+      op: ExpressionTypes.algebraicOperation,
+      s1: DistTypes.xyShape,
+      s2: DistTypes.xyShape,
+    )
     : DistTypes.xyShape => {
   let t1n = s1 |> XYShape.T.length;
   let t2n = s2 |> XYShape.T.length;
@@ -118,10 +122,11 @@ let combineShapesContinuousContinuous =
   // if we add the two distributions, we should probably use normal filters.
   // if we multiply the two distributions, we should probably use lognormal filters.
   let t1m = toDiscretePointMassesFromTriangulars(s1);
-  let t2m = switch (op) {
+  let t2m =
+    switch (op) {
     | `Divide => toDiscretePointMassesFromTriangulars(~inverse=true, s2)
     | _ => toDiscretePointMassesFromTriangulars(~inverse=false, s2)
-  };
+    };
 
   let combineMeansFn =
     switch (op) {
@@ -185,27 +190,30 @@ let combineShapesContinuousContinuous =
   // we now want to create a set of target points. For now, let's just evenly distribute 200 points between
   // between the outputMinX and outputMaxX
   let nOut = 300;
-  let outputXs: array(float) = E.A.Floats.range(outputMinX^, outputMaxX^, nOut);
+  let outputXs: array(float) =
+    E.A.Floats.range(outputMinX^, outputMaxX^, nOut);
   let outputYs: array(float) = Belt.Array.make(nOut, 0.0);
   // now, for each of the outputYs, accumulate from a Gaussian kernel over each input point.
-  for (j in 0 to E.A.length(masses) - 1) { // go through all of the result points
+  for (j in 0 to E.A.length(masses) - 1) {
+    // go through all of the result points
     if (variances[j] > 0. && masses[j] > 0.) {
-      for (i in 0 to E.A.length(outputXs) - 1) { // go through all of the target points
+      for (i in 0 to E.A.length(outputXs) - 1) {
+        // go through all of the target points
         let dx = outputXs[i] -. means[j];
-        let contribution = masses[j] *. exp(-. (dx ** 2.) /. (2. *. variances[j])) /. (sqrt(2. *. 3.14159276 *. variances[j]));
+        let contribution =
+          masses[j]
+          *. exp(-. (dx ** 2.) /. (2. *. variances[j]))
+          /. sqrt(2. *. 3.14159276 *. variances[j]);
         Belt.Array.set(outputYs, i, outputYs[i] +. contribution) |> ignore;
-        ();
       };
-      ();
-    } |> ignore;
-    ();
+    };
   };
 
   {xs: outputXs, ys: outputYs};
 };
 
-let toDiscretePointMassesFromDiscrete = (s: DistTypes.xyShape): pointMassesWithMoments => {
-  let n = s |> XYShape.T.length;
+let toDiscretePointMassesFromDiscrete =
+    (s: DistTypes.xyShape): pointMassesWithMoments => {
   let {xs, ys}: XYShape.T.t = s;
   let n = E.A.length(xs);
 
@@ -231,7 +239,7 @@ let combineShapesContinuousDiscrete =
 
   switch (op) {
   | `Add
-  | `Subtract => {
+  | `Subtract =>
     for (j in 0 to t2n - 1) {
       // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
       let dxyShape: array((float, float)) =
@@ -240,16 +248,16 @@ let combineShapesContinuousDiscrete =
         Belt.Array.set(
           dxyShape,
           i,
-          (fn(continuousShape.xs[i], discreteShape.xs[j]), continuousShape.ys[i] *. discreteShape.ys[j]),
+          (fn(continuousShape.xs[i], discreteShape.xs[j]),
+          continuousShape.ys[i] *. discreteShape.ys[j]),
         ) |> ignore;
         ();
       };
       Belt.Array.set(outXYShapes, j, dxyShape) |> ignore;
       ();
     }
-    }
-    | `Multiply
-    | `Divide => {
+  | `Multiply
+  | `Divide =>
     for (j in 0 to t2n - 1) {
       // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
       let dxyShape: array((float, float)) =
@@ -264,7 +272,6 @@ let combineShapesContinuousDiscrete =
       };
       Belt.Array.set(outXYShapes, j, dxyShape) |> ignore;
       ();
-    }
     }
   };
 
