@@ -157,8 +157,11 @@ module MathAdtToDistDst = {
   let triangular:
     array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
-    | [|Value(low), Value(medium), Value(high)|] =>
+    | [|Value(low), Value(medium), Value(high)|]
+        when low < medium && medium < high =>
       Ok(`SymbolicDist(`Triangular({low, medium, high})))
+    | [|Value(_), Value(_), Value(_)|] =>
+      Error("Triangular values must be increasing order")
     | _ => Error("Wrong number of variables in triangle distribution");
 
   let multiModal =
@@ -238,7 +241,7 @@ module MathAdtToDistDst = {
       ) => {
     let toOkAlgebraic = r => Ok(`AlgebraicCombination(r));
     let toOkTruncate = r => Ok(`Truncate(r));
-    let toOkFloatFromDist = r => Ok(`FloatFromDist(r))
+    let toOkFloatFromDist = r => Ok(`FloatFromDist(r));
     switch (name, args) {
     | ("add", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Add, l, r))
     | ("add", _) => Error("Addition needs two operands")
@@ -276,10 +279,8 @@ module MathAdtToDistDst = {
       toOkFloatFromDist((`Cdf(v), d))
     | ("inv", [|Ok(d), Ok(`SymbolicDist(`Float(v)))|]) =>
       toOkFloatFromDist((`Inv(v), d))
-    | ("mean", [|Ok(d)|]) =>
-      toOkFloatFromDist((`Mean, d))
-    | ("sample", [|Ok(d)|]) =>
-      toOkFloatFromDist((`Sample, d))
+    | ("mean", [|Ok(d)|]) => toOkFloatFromDist((`Mean, d))
+    | ("sample", [|Ok(d)|]) => toOkFloatFromDist((`Sample, d))
     | _ => Error("This type not currently supported")
     };
   };
