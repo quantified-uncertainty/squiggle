@@ -14,11 +14,11 @@ type xyShape = {
   ys: array(float),
 };
 
-type interpolation = [
+type interpolationStrategy = [
     | `Stepwise
     | `Linear
 ];
-type extrapolation = [
+type extrapolationStrategy = [
     | `UseZero
     | `UseOutermostPoints
 ];
@@ -27,14 +27,13 @@ type interpolator = (xyShape, int, float) => float;
 
 type continuousShape = {
   xyShape,
-  interpolation: interpolation,
+  interpolation: interpolationStrategy,
   integralSumCache: option(float),
   integralCache: option(continuousShape),
 };
 
 type discreteShape = {
   xyShape,
-  /* interpolation is always `Discrete */
   integralSumCache: option(float),
   integralCache: option(continuousShape),
 };

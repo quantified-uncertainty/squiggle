@@ -4,7 +4,7 @@ module type dist = {
   let minX: t => float;
   let maxX: t => float;
   let mapY:
-    (~integralSumCacheFn: float => option(float)=?, ~integralCacheFn: DistTypes.continuousShape => option(DistTypes.continuousShape)=?, float => float, t) => t;
+    (~integralSumCacheFn: float => option(float)=?, ~integralCacheFn: DistTypes.continuousShape => option(DistTypes.continuousShape)=?, ~fn: float => float, t) => t;
   let xToY: (float, t) => DistTypes.mixedPoint;
   let toShape: t => DistTypes.shape;
   let toContinuous: t => option(DistTypes.continuousShape);

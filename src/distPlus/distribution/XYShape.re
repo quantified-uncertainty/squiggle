@@ -146,56 +146,52 @@ module XtoY = {
 
   /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
      Interpolation can either be stepwise (using the value on the left) or linear. Extrapolation can be `UseZero or `UseOutermostPoints. */
-  let continuousInterpolator = (interpolation: DistTypes.interpolation, extrapolation: DistTypes.extrapolation): interpolator => {
-    switch (interpolation) {
-    | `Linear => switch (extrapolation) {
-      | `UseZero => (t: T.t, leftIndex: int, x: float) => {
-        if (leftIndex < 0) {
-          0.0
-        } else if (leftIndex >= T.length(t) - 1) {
-          0.0
-        } else {
-          let x1 = t.xs[leftIndex];
-          let x2 = t.xs[leftIndex + 1];
-          let y1 = t.ys[leftIndex];
-          let y2 = t.ys[leftIndex + 1];
-          let fraction = (x -. x1) /. (x2 -. x1);
-          y1 *. (1. -. fraction) +. y2 *. fraction;
-        };
-      }
-      | `UseOutermostPoints => (t: T.t, leftIndex: int, x: float) => {
-        if (leftIndex < 0) {
-          t.ys[0];
-        } else if (leftIndex >= T.length(t) - 1) {
-          T.lastY(t);
-        } else {
-          let x1 = t.xs[leftIndex];
-          let x2 = t.xs[leftIndex + 1];
-          let y1 = t.ys[leftIndex];
-          let y2 = t.ys[leftIndex + 1];
-          let fraction = (x -. x1) /. (x2 -. x1);
-          y1 *. (1. -. fraction) +. y2 *. fraction;
-        };
+  let continuousInterpolator = (interpolation: DistTypes.interpolationStrategy, extrapolation: DistTypes.extrapolationStrategy): interpolator => {
+    switch (interpolation, extrapolation) {
+    | (`Linear, `UseZero) => (t: T.t, leftIndex: int, x: float) => {
+      if (leftIndex < 0) {
+        0.0
+      } else if (leftIndex >= T.length(t) - 1) {
+        0.0
+      } else {
+        let x1 = t.xs[leftIndex];
+        let x2 = t.xs[leftIndex + 1];
+        let y1 = t.ys[leftIndex];
+        let y2 = t.ys[leftIndex + 1];
+        let fraction = (x -. x1) /. (x2 -. x1);
+        y1 *. (1. -. fraction) +. y2 *. fraction;
+      };
+    }
+    | (`Linear, `UseOutermostPoints) => (t: T.t, leftIndex: int, x: float) => {
+      if (leftIndex < 0) {
+        t.ys[0];
+      } else if (leftIndex >= T.length(t) - 1) {
+        t.ys[T.length(t) - 1]
+      } else {
+        let x1 = t.xs[leftIndex];
+        let x2 = t.xs[leftIndex + 1];
+        let y1 = t.ys[leftIndex];
+        let y2 = t.ys[leftIndex + 1];
+        let fraction = (x -. x1) /. (x2 -. x1);
+        y1 *. (1. -. fraction) +. y2 *. fraction;
+      };
+    }
+    | (`Stepwise, `UseZero) => (t: T.t, leftIndex: int, x: float) => {
+      if (leftIndex < 0) {
+        0.0
+      } else if (leftIndex >= T.length(t) - 1) {
+        0.0
+      } else {
+        t.ys[leftIndex];
       }
     }
-    | `Stepwise => switch (extrapolation) {
-      | `UseZero => (t: T.t, leftIndex: int, x: float) => {
-        if (leftIndex < 0) {
-          0.0
-        } else if (leftIndex >= T.length(t) - 1) {
-          0.0
-        } else {
-          t.ys[leftIndex];
-        }
-      }
-      | `UseOutermostPoints => (t: T.t, leftIndex: int, x: float) => {
-        if (leftIndex < 0) {
-          t.ys[0];
-        } else if (leftIndex >= T.length(t) - 1) {
-          T.lastY(t);
-        } else {
-          t.ys[leftIndex];
-        }
+    | (`Stepwise, `UseOutermostPoints) => (t: T.t, leftIndex: int, x: float) => {
+      if (leftIndex < 0) {
+        t.ys[0];
+      } else if (leftIndex >= T.length(t) - 1) {
+        t.ys[T.length(t) - 1]
+      } else {
+        t.ys[leftIndex];
       }
     }
     }
@@ -246,7 +242,7 @@ module PointwiseCombination = {
       // and interpolates the value on the other side, thus accumulating xs and ys.
       // This is written in raw JS because this can still be a bottleneck, and using refs for the i and j indices is quite painful.
 
-      function(fn, t1Interpolator, t2Interpolator, t1, t2) {
+      function(fn, interpolator, t1, t2) {
         let t1n = t1.xs.length;
         let t2n = t2.xs.length;
         let outX = [];
@@ -263,7 +259,7 @@ module PointwiseCombination = {
             x = t1.xs[i];
             ya = t1.ys[i];
 
-            yb = t2Interpolator(t2, j, x);
+            yb = interpolator(t2, j, x);
           } else if (i == t1n - 1 && j < t2n - 1 ||
                     t1.xs[i+1] > t2.xs[j+1]) { // if b has to catch up to a, or if a is already done
             j++;
@@ -271,7 +267,7 @@ module PointwiseCombination = {
             x = t2.xs[j];
             yb = t2.ys[j];
 
-            ya = t1Interpolator(t1, i, x);
+            ya = interpolator(t1, i, x);
           } else if (i < t1n - 1 && j < t2n && t1.xs[i+1] === t2.xs[j+1]) { // if they happen to be equal, move both ahead
             i++;
             j++;
@@ -384,16 +380,16 @@ module Range = {
     let newXs: array(float) = Belt.Array.makeUninitializedUnsafe(2 * length);
     let newYs: array(float) = Belt.Array.makeUninitializedUnsafe(2 * length);
 
-    let _ = Belt.Array.set(newXs, 0, xs[0] -. epsilon_float);
-    let _ = Belt.Array.set(newYs, 0, 0.);
-    let _ = Belt.Array.set(newXs, 1, xs[0]);
-    let _ = Belt.Array.set(newYs, 1, ys[0]);
+    Belt.Array.set(newXs, 0, xs[0] -. epsilon_float) |> ignore;
+    Belt.Array.set(newYs, 0, 0.) |> ignore;
+    Belt.Array.set(newXs, 1, xs[0]) |> ignore;
+    Belt.Array.set(newYs, 1, ys[0]) |> ignore;
 
     for (i in 1 to E.A.length(xs) - 1) {
-      let _ = Belt.Array.set(newXs, i * 2, xs[i] -. epsilon_float);
-      let _ = Belt.Array.set(newYs, i * 2, ys[i-1]);
-      let _ = Belt.Array.set(newXs, i * 2 + 1, xs[i]);
-      let _ = Belt.Array.set(newYs, i * 2 + 1, ys[i]);
+      Belt.Array.set(newXs, i * 2, xs[i] -. epsilon_float) |> ignore;
+      Belt.Array.set(newYs, i * 2, ys[i-1]) |> ignore;
+      Belt.Array.set(newXs, i * 2 + 1, xs[i]) |> ignore;
+      Belt.Array.set(newYs, i * 2 + 1, ys[i]) |> ignore;
       ();
     };
 

@@ -112,7 +112,7 @@ module VerticalScaling = {
           Shape.T.mapY(
             ~integralSumCacheFn=integralSumCacheFn(sm),
             ~integralCacheFn=integralCacheFn(sm),
-            fn(sm),
+            ~fn=fn(sm),
             rs,
           ),
         ),

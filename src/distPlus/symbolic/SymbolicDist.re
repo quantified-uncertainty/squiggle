@@ -317,13 +317,13 @@ module T = {
     switch (d) {
     | `Float(v) =>
       Discrete(
-        Discrete.make({xs: [|v|], ys: [|1.0|]}, Some(1.0), None),
+        Discrete.make(~integralSumCache=Some(1.0), {xs: [|v|], ys: [|1.0|]}),
       )
     | _ =>
       let xs = interpolateXs(~xSelection=`ByWeight, d, sampleCount);
       let ys = xs |> E.A.fmap(x => pdf(x, d));
       Continuous(
-        Continuous.make(`Linear, {xs, ys}, Some(1.0), None),
+        Continuous.make(~integralSumCache=Some(1.0), {xs, ys}),
       );
     };
 };

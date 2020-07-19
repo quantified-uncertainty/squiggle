@@ -94,11 +94,11 @@ module T =
         (
           ~integralSumCacheFn=previousIntegralSum => None,
           ~integralCacheFn=previousIntegralCache => None,
-          fn,
+          ~fn,
           {shape, _} as t: t,
         )
         : t =>
-      Shape.T.mapY(~integralSumCacheFn, fn, shape)
+      Shape.T.mapY(~integralSumCacheFn, ~fn, shape)
       |> updateShape(_, t);
 
     // get the total of everything

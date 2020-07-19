@@ -2,7 +2,7 @@ open Distributions;
 
 type t = DistTypes.discreteShape;
 
-let make = (xyShape, integralSumCache, integralCache): t => {xyShape, integralSumCache, integralCache};
+let make = (~integralSumCache=None, ~integralCache=None, xyShape): t => {xyShape, integralSumCache, integralCache};
 let shapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): t => {
   xyShape: fn(xyShape),
   integralSumCache,
@@ -10,9 +10,21 @@ let shapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): t => {
 };
 let getShape = (t: t) => t.xyShape;
 let oShapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): option(t) =>
-  fn(xyShape) |> E.O.fmap(make(_, integralSumCache, integralCache));
+  fn(xyShape) |> E.O.fmap(make(~integralSumCache, ~integralCache));
 
-let empty: t = {xyShape: XYShape.T.empty, integralSumCache: Some(0.0), integralCache: None};
+let emptyIntegral: DistTypes.continuousShape = {
+  xyShape: {xs: [|neg_infinity|], ys: [|0.0|]},
+  interpolation: `Stepwise,
+  integralSumCache: Some(0.0),
+  integralCache: None,
+};
+let empty: DistTypes.discreteShape = {
+  xyShape: XYShape.T.empty,
+  integralSumCache: Some(0.0),
+  integralCache: Some(emptyIntegral),
+};
+
+
 let shapeFn = (fn, t: t) => t |> getShape |> fn;
 
 let lastY = (t: t) => t |> getShape |> XYShape.T.lastY;
@@ -37,15 +49,13 @@ let combinePointwise =
   // It could be done for pointwise additions, but is that ever needed?
 
   make(
+    ~integralSumCache=combinedIntegralSum,
     XYShape.PointwiseCombination.combine(
       (+.),
-      XYShape.XtoY.discreteInterpolator,
       XYShape.XtoY.discreteInterpolator,
       t1.xyShape,
       t2.xyShape,
     ),
-    combinedIntegralSum,
-    None,
   );
 };
 
@@ -100,27 +110,26 @@ let combineAlgebraically =
 
   let combinedShape = XYShape.T.fromZippedArray(rxys);
 
-  make(combinedShape, combinedIntegralSum, None);
+  make(~integralSumCache=combinedIntegralSum, combinedShape);
 };
 
 let mapY = (~integralSumCacheFn=_ => None,
             ~integralCacheFn=_ => None,
-            fn, t: t) => {
-  let yMapFn = shapeMap(XYShape.T.mapY(fn));
-
-  t
-  |> yMapFn
-  |> updateIntegralSumCache(E.O.bind(t.integralSumCache, integralSumCacheFn))
-  |> updateIntegralCache(E.O.bind(t.integralCache, integralCacheFn));
+            ~fn, t: t) => {
+  make(
+    ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
+    ~integralCache=t.integralCache |> E.O.bind(_, integralCacheFn),
+    t |> getShape |> XYShape.T.mapY(fn),
+  );
 };
 
 
 let scaleBy = (~scale=1.0, t: t): t => {
-  let scaledIntegralSumCache = E.O.bind(t.integralSumCache, v => Some(scale *. v));
-  let scaledIntegralCache = E.O.bind(t.integralCache, v => Some(Continuous.scaleBy(~scale, v)));
+  let scaledIntegralSumCache = t.integralSumCache |> E.O.fmap((*.)(scale));
+  let scaledIntegralCache = t.integralCache |> E.O.fmap(Continuous.scaleBy(~scale));
 
   t
-  |> mapY((r: float) => r *. scale)
+  |> mapY(~fn=(r: float) => r *. scale)
   |> updateIntegralSumCache(scaledIntegralSumCache)
   |> updateIntegralCache(scaledIntegralCache)
 };
@@ -130,29 +139,21 @@ module T =
     type t = DistTypes.discreteShape;
     type integral = DistTypes.continuousShape;
     let integral = (t) =>
-      if (t |> getShape |> XYShape.T.isEmpty) {
-        Continuous.make(
-          `Stepwise,
-          {xs: [|neg_infinity|], ys: [|0.0|]},
-          None,
-          None,
-        );
-      } else {
-        switch (t.integralCache) {
-        | Some(c) => c
-        | None => {
-            let ts = getShape(t);
-            // The first xy of this integral should always be the zero, to ensure nice plotting
-            let firstX = ts |> XYShape.T.minX;
-            let prependedZeroPoint: XYShape.T.t = {xs: [|firstX -. epsilon_float|], ys: [|0.|]};
-            let integralShape =
-              ts
-              |> XYShape.T.concat(prependedZeroPoint)
-              |> XYShape.T.accumulateYs((+.));
+      switch (getShape(t) |> XYShape.T.isEmpty, t.integralCache) {
+      | (true, _) => emptyIntegral
+      | (false, Some(c)) => c
+      | (false, None) => {
+          let ts = getShape(t);
+          // The first xy of this integral should always be the zero, to ensure nice plotting
+          let firstX = ts |> XYShape.T.minX;
+          let prependedZeroPoint: XYShape.T.t = {xs: [|firstX -. epsilon_float|], ys: [|0.|]};
+          let integralShape =
+            ts
+            |> XYShape.T.concat(prependedZeroPoint)
+            |> XYShape.T.accumulateYs((+.));
 
-            Continuous.make(`Stepwise, integralShape, None, None);
-          }
-        };
+          Continuous.make(~interpolation=`Stepwise, integralShape);
+        }
       };
 
     let integralEndY = (t: t) =>
@@ -179,17 +180,15 @@ module T =
       let currentLength = t |> getShape |> XYShape.T.length;
 
       if (i < currentLength && i >= 1 && currentLength > 1) {
-        let clippedShape =
-          t
-          |> getShape
-          |> XYShape.T.zip
-          |> XYShape.Zipped.sortByY
-          |> Belt.Array.reverse
-          |> Belt.Array.slice(_, ~offset=0, ~len=i)
-          |> XYShape.Zipped.sortByX
-          |> XYShape.T.fromZippedArray;
-
-        make(clippedShape, None, None); // if someone needs the sum, they'll have to recompute it
+        t
+        |> getShape
+        |> XYShape.T.zip
+        |> XYShape.Zipped.sortByY
+        |> Belt.Array.reverse
+        |> Belt.Array.slice(_, ~offset=0, ~len=i)
+        |> XYShape.Zipped.sortByX
+        |> XYShape.T.fromZippedArray
+        |> make;
       } else {
         t;
       };
@@ -197,17 +196,15 @@ module T =
 
     let truncate =
         (leftCutoff: option(float), rightCutoff: option(float), t: t): t => {
-      let truncatedShape =
-        t
-        |> getShape
-        |> XYShape.T.zip
-        |> XYShape.Zipped.filterByX(x =>
-             x >= E.O.default(neg_infinity, leftCutoff)
-             && x <= E.O.default(infinity, rightCutoff)
-           )
-        |> XYShape.T.fromZippedArray;
-
-      make(truncatedShape, None, None);
+      t
+      |> getShape
+      |> XYShape.T.zip
+      |> XYShape.Zipped.filterByX(x =>
+            x >= E.O.default(neg_infinity, leftCutoff)
+            && x <= E.O.default(infinity, rightCutoff)
+          )
+      |> XYShape.T.fromZippedArray
+      |> make;
     };
 
     let xToY = (f, t) =>

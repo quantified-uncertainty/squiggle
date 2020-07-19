@@ -19,8 +19,8 @@ let fmap = ((fn1, fn2, fn3), t: t): t =>
 let toMixed =
   mapToAll((
     m => m,
-    d => Mixed.make(~discrete=d, ~continuous=Continuous.empty, d.integralSumCache, d.integralCache),
-    c => Mixed.make(~discrete=Discrete.empty, ~continuous=c, c.integralSumCache, c.integralCache),
+    d => Mixed.make(~integralSumCache=d.integralSumCache, ~integralCache=d.integralCache, ~discrete=d, ~continuous=Continuous.empty),
+    c => Mixed.make(~integralSumCache=c.integralSumCache, ~integralCache=c.integralCache, ~discrete=Discrete.empty, ~continuous=c),
   ));
 
 let combineAlgebraically =
@@ -176,11 +176,11 @@ module T =
       ));
     };
     let maxX = mapToAll((Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX));
-    let mapY = (~integralSumCacheFn=previousIntegralSum => None, ~integralCacheFn=previousIntegral=>None, fn) =>
+    let mapY = (~integralSumCacheFn=previousIntegralSum => None, ~integralCacheFn=previousIntegral=>None, ~fn) =>
       fmap((
-        Mixed.T.mapY(~integralSumCacheFn, ~integralCacheFn, fn),
-        Discrete.T.mapY(~integralSumCacheFn, ~integralCacheFn, fn),
-        Continuous.T.mapY(~integralSumCacheFn, ~integralCacheFn, fn),
+        Mixed.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
+        Discrete.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
+        Continuous.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
       ));
 
     let mean = (t: t): float =>

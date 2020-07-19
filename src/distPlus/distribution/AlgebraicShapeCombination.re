@@ -17,25 +17,25 @@ let toDiscretePointMassesFromTriangulars =
   let n = s |> XYShape.T.length;
   // first, double up the leftmost and rightmost points:
   let {xs, ys}: XYShape.T.t = s;
-  let _ = Js.Array.unshift(xs[0], xs);
-  let _ = Js.Array.unshift(ys[0], ys);
-  let _ = Js.Array.push(xs[n - 1], xs);
-  let _ = Js.Array.push(ys[n - 1], ys);
+  Js.Array.unshift(xs[0], xs) |> ignore;
+  Js.Array.unshift(ys[0], ys) |> ignore;
+  Js.Array.push(xs[n - 1], xs) |> ignore;
+  Js.Array.push(ys[n - 1], ys) |> ignore;
   let n = E.A.length(xs);
   // squares and neighbourly products of the xs
   let xsSq: array(float) = Belt.Array.makeUninitializedUnsafe(n);
   let xsProdN1: array(float) = Belt.Array.makeUninitializedUnsafe(n - 1);
   let xsProdN2: array(float) = Belt.Array.makeUninitializedUnsafe(n - 2);
   for (i in 0 to n - 1) {
-    let _ = Belt.Array.set(xsSq, i, xs[i] *. xs[i]);
+     Belt.Array.set(xsSq, i, xs[i] *. xs[i]) |> ignore;
     ();
   };
   for (i in 0 to n - 2) {
-    let _ = Belt.Array.set(xsProdN1, i, xs[i] *. xs[i + 1]);
+     Belt.Array.set(xsProdN1, i, xs[i] *. xs[i + 1]) |> ignore;
     ();
   };
   for (i in 0 to n - 3) {
-    let _ = Belt.Array.set(xsProdN2, i, xs[i] *. xs[i + 2]);
+     Belt.Array.set(xsProdN2, i, xs[i] *. xs[i + 2]) |> ignore;
     ();
   };
   // means and variances
@@ -45,12 +45,11 @@ let toDiscretePointMassesFromTriangulars =
 
   if (inverse) {
     for (i in 1 to n - 2) {
-      let _ =
-        Belt.Array.set(
-          masses,
-          i - 1,
-          (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.,
-        );
+      Belt.Array.set(
+        masses,
+        i - 1,
+        (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.,
+      ) |> ignore;
 
       // this only works when the whole triange is either on the left or on the right of zero
       let a = xs[i - 1];
@@ -71,43 +70,39 @@ let toDiscretePointMassesFromTriangulars =
         -. inverseMean
         ** 2.;
 
-      let _ = Belt.Array.set(means, i - 1, inverseMean);
+       Belt.Array.set(means, i - 1, inverseMean) |> ignore;
 
-      let _ = Belt.Array.set(variances, i - 1, inverseVar);
+       Belt.Array.set(variances, i - 1, inverseVar) |> ignore;
       ();
     };
 
     {n: n - 2, masses, means, variances};
   } else {
     for (i in 1 to n - 2) {
-
       // area of triangle = width * height / 2
-      let _ =
-        Belt.Array.set(
-          masses,
-          i - 1,
-          (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.,
-        );
+      Belt.Array.set(
+        masses,
+        i - 1,
+        (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.,
+      ) |> ignore;
 
       // means of triangle = (a + b + c) / 3
-      let _ =
-        Belt.Array.set(means, i - 1, (xs[i - 1] +. xs[i] +. xs[i + 1]) /. 3.);
+      Belt.Array.set(means, i - 1, (xs[i - 1] +. xs[i] +. xs[i + 1]) /. 3.) |> ignore;
 
       // variance of triangle = (a^2 + b^2 + c^2 - ab - ac - bc) / 18
-      let _ =
-        Belt.Array.set(
-          variances,
-          i - 1,
-          (
-            xsSq[i - 1]
-            +. xsSq[i]
-            +. xsSq[i + 1]
-            -. xsProdN1[i - 1]
-            -. xsProdN1[i]
-            -. xsProdN2[i - 1]
-          )
-          /. 18.,
-        );
+      Belt.Array.set(
+        variances,
+        i - 1,
+        (
+          xsSq[i - 1]
+          +. xsSq[i]
+          +. xsSq[i + 1]
+          -. xsProdN1[i - 1]
+          -. xsProdN1[i]
+          -. xsProdN2[i - 1]
+        )
+        /. 18.,
+      ) |> ignore;
       ();
     };
     {n: n - 2, masses, means, variances};
@@ -163,7 +158,7 @@ let combineShapesContinuousContinuous =
   for (i in 0 to t1m.n - 1) {
     for (j in 0 to t2m.n - 1) {
       let k = i * t2m.n + j;
-      let _ = Belt.Array.set(masses, k, t1m.masses[i] *. t2m.masses[j]);
+      Belt.Array.set(masses, k, t1m.masses[i] *. t2m.masses[j]) |> ignore;
 
       let mean = combineMeansFn(t1m.means[i], t2m.means[j]);
       let variance =
@@ -173,8 +168,8 @@ let combineShapesContinuousContinuous =
           t1m.means[i],
           t2m.means[j],
         );
-      let _ = Belt.Array.set(means, k, mean);
-      let _ = Belt.Array.set(variances, k, variance);
+      Belt.Array.set(means, k, mean) |> ignore;
+      Belt.Array.set(variances, k, variance) |> ignore;
       // update bounds
       let minX = mean -. 2. *. sqrt(variance) *. 1.644854;
       let maxX = mean +. 2. *. sqrt(variance) *. 1.644854;
@@ -194,15 +189,15 @@ let combineShapesContinuousContinuous =
   let outputYs: array(float) = Belt.Array.make(nOut, 0.0);
   // now, for each of the outputYs, accumulate from a Gaussian kernel over each input point.
   for (j in 0 to E.A.length(masses) - 1) { // go through all of the result points
-    let _ = if (variances[j] > 0. && masses[j] > 0.) {
+    if (variances[j] > 0. && masses[j] > 0.) {
       for (i in 0 to E.A.length(outputXs) - 1) { // go through all of the target points
         let dx = outputXs[i] -. means[j];
         let contribution = masses[j] *. exp(-. (dx ** 2.) /. (2. *. variances[j])) /. (sqrt(2. *. 3.14159276 *. variances[j]));
-        let _ = Belt.Array.set(outputYs, i, outputYs[i] +. contribution);
+        Belt.Array.set(outputYs, i, outputYs[i] +. contribution) |> ignore;
         ();
       };
       ();
-    };
+    } |> ignore;
     ();
   };
 
@@ -219,26 +214,23 @@ let toDiscretePointMassesFromDiscrete = (s: DistTypes.xyShape): pointMassesWithM
   let variances: array(float) = Belt.Array.makeUninitializedUnsafe(n);
 
   for (i in 0 to n - 1) {
-    let _ =
-      Belt.Array.set(
-        masses,
-        i,
-        ys[i]
-      );
+    Belt.Array.set(
+      masses,
+      i,
+      ys[i]
+    ) |> ignore;
 
-    let _ =
-      Belt.Array.set(
-        means,
-        i,
-        xs[i]
-      );
+    Belt.Array.set(
+      means,
+      i,
+      xs[i]
+    ) |> ignore;
 
-    let _ =
-      Belt.Array.set(
-        variances,
-        i,
-        0.0
-      );
+    Belt.Array.set(
+      variances,
+      i,
+      0.0
+    ) |> ignore;
     ();
   };
 
@@ -246,11 +238,11 @@ let toDiscretePointMassesFromDiscrete = (s: DistTypes.xyShape): pointMassesWithM
 };
 
 let combineShapesContinuousDiscrete =
-    (op: ExpressionTypes.algebraicOperation, s1: DistTypes.xyShape, s2: DistTypes.xyShape)
-    : array(DistTypes.xyShape) => {
+    (op: ExpressionTypes.algebraicOperation, continuousShape: DistTypes.xyShape, discreteShape: DistTypes.xyShape)
+    : DistTypes.xyShape => {
 
-  let t1n = s1 |> XYShape.T.length;
-  let t2n = s2 |> XYShape.T.length;
+  let t1n = continuousShape |> XYShape.T.length;
+  let t2n = discreteShape |> XYShape.T.length;
 
   // each x pair is added/subtracted
   let fn = Operation.Algebraic.toFn(op);
@@ -262,46 +254,45 @@ let combineShapesContinuousDiscrete =
   | `Add
   | `Subtract => {
     for (j in 0 to t2n - 1) {
-      // for each one of the discrete points
-      // create a new distribution, as long as the original continuous one
+      // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
       let dxyShape: array((float, float)) =
         Belt.Array.makeUninitializedUnsafe(t1n);
-
       for (i in 0 to t1n - 1) {
-        let _ =
-          Belt.Array.set(
-            dxyShape,
-            i,
-            (fn(s1.xs[i], s2.xs[j]), s1.ys[i] *. s2.ys[j]),
-          );
+        Belt.Array.set(
+          dxyShape,
+          i,
+          (fn(continuousShape.xs[i], discreteShape.xs[j]), continuousShape.ys[i] *. discreteShape.ys[j]),
+        ) |> ignore;
         ();
       };
-      let _ = Belt.Array.set(outXYShapes, j, dxyShape);
+      Belt.Array.set(outXYShapes, j, dxyShape) |> ignore;
       ();
     }
     }
     | `Multiply
     | `Divide => {
     for (j in 0 to t2n - 1) {
-      // for each one of the discrete points
-      // create a new distribution, as long as the original continuous one
+      // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
       let dxyShape: array((float, float)) =
         Belt.Array.makeUninitializedUnsafe(t1n);
       for (i in 0 to t1n - 1) {
-        let _ =
-          Belt.Array.set(
-            dxyShape,
-            i,
-            (fn(s1.xs[i], s2.xs[j]), s1.ys[i] *. s2.ys[j] /. s2.xs[j]),
-          );
+        Belt.Array.set(
+          dxyShape,
+          i,
+          (fn(continuousShape.xs[i], discreteShape.xs[j]), continuousShape.ys[i] *. discreteShape.ys[j] /. discreteShape.xs[j]),
+        ) |> ignore;
         ();
       };
-      let _ = Belt.Array.set(outXYShapes, j, dxyShape);
+      Belt.Array.set(outXYShapes, j, dxyShape) |> ignore;
       ();
     }
     }
   };
 
   outXYShapes
-  |> E.A.fmap(XYShape.T.fromZippedArray);
+  |> E.A.fmap(XYShape.T.fromZippedArray)
+  |> E.A.fold_left(
+      XYShape.PointwiseCombination.combine((+.),
+                                           XYShape.XtoY.continuousInterpolator(`Linear, `UseZero)),
+      XYShape.T.empty);
 };

@@ -1,7 +1,7 @@
 open Distributions;
 
 type t = DistTypes.mixedShape;
-let make = (~continuous, ~discrete, integralSumCache, integralCache): t => {continuous, discrete, integralSumCache, integralCache};
+let make = (~integralSumCache=None, ~integralCache=None, ~continuous, ~discrete): t => {continuous, discrete, integralSumCache, integralCache};
 
 let totalLength = (t: t): int => {
   let continuousLength =
@@ -16,7 +16,7 @@ let scaleBy = (~scale=1.0, t: t): t => {
   let scaledContinuous = Continuous.scaleBy(~scale, t.continuous);
   let scaledIntegralCache = E.O.bind(t.integralCache, v => Some(Continuous.scaleBy(~scale, v)));
   let scaledIntegralSumCache = E.O.bind(t.integralSumCache, s => Some(s *. scale));
-  make(~discrete=scaledDiscrete, ~continuous=scaledContinuous, scaledIntegralSumCache, scaledIntegralCache);
+  make(~discrete=scaledDiscrete, ~continuous=scaledContinuous, ~integralSumCache=scaledIntegralSumCache, ~integralCache=scaledIntegralCache);
 };
 
 let toContinuous = ({continuous}: t) => Some(continuous);
@@ -54,7 +54,7 @@ module T =
       let truncatedDiscrete =
         Discrete.T.truncate(leftCutoff, rightCutoff, discrete);
 
-      make(~discrete=truncatedDiscrete, ~continuous=truncatedContinuous, None, None);
+      make(~integralSumCache=None, ~integralCache=None, ~discrete=truncatedDiscrete, ~continuous=truncatedContinuous);
     };
 
     let normalize = (t: t): t => {
@@ -82,7 +82,7 @@ module T =
         |> Discrete.scaleBy(~scale=newDiscreteSum /. discreteIntegralSum)
         |> Discrete.updateIntegralSumCache(Some(newDiscreteSum));
 
-      make(~continuous=normalizedContinuous, ~discrete=normalizedDiscrete, Some(1.0), None);
+      make(~integralSumCache=Some(1.0), ~integralCache=None, ~continuous=normalizedContinuous, ~discrete=normalizedDiscrete);
     };
 
     let xToY = (x, t: t) => {
@@ -144,16 +144,12 @@ module T =
         let discreteIntegral = Continuous.stepwiseToLinear(Discrete.T.Integral.get(t.discrete));
 
         Continuous.make(
-          `Linear,
           XYShape.PointwiseCombination.combine(
             (+.),
-            XYShape.XtoY.continuousInterpolator(`Linear, `UseOutermostPoints),
             XYShape.XtoY.continuousInterpolator(`Linear, `UseOutermostPoints),
             Continuous.getShape(continuousIntegral),
             Continuous.getShape(discreteIntegral),
           ),
-          None,
-          None,
         );
       };
     };
@@ -177,19 +173,19 @@ module T =
         (
           ~integralSumCacheFn=previousIntegralSum => None,
           ~integralCacheFn=previousIntegral => None,
-          fn,
+          ~fn,
           t: t,
         )
         : t => {
       let yMappedDiscrete: DistTypes.discreteShape =
         t.discrete
-        |> Discrete.T.mapY(fn)
+        |> Discrete.T.mapY(~fn)
         |> Discrete.updateIntegralSumCache(E.O.bind(t.discrete.integralSumCache, integralSumCacheFn))
         |> Discrete.updateIntegralCache(E.O.bind(t.discrete.integralCache, integralCacheFn));
 
       let yMappedContinuous: DistTypes.continuousShape =
         t.continuous
-        |> Continuous.T.mapY(fn)
+        |> Continuous.T.mapY(~fn)
         |> Continuous.updateIntegralSumCache(E.O.bind(t.continuous.integralSumCache, integralSumCacheFn))
         |> Continuous.updateIntegralCache(E.O.bind(t.continuous.integralCache, integralCacheFn));
 
@@ -332,5 +328,5 @@ let combinePointwise = (~integralSumCachesFn = (_, _) => None, ~integralCachesFn
       t2.integralCache,
     );
 
-  make(~discrete=reducedDiscrete, ~continuous=reducedContinuous, combinedIntegralSum, combinedIntegral);
+  make(~integralSumCache=combinedIntegralSum, ~integralCache=combinedIntegral, ~discrete=reducedDiscrete, ~continuous=reducedContinuous);
 };
