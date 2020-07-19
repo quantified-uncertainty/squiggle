@@ -78,7 +78,7 @@ let combinePointwise =
   make(
     ~integralSumCache=combinedIntegralSum,
     XYShape.PointwiseCombination.combine(
-      (+.),
+      fn,
       interpolator,
       t1.xyShape,
       t2.xyShape,

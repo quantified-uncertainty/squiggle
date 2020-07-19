@@ -79,7 +79,10 @@ module VerticalScaling = {
 
 module PointwiseCombination = {
   let pointwiseAdd = (evaluationParams: evaluationParams, t1: t, t2: t) => {
-    switch (Render.render(evaluationParams, t1), Render.render(evaluationParams, t2)) {
+    switch (
+      Render.render(evaluationParams, t1),
+      Render.render(evaluationParams, t2),
+    ) {
     | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
       Ok(
         `RenderedDist(
@@ -110,9 +113,16 @@ module PointwiseCombination = {
   let pointwiseMultiply = (evaluationParams: evaluationParams, t1: t, t2: t) => {
     // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
-    Error(
-      "Pointwise multiplication not yet supported.",
-    );
+    switch (
+      Render.render(evaluationParams, t1),
+      Render.render(evaluationParams, t2),
+    ) {
+    | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
+      Ok(`RenderedDist(Shape.combinePointwise(( *. ), rs1, rs2)))
+    | (Error(e1), _) => Error(e1)
+    | (_, Error(e2)) => Error(e2)
+    | _ => Error("Pointwise combination: rendering failed.")
+    };
   };
 
   let operationToLeaf =
@@ -134,7 +144,9 @@ module Truncate = {
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, t) => `Solution(t)
     | (Some(lc), Some(rc), t) when lc > rc =>
-      `Error("Left truncation bound must be smaller than right truncation bound.")
+      `Error(
+        "Left truncation bound must be smaller than right truncation bound.",
+      )
     | (lc, rc, `SymbolicDist(`Uniform(u))) =>
       `Solution(
         `SymbolicDist(`Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))),
