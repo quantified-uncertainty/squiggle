@@ -36,6 +36,8 @@ module AlgebraicCombination = {
     let dLength = (r: DistTypes.discreteShape) =>
       r.xyShape |> XYShape.T.length;
     switch (t1, t2) {
+    | (`SymbolicDist(`Float(_)), _)
+    | (_, `SymbolicDist(`Float(_))) => `Analytical
     | (`RenderedDist(Continuous(_)), `RenderedDist(Continuous(_))) => `Sampling
     | (`RenderedDist(Discrete(m1)), `RenderedDist(Discrete(m2)))
         when dLength(m1) * dLength(m2) > 1000 => `Analytical
@@ -48,7 +50,7 @@ module AlgebraicCombination = {
     | _ => `Sampling
     };
   };
-  let foo =
+  let combine =
       (evaluationParams, algebraicOp, t1: node, t2: node)
       : result(node, string) => {
     E.R.merge(
@@ -90,7 +92,7 @@ module AlgebraicCombination = {
          _,
          fun
          | `SymbolicDist(_) as t => Ok(t)
-         | _ => foo(evaluationParams, algebraicOp, t1, t2),
+         | _ => combine(evaluationParams, algebraicOp, t1, t2),
        );
 };
 
