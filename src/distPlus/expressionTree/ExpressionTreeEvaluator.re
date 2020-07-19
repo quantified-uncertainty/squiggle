@@ -131,7 +131,7 @@ module PointwiseCombination = {
         `RenderedDist(
           Shape.combinePointwise(
             ~integralSumCachesFn=(a, b) => Some(a +. b),
-            ~integralCachesFn=(a, b) => Some(Continuous.combinePointwise(~extrapolation=`UseOutermostPoints, (+.), a, b)),
+            ~integralCachesFn=(a, b) => Some(Continuous.combinePointwise(~distributionType=`CDF, (+.), a, b)),
             (+.),
             rs1,
             rs2,

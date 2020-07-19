@@ -9,6 +9,11 @@ type domain =
   | RightLimited(domainLimit)
   | LeftAndRightLimited(domainLimit, domainLimit);
 
+type distributionType = [
+  | `PDF
+  | `CDF
+];
+
 type xyShape = {
   xs: array(float),
   ys: array(float),

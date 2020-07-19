@@ -209,30 +209,9 @@ let toDiscretePointMassesFromDiscrete = (s: DistTypes.xyShape): pointMassesWithM
   let {xs, ys}: XYShape.T.t = s;
   let n = E.A.length(xs);
 
-  let masses: array(float) = Belt.Array.makeUninitializedUnsafe(n); // doesn't include the fake first and last points
-  let means: array(float) = Belt.Array.makeUninitializedUnsafe(n);
-  let variances: array(float) = Belt.Array.makeUninitializedUnsafe(n);
-
-  for (i in 0 to n - 1) {
-    Belt.Array.set(
-      masses,
-      i,
-      ys[i]
-    ) |> ignore;
-
-    Belt.Array.set(
-      means,
-      i,
-      xs[i]
-    ) |> ignore;
-
-    Belt.Array.set(
-      variances,
-      i,
-      0.0
-    ) |> ignore;
-    ();
-  };
+  let masses: array(float) = Belt.Array.makeBy(n, i => ys[i]);
+  let means: array(float) = Belt.Array.makeBy(n, i => xs[i]);
+  let variances: array(float) = Belt.Array.makeBy(n, i => 0.0);
 
   {n, masses, means, variances};
 };

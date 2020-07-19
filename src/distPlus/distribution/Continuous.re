@@ -41,7 +41,7 @@ let combinePointwise =
     (
       ~integralSumCachesFn=(_, _) => None,
       ~integralCachesFn: (t, t) => option(t) =(_, _) => None,
-      ~extrapolation=`UseZero,
+      ~distributionType: DistTypes.distributionType = `PDF,
       fn: (float, float) => float,
       t1: DistTypes.continuousShape,
       t2: DistTypes.continuousShape,
@@ -66,6 +66,11 @@ let combinePointwise =
   | (`Stepwise, `Stepwise) => (t1, t2);
   | (`Linear, `Stepwise) => (t1, stepwiseToLinear(t2));
   | (`Stepwise, `Linear) => (stepwiseToLinear(t1), t2);
+  };
+
+  let extrapolation = switch (distributionType) {
+  | `PDF => `UseZero
+  | `CDF => `UseOutermostPoints
   };
 
   let interpolator = XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation);
