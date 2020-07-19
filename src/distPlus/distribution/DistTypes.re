@@ -9,25 +9,45 @@ type domain =
   | RightLimited(domainLimit)
   | LeftAndRightLimited(domainLimit, domainLimit);
 
+type distributionType = [
+  | `PDF
+  | `CDF
+];
+
 type xyShape = {
   xs: array(float),
   ys: array(float),
 };
 
+type interpolationStrategy = [
+    | `Stepwise
+    | `Linear
+];
+type extrapolationStrategy = [
+    | `UseZero
+    | `UseOutermostPoints
+];
+
+type interpolator = (xyShape, int, float) => float;
+
 type continuousShape = {
   xyShape,
-  interpolation: [ | `Stepwise | `Linear],
-  knownIntegralSum: option(float),
+  interpolation: interpolationStrategy,
+  integralSumCache: option(float),
+  integralCache: option(continuousShape),
 };
 
 type discreteShape = {
   xyShape,
-  knownIntegralSum: option(float),
+  integralSumCache: option(float),
+  integralCache: option(continuousShape),
 };
 
 type mixedShape = {
   continuous: continuousShape,
   discrete: discreteShape,
+  integralSumCache: option(float),
+  integralCache: option(continuousShape),
 };
 
 type shapeMonad('a, 'b, 'c) =

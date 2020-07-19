@@ -2,8 +2,7 @@ open DistTypes;
 
 type t = DistTypes.distPlus;
 
-let shapeIntegral = shape =>
-  Shape.T.Integral.get(~cache=None, shape);
+let shapeIntegral = shape => Shape.T.Integral.get(shape);
 let make =
     (
       ~shape,
@@ -59,7 +58,6 @@ module T =
     let normalize = (t: t): t => {
       let normalizedShape = t |> toShape |> Shape.T.normalize;
       t |> updateShape(normalizedShape);
-      // TODO: also adjust for domainIncludedProbabilityMass here.
     };
 
     let truncate = (leftCutoff, rightCutoff, t: t): t => {
@@ -69,28 +67,6 @@ module T =
         |> Shape.T.truncate(leftCutoff, rightCutoff);
 
       t |> updateShape(truncatedShape);
-    };
-
-    let normalizedToContinuous = (t: t) => {
-      t
-      |> toShape
-      |> Shape.T.normalizedToContinuous
-      |> E.O.fmap(
-           Continuous.T.mapY(
-             domainIncludedProbabilityMassAdjustment(t),
-           ),
-         );
-    };
-
-    let normalizedToDiscrete = (t: t) => {
-      t
-      |> toShape
-      |> Shape.T.normalizedToDiscrete
-      |> E.O.fmap(
-           Discrete.T.mapY(
-             domainIncludedProbabilityMassAdjustment(t),
-           ),
-         );
     };
 
     let xToY = (f, t: t) =>
@@ -105,34 +81,36 @@ module T =
       shapeFn(Shape.T.toDiscreteProbabilityMassFraction);
 
     // This bit is kind of awkward, could probably use rethinking.
-    let integral = (~cache, t: t) =>
+    let integral = (t: t) =>
       updateShape(Continuous(t.integralCache), t);
 
-    let downsample = (~cache=None, i, t): t =>
+    let updateIntegralCache = (integralCache: option(DistTypes.continuousShape), t) =>
+      update(~integralCache=E.O.default(t.integralCache, integralCache), t);
+
+    let downsample = (i, t): t =>
       updateShape(t |> toShape |> Shape.T.downsample(i), t);
     // todo: adjust for limit, maybe?
     let mapY =
         (
-          ~knownIntegralSumFn=previousIntegralSum => None,
-          fn,
+          ~integralSumCacheFn=previousIntegralSum => None,
+          ~integralCacheFn=previousIntegralCache => None,
+          ~fn,
           {shape, _} as t: t,
         )
         : t =>
-      Shape.T.mapY(~knownIntegralSumFn, fn, shape)
+      Shape.T.mapY(~integralSumCacheFn, ~fn, shape)
       |> updateShape(_, t);
 
     // get the total of everything
-    let integralEndY = (~cache as _, t: t) => {
+    let integralEndY = (t: t) => {
       Shape.T.Integral.sum(
-        ~cache=Some(t.integralCache),
         toShape(t),
       );
     };
 
     //   TODO: Fix this below, obviously. Adjust for limits
-    let integralXtoY = (~cache as _, f, t: t) => {
+    let integralXtoY = (f, t: t) => {
       Shape.T.Integral.xToY(
-        ~cache=Some(t.integralCache),
         f,
         toShape(t),
       )
@@ -140,8 +118,8 @@ module T =
     };
 
     // TODO: This part is broken when there is a limit, if this is supposed to be taken into account.
-    let integralYtoX = (~cache as _, f, t: t) => {
-      Shape.T.Integral.yToX(~cache=None, f, toShape(t));
+    let integralYtoX = (f, t: t) => {
+      Shape.T.Integral.yToX(f, toShape(t));
     };
 
     let mean = (t: t) => {

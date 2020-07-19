@@ -9,8 +9,8 @@ type assumptions = {
 };
 
 let buildSimple = (~continuous: option(DistTypes.continuousShape), ~discrete: option(DistTypes.discreteShape)): option(DistTypes.shape) => {
-  let continuous = continuous |> E.O.default(Continuous.make(`Linear, {xs: [||], ys: [||]}, Some(0.0)));
-  let discrete = discrete |> E.O.default(Discrete.make({xs: [||], ys: [||]}, Some(0.0)));
+  let continuous = continuous |> E.O.default(Continuous.make(~integralSumCache=Some(0.0), {xs: [||], ys: [||]}));
+  let discrete = discrete |> E.O.default(Discrete.make(~integralSumCache=Some(0.0), {xs: [||], ys: [||]}));
   let cLength =
     continuous
     |> Continuous.getShape
@@ -22,14 +22,12 @@ let buildSimple = (~continuous: option(DistTypes.continuousShape), ~discrete: op
   | (0 | 1, _) => Some(Discrete(discrete))
   | (_, 0) => Some(Continuous(continuous))
   | (_, _) =>
-    let discreteProbabilityMassFraction =
-      Discrete.T.Integral.sum(~cache=None, discrete);
-    let discrete = Discrete.T.normalize(discrete);
-    let continuous = Continuous.T.normalize(continuous);
     let mixedDist =
       Mixed.make(
+        ~integralSumCache=None,
+        ~integralCache=None,
         ~continuous,
-        ~discrete
+        ~discrete,
       );
     Some(Mixed(mixedDist));
   };

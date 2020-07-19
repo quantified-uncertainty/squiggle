@@ -1,7 +1,13 @@
 type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide];
 type pointwiseOperation = [ | `Add | `Multiply];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
-type distToFloatOperation = [ | `Pdf(float) | `Inv(float) | `Mean | `Sample];
+type distToFloatOperation = [
+  | `Pdf(float)
+  | `Cdf(float)
+  | `Inv(float)
+  | `Mean
+  | `Sample
+];
 
 module ExpressionTree = {
   type node = [
@@ -31,26 +37,42 @@ module ExpressionTree = {
   let evaluateNode = (evaluationParams: evaluationParams) =>
     evaluationParams.evaluateNode(evaluationParams);
 
-  let render = (evaluationParams: evaluationParams, r) =>
-    evaluateNode(evaluationParams, `Render(r));
-
   let evaluateAndRetry = (evaluationParams, fn, node) =>
     node
     |> evaluationParams.evaluateNode(evaluationParams)
     |> E.R.bind(_, fn(evaluationParams));
 
-  let renderable =
-    fun
-    | `SymbolicDist(_) => true
-    | `RenderedDist(_) => true
-    | _ => false;
+  module Render = {
+    type t = node;
 
-  let mapRenderable = (renderedFn, symFn, item: node) =>
-    switch (item) {
-    | `SymbolicDist(s) => Some(symFn(s))
-    | `RenderedDist(r) => Some(renderedFn(r))
-    | _ => None
-    };
+    let render = (evaluationParams: evaluationParams, r) =>
+      `Render(r) |> evaluateNode(evaluationParams);
+
+    let ensureIsRendered = (params, t) =>
+      switch (t) {
+      | `RenderedDist(_) => Ok(t)
+      | _ =>
+        switch (render(params, t)) {
+        | Ok(`RenderedDist(r)) => Ok(`RenderedDist(r))
+        | Ok(_) => Error("Did not render as requested")
+        | Error(e) => Error(e)
+        }
+      };
+
+    let ensureIsRenderedAndGetShape = (params, t) =>
+      switch (ensureIsRendered(params, t)) {
+      | Ok(`RenderedDist(r)) => Ok(r)
+      | Ok(_) => Error("Did not render as requested")
+      | Error(e) => Error(e)
+      };
+
+    let getShape = (item: node) =>
+      switch (item) {
+      | `RenderedDist(r) => Some(r)
+      | _ => None
+      };
+  };
+
 };
 
 type simplificationResult = [

@@ -237,7 +237,8 @@ module MathAdtToDistDst = {
         args: array(result(ExpressionTypes.ExpressionTree.node, string)),
       ) => {
     let toOkAlgebraic = r => Ok(`AlgebraicCombination(r));
-    let toOkTrunctate = r => Ok(`Truncate(r));
+    let toOkTruncate = r => Ok(`Truncate(r));
+    let toOkFloatFromDist = r => Ok(`FloatFromDist(r))
     switch (name, args) {
     | ("add", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Add, l, r))
     | ("add", _) => Error("Addition needs two operands")
@@ -249,11 +250,11 @@ module MathAdtToDistDst = {
     | ("divide", _) => Error("Division needs two operands")
     | ("pow", _) => Error("Exponentiation is not yet supported.")
     | ("leftTruncate", [|Ok(d), Ok(`SymbolicDist(`Float(lc)))|]) =>
-      toOkTrunctate((Some(lc), None, d))
+      toOkTruncate((Some(lc), None, d))
     | ("leftTruncate", _) =>
       Error("leftTruncate needs two arguments: the expression and the cutoff")
     | ("rightTruncate", [|Ok(d), Ok(`SymbolicDist(`Float(rc)))|]) =>
-      toOkTrunctate((None, Some(rc), d))
+      toOkTruncate((None, Some(rc), d))
     | ("rightTruncate", _) =>
       Error(
         "rightTruncate needs two arguments: the expression and the cutoff",
@@ -266,9 +267,19 @@ module MathAdtToDistDst = {
           Ok(`SymbolicDist(`Float(rc))),
         |],
       ) =>
-      toOkTrunctate((Some(lc), Some(rc), d))
+      toOkTruncate((Some(lc), Some(rc), d))
     | ("truncate", _) =>
       Error("truncate needs three arguments: the expression and both cutoffs")
+    | ("pdf", [|Ok(d), Ok(`SymbolicDist(`Float(v)))|]) =>
+      toOkFloatFromDist((`Pdf(v), d))
+    | ("cdf", [|Ok(d), Ok(`SymbolicDist(`Float(v)))|]) =>
+      toOkFloatFromDist((`Cdf(v), d))
+    | ("inv", [|Ok(d), Ok(`SymbolicDist(`Float(v)))|]) =>
+      toOkFloatFromDist((`Inv(v), d))
+    | ("mean", [|Ok(d)|]) =>
+      toOkFloatFromDist((`Mean, d))
+    | ("sample", [|Ok(d)|]) =>
+      toOkFloatFromDist((`Sample, d))
     | _ => Error("This type not currently supported")
     };
   };
@@ -316,11 +327,12 @@ module MathAdtToDistDst = {
     | "pow"
     | "leftTruncate"
     | "rightTruncate"
-    | "truncate" => operationParser(name, parseArgs())
-    | "mean" as n
-    | "inv" as n
-    | "sample" as n
-    | "pdf" as n
+    | "truncate"
+    | "mean"
+    | "inv"
+    | "sample"
+    | "cdf"
+    | "pdf" => operationParser(name, parseArgs())
     | n => Error(n ++ "(...) is not currently supported")
     };
   };

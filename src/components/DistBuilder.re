@@ -142,12 +142,15 @@ module DemoDist = {
                },
                ~distPlusIngredients,
                ~shouldDownsample=options.downsampleTo |> E.O.isSome,
-               ~recommendedLength=options.downsampleTo |> E.O.default(10000),
+               ~recommendedLength=options.downsampleTo |> E.O.default(100),
                (),
              );
            let response = DistPlusRenderer.run(inputs);
            switch (RenderTypes.DistPlusRenderer.Outputs.distplus(response)) {
-           | Some(distPlus) => <DistPlusPlot distPlus />
+           | Some(distPlus) => {
+             let normalizedDistPlus = DistPlus.T.normalize(distPlus);
+             <DistPlusPlot distPlus={normalizedDistPlus} />;
+           }
            | _ =>
              "Correct Guesstimator string input to show a distribution."
              |> R.ste
@@ -171,7 +174,7 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
-        guesstimatorString: "normal(0, 10) * 100", // , triangular(30, 40, 60)
+        guesstimatorString: "mm(1, 2, 3, normal(2, 1))", // , triangular(30, 40, 60)
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",

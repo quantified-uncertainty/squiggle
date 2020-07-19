@@ -20,61 +20,15 @@ module AlgebraicCombination = {
     | _ => Ok(`AlgebraicCombination((operation, t1, t2)))
     };
 
-  let tryCombination = (n, algebraicOp, t1: node, t2: node) => {
-    let sampleN =
-      mapRenderable(Shape.sampleNRendered(n), SymbolicDist.T.sampleN(n));
-    switch (sampleN(t1), sampleN(t2)) {
-    | (Some(a), Some(b)) =>
-      Some(
-        Belt.Array.zip(a, b)
-        |> E.A.fmap(((a, b)) => Operation.Algebraic.toFn(algebraicOp, a, b)),
-      )
-    | _ => None
-    };
-  };
-
-  let renderIfNotRendered = (params, t) =>
-    !renderable(t)
-      ? switch (render(params, t)) {
-        | Ok(r) => Ok(r)
-        | Error(e) => Error(e)
-        }
-      : Ok(t);
-
-  let combineAsShapes =
-      (evaluationParams: evaluationParams, algebraicOp, t1: node, t2: node) => {
-    let i1 = renderIfNotRendered(evaluationParams, t1);
-    let i2 = renderIfNotRendered(evaluationParams, t2);
-    E.R.merge(i1, i2)
-    |> E.R.bind(
-         _,
-         ((a, b)) => {
-           let samples =
-             tryCombination(
-               evaluationParams.samplingInputs.sampleCount,
-               algebraicOp,
-               a,
-               b,
-             );
-           let shape =
-             samples
-             |> E.O.fmap(
-                  Samples.T.fromSamples(
-                    ~samplingInputs={
-                      sampleCount:
-                        Some(evaluationParams.samplingInputs.sampleCount),
-                      outputXYPoints:
-                        Some(evaluationParams.samplingInputs.outputXYPoints),
-                      kernelWidth: evaluationParams.samplingInputs.kernelWidth,
-                    },
-                  ),
-                )
-             |> E.O.bind(_, (r: RenderTypes.ShapeRenderer.Sampling.outputs) =>
-                  r.shape
-                )
-             |> E.O.toResult("No response");
-           shape |> E.R.fmap(r => `Normalize(`RenderedDist(r)));
-         },
+  let combinationByRendering =
+      (evaluationParams, algebraicOp, t1: node, t2: node)
+      : result(node, string) => {
+    E.R.merge(
+      Render.ensureIsRenderedAndGetShape(evaluationParams, t1),
+      Render.ensureIsRenderedAndGetShape(evaluationParams, t2),
+    )
+    |> E.R.fmap(((a, b)) =>
+         `RenderedDist(Shape.combineAlgebraically(algebraicOp, a, b))
        );
   };
 
@@ -92,7 +46,7 @@ module AlgebraicCombination = {
          _,
          fun
          | `SymbolicDist(d) as t => Ok(t)
-         | _ => combineAsShapes(evaluationParams, algebraicOp, t1, t2),
+         | _ => combinationByRendering(evaluationParams, algebraicOp, t1, t2),
        );
 };
 
@@ -101,16 +55,18 @@ module VerticalScaling = {
       (evaluationParams: evaluationParams, scaleOp, t, scaleBy) => {
     // scaleBy has to be a single float, otherwise we'll return an error.
     let fn = Operation.Scale.toFn(scaleOp);
-    let knownIntegralSumFn = Operation.Scale.toKnownIntegralSumFn(scaleOp);
-    let renderedShape = render(evaluationParams, t);
+    let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(scaleOp);
+    let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp);
+    let renderedShape = Render.render(evaluationParams, t);
 
     switch (renderedShape, scaleBy) {
     | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(sm))) =>
       Ok(
         `RenderedDist(
           Shape.T.mapY(
-            ~knownIntegralSumFn=knownIntegralSumFn(sm),
-            fn(sm),
+            ~integralSumCacheFn=integralSumCacheFn(sm),
+            ~integralCacheFn=integralCacheFn(sm),
+            ~fn=fn(sm),
             rs,
           ),
         ),
@@ -122,13 +78,23 @@ module VerticalScaling = {
 };
 
 module PointwiseCombination = {
-  let pointwiseAdd = (evaluationParams: evaluationParams, t1, t2) => {
-    switch (render(evaluationParams, t1), render(evaluationParams, t2)) {
+  let pointwiseAdd = (evaluationParams: evaluationParams, t1: t, t2: t) => {
+    switch (Render.render(evaluationParams, t1), Render.render(evaluationParams, t2)) {
     | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
       Ok(
         `RenderedDist(
           Shape.combinePointwise(
-            ~knownIntegralSumsFn=(a, b) => Some(a +. b),
+            ~integralSumCachesFn=(a, b) => Some(a +. b),
+            ~integralCachesFn=
+              (a, b) =>
+                Some(
+                  Continuous.combinePointwise(
+                    ~distributionType=`CDF,
+                    (+.),
+                    a,
+                    b,
+                  ),
+                ),
             (+.),
             rs1,
             rs2,
@@ -141,7 +107,7 @@ module PointwiseCombination = {
     };
   };
 
-  let pointwiseMultiply = (evaluationParams: evaluationParams, t1, t2) => {
+  let pointwiseMultiply = (evaluationParams: evaluationParams, t1: t, t2: t) => {
     // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
     Error(
@@ -150,7 +116,12 @@ module PointwiseCombination = {
   };
 
   let operationToLeaf =
-      (evaluationParams: evaluationParams, pointwiseOp, t1, t2) => {
+      (
+        evaluationParams: evaluationParams,
+        pointwiseOp: pointwiseOperation,
+        t1: t,
+        t2: t,
+      ) => {
     switch (pointwiseOp) {
     | `Add => pointwiseAdd(evaluationParams, t1, t2)
     | `Multiply => pointwiseMultiply(evaluationParams, t1, t2)
@@ -163,7 +134,7 @@ module Truncate = {
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, t) => `Solution(t)
     | (Some(lc), Some(rc), t) when lc > rc =>
-      `Error("Left truncation bound must be smaller than right bound.")
+      `Error("Left truncation bound must be smaller than right truncation bound.")
     | (lc, rc, `SymbolicDist(`Uniform(u))) =>
       `Solution(
         `SymbolicDist(`Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))),
@@ -174,9 +145,9 @@ module Truncate = {
 
   let truncateAsShape =
       (evaluationParams: evaluationParams, leftCutoff, rightCutoff, t) => {
-    // TODO: use named args in renderToShape; if we're lucky we can at least get the tail
+    // TODO: use named args for xMin/xMax in renderToShape; if we're lucky we can at least get the tail
     // of a distribution we otherwise wouldn't get at all
-    switch (render(evaluationParams, t)) {
+    switch (Render.ensureIsRendered(evaluationParams, t)) {
     | Ok(`RenderedDist(rs)) =>
       Ok(`RenderedDist(Shape.T.truncate(leftCutoff, rightCutoff, rs)))
     | Error(e) => Error(e)
