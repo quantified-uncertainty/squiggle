@@ -395,7 +395,7 @@ module Draw = {
         numSamples,
         {sampleCount: 10000, outputXYPoints: 10000, kernelWidth: None},
         `SymbolicDist(normal),
-      );
+      ) |> E.R.toExn;
     let xyShape: Types.xyShape =
       switch (normalShape) {
       | Mixed(_) => {xs: [||], ys: [||]}

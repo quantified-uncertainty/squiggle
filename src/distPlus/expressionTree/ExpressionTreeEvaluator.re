@@ -32,6 +32,47 @@ module AlgebraicCombination = {
        );
   };
 
+  let nodeScore: node => int =
+    fun
+    | `SymbolicDist(`Float(_)) => 1
+    | `SymbolicDist(_) => 1000
+    | `RenderedDist(Discrete(m)) => m.xyShape |> XYShape.T.length
+    | `RenderedDist(Mixed(_)) => 1000
+    | `RenderedDist(Continuous(_)) => 1000
+    | _ => 1000;
+
+  let choose = (t1: node, t2: node) => {
+    nodeScore(t1) * nodeScore(t2) > 10000 ? `Sampling : `Analytical;
+  };
+
+  let combine =
+      (evaluationParams, algebraicOp, t1: node, t2: node)
+      : result(node, string) => {
+    E.R.merge(
+      SamplingDistribution.renderIfIsNotSamplingDistribution(
+        evaluationParams,
+        t1,
+      ),
+      SamplingDistribution.renderIfIsNotSamplingDistribution(
+        evaluationParams,
+        t2,
+      ),
+    )
+    |> E.R.bind(_, ((a, b)) =>
+         switch (choose(a, b)) {
+         | `Sampling =>
+           SamplingDistribution.combineShapesUsingSampling(
+             evaluationParams,
+             algebraicOp,
+             a,
+             b,
+           )
+         | `Analytical =>
+           combinationByRendering(evaluationParams, algebraicOp, a, b)
+         }
+       );
+  };
+
   let operationToLeaf =
       (
         evaluationParams: evaluationParams,
@@ -45,8 +86,8 @@ module AlgebraicCombination = {
     |> E.R.bind(
          _,
          fun
-         | `SymbolicDist(d) as t => Ok(t)
-         | _ => combinationByRendering(evaluationParams, algebraicOp, t1, t2),
+         | `SymbolicDist(_) as t => Ok(t)
+         | _ => combine(evaluationParams, algebraicOp, t1, t2),
        );
 };
 
@@ -79,7 +120,10 @@ module VerticalScaling = {
 
 module PointwiseCombination = {
   let pointwiseAdd = (evaluationParams: evaluationParams, t1: t, t2: t) => {
-    switch (Render.render(evaluationParams, t1), Render.render(evaluationParams, t2)) {
+    switch (
+      Render.render(evaluationParams, t1),
+      Render.render(evaluationParams, t2),
+    ) {
     | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
       Ok(
         `RenderedDist(
@@ -110,9 +154,17 @@ module PointwiseCombination = {
   let pointwiseMultiply = (evaluationParams: evaluationParams, t1: t, t2: t) => {
     // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
-    Error(
-      "Pointwise multiplication not yet supported.",
-    );
+    // TODO: This should work for symbolic distributions too!
+    switch (
+      Render.render(evaluationParams, t1),
+      Render.render(evaluationParams, t2),
+    ) {
+    | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
+      Ok(`RenderedDist(Shape.combinePointwise(( *. ), rs1, rs2)))
+    | (Error(e1), _) => Error(e1)
+    | (_, Error(e2)) => Error(e2)
+    | _ => Error("Pointwise combination: rendering failed.")
+    };
   };
 
   let operationToLeaf =
@@ -133,8 +185,10 @@ module Truncate = {
   let trySimplification = (leftCutoff, rightCutoff, t): simplificationResult => {
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, t) => `Solution(t)
-    | (Some(lc), Some(rc), t) when lc > rc =>
-      `Error("Left truncation bound must be smaller than right truncation bound.")
+    | (Some(lc), Some(rc), _) when lc > rc =>
+      `Error(
+        "Left truncation bound must be smaller than right truncation bound.",
+      )
     | (lc, rc, `SymbolicDist(`Uniform(u))) =>
       `Solution(
         `SymbolicDist(`Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))),

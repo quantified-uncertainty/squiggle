@@ -19,8 +19,9 @@ let timeDist ={
 let setup = dist =>
   RenderTypes.DistPlusRenderer.make(~distPlusIngredients=dist,())
   |> DistPlusRenderer.run
-  |> RenderTypes.DistPlusRenderer.Outputs.distplus
-  |> R.O.fmapOrNull(distPlus => <DistPlusPlot distPlus />);
+  |> E.R.fmap(distPlus => <DistPlusPlot distPlus />)
+  |> E.R.toOption
+  |> E.O.toExn("")
 
 let simpleExample = (name, guesstimatorString) =>
   <>

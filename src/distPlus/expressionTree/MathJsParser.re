@@ -15,12 +15,8 @@ module MathJsonToMathJsAdt = {
       switch (field("mathjs", string, j)) {
       | "FunctionNode" =>
         let args = j |> field("args", array(run));
-        Some(
-          Fn({
-            name: j |> field("fn", field("name", string)),
-            args: args |> E.A.O.concatSomes,
-          }),
-        );
+        let name = j |> optional(field("fn", field("name", string)));
+        name |> E.O.fmap(name => Fn({name, args: args |> E.A.O.concatSomes}));
       | "OperatorNode" =>
         let args = j |> field("args", array(run));
         Some(
@@ -240,6 +236,7 @@ module MathAdtToDistDst = {
         args: array(result(ExpressionTypes.ExpressionTree.node, string)),
       ) => {
     let toOkAlgebraic = r => Ok(`AlgebraicCombination(r));
+    let toOkPointwise = r => Ok(`PointwiseCombination(r));
     let toOkTruncate = r => Ok(`Truncate(r));
     let toOkFloatFromDist = r => Ok(`FloatFromDist(r));
     switch (name, args) {
@@ -249,6 +246,11 @@ module MathAdtToDistDst = {
     | ("subtract", _) => Error("Subtraction needs two operands")
     | ("multiply", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Multiply, l, r))
     | ("multiply", _) => Error("Multiplication needs two operands")
+    | ("dotMultiply", [|Ok(l), Ok(r)|]) => toOkPointwise((`Multiply, l, r))
+    | ("dotMultiply", _) =>
+      Error("Dotwise multiplication needs two operands")
+    | ("rightLogShift", [|Ok(l), Ok(r)|]) => toOkPointwise((`Add, l, r))
+    | ("rightLogShift", _) => Error("Dotwise addition needs two operands")
     | ("divide", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Divide, l, r))
     | ("divide", _) => Error("Division needs two operands")
     | ("pow", _) => Error("Exponentiation is not yet supported.")
@@ -324,6 +326,8 @@ module MathAdtToDistDst = {
     | "add"
     | "subtract"
     | "multiply"
+    | "dotMultiply"
+    | "rightLogShift"
     | "divide"
     | "pow"
     | "leftTruncate"
@@ -358,6 +362,13 @@ module MathAdtToDistDst = {
     r |> MathAdtCleaner.run |> topLevel;
 };
 
+/* The MathJs parser doesn't support '.+' syntax, but we want it because it
+   would make sense with '.*'. Our workaround is to change this to >>>, which is
+   logShift in mathJS. We don't expect to use logShift anytime soon, so this tradeoff
+   seems fine.
+   */
+let pointwiseToRightLogShift = Js.String.replaceByRe([%re "/\.\+/g"], ">>>");
+
 let fromString = str => {
   /* We feed the user-typed string into Mathjs.parseMath,
        which returns a JSON with (hopefully) a single-element array.
@@ -367,7 +378,7 @@ let fromString = str => {
        The function MathJsonToMathJsAdt then recursively unpacks this JSON into a typed data structure we can use.
        Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
      */
-  let mathJsToJson = Mathjs.parseMath(str);
+  let mathJsToJson = str |> pointwiseToRightLogShift |> Mathjs.parseMath;
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
       switch (MathJsonToMathJsAdt.run(r)) {
