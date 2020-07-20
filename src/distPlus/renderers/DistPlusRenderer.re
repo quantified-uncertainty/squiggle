@@ -1,28 +1,14 @@
-let truncateIfShould =
-    (
-      {recommendedLength, shouldTruncate}: RenderTypes.DistPlusRenderer.inputs,
-      outputs: RenderTypes.ShapeRenderer.Combined.outputs,
-      dist,
-    ) => {
-      let willTruncate = 
-  shouldTruncate
-  && RenderTypes.ShapeRenderer.Combined.methodUsed(outputs) == `Sampling;
-    willTruncate ? dist |> Distributions.DistPlus.T.truncate(recommendedLength) : dist;
-};
-
-let run =
-    (inputs: RenderTypes.DistPlusRenderer.inputs)
-    : RenderTypes.DistPlusRenderer.outputs => {
+let run = (inputs: RenderTypes.DistPlusRenderer.inputs) => {
   let toDist = shape =>
-    Distributions.DistPlus.make(
+    DistPlus.make(
       ~shape,
       ~domain=inputs.distPlusIngredients.domain,
       ~unit=inputs.distPlusIngredients.unit,
       ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),
       (),
     )
-    |> Distributions.DistPlus.T.scaleToIntegralSum(~intendedSum=1.0);
-  let outputs =
+    |> DistPlus.T.normalize;
+  let output =
     ShapeRenderer.run({
       samplingInputs: inputs.samplingInputs,
       guesstimatorString: inputs.distPlusIngredients.guesstimatorString,
@@ -30,8 +16,8 @@ let run =
         length: inputs.recommendedLength,
       },
     });
-  let shape = outputs |> RenderTypes.ShapeRenderer.Combined.getShape;
-  let dist =
-    shape |> E.O.fmap(toDist) |> E.O.fmap(truncateIfShould(inputs, outputs));
-  RenderTypes.DistPlusRenderer.Outputs.make(outputs, dist);
+  output
+  |> E.R.fmap((o: RenderTypes.ShapeRenderer.Symbolic.outputs) =>
+       toDist(o.shape)
+     );
 };

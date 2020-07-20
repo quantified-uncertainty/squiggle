@@ -37,27 +37,27 @@ let table = (distPlus, x) => {
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-             |> Distributions.DistPlus.T.xToY(x)
+             |> DistPlus.T.xToY(x)
              |> DistTypes.MixedPoint.toDiscreteValue
              |> Js.Float.toPrecisionWithPrecision(_, ~digits=7)
              |> ReasonReact.string}
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-             |> Distributions.DistPlus.T.xToY(x)
+             |> DistPlus.T.xToY(x)
              |> DistTypes.MixedPoint.toContinuousValue
              |> Js.Float.toPrecisionWithPrecision(_, ~digits=7)
              |> ReasonReact.string}
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.xToY(~cache=None, x)
+             |> DistPlus.T.Integral.xToY(x)
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.sum(~cache=None)
+             |> DistPlus.T.Integral.sum
              |> E.Float.with2DigitsPrecision
              |> ReasonReact.string}
           </td>
@@ -71,13 +71,7 @@ let table = (distPlus, x) => {
             {"Continuous Total" |> ReasonReact.string}
           </td>
           <td className="px-4 py-2">
-            {"Scaled Continuous Total" |> ReasonReact.string}
-          </td>
-          <td className="px-4 py-2">
             {"Discrete Total" |> ReasonReact.string}
-          </td>
-          <td className="px-4 py-2">
-            {"Scaled Discrete Total" |> ReasonReact.string}
           </td>
         </tr>
       </thead>
@@ -85,9 +79,9 @@ let table = (distPlus, x) => {
         <tr>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.toContinuous
+             |> DistPlus.T.toContinuous
              |> E.O.fmap(
-                  Distributions.Continuous.T.Integral.sum(~cache=None),
+                  Continuous.T.Integral.sum
                 )
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
@@ -95,26 +89,8 @@ let table = (distPlus, x) => {
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-             |> Distributions.DistPlus.T.toScaledContinuous
-             |> E.O.fmap(
-                  Distributions.Continuous.T.Integral.sum(~cache=None),
-                )
-             |> E.O.fmap(E.Float.with2DigitsPrecision)
-             |> E.O.default("")
-             |> ReasonReact.string}
-          </td>
-          <td className="px-4 py-2 border ">
-            {distPlus
-             |> Distributions.DistPlus.T.toDiscrete
-             |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
-             |> E.O.fmap(E.Float.with2DigitsPrecision)
-             |> E.O.default("")
-             |> ReasonReact.string}
-          </td>
-          <td className="px-4 py-2 border ">
-            {distPlus
-             |> Distributions.DistPlus.T.toScaledDiscrete
-             |> E.O.fmap(Distributions.Discrete.T.Integral.sum(~cache=None))
+             |> DistPlus.T.toDiscrete
+             |> E.O.fmap(Discrete.T.Integral.sum)
              |> E.O.fmap(E.Float.with2DigitsPrecision)
              |> E.O.default("")
              |> ReasonReact.string}
@@ -143,42 +119,42 @@ let percentiles = distPlus => {
         <tr>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.01)
+             |> DistPlus.T.Integral.yToX(0.01)
              |> showFloat}
           </td>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.05)
+             |> DistPlus.T.Integral.yToX(0.05)
              |> showFloat}
           </td>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.25)
+             |> DistPlus.T.Integral.yToX(0.25)
              |> showFloat}
           </td>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.5)
+             |> DistPlus.T.Integral.yToX(0.5)
              |> showFloat}
           </td>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.75)
+             |> DistPlus.T.Integral.yToX(0.75)
              |> showFloat}
           </td>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.95)
+             |> DistPlus.T.Integral.yToX(0.95)
              |> showFloat}
           </td>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99)
+             |> DistPlus.T.Integral.yToX(0.99)
              |> showFloat}
           </td>
           <td className="px-4 py-2 border">
             {distPlus
-             |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99999)
+             |> DistPlus.T.Integral.yToX(0.99999)
              |> showFloat}
           </td>
         </tr>
@@ -197,13 +173,13 @@ let percentiles = distPlus => {
       <tbody>
         <tr>
           <td className="px-4 py-2 border">
-            {distPlus |> Distributions.DistPlus.T.mean |> showFloat}
+            {distPlus |> DistPlus.T.mean |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> Distributions.DistPlus.T.variance |> (r => r ** 0.5) |> showFloat}
+            {distPlus |> DistPlus.T.variance |> (r => r ** 0.5) |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> Distributions.DistPlus.T.variance |> showFloat}
+            {distPlus |> DistPlus.T.variance |> showFloat}
           </td>
         </tr>
       </tbody>
@@ -211,34 +187,37 @@ let percentiles = distPlus => {
   </div>;
 };
 
-let adjustBoth = discreteProbabilityMass => {
-  let yMaxDiscreteDomainFactor = discreteProbabilityMass;
-  let yMaxContinuousDomainFactor = 1.0 -. discreteProbabilityMass;
-  let yMax =
-    yMaxDiscreteDomainFactor > yMaxContinuousDomainFactor
-      ? yMaxDiscreteDomainFactor : yMaxContinuousDomainFactor;
+let adjustBoth = discreteProbabilityMassFraction => {
+  let yMaxDiscreteDomainFactor = discreteProbabilityMassFraction;
+  let yMaxContinuousDomainFactor = 1.0 -. discreteProbabilityMassFraction;
+
+  // use the bigger proportion, such that whichever is the bigger proportion, the yMax is 1.
+
+
+  let yMax = (yMaxDiscreteDomainFactor > 0.5 ? yMaxDiscreteDomainFactor : yMaxContinuousDomainFactor);
   (
-    1.0 /. (yMaxDiscreteDomainFactor /. yMax),
-    1.0 /. (yMaxContinuousDomainFactor /. yMax),
+    yMax /. yMaxDiscreteDomainFactor,
+    yMax /. yMaxContinuousDomainFactor,
   );
 };
 
 module DistPlusChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
-    open Distributions.DistPlus;
-    let discrete = distPlus |> T.toScaledDiscrete;
+    open DistPlus;
+
+    let discrete = distPlus |> T.toDiscrete |> E.O.fmap(Discrete.getShape);
     let continuous =
       distPlus
-      |> T.toScaledContinuous
-      |> E.O.fmap(Distributions.Continuous.getShape);
+      |> T.toContinuous
+      |> E.O.fmap(Continuous.getShape);
     let range = T.xTotalRange(distPlus);
 
     // // We subtract a bit from the range to make sure that it fits. Maybe this should be done in d3 instead.
     // let minX =
     //   switch (
     //     distPlus
-    //     |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.0001),
+    //     |> DistPlus.T.Integral.yToX(0.0001),
     //     range,
     //   ) {
     //   | (min, Some(range)) => Some(min -. range *. 0.001)
@@ -246,18 +225,20 @@ module DistPlusChart = {
     //   };
 
     let minX = {
-      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.00001);
+      distPlus |> DistPlus.T.Integral.yToX(0.00001);
     };
 
     let maxX = {
-      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99);
+      distPlus |> DistPlus.T.Integral.yToX(0.99999);
     };
 
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
-    let toDiscreteProbabilityMass =
-      distPlus |> Distributions.DistPlus.T.toDiscreteProbabilityMass;
+    let discreteProbabilityMassFraction =
+      distPlus |> DistPlus.T.toDiscreteProbabilityMassFraction;
+
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) =
-      adjustBoth(toDiscreteProbabilityMass);
+      adjustBoth(discreteProbabilityMassFraction);
+
     <DistributionPlot
       xScale={config.xLog ? "log" : "linear"}
       yScale={config.yLog ? "log" : "linear"}
@@ -278,18 +259,18 @@ module DistPlusChart = {
 module IntegralChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
-    open Distributions.DistPlus;
+    open DistPlus;
     let integral = distPlus.integralCache;
     let continuous =
       integral
-      |> Distributions.Continuous.toLinear
-      |> E.O.fmap(Distributions.Continuous.getShape);
+      |> Continuous.toLinear
+      |> E.O.fmap(Continuous.getShape);
     let minX = {
-      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.00001);
+      distPlus |> DistPlus.T.Integral.yToX(0.00001);
     };
 
     let maxX = {
-      distPlus |> Distributions.DistPlus.T.Integral.yToX(~cache=None, 0.99);
+      distPlus |> DistPlus.T.Integral.yToX(0.99999);
     };
     let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson;
     <DistributionPlot
@@ -336,10 +317,11 @@ let make = (~distPlus: DistTypes.distPlus) => {
   let (x, setX) = React.useState(() => 0.);
   let (state, dispatch) =
     React.useReducer(DistPlusPlotReducer.reducer, DistPlusPlotReducer.init);
+
   <div>
     {state.distributions
      |> E.L.fmapi((index, config) =>
-          <div className="flex">
+          <div className="flex" key={string_of_int(index)}>
             <div className="w-4/5">
               <Chart distPlus config onHover={r => {setX(_ => r)}} />
             </div>

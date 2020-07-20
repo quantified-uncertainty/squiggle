@@ -145,6 +145,13 @@ module R = {
   let id = e => e |> result(U.id, U.id);
   let fmap = Rationale.Result.fmap;
   let bind = Rationale.Result.bind;
+  let toExn = Belt.Result.getExn;
+  let merge = (a, b) =>
+    switch (a, b) {
+    | (Error(e), _) => Error(e)
+    | (_, Error(e)) => Error(e)
+    | (Ok(a), Ok(b)) => Ok((a, b))
+    };
   let toOption = (e: Belt.Result.t('a, 'b)) =>
     switch (e) {
     | Ok(r) => Some(r)

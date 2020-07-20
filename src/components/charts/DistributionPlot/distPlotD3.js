@@ -427,7 +427,7 @@ export class DistPlotD3 {
   addLollipopsChart(common) {
     const data = this.getDataPoints('discrete');
 
-    const yMin = d3.min(this.attrs.data.discrete.ys);
+    const yMin = 0.;
     const yMax = d3.max(this.attrs.data.discrete.ys);
 
     // X axis.

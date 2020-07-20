@@ -14,33 +14,26 @@ let formatString = str => {
   str |> formatMessyArray;
 };
 
-let runSymbolic = (guesstimatorString, length) => {
-  let str = formatString(guesstimatorString);
+let runSymbolic = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
+  let str = formatString(inputs.guesstimatorString);
   let graph = MathJsParser.fromString(str);
   graph
-  |> E.R.fmap(g =>
-       RenderTypes.ShapeRenderer.Symbolic.make(
+  |> E.R.bind(_, g =>
+       ExpressionTree.toShape(
+         inputs.symbolicInputs.length,
+         {
+           sampleCount:
+             inputs.samplingInputs.sampleCount |> E.O.default(10000),
+           outputXYPoints:
+             inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
+           kernelWidth: inputs.samplingInputs.kernelWidth,
+         },
          g,
-         SymbolicDist.toShape(length, g),
        )
+       |> E.R.fmap(RenderTypes.ShapeRenderer.Symbolic.make(g))
      );
 };
 
-let run =
-    (inputs: RenderTypes.ShapeRenderer.Combined.inputs)
-    : RenderTypes.ShapeRenderer.Combined.outputs => {
-  let symbolic =
-    runSymbolic(inputs.guesstimatorString, inputs.symbolicInputs.length);
-  let sampling =
-    switch (symbolic) {
-    | Ok(_) => None
-    | Error(_) =>
-      Samples.T.fromGuesstimatorString(
-        ~guesstimatorString=inputs.guesstimatorString,
-        ~samplingInputs=inputs.samplingInputs,
-        (),
-      )
-    };
-  Js.log3("IS SOME?", symbolic |> E.R.toOption |> E.O.isSome, symbolic);
-  {symbolic: Some(symbolic), sampling};
+let run = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
+  runSymbolic(inputs);
 };

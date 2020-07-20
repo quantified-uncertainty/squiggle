@@ -5,6 +5,7 @@ type normal = {
   [@bs.meth] "cdf": (float, float, float) => float,
   [@bs.meth] "inv": (float, float, float) => float,
   [@bs.meth] "sample": (float, float) => float,
+  [@bs.meth] "mean": (float, float) => float,
 };
 type lognormal = {
   .
@@ -12,6 +13,7 @@ type lognormal = {
   [@bs.meth] "cdf": (float, float, float) => float,
   [@bs.meth] "inv": (float, float, float) => float,
   [@bs.meth] "sample": (float, float) => float,
+  [@bs.meth] "mean": (float, float) => float,
 };
 type uniform = {
   .
@@ -19,6 +21,7 @@ type uniform = {
   [@bs.meth] "cdf": (float, float, float) => float,
   [@bs.meth] "inv": (float, float, float) => float,
   [@bs.meth] "sample": (float, float) => float,
+  [@bs.meth] "mean": (float, float) => float,
 };
 type beta = {
   .
@@ -26,6 +29,7 @@ type beta = {
   [@bs.meth] "cdf": (float, float, float) => float,
   [@bs.meth] "inv": (float, float, float) => float,
   [@bs.meth] "sample": (float, float) => float,
+  [@bs.meth] "mean": (float, float) => float,
 };
 type exponential = {
   .
@@ -33,6 +37,7 @@ type exponential = {
   [@bs.meth] "cdf": (float, float) => float,
   [@bs.meth] "inv": (float, float) => float,
   [@bs.meth] "sample": float => float,
+  [@bs.meth] "mean": float => float,
 };
 type cauchy = {
   .
@@ -47,6 +52,7 @@ type triangular = {
   [@bs.meth] "cdf": (float, float, float, float) => float,
   [@bs.meth] "inv": (float, float, float, float) => float,
   [@bs.meth] "sample": (float, float, float) => float,
+  [@bs.meth] "mean": (float, float, float) => float,
 };
 
 // Pareto doesn't have sample for some reason
@@ -61,6 +67,7 @@ type poisson = {
   [@bs.meth] "pdf": (float, float) => float,
   [@bs.meth] "cdf": (float, float) => float,
   [@bs.meth] "sample": float => float,
+  [@bs.meth] "mean": float => float,
 };
 type weibull = {
   .
@@ -68,6 +75,7 @@ type weibull = {
   [@bs.meth] "cdf": (float, float, float) => float,
   [@bs.meth] "inv": (float, float, float) => float,
   [@bs.meth] "sample": (float, float) => float,
+  [@bs.meth] "mean": (float, float) => float,
 };
 type binomial = {
   .

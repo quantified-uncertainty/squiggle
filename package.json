@@ -27,7 +27,6 @@
   "license": "MIT",
   "dependencies": {
     "@foretold/components": "0.0.6",
-    "@foretold/guesstimator": "1.0.11",
     "@glennsl/bs-json": "^5.0.2",
     "antd": "3.17.0",
     "autoprefixer": "9.7.4",

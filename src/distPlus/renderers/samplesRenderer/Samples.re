@@ -1,3 +1,42 @@
+module Types = {
+  let defaultSampleCount = 5000;
+  let defaultOutputXYPoints = 10000;
+
+  type inputs = {
+    sampleCount: option(int),
+    outputXYPoints: option(int),
+    kernelWidth: option(float),
+  };
+
+  type samplingStats = {
+    sampleCount: int,
+    outputXYPoints: int,
+    bandwidthXSuggested: float,
+    bandwidthUnitSuggested: float,
+    bandwidthXImplemented: float,
+    bandwidthUnitImplemented: float,
+  };
+
+  type outputs = {
+    continuousParseParams: option(samplingStats),
+    shape: option(DistTypes.shape),
+  };
+
+  let empty = {sampleCount: None, outputXYPoints: None, kernelWidth: None};
+
+  type fInputs = {
+    sampleCount: int,
+    outputXYPoints: int,
+    kernelWidth: option(float),
+  };
+
+  let toF = (i: inputs): fInputs => {
+    sampleCount: i.sampleCount |> E.O.default(defaultSampleCount),
+    outputXYPoints: i.outputXYPoints |> E.O.default(defaultOutputXYPoints),
+    kernelWidth: i.kernelWidth,
+  };
+};
+
 module JS = {
   [@bs.deriving abstract]
   type distJs = {
@@ -20,39 +59,6 @@ module KDE = {
     samples
     |> JS.samplesToContinuousPdf(_, outputXYPoints, kernelWidth)
     |> JS.jsToDist;
-  };
-
-  // Note: This was an experiment, but it didn't actually work that well.
-  let inGroups = (samples, outputXYPoints, kernelWidth, ~cuttoff=0.9, ()) => {
-    let partitionAt =
-      samples
-      |> E.A.length
-      |> float_of_int
-      |> (e => e *. cuttoff)
-      |> int_of_float;
-    let part1XYPoints =
-      outputXYPoints |> float_of_int |> (e => e *. cuttoff) |> int_of_float;
-    let part2XYPoints = outputXYPoints - part1XYPoints |> Js.Math.max_int(30);
-    let part1Data =
-      samples |> Belt.Array.slice(_, ~offset=0, ~len=partitionAt);
-    let part2DataLength = (samples |> E.A.length) - partitionAt;
-    let part2Data =
-      samples
-      |> Belt.Array.slice(
-           _,
-           ~offset=(-1) * part2DataLength,
-           ~len=part2DataLength,
-         );
-    let part1 =
-      part1Data
-      |> JS.samplesToContinuousPdf(_, part1XYPoints, kernelWidth)
-      |> JS.jsToDist;
-    let part2 =
-      part2Data
-      |> JS.samplesToContinuousPdf(_, part2XYPoints, 3)
-      |> JS.jsToDist;
-    let opp = 1.0 -. cuttoff;
-    part1;
   };
 };
 
@@ -109,22 +115,24 @@ module T = {
   let toShape =
       (
         ~samples: t,
-        ~samplingInputs: RenderTypes.ShapeRenderer.Sampling.Inputs.fInputs,
+        ~samplingInputs: Types.fInputs,
         (),
       ) => {
     Array.fast_sort(compare, samples);
     let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples);
     let length = samples |> E.A.length |> float_of_int;
-    let discrete: DistTypes.xyShape =
+    let discrete: DistTypes.discreteShape =
       discretePart
       |> E.FloatFloatMap.fmap(r => r /. length)
       |> E.FloatFloatMap.toArray
-      |> XYShape.T.fromZippedArray;
+      |> XYShape.T.fromZippedArray
+      |> Discrete.make;
 
     let pdf =
       continuousPart |> E.A.length > 5
         ? {
           let _suggestedXWidth = Bandwidth.nrd0(continuousPart);
+          // todo: This does some recalculating from the last step.
           let _suggestedUnitWidth =
             suggestedUnitWidth(continuousPart, samplingInputs.outputXYPoints);
           let usedWidth =
@@ -135,7 +143,7 @@ module T = {
               samplingInputs.outputXYPoints,
               usedWidth,
             );
-          let foo: RenderTypes.ShapeRenderer.Sampling.samplingStats = {
+          let foo: Types.samplingStats = {
             sampleCount: samplingInputs.sampleCount,
             outputXYPoints: samplingInputs.outputXYPoints,
             bandwidthXSuggested: _suggestedXWidth,
@@ -149,16 +157,16 @@ module T = {
                ~outputXYPoints=samplingInputs.outputXYPoints,
                formatUnitWidth(usedUnitWidth),
              )
-          |> Distributions.Continuous.make(`Linear)
+          |> Continuous.make
           |> (r => Some((r, foo)));
         }
         : None;
     let shape =
       MixedShapeBuilder.buildSimple(
         ~continuous=pdf |> E.O.fmap(fst),
-        ~discrete,
+        ~discrete=Some(discrete),
       );
-    let samplesParse: RenderTypes.ShapeRenderer.Sampling.outputs = {
+    let samplesParse: Types.outputs = {
       continuousParseParams: pdf |> E.O.fmap(snd),
       shape,
     };
@@ -167,33 +175,11 @@ module T = {
 
   let fromSamples =
       (
-        ~samplingInputs=RenderTypes.ShapeRenderer.Sampling.Inputs.empty,
+        ~samplingInputs=Types.empty,
         samples,
       ) => {
     let samplingInputs =
-      RenderTypes.ShapeRenderer.Sampling.Inputs.toF(samplingInputs);
+      Types.toF(samplingInputs);
     toShape(~samples, ~samplingInputs, ());
-  };
-
-  let fromGuesstimatorString =
-      (
-        ~guesstimatorString,
-        ~samplingInputs=RenderTypes.ShapeRenderer.Sampling.Inputs.empty,
-        (),
-      ) => {
-    let hasValidSamples =
-      Guesstimator.stringToSamples(guesstimatorString, 10) |> E.A.length > 0;
-    let _samplingInputs =
-      RenderTypes.ShapeRenderer.Sampling.Inputs.toF(samplingInputs);
-    switch (hasValidSamples) {
-    | false => None
-    | true =>
-      let samples =
-        Guesstimator.stringToSamples(
-          guesstimatorString,
-          _samplingInputs.sampleCount,
-        );
-      Some(fromSamples(~samplingInputs, samples));
-    };
   };
 };

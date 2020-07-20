@@ -161,7 +161,6 @@ module Convert = {
   let canvasShapeToContinuousShape =
       (~canvasShape: Types.canvasShape, ~canvasElement: Dom.element)
       : Types.continuousShape => {
-      
     let xs = canvasShape.xValues;
     let hs = canvasShape.hs;
     let rectangle: Types.rectangle =
@@ -170,24 +169,28 @@ module Convert = {
     let paddingFactorY = CanvasContext.paddingFactorX(rectangle.height);
     let windowScrollY: float = [%raw "window.scrollY"];
 
-    let y0Line = bottom+.windowScrollY-.paddingFactorY;
-    let ys = E.A.fmap( h => y0Line -. h, hs);
-    
+    let y0Line = bottom +. windowScrollY -. paddingFactorY;
+    let ys = E.A.fmap(h => y0Line -. h, hs);
+
     let xyShape: Types.xyShape = {xs, ys};
     let continuousShape: Types.continuousShape = {
       xyShape,
       interpolation: `Linear,
+      integralSumCache: None,
+      integralCache: None,
     };
-    
+
     let integral = XYShape.Analysis.integrateContinuousShape(continuousShape);
     let ys = E.A.fmap(y => y /. integral, ys);
-    
+
     let continuousShape: Types.continuousShape = {
       xyShape: {
         xs,
         ys,
       },
       interpolation: `Linear,
+      integralSumCache: Some(1.0),
+      integralCache: None,
     };
     continuousShape;
   };
@@ -289,8 +292,8 @@ module Draw = {
     /*
           let continuousShape =
             Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
-          let mean = Distributions.Continuous.T.mean(continuousShape);
-          let variance = Distributions.Continuous.T.variance(continuousShape);
+          let mean = Continuous.T.mean(continuousShape);
+          let variance = Continuous.T.variance(continuousShape);
           let meanLocation =
             Convert.findClosestInOrderedArrayDangerously(mean, canvasShape.xValues);
           let meanLocationCanvasX = canvasShape.ws[meanLocation];
@@ -386,24 +389,29 @@ module Draw = {
     let stdev = 15.0;
     let numSamples = 3000;
 
-    let normal: SymbolicDist.dist = `Normal({mean, stdev});
-    let normalShape = SymbolicDist.GenericSimple.toShape(normal, numSamples);
+    let normal: SymbolicTypes.symbolicDist = `Normal({mean, stdev});
+    let normalShape =
+      ExpressionTree.toShape(
+        numSamples,
+        {sampleCount: 10000, outputXYPoints: 10000, kernelWidth: None},
+        `SymbolicDist(normal),
+      ) |> E.R.toExn;
     let xyShape: Types.xyShape =
       switch (normalShape) {
       | Mixed(_) => {xs: [||], ys: [||]}
       | Discrete(_) => {xs: [||], ys: [||]}
-      | Continuous(m) => Distributions.Continuous.getShape(m)
+      | Continuous(m) => Continuous.getShape(m)
       };
 
     /* // To use a lognormal instead:
-       let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
+       let lognormal = SymbolicTypes.Lognormal.fromMeanAndStdev(mean, stdev);
        let lognormalShape =
-         SymbolicDist.GenericSimple.toShape(lognormal, numSamples);
+         SymbolicTypes.GenericSimple.toShape(lognormal, numSamples);
        let lognormalXYShape: Types.xyShape =
          switch (lognormalShape) {
          | Mixed(_) => {xs: [||], ys: [||]}
          | Discrete(_) => {xs: [||], ys: [||]}
-         | Continuous(m) => Distributions.Continuous.getShape(m)
+         | Continuous(m) => Continuous.getShape(m)
          };
        */
 
@@ -666,14 +674,9 @@ module State = {
         Convert.canvasShapeToContinuousShape(~canvasShape, ~canvasElement);
 
       /* create a cdf from a pdf */
-      let _pdf =
-        Distributions.Continuous.T.scaleToIntegralSum(
-          ~cache=None,
-          ~intendedSum=1.0,
-          pdf,
-        );
+      let _pdf = Continuous.T.normalize(pdf);
 
-      let cdf = Distributions.Continuous.T.integral(~cache=None, _pdf);
+      let cdf = Continuous.T.integral(_pdf);
       let xs = [||];
       let ys = [||];
       for (i in 1 to 999) {

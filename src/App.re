@@ -1,8 +1,6 @@
 type route =
   | Model(string)
   | DistBuilder
-  | DistBuilder2
-  | DistBuilder3
   | Drawer
   | Home
   | NotFound;
@@ -11,8 +9,6 @@ let routeToPath = route =>
   switch (route) {
   | Model(modelId) => "/m/" ++ modelId
   | DistBuilder => "/dist-builder"
-  | DistBuilder2 => "/dist-builder2"
-  | DistBuilder3 => "/dist-builder3"
   | Drawer => "/drawer"
   | Home => "/"
   | _ => "/"
@@ -75,12 +71,6 @@ module Menu = {
       <Item href={routeToPath(DistBuilder)} key="dist-builder">
         {"Dist Builder" |> R.ste}
       </Item>
-      <Item href={routeToPath(DistBuilder2)} key="dist-builder-2">
-        {"Dist Builder 2" |> R.ste}
-      </Item>
-      <Item href={routeToPath(DistBuilder3)} key="dist-builder-3">
-        {"Dist Builder 3" |> R.ste}
-      </Item>
       <Item href={routeToPath(Drawer)} key="drawer">
         {"Drawer" |> R.ste}
       </Item>
@@ -97,8 +87,6 @@ let make = () => {
     switch (url.path) {
     | ["m", modelId] => Model(modelId)
     | ["dist-builder"] => DistBuilder
-    | ["dist-builder2"] => DistBuilder2
-    | ["dist-builder3"] => DistBuilder3
     | ["drawer"] => Drawer
     | [] => Home
     | _ => NotFound
@@ -113,8 +101,6 @@ let make = () => {
        | None => <div> {"Page is not found" |> R.ste} </div>
        }
      | DistBuilder => <DistBuilder />
-     | DistBuilder2 => <DistBuilder2 />
-     | DistBuilder3 => <DistBuilder3 />
      | Drawer => <Drawer />
      | Home => <Home />
      | _ => <div> {"Page is not found" |> R.ste} </div>

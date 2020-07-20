@@ -9,7 +9,7 @@ let interpolate =
 };
 
 // TODO: Make sure that shapes cannot be empty.
-let extImp = E.O.toExt("Should not be possible");
+let extImp = E.O.toExt("Tried to perform an operation on an empty XYShape.");
 
 module T = {
   type t = xyShape;
@@ -17,7 +17,9 @@ module T = {
   type ts = array(xyShape);
   let xs = (t: t) => t.xs;
   let ys = (t: t) => t.ys;
+  let length = (t: t) => E.A.length(t.xs);
   let empty = {xs: [||], ys: [||]};
+  let isEmpty = (t: t) => length(t) == 0;
   let minX = (t: t) => t |> xs |> E.A.Sorted.min |> extImp;
   let maxX = (t: t) => t |> xs |> E.A.Sorted.max |> extImp;
   let firstY = (t: t) => t |> ys |> E.A.first |> extImp;
@@ -30,6 +32,11 @@ module T = {
   let fromArrays = (xs, ys): t => {xs, ys};
   let accumulateYs = (fn, p: t) => {
     fromArray((p.xs, E.A.accumulate(fn, p.ys)));
+  };
+  let concat = (t1: t, t2: t) => {
+    let cxs = Array.concat([t1.xs, t2.xs]);
+    let cys = Array.concat([t1.ys, t2.ys]);
+    {xs: cxs, ys: cys};
   };
   let fromZippedArray = (pairs: array((float, float))): t =>
     pairs |> Belt.Array.unzip |> fromArray;
@@ -136,6 +143,63 @@ module XtoY = {
       };
     n;
   };
+
+  /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
+     Interpolation can either be stepwise (using the value on the left) or linear. Extrapolation can be `UseZero or `UseOutermostPoints. */
+  let continuousInterpolator = (interpolation: DistTypes.interpolationStrategy, extrapolation: DistTypes.extrapolationStrategy): interpolator => {
+    switch (interpolation, extrapolation) {
+    | (`Linear, `UseZero) => (t: T.t, leftIndex: int, x: float) => {
+      if (leftIndex < 0) {
+        0.0
+      } else if (leftIndex >= T.length(t) - 1) {
+        0.0
+      } else {
+        let x1 = t.xs[leftIndex];
+        let x2 = t.xs[leftIndex + 1];
+        let y1 = t.ys[leftIndex];
+        let y2 = t.ys[leftIndex + 1];
+        let fraction = (x -. x1) /. (x2 -. x1);
+        y1 *. (1. -. fraction) +. y2 *. fraction;
+      };
+    }
+    | (`Linear, `UseOutermostPoints) => (t: T.t, leftIndex: int, x: float) => {
+      if (leftIndex < 0) {
+        t.ys[0];
+      } else if (leftIndex >= T.length(t) - 1) {
+        t.ys[T.length(t) - 1]
+      } else {
+        let x1 = t.xs[leftIndex];
+        let x2 = t.xs[leftIndex + 1];
+        let y1 = t.ys[leftIndex];
+        let y2 = t.ys[leftIndex + 1];
+        let fraction = (x -. x1) /. (x2 -. x1);
+        y1 *. (1. -. fraction) +. y2 *. fraction;
+      };
+    }
+    | (`Stepwise, `UseZero) => (t: T.t, leftIndex: int, x: float) => {
+      if (leftIndex < 0) {
+        0.0
+      } else if (leftIndex >= T.length(t) - 1) {
+        0.0
+      } else {
+        t.ys[leftIndex];
+      }
+    }
+    | (`Stepwise, `UseOutermostPoints) => (t: T.t, leftIndex: int, x: float) => {
+      if (leftIndex < 0) {
+        t.ys[0];
+      } else if (leftIndex >= T.length(t) - 1) {
+        t.ys[T.length(t) - 1]
+      } else {
+        t.ys[leftIndex];
+      }
+    }
+    }
+  };
+
+  /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
+     For discrete distributions, the probability density between points is zero, so we just return zero here. */
+  let discreteInterpolator: interpolator = (t: T.t, leftIndex: int, x: float) => 0.0;
 };
 
 module XsConversion = {
@@ -154,7 +218,9 @@ module XsConversion = {
 
   let proportionByProbabilityMass =
       (newLength: int, integral: T.t, t: T.t): T.t => {
-    equallyDivideXByMass(newLength, integral) |> _replaceWithXs(_, t);
+    integral
+    |> equallyDivideXByMass(newLength) // creates a new set of xs at evenly spaced percentiles
+    |> _replaceWithXs(_, t); // linearly interpolates new ys for the new xs
   };
 };
 
@@ -164,36 +230,89 @@ module Zipped = {
   let compareXs = ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0;
   let sortByY = (t: zipped) => t |> E.A.stableSortBy(_, compareYs);
   let sortByX = (t: zipped) => t |> E.A.stableSortBy(_, compareXs);
+  let filterByX = (testFn: (float => bool), t: zipped) => t |> E.A.filter(((x, _)) => testFn(x));
 };
 
-module Combine = {
-  type xsSelection =
-    | ALL_XS
-    | XS_EVENLY_DIVIDED(int);
+module PointwiseCombination = {
 
-  let combine =
+  // t1Interpolator and t2Interpolator are functions from XYShape.XtoY, e.g. linearBetweenPointsExtrapolateFlat.
+  let combine = [%raw {| // : (float => float => float, T.t, T.t, bool) => T.t
+      // This function combines two xyShapes by looping through both of them simultaneously.
+      // It always moves on to the next smallest x, whether that's in the first or second input's xs,
+      // and interpolates the value on the other side, thus accumulating xs and ys.
+      // This is written in raw JS because this can still be a bottleneck, and using refs for the i and j indices is quite painful.
+
+      function(fn, interpolator, t1, t2) {
+        let t1n = t1.xs.length;
+        let t2n = t2.xs.length;
+        let outX = [];
+        let outY = [];
+        let i = -1;
+        let j = -1;
+
+        while (i <= t1n - 1 && j <= t2n - 1) {
+          let x, ya, yb;
+          if (j == t2n - 1 && i < t1n - 1 ||
+              t1.xs[i+1] < t2.xs[j+1]) { // if a has to catch up to b, or if b is already done
+            i++;
+
+            x = t1.xs[i];
+            ya = t1.ys[i];
+
+            yb = interpolator(t2, j, x);
+          } else if (i == t1n - 1 && j < t2n - 1 ||
+                    t1.xs[i+1] > t2.xs[j+1]) { // if b has to catch up to a, or if a is already done
+            j++;
+
+            x = t2.xs[j];
+            yb = t2.ys[j];
+
+            ya = interpolator(t1, i, x);
+          } else if (i < t1n - 1 && j < t2n && t1.xs[i+1] === t2.xs[j+1]) { // if they happen to be equal, move both ahead
+            i++;
+            j++;
+            x = t1.xs[i];
+            ya = t1.ys[i];
+            yb = t2.ys[j];
+          } else if (i === t1n - 1 && j === t2n - 1) {
+            // finished!
+            i = t1n;
+            j = t2n;
+            continue;
+          } else {
+            console.log("Error!", i, j);
+          }
+
+          outX.push(x);
+          outY.push(fn(ya, yb));
+        }
+
+        return {xs: outX, ys: outY};
+      }
+    |}];
+
+  let combineEvenXs =
       (
-        ~xToYSelection: (float, T.t) => 'a,
-        ~xsSelection=ALL_XS,
         ~fn,
+        ~xToYSelection,
+        sampleCount,
         t1: T.t,
         t2: T.t,
       ) => {
-    let allXs =
-      switch (xsSelection) {
-      | ALL_XS => Ts.allXs([|t1, t2|])
-      | XS_EVENLY_DIVIDED(sampleCount) =>
-        Ts.equallyDividedXs([|t1, t2|], sampleCount)
-      };
 
-    let allYs =
-      allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)));
-    T.fromArrays(allXs, allYs);
+    switch ((E.A.length(t1.xs), E.A.length(t2.xs))) {
+    | (0, 0) => T.empty
+    | (0, _) => t2
+    | (_, 0) => t1
+    | (_, _) => {
+        let allXs = Ts.equallyDividedXs([|t1, t2|], sampleCount);
+
+        let allYs = allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)));
+
+        T.fromArrays(allXs, allYs);
+      }
+    }
   };
-
-  let combineLinear = combine(~xToYSelection=XtoY.linear);
-  let combineStepwise = combine(~xToYSelection=XtoY.stepwiseIncremental);
-  let combineIfAtX = combine(~xToYSelection=XtoY.stepwiseIfAtX);
 
   // TODO: I'd bet this is pretty slow. Maybe it would be faster to intersperse Xs and Ys separately.
   let intersperse = (t1: T.t, t2: T.t) => {
@@ -244,8 +363,8 @@ module Range = {
         Belt.Array.set(
           cumulativeY,
           x + 1,
-          (xs[x + 1] -. xs[x])
-          *. ((ys[x] +. ys[x + 1]) /. 2.)
+          (xs[x + 1] -. xs[x])  // dx
+          *. ((ys[x] +. ys[x + 1]) /. 2.) // (1/2) * (avgY)
           +. cumulativeY[x],
         );
       ();
@@ -255,8 +374,31 @@ module Range = {
 
   let derivative = mapYsBasedOnRanges(delta_y_over_delta_x);
 
-  // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
+  let stepwiseToLinear = ({xs, ys}: T.t): T.t => {
+    // adds points at the bottom of each step.
+    let length = E.A.length(xs);
+    let newXs: array(float) = Belt.Array.makeUninitializedUnsafe(2 * length);
+    let newYs: array(float) = Belt.Array.makeUninitializedUnsafe(2 * length);
+
+    Belt.Array.set(newXs, 0, xs[0] -. epsilon_float) |> ignore;
+    Belt.Array.set(newYs, 0, 0.) |> ignore;
+    Belt.Array.set(newXs, 1, xs[0]) |> ignore;
+    Belt.Array.set(newYs, 1, ys[0]) |> ignore;
+
+    for (i in 1 to E.A.length(xs) - 1) {
+      Belt.Array.set(newXs, i * 2, xs[i] -. epsilon_float) |> ignore;
+      Belt.Array.set(newYs, i * 2, ys[i-1]) |> ignore;
+      Belt.Array.set(newXs, i * 2 + 1, xs[i]) |> ignore;
+      Belt.Array.set(newYs, i * 2 + 1, ys[i]) |> ignore;
+      ();
+    };
+
+    {xs: newXs, ys: newYs};
+  };
+
+  // TODO: I think this isn't needed by any functions anymore.
   let stepsToContinuous = t => {
+    // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
     let diff = T.xTotalRange(t) |> (r => r *. 0.00001);
     let items =
       switch (E.A.toRanges(Belt.Array.zip(t.xs, t.ys))) {
@@ -265,7 +407,7 @@ module Range = {
           items
           |> Belt.Array.map(_, rangePointAssumingSteps)
           |> T.fromZippedArray
-          |> Combine.intersperse(t |> T.mapX(e => e +. diff)),
+          |> PointwiseCombination.intersperse(t |> T.mapX(e => e +. diff)),
         )
       | _ => Some(t)
       };
@@ -287,10 +429,10 @@ let pointLogScore = (prediction, answer) =>
   };
 
 let logScorePoint = (sampleCount, t1, t2) =>
-  Combine.combine(
-    ~xsSelection=XS_EVENLY_DIVIDED(sampleCount),
-    ~xToYSelection=XtoY.linear,
+  PointwiseCombination.combineEvenXs(
     ~fn=pointLogScore,
+    ~xToYSelection=XtoY.linear,
+    sampleCount,
     t1,
     t2,
   )
@@ -315,6 +457,7 @@ module Analysis = {
       0.0,
       (acc, _x, i) => {
         let areaUnderIntegral =
+          // TODO Take this switch statement out of the loop body
           switch (t.interpolation, i) {
           | (_, 0) => 0.0
           | (`Stepwise, _) =>
@@ -323,12 +466,16 @@ module Analysis = {
           | (`Linear, _) =>
             let x1 = xs[i - 1];
             let x2 = xs[i];
-            let h1 = ys[i - 1];
-            let h2 = ys[i];
-            let b = (h1 -. h2) /. (x1 -. x2);
-            let a = h1 -. b *. x1;
-            indefiniteIntegralLinear(x2, a, b)
-            -. indefiniteIntegralLinear(x1, a, b);
+            if (x1 == x2) {
+              0.0
+            } else {
+              let h1 = ys[i - 1];
+              let h2 = ys[i];
+              let b = (h1 -. h2) /. (x1 -. x2);
+              let a = h1 -. b *. x1;
+              indefiniteIntegralLinear(x2, a, b)
+              -. indefiniteIntegralLinear(x1, a, b);
+            };
           };
         acc +. areaUnderIntegral;
       },

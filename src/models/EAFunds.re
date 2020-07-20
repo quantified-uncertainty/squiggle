@@ -112,8 +112,12 @@ module Model = {
     GlobalCatastrophe.makeI(MomentRe.momentNow())
     |> RenderTypes.DistPlusRenderer.make(~distPlusIngredients=_, ())
     |> DistPlusRenderer.run
-    |> RenderTypes.DistPlusRenderer.Outputs.distplus
-    |> E.O.bind(_, Distributions.DistPlusTime.Integral.xToY(Time(dateTime)));
+    |> E.R.bind(_, r =>
+         r
+         |> DistPlusTime.Integral.xToY(Time(dateTime))
+         |> E.O.toResult("error")
+       )
+    |> E.R.toOption;
   };
 
   let make =
