@@ -37,6 +37,7 @@ let empty: DistTypes.continuousShape = {
 let stepwiseToLinear = (t: t): t =>
   make(~integralSumCache=t.integralSumCache, ~integralCache=t.integralCache, XYShape.Range.stepwiseToLinear(t.xyShape));
 
+// Note: This results in a distribution with as many points as the sum of those in t1 and t2.
 let combinePointwise =
     (
       ~integralSumCachesFn=(_, _) => None,

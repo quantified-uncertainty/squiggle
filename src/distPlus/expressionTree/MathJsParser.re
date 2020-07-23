@@ -1,3 +1,5 @@
+type inputVars = Belt.Map.String.t(ExpressionTypes.ExpressionTree.node);
+
 module MathJsonToMathJsAdt = {
   type arg =
     | Symbol(string)
@@ -50,24 +52,33 @@ module MathJsonToMathJsAdt = {
 module MathAdtToDistDst = {
   open MathJsonToMathJsAdt;
 
+  let handleSymbol = (inputVars: inputVars, sym) => {
+    switch (Belt.Map.String.get(inputVars, sym)) {
+    | Some(s) => Ok(s)
+    | None => Error("Couldn't find.")
+    };
+  };
+
   module MathAdtCleaner = {
     let transformWithSymbol = (f: float, s: string) =>
       switch (s) {
       | "K"
-      | "k" => f *. 1000.
+      | "k" => Some(f *. 1000.)
       | "M"
-      | "m" => f *. 1000000.
+      | "m" => Some(f *. 1000000.)
       | "B"
-      | "b" => f *. 1000000000.
+      | "b" => Some(f *. 1000000000.)
       | "T"
-      | "t" => f *. 1000000000000.
-      | _ => f
+      | "t" => Some(f *. 1000000000000.)
+      | _ => None
       };
 
     let rec run =
       fun
-      | Fn({name: "multiply", args: [|Value(f), Symbol(s)|]}) =>
-        Value(transformWithSymbol(f, s))
+      | Fn({name: "multiply", args: [|Value(f), Symbol(s)|]}) as doNothing =>
+        transformWithSymbol(f, s)
+        |> E.O.fmap(r => Value(r))
+        |> E.O.default(doNothing)
       | Fn({name: "unaryMinus", args: [|Value(f)|]}) => Value((-1.0) *. f)
       | Fn({name, args}) => Fn({name, args: args |> E.A.fmap(run)})
       | Array(args) => Array(args |> E.A.fmap(run))
@@ -347,24 +358,26 @@ module MathAdtToDistDst = {
     };
   };
 
-  let rec nodeParser =
+  let rec nodeParser = inputVars =>
     fun
     | Value(f) => Ok(`SymbolicDist(`Float(f)))
-    | Fn({name, args}) => functionParser(nodeParser, name, args)
+    | Symbol(s) => handleSymbol(inputVars, s)
+    | Fn({name, args}) => functionParser(nodeParser(inputVars), name, args)
     | _ => {
         Error("This type not currently supported");
       };
 
-  let topLevel =
+  let topLevel = inputVars =>
     fun
-    | Value(_) as r => nodeParser(r)
-    | Fn(_) as r => nodeParser(r)
+    | Value(_) as r => nodeParser(inputVars, r)
+    | Fn(_) as r => nodeParser(inputVars, r)
     | Array(_) => Error("Array not valid as top level")
-    | Symbol(_) => Error("Symbol not valid as top level")
+    | Symbol(s) => handleSymbol(inputVars, s)
     | Object(_) => Error("Object not valid as top level");
 
-  let run = (r): result(ExpressionTypes.ExpressionTree.node, string) =>
-    r |> MathAdtCleaner.run |> topLevel;
+  let run =
+      (inputVars, r): result(ExpressionTypes.ExpressionTree.node, string) =>
+    r |> MathAdtCleaner.run |> topLevel(inputVars);
 };
 
 /* The MathJs parser doesn't support '.+' syntax, but we want it because it
@@ -374,7 +387,7 @@ module MathAdtToDistDst = {
    */
 let pointwiseToRightLogShift = Js.String.replaceByRe([%re "/\.\+/g"], ">>>");
 
-let fromString = str => {
+let fromString2 = (inputVars: inputVars, str) => {
   /* We feed the user-typed string into Mathjs.parseMath,
        which returns a JSON with (hopefully) a single-element array.
        This array element is the top-level node of a nested-object tree
@@ -384,7 +397,6 @@ let fromString = str => {
        Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
      */
   let mathJsToJson = str |> pointwiseToRightLogShift |> Mathjs.parseMath;
-  Js.log(mathJsToJson);
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
       switch (MathJsonToMathJsAdt.run(r)) {
@@ -394,6 +406,10 @@ let fromString = str => {
     });
 
   Js.log(mathJsParse);
-  let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
+  let value = E.R.bind(mathJsParse, MathAdtToDistDst.run(inputVars));
   value;
+};
+
+let fromString = (str, vars: inputVars) => {
+  fromString2(vars, str);
 };

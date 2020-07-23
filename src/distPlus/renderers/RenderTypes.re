@@ -1,3 +1,5 @@
+module MS = Belt.Map.String;
+
 module ShapeRenderer = {
   module Sampling = {
     type inputs = {
@@ -54,16 +56,18 @@ module ShapeRenderer = {
       samplingInputs: Sampling.inputs,
       symbolicInputs: Symbolic.inputs,
       guesstimatorString: string,
+      inputVariables: MS.t(ExpressionTypes.ExpressionTree.node),
     };
     type outputs = {
       symbolic: option(Belt.Result.t(Symbolic.outputs, string)),
       sampling: option(Sampling.outputs),
     };
-    let methodUsed = ({symbolic, sampling}:outputs) => switch(symbolic, sampling){
+    let methodUsed = ({symbolic, sampling}: outputs) =>
+      switch (symbolic, sampling) {
       | (Some(Ok(_)), _) => `Symbolic
       | (_, Some({shape: Some(_)})) => `Sampling
       | _ => `None
-    }
+      };
     let getShape = (r: outputs) =>
       switch (r.symbolic, r.sampling) {
       | (Some(Ok({shape})), _) => Some(shape)
@@ -86,6 +90,7 @@ module DistPlusRenderer = {
     samplingInputs: ShapeRenderer.Sampling.inputs,
     recommendedLength: int,
     shouldDownsample: bool,
+    inputVariables: MS.t(ExpressionTypes.ExpressionTree.node),
   };
   module Ingredients = {
     let make =
@@ -107,6 +112,7 @@ module DistPlusRenderer = {
         ~recommendedLength=defaultRecommendedLength,
         ~shouldDownsample=defaultShouldDownsample,
         ~distPlusIngredients,
+        ~inputVariables=[||]->Belt.Map.String.fromArray,
         (),
       )
       : inputs => {
@@ -114,14 +120,18 @@ module DistPlusRenderer = {
     samplingInputs,
     recommendedLength,
     shouldDownsample,
+    inputVariables,
   };
   type outputs = {
     shapeRenderOutputs: ShapeRenderer.Combined.outputs,
-    distPlus: option(DistTypes.distPlus)
-  }
+    distPlus: option(DistTypes.distPlus),
+  };
   module Outputs = {
-    let distplus = (t:outputs) => t.distPlus
-    let shapeRenderOutputs = (t:outputs) => t.shapeRenderOutputs
-    let make = (shapeRenderOutputs, distPlus) => {shapeRenderOutputs, distPlus};
-  }
+    let distplus = (t: outputs) => t.distPlus;
+    let shapeRenderOutputs = (t: outputs) => t.shapeRenderOutputs;
+    let make = (shapeRenderOutputs, distPlus) => {
+      shapeRenderOutputs,
+      distPlus,
+    };
+  };
 };

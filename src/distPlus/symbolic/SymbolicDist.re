@@ -32,6 +32,7 @@ module Triangular = {
 
 module Normal = {
   type t = normal;
+  let make = (mean, stdev):t => {mean, stdev};
   let pdf = (x, t: t) => Jstat.normal##pdf(x, t.mean, t.stdev);
   let cdf = (x, t: t) => Jstat.normal##cdf(x, t.mean, t.stdev);
 

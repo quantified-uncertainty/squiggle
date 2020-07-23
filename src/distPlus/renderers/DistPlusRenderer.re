@@ -8,10 +8,13 @@ let run = (inputs: RenderTypes.DistPlusRenderer.inputs) => {
       (),
     )
     |> DistPlus.T.normalize;
+  // let symbolicDist: ExpressionTypes.ExpressionTree.node = `SymbolicDist(`Float(30.0));
+  //     inputVariables: [|("p", symbolicDist)|] -> Belt.Map.String.fromArray,
   let output =
     ShapeRenderer.run({
       samplingInputs: inputs.samplingInputs,
       guesstimatorString: inputs.distPlusIngredients.guesstimatorString,
+      inputVariables: inputs.inputVariables,
       symbolicInputs: {
         length: inputs.recommendedLength,
       },

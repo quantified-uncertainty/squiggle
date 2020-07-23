@@ -14,9 +14,9 @@ let formatString = str => {
   str |> formatMessyArray;
 };
 
-let runSymbolic = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
+let run = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
   let str = formatString(inputs.guesstimatorString);
-  let graph = MathJsParser.fromString(str);
+  let graph = MathJsParser.fromString(str, inputs.inputVariables);
   graph
   |> E.R.bind(_, g =>
        ExpressionTree.toShape(
@@ -32,8 +32,4 @@ let runSymbolic = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
        )
        |> E.R.fmap(RenderTypes.ShapeRenderer.Symbolic.make(g))
      );
-};
-
-let run = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
-  runSymbolic(inputs);
 };
