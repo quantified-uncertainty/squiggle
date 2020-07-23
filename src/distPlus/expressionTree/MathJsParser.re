@@ -239,56 +239,61 @@ module MathAdtToDistDst = {
     let toOkPointwise = r => Ok(`PointwiseCombination(r));
     let toOkTruncate = r => Ok(`Truncate(r));
     let toOkFloatFromDist = r => Ok(`FloatFromDist(r));
-    switch (name, args) {
-    | ("add", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Add, l, r))
-    | ("add", _) => Error("Addition needs two operands")
-    | ("subtract", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Subtract, l, r))
-    | ("subtract", _) => Error("Subtraction needs two operands")
-    | ("multiply", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Multiply, l, r))
-    | ("multiply", _) => Error("Multiplication needs two operands")
-    | ("dotMultiply", [|Ok(l), Ok(r)|]) => toOkPointwise((`Multiply, l, r))
-    | ("dotMultiply", _) =>
-      Error("Dotwise multiplication needs two operands")
-    | ("rightLogShift", [|Ok(l), Ok(r)|]) => toOkPointwise((`Add, l, r))
-    | ("rightLogShift", _) => Error("Dotwise addition needs two operands")
-    | ("divide", [|Ok(l), Ok(r)|]) => toOkAlgebraic((`Divide, l, r))
-    | ("divide", _) => Error("Division needs two operands")
-    | ("pow", _) => Error("Exponentiation is not yet supported.")
-    | ("leftTruncate", [|Ok(d), Ok(`SymbolicDist(`Float(lc)))|]) =>
-      toOkTruncate((Some(lc), None, d))
-    | ("leftTruncate", _) =>
-      Error("leftTruncate needs two arguments: the expression and the cutoff")
-    | ("rightTruncate", [|Ok(d), Ok(`SymbolicDist(`Float(rc)))|]) =>
-      toOkTruncate((None, Some(rc), d))
-    | ("rightTruncate", _) =>
-      Error(
-        "rightTruncate needs two arguments: the expression and the cutoff",
-      )
-    | (
-        "truncate",
-        [|
-          Ok(d),
-          Ok(`SymbolicDist(`Float(lc))),
-          Ok(`SymbolicDist(`Float(rc))),
-        |],
-      ) =>
-      toOkTruncate((Some(lc), Some(rc), d))
-    | ("truncate", _) =>
-      Error("truncate needs three arguments: the expression and both cutoffs")
-    | ("pdf", [|Ok(d), Ok(`SymbolicDist(`Float(v)))|]) =>
-      toOkFloatFromDist((`Pdf(v), d))
-    | ("cdf", [|Ok(d), Ok(`SymbolicDist(`Float(v)))|]) =>
-      toOkFloatFromDist((`Cdf(v), d))
-    | ("inv", [|Ok(d), Ok(`SymbolicDist(`Float(v)))|]) =>
-      toOkFloatFromDist((`Inv(v), d))
-    | ("mean", [|Ok(d)|]) => toOkFloatFromDist((`Mean, d))
-    | ("sample", [|Ok(d)|]) => toOkFloatFromDist((`Sample, d))
-    | _ => Error("This type not currently supported")
-    };
+    E.A.R.firstErrorOrOpen(args)
+    |> E.R.bind(_, args => {
+         switch (name, args) {
+         | ("add", [|l, r|]) => toOkAlgebraic((`Add, l, r))
+         | ("add", _) => Error("Addition needs two operands")
+         | ("subtract", [|l, r|]) => toOkAlgebraic((`Subtract, l, r))
+         | ("subtract", _) => Error("Subtraction needs two operands")
+         | ("multiply", [|l, r|]) => toOkAlgebraic((`Multiply, l, r))
+         | ("multiply", _) => Error("Multiplication needs two operands")
+         | ("dotMultiply", [|l, r|]) => toOkPointwise((`Multiply, l, r))
+         | ("dotMultiply", _) =>
+           Error("Dotwise multiplication needs two operands")
+         | ("rightLogShift", [|l, r|]) => toOkPointwise((`Add, l, r))
+         | ("rightLogShift", _) =>
+           Error("Dotwise addition needs two operands")
+         | ("divide", [|l, r|]) => toOkAlgebraic((`Divide, l, r))
+         | ("divide", _) => Error("Division needs two operands")
+         | ("pow", _) => Error("Exponentiation is not yet supported.")
+         | ("leftTruncate", [|d, `SymbolicDist(`Float(lc))|]) =>
+           toOkTruncate((Some(lc), None, d))
+         | ("leftTruncate", _) =>
+           Error(
+             "leftTruncate needs two arguments: the expression and the cutoff",
+           )
+         | ("rightTruncate", [|d, `SymbolicDist(`Float(rc))|]) =>
+           toOkTruncate((None, Some(rc), d))
+         | ("rightTruncate", _) =>
+           Error(
+             "rightTruncate needs two arguments: the expression and the cutoff",
+           )
+         | (
+             "truncate",
+             [|d, `SymbolicDist(`Float(lc)), `SymbolicDist(`Float(rc))|],
+           ) =>
+           toOkTruncate((Some(lc), Some(rc), d))
+         | ("truncate", _) =>
+           Error(
+             "truncate needs three arguments: the expression and both cutoffs",
+           )
+         | ("pdf", [|d, `SymbolicDist(`Float(v))|]) =>
+           toOkFloatFromDist((`Pdf(v), d))
+         | ("cdf", [|d, `SymbolicDist(`Float(v))|]) =>
+           toOkFloatFromDist((`Cdf(v), d))
+         | ("inv", [|d, `SymbolicDist(`Float(v))|]) =>
+           toOkFloatFromDist((`Inv(v), d))
+         | ("mean", [|d|]) => toOkFloatFromDist((`Mean, d))
+         | ("sample", [|d|]) => toOkFloatFromDist((`Sample, d))
+         | _ => Error("This type not currently supported")
+         }
+       });
   };
 
   let functionParser = (nodeParser, name, args) => {
     let parseArgs = () => args |> E.A.fmap(nodeParser);
+    Js.log2("Parseargs", parseArgs);
     switch (name) {
     | "normal" => normal(args)
     | "lognormal" => lognormal(args)
@@ -379,6 +384,7 @@ let fromString = str => {
        Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
      */
   let mathJsToJson = str |> pointwiseToRightLogShift |> Mathjs.parseMath;
+  Js.log(mathJsToJson);
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
       switch (MathJsonToMathJsAdt.run(r)) {
@@ -387,6 +393,7 @@ let fromString = str => {
       }
     });
 
+  Js.log(mathJsParse);
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
   value;
 };
