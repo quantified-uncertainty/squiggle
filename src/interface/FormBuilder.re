@@ -22,7 +22,6 @@ let propValue = (t: Prop.Value.t) => {
       DistPlusRenderer.Inputs.make(
         ~distPlusIngredients=r,
         ~recommendedLength=10000,
-        ~shouldDownsample=true,
         (),
       )
       |> DistPlusRenderer.run;

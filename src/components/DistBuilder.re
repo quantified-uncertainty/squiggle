@@ -151,7 +151,6 @@ module DemoDist = {
                  kernelWidth: options.kernelWidth,
                },
                ~distPlusIngredients,
-               ~shouldDownsample=options.downsampleTo |> E.O.isSome,
                ~recommendedLength=options.downsampleTo |> E.O.default(1000),
                ~inputVariables=
                  [|("p", `SymbolicDist(`Float(1.0)))|]

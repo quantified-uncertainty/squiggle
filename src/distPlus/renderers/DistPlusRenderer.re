@@ -3,6 +3,7 @@
 module Inputs = {
   let defaultRecommendedLength = 10000;
   let defaultShouldDownsample = true;
+
   type ingredients = {
     guesstimatorString: string,
     domain: DistTypes.domain,
@@ -27,14 +28,12 @@ module Inputs = {
     distPlusIngredients: ingredients,
     samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
     recommendedLength: int,
-    shouldDownsample: bool,
     inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
   };
   let make =
       (
         ~samplingInputs=RenderTypes.ShapeRenderer.Sampling.Inputs.empty,
         ~recommendedLength=defaultRecommendedLength,
-        ~shouldDownsample=defaultShouldDownsample,
         ~distPlusIngredients,
         ~inputVariables=[||]->Belt.Map.String.fromArray,
         (),
@@ -43,7 +42,6 @@ module Inputs = {
     distPlusIngredients,
     samplingInputs,
     recommendedLength,
-    shouldDownsample,
     inputVariables,
   };
 };
