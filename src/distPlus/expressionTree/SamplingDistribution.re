@@ -60,7 +60,7 @@ let combineShapesUsingSampling =
          let shape =
            samples
            |> E.O.fmap(
-                Samples.T.fromSamples(
+                SamplesToShape.fromSamples(
                   ~samplingInputs=evaluationParams.samplingInputs,
                 ),
               )

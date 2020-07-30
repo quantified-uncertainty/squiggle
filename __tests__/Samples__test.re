@@ -14,12 +14,12 @@ describe("Lodash", () => {
   describe("Lodash", () => {
     makeTest(
       "split",
-      Samples.T.splitContinuousAndDiscrete([|1.432, 1.33455, 2.0|]),
+      SamplesToShape.Internals.T.splitContinuousAndDiscrete([|1.432, 1.33455, 2.0|]),
       ([|1.432, 1.33455, 2.0|], E.FloatFloatMap.empty()),
     );
     makeTest(
       "split",
-      Samples.T.splitContinuousAndDiscrete([|
+      SamplesToShape.Internals.T.splitContinuousAndDiscrete([|
         1.432,
         1.33455,
         2.0,
@@ -39,12 +39,12 @@ describe("Lodash", () => {
     };
 
     let (_, discrete) =
-      Samples.T.splitContinuousAndDiscrete(makeDuplicatedArray(10));
+      SamplesToShape.Internals.T.splitContinuousAndDiscrete(makeDuplicatedArray(10));
     let toArr = discrete |> E.FloatFloatMap.toArray;
     makeTest("splitMedium", toArr |> Belt.Array.length, 10);
 
     let (c, discrete) =
-      Samples.T.splitContinuousAndDiscrete(makeDuplicatedArray(500));
+      SamplesToShape.Internals.T.splitContinuousAndDiscrete(makeDuplicatedArray(500));
     let toArr = discrete |> E.FloatFloatMap.toArray;
     makeTest("splitMedium", toArr |> Belt.Array.length, 500);
   })
