@@ -392,8 +392,7 @@ module Draw = {
     let normal: SymbolicTypes.symbolicDist = `Normal({mean, stdev});
     let normalShape =
       ExpressionTree.toShape(
-        numSamples,
-        {sampleCount: 10000, outputXYPoints: 10000, kernelWidth: None},
+        {sampleCount: 10000, outputXYPoints: 10000, kernelWidth: None, shapeLength:numSamples},
         `SymbolicDist(normal),
       ) |> E.R.toExn;
     let xyShape: Types.xyShape =

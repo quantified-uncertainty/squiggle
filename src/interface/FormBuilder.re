@@ -21,7 +21,6 @@ let propValue = (t: Prop.Value.t) => {
     let newDistribution =
       DistPlusRenderer.Inputs.make(
         ~distPlusIngredients=r,
-        ~recommendedLength=10000,
         (),
       )
       |> DistPlusRenderer.run;

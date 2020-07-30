@@ -279,7 +279,7 @@ module Render = {
     | `SymbolicDist(d) =>
       Ok(
         `RenderedDist(
-          SymbolicDist.T.toShape(evaluationParams.intendedShapeLength, d),
+          SymbolicDist.T.toShape(1234, d),
         ),
       )
     | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here

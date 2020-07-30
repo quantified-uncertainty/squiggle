@@ -1,5 +1,13 @@
 // TODO: This setup is more confusing than it should be, there's more work to do in cleanup here.
 module Inputs = {
+  module SamplingInputs = {
+    type t = {
+      sampleCount: option(int),
+      outputXYPoints: option(int),
+      kernelWidth: option(float),
+      shapeLength: option(int),
+    };
+  };
   let defaultRecommendedLength = 10000;
   let defaultShouldDownsample = true;
 
@@ -25,20 +33,19 @@ module Inputs = {
   };
   type inputs = {
     distPlusIngredients: ingredients,
-    samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
-    recommendedLength: int,
+    samplingInputs: SamplingInputs.t,
     inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
   };
-  let empty: RenderTypes.ShapeRenderer.Sampling.inputs = {
+  let empty: SamplingInputs.t = {
     sampleCount: None,
     outputXYPoints: None,
     kernelWidth: None,
+    shapeLength: None
   };
 
   let make =
       (
         ~samplingInputs=empty,
-        ~recommendedLength=defaultRecommendedLength,
         ~distPlusIngredients,
         ~inputVariables=[||]->Belt.Map.String.fromArray,
         (),
@@ -46,15 +53,13 @@ module Inputs = {
       : inputs => {
     distPlusIngredients,
     samplingInputs,
-    recommendedLength,
     inputVariables,
   };
 };
 
 module Internals = {
   type inputs = {
-    samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
-    symbolicInputs: RenderTypes.ShapeRenderer.Symbolic.inputs,
+    samplingInputs: Inputs.SamplingInputs.t,
     guesstimatorString: string,
     inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
   };
@@ -64,9 +69,6 @@ module Internals = {
       samplingInputs: inputs.samplingInputs,
       guesstimatorString: inputs.distPlusIngredients.guesstimatorString,
       inputVariables: inputs.inputVariables,
-      symbolicInputs: {
-        length: inputs.recommendedLength,
-      },
     };
   };
 
@@ -80,13 +82,13 @@ module Internals = {
     MathJsParser.fromString(inputs.guesstimatorString, inputs.inputVariables)
     |> E.R.bind(_, g =>
          ExpressionTree.toShape(
-           inputs.symbolicInputs.length,
            {
              sampleCount:
                inputs.samplingInputs.sampleCount |> E.O.default(10000),
              outputXYPoints:
                inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
              kernelWidth: inputs.samplingInputs.kernelWidth,
+             shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000)
            },
            g,
          )

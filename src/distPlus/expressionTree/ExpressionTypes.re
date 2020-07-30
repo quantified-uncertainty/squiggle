@@ -28,11 +28,11 @@ module ExpressionTree = {
     sampleCount: int,
     outputXYPoints: int,
     kernelWidth: option(float),
+    shapeLength: int
   };
 
   type evaluationParams = {
     samplingInputs,
-    intendedShapeLength: int,
     evaluateNode: (evaluationParams, node) => Belt.Result.t(node, string),
   };
 

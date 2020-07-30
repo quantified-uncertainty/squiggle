@@ -149,9 +149,9 @@ module DemoDist = {
                  sampleCount: Some(options.sampleCount),
                  outputXYPoints: Some(options.outputXYPoints),
                  kernelWidth: options.kernelWidth,
+                 shapeLength: Some(options.downsampleTo |> E.O.default(1000))
                },
                ~distPlusIngredients,
-               ~recommendedLength=options.downsampleTo |> E.O.default(1000),
                ~inputVariables=
                  [|("p", `SymbolicDist(`Float(1.0)))|]
                  ->Belt.Map.String.fromArray,
