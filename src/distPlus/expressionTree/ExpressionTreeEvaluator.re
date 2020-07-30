@@ -259,6 +259,7 @@ module FloatFromDist = {
   };
 };
 
+// TODO: This forces things to be floats
 let callableFunction = (evaluationParams, name, args) => {
   let b =
     args
@@ -267,7 +268,7 @@ let callableFunction = (evaluationParams, name, args) => {
          |> E.R.bind(_, Render.toFloat)
        )
     |> E.A.R.firstErrorOrOpen;
-  b |> E.R.bind(_, Functions.fnn("normal"));
+  b |> E.R.bind(_, Functions.fnn(name));
 };
 
 module Render = {

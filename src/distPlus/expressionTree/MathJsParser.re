@@ -93,56 +93,26 @@ module MathAdtToDistDst = {
         );
   };
 
-  let lognormal:
-    array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
-    fun
-    | [|Value(mu), Value(sigma)|] =>
-      Ok(`SymbolicDist(`Lognormal({mu, sigma})))
-    | [|Object(o)|] => {
-        let g = Js.Dict.get(o);
-        switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
-        | (Some(Value(mean)), Some(Value(stdev)), _, _) =>
-          Ok(
-            `SymbolicDist(
-              SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev),
-            ),
-          )
-        | (_, _, Some(Value(mu)), Some(Value(sigma))) =>
-          Ok(`SymbolicDist(`Lognormal({mu, sigma})))
-        | _ => Error("Lognormal distribution would need mean and stdev")
-        };
-      }
-    | _ => Error("Wrong number of variables in lognormal distribution");
-
-  let to_: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
-    fun
-    | [|Value(low), Value(high)|] when low <= 0.0 && low < high => {
-        Ok(`SymbolicDist(SymbolicDist.Normal.from90PercentCI(low, high)));
-      }
-    | [|Value(low), Value(high)|] when low < high => {
+  let lognormal = (args, parseArgs, nodeParser) =>
+    switch (args) {
+    | [|Object(o)|] =>
+      let g = s =>
+        Js.Dict.get(o, s) |> E.O.toResult("") |> E.R.bind(_, nodeParser);
+      switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
+      | (Ok(mean), Ok(stdev), _, _) =>
         Ok(
-          `SymbolicDist(SymbolicDist.Lognormal.from90PercentCI(low, high)),
-        );
-      }
-    | [|Value(_), Value(_)|] =>
-      Error("Low value must be less than high value.")
-    | _ => Error("Wrong number of variables in lognormal distribution");
-
-  let exponential:
-    array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
-    fun
-    | [|Value(rate)|] => Ok(`SymbolicDist(`Exponential({rate: rate})))
-    | _ => Error("Wrong number of variables in Exponential distribution");
-
-  let triangular:
-    array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
-    fun
-    | [|Value(low), Value(medium), Value(high)|]
-        when low < medium && medium < high =>
-      Ok(`SymbolicDist(`Triangular({low, medium, high})))
-    | [|Value(_), Value(_), Value(_)|] =>
-      Error("Triangular values must be increasing order")
-    | _ => Error("Wrong number of variables in triangle distribution");
+          `CallableFunction(("lognormalFromMeanAndStdDev", [|mean, stdev|])),
+        )
+      | (_, _, Ok(mu), Ok(sigma)) =>
+        Ok(`CallableFunction(("lognormal", [|mu, sigma|])))
+      | _ => Error("Lognormal distribution needs either mean and stdev or mu and sigma")
+      };
+    | _ =>
+      parseArgs()
+      |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
+           `CallableFunction(("lognormal", args))
+         )
+    };
 
   let multiModal =
       (
@@ -150,15 +120,6 @@ module MathAdtToDistDst = {
         weights: option(array(float)),
       ) => {
     let weights = weights |> E.O.default([||]);
-
-    /*let dists:  =
-      args
-      |> E.A.fmap(
-           fun
-          | Ok(a) => a
-          | Error(e) => Error(e)
-          );*/
-
     let firstWithError = args |> Belt.Array.getBy(_, Belt.Result.isError);
     let withoutErrors = args |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
 
@@ -249,17 +210,22 @@ module MathAdtToDistDst = {
   };
 
   let functionParser = (nodeParser, name, args) => {
-    let parseArgs = () =>
-      args |> E.A.fmap(nodeParser) |> E.A.R.firstErrorOrOpen;
+    let parseArray = ags =>
+      ags |> E.A.fmap(nodeParser) |> E.A.R.firstErrorOrOpen;
+    let parseArgs = () => parseArray(args);
     switch (name) {
-    | "normal" | "uniform" | "beta" | "caucy" =>
+    | "normal"
+    | "uniform"
+    | "beta"
+    | "triangular"
+    | "to"
+    | "exponential"
+    | "cauchy" =>
       parseArgs()
-      |> E.R.fmap(
-           (
-             args: array(ExpressionTypes.ExpressionTree.node),
-           ) =>
+      |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
            `CallableFunction((name, args))
          )
+    | "lognormal" => lognormal(args, parseArgs, nodeParser)
     | "mm" =>
       let weights =
         args
