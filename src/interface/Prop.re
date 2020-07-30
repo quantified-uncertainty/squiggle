@@ -9,7 +9,7 @@ module Value = {
     | DateTime(MomentRe.Moment.t)
     | FloatPoint(float)
     | Probability(float)
-    | DistPlusIngredients(RenderTypes.DistPlusRenderer.ingredients)
+    | DistPlusIngredients(DistPlusRenderer.Inputs.ingredients)
     | ConditionalArray(array(conditional))
     | FloatCdf(string);
 
@@ -85,7 +85,7 @@ module ValueCluster = {
         [ | `combination(range(MomentRe.Moment.t)) | `item(string)],
       )
     | Probability([ | `item(string)])
-    | DistPlusIngredients([ | `item(RenderTypes.DistPlusRenderer.ingredients)])
+    | DistPlusIngredients([ | `item(DistPlusRenderer.Inputs.ingredients)])
     | ConditionalArray([ | `item(array(conditional))])
     | FloatCdf([ | `item(string)]);
 };

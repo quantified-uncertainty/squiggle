@@ -128,13 +128,6 @@ module Styles = {
     ]);
 };
 
-type inputs = {
-  samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
-  guesstimatorString: string,
-  length: int,
-  shouldDownsampleSampledDistribution: int,
-};
-
 module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
@@ -144,14 +137,14 @@ module DemoDist = {
         {switch (domain, unit, options) {
          | (Some(domain), Some(unit), Some(options)) =>
            let distPlusIngredients =
-             RenderTypes.DistPlusRenderer.Ingredients.make(
+             DistPlusRenderer.Inputs.Ingredients.make(
                ~guesstimatorString,
                ~domain,
                ~unit,
                (),
              );
            let inputs1 =
-             RenderTypes.DistPlusRenderer.make(
+             DistPlusRenderer.Inputs.make(
                ~samplingInputs={
                  sampleCount: Some(options.sampleCount),
                  outputXYPoints: Some(options.outputXYPoints),

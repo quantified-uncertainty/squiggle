@@ -1,7 +1,7 @@
 let guesstimatorString = "uniform(1, 100)";
 
 let makeI = (currentDateTime: MomentRe.Moment.t) => {
-  RenderTypes.DistPlusRenderer.Ingredients.make(
+  DistPlusRenderer.Inputs.Ingredients.make(
     ~guesstimatorString,
     ~unit=TimeDistribution({zero: currentDateTime, unit: `years}),
     ~domain=RightLimited({xPoint: 300.0, excludingProbabilityMass: 0.3}),

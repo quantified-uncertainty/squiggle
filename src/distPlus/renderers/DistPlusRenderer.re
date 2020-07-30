@@ -1,52 +1,110 @@
-type inputs = {
-  samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
-  symbolicInputs: RenderTypes.ShapeRenderer.Symbolic.inputs,
-  guesstimatorString: string,
-  inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
-};
-type outputs = {
-  graph: ExpressionTypes.ExpressionTree.node,
-  shape: DistTypes.shape,
-};
-let makeOutputs = (graph, shape): outputs => {graph, shape};
+// TODO: This setup is more confusing than it should be, there's more work to do in cleanup here.
 
-let inputsToShape = (inputs: inputs) => {
-  MathJsParser.fromString(inputs.guesstimatorString, inputs.inputVariables)
-  |> E.R.bind(_, g =>
-       ExpressionTree.toShape(
-         inputs.symbolicInputs.length,
-         {
-           sampleCount:
-             inputs.samplingInputs.sampleCount |> E.O.default(10000),
-           outputXYPoints:
-             inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
-           kernelWidth: inputs.samplingInputs.kernelWidth,
-         },
-         g,
-       )
-       |> E.R.fmap(makeOutputs(g))
-     );
+module Inputs = {
+  let defaultRecommendedLength = 10000;
+  let defaultShouldDownsample = true;
+  type ingredients = {
+    guesstimatorString: string,
+    domain: DistTypes.domain,
+    unit: DistTypes.distributionUnit,
+  };
+  module Ingredients = {
+    type t = ingredients;
+    let make =
+        (
+          ~guesstimatorString,
+          ~domain=DistTypes.Complete,
+          ~unit=DistTypes.UnspecifiedDistribution,
+          (),
+        )
+        : t => {
+      guesstimatorString,
+      domain,
+      unit,
+    };
+  };
+  type inputs = {
+    distPlusIngredients: ingredients,
+    samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
+    recommendedLength: int,
+    shouldDownsample: bool,
+    inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
+  };
+  let make =
+      (
+        ~samplingInputs=RenderTypes.ShapeRenderer.Sampling.Inputs.empty,
+        ~recommendedLength=defaultRecommendedLength,
+        ~shouldDownsample=defaultShouldDownsample,
+        ~distPlusIngredients,
+        ~inputVariables=[||]->Belt.Map.String.fromArray,
+        (),
+      )
+      : inputs => {
+    distPlusIngredients,
+    samplingInputs,
+    recommendedLength,
+    shouldDownsample,
+    inputVariables,
+  };
 };
 
-let run = (inputs: RenderTypes.DistPlusRenderer.inputs) => {
-  let output =
-    inputsToShape({
+module Internals = {
+  type inputs = {
+    samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
+    symbolicInputs: RenderTypes.ShapeRenderer.Symbolic.inputs,
+    guesstimatorString: string,
+    inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
+  };
+
+  let distPlusRenderInputsToInputs = (inputs: Inputs.inputs): inputs => {
+    {
       samplingInputs: inputs.samplingInputs,
       guesstimatorString: inputs.distPlusIngredients.guesstimatorString,
       inputVariables: inputs.inputVariables,
       symbolicInputs: {
         length: inputs.recommendedLength,
       },
-    });
-  output
-  |> E.R.fmap((o: outputs) =>
-       DistPlus.make(
-         ~shape=o.shape,
-         ~domain=inputs.distPlusIngredients.domain,
-         ~unit=inputs.distPlusIngredients.unit,
-         ~guesstimatorString=
-           Some(inputs.distPlusIngredients.guesstimatorString),
-         (),
-       )
-     );
+    };
+  };
+
+  type outputs = {
+    graph: ExpressionTypes.ExpressionTree.node,
+    shape: DistTypes.shape,
+  };
+  let makeOutputs = (graph, shape): outputs => {graph, shape};
+
+  let inputsToShape = (inputs: inputs) => {
+    MathJsParser.fromString(inputs.guesstimatorString, inputs.inputVariables)
+    |> E.R.bind(_, g =>
+         ExpressionTree.toShape(
+           inputs.symbolicInputs.length,
+           {
+             sampleCount:
+               inputs.samplingInputs.sampleCount |> E.O.default(10000),
+             outputXYPoints:
+               inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
+             kernelWidth: inputs.samplingInputs.kernelWidth,
+           },
+           g,
+         )
+         |> E.R.fmap(makeOutputs(g))
+       );
+  };
+
+  let outputToDistPlus = (inputs: Inputs.inputs, outputs: outputs) => {
+    DistPlus.make(
+      ~shape=outputs.shape,
+      ~domain=inputs.distPlusIngredients.domain,
+      ~unit=inputs.distPlusIngredients.unit,
+      ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),
+      (),
+    );
+  };
+};
+
+let run = (inputs: Inputs.inputs) => {
+  inputs
+  |> Internals.distPlusRenderInputsToInputs
+  |> Internals.inputsToShape
+  |> E.R.fmap(Internals.outputToDistPlus(inputs));
 };
