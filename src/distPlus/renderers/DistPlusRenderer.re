@@ -1,4 +1,16 @@
-let inputsToShape = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
+type inputs = {
+  samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
+  symbolicInputs: RenderTypes.ShapeRenderer.Symbolic.inputs,
+  guesstimatorString: string,
+  inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
+};
+type outputs = {
+  graph: ExpressionTypes.ExpressionTree.node,
+  shape: DistTypes.shape,
+};
+let makeOutputs = (graph, shape): outputs => {graph, shape};
+
+let inputsToShape = (inputs: inputs) => {
   MathJsParser.fromString(inputs.guesstimatorString, inputs.inputVariables)
   |> E.R.bind(_, g =>
        ExpressionTree.toShape(
@@ -12,20 +24,11 @@ let inputsToShape = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
          },
          g,
        )
-       |> E.R.fmap(RenderTypes.ShapeRenderer.Symbolic.make(g))
+       |> E.R.fmap(makeOutputs(g))
      );
 };
 
 let run = (inputs: RenderTypes.DistPlusRenderer.inputs) => {
-  let toDist = shape =>
-    DistPlus.make(
-      ~shape,
-      ~domain=inputs.distPlusIngredients.domain,
-      ~unit=inputs.distPlusIngredients.unit,
-      ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),
-      (),
-    )
-    |> DistPlus.T.normalize;
   let output =
     inputsToShape({
       samplingInputs: inputs.samplingInputs,
@@ -36,7 +39,14 @@ let run = (inputs: RenderTypes.DistPlusRenderer.inputs) => {
       },
     });
   output
-  |> E.R.fmap((o: RenderTypes.ShapeRenderer.Symbolic.outputs) =>
-       toDist(o.shape)
+  |> E.R.fmap((o: outputs) =>
+       DistPlus.make(
+         ~shape=o.shape,
+         ~domain=inputs.distPlusIngredients.domain,
+         ~unit=inputs.distPlusIngredients.unit,
+         ~guesstimatorString=
+           Some(inputs.distPlusIngredients.guesstimatorString),
+         (),
+       )
      );
 };

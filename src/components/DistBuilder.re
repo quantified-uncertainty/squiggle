@@ -167,30 +167,12 @@ module DemoDist = {
              );
 
            let response1 = DistPlusRenderer.run(inputs1);
-           let inputs2 =
-             RenderTypes.DistPlusRenderer.make(
-               ~samplingInputs={
-                 sampleCount: Some(options.sampleCount),
-                 outputXYPoints: Some(options.outputXYPoints),
-                 kernelWidth: options.kernelWidth,
-               },
-               ~distPlusIngredients,
-               ~shouldDownsample=options.downsampleTo |> E.O.isSome,
-               ~recommendedLength=options.downsampleTo |> E.O.default(1000),
-               ~inputVariables=
-                                [|("p", `SymbolicDist(`Float(2.0)))|]
-                 ->Belt.Map.String.fromArray,
-               (),
-             );
-           let response2 = DistPlusRenderer.run(inputs2);
-           switch (response1, response2) {
-           | (Ok(distPlus1), Ok(distPlus2)) =>
+           switch (response1) {
+           | (Ok(distPlus1)) =>
              <>
                <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
-               <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus2)} />
              </>
-           | (Error(r), _) => r |> R.ste
-           | (_, Error(r)) => r |> R.ste
+           | (Error(r)) => r |> R.ste
            };
          | _ =>
            "Nothing to show. Try to change the distribution description."

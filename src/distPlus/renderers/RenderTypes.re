@@ -7,20 +7,8 @@ module ShapeRenderer = {
       outputXYPoints: option(int),
       kernelWidth: option(float),
     };
-    type samplingStats = {
-      sampleCount: int,
-      outputXYPoints: int,
-      bandwidthXSuggested: float,
-      bandwidthUnitSuggested: float,
-      bandwidthXImplemented: float,
-      bandwidthUnitImplemented: float,
-    };
-    type outputs = {
-      continuousParseParams: option(samplingStats),
-      shape: option(DistTypes.shape),
-    };
     module Inputs = {
-      let defaultSampleCount = 5000;
+      let defaultSampleCount = 10000;
       let defaultOutputXYPoints = 10000;
       let empty = {
         sampleCount: None,
@@ -44,36 +32,6 @@ module ShapeRenderer = {
 
   module Symbolic = {
     type inputs = {length: int};
-    type outputs = {
-      graph: ExpressionTypes.ExpressionTree.node,
-      shape: DistTypes.shape,
-    };
-    let make = (graph, shape) => {graph, shape};
-  };
-
-  module Combined = {
-    type inputs = {
-      samplingInputs: Sampling.inputs,
-      symbolicInputs: Symbolic.inputs,
-      guesstimatorString: string,
-      inputVariables: MS.t(ExpressionTypes.ExpressionTree.node),
-    };
-    type outputs = {
-      symbolic: option(Belt.Result.t(Symbolic.outputs, string)),
-      sampling: option(Sampling.outputs),
-    };
-    let methodUsed = ({symbolic, sampling}: outputs) =>
-      switch (symbolic, sampling) {
-      | (Some(Ok(_)), _) => `Symbolic
-      | (_, Some({shape: Some(_)})) => `Sampling
-      | _ => `None
-      };
-    let getShape = (r: outputs) =>
-      switch (r.symbolic, r.sampling) {
-      | (Some(Ok({shape})), _) => Some(shape)
-      | (_, Some({shape})) => shape
-      | _ => None
-      };
   };
 };
 
@@ -85,14 +43,8 @@ module DistPlusRenderer = {
     domain: DistTypes.domain,
     unit: DistTypes.distributionUnit,
   };
-  type inputs = {
-    distPlusIngredients: ingredients,
-    samplingInputs: ShapeRenderer.Sampling.inputs,
-    recommendedLength: int,
-    shouldDownsample: bool,
-    inputVariables: MS.t(ExpressionTypes.ExpressionTree.node),
-  };
   module Ingredients = {
+    type t = ingredients;
     let make =
         (
           ~guesstimatorString,
@@ -100,11 +52,18 @@ module DistPlusRenderer = {
           ~unit=DistTypes.UnspecifiedDistribution,
           (),
         )
-        : ingredients => {
+        : t => {
       guesstimatorString,
       domain,
       unit,
     };
+  };
+  type inputs = {
+    distPlusIngredients: ingredients,
+    samplingInputs: ShapeRenderer.Sampling.inputs,
+    recommendedLength: int,
+    shouldDownsample: bool,
+    inputVariables: MS.t(ExpressionTypes.ExpressionTree.node),
   };
   let make =
       (
@@ -121,17 +80,5 @@ module DistPlusRenderer = {
     recommendedLength,
     shouldDownsample,
     inputVariables,
-  };
-  type outputs = {
-    shapeRenderOutputs: ShapeRenderer.Combined.outputs,
-    distPlus: option(DistTypes.distPlus),
-  };
-  module Outputs = {
-    let distplus = (t: outputs) => t.distPlus;
-    let shapeRenderOutputs = (t: outputs) => t.shapeRenderOutputs;
-    let make = (shapeRenderOutputs, distPlus) => {
-      shapeRenderOutputs,
-      distPlus,
-    };
   };
 };
