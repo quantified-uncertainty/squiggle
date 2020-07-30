@@ -1,5 +1,4 @@
 // TODO: This setup is more confusing than it should be, there's more work to do in cleanup here.
-
 module Inputs = {
   let defaultRecommendedLength = 10000;
   let defaultShouldDownsample = true;
@@ -30,9 +29,15 @@ module Inputs = {
     recommendedLength: int,
     inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
   };
+  let empty: RenderTypes.ShapeRenderer.Sampling.inputs = {
+    sampleCount: None,
+    outputXYPoints: None,
+    kernelWidth: None,
+  };
+
   let make =
       (
-        ~samplingInputs=RenderTypes.ShapeRenderer.Sampling.Inputs.empty,
+        ~samplingInputs=empty,
         ~recommendedLength=defaultRecommendedLength,
         ~distPlusIngredients,
         ~inputVariables=[||]->Belt.Map.String.fromArray,

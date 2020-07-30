@@ -1,13 +1,4 @@
 module Types = {
-  let defaultSampleCount = 5000;
-  let defaultOutputXYPoints = 10000;
-
-  type inputs = {
-    sampleCount: option(int),
-    outputXYPoints: option(int),
-    kernelWidth: option(float),
-  };
-
   type samplingStats = {
     sampleCount: int,
     outputXYPoints: int,
@@ -20,20 +11,6 @@ module Types = {
   type outputs = {
     continuousParseParams: option(samplingStats),
     shape: option(DistTypes.shape),
-  };
-
-  let empty = {sampleCount: None, outputXYPoints: None, kernelWidth: None};
-
-  type fInputs = {
-    sampleCount: int,
-    outputXYPoints: int,
-    kernelWidth: option(float),
-  };
-
-  let toF = (i: inputs): fInputs => {
-    sampleCount: i.sampleCount |> E.O.default(defaultSampleCount),
-    outputXYPoints: i.outputXYPoints |> E.O.default(defaultOutputXYPoints),
-    kernelWidth: i.kernelWidth,
   };
 };
 
@@ -112,12 +89,7 @@ module T = {
     KDE.normalSampling(samples, outputXYPoints, width);
   };
 
-  let toShape =
-      (
-        ~samples: t,
-        ~samplingInputs: Types.fInputs,
-        (),
-      ) => {
+  let toShape = (~samples: t, ~samplingInputs: ExpressionTypes.ExpressionTree.samplingInputs, ()) => {
     Array.fast_sort(compare, samples);
     let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples);
     let length = samples |> E.A.length |> float_of_int;
@@ -143,7 +115,7 @@ module T = {
               samplingInputs.outputXYPoints,
               usedWidth,
             );
-          let foo: Types.samplingStats = {
+          let samplingStats: Types.samplingStats = {
             sampleCount: samplingInputs.sampleCount,
             outputXYPoints: samplingInputs.outputXYPoints,
             bandwidthXSuggested: _suggestedXWidth,
@@ -158,28 +130,25 @@ module T = {
                formatUnitWidth(usedUnitWidth),
              )
           |> Continuous.make
-          |> (r => Some((r, foo)));
+          |> (r => Some((r, samplingStats)));
         }
         : None;
+
     let shape =
       MixedShapeBuilder.buildSimple(
         ~continuous=pdf |> E.O.fmap(fst),
         ~discrete=Some(discrete),
       );
+
     let samplesParse: Types.outputs = {
       continuousParseParams: pdf |> E.O.fmap(snd),
       shape,
     };
+
     samplesParse;
   };
 
-  let fromSamples =
-      (
-        ~samplingInputs=Types.empty,
-        samples,
-      ) => {
-    let samplingInputs =
-      Types.toF(samplingInputs);
+  let fromSamples = (~samplingInputs, samples) => {
     toShape(~samples, ~samplingInputs, ());
   };
 };
