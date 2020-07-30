@@ -259,10 +259,22 @@ module FloatFromDist = {
   };
 };
 
+let callableFunction = (evaluationParams, name, args) => {
+  let b =
+    args
+    |> E.A.fmap(a =>
+         Render.render(evaluationParams, a)
+         |> E.R.bind(_, Render.toFloat)
+       )
+    |> E.A.R.firstErrorOrOpen;
+  b |> E.R.bind(_, Functions.fnn("normal"));
+};
+
 module Render = {
   let rec operationToLeaf =
           (evaluationParams: evaluationParams, t: node): result(t, string) => {
     switch (t) {
+    | `Function(_) => Error("Cannot render a function")
     | `SymbolicDist(d) =>
       Ok(
         `RenderedDist(
@@ -272,6 +284,13 @@ module Render = {
     | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     };
+  };
+};
+
+let run = (node, fnNode) => {
+  switch (fnNode) {
+  | `Function(r) => Ok(r(node))
+  | _ => Error("Not a function")
   };
 };
 
@@ -314,5 +333,8 @@ let toLeaf =
     FloatFromDist.operationToLeaf(evaluationParams, distToFloatOp, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
+  | `Function(t) => Ok(`Function(t))
+  | `CallableFunction(name, args) =>
+    callableFunction(evaluationParams, name, args)
   };
 };

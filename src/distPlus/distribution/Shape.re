@@ -216,6 +216,11 @@ let sample = (t: t): float => {
   bar;
 };
 
+let isFloat = (t:t) => switch(t){
+| Discrete({xyShape: {xs: [|_|], ys: [|1.0|]}}) => true
+| _ => false
+}
+
 let sampleNRendered = (n, dist) => {
   let integralCache = T.Integral.get(dist);
   let distWithUpdatedIntegralCache = T.updateIntegralCache(Some(integralCache), dist);

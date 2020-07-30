@@ -20,6 +20,8 @@ module ExpressionTree = {
     | `Truncate(option(float), option(float), node)
     | `Normalize(node)
     | `FloatFromDist(distToFloatOperation, node)
+    | `Function(node => result(node, string))
+    | `CallableFunction(string, array(node))
   ];
 
   type samplingInputs = {
@@ -71,8 +73,14 @@ module ExpressionTree = {
       | `RenderedDist(r) => Some(r)
       | _ => None
       };
-  };
 
+    let _toFloat = (t:DistTypes.shape) => switch(t){
+    | Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}}) => Some(`SymbolicDist(`Float(x)))
+    | _ => None
+    }
+
+    let toFloat = (item:node):result(node, string) => item |> getShape |> E.O.bind(_,_toFloat) |> E.O.toResult("Not valid shape")
+  };
 };
 
 type simplificationResult = [

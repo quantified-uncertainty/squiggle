@@ -55,7 +55,7 @@ module MathAdtToDistDst = {
   let handleSymbol = (inputVars: inputVars, sym) => {
     switch (Belt.Map.String.get(inputVars, sym)) {
     | Some(s) => Ok(s)
-    | None => Error("Couldn't find.")
+    | None => Error("Couldn't find symbol " ++ sym)
     };
   };
 
@@ -93,13 +93,6 @@ module MathAdtToDistDst = {
         );
   };
 
-  let normal:
-    array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
-    fun
-    | [|Value(mean), Value(stdev)|] =>
-      Ok(`SymbolicDist(`Normal({mean, stdev})))
-    | _ => Error("Wrong number of variables in normal distribution");
-
   let lognormal:
     array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
@@ -135,31 +128,11 @@ module MathAdtToDistDst = {
       Error("Low value must be less than high value.")
     | _ => Error("Wrong number of variables in lognormal distribution");
 
-  let uniform:
-    array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
-    fun
-    | [|Value(low), Value(high)|] =>
-      Ok(`SymbolicDist(`Uniform({low, high})))
-    | _ => Error("Wrong number of variables in lognormal distribution");
-
-  let beta: array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
-    fun
-    | [|Value(alpha), Value(beta)|] =>
-      Ok(`SymbolicDist(`Beta({alpha, beta})))
-    | _ => Error("Wrong number of variables in lognormal distribution");
-
   let exponential:
     array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
     fun
     | [|Value(rate)|] => Ok(`SymbolicDist(`Exponential({rate: rate})))
     | _ => Error("Wrong number of variables in Exponential distribution");
-
-  let cauchy:
-    array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
-    fun
-    | [|Value(local), Value(scale)|] =>
-      Ok(`SymbolicDist(`Cauchy({local, scale})))
-    | _ => Error("Wrong number of variables in cauchy distribution");
 
   let triangular:
     array(arg) => result(ExpressionTypes.ExpressionTree.node, string) =
@@ -214,43 +187,16 @@ module MathAdtToDistDst = {
     };
   };
 
-  // let arrayParser =
-  //     (args: array(arg))
-  //     : result(ExpressionTypes.ExpressionTree.node, string) => {
-  //   let samples =
-  //     args
-  //     |> E.A.fmap(
-  //          fun
-  //          | Value(n) => Some(n)
-  //          | _ => None,
-  //        )
-  //     |> E.A.O.concatSomes;
-  //   let outputs = Samples.T.fromSamples(samples);
-  //   let pdf =
-  //     outputs.shape |> E.O.bind(_, Shape.T.toContinuous);
-  //   let shape =
-  //     pdf
-  //     |> E.O.fmap(pdf => {
-  //          let _pdf = Continuous.T.normalize(pdf);
-  //          let cdf = Continuous.T.integral(~cache=None, _pdf);
-  //          SymbolicDist.ContinuousShape.make(_pdf, cdf);
-  //        });
-  //   switch (shape) {
-  //   | Some(s) => Ok(`SymbolicDist(`ContinuousShape(s)))
-  //   | None => Error("Rendering did not work")
-  //   };
-  // };
-
   let operationParser =
       (
         name: string,
-        args: array(result(ExpressionTypes.ExpressionTree.node, string)),
+        args: result(array(ExpressionTypes.ExpressionTree.node), string),
       ) => {
     let toOkAlgebraic = r => Ok(`AlgebraicCombination(r));
     let toOkPointwise = r => Ok(`PointwiseCombination(r));
     let toOkTruncate = r => Ok(`Truncate(r));
     let toOkFloatFromDist = r => Ok(`FloatFromDist(r));
-    E.A.R.firstErrorOrOpen(args)
+    args
     |> E.R.bind(_, args => {
          switch (name, args) {
          | ("add", [|l, r|]) => toOkAlgebraic((`Add, l, r))
@@ -303,17 +249,17 @@ module MathAdtToDistDst = {
   };
 
   let functionParser = (nodeParser, name, args) => {
-    let parseArgs = () => args |> E.A.fmap(nodeParser);
-    Js.log2("Parseargs", parseArgs);
+    let parseArgs = () =>
+      args |> E.A.fmap(nodeParser) |> E.A.R.firstErrorOrOpen;
     switch (name) {
-    | "normal" => normal(args)
-    | "lognormal" => lognormal(args)
-    | "uniform" => uniform(args)
-    | "beta" => beta(args)
-    | "to" => to_(args)
-    | "exponential" => exponential(args)
-    | "cauchy" => cauchy(args)
-    | "triangular" => triangular(args)
+    | "normal" | "uniform" | "beta" | "caucy" =>
+      parseArgs()
+      |> E.R.fmap(
+           (
+             args: array(ExpressionTypes.ExpressionTree.node),
+           ) =>
+           `CallableFunction((name, args))
+         )
     | "mm" =>
       let weights =
         args
@@ -358,14 +304,18 @@ module MathAdtToDistDst = {
     };
   };
 
-  let rec nodeParser = inputVars =>
-    fun
-    | Value(f) => Ok(`SymbolicDist(`Float(f)))
-    | Symbol(s) => handleSymbol(inputVars, s)
-    | Fn({name, args}) => functionParser(nodeParser(inputVars), name, args)
-    | _ => {
-        Error("This type not currently supported");
-      };
+  let rec nodeParser:
+    (inputVars, MathJsonToMathJsAdt.arg) =>
+    result(ExpressionTypes.ExpressionTree.node, string) =
+    inputVars =>
+      fun
+      | Value(f) => Ok(`SymbolicDist(`Float(f)))
+      | Symbol(s) => handleSymbol(inputVars, s)
+      | Fn({name, args}) =>
+        functionParser(nodeParser(inputVars), name, args)
+      | _ => {
+          Error("This type not currently supported");
+        };
 
   let topLevel = inputVars =>
     fun
@@ -405,7 +355,6 @@ let fromString2 = (inputVars: inputVars, str) => {
       }
     });
 
-  Js.log(mathJsParse);
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run(inputVars));
   value;
 };
