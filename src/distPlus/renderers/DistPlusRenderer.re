@@ -1,3 +1,21 @@
+let inputsToShape = (inputs: RenderTypes.ShapeRenderer.Combined.inputs) => {
+  MathJsParser.fromString(inputs.guesstimatorString, inputs.inputVariables)
+  |> E.R.bind(_, g =>
+       ExpressionTree.toShape(
+         inputs.symbolicInputs.length,
+         {
+           sampleCount:
+             inputs.samplingInputs.sampleCount |> E.O.default(10000),
+           outputXYPoints:
+             inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
+           kernelWidth: inputs.samplingInputs.kernelWidth,
+         },
+         g,
+       )
+       |> E.R.fmap(RenderTypes.ShapeRenderer.Symbolic.make(g))
+     );
+};
+
 let run = (inputs: RenderTypes.DistPlusRenderer.inputs) => {
   let toDist = shape =>
     DistPlus.make(
@@ -8,10 +26,8 @@ let run = (inputs: RenderTypes.DistPlusRenderer.inputs) => {
       (),
     )
     |> DistPlus.T.normalize;
-  // let symbolicDist: ExpressionTypes.ExpressionTree.node = `SymbolicDist(`Float(30.0));
-  //     inputVariables: [|("p", symbolicDist)|] -> Belt.Map.String.fromArray,
   let output =
-    ShapeRenderer.run({
+    inputsToShape({
       samplingInputs: inputs.samplingInputs,
       guesstimatorString: inputs.distPlusIngredients.guesstimatorString,
       inputVariables: inputs.inputVariables,

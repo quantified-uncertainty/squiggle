@@ -74,12 +74,18 @@ module ExpressionTree = {
       | _ => None
       };
 
-    let _toFloat = (t:DistTypes.shape) => switch(t){
-    | Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}}) => Some(`SymbolicDist(`Float(x)))
-    | _ => None
-    }
+    let _toFloat = (t: DistTypes.shape) =>
+      switch (t) {
+      | Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}}) =>
+        Some(`SymbolicDist(`Float(x)))
+      | _ => None
+      };
 
-    let toFloat = (item:node):result(node, string) => item |> getShape |> E.O.bind(_,_toFloat) |> E.O.toResult("Not valid shape")
+    let toFloat = (item: node): result(node, string) =>
+      item
+      |> getShape
+      |> E.O.bind(_, _toFloat)
+      |> E.O.toResult("Not valid shape");
   };
 };
 
@@ -88,3 +94,8 @@ type simplificationResult = [
   | `Error(string)
   | `NoSolution
 ];
+
+module Program = {
+  type statement = [ | `Assignment(string, ExpressionTree.node) | `Expression(ExpressionTree.node)];
+  type program = array(statement);
+}
