@@ -6,7 +6,9 @@ module MathJsonToMathJsAdt = {
     | Value(float)
     | Fn(fn)
     | Array(array(arg))
+    | Blocks(array(arg))
     | Object(Js.Dict.t(arg))
+    | Assignment(arg,arg)
   and fn = {
     name: string,
     args: array(arg),
@@ -42,6 +44,19 @@ module MathJsonToMathJsAdt = {
         let items = field("items", array(run), j);
         Some(Array(items |> E.A.O.concatSomes));
       | "SymbolNode" => Some(Symbol(field("name", string, j)))
+      | "AssignmentNode" => {
+        let object_ = j |> field("object", run);
+        let value_ = j |> field("value", run);
+        switch(object_, value_){
+          | (Some(o), Some(v)) => Some(Assignment(o,v))
+          | _ => None
+        }
+      }
+      | "BlockNode" => {
+          let block = r => r |> field("node", run);
+          let args = j |> field("blocks", array(block)) |> E.A.O.concatSomes;
+          Some(Blocks(args))
+      }
       | n =>
         Js.log3("Couldn't parse mathjs node", j, n);
         None;
@@ -84,6 +99,8 @@ module MathAdtToDistDst = {
       | Array(args) => Array(args |> E.A.fmap(run))
       | Symbol(s) => Symbol(s)
       | Value(v) => Value(v)
+      | Blocks(args) => Blocks(args |> E.A.fmap(run))
+      | Assignment(a,b) => Assignment(a,run(b))
       | Object(v) =>
         Object(
           v
@@ -283,13 +300,15 @@ module MathAdtToDistDst = {
           Error("This type not currently supported");
         };
 
-  let topLevel = inputVars =>
+  let rec topLevel = inputVars =>
     fun
     | Value(_) as r => nodeParser(inputVars, r)
     | Fn(_) as r => nodeParser(inputVars, r)
     | Array(_) => Error("Array not valid as top level")
     | Symbol(s) => handleSymbol(inputVars, s)
-    | Object(_) => Error("Object not valid as top level");
+    | Object(_) => Error("Object not valid as top level")
+    | Assignment(_) => Error("Assignment not valid as top level")
+    | Blocks(blocks) => E.A.last(blocks) |> E.O.toResult("no blocks listed") |> E.R.bind(_, topLevel(inputVars))
 
   let run =
       (inputVars, r): result(ExpressionTypes.ExpressionTree.node, string) =>
@@ -313,6 +332,7 @@ let fromString2 = (inputVars: inputVars, str) => {
        Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
      */
   let mathJsToJson = str |> pointwiseToRightLogShift |> Mathjs.parseMath;
+  Js.log2("toJson", mathJsToJson);
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
       switch (MathJsonToMathJsAdt.run(r)) {

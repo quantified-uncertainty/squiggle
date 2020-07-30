@@ -33,6 +33,23 @@ module Form = ReForm.Make(FormConfig);
 
 let schema = Form.Validation.Schema([||]);
 
+module FieldText = {
+  [@react.component]
+  let make = (~field, ~label) => {
+    <Form.Field
+      field
+      render={({handleChange, error, value, validate}) =>
+        <Antd.Form.Item label={label |> R.ste}>
+          <Antd.Input.TextArea
+            value
+            onChange={BsReform.Helpers.handleChange(handleChange)}
+            onBlur={_ => validate()}
+          />
+        </Antd.Form.Item>
+      }
+    />;
+  };
+};
 module FieldString = {
   [@react.component]
   let make = (~field, ~label) => {
@@ -337,7 +354,7 @@ let make = () => {
         <Antd.Form onSubmit>
           <Row _type=`flex className=Styles.rows>
             <Col span=24>
-              <FieldString
+              <FieldText
                 field=FormConfig.GuesstimatorString
                 label="Guesstimator String"
               />
