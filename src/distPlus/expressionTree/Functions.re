@@ -79,7 +79,8 @@ let fnn =
       evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
       name,
       args: array(node),
-    ) =>
+    ) =>{
+    Js.log3("HERE", name, args);
   switch (
     name,
     ExpressionTypes.ExpressionTree.Environment.get(
@@ -120,3 +121,4 @@ let fnn =
   | ("to", _) => to_(args)
   | _ => Error("Function not found")
   };
+    }

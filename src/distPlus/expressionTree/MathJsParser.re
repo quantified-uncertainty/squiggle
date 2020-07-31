@@ -1,3 +1,4 @@
+[%%debugger.chrome]
 module MathJsonToMathJsAdt = {
   type arg =
     | Symbol(string)
@@ -355,6 +356,7 @@ let fromString2 = str => {
        Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
      */
   let mathJsToJson = str |> pointwiseToRightLogShift |> Mathjs.parseMath;
+  Js.log2("HI", mathJsToJson);
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
       switch (MathJsonToMathJsAdt.run(r)) {
@@ -364,6 +366,7 @@ let fromString2 = str => {
     });
 
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
+  Js.log3("HI", mathJsParse, value);
   value;
 };
 

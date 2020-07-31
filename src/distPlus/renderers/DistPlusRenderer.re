@@ -35,7 +35,7 @@ module Inputs = {
   type inputs = {
     distPlusIngredients: ingredients,
     samplingInputs: SamplingInputs.t,
-    environment: ExpressionTypes.ExpressionTree.environment
+    environment: ExpressionTypes.ExpressionTree.environment,
   };
 
   let empty: SamplingInputs.t = {
@@ -67,16 +67,14 @@ module Internals = {
   };
 
   let addVariable =
-      (
-        {samplingInputs, guesstimatorString, environment}: inputs,
-        str,
-        node,
-      )
+      ({samplingInputs, guesstimatorString, environment}: inputs, str, node)
       : inputs => {
     samplingInputs,
     guesstimatorString,
     environment:
-    ExpressionTypes.ExpressionTree.Environment.update(environment, str, _ => Some(node))
+      ExpressionTypes.ExpressionTree.Environment.update(environment, str, _ =>
+        Some(node)
+      ),
   };
 
   let distPlusRenderInputsToInputs = (inputs: Inputs.inputs): inputs => {
@@ -110,14 +108,15 @@ module Internals = {
   let runProgram = (inputs: inputs, p: ExpressionTypes.Program.program) => {
     let ins = ref(inputs);
     p
-    |> E.A.fmap(statement =>
+    |> E.A.fmap(statement => {
+         Js.log2("Running ling", statement);
          switch (statement) {
          | `Assignment(name, node) =>
            ins := addVariable(ins^, name, node);
            None;
          | `Expression(node) => Some(runNode(ins^, node))
-         }
-       )
+         };
+       })
     |> E.A.O.concatSomes
     |> E.A.R.firstErrorOrOpen;
   };
@@ -125,7 +124,12 @@ module Internals = {
   let inputsToShape = (inputs: inputs) => {
     MathJsParser.fromString(inputs.guesstimatorString)
     |> E.R.bind(_, g => runProgram(inputs, g))
-    |> E.R.bind(_, r => E.A.last(r) |> E.O.toResult("No rendered lines") |> E.R.fmap(Shape.T.normalize));
+    |> E.R.bind(_, r =>
+         E.A.last(r)
+         |> E.O.toResult("No rendered lines")
+         |> (e => {Js.log2("EE", e); e})
+         |> E.R.fmap(Shape.T.normalize)
+       );
   };
 
   let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) => {

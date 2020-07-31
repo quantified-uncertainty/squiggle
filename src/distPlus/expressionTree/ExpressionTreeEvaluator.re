@@ -335,7 +335,7 @@ let toLeaf =
     FloatFromDist.operationToLeaf(evaluationParams, distToFloatOp, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
-  | `Function(t) => Ok(`Function(t))
+  | `Function(_) => Error("Function must be called with params")
   | `Symbol(r) => ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r) |> E.O.toResult("Undeclared variable " ++ r)
   | `FunctionCall(name, args) =>
     callableFunction(evaluationParams, name, args)
