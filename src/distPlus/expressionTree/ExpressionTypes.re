@@ -38,7 +38,7 @@ module ExpressionTree = {
     type t = environment
     let empty:t = [||]->Belt.Map.String.fromArray
     let update = (t,str, fn) => Belt.Map.String.update(t, str, fn)
-    let get = (t,str) => Belt.Map.String.get(t, str)
+    let get = (t:t,str) => Belt.Map.String.get(t, str)
   }
 
   type evaluationParams = {
