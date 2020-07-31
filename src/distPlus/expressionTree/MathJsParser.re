@@ -123,7 +123,7 @@ module MathAdtToDistDst = {
     switch (args) {
     | [|Object(o)|] =>
       let g = s =>
-        Js.Dict.get(o, s) |> E.O.toResult("") |> E.R.bind(_, nodeParser);
+        Js.Dict.get(o, s) |> E.O.toResult("Variable was empty") |> E.R.bind(_, nodeParser);
       switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
       | (Ok(mean), Ok(stdev), _, _) =>
         Ok(
@@ -326,8 +326,8 @@ module MathAdtToDistDst = {
     switch (r) {
     | FunctionAssignment({name, args, expression}) =>
       switch (nodeParser(inputVars, expression)) {
-      | Ok(r) => Ok([|`Assignment((name, `Function(_ => Ok(r))))|])
-      | _ => Error("")
+      | Ok(r) => Ok([|`Assignment((name, `Function(args, r)))|])
+      | Error(r) => Error(r)
       }
     | Value(_) as r =>
       nodeParser(inputVars, r) |> E.R.fmap(r => [|`Expression(r)|])
@@ -382,6 +382,7 @@ let fromString2 = (inputVars: inputVars, str) => {
     });
 
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run(inputVars));
+  Js.log3("Parsed", mathJsParse, value);
   value;
 };
 

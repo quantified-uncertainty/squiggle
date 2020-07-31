@@ -49,21 +49,62 @@ let to_: array(node) => result(node, string) =
     Error("Low value must be less than high value.")
   | _ => Error("Requires 2 variables");
 
-let fnn = (evaluationParams:ExpressionTypes.ExpressionTree.evaluationParams, name, args: array(node)) => {
-  switch (name, ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, name)) {
-  | (_, Some(`Function(t))) => t(`Function(t));
-  | ("normal", _) => apply2(twoFloatsToOkSym(SymbolicDist.Normal.make), args)
-  | ("uniform", _) => apply2(twoFloatsToOkSym(SymbolicDist.Uniform.make), args)
+let processCustomFn =
+    (
+      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+      args: array(node),
+      argNames: array(string),
+      fnResult: node,
+    ) =>
+  if (E.A.length(args) == E.A.length(argNames)) {
+    let newEnvironment =
+      Belt.Array.zip(argNames, args)
+      |> ExpressionTypes.ExpressionTree.Environment.fromArray;
+    let newEvaluationParams: ExpressionTypes.ExpressionTree.evaluationParams = {
+      samplingInputs: evaluationParams.samplingInputs,
+      environment:
+        ExpressionTypes.ExpressionTree.Environment.mergeKeepSecond(
+          evaluationParams.environment,
+          newEnvironment,
+        ),
+      evaluateNode: evaluationParams.evaluateNode,
+    };
+    Js.log4("HI", newEnvironment, newEvaluationParams, args);
+    evaluationParams.evaluateNode(newEvaluationParams, fnResult);
+  } else {
+    Error("Failure");
+  };
+
+let fnn =
+    (
+      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+      name,
+      args: array(node),
+    ) => {
+      Js.log3("Trying function", name, evaluationParams.environment);
+  switch (
+    name,
+    ExpressionTypes.ExpressionTree.Environment.get(
+      evaluationParams.environment,
+      name,
+    ),
+  ) {
+  | (_, Some(`Function(argNames, tt))) => processCustomFn(evaluationParams, args, argNames, tt)
+  | ("normal", _) =>
+    apply2(twoFloatsToOkSym(SymbolicDist.Normal.make), args)
+  | ("uniform", _) =>
+    apply2(twoFloatsToOkSym(SymbolicDist.Uniform.make), args)
   | ("beta", _) => apply2(twoFloatsToOkSym(SymbolicDist.Beta.make), args)
-  | ("cauchy", _) => apply2(twoFloatsToOkSym(SymbolicDist.Cauchy.make), args)
-  | ("lognormal", _) => apply2(twoFloatsToOkSym(SymbolicDist.Lognormal.make), args)
-  | ("lognormalFromMeanAndStdDev", _) => apply2(twoFloatsToOkSym(SymbolicDist.Lognormal.fromMeanAndStdev), args)
-  | ("exponential", _) => 
+  | ("cauchy", _) =>
+    apply2(twoFloatsToOkSym(SymbolicDist.Cauchy.make), args)
+  | ("lognormal", _) =>
+    apply2(twoFloatsToOkSym(SymbolicDist.Lognormal.make), args)
+  | ("lognormalFromMeanAndStdDev", _) =>
+    apply2(twoFloatsToOkSym(SymbolicDist.Lognormal.fromMeanAndStdev), args)
+  | ("exponential", _) =>
     switch (args) {
-    | [|
-        `SymbolicDist(`Float(a)),
-      |] =>
-      Ok(`SymbolicDist(SymbolicDist.Exponential.make(a)));
+    | [|`SymbolicDist(`Float(a))|] =>
+      Ok(`SymbolicDist(SymbolicDist.Exponential.make(a)))
     | _ => Error("Needs 3 valid arguments")
     }
   | ("triangular", _) =>

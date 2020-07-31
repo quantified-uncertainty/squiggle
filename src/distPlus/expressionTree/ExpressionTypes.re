@@ -20,7 +20,7 @@ module ExpressionTree = {
     | `Truncate(option(float), option(float), node)
     | `Normalize(node)
     | `FloatFromDist(distToFloatOperation, node)
-    | `Function(node => result(node, string))
+    | `Function(array(string), node)
     | `CallableFunction(string, array(node))
     | `Symbol(string)
   ];
@@ -36,9 +36,16 @@ module ExpressionTree = {
 
   module Environment = {
     type t = environment
-    let empty:t = [||]->Belt.Map.String.fromArray
-    let update = (t,str, fn) => Belt.Map.String.update(t, str, fn)
-    let get = (t:t,str) => Belt.Map.String.get(t, str)
+    module MS = Belt.Map.String;
+    let fromArray = MS.fromArray
+    let empty:t = [||]->fromArray;
+    let mergeKeepSecond = (a:t,b:t) => MS.merge(a,b, (_,a,b) =>switch(a,b){
+      | (_, Some(b)) => Some(b)
+      | (Some(a), _) => Some(a)
+      | _ => None
+    })
+    let update = (t,str, fn) => MS.update(t, str, fn)
+    let get = (t:t,str) => MS.get(t, str)
   }
 
   type evaluationParams = {
