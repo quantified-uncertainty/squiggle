@@ -1,17 +1,17 @@
 open ExpressionTypes.ExpressionTree;
 
-let toLeaf = (samplingInputs, node: node) => {
+let toLeaf = (samplingInputs, environment, node: node) => {
   node
   |> ExpressionTreeEvaluator.toLeaf({
        samplingInputs,
+       environment,
        evaluateNode: ExpressionTreeEvaluator.toLeaf,
      });
 };
 
-let toShape = (samplingInputs, node: node) => {
+let toShape = (samplingInputs, environment, node: node) => {
   let renderResult =
-    `Render(`Normalize(node))
-    |> toLeaf(samplingInputs);
+    `Render(`Normalize(node)) |> toLeaf(samplingInputs, environment);
 
   switch (renderResult) {
   | Ok(`RenderedDist(shape)) => Ok(shape)

@@ -8,7 +8,7 @@ module MathJsonToMathJsAdt = {
     | Array(array(arg))
     | Blocks(array(arg))
     | Object(Js.Dict.t(arg))
-    | Assignment(arg,arg)
+    | Assignment(arg, arg)
   and fn = {
     name: string,
     args: array(arg),
@@ -44,19 +44,17 @@ module MathJsonToMathJsAdt = {
         let items = field("items", array(run), j);
         Some(Array(items |> E.A.O.concatSomes));
       | "SymbolNode" => Some(Symbol(field("name", string, j)))
-      | "AssignmentNode" => {
+      | "AssignmentNode" =>
         let object_ = j |> field("object", run);
         let value_ = j |> field("value", run);
-        switch(object_, value_){
-          | (Some(o), Some(v)) => Some(Assignment(o,v))
-          | _ => None
-        }
-      }
-      | "BlockNode" => {
-          let block = r => r |> field("node", run);
-          let args = j |> field("blocks", array(block)) |> E.A.O.concatSomes;
-          Some(Blocks(args))
-      }
+        switch (object_, value_) {
+        | (Some(o), Some(v)) => Some(Assignment(o, v))
+        | _ => None
+        };
+      | "BlockNode" =>
+        let block = r => r |> field("node", run);
+        let args = j |> field("blocks", array(block)) |> E.A.O.concatSomes;
+        Some(Blocks(args));
       | n =>
         Js.log3("Couldn't parse mathjs node", j, n);
         None;
@@ -68,10 +66,7 @@ module MathAdtToDistDst = {
   open MathJsonToMathJsAdt;
 
   let handleSymbol = (inputVars: inputVars, sym) => {
-    switch (Belt.Map.String.get(inputVars, sym)) {
-    | Some(s) => Ok(s)
-    | None => Error("Couldn't find symbol " ++ sym)
-    };
+    Ok(`Symbol(sym))
   };
 
   module MathAdtCleaner = {
@@ -100,7 +95,7 @@ module MathAdtToDistDst = {
       | Symbol(s) => Symbol(s)
       | Value(v) => Value(v)
       | Blocks(args) => Blocks(args |> E.A.fmap(run))
-      | Assignment(a,b) => Assignment(a,run(b))
+      | Assignment(a, b) => Assignment(a, run(b))
       | Object(v) =>
         Object(
           v
@@ -122,7 +117,10 @@ module MathAdtToDistDst = {
         )
       | (_, _, Ok(mu), Ok(sigma)) =>
         Ok(`CallableFunction(("lognormal", [|mu, sigma|])))
-      | _ => Error("Lognormal distribution needs either mean and stdev or mu and sigma")
+      | _ =>
+        Error(
+          "Lognormal distribution needs either mean and stdev or mu and sigma",
+        )
       };
     | _ =>
       parseArgs()
@@ -293,25 +291,40 @@ module MathAdtToDistDst = {
     inputVars =>
       fun
       | Value(f) => Ok(`SymbolicDist(`Float(f)))
-      | Symbol(s) => handleSymbol(inputVars, s)
+      | Symbol(sym) => Ok(`Symbol(sym))
       | Fn({name, args}) =>
         functionParser(nodeParser(inputVars), name, args)
       | _ => {
           Error("This type not currently supported");
         };
 
-  let rec topLevel = inputVars =>
-    fun
-    | Value(_) as r => nodeParser(inputVars, r)
-    | Fn(_) as r => nodeParser(inputVars, r)
+  let rec topLevel =
+          (inputVars: inputVars, r)
+          : result(ExpressionTypes.Program.program, string) =>
+    switch (r) {
+    | Value(_) as r =>
+      nodeParser(inputVars, r) |> E.R.fmap(r => [|`Expression(r)|])
+    | Fn(_) as r =>
+      nodeParser(inputVars, r) |> E.R.fmap(r => [|`Expression(r)|])
     | Array(_) => Error("Array not valid as top level")
-    | Symbol(s) => handleSymbol(inputVars, s)
+    | Symbol(s) =>
+      handleSymbol(inputVars, s) |> E.R.fmap(r => [|`Expression(r)|])
     | Object(_) => Error("Object not valid as top level")
-    | Assignment(_) => Error("Assignment not valid as top level")
-    | Blocks(blocks) => E.A.last(blocks) |> E.O.toResult("no blocks listed") |> E.R.bind(_, topLevel(inputVars))
+    | Assignment(name, value) =>
+      switch (name) {
+      | Symbol(symbol) =>
+        nodeParser(inputVars, value)
+        |> E.R.fmap(r => [|`Assignment((symbol, r))|])
+      | _ => Error("Symbol not a string")
+      }
+    | Blocks(blocks) =>
+      blocks
+      |> E.A.fmap(b => topLevel(inputVars, b))
+      |> E.A.R.firstErrorOrOpen
+      |> E.R.fmap(E.A.concatMany)
+    };
 
-  let run =
-      (inputVars, r): result(ExpressionTypes.ExpressionTree.node, string) =>
+  let run = (inputVars, r): result(ExpressionTypes.Program.program, string) =>
     r |> MathAdtCleaner.run |> topLevel(inputVars);
 };
 

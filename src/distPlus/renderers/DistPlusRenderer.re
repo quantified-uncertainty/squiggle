@@ -31,29 +31,31 @@ module Inputs = {
       unit,
     };
   };
+
   type inputs = {
     distPlusIngredients: ingredients,
     samplingInputs: SamplingInputs.t,
-    inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
+    environment: ExpressionTypes.ExpressionTree.environment
   };
+
   let empty: SamplingInputs.t = {
     sampleCount: None,
     outputXYPoints: None,
     kernelWidth: None,
-    shapeLength: None
+    shapeLength: None,
   };
 
   let make =
       (
         ~samplingInputs=empty,
         ~distPlusIngredients,
-        ~inputVariables=[||]->Belt.Map.String.fromArray,
+        ~environment=ExpressionTypes.ExpressionTree.Environment.empty,
         (),
       )
       : inputs => {
     distPlusIngredients,
     samplingInputs,
-    inputVariables,
+    environment,
   };
 };
 
@@ -61,14 +63,27 @@ module Internals = {
   type inputs = {
     samplingInputs: Inputs.SamplingInputs.t,
     guesstimatorString: string,
-    inputVariables: Belt.Map.String.t(ExpressionTypes.ExpressionTree.node),
+    environment: ExpressionTypes.ExpressionTree.environment,
+  };
+
+  let addVariable =
+      (
+        {samplingInputs, guesstimatorString, environment}: inputs,
+        str,
+        node,
+      )
+      : inputs => {
+    samplingInputs,
+    guesstimatorString,
+    environment:
+    ExpressionTypes.ExpressionTree.Environment.update(environment, str, _ => Some(node))
   };
 
   let distPlusRenderInputsToInputs = (inputs: Inputs.inputs): inputs => {
     {
       samplingInputs: inputs.samplingInputs,
       guesstimatorString: inputs.distPlusIngredients.guesstimatorString,
-      inputVariables: inputs.inputVariables,
+      environment: inputs.environment,
     };
   };
 
@@ -78,27 +93,46 @@ module Internals = {
   };
   let makeOutputs = (graph, shape): outputs => {graph, shape};
 
-  let inputsToShape = (inputs: inputs) => {
-    MathJsParser.fromString(inputs.guesstimatorString, inputs.inputVariables)
-    |> E.R.bind(_, g =>
-         ExpressionTree.toShape(
-           {
-             sampleCount:
-               inputs.samplingInputs.sampleCount |> E.O.default(10000),
-             outputXYPoints:
-               inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
-             kernelWidth: inputs.samplingInputs.kernelWidth,
-             shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000)
-           },
-           g,
-         )
-         |> E.R.fmap(makeOutputs(g))
-       );
+  let runNode = (inputs, node) => {
+    Js.log2("Inputs", inputs);
+    ExpressionTree.toShape(
+      {
+        sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
+        outputXYPoints:
+          inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
+        kernelWidth: inputs.samplingInputs.kernelWidth,
+        shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
+      },
+      inputs.environment,
+      node,
+    );
   };
 
-  let outputToDistPlus = (inputs: Inputs.inputs, outputs: outputs) => {
+  let runProgram = (inputs: inputs, p: ExpressionTypes.Program.program) => {
+    let ins = ref(inputs);
+    p
+    |> E.A.fmap(statement =>
+         switch (statement) {
+         | `Assignment(name, node) =>
+           ins := addVariable(ins^, name, node);
+           Js.log4("HIHI", ins, name, node);
+           None;
+         | `Expression(node) => Some(runNode(ins^, node))
+         }
+       )
+    |> E.A.O.concatSomes
+    |> E.A.R.firstErrorOrOpen;
+  };
+
+  let inputsToShape = (inputs: inputs) => {
+    MathJsParser.fromString(inputs.guesstimatorString, inputs.environment)
+    |> E.R.bind(_, g => runProgram(inputs, g))
+    |> E.R.bind(_, r => E.A.last(r) |> E.O.toResult("sdf"));
+  };
+
+  let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) => {
     DistPlus.make(
-      ~shape=outputs.shape,
+      ~shape,
       ~domain=inputs.distPlusIngredients.domain,
       ~unit=inputs.distPlusIngredients.unit,
       ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),

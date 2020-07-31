@@ -335,6 +335,7 @@ let toLeaf =
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
   | `Function(t) => Ok(`Function(t))
+  | `Symbol(r) => ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r) |> E.O.toResult("Undeclared variable " ++ r)
   | `CallableFunction(name, args) =>
     callableFunction(evaluationParams, name, args)
   };

@@ -152,7 +152,7 @@ module DemoDist = {
                  shapeLength: Some(options.downsampleTo |> E.O.default(1000))
                },
                ~distPlusIngredients,
-               ~inputVariables=
+               ~environment=
                  [|("p", `SymbolicDist(`Float(1.0)))|]
                  ->Belt.Map.String.fromArray,
                (),

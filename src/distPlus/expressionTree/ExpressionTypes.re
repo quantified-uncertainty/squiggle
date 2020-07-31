@@ -22,6 +22,7 @@ module ExpressionTree = {
     | `FloatFromDist(distToFloatOperation, node)
     | `Function(node => result(node, string))
     | `CallableFunction(string, array(node))
+    | `Symbol(string)
   ];
 
   type samplingInputs = {
@@ -31,8 +32,18 @@ module ExpressionTree = {
     shapeLength: int
   };
 
+  type environment = Belt.Map.String.t(node);
+
+  module Environment = {
+    type t = environment
+    let empty:t = [||]->Belt.Map.String.fromArray
+    let update = (t,str, fn) => Belt.Map.String.update(t, str, fn)
+    let get = (t,str) => Belt.Map.String.get(t, str)
+  }
+
   type evaluationParams = {
     samplingInputs,
+    environment,
     evaluateNode: (evaluationParams, node) => Belt.Result.t(node, string),
   };
 

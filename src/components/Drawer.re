@@ -393,6 +393,7 @@ module Draw = {
     let normalShape =
       ExpressionTree.toShape(
         {sampleCount: 10000, outputXYPoints: 10000, kernelWidth: None, shapeLength:numSamples},
+        ExpressionTypes.ExpressionTree.Environment.empty,
         `SymbolicDist(normal),
       ) |> E.R.toExn;
     let xyShape: Types.xyShape =
