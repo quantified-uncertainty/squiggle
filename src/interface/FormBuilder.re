@@ -17,12 +17,10 @@ let propValue = (t: Prop.Value.t) => {
   switch (t) {
   | SelectSingle(r) => r |> ReasonReact.string
   | ConditionalArray(r) => "Array" |> ReasonReact.string
-  | DistPlusIngredients((r: RenderTypes.DistPlusRenderer.ingredients)) =>
+  | DistPlusIngredients((r: DistPlusRenderer.Inputs.ingredients)) =>
     let newDistribution =
-      RenderTypes.DistPlusRenderer.make(
+      DistPlusRenderer.Inputs.make(
         ~distPlusIngredients=r,
-        ~recommendedLength=10000,
-        ~shouldDownsample=true,
         (),
       )
       |> DistPlusRenderer.run;

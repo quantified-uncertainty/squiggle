@@ -7,6 +7,7 @@ module Algebraic = {
     | `Add => (+.)
     | `Subtract => (-.)
     | `Multiply => ( *. )
+    | `Exponentiate => ( ** )
     | `Divide => (/.);
 
   let applyFn = (t, f1, f2) => {
@@ -21,6 +22,7 @@ module Algebraic = {
     | `Add => "+"
     | `Subtract => "-"
     | `Multiply => "*"
+    | `Exponentiate => ( "**" )
     | `Divide => "/";
 
   let format = (a, b, c) => b ++ " " ++ toString(a) ++ " " ++ c;

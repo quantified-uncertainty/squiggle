@@ -33,6 +33,23 @@ module Form = ReForm.Make(FormConfig);
 
 let schema = Form.Validation.Schema([||]);
 
+module FieldText = {
+  [@react.component]
+  let make = (~field, ~label) => {
+    <Form.Field
+      field
+      render={({handleChange, error, value, validate}) =>
+        <Antd.Form.Item label={label |> R.ste}>
+          <Antd.Input.TextArea
+            value
+            onChange={BsReform.Helpers.handleChange(handleChange)}
+            onBlur={_ => validate()}
+          />
+        </Antd.Form.Item>
+      }
+    />;
+  };
+};
 module FieldString = {
   [@react.component]
   let make = (~field, ~label) => {
@@ -111,13 +128,6 @@ module Styles = {
     ]);
 };
 
-type inputs = {
-  samplingInputs: RenderTypes.ShapeRenderer.Sampling.inputs,
-  guesstimatorString: string,
-  length: int,
-  shouldDownsampleSampledDistribution: int,
-};
-
 module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
@@ -127,30 +137,34 @@ module DemoDist = {
         {switch (domain, unit, options) {
          | (Some(domain), Some(unit), Some(options)) =>
            let distPlusIngredients =
-             RenderTypes.DistPlusRenderer.Ingredients.make(
+             DistPlusRenderer.Inputs.Ingredients.make(
                ~guesstimatorString,
                ~domain,
                ~unit,
                (),
              );
-           let inputs =
-             RenderTypes.DistPlusRenderer.make(
+           let inputs1 =
+             DistPlusRenderer.Inputs.make(
                ~samplingInputs={
                  sampleCount: Some(options.sampleCount),
                  outputXYPoints: Some(options.outputXYPoints),
                  kernelWidth: options.kernelWidth,
+                 shapeLength: Some(options.downsampleTo |> E.O.default(1000))
                },
                ~distPlusIngredients,
-               ~shouldDownsample=options.downsampleTo |> E.O.isSome,
-               ~recommendedLength=options.downsampleTo |> E.O.default(1000),
+               ~environment=
+                 [|("p", `SymbolicDist(`Float(1.0)))|]
+                 ->Belt.Map.String.fromArray,
                (),
              );
-           let response = DistPlusRenderer.run(inputs);
-           switch (response) {
-           | Ok(distPlus) =>
-             let normalizedDistPlus = DistPlus.T.normalize(distPlus);
-             <DistPlusPlot distPlus=normalizedDistPlus />;
-           | Error(r) => r |> R.ste
+
+           let response1 = DistPlusRenderer.run(inputs1);
+           switch (response1) {
+           | (Ok(distPlus1)) =>
+             <>
+               <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
+             </>
+           | (Error(r)) => r |> R.ste
            };
          | _ =>
            "Nothing to show. Try to change the distribution description."
@@ -314,7 +328,7 @@ let make = () => {
         <Antd.Form onSubmit>
           <Row _type=`flex className=Styles.rows>
             <Col span=24>
-              <FieldString
+              <FieldText
                 field=FormConfig.GuesstimatorString
                 label="Guesstimator String"
               />

@@ -60,17 +60,11 @@ let combineShapesUsingSampling =
          let shape =
            samples
            |> E.O.fmap(
-                Samples.T.fromSamples(
-                  ~samplingInputs={
-                    sampleCount:
-                      Some(evaluationParams.samplingInputs.sampleCount),
-                    outputXYPoints:
-                      Some(evaluationParams.samplingInputs.outputXYPoints),
-                    kernelWidth: evaluationParams.samplingInputs.kernelWidth,
-                  },
+                SamplesToShape.fromSamples(
+                  ~samplingInputs=evaluationParams.samplingInputs,
                 ),
               )
-           |> E.O.bind(_, (r) => r.shape)
+           |> E.O.bind(_, r => r.shape)
            |> E.O.toResult("No response");
          shape |> E.R.fmap(r => `Normalize(`RenderedDist(r)));
        },

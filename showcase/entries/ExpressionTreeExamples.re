@@ -1,5 +1,5 @@
 let setup = dist =>
-  RenderTypes.DistPlusRenderer.make(~distPlusIngredients=dist, ())
+  DistPlusRenderer.Inputs.make(~distPlusIngredients=dist, ())
   |> DistPlusRenderer.run
   |> E.R.fmap(distPlus => <DistPlusPlot distPlus />)
   |> E.R.toOption
@@ -10,7 +10,7 @@ let simpleExample = (guesstimatorString, ~problem="", ()) =>
     <p> {guesstimatorString |> ReasonReact.string} </p>
     <p> {problem |> (e => "problem: " ++ e) |> ReasonReact.string} </p>
     {setup(
-       RenderTypes.DistPlusRenderer.Ingredients.make(~guesstimatorString, ()),
+       DistPlusRenderer.Inputs.Ingredients.make(~guesstimatorString, ()),
      )}
   </>;
 

@@ -2,7 +2,7 @@ let guesstimatorString = age =>
   GuesstimatorDist.normal(72.0 -. age, 5.0 -. age *. 0.01);
 
 let makeI = (age: float) => {
-  RenderTypes.DistPlusRenderer.Ingredients.make(
+  DistPlusRenderer.Inputs.Ingredients.make(
     ~guesstimatorString=guesstimatorString(age),
     ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
     ~domain=RightLimited({xPoint: 300.0, excludingProbabilityMass: 0.3}),

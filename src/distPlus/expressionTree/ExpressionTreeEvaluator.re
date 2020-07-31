@@ -151,7 +151,7 @@ module PointwiseCombination = {
     };
   };
 
-  let pointwiseMultiply = (evaluationParams: evaluationParams, t1: t, t2: t) => {
+  let pointwiseCombine = (fn, evaluationParams: evaluationParams, t1: t, t2: t) => {
     // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
     // TODO: This should work for symbolic distributions too!
@@ -176,7 +176,8 @@ module PointwiseCombination = {
       ) => {
     switch (pointwiseOp) {
     | `Add => pointwiseAdd(evaluationParams, t1, t2)
-    | `Multiply => pointwiseMultiply(evaluationParams, t1, t2)
+    | `Multiply => pointwiseCombine(( *. ),evaluationParams, t1, t2)
+    | `Exponentiate => pointwiseCombine(( *. ),evaluationParams, t1, t2)
     };
   };
 };
@@ -259,19 +260,39 @@ module FloatFromDist = {
   };
 };
 
+// TODO: This forces things to be floats
+let callableFunction = (evaluationParams, name, args) => {
+  let b =
+    args
+    |> E.A.fmap(a =>
+         Render.render(evaluationParams, a)
+         |> E.R.bind(_, Render.toFloat)
+       )
+    |> E.A.R.firstErrorOrOpen;
+  b |> E.R.bind(_, Functions.fnn(evaluationParams, name));
+};
+
 module Render = {
   let rec operationToLeaf =
           (evaluationParams: evaluationParams, t: node): result(t, string) => {
     switch (t) {
+    | `Function(_) => Error("Cannot render a function")
     | `SymbolicDist(d) =>
       Ok(
         `RenderedDist(
-          SymbolicDist.T.toShape(evaluationParams.intendedShapeLength, d),
+          SymbolicDist.T.toShape(evaluationParams.samplingInputs.shapeLength, d),
         ),
       )
     | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     };
+  };
+};
+
+let run = (node, fnNode) => {
+  switch (fnNode) {
+  | `Function(r) => Ok(r(node))
+  | _ => Error("Not a function")
   };
 };
 
@@ -314,5 +335,9 @@ let toLeaf =
     FloatFromDist.operationToLeaf(evaluationParams, distToFloatOp, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
+  | `Function(t) => Ok(`Function(t))
+  | `Symbol(r) => ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r) |> E.O.toResult("Undeclared variable " ++ r)
+  | `FunctionCall(name, args) =>
+    callableFunction(evaluationParams, name, args)
   };
 };

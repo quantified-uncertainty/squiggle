@@ -6,18 +6,18 @@
 // uniform(0,1) > 0.3 ? lognormal(6.652, -0.41): 0
 
 let timeDist ={
-  let ingredients = RenderTypes.DistPlusRenderer.Ingredients.make(
+  let ingredients = DistPlusRenderer.Inputs.Ingredients.make(
     ~guesstimatorString="(floor(10 to 15))",
     ~domain=RightLimited({xPoint: 50.0, excludingProbabilityMass: 0.3}),
     ~unit=
       DistTypes.TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
     ());
-  let inputs = RenderTypes.DistPlusRenderer.make(~distPlusIngredients=ingredients,())
+  let inputs = DistPlusRenderer.Inputs.make(~distPlusIngredients=ingredients,())
   inputs |> DistPlusRenderer.run
 }
 
 let setup = dist =>
-  RenderTypes.DistPlusRenderer.make(~distPlusIngredients=dist,())
+  DistPlusRenderer.Inputs.make(~distPlusIngredients=dist,())
   |> DistPlusRenderer.run
   |> E.R.fmap(distPlus => <DistPlusPlot distPlus />)
   |> E.R.toOption
@@ -28,7 +28,7 @@ let simpleExample = (name, guesstimatorString) =>
     <h3 className="text-gray-600 text-lg font-bold">
       {name |> ReasonReact.string}
     </h3>
-    {setup(RenderTypes.DistPlusRenderer.Ingredients.make(~guesstimatorString, ()))}
+    {setup(DistPlusRenderer.Inputs.Ingredients.make(~guesstimatorString, ()))}
   </>;
 
 let timeExample = (name, guesstimatorString) =>
@@ -37,7 +37,7 @@ let timeExample = (name, guesstimatorString) =>
       {name |> ReasonReact.string}
     </h3>
     {setup(
-       RenderTypes.DistPlusRenderer.Ingredients.make(
+       DistPlusRenderer.Inputs.Ingredients.make(
          ~guesstimatorString,
          ~unit=TimeDistribution({zero: MomentRe.momentNow(), unit: `years}),
          (),

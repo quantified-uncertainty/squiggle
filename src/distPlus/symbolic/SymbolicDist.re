@@ -2,6 +2,12 @@ open SymbolicTypes;
 
 module Exponential = {
   type t = exponential;
+  let make = (rate:float): symbolicDist =>
+    `Exponential(
+      {
+        rate:rate
+      },
+    );
   let pdf = (x, t: t) => Jstat.exponential##pdf(x, t.rate);
   let cdf = (x, t: t) => Jstat.exponential##cdf(x, t.rate);
   let inv = (p, t: t) => Jstat.exponential##inv(p, t.rate);
@@ -12,6 +18,7 @@ module Exponential = {
 
 module Cauchy = {
   type t = cauchy;
+  let make = (local, scale): symbolicDist => `Cauchy({local, scale});
   let pdf = (x, t: t) => Jstat.cauchy##pdf(x, t.local, t.scale);
   let cdf = (x, t: t) => Jstat.cauchy##cdf(x, t.local, t.scale);
   let inv = (p, t: t) => Jstat.cauchy##inv(p, t.local, t.scale);
@@ -22,6 +29,10 @@ module Cauchy = {
 
 module Triangular = {
   type t = triangular;
+  let make = (low, medium, high): result(symbolicDist, string) =>
+    low < medium && medium < high
+      ? Ok(`Triangular({low, medium, high}))
+      : Error("Triangular values must be increasing order");
   let pdf = (x, t: t) => Jstat.triangular##pdf(x, t.low, t.high, t.medium);
   let cdf = (x, t: t) => Jstat.triangular##cdf(x, t.low, t.high, t.medium);
   let inv = (p, t: t) => Jstat.triangular##inv(p, t.low, t.high, t.medium);
@@ -32,6 +43,7 @@ module Triangular = {
 
 module Normal = {
   type t = normal;
+  let make = (mean, stdev): symbolicDist => `Normal({mean, stdev});
   let pdf = (x, t: t) => Jstat.normal##pdf(x, t.mean, t.stdev);
   let cdf = (x, t: t) => Jstat.normal##cdf(x, t.mean, t.stdev);
 
@@ -75,6 +87,7 @@ module Normal = {
 
 module Beta = {
   type t = beta;
+  let make = (alpha, beta) => `Beta({alpha, beta});
   let pdf = (x, t: t) => Jstat.beta##pdf(x, t.alpha, t.beta);
   let cdf = (x, t: t) => Jstat.beta##cdf(x, t.alpha, t.beta);
   let inv = (p, t: t) => Jstat.beta##inv(p, t.alpha, t.beta);
@@ -85,6 +98,7 @@ module Beta = {
 
 module Lognormal = {
   type t = lognormal;
+  let make = (mu, sigma) => `Lognormal({mu, sigma});
   let pdf = (x, t: t) => Jstat.lognormal##pdf(x, t.mu, t.sigma);
   let cdf = (x, t: t) => Jstat.lognormal##cdf(x, t.mu, t.sigma);
   let inv = (p, t: t) => Jstat.lognormal##inv(p, t.mu, t.sigma);
@@ -131,6 +145,7 @@ module Lognormal = {
 
 module Uniform = {
   type t = uniform;
+  let make = (low, high) => `Uniform({low, high});
   let pdf = (x, t: t) => Jstat.uniform##pdf(x, t.low, t.high);
   let cdf = (x, t: t) => Jstat.uniform##cdf(x, t.low, t.high);
   let inv = (p, t: t) => Jstat.uniform##inv(p, t.low, t.high);
@@ -146,6 +161,7 @@ module Uniform = {
 
 module Float = {
   type t = float;
+  let make = t => `Float(t);
   let pdf = (x, t: t) => x == t ? 1.0 : 0.0;
   let cdf = (x, t: t) => x >= t ? 1.0 : 0.0;
   let inv = (p, t: t) => p < t ? 0.0 : 1.0;
@@ -317,13 +333,14 @@ module T = {
     switch (d) {
     | `Float(v) =>
       Discrete(
-        Discrete.make(~integralSumCache=Some(1.0), {xs: [|v|], ys: [|1.0|]}),
+        Discrete.make(
+          ~integralSumCache=Some(1.0),
+          {xs: [|v|], ys: [|1.0|]},
+        ),
       )
     | _ =>
       let xs = interpolateXs(~xSelection=`ByWeight, d, sampleCount);
       let ys = xs |> E.A.fmap(x => pdf(x, d));
-      Continuous(
-        Continuous.make(~integralSumCache=Some(1.0), {xs, ys}),
-      );
+      Continuous(Continuous.make(~integralSumCache=Some(1.0), {xs, ys}));
     };
 };
