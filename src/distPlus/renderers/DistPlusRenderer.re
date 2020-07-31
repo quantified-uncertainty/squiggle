@@ -108,15 +108,14 @@ module Internals = {
   let runProgram = (inputs: inputs, p: ExpressionTypes.Program.program) => {
     let ins = ref(inputs);
     p
-    |> E.A.fmap(statement => {
-         Js.log2("Running ling", statement);
-         switch (statement) {
-         | `Assignment(name, node) =>
-           ins := addVariable(ins^, name, node);
-           None;
-         | `Expression(node) => Some(runNode(ins^, node))
-         };
-       })
+    |> E.A.fmap(
+         fun
+         | `Assignment(name, node) => {
+             ins := addVariable(ins^, name, node);
+             None;
+           }
+         | `Expression(node) => Some(runNode(ins^, node)),
+       )
     |> E.A.O.concatSomes
     |> E.A.R.firstErrorOrOpen;
   };
@@ -127,7 +126,6 @@ module Internals = {
     |> E.R.bind(_, r =>
          E.A.last(r)
          |> E.O.toResult("No rendered lines")
-         |> (e => {Js.log2("EE", e); e})
          |> E.R.fmap(Shape.T.normalize)
        );
   };
