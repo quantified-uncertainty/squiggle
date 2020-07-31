@@ -94,7 +94,6 @@ module Internals = {
   let makeOutputs = (graph, shape): outputs => {graph, shape};
 
   let runNode = (inputs, node) => {
-    Js.log2("Inputs", inputs);
     ExpressionTree.toShape(
       {
         sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
@@ -124,7 +123,7 @@ module Internals = {
   };
 
   let inputsToShape = (inputs: inputs) => {
-    MathJsParser.fromString(inputs.guesstimatorString, inputs.environment)
+    MathJsParser.fromString(inputs.guesstimatorString)
     |> E.R.bind(_, g => runProgram(inputs, g))
     |> E.R.bind(_, r => E.A.last(r) |> E.O.toResult("No rendered lines"));
   };
