@@ -9,9 +9,15 @@ module MathJsonToMathJsAdt = {
     | Blocks(array(arg))
     | Object(Js.Dict.t(arg))
     | Assignment(arg, arg)
+    | FunctionAssignment(fnAssignment)
   and fn = {
     name: string,
     args: array(arg),
+  }
+  and fnAssignment = {
+    name: string,
+    args: array(string),
+    expression: arg,
   };
 
   let rec run = (j: Js.Json.t) =>
@@ -55,6 +61,14 @@ module MathJsonToMathJsAdt = {
         let block = r => r |> field("node", run);
         let args = j |> field("blocks", array(block)) |> E.A.O.concatSomes;
         Some(Blocks(args));
+      | "FunctionAssignmentNode" =>
+        let name = j |> field("name", string);
+        let args = j |> field("params", array(field("name", string)));
+        let expression = j |> field("expr", run);
+        expression
+        |> E.O.fmap(expression =>
+             FunctionAssignment({name, args, expression})
+           );
       | n =>
         Js.log3("Couldn't parse mathjs node", j, n);
         None;
@@ -66,7 +80,7 @@ module MathAdtToDistDst = {
   open MathJsonToMathJsAdt;
 
   let handleSymbol = (inputVars: inputVars, sym) => {
-    Ok(`Symbol(sym))
+    Ok(`Symbol(sym));
   };
 
   module MathAdtCleaner = {
@@ -82,7 +96,6 @@ module MathAdtToDistDst = {
       | "t" => Some(f *. 1000000000000.)
       | _ => None
       };
-
     let rec run =
       fun
       | Fn({name: "multiply", args: [|Value(f), Symbol(s)|]}) as doNothing =>
@@ -96,6 +109,7 @@ module MathAdtToDistDst = {
       | Value(v) => Value(v)
       | Blocks(args) => Blocks(args |> E.A.fmap(run))
       | Assignment(a, b) => Assignment(a, run(b))
+      | FunctionAssignment(a) => FunctionAssignment(a)
       | Object(v) =>
         Object(
           v
@@ -281,7 +295,11 @@ module MathAdtToDistDst = {
     | "sample"
     | "cdf"
     | "pdf" => operationParser(name, parseArgs())
-    | n => Error(n ++ "(...) is not currently supported")
+    | name =>
+      parseArgs()
+      |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
+           `CallableFunction((name, args))
+         )
     };
   };
 
@@ -298,10 +316,19 @@ module MathAdtToDistDst = {
           Error("This type not currently supported");
         };
 
+  // | FunctionAssignment({name, args, expression}) => {
+  //   let evaluatedExpression = run(expression);
+  //   `Function(_ => Ok(evaluatedExpression));
+  // }
   let rec topLevel =
           (inputVars: inputVars, r)
           : result(ExpressionTypes.Program.program, string) =>
     switch (r) {
+    | FunctionAssignment({name, args, expression}) =>
+      switch (nodeParser(inputVars, expression)) {
+      | Ok(r) => Ok([|`Assignment((name, `Function(_ => Ok(r))))|])
+      | _ => Error("")
+      }
     | Value(_) as r =>
       nodeParser(inputVars, r) |> E.R.fmap(r => [|`Expression(r)|])
     | Fn(_) as r =>

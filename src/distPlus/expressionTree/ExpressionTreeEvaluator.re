@@ -268,7 +268,7 @@ let callableFunction = (evaluationParams, name, args) => {
          |> E.R.bind(_, Render.toFloat)
        )
     |> E.A.R.firstErrorOrOpen;
-  b |> E.R.bind(_, Functions.fnn(name));
+  b |> E.R.bind(_, Functions.fnn(evaluationParams, name));
 };
 
 module Render = {

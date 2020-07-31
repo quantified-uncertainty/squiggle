@@ -115,7 +115,6 @@ module Internals = {
          switch (statement) {
          | `Assignment(name, node) =>
            ins := addVariable(ins^, name, node);
-           Js.log4("HIHI", ins, name, node);
            None;
          | `Expression(node) => Some(runNode(ins^, node))
          }

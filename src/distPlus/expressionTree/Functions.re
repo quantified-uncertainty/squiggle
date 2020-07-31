@@ -49,15 +49,16 @@ let to_: array(node) => result(node, string) =
     Error("Low value must be less than high value.")
   | _ => Error("Requires 2 variables");
 
-let fnn = (name, args: array(node)) => {
-  switch (name) {
-  | "normal" => apply2(twoFloatsToOkSym(SymbolicDist.Normal.make), args)
-  | "uniform" => apply2(twoFloatsToOkSym(SymbolicDist.Uniform.make), args)
-  | "beta" => apply2(twoFloatsToOkSym(SymbolicDist.Beta.make), args)
-  | "cauchy" => apply2(twoFloatsToOkSym(SymbolicDist.Cauchy.make), args)
-  | "lognormal" => apply2(twoFloatsToOkSym(SymbolicDist.Lognormal.make), args)
-  | "lognormalFromMeanAndStdDev" => apply2(twoFloatsToOkSym(SymbolicDist.Lognormal.fromMeanAndStdev), args)
-  | "exponential" => 
+let fnn = (evaluationParams:ExpressionTypes.ExpressionTree.evaluationParams, name, args: array(node)) => {
+  switch (name, ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, name)) {
+  | (_, Some(`Function(t))) => t(`Function(t));
+  | ("normal", _) => apply2(twoFloatsToOkSym(SymbolicDist.Normal.make), args)
+  | ("uniform", _) => apply2(twoFloatsToOkSym(SymbolicDist.Uniform.make), args)
+  | ("beta", _) => apply2(twoFloatsToOkSym(SymbolicDist.Beta.make), args)
+  | ("cauchy", _) => apply2(twoFloatsToOkSym(SymbolicDist.Cauchy.make), args)
+  | ("lognormal", _) => apply2(twoFloatsToOkSym(SymbolicDist.Lognormal.make), args)
+  | ("lognormalFromMeanAndStdDev", _) => apply2(twoFloatsToOkSym(SymbolicDist.Lognormal.fromMeanAndStdev), args)
+  | ("exponential", _) => 
     switch (args) {
     | [|
         `SymbolicDist(`Float(a)),
@@ -65,7 +66,7 @@ let fnn = (name, args: array(node)) => {
       Ok(`SymbolicDist(SymbolicDist.Exponential.make(a)));
     | _ => Error("Needs 3 valid arguments")
     }
-  | "triangular" =>
+  | ("triangular", _) =>
     switch (args) {
     | [|
         `SymbolicDist(`Float(a)),
@@ -76,7 +77,7 @@ let fnn = (name, args: array(node)) => {
       |> E.R.fmap(r => `SymbolicDist(r))
     | _ => Error("Needs 3 valid arguments")
     }
-  | "to" => to_(args)
+  | ("to", _) => to_(args)
   | _ => Error("Function not found")
   };
 };
