@@ -245,17 +245,6 @@ module MathAdtToDistDst = {
       ags |> E.A.fmap(nodeParser) |> E.A.R.firstErrorOrOpen;
     let parseArgs = () => parseArray(args);
     switch (name) {
-    | "normal"
-    | "uniform"
-    | "beta"
-    | "triangular"
-    | "to"
-    | "exponential"
-    | "cauchy" =>
-      parseArgs()
-      |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
-           `FunctionCall((name, args))
-         )
     | "lognormal" => lognormal(args, parseArgs, nodeParser)
     | "mm" =>
       let weights =
