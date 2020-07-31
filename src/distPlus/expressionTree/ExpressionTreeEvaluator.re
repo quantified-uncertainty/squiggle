@@ -151,7 +151,7 @@ module PointwiseCombination = {
     };
   };
 
-  let pointwiseMultiply = (evaluationParams: evaluationParams, t1: t, t2: t) => {
+  let pointwiseCombine = (fn, evaluationParams: evaluationParams, t1: t, t2: t) => {
     // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
     // TODO: This should work for symbolic distributions too!
@@ -176,7 +176,8 @@ module PointwiseCombination = {
       ) => {
     switch (pointwiseOp) {
     | `Add => pointwiseAdd(evaluationParams, t1, t2)
-    | `Multiply => pointwiseMultiply(evaluationParams, t1, t2)
+    | `Multiply => pointwiseCombine(( *. ),evaluationParams, t1, t2)
+    | `Exponentiate => pointwiseCombine(( *. ),evaluationParams, t1, t2)
     };
   };
 };
@@ -279,7 +280,7 @@ module Render = {
     | `SymbolicDist(d) =>
       Ok(
         `RenderedDist(
-          SymbolicDist.T.toShape(1234, d),
+          SymbolicDist.T.toShape(evaluationParams.samplingInputs.shapeLength, d),
         ),
       )
     | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here

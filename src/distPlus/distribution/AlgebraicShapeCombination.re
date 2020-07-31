@@ -27,15 +27,15 @@ let toDiscretePointMassesFromTriangulars =
   let xsProdN1: array(float) = Belt.Array.makeUninitializedUnsafe(n - 1);
   let xsProdN2: array(float) = Belt.Array.makeUninitializedUnsafe(n - 2);
   for (i in 0 to n - 1) {
-     Belt.Array.set(xsSq, i, xs[i] *. xs[i]) |> ignore;
+    Belt.Array.set(xsSq, i, xs[i] *. xs[i]) |> ignore;
     ();
   };
   for (i in 0 to n - 2) {
-     Belt.Array.set(xsProdN1, i, xs[i] *. xs[i + 1]) |> ignore;
+    Belt.Array.set(xsProdN1, i, xs[i] *. xs[i + 1]) |> ignore;
     ();
   };
   for (i in 0 to n - 3) {
-     Belt.Array.set(xsProdN2, i, xs[i] *. xs[i + 2]) |> ignore;
+    Belt.Array.set(xsProdN2, i, xs[i] *. xs[i + 2]) |> ignore;
     ();
   };
   // means and variances
@@ -45,11 +45,8 @@ let toDiscretePointMassesFromTriangulars =
 
   if (inverse) {
     for (i in 1 to n - 2) {
-      Belt.Array.set(
-        masses,
-        i - 1,
-        (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.,
-      ) |> ignore;
+      Belt.Array.set(masses, i - 1, (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.)
+      |> ignore;
 
       // this only works when the whole triange is either on the left or on the right of zero
       let a = xs[i - 1];
@@ -70,9 +67,9 @@ let toDiscretePointMassesFromTriangulars =
         -. inverseMean
         ** 2.;
 
-       Belt.Array.set(means, i - 1, inverseMean) |> ignore;
+      Belt.Array.set(means, i - 1, inverseMean) |> ignore;
 
-       Belt.Array.set(variances, i - 1, inverseVar) |> ignore;
+      Belt.Array.set(variances, i - 1, inverseVar) |> ignore;
       ();
     };
 
@@ -80,14 +77,12 @@ let toDiscretePointMassesFromTriangulars =
   } else {
     for (i in 1 to n - 2) {
       // area of triangle = width * height / 2
-      Belt.Array.set(
-        masses,
-        i - 1,
-        (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.,
-      ) |> ignore;
+      Belt.Array.set(masses, i - 1, (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.)
+      |> ignore;
 
       // means of triangle = (a + b + c) / 3
-      Belt.Array.set(means, i - 1, (xs[i - 1] +. xs[i] +. xs[i + 1]) /. 3.) |> ignore;
+      Belt.Array.set(means, i - 1, (xs[i - 1] +. xs[i] +. xs[i + 1]) /. 3.)
+      |> ignore;
 
       // variance of triangle = (a^2 + b^2 + c^2 - ab - ac - bc) / 18
       Belt.Array.set(
@@ -102,7 +97,8 @@ let toDiscretePointMassesFromTriangulars =
           -. xsProdN2[i - 1]
         )
         /. 18.,
-      ) |> ignore;
+      )
+      |> ignore;
       ();
     };
     {n: n - 2, masses, means, variances};
@@ -134,8 +130,10 @@ let combineShapesContinuousContinuous =
     | `Subtract => ((m1, m2) => m1 -. m2)
     | `Multiply => ((m1, m2) => m1 *. m2)
     | `Divide => ((m1, mInv2) => m1 *. mInv2)
+    | `Exponentiate => ((m1, mInv2) => m1 ** mInv2)
     }; // note: here, mInv2 = mean(1 / t2) ~= 1 / mean(t2)
 
+  // TODO: I don't know what the variances are for exponentatiation
   // converts the variances and means of the two inputs into the variance of the output
   let combineVariancesFn =
     switch (op) {
@@ -144,6 +142,8 @@ let combineShapesContinuousContinuous =
     | `Multiply => (
         (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
       )
+    | `Exponentiate =>
+      ((v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.);
     | `Divide => (
         (v1, vInv2, m1, mInv2) =>
           v1 *. vInv2 +. v1 *. mInv2 ** 2. +. vInv2 *. m1 ** 2.
@@ -225,9 +225,12 @@ let toDiscretePointMassesFromDiscrete =
 };
 
 let combineShapesContinuousDiscrete =
-    (op: ExpressionTypes.algebraicOperation, continuousShape: DistTypes.xyShape, discreteShape: DistTypes.xyShape)
+    (
+      op: ExpressionTypes.algebraicOperation,
+      continuousShape: DistTypes.xyShape,
+      discreteShape: DistTypes.xyShape,
+    )
     : DistTypes.xyShape => {
-
   let t1n = continuousShape |> XYShape.T.length;
   let t2n = discreteShape |> XYShape.T.length;
 
@@ -248,15 +251,19 @@ let combineShapesContinuousDiscrete =
         Belt.Array.set(
           dxyShape,
           i,
-          (fn(continuousShape.xs[i], discreteShape.xs[j]),
-          continuousShape.ys[i] *. discreteShape.ys[j]),
-        ) |> ignore;
+          (
+            fn(continuousShape.xs[i], discreteShape.xs[j]),
+            continuousShape.ys[i] *. discreteShape.ys[j],
+          ),
+        )
+        |> ignore;
         ();
       };
       Belt.Array.set(outXYShapes, j, dxyShape) |> ignore;
       ();
     }
   | `Multiply
+  | `Exponentiate
   | `Divide =>
     for (j in 0 to t2n - 1) {
       // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
@@ -266,8 +273,12 @@ let combineShapesContinuousDiscrete =
         Belt.Array.set(
           dxyShape,
           i,
-          (fn(continuousShape.xs[i], discreteShape.xs[j]), continuousShape.ys[i] *. discreteShape.ys[j] /. discreteShape.xs[j]),
-        ) |> ignore;
+          (
+            fn(continuousShape.xs[i], discreteShape.xs[j]),
+            {continuousShape.ys[i] *. discreteShape.ys[j] /. discreteShape.xs[j]}
+          ),
+        )
+        |> ignore;
         ();
       };
       Belt.Array.set(outXYShapes, j, dxyShape) |> ignore;
@@ -278,7 +289,10 @@ let combineShapesContinuousDiscrete =
   outXYShapes
   |> E.A.fmap(XYShape.T.fromZippedArray)
   |> E.A.fold_left(
-      XYShape.PointwiseCombination.combine((+.),
-                                           XYShape.XtoY.continuousInterpolator(`Linear, `UseZero)),
-      XYShape.T.empty);
+       XYShape.PointwiseCombination.combine(
+         (+.),
+         XYShape.XtoY.continuousInterpolator(`Linear, `UseZero),
+       ),
+       XYShape.T.empty,
+     );
 };

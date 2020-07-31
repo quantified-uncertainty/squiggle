@@ -177,11 +177,12 @@ module MathAdtToDistDst = {
     };
   };
 
+          //  Error("Dotwise exponentiation needs two operands")
   let operationParser =
       (
         name: string,
         args: result(array(ExpressionTypes.ExpressionTree.node), string),
-      ) => {
+      ):result(ExpressionTypes.ExpressionTree.node,string) => {
     let toOkAlgebraic = r => Ok(`AlgebraicCombination(r));
     let toOkPointwise = r => Ok(`PointwiseCombination(r));
     let toOkTruncate = r => Ok(`Truncate(r));
@@ -195,6 +196,8 @@ module MathAdtToDistDst = {
          | ("subtract", _) => Error("Subtraction needs two operands")
          | ("multiply", [|l, r|]) => toOkAlgebraic((`Multiply, l, r))
          | ("multiply", _) => Error("Multiplication needs two operands")
+         | ("pow", [|l,r|]) => toOkAlgebraic((`Exponentiate, l, r))
+         | ("pow", _) => Error("Exponentiation needs two operands")
          | ("dotMultiply", [|l, r|]) => toOkPointwise((`Multiply, l, r))
          | ("dotMultiply", _) =>
            Error("Dotwise multiplication needs two operands")
@@ -203,7 +206,6 @@ module MathAdtToDistDst = {
            Error("Dotwise addition needs two operands")
          | ("divide", [|l, r|]) => toOkAlgebraic((`Divide, l, r))
          | ("divide", _) => Error("Division needs two operands")
-         | ("pow", _) => Error("Exponentiation is not yet supported.")
          | ("leftTruncate", [|d, `SymbolicDist(`Float(lc))|]) =>
            toOkTruncate((Some(lc), None, d))
          | ("leftTruncate", _) =>

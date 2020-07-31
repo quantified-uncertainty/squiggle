@@ -125,7 +125,7 @@ module Internals = {
   let inputsToShape = (inputs: inputs) => {
     MathJsParser.fromString(inputs.guesstimatorString)
     |> E.R.bind(_, g => runProgram(inputs, g))
-    |> E.R.bind(_, r => E.A.last(r) |> E.O.toResult("No rendered lines"));
+    |> E.R.bind(_, r => E.A.last(r) |> E.O.toResult("No rendered lines") |> E.R.fmap(Shape.T.normalize));
   };
 
   let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) => {

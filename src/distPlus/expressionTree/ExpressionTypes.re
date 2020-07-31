@@ -1,5 +1,5 @@
-type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide];
-type pointwiseOperation = [ | `Add | `Multiply];
+type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide | `Exponentiate];
+type pointwiseOperation = [ | `Add | `Multiply | `Exponentiate];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
 type distToFloatOperation = [
   | `Pdf(float)
