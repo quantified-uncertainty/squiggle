@@ -336,7 +336,7 @@ let toLeaf =
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
   | `Function(t) => Ok(`Function(t))
   | `Symbol(r) => ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r) |> E.O.toResult("Undeclared variable " ++ r)
-  | `CallableFunction(name, args) =>
+  | `FunctionCall(name, args) =>
     callableFunction(evaluationParams, name, args)
   };
 };

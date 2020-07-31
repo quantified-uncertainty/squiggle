@@ -127,10 +127,10 @@ module MathAdtToDistDst = {
       switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
       | (Ok(mean), Ok(stdev), _, _) =>
         Ok(
-          `CallableFunction(("lognormalFromMeanAndStdDev", [|mean, stdev|])),
+          `FunctionCall(("lognormalFromMeanAndStdDev", [|mean, stdev|])),
         )
       | (_, _, Ok(mu), Ok(sigma)) =>
-        Ok(`CallableFunction(("lognormal", [|mu, sigma|])))
+        Ok(`FunctionCall(("lognormal", [|mu, sigma|])))
       | _ =>
         Error(
           "Lognormal distribution needs either mean and stdev or mu and sigma",
@@ -139,7 +139,7 @@ module MathAdtToDistDst = {
     | _ =>
       parseArgs()
       |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
-           `CallableFunction(("lognormal", args))
+           `FunctionCall(("lognormal", args))
          )
     };
 
@@ -252,7 +252,7 @@ module MathAdtToDistDst = {
     | "cauchy" =>
       parseArgs()
       |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
-           `CallableFunction((name, args))
+           `FunctionCall((name, args))
          )
     | "lognormal" => lognormal(args, parseArgs, nodeParser)
     | "mm" =>
@@ -298,7 +298,7 @@ module MathAdtToDistDst = {
     | name =>
       parseArgs()
       |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
-           `CallableFunction((name, args))
+           `FunctionCall((name, args))
          )
     };
   };

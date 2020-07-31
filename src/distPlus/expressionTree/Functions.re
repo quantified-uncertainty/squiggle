@@ -69,7 +69,6 @@ let processCustomFn =
         ),
       evaluateNode: evaluationParams.evaluateNode,
     };
-    Js.log4("HI", newEnvironment, newEvaluationParams, args);
     evaluationParams.evaluateNode(newEvaluationParams, fnResult);
   } else {
     Error("Failure");
@@ -80,8 +79,7 @@ let fnn =
       evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
       name,
       args: array(node),
-    ) => {
-      Js.log3("Trying function", name, evaluationParams.environment);
+    ) =>
   switch (
     name,
     ExpressionTypes.ExpressionTree.Environment.get(
@@ -89,7 +87,8 @@ let fnn =
       name,
     ),
   ) {
-  | (_, Some(`Function(argNames, tt))) => processCustomFn(evaluationParams, args, argNames, tt)
+  | (_, Some(`Function(argNames, tt))) =>
+    processCustomFn(evaluationParams, args, argNames, tt)
   | ("normal", _) =>
     apply2(twoFloatsToOkSym(SymbolicDist.Normal.make), args)
   | ("uniform", _) =>
@@ -121,4 +120,3 @@ let fnn =
   | ("to", _) => to_(args)
   | _ => Error("Function not found")
   };
-};

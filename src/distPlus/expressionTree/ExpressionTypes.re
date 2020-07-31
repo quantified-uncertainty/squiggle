@@ -21,7 +21,7 @@ module ExpressionTree = {
     | `Normalize(node)
     | `FloatFromDist(distToFloatOperation, node)
     | `Function(array(string), node)
-    | `CallableFunction(string, array(node))
+    | `FunctionCall(string, array(node))
     | `Symbol(string)
   ];
 
