@@ -49,11 +49,11 @@ module AlgebraicCombination = {
       (evaluationParams, algebraicOp, t1: node, t2: node)
       : result(node, string) => {
     E.R.merge(
-      SamplingDistribution.renderIfIsNotSamplingDistribution(
+      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
         evaluationParams,
         t1,
       ),
-      SamplingDistribution.renderIfIsNotSamplingDistribution(
+      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
         evaluationParams,
         t2,
       ),
@@ -61,7 +61,7 @@ module AlgebraicCombination = {
     |> E.R.bind(_, ((a, b)) =>
          switch (choose(a, b)) {
          | `Sampling =>
-           SamplingDistribution.combineShapesUsingSampling(
+           PTypes.SamplingDistribution.combineShapesUsingSampling(
              evaluationParams,
              algebraicOp,
              a,
@@ -296,6 +296,21 @@ let run = (node, fnNode) => {
   };
 };
 
+// let outputType = (t:t) => t |> fun
+// | `SymbolicDist(_) => `RenderedDist
+// | `RenderedDist(_) => `RenderedDist
+// | `Bool(_) => `RenderedDist
+// | `AlgebraicCombination(_) => `RenderedDist
+// | `PointwiseCombination(_) => `RenderedDist
+// | `VerticalScaling(_) => `RenderedDist
+// | `Truncate(_) => `RenderedDist
+// | `FloatFromDist(_) => `RenderedDist
+// | `Normalize(_) => `RenderedDist
+// | `Render(_) => `RenderedDist
+// | `Function(_) => `Function
+// | `FunctionCall(_) => `Any
+// | `Symbol(_) => `Any
+
 /* This function recursively goes through the nodes of the parse tree,
    replacing each Operation node and its subtree with a Data node.
    Whenever possible, the replacement produces a new Symbolic Data node,
@@ -335,6 +350,7 @@ let toLeaf =
     FloatFromDist.operationToLeaf(evaluationParams, distToFloatOp, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
+
   | `Function(_) => Error("Function must be called with params")
   | `Symbol(r) => ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r) |> E.O.toResult("Undeclared variable " ++ r)
   | `FunctionCall(name, args) =>

@@ -13,6 +13,8 @@ module ExpressionTree = {
   type node = [
     | `SymbolicDist(SymbolicTypes.symbolicDist)
     | `RenderedDist(DistTypes.shape)
+    | `Symbol(string)
+    | `Function(array(string), node)
     | `AlgebraicCombination(algebraicOperation, node, node)
     | `PointwiseCombination(pointwiseOperation, node, node)
     | `VerticalScaling(scaleOperation, node, node)
@@ -20,9 +22,7 @@ module ExpressionTree = {
     | `Truncate(option(float), option(float), node)
     | `Normalize(node)
     | `FloatFromDist(distToFloatOperation, node)
-    | `Function(array(string), node)
     | `FunctionCall(string, array(node))
-    | `Symbol(string)
   ];
 
   type samplingInputs = {
