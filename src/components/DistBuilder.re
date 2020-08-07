@@ -149,7 +149,8 @@ module DemoDist = {
                  sampleCount: Some(options.sampleCount),
                  outputXYPoints: Some(options.outputXYPoints),
                  kernelWidth: options.kernelWidth,
-                 shapeLength: Some(options.downsampleTo |> E.O.default(1000))
+                 shapeLength:
+                   Some(options.downsampleTo |> E.O.default(1000)),
                },
                ~distPlusIngredients,
                ~environment=
@@ -160,12 +161,22 @@ module DemoDist = {
 
            let response1 = DistPlusRenderer.run2(inputs1);
            switch (response1) {
-           | (Ok(`DistPlus(distPlus1))) =>
+           | Ok(`DistPlus(distPlus1)) =>
+             <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
+           | Ok(`Function(f, a)) =>
+             let result1 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(5.0))|],);
+             let result2 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(20.0))|],);
+             let result3 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(40.0))|],);
+             switch (result1, result2, result3) {
+             | (Ok(`DistPlus(distPlus1)),Ok(`DistPlus(distPlus2)),Ok(`DistPlus(distPlus3)))  =>
              <>
                <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
+               <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus2)} />
+               <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus3)} />
              </>
-           | (Ok(`Function(f,a))) => "Function!!!" |> R.ste
-           | (Error(r)) => r |> R.ste
+             | _ => "Failure " |> R.ste
+             };
+           | Error(r) => r |> R.ste
            };
          | _ =>
            "Nothing to show. Try to change the distribution description."
@@ -329,10 +340,7 @@ let make = () => {
         <Antd.Form onSubmit>
           <Row _type=`flex className=Styles.rows>
             <Col span=24>
-              <FieldText
-                field=FormConfig.GuesstimatorString
-                label="Program"
-              />
+              <FieldText field=FormConfig.GuesstimatorString label="Program" />
             </Col>
           </Row>
           <Row _type=`flex className=Styles.rows>

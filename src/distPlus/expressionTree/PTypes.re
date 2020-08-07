@@ -31,7 +31,7 @@ module Function = {
       };
       evaluationParams.evaluateNode(newEvaluationParams, internals(t));
     } else {
-      Error("Failure");
+      Error("Wrong number of variables");
     };
 };
 

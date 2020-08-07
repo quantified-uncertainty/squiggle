@@ -123,10 +123,7 @@ module Internals = {
   let inputsToLeaf = (inputs: inputs) => {
     MathJsParser.fromString(inputs.guesstimatorString)
     |> E.R.bind(_, g => runProgram(inputs, g))
-    |> E.R.bind(_, r =>
-         E.A.last(r)
-         |> E.O.toResult("No rendered lines")
-       );
+    |> E.R.bind(_, r => E.A.last(r) |> E.O.toResult("No rendered lines"));
   };
 
   let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) => {
@@ -144,21 +141,54 @@ let run = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_,r => switch(r){
-    | `RenderedDist(n) => Ok(n)
-    | _ => Error("Didn't output renderedDist")
-  })
+  |> E.R.bind(_, r =>
+       switch (r) {
+       | `RenderedDist(n) => Ok(n)
+       | _ => Error("Didn't output renderedDist")
+       }
+     )
   |> E.R.fmap(Internals.outputToDistPlus(inputs));
 };
-
 
 let run2 = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_,r => switch(r){
-    | `RenderedDist(n) => Ok(`DistPlus(Internals.outputToDistPlus(inputs,n)))
-    | `Function(n) => Ok(`Function(n))
-    | _ => Error("Didn't output renderedDist")
-  })
+  |> E.R.bind(_, r =>
+       switch (r) {
+       | `RenderedDist(n) =>
+         Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
+       | `Function(n) => Ok(`Function(n))
+       | _ => Error("Didn't output renderedDist")
+       }
+     );
+};
+
+let runFunction =
+    (
+      ins: Inputs.inputs,
+      fn: (array(string), ExpressionTypes.ExpressionTree.node),
+      fnInputs,
+    ) => {
+  let (_, fns) = fn;
+  let inputs = ins |> Internals.distPlusRenderInputsToInputs;
+  let output =
+    ExpressionTree.runFunction(
+      {
+        sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
+        outputXYPoints:
+          inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
+        kernelWidth: inputs.samplingInputs.kernelWidth,
+        shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
+      },
+      inputs.environment,
+      fnInputs,
+      fn,
+    );
+    Js.log2("GOt output", output);
+  switch (output) {
+  | Ok(`RenderedDist(n)) => Ok(`DistPlus(Internals.outputToDistPlus(ins, n)))
+  | Ok(`Function(n)) => Ok(`Function(n))
+  | _ => Error("Didn't output renderedDist")
+  };
 };

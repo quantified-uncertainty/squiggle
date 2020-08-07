@@ -1,13 +1,10 @@
 open ExpressionTypes.ExpressionTree;
 
-let toLeaf = (samplingInputs, environment, node: node) => {
-  node
-  |> ExpressionTreeEvaluator.toLeaf({
-       samplingInputs,
-       environment,
-       evaluateNode: ExpressionTreeEvaluator.toLeaf,
-     });
+let envs = (samplingInputs, environment) => {
+  {samplingInputs, environment, evaluateNode: ExpressionTreeEvaluator.toLeaf};
 };
+let toLeaf = (samplingInputs, environment, node: node) =>
+  ExpressionTreeEvaluator.toLeaf(envs(samplingInputs, environment), node);
 
 let rec toString: node => string =
   fun
@@ -27,7 +24,7 @@ let rec toString: node => string =
   | `Render(t) => toString(t)
   | `Symbol(t) => "Symbol: " ++ t
   | `FunctionCall(name, args) =>
-    "[Fuction call: ("
+    "[Function call: ("
     ++ name
     ++ (args |> E.A.fmap(toString) |> Js.String.concatMany(_, ","))
     ++ ")]"
@@ -37,16 +34,6 @@ let rec toString: node => string =
     ++ toString(internal)
     ++ ")]";
 
-let toLeaf = (samplingInputs, environment, node: node) => {
-  switch(toLeaf(samplingInputs, environment, node)){
-  | Ok(`SymbolicDist(n)) => `Render(`SymbolicDist(n)) |> toLeaf(samplingInputs, environment);
-  | Ok(`Function(n)) => Ok(`Function(n))
-  | Ok(`RenderedDist(n)) => `Normalize(`RenderedDist(n))|> toLeaf(samplingInputs, environment)
-  | Error(e) => Error(e)
-  | _ => Error("Wrong type returned")
-  }
-}
-
 let toShape = (samplingInputs, environment, node: node) => {
   switch (toLeaf(samplingInputs, environment, node)) {
   | Ok(`RenderedDist(shape)) => Ok(shape)
@@ -54,3 +41,8 @@ let toShape = (samplingInputs, environment, node: node) => {
   | Error(e) => Error(e)
   };
 };
+
+let runFunction = (samplingInputs, environment, inputs, fn: PTypes.Function.t) => {
+  let params = envs(samplingInputs, environment);
+  PTypes.Function.run(params, inputs, fn)
+}
