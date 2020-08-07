@@ -1,11 +1,79 @@
 open ExpressionTypes.ExpressionTree;
 
+module Function = {
+  type t = (array(string), node);
+  let fromNode: node => option(t) =
+    node =>
+      switch (node) {
+      | `Function(r) => Some(r)
+      | _ => None
+      };
+  let argumentNames = ((a, _): t) => a;
+  let internals = ((_, b): t) => b;
+  let run =
+      (
+        evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+        args: array(node),
+        t: t,
+      ) =>
+    if (E.A.length(args) == E.A.length(argumentNames(t))) {
+      let newEnvironment =
+        Belt.Array.zip(argumentNames(t), args)
+        |> ExpressionTypes.ExpressionTree.Environment.fromArray;
+      let newEvaluationParams: ExpressionTypes.ExpressionTree.evaluationParams = {
+        samplingInputs: evaluationParams.samplingInputs,
+        environment:
+          ExpressionTypes.ExpressionTree.Environment.mergeKeepSecond(
+            evaluationParams.environment,
+            newEnvironment,
+          ),
+        evaluateNode: evaluationParams.evaluateNode,
+      };
+      evaluationParams.evaluateNode(newEvaluationParams, internals(t));
+    } else {
+      Error("Failure");
+    };
+};
+
+module Primative = {
+  type t = [
+    | `SymbolicDist(SymbolicTypes.symbolicDist)
+    | `RenderedDist(DistTypes.shape)
+    | `Function(array(string), node)
+  ];
+
+  let isPrimative: node => bool =
+    fun
+    | `SymbolicDist(_)
+    | `RenderedDist(_)
+    | `Function(_) => true
+    | _ => false;
+
+  let fromNode: node => option(t) =
+    fun
+    | `SymbolicDist(_) as n
+    | `RenderedDist(_) as n
+    | `Function(_) as n => Some(n)
+    | _ => None;
+};
+
 module SamplingDistribution = {
+  type t = [
+    | `SymbolicDist(SymbolicTypes.symbolicDist)
+    | `RenderedDist(DistTypes.shape)
+  ];
+
   let isSamplingDistribution: node => bool =
     fun
     | `SymbolicDist(_) => true
     | `RenderedDist(_) => true
     | _ => false;
+
+  let fromNode: node => result(t, string) =
+    fun
+    | `SymbolicDist(n) => Ok(`SymbolicDist(n))
+    | `RenderedDist(n) => Ok(`RenderedDist(n))
+    | _ => Error("Not valid type");
 
   let renderIfIsNotSamplingDistribution = (params, t): result(node, string) =>
     !isSamplingDistribution(t)

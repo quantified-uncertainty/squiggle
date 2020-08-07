@@ -1,4 +1,3 @@
-[%%debugger.chrome]
 module MathJsonToMathJsAdt = {
   type arg =
     | Symbol(string)

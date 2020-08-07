@@ -49,31 +49,6 @@ let to_: array(node) => result(node, string) =
     Error("Low value must be less than high value.")
   | _ => Error("Requires 2 variables");
 
-let processCustomFn =
-    (
-      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
-      args: array(node),
-      argNames: array(string),
-      fnResult: node,
-    ) =>
-  if (E.A.length(args) == E.A.length(argNames)) {
-    let newEnvironment =
-      Belt.Array.zip(argNames, args)
-      |> ExpressionTypes.ExpressionTree.Environment.fromArray;
-    let newEvaluationParams: ExpressionTypes.ExpressionTree.evaluationParams = {
-      samplingInputs: evaluationParams.samplingInputs,
-      environment:
-        ExpressionTypes.ExpressionTree.Environment.mergeKeepSecond(
-          evaluationParams.environment,
-          newEnvironment,
-        ),
-      evaluateNode: evaluationParams.evaluateNode,
-    };
-    evaluationParams.evaluateNode(newEvaluationParams, fnResult);
-  } else {
-    Error("Failure");
-  };
-
 let fnn =
     (
       evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
@@ -88,7 +63,7 @@ let fnn =
     ),
   ) {
   | (_, Some(`Function(argNames, tt))) =>
-    processCustomFn(evaluationParams, args, argNames, tt)
+    PTypes.Function.run(evaluationParams, args, (argNames, tt))
   | ("normal", _) =>
     apply2(twoFloatsToOkSym(SymbolicDist.Normal.make), args)
   | ("uniform", _) =>

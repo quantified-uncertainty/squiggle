@@ -289,28 +289,6 @@ module Render = {
   };
 };
 
-let run = (node, fnNode) => {
-  switch (fnNode) {
-  | `Function(r) => Ok(r(node))
-  | _ => Error("Not a function")
-  };
-};
-
-// let outputType = (t:t) => t |> fun
-// | `SymbolicDist(_) => `RenderedDist
-// | `RenderedDist(_) => `RenderedDist
-// | `Bool(_) => `RenderedDist
-// | `AlgebraicCombination(_) => `RenderedDist
-// | `PointwiseCombination(_) => `RenderedDist
-// | `VerticalScaling(_) => `RenderedDist
-// | `Truncate(_) => `RenderedDist
-// | `FloatFromDist(_) => `RenderedDist
-// | `Normalize(_) => `RenderedDist
-// | `Render(_) => `RenderedDist
-// | `Function(_) => `Function
-// | `FunctionCall(_) => `Any
-// | `Symbol(_) => `Any
-
 /* This function recursively goes through the nodes of the parse tree,
    replacing each Operation node and its subtree with a Data node.
    Whenever possible, the replacement produces a new Symbolic Data node,
