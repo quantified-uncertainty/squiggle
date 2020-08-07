@@ -164,16 +164,35 @@ module DemoDist = {
            | Ok(`DistPlus(distPlus1)) =>
              <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
            | Ok(`Function(f, a)) =>
-             let result1 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(5.0))|],);
-             let result2 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(10.0))|],);
-             let result3 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(20.0))|],);
+             let result1 =
+               DistPlusRenderer.runFunction(
+                 inputs1,
+                 (f, a),
+                 [|`SymbolicDist(`Float(5.0))|],
+               );
+             let result2 =
+               DistPlusRenderer.runFunction(
+                 inputs1,
+                 (f, a),
+                 [|`SymbolicDist(`Float(10.0))|],
+               );
+             let result3 =
+               DistPlusRenderer.runFunction(
+                 inputs1,
+                 (f, a),
+                 [|`SymbolicDist(`Float(20.0))|],
+               );
              switch (result1, result2, result3) {
-             | (Ok(`DistPlus(distPlus1)),Ok(`DistPlus(distPlus2)),Ok(`DistPlus(distPlus3)))  =>
-             <>
-               <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
-               <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus2)} />
-               <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus3)} />
-             </>
+             | (
+                 Ok(`DistPlus(distPlus1)),
+                 Ok(`DistPlus(distPlus2)),
+                 Ok(`DistPlus(distPlus3)),
+               ) =>
+               <>
+                 <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
+                 <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus2)} />
+                 <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus3)} />
+               </>
              | (Error(r), _, _) => r |> R.ste
              | _ => "Failure " |> R.ste
              };
@@ -325,6 +344,40 @@ let make = () => {
   };
 
   <div className=Styles.parent>
+    Victory.(
+      <VictoryChart
+        padding={"top": 1, "bottom": 9, "right": 1, "left": 3}
+        minDomain=0.0
+        maxDomain=2.0
+        height=20
+        width=20>
+        <VictoryAxis
+          height=200
+          scale={"x": "linear", "y": "log"}
+          style={
+            "axis": {
+              "stroke": "#aaa",
+            },
+            "tickLabels": {
+              "fontSize": 7,
+              "padding": 2,
+            },
+          }
+        />
+        <VictoryLine
+          data=[|
+            {"x": 0.5, "y": 0.8},
+            {"x": 0.8, "y": 0.9},
+            {"x": 0.2, "y": 1.1},
+          |]
+          style={
+            "data": {
+              "stroke": "#aaa",
+            },
+          }
+        />
+      </VictoryChart>
+    )
     <div className=Styles.spacer />
     demoDist
     <div className=Styles.spacer />
