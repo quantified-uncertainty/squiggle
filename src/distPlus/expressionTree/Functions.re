@@ -93,5 +93,5 @@ let fnn =
     | _ => Error("Needs 3 valid arguments")
     }
   | ("to", _) => to_(args)
-  | _ => Error("Function not found")
+  | _ => Error("Function " ++ name ++ " not found")
   };

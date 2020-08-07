@@ -9,7 +9,7 @@ let toLeaf = (samplingInputs, environment, node: node) =>
 let rec toString: node => string =
   fun
   | `SymbolicDist(d) => SymbolicDist.T.toString(d)
-  | `RenderedDist(_) => "[shape]"
+  | `RenderedDist(_) => "[renderedShape]"
   | `AlgebraicCombination(op, t1, t2) =>
     Operation.Algebraic.format(op, toString(t1), toString(t2))
   | `PointwiseCombination(op, t1, t2) =>

@@ -144,24 +144,31 @@ let run = (inputs: Inputs.inputs) => {
   |> E.R.bind(_, r =>
        switch (r) {
        | `RenderedDist(n) => Ok(n)
-       | _ => Error("Didn't output renderedDist")
+       | n =>
+         Error(
+           "Didn't output a rendered distribution. Format:"
+           ++ ExpressionTree.toString(n),
+         )
        }
      )
   |> E.R.fmap(Internals.outputToDistPlus(inputs));
 };
 
+let exportDistPlus = inputs =>
+  fun
+  | `RenderedDist(n) => Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
+  | `Function(n) => Ok(`Function(n))
+  | n =>
+    Error(
+      "Didn't output a rendered distribution. Format:"
+      ++ ExpressionTree.toString(n),
+    );
+
 let run2 = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_, r =>
-       switch (r) {
-       | `RenderedDist(n) =>
-         Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
-       | `Function(n) => Ok(`Function(n))
-       | _ => Error("Didn't output renderedDist")
-       }
-     );
+  |> E.R.bind(_, exportDistPlus(inputs));
 };
 
 let runFunction =
@@ -185,10 +192,5 @@ let runFunction =
       fnInputs,
       fn,
     );
-    Js.log2("GOt output", output);
-  switch (output) {
-  | Ok(`RenderedDist(n)) => Ok(`DistPlus(Internals.outputToDistPlus(ins, n)))
-  | Ok(`Function(n)) => Ok(`Function(n))
-  | _ => Error("Didn't output renderedDist")
-  };
+  output |> E.R.bind(_, exportDistPlus(ins));
 };

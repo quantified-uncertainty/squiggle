@@ -165,8 +165,8 @@ module DemoDist = {
              <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
            | Ok(`Function(f, a)) =>
              let result1 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(5.0))|],);
-             let result2 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(20.0))|],);
-             let result3 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(40.0))|],);
+             let result2 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(10.0))|],);
+             let result3 = DistPlusRenderer.runFunction(inputs1, (f, a), [|`SymbolicDist(`Float(20.0))|],);
              switch (result1, result2, result3) {
              | (Ok(`DistPlus(distPlus1)),Ok(`DistPlus(distPlus2)),Ok(`DistPlus(distPlus3)))  =>
              <>
@@ -174,6 +174,7 @@ module DemoDist = {
                <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus2)} />
                <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus3)} />
              </>
+             | (Error(r), _, _) => r |> R.ste
              | _ => "Failure " |> R.ste
              };
            | Error(r) => r |> R.ste
