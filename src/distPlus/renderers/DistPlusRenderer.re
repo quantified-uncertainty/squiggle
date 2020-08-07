@@ -92,7 +92,7 @@ module Internals = {
   let makeOutputs = (graph, shape): outputs => {graph, shape};
 
   let runNode = (inputs, node) => {
-    ExpressionTree.toShape(
+    ExpressionTree.toLeaf(
       {
         sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
         outputXYPoints:
@@ -120,13 +120,12 @@ module Internals = {
     |> E.A.R.firstErrorOrOpen;
   };
 
-  let inputsToShape = (inputs: inputs) => {
+  let inputsToLeaf = (inputs: inputs) => {
     MathJsParser.fromString(inputs.guesstimatorString)
     |> E.R.bind(_, g => runProgram(inputs, g))
     |> E.R.bind(_, r =>
          E.A.last(r)
          |> E.O.toResult("No rendered lines")
-         |> E.R.fmap(Shape.T.normalize)
        );
   };
 
@@ -144,6 +143,22 @@ module Internals = {
 let run = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
-  |> Internals.inputsToShape
+  |> Internals.inputsToLeaf
+  |> E.R.bind(_,r => switch(r){
+    | `RenderedDist(n) => Ok(n)
+    | _ => Error("Didn't output renderedDist")
+  })
   |> E.R.fmap(Internals.outputToDistPlus(inputs));
+};
+
+
+let run2 = (inputs: Inputs.inputs) => {
+  inputs
+  |> Internals.distPlusRenderInputsToInputs
+  |> Internals.inputsToLeaf
+  |> E.R.bind(_,r => switch(r){
+    | `RenderedDist(n) => Ok(`DistPlus(Internals.outputToDistPlus(inputs,n)))
+    | `Function(n) => Ok(`Function(n))
+    | _ => Error("Didn't output renderedDist")
+  })
 };

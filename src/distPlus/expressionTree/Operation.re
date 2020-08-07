@@ -33,6 +33,7 @@ module Pointwise = {
   let toString =
     fun
     | `Add => "+"
+    | `Exponentiate => "^"
     | `Multiply => "*";
 
   let format = (a, b, c) => b ++ " " ++ toString(a) ++ " " ++ c;

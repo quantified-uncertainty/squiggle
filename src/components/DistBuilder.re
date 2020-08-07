@@ -158,12 +158,13 @@ module DemoDist = {
                (),
              );
 
-           let response1 = DistPlusRenderer.run(inputs1);
+           let response1 = DistPlusRenderer.run2(inputs1);
            switch (response1) {
-           | (Ok(distPlus1)) =>
+           | (Ok(`DistPlus(distPlus1))) =>
              <>
                <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
              </>
+           | (Ok(`Function(f,a))) => "Function!!!" |> R.ste
            | (Error(r)) => r |> R.ste
            };
          | _ =>
@@ -330,159 +331,9 @@ let make = () => {
             <Col span=24>
               <FieldText
                 field=FormConfig.GuesstimatorString
-                label="Guesstimator String"
+                label="Program"
               />
             </Col>
-          </Row>
-          <Row _type=`flex className=Styles.rows>
-            <Col span=4>
-              <Form.Field
-                field=FormConfig.DomainType
-                render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Domain Type" |> R.ste}>
-                    <Antd.Select value onChange={e => e |> handleChange}>
-                      <Antd.Select.Option value="Complete">
-                        {"Complete" |> R.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="LeftLimited">
-                        {"Left Limited" |> R.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="RightLimited">
-                        {"Right Limited" |> R.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="LeftAndRightLimited">
-                        {"Left And Right Limited" |> R.ste}
-                      </Antd.Select.Option>
-                    </Antd.Select>
-                  </Antd.Form.Item>
-                }
-              />
-            </Col>
-            {<>
-               <Col span=4>
-                 <FieldFloat
-                   field=FormConfig.XPoint
-                   label="Left X-point"
-                   className=Styles.groupA
-                 />
-               </Col>
-               <Col span=4>
-                 <FieldFloat
-                   field=FormConfig.ExcludingProbabilityMass
-                   label="Left Excluding Probability Mass"
-                   className=Styles.groupA
-                 />
-               </Col>
-             </>
-             |> R.showIf(
-                  E.L.contains(
-                    reform.state.values.domainType,
-                    ["LeftLimited", "LeftAndRightLimited"],
-                  ),
-                )}
-            {<>
-               <Col span=4>
-                 <FieldFloat
-                   field=FormConfig.XPoint2
-                   label="Right X-point"
-                   className=Styles.groupB
-                 />
-               </Col>
-               <Col span=4>
-                 <FieldFloat
-                   field=FormConfig.ExcludingProbabilityMass2
-                   label="Right Excluding Probability Mass"
-                   className=Styles.groupB
-                 />
-               </Col>
-             </>
-             |> R.showIf(
-                  E.L.contains(
-                    reform.state.values.domainType,
-                    ["RightLimited", "LeftAndRightLimited"],
-                  ),
-                )}
-          </Row>
-          <Row _type=`flex className=Styles.rows>
-            <Col span=4>
-              <Form.Field
-                field=FormConfig.UnitType
-                render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Unit Type" |> R.ste}>
-                    <Antd.Select value onChange={e => e |> handleChange}>
-                      <Antd.Select.Option value="UnspecifiedDistribution">
-                        {"Unspecified Distribution" |> R.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="TimeDistribution">
-                        {"Time Distribution" |> R.ste}
-                      </Antd.Select.Option>
-                    </Antd.Select>
-                  </Antd.Form.Item>
-                }
-              />
-            </Col>
-            {<>
-               <Col span=4>
-                 <Form.Field
-                   field=FormConfig.Zero
-                   render={({handleChange, value}) =>
-                     <Antd.Form.Item label={"Zero Point" |> R.ste}>
-                       <Antd_DatePicker
-                         value
-                         onChange={e => {
-                           e |> handleChange;
-                           _ => ();
-                         }}
-                       />
-                     </Antd.Form.Item>
-                   }
-                 />
-               </Col>
-               <Col span=4>
-                 <Form.Field
-                   field=FormConfig.Unit
-                   render={({handleChange, value}) =>
-                     <Antd.Form.Item label={"Unit" |> R.ste}>
-                       <Antd.Select value onChange={e => e |> handleChange}>
-                         <Antd.Select.Option value="days">
-                           {"Days" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="hours">
-                           {"Hours" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="milliseconds">
-                           {"Milliseconds" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="minutes">
-                           {"Minutes" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="months">
-                           {"Months" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="quarters">
-                           {"Quarters" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="seconds">
-                           {"Seconds" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="weeks">
-                           {"Weeks" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="years">
-                           {"Years" |> R.ste}
-                         </Antd.Select.Option>
-                       </Antd.Select>
-                     </Antd.Form.Item>
-                   }
-                 />
-               </Col>
-             </>
-             |> R.showIf(
-                  E.L.contains(
-                    reform.state.values.unitType,
-                    ["TimeDistribution"],
-                  ),
-                )}
           </Row>
           <Row _type=`flex className=Styles.rows>
             <Col span=4>

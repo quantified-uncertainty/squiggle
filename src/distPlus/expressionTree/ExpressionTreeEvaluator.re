@@ -304,6 +304,7 @@ let toLeaf =
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)
+  | `Function(_)
   | `RenderedDist(_) => Ok(node)
   // Operations nevaluationParamsd to be turned into leaves
   | `AlgebraicCombination(algebraicOp, t1, t2) =>
@@ -328,8 +329,6 @@ let toLeaf =
     FloatFromDist.operationToLeaf(evaluationParams, distToFloatOp, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
-
-  | `Function(_) => Error("Function must be called with params")
   | `Symbol(r) => ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r) |> E.O.toResult("Undeclared variable " ++ r)
   | `FunctionCall(name, args) =>
     callableFunction(evaluationParams, name, args)
