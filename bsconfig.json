@@ -42,9 +42,7 @@
     "bs-css",
     "rationale",
     "bs-moment",
-    "reschema",
-    "bs-webapi",
-    "bs-fetch"
+    "reschema"
   ],
   "refmt": 3,
   "ppx-flags": [
