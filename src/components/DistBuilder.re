@@ -189,9 +189,13 @@ module DemoDist = {
                  Ok(`DistPlus(distPlus3)),
                ) =>
                <>
-                 <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
-                 <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus2)} />
-                 <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus3)} />
+                 <PercentilesChart
+                   dists=[|
+                     (5.0, distPlus1),
+                     (10.0, distPlus2),
+                     (20.0, distPlus3),
+                   |]
+                 />
                </>
              | (Error(r), _, _) => r |> R.ste
              | _ => "Failure " |> R.ste
@@ -217,7 +221,7 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
-        guesstimatorString: "mm(1, 2, 3, normal(2, 1))", // , triangular(30, 40, 60)
+        guesstimatorString: "foo(t) = mm(normal(5,t));foo", // , triangular(30, 40, 60)
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
@@ -344,40 +348,6 @@ let make = () => {
   };
 
   <div className=Styles.parent>
-    Victory.(
-      <VictoryChart
-        padding={"top": 1, "bottom": 9, "right": 1, "left": 3}
-        minDomain=0.0
-        maxDomain=2.0
-        height=20
-        width=20>
-        <VictoryAxis
-          height=200
-          scale={"x": "linear", "y": "log"}
-          style={
-            "axis": {
-              "stroke": "#aaa",
-            },
-            "tickLabels": {
-              "fontSize": 7,
-              "padding": 2,
-            },
-          }
-        />
-        <VictoryLine
-          data=[|
-            {"x": 0.5, "y": 0.8},
-            {"x": 0.8, "y": 0.9},
-            {"x": 0.2, "y": 1.1},
-          |]
-          style={
-            "data": {
-              "stroke": "#aaa",
-            },
-          }
-        />
-      </VictoryChart>
-    )
     <div className=Styles.spacer />
     demoDist
     <div className=Styles.spacer />
