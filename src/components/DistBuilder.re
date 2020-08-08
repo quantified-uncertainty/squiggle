@@ -168,36 +168,59 @@ module DemoDist = {
                DistPlusRenderer.runFunction(
                  inputs1,
                  (f, a),
-                 [|`SymbolicDist(`Float(5.0))|],
+                 [|`SymbolicDist(`Float(0.0))|],
                );
              let result2 =
                DistPlusRenderer.runFunction(
                  inputs1,
                  (f, a),
-                 [|`SymbolicDist(`Float(10.0))|],
+                 [|`SymbolicDist(`Float(2.0))|],
                );
              let result3 =
                DistPlusRenderer.runFunction(
                  inputs1,
                  (f, a),
-                 [|`SymbolicDist(`Float(20.0))|],
+                 [|`SymbolicDist(`Float(4.0))|],
                );
-             switch (result1, result2, result3) {
+             let result4 =
+               DistPlusRenderer.runFunction(
+                 inputs1,
+                 (f, a),
+                 [|`SymbolicDist(`Float(6.0))|],
+               );
+             let result5 =
+               DistPlusRenderer.runFunction(
+                 inputs1,
+                 (f, a),
+                 [|`SymbolicDist(`Float(8.0))|],
+               );
+             let result6 =
+               DistPlusRenderer.runFunction(
+                 inputs1,
+                 (f, a),
+                 [|`SymbolicDist(`Float(10.0))|],
+               );
+             switch (result1, result2, result3, result4, result5, result6) {
              | (
                  Ok(`DistPlus(distPlus1)),
                  Ok(`DistPlus(distPlus2)),
                  Ok(`DistPlus(distPlus3)),
+                 Ok(`DistPlus(distPlus4)),
+                 Ok(`DistPlus(distPlus5)),
+                 Ok(`DistPlus(distPlus6)),
                ) =>
                <>
                  <PercentilesChart
                    dists=[|
-                     (5.0, distPlus1),
-                     (10.0, distPlus2),
-                     (20.0, distPlus3),
+                     (0.0, distPlus1),
+                     (2.0, distPlus2),
+                     (4.0, distPlus3),
+                     (6.0, distPlus4),
+                     (8.0, distPlus5),
+                     (10.0, distPlus6),
                    |]
                  />
                </>
-             | (Error(r), _, _) => r |> R.ste
              | _ => "Failure " |> R.ste
              };
            | Error(r) => r |> R.ste

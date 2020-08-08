@@ -3,10 +3,10 @@ external percentilesChart: ReasonReact.reactClass = "PercentilesChart";
 
 module Internal = {
   [@react.component]
-  let make = (~data, ~children=ReasonReact.null) =>
+  let make = (~data, ~signalListeners, ~children=ReasonReact.null) =>
     ReasonReact.wrapJsForReason(
       ~reactClass=percentilesChart,
-      ~props={"data": data},
+      ~props={"data": data, "signalListeners": signalListeners},
       children,
     )
     |> ReasonReact.element;
@@ -37,5 +37,5 @@ let make =
        });
        Js.log3("Data", dists, data);
   let da = {"facet": data};
-  <Internal data=da />;
+  <Internal data=da signalListeners={}/>;
 };
