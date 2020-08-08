@@ -7,20 +7,6 @@
       {
         "name": "facet",
         "values": [
-          {
-             "x": 1,
-            "p5": 2,
-            "p95": 3,
-            "p50": 2.5
-          },
-          {  "x": 2,"p5": 3, "p95": 5, "p50": 4 },
-          {
-  
-            "x":3,
-            "p5": 2,
-            "p95": 8,
-            "p50": 5
-          }
         ],
         "format": { "type": "json", "parse": { "timestamp": "date" } }
       },
@@ -31,9 +17,9 @@
           {
             "type": "aggregate",
             "groupby": ["x"],
-            "ops": ["mean", "mean", "mean"],
-            "fields": ["p5", "p95", "p50"],
-            "as": ["p5", "p95", "p50"]
+            "ops": ["mean","mean","mean","mean","mean", "mean","mean","mean","mean","mean","mean","mean","mean"],
+            "fields": ["p1", "p5", "p10", "p20", "p30", "p40", "p50", "p60", "p70", "p80", "p90", "p95", "p99"],
+            "as": ["p1", "p5", "p10", "p20", "p30", "p40", "p50", "p60", "p70", "p80", "p90", "p95", "p99"]
           }
         ]
       }
@@ -84,15 +70,84 @@
         "type": "area",
         "from": { "data": "table" },
         "encode": {
-          "enter": { "fill": { "value": "#C9D6E5" } },
+          "enter": { "fill": { "value": "#4C78A8" } },
+          "update": {
+            "interpolate": { "value": "monotone" },
+            "x": { "scale": "xscale", "field": "x" },
+            "y": { "scale": "yscale", "field": "p1" },
+            "y2": { "scale": "yscale", "field": "p99" },
+            "opacity": { "value": 0.05 }
+          }
+        }
+      },
+      {
+        "type": "area",
+        "from": { "data": "table" },
+        "encode": {
+          "enter": { "fill": { "value": "#4C78A8" } },
           "update": {
             "interpolate": { "value": "monotone" },
             "x": { "scale": "xscale", "field": "x" },
             "y": { "scale": "yscale", "field": "p5" },
             "y2": { "scale": "yscale", "field": "p95" },
-            "opacity": { "value": 0.75 }
-          },
-          "hover": { "opacity": { "value": 0.5 } }
+            "opacity": { "value": 0.1 }
+          }
+        }
+      },
+      {
+        "type": "area",
+        "from": { "data": "table" },
+        "encode": {
+          "enter": { "fill": { "value": "#4C78A8" } },
+          "update": {
+            "interpolate": { "value": "monotone" },
+            "x": { "scale": "xscale", "field": "x" },
+            "y": { "scale": "yscale", "field": "p10" },
+            "y2": { "scale": "yscale", "field": "p90" },
+            "opacity": { "value": 0.15 }
+          }
+        }
+      },
+      {
+        "type": "area",
+        "from": { "data": "table" },
+        "encode": {
+          "enter": { "fill": { "value": "#4C78A8" } },
+          "update": {
+            "interpolate": { "value": "monotone" },
+            "x": { "scale": "xscale", "field": "x" },
+            "y": { "scale": "yscale", "field": "p20" },
+            "y2": { "scale": "yscale", "field": "p80" },
+            "opacity": { "value": 0.2 }
+          }
+        }
+      },
+      {
+        "type": "area",
+        "from": { "data": "table" },
+        "encode": {
+          "enter": { "fill": { "value": "#4C78A8" } },
+          "update": {
+            "interpolate": { "value": "monotone" },
+            "x": { "scale": "xscale", "field": "x" },
+            "y": { "scale": "yscale", "field": "p30" },
+            "y2": { "scale": "yscale", "field": "p70" },
+            "opacity": { "value": 0.2 }
+          }
+        }
+      },
+      {
+        "type": "area",
+        "from": { "data": "table" },
+        "encode": {
+          "enter": { "fill": { "value": "#4C78A8" } },
+          "update": {
+            "interpolate": { "value": "monotone" },
+            "x": { "scale": "xscale", "field": "x" },
+            "y": { "scale": "yscale", "field": "p40" },
+            "y2": { "scale": "yscale", "field": "p60" },
+            "opacity": { "value": 0.2 }
+          }
         }
       },
       {
@@ -103,10 +158,7 @@
             "interpolate": { "value": "monotone" },
             "stroke": { "value": "#4C78A8" },
             "strokeWidth": { "value": 2 },
-            "opacity": { "value": 0.8 }
-          },
-          "hover": { "opacity": { "value": 0.5 } },
-          "enter": {
+            "opacity": { "value": 0.8 },
             "x": { "scale": "xscale", "field": "x" },
             "y": { "scale": "yscale", "field": "p50" }
           }
