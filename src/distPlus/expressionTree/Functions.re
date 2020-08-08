@@ -49,6 +49,11 @@ let to_: array(node) => result(node, string) =
     Error("Low value must be less than high value.")
   | _ => Error("Requires 2 variables");
 
+// Possible setup:
+// let normal = {"inputs": [`float, `float], "outputs": [`float]};
+// let render = {"inputs": [`dist], "outputs": [`renderedDist]};
+// let render = {"inputs": [`distRenderedDist], "outputs": [`renderedDist]};
+
 let fnn =
     (
       evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,

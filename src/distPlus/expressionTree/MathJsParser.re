@@ -201,6 +201,9 @@ module MathAdtToDistDst = {
          | ("dotMultiply", [|l, r|]) => toOkPointwise((`Multiply, l, r))
          | ("dotMultiply", _) =>
            Error("Dotwise multiplication needs two operands")
+         | ("dotPow", [|l, r|]) => toOkPointwise((`Exponentiate, l, r))
+         | ("dotPow", _) =>
+           Error("Dotwise exponentiation needs two operands")
          | ("rightLogShift", [|l, r|]) => toOkPointwise((`Add, l, r))
          | ("rightLogShift", _) =>
            Error("Dotwise addition needs two operands")
@@ -227,6 +230,12 @@ module MathAdtToDistDst = {
            Error(
              "truncate needs three arguments: the expression and both cutoffs",
            )
+         | ("scaleMultiply", [|d, `SymbolicDist(`Float(v))|]) =>
+            Ok(`VerticalScaling(`Multiply, d, `SymbolicDist(`Float(v))))
+         | ("scaleExp", [|d, `SymbolicDist(`Float(v))|]) =>
+            Ok(`VerticalScaling(`Exponentiate, d, `SymbolicDist(`Float(v))))
+         | ("scaleLog", [|d, `SymbolicDist(`Float(v))|]) =>
+            Ok(`VerticalScaling(`Log, d, `SymbolicDist(`Float(v))))
          | ("pdf", [|d, `SymbolicDist(`Float(v))|]) =>
            toOkFloatFromDist((`Pdf(v), d))
          | ("cdf", [|d, `SymbolicDist(`Float(v))|]) =>
@@ -275,11 +284,15 @@ module MathAdtToDistDst = {
     | "subtract"
     | "multiply"
     | "dotMultiply"
+    | "dotPow"
     | "rightLogShift"
     | "divide"
     | "pow"
     | "leftTruncate"
     | "rightTruncate"
+    | "scaleMultiply"
+    | "scaleExp"
+    | "scaleLog"
     | "truncate"
     | "mean"
     | "inv"
@@ -355,6 +368,7 @@ let fromString2 = str => {
        Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
      */
   let mathJsToJson = str |> pointwiseToRightLogShift |> Mathjs.parseMath;
+
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
       switch (MathJsonToMathJsAdt.run(r)) {
@@ -364,6 +378,7 @@ let fromString2 = str => {
     });
 
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
+  Js.log2(mathJsParse, value);
   value;
 };
 

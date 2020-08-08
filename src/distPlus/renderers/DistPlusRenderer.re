@@ -91,18 +91,16 @@ module Internals = {
   };
   let makeOutputs = (graph, shape): outputs => {graph, shape};
 
+  let makeInputs = (inputs): ExpressionTypes.ExpressionTree.samplingInputs => {
+    sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
+    outputXYPoints:
+      inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
+    kernelWidth: inputs.samplingInputs.kernelWidth,
+    shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
+  };
+
   let runNode = (inputs, node) => {
-    ExpressionTree.toLeaf(
-      {
-        sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
-        outputXYPoints:
-          inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
-        kernelWidth: inputs.samplingInputs.kernelWidth,
-        shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
-      },
-      inputs.environment,
-      node,
-    );
+    ExpressionTree.toLeaf(makeInputs(inputs), inputs.environment, node);
   };
 
   let runProgram = (inputs: inputs, p: ExpressionTypes.Program.program) => {
@@ -154,15 +152,40 @@ let run = (inputs: Inputs.inputs) => {
   |> E.R.fmap(Internals.outputToDistPlus(inputs));
 };
 
-let exportDistPlus = inputs =>
-  fun
-  | `RenderedDist(n) => Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
-  | `Function(n) => Ok(`Function(n))
-  | n =>
-    Error(
-      "Didn't output a rendered distribution. Format:"
-      ++ ExpressionTree.toString(n),
-    );
+let renderIfNeeded =
+    (inputs, node: ExpressionTypes.ExpressionTree.node)
+    : result(ExpressionTypes.ExpressionTree.node, string) =>
+  node
+  |> (
+    fun
+    | `SymbolicDist(n) => {
+        `Render(`SymbolicDist(n))
+        |> Internals.runNode(Internals.distPlusRenderInputsToInputs(inputs))
+        |> (
+          fun
+          | Ok(`RenderedDist(n)) => Ok(`RenderedDist(n))
+          | Error(r) => Error(r)
+          | _ => Error("Didn't render, but intended to")
+        );
+      }
+    | n => Ok(n)
+  );
+
+let exportDistPlus = (inputs, node: ExpressionTypes.ExpressionTree.node) =>
+  node
+  |> renderIfNeeded(inputs)
+  |> E.R.bind(
+       _,
+       fun
+       | `RenderedDist(n) =>
+         Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
+       | `Function(n) => Ok(`Function(n))
+       | n =>
+         Error(
+           "Didn't output a rendered distribution. Format:"
+           ++ ExpressionTree.toString(n),
+         ),
+     );
 
 let run2 = (inputs: Inputs.inputs) => {
   inputs
@@ -177,17 +200,10 @@ let runFunction =
       fn: (array(string), ExpressionTypes.ExpressionTree.node),
       fnInputs,
     ) => {
-  let (_, fns) = fn;
   let inputs = ins |> Internals.distPlusRenderInputsToInputs;
   let output =
     ExpressionTree.runFunction(
-      {
-        sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
-        outputXYPoints:
-          inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
-        kernelWidth: inputs.samplingInputs.kernelWidth,
-        shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
-      },
+      Internals.makeInputs(inputs),
       inputs.environment,
       fnInputs,
       fn,

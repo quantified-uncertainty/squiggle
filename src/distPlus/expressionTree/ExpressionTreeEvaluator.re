@@ -160,7 +160,7 @@ module PointwiseCombination = {
       Render.render(evaluationParams, t2),
     ) {
     | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
-      Ok(`RenderedDist(Shape.combinePointwise(( *. ), rs1, rs2)))
+      Ok(`RenderedDist(Shape.combinePointwise(fn, rs1, rs2)))
     | (Error(e1), _) => Error(e1)
     | (_, Error(e2)) => Error(e2)
     | _ => Error("Pointwise combination: rendering failed.")
@@ -177,7 +177,7 @@ module PointwiseCombination = {
     switch (pointwiseOp) {
     | `Add => pointwiseAdd(evaluationParams, t1, t2)
     | `Multiply => pointwiseCombine(( *. ),evaluationParams, t1, t2)
-    | `Exponentiate => pointwiseCombine(( *. ),evaluationParams, t1, t2)
+    | `Exponentiate => pointwiseCombine(( ** ),evaluationParams, t1, t2)
     };
   };
 };
