@@ -52,6 +52,7 @@ module DistToFloat = {
     };
 };
 
+// Note that different logarithms don't really do anything.
 module Scale = {
   type t = scaleOperation;
   let toFn =

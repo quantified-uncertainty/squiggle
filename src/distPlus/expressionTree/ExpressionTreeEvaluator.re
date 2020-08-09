@@ -95,19 +95,19 @@ module VerticalScaling = {
   let operationToLeaf =
       (evaluationParams: evaluationParams, scaleOp, t, scaleBy) => {
     // scaleBy has to be a single float, otherwise we'll return an error.
-    let fn = Operation.Scale.toFn(scaleOp);
+    let fn = (secondary,main) => Operation.Scale.toFn(scaleOp)(main, secondary);
     let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(scaleOp);
     let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp);
     let renderedShape = Render.render(evaluationParams, t);
 
-    switch (renderedShape, scaleBy) {
-    | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(sm))) =>
+    let s = switch (renderedShape, scaleBy) {
+    | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(scaleBy))) =>
       Ok(
         `RenderedDist(
           Shape.T.mapY(
-            ~integralSumCacheFn=integralSumCacheFn(sm),
-            ~integralCacheFn=integralCacheFn(sm),
-            ~fn=fn(sm),
+            ~integralSumCacheFn=integralSumCacheFn(scaleBy),
+            ~integralCacheFn=integralCacheFn(scaleBy),
+            ~fn=fn(scaleBy),
             rs,
           ),
         ),
@@ -115,6 +115,7 @@ module VerticalScaling = {
     | (Error(e1), _) => Error(e1)
     | (_, _) => Error("Can only scale by float values.")
     };
+    s;
   };
 };
 

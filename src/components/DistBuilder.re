@@ -155,7 +155,7 @@ module DemoDist = {
                },
                ~distPlusIngredients,
                ~environment=
-                 [|("p", `SymbolicDist(`Float(1.0)))|]
+                 [||]
                  ->Belt.Map.String.fromArray,
                (),
              );

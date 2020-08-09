@@ -8,7 +8,7 @@ module Inputs = {
       shapeLength: option(int),
     };
   };
-  let defaultRecommendedLength = 10000;
+  let defaultRecommendedLength = 100;
   let defaultShouldDownsample = true;
 
   type ingredients = {

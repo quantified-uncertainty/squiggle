@@ -1,4 +1,10 @@
-type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide | `Exponentiate];
+type algebraicOperation = [
+  | `Add
+  | `Multiply
+  | `Subtract
+  | `Divide
+  | `Exponentiate
+];
 type pointwiseOperation = [ | `Add | `Multiply | `Exponentiate];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
 type distToFloatOperation = [
@@ -30,24 +36,42 @@ module ExpressionTree = {
     sampleCount: int,
     outputXYPoints: int,
     kernelWidth: option(float),
-    shapeLength: int
+    shapeLength: int,
+  };
+
+  module SamplingInputs = {
+    type t = {
+      sampleCount: option(int),
+      outputXYPoints: option(int),
+      kernelWidth: option(float),
+      shapeLength: option(int),
+    };
+    let withDefaults = (t: t): samplingInputs => {
+      sampleCount: t.sampleCount |> E.O.default(10000),
+      outputXYPoints: t.outputXYPoints |> E.O.default(10000),
+      kernelWidth: t.kernelWidth,
+      shapeLength: t.shapeLength |> E.O.default(10000),
+    };
   };
 
   type environment = Belt.Map.String.t(node);
 
   module Environment = {
-    type t = environment
+    type t = environment;
     module MS = Belt.Map.String;
-    let fromArray = MS.fromArray
-    let empty:t = [||]->fromArray;
-    let mergeKeepSecond = (a:t,b:t) => MS.merge(a,b, (_,a,b) =>switch(a,b){
-      | (_, Some(b)) => Some(b)
-      | (Some(a), _) => Some(a)
-      | _ => None
-    })
-    let update = (t,str, fn) => MS.update(t, str, fn)
-    let get = (t:t,str) => MS.get(t, str)
-  }
+    let fromArray = MS.fromArray;
+    let empty: t = [||]->fromArray;
+    let mergeKeepSecond = (a: t, b: t) =>
+      MS.merge(a, b, (_, a, b) =>
+        switch (a, b) {
+        | (_, Some(b)) => Some(b)
+        | (Some(a), _) => Some(a)
+        | _ => None
+        }
+      );
+    let update = (t, str, fn) => MS.update(t, str, fn);
+    let get = (t: t, str) => MS.get(t, str);
+  };
 
   type evaluationParams = {
     samplingInputs,
@@ -115,6 +139,9 @@ type simplificationResult = [
 ];
 
 module Program = {
-  type statement = [ | `Assignment(string, ExpressionTree.node) | `Expression(ExpressionTree.node)];
+  type statement = [
+    | `Assignment(string, ExpressionTree.node)
+    | `Expression(ExpressionTree.node)
+  ];
   type program = array(statement);
-}
+};

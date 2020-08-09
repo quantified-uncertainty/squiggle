@@ -192,6 +192,7 @@ module MathAdtToDistDst = {
          switch (name, args) {
          | ("add", [|l, r|]) => toOkAlgebraic((`Add, l, r))
          | ("add", _) => Error("Addition needs two operands")
+         | ("unaryMinus", [|l|]) => toOkAlgebraic((`Multiply, `SymbolicDist(`Float(-1.0)), l))
          | ("subtract", [|l, r|]) => toOkAlgebraic((`Subtract, l, r))
          | ("subtract", _) => Error("Subtraction needs two operands")
          | ("multiply", [|l, r|]) => toOkAlgebraic((`Multiply, l, r))
@@ -283,6 +284,7 @@ module MathAdtToDistDst = {
     | "add"
     | "subtract"
     | "multiply"
+    | "unaryMinus"
     | "dotMultiply"
     | "dotPow"
     | "rightLogShift"
