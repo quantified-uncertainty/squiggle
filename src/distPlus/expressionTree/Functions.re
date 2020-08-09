@@ -35,19 +35,18 @@ let apply3 = (fn, args: array(node)): result(node, string) =>
   | _ => Error("Needs 3 args")
   };
 
-let to_: array(node) => result(node, string) =
-  fun
-  | [|`SymbolicDist(`Float(low)), `SymbolicDist(`Float(high))|]
+let to_: (float, float) => result(node, string) = (low, high) => switch(low,high){
+  | (low,high)
       when low <= 0.0 && low < high => {
       Ok(`SymbolicDist(SymbolicDist.Normal.from90PercentCI(low, high)));
     }
-  | [|`SymbolicDist(`Float(low)), `SymbolicDist(`Float(high))|]
+  | (low,high)
       when low < high => {
       Ok(`SymbolicDist(SymbolicDist.Lognormal.from90PercentCI(low, high)));
     }
-  | [|`SymbolicDist(`Float(_)), `SymbolicDist(_)|] =>
+  | (low,high) =>
     Error("Low value must be less than high value.")
-  | _ => Error("Requires 2 variables");
+}
 
 // Possible setup:
 // let normal = {"inputs": [`float, `float], "outputs": [`float]};
@@ -97,6 +96,6 @@ let fnn =
       |> E.R.fmap(r => `SymbolicDist(r))
     | _ => Error("Needs 3 valid arguments")
     }
-  | ("to", _) => to_(args)
+  | ("to", _) => apply2(twoFloats(to_), args)
   | _ => Error("Function " ++ name ++ " not found")
   };

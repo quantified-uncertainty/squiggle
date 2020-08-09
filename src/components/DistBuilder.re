@@ -164,64 +164,24 @@ module DemoDist = {
            | Ok(`DistPlus(distPlus1)) =>
              <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
            | Ok(`Function(f, a)) =>
-             let result1 =
-               DistPlusRenderer.runFunction(
-                 inputs1,
-                 (f, a),
-                 [|`SymbolicDist(`Float(0.0))|],
-               );
-             let result2 =
-               DistPlusRenderer.runFunction(
-                 inputs1,
-                 (f, a),
-                 [|`SymbolicDist(`Float(2.0))|],
-               );
-             let result3 =
-               DistPlusRenderer.runFunction(
-                 inputs1,
-                 (f, a),
-                 [|`SymbolicDist(`Float(4.0))|],
-               );
-             let result4 =
-               DistPlusRenderer.runFunction(
-                 inputs1,
-                 (f, a),
-                 [|`SymbolicDist(`Float(6.0))|],
-               );
-             let result5 =
-               DistPlusRenderer.runFunction(
-                 inputs1,
-                 (f, a),
-                 [|`SymbolicDist(`Float(8.0))|],
-               );
-             let result6 =
-               DistPlusRenderer.runFunction(
-                 inputs1,
-                 (f, a),
-                 [|`SymbolicDist(`Float(10.0))|],
-               );
-             switch (result1, result2, result3, result4, result5, result6) {
-             | (
-                 Ok(`DistPlus(distPlus1)),
-                 Ok(`DistPlus(distPlus2)),
-                 Ok(`DistPlus(distPlus3)),
-                 Ok(`DistPlus(distPlus4)),
-                 Ok(`DistPlus(distPlus5)),
-                 Ok(`DistPlus(distPlus6)),
-               ) =>
-               <>
-                 <PercentilesChart
-                   dists=[|
-                     (0.0, distPlus1),
-                     (2.0, distPlus2),
-                     (4.0, distPlus3),
-                     (6.0, distPlus4),
-                     (8.0, distPlus5),
-                     (10.0, distPlus6),
-                   |]
-                 />
-               </>
-             | _ => "Failure " |> R.ste
+             let results = E.A.Floats.range(0.0, 10.0, 100)
+               |> E.A.fmap(r =>
+                    DistPlusRenderer.runFunction(
+                      inputs1,
+                      (f, a),
+                      [|`SymbolicDist(`Float(r))|],
+                    )
+                    |> E.R.bind(_, a =>
+                         switch (a) {
+                         | `DistPlus(d) => Ok((r, d))
+                         | _ => Error("")
+                         }
+                       )
+                  )
+               |> E.A.R.firstErrorOrOpen;
+             switch (results) {
+             | Ok(dists) => <> <PercentilesChart dists /> </>
+             | Error(r) => r |> R.ste
              };
            | Error(r) => r |> R.ste
            };
@@ -236,7 +196,7 @@ module DemoDist = {
 
 [@react.component]
 let make = () => {
-  let (reloader, setRealoader) = React.useState(() => 1);
+  let (reloader, setReloader) = React.useState(() => 1);
   let reform =
     Form.use(
       ~validationStrategy=OnDemand,
@@ -366,8 +326,8 @@ let make = () => {
       |],
     );
 
-  let onRealod = _ => {
-    setRealoader(_ => reloader + 1);
+  let onReload = _ => {
+    setReloader(_ => reloader + 1);
   };
 
   <div className=Styles.parent>
@@ -380,7 +340,7 @@ let make = () => {
         <Antd.Button
           icon=Antd.IconName.reload
           shape=`circle
-          onClick=onRealod
+          onClick=onReload
         />
       }>
       <Form.Provider value=reform>
@@ -411,7 +371,7 @@ let make = () => {
             </Col>
           </Row>
           <Antd.Button
-            _type=`primary icon=Antd.IconName.reload onClick=onRealod>
+            _type=`primary icon=Antd.IconName.reload onClick=onReload>
             {"Update Distribution" |> R.ste}
           </Antd.Button>
         </Antd.Form>

@@ -135,23 +135,6 @@ module Internals = {
   };
 };
 
-let run = (inputs: Inputs.inputs) => {
-  inputs
-  |> Internals.distPlusRenderInputsToInputs
-  |> Internals.inputsToLeaf
-  |> E.R.bind(_, r =>
-       switch (r) {
-       | `RenderedDist(n) => Ok(n)
-       | n =>
-         Error(
-           "Didn't output a rendered distribution. Format:"
-           ++ ExpressionTree.toString(n),
-         )
-       }
-     )
-  |> E.R.fmap(Internals.outputToDistPlus(inputs));
-};
-
 let renderIfNeeded =
     (inputs, node: ExpressionTypes.ExpressionTree.node)
     : result(ExpressionTypes.ExpressionTree.node, string) =>
@@ -170,6 +153,27 @@ let renderIfNeeded =
       }
     | n => Ok(n)
   );
+
+let run = (inputs: Inputs.inputs) => {
+  inputs
+  |> Internals.distPlusRenderInputsToInputs
+  |> Internals.inputsToLeaf
+  |> E.R.bind(_, r =>
+       r
+       |> renderIfNeeded(inputs)
+       |> (
+         fun
+         | Ok(`RenderedDist(n)) => Ok(n)
+         | Ok(n) =>
+           Error(
+             "Didn't output a rendered distribution. Format:"
+             ++ ExpressionTree.toString(n),
+           )
+         | Error(r) => Error(r)
+       )
+     )
+  |> E.R.fmap(Internals.outputToDistPlus(inputs));
+};
 
 let exportDistPlus = (inputs, node: ExpressionTypes.ExpressionTree.node) =>
   node
