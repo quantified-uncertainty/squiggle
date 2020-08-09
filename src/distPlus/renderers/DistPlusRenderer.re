@@ -112,7 +112,7 @@ module Internals = {
              ins := addVariable(ins^, name, node);
              None;
            }
-         | `Expression(node) => Some(runNode(ins^, node)),
+         | `Expression(node) => Some(runNode(ins^, node) |> E.R.fmap(r => (ins, r))),
        )
     |> E.A.O.concatSomes
     |> E.A.R.firstErrorOrOpen;
@@ -158,7 +158,7 @@ let run = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_, r =>
+  |> E.R.bind(_, ((lastIns,r)) =>
        r
        |> renderIfNeeded(inputs)
        |> (
@@ -195,7 +195,7 @@ let run2 = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_, exportDistPlus(inputs));
+  |> E.R.bind(_,((a,b)) => exportDistPlus(inputs,b))
 };
 
 let runFunction =

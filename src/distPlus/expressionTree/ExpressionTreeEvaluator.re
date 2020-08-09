@@ -297,7 +297,7 @@ module Render = {
    but most often it will produce a RenderedDist.
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
-let toLeaf =
+let rec toLeaf =
     (
       evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
       node: t,
@@ -337,6 +337,7 @@ let toLeaf =
       r,
     )
     |> E.O.toResult("Undeclared variable " ++ r)
+    |> E.R.bind(_, toLeaf(evaluationParams))
   | `FunctionCall(name, args) =>
     callableFunction(evaluationParams, name, args)
   };

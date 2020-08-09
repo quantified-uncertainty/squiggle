@@ -42,6 +42,7 @@ module FieldText = {
         <Antd.Form.Item label={label |> R.ste}>
           <Antd.Input.TextArea
             value
+            autosize=true
             onChange={BsReform.Helpers.handleChange(handleChange)}
             onBlur={_ => validate()}
           />
@@ -164,7 +165,8 @@ module DemoDist = {
            | Ok(`DistPlus(distPlus1)) =>
              <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
            | Ok(`Function(f, a)) =>
-             let results = E.A.Floats.range(0.0, 10.0, 100)
+          //  Problem: When it gets the function, it doesn't save state about previous commands
+             let results = E.A.Floats.range(0.0, 10.0, 2)
                |> E.A.fmap(r =>
                     DistPlusRenderer.runFunction(
                       inputs1,
@@ -204,7 +206,10 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
-        guesstimatorString: "foo(t) = mm(normal(5,t));foo", // , triangular(30, 40, 60)
+        guesstimatorString: "
+foo(t) = normal(t,2)
+bar(t) = foo(t)
+bar",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
