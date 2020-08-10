@@ -32,7 +32,9 @@ let rec toString: node => string =
     "[Function: ("
     ++ (args |> Js.String.concatMany(_, ","))
     ++ toString(internal)
-    ++ ")]";
+    ++ ")]"
+  | `Array(args) => "Array"
+  | `MultiModal(args) => "Multimodal"
 
 let toShape = (samplingInputs, environment, node: node) => {
   switch (toLeaf(samplingInputs, environment, node)) {

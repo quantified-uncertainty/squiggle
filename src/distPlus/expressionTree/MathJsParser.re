@@ -138,40 +138,6 @@ module MathAdtToDistDst = {
          )
     };
 
-  let multiModal =
-      (
-        args: array(result(ExpressionTypes.ExpressionTree.node, string)),
-        weights: option(array(float)),
-      ) => {
-    let weights = weights |> E.O.default([||]);
-    let firstWithError = args |> Belt.Array.getBy(_, Belt.Result.isError);
-    let withoutErrors = args |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
-
-    switch (firstWithError) {
-    | Some(Error(e)) => Error(e)
-    | None when withoutErrors |> E.A.length == 0 =>
-      Error("Multimodals need at least one input")
-    | _ =>
-      let components =
-        withoutErrors
-        |> E.A.fmapi((index, t) => {
-             let w = weights |> E.A.get(_, index) |> E.O.default(1.0);
-
-             `VerticalScaling((`Multiply, t, `SymbolicDist(`Float(w))));
-           });
-
-      let pointwiseSum =
-        components
-        |> Js.Array.sliceFrom(1)
-        |> E.A.fold_left(
-             (acc, x) => {`PointwiseCombination((`Add, acc, x))},
-             E.A.unsafe_get(components, 0),
-           );
-
-      Ok(`Normalize(pointwiseSum));
-    };
-  };
-
   //  Error("Dotwise exponentiation needs two operands")
   let operationParser =
       (
@@ -182,7 +148,6 @@ module MathAdtToDistDst = {
     let toOkAlgebraic = r => Ok(`AlgebraicCombination(r));
     let toOkPointwise = r => Ok(`PointwiseCombination(r));
     let toOkTruncate = r => Ok(`Truncate(r));
-    let toOkFloatFromDist = r => Ok(`FloatFromDist(r));
     args
     |> E.R.bind(_, args => {
          switch (name, args) {
@@ -247,31 +212,28 @@ module MathAdtToDistDst = {
     let parseArgs = () => parseArray(args);
     switch (name) {
     | "lognormal" => lognormal(args, parseArgs, nodeParser)
-    | "mm" =>
+    | "mm" =>{
       let weights =
         args
         |> E.A.last
         |> E.O.bind(
              _,
              fun
-             | Array(values) => Some(values)
-             | _ => None,
-           )
-        |> E.O.fmap(o =>
-             o
-             |> E.A.fmap(
-                  fun
-                  | Value(r) => Some(r)
-                  | _ => None,
-                )
-             |> E.A.O.concatSomes
+             | Array(values) => Some(parseArray(values))
+             | _ => None
            );
       let possibleDists =
         E.O.isSome(weights)
           ? Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1)
           : args;
-      let dists = possibleDists |> E.A.fmap(nodeParser);
-      multiModal(dists, weights);
+      let dists = parseArray(possibleDists);
+      switch(weights, dists){
+        | (Some(Error(r)), _) => Error(r)
+        | (_, Error(r)) => Error(r)
+        | (None, Ok(dists)) => Ok(`FunctionCall("multimodal", dists))
+        | (Some(Ok(r)), Ok(dists)) => Ok(`FunctionCall("multimodal", E.A.append([|`Array(r)|], dists)))
+      }
+    }
     | "add"
     | "subtract"
     | "multiply"

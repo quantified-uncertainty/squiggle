@@ -141,8 +141,9 @@ let renderIfNeeded =
   node
   |> (
     fun
-    | `SymbolicDist(n) => {
-        `Render(`SymbolicDist(n))
+    | `MultiModal(_) as n
+    | `SymbolicDist(_) as n => {
+        `Render(n)
         |> Internals.runNode(Internals.distPlusRenderInputsToInputs(inputs))
         |> (
           fun

@@ -86,50 +86,98 @@ let fnn =
     | _ => Error("Needs 3 valid arguments")
     }
   | ("to", _) => apply2(twoFloats(to_), args)
-  | ("pdf", _) => switch(args){
-    | [|fst,snd|] => {
-      switch(PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams,fst),getFloat(snd)){
-        | (Ok(fst), Some(flt)) => Ok(`FloatFromDist(`Pdf(flt), fst))
-        | _ => Error("Incorrect arguments")
+  | ("pdf", _) =>
+    switch (args) {
+    | [|fst, snd|] =>
+      switch (
+        PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
+          evaluationParams,
+          fst,
+        ),
+        getFloat(snd),
+      ) {
+      | (Ok(fst), Some(flt)) => Ok(`FloatFromDist((`Pdf(flt), fst)))
+      | _ => Error("Incorrect arguments")
       }
-    }
     | _ => Error("Needs two args")
-  }
-  | ("inv", _) => switch(args){
-    | [|fst,snd|] => {
-      switch(PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams,fst),getFloat(snd)){
-        | (Ok(fst), Some(flt)) => Ok(`FloatFromDist(`Inv(flt), fst))
-        | _ => Error("Incorrect arguments")
+    }
+  | ("inv", _) =>
+    switch (args) {
+    | [|fst, snd|] =>
+      switch (
+        PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
+          evaluationParams,
+          fst,
+        ),
+        getFloat(snd),
+      ) {
+      | (Ok(fst), Some(flt)) => Ok(`FloatFromDist((`Inv(flt), fst)))
+      | _ => Error("Incorrect arguments")
       }
-    }
     | _ => Error("Needs two args")
-  }
-  | ("cdf", _) => switch(args){
-    | [|fst,snd|] => {
-      switch(PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams,fst),getFloat(snd)){
-        | (Ok(fst), Some(flt)) => Ok(`FloatFromDist(`Cdf(flt), fst))
-        | _ => Error("Incorrect arguments")
+    }
+  | ("cdf", _) =>
+    switch (args) {
+    | [|fst, snd|] =>
+      switch (
+        PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
+          evaluationParams,
+          fst,
+        ),
+        getFloat(snd),
+      ) {
+      | (Ok(fst), Some(flt)) => Ok(`FloatFromDist((`Cdf(flt), fst)))
+      | _ => Error("Incorrect arguments")
       }
-    }
     | _ => Error("Needs two args")
-  }
-  | ("mean", _) => switch(args){
-    | [|fst|] => {
-      switch(PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams,fst)){
-        | (Ok(fst)) => Ok(`FloatFromDist(`Mean,fst))
-        | _ => Error("Incorrect arguments")
+    }
+  | ("mean", _) =>
+    switch (args) {
+    | [|fst|] =>
+      switch (
+        PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
+          evaluationParams,
+          fst,
+        )
+      ) {
+      | Ok(fst) => Ok(`FloatFromDist((`Mean, fst)))
+      | _ => Error("Incorrect arguments")
       }
-    }
     | _ => Error("Needs two args")
-  }
-  | ("sample", _) => switch(args){
-    | [|fst|] => {
-      switch(PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams,fst)){
-        | (Ok(fst)) => Ok(`FloatFromDist(`Sample,fst))
-        | _ => Error("Incorrect arguments")
+    }
+  | ("sample", _) =>
+    switch (args) {
+    | [|fst|] =>
+      switch (
+        PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
+          evaluationParams,
+          fst,
+        )
+      ) {
+      | Ok(fst) => Ok(`FloatFromDist((`Sample, fst)))
+      | _ => Error("Incorrect arguments")
       }
-    }
     | _ => Error("Needs two args")
-  }
+    }
+  | ("mm", _)
+  | ("multimodal", _) =>
+    switch (args |> E.A.to_list) {
+    | [`Array(weights), ...dists] =>
+      let withWeights =
+        dists
+        |> E.L.toArray
+        |> E.A.fmapi((index, t) => {
+             let w =
+               weights
+               |> E.A.get(_, index)
+               |> E.O.bind(_, getFloat)
+               |> E.O.default(1.0);
+             (t, w);
+           });
+      Ok(`MultiModal(withWeights));
+    | dists when E.L.length(dists) > 0 =>
+      Ok(`MultiModal(dists |> E.L.toArray |> E.A.fmap(r => (r, 1.0))))
+    | _ => Error("Needs at least one distribution")
+    }
   | _ => Error("Function " ++ name ++ " not found")
   };

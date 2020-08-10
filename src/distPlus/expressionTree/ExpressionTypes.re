@@ -29,6 +29,8 @@ module ExpressionTree = {
     | `Truncate(option(float), option(float), node)
     | `FloatFromDist(distToFloatOperation, node)
     | `FunctionCall(string, array(node))
+    | `Array(array(node))
+    | `MultiModal(array((node, float)))
   ];
   // Have nil as option
   let getFloat = (node:node) => node |> fun

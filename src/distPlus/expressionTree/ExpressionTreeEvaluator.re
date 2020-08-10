@@ -309,6 +309,11 @@ let rec toLeaf =
   | `SymbolicDist(_)
   | `Function(_)
   | `RenderedDist(_) => Ok(node)
+  | `Array(args) =>
+    args
+    |> E.A.fmap(toLeaf(evaluationParams))
+    |> E.A.R.firstErrorOrOpen
+    |> E.R.fmap(r => `Array(r))
   // Operations nevaluationParamsd to be turned into leaves
   | `AlgebraicCombination(algebraicOp, t1, t2) =>
     AlgebraicCombination.operationToLeaf(
@@ -341,5 +346,23 @@ let rec toLeaf =
     |> E.R.bind(_, toLeaf(evaluationParams))
   | `FunctionCall(name, args) =>
     callableFunction(evaluationParams, name, args)
+  | `MultiModal(r) =>
+    let components =
+      r
+      |> E.A.fmap(((dist, weight)) =>
+           `VerticalScaling((
+             `Multiply,
+             dist,
+             `SymbolicDist(`Float(weight)),
+           ))
+         );
+    let pointwiseSum =
+      components
+      |> Js.Array.sliceFrom(1)
+      |> E.A.fold_left(
+           (acc, x) => {`PointwiseCombination((`Add, acc, x))},
+           E.A.unsafe_get(components, 0),
+         );
+    Ok(`Render(`Normalize(pointwiseSum)));
   };
 };
