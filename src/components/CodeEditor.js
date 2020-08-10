@@ -31,7 +31,7 @@ export class CodeEditor extends React.Component {
         }}
         setOptions={{
           enableBasicAutocompletion: false,
-          enableLiveAutocompletion: false,
+          enableLiveAutocompletion: true,
           enableSnippets: true,
         }}
       />

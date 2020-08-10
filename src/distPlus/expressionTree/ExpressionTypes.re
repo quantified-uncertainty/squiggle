@@ -31,6 +31,10 @@ module ExpressionTree = {
     | `FunctionCall(string, array(node))
   ];
   // Have nil as option
+  let getFloat = (node:node) => node |> fun
+  | `RenderedDist(Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}})) => Some(x)
+  | `SymbolicDist(`Float(x)) => Some(x)
+  | _ => None
 
   type samplingInputs = {
     sampleCount: int,
@@ -86,6 +90,7 @@ module ExpressionTree = {
     node
     |> evaluationParams.evaluateNode(evaluationParams)
     |> E.R.bind(_, fn(evaluationParams));
+
 
   module Render = {
     type t = node;

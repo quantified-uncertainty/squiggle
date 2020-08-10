@@ -95,26 +95,28 @@ module VerticalScaling = {
   let operationToLeaf =
       (evaluationParams: evaluationParams, scaleOp, t, scaleBy) => {
     // scaleBy has to be a single float, otherwise we'll return an error.
-    let fn = (secondary,main) => Operation.Scale.toFn(scaleOp)(main, secondary);
+    let fn = (secondary, main) =>
+      Operation.Scale.toFn(scaleOp, main, secondary);
     let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(scaleOp);
     let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp);
     let renderedShape = Render.render(evaluationParams, t);
 
-    let s = switch (renderedShape, scaleBy) {
-    | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(scaleBy))) =>
-      Ok(
-        `RenderedDist(
-          Shape.T.mapY(
-            ~integralSumCacheFn=integralSumCacheFn(scaleBy),
-            ~integralCacheFn=integralCacheFn(scaleBy),
-            ~fn=fn(scaleBy),
-            rs,
+    let s =
+      switch (renderedShape, scaleBy) {
+      | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(scaleBy))) =>
+        Ok(
+          `RenderedDist(
+            Shape.T.mapY(
+              ~integralSumCacheFn=integralSumCacheFn(scaleBy),
+              ~integralCacheFn=integralCacheFn(scaleBy),
+              ~fn=fn(scaleBy),
+              rs,
+            ),
           ),
-        ),
-      )
-    | (Error(e1), _) => Error(e1)
-    | (_, _) => Error("Can only scale by float values.")
-    };
+        )
+      | (Error(e1), _) => Error(e1)
+      | (_, _) => Error("Can only scale by float values.")
+      };
     s;
   };
 };
@@ -265,9 +267,7 @@ module FloatFromDist = {
 // TODO: This forces things to be floats
 let callableFunction = (evaluationParams, name, args) => {
   args
-  |> E.A.fmap(a =>
-       Render.render(evaluationParams, a) |> E.R.bind(_, Render.toFloat)
-     )
+  |> E.A.fmap(a => evaluationParams.evaluateNode(evaluationParams, a))
   |> E.A.R.firstErrorOrOpen
   |> E.R.bind(_, Functions.fnn(evaluationParams, name));
 };
@@ -299,11 +299,11 @@ module Render = {
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
 let rec toLeaf =
-    (
-      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
-      node: t,
-    )
-    : result(t, string) => {
+        (
+          evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+          node: t,
+        )
+        : result(t, string) => {
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)

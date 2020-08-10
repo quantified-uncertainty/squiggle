@@ -236,14 +236,6 @@ module MathAdtToDistDst = {
            )
          | ("scaleLog", [|d, `SymbolicDist(`Float(v))|]) =>
            Ok(`VerticalScaling((`Log, d, `SymbolicDist(`Float(v)))))
-         | ("pdf", [|d, `SymbolicDist(`Float(v))|]) =>
-           toOkFloatFromDist((`Pdf(v), d))
-         | ("cdf", [|d, `SymbolicDist(`Float(v))|]) =>
-           toOkFloatFromDist((`Cdf(v), d))
-         | ("inv", [|d, `SymbolicDist(`Float(v))|]) =>
-           toOkFloatFromDist((`Inv(v), d))
-         | ("mean", [|d|]) => toOkFloatFromDist((`Mean, d))
-         | ("sample", [|d|]) => toOkFloatFromDist((`Sample, d))
          | _ => Error("This type not currently supported")
          }
        });
@@ -294,12 +286,7 @@ module MathAdtToDistDst = {
     | "scaleMultiply"
     | "scaleExp"
     | "scaleLog"
-    | "truncate"
-    | "mean"
-    | "inv"
-    | "sample"
-    | "cdf"
-    | "pdf" => operationParser(name, parseArgs())
+    | "truncate" => operationParser(name, parseArgs())
     | name =>
       parseArgs()
       |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
