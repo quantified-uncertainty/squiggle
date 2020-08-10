@@ -1,5 +1,4 @@
 // Not yet used
-
 type inputs = {
   samplingInputs: ExpressionTypes.ExpressionTree.SamplingInputs.t,
   program: string,
@@ -16,9 +15,11 @@ let addVariable =
     ),
 };
 
-let runNode = (inputs, node) => {
+let runNode = (inputs: inputs, node) => {
   ExpressionTree.toLeaf(
-    ExpressionTypes.ExpressionTree.SamplingInputs.withDefaults(inputs.samplingInputs),
+    ExpressionTypes.ExpressionTree.SamplingInputs.withDefaults(
+      inputs.samplingInputs,
+    ),
     inputs.environment,
     node,
   );

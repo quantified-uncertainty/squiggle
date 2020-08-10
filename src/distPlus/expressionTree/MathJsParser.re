@@ -84,14 +84,10 @@ module MathAdtToDistDst = {
   module MathAdtCleaner = {
     let transformWithSymbol = (f: float, s: string) =>
       switch (s) {
-      | "K"
-      | "k" => Some(f *. 1000.)
-      | "M"
-      | "m" => Some(f *. 1000000.)
-      | "B"
-      | "b" => Some(f *. 1000000000.)
-      | "T"
-      | "t" => Some(f *. 1000000000000.)
+      | "K" => Some(f *. 1000.)
+      | "M" => Some(f *. 1000000.)
+      | "B" => Some(f *. 1000000000.)
+      | "T" => Some(f *. 1000000000000.)
       | _ => None
       };
     let rec run =
@@ -126,9 +122,7 @@ module MathAdtToDistDst = {
         |> E.R.bind(_, nodeParser);
       switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
       | (Ok(mean), Ok(stdev), _, _) =>
-        Ok(
-          `FunctionCall(("lognormalFromMeanAndStdDev", [|mean, stdev|])),
-        )
+        Ok(`FunctionCall(("lognormalFromMeanAndStdDev", [|mean, stdev|])))
       | (_, _, Ok(mu), Ok(sigma)) =>
         Ok(`FunctionCall(("lognormal", [|mu, sigma|])))
       | _ =>
@@ -177,12 +171,13 @@ module MathAdtToDistDst = {
     };
   };
 
-          //  Error("Dotwise exponentiation needs two operands")
+  //  Error("Dotwise exponentiation needs two operands")
   let operationParser =
       (
         name: string,
         args: result(array(ExpressionTypes.ExpressionTree.node), string),
-      ):result(ExpressionTypes.ExpressionTree.node,string) => {
+      )
+      : result(ExpressionTypes.ExpressionTree.node, string) => {
     let toOkAlgebraic = r => Ok(`AlgebraicCombination(r));
     let toOkPointwise = r => Ok(`PointwiseCombination(r));
     let toOkTruncate = r => Ok(`Truncate(r));
@@ -192,12 +187,13 @@ module MathAdtToDistDst = {
          switch (name, args) {
          | ("add", [|l, r|]) => toOkAlgebraic((`Add, l, r))
          | ("add", _) => Error("Addition needs two operands")
-         | ("unaryMinus", [|l|]) => toOkAlgebraic((`Multiply, `SymbolicDist(`Float(-1.0)), l))
+         | ("unaryMinus", [|l|]) =>
+           toOkAlgebraic((`Multiply, `SymbolicDist(`Float(-1.0)), l))
          | ("subtract", [|l, r|]) => toOkAlgebraic((`Subtract, l, r))
          | ("subtract", _) => Error("Subtraction needs two operands")
          | ("multiply", [|l, r|]) => toOkAlgebraic((`Multiply, l, r))
          | ("multiply", _) => Error("Multiplication needs two operands")
-         | ("pow", [|l,r|]) => toOkAlgebraic((`Exponentiate, l, r))
+         | ("pow", [|l, r|]) => toOkAlgebraic((`Exponentiate, l, r))
          | ("pow", _) => Error("Exponentiation needs two operands")
          | ("dotMultiply", [|l, r|]) => toOkPointwise((`Multiply, l, r))
          | ("dotMultiply", _) =>
@@ -232,11 +228,13 @@ module MathAdtToDistDst = {
              "truncate needs three arguments: the expression and both cutoffs",
            )
          | ("scaleMultiply", [|d, `SymbolicDist(`Float(v))|]) =>
-            Ok(`VerticalScaling(`Multiply, d, `SymbolicDist(`Float(v))))
+           Ok(`VerticalScaling((`Multiply, d, `SymbolicDist(`Float(v)))))
          | ("scaleExp", [|d, `SymbolicDist(`Float(v))|]) =>
-            Ok(`VerticalScaling(`Exponentiate, d, `SymbolicDist(`Float(v))))
+           Ok(
+             `VerticalScaling((`Exponentiate, d, `SymbolicDist(`Float(v)))),
+           )
          | ("scaleLog", [|d, `SymbolicDist(`Float(v))|]) =>
-            Ok(`VerticalScaling(`Log, d, `SymbolicDist(`Float(v))))
+           Ok(`VerticalScaling((`Log, d, `SymbolicDist(`Float(v)))))
          | ("pdf", [|d, `SymbolicDist(`Float(v))|]) =>
            toOkFloatFromDist((`Pdf(v), d))
          | ("cdf", [|d, `SymbolicDist(`Float(v))|]) =>
@@ -317,7 +315,7 @@ module MathAdtToDistDst = {
     | Symbol(sym) => Ok(`Symbol(sym))
     | Fn({name, args}) => functionParser(nodeParser, name, args)
     | _ => {
-        Error("This type not currently supported")
+        Error("This type not currently supported");
       };
 
   // | FunctionAssignment({name, args, expression}) => {

@@ -112,7 +112,7 @@ module Internals = {
              ins := addVariable(ins^, name, node);
              None;
            }
-         | `Expression(node) => Some(runNode(ins^, node) |> E.R.fmap(r => (ins, r))),
+         | `Expression(node) => Some(runNode(ins^, node) |> E.R.fmap(r => (ins^.environment, r))),
        )
     |> E.A.O.concatSomes
     |> E.A.R.firstErrorOrOpen;
@@ -175,7 +175,7 @@ let run = (inputs: Inputs.inputs) => {
   |> E.R.fmap(Internals.outputToDistPlus(inputs));
 };
 
-let exportDistPlus = (inputs, node: ExpressionTypes.ExpressionTree.node) =>
+let exportDistPlus = (inputs, env:ProbExample.ExpressionTypes.ExpressionTree.environment, node: ExpressionTypes.ExpressionTree.node) =>
   node
   |> renderIfNeeded(inputs)
   |> E.R.bind(
@@ -183,7 +183,7 @@ let exportDistPlus = (inputs, node: ExpressionTypes.ExpressionTree.node) =>
        fun
        | `RenderedDist(n) =>
          Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
-       | `Function(n) => Ok(`Function(n))
+       | `Function(n) => Ok(`Function(n, env))
        | n =>
          Error(
            "Didn't output a rendered distribution. Format:"
@@ -195,7 +195,7 @@ let run2 = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_,((a,b)) => exportDistPlus(inputs,b))
+  |> E.R.bind(_,((a,b)) => exportDistPlus(inputs,a,b))
 };
 
 let runFunction =
@@ -212,5 +212,5 @@ let runFunction =
       fnInputs,
       fn,
     );
-  output |> E.R.bind(_, exportDistPlus(ins));
+  output |> E.R.bind(_, exportDistPlus(ins, inputs.environment));
 };

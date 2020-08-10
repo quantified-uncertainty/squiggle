@@ -155,7 +155,12 @@ module DemoDist = {
                },
                ~distPlusIngredients,
                ~environment=
-                 [||]
+                 [|
+                   ("K", `SymbolicDist(`Float(1000.0))),
+                   ("M", `SymbolicDist(`Float(1000000.0))),
+                   ("B", `SymbolicDist(`Float(1000000000.0))),
+                   ("T", `SymbolicDist(`Float(1000000000000.0))),
+                 |]
                  ->Belt.Map.String.fromArray,
                (),
              );
@@ -164,12 +169,18 @@ module DemoDist = {
            switch (response1) {
            | Ok(`DistPlus(distPlus1)) =>
              <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
-           | Ok(`Function(f, a)) =>
-          //  Problem: When it gets the function, it doesn't save state about previous commands
-             let results = E.A.Floats.range(0.0, 10.0, 2)
+           | Ok(`Function((f, a), env)) =>
+             //  Problem: When it gets the function, it doesn't save state about previous commands
+             let foo: DistPlusRenderer.Inputs.inputs = {
+               distPlusIngredients: inputs1.distPlusIngredients,
+               samplingInputs: inputs1.samplingInputs,
+               environment: env,
+             };
+             let results =
+               E.A.Floats.range(0.0, 10.0, 10)
                |> E.A.fmap(r =>
                     DistPlusRenderer.runFunction(
-                      inputs1,
+                      foo,
                       (f, a),
                       [|`SymbolicDist(`Float(r))|],
                     )
