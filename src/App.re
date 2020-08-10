@@ -73,6 +73,9 @@ module Menu = {
   };
 };
 
+let fixedLength = r =>
+  <div className="w-full max-w-screen-xl mx-auto px-6"> r </div>;
+
 [@react.component]
 let make = () => {
   let url = ReasonReactRouter.useUrl();
@@ -85,17 +88,20 @@ let make = () => {
     | _ => NotFound
     };
 
-  <div className="w-full max-w-screen-xl mx-auto px-6">
+  <>
     <Menu />
     {switch (routing) {
      | Model(id) =>
-       switch (Models.getById(id)) {
-       | Some(model) => <FormBuilder.ModelForm model key=id />
-       | None => <div> {"Page is not found" |> R.ste} </div>
-       }
+       (
+         switch (Models.getById(id)) {
+         | Some(model) => <FormBuilder.ModelForm model key=id />
+         | None => <div> {"Page is not found" |> R.ste} </div>
+         }
+       )
+       |> fixedLength
      | DistBuilder => <DistBuilder />
      | Home => <Home />
-     | _ => <div> {"Page is not found" |> R.ste} </div>
+     | _ => fixedLength({"Page is not found" |> R.ste})
      }}
-  </div>;
+  </>;
 };

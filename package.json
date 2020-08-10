@@ -28,6 +28,7 @@
   "dependencies": {
     "@foretold/components": "0.0.6",
     "@glennsl/bs-json": "^5.0.2",
+    "ace-builds": "^1.4.12",
     "antd": "3.17.0",
     "autoprefixer": "9.7.4",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
@@ -51,6 +52,7 @@
     "postcss-cli": "7.1.0",
     "rationale": "0.2.0",
     "react": "^16.8.0",
+    "react-ace": "^9.1.2",
     "react-dom": "^16.8.0",
     "react-use": "^13.27.0",
     "react-vega": "^7.4.1",

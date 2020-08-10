@@ -36,20 +36,14 @@ let schema = Form.Validation.Schema([||]);
 module FieldText = {
   [@react.component]
   let make = (~field, ~label) => {
-    <Form.Field
-      field
-      render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> R.ste}>
-          <Antd.Input.TextArea
-            value
-            spellcheck=false
-            autosize=true
-            onChange={BsReform.Helpers.handleChange(handleChange)}
-            onBlur={_ => validate()}
-          />
-        </Antd.Form.Item>
-      }
-    />;
+    <>
+      <Form.Field
+        field
+        render={({handleChange, error, value, validate}) =>
+          <CodeEditor value onChange={r => handleChange(r)} />
+        }
+      />
+    </>;
   };
 };
 module FieldString = {
@@ -134,7 +128,6 @@ module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
     <Antd.Card title={"Distribution" |> R.ste}>
-      <div className=Styles.spacer />
       <div>
         {switch (domain, unit, options) {
          | (Some(domain), Some(unit), Some(options)) =>
@@ -187,7 +180,7 @@ module DemoDist = {
                     )
                     |> E.R.bind(_, a =>
                          switch (a) {
-                         | `DistPlus(d) => Ok((r, d))
+                         | `DistPlus(d) => Ok((r, DistPlus.T.normalize(d)))
                          | _ => Error("")
                          }
                        )
@@ -347,53 +340,57 @@ bar",
     setReloader(_ => reloader + 1);
   };
 
-  <div className=Styles.parent>
-    <div className=Styles.spacer />
-    demoDist
-    <div className=Styles.spacer />
-    <Antd.Card
-      title={"Distribution Form" |> R.ste}
-      extra={
-        <Antd.Button
-          icon=Antd.IconName.reload
-          shape=`circle
-          onClick=onReload
-        />
-      }>
-      <Form.Provider value=reform>
-        <Antd.Form onSubmit>
-          <Row _type=`flex className=Styles.rows>
-            <Col span=24>
-              <FieldText field=FormConfig.GuesstimatorString label="Program" />
-            </Col>
-          </Row>
-          <Row _type=`flex className=Styles.rows>
-            <Col span=4>
-              <FieldFloat field=FormConfig.SampleCount label="Sample Count" />
-            </Col>
-            <Col span=4>
-              <FieldFloat
-                field=FormConfig.OutputXYPoints
-                label="Output XY-points"
-              />
-            </Col>
-            <Col span=4>
-              <FieldFloat
-                field=FormConfig.DownsampleTo
-                label="Downsample To"
-              />
-            </Col>
-            <Col span=4>
-              <FieldFloat field=FormConfig.KernelWidth label="Kernel Width" />
-            </Col>
-          </Row>
+  <div className="grid grid-cols-2 gap-4">
+    <div>
+      <Antd.Card
+        title={"Distribution Form" |> R.ste}
+        extra={
           <Antd.Button
-            _type=`primary icon=Antd.IconName.reload onClick=onReload>
-            {"Update Distribution" |> R.ste}
-          </Antd.Button>
-        </Antd.Form>
-      </Form.Provider>
-    </Antd.Card>
-    <div className=Styles.spacer />
+            icon=Antd.IconName.reload
+            shape=`circle
+            onClick=onReload
+          />
+        }>
+        <Form.Provider value=reform>
+          <Antd.Form onSubmit>
+            <Row _type=`flex className=Styles.rows>
+              <Col span=24>
+                <FieldText
+                  field=FormConfig.GuesstimatorString
+                  label="Program"
+                />
+              </Col>
+            </Row>
+            <Row _type=`flex className=Styles.rows>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.SampleCount
+                  label="Sample Count"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.OutputXYPoints
+                  label="Output XY-points"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.DownsampleTo
+                  label="Downsample To"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.KernelWidth
+                  label="Kernel Width"
+                />
+              </Col>
+            </Row>
+          </Antd.Form>
+        </Form.Provider>
+      </Antd.Card>
+    </div>
+    <div> demoDist </div>
   </div>;
 };

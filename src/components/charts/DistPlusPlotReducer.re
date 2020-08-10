@@ -106,6 +106,6 @@ let init = {
   showParams: false,
   showPercentiles: false,
   distributions: [
-    {yLog: false, xLog: false, isCumulative: false, height: 1},
+    {yLog: false, xLog: false, isCumulative: false, height: 4},
   ],
 };
