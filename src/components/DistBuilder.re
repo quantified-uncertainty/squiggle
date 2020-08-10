@@ -42,6 +42,7 @@ module FieldText = {
         <Antd.Form.Item label={label |> R.ste}>
           <Antd.Input.TextArea
             value
+            spellcheck=false
             autosize=true
             onChange={BsReform.Helpers.handleChange(handleChange)}
             onBlur={_ => validate()}

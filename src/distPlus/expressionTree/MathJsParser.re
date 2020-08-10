@@ -81,6 +81,7 @@ module MathAdtToDistDst = {
     Ok(`Symbol(sym));
   };
 
+  // TODO: This only works on the top level, which needs to be refactored. Also, I think functions don't need to be done like this anymore.
   module MathAdtCleaner = {
     let transformWithSymbol = (f: float, s: string) =>
       switch (s) {
