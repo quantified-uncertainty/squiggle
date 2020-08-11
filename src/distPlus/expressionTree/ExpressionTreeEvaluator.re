@@ -346,6 +346,7 @@ let rec toLeaf =
     |> E.R.bind(_, toLeaf(evaluationParams))
   | `FunctionCall(name, args) =>
     callableFunction(evaluationParams, name, args)
+    |> E.R.bind(_, toLeaf(evaluationParams))
   | `MultiModal(r) =>
     let components =
       r
@@ -363,6 +364,7 @@ let rec toLeaf =
            (acc, x) => {`PointwiseCombination((`Add, acc, x))},
            E.A.unsafe_get(components, 0),
          );
-    Ok(`Render(`Normalize(pointwiseSum)));
+    Ok(`Normalize(pointwiseSum))
+    |> E.R.bind(_, toLeaf(evaluationParams))
   };
 };

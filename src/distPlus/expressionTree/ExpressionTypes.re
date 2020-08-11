@@ -38,6 +38,11 @@ module ExpressionTree = {
   | `SymbolicDist(`Float(x)) => Some(x)
   | _ => None
 
+  let toFloatIfNeeded = (node:node) => switch(node |> getFloat){
+    | Some(float) => `SymbolicDist(`Float(float))
+    | None => node
+  }
+
   type samplingInputs = {
     sampleCount: int,
     outputXYPoints: int,

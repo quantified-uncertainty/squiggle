@@ -4,6 +4,7 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-golang";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-language_tools";
+import "ace-builds/src-noconflict/keybinding-vim";
 
 function onChange(newValue) {
   console.log("change", newValue);
@@ -20,6 +21,7 @@ export class CodeEditor extends React.Component {
         mode="golang"
         height="400px"
         width="100%"
+        keyboardHandler="vim"
         theme="github"
         showGutter={false}
         highlightActiveLine={false}

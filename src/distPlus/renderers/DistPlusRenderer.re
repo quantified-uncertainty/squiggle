@@ -112,7 +112,10 @@ module Internals = {
              ins := addVariable(ins^, name, node);
              None;
            }
-         | `Expression(node) => Some(runNode(ins^, node) |> E.R.fmap(r => (ins^.environment, r))),
+         | `Expression(node) =>
+           Some(
+             runNode(ins^, node) |> E.R.fmap(r => (ins^.environment, r)),
+           ),
        )
     |> E.A.O.concatSomes
     |> E.A.R.firstErrorOrOpen;
@@ -142,12 +145,13 @@ let renderIfNeeded =
   |> (
     fun
     | `MultiModal(_) as n
+    | `Normalize(_) as n
     | `SymbolicDist(_) as n => {
         `Render(n)
         |> Internals.runNode(Internals.distPlusRenderInputsToInputs(inputs))
         |> (
           fun
-          | Ok(`RenderedDist(n)) => Ok(`RenderedDist(n))
+          | Ok(`RenderedDist(_)) as r => r
           | Error(r) => Error(r)
           | _ => Error("Didn't render, but intended to")
         );
@@ -159,7 +163,7 @@ let run = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_, ((lastIns,r)) =>
+  |> E.R.bind(_, ((lastIns, r)) =>
        r
        |> renderIfNeeded(inputs)
        |> (
@@ -176,7 +180,37 @@ let run = (inputs: Inputs.inputs) => {
   |> E.R.fmap(Internals.outputToDistPlus(inputs));
 };
 
-let exportDistPlus = (inputs, env:ProbExample.ExpressionTypes.ExpressionTree.environment, node: ExpressionTypes.ExpressionTree.node) =>
+let exportDistPlus =
+    (
+      inputs,
+      env: ProbExample.ExpressionTypes.ExpressionTree.environment,
+      node: ExpressionTypes.ExpressionTree.node,
+    ) =>
+  node
+  |> renderIfNeeded(inputs)
+  |> E.R.bind(
+       _,
+       fun
+       | `RenderedDist(Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}})) =>
+         Ok(`Float(x))
+       | `SymbolicDist(`Float(x)) => Ok(`Float(x))
+       | `RenderedDist(n) =>
+         Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
+       | `Function(n) => Ok(`Function((n, env)))
+       | n =>
+         Error(
+           "Didn't output a rendered distribution. Format:"
+           ++ ExpressionTree.toString(n),
+         ),
+     );
+
+// This isn't ok with floats, which can't be done in a function easily
+let exportDistPlus2 =
+    (
+      inputs,
+      env: ProbExample.ExpressionTypes.ExpressionTree.environment,
+      node: ExpressionTypes.ExpressionTree.node,
+    ) =>
   node
   |> renderIfNeeded(inputs)
   |> E.R.bind(
@@ -184,7 +218,7 @@ let exportDistPlus = (inputs, env:ProbExample.ExpressionTypes.ExpressionTree.env
        fun
        | `RenderedDist(n) =>
          Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
-       | `Function(n) => Ok(`Function(n, env))
+       | `Function(n) => Ok(`Function((n, env)))
        | n =>
          Error(
            "Didn't output a rendered distribution. Format:"
@@ -196,7 +230,7 @@ let run2 = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_,((a,b)) => exportDistPlus(inputs,a,b))
+  |> E.R.bind(_, ((a, b)) => exportDistPlus(inputs, a, b));
 };
 
 let runFunction =
@@ -213,5 +247,5 @@ let runFunction =
       fnInputs,
       fn,
     );
-  output |> E.R.bind(_, exportDistPlus(ins, inputs.environment));
+  output |> E.R.bind(_, exportDistPlus2(ins, inputs.environment));
 };

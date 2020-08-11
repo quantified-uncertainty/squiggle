@@ -163,6 +163,8 @@ module DemoDist = {
            switch (response1) {
            | Ok(`DistPlus(distPlus1)) =>
              <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
+           | Ok(`Float(f)) =>
+             <ForetoldComponents.NumberShower number=f precision=3 />
            | Ok(`Function((f, a), env)) =>
              //  Problem: When it gets the function, it doesn't save state about previous commands
              let foo: DistPlusRenderer.Inputs.inputs = {
@@ -181,7 +183,7 @@ module DemoDist = {
                     |> E.R.bind(_, a =>
                          switch (a) {
                          | `DistPlus(d) => Ok((r, DistPlus.T.normalize(d)))
-                         | _ => Error("")
+                         | n => {Js.log2("Error here",n); Error("wrong type")}
                          }
                        )
                   )
