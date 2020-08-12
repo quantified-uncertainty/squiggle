@@ -107,5 +107,6 @@ let init = {
   showPercentiles: false,
   distributions: [
     {yLog: false, xLog: false, isCumulative: false, height: 4},
+    {yLog: false, xLog: false, isCumulative: true, height: 1},
   ],
 };

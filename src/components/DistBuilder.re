@@ -183,7 +183,9 @@ module DemoDist = {
                     |> E.R.bind(_, a =>
                          switch (a) {
                          | `DistPlus(d) => Ok((r, DistPlus.T.normalize(d)))
-                         | n => {Js.log2("Error here",n); Error("wrong type")}
+                         | n =>
+                           Js.log2("Error here", n);
+                           Error("wrong type");
                          }
                        )
                   )
@@ -214,9 +216,17 @@ let make = () => {
       ~initialState={
         //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
         guesstimatorString: "
-foo(t) = normal(t,2)
-bar(t) = foo(t)
-bar",
+        us_economy_2018 = (10.5 to 10.6)T
+growth_rate = 1.08 to 1.2
+us_economy(t) = us_economy_2018 * (growth_rate^t)
+
+us_population_2019 = 320M to 330M
+us_population_growth_rate = 1.01 to 1.02
+us_population(t) = us_population_2019 * (us_population_growth_rate^t)
+
+gdp_per_person(t) = us_economy(t)/us_population(t)
+gdp_per_person
+",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",

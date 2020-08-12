@@ -78,7 +78,7 @@
       "type": "linear",
       "range": "height",
       "nice": true,
-      "zero": false,
+      "zero": true,
       "domain": { "data": "facet", "field": "p99" }
     }
   ],

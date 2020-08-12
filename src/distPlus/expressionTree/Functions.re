@@ -46,6 +46,9 @@ let to_: (float, float) => result(node, string) =
 // let render = {"inputs": [`dist], "outputs": [`renderedDist]};
 // let render = {"inputs": [`distRenderedDist], "outputs": [`renderedDist]};
 
+// type types = [`Float| `Dist];
+// type def = {types};
+
 let fnn =
     (
       evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
