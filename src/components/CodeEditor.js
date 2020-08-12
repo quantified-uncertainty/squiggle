@@ -21,7 +21,6 @@ export class CodeEditor extends React.Component {
         mode="golang"
         height="400px"
         width="100%"
-        keyboardHandler="vim"
         theme="github"
         showGutter={false}
         highlightActiveLine={false}

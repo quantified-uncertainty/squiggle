@@ -235,7 +235,7 @@ gdp_per_person
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
-        sampleCount: "30000",
+        sampleCount: "1000",
         outputXYPoints: "1000",
         downsampleTo: "",
         kernelWidth: "",
