@@ -20,6 +20,7 @@ module ExpressionTree = {
     | `SymbolicDist(SymbolicTypes.symbolicDist)
     | `RenderedDist(DistTypes.shape)
     | `Symbol(string)
+    | `Hash(array((string, node)))
     | `Function(array(string), node)
     | `AlgebraicCombination(algebraicOperation, node, node)
     | `PointwiseCombination(pointwiseOperation, node, node)

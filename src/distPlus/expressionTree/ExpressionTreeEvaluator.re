@@ -337,6 +337,13 @@ let rec toLeaf =
     FloatFromDist.operationToLeaf(evaluationParams, distToFloatOp, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
+  | `Hash(t) =>
+    t
+    |> E.A.fmap(((name: string, node: node)) =>
+         toLeaf(evaluationParams, node) |> E.R.fmap(r => (name, r))
+       )
+    |> E.A.R.firstErrorOrOpen
+    |> E.R.fmap(r => `Hash(r))
   | `Symbol(r) =>
     ExpressionTypes.ExpressionTree.Environment.get(
       evaluationParams.environment,
@@ -364,7 +371,6 @@ let rec toLeaf =
            (acc, x) => {`PointwiseCombination((`Add, acc, x))},
            E.A.unsafe_get(components, 0),
          );
-    Ok(`Normalize(pointwiseSum))
-    |> E.R.bind(_, toLeaf(evaluationParams))
+    Ok(`Normalize(pointwiseSum)) |> E.R.bind(_, toLeaf(evaluationParams));
   };
 };
