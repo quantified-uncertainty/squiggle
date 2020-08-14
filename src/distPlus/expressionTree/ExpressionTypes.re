@@ -21,6 +21,7 @@ module ExpressionTree = {
     | `RenderedDist(DistTypes.shape)
     | `Symbol(string)
     | `Hash(array((string, node)))
+    | `Array(array(node))
     | `Function(array(string), node)
     | `AlgebraicCombination(algebraicOperation, node, node)
     | `PointwiseCombination(pointwiseOperation, node, node)
@@ -30,7 +31,6 @@ module ExpressionTree = {
     | `Truncate(option(float), option(float), node)
     | `FloatFromDist(distToFloatOperation, node)
     | `FunctionCall(string, array(node))
-    | `Array(array(node))
     | `MultiModal(array((node, float)))
   ];
   // Have nil as option

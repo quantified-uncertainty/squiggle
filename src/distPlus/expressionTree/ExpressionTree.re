@@ -1,11 +1,5 @@
 open ExpressionTypes.ExpressionTree;
 
-let envs = (samplingInputs, environment) => {
-  {samplingInputs, environment, evaluateNode: ExpressionTreeEvaluator.toLeaf};
-};
-let toLeaf = (samplingInputs, environment, node: node) =>
-  ExpressionTreeEvaluator.toLeaf(envs(samplingInputs, environment), node);
-
 let rec toString: node => string =
   fun
   | `SymbolicDist(d) => SymbolicDist.T.toString(d)
@@ -33,9 +27,16 @@ let rec toString: node => string =
     ++ (args |> Js.String.concatMany(_, ","))
     ++ toString(internal)
     ++ ")]"
-  | `Array(args) => "Array"
-  | `MultiModal(args) => "Multimodal"
+  | `Array(_) => "Array"
+  | `MultiModal(_) => "Multimodal"
+  | `Hash(_) => "Hash"
 
+let envs = (samplingInputs, environment) => {
+  {samplingInputs, environment, evaluateNode: ExpressionTreeEvaluator.toLeaf};
+};
+
+let toLeaf = (samplingInputs, environment, node: node) =>
+  ExpressionTreeEvaluator.toLeaf(envs(samplingInputs, environment), node);
 let toShape = (samplingInputs, environment, node: node) => {
   switch (toLeaf(samplingInputs, environment, node)) {
   | Ok(`RenderedDist(shape)) => Ok(shape)
