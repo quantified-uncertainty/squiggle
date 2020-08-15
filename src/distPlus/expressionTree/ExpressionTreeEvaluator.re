@@ -244,26 +244,6 @@ module Normalize = {
   };
 };
 
-module FloatFromDist = {
-  let rec operationToLeaf =
-          (evaluationParams, distToFloatOp: distToFloatOperation, t: node)
-          : result(node, string) => {
-    switch (t) {
-    | `SymbolicDist(s) =>
-      SymbolicDist.T.operate(distToFloatOp, s)
-      |> E.R.bind(_, v => Ok(`SymbolicDist(`Float(v))))
-    | `RenderedDist(rs) =>
-      Shape.operate(distToFloatOp, rs)
-      |> (v => Ok(`SymbolicDist(`Float(v))))
-    | _ =>
-      t
-      |> evaluateAndRetry(evaluationParams, r =>
-           operationToLeaf(r, distToFloatOp)
-         )
-    };
-  };
-};
-
 // TODO: This forces things to be floats
 let callableFunction = (evaluationParams, name, args) => {
   args
@@ -333,8 +313,6 @@ let rec toLeaf =
     VerticalScaling.operationToLeaf(evaluationParams, scaleOp, t, scaleBy)
   | `Truncate(leftCutoff, rightCutoff, t) =>
     Truncate.operationToLeaf(evaluationParams, leftCutoff, rightCutoff, t)
-  | `FloatFromDist(distToFloatOp, t) =>
-    FloatFromDist.operationToLeaf(evaluationParams, distToFloatOp, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
   | `Hash(t) =>

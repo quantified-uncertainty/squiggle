@@ -29,7 +29,6 @@ module ExpressionTree = {
     | `Normalize(node)
     | `Render(node)
     | `Truncate(option(float), option(float), node)
-    | `FloatFromDist(distToFloatOperation, node)
     | `FunctionCall(string, array(node))
     | `MultiModal(array((node, float)))
   ];

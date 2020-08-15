@@ -11,8 +11,6 @@ let rec toString: node => string =
   | `VerticalScaling(scaleOp, t, scaleBy) =>
     Operation.Scale.format(scaleOp, toString(t), toString(scaleBy))
   | `Normalize(t) => "normalize(k" ++ toString(t) ++ ")"
-  | `FloatFromDist(floatFromDistOp, t) =>
-    Operation.DistToFloat.format(floatFromDistOp, toString(t))
   | `Truncate(lc, rc, t) =>
     Operation.T.truncateToString(lc, rc, toString(t))
   | `Render(t) => toString(t)
