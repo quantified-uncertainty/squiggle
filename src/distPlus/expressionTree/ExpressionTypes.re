@@ -25,7 +25,6 @@ module ExpressionTree = {
     | `Function(array(string), node)
     | `AlgebraicCombination(algebraicOperation, node, node)
     | `PointwiseCombination(pointwiseOperation, node, node)
-    | `VerticalScaling(scaleOperation, node, node)
     | `Normalize(node)
     | `Render(node)
     | `Truncate(option(float), option(float), node)

@@ -1,6 +1,9 @@
 open TypeSystem;
 
-let wrongInputsError = (r) => {Js.log2("Wrong inputs", r); Error("Wrong inputs")};
+let wrongInputsError = r => {
+  Js.log2("Wrong inputs", r);
+  Error("Wrong inputs");
+};
 
 let to_: (float, float) => result(node, string) =
   (low, high) =>
@@ -20,7 +23,7 @@ let makeSymbolicFromTwoFloats = (name, fn) =>
     ~run=
       fun
       | [|`Float(a), `Float(b)|] => Ok(`SymbolicDist(fn(a, b)))
-      | e => wrongInputsError(e)
+      | e => wrongInputsError(e),
   );
 
 let makeSymbolicFromOneFloat = (name, fn) =>
@@ -31,21 +34,32 @@ let makeSymbolicFromOneFloat = (name, fn) =>
     ~run=
       fun
       | [|`Float(a)|] => Ok(`SymbolicDist(fn(a)))
-      | e => wrongInputsError(e)
+      | e => wrongInputsError(e),
   );
 
-let makeDistFloat = (name, fn) => 
+let makeDistFloat = (name, fn) =>
   Function.make(
     ~name,
     ~output=`SamplingDistribution,
     ~inputs=[|`SamplingDistribution, `Float|],
     ~run=
       fun
-      | [|`SamplingDist(a), `Float(b)|] => (fn(a,b))
-      | e => wrongInputsError(e)
+      | [|`SamplingDist(a), `Float(b)|] => fn(a, b)
+      | e => wrongInputsError(e),
   );
 
-let makeDist = (name, fn) => 
+let makeRenderedDistFloat = (name, fn) =>
+  Function.make(
+    ~name,
+    ~output=`RenderedDistribution,
+    ~inputs=[|`RenderedDistribution, `Float|],
+    ~run=
+      fun
+      | [|`RenderedDist(a), `Float(b)|] => fn(a, b)
+      | e => wrongInputsError(e),
+  );
+
+let makeDist = (name, fn) =>
   Function.make(
     ~name,
     ~output=`SamplingDistribution,
@@ -53,7 +67,7 @@ let makeDist = (name, fn) =>
     ~run=
       fun
       | [|`SamplingDist(a)|] => fn(a)
-      | e => wrongInputsError(e)
+      | e => wrongInputsError(e),
   );
 
 let floatFromDist =
@@ -69,6 +83,22 @@ let floatFromDist =
   | `RenderedDist(rs) =>
     Shape.operate(distToFloatOp, rs) |> (v => Ok(`SymbolicDist(`Float(v))))
   };
+};
+
+let verticalScaling = (scaleOp, rs, scaleBy) => {
+  // scaleBy has to be a single float, otherwise we'll return an error.
+  let fn = (secondary, main) =>
+    Operation.Scale.toFn(scaleOp, main, secondary);
+  let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(scaleOp);
+  let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp);
+  Ok(`RenderedDist(
+    Shape.T.mapY(
+      ~integralSumCacheFn=integralSumCacheFn(scaleBy),
+      ~integralCacheFn=integralCacheFn(scaleBy),
+      ~fn=fn(scaleBy),
+      rs,
+    ),
+  ));
 };
 
 let functions = [|
@@ -87,8 +117,8 @@ let functions = [|
     ~inputs=[|`Float, `Float|],
     ~run=
       fun
-      | [|`Float(a), `Float(b)|] => to_(a,b)
-      | e => wrongInputsError(e)
+      | [|`Float(a), `Float(b)|] => to_(a, b)
+      | e => wrongInputsError(e),
   ),
   Function.make(
     ~name="triangular",
@@ -99,11 +129,39 @@ let functions = [|
       | [|`Float(a), `Float(b), `Float(c)|] =>
         SymbolicDist.Triangular.make(a, b, c)
         |> E.R.fmap(r => `SymbolicDist(r))
-      | e => wrongInputsError(e)
+      | e => wrongInputsError(e),
   ),
   makeDistFloat("pdf", (dist, float) => floatFromDist(`Pdf(float), dist)),
   makeDistFloat("inv", (dist, float) => floatFromDist(`Inv(float), dist)),
   makeDistFloat("cdf", (dist, float) => floatFromDist(`Cdf(float), dist)),
-  makeDist("mean", (dist) => floatFromDist(`Mean, dist)),
-  makeDist("sample", (dist) => floatFromDist(`Sample, dist))
+  makeDist("mean", dist => floatFromDist(`Mean, dist)),
+  makeDist("sample", dist => floatFromDist(`Sample, dist)),
+  Function.make(
+    ~name="render",
+    ~output=`RenderedDistribution,
+    ~inputs=[|`RenderedDistribution|],
+    ~run=
+      fun
+      | [|`RenderedDist(c)|] => Ok(`RenderedDist(c))
+      | e => wrongInputsError(e),
+  ),
+  Function.make(
+    ~name="normalize",
+    ~output=`SamplingDistribution,
+    ~inputs=[|`SamplingDistribution|],
+    ~run=
+      fun
+      | [|`SamplingDist(`SymbolicDist(c))|] => Ok(`SymbolicDist(c))
+      | [|`SamplingDist(`RenderedDist(c))|] => Ok(`RenderedDist(Shape.T.normalize(c)))
+      | e => wrongInputsError(e),
+  ),
+  makeRenderedDistFloat("scaleExp", (dist, float) =>
+    verticalScaling(`Exponentiate, dist, float)
+  ),
+  makeRenderedDistFloat("scaleMultiply", (dist, float) =>
+    verticalScaling(`Multiply, dist, float)
+  ),
+  makeRenderedDistFloat("scaleLog", (dist, float) =>
+    verticalScaling(`Log, dist, float)
+  ),
 |];

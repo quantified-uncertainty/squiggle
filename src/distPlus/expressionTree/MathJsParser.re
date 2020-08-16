@@ -193,14 +193,6 @@ module MathAdtToDistDst = {
            Error(
              "truncate needs three arguments: the expression and both cutoffs",
            )
-         | ("scaleMultiply", [|d, `SymbolicDist(`Float(v))|]) =>
-           Ok(`VerticalScaling((`Multiply, d, `SymbolicDist(`Float(v)))))
-         | ("scaleExp", [|d, `SymbolicDist(`Float(v))|]) =>
-           Ok(
-             `VerticalScaling((`Exponentiate, d, `SymbolicDist(`Float(v)))),
-           )
-         | ("scaleLog", [|d, `SymbolicDist(`Float(v))|]) =>
-           Ok(`VerticalScaling((`Log, d, `SymbolicDist(`Float(v)))))
          | _ => Error("This type not currently supported")
          }
        });
@@ -245,9 +237,6 @@ module MathAdtToDistDst = {
     | "pow"
     | "leftTruncate"
     | "rightTruncate"
-    | "scaleMultiply"
-    | "scaleExp"
-    | "scaleLog"
     | "truncate" => operationParser(name, parseArgs())
     | name =>
       parseArgs()

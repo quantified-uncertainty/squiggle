@@ -8,8 +8,6 @@ let rec toString: node => string =
     Operation.Algebraic.format(op, toString(t1), toString(t2))
   | `PointwiseCombination(op, t1, t2) =>
     Operation.Pointwise.format(op, toString(t1), toString(t2))
-  | `VerticalScaling(scaleOp, t, scaleBy) =>
-    Operation.Scale.format(scaleOp, toString(t), toString(scaleBy))
   | `Normalize(t) => "normalize(k" ++ toString(t) ++ ")"
   | `Truncate(lc, rc, t) =>
     Operation.T.truncateToString(lc, rc, toString(t))

@@ -91,36 +91,6 @@ module AlgebraicCombination = {
        );
 };
 
-module VerticalScaling = {
-  let operationToLeaf =
-      (evaluationParams: evaluationParams, scaleOp, t, scaleBy) => {
-    // scaleBy has to be a single float, otherwise we'll return an error.
-    let fn = (secondary, main) =>
-      Operation.Scale.toFn(scaleOp, main, secondary);
-    let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(scaleOp);
-    let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp);
-    let renderedShape = Render.render(evaluationParams, t);
-
-    let s =
-      switch (renderedShape, scaleBy) {
-      | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(scaleBy))) =>
-        Ok(
-          `RenderedDist(
-            Shape.T.mapY(
-              ~integralSumCacheFn=integralSumCacheFn(scaleBy),
-              ~integralCacheFn=integralCacheFn(scaleBy),
-              ~fn=fn(scaleBy),
-              rs,
-            ),
-          ),
-        )
-      | (Error(e1), _) => Error(e1)
-      | (_, _) => Error("Can only scale by float values.")
-      };
-    s;
-  };
-};
-
 module PointwiseCombination = {
   let pointwiseAdd = (evaluationParams: evaluationParams, t1: t, t2: t) => {
     switch (
@@ -309,8 +279,6 @@ let rec toLeaf =
       t1,
       t2,
     )
-  | `VerticalScaling(scaleOp, t, scaleBy) =>
-    VerticalScaling.operationToLeaf(evaluationParams, scaleOp, t, scaleBy)
   | `Truncate(leftCutoff, rightCutoff, t) =>
     Truncate.operationToLeaf(evaluationParams, leftCutoff, rightCutoff, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
@@ -336,12 +304,7 @@ let rec toLeaf =
     let components =
       r
       |> E.A.fmap(((dist, weight)) =>
-           `VerticalScaling((
-             `Multiply,
-             dist,
-             `SymbolicDist(`Float(weight)),
-           ))
-         );
+      `FunctionCall("scaleExp", [|dist, `SymbolicDist(`Float(weight))|]));
     let pointwiseSum =
       components
       |> Js.Array.sliceFrom(1)
