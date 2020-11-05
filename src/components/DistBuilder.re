@@ -19,6 +19,9 @@ module FormConfig = [%lenses
     outputXYPoints: string,
     downsampleTo: string,
     kernelWidth: string,
+    diagramStart: string,
+    diagramStop: string,
+    diagramCount: string,
   }
 ];
 
@@ -27,6 +30,9 @@ type options = {
   outputXYPoints: int,
   downsampleTo: option(int),
   kernelWidth: option(float),
+  diagramStart: float,
+  diagramStop: float,
+  diagramCount: int,
 };
 
 module Form = ReForm.Make(FormConfig);
@@ -173,7 +179,7 @@ module DemoDist = {
                environment: env,
              };
              let results =
-               E.A.Floats.range(0.0, 10.0, 10)
+               E.A.Floats.range(options.diagramStart, options.diagramStop, options.diagramCount)
                |> E.A.fmap(r =>
                     DistPlusRenderer.runFunction(
                       foo,
@@ -239,6 +245,9 @@ gdp_per_person
         outputXYPoints: "1000",
         downsampleTo: "",
         kernelWidth: "",
+        diagramStart: "0",
+        diagramStop: "10",
+        diagramCount: "20",
       },
       (),
     );
@@ -267,6 +276,9 @@ gdp_per_person
     reform.state.values.outputXYPoints |> Js.Float.fromString;
   let downsampleTo = reform.state.values.downsampleTo |> Js.Float.fromString;
   let kernelWidth = reform.state.values.kernelWidth |> Js.Float.fromString;
+  let diagramStart = reform.state.values.diagramStart |> Js.Float.fromString;
+  let diagramStop = reform.state.values.diagramStop |> Js.Float.fromString;
+  let diagramCount = reform.state.values.diagramCount |> Js.Float.fromString;
 
   let domain =
     switch (domainType) {
@@ -322,6 +334,9 @@ gdp_per_person
           int_of_float(downsampleTo) > 0
             ? Some(int_of_float(downsampleTo)) : None,
         kernelWidth: kernelWidth == 0.0 ? None : Some(kernelWidth),
+        diagramStart: diagramStart,
+        diagramStop: diagramStop,
+        diagramCount: diagramCount |> int_of_float,
       })
     | _ => None
     };
@@ -344,6 +359,9 @@ gdp_per_person
         reform.state.values.outputXYPoints,
         reform.state.values.downsampleTo,
         reform.state.values.kernelWidth,
+        reform.state.values.diagramStart,
+        reform.state.values.diagramStop,
+        reform.state.values.diagramCount,
         reloader |> string_of_int,
       |],
     );
@@ -396,6 +414,24 @@ gdp_per_person
                 <FieldFloat
                   field=FormConfig.KernelWidth
                   label="Kernel Width"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.DiagramStart
+                  label="Diagram Start"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.DiagramStop
+                  label="Diagram Stop"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.DiagramCount
+                  label="Diagram Count"
                 />
               </Col>
             </Row>
