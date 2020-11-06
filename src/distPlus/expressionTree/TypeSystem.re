@@ -20,24 +20,25 @@ type tx = [
   | `Array(array(tx))
   | `Named(array((string, tx)))
 ];
+
 type fn = {
   name: string,
-  inputs: array(t),
-  output: t,
+  inputTypes: array(t),
+  outputType: t,
   run: array(tx) => result(node, string),
 };
 
 module Function = {
-  let make = (~name, ~inputs, ~output, ~run): fn => {
+  let make = (~name, ~inputTypes, ~outputType, ~run): fn => {
     name,
-    inputs,
-    output,
+    inputTypes,
+    outputType,
     run,
   };
 };
 
 type fns = array(fn);
-type inputs = array(node);
+type inputTypes = array(node);
 
 let rec fromNodeDirect = (node: node): result(tx, string) =>
   switch (ExpressionTypes.ExpressionTree.toFloatIfNeeded(node)) {
@@ -64,10 +65,7 @@ let compareInput = (evaluationParams, t: t, node) =>
   | `Float =>
     switch (getFloat(node)) {
     | Some(a) => Ok(`Float(a))
-    | _ =>
-      Error(
-        "Type Error: Expected float."
-      )
+    | _ => Error("Type Error: Expected float.")
     }
   | `SamplingDistribution =>
     PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
@@ -78,50 +76,57 @@ let compareInput = (evaluationParams, t: t, node) =>
   | `RenderedDistribution =>
     ExpressionTypes.ExpressionTree.Render.render(evaluationParams, node)
     |> E.R.bind(_, fromNodeDirect)
-  | _ => Error("Bad input, sorry.")
+  | _ => {
+    Js.log4("Type error: Expected ", t, ", got ", node);
+    Error("Bad input, sorry.")}
   };
 
 let sanatizeInputs =
     (
       evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
-      inputs: inputs,
+      inputTypes: inputTypes,
       t: fn,
     ) => {
-  E.A.length(t.inputs) == E.A.length(inputs)
-    ? Belt.Array.zip(t.inputs, inputs)
+  E.A.length(t.inputTypes) == E.A.length(inputTypes)
+    ? Belt.Array.zip(t.inputTypes, inputTypes)
       |> E.A.fmap(((def, input)) =>
            compareInput(evaluationParams, def, input)
          )
+         |> (r => {Js.log2("Inputs", r); r})
       |> E.A.R.firstErrorOrOpen
     : Error(
         "Wrong number of inputs. Expected"
-        ++ (E.A.length(t.inputs) |> E.I.toString)
+        ++ (E.A.length(t.inputTypes) |> E.I.toString)
         ++ ". Got:"
-        ++ (E.A.length(inputs) |> E.I.toString),
+        ++ (E.A.length(inputTypes) |> E.I.toString),
       );
 };
 
 let run =
     (
       evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
-      inputs: inputs,
+      inputTypes: inputTypes,
       t: fn,
-    ) =>{
-  (
-    switch (sanatizeInputs(evaluationParams, inputs, t)) {
-    | Ok(inputs) => t.run(inputs)
-    | Error(r) => Error(r)
-    }
-  )
+    ) => {
+  let _sanitizedInputs = sanatizeInputs(evaluationParams, inputTypes, t);
+  _sanitizedInputs |> E.R.bind(_,t.run)
   |> (
     fun
     | Ok(i) => Ok(i)
-    | Error(r) => {Js.log4("Error", inputs, t, sanatizeInputs(evaluationParams, inputs, t), ); Error("Function " ++ t.name ++ " error: " ++ r)}
+    | Error(r) => {
+        Js.log4(
+          "Error",
+          inputTypes,
+          t,
+          _sanitizedInputs
+        );
+        Error("Function " ++ t.name ++ " error: " ++ r);
+      }
   );
-    }
+};
 
 let getFn = (fns: fns, n: string) =>
   fns |> Belt.Array.getBy(_, ({name}) => name == n);
 
-let getAndRun = (fns: fns, n: string, evaluationParams, inputs) =>
-  getFn(fns, n) |> E.O.fmap(run(evaluationParams, inputs));
+let getAndRun = (fns: fns, n: string, evaluationParams, inputTypes) =>
+  getFn(fns, n) |> E.O.fmap(run(evaluationParams, inputTypes));

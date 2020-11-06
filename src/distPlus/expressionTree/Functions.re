@@ -38,7 +38,13 @@ let fnn =
              });
         Ok(`MultiModal(withWeights));
       | dists when E.L.length(dists) > 0 =>
-        Ok(`MultiModal(dists |> E.L.toArray |> E.A.fmap(r => (r, 1.0))))
+        Ok(
+          `MultiModal(
+            dists
+            |> E.L.toArray
+            |> E.A.fmap(r => (r, 1.0)),
+          ),
+        )
       | _ => Error("Needs at least one distribution")
       }
     | _ => Error("Function " ++ name ++ " not found")

@@ -1,7 +1,6 @@
 open TypeSystem;
 
 let wrongInputsError = r => {
-  Js.log2("Wrong inputs", r);
   Error("Wrong inputs");
 };
 
@@ -18,8 +17,8 @@ let to_: (float, float) => result(node, string) =
 let makeSymbolicFromTwoFloats = (name, fn) =>
   Function.make(
     ~name,
-    ~output=`SamplingDistribution,
-    ~inputs=[|`Float, `Float|],
+    ~outputType=`SamplingDistribution,
+    ~inputTypes=[|`Float, `Float|],
     ~run=
       fun
       | [|`Float(a), `Float(b)|] => Ok(`SymbolicDist(fn(a, b)))
@@ -29,8 +28,8 @@ let makeSymbolicFromTwoFloats = (name, fn) =>
 let makeSymbolicFromOneFloat = (name, fn) =>
   Function.make(
     ~name,
-    ~output=`SamplingDistribution,
-    ~inputs=[|`Float|],
+    ~outputType=`SamplingDistribution,
+    ~inputTypes=[|`Float|],
     ~run=
       fun
       | [|`Float(a)|] => Ok(`SymbolicDist(fn(a)))
@@ -40,8 +39,8 @@ let makeSymbolicFromOneFloat = (name, fn) =>
 let makeDistFloat = (name, fn) =>
   Function.make(
     ~name,
-    ~output=`SamplingDistribution,
-    ~inputs=[|`SamplingDistribution, `Float|],
+    ~outputType=`SamplingDistribution,
+    ~inputTypes=[|`SamplingDistribution, `Float|],
     ~run=
       fun
       | [|`SamplingDist(a), `Float(b)|] => fn(a, b)
@@ -51,19 +50,19 @@ let makeDistFloat = (name, fn) =>
 let makeRenderedDistFloat = (name, fn) =>
   Function.make(
     ~name,
-    ~output=`RenderedDistribution,
-    ~inputs=[|`RenderedDistribution, `Float|],
+    ~outputType=`RenderedDistribution,
+    ~inputTypes=[|`RenderedDistribution, `Float|],
     ~run=
       fun
       | [|`RenderedDist(a), `Float(b)|] => fn(a, b)
-      | e => wrongInputsError(e),
+      | e => wrongInputsError(e)
   );
 
 let makeDist = (name, fn) =>
   Function.make(
     ~name,
-    ~output=`SamplingDistribution,
-    ~inputs=[|`SamplingDistribution|],
+    ~outputType=`SamplingDistribution,
+    ~inputTypes=[|`SamplingDistribution|],
     ~run=
       fun
       | [|`SamplingDist(a)|] => fn(a)
@@ -115,8 +114,8 @@ let functions = [|
   makeSymbolicFromOneFloat("exponential", SymbolicDist.Exponential.make),
   Function.make(
     ~name="to",
-    ~output=`SamplingDistribution,
-    ~inputs=[|`Float, `Float|],
+    ~outputType=`SamplingDistribution,
+    ~inputTypes=[|`Float, `Float|],
     ~run=
       fun
       | [|`Float(a), `Float(b)|] => to_(a, b)
@@ -124,8 +123,8 @@ let functions = [|
   ),
   Function.make(
     ~name="triangular",
-    ~output=`SamplingDistribution,
-    ~inputs=[|`Float, `Float, `Float|],
+    ~outputType=`SamplingDistribution,
+    ~inputTypes=[|`Float, `Float, `Float|],
     ~run=
       fun
       | [|`Float(a), `Float(b), `Float(c)|] =>
@@ -140,8 +139,8 @@ let functions = [|
   makeDist("sample", dist => floatFromDist(`Sample, dist)),
   Function.make(
     ~name="render",
-    ~output=`RenderedDistribution,
-    ~inputs=[|`RenderedDistribution|],
+    ~outputType=`RenderedDistribution,
+    ~inputTypes=[|`RenderedDistribution|],
     ~run=
       fun
       | [|`RenderedDist(c)|] => Ok(`RenderedDist(c))
@@ -149,8 +148,8 @@ let functions = [|
   ),
   Function.make(
     ~name="normalize",
-    ~output=`SamplingDistribution,
-    ~inputs=[|`SamplingDistribution|],
+    ~outputType=`SamplingDistribution,
+    ~inputTypes=[|`SamplingDistribution|],
     ~run=
       fun
       | [|`SamplingDist(`SymbolicDist(c))|] => Ok(`SymbolicDist(c))

@@ -254,6 +254,7 @@ let rec toLeaf =
           node: t,
         )
         : result(t, string) => {
+          Js.log2("node",node);
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)
