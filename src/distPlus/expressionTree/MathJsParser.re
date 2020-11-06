@@ -204,7 +204,8 @@ module MathAdtToDistDst = {
     let parseArgs = () => parseArray(args);
     switch (name) {
     | "lognormal" => lognormal(args, parseArgs, nodeParser)
-    | "mm" =>{
+    | "multimodal"
+    | "mm" =>
       let weights =
         args
         |> E.A.last
@@ -212,20 +213,22 @@ module MathAdtToDistDst = {
              _,
              fun
              | Array(values) => Some(parseArray(values))
-             | _ => None
+             | _ => None,
            );
       let possibleDists =
         E.O.isSome(weights)
           ? Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1)
           : args;
       let dists = parseArray(possibleDists);
-      switch(weights, dists){
-        | (Some(Error(r)), _) => Error(r)
-        | (_, Error(r)) => Error(r)
-        | (None, Ok(dists)) => Ok(`FunctionCall("multimodal", dists))
-        | (Some(Ok(r)), Ok(dists)) => Ok(`FunctionCall("multimodal", E.A.append([|`Array(r)|], dists)))
-      }
-    }
+      switch (weights, dists) {
+      | (Some(Error(r)), _) => Error(r)
+      | (_, Error(r)) => Error(r)
+      | (None, Ok(dists)) => Ok(`FunctionCall(("multimodal", dists)))
+      | (Some(Ok(r)), Ok(dists)) =>
+        Ok(
+          `FunctionCall(("multimodal", E.A.append([|`Array(r)|], dists))),
+        )
+      };
     | "add"
     | "subtract"
     | "multiply"

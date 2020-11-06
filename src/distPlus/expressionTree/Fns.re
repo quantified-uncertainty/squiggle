@@ -91,14 +91,16 @@ let verticalScaling = (scaleOp, rs, scaleBy) => {
     Operation.Scale.toFn(scaleOp, main, secondary);
   let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(scaleOp);
   let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp);
-  Ok(`RenderedDist(
-    Shape.T.mapY(
-      ~integralSumCacheFn=integralSumCacheFn(scaleBy),
-      ~integralCacheFn=integralCacheFn(scaleBy),
-      ~fn=fn(scaleBy),
-      rs,
+  Ok(
+    `RenderedDist(
+      Shape.T.mapY(
+        ~integralSumCacheFn=integralSumCacheFn(scaleBy),
+        ~integralCacheFn=integralCacheFn(scaleBy),
+        ~fn=fn(scaleBy),
+        rs,
+      ),
     ),
-  ));
+  );
 };
 
 let functions = [|
@@ -152,7 +154,8 @@ let functions = [|
     ~run=
       fun
       | [|`SamplingDist(`SymbolicDist(c))|] => Ok(`SymbolicDist(c))
-      | [|`SamplingDist(`RenderedDist(c))|] => Ok(`RenderedDist(Shape.T.normalize(c)))
+      | [|`SamplingDist(`RenderedDist(c))|] =>
+        Ok(`RenderedDist(Shape.T.normalize(c)))
       | e => wrongInputsError(e),
   ),
   makeRenderedDistFloat("scaleExp", (dist, float) =>

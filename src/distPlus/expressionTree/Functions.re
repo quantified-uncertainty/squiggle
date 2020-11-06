@@ -22,7 +22,6 @@ let fnn =
     ) {
     | (_, Some(`Function(argNames, tt))) =>
       PTypes.Function.run(evaluationParams, args, (argNames, tt))
-    | ("mm", _)
     | ("multimodal", _) =>
       switch (args |> E.A.to_list) {
       | [`Array(weights), ...dists] =>

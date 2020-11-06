@@ -304,7 +304,7 @@ let rec toLeaf =
     let components =
       r
       |> E.A.fmap(((dist, weight)) =>
-      `FunctionCall("scaleExp", [|dist, `SymbolicDist(`Float(weight))|]));
+      `FunctionCall("scaleMultiply", [|dist, `SymbolicDist(`Float(weight))|]));
     let pointwiseSum =
       components
       |> Js.Array.sliceFrom(1)
