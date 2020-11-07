@@ -206,6 +206,7 @@ module Truncate = {
 
 module Normalize = {
   let rec operationToLeaf = (evaluationParams, t: node): result(node, string) => {
+    Js.log2("normalize", t);
     switch (t) {
     | `RenderedDist(s) => Ok(`RenderedDist(Shape.T.normalize(s)))
     | `SymbolicDist(_) => Ok(t)
@@ -225,6 +226,7 @@ let callableFunction = (evaluationParams, name, args) => {
 module Render = {
   let rec operationToLeaf =
           (evaluationParams: evaluationParams, t: node): result(t, string) => {
+            Js.log2("rendering", t);
     switch (t) {
     | `Function(_) => Error("Cannot render a function")
     | `SymbolicDist(d) =>
@@ -254,17 +256,18 @@ let rec toLeaf =
           node: t,
         )
         : result(t, string) => {
-          Js.log2("node",node);
+  Js.log2("node", node);
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)
   | `Function(_)
   | `RenderedDist(_) => Ok(node)
   | `Array(args) =>
+    Js.log2("Array!", args);
     args
     |> E.A.fmap(toLeaf(evaluationParams))
     |> E.A.R.firstErrorOrOpen
-    |> E.R.fmap(r => `Array(r))
+    |> E.R.fmap(r => `Array(r));
   // Operations nevaluationParamsd to be turned into leaves
   | `AlgebraicCombination(algebraicOp, t1, t2) =>
     AlgebraicCombination.operationToLeaf(
@@ -285,34 +288,25 @@ let rec toLeaf =
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
   | `Hash(t) =>
+    Js.log("In hash");
     t
     |> E.A.fmap(((name: string, node: node)) =>
          toLeaf(evaluationParams, node) |> E.R.fmap(r => (name, r))
        )
     |> E.A.R.firstErrorOrOpen
-    |> E.R.fmap(r => `Hash(r))
+    |> E.R.fmap(r => `Hash(r));
   | `Symbol(r) =>
+    Js.log("Symbol");
     ExpressionTypes.ExpressionTree.Environment.get(
       evaluationParams.environment,
       r,
     )
     |> E.O.toResult("Undeclared variable " ++ r)
-    |> E.R.bind(_, toLeaf(evaluationParams))
+    |> E.R.bind(_, toLeaf(evaluationParams));
   | `FunctionCall(name, args) =>
+    Js.log3("In function call", name, args);
     callableFunction(evaluationParams, name, args)
-    |> E.R.bind(_, toLeaf(evaluationParams))
-  | `MultiModal(r) =>
-    let components =
-      r
-      |> E.A.fmap(((dist, weight)) =>
-      `FunctionCall("scaleMultiply", [|dist, `SymbolicDist(`Float(weight))|]));
-    let pointwiseSum =
-      components
-      |> Js.Array.sliceFrom(1)
-      |> E.A.fold_left(
-           (acc, x) => {`PointwiseCombination((`Add, acc, x))},
-           E.A.unsafe_get(components, 0),
-         );
-    Ok(`Normalize(pointwiseSum)) |> E.R.bind(_, toLeaf(evaluationParams));
+    |> E.R.bind(_, toLeaf(evaluationParams));
+  | `MultiModal(r) => Error("Multimodal?")
   };
 };

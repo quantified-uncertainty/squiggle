@@ -8,9 +8,13 @@ let fnn =
       name,
       args: array(node),
     ) => {
-  let trySomeFns =
-    TypeSystem.getAndRun(Fns.functions, name, evaluationParams, args);
-  switch (trySomeFns) {
+  // let foundFn =
+  // TypeSystem.Function.Ts.findByName(Fns.functions, name) |> E.O.toResult("Function " ++ name ++ " not found");
+  // let ran = foundFn |> E.R.bind(_,TypeSystem.Function.T.run(evaluationParams,args))
+    
+  let foundFn =
+    TypeSystem.Function.Ts.findByNameAndRun(Fns.functions, name, evaluationParams, args);
+  switch (foundFn) {
   | Some(r) => r
   | None =>
     switch (
@@ -21,32 +25,8 @@ let fnn =
       ),
     ) {
     | (_, Some(`Function(argNames, tt))) =>
+      Js.log("Fundction found: " ++ name);
       PTypes.Function.run(evaluationParams, args, (argNames, tt))
-    | ("multimodal", _) =>
-      switch (args |> E.A.to_list) {
-      | [`Array(weights), ...dists] =>
-        let withWeights =
-          dists
-          |> E.L.toArray
-          |> E.A.fmapi((index, t) => {
-               let w =
-                 weights
-                 |> E.A.get(_, index)
-                 |> E.O.bind(_, getFloat)
-                 |> E.O.default(1.0);
-               (t, w);
-             });
-        Ok(`MultiModal(withWeights));
-      | dists when E.L.length(dists) > 0 =>
-        Ok(
-          `MultiModal(
-            dists
-            |> E.L.toArray
-            |> E.A.fmap(r => (r, 1.0)),
-          ),
-        )
-      | _ => Error("Needs at least one distribution")
-      }
     | _ => Error("Function " ++ name ++ " not found")
     }
   };

@@ -16,11 +16,12 @@ type distToFloatOperation = [
 ];
 
 module ExpressionTree = {
-  type node = [
+  type hash = array((string, node))
+  and node = [
     | `SymbolicDist(SymbolicTypes.symbolicDist)
     | `RenderedDist(DistTypes.shape)
     | `Symbol(string)
-    | `Hash(array((string, node)))
+    | `Hash(hash)
     | `Array(array(node))
     | `Function(array(string), node)
     | `AlgebraicCombination(algebraicOperation, node, node)
@@ -31,16 +32,31 @@ module ExpressionTree = {
     | `FunctionCall(string, array(node))
     | `MultiModal(array((node, float)))
   ];
-  // Have nil as option
-  let getFloat = (node:node) => node |> fun
-  | `RenderedDist(Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}})) => Some(x)
-  | `SymbolicDist(`Float(x)) => Some(x)
-  | _ => None
 
-  let toFloatIfNeeded = (node:node) => switch(node |> getFloat){
+  module Hash = {
+    type t('a) = array((string, 'a));
+    let getByName = (t:t('a), name) =>
+      E.A.getBy(t, ((n, _)) => n == name) |> E.O.fmap(((_, r)) => r);
+
+    let getByNames = (hash: t('a), names:array(string)) =>
+      names |> E.A.fmap(name => (name, getByName(hash, name)))
+  };
+  // Have nil as option
+  let getFloat = (node: node) =>
+    node
+    |> (
+      fun
+      | `RenderedDist(Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}})) =>
+        Some(x)
+      | `SymbolicDist(`Float(x)) => Some(x)
+      | _ => None
+    );
+
+  let toFloatIfNeeded = (node: node) =>
+    switch (node |> getFloat) {
     | Some(float) => `SymbolicDist(`Float(float))
     | None => node
-  }
+    };
 
   type samplingInputs = {
     sampleCount: int,
@@ -96,7 +112,6 @@ module ExpressionTree = {
     node
     |> evaluationParams.evaluateNode(evaluationParams)
     |> E.R.bind(_, fn(evaluationParams));
-
 
   module Render = {
     type t = node;

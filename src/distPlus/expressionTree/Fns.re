@@ -15,7 +15,7 @@ let to_: (float, float) => result(node, string) =
     };
 
 let makeSymbolicFromTwoFloats = (name, fn) =>
-  Function.make(
+  Function.T.make(
     ~name,
     ~outputType=`SamplingDistribution,
     ~inputTypes=[|`Float, `Float|],
@@ -23,10 +23,11 @@ let makeSymbolicFromTwoFloats = (name, fn) =>
       fun
       | [|`Float(a), `Float(b)|] => Ok(`SymbolicDist(fn(a, b)))
       | e => wrongInputsError(e),
+    (),
   );
 
 let makeSymbolicFromOneFloat = (name, fn) =>
-  Function.make(
+  Function.T.make(
     ~name,
     ~outputType=`SamplingDistribution,
     ~inputTypes=[|`Float|],
@@ -34,10 +35,11 @@ let makeSymbolicFromOneFloat = (name, fn) =>
       fun
       | [|`Float(a)|] => Ok(`SymbolicDist(fn(a)))
       | e => wrongInputsError(e),
+    (),
   );
 
 let makeDistFloat = (name, fn) =>
-  Function.make(
+  Function.T.make(
     ~name,
     ~outputType=`SamplingDistribution,
     ~inputTypes=[|`SamplingDistribution, `Float|],
@@ -45,21 +47,23 @@ let makeDistFloat = (name, fn) =>
       fun
       | [|`SamplingDist(a), `Float(b)|] => fn(a, b)
       | e => wrongInputsError(e),
+    (),
   );
 
 let makeRenderedDistFloat = (name, fn) =>
-  Function.make(
+  Function.T.make(
     ~name,
     ~outputType=`RenderedDistribution,
     ~inputTypes=[|`RenderedDistribution, `Float|],
     ~run=
       fun
       | [|`RenderedDist(a), `Float(b)|] => fn(a, b)
-      | e => wrongInputsError(e)
+      | e => wrongInputsError(e),
+    (),
   );
 
 let makeDist = (name, fn) =>
-  Function.make(
+  Function.T.make(
     ~name,
     ~outputType=`SamplingDistribution,
     ~inputTypes=[|`SamplingDistribution|],
@@ -67,6 +71,7 @@ let makeDist = (name, fn) =>
       fun
       | [|`SamplingDist(a)|] => fn(a)
       | e => wrongInputsError(e),
+    (),
   );
 
 let floatFromDist =
@@ -112,7 +117,7 @@ let functions = [|
     SymbolicDist.Lognormal.fromMeanAndStdev,
   ),
   makeSymbolicFromOneFloat("exponential", SymbolicDist.Exponential.make),
-  Function.make(
+  Function.T.make(
     ~name="to",
     ~outputType=`SamplingDistribution,
     ~inputTypes=[|`Float, `Float|],
@@ -120,8 +125,9 @@ let functions = [|
       fun
       | [|`Float(a), `Float(b)|] => to_(a, b)
       | e => wrongInputsError(e),
+    (),
   ),
-  Function.make(
+  Function.T.make(
     ~name="triangular",
     ~outputType=`SamplingDistribution,
     ~inputTypes=[|`Float, `Float, `Float|],
@@ -131,13 +137,14 @@ let functions = [|
         SymbolicDist.Triangular.make(a, b, c)
         |> E.R.fmap(r => `SymbolicDist(r))
       | e => wrongInputsError(e),
+    (),
   ),
   makeDistFloat("pdf", (dist, float) => floatFromDist(`Pdf(float), dist)),
   makeDistFloat("inv", (dist, float) => floatFromDist(`Inv(float), dist)),
   makeDistFloat("cdf", (dist, float) => floatFromDist(`Cdf(float), dist)),
   makeDist("mean", dist => floatFromDist(`Mean, dist)),
   makeDist("sample", dist => floatFromDist(`Sample, dist)),
-  Function.make(
+  Function.T.make(
     ~name="render",
     ~outputType=`RenderedDistribution,
     ~inputTypes=[|`RenderedDistribution|],
@@ -145,8 +152,9 @@ let functions = [|
       fun
       | [|`RenderedDist(c)|] => Ok(`RenderedDist(c))
       | e => wrongInputsError(e),
+    (),
   ),
-  Function.make(
+  Function.T.make(
     ~name="normalize",
     ~outputType=`SamplingDistribution,
     ~inputTypes=[|`SamplingDistribution|],
@@ -156,6 +164,7 @@ let functions = [|
       | [|`SamplingDist(`RenderedDist(c))|] =>
         Ok(`RenderedDist(Shape.T.normalize(c)))
       | e => wrongInputsError(e),
+    (),
   ),
   makeRenderedDistFloat("scaleExp", (dist, float) =>
     verticalScaling(`Exponentiate, dist, float)
@@ -165,5 +174,43 @@ let functions = [|
   ),
   makeRenderedDistFloat("scaleLog", (dist, float) =>
     verticalScaling(`Log, dist, float)
+  ),
+  Function.T.make(
+    ~name="multimodal",
+    ~outputType=`SamplingDistribution,
+    ~inputTypes=[|
+      `Named([|
+        ("dists", `Array(`SamplingDistribution)),
+        ("weights", `Array(`Float)),
+      |]),
+    |],
+    ~run=
+      fun
+      | [|`Named(r)|] => {
+          let foo =
+              (r: TypeSystem.typedValue)
+              : result(ExpressionTypes.ExpressionTree.node, string) =>
+            switch (r) {
+            | `SamplingDist(`SymbolicDist(c)) => Ok(`SymbolicDist(c))
+            | `SamplingDist(`RenderedDist(c)) => Ok(`RenderedDist(c))
+            | _ => Error("")
+            };
+          switch (ExpressionTypes.ExpressionTree.Hash.getByName(r, "dists")) {
+          | Some(`Array(r)) =>
+            r
+            |> E.A.fmap(foo)
+            |> E.A.R.firstErrorOrOpen
+            |> E.R.fmap(distributions => {
+                 distributions
+                 |> E.A.fold_left(
+                      (acc, x) => {`PointwiseCombination((`Add, acc, x))},
+                      E.A.unsafe_get(distributions, 0),
+                    )
+               })
+          | _ => Error("")
+          };
+        }
+      | _ => Error(""),
+    (),
   ),
 |];

@@ -198,13 +198,36 @@ module MathAdtToDistDst = {
        });
   };
 
-  let functionParser = (nodeParser, name, args) => {
+  let functionParser =
+      (
+        nodeParser:
+          MathJsonToMathJsAdt.arg =>
+          Belt.Result.t(
+            ProbExample.ExpressionTypes.ExpressionTree.node,
+            string,
+          ),
+        name: string,
+        args: array(MathJsonToMathJsAdt.arg),
+      )
+      : result(ExpressionTypes.ExpressionTree.node, string) => {
     let parseArray = ags =>
       ags |> E.A.fmap(nodeParser) |> E.A.R.firstErrorOrOpen;
     let parseArgs = () => parseArray(args);
     switch (name) {
     | "lognormal" => lognormal(args, parseArgs, nodeParser)
     | "multimodal"
+    | "add"
+    | "subtract"
+    | "multiply"
+    | "unaryMinus"
+    | "dotMultiply"
+    | "dotPow"
+    | "rightLogShift"
+    | "divide"
+    | "pow"
+    | "leftTruncate"
+    | "rightTruncate"
+    | "truncate" => operationParser(name, parseArgs())
     | "mm" =>
       let weights =
         args
@@ -223,24 +246,25 @@ module MathAdtToDistDst = {
       switch (weights, dists) {
       | (Some(Error(r)), _) => Error(r)
       | (_, Error(r)) => Error(r)
-      | (None, Ok(dists)) => Ok(`FunctionCall(("multimodal", dists)))
-      | (Some(Ok(r)), Ok(dists)) =>
-        Ok(
-          `FunctionCall(("multimodal", E.A.append([|`Array(r)|], dists))),
-        )
+      | (None, Ok(dists)) =>
+        let hash: ExpressionTypes.ExpressionTree.node =
+          `FunctionCall(("multimodal", [|`Hash(
+            [|
+            ("dists", `Array(dists)),
+            ("weights", `Array([||]))
+            |]
+          )|]));
+        Ok(hash);
+      | (Some(Ok(weights)), Ok(dists)) =>
+        let hash: ExpressionTypes.ExpressionTree.node =
+          `FunctionCall(("multimodal", [|`Hash(
+            [|
+            ("dists", `Array(dists)),
+            ("weights", `Array(weights))
+            |]
+          )|]));
+        Ok(hash);
       };
-    | "add"
-    | "subtract"
-    | "multiply"
-    | "unaryMinus"
-    | "dotMultiply"
-    | "dotPow"
-    | "rightLogShift"
-    | "divide"
-    | "pow"
-    | "leftTruncate"
-    | "rightTruncate"
-    | "truncate" => operationParser(name, parseArgs())
     | name =>
       parseArgs()
       |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>

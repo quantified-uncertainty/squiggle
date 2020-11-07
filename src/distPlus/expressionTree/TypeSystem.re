@@ -6,127 +6,186 @@ type samplingDist = [
   | `RenderedDist(DistTypes.shape)
 ];
 
-type t = [
+type _type = [
   | `Float
   | `SamplingDistribution
   | `RenderedDistribution
-  | `Array(t)
-  | `Named(array((string, t)))
+  | `Array(_type)
+  | `Named(array((string, _type)))
 ];
-type tx = [
+
+type typedValue = [
   | `Float(float)
   | `RenderedDist(DistTypes.shape)
   | `SamplingDist(samplingDist)
-  | `Array(array(tx))
-  | `Named(array((string, tx)))
+  | `Array(array(typedValue))
+  | `Named(array((string, typedValue)))
 ];
 
-type fn = {
+type _function = {
   name: string,
-  inputTypes: array(t),
-  outputType: t,
-  run: array(tx) => result(node, string),
+  inputTypes: array(_type),
+  outputType: _type,
+  run: array(typedValue) => result(node, string),
+  shouldCoerceTypes: bool,
+};
+
+type functions = array(_function);
+type inputNodes = array(node);
+
+module TypedValue = {
+  let rec fromNode = (node: node): result(typedValue, string) =>
+    switch (ExpressionTypes.ExpressionTree.toFloatIfNeeded(node)) {
+    | `SymbolicDist(`Float(r)) => Ok(`Float(r))
+    | `SymbolicDist(s) => Ok(`SamplingDist(`SymbolicDist(s)))
+    | `RenderedDist(s) => Ok(`RenderedDist(s))
+    | `Array(r) =>
+      r
+      |> E.A.fmap(fromNode)
+      |> E.A.R.firstErrorOrOpen
+      |> E.R.fmap(r => `Array(r))
+    | `Hash(hash) =>
+      hash
+      |> E.A.fmap(((name, t)) => fromNode(t) |> E.R.fmap(r => (name, r)))
+      |> E.A.R.firstErrorOrOpen
+      |> E.R.fmap(r => `Named(r))
+    | _ => Error("Wrong type")
+    };
+
+  // todo: Arrays and hashes
+  let rec fromNodeWithTypeCoercion = (evaluationParams, _type: _type, node) => {
+    Js.log3("With Coersion!", _type, node);
+    switch (_type, node) {
+    | (`Float, _) =>
+      switch (getFloat(node)) {
+      | Some(a) => Ok(`Float(a))
+      | _ => Error("Type Error: Expected float.")
+      }
+    | (`SamplingDistribution, _) =>
+      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
+        evaluationParams,
+        node,
+      )
+      |> E.R.bind(_, fromNode)
+    | (`RenderedDistribution, _) =>
+      ExpressionTypes.ExpressionTree.Render.render(evaluationParams, node)
+      |> E.R.bind(_, fromNode)
+    | (`Array(_type), `Array(b)) =>
+      b
+      |> E.A.fmap(fromNodeWithTypeCoercion(evaluationParams, _type))
+      |> E.A.R.firstErrorOrOpen
+      |> E.R.fmap(r => `Array(r))
+    | (`Named(named), `Hash(r)) =>
+      Js.log3("Named", named, r);
+      let foo =
+        named
+        |> E.A.fmap(((name, intendedType)) =>
+             (
+               name,
+               intendedType,
+               ExpressionTypes.ExpressionTree.Hash.getByName(r, name),
+             )
+           );
+      Js.log("Named: part 2");
+      let bar =
+        foo
+        |> E.A.fmap(((name, intendedType, optionNode)) =>
+             switch (optionNode) {
+             | Some(node) =>
+               fromNodeWithTypeCoercion(evaluationParams, intendedType, node)
+               |> E.R.fmap(node => (name, node))
+             | None => Error("Hash parameter not present in hash.")
+             }
+           )
+        |> E.A.R.firstErrorOrOpen
+        |> E.R.fmap(r => `Named(r));
+      Js.log3("Named!", foo, bar);
+      bar;
+    | _ => Error("fromNodeWithTypeCoercion error, sorry.")
+    };
+  };
 };
 
 module Function = {
-  let make = (~name, ~inputTypes, ~outputType, ~run): fn => {
-    name,
-    inputTypes,
-    outputType,
-    run,
-  };
-};
+  type t = _function;
+  type ts = functions;
 
-type fns = array(fn);
-type inputTypes = array(node);
+  module T = {
+    let make =
+        (~name, ~inputTypes, ~outputType, ~run, ~shouldCoerceTypes=true, _): t => {
+      name,
+      inputTypes,
+      outputType,
+      run,
+      shouldCoerceTypes,
+    };
 
-let rec fromNodeDirect = (node: node): result(tx, string) =>
-  switch (ExpressionTypes.ExpressionTree.toFloatIfNeeded(node)) {
-  | `SymbolicDist(`Float(r)) => Ok(`Float(r))
-  | `SymbolicDist(s) => Ok(`SamplingDist(`SymbolicDist(s)))
-  | `RenderedDist(s) => Ok(`RenderedDist(s))
-  | `Array(r) =>
-    r
-    |> E.A.fmap(fromNodeDirect)
-    |> E.A.R.firstErrorOrOpen
-    |> E.R.fmap(r => `Array(r))
-  | `Hash(hash) =>
-    hash
-    |> E.A.fmap(((name, t)) =>
-         fromNodeDirect(t) |> E.R.fmap(r => (name, r))
-       )
-    |> E.A.R.firstErrorOrOpen
-    |> E.R.fmap(r => `Named(r))
-  | _ => Error("Wrong type")
-  };
+    let _inputLengthCheck = (inputNodes: inputNodes, t: t) => {
+      let expectedLength = E.A.length(t.inputTypes);
+      let actualLength = E.A.length(inputNodes);
+      expectedLength == actualLength
+        ? Ok(inputNodes)
+        : Error(
+            "Wrong number of inputs. Expected"
+            ++ (expectedLength |> E.I.toString)
+            ++ ". Got:"
+            ++ (actualLength |> E.I.toString),
+          );
+    };
 
-let compareInput = (evaluationParams, t: t, node) =>
-  switch (t) {
-  | `Float =>
-    switch (getFloat(node)) {
-    | Some(a) => Ok(`Float(a))
-    | _ => Error("Type Error: Expected float.")
-    }
-  | `SamplingDistribution =>
-    PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
-      evaluationParams,
-      node,
-    )
-    |> E.R.bind(_, fromNodeDirect)
-  | `RenderedDistribution =>
-    ExpressionTypes.ExpressionTree.Render.render(evaluationParams, node)
-    |> E.R.bind(_, fromNodeDirect)
-  | _ => {
-    Js.log4("Type error: Expected ", t, ", got ", node);
-    Error("Bad input, sorry.")}
-  };
-
-let sanatizeInputs =
-    (
-      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
-      inputTypes: inputTypes,
-      t: fn,
-    ) => {
-  E.A.length(t.inputTypes) == E.A.length(inputTypes)
-    ? Belt.Array.zip(t.inputTypes, inputTypes)
+    let _coerceInputNodes =
+        (evaluationParams, inputTypes, shouldCoerce, inputNodes) =>
+      Belt.Array.zip(inputTypes, inputNodes)
       |> E.A.fmap(((def, input)) =>
-           compareInput(evaluationParams, def, input)
+           shouldCoerce
+             ? TypedValue.fromNodeWithTypeCoercion(
+                 evaluationParams,
+                 def,
+                 input,
+               )
+             : TypedValue.fromNode(input)
          )
-         |> (r => {Js.log2("Inputs", r); r})
-      |> E.A.R.firstErrorOrOpen
-    : Error(
-        "Wrong number of inputs. Expected"
-        ++ (E.A.length(t.inputTypes) |> E.I.toString)
-        ++ ". Got:"
-        ++ (E.A.length(inputTypes) |> E.I.toString),
-      );
-};
+      |> E.A.R.firstErrorOrOpen;
 
-let run =
-    (
-      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
-      inputTypes: inputTypes,
-      t: fn,
-    ) => {
-  let _sanitizedInputs = sanatizeInputs(evaluationParams, inputTypes, t);
-  _sanitizedInputs |> E.R.bind(_,t.run)
-  |> (
-    fun
-    | Ok(i) => Ok(i)
-    | Error(r) => {
-        Js.log4(
-          "Error",
-          inputTypes,
-          t,
-          _sanitizedInputs
+    let inputsToTypedValues =
+        (
+          evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+          inputNodes: inputNodes,
+          t: t,
+        ) => {
+      _inputLengthCheck(inputNodes, t)
+      ->E.R.bind(
+          _coerceInputNodes(
+            evaluationParams,
+            t.inputTypes,
+            t.shouldCoerceTypes,
+          ),
         );
-        Error("Function " ++ t.name ++ " error: " ++ r);
-      }
-  );
+    };
+
+    let run =
+        (
+          evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+          inputNodes: inputNodes,
+          t: t,
+        ) => {
+      Js.log("Running!");
+      inputsToTypedValues(evaluationParams, inputNodes, t)->E.R.bind(t.run)
+      |> (
+        fun
+        | Ok(i) => Ok(i)
+        | Error(r) => {
+            Error("Function " ++ t.name ++ " error: " ++ r);
+          }
+      );
+    };
+  };
+
+  module Ts = {
+    let findByName = (ts: ts, n: string) =>
+      ts |> Belt.Array.getBy(_, ({name}) => name == n);
+
+    let findByNameAndRun = (ts: ts, n: string, evaluationParams, inputTypes) =>
+      findByName(ts, n) |> E.O.fmap(T.run(evaluationParams, inputTypes));
+  };
 };
-
-let getFn = (fns: fns, n: string) =>
-  fns |> Belt.Array.getBy(_, ({name}) => name == n);
-
-let getAndRun = (fns: fns, n: string, evaluationParams, inputTypes) =>
-  getFn(fns, n) |> E.O.fmap(run(evaluationParams, inputTypes));
