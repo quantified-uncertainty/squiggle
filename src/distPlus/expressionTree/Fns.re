@@ -193,22 +193,78 @@ let functions = [|
             switch (r) {
             | `SamplingDist(`SymbolicDist(c)) => Ok(`SymbolicDist(c))
             | `SamplingDist(`RenderedDist(c)) => Ok(`RenderedDist(c))
+            | `Float(x) =>
+              Ok(`RenderedDist(SymbolicDist.T.toShape(1000, `Float(x))))
             | _ => Error("")
             };
-          switch (ExpressionTypes.ExpressionTree.Hash.getByName(r, "dists")) {
-          | Some(`Array(r)) =>
-            r
-            |> E.A.fmap(foo)
-            |> E.A.R.firstErrorOrOpen
-            |> E.R.fmap(distributions => {
-                 distributions
+          let weight = (r: TypeSystem.typedValue) =>
+            switch (r) {
+            | `Float(x) => Ok(x)
+            | _ => Error("Wrong Type")
+            };
+          let dists =
+            switch (ExpressionTypes.ExpressionTree.Hash.getByName(r, "dists")) {
+            | Some(`Array(r)) => r |> E.A.fmap(foo) |> E.A.R.firstErrorOrOpen
+            | _ => Error("")
+            };
+          let weights =
+            (
+              switch (
+                ExpressionTypes.ExpressionTree.Hash.getByName(r, "weights")
+              ) {
+              | Some(`Array(r)) =>
+                r |> E.A.fmap(weight) |> E.A.R.firstErrorOrOpen
+              | _ => Error("")
+              }
+            )
+            |> (
+              fun
+              | Ok(r) => r
+              | _ => [||]
+            );
+          let withWeights =
+            dists
+            |> E.R.fmap(d => {
+                 let iis =
+                   d |> E.A.length |> Belt.Array.makeUninitializedUnsafe;
+                 for (i in 0 to (d |> E.A.length) - 1) {
+                   Belt.Array.set(
+                     iis,
+                     i,
+                     (
+                       E.A.unsafe_get(d, i),
+                       E.A.get(weights, i) |> E.O.default(1.0),
+                     ),
+                   )
+                   |> ignore;
+                 };
+                 iis;
+               });
+          let components: result(array(node), string) =
+            withWeights
+            |> E.R.fmap(
+                 E.A.fmap(((dist, weight)) =>
+                   `FunctionCall((
+                     "scaleMultiply",
+                     [|dist, `SymbolicDist(`Float(weight))|],
+                   ))
+                 ),
+               );
+          let pointwiseSum =
+            components
+            |> E.R.bind(_, r => {
+                 E.A.length(r) > 0
+                   ? Ok(r) : Error("Invalid argument length")
+               })
+            |> E.R.fmap(r =>
+                 r
+                 |> Js.Array.sliceFrom(1)
                  |> E.A.fold_left(
                       (acc, x) => {`PointwiseCombination((`Add, acc, x))},
-                      E.A.unsafe_get(distributions, 0),
+                      E.A.unsafe_get(r, 0),
                     )
-               })
-          | _ => Error("")
-          };
+               );
+          pointwiseSum;
         }
       | _ => Error(""),
     (),
