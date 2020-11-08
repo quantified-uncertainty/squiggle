@@ -54,7 +54,6 @@ module TypedValue = {
 
   // todo: Arrays and hashes
   let rec fromNodeWithTypeCoercion = (evaluationParams, _type: _type, node) => {
-    Js.log3("With Coersion!", _type, node);
     switch (_type, node) {
     | (`Float, _) =>
       switch (getFloat(node)) {
@@ -76,7 +75,6 @@ module TypedValue = {
       |> E.A.R.firstErrorOrOpen
       |> E.R.fmap(r => `Array(r))
     | (`Named(named), `Hash(r)) =>
-      Js.log3("Named", named, r);
       let foo =
         named
         |> E.A.fmap(((name, intendedType)) =>
@@ -86,7 +84,6 @@ module TypedValue = {
                ExpressionTypes.ExpressionTree.Hash.getByName(r, name),
              )
            );
-      Js.log("Named: part 2");
       let bar =
         foo
         |> E.A.fmap(((name, intendedType, optionNode)) =>
@@ -99,11 +96,33 @@ module TypedValue = {
            )
         |> E.A.R.firstErrorOrOpen
         |> E.R.fmap(r => `Named(r));
-      Js.log3("Named!", foo, bar);
       bar;
     | _ => Error("fromNodeWithTypeCoercion error, sorry.")
     };
   };
+
+  let toFloat =
+    fun
+    | `Float(x) => Ok(x)
+    | _ => Error("Not a float");
+
+  let toArray =
+    fun
+    | `Array(x) => Ok(x)
+    | _ => Error("Not an array");
+
+  let toNamed =
+    fun
+    | `Named(x) => Ok(x)
+    | _ => Error("Not a named item");
+
+  let toDist =
+    fun
+    | `SamplingDist(`SymbolicDist(c)) => Ok(`SymbolicDist(c))
+    | `SamplingDist(`RenderedDist(c)) => Ok(`RenderedDist(c))
+    | `Float(x) =>
+      Ok(`RenderedDist(SymbolicDist.T.toShape(1000, `Float(x))))
+    | _ => Error("");
 };
 
 module Function = {

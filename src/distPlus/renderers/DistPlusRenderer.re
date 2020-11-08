@@ -144,7 +144,6 @@ let renderIfNeeded =
   node
   |> (
     fun
-    | `MultiModal(_) as n
     | `Normalize(_) as n
     | `SymbolicDist(_) as n => {
         `Render(n)

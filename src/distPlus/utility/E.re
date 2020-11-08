@@ -26,6 +26,9 @@ module FloatFloatMap = {
   let fmap = (fn, t: t) => Belt.MutableMap.map(t, fn);
 };
 
+module Int = {
+  let max = (i1: int, i2: int) => i1 > i2 ? i1 : i2;
+};
 /* Utils */
 module U = {
   let isEqual = (a, b) => a == b;
@@ -146,6 +149,11 @@ module R = {
   let fmap = Rationale.Result.fmap;
   let bind = Rationale.Result.bind;
   let toExn = Belt.Result.getExn;
+  let default = (default, res: Belt.Result.t('a, 'b)) =>
+    switch (res) {
+    | Ok(r) => r
+    | Error(_) => default
+    };
   let merge = (a, b) =>
     switch (a, b) {
     | (Error(e), _) => Error(e)
@@ -157,6 +165,9 @@ module R = {
     | Ok(r) => Some(r)
     | Error(_) => None
     };
+
+  let errorIfCondition = (errorCondition, errorMessage, r) =>
+    errorCondition(r) ? Error(errorMessage) : Ok(r);
 };
 
 let safe_fn_of_string = (fn, s: string): option('a) =>
@@ -263,6 +274,7 @@ module A = {
   let init = Array.init;
   let reduce = Belt.Array.reduce;
   let reducei = Belt.Array.reduceWithIndex;
+  let isEmpty = r => length(r) < 1;
   let min = a =>
     get(a, 0)
     |> O.fmap(first => Belt.Array.reduce(a, first, (i, j) => i < j ? i : j));
@@ -284,6 +296,16 @@ module A = {
          )
       |> Rationale.Result.return
     };
+
+  // This zips while taking the longest elements of each array.
+  let zipMaxLength = (array1, array2) => {
+    let maxLength = Int.max(length(array1), length(array2));
+    let result = maxLength |> Belt.Array.makeUninitializedUnsafe;
+    for (i in 0 to maxLength - 1) {
+      Belt.Array.set(result, i, (get(array1, i), get(array2, i))) |> ignore;
+    };
+    result;
+  };
 
   let asList = (f: list('a) => list('a), r: array('a)) =>
     r |> to_list |> f |> of_list;

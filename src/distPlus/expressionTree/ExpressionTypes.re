@@ -30,16 +30,18 @@ module ExpressionTree = {
     | `Render(node)
     | `Truncate(option(float), option(float), node)
     | `FunctionCall(string, array(node))
-    | `MultiModal(array((node, float)))
   ];
 
   module Hash = {
     type t('a) = array((string, 'a));
-    let getByName = (t:t('a), name) =>
+    let getByName = (t: t('a), name) =>
       E.A.getBy(t, ((n, _)) => n == name) |> E.O.fmap(((_, r)) => r);
 
-    let getByNames = (hash: t('a), names:array(string)) =>
-      names |> E.A.fmap(name => (name, getByName(hash, name)))
+    let getByNameResult = (t: t('a), name) =>
+      getByName(t, name) |> E.O.toResult(name ++ " expected and not found");
+
+    let getByNames = (hash: t('a), names: array(string)) =>
+      names |> E.A.fmap(name => (name, getByName(hash, name)));
   };
   // Have nil as option
   let getFloat = (node: node) =>

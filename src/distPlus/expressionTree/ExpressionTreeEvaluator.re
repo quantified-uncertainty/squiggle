@@ -307,6 +307,5 @@ let rec toLeaf =
     Js.log3("In function call", name, args);
     callableFunction(evaluationParams, name, args)
     |> E.R.bind(_, toLeaf(evaluationParams));
-  | `MultiModal(r) => Error("Multimodal?")
   };
 };

@@ -24,7 +24,6 @@ let rec toString: node => string =
     ++ toString(internal)
     ++ ")]"
   | `Array(_) => "Array"
-  | `MultiModal(_) => "Multimodal"
   | `Hash(_) => "Hash"
 
 let envs = (samplingInputs, environment) => {
