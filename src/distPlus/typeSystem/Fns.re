@@ -112,7 +112,7 @@ module Multimodal = {
 
   let _paramsToDistsAndWeights = (r: array(typedValue)) =>
     switch (r) {
-    | [|`Named(r)|] =>
+    | [|`Hash(r)|] =>
       let dists =
         getByNameResult(r, "dists")
         ->E.R.bind(TypeSystem.TypedValue.toArray)
@@ -171,7 +171,7 @@ module Multimodal = {
       ~name="multimodal",
       ~outputType=`SamplingDistribution,
       ~inputTypes=[|
-        `Named([|
+        `Hash([|
           ("dists", `Array(`SamplingDistribution)),
           ("weights", `Array(`Float)),
         |]),

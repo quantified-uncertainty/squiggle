@@ -99,6 +99,11 @@ module ExpressionTree = {
       );
     let update = (t, str, fn) => MS.update(t, str, fn);
     let get = (t: t, str) => MS.get(t, str);
+    let getFunction = (t: t, str) =>
+      switch (get(t, str)) {
+      | Some(`Function(argNames, fn)) => Ok((argNames, fn))
+      | _ => Error("Function " ++ str ++ " not found")
+      };
   };
 
   type evaluationParams = {

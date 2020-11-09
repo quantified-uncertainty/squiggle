@@ -215,18 +215,46 @@ module Normalize = {
   };
 };
 
+module FunctionCall = {
+  let _runHardcodedFunction = (name, evaluationParams, args) =>
+    TypeSystem.Function.Ts.findByNameAndRun(
+      Fns.functions,
+      name,
+      evaluationParams,
+      args,
+    );
+
+  let _runLocalFunction = (name, evaluationParams: evaluationParams, args) => {
+    Environment.getFunction(evaluationParams.environment, name)
+    |> E.R.bind(_, ((argNames, fn)) =>
+         PTypes.Function.run(evaluationParams, args, (argNames, fn))
+       );
+  };
+
+  let _runWithEvaluatedInputs =
+      (
+        evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+        name,
+        args: array(ExpressionTypes.ExpressionTree.node),
+      ) => {
+    _runHardcodedFunction(name, evaluationParams, args)
+    |> E.O.default(_runLocalFunction(name, evaluationParams, args));
+  };
+
 // TODO: This forces things to be floats
-let callableFunction = (evaluationParams, name, args) => {
-  args
-  |> E.A.fmap(a => evaluationParams.evaluateNode(evaluationParams, a))
-  |> E.A.R.firstErrorOrOpen
-  |> E.R.bind(_, Functions.fnn(evaluationParams, name));
+  let run = (evaluationParams, name, args) => {
+    args
+    |> E.A.fmap(a => evaluationParams.evaluateNode(evaluationParams, a))
+    |> E.A.R.firstErrorOrOpen
+    |> E.R.bind(_, _runWithEvaluatedInputs(evaluationParams, name));
+  };
 };
+
 
 module Render = {
   let rec operationToLeaf =
           (evaluationParams: evaluationParams, t: node): result(t, string) => {
-            Js.log2("rendering", t);
+    Js.log2("rendering", t);
     switch (t) {
     | `Function(_) => Error("Cannot render a function")
     | `SymbolicDist(d) =>
@@ -305,7 +333,7 @@ let rec toLeaf =
     |> E.R.bind(_, toLeaf(evaluationParams));
   | `FunctionCall(name, args) =>
     Js.log3("In function call", name, args);
-    callableFunction(evaluationParams, name, args)
+    FunctionCall.run(evaluationParams, name, args)
     |> E.R.bind(_, toLeaf(evaluationParams));
   };
 };

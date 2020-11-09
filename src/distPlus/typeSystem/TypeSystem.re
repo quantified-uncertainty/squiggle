@@ -6,20 +6,22 @@ type samplingDist = [
   | `RenderedDist(DistTypes.shape)
 ];
 
-type _type = [
+type hashType = array((string, _type))
+and _type = [
   | `Float
   | `SamplingDistribution
   | `RenderedDistribution
   | `Array(_type)
-  | `Named(array((string, _type)))
+  | `Hash(hashType)
 ];
 
-type typedValue = [
+type hashTypedValue = array((string, typedValue))
+and typedValue = [
   | `Float(float)
   | `RenderedDist(DistTypes.shape)
   | `SamplingDist(samplingDist)
   | `Array(array(typedValue))
-  | `Named(array((string, typedValue)))
+  | `Hash(hashTypedValue)
 ];
 
 type _function = {
@@ -48,7 +50,7 @@ module TypedValue = {
       hash
       |> E.A.fmap(((name, t)) => fromNode(t) |> E.R.fmap(r => (name, r)))
       |> E.A.R.firstErrorOrOpen
-      |> E.R.fmap(r => `Named(r))
+      |> E.R.fmap(r => `Hash(r))
     | _ => Error("Wrong type")
     };
 
@@ -74,8 +76,8 @@ module TypedValue = {
       |> E.A.fmap(fromNodeWithTypeCoercion(evaluationParams, _type))
       |> E.A.R.firstErrorOrOpen
       |> E.R.fmap(r => `Array(r))
-    | (`Named(named), `Hash(r)) =>
-      let foo =
+    | (`Hash(named), `Hash(r)) =>
+      let keyValues =
         named
         |> E.A.fmap(((name, intendedType)) =>
              (
@@ -84,8 +86,8 @@ module TypedValue = {
                ExpressionTypes.ExpressionTree.Hash.getByName(r, name),
              )
            );
-      let bar =
-        foo
+      let typedHash =
+        keyValues
         |> E.A.fmap(((name, intendedType, optionNode)) =>
              switch (optionNode) {
              | Some(node) =>
@@ -95,34 +97,33 @@ module TypedValue = {
              }
            )
         |> E.A.R.firstErrorOrOpen
-        |> E.R.fmap(r => `Named(r));
-      bar;
+        |> E.R.fmap(r => `Hash(r));
+      typedHash;
     | _ => Error("fromNodeWithTypeCoercion error, sorry.")
     };
   };
 
-  let toFloat =
+  let toFloat: typedValue => result(float,string) =
     fun
     | `Float(x) => Ok(x)
     | _ => Error("Not a float");
 
-  let toArray =
+  let toArray: typedValue => result(array('a),string) =
     fun
     | `Array(x) => Ok(x)
     | _ => Error("Not an array");
 
-  let toNamed =
+  let toNamed: typedValue => result(hashTypedValue, string) =
     fun
-    | `Named(x) => Ok(x)
+    | `Hash(x) => Ok(x)
     | _ => Error("Not a named item");
 
   let toDist =
     fun
     | `SamplingDist(`SymbolicDist(c)) => Ok(`SymbolicDist(c))
     | `SamplingDist(`RenderedDist(c)) => Ok(`RenderedDist(c))
-    | `Float(x) =>
-      Ok(`RenderedDist(SymbolicDist.T.toShape(1000, `Float(x))))
-    | _ => Error("");
+    | `Float(x) => Ok(`SymbolicDist(`Float(x)))
+    | _ => Error("Cannot be converted into a distribution");
 };
 
 module Function = {
@@ -188,7 +189,6 @@ module Function = {
           inputNodes: inputNodes,
           t: t,
         ) => {
-      Js.log("Running!");
       inputsToTypedValues(evaluationParams, inputNodes, t)->E.R.bind(t.run)
       |> (
         fun
