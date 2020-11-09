@@ -241,7 +241,7 @@ module FunctionCall = {
     |> E.O.default(_runLocalFunction(name, evaluationParams, args));
   };
 
-// TODO: This forces things to be floats
+  // TODO: This forces things to be floats
   let run = (evaluationParams, name, args) => {
     args
     |> E.A.fmap(a => evaluationParams.evaluateNode(evaluationParams, a))
@@ -249,7 +249,6 @@ module FunctionCall = {
     |> E.R.bind(_, _runWithEvaluatedInputs(evaluationParams, name));
   };
 };
-
 
 module Render = {
   let rec operationToLeaf =
@@ -284,18 +283,16 @@ let rec toLeaf =
           node: t,
         )
         : result(t, string) => {
-  Js.log2("node", node);
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)
   | `Function(_)
   | `RenderedDist(_) => Ok(node)
   | `Array(args) =>
-    Js.log2("Array!", args);
     args
     |> E.A.fmap(toLeaf(evaluationParams))
     |> E.A.R.firstErrorOrOpen
-    |> E.R.fmap(r => `Array(r));
+    |> E.R.fmap(r => `Array(r))
   // Operations nevaluationParamsd to be turned into leaves
   | `AlgebraicCombination(algebraicOp, t1, t2) =>
     AlgebraicCombination.operationToLeaf(
@@ -316,24 +313,21 @@ let rec toLeaf =
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
   | `Hash(t) =>
-    Js.log("In hash");
     t
     |> E.A.fmap(((name: string, node: node)) =>
          toLeaf(evaluationParams, node) |> E.R.fmap(r => (name, r))
        )
     |> E.A.R.firstErrorOrOpen
-    |> E.R.fmap(r => `Hash(r));
+    |> E.R.fmap(r => `Hash(r))
   | `Symbol(r) =>
-    Js.log("Symbol");
     ExpressionTypes.ExpressionTree.Environment.get(
       evaluationParams.environment,
       r,
     )
     |> E.O.toResult("Undeclared variable " ++ r)
-    |> E.R.bind(_, toLeaf(evaluationParams));
+    |> E.R.bind(_, toLeaf(evaluationParams))
   | `FunctionCall(name, args) =>
-    Js.log3("In function call", name, args);
     FunctionCall.run(evaluationParams, name, args)
-    |> E.R.bind(_, toLeaf(evaluationParams));
+    |> E.R.bind(_, toLeaf(evaluationParams))
   };
 };
