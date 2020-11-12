@@ -36,6 +36,22 @@ type functions = array(_function);
 type inputNodes = array(node);
 
 module TypedValue = {
+  let rec toString: typedValue => string =
+    fun
+    | `SamplingDist(_) => "[sampling dist]"
+    | `RenderedDist(_) => "[rendered Shape]"
+    | `Float(f) => "Float: " ++ Js.Float.toString(f)
+    | `Array(a) =>
+      "[" ++ (a |> E.A.fmap(toString) |> Js.String.concatMany(_, ",")) ++ "]"
+    | `Hash(v) =>
+      "{"
+      ++ (
+        v
+        |> E.A.fmap(((name, value)) => name ++ ":" ++ toString(value))
+        |> Js.String.concatMany(_, ",")
+      )
+      ++ "}";
+
   let rec fromNode = (node: node): result(typedValue, string) =>
     switch (ExpressionTypes.ExpressionTree.toFloatIfNeeded(node)) {
     | `SymbolicDist(`Float(r)) => Ok(`Float(r))
@@ -51,7 +67,7 @@ module TypedValue = {
       |> E.A.fmap(((name, t)) => fromNode(t) |> E.R.fmap(r => (name, r)))
       |> E.A.R.firstErrorOrOpen
       |> E.R.fmap(r => `Hash(r))
-    | _ => Error("Wrong type")
+    | e => Error("Wrong type: " ++ ExpressionTreeBasic.toString(e))
     };
 
   // todo: Arrays and hashes
@@ -103,12 +119,12 @@ module TypedValue = {
     };
   };
 
-  let toFloat: typedValue => result(float,string) =
+  let toFloat: typedValue => result(float, string) =
     fun
     | `Float(x) => Ok(x)
     | _ => Error("Not a float");
 
-  let toArray: typedValue => result(array('a),string) =
+  let toArray: typedValue => result(array('a), string) =
     fun
     | `Array(x) => Ok(x)
     | _ => Error("Not an array");
@@ -118,12 +134,13 @@ module TypedValue = {
     | `Hash(x) => Ok(x)
     | _ => Error("Not a named item");
 
-  let toDist =
+  let toDist: typedValue => result(node,string) =
     fun
     | `SamplingDist(`SymbolicDist(c)) => Ok(`SymbolicDist(c))
     | `SamplingDist(`RenderedDist(c)) => Ok(`RenderedDist(c))
+    | `RenderedDist(c) => Ok(`RenderedDist(c))
     | `Float(x) => Ok(`SymbolicDist(`Float(x)))
-    | _ => Error("Cannot be converted into a distribution");
+    | x => Error("Cannot be converted into a distribution: " ++ toString(x));
 };
 
 module Function = {

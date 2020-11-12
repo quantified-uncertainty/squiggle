@@ -1,7 +1,9 @@
 open TypeSystem;
 
-let wrongInputsError = r => {
-  Error("Wrong inputs");
+let wrongInputsError = (r: array(typedValue)) => {
+  let inputs = r |> E.A.fmap(TypedValue.toString) |>Js.String.concatMany(_, ",");
+  Js.log3("Inputs were", inputs, r);
+  Error("Wrong inputs. The inputs were:" ++ inputs);
 };
 
 let to_: (float, float) => result(node, string) =
@@ -46,6 +48,7 @@ let makeDistFloat = (name, fn) =>
     ~run=
       fun
       | [|`SamplingDist(a), `Float(b)|] => fn(a, b)
+      | [|`RenderedDist(a), `Float(b)|] => fn(`RenderedDist(a), b)
       | e => wrongInputsError(e),
     (),
   );
@@ -55,6 +58,7 @@ let makeRenderedDistFloat = (name, fn) =>
     ~name,
     ~outputType=`RenderedDistribution,
     ~inputTypes=[|`RenderedDistribution, `Float|],
+    ~shouldCoerceTypes=true,
     ~run=
       fun
       | [|`RenderedDist(a), `Float(b)|] => fn(a, b)
@@ -70,6 +74,7 @@ let makeDist = (name, fn) =>
     ~run=
       fun
       | [|`SamplingDist(a)|] => fn(a)
+      | [|`RenderedDist(a)|] => fn(`RenderedDist(a))
       | e => wrongInputsError(e),
     (),
   );
