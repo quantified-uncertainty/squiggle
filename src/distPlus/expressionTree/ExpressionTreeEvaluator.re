@@ -218,7 +218,7 @@ module Normalize = {
 module FunctionCall = {
   let _runHardcodedFunction = (name, evaluationParams, args) =>
     TypeSystem.Function.Ts.findByNameAndRun(
-      Fns.functions,
+      HardcodedFunctions.all,
       name,
       evaluationParams,
       args,
@@ -253,7 +253,6 @@ module FunctionCall = {
 module Render = {
   let rec operationToLeaf =
           (evaluationParams: evaluationParams, t: node): result(t, string) => {
-    Js.log2("rendering", t);
     switch (t) {
     | `Function(_) => Error("Cannot render a function")
     | `SymbolicDist(d) =>
@@ -329,5 +328,5 @@ let rec toLeaf =
   | `FunctionCall(name, args) =>
     FunctionCall.run(evaluationParams, name, args)
     |> E.R.bind(_, toLeaf(evaluationParams))
-  };
+  }
 };

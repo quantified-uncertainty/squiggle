@@ -53,7 +53,7 @@ module TypedValue = {
       ++ "}";
 
   let rec fromNode = (node: node): result(typedValue, string) =>
-    switch (ExpressionTypes.ExpressionTree.toFloatIfNeeded(node)) {
+    switch (node) {
     | `SymbolicDist(`Float(r)) => Ok(`Float(r))
     | `SymbolicDist(s) => Ok(`SamplingDist(`SymbolicDist(s)))
     | `RenderedDist(s) => Ok(`RenderedDist(s))
@@ -84,9 +84,10 @@ module TypedValue = {
         node,
       )
       |> E.R.bind(_, fromNode)
-    | (`RenderedDistribution, _) =>
+    | (`RenderedDistribution, _) =>{
       ExpressionTypes.ExpressionTree.Render.render(evaluationParams, node)
-      |> E.R.bind(_, fromNode)
+      |> E.R.bind(_, fromNode);
+    }
     | (`Array(_type), `Array(b)) =>
       b
       |> E.A.fmap(fromNodeWithTypeCoercion(evaluationParams, _type))
@@ -197,7 +198,7 @@ module Function = {
             t.inputTypes,
             t.shouldCoerceTypes,
           ),
-        );
+        )
     };
 
     let run =
