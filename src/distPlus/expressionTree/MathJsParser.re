@@ -1,4 +1,3 @@
-[%%debugger.chrome]
 module MathJsonToMathJsAdt = {
   type arg =
     | Symbol(string)
@@ -82,17 +81,14 @@ module MathAdtToDistDst = {
     Ok(`Symbol(sym));
   };
 
+  // TODO: This only works on the top level, which needs to be refactored. Also, I think functions don't need to be done like this anymore.
   module MathAdtCleaner = {
     let transformWithSymbol = (f: float, s: string) =>
       switch (s) {
-      | "K"
-      | "k" => Some(f *. 1000.)
-      | "M"
-      | "m" => Some(f *. 1000000.)
-      | "B"
-      | "b" => Some(f *. 1000000000.)
-      | "T"
-      | "t" => Some(f *. 1000000000000.)
+      | "K" => Some(f *. 1000.)
+      | "M" => Some(f *. 1000000.)
+      | "B" => Some(f *. 1000000000.)
+      | "T" => Some(f *. 1000000000000.)
       | _ => None
       };
     let rec run =
@@ -127,9 +123,7 @@ module MathAdtToDistDst = {
         |> E.R.bind(_, nodeParser);
       switch (g("mean"), g("stdev"), g("mu"), g("sigma")) {
       | (Ok(mean), Ok(stdev), _, _) =>
-        Ok(
-          `FunctionCall(("lognormalFromMeanAndStdDev", [|mean, stdev|])),
-        )
+        Ok(`FunctionCall(("lognormalFromMeanAndStdDev", [|mean, stdev|])))
       | (_, _, Ok(mu), Ok(sigma)) =>
         Ok(`FunctionCall(("lognormal", [|mu, sigma|])))
       | _ =>
@@ -144,64 +138,35 @@ module MathAdtToDistDst = {
          )
     };
 
-  let multiModal =
-      (
-        args: array(result(ExpressionTypes.ExpressionTree.node, string)),
-        weights: option(array(float)),
-      ) => {
-    let weights = weights |> E.O.default([||]);
-    let firstWithError = args |> Belt.Array.getBy(_, Belt.Result.isError);
-    let withoutErrors = args |> E.A.fmap(E.R.toOption) |> E.A.O.concatSomes;
-
-    switch (firstWithError) {
-    | Some(Error(e)) => Error(e)
-    | None when withoutErrors |> E.A.length == 0 =>
-      Error("Multimodals need at least one input")
-    | _ =>
-      let components =
-        withoutErrors
-        |> E.A.fmapi((index, t) => {
-             let w = weights |> E.A.get(_, index) |> E.O.default(1.0);
-
-             `VerticalScaling((`Multiply, t, `SymbolicDist(`Float(w))));
-           });
-
-      let pointwiseSum =
-        components
-        |> Js.Array.sliceFrom(1)
-        |> E.A.fold_left(
-             (acc, x) => {`PointwiseCombination((`Add, acc, x))},
-             E.A.unsafe_get(components, 0),
-           );
-
-      Ok(`Normalize(pointwiseSum));
-    };
-  };
-
-          //  Error("Dotwise exponentiation needs two operands")
+  //  Error("Dotwise exponentiation needs two operands")
   let operationParser =
       (
         name: string,
         args: result(array(ExpressionTypes.ExpressionTree.node), string),
-      ):result(ExpressionTypes.ExpressionTree.node,string) => {
+      )
+      : result(ExpressionTypes.ExpressionTree.node, string) => {
     let toOkAlgebraic = r => Ok(`AlgebraicCombination(r));
     let toOkPointwise = r => Ok(`PointwiseCombination(r));
     let toOkTruncate = r => Ok(`Truncate(r));
-    let toOkFloatFromDist = r => Ok(`FloatFromDist(r));
     args
     |> E.R.bind(_, args => {
          switch (name, args) {
          | ("add", [|l, r|]) => toOkAlgebraic((`Add, l, r))
          | ("add", _) => Error("Addition needs two operands")
+         | ("unaryMinus", [|l|]) =>
+           toOkAlgebraic((`Multiply, `SymbolicDist(`Float(-1.0)), l))
          | ("subtract", [|l, r|]) => toOkAlgebraic((`Subtract, l, r))
          | ("subtract", _) => Error("Subtraction needs two operands")
          | ("multiply", [|l, r|]) => toOkAlgebraic((`Multiply, l, r))
          | ("multiply", _) => Error("Multiplication needs two operands")
-         | ("pow", [|l,r|]) => toOkAlgebraic((`Exponentiate, l, r))
+         | ("pow", [|l, r|]) => toOkAlgebraic((`Exponentiate, l, r))
          | ("pow", _) => Error("Exponentiation needs two operands")
          | ("dotMultiply", [|l, r|]) => toOkPointwise((`Multiply, l, r))
          | ("dotMultiply", _) =>
            Error("Dotwise multiplication needs two operands")
+         | ("dotPow", [|l, r|]) => toOkPointwise((`Exponentiate, l, r))
+         | ("dotPow", _) =>
+           Error("Dotwise exponentiation needs two operands")
          | ("rightLogShift", [|l, r|]) => toOkPointwise((`Add, l, r))
          | ("rightLogShift", _) =>
            Error("Dotwise addition needs two operands")
@@ -228,25 +193,41 @@ module MathAdtToDistDst = {
            Error(
              "truncate needs three arguments: the expression and both cutoffs",
            )
-         | ("pdf", [|d, `SymbolicDist(`Float(v))|]) =>
-           toOkFloatFromDist((`Pdf(v), d))
-         | ("cdf", [|d, `SymbolicDist(`Float(v))|]) =>
-           toOkFloatFromDist((`Cdf(v), d))
-         | ("inv", [|d, `SymbolicDist(`Float(v))|]) =>
-           toOkFloatFromDist((`Inv(v), d))
-         | ("mean", [|d|]) => toOkFloatFromDist((`Mean, d))
-         | ("sample", [|d|]) => toOkFloatFromDist((`Sample, d))
          | _ => Error("This type not currently supported")
          }
        });
   };
 
-  let functionParser = (nodeParser, name, args) => {
+  let functionParser =
+      (
+        nodeParser:
+          MathJsonToMathJsAdt.arg =>
+          Belt.Result.t(
+            ProbExample.ExpressionTypes.ExpressionTree.node,
+            string,
+          ),
+        name: string,
+        args: array(MathJsonToMathJsAdt.arg),
+      )
+      : result(ExpressionTypes.ExpressionTree.node, string) => {
     let parseArray = ags =>
       ags |> E.A.fmap(nodeParser) |> E.A.R.firstErrorOrOpen;
     let parseArgs = () => parseArray(args);
     switch (name) {
     | "lognormal" => lognormal(args, parseArgs, nodeParser)
+    | "multimodal"
+    | "add"
+    | "subtract"
+    | "multiply"
+    | "unaryMinus"
+    | "dotMultiply"
+    | "dotPow"
+    | "rightLogShift"
+    | "divide"
+    | "pow"
+    | "leftTruncate"
+    | "rightTruncate"
+    | "truncate" => operationParser(name, parseArgs())
     | "mm" =>
       let weights =
         args
@@ -254,39 +235,36 @@ module MathAdtToDistDst = {
         |> E.O.bind(
              _,
              fun
-             | Array(values) => Some(values)
+             | Array(values) => Some(parseArray(values))
              | _ => None,
-           )
-        |> E.O.fmap(o =>
-             o
-             |> E.A.fmap(
-                  fun
-                  | Value(r) => Some(r)
-                  | _ => None,
-                )
-             |> E.A.O.concatSomes
            );
       let possibleDists =
         E.O.isSome(weights)
           ? Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1)
           : args;
-      let dists = possibleDists |> E.A.fmap(nodeParser);
-      multiModal(dists, weights);
-    | "add"
-    | "subtract"
-    | "multiply"
-    | "dotMultiply"
-    | "rightLogShift"
-    | "divide"
-    | "pow"
-    | "leftTruncate"
-    | "rightTruncate"
-    | "truncate"
-    | "mean"
-    | "inv"
-    | "sample"
-    | "cdf"
-    | "pdf" => operationParser(name, parseArgs())
+      let dists = parseArray(possibleDists);
+      switch (weights, dists) {
+      | (Some(Error(r)), _) => Error(r)
+      | (_, Error(r)) => Error(r)
+      | (None, Ok(dists)) =>
+        let hash: ExpressionTypes.ExpressionTree.node =
+          `FunctionCall(("multimodal", [|`Hash(
+            [|
+            ("dists", `Array(dists)),
+            ("weights", `Array([||]))
+            |]
+          )|]));
+        Ok(hash);
+      | (Some(Ok(weights)), Ok(dists)) =>
+        let hash: ExpressionTypes.ExpressionTree.node =
+          `FunctionCall(("multimodal", [|`Hash(
+            [|
+            ("dists", `Array(dists)),
+            ("weights", `Array(weights))
+            |]
+          )|]));
+        Ok(hash);
+      };
     | name =>
       parseArgs()
       |> E.R.fmap((args: array(ExpressionTypes.ExpressionTree.node)) =>
@@ -303,7 +281,7 @@ module MathAdtToDistDst = {
     | Symbol(sym) => Ok(`Symbol(sym))
     | Fn({name, args}) => functionParser(nodeParser, name, args)
     | _ => {
-        Error("This type not currently supported")
+        Error("This type not currently supported");
       };
 
   // | FunctionAssignment({name, args, expression}) => {
@@ -356,6 +334,7 @@ let fromString2 = str => {
        Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
      */
   let mathJsToJson = str |> pointwiseToRightLogShift |> Mathjs.parseMath;
+
   let mathJsParse =
     E.R.bind(mathJsToJson, r => {
       switch (MathJsonToMathJsAdt.run(r)) {
@@ -365,6 +344,7 @@ let fromString2 = str => {
     });
 
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
+  Js.log2(mathJsParse, value);
   value;
 };
 

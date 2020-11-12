@@ -104,8 +104,9 @@ let reducer = (state: state, action: action) =>
 let init = {
   showStats: false,
   showParams: false,
-  showPercentiles: true,
+  showPercentiles: false,
   distributions: [
-    {yLog: false, xLog: false, isCumulative: false, height: 1},
+    {yLog: false, xLog: false, isCumulative: false, height: 4},
+    {yLog: false, xLog: false, isCumulative: true, height: 1},
   ],
 };

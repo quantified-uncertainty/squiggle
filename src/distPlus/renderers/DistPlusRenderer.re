@@ -8,7 +8,7 @@ module Inputs = {
       shapeLength: option(int),
     };
   };
-  let defaultRecommendedLength = 10000;
+  let defaultRecommendedLength = 100;
   let defaultShouldDownsample = true;
 
   type ingredients = {
@@ -91,18 +91,16 @@ module Internals = {
   };
   let makeOutputs = (graph, shape): outputs => {graph, shape};
 
+  let makeInputs = (inputs): ExpressionTypes.ExpressionTree.samplingInputs => {
+    sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
+    outputXYPoints:
+      inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
+    kernelWidth: inputs.samplingInputs.kernelWidth,
+    shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
+  };
+
   let runNode = (inputs, node) => {
-    ExpressionTree.toShape(
-      {
-        sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
-        outputXYPoints:
-          inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
-        kernelWidth: inputs.samplingInputs.kernelWidth,
-        shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
-      },
-      inputs.environment,
-      node,
-    );
+    ExpressionTree.toLeaf(makeInputs(inputs), inputs.environment, node);
   };
 
   let runProgram = (inputs: inputs, p: ExpressionTypes.Program.program) => {
@@ -114,20 +112,19 @@ module Internals = {
              ins := addVariable(ins^, name, node);
              None;
            }
-         | `Expression(node) => Some(runNode(ins^, node)),
+         | `Expression(node) =>
+           Some(
+             runNode(ins^, node) |> E.R.fmap(r => (ins^.environment, r)),
+           ),
        )
     |> E.A.O.concatSomes
     |> E.A.R.firstErrorOrOpen;
   };
 
-  let inputsToShape = (inputs: inputs) => {
+  let inputsToLeaf = (inputs: inputs) => {
     MathJsParser.fromString(inputs.guesstimatorString)
     |> E.R.bind(_, g => runProgram(inputs, g))
-    |> E.R.bind(_, r =>
-         E.A.last(r)
-         |> E.O.toResult("No rendered lines")
-         |> E.R.fmap(Shape.T.normalize)
-       );
+    |> E.R.bind(_, r => E.A.last(r) |> E.O.toResult("No rendered lines"));
   };
 
   let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) => {
@@ -141,9 +138,113 @@ module Internals = {
   };
 };
 
+let renderIfNeeded =
+    (inputs, node: ExpressionTypes.ExpressionTree.node)
+    : result(ExpressionTypes.ExpressionTree.node, string) =>
+  node
+  |> (
+    fun
+    | `Normalize(_) as n
+    | `SymbolicDist(_) as n => {
+        `Render(n)
+        |> Internals.runNode(Internals.distPlusRenderInputsToInputs(inputs))
+        |> (
+          fun
+          | Ok(`RenderedDist(_)) as r => r
+          | Error(r) => Error(r)
+          | _ => Error("Didn't render, but intended to")
+        );
+      }
+    | n => Ok(n)
+  );
+
 let run = (inputs: Inputs.inputs) => {
   inputs
   |> Internals.distPlusRenderInputsToInputs
-  |> Internals.inputsToShape
+  |> Internals.inputsToLeaf
+  |> E.R.bind(_, ((lastIns, r)) =>
+       r
+       |> renderIfNeeded(inputs)
+       |> (
+         fun
+         | Ok(`RenderedDist(n)) => Ok(n)
+         | Ok(n) =>
+           Error(
+             "Didn't output a rendered distribution. Format:"
+             ++ ExpressionTree.toString(n),
+           )
+         | Error(r) => Error(r)
+       )
+     )
   |> E.R.fmap(Internals.outputToDistPlus(inputs));
+};
+
+let exportDistPlus =
+    (
+      inputs,
+      env: ProbExample.ExpressionTypes.ExpressionTree.environment,
+      node: ExpressionTypes.ExpressionTree.node,
+    ) =>
+  node
+  |> renderIfNeeded(inputs)
+  |> E.R.bind(
+       _,
+       fun
+       | `RenderedDist(Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}})) =>
+         Ok(`Float(x))
+       | `SymbolicDist(`Float(x)) => Ok(`Float(x))
+       | `RenderedDist(n) =>
+         Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
+       | `Function(n) => Ok(`Function((n, env)))
+       | n =>
+         Error(
+           "Didn't output a rendered distribution. Format:"
+           ++ ExpressionTree.toString(n),
+         ),
+     );
+
+// This isn't ok with floats, which can't be done in a function easily
+let exportDistPlus2 =
+    (
+      inputs,
+      env: ProbExample.ExpressionTypes.ExpressionTree.environment,
+      node: ExpressionTypes.ExpressionTree.node,
+    ) =>
+  node
+  |> renderIfNeeded(inputs)
+  |> E.R.bind(
+       _,
+       fun
+       | `RenderedDist(n) =>
+         Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
+       | `Function(n) => Ok(`Function((n, env)))
+       | n =>
+         Error(
+           "Didn't output a rendered distribution. Format:"
+           ++ ExpressionTree.toString(n),
+         ),
+     );
+
+let run2 = (inputs: Inputs.inputs) => {
+  inputs
+  |> Internals.distPlusRenderInputsToInputs
+  |> Internals.inputsToLeaf
+  |> E.R.bind(_, ((a, b)) => exportDistPlus(inputs, a, b));
+};
+
+let runFunction =
+    (
+      ins: Inputs.inputs,
+      fn: (array(string), ExpressionTypes.ExpressionTree.node),
+      fnInputs,
+    ) => {
+  let inputs = ins |> Internals.distPlusRenderInputsToInputs;
+  let output =
+    ExpressionTree.runFunction(
+      Internals.makeInputs(inputs),
+      inputs.environment,
+      fnInputs,
+      fn,
+    );
+  output |> E.R.bind(_, exportDistPlus2(ins, inputs.environment));
 };

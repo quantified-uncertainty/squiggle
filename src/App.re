@@ -1,7 +1,6 @@
 type route =
   | Model(string)
   | DistBuilder
-  | Drawer
   | Home
   | NotFound;
 
@@ -9,7 +8,6 @@ let routeToPath = route =>
   switch (route) {
   | Model(modelId) => "/m/" ++ modelId
   | DistBuilder => "/dist-builder"
-  | Drawer => "/drawer"
   | Home => "/"
   | _ => "/"
   };
@@ -71,13 +69,12 @@ module Menu = {
       <Item href={routeToPath(DistBuilder)} key="dist-builder">
         {"Dist Builder" |> R.ste}
       </Item>
-      <Item href={routeToPath(Drawer)} key="drawer">
-        {"Drawer" |> R.ste}
-      </Item>
-
     </div>;
   };
 };
+
+let fixedLength = r =>
+  <div className="w-full max-w-screen-xl mx-auto px-6"> r </div>;
 
 [@react.component]
 let make = () => {
@@ -87,23 +84,24 @@ let make = () => {
     switch (url.path) {
     | ["m", modelId] => Model(modelId)
     | ["dist-builder"] => DistBuilder
-    | ["drawer"] => Drawer
     | [] => Home
     | _ => NotFound
     };
 
-  <div className="w-full max-w-screen-xl mx-auto px-6">
+  <>
     <Menu />
     {switch (routing) {
      | Model(id) =>
-       switch (Models.getById(id)) {
-       | Some(model) => <FormBuilder.ModelForm model key=id />
-       | None => <div> {"Page is not found" |> R.ste} </div>
-       }
+       (
+         switch (Models.getById(id)) {
+         | Some(model) => <FormBuilder.ModelForm model key=id />
+         | None => <div> {"Page is not found" |> R.ste} </div>
+         }
+       )
+       |> fixedLength
      | DistBuilder => <DistBuilder />
-     | Drawer => <Drawer />
      | Home => <Home />
-     | _ => <div> {"Page is not found" |> R.ste} </div>
+     | _ => fixedLength({"Page is not found" |> R.ste})
      }}
-  </div>;
+  </>;
 };

@@ -19,6 +19,9 @@ module FormConfig = [%lenses
     outputXYPoints: string,
     downsampleTo: string,
     kernelWidth: string,
+    diagramStart: string,
+    diagramStop: string,
+    diagramCount: string,
   }
 ];
 
@@ -27,6 +30,9 @@ type options = {
   outputXYPoints: int,
   downsampleTo: option(int),
   kernelWidth: option(float),
+  diagramStart: float,
+  diagramStop: float,
+  diagramCount: int,
 };
 
 module Form = ReForm.Make(FormConfig);
@@ -36,18 +42,14 @@ let schema = Form.Validation.Schema([||]);
 module FieldText = {
   [@react.component]
   let make = (~field, ~label) => {
-    <Form.Field
-      field
-      render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> R.ste}>
-          <Antd.Input.TextArea
-            value
-            onChange={BsReform.Helpers.handleChange(handleChange)}
-            onBlur={_ => validate()}
-          />
-        </Antd.Form.Item>
-      }
-    />;
+    <>
+      <Form.Field
+        field
+        render={({handleChange, error, value, validate}) =>
+          <CodeEditor value onChange={r => handleChange(r)} />
+        }
+      />
+    </>;
   };
 };
 module FieldString = {
@@ -132,7 +134,6 @@ module DemoDist = {
   [@react.component]
   let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
     <Antd.Card title={"Distribution" |> R.ste}>
-      <div className=Styles.spacer />
       <div>
         {switch (domain, unit, options) {
          | (Some(domain), Some(unit), Some(options)) =>
@@ -149,22 +150,57 @@ module DemoDist = {
                  sampleCount: Some(options.sampleCount),
                  outputXYPoints: Some(options.outputXYPoints),
                  kernelWidth: options.kernelWidth,
-                 shapeLength: Some(options.downsampleTo |> E.O.default(1000))
+                 shapeLength:
+                   Some(options.downsampleTo |> E.O.default(1000)),
                },
                ~distPlusIngredients,
                ~environment=
-                 [|("p", `SymbolicDist(`Float(1.0)))|]
+                 [|
+                   ("K", `SymbolicDist(`Float(1000.0))),
+                   ("M", `SymbolicDist(`Float(1000000.0))),
+                   ("B", `SymbolicDist(`Float(1000000000.0))),
+                   ("T", `SymbolicDist(`Float(1000000000000.0))),
+                 |]
                  ->Belt.Map.String.fromArray,
                (),
              );
 
-           let response1 = DistPlusRenderer.run(inputs1);
+           let response1 = DistPlusRenderer.run2(inputs1);
            switch (response1) {
-           | (Ok(distPlus1)) =>
-             <>
-               <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
-             </>
-           | (Error(r)) => r |> R.ste
+           | Ok(`DistPlus(distPlus1)) =>
+             <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
+           | Ok(`Float(f)) =>
+             <ForetoldComponents.NumberShower number=f precision=3 />
+           | Ok(`Function((f, a), env)) =>
+             //  Problem: When it gets the function, it doesn't save state about previous commands
+             let foo: DistPlusRenderer.Inputs.inputs = {
+               distPlusIngredients: inputs1.distPlusIngredients,
+               samplingInputs: inputs1.samplingInputs,
+               environment: env,
+             };
+             let results =
+               E.A.Floats.range(options.diagramStart, options.diagramStop, options.diagramCount)
+               |> E.A.fmap(r =>
+                    DistPlusRenderer.runFunction(
+                      foo,
+                      (f, a),
+                      [|`SymbolicDist(`Float(r))|],
+                    )
+                    |> E.R.bind(_, a =>
+                         switch (a) {
+                         | `DistPlus(d) => Ok((r, DistPlus.T.normalize(d)))
+                         | n =>
+                           Js.log2("Error here", n);
+                           Error("wrong type");
+                         }
+                       )
+                  )
+               |> E.A.R.firstErrorOrOpen;
+             switch (results) {
+             | Ok(dists) => <PercentilesChart dists />
+             | Error(r) => r |> R.ste
+             };
+           | Error(r) => r |> R.ste
            };
          | _ =>
            "Nothing to show. Try to change the distribution description."
@@ -175,9 +211,21 @@ module DemoDist = {
   };
 };
 
+//         guesstimatorString: "
+//         us_economy_2018 = (10.5 to 10.6)T
+// growth_rate = 1.08 to 1.2
+// us_economy(t) = us_economy_2018 * (growth_rate^t)
+
+// us_population_2019 = 320M to 330M
+// us_population_growth_rate = 1.01 to 1.02
+// us_population(t) = us_population_2019 * (us_population_growth_rate^t)
+
+// gdp_per_person(t) = us_economy(t)/us_population(t)
+// gdp_per_person
+// ",
 [@react.component]
 let make = () => {
-  let (reloader, setRealoader) = React.useState(() => 1);
+  let (reloader, setReloader) = React.useState(() => 1);
   let reform =
     Form.use(
       ~validationStrategy=OnDemand,
@@ -185,7 +233,7 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
-        guesstimatorString: "mm(1, 2, 3, normal(2, 1))", // , triangular(30, 40, 60)
+         guesstimatorString: "mm(3)",
         domainType: "Complete",
         xPoint: "50.0",
         xPoint2: "60.0",
@@ -194,10 +242,13 @@ let make = () => {
         unitType: "UnspecifiedDistribution",
         zero: MomentRe.momentNow(),
         unit: "days",
-        sampleCount: "30000",
+        sampleCount: "1000",
         outputXYPoints: "1000",
         downsampleTo: "",
         kernelWidth: "",
+        diagramStart: "0",
+        diagramStop: "10",
+        diagramCount: "20",
       },
       (),
     );
@@ -226,6 +277,9 @@ let make = () => {
     reform.state.values.outputXYPoints |> Js.Float.fromString;
   let downsampleTo = reform.state.values.downsampleTo |> Js.Float.fromString;
   let kernelWidth = reform.state.values.kernelWidth |> Js.Float.fromString;
+  let diagramStart = reform.state.values.diagramStart |> Js.Float.fromString;
+  let diagramStop = reform.state.values.diagramStop |> Js.Float.fromString;
+  let diagramCount = reform.state.values.diagramCount |> Js.Float.fromString;
 
   let domain =
     switch (domainType) {
@@ -281,6 +335,9 @@ let make = () => {
           int_of_float(downsampleTo) > 0
             ? Some(int_of_float(downsampleTo)) : None,
         kernelWidth: kernelWidth == 0.0 ? None : Some(kernelWidth),
+        diagramStart: diagramStart,
+        diagramStop: diagramStop,
+        diagramCount: diagramCount |> int_of_float,
       })
     | _ => None
     };
@@ -303,214 +360,86 @@ let make = () => {
         reform.state.values.outputXYPoints,
         reform.state.values.downsampleTo,
         reform.state.values.kernelWidth,
+        reform.state.values.diagramStart,
+        reform.state.values.diagramStop,
+        reform.state.values.diagramCount,
         reloader |> string_of_int,
       |],
     );
 
-  let onRealod = _ => {
-    setRealoader(_ => reloader + 1);
+  let onReload = _ => {
+    setReloader(_ => reloader + 1);
   };
 
-  <div className=Styles.parent>
-    <div className=Styles.spacer />
-    demoDist
-    <div className=Styles.spacer />
-    <Antd.Card
-      title={"Distribution Form" |> R.ste}
-      extra={
-        <Antd.Button
-          icon=Antd.IconName.reload
-          shape=`circle
-          onClick=onRealod
-        />
-      }>
-      <Form.Provider value=reform>
-        <Antd.Form onSubmit>
-          <Row _type=`flex className=Styles.rows>
-            <Col span=24>
-              <FieldText
-                field=FormConfig.GuesstimatorString
-                label="Guesstimator String"
-              />
-            </Col>
-          </Row>
-          <Row _type=`flex className=Styles.rows>
-            <Col span=4>
-              <Form.Field
-                field=FormConfig.DomainType
-                render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Domain Type" |> R.ste}>
-                    <Antd.Select value onChange={e => e |> handleChange}>
-                      <Antd.Select.Option value="Complete">
-                        {"Complete" |> R.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="LeftLimited">
-                        {"Left Limited" |> R.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="RightLimited">
-                        {"Right Limited" |> R.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="LeftAndRightLimited">
-                        {"Left And Right Limited" |> R.ste}
-                      </Antd.Select.Option>
-                    </Antd.Select>
-                  </Antd.Form.Item>
-                }
-              />
-            </Col>
-            {<>
-               <Col span=4>
-                 <FieldFloat
-                   field=FormConfig.XPoint
-                   label="Left X-point"
-                   className=Styles.groupA
-                 />
-               </Col>
-               <Col span=4>
-                 <FieldFloat
-                   field=FormConfig.ExcludingProbabilityMass
-                   label="Left Excluding Probability Mass"
-                   className=Styles.groupA
-                 />
-               </Col>
-             </>
-             |> R.showIf(
-                  E.L.contains(
-                    reform.state.values.domainType,
-                    ["LeftLimited", "LeftAndRightLimited"],
-                  ),
-                )}
-            {<>
-               <Col span=4>
-                 <FieldFloat
-                   field=FormConfig.XPoint2
-                   label="Right X-point"
-                   className=Styles.groupB
-                 />
-               </Col>
-               <Col span=4>
-                 <FieldFloat
-                   field=FormConfig.ExcludingProbabilityMass2
-                   label="Right Excluding Probability Mass"
-                   className=Styles.groupB
-                 />
-               </Col>
-             </>
-             |> R.showIf(
-                  E.L.contains(
-                    reform.state.values.domainType,
-                    ["RightLimited", "LeftAndRightLimited"],
-                  ),
-                )}
-          </Row>
-          <Row _type=`flex className=Styles.rows>
-            <Col span=4>
-              <Form.Field
-                field=FormConfig.UnitType
-                render={({handleChange, value}) =>
-                  <Antd.Form.Item label={"Unit Type" |> R.ste}>
-                    <Antd.Select value onChange={e => e |> handleChange}>
-                      <Antd.Select.Option value="UnspecifiedDistribution">
-                        {"Unspecified Distribution" |> R.ste}
-                      </Antd.Select.Option>
-                      <Antd.Select.Option value="TimeDistribution">
-                        {"Time Distribution" |> R.ste}
-                      </Antd.Select.Option>
-                    </Antd.Select>
-                  </Antd.Form.Item>
-                }
-              />
-            </Col>
-            {<>
-               <Col span=4>
-                 <Form.Field
-                   field=FormConfig.Zero
-                   render={({handleChange, value}) =>
-                     <Antd.Form.Item label={"Zero Point" |> R.ste}>
-                       <Antd_DatePicker
-                         value
-                         onChange={e => {
-                           e |> handleChange;
-                           _ => ();
-                         }}
-                       />
-                     </Antd.Form.Item>
-                   }
-                 />
-               </Col>
-               <Col span=4>
-                 <Form.Field
-                   field=FormConfig.Unit
-                   render={({handleChange, value}) =>
-                     <Antd.Form.Item label={"Unit" |> R.ste}>
-                       <Antd.Select value onChange={e => e |> handleChange}>
-                         <Antd.Select.Option value="days">
-                           {"Days" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="hours">
-                           {"Hours" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="milliseconds">
-                           {"Milliseconds" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="minutes">
-                           {"Minutes" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="months">
-                           {"Months" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="quarters">
-                           {"Quarters" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="seconds">
-                           {"Seconds" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="weeks">
-                           {"Weeks" |> R.ste}
-                         </Antd.Select.Option>
-                         <Antd.Select.Option value="years">
-                           {"Years" |> R.ste}
-                         </Antd.Select.Option>
-                       </Antd.Select>
-                     </Antd.Form.Item>
-                   }
-                 />
-               </Col>
-             </>
-             |> R.showIf(
-                  E.L.contains(
-                    reform.state.values.unitType,
-                    ["TimeDistribution"],
-                  ),
-                )}
-          </Row>
-          <Row _type=`flex className=Styles.rows>
-            <Col span=4>
-              <FieldFloat field=FormConfig.SampleCount label="Sample Count" />
-            </Col>
-            <Col span=4>
-              <FieldFloat
-                field=FormConfig.OutputXYPoints
-                label="Output XY-points"
-              />
-            </Col>
-            <Col span=4>
-              <FieldFloat
-                field=FormConfig.DownsampleTo
-                label="Downsample To"
-              />
-            </Col>
-            <Col span=4>
-              <FieldFloat field=FormConfig.KernelWidth label="Kernel Width" />
-            </Col>
-          </Row>
+  <div className="grid grid-cols-2 gap-4">
+    <div>
+      <Antd.Card
+        title={"Distribution Form" |> R.ste}
+        extra={
           <Antd.Button
-            _type=`primary icon=Antd.IconName.reload onClick=onRealod>
-            {"Update Distribution" |> R.ste}
-          </Antd.Button>
-        </Antd.Form>
-      </Form.Provider>
-    </Antd.Card>
-    <div className=Styles.spacer />
+            icon=Antd.IconName.reload
+            shape=`circle
+            onClick=onReload
+          />
+        }>
+        <Form.Provider value=reform>
+          <Antd.Form onSubmit>
+            <Row _type=`flex className=Styles.rows>
+              <Col span=24>
+                <FieldText
+                  field=FormConfig.GuesstimatorString
+                  label="Program"
+                />
+              </Col>
+            </Row>
+            <Row _type=`flex className=Styles.rows>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.SampleCount
+                  label="Sample Count"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.OutputXYPoints
+                  label="Output XY-points"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.DownsampleTo
+                  label="Downsample To"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.KernelWidth
+                  label="Kernel Width"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.DiagramStart
+                  label="Diagram Start"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.DiagramStop
+                  label="Diagram Stop"
+                />
+              </Col>
+              <Col span=12>
+                <FieldFloat
+                  field=FormConfig.DiagramCount
+                  label="Diagram Count"
+                />
+              </Col>
+            </Row>
+          </Antd.Form>
+        </Form.Provider>
+      </Antd.Card>
+    </div>
+    <div> demoDist </div>
   </div>;
 };

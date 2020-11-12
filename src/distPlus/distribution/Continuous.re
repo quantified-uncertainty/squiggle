@@ -3,13 +3,21 @@ open Distributions;
 type t = DistTypes.continuousShape;
 let getShape = (t: t) => t.xyShape;
 let interpolation = (t: t) => t.interpolation;
-let make = (~interpolation=`Linear, ~integralSumCache=None, ~integralCache=None, xyShape): t => {
+let make =
+    (
+      ~interpolation=`Linear,
+      ~integralSumCache=None,
+      ~integralCache=None,
+      xyShape,
+    )
+    : t => {
   xyShape,
   interpolation,
   integralSumCache,
   integralCache,
 };
-let shapeMap = (fn, {xyShape, interpolation, integralSumCache, integralCache}: t): t => {
+let shapeMap =
+    (fn, {xyShape, interpolation, integralSumCache, integralCache}: t): t => {
   xyShape: fn(xyShape),
   interpolation,
   integralSumCache,
@@ -19,10 +27,14 @@ let lastY = (t: t) => t |> getShape |> XYShape.T.lastY;
 let oShapeMap =
     (fn, {xyShape, interpolation, integralSumCache, integralCache}: t)
     : option(DistTypes.continuousShape) =>
-  fn(xyShape) |> E.O.fmap(make(~interpolation, ~integralSumCache, ~integralCache));
+  fn(xyShape)
+  |> E.O.fmap(make(~interpolation, ~integralSumCache, ~integralCache));
 
 let emptyIntegral: DistTypes.continuousShape = {
-  xyShape: {xs: [|neg_infinity|], ys: [|0.0|]},
+  xyShape: {
+    xs: [|neg_infinity|],
+    ys: [|0.0|],
+  },
   interpolation: `Linear,
   integralSumCache: Some(0.0),
   integralCache: None,
@@ -35,14 +47,18 @@ let empty: DistTypes.continuousShape = {
 };
 
 let stepwiseToLinear = (t: t): t =>
-  make(~integralSumCache=t.integralSumCache, ~integralCache=t.integralCache, XYShape.Range.stepwiseToLinear(t.xyShape));
+  make(
+    ~integralSumCache=t.integralSumCache,
+    ~integralCache=t.integralCache,
+    XYShape.Range.stepwiseToLinear(t.xyShape),
+  );
 
 // Note: This results in a distribution with as many points as the sum of those in t1 and t2.
 let combinePointwise =
     (
       ~integralSumCachesFn=(_, _) => None,
-      ~integralCachesFn: (t, t) => option(t) =(_, _) => None,
-      ~distributionType: DistTypes.distributionType = `PDF,
+      ~integralCachesFn: (t, t) => option(t)=(_, _) => None,
+      ~distributionType: DistTypes.distributionType=`PDF,
       fn: (float, float) => float,
       t1: DistTypes.continuousShape,
       t2: DistTypes.continuousShape,
@@ -62,19 +78,22 @@ let combinePointwise =
 
   // If combining stepwise and linear, we must convert the stepwise to linear first,
   // i.e. add a point at the bottom of each step
-  let (t1, t2) = switch (t1.interpolation, t2.interpolation) {
-  | (`Linear, `Linear) => (t1, t2);
-  | (`Stepwise, `Stepwise) => (t1, t2);
-  | (`Linear, `Stepwise) => (t1, stepwiseToLinear(t2));
-  | (`Stepwise, `Linear) => (stepwiseToLinear(t1), t2);
-  };
+  let (t1, t2) =
+    switch (t1.interpolation, t2.interpolation) {
+    | (`Linear, `Linear) => (t1, t2)
+    | (`Stepwise, `Stepwise) => (t1, t2)
+    | (`Linear, `Stepwise) => (t1, stepwiseToLinear(t2))
+    | (`Stepwise, `Linear) => (stepwiseToLinear(t1), t2)
+    };
 
-  let extrapolation = switch (distributionType) {
-  | `PDF => `UseZero
-  | `CDF => `UseOutermostPoints
-  };
+  let extrapolation =
+    switch (distributionType) {
+    | `PDF => `UseZero
+    | `CDF => `UseOutermostPoints
+    };
 
-  let interpolator = XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation);
+  let interpolator =
+    XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation);
 
   make(
     ~integralSumCache=combinedIntegralSum,
@@ -103,10 +122,7 @@ let updateIntegralSumCache = (integralSumCache, t: t): t => {
   integralSumCache,
 };
 
-let updateIntegralCache = (integralCache, t: t): t => {
-  ...t,
-  integralCache,
-};
+let updateIntegralCache = (integralCache, t: t): t => {...t, integralCache};
 
 let reduce =
     (
@@ -116,11 +132,13 @@ let reduce =
       continuousShapes,
     ) =>
   continuousShapes
-  |> E.A.fold_left(combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn), empty);
+  |> E.A.fold_left(
+       combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn),
+       empty,
+     );
 
-let mapY = (~integralSumCacheFn=_ => None,
-            ~integralCacheFn=_ => None,
-            ~fn, t: t) => {
+let mapY =
+    (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t) => {
   make(
     ~interpolation=t.interpolation,
     ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
@@ -130,13 +148,15 @@ let mapY = (~integralSumCacheFn=_ => None,
 };
 
 let rec scaleBy = (~scale=1.0, t: t): t => {
-  let scaledIntegralSumCache = E.O.bind(t.integralSumCache, v => Some(scale *. v));
-  let scaledIntegralCache = E.O.bind(t.integralCache, v => Some(scaleBy(~scale, v)));
+  let scaledIntegralSumCache =
+    E.O.bind(t.integralSumCache, v => Some(scale *. v));
+  let scaledIntegralCache =
+    E.O.bind(t.integralCache, v => Some(scaleBy(~scale, v)));
 
   t
   |> mapY(~fn=(r: float) => r *. scale)
   |> updateIntegralSumCache(scaledIntegralSumCache)
-  |> updateIntegralCache(scaledIntegralCache)
+  |> updateIntegralCache(scaledIntegralCache);
 };
 
 module T =
@@ -171,20 +191,22 @@ module T =
         |> XYShape.Zipped.filterByX(x => x >= lc && x <= rc);
 
       let leftNewPoint =
-        leftCutoff |> E.O.dimap(lc => [|(lc -. epsilon_float, 0.)|], _ => [||]);
+        leftCutoff
+        |> E.O.dimap(lc => [|(lc -. epsilon_float, 0.)|], _ => [||]);
       let rightNewPoint =
-        rightCutoff |> E.O.dimap(rc => [|(rc +. epsilon_float, 0.)|], _ => [||]);
+        rightCutoff
+        |> E.O.dimap(rc => [|(rc +. epsilon_float, 0.)|], _ => [||]);
 
       let truncatedZippedPairsWithNewPoints =
         E.A.concatMany([|leftNewPoint, truncatedZippedPairs, rightNewPoint|]);
       let truncatedShape =
         XYShape.T.fromZippedArray(truncatedZippedPairsWithNewPoints);
 
-      make(truncatedShape)
+      make(truncatedShape);
     };
 
     // TODO: This should work with stepwise plots.
-    let integral = (t) =>
+    let integral = t =>
       switch (getShape(t) |> XYShape.T.isEmpty, t.integralCache) {
       | (true, _) => emptyIntegral
       | (false, Some(cache)) => cache
@@ -253,22 +275,37 @@ let combineAlgebraicallyWithDiscrete =
   if (XYShape.T.isEmpty(t1s) || XYShape.T.isEmpty(t2s)) {
     empty;
   } else {
-    let continuousAsLinear = switch (t1.interpolation) {
-    | `Linear => t1;
-    | `Stepwise => stepwiseToLinear(t1)
-    };
+    let continuousAsLinear =
+      switch (t1.interpolation) {
+      | `Linear => t1
+      | `Stepwise => stepwiseToLinear(t1)
+      };
 
-    let combinedShape = AlgebraicShapeCombination.combineShapesContinuousDiscrete(op, continuousAsLinear |> getShape, t2s);
-
-    let combinedIntegralSum =
-      Common.combineIntegralSums(
-        (a, b) => Some(a *. b),
-        t1.integralSumCache,
-        t2.integralSumCache,
+    let combinedShape =
+      AlgebraicShapeCombination.combineShapesContinuousDiscrete(
+        op,
+        continuousAsLinear |> getShape,
+        t2s,
       );
 
+    let combinedIntegralSum =
+      switch (op) {
+      | `Multiply
+      | `Divide =>
+        Common.combineIntegralSums(
+          (a, b) => Some(a *. b),
+          t1.integralSumCache,
+          t2.integralSumCache,
+        )
+      | _ => None
+      };
+
     // TODO: It could make sense to automatically transform the integrals here (shift or scale)
-    make(~interpolation=t1.interpolation, ~integralSumCache=combinedIntegralSum, combinedShape)
+    make(
+      ~interpolation=t1.interpolation,
+      ~integralSumCache=combinedIntegralSum,
+      combinedShape,
+    );
   };
 };
 

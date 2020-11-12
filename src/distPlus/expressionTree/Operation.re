@@ -33,6 +33,7 @@ module Pointwise = {
   let toString =
     fun
     | `Add => "+"
+    | `Exponentiate => "^"
     | `Multiply => "*";
 
   let format = (a, b, c) => b ++ " " ++ toString(a) ++ " " ++ c;
@@ -51,6 +52,7 @@ module DistToFloat = {
     };
 };
 
+// Note that different logarithms don't really do anything.
 module Scale = {
   type t = scaleOperation;
   let toFn =

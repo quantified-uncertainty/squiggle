@@ -1,4 +1,10 @@
-type algebraicOperation = [ | `Add | `Multiply | `Subtract | `Divide | `Exponentiate];
+type algebraicOperation = [
+  | `Add
+  | `Multiply
+  | `Subtract
+  | `Divide
+  | `Exponentiate
+];
 type pointwiseOperation = [ | `Add | `Multiply | `Exponentiate];
 type scaleOperation = [ | `Multiply | `Exponentiate | `Log];
 type distToFloatOperation = [
@@ -10,43 +16,95 @@ type distToFloatOperation = [
 ];
 
 module ExpressionTree = {
-  type node = [
+  type hash = array((string, node))
+  and node = [
     | `SymbolicDist(SymbolicTypes.symbolicDist)
     | `RenderedDist(DistTypes.shape)
+    | `Symbol(string)
+    | `Hash(hash)
+    | `Array(array(node))
+    | `Function(array(string), node)
     | `AlgebraicCombination(algebraicOperation, node, node)
     | `PointwiseCombination(pointwiseOperation, node, node)
-    | `VerticalScaling(scaleOperation, node, node)
+    | `Normalize(node)
     | `Render(node)
     | `Truncate(option(float), option(float), node)
-    | `Normalize(node)
-    | `FloatFromDist(distToFloatOperation, node)
-    | `Function(array(string), node)
     | `FunctionCall(string, array(node))
-    | `Symbol(string)
   ];
+
+  module Hash = {
+    type t('a) = array((string, 'a));
+    let getByName = (t: t('a), name) =>
+      E.A.getBy(t, ((n, _)) => n == name) |> E.O.fmap(((_, r)) => r);
+
+    let getByNameResult = (t: t('a), name) =>
+      getByName(t, name) |> E.O.toResult(name ++ " expected and not found");
+
+    let getByNames = (hash: t('a), names: array(string)) =>
+      names |> E.A.fmap(name => (name, getByName(hash, name)));
+  };
+  // Have nil as option
+  let getFloat = (node: node) =>
+    node
+    |> (
+      fun
+      | `RenderedDist(Discrete({xyShape: {xs: [|x|], ys: [|1.0|]}})) =>
+        Some(x)
+      | `SymbolicDist(`Float(x)) => Some(x)
+      | _ => None
+    );
+
+  let toFloatIfNeeded = (node: node) =>
+    switch (node |> getFloat) {
+    | Some(float) => `SymbolicDist(`Float(float))
+    | None => node
+    };
 
   type samplingInputs = {
     sampleCount: int,
     outputXYPoints: int,
     kernelWidth: option(float),
-    shapeLength: int
+    shapeLength: int,
+  };
+
+  module SamplingInputs = {
+    type t = {
+      sampleCount: option(int),
+      outputXYPoints: option(int),
+      kernelWidth: option(float),
+      shapeLength: option(int),
+    };
+    let withDefaults = (t: t): samplingInputs => {
+      sampleCount: t.sampleCount |> E.O.default(10000),
+      outputXYPoints: t.outputXYPoints |> E.O.default(10000),
+      kernelWidth: t.kernelWidth,
+      shapeLength: t.shapeLength |> E.O.default(10000),
+    };
   };
 
   type environment = Belt.Map.String.t(node);
 
   module Environment = {
-    type t = environment
+    type t = environment;
     module MS = Belt.Map.String;
-    let fromArray = MS.fromArray
-    let empty:t = [||]->fromArray;
-    let mergeKeepSecond = (a:t,b:t) => MS.merge(a,b, (_,a,b) =>switch(a,b){
-      | (_, Some(b)) => Some(b)
-      | (Some(a), _) => Some(a)
-      | _ => None
-    })
-    let update = (t,str, fn) => MS.update(t, str, fn)
-    let get = (t:t,str) => MS.get(t, str)
-  }
+    let fromArray = MS.fromArray;
+    let empty: t = [||]->fromArray;
+    let mergeKeepSecond = (a: t, b: t) =>
+      MS.merge(a, b, (_, a, b) =>
+        switch (a, b) {
+        | (_, Some(b)) => Some(b)
+        | (Some(a), _) => Some(a)
+        | _ => None
+        }
+      );
+    let update = (t, str, fn) => MS.update(t, str, fn);
+    let get = (t: t, str) => MS.get(t, str);
+    let getFunction = (t: t, str) =>
+      switch (get(t, str)) {
+      | Some(`Function(argNames, fn)) => Ok((argNames, fn))
+      | _ => Error("Function " ++ str ++ " not found")
+      };
+  };
 
   type evaluationParams = {
     samplingInputs,
@@ -66,7 +124,7 @@ module ExpressionTree = {
     type t = node;
 
     let render = (evaluationParams: evaluationParams, r) =>
-      `Render(r) |> evaluateNode(evaluationParams);
+      `Render(r) |> evaluateNode(evaluationParams)
 
     let ensureIsRendered = (params, t) =>
       switch (t) {
@@ -114,6 +172,9 @@ type simplificationResult = [
 ];
 
 module Program = {
-  type statement = [ | `Assignment(string, ExpressionTree.node) | `Expression(ExpressionTree.node)];
+  type statement = [
+    | `Assignment(string, ExpressionTree.node)
+    | `Expression(ExpressionTree.node)
+  ];
   type program = array(statement);
-}
+};

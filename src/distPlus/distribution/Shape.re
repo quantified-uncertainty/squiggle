@@ -25,6 +25,7 @@ let toMixed =
 
 let combineAlgebraically =
     (op: ExpressionTypes.algebraicOperation, t1: t, t2: t): t => {
+      
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toShape;
@@ -171,12 +172,13 @@ module T =
       ));
     };
     let maxX = mapToAll((Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX));
-    let mapY = (~integralSumCacheFn=previousIntegralSum => None, ~integralCacheFn=previousIntegral=>None, ~fn) =>
+    let mapY = (~integralSumCacheFn=previousIntegralSum => None, ~integralCacheFn=previousIntegral=>None, ~fn) =>{
       fmap((
         Mixed.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
         Discrete.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
         Continuous.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
       ));
+    }
 
     let mean = (t: t): float =>
       switch (t) {

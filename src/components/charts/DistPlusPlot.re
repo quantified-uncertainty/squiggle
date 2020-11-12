@@ -259,7 +259,6 @@ module DistPlusChart = {
 module IntegralChart = {
   [@react.component]
   let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
-    open DistPlus;
     let integral = distPlus.integralCache;
     let continuous =
       integral

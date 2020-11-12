@@ -49,11 +49,11 @@ module AlgebraicCombination = {
       (evaluationParams, algebraicOp, t1: node, t2: node)
       : result(node, string) => {
     E.R.merge(
-      SamplingDistribution.renderIfIsNotSamplingDistribution(
+      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
         evaluationParams,
         t1,
       ),
-      SamplingDistribution.renderIfIsNotSamplingDistribution(
+      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
         evaluationParams,
         t2,
       ),
@@ -61,7 +61,7 @@ module AlgebraicCombination = {
     |> E.R.bind(_, ((a, b)) =>
          switch (choose(a, b)) {
          | `Sampling =>
-           SamplingDistribution.combineShapesUsingSampling(
+           PTypes.SamplingDistribution.combineShapesUsingSampling(
              evaluationParams,
              algebraicOp,
              a,
@@ -89,33 +89,6 @@ module AlgebraicCombination = {
          | `SymbolicDist(_) as t => Ok(t)
          | _ => combine(evaluationParams, algebraicOp, t1, t2),
        );
-};
-
-module VerticalScaling = {
-  let operationToLeaf =
-      (evaluationParams: evaluationParams, scaleOp, t, scaleBy) => {
-    // scaleBy has to be a single float, otherwise we'll return an error.
-    let fn = Operation.Scale.toFn(scaleOp);
-    let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(scaleOp);
-    let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp);
-    let renderedShape = Render.render(evaluationParams, t);
-
-    switch (renderedShape, scaleBy) {
-    | (Ok(`RenderedDist(rs)), `SymbolicDist(`Float(sm))) =>
-      Ok(
-        `RenderedDist(
-          Shape.T.mapY(
-            ~integralSumCacheFn=integralSumCacheFn(sm),
-            ~integralCacheFn=integralCacheFn(sm),
-            ~fn=fn(sm),
-            rs,
-          ),
-        ),
-      )
-    | (Error(e1), _) => Error(e1)
-    | (_, _) => Error("Can only scale by float values.")
-    };
-  };
 };
 
 module PointwiseCombination = {
@@ -151,7 +124,8 @@ module PointwiseCombination = {
     };
   };
 
-  let pointwiseCombine = (fn, evaluationParams: evaluationParams, t1: t, t2: t) => {
+  let pointwiseCombine =
+      (fn, evaluationParams: evaluationParams, t1: t, t2: t) => {
     // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
     // TODO: This should work for symbolic distributions too!
@@ -160,7 +134,7 @@ module PointwiseCombination = {
       Render.render(evaluationParams, t2),
     ) {
     | (Ok(`RenderedDist(rs1)), Ok(`RenderedDist(rs2))) =>
-      Ok(`RenderedDist(Shape.combinePointwise(( *. ), rs1, rs2)))
+      Ok(`RenderedDist(Shape.combinePointwise(fn, rs1, rs2)))
     | (Error(e1), _) => Error(e1)
     | (_, Error(e2)) => Error(e2)
     | _ => Error("Pointwise combination: rendering failed.")
@@ -176,8 +150,8 @@ module PointwiseCombination = {
       ) => {
     switch (pointwiseOp) {
     | `Add => pointwiseAdd(evaluationParams, t1, t2)
-    | `Multiply => pointwiseCombine(( *. ),evaluationParams, t1, t2)
-    | `Exponentiate => pointwiseCombine(( *. ),evaluationParams, t1, t2)
+    | `Multiply => pointwiseCombine(( *. ), evaluationParams, t1, t2)
+    | `Exponentiate => pointwiseCombine(( ** ), evaluationParams, t1, t2)
     };
   };
 };
@@ -232,6 +206,7 @@ module Truncate = {
 
 module Normalize = {
   let rec operationToLeaf = (evaluationParams, t: node): result(node, string) => {
+    Js.log2("normalize", t);
     switch (t) {
     | `RenderedDist(s) => Ok(`RenderedDist(Shape.T.normalize(s)))
     | `SymbolicDist(_) => Ok(t)
@@ -240,36 +215,39 @@ module Normalize = {
   };
 };
 
-module FloatFromDist = {
-  let rec operationToLeaf =
-          (evaluationParams, distToFloatOp: distToFloatOperation, t: node)
-          : result(node, string) => {
-    switch (t) {
-    | `SymbolicDist(s) =>
-      SymbolicDist.T.operate(distToFloatOp, s)
-      |> E.R.bind(_, v => Ok(`SymbolicDist(`Float(v))))
-    | `RenderedDist(rs) =>
-      Shape.operate(distToFloatOp, rs)
-      |> (v => Ok(`SymbolicDist(`Float(v))))
-    | _ =>
-      t
-      |> evaluateAndRetry(evaluationParams, r =>
-           operationToLeaf(r, distToFloatOp)
-         )
-    };
-  };
-};
+module FunctionCall = {
+  let _runHardcodedFunction = (name, evaluationParams, args) =>
+    TypeSystem.Function.Ts.findByNameAndRun(
+      HardcodedFunctions.all,
+      name,
+      evaluationParams,
+      args,
+    );
 
-// TODO: This forces things to be floats
-let callableFunction = (evaluationParams, name, args) => {
-  let b =
+  let _runLocalFunction = (name, evaluationParams: evaluationParams, args) => {
+    Environment.getFunction(evaluationParams.environment, name)
+    |> E.R.bind(_, ((argNames, fn)) =>
+         PTypes.Function.run(evaluationParams, args, (argNames, fn))
+       );
+  };
+
+  let _runWithEvaluatedInputs =
+      (
+        evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+        name,
+        args: array(ExpressionTypes.ExpressionTree.node),
+      ) => {
+    _runHardcodedFunction(name, evaluationParams, args)
+    |> E.O.default(_runLocalFunction(name, evaluationParams, args));
+  };
+
+  // TODO: This forces things to be floats
+  let run = (evaluationParams, name, args) => {
     args
-    |> E.A.fmap(a =>
-         Render.render(evaluationParams, a)
-         |> E.R.bind(_, Render.toFloat)
-       )
-    |> E.A.R.firstErrorOrOpen;
-  b |> E.R.bind(_, Functions.fnn(evaluationParams, name));
+    |> E.A.fmap(a => evaluationParams.evaluateNode(evaluationParams, a))
+    |> E.A.R.firstErrorOrOpen
+    |> E.R.bind(_, _runWithEvaluatedInputs(evaluationParams, name));
+  };
 };
 
 module Render = {
@@ -280,19 +258,15 @@ module Render = {
     | `SymbolicDist(d) =>
       Ok(
         `RenderedDist(
-          SymbolicDist.T.toShape(evaluationParams.samplingInputs.shapeLength, d),
+          SymbolicDist.T.toShape(
+            evaluationParams.samplingInputs.shapeLength,
+            d,
+          ),
         ),
       )
     | `RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     };
-  };
-};
-
-let run = (node, fnNode) => {
-  switch (fnNode) {
-  | `Function(r) => Ok(r(node))
-  | _ => Error("Not a function")
   };
 };
 
@@ -302,16 +276,22 @@ let run = (node, fnNode) => {
    but most often it will produce a RenderedDist.
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
-let toLeaf =
-    (
-      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
-      node: t,
-    )
-    : result(t, string) => {
+let rec toLeaf =
+        (
+          evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+          node: t,
+        )
+        : result(t, string) => {
   switch (node) {
   // Leaf nodes just stay leaf nodes
   | `SymbolicDist(_)
+  | `Function(_)
   | `RenderedDist(_) => Ok(node)
+  | `Array(args) =>
+    args
+    |> E.A.fmap(toLeaf(evaluationParams))
+    |> E.A.R.firstErrorOrOpen
+    |> E.R.fmap(r => `Array(r))
   // Operations nevaluationParamsd to be turned into leaves
   | `AlgebraicCombination(algebraicOp, t1, t2) =>
     AlgebraicCombination.operationToLeaf(
@@ -327,17 +307,26 @@ let toLeaf =
       t1,
       t2,
     )
-  | `VerticalScaling(scaleOp, t, scaleBy) =>
-    VerticalScaling.operationToLeaf(evaluationParams, scaleOp, t, scaleBy)
   | `Truncate(leftCutoff, rightCutoff, t) =>
     Truncate.operationToLeaf(evaluationParams, leftCutoff, rightCutoff, t)
-  | `FloatFromDist(distToFloatOp, t) =>
-    FloatFromDist.operationToLeaf(evaluationParams, distToFloatOp, t)
   | `Normalize(t) => Normalize.operationToLeaf(evaluationParams, t)
   | `Render(t) => Render.operationToLeaf(evaluationParams, t)
-  | `Function(_) => Error("Function must be called with params")
-  | `Symbol(r) => ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r) |> E.O.toResult("Undeclared variable " ++ r)
+  | `Hash(t) =>
+    t
+    |> E.A.fmap(((name: string, node: node)) =>
+         toLeaf(evaluationParams, node) |> E.R.fmap(r => (name, r))
+       )
+    |> E.A.R.firstErrorOrOpen
+    |> E.R.fmap(r => `Hash(r))
+  | `Symbol(r) =>
+    ExpressionTypes.ExpressionTree.Environment.get(
+      evaluationParams.environment,
+      r,
+    )
+    |> E.O.toResult("Undeclared variable " ++ r)
+    |> E.R.bind(_, toLeaf(evaluationParams))
   | `FunctionCall(name, args) =>
-    callableFunction(evaluationParams, name, args)
-  };
+    FunctionCall.run(evaluationParams, name, args)
+    |> E.R.bind(_, toLeaf(evaluationParams))
+  }
 };
