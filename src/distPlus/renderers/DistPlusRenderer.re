@@ -11,24 +11,12 @@ module Inputs = {
   let defaultRecommendedLength = 100;
   let defaultShouldDownsample = true;
 
-  type ingredients = {
-    guesstimatorString: string,
-    domain: DistTypes.domain,
-    unit: DistTypes.distributionUnit,
-  };
+  type ingredients = {guesstimatorString: string};
+
   module Ingredients = {
     type t = ingredients;
-    let make =
-        (
-          ~guesstimatorString,
-          ~domain=DistTypes.Complete,
-          ~unit=DistTypes.UnspecifiedDistribution,
-          (),
-        )
-        : t => {
-      guesstimatorString,
-      domain,
-      unit,
+    let make = (~guesstimatorString: string, ()): t => {
+      guesstimatorString: guesstimatorString,
     };
   };
 
@@ -130,8 +118,6 @@ module Internals = {
   let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) => {
     DistPlus.make(
       ~shape,
-      ~domain=inputs.distPlusIngredients.domain,
-      ~unit=inputs.distPlusIngredients.unit,
       ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),
       (),
     );

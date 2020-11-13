@@ -5,16 +5,6 @@ module FormConfig = [%lenses
   type state = {
     guesstimatorString: string,
     //
-    domainType: string, // Complete, LeftLimited(...), RightLimited(...), LeftAndRightLimited(..., ...)
-    xPoint: string,
-    xPoint2: string,
-    excludingProbabilityMass: string,
-    excludingProbabilityMass2: string,
-    //
-    unitType: string, // UnspecifiedDistribution, TimeDistribution(zero, unit)
-    zero: MomentRe.Moment.t,
-    unit: string,
-    //
     sampleCount: string,
     outputXYPoints: string,
     downsampleTo: string,
@@ -132,16 +122,14 @@ module Styles = {
 
 module DemoDist = {
   [@react.component]
-  let make = (~guesstimatorString, ~domain, ~unit, ~options) => {
+  let make = (~guesstimatorString:string, ~options) => {
     <Antd.Card title={"Distribution" |> R.ste}>
       <div>
-        {switch (domain, unit, options) {
-         | (Some(domain), Some(unit), Some(options)) =>
+        {switch (options) {
+         | Some(options) =>
            let distPlusIngredients =
              DistPlusRenderer.Inputs.Ingredients.make(
                ~guesstimatorString,
-               ~domain,
-               ~unit,
                (),
              );
            let inputs1 =
@@ -233,15 +221,7 @@ let make = () => {
       ~onSubmit=({state}) => {None},
       ~initialState={
         //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
-         guesstimatorString: "mm(3)",
-        domainType: "Complete",
-        xPoint: "50.0",
-        xPoint2: "60.0",
-        excludingProbabilityMass2: "0.5",
-        excludingProbabilityMass: "0.3",
-        unitType: "UnspecifiedDistribution",
-        zero: MomentRe.momentNow(),
-        unit: "days",
+         guesstimatorString: "mm(normal(5,2), normal(10,2))",
         sampleCount: "1000",
         outputXYPoints: "1000",
         downsampleTo: "",
@@ -258,19 +238,6 @@ let make = () => {
     reform.submit();
   };
 
-  let xPoint = reform.state.values.xPoint |> Js.Float.fromString;
-  let xPoint2 = reform.state.values.xPoint2 |> Js.Float.fromString;
-  let excludingProbabilityMass =
-    reform.state.values.excludingProbabilityMass |> Js.Float.fromString;
-  let excludingProbabilityMass2 =
-    reform.state.values.excludingProbabilityMass2 |> Js.Float.fromString;
-
-  let zero = reform.state.values.zero;
-  let unit = reform.state.values.unit;
-
-  let domainType = reform.state.values.domainType;
-  let unitType = reform.state.values.unitType;
-
   let guesstimatorString = reform.state.values.guesstimatorString;
   let sampleCount = reform.state.values.sampleCount |> Js.Float.fromString;
   let outputXYPoints =
@@ -280,44 +247,6 @@ let make = () => {
   let diagramStart = reform.state.values.diagramStart |> Js.Float.fromString;
   let diagramStop = reform.state.values.diagramStop |> Js.Float.fromString;
   let diagramCount = reform.state.values.diagramCount |> Js.Float.fromString;
-
-  let domain =
-    switch (domainType) {
-    | "Complete" => Some(DistTypes.Complete)
-    | "LeftLimited"
-        when
-          !Js.Float.isNaN(xPoint)
-          && !Js.Float.isNaN(excludingProbabilityMass) =>
-      Some(LeftLimited({xPoint, excludingProbabilityMass}))
-    | "RightLimited"
-        when
-          !Js.Float.isNaN(xPoint2)
-          && !Js.Float.isNaN(excludingProbabilityMass2) =>
-      Some(RightLimited({xPoint, excludingProbabilityMass}))
-    | "LeftAndRightLimited"
-        when
-          !Js.Float.isNaN(xPoint)
-          && !Js.Float.isNaN(excludingProbabilityMass)
-          && !Js.Float.isNaN(xPoint2)
-          && !Js.Float.isNaN(excludingProbabilityMass2) =>
-      Some(
-        LeftAndRightLimited(
-          {xPoint, excludingProbabilityMass},
-          {xPoint, excludingProbabilityMass},
-        ),
-      )
-    | _ => None
-    };
-
-  let unit =
-    switch (unitType) {
-    | "UnspecifiedDistribution" => Some(DistTypes.UnspecifiedDistribution)
-    | "TimeDistribution" =>
-      Some(
-        TimeDistribution({zero, unit: unit |> TimeTypes.TimeUnit.ofString}),
-      )
-    | _ => None
-    };
 
   let options =
     switch (sampleCount, outputXYPoints, downsampleTo) {
@@ -344,18 +273,9 @@ let make = () => {
 
   let demoDist =
     React.useMemo1(
-      () => <DemoDist guesstimatorString domain unit options />,
+      () => <DemoDist guesstimatorString options />,
       [|
         reform.state.values.guesstimatorString,
-        reform.state.values.domainType,
-        reform.state.values.xPoint,
-        reform.state.values.xPoint2,
-        reform.state.values.xPoint2,
-        reform.state.values.excludingProbabilityMass,
-        reform.state.values.excludingProbabilityMass2,
-        reform.state.values.unitType,
-        reform.state.values.zero |> E.M.format(E.M.format_standard),
-        reform.state.values.unit,
         reform.state.values.sampleCount,
         reform.state.values.outputXYPoints,
         reform.state.values.downsampleTo,
