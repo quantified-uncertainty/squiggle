@@ -3,8 +3,7 @@ open Antd.Grid;
 
 module FormConfig = [%lenses
   type state = {
-    guesstimatorString: string,
-    //
+    squiggleString: string,
     sampleCount: string,
     outputXYPoints: string,
     downsampleTo: string,
@@ -122,18 +121,13 @@ module Styles = {
 
 module DemoDist = {
   [@react.component]
-  let make = (~guesstimatorString:string, ~options) => {
+  let make = (~squiggleString:string, ~options) => {
     <Antd.Card title={"Distribution" |> R.ste}>
       <div>
         {switch (options) {
          | Some(options) =>
-           let distPlusIngredients =
-             DistPlusRenderer.Inputs.Ingredients.make(
-               ~guesstimatorString,
-               (),
-             );
            let inputs1 =
-             DistPlusRenderer.Inputs.make(
+             ProgramEvaluator.Inputs.make(
                ~samplingInputs={
                  sampleCount: Some(options.sampleCount),
                  outputXYPoints: Some(options.outputXYPoints),
@@ -141,7 +135,7 @@ module DemoDist = {
                  shapeLength:
                    Some(options.downsampleTo |> E.O.default(1000)),
                },
-               ~distPlusIngredients,
+               ~squiggleString,
                ~environment=
                  [|
                    ("K", `SymbolicDist(`Float(1000.0))),
@@ -153,7 +147,7 @@ module DemoDist = {
                (),
              );
 
-           let response1 = DistPlusRenderer.run2(inputs1);
+           let response1 = ProgramEvaluator.evaluateProgram(inputs1);
            switch (response1) {
            | Ok(`DistPlus(distPlus1)) =>
              <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
@@ -161,15 +155,15 @@ module DemoDist = {
              <ForetoldComponents.NumberShower number=f precision=3 />
            | Ok(`Function((f, a), env)) =>
              //  Problem: When it gets the function, it doesn't save state about previous commands
-             let foo: DistPlusRenderer.Inputs.inputs = {
-               distPlusIngredients: inputs1.distPlusIngredients,
+             let foo: ProgramEvaluator.Inputs.inputs = {
+               squiggleString,
                samplingInputs: inputs1.samplingInputs,
                environment: env,
              };
              let results =
                E.A.Floats.range(options.diagramStart, options.diagramStop, options.diagramCount)
                |> E.A.fmap(r =>
-                    DistPlusRenderer.runFunction(
+                    ProgramEvaluator.evaluateFunction(
                       foo,
                       (f, a),
                       [|`SymbolicDist(`Float(r))|],
@@ -199,18 +193,6 @@ module DemoDist = {
   };
 };
 
-//         guesstimatorString: "
-//         us_economy_2018 = (10.5 to 10.6)T
-// growth_rate = 1.08 to 1.2
-// us_economy(t) = us_economy_2018 * (growth_rate^t)
-
-// us_population_2019 = 320M to 330M
-// us_population_growth_rate = 1.01 to 1.02
-// us_population(t) = us_population_2019 * (us_population_growth_rate^t)
-
-// gdp_per_person(t) = us_economy(t)/us_population(t)
-// gdp_per_person
-// ",
 [@react.component]
 let make = () => {
   let (reloader, setReloader) = React.useState(() => 1);
@@ -220,8 +202,8 @@ let make = () => {
       ~schema,
       ~onSubmit=({state}) => {None},
       ~initialState={
-        //guesstimatorString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
-         guesstimatorString: "mm(normal(5,2), normal(10,2))",
+        //squiggleString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",
+        squiggleString: "mm(normal(5,2), normal(10,2))",
         sampleCount: "1000",
         outputXYPoints: "1000",
         downsampleTo: "",
@@ -238,7 +220,7 @@ let make = () => {
     reform.submit();
   };
 
-  let guesstimatorString = reform.state.values.guesstimatorString;
+  let squiggleString = reform.state.values.squiggleString;
   let sampleCount = reform.state.values.sampleCount |> Js.Float.fromString;
   let outputXYPoints =
     reform.state.values.outputXYPoints |> Js.Float.fromString;
@@ -273,9 +255,9 @@ let make = () => {
 
   let demoDist =
     React.useMemo1(
-      () => <DemoDist guesstimatorString options />,
+      () => <DemoDist squiggleString options />,
       [|
-        reform.state.values.guesstimatorString,
+        reform.state.values.squiggleString,
         reform.state.values.sampleCount,
         reform.state.values.outputXYPoints,
         reform.state.values.downsampleTo,
@@ -307,7 +289,7 @@ let make = () => {
             <Row _type=`flex className=Styles.rows>
               <Col span=24>
                 <FieldText
-                  field=FormConfig.GuesstimatorString
+                  field=FormConfig.SquiggleString
                   label="Program"
                 />
               </Col>

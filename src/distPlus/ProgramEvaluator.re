@@ -11,17 +11,8 @@ module Inputs = {
   let defaultRecommendedLength = 100;
   let defaultShouldDownsample = true;
 
-  type ingredients = {guesstimatorString: string};
-
-  module Ingredients = {
-    type t = ingredients;
-    let make = (~guesstimatorString: string, ()): t => {
-      guesstimatorString: guesstimatorString,
-    };
-  };
-
   type inputs = {
-    distPlusIngredients: ingredients,
+    squiggleString: string,
     samplingInputs: SamplingInputs.t,
     environment: ExpressionTypes.ExpressionTree.environment,
   };
@@ -36,41 +27,31 @@ module Inputs = {
   let make =
       (
         ~samplingInputs=empty,
-        ~distPlusIngredients,
+        ~squiggleString,
         ~environment=ExpressionTypes.ExpressionTree.Environment.empty,
         (),
       )
       : inputs => {
-    distPlusIngredients,
     samplingInputs,
+    squiggleString,
     environment,
   };
 };
 
 module Internals = {
-  type inputs = {
-    samplingInputs: Inputs.SamplingInputs.t,
-    guesstimatorString: string,
-    environment: ExpressionTypes.ExpressionTree.environment,
-  };
-
   let addVariable =
-      ({samplingInputs, guesstimatorString, environment}: inputs, str, node)
-      : inputs => {
+      (
+        {samplingInputs, squiggleString, environment}: Inputs.inputs,
+        str,
+        node,
+      )
+      : Inputs.inputs => {
     samplingInputs,
-    guesstimatorString,
+    squiggleString,
     environment:
       ExpressionTypes.ExpressionTree.Environment.update(environment, str, _ =>
         Some(node)
       ),
-  };
-
-  let distPlusRenderInputsToInputs = (inputs: Inputs.inputs): inputs => {
-    {
-      samplingInputs: inputs.samplingInputs,
-      guesstimatorString: inputs.distPlusIngredients.guesstimatorString,
-      environment: inputs.environment,
-    };
   };
 
   type outputs = {
@@ -79,7 +60,8 @@ module Internals = {
   };
   let makeOutputs = (graph, shape): outputs => {graph, shape};
 
-  let makeInputs = (inputs): ExpressionTypes.ExpressionTree.samplingInputs => {
+  let makeInputs =
+      (inputs: Inputs.inputs): ExpressionTypes.ExpressionTree.samplingInputs => {
     sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
     outputXYPoints:
       inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
@@ -91,7 +73,7 @@ module Internals = {
     ExpressionTree.toLeaf(makeInputs(inputs), inputs.environment, node);
   };
 
-  let runProgram = (inputs: inputs, p: ExpressionTypes.Program.program) => {
+  let runProgram = (inputs: Inputs.inputs, p: ExpressionTypes.Program.program) => {
     let ins = ref(inputs);
     p
     |> E.A.fmap(
@@ -109,23 +91,19 @@ module Internals = {
     |> E.A.R.firstErrorOrOpen;
   };
 
-  let inputsToLeaf = (inputs: inputs) => {
-    MathJsParser.fromString(inputs.guesstimatorString)
+  let inputsToLeaf = (inputs: Inputs.inputs) => {
+    MathJsParser.fromString(inputs.squiggleString)
     |> E.R.bind(_, g => runProgram(inputs, g))
     |> E.R.bind(_, r => E.A.last(r) |> E.O.toResult("No rendered lines"));
   };
 
   let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) => {
-    DistPlus.make(
-      ~shape,
-      ~guesstimatorString=Some(inputs.distPlusIngredients.guesstimatorString),
-      (),
-    );
+    DistPlus.make(~shape, ~squiggleString=Some(inputs.squiggleString), ());
   };
 };
 
 let renderIfNeeded =
-    (inputs, node: ExpressionTypes.ExpressionTree.node)
+    (inputs: Inputs.inputs, node: ExpressionTypes.ExpressionTree.node)
     : result(ExpressionTypes.ExpressionTree.node, string) =>
   node
   |> (
@@ -133,7 +111,7 @@ let renderIfNeeded =
     | `Normalize(_) as n
     | `SymbolicDist(_) as n => {
         `Render(n)
-        |> Internals.runNode(Internals.distPlusRenderInputsToInputs(inputs))
+        |> Internals.runNode(inputs)
         |> (
           fun
           | Ok(`RenderedDist(_)) as r => r
@@ -144,28 +122,7 @@ let renderIfNeeded =
     | n => Ok(n)
   );
 
-let run = (inputs: Inputs.inputs) => {
-  inputs
-  |> Internals.distPlusRenderInputsToInputs
-  |> Internals.inputsToLeaf
-  |> E.R.bind(_, ((lastIns, r)) =>
-       r
-       |> renderIfNeeded(inputs)
-       |> (
-         fun
-         | Ok(`RenderedDist(n)) => Ok(n)
-         | Ok(n) =>
-           Error(
-             "Didn't output a rendered distribution. Format:"
-             ++ ExpressionTree.toString(n),
-           )
-         | Error(r) => Error(r)
-       )
-     )
-  |> E.R.fmap(Internals.outputToDistPlus(inputs));
-};
-
-let exportDistPlus =
+let coersionToExportedTypes =
     (
       inputs,
       env: ProbExample.ExpressionTypes.ExpressionTree.environment,
@@ -189,42 +146,18 @@ let exportDistPlus =
          ),
      );
 
-// This isn't ok with floats, which can't be done in a function easily
-let exportDistPlus2 =
-    (
-      inputs,
-      env: ProbExample.ExpressionTypes.ExpressionTree.environment,
-      node: ExpressionTypes.ExpressionTree.node,
-    ) =>
-  node
-  |> renderIfNeeded(inputs)
-  |> E.R.bind(
-       _,
-       fun
-       | `RenderedDist(n) =>
-         Ok(`DistPlus(Internals.outputToDistPlus(inputs, n)))
-       | `Function(n) => Ok(`Function((n, env)))
-       | n =>
-         Error(
-           "Didn't output a rendered distribution. Format:"
-           ++ ExpressionTree.toString(n),
-         ),
-     );
-
-let run2 = (inputs: Inputs.inputs) => {
+let evaluateProgram = (inputs: Inputs.inputs) => {
   inputs
-  |> Internals.distPlusRenderInputsToInputs
   |> Internals.inputsToLeaf
-  |> E.R.bind(_, ((a, b)) => exportDistPlus(inputs, a, b));
+  |> E.R.bind(_, ((a, b)) => coersionToExportedTypes(inputs, a, b));
 };
 
-let runFunction =
+let evaluateFunction =
     (
-      ins: Inputs.inputs,
+      inputs: Inputs.inputs,
       fn: (array(string), ExpressionTypes.ExpressionTree.node),
       fnInputs,
     ) => {
-  let inputs = ins |> Internals.distPlusRenderInputsToInputs;
   let output =
     ExpressionTree.runFunction(
       Internals.makeInputs(inputs),
@@ -232,5 +165,5 @@ let runFunction =
       fnInputs,
       fn,
     );
-  output |> E.R.bind(_, exportDistPlus2(ins, inputs.environment));
+  output |> E.R.bind(_, coersionToExportedTypes(inputs, inputs.environment));
 };

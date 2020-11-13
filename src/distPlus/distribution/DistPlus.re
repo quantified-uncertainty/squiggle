@@ -6,14 +6,14 @@ let shapeIntegral = shape => Shape.T.Integral.get(shape);
 let make =
     (
       ~shape,
-      ~guesstimatorString,
+      ~squiggleString,
       ~domain=Complete,
       ~unit=UnspecifiedDistribution,
       (),
     )
     : t => {
   let integral = shapeIntegral(shape);
-  {shape, domain, integralCache: integral, unit, guesstimatorString};
+  {shape, domain, integralCache: integral, unit, squiggleString};
 };
 
 let update =
@@ -22,14 +22,14 @@ let update =
       ~integralCache=?,
       ~domain=?,
       ~unit=?,
-      ~guesstimatorString=?,
+      ~squiggleString=?,
       t: t,
     ) => {
   shape: E.O.default(t.shape, shape),
   integralCache: E.O.default(t.integralCache, integralCache),
   domain: E.O.default(t.domain, domain),
   unit: E.O.default(t.unit, unit),
-  guesstimatorString: E.O.default(t.guesstimatorString, guesstimatorString),
+  squiggleString: E.O.default(t.squiggleString, squiggleString),
 };
 
 let updateShape = (shape, t) => {

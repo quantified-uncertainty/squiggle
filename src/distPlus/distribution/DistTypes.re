@@ -68,7 +68,7 @@ module ShapeMonad = {
 };
 
 type generationSource =
-  | GuesstimatorString(string)
+  | SquiggleString(string)
   | Shape(shape);
 
 type distributionUnit =
@@ -80,7 +80,7 @@ type distPlus = {
   domain,
   integralCache: continuousShape,
   unit: distributionUnit,
-  guesstimatorString: option(string),
+  squiggleString: option(string),
 };
 
 module DistributionUnit = {

@@ -329,7 +329,7 @@ let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
 //     let distPlus =
 //       DistPlus.make(
 //         ~shape=Mixed(mixed),
-//         ~guesstimatorString=None,
+//         ~squiggleString=None,
 //         (),
 //       );
 //     makeTest("minX", T.minX(distPlus), 1.0);

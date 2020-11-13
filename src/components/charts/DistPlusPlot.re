@@ -3,7 +3,7 @@ let plotBlue = `hex("1860ad");
 
 let showAsForm = (distPlus: DistTypes.distPlus) => {
   <div>
-    <Antd.Input value={distPlus.guesstimatorString |> E.O.default("")} />
+    <Antd.Input value={distPlus.squiggleString |> E.O.default("")} />
   </div>;
 };
 
