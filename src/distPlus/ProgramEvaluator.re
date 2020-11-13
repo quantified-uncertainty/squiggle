@@ -38,6 +38,15 @@ module Inputs = {
   };
 };
 
+type export = [
+  | `DistPlus(ProbExample.DistPlus.t)
+  | `Float(float)
+  | `Function(
+      (array(string), ProbExample.ExpressionTypes.ExpressionTree.node),
+      ProbExample.ExpressionTypes.ExpressionTree.environment,
+    )
+];
+
 module Internals = {
   let addVariable =
       (
@@ -122,12 +131,14 @@ let renderIfNeeded =
     | n => Ok(n)
   );
 
+// TODO: Consider using ExpressionTypes.ExpressionTree.getFloat or similar in this function
 let coersionToExportedTypes =
     (
       inputs,
       env: ProbExample.ExpressionTypes.ExpressionTree.environment,
       node: ExpressionTypes.ExpressionTree.node,
-    ) =>
+    )
+    : result(export, string) =>
   node
   |> renderIfNeeded(inputs)
   |> E.R.bind(

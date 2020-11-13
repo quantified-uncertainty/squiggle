@@ -124,7 +124,7 @@ module ExpressionTree = {
     type t = node;
 
     let render = (evaluationParams: evaluationParams, r) =>
-      `Render(r) |> evaluateNode(evaluationParams)
+      `Render(r) |> evaluateNode(evaluationParams);
 
     let ensureIsRendered = (params, t) =>
       switch (t) {
