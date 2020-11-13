@@ -1,25 +1,14 @@
 type route =
-  | Model(string)
   | DistBuilder
   | Home
   | NotFound;
 
 let routeToPath = route =>
   switch (route) {
-  | Model(modelId) => "/m/" ++ modelId
   | DistBuilder => "/dist-builder"
   | Home => "/"
   | _ => "/"
   };
-
-module Models = {
-  let all = [|
-    EAFunds.Interface.model,
-    GlobalCatastrophe.Interface.model,
-    Human.Interface.model,
-  |];
-  let getById = id => E.A.getBy(all, r => r.id == id);
-};
 
 module Menu = {
   module Styles = {
@@ -82,7 +71,6 @@ let make = () => {
 
   let routing =
     switch (url.path) {
-    | ["m", modelId] => Model(modelId)
     | ["dist-builder"] => DistBuilder
     | [] => Home
     | _ => NotFound
@@ -91,14 +79,6 @@ let make = () => {
   <>
     <Menu />
     {switch (routing) {
-     | Model(id) =>
-       (
-         switch (Models.getById(id)) {
-         | Some(model) => <FormBuilder.ModelForm model key=id />
-         | None => <div> {"Page is not found" |> R.ste} </div>
-         }
-       )
-       |> fixedLength
      | DistBuilder => <DistBuilder />
      | Home => <Home />
      | _ => fixedLength({"Page is not found" |> R.ste})
