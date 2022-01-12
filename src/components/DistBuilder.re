@@ -1,4 +1,4 @@
-open BsReform;
+open ReForm;
 open Antd.Grid;
 
 module FormConfig = [%lenses
@@ -26,8 +26,6 @@ type options = {
 
 module Form = ReForm.Make(FormConfig);
 
-let schema = Form.Validation.Schema([||]);
-
 module FieldText = {
   [@react.component]
   let make = (~field, ~label) => {
@@ -50,7 +48,7 @@ module FieldString = {
         <Antd.Form.Item label={label |> R.ste}>
           <Antd.Input
             value
-            onChange={BsReform.Helpers.handleChange(handleChange)}
+            onChange={ReForm.Helpers.handleChange(handleChange)}
             onBlur={_ => validate()}
           />
         </Antd.Form.Item>
@@ -68,7 +66,7 @@ module FieldFloat = {
         <Antd.Form.Item label={label |> R.ste}>
           <Antd.Input
             value
-            onChange={BsReform.Helpers.handleChange(handleChange)}
+            onChange={ReForm.Helpers.handleChange(handleChange)}
             onBlur={_ => validate()}
             className
           />
@@ -199,7 +197,7 @@ let make = () => {
   let reform =
     Form.use(
       ~validationStrategy=OnDemand,
-      ~schema,
+      ~schema=Form.Validation.Schema([||]),
       ~onSubmit=({state}) => {None},
       ~initialState={
         //squiggleString: "mm(normal(-10, 2), uniform(18, 25), lognormal({mean: 10, stdev: 8}), triangular(31,40,50))",

@@ -1,0 +1,37 @@
+{
+  "name": "@foretold/components",
+  "reason": {
+    "react-jsx": 3
+  },
+  "refmt": 3,
+  "bs-dependencies": [
+    "bs-css",
+    "bs-moment",
+    "reason-react",
+    "rationale"
+  ],
+  "warnings": {
+    "error": "+5"
+  },
+  "suffix": ".bs.js",
+  "package-specs": [{
+    "module": "commonjs",
+    "in-source": true
+  }],
+  "namespace": true,
+  "sources": [{
+      "dir": "src",
+      "subdirs": true
+    },
+    {
+      "dir": "example",
+      "type": "dev",
+      "subdirs": true
+    },
+    {
+      "dir": "showcase",
+      "type": "dev",
+      "subdirs": true
+    }
+  ]
+}

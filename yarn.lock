@@ -1070,10 +1070,8 @@
     parcel "1.12.3"
     pdfast "0.2.0"
 
-"@foretold/components@0.0.6":
+"@foretold/components@./foretold/components":
   version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@foretold/components/-/components-0.0.6.tgz#0ba6c583882b2df420b9f709a15d51ad8b7cce28"
-  integrity sha512-omMR4gB0ok1jFHh58MuBuZlN8NDN+I7fGqJgzu8+keXcklM/jvz55/bt/pJgrQovurrXCmkQXC+UNI6JFuqF0g==
   dependencies:
     "@foretold/cdf" "1.0.16"
     "@foretold/guesstimator" "1.0.11"
@@ -2519,14 +2517,14 @@ bs-platform@7.3.2:
   resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-7.3.2.tgz#301f5c9b4e8cf5713cb60ca22e145e56e793affe"
   integrity sha512-seJL5g4anK9la4erv+B2o2sMHQCxDF6OCRl9en3hbaUos/S3JsusQ0sPp4ORsbx5eXfHLYBwPljwKXlgpXtsgQ==
 
-bs-reform@9.7.1:
-  version "9.7.1"
-  resolved "https://registry.yarnpkg.com/bs-reform/-/bs-reform-9.7.1.tgz#d398e49b983dfd1f23c264ba0599f2a546bbe64f"
-  integrity sha512-Cj2PFJkmNm2sZvg1zBla382T00qmtWk8BNTJEnTKvfY71I8p8rw830dFEQY0Nhus/r/SiaYzbfhfKK2/k4emug==
+bs-reform@^10.0.3:
+  version "10.0.3"
+  resolved "https://registry.yarnpkg.com/bs-reform/-/bs-reform-10.0.3.tgz#babe65f729fcc12b4a020736bd6102abdf4c44ff"
+  integrity sha512-N9wcIUWkWEmmFNAvrxsaSt+uRnS8yQKnRhdsJnVIut0lQxAmzWHVU3OW1d6rs0PsiG61pDH/OF8ZsQoogo4A9g==
   dependencies:
     reason-react-compat "^0.4.0"
-    reason-react-update "^1.0.0"
-    reschema "^1.3.0"
+    reason-react-update "2.0.0"
+    reschema "^2.0.3"
 
 bsb-js@1.1.7:
   version "1.1.7"
@@ -8788,10 +8786,10 @@ reason-react-compat@^0.4.0:
   resolved "https://registry.yarnpkg.com/reason-react-compat/-/reason-react-compat-0.4.0.tgz#9c6705f9bd67e7ff7219355f3a95fd67442b578d"
   integrity sha512-Bwwgb6AHusLiRhdd0aupFAuMYaG3gnwR6iHYYlj9gfLD6Uxp53dtJIhS2ZMTEpCSU1JE2X0k7x3rru1IRdx9FQ==
 
-reason-react-update@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/reason-react-update/-/reason-react-update-1.0.0.tgz#c2e9f064fb665e24d35073a93f901c5792fdf36f"
-  integrity sha512-apsqywkgcEnkAc7V9fOs5ikEmufgYkxcLu5fqYWQ2Atb4UlYnoN7P92Xal3izReyqfk41G4zHlPHwJhoq0xwIA==
+reason-react-update@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/reason-react-update/-/reason-react-update-2.0.0.tgz#64aba8752d212582288996fe988b06087f854b98"
+  integrity sha512-0dHC8p0GKYH2TMCtw8f7tuJTOwJonuB2mg8R0RxjuK5yr9Ne/cIoZOKqjGiwGZkjU9pcT4xowS5OaaBuJJuj9Q==
 
 reason-react@0.7.1, reason-react@>=0.7.0:
   version "0.7.1"
@@ -8948,10 +8946,15 @@ require-main-filename@^2.0.0:
   resolved "https://registry.yarnpkg.com/require-main-filename/-/require-main-filename-2.0.0.tgz#d0b329ecc7cc0f61649f62215be69af54aa8989b"
   integrity sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==
 
-reschema@1.3.0, reschema@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/reschema/-/reschema-1.3.0.tgz#b8b33bdcdb7eeaa0a22fb024f28204e9d84243a6"
-  integrity sha512-s+Bb6aA4OrsPtE6D5Afb0eYmPbattAb8e+b2mbE06Wr+Uec8Pw8WP6435LWdB0/3Y8d8awHAQebscJjxRc4RQA==
+reschema@^2.0.3, reschema@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/reschema/-/reschema-2.2.0.tgz#e98730d5dff98ec4d99798a31bf1c4a4ebcb8f1c"
+  integrity sha512-vkFNYm2GEqrmoK+n1xomn/EXgltvCfqmowMxXkr2IBa6Zw0JItunzOap73PaS9DUGak0h6xHoIOciGcq+LC9cg==
+
+rescript@^9.1.4:
+  version "9.1.4"
+  resolved "https://registry.yarnpkg.com/rescript/-/rescript-9.1.4.tgz#1eb126f98d6c16942c0bf0df67c050198e580515"
+  integrity sha512-aXANK4IqecJzdnDpJUsU6pxMViCR5ogAxzuqS0mOr8TloMnzAjJFu63fjD6LCkWrKAhlMkFFzQvVQYaAaVkFXw==
 
 resize-observer-polyfill@^1.5.0, resize-observer-polyfill@^1.5.1:
   version "1.5.1"

@@ -1,3 +1,4 @@
+open FC.Base;
 open EntryTypes;
 
 module HS = Belt.HashMap.String;
@@ -26,10 +27,11 @@ let buildIds = entries => {
     f.id = curPath ++ "/" ++ genId(f.title, curPath);
     HS.set(entriesByPath, f.id, FolderEntry(f));
     f.children
-    |> E.L.iter(
-         fun
+    |> E.L.iter(e =>
+         switch (e) {
          | CompEntry(c) => processEntry(c, f.id)
-         | FolderEntry(f) => processFolder(f, f.id),
+         | FolderEntry(f) => processFolder(f, f.id)
+         }
        );
   }
   and processEntry = (c: compEntry, curPath) => {
@@ -37,10 +39,11 @@ let buildIds = entries => {
     HS.set(entriesByPath, c.id, CompEntry(c));
   };
   entries
-  |> E.L.iter(
-       fun
+  |> E.L.iter(e =>
+       switch (e) {
        | CompEntry(c) => processEntry(c, "")
-       | FolderEntry(f) => processFolder(f, ""),
+       | FolderEntry(f) => processFolder(f, "")
+       }
      );
 };
 
@@ -100,7 +103,7 @@ module Index = {
     | ChangeRoute(ReasonReactRouter.url);
 
   let changeId = (id: string) => {
-    let _ = ReasonReactRouter.push(baseUrl ++ "#" ++ id);
+    ReasonReactRouter.push(baseUrl ++ "#" ++ id);
     ();
   };
 
@@ -157,7 +160,7 @@ module Index = {
       });
 
     React.useState(() => {
-      let _ = ReasonReactRouter.watchUrl(url => setRoute(_ => url));
+      ReasonReactRouter.watchUrl(url => setRoute(_ => url));
       ();
     })
     |> ignore;

@@ -8,8 +8,7 @@ module Internal = {
       ~reactClass=percentilesChart,
       ~props={"data": data, "signalListeners": signalListeners},
       children,
-    )
-    |> ReasonReact.element;
+    ) |> ReasonReact.element;
 };
 
 [@react.component]
@@ -37,5 +36,5 @@ let make =
        });
        Js.log3("Data", dists, data);
   let da = {"facet": data};
-  <Internal data=da signalListeners={}/>;
+  <Internal data=da signalListeners={[]}/>;
 };

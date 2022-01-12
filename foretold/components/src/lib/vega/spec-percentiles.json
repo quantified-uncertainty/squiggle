@@ -1,0 +1,109 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "width": 900,
+  "height": 200,
+  "padding": 5,
+  "data": [
+    {
+      "name": "facet",
+      "values": [
+        {"timestamp": "2020-01-20 14:55:01.412", "p5": 2, "p95": 3, "p50": 2.5},
+        {"timestamp": "2020-01-23 14:55:01.412", "p5": 3, "p95": 5, "p50": 4},
+        {"timestamp": "2020-01-24 14:55:01.412", "p5": 7, "p95": 8, "p50": 7.5},
+        {"timestamp": "2020-01-24 14:55:01.412", "p5": 2, "p95": 3, "p50": 2.5},
+        {"timestamp": "2020-01-28 14:55:01.412", "p5": 3, "p95": 50, "p50": 40},
+        {"timestamp": "2020-01-29 14:55:01.412", "p5": 2, "p95": 3, "p50": 2.5}
+      ],
+      "format": {"type": "json", "parse": {"timestamp": "date"}}
+    },
+    {
+      "name": "table",
+      "source": "facet",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": ["timestamp"],
+          "ops": ["mean", "mean", "mean"],
+          "fields": ["p5", "p95", "p50"],
+          "as": ["p5", "p95", "p50"]
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "time",
+      "nice": "day",
+      "domain": {"data": "facet", "field": "timestamp"},
+      "range": "width"
+    },
+    {
+      "name": "yscale",
+      "type": "linear",
+      "range": "height",
+      "nice": true,
+      "zero": true,
+      "domain": {"data": "facet", "field": "p95"}
+    }
+  ],
+  "axes": [
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "format": "%m-%d",
+      "grid": true,
+      "title": "Days",
+      "encode": {
+        "grid": {"enter": {"stroke": {"value": "#ccc"}}},
+        "ticks": {"enter": {"stroke": {"value": "#ccc"}}}
+      }
+    },
+    {
+      "orient": "left",
+      "scale": "yscale",
+      "title": "Values and Percentiles",
+      "grid": true,
+      "domain": false,
+      "tickSize": 12,
+      "encode": {
+        "grid": {"enter": {"stroke": {"value": "#ccc"}}},
+        "ticks": {"enter": {"stroke": {"value": "#ccc"}}}
+      }
+    }
+  ],
+  "marks": [
+    {
+      "type": "area",
+      "from": {"data": "table"},
+      "encode": {
+        "enter": {"fill": {"value": "#C9D6E5"}},
+        "update": {
+          "interpolate": {"value": "monotone"},
+          "x": {"scale": "xscale", "field": "timestamp"},
+          "y": {"scale": "yscale", "field": "p5"},
+          "y2": {"scale": "yscale", "field": "p95"},
+          "opacity": {"value": 0.75}
+        },
+        "hover": {"opacity": {"value": 0.5}}
+      }
+    },
+    {
+      "type": "line",
+      "from": {"data": "table"},
+      "encode": {
+        "update": {
+          "interpolate": {"value": "monotone"},
+          "stroke": {"value": "#4C78A8"},
+          "strokeWidth": {"value": 2},
+          "opacity": {"value": 0.8}
+        },
+        "hover": {"opacity": {"value": 0.5}},
+        "enter": {
+          "x": {"scale": "xscale", "field": "timestamp"},
+          "y": {"scale": "yscale", "field": "p50"}
+        }
+      }
+    }
+  ]
+}
