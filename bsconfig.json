@@ -37,7 +37,7 @@
     "@glennsl/bs-json",
     "@foretold/components",
     "bs-ant-design-alt",
-    "reason-react",
+    "@rescript/react",
     "bs-reform",
     "bs-css",
     "rationale",
