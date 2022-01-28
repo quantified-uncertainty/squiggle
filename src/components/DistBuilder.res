@@ -59,14 +59,13 @@ module FieldFloat = {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label}>
           <Antd.Input
             value
             onChange={ReForm.Helpers.handleChange(handleChange)}
             onBlur={_ => validate()}
             style={className}
           />
-        </Antd.Form.Item>}
+        }
     />
 }
 
