@@ -10,32 +10,27 @@ function onChange(newValue) {
   console.log("change", newValue);
 }
 
-export class CodeEditor extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-  render() {
-    return (
-      <AceEditor
-        value={this.props.value}
-        mode="golang"
-        height="400px"
-        width="100%"
-        theme="github"
-        showGutter={false}
-        highlightActiveLine={false}
-        showPrintMargin={false}
-        onChange={this.props.onChange}
-        name="UNIQUE_ID_OF_DIV"
-        editorProps={{
-          $blockScrolling: true,
-        }}
-        setOptions={{
-          enableBasicAutocompletion: false,
-          enableLiveAutocompletion: true,
-          enableSnippets: true,
-        }}
-      />
-    );
-  }
+export function CodeEditor(props) {
+  return (
+    <AceEditor
+      value={props.value}
+      mode="golang"
+      height="400px"
+      width="100%"
+      theme="github"
+      showGutter={false}
+      highlightActiveLine={false}
+      showPrintMargin={false}
+      onChange={props.onChange}
+      name="UNIQUE_ID_OF_DIV"
+      editorProps={{
+        $blockScrolling: true,
+      }}
+      setOptions={{
+        enableBasicAutocompletion: false,
+        enableLiveAutocompletion: true,
+        enableSnippets: true,
+      }}
+    />
+  );
 }

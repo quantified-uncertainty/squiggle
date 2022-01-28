@@ -31,8 +31,11 @@ module FieldText = {
   let make = (~field, ~label) => <>
     <Form.Field
       field
-      render={({handleChange, error, value, validate}) =>
-        <CodeEditor value onChange={r => handleChange(r)} />}
+      render={({handleChange, error, value, validate}) =>{
+        Js.Console.log(CodeEditor.make);
+        (<CodeEditor value onChange={r => handleChange(r)} />)
+      }
+      }
     />
   </>
 }
@@ -42,7 +45,7 @@ module FieldString = {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> R.ste}>
+        <Antd.Form.Item label={label}>
           <Antd.Input
             value onChange={ReForm.Helpers.handleChange(handleChange)} onBlur={_ => validate()}
           />
@@ -52,50 +55,46 @@ module FieldString = {
 
 module FieldFloat = {
   @react.component
-  let make = (~field, ~label, ~className=Css.style(list{})) =>
+  let make = (~field, ~label, ~className=CssJs.style(. [])) =>
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
-        <Antd.Form.Item label={label |> R.ste}>
+        <Antd.Form.Item label={label}>
           <Antd.Input
             value
             onChange={ReForm.Helpers.handleChange(handleChange)}
             onBlur={_ => validate()}
-            className
+            style={className}
           />
         </Antd.Form.Item>}
     />
 }
 
 module Styles = {
-  open Css
-  let rows = style(list{
-    selector(">.ant-col:first-child", list{paddingLeft(em(0.25)), paddingRight(em(0.125))}),
-    selector(">.ant-col:last-child", list{paddingLeft(em(0.125)), paddingRight(em(0.25))}),
-    selector(
-      ">.ant-col:not(:first-child):not(:last-child)",
-      list{paddingLeft(em(0.125)), paddingRight(em(0.125))},
-    ),
-  })
-  let parent = style(list{
-    selector(".ant-input-number", list{width(#percent(100.))}),
-    selector(".anticon", list{verticalAlign(#zero)}),
-  })
-  let form = style(list{backgroundColor(hex("eee")), padding(em(1.))})
-  let dist = style(list{padding(em(1.))})
-  let spacer = style(list{marginTop(em(1.))})
-  let groupA = style(list{
-    selector(".ant-input-number-input", list{backgroundColor(hex("fff7db"))}),
-  })
-  let groupB = style(list{
-    selector(".ant-input-number-input", list{backgroundColor(hex("eaf4ff"))}),
-  })
+  open CssJs
+  let rows = style(. [ selector(. ">.antCol:firstChild", [ paddingLeft(em(0.25)), paddingRight(em(0.125)) ]),
+  selector(. ">.antCol:lastChild", [ paddingLeft(em(0.125)), paddingRight(em(0.25)) ]),
+  selector(. 
+    ">.antCol:not(:firstChild):not(:lastChild)",
+    [ paddingLeft(em(0.125)), paddingRight(em(0.125)) ],
+  ),
+])
+let parent = style(. [ selector(. ".antInputNumber", [ width(#percent(100.)) ]),
+selector(. ".anticon", [ verticalAlign(#zero) ]),
+ ])
+  let form = style(. [ backgroundColor(hex("eee")), padding(em(1.)) ])
+  let dist = style(. [ padding(em(1.)) ])
+  let spacer = style(. [ marginTop(em(1.)) ])
+  let groupA = style(. [ selector(. ".antInputNumberInput", [ backgroundColor(hex("fff7db")) ]),
+])
+let groupB = style(. [ selector(. ".antInputNumberInput", [ backgroundColor(hex("eaf4ff")) ]),
+ ])
 }
 
 module DemoDist = {
   @react.component
   let make = (~squiggleString: string, ~options) =>
-    <Antd.Card title={"Distribution" |> R.ste}>
+    <Antd.Card title={"Distribution"}>
       <div>
         {switch options {
         | Some(options) =>
@@ -121,7 +120,7 @@ module DemoDist = {
           let renderExpression = response1 => 
             switch response1 {
               | #DistPlus(distPlus1) => <DistPlusPlot distPlus={DistPlus.T.normalize(distPlus1)} />
-              | #Float(f) => <ForetoldComponents.NumberShower number=f precision=3 />
+              | #Float(f) => <NumberShower number=f precision=3 />
               | #Function((f, a), env) =>
                 //  Problem: When it gets the function, it doesn't save state about previous commands
                 let foo: ProgramEvaluator.Inputs.inputs = {
@@ -157,7 +156,9 @@ module DemoDist = {
             | Ok(xs) =>
                 let childrenElements = List.map(renderExpression, xs)
                 Js.Console.log(childrenElements)
-                @JSX div(~children=childrenElements, ())
+                <ul>
+                  {Belt.List.toArray(Belt.List.mapWithIndex(childrenElements, (i, child) => <li key={Belt.Int.toString(i)}>child</li>))->React.array}
+                </ul>
             | Error(r) => r |> R.ste
           }
         | _ => "Nothing to show. Try to change the distribution description." |> R.ste
@@ -242,10 +243,10 @@ let make = () => {
         extra={<Antd.Button icon=Antd.IconName.reload shape=#circle onClick=onReload />}>
         <Form.Provider value=reform>
           <Antd.Form onSubmit>
-            <Row _type=#flex className=Styles.rows>
+            <Row _type="flex" style=Styles.rows>
               <Col span=24> <FieldText field=FormConfig.SquiggleString label="Program" /> </Col>
             </Row>
-            <Row _type=#flex className=Styles.rows>
+            <Row _type="flex" style=Styles.rows>
               <Col span=12> <FieldFloat field=FormConfig.SampleCount label="Sample Count" /> </Col>
               <Col span=12>
                 <FieldFloat field=FormConfig.OutputXYPoints label="Output XY-points" />

@@ -35,11 +35,10 @@
   "bs-dependencies": [
     "@glennsl/bs-jest",
     "@glennsl/bs-json",
-    "@foretold/components",
-    "bs-ant-design-alt",
+    "@rescriptbr/reform",
     "@rescript/react",
-    "bs-reform",
     "bs-css",
+    "bs-css-dom",
     "rationale",
     "bs-moment",
     "reschema"
