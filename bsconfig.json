@@ -1,16 +1,10 @@
 {
   "name": "probExample",
   "reason": {
-    "react-jsx": 3
   },
   "sources": [
     {
       "dir": "src",
-      "subdirs": true
-    },
-    {
-      "dir": "showcase",
-      "type": "dev",
       "subdirs": true
     },
     {
@@ -35,19 +29,13 @@
   "bs-dependencies": [
     "@glennsl/bs-jest",
     "@glennsl/bs-json",
-    "@rescriptbr/reform",
-    "@rescript/react",
-    "bs-css",
-    "bs-css-dom",
     "rationale",
-    "bs-moment",
-    "reschema"
+    "bs-moment"
   ],
   "refmt": 3,
   "warnings": {
     "number": "+A-42-48-9-30-4-102"
   },
   "ppx-flags": [
-    "lenses-ppx/ppx"
   ]
 }

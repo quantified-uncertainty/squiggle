@@ -85,11 +85,6 @@ module O = {
 
   let min = compare(\"<")
   let max = compare(\">")
-  module React = {
-    let defaultNull = default(React.null)
-    let fmapOrNull = fn => \"||>"(fmap(fn), default(React.null))
-    let flatten = default(React.null)
-  }
 }
 
 /* Functions */
