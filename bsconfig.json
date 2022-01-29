@@ -28,11 +28,11 @@
   "bs-dependencies": [
     "@glennsl/bs-jest",
     "@glennsl/bs-json",
-    "rationale",
-    "bs-moment"
+    "rationale"
   ],
   "gentypeconfig": {
-    "language": "typescript",
+    "language": "untyped",
+    "module": "commonjs",
     "shims": {},
     "debug": {
       "all": false,

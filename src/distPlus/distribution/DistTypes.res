@@ -72,7 +72,6 @@ type generationSource =
 
 type distributionUnit =
   | UnspecifiedDistribution
-  | TimeDistribution(TimeTypes.timeVector)
 
 type distPlus = {
   shape: shape,
@@ -85,8 +84,6 @@ type distPlus = {
 module DistributionUnit = {
   let toJson = (distributionUnit: distributionUnit) =>
     switch distributionUnit {
-    | TimeDistribution({zero, unit}) =>
-      Js.Null.fromOption(Some({"zero": zero, "unit": unit |> TimeTypes.TimeUnit.toString}))
     | _ => Js.Null.fromOption(None)
     }
 }
