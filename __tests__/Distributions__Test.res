@@ -1,7 +1,7 @@
-open Jest;
-open Expect;
+open Jest
+open Expect
 
-let shape: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|8., 9., 2.|]};
+let shape: DistTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 // let makeTest = (~only=false, str, item1, item2) =>
 //   only

@@ -1,7 +1,6 @@
 {
   "name": "probExample",
-  "reason": {
-  },
+  "reason": {},
   "sources": [
     {
       "dir": "src",
@@ -32,10 +31,17 @@
     "rationale",
     "bs-moment"
   ],
+  "gentypeconfig": {
+    "language": "typescript",
+    "shims": {},
+    "debug": {
+      "all": false,
+      "basic": false
+    }
+  },
   "refmt": 3,
   "warnings": {
     "number": "+A-42-48-9-30-4-102"
   },
-  "ppx-flags": [
-  ]
+  "ppx-flags": []
 }

@@ -84,7 +84,7 @@ module T =
     let integral = (t: t) =>
       updateShape(Continuous(t.integralCache), t);
 
-    let updateIntegralCache = (integralCache: option(DistTypes.continuousShape), t) =>
+    let updateIntegralCache = (integralCache: option<DistTypes.continuousShape>, t) =>
       update(~integralCache=E.O.default(t.integralCache, integralCache), t);
 
     let downsample = (i, t): t =>

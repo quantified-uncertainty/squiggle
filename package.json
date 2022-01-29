@@ -47,6 +47,7 @@
     "@glennsl/bs-jest": "^0.5.1",
     "bs-platform": "9.0.2",
     "docsify": "^4.12.2",
+    "gentype": "^4.3.0",
     "parcel-bundler": "1.12.4",
     "parcel-plugin-bundle-visualiser": "^1.2.0",
     "parcel-plugin-less-js-enabled": "1.0.2"

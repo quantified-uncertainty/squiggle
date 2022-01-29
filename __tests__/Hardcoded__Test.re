@@ -1,6 +1,6 @@
 open Jest;
 open Expect;
-
+/* 
 let makeTest = (~only=false, str, item1, item2) =>
   only
     ? Only.test(str, () =>
@@ -54,4 +54,4 @@ describe("XYShapes", () => {
       Error("Sad"),
     )
   })
-});
+}); */

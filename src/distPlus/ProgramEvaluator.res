@@ -91,8 +91,7 @@ module Internals = {
   }
 
   let inputsToLeaf = (inputs: Inputs.inputs) =>
-    MathJsParser.fromString(inputs.squiggleString)
-    |> E.R.bind(_, g => runProgram(inputs, g))
+    MathJsParser.fromString(inputs.squiggleString) |> E.R.bind(_, g => runProgram(inputs, g))
 
   let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) =>
     DistPlus.make(~shape, ~squiggleString=Some(inputs.squiggleString), ())
@@ -117,6 +116,7 @@ let renderIfNeeded = (inputs: Inputs.inputs, node: ExpressionTypes.ExpressionTre
             | _ => Error("Didn't render, but intended to")
             }
         )
+
       | n => Ok(n)
       }
   )
@@ -141,20 +141,22 @@ let coersionToExportedTypes = (
 
 let rec mapM = (f, xs) =>
   switch xs {
-    | list{} => Ok(list{})
-    | list{x, ...rest} => 
-        switch f(x) {
-          | Error(err) => Error(err)
-          | Ok(val) => 
-              switch mapM(f, rest) {
-                 | Error(err) => Error(err)
-                 | Ok(restList) => Ok(list{val, ...restList})
-               }
-             }
-           }
+  | list{} => Ok(list{})
+  | list{x, ...rest} =>
+    switch f(x) {
+    | Error(err) => Error(err)
+    | Ok(val) =>
+      switch mapM(f, rest) {
+      | Error(err) => Error(err)
+      | Ok(restList) => Ok(list{val, ...restList})
+      }
+    }
+  }
 
 let evaluateProgram = (inputs: Inputs.inputs) =>
-  inputs |> Internals.inputsToLeaf |> E.R.bind(_, xs => mapM(((a, b)) => coersionToExportedTypes(inputs, a, b), (Array.to_list(xs))))
+  inputs
+  |> Internals.inputsToLeaf
+  |> E.R.bind(_, xs => mapM(((a, b)) => coersionToExportedTypes(inputs, a, b), Array.to_list(xs)))
 
 let evaluateFunction = (
   inputs: Inputs.inputs,
@@ -168,4 +170,21 @@ let evaluateFunction = (
     fn,
   )
   output |> E.R.bind(_, coersionToExportedTypes(inputs, inputs.environment))
+}
+
+@genType
+let runAll = (squiggleString: string) => {
+  let inputs = Inputs.make(
+    ~samplingInputs={
+      sampleCount: Some(10000),
+      outputXYPoints: Some(10000),
+      kernelWidth: None,
+      shapeLength: Some(1000),
+    },
+    ~squiggleString,
+    ~environment=[]->Belt.Map.String.fromArray,
+    (),
+  )
+  let response1 = evaluateProgram(inputs);
+  response1;
 }
