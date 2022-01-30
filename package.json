@@ -1,28 +1,22 @@
 {
   "name": "squiggle-experimental",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "homepage": "https://foretold-app.github.io/estiband/",
+  "main": "src/js/index.js",
+  "private": false,
   "scripts": {
     "build": "rescript build",
-    "build:style": "tailwind build src/styles/index.css -o src/styles/tailwind.css",
+    "build:style": "tailwind build",
+    "parcel": "parcel build ./src/js/index.js --no-source-maps",
     "start": "rescript build -w",
     "clean": "rescript clean",
-    "parcel": "parcel ./src/index.html",
-    "parcel-build": "parcel build ./src/index.html --no-source-maps --no-autoinstall",
-    "showcase": "PORT=12345 parcel showcase/index.html",
-    "server": "moduleserve ./ --port 8000",
-    "predeploy": "parcel build ./src/index.html --no-source-maps --no-autoinstall",
-    "deploy": "gh-pages -d dist",
     "test": "jest",
     "test:ci": "yarn jest",
     "watch:test": "jest --watchAll",
-    "watch:testjs": "jest --watchAll",
     "watch:s": "yarn jest -- Converter_test --watch"
   },
   "keywords": [
-    "BuckleScript",
-    "ReasonReact",
-    "reason-react"
+    "Rescript"
   ],
   "author": "Quantified Uncertainty Research Institute",
   "license": "MIT",
@@ -43,13 +37,10 @@
     "jest": "^25.5.1",
     "jstat": "1.9.2",
     "moduleserve": "0.9.1",
+    "parcel": "^2.2.1",
     "parcel-bundler": "1.12.4",
     "parcel-plugin-bundle-visualiser": "^1.2.0",
     "parcel-plugin-less-js-enabled": "1.0.2",
     "rescript": "^9.1.4"
-  },
-  "alias": {
-    "react": "./node_modules/react",
-    "react-dom": "./node_modules/react-dom"
   }
 }
