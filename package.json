@@ -1,11 +1,10 @@
 {
   "name": "squiggle-experimental",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "homepage": "https://foretold-app.github.io/estiband/",
   "private": false,
   "scripts": {
     "build": "rescript build",
-    "build:style": "tailwind build",
     "parcel": "parcel build ./src/js/index.js --no-source-maps --no-autoinstall",
     "start": "rescript build -w",
     "clean": "rescript clean",
