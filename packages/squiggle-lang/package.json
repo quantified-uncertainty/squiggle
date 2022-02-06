@@ -9,7 +9,7 @@
     "start": "rescript build -w",
     "clean": "rescript clean",
     "test": "jest",
-    "test:ci": "yarn jest",
+    "test:ci": "yarn jest ./__tests__/Lodash__test.re",
     "watch:test": "jest --watchAll",
     "watch:s": "yarn jest -- Converter_test --watch"
   },

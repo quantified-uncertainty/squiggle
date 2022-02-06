@@ -9094,6 +9094,19 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
+squiggle-experimental@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/squiggle-experimental/-/squiggle-experimental-0.1.8.tgz#2eae8cdb11eb316f6ee2d31e447b1a89062ee0d1"
+  integrity sha512-k+r6AD3n1mvUk6vFQ7qOYd36nl5/w341IF1RNyA2SOI24iuePLiz145C46kLeWRCAYEOmeAPsBV7PbpP0V912w==
+  dependencies:
+    "@glennsl/bs-json" "^5.0.2"
+    "@rescriptbr/reform" "^11.0.1"
+    babel-plugin-transform-es2015-modules-commonjs "^6.26.2"
+    lodash "4.17.15"
+    mathjs "5.10.3"
+    pdfast "^0.2.0"
+    rationale "0.2.0"
+
 sshpk@^1.7.0:
   version "1.16.1"
   resolved "https://registry.yarnpkg.com/sshpk/-/sshpk-1.16.1.tgz#fb661c0bef29b39db40769ee39fa70093d6f6877"
