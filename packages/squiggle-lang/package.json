@@ -28,8 +28,8 @@
     "rationale": "0.2.0"
   },
   "devDependencies": {
-    "@glennsl/bs-jest": "^0.5.1",
-    "bs-platform": "9.0.2",
+    "@glennsl/bs-jest": "^0.7.0",
+    "bs-platform": "^9.0.2",
     "docsify": "^4.12.2",
     "gentype": "^4.3.0",
     "jest": "^25.5.1",
