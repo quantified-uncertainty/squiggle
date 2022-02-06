@@ -203,7 +203,7 @@ module MathAdtToDistDst = {
         nodeParser:
           MathJsonToMathJsAdt.arg =>
           Belt.Result.t(
-            Squiggle-Website.ExpressionTypes.ExpressionTree.node,
+            SquiggleExperimental.ExpressionTypes.ExpressionTree.node,
             string,
           ),
         name: string,
@@ -344,6 +344,7 @@ let fromString2 = str => {
     });
 
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
+  Js.log2(mathJsParse, value);
   value;
 };
 
