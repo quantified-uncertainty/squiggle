@@ -1,0 +1,10 @@
+.lollipops-line-mouseover {
+    stroke-dasharray: 4;
+    animation: dash 2s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 1000;
+    }
+}
