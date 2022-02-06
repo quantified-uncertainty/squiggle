@@ -26,7 +26,7 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
-    "@glennsl/bs-jest",
+    "@glennsl/rescript-jest",
     "@glennsl/bs-json",
     "rationale"
   ],

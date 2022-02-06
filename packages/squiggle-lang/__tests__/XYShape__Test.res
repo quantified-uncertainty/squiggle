@@ -3,8 +3,8 @@ open Expect
 
 let makeTest = (~only=false, str, item1, item2) =>
   only
-    ? Only.test(str, () => expect(item1) |> toEqual(item2))
-    : test(str, () => expect(item1) |> toEqual(item2))
+    ? Only.test(str, () => expect(item1) -> toEqual(item2))
+    : test(str, () => expect(item1) -> toEqual(item2))
 
 let shape1: DistTypes.xyShape = {xs: [1., 4., 8.], ys: [0.2, 0.4, 0.8]}
 
