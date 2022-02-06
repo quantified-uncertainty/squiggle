@@ -1,44 +1,8 @@
 {
-  "name": "squiggle-experimental",
-  "version": "0.1.5",
-  "homepage": "https://foretold-app.github.io/estiband/",
-  "private": false,
-  "scripts": {
-    "build": "rescript build",
-    "parcel": "parcel build ./src/js/index.js --no-source-maps --no-autoinstall",
-    "start": "rescript build -w",
-    "clean": "rescript clean",
-    "test": "jest",
-    "test:ci": "yarn jest",
-    "watch:test": "jest --watchAll",
-    "watch:s": "yarn jest -- Converter_test --watch"
-  },
-  "keywords": [
-    "Rescript"
-  ],
-  "author": "Quantified Uncertainty Research Institute",
-  "license": "MIT",
-  "dependencies": {
-    "@glennsl/bs-json": "^5.0.2",
-    "@rescriptbr/reform": "^11.0.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-    "lodash": "4.17.15",
-    "mathjs": "5.10.3",
-    "pdfast": "^0.2.0",
-    "rationale": "0.2.0"
-  },
-  "devDependencies": {
-    "@glennsl/bs-jest": "^0.5.1",
-    "bs-platform": "9.0.2",
-    "docsify": "^4.12.2",
-    "gentype": "^4.3.0",
-    "jest": "^25.5.1",
-    "jstat": "1.9.2",
-    "moduleserve": "0.9.1",
-    "parcel": "^2.2.1",
-    "parcel-bundler": "1.12.4",
-    "parcel-plugin-bundle-visualiser": "^1.2.0",
-    "parcel-plugin-less-js-enabled": "1.0.2",
-    "rescript": "^9.1.4"
+    "name": "root",
+    "private": true,
+    "devDependencies": {
+    },
+    "scripts": {
+    }
   }
-}
