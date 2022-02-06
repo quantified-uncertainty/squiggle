@@ -203,7 +203,7 @@ module MathAdtToDistDst = {
         nodeParser:
           MathJsonToMathJsAdt.arg =>
           Belt.Result.t(
-            ProbExample.ExpressionTypes.ExpressionTree.node,
+            Squiggle-Website.ExpressionTypes.ExpressionTree.node,
             string,
           ),
         name: string,
