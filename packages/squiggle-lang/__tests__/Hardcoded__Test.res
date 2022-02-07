@@ -1,6 +1,6 @@
-open Jest;
-open Expect;
-/* 
+open Jest
+open Expect
+/*
 let makeTest = (~only=false, str, item1, item2) =>
   only
     ? Only.test(str, () =>

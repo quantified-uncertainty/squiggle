@@ -206,6 +206,7 @@ module Truncate = {
 
 module Normalize = {
   let rec operationToLeaf = (evaluationParams, t: node): result(node, string) => {
+    Js.log2("normalize", t);
     switch (t) {
     | `RenderedDist(s) => Ok(`RenderedDist(Shape.T.normalize(s)))
     | `SymbolicDist(_) => Ok(t)

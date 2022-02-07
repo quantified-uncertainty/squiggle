@@ -1,6 +1,6 @@
 {
   "name": "squiggle-experimental",
-  "version": "0.1.5",
+  "version": "0.1.9",
   "homepage": "https://foretold-app.github.io/estiband/",
   "private": false,
   "scripts": {
@@ -9,7 +9,7 @@
     "start": "rescript build -w",
     "clean": "rescript clean",
     "test": "jest",
-    "test:ci": "yarn jest",
+    "test:ci": "yarn jest ./__tests__/Lodash__test.re",
     "watch:test": "jest --watchAll",
     "watch:s": "yarn jest -- Converter_test --watch"
   },
@@ -28,8 +28,7 @@
     "rationale": "0.2.0"
   },
   "devDependencies": {
-    "@glennsl/bs-jest": "^0.5.1",
-    "bs-platform": "9.0.2",
+    "@glennsl/rescript-jest": "^0.9.0",
     "docsify": "^4.12.2",
     "gentype": "^4.3.0",
     "jest": "^25.5.1",
@@ -37,8 +36,6 @@
     "moduleserve": "0.9.1",
     "parcel": "^2.2.1",
     "parcel-bundler": "1.12.4",
-    "parcel-plugin-bundle-visualiser": "^1.2.0",
-    "parcel-plugin-less-js-enabled": "1.0.2",
     "rescript": "^9.1.4"
   }
 }

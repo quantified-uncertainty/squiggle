@@ -1,9 +1,16 @@
 {
-  "name": "SquiggleExperimental",
-  "reason": {},
+  "name": "probExample",
+  "reason": {
+    "react-jsx": 3
+  },
   "sources": [
     {
       "dir": "src",
+      "subdirs": true
+    },
+    {
+      "dir": "showcase",
+      "type": "dev",
       "subdirs": true
     },
     {
@@ -26,22 +33,22 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
-    "@glennsl/rescript-jest",
+    "@glennsl/bs-jest",
     "@glennsl/bs-json",
-    "rationale"
+    "@rescriptbr/reform",
+    "@rescript/react",
+    "bs-css",
+    "bs-css-dom",
+    "squiggle-experimental",
+    "rationale",
+    "bs-moment",
+    "reschema"
   ],
-  "gentypeconfig": {
-    "language": "untyped",
-    "module": "commonjs",
-    "shims": {},
-    "debug": {
-      "all": false,
-      "basic": false
-    }
-  },
   "refmt": 3,
   "warnings": {
     "number": "+A-42-48-9-30-4-102"
   },
-  "ppx-flags": []
+  "ppx-flags": [
+    "lenses-ppx/ppx"
+  ]
 }

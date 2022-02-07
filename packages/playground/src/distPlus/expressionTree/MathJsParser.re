@@ -344,6 +344,7 @@ let fromString2 = str => {
     });
 
   let value = E.R.bind(mathJsParse, MathAdtToDistDst.run);
+  Js.log2(mathJsParse, value);
   value;
 };
 
