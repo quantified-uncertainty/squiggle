@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@glennsl/rescript-jest": "^0.9.0",
-    "bs-platform": "^9.0.2",
     "docsify": "^4.12.2",
     "gentype": "^4.3.0",
     "jest": "^25.5.1",
