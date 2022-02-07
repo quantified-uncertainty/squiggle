@@ -1,0 +1,47 @@
+{
+  "name": "probExample",
+  "reason": {},
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    },
+    {
+      "dir": "__tests__",
+      "type": "dev",
+      "subdirs": true
+    }
+  ],
+  "bsc-flags": [
+    "-bs-super-errors",
+    "-bs-no-version-header",
+    "-bs-g"
+  ],
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": true
+    }
+  ],
+  "suffix": ".bs.js",
+  "namespace": true,
+  "bs-dependencies": [
+    "@glennsl/bs-jest",
+    "@glennsl/bs-json",
+    "rationale"
+  ],
+  "gentypeconfig": {
+    "language": "untyped",
+    "module": "commonjs",
+    "shims": {},
+    "debug": {
+      "all": false,
+      "basic": false
+    }
+  },
+  "refmt": 3,
+  "warnings": {
+    "number": "+A-42-48-9-30-4-102"
+  },
+  "ppx-flags": []
+}
