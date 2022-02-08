@@ -170,7 +170,7 @@ module MathAdtToDistDst = {
 
   let functionParser = (
     nodeParser: MathJsonToMathJsAdt.arg => Belt.Result.t<
-      SquiggleExperimental.ExpressionTypes.ExpressionTree.node,
+      ExpressionTypes.ExpressionTree.node,
       string,
     >,
     name: string,

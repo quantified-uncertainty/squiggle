@@ -37,11 +37,11 @@ module Inputs = {
 }
 
 type \"export" = [
-  | #DistPlus(SquiggleExperimental.DistPlus.t)
+  | #DistPlus(DistPlus.t)
   | #Float(float)
   | #Function(
-    (array<string>, SquiggleExperimental.ExpressionTypes.ExpressionTree.node),
-    SquiggleExperimental.ExpressionTypes.ExpressionTree.environment,
+    (array<string>, ExpressionTypes.ExpressionTree.node),
+    ExpressionTypes.ExpressionTree.environment,
   )
 ]
 
@@ -124,7 +124,7 @@ let renderIfNeeded = (inputs: Inputs.inputs, node: ExpressionTypes.ExpressionTre
 // TODO: Consider using ExpressionTypes.ExpressionTree.getFloat or similar in this function
 let coersionToExportedTypes = (
   inputs,
-  env: SquiggleExperimental.ExpressionTypes.ExpressionTree.environment,
+  env: ExpressionTypes.ExpressionTree.environment,
   node: ExpressionTypes.ExpressionTree.node,
 ): result<\"export", string> =>
   node
