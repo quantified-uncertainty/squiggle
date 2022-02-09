@@ -8,13 +8,13 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Squiggle',
   tagline: 'A programming language for probabilistic estimation',
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://squiggle-documentation.netlify.app',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'QURI', // Usually your GitHub org/user name.
+  projectName: 'Squiggle', // Usually your repo name.
 
   presets: [
     [
@@ -24,13 +24,13 @@ const config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl: 'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+          editUrl: 'https://github.com/foretold-app/squiggle/tree/main/packages/website/',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/foretold-app/squiggle/tree/main/packages/website/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -57,7 +57,7 @@ const config = {
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/foretold-app/squiggle',
+            href: 'https://github.com/QURIresearch/squiggle',
             label: 'GitHub',
             position: 'right',
           },
@@ -67,11 +67,11 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Blog',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'Overview',
+                to: '/docs/Language',
               },
             ],
           },
@@ -84,7 +84,7 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/foretold-app/squiggle',
+                href: 'https://github.com/QURIresearch/squiggle',
               },
             ],
           },
