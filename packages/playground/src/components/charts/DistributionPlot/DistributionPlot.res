@@ -86,7 +86,7 @@ let make = (
   ~showVerticalLine=false,
   ~timeScale=?,
 ) =>
-  <div style={Styles.graph(color)}>
+  <div className={Styles.graph(color)}>
     <RawPlot
       ?maxX
       ?minX

@@ -9,7 +9,7 @@ type makeType = props => React.element
   ~ghost: bool=?,
   ~href: string=?,
   ~htmlType: @string [#button | #submit | #submit]=?,
-  ~icon: 'a=?,
+  ~icon: Antd_IconName.t=?,
   ~shape: @string [#circle | #round]=?,
   ~size: @string [#small | #large]=?,
   ~target: string=?,

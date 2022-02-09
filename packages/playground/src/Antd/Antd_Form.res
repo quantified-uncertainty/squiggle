@@ -47,6 +47,6 @@ module Item = {
         ~children:React.element=?,
         unit
       ) => props = ""
-  @module("antd")
-  external make : makeType = "Form.Item"
+  @module("antd/lib/form/FormItem")
+  external make : makeType = "default"
 }
