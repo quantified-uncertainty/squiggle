@@ -20,8 +20,8 @@ let make = (~number, ~precision) => {
   let numberWithPresentation = JS.numberShow(number, precision)
   <span>
     {JS.valueGet(numberWithPresentation) |> React.string}
-    {JS.symbolGet(numberWithPresentation) |> E.O.React.fmapOrNull(React.string)}
-    {JS.powerGet(numberWithPresentation) |> E.O.React.fmapOrNull(e =>
+    {JS.symbolGet(numberWithPresentation) |> R.O.fmapOrNull(React.string)}
+    {JS.powerGet(numberWithPresentation) |> R.O.fmapOrNull(e =>
       <span>
         {j`\\u00b710` |> React.string}
         <span style=sup> {e |> E.Float.toString |> React.string} </span>

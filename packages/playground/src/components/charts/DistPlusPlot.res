@@ -1,7 +1,7 @@
 open DistPlusPlotReducer
 let plotBlue = #hex("1860ad")
 
-let showAsForm = (distPlus: DistTypes.distPlus) =>
+let showAsForm = (distPlus: ForetoldAppSquiggle.DistTypes.distPlus) =>
   <div> <Antd.Input value={distPlus.squiggleString |> E.O.default("")} /> </div>
 
 let showFloat = (~precision=3, number) => <NumberShower number precision />
@@ -23,27 +23,27 @@ let table = (distPlus, x) =>
           <td className="px-4 py-2 border"> {x |> E.Float.toString |> React.string} </td>
           <td className="px-4 py-2 border ">
             {distPlus
-            |> DistPlus.T.xToY(x)
-            |> DistTypes.MixedPoint.toDiscreteValue
+            |> ForetoldAppSquiggle.DistPlus.T.xToY(x)
+            |> ForetoldAppSquiggle.DistTypes.MixedPoint.toDiscreteValue
             |> Js.Float.toPrecisionWithPrecision(_, ~digits=7)
             |> React.string}
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-            |> DistPlus.T.xToY(x)
-            |> DistTypes.MixedPoint.toContinuousValue
+            |> ForetoldAppSquiggle.DistPlus.T.xToY(x)
+            |> ForetoldAppSquiggle.DistTypes.MixedPoint.toContinuousValue
             |> Js.Float.toPrecisionWithPrecision(_, ~digits=7)
             |> React.string}
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-            |> DistPlus.T.Integral.xToY(x)
+            |> ForetoldAppSquiggle.DistPlus.T.Integral.xToY(x)
             |> E.Float.with2DigitsPrecision
             |> React.string}
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-            |> DistPlus.T.Integral.sum
+            |> ForetoldAppSquiggle.DistPlus.T.Integral.sum
             |> E.Float.with2DigitsPrecision
             |> React.string}
           </td>
@@ -61,16 +61,16 @@ let table = (distPlus, x) =>
         <tr>
           <td className="px-4 py-2 border">
             {distPlus
-            |> DistPlus.T.toContinuous
-            |> E.O.fmap(Continuous.T.Integral.sum)
+            |> ForetoldAppSquiggle.DistPlus.T.toContinuous
+            |> E.O.fmap(ForetoldAppSquiggle.Continuous.T.Integral.sum)
             |> E.O.fmap(E.Float.with2DigitsPrecision)
             |> E.O.default("")
             |> React.string}
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
-            |> DistPlus.T.toDiscrete
-            |> E.O.fmap(Discrete.T.Integral.sum)
+            |> ForetoldAppSquiggle.DistPlus.T.toDiscrete
+            |> E.O.fmap(ForetoldAppSquiggle.Discrete.T.Integral.sum)
             |> E.O.fmap(E.Float.with2DigitsPrecision)
             |> E.O.default("")
             |> React.string}
@@ -97,28 +97,28 @@ let percentiles = distPlus =>
       <tbody>
         <tr>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.Integral.yToX(0.01) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.01) |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.Integral.yToX(0.05) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.05) |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.Integral.yToX(0.25) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.25) |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.Integral.yToX(0.5) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.5) |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.Integral.yToX(0.75) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.75) |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.Integral.yToX(0.95) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.95) |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.Integral.yToX(0.99) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.99) |> showFloat}
           </td>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.Integral.yToX(0.99999) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.99999) |> showFloat}
           </td>
         </tr>
       </tbody>
@@ -133,11 +133,11 @@ let percentiles = distPlus =>
       </thead>
       <tbody>
         <tr>
-          <td className="px-4 py-2 border"> {distPlus |> DistPlus.T.mean |> showFloat} </td>
+          <td className="px-4 py-2 border"> {distPlus |> ForetoldAppSquiggle.DistPlus.T.mean |> showFloat} </td>
           <td className="px-4 py-2 border">
-            {distPlus |> DistPlus.T.variance |> (r => r ** 0.5) |> showFloat}
+            {distPlus |> ForetoldAppSquiggle.DistPlus.T.variance |> (r => r ** 0.5) |> showFloat}
           </td>
-          <td className="px-4 py-2 border"> {distPlus |> DistPlus.T.variance |> showFloat} </td>
+          <td className="px-4 py-2 border"> {distPlus |> ForetoldAppSquiggle.DistPlus.T.variance |> showFloat} </td>
         </tr>
       </tbody>
     </table>
@@ -155,11 +155,11 @@ let adjustBoth = discreteProbabilityMassFraction => {
 
 module DistPlusChart = {
   @react.component
-  let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
-    open DistPlus
+  let make = (~distPlus: ForetoldAppSquiggle.DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
+    open ForetoldAppSquiggle.DistPlus
 
-    let discrete = distPlus |> T.toDiscrete |> E.O.fmap(Discrete.getShape)
-    let continuous = distPlus |> T.toContinuous |> E.O.fmap(Continuous.getShape)
+    let discrete = distPlus |> T.toDiscrete |> E.O.fmap(ForetoldAppSquiggle.Discrete.getShape)
+    let continuous = distPlus |> T.toContinuous |> E.O.fmap(ForetoldAppSquiggle.Continuous.getShape)
 
     // // We subtract a bit from the range to make sure that it fits. Maybe this should be done in d3 instead.
     // let minX =
@@ -172,12 +172,12 @@ module DistPlusChart = {
     //   | _ => None
     //   };
 
-    let minX = distPlus |> DistPlus.T.Integral.yToX(0.00001)
+    let minX = distPlus |> T.Integral.yToX(0.00001)
 
-    let maxX = distPlus |> DistPlus.T.Integral.yToX(0.99999)
+    let maxX = distPlus |> T.Integral.yToX(0.99999)
 
-    let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson
-    let discreteProbabilityMassFraction = distPlus |> DistPlus.T.toDiscreteProbabilityMassFraction
+    let timeScale = distPlus.unit |> ForetoldAppSquiggle.DistTypes.DistributionUnit.toJson
+    let discreteProbabilityMassFraction = distPlus |> T.toDiscreteProbabilityMassFraction
 
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) = adjustBoth(
       discreteProbabilityMassFraction,
@@ -202,13 +202,13 @@ module DistPlusChart = {
 
 module IntegralChart = {
   @react.component
-  let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
+  let make = (~distPlus: ForetoldAppSquiggle.DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
     let integral = distPlus.integralCache
-    let continuous = integral |> Continuous.toLinear |> E.O.fmap(Continuous.getShape)
-    let minX = distPlus |> DistPlus.T.Integral.yToX(0.00001)
+    let continuous = integral |> ForetoldAppSquiggle.Continuous.toLinear |> E.O.fmap(ForetoldAppSquiggle.Continuous.getShape)
+    let minX = distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.00001)
 
-    let maxX = distPlus |> DistPlus.T.Integral.yToX(0.99999)
-    let timeScale = distPlus.unit |> DistTypes.DistributionUnit.toJson
+    let maxX = distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.99999)
+    let timeScale = distPlus.unit |> ForetoldAppSquiggle.DistTypes.DistributionUnit.toJson
     <DistributionPlot
       xScale={config.xLog ? "log" : "linear"}
       yScale={config.yLog ? "log" : "linear"}
@@ -225,7 +225,7 @@ module IntegralChart = {
 
 module Chart = {
   @react.component
-  let make = (~distPlus: DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
+  let make = (~distPlus: ForetoldAppSquiggle.DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
     let chart = React.useMemo2(
       () =>
         config.isCumulative
@@ -246,7 +246,7 @@ module Chart = {
 let button = "bg-gray-300 hover:bg-gray-500 text-grey-darkest text-xs px-4 py-1"
 
 @react.component
-let make = (~distPlus: DistTypes.distPlus) => {
+let make = (~distPlus: ForetoldAppSquiggle.DistTypes.distPlus) => {
   let (x, setX) = React.useState(() => 0.)
   let (state, dispatch) = React.useReducer(DistPlusPlotReducer.reducer, DistPlusPlotReducer.init)
 

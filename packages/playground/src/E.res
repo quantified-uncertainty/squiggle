@@ -85,11 +85,6 @@ module O = {
 
   let min = compare(\"<")
   let max = compare(\">")
-  module React = {
-    let defaultNull = default(React.null)
-    let fmapOrNull = fn => \"||>"(fmap(fn), default(React.null))
-    let flatten = default(React.null)
-  }
 }
 
 /* Functions */
@@ -194,18 +189,6 @@ module J = {
       | _ => None
       }
   }
-}
-
-module M = {
-  let format = MomentRe.Moment.format
-  let format_standard = "MMM DD, YYYY HH:mm"
-  let format_simple = "L"
-  /* TODO: Figure out better name */
-  let goFormat_simple = MomentRe.Moment.format(format_simple)
-  let goFormat_standard = MomentRe.Moment.format(format_standard)
-  let toUtc = MomentRe.momentUtc
-  let toJSON = MomentRe.Moment.toJSON
-  let momentDefaultFormat = MomentRe.momentDefaultFormat
 }
 
 module JsDate = {

@@ -1,3 +1,4 @@
+open ForetoldAppSquiggle
 @module("./PercentilesChart.js")
 external percentilesChart: React.element = "PercentilesChart"
 
@@ -30,7 +31,7 @@ module Internal = {
 @react.component
 @module("./PercentilesChart.js")
 let make = (~dists: array<(float, DistTypes.distPlus)>, ~children=React.null) => {
-  let data = dists |> E.A.fmap(((x, r)) =>
+  let data = dists -> Belt.Array.map(((x, r)) =>
     {
       "x": x,
       "p1": r |> DistPlus.T.Integral.yToX(0.01),
