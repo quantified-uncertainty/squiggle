@@ -6,8 +6,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Squiggle',
-  tagline: 'A programming language for probabilistic estimation',
+  title: 'Squiggle (alpha)',
+  tagline: "A programming language for probabilistic estimation. It's still heavily experimental, and we're working to get to a stable release candidate.",
   url: 'https://squiggle-documentation.netlify.app',
   baseUrl: '/',
   onBrokenLinks: 'throw',

@@ -1,5 +1,5 @@
 ---
-slug: Squiggle-Talk 
+slug: squiggle-talk 
 title: The Squiggly language (Short Presentation)
 authors: ozzie
 ---
