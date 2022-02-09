@@ -38,7 +38,7 @@
     "@rescriptbr/reform",
     "@rescript/react",
     "bs-css",
-    "bs-css-dom",
+    "bs-css-emotion",
     "@foretold-app/squiggle",
     "rationale",
     "bs-moment",

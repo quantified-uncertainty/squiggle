@@ -59,25 +59,28 @@ module FieldFloat = {
     <Form.Field
       field
       render={({handleChange, error, value, validate}) =>
-          <Antd.Input
-            value
-            onChange={ReForm.Helpers.handleChange(handleChange)}
-            onBlur={_ => validate()}
-            style={className}
-          />
+          <Antd.Form.Item label={label}>
+            <Antd.Input
+              value
+              onChange={ReForm.Helpers.handleChange(handleChange)}
+              onBlur={_ => validate()}
+              className={className}
+            />
+          </Antd.Form.Item>
         }
     />
 }
 
 module Styles = {
   open CssJs
-  let rows = style(. [ selector(. ">.antCol:firstChild", [ paddingLeft(em(0.25)), paddingRight(em(0.125)) ]),
-  selector(. ">.antCol:lastChild", [ paddingLeft(em(0.125)), paddingRight(em(0.25)) ]),
-  selector(. 
-    ">.antCol:not(:firstChild):not(:lastChild)",
-    [ paddingLeft(em(0.125)), paddingRight(em(0.125)) ],
-  ),
-])
+  let rows = style(. [
+    selector(. ">.antCol:firstChild", [ paddingLeft(em(0.25)), paddingRight(em(0.125)) ]),
+    selector(. ">.antCol:lastChild", [ paddingLeft(em(0.125)), paddingRight(em(0.25)) ]),
+    selector(. 
+      ">.antCol:not(:firstChild):not(:lastChild)",
+      [ paddingLeft(em(0.125)), paddingRight(em(0.125)) ],
+    ),
+  ])
 let parent = style(. [ selector(. ".antInputNumber", [ width(#percent(100.)) ]),
 selector(. ".anticon", [ verticalAlign(#zero) ]),
  ])
@@ -238,14 +241,13 @@ let make = () => {
   <div className="grid grid-cols-2 gap-4">
     <div>
       <Antd.Card
-        title={"Distribution Form" |> R.ste}
-        extra={<Antd.Button icon=Antd.IconName.reload shape=#circle onClick=onReload />}>
+        title={"Distribution Form" |> R.ste}>
         <Form.Provider value=reform>
           <Antd.Form onSubmit>
-            <Row _type="flex" style=Styles.rows>
+            <Row _type="flex" className=Styles.rows>
               <Col span=24> <FieldText field=FormConfig.SquiggleString label="Program" /> </Col>
             </Row>
-            <Row _type="flex" style=Styles.rows>
+            <Row _type="flex" className=Styles.rows>
               <Col span=12> <FieldFloat field=FormConfig.SampleCount label="Sample Count" /> </Col>
               <Col span=12>
                 <FieldFloat field=FormConfig.OutputXYPoints label="Output XY-points" />

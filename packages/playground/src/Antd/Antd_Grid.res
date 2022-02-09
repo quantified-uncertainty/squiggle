@@ -1,3 +1,4 @@
+%%raw(`require("antd/lib/grid/style")`)
 
 
 module Row = {
