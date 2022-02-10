@@ -49,5 +49,14 @@ This interface should also be able to handle changing Squiggle values. This is b
 **Easily call other functions**  
 It would be great to be able to call other people's Squiggle functions, from other Squiggle functions. This could raise a whole bunch of challenging issues. Additionally, it would be neat to call other data, both from knowledge graphs, and from regular APIs. Note that this could obviously complicate scoring a lot; I imagine that either easy scoring, or simple data fetching, would have to accept sacrifices.
 
+**Correlated uncertainties**
+Right now there's no functionality to declare that two different distributions are correlated. 
+
+**Static / Sensitivity Analysis**
+Guesstimate has Sensitivity analysis that's pretty useful. This could be quite feasible to add, though it will likely require some thinking.
+
+**Annotation**
+It might be useful to allow people to annotate functions and variables with longer descriptions, maybe Markdown. This could very much help interpretation/analysis of these items.
+
 ## Fixes
 - Discrete distributions are particularly buggy. Try ``mm(1,2,3,4,5,6,7,8,9,10) .* (5 to 8)``
