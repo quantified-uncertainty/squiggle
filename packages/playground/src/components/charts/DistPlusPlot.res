@@ -234,7 +234,7 @@ module Chart = {
       (distPlus, config),
     )
     <div
-      style={
+      className={
         open CssJs
         style(. [ minHeight(#px(DistPlusPlotReducer.heightToPix(config.height))) ])
       }>

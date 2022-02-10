@@ -88,9 +88,9 @@ module Index = {
 
   let buildNav = _ => {
     let rec buildFolder = (f: folderEntry) =>
-      <div key=f.id style=Styles.folderNav>
+      <div key=f.id className=Styles.folderNav>
         <h4 onClick={_e => changeId(f.id)}> {f.title->React.string} </h4>
-        <div style=Styles.folderChildren>
+        <div className=Styles.folderChildren>
           {(f.children
           |> E.L.fmap(e =>
             switch e {
@@ -102,7 +102,7 @@ module Index = {
         </div>
       </div>
     and buildEntry = (e: compEntry) =>
-      <div key=e.id style=Styles.compNav onClick={_e => changeId(e.id)}>
+      <div key=e.id className=Styles.compNav onClick={_e => changeId(e.id)}>
         {e.title->React.string}
       </div>
     (entries
@@ -118,7 +118,7 @@ module Index = {
   let renderEntry = e =>
     switch e.container {
     | FullWidth => e.render()
-    | Sidebar => <div style=Styles.sidebarContainer> {e.render()} </div>
+    | Sidebar => <div className=Styles.sidebarContainer> {e.render()} </div>
     }
 
   @react.component
@@ -132,9 +132,9 @@ module Index = {
       let _ = RescriptReactRouter.watchUrl(url => setRoute(_ => url))
     }) |> ignore
 
-    <div style=Styles.pageContainer>
-      <div style=Styles.leftNav> {buildNav(setRoute)} </div>
-      <div style=Styles.compContainer>
+    <div className=Styles.pageContainer>
+      <div className=Styles.leftNav> {buildNav(setRoute)} </div>
+      <div className=Styles.compContainer>
         {if route.hash == "" {
           React.null
         } else {
@@ -148,7 +148,7 @@ module Index = {
               |> E.L.fmap(child =>
                 switch child {
                 | CompEntry(c) =>
-                  <div style=Styles.folderChildContainer key=c.id> {renderEntry(c)} </div>
+                  <div className=Styles.folderChildContainer key=c.id> {renderEntry(c)} </div>
                 | _ => React.null
                 }
               )

@@ -1,4 +1,3 @@
-
 @deriving(abstract)
 type props
 type makeType = props => React.element

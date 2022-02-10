@@ -24,7 +24,7 @@ let make = (~number, ~precision) => {
     {JS.powerGet(numberWithPresentation) |> R.O.fmapOrNull(e =>
       <span>
         {j`\\u00b710` |> React.string}
-        <span style=sup> {e |> E.Float.toString |> React.string} </span>
+        <span className=sup> {e |> E.Float.toString |> React.string} </span>
       </span>
     )}
   </span>
