@@ -39,6 +39,8 @@ rightTrunctate(distribution, rightValue) //todo
 distributionFromSamples(array, params) //todo
 distributionFromPoints() //todo
 distributionFromHash() //todo
+log() //todo
+
 ```
 
 ## Example Functions
