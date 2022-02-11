@@ -13,16 +13,10 @@ lognormalFromMeanAndStdDev(mean, stdev)
 beta(a,b)
 exponential(a)
 triangular(a,b,c)
-mm(a,b,c, [1,2,3])
+mm(a,b,c, [1,2,3]) //todo: change to mix, or mx(). Also, change input format, maybe to mx([a,b,c], [a,b,c]).
 cauchy() //todo
 pareto() //todo
-```
-
-## Functions
-```js
-trunctate() //todo
-leftTrunctate() //todo
-rightTrunctate()//todo
+metalog() //todo
 ```
 
 ## Functions
@@ -35,6 +29,16 @@ sample(distribution)
 scaleExp(distribution, float)
 scaleMultiply(distribution, float)
 scaleLog(distribution, float)
+samples(distribution, n) //todo
+toPdf(distribution) //todo
+toCdf(distribution) //todo
+toHash(distribution) //todo. Make hash of content, like, {xs:[], ys:[]}
+trunctate(distribution, leftValue, rightValue) //todo
+leftTrunctate(distribution, leftValue) //todo
+rightTrunctate(distribution, rightValue) //todo
+distributionFromSamples(array, params) //todo
+distributionFromPoints() //todo
+distributionFromHash() //todo
 ```
 
 ## Example Functions
