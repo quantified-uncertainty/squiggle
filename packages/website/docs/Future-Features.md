@@ -58,5 +58,11 @@ Guesstimate has Sensitivity analysis that's pretty useful. This could be quite f
 **Annotation**  
 It might be useful to allow people to annotate functions and variables with longer descriptions, maybe Markdown. This could very much help interpretation/analysis of these items.
 
+## Major Standard Language Features
+- Some testing story.
+- A custom code highlighting format.
+- Possibly a decent web GUI (a much more advanced playground).
+- A VS Code extention and similar.
+
 ## Fixes
 - Discrete distributions are particularly buggy. Try ``mm(1,2,3,4,5,6,7,8,9,10) .* (5 to 8)``
