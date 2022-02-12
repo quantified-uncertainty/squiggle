@@ -58,6 +58,9 @@ Guesstimate has Sensitivity analysis that's pretty useful. This could be quite f
 **Annotation**  
 It might be useful to allow people to annotate functions and variables with longer descriptions, maybe Markdown. This could very much help interpretation/analysis of these items.
 
+**Randomness Seeds**
+Right now, Monte Carlo simulations are totally random. It would be nicer to be able to enter a seed somehow in order to control the randomness. Or, with the same seed, the function should always return the same values. This would make debugging and similar easier.
+
 ## Major Standard Language Features
 - Some testing story.
 - A custom code highlighting format.
