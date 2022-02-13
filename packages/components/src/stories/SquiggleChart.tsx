@@ -2,13 +2,14 @@ import * as React  from 'react';
 import * as PropTypes  from 'prop-types';
 import * as _ from 'lodash';
 import './button.css';
-import type { LinearScale, Spec } from 'vega';
+import type { PowScale, Spec } from 'vega';
 import { run } from '@squiggle/squiggle-lang';
 import { createClassFromSpec } from 'react-vega';
 
-let scales : LinearScale[] = [{
+let scales : PowScale[] = [{
     "name": "xscale",
-    "type": "linear",
+    "type": "pow",
+    "exponent": {"signal": "xscale"},
     "range": "width",
     "zero": false,
     "nice": false,
@@ -20,7 +21,8 @@ let scales : LinearScale[] = [{
       }
   }, {
     "name": "yscale",
-    "type": "linear",
+    "type": "pow",
+    "exponent": {"signal": "yscale"},
     "range": "height",
     "nice": true,
     "zero": true,
@@ -48,6 +50,26 @@ let specification : Spec = {
       "description": "x position of mouse",
       "update": "0",
       "on": [{"events": "mousemove", "update": "1-x()/width"}]
+    },
+    {
+      "name": "xscale",
+      "description": "The transform of the x scale",
+      "value": 1.0,
+      "bind": {
+        "input": "range",
+        "min": 0.1,
+        "max": 1
+        }
+    },
+    {
+      "name": "yscale",
+      "description": "The transform of the y scale",
+      "value": 1.0,
+      "bind": {
+        "input": "range",
+        "min": 0.1,
+        "max": 1
+        }
     }
   ],
 
@@ -64,12 +86,12 @@ let specification : Spec = {
       "from": {"data": "con"},
       "encode": {
         "enter": {
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"},
-          "y2": {"scale": "yscale", "value": 0},
           "tooltip": {"signal": "datum.cdf"}
         },
         "update": {
+          "x": {"scale": "xscale", "field": "x"},
+          "y": {"scale": "yscale", "field": "y"},
+          "y2": {"scale": "yscale", "value": 0},
           "fill": {
               "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'blue'}, {offset: 1.0, color: 'blue'} ] }"
             },
@@ -83,10 +105,13 @@ let specification : Spec = {
       "from": {"data": "dis"},
       "encode": {
         "enter": {
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"},
           "y2": {"scale": "yscale", "value": 0},
           "width": {"value": 1}
+        },
+        "update": {
+          "x": {"scale": "xscale", "field": "x"},
+          "y": {"scale": "yscale", "field": "y"},
+
         }
       }
     },
@@ -96,10 +121,12 @@ let specification : Spec = {
       "encode": {
         "enter": {
           "shape": {"value": "circle"},
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"},
           "width": {"value": 5},
           "tooltip": {"signal": "datum.y"},
+        },
+        "update": {
+          "x": {"scale": "xscale", "field": "x"},
+          "y": {"scale": "yscale", "field": "y"},
         }
       }
     }
