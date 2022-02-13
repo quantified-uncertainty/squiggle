@@ -20,7 +20,7 @@
   "package-specs": [
     {
       "module": "commonjs",
-      "in-source": true
+      "in-source": false
     }
   ],
   "suffix": ".bs.js",
@@ -31,8 +31,9 @@
     "rationale"
   ],
   "gentypeconfig": {
-    "language": "untyped",
+    "language": "typescript",
     "module": "commonjs",
+    "generatedFileExtension": ".gen.ts",
     "shims": {},
     "debug": {
       "all": false,

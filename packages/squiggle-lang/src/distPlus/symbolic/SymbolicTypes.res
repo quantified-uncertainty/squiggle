@@ -31,6 +31,7 @@ type triangular = {
   high: float,
 }
 
+@genType
 type symbolicDist = [
   | #Normal(normal)
   | #Beta(beta)

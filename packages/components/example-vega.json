@@ -1,0 +1,75 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "A basic area chart example.",
+  "width": 500,
+  "height": 200,
+  "padding": 5,
+
+  "signals": [
+    {
+      "name": "mousex",
+      "description": "x position of mouse",
+      "update": "0",
+      "on": [{"events": "mousemove", "update": "1-x()/width"}]
+    }
+  ],
+
+  "data": [
+    {
+      "name": "table",
+      "transform": [
+        {"type": "sequence", "start": -5, "stop": 5,"step": 0.2, "as": "u"},
+        {"type": "formula", "expr": "densityNormal(datum.u,0,1)", "as": "v"},
+        {"type": "formula", "expr": "round(100 * cumulativeNormal(datum.u,0,1))", "as": "cdf"}
+      ]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "linear",
+      "range": "width",
+      "zero": false,
+      "domain": 
+        {"data": "table", "field": "u"}
+    },
+    {
+      "name": "yscale",
+      "type": "linear",
+      "range": "height",
+      "nice": true,
+      "zero": true,
+      "domain": 
+        {"data": "table", "field": "v"}
+    }
+  ],
+
+  "axes": [
+    {"orient": "bottom", "scale": "xscale", "tickCount": 20},
+    {"orient": "left", "scale": "yscale"}
+  ],
+
+  "marks": [
+    {
+      "type": "area",
+      "from": {"data": "table"},
+      "encode": {
+        "enter": {
+          "x": {"scale": "xscale", "field": "u"},
+          "y": {"scale": "yscale", "field": "v"},
+          "y2": {"scale": "yscale", "value": 0},
+          "tooltip": {"signal": "datum.cdf"}
+        },
+        "update": {
+          "fill": {
+              "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: 'steelblue'}, {offset: mousex, color: 'steelblue'}, {offset: mousex, color: 'blue'}, {offset: 1.0, color: 'blue'} ] }"
+            },
+          "interpolate": {"value": "monotone"},
+          "fillOpacity": {"value": 1}
+        }
+      }
+    }
+  ]
+}
+

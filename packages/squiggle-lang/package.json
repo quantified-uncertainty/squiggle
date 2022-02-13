@@ -1,10 +1,10 @@
 {
-  "name": "@foretold-app/squiggle",
+  "name": "@squiggle/squiggle-lang",
   "version": "0.1.9",
   "homepage": "https://foretold-app.github.io/estiband/",
   "private": false,
   "scripts": {
-    "build": "rescript build",
+    "build": "rescript build && tsc",
     "parcel": "parcel build ./src/js/index.js --no-source-maps --no-autoinstall",
     "start": "rescript build -w",
     "clean": "rescript clean",
@@ -21,11 +21,19 @@
   "dependencies": {
     "@glennsl/bs-json": "^5.0.2",
     "@rescriptbr/reform": "^11.0.1",
+    "@types/jest": "^27.4.0",
+    "@types/node": "^17.0.16",
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.11",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "cross-env": "^7.0.3",
     "lodash": "4.17.15",
     "mathjs": "5.10.3",
     "pdfast": "^0.2.0",
-    "rationale": "0.2.0"
+    "rationale": "0.2.0",
+    "react-vega": "^7.4.4",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "typescript": "^4.5.5"
   },
   "devDependencies": {
     "@glennsl/rescript-jest": "^0.9.0",
@@ -37,5 +45,7 @@
     "parcel": "^2.2.1",
     "parcel-bundler": "1.12.4",
     "rescript": "^9.1.4"
-  }
+  },
+  "main": "dist/js/index.js",
+  "types": "dist/js/index.d.ts"
 }

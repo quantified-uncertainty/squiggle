@@ -73,6 +73,7 @@ type generationSource =
 type distributionUnit =
   | UnspecifiedDistribution
 
+@genType
 type distPlus = {
   shape: shape,
   domain: domain,

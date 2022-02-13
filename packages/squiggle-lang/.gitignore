@@ -13,3 +13,4 @@ yarn-error.log
 # Local Netlify folder
 .netlify
 .idea
+dist

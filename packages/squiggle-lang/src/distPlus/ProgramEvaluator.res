@@ -36,13 +36,10 @@ module Inputs = {
   }
 }
 
-type \"export" = [
+type exportType = [
   | #DistPlus(DistPlus.t)
   | #Float(float)
-  | #Function(
-    (array<string>, ExpressionTypes.ExpressionTree.node),
-    ExpressionTypes.ExpressionTree.environment,
-  )
+  | #Function((float) => Belt.Result.t<DistPlus.t,string>)
 ]
 
 module Internals = {
@@ -121,12 +118,31 @@ let renderIfNeeded = (inputs: Inputs.inputs, node: ExpressionTypes.ExpressionTre
       }
   )
 
+let rec returnDist = (functionInfo : (array<string>, ExpressionTypes.ExpressionTree.node), 
+                  inputs : Inputs.inputs,
+                  env : ExpressionTypes.ExpressionTree.environment) => {
+  (input : float) => {
+    let foo: Inputs.inputs = {...inputs, environment: env};
+    evaluateFunction(
+      foo,
+      functionInfo,
+      [#SymbolicDist(#Float(input))],
+    ) |> E.R.bind(_, a =>
+      switch a {
+      | #DistPlus(d) => Ok(DistPlus.T.normalize(d))
+      | n =>
+        Js.log2("Error here", n)
+        Error("wrong type")
+      }
+    )
+  }
+}
 // TODO: Consider using ExpressionTypes.ExpressionTree.getFloat or similar in this function
-let coersionToExportedTypes = (
+and coersionToExportedTypes = (
   inputs,
   env: ExpressionTypes.ExpressionTree.environment,
   node: ExpressionTypes.ExpressionTree.node,
-): result<\"export", string> =>
+): result<exportType, string> =>
   node
   |> renderIfNeeded(inputs)
   |> E.R.bind(_, x =>
@@ -134,31 +150,12 @@ let coersionToExportedTypes = (
     | #RenderedDist(Discrete({xyShape: {xs: [x], ys: [1.0]}})) => Ok(#Float(x))
     | #SymbolicDist(#Float(x)) => Ok(#Float(x))
     | #RenderedDist(n) => Ok(#DistPlus(Internals.outputToDistPlus(inputs, n)))
-    | #Function(n) => Ok(#Function(n, env))
+    | #Function(n) => Ok(#Function(returnDist(n, inputs, env)))
     | n => Error("Didn't output a rendered distribution. Format:" ++ ExpressionTree.toString(n))
     }
   )
 
-let rec mapM = (f, xs) =>
-  switch xs {
-  | list{} => Ok(list{})
-  | list{x, ...rest} =>
-    switch f(x) {
-    | Error(err) => Error(err)
-    | Ok(val) =>
-      switch mapM(f, rest) {
-      | Error(err) => Error(err)
-      | Ok(restList) => Ok(list{val, ...restList})
-      }
-    }
-  }
-
-let evaluateProgram = (inputs: Inputs.inputs) =>
-  inputs
-  |> Internals.inputsToLeaf
-  |> E.R.bind(_, xs => mapM(((a, b)) => coersionToExportedTypes(inputs, a, b), Array.to_list(xs)))
-
-let evaluateFunction = (
+and evaluateFunction = (
   inputs: Inputs.inputs,
   fn: (array<string>, ExpressionTypes.ExpressionTree.node),
   fnInputs,
@@ -171,6 +168,29 @@ let evaluateFunction = (
   )
   output |> E.R.bind(_, coersionToExportedTypes(inputs, inputs.environment))
 }
+
+
+
+
+let rec mapM = (f, xs) =>
+  switch xs {
+  | [] => Ok([])
+  | arr =>
+    switch f(arr[0]) {
+    | Error(err) => Error(err)
+    | Ok(val) =>
+      switch mapM(f, Belt.Array.sliceToEnd(arr, 1)) {
+      | Error(err) => Error(err)
+      | Ok(restList) => Ok(Belt.Array.concat([val], restList))
+      }
+    }
+  }
+
+let evaluateProgram = (inputs: Inputs.inputs) =>
+  inputs
+  |> Internals.inputsToLeaf
+  |> E.R.bind(_, xs => mapM(((a, b)) => coersionToExportedTypes(inputs, a, b), xs))
+
 
 @genType
 let runAll = (squiggleString: string) => {
@@ -186,5 +206,5 @@ let runAll = (squiggleString: string) => {
     (),
   )
   let response1 = evaluateProgram(inputs);
-  response1;
+  response1
 }

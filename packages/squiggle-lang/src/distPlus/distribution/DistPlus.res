@@ -1,5 +1,6 @@
 open DistTypes;
 
+@genType
 type t = DistTypes.distPlus;
 
 let shapeIntegral = shape => Shape.T.Integral.get(shape);
