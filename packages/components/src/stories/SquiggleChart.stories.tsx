@@ -7,4 +7,9 @@ export default {
   component: SquiggleChart
 }
 
-export const Default = () => <SquiggleChart squiggleString="normal(5, 2)" />
+const Template = ({squiggleString}) => <SquiggleChart squiggleString={squiggleString} />
+
+export const Default = Template.bind({})
+Default.args = {
+  squiggleString: "normal(5, 2)"
+};
