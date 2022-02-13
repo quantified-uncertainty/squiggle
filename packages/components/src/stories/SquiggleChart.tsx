@@ -1,5 +1,6 @@
 import * as React  from 'react';
 import * as PropTypes  from 'prop-types';
+import * as _ from 'lodash';
 import './button.css';
 import type { LinearScale, Spec } from 'vega';
 import { run } from '@squiggle/squiggle-lang';
@@ -11,16 +12,24 @@ let scales : LinearScale[] = [{
     "range": "width",
     "zero": false,
     "nice": false,
-    "domain": 
-      {"data": "table", "field": "x"}
+    "domain": {
+      "fields": [
+        { "data": "con", "field": "x"},
+        { "data": "dis", "field": "x"}
+        ]
+      }
   }, {
     "name": "yscale",
     "type": "linear",
     "range": "height",
     "nice": true,
     "zero": true,
-    "domain": 
-      {"data": "table", "field": "y"}
+    "domain": {
+      "fields": [
+        { "data": "con", "field": "y"},
+        { "data": "dis", "field": "y"}
+        ]
+    }
   }
 ]
 
@@ -31,7 +40,7 @@ let specification : Spec = {
   "width": 500,
   "height": 200,
   "padding": 5,
-  "data": [{"name": "table"}],
+  "data": [{"name": "con"}, {"name": "dis"}],
 
   "signals": [
     {
@@ -52,7 +61,7 @@ let specification : Spec = {
   "marks": [
     {
       "type": "area",
-      "from": {"data": "table"},
+      "from": {"data": "con"},
       "encode": {
         "enter": {
           "x": {"scale": "xscale", "field": "x"},
@@ -68,22 +77,37 @@ let specification : Spec = {
           "fillOpacity": {"value": 1}
         }
       }
+    },
+    {
+      "type": "rect",
+      "from": {"data": "dis"},
+      "encode": {
+        "enter": {
+          "x": {"scale": "xscale", "field": "x"},
+          "y": {"scale": "yscale", "field": "y"},
+          "y2": {"scale": "yscale", "value": 0},
+          "width": {"value": 1}
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "from": {"data": "dis"},
+      "encode": {
+        "enter": {
+          "shape": {"value": "circle"},
+          "x": {"scale": "xscale", "field": "x"},
+          "y": {"scale": "yscale", "field": "y"},
+          "width": {"value": 5},
+          "tooltip": {"signal": "datum.y"},
+        }
+      }
     }
   ]
 };
 
 let SquiggleVegaChart = createClassFromSpec({'spec': specification});
 
-function zip<T>(a: Array<T>, b: Array<T>): Array<Array<T>>{
-  return a.map(function(e, i) {
-    return [e, b[i]];
-  })
-}
-function zip3<T>(a: Array<T>, b: Array<T>, c: Array<T>): Array<Array<T>>{
-  return a.map(function(e, i) {
-    return [e, b[i], c[i]];
-  })
-}
 /**
  * Primary UI component for user interaction
  */
@@ -106,11 +130,11 @@ export const SquiggleChart = ({ squiggleString }: { squiggleString: string}) => 
           return total / totalY;
         })
         console.log(cdf)
-        let values = zip3(cdf, xyShape.xs, xyShape.ys).map(([c, x, y ]) => ({cdf: (c * 100).toFixed(2) + "%", x: x, y: y}));
+        let values = _.zip(cdf, xyShape.xs, xyShape.ys).map(([c, x, y ]) => ({cdf: (c * 100).toFixed(2) + "%", x: x, y: y}));
 
         return (
           <SquiggleVegaChart 
-            data={{"table": values}}
+            data={{"con": values}}
             />
         );
       }
@@ -122,23 +146,63 @@ export const SquiggleChart = ({ squiggleString }: { squiggleString: string}) => 
           total += y;
           return total / totalY;
         })
-        let values = zip3(cdf, xyShape.xs, xyShape.ys).map(([c, x,y]) => ({cdf: (c * 100).toFixed(2) + "%", x: x, y: y}));
+        let values = _.zip(cdf, xyShape.xs, xyShape.ys).map(([c, x,y]) => ({cdf: (c * 100).toFixed(2) + "%", x: x, y: y}));
 
         return (
           <SquiggleVegaChart 
-            data={{"name": "table", "values": values}}
+            data={{"dis": values}}
             />
         );
       }
       else if(shape.tag === "Mixed"){
-        console.log(shape.value.integralSumCache)
-        console.log(shape.value.integralCache)
-        let xyShape = shape.value.continuous.xyShape;
-        let values = zip(xyShape.xs, xyShape.ys).map(([x,y]) => ({x: x, y: y}));
+        console.log(shape)
+        console.log(shape.value.continuous.integralSumCache)
+        let discreteShape = shape.value.discrete.xyShape;
+        let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
+
+        let discretePoints = _.zip(discreteShape.xs, discreteShape.ys);
+        let continuousShape = shape.value.continuous.xyShape;
+        let continuousPoints = _.zip(continuousShape.xs, continuousShape.ys);
+
+        interface labeledPoint {
+          x: number,
+          y: number,
+          type: "discrete" | "continuous"
+        };
+
+        let markedDisPoints : labeledPoint[] = discretePoints.map(([x,y]) => ({x: x, y: y, type: "discrete"}))
+        let markedConPoints : labeledPoint[] = continuousPoints.map(([x,y]) => ({x: x, y: y, type: "continuous"}))
+
+        let sortedPoints = _.sortBy(markedDisPoints.concat(markedConPoints), 'x')
+
+        let totalContinuous = 1 - totalDiscrete;
+        let totalY = continuousShape.ys.reduce((a:number, b:number) => a + b);
+
+        let total = 0;
+        let cdf = sortedPoints.map((point: labeledPoint) => {
+          if(point.type == "discrete") {
+            total += point.y;
+            return total;
+          }
+          else if (point.type == "continuous") {
+            total += point.y / totalY * totalContinuous;
+            return total;
+          }
+        });
+
+        interface cdfLabeledPoint {
+          cdf: string,
+          x: number,
+          y: number,
+          type: "discrete" | "continuous"
+        }
+        let cdfLabeledPoint : cdfLabeledPoint[] = _.zipWith(cdf, sortedPoints, (c: number, point: labeledPoint) => ({...point, cdf: (c * 100).toFixed(2) + "%"}))
+        let continuousValues = cdfLabeledPoint.filter(x => x.type == "continuous")
+        let discreteValues = cdfLabeledPoint.filter(x => x.type == "discrete")
 
         return (
           <SquiggleVegaChart 
-            data={{"name": "table", "values": values}}
+            data={{"con": continuousValues, "dis": discreteValues}}
             />
         );
         }
