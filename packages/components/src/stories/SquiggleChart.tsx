@@ -1,7 +1,6 @@
 import * as React  from 'react';
 import * as PropTypes  from 'prop-types';
 import * as _ from 'lodash';
-import './button.css';
 import type { Spec } from 'vega';
 import { run } from '@squiggle/squiggle-lang';
 import type { DistPlus } from '@squiggle/squiggle-lang';
@@ -19,152 +18,148 @@ let SquigglePercentilesChart = createClassFromSpec({'spec': percentilesSpec as S
 export const SquiggleChart = ({ squiggleString }: { squiggleString: string}) => {
 
   let result = run(squiggleString);
+  console.log(result)
   if (result.tag === "Ok") {
-    let chartResult = result.value[0];
-    if(chartResult["NAME"] === "Float"){
-      return <MakeNumberShower precision={3} number={chartResult["VAL"]} />;
-    }
-    else if(chartResult["NAME"] === "DistPlus"){
-      let shape = chartResult.VAL.shape;
-      if(shape.tag === "Continuous"){
-        let xyShape = shape.value.xyShape;
-        let totalY = xyShape.ys.reduce((a, b) => a + b);
-        let total = 0;
-        let cdf = xyShape.ys.map(y => {
-          total += y;
-          return total / totalY;
-        })
-        console.log(cdf)
-        let values = _.zip(cdf, xyShape.xs, xyShape.ys).map(([c, x, y ]) => ({cdf: (c * 100).toFixed(2) + "%", x: x, y: y}));
-
-        return (
-          <SquiggleVegaChart 
-            data={{"con": values}}
-            />
-        );
+    let chartResults = result.value.map(chartResult => {
+      console.log(chartResult)
+      if(chartResult["NAME"] === "Float"){
+        return <MakeNumberShower precision={3} number={chartResult["VAL"]} />;
       }
-      else if(shape.tag === "Discrete"){
-        let xyShape = shape.value.xyShape;
-        let totalY = xyShape.ys.reduce((a, b) => a + b);
-        let total = 0;
-        let cdf = xyShape.ys.map(y => {
-          total += y;
-          return total / totalY;
-        })
-        let values = _.zip(cdf, xyShape.xs, xyShape.ys).map(([c, x,y]) => ({cdf: (c * 100).toFixed(2) + "%", x: x, y: y}));
+      else if(chartResult["NAME"] === "DistPlus"){
+        let shape = chartResult.VAL.shape;
+        if(shape.tag === "Continuous"){
+          let xyShape = shape.value.xyShape;
+          let totalY = xyShape.ys.reduce((a, b) => a + b);
+          let total = 0;
+          let cdf = xyShape.ys.map(y => {
+            total += y;
+            return total / totalY;
+          })
+          let values = _.zip(cdf, xyShape.xs, xyShape.ys).map(([c, x, y ]) => ({cdf: (c * 100).toFixed(2) + "%", x: x, y: y}));
 
-        return (
-          <SquiggleVegaChart 
-            data={{"dis": values}}
-            />
-        );
-      }
-      else if(shape.tag === "Mixed"){
-        console.log(shape)
-        console.log(shape.value.continuous.integralSumCache)
-        let discreteShape = shape.value.discrete.xyShape;
-        let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
-
-        let discretePoints = _.zip(discreteShape.xs, discreteShape.ys);
-        let continuousShape = shape.value.continuous.xyShape;
-        let continuousPoints = _.zip(continuousShape.xs, continuousShape.ys);
-
-        interface labeledPoint {
-          x: number,
-          y: number,
-          type: "discrete" | "continuous"
-        };
-
-        let markedDisPoints : labeledPoint[] = discretePoints.map(([x,y]) => ({x: x, y: y, type: "discrete"}))
-        let markedConPoints : labeledPoint[] = continuousPoints.map(([x,y]) => ({x: x, y: y, type: "continuous"}))
-
-        let sortedPoints = _.sortBy(markedDisPoints.concat(markedConPoints), 'x')
-
-        let totalContinuous = 1 - totalDiscrete;
-        let totalY = continuousShape.ys.reduce((a:number, b:number) => a + b);
-
-        let total = 0;
-        let cdf = sortedPoints.map((point: labeledPoint) => {
-          if(point.type == "discrete") {
-            total += point.y;
-            return total;
-          }
-          else if (point.type == "continuous") {
-            total += point.y / totalY * totalContinuous;
-            return total;
-          }
-        });
-
-        interface cdfLabeledPoint {
-          cdf: string,
-          x: number,
-          y: number,
-          type: "discrete" | "continuous"
+          return (
+            <SquiggleVegaChart 
+              data={{"con": values}}
+              />
+          );
         }
-        let cdfLabeledPoint : cdfLabeledPoint[] = _.zipWith(cdf, sortedPoints, (c: number, point: labeledPoint) => ({...point, cdf: (c * 100).toFixed(2) + "%"}))
-        let continuousValues = cdfLabeledPoint.filter(x => x.type == "continuous")
-        let discreteValues = cdfLabeledPoint.filter(x => x.type == "discrete")
+        else if(shape.tag === "Discrete"){
+          let xyShape = shape.value.xyShape;
+          let totalY = xyShape.ys.reduce((a, b) => a + b);
+          let total = 0;
+          let cdf = xyShape.ys.map(y => {
+            total += y;
+            return total / totalY;
+          })
+          let values = _.zip(cdf, xyShape.xs, xyShape.ys).map(([c, x,y]) => ({cdf: (c * 100).toFixed(2) + "%", x: x, y: y}));
 
-        return (
-          <SquiggleVegaChart 
-            data={{"con": continuousValues, "dis": discreteValues}}
-            />
-        );
+          return (
+            <SquiggleVegaChart 
+              data={{"dis": values}}
+              />
+          );
         }
-    }
-    else if(chartResult.NAME === "Function"){
-      console.log("Function time")
-      // We are looking at a function. In this case, we draw a Percentiles chart
-        let data = _.range(0,10,0.1).map((_,i) => {
-          let x = i /10;
-          console.log(chartResult);
-          console.log("Run thing")
-          if(chartResult.NAME=="Function"){
-            let result = chartResult.VAL(x);
-            console.log(result);
-            if(result.tag == "Ok"){
-              let percentileArray = [
-                0.01,
-                0.05,
-                0.1,
-                0.2,
-                0.3,
-                0.4,
-                0.5,
-                0.6,
-                0.7,
-                0.8,
-                0.9,
-                0.95,
-                0.99
-              ]
-                
-              let percentiles = getPercentiles(percentileArray, result.value);
-              return {
-                "x": x,
-                "p1": percentiles[0],
-                "p5": percentiles[1],
-                "p10": percentiles[2],
-                "p20": percentiles[3],
-                "p30": percentiles[4],
-                "p40": percentiles[5],
-                "p50": percentiles[6],
-                "p60": percentiles[7],
-                "p70": percentiles[8],
-                "p80": percentiles[9],
-                "p90": percentiles[10],
-                "p95": percentiles[11],
-                "p99": percentiles[12]
-              }
+        else if(shape.tag === "Mixed"){
+          let discreteShape = shape.value.discrete.xyShape;
+          let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
 
-              }
+          let discretePoints = _.zip(discreteShape.xs, discreteShape.ys);
+          let continuousShape = shape.value.continuous.xyShape;
+          let continuousPoints = _.zip(continuousShape.xs, continuousShape.ys);
 
+          interface labeledPoint {
+            x: number,
+            y: number,
+            type: "discrete" | "continuous"
+          };
+
+          let markedDisPoints : labeledPoint[] = discretePoints.map(([x,y]) => ({x: x, y: y, type: "discrete"}))
+          let markedConPoints : labeledPoint[] = continuousPoints.map(([x,y]) => ({x: x, y: y, type: "continuous"}))
+
+          let sortedPoints = _.sortBy(markedDisPoints.concat(markedConPoints), 'x')
+
+          let totalContinuous = 1 - totalDiscrete;
+          let totalY = continuousShape.ys.reduce((a:number, b:number) => a + b);
+
+          let total = 0;
+          let cdf = sortedPoints.map((point: labeledPoint) => {
+            if(point.type == "discrete") {
+              total += point.y;
+              return total;
             }
-            return 0;
-        })
-        console.log(data);
-        return <SquigglePercentilesChart data={{"facet": data}} />
+            else if (point.type == "continuous") {
+              total += point.y / totalY * totalContinuous;
+              return total;
+            }
+          });
+
+          interface cdfLabeledPoint {
+            cdf: string,
+            x: number,
+            y: number,
+            type: "discrete" | "continuous"
+          }
+          let cdfLabeledPoint : cdfLabeledPoint[] = _.zipWith(cdf, sortedPoints, (c: number, point: labeledPoint) => ({...point, cdf: (c * 100).toFixed(2) + "%"}))
+          let continuousValues = cdfLabeledPoint.filter(x => x.type == "continuous")
+          let discreteValues = cdfLabeledPoint.filter(x => x.type == "discrete")
+
+          return (
+            <SquiggleVegaChart 
+              data={{"con": continuousValues, "dis": discreteValues}}
+              />
+          );
+          }
       }
+      else if(chartResult.NAME === "Function"){
+        // We are looking at a function. In this case, we draw a Percentiles chart
+          let data = _.range(0,10,0.1).map((_,i) => {
+            let x = i /10;
+            if(chartResult.NAME=="Function"){
+              let result = chartResult.VAL(x);
+              if(result.tag == "Ok"){
+                let percentileArray = [
+                  0.01,
+                  0.05,
+                  0.1,
+                  0.2,
+                  0.3,
+                  0.4,
+                  0.5,
+                  0.6,
+                  0.7,
+                  0.8,
+                  0.9,
+                  0.95,
+                  0.99
+                ]
+                  
+                let percentiles = getPercentiles(percentileArray, result.value);
+                return {
+                  "x": x,
+                  "p1": percentiles[0],
+                  "p5": percentiles[1],
+                  "p10": percentiles[2],
+                  "p20": percentiles[3],
+                  "p30": percentiles[4],
+                  "p40": percentiles[5],
+                  "p50": percentiles[6],
+                  "p60": percentiles[7],
+                  "p70": percentiles[8],
+                  "p80": percentiles[9],
+                  "p90": percentiles[10],
+                  "p95": percentiles[11],
+                  "p99": percentiles[12]
+                }
+
+                }
+
+              }
+              return 0;
+          })
+          return <SquigglePercentilesChart data={{"facet": data}} />
+        }
+      })
+    return <>{chartResults}</>;
   }
   else if(result.tag == "Error") {
     // At this point, we came across an error. What was our error?
