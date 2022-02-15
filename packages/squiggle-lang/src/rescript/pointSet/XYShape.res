@@ -1,4 +1,4 @@
-open DistTypes
+open PointSetTypes
 
 let interpolate = (xMin: float, xMax: float, yMin: float, yMax: float, xIntended: float): float => {
   let minProportion = (xMax -. xIntended) /. (xMax -. xMin)
@@ -126,8 +126,8 @@ module XtoY = {
   /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
    Interpolation can either be stepwise (using the value on the left) or linear. Extrapolation can be `UseZero or `UseOutermostPoints. */
   let continuousInterpolator = (
-    interpolation: DistTypes.interpolationStrategy,
-    extrapolation: DistTypes.extrapolationStrategy,
+    interpolation: PointSetTypes.interpolationStrategy,
+    extrapolation: PointSetTypes.extrapolationStrategy,
   ): interpolator =>
     switch (interpolation, extrapolation) {
     | (#Linear, #UseZero) =>
@@ -395,7 +395,7 @@ module Analysis = {
   let integrateContinuousShape = (
     ~indefiniteIntegralStepwise=(p, h1) => h1 *. p,
     ~indefiniteIntegralLinear=(p, a, b) => a *. p +. b *. p ** 2.0 /. 2.0,
-    t: DistTypes.continuousShape,
+    t: PointSetTypes.continuousShape,
   ): float => {
     let xs = t.xyShape.xs
     let ys = t.xyShape.ys
@@ -424,7 +424,7 @@ module Analysis = {
     })
   }
 
-  let getMeanOfSquaresContinuousShape = (t: DistTypes.continuousShape) => {
+  let getMeanOfSquaresContinuousShape = (t: PointSetTypes.continuousShape) => {
     let indefiniteIntegralLinear = (p, a, b) => a *. p ** 3.0 /. 3.0 +. b *. p ** 4.0 /. 4.0
     let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 3.0 /. 3.0
     integrateContinuousShape(~indefiniteIntegralStepwise, ~indefiniteIntegralLinear, t)

@@ -18,8 +18,8 @@ type distToFloatOperation = [
 module ExpressionTree = {
   type rec hash = array<(string, node)>
   and node = [
-    | #SymbolicDist(SymbolicTypes.symbolicDist)
-    | #RenderedDist(DistTypes.shape)
+    | #SymbolicDist(SymbolicDistTypes.symbolicDist)
+    | #RenderedDist(PointSetTypes.shape)
     | #Symbol(string)
     | #Hash(hash)
     | #Array(array<node>)
@@ -148,7 +148,7 @@ module ExpressionTree = {
       | _ => None
       }
 
-    let _toFloat = (t: DistTypes.shape) =>
+    let _toFloat = (t: PointSetTypes.shape) =>
       switch t {
       | Discrete({xyShape: {xs: [x], ys: [1.0]}}) => Some(#SymbolicDist(#Float(x)))
       | _ => None

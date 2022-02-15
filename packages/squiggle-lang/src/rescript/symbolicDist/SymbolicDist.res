@@ -1,4 +1,4 @@
-open SymbolicTypes
+open SymbolicDistTypes
 
 module Normal = {
   type t = normal
@@ -317,7 +317,7 @@ module T = {
     | _ => #NoSolution
     }
 
-  let toShape = (sampleCount, d: symbolicDist): DistTypes.shape =>
+  let toShape = (sampleCount, d: symbolicDist): PointSetTypes.shape =>
     switch d {
     | #Float(v) => Discrete(Discrete.make(~integralSumCache=Some(1.0), {xs: [v], ys: [1.0]}))
     | _ =>

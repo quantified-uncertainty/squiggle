@@ -6,14 +6,14 @@ let makeTest = (~only=false, str, item1, item2) =>
     ? Only.test(str, () => expect(item1) -> toEqual(item2))
     : test(str, () => expect(item1) -> toEqual(item2))
 
-let shape1: DistTypes.xyShape = {xs: [1., 4., 8.], ys: [0.2, 0.4, 0.8]}
+let shape1: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [0.2, 0.4, 0.8]}
 
-let shape2: DistTypes.xyShape = {
+let shape2: PointSetTypes.xyShape = {
   xs: [1., 5., 10.],
   ys: [0.2, 0.5, 0.8],
 }
 
-let shape3: DistTypes.xyShape = {
+let shape3: PointSetTypes.xyShape = {
   xs: [1., 20., 50.],
   ys: [0.2, 0.5, 0.8],
 }

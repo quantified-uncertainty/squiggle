@@ -11,7 +11,7 @@ module Internals = {
 
     type outputs = {
       continuousParseParams: option<samplingStats>,
-      shape: option<DistTypes.shape>,
+      shape: option<PointSetTypes.shape>,
     }
   }
 
@@ -22,7 +22,7 @@ module Internals = {
       ys: array<float>,
     }
 
-    let jsToDist = (d: distJs): DistTypes.xyShape => {
+    let jsToDist = (d: distJs): PointSetTypes.xyShape => {
       xs: xsGet(d),
       ys: ysGet(d),
     }
@@ -86,7 +86,7 @@ let toShape = (
   Array.fast_sort(compare, samples)
   let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples)
   let length = samples |> E.A.length |> float_of_int
-  let discrete: DistTypes.discreteShape =
+  let discrete: PointSetTypes.discreteShape =
     discretePart
     |> E.FloatFloatMap.fmap(r => r /. length)
     |> E.FloatFloatMap.toArray

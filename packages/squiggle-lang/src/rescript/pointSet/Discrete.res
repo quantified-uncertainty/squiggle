@@ -1,6 +1,6 @@
 open Distributions
 
-type t = DistTypes.discreteShape
+type t = PointSetTypes.discreteShape
 
 let make = (~integralSumCache=None, ~integralCache=None, xyShape): t => {
   xyShape: xyShape,
@@ -16,13 +16,13 @@ let getShape = (t: t) => t.xyShape
 let oShapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): option<t> =>
   fn(xyShape) |> E.O.fmap(make(~integralSumCache, ~integralCache))
 
-let emptyIntegral: DistTypes.continuousShape = {
+let emptyIntegral: PointSetTypes.continuousShape = {
   xyShape: {xs: [neg_infinity], ys: [0.0]},
   interpolation: #Stepwise,
   integralSumCache: Some(0.0),
   integralCache: None,
 }
-let empty: DistTypes.discreteShape = {
+let empty: PointSetTypes.discreteShape = {
   xyShape: XYShape.T.empty,
   integralSumCache: Some(0.0),
   integralCache: Some(emptyIntegral),
@@ -35,13 +35,13 @@ let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
   ~integralCachesFn: (
-    DistTypes.continuousShape,
-    DistTypes.continuousShape,
-  ) => option<DistTypes.continuousShape>=(_, _) => None,
+    PointSetTypes.continuousShape,
+    PointSetTypes.continuousShape,
+  ) => option<PointSetTypes.continuousShape>=(_, _) => None,
   fn,
-  t1: DistTypes.discreteShape,
-  t2: DistTypes.discreteShape,
-): DistTypes.discreteShape => {
+  t1: PointSetTypes.discreteShape,
+  t2: PointSetTypes.discreteShape,
+): PointSetTypes.discreteShape => {
   let combinedIntegralSum = Common.combineIntegralSums(
     integralSumCachesFn,
     t1.integralSumCache,
@@ -67,7 +67,7 @@ let reduce = (
   ~integralCachesFn=(_, _) => None,
   fn,
   discreteShapes,
-): DistTypes.discreteShape =>
+): PointSetTypes.discreteShape =>
   discreteShapes |> E.A.fold_left(
     combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn),
     empty,
@@ -134,8 +134,8 @@ let scaleBy = (~scale=1.0, t: t): t => {
 }
 
 module T = Dist({
-  type t = DistTypes.discreteShape
-  type integral = DistTypes.continuousShape
+  type t = PointSetTypes.discreteShape
+  type integral = PointSetTypes.continuousShape
   let integral = t =>
     switch (getShape(t) |> XYShape.T.isEmpty, t.integralCache) {
     | (true, _) => emptyIntegral
@@ -157,7 +157,7 @@ module T = Dist({
   let toDiscreteProbabilityMassFraction = _ => 1.0
   let mapY = mapY
   let updateIntegralCache = updateIntegralCache
-  let toShape = (t: t): DistTypes.shape => Discrete(t)
+  let toShape = (t: t): PointSetTypes.shape => Discrete(t)
   let toContinuous = _ => None
   let toDiscrete = t => Some(t)
 
@@ -199,7 +199,7 @@ module T = Dist({
     |> getShape
     |> XYShape.XtoY.stepwiseIfAtX(f)
     |> E.O.default(0.0)
-    |> DistTypes.MixedPoint.makeDiscrete
+    |> PointSetTypes.MixedPoint.makeDiscrete
 
   let integralXtoY = (f, t) => t |> integral |> Continuous.getShape |> XYShape.XtoY.linear(f)
 

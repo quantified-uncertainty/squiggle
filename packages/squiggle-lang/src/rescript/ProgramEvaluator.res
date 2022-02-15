@@ -60,7 +60,7 @@ module Internals = {
 
   type outputs = {
     graph: ExpressionTypes.ExpressionTree.node,
-    shape: DistTypes.shape,
+    shape: PointSetTypes.shape,
   }
   let makeOutputs = (graph, shape): outputs => {graph: graph, shape: shape}
 
@@ -93,7 +93,7 @@ module Internals = {
   let inputsToLeaf = (inputs: Inputs.inputs) =>
     MathJsParser.fromString(inputs.squiggleString) |> E.R.bind(_, g => runProgram(inputs, g))
 
-  let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) =>
+  let outputToDistPlus = (inputs: Inputs.inputs, shape: PointSetTypes.shape) =>
     DistPlus.make(~shape, ~squiggleString=Some(inputs.squiggleString), ())
 }
 

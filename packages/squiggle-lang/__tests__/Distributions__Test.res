@@ -1,7 +1,7 @@
 open Jest
 open Expect
 
-let shape: DistTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
+let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 // let makeTest = (~only=false, str, item1, item2) =>
 //   only
@@ -131,7 +131,7 @@ let shape: DistTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 //   describe("Discrete", () => {
 //     open Discrete;
-//     let shape: DistTypes.xyShape = {
+//     let shape: PointSetTypes.xyShape = {
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
 //     };
@@ -209,7 +209,7 @@ let shape: DistTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 //   describe("Mixed", () => {
 //     open Distributions.Mixed;
-//     let discreteShape: DistTypes.xyShape = {
+//     let discreteShape: PointSetTypes.xyShape = {
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
 //     };
@@ -309,7 +309,7 @@ let shape: DistTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 //   describe("Distplus", () => {
 //     open DistPlus;
-//     let discreteShape: DistTypes.xyShape = {
+//     let discreteShape: PointSetTypes.xyShape = {
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
 //     };
@@ -382,7 +382,7 @@ let shape: DistTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //     let variance = stdev ** 2.0;
 //     let numSamples = 10000;
 //     open Distributions.Shape;
-//     let normal: SymbolicTypes.symbolicDist = `Normal({mean, stdev});
+//     let normal: SymbolicDistTypes.symbolicDist = `Normal({mean, stdev});
 //     let normalShape = ExpressionTree.toShape(numSamples, `SymbolicDist(normal));
 //     let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
 //     let lognormalShape = ExpressionTree.toShape(numSamples, `SymbolicDist(lognormal));

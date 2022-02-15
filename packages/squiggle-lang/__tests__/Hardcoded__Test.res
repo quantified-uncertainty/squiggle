@@ -28,7 +28,7 @@ let evalParams: ExpressionTypes.ExpressionTree.evaluationParams = {
   evaluateNode: ExpressionTreeEvaluator.toLeaf,
 };
 
-let shape1: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|0.2, 0.4, 0.8|]};
+let shape1: PointSetTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|0.2, 0.4, 0.8|]};
 
 describe("XYShapes", () => {
   describe("logScorePoint", () => {

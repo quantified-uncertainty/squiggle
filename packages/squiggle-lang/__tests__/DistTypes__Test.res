@@ -6,12 +6,12 @@ let makeTest = (~only=false, str, item1, item2) =>
     ? Only.test(str, () => expect(item1) -> toEqual(item2))
     : test(str, () => expect(item1) -> toEqual(item2))
 
-describe("DistTypes", () =>
+describe("PointSetTypes", () =>
   describe("Domain", () => {
     let makeComplete = (yPoint, expectation) =>
       makeTest(
         "With input: " ++ Js.Float.toString(yPoint),
-        DistTypes.Domain.yPointToSubYPoint(Complete, yPoint),
+        PointSetTypes.Domain.yPointToSubYPoint(Complete, yPoint),
         expectation,
       )
     let makeSingle = (direction: [#left | #right], excludingProbabilityMass, yPoint, expectation) =>
@@ -19,7 +19,7 @@ describe("DistTypes", () =>
         "Excluding: " ++
         (Js.Float.toString(excludingProbabilityMass) ++
         (" and yPoint: " ++ Js.Float.toString(yPoint))),
-        DistTypes.Domain.yPointToSubYPoint(
+        PointSetTypes.Domain.yPointToSubYPoint(
           direction == #left
             ? LeftLimited({xPoint: 3.0, excludingProbabilityMass: excludingProbabilityMass})
             : RightLimited({xPoint: 3.0, excludingProbabilityMass: excludingProbabilityMass}),
@@ -28,7 +28,7 @@ describe("DistTypes", () =>
         expectation,
       )
     let makeDouble = (domain, yPoint, expectation) =>
-      makeTest("Excluding: limits", DistTypes.Domain.yPointToSubYPoint(domain, yPoint), expectation)
+      makeTest("Excluding: limits", PointSetTypes.Domain.yPointToSubYPoint(domain, yPoint), expectation)
 
     describe("With Complete Domain", () => {
       makeComplete(0.0, Some(0.0))

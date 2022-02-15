@@ -1,6 +1,6 @@
 open Distributions
 
-type t = DistTypes.mixedShape
+type t = PointSetTypes.mixedShape
 let make = (~integralSumCache=None, ~integralCache=None, ~continuous, ~discrete): t => {
   continuous: continuous,
   discrete: discrete,
@@ -37,13 +37,13 @@ let updateIntegralCache = (integralCache, t: t): t => {
 }
 
 module T = Dist({
-  type t = DistTypes.mixedShape
-  type integral = DistTypes.continuousShape
+  type t = PointSetTypes.mixedShape
+  type integral = PointSetTypes.continuousShape
   let minX = ({continuous, discrete}: t) =>
     min(Continuous.T.minX(continuous), Discrete.T.minX(discrete))
   let maxX = ({continuous, discrete}: t) =>
     max(Continuous.T.maxX(continuous), Discrete.T.maxX(discrete))
-  let toShape = (t: t): DistTypes.shape => Mixed(t)
+  let toShape = (t: t): PointSetTypes.shape => Mixed(t)
 
   let updateIntegralCache = updateIntegralCache
 
@@ -103,7 +103,7 @@ module T = Dist({
     let {continuous, discrete}: t = normalize(t)
     let c = Continuous.T.xToY(x, continuous)
     let d = Discrete.T.xToY(x, discrete)
-    DistTypes.MixedPoint.add(c, d) // "add" here just combines the two values into a single MixedPoint.
+    PointSetTypes.MixedPoint.add(c, d) // "add" here just combines the two values into a single MixedPoint.
   }
 
   let toDiscreteProbabilityMassFraction = ({discrete, continuous}: t) => {
@@ -170,13 +170,13 @@ module T = Dist({
     ~fn,
     t: t,
   ): t => {
-    let yMappedDiscrete: DistTypes.discreteShape =
+    let yMappedDiscrete: PointSetTypes.discreteShape =
       t.discrete
       |> Discrete.T.mapY(~fn)
       |> Discrete.updateIntegralSumCache(E.O.bind(t.discrete.integralSumCache, integralSumCacheFn))
       |> Discrete.updateIntegralCache(E.O.bind(t.discrete.integralCache, integralCacheFn))
 
-    let yMappedContinuous: DistTypes.continuousShape =
+    let yMappedContinuous: PointSetTypes.continuousShape =
       t.continuous
       |> Continuous.T.mapY(~fn)
       |> Continuous.updateIntegralSumCache(

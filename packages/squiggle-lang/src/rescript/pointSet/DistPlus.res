@@ -1,6 +1,6 @@
-open DistTypes;
+open PointSetTypes;
 
-type t = DistTypes.distPlus;
+type t = PointSetTypes.distPlus;
 
 let shapeIntegral = shape => Shape.T.Integral.get(shape);
 let make =
@@ -49,8 +49,8 @@ let shapeFn = (fn, {shape}: t) => fn(shape);
 
 module T =
   Distributions.Dist({
-    type t = DistTypes.distPlus;
-    type integral = DistTypes.distPlus;
+    type t = PointSetTypes.distPlus;
+    type integral = PointSetTypes.distPlus;
     let toShape = toShape;
     let toContinuous = shapeFn(Shape.T.toContinuous);
     let toDiscrete = shapeFn(Shape.T.toDiscrete);
@@ -84,7 +84,7 @@ module T =
     let integral = (t: t) =>
       updateShape(Continuous(t.integralCache), t);
 
-    let updateIntegralCache = (integralCache: option<DistTypes.continuousShape>, t) =>
+    let updateIntegralCache = (integralCache: option<PointSetTypes.continuousShape>, t) =>
       update(~integralCache=E.O.default(t.integralCache, integralCache), t);
 
     let downsample = (i, t): t =>

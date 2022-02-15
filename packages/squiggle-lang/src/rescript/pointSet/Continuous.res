@@ -1,6 +1,6 @@
 open Distributions
 
-type t = DistTypes.continuousShape
+type t = PointSetTypes.continuousShape
 let getShape = (t: t) => t.xyShape
 let interpolation = (t: t) => t.interpolation
 let make = (~interpolation=#Linear, ~integralSumCache=None, ~integralCache=None, xyShape): t => {
@@ -17,10 +17,10 @@ let shapeMap = (fn, {xyShape, interpolation, integralSumCache, integralCache}: t
 }
 let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
 let oShapeMap = (fn, {xyShape, interpolation, integralSumCache, integralCache}: t): option<
-  DistTypes.continuousShape,
+  PointSetTypes.continuousShape,
 > => fn(xyShape) |> E.O.fmap(make(~interpolation, ~integralSumCache, ~integralCache))
 
-let emptyIntegral: DistTypes.continuousShape = {
+let emptyIntegral: PointSetTypes.continuousShape = {
   xyShape: {
     xs: [neg_infinity],
     ys: [0.0],
@@ -29,7 +29,7 @@ let emptyIntegral: DistTypes.continuousShape = {
   integralSumCache: Some(0.0),
   integralCache: None,
 }
-let empty: DistTypes.continuousShape = {
+let empty: PointSetTypes.continuousShape = {
   xyShape: XYShape.T.empty,
   interpolation: #Linear,
   integralSumCache: Some(0.0),
@@ -47,11 +47,11 @@ let stepwiseToLinear = (t: t): t =>
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
   ~integralCachesFn: (t, t) => option<t>=(_, _) => None,
-  ~distributionType: DistTypes.distributionType=#PDF,
+  ~distributionType: PointSetTypes.distributionType=#PDF,
   fn: (float, float) => float,
-  t1: DistTypes.continuousShape,
-  t2: DistTypes.continuousShape,
-): DistTypes.continuousShape => {
+  t1: PointSetTypes.continuousShape,
+  t2: PointSetTypes.continuousShape,
+): PointSetTypes.continuousShape => {
   // If we're adding the distributions, and we know the total of each, then we
   // can just sum them up. Otherwise, all bets are off.
   let combinedIntegralSum = Common.combineIntegralSums(
@@ -130,19 +130,19 @@ let rec scaleBy = (~scale=1.0, t: t): t => {
 }
 
 module T = Dist({
-  type t = DistTypes.continuousShape
-  type integral = DistTypes.continuousShape
+  type t = PointSetTypes.continuousShape
+  type integral = PointSetTypes.continuousShape
   let minX = shapeFn(XYShape.T.minX)
   let maxX = shapeFn(XYShape.T.maxX)
   let mapY = mapY
   let updateIntegralCache = updateIntegralCache
   let toDiscreteProbabilityMassFraction = _ => 0.0
-  let toShape = (t: t): DistTypes.shape => Continuous(t)
+  let toShape = (t: t): PointSetTypes.shape => Continuous(t)
   let xToY = (f, {interpolation, xyShape}: t) =>
     switch interpolation {
     | #Stepwise => xyShape |> XYShape.XtoY.stepwiseIncremental(f) |> E.O.default(0.0)
     | #Linear => xyShape |> XYShape.XtoY.linear(f)
-    } |> DistTypes.MixedPoint.makeContinuous
+    } |> PointSetTypes.MixedPoint.makeContinuous
 
   let truncate = (leftCutoff: option<float>, rightCutoff: option<float>, t: t) => {
     let lc = E.O.default(neg_infinity, leftCutoff)
@@ -213,7 +213,7 @@ module T = Dist({
 let combineAlgebraicallyWithDiscrete = (
   op: ExpressionTypes.algebraicOperation,
   t1: t,
-  t2: DistTypes.discreteShape,
+  t2: PointSetTypes.discreteShape,
 ) => {
   let t1s = t1 |> getShape
   let t2s = t2.xyShape // TODO would like to use Discrete.getShape here, but current file structure doesn't allow for that

@@ -5,20 +5,20 @@ module type dist = {
   let maxX: t => float
   let mapY: (
     ~integralSumCacheFn: float => option<float>=?,
-    ~integralCacheFn: DistTypes.continuousShape => option<DistTypes.continuousShape>=?,
+    ~integralCacheFn: PointSetTypes.continuousShape => option<PointSetTypes.continuousShape>=?,
     ~fn: float => float,
     t,
   ) => t
-  let xToY: (float, t) => DistTypes.mixedPoint
-  let toShape: t => DistTypes.shape
-  let toContinuous: t => option<DistTypes.continuousShape>
-  let toDiscrete: t => option<DistTypes.discreteShape>
+  let xToY: (float, t) => PointSetTypes.mixedPoint
+  let toShape: t => PointSetTypes.shape
+  let toContinuous: t => option<PointSetTypes.continuousShape>
+  let toDiscrete: t => option<PointSetTypes.discreteShape>
   let normalize: t => t
   let toDiscreteProbabilityMassFraction: t => float
   let downsample: (int, t) => t
   let truncate: (option<float>, option<float>, t) => t
 
-  let updateIntegralCache: (option<DistTypes.continuousShape>, t) => t
+  let updateIntegralCache: (option<PointSetTypes.continuousShape>, t) => t
 
   let integral: t => integral
   let integralEndY: t => float
@@ -74,11 +74,11 @@ module Common = {
 
   let combineIntegrals = (
     combineFn: (
-      DistTypes.continuousShape,
-      DistTypes.continuousShape,
-    ) => option<DistTypes.continuousShape>,
-    t1IntegralCache: option<DistTypes.continuousShape>,
-    t2IntegralCache: option<DistTypes.continuousShape>,
+      PointSetTypes.continuousShape,
+      PointSetTypes.continuousShape,
+    ) => option<PointSetTypes.continuousShape>,
+    t1IntegralCache: option<PointSetTypes.continuousShape>,
+    t2IntegralCache: option<PointSetTypes.continuousShape>,
   ) =>
     switch (t1IntegralCache, t2IntegralCache) {
     | (None, _)

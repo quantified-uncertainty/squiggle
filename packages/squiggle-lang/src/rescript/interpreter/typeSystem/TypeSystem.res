@@ -2,8 +2,8 @@ type node = ExpressionTypes.ExpressionTree.node
 let getFloat = ExpressionTypes.ExpressionTree.getFloat
 
 type samplingDist = [
-  | #SymbolicDist(SymbolicTypes.symbolicDist)
-  | #RenderedDist(DistTypes.shape)
+  | #SymbolicDist(SymbolicDistTypes.symbolicDist)
+  | #RenderedDist(PointSetTypes.shape)
 ]
 
 type rec hashType = array<(string, _type)>
@@ -18,7 +18,7 @@ and _type = [
 type rec hashTypedValue = array<(string, typedValue)>
 and typedValue = [
   | #Float(float)
-  | #RenderedDist(DistTypes.shape)
+  | #RenderedDist(PointSetTypes.shape)
   | #SamplingDist(samplingDist)
   | #Array(array<typedValue>)
   | #Hash(hashTypedValue)
