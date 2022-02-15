@@ -2,138 +2,16 @@ import * as React  from 'react';
 import * as PropTypes  from 'prop-types';
 import * as _ from 'lodash';
 import './button.css';
-import type { PowScale, Spec } from 'vega';
+import type { Spec } from 'vega';
 import { run } from '@squiggle/squiggle-lang';
+import type { DistPlus } from '@squiggle/squiggle-lang';
 import { createClassFromSpec } from 'react-vega';
+import * as chartSpecification from './spec-distributions.json'
+import * as percentilesSpec from './spec-pertentiles.json'
 
-let scales : PowScale[] = [{
-    "name": "xscale",
-    "type": "pow",
-    "exponent": {"signal": "xscale"},
-    "range": "width",
-    "zero": false,
-    "nice": false,
-    "domain": {
-      "fields": [
-        { "data": "con", "field": "x"},
-        { "data": "dis", "field": "x"}
-        ]
-      }
-  }, {
-    "name": "yscale",
-    "type": "pow",
-    "exponent": {"signal": "yscale"},
-    "range": "height",
-    "nice": true,
-    "zero": true,
-    "domain": {
-      "fields": [
-        { "data": "con", "field": "y"},
-        { "data": "dis", "field": "y"}
-        ]
-    }
-  }
-]
+let SquiggleVegaChart = createClassFromSpec({'spec': chartSpecification as Spec});
 
-
-let specification : Spec = {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "A basic area chart example.",
-  "width": 500,
-  "height": 200,
-  "padding": 5,
-  "data": [{"name": "con"}, {"name": "dis"}],
-
-  "signals": [
-    {
-      "name": "mousex",
-      "description": "x position of mouse",
-      "update": "0",
-      "on": [{"events": "mousemove", "update": "1-x()/width"}]
-    },
-    {
-      "name": "xscale",
-      "description": "The transform of the x scale",
-      "value": 1.0,
-      "bind": {
-        "input": "range",
-        "min": 0.1,
-        "max": 1
-        }
-    },
-    {
-      "name": "yscale",
-      "description": "The transform of the y scale",
-      "value": 1.0,
-      "bind": {
-        "input": "range",
-        "min": 0.1,
-        "max": 1
-        }
-    }
-  ],
-
-  "scales": scales,
-
-  "axes": [
-    {"orient": "bottom", "scale": "xscale", "tickCount": 20},
-    {"orient": "left", "scale": "yscale"}
-  ],
-
-  "marks": [
-    {
-      "type": "area",
-      "from": {"data": "con"},
-      "encode": {
-        "enter": {
-          "tooltip": {"signal": "datum.cdf"}
-        },
-        "update": {
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"},
-          "y2": {"scale": "yscale", "value": 0},
-          "fill": {
-              "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'blue'}, {offset: 1.0, color: 'blue'} ] }"
-            },
-          "interpolate": {"value": "monotone"},
-          "fillOpacity": {"value": 1}
-        }
-      }
-    },
-    {
-      "type": "rect",
-      "from": {"data": "dis"},
-      "encode": {
-        "enter": {
-          "y2": {"scale": "yscale", "value": 0},
-          "width": {"value": 1}
-        },
-        "update": {
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"},
-
-        }
-      }
-    },
-    {
-      "type": "symbol",
-      "from": {"data": "dis"},
-      "encode": {
-        "enter": {
-          "shape": {"value": "circle"},
-          "width": {"value": 5},
-          "tooltip": {"signal": "datum.y"},
-        },
-        "update": {
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"},
-        }
-      }
-    }
-  ]
-};
-
-let SquiggleVegaChart = createClassFromSpec({'spec': specification});
+let SquigglePercentilesChart = createClassFromSpec({'spec': percentilesSpec as Spec});
 
 /**
  * Primary UI component for user interaction
@@ -235,8 +113,58 @@ export const SquiggleChart = ({ squiggleString }: { squiggleString: string}) => 
         }
     }
     else if(chartResult.NAME === "Function"){
+      console.log("Function time")
+      // We are looking at a function. In this case, we draw a Percentiles chart
+        let data = _.range(0,10,0.1).map((_,i) => {
+          let x = i /10;
+          console.log(chartResult);
+          console.log("Run thing")
+          if(chartResult.NAME=="Function"){
+            let result = chartResult.VAL(x);
+            console.log(result);
+            if(result.tag == "Ok"){
+              let percentileArray = [
+                0.01,
+                0.05,
+                0.1,
+                0.2,
+                0.3,
+                0.4,
+                0.5,
+                0.6,
+                0.7,
+                0.8,
+                0.9,
+                0.95,
+                0.99
+              ]
+                
+              let percentiles = getPercentiles(percentileArray, result.value);
+              return {
+                "x": x,
+                "p1": percentiles[0],
+                "p5": percentiles[1],
+                "p10": percentiles[2],
+                "p20": percentiles[3],
+                "p30": percentiles[4],
+                "p40": percentiles[5],
+                "p50": percentiles[6],
+                "p60": percentiles[7],
+                "p70": percentiles[8],
+                "p80": percentiles[9],
+                "p90": percentiles[10],
+                "p95": percentiles[11],
+                "p99": percentiles[12]
+              }
 
-    }
+              }
+
+            }
+            return 0;
+        })
+        console.log(data);
+        return <SquigglePercentilesChart data={{"facet": data}} />
+      }
   }
   else if(result.tag == "Error") {
     // At this point, we came across an error. What was our error?
@@ -245,6 +173,79 @@ export const SquiggleChart = ({ squiggleString }: { squiggleString: string}) => 
   }
   return (<p>{"Invalid Response"}</p>)
 };
+
+function getPercentiles(percentiles:number[], t : DistPlus) {
+  if(t.shape.tag == "Discrete") {
+    let total = 0;
+    let maxX = _.max(t.shape.value.xyShape.xs)
+    let bounds = percentiles.map(_ => maxX);
+     _.zipWith(t.shape.value.xyShape.xs,t.shape.value.xyShape.ys, (x,y) => {
+        total += y
+        percentiles.forEach((v, i) => {
+        if(total > v && bounds[i] == maxX){
+        bounds[i] = x
+        }
+        })
+     });
+     return bounds;
+  }
+  else if(t.shape.tag == "Continuous"){
+    let total = 0;
+    let maxX = _.max(t.shape.value.xyShape.xs)
+    let totalY = _.sum(t.shape.value.xyShape.ys)
+    let bounds = percentiles.map(_ => maxX);
+     _.zipWith(t.shape.value.xyShape.xs,t.shape.value.xyShape.ys, (x,y) => {
+        total += y / totalY;
+        percentiles.forEach((v, i) => {
+        if(total > v && bounds[i] == maxX){
+        bounds[i] = x
+        }
+        })
+     });
+     return bounds;
+  }
+  else if(t.shape.tag == "Mixed"){
+    let discreteShape = t.shape.value.discrete.xyShape;
+    let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
+
+    let discretePoints = _.zip(discreteShape.xs, discreteShape.ys);
+    let continuousShape = t.shape.value.continuous.xyShape;
+    let continuousPoints = _.zip(continuousShape.xs, continuousShape.ys);
+
+    interface labeledPoint {
+      x: number,
+      y: number,
+      type: "discrete" | "continuous"
+    };
+
+    let markedDisPoints : labeledPoint[] = discretePoints.map(([x,y]) => ({x: x, y: y, type: "discrete"}))
+    let markedConPoints : labeledPoint[] = continuousPoints.map(([x,y]) => ({x: x, y: y, type: "continuous"}))
+
+    let sortedPoints = _.sortBy(markedDisPoints.concat(markedConPoints), 'x')
+
+    let totalContinuous = 1 - totalDiscrete;
+    let totalY = continuousShape.ys.reduce((a:number, b:number) => a + b);
+
+    let total = 0;
+    let maxX = _.max(sortedPoints.map(x => x.x));
+    let bounds = percentiles.map(_ => maxX);
+    sortedPoints.map((point: labeledPoint) => {
+      if(point.type == "discrete") {
+        total += point.y;
+      }
+      else if (point.type == "continuous") {
+        total += point.y / totalY * totalContinuous;
+      }
+      percentiles.forEach((v,i) => {
+        if(total > v && bounds[i] == maxX){
+          bounds[i] = total;
+        }
+      })
+      return total;
+    });
+    return bounds;
+  }
+}
 
 SquiggleChart.propTypes = {
  /**
