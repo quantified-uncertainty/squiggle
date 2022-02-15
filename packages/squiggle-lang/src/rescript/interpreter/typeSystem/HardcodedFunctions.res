@@ -84,7 +84,7 @@ let makeDist = (name, fn) =>
   )
 
 let floatFromDist = (
-  distToFloatOp: ExpressionTypes.distToFloatOperation,
+  distToFloatOp: ASTTypes.distToFloatOperation,
   t: TypeSystem.samplingDist,
 ): result<node, string> =>
   switch t {
@@ -111,7 +111,7 @@ let verticalScaling = (scaleOp, rs, scaleBy) => {
 }
 
 module Multimodal = {
-  let getByNameResult = ExpressionTypes.ExpressionTree.Hash.getByNameResult
+  let getByNameResult = ASTTypes.AST.Hash.getByNameResult
 
   let _paramsToDistsAndWeights = (r: array<typedValue>) =>
     switch r {

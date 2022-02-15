@@ -1,5 +1,5 @@
-open ExpressionTypes
-open ExpressionTypes.ExpressionTree
+open ASTTypes
+open ASTTypes.AST
 
 type t = node
 type tResult = node => result<node, string>
@@ -56,7 +56,7 @@ module AlgebraicCombination = {
 
   let operationToLeaf = (
     evaluationParams: evaluationParams,
-    algebraicOp: ExpressionTypes.algebraicOperation,
+    algebraicOp: ASTTypes.algebraicOperation,
     t1: t,
     t2: t,
   ): result<node, string> =>
@@ -174,9 +174,9 @@ module FunctionCall = {
     )
 
   let _runWithEvaluatedInputs = (
-    evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+    evaluationParams: ASTTypes.AST.evaluationParams,
     name,
-    args: array<ExpressionTypes.ExpressionTree.node>,
+    args: array<ASTTypes.AST.node>,
   ) =>
     _runHardcodedFunction(name, evaluationParams, args) |> E.O.default(
       _runLocalFunction(name, evaluationParams, args),
@@ -208,7 +208,7 @@ module Render = {
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
 let rec toLeaf = (
-  evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+  evaluationParams: ASTTypes.AST.evaluationParams,
   node: t,
 ): result<t, string> =>
   switch node {
@@ -236,7 +236,7 @@ let rec toLeaf = (
     |> E.A.R.firstErrorOrOpen
     |> E.R.fmap(r => #Hash(r))
   | #Symbol(r) =>
-    ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r)
+    ASTTypes.AST.Environment.get(evaluationParams.environment, r)
     |> E.O.toResult("Undeclared variable " ++ r)
     |> E.R.bind(_, toLeaf(evaluationParams))
   | #FunctionCall(name, args) =>

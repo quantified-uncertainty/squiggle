@@ -383,9 +383,9 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //     let numSamples = 10000;
 //     open Distributions.Shape;
 //     let normal: SymbolicDistTypes.symbolicDist = `Normal({mean, stdev});
-//     let normalShape = ExpressionTree.toShape(numSamples, `SymbolicDist(normal));
+//     let normalShape = AST.toShape(numSamples, `SymbolicDist(normal));
 //     let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
-//     let lognormalShape = ExpressionTree.toShape(numSamples, `SymbolicDist(lognormal));
+//     let lognormalShape = AST.toShape(numSamples, `SymbolicDist(lognormal));
 
 //     makeTestCloseEquality(
 //       "Mean of a normal",

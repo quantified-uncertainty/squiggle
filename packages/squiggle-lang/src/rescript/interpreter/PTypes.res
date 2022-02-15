@@ -1,4 +1,4 @@
-open ExpressionTypes.ExpressionTree
+open ASTTypes.AST
 
 module Function = {
   type t = (array<string>, node)
@@ -10,7 +10,7 @@ module Function = {
   let argumentNames = ((a, _): t) => a
   let internals = ((_, b): t) => b
   let run = (
-    evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+    evaluationParams: ASTTypes.AST.evaluationParams,
     args: array<node>,
     t: t,
   ) =>
@@ -19,10 +19,10 @@ module Function = {
         Belt.Array.zip(
           argumentNames(t),
           args,
-        ) |> ExpressionTypes.ExpressionTree.Environment.fromArray
-      let newEvaluationParams: ExpressionTypes.ExpressionTree.evaluationParams = {
+        ) |> ASTTypes.AST.Environment.fromArray
+      let newEvaluationParams: ASTTypes.AST.evaluationParams = {
         samplingInputs: evaluationParams.samplingInputs,
-        environment: ExpressionTypes.ExpressionTree.Environment.mergeKeepSecond(
+        environment: ASTTypes.AST.Environment.mergeKeepSecond(
           evaluationParams.environment,
           newEnvironment,
         ),

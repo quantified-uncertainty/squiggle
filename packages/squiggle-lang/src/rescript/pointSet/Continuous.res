@@ -211,7 +211,7 @@ module T = Dist({
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
 let combineAlgebraicallyWithDiscrete = (
-  op: ExpressionTypes.algebraicOperation,
+  op: ASTTypes.algebraicOperation,
   t1: t,
   t2: PointSetTypes.discreteShape,
 ) => {
@@ -244,7 +244,7 @@ let combineAlgebraicallyWithDiscrete = (
   }
 }
 
-let combineAlgebraically = (op: ExpressionTypes.algebraicOperation, t1: t, t2: t) => {
+let combineAlgebraically = (op: ASTTypes.algebraicOperation, t1: t, t2: t) => {
   let s1 = t1 |> getShape
   let s2 = t2 |> getShape
   let t1n = s1 |> XYShape.T.length

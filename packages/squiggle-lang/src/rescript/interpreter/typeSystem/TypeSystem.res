@@ -1,5 +1,5 @@
-type node = ExpressionTypes.ExpressionTree.node
-let getFloat = ExpressionTypes.ExpressionTree.getFloat
+type node = ASTTypes.AST.node
+let getFloat = ASTTypes.AST.getFloat
 
 type samplingDist = [
   | #SymbolicDist(SymbolicDistTypes.symbolicDist)
@@ -61,7 +61,7 @@ module TypedValue = {
       |> E.A.fmap(((name, t)) => fromNode(t) |> E.R.fmap(r => (name, r)))
       |> E.A.R.firstErrorOrOpen
       |> E.R.fmap(r => #Hash(r))
-    | e => Error("Wrong type: " ++ ExpressionTreeBasic.toString(e))
+    | e => Error("Wrong type: " ++ ASTBasic.toString(e))
     }
 
   // todo: Arrays and hashes
@@ -78,7 +78,7 @@ module TypedValue = {
         node,
       ) |> E.R.bind(_, fromNode)
     | (#RenderedDistribution, _) =>
-      ExpressionTypes.ExpressionTree.Render.render(evaluationParams, node) |> E.R.bind(_, fromNode)
+      ASTTypes.AST.Render.render(evaluationParams, node) |> E.R.bind(_, fromNode)
     | (#Array(_type), #Array(b)) =>
       b
       |> E.A.fmap(fromNodeWithTypeCoercion(evaluationParams, _type))
@@ -89,7 +89,7 @@ module TypedValue = {
         named |> E.A.fmap(((name, intendedType)) => (
           name,
           intendedType,
-          ExpressionTypes.ExpressionTree.Hash.getByName(r, name),
+          ASTTypes.AST.Hash.getByName(r, name),
         ))
       let typedHash =
         keyValues
@@ -172,7 +172,7 @@ module Function = {
       |> E.A.R.firstErrorOrOpen
 
     let inputsToTypedValues = (
-      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+      evaluationParams: ASTTypes.AST.evaluationParams,
       inputNodes: inputNodes,
       t: t,
     ) =>
@@ -181,7 +181,7 @@ module Function = {
       )
 
     let run = (
-      evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+      evaluationParams: ASTTypes.AST.evaluationParams,
       inputNodes: inputNodes,
       t: t,
     ) =>

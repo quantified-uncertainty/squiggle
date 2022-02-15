@@ -1,14 +1,14 @@
-open ExpressionTypes.ExpressionTree
+open ASTTypes.AST
 
-let toString = ExpressionTreeBasic.toString
+let toString = ASTBasic.toString
 let envs = (samplingInputs, environment) => {
   samplingInputs: samplingInputs,
   environment: environment,
-  evaluateNode: ExpressionTreeEvaluator.toLeaf,
+  evaluateNode: ASTEvaluator.toLeaf,
 }
 
 let toLeaf = (samplingInputs, environment, node: node) =>
-  ExpressionTreeEvaluator.toLeaf(envs(samplingInputs, environment), node)
+  ASTEvaluator.toLeaf(envs(samplingInputs, environment), node)
 let toShape = (samplingInputs, environment, node: node) =>
   switch toLeaf(samplingInputs, environment, node) {
   | Ok(#RenderedDist(shape)) => Ok(shape)

@@ -80,7 +80,7 @@ module Internals = {
 
 let toShape = (
   ~samples: Internals.T.t,
-  ~samplingInputs: ExpressionTypes.ExpressionTree.samplingInputs,
+  ~samplingInputs: ASTTypes.AST.samplingInputs,
   (),
 ) => {
   Array.fast_sort(compare, samples)

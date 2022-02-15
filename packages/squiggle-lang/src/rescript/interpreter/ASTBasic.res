@@ -1,4 +1,4 @@
-open ExpressionTypes.ExpressionTree
+open ASTTypes.AST
 // This file exists to manage a dependency cycle. It would be good to refactor later.
 
 let rec toString: node => string = x =>

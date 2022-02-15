@@ -1,4 +1,4 @@
-open ExpressionTypes
+open ASTTypes
 
 module Algebraic = {
   type t = algebraicOperation
@@ -103,5 +103,5 @@ module T = {
     | #Truncate(lc, rc, t) => truncateToString(lc, rc, nodeToString(t))
     | #Render(t) => nodeToString(t)
     | _ => ""
-    } // SymbolicDist and RenderedDist are handled in ExpressionTree.toString.
+    } // SymbolicDist and RenderedDist are handled in AST.toString.
 }

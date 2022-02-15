@@ -15,7 +15,7 @@ type distToFloatOperation = [
   | #Sample
 ]
 
-module ExpressionTree = {
+module AST = {
   type rec hash = array<(string, node)>
   and node = [
     | #SymbolicDist(SymbolicDistTypes.symbolicDist)
@@ -160,15 +160,15 @@ module ExpressionTree = {
 }
 
 type simplificationResult = [
-  | #Solution(ExpressionTree.node)
+  | #Solution(AST.node)
   | #Error(string)
   | #NoSolution
 ]
 
 module Program = {
   type statement = [
-    | #Assignment(string, ExpressionTree.node)
-    | #Expression(ExpressionTree.node)
+    | #Assignment(string, AST.node)
+    | #Expression(AST.node)
   ]
   type program = array<statement>
 }

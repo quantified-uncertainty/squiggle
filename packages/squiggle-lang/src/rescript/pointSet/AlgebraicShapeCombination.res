@@ -96,7 +96,7 @@ let toDiscretePointMassesFromTriangulars = (
 }
 
 let combineShapesContinuousContinuous = (
-  op: ExpressionTypes.algebraicOperation,
+  op: ASTTypes.algebraicOperation,
   s1: PointSetTypes.xyShape,
   s2: PointSetTypes.xyShape,
 ): PointSetTypes.xyShape => {
@@ -200,7 +200,7 @@ let toDiscretePointMassesFromDiscrete = (s: PointSetTypes.xyShape): pointMassesW
 }
 
 let combineShapesContinuousDiscrete = (
-  op: ExpressionTypes.algebraicOperation,
+  op: ASTTypes.algebraicOperation,
   continuousShape: PointSetTypes.xyShape,
   discreteShape: PointSetTypes.xyShape,
 ): PointSetTypes.xyShape => {
