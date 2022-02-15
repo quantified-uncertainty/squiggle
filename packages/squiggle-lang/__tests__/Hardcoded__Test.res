@@ -15,7 +15,7 @@ let evalParams: ASTTypes.AST.evaluationParams = {
     sampleCount: 1000,
     outputXYPoints: 10000,
     kernelWidth: None,
-    shapeLength: 1000,
+    PointSetDistLength: 1000,
   },
   environment:
     [|
@@ -28,9 +28,9 @@ let evalParams: ASTTypes.AST.evaluationParams = {
   evaluateNode: ASTEvaluator.toLeaf,
 };
 
-let shape1: PointSetTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|0.2, 0.4, 0.8|]};
+let PointSetDist1: PointSetTypes.xyPointSetDist = {xs: [|1., 4., 8.|], ys: [|0.2, 0.4, 0.8|]};
 
-describe("XYShapes", () => {
+describe("XYPointSetDists", () => {
   describe("logScorePoint", () => {
     makeTest(
       "When identical",

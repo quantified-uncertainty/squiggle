@@ -98,7 +98,7 @@ module SamplingDistribution = {
     )
 
   let sampleN = n =>
-    map(~renderedDistFn=Shape.sampleNRendered(n), ~symbolicDistFn=SymbolicDist.T.sampleN(n))
+    map(~renderedDistFn=PointSetDist.sampleNRendered(n), ~symbolicDistFn=SymbolicDist.T.sampleN(n))
 
   let getCombinationSamples = (n, algebraicOp, t1: node, t2: node) =>
     switch (sampleN(n, t1), sampleN(n, t2)) {

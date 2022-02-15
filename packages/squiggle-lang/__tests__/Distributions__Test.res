@@ -1,7 +1,7 @@
 open Jest
 open Expect
 
-let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
+// let PointSetDist: PointSetTypes.xyPointSetDist = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 // let makeTest = (~only=false, str, item1, item2) =>
 //   only
@@ -21,15 +21,15 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //         expect(item1) |> toBeSoCloseTo(item2, ~digits)
 //       );
 
-// describe("Shape", () => {
+// describe("PointSetDist", () => {
 //   describe("Continuous", () => {
 //     open Continuous;
-//     let continuous = make(`Linear, shape, None);
+//     let continuous = make(`Linear, PointSetDist, None);
 //     makeTest("minX", T.minX(continuous), 1.0);
 //     makeTest("maxX", T.maxX(continuous), 8.0);
 //     makeTest(
 //       "mapY",
-//       T.mapY(r => r *. 2.0, continuous) |> getShape |> (r => r.ys),
+//       T.mapY(r => r *. 2.0, continuous) |> getPointSetDist |> (r => r.ys),
 //       [|16., 18.0, 4.0|],
 //     );
 //     describe("xToY", () => {
@@ -57,7 +57,7 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //         );
 //       });
 //       describe("when Stepwise", () => {
-//         let continuous = make(`Stepwise, shape, None);
+//         let continuous = make(`Stepwise, PointSetDist, None);
 //         makeTest(
 //           "at 4.0",
 //           T.xToY(4., continuous),
@@ -82,7 +82,7 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //     });
 //     makeTest(
 //       "integral",
-//       T.Integral.get(~cache=None, continuous) |> getShape,
+//       T.Integral.get(~cache=None, continuous) |> getPointSetDist,
 //       {xs: [|1.0, 4.0, 8.0|], ys: [|0.0, 25.5, 47.5|]},
 //     );
 //     makeTest(
@@ -90,7 +90,7 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //       {
 //         let continuous =
 //           make(`Stepwise, {xs: [|1., 4., 8.|], ys: [|0.1, 5., 1.0|]}, None);
-//         continuous |> toLinear |> E.O.fmap(getShape);
+//         continuous |> toLinear |> E.O.fmap(getPointSetDist);
 //       },
 //       Some({
 //         xs: [|1.00007, 1.00007, 4.0, 4.00007, 8.0, 8.00007|],
@@ -101,7 +101,7 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //       "toLinear",
 //       {
 //         let continuous = make(`Stepwise, {xs: [|0.0|], ys: [|0.3|]}, None);
-//         continuous |> toLinear |> E.O.fmap(getShape);
+//         continuous |> toLinear |> E.O.fmap(getPointSetDist);
 //       },
 //       Some({xs: [|0.0|], ys: [|0.3|]}),
 //     );
@@ -131,16 +131,16 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 //   describe("Discrete", () => {
 //     open Discrete;
-//     let shape: PointSetTypes.xyShape = {
+//     let PointSetDist: PointSetTypes.xyPointSetDist = {
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
 //     };
-//     let discrete = make(shape, None);
+//     let discrete = make(PointSetDist, None);
 //     makeTest("minX", T.minX(discrete), 1.0);
 //     makeTest("maxX", T.maxX(discrete), 8.0);
 //     makeTest(
 //       "mapY",
-//       T.mapY(r => r *. 2.0, discrete) |> (r => getShape(r).ys),
+//       T.mapY(r => r *. 2.0, discrete) |> (r => getPointSetDist(r).ys),
 //       [|0.6, 1.0, 0.4|],
 //     );
 //     makeTest(
@@ -209,11 +209,11 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 //   describe("Mixed", () => {
 //     open Distributions.Mixed;
-//     let discreteShape: PointSetTypes.xyShape = {
+//     let discretePointSetDist: PointSetTypes.xyPointSetDist = {
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
 //     };
-//     let discrete = Discrete.make(discreteShape, None);
+//     let discrete = Discrete.make(discretePointSetDist, None);
 //     let continuous =
 //       Continuous.make(
 //         `Linear,
@@ -309,11 +309,11 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 //   describe("Distplus", () => {
 //     open DistPlus;
-//     let discreteShape: PointSetTypes.xyShape = {
+//     let discretePointSetDist: PointSetTypes.xyPointSetDist = {
 //       xs: [|1., 4., 8.|],
 //       ys: [|0.3, 0.5, 0.2|],
 //     };
-//     let discrete = Discrete.make(discreteShape, None);
+//     let discrete = Discrete.make(discretePointSetDist, None);
 //     let continuous =
 //       Continuous.make(
 //         `Linear,
@@ -328,7 +328,7 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //       );
 //     let distPlus =
 //       DistPlus.make(
-//         ~shape=Mixed(mixed),
+//         ~PointSetDist=Mixed(mixed),
 //         ~squiggleString=None,
 //         (),
 //       );
@@ -376,38 +376,38 @@ let shape: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 //     );
 //   });
 
-//   describe("Shape", () => {
+//   describe("PointSetDist", () => {
 //     let mean = 10.0;
 //     let stdev = 4.0;
 //     let variance = stdev ** 2.0;
 //     let numSamples = 10000;
-//     open Distributions.Shape;
+//     open Distributions.PointSetDist;
 //     let normal: SymbolicDistTypes.symbolicDist = `Normal({mean, stdev});
-//     let normalShape = AST.toShape(numSamples, `SymbolicDist(normal));
+//     let normalPointSetDist = AST.toPointSetDist(numSamples, `SymbolicDist(normal));
 //     let lognormal = SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev);
-//     let lognormalShape = AST.toShape(numSamples, `SymbolicDist(lognormal));
+//     let lognormalPointSetDist = AST.toPointSetDist(numSamples, `SymbolicDist(lognormal));
 
 //     makeTestCloseEquality(
 //       "Mean of a normal",
-//       T.mean(normalShape),
+//       T.mean(normalPointSetDist),
 //       mean,
 //       ~digits=2,
 //     );
 //     makeTestCloseEquality(
 //       "Variance of a normal",
-//       T.variance(normalShape),
+//       T.variance(normalPointSetDist),
 //       variance,
 //       ~digits=1,
 //     );
 //     makeTestCloseEquality(
 //       "Mean of a lognormal",
-//       T.mean(lognormalShape),
+//       T.mean(lognormalPointSetDist),
 //       mean,
 //       ~digits=2,
 //     );
 //     makeTestCloseEquality(
 //       "Variance of a lognormal",
-//       T.variance(lognormalShape),
+//       T.variance(lognormalPointSetDist),
 //       variance,
 //       ~digits=0,
 //     );

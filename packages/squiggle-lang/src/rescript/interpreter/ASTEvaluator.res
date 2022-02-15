@@ -27,7 +27,7 @@ module AlgebraicCombination = {
     E.R.merge(
       Render.ensureIsRenderedAndGetShape(evaluationParams, t1),
       Render.ensureIsRenderedAndGetShape(evaluationParams, t2),
-    ) |> E.R.fmap(((a, b)) => #RenderedDist(Shape.combineAlgebraically(algebraicOp, a, b)))
+    ) |> E.R.fmap(((a, b)) => #RenderedDist(PointSetDist.combineAlgebraically(algebraicOp, a, b)))
 
   let nodeScore: node => int = x =>
     switch x {
@@ -76,7 +76,7 @@ module PointwiseCombination = {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>
       Ok(
         #RenderedDist(
-          Shape.combinePointwise(
+          PointSetDist.combinePointwise(
             ~integralSumCachesFn=(a, b) => Some(a +. b),
             ~integralCachesFn=(a, b) => Some(
               Continuous.combinePointwise(~distributionType=#CDF, \"+.", a, b),
@@ -98,7 +98,7 @@ module PointwiseCombination = {
     // TODO: This should work for symbolic distributions too!
     (Render.render(evaluationParams, t1), Render.render(evaluationParams, t2)) {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>
-      Ok(#RenderedDist(Shape.combinePointwise(fn, rs1, rs2)))
+      Ok(#RenderedDist(PointSetDist.combinePointwise(fn, rs1, rs2)))
     | (Error(e1), _) => Error(e1)
     | (_, Error(e2)) => Error(e2)
     | _ => Error("Pointwise combination: rendering failed.")
@@ -132,7 +132,7 @@ module Truncate = {
     switch // TODO: use named args for xMin/xMax in renderToShape; if we're lucky we can at least get the tail
     // of a distribution we otherwise wouldn't get at all
     Render.ensureIsRendered(evaluationParams, t) {
-    | Ok(#RenderedDist(rs)) => Ok(#RenderedDist(Shape.T.truncate(leftCutoff, rightCutoff, rs)))
+    | Ok(#RenderedDist(rs)) => Ok(#RenderedDist(PointSetDist.T.truncate(leftCutoff, rightCutoff, rs)))
     | Error(e) => Error(e)
     | _ => Error("Could not truncate distribution.")
     }
@@ -158,7 +158,7 @@ module Truncate = {
 module Normalize = {
   let rec operationToLeaf = (evaluationParams, t: node): result<node, string> =>
     switch t {
-    | #RenderedDist(s) => Ok(#RenderedDist(Shape.T.normalize(s)))
+    | #RenderedDist(s) => Ok(#RenderedDist(PointSetDist.T.normalize(s)))
     | #SymbolicDist(_) => Ok(t)
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     }

@@ -39,7 +39,7 @@ module TypedValue = {
   let rec toString: typedValue => string = x =>
     switch x {
     | #SamplingDist(_) => "[sampling dist]"
-    | #RenderedDist(_) => "[rendered Shape]"
+    | #RenderedDist(_) => "[rendered PointSetDist]"
     | #Float(f) => "Float: " ++ Js.Float.toString(f)
     | #Array(a) => "[" ++ ((a |> E.A.fmap(toString) |> Js.String.concatMany(_, ",")) ++ "]")
     | #Hash(v) =>
