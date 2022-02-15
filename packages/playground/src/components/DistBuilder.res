@@ -94,79 +94,13 @@ let groupB = style(. [ selector(. ".antInputNumberInput", [ backgroundColor(hex(
 }
 
 module DemoDist = {
-  @react.component
-  let make = (~squiggleString: string, ~options) =>
-    <Antd.Card title={"Distribution"}>
-      <div>
-        {switch options {
-        | Some(options) =>
-          let inputs1 = ForetoldAppSquiggle.ProgramEvaluator.Inputs.make(
-            ~samplingInputs={
-              sampleCount: Some(options.sampleCount),
-              outputXYPoints: Some(options.outputXYPoints),
-              kernelWidth: options.kernelWidth,
-              shapeLength: Some(options.downsampleTo |> E.O.default(1000)),
-            },
-            ~squiggleString,
-            ~environment=[
-              ("K", #SymbolicDist(#Float(1000.0))),
-              ("M", #SymbolicDist(#Float(1000000.0))),
-              ("B", #SymbolicDist(#Float(1000000000.0))),
-              ("T", #SymbolicDist(#Float(1000000000000.0))),
-            ]->Belt.Map.String.fromArray,
-            (),
-          )
 
-          let distributionList = ForetoldAppSquiggle.ProgramEvaluator.evaluateProgram(inputs1)
+  type props
 
-          let renderExpression = response1 => 
-            switch response1 {
-              | #DistPlus(distPlus1) => <DistPlusPlot distPlus={ForetoldAppSquiggle.DistPlus.T.normalize(distPlus1)} />
-              | #Float(f) => <NumberShower number=f precision=3 />
-              | #Function((f, a), env) =>
-                //  Problem: When it gets the function, it doesn't save state about previous commands
-                let foo: ForetoldAppSquiggle.ProgramEvaluator.Inputs.inputs = {
-                  squiggleString: squiggleString,
-                  samplingInputs: inputs1.samplingInputs,
-                  environment: env,
-                }
-                let results =
-                  E.A.Floats.range(options.diagramStart, options.diagramStop, options.diagramCount)
-                  |> E.A.fmap(r =>
-                    ForetoldAppSquiggle.ProgramEvaluator.evaluateFunction(
-                      foo,
-                      (f, a),
-                      [#SymbolicDist(#Float(r))],
-                    ) |> E.R.bind(_, a =>
-                      switch a {
-                      | #DistPlus(d) => Ok((r, ForetoldAppSquiggle.DistPlus.T.normalize(d)))
-                      | n =>
-                        Js.log2("Error here", n)
-                        Error("wrong type")
-                      }
-                    )
-                  )
-                  |> E.A.R.firstErrorOrOpen
-                switch results {
-                | Ok(dists) => <PercentilesChart dists />
-                | Error(r) => r |> R.ste
-                }
-              }
+  @obj external makeProps : (~squiggleString: string,unit) => props = ""
 
-          // Render the list of distributions given by the
-          switch distributionList {
-            | Ok(xs) =>
-                let childrenElements = List.map(renderExpression, xs)
-                Js.Console.log(childrenElements)
-                <ul>
-                  {Belt.List.toArray(Belt.List.mapWithIndex(childrenElements, (i, child) => <li key={Belt.Int.toString(i)}>child</li>))->React.array}
-                </ul>
-            | Error(r) => r |> R.ste
-          }
-        | _ => "Nothing to show. Try to change the distribution description." |> R.ste
-        }}
-      </div>
-    </Antd.Card>
+  @module("@squiggle/components")
+  external make : props => React.element = "SquiggleChart"
 }
 
 @react.component
@@ -196,6 +130,7 @@ let make = () => {
   }
 
   let squiggleString = reform.state.values.squiggleString
+  /*
   let sampleCount = reform.state.values.sampleCount |> Js.Float.fromString
   let outputXYPoints = reform.state.values.outputXYPoints |> Js.Float.fromString
   let downsampleTo = reform.state.values.downsampleTo |> Js.Float.fromString
@@ -220,21 +155,10 @@ let make = () => {
     })
   | _ => None
   }
+  */
 
-  let demoDist = React.useMemo1(
-    () => <DemoDist squiggleString options />,
-    [
-      reform.state.values.squiggleString,
-      reform.state.values.sampleCount,
-      reform.state.values.outputXYPoints,
-      reform.state.values.downsampleTo,
-      reform.state.values.kernelWidth,
-      reform.state.values.diagramStart,
-      reform.state.values.diagramStop,
-      reform.state.values.diagramCount,
-      reloader |> string_of_int,
-    ],
-  )
+  let demoDist = 
+   <DemoDist squiggleString=squiggleString />
 
   let onReload = _ => setReloader(_ => reloader + 1)
 

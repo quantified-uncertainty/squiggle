@@ -1,5 +1,5 @@
 {
-  "name": "@foretold-app/squiggle-playground",
+  "name": "@squiggle/playground",
   "version": "0.1.0",
   "homepage": "https://foretold-app.github.io/estiband/",
   "scripts": {
@@ -30,6 +30,13 @@
     "@glennsl/bs-json": "^5.0.2",
     "@rescript/react": "^0.10.3",
     "@rescriptbr/reform": "^11.0.1",
+    "@squiggle/components": "^0.1.0",
+    "@squiggle/squiggle-lang": "^0.1.9",
+    "@types/jest": "^27.4.0",
+    "@types/lodash": "^4.14.178",
+    "@types/node": "^17.0.16",
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.11",
     "ace-builds": "^1.4.12",
     "antd": "^4.18.5",
     "autoprefixer": "9.8.8",
@@ -40,6 +47,7 @@
     "bs-css-emotion": "^4.1.0",
     "bs-moment": "0.6.0",
     "bsb-js": "1.1.7",
+    "cross-env": "^7.0.3",
     "css-loader": "^6.6.0",
     "d3": "7.3.0",
     "gh-pages": "2.2.0",
@@ -47,7 +55,7 @@
     "jstat": "1.9.2",
     "lenses-ppx": "5.1.0",
     "less": "3.10.3",
-    "lodash": "4.17.15",
+    "lodash": "^4.17.21",
     "mathjs": "5.10.3",
     "moduleserve": "0.9.1",
     "moment": "2.24.0",
@@ -61,11 +69,13 @@
     "react-vega": "^7.4.4",
     "reschema": "^2.2.0",
     "rescript": "^9.1.4",
-    "@foretold-app/squiggle": "^0.1.9",
     "tailwindcss": "1.2.0",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "typescript": "^4.5.5",
     "vega": "*",
     "vega-embed": "6.6.0",
-    "vega-lite": "*"
+    "vega-lite": "*",
+    "webpack-cli": "^4.9.2"
   },
   "devDependencies": {
     "@glennsl/bs-jest": "^0.5.1",

@@ -39,7 +39,7 @@
     "@rescript/react",
     "bs-css",
     "bs-css-emotion",
-    "@foretold-app/squiggle",
+    "@squiggle/squiggle-lang",
     "rationale",
     "bs-moment",
     "reschema"
