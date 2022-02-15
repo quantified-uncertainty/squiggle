@@ -94,7 +94,7 @@ module PointwiseCombination = {
 
   let pointwiseCombine = (fn, evaluationParams: evaluationParams, t1: t, t2: t) =>
     switch // TODO: construct a function that we can easily sample from, to construct
-    // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
+    // a RenderedDist. Use the xMin and xMax of the rendered pointSetDists to tell the sampling function where to look.
     // TODO: This should work for symbolic distributions too!
     (Render.render(evaluationParams, t1), Render.render(evaluationParams, t2)) {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>
@@ -195,8 +195,8 @@ module Render = {
     switch t {
     | #Function(_) => Error("Cannot render a function")
     | #SymbolicDist(d) =>
-      Ok(#RenderedDist(SymbolicDist.T.toShape(evaluationParams.samplingInputs.shapeLength, d)))
-    | #RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here
+      Ok(#RenderedDist(SymbolicDist.T.toPointSetDist(evaluationParams.samplingInputs.pointSetDistLength, d)))
+    | #RenderedDist(_) as t => Ok(t) // already a rendered pointSetDist, we're done here
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     }
 }

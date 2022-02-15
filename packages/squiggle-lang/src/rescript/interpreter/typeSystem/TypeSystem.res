@@ -3,7 +3,7 @@ let getFloat = ASTTypes.AST.getFloat
 
 type samplingDist = [
   | #SymbolicDist(SymbolicDistTypes.symbolicDist)
-  | #RenderedDist(PointSetTypes.shape)
+  | #RenderedDist(PointSetTypes.pointSetDist)
 ]
 
 type rec hashType = array<(string, _type)>
@@ -18,7 +18,7 @@ and _type = [
 type rec hashTypedValue = array<(string, typedValue)>
 and typedValue = [
   | #Float(float)
-  | #RenderedDist(PointSetTypes.shape)
+  | #RenderedDist(PointSetTypes.pointSetDist)
   | #SamplingDist(samplingDist)
   | #Array(array<typedValue>)
   | #Hash(hashTypedValue)

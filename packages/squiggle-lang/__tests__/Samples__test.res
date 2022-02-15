@@ -10,12 +10,12 @@ describe("Lodash", () =>
   describe("Lodash", () => {
     makeTest(
       "split",
-      SamplesToShape.Internals.T.splitContinuousAndDiscrete([1.432, 1.33455, 2.0]),
+      SampleSet.Internals.T.splitContinuousAndDiscrete([1.432, 1.33455, 2.0]),
       ([1.432, 1.33455, 2.0], E.FloatFloatMap.empty()),
     )
     makeTest(
       "split",
-      SamplesToShape.Internals.T.splitContinuousAndDiscrete([
+      SampleSet.Internals.T.splitContinuousAndDiscrete([
         1.432,
         1.33455,
         2.0,
@@ -32,13 +32,13 @@ describe("Lodash", () =>
       E.A.concatMany([sorted, sorted, sorted, sorted]) |> Belt.SortArray.stableSortBy(_, compare)
     }
 
-    let (_, discrete) = SamplesToShape.Internals.T.splitContinuousAndDiscrete(
+    let (_, discrete) = SampleSet.Internals.T.splitContinuousAndDiscrete(
       makeDuplicatedArray(10),
     )
     let toArr = discrete |> E.FloatFloatMap.toArray
     makeTest("splitMedium", toArr |> Belt.Array.length, 10)
 
-    let (c, discrete) = SamplesToShape.Internals.T.splitContinuousAndDiscrete(
+    let (c, discrete) = SampleSet.Internals.T.splitContinuousAndDiscrete(
       makeDuplicatedArray(500),
     )
     let toArr = discrete |> E.FloatFloatMap.toArray

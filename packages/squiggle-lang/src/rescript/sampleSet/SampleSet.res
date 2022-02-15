@@ -11,7 +11,7 @@ module Internals = {
 
     type outputs = {
       continuousParseParams: option<samplingStats>,
-      shape: option<PointSetTypes.shape>,
+      pointSetDist: option<PointSetTypes.pointSetDist>,
     }
   }
 
@@ -78,7 +78,7 @@ module Internals = {
   }
 }
 
-let toShape = (
+let toPointSetDist = (
   ~samples: Internals.T.t,
   ~samplingInputs: ASTTypes.AST.samplingInputs,
   (),
@@ -127,17 +127,15 @@ let toShape = (
         }
       : None
 
-  let shape = MixedShapeBuilder.buildSimple(
+  let pointSetDist = MixedShapeBuilder.buildSimple(
     ~continuous=pdf |> E.O.fmap(fst),
     ~discrete=Some(discrete),
   )
 
   let samplesParse: Internals.Types.outputs = {
     continuousParseParams: pdf |> E.O.fmap(snd),
-    shape: shape,
+    pointSetDist: pointSetDist,
   }
 
   samplesParse
 }
-
-let fromSamples = (~samplingInputs, samples) => toShape(~samples, ~samplingInputs, ())

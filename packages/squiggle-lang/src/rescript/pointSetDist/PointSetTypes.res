@@ -50,15 +50,15 @@ type mixedShape = {
   integralCache: option<continuousShape>,
 }
 
-type shapeMonad<'a, 'b, 'c> =
+type pointSetDistMonad<'a, 'b, 'c> =
   | Mixed('a)
   | Discrete('b)
   | Continuous('c)
 
-type shape = shapeMonad<mixedShape, discreteShape, continuousShape>
+type pointSetDist = pointSetDistMonad<mixedShape, discreteShape, continuousShape>
 
 module ShapeMonad = {
-  let fmap = (t: shapeMonad<'a, 'b, 'c>, (fn1, fn2, fn3)): shapeMonad<'d, 'e, 'f> =>
+  let fmap = (t: pointSetDistMonad<'a, 'b, 'c>, (fn1, fn2, fn3)): pointSetDistMonad<'d, 'e, 'f> =>
     switch t {
     | Mixed(m) => Mixed(fn1(m))
     | Discrete(m) => Discrete(fn2(m))
@@ -68,13 +68,13 @@ module ShapeMonad = {
 
 type generationSource =
   | SquiggleString(string)
-  | Shape(shape)
+  | Shape(pointSetDist)
 
 type distributionUnit =
   | UnspecifiedDistribution
 
 type distPlus = {
-  shape: shape,
+  pointSetDist: pointSetDist,
   domain: domain,
   integralCache: continuousShape,
   unit: distributionUnit,

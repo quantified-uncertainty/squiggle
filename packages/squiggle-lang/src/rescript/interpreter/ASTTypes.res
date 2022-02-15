@@ -19,7 +19,7 @@ module AST = {
   type rec hash = array<(string, node)>
   and node = [
     | #SymbolicDist(SymbolicDistTypes.symbolicDist)
-    | #RenderedDist(PointSetTypes.shape)
+    | #RenderedDist(PointSetTypes.pointSetDist)
     | #Symbol(string)
     | #Hash(hash)
     | #Array(array<node>)
@@ -64,7 +64,7 @@ module AST = {
     sampleCount: int,
     outputXYPoints: int,
     kernelWidth: option<float>,
-    shapeLength: int,
+    pointSetDistLength: int,
   }
 
   module SamplingInputs = {
@@ -72,13 +72,13 @@ module AST = {
       sampleCount: option<int>,
       outputXYPoints: option<int>,
       kernelWidth: option<float>,
-      shapeLength: option<int>,
+      pointSetDistLength: option<int>,
     }
     let withDefaults = (t: t): samplingInputs => {
       sampleCount: t.sampleCount |> E.O.default(10000),
       outputXYPoints: t.outputXYPoints |> E.O.default(10000),
       kernelWidth: t.kernelWidth,
-      shapeLength: t.shapeLength |> E.O.default(10000),
+      pointSetDistLength: t.pointSetDistLength |> E.O.default(10000),
     }
   }
 
@@ -148,7 +148,7 @@ module AST = {
       | _ => None
       }
 
-    let _toFloat = (t: PointSetTypes.shape) =>
+    let _toFloat = (t: PointSetTypes.pointSetDist) =>
       switch t {
       | Discrete({xyShape: {xs: [x], ys: [1.0]}}) => Some(#SymbolicDist(#Float(x)))
       | _ => None

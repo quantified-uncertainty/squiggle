@@ -157,7 +157,7 @@ module T = Dist({
   let toDiscreteProbabilityMassFraction = _ => 1.0
   let mapY = mapY
   let updateIntegralCache = updateIntegralCache
-  let toShape = (t: t): PointSetTypes.shape => Discrete(t)
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Discrete(t)
   let toContinuous = _ => None
   let toDiscrete = t => Some(t)
 

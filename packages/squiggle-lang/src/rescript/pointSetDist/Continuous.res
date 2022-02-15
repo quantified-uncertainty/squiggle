@@ -137,7 +137,7 @@ module T = Dist({
   let mapY = mapY
   let updateIntegralCache = updateIntegralCache
   let toDiscreteProbabilityMassFraction = _ => 0.0
-  let toShape = (t: t): PointSetTypes.shape => Continuous(t)
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Continuous(t)
   let xToY = (f, {interpolation, xyShape}: t) =>
     switch interpolation {
     | #Stepwise => xyShape |> XYShape.XtoY.stepwiseIncremental(f) |> E.O.default(0.0)

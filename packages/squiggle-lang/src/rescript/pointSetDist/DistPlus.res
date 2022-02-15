@@ -2,39 +2,39 @@ open PointSetTypes;
 
 type t = PointSetTypes.distPlus;
 
-let shapeIntegral = shape => PointSetDist.T.Integral.get(shape);
+let pointSetDistIntegral = pointSetDist => PointSetDist.T.Integral.get(pointSetDist);
 let make =
     (
-      ~shape,
+      ~pointSetDist,
       ~squiggleString,
       ~domain=Complete,
       ~unit=UnspecifiedDistribution,
       (),
     )
     : t => {
-  let integral = shapeIntegral(shape);
-  {shape, domain, integralCache: integral, unit, squiggleString};
+  let integral = pointSetDistIntegral(pointSetDist);
+  {pointSetDist, domain, integralCache: integral, unit, squiggleString};
 };
 
 let update =
     (
-      ~shape=?,
+      ~pointSetDist=?,
       ~integralCache=?,
       ~domain=?,
       ~unit=?,
       ~squiggleString=?,
       t: t,
     ) => {
-  shape: E.O.default(t.shape, shape),
+  pointSetDist: E.O.default(t.pointSetDist, pointSetDist),
   integralCache: E.O.default(t.integralCache, integralCache),
   domain: E.O.default(t.domain, domain),
   unit: E.O.default(t.unit, unit),
   squiggleString: E.O.default(t.squiggleString, squiggleString),
 };
 
-let updateShape = (shape, t) => {
-  let integralCache = shapeIntegral(shape);
-  update(~shape, ~integralCache, t);
+let updateShape = (pointSetDist, t) => {
+  let integralCache = pointSetDistIntegral(pointSetDist);
+  update(~pointSetDist, ~integralCache, t);
 };
 
 let domainIncludedProbabilityMass = (t: t) =>
@@ -43,27 +43,27 @@ let domainIncludedProbabilityMass = (t: t) =>
 let domainIncludedProbabilityMassAdjustment = (t: t, f) =>
   f *. Domain.includedProbabilityMass(t.domain);
 
-let toShape = ({shape, _}: t) => shape;
+let toPointSetDist = ({pointSetDist, _}: t) => pointSetDist;
 
-let shapeFn = (fn, {shape}: t) => fn(shape);
+let pointSetDistFn = (fn, {pointSetDist}: t) => fn(pointSetDist);
 
 module T =
   Distributions.Dist({
     type t = PointSetTypes.distPlus;
     type integral = PointSetTypes.distPlus;
-    let toShape = toShape;
-    let toContinuous = shapeFn(PointSetDist.T.toContinuous);
-    let toDiscrete = shapeFn(PointSetDist.T.toDiscrete);
+    let toPointSetDist = toPointSetDist;
+    let toContinuous = pointSetDistFn(PointSetDist.T.toContinuous);
+    let toDiscrete = pointSetDistFn(PointSetDist.T.toDiscrete);
 
     let normalize = (t: t): t => {
-      let normalizedShape = t |> toShape |> PointSetDist.T.normalize;
+      let normalizedShape = t |> toPointSetDist |> PointSetDist.T.normalize;
       t |> updateShape(normalizedShape);
     };
 
     let truncate = (leftCutoff, rightCutoff, t: t): t => {
       let truncatedShape =
         t
-        |> toShape
+        |> toPointSetDist
         |> PointSetDist.T.truncate(leftCutoff, rightCutoff);
 
       t |> updateShape(truncatedShape);
@@ -71,14 +71,14 @@ module T =
 
     let xToY = (f, t: t) =>
       t
-      |> toShape
+      |> toPointSetDist
       |> PointSetDist.T.xToY(f)
       |> MixedPoint.fmap(domainIncludedProbabilityMassAdjustment(t));
 
-    let minX = shapeFn(PointSetDist.T.minX);
-    let maxX = shapeFn(PointSetDist.T.maxX);
+    let minX = pointSetDistFn(PointSetDist.T.minX);
+    let maxX = pointSetDistFn(PointSetDist.T.maxX);
     let toDiscreteProbabilityMassFraction =
-      shapeFn(PointSetDist.T.toDiscreteProbabilityMassFraction);
+      pointSetDistFn(PointSetDist.T.toDiscreteProbabilityMassFraction);
 
     // This bit is kind of awkward, could probably use rethinking.
     let integral = (t: t) =>
@@ -88,23 +88,23 @@ module T =
       update(~integralCache=E.O.default(t.integralCache, integralCache), t);
 
     let downsample = (i, t): t =>
-      updateShape(t |> toShape |> PointSetDist.T.downsample(i), t);
+      updateShape(t |> toPointSetDist |> PointSetDist.T.downsample(i), t);
     // todo: adjust for limit, maybe?
     let mapY =
         (
           ~integralSumCacheFn=previousIntegralSum => None,
           ~integralCacheFn=previousIntegralCache => None,
           ~fn,
-          {shape, _} as t: t,
+          {pointSetDist, _} as t: t,
         )
         : t =>
-      PointSetDist.T.mapY(~integralSumCacheFn, ~fn, shape)
+      PointSetDist.T.mapY(~integralSumCacheFn, ~fn, pointSetDist)
       |> updateShape(_, t);
 
     // get the total of everything
     let integralEndY = (t: t) => {
       PointSetDist.T.Integral.sum(
-        toShape(t),
+        toPointSetDist(t),
       );
     };
 
@@ -112,18 +112,18 @@ module T =
     let integralXtoY = (f, t: t) => {
       PointSetDist.T.Integral.xToY(
         f,
-        toShape(t),
+        toPointSetDist(t),
       )
       |> domainIncludedProbabilityMassAdjustment(t);
     };
 
     // TODO: This part is broken when there is a limit, if this is supposed to be taken into account.
     let integralYtoX = (f, t: t) => {
-      PointSetDist.T.Integral.yToX(f, toShape(t));
+      PointSetDist.T.Integral.yToX(f, toPointSetDist(t));
     };
 
     let mean = (t: t) => {
-      PointSetDist.T.mean(t.shape);
+      PointSetDist.T.mean(t.pointSetDist);
     };
-    let variance = (t: t) => PointSetDist.T.variance(t.shape);
+    let variance = (t: t) => PointSetDist.T.variance(t.pointSetDist);
   });

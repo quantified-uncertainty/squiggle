@@ -43,7 +43,7 @@ module T = Dist({
     min(Continuous.T.minX(continuous), Discrete.T.minX(discrete))
   let maxX = ({continuous, discrete}: t) =>
     max(Continuous.T.maxX(continuous), Discrete.T.maxX(discrete))
-  let toShape = (t: t): PointSetTypes.shape => Mixed(t)
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Mixed(t)
 
   let updateIntegralCache = updateIntegralCache
 

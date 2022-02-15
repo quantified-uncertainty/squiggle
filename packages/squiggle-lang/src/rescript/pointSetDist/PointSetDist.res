@@ -1,6 +1,6 @@
 open Distributions
 
-type t = PointSetTypes.shape
+type t = PointSetTypes.pointSetDist
 let mapToAll = ((fn1, fn2, fn3), t: t) =>
   switch t {
   | Mixed(m) => fn1(m)
@@ -36,12 +36,12 @@ let toMixed = mapToAll((
 let combineAlgebraically = (op: ASTTypes.algebraicOperation, t1: t, t2: t): t =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
-    Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toShape
+    Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toPointSetDist
   | (Continuous(m1), Discrete(m2))
   | (Discrete(m2), Continuous(m1)) =>
-    Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2) |> Continuous.T.toShape
-  | (Discrete(m1), Discrete(m2)) => Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toShape
-  | (m1, m2) => Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2)) |> Mixed.T.toShape
+    Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2) |> Continuous.T.toPointSetDist
+  | (Discrete(m1), Discrete(m2)) => Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toPointSetDist
+  | (m1, m2) => Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2)) |> Mixed.T.toPointSetDist
   }
 
 let combinePointwise = (
@@ -70,12 +70,12 @@ let combinePointwise = (
   }
 
 module T = Dist({
-  type t = PointSetTypes.shape
+  type t = PointSetTypes.pointSetDist
   type integral = PointSetTypes.continuousShape
 
   let xToY = (f: float) => mapToAll((Mixed.T.xToY(f), Discrete.T.xToY(f), Continuous.T.xToY(f)))
 
-  let toShape = (t: t) => t
+  let toPointSetDist = (t: t) => t
 
   let toContinuous = t => None
   let toDiscrete = t => None

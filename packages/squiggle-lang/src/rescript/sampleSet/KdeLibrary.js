@@ -15,7 +15,6 @@ const samplesToContinuousPdf = (
   return {xs: pdf.map(r => r.x), ys: pdf.map(r => r.y)};
 };
 
-
 module.exports = {
   samplesToContinuousPdf,
 };

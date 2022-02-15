@@ -37,7 +37,7 @@ module Function = {
 module Primative = {
   type t = [
     | #SymbolicDist(SymbolicDistTypes.symbolicDist)
-    | #RenderedDist(PointSetTypes.shape)
+    | #RenderedDist(PointSetTypes.pointSetDist)
     | #Function(array<string>, node)
   ]
 
@@ -62,7 +62,7 @@ module Primative = {
 module SamplingDistribution = {
   type t = [
     | #SymbolicDist(SymbolicDistTypes.symbolicDist)
-    | #RenderedDist(PointSetTypes.shape)
+    | #RenderedDist(PointSetTypes.pointSetDist)
   ]
 
   let isSamplingDistribution: node => bool = x =>
@@ -126,12 +126,13 @@ module SamplingDistribution = {
       )
 
       //  todo: This bottom part should probably be somewhere else.
-      let shape =
+      // todo: REFACTOR: I'm not sure about the SampleSet line.
+      let pointSetDist =
         samples
-        |> E.O.fmap(SamplesToShape.fromSamples(~samplingInputs=evaluationParams.samplingInputs))
-        |> E.O.bind(_, r => r.shape)
+        |> E.O.fmap(r => SampleSet.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r, ()))
+        |> E.O.bind(_, r => r.pointSetDist)
         |> E.O.toResult("No response")
-      shape |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
+      pointSetDist |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
     })
   }
 }

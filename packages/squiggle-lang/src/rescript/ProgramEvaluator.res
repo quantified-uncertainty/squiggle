@@ -5,7 +5,7 @@ module Inputs = {
       sampleCount: option<int>,
       outputXYPoints: option<int>,
       kernelWidth: option<float>,
-      shapeLength: option<int>,
+      pointSetDistLength: option<int>,
     }
   }
   let defaultRecommendedLength = 100
@@ -21,7 +21,7 @@ module Inputs = {
     sampleCount: None,
     outputXYPoints: None,
     kernelWidth: None,
-    shapeLength: None,
+    pointSetDistLength: None,
   }
 
   let make = (
@@ -60,15 +60,15 @@ module Internals = {
 
   type outputs = {
     graph: ASTTypes.AST.node,
-    shape: PointSetTypes.shape,
+    pointSetDist: PointSetTypes.pointSetDist,
   }
-  let makeOutputs = (graph, shape): outputs => {graph: graph, shape: shape}
+  let makeOutputs = (graph, pointSetDist): outputs => {graph: graph, pointSetDist: pointSetDist}
 
   let makeInputs = (inputs: Inputs.inputs): ASTTypes.AST.samplingInputs => {
     sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
     outputXYPoints: inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
     kernelWidth: inputs.samplingInputs.kernelWidth,
-    shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
+    pointSetDistLength: inputs.samplingInputs.pointSetDistLength |> E.O.default(10000),
   }
 
   let runNode = (inputs, node) =>
@@ -93,8 +93,8 @@ module Internals = {
   let inputsToLeaf = (inputs: Inputs.inputs) =>
     Parser.fromString(inputs.squiggleString) |> E.R.bind(_, g => runProgram(inputs, g))
 
-  let outputToDistPlus = (inputs: Inputs.inputs, shape: PointSetTypes.shape) =>
-    DistPlus.make(~shape, ~squiggleString=Some(inputs.squiggleString), ())
+  let outputToDistPlus = (inputs: Inputs.inputs, pointSetDist: PointSetTypes.pointSetDist) =>
+    DistPlus.make(~pointSetDist, ~squiggleString=Some(inputs.squiggleString), ())
 }
 
 let renderIfNeeded = (inputs: Inputs.inputs, node: ASTTypes.AST.node): result<
@@ -179,7 +179,7 @@ let runAll = (squiggleString: string) => {
       sampleCount: Some(10000),
       outputXYPoints: Some(10000),
       kernelWidth: None,
-      shapeLength: Some(1000),
+      pointSetDistLength: Some(1000),
     },
     ~squiggleString,
     ~environment=[]->Belt.Map.String.fromArray,
