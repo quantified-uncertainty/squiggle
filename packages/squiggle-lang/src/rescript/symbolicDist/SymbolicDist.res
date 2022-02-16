@@ -1,4 +1,4 @@
-open SymbolicTypes
+open SymbolicDistTypes
 
 module Normal = {
   type t = normal
@@ -272,7 +272,7 @@ module T = {
     | #Float(n) => Float.mean(n)
     }
 
-  let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s) =>
+  let operate = (distToFloatOp: ASTTypes.distToFloatOperation, s) =>
     switch distToFloatOp {
     | #Cdf(f) => Ok(cdf(f, s))
     | #Pdf(f) => Ok(pdf(f, s))
@@ -302,7 +302,7 @@ module T = {
   let tryAnalyticalSimplification = (
     d1: symbolicDist,
     d2: symbolicDist,
-    op: ExpressionTypes.algebraicOperation,
+    op: ASTTypes.algebraicOperation,
   ): analyticalSimplificationResult =>
     switch (d1, d2) {
     | (#Float(v1), #Float(v2)) =>
@@ -317,7 +317,7 @@ module T = {
     | _ => #NoSolution
     }
 
-  let toShape = (sampleCount, d: symbolicDist): DistTypes.shape =>
+  let toPointSetDist = (sampleCount, d: symbolicDist): PointSetTypes.pointSetDist =>
     switch d {
     | #Float(v) => Discrete(Discrete.make(~integralSumCache=Some(1.0), {xs: [v], ys: [1.0]}))
     | _ =>

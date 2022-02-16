@@ -1,4 +1,4 @@
-open ExpressionTypes.ExpressionTree
+open ASTTypes.AST
 
 module Function = {
   type t = (array<string>, node)
@@ -10,7 +10,7 @@ module Function = {
   let argumentNames = ((a, _): t) => a
   let internals = ((_, b): t) => b
   let run = (
-    evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+    evaluationParams: ASTTypes.AST.evaluationParams,
     args: array<node>,
     t: t,
   ) =>
@@ -19,10 +19,10 @@ module Function = {
         Belt.Array.zip(
           argumentNames(t),
           args,
-        ) |> ExpressionTypes.ExpressionTree.Environment.fromArray
-      let newEvaluationParams: ExpressionTypes.ExpressionTree.evaluationParams = {
+        ) |> ASTTypes.AST.Environment.fromArray
+      let newEvaluationParams: ASTTypes.AST.evaluationParams = {
         samplingInputs: evaluationParams.samplingInputs,
-        environment: ExpressionTypes.ExpressionTree.Environment.mergeKeepSecond(
+        environment: ASTTypes.AST.Environment.mergeKeepSecond(
           evaluationParams.environment,
           newEnvironment,
         ),
@@ -36,8 +36,8 @@ module Function = {
 
 module Primative = {
   type t = [
-    | #SymbolicDist(SymbolicTypes.symbolicDist)
-    | #RenderedDist(DistTypes.shape)
+    | #SymbolicDist(SymbolicDistTypes.symbolicDist)
+    | #RenderedDist(PointSetTypes.pointSetDist)
     | #Function(array<string>, node)
   ]
 
@@ -61,8 +61,8 @@ module Primative = {
 
 module SamplingDistribution = {
   type t = [
-    | #SymbolicDist(SymbolicTypes.symbolicDist)
-    | #RenderedDist(DistTypes.shape)
+    | #SymbolicDist(SymbolicDistTypes.symbolicDist)
+    | #RenderedDist(PointSetTypes.pointSetDist)
   ]
 
   let isSamplingDistribution: node => bool = x =>
@@ -98,7 +98,7 @@ module SamplingDistribution = {
     )
 
   let sampleN = n =>
-    map(~renderedDistFn=Shape.sampleNRendered(n), ~symbolicDistFn=SymbolicDist.T.sampleN(n))
+    map(~renderedDistFn=PointSetDist.sampleNRendered(n), ~symbolicDistFn=SymbolicDist.T.sampleN(n))
 
   let getCombinationSamples = (n, algebraicOp, t1: node, t2: node) =>
     switch (sampleN(n, t1), sampleN(n, t2)) {
@@ -126,12 +126,13 @@ module SamplingDistribution = {
       )
 
       //  todo: This bottom part should probably be somewhere else.
-      let shape =
+      // todo: REFACTOR: I'm not sure about the SampleSet line.
+      let pointSetDist =
         samples
-        |> E.O.fmap(SamplesToShape.fromSamples(~samplingInputs=evaluationParams.samplingInputs))
-        |> E.O.bind(_, r => r.shape)
+        |> E.O.fmap(r => SampleSet.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r, ()))
+        |> E.O.bind(_, r => r.pointSetDist)
         |> E.O.toResult("No response")
-      shape |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
+      pointSetDist |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
     })
   }
 }

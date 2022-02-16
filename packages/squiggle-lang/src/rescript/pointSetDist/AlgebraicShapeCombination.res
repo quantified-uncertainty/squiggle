@@ -96,10 +96,10 @@ let toDiscretePointMassesFromTriangulars = (
 }
 
 let combineShapesContinuousContinuous = (
-  op: ExpressionTypes.algebraicOperation,
-  s1: DistTypes.xyShape,
-  s2: DistTypes.xyShape,
-): DistTypes.xyShape => {
+  op: ASTTypes.algebraicOperation,
+  s1: PointSetTypes.xyShape,
+  s2: PointSetTypes.xyShape,
+): PointSetTypes.xyShape => {
   let t1n = s1 |> XYShape.T.length
   let t2n = s2 |> XYShape.T.length
 
@@ -188,7 +188,7 @@ let combineShapesContinuousContinuous = (
   {xs: outputXs, ys: outputYs}
 }
 
-let toDiscretePointMassesFromDiscrete = (s: DistTypes.xyShape): pointMassesWithMoments => {
+let toDiscretePointMassesFromDiscrete = (s: PointSetTypes.xyShape): pointMassesWithMoments => {
   let {xs, ys}: XYShape.T.t = s
   let n = E.A.length(xs)
 
@@ -200,10 +200,10 @@ let toDiscretePointMassesFromDiscrete = (s: DistTypes.xyShape): pointMassesWithM
 }
 
 let combineShapesContinuousDiscrete = (
-  op: ExpressionTypes.algebraicOperation,
-  continuousShape: DistTypes.xyShape,
-  discreteShape: DistTypes.xyShape,
-): DistTypes.xyShape => {
+  op: ASTTypes.algebraicOperation,
+  continuousShape: PointSetTypes.xyShape,
+  discreteShape: PointSetTypes.xyShape,
+): PointSetTypes.xyShape => {
   let t1n = continuousShape |> XYShape.T.length
   let t2n = discreteShape |> XYShape.T.length
 

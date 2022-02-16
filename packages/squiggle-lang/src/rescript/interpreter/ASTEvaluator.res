@@ -1,5 +1,5 @@
-open ExpressionTypes
-open ExpressionTypes.ExpressionTree
+open ASTTypes
+open ASTTypes.AST
 
 type t = node
 type tResult = node => result<node, string>
@@ -27,7 +27,7 @@ module AlgebraicCombination = {
     E.R.merge(
       Render.ensureIsRenderedAndGetShape(evaluationParams, t1),
       Render.ensureIsRenderedAndGetShape(evaluationParams, t2),
-    ) |> E.R.fmap(((a, b)) => #RenderedDist(Shape.combineAlgebraically(algebraicOp, a, b)))
+    ) |> E.R.fmap(((a, b)) => #RenderedDist(PointSetDist.combineAlgebraically(algebraicOp, a, b)))
 
   let nodeScore: node => int = x =>
     switch x {
@@ -56,7 +56,7 @@ module AlgebraicCombination = {
 
   let operationToLeaf = (
     evaluationParams: evaluationParams,
-    algebraicOp: ExpressionTypes.algebraicOperation,
+    algebraicOp: ASTTypes.algebraicOperation,
     t1: t,
     t2: t,
   ): result<node, string> =>
@@ -76,7 +76,7 @@ module PointwiseCombination = {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>
       Ok(
         #RenderedDist(
-          Shape.combinePointwise(
+          PointSetDist.combinePointwise(
             ~integralSumCachesFn=(a, b) => Some(a +. b),
             ~integralCachesFn=(a, b) => Some(
               Continuous.combinePointwise(~distributionType=#CDF, \"+.", a, b),
@@ -94,11 +94,11 @@ module PointwiseCombination = {
 
   let pointwiseCombine = (fn, evaluationParams: evaluationParams, t1: t, t2: t) =>
     switch // TODO: construct a function that we can easily sample from, to construct
-    // a RenderedDist. Use the xMin and xMax of the rendered shapes to tell the sampling function where to look.
+    // a RenderedDist. Use the xMin and xMax of the rendered pointSetDists to tell the sampling function where to look.
     // TODO: This should work for symbolic distributions too!
     (Render.render(evaluationParams, t1), Render.render(evaluationParams, t2)) {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>
-      Ok(#RenderedDist(Shape.combinePointwise(fn, rs1, rs2)))
+      Ok(#RenderedDist(PointSetDist.combinePointwise(fn, rs1, rs2)))
     | (Error(e1), _) => Error(e1)
     | (_, Error(e2)) => Error(e2)
     | _ => Error("Pointwise combination: rendering failed.")
@@ -132,7 +132,7 @@ module Truncate = {
     switch // TODO: use named args for xMin/xMax in renderToShape; if we're lucky we can at least get the tail
     // of a distribution we otherwise wouldn't get at all
     Render.ensureIsRendered(evaluationParams, t) {
-    | Ok(#RenderedDist(rs)) => Ok(#RenderedDist(Shape.T.truncate(leftCutoff, rightCutoff, rs)))
+    | Ok(#RenderedDist(rs)) => Ok(#RenderedDist(PointSetDist.T.truncate(leftCutoff, rightCutoff, rs)))
     | Error(e) => Error(e)
     | _ => Error("Could not truncate distribution.")
     }
@@ -158,7 +158,7 @@ module Truncate = {
 module Normalize = {
   let rec operationToLeaf = (evaluationParams, t: node): result<node, string> =>
     switch t {
-    | #RenderedDist(s) => Ok(#RenderedDist(Shape.T.normalize(s)))
+    | #RenderedDist(s) => Ok(#RenderedDist(PointSetDist.T.normalize(s)))
     | #SymbolicDist(_) => Ok(t)
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     }
@@ -174,9 +174,9 @@ module FunctionCall = {
     )
 
   let _runWithEvaluatedInputs = (
-    evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+    evaluationParams: ASTTypes.AST.evaluationParams,
     name,
-    args: array<ExpressionTypes.ExpressionTree.node>,
+    args: array<ASTTypes.AST.node>,
   ) =>
     _runHardcodedFunction(name, evaluationParams, args) |> E.O.default(
       _runLocalFunction(name, evaluationParams, args),
@@ -195,8 +195,8 @@ module Render = {
     switch t {
     | #Function(_) => Error("Cannot render a function")
     | #SymbolicDist(d) =>
-      Ok(#RenderedDist(SymbolicDist.T.toShape(evaluationParams.samplingInputs.shapeLength, d)))
-    | #RenderedDist(_) as t => Ok(t) // already a rendered shape, we're done here
+      Ok(#RenderedDist(SymbolicDist.T.toPointSetDist(evaluationParams.samplingInputs.pointSetDistLength, d)))
+    | #RenderedDist(_) as t => Ok(t) // already a rendered pointSetDist, we're done here
     | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
     }
 }
@@ -208,7 +208,7 @@ module Render = {
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
 let rec toLeaf = (
-  evaluationParams: ExpressionTypes.ExpressionTree.evaluationParams,
+  evaluationParams: ASTTypes.AST.evaluationParams,
   node: t,
 ): result<t, string> =>
   switch node {
@@ -236,7 +236,7 @@ let rec toLeaf = (
     |> E.A.R.firstErrorOrOpen
     |> E.R.fmap(r => #Hash(r))
   | #Symbol(r) =>
-    ExpressionTypes.ExpressionTree.Environment.get(evaluationParams.environment, r)
+    ASTTypes.AST.Environment.get(evaluationParams.environment, r)
     |> E.O.toResult("Undeclared variable " ++ r)
     |> E.R.bind(_, toLeaf(evaluationParams))
   | #FunctionCall(name, args) =>

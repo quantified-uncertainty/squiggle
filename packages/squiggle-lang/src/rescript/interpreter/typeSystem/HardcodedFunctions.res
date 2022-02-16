@@ -84,13 +84,13 @@ let makeDist = (name, fn) =>
   )
 
 let floatFromDist = (
-  distToFloatOp: ExpressionTypes.distToFloatOperation,
+  distToFloatOp: ASTTypes.distToFloatOperation,
   t: TypeSystem.samplingDist,
 ): result<node, string> =>
   switch t {
   | #SymbolicDist(s) =>
     SymbolicDist.T.operate(distToFloatOp, s) |> E.R.bind(_, v => Ok(#SymbolicDist(#Float(v))))
-  | #RenderedDist(rs) => Shape.operate(distToFloatOp, rs) |> (v => Ok(#SymbolicDist(#Float(v))))
+  | #RenderedDist(rs) => PointSetDist.operate(distToFloatOp, rs) |> (v => Ok(#SymbolicDist(#Float(v))))
   }
 
 let verticalScaling = (scaleOp, rs, scaleBy) => {
@@ -100,7 +100,7 @@ let verticalScaling = (scaleOp, rs, scaleBy) => {
   let integralCacheFn = Operation.Scale.toIntegralCacheFn(scaleOp)
   Ok(
     #RenderedDist(
-      Shape.T.mapY(
+      PointSetDist.T.mapY(
         ~integralSumCacheFn=integralSumCacheFn(scaleBy),
         ~integralCacheFn=integralCacheFn(scaleBy),
         ~fn=fn(scaleBy),
@@ -111,7 +111,7 @@ let verticalScaling = (scaleOp, rs, scaleBy) => {
 }
 
 module Multimodal = {
-  let getByNameResult = ExpressionTypes.ExpressionTree.Hash.getByNameResult
+  let getByNameResult = ASTTypes.AST.Hash.getByNameResult
 
   let _paramsToDistsAndWeights = (r: array<typedValue>) =>
     switch r {
@@ -209,7 +209,7 @@ let all = [
     ~run=x =>
       switch x {
       | [#SamplingDist(#SymbolicDist(c))] => Ok(#SymbolicDist(c))
-      | [#SamplingDist(#RenderedDist(c))] => Ok(#RenderedDist(Shape.T.normalize(c)))
+      | [#SamplingDist(#RenderedDist(c))] => Ok(#RenderedDist(PointSetDist.T.normalize(c)))
       | e => wrongInputsError(e)
       },
     (),

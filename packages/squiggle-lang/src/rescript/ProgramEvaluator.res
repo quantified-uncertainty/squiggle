@@ -5,7 +5,7 @@ module Inputs = {
       sampleCount: option<int>,
       outputXYPoints: option<int>,
       kernelWidth: option<float>,
-      shapeLength: option<int>,
+      pointSetDistLength: option<int>,
     }
   }
   let defaultRecommendedLength = 100
@@ -14,20 +14,20 @@ module Inputs = {
   type inputs = {
     squiggleString: string,
     samplingInputs: SamplingInputs.t,
-    environment: ExpressionTypes.ExpressionTree.environment,
+    environment: ASTTypes.AST.environment,
   }
 
   let empty: SamplingInputs.t = {
     sampleCount: None,
     outputXYPoints: None,
     kernelWidth: None,
-    shapeLength: None,
+    pointSetDistLength: None,
   }
 
   let make = (
     ~samplingInputs=empty,
     ~squiggleString,
-    ~environment=ExpressionTypes.ExpressionTree.Environment.empty,
+    ~environment=ASTTypes.AST.Environment.empty,
     (),
   ): inputs => {
     samplingInputs: samplingInputs,
@@ -40,8 +40,8 @@ type \"export" = [
   | #DistPlus(DistPlus.t)
   | #Float(float)
   | #Function(
-    (array<string>, ExpressionTypes.ExpressionTree.node),
-    ExpressionTypes.ExpressionTree.environment,
+    (array<string>, ASTTypes.AST.node),
+    ASTTypes.AST.environment,
   )
 ]
 
@@ -53,28 +53,28 @@ module Internals = {
   ): Inputs.inputs => {
     samplingInputs: samplingInputs,
     squiggleString: squiggleString,
-    environment: ExpressionTypes.ExpressionTree.Environment.update(environment, str, _ => Some(
+    environment: ASTTypes.AST.Environment.update(environment, str, _ => Some(
       node,
     )),
   }
 
   type outputs = {
-    graph: ExpressionTypes.ExpressionTree.node,
-    shape: DistTypes.shape,
+    graph: ASTTypes.AST.node,
+    pointSetDist: PointSetTypes.pointSetDist,
   }
-  let makeOutputs = (graph, shape): outputs => {graph: graph, shape: shape}
+  let makeOutputs = (graph, pointSetDist): outputs => {graph: graph, pointSetDist: pointSetDist}
 
-  let makeInputs = (inputs: Inputs.inputs): ExpressionTypes.ExpressionTree.samplingInputs => {
+  let makeInputs = (inputs: Inputs.inputs): ASTTypes.AST.samplingInputs => {
     sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
     outputXYPoints: inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
     kernelWidth: inputs.samplingInputs.kernelWidth,
-    shapeLength: inputs.samplingInputs.shapeLength |> E.O.default(10000),
+    pointSetDistLength: inputs.samplingInputs.pointSetDistLength |> E.O.default(10000),
   }
 
   let runNode = (inputs, node) =>
-    ExpressionTree.toLeaf(makeInputs(inputs), inputs.environment, node)
+    AST.toLeaf(makeInputs(inputs), inputs.environment, node)
 
-  let runProgram = (inputs: Inputs.inputs, p: ExpressionTypes.Program.program) => {
+  let runProgram = (inputs: Inputs.inputs, p: ASTTypes.Program.program) => {
     let ins = ref(inputs)
     p
     |> E.A.fmap(x =>
@@ -91,14 +91,14 @@ module Internals = {
   }
 
   let inputsToLeaf = (inputs: Inputs.inputs) =>
-    MathJsParser.fromString(inputs.squiggleString) |> E.R.bind(_, g => runProgram(inputs, g))
+    Parser.fromString(inputs.squiggleString) |> E.R.bind(_, g => runProgram(inputs, g))
 
-  let outputToDistPlus = (inputs: Inputs.inputs, shape: DistTypes.shape) =>
-    DistPlus.make(~shape, ~squiggleString=Some(inputs.squiggleString), ())
+  let outputToDistPlus = (inputs: Inputs.inputs, pointSetDist: PointSetTypes.pointSetDist) =>
+    DistPlus.make(~pointSetDist, ~squiggleString=Some(inputs.squiggleString), ())
 }
 
-let renderIfNeeded = (inputs: Inputs.inputs, node: ExpressionTypes.ExpressionTree.node): result<
-  ExpressionTypes.ExpressionTree.node,
+let renderIfNeeded = (inputs: Inputs.inputs, node: ASTTypes.AST.node): result<
+  ASTTypes.AST.node,
   string,
 > =>
   node |> (
@@ -121,11 +121,11 @@ let renderIfNeeded = (inputs: Inputs.inputs, node: ExpressionTypes.ExpressionTre
       }
   )
 
-// TODO: Consider using ExpressionTypes.ExpressionTree.getFloat or similar in this function
+// TODO: Consider using ASTTypes.AST.getFloat or similar in this function
 let coersionToExportedTypes = (
   inputs,
-  env: ExpressionTypes.ExpressionTree.environment,
-  node: ExpressionTypes.ExpressionTree.node,
+  env: ASTTypes.AST.environment,
+  node: ASTTypes.AST.node,
 ): result<\"export", string> =>
   node
   |> renderIfNeeded(inputs)
@@ -135,7 +135,7 @@ let coersionToExportedTypes = (
     | #SymbolicDist(#Float(x)) => Ok(#Float(x))
     | #RenderedDist(n) => Ok(#DistPlus(Internals.outputToDistPlus(inputs, n)))
     | #Function(n) => Ok(#Function(n, env))
-    | n => Error("Didn't output a rendered distribution. Format:" ++ ExpressionTree.toString(n))
+    | n => Error("Didn't output a rendered distribution. Format:" ++ AST.toString(n))
     }
   )
 
@@ -160,10 +160,10 @@ let evaluateProgram = (inputs: Inputs.inputs) =>
 
 let evaluateFunction = (
   inputs: Inputs.inputs,
-  fn: (array<string>, ExpressionTypes.ExpressionTree.node),
+  fn: (array<string>, ASTTypes.AST.node),
   fnInputs,
 ) => {
-  let output = ExpressionTree.runFunction(
+  let output = AST.runFunction(
     Internals.makeInputs(inputs),
     inputs.environment,
     fnInputs,
@@ -179,7 +179,7 @@ let runAll = (squiggleString: string) => {
       sampleCount: Some(10000),
       outputXYPoints: Some(10000),
       kernelWidth: None,
-      shapeLength: Some(1000),
+      pointSetDistLength: Some(1000),
     },
     ~squiggleString,
     ~environment=[]->Belt.Map.String.fromArray,

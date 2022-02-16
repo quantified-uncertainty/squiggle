@@ -1,6 +1,6 @@
 open Distributions
 
-type t = DistTypes.shape
+type t = PointSetTypes.pointSetDist
 let mapToAll = ((fn1, fn2, fn3), t: t) =>
   switch t {
   | Mixed(m) => fn1(m)
@@ -33,49 +33,49 @@ let toMixed = mapToAll((
     ),
 ))
 
-let combineAlgebraically = (op: ExpressionTypes.algebraicOperation, t1: t, t2: t): t =>
+let combineAlgebraically = (op: ASTTypes.algebraicOperation, t1: t, t2: t): t =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
-    Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toShape
+    Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toPointSetDist
   | (Continuous(m1), Discrete(m2))
   | (Discrete(m2), Continuous(m1)) =>
-    Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2) |> Continuous.T.toShape
-  | (Discrete(m1), Discrete(m2)) => Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toShape
-  | (m1, m2) => Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2)) |> Mixed.T.toShape
+    Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2) |> Continuous.T.toPointSetDist
+  | (Discrete(m1), Discrete(m2)) => Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toPointSetDist
+  | (m1, m2) => Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2)) |> Mixed.T.toPointSetDist
   }
 
 let combinePointwise = (
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
   ~integralCachesFn: (
-    DistTypes.continuousShape,
-    DistTypes.continuousShape,
-  ) => option<DistTypes.continuousShape>=(_, _) => None,
+    PointSetTypes.continuousShape,
+    PointSetTypes.continuousShape,
+  ) => option<PointSetTypes.continuousShape>=(_, _) => None,
   fn,
   t1: t,
   t2: t,
 ) =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
-    DistTypes.Continuous(
+    PointSetTypes.Continuous(
       Continuous.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, m1, m2),
     )
   | (Discrete(m1), Discrete(m2)) =>
-    DistTypes.Discrete(
+    PointSetTypes.Discrete(
       Discrete.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, m1, m2),
     )
   | (m1, m2) =>
-    DistTypes.Mixed(
+    PointSetTypes.Mixed(
       Mixed.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, toMixed(m1), toMixed(m2)),
     )
   }
 
 module T = Dist({
-  type t = DistTypes.shape
-  type integral = DistTypes.continuousShape
+  type t = PointSetTypes.pointSetDist
+  type integral = PointSetTypes.continuousShape
 
   let xToY = (f: float) => mapToAll((Mixed.T.xToY(f), Discrete.T.xToY(f), Continuous.T.xToY(f)))
 
-  let toShape = (t: t) => t
+  let toPointSetDist = (t: t) => t
 
   let toContinuous = t => None
   let toDiscrete = t => None
@@ -163,7 +163,7 @@ module T = Dist({
 })
 
 let pdf = (f: float, t: t) => {
-  let mixedPoint: DistTypes.mixedPoint = T.xToY(f, t)
+  let mixedPoint: PointSetTypes.mixedPoint = T.xToY(f, t)
   mixedPoint.continuous +. mixedPoint.discrete
 }
 
@@ -197,7 +197,7 @@ let sampleNRendered = (n, dist) => {
   doN(n, () => sample(distWithUpdatedIntegralCache))
 }
 
-let operate = (distToFloatOp: ExpressionTypes.distToFloatOperation, s): float =>
+let operate = (distToFloatOp: ASTTypes.distToFloatOperation, s): float =>
   switch distToFloatOp {
   | #Pdf(f) => pdf(f, s)
   | #Cdf(f) => pdf(f, s)

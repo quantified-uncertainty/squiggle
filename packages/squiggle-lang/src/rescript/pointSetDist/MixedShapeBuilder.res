@@ -9,9 +9,9 @@ type assumptions = {
 }
 
 let buildSimple = (
-  ~continuous: option<DistTypes.continuousShape>,
-  ~discrete: option<DistTypes.discreteShape>,
-): option<DistTypes.shape> => {
+  ~continuous: option<PointSetTypes.continuousShape>,
+  ~discrete: option<PointSetTypes.discreteShape>,
+): option<PointSetTypes.pointSetDist> => {
   let continuous =
     continuous |> E.O.default(Continuous.make(~integralSumCache=Some(0.0), {xs: [], ys: []}))
   let discrete =

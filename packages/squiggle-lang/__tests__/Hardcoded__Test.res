@@ -10,12 +10,12 @@ let makeTest = (~only=false, str, item1, item2) =>
         expect(item1) |> toEqual(item2)
       );
 
-let evalParams: ExpressionTypes.ExpressionTree.evaluationParams = {
+let evalParams: ASTTypes.AST.evaluationParams = {
   samplingInputs: {
     sampleCount: 1000,
     outputXYPoints: 10000,
     kernelWidth: None,
-    shapeLength: 1000,
+    PointSetDistLength: 1000,
   },
   environment:
     [|
@@ -25,12 +25,12 @@ let evalParams: ExpressionTypes.ExpressionTree.evaluationParams = {
       ("T", `SymbolicDist(`Float(1000000000000.0))),
     |]
     ->Belt.Map.String.fromArray,
-  evaluateNode: ExpressionTreeEvaluator.toLeaf,
+  evaluateNode: ASTEvaluator.toLeaf,
 };
 
-let shape1: DistTypes.xyShape = {xs: [|1., 4., 8.|], ys: [|0.2, 0.4, 0.8|]};
+let PointSetDist1: PointSetTypes.xyPointSetDist = {xs: [|1., 4., 8.|], ys: [|0.2, 0.4, 0.8|]};
 
-describe("XYShapes", () => {
+describe("XYPointSetDists", () => {
   describe("logScorePoint", () => {
     makeTest(
       "When identical",
