@@ -1,5 +1,5 @@
 type node = ASTTypes.AST.node
-let getFloat = ASTTypes.AST.getFloat
+let getFloat = ASTTypes.AST.Node.getFloat
 
 type samplingDist = [
   | #SymbolicDist(SymbolicDistTypes.symbolicDist)
@@ -61,7 +61,7 @@ module TypedValue = {
       |> E.A.fmap(((name, t)) => fromNode(t) |> E.R.fmap(r => (name, r)))
       |> E.A.R.firstErrorOrOpen
       |> E.R.fmap(r => #Hash(r))
-    | e => Error("Wrong type: " ++ ASTTypes.Node.toString(e))
+    | e => Error("Wrong type: " ++ ASTTypes.AST.Node.toString(e))
     }
 
   // todo: Arrays and hashes
@@ -78,7 +78,7 @@ module TypedValue = {
         node,
       ) |> E.R.bind(_, fromNode)
     | (#RenderedDistribution, _) =>
-      ASTTypes.AST.Render.render(evaluationParams, node) |> E.R.bind(_, fromNode)
+      ASTTypes.AST.Node.render(evaluationParams, node) |> E.R.bind(_, fromNode)
     | (#Array(_type), #Array(b)) =>
       b
       |> E.A.fmap(fromNodeWithTypeCoercion(evaluationParams, _type))

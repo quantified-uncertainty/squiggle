@@ -25,8 +25,8 @@ module AlgebraicCombination = {
     string,
   > =>
     E.R.merge(
-      Render.ensureIsRenderedAndGetShape(evaluationParams, t1),
-      Render.ensureIsRenderedAndGetShape(evaluationParams, t2),
+      Node.ensureIsRenderedAndGetShape(evaluationParams, t1),
+      Node.ensureIsRenderedAndGetShape(evaluationParams, t2),
     ) |> E.R.fmap(((a, b)) => #RenderedDist(PointSetDist.combineAlgebraically(algebraicOp, a, b)))
 
   let nodeScore: node => int = x =>
@@ -72,7 +72,7 @@ module AlgebraicCombination = {
 
 module PointwiseCombination = {
   let pointwiseAdd = (evaluationParams: evaluationParams, t1: t, t2: t) =>
-    switch (Render.render(evaluationParams, t1), Render.render(evaluationParams, t2)) {
+    switch (Node.render(evaluationParams, t1), Node.render(evaluationParams, t2)) {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>
       Ok(
         #RenderedDist(
@@ -96,7 +96,7 @@ module PointwiseCombination = {
     switch // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered pointSetDists to tell the sampling function where to look.
     // TODO: This should work for symbolic distributions too!
-    (Render.render(evaluationParams, t1), Render.render(evaluationParams, t2)) {
+    (Node.render(evaluationParams, t1), Node.render(evaluationParams, t2)) {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>
       Ok(#RenderedDist(PointSetDist.combinePointwise(fn, rs1, rs2)))
     | (Error(e1), _) => Error(e1)
@@ -131,7 +131,7 @@ module Truncate = {
   let truncateAsShape = (evaluationParams: evaluationParams, leftCutoff, rightCutoff, t) =>
     switch // TODO: use named args for xMin/xMax in renderToShape; if we're lucky we can at least get the tail
     // of a distribution we otherwise wouldn't get at all
-    Render.ensureIsRendered(evaluationParams, t) {
+    Node.ensureIsRendered(evaluationParams, t) {
     | Ok(#RenderedDist(rs)) => Ok(#RenderedDist(PointSetDist.T.truncate(leftCutoff, rightCutoff, rs)))
     | Error(e) => Error(e)
     | _ => Error("Could not truncate distribution.")

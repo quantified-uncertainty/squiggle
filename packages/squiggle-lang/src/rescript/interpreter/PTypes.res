@@ -81,7 +81,7 @@ module SamplingDistribution = {
 
   let renderIfIsNotSamplingDistribution = (params, t): result<node, string> =>
     !isSamplingDistribution(t)
-      ? switch Render.render(params, t) {
+      ? switch Node.render(params, t) {
         | Ok(r) => Ok(r)
         | Error(e) => Error(e)
         }
