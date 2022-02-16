@@ -15,42 +15,19 @@ module AST = {
     | #FunctionCall(string, array<node>)
   ]
 
-  module Hash = {
-    type t<'a> = array<(string, 'a)>
-    let getByName = (t: t<'a>, name) =>
-      E.A.getBy(t, ((n, _)) => n == name) |> E.O.fmap(((_, r)) => r)
-
-    let getByNameResult = (t: t<'a>, name) =>
-      getByName(t, name) |> E.O.toResult(name ++ " expected and not found")
-
-    let getByNames = (hash: t<'a>, names: array<string>) =>
-      names |> E.A.fmap(name => (name, getByName(hash, name)))
-  }
-  // Have nil as option
-
-  type samplingInputs = {
-    sampleCount: int,
-    outputXYPoints: int,
-    kernelWidth: option<float>,
-    pointSetDistLength: int,
-  }
-
-  module SamplingInputs = {
-    type t = {
-      sampleCount: option<int>,
-      outputXYPoints: option<int>,
-      kernelWidth: option<float>,
-      pointSetDistLength: option<int>,
-    }
-    let withDefaults = (t: t): samplingInputs => {
-      sampleCount: t.sampleCount |> E.O.default(10000),
-      outputXYPoints: t.outputXYPoints |> E.O.default(10000),
-      kernelWidth: t.kernelWidth,
-      pointSetDistLength: t.pointSetDistLength |> E.O.default(10000),
-    }
-  }
+  type statement = [
+    | #Assignment(string, node)
+    | #Expression(node)
+  ]
+  type program = array<statement>
 
   type environment = Belt.Map.String.t<node>
+
+  type rec evaluationParams = {
+    samplingInputs: SamplingInputs.samplingInputs,
+    environment: environment,
+    evaluateNode: (evaluationParams, node) => Belt.Result.t<node, string>,
+  }
 
   module Environment = {
     type t = environment
@@ -74,18 +51,6 @@ module AST = {
       }
   }
 
-  type rec evaluationParams = {
-    samplingInputs: samplingInputs,
-    environment: environment,
-    evaluateNode: (evaluationParams, node) => Belt.Result.t<node, string>,
-  }
-
-  let evaluateNode = (evaluationParams: evaluationParams) =>
-    evaluationParams.evaluateNode(evaluationParams)
-
-  let evaluateAndRetry = (evaluationParams, fn, node) =>
-    node |> evaluationParams.evaluateNode(evaluationParams) |> E.R.bind(_, fn(evaluationParams))
-
   module Node = {
     let getFloat = (node: node) =>
       node |> (
@@ -96,6 +61,12 @@ module AST = {
           | _ => None
           }
       )
+
+    let evaluate = (evaluationParams: evaluationParams) =>
+      evaluationParams.evaluateNode(evaluationParams)
+
+    let evaluateAndRetry = (evaluationParams, fn, node) =>
+      node |> evaluationParams.evaluateNode(evaluationParams) |> E.R.bind(_, fn(evaluationParams))
 
     let rec toString: node => string = x =>
       switch x {
@@ -124,8 +95,7 @@ module AST = {
         "}")
       }
 
-    let render = (evaluationParams: evaluationParams, r) =>
-      #Render(r) |> evaluateNode(evaluationParams)
+    let render = (evaluationParams: evaluationParams, r) => #Render(r) |> evaluate(evaluationParams)
 
     let ensureIsRendered = (params, t) =>
       switch t {
@@ -160,18 +130,143 @@ module AST = {
     let toFloat = (item: node): result<node, string> =>
       item |> toPointSetDist |> E.O.bind(_, _toFloat) |> E.O.toResult("Not valid shape")
   }
-}
 
-type simplificationResult = [
-  | #Solution(AST.node)
-  | #Error(string)
-  | #NoSolution
-]
+  module Function = {
+    type t = (array<string>, node)
+    let fromNode: node => option<t> = node =>
+      switch node {
+      | #Function(r) => Some(r)
+      | _ => None
+      }
+    let argumentNames = ((a, _): t) => a
+    let internals = ((_, b): t) => b
+    let run = (evaluationParams: evaluationParams, args: array<node>, t: t) =>
+      if E.A.length(args) == E.A.length(argumentNames(t)) {
+        let newEnvironment = Belt.Array.zip(argumentNames(t), args) |> Environment.fromArray
+        let newEvaluationParams: evaluationParams = {
+          samplingInputs: evaluationParams.samplingInputs,
+          environment: Environment.mergeKeepSecond(
+            evaluationParams.environment,
+            newEnvironment,
+          ),
+          evaluateNode: evaluationParams.evaluateNode,
+        }
+        evaluationParams.evaluateNode(newEvaluationParams, internals(t))
+      } else {
+        Error("Wrong number of variables")
+      }
+  }
 
-module Program = {
-  type statement = [
-    | #Assignment(string, AST.node)
-    | #Expression(AST.node)
-  ]
-  type program = array<statement>
+  module Primative = {
+    type t = [
+      | #SymbolicDist(SymbolicDistTypes.symbolicDist)
+      | #RenderedDist(PointSetTypes.pointSetDist)
+      | #Function(array<string>, node)
+    ]
+
+    let isPrimative: node => bool = x =>
+      switch x {
+      | #SymbolicDist(_)
+      | #RenderedDist(_)
+      | #Function(_) => true
+      | _ => false
+      }
+
+    let fromNode: node => option<t> = x =>
+      switch x {
+      | #SymbolicDist(_) as n
+      | #RenderedDist(_) as n
+      | #Function(_) as n =>
+        Some(n)
+      | _ => None
+      }
+  }
+
+  module SamplingDistribution = {
+    type t = [
+      | #SymbolicDist(SymbolicDistTypes.symbolicDist)
+      | #RenderedDist(PointSetTypes.pointSetDist)
+    ]
+
+    let isSamplingDistribution: node => bool = x =>
+      switch x {
+      | #SymbolicDist(_) => true
+      | #RenderedDist(_) => true
+      | _ => false
+      }
+
+    let fromNode: node => result<t, string> = x =>
+      switch x {
+      | #SymbolicDist(n) => Ok(#SymbolicDist(n))
+      | #RenderedDist(n) => Ok(#RenderedDist(n))
+      | _ => Error("Not valid type")
+      }
+
+    let renderIfIsNotSamplingDistribution = (params, t): result<node, string> =>
+      !isSamplingDistribution(t)
+        ? switch Node.render(params, t) {
+          | Ok(r) => Ok(r)
+          | Error(e) => Error(e)
+          }
+        : Ok(t)
+
+    let map = (~renderedDistFn, ~symbolicDistFn, node: node) =>
+      node |> (
+        x =>
+          switch x {
+          | #RenderedDist(r) => Some(renderedDistFn(r))
+          | #SymbolicDist(s) => Some(symbolicDistFn(s))
+          | _ => None
+          }
+      )
+
+    let sampleN = n =>
+      map(
+        ~renderedDistFn=PointSetDist.sampleNRendered(n),
+        ~symbolicDistFn=SymbolicDist.T.sampleN(n),
+      )
+
+    let getCombinationSamples = (n, algebraicOp, t1: node, t2: node) =>
+      switch (sampleN(n, t1), sampleN(n, t2)) {
+      | (Some(a), Some(b)) =>
+        Some(
+          Belt.Array.zip(a, b) |> E.A.fmap(((a, b)) => Operation.Algebraic.toFn(algebraicOp, a, b)),
+        )
+      | _ => None
+      }
+
+    let combineShapesUsingSampling = (
+      evaluationParams: evaluationParams,
+      algebraicOp,
+      t1: node,
+      t2: node,
+    ) => {
+      let i1 = renderIfIsNotSamplingDistribution(evaluationParams, t1)
+      let i2 = renderIfIsNotSamplingDistribution(evaluationParams, t2)
+      E.R.merge(i1, i2) |> E.R.bind(_, ((a, b)) => {
+        let samples = getCombinationSamples(
+          evaluationParams.samplingInputs.sampleCount,
+          algebraicOp,
+          a,
+          b,
+        )
+
+        let pointSetDist =
+          samples
+          |> E.O.fmap(r =>
+            SampleSet.toPointSetDist(
+              ~samplingInputs=evaluationParams.samplingInputs,
+              ~samples=r,
+              (),
+            )
+          )
+          |> E.O.bind(_, r => r.pointSetDist)
+          |> E.O.toResult("No response")
+        pointSetDist |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
+      })
+
+      //  todo: This bottom part should probably be somewhere else.
+      // todo: REFACTOR: I'm not sure about the SampleSet line.
+    }
+  }
 }

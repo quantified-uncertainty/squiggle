@@ -64,7 +64,7 @@ module Internals = {
   }
   let makeOutputs = (graph, pointSetDist): outputs => {graph: graph, pointSetDist: pointSetDist}
 
-  let makeInputs = (inputs: Inputs.inputs): ASTTypes.AST.samplingInputs => {
+  let makeInputs = (inputs: Inputs.inputs): SamplingInputs.samplingInputs => {
     sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
     outputXYPoints: inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
     kernelWidth: inputs.samplingInputs.kernelWidth,
@@ -74,7 +74,7 @@ module Internals = {
   let runNode = (inputs, node) =>
     AST.toLeaf(makeInputs(inputs), inputs.environment, node)
 
-  let runProgram = (inputs: Inputs.inputs, p: ASTTypes.Program.program) => {
+  let runProgram = (inputs: Inputs.inputs, p: ASTTypes.AST.program) => {
     let ins = ref(inputs)
     p
     |> E.A.fmap(x =>

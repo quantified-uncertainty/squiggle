@@ -111,7 +111,7 @@ let verticalScaling = (scaleOp, rs, scaleBy) => {
 }
 
 module Multimodal = {
-  let getByNameResult = ASTTypes.AST.Hash.getByNameResult
+  let getByNameResult = Hash.getByNameResult
 
   let _paramsToDistsAndWeights = (r: array<typedValue>) =>
     switch r {

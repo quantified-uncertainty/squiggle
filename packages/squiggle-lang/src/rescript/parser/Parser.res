@@ -246,7 +246,7 @@ module MathAdtToDistDst = {
   //   let evaluatedExpression = run(expression);
   //   `Function(_ => Ok(evaluatedExpression));
   // }
-  let rec topLevel = (r): result<ASTTypes.Program.program, string> =>
+  let rec topLevel = (r): result<ASTTypes.AST.program, string> =>
     switch r {
     | FunctionAssignment({name, args, expression}) =>
       switch nodeParser(expression) {
@@ -267,7 +267,7 @@ module MathAdtToDistDst = {
       blocks |> E.A.fmap(b => topLevel(b)) |> E.A.R.firstErrorOrOpen |> E.R.fmap(E.A.concatMany)
     }
 
-  let run = (r): result<ASTTypes.Program.program, string> =>
+  let run = (r): result<ASTTypes.AST.program, string> =>
     r |> MathAdtCleaner.run |> topLevel
 }
 

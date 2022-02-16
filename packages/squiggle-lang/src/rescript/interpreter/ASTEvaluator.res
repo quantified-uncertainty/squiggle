@@ -1,4 +1,3 @@
-open ASTTypes
 open ASTTypes.AST
 
 type t = node
@@ -44,12 +43,17 @@ module AlgebraicCombination = {
 
   let combine = (evaluationParams, algebraicOp, t1: node, t2: node): result<node, string> =>
     E.R.merge(
-      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams, t1),
-      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams, t2),
+      ASTTypes.AST.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams, t1),
+      ASTTypes.AST.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams, t2),
     ) |> E.R.bind(_, ((a, b)) =>
       switch choose(a, b) {
       | #Sampling =>
-        PTypes.SamplingDistribution.combineShapesUsingSampling(evaluationParams, algebraicOp, a, b)
+        ASTTypes.AST.SamplingDistribution.combineShapesUsingSampling(
+          evaluationParams,
+          algebraicOp,
+          a,
+          b,
+        )
       | #Analytical => combinationByRendering(evaluationParams, algebraicOp, a, b)
       }
     )
@@ -118,6 +122,12 @@ module PointwiseCombination = {
 }
 
 module Truncate = {
+  type simplificationResult = [
+    | #Solution(ASTTypes.AST.node)
+    | #Error(string)
+    | #NoSolution
+  ]
+
   let trySimplification = (leftCutoff, rightCutoff, t): simplificationResult =>
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, t) => #Solution(t)
@@ -132,7 +142,8 @@ module Truncate = {
     switch // TODO: use named args for xMin/xMax in renderToShape; if we're lucky we can at least get the tail
     // of a distribution we otherwise wouldn't get at all
     Node.ensureIsRendered(evaluationParams, t) {
-    | Ok(#RenderedDist(rs)) => Ok(#RenderedDist(PointSetDist.T.truncate(leftCutoff, rightCutoff, rs)))
+    | Ok(#RenderedDist(rs)) =>
+      Ok(#RenderedDist(PointSetDist.T.truncate(leftCutoff, rightCutoff, rs)))
     | Error(e) => Error(e)
     | _ => Error("Could not truncate distribution.")
     }
@@ -160,7 +171,7 @@ module Normalize = {
     switch t {
     | #RenderedDist(s) => Ok(#RenderedDist(PointSetDist.T.normalize(s)))
     | #SymbolicDist(_) => Ok(t)
-    | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
+    | _ => ASTTypes.AST.Node.evaluateAndRetry(evaluationParams, operationToLeaf, t)
     }
 }
 
@@ -170,7 +181,7 @@ module FunctionCall = {
 
   let _runLocalFunction = (name, evaluationParams: evaluationParams, args) =>
     Environment.getFunction(evaluationParams.environment, name) |> E.R.bind(_, ((argNames, fn)) =>
-      PTypes.Function.run(evaluationParams, args, (argNames, fn))
+      ASTTypes.AST.Function.run(evaluationParams, args, (argNames, fn))
     )
 
   let _runWithEvaluatedInputs = (
@@ -195,9 +206,13 @@ module Render = {
     switch t {
     | #Function(_) => Error("Cannot render a function")
     | #SymbolicDist(d) =>
-      Ok(#RenderedDist(SymbolicDist.T.toPointSetDist(evaluationParams.samplingInputs.pointSetDistLength, d)))
+      Ok(
+        #RenderedDist(
+          SymbolicDist.T.toPointSetDist(evaluationParams.samplingInputs.pointSetDistLength, d),
+        ),
+      )
     | #RenderedDist(_) as t => Ok(t) // already a rendered pointSetDist, we're done here
-    | _ => evaluateAndRetry(evaluationParams, operationToLeaf, t)
+    | _ => ASTTypes.AST.Node.evaluateAndRetry(evaluationParams, operationToLeaf, t)
     }
 }
 
@@ -207,10 +222,7 @@ module Render = {
    but most often it will produce a RenderedDist.
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
-let rec toLeaf = (
-  evaluationParams: ASTTypes.AST.evaluationParams,
-  node: t,
-): result<t, string> =>
+let rec toLeaf = (evaluationParams: ASTTypes.AST.evaluationParams, node: t): result<t, string> =>
   switch node {
   // Leaf nodes just stay leaf nodes
   | #SymbolicDist(_)

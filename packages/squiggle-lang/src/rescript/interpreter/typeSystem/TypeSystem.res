@@ -73,7 +73,7 @@ module TypedValue = {
       | _ => Error("Type Error: Expected float.")
       }
     | (#SamplingDistribution, _) =>
-      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
+      ASTTypes.AST.SamplingDistribution.renderIfIsNotSamplingDistribution(
         evaluationParams,
         node,
       ) |> E.R.bind(_, fromNode)
@@ -89,7 +89,7 @@ module TypedValue = {
         named |> E.A.fmap(((name, intendedType)) => (
           name,
           intendedType,
-          ASTTypes.AST.Hash.getByName(r, name),
+          Hash.getByName(r, name),
         ))
       let typedHash =
         keyValues

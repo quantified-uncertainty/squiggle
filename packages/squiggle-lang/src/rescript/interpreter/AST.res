@@ -18,7 +18,7 @@ let toPointSetDist = (samplingInputs, environment, node: node) =>
   | Error(e) => Error(e)
   }
 
-let runFunction = (samplingInputs, environment, inputs, fn: PTypes.Function.t) => {
+let runFunction = (samplingInputs, environment, inputs, fn: ASTTypes.AST.Function.t) => {
   let params = envs(samplingInputs, environment)
-  PTypes.Function.run(params, inputs, fn)
+  ASTTypes.AST.Function.run(params, inputs, fn)
 }
