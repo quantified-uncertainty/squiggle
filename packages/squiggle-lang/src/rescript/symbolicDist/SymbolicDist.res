@@ -272,7 +272,7 @@ module T = {
     | #Float(n) => Float.mean(n)
     }
 
-  let operate = (distToFloatOp: ASTTypes.distToFloatOperation, s) =>
+  let operate = (distToFloatOp: Operation.distToFloatOperation, s) =>
     switch distToFloatOp {
     | #Cdf(f) => Ok(cdf(f, s))
     | #Pdf(f) => Ok(pdf(f, s))
@@ -302,7 +302,7 @@ module T = {
   let tryAnalyticalSimplification = (
     d1: symbolicDist,
     d2: symbolicDist,
-    op: ASTTypes.algebraicOperation,
+    op: Operation.algebraicOperation,
   ): analyticalSimplificationResult =>
     switch (d1, d2) {
     | (#Float(v1), #Float(v2)) =>

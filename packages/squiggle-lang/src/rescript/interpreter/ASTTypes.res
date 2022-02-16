@@ -1,20 +1,3 @@
-type algebraicOperation = [
-  | #Add
-  | #Multiply
-  | #Subtract
-  | #Divide
-  | #Exponentiate
-]
-type pointwiseOperation = [#Add | #Multiply | #Exponentiate]
-type scaleOperation = [#Multiply | #Exponentiate | #Log]
-type distToFloatOperation = [
-  | #Pdf(float)
-  | #Cdf(float)
-  | #Inv(float)
-  | #Mean
-  | #Sample
-]
-
 module AST = {
   type rec hash = array<(string, node)>
   and node = [
@@ -24,8 +7,8 @@ module AST = {
     | #Hash(hash)
     | #Array(array<node>)
     | #Function(array<string>, node)
-    | #AlgebraicCombination(algebraicOperation, node, node)
-    | #PointwiseCombination(pointwiseOperation, node, node)
+    | #AlgebraicCombination(Operation.algebraicOperation, node, node)
+    | #PointwiseCombination(Operation.pointwiseOperation, node, node)
     | #Normalize(node)
     | #Render(node)
     | #Truncate(option<float>, option<float>, node)
@@ -171,4 +154,33 @@ module Program = {
     | #Expression(AST.node)
   ]
   type program = array<statement>
+}
+
+module Node = {
+  let rec toString: AST.node => string = x =>
+    switch x {
+    | #SymbolicDist(d) => SymbolicDist.T.toString(d)
+    | #RenderedDist(_) => "[renderedShape]"
+    | #AlgebraicCombination(op, t1, t2) =>
+      Operation.Algebraic.format(op, toString(t1), toString(t2))
+    | #PointwiseCombination(op, t1, t2) =>
+      Operation.Pointwise.format(op, toString(t1), toString(t2))
+    | #Normalize(t) => "normalize(k" ++ (toString(t) ++ ")")
+    | #Truncate(lc, rc, t) => Operation.Truncate.toString(lc, rc, toString(t))
+    | #Render(t) => toString(t)
+    | #Symbol(t) => "Symbol: " ++ t
+    | #FunctionCall(name, args) =>
+      "[Function call: (" ++
+      (name ++
+      ((args |> E.A.fmap(toString) |> Js.String.concatMany(_, ",")) ++ ")]"))
+    | #Function(args, internal) =>
+      "[Function: (" ++ ((args |> Js.String.concatMany(_, ",")) ++ (toString(internal) ++ ")]"))
+    | #Array(a) => "[" ++ ((a |> E.A.fmap(toString) |> Js.String.concatMany(_, ",")) ++ "]")
+    | #Hash(h) =>
+      "{" ++
+      ((h
+      |> E.A.fmap(((name, value)) => name ++ (":" ++ toString(value)))
+      |> Js.String.concatMany(_, ",")) ++
+      "}")
+    }
 }

@@ -56,7 +56,7 @@ module AlgebraicCombination = {
 
   let operationToLeaf = (
     evaluationParams: evaluationParams,
-    algebraicOp: ASTTypes.algebraicOperation,
+    algebraicOp: Operation.algebraicOperation,
     t1: t,
     t2: t,
   ): result<node, string> =>
@@ -106,7 +106,7 @@ module PointwiseCombination = {
 
   let operationToLeaf = (
     evaluationParams: evaluationParams,
-    pointwiseOp: pointwiseOperation,
+    pointwiseOp: Operation.pointwiseOperation,
     t1: t,
     t2: t,
   ) =>

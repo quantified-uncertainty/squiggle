@@ -33,7 +33,7 @@ let toMixed = mapToAll((
     ),
 ))
 
-let combineAlgebraically = (op: ASTTypes.algebraicOperation, t1: t, t2: t): t =>
+let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toPointSetDist
@@ -197,7 +197,7 @@ let sampleNRendered = (n, dist) => {
   doN(n, () => sample(distWithUpdatedIntegralCache))
 }
 
-let operate = (distToFloatOp: ASTTypes.distToFloatOperation, s): float =>
+let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   switch distToFloatOp {
   | #Pdf(f) => pdf(f, s)
   | #Cdf(f) => pdf(f, s)

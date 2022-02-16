@@ -84,7 +84,7 @@ let makeDist = (name, fn) =>
   )
 
 let floatFromDist = (
-  distToFloatOp: ASTTypes.distToFloatOperation,
+  distToFloatOp: Operation.distToFloatOperation,
   t: TypeSystem.samplingDist,
 ): result<node, string> =>
   switch t {

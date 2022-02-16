@@ -61,7 +61,7 @@ module TypedValue = {
       |> E.A.fmap(((name, t)) => fromNode(t) |> E.R.fmap(r => (name, r)))
       |> E.A.R.firstErrorOrOpen
       |> E.R.fmap(r => #Hash(r))
-    | e => Error("Wrong type: " ++ ASTBasic.toString(e))
+    | e => Error("Wrong type: " ++ ASTTypes.Node.toString(e))
     }
 
   // todo: Arrays and hashes

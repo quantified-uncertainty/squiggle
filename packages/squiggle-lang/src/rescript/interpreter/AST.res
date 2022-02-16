@@ -1,6 +1,6 @@
 open ASTTypes.AST
 
-let toString = ASTBasic.toString
+let toString = ASTTypes.Node.toString
 
 let envs = (samplingInputs, environment) => {
   samplingInputs: samplingInputs,
