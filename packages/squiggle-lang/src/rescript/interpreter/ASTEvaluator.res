@@ -1,4 +1,4 @@
-open ASTTypes.AST
+open ASTTypes
 
 type t = node
 type tResult = node => result<node, string>
@@ -43,12 +43,12 @@ module AlgebraicCombination = {
 
   let combine = (evaluationParams, algebraicOp, t1: node, t2: node): result<node, string> =>
     E.R.merge(
-      ASTTypes.AST.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams, t1),
-      ASTTypes.AST.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams, t2),
+      ASTTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams, t1),
+      ASTTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(evaluationParams, t2),
     ) |> E.R.bind(_, ((a, b)) =>
       switch choose(a, b) {
       | #Sampling =>
-        ASTTypes.AST.SamplingDistribution.combineShapesUsingSampling(
+        ASTTypes.SamplingDistribution.combineShapesUsingSampling(
           evaluationParams,
           algebraicOp,
           a,
@@ -123,7 +123,7 @@ module PointwiseCombination = {
 
 module Truncate = {
   type simplificationResult = [
-    | #Solution(ASTTypes.AST.node)
+    | #Solution(ASTTypes.node)
     | #Error(string)
     | #NoSolution
   ]
@@ -171,7 +171,7 @@ module Normalize = {
     switch t {
     | #RenderedDist(s) => Ok(#RenderedDist(PointSetDist.T.normalize(s)))
     | #SymbolicDist(_) => Ok(t)
-    | _ => ASTTypes.AST.Node.evaluateAndRetry(evaluationParams, operationToLeaf, t)
+    | _ => ASTTypes.Node.evaluateAndRetry(evaluationParams, operationToLeaf, t)
     }
 }
 
@@ -181,13 +181,13 @@ module FunctionCall = {
 
   let _runLocalFunction = (name, evaluationParams: evaluationParams, args) =>
     Environment.getFunction(evaluationParams.environment, name) |> E.R.bind(_, ((argNames, fn)) =>
-      ASTTypes.AST.Function.run(evaluationParams, args, (argNames, fn))
+      ASTTypes.Function.run(evaluationParams, args, (argNames, fn))
     )
 
   let _runWithEvaluatedInputs = (
-    evaluationParams: ASTTypes.AST.evaluationParams,
+    evaluationParams: ASTTypes.evaluationParams,
     name,
-    args: array<ASTTypes.AST.node>,
+    args: array<ASTTypes.node>,
   ) =>
     _runHardcodedFunction(name, evaluationParams, args) |> E.O.default(
       _runLocalFunction(name, evaluationParams, args),
@@ -212,7 +212,7 @@ module Render = {
         ),
       )
     | #RenderedDist(_) as t => Ok(t) // already a rendered pointSetDist, we're done here
-    | _ => ASTTypes.AST.Node.evaluateAndRetry(evaluationParams, operationToLeaf, t)
+    | _ => ASTTypes.Node.evaluateAndRetry(evaluationParams, operationToLeaf, t)
     }
 }
 
@@ -222,7 +222,7 @@ module Render = {
    but most often it will produce a RenderedDist.
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
-let rec toLeaf = (evaluationParams: ASTTypes.AST.evaluationParams, node: t): result<t, string> =>
+let rec toLeaf = (evaluationParams: ASTTypes.evaluationParams, node: t): result<t, string> =>
   switch node {
   // Leaf nodes just stay leaf nodes
   | #SymbolicDist(_)
@@ -248,7 +248,7 @@ let rec toLeaf = (evaluationParams: ASTTypes.AST.evaluationParams, node: t): res
     |> E.A.R.firstErrorOrOpen
     |> E.R.fmap(r => #Hash(r))
   | #Symbol(r) =>
-    ASTTypes.AST.Environment.get(evaluationParams.environment, r)
+    ASTTypes.Environment.get(evaluationParams.environment, r)
     |> E.O.toResult("Undeclared variable " ++ r)
     |> E.R.bind(_, toLeaf(evaluationParams))
   | #FunctionCall(name, args) =>

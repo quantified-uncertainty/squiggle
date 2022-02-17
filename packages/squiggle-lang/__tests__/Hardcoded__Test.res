@@ -10,7 +10,7 @@ let makeTest = (~only=false, str, item1, item2) =>
         expect(item1) |> toEqual(item2)
       );
 
-let evalParams: ASTTypes.AST.evaluationParams = {
+let evalParams: ASTTypes.evaluationParams = {
   samplingInputs: {
     sampleCount: 1000,
     outputXYPoints: 10000,

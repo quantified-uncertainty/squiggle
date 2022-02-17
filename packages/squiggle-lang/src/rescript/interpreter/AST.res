@@ -1,6 +1,6 @@
-open ASTTypes.AST
+open ASTTypes
 
-let toString = ASTTypes.AST.Node.toString
+let toString = ASTTypes.Node.toString
 
 let envs = (samplingInputs, environment) => {
   samplingInputs: samplingInputs,
@@ -18,7 +18,7 @@ let toPointSetDist = (samplingInputs, environment, node: node) =>
   | Error(e) => Error(e)
   }
 
-let runFunction = (samplingInputs, environment, inputs, fn: ASTTypes.AST.Function.t) => {
+let runFunction = (samplingInputs, environment, inputs, fn: ASTTypes.Function.t) => {
   let params = envs(samplingInputs, environment)
-  ASTTypes.AST.Function.run(params, inputs, fn)
+  ASTTypes.Function.run(params, inputs, fn)
 }
