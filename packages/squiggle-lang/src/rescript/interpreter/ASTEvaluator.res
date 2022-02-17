@@ -75,6 +75,8 @@ module AlgebraicCombination = {
 }
 
 module PointwiseCombination = {
+  //TODO: This is crude and slow. It forces everything to be pointSetDist, even though much
+  //of the process could happen on symbolic distributions without a conversion to be a pointSetDist.
   let pointwiseAdd = (evaluationParams: evaluationParams, t1: t, t2: t) =>
     switch (Node.render(evaluationParams, t1), Node.render(evaluationParams, t2)) {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>

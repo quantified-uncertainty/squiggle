@@ -36,7 +36,7 @@ module Inputs = {
   }
 }
 
-type \"export" = [
+type exported = [
   | #DistPlus(DistPlus.t)
   | #Float(float)
   | #Function(
@@ -126,7 +126,7 @@ let coersionToExportedTypes = (
   inputs,
   env: ASTTypes.environment,
   node: ASTTypes.node,
-): result<\"export", string> =>
+): result<exported, string> =>
   node
   |> renderIfNeeded(inputs)
   |> E.R.bind(_, x =>
