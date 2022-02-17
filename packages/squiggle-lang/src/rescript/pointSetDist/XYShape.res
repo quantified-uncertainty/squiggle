@@ -159,7 +159,7 @@ module XtoY = {
           y1 *. (1. -. fraction) +. y2 *. fraction
         }
     | (#Stepwise, #UseZero) =>
-      (t: T.t, leftIndex: int, x: float) =>
+      (t: T.t, leftIndex: int, _x: float) =>
         if leftIndex < 0 {
           0.0
         } else if leftIndex >= T.length(t) - 1 {
@@ -168,7 +168,7 @@ module XtoY = {
           t.ys[leftIndex]
         }
     | (#Stepwise, #UseOutermostPoints) =>
-      (t: T.t, leftIndex: int, x: float) =>
+      (t: T.t, leftIndex: int, _x: float) =>
         if leftIndex < 0 {
           t.ys[0]
         } else if leftIndex >= T.length(t) - 1 {

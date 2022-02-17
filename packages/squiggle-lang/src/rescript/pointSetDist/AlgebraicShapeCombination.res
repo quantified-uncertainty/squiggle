@@ -100,8 +100,6 @@ let combineShapesContinuousContinuous = (
   s1: PointSetTypes.xyShape,
   s2: PointSetTypes.xyShape,
 ): PointSetTypes.xyShape => {
-  let t1n = s1 |> XYShape.T.length
-  let t2n = s2 |> XYShape.T.length
 
   // if we add the two distributions, we should probably use normal filters.
   // if we multiply the two distributions, we should probably use lognormal filters.
@@ -194,7 +192,7 @@ let toDiscretePointMassesFromDiscrete = (s: PointSetTypes.xyShape): pointMassesW
 
   let masses: array<float> = Belt.Array.makeBy(n, i => ys[i])
   let means: array<float> = Belt.Array.makeBy(n, i => xs[i])
-  let variances: array<float> = Belt.Array.makeBy(n, i => 0.0)
+  let variances: array<float> = Belt.Array.makeBy(n, _ => 0.0)
 
   {n: n, masses: masses, means: means, variances: variances}
 }

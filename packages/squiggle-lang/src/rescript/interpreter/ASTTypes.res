@@ -153,31 +153,6 @@ module Function = {
     }
 }
 
-module Primative = {
-  type t = [
-    | #SymbolicDist(SymbolicDistTypes.symbolicDist)
-    | #RenderedDist(PointSetTypes.pointSetDist)
-    | #Function(array<string>, node)
-  ]
-
-  let isPrimative: node => bool = x =>
-    switch x {
-    | #SymbolicDist(_)
-    | #RenderedDist(_)
-    | #Function(_) => true
-    | _ => false
-    }
-
-  let fromNode: node => option<t> = x =>
-    switch x {
-    | #SymbolicDist(_) as n
-    | #RenderedDist(_) as n
-    | #Function(_) as n =>
-      Some(n)
-    | _ => None
-    }
-}
-
 module SamplingDistribution = {
   type t = [
     | #SymbolicDist(SymbolicDistTypes.symbolicDist)

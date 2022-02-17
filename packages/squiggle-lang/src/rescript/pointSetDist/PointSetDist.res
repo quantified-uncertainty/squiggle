@@ -1,6 +1,7 @@
 open Distributions
 
 type t = PointSetTypes.pointSetDist
+
 let mapToAll = ((fn1, fn2, fn3), t: t) =>
   switch t {
   | Mixed(m) => fn1(m)
@@ -77,9 +78,6 @@ module T = Dist({
 
   let toPointSetDist = (t: t) => t
 
-  let toContinuous = t => None
-  let toDiscrete = t => None
-
   let downsample = (i, t) =>
     fmap((Mixed.T.downsample(i), Discrete.T.downsample(i), Continuous.T.downsample(i)), t)
 
@@ -92,8 +90,6 @@ module T = Dist({
       ),
       t,
     )
-
-  let toDiscreteProbabilityMassFraction = t => 0.0
 
   let normalize = fmap((Mixed.T.normalize, Discrete.T.normalize, Continuous.T.normalize))
 

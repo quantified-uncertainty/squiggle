@@ -240,9 +240,6 @@ let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =
   //  sqtl > 10 ? T.downsample(int_of_float(sqtl), t) : t;
   //};
 
-  let t1d = t1
-  let t2d = t2
-
   // continuous (*) continuous => continuous, but also
   // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:
   let ccConvResult = Continuous.combineAlgebraically(op, t1.continuous, t2.continuous)

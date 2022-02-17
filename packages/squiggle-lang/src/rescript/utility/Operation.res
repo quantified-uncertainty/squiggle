@@ -97,7 +97,7 @@ module Scale = {
 
   let toIntegralCacheFn = x =>
     switch x {
-    | #Multiply => (a, b) => None // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
+    | #Multiply => (_, _) => None // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
     | #Exponentiate => (_, _) => None
     | #Log => (_, _) => None
     }

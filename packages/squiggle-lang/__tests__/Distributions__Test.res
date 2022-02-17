@@ -1,6 +1,3 @@
-open Jest
-open Expect
-
 // let PointSetDist: PointSetTypes.xyPointSetDist = {xs: [1., 4., 8.], ys: [8., 9., 2.]}
 
 // let makeTest = (~only=false, str, item1, item2) =>

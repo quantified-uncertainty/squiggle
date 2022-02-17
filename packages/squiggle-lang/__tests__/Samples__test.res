@@ -38,7 +38,7 @@ describe("Lodash", () =>
     let toArr = discrete |> E.FloatFloatMap.toArray
     makeTest("splitMedium", toArr |> Belt.Array.length, 10)
 
-    let (c, discrete) = SampleSet.Internals.T.splitContinuousAndDiscrete(
+    let (_c, discrete) = SampleSet.Internals.T.splitContinuousAndDiscrete(
       makeDuplicatedArray(500),
     )
     let toArr = discrete |> E.FloatFloatMap.toArray
