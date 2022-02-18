@@ -5,9 +5,10 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    run:
-      shell: bash
-      working-directory: packages/squiggle-lang
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/squiggle-lang
     steps:
     - uses: actions/checkout@v2
     - name: Install Packages
