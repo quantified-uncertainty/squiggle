@@ -1,4 +1,21 @@
-open ASTTypes
+// This file has no dependencies. It's used outside of the interpreter, but the interpreter depends on it.
+
+type algebraicOperation = [
+  | #Add
+  | #Multiply
+  | #Subtract
+  | #Divide
+  | #Exponentiate
+]
+type pointwiseOperation = [#Add | #Multiply | #Exponentiate]
+type scaleOperation = [#Multiply | #Exponentiate | #Log]
+type distToFloatOperation = [
+  | #Pdf(float)
+  | #Cdf(float)
+  | #Inv(float)
+  | #Mean
+  | #Sample
+]
 
 module Algebraic = {
   type t = algebraicOperation
@@ -80,28 +97,16 @@ module Scale = {
 
   let toIntegralCacheFn = x =>
     switch x {
-    | #Multiply => (a, b) => None // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
+    | #Multiply => (_, _) => None // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
     | #Exponentiate => (_, _) => None
     | #Log => (_, _) => None
     }
 }
 
-module T = {
-  let truncateToString = (left: option<float>, right: option<float>, nodeToString) => {
+module Truncate = {
+  let toString = (left: option<float>, right: option<float>, nodeToString) => {
     let left = left |> E.O.dimap(Js.Float.toString, () => "-inf")
     let right = right |> E.O.dimap(Js.Float.toString, () => "inf")
     j`truncate($nodeToString, $left, $right)`
   }
-  let toString = (nodeToString, x) =>
-    switch x {
-    | #AlgebraicCombination(op, t1, t2) => Algebraic.format(op, nodeToString(t1), nodeToString(t2))
-    | #PointwiseCombination(op, t1, t2) => Pointwise.format(op, nodeToString(t1), nodeToString(t2))
-    | #VerticalScaling(scaleOp, t, scaleBy) =>
-      Scale.format(scaleOp, nodeToString(t), nodeToString(scaleBy))
-    | #Normalize(t) => "normalize(k" ++ (nodeToString(t) ++ ")")
-    | #FloatFromDist(floatFromDistOp, t) => DistToFloat.format(floatFromDistOp, nodeToString(t))
-    | #Truncate(lc, rc, t) => truncateToString(lc, rc, nodeToString(t))
-    | #Render(t) => nodeToString(t)
-    | _ => ""
-    } // SymbolicDist and RenderedDist are handled in AST.toString.
 }

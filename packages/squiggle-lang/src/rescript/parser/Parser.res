@@ -122,7 +122,7 @@ module MathAdtToDistDst = {
       | _ => Error("Lognormal distribution needs either mean and stdev or mu and sigma")
       }
     | _ =>
-      parseArgs() |> E.R.fmap((args: array<ASTTypes.AST.node>) =>
+      parseArgs() |> E.R.fmap((args: array<ASTTypes.node>) =>
         #FunctionCall("lognormal", args)
       )
     }
@@ -130,8 +130,8 @@ module MathAdtToDistDst = {
   //  Error("Dotwise exponentiation needs two operands")
   let operationParser = (
     name: string,
-    args: result<array<ASTTypes.AST.node>, string>,
-  ): result<ASTTypes.AST.node, string> => {
+    args: result<array<ASTTypes.node>, string>,
+  ): result<ASTTypes.node, string> => {
     let toOkAlgebraic = r => Ok(#AlgebraicCombination(r))
     let toOkPointwise = r => Ok(#PointwiseCombination(r))
     let toOkTruncate = r => Ok(#Truncate(r))
@@ -170,12 +170,12 @@ module MathAdtToDistDst = {
 
   let functionParser = (
     nodeParser: MathJsonToMathJsAdt.arg => Belt.Result.t<
-      ASTTypes.AST.node,
+      ASTTypes.node,
       string,
     >,
     name: string,
     args: array<MathJsonToMathJsAdt.arg>,
-  ): result<ASTTypes.AST.node, string> => {
+  ): result<ASTTypes.node, string> => {
     let parseArray = ags => ags |> E.A.fmap(nodeParser) |> E.A.R.firstErrorOrOpen
     let parseArgs = () => parseArray(args)
     switch name {
@@ -212,27 +212,27 @@ module MathAdtToDistDst = {
       | (Some(Error(r)), _) => Error(r)
       | (_, Error(r)) => Error(r)
       | (None, Ok(dists)) =>
-        let hash: ASTTypes.AST.node = #FunctionCall(
+        let hash: ASTTypes.node = #FunctionCall(
           "multimodal",
           [#Hash([("dists", #Array(dists)), ("weights", #Array([]))])],
         )
         Ok(hash)
       | (Some(Ok(weights)), Ok(dists)) =>
-        let hash: ASTTypes.AST.node = #FunctionCall(
+        let hash: ASTTypes.node = #FunctionCall(
           "multimodal",
           [#Hash([("dists", #Array(dists)), ("weights", #Array(weights))])],
         )
         Ok(hash)
       }
     | name =>
-      parseArgs() |> E.R.fmap((args: array<ASTTypes.AST.node>) =>
+      parseArgs() |> E.R.fmap((args: array<ASTTypes.node>) =>
         #FunctionCall(name, args)
       )
     }
   }
 
   let rec nodeParser: MathJsonToMathJsAdt.arg => result<
-    ASTTypes.AST.node,
+    ASTTypes.node,
     string,
   > = x =>
     switch x {
@@ -246,7 +246,7 @@ module MathAdtToDistDst = {
   //   let evaluatedExpression = run(expression);
   //   `Function(_ => Ok(evaluatedExpression));
   // }
-  let rec topLevel = (r): result<ASTTypes.Program.program, string> =>
+  let rec topLevel = (r): result<ASTTypes.program, string> =>
     switch r {
     | FunctionAssignment({name, args, expression}) =>
       switch nodeParser(expression) {
@@ -267,7 +267,7 @@ module MathAdtToDistDst = {
       blocks |> E.A.fmap(b => topLevel(b)) |> E.A.R.firstErrorOrOpen |> E.R.fmap(E.A.concatMany)
     }
 
-  let run = (r): result<ASTTypes.Program.program, string> =>
+  let run = (r): result<ASTTypes.program, string> =>
     r |> MathAdtCleaner.run |> topLevel
 }
 

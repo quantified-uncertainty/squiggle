@@ -80,7 +80,7 @@ module Internals = {
 
 let toPointSetDist = (
   ~samples: Internals.T.t,
-  ~samplingInputs: ASTTypes.AST.samplingInputs,
+  ~samplingInputs: SamplingInputs.samplingInputs,
   (),
 ) => {
   Array.fast_sort(compare, samples)

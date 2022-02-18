@@ -227,7 +227,7 @@ module T = Dist({
   }
 })
 
-let combineAlgebraically = (op: ASTTypes.algebraicOperation, t1: t, t2: t): t => {
+let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t => {
   // Discrete convolution can cause a huge increase in the number of samples,
   // so we'll first downsample.
 
@@ -239,9 +239,6 @@ let combineAlgebraically = (op: ASTTypes.algebraicOperation, t1: t, t2: t): t =>
   //  let sqtl = sqrt(float_of_int(totalLength(t)));
   //  sqtl > 10 ? T.downsample(int_of_float(sqtl), t) : t;
   //};
-
-  let t1d = t1
-  let t2d = t2
 
   // continuous (*) continuous => continuous, but also
   // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:

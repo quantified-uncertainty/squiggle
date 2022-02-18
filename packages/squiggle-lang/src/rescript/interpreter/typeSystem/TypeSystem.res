@@ -1,5 +1,5 @@
-type node = ASTTypes.AST.node
-let getFloat = ASTTypes.AST.getFloat
+type node = ASTTypes.node
+let getFloat = ASTTypes.Node.getFloat
 
 type samplingDist = [
   | #SymbolicDist(SymbolicDistTypes.symbolicDist)
@@ -61,7 +61,7 @@ module TypedValue = {
       |> E.A.fmap(((name, t)) => fromNode(t) |> E.R.fmap(r => (name, r)))
       |> E.A.R.firstErrorOrOpen
       |> E.R.fmap(r => #Hash(r))
-    | e => Error("Wrong type: " ++ ASTBasic.toString(e))
+    | e => Error("Wrong type: " ++ ASTTypes.Node.toString(e))
     }
 
   // todo: Arrays and hashes
@@ -73,12 +73,12 @@ module TypedValue = {
       | _ => Error("Type Error: Expected float.")
       }
     | (#SamplingDistribution, _) =>
-      PTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
+      ASTTypes.SamplingDistribution.renderIfIsNotSamplingDistribution(
         evaluationParams,
         node,
       ) |> E.R.bind(_, fromNode)
     | (#RenderedDistribution, _) =>
-      ASTTypes.AST.Render.render(evaluationParams, node) |> E.R.bind(_, fromNode)
+      ASTTypes.Node.render(evaluationParams, node) |> E.R.bind(_, fromNode)
     | (#Array(_type), #Array(b)) =>
       b
       |> E.A.fmap(fromNodeWithTypeCoercion(evaluationParams, _type))
@@ -89,7 +89,7 @@ module TypedValue = {
         named |> E.A.fmap(((name, intendedType)) => (
           name,
           intendedType,
-          ASTTypes.AST.Hash.getByName(r, name),
+          Hash.getByName(r, name),
         ))
       let typedHash =
         keyValues
@@ -172,7 +172,7 @@ module Function = {
       |> E.A.R.firstErrorOrOpen
 
     let inputsToTypedValues = (
-      evaluationParams: ASTTypes.AST.evaluationParams,
+      evaluationParams: ASTTypes.evaluationParams,
       inputNodes: inputNodes,
       t: t,
     ) =>
@@ -181,7 +181,7 @@ module Function = {
       )
 
     let run = (
-      evaluationParams: ASTTypes.AST.evaluationParams,
+      evaluationParams: ASTTypes.evaluationParams,
       inputNodes: inputNodes,
       t: t,
     ) =>

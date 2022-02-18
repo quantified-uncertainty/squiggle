@@ -14,7 +14,7 @@ module Inputs = {
   type inputs = {
     squiggleString: string,
     samplingInputs: SamplingInputs.t,
-    environment: ASTTypes.AST.environment,
+    environment: ASTTypes.environment,
   }
 
   let empty: SamplingInputs.t = {
@@ -27,7 +27,7 @@ module Inputs = {
   let make = (
     ~samplingInputs=empty,
     ~squiggleString,
-    ~environment=ASTTypes.AST.Environment.empty,
+    ~environment=ASTTypes.Environment.empty,
     (),
   ): inputs => {
     samplingInputs: samplingInputs,
@@ -36,12 +36,12 @@ module Inputs = {
   }
 }
 
-type \"export" = [
+type exported = [
   | #DistPlus(DistPlus.t)
   | #Float(float)
   | #Function(
-    (array<string>, ASTTypes.AST.node),
-    ASTTypes.AST.environment,
+    (array<string>, ASTTypes.node),
+    ASTTypes.environment,
   )
 ]
 
@@ -53,18 +53,18 @@ module Internals = {
   ): Inputs.inputs => {
     samplingInputs: samplingInputs,
     squiggleString: squiggleString,
-    environment: ASTTypes.AST.Environment.update(environment, str, _ => Some(
+    environment: ASTTypes.Environment.update(environment, str, _ => Some(
       node,
     )),
   }
 
   type outputs = {
-    graph: ASTTypes.AST.node,
+    graph: ASTTypes.node,
     pointSetDist: PointSetTypes.pointSetDist,
   }
   let makeOutputs = (graph, pointSetDist): outputs => {graph: graph, pointSetDist: pointSetDist}
 
-  let makeInputs = (inputs: Inputs.inputs): ASTTypes.AST.samplingInputs => {
+  let makeInputs = (inputs: Inputs.inputs): SamplingInputs.samplingInputs => {
     sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
     outputXYPoints: inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
     kernelWidth: inputs.samplingInputs.kernelWidth,
@@ -74,7 +74,7 @@ module Internals = {
   let runNode = (inputs, node) =>
     AST.toLeaf(makeInputs(inputs), inputs.environment, node)
 
-  let runProgram = (inputs: Inputs.inputs, p: ASTTypes.Program.program) => {
+  let runProgram = (inputs: Inputs.inputs, p: ASTTypes.program) => {
     let ins = ref(inputs)
     p
     |> E.A.fmap(x =>
@@ -97,8 +97,8 @@ module Internals = {
     DistPlus.make(~pointSetDist, ~squiggleString=Some(inputs.squiggleString), ())
 }
 
-let renderIfNeeded = (inputs: Inputs.inputs, node: ASTTypes.AST.node): result<
-  ASTTypes.AST.node,
+let renderIfNeeded = (inputs: Inputs.inputs, node: ASTTypes.node): result<
+  ASTTypes.node,
   string,
 > =>
   node |> (
@@ -121,12 +121,12 @@ let renderIfNeeded = (inputs: Inputs.inputs, node: ASTTypes.AST.node): result<
       }
   )
 
-// TODO: Consider using ASTTypes.AST.getFloat or similar in this function
+// TODO: Consider using ASTTypes.getFloat or similar in this function
 let coersionToExportedTypes = (
   inputs,
-  env: ASTTypes.AST.environment,
-  node: ASTTypes.AST.node,
-): result<\"export", string> =>
+  env: ASTTypes.environment,
+  node: ASTTypes.node,
+): result<exported, string> =>
   node
   |> renderIfNeeded(inputs)
   |> E.R.bind(_, x =>
@@ -160,7 +160,7 @@ let evaluateProgram = (inputs: Inputs.inputs) =>
 
 let evaluateFunction = (
   inputs: Inputs.inputs,
-  fn: (array<string>, ASTTypes.AST.node),
+  fn: (array<string>, ASTTypes.node),
   fnInputs,
 ) => {
   let output = AST.runFunction(
