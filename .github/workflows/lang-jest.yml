@@ -14,6 +14,6 @@ jobs:
     - name: Install Packages
       run: yarn 
     - name: Build rescript
-      run: yarn rescript build -with-deps
+      run: yarn run build
     - name: Run tests
       run: yarn test
