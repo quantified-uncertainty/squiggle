@@ -1,0 +1,19 @@
+name: Squiggle Lang Jest Tests
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/squiggle-lang
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Packages
+      run: yarn 
+    - name: Build rescript
+      run: yarn rescript build -with-deps
+    - name: Run tests
+      run: yarn test
