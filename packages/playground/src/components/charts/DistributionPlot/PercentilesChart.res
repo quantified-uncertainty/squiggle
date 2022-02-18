@@ -30,7 +30,7 @@ module Internal = {
 
 @react.component
 @module("./PercentilesChart.js")
-let make = (~dists: array<(float, DistTypes.distPlus)>, ~children=React.null) => {
+let make = (~dists: array<(float, PointSetTypes.distPlus)>, ~children=React.null) => {
   let data = dists -> Belt.Array.map(((x, r)) =>
     {
       "x": x,

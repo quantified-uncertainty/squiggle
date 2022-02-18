@@ -1,7 +1,7 @@
 open DistPlusPlotReducer
 let plotBlue = #hex("1860ad")
 
-let showAsForm = (distPlus: ForetoldAppSquiggle.DistTypes.distPlus) =>
+let showAsForm = (distPlus: ForetoldAppSquiggle.PointSetTypes.distPlus) =>
   <div> <Antd.Input value={distPlus.squiggleString |> E.O.default("")} /> </div>
 
 let showFloat = (~precision=3, number) => <NumberShower number precision />
@@ -24,14 +24,14 @@ let table = (distPlus, x) =>
           <td className="px-4 py-2 border ">
             {distPlus
             |> ForetoldAppSquiggle.DistPlus.T.xToY(x)
-            |> ForetoldAppSquiggle.DistTypes.MixedPoint.toDiscreteValue
+            |> ForetoldAppSquiggle.PointSetTypes.MixedPoint.toDiscreteValue
             |> Js.Float.toPrecisionWithPrecision(_, ~digits=7)
             |> React.string}
           </td>
           <td className="px-4 py-2 border ">
             {distPlus
             |> ForetoldAppSquiggle.DistPlus.T.xToY(x)
-            |> ForetoldAppSquiggle.DistTypes.MixedPoint.toContinuousValue
+            |> ForetoldAppSquiggle.PointSetTypes.MixedPoint.toContinuousValue
             |> Js.Float.toPrecisionWithPrecision(_, ~digits=7)
             |> React.string}
           </td>
@@ -155,7 +155,7 @@ let adjustBoth = discreteProbabilityMassFraction => {
 
 module DistPlusChart = {
   @react.component
-  let make = (~distPlus: ForetoldAppSquiggle.DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
+  let make = (~distPlus: ForetoldAppSquiggle.PointSetTypes.distPlus, ~config: chartConfig, ~onHover) => {
     open ForetoldAppSquiggle.DistPlus
 
     let discrete = distPlus |> T.toDiscrete |> E.O.fmap(ForetoldAppSquiggle.Discrete.getShape)
@@ -176,7 +176,7 @@ module DistPlusChart = {
 
     let maxX = distPlus |> T.Integral.yToX(0.99999)
 
-    let timeScale = distPlus.unit |> ForetoldAppSquiggle.DistTypes.DistributionUnit.toJson
+    let timeScale = distPlus.unit |> ForetoldAppSquiggle.PointSetTypes.DistributionUnit.toJson
     let discreteProbabilityMassFraction = distPlus |> T.toDiscreteProbabilityMassFraction
 
     let (yMaxDiscreteDomainFactor, yMaxContinuousDomainFactor) = adjustBoth(
@@ -202,13 +202,13 @@ module DistPlusChart = {
 
 module IntegralChart = {
   @react.component
-  let make = (~distPlus: ForetoldAppSquiggle.DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
+  let make = (~distPlus: ForetoldAppSquiggle.PointSetTypes.distPlus, ~config: chartConfig, ~onHover) => {
     let integral = distPlus.integralCache
     let continuous = integral |> ForetoldAppSquiggle.Continuous.toLinear |> E.O.fmap(ForetoldAppSquiggle.Continuous.getShape)
     let minX = distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.00001)
 
     let maxX = distPlus |> ForetoldAppSquiggle.DistPlus.T.Integral.yToX(0.99999)
-    let timeScale = distPlus.unit |> ForetoldAppSquiggle.DistTypes.DistributionUnit.toJson
+    let timeScale = distPlus.unit |> ForetoldAppSquiggle.PointSetTypes.DistributionUnit.toJson
     <DistributionPlot
       xScale={config.xLog ? "log" : "linear"}
       yScale={config.yLog ? "log" : "linear"}
@@ -225,7 +225,7 @@ module IntegralChart = {
 
 module Chart = {
   @react.component
-  let make = (~distPlus: ForetoldAppSquiggle.DistTypes.distPlus, ~config: chartConfig, ~onHover) => {
+  let make = (~distPlus: ForetoldAppSquiggle.PointSetTypes.distPlus, ~config: chartConfig, ~onHover) => {
     let chart = React.useMemo2(
       () =>
         config.isCumulative
@@ -246,7 +246,7 @@ module Chart = {
 let button = "bg-gray-300 hover:bg-gray-500 text-grey-darkest text-xs px-4 py-1"
 
 @react.component
-let make = (~distPlus: ForetoldAppSquiggle.DistTypes.distPlus) => {
+let make = (~distPlus: ForetoldAppSquiggle.PointSetTypes.distPlus) => {
   let (x, setX) = React.useState(() => 0.)
   let (state, dispatch) = React.useReducer(DistPlusPlotReducer.reducer, DistPlusPlotReducer.init)
 
