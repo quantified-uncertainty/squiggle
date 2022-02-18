@@ -13,5 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install Packages
       run: yarn 
+    - name: Build rescript
+      run: yarn recsript build -with-deps
     - name: Run tests
       run: yarn test
