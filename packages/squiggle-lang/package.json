@@ -4,9 +4,9 @@
   "homepage": "https://foretold-app.github.io/estiband/",
   "private": false,
   "scripts": {
-    "build": "rescript build",
+    "build": "rescript build -with-deps",
     "parcel": "parcel build ./src/js/index.js --no-source-maps --no-autoinstall",
-    "start": "rescript build -w",
+    "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
     "test": "jest",
     "test:ci": "yarn jest ./__tests__/Lodash__test.re",
