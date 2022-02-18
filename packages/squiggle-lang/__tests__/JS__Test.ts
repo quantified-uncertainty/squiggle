@@ -8,4 +8,8 @@ describe("A simple result", () => {
         let foo = run("normal(5,2)");
         expect(1).toEqual(1);
     });
+    test("log(1) = 0", () => {
+      let foo = run("log(1)");
+      expect(foo).toEqual({ tag: 'Ok', value: { hd: { NAME: 'Float', VAL: 0}, tl: 0}});
+    })
 });
