@@ -30,7 +30,17 @@ Convert XY coordinates into a distribution. Figure out a good way to do this for
 [Metalog Distribution](https://en.wikipedia.org/wiki/Metalog_distribution)  
 Add the Metalog distribution, and some convenient methods for generating these distributions. This might be a bit tricky because we might need or build a library to fit data. There's no Metalog javascript library yet, this would be pretty useful. There's already a Metalog library in Python, so that one could be used for inspiration.
 
+``Distribution.smoothen(p)``
+Takes a distribution and smoothens it. For example, [Elicit Forecast](https://forecast.elicit.org/) does something like this, with uniform distributions.
+
 ## Major Future Additions
+
+**Probabilities**  
+Right now Squiggle mostly works with probability distributions only, but it should also work smoothly with probabilities.
+
+**Scoring**  
+Have functions to score probabilities, probability distributions, and functions that return probability distributions.
+
 **Full javascript library**  
 A full Javascript library that accesses most of the probabilistic functionality of Squiggle, but can be used directly in javascript functions.
 
