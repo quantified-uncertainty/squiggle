@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Squiggle (alpha)',
-  tagline: "A programming language for probabilistic estimation. It's still heavily experimental, and we're working to get to a stable release candidate.",
+  tagline: "Scorable programming, for use by forecasters",
   url: 'https://squiggle-documentation.netlify.app',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -53,9 +53,14 @@ const config = {
             type: 'doc',
             docId: 'Language',
             position: 'left',
-            label: 'Tutorial',
+            label: 'Documentation',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
+          {
+            href: 'https://playground.squiggle-language.com/dist-builder',
+            label: 'Playground',
+            position: 'left',
+          },
           {
             href: 'https://github.com/QURIresearch/squiggle',
             label: 'GitHub',
