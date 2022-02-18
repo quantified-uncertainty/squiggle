@@ -186,6 +186,17 @@ let all = [
       },
     (),
   ),
+  Function.T.make(
+    ~name="log",
+    ~outputType=#Float,
+    ~inputTypes=[#Float],
+    ~run=x =>
+      switch x {
+      | [#Float(a)] => Ok(#SymbolicDist(#Float(Js.Math.log(a))))
+      | e => wrongInputsError(e)
+      },
+    (),
+  ),
   makeDistFloat("pdf", (dist, float) => floatFromDist(#Pdf(float), dist)),
   makeDistFloat("inv", (dist, float) => floatFromDist(#Inv(float), dist)),
   makeDistFloat("cdf", (dist, float) => floatFromDist(#Cdf(float), dist)),
