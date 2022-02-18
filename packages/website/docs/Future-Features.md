@@ -30,7 +30,17 @@ Convert XY coordinates into a distribution. Figure out a good way to do this for
 [Metalog Distribution](https://en.wikipedia.org/wiki/Metalog_distribution)  
 Add the Metalog distribution, and some convenient methods for generating these distributions. This might be a bit tricky because we might need or build a library to fit data. There's no Metalog javascript library yet, this would be pretty useful. There's already a Metalog library in Python, so that one could be used for inspiration.
 
+``Distribution.smoothen(p)``
+Takes a distribution and smoothens it. For example, [Elicit Forecast](https://forecast.elicit.org/) does something like this, with uniform distributions.
+
 ## Major Future Additions
+
+**Probabilities**  
+Right now Squiggle mostly works with probability distributions only, but it should also work smoothly with probabilities.
+
+**Scoring**  
+Have functions to score probabilities, probability distributions, and functions that return probability distributions.
+
 **Full javascript library**  
 A full Javascript library that accesses most of the probabilistic functionality of Squiggle, but can be used directly in javascript functions.
 
@@ -58,7 +68,7 @@ Guesstimate has Sensitivity analysis that's pretty useful. This could be quite f
 **Annotation**  
 It might be useful to allow people to annotate functions and variables with longer descriptions, maybe Markdown. This could very much help interpretation/analysis of these items.
 
-**Randomness Seeds**
+**Randomness Seeds**  
 Right now, Monte Carlo simulations are totally random. It would be nicer to be able to enter a seed somehow in order to control the randomness. Or, with the same seed, the function should always return the same values. This would make debugging and similar easier.
 
 ## Major Standard Language Features
