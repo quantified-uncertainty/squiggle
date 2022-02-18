@@ -91,7 +91,7 @@ module Internals = {
   }
 
   let inputsToLeaf = (inputs: Inputs.inputs) =>
-    Parser.fromString(inputs.squiggleString) |> E.R.bind(_, g => runProgram(inputs, g))
+    Parser.fromString(inputs.squiggleString) -> E.R.bind(g => runProgram(inputs, g))
 
   let outputToDistPlus = (inputs: Inputs.inputs, pointSetDist: PointSetTypes.pointSetDist) =>
     DistPlus.make(~pointSetDist, ~squiggleString=Some(inputs.squiggleString), ())

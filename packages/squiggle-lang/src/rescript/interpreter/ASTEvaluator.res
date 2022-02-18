@@ -1,6 +1,5 @@
 open ASTTypes
 
-type t = node
 type tResult = node => result<node, string>
 
 /* Given two random variables A and B, this returns the distribution
@@ -8,7 +7,7 @@ type tResult = node => result<node, string>
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
    In general, this is implemented via convolution. */
 module AlgebraicCombination = {
-  let tryAnalyticalSimplification = (operation, t1: t, t2: t) =>
+  let tryAnalyticalSimplification = (operation, t1: node, t2: node) =>
     switch (operation, t1, t2) {
     | (operation, #SymbolicDist(d1), #SymbolicDist(d2)) =>
       switch SymbolicDist.T.tryAnalyticalSimplification(d1, d2, operation) {
@@ -61,8 +60,8 @@ module AlgebraicCombination = {
   let operationToLeaf = (
     evaluationParams: evaluationParams,
     algebraicOp: Operation.algebraicOperation,
-    t1: t,
-    t2: t,
+    t1: node,
+    t2: node,
   ): result<node, string> =>
     algebraicOp
     |> tryAnalyticalSimplification(_, t1, t2)
@@ -77,7 +76,7 @@ module AlgebraicCombination = {
 module PointwiseCombination = {
   //TODO: This is crude and slow. It forces everything to be pointSetDist, even though much
   //of the process could happen on symbolic distributions without a conversion to be a pointSetDist.
-  let pointwiseAdd = (evaluationParams: evaluationParams, t1: t, t2: t) =>
+  let pointwiseAdd = (evaluationParams: evaluationParams, t1: node, t2: node) =>
     switch (Node.render(evaluationParams, t1), Node.render(evaluationParams, t2)) {
     | (Ok(#RenderedDist(rs1)), Ok(#RenderedDist(rs2))) =>
       Ok(
@@ -98,7 +97,7 @@ module PointwiseCombination = {
     | _ => Error("Pointwise combination: rendering failed.")
     }
 
-  let pointwiseCombine = (fn, evaluationParams: evaluationParams, t1: t, t2: t) =>
+  let pointwiseCombine = (fn, evaluationParams: evaluationParams, t1: node, t2: node) =>
     switch // TODO: construct a function that we can easily sample from, to construct
     // a RenderedDist. Use the xMin and xMax of the rendered pointSetDists to tell the sampling function where to look.
     // TODO: This should work for symbolic distributions too!
@@ -113,8 +112,8 @@ module PointwiseCombination = {
   let operationToLeaf = (
     evaluationParams: evaluationParams,
     pointwiseOp: Operation.pointwiseOperation,
-    t1: t,
-    t2: t,
+    t1: node,
+    t2: node,
   ) =>
     switch pointwiseOp {
     | #Add => pointwiseAdd(evaluationParams, t1, t2)
@@ -204,7 +203,7 @@ module FunctionCall = {
 }
 
 module Render = {
-  let rec operationToLeaf = (evaluationParams: evaluationParams, t: node): result<t, string> =>
+  let rec operationToLeaf = (evaluationParams: evaluationParams, t: node): result<node, string> =>
     switch t {
     | #Function(_) => Error("Cannot render a function")
     | #SymbolicDist(d) =>
@@ -224,7 +223,7 @@ module Render = {
    but most often it will produce a RenderedDist.
    This function is used mainly to turn a parse tree into a single RenderedDist
    that can then be displayed to the user. */
-let rec toLeaf = (evaluationParams: ASTTypes.evaluationParams, node: t): result<t, string> =>
+let rec toLeaf = (evaluationParams: ASTTypes.evaluationParams, node: node): result<node, string> =>
   switch node {
   // Leaf nodes just stay leaf nodes
   | #SymbolicDist(_)
