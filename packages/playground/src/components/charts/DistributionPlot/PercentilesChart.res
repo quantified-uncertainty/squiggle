@@ -1,4 +1,4 @@
-open ForetoldAppSquiggle
+open SquiggleLang
 @module("./PercentilesChart.js")
 external percentilesChart: React.element = "PercentilesChart"
 

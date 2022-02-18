@@ -95,12 +95,12 @@ let make = (
       ?xScale
       ?yScale
       ?timeScale
-      discrete={discrete |> E.O.fmap(ForetoldAppSquiggle.XYShape.T.toJs)}
+      discrete={discrete |> E.O.fmap(SquiggleLang.XYShape.T.toJs)}
       height
       marginBottom=50
       marginTop=0
       onHover
-      continuous={continuous |> E.O.fmap(ForetoldAppSquiggle.XYShape.T.toJs)}
+      continuous={continuous |> E.O.fmap(SquiggleLang.XYShape.T.toJs)}
       showDistributionLines
       showDistributionYAxis
       showVerticalLine
