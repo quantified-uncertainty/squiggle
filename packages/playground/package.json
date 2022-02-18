@@ -1,5 +1,5 @@
 {
-  "name": "@foretold-app/squiggle-playground",
+  "name": "@squiggle/playground",
   "version": "0.1.0",
   "homepage": "https://foretold-app.github.io/estiband/",
   "scripts": {
@@ -61,7 +61,7 @@
     "react-vega": "^7.4.4",
     "reschema": "^2.2.0",
     "rescript": "^9.1.4",
-    "@foretold-app/squiggle": "^0.1.9",
+    "@squiggle/lang": "^0.1.9",
     "tailwindcss": "1.2.0",
     "vega": "*",
     "vega-embed": "6.6.0",

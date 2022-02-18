@@ -100,7 +100,7 @@ module DemoDist = {
       <div>
         {switch options {
         | Some(options) =>
-          let inputs1 = ForetoldAppSquiggle.ProgramEvaluator.Inputs.make(
+          let inputs1 = SquiggleLang.ProgramEvaluator.Inputs.make(
             ~samplingInputs={
               sampleCount: Some(options.sampleCount),
               outputXYPoints: Some(options.outputXYPoints),
@@ -117,15 +117,15 @@ module DemoDist = {
             (),
           )
 
-          let distributionList = ForetoldAppSquiggle.ProgramEvaluator.evaluateProgram(inputs1)
+          let distributionList = SquiggleLang.ProgramEvaluator.evaluateProgram(inputs1)
 
           let renderExpression = response1 => 
             switch response1 {
-              | #DistPlus(distPlus1) => <DistPlusPlot distPlus={ForetoldAppSquiggle.DistPlus.T.normalize(distPlus1)} />
+              | #DistPlus(distPlus1) => <DistPlusPlot distPlus={SquiggleLang.DistPlus.T.normalize(distPlus1)} />
               | #Float(f) => <NumberShower number=f precision=3 />
               | #Function((f, a), env) =>
                 //  Problem: When it gets the function, it doesn't save state about previous commands
-                let foo: ForetoldAppSquiggle.ProgramEvaluator.Inputs.inputs = {
+                let foo: SquiggleLang.ProgramEvaluator.Inputs.inputs = {
                   squiggleString: squiggleString,
                   samplingInputs: inputs1.samplingInputs,
                   environment: env,
@@ -133,13 +133,13 @@ module DemoDist = {
                 let results =
                   E.A.Floats.range(options.diagramStart, options.diagramStop, options.diagramCount)
                   |> E.A.fmap(r =>
-                    ForetoldAppSquiggle.ProgramEvaluator.evaluateFunction(
+                    SquiggleLang.ProgramEvaluator.evaluateFunction(
                       foo,
                       (f, a),
                       [#SymbolicDist(#Float(r))],
                     ) |> E.R.bind(_, a =>
                       switch a {
-                      | #DistPlus(d) => Ok((r, ForetoldAppSquiggle.DistPlus.T.normalize(d)))
+                      | #DistPlus(d) => Ok((r, SquiggleLang.DistPlus.T.normalize(d)))
                       | n =>
                         Js.log2("Error here", n)
                         Error("wrong type")
