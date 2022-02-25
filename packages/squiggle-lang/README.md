@@ -41,6 +41,11 @@ rebuilding every time there is one.
 
 Finally, `yarn test` runs the current test suite over the language.
 
+You may notice sometimes, that there are errors about the `rationale` package.
+If you ever get these errors, `yarn build` should fix this issue. These errors
+occur because `yarn build` also needs to create build files that are in `node_modules`.
+So if you replace `node_modules` you may need to rebuild to get those files back.
+
 ## Distributing this package or using this package from other monorepo packages
 If you would like to distribute this package, run `yarn package` to compile all the js
 and typescript into the `dist` directory. This `dist` directory code is what's
