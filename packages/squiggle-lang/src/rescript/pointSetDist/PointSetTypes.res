@@ -55,6 +55,7 @@ type pointSetDistMonad<'a, 'b, 'c> =
   | Discrete('b)
   | Continuous('c)
 
+@genType
 type pointSetDist = pointSetDistMonad<mixedShape, discreteShape, continuousShape>
 
 module ShapeMonad = {
@@ -73,6 +74,7 @@ type generationSource =
 type distributionUnit =
   | UnspecifiedDistribution
 
+@genType
 type distPlus = {
   pointSetDist: pointSetDist,
   domain: domain,

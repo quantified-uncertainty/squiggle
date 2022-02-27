@@ -5,7 +5,7 @@ module Inputs = {
       sampleCount: option<int>,
       outputXYPoints: option<int>,
       kernelWidth: option<float>,
-      pointSetDistLength: option<int>,
+      pointDistLength: option<int>,
     }
   }
   let defaultRecommendedLength = 100
@@ -21,7 +21,7 @@ module Inputs = {
     sampleCount: None,
     outputXYPoints: None,
     kernelWidth: None,
-    pointSetDistLength: None,
+    pointDistLength: None,
   }
 
   let make = (
@@ -36,13 +36,10 @@ module Inputs = {
   }
 }
 
-type exported = [
+type exportType = [
   | #DistPlus(DistPlus.t)
   | #Float(float)
-  | #Function(
-    (array<string>, ASTTypes.node),
-    ASTTypes.environment,
-  )
+  | #Function((float) => Belt.Result.t<DistPlus.t,string>)
 ]
 
 module Internals = {
@@ -62,13 +59,13 @@ module Internals = {
     graph: ASTTypes.node,
     pointSetDist: PointSetTypes.pointSetDist,
   }
-  let makeOutputs = (graph, pointSetDist): outputs => {graph: graph, pointSetDist: pointSetDist}
+  let makeOutputs = (graph, shape): outputs => {graph: graph, pointSetDist: shape}
 
   let makeInputs = (inputs: Inputs.inputs): SamplingInputs.samplingInputs => {
     sampleCount: inputs.samplingInputs.sampleCount |> E.O.default(10000),
     outputXYPoints: inputs.samplingInputs.outputXYPoints |> E.O.default(10000),
     kernelWidth: inputs.samplingInputs.kernelWidth,
-    pointSetDistLength: inputs.samplingInputs.pointSetDistLength |> E.O.default(10000),
+    pointSetDistLength: inputs.samplingInputs.pointDistLength |> E.O.default(10000),
   }
 
   let runNode = (inputs, node) =>
@@ -91,7 +88,7 @@ module Internals = {
   }
 
   let inputsToLeaf = (inputs: Inputs.inputs) =>
-    Parser.fromString(inputs.squiggleString) -> E.R.bind(g => runProgram(inputs, g))
+    Parser.fromString(inputs.squiggleString) |> E.R.bind(_, g => runProgram(inputs, g))
 
   let outputToDistPlus = (inputs: Inputs.inputs, pointSetDist: PointSetTypes.pointSetDist) =>
     DistPlus.make(~pointSetDist, ~squiggleString=Some(inputs.squiggleString), ())
@@ -121,12 +118,31 @@ let renderIfNeeded = (inputs: Inputs.inputs, node: ASTTypes.node): result<
       }
   )
 
-// TODO: Consider using ASTTypes.getFloat or similar in this function
-let coersionToExportedTypes = (
+let rec returnDist = (functionInfo : (array<string>, ASTTypes.node), 
+                  inputs : Inputs.inputs,
+                  env : ASTTypes.environment) => {
+  (input : float) => {
+    let foo: Inputs.inputs = {...inputs, environment: env};
+    evaluateFunction(
+      foo,
+      functionInfo,
+      [#SymbolicDist(#Float(input))],
+    ) |> E.R.bind(_, a =>
+      switch a {
+      | #DistPlus(d) => Ok(DistPlus.T.normalize(d))
+      | n =>
+        Js.log2("Error here", n)
+        Error("wrong type")
+      }
+    )
+  }
+}
+// TODO: Consider using ExpressionTypes.ExpressionTree.getFloat or similar in this function
+and coersionToExportedTypes = (
   inputs,
   env: ASTTypes.environment,
   node: ASTTypes.node,
-): result<exported, string> =>
+): result<exportType, string> =>
   node
   |> renderIfNeeded(inputs)
   |> E.R.bind(_, x =>
@@ -134,31 +150,12 @@ let coersionToExportedTypes = (
     | #RenderedDist(Discrete({xyShape: {xs: [x], ys: [1.0]}})) => Ok(#Float(x))
     | #SymbolicDist(#Float(x)) => Ok(#Float(x))
     | #RenderedDist(n) => Ok(#DistPlus(Internals.outputToDistPlus(inputs, n)))
-    | #Function(n) => Ok(#Function(n, env))
+    | #Function(n) => Ok(#Function(returnDist(n, inputs, env)))
     | n => Error("Didn't output a rendered distribution. Format:" ++ AST.toString(n))
     }
   )
 
-let rec mapM = (f, xs) =>
-  switch xs {
-  | list{} => Ok(list{})
-  | list{x, ...rest} =>
-    switch f(x) {
-    | Error(err) => Error(err)
-    | Ok(val) =>
-      switch mapM(f, rest) {
-      | Error(err) => Error(err)
-      | Ok(restList) => Ok(list{val, ...restList})
-      }
-    }
-  }
-
-let evaluateProgram = (inputs: Inputs.inputs) =>
-  inputs
-  |> Internals.inputsToLeaf
-  |> E.R.bind(_, xs => mapM(((a, b)) => coersionToExportedTypes(inputs, a, b), Array.to_list(xs)))
-
-let evaluateFunction = (
+and evaluateFunction = (
   inputs: Inputs.inputs,
   fn: (array<string>, ASTTypes.node),
   fnInputs,
@@ -172,6 +169,29 @@ let evaluateFunction = (
   output |> E.R.bind(_, coersionToExportedTypes(inputs, inputs.environment))
 }
 
+
+
+
+let rec mapM = (f, xs) =>
+  switch xs {
+  | [] => Ok([])
+  | arr =>
+    switch f(arr[0]) {
+    | Error(err) => Error(err)
+    | Ok(val) =>
+      switch mapM(f, Belt.Array.sliceToEnd(arr, 1)) {
+      | Error(err) => Error(err)
+      | Ok(restList) => Ok(Belt.Array.concat([val], restList))
+      }
+    }
+  }
+
+let evaluateProgram = (inputs: Inputs.inputs) =>
+  inputs
+  |> Internals.inputsToLeaf
+  |> E.R.bind(_, xs => mapM(((a, b)) => coersionToExportedTypes(inputs, a, b), xs))
+
+
 @genType
 let runAll = (squiggleString: string) => {
   let inputs = Inputs.make(
@@ -179,12 +199,12 @@ let runAll = (squiggleString: string) => {
       sampleCount: Some(10000),
       outputXYPoints: Some(10000),
       kernelWidth: None,
-      pointSetDistLength: Some(1000),
+      pointDistLength: Some(1000),
     },
     ~squiggleString,
     ~environment=[]->Belt.Map.String.fromArray,
     (),
   )
   let response1 = evaluateProgram(inputs);
-  response1;
+  response1
 }

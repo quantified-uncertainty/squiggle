@@ -31,7 +31,8 @@
     "rationale"
   ],
   "gentypeconfig": {
-    "language": "untyped",
+    "language": "typescript",
+    "generatedFileExtension": ".gen.ts",
     "module": "commonjs",
     "shims": {},
     "debug": {
