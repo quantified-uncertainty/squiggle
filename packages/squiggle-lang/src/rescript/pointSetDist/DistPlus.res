@@ -1,5 +1,6 @@
 open PointSetTypes;
 
+@genType
 type t = PointSetTypes.distPlus;
 
 let pointSetDistIntegral = pointSetDist => PointSetDist.T.Integral.get(pointSetDist);

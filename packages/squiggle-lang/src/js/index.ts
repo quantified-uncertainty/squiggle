@@ -1,1 +1,3 @@
-export {runAll as run} from '../rescript/ProgramEvaluator.gen'
+import {runAll} from '../rescript/ProgramEvaluator.gen';
+export type {t as DistPlus} from '../rescript/pointSetDist/DistPlus.gen';
+export let run = runAll
