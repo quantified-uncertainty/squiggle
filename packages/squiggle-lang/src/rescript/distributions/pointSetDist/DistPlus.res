@@ -48,8 +48,7 @@ let toPointSetDist = ({pointSetDist, _}: t) => pointSetDist;
 
 let pointSetDistFn = (fn, {pointSetDist}: t) => fn(pointSetDist);
 
-module T =
-  Distributions.Dist({
+module Thedist: Distributions.dist = {
     type t = PointSetTypes.distPlus;
     type integral = PointSetTypes.distPlus;
     let toPointSetDist = toPointSetDist;
@@ -127,4 +126,6 @@ module T =
       PointSetDist.T.mean(t.pointSetDist);
     };
     let variance = (t: t) => PointSetDist.T.variance(t.pointSetDist);
-  });
+}
+
+module T = Distributions.Dist(Thedist);

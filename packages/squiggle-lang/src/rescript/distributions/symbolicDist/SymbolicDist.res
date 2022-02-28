@@ -1,5 +1,6 @@
 open SymbolicDistTypes
 
+// TODO: make module enumeration in the same order as the variant enumeration in SymbolicDistTypes
 module Normal = {
   type t = normal
   let make = (mean, stdev): symbolicDist => #Normal({mean: mean, stdev: stdev})

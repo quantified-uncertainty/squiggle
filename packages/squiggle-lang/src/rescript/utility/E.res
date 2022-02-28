@@ -441,3 +441,31 @@ module JsArray = {
     |> Js.Array.map(Rationale.Option.toExn("Warning: This should not have happened"))
   let filter = Js.Array.filter
 }
+
+module type Tau = {
+  type tau
+}
+module Threither = (Tau1: Tau, Tau2: Tau, Tau3: Tau) => {
+  type either3 = First(Tau1.tau) | Second(Tau2.tau) | Third(Tau3.tau)
+  let fmap1 = (~fn: Tau1.tau => 'a, ~x: either3) => switch x {
+      | First(y) => First(fn(y))
+      | Second(y) => Second(y)
+      | Third(y) => Third(y)
+  }
+  let fmap2 = (~fn: Tau2.tau => 'a, ~x: either3) => switch x {
+      | First(y) => First(y)
+      | Second(y) => Second(fn(y))
+      | Third(y) => Third(y)
+  }
+  let fmap3 = (~fn: Tau3.tau => 'a, ~x: either3) => switch x {
+      | First(y) => First(y)
+      | Second(y) => Second(y)
+      | Third(y) => Third(fn(y))
+  }
+
+  let trifmap = (~fn1: Tau1.tau => 'a, ~fn2: Tau2.tau => 'b, ~fn3: Tau3.tau => 'c, ~x: either3) => switch x {
+      | First(y) => First(fn1(y))
+      | Second(y) => Second(fn2(y))
+      | Third(y) => Third(fn3(y))
+  }
+}

@@ -47,3 +47,13 @@ type analyticalSimplificationResult = [
   | #Error(string)
   | #NoSolution
 ]
+
+type params =
+  | NormalParams(normal)
+  | BetaParams(beta)
+  | LognormalParams(lognormal)
+  | UniformParams(uniform)
+  | ExponentialParams(exponential)
+  | CauchyParams(cauchy)
+  | TriangularParams(triangular)
+  | FloatParams(float)
