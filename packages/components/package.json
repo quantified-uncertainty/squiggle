@@ -25,12 +25,9 @@
     "webpack-cli": "^4.9.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
     "storybook": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "build-storybook": "build-storybook -s public",
+    "package": "tsc"
   },
   "eslintConfig": {
     "extends": [
