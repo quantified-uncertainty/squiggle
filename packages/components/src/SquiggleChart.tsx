@@ -1,9 +1,8 @@
 import * as React  from 'react';
-import * as PropTypes  from 'prop-types';
 import * as _ from 'lodash';
 import type { Spec } from 'vega';
 import { run } from '@squiggle/lang';
-import type { DistPlus } from '@squiggle/lang';
+import type { DistPlus, SamplingInputs } from '@squiggle/lang';
 import { createClassFromSpec } from 'react-vega';
 import * as chartSpecification from './spec-distributions.json'
 import * as percentilesSpec from './spec-pertentiles.json'
@@ -12,12 +11,34 @@ let SquiggleVegaChart = createClassFromSpec({'spec': chartSpecification as Spec}
 
 let SquigglePercentilesChart = createClassFromSpec({'spec': percentilesSpec as Spec});
 
-/**
- * Primary UI component for user interaction
- */
-export const SquiggleChart = ({ squiggleString }: { squiggleString: string}) => {
+export interface SquiggleChartProps {
+  /** The input string for squiggle */
+  squiggleString : string,
+  
+  /** If the output requires monte carlo sampling, the amount of samples */
+  sampleCount? : number,
+  /** The amount of points returned to draw the distribution */
+  outputXYPoints? : number,
+  kernelWidth? : number,
+  pointDistLength? : number,
+  /** If the result is a function, where the function starts */
+  diagramStart? : number,
+  /** If the result is a function, where the function ends */
+  diagramStop? : number,
+  /** If the result is a function, how many points along the function it samples */
+  diagramCount? : number
+}
 
-  let result = run(squiggleString);
+export const SquiggleChart : React.FC<SquiggleChartProps> = props => {
+  let samplingInputs : SamplingInputs = {
+    sampleCount : props.sampleCount,
+    outputXYPoints : props.outputXYPoints,
+    kernelWidth : props.kernelWidth,
+    pointDistLength : props.pointDistLength
+  }
+ 
+
+  let result = run(props.squiggleString, samplingInputs);
   console.log(result)
   if (result.tag === "Ok") {
     let chartResults = result.value.map(chartResult => {
@@ -112,8 +133,11 @@ export const SquiggleChart = ({ squiggleString }: { squiggleString: string}) => 
       }
       else if(chartResult.NAME === "Function"){
         // We are looking at a function. In this case, we draw a Percentiles chart
-          let data = _.range(0,10,0.1).map((_,i) => {
-            let x = i /10;
+          let start = props.diagramStart ? props.diagramStart : 0
+          let stop = props.diagramStop ? props.diagramStop : 10
+          let count = props.diagramCount ? props.diagramCount : 0.1
+          let step = (stop - start)/ count
+          let data = _.range(start, stop, step).map(x => {
             if(chartResult.NAME=="Function"){
               let result = chartResult.VAL(x);
               if(result.tag == "Ok"){
@@ -241,19 +265,6 @@ function getPercentiles(percentiles:number[], t : DistPlus) {
     return bounds;
   }
 }
-
-SquiggleChart.propTypes = {
- /**
-  * Squiggle String
-  */
- squiggleString : PropTypes.string
-};
-
-SquiggleChart.defaultProps = {
-squggleString: "normal(5, 2)"
-
-};
-
 
 function MakeNumberShower(props: {number: number, precision :number}){
   let numberWithPresentation = numberShow(props.number, props.precision);
