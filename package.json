@@ -6,7 +6,8 @@
   "name": "squiggle",
   "scripts": {
     "build:lang": "cd packages/squiggle-lang && yarn && yarn build && yarn package",
-    "storybook:components": "cd packages/components && yarn && yarn storybook"
+    "storybook:components": "cd packages/components && yarn && yarn storybook",
+    "build-storybook:components": "cd packages/components && yarn && yarn build-storybook",
     "build:components": "cd packages/components && yarn && yarn package"
   },
   "workspaces": ["packages/*"]
