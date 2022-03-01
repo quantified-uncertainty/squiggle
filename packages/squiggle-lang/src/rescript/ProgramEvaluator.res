@@ -193,14 +193,9 @@ let evaluateProgram = (inputs: Inputs.inputs) =>
 
 
 @genType
-let runAll = (squiggleString: string) => {
+let runAll = (squiggleString: string, samplingInputs: Inputs.SamplingInputs.t) => {
   let inputs = Inputs.make(
-    ~samplingInputs={
-      sampleCount: Some(10000),
-      outputXYPoints: Some(10000),
-      kernelWidth: None,
-      pointDistLength: Some(1000),
-    },
+    ~samplingInputs,
     ~squiggleString,
     ~environment=[]->Belt.Map.String.fromArray,
     (),

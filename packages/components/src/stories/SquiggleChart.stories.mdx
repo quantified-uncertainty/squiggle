@@ -1,9 +1,9 @@
 import { SquiggleChart } from '../SquiggleChart'
-import { Canvas, Meta, Story } from '@storybook/addon-docs';
+import { Canvas, Meta, Story, Props } from '@storybook/addon-docs';
 
 <Meta title="Squiggle/SquiggleChart" component={ SquiggleChart } />
 
-export const Template = ({squiggleString}) => <SquiggleChart squiggleString={squiggleString} />
+export const Template = SquiggleChart
 
 # Squiggle Chart
 
@@ -79,3 +79,4 @@ over the axis between x = 0 and 10.
   </Story>
 </Canvas>
 
+<Props of={SquiggleChart} />
