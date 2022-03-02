@@ -1,19 +1,19 @@
-# Squiggle
+# Squiggle Playground
 
-This is an experiment DSL/language for making probabilistic estimates.
+This repository contains the squiggle playground, a small web interface
+for playing around with squiggle concepts.
 
-## DistPlus 
-We have a custom library called DistPlus to handle distributions with additional metadata. This helps handle mixed distributions (continuous + discrete), a cache for a cdf, possible unit types (specific times are supported), and limited domains.
-
-## Running
-
-Currently it only has a few very simple models.
+It depends on `@squiggle/components` and `@squiggle/lang` so both of them will
+need to be packaged for this to work. This can be done from the root directory
+with
 
 ```
-yarn
-yarn run start
-yarn run parcel
+yarn build:lang
+yarn build:components
 ```
 
-## Expected future setup
-![setup](https://raw.githubusercontent.com/foretold-app/widedomain/master/Screen%20Shot%202020-06-30%20at%208.27.32%20AM.png)
+Then, starting the playground can be done with:
+
+```
+yarn parcel
+```

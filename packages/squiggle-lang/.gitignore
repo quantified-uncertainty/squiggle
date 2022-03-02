@@ -15,3 +15,4 @@ yarn-error.log
 .idea
 *.gen.ts
 *.gen.js
+dist
