@@ -2,7 +2,6 @@
   "name": "@squiggle/lang",
   "version": "0.1.9",
   "homepage": "https://foretold-app.github.io/estiband/",
-  "private": false,
   "scripts": {
     "build": "rescript build -with-deps",
     "parcel": "parcel build ./src/js/index.js --no-source-maps --no-autoinstall",
@@ -12,7 +11,8 @@
     "test:ci": "yarn jest ./__tests__/Lodash__test.re",
     "watch:test": "jest --watchAll",
     "watch:s": "yarn jest -- Converter_test --watch",
-    "package": "tsc"
+    "package": "tsc",
+    "ci": "yarn build && yarn package"
   },
   "keywords": [
     "Rescript"

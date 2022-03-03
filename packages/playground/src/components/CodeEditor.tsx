@@ -1,4 +1,4 @@
-import React from "react";
+import React, {FC} from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-golang";
@@ -6,12 +6,12 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/keybinding-vim";
 
-function onChange(newValue) {
-  console.log("change", newValue);
+interface CodeEditorProps {
+   value : string,
+   onChange : (value: string) => void
 }
 
-export function CodeEditor(props) {
-  return (
+export let CodeEditor : FC<CodeEditorProps> = (props) =>
     <AceEditor
       value={props.value}
       mode="golang"
@@ -32,5 +32,3 @@ export function CodeEditor(props) {
         enableSnippets: true,
       }}
     />
-  );
-}
