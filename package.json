@@ -1,77 +1,21 @@
 {
-  "name": "estiband",
-  "version": "0.1.0",
-  "homepage": "https://foretold-app.github.io/estiband/",
+  "private": true,
+  "name": "squiggle",
   "scripts": {
-    "build": "bsb -make-world",
-    "build:style": "tailwind build src/styles/index.css -o src/styles/tailwind.css",
-    "start": "bsb -make-world -w -ws _ ",
-    "clean": "bsb -clean-world",
-    "parcel": "parcel ./src/index.html --public-url / --no-autoinstall -- watch",
-    "parcel-build": "parcel build ./src/index.html --no-source-maps --no-autoinstall",
-    "showcase": "PORT=12345 parcel showcase/index.html",
-    "server": "moduleserve ./ --port 8000",
-    "predeploy": "parcel build ./src/index.html --no-source-maps --no-autoinstall",
-    "deploy": "gh-pages -d dist",
-    "test": "jest",
-    "test:ci": "yarn jest",
-    "watch:test": "jest --watchAll",
-    "watch:s": "yarn jest -- Converter_test --watch"
+    "build:lang": "cd packages/squiggle-lang && yarn && yarn build && yarn package",
+    "storybook:components": "cd packages/components && yarn && yarn storybook",
+    "build-storybook:components": "cd packages/components && yarn && yarn build-storybook",
+    "build:components": "cd packages/components && yarn && yarn package",
+    "build:playground": "cd packages/playground && yarn && yarn parcel-build",
+    "ci:lang": "yarn workspace @squiggle/lang ci",
+    "ci:components": "yarn ci:lang && yarn workspace @squiggle/components ci",
+    "ci:playground": "yarn ci:components && yarn workspace @squiggle/playground ci"
   },
-  "keywords": [
-    "BuckleScript",
-    "ReasonReact",
-    "reason-react"
+  "workspaces": [
+    "packages/*"
   ],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "@foretold/components": "0.0.6",
-    "@glennsl/bs-json": "^5.0.2",
-    "ace-builds": "^1.4.12",
-    "antd": "3.17.0",
-    "autoprefixer": "9.7.4",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-    "binary-search-tree": "0.2.6",
-    "bs-ant-design-alt": "2.0.0-alpha.33",
-    "bs-css": "11.0.0",
-    "bs-moment": "0.4.5",
-    "bs-reform": "9.7.1",
-    "bsb-js": "1.1.7",
-    "d3": "5.15.0",
-    "gh-pages": "2.2.0",
-    "jest": "^25.5.1",
-    "jstat": "1.9.2",
-    "lenses-ppx": "5.1.0",
-    "less": "3.10.3",
-    "lodash": "4.17.15",
-    "mathjs": "5.10.3",
-    "moduleserve": "0.9.1",
-    "moment": "2.24.0",
-    "pdfast": "^0.2.0",
-    "postcss-cli": "7.1.0",
-    "rationale": "0.2.0",
-    "react": "^16.10.0",
-    "react-ace": "^9.2.0",
-    "react-dom": "^0.13.0 || ^0.14.0 || ^15.0.1 || ^16.0.0",
-    "react-use": "^13.27.0",
-    "react-vega": "^7.4.1",
-    "reason-react": ">=0.7.0",
-    "reschema": "1.3.0",
-    "tailwindcss": "1.2.0",
-    "vega": "*",
-    "vega-embed": "6.6.0",
-    "vega-lite": "*"
+  "resolutions": {
+    "@types/react": "17.0.39"
   },
-  "devDependencies": {
-    "@glennsl/bs-jest": "^0.5.1",
-    "bs-platform": "7.3.2",
-    "parcel-bundler": "1.12.4",
-    "parcel-plugin-bundle-visualiser": "^1.2.0",
-    "parcel-plugin-less-js-enabled": "1.0.2"
-  },
-  "alias": {
-    "react": "./node_modules/react",
-    "react-dom": "./node_modules/react-dom"
-  }
+  "packageManager": "yarn@1.22.17"
 }
