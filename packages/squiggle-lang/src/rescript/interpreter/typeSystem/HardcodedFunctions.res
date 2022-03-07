@@ -125,8 +125,10 @@ module Multimodal = {
         ->E.R.bind(TypeSystem.TypedValue.toArray)
         ->E.R.bind(r => r |> E.A.fmap(TypeSystem.TypedValue.toFloat) |> E.A.R.firstErrorOrOpen)
 
-      E.R.merge(dists, weights) |> E.R.fmap(((a, b)) =>
-        E.A.zipMaxLength(a, b) |> E.A.fmap(((a, b)) => (a |> E.O.toExn(""), b |> E.O.default(1.0)))
+        E.R.merge(dists, weights) -> E.R.bind(((a, b)) =>
+          E.A.length(b) > E.A.length(a) ?
+            Error("Too many weights provided") :
+            Ok(E.A.zipMaxLength(a, b) |> E.A.fmap(((a, b)) => (a |> E.O.toExn(""), b |> E.O.default(1.0))))
       )
     | _ => Error("Needs items")
     }
