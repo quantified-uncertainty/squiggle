@@ -1,8 +1,8 @@
 import * as React  from 'react';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import type { Spec } from 'vega';
-import { run } from '@squiggle/lang';
-import type { DistPlus, SamplingInputs } from '@squiggle/lang';
+import { run } from '@quri/squiggle-lang';
+import type { DistPlus, SamplingInputs } from '@quri/squiggle-lang';
 import { createClassFromSpec } from 'react-vega';
 import * as chartSpecification from './spec-distributions.json'
 import * as percentilesSpec from './spec-pertentiles.json'
@@ -39,10 +39,8 @@ export const SquiggleChart : React.FC<SquiggleChartProps> = props => {
  
 
   let result = run(props.squiggleString, samplingInputs);
-  console.log(result)
   if (result.tag === "Ok") {
     let chartResults = result.value.map(chartResult => {
-      console.log(chartResult)
       if(chartResult["NAME"] === "Float"){
         return <MakeNumberShower precision={3} number={chartResult["VAL"]} />;
       }

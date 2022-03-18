@@ -1,0 +1,26 @@
+import { SquiggleEditor } from '../SquiggleEditor'
+import { Canvas, Meta, Story, Props } from '@storybook/addon-docs';
+
+<Meta title="Squiggle/SquiggleEditor" component={ SquiggleEditor } />
+
+export const Template = SquiggleEditor
+
+# Squiggle Editor
+
+A Squiggle editor is simply a squiggle chart with a text editor rendered before
+it that allows the user to change the expression that is getting rendered.
+
+## Usage
+
+An example of a normal distribution is:
+<Canvas>
+  <Story
+    name="Default"
+    args={{
+      initialSquiggleString: "normal(5,2)"
+    }}> 
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+<Props of={SquiggleEditor} />
