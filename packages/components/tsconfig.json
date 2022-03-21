@@ -2,11 +2,11 @@
   "compilerOptions": {
     "module": "commonjs",
     "jsx": "react",
+    "resolveJsonModule": true,
     "noImplicitAny": false,
     "esModuleInterop": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "resolveJsonModule": true,
     "outDir": "./dist",
     "declarationDir": "./dist",
     "declaration": true,

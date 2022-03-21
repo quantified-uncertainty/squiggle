@@ -1,0 +1,11 @@
+node_modules
+shell.nix
+.cache
+.direnv
+src
+__tests__
+lib
+examples
+yarn.nix
+bsconfig.json
+tsconfig.json
