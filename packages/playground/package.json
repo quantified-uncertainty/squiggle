@@ -1,5 +1,5 @@
 {
-  "name": "@squiggle/playground",
+  "name": "@quri/squiggle-playground",
   "version": "0.1.0",
   "homepage": "https://foretold-app.github.io/estiband/",
   "scripts": {
@@ -13,7 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@emotion/react": "^11.8.1",
-    "@squiggle/lang": "^0.1.9",
+    "@quri/squiggle-lang": "^0.2.2",
     "ace-builds": "^1.4.12",
     "antd": "^4.18.5",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
