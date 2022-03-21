@@ -1,9 +1,8 @@
 {
-  "name": "@squiggle/components",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@quri/squiggle-components",
+  "version": "0.1.5",
   "dependencies": {
-    "@squiggle/lang": "0.1.9",
+    "@quri/squiggle-lang": "0.2.1",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
@@ -69,11 +68,18 @@
     "@storybook/node-logger": "^6.4.18",
     "@storybook/preset-create-react-app": "^4.0.0",
     "@storybook/react": "^6.4.18",
-    "webpack": "^5.68.0"
+    "@types/webpack": "^5.28.0",
+    "react-ace": "^9.5.0",
+    "react-codejar": "^1.1.2",
+    "ts-loader": "^9.2.8",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
   },
   "resolutions": {
     "@types/react": "17.0.39"
   },
-  "main": "dist/index.js",
+  "source": "./src/index.ts",
+  "module": "dist/bundle.js",
+  "main": "dist/bundle.js",
   "types": "dist/index.d.ts"
 }
