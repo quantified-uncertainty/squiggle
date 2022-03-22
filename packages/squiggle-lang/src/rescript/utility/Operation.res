@@ -1,5 +1,6 @@
 // This file has no dependencies. It's used outside of the interpreter, but the interpreter depends on it.
 
+@genType
 type algebraicOperation = [
   | #Add
   | #Multiply
@@ -7,6 +8,7 @@ type algebraicOperation = [
   | #Divide
   | #Exponentiate
 ]
+@genType
 type pointwiseOperation = [#Add | #Multiply | #Exponentiate]
 type scaleOperation = [#Multiply | #Exponentiate | #Log]
 type distToFloatOperation = [

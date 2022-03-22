@@ -1,8 +1,8 @@
 import * as React  from 'react';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import type { Spec } from 'vega';
-import { run } from '@squiggle/lang';
-import type { DistPlus, SamplingInputs } from '@squiggle/lang';
+import { run } from '@quri/squiggle-lang';
+import type { DistPlus, SamplingInputs, exportEnv, exportDistribution } from '@quri/squiggle-lang';
 import { createClassFromSpec } from 'react-vega';
 import * as chartSpecification from './spec-distributions.json'
 import * as percentilesSpec from './spec-pertentiles.json'
@@ -26,7 +26,11 @@ export interface SquiggleChartProps {
   /** If the result is a function, where the function ends */
   diagramStop? : number,
   /** If the result is a function, how many points along the function it samples */
-  diagramCount? : number
+  diagramCount? : number,
+  /** variables declared before this expression */
+  environment? : exportEnv,
+  /** When the environment changes */
+  onEnvChange?(env: exportEnv): void
 }
 
 export const SquiggleChart : React.FC<SquiggleChartProps> = props => {
@@ -38,11 +42,13 @@ export const SquiggleChart : React.FC<SquiggleChartProps> = props => {
   }
  
 
-  let result = run(props.squiggleString, samplingInputs);
-  console.log(result)
+  let result = run(props.squiggleString, samplingInputs, props.environment);
   if (result.tag === "Ok") {
-    let chartResults = result.value.map(chartResult => {
-      console.log(chartResult)
+    let environment = result.value.environment
+    let exports = result.value.exports
+    if(props.onEnvChange)
+      props.onEnvChange(environment)
+    let chartResults = exports.map((chartResult:exportDistribution )=> {
       if(chartResult["NAME"] === "Float"){
         return <MakeNumberShower precision={3} number={chartResult["VAL"]} />;
       }

@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
+  devtool: 'source-map',
   entry: './src/index.ts',
   module: {
     rules: [
@@ -22,5 +23,12 @@ module.exports = {
       name: 'squiggle_components',
       type: 'umd',
     },
+  },
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'public'),
+    },
+    compress: true,
+    port: 9000,
   },
 };
