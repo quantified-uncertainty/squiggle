@@ -196,7 +196,7 @@ let sampleNRendered = (n, dist) => {
 let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   switch distToFloatOp {
   | #Pdf(f) => pdf(f, s)
-  | #Cdf(f) => pdf(f, s)
+  | #Cdf(f) => cdf(f, s)
   | #Inv(f) => inv(f, s)
   | #Sample => sample(s)
   | #Mean => T.mean(s)

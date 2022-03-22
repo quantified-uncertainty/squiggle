@@ -1,18 +1,12 @@
-type symboliDist = SymbolicDistTypes.symbolicDist;
+type symboliDist = SymbolicDistTypes.symbolicDist
 
 type genericDist = [
-  | #XYContinuous(PointSetTypes.continuousShape)
-  | #XYDiscrete(Discrete.t)
+  | #XYShape(PointSetTypes.pointSetDist)
   | #SampleSet(array<float>)
   | #Symbolic(symboliDist)
   | #Error(string)
+  | #Float(float)
 ]
-
-let isSymbolic = (r: genericDist) =>
-  switch r {
-  | #Symbolic(_) => true
-  | _ => false
-  }
 
 type params = {
   sampleCount: int,
@@ -28,35 +22,58 @@ type wrapped = (genericDist, params)
 
 let wrapWithParams = (g: genericDist, f: params): wrapped => (g, f)
 
-let exampleDist: genericDist = #XYDiscrete(
-  Discrete.make(~integralSumCache=Some(1.0), {xs: [3.0], ys: [1.0]}),
+let exampleDist: genericDist = #XYShape(
+  Discrete(Discrete.make(~integralSumCache=Some(1.0), {xs: [3.0], ys: [1.0]})),
 )
 
-let rec isFunctionPossible = (wrapped: wrapped, fnName): bool => {
-  let (v, _) = wrapped
-  switch (fnName, v) {
-  | (#truncateLeft(_), #XYContinuous(_)) => true
-  | (#truncateRight(_), #XYContinuous(_)) => true
-  | _ => false
-  }
+let defaultSamplingInputs: SamplingInputs.samplingInputs = {
+  sampleCount: 10000,
+  outputXYPoints: 10000,
+  pointSetDistLength: 1000,
+  kernelWidth: None,
 }
 
-let rec doFunction = (wrapped: wrapped, fnName): wrapped => {
+let distToFloat = (wrapped: wrapped, fnName) => {
   let (v, extra) = wrapped
   let newVal = switch (fnName, v) {
-  | (#truncateLeft(f), #XYContinuous(r)) => #XYContinuous(Continuous.T.truncate(Some(f), None, r))
-  | (#truncateRight(f), #XYContinuous(r)) => #XYContinuous(Continuous.T.truncate(None, Some(f), r))
-  | (#toPointSet, #XYContinuous(r)) => v
-  | (#toPointSet, #XYDiscrete(r)) => v
-  | (#toPointSet, #Symbolic(#Float(f))) => #XYDiscrete(Discrete.make(~integralSumCache=Some(1.0), {xs: [f], ys: [1.0]}));
-  | (#toPointSet, #Symbolic(r)) => {
-      let xs = SymbolicDist.T.interpolateXs(~xSelection=#ByWeight, r, 1000)
-      let ys = xs |> E.A.fmap(x => SymbolicDist.T.pdf(x, r))
-      #XYContinuous(Continuous.make(~integralSumCache=Some(1.0), {xs: xs, ys: ys}))
+  | (operation, #XYShape(r)) => #Float(PointSetDist.operate(operation, r))
+  | (operation, #Symbolic(r)) => switch(SymbolicDist.T.operate(operation, r)){
+    | Ok(r) => #SymbolicDist(r)
+    | Error(r) => #Error(r)
   }
   | _ => #Error("No Match")
   }
   (newVal, extra)
 }
 
-let foo = exampleDist->wrapWithParams(genericParams)->doFunction(#truncateLeft(3.0))
+let distToDist = (wrapped: wrapped, fnName): wrapped => {
+  let (v, extra) = wrapped
+  let newVal = switch (fnName, v) {
+  | (#normalize, #XYShape(r)) => #XYShape(PointSetDist.T.normalize(r))
+  | (#normalize, #Symbolic(_)) => v
+  | (#normalize, #SampleSet(_)) => v
+  | (#toPointSet, #XYShape(_)) => v
+  | (#toPointSet, #Symbolic(r)) => #XYShape(SymbolicDist.T.toPointSetDist(1000, r))
+  | (#toPointSet, #SampleSet(r)) => {
+      let response = SampleSet.toPointSetDist(
+        ~samples=r,
+        ~samplingInputs=defaultSamplingInputs,
+        (),
+      ).pointSetDist
+      switch response {
+      | Some(r) => #XYShape(r)
+      | None => #Error("Failed to convert sample into shape")
+      }
+    }
+  | _ => #Error("No Match")
+  }
+  (newVal, extra)
+}
+// | (#truncateLeft(f), #XYContinuous(r)) => #XYContinuous(Continuous.T.truncate(Some(f), None, r))
+// | (#truncateRight(f), #XYContinuous(r)) => #XYContinuous(Continuous.T.truncate(None, Some(f), r))
+
+let foo =
+  exampleDist
+  ->wrapWithParams(genericParams)
+  ->distToDist(#truncateLeft(3.0))
+  ->distToDist(#trunctateRight(5.0))
