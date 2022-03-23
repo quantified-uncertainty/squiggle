@@ -1,0 +1,23 @@
+# CODEOWNERS file
+#
+# This file is used to describe who owns what in this repository.
+#
+# For documentation on this file, see https://help.github.com/articles/about-codeowners/
+# Mentioned users will get code review requests.
+#
+# IMPORTANT NOTE: in order to actually get pinged, commit access is required.
+# This also holds true for GitHub teams.
+
+# This file
+/.github/CODEOWNERS @quinn-dougherty
+
+# Any rescript code
+*.res @Hazelfire @OAGr @quinn-dougherty
+
+# Any typescript code
+*.tsx @Hazelfire @OAGr @quinn-dougherty
+
+# Any opsy files
+*.json @quinn-dougherty
+*.yaml @quinn-dougherty
+*.yml @quinn-dougherty
