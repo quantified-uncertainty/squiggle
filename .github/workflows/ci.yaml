@@ -10,6 +10,7 @@ jobs:
     outputs:
       should_skip_lang: ${{ steps.skip_lang_check.outputs.should_skip }}
       should_skip_components: ${{ steps.skip_components_check.outputs.should_skip }}
+      should_skip_website: ${{ steps.skip_website_check.outputs.should_skip }}
     steps:
       - id: skip_lang_check
         name: Check if the changes are about squiggle-lang src files
@@ -21,6 +22,11 @@ jobs:
         uses: fkirc/skip-duplicate-actions@master
         with:
           paths: '["packages/components/*"]'
+      - id: skip_website_check
+        name: Check if the changes are about website src files
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          paths: '["packages/website/*"]'
 
   lang-build-test:
     name: Language build and test
@@ -53,9 +59,33 @@ jobs:
         working-directory: packages/components
     steps:
     - uses: actions/checkout@v2
-    - name: Install packages
+    - name: Install packages at monorepo-level and build squiggle-language
+      run: |
+        cd ../../ &&
+        yarn &&
+        cd packages/squiggle-lang &&
+        yarn &&
+        yarn build &&
+        yarn bundle
+    - name: Install packages for components package
       run: yarn
     - name: See if storybook builds
       run: yarn build
     - name: Run tsc and webpack
       run: yarn bundle
+
+  website-dry-build:
+    name: Website dry build
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_website != 'true' }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/website
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install packages
+      run: yarn
+    - name: Build website assets
+      run: yarn build
