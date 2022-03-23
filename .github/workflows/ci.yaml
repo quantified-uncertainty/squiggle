@@ -1,0 +1,58 @@
+name: Squiggle Lang Jest Tests
+
+on: [push]
+
+jobs:
+
+  pre_check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip_lang: ${{ steps.skip_lang_check.outputs.should_skip }}
+      should_skip_components: ${{ steps.skip_components_check.outputs.should_skip }}
+    steps:
+      - id: skip_lang_check
+        name: Check if the changes are about squiggle-lang src files
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          paths: '["packages/squiggle-lange/*"]'
+      - id: skip_components_check
+        name: Check if the changes are about components src files
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          paths: '["packages/components/*"]'
+
+  lang-build-test:
+    name: Squiggle language build and test
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/squiggle-lang
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install packages
+      run: yarn 
+    - name: Build rescript
+      run: yarn build
+    - name: Run tests
+      run: yarn test
+
+  components-build-test:
+    name: Squiggle components build and test
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_components != 'true' }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/components
+    steps:
+    - users: actions/checkout@v2
+    - name: Install packages
+      run: yarn
+    - name: See if storybook builds
+      run: yarn build-storybook
+    - name: Run tsc
+      run: yarn ci

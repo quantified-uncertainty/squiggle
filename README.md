@@ -27,8 +27,8 @@ the components library and the playground.
 Scripts are available for you in the root directory to do important activities,
 such as:
 
-`yarn build:lang`. Builds and packages the language
-`yarn storybook:components`. Hosts the component storybook
+- `yarn build:lang`. Builds and packages the language
+- `yarn storybook:components`. Hosts the component storybook
 
 # Local playground
 
