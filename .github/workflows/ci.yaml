@@ -5,6 +5,7 @@ on: [push]
 jobs:
 
   pre_check:
+    name: Precheck for skipping redundant jobs
     runs-on: ubuntu-latest
     outputs:
       should_skip_lang: ${{ steps.skip_lang_check.outputs.should_skip }}
@@ -34,7 +35,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install packages
       run: yarn 
-    - name: Build rescript
+    - name: Build rescript codebase
       run: yarn build
     - name: Run tests
       run: yarn test
