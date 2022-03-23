@@ -1,2 +1,2 @@
-export { SquiggleChart } from './SquiggleChart';
-export { SquiggleEditor, renderSquiggleEditor } from './SquiggleEditor';
+export { SquiggleChart } from "./SquiggleChart";
+export { SquiggleEditor, renderSquiggleEditor } from "./SquiggleEditor";
