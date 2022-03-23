@@ -14,5 +14,6 @@ yarn-error.log
 .netlify
 .idea
 *.gen.ts
+*.gen.tsx
 *.gen.js
 dist
