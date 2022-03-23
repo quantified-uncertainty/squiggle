@@ -1,4 +1,4 @@
-name: Squiggle Lang Jest Tests
+name: Squiggle lang and components check
 
 on: [push]
 
@@ -14,7 +14,7 @@ jobs:
         name: Check if the changes are about squiggle-lang src files
         uses: fkirc/skip-duplicate-actions@master
         with:
-          paths: '["packages/squiggle-lange/*"]'
+          paths: '["packages/squiggle-lang/*"]'
       - id: skip_components_check
         name: Check if the changes are about components src files
         uses: fkirc/skip-duplicate-actions@master
@@ -49,7 +49,7 @@ jobs:
         shell: bash
         working-directory: packages/components
     steps:
-    - users: actions/checkout@v2
+    - uses: actions/checkout@v2
     - name: Install packages
       run: yarn
     - name: See if storybook builds
