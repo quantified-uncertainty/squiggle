@@ -30,3 +30,10 @@ such as:
 `yarn build:lang`. Builds and packages the language
 `yarn storybook:components`. Hosts the component storybook
 
+# Local playground
+
+``` sh
+yarn build:playground
+cd packages/playground
+yarn parcel 
+```
