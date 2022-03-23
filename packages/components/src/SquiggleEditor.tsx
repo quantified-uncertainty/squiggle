@@ -93,7 +93,20 @@ export function renderSquiggleEditor(props: SquiggleEditorProps) {
     <SquiggleEditor
       {...props}
       onEnvChange={(env) => {
-        // I can set the value here because I need it for creating notebooks
+        // Typescript complains on two levels here.
+        //  - Div elements don't have a value property
+        //  - Even if it did (like it was an input element), it would have to
+        //    be a string
+        //
+        //  Which are reasonable in most web contexts.
+        //
+        //  However we're using observable, neither of those things have to be
+        //  true there. div elements can contain the value property, and can have
+        //  the value be any datatype they wish.
+        //
+        //  This is here to get the 'viewof' part of:
+        //  viewof env = cell('normal(0,1)')
+        //  to work
         // @ts-ignore
         parent.value = env;
 
