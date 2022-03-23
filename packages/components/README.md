@@ -1,7 +1,7 @@
 # Squiggle Components
 This package contains all the components for squiggle. These can be used either as a library or hosted as a [storybook](https://storybook.js.org/).
-# Build for development
 
+# Build for development
 You need to _prepare_ by building and bundling `squiggle-lang` 
 ``` sh
 cd ../squiggle-language
@@ -23,7 +23,7 @@ Run a development server
 yarn start
 ```
 
-And build artefacts for production,
+And build artefacts for production, 
 
 ``` sh
 yarn bundle  # builds components library

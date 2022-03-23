@@ -39,6 +39,8 @@ jobs:
       run: yarn build
     - name: Run tests
       run: yarn test
+    - name: Run tsc and webpack
+      run: yarn bundle
 
   components-build-test:
     name: Components build and test
@@ -54,6 +56,6 @@ jobs:
     - name: Install packages
       run: yarn
     - name: See if storybook builds
-      run: yarn build-storybook
-    - name: Run tsc
-      run: yarn ci
+      run: yarn build
+    - name: Run tsc and webpack
+      run: yarn bundle

@@ -16,7 +16,7 @@ Squiggle is currently pre-alpha.
 
 # Bug reports
 
-Anyone (with a github account) can file an issue at any time. Please allow Quinn, Sam, and Ozzie to triage, but we encourage you to use either the `Bug` or `Enhancement` labels depending on the nature of the issue you're filing. `
+Anyone (with a github account) can file an issue at any time. Please allow Quinn, Sam, and Ozzie to triage, but otherwise just follow the suggestions in the issue templates. 
 
 # Project structure
 

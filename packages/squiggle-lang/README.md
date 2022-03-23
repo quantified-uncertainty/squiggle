@@ -1,9 +1,27 @@
+# Squiggle language
+
+# Build for development
+``` sh
+yarn 
+yarn build
+yarn bundle
+```
+
+Other: 
+``` sh
+yarn start  # listens to files and recompiles at every mutation
+yarn test
+yarn test:watch  # keeps an active session and runs all tests at every mutation
+```
+
+# TODO: clean up this README.md 
+
 # Squiggle Language
 Squiggle is a language for representing probability distributions, as well as 
 functions that return probability distributions. Its original intended use is
 for improving epistemics around EA decisions.
 
-This package, @squiggle/lang, contains the core language of squiggle. The main
+This package, @quri/squiggle-lang, contains the core language of squiggle. The main
 feature revolves around evaluating squiggle expressions. Currently the package
 only exports a single function, named "run", which from a squiggle string returns
 an object representing the result of the evaluation.

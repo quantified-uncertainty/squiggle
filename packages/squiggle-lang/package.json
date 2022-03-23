@@ -8,11 +8,8 @@
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
     "test": "jest",
-    "test:ci": "yarn jest ./__tests__/Lodash__test.res",
-    "watch:test": "jest --watchAll",
-    "watch:s": "yarn jest -- Converter_test --watch",
-    "package": "tsc",
-    "ci": "yarn build && yarn package"
+    "test:watch": "jest --watchAll",
+    "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [
     "Rescript"
