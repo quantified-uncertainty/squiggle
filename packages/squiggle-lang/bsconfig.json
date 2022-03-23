@@ -33,6 +33,7 @@
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",
+    "generatedFileExtension": ".gen.tsx",
     "shims": {},
     "debug": {
       "all": false,
