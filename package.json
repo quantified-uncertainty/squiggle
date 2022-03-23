@@ -10,7 +10,7 @@
     "ci:lang": "yarn workspace @quri/squiggle-lang ci",
     "ci:components": "yarn ci:lang && yarn workspace @quri/squiggle-components ci",
     "ci:playground": "yarn ci:components && yarn workspace @quri/squiggle-playground ci",
-    "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules && "
+    "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules"
   },
   "workspaces": [
     "packages/*"

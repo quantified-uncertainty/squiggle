@@ -47,11 +47,20 @@ jobs:
       run: yarn test
     - name: Run tsc and webpack
       run: yarn bundle
+    - name: Cache lang build and bundle outputs
+      uses: actions/cache@v3
+      id: lang-outputs
+      with:
+        path: |
+          lib
+          dist
+          node_modules
+        key: ${{ github.sha }}
 
   components-build-test:
     name: Components build and test
     runs-on: ubuntu-latest
-    needs: pre_check
+    needs: [pre_check, lang-build-test]
     if: ${{ needs.pre_check.outputs.should_skip_components != 'true' }}
     defaults:
       run:
@@ -59,14 +68,15 @@ jobs:
         working-directory: packages/components
     steps:
     - uses: actions/checkout@v2
-    - name: Install packages at monorepo-level and build squiggle-language
-      run: |
-        cd ../../ &&
-        yarn &&
-        cd packages/squiggle-lang &&
-        yarn &&
-        yarn build &&
-        yarn bundle
+    - name: Gain lang build and bundle outputs from cache
+      uses: actions/cache@v3
+      id: lang-outputs
+      with:
+        path: |
+          lib
+          dist
+          node_modules
+        key: ${{ github.sha }}
     - name: Install packages for components package
       run: yarn
     - name: See if storybook builds
