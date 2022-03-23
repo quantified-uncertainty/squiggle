@@ -1,4 +1,4 @@
-name: Squiggle lang and components check
+name: Squiggle packages check
 
 on: [push]
 
@@ -23,7 +23,7 @@ jobs:
           paths: '["packages/components/*"]'
 
   lang-build-test:
-    name: Squiggle language build and test
+    name: Language build and test
     runs-on: ubuntu-latest
     needs: pre_check
     if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
@@ -41,7 +41,7 @@ jobs:
       run: yarn test
 
   components-build-test:
-    name: Squiggle components build and test
+    name: Components build and test
     runs-on: ubuntu-latest
     needs: pre_check
     if: ${{ needs.pre_check.outputs.should_skip_components != 'true' }}
