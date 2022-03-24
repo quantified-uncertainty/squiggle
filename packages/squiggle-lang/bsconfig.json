@@ -3,7 +3,7 @@
   "reason": {},
   "sources": [
     {
-      "dir": "src",
+      "dir": "src/rescript",
       "subdirs": true
     },
     {
