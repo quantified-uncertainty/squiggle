@@ -23,7 +23,7 @@ Run a development server
 yarn start
 ```
 
-And build artefacts for production, 
+And build artefacts for production,
 
 ``` sh
 yarn bundle  # builds components library

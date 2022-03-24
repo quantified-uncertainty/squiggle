@@ -83,10 +83,10 @@ jobs:
       run: cd ../../ && yarn
     - name: Install packages for components package
       run: yarn
-    - name: Build storybook
-      run: yarn build
     - name: Run tsc and webpack
       run: yarn bundle
+    - name: Build storybook
+      run: yarn build
 
   website-dry-build:
     name: Website dry build
