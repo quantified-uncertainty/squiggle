@@ -3,3 +3,4 @@ yarn-error.log
 .cache
 .merlin
 .parcel-cache
+**/.sync.ffs_db
