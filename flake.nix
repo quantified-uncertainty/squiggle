@@ -63,5 +63,6 @@
           });
           defaultPackage.${system} = self.packages.${system}.yarn;
         });
+      defaultPackage.x86_64-linux = self.devShells.defaultPackage.x86_64-linux;
     };
 }
