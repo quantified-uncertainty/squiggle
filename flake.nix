@@ -61,6 +61,7 @@
                 vscodeWithRescript
               ];
           });
+          defaultPackage.${system} = self.packages.${system}.yarn;
         });
     };
 }
