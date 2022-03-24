@@ -9,7 +9,7 @@ yarn
 yarn build
 yarn bundle
 ```
-If you've otherwise done this recently you can skip those.
+If you've otherwise done this recently you can skip those. 
 
 Then, you can install dependencies
 ``` sh
