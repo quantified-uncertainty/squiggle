@@ -4,14 +4,14 @@
   "width": 500,
   "height": 200,
   "padding": 5,
-  "data": [{"name": "con"}, {"name": "dis"}],
+  "data": [{ "name": "con" }, { "name": "dis" }],
 
   "signals": [
     {
       "name": "mousex",
       "description": "x position of mouse",
       "update": "0",
-      "on": [{"events": "mousemove", "update": "1-x()/width"}]
+      "on": [{ "events": "mousemove", "update": "1-x()/width" }]
     },
     {
       "name": "xscale",
@@ -21,7 +21,7 @@
         "input": "range",
         "min": 0.1,
         "max": 1
-        }
+      }
     },
     {
       "name": "yscale",
@@ -31,90 +31,92 @@
         "input": "range",
         "min": 0.1,
         "max": 1
-        }
+      }
     }
   ],
 
-  "scales": [{
-    "name": "xscale",
-    "type": "pow",
-    "exponent": {"signal": "xscale"},
-    "range": "width",
-    "zero": false,
-    "nice": false,
-    "domain": {
-      "fields": [
-        { "data": "con", "field": "x"},
-        { "data": "dis", "field": "x"}
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "pow",
+      "exponent": { "signal": "xscale" },
+      "range": "width",
+      "zero": false,
+      "nice": false,
+      "domain": {
+        "fields": [
+          { "data": "con", "field": "x" },
+          { "data": "dis", "field": "x" }
         ]
       }
-  }, {
-    "name": "yscale",
-    "type": "pow",
-    "exponent": {"signal": "yscale"},
-    "range": "height",
-    "nice": true,
-    "zero": true,
-    "domain": {
-      "fields": [
-        { "data": "con", "field": "y"},
-        { "data": "dis", "field": "y"}
+    },
+    {
+      "name": "yscale",
+      "type": "pow",
+      "exponent": { "signal": "yscale" },
+      "range": "height",
+      "nice": true,
+      "zero": true,
+      "domain": {
+        "fields": [
+          { "data": "con", "field": "y" },
+          { "data": "dis", "field": "y" }
         ]
+      }
     }
-  }
   ],
 
   "axes": [
-    {"orient": "bottom", "scale": "xscale", "tickCount": 20},
-    {"orient": "left", "scale": "yscale"}
+    { "orient": "bottom", "scale": "xscale", "tickCount": 20 },
+    { "orient": "left", "scale": "yscale" }
   ],
 
   "marks": [
     {
       "type": "area",
-      "from": {"data": "con"},
+      "from": { "data": "con" },
       "encode": {
         "enter": {
-          "tooltip": {"signal": "datum.cdf"}
+          "tooltip": { "signal": "datum.cdf" }
         },
         "update": {
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"},
-          "y2": {"scale": "yscale", "value": 0},
+          "x": { "scale": "xscale", "field": "x" },
+          "y": { "scale": "yscale", "field": "y" },
+          "y2": { "scale": "yscale", "value": 0 },
           "fill": {
-              "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'blue'}, {offset: 1.0, color: 'blue'} ] }"
-            },
-          "interpolate": {"value": "monotone"},
-          "fillOpacity": {"value": 1}
+            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'blue'}, {offset: 1.0, color: 'blue'} ] }"
+          },
+          "interpolate": { "value": "monotone" },
+          "fillOpacity": { "value": 1 }
         }
       }
     },
     {
       "type": "rect",
-      "from": {"data": "dis"},
+      "from": { "data": "dis" },
       "encode": {
         "enter": {
-          "y2": {"scale": "yscale", "value": 0},
-          "width": {"value": 1}
+          "y2": { "scale": "yscale", "value": 0 },
+          "width": { "value": 1 }
         },
         "update": {
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"}
+          "x": { "scale": "xscale", "field": "x" },
+          "y": { "scale": "yscale", "field": "y" }
         }
       }
     },
     {
       "type": "symbol",
-      "from": {"data": "dis"},
+      "from": { "data": "dis" },
       "encode": {
         "enter": {
-          "shape": {"value": "circle"},
-          "width": {"value": 5},
-          "tooltip": {"signal": "datum.y"}
+          "shape": { "value": "circle" },
+          "width": { "value": 5 },
+          "tooltip": { "signal": "datum.y" }
         },
         "update": {
-          "x": {"scale": "xscale", "field": "x"},
-          "y": {"scale": "yscale", "field": "y"}
+          "x": { "scale": "xscale", "field": "x" },
+          "y": { "scale": "yscale", "field": "y" }
         }
       }
     }
