@@ -3,11 +3,16 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
   outputs =
     { self
     , nixpkgs
+    , flake-compat
     }:
     let
       # Generate a user-friendly version number.
@@ -32,37 +37,36 @@
           pkgs = nixpkgsFor."${system}";
         in
         {
-          # In case we don't want to provide an editor, this defaultShell will
-          # provide only coq packages we need.
+          # In case we don't want to provide an editor, this defaultShell will provide only coq packages we need.
           defaultShell = pkgs.mkShell {
             buildInputs = with pkgs; [
               yarn
-            ];
-          };
-          # This is the defaultShell, but overriden to add one additional buildInput,
-          # vscodium!
-          vscodium = self.devShells.${system}.defaultShell.overrideAttrs (old: {
-            buildInputs =
-              let
-                vscodeWithRescript = pkgs.vscode-with-extensions.override {
+              (pkgs.vscode-with-extensions.override {
                   vscode = pkgs.vscodium;
                   vscodeExtensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+#                    {
+#                      name = "rescript-vscode";
+#                      publisher = "rescript-lang";
+#                      version = "1.2.1";
+#                      # sha256 = "sha256-b0gCaEzt5yAj53oLFZSXSD3bum9J1fYes/uf9+OlUek=";
+#                    }
                     {
-                      name = "rescript-vscode";
-                      publisher = "rescript-lang";
-                      version = "1.2.1";
-                      sha256 = "sha256-b0gCaEzt5yAj53oLFZSXSD3bum9J1fYes/uf9+OlUek=";
+                      name = "vim";
+                      publisher = "vscodevim";
+                      version = "1.22.2";
+                      sha256 = "sha256-dtIlgODzRdoMKnG9050ZcCX3w15A/R3FaMc+ZylvBbU=";
+                    }
+                    {
+                      name = "vscode-typescript-next";
+                      publisher = "ms-vscode";
+                      version = "4.7.20220323";
+                      sha256 = "sha256-mjiBCyg5As/XAU9I5k6jEZWGJA3P6P5o1roe2bS7aUI=";
                     }
                   ];
-                };
-              in
-              old.buildInputs
-              ++ [
-                vscodeWithRescript
-              ];
-          });
-          defaultPackage.${system} = self.packages.${system}.yarn;
-        });
-      defaultPackage.x86_64-linux = self.devShells.defaultPackage.x86_64-linux;
+              })
+            ];
+          };
+        }
+      );
     };
 }
