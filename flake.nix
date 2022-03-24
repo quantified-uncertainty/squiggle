@@ -44,12 +44,12 @@
               (pkgs.vscode-with-extensions.override {
                   vscode = pkgs.vscodium;
                   vscodeExtensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-#                    {
-#                      name = "rescript-vscode";
-#                      publisher = "rescript-lang";
-#                      version = "1.2.1";
-#                      # sha256 = "sha256-b0gCaEzt5yAj53oLFZSXSD3bum9J1fYes/uf9+OlUek=";
-#                    }
+                    {
+                      name = "rescript-vscode";
+                      publisher = "chenglou92";
+                      version = "1.2.1";
+                      sha256 = "sha256-7/YakKtJ4WhgAR4rZltrq8g4TtM5QZ2spbrEUrNoXVg=";
+                    }
                     {
                       name = "vim";
                       publisher = "vscodevim";
