@@ -8,13 +8,17 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        loader: "ts-loader",
+        options: { projectReferences: true },
         exclude: /node_modules/,
       },
     ],
   },
   resolve: {
     extensions: [".js", ".tsx", ".ts"],
+    alias: {
+      "@quri/squiggle-lang": path.resolve(__dirname, '../squiggle-lang/src/js')
+    },
   },
   output: {
     filename: "bundle.js",

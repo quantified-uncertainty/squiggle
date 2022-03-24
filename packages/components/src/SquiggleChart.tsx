@@ -10,7 +10,7 @@ import type {
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as chartSpecification from "./spec-distributions.json";
-import * as percentilesSpec from "./spec-pertentiles.json";
+import * as percentilesSpec from "./spec-percentiles.json";
 
 let SquiggleVegaChart = createClassFromSpec({
   spec: chartSpecification as Spec,

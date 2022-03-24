@@ -4,7 +4,7 @@
   "homepage": "https://squiggle-language.com",
   "scripts": {
     "build": "rescript build -with-deps",
-    "bundle": "tsc && webpack",
+    "bundle": "webpack",
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
     "test": "jest",
