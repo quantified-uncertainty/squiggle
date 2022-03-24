@@ -39,6 +39,8 @@ jobs:
         working-directory: packages/squiggle-lang
     steps:
     - uses: actions/checkout@v2
+    - name: Install packages from monorepo level
+      run: cd ../../ && yarn
     - name: Install packages
       run: yarn 
     - name: Build rescript codebase
@@ -81,7 +83,7 @@ jobs:
       run: cd ../../ && yarn
     - name: Install packages for components package
       run: yarn
-    - name: See if storybook builds
+    - name: Build storybook
       run: yarn build
     - name: Run tsc and webpack
       run: yarn bundle
