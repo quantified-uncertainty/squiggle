@@ -40,5 +40,7 @@ nix develop
 codium 
 ```
 
+The `nix develop` shell also provides `yarn`. 
+
 # Contributing
 See `CONTRIBUTING.md`. 
