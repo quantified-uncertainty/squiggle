@@ -83,7 +83,7 @@ jobs:
     #   run: cd ../../ && yarn
     - name: Install packages for components package
       run: yarn
-    - name: Run tsc and webpack
+    - name: Run tsc and webpack  # I'm uncertain if bundle comes before build, it was jotted down in a readme that way but it may have been erroneous.
       run: yarn bundle
     - name: Build storybook
       run: yarn build
