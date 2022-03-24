@@ -1,5 +1,5 @@
 {
-  description = "A Flake for building coq and providing devShells for the coq-tinyram project";
+  description = "Building codium for rescript development";
 
   inputs = {
     flake-compat = {
