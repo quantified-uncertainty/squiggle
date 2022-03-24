@@ -29,7 +29,7 @@
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
     "build": "build-storybook -s public",
     "bundle": "tsc && webpack",
-    "all": "yarn build && yarn bundle"
+    "all": "yarn bundle && yarn build"
   },
   "eslintConfig": {
     "extends": [
