@@ -41,6 +41,9 @@
           defaultShell = pkgs.mkShell {
             buildInputs = with pkgs; [
               yarn
+              yarn2nix
+              npm
+              nodejs
               (pkgs.vscode-with-extensions.override {
                   vscode = pkgs.vscodium;
                   vscodeExtensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace [
@@ -61,6 +64,24 @@
                       publisher = "ms-vscode";
                       version = "4.7.20220323";
                       sha256 = "sha256-mjiBCyg5As/XAU9I5k6jEZWGJA3P6P5o1roe2bS7aUI=";
+                    }
+                    {
+                      name = "nix-ide";
+                      publisher = "jnoortheen";
+                      version = "0.1.20";
+                      sha256 = "sha256-Q6X41I68m0jaCXaQGEFOoAbSUrr/wFhfCH5KrduOtZo=";
+                    }
+                    {
+                      name = "json";
+                      publisher = "ZainChen";
+                      version = "2.0.2";
+                      sha256 = "sha256-nC3Q8KuCtn/jg1j/NaAxWGvnKe/ykrPm2PUjfsJz8aI=";
+                    }
+                    {
+                      name = "prettier-vscode";
+                      publisher = "esbenp";
+                      version = "9.3.0";
+                      sha256 = "sha256-hJgPjWf7a8+ltjmXTK8U/MwqgIZqBjmcCfHsAk2G3PA=";
                     }
                   ];
               })
