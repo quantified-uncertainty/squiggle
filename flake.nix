@@ -42,7 +42,7 @@
             buildInputs = with pkgs; [
               yarn
               yarn2nix
-              npm
+              nodePackages.npm
               nodejs
               (pkgs.vscode-with-extensions.override {
                   vscode = pkgs.vscodium;
