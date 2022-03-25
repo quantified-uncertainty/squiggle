@@ -1,5 +1,5 @@
 /*
-  Irreducable values. Reducer does not know about those. Only used for external calls
+  Irreducible values. Reducer does not know about those. Only used for external calls
   This is a configuration to to make external calls of those types
 */
 module AE = Reducer_Extra_Array
