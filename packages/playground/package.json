@@ -24,7 +24,7 @@
     "lenses-ppx": "5.1.0",
     "less": "3.10.3",
     "lodash": "4.17.15",
-    "mathjs": "5.10.3",
+    "mathjs": "10.4.1",
     "moduleserve": "0.9.1",
     "moment": "2.24.0",
     "pdfast": "^0.2.0",
