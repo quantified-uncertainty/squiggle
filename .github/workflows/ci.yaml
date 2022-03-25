@@ -41,8 +41,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies from monorepo level
       run: cd ../../ && yarn
-    # - name: Install dependencies
-    #  run: yarn 
     - name: Build rescript codebase
       run: yarn build
     - name: Run tests
@@ -65,9 +63,7 @@ jobs:
       run: cd ../../ && yarn
     - name: Build rescript in squiggle-lang
       run: cd ../squiggle-lang && yarn build
-    # - name: Install dependencies for components package
-    #  run: yarn
-    - name: Run webpack  # I'm uncertain if bundle comes before build, it was jotted down in a readme that way but it may have been erroneous.
+    - name: Run webpack
       run: yarn bundle
     - name: Build storybook
       run: yarn build
