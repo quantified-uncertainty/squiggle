@@ -9,18 +9,6 @@ type codeTree = CTT.codeTree
 type codeTreeValue = CTV.codeTreeValue
 type reducerError = Rerr.reducerError
 
-// TODO:
-// AccessorNode
-// AssignmentNode
-// BlockNode
-// ConditionalNode
-// FunctionAssignmentNode
-// IndexNode
-// ObjectNode
-// RangeNode
-// RelationalNode
-// SymbolNode
-
 let rec fromNode =
   (mjnode: MJ.node): result<codeTree, reducerError> =>
     MJ.castNodeType(mjnode) -> Result.flatMap(typedMjNode => {

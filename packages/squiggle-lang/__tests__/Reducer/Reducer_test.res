@@ -7,6 +7,7 @@ describe("reducer using mathjs parse", () => {
   // Reducer.parse is called by Reducer.eval
   // See https://mathjs.org/docs/expressions/syntax.html
   // See https://mathjs.org/docs/reference/functions.html
+  // Those tests show that we are converting mathjs parse tree to what we need
 
   describe("expressions", () => {
     test("1", () => expectParseToBe("1", "Ok(1)"))
@@ -49,8 +50,6 @@ describe("eval", () => {
     // TODO more built ins
   })
   describe("arrays", () => {
-    //Note. () is a empty list in Lisp
-    // The only builtin structure in Lisp is list
     test("empty array", () => expectEvalToBe( "[]", "Ok([])"))
     test("[1, 2, 3]", () => expectEvalToBe( "[1, 2, 3]", "Ok([1, 2, 3])"))
     test("['hello', 'world']", () => expectEvalToBe( "['hello', 'world']", "Ok(['hello', 'world'])"))

@@ -8,7 +8,7 @@ module Rerr = Reducer_Error
 
 type reducerError = Rerr.reducerError
 
-type rec node = {
+type node = {
   "type": string,
   "isNode": bool,
   "comment": string
