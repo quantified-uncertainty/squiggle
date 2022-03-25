@@ -1,6 +1,11 @@
 name: Squiggle packages check
 
-on: [push]
+on:
+  push:  # Delete this line if there becomes a scarcity of build minutes.
+  pull_request:
+    branches:
+      - master
+      - staging
 
 jobs:
 
@@ -61,7 +66,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies from monorepo level
       run: cd ../../ && yarn
-    - name: Build rescript in squiggle-lang
+    - name: Build rescript codebase in squiggle-lang
       run: cd ../squiggle-lang && yarn build
     - name: Run webpack
       run: yarn bundle
