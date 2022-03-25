@@ -163,7 +163,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
         // We are looking at a function. In this case, we draw a Percentiles chart
         let start = props.diagramStart ? props.diagramStart : 0;
         let stop = props.diagramStop ? props.diagramStop : 10;
-        let count = props.diagramCount ? props.diagramCount : 0.1;
+        let count = props.diagramCount ? props.diagramCount : 100;
         let step = (stop - start) / count;
         let data = _.range(start, stop, step).map((x) => {
           if (chartResult.NAME == "Function") {
@@ -192,10 +192,10 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
                 p99: percentiles[12],
               };
             }
+            return null;
           }
-          return 0;
         });
-        return <SquigglePercentilesChart data={{ facet: data }} />;
+        return <SquigglePercentilesChart data={{ facet: data.filter(x => x !== null) }} />;
       }
     });
     return <>{chartResults}</>;
