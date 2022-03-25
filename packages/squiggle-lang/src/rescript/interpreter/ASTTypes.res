@@ -1,3 +1,4 @@
+@genType
 type rec hash = array<(string, node)>
 and node = [
   | #SymbolicDist(SymbolicDistTypes.symbolicDist)

@@ -1,5 +1,5 @@
 import { FC, useState } from "react"
-import { SquiggleChart } from "@squiggle/components"
+import { SquiggleChart } from "@quri/squiggle-components"
 import { CodeEditor } from "./CodeEditor"
 import { Form, Input, Card, Row, Col } from "antd"
 import { css } from '@emotion/react'

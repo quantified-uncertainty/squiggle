@@ -1,19 +1,16 @@
 {
   "name": "@quri/squiggle-lang",
   "version": "0.2.2",
-  "homepage": "https://foretold-app.github.io/estiband/",
+  "homepage": "https://squiggle-language.com",
   "scripts": {
     "build": "rescript build -with-deps",
-    "bundle": "tsc && webpack",
+    "bundle": "webpack",
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
     "test:reducer": "jest --testPathPattern '.*__tests__/Reducer.*'",
     "test": "jest",
-    "test:ci": "yarn jest ./__tests__/Lodash__test.re",
-    "watch:test": "jest --watchAll",
-    "watch:s": "yarn jest -- Converter_test --watch",
-    "package": "tsc",
-    "ci": "yarn build && yarn package"
+    "test:watch": "jest --watchAll",
+    "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [
     "Rescript"

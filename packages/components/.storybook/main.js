@@ -1,15 +1,11 @@
 //const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const custom = require('../webpack.config.js');
 
 module.exports = {
- /* webpackFinal: async (config) => {
-    config.resolve.plugins = [
-      ...(config.resolve.plugins || []),
-      new TsconfigPathsPlugin({
-        extensions: config.resolve.extensions,
-      }),
-    ];
-    return config;
-  },*/
+   webpackFinal: async (config) => {
+    config.resolve.alias = custom.resolve.alias;
+    return { ...config, module: { ...config.module, rules: config.module.rules.concat(custom.module.rules) } };
+  },
   "stories": [
     "../src/**/*.stories.mdx",
     "../src/**/*.stories.@(js|jsx|ts|tsx)"
