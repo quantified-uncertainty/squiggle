@@ -1,6 +1,11 @@
 name: Squiggle packages check
 
-on: [push]
+on:
+  push:  # Delete this line if there becomes a scarcity of build minutes.
+  pull_request:
+    branches:
+      - master
+      - staging
 
 jobs:
 
