@@ -1,11 +1,12 @@
 # Squiggle language
 
 # Build for development
+We assume that you ran `yarn` at the monorepo level. 
 ``` sh
-yarn 
 yarn build
-yarn bundle
 ```
+
+`yarn bundle` is needed for a deployment. 
 
 Other: 
 ``` sh
