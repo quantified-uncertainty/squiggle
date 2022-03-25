@@ -39,4 +39,3 @@ TODO: fill this out based on all the different packages scripts once they cool d
 # Pull request protocol
 
 Please work against `staging` branch. **Do not** work against `master`. Please do not merge without approval from some subset of Quinn, Sam, and Ozzie; they will be auto-pinged. 
-
