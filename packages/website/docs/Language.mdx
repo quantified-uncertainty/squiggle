@@ -35,17 +35,3 @@ Squiggle supports functions, including the rendering of functions:
 ozzie_estimate
 `} />
 
-## Squiggle units
-
-Squiggle supports using suffixes at the end of numbers to refer to units:
-
-<SquiggleEditor initialSquiggleString={`
-us_economy_2018 = (10.5 to 10.9)T
-growth_rate = 1.08 to 1.2
-us_economy(t) = us_economy_2018 * (growth_rate^t)
-us_population_2019 = 320M to 330M
-us_population_growth_rate = 1.01 to 1.1
-us_population(t) = us_population_2019 * (us_population_growth_rate^t)
-gdp_per_person(t) = us_economy(t)/us_population(t)
-gdp_per_person`} />
-
