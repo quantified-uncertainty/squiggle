@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Future Features
@@ -79,3 +79,32 @@ Right now, Monte Carlo simulations are totally random. It would be nicer to be a
 
 ## Fixes
 - Discrete distributions are particularly buggy. Try ``mm(1,2,3,4,5,6,7,8,9,10) .* (5 to 8)``
+
+## New Functions
+
+### Distributions
+```
+cauchy() //todo
+pareto() //todo
+metalog() //todo
+```
+
+Possibly change mm to mix, or mx(). Also, change input format, maybe to mx([a,b,c], [a,b,c]).
+
+
+### Functions
+```
+samples(distribution, n) //todo
+toPdf(distribution) //todo
+toCdf(distribution) //todo
+toHash(distribution) //todo. Make hash of content, like, {xs:[], ys:[]}
+trunctate(distribution, leftValue, rightValue) //todo
+leftTrunctate(distribution, leftValue) //todo
+rightTrunctate(distribution, rightValue) //todo
+distributionFromSamples(array, params) //todo
+distributionFromPoints() //todo
+distributionFromHash() //todo
+```
+
+
+
