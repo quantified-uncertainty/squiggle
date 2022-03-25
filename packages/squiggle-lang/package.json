@@ -10,7 +10,8 @@
     "test:reducer": "jest --testPathPattern '.*__tests__/Reducer.*'",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "all": "yarn build && yarn bundle && yarn test"
+    "all": "yarn build && yarn bundle && yarn test",
+    "import-graph-viz": "import-graph-visualizer --entry-points src/rescript/"
   },
   "keywords": [
     "Rescript"
@@ -27,6 +28,7 @@
     "rescript": "^9.1.4"
   },
   "devDependencies": {
+    "@rx-angular/import-graph-visualizer": "0.2.0",
     "@glennsl/rescript-jest": "^0.9.0",
     "@types/jest": "^27.4.0",
     "@types/webpack": "^5.28.0",
