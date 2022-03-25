@@ -2,20 +2,14 @@
 This package contains all the components for squiggle. These can be used either as a library or hosted as a [storybook](https://storybook.js.org/).
 
 # Build for development
+We assume that you had run `yarn` at monorepo level, installing dependencies. 
+
 You need to _prepare_ by building and bundling `squiggle-lang` 
 ``` sh
-cd ../squiggle-language
-yarn
+cd ../squiggle-lang
 yarn build
-yarn bundle
 ```
 If you've otherwise done this recently you can skip those.
-
-Then, you can install dependencies
-``` sh
-cd packages/components
-yarn 
-```
 
 Run a development server
 
