@@ -9,7 +9,7 @@
     "clean": "rescript clean",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "all": "yarn build && yarn bundle && yarn test",
+    "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [
     "Rescript"
