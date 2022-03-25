@@ -4,4 +4,3 @@ yarn-error.log
 .merlin
 .parcel-cache
 .DS_Store
-**/.sync.ffs_db
