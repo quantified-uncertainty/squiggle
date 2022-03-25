@@ -20,7 +20,7 @@
     "binary-search-tree": "0.2.6",
     "css-loader": "^6.7.1",
     "gh-pages": "3.2.3",
-    "jstat": "1.9.2",
+    "jstat": "1.9.5",
     "lenses-ppx": "6.1.10",
     "less": "3.10.3",
     "lodash": "4.17.15",
