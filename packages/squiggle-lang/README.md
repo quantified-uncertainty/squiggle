@@ -81,3 +81,9 @@ complicated, as it has to return either a number, or a distribution, or even
 a representation of a function of distributions. Currently the export is simply
 the generated type that rescript creates, and can be quite confusing. We therefore
 highly recommend the use of typescript when creating tests or using this package.
+
+## Potential Issues
+If you experiment with generating different types of .gen.ts files and similar, note that they won't be caught by git (because they are in .gitignore). Make sure you delete these extra files, once they are unecessary.
+```
+    rm src/rescript/**/*.gen.ts
+```
