@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{syntax}
+\setlength{\grammarparsep}{2ex plus 0.1ex minus 0.05ex}
+% \usepackage[T1]{fontenc}
+\usepackage{bussproofs}
+\usepackage{amsfonts}
+\usepackage{subfiles}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks = true, citecolor = blue}
+
+\usepackage[backend=biber, hyperref=true, citestyle=authoryear]{biblatex}
+\addbibresource{biblio.bib}
+
+\title{pluto-spec}
+\author{Platonic.Systems}
+\date{February 2022}
+
+\begin{document}
+\maketitle{}
+
+\nocite{*}
+\subfile{introduction}
+\subfile{syntax}
+\subfile{semantics}
+\subfile{appendix}
+\printbibliography
+\end{document}
