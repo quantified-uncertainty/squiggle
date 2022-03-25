@@ -20,7 +20,7 @@ The playground depends on the components library which then depends on the langu
 
 # Develop
 
-For any project in the repo, begin by running `yarn` in the top level (TODO: is this true?) 
+For any project in the repo (`packages/`), begin by running `yarn` in the top level (TODO: is this true?) 
 
 ``` sh
 yarn
@@ -38,6 +38,17 @@ codium
 ```
 
 The `nix develop` shell also provides `yarn`. 
+
+# Alpha syntax specification
+
+You can render a pdf of the syntax specification. 
+``` sh
+cd syntax
+nix-build
+o result/squiggle-spec.pdf
+```
+
+Where `o` is `open` if you're on OSX and `xdg-open` if you're on linux. 
 
 # Contributing
 See `CONTRIBUTING.md`. 

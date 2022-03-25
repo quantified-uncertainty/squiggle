@@ -2,7 +2,8 @@
 
 We give the syntax in a BNF-like specification
 
+## Render
 ``` sh
 nix-build
 ```
-shall dump `squiggle-spec.pdf` in the `result` directory. 
+Shall dump `squiggle-spec.pdf` in the `result` directory. 
