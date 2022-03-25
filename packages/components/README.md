@@ -29,7 +29,3 @@ And build artefacts for production,
 yarn bundle  # builds components library
 yarn build  # builds storybook app
 ```
-
-## TODO: double check if `tsc && webpack` is redundantly equivalent to `webpack`. (Edit job step name in `ci.yaml` if you edit the script). 
-
-## TODO: test coverage for react code

@@ -16,10 +16,7 @@ for squiggle. This website is hosted at `playground.squiggle-language.com`
 - `@quri/squiggle-website` in `packages/website` The main descriptive website for squiggle,
 it is hosted at `squiggle-language.com`.
 
-The playground depends on the components library which then depends on the language.
-This means that if you wish to work on the components library, you will need
-to build and bundle the language, and for the playground to work, you will need to build and bundle
-the components library and the playground.
+The playground depends on the components library which then depends on the language. This means that if you wish to work on the components library, you will need to build (no need to bundle) the language, and as of this writing playground doesn't really work.
 
 # Develop
 
