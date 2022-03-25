@@ -22,7 +22,7 @@ let makeSymbolicFromTwoFloats = (name, fn) =>
     ~inputTypes=[#Float, #Float],
     ~run=x =>
       switch x {
-      | [#Float(a), #Float(b)] => Ok(#SymbolicDist(fn(a, b)))
+      | [#Float(a), #Float(b)] => fn(a, b) |> E.R.fmap(r => (#SymbolicDist(r)))
       | e => wrongInputsError(e)
       },
     (),
@@ -35,7 +35,7 @@ let makeSymbolicFromOneFloat = (name, fn) =>
     ~inputTypes=[#Float],
     ~run=x =>
       switch x {
-      | [#Float(a)] => Ok(#SymbolicDist(fn(a)))
+      | [#Float(a)] => fn(a) |> E.R.fmap(r => #SymbolicDist(r))
       | e => wrongInputsError(e)
       },
     (),
