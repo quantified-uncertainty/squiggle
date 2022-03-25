@@ -14,7 +14,7 @@ exception TestRescriptException
 
 let callInternal = (call: CTV.functionCall): result<'b, reducerError> =>{
 
-  let callMatjJs = (call: CTV.functionCall): result<'b, reducerError> =>
+  let callMathJs = (call: CTV.functionCall): result<'b, reducerError> =>
     switch call {
       | ("jsraise", [msg]) => Js.Exn.raiseError(CTV.show(msg)) // For Tests
       | ("resraise", _) => raise(TestRescriptException) // For Tests
@@ -51,7 +51,7 @@ let callInternal = (call: CTV.functionCall): result<'b, reducerError> =>{
     arrayAtIndex(aValueArray, fIndex)
   | ("$atIndex", [CTV.CtvRecord(dict), CTV.CtvArray([CTV.CtvString(sIndex)])]) => recordAtIndex(dict, sIndex)
   | ("$atIndex", [obj, index]) => (CTV.showWithType(obj) ++ "??~~~~" ++ CTV.showWithType(index))->CTV.CtvString->Ok
-  | call => callMatjJs(call)
+  | call => callMathJs(call)
   }
 
 }
