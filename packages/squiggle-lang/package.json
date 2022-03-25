@@ -7,7 +7,6 @@
     "bundle": "webpack",
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
-    "test:reducer": "jest --testPathPattern '.*__tests__/Reducer.*'",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "all": "yarn build && yarn bundle && yarn test"
