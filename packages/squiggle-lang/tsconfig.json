@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "jsx": "react",
     "allowJs": true,
     "noImplicitAny": true,
     "removeComments": true,
@@ -8,9 +9,10 @@
     "sourceMap": true,
     "outDir": "./dist",
     "declarationDir": "./dist",
-    "declaration": true
+    "declaration": true,
+    "composite": true
   },
   "target": "ES6",
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "exclude": ["node_modules", "**/*.spec.ts", "webpack.config.js"]
 }

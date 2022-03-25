@@ -1,18 +1,28 @@
 {
   "compilerOptions": {
+    "paths": {
+      "@quri/squiggle-lang": ["../squiggle-lang/src/js"]
+    },
     "module": "commonjs",
     "jsx": "react",
+    "resolveJsonModule": true,
     "noImplicitAny": false,
     "esModuleInterop": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "resolveJsonModule": true,
+    "composite": true,
     "outDir": "./dist",
     "declarationDir": "./dist",
     "declaration": true,
     "sourceMap": true
   },
+  "files": ["src/spec-distributions.json","src/spec-percentiles.json"],
   "target": "ES6",
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "include": ["src/**/*", "src/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"],
+  "references": [
+    {
+      "path": "../squiggle-lang"
+    }
+  ]
 }

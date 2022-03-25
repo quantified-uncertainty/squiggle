@@ -1,18 +1,15 @@
 {
-  "name": "@squiggle/lang",
-  "version": "0.1.9",
-  "homepage": "https://foretold-app.github.io/estiband/",
+  "name": "@quri/squiggle-lang",
+  "version": "0.2.2",
+  "homepage": "https://squiggle-language.com",
   "scripts": {
     "build": "rescript build -with-deps",
-    "parcel": "parcel build ./src/js/index.js --no-source-maps --no-autoinstall",
+    "bundle": "webpack",
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
     "test": "jest",
-    "test:ci": "yarn jest ./__tests__/Lodash__test.re",
-    "watch:test": "jest --watchAll",
-    "watch:s": "yarn jest -- Converter_test --watch",
-    "package": "tsc",
-    "ci": "yarn build && yarn package"
+    "test:watch": "jest --watchAll",
+    "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [
     "Rescript"
@@ -21,27 +18,29 @@
   "license": "MIT",
   "dependencies": {
     "@glennsl/bs-json": "^5.0.2",
-    "@rescriptbr/reform": "^11.0.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "jstat": "^1.9.5",
     "lodash": "4.17.15",
     "mathjs": "5.10.3",
     "pdfast": "^0.2.0",
-    "rationale": "0.2.0"
+    "rationale": "0.2.0",
+    "rescript": "^9.1.4"
   },
   "devDependencies": {
     "@glennsl/rescript-jest": "^0.9.0",
     "@types/jest": "^27.4.0",
+    "@types/webpack": "^5.28.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "docsify": "^4.12.2",
     "gentype": "^4.3.0",
     "jest": "^27.5.1",
-    "jstat": "1.9.2",
     "moduleserve": "0.9.1",
-    "parcel": "^2.2.1",
-    "parcel-bundler": "1.12.4",
-    "rescript": "^9.1.4",
     "ts-jest": "^27.1.3",
-    "typescript": "^4.5.5"
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.5.5",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
   },
-  "main": "./dist/js/index.js",
+  "source": "./src/js/index.ts",
+  "main": "./dist/bundle.js",
   "types": "./dist/js/index.d.ts"
 }

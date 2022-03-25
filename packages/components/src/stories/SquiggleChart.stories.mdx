@@ -1,9 +1,9 @@
-import { SquiggleChart } from '../SquiggleChart'
-import { Canvas, Meta, Story, Props } from '@storybook/addon-docs';
+import { SquiggleChart } from "../SquiggleChart";
+import { Canvas, Meta, Story, Props } from "@storybook/addon-docs";
 
-<Meta title="Squiggle/SquiggleChart" component={ SquiggleChart } />
+<Meta title="Squiggle/SquiggleChart" component={SquiggleChart} />
 
-export const Template = SquiggleChart
+export const Template = SquiggleChart;
 
 # Squiggle Chart
 
@@ -19,53 +19,62 @@ could be continuous, discrete or mixed.
 ## Distributions
 
 An example of a normal distribution is:
+
 <Canvas>
   <Story
     name="Normal"
     args={{
-      squiggleString: "normal(5,2)"
-    }}> 
+      squiggleString: "normal(5,2)",
+    }}
+  >
     {Template.bind({})}
   </Story>
 </Canvas>
 
-
 An example of a Discrete distribution is:
+
 <Canvas>
   <Story
     name="Discrete"
     args={{
-      squiggleString: "mm(0, 1, [0.5, 0.5])"
-    }}>
+      squiggleString: "mm(0, 1, [0.5, 0.5])",
+    }}
+  >
     {Template.bind({})}
   </Story>
 </Canvas>
 
 An example of a Mixed distribution is:
+
 <Canvas>
   <Story
     name="Mixed"
     args={{
-      squiggleString: "mm(0, 5 to 10, [0.5, 0.5])"
-    }}> 
+      squiggleString: "mm(0, 5 to 10, [0.5, 0.5])",
+    }}
+  >
     {Template.bind({})}
   </Story>
 </Canvas>
 
 ## Constants
+
 A constant is a simple number as a result. This has special formatting rules
 to allow large and small numbers being printed cleanly.
+
 <Canvas>
   <Story
     name="Constant"
     args={{
-      squiggleString: "500000 * 5000000"
-    }}> 
+      squiggleString: "500000 * 5000000",
+    }}
+  >
     {Template.bind({})}
   </Story>
 </Canvas>
 
 ## Functions
+
 Finally, a function can be returned, and this shows how the distribution changes
 over the axis between x = 0 and 10.
 
@@ -73,8 +82,9 @@ over the axis between x = 0 and 10.
   <Story
     name="Function"
     args={{
-      squiggleString: "f(x) = normal(x,x)\nf"
-    }}> 
+      squiggleString: "f(x) = normal(x,x)\nf",
+    }}
+  >
     {Template.bind({})}
   </Story>
 </Canvas>
