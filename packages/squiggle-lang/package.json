@@ -7,7 +7,6 @@
     "bundle": "webpack",
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
-    "coverage": "jest --coverage",
     "test:reducer": "jest --testPathPattern '.*__tests__/Reducer.*'",
     "test": "jest",
     "test:watch": "jest --watchAll",
