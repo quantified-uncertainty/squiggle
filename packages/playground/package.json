@@ -21,7 +21,7 @@
     "css-loader": "^6.7.1",
     "gh-pages": "2.2.0",
     "jstat": "1.9.2",
-    "lenses-ppx": "5.1.0",
+    "lenses-ppx": "6.1.10",
     "less": "3.10.3",
     "lodash": "4.17.15",
     "mathjs": "10.4.1",
