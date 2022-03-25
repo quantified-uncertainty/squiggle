@@ -1,0 +1,36 @@
+---
+sidebar_position: 2
+---
+
+import { SquiggleEditor } from '../src/components/SquiggleEditor'
+
+# Squiggle Language
+
+The squiggle language has a very simple syntax. The best way to get to understand
+it is by simply looking at examples.
+
+## Basic Language 
+
+As an example:
+
+<SquiggleEditor initialSquiggleString={`value_of_work = 10 to 70
+value_of_work`} />
+
+Squiggle can declare variables (`value_of_work = 10 to 70`) and declare exports
+(the lone `value_of_work` line). Variables can be used later in a squiggle program
+and even in other notebooks! 
+
+An export is rendered to the output view so you can see your result.
+
+the exports can be expressions, such as:
+
+<SquiggleEditor initialSquiggleString="normal(0,1)" />
+
+## Functions
+
+Squiggle supports functions, including the rendering of functions:
+
+<SquiggleEditor initialSquiggleString={`ozzie_estimate(t) = lognormal({mean: 3 + (t+.1)^2.5, stdev: 8})
+ozzie_estimate
+`} />
+
