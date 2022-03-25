@@ -84,7 +84,8 @@
           "y": { "scale": "yscale", "field": "y" },
           "y2": { "scale": "yscale", "value": 0 },
           "fill": {
-            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'steelblue'}, {offset: clamp(mousex, 0, 1), color: 'blue'}, {offset: 1.0, color: 'blue'} ] }"
+            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: '#11ac8f'}, {offset: clamp(mousex, 0, 1), color: '#11ac8f'}, {offset: clamp(mousex, 0, 1), color: '#1b6fac'}, {offset: 1.0, color: '#1b6fac'} ] }",
+            "color": "#000"
           },
           "interpolate": { "value": "monotone" },
           "fillOpacity": { "value": 1 }
