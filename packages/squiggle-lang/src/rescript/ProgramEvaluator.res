@@ -110,7 +110,6 @@ module Internals = {
                     inputs : Inputs.inputs,
                     env : ASTTypes.environment) => {
     (input : float) => {
-      Js.log2("Environment", inputs);
       let foo: Inputs.inputs = {...inputs, environment: env};
       evaluateFunction(
         foo,
