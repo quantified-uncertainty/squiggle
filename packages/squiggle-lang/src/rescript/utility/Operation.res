@@ -7,10 +7,11 @@ type algebraicOperation = [
   | #Subtract
   | #Divide
   | #Exponentiate
+  | #Log
 ]
 @genType
 type pointwiseOperation = [#Add | #Multiply | #Exponentiate]
-type scaleOperation = [#Multiply | #Exponentiate | #Log]
+type scaleOperation = [#Multiply | #Exponentiate | #Log | #Divide]
 type distToFloatOperation = [
   | #Pdf(float)
   | #Cdf(float)
@@ -28,6 +29,7 @@ module Algebraic = {
     | #Multiply => \"*."
     | #Exponentiate => \"**"
     | #Divide => \"/."
+    | #Log => (a, b) => log(a) /. log(b)
     }
 
   let applyFn = (t, f1, f2) =>
@@ -43,6 +45,7 @@ module Algebraic = {
     | #Multiply => "*"
     | #Exponentiate => "**"
     | #Divide => "/"
+    | #Log => "log"
     }
 
   let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
@@ -79,6 +82,7 @@ module Scale = {
   let toFn = x =>
     switch x {
     | #Multiply => \"*."
+    | #Divide => \"/."
     | #Exponentiate => \"**"
     | #Log => (a, b) => log(a) /. log(b)
     }
@@ -86,6 +90,7 @@ module Scale = {
   let format = (operation: t, value, scaleBy) =>
     switch operation {
     | #Multiply => j`verticalMultiply($value, $scaleBy) `
+    | #Divide => j`verticalDivide($value, $scaleBy) `
     | #Exponentiate => j`verticalExponentiate($value, $scaleBy) `
     | #Log => j`verticalLog($value, $scaleBy) `
     }
@@ -93,6 +98,7 @@ module Scale = {
   let toIntegralSumCacheFn = x =>
     switch x {
     | #Multiply => (a, b) => Some(a *. b)
+    | #Divide => (a, b) => Some(a /. b)
     | #Exponentiate => (_, _) => None
     | #Log => (_, _) => None
     }
@@ -100,6 +106,7 @@ module Scale = {
   let toIntegralCacheFn = x =>
     switch x {
     | #Multiply => (_, _) => None // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
+    | #Divide => (_, _) => None
     | #Exponentiate => (_, _) => None
     | #Log => (_, _) => None
     }
