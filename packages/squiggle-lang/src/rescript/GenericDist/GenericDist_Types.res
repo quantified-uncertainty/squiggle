@@ -54,10 +54,32 @@ module Operation = {
     | #Sample(int)
   ]
 
-  type t = [
+  type fromDist = [
     | #toFloat(toFloat)
     | #toDist(toDist)
     | #toDistCombination(direction, arithmeticOperation, [#Dist(genericDist) | #Float(float)])
     | #toString
   ]
+
+  type genericFunction = [
+    | #fromDist(fromDist, genericDist)
+    | #fromFloat(fromDist, float)
+    | #mixture(array<(genericDist, float)>)
+  ]
+
+  let toString = (distFunction: fromDist): string =>
+    switch distFunction {
+    | #toFloat(#Cdf(r)) => `cdf(${E.Float.toFixed(r)})`
+    | #toFloat(#Inv(r)) => `inv(${E.Float.toFixed(r)})`
+    | #toFloat(#Mean) => `mean`
+    | #toFloat(#Pdf(r)) => `pdf${E.Float.toFixed(r)}`
+    | #toFloat(#Sample) => `sample`
+    | #toDist(#normalize) => `normalize`
+    | #toDist(#toPointSet) => `toPointSet`
+    | #toDist(#toSampleSet(r)) => `toSampleSet${E.I.toString(r)}`
+    | #toDist(#truncate(_, _)) => `truncate`
+    | #toString => `toString`
+    | #toDistCombination(#Algebraic, _, _) => `algebraic`
+    | #toDistCombination(#Pointwise, _, _) => `pointwise`
+    }
 }

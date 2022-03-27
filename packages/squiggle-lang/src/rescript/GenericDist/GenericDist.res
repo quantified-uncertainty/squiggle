@@ -1,4 +1,4 @@
-//TODO: multimodal, add interface, split up a little bit, test somehow, track performance, refactor sampleSet, refactor ASTEvaluator.res.
+//TODO: multimodal, add interface, test somehow, track performance, refactor sampleSet, refactor ASTEvaluator.res.
 type genericDist = GenericDist_Types.genericDist
 type error = GenericDist_Types.error
 type toPointSetFn = genericDist => result<PointSetTypes.pointSetDist, error>
@@ -26,6 +26,8 @@ let normalize = (t: t) =>
   | #SampleSet(_) => t
   }
 
+// let isNormalized = (t:t) => 
+
 
 let operationToFloat = (toPointSet: toPointSetFn, fnName, t: genericDist): result<float, error> => {
   let symbolicSolution = switch t {
@@ -36,6 +38,7 @@ let operationToFloat = (toPointSet: toPointSetFn, fnName, t: genericDist): resul
     }
   | _ => None
   }
+
   switch symbolicSolution {
   | Some(r) => Ok(r)
   | None => toPointSet(t) |> E.R.fmap(PointSetDist.operate(fnName))
