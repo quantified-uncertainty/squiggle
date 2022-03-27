@@ -29,11 +29,20 @@ let fromResult = (r: result<outputType, error>): outputType =>
   | Error(e) => #Error(e)
   }
 
+let outputToDistResult = (b: outputType): result<genericDist, error> =>
+  switch b {
+  | #Dist(r) => Ok(r)
+  | #Error(r) => Error(r)
+  | _ => Error(ImpossiblePath)
+  }
+
 let rec run = (extra, fnName: operation): outputType => {
   let {sampleCount, xyPointLength} = extra
+
   let reCall = (~extra=extra, ~fnName=fnName, ()) => {
     run(extra, fnName)
   }
+
   let toPointSet = r => {
     switch reCall(~fnName=#fromDist(#toDist(#toPointSet), r), ()) {
     | #Dist(#PointSet(p)) => Ok(p)
@@ -41,6 +50,7 @@ let rec run = (extra, fnName: operation): outputType => {
     | _ => Error(ImpossiblePath)
     }
   }
+
   let toSampleSet = r => {
     switch reCall(~fnName=#fromDist(#toDist(#toSampleSet(sampleCount)), r), ()) {
     | #Dist(#SampleSet(p)) => Ok(p)
@@ -48,6 +58,18 @@ let rec run = (extra, fnName: operation): outputType => {
     | _ => Error(ImpossiblePath)
     }
   }
+
+  let scaleMultiply = (r, weight) =>
+    reCall(
+      ~fnName=#fromDist(#toDistCombination(#Pointwise, #Multiply, #Float(weight)), r),
+      (),
+    ) |> outputToDistResult
+
+  let pointwiseAdd = (r1, r2) =>
+    reCall(
+      ~fnName=#fromDist(#toDistCombination(#Pointwise, #Add, #Dist(r2)), r1),
+      (),
+    ) |> outputToDistResult
 
   let fromDistFn = (subFn: GenericDist_Types.Operation.fromDist, dist: genericDist) =>
     switch subFn {
@@ -89,10 +111,8 @@ let rec run = (extra, fnName: operation): outputType => {
 
   switch fnName {
   | #fromDist(subFn, dist) => fromDistFn(subFn, dist)
-  | #fromFloat(subFn, float) => reCall(
-      ~fnName=#fromDist(subFn, #Symbolic(SymbolicDist.Float.make(float))),
-      (),
-    )
-  | _ => #Error(NotYetImplemented)
+  | #fromFloat(subFn, float) => reCall(~fnName=#fromDist(subFn, GenericDist.fromFloat(float)), ())
+  | #mixture(dists) =>
+    GenericDist.mixture(scaleMultiply, pointwiseAdd, dists) |> E.R.fmap(r => #Dist(r)) |> fromResult
   }
 }

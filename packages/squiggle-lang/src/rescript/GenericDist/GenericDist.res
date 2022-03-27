@@ -5,12 +5,14 @@ type toPointSetFn = genericDist => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = genericDist => result<array<float>, error>
 type t = genericDist
 
-let sampleN = (n, t: t) => 
+let sampleN = (n, t: t) =>
   switch t {
   | #PointSet(r) => Ok(PointSetDist.sampleNRendered(n, r))
   | #Symbolic(r) => Ok(SymbolicDist.T.sampleN(n, r))
   | #SampleSet(_) => Error(GenericDist_Types.NotYetImplemented)
   }
+
+let fromFloat = (f: float) => #Symbolic(SymbolicDist.Float.make(f))
 
 let toString = (t: t) =>
   switch t {
@@ -19,15 +21,14 @@ let toString = (t: t) =>
   | #SampleSet(_) => "Sample Set Distribution"
   }
 
-let normalize = (t: t) => 
+let normalize = (t: t) =>
   switch t {
   | #PointSet(r) => #PointSet(PointSetDist.T.normalize(r))
   | #Symbolic(_) => t
   | #SampleSet(_) => t
   }
 
-// let isNormalized = (t:t) => 
-
+// let isNormalized = (t:t) =>
 
 let operationToFloat = (toPointSet: toPointSetFn, fnName, t: genericDist): result<float, error> => {
   let symbolicSolution = switch t {
@@ -213,4 +214,21 @@ let pointwiseCombinationFloat = (
       )
     })
   } |> E.R.fmap(r => #PointSet(r))
+}
+
+let mixture = (
+  scaleMultiply: (genericDist, float) => result<genericDist, error>,
+  pointwiseAdd: (genericDist, genericDist) => result<genericDist, error>,
+  values: array<(genericDist, float)>,
+) => {
+  let properlyWeightedValues =
+    values |> E.A.fmap(((dist, weight)) => scaleMultiply(dist, weight)) |> E.A.R.firstErrorOrOpen
+  properlyWeightedValues |> E.R.bind(_, values => {
+    values
+    |> Js.Array.sliceFrom(1)
+    |> E.A.fold_left(
+      (acc, x) => E.R.bind(acc, acc => pointwiseAdd(acc, x)),
+      Ok(E.A.unsafe_get(values, 0)),
+    )
+  })
 }
