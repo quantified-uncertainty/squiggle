@@ -28,8 +28,6 @@ let normalize = (t: t) =>
   | #SampleSet(_) => t
   }
 
-// let isNormalized = (t:t) =>
-
 let operationToFloat = (toPointSet: toPointSetFn, fnName, t: genericDist): result<float, error> => {
   let symbolicSolution = switch t {
   | #Symbolic(r) =>

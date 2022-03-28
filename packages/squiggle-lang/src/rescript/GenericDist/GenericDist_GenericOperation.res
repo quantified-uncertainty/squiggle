@@ -21,6 +21,7 @@ type outputType = [
   | #Dist(genericDist)
   | #Error(error)
   | #Float(float)
+  | #String(string)
 ]
 
 let fromResult = (r: result<outputType, error>): outputType =>
@@ -77,7 +78,7 @@ let rec run = (extra, fnName: operation): outputType => {
       GenericDist.operationToFloat(toPointSet, fnName, dist)
       |> E.R.fmap(r => #Float(r))
       |> fromResult
-    | #toString => #Error(GenericDist_Types.NotYetImplemented)
+    | #toString => dist |> GenericDist.toString |> (r => #String(r))
     | #toDist(#normalize) => dist |> GenericDist.normalize |> (r => #Dist(r))
     | #toDist(#truncate(left, right)) =>
       dist
