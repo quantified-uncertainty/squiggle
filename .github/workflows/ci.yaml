@@ -21,17 +21,17 @@ jobs:
         name: Check if the changes are about squiggle-lang src files
         uses: fkirc/skip-duplicate-actions@master
         with:
-          paths: '["packages/squiggle-lang/*"]'
+          paths: '["packages/squiggle-lang/**"]'
       - id: skip_components_check
         name: Check if the changes are about components src files
         uses: fkirc/skip-duplicate-actions@master
         with:
-          paths: '["packages/components/*"]'
+          paths: '["packages/components/**"]'
       - id: skip_website_check
         name: Check if the changes are about website src files
         uses: fkirc/skip-duplicate-actions@master
         with:
-          paths: '["packages/website/*"]'
+          paths: '["packages/website/**"]'
 
   lang-build-test:
     name: Language build and test
