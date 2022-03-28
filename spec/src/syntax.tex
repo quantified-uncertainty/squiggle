@@ -2,43 +2,31 @@
 \begin{document}
 \section{Syntax}\label{section:syntax}
 
-At a high level, we will first be slightly dishonest because the different types of distributions make the story more intricate. Details about assignment and arithmetic on floats will follow eventually, but I want to sketch out a theory of combining distributions, first.
+Details about assignment and arithmetic on floats will follow eventually, but I want to sketch out a theory of combining distributions, first.
 
+Abstractly, you can think of Squiggle as containing two types
+\begin{grammar}
+  <type> ::= <GenericDist> \alt \texttt{float}
+\end{grammar}\label{gram:type}
 
-
-
-
-\subsection{THE FOLLOWING IS HERE FOR TEMPLATE SO I DON'T FORGET HOW TO BNF IN LATEX. }
-
-In regex notation, we provide the following means of describing literals as well as the specification of the constants T and F.
-    \begin{center}
-    \begin{tabular}{c c c}
-        \texttt{var} & ::= & [a-z][a-zA-Z0-9]* \\
-        \texttt{int} & ::= & "-"? [0-9]+ \\
-        \texttt{byte} & ::= & "0x" [0-9a-fA-F] \\
-        \texttt{bytestring} & ::= & "0x" [0-9a-fA-F]+ \\
-        \texttt{text} & ::= & <too tough to get latex to compile it lol>  \\
-        \texttt{bool} & ::= & [TF] \\
-        \texttt{unit} & ::= & [()]
-    \end{tabular}
-    \end{center}
-    \label{tab:atomsregex}
+Where \texttt{float} is ordinary IEEE754 floating point numbers, and $\langle \textit{GenericDist} \rangle$ is as follows
 
 \begin{grammar}
-    <builtin> ::=
-        "AddInteger" \alt "SubtractInteger" \alt "MultiplyInteger"
-        \alt "DivideInteger" \alt "QuotientInteger" \alt "RemainderInteger"
-        \alt "ModInteger" \alt "EqualsInteger" \alt "LessThanInteger"
-        \alt "LessThanEqualsInteger" \alt "AppendByteString"
-        \alt "ConsByteString" \alt "SliceByteString" \alt "LengthByteString"
-        \alt "IndexByteString" \alt "EqualsByteString" \alt "LessThanByteString"
-        \alt "LessThanEqualsByteString" \alt "Sha2_256" \alt "Sha3_256" \alt "Blake2b_256"
-        \alt "VerifySignature" \alt "AppendString" \alt "EqualsString"
-        \alt "EncodeUtf8" \alt "DecodeUtf8" \alt "IfThenElse" \alt "ChooseUnit"
-        \alt "MkCons" \alt "HeadList" \alt "TailList" \alt "NullList"
-        \alt "ChooseData" \alt "ConstrData" \alt "MapData" \alt "ListData"
-        \alt "IData" \alt "BData" \alt "UnConstrData" \alt "UnMapData"
-        \alt "EqualsData" \alt "MkPairData" \alt "MkNilData" \alt "MkNilPairData"
+  <GenericDist> ::= <PointSetDist> \alt \texttt{SampleSet} \alt <Symbolic>
+
+  <PointSetDist> ::= <Mixed> \alt <Continuous> \alt <Discrete>
+
+  <Symbolic> ::= \texttt{Normal} \alt \texttt{LogNormal} \alt \texttt{Triangular} \alt \texttt{Beta} \alt \texttt{Uniform} \alt \texttt{Float} \alt \texttt{Exponential} \alt \texttt{Cauchy}
 \end{grammar}
+
+From a grammatical perspective \texttt{SampleSet} and all of the alternatives of $\langle \textit{Symbolic} \rangle$ are \textit{black boxes}. They needn't be discussed from this point of view.
+
+Finally, most of the magic happens in $\langle \textit{Expression} \rangle$
+
+\begin{grammar}
+  <Expression> ::= <GenericDist> \alt \texttt{float} \alt <Expression> + <Expression> \alt <Expression> * <Expression> \alt <Expression> .+ <Expression> \alt <Expression> .* <Expression>
+\end{grammar}
+
+TODO: split this up into multiple declarations such that order of operations is captured/described.
 
 \end{document}
