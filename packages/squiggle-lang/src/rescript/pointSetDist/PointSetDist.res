@@ -34,6 +34,7 @@ let toMixed = mapToAll((
     ),
 ))
 
+//TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
 let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>

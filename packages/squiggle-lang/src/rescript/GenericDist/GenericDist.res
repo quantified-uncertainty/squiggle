@@ -100,6 +100,8 @@ module Truncate = {
   }
 }
 
+let truncate = Truncate.run
+
 /* Given two random variables A and B, this returns the distribution
    of a new variable that is the result of the operation on A and B.
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
@@ -136,8 +138,9 @@ module AlgebraicCombination = {
     t1: t,
     t2: t,
   ) => {
+    let operation = Operation.Algebraic.toFn(operation)
     E.R.merge(toSampleSet(t1), toSampleSet(t2)) |> E.R.fmap(((a, b)) => {
-      Belt.Array.zip(a, b) |> E.A.fmap(((a, b)) => Operation.Algebraic.toFn(operation, a, b))
+      Belt.Array.zip(a, b) |> E.A.fmap(((a, b)) => operation(a, b))
     })
   }
 
@@ -177,6 +180,8 @@ module AlgebraicCombination = {
     }
   }
 }
+
+let algebraicCombination = AlgebraicCombination.run
 
 //TODO: Add faster pointwiseCombine fn
 let pointwiseCombination = (toPointSet: toPointSetFn, operation, t2: t, t1: t): result<
@@ -219,14 +224,18 @@ let mixture = (
   pointwiseAdd: (genericDist, genericDist) => result<genericDist, error>,
   values: array<(genericDist, float)>,
 ) => {
-  let properlyWeightedValues =
-    values |> E.A.fmap(((dist, weight)) => scaleMultiply(dist, weight)) |> E.A.R.firstErrorOrOpen
-  properlyWeightedValues |> E.R.bind(_, values => {
-    values
-    |> Js.Array.sliceFrom(1)
-    |> E.A.fold_left(
-      (acc, x) => E.R.bind(acc, acc => pointwiseAdd(acc, x)),
-      Ok(E.A.unsafe_get(values, 0)),
-    )
-  })
+  if E.A.length(values) == 0 {
+    Error(GenericDist_Types.Other("mixture must have at least 1 element"))
+  } else {
+    let properlyWeightedValues =
+      values |> E.A.fmap(((dist, weight)) => scaleMultiply(dist, weight)) |> E.A.R.firstErrorOrOpen
+    properlyWeightedValues |> E.R.bind(_, values => {
+      values
+      |> Js.Array.sliceFrom(1)
+      |> E.A.fold_left(
+        (acc, x) => E.R.bind(acc, acc => pointwiseAdd(acc, x)),
+        Ok(E.A.unsafe_get(values, 0)),
+      )
+    })
+  }
 }

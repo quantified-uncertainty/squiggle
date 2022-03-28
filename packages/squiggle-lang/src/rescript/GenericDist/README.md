@@ -30,3 +30,16 @@ graph TD
     D --> Exponential(Exponential)
     D --> Cauchy(Cauchy)
 ```
+
+## Todo
+- [ ] Lots of cleanup 
+- [ ] Add interface files
+- [ ] Simple test story
+- [ ] Provide decent stack traces for key calls in GenericOperation. This could be very useful for debugging.
+- [ ] Cleanup Sample Set library
+- [ ] Add memoization for calculations
+- [ ] Performance bechmarking reports
+- [ ] Remove most of DistPlus, much of which is not needed anymore
+- [ ] More functions for Sample Set, which is very minimal now
+- [ ] Allow these functions to be run on web workers
+- [ ] Refactor interpreter to use GenericDist. This might not be necessary, as the new reducer-inspired interpreter is integrated.
