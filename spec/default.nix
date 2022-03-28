@@ -13,7 +13,7 @@ let deps = [
 in
   stdenv.mkDerivation {
     name = "render_squiggle-spec";
-    src = ./spec;
+    src = ./src;
     buildInputs = deps;
     buildPhase = ''
       echo rendering...

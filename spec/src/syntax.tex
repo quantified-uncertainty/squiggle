@@ -9,6 +9,7 @@ At a high level, we will first be slightly dishonest because the different types
 
 
 \subsection{THE FOLLOWING IS HERE FOR TEMPLATE SO I DON'T FORGET HOW TO BNF IN LATEX. }
+
 In regex notation, we provide the following means of describing literals as well as the specification of the constants T and F.
     \begin{center}
     \begin{tabular}{c c c}
@@ -23,7 +24,6 @@ In regex notation, we provide the following means of describing literals as well
     \end{center}
     \label{tab:atomsregex}
 
-Additionally, we have builtins as follows, (with semantics given in \ref{section:dynamics}). \textbf{Morgan: should a let ast node be in this list of builtins??}
 \begin{grammar}
     <builtin> ::=
         "AddInteger" \alt "SubtractInteger" \alt "MultiplyInteger"
@@ -40,12 +40,5 @@ Additionally, we have builtins as follows, (with semantics given in \ref{section
         \alt "IData" \alt "BData" \alt "UnConstrData" \alt "UnMapData"
         \alt "EqualsData" \alt "MkPairData" \alt "MkNilData" \alt "MkNilPairData"
 \end{grammar}
-
-Many of which have syntax sugars for infix application, like so
-\begin{grammar}
-    <infixbuiltin> ::=
-        "+i" \alt "-i" \alt "*i" \alt "/i" \alt "//i" \alt $\%$"i" \alt "==i" \alt "lti" \alt $\leq$"i" \alt "+b" \alt ":b" \alt "!b" \alt "==b" \alt "ltb" \alt $\leq$"b" \alt "+s" \alt "==s" \alt "==d"
-\end{grammar}
-\textit{Sorry, having trouble getting lessthan sign to render rn}. In the small step dynamics given in \ref{section:dynamics}, only abstract syntax (i.e. $<builtin>$) will be provided, not concrete syntax (i.e. including sugar).
 
 \end{document}

@@ -20,7 +20,7 @@ The playground depends on the components library which then depends on the langu
 
 # Develop
 
-For any project in the repo (`packages/`), begin by running `yarn` in the top level (TODO: is this true?) 
+For any project in the repo (`packages/*`), begin by running `yarn` in the top level.  
 
 ``` sh
 yarn
