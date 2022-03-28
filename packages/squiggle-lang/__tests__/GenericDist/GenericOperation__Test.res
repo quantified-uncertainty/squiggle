@@ -62,43 +62,14 @@ describe("toPointSet", () => {
     expect(result)->toEqual(#Error(Other("Converting sampleSet to pointSet failed")))
   })
 
-  test("back and forth", () => {
+  test("on sample set", () => {
     let result =
       run(#fromDist(#toDist(#toPointSet), normalDist))
       |> fmap(#fromDist(#toDist(#toSampleSet(1000))))
-      |> fmap(#fromDist(#toDist(#consoleLog)))
       |> fmap(#fromDist(#toDist(#toPointSet)))
-      |> fmap(#fromDist(#toDist(#consoleLog)))
       |> fmap(#fromDist(#toFloat(#Mean)))
       |> toFloat
       |> toExt
-    expect(result)->toBeCloseTo(5.09)
-  })
-
-  test("on sample set distribution", () => {
-    let result =
-      run(
-        #fromDist(
-          #toDist(#toPointSet),
-          #SampleSet([
-            0.0,
-            1.0,
-            2.0,
-            3.0,
-            4.0,
-            5.0,
-            6.0,
-            7.0,
-            8.0,
-            9.0,
-            10.0,
-          ]),
-        ),
-      )
-      |> fmap(#fromDist(#toFloat(#Mean)))
-      |> toFloat
-      |> toExt
-    Js.log(result)
     expect(result)->toBeCloseTo(5.09)
   })
 })
