@@ -19,7 +19,7 @@
     "react-vega": "^7.4.4",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.6.3",
-    "vega": "^5.21.0",
+    "vega": "^5.22.1",
     "vega-embed": "^6.20.6",
     "vega-lite": "^5.2.0",
     "web-vitals": "^2.1.4",
