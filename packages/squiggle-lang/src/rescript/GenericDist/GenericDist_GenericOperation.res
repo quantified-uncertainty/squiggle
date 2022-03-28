@@ -1,4 +1,4 @@
-type operation = GenericDist_Types.Operation.genericFunction
+type operation = GenericDist_Types.Operation.genericFunctionCall
 type genericDist = GenericDist_Types.genericDist
 type error = GenericDist_Types.error
 
@@ -9,14 +9,6 @@ type params = {
   xyPointLength: int,
 }
 
-let genericParams = {
-  sampleCount: 1000,
-  xyPointLength: 1000,
-}
-
-type wrapped = (genericDist, params)
-
-let wrapWithParams = (g: genericDist, f: params): wrapped => (g, f)
 type outputType = [
   | #Dist(genericDist)
   | #Error(error)
@@ -82,7 +74,7 @@ let rec run = (extra, fnName: operation): outputType => {
     | #toDist(#normalize) => dist |> GenericDist.normalize |> (r => #Dist(r))
     | #toDist(#truncate(left, right)) =>
       dist
-      |> GenericDist.Truncate.run(toPointSet, left, right)
+      |> GenericDist.truncate(toPointSet, left, right)
       |> E.R.fmap(r => #Dist(r))
       |> fromResult
     | #toDist(#toPointSet) =>
@@ -95,7 +87,7 @@ let rec run = (extra, fnName: operation): outputType => {
     | #toDistCombination(#Algebraic, _, #Float(_)) => #Error(NotYetImplemented)
     | #toDistCombination(#Algebraic, operation, #Dist(dist2)) =>
       dist
-      |> GenericDist.AlgebraicCombination.run(toPointSet, toSampleSet, operation, dist2)
+      |> GenericDist.algebraicCombination(toPointSet, toSampleSet, operation, dist2)
       |> E.R.fmap(r => #Dist(r))
       |> fromResult
     | #toDistCombination(#Pointwise, operation, #Dist(dist2)) =>

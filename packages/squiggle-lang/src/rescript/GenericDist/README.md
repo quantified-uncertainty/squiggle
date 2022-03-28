@@ -33,7 +33,6 @@ graph TD
 
 ## Todo
 - [ ] Lots of cleanup 
-- [ ] Add interface files
 - [ ] Simple test story
 - [ ] Provide decent stack traces for key calls in GenericOperation. This could be very useful for debugging.
 - [ ] Cleanup Sample Set library

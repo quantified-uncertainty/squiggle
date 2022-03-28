@@ -61,7 +61,7 @@ module Operation = {
     | #toString
   ]
 
-  type genericFunction = [
+  type genericFunctionCall = [
     | #fromDist(fromDist, genericDist)
     | #fromFloat(fromDist, float)
     | #mixture(array<(genericDist, float)>)

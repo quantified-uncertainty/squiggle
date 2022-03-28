@@ -1,9 +1,10 @@
 //TODO: multimodal, add interface, test somehow, track performance, refactor sampleSet, refactor ASTEvaluator.res.
-type genericDist = GenericDist_Types.genericDist
+type t = GenericDist_Types.genericDist
 type error = GenericDist_Types.error
-type toPointSetFn = genericDist => result<PointSetTypes.pointSetDist, error>
-type toSampleSetFn = genericDist => result<array<float>, error>
-type t = genericDist
+type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
+type toSampleSetFn = t => result<array<float>, error>
+type scaleMultiplyFn = (t, float) => result<t, error>
+type pointwiseAddFn = (t, t) => result<t, error>
 
 let sampleN = (n, t: t) =>
   switch t {
@@ -28,7 +29,7 @@ let normalize = (t: t) =>
   | #SampleSet(_) => t
   }
 
-let operationToFloat = (toPointSet: toPointSetFn, fnName, t: genericDist): result<float, error> => {
+let operationToFloat = (toPointSet: toPointSetFn, fnName, t) => {
   let symbolicSolution = switch t {
   | #Symbolic(r) =>
     switch SymbolicDist.T.operate(fnName, r) {
@@ -220,9 +221,9 @@ let pointwiseCombinationFloat = (
 }
 
 let mixture = (
-  scaleMultiply: (genericDist, float) => result<genericDist, error>,
-  pointwiseAdd: (genericDist, genericDist) => result<genericDist, error>,
-  values: array<(genericDist, float)>,
+  scaleMultiply: scaleMultiplyFn,
+  pointwiseAdd: pointwiseAddFn,
+  values: array<(t, float)>,
 ) => {
   if E.A.length(values) == 0 {
     Error(GenericDist_Types.Other("mixture must have at least 1 element"))
