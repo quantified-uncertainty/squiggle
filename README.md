@@ -8,6 +8,7 @@ This is an experiment DSL/language for making probabilistic estimates. The full 
 - **website/docs staging**: https://staging--squiggle-documentation.netlify.app/
 - **old playground**: https://playground.squiggle-language.com
 
+## Packages
 This monorepo has several packages that can be used for various purposes. All 
 the packages can be found in `packages`.
 
