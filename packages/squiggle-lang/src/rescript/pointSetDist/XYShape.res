@@ -254,7 +254,7 @@ module PointwiseCombination = {
             j = t2n;
             continue;
           } else {
-            console.log("Error!", i, j);
+            console.log("PointwiseCombination Error", i, j);
           }
 
           outX.push(x);

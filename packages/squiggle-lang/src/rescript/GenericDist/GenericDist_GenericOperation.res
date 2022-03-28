@@ -16,6 +16,32 @@ type outputType = [
   | #String(string)
 ]
 
+module Output = {
+  let toDist = (o: outputType) =>
+    switch o {
+    | #Dist(d) => Some(d)
+    | _ => None
+    }
+
+  let toFloat = (o: outputType) =>
+    switch o {
+    | #Float(d) => Some(d)
+    | _ => None
+    }
+
+  let toString = (o: outputType) =>
+    switch o {
+    | #String(d) => Some(d)
+    | _ => None
+    }
+
+  let toError = (o: outputType) =>
+    switch o {
+    | #Error(d) => Some(d)
+    | _ => None
+    }
+}
+
 let fromResult = (r: result<outputType, error>): outputType =>
   switch r {
   | Ok(o) => o
@@ -71,12 +97,13 @@ let rec run = (extra, fnName: operation): outputType => {
       |> E.R.fmap(r => #Float(r))
       |> fromResult
     | #toString => dist |> GenericDist.toString |> (r => #String(r))
+    | #toDist(#consoleLog) => {
+        Js.log2("Console log requested: ", dist)
+        #Dist(dist)
+      }
     | #toDist(#normalize) => dist |> GenericDist.normalize |> (r => #Dist(r))
     | #toDist(#truncate(left, right)) =>
-      dist
-      |> GenericDist.truncate(toPointSet, left, right)
-      |> E.R.fmap(r => #Dist(r))
-      |> fromResult
+      dist |> GenericDist.truncate(toPointSet, left, right) |> E.R.fmap(r => #Dist(r)) |> fromResult
     | #toDist(#toPointSet) =>
       dist
       |> GenericDist.toPointSet(xyPointLength)
@@ -108,4 +135,22 @@ let rec run = (extra, fnName: operation): outputType => {
   | #mixture(dists) =>
     GenericDist.mixture(scaleMultiply, pointwiseAdd, dists) |> E.R.fmap(r => #Dist(r)) |> fromResult
   }
+}
+
+let runFromDist = (extra, fnName, dist) => run(extra, #fromDist(fnName, dist))
+let runFromFloat = (extra, fnName, float) => run(extra, #fromFloat(fnName, float))
+
+let fmap = (
+  extra,
+  fn: GenericDist_Types.Operation.singleParamaterFunction,
+  input: outputType,
+): outputType => {
+  let newFnCall: result<operation, error> = switch (fn, input) {
+  | (#fromDist(fromDist), #Dist(o)) => Ok(#fromDist(fromDist, o))
+  | (#fromFloat(fromDist), #Float(o)) => Ok(#fromFloat(fromDist, o))
+  | (_, #Error(r)) => Error(r)
+  | (#fromDist(_), _) => Error(Other("Expected dist, got something else"))
+  | (#fromFloat(_), _) => Error(Other("Expected float, got something else"))
+  }
+  newFnCall |> E.R.fmap(r => run(extra, r)) |> fromResult
 }

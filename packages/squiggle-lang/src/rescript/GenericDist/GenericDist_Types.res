@@ -48,6 +48,7 @@ module Operation = {
     | #toPointSet
     | #toSampleSet(int)
     | #truncate(option<float>, option<float>)
+    | #consoleLog
   ]
 
   type toFloatArray = [
@@ -59,6 +60,11 @@ module Operation = {
     | #toDist(toDist)
     | #toDistCombination(direction, arithmeticOperation, [#Dist(genericDist) | #Float(float)])
     | #toString
+  ]
+
+  type singleParamaterFunction = [
+    | #fromDist(fromDist)
+    | #fromFloat(fromDist)
   ]
 
   type genericFunctionCall = [
@@ -78,6 +84,7 @@ module Operation = {
     | #toDist(#toPointSet) => `toPointSet`
     | #toDist(#toSampleSet(r)) => `toSampleSet${E.I.toString(r)}`
     | #toDist(#truncate(_, _)) => `truncate`
+    | #toDist(#consoleLog) => `consoleLog`
     | #toString => `toString`
     | #toDistCombination(#Algebraic, _, _) => `algebraic`
     | #toDistCombination(#Pointwise, _, _) => `pointwise`
