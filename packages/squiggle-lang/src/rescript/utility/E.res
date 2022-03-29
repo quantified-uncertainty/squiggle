@@ -269,6 +269,7 @@ module A = {
       ))
       |> Rationale.Result.return
     }
+  let rangeFloat = (start, stop) => start -> Belt.Array.rangeBy(stop, ~step=1) -> (arr => fmap(Belt.Int.toFloat, arr))
 
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {
