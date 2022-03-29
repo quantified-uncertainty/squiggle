@@ -29,7 +29,7 @@ let normalize = (t: t) =>
   | #SampleSet(_) => t
   }
 
-let operationToFloat = (toPointSet: toPointSetFn, fnName, t) => {
+let operationToFloat = (t, toPointSet: toPointSetFn, fnName) => {
   let symbolicSolution = switch t {
   | #Symbolic(r) =>
     switch SymbolicDist.T.operate(fnName, r) {
@@ -83,10 +83,10 @@ module Truncate = {
     }
 
   let run = (
+    t: t,
     toPointSet: toPointSetFn,
     leftCutoff: option<float>,
     rightCutoff: option<float>,
-    t: t,
   ): result<t, error> => {
     let doesNotNeedCutoff = E.O.isNone(leftCutoff) && E.O.isNone(rightCutoff)
     if doesNotNeedCutoff {
@@ -95,7 +95,7 @@ module Truncate = {
       switch trySymbolicSimplification(leftCutoff, rightCutoff, t) {
       | Some(r) => Ok(r)
       | None =>
-        toPointSet(t) |> E.R.fmap(t =>
+        toPointSet(t)->E.R.fmap2(t =>
           #PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t))
         )
       }
@@ -134,7 +134,7 @@ module AlgebraicCombination = {
     t1: t,
     t2: t,
   ) =>
-    E.R.merge(toPointSet(t1), toPointSet(t2)) |> E.R.fmap(((a, b)) =>
+    E.R.merge(toPointSet(t1), toPointSet(t2))->E.R.fmap2(((a, b)) =>
       PointSetDist.combineAlgebraically(operation, a, b)
     )
 
@@ -145,8 +145,8 @@ module AlgebraicCombination = {
     t2: t,
   ) => {
     let operation = Operation.Algebraic.toFn(operation)
-    E.R.merge(toSampleSet(t1), toSampleSet(t2)) |> E.R.fmap(((a, b)) => {
-      Belt.Array.zip(a, b) |> E.A.fmap(((a, b)) => operation(a, b))
+    E.R.merge(toSampleSet(t1), toSampleSet(t2)) -> E.R.fmap2(((a, b)) => {
+      Belt.Array.zip(a, b) -> E.A.fmap2(((a, b)) => operation(a, b))
     })
   }
 
@@ -155,7 +155,7 @@ module AlgebraicCombination = {
     switch x {
     | #Symbolic(#Float(_)) => 1
     | #Symbolic(_) => 1000
-    | #PointSet(Discrete(m)) => m.xyShape |> XYShape.T.length
+    | #PointSet(Discrete(m)) => m.xyShape -> XYShape.T.length
     | #PointSet(Mixed(_)) => 1000
     | #PointSet(Continuous(_)) => 1000
     | _ => 1000
@@ -167,10 +167,10 @@ module AlgebraicCombination = {
       : #CalculateWithConvolution
 
   let run = (
+    t1: t,
     toPointSet: toPointSetFn,
     toSampleSet: toSampleSetFn,
     algebraicOp,
-    t1: t,
     t2: t,
   ): result<t, error> => {
     switch tryAnalyticalSimplification(algebraicOp, t1, t2) {
@@ -190,7 +190,7 @@ module AlgebraicCombination = {
 let algebraicCombination = AlgebraicCombination.run
 
 //TODO: Add faster pointwiseCombine fn
-let pointwiseCombination = (toPointSet: toPointSetFn, operation, t2: t, t1: t): result<
+let pointwiseCombination = (t1: t, toPointSet: toPointSetFn, operation, t2: t): result<
   t,
   error,
 > => {
@@ -202,10 +202,10 @@ let pointwiseCombination = (toPointSet: toPointSetFn, operation, t2: t, t1: t): 
 }
 
 let pointwiseCombinationFloat = (
+  t: t,
   toPointSet: toPointSetFn,
   operation: GenericDist_Types.Operation.arithmeticOperation,
   f: float,
-  t: t,
 ): result<t, error> => {
   switch operation {
   | #Add | #Subtract => Error(GenericDist_Types.DistributionVerticalShiftIsInvalid)
@@ -227,9 +227,9 @@ let pointwiseCombinationFloat = (
 
 //Note: The result should always cumulatively sum to 1.
 let mixture = (
+  values: array<(t, float)>,
   scaleMultiply: scaleMultiplyFn,
   pointwiseAdd: pointwiseAddFn,
-  values: array<(t, float)>,
 ) => {
   if E.A.length(values) == 0 {
     Error(GenericDist_Types.Other("mixture must have at least 1 element"))

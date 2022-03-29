@@ -93,7 +93,7 @@ let rec run = (extra, fnName: operation): outputType => {
   let fromDistFn = (subFn: GenericDist_Types.Operation.fromDist, dist: genericDist) =>
     switch subFn {
     | #toFloat(fnName) =>
-      GenericDist.operationToFloat(toPointSet, fnName, dist)->E.R.fmap2(r => #Float(r))->fromResult
+      GenericDist.operationToFloat(dist, toPointSet, fnName)->E.R.fmap2(r => #Float(r))->fromResult
     | #toString => dist->GenericDist.toString->(r => #String(r))
     | #toDist(#consoleLog) => {
         Js.log2("Console log requested: ", dist)
@@ -101,7 +101,7 @@ let rec run = (extra, fnName: operation): outputType => {
       }
     | #toDist(#normalize) => dist->GenericDist.normalize->(r => #Dist(r))
     | #toDist(#truncate(left, right)) =>
-      dist |> GenericDist.truncate(toPointSet, left, right) |> E.R.fmap(r => #Dist(r)) |> fromResult
+      dist->GenericDist.truncate(toPointSet, left, right)->E.R.fmap2(r => #Dist(r))->fromResult
     | #toDist(#toPointSet) =>
       dist->GenericDist.toPointSet(xyPointLength)->E.R.fmap2(r => #Dist(#PointSet(r)))->fromResult
     | #toDist(#toSampleSet(n)) =>
@@ -109,26 +109,26 @@ let rec run = (extra, fnName: operation): outputType => {
     | #toDistCombination(#Algebraic, _, #Float(_)) => #Error(NotYetImplemented)
     | #toDistCombination(#Algebraic, operation, #Dist(dist2)) =>
       dist
-      |> GenericDist.algebraicCombination(toPointSet, toSampleSet, operation, dist2)
-      |> E.R.fmap(r => #Dist(r))
-      |> fromResult
+      ->GenericDist.algebraicCombination(toPointSet, toSampleSet, operation, dist2)
+      ->E.R.fmap2(r => #Dist(r))
+      ->fromResult
     | #toDistCombination(#Pointwise, operation, #Dist(dist2)) =>
       dist
-      |> GenericDist.pointwiseCombination(toPointSet, operation, dist2)
-      |> E.R.fmap(r => #Dist(r))
-      |> fromResult
+      ->GenericDist.pointwiseCombination(toPointSet, operation, dist2)
+      ->E.R.fmap2(r => #Dist(r))
+      ->fromResult
     | #toDistCombination(#Pointwise, operation, #Float(f)) =>
       dist
-      |> GenericDist.pointwiseCombinationFloat(toPointSet, operation, f)
-      |> E.R.fmap(r => #Dist(r))
-      |> fromResult
+      ->GenericDist.pointwiseCombinationFloat(toPointSet, operation, f)
+      ->E.R.fmap2(r => #Dist(r))
+      ->fromResult
     }
 
   switch fnName {
   | #fromDist(subFn, dist) => fromDistFn(subFn, dist)
   | #fromFloat(subFn, float) => reCall(~fnName=#fromDist(subFn, GenericDist.fromFloat(float)), ())
   | #mixture(dists) =>
-    GenericDist.mixture(scaleMultiply, pointwiseAdd, dists)->E.R.fmap2(r => #Dist(r))->fromResult
+    dists->GenericDist.mixture(scaleMultiply, pointwiseAdd)->E.R.fmap2(r => #Dist(r))->fromResult
   }
 }
 

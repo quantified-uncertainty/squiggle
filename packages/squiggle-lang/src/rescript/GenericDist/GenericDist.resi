@@ -13,32 +13,32 @@ let toString: t => string
 
 let normalize: t => t
 
-let operationToFloat: (toPointSetFn, Operation.distToFloatOperation, t) => result<float, error>
+let operationToFloat: (t, toPointSetFn, Operation.distToFloatOperation) => result<float, error>
 
 let toPointSet: (t, int) => result<PointSetTypes.pointSetDist, error>
 
-let truncate: (toPointSetFn, option<float>, option<float>, t) => result<t, error>
+let truncate: (t, toPointSetFn, option<float>, option<float>) => result<t, error>
 
 let algebraicCombination: (
+  t,
   toPointSetFn,
   toSampleSetFn,
   GenericDist_Types.Operation.arithmeticOperation,
   t,
-  t,
 ) => result<t, error>
 
 let pointwiseCombination: (
+  t,
   toPointSetFn,
   GenericDist_Types.Operation.arithmeticOperation,
-  t,
   t,
 ) => result<t, error>
 
 let pointwiseCombinationFloat: (
+  t,
   toPointSetFn,
   GenericDist_Types.Operation.arithmeticOperation,
   float,
-  t,
 ) => result<t, error>
 
-let mixture: (scaleMultiplyFn, pointwiseAddFn, array<(t, float)>) => result<t, error>
+let mixture: (array<(t, float)>, scaleMultiplyFn, pointwiseAddFn) => result<t, error>
