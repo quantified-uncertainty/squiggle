@@ -33,6 +33,17 @@ module U = {
   let id = e => e
 }
 
+module Tuple2 = {
+  let first = (v: ('a, 'b)) => {
+    let (a, _) = v
+    a
+  }
+  let second = (v: ('a, 'b)) => {
+    let (_, b) = v
+    b
+  }
+}
+
 module O = {
   let dimap = (sFn, rFn, e) =>
     switch e {
@@ -137,6 +148,7 @@ module R = {
   let result = Rationale.Result.result
   let id = e => e |> result(U.id, U.id)
   let fmap = Rationale.Result.fmap
+  let fmap2 = (a,b) => Rationale.Result.fmap(b,a)
   let bind = Rationale.Result.bind
   let toExn = Belt.Result.getExn
   let default = (default, res: Belt.Result.t<'a, 'b>) =>
@@ -233,6 +245,7 @@ module L = {
 /* A for Array */
 module A = {
   let fmap = Array.map
+  let fmap2 = (a,b) => Array.map(b,a)
   let fmapi = Array.mapi
   let to_list = Array.to_list
   let of_list = Array.of_list
@@ -405,6 +418,7 @@ module A = {
             : {
                 let _ = Js.Array.push(element, continuous)
               }
+
           ()
         })
 

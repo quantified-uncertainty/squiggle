@@ -16,7 +16,6 @@ type outputType = [
   | #String(string)
 ]
 
-
 module Output = {
   let toDist = (o: outputType) =>
     switch o {
@@ -83,36 +82,30 @@ let rec run = (extra, fnName: operation): outputType => {
     reCall(
       ~fnName=#fromDist(#toDistCombination(#Pointwise, #Multiply, #Float(weight)), r),
       (),
-    ) -> outputToDistResult
+    )->outputToDistResult
 
   let pointwiseAdd = (r1, r2) =>
     reCall(
       ~fnName=#fromDist(#toDistCombination(#Pointwise, #Add, #Dist(r2)), r1),
       (),
-    ) -> outputToDistResult
-
+    )->outputToDistResult
 
   let fromDistFn = (subFn: GenericDist_Types.Operation.fromDist, dist: genericDist) =>
     switch subFn {
     | #toFloat(fnName) =>
-      GenericDist.operationToFloat(toPointSet, fnName, dist)
-      |> E.R.fmap(r => #Float(r))
-      |> fromResult
-    | #toString => dist -> GenericDist.toString -> (r => #String(r))
+      GenericDist.operationToFloat(toPointSet, fnName, dist)->E.R.fmap2(r => #Float(r))->fromResult
+    | #toString => dist->GenericDist.toString->(r => #String(r))
     | #toDist(#consoleLog) => {
         Js.log2("Console log requested: ", dist)
         #Dist(dist)
       }
-    | #toDist(#normalize) => dist -> GenericDist.normalize -> (r => #Dist(r))
+    | #toDist(#normalize) => dist->GenericDist.normalize->(r => #Dist(r))
     | #toDist(#truncate(left, right)) =>
       dist |> GenericDist.truncate(toPointSet, left, right) |> E.R.fmap(r => #Dist(r)) |> fromResult
     | #toDist(#toPointSet) =>
-      dist
-      -> GenericDist.toPointSet(xyPointLength)
-      |> E.R.fmap(r => #Dist(#PointSet(r)))
-      |> fromResult
+      dist->GenericDist.toPointSet(xyPointLength)->E.R.fmap2(r => #Dist(#PointSet(r)))->fromResult
     | #toDist(#toSampleSet(n)) =>
-      dist -> GenericDist.sampleN(n) |> E.R.fmap(r => #Dist(#SampleSet(r))) |> fromResult
+      dist->GenericDist.sampleN(n)->E.R.fmap2(r => #Dist(#SampleSet(r)))->fromResult
     | #toDistCombination(#Algebraic, _, #Float(_)) => #Error(NotYetImplemented)
     | #toDistCombination(#Algebraic, operation, #Dist(dist2)) =>
       dist
@@ -135,7 +128,7 @@ let rec run = (extra, fnName: operation): outputType => {
   | #fromDist(subFn, dist) => fromDistFn(subFn, dist)
   | #fromFloat(subFn, float) => reCall(~fnName=#fromDist(subFn, GenericDist.fromFloat(float)), ())
   | #mixture(dists) =>
-    GenericDist.mixture(scaleMultiply, pointwiseAdd, dists) |> E.R.fmap(r => #Dist(r)) |> fromResult
+    GenericDist.mixture(scaleMultiply, pointwiseAdd, dists)->E.R.fmap2(r => #Dist(r))->fromResult
   }
 }
 
@@ -154,5 +147,5 @@ let fmap = (
   | (#fromDist(_), _) => Error(Other("Expected dist, got something else"))
   | (#fromFloat(_), _) => Error(Other("Expected float, got something else"))
   }
-  newFnCall |> E.R.fmap(r => run(extra, r)) |> fromResult
+  newFnCall->E.R.fmap2(r => run(extra, r))->fromResult
 }

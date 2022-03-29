@@ -41,7 +41,7 @@ let operationToFloat = (toPointSet: toPointSetFn, fnName, t) => {
 
   switch symbolicSolution {
   | Some(r) => Ok(r)
-  | None => toPointSet(t) |> E.R.fmap(PointSetDist.operate(fnName))
+  | None => toPointSet(t)->E.R.fmap2(PointSetDist.operate(fnName))
   }
 }
 
@@ -53,6 +53,8 @@ let defaultSamplingInputs: SamplingInputs.samplingInputs = {
   kernelWidth: None,
 }
 
+//Todo: If it's a pointSet, but the xyPointLenght is different from what it has, it should change.
+// This is tricky because the case of discrete distributions.
 let toPointSet = (t, xyPointLength): result<PointSetTypes.pointSetDist, error> => {
   switch t {
   | #PointSet(pointSet) => Ok(pointSet)
@@ -106,7 +108,10 @@ let truncate = Truncate.run
 /* Given two random variables A and B, this returns the distribution
    of a new variable that is the result of the operation on A and B.
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
-   In general, this is implemented via convolution. */
+   In general, this is implemented via convolution.
+
+  TODO: It would be useful to be able to pass in a paramater to get this to run either with convolution or monte carlo.
+*/
 module AlgebraicCombination = {
   let tryAnalyticalSimplification = (
     operation: GenericDist_Types.Operation.arithmeticOperation,
@@ -174,9 +179,9 @@ module AlgebraicCombination = {
     | None =>
       switch chooseConvolutionOrMonteCarlo(t1, t2) {
       | #CalculateWithMonteCarlo =>
-        runMonteCarlo(toSampleSet, algebraicOp, t1, t2) |> E.R.fmap(r => #SampleSet(r))
+        runMonteCarlo(toSampleSet, algebraicOp, t1, t2)->E.R.fmap2(r => #SampleSet(r))
       | #CalculateWithConvolution =>
-        runConvolution(toPointSet, algebraicOp, t1, t2) |> E.R.fmap(r => #PointSet(r))
+        runConvolution(toPointSet, algebraicOp, t1, t2)->E.R.fmap2(r => #PointSet(r))
       }
     }
   }
@@ -190,10 +195,10 @@ let pointwiseCombination = (toPointSet: toPointSetFn, operation, t2: t, t1: t): 
   error,
 > => {
   E.R.merge(toPointSet(t1), toPointSet(t2))
-  |> E.R.fmap(((t1, t2)) =>
+  ->E.R.fmap2(((t1, t2)) =>
     PointSetDist.combinePointwise(GenericDist_Types.Operation.arithmeticToFn(operation), t1, t2)
   )
-  |> E.R.fmap(r => #PointSet(r))
+  ->E.R.fmap2(r => #PointSet(r))
 }
 
 let pointwiseCombinationFloat = (
@@ -205,7 +210,7 @@ let pointwiseCombinationFloat = (
   switch operation {
   | #Add | #Subtract => Error(GenericDist_Types.DistributionVerticalShiftIsInvalid)
   | (#Multiply | #Divide | #Exponentiate | #Log) as operation =>
-    toPointSet(t) |> E.R.fmap(t => {
+    toPointSet(t)->E.R.fmap2(t => {
       //TODO: Move to PointSet codebase
       let fn = (secondary, main) => Operation.Scale.toFn(operation, main, secondary)
       let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(operation)
@@ -217,9 +222,10 @@ let pointwiseCombinationFloat = (
         t,
       )
     })
-  } |> E.R.fmap(r => #PointSet(r))
+  }->E.R.fmap2(r => #PointSet(r))
 }
 
+//Note: The result should always cumulatively sum to 1.
 let mixture = (
   scaleMultiply: scaleMultiplyFn,
   pointwiseAdd: pointwiseAddFn,
@@ -228,9 +234,12 @@ let mixture = (
   if E.A.length(values) == 0 {
     Error(GenericDist_Types.Other("mixture must have at least 1 element"))
   } else {
+    let totalWeight = values->E.A.fmap2(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =
-      values |> E.A.fmap(((dist, weight)) => scaleMultiply(dist, weight)) |> E.A.R.firstErrorOrOpen
-    properlyWeightedValues |> E.R.bind(_, values => {
+      values
+      ->E.A.fmap2(((dist, weight)) => scaleMultiply(dist, weight /. totalWeight))
+      ->E.A.R.firstErrorOrOpen
+    properlyWeightedValues->E.R.bind(values => {
       values
       |> Js.Array.sliceFrom(1)
       |> E.A.fold_left(
