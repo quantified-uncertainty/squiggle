@@ -11,13 +11,13 @@ let sparkly = (
   numbers: array<float>,
   ~options = {minimum: None, maximum: None}
 ) => {
-  // if not numbers is not an array, throw typeerror "Expected an array"
-
   // Unlike reference impl, we assume that all numbers are finite, i.e. no NaN.
+
   let ticks = [`▁`, `▂`, `▃`, `▄`, `▅`, `▆`, `▇`, `█`]
 
   let minimum = E.O.default(Js.Math.minMany_float(numbers), options.minimum)
   let maximum = E.O.default(Js.Math.maxMany_float(numbers), options.maximum)
+
   // Use a high tick if data is constant and max is not equal
   let ticks = if minimum == maximum && maximum != 0.0 {
     [ticks[4]]
@@ -26,19 +26,15 @@ let sparkly = (
   }
 
   let toMapWith = (number: float) => {
-    let ret = {
-      let tickIndex = Js.Math.ceil_int((number /. maximum) *. Belt.Int.toFloat(Belt.Array.length(ticks))) - 1
+    let tickIndex = Js.Math.ceil_int((number /. maximum) *. Belt.Int.toFloat(Belt.Array.length(ticks))) - 1
 
-      let tickIndex = if maximum == 0.0 || tickIndex < 0 {
+    let tickIndex = if maximum == 0.0 || tickIndex < 0 {
         0
       } else {
         tickIndex
       }
-      ticks[tickIndex]
-    }
-    ret
+
+    ticks[tickIndex]
   }
-  let ret = Belt.Array.map(numbers, toMapWith)
-  // Belt.Array.reduce(ret, "", (x, y) => x ++ y)
-  Js.Array.joinWith("", ret)
+  Js.Array.joinWith("", Belt.Array.map(numbers, toMapWith))
 }
