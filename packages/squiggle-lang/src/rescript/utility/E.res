@@ -323,6 +323,7 @@ module A = {
         }
     )
   let filter = (o, e) => Js.Array.filter(o, e)
+  let joinWith = (fill, arr) => Js.Array.joinWith(fill, arr)
 
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
