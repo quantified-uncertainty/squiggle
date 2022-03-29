@@ -1,5 +1,4 @@
 open Rationale.Function.Infix
-
 module FloatFloatMap = {
   module Id = Belt.Id.MakeComparable({
     type t = float
@@ -85,6 +84,11 @@ module O = {
 
   let min = compare(\"<")
   let max = compare(\">")
+}
+
+module O2 = {
+  let default = (a, b) => O.default(b, a)
+  let toExn = (a, b) => O.toExn(b, a)
 }
 
 /* Functions */
@@ -269,7 +273,8 @@ module A = {
       ))
       |> Rationale.Result.return
     }
-  let rangeFloat = (start, stop) => start -> Belt.Array.rangeBy(stop, ~step=1) -> (arr => fmap(Belt.Int.toFloat, arr))
+  let rangeFloat = (~step=1, start, stop) =>
+    Belt.Array.rangeBy(start, stop, ~step) |> fmap(Belt.Int.toFloat)
 
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {
@@ -323,8 +328,8 @@ module A = {
         | r => Some(r)
         }
     )
-  let filter = (o, e) => Js.Array.filter(o, e)
-  let joinWith = (fill, arr) => Js.Array.joinWith(fill, arr)
+  let filter = Js.Array.filter
+  let joinWith = Js.Array.joinWith
 
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
@@ -407,6 +412,7 @@ module A = {
             : {
                 let _ = Js.Array.push(element, continuous)
               }
+
           ()
         })
 
@@ -434,6 +440,11 @@ module A = {
         Belt.Array.makeBy(n, i => min +. Belt.Float.fromInt(i) *. diff)
       }
   }
+}
+
+module A2 = {
+  let fmap = (a, b) => Array.map(b, a)
+  let joinWith = (a, b) => A.joinWith(b, a)
 }
 
 module JsArray = {

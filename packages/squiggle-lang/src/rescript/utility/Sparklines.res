@@ -3,26 +3,24 @@
 // Omitting rgb "fire" style, so no `chalk` dependency
 // Omitting: NaN handling, special consideration for constant data.
 
-let create = (
-  numbers: array<float>,
-  ~minimum=?,
-  ~maximum=?,
-  ()
-) => {
-  let ticks = [`▁`, `▂`, `▃`, `▄`, `▅`, `▆`, `▇`, `█`]
+let ticks = [`▁`, `▂`, `▃`, `▄`, `▅`, `▆`, `▇`, `█`]
 
-  let minimum = E.O.default(Js.Math.minMany_float(numbers), minimum)
-  let maximum = E.O.default(Js.Math.maxMany_float(numbers), maximum)
+let _ticksLength = E.A.length(ticks)
 
-  let toHeight = (number: float) => {
-    let tickIndex = Js.Math.ceil_int((number /. maximum) *. (ticks -> Belt.Array.length -> Belt.Int.toFloat)) - 1
-    let tickIndex = if maximum == 0.0 || tickIndex < 0 {
-        0
-      } else {
-        tickIndex
-      }
-    ticks[tickIndex]
+let _heightToTickIndex = (maximum: float, v: float) => {
+  let suggestedTickIndex = Js.Math.ceil_int(v /. maximum *. Belt.Int.toFloat(_ticksLength)) - 1
+  max(suggestedTickIndex, 0)
+}
+
+let create = (relativeHeights: array<float>, ~maximum=?, ()) => {
+  if E.A.length(relativeHeights) === 0 {
+    ""
+  } else {
+    let maximum = maximum->E.O2.default(E.A.max(relativeHeights)->E.O2.toExn(""))
+
+    relativeHeights
+    ->E.A2.fmap(_heightToTickIndex(maximum))
+    ->E.A2.fmap(r => E.A.get(ticks, r)->E.O2.toExn(""))
+    ->E.A2.joinWith("")
   }
-
-  toHeight -> E.A.fmap(numbers) -> (arr => E.A.joinWith("", arr))
 }
