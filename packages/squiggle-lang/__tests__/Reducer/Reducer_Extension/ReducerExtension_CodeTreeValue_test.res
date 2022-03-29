@@ -1,15 +1,11 @@
-module CTV = Reducer.Extension.CodeTreeValue
+open ReducerInterface.ExpressionValue
 open Jest
 open Expect
 
-describe("CodeTreeValue", () => {
-  test("showArgs", () =>
-    expect([CTV.CtvNumber(1.), CTV.CtvString("a")]->CTV.showArgs)
-    ->toBe("1, 'a'")
-  )
+describe("ExpressionValue", () => {
+  test("showArgs", () => expect([EvNumber(1.), EvString("a")]->showArgs)->toBe("1, 'a'"))
 
   test("showFunctionCall", () =>
-    expect( ("fn", [CTV.CtvNumber(1.), CTV.CtvString("a")])->CTV.showFunctionCall )
-    ->toBe("fn(1, 'a')")
+    expect(("fn", [EvNumber(1.), EvString("a")])->showFunctionCall)->toBe("fn(1, 'a')")
   )
 })
