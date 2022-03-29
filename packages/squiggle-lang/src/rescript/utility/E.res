@@ -441,3 +441,7 @@ module JsArray = {
     |> Js.Array.map(Rationale.Option.toExn("Warning: This should not have happened"))
   let filter = Js.Array.filter
 }
+
+module Sp = {
+  @module("sparkly") @scope("sparkly") external sparkly: string => string = "sparkly"
+}
