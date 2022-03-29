@@ -8,19 +8,19 @@ let ticks = [`▁`, `▂`, `▃`, `▄`, `▅`, `▆`, `▇`, `█`]
 let _ticksLength = E.A.length(ticks)
 
 let _heightToTickIndex = (maximum: float, v: float) => {
-  let v = Js.Math.ceil_int(v /. maximum *. Belt.Int.toFloat(_ticksLength)) - 1
-  min(v, 0)
+  let suggestedTickIndex = Js.Math.ceil_int(v /. maximum *. Belt.Int.toFloat(_ticksLength)) - 1
+  max(suggestedTickIndex, 0)
 }
 
 let create = (relativeHeights: array<float>, ~maximum=?, ()) => {
   if E.A.length(relativeHeights) === 0 {
     ""
   } else {
-    let maximum = maximum |> E.O.default(E.A.max(relativeHeights) |> E.O.toExn(""))
+    let maximum = maximum->E.O2.default(E.A.max(relativeHeights)->E.O2.toExn(""))
 
     relativeHeights
-    |> E.A.fmap(_heightToTickIndex(maximum))
-    |> E.A.fmap(r => E.A.get(ticks, r) |> E.O.toExn(""))
-    |> E.A.joinWith("")
+    ->E.A2.fmap(_heightToTickIndex(maximum))
+    ->E.A2.fmap(r => E.A.get(ticks, r)->E.O2.toExn(""))
+    ->E.A2.joinWith("")
   }
 }
