@@ -9,14 +9,22 @@ let makeTest = (~only=false, str, item1, item2) =>
     : test(str, () => expect(item1) -> toEqual(item2))
 
 let normalParams1: SymbolicDistTypes.normal = {mean: 5.0, stdev: 2.0}
-let normalParams2: SymbolicDistTypes.normal = {mean: 10.0, stdev: 2.0}
+// let normalParams2: SymbolicDistTypes.normal = {mean: 10.0, stdev: 2.0}
 let normalParams3: SymbolicDistTypes.normal = {mean: 20.0, stdev: 2.0}
 let range20 = [0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0]
 let forSparkline = (thisPdf, inps) => map(thisPdf, inps)
 
-describe("Sparklines", () => {
+describe("Normal with Sparklines", () => {
   let pdf1 = x => Normal.pdf(x, normalParams1)
   let forSparkline1 = forSparkline(pdf1, range20)
-  Js.Console.log(Sparklines.sparkly(forSparkline1, ~options={minimum: None, maximum: None}))
-  makeTest("Spark1", 1, 0)
+  makeTest("mean=5", Sparklines.sparkly(forSparkline1, ~options={minimum: None, maximum: None}), `▁▂▃▅███▅▃▂▁▁▁▁▁▁▁▁▁▁▁`)
+
+  let normal4 = Normal.add(normalParams1, normalParams3)
+  let normalParams4 = switch normal4 {
+      | #Normal(params) => params
+      | _ => {mean: 0.0, stdev: 1.0}
+  }
+  let pdf4 = x => Normal.pdf(x, normalParams4)
+  let forSparkline4 = forSparkline(pdf4, range20)
+  makeTest("mixture of two normals", Sparklines.sparkly(forSparkline4, ~options={minimum: None, maximum: None}), `▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▅█`)
 })

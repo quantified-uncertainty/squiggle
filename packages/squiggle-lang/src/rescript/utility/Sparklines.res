@@ -14,16 +14,17 @@ let sparkly = (
   // if not numbers is not an array, throw typeerror "Expected an array"
 
   // Unlike reference impl, we assume that all numbers are finite, i.e. no NaN.
-  let ticks = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]// ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+  let ticks = [`▁`, `▂`, `▃`, `▄`, `▅`, `▆`, `▇`, `█`]
   let minimum = switch options.minimum {
     | None => Js.Math.minMany_float(numbers)
     | Some(x) => x
   }
+  // let minimum = E.O.default(Js.Math.minMany_float(numbers))
   let maximum = switch options.maximum {
     | None => Js.Math.maxMany_float(numbers)
     | Some(x) => x
   }
-
+  // let maximum = E.O.default(Js.Math.maxMany_float(numbers))
   // Use a high tick if data is constant and max is not equal
   let ticks = if minimum == maximum && maximum != 0.0 {
     [ticks[4]]
