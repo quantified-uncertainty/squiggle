@@ -14,9 +14,9 @@ let normalParams3: SymbolicDistTypes.normal = {mean: 20.0, stdev: 2.0}
 let range20 = [0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0]
 let forSparkline = (thisPdf, inps) => map(thisPdf, inps)
 
-describe("normal combine", () => {
+describe("Sparklines", () => {
   let pdf1 = x => Normal.pdf(x, normalParams1)
   let forSparkline1 = forSparkline(pdf1, range20)
-  let x = forSparkline1 -> toString -> Sparklines.sparkly -> Js.Console.log
+  Js.Console.log(Sparklines.sparkly(forSparkline1, ~options={minimum: None, maximum: None}))
   makeTest("Spark1", 1, 0)
 })
