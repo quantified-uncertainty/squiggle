@@ -42,7 +42,7 @@
     "@emotion/babel-plugin": "^11.7.2",
     "@parcel/core": "^2.4.0",
     "@types/react": "^17.0.43",
-    "autoprefixer": "^10.4.2",
+    "autoprefixer": "^10.4.4",
     "docsify": "^4.12.2",
     "jest": "^27.5.1",
     "parcel": "^2.4.0",
