@@ -41,7 +41,7 @@ let operationToFloat = (t, toPointSet: toPointSetFn, fnName) => {
 
   switch symbolicSolution {
   | Some(r) => Ok(r)
-  | None => toPointSet(t)->E.R.fmap2(PointSetDist.operate(fnName))
+  | None => toPointSet(t)->E.R2.fmap(PointSetDist.operate(fnName))
   }
 }
 
@@ -95,7 +95,7 @@ module Truncate = {
       switch trySymbolicSimplification(leftCutoff, rightCutoff, t) {
       | Some(r) => Ok(r)
       | None =>
-        toPointSet(t)->E.R.fmap2(t =>
+        toPointSet(t)->E.R2.fmap(t =>
           #PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t))
         )
       }
@@ -134,7 +134,7 @@ module AlgebraicCombination = {
     t1: t,
     t2: t,
   ) =>
-    E.R.merge(toPointSet(t1), toPointSet(t2))->E.R.fmap2(((a, b)) =>
+    E.R.merge(toPointSet(t1), toPointSet(t2))->E.R2.fmap(((a, b)) =>
       PointSetDist.combineAlgebraically(operation, a, b)
     )
 
@@ -145,8 +145,8 @@ module AlgebraicCombination = {
     t2: t,
   ) => {
     let operation = Operation.Algebraic.toFn(operation)
-    E.R.merge(toSampleSet(t1), toSampleSet(t2)) -> E.R.fmap2(((a, b)) => {
-      Belt.Array.zip(a, b) -> E.A.fmap2(((a, b)) => operation(a, b))
+    E.R.merge(toSampleSet(t1), toSampleSet(t2))->E.R2.fmap(((a, b)) => {
+      Belt.Array.zip(a, b)->E.A2.fmap(((a, b)) => operation(a, b))
     })
   }
 
@@ -155,7 +155,7 @@ module AlgebraicCombination = {
     switch x {
     | #Symbolic(#Float(_)) => 1
     | #Symbolic(_) => 1000
-    | #PointSet(Discrete(m)) => m.xyShape -> XYShape.T.length
+    | #PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
     | #PointSet(Mixed(_)) => 1000
     | #PointSet(Continuous(_)) => 1000
     | _ => 1000
@@ -179,9 +179,9 @@ module AlgebraicCombination = {
     | None =>
       switch chooseConvolutionOrMonteCarlo(t1, t2) {
       | #CalculateWithMonteCarlo =>
-        runMonteCarlo(toSampleSet, algebraicOp, t1, t2)->E.R.fmap2(r => #SampleSet(r))
+        runMonteCarlo(toSampleSet, algebraicOp, t1, t2)->E.R2.fmap(r => #SampleSet(r))
       | #CalculateWithConvolution =>
-        runConvolution(toPointSet, algebraicOp, t1, t2)->E.R.fmap2(r => #PointSet(r))
+        runConvolution(toPointSet, algebraicOp, t1, t2)->E.R2.fmap(r => #PointSet(r))
       }
     }
   }
@@ -195,10 +195,10 @@ let pointwiseCombination = (t1: t, toPointSet: toPointSetFn, operation, t2: t): 
   error,
 > => {
   E.R.merge(toPointSet(t1), toPointSet(t2))
-  ->E.R.fmap2(((t1, t2)) =>
+  ->E.R2.fmap(((t1, t2)) =>
     PointSetDist.combinePointwise(GenericDist_Types.Operation.arithmeticToFn(operation), t1, t2)
   )
-  ->E.R.fmap2(r => #PointSet(r))
+  ->E.R2.fmap(r => #PointSet(r))
 }
 
 let pointwiseCombinationFloat = (
@@ -210,7 +210,7 @@ let pointwiseCombinationFloat = (
   switch operation {
   | #Add | #Subtract => Error(GenericDist_Types.DistributionVerticalShiftIsInvalid)
   | (#Multiply | #Divide | #Exponentiate | #Log) as operation =>
-    toPointSet(t)->E.R.fmap2(t => {
+    toPointSet(t)->E.R2.fmap(t => {
       //TODO: Move to PointSet codebase
       let fn = (secondary, main) => Operation.Scale.toFn(operation, main, secondary)
       let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(operation)
@@ -222,10 +222,10 @@ let pointwiseCombinationFloat = (
         t,
       )
     })
-  }->E.R.fmap2(r => #PointSet(r))
+  }->E.R2.fmap(r => #PointSet(r))
 }
 
-//Note: The result should always cumulatively sum to 1.
+//Note: The result should always cumulatively sum to 1. This would be good to test.
 let mixture = (
   values: array<(t, float)>,
   scaleMultiply: scaleMultiplyFn,
@@ -234,10 +234,10 @@ let mixture = (
   if E.A.length(values) == 0 {
     Error(GenericDist_Types.Other("mixture must have at least 1 element"))
   } else {
-    let totalWeight = values->E.A.fmap2(E.Tuple2.second)->E.A.Floats.sum
+    let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =
       values
-      ->E.A.fmap2(((dist, weight)) => scaleMultiply(dist, weight /. totalWeight))
+      ->E.A2.fmap(((dist, weight)) => scaleMultiply(dist, weight /. totalWeight))
       ->E.A.R.firstErrorOrOpen
     properlyWeightedValues->E.R.bind(values => {
       values

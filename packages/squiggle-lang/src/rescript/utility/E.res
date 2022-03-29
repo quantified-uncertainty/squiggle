@@ -148,7 +148,6 @@ module R = {
   let result = Rationale.Result.result
   let id = e => e |> result(U.id, U.id)
   let fmap = Rationale.Result.fmap
-  let fmap2 = (a,b) => Rationale.Result.fmap(b,a)
   let bind = Rationale.Result.bind
   let toExn = Belt.Result.getExn
   let default = (default, res: Belt.Result.t<'a, 'b>) =>
@@ -170,6 +169,10 @@ module R = {
 
   let errorIfCondition = (errorCondition, errorMessage, r) =>
     errorCondition(r) ? Error(errorMessage) : Ok(r)
+}
+
+module R2 = {
+  let fmap = (a,b) => R.fmap(b,a)
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>
@@ -245,7 +248,6 @@ module L = {
 /* A for Array */
 module A = {
   let fmap = Array.map
-  let fmap2 = (a,b) => Array.map(b,a)
   let fmapi = Array.mapi
   let to_list = Array.to_list
   let of_list = Array.of_list
@@ -446,6 +448,10 @@ module A = {
         Belt.Array.makeBy(n, i => min +. Belt.Float.fromInt(i) *. diff)
       }
   }
+}
+
+module A2 = {
+  let fmap = (a,b) => A.fmap(b,a)
 }
 
 module JsArray = {
