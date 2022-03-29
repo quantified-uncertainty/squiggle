@@ -37,9 +37,9 @@ describe("mixture", () => {
   test("on two normal distributions", () => {
     let result =
       run(#mixture([(normalDist10, 0.5), (normalDist20, 0.5)]))
-      |> fmap(#fromDist(#toFloat(#Mean)))
-      |> toFloat
-      |> toExt
+      ->fmap(#fromDist(#toFloat(#Mean)))
+      ->toFloat
+      ->toExt
     expect(result)->toBeCloseTo(15.28)
   })
 })
@@ -48,15 +48,15 @@ describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {
     let result =
       run(#fromDist(#toDist(#toPointSet), normalDist))
-      |> fmap(#fromDist(#toFloat(#Mean)))
-      |> toFloat
-      |> toExt
+      ->fmap(#fromDist(#toFloat(#Mean)))
+      ->toFloat
+      ->toExt
     expect(result)->toBeCloseTo(5.09)
   })
 
   test("on sample set distribution with under 4 points", () => {
     let result =
-      run(#fromDist(#toDist(#toPointSet), #SampleSet([0.0, 1.0, 2.0, 3.0]))) |> fmap(
+      run(#fromDist(#toDist(#toPointSet), #SampleSet([0.0, 1.0, 2.0, 3.0])))->fmap(
         #fromDist(#toFloat(#Mean)),
       )
     expect(result)->toEqual(#Error(Other("Converting sampleSet to pointSet failed")))
@@ -65,11 +65,11 @@ describe("toPointSet", () => {
   test("on sample set", () => {
     let result =
       run(#fromDist(#toDist(#toPointSet), normalDist))
-      |> fmap(#fromDist(#toDist(#toSampleSet(1000))))
-      |> fmap(#fromDist(#toDist(#toPointSet)))
-      |> fmap(#fromDist(#toFloat(#Mean)))
-      |> toFloat
-      |> toExt
+      ->fmap(#fromDist(#toDist(#toSampleSet(1000))))
+      ->fmap(#fromDist(#toDist(#toPointSet)))
+      ->fmap(#fromDist(#toFloat(#Mean)))
+      ->toFloat
+      ->toExt
     expect(result)->toBeCloseTo(5.09)
   })
 })

@@ -31,6 +31,8 @@ graph TD
     D --> Cauchy(Cauchy)
 ```
 
+## Diagram of Generic Distribution Types
+
 ## Todo
 - [ ] Lots of cleanup 
 - [ ] Simple test story
@@ -42,3 +44,5 @@ graph TD
 - [ ] More functions for Sample Set, which is very minimal now
 - [ ] Allow these functions to be run on web workers
 - [ ] Refactor interpreter to use GenericDist. This might not be necessary, as the new reducer-inspired interpreter is integrated.
+
+## More todos

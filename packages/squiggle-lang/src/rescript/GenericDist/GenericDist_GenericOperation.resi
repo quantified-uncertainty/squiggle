@@ -17,7 +17,7 @@ let runFromDist: (
   GenericDist_Types.genericDist,
 ) => outputType
 let runFromFloat: (params, GenericDist_Types.Operation.fromDist, float) => outputType
-let fmap: (params, GenericDist_Types.Operation.singleParamaterFunction, outputType) => outputType
+let fmap: (params, outputType, GenericDist_Types.Operation.singleParamaterFunction) => outputType
 
 module Output: {
   let toDist: outputType => option<GenericDist_Types.genericDist>

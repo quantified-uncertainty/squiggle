@@ -16,6 +16,7 @@ type outputType = [
   | #String(string)
 ]
 
+
 module Output = {
   let toDist = (o: outputType) =>
     switch o {
@@ -82,13 +83,14 @@ let rec run = (extra, fnName: operation): outputType => {
     reCall(
       ~fnName=#fromDist(#toDistCombination(#Pointwise, #Multiply, #Float(weight)), r),
       (),
-    ) |> outputToDistResult
+    ) -> outputToDistResult
 
   let pointwiseAdd = (r1, r2) =>
     reCall(
       ~fnName=#fromDist(#toDistCombination(#Pointwise, #Add, #Dist(r2)), r1),
       (),
-    ) |> outputToDistResult
+    ) -> outputToDistResult
+
 
   let fromDistFn = (subFn: GenericDist_Types.Operation.fromDist, dist: genericDist) =>
     switch subFn {
@@ -96,21 +98,21 @@ let rec run = (extra, fnName: operation): outputType => {
       GenericDist.operationToFloat(toPointSet, fnName, dist)
       |> E.R.fmap(r => #Float(r))
       |> fromResult
-    | #toString => dist |> GenericDist.toString |> (r => #String(r))
+    | #toString => dist -> GenericDist.toString -> (r => #String(r))
     | #toDist(#consoleLog) => {
         Js.log2("Console log requested: ", dist)
         #Dist(dist)
       }
-    | #toDist(#normalize) => dist |> GenericDist.normalize |> (r => #Dist(r))
+    | #toDist(#normalize) => dist -> GenericDist.normalize -> (r => #Dist(r))
     | #toDist(#truncate(left, right)) =>
       dist |> GenericDist.truncate(toPointSet, left, right) |> E.R.fmap(r => #Dist(r)) |> fromResult
     | #toDist(#toPointSet) =>
       dist
-      |> GenericDist.toPointSet(xyPointLength)
+      -> GenericDist.toPointSet(xyPointLength)
       |> E.R.fmap(r => #Dist(#PointSet(r)))
       |> fromResult
     | #toDist(#toSampleSet(n)) =>
-      dist |> GenericDist.sampleN(n) |> E.R.fmap(r => #Dist(#SampleSet(r))) |> fromResult
+      dist -> GenericDist.sampleN(n) |> E.R.fmap(r => #Dist(#SampleSet(r))) |> fromResult
     | #toDistCombination(#Algebraic, _, #Float(_)) => #Error(NotYetImplemented)
     | #toDistCombination(#Algebraic, operation, #Dist(dist2)) =>
       dist
@@ -142,8 +144,8 @@ let runFromFloat = (extra, fnName, float) => run(extra, #fromFloat(fnName, float
 
 let fmap = (
   extra,
-  fn: GenericDist_Types.Operation.singleParamaterFunction,
   input: outputType,
+  fn: GenericDist_Types.Operation.singleParamaterFunction,
 ): outputType => {
   let newFnCall: result<operation, error> = switch (fn, input) {
   | (#fromDist(fromDist), #Dist(o)) => Ok(#fromDist(fromDist, o))

@@ -5,7 +5,7 @@ type toSampleSetFn = t => result<array<float>, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
-let sampleN: (int, t) => result<array<float>, error>
+let sampleN: (t, int) => result<array<float>, error>
 
 let fromFloat: float => t
 
@@ -15,7 +15,7 @@ let normalize: t => t
 
 let operationToFloat: (toPointSetFn, Operation.distToFloatOperation, t) => result<float, error>
 
-let toPointSet: (int, t) => result<PointSetTypes.pointSetDist, error>
+let toPointSet: (t, int) => result<PointSetTypes.pointSetDist, error>
 
 let truncate: (toPointSetFn, option<float>, option<float>, t) => result<t, error>
 

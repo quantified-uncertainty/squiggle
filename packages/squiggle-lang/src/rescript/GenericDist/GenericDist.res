@@ -6,7 +6,7 @@ type toSampleSetFn = t => result<array<float>, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
-let sampleN = (n, t: t) =>
+let sampleN = (t: t, n) =>
   switch t {
   | #PointSet(r) => Ok(PointSetDist.sampleNRendered(n, r))
   | #Symbolic(r) => Ok(SymbolicDist.T.sampleN(n, r))
@@ -53,7 +53,7 @@ let defaultSamplingInputs: SamplingInputs.samplingInputs = {
   kernelWidth: None,
 }
 
-let toPointSet = (xyPointLength, t: t): result<PointSetTypes.pointSetDist, error> => {
+let toPointSet = (t, xyPointLength): result<PointSetTypes.pointSetDist, error> => {
   switch t {
   | #PointSet(pointSet) => Ok(pointSet)
   | #Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(xyPointLength, r))
