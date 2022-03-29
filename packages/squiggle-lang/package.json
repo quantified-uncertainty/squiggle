@@ -24,8 +24,7 @@
     "mathjs": "10.4.1",
     "pdfast": "^0.2.0",
     "rationale": "0.2.0",
-    "rescript": "^9.1.4",
-    "sparkly": "6.0.0"
+    "rescript": "^9.1.4"
   },
   "devDependencies": {
     "@glennsl/rescript-jest": "^0.9.0",

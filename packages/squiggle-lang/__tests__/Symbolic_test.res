@@ -2,7 +2,6 @@ open Jest
 open Expect
 open Js.Array
 open SymbolicDist
-open E.Sp
 
 let makeTest = (~only=false, str, item1, item2) =>
   only
@@ -18,6 +17,6 @@ let forSparkline = (thisPdf, inps) => map(thisPdf, inps)
 describe("normal combine", () => {
   let pdf1 = x => Normal.pdf(x, normalParams1)
   let forSparkline1 = forSparkline(pdf1, range20)
-  let x = forSparkline1 -> toString -> sparkly -> Js.Console.log
+  let x = forSparkline1 -> toString -> Sparklines.sparkly -> Js.Console.log
   makeTest("Spark1", 1, 0)
 })
