@@ -44,6 +44,7 @@
               yarn2nix
               nodePackages.npm
               nodejs
+              patchelf
               (pkgs.vscode-with-extensions.override {
                   vscode = pkgs.vscodium;
                   vscodeExtensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace [
