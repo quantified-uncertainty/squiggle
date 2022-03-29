@@ -269,7 +269,8 @@ module A = {
       ))
       |> Rationale.Result.return
     }
-  let rangeFloat = (start, stop) => start -> Belt.Array.rangeBy(stop, ~step=1) -> (arr => fmap(Belt.Int.toFloat, arr))
+  let rangeFloat = (~step=1, start, stop) =>
+    Belt.Array.rangeBy(start, stop, ~step) |> fmap(Belt.Int.toFloat)
 
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {
@@ -324,7 +325,7 @@ module A = {
         }
     )
   let filter = (o, e) => Js.Array.filter(o, e)
-  let joinWith = (fill, arr) => Js.Array.joinWith(fill, arr)
+  let joinWith = Js.Array.joinWith
 
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
@@ -407,6 +408,7 @@ module A = {
             : {
                 let _ = Js.Array.push(element, continuous)
               }
+
           ()
         })
 
