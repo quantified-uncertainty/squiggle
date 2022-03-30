@@ -47,7 +47,7 @@ let parse = (expr: string): result<node, errorValue> =>
   | Js.Exn.Error(obj) => REJs(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   }
 
-type mjNode =
+type mathJsNode =
   | MjAccessorNode(accessorNode)
   | MjArrayNode(arrayNode)
   | MjConstantNode(constantNode)
@@ -72,7 +72,7 @@ let castNodeType = (node: node) =>
   | _ => RETodo(`Argg, unhandled MathJsNode: ${node["type"]}`)->Error
   }
 
-let rec show = (mjNode: mjNode): string => {
+let rec show = (mathJsNode: mathJsNode): string => {
   let showValue = (a: 'a): string =>
     if Js.typeof(a) == "string" {
       `'${Js.String.make(a)}'`
@@ -103,7 +103,7 @@ let rec show = (mjNode: mjNode): string => {
     ->Belt.Array.map(each => showResult(each->castNodeType))
     ->Js.String.concatMany("")
 
-  switch mjNode {
+  switch mathJsNode {
   | MjAccessorNode(aNode) => `${aNode["object"]->showMathJsNode}[${aNode["index"]->showIndexNode}]`
   | MjArrayNode(aNode) => `[${aNode["items"]->showNodeArray}]`
   | MjConstantNode(cNode) => cNode["value"]->showValue
@@ -115,9 +115,9 @@ let rec show = (mjNode: mjNode): string => {
   | MjSymbolNode(sNode) => sNode["name"]
   }
 }
-and showResult = (rmjnode: result<mjNode, errorValue>): string =>
-  switch rmjnode {
+and showResult = (rMathJsNode: result<mathJsNode, errorValue>): string =>
+  switch rMathJsNode {
   | Error(e) => showError(e)
-  | Ok(mjNode) => show(mjNode)
+  | Ok(mathJsNode) => show(mathJsNode)
   }
 and showMathJsNode = node => node->castNodeType->showResult

@@ -9,8 +9,8 @@ type expression = ExtressionT.expression
 type expressionValue = ExpressionValue.expressionValue
 type errorValue = ErrorValue.errorValue
 
-let rec fromNode = (mjnode: Parse.node): result<expression, errorValue> =>
-  Parse.castNodeType(mjnode)->Result.flatMap(typedMjNode => {
+let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
+  Parse.castNodeType(mathJsNode)->Result.flatMap(typedMathJsNode => {
     let fromNodeList = (nodeList: list<Parse.node>): result<list<expression>, 'e> =>
       Belt.List.reduceReverse(nodeList, Ok(list{}), (racc, currNode) =>
         racc->Result.flatMap(acc =>
@@ -52,9 +52,9 @@ let rec fromNode = (mjnode: Parse.node): result<expression, errorValue> =>
       let rpropertyCodeList = Belt.List.reduceReverse(
         iNode["dimensions"]->Belt.List.fromArray,
         Ok(list{}),
-        (racc, currentPropertyMjNode) =>
+        (racc, currentPropertyMathJsNode) =>
           racc->Result.flatMap(acc =>
-            fromNode(currentPropertyMjNode)->Result.map(propertyCode => list{propertyCode, ...acc})
+            fromNode(currentPropertyMathJsNode)->Result.map(propertyCode => list{propertyCode, ...acc})
           ),
       )
       rpropertyCodeList->Result.map(propertyCodeList => ExtressionT.EList(propertyCodeList))
@@ -70,7 +70,7 @@ let rec fromNode = (mjnode: Parse.node): result<expression, errorValue> =>
       })
     }
 
-    switch typedMjNode {
+    switch typedMathJsNode {
     | MjArrayNode(aNode) =>
       aNode["items"]->Belt.List.fromArray->fromNodeList->Result.map(list => ExtressionT.EList(list))
     | MjConstantNode(cNode) =>
