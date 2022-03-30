@@ -2,6 +2,18 @@
 \begin{document}
 \section{Syntax}\label{section:syntax}
 
+\subsection{Lexical descriptions of constants and variables}
+The lexical grammars of \texttt{float} and $\langle \textit{var} \rangle$ are given by the following regular expressions (floats from \cite{@CraftingInterpreters, Appendix I})
+
+\begin{tabular}{ c c }
+  \texttt{float} & $\langle digit \rangle$+ ( . $\langle digit \rangle$+ )? \\
+  $\langle digit \rangle$ & 0-9 \\
+  $\langle var \rangle$ & a-zA-Z+ a-zA-Z0-9?
+\end{tabular}\label{regex:float}
+
+
+\subsection{A high-level story}
+
 Details about assignment and arithmetic on floats will follow eventually, but I want to sketch out a theory of combining distributions, first.
 
 Abstractly, you can think of Squiggle as containing two types
@@ -9,25 +21,120 @@ Abstractly, you can think of Squiggle as containing two types
   <type> ::= <GenericDist> \alt \texttt{float}
 \end{grammar}\label{gram:type}
 
+
+\textbf{Squiggle does not support integers}. Every number is cast to float if it is not specified with a trailing \texttt{.0}.
+
 Where \texttt{float} is ordinary IEEE754 floating point numbers, and $\langle \textit{GenericDist} \rangle$ is as follows
 
 \begin{grammar}
   <GenericDist> ::= <PointSetDist> \alt \texttt{SampleSet} \alt <Symbolic>
 
-  <PointSetDist> ::= <Mixed> \alt <Continuous> \alt <Discrete>
+  <PointSetDist> ::= \texttt{Mixed} \alt \texttt{Continuous} \alt \texttt{Discrete}
 
   <Symbolic> ::= \texttt{Normal} \alt \texttt{LogNormal} \alt \texttt{Triangular} \alt \texttt{Beta} \alt \texttt{Uniform} \alt \texttt{Float} \alt \texttt{Exponential} \alt \texttt{Cauchy}
-\end{grammar}
+\end{grammar}\label{gram:gendist}
 
 From a grammatical perspective \texttt{SampleSet} and all of the alternatives of $\langle \textit{Symbolic} \rangle$ are \textit{black boxes}. They needn't be discussed from this point of view.
 
-Finally, most of the magic happens in $\langle \textit{Expression} \rangle$
+Finally, most of the magic happens in $\langle \textit{Expression} \rangle$, though this story is suppresses a lot of the detail that would make opertational semantics possible.
 
 \begin{grammar}
-  <Factor> ::= <GenericDist> \alt \texttt{float} \alt <Factor> * <Factor> \alt <Factor> .* <Factor>
+  <Factor> ::= <GenericDist> \alt \texttt{float} \alt list(<type>) \alt <var> \alt <Factor> * <Factor> \alt <Factor> .* <Factor> \alt <Factor> ./ <Factor>
 
-  <Expression> ::= <Factor> + <Factor> \alt <Factor> .+ <Factor>
+  <Expression> ::= <Factor> \alt <Factor> + <Factor> \alt <Factor> .+ <Factor> \alt <Factor> - <Factor> \alt <Factor> .- <Factor>
+\end{grammar}\label{gram:expr}
+
+In the true story, these binary operators shall be revealed to be \textit{sugars}, with different meanings depending on if their arguments are $\langle \textit{GenericDist} \rangle$ or \texttt{float}.
+
+\subsection{Functions}
+
+We have a type of not-necessarily-normalized distributions along with a normalization function \texttt{normalize}, where an ordinary $\langle \textit{GenericDist} \rangle$ corresponds to the special case where \texttt{normalize} is idempotent.
+
+Give another alternative to $\langle \textit{GenericDist} \rangle$ for the normalization function, and define a list of functions that return $\langle \textit{NonNormalizedDist} \rangle$
+\begin{grammar}
+  <GenericDist> ::= <GenericDist> \alt \texttt{normalize}\ <NonNormalizedDist>
+
+  <NonNormalizedDist> ::=
+    <GenericDist>
+    \alt \texttt{distFloatAdd} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{distFloatMultiply} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{distFloatSubtract} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{distFloatDivide} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{distFloatExponent} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{pointwiseAddConstant} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{pointwiseMultiplyConstant} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{pointwiseSubtractConstant} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{pointwiseDivideConstant} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{pointwiseLogConstant} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{distDistAdd} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{distDistSum} list(<NonNormalizedDist>)
+    \alt \texttt{distDistMultiply} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{distDistProduct} list(<NonNormalizedDist>)
+    \alt \texttt{distDistSubtract} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{distDistDivide} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{distDistExponent} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{pointwiseDistAdd} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{pointwiseDistSum} list(<NonNormalizedDist>)
+    \alt \texttt{pointwiseDistMultiply} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{pointwiseDistProduct} list(<NonNormalizedDist>)
+    \alt \texttt{pointwiseDistSubtract} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{pointwiseDistDivide} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{pointwiseDistExponent} <NonNormalizedDist> <NonNormalizedDist>
+    \alt \texttt{truncate} <NonNormalizedDist> \texttt{float} \texttt{float}
+    \alt \texttt{truncateLeft} <NonNormalizedDist> \texttt{float}
+    \alt \texttt{truncateRight} <NonNormalizedDist> \texttt{float}
+\end{grammar}\label{gram:nonnormdist}
+
+Note, \texttt{pointwiseFloat*} and \texttt{pointwise*Constant} are each simple dispatchers that cast the float to a constant distribution (a uniform distribution with one outcome) then call the corresponding \texttt{distDist*} or \texttt{pointwiseDist*} function.
+
+\textbf{TODO: We'll get rid of the NonNormalizedDist -> float -> NonNormalizedDist and cast float to dist at operatingtime}.
+
+We have basic arithmetic on floats along with functions from dist to float.
+\begin{grammar}
+  <float> ::=
+    \texttt{float}
+    \alt \texttt{add} \texttt{float} \texttt{float}
+    \alt \texttt{multiply} \texttt{float} \texttt{float}
+    \alt \texttt{subtract} \texttt{float} \texttt{float}
+    \alt \texttt{divide} \texttt{float} \texttt{float}
+    \alt \texttt{exponent} \texttt{float} \texttt{float}
+    \alt \texttt{log} \texttt{float} \texttt{float}
+    \alt \texttt{pdfPoint} <GenericDist> \texttt{float}
+    \alt \texttt{invPdfPoint} <GenericDist> \texttt{float}
+    \alt \texttt{cdfPoint} <GenericDist> \texttt{float}
+    \alt \texttt{mean} <GenericDist>
+    \alt \texttt{sample} <GenericDist>
+\end{grammar}\label{gram:float}
+
+\textbf{TODO: can we have log on floats?}
+\textbf{TODO: We may be cutting nSamples from alpha because we don't want to deal with ints at all.}
+
+\subsubsection{Sugars/operators}
+\begin{tabular}{ c c }
+  \texttt{distDistAdd} & \texttt{+} \\
+  \texttt{distDistMultiply} & \texttt{*} \\
+  \texttt{distDistSubtract} & \texttt{-} \\
+  \texttt{distDistDivide} & \texttt{/} \\
+  \texttt{distDistExponent} & \texttt{**} \\
+  \texttt{pointwiseDistAdd} & \texttt{.+} \\
+  \texttt{distDistMultiply} & \texttt{.*} \\
+  \texttt{distDistSubtract} & \texttt{.-} \\
+  \texttt{distDistDivide} & \texttt{./} \\
+  \texttt{distDistExponent} & \texttt{.**}
+\end{tabular}\label{sugar}
+
+\subsection{Statements}
+Squiggle supports \textit{assignment}. Functions are assigned in the form $f(x) = \langle \textit{Expression} \rangle$
+
+\begin{grammar}
+  <statement> ::= \texttt{assgn} <var> <Expression> \alt \texttt{assgnFn} <var> <var> <Expression>
 \end{grammar}
 
+With the following obvious sugars
+
+\begin{tabular}{ c c }
+  \texttt{assgn} $\langle var \rangle$ $\langle Expression \rangle$ & $\langle var \rangle = \langle Expression \rangle$ \\
+  \texttt{assgnFn} $\langle var \rangle$ $\langle var \rangle$ $\langle Expression \rangle$ & $\langle var \rangle (\langle var \rangle) = \langle Expression \rangle$
+\end{tabular}
 
 \end{document}
