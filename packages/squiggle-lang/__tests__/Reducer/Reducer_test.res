@@ -3,11 +3,11 @@ open Reducer_TestHelpers
 
 describe("reducer using mathjs parse", () => {
   // Test the MathJs parser compatibility
-  // Those tests show that there is a semantic mapping from MathJs to Expression
+  // Those tests toString that there is a semantic mapping from MathJs to Expression
   // Reducer.parse is called by Reducer.eval
   // See https://mathjs.org/docs/expressions/syntax.html
   // See https://mathjs.org/docs/reference/functions.html
-  // Those tests show that we are converting mathjs parse tree to what we need
+  // Those tests toString that we are converting mathjs parse tree to what we need
 
   describe("expressions", () => {
     test("1", () => expectParseToBe("1", "Ok(1)"))

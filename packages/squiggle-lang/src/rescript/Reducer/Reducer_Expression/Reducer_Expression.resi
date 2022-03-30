@@ -3,8 +3,8 @@ module T = Reducer_Expression_T
 type expression = T.expression
 type expressionValue = ReducerInterface.ExpressionValue.expressionValue
 type t = expression
-let show: T.expression => Js.String.t
-let showResult: result<T.expression, 'a> => string
+let toString: T.expression => Js.String.t
+let toStringResult: result<T.expression, 'a> => string
 let parse_: (
   string,
   string => Result.t<'a, Reducer_ErrorValue.t>,

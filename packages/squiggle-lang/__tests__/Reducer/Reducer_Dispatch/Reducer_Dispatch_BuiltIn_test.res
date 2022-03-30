@@ -4,7 +4,7 @@ open Jest
 open Expect
 
 let expectEvalToBe = (expr: string, answer: string) =>
-  Reducer.eval(expr)->ExpressionValue.showResult->expect->toBe(answer)
+  Reducer.eval(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
 
 describe("builtin", () => {
   // All MathJs operators and functions are available for string, number and boolean

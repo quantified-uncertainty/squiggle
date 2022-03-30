@@ -7,7 +7,7 @@ type errorValue =
 
 type t = errorValue
 
-let showError = err =>
+let errorToString = err =>
   switch err {
   | REArrayIndexNotFound(msg, index) => `${msg}: ${Js.String.make(index)}`
   | REFunctionExpected(msg) => `Function expected: ${msg}`

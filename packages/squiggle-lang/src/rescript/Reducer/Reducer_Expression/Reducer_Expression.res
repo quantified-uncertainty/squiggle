@@ -13,19 +13,19 @@ type t = expression
 /*
   Shows the Lisp Code as text lisp code
 */
-let rec show = expression =>
+let rec toString = expression =>
   switch expression {
   | T.EList(aList) =>
-    `(${Belt.List.map(aList, aValue => show(aValue))
+    `(${Belt.List.map(aList, aValue => toString(aValue))
       ->Extra.List.interperse(" ")
       ->Belt.List.toArray
       ->Js.String.concatMany("")})`
-  | EValue(aValue) => ExpressionValue.show(aValue)
+  | EValue(aValue) => ExpressionValue.toString(aValue)
   }
 
-let showResult = codeResult =>
+let toStringResult = codeResult =>
   switch codeResult {
-  | Ok(a) => `Ok(${show(a)})`
+  | Ok(a) => `Ok(${toString(a)})`
   | Error(m) => `Error(${Js.String.make(m)})`
   }
 

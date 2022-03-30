@@ -14,16 +14,16 @@ exception TestRescriptException
 let callInternal = (call: functionCall): result<'b, errorValue> => {
   let callMathJs = (call: functionCall): result<'b, errorValue> =>
     switch call {
-    | ("jsraise", [msg]) => Js.Exn.raiseError(show(msg)) // For Tests
+    | ("jsraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
     | ("resraise", _) => raise(TestRescriptException) // For Tests
-    | call => call->showFunctionCall->MathJs.Eval.eval
+    | call => call->toStringFunctionCall->MathJs.Eval.eval
     }
 
   let constructRecord = arrayOfPairs => {
     Belt.Array.map(arrayOfPairs, pairValue => {
       switch pairValue {
       | EvArray([EvString(key), valueValue]) => (key, valueValue)
-      | _ => ("wrong key type", pairValue->showWithType->EvString)
+      | _ => ("wrong key type", pairValue->toStringWithType->EvString)
       }
     })
     ->Js.Dict.fromArray
@@ -52,7 +52,7 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
     arrayAtIndex(aValueArray, fIndex)
   | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
   | ("$atIndex", [obj, index]) =>
-    (showWithType(obj) ++ "??~~~~" ++ showWithType(index))->EvString->Ok
+    (toStringWithType(obj) ++ "??~~~~" ++ toStringWithType(index))->EvString->Ok
   | call => callMathJs(call)
   }
 }

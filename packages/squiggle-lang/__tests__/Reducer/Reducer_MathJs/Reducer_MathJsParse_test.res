@@ -5,7 +5,7 @@ open Jest
 open Expect
 
 let expectParseToBe = (expr, answer) =>
-  Parse.parse(expr)->Result.flatMap(Parse.castNodeType)->Parse.showResult->expect->toBe(answer)
+  Parse.parse(expr)->Result.flatMap(Parse.castNodeType)->Parse.toStringResult->expect->toBe(answer)
 
 describe("MathJs parse", () => {
   describe("literals operators paranthesis", () => {
