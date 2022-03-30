@@ -8,6 +8,7 @@ open Reducer_ErrorValue
 
 type expression = T.expression
 type expressionValue = ExpressionValue.expressionValue
+type t = expression
 
 /*
   Shows the Lisp Code as text lisp code
@@ -31,10 +32,10 @@ let showResult = codeResult =>
 /*
   Converts a MathJs code to Lisp Code
 */
-let parse_ = (expr: string, parser, converter): result<expression, errorValue> =>
+let parse_ = (expr: string, parser, converter): result<t, errorValue> =>
   expr->parser->Result.flatMap(node => converter(node))
 
-let parse = (mathJsCode: string): result<expression, errorValue> =>
+let parse = (mathJsCode: string): result<t, errorValue> =>
   mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromNode)
 
 module MapString = Belt.Map.String
@@ -54,7 +55,7 @@ let reduceValueList = (valueList: list<expressionValue>): result<expressionValue
 /*
   Recursively evaluate/reduce the code tree
 */
-let rec reduceExpression = (expression: expression, bindings): result<expressionValue, 'e> =>
+let rec reduceExpression = (expression: t, bindings): result<expressionValue, 'e> =>
   switch expression {
   | T.EValue(value) => value->Ok
   | T.EList(list) => {

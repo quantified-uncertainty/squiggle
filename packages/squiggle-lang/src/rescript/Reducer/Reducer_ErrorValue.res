@@ -5,6 +5,8 @@ type errorValue =
   | RERecordPropertyNotFound(string, string)
   | RETodo(string) // To do
 
+type t = errorValue
+
 let showError = err =>
   switch err {
   | REArrayIndexNotFound(msg, index) => `${msg}: ${Js.String.make(index)}`
