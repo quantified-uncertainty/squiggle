@@ -18,7 +18,7 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
         )
       )
 
-    let caseFunctionNode = fNode => {
+    let castFunctionNode = fNode => {
       let fn = fNode["fn"]->ExpressionValue.EvSymbol->ExtressionT.EValue
       let lispArgs = fNode["args"]->Belt.List.fromArray->fromNodeList
       lispArgs->Result.map(argsCode => list{fn, ...argsCode}->ExtressionT.EList)
@@ -75,8 +75,8 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
       aNode["items"]->Belt.List.fromArray->fromNodeList->Result.map(list => ExtressionT.EList(list))
     | MjConstantNode(cNode) =>
       cNode["value"]->JavaScript.Gate.jsToEv->Result.map(v => v->ExtressionT.EValue)
-    | MjFunctionNode(fNode) => fNode->caseFunctionNode
-    | MjOperatorNode(opNode) => opNode->Parse.castOperatorNodeToFunctionNode->caseFunctionNode
+    | MjFunctionNode(fNode) => fNode->castFunctionNode
+    | MjOperatorNode(opNode) => opNode->Parse.castOperatorNodeToFunctionNode->castFunctionNode
     | MjParenthesisNode(pNode) => pNode["content"]->fromNode
     | MjAccessorNode(aNode) => caseAccessorNode(aNode["object"], aNode["index"])
     | MjObjectNode(oNode) => caseObjectNode(oNode)
