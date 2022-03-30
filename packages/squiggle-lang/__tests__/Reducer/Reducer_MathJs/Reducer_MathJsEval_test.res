@@ -20,7 +20,7 @@ describe("errors", () => {
   // All those errors propagete up and are returned by the resolver
   test("unknown function", () =>
     expect(MathJs.Eval.eval("testZadanga()"))->toEqual(
-      Error(ErrorValue.REJs(Some("Undefined function testZadanga"), Some("Error"))),
+      Error(ErrorValue.REJavaScriptExn(Some("Undefined function testZadanga"), Some("Error"))),
     )
   )
 

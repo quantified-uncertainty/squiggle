@@ -67,6 +67,6 @@ let dispatch = (call: functionCall): result<expressionValue, errorValue> =>
     // So we have to recreate a copy of the string
     ExternalLibrary.dispatch((Js.String.make(fn), args), callInternal)
   } catch {
-  | Js.Exn.Error(obj) => REJs(Js.Exn.message(obj), Js.Exn.name(obj))->Error
+  | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   | _ => RETodo("unhandled rescript exception")->Error
   }

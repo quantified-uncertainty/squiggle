@@ -44,7 +44,7 @@ let parse = (expr: string): result<node, errorValue> =>
   try {
     Ok(parse__(expr))
   } catch {
-  | Js.Exn.Error(obj) => REJs(Js.Exn.message(obj), Js.Exn.name(obj))->Error
+  | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   }
 
 type mathJsNode =

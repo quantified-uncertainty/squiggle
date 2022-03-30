@@ -22,6 +22,6 @@ let eval = (expr: string): result<expressionValue, errorValue> => {
     let answer = eval__(expr)
     answer["value"]->JavaScript.Gate.jsToEv
   } catch {
-  | Js.Exn.Error(obj) => REJs(Js.Exn.message(obj), Js.Exn.name(obj))->Error
+  | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   }
 }
