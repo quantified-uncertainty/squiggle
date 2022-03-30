@@ -5,11 +5,6 @@ type expressionValue = ReducerInterface.ExpressionValue.expressionValue
 type t = expression
 let toString: T.expression => Js.String.t
 let toStringResult: result<T.expression, 'a> => string
-let parse_: (
-  string,
-  string => Result.t<'a, Reducer_ErrorValue.t>,
-  'a => Result.t<expression, Reducer_ErrorValue.t>,
-) => result<expression, Reducer_ErrorValue.t>
 let parse: string => result<expression, Reducer_ErrorValue.t>
 module MapString = Belt.Map.String
 type bindings = MapString.t<unit>
