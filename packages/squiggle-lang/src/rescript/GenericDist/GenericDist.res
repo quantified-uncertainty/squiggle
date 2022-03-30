@@ -207,7 +207,7 @@ let pointwiseCombinationFloat = (
   operation: GenericDist_Types.Operation.arithmeticOperation,
   f: float,
 ): result<t, error> => {
-  switch operation {
+  let m = switch operation {
   | #Add | #Subtract => Error(GenericDist_Types.DistributionVerticalShiftIsInvalid)
   | (#Multiply | #Divide | #Exponentiate | #Log) as operation =>
     toPointSet(t)->E.R2.fmap(t => {
@@ -222,10 +222,12 @@ let pointwiseCombinationFloat = (
         t,
       )
     })
-  }->E.R2.fmap(r => #PointSet(r))
+  }
+  m->E.R2.fmap(r => #PointSet(r))
 }
 
 //Note: The result should always cumulatively sum to 1. This would be good to test.
+//Note: If the inputs are not normalized, this will return poor results. The weights probably refer to the post-normalized forms. It would be good to apply a catch to this.
 let mixture = (
   values: array<(t, float)>,
   scaleMultiply: scaleMultiplyFn,

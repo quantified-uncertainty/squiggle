@@ -59,7 +59,7 @@ describe("toPointSet", () => {
       run(#fromDist(#toDist(#toPointSet), #SampleSet([0.0, 1.0, 2.0, 3.0])))->fmap(
         #fromDist(#toFloat(#Mean)),
       )
-    expect(result)->toEqual(#Error(Other("Converting sampleSet to pointSet failed")))
+    expect(result)->toEqual(#GenDistError(Other("Converting sampleSet to pointSet failed")))
   })
 
   test("on sample set", () => {

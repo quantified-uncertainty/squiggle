@@ -6,7 +6,7 @@ type genericDist = [
 
 type error =
   | NotYetImplemented
-  | ImpossiblePath
+  | Unreachable
   | DistributionVerticalShiftIsInvalid
   | Other(string)
 
@@ -67,12 +67,13 @@ module Operation = {
     | #fromFloat(fromDist)
   ]
 
-  type genericFunctionCall = [
+  type genericFunctionCallInfo = [
     | #fromDist(fromDist, genericDist)
     | #fromFloat(fromDist, float)
     | #mixture(array<(genericDist, float)>)
   ]
 
+  //TODO: Should support all genericFunctionCallInfo types
   let toString = (distFunction: fromDist): string =>
     switch distFunction {
     | #toFloat(#Cdf(r)) => `cdf(${E.Float.toFixed(r)})`

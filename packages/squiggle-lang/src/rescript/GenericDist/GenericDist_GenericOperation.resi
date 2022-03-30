@@ -5,12 +5,12 @@ type params = {
 
 type outputType = [
   | #Dist(GenericDist_Types.genericDist)
-  | #Error(GenericDist_Types.error)
+  | #GenDistError(GenericDist_Types.error)
   | #Float(float)
   | #String(string)
 ]
 
-let run: (params, GenericDist_Types.Operation.genericFunctionCall) => outputType
+let run: (params, GenericDist_Types.Operation.genericFunctionCallInfo) => outputType
 let runFromDist: (
   params,
   GenericDist_Types.Operation.fromDist,
