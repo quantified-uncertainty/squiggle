@@ -25,11 +25,7 @@ export interface SquiggleEditorProps {
   onEnvChange?(env: exportEnv): void;
 }
 
-const highlight = (editor: HTMLInputElement) => {
-  let code = editor.textContent;
-  code = code.replace(/\((\w+?)(\b)/g, '(<font color="#8a2be2">$1</font>$2');
-  editor.innerHTML = code;
-};
+const highlight = (_: HTMLInputElement) => {};
 
 interface SquiggleEditorState {
   expression: string;
