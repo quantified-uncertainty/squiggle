@@ -1,72 +1,72 @@
-module CTV = Reducer_Extension.CodeTreeValue
-module Lib = Reducer_Extension.ReducerLibrary
-module ME = Reducer_MathJs.Eval
-module Rerr = Reducer_Error
+module ExternalLibrary = ReducerInterface.ExternalLibrary
+module MathJs = Reducer_MathJs
+open ReducerInterface.ExpressionValue
+open Reducer_ErrorValue
+
 /*
   MathJs provides default implementations for builtins
   This is where all the expected builtins like + = * / sin cos log ln etc are handled
   DO NOT try to add external function mapping here!
 */
-type codeTreeValue = CTV.codeTreeValue
-type reducerError = Rerr.reducerError
 
 exception TestRescriptException
 
-let callInternal = (call: CTV.functionCall): result<'b, reducerError> =>{
-
-  let callMatjJs = (call: CTV.functionCall): result<'b, reducerError> =>
+let callInternal = (call: functionCall): result<'b, errorValue> => {
+  let callMathJs = (call: functionCall): result<'b, errorValue> =>
     switch call {
-      | ("jsraise", [msg]) => Js.Exn.raiseError(CTV.show(msg)) // For Tests
-      | ("resraise", _) => raise(TestRescriptException) // For Tests
-      | call => call->CTV.showFunctionCall-> ME.eval
+    | ("jsraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
+    | ("resraise", _) => raise(TestRescriptException) // For Tests
+    | call => call->toStringFunctionCall->MathJs.Eval.eval
     }
 
   let constructRecord = arrayOfPairs => {
-      Belt.Array.map(arrayOfPairs, pairValue => {
+    Belt.Array.map(arrayOfPairs, pairValue => {
       switch pairValue {
-      | CTV.CtvArray([CTV.CtvString(key), valueValue]) =>
-        (key, valueValue)
-      | _ => ("wrong key type", pairValue->CTV.showWithType->CTV.CtvString)}
-      }) -> Js.Dict.fromArray -> CTV.CtvRecord -> Ok
+      | EvArray([EvString(key), valueValue]) => (key, valueValue)
+      | _ => ("wrong key type", pairValue->toStringWithType->EvString)
+      }
+    })
+    ->Js.Dict.fromArray
+    ->EvRecord
+    ->Ok
   }
 
-  let arrayAtIndex = (aValueArray: array<codeTreeValue>, fIndex: float) =>
+  let arrayAtIndex = (aValueArray: array<expressionValue>, fIndex: float) =>
     switch Belt.Array.get(aValueArray, Belt.Int.fromFloat(fIndex)) {
-    | Some(value) => value -> Ok
-    | None => Rerr.RerrArrayIndexNotFound("Array index not found", Belt.Int.fromFloat(fIndex)) -> Error
+    | Some(value) => value->Ok
+    | None => REArrayIndexNotFound("Array index not found", Belt.Int.fromFloat(fIndex))->Error
     }
 
-  let recordAtIndex = (dict: Js.Dict.t<codeTreeValue>, sIndex) =>
-    switch (Js.Dict.get(dict, sIndex)) {
-      | Some(value) => value -> Ok
-      | None => Rerr.RerrRecordPropertyNotFound("Record property not found", sIndex) -> Error
+  let recordAtIndex = (dict: Js.Dict.t<expressionValue>, sIndex) =>
+    switch Js.Dict.get(dict, sIndex) {
+    | Some(value) => value->Ok
+    | None => RERecordPropertyNotFound("Record property not found", sIndex)->Error
     }
 
   switch call {
   // | ("$constructRecord", pairArray)
-  // | ("$atIndex", [CTV.CtvArray(anArray), CTV.CtvNumber(fIndex)]) => arrayAtIndex(anArray, fIndex)
-  // | ("$atIndex", [CTV.CtvRecord(aRecord), CTV.CtvString(sIndex)]) => recordAtIndex(aRecord, sIndex)
-  | ("$constructRecord", [CTV.CtvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
-  | ("$atIndex", [CTV.CtvArray(aValueArray), CTV.CtvArray([CTV.CtvNumber(fIndex)])])  =>
+  // | ("$atIndex", [EvArray(anArray), EvNumber(fIndex)]) => arrayAtIndex(anArray, fIndex)
+  // | ("$atIndex", [EvRecord(aRecord), EvString(sIndex)]) => recordAtIndex(aRecord, sIndex)
+  | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
+  | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
     arrayAtIndex(aValueArray, fIndex)
-  | ("$atIndex", [CTV.CtvRecord(dict), CTV.CtvArray([CTV.CtvString(sIndex)])]) => recordAtIndex(dict, sIndex)
-  | ("$atIndex", [obj, index]) => (CTV.showWithType(obj) ++ "??~~~~" ++ CTV.showWithType(index))->CTV.CtvString->Ok
-  | call => callMatjJs(call)
+  | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
+  | ("$atIndex", [obj, index]) =>
+    (toStringWithType(obj) ++ "??~~~~" ++ toStringWithType(index))->EvString->Ok
+  | call => callMathJs(call)
   }
-
 }
 
 /*
   Lisp engine uses Result monad while reducing expressions
 */
-let dispatch = (call: CTV.functionCall): result<codeTreeValue, reducerError> =>
+let dispatch = (call: functionCall): result<expressionValue, errorValue> =>
   try {
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    Lib.dispatch((Js.String.make(fn), args), callInternal)
+    ExternalLibrary.dispatch((Js.String.make(fn), args), callInternal)
   } catch {
-  | Js.Exn.Error(obj) =>
-    RerrJs(Js.Exn.message(obj), Js.Exn.name(obj))->Error
-  | _ => RerrTodo("unhandled rescript exception")->Error
+  | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
+  | _ => RETodo("unhandled rescript exception")->Error
   }

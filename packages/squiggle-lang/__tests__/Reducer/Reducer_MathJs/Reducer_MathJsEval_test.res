@@ -1,30 +1,32 @@
-module CTV = Reducer.Extension.CodeTreeValue
-module ME = Reducer.MathJs.Eval
-module Rerr = Reducer.Error
+open ReducerInterface.ExpressionValue
+module MathJs = Reducer.MathJs
+module ErrorValue = Reducer.ErrorValue
 
 open Jest
 open ExpectJs
 
 describe("eval", () => {
-    test("Number", () => expect(ME.eval("1"))
-    -> toEqual(Ok(CTV.CtvNumber(1.))))
-    test("Number expr", () => expect(ME.eval("1-1"))
-    -> toEqual(Ok(CTV.CtvNumber(0.))))
-    test("String", () => expect(ME.eval("'hello'"))
-    -> toEqual(Ok(CTV.CtvString("hello"))))
-    test("String expr", () => expect(ME.eval("concat('hello ','world')"))
-    -> toEqual(Ok(CTV.CtvString("hello world"))))
-    test("Boolean", () => expect(ME.eval("true"))
-    -> toEqual(Ok(CTV.CtvBool(true))))
-    test("Boolean expr", () => expect(ME.eval("2>1"))
-    -> toEqual(Ok(CTV.CtvBool(true))))
+  test("Number", () => expect(MathJs.Eval.eval("1"))->toEqual(Ok(EvNumber(1.))))
+  test("Number expr", () => expect(MathJs.Eval.eval("1-1"))->toEqual(Ok(EvNumber(0.))))
+  test("String", () => expect(MathJs.Eval.eval("'hello'"))->toEqual(Ok(EvString("hello"))))
+  test("String expr", () =>
+    expect(MathJs.Eval.eval("concat('hello ','world')"))->toEqual(Ok(EvString("hello world")))
+  )
+  test("Boolean", () => expect(MathJs.Eval.eval("true"))->toEqual(Ok(EvBool(true))))
+  test("Boolean expr", () => expect(MathJs.Eval.eval("2>1"))->toEqual(Ok(EvBool(true))))
 })
 
 describe("errors", () => {
   // All those errors propagete up and are returned by the resolver
-  test("unknown function", () => expect(ME.eval("testZadanga()"))
-  -> toEqual(Error(Rerr.RerrJs(Some("Undefined function testZadanga"), Some("Error")))))
+  test("unknown function", () =>
+    expect(MathJs.Eval.eval("testZadanga()"))->toEqual(
+      Error(ErrorValue.REJavaScriptExn(Some("Undefined function testZadanga"), Some("Error"))),
+    )
+  )
 
-  test("unknown answer type", () => expect(ME.eval("1+1i"))
-  -> toEqual(Error(Rerr.RerrTodo("Unhandled MathJs literal type: object"))))
+  test("unknown answer type", () =>
+    expect(MathJs.Eval.eval("1+1i"))->toEqual(
+      Error(ErrorValue.RETodo("Unhandled MathJs literal type: object")),
+    )
+  )
 })

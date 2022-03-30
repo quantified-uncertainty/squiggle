@@ -2,63 +2,27 @@
   MathJs Nodes
   We make MathJs Nodes strong-typed
 */
-module AE = Reducer_Extra_Array
-module JsG = Reducer_Js_Gate
-module Rerr = Reducer_Error
+module Extra = Reducer_Extra
+open Reducer_ErrorValue
 
-type reducerError = Rerr.reducerError
-
-type node = {
-  "type": string,
-  "isNode": bool,
-  "comment": string
-}
-type arrayNode = {
-  ...node,
-  "items": array<node>
-}
+type node = {"type": string, "isNode": bool, "comment": string}
+type arrayNode = {...node, "items": array<node>}
 //assignmentNode
 //blockNode
 //conditionalNode
-type constantNode = {
-  ...node,
-  "value": unit
-}
+type constantNode = {...node, "value": unit}
 //functionAssignmentNode
-type functionNode = {
-  ...node,
-  "fn": string,
-  "args": array<node>
-}
-type indexNode = {
-  ...node,
-  "dimensions": array<node>
-}
-type objectNode = {
-  ...node,
-  "properties": Js.Dict.t<node>
-}
-type accessorNode = {
-  ...node,
-  "object": node,
-  "index": indexNode
-}
-type operatorNode = {
-  ...functionNode,
-  "op": string,
-}
+type functionNode = {...node, "fn": string, "args": array<node>}
+type indexNode = {...node, "dimensions": array<node>}
+type objectNode = {...node, "properties": Js.Dict.t<node>}
+type accessorNode = {...node, "object": node, "index": indexNode}
+type operatorNode = {...functionNode, "op": string}
 
 //parenthesisNode
-type parenthesisNode = {
-  ...node,
-  "content": node
-}
+type parenthesisNode = {...node, "content": node}
 //rangeNode
 //relationalNode
-type symbolNode = {
-  ...node,
-  "name": string
-}
+type symbolNode = {...node, "name": string}
 
 external castAccessorNode: node => accessorNode = "%identity"
 external castArrayNode: node => arrayNode = "%identity"
@@ -76,15 +40,14 @@ external castSymbolNode: node => symbolNode = "%identity"
 */
 @module("mathjs") external parse__: string => node = "parse"
 
-let parse = (expr: string): result<node, reducerError> =>
+let parse = (expr: string): result<node, errorValue> =>
   try {
     Ok(parse__(expr))
   } catch {
-  | Js.Exn.Error(obj) =>
-    RerrJs(Js.Exn.message(obj), Js.Exn.name(obj))->Error
+  | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   }
 
-type mjNode =
+type mathJsNode =
   | MjAccessorNode(accessorNode)
   | MjArrayNode(arrayNode)
   | MjConstantNode(constantNode)
@@ -95,64 +58,66 @@ type mjNode =
   | MjParenthesisNode(parenthesisNode)
   | MjSymbolNode(symbolNode)
 
-let castNodeType = (node: node) => switch node["type"] {
-  | "AccessorNode" => node -> castAccessorNode -> MjAccessorNode -> Ok
-  | "ArrayNode" => node -> castArrayNode -> MjArrayNode -> Ok
-  | "ConstantNode" => node -> castConstantNode -> MjConstantNode -> Ok
-  | "FunctionNode" => node -> castFunctionNode -> MjFunctionNode -> Ok
-  | "IndexNode" => node -> castIndexNode -> MjIndexNode -> Ok
-  | "ObjectNode" => node -> castObjectNode -> MjObjectNode -> Ok
-  | "OperatorNode" => node -> castOperatorNode -> MjOperatorNode -> Ok
-  | "ParenthesisNode" => node -> castParenthesisNode -> MjParenthesisNode -> Ok
-  | "SymbolNode" => node -> castSymbolNode -> MjSymbolNode -> Ok
-  | _ => Rerr.RerrTodo(`Argg, unhandled MathJsNode: ${node["type"]}`)-> Error
-}
-
-let rec show = (mjNode: mjNode): string => {
-  let showValue = (a: 'a): string => if (Js.typeof(a) == "string") {
-    `'${Js.String.make(a)}'`
-  } else {
-    Js.String.make(a)
+let castNodeType = (node: node) =>
+  switch node["type"] {
+  | "AccessorNode" => node->castAccessorNode->MjAccessorNode->Ok
+  | "ArrayNode" => node->castArrayNode->MjArrayNode->Ok
+  | "ConstantNode" => node->castConstantNode->MjConstantNode->Ok
+  | "FunctionNode" => node->castFunctionNode->MjFunctionNode->Ok
+  | "IndexNode" => node->castIndexNode->MjIndexNode->Ok
+  | "ObjectNode" => node->castObjectNode->MjObjectNode->Ok
+  | "OperatorNode" => node->castOperatorNode->MjOperatorNode->Ok
+  | "ParenthesisNode" => node->castParenthesisNode->MjParenthesisNode->Ok
+  | "SymbolNode" => node->castSymbolNode->MjSymbolNode->Ok
+  | _ => RETodo(`Argg, unhandled MathJsNode: ${node["type"]}`)->Error
   }
 
-  let showNodeArray = (nodeArray: array<node>): string =>
+let rec toString = (mathJsNode: mathJsNode): string => {
+  let toStringValue = (a: 'a): string =>
+    if Js.typeof(a) == "string" {
+      `'${Js.String.make(a)}'`
+    } else {
+      Js.String.make(a)
+    }
+
+  let toStringNodeArray = (nodeArray: array<node>): string =>
     nodeArray
-    -> Belt.Array.map( a => showMathJsNode(a) )
-    -> AE.interperse(", ")
-    -> Js.String.concatMany("")
+    ->Belt.Array.map(a => toStringMathJsNode(a))
+    ->Extra.Array.interperse(", ")
+    ->Js.String.concatMany("")
 
-  let showFunctionNode = (fnode: functionNode): string =>
-    `${fnode["fn"]}(${fnode["args"]->showNodeArray})`
+  let toStringFunctionNode = (fnode: functionNode): string =>
+    `${fnode["fn"]}(${fnode["args"]->toStringNodeArray})`
 
-  let showObjectEntry = ( (key: string, value: node) ): string =>
-    `${key}: ${value->showMathJsNode}`
+  let toStringObjectEntry = ((key: string, value: node)): string => `${key}: ${value->toStringMathJsNode}`
 
-  let showObjectNode = (oNode: objectNode): string =>
-    `{${  oNode["properties"]
-          ->Js.Dict.entries
-          ->Belt.Array.map(entry=>entry->showObjectEntry)
-          ->AE.interperse(", ")->Js.String.concatMany("")
-    }}`
+  let toStringObjectNode = (oNode: objectNode): string =>
+    `{${oNode["properties"]
+      ->Js.Dict.entries
+      ->Belt.Array.map(entry => entry->toStringObjectEntry)
+      ->Extra.Array.interperse(", ")
+      ->Js.String.concatMany("")}}`
 
-  let showIndexNode = (iNode: indexNode): string =>
+  let toStringIndexNode = (iNode: indexNode): string =>
     iNode["dimensions"]
-    -> Belt.Array.map( each => `${showResult(each->castNodeType)}`)
-    -> Js.String.concatMany("")
+    ->Belt.Array.map(each => toStringResult(each->castNodeType))
+    ->Js.String.concatMany("")
 
-  switch mjNode {
-  | MjAccessorNode(aNode) => `${aNode["object"]->showMathJsNode}[${aNode["index"]->showIndexNode}]`
-  | MjArrayNode(aNode) => `[${aNode["items"]->showNodeArray}]`
-  | MjConstantNode(cNode) => cNode["value"]->showValue
-  | MjFunctionNode(fNode) => fNode -> showFunctionNode
-  | MjIndexNode(iNode) => iNode -> showIndexNode
-  | MjObjectNode(oNode) => oNode -> showObjectNode
-  | MjOperatorNode(opNode) => opNode -> castOperatorNodeToFunctionNode -> showFunctionNode
-  | MjParenthesisNode(pNode) => `(${showMathJsNode(pNode["content"])})`
+  switch mathJsNode {
+  | MjAccessorNode(aNode) => `${aNode["object"]->toStringMathJsNode}[${aNode["index"]->toStringIndexNode}]`
+  | MjArrayNode(aNode) => `[${aNode["items"]->toStringNodeArray}]`
+  | MjConstantNode(cNode) => cNode["value"]->toStringValue
+  | MjFunctionNode(fNode) => fNode->toStringFunctionNode
+  | MjIndexNode(iNode) => iNode->toStringIndexNode
+  | MjObjectNode(oNode) => oNode->toStringObjectNode
+  | MjOperatorNode(opNode) => opNode->castOperatorNodeToFunctionNode->toStringFunctionNode
+  | MjParenthesisNode(pNode) => `(${toStringMathJsNode(pNode["content"])})`
   | MjSymbolNode(sNode) => sNode["name"]
-}}
-and let showResult = (rmjnode: result<mjNode, reducerError>): string =>
-  switch rmjnode {
-    | Error(e) => Rerr.showError(e)
-    | Ok(mjNode) => show(mjNode)
   }
-and let showMathJsNode = (node) => node -> castNodeType -> showResult
+}
+and toStringResult = (rMathJsNode: result<mathJsNode, errorValue>): string =>
+  switch rMathJsNode {
+  | Error(e) => errorToString(e)
+  | Ok(mathJsNode) => toString(mathJsNode)
+  }
+and toStringMathJsNode = node => node->castNodeType->toStringResult
