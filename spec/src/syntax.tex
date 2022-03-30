@@ -24,9 +24,10 @@ From a grammatical perspective \texttt{SampleSet} and all of the alternatives of
 Finally, most of the magic happens in $\langle \textit{Expression} \rangle$
 
 \begin{grammar}
-  <Expression> ::= <GenericDist> \alt \texttt{float} \alt <Expression> + <Expression> \alt <Expression> * <Expression> \alt <Expression> .+ <Expression> \alt <Expression> .* <Expression>
+  <Factor> ::= <GenericDist> \alt \texttt{float} \alt <Factor> * <Factor> \alt <Factor> .* <Factor>
+
+  <Expression> ::= <Factor> + <Factor> \alt <Factor> .+ <Factor>
 \end{grammar}
 
-TODO: split this up into multiple declarations such that order of operations is captured/described.
 
 \end{document}
