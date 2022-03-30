@@ -1,5 +1,4 @@
 module Dispatch = Reducer_Dispatch
-module Error = Reducer_ErrorValue
 module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
 module Extra = Reducer_Extra

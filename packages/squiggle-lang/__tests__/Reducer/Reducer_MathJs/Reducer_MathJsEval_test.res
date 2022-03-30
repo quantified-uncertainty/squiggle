@@ -1,6 +1,6 @@
 open ReducerInterface.ExpressionValue
 module MathJs = Reducer.MathJs
-module ErrorValue = Reducer.Error
+module ErrorValue = Reducer.ErrorValue
 
 open Jest
 open ExpectJs
