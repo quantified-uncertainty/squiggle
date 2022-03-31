@@ -9,35 +9,34 @@ type params = {
   xyPointLength: int,
 }
 
-type outputType = [
-  | #Dist(genericDist)
-  | #Float(float)
-  | #String(string)
-  | #GenDistError(error)
-]
+type outputType = 
+  | Dist(GenericDist_Types.genericDist)
+  | Float(float)
+  | String(string)
+  | GenDistError(GenericDist_Types.error)
 
 module Output = {
   let toDist = (o: outputType) =>
     switch o {
-    | #Dist(d) => Some(d)
+    | Dist(d) => Some(d)
     | _ => None
     }
 
   let toFloat = (o: outputType) =>
     switch o {
-    | #Float(d) => Some(d)
+    | Float(d) => Some(d)
     | _ => None
     }
 
   let toString = (o: outputType) =>
     switch o {
-    | #String(d) => Some(d)
+    | String(d) => Some(d)
     | _ => None
     }
 
   let toError = (o: outputType) =>
     switch o {
-    | #GenDistError(d) => Some(d)
+    | GenDistError(d) => Some(d)
     | _ => None
     }
 }
@@ -45,19 +44,19 @@ module Output = {
 let fromResult = (r: result<outputType, error>): outputType =>
   switch r {
   | Ok(o) => o
-  | Error(e) => #GenDistError(e)
+  | Error(e) => GenDistError(e)
   }
 
 //This is used to catch errors in other switch statements.
 let _errorMap = (o: outputType): error =>
   switch o {
-  | #GenDistError(r) => r
+  | GenDistError(r) => r
   | _ => Unreachable
   }
 
 let outputToDistResult = (o: outputType): result<genericDist, error> =>
   switch o {
-  | #Dist(r) => Ok(r)
+  | Dist(r) => Ok(r)
   | r => Error(_errorMap(r))
   }
 
@@ -70,14 +69,14 @@ let rec run = (extra, fnName: operation): outputType => {
 
   let toPointSetFn = r => {
     switch reCall(~fnName=#fromDist(#toDist(#toPointSet), r), ()) {
-    | #Dist(#PointSet(p)) => Ok(p)
+    | Dist(#PointSet(p)) => Ok(p)
     | r => Error(_errorMap(r))
     }
   }
 
   let toSampleSetFn = r => {
     switch reCall(~fnName=#fromDist(#toDist(#toSampleSet(sampleCount)), r), ()) {
-    | #Dist(#SampleSet(p)) => Ok(p)
+    | Dist(#SampleSet(p)) => Ok(p)
     | r => Error(_errorMap(r))
     }
   }
@@ -98,37 +97,37 @@ let rec run = (extra, fnName: operation): outputType => {
     switch subFnName {
     | #toFloat(fnName) =>
       GenericDist.operationToFloat(dist, ~toPointSetFn, ~operation=fnName)
-      ->E.R2.fmap(r => #Float(r))
+      ->E.R2.fmap(r => Float(r))
       ->fromResult
-    | #toString => dist->GenericDist.toString->(r => #String(r))
+    | #toString => dist->GenericDist.toString->String
     | #toDist(#inspect) => {
         Js.log2("Console log requested: ", dist)
-        #Dist(dist)
+        Dist(dist)
       }
-    | #toDist(#normalize) => dist->GenericDist.normalize->(r => #Dist(r))
+    | #toDist(#normalize) => dist->GenericDist.normalize->Dist
     | #toDist(#truncate(leftCutoff, rightCutoff)) =>
       GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
-      ->E.R2.fmap(r => #Dist(r))
+      ->E.R2.fmap(r => Dist(r))
       ->fromResult
     | #toDist(#toPointSet) =>
-      dist->GenericDist.toPointSet(xyPointLength)->E.R2.fmap(r => #Dist(#PointSet(r)))->fromResult
+      dist->GenericDist.toPointSet(xyPointLength)->E.R2.fmap(r => Dist(#PointSet(r)))->fromResult
     | #toDist(#toSampleSet(n)) =>
-      dist->GenericDist.sampleN(n)->E.R2.fmap(r => #Dist(#SampleSet(r)))->fromResult
-    | #toDistCombination(#Algebraic, _, #Float(_)) => #GenDistError(NotYetImplemented)
+      dist->GenericDist.sampleN(n)->E.R2.fmap(r => Dist(#SampleSet(r)))->fromResult
+    | #toDistCombination(#Algebraic, _, #Float(_)) => GenDistError(NotYetImplemented)
     | #toDistCombination(#Algebraic, operation, #Dist(t2)) =>
       dist
       ->GenericDist.algebraicCombination(~toPointSetFn, ~toSampleSetFn, ~operation, ~t2)
-      ->E.R2.fmap(r => #Dist(r))
+      ->E.R2.fmap(r => Dist(r))
       ->fromResult
     | #toDistCombination(#Pointwise, operation, #Dist(t2)) =>
       dist
       ->GenericDist.pointwiseCombination(~toPointSetFn, ~operation, ~t2)
-      ->E.R2.fmap(r => #Dist(r))
+      ->E.R2.fmap(r => Dist(r))
       ->fromResult
     | #toDistCombination(#Pointwise, operation, #Float(float)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~operation, ~float)
-      ->E.R2.fmap(r => #Dist(r))
+      ->E.R2.fmap(r => Dist(r))
       ->fromResult
     }
 
@@ -139,7 +138,7 @@ let rec run = (extra, fnName: operation): outputType => {
   | #mixture(dists) =>
     dists
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd)
-    ->E.R2.fmap(r => #Dist(r))
+    ->E.R2.fmap(r => Dist(r))
     ->fromResult
   }
 }
@@ -153,9 +152,9 @@ let outputMap = (
   fn: GenericDist_Types.Operation.singleParamaterFunction,
 ): outputType => {
   let newFnCall: result<operation, error> = switch (fn, input) {
-  | (#fromDist(fromDist), #Dist(o)) => Ok(#fromDist(fromDist, o))
-  | (#fromFloat(fromDist), #Float(o)) => Ok(#fromFloat(fromDist, o))
-  | (_, #GenDistError(r)) => Error(r)
+  | (#fromDist(fromDist), Dist(o)) => Ok(#fromDist(fromDist, o))
+  | (#fromFloat(fromDist), Float(o)) => Ok(#fromFloat(fromDist, o))
+  | (_, GenDistError(r)) => Error(r)
   | (#fromDist(_), _) => Error(Other("Expected dist, got something else"))
   | (#fromFloat(_), _) => Error(Other("Expected float, got something else"))
   }

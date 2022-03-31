@@ -22,14 +22,14 @@ let toExt: option<'a> => 'a = E.O.toExt(
 describe("normalize", () => {
   test("has no impact on normal dist", () => {
     let result = run(#fromDist(#toDist(#normalize), normalDist))
-    expect(result)->toEqual(#Dist(normalDist))
+    expect(result)->toEqual(Dist(normalDist))
   })
 })
 
 describe("mean", () => {
   test("for a normal distribution", () => {
     let result = GenericDist_GenericOperation.run(params, #fromDist(#toFloat(#Mean), normalDist))
-    expect(result)->toEqual(#Float(5.0))
+    expect(result)->toEqual(Float(5.0))
   })
 })
 
@@ -59,7 +59,7 @@ describe("toPointSet", () => {
       run(#fromDist(#toDist(#toPointSet), #SampleSet([0.0, 1.0, 2.0, 3.0])))->outputMap(
         #fromDist(#toFloat(#Mean)),
       )
-    expect(result)->toEqual(#GenDistError(Other("Converting sampleSet to pointSet failed")))
+    expect(result)->toEqual(GenDistError(Other("Converting sampleSet to pointSet failed")))
   })
 
   Skip.test("on sample set", () => {
