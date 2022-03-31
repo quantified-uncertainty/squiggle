@@ -13,10 +13,32 @@ module Sample = {
 /*
   Map external calls of Reducer
 */
+let env: GenericDist_GenericOperation.env = {
+  sampleCount: 100,
+  xyPointLength: 100,
+}
+
 let dispatch = (call: ExpressionValue.functionCall, chain): result<expressionValue, 'e> =>
   switch call {
   | ("add", [EvNumber(a), EvNumber(b)]) => Sample.customAdd(a, b)->EvNumber->Ok
-
+  | ("add", [EvDist(a), EvDist(b)]) => {
+    let x = GenericDist_GenericOperation.Output.toDistR(
+      GenericDist_GenericOperation.run(~env, FromDist(ToDistCombination(Algebraic, #Add, #Dist(b)), a))
+    )
+    switch x {
+      | Ok(thing) => Ok(EvDist(thing))
+      | Error(err) => Error(Reducer_ErrorValue.RETodo("")) // TODO:
+    }
+  }
+  | ("add", [EvNumber(a), EvDist(b)]) => {
+    let x = GenericDist_GenericOperation.Output.toDistR(
+      GenericDist_GenericOperation.run(~env, FromDist(ToDistCombination(Algebraic, #Add, #Dist(b)), a))
+    )
+    switch x {
+      | Ok(thing) => Ok(EvDist(thing))
+      | Error(err) => Error(Reducer_ErrorValue.RETodo("")) // TODO:
+    }
+  }
   | call => chain(call)
 
   /*

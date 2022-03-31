@@ -12,6 +12,7 @@ type rec expressionValue =
   | EvSymbol(string)
   | EvArray(array<expressionValue>)
   | EvRecord(Js.Dict.t<expressionValue>)
+  | EvDist(GenericDist_Types.genericDist)
 
 type functionCall = (string, array<expressionValue>)
 
@@ -35,6 +36,7 @@ let rec toString = aValue =>
         ->Js.String.concatMany("")
       `{${pairs}}`
     }
+  // | Dist() =>
   }
 
 let toStringWithType = aValue =>
@@ -45,6 +47,7 @@ let toStringWithType = aValue =>
   | EvSymbol(_) => `Symbol::${toString(aValue)}`
   | EvArray(_) => `Array::${toString(aValue)}`
   | EvRecord(_) => `Record::${toString(aValue)}`
+  // | Dist(_) =>
   }
 
 let argsToString = (args: array<expressionValue>): string => {
