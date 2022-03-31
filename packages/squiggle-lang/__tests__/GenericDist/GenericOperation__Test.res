@@ -12,9 +12,10 @@ let normalDist20: GenericDist_Types.genericDist = #Symbolic(#Normal({mean: 20.0,
 let uniformDist: GenericDist_Types.genericDist = #Symbolic(#Uniform({low: 9.0, high: 10.0}))
 
 let {toFloat, toDist, toString, toError} = module(GenericDist_GenericOperation.Output)
-let {run, outputMap} = module(GenericDist_GenericOperation)
+let {run} = module(GenericDist_GenericOperation)
+let {fmap} = module(GenericDist_GenericOperation.Output)
 let run = run(params)
-let outputMap = outputMap(params)
+let outputMap = fmap(params)
 let toExt: option<'a> => 'a = E.O.toExt(
   "Should be impossible to reach (This error is in test file)",
 )

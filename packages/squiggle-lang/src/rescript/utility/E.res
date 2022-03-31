@@ -98,6 +98,10 @@ module O = {
   let max = compare(\">")
 }
 
+module O2 = {
+  let default = (a,b) => O.default(b,a)
+}
+
 /* Functions */
 module F = {
   let apply = (a, e) => a |> e

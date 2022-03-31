@@ -16,15 +16,13 @@ let runFromDist: (
   GenericDist_Types.genericDist,
 ) => outputType
 let runFromFloat: (params, GenericDist_Types.Operation.fromDist, float) => outputType
-let outputMap: (
-  params,
-  outputType,
-  GenericDist_Types.Operation.singleParamaterFunction,
-) => outputType
 
 module Output: {
-  let toDist: outputType => option<GenericDist_Types.genericDist>
-  let toFloat: outputType => option<float>
-  let toString: outputType => option<string>
-  let toError: outputType => option<GenericDist_Types.error>
+  type t = outputType
+  let toDist: t => option<GenericDist_Types.genericDist>
+  let toDistR: t => result<GenericDist_Types.genericDist, GenericDist_Types.error>
+  let toFloat: t => option<float>
+  let toString: t => option<string>
+  let toError: t => option<GenericDist_Types.error>
+  let fmap: (params, t, GenericDist_Types.Operation.singleParamaterFunction) => t
 }
