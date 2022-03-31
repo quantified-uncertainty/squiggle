@@ -3,18 +3,35 @@
 
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const path = require('path');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Squiggle (alpha)',
-  tagline: "Scorable programming, for use by forecasters",
-  url: 'https://squiggle-documentation.netlify.app',
+  tagline: "Estimation language for forecasters",
+  url: 'https://squiggle-language.com',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-  organizationName: 'QURI', // Usually your GitHub org/user name.
-  projectName: 'Squiggle', // Usually your repo name.
+  organizationName: 'QURIResearch', // Usually your GitHub org/user name.
+  projectName: 'squiggle', // Usually your repo name.
+
+  plugins: [
+    () => ({
+      configureWebpack(config, isServer, utils, content) {
+        return {
+            resolve: {
+              alias : {
+                "@quri/squiggle-components": path.resolve(__dirname, "../components/src"),
+                "@quri/squiggle-lang": path.resolve(__dirname, "../squiggle-lang/src/js")
+              }
+            }
+
+        };
+      }
+    })
+  ],
 
   presets: [
     [
@@ -51,7 +68,7 @@ const config = {
         items: [
           {
             type: 'doc',
-            docId: 'Language',
+            docId: 'Introduction',
             position: 'left',
             label: 'Documentation',
           },

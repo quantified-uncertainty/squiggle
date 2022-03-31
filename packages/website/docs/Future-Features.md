@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Future Features
@@ -77,5 +77,34 @@ Right now, Monte Carlo simulations are totally random. It would be nicer to be a
 - Possibly a decent web GUI (a much more advanced playground).
 - A VS Code extention and similar.
 
-## Fixes
+## Bugs
 - Discrete distributions are particularly buggy. Try ``mm(1,2,3,4,5,6,7,8,9,10) .* (5 to 8)``
+
+## New Functions
+
+### Distributions
+```js
+cauchy()
+pareto()
+metalog()
+```
+
+Possibly change mm to mix, or mx(). Also, change input format, maybe to mx([a,b,c], [a,b,c]).
+
+
+### Functions
+```js
+samples(distribution, n)
+toPdf(distribution)
+toCdf(distribution)
+toHash(distribution)
+trunctate(distribution, leftValue, rightValue)
+leftTrunctate(distribution, leftValue)
+rightTrunctate(distribution, rightValue)
+distributionFromSamples(array, params)
+distributionFromPoints()
+distributionFromHash()
+```
+
+
+
