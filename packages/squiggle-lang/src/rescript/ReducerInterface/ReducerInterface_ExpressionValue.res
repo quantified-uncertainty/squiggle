@@ -36,7 +36,7 @@ let rec toString = aValue =>
         ->Js.String.concatMany("")
       `{${pairs}}`
     }
-  // | Dist() =>
+  | EvDist(dist) => `${GenericDist.toString(dist)}`
   }
 
 let toStringWithType = aValue =>
@@ -47,7 +47,7 @@ let toStringWithType = aValue =>
   | EvSymbol(_) => `Symbol::${toString(aValue)}`
   | EvArray(_) => `Array::${toString(aValue)}`
   | EvRecord(_) => `Record::${toString(aValue)}`
-  // | Dist(_) =>
+  | EvDist(_) => `Distribution::${toString(aValue)}`
   }
 
 let argsToString = (args: array<expressionValue>): string => {
