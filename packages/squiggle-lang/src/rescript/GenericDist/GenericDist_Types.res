@@ -1,8 +1,7 @@
-type genericDist = [
-  | #PointSet(PointSetTypes.pointSetDist)
-  | #SampleSet(array<float>)
-  | #Symbolic(SymbolicDistTypes.symbolicDist)
-]
+type genericDist =
+  | PointSet(PointSetTypes.pointSetDist)
+  | SampleSet(array<float>)
+  | Symbolic(SymbolicDistTypes.symbolicDist)
 
 type error =
   | NotYetImplemented

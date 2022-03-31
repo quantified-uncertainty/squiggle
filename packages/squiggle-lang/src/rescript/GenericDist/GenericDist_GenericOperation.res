@@ -71,14 +71,14 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
 
   let toPointSetFn = r => {
     switch reCall(~functionCallInfo=#fromDist(#toDist(#toPointSet), r), ()) {
-    | Dist(#PointSet(p)) => Ok(p)
+    | Dist(PointSet(p)) => Ok(p)
     | e => Error(OutputLocal.toErrorOrUnreachable(e))
     }
   }
 
   let toSampleSetFn = r => {
     switch reCall(~functionCallInfo=#fromDist(#toDist(#toSampleSet(sampleCount)), r), ()) {
-    | Dist(#SampleSet(p)) => Ok(p)
+    | Dist(SampleSet(p)) => Ok(p)
     | e => Error(OutputLocal.toErrorOrUnreachable(e))
     }
   }
@@ -114,10 +114,10 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
     | #toDist(#toPointSet) =>
       dist
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount)
-      ->E.R2.fmap(r => Dist(#PointSet(r)))
+      ->E.R2.fmap(r => Dist(PointSet(r)))
       ->OutputLocal.fromResult
     | #toDist(#toSampleSet(n)) =>
-      dist->GenericDist.sampleN(n)->E.R2.fmap(r => Dist(#SampleSet(r)))->OutputLocal.fromResult
+      dist->GenericDist.sampleN(n)->E.R2.fmap(r => Dist(SampleSet(r)))->OutputLocal.fromResult
     | #toDistCombination(#Algebraic, _, #Float(_)) => GenDistError(NotYetImplemented)
     | #toDistCombination(#Algebraic, arithmeticOperation, #Dist(t2)) =>
       dist

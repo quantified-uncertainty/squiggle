@@ -15,7 +15,11 @@ let runFromDist: (
   ~functionCallInfo: GenericDist_Types.Operation.fromDist,
   GenericDist_Types.genericDist,
 ) => outputType
-let runFromFloat: (~env: env, ~functionCallInfo: GenericDist_Types.Operation.fromDist, float) => outputType
+let runFromFloat: (
+  ~env: env,
+  ~functionCallInfo: GenericDist_Types.Operation.fromDist,
+  float,
+) => outputType
 
 module Output: {
   type t = outputType

@@ -8,25 +8,25 @@ type pointwiseAddFn = (t, t) => result<t, error>
 
 let sampleN = (t: t, n) =>
   switch t {
-  | #PointSet(r) => Ok(PointSetDist.sampleNRendered(n, r))
-  | #Symbolic(r) => Ok(SymbolicDist.T.sampleN(n, r))
-  | #SampleSet(_) => Error(GenericDist_Types.NotYetImplemented)
+  | PointSet(r) => Ok(PointSetDist.sampleNRendered(n, r))
+  | Symbolic(r) => Ok(SymbolicDist.T.sampleN(n, r))
+  | SampleSet(_) => Error(GenericDist_Types.NotYetImplemented)
   }
 
-let fromFloat = (f: float) => #Symbolic(SymbolicDist.Float.make(f))
+let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
 let toString = (t: t) =>
   switch t {
-  | #PointSet(_) => "Point Set Distribution"
-  | #Symbolic(r) => SymbolicDist.T.toString(r)
-  | #SampleSet(_) => "Sample Set Distribution"
+  | PointSet(_) => "Point Set Distribution"
+  | Symbolic(r) => SymbolicDist.T.toString(r)
+  | SampleSet(_) => "Sample Set Distribution"
   }
 
-let normalize = (t: t) =>
+let normalize = (t: t): t =>
   switch t {
-  | #PointSet(r) => #PointSet(PointSetDist.T.normalize(r))
-  | #Symbolic(_) => t
-  | #SampleSet(_) => t
+  | PointSet(r) => PointSet(PointSetDist.T.normalize(r))
+  | Symbolic(_) => t
+  | SampleSet(_) => t
   }
 
 let toFloatOperation = (
@@ -34,8 +34,8 @@ let toFloatOperation = (
   ~toPointSetFn: toPointSetFn,
   ~distToFloatOperation: Operation.distToFloatOperation,
 ) => {
-  let symbolicSolution = switch t {
-  | #Symbolic(r) =>
+  let symbolicSolution = switch (t: t) {
+  | Symbolic(r) =>
     switch SymbolicDist.T.operate(distToFloatOperation, r) {
     | Ok(f) => Some(f)
     | _ => None
@@ -53,10 +53,10 @@ let toFloatOperation = (
 // This is tricky because the case of discrete distributions.
 // Also, change the outputXYPoints/pointSetDistLength details
 let toPointSet = (~xyPointLength, ~sampleCount, t): result<PointSetTypes.pointSetDist, error> => {
-  switch t {
-  | #PointSet(pointSet) => Ok(pointSet)
-  | #Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(xyPointLength, r))
-  | #SampleSet(r) => {
+  switch (t: t) {
+  | PointSet(pointSet) => Ok(pointSet)
+  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(xyPointLength, r))
+  | SampleSet(r) => {
       let response = SampleSet.toPointSetDist(
         ~samples=r,
         ~samplingInputs={
@@ -76,11 +76,11 @@ let toPointSet = (~xyPointLength, ~sampleCount, t): result<PointSetTypes.pointSe
 }
 
 module Truncate = {
-  let trySymbolicSimplification = (leftCutoff, rightCutoff, t): option<t> =>
+  let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, _) => None
-    | (lc, rc, #Symbolic(#Uniform(u))) if lc < rc =>
-      Some(#Symbolic(#Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))))
+    | (lc, rc, Symbolic(#Uniform(u))) if lc < rc =>
+      Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))))
     | _ => None
     }
 
@@ -98,9 +98,9 @@ module Truncate = {
       switch trySymbolicSimplification(leftCutoff, rightCutoff, t) {
       | Some(r) => Ok(r)
       | None =>
-        toPointSetFn(t)->E.R2.fmap(t =>
-          #PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t))
-        )
+        toPointSetFn(t)->E.R2.fmap(t => {
+          GenericDist_Types.PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t))
+        })
       }
     }
   }
@@ -122,7 +122,7 @@ module AlgebraicCombination = {
     t2: t,
   ): option<result<SymbolicDistTypes.symbolicDist, string>> =>
     switch (arithmeticOperation, t1, t2) {
-    | (arithmeticOperation, #Symbolic(d1), #Symbolic(d2)) =>
+    | (arithmeticOperation, Symbolic(d1), Symbolic(d2)) =>
       switch SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation) {
       | #AnalyticalSolution(symbolicDist) => Some(Ok(symbolicDist))
       | #Error(er) => Some(Error(er))
@@ -156,11 +156,11 @@ module AlgebraicCombination = {
   //I'm (Ozzie) really just guessing here, very little idea what's best
   let expectedConvolutionCost: t => int = x =>
     switch x {
-    | #Symbolic(#Float(_)) => 1
-    | #Symbolic(_) => 1000
-    | #PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
-    | #PointSet(Mixed(_)) => 1000
-    | #PointSet(Continuous(_)) => 1000
+    | Symbolic(#Float(_)) => 1
+    | Symbolic(_) => 1000
+    | PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
+    | PointSet(Mixed(_)) => 1000
+    | PointSet(Continuous(_)) => 1000
     | _ => 1000
     }
 
@@ -177,14 +177,24 @@ module AlgebraicCombination = {
     ~t2: t,
   ): result<t, error> => {
     switch tryAnalyticalSimplification(arithmeticOperation, t1, t2) {
-    | Some(Ok(symbolicDist)) => Ok(#Symbolic(symbolicDist))
+    | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
     | Some(Error(e)) => Error(Other(e))
     | None =>
       switch chooseConvolutionOrMonteCarlo(t1, t2) {
       | #CalculateWithMonteCarlo =>
-        runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)->E.R2.fmap(r => #SampleSet(r))
+        runMonteCarlo(
+          toSampleSetFn,
+          arithmeticOperation,
+          t1,
+          t2,
+        )->E.R2.fmap(r => GenericDist_Types.SampleSet(r))
       | #CalculateWithConvolution =>
-        runConvolution(toPointSetFn, arithmeticOperation, t1, t2)->E.R2.fmap(r => #PointSet(r))
+        runConvolution(
+          toPointSetFn,
+          arithmeticOperation,
+          t1,
+          t2,
+        )->E.R2.fmap(r => GenericDist_Types.PointSet(r))
       }
     }
   }
@@ -207,7 +217,7 @@ let pointwiseCombination = (
       t2,
     )
   )
-  ->E.R2.fmap(r => #PointSet(r))
+  ->E.R2.fmap(r => GenericDist_Types.PointSet(r))
 }
 
 let pointwiseCombinationFloat = (
@@ -232,7 +242,7 @@ let pointwiseCombinationFloat = (
       )
     })
   }
-  m->E.R2.fmap(r => #PointSet(r))
+  m->E.R2.fmap(r => GenericDist_Types.PointSet(r))
 }
 
 //Note: The result should always cumulatively sum to 1. This would be good to test.

@@ -6,10 +6,10 @@ let env: GenericDist_GenericOperation.env = {
   xyPointLength: 100,
 }
 
-let normalDist: GenericDist_Types.genericDist = #Symbolic(#Normal({mean: 5.0, stdev: 2.0}))
-let normalDist10: GenericDist_Types.genericDist = #Symbolic(#Normal({mean: 10.0, stdev: 2.0}))
-let normalDist20: GenericDist_Types.genericDist = #Symbolic(#Normal({mean: 20.0, stdev: 2.0}))
-let uniformDist: GenericDist_Types.genericDist = #Symbolic(#Uniform({low: 9.0, high: 10.0}))
+let normalDist: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 5.0, stdev: 2.0}))
+let normalDist10: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 10.0, stdev: 2.0}))
+let normalDist20: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 20.0, stdev: 2.0}))
+let uniformDist: GenericDist_Types.genericDist = Symbolic(#Uniform({low: 9.0, high: 10.0}))
 
 let {toFloat, toDist, toString, toError} = module(GenericDist_GenericOperation.Output)
 let {run} = module(GenericDist_GenericOperation)
@@ -57,7 +57,7 @@ describe("toPointSet", () => {
 
   test("on sample set distribution with under 4 points", () => {
     let result =
-      run(#fromDist(#toDist(#toPointSet), #SampleSet([0.0, 1.0, 2.0, 3.0])))->outputMap(
+      run(#fromDist(#toDist(#toPointSet), SampleSet([0.0, 1.0, 2.0, 3.0])))->outputMap(
         #fromDist(#toFloat(#Mean)),
       )
     expect(result)->toEqual(GenDistError(Other("Converting sampleSet to pointSet failed")))
