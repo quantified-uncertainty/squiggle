@@ -10,10 +10,9 @@ type error =
   | Other(string)
 
 module Operation = {
-  type direction = [
-    | #Algebraic
-    | #Pointwise
-  ]
+  type direction =
+    | Algebraic
+    | Pointwise
 
   type arithmeticOperation = [
     | #Add
@@ -42,51 +41,50 @@ module Operation = {
     | #Sample
   ]
 
-  type toDist = [
-    | #normalize
-    | #toPointSet
-    | #toSampleSet(int)
-    | #truncate(option<float>, option<float>)
-    | #inspect
-  ]
+  type toDist =
+    | Normalize
+    | ToPointSet
+    | ToSampleSet(int)
+    | Truncate(option<float>, option<float>)
+    | Inspect
 
-  type toFloatArray = [
-    | #Sample(int)
-  ]
+  type toFloatArray = Sample(int)
 
-  type fromDist = [
-    | #toFloat(toFloat)
-    | #toDist(toDist)
-    | #toDistCombination(direction, arithmeticOperation, [#Dist(genericDist) | #Float(float)])
-    | #toString
-  ]
+  type fromDist =
+    | ToFloat(toFloat)
+    | ToDist(toDist)
+    | ToDistCombination(direction, arithmeticOperation, [#Dist(genericDist) | #Float(float)])
+    | ToString
 
-  type singleParamaterFunction = [
-    | #fromDist(fromDist)
-    | #fromFloat(fromDist)
-  ]
+  type singleParamaterFunction =
+    | FromDist(fromDist)
+    | FromFloat(fromDist)
 
-  type genericFunctionCallInfo = [
-    | #fromDist(fromDist, genericDist)
-    | #fromFloat(fromDist, float)
-    | #mixture(array<(genericDist, float)>)
-  ]
+  type genericFunctionCallInfo =
+    | FromDist(fromDist, genericDist)
+    | FromFloat(fromDist, float)
+    | Mixture(array<(genericDist, float)>)
 
-  //TODO: Should support all genericFunctionCallInfo types
-  let toString = (distFunction: fromDist): string =>
+  let distCallToString = (distFunction: fromDist): string =>
     switch distFunction {
-    | #toFloat(#Cdf(r)) => `cdf(${E.Float.toFixed(r)})`
-    | #toFloat(#Inv(r)) => `inv(${E.Float.toFixed(r)})`
-    | #toFloat(#Mean) => `mean`
-    | #toFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
-    | #toFloat(#Sample) => `sample`
-    | #toDist(#normalize) => `normalize`
-    | #toDist(#toPointSet) => `toPointSet`
-    | #toDist(#toSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
-    | #toDist(#truncate(_, _)) => `truncate`
-    | #toDist(#inspect) => `inspect`
-    | #toString => `toString`
-    | #toDistCombination(#Algebraic, _, _) => `algebraic`
-    | #toDistCombination(#Pointwise, _, _) => `pointwise`
+    | ToFloat(#Cdf(r)) => `cdf(${E.Float.toFixed(r)})`
+    | ToFloat(#Inv(r)) => `inv(${E.Float.toFixed(r)})`
+    | ToFloat(#Mean) => `mean`
+    | ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
+    | ToFloat(#Sample) => `sample`
+    | ToDist(Normalize) => `normalize`
+    | ToDist(ToPointSet) => `toPointSet`
+    | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
+    | ToDist(Truncate(_, _)) => `truncate`
+    | ToDist(Inspect) => `inspect`
+    | ToString => `toString`
+    | ToDistCombination(Algebraic, _, _) => `algebraic`
+    | ToDistCombination(Pointwise, _, _) => `pointwise`
+    }
+
+  let toString = (d: genericFunctionCallInfo): string =>
+    switch d {
+    | FromDist(f, _) | FromFloat(f, _) => distCallToString(f)
+    | Mixture(_) => `mixture`
     }
 }
