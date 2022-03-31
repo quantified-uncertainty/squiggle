@@ -135,7 +135,7 @@ let rec run = (extra, fnName: operation): outputType => {
 let runFromDist = (extra, fnName, dist) => run(extra, #fromDist(fnName, dist))
 let runFromFloat = (extra, fnName, float) => run(extra, #fromFloat(fnName, float))
 
-let fmap = (
+let outputMap = (
   extra,
   input: outputType,
   fn: GenericDist_Types.Operation.singleParamaterFunction,
