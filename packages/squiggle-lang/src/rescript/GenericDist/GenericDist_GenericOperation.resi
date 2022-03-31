@@ -1,4 +1,4 @@
-type params = {
+type env = {
   sampleCount: int,
   xyPointLength: int,
 }
@@ -9,13 +9,13 @@ type outputType =
   | String(string)
   | GenDistError(GenericDist_Types.error)
 
-let run: (params, GenericDist_Types.Operation.genericFunctionCallInfo) => outputType
+let run: (~env: env, GenericDist_Types.Operation.genericFunctionCallInfo) => outputType
 let runFromDist: (
-  params,
-  GenericDist_Types.Operation.fromDist,
+  ~env: env,
+  ~functionCallInfo: GenericDist_Types.Operation.fromDist,
   GenericDist_Types.genericDist,
 ) => outputType
-let runFromFloat: (params, GenericDist_Types.Operation.fromDist, float) => outputType
+let runFromFloat: (~env: env, ~functionCallInfo: GenericDist_Types.Operation.fromDist, float) => outputType
 
 module Output: {
   type t = outputType
@@ -24,5 +24,5 @@ module Output: {
   let toFloat: t => option<float>
   let toString: t => option<string>
   let toError: t => option<GenericDist_Types.error>
-  let fmap: (params, t, GenericDist_Types.Operation.singleParamaterFunction) => t
+  let fmap: (~env: env, t, GenericDist_Types.Operation.singleParamaterFunction) => t
 }

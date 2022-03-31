@@ -1,7 +1,7 @@
 open Jest
 open Expect
 
-let params: GenericDist_GenericOperation.params = {
+let env: GenericDist_GenericOperation.env = {
   sampleCount: 100,
   xyPointLength: 100,
 }
@@ -14,8 +14,8 @@ let uniformDist: GenericDist_Types.genericDist = #Symbolic(#Uniform({low: 9.0, h
 let {toFloat, toDist, toString, toError} = module(GenericDist_GenericOperation.Output)
 let {run} = module(GenericDist_GenericOperation)
 let {fmap} = module(GenericDist_GenericOperation.Output)
-let run = run(params)
-let outputMap = fmap(params)
+let run = run(~env)
+let outputMap = fmap(~env)
 let toExt: option<'a> => 'a = E.O.toExt(
   "Should be impossible to reach (This error is in test file)",
 )
@@ -29,7 +29,7 @@ describe("normalize", () => {
 
 describe("mean", () => {
   test("for a normal distribution", () => {
-    let result = GenericDist_GenericOperation.run(params, #fromDist(#toFloat(#Mean), normalDist))
+    let result = GenericDist_GenericOperation.run(~env, #fromDist(#toFloat(#Mean), normalDist))
     expect(result)->toEqual(Float(5.0))
   })
 })

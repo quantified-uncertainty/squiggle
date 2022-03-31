@@ -1,10 +1,10 @@
-type operation = GenericDist_Types.Operation.genericFunctionCallInfo
+type functionCallInfo = GenericDist_Types.Operation.genericFunctionCallInfo
 type genericDist = GenericDist_Types.genericDist
 type error = GenericDist_Types.error
 
 // TODO: It could be great to use a cache for some calculations (basically, do memoization). Also, better analytics/tracking could go a long way.
 
-type params = {
+type env = {
   sampleCount: int,
   xyPointLength: int,
 }
@@ -62,22 +62,22 @@ module OutputLocal = {
     }
 }
 
-let rec run = (extra, fnName: operation): outputType => {
-  let {sampleCount, xyPointLength} = extra
+let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
+  let {sampleCount, xyPointLength} = env
 
-  let reCall = (~extra=extra, ~fnName=fnName, ()) => {
-    run(extra, fnName)
+  let reCall = (~env=env, ~functionCallInfo=functionCallInfo, ()) => {
+    run(~env, functionCallInfo)
   }
 
   let toPointSetFn = r => {
-    switch reCall(~fnName=#fromDist(#toDist(#toPointSet), r), ()) {
+    switch reCall(~functionCallInfo=#fromDist(#toDist(#toPointSet), r), ()) {
     | Dist(#PointSet(p)) => Ok(p)
     | e => Error(OutputLocal.toErrorOrUnreachable(e))
     }
   }
 
   let toSampleSetFn = r => {
-    switch reCall(~fnName=#fromDist(#toDist(#toSampleSet(sampleCount)), r), ()) {
+    switch reCall(~functionCallInfo=#fromDist(#toDist(#toSampleSet(sampleCount)), r), ()) {
     | Dist(#SampleSet(p)) => Ok(p)
     | e => Error(OutputLocal.toErrorOrUnreachable(e))
     }
@@ -85,20 +85,20 @@ let rec run = (extra, fnName: operation): outputType => {
 
   let scaleMultiply = (r, weight) =>
     reCall(
-      ~fnName=#fromDist(#toDistCombination(#Pointwise, #Multiply, #Float(weight)), r),
+      ~functionCallInfo=#fromDist(#toDistCombination(#Pointwise, #Multiply, #Float(weight)), r),
       (),
     )->OutputLocal.toDistR
 
   let pointwiseAdd = (r1, r2) =>
     reCall(
-      ~fnName=#fromDist(#toDistCombination(#Pointwise, #Add, #Dist(r2)), r1),
+      ~functionCallInfo=#fromDist(#toDistCombination(#Pointwise, #Add, #Dist(r2)), r1),
       (),
     )->OutputLocal.toDistR
 
   let fromDistFn = (subFnName: GenericDist_Types.Operation.fromDist, dist: genericDist) =>
     switch subFnName {
-    | #toFloat(fnName) =>
-      GenericDist.operationToFloat(dist, ~toPointSetFn, ~operation=fnName)
+    | #toFloat(distToFloatOperation) =>
+      GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
     | #toString => dist->GenericDist.toString->String
@@ -113,33 +113,33 @@ let rec run = (extra, fnName: operation): outputType => {
       ->OutputLocal.fromResult
     | #toDist(#toPointSet) =>
       dist
-      ->GenericDist.toPointSet(xyPointLength)
+      ->GenericDist.toPointSet(~xyPointLength, ~sampleCount)
       ->E.R2.fmap(r => Dist(#PointSet(r)))
       ->OutputLocal.fromResult
     | #toDist(#toSampleSet(n)) =>
       dist->GenericDist.sampleN(n)->E.R2.fmap(r => Dist(#SampleSet(r)))->OutputLocal.fromResult
     | #toDistCombination(#Algebraic, _, #Float(_)) => GenDistError(NotYetImplemented)
-    | #toDistCombination(#Algebraic, operation, #Dist(t2)) =>
+    | #toDistCombination(#Algebraic, arithmeticOperation, #Dist(t2)) =>
       dist
-      ->GenericDist.algebraicCombination(~toPointSetFn, ~toSampleSetFn, ~operation, ~t2)
+      ->GenericDist.algebraicCombination(~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | #toDistCombination(#Pointwise, operation, #Dist(t2)) =>
+    | #toDistCombination(#Pointwise, arithmeticOperation, #Dist(t2)) =>
       dist
-      ->GenericDist.pointwiseCombination(~toPointSetFn, ~operation, ~t2)
+      ->GenericDist.pointwiseCombination(~toPointSetFn, ~arithmeticOperation, ~t2)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | #toDistCombination(#Pointwise, operation, #Float(float)) =>
+    | #toDistCombination(#Pointwise, arithmeticOperation, #Float(float)) =>
       dist
-      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~operation, ~float)
+      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~arithmeticOperation, ~float)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     }
 
-  switch fnName {
+  switch functionCallInfo {
   | #fromDist(subFnName, dist) => fromDistFn(subFnName, dist)
   | #fromFloat(subFnName, float) =>
-    reCall(~fnName=#fromDist(subFnName, GenericDist.fromFloat(float)), ())
+    reCall(~functionCallInfo=#fromDist(subFnName, GenericDist.fromFloat(float)), ())
   | #mixture(dists) =>
     dists
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd)
@@ -148,24 +148,25 @@ let rec run = (extra, fnName: operation): outputType => {
   }
 }
 
-let runFromDist = (extra, fnName, dist) => run(extra, #fromDist(fnName, dist))
-let runFromFloat = (extra, fnName, float) => run(extra, #fromFloat(fnName, float))
+let runFromDist = (~env, ~functionCallInfo, dist) => run(~env, #fromDist(functionCallInfo, dist))
+let runFromFloat = (~env, ~functionCallInfo, float) =>
+  run(~env, #fromFloat(functionCallInfo, float))
 
 module Output = {
   include OutputLocal
 
   let fmap = (
-    extra,
+    ~env,
     input: outputType,
-    fn: GenericDist_Types.Operation.singleParamaterFunction,
+    functionCallInfo: GenericDist_Types.Operation.singleParamaterFunction,
   ): outputType => {
-    let newFnCall: result<operation, error> = switch (fn, input) {
+    let newFnCall: result<functionCallInfo, error> = switch (functionCallInfo, input) {
     | (#fromDist(fromDist), Dist(o)) => Ok(#fromDist(fromDist, o))
     | (#fromFloat(fromDist), Float(o)) => Ok(#fromFloat(fromDist, o))
     | (_, GenDistError(r)) => Error(r)
     | (#fromDist(_), _) => Error(Other("Expected dist, got something else"))
     | (#fromFloat(_), _) => Error(Other("Expected float, got something else"))
     }
-    newFnCall->E.R2.fmap(r => run(extra, r))->OutputLocal.fromResult
+    newFnCall->E.R2.fmap(run(~env))->OutputLocal.fromResult
   }
 }
