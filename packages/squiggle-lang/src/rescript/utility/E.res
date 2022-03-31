@@ -32,6 +32,17 @@ module U = {
   let id = e => e
 }
 
+module Tuple2 = {
+  let first = (v: ('a, 'b)) => {
+    let (a, _) = v
+    a
+  }
+  let second = (v: ('a, 'b)) => {
+    let (_, b) = v
+    b
+  }
+}
+
 module O = {
   let dimap = (sFn, rFn, e) =>
     switch e {
@@ -162,6 +173,10 @@ module R = {
 
   let errorIfCondition = (errorCondition, errorMessage, r) =>
     errorCondition(r) ? Error(errorMessage) : Ok(r)
+}
+
+module R2 = {
+  let fmap = (a,b) => R.fmap(b,a)
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>
@@ -443,7 +458,7 @@ module A = {
 }
 
 module A2 = {
-  let fmap = (a, b) => Array.map(b, a)
+  let fmap = (a,b) => A.fmap(b,a)
   let joinWith = (a, b) => A.joinWith(b, a)
 }
 

@@ -1,3 +1,5 @@
+// TODO: Refactor to raise correct error when not enough samples
+
 module Internals = {
   module Types = {
     type samplingStats = {

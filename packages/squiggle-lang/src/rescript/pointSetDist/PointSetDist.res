@@ -34,6 +34,7 @@ let toMixed = mapToAll((
     ),
 ))
 
+//TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
 let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
@@ -41,7 +42,8 @@ let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =
   | (Continuous(m1), Discrete(m2))
   | (Discrete(m2), Continuous(m1)) =>
     Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2) |> Continuous.T.toPointSetDist
-  | (Discrete(m1), Discrete(m2)) => Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toPointSetDist
+  | (Discrete(m1), Discrete(m2)) =>
+    Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toPointSetDist
   | (m1, m2) => Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2)) |> Mixed.T.toPointSetDist
   }
 
@@ -196,7 +198,7 @@ let sampleNRendered = (n, dist) => {
 let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   switch distToFloatOp {
   | #Pdf(f) => pdf(f, s)
-  | #Cdf(f) => pdf(f, s)
+  | #Cdf(f) => cdf(f, s)
   | #Inv(f) => inv(f, s)
   | #Sample => sample(s)
   | #Mean => T.mean(s)
