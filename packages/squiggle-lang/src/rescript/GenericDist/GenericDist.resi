@@ -13,32 +13,46 @@ let toString: t => string
 
 let normalize: t => t
 
-let operationToFloat: (t, toPointSetFn, Operation.distToFloatOperation) => result<float, error>
+let operationToFloat: (
+  t,
+  ~toPointSetFn: toPointSetFn,
+  ~operation: Operation.distToFloatOperation,
+) => result<float, error>
 
 let toPointSet: (t, int) => result<PointSetTypes.pointSetDist, error>
 
-let truncate: (t, toPointSetFn, option<float>, option<float>) => result<t, error>
+let truncate: (
+  t,
+  ~toPointSetFn: toPointSetFn,
+  ~leftCutoff: option<float>=?,
+  ~rightCutoff: option<float>=?,
+  unit,
+) => result<t, error>
 
 let algebraicCombination: (
   t,
-  toPointSetFn,
-  toSampleSetFn,
-  GenericDist_Types.Operation.arithmeticOperation,
-  t,
+  ~toPointSetFn: toPointSetFn,
+  ~toSampleSetFn: toSampleSetFn,
+  ~operation: GenericDist_Types.Operation.arithmeticOperation,
+  ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombination: (
   t,
-  toPointSetFn,
-  GenericDist_Types.Operation.arithmeticOperation,
-  t,
+  ~toPointSetFn: toPointSetFn,
+  ~operation: GenericDist_Types.Operation.arithmeticOperation,
+  ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombinationFloat: (
   t,
-  toPointSetFn,
-  GenericDist_Types.Operation.arithmeticOperation,
-  float,
+  ~toPointSetFn: toPointSetFn,
+  ~operation: GenericDist_Types.Operation.arithmeticOperation,
+  ~float: float,
 ) => result<t, error>
 
-let mixture: (array<(t, float)>, scaleMultiplyFn, pointwiseAddFn) => result<t, error>
+let mixture: (
+  array<(t, float)>,
+  ~scaleMultiplyFn: scaleMultiplyFn,
+  ~pointwiseAddFn: pointwiseAddFn,
+) => result<t, error>

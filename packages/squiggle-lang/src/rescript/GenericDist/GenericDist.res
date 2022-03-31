@@ -29,10 +29,14 @@ let normalize = (t: t) =>
   | #SampleSet(_) => t
   }
 
-let operationToFloat = (t, toPointSet: toPointSetFn, fnName) => {
+let operationToFloat = (
+  t,
+  ~toPointSetFn: toPointSetFn,
+  ~operation: Operation.distToFloatOperation,
+) => {
   let symbolicSolution = switch t {
   | #Symbolic(r) =>
-    switch SymbolicDist.T.operate(fnName, r) {
+    switch SymbolicDist.T.operate(operation, r) {
     | Ok(f) => Some(f)
     | _ => None
     }
@@ -41,7 +45,7 @@ let operationToFloat = (t, toPointSet: toPointSetFn, fnName) => {
 
   switch symbolicSolution {
   | Some(r) => Ok(r)
-  | None => toPointSet(t)->E.R2.fmap(PointSetDist.operate(fnName))
+  | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(operation))
   }
 }
 
@@ -84,9 +88,10 @@ module Truncate = {
 
   let run = (
     t: t,
-    toPointSet: toPointSetFn,
-    leftCutoff: option<float>,
-    rightCutoff: option<float>,
+    ~toPointSetFn: toPointSetFn,
+    ~leftCutoff=None: option<float>,
+    ~rightCutoff=None: option<float>,
+    (),
   ): result<t, error> => {
     let doesNotNeedCutoff = E.O.isNone(leftCutoff) && E.O.isNone(rightCutoff)
     if doesNotNeedCutoff {
@@ -95,7 +100,7 @@ module Truncate = {
       switch trySymbolicSimplification(leftCutoff, rightCutoff, t) {
       | Some(r) => Ok(r)
       | None =>
-        toPointSet(t)->E.R2.fmap(t =>
+        toPointSetFn(t)->E.R2.fmap(t =>
           #PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t))
         )
       }
@@ -168,20 +173,20 @@ module AlgebraicCombination = {
 
   let run = (
     t1: t,
-    toPointSet: toPointSetFn,
-    toSampleSet: toSampleSetFn,
-    algebraicOp,
-    t2: t,
+    ~toPointSetFn: toPointSetFn,
+    ~toSampleSetFn: toSampleSetFn,
+    ~operation,
+    ~t2: t,
   ): result<t, error> => {
-    switch tryAnalyticalSimplification(algebraicOp, t1, t2) {
+    switch tryAnalyticalSimplification(operation, t1, t2) {
     | Some(Ok(symbolicDist)) => Ok(#Symbolic(symbolicDist))
     | Some(Error(e)) => Error(Other(e))
     | None =>
       switch chooseConvolutionOrMonteCarlo(t1, t2) {
       | #CalculateWithMonteCarlo =>
-        runMonteCarlo(toSampleSet, algebraicOp, t1, t2)->E.R2.fmap(r => #SampleSet(r))
+        runMonteCarlo(toSampleSetFn, operation, t1, t2)->E.R2.fmap(r => #SampleSet(r))
       | #CalculateWithConvolution =>
-        runConvolution(toPointSet, algebraicOp, t1, t2)->E.R2.fmap(r => #PointSet(r))
+        runConvolution(toPointSetFn, operation, t1, t2)->E.R2.fmap(r => #PointSet(r))
       }
     }
   }
@@ -190,11 +195,11 @@ module AlgebraicCombination = {
 let algebraicCombination = AlgebraicCombination.run
 
 //TODO: Add faster pointwiseCombine fn
-let pointwiseCombination = (t1: t, toPointSet: toPointSetFn, operation, t2: t): result<
+let pointwiseCombination = (t1: t, ~toPointSetFn: toPointSetFn, ~operation, ~t2: t): result<
   t,
   error,
 > => {
-  E.R.merge(toPointSet(t1), toPointSet(t2))
+  E.R.merge(toPointSetFn(t1), toPointSetFn(t2))
   ->E.R2.fmap(((t1, t2)) =>
     PointSetDist.combinePointwise(GenericDist_Types.Operation.arithmeticToFn(operation), t1, t2)
   )
@@ -203,22 +208,22 @@ let pointwiseCombination = (t1: t, toPointSet: toPointSetFn, operation, t2: t): 
 
 let pointwiseCombinationFloat = (
   t: t,
-  toPointSet: toPointSetFn,
-  operation: GenericDist_Types.Operation.arithmeticOperation,
-  f: float,
+  ~toPointSetFn: toPointSetFn,
+  ~operation: GenericDist_Types.Operation.arithmeticOperation,
+  ~float: float,
 ): result<t, error> => {
   let m = switch operation {
   | #Add | #Subtract => Error(GenericDist_Types.DistributionVerticalShiftIsInvalid)
   | (#Multiply | #Divide | #Exponentiate | #Log) as operation =>
-    toPointSet(t)->E.R2.fmap(t => {
+    toPointSetFn(t)->E.R2.fmap(t => {
       //TODO: Move to PointSet codebase
       let fn = (secondary, main) => Operation.Scale.toFn(operation, main, secondary)
       let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(operation)
       let integralCacheFn = Operation.Scale.toIntegralCacheFn(operation)
       PointSetDist.T.mapY(
-        ~integralSumCacheFn=integralSumCacheFn(f),
-        ~integralCacheFn=integralCacheFn(f),
-        ~fn=fn(f),
+        ~integralSumCacheFn=integralSumCacheFn(float),
+        ~integralCacheFn=integralCacheFn(float),
+        ~fn=fn(float),
         t,
       )
     })
@@ -230,8 +235,8 @@ let pointwiseCombinationFloat = (
 //Note: If the inputs are not normalized, this will return poor results. The weights probably refer to the post-normalized forms. It would be good to apply a catch to this.
 let mixture = (
   values: array<(t, float)>,
-  scaleMultiply: scaleMultiplyFn,
-  pointwiseAdd: pointwiseAddFn,
+  ~scaleMultiplyFn: scaleMultiplyFn,
+  ~pointwiseAddFn: pointwiseAddFn,
 ) => {
   if E.A.length(values) == 0 {
     Error(GenericDist_Types.Other("mixture must have at least 1 element"))
@@ -239,13 +244,13 @@ let mixture = (
     let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =
       values
-      ->E.A2.fmap(((dist, weight)) => scaleMultiply(dist, weight /. totalWeight))
+      ->E.A2.fmap(((dist, weight)) => scaleMultiplyFn(dist, weight /. totalWeight))
       ->E.A.R.firstErrorOrOpen
     properlyWeightedValues->E.R.bind(values => {
       values
       |> Js.Array.sliceFrom(1)
       |> E.A.fold_left(
-        (acc, x) => E.R.bind(acc, acc => pointwiseAdd(acc, x)),
+        (acc, x) => E.R.bind(acc, acc => pointwiseAddFn(acc, x)),
         Ok(E.A.unsafe_get(values, 0)),
       )
     })
