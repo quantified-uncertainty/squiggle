@@ -48,8 +48,8 @@ let fromResult = (r: result<outputType, error>): outputType =>
   | Error(e) => #GenDistError(e)
   }
 
-let outputToDistResult = (b: outputType): result<genericDist, error> =>
-  switch b {
+let outputToDistResult = (o: outputType): result<genericDist, error> =>
+  switch o {
   | #Dist(r) => Ok(r)
   | #GenDistError(r) => Error(r)
   | _ => Error(Unreachable)
@@ -90,8 +90,8 @@ let rec run = (extra, fnName: operation): outputType => {
       (),
     )->outputToDistResult
 
-  let fromDistFn = (subFn: GenericDist_Types.Operation.fromDist, dist: genericDist) =>
-    switch subFn {
+  let fromDistFn = (subFnName: GenericDist_Types.Operation.fromDist, dist: genericDist) =>
+    switch subFnName {
     | #toFloat(fnName) =>
       GenericDist.operationToFloat(dist, toPointSet, fnName)->E.R2.fmap(r => #Float(r))->fromResult
     | #toString => dist->GenericDist.toString->(r => #String(r))
@@ -125,8 +125,8 @@ let rec run = (extra, fnName: operation): outputType => {
     }
 
   switch fnName {
-  | #fromDist(subFn, dist) => fromDistFn(subFn, dist)
-  | #fromFloat(subFn, float) => reCall(~fnName=#fromDist(subFn, GenericDist.fromFloat(float)), ())
+  | #fromDist(subFnName, dist) => fromDistFn(subFnName, dist)
+  | #fromFloat(subFnName, float) => reCall(~fnName=#fromDist(subFnName, GenericDist.fromFloat(float)), ())
   | #mixture(dists) =>
     dists->GenericDist.mixture(scaleMultiply, pointwiseAdd)->E.R2.fmap(r => #Dist(r))->fromResult
   }

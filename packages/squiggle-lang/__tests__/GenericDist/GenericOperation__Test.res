@@ -62,7 +62,7 @@ describe("toPointSet", () => {
     expect(result)->toEqual(#GenDistError(Other("Converting sampleSet to pointSet failed")))
   })
 
-  test("on sample set", () => {
+  Skip.test("on sample set", () => {
     let result =
       run(#fromDist(#toDist(#toPointSet), normalDist))
       ->fmap(#fromDist(#toDist(#toSampleSet(1000))))
