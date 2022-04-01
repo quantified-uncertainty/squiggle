@@ -30,9 +30,9 @@ let catchAndConvertTwoArgsToDists = (args: array<expressionValue>): option<(
   GenericDist_Types.genericDist,
 )> => {
   switch args {
-  | [EvDist(a), EvDist(b)] => Some((a, b))
-  | [EvNumber(a), EvDist(b)] => Some((GenericDist.fromFloat(a), b))
-  | [EvDist(a), EvNumber(b)] => Some((a, GenericDist.fromFloat(b)))
+  | [EvDistribution(a), EvDistribution(b)] => Some((a, b))
+  | [EvNumber(a), EvDistribution(b)] => Some((GenericDist.fromFloat(a), b))
+  | [EvDistribution(a), EvNumber(b)] => Some((a, GenericDist.fromFloat(b)))
   | _ => None
   }
 }
@@ -64,7 +64,7 @@ let genericOutputToReducerValue = (o: GenericDist_GenericOperation.outputType): 
   Reducer_ErrorValue.errorValue,
 > =>
   switch o {
-  | Dist(d) => Ok(ReducerInterface_ExpressionValue.EvDist(d))
+  | Dist(d) => Ok(ReducerInterface_ExpressionValue.EvDistribution(d))
   | Float(d) => Ok(EvNumber(d))
   | String(d) => Ok(EvString(d))
   | GenDistError(NotYetImplemented) => Error(RETodo("Function not yet implemented"))
@@ -79,19 +79,19 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
 > => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("sample", [EvDist(dist)]) => toFloatFn(#Sample, dist)
-  | ("mean", [EvDist(dist)]) => toFloatFn(#Mean, dist)
-  | ("normalize", [EvDist(dist)]) => toDistFn(Normalize, dist)
-  | ("toPointSet", [EvDist(dist)]) => toDistFn(ToPointSet, dist)
-  | ("cdf", [EvDist(dist), EvNumber(float)]) => toFloatFn(#Cdf(float), dist)
-  | ("pdf", [EvDist(dist), EvNumber(float)]) => toFloatFn(#Pdf(float), dist)
-  | ("inv", [EvDist(dist), EvNumber(float)]) => toFloatFn(#Inv(float), dist)
-  | ("toSampleSet", [EvDist(dist), EvNumber(float)]) =>
+  | ("sample", [EvDistribution(dist)]) => toFloatFn(#Sample, dist)
+  | ("mean", [EvDistribution(dist)]) => toFloatFn(#Mean, dist)
+  | ("normalize", [EvDistribution(dist)]) => toDistFn(Normalize, dist)
+  | ("toPointSet", [EvDistribution(dist)]) => toDistFn(ToPointSet, dist)
+  | ("cdf", [EvDistribution(dist), EvNumber(float)]) => toFloatFn(#Cdf(float), dist)
+  | ("pdf", [EvDistribution(dist), EvNumber(float)]) => toFloatFn(#Pdf(float), dist)
+  | ("inv", [EvDistribution(dist), EvNumber(float)]) => toFloatFn(#Inv(float), dist)
+  | ("toSampleSet", [EvDistribution(dist), EvNumber(float)]) =>
     toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist)
-  | ("truncateLeft", [EvDist(dist), EvNumber(float)]) => toDistFn(Truncate(Some(float), None), dist)
-  | ("truncateRight", [EvDist(dist), EvNumber(float)]) =>
+  | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) => toDistFn(Truncate(Some(float), None), dist)
+  | ("truncateRight", [EvDistribution(dist), EvNumber(float)]) =>
     toDistFn(Truncate(None, Some(float)), dist)
-  | ("truncate", [EvDist(dist), EvNumber(float1), EvNumber(float2)]) =>
+  | ("truncate", [EvDistribution(dist), EvNumber(float1), EvNumber(float2)]) =>
     toDistFn(Truncate(Some(float1), Some(float2)), dist)
   | (("add" | "multiply" | "subtract" | "divide" | "exponentiate") as arithmetic, [a, b] as args) =>
     catchAndConvertTwoArgsToDists(args) -> E.O2.fmap(((fst, snd)) =>
