@@ -7,11 +7,11 @@ type algebraicOperation = [
   | #Subtract
   | #Divide
   | #Exponentiate
-  | #Log
+  | #Logarithm
 ]
 @genType
 type pointwiseOperation = [#Add | #Multiply | #Exponentiate]
-type scaleOperation = [#Multiply | #Exponentiate | #Log | #Divide]
+type scaleOperation = [#Multiply | #Exponentiate | #Logarithm | #Divide]
 type distToFloatOperation = [
   | #Pdf(float)
   | #Cdf(float)
@@ -29,7 +29,7 @@ module Algebraic = {
     | #Multiply => \"*."
     | #Exponentiate => \"**"
     | #Divide => \"/."
-    | #Log => (a, b) => log(a) /. log(b)
+    | #Logarithm => (a, b) => log(a) /. log(b)
     }
 
   let applyFn = (t, f1, f2) =>
@@ -45,7 +45,7 @@ module Algebraic = {
     | #Multiply => "*"
     | #Exponentiate => "**"
     | #Divide => "/"
-    | #Log => "log"
+    | #Logarithm => "log"
     }
 
   let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
@@ -84,7 +84,7 @@ module Scale = {
     | #Multiply => \"*."
     | #Divide => \"/."
     | #Exponentiate => \"**"
-    | #Log => (a, b) => log(a) /. log(b)
+    | #Logarithm => (a, b) => log(a) /. log(b)
     }
 
   let format = (operation: t, value, scaleBy) =>
@@ -92,7 +92,7 @@ module Scale = {
     | #Multiply => j`verticalMultiply($value, $scaleBy) `
     | #Divide => j`verticalDivide($value, $scaleBy) `
     | #Exponentiate => j`verticalExponentiate($value, $scaleBy) `
-    | #Log => j`verticalLog($value, $scaleBy) `
+    | #Logarithm => j`verticalLog($value, $scaleBy) `
     }
 
   let toIntegralSumCacheFn = x =>
@@ -100,7 +100,7 @@ module Scale = {
     | #Multiply => (a, b) => Some(a *. b)
     | #Divide => (a, b) => Some(a /. b)
     | #Exponentiate => (_, _) => None
-    | #Log => (_, _) => None
+    | #Logarithm => (_, _) => None
     }
 
   let toIntegralCacheFn = x =>
@@ -108,7 +108,7 @@ module Scale = {
     | #Multiply => (_, _) => None // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
     | #Divide => (_, _) => None
     | #Exponentiate => (_, _) => None
-    | #Log => (_, _) => None
+    | #Logarithm => (_, _) => None
     }
 }
 

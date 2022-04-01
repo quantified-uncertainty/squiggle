@@ -2,7 +2,7 @@ open SymbolicDistTypes
 
 module Normal = {
   type t = normal
-  let make = (mean: float, stdev: float): result<symbolicDist,string> => 
+  let make = (mean: float, stdev: float): result<symbolicDist, string> =>
     stdev > 0.0
       ? Ok(#Normal({mean: mean, stdev: stdev}))
       : Error("Standard deviation of normal distribution must be larger than 0")
@@ -48,11 +48,13 @@ module Normal = {
 
 module Exponential = {
   type t = exponential
-  let make = (rate: float): result<symbolicDist,string> =>
+  let make = (rate: float): result<symbolicDist, string> =>
     rate > 0.0
-      ? Ok(#Exponential({
-          rate: rate,
-        }))
+      ? Ok(
+          #Exponential({
+            rate: rate,
+          }),
+        )
       : Error("Exponential distributions mean must be larger than 0")
   let pdf = (x, t: t) => Jstat.Exponential.pdf(x, t.rate)
   let cdf = (x, t: t) => Jstat.Exponential.cdf(x, t.rate)
@@ -89,7 +91,7 @@ module Triangular = {
 
 module Beta = {
   type t = beta
-  let make = (alpha, beta) => 
+  let make = (alpha, beta) =>
     alpha > 0.0 && beta > 0.0
       ? Ok(#Beta({alpha: alpha, beta: beta}))
       : Error("Beta distribution parameters must be positive")
@@ -103,10 +105,10 @@ module Beta = {
 
 module Lognormal = {
   type t = lognormal
-  let make = (mu, sigma) => 
-      sigma > 0.0
-        ? Ok(#Lognormal({mu: mu, sigma: sigma}))
-        : Error("Lognormal standard deviation must be larger than 0")
+  let make = (mu, sigma) =>
+    sigma > 0.0
+      ? Ok(#Lognormal({mu: mu, sigma: sigma}))
+      : Error("Lognormal standard deviation must be larger than 0")
   let pdf = (x, t: t) => Jstat.Lognormal.pdf(x, t.mu, t.sigma)
   let cdf = (x, t: t) => Jstat.Lognormal.cdf(x, t.mu, t.sigma)
   let inv = (p, t: t) => Jstat.Lognormal.inv(p, t.mu, t.sigma)
@@ -127,8 +129,7 @@ module Lognormal = {
       let mu = Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance /. meanSquared +. 1.0)
       let sigma = Js.Math.pow_float(~base=Js.Math.log(variance /. meanSquared +. 1.0), ~exp=0.5)
       Ok(#Lognormal({mu: mu, sigma: sigma}))
-    }
-    else {
+    } else {
       Error("Lognormal standard deviation must be larger than 0")
     }
   }
@@ -154,9 +155,7 @@ module Lognormal = {
 module Uniform = {
   type t = uniform
   let make = (low, high) =>
-     high > low 
-       ? Ok(#Uniform({low: low, high: high}))
-       : Error("High must be larger than low")
+    high > low ? Ok(#Uniform({low: low, high: high})) : Error("High must be larger than low")
 
   let pdf = (x, t: t) => Jstat.Uniform.pdf(x, t.low, t.high)
   let cdf = (x, t: t) => Jstat.Uniform.cdf(x, t.low, t.high)
@@ -165,7 +164,7 @@ module Uniform = {
   let mean = (t: t) => Ok(Jstat.Uniform.mean(t.low, t.high))
   let toString = ({low, high}: t) => j`Uniform($low,$high)`
   let truncate = (low, high, t: t): t => {
-//todo: add check
+    //todo: add check
     let newLow = max(E.O.default(neg_infinity, low), t.low)
     let newHigh = min(E.O.default(infinity, high), t.high)
     {low: newLow, high: newHigh}
@@ -181,6 +180,15 @@ module Float = {
   let mean = (t: t) => Ok(t)
   let sample = (t: t) => t
   let toString = Js.Float.toString
+}
+
+module From90thPercentile = {
+  let make = (low, high) =>
+    switch (low, high) {
+    | (low, high) if low <= 0.0 && low < high => Ok(Normal.from90PercentCI(low, high))
+    | (low, high) if low < high => Ok(Lognormal.from90PercentCI(low, high))
+    | (_, _) => Error("Low value must be less than high value.")
+    }
 }
 
 module T = {

@@ -6,6 +6,9 @@ let makeTest = (str, result) => test(str, () => expectEvalToBe(str, result))
 describe("eval", () => {
   Only.describe("expressions", () => {
     makeTest("normal(5,2)", "Ok(Normal(5,2))")
+    makeTest("5 to 2", "Error(TODO: Low value must be less than high value.)")
+    makeTest("to(2,5)", "Ok(Lognormal(1.1512925464970227,0.278507821238345))")
+    makeTest("to(-2,2)", "Ok(Normal(0,1.215913388057542))")
     makeTest("lognormal(5,2)", "Ok(Lognormal(5,2))")
     makeTest("mean(normal(5,2))", "Ok(5)")
     makeTest("mean(lognormal(1,2))", "Ok(20.085536923187668)")
@@ -21,6 +24,5 @@ describe("eval", () => {
     makeTest("3+normal(5,2)", "Ok(Point Set Distribution)")
     makeTest("add(3, 3)", "Ok(6)")
     makeTest("truncateLeft(normal(5,2), 3)", "Ok(Point Set Distribution)")
-    makeTest("mean(add(3, normal(5,2)))", "Ok(8.004619792609384)")
   })
 })

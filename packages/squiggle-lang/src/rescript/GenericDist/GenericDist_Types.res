@@ -20,7 +20,7 @@ module Operation = {
     | #Subtract
     | #Divide
     | #Exponentiate
-    | #Log
+    | #Logarithm
   ]
 
   let arithmeticToFn = (arithmetic: arithmeticOperation) =>
@@ -30,7 +30,7 @@ module Operation = {
     | #Subtract => \"-."
     | #Exponentiate => \"**"
     | #Divide => \"/."
-    | #Log => (a, b) => log(a) /. log(b)
+    | #Logarithm => (a, b) => log(a) /. log(b)
     }
 
   type toFloat = [
