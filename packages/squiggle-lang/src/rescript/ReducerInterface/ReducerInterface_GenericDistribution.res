@@ -74,11 +74,54 @@ let genericOutputToReducerValue = (o: GenericDist_GenericOperation.outputType): 
   | GenDistError(Other(s)) => Error(RETodo(s))
   }
 
+module SymbolicConstructor = {
+  let oneFloat = name =>
+    switch name {
+    | "exponential" => Ok(SymbolicDist.Exponential.make)
+    | _ => Error("impossible path")
+    }
+
+  let twoFloat = name =>
+    switch name {
+    | "normal" => Ok(SymbolicDist.Normal.make)
+    | "uniform" => Ok(SymbolicDist.Uniform.make)
+    | "beta" => Ok(SymbolicDist.Beta.make)
+    | "lognormal" => Ok(SymbolicDist.Lognormal.make)
+    | _ => Error("impossible path")
+    }
+
+  let threeFloat = name =>
+    switch name {
+    | "triangular" => Ok(SymbolicDist.Triangular.make)
+    | _ => Error("impossible path")
+    }
+
+  let symbolicResultToOutput = (
+    symbolicResult: result<SymbolicDistTypes.symbolicDist, string>,
+  ): option<GenericDist_GenericOperation.outputType> =>
+    switch symbolicResult {
+    | Ok(r) => Some(Dist(Symbolic(r)))
+    | Error(r) => Some(GenDistError(Other(r)))
+    }
+}
+
 let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
   GenericDist_GenericOperation.outputType,
 > => {
   let (fnName, args) = call
   switch (fnName, args) {
+  | ("exponential" as fnName, [EvNumber(f1)]) =>
+    SymbolicConstructor.oneFloat(fnName)
+    ->E.R.bind(r => r(f1))
+    ->SymbolicConstructor.symbolicResultToOutput
+  | (("normal" | "uniform" | "beta" | "lognormal") as fnName, [EvNumber(f1), EvNumber(f2)]) =>
+    SymbolicConstructor.twoFloat(fnName)
+    ->E.R.bind(r => r(f1, f2))
+    ->SymbolicConstructor.symbolicResultToOutput
+  | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>
+    SymbolicConstructor.threeFloat(fnName)
+    ->E.R.bind(r => r(f1, f2, f3))
+    ->SymbolicConstructor.symbolicResultToOutput
   | ("sample", [EvDistribution(dist)]) => toFloatFn(#Sample, dist)
   | ("mean", [EvDistribution(dist)]) => toFloatFn(#Mean, dist)
   | ("normalize", [EvDistribution(dist)]) => toDistFn(Normalize, dist)
@@ -88,20 +131,21 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
   | ("inv", [EvDistribution(dist), EvNumber(float)]) => toFloatFn(#Inv(float), dist)
   | ("toSampleSet", [EvDistribution(dist), EvNumber(float)]) =>
     toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist)
-  | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) => toDistFn(Truncate(Some(float), None), dist)
+  | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) =>
+    toDistFn(Truncate(Some(float), None), dist)
   | ("truncateRight", [EvDistribution(dist), EvNumber(float)]) =>
     toDistFn(Truncate(None, Some(float)), dist)
   | ("truncate", [EvDistribution(dist), EvNumber(float1), EvNumber(float2)]) =>
     toDistFn(Truncate(Some(float1), Some(float2)), dist)
   | (("add" | "multiply" | "subtract" | "divide" | "exponentiate") as arithmetic, [a, b] as args) =>
-    catchAndConvertTwoArgsToDists(args) -> E.O2.fmap(((fst, snd)) =>
+    catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       twoDiststoDistFn(Algebraic, arithmetic, fst, snd)
     )
   | (
       ("dotAdd" | "dotMultiply" | "dotSubtract" | "dotDivide" | "dotExponentiate") as arithmetic,
       [a, b] as args,
     ) =>
-    catchAndConvertTwoArgsToDists(args) -> E.O2.fmap(((fst, snd)) =>
+    catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       twoDiststoDistFn(Pointwise, arithmetic, fst, snd)
     )
   | _ => None
@@ -109,5 +153,5 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
 }
 
 let dispatch = call => {
-  dispatchToGenericOutput(call) -> E.O2.fmap(genericOutputToReducerValue)
+  dispatchToGenericOutput(call)->E.O2.fmap(genericOutputToReducerValue)
 }
