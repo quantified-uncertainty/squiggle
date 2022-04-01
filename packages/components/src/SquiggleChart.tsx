@@ -40,6 +40,8 @@ export interface SquiggleChartProps {
   environment?: exportEnv;
   /** When the environment changes */
   onEnvChange?(env: exportEnv): void;
+  /** CSS width of the element */
+  width?: number;
 }
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
@@ -75,7 +77,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
           }));
 
           console.log(values.length)
-          return <SquiggleVegaChart data={{ con: values }} actions={false}/>;
+          return <SquiggleVegaChart width={props.width ? props.width : 500} data={{ con: values }} actions={false}/>;
         } else if (shape.tag === "Discrete") {
           let xyShape = shape.value.xyShape;
           let totalY = xyShape.ys.reduce((a, b) => a + b);

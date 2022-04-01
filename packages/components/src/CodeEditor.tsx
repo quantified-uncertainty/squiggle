@@ -9,7 +9,8 @@ import "ace-builds/src-noconflict/keybinding-vim";
 interface CodeEditorProps {
    value : string,
    onChange : (value: string) => void,
-   oneLine : boolean
+   oneLine : boolean,
+   width: number
 }
 
 export let CodeEditor : FC<CodeEditorProps> = (props) =>
@@ -17,6 +18,7 @@ export let CodeEditor : FC<CodeEditorProps> = (props) =>
       value={props.value}
       mode="golang"
       theme="github"
+      width={props.width + "px"}
       height={props.oneLine ? "1em" : "500px"}
       showGutter={false}
       highlightActiveLine={false}

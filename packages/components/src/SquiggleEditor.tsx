@@ -23,6 +23,8 @@ export interface SquiggleEditorProps {
   environment?: exportEnv;
   /** when the environment changes. Used again for notebook magic*/
   onEnvChange?(env: exportEnv): void;
+  /** The width of the element */
+  width: number;
 }
 
 const highlight = (_: HTMLInputElement) => {};
@@ -47,6 +49,7 @@ export class SquiggleEditor extends React.Component<
     return (
       <div>
         <CodeEditor
+          width={props.width ? props.width : 500}
           value={expression}
           onChange={(e) => {
             this.setState({ expression: e });
@@ -54,6 +57,7 @@ export class SquiggleEditor extends React.Component<
           oneLine={true}
         />
         <SquiggleChart
+          width={props.width ? props.width : 500}
           squiggleString={expression}
           sampleCount={props.sampleCount}
           outputXYPoints={props.outputXYPoints}
