@@ -16,8 +16,8 @@ export let CodeEditor : FC<CodeEditorProps> = (props) =>
     <AceEditor
       value={props.value}
       mode="golang"
-      minLines={props.oneLine ? 1 : 10}
       theme="github"
+      height={props.oneLine ? "1em" : "500px"}
       showGutter={false}
       highlightActiveLine={false}
       showPrintMargin={false}

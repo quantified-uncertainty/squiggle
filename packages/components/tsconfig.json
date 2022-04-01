@@ -4,8 +4,7 @@
       "@quri/squiggle-lang": ["../squiggle-lang/src/js"]
     },
     "module": "commonjs",
-    "jsx": "react-jsx",
-    "jsxImportSource": "@emotion/react",
+    "jsx": "react",
     "resolveJsonModule": true,
     "noImplicitAny": false,
     "esModuleInterop": true,

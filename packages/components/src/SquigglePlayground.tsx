@@ -3,7 +3,6 @@ import { SquiggleChart } from "./SquiggleChart"
 import CodeEditor from "./CodeEditor"
 import { Form, Input, Card, Row, Col } from "antd"
 import 'antd/dist/antd.css';
-import { css } from '@emotion/react'
 
 interface FieldFloatProps {
   label : string,
@@ -29,64 +28,6 @@ function FieldFloat(Props: FieldFloatProps) {
   </Form.Item> 
 }
 
-let rows = css`
-  >.antCol:firstChild {
-    paddingLeft: 0.25em;
-    paddingRight: 0.125em;
-  }
-  >.antCol:lastChild {
-    paddingLeft: 0.125em;
-    paddingRight: 0.25em;
-  }
-  >.antCol:not(:lastChild):not(:lastChild) {
-    paddingLeft: 0.125em;
-    paddingRight: 0.125em;
-  }
-  `
-
-let parent = css`
-  .antImportNumber {
-    width: 100%;
-  }
-
-  .anticon {
-    verticalAlign: "zero";
-  }
-  `
-var form = css`
-  backgroundColor: #eee;
-  padding: 1em;
-  `
-var dist = css`
-  padding: 1em;
-  `
-
-var spacer = css`
-  marginTop: 1em;
-  `
-
-var groupA = css`
-  .antInputNumberInputs {
-    backgroundColor: #fff7db;
-  }
-  `
-
-var groupB = css`
-  .antInputNumberInput {
-    backgroundColor: #eaf4ff;
-  }
-  `
-
-var Styles = {
-  rows: rows,
-  parent: parent,
-  form: form,
-  dist: dist,
-  spacer: spacer,
-  groupA: groupA,
-  groupB: groupB
-};
-
 interface Props {
   initialSquiggleString : string
 }
@@ -95,8 +36,7 @@ let SquigglePlayground : FC<Props> = (props) => {
   let [squiggleString, setSquiggleString] = useState(props.initialSquiggleString)
   let [sampleCount, setSampleCount] = useState(1000)
   let [outputXYPoints, setOutputXYPoints] = useState(1000)
-  let [pointDistLength, setPointDistLength] = useState(undefined)
-  let [kernelWidth, setKernelWidth] = useState(undefined)
+  let [pointDistLength, setPointDistLength] = useState(1000)
   let [diagramStart, setDiagramStart] = useState(0)
   let [diagramStop, setDiagramStop] = useState(10)
   let [diagramCount, setDiagramCount] = useState(20)
@@ -116,11 +56,11 @@ let SquigglePlayground : FC<Props> = (props) => {
         <Card
           title="Distribution Form">
           <Form>
-            <Row css={Styles.rows} >
+            <Row gutter={16}>
               <Col span={24}> 
                 <CodeEditor value={squiggleString} onChange={setSquiggleString} oneLine={false}/> </Col>
             </Row>
-            <Row css={Styles.rows}>
+            <Row gutter={16}>
               <Col span={12}> 
                 <FieldFloat 
                   value={sampleCount} 
@@ -140,12 +80,6 @@ let SquigglePlayground : FC<Props> = (props) => {
                    label="Downsample To"
                    />
               </Col>
-              <Col span={12}> 
-                <FieldFloat 
-                  value={kernelWidth}
-                  onChange={setKernelWidth}
-                  label="Kernel Width" 
-                  /> </Col>
               <Col span={12}>
                 <FieldFloat 
                   value={diagramStart}

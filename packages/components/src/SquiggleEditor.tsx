@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
-import { ReactCodeJar } from "react-codejar";
+import { CodeEditor } from "./CodeEditor";
 import type { exportEnv } from "@quri/squiggle-lang";
 
 export interface SquiggleEditorProps {
@@ -46,25 +46,12 @@ export class SquiggleEditor extends React.Component<
     let props = this.props;
     return (
       <div>
-        <ReactCodeJar
-          code={expression}
-          onUpdate={(e) => {
+        <CodeEditor
+          value={expression}
+          onChange={(e) => {
             this.setState({ expression: e });
           }}
-          style={{
-            borderRadius: "6px",
-            width: "530px",
-            border: "1px solid grey",
-            fontFamily: "'Source Code Pro', monospace",
-            fontSize: "14px",
-            fontWeight: "400",
-            letterSpacing: "normal",
-            lineHeight: "20px",
-            padding: "10px",
-            tabSize: "4",
-          }}
-          highlight={highlight}
-          lineNumbers={false}
+          oneLine={true}
         />
         <SquiggleChart
           squiggleString={expression}
