@@ -8,15 +8,15 @@ import "ace-builds/src-noconflict/keybinding-vim";
 
 interface CodeEditorProps {
    value : string,
-   onChange : (value: string) => void
+   onChange : (value: string) => void,
+   oneLine : boolean
 }
 
 export let CodeEditor : FC<CodeEditorProps> = (props) =>
     <AceEditor
       value={props.value}
       mode="golang"
-      height="400px"
-      width="100%"
+      minLines={props.oneLine ? 1 : 10}
       theme="github"
       showGutter={false}
       highlightActiveLine={false}
@@ -32,3 +32,4 @@ export let CodeEditor : FC<CodeEditorProps> = (props) =>
         enableSnippets: true,
       }}
     />
+export default CodeEditor

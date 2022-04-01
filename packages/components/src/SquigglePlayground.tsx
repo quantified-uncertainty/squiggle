@@ -1,7 +1,8 @@
-import { FC, useState } from "react"
-import { SquiggleChart } from "@quri/squiggle-components"
-import { CodeEditor } from "./CodeEditor"
+import React, { FC, useState } from "react"
+import { SquiggleChart } from "./SquiggleChart"
+import CodeEditor from "./CodeEditor"
 import { Form, Input, Card, Row, Col } from "antd"
+import 'antd/dist/antd.css';
 import { css } from '@emotion/react'
 
 interface FieldFloatProps {
@@ -27,6 +28,7 @@ function FieldFloat(Props: FieldFloatProps) {
       />
   </Form.Item> 
 }
+
 let rows = css`
   >.antCol:firstChild {
     paddingLeft: 0.25em;
@@ -85,8 +87,12 @@ var Styles = {
   groupB: groupB
 };
 
-let DistBuilder : FC<{}> = (_: {}) => {
-  let [squiggleString, setSquiggleString] = useState("mm(normal(5,2), normal(10,2))")
+interface Props {
+  initialSquiggleString : string
+}
+
+let SquigglePlayground : FC<Props> = (props) => {
+  let [squiggleString, setSquiggleString] = useState(props.initialSquiggleString)
   let [sampleCount, setSampleCount] = useState(1000)
   let [outputXYPoints, setOutputXYPoints] = useState(1000)
   let [pointDistLength, setPointDistLength] = useState(undefined)
@@ -105,14 +111,14 @@ let DistBuilder : FC<{}> = (_: {}) => {
       pointDistLength={pointDistLength}
       />
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div>
+    <Row>
+      <Col span={12}>
         <Card
           title="Distribution Form">
           <Form>
-            <Row css={Styles.rows}>
+            <Row css={Styles.rows} >
               <Col span={24}> 
-                <CodeEditor value={squiggleString} onChange={setSquiggleString} /> </Col>
+                <CodeEditor value={squiggleString} onChange={setSquiggleString} oneLine={false}/> </Col>
             </Row>
             <Row css={Styles.rows}>
               <Col span={12}> 
@@ -163,9 +169,11 @@ let DistBuilder : FC<{}> = (_: {}) => {
             </Row>
           </Form>
         </Card>
-      </div>
+      </Col>
+      <Col span={12} >
         {demoDist}
-    </div>
+      </Col>
+    </Row>
   )
 }
-export default DistBuilder
+export default SquigglePlayground;
