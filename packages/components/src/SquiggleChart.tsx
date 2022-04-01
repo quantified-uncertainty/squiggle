@@ -45,9 +45,9 @@ export interface SquiggleChartProps {
 export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
   let samplingInputs: SamplingInputs = {
     sampleCount: props.sampleCount,
-    outputXYPoints: props.outputXYPoints,
+    outputXYPoints: props.outputXYPoints ? props.outputXYPoints : 1000,
     kernelWidth: props.kernelWidth,
-    pointDistLength: props.pointDistLength,
+    pointDistLength: props.pointDistLength ? props.pointDistLength : 1000,
   };
 
   let result = run(props.squiggleString, samplingInputs, props.environment);
@@ -74,6 +74,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             y: y,
           }));
 
+          console.log(values.length)
           return <SquiggleVegaChart data={{ con: values }} actions={false}/>;
         } else if (shape.tag === "Discrete") {
           let xyShape = shape.value.xyShape;
@@ -164,7 +165,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
         // We are looking at a function. In this case, we draw a Percentiles chart
         let start = props.diagramStart ? props.diagramStart : 0;
         let stop = props.diagramStop ? props.diagramStop : 10;
-        let count = props.diagramCount ? props.diagramCount : 100;
+        let count = props.diagramCount ? props.diagramCount : 20;
         let step = (stop - start) / count;
         let data = _.range(start, stop, step).map((x) => {
           if (chartResult.NAME == "Function") {
