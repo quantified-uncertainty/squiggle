@@ -10,7 +10,7 @@ interface CodeEditorProps {
    value : string,
    onChange : (value: string) => void,
    oneLine : boolean,
-   width: number
+   width?: number
 }
 
 export let CodeEditor : FC<CodeEditorProps> = (props) =>
@@ -18,8 +18,8 @@ export let CodeEditor : FC<CodeEditorProps> = (props) =>
       value={props.value}
       mode="golang"
       theme="github"
-      width={props.width + "px"}
-      height={props.oneLine ? "1em" : "500px"}
+      width={props.width ? props.width + 'px' : '500px'}
+      height={props.oneLine ? "1.2em" : "500px"}
       showGutter={false}
       highlightActiveLine={false}
       showPrintMargin={false}
