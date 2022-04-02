@@ -60,12 +60,12 @@
     ]
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^6.4.18",
-    "@storybook/addon-essentials": "^6.4.18",
-    "@storybook/addon-links": "^6.4.18",
+    "@storybook/addon-actions": "^6.4.20",
+    "@storybook/addon-essentials": "^6.4.20",
+    "@storybook/addon-links": "^6.4.20",
     "@storybook/builder-webpack5": "^6.4.18",
     "@storybook/manager-webpack5": "^6.4.18",
-    "@storybook/node-logger": "^6.4.18",
+    "@storybook/node-logger": "^6.4.20",
     "@storybook/preset-create-react-app": "^4.1.0",
     "@storybook/react": "^6.4.18",
     "@types/webpack": "^5.28.0",
