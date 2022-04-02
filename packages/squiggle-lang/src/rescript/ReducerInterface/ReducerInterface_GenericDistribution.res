@@ -139,6 +139,8 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(Math.e))->Some
   | ("log10", [EvDistribution(a)]) =>
     Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(10.0))->Some
+  | ("unaryMinus", [EvDistribution(a)]) =>
+    Helpers.twoDiststoDistFn(Algebraic, "multiply", a, GenericDist.fromFloat(-1.0))->Some
   | (("add" | "multiply" | "subtract" | "divide" | "pow" | "log") as arithmetic, [a, b] as args) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Algebraic, arithmetic, fst, snd)
