@@ -12,17 +12,17 @@ module Helpers = {
   let arithmeticMap = r =>
     switch r {
     | "add" => #Add
-    | "dotAdd" => #Add
+    | "pointwiseAdd" => #Add
     | "subtract" => #Subtract
-    | "dotSubtract" => #Subtract
+    | "pointwiseSubtract" => #Subtract
     | "divide" => #Divide
     | "logarithm" => #Logarithm
-    | "dotDivide" => #Divide
+    | "pointwiseDivide" => #Divide
     | "exponentiate" => #Exponentiate
-    | "dotExponentiate" => #Exponentiate
+    | "pointwiseExponentiate" => #Exponentiate
     | "multiply" => #Multiply
-    | "dotMultiply" => #Multiply
-    | "dotLogarithm" => #Logarithm
+    | "pointwiseMultiply" => #Multiply
+    | "pointwiseLogarithm" => #Logarithm
     | _ => #Multiply
     }
 
@@ -65,7 +65,7 @@ module SymbolicConstructors = {
   let oneFloat = name =>
     switch name {
     | "exponential" => Ok(SymbolicDist.Exponential.make)
-    | _ => Error("impossible path")
+    | _ => Error("Unreachable state")
     }
 
   let twoFloat = name =>
@@ -75,13 +75,13 @@ module SymbolicConstructors = {
     | "beta" => Ok(SymbolicDist.Beta.make)
     | "lognormal" => Ok(SymbolicDist.Lognormal.make)
     | "to" => Ok(SymbolicDist.From90thPercentile.make)
-    | _ => Error("impossible path")
+    | _ => Error("Unreachable state")
     }
 
   let threeFloat = name =>
     switch name {
     | "triangular" => Ok(SymbolicDist.Triangular.make)
-    | _ => Error("impossible path")
+    | _ => Error("Unreachable state")
     }
 
   let symbolicResultToOutput = (
@@ -128,12 +128,20 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(Truncate(None, Some(float)), dist)
   | ("truncate", [EvDistribution(dist), EvNumber(float1), EvNumber(float2)]) =>
     Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist)
-  | (("add" | "multiply" | "subtract" | "divide" | "exponentiate" | "log") as arithmetic, [a, b] as args) =>
+  | (
+      ("add" | "multiply" | "subtract" | "divide" | "exponentiate" | "log") as arithmetic,
+      [a, b] as args,
+    ) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Algebraic, arithmetic, fst, snd)
     )
   | (
-      ("dotAdd" | "dotMultiply" | "dotSubtract" | "dotDivide" | "dotExponentiate" | "dotLogarithm") as arithmetic,
+      ("pointwiseAdd"
+      | "pointwiseMultiply"
+      | "pointwiseSubtract"
+      | "pointwiseDivide"
+      | "pointwiseExponentiate"
+      | "pointwiseLogarithm") as arithmetic,
       [a, b] as args,
     ) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
