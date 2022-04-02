@@ -12,17 +12,17 @@ module Helpers = {
   let arithmeticMap = r =>
     switch r {
     | "add" => #Add
-    | "pointwiseAdd" => #Add
+    | "dotAdd" => #Add
     | "subtract" => #Subtract
-    | "pointwiseSubtract" => #Subtract
+    | "dotSubtract" => #Subtract
     | "divide" => #Divide
-    | "logarithm" => #Logarithm
-    | "pointwiseDivide" => #Divide
-    | "exponentiate" => #Exponentiate
-    | "pointwiseExponentiate" => #Exponentiate
+    | "log" => #Logarithm
+    | "dotDivide" => #Divide
+    | "pow" => #Exponentiate
+    | "dotPow" => #Exponentiate
     | "multiply" => #Multiply
-    | "pointwiseMultiply" => #Multiply
-    | "pointwiseLogarithm" => #Logarithm
+    | "dotMultiply" => #Multiply
+    | "dotLog" => #Logarithm
     | _ => #Multiply
     }
 
@@ -93,6 +93,10 @@ module SymbolicConstructors = {
     }
 }
 
+module Math = {
+  let e = 2.718281828459
+}
+
 let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
   GenericDist_GenericOperation.outputType,
 > => {
@@ -115,6 +119,9 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     ->SymbolicConstructors.symbolicResultToOutput
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist)
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist)
+  | ("exp", [EvDistribution(a)]) =>
+    // https://mathjs.org/docs/reference/functions/exp.html
+    Helpers.twoDiststoDistFn(Algebraic, "pow", GenericDist.fromFloat(Math.e), a)->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
   | ("cdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist)
@@ -128,25 +135,30 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(Truncate(None, Some(float)), dist)
   | ("truncate", [EvDistribution(dist), EvNumber(float1), EvNumber(float2)]) =>
     Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist)
-  | (
-      ("add" | "multiply" | "subtract" | "divide" | "exponentiate" | "log") as arithmetic,
-      [a, b] as args,
-    ) =>
+  | ("log", [EvDistribution(a)]) =>
+    Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(Math.e))->Some
+  | ("log10", [EvDistribution(a)]) =>
+    Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(10.0))->Some
+  | (("add" | "multiply" | "subtract" | "divide" | "pow" | "log") as arithmetic, [a, b] as args) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Algebraic, arithmetic, fst, snd)
     )
   | (
-      ("pointwiseAdd"
-      | "pointwiseMultiply"
-      | "pointwiseSubtract"
-      | "pointwiseDivide"
-      | "pointwiseExponentiate"
-      | "pointwiseLogarithm") as arithmetic,
+      ("dotAdd"
+      | "dotMultiply"
+      | "dotSubtract"
+      | "dotDivide"
+      | "dotPow"
+      | "dotLog") as arithmetic,
       [a, b] as args,
     ) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd)
     )
+  | ("dotLog", [EvDistribution(a)]) =>
+    Helpers.twoDiststoDistFn(Pointwise, "dotLog", a, GenericDist.fromFloat(Math.e))->Some
+  | ("dotExp", [EvDistribution(a)]) =>
+    Helpers.twoDiststoDistFn(Pointwise, "dotPow", GenericDist.fromFloat(Math.e), a)->Some
   | _ => None
   }
 }
