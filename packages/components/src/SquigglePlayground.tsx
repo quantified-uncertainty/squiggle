@@ -1,8 +1,9 @@
 import React, { FC, useState } from "react"
+import ReactDOM from "react-dom"
 import { SquiggleChart } from "./SquiggleChart"
 import CodeEditor from "./CodeEditor"
 import { Form, Input, Card, Row, Col } from "antd"
-import 'antd/dist/antd.css';
+import 'antd/dist/antd.min.css';
 
 interface FieldFloatProps {
   label : string,
@@ -111,3 +112,13 @@ let SquigglePlayground : FC<Props> = (props) => {
   )
 }
 export default SquigglePlayground;
+export function renderSquigglePlayground(props : Props){
+  let parent = document.createElement("div");
+  ReactDOM.render(
+    <SquigglePlayground
+      {...props}
+    />,
+    parent
+  );
+  return parent;
+}

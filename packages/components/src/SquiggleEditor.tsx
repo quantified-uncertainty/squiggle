@@ -27,8 +27,6 @@ export interface SquiggleEditorProps {
   width: number;
 }
 
-const highlight = (_: HTMLInputElement) => {};
-
 interface SquiggleEditorState {
   expression: string;
   env: exportEnv;
