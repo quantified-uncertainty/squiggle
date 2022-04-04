@@ -74,47 +74,8 @@ type generationSource =
 @genType
 type distPlus = {
   pointSetDist: pointSetDist,
-  domain: domain,
   integralCache: continuousShape,
   squiggleString: option<string>,
-}
-
-module Domain = {
-  let excludedProbabilityMass = (t: domain) =>
-    switch t {
-    | Complete => 0.0
-    | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
-    | RightLimited({excludingProbabilityMass}) => excludingProbabilityMass
-    | LeftAndRightLimited({excludingProbabilityMass: l}, {excludingProbabilityMass: r}) => l +. r
-    }
-
-  let includedProbabilityMass = (t: domain) => 1.0 -. excludedProbabilityMass(t)
-
-  let initialProbabilityMass = (t: domain) =>
-    switch t {
-    | Complete
-    | RightLimited(_) => 0.0
-    | LeftLimited({excludingProbabilityMass}) => excludingProbabilityMass
-    | LeftAndRightLimited({excludingProbabilityMass}, _) => excludingProbabilityMass
-    }
-
-  let normalizeProbabilityMass = (t: domain) => 1. /. excludedProbabilityMass(t)
-
-  let yPointToSubYPoint = (t: domain, yPoint) =>
-    switch t {
-    | Complete => Some(yPoint)
-    | LeftLimited({excludingProbabilityMass}) if yPoint < excludingProbabilityMass => None
-    | LeftLimited({excludingProbabilityMass}) if yPoint >= excludingProbabilityMass =>
-      Some((yPoint -. excludingProbabilityMass) /. includedProbabilityMass(t))
-    | RightLimited({excludingProbabilityMass}) if yPoint > 1. -. excludingProbabilityMass => None
-    | RightLimited({excludingProbabilityMass}) if yPoint <= 1. -. excludingProbabilityMass =>
-      Some(yPoint /. includedProbabilityMass(t))
-    | LeftAndRightLimited({excludingProbabilityMass: l}, _) if yPoint < l => None
-    | LeftAndRightLimited(_, {excludingProbabilityMass: r}) if yPoint > 1.0 -. r => None
-    | LeftAndRightLimited({excludingProbabilityMass: l}, _) =>
-      Some((yPoint -. l) /. includedProbabilityMass(t))
-    | _ => None
-    }
 }
 
 type mixedPoint = {
