@@ -3,7 +3,7 @@ import ReactDOM from "react-dom"
 import { SquiggleChart } from "./SquiggleChart"
 import CodeEditor from "./CodeEditor"
 import { Form, Input, Card, Row, Col } from "antd"
-import 'antd/dist/antd.min.css';
+import 'antd/dist/antd.css';
 
 interface FieldFloatProps {
   label : string,
