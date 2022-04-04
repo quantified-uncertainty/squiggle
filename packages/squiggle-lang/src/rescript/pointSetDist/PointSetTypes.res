@@ -71,23 +71,12 @@ type generationSource =
   | SquiggleString(string)
   | Shape(pointSetDist)
 
-type distributionUnit =
-  | UnspecifiedDistribution
-
 @genType
 type distPlus = {
   pointSetDist: pointSetDist,
   domain: domain,
   integralCache: continuousShape,
-  unit: distributionUnit,
   squiggleString: option<string>,
-}
-
-module DistributionUnit = {
-  let toJson = (distributionUnit: distributionUnit) =>
-    switch distributionUnit {
-    | _ => Js.Null.fromOption(None)
-    }
 }
 
 module Domain = {

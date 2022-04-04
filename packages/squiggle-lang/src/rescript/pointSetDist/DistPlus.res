@@ -9,12 +9,11 @@ let make =
       ~pointSetDist,
       ~squiggleString,
       ~domain=Complete,
-      ~unit=UnspecifiedDistribution,
       (),
     )
     : t => {
   let integral = pointSetDistIntegral(pointSetDist);
-  {pointSetDist, domain, integralCache: integral, unit, squiggleString};
+  {pointSetDist, domain, integralCache: integral, squiggleString};
 };
 
 let update =
@@ -22,14 +21,12 @@ let update =
       ~pointSetDist=?,
       ~integralCache=?,
       ~domain=?,
-      ~unit=?,
       ~squiggleString=?,
       t: t,
     ) => {
   pointSetDist: E.O.default(t.pointSetDist, pointSetDist),
   integralCache: E.O.default(t.integralCache, integralCache),
   domain: E.O.default(t.domain, domain),
-  unit: E.O.default(t.unit, unit),
   squiggleString: E.O.default(t.squiggleString, squiggleString),
 };
 

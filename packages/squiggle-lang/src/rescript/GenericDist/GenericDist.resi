@@ -30,7 +30,7 @@ let truncate: (
   ~toPointSetFn: toPointSetFn,
   ~leftCutoff: option<float>=?,
   ~rightCutoff: option<float>=?,
-  unit,
+  unit
 ) => result<t, error>
 
 let algebraicCombination: (
