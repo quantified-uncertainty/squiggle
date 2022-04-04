@@ -70,7 +70,6 @@
     "@storybook/preset-create-react-app": "^4.0.0",
     "@storybook/react": "^6.4.18",
     "@types/styled-components": "^5.1.24",
-    "@types/webpack": "^5.28.0",
     "css-loader": "^6.7.1",
     "prettier": "^2.6.0",
     "react-codejar": "^1.1.2",
