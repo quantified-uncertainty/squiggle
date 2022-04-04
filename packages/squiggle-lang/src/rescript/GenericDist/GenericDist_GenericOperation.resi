@@ -26,7 +26,9 @@ module Output: {
   let toDist: t => option<GenericDist_Types.genericDist>
   let toDistR: t => result<GenericDist_Types.genericDist, GenericDist_Types.error>
   let toFloat: t => option<float>
+  let toFloatR: t => result<float, GenericDist_Types.error>
   let toString: t => option<string>
+  let toStringR: t => result<string, GenericDist_Types.error>
   let toError: t => option<GenericDist_Types.error>
   let fmap: (~env: env, t, GenericDist_Types.Operation.singleParamaterFunction) => t
 }

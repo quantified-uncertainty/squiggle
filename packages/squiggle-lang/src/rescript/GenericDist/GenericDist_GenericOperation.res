@@ -48,10 +48,22 @@ module OutputLocal = {
     | _ => None
     }
 
+  let toFloatR = (t: t): result<float, error> =>
+    switch t {
+    | Float(r) => Ok(r)
+    | e => Error(toErrorOrUnreachable(e))
+    }
+
   let toString = (t: t) =>
     switch t {
     | String(d) => Some(d)
     | _ => None
+    }
+
+  let toStringR = (t: t): result<string, error> =>
+    switch t {
+    | String(r) => Ok(r)
+    | e => Error(toErrorOrUnreachable(e))
     }
 
   //This is used to catch errors in other switch statements.

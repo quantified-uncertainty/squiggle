@@ -229,6 +229,6 @@ let all = [
   ),
   makeRenderedDistFloat("scaleExp", (dist, float) => verticalScaling(#Exponentiate, dist, float)),
   makeRenderedDistFloat("scaleMultiply", (dist, float) => verticalScaling(#Multiply, dist, float)),
-  makeRenderedDistFloat("scaleLog", (dist, float) => verticalScaling(#Log, dist, float)),
+  makeRenderedDistFloat("scaleLog", (dist, float) => verticalScaling(#Logarithm, dist, float)),
   Multimodal._function,
 ]
