@@ -14,21 +14,10 @@ type distributionType = [
   | #CDF
 ]
 
-type xyShape = {
-  xs: array<float>,
-  ys: array<float>,
-}
-
-type interpolationStrategy = [
-  | #Stepwise
-  | #Linear
-]
-type extrapolationStrategy = [
-  | #UseZero
-  | #UseOutermostPoints
-]
-
-type interpolator = (xyShape, int, float) => float
+type xyShape = XYShape.xyShape;
+type interpolationStrategy = XYShape.interpolationStrategy;
+type extrapolationStrategy = XYShape.extrapolationStrategy;
+type interpolator = XYShape.extrapolationStrategy;
 
 type rec continuousShape = {
   xyShape: xyShape,

@@ -1,4 +1,18 @@
-open PointSetTypes
+type xyShape = {
+  xs: array<float>,
+  ys: array<float>,
+}
+
+type interpolationStrategy = [
+  | #Stepwise
+  | #Linear
+]
+type extrapolationStrategy = [
+  | #UseZero
+  | #UseOutermostPoints
+]
+
+type interpolator = (xyShape, int, float) => float
 
 let interpolate = (xMin: float, xMax: float, yMin: float, yMax: float, xIntended: float): float => {
   let minProportion = (xMax -. xIntended) /. (xMax -. xMin)
@@ -25,6 +39,7 @@ module T = {
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
   let mapX = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys}
   let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(fn, t.ys)}
+  let square = mapX(x => x ** 2.0)
   let zip = ({xs, ys}: t) => Belt.Array.zip(xs, ys)
   let fromArray = ((xs, ys)): t => {xs: xs, ys: ys}
   let fromArrays = (xs, ys): t => {xs: xs, ys: ys}
@@ -126,8 +141,8 @@ module XtoY = {
   /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
    Interpolation can either be stepwise (using the value on the left) or linear. Extrapolation can be `UseZero or `UseOutermostPoints. */
   let continuousInterpolator = (
-    interpolation: PointSetTypes.interpolationStrategy,
-    extrapolation: PointSetTypes.extrapolationStrategy,
+    interpolation: interpolationStrategy,
+    extrapolation: extrapolationStrategy,
   ): interpolator =>
     switch (interpolation, extrapolation) {
     | (#Linear, #UseZero) =>
@@ -392,49 +407,9 @@ let logScorePoint = (sampleCount, t1, t2) =>
   |> E.O.fmap(Pairs.y)
 
 module Analysis = {
-  let integrateContinuousShape = (
-    ~indefiniteIntegralStepwise=(p, h1) => h1 *. p,
-    ~indefiniteIntegralLinear=(p, a, b) => a *. p +. b *. p ** 2.0 /. 2.0,
-    t: PointSetTypes.continuousShape,
-  ): float => {
-    let xs = t.xyShape.xs
-    let ys = t.xyShape.ys
-
-    E.A.reducei(xs, 0.0, (acc, _x, i) => {
-      let areaUnderIntegral = // TODO Take this switch statement out of the loop body
-      switch (t.interpolation, i) {
-      | (_, 0) => 0.0
-      | (#Stepwise, _) =>
-        indefiniteIntegralStepwise(xs[i], ys[i - 1]) -.
-        indefiniteIntegralStepwise(xs[i - 1], ys[i - 1])
-      | (#Linear, _) =>
-        let x1 = xs[i - 1]
-        let x2 = xs[i]
-        if x1 == x2 {
-          0.0
-        } else {
-          let h1 = ys[i - 1]
-          let h2 = ys[i]
-          let b = (h1 -. h2) /. (x1 -. x2)
-          let a = h1 -. b *. x1
-          indefiniteIntegralLinear(x2, a, b) -. indefiniteIntegralLinear(x1, a, b)
-        }
-      }
-      acc +. areaUnderIntegral
-    })
-  }
-
-  let getMeanOfSquaresContinuousShape = (t: PointSetTypes.continuousShape) => {
-    let indefiniteIntegralLinear = (p, a, b) => a *. p ** 3.0 /. 3.0 +. b *. p ** 4.0 /. 4.0
-    let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 3.0 /. 3.0
-    integrateContinuousShape(~indefiniteIntegralStepwise, ~indefiniteIntegralLinear, t)
-  }
-
   let getVarianceDangerously = (t: 't, mean: 't => float, getMeanOfSquares: 't => float): float => {
     let meanSquared = mean(t) ** 2.0
     let meanOfSquares = getMeanOfSquares(t)
     meanOfSquares -. meanSquared
   }
-
-  let squareXYShape = T.mapX(x => x ** 2.0)
 }
