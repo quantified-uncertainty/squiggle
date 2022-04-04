@@ -1,7 +1,7 @@
 module ExpressionValue = ReducerInterface_ExpressionValue
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
-let runGenericOperation = GenericDist_GenericOperation.run(
+let runGenericOperation = DistributionOperation.run(
   ~env={
     sampleCount: 1000,
     xyPointLength: 1000,
@@ -86,7 +86,7 @@ module SymbolicConstructors = {
 
   let symbolicResultToOutput = (
     symbolicResult: result<SymbolicDistTypes.symbolicDist, string>,
-  ): option<GenericDist_GenericOperation.outputType> =>
+  ): option<DistributionOperation.outputType> =>
     switch symbolicResult {
     | Ok(r) => Some(Dist(Symbolic(r)))
     | Error(r) => Some(GenDistError(Other(r)))
@@ -98,7 +98,7 @@ module Math = {
 }
 
 let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
-  GenericDist_GenericOperation.outputType,
+  DistributionOperation.outputType,
 > => {
   let (fnName, args) = call
   switch (fnName, args) {
@@ -165,7 +165,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
   }
 }
 
-let genericOutputToReducerValue = (o: GenericDist_GenericOperation.outputType): result<
+let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   expressionValue,
   Reducer_ErrorValue.errorValue,
 > =>
