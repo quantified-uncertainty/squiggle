@@ -7,17 +7,13 @@ open Expect
 let expectParseToBe = (expr, answer) =>
   Parse.parse(expr)->Result.flatMap(Parse.castNodeType)->Parse.toStringResult->expect->toBe(answer)
 
-let testParse = (expr, answer) =>
-  test(expr, () => expectParseToBe(expr, answer))
+let testParse = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
 
-let testDescParse = (desc, expr, answer) =>
-  test(desc, () => expectParseToBe(expr, answer))
+let testDescParse = (desc, expr, answer) => test(desc, () => expectParseToBe(expr, answer))
 
-let skipTestParse = (expr, answer) =>
-    Skip.test(expr, () => expectParseToBe(expr, answer))
+let skipTestParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
 
-let skipDescTestParse = (desc, expr, answer) =>
-    Skip.test(desc, () => expectParseToBe(expr, answer))
+let skipDescTestParse = (desc, expr, answer) => Skip.test(desc, () => expectParseToBe(expr, answer))
 
 describe("MathJs parse", () => {
   describe("literals operators paranthesis", () => {
@@ -31,7 +27,7 @@ describe("MathJs parse", () => {
   })
 
   describe("variables", () => {
-    skipTestParse("x = 1", "???")
+    testParse("x = 1", "x = 1")
     skipTestParse("x", "???")
   })
 

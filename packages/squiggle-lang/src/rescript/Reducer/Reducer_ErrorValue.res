@@ -3,6 +3,7 @@ type errorValue =
   | REFunctionExpected(string)
   | REJavaScriptExn(option<string>, option<string>) // Javascript Exception
   | RERecordPropertyNotFound(string, string)
+  | RESyntaxError(string)
   | RETodo(string) // To do
 
 type t = errorValue
@@ -24,5 +25,6 @@ let errorToString = err =>
       answer
     }
   | RERecordPropertyNotFound(msg, index) => `${msg}: ${index}`
+  | RESyntaxError(desc) => `Syntax Error: ${desc}`
   | RETodo(msg) => `TODO: ${msg}`
   }
