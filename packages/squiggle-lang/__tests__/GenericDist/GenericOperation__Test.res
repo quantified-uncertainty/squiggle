@@ -1,7 +1,7 @@
 open Jest
 open Expect
 
-let env: GenericDist_GenericOperation.env = {
+let env: DistributionOperation.env = {
   sampleCount: 100,
   xyPointLength: 100,
 }
@@ -11,9 +11,9 @@ let normalDist10: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 10.0, 
 let normalDist20: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 20.0, stdev: 2.0}))
 let uniformDist: GenericDist_Types.genericDist = Symbolic(#Uniform({low: 9.0, high: 10.0}))
 
-let {toFloat, toDist, toString, toError} = module(GenericDist_GenericOperation.Output)
-let {run} = module(GenericDist_GenericOperation)
-let {fmap} = module(GenericDist_GenericOperation.Output)
+let {toFloat, toDist, toString, toError} = module(DistributionOperation.Output)
+let {run} = module(DistributionOperation)
+let {fmap} = module(DistributionOperation.Output)
 let run = run(~env)
 let outputMap = fmap(~env)
 let toExt: option<'a> => 'a = E.O.toExt(
@@ -29,7 +29,7 @@ describe("normalize", () => {
 
 describe("mean", () => {
   test("for a normal distribution", () => {
-    let result = GenericDist_GenericOperation.run(~env, FromDist(ToFloat(#Mean), normalDist))
+    let result = DistributionOperation.run(~env, FromDist(ToFloat(#Mean), normalDist))
     expect(result)->toEqual(Float(5.0))
   })
 })

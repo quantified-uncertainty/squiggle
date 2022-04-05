@@ -209,8 +209,9 @@ module T = Dist({
     let s = getShape(t)
     E.A.reducei(s.xs, 0.0, (acc, x, i) => acc +. x *. s.ys[i])
   }
+
   let variance = (t: t): float => {
-    let getMeanOfSquares = t => t |> shapeMap(XYShape.Analysis.squareXYShape) |> mean
+    let getMeanOfSquares = t => t |> shapeMap(XYShape.T.square) |> mean
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
   }
 })
