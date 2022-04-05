@@ -22,7 +22,7 @@ let SquigglePercentilesChart = createClassFromSpec({
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
-  squiggleString: string;
+  squiggleString?: string;
 
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
@@ -44,19 +44,31 @@ export interface SquiggleChartProps {
   width?: number;
 }
 
-export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
+export const SquiggleChart: React.FC<SquiggleChartProps> = ({
+  squiggleString = "",
+  sampleCount = 1000,
+  outputXYPoints = 1000,
+  kernelWidth,
+  pointDistLength = 1000,
+  diagramStart = 0,
+  diagramStop = 10,
+  diagramCount = 20,
+  environment = [],
+  onEnvChange = () => {},
+  width = 500,
+}: SquiggleChartProps) => {
   let samplingInputs: SamplingInputs = {
-    sampleCount: props.sampleCount,
-    outputXYPoints: props.outputXYPoints ? props.outputXYPoints : 1000,
-    kernelWidth: props.kernelWidth,
-    pointDistLength: props.pointDistLength ? props.pointDistLength : 1000,
+    sampleCount: sampleCount,
+    outputXYPoints: outputXYPoints,
+    kernelWidth: kernelWidth,
+    pointDistLength: pointDistLength,
   };
 
-  let result = run(props.squiggleString, samplingInputs, props.environment);
+  let result = run(squiggleString, samplingInputs, environment);
   if (result.tag === "Ok") {
     let environment = result.value.environment;
     let exports = result.value.exports;
-    if (props.onEnvChange) props.onEnvChange(environment);
+    onEnvChange(environment);
     let chartResults = exports.map((chartResult: exportDistribution) => {
       if (chartResult["NAME"] === "Float") {
         return <MakeNumberShower precision={3} number={chartResult["VAL"]} />;
@@ -78,7 +90,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
 
           return (
             <SquiggleVegaChart
-              width={props.width ? props.width : 500}
+              width={width}
               data={{ con: values }}
               actions={false}
             />
@@ -170,9 +182,9 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
         }
       } else if (chartResult.NAME === "Function") {
         // We are looking at a function. In this case, we draw a Percentiles chart
-        let start = props.diagramStart ? props.diagramStart : 0;
-        let stop = props.diagramStop ? props.diagramStop : 10;
-        let count = props.diagramCount ? props.diagramCount : 20;
+        let start = diagramStart;
+        let stop = diagramStop;
+        let count = diagramCount;
         let step = (stop - start) / count;
         let data = _.range(start, stop, step).map((x) => {
           if (chartResult.NAME === "Function") {

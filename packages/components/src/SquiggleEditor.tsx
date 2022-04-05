@@ -27,50 +27,44 @@ export interface SquiggleEditorProps {
   width: number;
 }
 
-interface SquiggleEditorState {
-  expression: string;
-  env: exportEnv;
-}
-
-export class SquiggleEditor extends React.Component<
-  SquiggleEditorProps,
-  SquiggleEditorState
-> {
-  constructor(props: SquiggleEditorProps) {
-    super(props);
-    let code = props.initialSquiggleString ? props.initialSquiggleString : "";
-    this.state = { expression: code, env: props.environment };
-  }
-  render() {
-    let { expression, env } = this.state;
-    let props = this.props;
-    return (
-      <div>
-        <CodeEditor
-          width={props.width ? props.width : 500}
-          value={expression}
-          onChange={(e) => {
-            this.setState({ expression: e });
-          }}
-          oneLine={true}
-        />
-        <SquiggleChart
-          width={props.width ? props.width : 500}
-          squiggleString={expression}
-          sampleCount={props.sampleCount}
-          outputXYPoints={props.outputXYPoints}
-          kernelWidth={props.kernelWidth}
-          pointDistLength={props.pointDistLength}
-          diagramStart={props.diagramStart}
-          diagramStop={props.diagramStop}
-          diagramCount={props.diagramCount}
-          environment={env}
-          onEnvChange={props.onEnvChange}
-        />
-      </div>
-    );
-  }
-}
+export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
+  initialSquiggleString = "",
+  width = 500,
+  sampleCount,
+  outputXYPoints,
+  kernelWidth,
+  pointDistLength,
+  diagramStart,
+  diagramStop,
+  diagramCount,
+  onEnvChange,
+  environment,
+}: SquiggleEditorProps) => {
+  let [expression, setExpression] = React.useState(initialSquiggleString);
+  return (
+    <div>
+      <CodeEditor
+        width={width}
+        value={expression}
+        onChange={setExpression}
+        oneLine={true}
+      />
+      <SquiggleChart
+        width={width}
+        squiggleString={expression}
+        sampleCount={sampleCount}
+        outputXYPoints={outputXYPoints}
+        kernelWidth={kernelWidth}
+        pointDistLength={pointDistLength}
+        diagramStart={diagramStart}
+        diagramStop={diagramStop}
+        diagramCount={diagramCount}
+        environment={environment}
+        onEnvChange={onEnvChange}
+      />
+    </div>
+  );
+};
 
 export function renderSquiggleEditor(props: SquiggleEditorProps) {
   let parent = document.createElement("div");

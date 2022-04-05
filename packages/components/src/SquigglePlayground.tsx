@@ -1,3 +1,4 @@
+import _ from "lodash";
 import React, { FC, useState } from "react";
 import ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
@@ -20,9 +21,9 @@ function FieldFloat(Props: FieldFloatProps) {
         value={contents}
         className={Props.className ? Props.className : ""}
         onChange={(e) => setContents(e.target.value)}
-        onBlur={(_) => {
+        onBlur={() => {
           let result = parseFloat(contents);
-          if (result != NaN) {
+          if (_.isFinite(result)) {
             Props.onChange(result);
           }
         }}
@@ -67,7 +68,7 @@ let SquigglePlayground: FC<Props> = (props) => {
                   value={squiggleString}
                   onChange={setSquiggleString}
                   oneLine={false}
-                />{" "}
+                />
               </Col>
             </Row>
             <Row gutter={16}>
@@ -76,7 +77,7 @@ let SquigglePlayground: FC<Props> = (props) => {
                   value={sampleCount}
                   label="Sample Count"
                   onChange={setSampleCount}
-                />{" "}
+                />
               </Col>
               <Col span={12}>
                 <FieldFloat
@@ -104,7 +105,7 @@ let SquigglePlayground: FC<Props> = (props) => {
                   value={diagramStop}
                   onChange={setDiagramStop}
                   label="Diagram Stop"
-                />{" "}
+                />
               </Col>
               <Col span={12}>
                 <FieldFloat

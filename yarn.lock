@@ -6246,11 +6246,6 @@ coa@^2.0.2:
     chalk "^2.4.1"
     q "^1.1.2"
 
-codejar@^3.2.3:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/codejar/-/codejar-3.6.0.tgz#be491d4db4d723da24f1bcd735ecad09e0f6c36d"
-  integrity sha512-30iPkdz4Y3d2qVMpMKsvEREtfUBH6JHvW2aWeoCBR67DUoZqSQLIvcAlLWZuTG7i7DonJkbCqkBnJPPhbj+J6w==
-
 collapse-white-space@^1.0.2:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/collapse-white-space/-/collapse-white-space-1.0.6.tgz#e63629c0016665792060dbbeb79c42239d2c5287"
@@ -13996,13 +13991,6 @@ react-base16-styling@^0.6.0:
     lodash.curry "^4.0.1"
     lodash.flow "^3.3.0"
     pure-color "^1.2.0"
-
-react-codejar@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/react-codejar/-/react-codejar-1.1.2.tgz#b55789f8c7e5360bb63f3d2501c99e49453845cf"
-  integrity sha512-xGmwZ3ij1AQNkpeJUgOIqFzgZx9Nl4/onflOt6FjJrexzRMkBowAqmLTlLzZGdA8QmCSJf7hSlrClHZGFC8b4A==
-  dependencies:
-    codejar "^3.2.3"
 
 react-colorful@^5.1.2:
   version "5.5.1"

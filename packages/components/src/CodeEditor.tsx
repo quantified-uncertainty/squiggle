@@ -9,21 +9,27 @@ import "ace-builds/src-noconflict/keybinding-vim";
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
-  oneLine: boolean;
+  oneLine?: boolean;
   width?: number;
 }
 
-export let CodeEditor: FC<CodeEditorProps> = (props) => (
+export let CodeEditor: FC<CodeEditorProps> = ({
+  value,
+  onChange,
+  oneLine = false,
+  width = 500,
+}: CodeEditorProps) => (
   <AceEditor
-    value={props.value}
+    value={value}
     mode="golang"
     theme="github"
-    width={props.width ? props.width + "px" : "500px"}
-    height={props.oneLine ? "1.2em" : "500px"}
+    width={width + "px"}
+    maxLines={oneLine ? 1 : 15}
+    minLines={oneLine ? 1 : 15}
     showGutter={false}
     highlightActiveLine={false}
     showPrintMargin={false}
-    onChange={props.onChange}
+    onChange={onChange}
     name="UNIQUE_ID_OF_DIV"
     editorProps={{
       $blockScrolling: true,
@@ -31,7 +37,6 @@ export let CodeEditor: FC<CodeEditorProps> = (props) => (
     setOptions={{
       enableBasicAutocompletion: false,
       enableLiveAutocompletion: true,
-      enableSnippets: true,
     }}
   />
 );
