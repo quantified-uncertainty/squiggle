@@ -1,12 +1,16 @@
+@genType
 type xyShape = {
   xs: array<float>,
   ys: array<float>,
 }
 
+@genType
 type interpolationStrategy = [
   | #Stepwise
   | #Linear
 ]
+
+@genType
 type extrapolationStrategy = [
   | #UseZero
   | #UseOutermostPoints
