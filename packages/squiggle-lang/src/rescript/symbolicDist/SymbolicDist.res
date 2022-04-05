@@ -165,6 +165,7 @@ module Uniform = {
   let mean = (t: t) => Ok(Jstat.Uniform.mean(t.low, t.high))
   let toString = ({low, high}: t) => j`Uniform($low,$high)`
   let truncate = (low, high, t: t): t => {
+//todo: add check
     let newLow = max(E.O.default(neg_infinity, low), t.low)
     let newHigh = min(E.O.default(infinity, high), t.high)
     {low: newLow, high: newHigh}

@@ -115,6 +115,7 @@ let combineShapesContinuousContinuous = (
   | #Multiply => (m1, m2) => m1 *. m2
   | #Divide => (m1, mInv2) => m1 *. mInv2
   | #Exponentiate => (m1, mInv2) => m1 ** mInv2
+  | #Log => (m1, m2) => log(m1) /. log(m2)
   } // note: here, mInv2 = mean(1 / t2) ~= 1 / mean(t2)
 
   // TODO: I don't know what the variances are for exponentatiation
@@ -232,6 +233,7 @@ let combineShapesContinuousDiscrete = (
     }
   | #Multiply
   | #Exponentiate
+  | #Log
   | #Divide =>
     for j in 0 to t2n - 1 {
       // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.

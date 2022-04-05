@@ -1,5 +1,4 @@
 open Rationale.Function.Infix
-
 module FloatFloatMap = {
   module Id = Belt.Id.MakeComparable({
     type t = float
@@ -31,6 +30,17 @@ module U = {
   let isEqual = (a, b) => a == b
   let toA = a => [a]
   let id = e => e
+}
+
+module Tuple2 = {
+  let first = (v: ('a, 'b)) => {
+    let (a, _) = v
+    a
+  }
+  let second = (v: ('a, 'b)) => {
+    let (_, b) = v
+    b
+  }
 }
 
 module O = {
@@ -85,6 +95,11 @@ module O = {
 
   let min = compare(\"<")
   let max = compare(\">")
+}
+
+module O2 = {
+  let default = (a, b) => O.default(b, a)
+  let toExn = (a, b) => O.toExn(b, a)
 }
 
 /* Functions */
@@ -158,6 +173,10 @@ module R = {
 
   let errorIfCondition = (errorCondition, errorMessage, r) =>
     errorCondition(r) ? Error(errorMessage) : Ok(r)
+}
+
+module R2 = {
+  let fmap = (a,b) => R.fmap(b,a)
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>
@@ -269,6 +288,8 @@ module A = {
       ))
       |> Rationale.Result.return
     }
+  let rangeFloat = (~step=1, start, stop) =>
+    Belt.Array.rangeBy(start, stop, ~step) |> fmap(Belt.Int.toFloat)
 
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {
@@ -322,7 +343,8 @@ module A = {
         | r => Some(r)
         }
     )
-  let filter = (o, e) => Js.Array.filter(o, e)
+  let filter = Js.Array.filter
+  let joinWith = Js.Array.joinWith
 
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
@@ -405,6 +427,7 @@ module A = {
             : {
                 let _ = Js.Array.push(element, continuous)
               }
+
           ()
         })
 
@@ -432,6 +455,11 @@ module A = {
         Belt.Array.makeBy(n, i => min +. Belt.Float.fromInt(i) *. diff)
       }
   }
+}
+
+module A2 = {
+  let fmap = (a,b) => A.fmap(b,a)
+  let joinWith = (a, b) => A.joinWith(b, a)
 }
 
 module JsArray = {

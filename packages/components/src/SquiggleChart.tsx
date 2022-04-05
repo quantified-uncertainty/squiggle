@@ -13,11 +13,11 @@ import * as chartSpecification from "./spec-distributions.json";
 import * as percentilesSpec from "./spec-percentiles.json";
 
 let SquiggleVegaChart = createClassFromSpec({
-  spec: chartSpecification as Spec,
+  spec: chartSpecification as Spec
 });
 
 let SquigglePercentilesChart = createClassFromSpec({
-  spec: percentilesSpec as Spec,
+  spec: percentilesSpec as Spec
 });
 
 export interface SquiggleChartProps {
@@ -74,7 +74,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             y: y,
           }));
 
-          return <SquiggleVegaChart data={{ con: values }} />;
+          return <SquiggleVegaChart data={{ con: values }} actions={false}/>;
         } else if (shape.tag === "Discrete") {
           let xyShape = shape.value.xyShape;
           let totalY = xyShape.ys.reduce((a, b) => a + b);
@@ -89,7 +89,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             y: y,
           }));
 
-          return <SquiggleVegaChart data={{ dis: values }} />;
+          return <SquiggleVegaChart data={{ dis: values }} actions={false}/>;
         } else if (shape.tag === "Mixed") {
           let discreteShape = shape.value.discrete.xyShape;
           let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
@@ -156,6 +156,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
           return (
             <SquiggleVegaChart
               data={{ con: continuousValues, dis: discreteValues }}
+              actions={false}
             />
           );
         }
@@ -195,7 +196,10 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             return null;
           }
         });
-        return <SquigglePercentilesChart data={{ facet: data.filter(x => x !== null) }} />;
+        return <SquigglePercentilesChart 
+            data={{ facet: data.filter(x => x !== null) }} 
+            actions={false}
+          />;
       }
     });
     return <>{chartResults}</>;
