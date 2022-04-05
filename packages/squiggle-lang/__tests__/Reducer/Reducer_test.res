@@ -1,6 +1,12 @@
 open Jest
 open Reducer_TestHelpers
 
+let testParseToBe = (expr, answer) =>
+  test(expr, () => expectParseToBe(expr, answer))
+
+let testEvalToBe = (expr, answer) =>
+    test(expr, () => expectEvalToBe(expr, answer))
+
 describe("reducer using mathjs parse", () => {
   // Test the MathJs parser compatibility
   // Those tests toString that there is a semantic mapping from MathJs to Expression
@@ -10,20 +16,20 @@ describe("reducer using mathjs parse", () => {
   // Those tests toString that we are converting mathjs parse tree to what we need
 
   describe("expressions", () => {
-    test("1", () => expectParseToBe("1", "Ok(1)"))
-    test("(1)", () => expectParseToBe("(1)", "Ok(1)"))
-    test("1+2", () => expectParseToBe("1+2", "Ok((:add 1 2))"))
-    test("(1+2)", () => expectParseToBe("1+2", "Ok((:add 1 2))"))
-    test("add(1,2)", () => expectParseToBe("1+2", "Ok((:add 1 2))"))
-    test("1+2*3", () => expectParseToBe("1+2*3", "Ok((:add 1 (:multiply 2 3)))"))
+    testParseToBe("1", "Ok(1)")
+    testParseToBe("(1)", "Ok(1)")
+    testParseToBe("1+2", "Ok((:add 1 2))")
+    testParseToBe("1+2", "Ok((:add 1 2))")
+    testParseToBe("1+2", "Ok((:add 1 2))")
+    testParseToBe("1+2*3", "Ok((:add 1 (:multiply 2 3)))")
   })
   describe("arrays", () => {
     //Note. () is a empty list in Lisp
     //  The only builtin structure in Lisp is list. There are no arrays
     //  [1,2,3] becomes (1 2 3)
     test("empty", () => expectParseToBe("[]", "Ok(())"))
-    test("[1, 2, 3]", () => expectParseToBe("[1, 2, 3]", "Ok((1 2 3))"))
-    test("['hello', 'world']", () => expectParseToBe("['hello', 'world']", "Ok(('hello' 'world'))"))
+    testParseToBe("[1, 2, 3]", "Ok((1 2 3))")
+    testParseToBe("['hello', 'world']", "Ok(('hello' 'world'))")
     test("index", () => expectParseToBe("([0,1,2])[1]", "Ok((:$atIndex (0 1 2) (1)))"))
   })
   describe("records", () => {
@@ -45,20 +51,20 @@ describe("eval", () => {
   // See https://mathjs.org/docs/expressions/syntax.html
   // See https://mathjs.org/docs/reference/functions.html
   describe("expressions", () => {
-    test("1", () => expectEvalToBe("1", "Ok(1)"))
-    test("1+2", () => expectEvalToBe("1+2", "Ok(3)"))
-    test("(1+2)*3", () => expectEvalToBe("(1+2)*3", "Ok(9)"))
-    test("2>1", () => expectEvalToBe("2>1", "Ok(true)"))
-    test("concat('a ', 'b')", () => expectEvalToBe("concat('a ', 'b')", "Ok('a b')"))
-    test("log(10)", () => expectEvalToBe("log(10)", "Ok(2.302585092994046)"))
-    test("cos(10)", () => expectEvalToBe("cos(10)", "Ok(-0.8390715290764524)"))
+    testEvalToBe("1", "Ok(1)")
+    testEvalToBe("1+2", "Ok(3)")
+    testEvalToBe("(1+2)*3", "Ok(9)")
+    testEvalToBe("2>1", "Ok(true)")
+    testEvalToBe("concat('a ', 'b')", "Ok('a b')")
+    testEvalToBe("log(10)", "Ok(2.302585092994046)")
+    testEvalToBe("cos(10)", "Ok(-0.8390715290764524)")
     // TODO more built ins
   })
   describe("arrays", () => {
     test("empty array", () => expectEvalToBe("[]", "Ok([])"))
-    test("[1, 2, 3]", () => expectEvalToBe("[1, 2, 3]", "Ok([1, 2, 3])"))
-    test("['hello', 'world']", () => expectEvalToBe("['hello', 'world']", "Ok(['hello', 'world'])"))
-    test("index", () => expectEvalToBe("([0,1,2])[1]", "Ok(1)"))
+    testEvalToBe("[1, 2, 3]", "Ok([1, 2, 3])")
+    testEvalToBe("['hello', 'world']", "Ok(['hello', 'world'])")
+    testEvalToBe("([0,1,2])[1]", "Ok(1)")
     test("index not found", () =>
       expectEvalToBe("([0,1,2])[10]", "Error(Array index not found: 10)")
     )
