@@ -118,7 +118,7 @@ let combineShapesContinuousContinuous = (
   | #Logarithm => (m1, m2) => log(m1) /. log(m2)
   } // note: here, mInv2 = mean(1 / t2) ~= 1 / mean(t2)
 
-  // TODO: I don't know what the variances are for exponentatiation or logarithms
+  // TODO: Variances are for exponentatiation or logarithms are almost totally made up and very likely very wrong.
   // converts the variances and means of the two inputs into the variance of the output
   let combineVariancesFn = switch op {
   | #Add => (v1, v2, _, _) => v1 +. v2
