@@ -29,6 +29,7 @@ describe("MathJs parse", () => {
   describe("variables", () => {
     testParse("x = 1", "x = 1")
     skipTestParse("x", "???")
+    skipTestParse("x = 1; x", "???")
   })
 
   describe("functions", () => {
