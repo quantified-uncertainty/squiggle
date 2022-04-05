@@ -23,7 +23,10 @@ let rec toString = aValue =>
   | EvSymbol(aString) => `:${aString}`
   | EvArray(anArray) => {
       let args =
-        anArray->Belt.Array.map(each => toString(each))->Extra_Array.interperse(", ")->Js.String.concatMany("")
+        anArray
+        ->Belt.Array.map(each => toString(each))
+        ->Extra_Array.interperse(", ")
+        ->Js.String.concatMany("")
       `[${args}]`
     }
   | EvRecord(aRecord) => {

@@ -54,7 +54,10 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
         Ok(list{}),
         (racc, currentPropertyMathJsNode) =>
           racc->Result.flatMap(acc =>
-            fromNode(currentPropertyMathJsNode)->Result.map(propertyCode => list{propertyCode, ...acc})
+            fromNode(currentPropertyMathJsNode)->Result.map(propertyCode => list{
+              propertyCode,
+              ...acc,
+            })
           ),
       )
       rpropertyCodeList->Result.map(propertyCodeList => ExtressionT.EList(propertyCodeList))
