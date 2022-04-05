@@ -1,11 +1,18 @@
 open Jest
 open Reducer_TestHelpers
 
+
 let testParseToBe = (expr, answer) =>
   test(expr, () => expectParseToBe(expr, answer))
 
+let testDescParseToBe = (desc, expr, answer) =>
+  test(desc, () => expectParseToBe(expr, answer))
+
 let testEvalToBe = (expr, answer) =>
     test(expr, () => expectEvalToBe(expr, answer))
+
+let testDescEvalToBe = (desc, expr, answer) =>
+    test(desc, () => expectEvalToBe(expr, answer))
 
 describe("reducer using mathjs parse", () => {
   // Test the MathJs parser compatibility
@@ -27,21 +34,17 @@ describe("reducer using mathjs parse", () => {
     //Note. () is a empty list in Lisp
     //  The only builtin structure in Lisp is list. There are no arrays
     //  [1,2,3] becomes (1 2 3)
-    test("empty", () => expectParseToBe("[]", "Ok(())"))
+    testDescParseToBe("empty", "[]", "Ok(())")
     testParseToBe("[1, 2, 3]", "Ok((1 2 3))")
     testParseToBe("['hello', 'world']", "Ok(('hello' 'world'))")
-    test("index", () => expectParseToBe("([0,1,2])[1]", "Ok((:$atIndex (0 1 2) (1)))"))
+    testDescParseToBe("index", "([0,1,2])[1]", "Ok((:$atIndex (0 1 2) (1)))")
   })
   describe("records", () => {
-    test("define", () =>
-      expectParseToBe("{a: 1, b: 2}", "Ok((:$constructRecord (('a' 1) ('b' 2))))")
-    )
-    test("use", () =>
-      expectParseToBe(
+    testDescParseToBe("define",
+      "{a: 1, b: 2}", "Ok((:$constructRecord (('a' 1) ('b' 2))))")
+    testDescParseToBe("use",
         "{a: 1, b: 2}.a",
-        "Ok((:$atIndex (:$constructRecord (('a' 1) ('b' 2))) ('a')))",
-      )
-    )
+        "Ok((:$atIndex (:$constructRecord (('a' 1) ('b' 2))) ('a')))")
   })
 })
 
@@ -65,9 +68,8 @@ describe("eval", () => {
     testEvalToBe("[1, 2, 3]", "Ok([1, 2, 3])")
     testEvalToBe("['hello', 'world']", "Ok(['hello', 'world'])")
     testEvalToBe("([0,1,2])[1]", "Ok(1)")
-    test("index not found", () =>
-      expectEvalToBe("([0,1,2])[10]", "Error(Array index not found: 10)")
-    )
+    testDescEvalToBe("index not found",
+      "([0,1,2])[10]", "Error(Array index not found: 10)")
   })
   describe("records", () => {
     test("define", () => expectEvalToBe("{a: 1, b: 2}", "Ok({a: 1, b: 2})"))
@@ -77,11 +79,8 @@ describe("eval", () => {
 })
 
 describe("test exceptions", () => {
-  test("javascript exception", () =>
-    expectEvalToBe("jsraise('div by 0')", "Error(JS Exception: Error: 'div by 0')")
-  )
-
-  test("rescript exception", () =>
-    expectEvalToBe("resraise()", "Error(TODO: unhandled rescript exception)")
-  )
+  testDescEvalToBe("javascript exception",
+    "jsraise('div by 0')", "Error(JS Exception: Error: 'div by 0')")
+  testDescEvalToBe("rescript exception",
+    "resraise()", "Error(TODO: unhandled rescript exception)")
 })

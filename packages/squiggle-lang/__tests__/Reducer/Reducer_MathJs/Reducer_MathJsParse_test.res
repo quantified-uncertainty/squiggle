@@ -10,8 +10,14 @@ let expectParseToBe = (expr, answer) =>
 let testParse = (expr, answer) =>
   test(expr, () => expectParseToBe(expr, answer))
 
+let testDescParse = (desc, expr, answer) =>
+  test(desc, () => expectParseToBe(expr, answer))
+
 let skipTestParse = (expr, answer) =>
     Skip.test(expr, () => expectParseToBe(expr, answer))
+
+let skipDescTestParse = (desc, expr, answer) =>
+    Skip.test(desc, () => expectParseToBe(expr, answer))
 
 describe("MathJs parse", () => {
   describe("literals operators paranthesis", () => {
@@ -43,15 +49,15 @@ describe("MathJs parse", () => {
   })
 
   describe("records", () => {
-    test("define", () => expectParseToBe("{a: 1, b: 2}", "{a: 1, b: 2}"))
-    test("use", () => expectParseToBe("record.property", "record['property']"))
+    testDescParse("define", "{a: 1, b: 2}", "{a: 1, b: 2}")
+    testDescParse("use", "record.property", "record['property']")
   })
 
   describe("comments", () => {
-    Skip.test("define", () => expectParseToBe("# This is a comment", "???"))
+    skipDescTestParse("define", "# This is a comment", "???")
   })
 
   describe("if statement", () => {
-    Skip.test("define", () => expectParseToBe("if (true) { 1 } else { 0 }", "???"))
+    skipDescTestParse("define", "if (true) { 1 } else { 0 }", "???")
   })
 })
