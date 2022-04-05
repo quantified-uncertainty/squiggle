@@ -10,7 +10,8 @@
     "test:reducer": "jest --testPathPattern '.*__tests__/Reducer.*'",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "all": "yarn build && yarn bundle && yarn test"
+    "all": "yarn build && yarn bundle && yarn test",
+    "rescript:format": "find . -type f \\( -name '*.res' -o -name '*.resi' \\) -exec sh -c 'bsc -format {} | sponge {}'  \\;"
   },
   "keywords": [
     "Rescript"
