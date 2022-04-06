@@ -10,6 +10,7 @@
     "test:reducer": "jest --testPathPattern '.*__tests__/Reducer.*'",
     "test": "jest",
     "test:watch": "jest --watchAll",
+    "coverage": "rm -f *.coverage; yarn clean; BISECT_ENABLE=yes yarn build; yarn test; ./node_modules/.bin/bisect-ppx-report html", 
     "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [
@@ -24,7 +25,8 @@
     "mathjs": "10.4.1",
     "pdfast": "^0.2.0",
     "rationale": "0.2.0",
-    "rescript": "^9.1.4"
+    "rescript": "^9.1.4", 
+    "bisect_ppx": "^2.7.1"
   },
   "devDependencies": {
     "@glennsl/rescript-jest": "^0.9.0",
@@ -38,7 +40,7 @@
     "ts-loader": "^9.2.8",
     "typescript": "^4.6.3",
     "webpack": "^5.70.0",
-    "webpack-cli": "^4.9.2"
+    "webpack-cli": "^4.9.2" 
   },
   "source": "./src/js/index.ts",
   "main": "./dist/bundle.js",
