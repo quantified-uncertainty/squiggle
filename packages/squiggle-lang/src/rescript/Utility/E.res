@@ -100,6 +100,7 @@ module O = {
 module O2 = {
   let default = (a, b) => O.default(b, a)
   let toExn = (a, b) => O.toExn(b, a)
+  let fmap = (a, b) => O.fmap(b, a)
 }
 
 /* Functions */

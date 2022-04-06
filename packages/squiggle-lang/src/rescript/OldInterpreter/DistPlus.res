@@ -8,28 +8,22 @@ let make =
     (
       ~pointSetDist,
       ~squiggleString,
-      ~domain=Complete,
-      ~unit=UnspecifiedDistribution,
       (),
     )
     : t => {
   let integral = pointSetDistIntegral(pointSetDist);
-  {pointSetDist, domain, integralCache: integral, unit, squiggleString};
+  {pointSetDist, integralCache: integral, squiggleString};
 };
 
 let update =
     (
       ~pointSetDist=?,
       ~integralCache=?,
-      ~domain=?,
-      ~unit=?,
       ~squiggleString=?,
       t: t,
     ) => {
   pointSetDist: E.O.default(t.pointSetDist, pointSetDist),
   integralCache: E.O.default(t.integralCache, integralCache),
-  domain: E.O.default(t.domain, domain),
-  unit: E.O.default(t.unit, unit),
   squiggleString: E.O.default(t.squiggleString, squiggleString),
 };
 
@@ -37,12 +31,6 @@ let updateShape = (pointSetDist, t) => {
   let integralCache = pointSetDistIntegral(pointSetDist);
   update(~pointSetDist, ~integralCache, t);
 };
-
-let domainIncludedProbabilityMass = (t: t) =>
-  Domain.includedProbabilityMass(t.domain);
-
-let domainIncludedProbabilityMassAdjustment = (t: t, f) =>
-  f *. Domain.includedProbabilityMass(t.domain);
 
 let toPointSetDist = ({pointSetDist, _}: t) => pointSetDist;
 
@@ -73,8 +61,7 @@ module T =
     let xToY = (f, t: t) =>
       t
       |> toPointSetDist
-      |> PointSetDist.T.xToY(f)
-      |> MixedPoint.fmap(domainIncludedProbabilityMassAdjustment(t));
+      |> PointSetDist.T.xToY(f);
 
     let minX = pointSetDistFn(PointSetDist.T.minX);
     let maxX = pointSetDistFn(PointSetDist.T.maxX);
@@ -115,7 +102,6 @@ module T =
         f,
         toPointSetDist(t),
       )
-      |> domainIncludedProbabilityMassAdjustment(t);
     };
 
     // TODO: This part is broken when there is a limit, if this is supposed to be taken into account.

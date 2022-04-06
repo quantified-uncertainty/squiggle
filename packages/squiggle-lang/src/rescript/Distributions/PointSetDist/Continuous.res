@@ -1,6 +1,47 @@
 open Distributions
 
 type t = PointSetTypes.continuousShape
+
+module Analysis = {
+  let integrate = (
+    ~indefiniteIntegralStepwise=(p, h1) => h1 *. p,
+    ~indefiniteIntegralLinear=(p, a, b) => a *. p +. b *. p ** 2.0 /. 2.0,
+    t: t,
+  ): float => {
+    let xs = t.xyShape.xs
+    let ys = t.xyShape.ys
+
+    E.A.reducei(xs, 0.0, (acc, _x, i) => {
+      let areaUnderIntegral = // TODO Take this switch statement out of the loop body
+      switch (t.interpolation, i) {
+      | (_, 0) => 0.0
+      | (#Stepwise, _) =>
+        indefiniteIntegralStepwise(xs[i], ys[i - 1]) -.
+        indefiniteIntegralStepwise(xs[i - 1], ys[i - 1])
+      | (#Linear, _) =>
+        let x1 = xs[i - 1]
+        let x2 = xs[i]
+        if x1 == x2 {
+          0.0
+        } else {
+          let h1 = ys[i - 1]
+          let h2 = ys[i]
+          let b = (h1 -. h2) /. (x1 -. x2)
+          let a = h1 -. b *. x1
+          indefiniteIntegralLinear(x2, a, b) -. indefiniteIntegralLinear(x1, a, b)
+        }
+      }
+      acc +. areaUnderIntegral
+    })
+  }
+
+  let getMeanOfSquares = (t: t) => {
+    let indefiniteIntegralLinear = (p, a, b) => a *. p ** 3.0 /. 3.0 +. b *. p ** 4.0 /. 4.0
+    let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 3.0 /. 3.0
+    integrate(~indefiniteIntegralStepwise, ~indefiniteIntegralLinear, t)
+  }
+}
+
 let getShape = (t: t) => t.xyShape
 let interpolation = (t: t) => t.interpolation
 let make = (~interpolation=#Linear, ~integralSumCache=None, ~integralCache=None, xyShape): t => {
@@ -194,7 +235,7 @@ module T = Dist({
     let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 2.0 /. 2.0
     let indefiniteIntegralLinear = (p, a, b) => a *. p ** 2.0 /. 2.0 +. b *. p ** 3.0 /. 3.0
 
-    XYShape.Analysis.integrateContinuousShape(
+    Analysis.integrate(
       ~indefiniteIntegralStepwise,
       ~indefiniteIntegralLinear,
       t,
@@ -204,7 +245,7 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(
       t,
       mean,
-      XYShape.Analysis.getMeanOfSquaresContinuousShape,
+      Analysis.getMeanOfSquares,
     )
 })
 
