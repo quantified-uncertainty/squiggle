@@ -7,7 +7,12 @@
     {
       "name": "facet",
       "values": [],
-      "format": { "type": "json", "parse": { "timestamp": "date" } }
+      "format": {
+        "type": "json",
+        "parse": {
+          "timestamp": "date"
+        }
+      }
     },
     {
       "name": "table",
@@ -15,7 +20,9 @@
       "transform": [
         {
           "type": "aggregate",
-          "groupby": ["x"],
+          "groupby": [
+            "x"
+          ],
           "ops": [
             "mean",
             "mean",
@@ -70,7 +77,10 @@
       "name": "xscale",
       "type": "linear",
       "nice": true,
-      "domain": { "data": "facet", "field": "x" },
+      "domain": {
+        "data": "facet",
+        "field": "x"
+      },
       "range": "width"
     },
     {
@@ -79,7 +89,10 @@
       "range": "height",
       "nice": true,
       "zero": true,
-      "domain": { "data": "facet", "field": "p99" }
+      "domain": {
+        "data": "facet",
+        "field": "p99"
+      }
     }
   ],
   "axes": [
@@ -89,8 +102,20 @@
       "grid": false,
       "tickSize": 2,
       "encode": {
-        "grid": { "enter": { "stroke": { "value": "#ccc" } } },
-        "ticks": { "enter": { "stroke": { "value": "#ccc" } } }
+        "grid": {
+          "enter": {
+            "stroke": {
+              "value": "#ccc"
+            }
+          }
+        },
+        "ticks": {
+          "enter": {
+            "stroke": {
+              "value": "#ccc"
+            }
+          }
+        }
       }
     },
     {
@@ -100,107 +125,249 @@
       "domain": false,
       "tickSize": 2,
       "encode": {
-        "grid": { "enter": { "stroke": { "value": "#ccc" } } },
-        "ticks": { "enter": { "stroke": { "value": "#ccc" } } }
+        "grid": {
+          "enter": {
+            "stroke": {
+              "value": "#ccc"
+            }
+          }
+        },
+        "ticks": {
+          "enter": {
+            "stroke": {
+              "value": "#ccc"
+            }
+          }
+        }
       }
     }
   ],
   "marks": [
     {
       "type": "area",
-      "from": { "data": "table" },
+      "from": {
+        "data": "table"
+      },
       "encode": {
-        "enter": { "fill": { "value": "#4C78A8" } },
+        "enter": {
+          "fill": {
+            "value": "#4C78A8"
+          }
+        },
         "update": {
-          "interpolate": { "value": "monotone" },
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "p1" },
-          "y2": { "scale": "yscale", "field": "p99" },
-          "opacity": { "value": 0.05 }
+          "interpolate": {
+            "value": "monotone"
+          },
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "p1"
+          },
+          "y2": {
+            "scale": "yscale",
+            "field": "p99"
+          },
+          "opacity": {
+            "value": 0.05
+          }
         }
       }
     },
     {
       "type": "area",
-      "from": { "data": "table" },
+      "from": {
+        "data": "table"
+      },
       "encode": {
-        "enter": { "fill": { "value": "#4C78A8" } },
+        "enter": {
+          "fill": {
+            "value": "#4C78A8"
+          }
+        },
         "update": {
-          "interpolate": { "value": "monotone" },
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "p5" },
-          "y2": { "scale": "yscale", "field": "p95" },
-          "opacity": { "value": 0.1 }
+          "interpolate": {
+            "value": "monotone"
+          },
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "p5"
+          },
+          "y2": {
+            "scale": "yscale",
+            "field": "p95"
+          },
+          "opacity": {
+            "value": 0.1
+          }
         }
       }
     },
     {
       "type": "area",
-      "from": { "data": "table" },
+      "from": {
+        "data": "table"
+      },
       "encode": {
-        "enter": { "fill": { "value": "#4C78A8" } },
+        "enter": {
+          "fill": {
+            "value": "#4C78A8"
+          }
+        },
         "update": {
-          "interpolate": { "value": "monotone" },
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "p10" },
-          "y2": { "scale": "yscale", "field": "p90" },
-          "opacity": { "value": 0.15 }
+          "interpolate": {
+            "value": "monotone"
+          },
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "p10"
+          },
+          "y2": {
+            "scale": "yscale",
+            "field": "p90"
+          },
+          "opacity": {
+            "value": 0.15
+          }
         }
       }
     },
     {
       "type": "area",
-      "from": { "data": "table" },
+      "from": {
+        "data": "table"
+      },
       "encode": {
-        "enter": { "fill": { "value": "#4C78A8" } },
+        "enter": {
+          "fill": {
+            "value": "#4C78A8"
+          }
+        },
         "update": {
-          "interpolate": { "value": "monotone" },
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "p20" },
-          "y2": { "scale": "yscale", "field": "p80" },
-          "opacity": { "value": 0.2 }
+          "interpolate": {
+            "value": "monotone"
+          },
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "p20"
+          },
+          "y2": {
+            "scale": "yscale",
+            "field": "p80"
+          },
+          "opacity": {
+            "value": 0.2
+          }
         }
       }
     },
     {
       "type": "area",
-      "from": { "data": "table" },
+      "from": {
+        "data": "table"
+      },
       "encode": {
-        "enter": { "fill": { "value": "#4C78A8" } },
+        "enter": {
+          "fill": {
+            "value": "#4C78A8"
+          }
+        },
         "update": {
-          "interpolate": { "value": "monotone" },
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "p30" },
-          "y2": { "scale": "yscale", "field": "p70" },
-          "opacity": { "value": 0.2 }
+          "interpolate": {
+            "value": "monotone"
+          },
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "p30"
+          },
+          "y2": {
+            "scale": "yscale",
+            "field": "p70"
+          },
+          "opacity": {
+            "value": 0.2
+          }
         }
       }
     },
     {
       "type": "area",
-      "from": { "data": "table" },
+      "from": {
+        "data": "table"
+      },
       "encode": {
-        "enter": { "fill": { "value": "#4C78A8" } },
+        "enter": {
+          "fill": {
+            "value": "#4C78A8"
+          }
+        },
         "update": {
-          "interpolate": { "value": "monotone" },
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "p40" },
-          "y2": { "scale": "yscale", "field": "p60" },
-          "opacity": { "value": 0.2 }
+          "interpolate": {
+            "value": "monotone"
+          },
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "p40"
+          },
+          "y2": {
+            "scale": "yscale",
+            "field": "p60"
+          },
+          "opacity": {
+            "value": 0.2
+          }
         }
       }
     },
     {
       "type": "line",
-      "from": { "data": "table" },
+      "from": {
+        "data": "table"
+      },
       "encode": {
         "update": {
-          "interpolate": { "value": "monotone" },
-          "stroke": { "value": "#4C78A8" },
-          "strokeWidth": { "value": 2 },
-          "opacity": { "value": 0.8 },
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "p50" }
+          "interpolate": {
+            "value": "monotone"
+          },
+          "stroke": {
+            "value": "#4C78A8"
+          },
+          "strokeWidth": {
+            "value": 2
+          },
+          "opacity": {
+            "value": 0.8
+          },
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "p50"
+          }
         }
       }
     }

@@ -18,7 +18,7 @@ could be continuous, discrete or mixed.
 
 ## Distributions
 
-An example of a normal distribution is:
+### Continuous Distributions
 
 <Canvas>
   <Story
@@ -31,26 +31,26 @@ An example of a normal distribution is:
   </Story>
 </Canvas>
 
-An example of a Discrete distribution is:
+### Discrete Distributions
 
 <Canvas>
   <Story
     name="Discrete"
     args={{
-      squiggleString: "mm(0, 1, [0.5, 0.5])",
+      squiggleString: "mm(0, 1, 3, 5, 8, 10, [0.1, 0.8, 0.5, 0.3, 0.2, 0.1])",
     }}
   >
     {Template.bind({})}
   </Story>
 </Canvas>
 
-An example of a Mixed distribution is:
+## Mixed distributions
 
 <Canvas>
   <Story
     name="Mixed"
     args={{
-      squiggleString: "mm(0, 5 to 10, [0.5, 0.5])",
+      squiggleString: "mm(0, 1, 3, 5, 8, normal(8, 1), [0.1, 0.3, 0.4, 0.35, 0.2, 0.8])",
     }}
   >
     {Template.bind({})}
@@ -66,7 +66,7 @@ to allow large and small numbers being printed cleanly.
   <Story
     name="Constant"
     args={{
-      squiggleString: "500000 * 5000000",
+      squiggleString: "500000000",
     }}
   >
     {Template.bind({})}
@@ -75,14 +75,15 @@ to allow large and small numbers being printed cleanly.
 
 ## Functions
 
-Finally, a function can be returned, and this shows how the distribution changes
-over the axis between x = 0 and 10.
+Full functions can be returned. These plot out the results of distributions between a set of x-coordinates.  
+
+The default is show 10 points between 0 and 10.
 
 <Canvas>
   <Story
     name="Function"
     args={{
-      squiggleString: "f(x) = normal(x,x)\nf",
+      squiggleString: "f(x) = normal(x^2,x^1.8)\nf",
     }}
   >
     {Template.bind({})}
