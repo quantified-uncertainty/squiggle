@@ -1,10 +1,9 @@
+import _ from "lodash";
 import React, { FC } from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-golang";
 import "ace-builds/src-noconflict/theme-github";
-import "ace-builds/src-noconflict/ext-language_tools";
-import "ace-builds/src-noconflict/keybinding-vim";
 
 interface CodeEditorProps {
   value: string;
@@ -18,26 +17,30 @@ export let CodeEditor: FC<CodeEditorProps> = ({
   onChange,
   oneLine = false,
   width = 500,
-}: CodeEditorProps) => (
-  <AceEditor
-    value={value}
-    mode="golang"
-    theme="github"
-    width={width + "px"}
-    maxLines={oneLine ? 1 : 15}
-    minLines={oneLine ? 1 : 15}
-    showGutter={false}
-    highlightActiveLine={false}
-    showPrintMargin={false}
-    onChange={onChange}
-    name="UNIQUE_ID_OF_DIV"
-    editorProps={{
-      $blockScrolling: true,
-    }}
-    setOptions={{
-      enableBasicAutocompletion: false,
-      enableLiveAutocompletion: true,
-    }}
-  />
-);
+}: CodeEditorProps) => {
+  let lineCount = value.split("\n").length;
+  let id = _.uniqueId();
+  return (
+    <AceEditor
+      value={value}
+      mode="golang"
+      theme="github"
+      width={width + "px"}
+      minLines={oneLine ? lineCount : 15}
+      maxLines={oneLine ? lineCount : 15}
+      showGutter={false}
+      highlightActiveLine={false}
+      showPrintMargin={false}
+      onChange={onChange}
+      name={id}
+      editorProps={{
+        $blockScrolling: true,
+      }}
+      setOptions={{
+        enableBasicAutocompletion: false,
+        enableLiveAutocompletion: false,
+      }}
+    />
+  );
+};
 export default CodeEditor;

@@ -20,8 +20,8 @@ function FieldFloat(Props: FieldFloatProps) {
       <Input
         value={contents}
         className={Props.className ? Props.className : ""}
-        onChange={(e) => setContents(e.target.value)}
-        onBlur={() => {
+        onChange={(e) => {
+          setContents(e.target.value);
           let result = parseFloat(contents);
           if (_.isFinite(result)) {
             Props.onChange(result);
@@ -123,7 +123,7 @@ let SquigglePlayground: FC<Props> = (props) => {
   );
 };
 export default SquigglePlayground;
-export function renderSquigglePlayground(props: Props) {
+export function renderSquigglePlaygroundToDom(props: Props) {
   let parent = document.createElement("div");
   ReactDOM.render(<SquigglePlayground {...props} />, parent);
   return parent;

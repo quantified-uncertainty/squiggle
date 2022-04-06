@@ -66,7 +66,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   );
 };
 
-export function renderSquiggleEditor(props: SquiggleEditorProps) {
+export function renderSquiggleEditorToDom(props: SquiggleEditorProps) {
   let parent = document.createElement("div");
   ReactDOM.render(
     <SquiggleEditor

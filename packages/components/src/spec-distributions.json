@@ -16,21 +16,19 @@
     {
       "name": "xscale",
       "description": "The transform of the x scale",
-      "value": 1.0,
+      "value": false,
       "bind": {
-        "input": "select",
-        "options": [0.1, 1],
-        "labels": ["log", "linear"]
+        "input": "checkbox",
+        "name": "log x scale"
       }
     },
     {
       "name": "yscale",
       "description": "The transform of the y scale",
-      "value": 1.0,
+      "value": false,
       "bind": {
-        "input": "select",
-        "options": [0.1, 1],
-        "labels": ["log", "linear"]
+        "input": "checkbox",
+        "name": "log y scale"
       }
     }
   ],
@@ -39,7 +37,7 @@
     {
       "name": "xscale",
       "type": "pow",
-      "exponent": { "signal": "xscale" },
+      "exponent": { "signal": "xscale ? 0.1 : 1" },
       "range": "width",
       "zero": false,
       "nice": false,
@@ -53,7 +51,7 @@
     {
       "name": "yscale",
       "type": "pow",
-      "exponent": { "signal": "yscale" },
+      "exponent": { "signal": "yscale ? 0.1 : 1" },
       "range": "height",
       "nice": true,
       "zero": true,
