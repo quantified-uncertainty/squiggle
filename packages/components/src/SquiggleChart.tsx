@@ -13,16 +13,16 @@ import * as chartSpecification from "./spec-distributions.json";
 import * as percentilesSpec from "./spec-percentiles.json";
 
 let SquiggleVegaChart = createClassFromSpec({
-  spec: chartSpecification as Spec
+  spec: chartSpecification as Spec,
 });
 
 let SquigglePercentilesChart = createClassFromSpec({
-  spec: percentilesSpec as Spec
+  spec: percentilesSpec as Spec,
 });
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
-  squiggleString: string;
+  squiggleString?: string;
 
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
@@ -40,21 +40,35 @@ export interface SquiggleChartProps {
   environment?: exportEnv;
   /** When the environment changes */
   onEnvChange?(env: exportEnv): void;
+  /** CSS width of the element */
+  width?: number;
 }
 
-export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
+export const SquiggleChart: React.FC<SquiggleChartProps> = ({
+  squiggleString = "",
+  sampleCount = 1000,
+  outputXYPoints = 1000,
+  kernelWidth,
+  pointDistLength = 1000,
+  diagramStart = 0,
+  diagramStop = 10,
+  diagramCount = 20,
+  environment = [],
+  onEnvChange = () => {},
+  width = 500,
+}: SquiggleChartProps) => {
   let samplingInputs: SamplingInputs = {
-    sampleCount: props.sampleCount,
-    outputXYPoints: props.outputXYPoints,
-    kernelWidth: props.kernelWidth,
-    pointDistLength: props.pointDistLength,
+    sampleCount: sampleCount,
+    outputXYPoints: outputXYPoints,
+    kernelWidth: kernelWidth,
+    pointDistLength: pointDistLength,
   };
 
-  let result = run(props.squiggleString, samplingInputs, props.environment);
+  let result = run(squiggleString, samplingInputs, environment);
   if (result.tag === "Ok") {
     let environment = result.value.environment;
     let exports = result.value.exports;
-    if (props.onEnvChange) props.onEnvChange(environment);
+    onEnvChange(environment);
     let chartResults = exports.map((chartResult: exportDistribution) => {
       if (chartResult["NAME"] === "Float") {
         return <MakeNumberShower precision={3} number={chartResult["VAL"]} />;
@@ -74,7 +88,13 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             y: y,
           }));
 
-          return <SquiggleVegaChart data={{ con: values }} actions={false}/>;
+          return (
+            <SquiggleVegaChart
+              width={width}
+              data={{ con: values }}
+              actions={false}
+            />
+          );
         } else if (shape.tag === "Discrete") {
           let xyShape = shape.value.xyShape;
           let totalY = xyShape.ys.reduce((a, b) => a + b);
@@ -89,7 +109,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             y: y,
           }));
 
-          return <SquiggleVegaChart data={{ dis: values }} actions={false}/>;
+          return <SquiggleVegaChart data={{ dis: values }} actions={false} />;
         } else if (shape.tag === "Mixed") {
           let discreteShape = shape.value.discrete.xyShape;
           let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
@@ -123,10 +143,10 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
 
           let total = 0;
           let cdf = sortedPoints.map((point: labeledPoint) => {
-            if (point.type == "discrete") {
+            if (point.type === "discrete") {
               total += point.y;
               return total;
-            } else if (point.type == "continuous") {
+            } else if (point.type === "continuous") {
               total += (point.y / totalY) * totalContinuous;
               return total;
             }
@@ -147,10 +167,10 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             })
           );
           let continuousValues = cdfLabeledPoint.filter(
-            (x) => x.type == "continuous"
+            (x) => x.type === "continuous"
           );
           let discreteValues = cdfLabeledPoint.filter(
-            (x) => x.type == "discrete"
+            (x) => x.type === "discrete"
           );
 
           return (
@@ -162,14 +182,14 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
         }
       } else if (chartResult.NAME === "Function") {
         // We are looking at a function. In this case, we draw a Percentiles chart
-        let start = props.diagramStart ? props.diagramStart : 0;
-        let stop = props.diagramStop ? props.diagramStop : 10;
-        let count = props.diagramCount ? props.diagramCount : 100;
+        let start = diagramStart;
+        let stop = diagramStop;
+        let count = diagramCount;
         let step = (stop - start) / count;
         let data = _.range(start, stop, step).map((x) => {
-          if (chartResult.NAME == "Function") {
+          if (chartResult.NAME === "Function") {
             let result = chartResult.VAL(x);
-            if (result.tag == "Ok") {
+            if (result.tag === "Ok") {
               let percentileArray = [
                 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95,
                 0.99,
@@ -196,14 +216,16 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             return null;
           }
         });
-        return <SquigglePercentilesChart 
-            data={{ facet: data.filter(x => x !== null) }} 
+        return (
+          <SquigglePercentilesChart
+            data={{ facet: data.filter((x) => x !== null) }}
             actions={false}
-          />;
+          />
+        );
       }
     });
     return <>{chartResults}</>;
-  } else if (result.tag == "Error") {
+  } else if (result.tag === "Error") {
     // At this point, we came across an error. What was our error?
     return <p>{"Error parsing Squiggle: " + result.value}</p>;
   }
@@ -211,7 +233,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
 };
 
 function getPercentiles(percentiles: number[], t: DistPlus) {
-  if (t.pointSetDist.tag == "Discrete") {
+  if (t.pointSetDist.tag === "Discrete") {
     let total = 0;
     let maxX = _.max(t.pointSetDist.value.xyShape.xs);
     let bounds = percentiles.map((_) => maxX);
@@ -221,14 +243,14 @@ function getPercentiles(percentiles: number[], t: DistPlus) {
       (x, y) => {
         total += y;
         percentiles.forEach((v, i) => {
-          if (total > v && bounds[i] == maxX) {
+          if (total > v && bounds[i] === maxX) {
             bounds[i] = x;
           }
         });
       }
     );
     return bounds;
-  } else if (t.pointSetDist.tag == "Continuous") {
+  } else if (t.pointSetDist.tag === "Continuous") {
     let total = 0;
     let maxX = _.max(t.pointSetDist.value.xyShape.xs);
     let totalY = _.sum(t.pointSetDist.value.xyShape.ys);
@@ -239,14 +261,14 @@ function getPercentiles(percentiles: number[], t: DistPlus) {
       (x, y) => {
         total += y / totalY;
         percentiles.forEach((v, i) => {
-          if (total > v && bounds[i] == maxX) {
+          if (total > v && bounds[i] === maxX) {
             bounds[i] = x;
           }
         });
       }
     );
     return bounds;
-  } else if (t.pointSetDist.tag == "Mixed") {
+  } else if (t.pointSetDist.tag === "Mixed") {
     let discreteShape = t.pointSetDist.value.discrete.xyShape;
     let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
 
@@ -280,13 +302,13 @@ function getPercentiles(percentiles: number[], t: DistPlus) {
     let maxX = _.max(sortedPoints.map((x) => x.x));
     let bounds = percentiles.map((_) => maxX);
     sortedPoints.map((point: labeledPoint) => {
-      if (point.type == "discrete") {
+      if (point.type === "discrete") {
         total += point.y;
-      } else if (point.type == "continuous") {
+      } else if (point.type === "continuous") {
         total += (point.y / totalY) * totalContinuous;
       }
       percentiles.forEach((v, i) => {
-        if (total > v && bounds[i] == maxX) {
+        if (total > v && bounds[i] === maxX) {
           bounds[i] = total;
         }
       });
