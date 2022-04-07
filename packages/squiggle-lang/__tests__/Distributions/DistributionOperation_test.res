@@ -26,7 +26,7 @@ describe("toPointSet", () => {
       ->outputMap(FromDist(ToFloat(#Mean)))
       ->toFloat
       ->toExt
-    expect(result)->toBeCloseTo(5.09)
+    expect(result)->toBeSoCloseTo(5.0, ~digits=0)
   })
 
   test("on sample set distribution with under 4 points", () => {
@@ -37,7 +37,7 @@ describe("toPointSet", () => {
     expect(result)->toEqual(GenDistError(Other("Converting sampleSet to pointSet failed")))
   })
 
-  Skip.test("on sample set", () => {
+  test("on sample set", () => {
     let result =
       run(FromDist(ToDist(ToPointSet), normalDist5))
       ->outputMap(FromDist(ToDist(ToSampleSet(1000))))
@@ -45,6 +45,6 @@ describe("toPointSet", () => {
       ->outputMap(FromDist(ToFloat(#Mean)))
       ->toFloat
       ->toExt
-    expect(result)->toBeCloseTo(5.09)
+    expect(result)->toBeSoCloseTo(5.0, ~digits=-1)
   })
 })
