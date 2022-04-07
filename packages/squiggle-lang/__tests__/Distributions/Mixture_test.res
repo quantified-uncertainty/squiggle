@@ -17,6 +17,9 @@ let unpackFloat = x => x -> toFloat -> toExt
 let mkNormal = (mean, stdev) => GenericDist_Types.Symbolic(#Normal({mean: mean, stdev: stdev}))
 let mkBeta = (alpha, beta) => GenericDist_Types.Symbolic(#Beta({alpha: alpha, beta: beta}))
 let mkExponential = rate => GenericDist_Types.Symbolic(#Exponential({rate: rate}))
+let mkUniform = (low, high) => GenericDist_Types.Symbolic(#Uniform({low: low, high: high})) 
+let mkCauchy = (local, scale) => GenericDist_Types.Symbolic(#Cauchy({local: local, scale: scale}))
+let mkLognormal = (mu, sigma) => GenericDist_Types.Symbolic(#Lognormal({mu: mu, sigma: sigma}))
 
 describe("mixture", () => {
   testAll("fair mean of two normal distributions", list{(0.0, 1e2), (-1e1, -1e-4), (-1e1, 1e2), (-1e1, 1e1)}, tup => {  // should be property
@@ -49,6 +52,23 @@ describe("mixture", () => {
             0.25 *. 1.0 /. (1.0 +. beta /. alpha) +. 0.75 *. 1.0 /. rate, 
             ~digits=-1
         )
+      }
+  )
+  testAll(
+      "weighted mean of lognormal and uniform", 
+      list{}, 
+      tup => {
+          let (uniformParams, lognormalParams) = tup
+          let (low, high) = uniformParams
+          let (mu, sigma) = lognormalParams
+          let theMean = {
+              run(Mixture([(mkUniform(low, high), 0.6), (mkLognormal(mu, sigma), 0.4)]))
+              -> outputMap(FromDist(ToFloat(#Mean)))
+          }
+          theMean
+          -> unpackFloat
+          -> expect
+          -> toBeSoCloseTo(0.6 *. (low +. high) /. 2.0 +. 0.4 *. (mu +. sigma ** 2.0 /. 2.0), ~digits=0)
       }
   )
 })

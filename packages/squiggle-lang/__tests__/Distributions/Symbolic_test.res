@@ -21,7 +21,7 @@ let toExtDist: option<GenericDist_Types.genericDist> => GenericDist_Types.generi
 let unpackFloat = x => x -> toFloat -> toExtFloat
 let unpackDist = y => y -> toDist -> toExtDist
 
-describe("normalize", () => {
+describe("(Symbolic) normalize", () => {
   testAll("has no impact on normal distributions", list{-1e8, -16.0, -1e-2, 0.0, 1e-4, 32.0, 1e16}, mean => {
     let theNormal = mkNormal(mean, 2.0)
     let theNormalized = run(FromDist(ToDist(Normalize), theNormal))
@@ -68,17 +68,19 @@ describe("(Symbolic) mean", () => {
     //-> toBe(GenDistError(Other("Cauchy distributions may have no mean value.")))
   })
 
-  test("of a triangular distribution", () => {  // should be property
+  testAll("of triangular distributions", list{(1.0,2.0,3.0), (-1e7,-1e-7,1e-7), (-1e-7,1e0,1e7), (-1e-16,0.0,1e-16)}, tup => {
+    let (low, medium, high) = tup
     let theMean = run(FromDist(
       ToFloat(#Mean), 
-      GenericDist_Types.Symbolic(#Triangular({low: - 5.0, medium: 1e-3, high: 10.0}))
+      GenericDist_Types.Symbolic(#Triangular({low: low, medium: medium, high: high}))
     ))
     theMean 
     -> unpackFloat 
     -> expect 
-    -> toBeCloseTo((-5.0 +. 1e-3 +. 10.0) /. 3.0)  // https://www.statology.org/triangular-distribution/
+    -> toBeCloseTo((low +. medium +. high) /. 3.0)  // https://www.statology.org/triangular-distribution/
   })
 
+  // TODO: nonpositive inputs are SUPPOSED to crash. 
   testAll("of beta distributions", list{(1e-4, 6.4e1), (1.28e2, 1e0), (1e-16, 1e-16), (1e16, 1e16), (-1e4, 1e1), (1e1, -1e4)}, tup => {
     let (alpha, beta) = tup
     let theMean = run(FromDist(
@@ -91,6 +93,7 @@ describe("(Symbolic) mean", () => {
     -> toBeCloseTo(1.0 /. (1.0 +. (beta /. alpha)))  // https://en.wikipedia.org/wiki/Beta_distribution#Mean
   })
 
+  // TODO: When we have our theory of validators we won't want this to be NaN but to be an error.
   test("of beta(0, 0)", () => {
     let theMean = run(FromDist(
       ToFloat(#Mean), 
