@@ -11,6 +11,8 @@ import type {
 import { createClassFromSpec } from "react-vega";
 import * as chartSpecification from "./spec-distributions.json";
 import * as percentilesSpec from "./spec-percentiles.json";
+import { NumberShower } from "./NumberShower";
+import styled from "styled-components";
 
 let SquiggleVegaChart = createClassFromSpec({
   spec: chartSpecification as Spec,
@@ -42,7 +44,26 @@ export interface SquiggleChartProps {
   onEnvChange?(env: exportEnv): void;
   /** CSS width of the element */
   width?: number;
+  height?: number;
 }
+
+const Error = styled.div`
+  border: 1px solid #792e2e;
+  background: #eee2e2;
+  padding: 0.4em 0.8em;
+`;
+
+const ShowError: React.FC<{ heading: string; children: React.ReactNode }> = ({
+  heading = "Error",
+  children,
+}) => {
+  return (
+    <Error>
+      <h3>{heading}</h3>
+      {children}
+    </Error>
+  );
+};
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
@@ -56,6 +77,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   environment = [],
   onEnvChange = () => {},
   width = 500,
+  height = 60,
 }: SquiggleChartProps) => {
   let samplingInputs: SamplingInputs = {
     sampleCount: sampleCount,
@@ -71,7 +93,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     onEnvChange(environment);
     let chartResults = exports.map((chartResult: exportDistribution) => {
       if (chartResult["NAME"] === "Float") {
-        return <MakeNumberShower precision={3} number={chartResult["VAL"]} />;
+        return <NumberShower precision={3} number={chartResult["VAL"]} />;
       } else if (chartResult["NAME"] === "DistPlus") {
         let shape = chartResult.VAL.pointSetDist;
         if (shape.tag === "Continuous") {
@@ -91,6 +113,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
           return (
             <SquiggleVegaChart
               width={width}
+              height={height}
               data={{ con: values }}
               actions={false}
             />
@@ -227,7 +250,11 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     return <>{chartResults}</>;
   } else if (result.tag === "Error") {
     // At this point, we came across an error. What was our error?
-    return <p>{"Error parsing Squiggle: " + result.value}</p>;
+    return (
+      <ShowError heading={"Parse Error"}>
+        {result.value}
+      </ShowError>
+    );
   }
   return <p>{"Invalid Response"}</p>;
 };
@@ -316,92 +343,4 @@ function getPercentiles(percentiles: number[], t: DistPlus) {
     });
     return bounds;
   }
-}
-
-function MakeNumberShower(props: { number: number; precision: number }) {
-  let numberWithPresentation = numberShow(props.number, props.precision);
-  return (
-    <span>
-      {numberWithPresentation.value}
-      {numberWithPresentation.symbol}
-      {numberWithPresentation.power ? (
-        <span>
-          {"\u00b710"}
-          <span style={{ fontSize: "0.6em", verticalAlign: "super" }}>
-            {numberWithPresentation.power}
-          </span>
-        </span>
-      ) : (
-        <></>
-      )}
-    </span>
-  );
-}
-
-const orderOfMagnitudeNum = (n: number) => {
-  return Math.pow(10, n);
-};
-
-// 105 -> 3
-const orderOfMagnitude = (n: number) => {
-  return Math.floor(Math.log(n) / Math.LN10 + 0.000000001);
-};
-
-function withXSigFigs(number: number, sigFigs: number) {
-  const withPrecision = number.toPrecision(sigFigs);
-  const formatted = Number(withPrecision);
-  return `${formatted}`;
-}
-
-class NumberShower {
-  number: number;
-  precision: number;
-
-  constructor(number: number, precision = 2) {
-    this.number = number;
-    this.precision = precision;
-  }
-
-  convert() {
-    const number = Math.abs(this.number);
-    const response = this.evaluate(number);
-    if (this.number < 0) {
-      response.value = "-" + response.value;
-    }
-    return response;
-  }
-
-  metricSystem(number: number, order: number) {
-    const newNumber = number / orderOfMagnitudeNum(order);
-    const precision = this.precision;
-    return `${withXSigFigs(newNumber, precision)}`;
-  }
-
-  evaluate(number: number) {
-    if (number === 0) {
-      return { value: this.metricSystem(0, 0) };
-    }
-
-    const order = orderOfMagnitude(number);
-    if (order < -2) {
-      return { value: this.metricSystem(number, order), power: order };
-    } else if (order < 4) {
-      return { value: this.metricSystem(number, 0) };
-    } else if (order < 6) {
-      return { value: this.metricSystem(number, 3), symbol: "K" };
-    } else if (order < 9) {
-      return { value: this.metricSystem(number, 6), symbol: "M" };
-    } else if (order < 12) {
-      return { value: this.metricSystem(number, 9), symbol: "B" };
-    } else if (order < 15) {
-      return { value: this.metricSystem(number, 12), symbol: "T" };
-    } else {
-      return { value: this.metricSystem(number, order), power: order };
-    }
-  }
-}
-
-export function numberShow(number: number, precision = 2) {
-  const ns = new NumberShower(number, precision);
-  return ns.convert();
 }

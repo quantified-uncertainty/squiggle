@@ -16,7 +16,6 @@ export let CodeEditor: FC<CodeEditorProps> = ({
   value,
   onChange,
   oneLine = false,
-  width = 500,
 }: CodeEditorProps) => {
   let lineCount = value.split("\n").length;
   let id = _.uniqueId();
@@ -25,7 +24,7 @@ export let CodeEditor: FC<CodeEditorProps> = ({
       value={value}
       mode="golang"
       theme="github"
-      width={width + "px"}
+      width={"100%"}
       minLines={oneLine ? lineCount : 15}
       maxLines={oneLine ? lineCount : 15}
       showGutter={false}
