@@ -55,6 +55,7 @@ let SquigglePlayground: FC<Props> = (props) => {
       diagramStop={diagramStop}
       diagramCount={diagramCount}
       pointDistLength={pointDistLength}
+      height={150}
     />
   );
   return (

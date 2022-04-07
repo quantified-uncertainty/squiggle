@@ -43,6 +43,7 @@ export interface SquiggleChartProps {
   onEnvChange?(env: exportEnv): void;
   /** CSS width of the element */
   width?: number;
+  height?: number;
 }
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
@@ -57,6 +58,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   environment = [],
   onEnvChange = () => {},
   width = 500,
+  height = 60,
 }: SquiggleChartProps) => {
   let samplingInputs: SamplingInputs = {
     sampleCount: sampleCount,
@@ -92,6 +94,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
           return (
             <SquiggleVegaChart
               width={width}
+              height={height}
               data={{ con: values }}
               actions={false}
             />

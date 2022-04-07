@@ -1,8 +1,8 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "A basic area chart example.",
+  "description": "A basic area chart example",
   "width": 500,
-  "height": 200,
+  "height": 100,
   "padding": 5,
   "data": [
     {
@@ -13,17 +13,6 @@
     }
   ],
   "signals": [
-    {
-      "name": "mousex",
-      "description": "x position of mouse",
-      "update": "0",
-      "on": [
-        {
-          "events": "mousemove",
-          "update": "1-x()/width"
-        }
-      ]
-    },
     {
       "name": "xscale",
       "description": "The transform of the x scale",
@@ -93,6 +82,9 @@
     {
       "orient": "bottom",
       "scale": "xscale",
+      "labelColor": "#666",
+      "tickColor": "#ddd",
+      "format": "~s",
       "tickCount": 20
     }
   ],
@@ -103,11 +95,6 @@
         "data": "con"
       },
       "encode": {
-        "enter": {
-          "tooltip": {
-            "signal": "datum.cdf"
-          }
-        },
         "update": {
           "x": {
             "scale": "xscale",
@@ -122,8 +109,7 @@
             "value": 0
           },
           "fill": {
-            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: '#11ac8f'}, {offset: clamp(mousex, 0, 1), color: '#11ac8f'}, {offset: clamp(mousex, 0, 1), color: '#1b6fac'}, {offset: 1.0, color: '#1b6fac'} ] }",
-            "color": "#000"
+            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: '#4C78A8'}] }"
           },
           "interpolate": {
             "value": "monotone"
@@ -186,6 +172,9 @@
           "y": {
             "scale": "yscale",
             "field": "y"
+          },
+          "fill": {
+            "value": "#1e4577"
           }
         }
       }
