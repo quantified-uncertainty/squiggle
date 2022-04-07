@@ -167,7 +167,7 @@ describe("Normal distribution with sparklines", () => {
     -> toEqual(`▁▁▁▁▁▁▁▁▁▁▂▃▅▇███▇▅▃▂`)
   })
 
-  test("mean=5 cdf", () => {
+  test("mean=10 cdf", () => {
     let cdfNormalDistAtMean10 = x => SymbolicDist.Normal.cdf(x, normalDistAtMean10)
     let sparklineMean10 = fnImage(cdfNormalDistAtMean10, range20Float)
     Sparklines.create(sparklineMean10, ())
