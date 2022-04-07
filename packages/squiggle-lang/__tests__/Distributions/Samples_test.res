@@ -1,19 +1,14 @@
 open Jest
-open Expect
-
-let makeTest = (~only=false, str, item1, item2) =>
-  only
-    ? Only.test(str, () => expect(item1) -> toEqual(item2))
-    : test(str, () => expect(item1) -> toEqual(item2))
+open TestHelpers
 
 describe("Continuous and discrete splits", () => {
   makeTest(
-    "check splits one",
+    "splits (1)",
     SampleSet.Internals.T.splitContinuousAndDiscrete([1.432, 1.33455, 2.0]),
     ([1.432, 1.33455, 2.0], E.FloatFloatMap.empty()),
   )
   makeTest(
-    "check splits two",
+    "splits (2)",
     SampleSet.Internals.T.splitContinuousAndDiscrete([
       1.432,
       1.33455,

@@ -1,19 +1,8 @@
 open Jest
 open Expect 
+open TestHelpers 
 
-let env: DistributionOperation.env = {
-  sampleCount: 10000,
-  xyPointLength: 1000,
-}
-
-let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Output)
-let run = DistributionOperation.run(~env)
-let outputMap = fmap(~env)
-let toExt: option<'a> => 'a = E.O.toExt(
-  "Should be impossible to reach (This error is in test file)",
-)
-let unpackFloat = x => x -> toFloat -> toExt
-
+// TODO: use Normal.make (etc.), but preferably after the new validation dispatch is in. 
 let mkNormal = (mean, stdev) => GenericDist_Types.Symbolic(#Normal({mean: mean, stdev: stdev}))
 let mkBeta = (alpha, beta) => GenericDist_Types.Symbolic(#Beta({alpha: alpha, beta: beta}))
 let mkExponential = rate => GenericDist_Types.Symbolic(#Exponential({rate: rate}))
@@ -24,32 +13,35 @@ let mkLognormal = (mu, sigma) => GenericDist_Types.Symbolic(#Lognormal({mu: mu, 
 describe("mixture", () => {
   testAll("fair mean of two normal distributions", list{(0.0, 1e2), (-1e1, -1e-4), (-1e1, 1e2), (-1e1, 1e1)}, tup => {  // should be property
     let (mean1, mean2) = tup
-    let theMean = {
+    let meanValue = {
         run(Mixture([(mkNormal(mean1, 9e-1), 0.5), (mkNormal(mean2, 9e-1), 0.5)])) 
         -> outputMap(FromDist(ToFloat(#Mean)))
     }
-    theMean -> unpackFloat -> expect -> toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1) // the .56 is arbitrary? should be 15.0 with a looser tolerance?
+    meanValue -> unpackFloat -> expect -> toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1) 
   })
   testAll(
       "weighted mean of a beta and an exponential",
       // This would not survive property testing, it was easy for me to find cases that NaN'd out. 
       list{((128.0, 1.0), 2.0), ((2e-1, 64.0), 16.0), ((1e0, 1e0), 64.0)}, 
       tup => {
-        let (betaParams, rate) = tup
-        let (alpha, beta) = betaParams
-        let theMean = {
+        let ((alpha, beta), rate) = tup
+        let betaWeight = 0.25
+        let exponentialWeight = 0.75
+        let meanValue = {
           run(Mixture(
               [
-                (mkBeta(alpha, beta), 0.25), 
-                (mkExponential(rate), 0.75)
+                (mkBeta(alpha, beta), betaWeight), 
+                (mkExponential(rate), exponentialWeight)
               ]
           )) -> outputMap(FromDist(ToFloat(#Mean)))
         }
-        theMean 
+        let betaMean = 1.0 /. (1.0 +. beta /. alpha)
+        let exponentialMean = 1.0 /. rate
+        meanValue 
         -> unpackFloat 
         -> expect 
         -> toBeSoCloseTo(
-            0.25 *. 1.0 /. (1.0 +. beta /. alpha) +. 0.75 *. 1.0 /. rate, 
+            betaWeight *. betaMean +. exponentialWeight *. exponentialMean, 
             ~digits=-1
         )
       }
@@ -59,17 +51,19 @@ describe("mixture", () => {
       // Would not survive property tests: very easy to find cases that NaN out. 
       list{((-1e2,1e1), (2e0,1e0)), ((-1e-16,1e-16), (1e-8,1e0)), ((0.0,1e0), (1e0,1e-2))}, 
       tup => {
-          let (uniformParams, lognormalParams) = tup
-          let (low, high) = uniformParams
-          let (mu, sigma) = lognormalParams
-          let theMean = {
-              run(Mixture([(mkUniform(low, high), 0.6), (mkLognormal(mu, sigma), 0.4)]))
+          let ((low, high), (mu, sigma)) = tup
+          let uniformWeight = 0.6
+          let lognormalWeight = 0.4
+          let meanValue = {
+              run(Mixture([(mkUniform(low, high), uniformWeight), (mkLognormal(mu, sigma), lognormalWeight)]))
               -> outputMap(FromDist(ToFloat(#Mean)))
           }
-          theMean
+          let uniformMean = (low +. high) /. 2.0
+          let lognormalMean = mu +. sigma ** 2.0 /. 2.0
+          meanValue
           -> unpackFloat
           -> expect
-          -> toBeSoCloseTo(0.6 *. (low +. high) /. 2.0 +. 0.4 *. (mu +. sigma ** 2.0 /. 2.0), ~digits=-1)
+          -> toBeSoCloseTo(uniformWeight *. uniformMean +. lognormalWeight *. lognormalMean, ~digits=-1)
       }
   )
 })
