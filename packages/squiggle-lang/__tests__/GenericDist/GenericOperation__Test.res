@@ -6,7 +6,7 @@ let env: DistributionOperation.env = {
   xyPointLength: 100,
 }
 
-let normalDist: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 5.0, stdev: 2.0}))
+let normalDist5: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 5.0, stdev: 2.0}))
 let normalDist10: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 10.0, stdev: 2.0}))
 let normalDist20: GenericDist_Types.genericDist = Symbolic(#Normal({mean: 20.0, stdev: 2.0}))
 let uniformDist: GenericDist_Types.genericDist = Symbolic(#Uniform({low: 9.0, high: 10.0}))
@@ -22,14 +22,14 @@ let toExt: option<'a> => 'a = E.O.toExt(
 
 describe("normalize", () => {
   test("has no impact on normal dist", () => {
-    let result = run(FromDist(ToDist(Normalize), normalDist))
-    expect(result)->toEqual(Dist(normalDist))
+    let result = run(FromDist(ToDist(Normalize), normalDist5))
+    expect(result)->toEqual(Dist(normalDist5))
   })
 })
 
 describe("mean", () => {
   test("for a normal distribution", () => {
-    let result = DistributionOperation.run(~env, FromDist(ToFloat(#Mean), normalDist))
+    let result = DistributionOperation.run(~env, FromDist(ToFloat(#Mean), normalDist5))
     expect(result)->toEqual(Float(5.0))
   })
 })
@@ -48,7 +48,7 @@ describe("mixture", () => {
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {
     let result =
-      run(FromDist(ToDist(ToPointSet), normalDist))
+      run(FromDist(ToDist(ToPointSet), normalDist5))
       ->outputMap(FromDist(ToFloat(#Mean)))
       ->toFloat
       ->toExt
@@ -65,7 +65,7 @@ describe("toPointSet", () => {
 
   Skip.test("on sample set", () => {
     let result =
-      run(FromDist(ToDist(ToPointSet), normalDist))
+      run(FromDist(ToDist(ToPointSet), normalDist5))
       ->outputMap(FromDist(ToDist(ToSampleSet(1000))))
       ->outputMap(FromDist(ToDist(ToPointSet)))
       ->outputMap(FromDist(ToFloat(#Mean)))
