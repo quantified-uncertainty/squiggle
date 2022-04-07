@@ -2,8 +2,8 @@ open Jest
 open Expect 
 
 let env: DistributionOperation.env = {
-  sampleCount: 1000,
-  xyPointLength: 100,
+  sampleCount: 10000,
+  xyPointLength: 1000,
 }
 
 let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Output)
@@ -56,7 +56,8 @@ describe("mixture", () => {
   )
   testAll(
       "weighted mean of lognormal and uniform", 
-      list{}, 
+      // Would not survive property tests: very easy to find cases that NaN out. 
+      list{((-1e2,1e1), (2e0,1e0)), ((-1e-16,1e-16), (1e-8,1e0)), ((0.0,1e0), (1e0,1e-2))}, 
       tup => {
           let (uniformParams, lognormalParams) = tup
           let (low, high) = uniformParams
@@ -68,7 +69,7 @@ describe("mixture", () => {
           theMean
           -> unpackFloat
           -> expect
-          -> toBeSoCloseTo(0.6 *. (low +. high) /. 2.0 +. 0.4 *. (mu +. sigma ** 2.0 /. 2.0), ~digits=0)
+          -> toBeSoCloseTo(0.6 *. (low +. high) /. 2.0 +. 0.4 *. (mu +. sigma ** 2.0 /. 2.0), ~digits=-1)
       }
   )
 })
