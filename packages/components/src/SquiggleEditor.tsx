@@ -30,7 +30,7 @@ export interface SquiggleEditorProps {
 
 const Input = styled.div`
   border: 1px solid #ddd;
-  padding: 0.1em 0.1em;
+  padding: 0.3em 0.3em;
   margin-bottom: 1em;
 `;
 
