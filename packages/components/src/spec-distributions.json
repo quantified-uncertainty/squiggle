@@ -82,10 +82,13 @@
     {
       "orient": "bottom",
       "scale": "xscale",
-      "labelColor": "#666",
-      "tickColor": "#ddd",
+      "labelColor": "#727d93",
+      "tickColor": "#fff",
+      "tickOpacity": 0.0,
+      "domainColor": "#fff",
+      "domainOpacity": 0.0,
       "format": "~s",
-      "tickCount": 20
+      "tickCount": 10
     }
   ],
   "marks": [

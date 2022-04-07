@@ -98,46 +98,23 @@
       "orient": "bottom",
       "scale": "xscale",
       "grid": false,
-      "tickSize": 2,
-      "encode": {
-        "grid": {
-          "enter": {
-            "stroke": {
-              "value": "#ccc"
-            }
-          }
-        },
-        "ticks": {
-          "enter": {
-            "stroke": {
-              "value": "#ccc"
-            }
-          }
-        }
-      }
+      "labelColor": "#727d93",
+      "tickColor": "#fff",
+      "tickOpacity": 0.0,
+      "domainColor": "#727d93",
+      "domainOpacity": 0.1,
+      "tickCount": 5
     },
     {
       "orient": "left",
       "scale": "yscale",
       "grid": false,
-      "domain": false,
-      "tickSize": 2,
-      "encode": {
-        "grid": {
-          "enter": {
-            "stroke": {
-              "value": "#ccc"
-            }
-          }
-        },
-        "ticks": {
-          "enter": {
-            "stroke": {
-              "value": "#ccc"
-            }
-          }
-        }
-      }
+      "labelColor": "#727d93",
+      "tickColor": "#fff",
+      "tickOpacity": 0.0,
+      "domainColor": "#727d93",
+      "domainOpacity": 0.1,
+      "tickCount": 5
     }
   ],
   "marks": [
