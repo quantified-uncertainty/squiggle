@@ -6,10 +6,8 @@ let env: DistributionOperation.env = {
   xyPointLength: 100,
 }
 
-let {toFloat, toDist, toString, toError} = module(DistributionOperation.Output)
-let {run} = module(DistributionOperation)
-let {fmap} = module(DistributionOperation.Output)
-let run = run(~env)
+let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Output)
+let run = DistributionOperation.run(~env)
 let outputMap = fmap(~env)
 let toExt: option<'a> => 'a = E.O.toExt(
   "Should be impossible to reach (This error is in test file)",
@@ -39,8 +37,8 @@ describe("mixture", () => {
         let theMean = {
           run(Mixture(
               [
-                  (mkBeta(alpha, beta), 0.25), 
-                  (mkExponential(rate), 0.75)
+                (mkBeta(alpha, beta), 0.25), 
+                (mkExponential(rate), 0.75)
               ]
           )) -> outputMap(FromDist(ToFloat(#Mean)))
         }
