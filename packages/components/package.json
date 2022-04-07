@@ -18,6 +18,7 @@
     "react-dom": "^17.0.2",
     "react-scripts": "5.0.0",
     "react-vega": "^7.4.4",
+    "styled-components": "^5.3.5",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.6.3",
     "vega": "^5.21.0",

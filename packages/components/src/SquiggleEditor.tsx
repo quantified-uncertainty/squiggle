@@ -3,6 +3,7 @@ import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
 import type { exportEnv } from "@quri/squiggle-lang";
+import styled from 'styled-components'
 
 export interface SquiggleEditorProps {
   /** The input string for squiggle */
@@ -27,6 +28,12 @@ export interface SquiggleEditorProps {
   width: number;
 }
 
+const Input = styled.div`
+  border: 1px solid #ddd;
+  padding: 0.1em 0.1em;
+  margin-bottom: 1em;
+`;
+
 export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   initialSquiggleString = "",
   width = 500,
@@ -43,12 +50,13 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
     <div>
-      <CodeEditor
-        width={width}
-        value={expression}
-        onChange={setExpression}
-        oneLine={true}
-      />
+      <Input>
+        <CodeEditor
+          value={expression}
+          onChange={setExpression}
+          oneLine={true}
+        />
+      </Input>
       <SquiggleChart
         width={width}
         squiggleString={expression}
