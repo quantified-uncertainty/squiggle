@@ -216,41 +216,57 @@ export const FunctionChart: React.FC<{
     ) : (
       <></>
     );
-  let data = _rangeByCount(diagramStart, diagramStop, diagramCount)
+  let data1 = _rangeByCount(diagramStart, diagramStop, diagramCount);
+  let valueData = data1
     .map((x) => {
       let result = distPlusFn(x);
       if (result.tag === "Ok") {
-        let percentiles = getPercentiles(percentileArray, result.value);
-        return {
-          x: x,
-          p1: percentiles[0],
-          p5: percentiles[1],
-          p10: percentiles[2],
-          p20: percentiles[3],
-          p30: percentiles[4],
-          p40: percentiles[5],
-          p50: percentiles[6],
-          p60: percentiles[7],
-          p70: percentiles[8],
-          p80: percentiles[9],
-          p90: percentiles[10],
-          p95: percentiles[11],
-          p99: percentiles[12],
-        };
-      } else {
-        console.log("Error", x, result);
-        return null;
-      }
+        return { x: x, value: result.value };
+      } else return null;
+    })
+    .filter((x) => x !== null)
+    .map(({ x, value }) => {
+      let percentiles = getPercentiles(percentileArray, value);
+      return {
+        x: x,
+        p1: percentiles[0],
+        p5: percentiles[1],
+        p10: percentiles[2],
+        p20: percentiles[3],
+        p30: percentiles[4],
+        p40: percentiles[5],
+        p50: percentiles[6],
+        p60: percentiles[7],
+        p70: percentiles[8],
+        p80: percentiles[9],
+        p90: percentiles[10],
+        p95: percentiles[11],
+        p99: percentiles[12],
+      };
+    });
+
+  let errorData = data1
+    .map((x) => {
+      let result = distPlusFn(x);
+      if (result.tag === "Error") {
+        return { x: x, error: result.value };
+      } else return null;
     })
     .filter((x) => x !== null);
+  let error2 = _.groupBy(errorData, (x) => x.error);
   return (
     <>
       <SquigglePercentilesChart
-        data={{ facet: data }}
+        data={{ facet: valueData }}
         actions={false}
         signalListeners={signalListeners}
       />
       {showChart}
+      {_.keysIn(error2).map((k) => (
+        <ShowError heading={k}>
+          {`Values: [${error2[k].map((r) => r.x.toFixed(2)).join(",")}]`}
+        </ShowError>
+      ))}
     </>
   );
 };
@@ -308,7 +324,6 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     // At this point, we came across an error. What was our error?
     return <ShowError heading={"Parse Error"}>{result.value}</ShowError>;
   }
-  return <p>{"Invalid Response"}</p>;
 };
 
 function getPercentiles(percentiles: number[], t: DistPlus) {
