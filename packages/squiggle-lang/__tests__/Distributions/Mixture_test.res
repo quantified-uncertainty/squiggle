@@ -37,12 +37,12 @@ describe("mixture", () => {
         let (betaParams, rate) = tup
         let (alpha, beta) = betaParams
         let theMean = {
-            run(Mixture(
-                [
-                    (mkBeta(alpha, beta), 0.25), 
-                    (mkExponential(rate), 0.75)
-                ]
-            )) -> outputMap(FromDist(ToFloat(#Mean)))
+          run(Mixture(
+              [
+                  (mkBeta(alpha, beta), 0.25), 
+                  (mkExponential(rate), 0.75)
+              ]
+          )) -> outputMap(FromDist(ToFloat(#Mean)))
         }
         theMean 
         -> unpackFloat 

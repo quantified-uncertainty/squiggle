@@ -30,9 +30,6 @@
     "rationale", 
     "bisect_ppx"
   ],
-  "bs-dev-dependencies": [
-    "rescript-fast-check"
-  ],
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",

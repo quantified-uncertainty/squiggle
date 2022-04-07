@@ -35,7 +35,6 @@
     "docsify": "^4.12.2",
     "gentype": "^4.3.0",
     "jest": "^27.5.1",
-    "rescript-fast-check": "^1.1.1", 
     "moduleserve": "0.9.1",
     "ts-jest": "^27.1.4",
     "ts-loader": "^9.2.8",
