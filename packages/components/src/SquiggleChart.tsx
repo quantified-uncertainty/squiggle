@@ -12,7 +12,7 @@ import { createClassFromSpec } from "react-vega";
 import * as chartSpecification from "./spec-distributions.json";
 import * as percentilesSpec from "./spec-percentiles.json";
 import { NumberShower } from "./NumberShower";
-import styled from 'styled-components'
+import styled from "styled-components";
 
 let SquiggleVegaChart = createClassFromSpec({
   spec: chartSpecification as Spec,
@@ -53,14 +53,17 @@ const Error = styled.div`
   padding: 0.4em 0.8em;
 `;
 
-const ShowError: React.FC<{ heading:string, errorMessage: string }> = ({ heading="Error", errorMessage }) => {
+const ShowError: React.FC<{ heading: string; children: React.ReactNode }> = ({
+  heading = "Error",
+  children,
+}) => {
   return (
     <Error>
       <h3>{heading}</h3>
-      <>{errorMessage}</>
+      {children}
     </Error>
   );
-}
+};
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
@@ -72,7 +75,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   diagramStop = 10,
   diagramCount = 20,
   environment = [],
-  onEnvChange = () => { },
+  onEnvChange = () => {},
   width = 500,
   height = 60,
 }: SquiggleChartProps) => {
@@ -247,7 +250,11 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     return <>{chartResults}</>;
   } else if (result.tag === "Error") {
     // At this point, we came across an error. What was our error?
-    return <ShowError heading={"Parse Error"} errorMessage={result.value} />
+    return (
+      <ShowError heading={"Parse Error"}>
+        {result.value}
+      </ShowError>
+    );
   }
   return <p>{"Invalid Response"}</p>;
 };
