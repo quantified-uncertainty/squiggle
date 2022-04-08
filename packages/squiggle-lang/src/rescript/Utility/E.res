@@ -289,16 +289,14 @@ module A = {
       ))
       |> Rationale.Result.return
     }
-  let rangeFloat = (~step=1, start, stop) =>
-    Belt.Array.rangeBy(start, stop, ~step) |> fmap(Belt.Int.toFloat)
 
   let diff = (arr: array<float>): array<float> =>
     Belt.Array.zipBy(arr, Belt.Array.sliceToEnd(arr, 1), (left, right) => right -. left)
 
-  let rec rangeByFloat = (~step: float=1.0, start : float, end: float) : array<float> => 
+  let rec rangeFloat = (~step: float=1.0, start : float, end: float) : array<float> => 
     start > end ?
       []
-      : Belt.Array.concat([start], rangeByFloat(~step, start +. step, end))
+      : Belt.Array.concat([start], rangeFloat(~step, start +. step, end))
 
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {

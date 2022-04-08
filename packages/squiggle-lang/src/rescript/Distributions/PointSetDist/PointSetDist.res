@@ -173,7 +173,7 @@ let cdf = T.Integral.xToY
 let toSparkline = (buckets: int, t: t ): string => {
   let size : float = T.maxX(t) -. T.minX(t)
   let stepSize = size /. Belt.Int.toFloat(buckets)
-  let cdfImage = E.A.rangeByFloat(~step=stepSize, T.minX(t), T.maxX(t)) -> Belt.Array.map(val => cdf(val,t))
+  let cdfImage = E.A.rangeFloat(~step=stepSize, T.minX(t), T.maxX(t)) -> Belt.Array.map(val => cdf(val,t))
   Sparklines.create(E.A.diff(cdfImage), ())
 }
 
