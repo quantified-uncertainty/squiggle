@@ -41,6 +41,8 @@ module Operation = {
     | #Sample
   ]
 
+  type pointsetXSelection = [#Linear | #ByWeight]
+
   type toDist =
     | Normalize
     | ToPointSet
@@ -55,6 +57,7 @@ module Operation = {
     | ToDist(toDist)
     | ToDistCombination(direction, arithmeticOperation, [#Dist(genericDist) | #Float(float)])
     | ToString
+    | ToSparkline(int)
 
   type singleParamaterFunction =
     | FromDist(fromDist)
@@ -78,6 +81,7 @@ module Operation = {
     | ToDist(Truncate(_, _)) => `truncate`
     | ToDist(Inspect) => `inspect`
     | ToString => `toString`
+    | ToSparkline(n) => `toSparkline(${E.I.toString(n)})`
     | ToDistCombination(Algebraic, _, _) => `algebraic`
     | ToDistCombination(Pointwise, _, _) => `pointwise`
     }

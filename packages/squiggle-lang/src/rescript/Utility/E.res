@@ -180,6 +180,12 @@ module R = {
 module R2 = {
   let fmap = (a,b) => R.fmap(b,a)
   let bind = (a, b) => R.bind(b, a) 
+
+  //Converts result type to change error type only
+  let errMap = (a, map) => switch(a){
+    | Ok(r) => Ok(r)
+    | Error(e) => map(e)
+  }
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>

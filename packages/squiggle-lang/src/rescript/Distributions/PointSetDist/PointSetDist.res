@@ -202,3 +202,8 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Sample => sample(s)
   | #Mean => T.mean(s)
   }
+
+let toSparkline = (t: t) =>
+  T.toContinuous(t)
+  ->E.O2.toResult("toContinous Error: Could not convert into continuous distribution")
+  ->E.R2.fmap(r => Continuous.getShape(r).ys->Sparklines.create())

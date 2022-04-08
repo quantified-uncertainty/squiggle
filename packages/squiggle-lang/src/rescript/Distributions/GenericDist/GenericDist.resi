@@ -20,22 +20,20 @@ let toFloatOperation: (
 ) => result<float, error>
 
 let toPointSet: (
+  t,
   ~xyPointLength: int,
   ~sampleCount: int,
-  t,
+  ~xSelection: GenericDist_Types.Operation.pointsetXSelection=?,
+  unit,
 ) => result<PointSetTypes.pointSetDist, error>
-let toSparkline: (
-  ~sampleCount: int,
-  ~buckets: int=?,
-  t,
-) => result<string, error>
+let toSparkline: (t, ~sampleCount: int, ~buckets: int=?, unit) => result<string, error>
 
 let truncate: (
   t,
   ~toPointSetFn: toPointSetFn,
   ~leftCutoff: option<float>=?,
   ~rightCutoff: option<float>=?,
-  unit
+  unit,
 ) => result<t, error>
 
 let algebraicCombination: (

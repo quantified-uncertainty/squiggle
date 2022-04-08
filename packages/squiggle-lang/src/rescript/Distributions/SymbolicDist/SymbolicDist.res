@@ -346,11 +346,11 @@ module T = {
     | _ => #NoSolution
     }
 
-  let toPointSetDist = (sampleCount, d: symbolicDist): PointSetTypes.pointSetDist =>
+  let toPointSetDist = (~xSelection=#ByWeight, sampleCount, d: symbolicDist): PointSetTypes.pointSetDist =>
     switch d {
     | #Float(v) => Discrete(Discrete.make(~integralSumCache=Some(1.0), {xs: [v], ys: [1.0]}))
     | _ =>
-      let xs = interpolateXs(~xSelection=#ByWeight, d, sampleCount)
+      let xs = interpolateXs(~xSelection, d, sampleCount)
       let ys = xs |> E.A.fmap(x => pdf(x, d))
       Continuous(Continuous.make(~integralSumCache=Some(1.0), {xs: xs, ys: ys}))
     }

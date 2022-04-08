@@ -114,6 +114,10 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
     | ToString => dist->GenericDist.toString->String
+    | ToSparkline(buckets) =>
+      GenericDist.toSparkline(dist, ~sampleCount, ~buckets, ())
+      ->E.R2.fmap(r => String(r))
+      ->OutputLocal.fromResult
     | ToDist(Inspect) => {
         Js.log2("Console log requested: ", dist)
         Dist(dist)
@@ -127,7 +131,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       dist->GenericDist.sampleN(n)->E.R2.fmap(r => Dist(SampleSet(r)))->OutputLocal.fromResult
     | ToDist(ToPointSet) =>
       dist
-      ->GenericDist.toPointSet(~xyPointLength, ~sampleCount)
+      ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
       ->E.R2.fmap(r => Dist(PointSet(r)))
       ->OutputLocal.fromResult
     | ToDistCombination(Algebraic, _, #Float(_)) => GenDistError(NotYetImplemented)
