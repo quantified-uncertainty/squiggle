@@ -22,7 +22,7 @@ describe("Normal distribution with sparklines", () => {
 
   let normalDistAtMean5: SymbolicDistTypes.normal = {mean: 5.0, stdev: 2.0}
   let normalDistAtMean10: SymbolicDistTypes.normal = {mean: 10.0, stdev: 2.0}
-  let range20Float = E.A.rangeFloat(0, 20) // [0.0,1.0,2.0,3.0,4.0,...19.0,]
+  let range20Float = E.A.rangeFloat(0.0, 20.0) // [0.0,1.0,2.0,3.0,4.0,...19.0,]
 
   let pdfNormalDistAtMean5 = x => Normal.pdf(x, normalDistAtMean5)
   let sparklineMean5 = pdfImage(pdfNormalDistAtMean5, range20Float)
