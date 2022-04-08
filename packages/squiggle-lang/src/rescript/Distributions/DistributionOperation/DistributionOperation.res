@@ -10,10 +10,10 @@ type env = {
 }
 
 type outputType =
-  | Dist(GenericDist_Types.genericDist)
+  | Dist(genericDist)
   | Float(float)
   | String(string)
-  | GenDistError(GenericDist_Types.error)
+  | GenDistError(error)
 
 /*
 We're going to add another function to this module later, so first define a

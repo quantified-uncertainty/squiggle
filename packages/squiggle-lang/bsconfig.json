@@ -47,7 +47,7 @@
     [
       "../../node_modules/bisect_ppx/ppx", 
       "--exclude-files", 
-      ".*_Test\\.res$$"
+      ".*_test\\.res$$"
     ]
   ]
 }
