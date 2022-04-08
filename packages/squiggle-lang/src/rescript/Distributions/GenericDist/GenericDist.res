@@ -75,8 +75,10 @@ let toPointSet = (~xyPointLength, ~sampleCount, t): result<PointSetTypes.pointSe
   }
 }
 
-let toSparkline = (~xyPointLength: int, ~sampleCount: int, ~buckets: int = 20, t: t) : result<string, error> => 
-  toPointSet(~xyPointLength, ~sampleCount, t) -> E.R2.fmap(PointSetDist.toSparkline(buckets))
+let toSparkline = (~sampleCount: int, ~buckets: int = 20, t: t) : result<string, error> => 
+  toPointSet(~xyPointLength=buckets, ~sampleCount, t)
+    -> E.R.bind(x => x -> PointSetDist.T.toContinuous -> E.O2.toResult(GenericDist_Types.Other("Could not convert to continuous")))
+    -> E.R2.fmap(c => Sparklines.create(Continuous.getShape(c).ys, ()))
 
 module Truncate = {
   let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>

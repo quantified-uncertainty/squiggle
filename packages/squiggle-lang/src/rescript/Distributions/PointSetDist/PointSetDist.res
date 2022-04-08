@@ -168,15 +168,6 @@ let pdf = (f: float, t: t) => {
 let inv = T.Integral.yToX
 let cdf = T.Integral.xToY
 
-
-@genType
-let toSparkline = (buckets: int, t: t ): string => {
-  let size : float = T.maxX(t) -. T.minX(t)
-  let stepSize = size /. Belt.Int.toFloat(buckets)
-  let cdfImage = E.A.rangeFloat(~step=stepSize, T.minX(t), T.maxX(t)) -> Belt.Array.map(val => cdf(val,t))
-  Sparklines.create(E.A.diff(cdfImage), ())
-}
-
 let doN = (n, fn) => {
   let items = Belt.Array.make(n, 0.0)
   for x in 0 to n - 1 {
@@ -200,7 +191,6 @@ let isFloat = (t: t) =>
 let sampleNRendered = (n, dist) => {
   let integralCache = T.Integral.get(dist)
   let distWithUpdatedIntegralCache = T.updateIntegralCache(Some(integralCache), dist)
-
   doN(n, () => sample(distWithUpdatedIntegralCache))
 }
 

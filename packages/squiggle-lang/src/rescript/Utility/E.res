@@ -101,6 +101,7 @@ module O2 = {
   let default = (a, b) => O.default(b, a)
   let toExn = (a, b) => O.toExn(b, a)
   let fmap = (a, b) => O.fmap(b, a)
+  let toResult = (a, b) => O.toResult(b, a)
 }
 
 /* Functions */
@@ -178,6 +179,7 @@ module R = {
 
 module R2 = {
   let fmap = (a,b) => R.fmap(b,a)
+  let bind = (a, b) => R.bind(b, a) 
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>
@@ -290,13 +292,6 @@ module A = {
       |> Rationale.Result.return
     }
 
-  let diff = (arr: array<float>): array<float> =>
-    Belt.Array.zipBy(arr, Belt.Array.sliceToEnd(arr, 1), (left, right) => right -. left)
-
-  let rec rangeFloat = (~step: float=1.0, start : float, end: float) : array<float> => 
-    start > end ?
-      []
-      : Belt.Array.concat([start], rangeFloat(~step, start +. step, end))
 
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {
@@ -447,6 +442,10 @@ module A = {
     let sum = Belt.Array.reduce(_, 0., (i, j) => i +. j)
     let mean = a => sum(a) /. (Array.length(a) |> float_of_int)
     let random = Js.Math.random_int
+
+    let diff = (arr: array<float>): array<float> =>
+      Belt.Array.zipBy(arr, Belt.Array.sliceToEnd(arr, 1), (left, right) => right -. left)
+
 
     exception RangeError(string)
     let range = (min: float, max: float, n: int): array<float> =>
