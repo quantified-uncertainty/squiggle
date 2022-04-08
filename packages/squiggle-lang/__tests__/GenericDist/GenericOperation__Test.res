@@ -6,8 +6,18 @@ let env: DistributionOperation.env = {
   xyPointLength: 100,
 }
 
-
-let {normalDist5, normalDist10, normalDist20, uniformDist} = module(GenericDist_Fixtures)
+let {
+  normalDist5,
+  normalDist10,
+  normalDist20,
+  normalDist,
+  uniformDist,
+  betaDist,
+  lognormalDist,
+  cauchyDist,
+  triangularDist,
+  exponentialDist,
+} = module(GenericDist_Fixtures)
 let {toFloat, toDist, toString, toError} = module(DistributionOperation.Output)
 let {run} = module(DistributionOperation)
 let {fmap} = module(DistributionOperation.Output)
@@ -40,6 +50,57 @@ describe("mixture", () => {
       ->toExt
     expect(result)->toBeCloseTo(15.28)
   })
+})
+
+describe("sparkline", () => {
+  let runTest = (
+    name: string,
+    dist: GenericDist_Types.genericDist,
+    expected: DistributionOperation.outputType,
+  ) => {
+    test(name, () => {
+      let result = DistributionOperation.run(~env, FromDist(ToSparkline(20), dist))
+      expect(result)->toEqual(expected)
+    })
+  }
+
+  runTest(
+    "normal",
+    normalDist,
+    String(`▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁`),
+  )
+
+  runTest(
+    "uniform",
+    uniformDist,
+    String(`████████████████████`),
+  )
+
+  runTest("beta", betaDist, String(`▁▄▇████▇▆▅▄▃▃▂▁▁▁▁▁▁`))
+
+  runTest(
+    "lognormal",
+    lognormalDist,
+    String(`▁█▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁`),
+  )
+
+  runTest(
+    "cauchy",
+    cauchyDist,
+    String(`▁▁▁▁▁▁▁▁▁██▁▁▁▁▁▁▁▁▁`),
+  )
+
+  runTest(
+    "triangular",
+    triangularDist,
+    String(`▁▁▂▃▄▅▆▇████▇▆▅▄▃▂▁▁`),
+  )
+
+  runTest(
+    "exponential",
+    exponentialDist,
+    String(`█▅▄▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁`),
+  )
 })
 
 describe("toPointSet", () => {
