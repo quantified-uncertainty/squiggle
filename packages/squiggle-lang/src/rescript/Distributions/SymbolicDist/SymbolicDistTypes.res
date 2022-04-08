@@ -98,7 +98,6 @@ let valiFloat: float => validated<float> = t => {
   Ok(t)
 }
 
-@genType
 type symbolicDistR = [
   | #NormalR(validated<normal>)
   | #BetaR(validated<beta>)
@@ -110,6 +109,7 @@ type symbolicDistR = [
   | #FloatR(validated<float>)
 ]
 
+@genType
 type symbolicDist = [
   | #Normal(normal)
   | #Beta(beta)
