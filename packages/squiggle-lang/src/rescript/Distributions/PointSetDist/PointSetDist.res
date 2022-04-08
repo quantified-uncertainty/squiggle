@@ -168,6 +168,22 @@ let pdf = (f: float, t: t) => {
 let inv = T.Integral.yToX
 let cdf = T.Integral.xToY
 
+let diff = (arr: array<float>): array<float> =>
+  Belt.Array.zipBy(arr, Belt.Array.sliceToEnd(arr, 1), (left, right) => right -. left)
+
+let rec rangeByFloat = (start : float, end: float, step: float) => 
+  start > end ?
+    []
+    : Belt.Array.concat([start], rangeByFloat(start +. step, end, step))
+
+@genType
+let toSparkline = (buckets: int, t: t ): string => {
+  let size : float = T.maxX(t) -. T.minX(t)
+  let stepSize = size /. Belt.Int.toFloat(buckets)
+  let cdf = rangeByFloat(T.minX(t), T.maxX(t), stepSize) -> Belt.Array.map(val => cdf(val,t))
+  Sparklines.create(diff(cdf), ())
+}
+
 let doN = (n, fn) => {
   let items = Belt.Array.make(n, 0.0)
   for x in 0 to n - 1 {

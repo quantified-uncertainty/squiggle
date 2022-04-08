@@ -49,7 +49,7 @@ let toFloatOperation = (
   }
 }
 
-//Todo: If it's a pointSet, but the xyPointLenght is different from what it has, it should change.
+//Todo: If it's a pointSet, but the xyPointLength is different from what it has, it should change.
 // This is tricky because the case of discrete distributions.
 // Also, change the outputXYPoints/pointSetDistLength details
 let toPointSet = (~xyPointLength, ~sampleCount, t): result<PointSetTypes.pointSetDist, error> => {
@@ -74,6 +74,9 @@ let toPointSet = (~xyPointLength, ~sampleCount, t): result<PointSetTypes.pointSe
     }
   }
 }
+
+let toSparkline = (~xyPointLength: int, ~sampleCount: int, ~buckets: int = 20, t: t) : result<string, error> => 
+  toPointSet(~xyPointLength, ~sampleCount, t) -> E.R2.fmap(PointSetDist.toSparkline(buckets))
 
 module Truncate = {
   let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>

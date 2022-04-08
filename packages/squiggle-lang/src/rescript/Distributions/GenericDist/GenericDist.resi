@@ -24,6 +24,12 @@ let toPointSet: (
   ~sampleCount: int,
   t,
 ) => result<PointSetTypes.pointSetDist, error>
+let toSparkline: (
+  ~xyPointLength: int,
+  ~sampleCount: int,
+  ~buckets: int=?,
+  t,
+) => result<string, error>
 
 let truncate: (
   t,
