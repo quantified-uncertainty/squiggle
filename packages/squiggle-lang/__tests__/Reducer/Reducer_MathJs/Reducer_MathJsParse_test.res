@@ -11,9 +11,11 @@ let testParse = (expr, answer) => test(expr, () => expectParseToBe(expr, answer)
 
 let testDescParse = (desc, expr, answer) => test(desc, () => expectParseToBe(expr, answer))
 
-let skipTestParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
+module MySkip = {
+  let testParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
 
-let skipDescTestParse = (desc, expr, answer) => Skip.test(desc, () => expectParseToBe(expr, answer))
+  let testDescParse = (desc, expr, answer) => Skip.test(desc, () => expectParseToBe(expr, answer))
+}
 
 describe("MathJs parse", () => {
   describe("literals operators paranthesis", () => {
@@ -26,6 +28,10 @@ describe("MathJs parse", () => {
     testParse("(1+2)", "(add(1, 2))")
   })
 
+  describe("multi-line", () => {
+    testParse("1; 2", "{1; 2}")
+  })
+
   describe("variables", () => {
     testParse("x = 1", "x = 1")
     testParse("x", "x")
@@ -33,16 +39,16 @@ describe("MathJs parse", () => {
   })
 
   describe("functions", () => {
-    skipTestParse("identity(x) = x", "???")
-    skipTestParse("identity(x)", "???")
+    MySkip.testParse("identity(x) = x", "???")
+    MySkip.testParse("identity(x)", "???")
   })
 
   describe("arrays", () => {
-    test("empty", () => expectParseToBe("[]", "[]"))
-    test("define", () => expectParseToBe("[0, 1, 2]", "[0, 1, 2]"))
-    test("define with strings", () => expectParseToBe("['hello', 'world']", "['hello', 'world']"))
-    skipTestParse("range(0, 4)", "range(0, 4)")
-    test("index", () => expectParseToBe("([0,1,2])[1]", "([0, 1, 2])[1]"))
+    testDescParse("empty", "[]", "[]")
+    testDescParse("define", "[0, 1, 2]", "[0, 1, 2]")
+    testDescParse("define with strings", "['hello', 'world']", "['hello', 'world']")
+    MySkip.testParse("range(0, 4)", "range(0, 4)")
+    testDescParse("index", "([0,1,2])[1]", "([0, 1, 2])[1]")
   })
 
   describe("records", () => {
@@ -51,10 +57,10 @@ describe("MathJs parse", () => {
   })
 
   describe("comments", () => {
-    skipDescTestParse("define", "# This is a comment", "???")
+    MySkip.testDescParse("define", "# This is a comment", "???")
   })
 
-  describe("if statement", () => {
-    skipDescTestParse("define", "if (true) { 1 } else { 0 }", "???")
+  describe("if statement", () => { // TODO Tertiary operator instead
+    MySkip.testDescParse("define", "if (true) { 1 } else { 0 }", "???")
   })
 })

@@ -42,6 +42,15 @@ describe("reducer using mathjs parse", () => {
       "Ok((:$atIndex (:$constructRecord (('a' 1) ('b' 2))) ('a')))",
     )
   })
+  describe("multi-line", () => {
+    testParseToBe("1; 2", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) 1) 2))")
+    testParseToBe("1+1; 2+1", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:add 1 1)) (:add 2 1)))")
+  })
+  describe("assignment", () => {
+    testParseToBe("x=1; x", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :x 1)) :x))")
+    testParseToBe("x=1+1; x+1", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :x (:add 1 1))) (:add :x 1)))")
+  })
+
 })
 
 describe("eval", () => {
@@ -71,13 +80,26 @@ describe("eval", () => {
     test("index", () => expectEvalToBe("{a: 1}.a", "Ok(1)"))
     test("index not found", () => expectEvalToBe("{a: 1}.b", "Error(Record property not found: b)"))
   })
+
+  describe("multi-line", () => {
+    testEvalToBe("1; 2", "Error(Assignment expected)")
+    testEvalToBe("1+1; 2+1", "Error(Assignment expected)")
+  })
+  describe("assignment", () => {
+    testEvalToBe("x=1; x", "Ok(1)")
+    testEvalToBe("x=1+1; x+1", "Ok(3)")
+    testEvalToBe("x=1; y=x+1; y+1", "Ok(3)")
+    testEvalToBe("1; x=1", "Error(Assignment expected)")
+    testEvalToBe("1; 1", "Error(Assignment expected)")
+    testEvalToBe("x=1; x=1", "Error(Expression expected)")
+  })
 })
 
 describe("test exceptions", () => {
   testDescEvalToBe(
     "javascript exception",
-    "jsraise('div by 0')",
+    "javascriptraise('div by 0')",
     "Error(JS Exception: Error: 'div by 0')",
   )
-  testDescEvalToBe("rescript exception", "resraise()", "Error(TODO: unhandled rescript exception)")
+  testDescEvalToBe("rescript exception", "rescriptraise()", "Error(TODO: unhandled rescript exception)")
 })

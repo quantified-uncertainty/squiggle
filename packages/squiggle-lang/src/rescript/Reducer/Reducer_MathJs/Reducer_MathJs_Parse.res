@@ -12,17 +12,16 @@ type blockNode = {...node, "blocks": array<block>}
 //conditionalNode
 type constantNode = {...node, "value": unit}
 //functionAssignmentNode
-type functionNode = {...node, "fn": string, "args": array<node>}
 type indexNode = {...node, "dimensions": array<node>}
 type objectNode = {...node, "properties": Js.Dict.t<node>}
-type accessorNode = {...node, "object": node, "index": indexNode}
-type operatorNode = {...functionNode, "op": string}
+type accessorNode = {...node, "object": node, "index": indexNode, "name": string}
 
-//parenthesisNode
 type parenthesisNode = {...node, "content": node}
 //rangeNode
 //relationalNode
 type symbolNode = {...node, "name": string}
+type functionNode = {...node, "fn": unit, "args": array<node>}
+type operatorNode = {...functionNode, "op": string}
 type assignmentNode = {...node, "object": symbolNode, "value": node}
 type assignmentNodeWAccessor = {...node, "object": accessorNode, "value": node}
 type assignmentNodeWIndex = {...assignmentNodeWAccessor, "index": Js.null<indexNode>}
@@ -93,6 +92,18 @@ let castNodeType = (node: node) => {
   }
 }
 
+external unitAsSymbolNode: unit => symbolNode = "%identity"
+external unitAsString: unit => string = "%identity"
+
+let nameOfFunctionNode = (fNode: functionNode): string => {
+  let name = fNode["fn"]
+  if Js.typeof(name) == "string" {
+    name->unitAsString
+  } else {
+    (name->unitAsSymbolNode)["name"]
+  }
+}
+
 let rec toString = (mathJsNode: mathJsNode): string => {
   let toStringValue = (a: 'a): string =>
     if Js.typeof(a) == "string" {
@@ -108,7 +119,7 @@ let rec toString = (mathJsNode: mathJsNode): string => {
     ->Js.String.concatMany("")
 
   let toStringFunctionNode = (fnode: functionNode): string =>
-    `${fnode["fn"]}(${fnode["args"]->toStringNodeArray})`
+    `${fnode->nameOfFunctionNode}(${fnode["args"]->toStringNodeArray})`
 
   let toStringObjectEntry = ((key: string, value: node)): string =>
     `${key}: ${value->toStringMathJsNode}`

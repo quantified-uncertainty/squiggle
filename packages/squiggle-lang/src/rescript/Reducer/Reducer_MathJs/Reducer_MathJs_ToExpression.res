@@ -1,11 +1,11 @@
 module ErrorValue = Reducer_ErrorValue
 module ExpressionValue = ReducerInterface.ExpressionValue
-module ExtressionT = Reducer_Expression_T
+module ExpressionT = Reducer_Expression_T
 module JavaScript = Reducer_Js
 module Parse = Reducer_MathJs_Parse
 module Result = Belt.Result
 
-type expression = ExtressionT.expression
+type expression = ExpressionT.expression
 type expressionValue = ExpressionValue.expressionValue
 type errorValue = ErrorValue.errorValue
 
@@ -18,10 +18,19 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
         )
       )
 
-    let castFunctionNode = fNode => {
-      let fn = fNode["fn"]->ExpressionValue.EvSymbol->ExtressionT.EValue
+    let toEvCallValue = (name: string): expression =>
+      name->ExpressionValue.EvCall->ExpressionT.EValue
+    let toEvSymbolValue = (name: string): expression =>
+      name->ExpressionValue.EvSymbol->ExpressionT.EValue
+
+    let passToFunction = (fName: string, rLispArgs): result<expression, errorValue> => {
+      let fn = fName->toEvCallValue
+      rLispArgs->Result.flatMap(lispArgs => list{fn, ...lispArgs}->ExpressionT.EList->Ok)
+    }
+
+    let caseFunctionNode = fNode => {
       let lispArgs = fNode["args"]->Belt.List.fromArray->fromNodeList
-      lispArgs->Result.map(argsCode => list{fn, ...argsCode}->ExtressionT.EList)
+      passToFunction(fNode->Parse.nameOfFunctionNode, lispArgs)
     }
 
     let caseObjectNode = oNode => {
@@ -34,15 +43,16 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
             fromNode(value)->Result.map(valueExpression => {
               let entryCode =
                 list{
-                  key->ExpressionValue.EvString->ExtressionT.EValue,
+                  key->ExpressionValue.EvString->ExpressionT.EValue,
                   valueExpression,
-                }->ExtressionT.EList
+                }->ExpressionT.EList
               list{entryCode, ...acc}
             })
           )
         )
-        let lispName = "$constructRecord"->ExpressionValue.EvSymbol->ExtressionT.EValue
-        rargs->Result.map(args => list{lispName, ExtressionT.EList(args)}->ExtressionT.EList)
+        rargs->Result.flatMap(args =>
+          passToFunction("$constructRecord", list{ExpressionT.EList(args)}->Ok)
+        ) // $consturctRecord gets a single argument: List of key-value paiers
       }
 
       oNode["properties"]->Js.Dict.entries->Belt.List.fromArray->fromObjectEntries
@@ -60,30 +70,69 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
             })
           ),
       )
-      rpropertyCodeList->Result.map(propertyCodeList => ExtressionT.EList(propertyCodeList))
+      rpropertyCodeList->Result.map(propertyCodeList => ExpressionT.EList(propertyCodeList))
     }
 
     let caseAccessorNode = (objectNode, indexNode) => {
-      let fn = "$atIndex"->ExpressionValue.EvSymbol->ExtressionT.EValue
-
       caseIndexNode(indexNode)->Result.flatMap(indexCode => {
-        fromNode(objectNode)->Result.map(objectCode =>
-          list{fn, objectCode, indexCode}->ExtressionT.EList
+        fromNode(objectNode)->Result.flatMap(objectCode =>
+          passToFunction("$atIndex", list{objectCode, indexCode}->Ok)
         )
       })
     }
 
-    switch typedMathJsNode {
-    | MjArrayNode(aNode) =>
-      aNode["items"]->Belt.List.fromArray->fromNodeList->Result.map(list => ExtressionT.EList(list))
-    | MjConstantNode(cNode) =>
-      cNode["value"]->JavaScript.Gate.jsToEv->Result.map(v => v->ExtressionT.EValue)
-    | MjFunctionNode(fNode) => fNode->castFunctionNode
-    | MjOperatorNode(opNode) => opNode->Parse.castOperatorNodeToFunctionNode->castFunctionNode
-    | MjParenthesisNode(pNode) => pNode["content"]->fromNode
-    | MjAccessorNode(aNode) => caseAccessorNode(aNode["object"], aNode["index"])
-    | MjObjectNode(oNode) => caseObjectNode(oNode)
-    | MjSymbolNode(sNode) => sNode["name"]->ExpressionValue.EvSymbol->ExtressionT.EValue->Ok
-    | MjIndexNode(iNode) => caseIndexNode(iNode)
+    let caseAssignmentNode = aNode => {
+      let symbol = aNode["object"]["name"]->toEvSymbolValue
+      let rValueExpression = fromNode(aNode["value"])
+      rValueExpression->Result.flatMap(valueExpression => {
+        let lispArgs = list{symbol, valueExpression}->Ok
+        passToFunction("$let", lispArgs)
+      })
     }
+
+    let caseArrayNode = aNode => {
+      aNode["items"]->Belt.List.fromArray->fromNodeList->Result.map(list => ExpressionT.EList(list))
+    }
+
+    let caseBlockNode = (bNode): result<expression, errorValue> => {
+      let blocks = bNode["blocks"]
+      let initialBindings = passToFunction("$$bindings", list{}->Ok)
+      let lastIndex = Belt.Array.length(blocks) - 1
+      blocks->Belt.Array.reduceWithIndex(initialBindings, (rPreviousBindings, block, i) => {
+        rPreviousBindings->Result.flatMap(previousBindings => {
+          let node = block["node"]
+          let rStatement: result<expression, errorValue> = node->fromNode
+          let bindName = if i == lastIndex {
+            "$$bindExpression"
+          } else {
+            "$$bindStatement"
+          }
+          rStatement->Result.flatMap((statement: expression) => {
+            let lispArgs = list{previousBindings, statement}->Ok
+            passToFunction(bindName, lispArgs)
+          })
+        })
+      })
+    }
+
+    let rFinalExpression: result<expression, errorValue> = switch typedMathJsNode {
+    | MjAccessorNode(aNode) => caseAccessorNode(aNode["object"], aNode["index"])
+    | MjArrayNode(aNode) => caseArrayNode(aNode)
+    | MjAssignmentNode(aNode) => caseAssignmentNode(aNode)
+    | MjSymbolNode(sNode) => {
+        let expr: expression = toEvSymbolValue(sNode["name"])
+        let rExpr: result<expression, errorValue> = expr->Ok
+        rExpr
+      }
+    | MjBlockNode(bNode) => caseBlockNode(bNode)
+    // | MjBlockNode(bNode) => "statement"->toEvSymbolValue->Ok
+    | MjConstantNode(cNode) =>
+      cNode["value"]->JavaScript.Gate.jsToEv->Result.flatMap(v => v->ExpressionT.EValue->Ok)
+    | MjFunctionNode(fNode) => fNode->caseFunctionNode
+    | MjIndexNode(iNode) => caseIndexNode(iNode)
+    | MjObjectNode(oNode) => caseObjectNode(oNode)
+    | MjOperatorNode(opNode) => opNode->Parse.castOperatorNodeToFunctionNode->caseFunctionNode
+    | MjParenthesisNode(pNode) => pNode["content"]->fromNode
+    }
+    rFinalExpression
   })
