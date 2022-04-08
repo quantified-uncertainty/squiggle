@@ -81,7 +81,7 @@ module Triangular = {
     low < medium && medium < high
       ? Ok(#Triangular({low: low, medium: medium, high: high}))
       : Error("Triangular values must be increasing order.")
-  let pdf = (x, t: t) => Jstat.Triangular.pdf(x, t.low, t.high, t.medium) // not obvious in jstat docs that high comes before medium? 
+  let pdf = (x, t: t) => Jstat.Triangular.pdf(x, t.low, t.high, t.medium)  
   let cdf = (x, t: t) => Jstat.Triangular.cdf(x, t.low, t.high, t.medium)
   let inv = (p, t: t) => Jstat.Triangular.inv(p, t.low, t.high, t.medium)
   let sample = (t: t) => Jstat.Triangular.sample(t.low, t.high, t.medium)
