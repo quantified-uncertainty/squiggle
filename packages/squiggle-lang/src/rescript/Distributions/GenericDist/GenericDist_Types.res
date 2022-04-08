@@ -103,7 +103,7 @@ module Constructors = {
 
   module UsingDists = {
     let mean = (dist): t => FromDist(ToFloat(#Mean), dist)
-    let sample = (dist): t => FromDist(ToFloat(#Mean), dist)
+    let sample = (dist): t => FromDist(ToFloat(#Sample), dist)
     let cdf = (dist, f): t => FromDist(ToFloat(#Cdf(f)), dist)
     let inv = (dist, f): t => FromDist(ToFloat(#Inv(f)), dist)
     let pdf = (dist, f): t => FromDist(ToFloat(#Pdf(f)), dist)
