@@ -4854,10 +4854,17 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/react-dom@*", "@types/react-dom@^17.0.14":
+"@types/react-dom@*":
   version "17.0.14"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.14.tgz#c8f917156b652ddf807711f5becbd2ab018dea9f"
   integrity sha512-H03xwEP1oXmSfl3iobtmQ/2dHF5aBHr8aUMwyGZya6OW45G+xtdzmq6HkncefiBt5JU8DVyaWl/nWZbjZCnzAQ==
+  dependencies:
+    "@types/react" "*"
+
+"@types/react-dom@^18.0.0":
+  version "18.0.0"
+  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.0.0.tgz#b13f8d098e4b0c45df4f1ed123833143b0c71141"
+  integrity sha512-49897Y0UiCGmxZqpC8Blrf6meL8QUla6eb+BBhn69dTXlmuOlzkfr7HHY/O8J25e1lTUMs+YYxSlVDAaGHCOLg==
   dependencies:
     "@types/react" "*"
 
@@ -15660,10 +15667,10 @@ react-use@^17.3.2:
     ts-easing "^0.2.0"
     tslib "^2.1.0"
 
-react-vega@^7.4.4:
-  version "7.4.4"
-  resolved "https://registry.yarnpkg.com/react-vega/-/react-vega-7.4.4.tgz#098bca8761e8f9b9e7ab300beef434ca18dbb843"
-  integrity sha512-zIQo5+iz82z0+tSHzhT0U32MkMtbzWJG4SVMEJoJlduQJvkeJCQ7qaqfjUaatOhiO8eqjE5oM81BadUAXZ5Njw==
+react-vega@^7.5.0:
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/react-vega/-/react-vega-7.5.0.tgz#b9726d4fd7f35299d417d340935e093bf4bed558"
+  integrity sha512-JysyZ0PdihfSztkbxOd7DcYBrCVotRbkKiGNYWKkLP1D4Mt2Dq0uMwNtBEBGjoWdmrE3Qwd+uz7ekklP6MqxDw==
   dependencies:
     "@types/react" "^16.9.19"
     fast-deep-equal "^3.1.1"
