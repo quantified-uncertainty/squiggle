@@ -160,9 +160,7 @@
           "shape": {
             "value": "circle"
           },
-          "width": {
-            "value": 5
-          },
+          "size": [{"value": 30}],
           "tooltip": {
             "signal": "datum.y"
           }
