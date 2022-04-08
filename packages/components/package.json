@@ -9,7 +9,7 @@
     "@types/jest": "^27.4.0",
     "@types/lodash": "^4.14.181",
     "@types/node": "^17.0.23",
-    "@types/react": "^17.0.43",
+    "@types/react": "^18.0.0",
     "@types/react-dom": "^17.0.14",
     "cross-env": "^7.0.3",
     "lodash": "^4.17.21",
