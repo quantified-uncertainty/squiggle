@@ -1,6 +1,5 @@
 {
   "name": "@quri/squiggle-lang",
-  "reason": {},
   "sources": [
     {
       "dir": "src/rescript",
@@ -28,7 +27,8 @@
   "bs-dependencies": [
     "@glennsl/rescript-jest",
     "@glennsl/bs-json",
-    "rationale"
+    "rationale", 
+    "bisect_ppx"
   ],
   "gentypeconfig": {
     "language": "typescript",
@@ -41,7 +41,13 @@
   },
   "refmt": 3,
   "warnings": {
-    "number": "+A-42-48-9-30-4-102"
+    "number": "+A-42-48-9-30-4-102-20-27-41"
   },
-  "ppx-flags": []
+  "ppx-flags": [
+    [
+      "../../node_modules/bisect_ppx/ppx", 
+      "--exclude-files", 
+      ".*_test\\.res$$"
+    ]
+  ]
 }

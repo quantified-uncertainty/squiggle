@@ -1,8 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
-import { ReactCodeJar } from "react-codejar";
+import { CodeEditor } from "./CodeEditor";
 import type { exportEnv } from "@quri/squiggle-lang";
+import styled from 'styled-components'
 
 export interface SquiggleEditorProps {
   /** The input string for squiggle */
@@ -23,67 +24,57 @@ export interface SquiggleEditorProps {
   environment?: exportEnv;
   /** when the environment changes. Used again for notebook magic*/
   onEnvChange?(env: exportEnv): void;
+  /** The width of the element */
+  width: number;
 }
 
-const highlight = (_: HTMLInputElement) => {};
+const Input = styled.div`
+  border: 1px solid #ddd;
+  padding: 0.3em 0.3em;
+  margin-bottom: 1em;
+`;
 
-interface SquiggleEditorState {
-  expression: string;
-  env: exportEnv;
-}
-
-export class SquiggleEditor extends React.Component<
-  SquiggleEditorProps,
-  SquiggleEditorState
-> {
-  constructor(props: SquiggleEditorProps) {
-    super(props);
-    let code = props.initialSquiggleString ? props.initialSquiggleString : "";
-    this.state = { expression: code, env: props.environment };
-  }
-  render() {
-    let { expression, env } = this.state;
-    let props = this.props;
-    return (
-      <div>
-        <ReactCodeJar
-          code={expression}
-          onUpdate={(e) => {
-            this.setState({ expression: e });
-          }}
-          style={{
-            borderRadius: "6px",
-            width: "530px",
-            border: "1px solid grey",
-            fontFamily: "'Source Code Pro', monospace",
-            fontSize: "14px",
-            fontWeight: "400",
-            letterSpacing: "normal",
-            lineHeight: "20px",
-            padding: "10px",
-            tabSize: "4",
-          }}
-          highlight={highlight}
-          lineNumbers={false}
+export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
+  initialSquiggleString = "",
+  width = 500,
+  sampleCount,
+  outputXYPoints,
+  kernelWidth,
+  pointDistLength,
+  diagramStart,
+  diagramStop,
+  diagramCount,
+  onEnvChange,
+  environment,
+}: SquiggleEditorProps) => {
+  let [expression, setExpression] = React.useState(initialSquiggleString);
+  return (
+    <div>
+      <Input>
+        <CodeEditor
+          value={expression}
+          onChange={setExpression}
+          oneLine={true}
         />
-        <SquiggleChart
-          squiggleString={expression}
-          sampleCount={props.sampleCount}
-          outputXYPoints={props.outputXYPoints}
-          kernelWidth={props.kernelWidth}
-          pointDistLength={props.pointDistLength}
-          diagramStart={props.diagramStart}
-          diagramStop={props.diagramStop}
-          diagramCount={props.diagramCount}
-          environment={env}
-          onEnvChange={props.onEnvChange}
-        />
-      </div>
-    );
-  }
-}
+      </Input>
+      <SquiggleChart
+        width={width}
+        squiggleString={expression}
+        sampleCount={sampleCount}
+        outputXYPoints={outputXYPoints}
+        kernelWidth={kernelWidth}
+        pointDistLength={pointDistLength}
+        diagramStart={diagramStart}
+        diagramStop={diagramStop}
+        diagramCount={diagramCount}
+        environment={environment}
+        onEnvChange={onEnvChange}
+      />
+    </div>
+  );
+};
 
-export function renderSquiggleEditor(props: SquiggleEditorProps) {
+export function renderSquiggleEditorToDom(props: SquiggleEditorProps) {
   let parent = document.createElement("div");
   ReactDOM.render(
     <SquiggleEditor

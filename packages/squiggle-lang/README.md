@@ -13,6 +13,9 @@ Other:
 yarn start  # listens to files and recompiles at every mutation
 yarn test
 yarn test:watch  # keeps an active session and runs all tests at every mutation
+
+# where o := open in osx and o := xdg-open in linux,  
+yarn coverage; o _coverage/index.html  # produces coverage report and opens it in browser
 ```
 
 # TODO: clean up this README.md 

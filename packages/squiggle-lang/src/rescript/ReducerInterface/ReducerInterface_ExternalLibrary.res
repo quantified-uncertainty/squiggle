@@ -13,13 +13,10 @@ module Sample = {
 /*
   Map external calls of Reducer
 */
+
 let dispatch = (call: ExpressionValue.functionCall, chain): result<expressionValue, 'e> =>
-  switch call {
-  | ("add", [EvNumber(a), EvNumber(b)]) => Sample.customAdd(a, b)->EvNumber->Ok
-
-  | call => chain(call)
-
-  /*
+  ReducerInterface_GenericDistribution.dispatch(call) |> E.O.default(chain(call))
+/*
 If your dispatch is too big you can divide it into smaller dispatches and pass the call so that it gets called finally.
 
 The final chain(call) invokes the builtin default functions of the interpreter.
@@ -35,4 +32,3 @@ Remember from the users point of view, there are no different modules:
 // "doSth( constructorType2 )"
 doSth gets dispatched to the correct module because of the type signature. You get function and operator abstraction for free. You don't need to combine different implementations into one type. That would be duplicating the repsonsibility of the dispatcher.
 */
-  }

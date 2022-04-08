@@ -20,3 +20,16 @@ the distribution.
     {Template.bind({})}
   </Story>
 </Canvas>
+
+You can also name variables like so:
+
+<Canvas>
+  <Story
+    name="Variables"
+    args={{
+      initialSquiggleString: "x = 2\nnormal(x,2)",
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>

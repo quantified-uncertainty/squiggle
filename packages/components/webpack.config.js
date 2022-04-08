@@ -12,12 +12,16 @@ module.exports = {
         options: { projectReferences: true },
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
     ],
   },
   resolve: {
     extensions: [".js", ".tsx", ".ts"],
     alias: {
-      "@quri/squiggle-lang": path.resolve(__dirname, '../squiggle-lang/src/js')
+      "@quri/squiggle-lang": path.resolve(__dirname, "../squiggle-lang/src/js"),
     },
   },
   output: {

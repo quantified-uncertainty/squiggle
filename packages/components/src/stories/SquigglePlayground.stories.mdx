@@ -1,0 +1,22 @@
+import SquigglePlayground from "../SquigglePlayground";
+import { Canvas, Meta, Story, Props } from "@storybook/addon-docs";
+
+<Meta title="Squiggle/SquigglePlayground" component={SquigglePlayground} />
+
+export const Template = (props) => <SquigglePlayground {...props} />;
+
+# Squiggle Playground
+
+A Squiggle playground is an environment where you can play around with all settings,
+including sampling settings, in squiggle.
+
+<Canvas>
+  <Story
+    name="Normal"
+    args={{
+      initialSquiggleString: "normal(5,2)",
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>

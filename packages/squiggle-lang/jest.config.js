@@ -2,4 +2,10 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  setupFilesAfterEnv: [
+    "<rootdir>/../../node_modules/bisect_ppx/src/runtime/js/jest.bs.js"
+  ],
+  testPathIgnorePatterns: [
+    "__tests__/TestHelpers.bs.js"
+  ], 
 };

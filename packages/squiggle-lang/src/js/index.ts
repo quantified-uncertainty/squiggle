@@ -1,7 +1,7 @@
 import {runAll} from '../rescript/ProgramEvaluator.gen';
 import type { Inputs_SamplingInputs_t as SamplingInputs, exportEnv, exportType, exportDistribution} from '../rescript/ProgramEvaluator.gen';
 export type { SamplingInputs, exportEnv, exportDistribution }
-export type {t as DistPlus} from '../rescript/pointSetDist/DistPlus.gen';
+export type {t as DistPlus} from '../rescript/OldInterpreter/DistPlus.gen';
 
 export let defaultSamplingInputs : SamplingInputs = {
   sampleCount : 10000,
