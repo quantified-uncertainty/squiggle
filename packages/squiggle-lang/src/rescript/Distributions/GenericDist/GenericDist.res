@@ -13,6 +13,13 @@ let sampleN = (t: t, n) =>
   | SampleSet(_) => Error(GenericDist_Types.NotYetImplemented)
   }
 
+let inv = (t: t, x: float): result<float, error> =>
+  switch t {
+  | PointSet(r) => Ok(PointSetDist.inv(x, r))
+  | Symbolic(r) => Ok(SymbolicDist.T.inv(x, r))
+  | SampleSet(_) => Error(GenericDist_Types.NotYetImplemented)
+  }
+
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
 let toString = (t: t) =>

@@ -7,6 +7,9 @@ type pointwiseAddFn = (t, t) => result<t, error>
 
 let sampleN: (t, int) => result<array<float>, error>
 
+@genType
+let inv : (t, float) => result<float, error>
+
 let fromFloat: float => t
 
 let toString: t => string
@@ -19,6 +22,7 @@ let toFloatOperation: (
   ~distToFloatOperation: Operation.distToFloatOperation,
 ) => result<float, error>
 
+@genType
 let toPointSet: (
   ~xyPointLength: int,
   ~sampleCount: int,
