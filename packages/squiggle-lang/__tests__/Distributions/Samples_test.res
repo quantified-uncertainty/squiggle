@@ -26,16 +26,16 @@ describe("Continuous and discrete splits", () => {
     E.A.concatMany([sorted, sorted, sorted, sorted]) |> Belt.SortArray.stableSortBy(_, compare)
   }
 
-  let (_, discrete) = SampleSet.Internals.T.splitContinuousAndDiscrete(
+  let (_, discrete1) = SampleSet.Internals.T.splitContinuousAndDiscrete(
     makeDuplicatedArray(10),
   )
-  let toArr = discrete |> E.FloatFloatMap.toArray
-  makeTest("splitMedium at count=10", toArr |> Belt.Array.length, 10)
+  let toArr1 = discrete1 |> E.FloatFloatMap.toArray
+  makeTest("splitMedium at count=10", toArr1 |> Belt.Array.length, 10)
 
-  let (_c, discrete) = SampleSet.Internals.T.splitContinuousAndDiscrete(
+  let (_c, discrete2) = SampleSet.Internals.T.splitContinuousAndDiscrete(
     makeDuplicatedArray(500),
   )
-  let toArr = discrete |> E.FloatFloatMap.toArray
-  makeTest("splitMedium at count=500", toArr |> Belt.Array.length, 500)
+  let toArr2 = discrete2 |> E.FloatFloatMap.toArray
+  makeTest("splitMedium at count=500", toArr2 |> Belt.Array.length, 500)
 })
 
