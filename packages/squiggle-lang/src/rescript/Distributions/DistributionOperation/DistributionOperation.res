@@ -113,8 +113,8 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
-    | ToString => dist->GenericDist.toString->String
-    | ToSparkline(buckets) =>
+    | ToString(ToString) => dist->GenericDist.toString->String
+    | ToString(ToSparkline(buckets)) =>
       GenericDist.toSparkline(dist, ~sampleCount, ~buckets, ())
       ->E.R2.fmap(r => String(r))
       ->OutputLocal.fromResult

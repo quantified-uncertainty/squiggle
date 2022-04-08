@@ -52,12 +52,15 @@ module Operation = {
 
   type toFloatArray = Sample(int)
 
+  type toString = 
+  | ToString
+  | ToSparkline(int)
+
   type fromDist =
     | ToFloat(toFloat)
     | ToDist(toDist)
     | ToDistCombination(direction, arithmeticOperation, [#Dist(genericDist) | #Float(float)])
-    | ToString
-    | ToSparkline(int)
+    | ToString(toString)
 
   type singleParamaterFunction =
     | FromDist(fromDist)
@@ -80,8 +83,8 @@ module Operation = {
     | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
     | ToDist(Truncate(_, _)) => `truncate`
     | ToDist(Inspect) => `inspect`
-    | ToString => `toString`
-    | ToSparkline(n) => `toSparkline(${E.I.toString(n)})`
+    | ToString(ToString) => `toString`
+    | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
     | ToDistCombination(Algebraic, _, _) => `algebraic`
     | ToDistCombination(Pointwise, _, _) => `pointwise`
     }

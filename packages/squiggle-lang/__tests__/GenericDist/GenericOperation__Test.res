@@ -59,7 +59,7 @@ describe("sparkline", () => {
     expected: DistributionOperation.outputType,
   ) => {
     test(name, () => {
-      let result = DistributionOperation.run(~env, FromDist(ToSparkline(20), dist))
+      let result = DistributionOperation.run(~env, FromDist(ToString(ToSparkline(20)), dist))
       expect(result)->toEqual(expected)
     })
   }
