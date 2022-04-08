@@ -190,10 +190,7 @@ module Constructors = {
   module UsingDists = {
     module C = GenericDist_Types.Constructors.UsingDists
     open OutputLocal
-    type dist = GenericDist_Types.genericDist
-    type fResult = result<float, GenericDist_Types.error>
-    type dResult = result<dist, GenericDist_Types.error>
-    type sResult = result<string, GenericDist_Types.error>
+    type floatResult= result<float, error>
 
     let mean = (~env, dist) => run(~env, C.mean(dist))->toFloatR
     let sample = (~env, dist) => run(~env, C.sample(dist))->toFloatR

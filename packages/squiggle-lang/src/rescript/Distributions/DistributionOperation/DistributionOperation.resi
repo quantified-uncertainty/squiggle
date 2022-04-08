@@ -4,19 +4,21 @@ type env = {
   xyPointLength: int,
 }
 
+open GenericDist_Types
+
 @genType
 type outputType =
-  | Dist(GenericDist_Types.genericDist)
+  | Dist(genericDist)
   | Float(float)
   | String(string)
-  | GenDistError(GenericDist_Types.error)
+  | GenDistError(error)
 
 @genType
 let run: (~env: env, GenericDist_Types.Operation.genericFunctionCallInfo) => outputType
 let runFromDist: (
   ~env: env,
   ~functionCallInfo: GenericDist_Types.Operation.fromDist,
-  GenericDist_Types.genericDist,
+  genericDist,
 ) => outputType
 let runFromFloat: (
   ~env: env,
@@ -26,45 +28,70 @@ let runFromFloat: (
 
 module Output: {
   type t = outputType
-  let toDist: t => option<GenericDist_Types.genericDist>
-  let toDistR: t => result<GenericDist_Types.genericDist, GenericDist_Types.error>
+  let toDist: t => option<genericDist>
+  let toDistR: t => result<genericDist, error>
   let toFloat: t => option<float>
-  let toFloatR: t => result<float, GenericDist_Types.error>
+  let toFloatR: t => result<float, error>
   let toString: t => option<string>
-  let toStringR: t => result<string, GenericDist_Types.error>
-  let toError: t => option<GenericDist_Types.error>
+  let toStringR: t => result<string, error>
+  let toError: t => option<error>
   let fmap: (~env: env, t, GenericDist_Types.Operation.singleParamaterFunction) => t
 }
 
 module Constructors: {
   module UsingDists: {
-    type dist = GenericDist_Types.genericDist
-    type fResult = result<float, GenericDist_Types.error>
-    type dResult = result<dist, GenericDist_Types.error>
-    type sResult = result<string, GenericDist_Types.error>
-    let mean: (~env: env, dist) => fResult
-    let sample: (~env: env, dist) => fResult
-    let cdf: (~env: env, dist, float) => fResult
-    let inv: (~env: env, dist, float) => fResult
-    let pdf: (~env: env, dist, float) => fResult
-    let normalize: (~env: env, dist) => dResult
-    let toPointSet: (~env: env, dist) => dResult
-    let toSampleSet: (~env: env, dist, int) => dResult
-    let truncate: (~env: env, dist, option<float>, option<float>) => dResult
-    let inspect: (~env: env, dist) => dResult
-    let toString: (~env: env, dist) => sResult
-    let toSparkline: (~env: env, dist, int) => sResult
-    let algebraicAdd: (~env: env, dist, dist) => dResult
-    let algebraicMultiply: (~env: env, dist, dist) => dResult
-    let algebraicDivide: (~env: env, dist, dist) => dResult
-    let algebraicSubtract: (~env: env, dist, dist) => dResult
-    let algebraicLogarithm: (~env: env, dist, dist) => dResult
-    let algebraicExponentiate: (~env: env, dist, dist) => dResult
-    let pointwiseAdd: (~env: env, dist, dist) => dResult
-    let pointwiseMultiply: (~env: env, dist, dist) => dResult
-    let pointwiseDivide: (~env: env, dist, dist) => dResult
-    let pointwiseSubtract: (~env: env, dist, dist) => dResult
-    let pointwiseLogarithm: (~env: env, dist, dist) => dResult
-    let pointwiseExponentiate: (~env: env, dist, dist) => dResult
+    @genType
+    let mean: (~env: env, genericDist) => result<float, error>
+    @genType
+    let sample: (~env: env, genericDist) => result<float, error>
+    @genType
+    let cdf: (~env: env, genericDist, float) => result<float, error>
+    @genType
+    let inv: (~env: env, genericDist, float) => result<float, error>
+    @genType
+    let pdf: (~env: env, genericDist, float) => result<float, error>
+    @genType
+    let normalize: (~env: env, genericDist) => result<genericDist, error>
+    @genType
+    let toPointSet: (~env: env, genericDist) => result<genericDist, error>
+    @genType
+    let toSampleSet: (~env: env, genericDist, int) => result<genericDist, error>
+    @genType
+    let truncate: (
+      ~env: env,
+      genericDist,
+      option<float>,
+      option<float>,
+    ) => result<genericDist, error>
+    @genType
+    let inspect: (~env: env, genericDist) => result<genericDist, error>
+    @genType
+    let toString: (~env: env, genericDist) => result<string, error>
+    @genType
+    let toSparkline: (~env: env, genericDist, int) => result<string, error>
+    @genType
+    let algebraicAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let algebraicMultiply: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let algebraicDivide: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let algebraicSubtract: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let algebraicLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let algebraicExponentiate: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let pointwiseAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let pointwiseMultiply: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let pointwiseDivide: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let pointwiseSubtract: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let pointwiseLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    @genType
+    let pointwiseExponentiate: (~env: env, genericDist, genericDist) => result<genericDist, error>
   }
 }

@@ -114,7 +114,7 @@ module Constructors = {
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
     let toString = (dist): t => FromDist(ToString(ToString), dist)
     let toSparkline = (dist, n): t => FromDist(ToString(ToSparkline(n)), dist)
-    let algebraicAdd = (dist1, dist2:genericDist): t => FromDist(
+    let algebraicAdd = (dist1, dist2: genericDist): t => FromDist(
       ToDistCombination(Algebraic, #Add, #Dist(dist2)),
       dist1,
     )
@@ -163,4 +163,64 @@ module Constructors = {
       dist1,
     )
   }
+}
+
+module DistVariant = {
+  type t =
+    | Mean(genericDist)
+    | Sample(genericDist)
+    | Cdf(genericDist, float)
+    | Inv(genericDist, float)
+    | Pdf(genericDist, float)
+    | Normalize(genericDist)
+    | ToPointSet(genericDist)
+    | ToSampleSet(genericDist, int)
+    | Truncate(genericDist, option<float>, option<float>)
+    | Inspect(genericDist)
+    | ToString(genericDist)
+    | ToSparkline(genericDist, int)
+    | AlgebraicAdd(genericDist, genericDist)
+    | AlgebraicMultiply(genericDist, genericDist)
+    | AlgebraicDivide(genericDist, genericDist)
+    | AlgebraicSubtract(genericDist, genericDist)
+    | AlgebraicLogarithm(genericDist, genericDist)
+    | AlgebraicExponentiate(genericDist, genericDist)
+    | PointwiseAdd(genericDist, genericDist)
+    | PointwiseMultiply(genericDist, genericDist)
+    | PointwiseDivide(genericDist, genericDist)
+    | PointwiseSubtract(genericDist, genericDist)
+    | PointwiseLogarithm(genericDist, genericDist)
+    | PointwiseExponentiate(genericDist, genericDist)
+  
+  let toGenericFunctionCallInfo = (t: t) =>
+    switch t {
+    | Mean(d) => Operation.FromDist(ToFloat(#Mean), d)
+    | Sample(d) => FromDist(ToFloat(#Mean), d)
+    | Cdf(d, f) => FromDist(ToFloat(#Cdf(f)), d)
+    | Inv(d, f) => FromDist(ToFloat(#Inv(f)), d)
+    | Pdf(d, f) => FromDist(ToFloat(#Pdf(f)), d)
+    | Normalize(d) => FromDist(ToDist(Normalize), d)
+    | ToPointSet(d) => FromDist(ToDist(ToPointSet), d)
+    | ToSampleSet(d, r) => FromDist(ToDist(ToSampleSet(r)), d)
+    | Truncate(d, left, right) => FromDist(ToDist(Truncate(left, right)), d)
+    | Inspect(d) => FromDist(ToDist(Inspect), d)
+    | ToString(d) => FromDist(ToString(ToString), d)
+    | ToSparkline(d, n) => FromDist(ToString(ToSparkline(n)), d)
+    | AlgebraicAdd(d1, d2) => FromDist(ToDistCombination(Algebraic, #Add, #Dist(d2)), d1)
+    | AlgebraicMultiply(d1, d2) => FromDist(ToDistCombination(Algebraic, #Multiply, #Dist(d2)), d1)
+    | AlgebraicDivide(d1, d2) => FromDist(ToDistCombination(Algebraic, #Divide, #Dist(d2)), d1)
+    | AlgebraicSubtract(d1, d2) => FromDist(ToDistCombination(Algebraic, #Subtract, #Dist(d2)), d1)
+    | AlgebraicLogarithm(d1, d2) =>
+      FromDist(ToDistCombination(Algebraic, #Logarithm, #Dist(d2)), d1)
+    | AlgebraicExponentiate(d1, d2) =>
+      FromDist(ToDistCombination(Algebraic, #Exponentiate, #Dist(d2)), d1)
+    | PointwiseAdd(d1, d2) => FromDist(ToDistCombination(Pointwise, #Add, #Dist(d2)), d1)
+    | PointwiseMultiply(d1, d2) => FromDist(ToDistCombination(Pointwise, #Multiply, #Dist(d2)), d1)
+    | PointwiseDivide(d1, d2) => FromDist(ToDistCombination(Pointwise, #Divide, #Dist(d2)), d1)
+    | PointwiseSubtract(d1, d2) => FromDist(ToDistCombination(Pointwise, #Subtract, #Dist(d2)), d1)
+    | PointwiseLogarithm(d1, d2) =>
+      FromDist(ToDistCombination(Pointwise, #Logarithm, #Dist(d2)), d1)
+    | PointwiseExponentiate(d1, d2) =>
+      FromDist(ToDistCombination(Pointwise, #Exponentiate, #Dist(d2)), d1)
+    }
 }

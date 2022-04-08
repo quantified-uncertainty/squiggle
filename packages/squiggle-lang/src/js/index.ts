@@ -8,13 +8,39 @@ import type {
 export type { SamplingInputs, exportEnv, exportDistribution };
 export type { t as DistPlus } from "../rescript/OldInterpreter/DistPlus.gen";
 import type { Operation_genericFunctionCallInfo } from "../rescript/Distributions/GenericDist/GenericDist_Types.gen";
-import { genericDist } from "../rescript/TSInterface.gen";
 import {
-  run as runR,
+  genericDist,
+  resultDist,
+  resultFloat,
+  resultString,
+} from "../rescript/TSInterface.gen";
+import {
   env,
-  outputType,
+  Constructors_UsingDists_mean,
+  Constructors_UsingDists_sample,
+  Constructors_UsingDists_pdf,
+  Constructors_UsingDists_cdf,
+  Constructors_UsingDists_inv,
+  Constructors_UsingDists_normalize,
+  Constructors_UsingDists_toPointSet,
+  Constructors_UsingDists_toSampleSet,
+  Constructors_UsingDists_truncate,
+  Constructors_UsingDists_inspect,
+  Constructors_UsingDists_toString,
+  Constructors_UsingDists_toSparkline,
+  Constructors_UsingDists_algebraicAdd,
+  Constructors_UsingDists_algebraicMultiply,
+  Constructors_UsingDists_algebraicDivide,
+  Constructors_UsingDists_algebraicSubtract,
+  Constructors_UsingDists_algebraicLogarithm,
+  Constructors_UsingDists_algebraicExponentiate,
+  Constructors_UsingDists_pointwiseAdd,
+  Constructors_UsingDists_pointwiseMultiply,
+  Constructors_UsingDists_pointwiseDivide,
+  Constructors_UsingDists_pointwiseSubtract,
+  Constructors_UsingDists_pointwiseLogarithm,
+  Constructors_UsingDists_pointwiseExponentiate,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
-import { add } from "lodash";
 
 export let defaultSamplingInputs: SamplingInputs = {
   sampleCount: 10000,
@@ -42,140 +68,152 @@ class GenericDist {
     this.t = t;
   }
 
-  mean(): outputType {
-    return runR(
+  mean(): resultFloat {
+    return Constructors_UsingDists_mean({ env: this.env }, this.t);
+  }
+
+  sample(): resultFloat {
+    return Constructors_UsingDists_sample({ env: this.env }, this.t);
+  }
+
+  pdf(n: number): resultFloat {
+    return Constructors_UsingDists_pdf({ env: this.env }, this.t, n);
+  }
+
+  cdf(n: number): resultFloat {
+    return Constructors_UsingDists_cdf({ env: this.env }, this.t, n);
+  }
+
+  inv(n: number): resultFloat {
+    return Constructors_UsingDists_inv({ env: this.env }, this.t, n);
+  }
+
+  normalize(): resultDist {
+    return Constructors_UsingDists_normalize({ env: this.env }, this.t);
+  }
+
+  toPointSet(): resultDist {
+    return Constructors_UsingDists_toPointSet({ env: this.env }, this.t);
+  }
+
+  toSampleSet(n: number): resultDist {
+    return Constructors_UsingDists_toSampleSet({ env: this.env }, this.t, n);
+  }
+
+  truncate(left: number, right: number): resultDist {
+    return Constructors_UsingDists_truncate(
       { env: this.env },
-      { tag: "FromDist", value: [{ tag: "ToFloat", value: "Mean" }, this.t] }
+      this.t,
+      left,
+      right
     );
   }
 
-  pdf(n: number): outputType {
-    return runR(
+  inspect(): resultDist {
+    return Constructors_UsingDists_inspect({ env: this.env }, this.t);
+  }
+
+  toString(): resultString {
+    return Constructors_UsingDists_toString({ env: this.env }, this.t);
+  }
+
+  toSparkline(n: number): resultString {
+    return Constructors_UsingDists_toSparkline({ env: this.env }, this.t, n);
+  }
+
+  algebraicAdd(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_algebraicAdd(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [{ tag: "ToFloat", value: { NAME: "Pdf", VAL: n } }, this.t],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  cdf(n: number): outputType {
-    return runR(
+  algebraicMultiply(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_algebraicMultiply(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [{ tag: "ToFloat", value: { NAME: "Pdf", VAL: n } }, this.t],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  inv(n: number): outputType {
-    return runR(
+  algebraicDivide(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_algebraicDivide(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [{ tag: "ToFloat", value: { NAME: "Pdf", VAL: n } }, this.t],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  normalize(n: number): outputType {
-    return runR(
+  algebraicSubtract(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_algebraicSubtract(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [{ tag: "ToDist", value: "Normalize" }, this.t],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  toPointSet(): outputType {
-    return runR(
+  algebraicLogarithm(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_algebraicLogarithm(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [{ tag: "ToDist", value: "ToPointSet" }, this.t],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  inspect(): outputType {
-    return runR(
+  algebraicExponentiate(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_algebraicExponentiate(
       { env: this.env },
-      { tag: "FromDist", value: [{ tag: "ToDist", value: "Inspect" }, this.t] }
+      this.t,
+      d2.t
     );
   }
 
-  toSampleSet(n: number): outputType {
-    return runR(
+  pointwiseAdd(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_pointwiseAdd(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [
-          { tag: "ToDist", value: { tag: "ToSampleSet", value: n } },
-          this.t,
-        ],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  truncate(
-    left: null | undefined | number,
-    right: null | undefined | number
-  ): outputType {
-    return runR(
+  pointwiseMultiply(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_pointwiseMultiply(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [
-          { tag: "ToDist", value: { tag: "Truncate", value: [left, right] } },
-          this.t,
-        ],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  toString(): outputType {
-    return runR(
+  pointwiseDivide(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_pointwiseDivide(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [{ tag: "ToString", value: "ToString" }, this.t],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  toSparkline(n: number): outputType {
-    return runR(
+  pointwiseSubtract(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_pointwiseSubtract(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [
-          { tag: "ToString", value: { tag: "ToSparkline", value: n } },
-          this.t,
-        ],
-      }
+      this.t,
+      d2.t
     );
   }
 
-  add(g2: genericDist): outputType {
-    return runR(
+  pointwiseLogarithm(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_pointwiseLogarithm(
       { env: this.env },
-      {
-        tag: "FromDist",
-        value: [
-          {
-            tag: "ToDistCombination",
-            value: [
-              {
-                tag: "ToDistCombination",
-                value: ["Algebraic", "Add", { NAME: "Dist", VAL: g2 }],
-              },
-            ],
-          },
-          this.t,
-        ],
-      }
+      this.t,
+      d2.t
+    );
+  }
+
+  pointwiseExponentiate(d2: GenericDist): resultDist {
+    return Constructors_UsingDists_pointwiseExponentiate(
+      { env: this.env },
+      this.t,
+      d2.t
     );
   }
 }

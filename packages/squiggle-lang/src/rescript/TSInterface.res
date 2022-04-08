@@ -12,3 +12,10 @@ type error = GenericDist_Types.error;
 
 @genType
 let runDistributionOperation = DistributionOperation.run;
+
+@genType
+type resultDist = result<genericDist, error>
+@genType
+type resultFloat = result<float, error>
+@genType
+type resultString = result<string, error>
