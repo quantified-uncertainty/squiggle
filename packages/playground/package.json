@@ -33,7 +33,7 @@
     "react-ace": "^9.2.0",
     "react-dom": "^18.0.0",
     "react-use": "^17.3.2",
-    "react-vega": "^7.4.4",
+    "react-vega": "^7.5.0",
     "vega": "*",
     "vega-embed": "6.20.8",
     "vega-lite": "*"

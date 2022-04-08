@@ -16,7 +16,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "5.0.0",
-    "react-vega": "^7.4.4",
+    "react-vega": "^7.5.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.6.3",
     "vega": "^5.22.1",
