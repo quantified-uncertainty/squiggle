@@ -187,8 +187,7 @@ module Output = {
 }
 
 module Constructors = {
-  module UsingDists = {
-    module C = GenericDist_Types.Constructors.UsingDists
+    module C = GenericDist_Types.Constructors.UsingDists;
     open OutputLocal
     let mean = (~env, dist) => C.mean(dist)->run(~env)->toFloatR
     let sample = (~env, dist) => C.sample(dist)->run(~env)->toFloatR
@@ -225,5 +224,4 @@ module Constructors = {
       C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
     let pointwiseExponentiate = (~env, dist1, dist2) =>
       C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
-  }
 }

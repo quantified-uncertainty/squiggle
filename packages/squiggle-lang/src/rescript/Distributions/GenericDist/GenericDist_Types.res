@@ -102,6 +102,7 @@ module Constructors = {
   type t = Operation.genericFunctionCallInfo
 
   module UsingDists = {
+    @genType
     let mean = (dist): t => FromDist(ToFloat(#Mean), dist)
     let sample = (dist): t => FromDist(ToFloat(#Sample), dist)
     let cdf = (dist, f): t => FromDist(ToFloat(#Cdf(f)), dist)

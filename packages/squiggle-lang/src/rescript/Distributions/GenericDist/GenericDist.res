@@ -83,8 +83,8 @@ let toPointSet = (
 
 let toSparkline = (t: t, ~sampleCount: int, ~buckets: int=20, unit): result<string, error> =>
   t
-  ->toPointSet(~xSelection=#Linear, ~xyPointLength=buckets, ~sampleCount, ())
-  ->E.R.bind(r => r->PointSetDist.toSparkline->E.R2.errMap(r => Error(GenericDist_Types.Other(r))))
+  ->toPointSet(~xSelection=#Linear, ~xyPointLength=buckets*3, ~sampleCount, ())
+  ->E.R.bind(r => r->PointSetDist.toSparkline(buckets)->E.R2.errMap(r => Error(GenericDist_Types.Other(r))))
 
 module Truncate = {
   let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>

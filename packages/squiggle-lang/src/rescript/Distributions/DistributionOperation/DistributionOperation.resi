@@ -39,7 +39,6 @@ module Output: {
 }
 
 module Constructors: {
-  module UsingDists: {
     @genType
     let mean: (~env: env, genericDist) => result<float, error>
     @genType
@@ -93,5 +92,4 @@ module Constructors: {
     let pointwiseLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
     @genType
     let pointwiseExponentiate: (~env: env, genericDist, genericDist) => result<genericDist, error>
-  }
 }
