@@ -134,21 +134,21 @@ describe("Normal distribution with sparklines", () => {
 
   let normalDistAtMean5: SymbolicDistTypes.normal = {mean: 5.0, stdev: 2.0}
   let normalDistAtMean10: SymbolicDistTypes.normal = {mean: 10.0, stdev: 2.0}
-  let range20Float = E.A.rangeFloat(0, 20) // [0.0,1.0,2.0,3.0,4.0,...19.0,]
+  let range20Float = E.A.Floats.range(0.0, 20.0, 20) // [0.0,1.0,2.0,3.0,4.0,...19.0,]
 
   test("mean=5 pdf", () => {
     let pdfNormalDistAtMean5 = x => SymbolicDist.Normal.pdf(x, normalDistAtMean5)
     let sparklineMean5 = fnImage(pdfNormalDistAtMean5, range20Float) 
     Sparklines.create(sparklineMean5, ()) 
     -> expect 
-    -> toEqual(`▁▂▃▅███▅▃▂▁▁▁▁▁▁▁▁▁▁▁`)
+    -> toEqual(`▁▂▃▆██▇▅▂▁▁▁▁▁▁▁▁▁▁▁`)
   })
   
   test("parameter-wise addition of two normal distributions", () => {  
     let sparklineMean15 = normalDistAtMean5 -> parameterWiseAdditionPdf(normalDistAtMean10) -> fnImage(range20Float)
     Sparklines.create(sparklineMean15, ())
     -> expect
-    -> toEqual(`▁▁▁▁▁▁▁▁▁▁▂▃▅▇███▇▅▃▂`)
+    -> toEqual(`▁▁▁▁▁▁▁▁▁▂▃▄▆███▇▅▄▂`)
   })
 
   test("mean=10 cdf", () => {
@@ -156,6 +156,6 @@ describe("Normal distribution with sparklines", () => {
     let sparklineMean10 = fnImage(cdfNormalDistAtMean10, range20Float)
     Sparklines.create(sparklineMean10, ())
     -> expect
-    -> toEqual(`▁▁▁▁▁▁▁▁▂▃▅▆▇████████`)
+    -> toEqual(`▁▁▁▁▁▁▁▁▂▄▅▇████████`)
   })
 })

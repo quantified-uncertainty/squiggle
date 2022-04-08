@@ -49,13 +49,19 @@ let toFloatOperation = (
   }
 }
 
-//Todo: If it's a pointSet, but the xyPointLenght is different from what it has, it should change.
+//Todo: If it's a pointSet, but the xyPointLength is different from what it has, it should change.
 // This is tricky because the case of discrete distributions.
 // Also, change the outputXYPoints/pointSetDistLength details
-let toPointSet = (~xyPointLength, ~sampleCount, t): result<PointSetTypes.pointSetDist, error> => {
+let toPointSet = (
+  t,
+  ~xyPointLength,
+  ~sampleCount,
+  ~xSelection: GenericDist_Types.Operation.pointsetXSelection=#ByWeight,
+  unit,
+): result<PointSetTypes.pointSetDist, error> => {
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
-  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(xyPointLength, r))
+  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, xyPointLength, r))
   | SampleSet(r) => {
       let response = SampleSet.toPointSetDist(
         ~samples=r,
@@ -74,6 +80,11 @@ let toPointSet = (~xyPointLength, ~sampleCount, t): result<PointSetTypes.pointSe
     }
   }
 }
+
+let toSparkline = (t: t, ~sampleCount: int, ~buckets: int=20, unit): result<string, error> =>
+  t
+  ->toPointSet(~xSelection=#Linear, ~xyPointLength=buckets, ~sampleCount, ())
+  ->E.R.bind(r => r->PointSetDist.toSparkline->E.R2.errMap(r => Error(GenericDist_Types.Other(r))))
 
 module Truncate = {
   let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>

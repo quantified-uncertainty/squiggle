@@ -30,6 +30,9 @@ describe("eval on distribution functions", () => {
     testEval("mean(normal(5,2))", "Ok(5)")
     testEval("mean(lognormal(1,2))", "Ok(20.085536923187668)")
   })
+  describe("toString", () => {
+    testEval("toString(normal(5,2))", "Ok('Normal(5,2)')")
+  })
   describe("normalize", () => {
     testEval("normalize(normal(5,2))", "Ok(Normal(5,2))")
   })
