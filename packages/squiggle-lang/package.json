@@ -20,7 +20,7 @@
     "@glennsl/bs-json": "^5.0.2",
     "jstat": "^1.9.5",
     "lodash": "4.17.21",
-    "mathjs": "10.4.2",
+    "mathjs": "10.4.3",
     "pdfast": "^0.2.0",
     "rationale": "0.2.0",
     "rescript": "^9.1.4"
