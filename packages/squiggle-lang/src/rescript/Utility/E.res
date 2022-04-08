@@ -443,6 +443,8 @@ module A = {
     let mean = a => sum(a) /. (Array.length(a) |> float_of_int)
     let random = Js.Math.random_int
 
+    // Gives an array with all the differences between values
+    // diff([1,5,3,7]) = [4,-2,4]
     let diff = (arr: array<float>): array<float> =>
       Belt.Array.zipBy(arr, Belt.Array.sliceToEnd(arr, 1), (left, right) => right -. left)
 
