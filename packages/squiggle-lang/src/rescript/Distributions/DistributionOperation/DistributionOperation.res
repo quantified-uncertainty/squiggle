@@ -185,3 +185,50 @@ module Output = {
     newFnCall->E.R2.fmap(run(~env))->OutputLocal.fromResult
   }
 }
+
+module Constructors = {
+  module UsingDists = {
+    module C = GenericDist_Types.Constructors.UsingDists
+    open OutputLocal
+    type dist = GenericDist_Types.genericDist
+    type fResult = result<float, GenericDist_Types.error>
+    type dResult = result<dist, GenericDist_Types.error>
+    type sResult = result<string, GenericDist_Types.error>
+
+    let mean = (~env, dist) => run(~env, C.mean(dist))->toFloatR
+    let sample = (~env, dist) => run(~env, C.sample(dist))->toFloatR
+    let cdf = (~env, dist, f) => run(~env, C.cdf(dist, f))->toFloatR
+    let inv = (~env, dist, f) => run(~env, C.inv(dist, f))->toFloatR
+    let pdf = (~env, dist, f) => run(~env, C.pdf(dist, f))->toFloatR
+    let normalize = (~env, dist) => run(~env, C.normalize(dist))->toDistR
+    let toPointSet = (~env, dist) => run(~env, C.toPointSet(dist))->toDistR
+    let toSampleSet = (~env, dist, n) => run(~env, C.toSampleSet(dist, n))->toDistR
+    let truncate = (~env, dist, leftCutoff, rightCutoff) =>
+      run(~env, C.truncate(dist, leftCutoff, rightCutoff))->toDistR
+    let inspect = (~env, dist) => run(~env, C.inspect(dist))->toDistR
+    let toString = (~env, dist) => run(~env, C.toString(dist))->toStringR
+    let toSparkline = (~env, dist, buckets) => run(~env, C.toSparkline(dist, buckets))->toStringR
+    let algebraicAdd = (~env, dist1, dist2) => run(~env, C.algebraicAdd(dist1, dist2))->toDistR
+    let algebraicMultiply = (~env, dist1, dist2) =>
+      run(~env, C.algebraicMultiply(dist1, dist2))->toDistR
+    let algebraicDivide = (~env, dist1, dist2) =>
+      run(~env, C.algebraicDivide(dist1, dist2))->toDistR
+    let algebraicSubtract = (~env, dist1, dist2) =>
+      run(~env, C.algebraicSubtract(dist1, dist2))->toDistR
+    let algebraicLogarithm = (~env, dist1, dist2) =>
+      run(~env, C.algebraicLogarithm(dist1, dist2))->toDistR
+    let algebraicExponentiate = (~env, dist1, dist2) =>
+      run(~env, C.algebraicExponentiate(dist1, dist2))->toDistR
+    let pointwiseAdd = (~env, dist1, dist2) => run(~env, C.pointwiseAdd(dist1, dist2))->toDistR
+    let pointwiseMultiply = (~env, dist1, dist2) =>
+      run(~env, C.pointwiseMultiply(dist1, dist2))->toDistR
+    let pointwiseDivide = (~env, dist1, dist2) =>
+      run(~env, C.pointwiseDivide(dist1, dist2))->toDistR
+    let pointwiseSubtract = (~env, dist1, dist2) =>
+      run(~env, C.pointwiseSubtract(dist1, dist2))->toDistR
+    let pointwiseLogarithm = (~env, dist1, dist2) =>
+      run(~env, C.pointwiseSubtract(dist1, dist2))->toDistR
+    let pointwiseExponentiate = (~env, dist1, dist2) =>
+      run(~env, C.pointwiseSubtract(dist1, dist2))->toDistR
+  }
+}

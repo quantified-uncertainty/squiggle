@@ -33,7 +33,7 @@
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",
-    "shims": {},
+    "shims": {"Js": "Js"},
     "debug": {
       "all": false,
       "basic": false
