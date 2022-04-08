@@ -1,3 +1,5 @@
+type t = array<float>
+
 // TODO: Refactor to raise correct error when not enough samples
 
 module Internals = {

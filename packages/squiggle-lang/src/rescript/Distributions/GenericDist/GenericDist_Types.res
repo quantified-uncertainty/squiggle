@@ -1,6 +1,6 @@
 type genericDist =
   | PointSet(PointSetTypes.pointSetDist)
-  | SampleSet(array<float>)
+  | SampleSet(SampleSet.t)
   | Symbolic(SymbolicDistTypes.symbolicDist)
 
 type error =

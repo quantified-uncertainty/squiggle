@@ -55,7 +55,7 @@ module Exponential = {
             rate: rate,
           }),
         )
-      : Error("Exponential distributions mean must be larger than 0")
+      : Error("Exponential distributions rate must be larger than 0.")
   let pdf = (x, t: t) => Jstat.Exponential.pdf(x, t.rate)
   let cdf = (x, t: t) => Jstat.Exponential.cdf(x, t.rate)
   let inv = (p, t: t) => Jstat.Exponential.inv(p, t.rate)
@@ -71,7 +71,7 @@ module Cauchy = {
   let cdf = (x, t: t) => Jstat.Cauchy.cdf(x, t.local, t.scale)
   let inv = (p, t: t) => Jstat.Cauchy.inv(p, t.local, t.scale)
   let sample = (t: t) => Jstat.Cauchy.sample(t.local, t.scale)
-  let mean = (_: t) => Error("Cauchy distributions have no mean value.")
+  let mean = (_: t) => Error("Cauchy distributions may have no mean value.")
   let toString = ({local, scale}: t) => j`Cauchy($local, $scale)`
 }
 
@@ -80,8 +80,8 @@ module Triangular = {
   let make = (low, medium, high): result<symbolicDist, string> =>
     low < medium && medium < high
       ? Ok(#Triangular({low: low, medium: medium, high: high}))
-      : Error("Triangular values must be increasing order")
-  let pdf = (x, t: t) => Jstat.Triangular.pdf(x, t.low, t.high, t.medium)
+      : Error("Triangular values must be increasing order.")
+  let pdf = (x, t: t) => Jstat.Triangular.pdf(x, t.low, t.high, t.medium) // not obvious in jstat docs that high comes before medium? 
   let cdf = (x, t: t) => Jstat.Triangular.cdf(x, t.low, t.high, t.medium)
   let inv = (p, t: t) => Jstat.Triangular.inv(p, t.low, t.high, t.medium)
   let sample = (t: t) => Jstat.Triangular.sample(t.low, t.high, t.medium)
