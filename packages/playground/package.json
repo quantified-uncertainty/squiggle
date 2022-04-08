@@ -41,7 +41,7 @@
   "devDependencies": {
     "@emotion/babel-plugin": "^11.7.2",
     "@parcel/core": "^2.4.0",
-    "@types/react": "^17.0.43",
+    "@types/react": "^18.0.0",
     "autoprefixer": "^10.4.4",
     "docsify": "^4.12.2",
     "jest": "^27.5.1",
