@@ -1,4 +1,5 @@
 # Squiggle
+![Packages check](https://github.com/QURIresearch/squiggle/actions/workflows/ci.yaml/badge.svg)
 
 This is an experiment DSL/language for making probabilistic estimates. The full story can be found [here](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3). 
 
