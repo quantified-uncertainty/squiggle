@@ -1,12 +1,13 @@
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  testPathIgnorePatterns: [".*Fixtures.bs.js", "/node_modules/", ".*Helpers.bs.js"],
+  preset: "ts-jest",
+  testEnvironment: "node",
   setupFilesAfterEnv: [
-    "<rootdir>/../../node_modules/bisect_ppx/src/runtime/js/jest.bs.js"
+    "<rootdir>/../../node_modules/bisect_ppx/src/runtime/js/jest.bs.js",
   ],
   testPathIgnorePatterns: [
-    "__tests__/TestHelpers.bs.js"
-  ], 
+    ".*Fixtures.bs.js",
+    "/node_modules/",
+    ".*Helpers.bs.js",
+  ],
 };

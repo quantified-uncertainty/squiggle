@@ -29,31 +29,6 @@ let toExt: option<'a> => 'a = E.O.toExt(
   "Should be impossible to reach (This error is in test file)",
 )
 
-describe("normalize", () => {
-  test("has no impact on normal dist", () => {
-    let result = run(FromDist(ToDist(Normalize), normalDist5))
-    expect(result)->toEqual(Dist(normalDist5))
-  })
-})
-
-describe("mean", () => {
-  test("for a normal distribution", () => {
-    let result = DistributionOperation.run(~env, FromDist(ToFloat(#Mean), normalDist5))
-    expect(result)->toEqual(Float(5.0))
-  })
-})
-
-describe("mixture", () => {
-  test("on two normal distributions", () => {
-    let result =
-      run(Mixture([(normalDist10, 0.5), (normalDist20, 0.5)]))
-      ->outputMap(FromDist(ToFloat(#Mean)))
-      ->toFloat
-      ->toExt
-    expect(result)->toBeCloseTo(15.28)
-  })
-})
-
 describe("sparkline", () => {
   let runTest = (
     name: string,
