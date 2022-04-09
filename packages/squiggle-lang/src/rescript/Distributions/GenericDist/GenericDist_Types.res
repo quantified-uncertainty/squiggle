@@ -20,7 +20,7 @@ module Operation = {
     | #Multiply
     | #Subtract
     | #Divide
-    | #Exponentiate
+    | #Power
     | #Logarithm
   ]
 
@@ -29,7 +29,7 @@ module Operation = {
     | #Add => \"+."
     | #Multiply => \"*."
     | #Subtract => \"-."
-    | #Exponentiate => \"**"
+    | #Power => \"**"
     | #Divide => \"/."
     | #Logarithm => (a, b) => log(a) /. log(b)
     }
@@ -143,8 +143,8 @@ module Constructors = {
       ToDistCombination(Algebraic, #Logarithm, #Dist(dist2)),
       dist1,
     )
-    let algebraicExponentiate = (dist1, dist2): t => FromDist(
-      ToDistCombination(Algebraic, #Exponentiate, #Dist(dist2)),
+    let algebraicPower = (dist1, dist2): t => FromDist(
+      ToDistCombination(Algebraic, #Power, #Dist(dist2)),
       dist1,
     )
     let pointwiseAdd = (dist1, dist2): t => FromDist(
@@ -167,8 +167,8 @@ module Constructors = {
       ToDistCombination(Pointwise, #Logarithm, #Dist(dist2)),
       dist1,
     )
-    let pointwiseExponentiate = (dist1, dist2): t => FromDist(
-      ToDistCombination(Pointwise, #Exponentiate, #Dist(dist2)),
+    let pointwisePower = (dist1, dist2): t => FromDist(
+      ToDistCombination(Pointwise, #Power, #Dist(dist2)),
       dist1,
     )
   }

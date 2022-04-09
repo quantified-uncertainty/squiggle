@@ -79,7 +79,7 @@ module Constructors: {
     @genType
     let algebraicLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
     @genType
-    let algebraicExponentiate: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    let algebraicPower: (~env: env, genericDist, genericDist) => result<genericDist, error>
     @genType
     let pointwiseAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>
     @genType
@@ -91,5 +91,5 @@ module Constructors: {
     @genType
     let pointwiseLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
     @genType
-    let pointwiseExponentiate: (~env: env, genericDist, genericDist) => result<genericDist, error>
+    let pointwisePower: (~env: env, genericDist, genericDist) => result<genericDist, error>
 }

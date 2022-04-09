@@ -213,8 +213,8 @@ module Constructors = {
     C.algebraicSubtract(dist1, dist2)->run(~env)->toDistR
   let algebraicLogarithm = (~env, dist1, dist2) =>
     C.algebraicLogarithm(dist1, dist2)->run(~env)->toDistR
-  let algebraicExponentiate = (~env, dist1, dist2) =>
-    C.algebraicExponentiate(dist1, dist2)->run(~env)->toDistR
+  let algebraicPower = (~env, dist1, dist2) =>
+    C.algebraicPower(dist1, dist2)->run(~env)->toDistR
   let pointwiseAdd = (~env, dist1, dist2) => C.pointwiseAdd(dist1, dist2)->run(~env)->toDistR
   let pointwiseMultiply = (~env, dist1, dist2) =>
     C.pointwiseMultiply(dist1, dist2)->run(~env)->toDistR
@@ -223,6 +223,6 @@ module Constructors = {
     C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
   let pointwiseLogarithm = (~env, dist1, dist2) =>
     C.pointwiseLogarithm(dist1, dist2)->run(~env)->toDistR
-  let pointwiseExponentiate = (~env, dist1, dist2) =>
-    C.pointwiseExponentiate(dist1, dist2)->run(~env)->toDistR
+  let pointwisePower = (~env, dist1, dist2) =>
+    C.pointwisePower(dist1, dist2)->run(~env)->toDistR
 }

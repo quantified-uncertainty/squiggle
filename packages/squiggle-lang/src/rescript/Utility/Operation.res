@@ -6,12 +6,12 @@ type algebraicOperation = [
   | #Multiply
   | #Subtract
   | #Divide
-  | #Exponentiate
+  | #Power
   | #Logarithm
 ]
 @genType
-type pointwiseOperation = [#Add | #Multiply | #Exponentiate]
-type scaleOperation = [#Multiply | #Exponentiate | #Logarithm | #Divide]
+type pointwiseOperation = [#Add | #Multiply | #Power]
+type scaleOperation = [#Multiply | #Power | #Logarithm | #Divide]
 type distToFloatOperation = [
   | #Pdf(float)
   | #Cdf(float)
@@ -27,7 +27,7 @@ module Algebraic = {
     | #Add => \"+."
     | #Subtract => \"-."
     | #Multiply => \"*."
-    | #Exponentiate => \"**"
+    | #Power => \"**"
     | #Divide => \"/."
     | #Logarithm => (a, b) => log(a) /. log(b)
     }
@@ -43,7 +43,7 @@ module Algebraic = {
     | #Add => "+"
     | #Subtract => "-"
     | #Multiply => "*"
-    | #Exponentiate => "**"
+    | #Power => "**"
     | #Divide => "/"
     | #Logarithm => "log"
     }
@@ -56,7 +56,7 @@ module Pointwise = {
   let toString = x =>
     switch x {
     | #Add => "+"
-    | #Exponentiate => "^"
+    | #Power => "^"
     | #Multiply => "*"
     }
 
@@ -83,7 +83,7 @@ module Scale = {
     switch x {
     | #Multiply => \"*."
     | #Divide => \"/."
-    | #Exponentiate => \"**"
+    | #Power => \"**"
     | #Logarithm => (a, b) => log(a) /. log(b)
     }
 
@@ -91,7 +91,7 @@ module Scale = {
     switch operation {
     | #Multiply => j`verticalMultiply($value, $scaleBy) `
     | #Divide => j`verticalDivide($value, $scaleBy) `
-    | #Exponentiate => j`verticalExponentiate($value, $scaleBy) `
+    | #Power => j`verticalPower($value, $scaleBy) `
     | #Logarithm => j`verticalLog($value, $scaleBy) `
     }
 
@@ -99,7 +99,7 @@ module Scale = {
     switch x {
     | #Multiply => (a, b) => Some(a *. b)
     | #Divide => (a, b) => Some(a /. b)
-    | #Exponentiate => (_, _) => None
+    | #Power => (_, _) => None
     | #Logarithm => (_, _) => None
     }
 
@@ -107,7 +107,7 @@ module Scale = {
     switch x {
     | #Multiply => (_, _) => None // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
     | #Divide => (_, _) => None
-    | #Exponentiate => (_, _) => None
+    | #Power => (_, _) => None
     | #Logarithm => (_, _) => None
     }
 }

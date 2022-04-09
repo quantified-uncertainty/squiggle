@@ -247,7 +247,7 @@ let pointwiseCombinationFloat = (
 ): result<t, error> => {
   let m = switch arithmeticOperation {
   | #Add | #Subtract => Error(GenericDist_Types.DistributionVerticalShiftIsInvalid)
-  | (#Multiply | #Divide | #Exponentiate | #Logarithm) as arithmeticOperation =>
+  | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
     toPointSetFn(t)->E.R2.fmap(t => {
       //TODO: Move to PointSet codebase
       let fn = (secondary, main) => Operation.Scale.toFn(arithmeticOperation, main, secondary)
