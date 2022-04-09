@@ -26,7 +26,7 @@ let toPointSet: (
   ~xSelection: GenericDist_Types.Operation.pointsetXSelection=?,
   unit,
 ) => result<PointSetTypes.pointSetDist, error>
-let toSparkline: (t, ~sampleCount: int, ~buckets: int=?, unit) => result<string, error>
+let toSparkline: (t, ~sampleCount: int, ~bucketCount: int=?, unit) => result<string, error>
 
 let truncate: (
   t,

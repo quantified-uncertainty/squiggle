@@ -114,8 +114,8 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
     | ToString(ToString) => dist->GenericDist.toString->String
-    | ToString(ToSparkline(buckets)) =>
-      GenericDist.toSparkline(dist, ~sampleCount, ~buckets, ())
+    | ToString(ToSparkline(bucketCount)) =>
+      GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
       ->E.R2.fmap(r => String(r))
       ->OutputLocal.fromResult
     | ToDist(Inspect) => {
@@ -186,42 +186,43 @@ module Output = {
   }
 }
 
+// See comment above GenericDist_Types.Constructors to explain the purpose of this module.
+// I tried having another internal module called UsingDists, similar to how its done in
+// GenericDist_Types.Constructors. However, this broke GenType for me, so beware.
 module Constructors = {
-    module C = GenericDist_Types.Constructors.UsingDists;
-    open OutputLocal
-    let mean = (~env, dist) => C.mean(dist)->run(~env)->toFloatR
-    let sample = (~env, dist) => C.sample(dist)->run(~env)->toFloatR
-    let cdf = (~env, dist, f) => C.cdf(dist, f)->run(~env)->toFloatR
-    let inv = (~env, dist, f) => C.inv(dist, f)->run(~env)->toFloatR
-    let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
-    let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
-    let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
-    let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
-    let truncate = (~env, dist, leftCutoff, rightCutoff) =>
-      C.truncate(dist, leftCutoff, rightCutoff)->run(~env)->toDistR
-    let inspect = (~env, dist) => C.inspect(dist)->run(~env)->toDistR
-    let toString = (~env, dist) => C.toString(dist)->run(~env)->toStringR
-    let toSparkline = (~env, dist, buckets) => C.toSparkline(dist, buckets)->run(~env)->toStringR
-    let algebraicAdd = (~env, dist1, dist2) => C.algebraicAdd(dist1, dist2)->run(~env)->toDistR
-    let algebraicMultiply = (~env, dist1, dist2) =>
-      C.algebraicMultiply(dist1, dist2)->run(~env)->toDistR
-    let algebraicDivide = (~env, dist1, dist2) =>
-      C.algebraicDivide(dist1, dist2)->run(~env)->toDistR
-    let algebraicSubtract = (~env, dist1, dist2) =>
-      C.algebraicSubtract(dist1, dist2)->run(~env)->toDistR
-    let algebraicLogarithm = (~env, dist1, dist2) =>
-      C.algebraicLogarithm(dist1, dist2)->run(~env)->toDistR
-    let algebraicExponentiate = (~env, dist1, dist2) =>
-      C.algebraicExponentiate(dist1, dist2)->run(~env)->toDistR
-    let pointwiseAdd = (~env, dist1, dist2) => C.pointwiseAdd(dist1, dist2)->run(~env)->toDistR
-    let pointwiseMultiply = (~env, dist1, dist2) =>
-      C.pointwiseMultiply(dist1, dist2)->run(~env)->toDistR
-    let pointwiseDivide = (~env, dist1, dist2) =>
-      C.pointwiseDivide(dist1, dist2)->run(~env)->toDistR
-    let pointwiseSubtract = (~env, dist1, dist2) =>
-      C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
-    let pointwiseLogarithm = (~env, dist1, dist2) =>
-      C.pointwiseLogarithm(dist1, dist2)->run(~env)->toDistR
-    let pointwiseExponentiate = (~env, dist1, dist2) =>
-      C.pointwiseExponentiate(dist1, dist2)->run(~env)->toDistR
+  module C = GenericDist_Types.Constructors.UsingDists
+  open OutputLocal
+  let mean = (~env, dist) => C.mean(dist)->run(~env)->toFloatR
+  let sample = (~env, dist) => C.sample(dist)->run(~env)->toFloatR
+  let cdf = (~env, dist, f) => C.cdf(dist, f)->run(~env)->toFloatR
+  let inv = (~env, dist, f) => C.inv(dist, f)->run(~env)->toFloatR
+  let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
+  let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
+  let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
+  let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
+  let truncate = (~env, dist, leftCutoff, rightCutoff) =>
+    C.truncate(dist, leftCutoff, rightCutoff)->run(~env)->toDistR
+  let inspect = (~env, dist) => C.inspect(dist)->run(~env)->toDistR
+  let toString = (~env, dist) => C.toString(dist)->run(~env)->toStringR
+  let toSparkline = (~env, dist, bucketCount) => C.toSparkline(dist, bucketCount)->run(~env)->toStringR
+  let algebraicAdd = (~env, dist1, dist2) => C.algebraicAdd(dist1, dist2)->run(~env)->toDistR
+  let algebraicMultiply = (~env, dist1, dist2) =>
+    C.algebraicMultiply(dist1, dist2)->run(~env)->toDistR
+  let algebraicDivide = (~env, dist1, dist2) => C.algebraicDivide(dist1, dist2)->run(~env)->toDistR
+  let algebraicSubtract = (~env, dist1, dist2) =>
+    C.algebraicSubtract(dist1, dist2)->run(~env)->toDistR
+  let algebraicLogarithm = (~env, dist1, dist2) =>
+    C.algebraicLogarithm(dist1, dist2)->run(~env)->toDistR
+  let algebraicExponentiate = (~env, dist1, dist2) =>
+    C.algebraicExponentiate(dist1, dist2)->run(~env)->toDistR
+  let pointwiseAdd = (~env, dist1, dist2) => C.pointwiseAdd(dist1, dist2)->run(~env)->toDistR
+  let pointwiseMultiply = (~env, dist1, dist2) =>
+    C.pointwiseMultiply(dist1, dist2)->run(~env)->toDistR
+  let pointwiseDivide = (~env, dist1, dist2) => C.pointwiseDivide(dist1, dist2)->run(~env)->toDistR
+  let pointwiseSubtract = (~env, dist1, dist2) =>
+    C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
+  let pointwiseLogarithm = (~env, dist1, dist2) =>
+    C.pointwiseLogarithm(dist1, dist2)->run(~env)->toDistR
+  let pointwiseExponentiate = (~env, dist1, dist2) =>
+    C.pointwiseExponentiate(dist1, dist2)->run(~env)->toDistR
 }

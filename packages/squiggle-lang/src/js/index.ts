@@ -9,12 +9,12 @@ export type { SamplingInputs, exportEnv, exportDistribution };
 export type { t as DistPlus } from "../rescript/OldInterpreter/DistPlus.gen";
 import {
   genericDist,
+  env,
   resultDist,
   resultFloat,
   resultString,
-} from "../rescript/TSInterface.gen";
+} from "../rescript/TypescriptInterface.gen";
 import {
-  env,
   Constructors_mean,
   Constructors_sample,
   Constructors_pdf,
@@ -59,18 +59,9 @@ export function run(
   return runAll(squiggleString, si, env);
 }
 
-export function resultMap(
-  r:
-    | {
-        tag: "Ok";
-        value: any;
-      }
-    | {
-        tag: "Error";
-        value: any;
-      },
-  mapFn: any
-):
+//This is clearly not fully typed. I think later we should use a functional library to
+// provide a better Either type and corresponding functions.
+type result =
   | {
       tag: "Ok";
       value: any;
@@ -78,7 +69,9 @@ export function resultMap(
   | {
       tag: "Error";
       value: any;
-    } {
+    };
+
+export function resultMap(r: result, mapFn: any): result {
   if (r.tag === "Ok") {
     return { tag: "Ok", value: mapFn(r.value) };
   } else {
