@@ -60,6 +60,7 @@ module Internals = {
           : {
               let _ = Js.Array.push(element, continuous)
             }
+
         ()
       })
       (continuous, discrete)
@@ -143,4 +144,17 @@ let toPointSetDist = (
   }
 
   samplesParse
+}
+
+let sample = (t: t): float => {
+  let i = E.Int.random(~min=0, ~max=E.A.length(t) - 1)
+  E.A.unsafe_get(t, i)
+}
+
+let sampleN = (t: t, n) => {
+  if n <= E.A.length(t) {
+    E.A.slice(t, ~offset=0, ~len=n)
+  } else {
+    Belt.Array.makeBy(n, _ => sample(t))
+  }
 }

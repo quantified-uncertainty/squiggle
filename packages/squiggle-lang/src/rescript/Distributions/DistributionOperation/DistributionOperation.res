@@ -221,7 +221,7 @@ module Constructors = {
     let pointwiseSubtract = (~env, dist1, dist2) =>
       C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
     let pointwiseLogarithm = (~env, dist1, dist2) =>
-      C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
+      C.pointwiseLogarithm(dist1, dist2)->run(~env)->toDistR
     let pointwiseExponentiate = (~env, dist1, dist2) =>
-      C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
+      C.pointwiseExponentiate(dist1, dist2)->run(~env)->toDistR
 }

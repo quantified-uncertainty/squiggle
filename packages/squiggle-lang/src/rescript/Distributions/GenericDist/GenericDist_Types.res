@@ -140,7 +140,7 @@ module Constructors = {
       dist1,
     )
     let pointwiseAdd = (dist1, dist2): t => FromDist(
-      ToDistCombination(Algebraic, #Add, #Dist(dist2)),
+      ToDistCombination(Pointwise, #Add, #Dist(dist2)),
       dist1,
     )
     let pointwiseMultiply = (dist1, dist2): t => FromDist(

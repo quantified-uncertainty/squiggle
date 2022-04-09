@@ -39,10 +39,18 @@ describe("Multimodal too many weights error", () => {
 });
 
 describe("GenericDist", () => {
+
+  //It's important that sampleCount is less than 9. If it's more, than that will create randomness
+  let env = { sampleCount: 8, xyPointLength: 100 };
   let dist = new GenericDist(
     { tag: "SampleSet", value: [3, 4, 5, 6, 6, 7, 10, 15, 30] },
-    { sampleCount: 100, xyPointLength: 100 }
+    env
   );
+  let dist2 = new GenericDist(
+    { tag: "SampleSet", value: [20, 22, 24, 29, 30, 35, 38, 44, 52] },
+    env
+  );
+
   test("mean", () => {
     expect(dist.mean().value).toBeCloseTo(3.737);
   });
@@ -62,5 +70,17 @@ describe("GenericDist", () => {
   });
   test("toSparkline", () => {
     expect(dist.toSparkline(20).value).toBe("▁▁▃▅███▆▄▃▂▁▁▂▂▃▂▁▁▁");
+  });
+  test("algebraicAdd", () => {
+    expect(
+      resultMap(dist.algebraicAdd(dist2), (r: GenericDist) => r.toSparkline(20))
+        .value.value
+    ).toBe("▁▁▂▄▆████▇▆▄▄▃▃▃▂▁▁▁");
+  });
+  test("pointwiseAdd", () => {
+    expect(
+      resultMap(dist.pointwiseAdd(dist2), (r: GenericDist) => r.toSparkline(20))
+        .value.value
+    ).toBe("▁▂▅██▅▅▅▆▇█▆▅▃▃▂▂▁▁▁");
   });
 });
