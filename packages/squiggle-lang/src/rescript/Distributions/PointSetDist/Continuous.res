@@ -249,6 +249,9 @@ module T = Dist({
     )
 })
 
+let downsampleEquallyOverX = (length, t): t =>
+  t |> shapeMap(XYShape.XsConversion.proportionEquallyOverX(length))
+
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
 let combineAlgebraicallyWithDiscrete = (

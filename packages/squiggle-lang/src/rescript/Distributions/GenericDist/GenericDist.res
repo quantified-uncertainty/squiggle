@@ -10,7 +10,7 @@ let sampleN = (t: t, n) =>
   switch t {
   | PointSet(r) => Ok(PointSetDist.sampleNRendered(n, r))
   | Symbolic(r) => Ok(SymbolicDist.T.sampleN(n, r))
-  | SampleSet(_) => Error(GenericDist_Types.NotYetImplemented)
+  | SampleSet(r) => Ok(SampleSet.sampleN(r, n))
   }
 
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
@@ -81,10 +81,18 @@ let toPointSet = (
   }
 }
 
-let toSparkline = (t: t, ~sampleCount: int, ~buckets: int=20, unit): result<string, error> =>
+/*
+  PointSetDist.toSparkline calls "downsampleEquallyOverX", which downsamples it to n=bucketCount.
+  It first needs a pointSetDist, so we convert to a pointSetDist. In this process we want the 
+  xyPointLength to be a bit longer than the eventual toSparkline downsampling. I chose 3 
+  fairly arbitrarily.
+ */
+let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, unit): result<string, error> =>
   t
-  ->toPointSet(~xSelection=#Linear, ~xyPointLength=buckets, ~sampleCount, ())
-  ->E.R.bind(r => r->PointSetDist.toSparkline->E.R2.errMap(r => Error(GenericDist_Types.Other(r))))
+  ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
+  ->E.R.bind(r =>
+    r->PointSetDist.toSparkline(bucketCount)->E.R2.errMap(r => Error(GenericDist_Types.Other(r)))
+  )
 
 module Truncate = {
   let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>

@@ -24,6 +24,7 @@ module FloatFloatMap = {
 
 module Int = {
   let max = (i1: int, i2: int) => i1 > i2 ? i1 : i2
+  let random = (~min, ~max) => Js.Math.random_int(min, max)
 }
 /* Utils */
 module U = {
@@ -277,6 +278,7 @@ module A = {
   let fold_right = Array.fold_right
   let concatMany = Belt.Array.concatMany
   let keepMap = Belt.Array.keepMap
+  let slice = Belt.Array.slice
   let init = Array.init
   let reduce = Belt.Array.reduce
   let reducei = Belt.Array.reduceWithIndex
