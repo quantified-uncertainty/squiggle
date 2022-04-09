@@ -1,6 +1,6 @@
 type genericDist =
   | PointSet(PointSetTypes.pointSetDist)
-  | SampleSet(SampleSet.t)
+  | SampleSet(SampleSetDist.t)
   | Symbolic(SymbolicDistTypes.symbolicDist)
 
 @genType

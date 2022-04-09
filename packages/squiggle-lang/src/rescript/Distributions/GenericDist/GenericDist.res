@@ -2,16 +2,18 @@
 type t = GenericDist_Types.genericDist
 type error = GenericDist_Types.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
-type toSampleSetFn = t => result<array<float>, error>
+type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
-
+let mapStringErrors = n => n->E.R2.errMap(r => Error(GenericDist_Types.Other(r)))
 let sampleN = (t: t, n) =>
   switch t {
   | PointSet(r) => Ok(PointSetDist.sampleNRendered(n, r))
   | Symbolic(r) => Ok(SymbolicDist.T.sampleN(n, r))
-  | SampleSet(r) => Ok(SampleSet.sampleN(r, n))
+  | SampleSet(r) => Ok(SampleSetDist.sampleN(r, n))
   }
+let toSampleSetDist = (t: t, n) => sampleN(t, n)->E.R.bind(SampleSetDist.make)->mapStringErrors
+let mapStringErrors = n => n->E.R2.errMap(r => Error(GenericDist_Types.Other(r)))
 
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
@@ -63,7 +65,7 @@ let toPointSet = (
   | PointSet(pointSet) => Ok(pointSet)
   | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, xyPointLength, r))
   | SampleSet(r) => {
-      let response = SampleSet.toPointSetDist(
+      let response = SampleSetDist.toPointSetDist(
         ~samples=r,
         ~samplingInputs={
           sampleCount: sampleCount,
@@ -167,8 +169,9 @@ module AlgebraicCombination = {
     t2: t,
   ) => {
     let arithmeticOperation = Operation.Algebraic.toFn(arithmeticOperation)
-    E.R.merge(toSampleSet(t1), toSampleSet(t2))->E.R2.fmap(((a, b)) => {
-      Belt.Array.zip(a, b)->E.A2.fmap(((a, b)) => arithmeticOperation(a, b))
+    E.R.merge(toSampleSet(t1), toSampleSet(t2))->E.R.bind(((a, b)) => {
+      SampleSetDist.runMonteCarlo(arithmeticOperation, a, b)
+      ->mapStringErrors
     })
   }
 
@@ -200,13 +203,15 @@ module AlgebraicCombination = {
     | Some(Error(e)) => Error(Other(e))
     | None =>
       switch chooseConvolutionOrMonteCarlo(t1, t2) {
-      | #CalculateWithMonteCarlo =>
-        runMonteCarlo(
-          toSampleSetFn,
-          arithmeticOperation,
-          t1,
-          t2,
-        )->E.R2.fmap(r => GenericDist_Types.SampleSet(r))
+      | #CalculateWithMonteCarlo => {
+          let sampleSetDist: result<SampleSetDist.t, error> = runMonteCarlo(
+            toSampleSetFn,
+            arithmeticOperation,
+            t1,
+            t2,
+          )
+          sampleSetDist->E.R2.fmap(r => GenericDist_Types.SampleSet(r))
+        }
       | #CalculateWithConvolution =>
         runConvolution(
           toPointSetFn,
