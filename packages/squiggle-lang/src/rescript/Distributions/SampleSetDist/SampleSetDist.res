@@ -4,8 +4,10 @@ this constructor.
 https://stackoverflow.com/questions/66909578/how-to-make-a-type-constructor-private-in-rescript-except-in-current-module
 */
 module T: {
+  //This really should be hidden (remove the array<float>). The reason it isn't is to act as an escape hatch in JS__Test.ts.
+  //When we get a good functional library in TS, we could refactor that out.
   @genType
-  type t
+  type t = array<float>
   let make: array<float> => result<t, string>
   let get: t => array<float>
 } = {

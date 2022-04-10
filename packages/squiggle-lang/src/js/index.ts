@@ -14,6 +14,7 @@ import {
   resultFloat,
   resultString,
 } from "../rescript/TypescriptInterface.gen";
+export {makeSampleSetDist} from "../rescript/TypescriptInterface.gen";
 import {
   Constructors_mean,
   Constructors_sample,
@@ -77,6 +78,10 @@ export function resultMap(r: result, mapFn: any): result {
   } else {
     return r;
   }
+}
+
+export function resultExn(r: result): any {
+  r.value
 }
 
 export class GenericDist {

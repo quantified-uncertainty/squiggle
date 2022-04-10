@@ -1,4 +1,4 @@
-import { run, GenericDist, resultMap } from "../src/js/index";
+import { run, GenericDist, resultMap, makeSampleSetDist } from "../src/js/index";
 
 let testRun = (x: string) => {
   let result = run(x);
@@ -41,6 +41,7 @@ describe("Multimodal too many weights error", () => {
 describe("GenericDist", () => {
 
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
+  //Also, note, the value should be created using makeSampleSetDist() later on.
   let env = { sampleCount: 8, xyPointLength: 100 };
   let dist = new GenericDist(
     { tag: "SampleSet", value: [3, 4, 5, 6, 6, 7, 10, 15, 30] },
