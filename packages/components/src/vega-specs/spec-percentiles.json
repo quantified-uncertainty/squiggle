@@ -1,7 +1,7 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   "width": 500,
-  "height": 400,
+  "height": 200,
   "padding": 5,
   "data": [
     {
@@ -93,54 +93,49 @@
       }
     }
   ],
+  "signals": [
+    {
+      "name": "mousemove",
+      "on": [{"events": "mousemove", "update": "invert('xscale', x())"}]
+    },
+    {
+      "name": "mouseout",
+      "on": [{"events": "mouseout", "update": "invert('xscale', x())"}]
+    }
+  ],
   "axes": [
     {
       "orient": "bottom",
       "scale": "xscale",
       "grid": false,
-      "tickSize": 2,
-      "encode": {
-        "grid": {
-          "enter": {
-            "stroke": {
-              "value": "#ccc"
-            }
-          }
-        },
-        "ticks": {
-          "enter": {
-            "stroke": {
-              "value": "#ccc"
-            }
-          }
-        }
-      }
+      "labelColor": "#727d93",
+      "tickColor": "#fff",
+      "tickOpacity": 0.0,
+      "domainColor": "#727d93",
+      "domainOpacity": 0.1,
+      "tickCount": 5
     },
     {
       "orient": "left",
       "scale": "yscale",
       "grid": false,
-      "domain": false,
-      "tickSize": 2,
-      "encode": {
-        "grid": {
-          "enter": {
-            "stroke": {
-              "value": "#ccc"
-            }
-          }
-        },
-        "ticks": {
-          "enter": {
-            "stroke": {
-              "value": "#ccc"
-            }
-          }
-        }
-      }
+      "labelColor": "#727d93",
+      "tickColor": "#fff",
+      "tickOpacity": 0.0,
+      "domainColor": "#727d93",
+      "domainOpacity": 0.1,
+      "tickCount": 5
     }
   ],
   "marks": [
+    {
+      "type": "rule",
+      "encode": {
+        "update": {
+          "xscale": {"scale": "xscale", "signal": "mousemove"}
+        }
+      }
+    },
     {
       "type": "area",
       "from": {
