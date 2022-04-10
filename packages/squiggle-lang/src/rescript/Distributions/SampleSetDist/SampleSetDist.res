@@ -1,3 +1,8 @@
+/*
+This is used as a smart constructor. The only way to create a SampleSetDist.t is to call
+this constructor.
+https://stackoverflow.com/questions/66909578/how-to-make-a-type-constructor-private-in-rescript-except-in-current-module
+*/
 module T: {
   @genType
   type t
@@ -16,9 +21,12 @@ module T: {
 
 include T
 
-let length = (t: t) => get(t) |> E.A.length
+let length = (t: t) => get(t)->E.A.length
 
-// TODO: Refactor to get error in the toPointSetDist function, instead of adding at very end.
+/*
+TODO: Refactor to get a more precise estimate. Also, this code is just fairly messy, could use 
+some refactoring.
+*/
 let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs): result<
   PointSetTypes.pointSetDist,
   string,
@@ -27,7 +35,7 @@ let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInput
     ~samples=get(samples),
     ~samplingInputs,
     (),
-  ).pointSetDist |> E.O.toResult("Failed to convert to PointSetDist")
+  ).pointSetDist->E.O2.toResult("Failed to convert to PointSetDist")
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
