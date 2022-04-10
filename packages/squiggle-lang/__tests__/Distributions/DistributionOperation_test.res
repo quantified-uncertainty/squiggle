@@ -90,15 +90,6 @@ describe("toPointSet", () => {
     expect(result)->toBeSoCloseTo(5.0, ~digits=0)
   })
 
-  test("on sample set distribution with under 4 points", () => {
-    let sampleSet = SampleSetDist.make([0.0, 1.0, 2.0, 3.0]) -> E.R.toExn;
-    let result =
-      run(FromDist(ToDist(ToPointSet), SampleSet(sampleSet)))->outputMap(
-        FromDist(ToFloat(#Mean)),
-      )
-    expect(result)->toEqual(GenDistError(Other("Converting sampleSet to pointSet failed")))
-  })
-
   test("on sample set", () => {
     let result =
       run(FromDist(ToDist(ToPointSet), normalDist5))

@@ -65,7 +65,7 @@ let toPointSet = (
   | PointSet(pointSet) => Ok(pointSet)
   | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, xyPointLength, r))
   | SampleSet(r) =>
-    SampleSetDist.toPointSetDist2(
+    SampleSetDist.toPointSetDist(
       ~samples=r,
       ~samplingInputs={
         sampleCount: sampleCount,

@@ -222,11 +222,10 @@ module SamplingDistribution = {
 
       let sampleSetDist = samples -> E.R.bind(SampleSetDist.make)
 
-      let pointSetDist =
+      let pointSetDist = 
         sampleSetDist
-        -> E.R2.fmap(r =>
-          SampleSetDist.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r, ()))
-        -> E.R.bind(r => r.pointSetDist |> E.O.toResult("combineShapesUsingSampling Error"))
+        -> E.R.bind(r =>
+          SampleSetDist.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r, ()));
       pointSetDist |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
     })
   }

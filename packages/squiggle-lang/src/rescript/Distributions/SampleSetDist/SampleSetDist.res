@@ -15,14 +15,18 @@ module T: {
 
 include T
 
-let length = (t:t) => get(t) |> E.A.length;
+let length = (t: t) => get(t) |> E.A.length
 
-// TODO: Refactor to raise correct error when not enough samples
-let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs, ()) =>
-  SampleSetDist_ToPointSet.toPointSetDist(~samples=get(samples), ~samplingInputs, ())
-
-let toPointSetDist2 = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs, ()) =>
-  SampleSetDist_ToPointSet.toPointSetDist(~samples=get(samples), ~samplingInputs, ()).pointSetDist |> E.O.toResult("Failed to convert to PointSetDist")
+// TODO: Refactor to get error in the toPointSetDist function, instead of adding at very end.
+let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs, ()): result<
+  PointSetTypes.pointSetDist,
+  string,
+> =>
+  SampleSetDist_ToPointSet.toPointSetDist(
+    ~samples=get(samples),
+    ~samplingInputs,
+    (),
+  ).pointSetDist |> E.O.toResult("Failed to convert to PointSetDist")
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
