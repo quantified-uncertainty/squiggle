@@ -15,10 +15,14 @@ module T: {
 
 include T
 
-// TODO: Refactor to raise correct error when not enough samples
+let length = (t:t) => get(t) |> E.A.length;
 
+// TODO: Refactor to raise correct error when not enough samples
 let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs, ()) =>
   SampleSetDist_ToPointSet.toPointSetDist(~samples=get(samples), ~samplingInputs, ())
+
+let toPointSetDist2 = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs, ()) =>
+  SampleSetDist_ToPointSet.toPointSetDist(~samples=get(samples), ~samplingInputs, ()).pointSetDist |> E.O.toResult("Failed to convert to PointSetDist")
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
@@ -42,7 +46,8 @@ let sampleN = (t: t, n) => {
   }
 }
 
-let runMonteCarlo = (fn: (float, float) => float, t1: t, t2: t) => {
+//TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
+let map2 = (~fn: (float, float) => float, ~t1: t, ~t2: t) => {
   let samples = Belt.Array.zip(get(t1), get(t2))->E.A2.fmap(((a, b)) => fn(a, b))
   make(samples)
 }

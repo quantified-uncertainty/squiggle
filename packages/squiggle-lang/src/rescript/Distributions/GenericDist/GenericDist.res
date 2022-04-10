@@ -64,22 +64,17 @@ let toPointSet = (
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
   | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, xyPointLength, r))
-  | SampleSet(r) => {
-      let response = SampleSetDist.toPointSetDist(
-        ~samples=r,
-        ~samplingInputs={
-          sampleCount: sampleCount,
-          outputXYPoints: xyPointLength,
-          pointSetDistLength: xyPointLength,
-          kernelWidth: None,
-        },
-        (),
-      ).pointSetDist
-      switch response {
-      | Some(r) => Ok(r)
-      | None => Error(Other("Converting sampleSet to pointSet failed"))
-      }
-    }
+  | SampleSet(r) =>
+    SampleSetDist.toPointSetDist2(
+      ~samples=r,
+      ~samplingInputs={
+        sampleCount: sampleCount,
+        outputXYPoints: xyPointLength,
+        pointSetDistLength: xyPointLength,
+        kernelWidth: None,
+      },
+      (),
+    )->mapStringErrors
   }
 }
 
@@ -170,8 +165,7 @@ module AlgebraicCombination = {
   ) => {
     let arithmeticOperation = Operation.Algebraic.toFn(arithmeticOperation)
     E.R.merge(toSampleSet(t1), toSampleSet(t2))->E.R.bind(((a, b)) => {
-      SampleSetDist.runMonteCarlo(arithmeticOperation, a, b)
-      ->mapStringErrors
+      SampleSetDist.map2(~fn=arithmeticOperation, ~t1=a, ~t2=b)->mapStringErrors
     })
   }
 
