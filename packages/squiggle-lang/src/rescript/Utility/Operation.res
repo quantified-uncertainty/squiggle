@@ -56,7 +56,7 @@ module Pointwise = {
   let toString = x =>
     switch x {
     | #Add => "+"
-    | #Power => "^"
+    | #Power => "**"
     | #Multiply => "*"
     }
 
