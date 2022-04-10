@@ -1,4 +1,4 @@
-//The math here was taken from https://github.com/jasondavies/science.js/blob/master/src/stats/bandwidth.js
+//The math here was taken from https://github.com/jasondavies/science.js/blob/master/src/stats/SampleSetDist_Bandwidth.js
 
 let len = x => E.A.length(x) |> float_of_int
 

@@ -1,5 +1,3 @@
-// TODO: Refactor to raise correct error when not enough samples
-
 module Internals = {
   module Types = {
     type samplingStats = {
@@ -57,6 +55,7 @@ module Internals = {
           : {
               let _ = Js.Array.push(element, continuous)
             }
+
         ()
       })
       (continuous, discrete)
@@ -71,7 +70,7 @@ module Internals = {
     let formatUnitWidth = w => Jstat.max([w, 1.0]) |> int_of_float
 
     let suggestedUnitWidth = (samples, outputXYPoints) => {
-      let suggestedXWidth = Bandwidth.nrd0(samples)
+      let suggestedXWidth = SampleSetDist_Bandwidth.nrd0(samples)
       xWidthToUnitWidth(samples, outputXYPoints, suggestedXWidth)
     }
 
@@ -98,7 +97,7 @@ let toPointSetDist = (
   let pdf =
     continuousPart |> E.A.length > 5
       ? {
-          let _suggestedXWidth = Bandwidth.nrd0(continuousPart)
+          let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
           // todo: This does some recalculating from the last step.
           let _suggestedUnitWidth = Internals.T.suggestedUnitWidth(
             continuousPart,

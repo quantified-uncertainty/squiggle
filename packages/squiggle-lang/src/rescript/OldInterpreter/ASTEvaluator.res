@@ -118,7 +118,7 @@ module PointwiseCombination = {
     switch pointwiseOp {
     | #Add => pointwiseAdd(evaluationParams, t1, t2)
     | #Multiply => pointwiseCombine(\"*.", evaluationParams, t1, t2)
-    | #Exponentiate => pointwiseCombine(\"**", evaluationParams, t1, t2)
+    | #Power => pointwiseCombine(\"**", evaluationParams, t1, t2)
     }
 }
 

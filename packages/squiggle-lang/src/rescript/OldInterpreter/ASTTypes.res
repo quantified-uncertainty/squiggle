@@ -218,15 +218,14 @@ module SamplingDistribution = {
         algebraicOp,
         a,
         b,
-      )
+      ) |> E.O.toResult("Could not get samples")
 
-      let pointSetDist =
-        samples
-        |> E.O.fmap(r =>
-          SampleSet.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r, ())
-        )
-        |> E.O.bind(_, r => r.pointSetDist)
-        |> E.O.toResult("No response")
+      let sampleSetDist = samples -> E.R.bind(SampleSetDist.make)
+
+      let pointSetDist = 
+        sampleSetDist
+        -> E.R.bind(r =>
+          SampleSetDist.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r));
       pointSetDist |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
     })
   }

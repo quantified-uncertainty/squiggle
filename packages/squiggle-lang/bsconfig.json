@@ -33,7 +33,7 @@
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",
-    "shims": {},
+    "shims": {"Js": "Js"},
     "debug": {
       "all": false,
       "basic": false
@@ -47,7 +47,7 @@
     [
       "../../node_modules/bisect_ppx/ppx", 
       "--exclude-files", 
-      ".*_Test\\.res$$"
+      ".*_test\\.res$$"
     ]
   ]
 }
