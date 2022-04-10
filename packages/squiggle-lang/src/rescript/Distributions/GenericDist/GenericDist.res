@@ -5,15 +5,14 @@ type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
-let mapStringErrors = n => n->E.R2.errMap(r => Error(GenericDist_Types.Other(r)))
 let sampleN = (t: t, n) =>
   switch t {
   | PointSet(r) => Ok(PointSetDist.sampleNRendered(n, r))
   | Symbolic(r) => Ok(SymbolicDist.T.sampleN(n, r))
   | SampleSet(r) => Ok(SampleSetDist.sampleN(r, n))
   }
-let toSampleSetDist = (t: t, n) => sampleN(t, n)->E.R.bind(SampleSetDist.make)->mapStringErrors
-let mapStringErrors = n => n->E.R2.errMap(r => Error(GenericDist_Types.Other(r)))
+let toSampleSetDist = (t: t, n) =>
+  sampleN(t, n)->E.R.bind(SampleSetDist.make)->GenericDist_Types.Error.resultStringToResultError
 
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
@@ -74,7 +73,7 @@ let toPointSet = (
         kernelWidth: None,
       },
       (),
-    )->mapStringErrors
+    )->GenericDist_Types.Error.resultStringToResultError
   }
 }
 
@@ -88,7 +87,7 @@ let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, unit): result<
   t
   ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
   ->E.R.bind(r =>
-    r->PointSetDist.toSparkline(bucketCount)->E.R2.errMap(r => Error(GenericDist_Types.Other(r)))
+    r->PointSetDist.toSparkline(bucketCount)->GenericDist_Types.Error.resultStringToResultError
   )
 
 module Truncate = {
@@ -165,7 +164,11 @@ module AlgebraicCombination = {
   ) => {
     let arithmeticOperation = Operation.Algebraic.toFn(arithmeticOperation)
     E.R.merge(toSampleSet(t1), toSampleSet(t2))->E.R.bind(((a, b)) => {
-      SampleSetDist.map2(~fn=arithmeticOperation, ~t1=a, ~t2=b)->mapStringErrors
+      SampleSetDist.map2(
+        ~fn=arithmeticOperation,
+        ~t1=a,
+        ~t2=b,
+      )->GenericDist_Types.Error.resultStringToResultError
     })
   }
 

@@ -10,6 +10,15 @@ type error =
   | DistributionVerticalShiftIsInvalid
   | Other(string)
 
+module Error = {
+  type t = error
+
+  let fromString = (s: string): t => Other(s)
+
+  let resultStringToResultError: result<'a, string> => result<'a, error> = n =>
+    n->E.R2.errMap(r => r->fromString->Error)
+}
+
 module Operation = {
   type direction =
     | Algebraic
