@@ -74,9 +74,10 @@ const config = {
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://playground.squiggle-language.com/dist-builder',
+            type: 'doc',
+            docId: 'Playground',
             label: 'Playground',
-            position: 'left',
+            position: 'left'
           },
           {
             href: 'https://github.com/QURIresearch/squiggle',
