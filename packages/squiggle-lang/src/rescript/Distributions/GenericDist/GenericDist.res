@@ -2,16 +2,19 @@
 type t = GenericDist_Types.genericDist
 type error = GenericDist_Types.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
-type toSampleSetFn = t => result<array<float>, error>
+type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
 let sampleN = (t: t, n) =>
   switch t {
-  | PointSet(r) => Ok(PointSetDist.sampleNRendered(n, r))
-  | Symbolic(r) => Ok(SymbolicDist.T.sampleN(n, r))
-  | SampleSet(r) => Ok(SampleSet.sampleN(r, n))
+  | PointSet(r) => PointSetDist.sampleNRendered(n, r)
+  | Symbolic(r) => SymbolicDist.T.sampleN(n, r)
+  | SampleSet(r) => SampleSetDist.sampleN(r, n)
   }
+
+let toSampleSetDist = (t: t, n) =>
+  SampleSetDist.make(sampleN(t, n))->GenericDist_Types.Error.resultStringToResultError
 
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
@@ -62,22 +65,16 @@ let toPointSet = (
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
   | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, xyPointLength, r))
-  | SampleSet(r) => {
-      let response = SampleSet.toPointSetDist(
-        ~samples=r,
-        ~samplingInputs={
-          sampleCount: sampleCount,
-          outputXYPoints: xyPointLength,
-          pointSetDistLength: xyPointLength,
-          kernelWidth: None,
-        },
-        (),
-      ).pointSetDist
-      switch response {
-      | Some(r) => Ok(r)
-      | None => Error(Other("Converting sampleSet to pointSet failed"))
-      }
-    }
+  | SampleSet(r) =>
+    SampleSetDist.toPointSetDist(
+      ~samples=r,
+      ~samplingInputs={
+        sampleCount: sampleCount,
+        outputXYPoints: xyPointLength,
+        pointSetDistLength: xyPointLength,
+        kernelWidth: None,
+      },
+    )->GenericDist_Types.Error.resultStringToResultError
   }
 }
 
@@ -91,7 +88,7 @@ let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, unit): result<
   t
   ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
   ->E.R.bind(r =>
-    r->PointSetDist.toSparkline(bucketCount)->E.R2.errMap(r => Error(GenericDist_Types.Other(r)))
+    r->PointSetDist.toSparkline(bucketCount)->GenericDist_Types.Error.resultStringToResultError
   )
 
 module Truncate = {
@@ -166,10 +163,12 @@ module AlgebraicCombination = {
     t1: t,
     t2: t,
   ) => {
-    let arithmeticOperation = Operation.Algebraic.toFn(arithmeticOperation)
-    E.R.merge(toSampleSet(t1), toSampleSet(t2))->E.R2.fmap(((a, b)) => {
-      Belt.Array.zip(a, b)->E.A2.fmap(((a, b)) => arithmeticOperation(a, b))
+    let fn = Operation.Algebraic.toFn(arithmeticOperation)
+    E.R.merge(toSampleSet(t1), toSampleSet(t2))
+    ->E.R.bind(((t1, t2)) => {
+      SampleSetDist.map2(~fn, ~t1, ~t2)->GenericDist_Types.Error.resultStringToResultError
     })
+    ->E.R2.fmap(r => GenericDist_Types.SampleSet(r))
   }
 
   //I'm (Ozzie) really just guessing here, very little idea what's best
@@ -200,13 +199,7 @@ module AlgebraicCombination = {
     | Some(Error(e)) => Error(Other(e))
     | None =>
       switch chooseConvolutionOrMonteCarlo(t1, t2) {
-      | #CalculateWithMonteCarlo =>
-        runMonteCarlo(
-          toSampleSetFn,
-          arithmeticOperation,
-          t1,
-          t2,
-        )->E.R2.fmap(r => GenericDist_Types.SampleSet(r))
+      | #CalculateWithMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
       | #CalculateWithConvolution =>
         runConvolution(
           toPointSetFn,
@@ -247,7 +240,7 @@ let pointwiseCombinationFloat = (
 ): result<t, error> => {
   let m = switch arithmeticOperation {
   | #Add | #Subtract => Error(GenericDist_Types.DistributionVerticalShiftIsInvalid)
-  | (#Multiply | #Divide | #Exponentiate | #Logarithm) as arithmeticOperation =>
+  | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
     toPointSetFn(t)->E.R2.fmap(t => {
       //TODO: Move to PointSet codebase
       let fn = (secondary, main) => Operation.Scale.toFn(arithmeticOperation, main, secondary)
@@ -272,7 +265,7 @@ let mixture = (
   ~pointwiseAddFn: pointwiseAddFn,
 ) => {
   if E.A.length(values) == 0 {
-    Error(GenericDist_Types.Other("mixture must have at least 1 element"))
+    Error(GenericDist_Types.Other("Mixture error: mixture must have at least 1 element"))
   } else {
     let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =

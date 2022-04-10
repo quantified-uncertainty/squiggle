@@ -14,6 +14,7 @@ import {
   resultFloat,
   resultString,
 } from "../rescript/TypescriptInterface.gen";
+export {makeSampleSetDist} from "../rescript/TypescriptInterface.gen";
 import {
   Constructors_mean,
   Constructors_sample,
@@ -32,13 +33,13 @@ import {
   Constructors_algebraicDivide,
   Constructors_algebraicSubtract,
   Constructors_algebraicLogarithm,
-  Constructors_algebraicExponentiate,
+  Constructors_algebraicPower,
   Constructors_pointwiseAdd,
   Constructors_pointwiseMultiply,
   Constructors_pointwiseDivide,
   Constructors_pointwiseSubtract,
   Constructors_pointwiseLogarithm,
-  Constructors_pointwiseExponentiate,
+  Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
 
 export let defaultSamplingInputs: SamplingInputs = {
@@ -77,6 +78,10 @@ export function resultMap(r: result, mapFn: any): result {
   } else {
     return r;
   }
+}
+
+export function resultExn(r: result): any {
+  r.value
 }
 
 export class GenericDist {
@@ -179,9 +184,9 @@ export class GenericDist {
     );
   }
 
-  algebraicExponentiate(d2: GenericDist) {
+  algebraicPower(d2: GenericDist) {
     return this.mapResultDist(
-      Constructors_algebraicExponentiate({ env: this.env }, this.t, d2.t)
+      Constructors_algebraicPower({ env: this.env }, this.t, d2.t)
     );
   }
 
@@ -215,9 +220,9 @@ export class GenericDist {
     );
   }
 
-  pointwiseExponentiate(d2: GenericDist) {
+  pointwisePower(d2: GenericDist) {
     return this.mapResultDist(
-      Constructors_pointwiseExponentiate({ env: this.env }, this.t, d2.t)
+      Constructors_pointwisePower({ env: this.env }, this.t, d2.t)
     );
   }
 }

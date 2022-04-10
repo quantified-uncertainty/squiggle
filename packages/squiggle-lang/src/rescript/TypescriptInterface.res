@@ -22,3 +22,6 @@ type resultDist = result<genericDist, error>
 type resultFloat = result<float, error>
 @genType
 type resultString = result<string, error>
+
+@genType
+let makeSampleSetDist = SampleSetDist.make

@@ -1,8 +1,3 @@
-@genType
-type t = array<float>
-
-// TODO: Refactor to raise correct error when not enough samples
-
 module Internals = {
   module Types = {
     type samplingStats = {
@@ -75,7 +70,7 @@ module Internals = {
     let formatUnitWidth = w => Jstat.max([w, 1.0]) |> int_of_float
 
     let suggestedUnitWidth = (samples, outputXYPoints) => {
-      let suggestedXWidth = Bandwidth.nrd0(samples)
+      let suggestedXWidth = SampleSetDist_Bandwidth.nrd0(samples)
       xWidthToUnitWidth(samples, outputXYPoints, suggestedXWidth)
     }
 
@@ -102,7 +97,7 @@ let toPointSetDist = (
   let pdf =
     continuousPart |> E.A.length > 5
       ? {
-          let _suggestedXWidth = Bandwidth.nrd0(continuousPart)
+          let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
           // todo: This does some recalculating from the last step.
           let _suggestedUnitWidth = Internals.T.suggestedUnitWidth(
             continuousPart,
@@ -144,26 +139,4 @@ let toPointSetDist = (
   }
 
   samplesParse
-}
-
-//Randomly get one sample from the distribution
-let sample = (t: t): float => {
-  let i = E.Int.random(~min=0, ~max=E.A.length(t) - 1)
-  E.A.unsafe_get(t, i)
-}
-
-/*
-If asked for a length of samples shorter or equal the length of the distribution,
-return this first n samples of this distribution.
-Else, return n random samples of the distribution.
-The former helps in cases where multiple distributions are correlated.
-However, if n > length(t), then there's no clear right answer, so we just randomly
-sample everything.
-*/
-let sampleN = (t: t, n) => {
-  if n <= E.A.length(t) {
-    E.A.slice(t, ~offset=0, ~len=n)
-  } else {
-    Belt.Array.makeBy(n, _ => sample(t))
-  }
 }

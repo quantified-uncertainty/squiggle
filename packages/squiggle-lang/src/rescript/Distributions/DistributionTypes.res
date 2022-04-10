@@ -19,7 +19,7 @@ module Operation = {
     | #Multiply
     | #Subtract
     | #Divide
-    | #Exponentiate
+    | #Power
     | #Logarithm
   ]
 
@@ -28,7 +28,7 @@ module Operation = {
     | #Add => \"+."
     | #Multiply => \"*."
     | #Subtract => \"-."
-    | #Exponentiate => \"**"
+    | #Power => \"**"
     | #Divide => \"/."
     | #Logarithm => (a, b) => log(a) /. log(b)
     }
