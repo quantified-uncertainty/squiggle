@@ -47,13 +47,13 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/foretold-app/squiggle/tree/main/packages/website/",
+            "https://github.com/foretold-app/squiggle/tree/master/packages/website/",
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            "https://github.com/foretold-app/squiggle/tree/main/packages/website/",
+            "https://github.com/foretold-app/squiggle/tree/master/packages/website/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
