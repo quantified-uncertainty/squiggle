@@ -225,7 +225,7 @@ module SamplingDistribution = {
       let pointSetDist = 
         sampleSetDist
         -> E.R.bind(r =>
-          SampleSetDist.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r, ()));
+          SampleSetDist.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r));
       pointSetDist |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
     })
   }

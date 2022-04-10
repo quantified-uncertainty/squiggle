@@ -1,4 +1,5 @@
 module T: {
+  @genType
   type t
   let make: array<float> => result<t, string>
   let get: t => array<float>
@@ -18,7 +19,7 @@ include T
 let length = (t: t) => get(t) |> E.A.length
 
 // TODO: Refactor to get error in the toPointSetDist function, instead of adding at very end.
-let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs, ()): result<
+let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs): result<
   PointSetTypes.pointSetDist,
   string,
 > =>

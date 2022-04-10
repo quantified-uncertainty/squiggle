@@ -128,7 +128,10 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | ToDist(ToSampleSet(n)) =>
-      dist->GenericDist.toSampleSetDist(n)->E.R2.fmap(r => Dist(SampleSet(r)))->OutputLocal.fromResult
+      dist
+      ->GenericDist.toSampleSetDist(n)
+      ->E.R2.fmap(r => Dist(SampleSet(r)))
+      ->OutputLocal.fromResult
     | ToDist(ToPointSet) =>
       dist
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
@@ -204,7 +207,8 @@ module Constructors = {
     C.truncate(dist, leftCutoff, rightCutoff)->run(~env)->toDistR
   let inspect = (~env, dist) => C.inspect(dist)->run(~env)->toDistR
   let toString = (~env, dist) => C.toString(dist)->run(~env)->toStringR
-  let toSparkline = (~env, dist, bucketCount) => C.toSparkline(dist, bucketCount)->run(~env)->toStringR
+  let toSparkline = (~env, dist, bucketCount) =>
+    C.toSparkline(dist, bucketCount)->run(~env)->toStringR
   let algebraicAdd = (~env, dist1, dist2) => C.algebraicAdd(dist1, dist2)->run(~env)->toDistR
   let algebraicMultiply = (~env, dist1, dist2) =>
     C.algebraicMultiply(dist1, dist2)->run(~env)->toDistR
@@ -213,8 +217,7 @@ module Constructors = {
     C.algebraicSubtract(dist1, dist2)->run(~env)->toDistR
   let algebraicLogarithm = (~env, dist1, dist2) =>
     C.algebraicLogarithm(dist1, dist2)->run(~env)->toDistR
-  let algebraicPower = (~env, dist1, dist2) =>
-    C.algebraicPower(dist1, dist2)->run(~env)->toDistR
+  let algebraicPower = (~env, dist1, dist2) => C.algebraicPower(dist1, dist2)->run(~env)->toDistR
   let pointwiseAdd = (~env, dist1, dist2) => C.pointwiseAdd(dist1, dist2)->run(~env)->toDistR
   let pointwiseMultiply = (~env, dist1, dist2) =>
     C.pointwiseMultiply(dist1, dist2)->run(~env)->toDistR
@@ -223,6 +226,5 @@ module Constructors = {
     C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
   let pointwiseLogarithm = (~env, dist1, dist2) =>
     C.pointwiseLogarithm(dist1, dist2)->run(~env)->toDistR
-  let pointwisePower = (~env, dist1, dist2) =>
-    C.pointwisePower(dist1, dist2)->run(~env)->toDistR
+  let pointwisePower = (~env, dist1, dist2) => C.pointwisePower(dist1, dist2)->run(~env)->toDistR
 }
