@@ -1,2 +1,6 @@
 export { SquiggleChart } from "./SquiggleChart";
-export { SquiggleEditor, renderSquiggleEditor } from "./SquiggleEditor";
+export { SquiggleEditor, renderSquiggleEditorToDom } from "./SquiggleEditor";
+import SquigglePlayground, {
+  renderSquigglePlaygroundToDom,
+} from "./SquigglePlayground";
+export { SquigglePlayground, renderSquigglePlaygroundToDom };

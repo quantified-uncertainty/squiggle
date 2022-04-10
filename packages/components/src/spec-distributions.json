@@ -1,123 +1,181 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "A basic area chart example.",
+  "description": "A basic area chart example",
   "width": 500,
-  "height": 200,
+  "height": 100,
   "padding": 5,
-  "data": [{ "name": "con" }, { "name": "dis" }],
-
-  "signals": [
+  "data": [
     {
-      "name": "mousex",
-      "description": "x position of mouse",
-      "update": "0",
-      "on": [{ "events": "mousemove", "update": "1-x()/width" }]
+      "name": "con"
     },
+    {
+      "name": "dis"
+    }
+  ],
+  "signals": [
     {
       "name": "xscale",
       "description": "The transform of the x scale",
-      "value": 1.0,
+      "value": false,
       "bind": {
-        "input": "range",
-        "min": 0.1,
-        "max": 1
+        "input": "checkbox",
+        "name": "log x scale"
       }
     },
     {
       "name": "yscale",
       "description": "The transform of the y scale",
-      "value": 1.0,
+      "value": false,
       "bind": {
-        "input": "range",
-        "min": 0.1,
-        "max": 1
+        "input": "checkbox",
+        "name": "log y scale"
       }
     }
   ],
-
   "scales": [
     {
       "name": "xscale",
       "type": "pow",
-      "exponent": { "signal": "xscale" },
+      "exponent": {
+        "signal": "xscale ? 0.1 : 1"
+      },
       "range": "width",
       "zero": false,
       "nice": false,
       "domain": {
         "fields": [
-          { "data": "con", "field": "x" },
-          { "data": "dis", "field": "x" }
+          {
+            "data": "con",
+            "field": "x"
+          },
+          {
+            "data": "dis",
+            "field": "x"
+          }
         ]
       }
     },
     {
       "name": "yscale",
       "type": "pow",
-      "exponent": { "signal": "yscale" },
+      "exponent": {
+        "signal": "yscale ? 0.1 : 1"
+      },
       "range": "height",
       "nice": true,
       "zero": true,
       "domain": {
         "fields": [
-          { "data": "con", "field": "y" },
-          { "data": "dis", "field": "y" }
+          {
+            "data": "con",
+            "field": "y"
+          },
+          {
+            "data": "dis",
+            "field": "y"
+          }
         ]
       }
     }
   ],
-
   "axes": [
-    { "orient": "bottom", "scale": "xscale", "tickCount": 20 },
-    { "orient": "left", "scale": "yscale" }
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "labelColor": "#666",
+      "tickColor": "#ddd",
+      "format": "~s",
+      "tickCount": 20
+    }
   ],
-
   "marks": [
     {
       "type": "area",
-      "from": { "data": "con" },
+      "from": {
+        "data": "con"
+      },
       "encode": {
-        "enter": {
-          "tooltip": { "signal": "datum.cdf" }
-        },
         "update": {
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "y" },
-          "y2": { "scale": "yscale", "value": 0 },
-          "fill": {
-            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: '#11ac8f'}, {offset: clamp(mousex, 0, 1), color: '#11ac8f'}, {offset: clamp(mousex, 0, 1), color: '#1b6fac'}, {offset: 1.0, color: '#1b6fac'} ] }",
-            "color": "#000"
+          "x": {
+            "scale": "xscale",
+            "field": "x"
           },
-          "interpolate": { "value": "monotone" },
-          "fillOpacity": { "value": 1 }
+          "y": {
+            "scale": "yscale",
+            "field": "y"
+          },
+          "y2": {
+            "scale": "yscale",
+            "value": 0
+          },
+          "fill": {
+            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: '#4C78A8'}] }"
+          },
+          "interpolate": {
+            "value": "monotone"
+          },
+          "fillOpacity": {
+            "value": 1
+          }
         }
       }
     },
     {
       "type": "rect",
-      "from": { "data": "dis" },
+      "from": {
+        "data": "dis"
+      },
       "encode": {
         "enter": {
-          "y2": { "scale": "yscale", "value": 0 },
-          "width": { "value": 1 }
+          "y2": {
+            "scale": "yscale",
+            "value": 0
+          },
+          "width": {
+            "value": 1
+          }
         },
         "update": {
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "y" }
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "y"
+          }
         }
       }
     },
     {
       "type": "symbol",
-      "from": { "data": "dis" },
+      "from": {
+        "data": "dis"
+      },
       "encode": {
         "enter": {
-          "shape": { "value": "circle" },
-          "width": { "value": 5 },
-          "tooltip": { "signal": "datum.y" }
+          "shape": {
+            "value": "circle"
+          },
+          "width": {
+            "value": 5
+          },
+          "tooltip": {
+            "signal": "datum.y"
+          }
         },
         "update": {
-          "x": { "scale": "xscale", "field": "x" },
-          "y": { "scale": "yscale", "field": "y" }
+          "x": {
+            "scale": "xscale",
+            "field": "x"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "y"
+          },
+          "fill": {
+            "value": "#1e4577"
+          }
         }
       }
     }

@@ -38,6 +38,15 @@ Being a monorepo, where packages are connected by dependency, it's important to 
 
 We aspire for `ci.yaml` and `README.md`s to be in one-to-one correspondence. 
 
+## If you're on NixOS
+
+You'll need to run a command like this in order to get `yarn build` to run, especially in `packages/squiggle-lang`. 
+```sh
+patchelf --set-interpreter $(patchelf --print-interpreter $(which mkdir)) ./node_modules/gentype/gentype.exe 
+```
+
+See [here](https://github.com/NixOS/nixpkgs/issues/107375)
+
 # Pull request protocol
 
 Please work against `staging` branch. **Do not** work against `master`. Please do not merge without approval from some subset of Quinn, Sam, and Ozzie; they will be auto-pinged. 

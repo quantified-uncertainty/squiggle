@@ -11,6 +11,8 @@ import type {
 import { createClassFromSpec } from "react-vega";
 import * as chartSpecification from "./spec-distributions.json";
 import * as percentilesSpec from "./spec-percentiles.json";
+import { NumberShower } from "./NumberShower";
+import styled from "styled-components";
 
 let SquiggleVegaChart = createClassFromSpec({
   spec: chartSpecification as Spec,
@@ -22,7 +24,7 @@ let SquigglePercentilesChart = createClassFromSpec({
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
-  squiggleString: string;
+  squiggleString?: string;
 
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
@@ -40,24 +42,58 @@ export interface SquiggleChartProps {
   environment?: exportEnv;
   /** When the environment changes */
   onEnvChange?(env: exportEnv): void;
+  /** CSS width of the element */
+  width?: number;
+  height?: number;
 }
 
-export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
+const Error = styled.div`
+  border: 1px solid #792e2e;
+  background: #eee2e2;
+  padding: 0.4em 0.8em;
+`;
+
+const ShowError: React.FC<{ heading: string; children: React.ReactNode }> = ({
+  heading = "Error",
+  children,
+}) => {
+  return (
+    <Error>
+      <h3>{heading}</h3>
+      {children}
+    </Error>
+  );
+};
+
+export const SquiggleChart: React.FC<SquiggleChartProps> = ({
+  squiggleString = "",
+  sampleCount = 1000,
+  outputXYPoints = 1000,
+  kernelWidth,
+  pointDistLength = 1000,
+  diagramStart = 0,
+  diagramStop = 10,
+  diagramCount = 20,
+  environment = [],
+  onEnvChange = () => {},
+  width = 500,
+  height = 60,
+}: SquiggleChartProps) => {
   let samplingInputs: SamplingInputs = {
-    sampleCount: props.sampleCount,
-    outputXYPoints: props.outputXYPoints,
-    kernelWidth: props.kernelWidth,
-    pointDistLength: props.pointDistLength,
+    sampleCount: sampleCount,
+    outputXYPoints: outputXYPoints,
+    kernelWidth: kernelWidth,
+    pointDistLength: pointDistLength,
   };
 
-  let result = run(props.squiggleString, samplingInputs, props.environment);
+  let result = run(squiggleString, samplingInputs, environment);
   if (result.tag === "Ok") {
     let environment = result.value.environment;
     let exports = result.value.exports;
-    if (props.onEnvChange) props.onEnvChange(environment);
+    onEnvChange(environment);
     let chartResults = exports.map((chartResult: exportDistribution) => {
       if (chartResult["NAME"] === "Float") {
-        return <MakeNumberShower precision={3} number={chartResult["VAL"]} />;
+        return <NumberShower precision={3} number={chartResult["VAL"]} />;
       } else if (chartResult["NAME"] === "DistPlus") {
         let shape = chartResult.VAL.pointSetDist;
         if (shape.tag === "Continuous") {
@@ -74,7 +110,14 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             y: y,
           }));
 
-          return <SquiggleVegaChart data={{ con: values }} />;
+          return (
+            <SquiggleVegaChart
+              width={width}
+              height={height}
+              data={{ con: values }}
+              actions={false}
+            />
+          );
         } else if (shape.tag === "Discrete") {
           let xyShape = shape.value.xyShape;
           let totalY = xyShape.ys.reduce((a, b) => a + b);
@@ -89,7 +132,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             y: y,
           }));
 
-          return <SquiggleVegaChart data={{ dis: values }} />;
+          return <SquiggleVegaChart data={{ dis: values }} actions={false} />;
         } else if (shape.tag === "Mixed") {
           let discreteShape = shape.value.discrete.xyShape;
           let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
@@ -123,10 +166,10 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
 
           let total = 0;
           let cdf = sortedPoints.map((point: labeledPoint) => {
-            if (point.type == "discrete") {
+            if (point.type === "discrete") {
               total += point.y;
               return total;
-            } else if (point.type == "continuous") {
+            } else if (point.type === "continuous") {
               total += (point.y / totalY) * totalContinuous;
               return total;
             }
@@ -147,28 +190,29 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             })
           );
           let continuousValues = cdfLabeledPoint.filter(
-            (x) => x.type == "continuous"
+            (x) => x.type === "continuous"
           );
           let discreteValues = cdfLabeledPoint.filter(
-            (x) => x.type == "discrete"
+            (x) => x.type === "discrete"
           );
 
           return (
             <SquiggleVegaChart
               data={{ con: continuousValues, dis: discreteValues }}
+              actions={false}
             />
           );
         }
       } else if (chartResult.NAME === "Function") {
         // We are looking at a function. In this case, we draw a Percentiles chart
-        let start = props.diagramStart ? props.diagramStart : 0;
-        let stop = props.diagramStop ? props.diagramStop : 10;
-        let count = props.diagramCount ? props.diagramCount : 100;
+        let start = diagramStart;
+        let stop = diagramStop;
+        let count = diagramCount;
         let step = (stop - start) / count;
         let data = _.range(start, stop, step).map((x) => {
-          if (chartResult.NAME == "Function") {
+          if (chartResult.NAME === "Function") {
             let result = chartResult.VAL(x);
-            if (result.tag == "Ok") {
+            if (result.tag === "Ok") {
               let percentileArray = [
                 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95,
                 0.99,
@@ -195,19 +239,28 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = (props) => {
             return null;
           }
         });
-        return <SquigglePercentilesChart data={{ facet: data.filter(x => x !== null) }} />;
+        return (
+          <SquigglePercentilesChart
+            data={{ facet: data.filter((x) => x !== null) }}
+            actions={false}
+          />
+        );
       }
     });
     return <>{chartResults}</>;
-  } else if (result.tag == "Error") {
+  } else if (result.tag === "Error") {
     // At this point, we came across an error. What was our error?
-    return <p>{"Error parsing Squiggle: " + result.value}</p>;
+    return (
+      <ShowError heading={"Parse Error"}>
+        {result.value}
+      </ShowError>
+    );
   }
   return <p>{"Invalid Response"}</p>;
 };
 
 function getPercentiles(percentiles: number[], t: DistPlus) {
-  if (t.pointSetDist.tag == "Discrete") {
+  if (t.pointSetDist.tag === "Discrete") {
     let total = 0;
     let maxX = _.max(t.pointSetDist.value.xyShape.xs);
     let bounds = percentiles.map((_) => maxX);
@@ -217,14 +270,14 @@ function getPercentiles(percentiles: number[], t: DistPlus) {
       (x, y) => {
         total += y;
         percentiles.forEach((v, i) => {
-          if (total > v && bounds[i] == maxX) {
+          if (total > v && bounds[i] === maxX) {
             bounds[i] = x;
           }
         });
       }
     );
     return bounds;
-  } else if (t.pointSetDist.tag == "Continuous") {
+  } else if (t.pointSetDist.tag === "Continuous") {
     let total = 0;
     let maxX = _.max(t.pointSetDist.value.xyShape.xs);
     let totalY = _.sum(t.pointSetDist.value.xyShape.ys);
@@ -235,14 +288,14 @@ function getPercentiles(percentiles: number[], t: DistPlus) {
       (x, y) => {
         total += y / totalY;
         percentiles.forEach((v, i) => {
-          if (total > v && bounds[i] == maxX) {
+          if (total > v && bounds[i] === maxX) {
             bounds[i] = x;
           }
         });
       }
     );
     return bounds;
-  } else if (t.pointSetDist.tag == "Mixed") {
+  } else if (t.pointSetDist.tag === "Mixed") {
     let discreteShape = t.pointSetDist.value.discrete.xyShape;
     let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
 
@@ -276,13 +329,13 @@ function getPercentiles(percentiles: number[], t: DistPlus) {
     let maxX = _.max(sortedPoints.map((x) => x.x));
     let bounds = percentiles.map((_) => maxX);
     sortedPoints.map((point: labeledPoint) => {
-      if (point.type == "discrete") {
+      if (point.type === "discrete") {
         total += point.y;
-      } else if (point.type == "continuous") {
+      } else if (point.type === "continuous") {
         total += (point.y / totalY) * totalContinuous;
       }
       percentiles.forEach((v, i) => {
-        if (total > v && bounds[i] == maxX) {
+        if (total > v && bounds[i] === maxX) {
           bounds[i] = total;
         }
       });
@@ -290,92 +343,4 @@ function getPercentiles(percentiles: number[], t: DistPlus) {
     });
     return bounds;
   }
-}
-
-function MakeNumberShower(props: { number: number; precision: number }) {
-  let numberWithPresentation = numberShow(props.number, props.precision);
-  return (
-    <span>
-      {numberWithPresentation.value}
-      {numberWithPresentation.symbol}
-      {numberWithPresentation.power ? (
-        <span>
-          {"\u00b710"}
-          <span style={{ fontSize: "0.6em", verticalAlign: "super" }}>
-            {numberWithPresentation.power}
-          </span>
-        </span>
-      ) : (
-        <></>
-      )}
-    </span>
-  );
-}
-
-const orderOfMagnitudeNum = (n: number) => {
-  return Math.pow(10, n);
-};
-
-// 105 -> 3
-const orderOfMagnitude = (n: number) => {
-  return Math.floor(Math.log(n) / Math.LN10 + 0.000000001);
-};
-
-function withXSigFigs(number: number, sigFigs: number) {
-  const withPrecision = number.toPrecision(sigFigs);
-  const formatted = Number(withPrecision);
-  return `${formatted}`;
-}
-
-class NumberShower {
-  number: number;
-  precision: number;
-
-  constructor(number: number, precision = 2) {
-    this.number = number;
-    this.precision = precision;
-  }
-
-  convert() {
-    const number = Math.abs(this.number);
-    const response = this.evaluate(number);
-    if (this.number < 0) {
-      response.value = "-" + response.value;
-    }
-    return response;
-  }
-
-  metricSystem(number: number, order: number) {
-    const newNumber = number / orderOfMagnitudeNum(order);
-    const precision = this.precision;
-    return `${withXSigFigs(newNumber, precision)}`;
-  }
-
-  evaluate(number: number) {
-    if (number === 0) {
-      return { value: this.metricSystem(0, 0) };
-    }
-
-    const order = orderOfMagnitude(number);
-    if (order < -2) {
-      return { value: this.metricSystem(number, order), power: order };
-    } else if (order < 4) {
-      return { value: this.metricSystem(number, 0) };
-    } else if (order < 6) {
-      return { value: this.metricSystem(number, 3), symbol: "K" };
-    } else if (order < 9) {
-      return { value: this.metricSystem(number, 6), symbol: "M" };
-    } else if (order < 12) {
-      return { value: this.metricSystem(number, 9), symbol: "B" };
-    } else if (order < 15) {
-      return { value: this.metricSystem(number, 12), symbol: "T" };
-    } else {
-      return { value: this.metricSystem(number, order), power: order };
-    }
-  }
-}
-
-export function numberShow(number: number, precision = 2) {
-  const ns = new NumberShower(number, precision);
-  return ns.convert();
 }

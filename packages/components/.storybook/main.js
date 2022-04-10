@@ -4,7 +4,7 @@ const custom = require('../webpack.config.js');
 module.exports = {
    webpackFinal: async (config) => {
     config.resolve.alias = custom.resolve.alias;
-    return { ...config, module: { ...config.module, rules: config.module.rules.concat(custom.module.rules) } };
+    return { ...config, module: { ...config.module, rules: config.module.rules.concat(custom.module.rules.filter(x => x.loader === "ts-loader")) } };
   },
   "stories": [
     "../src/**/*.stories.mdx",

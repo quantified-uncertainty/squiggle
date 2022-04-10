@@ -17,3 +17,5 @@ yarn-error.log
 *.gen.tsx
 *.gen.js
 dist
+*.coverage
+_coverage
