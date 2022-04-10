@@ -58,7 +58,7 @@ Convert to graph, then display that. (Optionally, you can also convert to sample
 Lists of the x-y coordinates of the shape of a distribution. (Usually the pdf, which is more compressed than the cdf).  Some key functions (like pdf, cdf) and manipulations can work on almost any graphally-described distribution. 
 
 **Alternative Names:**  
-Grid, Mesh, Graph, Vector, Pdf, Discretised, Bezier, Curve.  
+Grid, Mesh, Graph, Vector, Pdf, PdfCoords/PdfPoints, Discretised, Bezier, Curve  
 See [this facebook thread](https://www.facebook.com/ozzie.gooen/posts/10165936265785363?notif_id=1644937423623638&notif_t=feedback_reaction_generic&ref=notif).
 
 **How to Do Computation**  

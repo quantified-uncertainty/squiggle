@@ -3,6 +3,13 @@
 
 This is an experiment DSL/language for making probabilistic estimates. The full story can be found [here](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3). 
 
+## Our deployments
+
+- **website/docs prod**: https://squiggle-language.com
+- **website/docs staging**: https://staging--squiggle-documentation.netlify.app/
+- **old playground**: https://playground.squiggle-language.com
+
+## Packages
 This monorepo has several packages that can be used for various purposes. All 
 the packages can be found in `packages`.
 
