@@ -33,5 +33,5 @@ The `@quri/squiggle-components` package offers several components and utilities
 for people who want to embed Squiggle components into websites. This documentation
 relies on `@quri/squiggle-components` frequently.
 
-We host [a storybook](https://components.squiggle-language.com/) with details
+We host [a storybook](https://squiggle-components.netlify.app/) with details
 and usage of each of the components made available.
