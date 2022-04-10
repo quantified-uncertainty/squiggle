@@ -1,37 +1,37 @@
-import React from 'react';
-import clsx from 'clsx';
-import styles from './HomepageFeatures.module.css';
+import React from "react";
+import clsx from "clsx";
+import styles from "./HomepageFeatures.module.css";
 
 const FeatureList = [
   {
-    title: 'Probabilistic',
+    title: "Probabilistic",
+    description: (
+      <>Squiggle makes working with probability distributions really easy.</>
+    ),
+  },
+  {
+    title: "Portable",
     description: (
       <>
-        Squiggle makes working with probability distributions really easy. 
+        Squiggle is in a small Rescript / Javascript library. It can be used
+        wherever Rescript and Javascript are available.
       </>
     ),
   },
   {
-    title: 'Portable',
+    title: "Fast",
     description: (
       <>
-      Squiggle is in a small Rescript / Javascript library. It can be used wherever Rescript and Javascript are available.
-      </>
-    ),
-  },
-  {
-    title: 'Fast',
-    description: (
-      <>
-        Squiggle tries to get as far as it can without resorting to Monte Carlo simulation, but does so when necessary.
+        Squiggle tries to get as far as it can without resorting to Monte Carlo
+        simulation, but does so when necessary.
       </>
     ),
   },
 ];
 
-function Feature({Svg, title, description}) {
+function Feature({ Svg, title, description }) {
   return (
-    <div className={clsx('col col--4')}>
+    <div className={clsx("col col--4")}>
       <div className="text--center padding-horiz--md">
         <h3>{title}</h3>
         <p>{description}</p>

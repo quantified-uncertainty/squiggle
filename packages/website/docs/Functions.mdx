@@ -2,7 +2,7 @@
 sidebar_position: 7
 ---
 
-import { SquiggleEditor } from '../src/components/SquiggleEditor'
+import { SquiggleEditor } from "../src/components/SquiggleEditor";
 
 # Squiggle Functions Reference
 
@@ -21,7 +21,6 @@ The `uniform(low, high)` function creates a uniform distribution between the
 two given numbers.
 
 <SquiggleEditor initialSquiggleString="uniform(3, 7)" />
-
 
 ### Lognormal distribution
 
@@ -42,7 +41,6 @@ and standard deviation, using `lognormalFromMeanAndStdDev`.
 
 <SquiggleEditor initialSquiggleString="lognormalFromMeanAndStdDev(20, 10)" />
 
-
 ### Beta distribution
 
 The `beta(a, b)` function creates a beta distribution with parameters a and b:
@@ -55,7 +53,6 @@ The `exponential(mean)` function creates an exponential distribution with the gi
 mean.
 
 <SquiggleEditor initialSquiggleString="exponential(1)" />
-
 
 ### The Triangular distribution
 
@@ -84,6 +81,7 @@ As well as mixed distributions:
 ## Other Functions
 
 ### PDF of a distribution
+
 The `pdf(distribution, x)` function returns the density of a distribution at the
 given point x.
 
@@ -104,11 +102,13 @@ or all values lower than x. It is the inverse of `inv`.
 <SquiggleEditor initialSquiggleString="cdf(normal(0,1),0)" />
 
 ### Mean of a distribution
+
 The `mean(distribution)` function gives the mean (expected value) of a distribution.
 
 <SquiggleEditor initialSquiggleString="mean(normal(5, 10))" />
 
 ### Sampling a distribution
+
 The `sample(distribution)` samples a given distribution.
 
 <SquiggleEditor initialSquiggleString="sample(normal(0, 10))" />
