@@ -37,7 +37,7 @@ jobs:
     name: Language lint
     runs-on: ubuntu-latest
     needs: pre_check
-    if: ${{ ! needs.pre_check.outputs.should_skip_lang }}
+    if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
     defaults: 
       run: 
         shell: bash
