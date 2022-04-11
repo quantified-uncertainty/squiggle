@@ -1,11 +1,11 @@
 import BrowserOnly from "@docusaurus/BrowserOnly";
 
-export function SquiggleEditor(props) {
+export function SquigglePlayground(props) {
   return (
     <BrowserOnly fallback={<div>Loading...</div>}>
       {() => {
         const LibComponent =
-          require("@quri/squiggle-components").SquiggleEditor;
+          require("@quri/squiggle-components").SquigglePlayground;
         return <LibComponent {...props} />;
       }}
     </BrowserOnly>
