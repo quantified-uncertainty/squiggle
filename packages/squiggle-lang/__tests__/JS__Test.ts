@@ -1,8 +1,7 @@
 import {
   run,
-  GenericDist,
+  Distribution,
   resultMap,
-  makeSampleSetDist,
 } from "../src/js/index";
 
 let testRun = (x: string) => {
@@ -13,6 +12,10 @@ let testRun = (x: string) => {
     return result;
   }
 };
+
+function Ok<b>(x: b) {
+  return { tag: "Ok", value: x}
+}
 
 describe("Simple calculations and results", () => {
   test("mean(normal(5,2))", () => {
@@ -43,15 +46,15 @@ describe("Multimodal too many weights error", () => {
   });
 });
 
-describe("GenericDist", () => {
+describe("Distribution", () => {
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
   //Also, note, the value should be created using makeSampleSetDist() later on.
   let env = { sampleCount: 8, xyPointLength: 100 };
-  let dist = new GenericDist(
+  let dist = new Distribution(
     { tag: "SampleSet", value: [3, 4, 5, 6, 6, 7, 10, 15, 30] },
     env
   );
-  let dist2 = new GenericDist(
+  let dist2 = new Distribution(
     { tag: "SampleSet", value: [20, 22, 24, 29, 30, 35, 38, 44, 52] },
     env
   );
@@ -70,22 +73,22 @@ describe("GenericDist", () => {
   });
   test("toPointSet", () => {
     expect(
-      resultMap(dist.toPointSet(), (r: GenericDist) => r.toString()).value.value
-    ).toBe("Point Set Distribution");
+      resultMap(dist.toPointSet(), (r: Distribution) => r.toString()).value
+    ).toEqual(Ok("Point Set Distribution"));
   });
   test("toSparkline", () => {
-    expect(dist.toSparkline(20).value).toBe("▁▁▃▅███▆▄▃▂▁▁▂▂▃▂▁▁▁");
+    expect(dist.toSparkline(20).value).toEqual("▁▁▃▅███▆▄▃▂▁▁▂▂▃▂▁▁▁");
   });
   test("algebraicAdd", () => {
     expect(
-      resultMap(dist.algebraicAdd(dist2), (r: GenericDist) => r.toSparkline(20))
-        .value.value
-    ).toBe("▁▁▂▄▆████▇▆▄▄▃▃▃▂▁▁▁");
+      resultMap(dist.algebraicAdd(dist2), (r: Distribution) => r.toSparkline(20))
+        .value
+    ).toEqual(Ok("▁▁▂▄▆████▇▆▄▄▃▃▃▂▁▁▁"));
   });
   test("pointwiseAdd", () => {
     expect(
-      resultMap(dist.pointwiseAdd(dist2), (r: GenericDist) => r.toSparkline(20))
-        .value.value
-    ).toBe("▁▂▅██▅▅▅▆▇█▆▅▃▃▂▂▁▁▁");
+      resultMap(dist.pointwiseAdd(dist2), (r: Distribution) => r.toSparkline(20))
+        .value
+    ).toEqual(Ok("▁▂▅██▅▅▅▆▇█▆▅▃▃▂▂▁▁▁"));
   });
 });
