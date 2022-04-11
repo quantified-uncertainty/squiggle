@@ -13,7 +13,7 @@
 
 # Any typescript code
 *.tsx @Hazelfire @OAGr
-*.tx @Hazelfire @OAGr
+*.ts @Hazelfire @OAGr
 
 # Any opsy files
 .github/*
