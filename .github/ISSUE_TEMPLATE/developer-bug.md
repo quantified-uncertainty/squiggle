@@ -1,6 +1,6 @@
 ---
 name: Developer friction when contributing to Squiggle
-about: Did your yarn scripts fail? Did the CI diverge from a README? Have a testing-related task? Etc. 
+about: Have a testing-related task? Did your yarn scripts fail? Did the CI diverge from a README? Etc.  
 labels: 'ops & testing'
 ---
 # Description:
