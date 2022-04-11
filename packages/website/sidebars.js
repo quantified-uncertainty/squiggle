@@ -21,11 +21,6 @@ const sidebars = {
       label: "Introduction",
     },
     {
-      type: "doc",
-      id: "Playground",
-      label: "Playground",
-    },
-    {
       type: "category",
       label: "Features",
       items: [

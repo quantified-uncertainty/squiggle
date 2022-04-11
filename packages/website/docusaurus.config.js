@@ -79,12 +79,7 @@ const config = {
             label: "Documentation",
           },
           { to: "/blog", label: "Blog", position: "left" },
-          {
-            type: "doc",
-            docId: "Playground",
-            label: "Playground",
-            position: "left",
-          },
+          { to: "/playground", label: "Playground", position: "left" },
           {
             href: "https://github.com/QURIresearch/squiggle",
             label: "GitHub",
