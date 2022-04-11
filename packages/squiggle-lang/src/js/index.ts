@@ -4,8 +4,8 @@ import type {
   exportDistribution,
 } from "../rescript/ProgramEvaluator.gen";
 export type {  exportEnv, exportDistribution };
-import { genericDist, samplingParams, evaluate, expressionValue, errorValue, distributionError } from "../rescript/TypescriptInterface.gen";
-export { makeSampleSetDist } from "../rescript/TypescriptInterface.gen";
+import { genericDist, samplingParams, evaluate, expressionValue, errorValue, distributionError, toPointSet, continuousShape, discreteShape, distributionErrorToString } from "../rescript/TypescriptInterface.gen";
+export { makeSampleSetDist, errorValueToString, distributionErrorToString } from "../rescript/TypescriptInterface.gen";
 import {
   Constructors_mean,
   Constructors_sample,
@@ -32,19 +32,14 @@ import {
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
+export type {samplingParams, errorValue}
 
-export type SamplingInputs = {
-  readonly sampleCount?: number; 
-  readonly outputXYPoints?: number; 
-  readonly kernelWidth?: number; 
-  readonly pointDistLength?: number
-};
 export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
   xyPointLength: 10000
 };
 
-type result<a, b> =
+export type result<a, b> =
   | {
       tag: "Ok";
       value: a;
@@ -63,6 +58,10 @@ export function resultMap<a, b, c>(
   } else {
     return r;
   }
+}
+
+function Ok<a,b>(x: a): result<a,b> {
+  return {"tag": "Ok", value: x}
 }
 
 type tagged<a, b> = {tag: a, value: b}
@@ -97,15 +96,25 @@ function createTsExport(x: expressionValue, sampEnv: samplingParams): squiggleEx
       return tag("number", x.value);
     case "EvRecord":
       return tag("record", _.mapValues(x.value, x => createTsExport(x, sampEnv)))
-
-      
-      
   }
 }
 
 
 export function resultExn<a, c>(r: result<a, c>): a | c {
   return r.value;
+}
+
+export type point = { x: number, y: number}
+
+export type shape = {
+  continuous: point[]
+  discrete: point[]
+}
+
+function shapePoints(x : continuousShape | discreteShape): point[]{
+  let xs = x.xyShape.xs;
+  let ys = x.xyShape.ys;
+  return _.zipWith(xs, ys, (x, y) => ({x, y}))
 }
 
 export class Distribution {
@@ -148,6 +157,34 @@ export class Distribution {
     );
   }
 
+  shape() : result<shape, distributionError> {
+    let pointSet = toPointSet(this.t, {xyPointLength: this.env.xyPointLength, sampleCount: this.env.sampleCount}, null);
+    if(pointSet.tag === "Ok"){
+      let distribution = pointSet.value;
+      if(distribution.tag === "Continuous"){
+        return Ok({
+          continuous: shapePoints(distribution.value),
+          discrete: []
+        })
+      }
+      else if(distribution.tag === "Discrete"){
+        return Ok({
+          discrete: shapePoints(distribution.value),
+          continuous: []
+        })
+      }
+      else if(distribution.tag === "Mixed"){
+        return Ok({
+          discrete: shapePoints(distribution.value.discrete),
+          continuous: shapePoints(distribution.value.continuous)
+        })
+      }
+    }
+    else {
+      return pointSet
+    }
+  }
+
   toPointSet(): result<Distribution, distributionError> {
     return this.mapResultDist(
       Constructors_toPointSet({ env: this.env }, this.t)
@@ -170,8 +207,14 @@ export class Distribution {
     return this.mapResultDist(Constructors_inspect({ env: this.env }, this.t));
   }
 
-  toString(): result<string, distributionError> {
-    return Constructors_toString({ env: this.env }, this.t);
+  toString(): string {
+    let result = Constructors_toString({ env: this.env }, this.t);
+    if(result.tag  === "Ok"){
+      result.value
+    }
+    else {
+      return distributionErrorToString(result.value)
+    }
   }
 
   toSparkline(n: number): result<string, distributionError> {

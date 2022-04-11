@@ -36,3 +36,21 @@ type expressionValue = Reducer_Expression.expressionValue
 
 @genType
 type errorValue = Reducer_ErrorValue.errorValue
+
+@genType
+let toPointSet = GenericDist.toPointSet
+
+@genType
+type mixedShape = PointSetTypes.mixedShape
+
+@genType
+type discreteShape = PointSetTypes.discreteShape
+
+@genType
+type continuousShape = PointSetTypes.continuousShape
+
+@genType
+let errorValueToString = Reducer_ErrorValue.errorToString
+
+@genType
+let distributionErrorToString = GenericDist_Types.Error.toString

@@ -1,10 +1,10 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import type { DistPlus } from "@quri/squiggle-lang";
+import type { Distribution, errorValue, result } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
-import { DistPlusChart } from "./DistPlusChart";
+import { DistributionChart } from "./DistributionChart";
 import { Error } from "./Error";
 
 let SquigglePercentilesChart = createClassFromSpec({
@@ -13,36 +13,38 @@ let SquigglePercentilesChart = createClassFromSpec({
 
 type distPlusFn = (
   a: number
-) => { tag: "Ok"; value: DistPlus } | { tag: "Error"; value: string };
+) => result<Distribution, errorValue>
 
-const _rangeByCount = (start, stop, count) => {
+const _rangeByCount = (start: number, stop: number, count: number) => {
   const step = (stop - start) / (count - 1);
   const items = _.range(start, stop, step);
   const result = items.concat([stop]);
   return result;
 };
 
+function unwrap<a, b>( x: result<a, b>): a {
+  if(x.tag === "Ok"){
+    return x.value
+  }
+}
 export const FunctionChart: React.FC<{
   distPlusFn: distPlusFn;
   diagramStart: number;
   diagramStop: number;
   diagramCount: number;
 }> = ({ distPlusFn, diagramStart, diagramStop, diagramCount }) => {
-  let [mouseOverlay, setMouseOverlay] = React.useState(NaN);
+  let [mouseOverlay, setMouseOverlay] = React.useState(0);
   function handleHover(...args) {
     setMouseOverlay(args[1]);
   }
-  function handleOut(...args) {
+  function handleOut() {
     setMouseOverlay(NaN);
   }
   const signalListeners = { mousemove: handleHover, mouseout: handleOut };
-  let percentileArray = [
-    0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99,
-  ];
   let mouseItem = distPlusFn(mouseOverlay);
   let showChart =
     mouseItem.tag === "Ok" ? (
-      <DistPlusChart distPlus={mouseItem.value} width={400} height={140} />
+      <DistributionChart distribution={mouseItem.value} width={400} height={140} />
     ) : (
       <></>
     );
@@ -56,22 +58,21 @@ export const FunctionChart: React.FC<{
     })
     .filter((x) => x !== null)
     .map(({ x, value }) => {
-      let percentiles = getPercentiles(percentileArray, value);
       return {
         x: x,
-        p1: percentiles[0],
-        p5: percentiles[1],
-        p10: percentiles[2],
-        p20: percentiles[3],
-        p30: percentiles[4],
-        p40: percentiles[5],
-        p50: percentiles[6],
-        p60: percentiles[7],
-        p70: percentiles[8],
-        p80: percentiles[9],
-        p90: percentiles[10],
-        p95: percentiles[11],
-        p99: percentiles[12],
+        p1: unwrap(value.inv(0.01)),
+        p5: unwrap(value.inv(0.05)),
+        p10: unwrap(value.inv(0.12)),
+        p20: unwrap(value.inv(0.20)),
+        p30: unwrap(value.inv(0.30)),
+        p40: unwrap(value.inv(0.40)),
+        p50: unwrap(value.inv(0.50)),
+        p60: unwrap(value.inv(0.60)),
+        p70: unwrap(value.inv(0.70)),
+        p80: unwrap(value.inv(0.80)),
+        p90: unwrap(value.inv(0.90)),
+        p95: unwrap(value.inv(0.95)),
+        p99: unwrap(value.inv(0.99)),
       };
     });
 
@@ -101,88 +102,3 @@ export const FunctionChart: React.FC<{
   );
 };
 
-function getPercentiles(percentiles: number[], t: DistPlus) {
-  if (t.pointSetDist.tag === "Discrete") {
-    let total = 0;
-    let maxX = _.max(t.pointSetDist.value.xyShape.xs);
-    let bounds = percentiles.map((_) => maxX);
-    _.zipWith(
-      t.pointSetDist.value.xyShape.xs,
-      t.pointSetDist.value.xyShape.ys,
-      (x, y) => {
-        total += y;
-        percentiles.forEach((v, i) => {
-          if (total > v && bounds[i] === maxX) {
-            bounds[i] = x;
-          }
-        });
-      }
-    );
-    return bounds;
-  } else if (t.pointSetDist.tag === "Continuous") {
-    let total = 0;
-    let maxX = _.max(t.pointSetDist.value.xyShape.xs);
-    let totalY = _.sum(t.pointSetDist.value.xyShape.ys);
-    let bounds = percentiles.map((_) => maxX);
-    _.zipWith(
-      t.pointSetDist.value.xyShape.xs,
-      t.pointSetDist.value.xyShape.ys,
-      (x, y) => {
-        total += y / totalY;
-        percentiles.forEach((v, i) => {
-          if (total > v && bounds[i] === maxX) {
-            bounds[i] = x;
-          }
-        });
-      }
-    );
-    return bounds;
-  } else if (t.pointSetDist.tag === "Mixed") {
-    let discreteShape = t.pointSetDist.value.discrete.xyShape;
-    let totalDiscrete = discreteShape.ys.reduce((a, b) => a + b);
-
-    let discretePoints = _.zip(discreteShape.xs, discreteShape.ys);
-    let continuousShape = t.pointSetDist.value.continuous.xyShape;
-    let continuousPoints = _.zip(continuousShape.xs, continuousShape.ys);
-
-    interface labeledPoint {
-      x: number;
-      y: number;
-      type: "discrete" | "continuous";
-    }
-
-    let markedDisPoints: labeledPoint[] = discretePoints.map(([x, y]) => ({
-      x: x,
-      y: y,
-      type: "discrete",
-    }));
-    let markedConPoints: labeledPoint[] = continuousPoints.map(([x, y]) => ({
-      x: x,
-      y: y,
-      type: "continuous",
-    }));
-
-    let sortedPoints = _.sortBy(markedDisPoints.concat(markedConPoints), "x");
-
-    let totalContinuous = 1 - totalDiscrete;
-    let totalY = continuousShape.ys.reduce((a: number, b: number) => a + b);
-
-    let total = 0;
-    let maxX = _.max(sortedPoints.map((x) => x.x));
-    let bounds = percentiles.map((_) => maxX);
-    sortedPoints.map((point: labeledPoint) => {
-      if (point.type === "discrete") {
-        total += point.y;
-      } else if (point.type === "continuous") {
-        total += (point.y / totalY) * totalContinuous;
-      }
-      percentiles.forEach((v, i) => {
-        if (total > v && bounds[i] === maxX) {
-          bounds[i] = total;
-        }
-      });
-      return total;
-    });
-    return bounds;
-  }
-}

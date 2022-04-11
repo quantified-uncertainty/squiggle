@@ -8,6 +8,7 @@ type errorValue =
 
 type t = errorValue
 
+@genType
 let errorToString = err =>
   switch err {
   | REArrayIndexNotFound(msg, index) => `${msg}: ${Js.String.make(index)}`

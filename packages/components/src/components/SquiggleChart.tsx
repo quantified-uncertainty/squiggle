@@ -1,14 +1,12 @@
 import * as React from "react";
 import _ from "lodash";
-import { run } from "@quri/squiggle-lang";
+import { run, errorValueToString } from "@quri/squiggle-lang";
 import type {
-  SamplingInputs,
+  samplingParams,
   exportEnv,
-  exportDistribution,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
-import { DistPlusChart } from "./DistPlusChart";
-import { FunctionChart } from "./FunctionChart";
+import { DistributionChart } from "./DistributionChart";
 import { Error } from "./Error";
 
 export interface SquiggleChartProps {
@@ -39,8 +37,6 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   sampleCount = 1000,
   outputXYPoints = 1000,
-  kernelWidth,
-  pointDistLength = 1000,
   diagramStart = 0,
   diagramStop = 10,
   diagramCount = 20,
@@ -49,43 +45,35 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   width = 500,
   height = 60,
 }: SquiggleChartProps) => {
-  let samplingInputs: SamplingInputs = {
+  let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
-    outputXYPoints: outputXYPoints,
-    kernelWidth: kernelWidth,
-    pointDistLength: pointDistLength,
+    xyPointLength: outputXYPoints
   };
 
   let result = run(squiggleString, samplingInputs, environment);
+  console.log(result)
   if (result.tag === "Ok") {
-    let environment = result.value.environment;
-    let exports = result.value.exports;
     onEnvChange(environment);
-    let chartResults = exports.map((chartResult: exportDistribution) => {
-      if (chartResult["NAME"] === "Float") {
-        return <NumberShower precision={3} number={chartResult["VAL"]} />;
-      } else if (chartResult["NAME"] === "DistPlus") {
-        return (
-          <DistPlusChart
-            distPlus={chartResult.VAL}
-            height={height}
-            width={width}
-          />
-        );
-      } else if (chartResult.NAME === "Function") {
-        return (
-          <FunctionChart
-            distPlusFn={chartResult.VAL}
-            diagramStart={diagramStart}
-            diagramStop={diagramStop}
-            diagramCount={diagramCount}
-          />
-        );
-      }
-    });
-    return <>{chartResults}</>;
+    let chartResult = result.value;
+    if (chartResult.tag === "number") {
+      return <NumberShower precision={3} number={chartResult.value} />;
+    } else if (chartResult.tag === "distribution") {
+      console.log("Is a distribution")
+      return (
+        <DistributionChart
+          distribution={chartResult.value}
+          height={height}
+          width={width}
+        />
+      );
+      console.log("NOT THIS LINE")
+    }
+    else {
+      console.log("Is a distribution")
+      return <Error heading="No Viewer">{"We don't currently have a viewer for this type: " + chartResult.tag}</Error>;
+    }
   } else if (result.tag === "Error") {
     // At this point, we came across an error. What was our error?
-    return <Error heading={"Parse Error"}>{result.value}</Error>;
+    return <Error heading={"Parse Error"}>{errorValueToString(result.value)}</Error>;
   }
 };

@@ -21,6 +21,7 @@ let toFloatOperation: (
   ~distToFloatOperation: Operation.distToFloatOperation,
 ) => result<float, error>
 
+@genType
 let toPointSet: (
   t,
   ~xyPointLength: int,
