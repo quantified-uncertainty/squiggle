@@ -1,17 +1,17 @@
 # Squiggle
-![Packages check](https://github.com/QURIresearch/squiggle/actions/workflows/ci.yml/badge.svg)
+![Packages check](https://github.com/quantified-uncertainty/squiggle/actions/workflows/ci.yml/badge.svg)
 [![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)](https://www.npmjs.com/package/@quri/squiggle-lang)
 [![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/QURIresearch/squiggle/blob/staging/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/quantified-uncertainty/squiggle/blob/develop/LICENSE)
  
 This is an experimental DSL/language for making probabilistic estimates. The full story can be found [here](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3). 
 
 ## Our deployments
 
 - **website/docs prod**: https://squiggle-language.com [![Netlify Status](https://api.netlify.com/api/v1/badges/2139af5c-671d-473d-a9f6-66c96077d8a1/deploy-status)](https://app.netlify.com/sites/squiggle-documentation/deploys)
-- **website/docs staging**: https://staging--squiggle-documentation.netlify.app/
+- **website/docs staging**: https://develop--squiggle-documentation.netlify.app/
 - **components storybook prod**: https://squiggle-components.netlify.app/ [![Netlify Status](https://api.netlify.com/api/v1/badges/b7f724aa-6b20-4d0e-bf86-3fcd1a3e9a70/deploy-status)](https://app.netlify.com/sites/squiggle-components/deploys) 
-- **components storybook staging**: https://staging--squiggle-components.netlify.app/ 
+- **components storybook staging**: https://develop--squiggle-components.netlify.app/ 
 - **legacy (2020) playground**: https://playground.squiggle-language.com  
 
 ## Packages
