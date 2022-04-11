@@ -1,3 +1,4 @@
+@genType
 type errorValue =
   | REArrayIndexNotFound(string, int)
   | REFunctionExpected(string)

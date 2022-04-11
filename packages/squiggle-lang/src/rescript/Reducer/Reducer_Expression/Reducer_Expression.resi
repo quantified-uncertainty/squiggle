@@ -1,7 +1,8 @@
 module Result = Belt.Result
 module T = Reducer_Expression_T
 type expression = T.expression
-type expressionValue = ReducerInterface.ExpressionValue.expressionValue
+@genType
+type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 type t = expression
 let toString: T.expression => Js.String.t
 let toStringResult: result<T.expression, 'a> => string
