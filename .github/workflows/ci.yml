@@ -43,11 +43,13 @@ jobs:
         working-directory: packages/squiggle-lang
     steps: 
     - uses: actions/checkout@v2
+    - name: Install Dependencies
+      run: yarn
     - name: Check lint
       run: yarn lint
 
-  lang-build-test:
-    name: Language build and test
+  lang-build-test-bundle:
+    name: Language build, test, and bundle
     runs-on: ubuntu-latest
     needs: pre_check
     if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
@@ -67,7 +69,7 @@ jobs:
       run: yarn bundle
 
   components-build-test:
-    name: Components build and test
+    name: Components bundle and build
     runs-on: ubuntu-latest
     needs: pre_check
     if: ${{ (needs.pre_check.outputs.should_skip_components != 'true') || (needs.pre_check.outputs.should_skip_lang != 'true') }}
