@@ -185,7 +185,7 @@ export class Distribution {
     );
   }
 
-  pointwiseAdd(d2: Distribution) {
+  pointwiseAdd(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_pointwiseAdd({ env: this.env }, this.t, d2.t)
     );

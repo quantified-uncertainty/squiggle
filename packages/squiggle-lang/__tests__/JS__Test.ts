@@ -1,8 +1,4 @@
-import {
-  run,
-  Distribution,
-  resultMap,
-} from "../src/js/index";
+import { run, Distribution, resultMap } from "../src/js/index";
 
 let testRun = (x: string) => {
   let result = run(x);
@@ -14,7 +10,7 @@ let testRun = (x: string) => {
 };
 
 function Ok<b>(x: b) {
-  return { tag: "Ok", value: x}
+  return { tag: "Ok", value: x };
 }
 
 describe("Simple calculations and results", () => {
@@ -81,14 +77,16 @@ describe("Distribution", () => {
   });
   test("algebraicAdd", () => {
     expect(
-      resultMap(dist.algebraicAdd(dist2), (r: Distribution) => r.toSparkline(20))
-        .value
+      resultMap(dist.algebraicAdd(dist2), (r: Distribution) =>
+        r.toSparkline(20)
+      ).value
     ).toEqual(Ok("▁▁▂▄▆████▇▆▄▄▃▃▃▂▁▁▁"));
   });
   test("pointwiseAdd", () => {
     expect(
-      resultMap(dist.pointwiseAdd(dist2), (r: Distribution) => r.toSparkline(20))
-        .value
+      resultMap(dist.pointwiseAdd(dist2), (r: Distribution) =>
+        r.toSparkline(20)
+      ).value
     ).toEqual(Ok("▁▂▅██▅▅▅▆▇█▆▅▃▃▂▂▁▁▁"));
   });
 });
