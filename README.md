@@ -12,7 +12,7 @@ This is an experimental DSL/language for making probabilistic estimates. The ful
 - **website/docs staging**: https://staging--squiggle-documentation.netlify.app/
 - **components storybook prod**: https://squiggle-components.netlify.app/ [![Netlify Status](https://api.netlify.com/api/v1/badges/b7f724aa-6b20-4d0e-bf86-3fcd1a3e9a70/deploy-status)](https://app.netlify.com/sites/squiggle-components/deploys) 
 - **components storybook staging**: https://staging--squiggle-components.netlify.app/ 
-- **old playground**: https://playground.squiggle-language.com
+- **legacy (2020) playground**: https://playground.squiggle-language.com  
 
 ## Packages
 This monorepo has several packages that can be used for various purposes. All 
