@@ -16,7 +16,7 @@
 *.ts @Hazelfire @OAGr
 
 # Any opsy files
-.github/*
+.github/* @quinn-dougherty
 *.json @quinn-dougherty @Hazelfire
 *.y*ml @quinn-dougherty
 *.config.js @Hazelfire
