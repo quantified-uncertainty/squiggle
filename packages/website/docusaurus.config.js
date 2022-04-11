@@ -96,15 +96,6 @@ const config = {
         style: "dark",
         links: [
           {
-            title: "Blog",
-            items: [
-              {
-                label: "Overview",
-                to: "/docs/Language",
-              },
-            ],
-          },
-          {
             title: "More",
             items: [
               {
