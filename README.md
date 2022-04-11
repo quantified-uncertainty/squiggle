@@ -1,5 +1,5 @@
 # Squiggle
-![Packages check](https://github.com/QURIresearch/squiggle/actions/workflows/ci.yaml/badge.svg)
+![Packages check](https://github.com/QURIresearch/squiggle/actions/workflows/ci.yml/badge.svg)
 [![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)](https://www.npmjs.com/package/@quri/squiggle-lang)
 [![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
 
