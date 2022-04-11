@@ -11,10 +11,10 @@ The below few seem to work fine. In the future there's definitely more work to d
 type samplingParams = DistributionOperation.env
 
 @genType
-type genericDist = GenericDist_Types.genericDist
+type genericDist = DistributionTypes.genericDist
 
 @genType
-type distributionError = GenericDist_Types.error
+type distributionError = DistributionTypes.error
 
 @genType
 type resultDist = result<genericDist, distributionError>

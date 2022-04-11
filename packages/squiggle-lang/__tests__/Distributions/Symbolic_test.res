@@ -3,7 +3,7 @@ open Expect
 open TestHelpers
 
 // TODO: use Normal.make (but preferably after teh new validation dispatch is in)
-let mkNormal = (mean, stdev) => GenericDist_Types.Symbolic(#Normal({mean: mean, stdev: stdev}))
+let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean: mean, stdev: stdev}))
 
 describe("(Symbolic) normalize", () => {
   testAll("has no impact on normal distributions", list{-1e8, -1e-2, 0.0, 1e-4, 1e16}, mean => {

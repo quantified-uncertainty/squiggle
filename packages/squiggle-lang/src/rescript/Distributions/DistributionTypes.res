@@ -1,8 +1,10 @@
+@genType
 type genericDist =
   | PointSet(PointSetTypes.pointSetDist)
-  | SampleSet(array<float>)
+  | SampleSet(SampleSetDist.t)
   | Symbolic(SymbolicDistTypes.symbolicDist)
 
+@genType
 type error =
   | NotYetImplemented
   | Unreachable

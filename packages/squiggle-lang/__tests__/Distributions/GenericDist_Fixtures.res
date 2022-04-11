@@ -11,3 +11,4 @@ let triangularDist: GenericDist_Types.genericDist = Symbolic(
 )
 let exponentialDist: GenericDist_Types.genericDist = Symbolic(#Exponential({rate: 2.0}))
 let uniformDist: GenericDist_Types.genericDist = Symbolic(#Uniform({low: 9.0, high: 10.0}))
+let floatDist: GenericDist_Types.genericDist = Symbolic(#Float(1e1))
