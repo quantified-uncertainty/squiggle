@@ -11,8 +11,8 @@ let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Ou
 let fnImage = (theFn, inps) => Js.Array.map(theFn, inps)
 
 let env: DistributionOperation.env = {
-  sampleCount: 100,
-  xyPointLength: 100,
+  sampleCount: 100000,
+  xyPointLength: 1000,
 }
 
 let run = DistributionOperation.run(~env)

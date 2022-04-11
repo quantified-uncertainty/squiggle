@@ -31,7 +31,7 @@ let algebraicSubtract = algebraicSubtract(~env)
 let algebraicLogarithm = algebraicLogarithm(~env)
 let algebraicPower = algebraicPower(~env)
 
-describe("Addition of distributions", () => {
+describe("(Algebraic) addition of distributions", () => {
 
     describe("mean", () => {
         test("normal(mean=5) + normal(mean=20)", () => {
@@ -43,6 +43,39 @@ describe("Addition of distributions", () => {
             -> E.R.toExn
             -> expect
             -> toBe(Some(2.5e1))
+        })
+
+        test("uniform(low=9, high=10) + beta(alpha=2, beta=5)", () => {
+            // let uniformMean = (9.0 +. 10.0) /. 2.0
+            // let betaMean = 1.0 /. (1.0 +. 5.0 /. 2.0)
+            let received = uniformDist 
+                -> algebraicAdd(betaDist)
+                -> E.R2.fmap(GenericDist_Types.Constructors.UsingDists.mean)
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toExn
+            switch received {
+                | None => false -> expect -> toBe(true)
+                // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
+                // sometimes it works with ~digits=2. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.1884273175239643, ~digits=1)  // (uniformMean +. betaMean)
+            }
+        })
+        test("beta(alpha=2, beta=5) + uniform(low=9, high=10)", () => {
+            // let uniformMean = (9.0 +. 10.0) /. 2.0
+            // let betaMean = 1.0 /. (1.0 +. 5.0 /. 2.0)
+            let received = betaDist 
+                -> algebraicAdd(uniformDist)
+                -> E.R2.fmap(GenericDist_Types.Constructors.UsingDists.mean)
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toExn
+            switch received {
+                | None => false -> expect -> toBe(true)
+                // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
+                // sometimes it works with ~digits=2. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.19708465087256619, ~digits=1)  // (uniformMean +. betaMean)
+            }
         })
     })
     describe("pdf", () => {
@@ -192,7 +225,5 @@ describe("Addition of distributions", () => {
                 }
             }
         })
-
-
     })
 })
