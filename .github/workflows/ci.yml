@@ -37,7 +37,7 @@ jobs:
     name: Language lint
     runs-on: ubuntu-latest
     needs: pre_check
-    if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
+    if: $${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
     defaults: 
       run: 
         shell: bash
@@ -50,8 +50,8 @@ jobs:
   lang-build-test:
     name: Language build and test
     runs-on: ubuntu-latest
-    needs: pre_check
-    if: $${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
+    needs: lang-lint
+    # if: $${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
     defaults:
       run:
         shell: bash
