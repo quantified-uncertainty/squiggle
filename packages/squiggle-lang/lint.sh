@@ -3,7 +3,7 @@
 # Hat tip to @dfalling
 # https://forum.rescript-lang.org/t/rescript-9-1-how-can-we-format-to-standard-out/1590/2?u=quinn-dougherty
 
-files=`ls src/rescript/**/*.res src/rescript/*.res`
+files=`ls src/rescript/**/**/*.res src/rescript/**/*.res src/rescript/*.res`
 errors=false
 for file in $files
 do
