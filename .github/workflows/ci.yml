@@ -1,7 +1,6 @@
 name: Squiggle packages check
 
 on:
-  # push:  # Delete this line if there becomes a scarcity of build minutes.
   pull_request:
     branches:
       - master
@@ -51,7 +50,7 @@ jobs:
     name: Language build and test
     runs-on: ubuntu-latest
     needs: pre_check
-    if: ${{ needs.pre_check.outputs.should_skip_lang != 'true'}}
+    if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
     defaults:
       run:
         shell: bash

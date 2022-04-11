@@ -8,7 +8,7 @@ errors=false
 for file in $files
 do
   current=`cat $file`
-  linted=`echo "${current}" | rescript format -stdin .res`
+  linted=`echo "${current}" | ./node_modules/.bin/rescript format -stdin .res`
   diff=`diff <(echo $current) <(echo $linted)`
 
   if [ ${#diff} -gt 0 ]
