@@ -2,7 +2,8 @@
 ![Packages check](https://github.com/QURIresearch/squiggle/actions/workflows/ci.yml/badge.svg)
 [![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)](https://www.npmjs.com/package/@quri/squiggle-lang)
 [![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/QURIresearch/squiggle/blob/staging/LICENSE)
+ 
 This is an experimental DSL/language for making probabilistic estimates. The full story can be found [here](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3). 
 
 ## Our deployments
