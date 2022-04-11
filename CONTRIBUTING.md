@@ -34,7 +34,9 @@ We use netlify, and it should only concern Quinn, Sam, and Ozzie.
 
 You need `yarn`. 
 
-TODO: fill this out based on all the different packages scripts once they cool down. 
+Being a monorepo, where packages are connected by dependency, it's important to follow `README.md`s closely. Each package has it's own `README.md`, which is where the bulk of information is. 
+
+We aspire for `ci.yaml` and `README.md`s to be in one-to-one correspondence. 
 
 ## If you're on NixOS
 
@@ -48,4 +50,3 @@ See [here](https://github.com/NixOS/nixpkgs/issues/107375)
 # Pull request protocol
 
 Please work against `staging` branch. **Do not** work against `master`. Please do not merge without approval from some subset of Quinn, Sam, and Ozzie; they will be auto-pinged. 
-

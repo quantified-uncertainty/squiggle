@@ -11,11 +11,7 @@
       "subdirs": true
     }
   ],
-  "bsc-flags": [
-    "-bs-super-errors",
-    "-bs-no-version-header",
-    "-bs-g"
-  ],
+  "bsc-flags": ["-bs-super-errors", "-bs-no-version-header", "-bs-g"],
   "package-specs": [
     {
       "module": "commonjs",
@@ -27,13 +23,13 @@
   "bs-dependencies": [
     "@glennsl/rescript-jest",
     "@glennsl/bs-json",
-    "rationale", 
+    "rationale",
     "bisect_ppx"
   ],
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",
-    "shims": {},
+    "shims": { "Js": "Js" },
     "debug": {
       "all": false,
       "basic": false
@@ -44,10 +40,6 @@
     "number": "+A-42-48-9-30-4-102-20-27-41"
   },
   "ppx-flags": [
-    [
-      "../../node_modules/bisect_ppx/ppx", 
-      "--exclude-files", 
-      ".*_test\\.res$$"
-    ]
+    ["../../node_modules/bisect_ppx/ppx", "--exclude-files", ".*_test\\.res$$"]
   ]
 }

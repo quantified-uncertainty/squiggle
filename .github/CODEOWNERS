@@ -15,9 +15,8 @@
 *.res @Hazelfire @OAGr @quinn-dougherty
 
 # Any typescript code
-*.tsx @Hazelfire @OAGr @quinn-dougherty
+*.tsx @Hazelfire @OAGr
 
 # Any opsy files
-*.json @quinn-dougherty
-*.yaml @quinn-dougherty
-*.yml @quinn-dougherty
+*.json @quinn-dougherty @Hazelfire
+*.y*ml @quinn-dougherty

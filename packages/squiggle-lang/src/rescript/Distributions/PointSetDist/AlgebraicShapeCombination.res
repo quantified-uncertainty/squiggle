@@ -114,7 +114,7 @@ let combineShapesContinuousContinuous = (
   | #Subtract => (m1, m2) => m1 -. m2
   | #Multiply => (m1, m2) => m1 *. m2
   | #Divide => (m1, mInv2) => m1 *. mInv2
-  | #Exponentiate => (m1, mInv2) => m1 ** mInv2
+  | #Power => (m1, mInv2) => m1 ** mInv2
   | #Logarithm => (m1, m2) => log(m1) /. log(m2)
   } // note: here, mInv2 = mean(1 / t2) ~= 1 / mean(t2)
 
@@ -124,7 +124,7 @@ let combineShapesContinuousContinuous = (
   | #Add => (v1, v2, _, _) => v1 +. v2
   | #Subtract => (v1, v2, _, _) => v1 +. v2
   | #Multiply => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
-  | #Exponentiate => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
+  | #Power => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
   | #Logarithm => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
   | #Divide => (v1, vInv2, m1, mInv2) => v1 *. vInv2 +. v1 *. mInv2 ** 2. +. vInv2 *. m1 ** 2.
   }
@@ -233,7 +233,7 @@ let combineShapesContinuousDiscrete = (
       ()
     }
   | #Multiply
-  | #Exponentiate
+  | #Power
   | #Logarithm
   | #Divide =>
     for j in 0 to t2n - 1 {

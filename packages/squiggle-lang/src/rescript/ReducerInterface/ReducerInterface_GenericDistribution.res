@@ -18,8 +18,8 @@ module Helpers = {
     | "divide" => #Divide
     | "log" => #Logarithm
     | "dotDivide" => #Divide
-    | "pow" => #Exponentiate
-    | "dotPow" => #Exponentiate
+    | "pow" => #Power
+    | "dotPow" => #Power
     | "multiply" => #Multiply
     | "dotMultiply" => #Multiply
     | "dotLog" => #Logarithm
@@ -43,6 +43,13 @@ module Helpers = {
     dist: GenericDist_Types.genericDist,
   ) => {
     FromDist(GenericDist_Types.Operation.ToFloat(fnCall), dist)->runGenericOperation->Some
+  }
+
+  let toStringFn = (
+    fnCall: GenericDist_Types.Operation.toString,
+    dist: GenericDist_Types.genericDist,
+  ) => {
+    FromDist(GenericDist_Types.Operation.ToString(fnCall), dist)->runGenericOperation->Some
   }
 
   let toDistFn = (fnCall: GenericDist_Types.Operation.toDist, dist) => {
@@ -119,6 +126,9 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     ->SymbolicConstructors.symbolicResultToOutput
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist)
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist)
+  | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist)
+  | ("toSparkline", [EvDistribution(dist)]) => Helpers.toStringFn(ToSparkline(20), dist)
+  | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) => Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist)
   | ("exp", [EvDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
     Helpers.twoDiststoDistFn(Algebraic, "pow", GenericDist.fromFloat(Math.e), a)->Some

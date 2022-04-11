@@ -2,34 +2,30 @@
 
 This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
 
-### Installation
+## Build for development and production
 
-``` sh
+This one actually works without running `yarn` at the monorepo level, but it doesn't hurt. You must at least run it at this package level
+
+```sh
 yarn
-```
-
-### Local Development
-
-``` sh
-yarn start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
-
-``` sh
-yarn build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
 
-### Clean
-
-Clean up the build artefacts. 
-``` sh
-yarn clean
+```sh
+yarn build
 ```
 
-# TODO: unify formatting across `packages/*/README.md` 
-# TODO: build docs in `ci.yaml`. 
+Your local dev server is here, opening up a browser window.
+
+```sh
+yarn start
+```
+
+Most changes are reflected live without having to restart the server.
+
+Clean up the build artefacts.
+
+```sh
+yarn clean
+```

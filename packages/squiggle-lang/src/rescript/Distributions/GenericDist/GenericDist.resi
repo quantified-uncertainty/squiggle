@@ -1,11 +1,13 @@
 type t = GenericDist_Types.genericDist
 type error = GenericDist_Types.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
-type toSampleSetFn = t => result<array<float>, error>
+type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
-let sampleN: (t, int) => result<array<float>, error>
+let sampleN: (t, int) => array<float>
+
+let toSampleSetDist: (t, int) => Belt.Result.t<QuriSquiggleLang.SampleSetDist.t, error>
 
 let fromFloat: float => t
 
@@ -20,17 +22,20 @@ let toFloatOperation: (
 ) => result<float, error>
 
 let toPointSet: (
+  t,
   ~xyPointLength: int,
   ~sampleCount: int,
-  t,
+  ~xSelection: GenericDist_Types.Operation.pointsetXSelection=?,
+  unit,
 ) => result<PointSetTypes.pointSetDist, error>
+let toSparkline: (t, ~sampleCount: int, ~bucketCount: int=?, unit) => result<string, error>
 
 let truncate: (
   t,
   ~toPointSetFn: toPointSetFn,
   ~leftCutoff: option<float>=?,
   ~rightCutoff: option<float>=?,
-  unit
+  unit,
 ) => result<t, error>
 
 let algebraicCombination: (

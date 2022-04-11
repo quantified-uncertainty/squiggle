@@ -11,8 +11,6 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "coverage": "rm -f *.coverage; yarn clean; BISECT_ENABLE=yes yarn build; yarn test; bisect-ppx-report html",
-    "rescript:format": "find . -type f \\( -name '*.res' -o -name '*.resi' \\) -exec sh -c 'bsc -format {} | sponge {}'  \\;",
-    "reducer:format": "find src/rescript/Reducer src/rescript/ReducerInterface -type f \\( -name '*.res' -o -name '*.resi' \\) -exec sh -c 'bsc -format {} | sponge {}'  \\;",
     "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [
@@ -24,7 +22,7 @@
     "@glennsl/bs-json": "^5.0.2",
     "jstat": "^1.9.5",
     "lodash": "4.17.21",
-    "mathjs": "10.4.1",
+    "mathjs": "10.4.3",
     "pdfast": "^0.2.0",
     "rationale": "0.2.0",
     "rescript": "^9.1.4",
@@ -41,7 +39,7 @@
     "ts-jest": "^27.1.4",
     "ts-loader": "^9.2.8",
     "typescript": "^4.6.3",
-    "webpack": "^5.70.0",
+    "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2"
   },
   "source": "./src/js/index.ts",
