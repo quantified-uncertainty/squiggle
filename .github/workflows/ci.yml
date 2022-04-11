@@ -48,7 +48,7 @@ jobs:
     - name: Install Dependencies
       run: cd ../../ && yarn
     - name: Check rescript lint
-      run: yarn lint
+      run: yarn lint:rescript
     - name: Check javascript, typescript, and markdown lint
       uses: creyD/prettier_action@v4.2
       with:
@@ -79,7 +79,7 @@ jobs:
     name: Components lint
     runs-on: ubuntu-latest
     needs: pre_check
-    if: ${{ (needs.pre_check.outputs.should_skip_components != 'true') || (needs.pre_check.outputs.should_skip_lang != 'true') }}
+    if: ${{ needs.pre_check.outputs.should_skip_components != 'true' }}
     defaults: 
       run: 
         shell: bash
@@ -92,7 +92,7 @@ jobs:
         dry: true
         prettier_options: --check .
 
-  components-build-test:
+  components-bundle-build:
     name: Components bundle and build
     runs-on: ubuntu-latest
     needs: pre_check
@@ -116,7 +116,7 @@ jobs:
     name: Website lint
     runs-on: ubuntu-latest
     needs: pre_check
-    if: ${{ (needs.pre_check.outputs.should_skip_website != 'true') || (needs.pre_check.outputs.should_skip_lang != 'true')  || (needs.pre_check.outputs.should_skip_components != 'true') }} 
+    if: ${{ needs.pre_check.outputs.should_skip_website != 'true' }} 
     defaults: 
       run: 
         shell: bash
