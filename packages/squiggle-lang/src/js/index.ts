@@ -7,12 +7,8 @@ import type {
 } from "../rescript/ProgramEvaluator.gen";
 export type { SamplingInputs, exportEnv, exportDistribution };
 export type { t as DistPlus } from "../rescript/OldInterpreter/DistPlus.gen";
-import {
-  genericDist,
-  env,
-  error,
-} from "../rescript/TypescriptInterface.gen";
-export {makeSampleSetDist} from "../rescript/TypescriptInterface.gen";
+import { genericDist, env, error } from "../rescript/TypescriptInterface.gen";
+export { makeSampleSetDist } from "../rescript/TypescriptInterface.gen";
 import {
   Constructors_mean,
   Constructors_sample,
@@ -68,7 +64,10 @@ type result<a, b> =
       value: b;
     };
 
-export function resultMap<a,b,c>(r: result<a,c>, mapFn: ((x: a) => b)): result<b,c> {
+export function resultMap<a, b, c>(
+  r: result<a, c>,
+  mapFn: (x: a) => b
+): result<b, c> {
   if (r.tag === "Ok") {
     return { tag: "Ok", value: mapFn(r.value) };
   } else {
@@ -76,8 +75,8 @@ export function resultMap<a,b,c>(r: result<a,c>, mapFn: ((x: a) => b)): result<b
   }
 }
 
-export function resultExn<a,c>(r: result<a,c>): a | c {
-  return r.value
+export function resultExn<a, c>(r: result<a, c>): a | c {
+  return r.value;
 }
 
 export class Distribution {
@@ -90,55 +89,55 @@ export class Distribution {
     return this;
   }
 
-  mapResultDist(r: result<genericDist, error>) : result<Distribution, error>{
+  mapResultDist(r: result<genericDist, error>): result<Distribution, error> {
     return resultMap(r, (v: genericDist) => new Distribution(v, this.env));
   }
 
-  mean() : result<number,error> {
+  mean(): result<number, error> {
     return Constructors_mean({ env: this.env }, this.t);
   }
 
-  sample(): result<number,error> {
+  sample(): result<number, error> {
     return Constructors_sample({ env: this.env }, this.t);
   }
 
-  pdf(n: number): result<number,error> {
+  pdf(n: number): result<number, error> {
     return Constructors_pdf({ env: this.env }, this.t, n);
   }
 
-  cdf(n: number): result<number,error> {
+  cdf(n: number): result<number, error> {
     return Constructors_cdf({ env: this.env }, this.t, n);
   }
 
-  inv(n: number): result<number,error> {
+  inv(n: number): result<number, error> {
     return Constructors_inv({ env: this.env }, this.t, n);
   }
 
-  normalize() : result<Distribution, error> {
+  normalize(): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_normalize({ env: this.env }, this.t)
     );
   }
 
-  toPointSet() : result<Distribution, error>{
+  toPointSet(): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_toPointSet({ env: this.env }, this.t)
     );
   }
 
-  toSampleSet(n: number) : result<Distribution, error>{
+  toSampleSet(n: number): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_toSampleSet({ env: this.env }, this.t, n)
     );
   }
 
-  truncate(left: number, right: number) : result<Distribution, error> {
+  truncate(left: number, right: number): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_truncate({ env: this.env }, this.t, left, right)
     );
   }
 
-  inspect() : result<Distribution, error> {
+  inspect(): result<Distribution, error> {
     return this.mapResultDist(Constructors_inspect({ env: this.env }, this.t));
   }
 
@@ -150,37 +149,37 @@ export class Distribution {
     return Constructors_toSparkline({ env: this.env }, this.t, n);
   }
 
-  algebraicAdd(d2: Distribution) : result<Distribution, error> {
+  algebraicAdd(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_algebraicAdd({ env: this.env }, this.t, d2.t)
     );
   }
 
-  algebraicMultiply(d2: Distribution) : result<Distribution, error> {
+  algebraicMultiply(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_algebraicMultiply({ env: this.env }, this.t, d2.t)
     );
   }
 
-  algebraicDivide(d2: Distribution) : result<Distribution, error> {
+  algebraicDivide(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_algebraicDivide({ env: this.env }, this.t, d2.t)
     );
   }
 
-  algebraicSubtract(d2: Distribution) : result<Distribution, error> {
+  algebraicSubtract(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_algebraicSubtract({ env: this.env }, this.t, d2.t)
     );
   }
 
-  algebraicLogarithm(d2: Distribution) : result<Distribution, error> {
+  algebraicLogarithm(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_algebraicLogarithm({ env: this.env }, this.t, d2.t)
     );
   }
 
-  algebraicPower(d2: Distribution) : result<Distribution, error>{
+  algebraicPower(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_algebraicPower({ env: this.env }, this.t, d2.t)
     );
@@ -192,31 +191,31 @@ export class Distribution {
     );
   }
 
-  pointwiseMultiply(d2: Distribution) : result<Distribution, error>{
+  pointwiseMultiply(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_pointwiseMultiply({ env: this.env }, this.t, d2.t)
     );
   }
 
-  pointwiseDivide(d2: Distribution) : result<Distribution, error>{
+  pointwiseDivide(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_pointwiseDivide({ env: this.env }, this.t, d2.t)
     );
   }
 
-  pointwiseSubtract(d2: Distribution) : result<Distribution, error>{
+  pointwiseSubtract(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_pointwiseSubtract({ env: this.env }, this.t, d2.t)
     );
   }
 
-  pointwiseLogarithm(d2: Distribution) : result<Distribution, error>{
+  pointwiseLogarithm(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_pointwiseLogarithm({ env: this.env }, this.t, d2.t)
     );
   }
 
-  pointwisePower(d2: Distribution) : result<Distribution, error>{
+  pointwisePower(d2: Distribution): result<Distribution, error> {
     return this.mapResultDist(
       Constructors_pointwisePower({ env: this.env }, this.t, d2.t)
     );
