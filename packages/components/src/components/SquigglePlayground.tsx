@@ -33,12 +33,12 @@ function FieldFloat(Props: FieldFloatProps) {
 }
 
 interface Props {
-  initialSquiggleString: string;
+  initialSquiggleString?: string;
 }
 
-let SquigglePlayground: FC<Props> = (props) => {
+let SquigglePlayground: FC<Props> = ({initialSquiggleString=""}: Props) => {
   let [squiggleString, setSquiggleString] = useState(
-    props.initialSquiggleString
+    initialSquiggleString
   );
   let [sampleCount, setSampleCount] = useState(1000);
   let [outputXYPoints, setOutputXYPoints] = useState(1000);

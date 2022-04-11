@@ -1,7 +1,9 @@
 # Squiggle
 ![Packages check](https://github.com/QURIresearch/squiggle/actions/workflows/ci.yaml/badge.svg)
+[![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)](https://www.npmjs.com/package/@quri/squiggle-lang)
+[![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
 
-This is an experiment DSL/language for making probabilistic estimates. The full story can be found [here](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3). 
+This is an experimental DSL/language for making probabilistic estimates. The full story can be found [here](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3). 
 
 ## Our deployments
 
@@ -19,8 +21,6 @@ or results.
 - `@quri/squiggle-components` in `packages/components` contains React components that
 can be passed squiggle strings as props, and return a presentation of the result
 of the calculation.
-- `@quri/playground` in `packages/playground` contains a website for a playground
-for squiggle. This website is hosted at `playground.squiggle-language.com`
 - `@quri/squiggle-website` in `packages/website` The main descriptive website for squiggle,
 it is hosted at `squiggle-language.com`.
 
