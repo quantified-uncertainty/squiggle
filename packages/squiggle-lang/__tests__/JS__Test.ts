@@ -58,7 +58,7 @@ describe("Distribution", () => {
   });
   test("toPointSet", () => {
     expect(
-      resultMap(dist.toPointSet(), (r: Distribution) => r.toString()).value
+      resultMap(dist.toPointSet(), (r: Distribution) => r.toString())
     ).toEqual(Ok("Point Set Distribution"));
   });
   test("toSparkline", () => {

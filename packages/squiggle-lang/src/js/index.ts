@@ -210,7 +210,7 @@ export class Distribution {
   toString(): string {
     let result = Constructors_toString({ env: this.env }, this.t);
     if(result.tag  === "Ok"){
-      result.value
+      return result.value
     }
     else {
       return distributionErrorToString(result.value)
