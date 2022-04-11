@@ -59,8 +59,9 @@ module O = {
   let toExn = Rationale.Option.toExn
   let some = Rationale.Option.some
   let firstSome = Rationale.Option.firstSome
-  let toExt = Rationale.Option.toExn
+  let toExt = Rationale.Option.toExn  // wanna flag this-- looks like a typo but `Rationale.OptiontoExt` doesn't exist.
   let flatApply = (fn, b) => Rationale.Option.apply(fn, Some(b)) |> Rationale.Option.flatten
+  let flatten = Rationale.Option.flatten
 
   let toBool = opt =>
     switch opt {
@@ -103,6 +104,7 @@ module O2 = {
   let toExn = (a, b) => O.toExn(b, a)
   let fmap = (a, b) => O.fmap(b, a)
   let toResult = (a, b) => O.toResult(b, a)
+  let bind = (a, b) => O.bind(b, a)
 }
 
 /* Functions */

@@ -2,15 +2,10 @@ open Jest
 open Expect
 open TestHelpers
 
-//let env: DistributionOperation.env = {
-//    sampleCount: 100, 
-//    xyPointLength: 100, 
-//}
-
 let {
-  normalDist5,
-  normalDist10,
-  normalDist20,
+  normalDist5,  // mean=5, stdev=2
+  normalDist10,  // mean=10, stdev=2
+  normalDist20,  // mean=20, stdev=2
   normalDist,  // mean=5; stdev=2
   uniformDist,  // low=9; high=10
   betaDist,  // alpha=2; beta=5
@@ -20,8 +15,6 @@ let {
   exponentialDist,  // rate=2
 } = module(GenericDist_Fixtures)
 
-// let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Output)
-// let {run} = module(DistributionOperation)
 let {
     algebraicAdd, 
     algebraicMultiply, 
@@ -30,15 +23,14 @@ let {
     algebraicLogarithm, 
     algebraicPower
 } = module(DistributionOperation.Constructors)
-// let toExt: option<'a> => 'a = E.O.toExt(
-//   "Should be impossible to reach (This error is in test file)",
-// )
+
 let algebraicAdd = algebraicAdd(~env)
 let algebraicMultiply = algebraicMultiply(~env)
 let algebraicDivide = algebraicDivide(~env)
 let algebraicSubtract = algebraicSubtract(~env)
 let algebraicLogarithm = algebraicLogarithm(~env)
 let algebraicPower = algebraicPower(~env)
+
 describe("Addition of distributions", () => {
 
     describe("mean", () => {
@@ -51,15 +43,84 @@ describe("Addition of distributions", () => {
             -> E.R.toExn
             -> expect
             -> toBe(Some(2.5e1))
-            // -> toBeSoCloseTo(2.5e1, ~digits=7)
         })
     })
-//   testAll("(normal(mean=5) + normal(mean=5)).pdf", list{1e0, 3e0, 5e0, 7e0}, x => {
-//       let additionValue = algebraicAdd(normalDist5, normalDist5)
-//       let targetValue = run(FromDist(ToFloat(#Pdf(x)), normalDist10)) -> unpackFloat
-//       E.R.fmap(run(FromDist(ToFloat(#Pdf(x)), additionValue)))
-//       -> unpackFloat
-//       -> expect 
-//       -> toBeSoCloseTo(2.5e1, ~digits=7)
-//   })
+    describe("pdf", () => {
+        testAll("(normal(mean=5) + normal(mean=5)).pdf", list{8e0, 1e1, 1.2e1, 1.4e1}, x => {
+            let expected = normalDist10
+                -> Ok 
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, x))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toOption
+                -> E.O.flatten
+            let calculated = normalDist5
+                -> algebraicAdd(normalDist5)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, x))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toOption
+                -> E.O.flatten
+            
+            switch expected {  // not exactly happy with this
+                | None => false -> expect -> toBe(true)
+                | Some(x) => switch calculated {
+                    | None => false -> expect -> toBe(true)
+                    | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=0)
+                }
+            }
+        })
+    })
+    describe("cdf", () => {
+        testAll("(normal(mean=5) + normal(mean=5)).cdf", list{6e0, 8e0, 1e1, 1.2e1}, x => {
+            let expected = normalDist10
+                -> Ok 
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, x))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toOption
+                -> E.O.flatten
+            let calculated = normalDist5
+                -> algebraicAdd(normalDist5)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, x))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toOption
+                -> E.O.flatten
+            
+            switch expected {  // not exactly happy with this
+                | None => false -> expect -> toBe(true)
+                | Some(x) => switch calculated {
+                    | None => false -> expect -> toBe(true)
+                    | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=0)
+                }
+            }
+        })
+    })
+    describe("inv", () => {
+        testAll("(normal(mean=5) + normal(mean=5)).inv", list{5e-2, 4.2e-3, 9e-3}, x => {
+            let expected = normalDist10
+                -> Ok 
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, x))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toOption
+                -> E.O.flatten
+            let calculated = normalDist5
+                -> algebraicAdd(normalDist5)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, x))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toOption
+                -> E.O.flatten
+            
+            switch expected {  // not exactly happy with this. 
+                | None => false -> expect -> toBe(true)
+                | Some(x) => switch calculated {
+                    | None => false -> expect -> toBe(true)
+                    | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=-1)
+                }
+            }
+        })
+    })
 })
