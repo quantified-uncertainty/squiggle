@@ -7,7 +7,7 @@ This is an experimental DSL/language for making probabilistic estimates. The ful
 
 ## Our deployments
 
-- **website/docs prod**: https://squiggle-language.com
+- **website/docs prod**: https://squiggle-language.com [![Netlify Status](https://api.netlify.com/api/v1/badges/2139af5c-671d-473d-a9f6-66c96077d8a1/deploy-status)](https://app.netlify.com/sites/squiggle-documentation/deploys)
 - **website/docs staging**: https://staging--squiggle-documentation.netlify.app/
 - **old playground**: https://playground.squiggle-language.com
 
