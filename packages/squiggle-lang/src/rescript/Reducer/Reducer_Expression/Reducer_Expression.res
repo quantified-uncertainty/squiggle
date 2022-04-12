@@ -11,7 +11,7 @@ type expressionValue = ExpressionValue.expressionValue
 type t = expression
 
 /*
-  Shows the Lisp Code as text lisp code
+  Shows the expression as text of expression
 */
 let rec toString = expression =>
   switch expression {
@@ -31,7 +31,7 @@ let toStringResult = codeResult =>
   }
 
 /*
-  Converts a MathJs code to Lisp Code
+  Converts a MathJs code to expression
 */
 let parse_ = (expr: string, parser, converter): result<t, errorValue> =>
   expr->parser->Result.flatMap(node => converter(node))
@@ -167,13 +167,13 @@ let evalWBindingsExpression = (aExpression, bindings): result<expressionValue, '
   reduceExpression(aExpression, bindings)
 
 /*
-  Evaluates MathJs code via Lisp using bindings and answers the result
+  Evaluates MathJs code via Reducer using bindings and answers the result
 */
 let evalWBindings = (codeText: string, bindings: T.bindings) => {
   parse(codeText)->Result.flatMap(code => code->evalWBindingsExpression(bindings))
 }
 
 /*
-  Evaluates MathJs code via Lisp and answers the result
+  Evaluates MathJs code via Reducer and answers the result
 */
 let eval = (code: string) => evalWBindings(code, defaultBindings)

@@ -58,7 +58,7 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
 }
 
 /*
-  Lisp engine uses Result monad while reducing expressions
+  Reducer uses Result monad while reducing expressions
 */
 let dispatch = (call: functionCall): result<expressionValue, errorValue> =>
   try {
