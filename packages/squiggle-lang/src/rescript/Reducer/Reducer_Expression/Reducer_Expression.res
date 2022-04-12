@@ -70,18 +70,18 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
           }
         | T.EValue(_) => expression->Ok
         | T.EBindings(_) => expression->Ok
-        | T.EList(list) =>
-          list
-          ->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
-            racc->Result.flatMap(acc => {
-              each
-              ->replaceSymbols(bindings)
-              ->Result.flatMap(newNode => {
-                acc->Belt.List.add(newNode)->Ok
+        | T.EList(list) => {
+            let racc = list->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
+              racc->Result.flatMap(acc => {
+                each
+                ->replaceSymbols(bindings)
+                ->Result.flatMap(newNode => {
+                  acc->Belt.List.add(newNode)->Ok
+                })
               })
-            })
-          )
-          ->Result.map(acc => acc->T.EList)
+            )
+            racc->Result.map(acc => acc->T.EList)
+          }
         }
 
       let doBindStatement = (statement: t, bindings: T.bindings) => {
