@@ -15,7 +15,7 @@ module Error = {
   type t = error
 
   let fromString = (s: string): t => Other(s)
-  
+
   @genType
   let toString = (x: t) => {
     switch x {

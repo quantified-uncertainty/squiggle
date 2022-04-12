@@ -14,10 +14,10 @@ type distributionType = [
   | #CDF
 ]
 
-type xyShape = XYShape.xyShape;
-type interpolationStrategy = XYShape.interpolationStrategy;
-type extrapolationStrategy = XYShape.extrapolationStrategy;
-type interpolator = XYShape.extrapolationStrategy;
+type xyShape = XYShape.xyShape
+type interpolationStrategy = XYShape.interpolationStrategy
+type extrapolationStrategy = XYShape.extrapolationStrategy
+type interpolator = XYShape.extrapolationStrategy
 
 @genType
 type rec continuousShape = {

@@ -6,8 +6,7 @@ open Expect
 let expectEvalToBe = (expr: string, answer: string) =>
   Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
 
-let testEval = (expr, answer) =>
-  test(expr, () => expectEvalToBe(expr, answer))
+let testEval = (expr, answer) => test(expr, () => expectEvalToBe(expr, answer))
 
 describe("builtin", () => {
   // All MathJs operators and functions are available for string, number and boolean

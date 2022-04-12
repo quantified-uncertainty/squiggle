@@ -111,7 +111,11 @@ describe("parse on distribution functions", () => {
   })
   describe("pointwise arithmetic expressions", () => {
     testParse(~skip=true, "normal(5,2) .+ normal(5,1)", "Ok((:dotAdd (:normal 5 2) (:normal 5 1)))")
-    testParse(~skip=true, "normal(5,2) .- normal(5,1)", "Ok((:dotSubtract (:normal 5 2) (:normal 5 1)))")
+    testParse(
+      ~skip=true,
+      "normal(5,2) .- normal(5,1)",
+      "Ok((:dotSubtract (:normal 5 2) (:normal 5 1)))",
+    )
     testParse("normal(5,2) .* normal(5,1)", "Ok((:dotMultiply (:normal 5 2) (:normal 5 1)))")
     testParse("normal(5,2) ./ normal(5,1)", "Ok((:dotDivide (:normal 5 2) (:normal 5 1)))")
     testParse("normal(5,2) .^ normal(5,1)", "Ok((:dotPow (:normal 5 2) (:normal 5 1)))")
