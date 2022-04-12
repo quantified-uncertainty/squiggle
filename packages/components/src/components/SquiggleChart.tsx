@@ -44,16 +44,16 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     xyPointLength: outputXYPoints,
   };
 
-  let result = run(squiggleString, samplingInputs, environment);
-  if (result.tag === "Ok") {
+  let expressionResult = run(squiggleString, samplingInputs, environment);
+  if (expressionResult.tag === "Ok") {
     onEnvChange(environment);
-    let chartResult = result.value;
-    if (chartResult.tag === "number") {
-      return <NumberShower precision={3} number={chartResult.value} />;
-    } else if (chartResult.tag === "distribution") {
+    let expression = expressionResult.value;
+    if (expression.tag === "number") {
+      return <NumberShower precision={3} number={expression.value} />;
+    } else if (expression.tag === "distribution") {
       return (
         <DistributionChart
-          distribution={chartResult.value}
+          distribution={expression.value}
           height={height}
           width={width}
         />
@@ -61,7 +61,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     } else {
       return (
         <ErrorBox heading="No Viewer">
-          {"We don't currently have a viewer for this type: " + chartResult.tag}
+          {"We don't currently have a viewer for this type: " + expression.tag}
         </ErrorBox>
       );
     }
@@ -69,7 +69,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     // At this point, we came across an error. What was our error?
     return (
       <ErrorBox heading={"Parse Error"}>
-        {errorValueToString(result.value)}
+        {errorValueToString(expressionResult.value)}
       </ErrorBox>
     );
   }

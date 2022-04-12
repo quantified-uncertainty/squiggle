@@ -5,6 +5,7 @@ import type { Distribution } from "@quri/squiggle-lang";
 import { distributionErrorToString } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
+import { ErrorBox } from "./ErrorBox";
 
 let SquiggleVegaChart = createClassFromSpec({
   spec: chartSpecification as Spec,
@@ -21,7 +22,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   width,
   height,
 }: DistributionChartProps) => {
-  let shape = distribution.shape();
+  let shape = distribution.pointSet();
   if (shape.tag === "Ok") {
     return (
       <SquiggleVegaChart
@@ -32,6 +33,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       />
     );
   } else {
-    return <> {distributionErrorToString(shape.value)} </>;
+    return (
+      <ErrorBox heading="Distribution Error">
+        {distributionErrorToString(shape.value)}
+      </ErrorBox>
+    );
   }
 };
