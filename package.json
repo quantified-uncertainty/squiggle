@@ -4,6 +4,9 @@
   "scripts": {
     "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules"
   },
+  "devDependencies": {
+    "prettier": "^2.6.2"
+  },
   "workspaces": [
     "packages/*"
   ],

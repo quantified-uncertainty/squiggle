@@ -213,19 +213,20 @@ module SamplingDistribution = {
     let i1 = renderIfIsNotSamplingDistribution(evaluationParams, t1)
     let i2 = renderIfIsNotSamplingDistribution(evaluationParams, t2)
     E.R.merge(i1, i2) |> E.R.bind(_, ((a, b)) => {
-      let samples = getCombinationSamples(
-        evaluationParams.samplingInputs.sampleCount,
-        algebraicOp,
-        a,
-        b,
-      ) |> E.O.toResult("Could not get samples")
+      let samples =
+        getCombinationSamples(
+          evaluationParams.samplingInputs.sampleCount,
+          algebraicOp,
+          a,
+          b,
+        ) |> E.O.toResult("Could not get samples")
 
-      let sampleSetDist = samples -> E.R.bind(SampleSetDist.make)
+      let sampleSetDist = samples->E.R.bind(SampleSetDist.make)
 
-      let pointSetDist = 
-        sampleSetDist
-        -> E.R.bind(r =>
-          SampleSetDist.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r));
+      let pointSetDist =
+        sampleSetDist->E.R.bind(r =>
+          SampleSetDist.toPointSetDist(~samplingInputs=evaluationParams.samplingInputs, ~samples=r)
+        )
       pointSetDist |> E.R.fmap(r => #Normalize(#RenderedDist(r)))
     })
   }

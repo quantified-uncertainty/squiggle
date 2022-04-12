@@ -4,7 +4,7 @@
   "dependencies": {
     "@quri/squiggle-lang": "0.2.2",
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.0.0",
+    "@testing-library/react": "^13.0.1",
     "@testing-library/user-event": "^14.0.4",
     "@types/jest": "^27.4.0",
     "@types/lodash": "^4.14.181",
@@ -31,8 +31,10 @@
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
     "build": "tsc -b && build-storybook -s public",
-    "bundle": "tsc -b && webpack",
-    "all": "yarn bundle && yarn build"
+    "bundle": "webpack",
+    "all": "yarn bundle && yarn build",
+    "lint": "prettier --check .",
+    "format": "prettier --write ."
   },
   "eslintConfig": {
     "extends": [
@@ -74,10 +76,7 @@
     "@storybook/react": "^6.4.20",
     "@types/styled-components": "^5.1.24",
     "@types/webpack": "^4.41.32",
-    "css-loader": "^6.7.1",
-    "prettier": "^2.6.2",
     "react-codejar": "^1.1.2",
-    "speed-measure-webpack-plugin": "^1.5.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.8",
     "webpack": "^5.72.0",

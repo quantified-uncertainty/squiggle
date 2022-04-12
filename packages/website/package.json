@@ -6,7 +6,9 @@
     "start": "docusaurus start",
     "build": "docusaurus build",
     "clean": "docusaurus clear",
-    "all": "yarn build"
+    "all": "yarn build",
+    "lint": "prettier --check .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@docusaurus/core": "2.0.0-beta.18",
