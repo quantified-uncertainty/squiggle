@@ -58,8 +58,7 @@ jobs:
         uses: creyD/prettier_action@v4.2
         with:
           dry: true
-          prettier_options: --check .
-          # working_directory: packages/squiggle-lang
+          prettier_options: --check packages/squiggle-lang
 
   lang-build-test-bundle:
     name: Language build, test, and bundle
@@ -91,15 +90,14 @@ jobs:
     defaults:
       run:
         shell: bash
-        # working-directory: packages/components
+        working-directory: packages/components
     steps:
       - uses: actions/checkout@v2
       - name: Check javascript, typescript, and markdown lint
         uses: creyD/prettier_action@v4.2
         with:
           dry: true
-          prettier_options: --check .
-          working_directory: packages/components
+          prettier_options: --check packages/components
 
   components-bundle-build:
     name: Components bundle and build
@@ -129,15 +127,14 @@ jobs:
     defaults:
       run:
         shell: bash
-        # working-directory: packages/website
+        working-directory: packages/website
     steps:
       - uses: actions/checkout@v2
       - name: Check javascript, typescript, and markdown lint
         uses: creyD/prettier_action@v4.2
         with:
           dry: true
-          prettier_options: --check .
-          working_directory: packages/website
+          prettier_options: --check packages/website
 
   website-build:
     name: Website build
