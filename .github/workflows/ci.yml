@@ -25,17 +25,17 @@ jobs:
     steps:
       - id: skip_lang_check
         name: Check if the changes are about squiggle-lang src files
-        uses: fkirc/skip-duplicate-actions@master
+        uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
           paths: '["packages/squiggle-lang/**"]'
       - id: skip_components_check
         name: Check if the changes are about components src files
-        uses: fkirc/skip-duplicate-actions@master
+        uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
           paths: '["packages/components/**"]'
       - id: skip_website_check
         name: Check if the changes are about website src files
-        uses: fkirc/skip-duplicate-actions@master
+        uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
           paths: '["packages/website/**"]'
 
