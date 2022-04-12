@@ -260,6 +260,12 @@ module L = {
   let update = Rationale.RList.update
   let iter = List.iter
   let findIndex = Rationale.RList.findIndex
+  let completeGraph = xs => {
+    // TODO
+    let n = length(xs)
+    let result = n
+    n 
+  }
 }
 
 /* A for Array */

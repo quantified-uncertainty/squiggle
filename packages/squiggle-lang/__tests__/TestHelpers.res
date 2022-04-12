@@ -19,9 +19,24 @@ let run = DistributionOperation.run(~env)
 let outputMap = fmap(~env)
 let unreachableInTestFileMessage = "Should be impossible to reach (This error is in test file)"
 let toExtFloat: option<float> => float = E.O.toExt(unreachableInTestFileMessage)
-let toExtDist: option<GenericDist_Types.genericDist> => GenericDist_Types.genericDist = E.O.toExt(
-  unreachableInTestFileMessage,
-)
+let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.genericDist = E.O.toExt(unreachableInTestFileMessage)
 // let toExt: option<'a> => 'a = E.O.toExt(unreachableInTestFileMessage)
-let unpackFloat = x => x->toFloat->toExtFloat
-let unpackDist = y => y->toDist->toExtDist
+let unpackFloat = x => x -> toFloat -> toExtFloat
+let unpackDist = y => y -> toDist -> toExtDist
+
+// TODO: use Normal.make (etc.), but preferably after the new validation dispatch is in. 
+let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean: mean, stdev: stdev}))
+let mkBeta = (alpha, beta) => DistributionTypes.Symbolic(#Beta({alpha: alpha, beta: beta}))
+let mkExponential = rate => DistributionTypes.Symbolic(#Exponential({rate: rate}))
+let mkUniform = (low, high) => DistributionTypes.Symbolic(#Uniform({low: low, high: high})) 
+let mkCauchy = (local, scale) => DistributionTypes.Symbolic(#Cauchy({local: local, scale: scale}))
+let mkLognormal = (mu, sigma) => DistributionTypes.Symbolic(#Lognormal({mu: mu, sigma: sigma}))
+
+let normalMake = SymbolicDist.Normal.make
+let betaMake = SymbolicDist.Beta.make
+let exponentialMake = SymbolicDist.Exponential.make
+let uniformMake = SymbolicDist.Uniform.make
+let cauchyMake = SymbolicDist.Cauchy.make
+let lognormalMake = SymbolicDist.Lognormal.make
+let triangularMake = SymbolicDist.Triangular.make 
+let floatMake = SymbolicDist.Float.make 
