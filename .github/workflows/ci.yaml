@@ -1,14 +1,13 @@
 name: Squiggle packages check
 
 on:
-  push:  # Delete this line if there becomes a scarcity of build minutes.
+  push: # Delete this line if there becomes a scarcity of build minutes.
   pull_request:
     branches:
       - master
       - staging
 
 jobs:
-
   pre_check:
     name: Precheck for skipping redundant jobs
     runs-on: ubuntu-latest
@@ -43,15 +42,15 @@ jobs:
         shell: bash
         working-directory: packages/squiggle-lang
     steps:
-    - uses: actions/checkout@v2
-    - name: Install dependencies from monorepo level
-      run: cd ../../ && yarn
-    - name: Build rescript codebase
-      run: yarn build
-    - name: Run tests
-      run: yarn test
-    - name: Run webpack
-      run: yarn bundle
+      - uses: actions/checkout@v2
+      - name: Install dependencies from monorepo level
+        run: cd ../../ && yarn
+      - name: Build rescript codebase
+        run: yarn build
+      - name: Run tests
+        run: yarn test
+      - name: Run webpack
+        run: yarn bundle
 
   components-build-test:
     name: Components build and test
@@ -63,15 +62,15 @@ jobs:
         shell: bash
         working-directory: packages/components
     steps:
-    - uses: actions/checkout@v2
-    - name: Install dependencies from monorepo level
-      run: cd ../../ && yarn
-    - name: Build rescript codebase in squiggle-lang
-      run: cd ../squiggle-lang && yarn build
-    - name: Run webpack
-      run: yarn bundle
-    - name: Build storybook
-      run: yarn build
+      - uses: actions/checkout@v2
+      - name: Install dependencies from monorepo level
+        run: cd ../../ && yarn
+      - name: Build rescript codebase in squiggle-lang
+        run: cd ../squiggle-lang && yarn build
+      - name: Run webpack
+        run: yarn bundle
+      - name: Build storybook
+        run: yarn build
 
   website-build:
     name: Website build
@@ -83,10 +82,10 @@ jobs:
         shell: bash
         working-directory: packages/website
     steps:
-    - uses: actions/checkout@v2
-    - name: Install dependencies from monorepo level
-      run: cd ../../ && yarn
-    - name: Build rescript in squiggle-lang
-      run: cd ../squiggle-lang && yarn build
-    - name: Build website assets
-      run: yarn build
+      - uses: actions/checkout@v2
+      - name: Install dependencies from monorepo level
+        run: cd ../../ && yarn
+      - name: Build rescript in squiggle-lang
+        run: cd ../squiggle-lang && yarn build
+      - name: Build website assets
+        run: yarn build

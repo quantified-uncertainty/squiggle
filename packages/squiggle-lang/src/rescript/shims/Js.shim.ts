@@ -1,1 +1,1 @@
-export type Dict_t<T> = { [key: string]: T }
+export type Dict_t<T> = { [key: string]: T };

@@ -1,11 +1,26 @@
-import * as _ from 'lodash'
+import * as _ from "lodash";
 import type {
   exportEnv,
   exportDistribution,
 } from "../rescript/ProgramEvaluator.gen";
-export type {  exportEnv, exportDistribution };
-import { genericDist, samplingParams, evaluate, expressionValue, errorValue, distributionError, toPointSet, continuousShape, discreteShape, distributionErrorToString } from "../rescript/TypescriptInterface.gen";
-export { makeSampleSetDist, errorValueToString, distributionErrorToString } from "../rescript/TypescriptInterface.gen";
+export type { exportEnv, exportDistribution };
+import {
+  genericDist,
+  samplingParams,
+  evaluate,
+  expressionValue,
+  errorValue,
+  distributionError,
+  toPointSet,
+  continuousShape,
+  discreteShape,
+  distributionErrorToString,
+} from "../rescript/TypescriptInterface.gen";
+export {
+  makeSampleSetDist,
+  errorValueToString,
+  distributionErrorToString,
+} from "../rescript/TypescriptInterface.gen";
 import {
   Constructors_mean,
   Constructors_sample,
@@ -32,11 +47,11 @@ import {
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
-export type {samplingParams, errorValue}
+export type { samplingParams, errorValue };
 
 export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
-  xyPointLength: 10000
+  xyPointLength: 10000,
 };
 
 export type result<a, b> =
@@ -60,17 +75,24 @@ export function resultMap<a, b, c>(
   }
 }
 
-function Ok<a,b>(x: a): result<a,b> {
-  return {"tag": "Ok", value: x}
+function Ok<a, b>(x: a): result<a, b> {
+  return { tag: "Ok", value: x };
 }
 
-type tagged<a, b> = {tag: a, value: b}
+type tagged<a, b> = { tag: a; value: b };
 
-function tag<a,b>(x: a, y: b) : tagged<a, b>{
-  return { tag: x, value: y}
+function tag<a, b>(x: a, y: b): tagged<a, b> {
+  return { tag: x, value: y };
 }
 
-export type squiggleExpression = tagged<"symbol", string> | tagged<"string", string> | tagged<"array", squiggleExpression[]> | tagged<"boolean", boolean> | tagged<"distribution", Distribution> | tagged<"number", number> | tagged<"record", {[key: string]: squiggleExpression }>
+export type squiggleExpression =
+  | tagged<"symbol", string>
+  | tagged<"string", string>
+  | tagged<"array", squiggleExpression[]>
+  | tagged<"boolean", boolean>
+  | tagged<"distribution", Distribution>
+  | tagged<"number", number>
+  | tagged<"record", { [key: string]: squiggleExpression }>;
 export function run(
   squiggleString: string,
   samplingInputs?: samplingParams,
@@ -79,15 +101,20 @@ export function run(
   let si: samplingParams = samplingInputs
     ? samplingInputs
     : defaultSamplingInputs;
-  let result : result<expressionValue, errorValue> = evaluate(squiggleString);
-  return resultMap(result, x => createTsExport(x, si));
+  let result: result<expressionValue, errorValue> = evaluate(squiggleString);
+  return resultMap(result, (x) => createTsExport(x, si));
 }
 
-
-function createTsExport(x: expressionValue, sampEnv: samplingParams): squiggleExpression {
+function createTsExport(
+  x: expressionValue,
+  sampEnv: samplingParams
+): squiggleExpression {
   switch (x.tag) {
     case "EvArray":
-      return tag("array", x.value.map(x => createTsExport(x, sampEnv)));
+      return tag(
+        "array",
+        x.value.map((x) => createTsExport(x, sampEnv))
+      );
     case "EvBool":
       return tag("boolean", x.value);
     case "EvDistribution":
@@ -95,26 +122,32 @@ function createTsExport(x: expressionValue, sampEnv: samplingParams): squiggleEx
     case "EvNumber":
       return tag("number", x.value);
     case "EvRecord":
-      return tag("record", _.mapValues(x.value, x => createTsExport(x, sampEnv)))
+      return tag(
+        "record",
+        _.mapValues(x.value, (x) => createTsExport(x, sampEnv))
+      );
+    case "EvString":
+      return tag("string", x.value);
+    case "EvSymbol":
+      return tag("symbol", x.value);
   }
 }
-
 
 export function resultExn<a, c>(r: result<a, c>): a | c {
   return r.value;
 }
 
-export type point = { x: number, y: number}
+export type point = { x: number; y: number };
 
 export type shape = {
-  continuous: point[]
-  discrete: point[]
-}
+  continuous: point[];
+  discrete: point[];
+};
 
-function shapePoints(x : continuousShape | discreteShape): point[]{
+function shapePoints(x: continuousShape | discreteShape): point[] {
   let xs = x.xyShape.xs;
   let ys = x.xyShape.ys;
-  return _.zipWith(xs, ys, (x, y) => ({x, y}))
+  return _.zipWith(xs, ys, (x, y) => ({ x, y }));
 }
 
 export class Distribution {
@@ -127,7 +160,9 @@ export class Distribution {
     return this;
   }
 
-  mapResultDist(r: result<genericDist, distributionError>): result<Distribution, distributionError> {
+  mapResultDist(
+    r: result<genericDist, distributionError>
+  ): result<Distribution, distributionError> {
     return resultMap(r, (v: genericDist) => new Distribution(v, this.env));
   }
 
@@ -157,31 +192,35 @@ export class Distribution {
     );
   }
 
-  shape() : result<shape, distributionError> {
-    let pointSet = toPointSet(this.t, {xyPointLength: this.env.xyPointLength, sampleCount: this.env.sampleCount}, null);
-    if(pointSet.tag === "Ok"){
+  shape(): result<shape, distributionError> {
+    let pointSet = toPointSet(
+      this.t,
+      {
+        xyPointLength: this.env.xyPointLength,
+        sampleCount: this.env.sampleCount,
+      },
+      undefined
+    );
+    if (pointSet.tag === "Ok") {
       let distribution = pointSet.value;
-      if(distribution.tag === "Continuous"){
+      if (distribution.tag === "Continuous") {
         return Ok({
           continuous: shapePoints(distribution.value),
-          discrete: []
-        })
-      }
-      else if(distribution.tag === "Discrete"){
+          discrete: [],
+        });
+      } else if (distribution.tag === "Discrete") {
         return Ok({
           discrete: shapePoints(distribution.value),
-          continuous: []
-        })
-      }
-      else if(distribution.tag === "Mixed"){
+          continuous: [],
+        });
+      } else {
         return Ok({
           discrete: shapePoints(distribution.value.discrete),
-          continuous: shapePoints(distribution.value.continuous)
-        })
+          continuous: shapePoints(distribution.value.continuous),
+        });
       }
-    }
-    else {
-      return pointSet
+    } else {
+      return pointSet;
     }
   }
 
@@ -197,7 +236,10 @@ export class Distribution {
     );
   }
 
-  truncate(left: number, right: number): result<Distribution, distributionError> {
+  truncate(
+    left: number,
+    right: number
+  ): result<Distribution, distributionError> {
     return this.mapResultDist(
       Constructors_truncate({ env: this.env }, this.t, left, right)
     );
@@ -209,11 +251,10 @@ export class Distribution {
 
   toString(): string {
     let result = Constructors_toString({ env: this.env }, this.t);
-    if(result.tag  === "Ok"){
-      return result.value
-    }
-    else {
-      return distributionErrorToString(result.value)
+    if (result.tag === "Ok") {
+      return result.value;
+    } else {
+      return distributionErrorToString(result.value);
     }
   }
 
@@ -245,7 +286,9 @@ export class Distribution {
     );
   }
 
-  algebraicLogarithm(d2: Distribution): result<Distribution, distributionError> {
+  algebraicLogarithm(
+    d2: Distribution
+  ): result<Distribution, distributionError> {
     return this.mapResultDist(
       Constructors_algebraicLogarithm({ env: this.env }, this.t, d2.t)
     );
@@ -281,7 +324,9 @@ export class Distribution {
     );
   }
 
-  pointwiseLogarithm(d2: Distribution): result<Distribution, distributionError> {
+  pointwiseLogarithm(
+    d2: Distribution
+  ): result<Distribution, distributionError> {
     return this.mapResultDist(
       Constructors_pointwiseLogarithm({ env: this.env }, this.t, d2.t)
     );

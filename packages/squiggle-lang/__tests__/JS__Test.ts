@@ -1,10 +1,15 @@
-import { run, Distribution, resultMap, squiggleExpression } from "../src/js/index";
+import {
+  run,
+  Distribution,
+  resultMap,
+  squiggleExpression,
+} from "../src/js/index";
 
 let testRun = (x: string): squiggleExpression => {
-  let result = run(x, {sampleCount: 100, xyPointLength: 100});
-  expect(result.tag).toEqual("Ok")
-  if(result.tag === "Ok") {
-    return result.value
+  let result = run(x, { sampleCount: 100, xyPointLength: 100 });
+  expect(result.tag).toEqual("Ok");
+  if (result.tag === "Ok") {
+    return result.value;
   }
 };
 
@@ -16,7 +21,7 @@ describe("Simple calculations and results", () => {
   test("mean(normal(5,2))", () => {
     expect(testRun("mean(normal(5,2))")).toEqual({
       tag: "number",
-      value: 5
+      value: 5,
     });
   });
   test("10+10", () => {

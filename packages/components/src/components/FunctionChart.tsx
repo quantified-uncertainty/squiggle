@@ -5,15 +5,13 @@ import type { Distribution, errorValue, result } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import { DistributionChart } from "./DistributionChart";
-import { Error } from "./Error";
+import { ErrorBox } from "./ErrorBox";
 
 let SquigglePercentilesChart = createClassFromSpec({
   spec: percentilesSpec as Spec,
 });
 
-type distPlusFn = (
-  a: number
-) => result<Distribution, errorValue>
+type distPlusFn = (a: number) => result<Distribution, errorValue>;
 
 const _rangeByCount = (start: number, stop: number, count: number) => {
   const step = (stop - start) / (count - 1);
@@ -22,11 +20,26 @@ const _rangeByCount = (start: number, stop: number, count: number) => {
   return result;
 };
 
-function unwrap<a, b>( x: result<a, b>): a {
-  if(x.tag === "Ok"){
-    return x.value
+function unwrap<a, b>(x: result<a, b>): a {
+  if (x.tag === "Ok") {
+    return x.value;
+  } else {
+    throw Error("FAILURE TO UNWRAP");
   }
 }
+
+function mapFilter<a, b>(xs: a[], f: (x: a) => b | undefined): b[] {
+  let initial: b[] = [];
+  return xs.reduce((previous, current) => {
+    let value: b | undefined = f(current);
+    if (value !== undefined) {
+      return previous.concat([value]);
+    } else {
+      return previous;
+    }
+  }, initial);
+}
+
 export const FunctionChart: React.FC<{
   distPlusFn: distPlusFn;
   diagramStart: number;
@@ -44,46 +57,45 @@ export const FunctionChart: React.FC<{
   let mouseItem = distPlusFn(mouseOverlay);
   let showChart =
     mouseItem.tag === "Ok" ? (
-      <DistributionChart distribution={mouseItem.value} width={400} height={140} />
+      <DistributionChart
+        distribution={mouseItem.value}
+        width={400}
+        height={140}
+      />
     ) : (
       <></>
     );
   let data1 = _rangeByCount(diagramStart, diagramStop, diagramCount);
-  let valueData = data1
-    .map((x) => {
-      let result = distPlusFn(x);
-      if (result.tag === "Ok") {
-        return { x: x, value: result.value };
-      } else return null;
-    })
-    .filter((x) => x !== null)
-    .map(({ x, value }) => {
-      return {
-        x: x,
-        p1: unwrap(value.inv(0.01)),
-        p5: unwrap(value.inv(0.05)),
-        p10: unwrap(value.inv(0.12)),
-        p20: unwrap(value.inv(0.20)),
-        p30: unwrap(value.inv(0.30)),
-        p40: unwrap(value.inv(0.40)),
-        p50: unwrap(value.inv(0.50)),
-        p60: unwrap(value.inv(0.60)),
-        p70: unwrap(value.inv(0.70)),
-        p80: unwrap(value.inv(0.80)),
-        p90: unwrap(value.inv(0.90)),
-        p95: unwrap(value.inv(0.95)),
-        p99: unwrap(value.inv(0.99)),
-      };
-    });
+  let valueData = mapFilter(data1, (x) => {
+    let result = distPlusFn(x);
+    if (result.tag === "Ok") {
+      return { x: x, value: result.value };
+    }
+  }).map(({ x, value }) => {
+    return {
+      x: x,
+      p1: unwrap(value.inv(0.01)),
+      p5: unwrap(value.inv(0.05)),
+      p10: unwrap(value.inv(0.12)),
+      p20: unwrap(value.inv(0.2)),
+      p30: unwrap(value.inv(0.3)),
+      p40: unwrap(value.inv(0.4)),
+      p50: unwrap(value.inv(0.5)),
+      p60: unwrap(value.inv(0.6)),
+      p70: unwrap(value.inv(0.7)),
+      p80: unwrap(value.inv(0.8)),
+      p90: unwrap(value.inv(0.9)),
+      p95: unwrap(value.inv(0.95)),
+      p99: unwrap(value.inv(0.99)),
+    };
+  });
 
-  let errorData = data1
-    .map((x) => {
-      let result = distPlusFn(x);
-      if (result.tag === "Error") {
-        return { x: x, error: result.value };
-      } else return null;
-    })
-    .filter((x) => x !== null);
+  let errorData = mapFilter(data1, (x) => {
+    let result = distPlusFn(x);
+    if (result.tag === "Error") {
+      return { x: x, error: result.value };
+    }
+  });
   let error2 = _.groupBy(errorData, (x) => x.error);
   return (
     <>
@@ -94,11 +106,10 @@ export const FunctionChart: React.FC<{
       />
       {showChart}
       {_.keysIn(error2).map((k) => (
-        <Error heading={k}>
+        <ErrorBox heading={k}>
           {`Values: [${error2[k].map((r) => r.x.toFixed(2)).join(",")}]`}
-        </Error>
+        </ErrorBox>
       ))}
     </>
   );
 };
-

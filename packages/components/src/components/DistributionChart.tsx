@@ -1,10 +1,8 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import type {
-  Distribution,
-} from "@quri/squiggle-lang";
-import { distributionErrorToString } from '@quri/squiggle-lang';
+import type { Distribution } from "@quri/squiggle-lang";
+import { distributionErrorToString } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
 
@@ -16,12 +14,14 @@ type DistributionChartProps = {
   distribution: Distribution;
   width: number;
   height: number;
-}
+};
 
-export const DistributionChart: React.FC<DistributionChartProps> = ({ distribution, width, height }: DistributionChartProps) => {
-  console.log("Making shape")
+export const DistributionChart: React.FC<DistributionChartProps> = ({
+  distribution,
+  width,
+  height,
+}: DistributionChartProps) => {
   let shape = distribution.shape();
-  console.log(shape)
   if (shape.tag === "Ok") {
     return (
       <SquiggleVegaChart
@@ -31,8 +31,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({ distributi
         actions={false}
       />
     );
-  }
-  else{
+  } else {
     return <> {distributionErrorToString(shape.value)} </>;
   }
 };
