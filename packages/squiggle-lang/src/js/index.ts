@@ -88,6 +88,7 @@ function tag<a, b>(x: a, y: b): tagged<a, b> {
 export type squiggleExpression =
   | tagged<"symbol", string>
   | tagged<"string", string>
+  | tagged<"call", string>
   | tagged<"array", squiggleExpression[]>
   | tagged<"boolean", boolean>
   | tagged<"distribution", Distribution>
