@@ -17,10 +17,10 @@
 *.ts @Hazelfire @OAGr
 
 # Javascript
-*.js @Hazelfire
+*.js @Hazelfire @OAGr
 
 # Any opsy files
-.github/* @quinn-dougherty
+.github/** @quinn-dougherty @OAGr
 *.json @quinn-dougherty @Hazelfire @OAGr
 *.y*ml @quinn-dougherty @OAGr
 *.config.js @Hazelfire @OAGr
