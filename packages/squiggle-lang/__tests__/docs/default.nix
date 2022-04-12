@@ -4,22 +4,23 @@
 # Style sheets https://github.com/citation-style-language/styles/
 with pkgs;
 
+let deps = [
+  pandoc 
+  (texlive.combine 
+    { inherit (texlive) scheme-small datetime; }
+  )
+]; in
 stdenv.mkDerivation {
   name = "render_squiggle_properties";
   src = ./.;
-  buildInputs = [pandoc];
+  buildInputs = deps;
   buildPhase = ''
     echo rendering...
-    pandoc \
-           --from markdown \
-           --to latex \
-           --out properties.pdf \
-           --pdf-engine xelatex \
-           properties.md \
+    pandoc -s invariants.md -o invariants.pdf 
     echo rendered.
   '';
   installPhase = ''
     mkdir -p $out
-    cp properties.pdf $out/properties.pdf
+    cp invariants.pdf $out/invariants.pdf
     '';
 }
