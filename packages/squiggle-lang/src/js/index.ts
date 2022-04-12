@@ -117,6 +117,8 @@ function createTsExport(
       );
     case "EvBool":
       return tag("boolean", x.value);
+    case "EvCall":
+      return tag("call", x.value);
     case "EvDistribution":
       return tag("distribution", new Distribution(x.value, sampEnv));
     case "EvNumber":
