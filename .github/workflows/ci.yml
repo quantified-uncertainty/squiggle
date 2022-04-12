@@ -74,6 +74,8 @@ jobs:
       run: yarn test
     - name: Run webpack
       run: yarn bundle
+    - name: Upload coverage report
+      run: yarn coverage:ci
 
   components-lint:
     name: Components lint
