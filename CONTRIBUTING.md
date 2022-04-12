@@ -110,9 +110,9 @@ If a function is called externally (in a different file), and has either:
 2. Three paramaters or more.
 
 **Module naming: Use x_y as module names**  
-For example: ``Myname__Myproject__Add.res``. Rescript/Ocaml both require files to have unique names, so long names are needed to keep different parts separate from each other.
+For example: ``Myname_Myproject_Add.res``. Rescript/Ocaml both require files to have unique names, so long names are needed to keep different parts separate from each other.
 
-See [this page](https://dev.to/yawaramin/a-modular-ocaml-project-structure-1ikd) for more information.
+See [this page](https://dev.to/yawaramin/a-modular-ocaml-project-structure-1ikd) for more information. (Though note that they use two underscores, and we do one. We might refactor that later.
 
 **Module naming: Don't rename modules**
 We have some of this in the Reducer code, but generally discourage it. 
