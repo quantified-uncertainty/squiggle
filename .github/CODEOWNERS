@@ -21,9 +21,9 @@
 
 # Any opsy files
 .github/* @quinn-dougherty
-*.json @quinn-dougherty @Hazelfire
-*.y*ml @quinn-dougherty
-*.config.js @Hazelfire
+*.json @quinn-dougherty @Hazelfire @OAGr
+*.y*ml @quinn-dougherty @OAGr
+*.config.js @Hazelfire @OAGr
 
 # Documentation
 *.md @quinn-dougherty @OAGr @Hazelfire
