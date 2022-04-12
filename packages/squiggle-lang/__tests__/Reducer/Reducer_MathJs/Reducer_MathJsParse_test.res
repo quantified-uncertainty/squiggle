@@ -9,12 +9,12 @@ let expectParseToBe = (expr, answer) =>
 
 let testParse = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
 
-let testDescParse = (desc, expr, answer) => test(desc, () => expectParseToBe(expr, answer))
+let testDescriptionParse = (desc, expr, answer) => test(desc, () => expectParseToBe(expr, answer))
 
 module MySkip = {
   let testParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
 
-  let testDescParse = (desc, expr, answer) => Skip.test(desc, () => expectParseToBe(expr, answer))
+  let testDescriptionParse = (desc, expr, answer) => Skip.test(desc, () => expectParseToBe(expr, answer))
 }
 
 describe("MathJs parse", () => {
@@ -44,23 +44,23 @@ describe("MathJs parse", () => {
   })
 
   describe("arrays", () => {
-    testDescParse("empty", "[]", "[]")
-    testDescParse("define", "[0, 1, 2]", "[0, 1, 2]")
-    testDescParse("define with strings", "['hello', 'world']", "['hello', 'world']")
+    testDescriptionParse("empty", "[]", "[]")
+    testDescriptionParse("define", "[0, 1, 2]", "[0, 1, 2]")
+    testDescriptionParse("define with strings", "['hello', 'world']", "['hello', 'world']")
     MySkip.testParse("range(0, 4)", "range(0, 4)")
-    testDescParse("index", "([0,1,2])[1]", "([0, 1, 2])[1]")
+    testDescriptionParse("index", "([0,1,2])[1]", "([0, 1, 2])[1]")
   })
 
   describe("records", () => {
-    testDescParse("define", "{a: 1, b: 2}", "{a: 1, b: 2}")
-    testDescParse("use", "record.property", "record['property']")
+    testDescriptionParse("define", "{a: 1, b: 2}", "{a: 1, b: 2}")
+    testDescriptionParse("use", "record.property", "record['property']")
   })
 
   describe("comments", () => {
-    MySkip.testDescParse("define", "# This is a comment", "???")
+    MySkip.testDescriptionParse("define", "# This is a comment", "???")
   })
 
   describe("if statement", () => { // TODO Tertiary operator instead
-    MySkip.testDescParse("define", "if (true) { 1 } else { 0 }", "???")
+    MySkip.testDescriptionParse("define", "if (true) { 1 } else { 0 }", "???")
   })
 })
