@@ -24,7 +24,6 @@ let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.generi
 let unpackFloat = x => x -> toFloat -> toExtFloat
 let unpackDist = y => y -> toDist -> toExtDist
 
-// TODO: use Normal.make (etc.), but preferably after the new validation dispatch is in. 
 let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean: mean, stdev: stdev}))
 let mkBeta = (alpha, beta) => DistributionTypes.Symbolic(#Beta({alpha: alpha, beta: beta}))
 let mkExponential = rate => DistributionTypes.Symbolic(#Exponential({rate: rate}))

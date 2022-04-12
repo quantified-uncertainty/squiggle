@@ -260,11 +260,22 @@ module L = {
   let update = Rationale.RList.update
   let iter = List.iter
   let findIndex = Rationale.RList.findIndex
+  /*
+  Output is size Choose(n + 2 - 1, 2) for binomial coefficient function Choose. 
+  inspired by https://docs.python.org/3/library/itertools.html#itertools.combinations_with_replacement at r=2
+  */
   let completeGraph = xs => {
     // TODO
+    let rec loop = (x', xs') => {
+      let intermediate = fmap(y => append(y, list{x'}))
+      // map (y => append(y, list{x'})) xs'
+    }
+
+    let intermediate = fmap()
     let n = length(xs)
-    let result = n
-    n 
+    
+    let indices = list{0, 0}
+
   }
 }
 
