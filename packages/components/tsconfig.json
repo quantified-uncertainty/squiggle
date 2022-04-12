@@ -5,10 +5,12 @@
     },
     "module": "commonjs",
     "jsx": "react",
+    "skipLibCheck": true,
     "resolveJsonModule": true,
     "noImplicitAny": false,
     "esModuleInterop": true,
     "removeComments": true,
+    "strict": true,
     "preserveConstEnums": true,
     "composite": true,
     "outDir": "./dist",
@@ -16,7 +18,10 @@
     "declaration": true,
     "sourceMap": true
   },
-  "files": ["src/vega-specs/spec-distributions.json", "src/vega-specs/spec-percentiles.json"],
+  "files": [
+    "src/vega-specs/spec-distributions.json",
+    "src/vega-specs/spec-percentiles.json"
+  ],
   "target": "ES6",
   "include": ["src/**/*", "src/*"],
   "exclude": ["node_modules", "**/*.spec.ts", "webpack.config.js"],

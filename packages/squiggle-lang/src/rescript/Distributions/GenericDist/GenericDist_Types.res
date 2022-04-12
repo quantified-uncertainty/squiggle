@@ -10,10 +10,21 @@ type error =
   | DistributionVerticalShiftIsInvalid
   | Other(string)
 
+@genType
 module Error = {
   type t = error
 
   let fromString = (s: string): t => Other(s)
+  
+  @genType
+  let toString = (x: t) => {
+    switch x {
+    | NotYetImplemented => "Not Yet Implemented"
+    | Unreachable => "Unreachable"
+    | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift Is Invalid"
+    | Other(s) => s
+    }
+  }
 
   let resultStringToResultError: result<'a, string> => result<'a, error> = n =>
     n->E.R2.errMap(r => r->fromString->Error)
@@ -51,6 +62,7 @@ module Operation = {
     | #Sample
   ]
 
+  @genType
   type pointsetXSelection = [#Linear | #ByWeight]
 
   type toDist =

@@ -96,11 +96,11 @@
   "signals": [
     {
       "name": "mousemove",
-      "on": [{"events": "mousemove", "update": "invert('xscale', x())"}]
+      "on": [{ "events": "mousemove", "update": "invert('xscale', x())" }]
     },
     {
       "name": "mouseout",
-      "on": [{"events": "mouseout", "update": "invert('xscale', x())"}]
+      "on": [{ "events": "mouseout", "update": "invert('xscale', x())" }]
     }
   ],
   "axes": [
@@ -132,7 +132,7 @@
       "type": "rule",
       "encode": {
         "update": {
-          "xscale": {"scale": "xscale", "signal": "mousemove"}
+          "xscale": { "scale": "xscale", "signal": "mousemove" }
         }
       }
     },

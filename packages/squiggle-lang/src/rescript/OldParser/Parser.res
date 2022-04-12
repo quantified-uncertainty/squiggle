@@ -121,17 +121,14 @@ module MathAdtToDistDst = {
       | (_, _, Ok(mu), Ok(sigma)) => Ok(#FunctionCall("lognormal", [mu, sigma]))
       | _ => Error("Lognormal distribution needs either mean and stdev or mu and sigma")
       }
-    | _ =>
-      parseArgs() |> E.R.fmap((args: array<ASTTypes.node>) =>
-        #FunctionCall("lognormal", args)
-      )
+    | _ => parseArgs() |> E.R.fmap((args: array<ASTTypes.node>) => #FunctionCall("lognormal", args))
     }
 
   //  Error("Dotwise exponentiation needs two operands")
-  let operationParser = (
-    name: string,
-    args: result<array<ASTTypes.node>, string>,
-  ): result<ASTTypes.node, string> => {
+  let operationParser = (name: string, args: result<array<ASTTypes.node>, string>): result<
+    ASTTypes.node,
+    string,
+  > => {
     let toOkAlgebraic = r => Ok(#AlgebraicCombination(r))
     let toOkPointwise = r => Ok(#PointwiseCombination(r))
     let toOkTruncate = r => Ok(#Truncate(r))
@@ -169,10 +166,7 @@ module MathAdtToDistDst = {
   }
 
   let functionParser = (
-    nodeParser: MathJsonToMathJsAdt.arg => Belt.Result.t<
-      ASTTypes.node,
-      string,
-    >,
+    nodeParser: MathJsonToMathJsAdt.arg => Belt.Result.t<ASTTypes.node, string>,
     name: string,
     args: array<MathJsonToMathJsAdt.arg>,
   ): result<ASTTypes.node, string> => {
@@ -224,17 +218,11 @@ module MathAdtToDistDst = {
         )
         Ok(hash)
       }
-    | name =>
-      parseArgs() |> E.R.fmap((args: array<ASTTypes.node>) =>
-        #FunctionCall(name, args)
-      )
+    | name => parseArgs() |> E.R.fmap((args: array<ASTTypes.node>) => #FunctionCall(name, args))
     }
   }
 
-  let rec nodeParser: MathJsonToMathJsAdt.arg => result<
-    ASTTypes.node,
-    string,
-  > = x =>
+  let rec nodeParser: MathJsonToMathJsAdt.arg => result<ASTTypes.node, string> = x =>
     switch x {
     | Value(f) => Ok(#SymbolicDist(#Float(f)))
     | Symbol(sym) => Ok(#Symbol(sym))
@@ -267,8 +255,7 @@ module MathAdtToDistDst = {
       blocks |> E.A.fmap(b => topLevel(b)) |> E.A.R.firstErrorOrOpen |> E.R.fmap(E.A.concatMany)
     }
 
-  let run = (r): result<ASTTypes.program, string> =>
-    r |> MathAdtCleaner.run |> topLevel
+  let run = (r): result<ASTTypes.program, string> => r |> MathAdtCleaner.run |> topLevel
 }
 
 /* The MathJs parser doesn't support '.+' syntax, but we want it because it
