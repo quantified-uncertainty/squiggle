@@ -79,8 +79,9 @@ describe("(Algebraic) addition of distributions", () => {
         })
     })
     describe("pdf", () => {
+        // TEST IS WRONG. SEE STDEV ADDITION EXPRESSION. 
         testAll("(normal(mean=5) + normal(mean=5)).pdf (imprecise)", list{8e0, 1e1, 1.2e1, 1.4e1}, x => {
-            let received = normalDist10
+            let received = normalDist10  // this should be normal(10, sqrt(8))
                 -> Ok 
                 -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, x))
                 -> E.R2.fmap(run)
