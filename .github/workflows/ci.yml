@@ -59,7 +59,7 @@ jobs:
         with:
           dry: true
           prettier_options: --check .
-          working_directory: packages/squiggle-lang
+          # working_directory: packages/squiggle-lang
 
   lang-build-test-bundle:
     name: Language build, test, and bundle
@@ -91,7 +91,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: packages/components
+        # working-directory: packages/components
     steps:
       - uses: actions/checkout@v2
       - name: Check javascript, typescript, and markdown lint
@@ -129,7 +129,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: packages/website
+        # working-directory: packages/website
     steps:
       - uses: actions/checkout@v2
       - name: Check javascript, typescript, and markdown lint
