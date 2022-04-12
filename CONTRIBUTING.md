@@ -51,7 +51,13 @@ See [here](https://github.com/NixOS/nixpkgs/issues/107375)
 
 # Pull request protocol
 
-Please work against `staging` branch. **Do not** work against `master`. Please do not merge without approval from some subset of Quinn, Sam, and Ozzie; they will be auto-pinged. 
+Please work against `develop` branch. **Do not** work against `master`. 
+
+- For rescript code: Quinn and Ozzie are reviewers
+- For js or typescript code: Sam and Ozzie are reviewers
+- For ops code (i.e. yaml, package.json): Quinn and Sam are reviewers
+
+Autopings are set up: if you are not autopinged, you are welcome to comment, but please do not use the formal review feature, send approvals, rejections, or merges.
 
 # Code Quality
 - Aim for at least 8/10* quality in ``/packages/squiggle-lang``, and 7/10 quality in ``/packages/components``. 
