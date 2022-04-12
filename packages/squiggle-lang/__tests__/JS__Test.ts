@@ -3,6 +3,7 @@ import {
   Distribution,
   resultMap,
   squiggleExpression,
+  errorValueToString,
 } from "../src/js/index";
 
 let testRun = (x: string): squiggleExpression => {
@@ -10,6 +11,11 @@ let testRun = (x: string): squiggleExpression => {
   expect(result.tag).toEqual("Ok");
   if (result.tag === "Ok") {
     return result.value;
+  } else {
+    throw Error(
+      "Expected squiggle expression to evaluate but got error: " +
+        errorValueToString(result.value)
+    );
   }
 };
 

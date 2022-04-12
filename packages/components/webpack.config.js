@@ -10,7 +10,6 @@ module.exports = {
       {
         test: /\.tsx?$/,
         loader: "ts-loader",
-        include: path.resolve(__dirname, "src"),
         options: { projectReferences: true, transpileOnly: true },
         exclude: /node_modules/,
       },

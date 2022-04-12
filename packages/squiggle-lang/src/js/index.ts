@@ -192,7 +192,7 @@ export class Distribution {
     );
   }
 
-  shape(): result<shape, distributionError> {
+  pointSet(): result<shape, distributionError> {
     let pointSet = toPointSet(
       this.t,
       {
