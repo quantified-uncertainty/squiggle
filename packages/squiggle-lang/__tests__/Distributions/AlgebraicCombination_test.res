@@ -55,7 +55,7 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toExn
             switch received {
-                | None => false -> expect -> toBe(true)
+                | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
                 // sometimes it works with ~digits=2. 
                 | Some(x) => x -> expect -> toBeSoCloseTo(0.01927225696028752, ~digits=1)  // (uniformMean +. betaMean)
@@ -71,7 +71,7 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toExn
             switch received {
-                | None => false -> expect -> toBe(true)
+                | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
                 // sometimes it works with ~digits=2. 
                 | Some(x) => x -> expect -> toBeSoCloseTo(0.019275414920485248, ~digits=1)  // (uniformMean +. betaMean)
@@ -80,7 +80,7 @@ describe("(Algebraic) addition of distributions", () => {
     })
     describe("pdf", () => {
         testAll("(normal(mean=5) + normal(mean=5)).pdf (imprecise)", list{8e0, 1e1, 1.2e1, 1.4e1}, x => {
-            let expected = normalDist10
+            let received = normalDist10
                 -> Ok 
                 -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, x))
                 -> E.R2.fmap(run)
@@ -95,16 +95,16 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R.toOption
                 -> E.O.flatten
             
-            switch expected {  // not exactly happy with this
-                | None => false -> expect -> toBe(true)
+            switch received {   
+                | None => "this branch occurs when the dispatch to Jstat on trusted input fails." -> expect -> toBe("never")
                 | Some(x) => switch calculated {
-                    | None => false -> expect -> toBe(true)
+                    | None => "algebraicAdd has" -> expect -> toBe("failed")
                     | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=0)
                 }
             }
         })
         test("(normal(mean=10) + normal(mean=10)).pdf(1.9e1)", () => {
-            let expected = normalDist20
+            let received = normalDist20
                 -> Ok
                 -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1.9e1))
                 -> E.R2.fmap(run)
@@ -118,10 +118,10 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toOption
                 -> E.O.flatten
-            switch expected {  // not exactly happy with this
-                | None => false -> expect -> toBe(true)
+            switch received {  
+                | None => "this branch occurs when the dispatch to Jstat on trusted input fails." -> expect -> toBe("never")
                 | Some(x) => switch calculated {
-                    | None => false -> expect -> toBe(true)
+                    | None => "algebraicAdd has" -> expect -> toBe("failed")
                     | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=1)
                 }
             }
@@ -134,10 +134,10 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toExn
             switch received {
-                | None => false -> expect -> toBe(true)
+                | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
-                // sometimes it works with ~digits=2. 
-                | Some(x) => x -> expect -> toBeSoCloseTo(0.001978994877226945, ~digits=3)  // (uniformMean +. betaMean)
+                // sometimes it works with ~digits=4. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.001978994877226945, ~digits=3)  
             }
         })
         test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).pdf(10)", () => {
@@ -148,16 +148,16 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toExn
             switch received {
-                | None => false -> expect -> toBe(true)
+                | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
-                // sometimes it works with ~digits=2. 
-                | Some(x) => x -> expect -> toBeSoCloseTo(0.001978994877226945, ~digits=3)  // (uniformMean +. betaMean)
+                // sometimes it works with ~digits=4. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.001978994877226945, ~digits=3) 
             }
         })
     })
     describe("cdf", () => {
         testAll("(normal(mean=5) + normal(mean=5)).cdf (imprecise)", list{6e0, 8e0, 1e1, 1.2e1}, x => {
-            let expected = normalDist10
+            let received = normalDist10
                 -> Ok 
                 -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, x))
                 -> E.R2.fmap(run)
@@ -172,16 +172,16 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R.toOption
                 -> E.O.flatten
             
-            switch expected {  // not exactly happy with this
-                | None => false -> expect -> toBe(true)
+            switch received {  
+                | None => "this branch occurs when the dispatch to Jstat on trusted input fails." -> expect -> toBe("never")
                 | Some(x) => switch calculated {
-                    | None => false -> expect -> toBe(true)
+                    | None => "algebraicAdd has" -> expect -> toBe("failed")
                     | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=0)
                 }
             }
         })
         test("(normal(mean=10) + normal(mean=10)).cdf(1.25e1)", () => {
-            let expected = normalDist20
+            let received = normalDist20
                 -> Ok
                 -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1.25e1))
                 -> E.R2.fmap(run)
@@ -195,10 +195,10 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toOption
                 -> E.O.flatten
-            switch expected {  // not exactly happy with this
-                | None => false -> expect -> toBe(true)
+            switch received {  
+                | None => "this branch occurs when the dispatch to Jstat on trusted input fails." -> expect -> toBe("never")
                 | Some(x) => switch calculated {
-                    | None => false -> expect -> toBe(true)
+                    | None => "algebraicAdd has" -> expect -> toBe("failed")
                     | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=2)
                 }
             }
@@ -211,9 +211,9 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toExn
             switch received {
-                | None => false -> expect -> toBe(true)
+                | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
-                // sometimes it works with ~digits=2. 
+                // sometimes it works with ~digits=4. 
                 | Some(x) => x -> expect -> toBeSoCloseTo(0.0013961779932477507, ~digits=4)
             }
         })
@@ -225,9 +225,9 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toExn
             switch received {
-                | None => false -> expect -> toBe(true)
+                | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
-                // sometimes it works with ~digits=2. 
+                // sometimes it works with ~digits=4. 
                 | Some(x) => x -> expect -> toBeSoCloseTo(0.001388898111625753, ~digits=3)
             }
         })
@@ -235,7 +235,7 @@ describe("(Algebraic) addition of distributions", () => {
 
     describe("inv", () => {
         testAll("(normal(mean=5) + normal(mean=5)).inv (imprecise)", list{5e-2, 4.2e-3, 9e-3}, x => {
-            let expected = normalDist10
+            let received = normalDist10
                 -> Ok 
                 -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, x))
                 -> E.R2.fmap(run)
@@ -250,16 +250,16 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R.toOption
                 -> E.O.flatten
             
-            switch expected {  // not exactly happy with this. 
-                | None => false -> expect -> toBe(true)
+            switch received {
+                | None => "this branch occurs when the dispatch to Jstat on trusted input fails." -> expect -> toBe("never")
                 | Some(x) => switch calculated {
-                    | None => false -> expect -> toBe(true)
+                    | None => "algebraicAdd has" -> expect -> toBe("failed")
                     | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=-1)
                 }
             }
         })
         test("(normal(mean=10) + normal(mean=10)).inv(1e-1)", () => {
-            let expected = normalDist20
+            let received = normalDist20
                 -> Ok
                 -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 1e-1))
                 -> E.R2.fmap(run)
@@ -273,10 +273,10 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toOption
                 -> E.O.flatten
-            switch expected {  // not exactly happy with this
-                | None => false -> expect -> toBe(true)
+            switch received {
+                | None => "this branch occurs when the dispatch to Jstat on trusted input fails." -> expect -> toBe("never")
                 | Some(x) => switch calculated {
-                    | None => false -> expect -> toBe(true)
+                    | None => "algebraicAdd has" -> expect -> toBe("failed")
                     | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=-1)
                 }
             }
@@ -289,7 +289,7 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toExn
             switch received {
-                | None => false -> expect -> toBe(true)
+                | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
                 // sometimes it works with ~digits=2. 
                 | Some(x) => x -> expect -> toBeSoCloseTo(10.927078217530806, ~digits=1)
@@ -303,7 +303,7 @@ describe("(Algebraic) addition of distributions", () => {
                 -> E.R2.fmap(toFloat)
                 -> E.R.toExn
             switch received {
-                | None => false -> expect -> toBe(true)
+                | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
                 // sometimes it works with ~digits=2. 
                 | Some(x) => x -> expect -> toBeSoCloseTo(10.915396627014363, ~digits=1)
