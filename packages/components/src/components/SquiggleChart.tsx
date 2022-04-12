@@ -1,15 +1,10 @@
 import * as React from "react";
 import _ from "lodash";
-import { run } from "@quri/squiggle-lang";
-import type {
-  SamplingInputs,
-  exportEnv,
-  exportDistribution,
-} from "@quri/squiggle-lang";
+import { run, errorValueToString } from "@quri/squiggle-lang";
+import type { samplingParams, exportEnv } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
-import { DistPlusChart } from "./DistPlusChart";
-import { FunctionChart } from "./FunctionChart";
-import { Error } from "./Error";
+import { DistributionChart } from "./DistributionChart";
+import { ErrorBox } from "./ErrorBox";
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
@@ -39,53 +34,43 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   sampleCount = 1000,
   outputXYPoints = 1000,
-  kernelWidth,
-  pointDistLength = 1000,
-  diagramStart = 0,
-  diagramStop = 10,
-  diagramCount = 20,
   environment = [],
   onEnvChange = () => {},
   width = 500,
   height = 60,
 }: SquiggleChartProps) => {
-  let samplingInputs: SamplingInputs = {
+  let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
-    outputXYPoints: outputXYPoints,
-    kernelWidth: kernelWidth,
-    pointDistLength: pointDistLength,
+    xyPointLength: outputXYPoints,
   };
 
-  let result = run(squiggleString, samplingInputs, environment);
-  if (result.tag === "Ok") {
-    let environment = result.value.environment;
-    let exports = result.value.exports;
+  let expressionResult = run(squiggleString, samplingInputs, environment);
+  if (expressionResult.tag === "Ok") {
     onEnvChange(environment);
-    let chartResults = exports.map((chartResult: exportDistribution) => {
-      if (chartResult["NAME"] === "Float") {
-        return <NumberShower precision={3} number={chartResult["VAL"]} />;
-      } else if (chartResult["NAME"] === "DistPlus") {
-        return (
-          <DistPlusChart
-            distPlus={chartResult.VAL}
-            height={height}
-            width={width}
-          />
-        );
-      } else if (chartResult.NAME === "Function") {
-        return (
-          <FunctionChart
-            distPlusFn={chartResult.VAL}
-            diagramStart={diagramStart}
-            diagramStop={diagramStop}
-            diagramCount={diagramCount}
-          />
-        );
-      }
-    });
-    return <>{chartResults}</>;
-  } else if (result.tag === "Error") {
+    let expression = expressionResult.value;
+    if (expression.tag === "number") {
+      return <NumberShower precision={3} number={expression.value} />;
+    } else if (expression.tag === "distribution") {
+      return (
+        <DistributionChart
+          distribution={expression.value}
+          height={height}
+          width={width}
+        />
+      );
+    } else {
+      return (
+        <ErrorBox heading="No Viewer">
+          {"We don't currently have a viewer for this type: " + expression.tag}
+        </ErrorBox>
+      );
+    }
+  } else {
     // At this point, we came across an error. What was our error?
-    return <Error heading={"Parse Error"}>{result.value}</Error>;
+    return (
+      <ErrorBox heading={"Parse Error"}>
+        {errorValueToString(expressionResult.value)}
+      </ErrorBox>
+    );
   }
 };

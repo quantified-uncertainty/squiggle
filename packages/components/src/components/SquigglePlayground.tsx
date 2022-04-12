@@ -36,10 +36,8 @@ interface Props {
   initialSquiggleString?: string;
 }
 
-let SquigglePlayground: FC<Props> = ({initialSquiggleString=""}: Props) => {
-  let [squiggleString, setSquiggleString] = useState(
-    initialSquiggleString
-  );
+let SquigglePlayground: FC<Props> = ({ initialSquiggleString = "" }: Props) => {
+  let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
   let [sampleCount, setSampleCount] = useState(1000);
   let [outputXYPoints, setOutputXYPoints] = useState(1000);
   let [pointDistLength, setPointDistLength] = useState(1000);

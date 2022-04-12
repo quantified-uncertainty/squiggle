@@ -4,7 +4,7 @@ open Jest
 open Expect
 
 let expectEvalToBe = (expr: string, answer: string) =>
-  Reducer.eval(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
+  Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
 
 let testEval = (expr, answer) =>
   test(expr, () => expectEvalToBe(expr, answer))

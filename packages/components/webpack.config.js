@@ -3,13 +3,14 @@ const path = require("path");
 module.exports = {
   mode: "production",
   devtool: "source-map",
+  profile: true,
   entry: "./src/index.ts",
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         loader: "ts-loader",
-        options: { projectReferences: true },
+        options: { projectReferences: true, transpileOnly: true },
         exclude: /node_modules/,
       },
       {

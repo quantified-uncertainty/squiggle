@@ -5,6 +5,7 @@
 module Extra_Array = Reducer_Extra_Array
 module ErrorValue = Reducer_ErrorValue
 
+@genType
 type rec expressionValue =
   | EvArray(array<expressionValue>)
   | EvBool(bool)

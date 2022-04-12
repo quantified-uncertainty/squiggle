@@ -6,8 +6,8 @@
     "start": "docusaurus start",
     "build": "docusaurus build",
     "clean": "docusaurus clear",
-    "all": "yarn build", 
-    "lint": "prettier --check .", 
+    "all": "yarn build",
+    "lint": "prettier --check .",
     "format": "prettier --write ."
   },
   "dependencies": {
