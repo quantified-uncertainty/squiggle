@@ -7,10 +7,10 @@ const ShowError = styled.div`
   padding: 0.4em 0.8em;
 `;
 
-export const Error: React.FC<{ heading: string; children: React.ReactNode }> = ({
-  heading = "Error",
-  children,
-}) => {
+export const ErrorBox: React.FC<{
+  heading: string;
+  children: React.ReactNode;
+}> = ({ heading = "Error", children }) => {
   return (
     <ShowError>
       <h3>{heading}</h3>

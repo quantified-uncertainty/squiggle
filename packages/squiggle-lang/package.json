@@ -14,8 +14,8 @@
     "coverage:ci": "yarn clean; BISECT_ENABLE=yes yarn build; yarn test; bisect-ppx-report send-to Codecov",
     "lint:rescript": "./lint.sh",
     "lint:prettier": "prettier --check .",
-    "lint": "yarn lint:rescript && yarn lint:prettier", 
-    "format": "rescript format -all && prettier --write .", 
+    "lint": "yarn lint:rescript && yarn lint:prettier",
+    "format": "rescript format -all && prettier --write .",
     "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [

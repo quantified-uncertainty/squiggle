@@ -15,10 +15,10 @@
     "cross-env": "^7.0.3",
     "lodash": "^4.17.21",
     "react": "^18.0.0",
+    "react-ace": "9.5.0",
     "react-dom": "^18.0.0",
     "react-scripts": "5.0.0",
     "react-vega": "^7.5.0",
-    "react-ace": "9.5.0", 
     "styled-components": "^5.3.5",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.6.3",
@@ -32,8 +32,8 @@
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
     "build": "tsc -b && build-storybook -s public",
     "bundle": "webpack",
-    "all": "yarn bundle && yarn build", 
-    "lint": "prettier --check .", 
+    "all": "yarn bundle && yarn build",
+    "lint": "prettier --check .",
     "format": "prettier --write ."
   },
   "eslintConfig": {
@@ -65,9 +65,6 @@
     ]
   },
   "devDependencies": {
-    "@types/styled-components": "^5.1.24",
-    "css-loader": "^6.7.1",
-    "style-loader": "^3.3.1",
     "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
     "@storybook/addon-actions": "^6.4.20",
     "@storybook/addon-essentials": "^6.4.20",
@@ -77,8 +74,10 @@
     "@storybook/node-logger": "^6.4.20",
     "@storybook/preset-create-react-app": "^4.1.0",
     "@storybook/react": "^6.4.20",
+    "@types/styled-components": "^5.1.24",
     "@types/webpack": "^4.41.32",
     "react-codejar": "^1.1.2",
+    "style-loader": "^3.3.1",
     "ts-loader": "^9.2.8",
     "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2",
