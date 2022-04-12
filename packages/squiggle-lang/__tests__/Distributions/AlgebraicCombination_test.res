@@ -58,7 +58,7 @@ describe("(Algebraic) addition of distributions", () => {
                 | None => false -> expect -> toBe(true)
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
                 // sometimes it works with ~digits=2. 
-                | Some(x) => x -> expect -> toBeSoCloseTo(0.1884273175239643, ~digits=1)  // (uniformMean +. betaMean)
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.01927225696028752, ~digits=1)  // (uniformMean +. betaMean)
             }
         })
         test("beta(alpha=2, beta=5) + uniform(low=9, high=10)", () => {
@@ -74,7 +74,7 @@ describe("(Algebraic) addition of distributions", () => {
                 | None => false -> expect -> toBe(true)
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
                 // sometimes it works with ~digits=2. 
-                | Some(x) => x -> expect -> toBeSoCloseTo(0.19708465087256619, ~digits=1)  // (uniformMean +. betaMean)
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.019275414920485248, ~digits=1)  // (uniformMean +. betaMean)
             }
         })
     })
@@ -126,6 +126,34 @@ describe("(Algebraic) addition of distributions", () => {
                 }
             }
         })
+        test("(uniform(low=9, high=10) + beta(alpha=2, beta=5)).pdf(10)", () => {
+            let received = uniformDist 
+                -> algebraicAdd(betaDist)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1e1))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toExn
+            switch received {
+                | None => false -> expect -> toBe(true)
+                // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
+                // sometimes it works with ~digits=2. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.001978994877226945, ~digits=3)  // (uniformMean +. betaMean)
+            }
+        })
+        test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).pdf(10)", () => {
+            let received = betaDist 
+                -> algebraicAdd(uniformDist)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1e1))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toExn
+            switch received {
+                | None => false -> expect -> toBe(true)
+                // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
+                // sometimes it works with ~digits=2. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.001978994877226945, ~digits=3)  // (uniformMean +. betaMean)
+            }
+        })
     })
     describe("cdf", () => {
         testAll("(normal(mean=5) + normal(mean=5)).cdf (imprecise)", list{6e0, 8e0, 1e1, 1.2e1}, x => {
@@ -175,8 +203,36 @@ describe("(Algebraic) addition of distributions", () => {
                 }
             }
         })
-
+        test("(uniform(low=9, high=10) + beta(alpha=2, beta=5)).cdf(10)", () => {
+            let received = uniformDist 
+                -> algebraicAdd(betaDist)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1e1))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toExn
+            switch received {
+                | None => false -> expect -> toBe(true)
+                // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
+                // sometimes it works with ~digits=2. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.0013961779932477507, ~digits=4)
+            }
+        })
+        test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).cdf(10)", () => {
+            let received = betaDist 
+                -> algebraicAdd(uniformDist)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1e1))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toExn
+            switch received {
+                | None => false -> expect -> toBe(true)
+                // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
+                // sometimes it works with ~digits=2. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(0.001388898111625753, ~digits=3)
+            }
+        })
     })
+
     describe("inv", () => {
         testAll("(normal(mean=5) + normal(mean=5)).inv (imprecise)", list{5e-2, 4.2e-3, 9e-3}, x => {
             let expected = normalDist10
@@ -223,6 +279,34 @@ describe("(Algebraic) addition of distributions", () => {
                     | None => false -> expect -> toBe(true)
                     | Some(y) => x -> expect -> toBeSoCloseTo(y, ~digits=-1)
                 }
+            }
+        })
+        test("(uniform(low=9, high=10) + beta(alpha=2, beta=5)).inv(2e-2)", () => {
+            let received = uniformDist 
+                -> algebraicAdd(betaDist)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 2e-2))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toExn
+            switch received {
+                | None => false -> expect -> toBe(true)
+                // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
+                // sometimes it works with ~digits=2. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(10.927078217530806, ~digits=1)
+            }
+        })
+        test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).inv(2e-2)", () => {
+            let received = betaDist 
+                -> algebraicAdd(uniformDist)
+                -> E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 2e-2))
+                -> E.R2.fmap(run)
+                -> E.R2.fmap(toFloat)
+                -> E.R.toExn
+            switch received {
+                | None => false -> expect -> toBe(true)
+                // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
+                // sometimes it works with ~digits=2. 
+                | Some(x) => x -> expect -> toBeSoCloseTo(10.915396627014363, ~digits=1)
             }
         })
     })
