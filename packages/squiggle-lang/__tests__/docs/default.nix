@@ -3,31 +3,23 @@
 }:
 # Style sheets https://github.com/citation-style-language/styles/
 with pkgs;
-let deps = [
-#      (texlive.combine
-#        { inherit (texlive)
-#        scheme-small thmtools datetime xpatch fmtcount;
-#        }
-#      )
-      haskellPackages.pandoc
-    ];
-in
-  stdenv.mkDerivation {
-    name = "render_squiggle_properties";
-    src = ./.;
-    buildInputs = deps;
-    buildPhase = ''
-      echo rendering...
-      pandoc \
-             --from markdown \
-             --to latex \
-             --out properties.pdf \
-             --pdf-engine xelatex \
-             properties.md \
-      echo rendered.
+
+stdenv.mkDerivation {
+  name = "render_squiggle_properties";
+  src = ./.;
+  buildInputs = [pandoc];
+  buildPhase = ''
+    echo rendering...
+    pandoc \
+           --from markdown \
+           --to latex \
+           --out properties.pdf \
+           --pdf-engine xelatex \
+           properties.md \
+    echo rendered.
+  '';
+  installPhase = ''
+    mkdir -p $out
+    cp properties.pdf $out/properties.pdf
     '';
-    installPhase = ''
-      mkdir -p $out
-      cp properties.pdf $out/properties.pdf
-      '';
-  }
+}
