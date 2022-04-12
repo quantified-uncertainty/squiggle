@@ -177,7 +177,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(Truncate(None, Some(float)), dist)
   | ("truncate", [EvDistribution(dist), EvNumber(float1), EvNumber(float2)]) =>
     Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist)
-  | ("mx", args) =>
+  | (("mx" | "mixture"), args) =>
     Helpers.mixture(args) -> Some
   | ("log", [EvDistribution(a)]) =>
     Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(Math.e))->Some
