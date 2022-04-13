@@ -14,6 +14,7 @@ module Error = {
     | NotYetImplemented => "Not Yet Implemented"
     | Unreachable => "Unreachable"
     | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift Is Invalid"
+    | ArgumentError(x) => `Argument Error: ${x}`
     | Other(s) => s
     }
   }
