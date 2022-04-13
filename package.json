@@ -3,7 +3,8 @@
   "name": "squiggle",
   "scripts": {
     "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules",
-    "format:all": "prettier --write . && cd packages/squiggle-lang && yarn format"
+    "format:all": "prettier --write . && cd packages/squiggle-lang && yarn format",
+    "lint:all": "prettier --check . && cd packages/squiggle-lang && yarn lint:rescript"
   },
   "devDependencies": {
     "prettier": "^2.6.2"

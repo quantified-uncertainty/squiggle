@@ -90,16 +90,8 @@ describe("eval on distribution functions", () => {
   })
 
   describe("mixture", () => {
-    testEval(
-      ~skip=true,
-      "mx(normal(5,2), normal(10,1), normal(15, 1))",
-      "Ok(Point Set Distribution)",
-    )
-    testEval(
-      ~skip=true,
-      "mixture(normal(5,2), normal(10,1), [.2,, .4])",
-      "Ok(Point Set Distribution)",
-    )
+    testEval("mx(normal(5,2), normal(10,1), normal(15, 1))", "Ok(Point Set Distribution)")
+    testEval("mixture(normal(5,2), normal(10,1), [0.2, 0.4])", "Ok(Point Set Distribution)")
   })
 })
 

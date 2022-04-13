@@ -1,0 +1,4 @@
+dist
+lib
+*.bs.js
+*.gen.tsx

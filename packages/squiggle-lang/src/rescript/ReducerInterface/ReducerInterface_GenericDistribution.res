@@ -66,6 +66,64 @@ module Helpers = {
       dist1,
     )->runGenericOperation
   }
+  let parseNumber = (args: expressionValue): Belt.Result.t<float, string> =>
+    switch args {
+    | EvNumber(x) => Ok(x)
+    | _ => Error("Not a number")
+    }
+
+  let parseNumberArray = (ags: array<expressionValue>): Belt.Result.t<array<float>, string> =>
+    E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
+
+  let parseDist = (args: expressionValue): Belt.Result.t<GenericDist_Types.genericDist, string> =>
+    switch args {
+    | EvDistribution(x) => Ok(x)
+    | EvNumber(x) => Ok(GenericDist.fromFloat(x))
+    | _ => Error("Not a distribution")
+    }
+
+  let parseDistributionArray = (ags: array<expressionValue>): Belt.Result.t<
+    array<GenericDist_Types.genericDist>,
+    string,
+  > => E.A.fmap(parseDist, ags) |> E.A.R.firstErrorOrOpen
+
+  let mixtureWithGivenWeights = (
+    distributions: array<GenericDist_Types.genericDist>,
+    weights: array<float>,
+  ): DistributionOperation.outputType =>
+    E.A.length(distributions) == E.A.length(weights)
+      ? Mixture(Belt.Array.zip(distributions, weights))->runGenericOperation
+      : GenDistError(
+          ArgumentError("Error, mixture call has different number of distributions and weights"),
+        )
+
+  let mixtureWithDefaultWeights = (
+    distributions: array<GenericDist_Types.genericDist>,
+  ): DistributionOperation.outputType => {
+    let length = E.A.length(distributions)
+    let weights = Belt.Array.make(length, 1.0 /. Belt.Int.toFloat(length))
+    mixtureWithGivenWeights(distributions, weights)
+  }
+
+  let mixture = (args: array<expressionValue>): DistributionOperation.outputType => {
+    switch E.A.last(args) {
+    | Some(EvArray(b)) => {
+        let weights = parseNumberArray(b)
+        let distributions = parseDistributionArray(
+          Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
+        )
+        switch E.R.merge(distributions, weights) {
+        | Ok(d, w) => mixtureWithGivenWeights(d, w)
+        | Error(err) => GenDistError(ArgumentError(err))
+        }
+      }
+    | Some(EvDistribution(b)) => switch parseDistributionArray(args) {
+      | Ok(distributions) => mixtureWithDefaultWeights(distributions)
+      | Error(err) => GenDistError(ArgumentError(err))
+      }
+    | _ => GenDistError(ArgumentError("Last argument of mx must be array or distribution"))
+    }
+  }
 }
 
 module SymbolicConstructors = {
@@ -146,6 +204,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(Truncate(None, Some(float)), dist)
   | ("truncate", [EvDistribution(dist), EvNumber(float1), EvNumber(float2)]) =>
     Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist)
+  | ("mx" | "mixture", args) => Helpers.mixture(args)->Some
   | ("log", [EvDistribution(a)]) =>
     Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(Math.e))->Some
   | ("log10", [EvDistribution(a)]) =>
@@ -187,7 +246,8 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(NotYetImplemented) => Error(RETodo("Function not yet implemented"))
   | GenDistError(Unreachable) => Error(RETodo("Unreachable"))
   | GenDistError(DistributionVerticalShiftIsInvalid) =>
-    Error(RETodo("Distribution Vertical Shift is Invalid"))
+    Error(RETodo("Distribution Vertical Shift Is Invalid"))
+  | GenDistError(ArgumentError(err)) => Error(RETodo("Argument Error: " ++ err))
   | GenDistError(Other(s)) => Error(RETodo(s))
   }
 
