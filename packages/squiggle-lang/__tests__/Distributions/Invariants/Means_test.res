@@ -27,13 +27,17 @@ let algebraicLogarithm = algebraicLogarithm(~env)
 let algebraicPower = algebraicPower(~env)
 
 describe("Mean", () => {
+  let digits = -4
+
   let mean = GenericDist_Types.Constructors.UsingDists.mean
 
   let runMean: result<DistributionTypes.genericDist, DistributionTypes.error> => float = distR => {
-    switch distR->E.R2.fmap(mean)->E.R2.fmap(run)->E.R2.fmap(toFloat) {
-    | Ok(Some(x)) => x
-    | _ => 9e99 // We trust input in test fixtures so this won't happen
-    }
+    distR
+    ->E.R2.fmap(mean)
+    ->E.R2.fmap(run)
+    ->E.R2.fmap(toFloat)
+    ->E.R.toExn
+    ->E.O2.toExn("Shouldn't see this because we trust testcase input")
   }
 
   let impossiblePath: string => assertion = algebraicOp =>
@@ -51,7 +55,6 @@ describe("Mean", () => {
   }
   let combinations = E.L.combinations2(distributions)
   let zipDistsDists = E.L.zip(distributions, distributions)
-  let digits = -4
 
   let testOperationMean = (
       distOp: (DistributionTypes.genericDist, DistributionTypes.genericDist) => result<DistributionTypes.genericDist, DistributionTypes.error>, 
@@ -79,7 +82,7 @@ describe("Mean", () => {
   }
 
   describe("addition", () => {
-    let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", (x,y)=>x+.y)  
+    let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", \"+.")  
 
     testAll("homogeneous addition", zipDistsDists, dists => {
       let (dist1, dist2) = dists
@@ -98,7 +101,7 @@ describe("Mean", () => {
   })
 
   describe("subtraction", () => {
-    let testSubtractionMean = testOperationMean(algebraicSubtract, "algebraicSubtract", (x,y)=>x-.y)
+    let testSubtractionMean = testOperationMean(algebraicSubtract, "algebraicSubtract", \"-.")
 
     testAll("homogeneous subtraction", zipDistsDists, dists => {
       let (dist1, dist2) = dists
@@ -117,7 +120,7 @@ describe("Mean", () => {
   })
 
   describe("multiplication", () => {
-    let testMultiplicationMean = testOperationMean(algebraicMultiply, "algebraicMultiply", (x,y)=>x*.y)
+    let testMultiplicationMean = testOperationMean(algebraicMultiply, "algebraicMultiply", \"*.")
 
     testAll("homogeneous subtraction", zipDistsDists, dists => {
       let (dist1, dist2) = dists
