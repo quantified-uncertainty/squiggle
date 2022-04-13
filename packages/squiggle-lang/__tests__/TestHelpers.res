@@ -1,6 +1,16 @@
 open Jest
 open Expect
 
+let expectErrorToBeBounded = (received, expected, ~epsilon) => {
+  let distance = Js.Math.abs_float(received -. expected)
+  let error = if expected < epsilon ** 2.5 {
+    distance /. epsilon
+  } else {
+    distance /. Js.Math.abs_float(expected)
+  }
+  error -> expect -> toBeLessThan(epsilon)
+}
+
 let makeTest = (~only=false, str, item1, item2) =>
   only
     ? Only.test(str, () => expect(item1)->toEqual(item2))
