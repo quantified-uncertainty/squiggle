@@ -1,3 +1,7 @@
+/*
+This file was going to be too big and it will be factored into smaller files. 
+*/
+
 open Jest
 open Expect
 open TestHelpers
@@ -307,7 +311,7 @@ describe("(Algebraic) addition of distributions", () => {
                 | None => "algebraicAdd has" -> expect -> toBe("failed")
                 // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad. 
                 // sometimes it works with ~digits=2. 
-                | Some(x) => x -> expect -> toBeSoCloseTo(10.915396627014363, ~digits=1)
+                | Some(x) => x -> expect -> toBeSoCloseTo(10.915396627014363, ~digits=0)
             }
         })
     })

@@ -178,6 +178,25 @@ module R = {
 
   let errorIfCondition = (errorCondition, errorMessage, r) =>
     errorCondition(r) ? Error(errorMessage) : Ok(r)
+
+  let ap = Rationale.Result.ap
+  let ap' = (r, a) => switch r {
+    | Ok(f) => fmap(f, a)
+    | Error(err) => Error(err)
+  }
+  // (a1 -> a2 -> r) -> m a1 -> m a2 -> m r  // not in Rationale
+  let liftM2: (('a, 'b) => 'c, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
+    ap'(fmap(op, xR), yR)
+  }
+
+  let liftJoin2: (('a, 'b) => result<'c, 'd>, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
+    bind(liftM2(op, xR, yR), x => x)
+  }
+
+  let fmap2 = (f, r) => switch r {
+    | Ok(r) => r->Ok
+    | Error(x) => x->f->Error
+  }
 }
 
 module R2 = {
@@ -260,22 +279,28 @@ module L = {
   let update = Rationale.RList.update
   let iter = List.iter
   let findIndex = Rationale.RList.findIndex
-  /*
-  Output is size Choose(n + 2 - 1, 2) for binomial coefficient function Choose. 
-  inspired by https://docs.python.org/3/library/itertools.html#itertools.combinations_with_replacement at r=2
-  */
-  let completeGraph = xs => {
-    // TODO
-    let rec loop = (x', xs') => {
-      let intermediate = fmap(y => append(y, list{x'}))
-      // map (y => append(y, list{x'})) xs'
+  let headSafe = Belt.List.head
+  let tailSafe = Belt.List.tail
+  let headExn = Belt.List.headExn
+  let tailExn = Belt.List.tailExn
+  let zip = Belt.List.zip 
+  
+  let combinations2: list<'a> => list<('a, 'a)> = xs => {
+    let rec loop: ('a, list<'a>) => list<('a, 'a)> = (x', xs') => {
+      let n = length(xs')
+      if n == 0 {
+        list{}
+      } else {
+        let combs = fmap(y => (x', y), xs')
+        let hd = headExn(xs')
+        let tl = tailExn(xs')
+        concat(list{combs, loop(hd, tl)})
+      }
     }
-
-    let intermediate = fmap()
-    let n = length(xs)
-    
-    let indices = list{0, 0}
-
+    switch (headSafe(xs), tailSafe(xs)) {
+      | (Some(x'), Some(xs')) => loop(x', xs')
+      | (_, _) => list{}
+    }
   }
 }
 
