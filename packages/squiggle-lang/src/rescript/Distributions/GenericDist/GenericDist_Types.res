@@ -1,15 +1,6 @@
 type genericDist = DistributionTypes.genericDist
 @genType
-<<<<<<< HEAD
-type error =
-  | NotYetImplemented
-  | Unreachable
-  | DistributionVerticalShiftIsInvalid
-  | ArgumentError(string)
-  | Other(string)
-=======
 type error = DistributionTypes.error
->>>>>>> eff1810 ((rebase): (rebase): **refactor**: rm duplicated `genericDist` and `error` declarations)
 
 @genType
 module Error = {

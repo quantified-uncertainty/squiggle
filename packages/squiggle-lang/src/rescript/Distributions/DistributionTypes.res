@@ -9,6 +9,7 @@ type error =
   | NotYetImplemented
   | Unreachable
   | DistributionVerticalShiftIsInvalid
+  | ArgumentError(string)
   | Other(string)
 
 module Operation = {
