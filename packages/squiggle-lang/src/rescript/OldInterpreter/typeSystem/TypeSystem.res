@@ -86,11 +86,7 @@ module TypedValue = {
       |> E.R.fmap(r => #Array(r))
     | (#Hash(named), #Hash(r)) =>
       let keyValues =
-        named |> E.A.fmap(((name, intendedType)) => (
-          name,
-          intendedType,
-          Hash.getByName(r, name),
-        ))
+        named |> E.A.fmap(((name, intendedType)) => (name, intendedType, Hash.getByName(r, name)))
       let typedHash =
         keyValues
         |> E.A.fmap(((name, intendedType, optionNode)) =>
@@ -180,11 +176,7 @@ module Function = {
         _coerceInputNodes(evaluationParams, t.inputTypes, t.shouldCoerceTypes),
       )
 
-    let run = (
-      evaluationParams: ASTTypes.evaluationParams,
-      inputNodes: inputNodes,
-      t: t,
-    ) =>
+    let run = (evaluationParams: ASTTypes.evaluationParams, inputNodes: inputNodes, t: t) =>
       inputsToTypedValues(evaluationParams, inputNodes, t)->E.R.bind(t.run)
         |> (
           x =>

@@ -55,7 +55,11 @@ module DistributionOperation = {
   type fromDist =
     | ToFloat(Operation.toFloat)
     | ToDist(toDist)
-    | ToDistCombination(Operation.direction, Operation.arithmeticOperation, [#Dist(genericDist) | #Float(float)])
+    | ToDistCombination(
+        Operation.direction,
+        Operation.arithmeticOperation,
+        [#Dist(genericDist) | #Float(float)],
+      )
     | ToString
 
   type singleParamaterFunction =

@@ -3,7 +3,8 @@ open Reducer_TestHelpers
 
 let testParseToBe = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
 
-let testDescriptionParseToBe = (desc, expr, answer) => test(desc, () => expectParseToBe(expr, answer))
+let testDescriptionParseToBe = (desc, expr, answer) =>
+  test(desc, () => expectParseToBe(expr, answer))
 
 let testEvalToBe = (expr, answer) => test(expr, () => expectEvalToBe(expr, answer))
 
@@ -44,13 +45,21 @@ describe("reducer using mathjs parse", () => {
   })
   describe("multi-line", () => {
     testParseToBe("1; 2", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) 1) 2))")
-    testParseToBe("1+1; 2+1", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:add 1 1)) (:add 2 1)))")
+    testParseToBe(
+      "1+1; 2+1",
+      "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:add 1 1)) (:add 2 1)))",
+    )
   })
   describe("assignment", () => {
-    testParseToBe("x=1; x", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :x 1)) :x))")
-    testParseToBe("x=1+1; x+1", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :x (:add 1 1))) (:add :x 1)))")
+    testParseToBe(
+      "x=1; x",
+      "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :x 1)) :x))",
+    )
+    testParseToBe(
+      "x=1+1; x+1",
+      "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :x (:add 1 1))) (:add :x 1)))",
+    )
   })
-
 })
 
 describe("eval", () => {
@@ -101,5 +110,9 @@ describe("test exceptions", () => {
     "javascriptraise('div by 0')",
     "Error(JS Exception: Error: 'div by 0')",
   )
-  testDescriptionEvalToBe("rescript exception", "rescriptraise()", "Error(TODO: unhandled rescript exception)")
+  testDescriptionEvalToBe(
+    "rescript exception",
+    "rescriptraise()",
+    "Error(TODO: unhandled rescript exception)",
+  )
 })

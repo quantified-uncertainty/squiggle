@@ -14,7 +14,8 @@ let testDescriptionParse = (desc, expr, answer) => test(desc, () => expectParseT
 module MySkip = {
   let testParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
 
-  let testDescriptionParse = (desc, expr, answer) => Skip.test(desc, () => expectParseToBe(expr, answer))
+  let testDescriptionParse = (desc, expr, answer) =>
+    Skip.test(desc, () => expectParseToBe(expr, answer))
 }
 
 describe("MathJs parse", () => {
@@ -60,7 +61,8 @@ describe("MathJs parse", () => {
     MySkip.testDescriptionParse("define", "# This is a comment", "???")
   })
 
-  describe("if statement", () => { // TODO Tertiary operator instead
+  describe("if statement", () => {
+    // TODO Tertiary operator instead
     MySkip.testDescriptionParse("define", "if (true) { 1 } else { 0 }", "???")
   })
 })

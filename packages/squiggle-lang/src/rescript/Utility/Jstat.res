@@ -36,8 +36,8 @@ module Exponential = {
   @module("jstat") @scope("exponential") external pdf: (float, float) => float = "pdf"
   @module("jstat") @scope("exponential") external cdf: (float, float) => float = "cdf"
   @module("jstat") @scope("exponential") external inv: (float, float) => float = "inv"
-  @module("jstat") @scope("exponential") external sample: (float) => float = "sample"
-  @module("jstat") @scope("exponential") external mean: (float) => float = "mean"
+  @module("jstat") @scope("exponential") external sample: float => float = "sample"
+  @module("jstat") @scope("exponential") external mean: float => float = "mean"
 }
 
 module Cauchy = {
@@ -56,7 +56,6 @@ module Triangular = {
   @module("jstat") @scope("triangular") external mean: (float, float, float) => float = "mean"
 }
 
-
 module Pareto = {
   @module("jstat") @scope("pareto") external pdf: (float, float, float) => float = "pdf"
   @module("jstat") @scope("pareto") external cdf: (float, float, float) => float = "cdf"
@@ -66,20 +65,20 @@ module Pareto = {
 module Poisson = {
   @module("jstat") @scope("poisson") external pdf: (float, float) => float = "pdf"
   @module("jstat") @scope("poisson") external cdf: (float, float) => float = "cdf"
-  @module("jstat") @scope("poisson") external sample: (float) => float = "sample"
-  @module("jstat") @scope("poisson") external mean: (float) => float = "mean"
+  @module("jstat") @scope("poisson") external sample: float => float = "sample"
+  @module("jstat") @scope("poisson") external mean: float => float = "mean"
 }
 
 module Weibull = {
   @module("jstat") @scope("weibull") external pdf: (float, float, float) => float = "pdf"
-  @module("jstat") @scope("weibull") external cdf: (float, float,float ) => float = "cdf"
-  @module("jstat") @scope("weibull") external sample: (float,float) => float = "sample"
-  @module("jstat") @scope("weibull") external mean: (float,float) => float = "mean"
+  @module("jstat") @scope("weibull") external cdf: (float, float, float) => float = "cdf"
+  @module("jstat") @scope("weibull") external sample: (float, float) => float = "sample"
+  @module("jstat") @scope("weibull") external mean: (float, float) => float = "mean"
 }
 
 module Binomial = {
   @module("jstat") @scope("binomial") external pdf: (float, float, float) => float = "pdf"
-  @module("jstat") @scope("binomial") external cdf: (float, float,float ) => float = "cdf"
+  @module("jstat") @scope("binomial") external cdf: (float, float, float) => float = "cdf"
 }
 
 @module("jstat") external sum: array<float> => float = "sum"
