@@ -1,6 +1,11 @@
 import * as React from "react";
 import _ from "lodash";
-import { run, errorValueToString } from "@quri/squiggle-lang";
+import styled from "styled-components";
+import {
+  run,
+  errorValueToString,
+  squiggleExpression,
+} from "@quri/squiggle-lang";
 import type { samplingParams, exportEnv } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
@@ -30,6 +35,93 @@ export interface SquiggleChartProps {
   height?: number;
 }
 
+export interface SquiggleItemProps {
+  /** The input string for squiggle */
+  expression: squiggleExpression;
+  width: number;
+  height: number;
+}
+
+const ShowBox = styled.div`
+  border: 1px solid #ddd;
+`;
+
+const ShowBoxHeading = styled.div`
+  border-bottom: 1px solid #ddd;
+  padding: 0.4em 0.8em;
+`;
+
+const ShowBoxPadding = styled.div`
+  padding: 0.4em 0.8em;
+`;
+
+export const Box: React.FC<{
+  heading: string;
+  children: React.ReactNode;
+}> = ({ heading = "Error", children }) => {
+  return (
+    <ShowBox>
+      <ShowBoxHeading>
+        <h3>{heading}</h3>
+      </ShowBoxHeading>
+      <ShowBoxPadding>{children}</ShowBoxPadding>
+    </ShowBox>
+  );
+};
+
+const SquiggleItem: React.FC<SquiggleItemProps> = ({
+  expression,
+  width,
+  height,
+}: SquiggleItemProps) => {
+  if (expression.tag === "number") {
+    return (
+      <Box heading="Number">
+        <NumberShower precision={3} number={expression.value} />
+      </Box>
+    );
+  } else if (expression.tag === "distribution") {
+    let distType = expression.value.type();
+    return (
+      <Box heading={`Distribution (${distType}${distType === "Symbolic" ? ": " + expression.value.toString() : ""})`}>
+        <DistributionChart
+          distribution={expression.value}
+          height={height}
+          width={width}
+        />
+      </Box>
+    );
+  } else if (expression.tag === "string") {
+    return <Box heading="String">({expression.value})</Box>;
+  } else if (expression.tag === "boolean") {
+    return (
+      <Box heading="Boolean">
+        ({expression.value == true ? "True" : "False"})
+      </Box>
+    );
+  } else if (expression.tag === "symbol") {
+    return <Box heading="Symbol">({expression.value})</Box>;
+  } else if (expression.tag === "call") {
+    return <Box heading="Call">({expression.value})</Box>;
+  } else if (expression.tag === "array") {
+    return (
+      <Box heading="Array">
+        <div>
+          {expression.value.map((r) => (
+            <SquiggleItem expression={r} width={width - 20} height={50} />
+          ))}
+        </div>
+      </Box>
+    );
+  } else {
+    return (
+      <ErrorBox heading="No Viewer">
+        {"We don't currently have a viewer for record types."}
+      </ErrorBox>
+    );
+  }
+};
+
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   sampleCount = 1000,
@@ -48,23 +140,9 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   if (expressionResult.tag === "Ok") {
     onEnvChange(environment);
     let expression = expressionResult.value;
-    if (expression.tag === "number") {
-      return <NumberShower precision={3} number={expression.value} />;
-    } else if (expression.tag === "distribution") {
-      return (
-        <DistributionChart
-          distribution={expression.value}
-          height={height}
-          width={width}
-        />
-      );
-    } else {
-      return (
-        <ErrorBox heading="No Viewer">
-          {"We don't currently have a viewer for this type: " + expression.tag}
-        </ErrorBox>
-      );
-    }
+    return (
+      <SquiggleItem expression={expression} width={width} height={height} />
+    );
   } else {
     // At this point, we came across an error. What was our error?
     return (

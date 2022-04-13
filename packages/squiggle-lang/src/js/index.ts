@@ -47,6 +47,7 @@ import {
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
+import { pointSetDistFn } from "../rescript/OldInterpreter/DistPlus.bs";
 export type { samplingParams, errorValue };
 
 export let defaultSamplingInputs: samplingParams = {
@@ -193,6 +194,10 @@ export class Distribution {
     return this.mapResultDist(
       Constructors_normalize({ env: this.env }, this.t)
     );
+  }
+
+  type(){
+    return this.t.tag;
   }
 
   pointSet(): result<shape, distributionError> {
