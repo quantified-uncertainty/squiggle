@@ -1,1 +1,1 @@
- pandoc -s property-tests.md -o property-tests.pdf
+ pandoc -s invariants.md -o invariants.pdf
