@@ -13,7 +13,7 @@ open Expect
 open TestHelpers
 
 module Internals = {
-  let epsilon = 1e3
+  let epsilon = 1e1
 
   let mean = GenericDist_Types.Constructors.UsingDists.mean
 
@@ -47,8 +47,8 @@ module Internals = {
     dist2': SymbolicDistTypes.symbolicDist,
     ~epsilon: float,
   ) => {
-    let dist1 = dist1'->DistributionTypes.Symbolic // ->DistributionTypes.Other
-    let dist2 = dist2'->DistributionTypes.Symbolic // ->DistributionTypes.Other
+    let dist1 = dist1'->DistributionTypes.Symbolic
+    let dist2 = dist2'->DistributionTypes.Symbolic
     let received =
       distOp(dist1, dist2)->E.R2.fmap(mean)->E.R2.fmap(run)->E.R2.fmap(toFloat)->E.R.toExn
     let expected = floatOp(runMean(dist1), runMean(dist2))
@@ -81,19 +81,23 @@ describe("Means invariant", () => {
   describe("for addition", () => {
     let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", \"+.", ~epsilon)
 
-    testAll("of two of the same distribution", distributions, dist => {
+    testAll("with two of the same distribution", distributions, dist => {
       E.R.liftM2(testAdditionMean, dist, dist)->E.R.toExn
     })
 
-    testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
+    testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
       E.R.liftM2(testAdditionMean, dist1, dist2)->E.R.toExn
     })
 
-    testAll("of two difference distributions", pairsOfDifferentDistributions, dists => {
-      let (dist1, dist2) = dists
-      E.R.liftM2(testAdditionMean, dist2, dist1)->E.R.toExn
-    })
+    testAll(
+      "with two different distributions in swapped order",
+      pairsOfDifferentDistributions,
+      dists => {
+        let (dist1, dist2) = dists
+        E.R.liftM2(testAdditionMean, dist2, dist1)->E.R.toExn
+      },
+    )
   })
 
   describe("for subtraction", () => {
@@ -104,19 +108,23 @@ describe("Means invariant", () => {
       ~epsilon,
     )
 
-    testAll("of two of the same distribution", distributions, dist => {
+    testAll("with two of the same distribution", distributions, dist => {
       E.R.liftM2(testSubtractionMean, dist, dist)->E.R.toExn
     })
 
-    testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
+    testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
       E.R.liftM2(testSubtractionMean, dist1, dist2)->E.R.toExn
     })
 
-    testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
-      let (dist1, dist2) = dists
-      E.R.liftM2(testSubtractionMean, dist2, dist1)->E.R.toExn
-    })
+    testAll(
+      "with two different distributions in swapped order",
+      pairsOfDifferentDistributions,
+      dists => {
+        let (dist1, dist2) = dists
+        E.R.liftM2(testSubtractionMean, dist2, dist1)->E.R.toExn
+      },
+    )
   })
 
   describe("for multiplication", () => {
@@ -127,18 +135,22 @@ describe("Means invariant", () => {
       ~epsilon,
     )
 
-    testAll("of two of the same distribution", distributions, dist => {
+    testAll("with two of the same distribution", distributions, dist => {
       E.R.liftM2(testMultiplicationMean, dist, dist)->E.R.toExn
     })
 
-    testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
+    testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
       E.R.liftM2(testMultiplicationMean, dist1, dist2)->E.R.toExn
     })
 
-    testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
-      let (dist1, dist2) = dists
-      E.R.liftM2(testMultiplicationMean, dist2, dist1)->E.R.toExn
-    })
+    testAll(
+      "with two different distributions in swapped order",
+      pairsOfDifferentDistributions,
+      dists => {
+        let (dist1, dist2) = dists
+        E.R.liftM2(testMultiplicationMean, dist2, dist1)->E.R.toExn
+      },
+    )
   })
 })

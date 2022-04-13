@@ -3,11 +3,12 @@ open Expect
 
 let expectErrorToBeBounded = (received, expected, ~epsilon) => {
   let distance = Js.Math.abs_float(received -. expected)
-  let error = if expected < epsilon ** 2.5 {
-    distance /. epsilon
-  } else {
-    distance /. Js.Math.abs_float(expected)
-  }
+  let expectedAbs = Js.Math.abs_float(expected)
+  let normalizingDenom = Js.Math.max_float(
+    expectedAbs,
+    epsilon < 1.0 ? epsilon ** 2.0 : epsilon ** -2.0,
+  )
+  let error = distance /. normalizingDenom
   error->expect->toBeLessThan(epsilon)
 }
 
