@@ -160,7 +160,8 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist)
   | ("toSparkline", [EvDistribution(dist)]) => Helpers.toStringFn(ToSparkline(20), dist)
-  | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) => Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist)
+  | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
+    Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist)
   | ("exp", [EvDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
     Helpers.twoDiststoDistFn(Algebraic, "pow", GenericDist.fromFloat(Math.e), a)->Some

@@ -7,25 +7,31 @@ open Reducer_ErrorValue
 
 type node = {"type": string, "isNode": bool, "comment": string}
 type arrayNode = {...node, "items": array<node>}
-//assignmentNode
-//blockNode
+type block = {"node": node}
+type blockNode = {...node, "blocks": array<block>}
 //conditionalNode
 type constantNode = {...node, "value": unit}
 //functionAssignmentNode
-type functionNode = {...node, "fn": string, "args": array<node>}
 type indexNode = {...node, "dimensions": array<node>}
 type objectNode = {...node, "properties": Js.Dict.t<node>}
-type accessorNode = {...node, "object": node, "index": indexNode}
-type operatorNode = {...functionNode, "op": string}
+type accessorNode = {...node, "object": node, "index": indexNode, "name": string}
 
-//parenthesisNode
 type parenthesisNode = {...node, "content": node}
 //rangeNode
 //relationalNode
 type symbolNode = {...node, "name": string}
+type functionNode = {...node, "fn": unit, "args": array<node>}
+type operatorNode = {...functionNode, "op": string}
+type assignmentNode = {...node, "object": symbolNode, "value": node}
+type assignmentNodeWAccessor = {...node, "object": accessorNode, "value": node}
+type assignmentNodeWIndex = {...assignmentNodeWAccessor, "index": Js.null<indexNode>}
 
 external castAccessorNode: node => accessorNode = "%identity"
 external castArrayNode: node => arrayNode = "%identity"
+external castAssignmentNode: node => assignmentNode = "%identity"
+external castAssignmentNodeWAccessor: node => assignmentNodeWAccessor = "%identity"
+external castAssignmentNodeWIndex: node => assignmentNodeWIndex = "%identity"
+external castBlockNode: node => blockNode = "%identity"
 external castConstantNode: node => constantNode = "%identity"
 external castFunctionNode: node => functionNode = "%identity"
 external castIndexNode: node => indexNode = "%identity"
@@ -50,6 +56,8 @@ let parse = (expr: string): result<node, errorValue> =>
 type mathJsNode =
   | MjAccessorNode(accessorNode)
   | MjArrayNode(arrayNode)
+  | MjAssignmentNode(assignmentNode)
+  | MjBlockNode(blockNode)
   | MjConstantNode(constantNode)
   | MjFunctionNode(functionNode)
   | MjIndexNode(indexNode)
@@ -58,10 +66,21 @@ type mathJsNode =
   | MjParenthesisNode(parenthesisNode)
   | MjSymbolNode(symbolNode)
 
-let castNodeType = (node: node) =>
+let castNodeType = (node: node) => {
+  let decideAssignmentNode = node => {
+    let iNode = node->castAssignmentNodeWIndex
+    if Js.null == iNode["index"] && iNode["object"]["type"] == "SymbolNode" {
+      node->castAssignmentNode->MjAssignmentNode->Ok
+    } else {
+      RESyntaxError("Assignment to index or property not supported")->Error
+    }
+  }
+
   switch node["type"] {
   | "AccessorNode" => node->castAccessorNode->MjAccessorNode->Ok
   | "ArrayNode" => node->castArrayNode->MjArrayNode->Ok
+  | "AssignmentNode" => node->decideAssignmentNode
+  | "BlockNode" => node->castBlockNode->MjBlockNode->Ok
   | "ConstantNode" => node->castConstantNode->MjConstantNode->Ok
   | "FunctionNode" => node->castFunctionNode->MjFunctionNode->Ok
   | "IndexNode" => node->castIndexNode->MjIndexNode->Ok
@@ -71,6 +90,19 @@ let castNodeType = (node: node) =>
   | "SymbolNode" => node->castSymbolNode->MjSymbolNode->Ok
   | _ => RETodo(`Argg, unhandled MathJsNode: ${node["type"]}`)->Error
   }
+}
+
+external unitAsSymbolNode: unit => symbolNode = "%identity"
+external unitAsString: unit => string = "%identity"
+
+let nameOfFunctionNode = (fNode: functionNode): string => {
+  let name = fNode["fn"]
+  if Js.typeof(name) == "string" {
+    name->unitAsString
+  } else {
+    (name->unitAsSymbolNode)["name"]
+  }
+}
 
 let rec toString = (mathJsNode: mathJsNode): string => {
   let toStringValue = (a: 'a): string =>
@@ -87,9 +119,10 @@ let rec toString = (mathJsNode: mathJsNode): string => {
     ->Js.String.concatMany("")
 
   let toStringFunctionNode = (fnode: functionNode): string =>
-    `${fnode["fn"]}(${fnode["args"]->toStringNodeArray})`
+    `${fnode->nameOfFunctionNode}(${fnode["args"]->toStringNodeArray})`
 
-  let toStringObjectEntry = ((key: string, value: node)): string => `${key}: ${value->toStringMathJsNode}`
+  let toStringObjectEntry = ((key: string, value: node)): string =>
+    `${key}: ${value->toStringMathJsNode}`
 
   let toStringObjectNode = (oNode: objectNode): string =>
     `{${oNode["properties"]
@@ -103,16 +136,28 @@ let rec toString = (mathJsNode: mathJsNode): string => {
     ->Belt.Array.map(each => toStringResult(each->castNodeType))
     ->Js.String.concatMany("")
 
+  let toStringSymbolNode = (sNode: symbolNode): string => sNode["name"]
+
+  let toStringBlocks = (blocks: array<block>): string =>
+    blocks
+    ->Belt.Array.map(each => each["node"]->castNodeType->toStringResult)
+    ->Extra.Array.interperse("; ")
+    ->Js.String.concatMany("")
+
   switch mathJsNode {
-  | MjAccessorNode(aNode) => `${aNode["object"]->toStringMathJsNode}[${aNode["index"]->toStringIndexNode}]`
+  | MjAccessorNode(aNode) =>
+    `${aNode["object"]->toStringMathJsNode}[${aNode["index"]->toStringIndexNode}]`
   | MjArrayNode(aNode) => `[${aNode["items"]->toStringNodeArray}]`
+  | MjAssignmentNode(aNode) =>
+    `${aNode["object"]->toStringSymbolNode} = ${aNode["value"]->toStringMathJsNode}`
+  | MjBlockNode(bNode) => `{${bNode["blocks"]->toStringBlocks}}`
   | MjConstantNode(cNode) => cNode["value"]->toStringValue
   | MjFunctionNode(fNode) => fNode->toStringFunctionNode
   | MjIndexNode(iNode) => iNode->toStringIndexNode
   | MjObjectNode(oNode) => oNode->toStringObjectNode
   | MjOperatorNode(opNode) => opNode->castOperatorNodeToFunctionNode->toStringFunctionNode
   | MjParenthesisNode(pNode) => `(${toStringMathJsNode(pNode["content"])})`
-  | MjSymbolNode(sNode) => sNode["name"]
+  | MjSymbolNode(sNode) => sNode->toStringSymbolNode
   }
 }
 and toStringResult = (rMathJsNode: result<mathJsNode, errorValue>): string =>

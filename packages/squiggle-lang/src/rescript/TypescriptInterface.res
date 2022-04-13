@@ -32,7 +32,7 @@ let makeSampleSetDist = SampleSetDist.make
 let evaluate = Reducer.evaluate
 
 @genType
-type expressionValue = Reducer_Expression.expressionValue
+type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
 @genType
 type errorValue = Reducer_ErrorValue.errorValue

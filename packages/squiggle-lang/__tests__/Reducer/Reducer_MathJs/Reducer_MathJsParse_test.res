@@ -7,45 +7,62 @@ open Expect
 let expectParseToBe = (expr, answer) =>
   Parse.parse(expr)->Result.flatMap(Parse.castNodeType)->Parse.toStringResult->expect->toBe(answer)
 
+let testParse = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
+
+let testDescriptionParse = (desc, expr, answer) => test(desc, () => expectParseToBe(expr, answer))
+
+module MySkip = {
+  let testParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
+
+  let testDescriptionParse = (desc, expr, answer) =>
+    Skip.test(desc, () => expectParseToBe(expr, answer))
+}
+
 describe("MathJs parse", () => {
   describe("literals operators paranthesis", () => {
-    test("1", () => expectParseToBe("1", "1"))
-    test("'hello'", () => expectParseToBe("'hello'", "'hello'"))
-    test("true", () => expectParseToBe("true", "true"))
-    test("1+2", () => expectParseToBe("1+2", "add(1, 2)"))
-    test("add(1,2)", () => expectParseToBe("add(1,2)", "add(1, 2)"))
-    test("(1)", () => expectParseToBe("(1)", "(1)"))
-    test("(1+2)", () => expectParseToBe("(1+2)", "(add(1, 2))"))
+    testParse("1", "1")
+    testParse("'hello'", "'hello'")
+    testParse("true", "true")
+    testParse("1+2", "add(1, 2)")
+    testParse("add(1,2)", "add(1, 2)")
+    testParse("(1)", "(1)")
+    testParse("(1+2)", "(add(1, 2))")
+  })
+
+  describe("multi-line", () => {
+    testParse("1; 2", "{1; 2}")
   })
 
   describe("variables", () => {
-    Skip.test("define", () => expectParseToBe("x = 1", "???"))
-    Skip.test("use", () => expectParseToBe("x", "???"))
+    testParse("x = 1", "x = 1")
+    testParse("x", "x")
+    testParse("x = 1; x", "{x = 1; x}")
   })
 
   describe("functions", () => {
-    Skip.test("define", () => expectParseToBe("identity(x) = x", "???"))
-    Skip.test("use", () => expectParseToBe("identity(x)", "???"))
+    MySkip.testParse("identity(x) = x", "???")
+    MySkip.testParse("identity(x)", "???")
   })
 
   describe("arrays", () => {
-    test("empty", () => expectParseToBe("[]", "[]"))
-    test("define", () => expectParseToBe("[0, 1, 2]", "[0, 1, 2]"))
-    test("define with strings", () => expectParseToBe("['hello', 'world']", "['hello', 'world']"))
-    Skip.test("range", () => expectParseToBe("range(0, 4)", "range(0, 4)"))
-    test("index", () => expectParseToBe("([0,1,2])[1]", "([0, 1, 2])[1]"))
+    testDescriptionParse("empty", "[]", "[]")
+    testDescriptionParse("define", "[0, 1, 2]", "[0, 1, 2]")
+    testDescriptionParse("define with strings", "['hello', 'world']", "['hello', 'world']")
+    MySkip.testParse("range(0, 4)", "range(0, 4)")
+    testDescriptionParse("index", "([0,1,2])[1]", "([0, 1, 2])[1]")
   })
 
   describe("records", () => {
-    test("define", () => expectParseToBe("{a: 1, b: 2}", "{a: 1, b: 2}"))
-    test("use", () => expectParseToBe("record.property", "record['property']"))
+    testDescriptionParse("define", "{a: 1, b: 2}", "{a: 1, b: 2}")
+    testDescriptionParse("use", "record.property", "record['property']")
   })
 
   describe("comments", () => {
-    Skip.test("define", () => expectParseToBe("# This is a comment", "???"))
+    MySkip.testDescriptionParse("define", "# This is a comment", "???")
   })
 
   describe("if statement", () => {
-    Skip.test("define", () => expectParseToBe("if (true) { 1 } else { 0 }", "???"))
+    // TODO Tertiary operator instead
+    MySkip.testDescriptionParse("define", "if (true) { 1 } else { 0 }", "???")
   })
 })

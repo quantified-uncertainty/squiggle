@@ -14,8 +14,8 @@ exception TestRescriptException
 let callInternal = (call: functionCall): result<'b, errorValue> => {
   let callMathJs = (call: functionCall): result<'b, errorValue> =>
     switch call {
-    | ("jsraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
-    | ("resraise", _) => raise(TestRescriptException) // For Tests
+    | ("javascriptraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
+    | ("rescriptraise", _) => raise(TestRescriptException) // For Tests
     | call => call->toStringFunctionCall->MathJs.Eval.eval
     }
 
@@ -58,7 +58,7 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
 }
 
 /*
-  Lisp engine uses Result monad while reducing expressions
+  Reducer uses Result monad while reducing expressions
 */
 let dispatch = (call: functionCall): result<expressionValue, errorValue> =>
   try {
