@@ -45,28 +45,27 @@ describe("Mean", () => {
   let zipDistsDists = E.L.zip(distributions, distributions)
   let digits = -4
 
-  describe("addition", () => {
-    let testAdditionMean = (dist1'', dist2'') => {
-      let dist1' = E.R.fmap(x => DistributionTypes.Symbolic(x), dist1'')
-      let dist2' = E.R.fmap(x => DistributionTypes.Symbolic(x), dist2'')
-      let dist1 = E.R.fmap2(s => DistributionTypes.Other(s), dist1')
-      let dist2 = E.R.fmap2(s => DistributionTypes.Other(s), dist2')
-
-      let received =
-        E.R.liftJoin2(algebraicAdd, dist1, dist2)
-        ->E.R2.fmap(mean)
-        ->E.R2.fmap(run)
-        ->E.R2.fmap(toFloat)
-      let expected = runMean(dist1) +. runMean(dist2)
-      switch received {
-      | Error(err) => impossiblePath("algebraicAdd")
-      | Ok(x) =>
-        switch x {
-        | None => impossiblePath("algebraicAdd")
-        | Some(x) => x->expect->toBeSoCloseTo(expected, ~digits)
-        }
+  let testOperationMean = (distOp, description, floatOp, dist1', dist2') => {
+    let dist1 = dist1'->E.R2.fmap(x=>DistributionTypes.Symbolic(x))->E.R2.fmap2(s=>DistributionTypes.Other(s))
+    let dist2 = dist2'->E.R2.fmap(x=>DistributionTypes.Symbolic(x))->E.R2.fmap2(s=>DistributionTypes.Other(s))
+    let received =
+      E.R.liftJoin2(distOp, dist1, dist2)
+      ->E.R2.fmap(mean)
+      ->E.R2.fmap(run)
+      ->E.R2.fmap(toFloat)
+    let expected = floatOp(runMean(dist1), runMean(dist2))
+    switch received {
+    | Error(err) => impossiblePath(description)
+    | Ok(x) =>
+      switch x {
+      | None => impossiblePath(description)
+      | Some(x) => x->expect->toBeSoCloseTo(expected, ~digits)
       }
     }
+  }
+
+  describe("addition", () => {
+    let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", (x,y)=>x+.y)  
 
     testAll("homogeneous addition", zipDistsDists, dists => {
       let (dist1, dist2) = dists
@@ -85,27 +84,7 @@ describe("Mean", () => {
   })
 
   describe("subtraction", () => {
-    let testSubtractionMean = (dist1'', dist2'') => {
-      let dist1' = E.R.fmap(x => DistributionTypes.Symbolic(x), dist1'')
-      let dist2' = E.R.fmap(x => DistributionTypes.Symbolic(x), dist2'')
-      let dist1 = E.R.fmap2(s => DistributionTypes.Other(s), dist1')
-      let dist2 = E.R.fmap2(s => DistributionTypes.Other(s), dist2')
-
-      let received =
-        E.R.liftJoin2(algebraicSubtract, dist1, dist2)
-        ->E.R2.fmap(mean)
-        ->E.R2.fmap(run)
-        ->E.R2.fmap(toFloat)
-      let expected = runMean(dist1) -. runMean(dist2)
-      switch received {
-      | Error(err) => impossiblePath("algebraicSubtract")
-      | Ok(x) =>
-        switch x {
-        | None => impossiblePath("algebraicSubtract")
-        | Some(x) => x->expect->toBeSoCloseTo(expected, ~digits)
-        }
-      }
-    }
+    let testSubtractionMean = testOperationMean(algebraicSubtract, "algebraicSubtract", (x,y)=>x-.y)
 
     testAll("homogeneous subtraction", zipDistsDists, dists => {
       let (dist1, dist2) = dists
@@ -124,27 +103,7 @@ describe("Mean", () => {
   })
 
   describe("multiplication", () => {
-    let testMultiplicationMean = (dist1'', dist2'') => {
-      let dist1' = E.R.fmap(x => DistributionTypes.Symbolic(x), dist1'')
-      let dist2' = E.R.fmap(x => DistributionTypes.Symbolic(x), dist2'')
-      let dist1 = E.R.fmap2(s => DistributionTypes.Other(s), dist1')
-      let dist2 = E.R.fmap2(s => DistributionTypes.Other(s), dist2')
-
-      let received =
-        E.R.liftJoin2(algebraicMultiply, dist1, dist2)
-        ->E.R2.fmap(mean)
-        ->E.R2.fmap(run)
-        ->E.R2.fmap(toFloat)
-      let expected = runMean(dist1) *. runMean(dist2)
-      switch received {
-      | Error(err) => impossiblePath("algebraicMultiply")
-      | Ok(x) =>
-        switch x {
-        | None => impossiblePath("algebraicMultiply")
-        | Some(x) => x->expect->toBeSoCloseTo(expected, ~digits)
-        }
-      }
-    }
+    let testMultiplicationMean = testOperationMean(algebraicMultiply, "algebraicMultiply", (x,y)=>x*.y)
 
     testAll("homogeneous subtraction", zipDistsDists, dists => {
       let (dist1, dist2) = dists

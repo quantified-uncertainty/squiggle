@@ -215,6 +215,12 @@ module R2 = {
     | Ok(r) => Ok(r)
     | Error(e) => map(e)
     }
+  
+  let fmap2 = (xR, f) => 
+    switch xR {
+    | Ok(x) => x->Ok
+    | Error(x) => x->f->Error
+    }
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>
