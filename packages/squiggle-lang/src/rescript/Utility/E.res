@@ -59,7 +59,7 @@ module O = {
   let toExn = Rationale.Option.toExn
   let some = Rationale.Option.some
   let firstSome = Rationale.Option.firstSome
-  let toExt = Rationale.Option.toExn  // wanna flag this-- looks like a typo but `Rationale.OptiontoExt` doesn't exist.
+  let toExt = Rationale.Option.toExn // wanna flag this-- looks like a typo but `Rationale.OptiontoExt` doesn't exist.
   let flatApply = (fn, b) => Rationale.Option.apply(fn, Some(b)) |> Rationale.Option.flatten
   let flatten = Rationale.Option.flatten
 
@@ -180,23 +180,29 @@ module R = {
     errorCondition(r) ? Error(errorMessage) : Ok(r)
 
   let ap = Rationale.Result.ap
-  let ap' = (r, a) => switch r {
+  let ap' = (r, a) =>
+    switch r {
     | Ok(f) => fmap(f, a)
     | Error(err) => Error(err)
-  }
+    }
   // (a1 -> a2 -> r) -> m a1 -> m a2 -> m r  // not in Rationale
   let liftM2: (('a, 'b) => 'c, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
     ap'(fmap(op, xR), yR)
   }
 
-  let liftJoin2: (('a, 'b) => result<'c, 'd>, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
+  let liftJoin2: (('a, 'b) => result<'c, 'd>, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (
+    op,
+    xR,
+    yR,
+  ) => {
     bind(liftM2(op, xR, yR), x => x)
   }
 
-  let fmap2 = (f, r) => switch r {
+  let fmap2 = (f, r) =>
+    switch r {
     | Ok(r) => r->Ok
     | Error(x) => x->f->Error
-  }
+    }
 }
 
 module R2 = {
@@ -283,8 +289,8 @@ module L = {
   let tailSafe = Belt.List.tail
   let headExn = Belt.List.headExn
   let tailExn = Belt.List.tailExn
-  let zip = Belt.List.zip 
-  
+  let zip = Belt.List.zip
+
   let combinations2: list<'a> => list<('a, 'a)> = xs => {
     let rec loop: ('a, list<'a>) => list<('a, 'a)> = (x', xs') => {
       let n = length(xs')
@@ -298,8 +304,8 @@ module L = {
       }
     }
     switch (headSafe(xs), tailSafe(xs)) {
-      | (Some(x'), Some(xs')) => loop(x', xs')
-      | (_, _) => list{}
+    | (Some(x'), Some(xs')) => loop(x', xs')
+    | (_, _) => list{}
     }
   }
 }
