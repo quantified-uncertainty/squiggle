@@ -104,7 +104,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
       }
 
       switch list {
-      | list{T.EValue(EvCall("$$bindings"))} => bindings->EBindings->Ok
+      | list{T.EValue(EvCall("$$bindings"))} => bindings->T.EBindings->Ok
 
       | list{T.EValue(EvCall("$$bindStatement")), T.EBindings(bindings), statement} =>
         doBindStatement(statement, bindings)
