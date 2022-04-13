@@ -16,7 +16,7 @@ module Internals = {
   let epsilon = 1e3
 
   let mean = GenericDist_Types.Constructors.UsingDists.mean
-  
+
   let expectImpossiblePath: string => assertion = algebraicOp =>
     `${algebraicOp} has`->expect->toEqual("failed")
 
@@ -37,25 +37,24 @@ module Internals = {
   }
 
   let testOperationMean = (
-      distOp: (DistributionTypes.genericDist, DistributionTypes.genericDist) => result<DistributionTypes.genericDist, DistributionTypes.error>, 
-      description: string, 
-      floatOp: (float, float) => float, 
-      dist1': SymbolicDistTypes.symbolicDist, 
-      dist2': SymbolicDistTypes.symbolicDist, 
-      ~epsilon: float
-    ) => {
-    let dist1 = dist1'->DistributionTypes.Symbolic  // ->DistributionTypes.Other
-    let dist2 = dist2'->DistributionTypes.Symbolic  // ->DistributionTypes.Other
+    distOp: (
+      DistributionTypes.genericDist,
+      DistributionTypes.genericDist,
+    ) => result<DistributionTypes.genericDist, DistributionTypes.error>,
+    description: string,
+    floatOp: (float, float) => float,
+    dist1': SymbolicDistTypes.symbolicDist,
+    dist2': SymbolicDistTypes.symbolicDist,
+    ~epsilon: float,
+  ) => {
+    let dist1 = dist1'->DistributionTypes.Symbolic // ->DistributionTypes.Other
+    let dist2 = dist2'->DistributionTypes.Symbolic // ->DistributionTypes.Other
     let received =
-      distOp(dist1, dist2)
-      ->E.R2.fmap(mean)
-      ->E.R2.fmap(run)
-      ->E.R2.fmap(toFloat)
-      ->E.R.toExn
+      distOp(dist1, dist2)->E.R2.fmap(mean)->E.R2.fmap(run)->E.R2.fmap(toFloat)->E.R.toExn
     let expected = floatOp(runMean(dist1), runMean(dist2))
     switch received {
     | None => expectImpossiblePath(description)
-    | Some(x) => expectErrorToBeBounded(x, expected, ~epsilon=epsilon)
+    | Some(x) => expectErrorToBeBounded(x, expected, ~epsilon)
     }
   }
 }
@@ -79,58 +78,67 @@ let algebraicPower = algebraicPower(~env)
 let {testOperationMean, distributions, pairsOfDifferentDistributions, epsilon} = module(Internals)
 
 describe("Means invariant", () => {
-
   describe("for addition", () => {
-    let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", \"+.", ~epsilon=epsilon)  
-    
+    let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", \"+.", ~epsilon)
+
     testAll("of two of the same distribution", distributions, dist => {
-      E.R.liftM2(testAdditionMean, dist, dist) -> E.R.toExn
+      E.R.liftM2(testAdditionMean, dist, dist)->E.R.toExn
     })
 
     testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testAdditionMean, dist1, dist2) -> E.R.toExn
+      E.R.liftM2(testAdditionMean, dist1, dist2)->E.R.toExn
     })
 
     testAll("of two difference distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testAdditionMean, dist2, dist1) -> E.R.toExn
+      E.R.liftM2(testAdditionMean, dist2, dist1)->E.R.toExn
     })
   })
 
   describe("for subtraction", () => {
-    let testSubtractionMean = testOperationMean(algebraicSubtract, "algebraicSubtract", \"-.", ~epsilon=epsilon)
+    let testSubtractionMean = testOperationMean(
+      algebraicSubtract,
+      "algebraicSubtract",
+      \"-.",
+      ~epsilon,
+    )
 
     testAll("of two of the same distribution", distributions, dist => {
-      E.R.liftM2(testSubtractionMean, dist, dist) -> E.R.toExn
+      E.R.liftM2(testSubtractionMean, dist, dist)->E.R.toExn
     })
 
     testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testSubtractionMean, dist1, dist2) -> E.R.toExn
+      E.R.liftM2(testSubtractionMean, dist1, dist2)->E.R.toExn
     })
 
     testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testSubtractionMean, dist2, dist1) -> E.R.toExn
+      E.R.liftM2(testSubtractionMean, dist2, dist1)->E.R.toExn
     })
   })
 
   describe("for multiplication", () => {
-    let testMultiplicationMean = testOperationMean(algebraicMultiply, "algebraicMultiply", \"*.", ~epsilon=epsilon)
+    let testMultiplicationMean = testOperationMean(
+      algebraicMultiply,
+      "algebraicMultiply",
+      \"*.",
+      ~epsilon,
+    )
 
     testAll("of two of the same distribution", distributions, dist => {
-      E.R.liftM2(testMultiplicationMean, dist, dist) -> E.R.toExn
+      E.R.liftM2(testMultiplicationMean, dist, dist)->E.R.toExn
     })
 
     testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testMultiplicationMean, dist1, dist2) -> E.R.toExn
+      E.R.liftM2(testMultiplicationMean, dist1, dist2)->E.R.toExn
     })
 
     testAll("of two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testMultiplicationMean, dist2, dist1) -> E.R.toExn
+      E.R.liftM2(testMultiplicationMean, dist2, dist1)->E.R.toExn
     })
   })
 })

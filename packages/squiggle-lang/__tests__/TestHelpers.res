@@ -8,7 +8,7 @@ let expectErrorToBeBounded = (received, expected, ~epsilon) => {
   } else {
     distance /. Js.Math.abs_float(expected)
   }
-  error -> expect -> toBeLessThan(epsilon)
+  error->expect->toBeLessThan(epsilon)
 }
 
 let makeTest = (~only=false, str, item1, item2) =>

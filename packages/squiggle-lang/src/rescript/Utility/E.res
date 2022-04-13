@@ -215,8 +215,8 @@ module R2 = {
     | Ok(r) => Ok(r)
     | Error(e) => map(e)
     }
-  
-  let fmap2 = (xR, f) => 
+
+  let fmap2 = (xR, f) =>
     switch xR {
     | Ok(x) => x->Ok
     | Error(x) => x->f->Error
