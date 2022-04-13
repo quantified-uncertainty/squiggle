@@ -59,8 +59,9 @@ module O = {
   let toExn = Rationale.Option.toExn
   let some = Rationale.Option.some
   let firstSome = Rationale.Option.firstSome
-  let toExt = Rationale.Option.toExn
+  let toExt = Rationale.Option.toExn // wanna flag this-- looks like a typo but `Rationale.OptiontoExt` doesn't exist.
   let flatApply = (fn, b) => Rationale.Option.apply(fn, Some(b)) |> Rationale.Option.flatten
+  let flatten = Rationale.Option.flatten
 
   let toBool = opt =>
     switch opt {
@@ -103,6 +104,7 @@ module O2 = {
   let toExn = (a, b) => O.toExn(b, a)
   let fmap = (a, b) => O.fmap(b, a)
   let toResult = (a, b) => O.toResult(b, a)
+  let bind = (a, b) => O.bind(b, a)
 }
 
 /* Functions */
@@ -176,6 +178,31 @@ module R = {
 
   let errorIfCondition = (errorCondition, errorMessage, r) =>
     errorCondition(r) ? Error(errorMessage) : Ok(r)
+
+  let ap = Rationale.Result.ap
+  let ap' = (r, a) =>
+    switch r {
+    | Ok(f) => fmap(f, a)
+    | Error(err) => Error(err)
+    }
+  // (a1 -> a2 -> r) -> m a1 -> m a2 -> m r  // not in Rationale
+  let liftM2: (('a, 'b) => 'c, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
+    ap'(fmap(op, xR), yR)
+  }
+
+  let liftJoin2: (('a, 'b) => result<'c, 'd>, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (
+    op,
+    xR,
+    yR,
+  ) => {
+    bind(liftM2(op, xR, yR), x => x)
+  }
+
+  let fmap2 = (f, r) =>
+    switch r {
+    | Ok(r) => r->Ok
+    | Error(x) => x->f->Error
+    }
 }
 
 module R2 = {
@@ -187,6 +214,12 @@ module R2 = {
     switch a {
     | Ok(r) => Ok(r)
     | Error(e) => map(e)
+    }
+  
+  let fmap2 = (xR, f) => 
+    switch xR {
+    | Ok(x) => x->Ok
+    | Error(x) => x->f->Error
     }
 }
 
@@ -258,6 +291,29 @@ module L = {
   let update = Rationale.RList.update
   let iter = List.iter
   let findIndex = Rationale.RList.findIndex
+  let headSafe = Belt.List.head
+  let tailSafe = Belt.List.tail
+  let headExn = Belt.List.headExn
+  let tailExn = Belt.List.tailExn
+  let zip = Belt.List.zip
+
+  let combinations2: list<'a> => list<('a, 'a)> = xs => {
+    let rec loop: ('a, list<'a>) => list<('a, 'a)> = (x', xs') => {
+      let n = length(xs')
+      if n == 0 {
+        list{}
+      } else {
+        let combs = fmap(y => (x', y), xs')
+        let hd = headExn(xs')
+        let tl = tailExn(xs')
+        concat(list{combs, loop(hd, tl)})
+      }
+    }
+    switch (headSafe(xs), tailSafe(xs)) {
+    | (Some(x'), Some(xs')) => loop(x', xs')
+    | (_, _) => list{}
+    }
+  }
 }
 
 /* A for Array */

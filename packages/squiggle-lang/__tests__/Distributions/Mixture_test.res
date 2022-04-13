@@ -2,14 +2,6 @@ open Jest
 open Expect
 open TestHelpers
 
-// TODO: use Normal.make (etc.), but preferably after the new validation dispatch is in.
-let mkNormal = (mean, stdev) => GenericDist_Types.Symbolic(#Normal({mean: mean, stdev: stdev}))
-let mkBeta = (alpha, beta) => GenericDist_Types.Symbolic(#Beta({alpha: alpha, beta: beta}))
-let mkExponential = rate => GenericDist_Types.Symbolic(#Exponential({rate: rate}))
-let mkUniform = (low, high) => GenericDist_Types.Symbolic(#Uniform({low: low, high: high}))
-let mkCauchy = (local, scale) => GenericDist_Types.Symbolic(#Cauchy({local: local, scale: scale}))
-let mkLognormal = (mu, sigma) => GenericDist_Types.Symbolic(#Lognormal({mu: mu, sigma: sigma}))
-
 describe("mixture", () => {
   testAll(
     "fair mean of two normal distributions",

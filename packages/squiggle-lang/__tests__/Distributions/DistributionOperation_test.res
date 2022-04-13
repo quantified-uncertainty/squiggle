@@ -18,11 +18,9 @@ let {
   triangularDist,
   exponentialDist,
 } = module(GenericDist_Fixtures)
-let mkNormal = (mean, stdev) => GenericDist_Types.Symbolic(#Normal({mean: mean, stdev: stdev}))
 
-let {toFloat, toDist, toString, toError} = module(DistributionOperation.Output)
+let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Output)
 let {run} = module(DistributionOperation)
-let {fmap} = module(DistributionOperation.Output)
 let run = run(~env)
 let outputMap = fmap(~env)
 let toExt: option<'a> => 'a = E.O.toExt(

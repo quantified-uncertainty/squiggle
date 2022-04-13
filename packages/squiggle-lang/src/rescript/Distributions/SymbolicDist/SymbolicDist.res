@@ -141,6 +141,8 @@ module Lognormal = {
   }
   let divide = (l1, l2) => {
     let mu = l1.mu -. l2.mu
+    // We believe the ratiands will have covariance zero.
+    // See here https://stats.stackexchange.com/questions/21735/what-are-the-mean-and-variance-of-the-ratio-of-two-lognormal-variables for details
     let sigma = l1.sigma +. l2.sigma
     #Lognormal({mu: mu, sigma: sigma})
   }
