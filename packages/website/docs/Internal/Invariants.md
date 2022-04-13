@@ -7,6 +7,8 @@ author:
 abstract: This document outlines some properties about algebraic combinations of distributions. It is meant to facilitate property tests for [Squiggle](https://squiggle-language.com/), an estimation language for forecasters. So far, we are focusing on the means, the standard deviation and the shape of the pdfs.
 ---
 
+_This document right now is normative and aspirational, not a description of the testing that's currently done_.
+
 The academic keyword to search for in relation to this document is "[algebra of random variables](https://wikiless.org/wiki/Algebra_of_random_variables?lang=en)". Squiggle doesn't yet support getting the standard deviation, denoted by $\sigma$, but such support could yet be added.
 
 ## Means and standard deviations
@@ -17,7 +19,8 @@ $$
 mean(f+g) = mean(f) + mean(g)
 $$
 
-$$\sigma(f+g) = \sqrt{\sigma(f)^2 + \sigma(g)^2}
+$$
+\sigma(f+g) = \sqrt{\sigma(f)^2 + \sigma(g)^2}
 $$
 
 In the case of normal distributions,
@@ -28,8 +31,8 @@ $$
 
 ### Subtractions
 
-$$ 
-mean(f-g) = mean(f) - mean(g) 
+$$
+mean(f-g) = mean(f) - mean(g)
 $$
 
 $$
