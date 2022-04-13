@@ -50,6 +50,26 @@ describe("eval on distribution functions", () => {
     testEval("3+normal(5,2)", "Ok(Normal(8,2))")
     testEval("normal(5,2)+3", "Ok(Normal(8,2))")
   })
+  describe("subtract", () => {
+    testEval("10 - normal(5, 1)", "Ok(Normal(5,1))")
+    testEval("normal(5, 1) - 10", "Ok(Normal(-5,1))")
+  })
+  describe("multiply", () => {
+    testEval("normal(10, 2) * 2", "Ok(Normal(20,4))")
+    testEval("2 * normal(10, 2)", "Ok(Normal(20,4))")
+    testEval("lognormal(5,2) * lognormal(10,2)", "Ok(Lognormal(15,4))")
+    testEval("lognormal(10, 2) * lognormal(5, 2)", "Ok(Lognormal(15,4))")
+    testEval("2 * lognormal(5, 2)", "Ok(Lognormal(5.693147180559945,2))")
+    testEval("lognormal(5, 2) * 2", "Ok(Lognormal(5.693147180559945,2))")
+  })
+  describe("division", () => {
+    testEval("lognormal(5,2) / lognormal(10,2)", "Ok(Lognormal(-5,4))")
+    testEval("lognormal(10,2) / lognormal(5,2)", "Ok(Lognormal(5,4))")
+    testEval("lognormal(5, 2) / 2", "Ok(Lognormal(4.306852819440055,2))")
+    testEval("2 / lognormal(5, 2)", "Ok(Lognormal(-4.306852819440055,2))")
+    testEval("2 / normal(10, 2)", "Ok(Point Set Distribution)")
+    testEval("normal(10, 2) / 2", "Ok(Normal(5,1))")
+  })
   describe("truncate", () => {
     testEval("truncateLeft(normal(5,2), 3)", "Ok(Point Set Distribution)")
     testEval("truncateRight(normal(5,2), 3)", "Ok(Point Set Distribution)")
@@ -92,11 +112,6 @@ describe("eval on distribution functions", () => {
   describe("mixture", () => {
     testEval("mx(normal(5,2), normal(10,1), normal(15, 1))", "Ok(Point Set Distribution)")
     testEval("mixture(normal(5,2), normal(10,1), [0.2, 0.4])", "Ok(Point Set Distribution)")
-  })
-
-  describe("subtract", () => {
-    testEval("10 - normal(5, 1)", "Ok(Normal(5,1))")
-    testEval("normal(5, 1) - 10", "Ok(Normal(-5,1))")
   })
 })
 
