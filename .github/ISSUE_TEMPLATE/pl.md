@@ -1,6 +1,6 @@
 ---
-name: Regarding the programming language
-about: Interpreter, parser, syntax, semantics, and including distributions
+name: Regarding the programming language (the `squiggle-lang` package)
+about: Anything concerning distributions/numerics, as well as the interpreter, parser, syntax, semantics
 labels: "programming language"
 ---
 
