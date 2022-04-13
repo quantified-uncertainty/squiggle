@@ -19,7 +19,7 @@ describe("eval on distribution functions", () => {
     testEval("lognormal(5,2)", "Ok(Lognormal(5,2))")
   })
   describe("unaryMinus", () => {
-    testEval("mean(-normal(5,2))", "Ok(-5.002887370380851)")
+    testEval("mean(-normal(5,2))", "Ok(-5)")
   })
   describe("to", () => {
     testEval("5 to 2", "Error(TODO: Low value must be less than high value.)")
@@ -45,10 +45,10 @@ describe("eval on distribution functions", () => {
   describe("add", () => {
     testEval("add(normal(5,2), normal(10,2))", "Ok(Normal(15,2.8284271247461903))")
     testEval("add(normal(5,2), lognormal(10,2))", "Ok(Sample Set Distribution)")
-    testEval("add(normal(5,2), 3)", "Ok(Point Set Distribution)")
-    testEval("add(3, normal(5,2))", "Ok(Point Set Distribution)")
-    testEval("3+normal(5,2)", "Ok(Point Set Distribution)")
-    testEval("normal(5,2)+3", "Ok(Point Set Distribution)")
+    testEval("add(normal(5,2), 3)", "Ok(Normal(8,2))")
+    testEval("add(3, normal(5,2))", "Ok(Normal(8,2))")
+    testEval("3+normal(5,2)", "Ok(Normal(8,2))")
+    testEval("normal(5,2)+3", "Ok(Normal(8,2))")
   })
   describe("truncate", () => {
     testEval("truncateLeft(normal(5,2), 3)", "Ok(Point Set Distribution)")
@@ -93,6 +93,11 @@ describe("eval on distribution functions", () => {
     testEval("mx(normal(5,2), normal(10,1), normal(15, 1))", "Ok(Point Set Distribution)")
     testEval("mixture(normal(5,2), normal(10,1), [0.2, 0.4])", "Ok(Point Set Distribution)")
   })
+
+  describe("subtract", () => {
+    testEval("10 - normal(5, 1)", "Ok(Normal(5,1))")
+    testEval("normal(5, 1) - 10", "Ok(Normal(-5,1))")
+  })
 })
 
 describe("parse on distribution functions", () => {
@@ -100,6 +105,10 @@ describe("parse on distribution functions", () => {
     testParse("normal(5,2) ^ normal(5,1)", "Ok((:pow (:normal 5 2) (:normal 5 1)))")
     testParse("3 ^ normal(5,1)", "Ok((:pow 3 (:normal 5 1)))")
     testParse("normal(5,2) ^ 3", "Ok((:pow (:normal 5 2) 3))")
+  })
+  describe("subtraction", () => {
+    testParse("10 - normal(5,1)", "Ok((:subtract 10 (:normal 5 1)))")
+    testParse("normal(5,1) - 10", "Ok((:subtract (:normal 5 1) 10))")
   })
   describe("pointwise arithmetic expressions", () => {
     testParse(~skip=true, "normal(5,2) .+ normal(5,1)", "Ok((:dotAdd (:normal 5 2) (:normal 5 1)))")
