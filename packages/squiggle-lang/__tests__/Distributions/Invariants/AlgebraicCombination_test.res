@@ -1,5 +1,8 @@
 /*
-This file was going to be too big and it will be factored into smaller files. 
+This file is like a half measure between one-off unit tests and proper invariant validation. 
+As such, I'm not that excited about it, though it does provide some structure and will alarm us 
+when things substantially change. 
+Also, there are some open comments in https://github.com/quantified-uncertainty/squiggle/pull/232 that haven't been addressed.
 */
 
 open Jest

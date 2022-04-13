@@ -1,3 +1,11 @@
+/*
+This is the most basic file in our invariants family of tests. 
+
+See document in https://github.com/quantified-uncertainty/squiggle/pull/238 for details
+
+Note: digits parameter should be higher than -4. 
+*/
+
 open Jest
 open Expect
 open TestHelpers
@@ -45,7 +53,13 @@ describe("Mean", () => {
   let zipDistsDists = E.L.zip(distributions, distributions)
   let digits = -4
 
-  let testOperationMean = (distOp, description, floatOp, dist1', dist2') => {
+  let testOperationMean = (
+      distOp: (DistributionTypes.genericDist, DistributionTypes.genericDist) => result<DistributionTypes.genericDist, DistributionTypes.error>, 
+      description: string, 
+      floatOp: (float, float) => float, 
+      dist1': result<SymbolicDistTypes.symbolicDist, string>, 
+      dist2': result<SymbolicDistTypes.symbolicDist, string>
+    ) => {
     let dist1 = dist1'->E.R2.fmap(x=>DistributionTypes.Symbolic(x))->E.R2.fmap2(s=>DistributionTypes.Other(s))
     let dist2 = dist2'->E.R2.fmap(x=>DistributionTypes.Symbolic(x))->E.R2.fmap2(s=>DistributionTypes.Other(s))
     let received =
@@ -72,12 +86,12 @@ describe("Mean", () => {
       testAdditionMean(dist1, dist2)
     })
 
-    testAll("heterogeneoous addition (1)", combinations, dists => {
+    testAll("heterogeneous addition (1)", combinations, dists => {
       let (dist1, dist2) = dists
       testAdditionMean(dist1, dist2)
     })
 
-    testAll("heterogeneoous addition (commuted of 1 (or; 2))", combinations, dists => {
+    testAll("heterogeneous addition (commuted of 1 (or; 2))", combinations, dists => {
       let (dist1, dist2) = dists
       testAdditionMean(dist2, dist1)
     })
@@ -91,12 +105,12 @@ describe("Mean", () => {
       testSubtractionMean(dist1, dist2)
     })
 
-    testAll("heterogeneoous subtraction (1)", combinations, dists => {
+    testAll("heterogeneous subtraction (1)", combinations, dists => {
       let (dist1, dist2) = dists
       testSubtractionMean(dist1, dist2)
     })
 
-    testAll("heterogeneoous subtraction (commuted of 1 (or; 2))", combinations, dists => {
+    testAll("heterogeneous subtraction (commuted of 1 (or; 2))", combinations, dists => {
       let (dist1, dist2) = dists
       testSubtractionMean(dist2, dist1)
     })
