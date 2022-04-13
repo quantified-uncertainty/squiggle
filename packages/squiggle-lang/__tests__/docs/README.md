@@ -14,4 +14,4 @@ pandoc -s property-tests.md -o property-tests.pdf
 
 ## _Details_
 
-The `properties-tests.pdf` document is _normative and aspirational_. It does not document tests as they exist in the codebase, but somewhat represents how we think squiggle ought to be tested. 
+The `property-tests.pdf` document is _normative and aspirational_. It does not document tests as they exist in the codebase, but somewhat represents how we think squiggle ought to be tested. 
