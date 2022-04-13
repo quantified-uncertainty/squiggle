@@ -2,7 +2,8 @@
   "private": true,
   "name": "squiggle",
   "scripts": {
-    "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules"
+    "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules",
+    "format:all": "prettier --write . && cd packages/squiggle-lang && yarn format"
   },
   "devDependencies": {
     "prettier": "^2.6.2"
