@@ -13,7 +13,7 @@ open Expect
 open TestHelpers
 
 module Internals = {
-  let epsilon = 1e1
+  let epsilon = 5e1
 
   let mean = GenericDist_Types.Constructors.UsingDists.mean
 
@@ -21,12 +21,12 @@ module Internals = {
     `${algebraicOp} has`->expect->toEqual("failed")
 
   let distributions = list{
-    normalMake(0.0, 1e0),
+    normalMake(4e0, 1e0),
     betaMake(2e0, 4e0),
     exponentialMake(1.234e0),
     uniformMake(7e0, 1e1),
     // cauchyMake(1e0, 1e0),
-    lognormalMake(1e0, 1e0),
+    lognormalMake(2e0, 1e0),
     triangularMake(1e0, 1e1, 5e1),
     Ok(floatMake(1e1)),
   }
@@ -77,7 +77,7 @@ let algebraicPower = algebraicPower(~env)
 
 let {testOperationMean, distributions, pairsOfDifferentDistributions, epsilon} = module(Internals)
 
-describe("Means invariant", () => {
+describe("Means are invariant", () => {
   describe("for addition", () => {
     let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", \"+.", ~epsilon)
 

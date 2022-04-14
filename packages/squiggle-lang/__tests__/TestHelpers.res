@@ -1,13 +1,21 @@
 open Jest
 open Expect
 
+/*
+This encodes the expression for percent error
+The test says "the percent error of received against expected is bounded by epsilon"
+
+However, the semantics are degraded by catching some numerical instability: 
+when expected is too small, the return of this function might blow up to infinity. 
+So we capture that by taking the max of abs(expected) against a 1. 
+
+A sanity check of this function would be welcome, in general it is a better way of approaching 
+squiggle-lang tests than toBeSoCloseTo. 
+*/
 let expectErrorToBeBounded = (received, expected, ~epsilon) => {
   let distance = Js.Math.abs_float(received -. expected)
   let expectedAbs = Js.Math.abs_float(expected)
-  let normalizingDenom = Js.Math.max_float(
-    expectedAbs,
-    epsilon < 1.0 ? epsilon ** 2.0 : epsilon ** -2.0,
-  )
+  let normalizingDenom = Js.Math.max_float(expectedAbs, 1e0)
   let error = distance /. normalizingDenom
   error->expect->toBeLessThan(epsilon)
 }
