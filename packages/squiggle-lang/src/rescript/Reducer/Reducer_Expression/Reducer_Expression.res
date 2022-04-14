@@ -44,7 +44,7 @@ let defaultBindings: T.bindings = Belt.Map.String.empty
 /*
   Recursively evaluate/reduce the expression (Lisp AST)
 */
-let rec reduceExpression = (expression: t, bindings: T.bindings): result<expressionValue, 'e> => {
+let reduceExpression = (expression: t, bindings: T.bindings): result<expressionValue, 'e> => {
   /*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
