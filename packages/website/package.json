@@ -18,7 +18,7 @@
     "prism-react-renderer": "^1.2.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "remark-math": "^3",
+    "remark-math": "^5",
     "rehype-katex": "^5",
     "hast-util-is-element": "2.1.2"
   },
