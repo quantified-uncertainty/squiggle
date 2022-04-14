@@ -119,7 +119,8 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
 
   let rec seekMacros = (expression: t, bindings: T.bindings): result<t, 'e> =>
     switch expression {
-    | T.EValue(value) => expression->Ok
+    | T.EValue(_value) => expression->Ok
+    | T.EBindings(_value) => expression->Ok
     | T.EList(list) => {
         let racc: result<list<t>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
           racc,
@@ -155,6 +156,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
         )
         racc->Result.flatMap(acc => acc->reduceValueList)
       }
+    | _ => RETodo("Error: Bindings cannot be reduced to values")->Error
     }
 
   let rExpandedExpression: result<t, 'e> = expression->seekMacros(bindings)
