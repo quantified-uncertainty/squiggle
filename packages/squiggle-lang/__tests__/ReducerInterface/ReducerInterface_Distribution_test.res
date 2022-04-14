@@ -57,8 +57,8 @@ describe("eval on distribution functions", () => {
   describe("multiply", () => {
     testEval("normal(10, 2) * 2", "Ok(Normal(20,4))")
     testEval("2 * normal(10, 2)", "Ok(Normal(20,4))")
-    testEval("lognormal(5,2) * lognormal(10,2)", "Ok(Lognormal(15,4))")
-    testEval("lognormal(10, 2) * lognormal(5, 2)", "Ok(Lognormal(15,4))")
+    testEval("lognormal(5,2) * lognormal(10,2)", "Ok(Lognormal(15,2.8284271247461903))")
+    testEval("lognormal(10, 2) * lognormal(5, 2)", "Ok(Lognormal(15,2.8284271247461903))")
     testEval("2 * lognormal(5, 2)", "Ok(Lognormal(5.693147180559945,2))")
     testEval("lognormal(5, 2) * 2", "Ok(Lognormal(5.693147180559945,2))")
   })
