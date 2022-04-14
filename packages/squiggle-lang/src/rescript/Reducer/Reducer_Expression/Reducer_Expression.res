@@ -59,63 +59,8 @@ let reduceExpression = (expression: t, bindings: T.bindings): result<expressionV
     they take expressions as parameters and return a new expression.
     Macros are used to define language building blocks. They are like Lisp macros.
  */
-  let doMacroCall = (list: list<t>, bindings: T.bindings): result<t, 'e> => {
-    let dispatchMacroCall = (list: list<t>, bindings: T.bindings): result<t, 'e> => {
-      let rec replaceSymbols = (expression: t, bindings: T.bindings): result<t, errorValue> =>
-        switch expression {
-        | T.EValue(EvSymbol(aSymbol)) =>
-          switch bindings->Belt.Map.String.get(aSymbol) {
-          | Some(boundExpression) => boundExpression->Ok
-          | None => RESymbolNotFound(aSymbol)->Error
-          }
-        | T.EValue(_) => expression->Ok
-        | T.EBindings(_) => expression->Ok
-        | T.EList(list) => {
-            let racc = list->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
-              racc->Result.flatMap(acc => {
-                each
-                ->replaceSymbols(bindings)
-                ->Result.flatMap(newNode => {
-                  acc->Belt.List.add(newNode)->Ok
-                })
-              })
-            )
-            racc->Result.map(acc => acc->T.EList)
-          }
-        }
-
-      let doBindStatement = (statement: t, bindings: T.bindings) => {
-        switch statement {
-        | T.EList(list{T.EValue(EvCall("$let")), T.EValue(EvSymbol(aSymbol)), expression}) => {
-            let rNewExpression = replaceSymbols(expression, bindings)
-            rNewExpression->Result.map(newExpression =>
-              Belt.Map.String.set(bindings, aSymbol, newExpression)->T.EBindings
-            )
-          }
-        | _ => REAssignmentExpected->Error
-        }
-      }
-
-      let doBindExpression = (expression: t, bindings: T.bindings) => {
-        switch expression {
-        | T.EList(list{T.EValue(EvCall("$let")), ..._}) => REExpressionExpected->Error
-        | _ => replaceSymbols(expression, bindings)
-        }
-      }
-
-      switch list {
-      | list{T.EValue(EvCall("$$bindings"))} => bindings->T.EBindings->Ok
-
-      | list{T.EValue(EvCall("$$bindStatement")), T.EBindings(bindings), statement} =>
-        doBindStatement(statement, bindings)
-      | list{T.EValue(EvCall("$$bindExpression")), T.EBindings(bindings), expression} =>
-        doBindExpression(expression, bindings)
-      | _ => list->T.EList->Ok
-      }
-    }
-
-    list->dispatchMacroCall(bindings)
-  }
+  let doMacroCall = (list: list<t>, bindings: T.bindings): result<t, 'e> =>
+    list->Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(bindings)
 
   let rec seekMacros = (expression: t, bindings: T.bindings): result<t, 'e> =>
     switch expression {
