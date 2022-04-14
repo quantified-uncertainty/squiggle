@@ -62,7 +62,7 @@ jobs:
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
-      - name: Install dependencies 
+      - name: Install dependencies
         run: yarn
       - name: Build rescript
         run: cd packages/squiggle-lang && yarn build
