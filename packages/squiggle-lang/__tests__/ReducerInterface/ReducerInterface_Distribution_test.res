@@ -23,8 +23,8 @@ describe("eval on distribution functions", () => {
   })
   describe("to", () => {
     testEval("5 to 2", "Error(TODO: Low value must be less than high value.)")
-    testEval("to(2,5)", "Ok(Lognormal(1.1512925464970227,0.278507821238345))")
-    testEval("to(-2,2)", "Ok(Normal(0,1.215913388057542))")
+    testEval("to(2,5)", "Ok(Lognormal(1.1512925464970227,0.27853260523016377))")
+    testEval("to(-2,2)", "Ok(Normal(0,1.2159136638235384))")
   })
   describe("mean", () => {
     testEval("mean(normal(5,2))", "Ok(5)")
@@ -57,8 +57,8 @@ describe("eval on distribution functions", () => {
   describe("multiply", () => {
     testEval("normal(10, 2) * 2", "Ok(Normal(20,4))")
     testEval("2 * normal(10, 2)", "Ok(Normal(20,4))")
-    testEval("lognormal(5,2) * lognormal(10,2)", "Ok(Lognormal(15,4))")
-    testEval("lognormal(10, 2) * lognormal(5, 2)", "Ok(Lognormal(15,4))")
+    testEval("lognormal(5,2) * lognormal(10,2)", "Ok(Lognormal(15,2.8284271247461903))")
+    testEval("lognormal(10, 2) * lognormal(5, 2)", "Ok(Lognormal(15,2.8284271247461903))")
     testEval("2 * lognormal(5, 2)", "Ok(Lognormal(5.693147180559945,2))")
     testEval("lognormal(5, 2) * 2", "Ok(Lognormal(5.693147180559945,2))")
   })
