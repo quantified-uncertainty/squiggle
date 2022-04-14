@@ -19,7 +19,7 @@ module Normal = {
   let mean = (t: t) => Ok(Jstat.Normal.mean(t.mean, t.stdev))
   let toString = ({mean, stdev}: t) => j`Normal($mean,$stdev)`
 
-  let add = (n1: t, n2: t) => { 
+  let add = (n1: t, n2: t) => {
     let mean = n1.mean +. n2.mean
     let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
     #Normal({mean: mean, stdev: stdev})
@@ -115,7 +115,7 @@ module Lognormal = {
   let mean = (t: t) => Ok(Jstat.Lognormal.mean(t.mu, t.sigma))
   let sample = (t: t) => Jstat.Lognormal.sample(t.mu, t.sigma)
   let toString = ({mu, sigma}: t) => j`Lognormal($mu,$sigma)`
-  
+
   let from90PercentCI = (low, high) => {
     let logLow = Js.Math.log(low)
     let logHigh = Js.Math.log(high)
@@ -130,7 +130,7 @@ module Lognormal = {
       let variance = stdev ** 2.
       let meanSquared = mean ** 2.
       let mu = 2. *. Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance +. meanSquared)
-      let sigma = Js.Math.sqrt(Js.Math.log((variance /. meanSquared) +. 1.) )
+      let sigma = Js.Math.sqrt(Js.Math.log(variance /. meanSquared +. 1.))
       Ok(#Lognormal({mu: mu, sigma: sigma}))
     } else {
       Error("Lognormal standard deviation must be larger than 0")
@@ -142,7 +142,7 @@ module Lognormal = {
     let mu = l1.mu +. l2.mu
     let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.) // m
     #Lognormal({mu: mu, sigma: sigma})
-  } 
+  }
   let divide = (l1, l2) => {
     let mu = l1.mu -. l2.mu
     // We believe the ratiands will have covariance zero.
