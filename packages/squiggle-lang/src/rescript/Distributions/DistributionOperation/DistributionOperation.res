@@ -1,6 +1,6 @@
 type functionCallInfo = GenericDist_Types.Operation.genericFunctionCallInfo
-type genericDist = GenericDist_Types.genericDist
-type error = GenericDist_Types.error
+type genericDist = DistributionTypes.genericDist
+type error = DistributionTypes.error
 
 // TODO: It could be great to use a cache for some calculations (basically, do memoization). Also, better analytics/tracking could go a long way.
 

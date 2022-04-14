@@ -3,8 +3,8 @@ open Expect
 
 let makeTest = (~only=false, str, item1, item2) =>
   only
-    ? Only.test(str, () => expect(item1) -> toEqual(item2))
-    : test(str, () => expect(item1) -> toEqual(item2))
+    ? Only.test(str, () => expect(item1)->toEqual(item2))
+    : test(str, () => expect(item1)->toEqual(item2))
 
 let pointSetDist1: PointSetTypes.xyShape = {xs: [1., 4., 8.], ys: [0.2, 0.4, 0.8]}
 
@@ -21,7 +21,11 @@ let pointSetDist3: PointSetTypes.xyShape = {
 describe("XYShapes", () => {
   describe("logScorePoint", () => {
     makeTest("When identical", XYShape.logScorePoint(30, pointSetDist1, pointSetDist1), Some(0.0))
-    makeTest("When similar", XYShape.logScorePoint(30, pointSetDist1, pointSetDist2), Some(1.658971191043856))
+    makeTest(
+      "When similar",
+      XYShape.logScorePoint(30, pointSetDist1, pointSetDist2),
+      Some(1.658971191043856),
+    )
     makeTest(
       "When very different",
       XYShape.logScorePoint(30, pointSetDist1, pointSetDist3),

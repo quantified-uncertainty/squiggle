@@ -90,16 +90,8 @@ describe("eval on distribution functions", () => {
   })
 
   describe("mixture", () => {
-    testEval(
-      ~skip=true,
-      "mx(normal(5,2), normal(10,1), normal(15, 1))",
-      "Ok(Point Set Distribution)",
-    )
-    testEval(
-      ~skip=true,
-      "mixture(normal(5,2), normal(10,1), [.2,, .4])",
-      "Ok(Point Set Distribution)",
-    )
+    testEval("mx(normal(5,2), normal(10,1), normal(15, 1))", "Ok(Point Set Distribution)")
+    testEval("mixture(normal(5,2), normal(10,1), [0.2, 0.4])", "Ok(Point Set Distribution)")
   })
 })
 
@@ -111,7 +103,11 @@ describe("parse on distribution functions", () => {
   })
   describe("pointwise arithmetic expressions", () => {
     testParse(~skip=true, "normal(5,2) .+ normal(5,1)", "Ok((:dotAdd (:normal 5 2) (:normal 5 1)))")
-    testParse(~skip=true, "normal(5,2) .- normal(5,1)", "Ok((:dotSubtract (:normal 5 2) (:normal 5 1)))")
+    testParse(
+      ~skip=true,
+      "normal(5,2) .- normal(5,1)",
+      "Ok((:dotSubtract (:normal 5 2) (:normal 5 1)))",
+    )
     testParse("normal(5,2) .* normal(5,1)", "Ok((:dotMultiply (:normal 5 2) (:normal 5 1)))")
     testParse("normal(5,2) ./ normal(5,1)", "Ok((:dotDivide (:normal 5 2) (:normal 5 1)))")
     testParse("normal(5,2) .^ normal(5,1)", "Ok((:dotPow (:normal 5 2) (:normal 5 1)))")

@@ -1,27 +1,20 @@
-type genericDist =
-  | PointSet(PointSetTypes.pointSetDist)
-  | SampleSet(SampleSetDist.t)
-  | Symbolic(SymbolicDistTypes.symbolicDist)
-
+type genericDist = DistributionTypes.genericDist
 @genType
-type error =
-  | NotYetImplemented
-  | Unreachable
-  | DistributionVerticalShiftIsInvalid
-  | Other(string)
+type error = DistributionTypes.error
 
 @genType
 module Error = {
   type t = error
 
   let fromString = (s: string): t => Other(s)
-  
+
   @genType
   let toString = (x: t) => {
     switch x {
     | NotYetImplemented => "Not Yet Implemented"
     | Unreachable => "Unreachable"
     | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift Is Invalid"
+    | ArgumentError(x) => `Argument Error: ${x}`
     | Other(s) => s
     }
   }

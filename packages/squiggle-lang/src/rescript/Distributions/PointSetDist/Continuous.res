@@ -235,18 +235,10 @@ module T = Dist({
     let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 2.0 /. 2.0
     let indefiniteIntegralLinear = (p, a, b) => a *. p ** 2.0 /. 2.0 +. b *. p ** 3.0 /. 3.0
 
-    Analysis.integrate(
-      ~indefiniteIntegralStepwise,
-      ~indefiniteIntegralLinear,
-      t,
-    )
+    Analysis.integrate(~indefiniteIntegralStepwise, ~indefiniteIntegralLinear, t)
   }
   let variance = (t: t): float =>
-    XYShape.Analysis.getVarianceDangerously(
-      t,
-      mean,
-      Analysis.getMeanOfSquares,
-    )
+    XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
 })
 
 let downsampleEquallyOverX = (length, t): t =>

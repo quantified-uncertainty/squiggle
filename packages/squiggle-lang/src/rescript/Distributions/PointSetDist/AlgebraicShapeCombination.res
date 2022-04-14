@@ -100,7 +100,6 @@ let combineShapesContinuousContinuous = (
   s1: PointSetTypes.xyShape,
   s2: PointSetTypes.xyShape,
 ): PointSetTypes.xyShape => {
-
   // if we add the two distributions, we should probably use normal filters.
   // if we multiply the two distributions, we should probably use lognormal filters.
   let t1m = toDiscretePointMassesFromTriangulars(s1)

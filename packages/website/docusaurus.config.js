@@ -1,5 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
+const math = require("remark-math");
+const katex = require("rehype-katex");
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
@@ -14,7 +16,7 @@ const config = {
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  organizationName: "QURIResearch", // Usually your GitHub org/user name.
+  organizationName: "quantified-uncertainty", // Usually your GitHub org/user name.
   projectName: "squiggle", // Usually your repo name.
 
   plugins: [
@@ -47,13 +49,15 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/foretold-app/squiggle/tree/master/packages/website/",
+            "https://github.com/quantified-uncertainty/squiggle/tree/master/packages/website/",
+          remarkPlugins: [math],
+          rehypePlugins: [katex],
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            "https://github.com/foretold-app/squiggle/tree/master/packages/website/",
+            "https://github.com/quantified-uncertainty/squiggle/tree/master/packages/website/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
@@ -111,6 +115,15 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+  stylesheets: [
+    {
+      href: "https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css",
+      type: "text/css",
+      integrity:
+        "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
+      crossorigin: "anonymous",
+    },
+  ],
 };
 
 module.exports = config;

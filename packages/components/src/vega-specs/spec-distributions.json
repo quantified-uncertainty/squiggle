@@ -130,10 +130,6 @@
       },
       "encode": {
         "enter": {
-          "y2": {
-            "scale": "yscale",
-            "value": 0
-          },
           "width": {
             "value": 1
           }
@@ -146,6 +142,10 @@
           "y": {
             "scale": "yscale",
             "field": "y"
+          },
+          "y2": {
+            "scale": "yscale",
+            "value": 0
           }
         }
       }
@@ -160,7 +160,7 @@
           "shape": {
             "value": "circle"
           },
-          "size": [{ "value": 30 }],
+          "size": [{ "value": 100 }],
           "tooltip": {
             "signal": "datum.y"
           }

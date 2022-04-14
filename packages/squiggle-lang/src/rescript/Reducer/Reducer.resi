@@ -6,7 +6,7 @@ module Js = Reducer_Js
 module MathJs = Reducer_MathJs
 
 @genType
-type expressionValue = Reducer_Expression.expressionValue
+type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
 @genType
 let evaluate: string => result<expressionValue, Reducer_ErrorValue.errorValue>
