@@ -25,13 +25,13 @@
   "license": "MIT",
   "dependencies": {
     "@glennsl/bs-json": "^5.0.2",
+    "bisect_ppx": "^2.7.1",
     "jstat": "^1.9.5",
     "lodash": "4.17.21",
     "mathjs": "10.4.3",
     "pdfast": "^0.2.0",
     "rationale": "0.2.0",
-    "rescript": "^9.1.4",
-    "bisect_ppx": "^2.7.1"
+    "rescript": "^9.1.4"
   },
   "devDependencies": {
     "@glennsl/rescript-jest": "^0.9.0",
@@ -41,6 +41,7 @@
     "gentype": "^4.3.0",
     "jest": "^27.5.1",
     "moduleserve": "0.9.1",
+    "reanalyze": "^2.19.0",
     "ts-jest": "^27.1.4",
     "ts-loader": "^9.2.8",
     "typescript": "^4.6.3",
