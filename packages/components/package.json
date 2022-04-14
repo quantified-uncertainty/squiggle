@@ -68,7 +68,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
     "@storybook/addon-actions": "^6.4.22",
     "@storybook/addon-essentials": "^6.4.20",
-    "@storybook/addon-links": "^6.4.20",
+    "@storybook/addon-links": "^6.4.22",
     "@storybook/builder-webpack5": "^6.4.20",
     "@storybook/manager-webpack5": "^6.4.20",
     "@storybook/node-logger": "^6.4.22",
