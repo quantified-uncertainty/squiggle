@@ -73,7 +73,7 @@
     "@storybook/manager-webpack5": "^6.4.22",
     "@storybook/node-logger": "^6.4.22",
     "@storybook/preset-create-react-app": "^4.1.0",
-    "@storybook/react": "^6.4.20",
+    "@storybook/react": "^6.4.22",
     "@types/styled-components": "^5.1.24",
     "@types/webpack": "^5.28.0",
     "react-codejar": "^1.1.2",
