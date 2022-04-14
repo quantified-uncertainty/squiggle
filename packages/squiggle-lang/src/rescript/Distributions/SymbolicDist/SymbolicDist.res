@@ -11,7 +11,7 @@ module Normal = {
 
   let from90PercentCI = (low, high) => {
     let mean = E.A.Floats.mean([low, high])
-    let stdev = (high -. low) /. (2. *. 1.644854)
+    let stdev = (high -. low) /. (2. *. 1.6448536269514722)
     #Normal({mean: mean, stdev: stdev})
   }
   let inv = (p, t: t) => Jstat.Normal.inv(p, t.mean, t.stdev)
@@ -19,14 +19,14 @@ module Normal = {
   let mean = (t: t) => Ok(Jstat.Normal.mean(t.mean, t.stdev))
   let toString = ({mean, stdev}: t) => j`Normal($mean,$stdev)`
 
-  let add = (n1: t, n2: t) => {
+  let add = (n1: t, n2: t) => { 
     let mean = n1.mean +. n2.mean
-    let stdev = sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
+    let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
     #Normal({mean: mean, stdev: stdev})
   }
   let subtract = (n1: t, n2: t) => {
     let mean = n1.mean -. n2.mean
-    let stdev = sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
+    let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
     #Normal({mean: mean, stdev: stdev})
   }
 
@@ -115,19 +115,22 @@ module Lognormal = {
   let mean = (t: t) => Ok(Jstat.Lognormal.mean(t.mu, t.sigma))
   let sample = (t: t) => Jstat.Lognormal.sample(t.mu, t.sigma)
   let toString = ({mu, sigma}: t) => j`Lognormal($mu,$sigma)`
+  
   let from90PercentCI = (low, high) => {
     let logLow = Js.Math.log(low)
     let logHigh = Js.Math.log(high)
     let mu = E.A.Floats.mean([logLow, logHigh])
-    let sigma = (logHigh -. logLow) /. (2.0 *. 1.645)
+    let sigma = (logHigh -. logLow) /. (2.0 *. 1.6448536269514722)
     #Lognormal({mu: mu, sigma: sigma})
   }
   let fromMeanAndStdev = (mean, stdev) => {
+    // https://math.stackexchange.com/questions/2501783/parameters-of-a-lognormal-distribution
+    // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Generation_and_parameters
     if stdev > 0.0 {
-      let variance = Js.Math.pow_float(~base=stdev, ~exp=2.0)
-      let meanSquared = Js.Math.pow_float(~base=mean, ~exp=2.0)
-      let mu = Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance /. meanSquared +. 1.0)
-      let sigma = Js.Math.pow_float(~base=Js.Math.log(variance /. meanSquared +. 1.0), ~exp=0.5)
+      let variance = stdev ** 2.
+      let meanSquared = mean ** 2.
+      let mu = 2*Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance +. meanSquared)
+      let sigma = Js.Math.sqrt(Js.Math.log((variance /. meanSquared) +. 1) )
       Ok(#Lognormal({mu: mu, sigma: sigma}))
     } else {
       Error("Lognormal standard deviation must be larger than 0")
@@ -135,10 +138,11 @@ module Lognormal = {
   }
 
   let multiply = (l1, l2) => {
+    // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Multiplication_and_division_of_independent,_log-normal_random_variables
     let mu = l1.mu +. l2.mu
-    let sigma = l1.sigma +. l2.sigma
+    let sigma = Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.)
     #Lognormal({mu: mu, sigma: sigma})
-  }
+  } 
   let divide = (l1, l2) => {
     let mu = l1.mu -. l2.mu
     // We believe the ratiands will have covariance zero.
