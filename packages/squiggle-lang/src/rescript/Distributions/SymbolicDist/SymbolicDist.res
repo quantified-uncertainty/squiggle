@@ -47,6 +47,23 @@ module Normal = {
     | #Subtract => Some(subtract(n1, n2))
     | _ => None
     }
+
+  let operateFloatFirst = (operation: Operation.Algebraic.t, n1: float, n2: t) =>
+    switch operation {
+    | #Add => Some(#Normal({mean: n1 +. n2.mean, stdev: n2.stdev}))
+    | #Subtract => Some(#Normal({mean: n1 -. n2.mean, stdev: n2.stdev}))
+    | #Multiply => Some(#Normal({mean: n1 *. n2.mean, stdev: n1 *. n2.stdev}))
+    | _ => None
+    }
+
+  let operateFloatSecond = (operation: Operation.Algebraic.t, n1: t, n2: float) =>
+    switch operation {
+    | #Add => Some(#Normal({mean: n1.mean +. n2, stdev: n1.stdev}))
+    | #Subtract => Some(#Normal({mean: n1.mean -. n2, stdev: n1.stdev}))
+    | #Multiply => Some(#Normal({mean: n1.mean *. n2, stdev: n1.stdev *. n2}))
+    | #Divide => Some(#Normal({mean: n1.mean /. n2, stdev: n1.stdev /. n2}))
+    | _ => None
+    }
 }
 
 module Exponential = {
@@ -157,6 +174,22 @@ module Lognormal = {
     switch operation {
     | #Multiply => Some(multiply(n1, n2))
     | #Divide => Some(divide(n1, n2))
+    | _ => None
+    }
+
+  let operateFloatFirst = (operation: Operation.Algebraic.t, n1: float, n2: t) =>
+    switch operation {
+    | #Multiply =>
+      n1 > 0.0 ? Some(#Lognormal({mu: Js.Math.log(n1) +. n2.mu, sigma: n2.sigma})) : None
+    | #Divide => n1 > 0.0 ? Some(#Lognormal({mu: Js.Math.log(n1) -. n2.mu, sigma: n2.sigma})) : None
+    | _ => None
+    }
+
+  let operateFloatSecond = (operation: Operation.Algebraic.t, n1: t, n2: float) =>
+    switch operation {
+    | #Multiply =>
+      n2 > 0.0 ? Some(#Lognormal({mu: n1.mu +. Js.Math.log(n2), sigma: n1.sigma})) : None
+    | #Divide => n2 > 0.0 ? Some(#Lognormal({mu: n1.mu -. Js.Math.log(n2), sigma: n1.sigma})) : None
     | _ => None
     }
 }
@@ -350,8 +383,28 @@ module T = {
       }
     | (#Normal(v1), #Normal(v2)) =>
       Normal.operate(op, v1, v2) |> E.O.dimap(r => #AnalyticalSolution(r), () => #NoSolution)
+    | (#Float(v1), #Normal(v2)) =>
+      Normal.operateFloatFirst(op, v1, v2) |> E.O.dimap(
+        r => #AnalyticalSolution(r),
+        () => #NoSolution,
+      )
+    | (#Normal(v1), #Float(v2)) =>
+      Normal.operateFloatSecond(op, v1, v2) |> E.O.dimap(
+        r => #AnalyticalSolution(r),
+        () => #NoSolution,
+      )
     | (#Lognormal(v1), #Lognormal(v2)) =>
       Lognormal.operate(op, v1, v2) |> E.O.dimap(r => #AnalyticalSolution(r), () => #NoSolution)
+    | (#Float(v1), #Lognormal(v2)) =>
+      Lognormal.operateFloatFirst(op, v1, v2) |> E.O.dimap(
+        r => #AnalyticalSolution(r),
+        () => #NoSolution,
+      )
+    | (#Lognormal(v1), #Float(v2)) =>
+      Lognormal.operateFloatSecond(op, v1, v2) |> E.O.dimap(
+        r => #AnalyticalSolution(r),
+        () => #NoSolution,
+      )
     | _ => #NoSolution
     }
 
