@@ -19,7 +19,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "remark-math": "^3",
-    "rehype-katex": "^5",
+    "rehype-katex": "^6",
     "hast-util-is-element": "1.1.0"
   },
   "browserslist": {
