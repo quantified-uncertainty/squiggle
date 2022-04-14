@@ -1,5 +1,8 @@
 open SymbolicDistTypes
 
+let normal95confidencePoint = 1.6448536269514722
+// explained in website/docs/internal/ProcessingConfidenceIntervals
+
 module Normal = {
   type t = normal
   let make = (mean: float, stdev: float): result<symbolicDist, string> =>
@@ -11,7 +14,7 @@ module Normal = {
 
   let from90PercentCI = (low, high) => {
     let mean = E.A.Floats.mean([low, high])
-    let stdev = (high -. low) /. (2. *. 1.6448536269514722)
+    let stdev = (high -. low) /. (2. *. normal95confidencePoint)
     #Normal({mean: mean, stdev: stdev})
   }
   let inv = (p, t: t) => Jstat.Normal.inv(p, t.mean, t.stdev)
@@ -120,7 +123,7 @@ module Lognormal = {
     let logLow = Js.Math.log(low)
     let logHigh = Js.Math.log(high)
     let mu = E.A.Floats.mean([logLow, logHigh])
-    let sigma = (logHigh -. logLow) /. (2.0 *. 1.6448536269514722)
+    let sigma = (logHigh -. logLow) /. (2.0 *. normal95confidencePoint)
     #Lognormal({mu: mu, sigma: sigma})
   }
   let fromMeanAndStdev = (mean, stdev) => {
