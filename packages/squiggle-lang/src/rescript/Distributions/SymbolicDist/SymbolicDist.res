@@ -129,8 +129,8 @@ module Lognormal = {
     if stdev > 0.0 {
       let variance = stdev ** 2.
       let meanSquared = mean ** 2.
-      let mu = 2*Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance +. meanSquared)
-      let sigma = Js.Math.sqrt(Js.Math.log((variance /. meanSquared) +. 1) )
+      let mu = 2. *. Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance +. meanSquared)
+      let sigma = Js.Math.sqrt(Js.Math.log((variance /. meanSquared) +. 1.) )
       Ok(#Lognormal({mu: mu, sigma: sigma}))
     } else {
       Error("Lognormal standard deviation must be larger than 0")
@@ -140,7 +140,7 @@ module Lognormal = {
   let multiply = (l1, l2) => {
     // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Multiplication_and_division_of_independent,_log-normal_random_variables
     let mu = l1.mu +. l2.mu
-    let sigma = Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.)
+    let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.) // m
     #Lognormal({mu: mu, sigma: sigma})
   } 
   let divide = (l1, l2) => {
