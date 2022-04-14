@@ -156,7 +156,7 @@ let reduceExpression = (expression: t, bindings: T.bindings): result<expressionV
         )
         racc->Result.flatMap(acc => acc->reduceValueList)
       }
-    | _ => RETodo("Error: Bindings cannot be reduced to values")->Error
+    | EBindings(_bindings) => RETodo("Error: Bindings cannot be reduced to values")->Error
     }
 
   let rExpandedExpression: result<t, 'e> = expression->seekMacros(bindings)
