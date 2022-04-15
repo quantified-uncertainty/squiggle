@@ -42,17 +42,6 @@ yarn
 
 See `packages/*/README.md` to work with whatever project you're interested in.
 
-## `codium` for `rescript`
-
-If you have `nix` installed with `flakes` enabled, you can build a `codium` in this repo for `rescript` development, if you don't want to pollute your machine's global editor with another mode/extension.
-
-```sh
-nix develop
-codium
-```
-
-The `nix develop` shell also provides `yarn`.
-
 # Contributing
 
 See `CONTRIBUTING.md`.
