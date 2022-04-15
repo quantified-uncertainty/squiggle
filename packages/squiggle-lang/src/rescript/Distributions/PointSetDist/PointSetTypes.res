@@ -14,11 +14,12 @@ type distributionType = [
   | #CDF
 ]
 
-type xyShape = XYShape.xyShape;
-type interpolationStrategy = XYShape.interpolationStrategy;
-type extrapolationStrategy = XYShape.extrapolationStrategy;
-type interpolator = XYShape.extrapolationStrategy;
+type xyShape = XYShape.xyShape
+type interpolationStrategy = XYShape.interpolationStrategy
+type extrapolationStrategy = XYShape.extrapolationStrategy
+type interpolator = XYShape.extrapolationStrategy
 
+@genType
 type rec continuousShape = {
   xyShape: xyShape,
   interpolation: interpolationStrategy,
@@ -26,12 +27,14 @@ type rec continuousShape = {
   integralCache: option<continuousShape>,
 }
 
+@genType
 type discreteShape = {
   xyShape: xyShape,
   integralSumCache: option<float>,
   integralCache: option<continuousShape>,
 }
 
+@genType
 type mixedShape = {
   continuous: continuousShape,
   discrete: discreteShape,

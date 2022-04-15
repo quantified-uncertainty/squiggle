@@ -47,6 +47,7 @@ module Dist = (T: dist) => {
   let truncate = T.truncate
   let mean = T.mean
   let variance = T.variance
+  let integralEndY = T.integralEndY
 
   let updateIntegralCache = T.updateIntegralCache
 

@@ -1,0 +1,9 @@
+.direnv
+*.bs.js
+*.gen.tsx
+packages/*/dist
+packages/components/storybook-static
+node_modules
+packages/*/node_modules
+packages/website/.docusaurus
+packages/squiggle-lang/lib

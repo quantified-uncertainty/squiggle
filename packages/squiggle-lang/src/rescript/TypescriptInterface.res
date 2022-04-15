@@ -8,20 +8,49 @@ The below few seem to work fine. In the future there's definitely more work to d
 */
 
 @genType
-type env = DistributionOperation.env
+type samplingParams = DistributionOperation.env
 
 @genType
-type genericDist = GenericDist_Types.genericDist
+type genericDist = DistributionTypes.genericDist
 
 @genType
-type error = GenericDist_Types.error
+type distributionError = DistributionTypes.error
 
 @genType
-type resultDist = result<genericDist, error>
+type resultDist = result<genericDist, distributionError>
+
 @genType
-type resultFloat = result<float, error>
+type resultFloat = result<float, distributionError>
+
 @genType
-type resultString = result<string, error>
+type resultString = result<string, distributionError>
 
 @genType
 let makeSampleSetDist = SampleSetDist.make
+
+@genType
+let evaluate = Reducer.evaluate
+
+@genType
+type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+
+@genType
+type errorValue = Reducer_ErrorValue.errorValue
+
+@genType
+let toPointSet = GenericDist.toPointSet
+
+@genType
+type mixedShape = PointSetTypes.mixedShape
+
+@genType
+type discreteShape = PointSetTypes.discreteShape
+
+@genType
+type continuousShape = PointSetTypes.continuousShape
+
+@genType
+let errorValueToString = Reducer_ErrorValue.errorToString
+
+@genType
+let distributionErrorToString = GenericDist_Types.Error.toString

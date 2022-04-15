@@ -5,26 +5,32 @@
 module Extra_Array = Reducer_Extra_Array
 module ErrorValue = Reducer_ErrorValue
 
+@genType
 type rec expressionValue =
+  | EvArray(array<expressionValue>)
   | EvBool(bool)
+  | EvCall(string) // External function call
+  | EvDistribution(GenericDist_Types.genericDist)
   | EvNumber(float)
+  | EvRecord(Js.Dict.t<expressionValue>)
   | EvString(string)
   | EvSymbol(string)
-  | EvArray(array<expressionValue>)
-  | EvRecord(Js.Dict.t<expressionValue>)
-  | EvDistribution(GenericDist_Types.genericDist)
 
 type functionCall = (string, array<expressionValue>)
 
 let rec toString = aValue =>
   switch aValue {
   | EvBool(aBool) => Js.String.make(aBool)
+  | EvCall(fName) => `:${fName}`
   | EvNumber(aNumber) => Js.String.make(aNumber)
   | EvString(aString) => `'${aString}'`
   | EvSymbol(aString) => `:${aString}`
   | EvArray(anArray) => {
       let args =
-        anArray->Belt.Array.map(each => toString(each))->Extra_Array.interperse(", ")->Js.String.concatMany("")
+        anArray
+        ->Belt.Array.map(each => toString(each))
+        ->Extra_Array.interperse(", ")
+        ->Js.String.concatMany("")
       `[${args}]`
     }
   | EvRecord(aRecord) => {
@@ -36,12 +42,13 @@ let rec toString = aValue =>
         ->Js.String.concatMany("")
       `{${pairs}}`
     }
-  | EvDistribution(dist) => `${GenericDist.toString(dist)}`
+  | EvDistribution(dist) => GenericDist.toString(dist)
   }
 
 let toStringWithType = aValue =>
   switch aValue {
   | EvBool(_) => `Bool::${toString(aValue)}`
+  | EvCall(_) => `Call::${toString(aValue)}`
   | EvNumber(_) => `Number::${toString(aValue)}`
   | EvString(_) => `String::${toString(aValue)}`
   | EvSymbol(_) => `Symbol::${toString(aValue)}`

@@ -1,56 +1,66 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
+const math = require("remark-math");
+const katex = require("rehype-katex");
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
-const path = require('path');
+const lightCodeTheme = require("prism-react-renderer/themes/github");
+const darkCodeTheme = require("prism-react-renderer/themes/dracula");
+const path = require("path");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Squiggle (alpha)',
+  title: "Squiggle (alpha)",
   tagline: "Estimation language for forecasters",
-  url: 'https://squiggle-language.com',
-  baseUrl: '/',
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
-  organizationName: 'QURIResearch', // Usually your GitHub org/user name.
-  projectName: 'squiggle', // Usually your repo name.
+  url: "https://squiggle-language.com",
+  baseUrl: "/",
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "warn",
+  favicon: "img/favicon.ico",
+  organizationName: "quantified-uncertainty", // Usually your GitHub org/user name.
+  projectName: "squiggle", // Usually your repo name.
 
   plugins: [
     () => ({
       configureWebpack(config, isServer, utils, content) {
         return {
-            resolve: {
-              alias : {
-                "@quri/squiggle-components": path.resolve(__dirname, "../components/src"),
-                "@quri/squiggle-lang": path.resolve(__dirname, "../squiggle-lang/src/js")
-              }
-            }
-
+          resolve: {
+            alias: {
+              "@quri/squiggle-components": path.resolve(
+                __dirname,
+                "../components/src"
+              ),
+              "@quri/squiggle-lang": path.resolve(
+                __dirname,
+                "../squiggle-lang/src/js"
+              ),
+            },
+          },
         };
-      }
-    })
+      },
+    }),
   ],
 
   presets: [
     [
-      'classic',
+      "classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: require.resolve('./sidebars.js'),
+          sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl: 'https://github.com/foretold-app/squiggle/tree/main/packages/website/',
+          editUrl:
+            "https://github.com/quantified-uncertainty/squiggle/tree/master/packages/website/",
+          remarkPlugins: [math],
+          rehypePlugins: [katex],
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/foretold-app/squiggle/tree/main/packages/website/',
+            "https://github.com/quantified-uncertainty/squiggle/tree/master/packages/website/",
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: require.resolve("./src/css/custom.css"),
         },
       }),
     ],
@@ -60,53 +70,40 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'Squiggle',
+        title: "Squiggle",
         logo: {
-          alt: 'Squiggle Logo',
-          src: 'img/logo.svg',
+          alt: "Squiggle Logo",
+          src: "img/logo.svg",
         },
         items: [
           {
-            type: 'doc',
-            docId: 'Introduction',
-            position: 'left',
-            label: 'Documentation',
+            type: "doc",
+            docId: "Introduction",
+            position: "left",
+            label: "Documentation",
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
+          { to: "/blog", label: "Blog", position: "left" },
+          { to: "/playground", label: "Playground", position: "left" },
           {
-            href: 'https://playground.squiggle-language.com/dist-builder',
-            label: 'Playground',
-            position: 'left',
-          },
-          {
-            href: 'https://github.com/QURIresearch/squiggle',
-            label: 'GitHub',
-            position: 'right',
+            href: "https://github.com/QURIresearch/squiggle",
+            label: "GitHub",
+            position: "right",
           },
         ],
       },
       footer: {
-        style: 'dark',
+        style: "dark",
         links: [
           {
-            title: 'Blog',
+            title: "More",
             items: [
               {
-                label: 'Overview',
-                to: '/docs/Language',
-              },
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'Blog',
-                to: '/blog',
+                label: "Blog",
+                to: "/blog",
               },
               {
-                label: 'GitHub',
-                href: 'https://github.com/QURIresearch/squiggle',
+                label: "GitHub",
+                href: "https://github.com/QURIresearch/squiggle",
               },
             ],
           },
@@ -118,6 +115,15 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+  stylesheets: [
+    {
+      href: "https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css",
+      type: "text/css",
+      integrity:
+        "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
+      crossorigin: "anonymous",
+    },
+  ],
 };
 
 module.exports = config;

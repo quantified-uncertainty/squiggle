@@ -2,27 +2,33 @@
 
 This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
 
-## Build for development and production
+# Build for development
 
-This one actually works without running `yarn` at the monorepo level, but it doesn't hurt. You must at least run it at this package level
+We assume you ran `yarn` at monorepo level.
 
-``` sh
-yarn
-```
+The website depends on `squiggle-lang`, which you have to build manually.
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-``` sh
+```sh
+cd ../squiggle-lang
 yarn build
 ```
 
-Your local dev server is here, opening up a browser window. 
-``` sh
+Generate static content, to the `build` directory.
+
+```sh
+yarn build
+```
+
+Open a local dev server
+
+```sh
 yarn start
 ```
 
 Most changes are reflected live without having to restart the server.
 
-Clean up the build artefacts. 
-``` sh
+Clean up the build artefacts.
+
+```sh
 yarn clean
 ```

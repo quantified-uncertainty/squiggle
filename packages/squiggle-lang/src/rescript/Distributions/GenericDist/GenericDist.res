@@ -1,6 +1,6 @@
 //TODO: multimodal, add interface, test somehow, track performance, refactor sampleSet, refactor ASTEvaluator.res.
-type t = GenericDist_Types.genericDist
-type error = GenericDist_Types.error
+type t = DistributionTypes.genericDist
+type error = DistributionTypes.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
@@ -31,6 +31,15 @@ let normalize = (t: t): t =>
   | Symbolic(_) => t
   | SampleSet(_) => t
   }
+
+let integralEndY = (t: t): float =>
+  switch t {
+  | PointSet(r) => PointSetDist.T.integralEndY(r)
+  | Symbolic(_) => 1.0
+  | SampleSet(_) => 1.0
+  }
+
+let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
 let toFloatOperation = (
   t,
@@ -115,7 +124,7 @@ module Truncate = {
       | Some(r) => Ok(r)
       | None =>
         toPointSetFn(t)->E.R2.fmap(t => {
-          GenericDist_Types.PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t))
+          DistributionTypes.PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t))
         })
       }
     }
@@ -168,7 +177,7 @@ module AlgebraicCombination = {
     ->E.R.bind(((t1, t2)) => {
       SampleSetDist.map2(~fn, ~t1, ~t2)->GenericDist_Types.Error.resultStringToResultError
     })
-    ->E.R2.fmap(r => GenericDist_Types.SampleSet(r))
+    ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
   }
 
   //I'm (Ozzie) really just guessing here, very little idea what's best
@@ -206,7 +215,7 @@ module AlgebraicCombination = {
           arithmeticOperation,
           t1,
           t2,
-        )->E.R2.fmap(r => GenericDist_Types.PointSet(r))
+        )->E.R2.fmap(r => DistributionTypes.PointSet(r))
       }
     }
   }
@@ -229,7 +238,7 @@ let pointwiseCombination = (
       t2,
     )
   )
-  ->E.R2.fmap(r => GenericDist_Types.PointSet(r))
+  ->E.R2.fmap(r => DistributionTypes.PointSet(r))
 }
 
 let pointwiseCombinationFloat = (
@@ -239,7 +248,7 @@ let pointwiseCombinationFloat = (
   ~float: float,
 ): result<t, error> => {
   let m = switch arithmeticOperation {
-  | #Add | #Subtract => Error(GenericDist_Types.DistributionVerticalShiftIsInvalid)
+  | #Add | #Subtract => Error(DistributionTypes.DistributionVerticalShiftIsInvalid)
   | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
     toPointSetFn(t)->E.R2.fmap(t => {
       //TODO: Move to PointSet codebase
@@ -254,7 +263,7 @@ let pointwiseCombinationFloat = (
       )
     })
   }
-  m->E.R2.fmap(r => GenericDist_Types.PointSet(r))
+  m->E.R2.fmap(r => DistributionTypes.PointSet(r))
 }
 
 //Note: The result should always cumulatively sum to 1. This would be good to test.
@@ -265,7 +274,7 @@ let mixture = (
   ~pointwiseAddFn: pointwiseAddFn,
 ) => {
   if E.A.length(values) == 0 {
-    Error(GenericDist_Types.Other("Mixture error: mixture must have at least 1 element"))
+    Error(DistributionTypes.Other("Mixture error: mixture must have at least 1 element"))
   } else {
     let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =

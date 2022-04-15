@@ -4,5 +4,10 @@ module Expression = Reducer_Expression
 module Extra = Reducer_Extra
 module Js = Reducer_Js
 module MathJs = Reducer_MathJs
-let eval: string => result<Expression.expressionValue, ErrorValue.errorValue>
+
+@genType
+type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+
+@genType
+let evaluate: string => result<expressionValue, Reducer_ErrorValue.errorValue>
 let parse: string => result<Expression.expression, ErrorValue.errorValue>

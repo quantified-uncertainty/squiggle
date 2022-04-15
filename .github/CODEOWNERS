@@ -8,15 +8,24 @@
 # IMPORTANT NOTE: in order to actually get pinged, commit access is required.
 # This also holds true for GitHub teams.
 
-# This file
-/.github/CODEOWNERS @quinn-dougherty
+# Rescript 
+*.res @OAGr @quinn-dougherty
+*.resi @OAGr @quinn-dougherty
 
-# Any rescript code
-*.res @Hazelfire @OAGr @quinn-dougherty
-
-# Any typescript code
+# Typescript 
 *.tsx @Hazelfire @OAGr
+*.ts @Hazelfire @OAGr
+
+# Javascript
+*.js @Hazelfire @OAGr
 
 # Any opsy files
-*.json @quinn-dougherty @Hazelfire
-*.y*ml @quinn-dougherty
+.github/** @quinn-dougherty @OAGr
+*.json @quinn-dougherty @Hazelfire @OAGr
+*.y*ml @quinn-dougherty @OAGr
+*.config.js @Hazelfire @OAGr
+netlify.toml @quinn-dougherty @OAGr @Hazelfire 
+
+# Documentation
+*.md @quinn-dougherty @OAGr @Hazelfire
+*.mdx @quinn-dougherty @OAGr @Hazelfire

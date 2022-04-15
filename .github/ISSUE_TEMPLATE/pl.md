@@ -1,14 +1,13 @@
 ---
-name: Regarding the programming language
-about: Interpreter, parser, syntax, semantics, and including distributions
-labels: 'programming language'
+name: Regarding the programming language (the `squiggle-lang` package)
+about: Anything concerning distributions/numerics, as well as the interpreter, parser, syntax, semantics
+labels: "programming language"
 ---
-<!-- mark one with an x --> 
-- _ Is refactor
-- _ Is new feature
-- _ Concerns documentation
+
+<!-- mark one with an x -->
+
+- \_ Is refactor
+- \_ Is new feature
+- \_ Concerns documentation
 
 # Description of suggestion or shortcoming:
-
-
-

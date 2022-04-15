@@ -6,15 +6,21 @@
     "start": "docusaurus start",
     "build": "docusaurus build",
     "clean": "docusaurus clear",
-    "all": "yarn build"
+    "all": "yarn build",
+    "lint": "prettier --check .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@docusaurus/core": "2.0.0-beta.18",
     "@docusaurus/preset-classic": "2.0.0-beta.18",
+    "@quri/squiggle-components": "0.1.8",
     "clsx": "^1.1.1",
     "prism-react-renderer": "^1.2.1",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "remark-math": "^3",
+    "rehype-katex": "^5",
+    "hast-util-is-element": "2.1.2"
   },
   "browserslist": {
     "production": [

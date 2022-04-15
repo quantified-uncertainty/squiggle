@@ -1,6 +1,6 @@
 type functionCallInfo = GenericDist_Types.Operation.genericFunctionCallInfo
-type genericDist = GenericDist_Types.genericDist
-type error = GenericDist_Types.error
+type genericDist = DistributionTypes.genericDist
+type error = DistributionTypes.error
 
 // TODO: It could be great to use a cache for some calculations (basically, do memoization). Also, better analytics/tracking could go a long way.
 
@@ -13,6 +13,7 @@ type outputType =
   | Dist(genericDist)
   | Float(float)
   | String(string)
+  | Bool(bool)
   | GenDistError(error)
 
 /*
@@ -66,6 +67,18 @@ module OutputLocal = {
     | e => Error(toErrorOrUnreachable(e))
     }
 
+  let toBool = (t: t) =>
+    switch t {
+    | Bool(d) => Some(d)
+    | _ => None
+    }
+
+  let toBoolR = (t: t): result<bool, error> =>
+    switch t {
+    | Bool(r) => Ok(r)
+    | e => Error(toErrorOrUnreachable(e))
+    }
+
   //This is used to catch errors in other switch statements.
   let fromResult = (r: result<t, error>): outputType =>
     switch r {
@@ -107,8 +120,8 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       (),
     )->OutputLocal.toDistR
 
-  let fromDistFn = (subFnName: GenericDist_Types.Operation.fromDist, dist: genericDist) =>
-    switch subFnName {
+  let fromDistFn = (subFnName: GenericDist_Types.Operation.fromDist, dist: genericDist) => {
+    let response = switch subFnName {
     | ToFloat(distToFloatOperation) =>
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
       ->E.R2.fmap(r => Float(r))
@@ -123,6 +136,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
         Dist(dist)
       }
     | ToDist(Normalize) => dist->GenericDist.normalize->Dist
+    | ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
     | ToDist(Truncate(leftCutoff, rightCutoff)) =>
       GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
       ->E.R2.fmap(r => Dist(r))
@@ -154,6 +168,8 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     }
+    response
+  }
 
   switch functionCallInfo {
   | FromDist(subFnName, dist) => fromDistFn(subFnName, dist)
@@ -201,6 +217,7 @@ module Constructors = {
   let inv = (~env, dist, f) => C.inv(dist, f)->run(~env)->toFloatR
   let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
   let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
+  let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
   let truncate = (~env, dist, leftCutoff, rightCutoff) =>

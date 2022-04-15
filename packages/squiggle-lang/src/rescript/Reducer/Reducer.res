@@ -5,5 +5,6 @@ module Extra = Reducer_Extra
 module Js = Reducer_Js
 module MathJs = Reducer_MathJs
 
-let eval = Expression.eval
+type expressionValue = Reducer_Expression.expressionValue
+let evaluate = Expression.eval
 let parse = Expression.parse

@@ -1,12 +1,15 @@
+@genType
 type genericDist =
   | PointSet(PointSetTypes.pointSetDist)
-  | SampleSet(array<float>)
+  | SampleSet(SampleSetDist.t)
   | Symbolic(SymbolicDistTypes.symbolicDist)
 
+@genType
 type error =
   | NotYetImplemented
   | Unreachable
   | DistributionVerticalShiftIsInvalid
+  | ArgumentError(string)
   | Other(string)
 
 module Operation = {
@@ -55,7 +58,11 @@ module DistributionOperation = {
   type fromDist =
     | ToFloat(Operation.toFloat)
     | ToDist(toDist)
-    | ToDistCombination(Operation.direction, Operation.arithmeticOperation, [#Dist(genericDist) | #Float(float)])
+    | ToDistCombination(
+        Operation.direction,
+        Operation.arithmeticOperation,
+        [#Dist(genericDist) | #Float(float)],
+      )
     | ToString
 
   type singleParamaterFunction =

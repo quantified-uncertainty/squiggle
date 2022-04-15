@@ -4,11 +4,12 @@ This library provides one interface to generic distributions. These distribution
 
 Different internal formats (symbolic, point set, sample set) allow for benefits and features. It's common for distributions to be converted into either point sets or sample sets to enable certain functions.
 
-In addition to this interface, there's a second, generic function, for calling functions on this generic distribution type. This ``genericOperation`` standardizes the inputs and outputs for these various function calls. See it's ``run()`` function.
+In addition to this interface, there's a second, generic function, for calling functions on this generic distribution type. This `genericOperation` standardizes the inputs and outputs for these various function calls. See it's `run()` function.
 
 Performance is very important. Some operations can take a long time to run, and even then, be inaccurate. Because of this, we plan to have a lot of logging and stack tracing functionality eventually built in.
 
 ## Diagram of Distribution Types
+
 ```mermaid
 graph TD
     A[Generic Distribution] -->B{Point Set}
@@ -34,7 +35,8 @@ graph TD
 ## Diagram of Generic Distribution Types
 
 ## Todo
-- [ ] Lots of cleanup 
+
+- [ ] Lots of cleanup
 - [ ] Simple test story
 - [ ] Provide decent stack traces for key calls in GenericOperation. This could be very useful for debugging.
 - [ ] Cleanup Sample Set library

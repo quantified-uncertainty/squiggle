@@ -5,8 +5,9 @@ sidebar_position: 3
 # Javascript Libraries
 
 There are two JavaScript packages currently available for Squiggle:
- - [`@quri/squiggle-lang`](https://www.npmjs.com/package/@quri/squiggle-lang)
- - [`@quri/squiggle-components`](https://www.npmjs.com/package/@quri/squiggle-components)
+
+- [`@quri/squiggle-lang`](https://www.npmjs.com/package/@quri/squiggle-lang)
+- [`@quri/squiggle-components`](https://www.npmjs.com/package/@quri/squiggle-components)
 
 Types are available for both packages.
 
@@ -30,7 +31,7 @@ this library to help navigate the return type.
 
 The `@quri/squiggle-components` package offers several components and utilities
 for people who want to embed Squiggle components into websites. This documentation
-relies on `@quri/squiggle-components` frequently. 
+relies on `@quri/squiggle-components` frequently.
 
-We host [a storybook](https://components.squiggle-language.com/) with details
+We host [a storybook](https://squiggle-components.netlify.app/) with details
 and usage of each of the components made available.

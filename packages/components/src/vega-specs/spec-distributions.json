@@ -82,10 +82,13 @@
     {
       "orient": "bottom",
       "scale": "xscale",
-      "labelColor": "#666",
-      "tickColor": "#ddd",
+      "labelColor": "#727d93",
+      "tickColor": "#fff",
+      "tickOpacity": 0.0,
+      "domainColor": "#fff",
+      "domainOpacity": 0.0,
       "format": "~s",
-      "tickCount": 20
+      "tickCount": 10
     }
   ],
   "marks": [
@@ -127,10 +130,6 @@
       },
       "encode": {
         "enter": {
-          "y2": {
-            "scale": "yscale",
-            "value": 0
-          },
           "width": {
             "value": 1
           }
@@ -143,6 +142,10 @@
           "y": {
             "scale": "yscale",
             "field": "y"
+          },
+          "y2": {
+            "scale": "yscale",
+            "value": 0
           }
         }
       }
@@ -157,9 +160,7 @@
           "shape": {
             "value": "circle"
           },
-          "width": {
-            "value": 5
-          },
+          "size": [{ "value": 100 }],
           "tooltip": {
             "signal": "datum.y"
           }

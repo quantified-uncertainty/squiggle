@@ -1,4 +1,4 @@
-import { NumberShower } from "../NumberShower";
+import { NumberShower } from "../components/NumberShower";
 import { Canvas, Meta, Story, Props } from "@storybook/addon-docs";
 
 <Meta title="Squiggle/NumberShower" component={NumberShower} />
@@ -14,10 +14,10 @@ It uses the symbols "K", "M", "B", and "T", to represent thousands, millions, bi
     name="Ten Thousand"
     args={{
       number: 10000,
-      precision: 2
+      precision: 2,
     }}
   >
-    {args => <NumberShower {...args}/>}
+    {(args) => <NumberShower {...args} />}
   </Story>
 </Canvas>
 
@@ -26,10 +26,10 @@ It uses the symbols "K", "M", "B", and "T", to represent thousands, millions, bi
     name="Ten Billion"
     args={{
       number: 10000000000,
-      precision: 2
+      precision: 2,
     }}
   >
-    {args => <NumberShower {...args}/>}
+    {(args) => <NumberShower {...args} />}
   </Story>
 </Canvas>
 
@@ -38,10 +38,10 @@ It uses the symbols "K", "M", "B", and "T", to represent thousands, millions, bi
     name="1.2*10^15"
     args={{
       number: 1200000000000000,
-      precision: 2
+      precision: 2,
     }}
   >
-    {args => <NumberShower {...args}/>}
+    {(args) => <NumberShower {...args} />}
   </Story>
 </Canvas>
 
@@ -50,10 +50,10 @@ It uses the symbols "K", "M", "B", and "T", to represent thousands, millions, bi
     name="1.35*10^-13"
     args={{
       number: 0.000000000000135,
-      precision: 2
+      precision: 2,
     }}
   >
-    {args => <NumberShower {...args}/>}
+    {(args) => <NumberShower {...args} />}
   </Story>
 </Canvas>
 
