@@ -117,7 +117,8 @@ module Helpers = {
         | Error(err) => GenDistError(ArgumentError(err))
         }
       }
-    | Some(EvDistribution(b)) => switch parseDistributionArray(args) {
+    | Some(EvDistribution(b)) =>
+      switch parseDistributionArray(args) {
       | Ok(distributions) => mixtureWithDefaultWeights(distributions)
       | Error(err) => GenDistError(ArgumentError(err))
       }
