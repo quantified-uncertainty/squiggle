@@ -1,4 +1,5 @@
 [build]
-    publish = "packages/components/storybook-static/"
-    build = "cd packages/squiggle-lang && yarn build && cd ../components && yarn build"
-    ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF packages/components packages/squiggle-lang"
+    base = "packages/components/"
+    publish = "storybook-static/"
+    build = "cd ../squiggle-lang && yarn build && cd ../components && yarn build"
+    ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF . ../squiggle-lang"

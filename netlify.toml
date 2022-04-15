@@ -5,4 +5,4 @@
     NETLIFY_USE_YARN = "true"
 
 [context.deploy-preview]
-    ignore = "node netlify-skip-deploy.js #  -e 'process.env.BRANCH.includes(\"dependabot\") ? 0 : 1'"
+    ignore = "node netlify-skip-deploy.js 
