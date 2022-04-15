@@ -63,8 +63,8 @@ describe("eval on distribution functions", () => {
     testEval("lognormal(5, 2) * 2", "Ok(Lognormal(5.693147180559945,2))")
   })
   describe("division", () => {
-    testEval("lognormal(5,2) / lognormal(10,2)", "Ok(Lognormal(-5,4))")
-    testEval("lognormal(10,2) / lognormal(5,2)", "Ok(Lognormal(5,4))")
+    testEval("lognormal(5,2) / lognormal(10,2)", "Ok(Lognormal(-5,2.8284271247461903))")
+    testEval("lognormal(10,2) / lognormal(5,2)", "Ok(Lognormal(5,2.8284271247461903))")
     testEval("lognormal(5, 2) / 2", "Ok(Lognormal(4.306852819440055,2))")
     testEval("2 / lognormal(5, 2)", "Ok(Lognormal(-4.306852819440055,2))")
     testEval("2 / normal(10, 2)", "Ok(Point Set Distribution)")
