@@ -56,58 +56,60 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
   width,
   height,
 }: SquiggleItemProps) => {
-  if (expression.tag === "number") {
-    return (
-      <VariableBox heading="Number">
-        <NumberShower precision={3} number={expression.value} />
-      </VariableBox>
-    );
-  } else if (expression.tag === "distribution") {
-    let distType = expression.value.type();
-    return (
-      <VariableBox heading={`Distribution (${distType})`}>
-        {distType === "Symbolic" ? (
-          <>
-            <div>{expression.value.toString()}</div>
-          </>
-        ) : (
-          <></>
-        )}
-        <DistributionChart
-          distribution={expression.value}
-          height={height}
-          width={width}
-        />
-      </VariableBox>
-    );
-  } else if (expression.tag === "string") {
-    return (
-      <VariableBox heading="String">{`"${expression.value}"`}</VariableBox>
-    );
-  } else if (expression.tag === "boolean") {
-    return (
-      <VariableBox heading="Boolean">
-        {expression.value == true ? "True" : "False"}
-      </VariableBox>
-    );
-  } else if (expression.tag === "symbol") {
-    return <VariableBox heading="Symbol">{expression.value}</VariableBox>;
-  } else if (expression.tag === "call") {
-    return <VariableBox heading="Call">{expression.value}</VariableBox>;
-  } else if (expression.tag === "array") {
-    return (
-      <VariableBox heading="Array">
-        {expression.value.map((r) => (
-          <SquiggleItem expression={r} width={width - 20} height={50} />
-        ))}
-      </VariableBox>
-    );
-  } else {
-    return (
-      <ErrorBox heading="No Viewer">
-        {"We don't currently have a viewer for record types."}
-      </ErrorBox>
-    );
+  switch (expression.tag) {
+    case "number":
+      return (
+        <VariableBox heading="Number">
+          <NumberShower precision={3} number={expression.value} />
+        </VariableBox>
+      );
+    case "distribution": {
+      let distType = expression.value.type();
+      return (
+        <VariableBox heading={`Distribution (${distType})`}>
+          {distType === "Symbolic" ? (
+            <>
+              <div>{expression.value.toString()}</div>
+            </>
+          ) : (
+            <></>
+          )}
+          <DistributionChart
+            distribution={expression.value}
+            height={height}
+            width={width}
+          />
+        </VariableBox>
+      );
+    }
+    case "string":
+      return (
+        <VariableBox heading="String">{`"${expression.value}"`}</VariableBox>
+      );
+    case "boolean":
+      return (
+        <VariableBox heading="Boolean">
+          {expression.value.toString()}
+        </VariableBox>
+      );
+    case "symbol":
+      return <VariableBox heading="Symbol">{expression.value}</VariableBox>;
+    case "call":
+      return <VariableBox heading="Call">{expression.value}</VariableBox>;
+    case "array":
+      return (
+        <VariableBox heading="Array">
+          {expression.value.map((r) => (
+            <SquiggleItem expression={r} width={width - 20} height={50} />
+          ))}
+        </VariableBox>
+      );
+    default:
+      return (
+        <ErrorBox heading="No Viewer">
+          {"We don't currently have a working viewer for record types."}
+        </ErrorBox>
+      );
   }
 };
 
