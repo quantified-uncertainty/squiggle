@@ -12,6 +12,105 @@ import { DistributionChart } from "./DistributionChart";
 import { ErrorBox } from "./ErrorBox";
 import useSize from "@react-hook/size";
 
+const variableBox = {
+  Component: styled.div`
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    margin-bottom: 0.4em;
+  `,
+  Heading: styled.div`
+    border-bottom: 1px solid #eee;
+    padding-left: 0.8em;
+    padding-right: 0.8em;
+    padding-top: 0.1em;
+  `,
+  Body: styled.div`
+    padding: 0.4em 0.8em;
+  `,
+};
+
+export const VariableBox: React.FC<{
+  heading: string;
+  children: React.ReactNode;
+}> = ({ heading = "Error", children }) => {
+  return (
+    <variableBox.Component>
+      <variableBox.Heading>
+        <h3>{heading}</h3>
+      </variableBox.Heading>
+      <variableBox.Body>{children}</variableBox.Body>
+    </variableBox.Component>
+  );
+};
+
+export interface SquiggleItemProps {
+  /** The input string for squiggle */
+  expression: squiggleExpression;
+  width: number;
+  height: number;
+}
+
+const SquiggleItem: React.FC<SquiggleItemProps> = ({
+  expression,
+  width,
+  height,
+}: SquiggleItemProps) => {
+  if (expression.tag === "number") {
+    return (
+      <VariableBox heading="Number">
+        <NumberShower precision={3} number={expression.value} />
+      </VariableBox>
+    );
+  } else if (expression.tag === "distribution") {
+    let distType = expression.value.type();
+    return (
+      <VariableBox heading={`Distribution (${distType})`}>
+        {distType === "Symbolic" ? (
+          <>
+            <div>{expression.value.toString()}</div>
+          </>
+        ) : (
+          <></>
+        )}
+        <DistributionChart
+          distribution={expression.value}
+          height={height}
+          width={width}
+        />
+      </VariableBox>
+    );
+  } else if (expression.tag === "string") {
+    return (
+      <VariableBox heading="String">{`"${expression.value}"`}</VariableBox>
+    );
+  } else if (expression.tag === "boolean") {
+    return (
+      <VariableBox heading="Boolean">
+        {expression.value == true ? "True" : "False"}
+      </VariableBox>
+    );
+  } else if (expression.tag === "symbol") {
+    return <VariableBox heading="Symbol">{expression.value}</VariableBox>;
+  } else if (expression.tag === "call") {
+    return <VariableBox heading="Call">{expression.value}</VariableBox>;
+  } else if (expression.tag === "array") {
+    return (
+      <VariableBox heading="Array">
+        {expression.value.map((r) => (
+          <SquiggleItem expression={r} width={width - 20} height={50} />
+        ))}
+      </VariableBox>
+    );
+  } else {
+    return (
+      <ErrorBox heading="No Viewer">
+        {"We don't currently have a viewer for record types."}
+      </ErrorBox>
+    );
+  }
+};
+
 export interface SquiggleChartProps {
   /** The input string for squiggle */
   squiggleString?: string;
@@ -35,105 +134,6 @@ export interface SquiggleChartProps {
   width?: number;
   height?: number;
 }
-
-export interface SquiggleItemProps {
-  /** The input string for squiggle */
-  expression: squiggleExpression;
-  width: number;
-  height: number;
-}
-
-const ShowBox = styled.div`
-  background: white;
-  border: 1px solid #eee;
-  border-radius: 2px;
-  margin-bottom: 0.4em;
-`;
-
-const ShowBoxHeading = styled.div`
-  border-bottom: 1px solid #eee;
-  padding-left: 0.8em;
-  padding-right: 0.8em;
-  padding-top: 0.1em;
-`;
-
-const ShowBoxPadding = styled.div`
-  padding: 0.4em 0.8em;
-`;
-
-export const Box: React.FC<{
-  heading: string;
-  children: React.ReactNode;
-}> = ({ heading = "Error", children }) => {
-  return (
-    <ShowBox>
-      <ShowBoxHeading>
-        <h3>{heading}</h3>
-      </ShowBoxHeading>
-      <ShowBoxPadding>{children}</ShowBoxPadding>
-    </ShowBox>
-  );
-};
-
-const SquiggleItem: React.FC<SquiggleItemProps> = ({
-  expression,
-  width,
-  height,
-}: SquiggleItemProps) => {
-  if (expression.tag === "number") {
-    return (
-      <Box heading="Number">
-        <NumberShower precision={3} number={expression.value} />
-      </Box>
-    );
-  } else if (expression.tag === "distribution") {
-    let distType = expression.value.type();
-    return (
-      <Box heading={`Distribution (${distType})`}>
-        {distType === "Symbolic" ? (
-          <>
-            <div>{expression.value.toString()}</div>
-          </>
-        ) : (
-          <></>
-        )}
-        <DistributionChart
-          distribution={expression.value}
-          height={height}
-          width={width}
-        />
-      </Box>
-    );
-  } else if (expression.tag === "string") {
-    return <Box heading="String">{`"${expression.value}"`}</Box>;
-  } else if (expression.tag === "boolean") {
-    return (
-      <Box heading="Boolean">
-        ({expression.value == true ? "True" : "False"})
-      </Box>
-    );
-  } else if (expression.tag === "symbol") {
-    return <Box heading="Symbol">({expression.value})</Box>;
-  } else if (expression.tag === "call") {
-    return <Box heading="Call">({expression.value})</Box>;
-  } else if (expression.tag === "array") {
-    return (
-      <Box heading="Array">
-        <div>
-          {expression.value.map((r) => (
-            <SquiggleItem expression={r} width={width - 20} height={50} />
-          ))}
-        </div>
-      </Box>
-    );
-  } else {
-    return (
-      <ErrorBox heading="No Viewer">
-        {"We don't currently have a viewer for record types."}
-      </ErrorBox>
-    );
-  }
-};
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",

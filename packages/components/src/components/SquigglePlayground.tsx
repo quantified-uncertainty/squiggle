@@ -45,13 +45,12 @@ interface Props2 {
 const ShowBox = styled.div<Props2>`
   border: 1px solid #eee;
   border-radius: 2px;
-  height: ${props => props.height};
+  height: ${(props) => props.height};
 `;
 
 const MyComponent = styled.div`
-  color: ${props => props.theme.colors.main};
+  color: ${(props) => props.theme.colors.main};
 `;
-
 
 interface TitleProps {
   readonly maxHeight: number;
@@ -63,10 +62,13 @@ const Display = styled.div<TitleProps>`
   height: 100vh;
   padding: 3px;
   overflow-y: auto;
-  max-height: ${props => props.maxHeight}px;
+  max-height: ${(props) => props.maxHeight}px;
 `;
 
-let SquigglePlayground: FC<Props> = ({ initialSquiggleString = "", height = 300 }: Props) => {
+let SquigglePlayground: FC<Props> = ({
+  initialSquiggleString = "",
+  height = 300,
+}: Props) => {
   let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
   let [sampleCount, setSampleCount] = useState(1000);
   let [outputXYPoints, setOutputXYPoints] = useState(1000);
@@ -87,7 +89,7 @@ let SquigglePlayground: FC<Props> = ({ initialSquiggleString = "", height = 300 
           />
         </Col>
         <Col span={12}>
-          <Display maxHeight={height-3}>
+          <Display maxHeight={height - 3}>
             <SquiggleChart
               squiggleString={squiggleString}
               sampleCount={sampleCount}

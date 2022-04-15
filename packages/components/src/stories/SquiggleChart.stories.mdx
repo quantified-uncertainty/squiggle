@@ -8,7 +8,7 @@ export const Template = SquiggleChart;
   We have to hardcode a width here, because otherwise some interaction with
   Storybook creates an infinite loop with the internal width
 */
-const width = 500;
+const width = 600;
 
 # Squiggle Chart
 
@@ -23,13 +23,41 @@ could be continuous, discrete or mixed.
 
 ## Distributions
 
-### Continuous Distributions
+### Continuous Distributions (Symbolic)
 
 <Canvas>
   <Story
-    name="Normal"
+    name="Continuous Symbolic"
     args={{
       squiggleString: "normal(5,2)",
+      width,
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+### Continuous Distributions (PointSet)
+
+<Canvas>
+  <Story
+    name="Continuous Pointset"
+    args={{
+      squiggleString: "toPointSet(normal(5,2))",
+      width,
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+### Continuous Distributions (SampleSet)
+
+<Canvas>
+  <Story
+    name="Continuous SampleSet"
+    args={{
+      squiggleString: "toSampleSet(normal(5,2), 1000)",
       width,
     }}
   >
@@ -83,17 +111,13 @@ to allow large and small numbers being printed cleanly.
   </Story>
 </Canvas>
 
-## Functions
-
-Full functions can be returned. These plot out the results of distributions between a set of x-coordinates.
-
-The default is show 10 points between 0 and 10.
+## Arrays
 
 <Canvas>
   <Story
-    name="Function"
+    name="Array"
     args={{
-      squiggleString: "f(x) = normal(x^2,(x+.1)^1.8)\nf",
+      squiggleString: "[normal(5,2), normal(10,1), normal(40,2), 400000]",
       width,
     }}
   >
@@ -108,6 +132,48 @@ The default is show 10 points between 0 and 10.
     name="Error"
     args={{
       squiggleString: "f(x) = normal(",
+      width,
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Booleans
+
+<Canvas>
+  <Story
+    name="Boolean"
+    args={{
+      squiggleString: "3 == 3",
+      width,
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Records
+
+<Canvas>
+  <Story
+    name="Record"
+    args={{
+      squiggleString: "{foo: 35 to 50, bar: [1,2,3]}",
+      width,
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Strings
+
+<Canvas>
+  <Story
+    name="String"
+    args={{
+      squiggleString: '"Lucky day!"',
       width,
     }}
   >
