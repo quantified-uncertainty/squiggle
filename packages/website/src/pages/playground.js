@@ -8,12 +8,9 @@ export default function PlaygroundPage() {
       <div
         style={{
           maxWidth: 2000,
-          paddingTop: "3em",
-          margin: "0 auto",
         }}
       >
-        <h2> Squiggle Playground </h2>
-        <SquigglePlayground initialSquiggleString="normal(0,1)" />
+        <SquigglePlayground initialSquiggleString="normal(0,1)" height={500} />
       </div>
     </Layout>
   );

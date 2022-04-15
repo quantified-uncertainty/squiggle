@@ -196,7 +196,7 @@ export class Distribution {
     );
   }
 
-  type(){
+  type() {
     return this.t.tag;
   }
 
