@@ -39,6 +39,9 @@ let parse_ = (expr: string, parser, converter): result<t, errorValue> =>
 let parse = (mathJsCode: string): result<t, errorValue> =>
   mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromNode)
 
+let parsePartial = (mathJsCode: string): result<t, errorValue> =>
+  mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromPartialNode)
+
 let defaultBindings: T.bindings = Belt.Map.String.empty
 
 /*
@@ -115,15 +118,18 @@ let evalWBindingsExpression_ = (aExpression, bindings): result<expressionValue, 
 
 /*
   Evaluates MathJs code via Reducer using bindings and answers the result
+  When bindings are used, the code is a partial code as if it is cut from a larger code.
 */
 let evalWBindings_ = (codeText: string, bindings: T.bindings) => {
-  parse(codeText)->Result.flatMap(code => code->evalWBindingsExpression_(bindings))
+  parsePartial(codeText)->Result.flatMap(expression => expression->evalWBindingsExpression_(bindings))
 }
 
 /*
-  Evaluates MathJs code via Reducer and answers the result
+  Evaluates MathJs code and bindings via Reducer and answers the result
 */
-let eval = (code: string) => evalWBindings_(code, defaultBindings)
+let eval = (codeText: string) => {
+  parse(codeText)->Result.flatMap(expression => expression->evalWBindingsExpression_(defaultBindings))
+}
 
 type externalBindings = Js.Dict.t<expressionValue>
 

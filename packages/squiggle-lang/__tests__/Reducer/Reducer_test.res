@@ -119,6 +119,10 @@ describe("eval", () => {
       list{("x", ExpressionValue.EvNumber(1.))}->Js.Dict.fromList,
       "Error(JS Exception: Error: Undefined symbol x)",
     )
+    testEvalToBe(
+      "x=1; y=1",
+      "???",
+    )
   })
 })
 
