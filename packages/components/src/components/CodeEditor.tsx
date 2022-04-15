@@ -10,12 +10,16 @@ interface CodeEditorProps {
   onChange: (value: string) => void;
   oneLine?: boolean;
   width?: number;
+  height: number;
+  showGutter?: boolean;
 }
 
 export let CodeEditor: FC<CodeEditorProps> = ({
   value,
   onChange,
   oneLine = false,
+  showGutter = false,
+  height,
 }: CodeEditorProps) => {
   let lineCount = value.split("\n").length;
   let id = _.uniqueId();
@@ -25,9 +29,10 @@ export let CodeEditor: FC<CodeEditorProps> = ({
       mode="golang"
       theme="github"
       width={"100%"}
-      minLines={oneLine ? lineCount : 15}
-      maxLines={oneLine ? lineCount : 15}
-      showGutter={false}
+      height={String(height) + "px"}
+      minLines={oneLine ? lineCount : undefined}
+      maxLines={oneLine ? lineCount : undefined}
+      showGutter={showGutter}
       highlightActiveLine={false}
       showPrintMargin={false}
       onChange={onChange}

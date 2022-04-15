@@ -27,7 +27,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
     return (
       <SquiggleVegaChart
         data={{ con: shape.value.continuous, dis: shape.value.discrete }}
-        width={width}
+        width={width - 20}
         height={height}
         actions={false}
       />

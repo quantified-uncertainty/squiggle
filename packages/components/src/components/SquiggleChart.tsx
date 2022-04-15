@@ -10,6 +10,7 @@ import type { samplingParams, exportEnv } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
 import { ErrorBox } from "./ErrorBox";
+import useSize from "@react-hook/size";
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
@@ -43,12 +44,17 @@ export interface SquiggleItemProps {
 }
 
 const ShowBox = styled.div`
-  border: 1px solid #ddd;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 2px;
+  margin-bottom: 0.4em;
 `;
 
 const ShowBoxHeading = styled.div`
-  border-bottom: 1px solid #ddd;
-  padding: 0.4em 0.8em;
+  border-bottom: 1px solid #eee;
+  padding-left: 0.8em;
+  padding-right: 0.8em;
+  padding-top: 0.1em;
 `;
 
 const ShowBoxPadding = styled.div`
@@ -83,7 +89,14 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
   } else if (expression.tag === "distribution") {
     let distType = expression.value.type();
     return (
-      <Box heading={`Distribution (${distType}${distType === "Symbolic" ? ": " + expression.value.toString() : ""})`}>
+      <Box heading={`Distribution (${distType})`}>
+        {distType === "Symbolic" ? (
+          <>
+            <div>{expression.value.toString()}</div>
+          </>
+        ) : (
+          <></>
+        )}
         <DistributionChart
           distribution={expression.value}
           height={height}
@@ -92,7 +105,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       </Box>
     );
   } else if (expression.tag === "string") {
-    return <Box heading="String">({expression.value})</Box>;
+    return <Box heading="String">{`"${expression.value}"`}</Box>;
   } else if (expression.tag === "boolean") {
     return (
       <Box heading="Boolean">
@@ -128,27 +141,33 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   outputXYPoints = 1000,
   environment = [],
   onEnvChange = () => {},
-  width = 500,
   height = 60,
 }: SquiggleChartProps) => {
+  const target = React.useRef(null);
+  const [width] = useSize(target);
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
     xyPointLength: outputXYPoints,
   };
-
   let expressionResult = run(squiggleString, samplingInputs, environment);
+  let internal = <></>;
   if (expressionResult.tag === "Ok") {
     onEnvChange(environment);
     let expression = expressionResult.value;
-    return (
-      <SquiggleItem expression={expression} width={width} height={height} />
+    internal = (
+      <SquiggleItem
+        expression={expression}
+        width={width - 20}
+        height={height}
+      />
     );
   } else {
     // At this point, we came across an error. What was our error?
-    return (
+    internal = (
       <ErrorBox heading={"Parse Error"}>
         {errorValueToString(expressionResult.value)}
       </ErrorBox>
     );
   }
+  return <div ref={target}>{internal}</div>;
 };
