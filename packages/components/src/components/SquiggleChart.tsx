@@ -142,24 +142,24 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   environment = [],
   onEnvChange = () => {},
   height = 60,
+  width = NaN,
 }: SquiggleChartProps) => {
   const target = React.useRef(null);
-  const [width] = useSize(target);
+  const [componentWidth] = useSize(target);
+  // I would have wanted to just use componentWidth, but this created infinite loops with SquiggleChart.stories.
+  //So you can manually add a width, as an escape hatch.
+  let _width = width || componentWidth;
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
     xyPointLength: outputXYPoints,
   };
   let expressionResult = run(squiggleString, samplingInputs, environment);
-  let internal = <></>;
+  let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
     onEnvChange(environment);
     let expression = expressionResult.value;
     internal = (
-      <SquiggleItem
-        expression={expression}
-        width={width - 20}
-        height={height}
-      />
+      <SquiggleItem expression={expression} width={_width} height={height} />
     );
   } else {
     // At this point, we came across an error. What was our error?
