@@ -1,10 +1,10 @@
 [build]
-    publish = packages/components/storybook-static
-    build = cd packages/squiggle-lang && yarn build && cd ../components && yarn build
+    publish = "packages/components/storybook-static/"
+    build = "cd packages/squiggle-lang && yarn build && cd ../components && yarn build"
     ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF packages/components packages/squiggle-lang"
 
 [build.environment]
     NETLIFY_USE_YARN = true
 
 [context.deploy-preview]
-    ignore = node -e "process.env.BRANCH.includes("dependabot") ? 0 : 1"
+    ignore = "node -e 'process.env.BRANCH.includes("dependabot") ? 0 : 1'"
