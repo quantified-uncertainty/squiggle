@@ -10,6 +10,9 @@ let testEvalToBe = (expr, answer) => test(expr, () => expectEvalToBe(expr, answe
 
 let testDescriptionEvalToBe = (desc, expr, answer) => test(desc, () => expectEvalToBe(expr, answer))
 
+let testEvalBindingsToBe = (expr, bindings, answer) =>
+  test(expr, () => expectEvalBindingsToBe(expr, bindings, answer))
+
 describe("reducer using mathjs parse", () => {
   // Test the MathJs parser compatibility
   // Those tests toString that there is a semantic mapping from MathJs to Expression
@@ -101,6 +104,21 @@ describe("eval", () => {
     testEvalToBe("1; x=1", "Error(Assignment expected)")
     testEvalToBe("1; 1", "Error(Assignment expected)")
     testEvalToBe("x=1; x=1", "Error(Expression expected)")
+  })
+  describe("external bindings", () => {
+    testEvalBindingsToBe(
+      "y=1; x+1",
+      list{("x", ExpressionValue.EvNumber(1.))}->Js.Dict.fromList,
+      "Ok(2)",
+    )
+    testEvalBindingsToBe(
+      // This will go away when we have a proper parser
+      // x+1 is an expression not a block!
+      // Bindings are done for blocks only
+      "x+1",
+      list{("x", ExpressionValue.EvNumber(1.))}->Js.Dict.fromList,
+      "Error(JS Exception: Error: Undefined symbol x)",
+    )
   })
 })
 

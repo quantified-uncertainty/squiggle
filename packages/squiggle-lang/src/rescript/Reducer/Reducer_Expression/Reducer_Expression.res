@@ -110,17 +110,31 @@ let reduceExpression = (expression: t, bindings: T.bindings): result<expressionV
   )
 }
 
-let evalWBindingsExpression = (aExpression, bindings): result<expressionValue, 'e> =>
+let evalWBindingsExpression_ = (aExpression, bindings): result<expressionValue, 'e> =>
   reduceExpression(aExpression, bindings)
 
 /*
   Evaluates MathJs code via Reducer using bindings and answers the result
 */
-let evalWBindings = (codeText: string, bindings: T.bindings) => {
-  parse(codeText)->Result.flatMap(code => code->evalWBindingsExpression(bindings))
+let evalWBindings_ = (codeText: string, bindings: T.bindings) => {
+  parse(codeText)->Result.flatMap(code => code->evalWBindingsExpression_(bindings))
 }
 
 /*
   Evaluates MathJs code via Reducer and answers the result
 */
-let eval = (code: string) => evalWBindings(code, defaultBindings)
+let eval = (code: string) => evalWBindings_(code, defaultBindings)
+
+type externalBindings = Js.Dict.t<expressionValue>
+
+/*
+  Evaluates code with external bindings. External bindings are a record of expression values.
+*/
+let evalWBindings = (code: string, externalBindings: externalBindings) => {
+  let keys = Js.Dict.keys(externalBindings)
+  let bindings = keys->Belt.Array.reduce(defaultBindings, (acc, key) => {
+    let value = Js.Dict.unsafeGet(externalBindings, key)
+    acc->Belt.Map.String.set(key, T.EValue(value))
+  })
+  evalWBindings_(code, bindings)
+}
