@@ -160,14 +160,14 @@ module Lognormal = {
   let multiply = (l1, l2) => {
     // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Multiplication_and_division_of_independent,_log-normal_random_variables
     let mu = l1.mu +. l2.mu
-    let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.) // m
+    let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.)
     #Lognormal({mu: mu, sigma: sigma})
   }
   let divide = (l1, l2) => {
     let mu = l1.mu -. l2.mu
     // We believe the ratiands will have covariance zero.
     // See here https://stats.stackexchange.com/questions/21735/what-are-the-mean-and-variance-of-the-ratio-of-two-lognormal-variables for details
-    let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.) // m
+    let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.)
     #Lognormal({mu: mu, sigma: sigma})
   }
   let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
