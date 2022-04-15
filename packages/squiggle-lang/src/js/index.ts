@@ -28,6 +28,7 @@ import {
   Constructors_cdf,
   Constructors_inv,
   Constructors_normalize,
+  Constructors_isNormalized,
   Constructors_toPointSet,
   Constructors_toSampleSet,
   Constructors_truncate,
@@ -187,6 +188,10 @@ export class Distribution {
 
   inv(n: number): result<number, distributionError> {
     return Constructors_inv({ env: this.env }, this.t, n);
+  }
+
+  isNormalized(): result<boolean, distributionError> {
+    return Constructors_isNormalized({ env: this.env }, this.t);
   }
 
   normalize(): result<Distribution, distributionError> {

@@ -71,11 +71,14 @@ module Operation = {
     | ToString
     | ToSparkline(int)
 
+  type toBool = IsNormalized
+
   type fromDist =
     | ToFloat(toFloat)
     | ToDist(toDist)
     | ToDistCombination(direction, arithmeticOperation, [#Dist(genericDist) | #Float(float)])
     | ToString(toString)
+    | ToBool(toBool)
 
   type singleParamaterFunction =
     | FromDist(fromDist)
@@ -101,6 +104,7 @@ module Operation = {
     | ToDist(Inspect) => `inspect`
     | ToString(ToString) => `toString`
     | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
+    | ToBool(IsNormalized) => `isNormalized`
     | ToDistCombination(Algebraic, _, _) => `algebraic`
     | ToDistCombination(Pointwise, _, _) => `pointwise`
     }
@@ -131,6 +135,7 @@ module Constructors = {
     let inv = (dist, x): t => FromDist(ToFloat(#Inv(x)), dist)
     let pdf = (dist, x): t => FromDist(ToFloat(#Pdf(x)), dist)
     let normalize = (dist): t => FromDist(ToDist(Normalize), dist)
+    let isNormalized = (dist): t => FromDist(ToBool(IsNormalized), dist)
     let toPointSet = (dist): t => FromDist(ToDist(ToPointSet), dist)
     let toSampleSet = (dist, r): t => FromDist(ToDist(ToSampleSet(r)), dist)
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)

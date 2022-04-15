@@ -11,6 +11,7 @@ type outputType =
   | Dist(genericDist)
   | Float(float)
   | String(string)
+  | Bool(bool)
   | GenDistError(error)
 
 @genType
@@ -34,6 +35,8 @@ module Output: {
   let toFloatR: t => result<float, error>
   let toString: t => option<string>
   let toStringR: t => result<string, error>
+  let toBool: t => option<bool>
+  let toBoolR: t => result<bool, error>
   let toError: t => option<error>
   let fmap: (~env: env, t, GenericDist_Types.Operation.singleParamaterFunction) => t
 }
@@ -51,6 +54,8 @@ module Constructors: {
   let pdf: (~env: env, genericDist, float) => result<float, error>
   @genType
   let normalize: (~env: env, genericDist) => result<genericDist, error>
+  @genType
+  let isNormalized: (~env: env, genericDist) => result<bool, error>
   @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>
   @genType

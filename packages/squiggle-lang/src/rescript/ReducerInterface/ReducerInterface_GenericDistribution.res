@@ -1,9 +1,11 @@
 module ExpressionValue = ReducerInterface_ExpressionValue
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
+let defaultSampleCount = 10000
+
 let runGenericOperation = DistributionOperation.run(
   ~env={
-    sampleCount: 1000,
+    sampleCount: defaultSampleCount,
     xyPointLength: 1000,
   },
 )
@@ -50,6 +52,13 @@ module Helpers = {
     dist: GenericDist_Types.genericDist,
   ) => {
     FromDist(GenericDist_Types.Operation.ToString(fnCall), dist)->runGenericOperation->Some
+  }
+
+  let toBoolFn = (
+    fnCall: GenericDist_Types.Operation.toBool,
+    dist: GenericDist_Types.genericDist,
+  ) => {
+    FromDist(GenericDist_Types.Operation.ToBool(fnCall), dist)->runGenericOperation->Some
   }
 
   let toDistFn = (fnCall: GenericDist_Types.Operation.toDist, dist) => {
@@ -193,12 +202,16 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     // https://mathjs.org/docs/reference/functions/exp.html
     Helpers.twoDiststoDistFn(Algebraic, "pow", GenericDist.fromFloat(Math.e), a)->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
+  | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
   | ("cdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist)
   | ("pdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Pdf(float), dist)
   | ("inv", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist)
   | ("toSampleSet", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist)
+  | ("toSampleSet", [EvDistribution(dist)]) =>
+    Helpers.toDistFn(ToSampleSet(defaultSampleCount), dist)
+  | ("inspect", [EvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist)
   | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Truncate(Some(float), None), dist)
   | ("truncateRight", [EvDistribution(dist), EvNumber(float)]) =>
@@ -244,6 +257,7 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | Dist(d) => Ok(ReducerInterface_ExpressionValue.EvDistribution(d))
   | Float(d) => Ok(EvNumber(d))
   | String(d) => Ok(EvString(d))
+  | Bool(d) => Ok(EvBool(d))
   | GenDistError(NotYetImplemented) => Error(RETodo("Function not yet implemented"))
   | GenDistError(Unreachable) => Error(RETodo("Unreachable"))
   | GenDistError(DistributionVerticalShiftIsInvalid) =>
