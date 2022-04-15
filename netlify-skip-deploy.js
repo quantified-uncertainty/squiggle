@@ -1,1 +1,0 @@
-process.env.BRANCH.includes("dependabot") ? 0 : 1
