@@ -211,8 +211,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist)
   | ("toSampleSet", [EvDistribution(dist)]) =>
     Helpers.toDistFn(ToSampleSet(defaultSampleCount), dist)
-  | ("inspect", [EvDistribution(dist)]) =>
-    Helpers.toDistFn(Inspect, dist)
+  | ("inspect", [EvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist)
   | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Truncate(Some(float), None), dist)
   | ("truncateRight", [EvDistribution(dist), EvNumber(float)]) =>

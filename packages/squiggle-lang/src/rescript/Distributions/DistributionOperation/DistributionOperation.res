@@ -120,7 +120,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       (),
     )->OutputLocal.toDistR
 
-  let fromDistFn = (subFnName: GenericDist_Types.Operation.fromDist, dist: genericDist) =>{
+  let fromDistFn = (subFnName: GenericDist_Types.Operation.fromDist, dist: genericDist) => {
     let response = switch subFnName {
     | ToFloat(distToFloatOperation) =>
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
