@@ -39,7 +39,7 @@ let integralEndY = (t: t): float =>
   | SampleSet(_) => 1.0
   }
 
-let isNormalized = (t: t): bool => integralEndY(t) == 1.0
+let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
 let toFloatOperation = (
   t,
