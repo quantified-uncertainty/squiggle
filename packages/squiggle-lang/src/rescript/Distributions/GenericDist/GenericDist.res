@@ -32,6 +32,15 @@ let normalize = (t: t): t =>
   | SampleSet(_) => t
   }
 
+let integralEndY = (t: t): float =>
+  switch t {
+  | PointSet(r) => PointSetDist.T.integralEndY(r)
+  | Symbolic(_) => 1.0
+  | SampleSet(_) => 1.0
+  }
+
+let isNormalized = (t: t): bool => integralEndY(t) == 1.0
+
 let toFloatOperation = (
   t,
   ~toPointSetFn: toPointSetFn,

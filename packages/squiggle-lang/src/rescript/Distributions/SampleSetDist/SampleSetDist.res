@@ -12,12 +12,14 @@ module T: {
   let get: t => array<float>
 } = {
   type t = array<float>
-  let make = (a: array<float>) =>
+  let make = (a: array<float>) =>{
+    Js.log2("makingFromArray", a);
     if E.A.length(a) > 5 {
       Ok(a)
     } else {
       Error("too small")
     }
+  }
   let get = (a: t) => a
 }
 
