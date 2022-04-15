@@ -55,6 +55,8 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
           value={expression}
           onChange={setExpression}
           oneLine={true}
+          showGutter={false}
+          height={20}
         />
       </Input>
       <SquiggleChart

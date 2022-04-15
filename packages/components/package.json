@@ -3,6 +3,7 @@
   "version": "0.1.8",
   "dependencies": {
     "@quri/squiggle-lang": "0.2.2",
+    "@react-hook/size": "^2.1.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.0.1",
     "@testing-library/user-event": "^14.0.4",
