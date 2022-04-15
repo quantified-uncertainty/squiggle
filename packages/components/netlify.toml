@@ -1,5 +1,5 @@
 [build]
     base = "packages/components/"
-    build = "cd ../squiggle-lang && yarn build && cd ../components && yarn build"
+    command = "cd ../squiggle-lang && yarn build && cd ../components && yarn build"
     publish = "storybook-static/"
     ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF . ../squiggle-lang"
