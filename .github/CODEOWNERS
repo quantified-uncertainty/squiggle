@@ -24,6 +24,7 @@
 *.json @quinn-dougherty @Hazelfire @OAGr
 *.y*ml @quinn-dougherty @OAGr
 *.config.js @Hazelfire @OAGr
+netlify.toml @quinn-dougherty @OAGr @Hazelfire 
 
 # Documentation
 *.md @quinn-dougherty @OAGr @Hazelfire
