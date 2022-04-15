@@ -1,0 +1,1 @@
+process.exitCode = process.env.BRANCH.includes("dependabot") ? 0 : 1

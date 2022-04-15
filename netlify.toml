@@ -5,4 +5,4 @@
     NETLIFY_USE_YARN = "true"
 
 [context.deploy-preview]
-    ignore = "node netlify-skip-deploy.js" 
+    ignore = "node scripts/netlify-skip-deploy.js" 
