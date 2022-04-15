@@ -5,4 +5,4 @@
     NETLIFY_USE_YARN = "true"
 
 [context.deploy-preview]
-    ignore = "node scripts/netlify-skip-deploy.js && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF" packages" 
+    ignore = "node scripts/netlify-skip-deploy.js && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF packages" 
