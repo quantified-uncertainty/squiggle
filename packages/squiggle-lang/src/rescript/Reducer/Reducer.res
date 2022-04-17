@@ -11,3 +11,5 @@ let evaluate = Expression.eval
 let evaluateWBindings = Expression.evalWBindings
 let evaluatePartialWBindings = Expression.evalPartialWBindings
 let parse = Expression.parse
+let parseOuter = Expression.parseOuter
+let parsePartial = Expression.parsePartial

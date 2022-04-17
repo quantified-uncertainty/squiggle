@@ -22,3 +22,5 @@ let evaluatePartialWBindings: (
   externalBindings,
 ) => result<externalBindings, Reducer_ErrorValue.errorValue>
 let parse: string => result<Expression.expression, ErrorValue.errorValue>
+let parseOuter: string => result<Expression.expression, ErrorValue.errorValue>
+let parsePartial: string => result<Expression.expression, ErrorValue.errorValue>
