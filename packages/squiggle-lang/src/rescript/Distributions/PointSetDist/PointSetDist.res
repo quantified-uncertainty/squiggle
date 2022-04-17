@@ -93,7 +93,20 @@ module T = Dist({
       t,
     )
 
-  let normalize = fmap((Mixed.T.normalize, Discrete.T.normalize, Continuous.T.normalize))
+  let integralEndY = mapToAll((
+    Mixed.T.Integral.sum,
+    Discrete.T.Integral.sum,
+    Continuous.T.Integral.sum,
+  ))
+
+  let isNormalized = t => integralEndY(t) == 1.0
+
+  let normalize = (t: t): t =>
+    if isNormalized(t) {
+      t
+    } else {
+      t |> fmap((Mixed.T.normalize, Discrete.T.normalize, Continuous.T.normalize))
+    }
 
   let updateIntegralCache = (integralCache, t: t): t =>
     fmap(
@@ -123,11 +136,6 @@ module T = Dist({
     Mixed.T.Integral.get,
     Discrete.T.Integral.get,
     Continuous.T.Integral.get,
-  ))
-  let integralEndY = mapToAll((
-    Mixed.T.Integral.sum,
-    Discrete.T.Integral.sum,
-    Continuous.T.Integral.sum,
   ))
   let integralXtoY = f =>
     mapToAll((Mixed.T.Integral.xToY(f), Discrete.T.Integral.xToY(f), Continuous.T.Integral.xToY(f)))

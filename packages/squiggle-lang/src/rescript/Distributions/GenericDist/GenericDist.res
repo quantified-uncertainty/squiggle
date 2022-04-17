@@ -83,7 +83,8 @@ let toPointSet = (
         pointSetDistLength: xyPointLength,
         kernelWidth: None,
       },
-    )->GenericDist_Types.Error.resultStringToResultError
+    )
+    ->GenericDist_Types.Error.resultStringToResultError
   }
 }
 
@@ -161,10 +162,12 @@ module AlgebraicCombination = {
     arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
     t1: t,
     t2: t,
-  ) =>
+  ) => {
+    let normalize = PointSetDist.T.normalize
     E.R.merge(toPointSet(t1), toPointSet(t2))->E.R2.fmap(((a, b)) =>
-      PointSetDist.combineAlgebraically(arithmeticOperation, a, b)
+      PointSetDist.combineAlgebraically(arithmeticOperation, normalize(a), normalize(b))->normalize
     )
+  }
 
   let runMonteCarlo = (
     toSampleSet: toSampleSetFn,
@@ -196,6 +199,50 @@ module AlgebraicCombination = {
       ? #CalculateWithMonteCarlo
       : #CalculateWithConvolution
 
+  let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
+    let firstOperandIsGreaterThanZero =
+      toFloatOperation(t1, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
+        r > 0.
+      )
+    let secondOperandIsGreaterThanZero =
+      toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
+        r > 0.
+      )
+    let secondOperandHasMassAt1 =
+      toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Pdf(1.0)) |> E.R.fmap(r =>
+        r >= 1e-10
+      )
+    let items = E.A.R.firstErrorOrOpen([
+      firstOperandIsGreaterThanZero,
+      secondOperandIsGreaterThanZero,
+      secondOperandHasMassAt1,
+    ])
+    Js.log2("PMASS", toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Pdf(1.0)))
+    Js.log4("HIHI", items, t1, t2)
+    switch items {
+    | Error(r) => Some(r)
+    | Ok([true, _, _]) => Some(Other("First input of logarithm must be fully greater than 0"))
+    | Ok([false, true, _]) => Some(Other("Second input of logarithm must be fully greater than 0"))
+    | Ok([false, false, true]) =>
+      Some(Other("Second input of logarithm cannot have probability mass at 1.0"))
+    | Ok([false, false, false]) => None
+    | Ok(_) => Some(Unreachable)
+    }
+  }
+
+  let getInvalidOperationError = (
+    t1: t,
+    t2: t,
+    ~toPointSetFn: toPointSetFn,
+    ~arithmeticOperation,
+  ): option<error> => {
+    if arithmeticOperation == #Logarithm {
+      getLogarithmInputError(t1, t2, ~toPointSetFn)
+    } else {
+      None
+    }
+  }
+
   let run = (
     t1: t,
     ~toPointSetFn: toPointSetFn,
@@ -207,15 +254,19 @@ module AlgebraicCombination = {
     | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
     | Some(Error(e)) => Error(Other(e))
     | None =>
-      switch chooseConvolutionOrMonteCarlo(t1, t2) {
-      | #CalculateWithMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-      | #CalculateWithConvolution =>
-        runConvolution(
-          toPointSetFn,
-          arithmeticOperation,
-          t1,
-          t2,
-        )->E.R2.fmap(r => DistributionTypes.PointSet(r))
+      switch getInvalidOperationError(t1, t2, ~toPointSetFn, ~arithmeticOperation) {
+      | Some(e) => Error(e)
+      | None =>
+        switch chooseConvolutionOrMonteCarlo(t1, t2) {
+        | #CalculateWithMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+        | #CalculateWithConvolution =>
+          runConvolution(
+            toPointSetFn,
+            arithmeticOperation,
+            t1,
+            t2,
+          )->E.R2.fmap(r => DistributionTypes.PointSet(PointSetDist.T.normalize(r)))
+        }
       }
     }
   }

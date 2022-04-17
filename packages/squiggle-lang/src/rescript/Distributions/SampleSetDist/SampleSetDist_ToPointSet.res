@@ -133,9 +133,12 @@ let toPointSetDist = (
     ~discrete=Some(discrete),
   )
 
+  //The latter doesn't always produce a normalized result, so we need to normalize it.
+  let normalized = pointSetDist->E.O2.fmap(PointSetDist.T.normalize)
+
   let samplesParse: Internals.Types.outputs = {
     continuousParseParams: pdf |> E.O.fmap(snd),
-    pointSetDist: pointSetDist,
+    pointSetDist: normalized,
   }
 
   samplesParse

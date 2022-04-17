@@ -64,5 +64,10 @@ let sampleN = (t: t, n) => {
 //TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
 let map2 = (~fn: (float, float) => float, ~t1: t, ~t2: t) => {
   let samples = Belt.Array.zip(get(t1), get(t2))->E.A2.fmap(((a, b)) => fn(a, b))
-  make(samples)
+  let has_invalid_results = Belt.Array.some(samples, a => Js.Float.isNaN(a))
+  if has_invalid_results {
+    Error("Distribution combination produced invalid results")
+  } else {
+    make(samples)
+  }
 }
