@@ -6,7 +6,8 @@ labels: "ops & testing"
 
 # Description:
 
-<!-- delete this section if testing task or otherwise not applicable --> 
 # The OS and version, yarn version, etc. in which this came up
+
+<!-- delete this section if testing task or otherwise not applicable -->
 
 # Desired behavior

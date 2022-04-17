@@ -28,6 +28,7 @@ import {
   Constructors_cdf,
   Constructors_inv,
   Constructors_normalize,
+  Constructors_isNormalized,
   Constructors_toPointSet,
   Constructors_toSampleSet,
   Constructors_truncate,
@@ -47,6 +48,7 @@ import {
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
+import { pointSetDistFn } from "../rescript/OldInterpreter/DistPlus.bs";
 export type { samplingParams, errorValue };
 
 export let defaultSamplingInputs: samplingParams = {
@@ -189,10 +191,18 @@ export class Distribution {
     return Constructors_inv({ env: this.env }, this.t, n);
   }
 
+  isNormalized(): result<boolean, distributionError> {
+    return Constructors_isNormalized({ env: this.env }, this.t);
+  }
+
   normalize(): result<Distribution, distributionError> {
     return this.mapResultDist(
       Constructors_normalize({ env: this.env }, this.t)
     );
+  }
+
+  type() {
+    return this.t.tag;
   }
 
   pointSet(): result<shape, distributionError> {

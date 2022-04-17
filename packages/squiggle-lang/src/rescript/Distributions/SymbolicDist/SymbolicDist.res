@@ -1,5 +1,8 @@
 open SymbolicDistTypes
 
+let normal95confidencePoint = 1.6448536269514722
+// explained in website/docs/internal/ProcessingConfidenceIntervals
+
 module Normal = {
   type t = normal
   let make = (mean: float, stdev: float): result<symbolicDist, string> =>
@@ -11,7 +14,7 @@ module Normal = {
 
   let from90PercentCI = (low, high) => {
     let mean = E.A.Floats.mean([low, high])
-    let stdev = (high -. low) /. (2. *. 1.644854)
+    let stdev = (high -. low) /. (2. *. normal95confidencePoint)
     #Normal({mean: mean, stdev: stdev})
   }
   let inv = (p, t: t) => Jstat.Normal.inv(p, t.mean, t.stdev)
@@ -21,12 +24,12 @@ module Normal = {
 
   let add = (n1: t, n2: t) => {
     let mean = n1.mean +. n2.mean
-    let stdev = sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
+    let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
     #Normal({mean: mean, stdev: stdev})
   }
   let subtract = (n1: t, n2: t) => {
     let mean = n1.mean -. n2.mean
-    let stdev = sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
+    let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
     #Normal({mean: mean, stdev: stdev})
   }
 
@@ -42,6 +45,23 @@ module Normal = {
     switch operation {
     | #Add => Some(add(n1, n2))
     | #Subtract => Some(subtract(n1, n2))
+    | _ => None
+    }
+
+  let operateFloatFirst = (operation: Operation.Algebraic.t, n1: float, n2: t) =>
+    switch operation {
+    | #Add => Some(#Normal({mean: n1 +. n2.mean, stdev: n2.stdev}))
+    | #Subtract => Some(#Normal({mean: n1 -. n2.mean, stdev: n2.stdev}))
+    | #Multiply => Some(#Normal({mean: n1 *. n2.mean, stdev: n1 *. n2.stdev}))
+    | _ => None
+    }
+
+  let operateFloatSecond = (operation: Operation.Algebraic.t, n1: t, n2: float) =>
+    switch operation {
+    | #Add => Some(#Normal({mean: n1.mean +. n2, stdev: n1.stdev}))
+    | #Subtract => Some(#Normal({mean: n1.mean -. n2, stdev: n1.stdev}))
+    | #Multiply => Some(#Normal({mean: n1.mean *. n2, stdev: n1.stdev *. n2}))
+    | #Divide => Some(#Normal({mean: n1.mean /. n2, stdev: n1.stdev /. n2}))
     | _ => None
     }
 }
@@ -115,19 +135,22 @@ module Lognormal = {
   let mean = (t: t) => Ok(Jstat.Lognormal.mean(t.mu, t.sigma))
   let sample = (t: t) => Jstat.Lognormal.sample(t.mu, t.sigma)
   let toString = ({mu, sigma}: t) => j`Lognormal($mu,$sigma)`
+
   let from90PercentCI = (low, high) => {
     let logLow = Js.Math.log(low)
     let logHigh = Js.Math.log(high)
     let mu = E.A.Floats.mean([logLow, logHigh])
-    let sigma = (logHigh -. logLow) /. (2.0 *. 1.645)
+    let sigma = (logHigh -. logLow) /. (2.0 *. normal95confidencePoint)
     #Lognormal({mu: mu, sigma: sigma})
   }
   let fromMeanAndStdev = (mean, stdev) => {
+    // https://math.stackexchange.com/questions/2501783/parameters-of-a-lognormal-distribution
+    // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Generation_and_parameters
     if stdev > 0.0 {
-      let variance = Js.Math.pow_float(~base=stdev, ~exp=2.0)
-      let meanSquared = Js.Math.pow_float(~base=mean, ~exp=2.0)
-      let mu = Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance /. meanSquared +. 1.0)
-      let sigma = Js.Math.pow_float(~base=Js.Math.log(variance /. meanSquared +. 1.0), ~exp=0.5)
+      let variance = stdev ** 2.
+      let meanSquared = mean ** 2.
+      let mu = 2. *. Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance +. meanSquared)
+      let sigma = Js.Math.sqrt(Js.Math.log(variance /. meanSquared +. 1.))
       Ok(#Lognormal({mu: mu, sigma: sigma}))
     } else {
       Error("Lognormal standard deviation must be larger than 0")
@@ -135,21 +158,38 @@ module Lognormal = {
   }
 
   let multiply = (l1, l2) => {
+    // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Multiplication_and_division_of_independent,_log-normal_random_variables
     let mu = l1.mu +. l2.mu
-    let sigma = l1.sigma +. l2.sigma
+    let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.)
     #Lognormal({mu: mu, sigma: sigma})
   }
   let divide = (l1, l2) => {
     let mu = l1.mu -. l2.mu
     // We believe the ratiands will have covariance zero.
     // See here https://stats.stackexchange.com/questions/21735/what-are-the-mean-and-variance-of-the-ratio-of-two-lognormal-variables for details
-    let sigma = l1.sigma +. l2.sigma
+    let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.)
     #Lognormal({mu: mu, sigma: sigma})
   }
   let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
     switch operation {
     | #Multiply => Some(multiply(n1, n2))
     | #Divide => Some(divide(n1, n2))
+    | _ => None
+    }
+
+  let operateFloatFirst = (operation: Operation.Algebraic.t, n1: float, n2: t) =>
+    switch operation {
+    | #Multiply =>
+      n1 > 0.0 ? Some(#Lognormal({mu: Js.Math.log(n1) +. n2.mu, sigma: n2.sigma})) : None
+    | #Divide => n1 > 0.0 ? Some(#Lognormal({mu: Js.Math.log(n1) -. n2.mu, sigma: n2.sigma})) : None
+    | _ => None
+    }
+
+  let operateFloatSecond = (operation: Operation.Algebraic.t, n1: t, n2: float) =>
+    switch operation {
+    | #Multiply =>
+      n2 > 0.0 ? Some(#Lognormal({mu: n1.mu +. Js.Math.log(n2), sigma: n1.sigma})) : None
+    | #Divide => n2 > 0.0 ? Some(#Lognormal({mu: n1.mu -. Js.Math.log(n2), sigma: n1.sigma})) : None
     | _ => None
     }
 }
@@ -343,8 +383,28 @@ module T = {
       }
     | (#Normal(v1), #Normal(v2)) =>
       Normal.operate(op, v1, v2) |> E.O.dimap(r => #AnalyticalSolution(r), () => #NoSolution)
+    | (#Float(v1), #Normal(v2)) =>
+      Normal.operateFloatFirst(op, v1, v2) |> E.O.dimap(
+        r => #AnalyticalSolution(r),
+        () => #NoSolution,
+      )
+    | (#Normal(v1), #Float(v2)) =>
+      Normal.operateFloatSecond(op, v1, v2) |> E.O.dimap(
+        r => #AnalyticalSolution(r),
+        () => #NoSolution,
+      )
     | (#Lognormal(v1), #Lognormal(v2)) =>
       Lognormal.operate(op, v1, v2) |> E.O.dimap(r => #AnalyticalSolution(r), () => #NoSolution)
+    | (#Float(v1), #Lognormal(v2)) =>
+      Lognormal.operateFloatFirst(op, v1, v2) |> E.O.dimap(
+        r => #AnalyticalSolution(r),
+        () => #NoSolution,
+      )
+    | (#Lognormal(v1), #Float(v2)) =>
+      Lognormal.operateFloatSecond(op, v1, v2) |> E.O.dimap(
+        r => #AnalyticalSolution(r),
+        () => #NoSolution,
+      )
     | _ => #NoSolution
     }
 

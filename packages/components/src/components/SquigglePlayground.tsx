@@ -3,7 +3,8 @@ import React, { FC, useState } from "react";
 import ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import CodeEditor from "./CodeEditor";
-import { Form, Input, Card, Row, Col } from "antd";
+import { Form, Input, Row, Col } from "antd";
+import styled from "styled-components";
 import "antd/dist/antd.css";
 
 interface FieldFloatProps {
@@ -34,9 +35,40 @@ function FieldFloat(Props: FieldFloatProps) {
 
 interface Props {
   initialSquiggleString?: string;
+  height?: number;
 }
 
-let SquigglePlayground: FC<Props> = ({ initialSquiggleString = "" }: Props) => {
+interface Props2 {
+  height: number;
+}
+
+const ShowBox = styled.div<Props2>`
+  border: 1px solid #eee;
+  border-radius: 2px;
+  height: ${(props) => props.height};
+`;
+
+const MyComponent = styled.div`
+  color: ${(props) => props.theme.colors.main};
+`;
+
+interface TitleProps {
+  readonly maxHeight: number;
+}
+
+const Display = styled.div<TitleProps>`
+  background: #f6f6f6;
+  border-left: 1px solid #eee;
+  height: 100vh;
+  padding: 3px;
+  overflow-y: auto;
+  max-height: ${(props) => props.maxHeight}px;
+`;
+
+let SquigglePlayground: FC<Props> = ({
+  initialSquiggleString = "",
+  height = 300,
+}: Props) => {
   let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
   let [sampleCount, setSampleCount] = useState(1000);
   let [outputXYPoints, setOutputXYPoints] = useState(1000);
@@ -44,81 +76,34 @@ let SquigglePlayground: FC<Props> = ({ initialSquiggleString = "" }: Props) => {
   let [diagramStart, setDiagramStart] = useState(0);
   let [diagramStop, setDiagramStop] = useState(10);
   let [diagramCount, setDiagramCount] = useState(20);
-  var demoDist = (
-    <SquiggleChart
-      squiggleString={squiggleString}
-      sampleCount={sampleCount}
-      outputXYPoints={outputXYPoints}
-      diagramStart={diagramStart}
-      diagramStop={diagramStop}
-      diagramCount={diagramCount}
-      pointDistLength={pointDistLength}
-      height={150}
-    />
-  );
   return (
-    <Row>
-      <Col span={12}>
-        <Card title="Distribution Form">
-          <Form>
-            <Row gutter={16}>
-              <Col span={24}>
-                <CodeEditor
-                  value={squiggleString}
-                  onChange={setSquiggleString}
-                  oneLine={false}
-                />
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col span={12}>
-                <FieldFloat
-                  value={sampleCount}
-                  label="Sample Count"
-                  onChange={setSampleCount}
-                />
-              </Col>
-              <Col span={12}>
-                <FieldFloat
-                  value={outputXYPoints}
-                  onChange={setOutputXYPoints}
-                  label="Output XY-points"
-                />
-              </Col>
-              <Col span={12}>
-                <FieldFloat
-                  value={pointDistLength}
-                  onChange={setPointDistLength}
-                  label="Downsample To"
-                />
-              </Col>
-              <Col span={12}>
-                <FieldFloat
-                  value={diagramStart}
-                  onChange={setDiagramStart}
-                  label="Diagram Start"
-                />
-              </Col>
-              <Col span={12}>
-                <FieldFloat
-                  value={diagramStop}
-                  onChange={setDiagramStop}
-                  label="Diagram Stop"
-                />
-              </Col>
-              <Col span={12}>
-                <FieldFloat
-                  value={diagramCount}
-                  onChange={setDiagramCount}
-                  label="Diagram Count"
-                />
-              </Col>
-            </Row>
-          </Form>
-        </Card>
-      </Col>
-      <Col span={12}>{demoDist}</Col>
-    </Row>
+    <ShowBox height={height}>
+      <Row>
+        <Col span={12}>
+          <CodeEditor
+            value={squiggleString}
+            onChange={setSquiggleString}
+            oneLine={false}
+            showGutter={true}
+            height={height - 3}
+          />
+        </Col>
+        <Col span={12}>
+          <Display maxHeight={height - 3}>
+            <SquiggleChart
+              squiggleString={squiggleString}
+              sampleCount={sampleCount}
+              outputXYPoints={outputXYPoints}
+              diagramStart={diagramStart}
+              diagramStop={diagramStop}
+              diagramCount={diagramCount}
+              pointDistLength={pointDistLength}
+              height={150}
+            />
+          </Display>
+        </Col>
+      </Row>
+    </ShowBox>
   );
 };
 export default SquigglePlayground;

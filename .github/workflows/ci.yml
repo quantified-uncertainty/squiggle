@@ -4,14 +4,10 @@ on:
   push:
     branches:
       - master
-      - production
-      - staging
       - develop
   pull_request:
     branches:
       - master
-      - production
-      - staging
       - develop
 
 jobs:

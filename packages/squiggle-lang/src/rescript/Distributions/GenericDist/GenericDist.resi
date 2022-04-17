@@ -15,6 +15,8 @@ let toString: t => string
 
 let normalize: t => t
 
+let isNormalized: t => bool
+
 let toFloatOperation: (
   t,
   ~toPointSetFn: toPointSetFn,
