@@ -130,12 +130,11 @@ and caseTagOrNodes = (tagOrNodes): result<expression, errorValue> => {
     rPreviousBindings->Result.flatMap(previousBindings => {
       let rStatement: result<expression, errorValue> = switch tagOrNode {
       | BlockNode(node) => fromNode(node)
-      | BlockTag(tag) => switch tag {
-        | ImportVariablesStatement =>
-          passToFunction("$$importVariablesStatement", list{}->Ok)
-        | ExportVariablesExpression =>
-          passToFunction("$$exportVariablesExpression", list{}->Ok)
-      }
+      | BlockTag(tag) =>
+        switch tag {
+        | ImportVariablesStatement => passToFunction("$importVariablesStatement", list{}->Ok)
+        | ExportVariablesExpression => passToFunction("$exportVariablesExpression", list{}->Ok)
+        }
       }
 
       let bindName = if i == lastIndex {
@@ -167,6 +166,30 @@ let fromPartialNode = (mathJsNode: Parse.node): result<expression, errorValue> =
       let completed = Js.Array2.concatMany(
         [BlockTag(ImportVariablesStatement)],
         [[BlockNode(node)], [BlockTag(ExportVariablesExpression)]],
+      )
+      completed->caseTagOrNodes
+    }
+
+    let rFinalExpression: result<expression, errorValue> = switch typedMathJsNode {
+    | MjBlockNode(bNode) => casePartialBlockNode(bNode)
+    | _ => casePartialExpression(mathJsNode)
+    }
+    rFinalExpression
+  })
+}
+
+let fromOuterNode = (mathJsNode: Parse.node): result<expression, errorValue> => {
+  Parse.castNodeType(mathJsNode)->Result.flatMap(typedMathJsNode => {
+    let casePartialBlockNode = (bNode: Parse.blockNode) => {
+      let blocksOrTags = bNode["blocks"]->Belt.Array.map(toTagOrNode)
+      let completed = Js.Array2.concatMany([BlockTag(ImportVariablesStatement)], [blocksOrTags])
+      completed->caseTagOrNodes
+    }
+
+    let casePartialExpression = (node: Parse.node) => {
+      let completed = Js.Array2.concatMany(
+        [BlockTag(ImportVariablesStatement)],
+        [[BlockNode(node)]],
       )
       completed->caseTagOrNodes
     }

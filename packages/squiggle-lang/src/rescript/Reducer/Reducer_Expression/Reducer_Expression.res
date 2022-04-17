@@ -42,6 +42,9 @@ let parse = (mathJsCode: string): result<t, errorValue> =>
 let parsePartial = (mathJsCode: string): result<t, errorValue> =>
   mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromPartialNode)
 
+let parseOuter = (mathJsCode: string): result<t, errorValue> =>
+  mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromOuterNode)
+
 let defaultBindings: T.bindings = Belt.Map.String.empty
 
 /*
@@ -117,30 +120,60 @@ let evalWBindingsExpression_ = (aExpression, bindings): result<expressionValue, 
   reduceExpression(aExpression, bindings)
 
 /*
-  Evaluates MathJs code via Reducer using bindings and answers the result
+  Evaluates MathJs code via Reducer using bindings and answers the result.
   When bindings are used, the code is a partial code as if it is cut from a larger code.
+  Therefore all statments are assignments.
 */
-let evalWBindings_ = (codeText: string, bindings: T.bindings) => {
-  parsePartial(codeText)->Result.flatMap(expression => expression->evalWBindingsExpression_(bindings))
+let evalPartialWBindings_ = (codeText: string, bindings: T.bindings) => {
+  parsePartial(codeText)->Result.flatMap(expression =>
+    expression->evalWBindingsExpression_(bindings)
+  )
+}
+
+/*
+  Evaluates MathJs code via Reducer using bindings and answers the result.
+  When bindings are used, the code is a partial code as if it is cut from a larger code.
+  Therefore all statments are assignments.
+*/
+let evalOuterWBindings_ = (codeText: string, bindings: T.bindings) => {
+  parseOuter(codeText)->Result.flatMap(expression => expression->evalWBindingsExpression_(bindings))
 }
 
 /*
   Evaluates MathJs code and bindings via Reducer and answers the result
 */
 let eval = (codeText: string) => {
-  parse(codeText)->Result.flatMap(expression => expression->evalWBindingsExpression_(defaultBindings))
+  parse(codeText)->Result.flatMap(expression =>
+    expression->evalWBindingsExpression_(defaultBindings)
+  )
 }
 
 type externalBindings = Js.Dict.t<expressionValue>
 
+let externalBindingsToBindings = (externalBindings: externalBindings): T.bindings => {
+  let keys = Js.Dict.keys(externalBindings)
+  keys->Belt.Array.reduce(defaultBindings, (acc, key) => {
+    let value = Js.Dict.unsafeGet(externalBindings, key)
+    acc->Belt.Map.String.set(key, T.EValue(value))
+  })
+}
 /*
   Evaluates code with external bindings. External bindings are a record of expression values.
 */
 let evalWBindings = (code: string, externalBindings: externalBindings) => {
-  let keys = Js.Dict.keys(externalBindings)
-  let bindings = keys->Belt.Array.reduce(defaultBindings, (acc, key) => {
-    let value = Js.Dict.unsafeGet(externalBindings, key)
-    acc->Belt.Map.String.set(key, T.EValue(value))
+  let bindings = externalBindings -> externalBindingsToBindings
+  evalOuterWBindings_(code, bindings)
+}
+
+/*
+  Evaluates code with external bindings. External bindings are a record of expression values.
+  The code is a partial code as if it is cut from a larger code. Therefore all statments are assignments.
+*/
+let evalPartialWBindings = (code: string, externalBindings: externalBindings): result<externalBindings, 'e> => {
+  let bindings = externalBindings -> externalBindingsToBindings
+  let answer = evalPartialWBindings_(code, bindings)
+  answer->Result.flatMap(answer => switch answer {
+    | EvRecord(aRecord) => Ok(aRecord)
+    | _ => RETodo("TODO: External bindings must be returned")->Error
   })
-  evalWBindings_(code, bindings)
 }

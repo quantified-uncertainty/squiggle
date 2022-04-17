@@ -9,4 +9,5 @@ type expressionValue = Reducer_Expression.expressionValue
 type externalBindings = Expression.externalBindings
 let evaluate = Expression.eval
 let evaluateWBindings = Expression.evalWBindings
+let evaluatePartialWBindings = Expression.evalPartialWBindings
 let parse = Expression.parse

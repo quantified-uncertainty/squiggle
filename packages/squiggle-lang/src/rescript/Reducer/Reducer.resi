@@ -12,5 +12,13 @@ type externalBindings = Expression.externalBindings
 @genType
 let evaluate: string => result<expressionValue, Reducer_ErrorValue.errorValue>
 @genType
-let evaluateWBindings: (string, externalBindings) => result<expressionValue, Reducer_ErrorValue.errorValue>
+let evaluateWBindings: (
+  string,
+  externalBindings,
+) => result<expressionValue, Reducer_ErrorValue.errorValue>
+@genType
+let evaluatePartialWBindings: (
+  string,
+  externalBindings,
+) => result<externalBindings, Reducer_ErrorValue.errorValue>
 let parse: string => result<Expression.expression, ErrorValue.errorValue>
