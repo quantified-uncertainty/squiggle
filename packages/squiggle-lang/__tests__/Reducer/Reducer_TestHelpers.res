@@ -19,37 +19,54 @@ let expectEvalToBe = (expr: string, answer: string) =>
 let expectEvalBindingsToBe = (expr: string, bindings: Reducer.externalBindings, answer: string) =>
   Reducer.evaluateWBindings(expr, bindings)->ExpressionValue.toStringResult->expect->toBe(answer)
 
-let expectEvalPartialBindingsToBe = (expr: string, bindings: Reducer.externalBindings, answer: string) =>
-  Reducer.evaluatePartialWBindings(expr, bindings)->ExpressionValue.toStringResultRecord->expect->toBe(answer)
+let expectEvalPartialBindingsToBe = (
+  expr: string,
+  bindings: Reducer.externalBindings,
+  answer: string,
+) =>
+  Reducer.evaluatePartialWBindings(expr, bindings)
+  ->ExpressionValue.toStringResultRecord
+  ->expect
+  ->toBe(answer)
 
 let testParseToBe = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
 let testParseOuterToBe = (expr, answer) => test(expr, () => expectParseOuterToBe(expr, answer))
 let testParsePartialToBe = (expr, answer) => test(expr, () => expectParsePartialToBe(expr, answer))
-
 let testDescriptionParseToBe = (desc, expr, answer) =>
   test(desc, () => expectParseToBe(expr, answer))
 
 let testEvalToBe = (expr, answer) => test(expr, () => expectEvalToBe(expr, answer))
-
 let testDescriptionEvalToBe = (desc, expr, answer) => test(desc, () => expectEvalToBe(expr, answer))
-
 let testEvalBindingsToBe = (expr, bindingsList, answer) =>
   test(expr, () => expectEvalBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
-
 let testEvalPartialBindingsToBe = (expr, bindingsList, answer) =>
   test(expr, () => expectEvalPartialBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
 
 module MySkip = {
+  let testParseToBe = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
+  let testParseOuterToBe = (expr, answer) =>
+    Skip.test(expr, () => expectParseOuterToBe(expr, answer))
+  let testParsePartialToBe = (expr, answer) =>
+    Skip.test(expr, () => expectParsePartialToBe(expr, answer))
   let testEvalToBe = (expr, answer) => Skip.test(expr, () => expectEvalToBe(expr, answer))
   let testEvalBindingsToBe = (expr, bindingsList, answer) =>
     Skip.test(expr, () => expectEvalBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
   let testEvalPartialBindingsToBe = (expr, bindingsList, answer) =>
-    Skip.test(expr, () => expectEvalPartialBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
+    Skip.test(expr, () =>
+      expectEvalPartialBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer)
+    )
 }
 module MyOnly = {
+  let testParseToBe = (expr, answer) => Only.test(expr, () => expectParseToBe(expr, answer))
+  let testParseOuterToBe = (expr, answer) =>
+    Only.test(expr, () => expectParseOuterToBe(expr, answer))
+  let testParsePartialToBe = (expr, answer) =>
+    Only.test(expr, () => expectParsePartialToBe(expr, answer))
   let testEvalToBe = (expr, answer) => Only.test(expr, () => expectEvalToBe(expr, answer))
   let testEvalBindingsToBe = (expr, bindingsList, answer) =>
     Only.test(expr, () => expectEvalBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
   let testEvalPartialBindingsToBe = (expr, bindingsList, answer) =>
-    Only.test(expr, () => expectEvalPartialBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
+    Only.test(expr, () =>
+      expectEvalPartialBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer)
+    )
 }

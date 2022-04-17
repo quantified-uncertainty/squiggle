@@ -1,20 +1,72 @@
 open Jest
 open Reducer_TestHelpers
 
+Skip.describe("Parse for Bindings", () => {
+  testParseOuterToBe(
+    "x",
+    "????",
+    ) 
+  testParseOuterToBe(
+    "x+1",
+    "????",
+    ) 
+  testParseOuterToBe(
+    "y = x+1; y",
+    "????",
+    ) 
+  testParsePartialToBe(
+    "x",
+    "????",
+    ) 
+  testParsePartialToBe(
+    "y=x",
+    "????",
+    ) 
+  testParsePartialToBe(
+    "y=x+1",
+    "????",
+    ) 
+  testParsePartialToBe(
+    "y = x+1; z = y",
+    "????",
+    ) 
+})
 
-describe("external bindings", () => {
-MySkip.testEvalBindingsToBe(
-    "y=1; x+1",
+Skip.describe("Eval for Bindings", () => {
+  testEvalBindingsToBe(
+    "x",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "Ok(2)",
-)
-MySkip.testEvalBindingsToBe(
-    // This will go away when we have a proper parser
-    // x+1 is an expression not a block!
-    // Bindings are done for blocks only
+    "????",
+    ) 
+  testEvalBindingsToBe(
     "x+1",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "Error(JS Exception: Error: Undefined symbol x)",
-)
-MySkip.testEvalToBe("x=1; y=1", "???")
+    "????",
+    ) 
+  testEvalBindingsToBe(
+    "y = x+1; y",
+    list{("x", ExpressionValue.EvNumber(1.))},
+    "????",
+    ) 
+  testEvalPartialBindingsToBe(
+    "x",
+    list{("x", ExpressionValue.EvNumber(1.))},
+    "????",
+    ) 
+  testEvalPartialBindingsToBe(
+    "y=x",
+    list{("x", ExpressionValue.EvNumber(1.))},
+    "????",
+    ) 
+  testEvalBindingsToBe(
+    "y=x+1",
+    list{("x", ExpressionValue.EvNumber(1.))},
+    "????",
+    ) 
+  testEvalBindingsToBe(
+    "y = x+1; z = y",
+    list{("x", ExpressionValue.EvNumber(1.))},
+    "????",
+    ) 
 })
+
