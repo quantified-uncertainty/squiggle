@@ -33,17 +33,18 @@ let rec toString = aValue =>
         ->Js.String.concatMany("")
       `[${args}]`
     }
-  | EvRecord(aRecord) => {
-      let pairs =
-        aRecord
-        ->Js.Dict.entries
-        ->Belt.Array.map(((eachKey, eachValue)) => `${eachKey}: ${toString(eachValue)}`)
-        ->Extra_Array.interperse(", ")
-        ->Js.String.concatMany("")
-      `{${pairs}}`
-    }
+  | EvRecord(aRecord) => aRecord->toStringRecord
   | EvDistribution(dist) => GenericDist.toString(dist)
   }
+and toStringRecord = aRecord => {
+  let pairs =
+    aRecord
+    ->Js.Dict.entries
+    ->Belt.Array.map(((eachKey, eachValue)) => `${eachKey}: ${toString(eachValue)}`)
+    ->Extra_Array.interperse(", ")
+    ->Js.String.concatMany("")
+  `{${pairs}}`
+}
 
 let toStringWithType = aValue =>
   switch aValue {
@@ -66,5 +67,11 @@ let toStringFunctionCall = ((fn, args)): string => `${fn}(${argsToString(args)})
 let toStringResult = x =>
   switch x {
   | Ok(a) => `Ok(${toString(a)})`
+  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
+  }
+
+let toStringResultRecord = x =>
+  switch x {
+  | Ok(a) => `Ok(${toStringRecord(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
