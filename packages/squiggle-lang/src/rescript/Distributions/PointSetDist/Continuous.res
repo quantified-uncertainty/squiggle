@@ -246,7 +246,7 @@ let downsampleEquallyOverX = (length, t): t =>
 
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
-let combineAlgebraicallyWithDiscrete = (
+let combineAlgebraicallyWithDiscreteSecond = (
   op: Operation.algebraicOperation,
   t1: t,
   t2: PointSetTypes.discreteShape,
@@ -277,6 +277,40 @@ let combineAlgebraicallyWithDiscrete = (
 
     // TODO: It could make sense to automatically transform the integrals here (shift or scale)
     make(~interpolation=t1.interpolation, ~integralSumCache=combinedIntegralSum, combinedShape)
+  }
+}
+
+let combineAlgebraicallyWithDiscreteFirst = (
+  op: Operation.algebraicOperation,
+  t1: PointSetTypes.discreteShape,
+  t2: t,
+) => {
+  let t1s = t1.xyShape
+  let t2s = t2->getShape
+
+  if XYShape.T.isEmpty(t1s) || XYShape.T.isEmpty(t2s) {
+    empty
+  } else {
+    let continuousAsLinear = switch t2.interpolation {
+    | #Linear => t2
+    | #Stepwise => stepwiseToLinear(t2)
+    }
+
+    let combinedShape = AlgebraicShapeCombination.combineShapesDiscreteContinuous(
+      op,
+      t1s,
+      continuousAsLinear |> getShape,
+    )
+
+    let combinedIntegralSum = switch op {
+    | #Multiply
+    | #Divide =>
+      Common.combineIntegralSums((a, b) => Some(a *. b), t1.integralSumCache, t2.integralSumCache)
+    | _ => None
+    }
+
+    // TODO: It could make sense to automatically transform the integrals here (shift or scale)
+    make(~interpolation=t2.interpolation, ~integralSumCache=combinedIntegralSum, combinedShape)
   }
 }
 
