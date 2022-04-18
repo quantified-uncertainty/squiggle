@@ -5,7 +5,7 @@
     "@quri/squiggle-lang": "0.2.2",
     "@react-hook/size": "^2.1.2",
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.0.1",
+    "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^14.1.1",
     "@types/jest": "^27.4.0",
     "@types/lodash": "^4.14.181",
