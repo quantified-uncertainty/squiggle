@@ -7,7 +7,7 @@ let getApproximatePdfOfContinuousDistributionAtPoint = (
 ): float => {
   let closestFromBelowIndex = E.A.reducei(dist.xs, None, (accumulator, item, index) =>
     item < point ? Some(index) : accumulator
-  )
+  ) // This could be improved by taking advantage of the fact that these are ordered
   let closestFromAboveIndexOption = Belt.Array.getIndexBy(dist.xs, item => item > point)
 
   let weightedMean = (
@@ -29,7 +29,7 @@ let getApproximatePdfOfContinuousDistributionAtPoint = (
     raise(
       LogicallyInconsistent(
         "Logically inconsistent option in NumericShapeCombination2.res. Possibly caused by empty distribution",
-      ),
+      ), // to do: give an error type
     ) // all are smaller, and all are larger
   | (None, Some(i)) => 0.0 // none are smaller, all are larger
   | (Some(i), None) => 0.0 // all are smaller, none are larger
@@ -66,6 +66,9 @@ let addContinuousContinuous = (
   let getApproximatePdfOfS2AtPoint = x => getApproximatePdfOfContinuousDistributionAtPoint(s2, x)
   let float = x => Belt.Int.toFloat(x)
   // Compute the integral numerically.
+  // I wouldn't worry too much about the O(n^3). At 5000 samples, this takes on the order of 25 million operations
+  // The AMD Ryzen 7 processor in my computer can do around 300K million operations per second.
+  // src: https://wikiless.org/wiki/Instructions_per_second?lang=en#Thousand_instructions_per_second_(TIPS/kIPS)
   for i in 0 to numIntervals - 1 {
     newXs[i] = lowerBound +. float(i) *. epsilon
     newYs[i] = 0.0
@@ -83,6 +86,13 @@ let addContinuousContinuous = (
   {xs: newXs, ys: newYs}
 }
 
+let getArithmeticComplementOfDistributionForSubstraction = (
+  dist: PointSetTypes.xyShape,
+): PointSetTypes.xyShape => {
+  let newXs = Belt.Array.map(dist.xs, x => -.x)
+  {xs: newXs, ys: dist.ys}
+}
+
 let combineShapesContinuousContinuous = (
   op: Operation.algebraicOperation,
   s1: PointSetTypes.xyShape,
@@ -90,11 +100,12 @@ let combineShapesContinuousContinuous = (
 ): PointSetTypes.xyShape => {
   let result = switch op {
   | #Add => addContinuousContinuous(s1, s2)
-  | #Subtract => emptyXYShape
+  | #Subtract =>
+    addContinuousContinuous(s1, getArithmeticComplementOfDistributionForSubstraction(s2))
   | #Multiply => emptyXYShape
+  | #Divide => emptyXYShape
   | #Power => emptyXYShape
   | #Logarithm => emptyXYShape
-  | #Divide => emptyXYShape
   }
   result
 }
