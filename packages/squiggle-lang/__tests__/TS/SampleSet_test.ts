@@ -1,4 +1,5 @@
 import { Distribution } from "../../src/js/index";
+import { expectErrorToBeBounded, failDefault } from "./TestHelpers";
 import * as fc from "fast-check";
 
 // Beware: float64Array makes it appear in an infinite loop.
@@ -126,80 +127,49 @@ describe("SampleSet: cdf", () => {
 //  });
 // });
 
+// This should be true, but I can't get it to work.
 // describe("SampleSet: mean is mean", () => {
-//  test("mean(samples(xs)) sampling twice as widely as the input", () => {
-//    fc.assert(
-//      fc.property(
-//        fc.float64Array({ minLength: 10, maxLength: 100000 }),
-//        (xs) => {
-//          let ys = Array.from(xs);
-//          let n = ys.length;
-//          let dist = new Distribution(
-//            { tag: "SampleSet", value: ys },
-//            { sampleCount: 2 * n, xyPointLength: 4 * n }
-//          );
-//
-//          expect(dist.mean().value).toBeCloseTo(
-//            ys.reduce((a, b) => a + b, 0.0) / n
-//          );
-//        }
-//      )
-//    );
-//  });
-//
-//  test("mean(samples(xs)) sampling half as widely as the input", () => {
-//    fc.assert(
-//      fc.property(
-//        fc.float64Array({ minLength: 10, maxLength: 100000 }),
-//        (xs) => {
-//          let ys = Array.from(xs);
-//          let n = ys.length;
-//          let dist = new Distribution(
-//            { tag: "SampleSet", value: ys },
-//            { sampleCount: Math.floor(5 / 2), xyPointLength: 4 * n }
-//          );
-//
-//          expect(dist.mean().value).toBeCloseTo(
-//            ys.reduce((a, b) => a + b, 0.0) / n
-//          );
-//        }
-//      )
-//    );
-//  });
+// test("mean(samples(xs)) sampling twice as widely as the input", () => {
+//   fc.assert(
+//     fc.property(
+//       fc.float64Array({ minLength: 10, maxLength: 100000 }),
+//       (xs) => {
+//         let ys = Array.from(xs);
+//         let n = ys.length;
+//         let dist = new Distribution(
+//           { tag: "SampleSet", value: ys },
+//           { sampleCount: 2 * n, xyPointLength: 4 * n }
+//         );
+//         let mean = dist.mean()
+//         if (typeof mean.value == "number") {
+//           expectErrorToBeBounded(mean.value, ys.reduce((a, b) => a + b, 0.0) / n, 5e-1, 1)
+//         } else {
+//           failDefault()
+//         }
+//       }
+//     )
+//   );
 // });
-
-// describe("Mean of mixture is weighted average of means", () => {
-//  test("mx(beta(a,b), lognormal(m,s), [x,y])", () => {
-//    fc.assert(
-//      fc.property(
-//        fc.float({ min: 1e-1 }),  // alpha
-//        fc.float({ min: 1 }),   // beta
-//        fc.float(),  // mu
-//        fc.float({ min: 1e-1 }),  // sigma
-//        fc.float({ min: 1e-7 }),
-//        fc.float({ min: 1e-7 }),
-//        (a, b, m, s, x, y) => {
-//          let squiggleString = `mean(mx(beta(${a},${b}), lognormal(${m},${s}), [${x}, ${y}]))`;
-//          let res = testRun(squiggleString);
-//          switch (res.tag) {
-//            case "Error":
-//              expect(errorValueToString(res.value)).toEqual(
-//                "<I wonder if test cases will find this>"
-//              );
-//            case "Ok":
-//              let betaWeight = x / (x + y);
-//              let lognormalWeight = y / (x + y);
-//              let betaMean = 1 / (1 + b / a);
-//              let lognormalMean = m + s ** 2 / 2;
-//              expect(res.value).toEqual({
-//                tag: "number",
-//                value: betaWeight * betaMean + lognormalWeight * lognormalMean,
-//              });
-//            default:
-//              expect("mean returned").toBe(`something other than a number`);
-//          }
-//        }
-//      )
-//    );
-//  });
+//
+// test("mean(samples(xs)) sampling half as widely as the input", () => {
+//   fc.assert(
+//     fc.property(
+//       fc.float64Array({ minLength: 10, maxLength: 100000 }),
+//       (xs) => {
+//         let ys = Array.from(xs);
+//         let n = ys.length;
+//         let dist = new Distribution(
+//           { tag: "SampleSet", value: ys },
+//           { sampleCount: Math.floor(n / 2), xyPointLength: 4 * n }
+//         );
+//         let mean = dist.mean()
+//         if (typeof mean.value == "number") {
+//           expectErrorToBeBounded(mean.value, ys.reduce((a, b) => a + b, 0.0) / n, 5e-1, 1)
+//         } else {
+//           failDefault()
+//         }
+//       }
+//     )
+//   );
+// });
 // });
