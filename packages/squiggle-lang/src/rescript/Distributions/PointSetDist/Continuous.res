@@ -263,7 +263,7 @@ let combineAlgebraicallyWithDiscrete = (
     | #Stepwise => stepwiseToLinear(t1)
     }
 
-    let combinedShape = AlgebraicShapeCombination.combineShapesContinuousDiscrete(
+    let combinedShape = NumericShapeCombination.combineShapesContinuousDiscrete(
       op,
       continuousAsLinear |> getShape,
       t2s,
@@ -290,7 +290,7 @@ let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t) => {
   if t1n == 0 || t2n == 0 {
     empty
   } else {
-    let combinedShape = AlgebraicShapeCombination.combineShapesContinuousContinuous(op, s1, s2)
+    let combinedShape = NumericShapeCombination.combineShapesContinuousContinuous(op, s1, s2)
     let combinedIntegralSum = Common.combineIntegralSums(
       (a, b) => Some(a *. b),
       t1.integralSumCache,
