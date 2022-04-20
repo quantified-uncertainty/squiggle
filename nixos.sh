@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
+# This script is only relevant if you're rolling nixos.
+
+# Esy (a bisect_ppx dependency/build tool) is borked on nixos without using an FHS shell. https://github.com/esy/esy/issues/858
+# We need to patchelf rescript executables. https://github.com/NixOS/nixpkgs/issues/107375
 set -x
 
 fhsShellName="squiggle-development"
-# Esy (a bisect_ppx dependency/build tool) is borked on nixos without using an FHS shell. https://github.com/esy/esy/issues/858
 fhsShellDotNix="{pkgs ? import <nixpkgs> {} }: (pkgs.buildFHSUserEnv { name = \"${fhsShellName}\"; targetPkgs = pkgs: [pkgs.yarn]; runScript = \"yarn\"; }).env"
 nix-shell - <<<"$fhsShellDotNix"
 
-# We need to patchelf rescript executables. https://github.com/NixOS/nixpkgs/issues/107375
 theLd=$(patchelf --print-interpreter $(which mkdir))
 patchelf --set-interpreter $theLd ./node_modules/gentype/gentype.exe
 patchelf --set-interpreter $theLd ./node_modules/rescript/linux/*.exe

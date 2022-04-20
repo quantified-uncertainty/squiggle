@@ -1,15 +1,29 @@
 import {
   run,
-  Distribution,
+  // Distribution,
   squiggleExpression,
   errorValueToString,
-  errorValue,
-  result,
+  // errorValue,
+  // result,
 } from "../../src/js/index";
 
-export function testRun(x: string): any {
+export function testRunR(x: string): any {
   //: result<squiggleExpression, errorValue> => {
   return run(x, { sampleCount: 1000, xyPointLength: 100 });
+}
+
+export function testRun(x: string): squiggleExpression {
+  let squiggleResult = run(x, { sampleCount: 1000, xyPointLength: 100 });
+  // return squiggleResult.value
+  if (squiggleResult.tag === "Ok") {
+    return squiggleResult.value;
+  } else {
+    throw new Error(
+      `Expected squiggle expression to evaluate but got error: ${errorValueToString(
+        squiggleResult.value
+      )}`
+    );
+  }
 }
 
 export function failDefault() {

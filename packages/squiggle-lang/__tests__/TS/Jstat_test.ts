@@ -1,44 +1,26 @@
-import { errorValueToString } from "../../src/js/index";
+// import { errorValueToString } from "../../src/js/index";
 import * as fc from "fast-check";
 import { testRun } from "./TestHelpers";
 
-describe("Jstat: cumulative density function", () => {
-  test("of a normal distribution at 3 stdevs to the right of the mean is within epsilon of 1", () => {
+describe("cumulative density function of a normal distribution", () => {
+  test("at 3 stdevs to the right of the mean is near 1", () => {
     fc.assert(
       fc.property(fc.float(), fc.float({ min: 1e-7 }), (mean, stdev) => {
-        let squiggleString = `cdf(normal(${mean}, ${stdev}), ${
-          mean + 3 * stdev
-        })`;
+        let threeStdevsAboveMean = mean + 3 * stdev;
+        let squiggleString = `cdf(normal(${mean}, ${stdev}), ${threeStdevsAboveMean})`;
         let squiggleResult = testRun(squiggleString);
-        let epsilon = 5e-3;
-        switch (squiggleResult.tag) {
-          case "Error":
-            expect(errorValueToString(squiggleResult.value)).toEqual(
-              "<Test cases don't seem to be finding this>"
-            );
-          case "Ok":
-            expect(squiggleResult.value.value).toBeGreaterThan(1 - epsilon);
-        }
+        expect(squiggleResult.value).toBeCloseTo(1);
       })
     );
   });
 
-  test("of a normal distribution at 3 stdevs to the left of the mean is within epsilon of 0", () => {
+  test("at 3 stdevs to the left of the mean is near 0", () => {
     fc.assert(
       fc.property(fc.float(), fc.float({ min: 1e-7 }), (mean, stdev) => {
-        let squiggleString = `cdf(normal(${mean}, ${stdev}), ${
-          mean - 3 * stdev
-        })`;
+        let threeStdevsBelowMean = mean - 3 * stdev;
+        let squiggleString = `cdf(normal(${mean}, ${stdev}), ${threeStdevsBelowMean})`;
         let squiggleResult = testRun(squiggleString);
-        let epsilon = 5e-3;
-        switch (squiggleResult.tag) {
-          case "Error":
-            expect(errorValueToString(squiggleResult.value)).toEqual(
-              "<Test cases don't seem to be finding this>"
-            );
-          case "Ok":
-            expect(squiggleResult.value.value).toBeLessThan(epsilon);
-        }
+        expect(squiggleResult.value).toBeCloseTo(0);
       })
     );
   });

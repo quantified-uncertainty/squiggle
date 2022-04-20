@@ -1,5 +1,5 @@
 import { Distribution } from "../../src/js/index";
-import { expectErrorToBeBounded, failDefault } from "./TestHelpers";
+// import { expectErrorToBeBounded, failDefault } from "./TestHelpers";
 import * as fc from "fast-check";
 
 // Beware: float64Array makes it appear in an infinite loop.
@@ -11,20 +11,53 @@ let arrayGen = () =>
     noNaN: true,
   });
 
-describe("SampleSet: cdf", () => {
+describe("cumulative density function", () => {
   let n = 10000;
-  test("at the highest number in the distribution is within epsilon of 1", () => {
+
+  //  // We should obtain the math here.
+  // test("'s codomain is bounded above", () => {
+  //   fc.assert(
+  //     fc.property(arrayGen(), fc.float(), (xs_, x) => {
+  //       let xs = Array.from(xs_);
+  //       // Should compute with squiggle strings once interpreter has `sample`
+  //       let dist = new Distribution(
+  //         { tag: "SampleSet", value: xs },
+  //         { sampleCount: n, xyPointLength: 100 }
+  //       );
+  //       let cdfValue = dist.cdf(x).value;
+  //       let epsilon = 5e-7
+  //       expect(cdfValue).toBeLessThanOrEqual(1 + epsilon)
+  //     })
+  //   );
+  // })
+
+  test("'s codomain is bounded below", () => {
     fc.assert(
-      fc.property(arrayGen(), (xs) => {
-        let ys = Array.from(xs);
-        let max = Math.max(...ys);
-        // Should compute with squiglge strings once interpreter has `sample`
+      fc.property(arrayGen(), fc.float(), (xs_, x) => {
+        let xs = Array.from(xs_);
+        // Should compute with squiggle strings once interpreter has `sample`
         let dist = new Distribution(
-          { tag: "SampleSet", value: ys },
+          { tag: "SampleSet", value: xs },
+          { sampleCount: n, xyPointLength: 100 }
+        );
+        let cdfValue = dist.cdf(x).value;
+        expect(cdfValue).toBeGreaterThanOrEqual(0);
+      })
+    );
+  });
+
+  test("at the highest number in the sample is close to 1", () => {
+    fc.assert(
+      fc.property(arrayGen(), (xs_) => {
+        let xs = Array.from(xs_);
+        let max = Math.max(...xs);
+        // Should compute with squiggle strings once interpreter has `sample`
+        let dist = new Distribution(
+          { tag: "SampleSet", value: xs },
           { sampleCount: n, xyPointLength: 100 }
         );
         let cdfValue = dist.cdf(max).value;
-        let min = Math.min(...ys);
+        let min = Math.min(...xs);
         let epsilon = 5e-3;
         if (max - min < epsilon) {
           expect(cdfValue).toBeLessThan(1 - epsilon);
@@ -38,16 +71,16 @@ describe("SampleSet: cdf", () => {
   // I may simply be mistaken about the math here.
   // test("at the lowest number in the distribution is within epsilon of 0", () => {
   //   fc.assert(
-  //     fc.property(arrayGen(), (xs) => {
-  //       let ys = Array.from(xs);
-  //       let min = Math.min(...ys);
+  //     fc.property(arrayGen(), (xs_) => {
+  //       let xs = Array.from(xs_);
+  //       let min = Math.min(...xs);
   //       // Should compute with squiggle strings once interpreter has `sample`
   //       let dist = new Distribution(
-  //         { tag: "SampleSet", value: ys },
+  //         { tag: "SampleSet", value: xs },
   //         { sampleCount: n, xyPointLength: 100 }
   //       );
   //       let cdfValue = dist.cdf(min).value;
-  //       let max = Math.max(...ys);
+  //       let max = Math.max(...xs);
   //       let epsilon = 5e-3;
   //       if (max - min < epsilon) {
   //         expect(cdfValue).toBeGreaterThan(4 * epsilon);
@@ -61,14 +94,14 @@ describe("SampleSet: cdf", () => {
   // I believe this is true, but due to bugs can't get the test to pass.
   //  test("is <= 1 everywhere with equality when x is higher than the max", () => {
   //    fc.assert(
-  //      fc.property(arrayGen(), fc.float(), (xs, x) => {
-  //        let ys = Array.from(xs);
+  //      fc.property(arrayGen(), fc.float(), (xs_, x) => {
+  //        let xs = Array.from(xs_);
   //        let dist = new Distribution(
-  //          { tag: "SampleSet", value: ys },
+  //          { tag: "SampleSet", value: xs },
   //          { sampleCount: n, xyPointLength: 100 }
   //        );
   //        let cdfValue = dist.cdf(x).value;
-  //        let max = Math.max(...ys)
+  //        let max = Math.max(...xs)
   //        if (x > max) {
   //          let epsilon = (x - max) / x
   //          expect(cdfValue).toBeGreaterThan(1 * (1 - epsilon));
@@ -81,16 +114,16 @@ describe("SampleSet: cdf", () => {
   //    );
   //  });
 
-  test("is >= 0 everywhere with equality when x is lower than the min", () => {
+  test("is non-negative everywhere with zero when x is lower than the min", () => {
     fc.assert(
-      fc.property(arrayGen(), fc.float(), (xs, x) => {
-        let ys = Array.from(xs);
+      fc.property(arrayGen(), fc.float(), (xs_, x) => {
+        let xs = Array.from(xs_);
         let dist = new Distribution(
-          { tag: "SampleSet", value: ys },
+          { tag: "SampleSet", value: xs },
           { sampleCount: n, xyPointLength: 100 }
         );
         let cdfValue = dist.cdf(x).value;
-        if (x < Math.min(...ys)) {
+        if (x < Math.min(...xs)) {
           expect(cdfValue).toEqual(0);
         } else {
           expect(cdfValue).toBeGreaterThan(0);
@@ -101,18 +134,18 @@ describe("SampleSet: cdf", () => {
 });
 
 // // I no longer believe this is true.
-// describe("SampleSet: pdf", () => {
+// describe("probability density function", () => {
 //  let n = 1000;
 //
 //  test("assigns to the max at most the weight of the mean", () => {
 //    fc.assert(
-//      fc.property(arrayGen(), (xs) => {
-//        let ys = Array.from(xs);
-//        let max = Math.max(...ys);
-//        let mean = ys.reduce((a, b) => a + b, 0.0) / ys.length;
+//      fc.property(arrayGen(), (xs_) => {
+//        let xs = Array.from(xs_);
+//        let max = Math.max(...xs);
+//        let mean = xs.reduce((a, b) => a + b, 0.0) / ys.length;
 //        // Should be from squiggleString once interpreter exposes sampleset
 //        let dist = new Distribution(
-//          { tag: "SampleSet", value: ys },
+//          { tag: "SampleSet", value: xs },
 //          { sampleCount: n, xyPointLength: 100 }
 //        );
 //        let pdfValueMean = dist.pdf(mean).value;
@@ -128,21 +161,21 @@ describe("SampleSet: cdf", () => {
 // });
 
 // This should be true, but I can't get it to work.
-// describe("SampleSet: mean is mean", () => {
-// test("mean(samples(xs)) sampling twice as widely as the input", () => {
+// describe("mean is mean", () => {
+// test("when sampling twice as widely as the input", () => {
 //   fc.assert(
 //     fc.property(
 //       fc.float64Array({ minLength: 10, maxLength: 100000 }),
-//       (xs) => {
-//         let ys = Array.from(xs);
-//         let n = ys.length;
+//       (xs_) => {
+//         let xs = Array.from(xs_);
+//         let n = xs.length;
 //         let dist = new Distribution(
-//           { tag: "SampleSet", value: ys },
+//           { tag: "SampleSet", value: xs },
 //           { sampleCount: 2 * n, xyPointLength: 4 * n }
 //         );
 //         let mean = dist.mean()
 //         if (typeof mean.value == "number") {
-//           expectErrorToBeBounded(mean.value, ys.reduce((a, b) => a + b, 0.0) / n, 5e-1, 1)
+//           expectErrorToBeBounded(mean.value, xs.reduce((a, b) => a + b, 0.0) / n, 5e-1, 1)
 //         } else {
 //           failDefault()
 //         }
@@ -151,20 +184,20 @@ describe("SampleSet: cdf", () => {
 //   );
 // });
 //
-// test("mean(samples(xs)) sampling half as widely as the input", () => {
+// test("when sampling half as widely as the input", () => {
 //   fc.assert(
 //     fc.property(
 //       fc.float64Array({ minLength: 10, maxLength: 100000 }),
-//       (xs) => {
-//         let ys = Array.from(xs);
-//         let n = ys.length;
+//       (xs_) => {
+//         let xs = Array.from(xs_);
+//         let n = xs.length;
 //         let dist = new Distribution(
-//           { tag: "SampleSet", value: ys },
+//           { tag: "SampleSet", value: xs },
 //           { sampleCount: Math.floor(n / 2), xyPointLength: 4 * n }
 //         );
 //         let mean = dist.mean()
 //         if (typeof mean.value == "number") {
-//           expectErrorToBeBounded(mean.value, ys.reduce((a, b) => a + b, 0.0) / n, 5e-1, 1)
+//           expectErrorToBeBounded(mean.value, xs.reduce((a, b) => a + b, 0.0) / n, 5e-1, 1)
 //         } else {
 //           failDefault()
 //         }

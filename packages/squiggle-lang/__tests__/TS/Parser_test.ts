@@ -7,7 +7,7 @@ import {
 import { testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 
-describe("Squiggle is whitespace insensitive", () => {
+describe("Squiggle's parser is whitespace insensitive", () => {
   test("when assigning a distribution to a name and calling that name", () => {
     /*
      * intersperse varying amounts of whitespace in a squiggle string
@@ -27,9 +27,8 @@ describe("Squiggle is whitespace insensitive", () => {
     let squiggleOutput = testRun(
       squiggleString("", "", "", "", "", "", "", "")
     );
-    /*
-     * Add "\n" to this when multiline is introduced.
-     */
+
+    // Add "\n" to this when multiline is introduced.
     let whitespaceGen = () => {
       return fc.constantFrom("", " ", "\t", "  ", "   ", "    ", "     ");
     };

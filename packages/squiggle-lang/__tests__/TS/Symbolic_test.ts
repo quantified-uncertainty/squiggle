@@ -3,30 +3,17 @@ import { testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 
 describe("Symbolic mean", () => {
-  let triangularInputError = {
-    tag: "Error",
-    value: {
-      tag: "RETodo",
-      value: "Triangular values must be increasing order.",
-    },
-  };
   test("mean(triangular(x,y,z))", () => {
     fc.assert(
       fc.property(fc.float(), fc.float(), fc.float(), (x, y, z) => {
-        let res = testRun(`mean(triangular(${x},${y},${z}))`);
         if (!(x < y && y < z)) {
-          expect(res).toEqual(triangularInputError);
-        } else {
-          switch (res.tag) {
-            case "Error":
-              expect(errorValueToString(res.value)).toEqual(
-                "<Test cases don't seem to be finding this>"
-              );
-            case "Ok":
-              expect(res.value).toEqual({
-                tag: "number",
-                value: (x + y + z) / 3,
-              });
+          try {
+            let squiggleResult = testRun(`mean(triangular(${x},${y},${z}))`);
+            expect(squiggleResult.value).toBeCloseTo((x + y + z) / 3);
+          } catch (err) {
+            expect((err as Error).message).toEqual(
+              "Expected squiggle expression to evaluate but got error: TODO: Triangular values must be increasing order."
+            );
           }
         }
       })

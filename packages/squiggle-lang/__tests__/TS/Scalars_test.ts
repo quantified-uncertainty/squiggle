@@ -1,29 +1,21 @@
-import { errorValueToString } from "../../src/js/index";
+// import { errorValueToString } from "../../src/js/index";
 import { testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 
 describe("Scalar manipulation is well-modeled by javascript math", () => {
-  test("in the case of logarithms (with assignment)", () => {
+  test("in the case of natural logarithms", () => {
     fc.assert(
       fc.property(fc.float(), (x) => {
-        let squiggleString = `x = log(${x}); x`;
+        let squiggleString = `log(${x})`;
         let squiggleResult = testRun(squiggleString);
         if (x == 0) {
-          expect(squiggleResult.value).toEqual({
-            tag: "number",
-            value: -Infinity,
-          });
+          expect(squiggleResult.value).toEqual(-Infinity);
         } else if (x < 0) {
-          expect(squiggleResult.value).toEqual({
-            tag: "RETodo",
-            value:
-              "somemessage (confused why a test case hasn't pointed out to me that this message is bogus)",
-          });
+          expect(squiggleResult.value).toEqual(
+            "somemessage (confused why a test case hasn't pointed out to me that this message is bogus)"
+          );
         } else {
-          expect(squiggleResult.value).toEqual({
-            tag: "number",
-            value: Math.log(x),
-          });
+          expect(squiggleResult.value).toEqual(Math.log(x));
         }
       })
     );
@@ -34,17 +26,7 @@ describe("Scalar manipulation is well-modeled by javascript math", () => {
       fc.property(fc.float(), fc.float(), fc.float(), (x, y, z) => {
         let squiggleString = `x = ${x}; y = ${y}; z = ${z}; x + y + z`;
         let squiggleResult = testRun(squiggleString);
-        switch (squiggleResult.tag) {
-          case "Error":
-            expect(errorValueToString(squiggleResult.value)).toEqual(
-              "some message (hopefully a test case points it out to me)"
-            );
-          case "Ok":
-            expect(squiggleResult.value).toEqual({
-              tag: "number",
-              value: x + y + z,
-            });
-        }
+        expect(squiggleResult.value).toBeCloseTo(x + y + z);
       })
     );
   });
