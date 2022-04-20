@@ -1,12 +1,15 @@
 ---
+title: "Functions Reference"
 sidebar_position: 7
 ---
 
 import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
-# Squiggle Functions Reference
+_The source of truth for this document is [this file of code](https://github.com/quantified-uncertainty/squiggle/blob/develop/packages/squiggle-lang/src/rescript/ReducerInterface/ReducerInterface_GenericDistribution.res)_
 
-## Distributions
+## Inventory distributions
+
+We provide starter distributions, computed symbolically.
 
 ### Normal distribution
 
@@ -15,6 +18,10 @@ and standard deviation.
 
 <SquiggleEditor initialSquiggleString="normal(5, 1)" />
 
+#### Validity
+
+- `sd > 0`
+
 ### Uniform distribution
 
 The `uniform(low, high)` function creates a uniform distribution between the
@@ -22,86 +29,281 @@ two given numbers.
 
 <SquiggleEditor initialSquiggleString="uniform(3, 7)" />
 
+#### Validity
+
+- `low < high`
+
 ### Lognormal distribution
 
 The `lognormal(mu, sigma)` returns the log of a normal distribution with parameters
-mu and sigma. The log of lognormal(mu, sigma) is a normal distribution with parameters
-mean mu and standard deviation sigma.
+`mu` and `sigma`. The log of `lognormal(mu, sigma)` is a normal distribution with mean `mu` and standard deviation `sigma`.
 
 <SquiggleEditor initialSquiggleString="lognormal(0, 0.7)" />
 
-An alternative format is also available. The "to" notation creates a lognormal
+An alternative format is also available. The `to` notation creates a lognormal
 distribution with a 90% confidence interval between the two numbers. We add
-this convinience as lognormal distributions are commonly used in practice.
+this convenience as lognormal distributions are commonly used in practice.
 
 <SquiggleEditor initialSquiggleString="2 to 10" />
+
+#### Future feature:
 
 Furthermore, it's also possible to create a lognormal from it's actual mean
 and standard deviation, using `lognormalFromMeanAndStdDev`.
 
+TODO: interpreter/parser doesn't provide this in current `develop` branch
+
 <SquiggleEditor initialSquiggleString="lognormalFromMeanAndStdDev(20, 10)" />
+
+#### Validity
+
+- `sigma > 0`
+- In `x to y` notation, `x < y`
 
 ### Beta distribution
 
-The `beta(a, b)` function creates a beta distribution with parameters a and b:
+The `beta(a, b)` function creates a beta distribution with parameters `a` and `b`:
 
-<SquiggleEditor initialSquiggleString="beta(20, 20)" />
+<SquiggleEditor initialSquiggleString="beta(10, 20)" />
+
+#### Validity
+
+- `a > 0`
+- `b > 0`
+- Empirically, we have noticed that numerical instability arises when `a < 1` or `b < 1`
 
 ### Exponential distribution
 
-The `exponential(mean)` function creates an exponential distribution with the given
-mean.
+The `exponential(rate)` function creates an exponential distribution with the given
+rate.
 
-<SquiggleEditor initialSquiggleString="exponential(1)" />
+<SquiggleEditor initialSquiggleString="exponential(1.11)" />
 
-### The Triangular distribution
+#### Validity
+
+- `rate > 0`
+
+### Triangular distribution
 
 The `triangular(a,b,c)` function creates a triangular distribution with lower
-bound a, mode b and upper bound c.
+bound `a`, mode `b` and upper bound `c`.
+
+#### Validity
+
+- `a < b < c`
 
 <SquiggleEditor initialSquiggleString="triangular(1, 2, 4)" />
 
-### Multimodal distriutions
+### Scalar (constant dist)
 
-The multimodal function combines 2 or more other distributions to create a weighted
+Squiggle, when the context is right, automatically casts a float to a constant distribution.
+
+## Operating on distributions
+
+Here are the ways we combine distributions.
+
+### Mixture of distributions
+
+The `mixture` function combines 2 or more other distributions to create a weighted
 combination of the two. The first positional arguments represent the distributions
 to be combined, and the last argument is how much to weigh every distribution in the
 combination.
 
-<SquiggleEditor initialSquiggleString="mx(uniform(0,1), normal(1,1), [0.5, 0.5])" />
+<SquiggleEditor initialSquiggleString="mixture(uniform(0,1), normal(1,1), [0.5, 0.5])" />
 
 It's possible to create discrete distributions using this method.
 
-<SquiggleEditor initialSquiggleString="mx(0, 1, [0.2,0.8])" />
+<SquiggleEditor initialSquiggleString="mixture(0, 1, [0.2,0.8])" />
 
 As well as mixed distributions:
 
-<SquiggleEditor initialSquiggleString="mx(3, 8, 1 to 10, [0.2, 0.3, 0.5])" />
+<SquiggleEditor initialSquiggleString="mixture(3, 8, 1 to 10, [0.2, 0.3, 0.5])" />
 
-## Other Functions
+An alias of `mixture` is `mx`
 
-### PDF of a distribution
+#### Validity
 
-The `pdf(distribution, x)` function returns the density of a distribution at the
+Using javascript's variable arguments notation, consider `mx(...dists, weights)`:
+
+- `dists.length == weights.length`
+
+### Addition
+
+A horizontal right shift
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 + dist2`}
+/>
+
+### Subtraction
+
+A horizontal left shift
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 - dist2`}
+/>
+
+### Multiplication
+
+TODO: provide intuition pump for the semantics
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 * dist2`}
+/>
+
+We also provide concatenation of two distributions as a syntax sugar for `*`
+
+<SquiggleEditor initialSquiggleString="(0.1 to 1) triangular(1,2,3)" />
+
+### Division
+
+TODO: provide intuition pump for the semantics
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 / dist2`}
+/>
+
+### Exponentiation
+
+TODO: provide intuition pump for the semantics
+
+<SquiggleEditor initialSquiggleString={`(0.1 to 1) ^ beta(2, 3)`} />
+
+### Taking the base `e` exponential
+
+<SquiggleEditor
+  initialSquiggleString={`dist = triangular(1,2,3)
+exp(dist)`}
+/>
+
+### Taking logarithms
+
+<SquiggleEditor
+  initialSquiggleString={`dist = triangular(1,2,3)
+log(dist)`}
+/>
+
+<SquiggleEditor
+  initialSquiggleString={`dist = beta(1,2)
+log10(dist)`}
+/>
+
+Base `x`
+
+<SquiggleEditor
+  initialSquiggleString={`x = 2
+dist = beta(2,3)
+log(dist, x)`}
+/>
+
+#### Validity
+
+- `x` must be a scalar
+- See [the current discourse](https://github.com/quantified-uncertainty/squiggle/issues/304)
+
+### Pointwise addition
+
+**Pointwise operations are done with `PointSetDist` internals rather than `SampleSetDist` internals**.
+
+TODO: this isn't in the new interpreter/parser yet.
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 .+ dist2`}
+/>
+
+### Pointwise subtraction
+
+TODO: this isn't in the new interpreter/parser yet.
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 .- dist2`}
+/>
+
+### Pointwise multiplication
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 .* dist2`}
+/>
+
+### Pointwise division
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 ./ dist2`}
+/>
+
+### Pointwise exponentiation
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 .^ dist2`}
+/>
+
+### Pointwise logarithm
+
+TODO: write about the semantics and the case handling re scalar vs. dist and log base.
+
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dotLog(dist1, dist2)`}
+/>
+
+## Standard functions on distributions
+
+### Probability density function
+
+The `pdf(dist, x)` function returns the density of a distribution at the
 given point x.
 
 <SquiggleEditor initialSquiggleString="pdf(normal(0,1),0)" />
 
-### Inverse of a distribution
+#### Validity
 
-The `inv(distribution, prob)` gives the value x or which the probability for all values
-lower than x is equal to prob. It is the inverse of `cdf`.
+- `x` must be a scalar
+- `dist` must be a distribution
 
-<SquiggleEditor initialSquiggleString="inv(normal(0,1),0.5)" />
+### Cumulative density function
 
-### CDF of a distribution
-
-The `cdf(distribution,x)` gives the cumulative probability of the distribution
+The `cdf(dist, x)` gives the cumulative probability of the distribution
 or all values lower than x. It is the inverse of `inv`.
 
 <SquiggleEditor initialSquiggleString="cdf(normal(0,1),0)" />
 
-### Mean of a distribution
+#### Validity
+
+- `x` must be a scalar
+- `dist` must be a distribution
+
+### Inverse CDF
+
+The `inv(dist, prob)` gives the value x or which the probability for all values
+lower than x is equal to prob. It is the inverse of `cdf`.
+
+<SquiggleEditor initialSquiggleString="inv(normal(0,1),0.5)" />
+
+#### Validity
+
+- `prob` must be a scalar (please only put it in `(0,1)`)
+- `dist` must be a distribution
+
+### Mean
 
 The `mean(distribution)` function gives the mean (expected value) of a distribution.
 
@@ -112,3 +314,55 @@ The `mean(distribution)` function gives the mean (expected value) of a distribut
 The `sample(distribution)` samples a given distribution.
 
 <SquiggleEditor initialSquiggleString="sample(normal(0, 10))" />
+
+## Normalization
+
+Some distribution operations (like horizontal shift) return an unnormalized distriibution.
+
+We provide a `normalize` function
+
+<SquiggleEditor initialSquiggleString="normalize((0.1 to 1) + triangular(0.1, 1, 10))" />
+
+#### Validity - Input to `normalize` must be a dist
+
+We provide a predicate `isNormalized`, for when we have simple control flow
+
+<SquiggleEditor initialSquiggleString="isNormalized((0.1 to 1) * triangular(0.1, 1, 10))" />
+
+#### Validity
+
+- Input to `isNormalized` must be a dist
+
+## Convert any distribution to a sample set distribution
+
+`toSampleSet` has two signatures
+
+It is unary when you use an internal hardcoded number of samples
+
+<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1)" />
+
+And binary when you provide a number of samples (floored)
+
+<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1, 100)" />
+
+## `inspect`
+
+You may like to debug by right clicking your browser and using the _inspect_ functionality on the webpage, and viewing the _console_ tab. Then, wrap your squiggle output with `inspect` to log an internal representation.
+
+<SquiggleEditor initialSquiggleString="inspect(toSampleSet(0.1 to 1, 100))" />
+
+Save for a logging side effect, `inspect` does nothing to input and returns it.
+
+## Truncate
+
+You can cut off from the left
+
+<SquiggleEditor initialSquiggleString="truncateLeft(0.1 to 1, 0.5)" />
+
+You can cut off from the right
+
+<SquiggleEditor initialSquiggleString="truncateRight(0.1 to 1, 10)" />
+
+You can cut off from both sides
+
+<SquiggleEditor initialSquiggleString="truncate(0.1 to 1, 0.5, 1.5)" />
