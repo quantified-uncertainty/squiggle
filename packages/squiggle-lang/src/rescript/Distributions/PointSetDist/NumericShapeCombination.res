@@ -202,9 +202,11 @@ let combineShapesContinuousDiscrete = (
   op: Operation.algebraicOperation,
   continuousShape: PointSetTypes.xyShape,
   discreteShape: PointSetTypes.xyShape,
+  discreteFirst: bool,
 ): PointSetTypes.xyShape => {
   // each x pair is added/subtracted
-  let fn = Operation.Algebraic.toFn(op)
+  let opFunc = Operation.Algebraic.toFn(op)
+  let fn = discreteFirst ? (a, b) => opFunc(b, a) : opFunc
 
   let discretePoints = Belt.Array.zip(discreteShape.xs, discreteShape.ys)
   let continuousPoints = Belt.Array.zip(continuousShape.xs, continuousShape.ys)
@@ -221,43 +223,6 @@ let combineShapesContinuousDiscrete = (
   | #Divide =>
     discretePoints->E.A2.fmap(((dx, dy)) =>
       continuousPoints->E.A2.fmap(((cx, cy)) => (fn(cx, dx), cy *. dy /. dx))
-    )
-  }
-
-  outXYShapes
-  |> E.A.fmap(XYShape.T.fromZippedArray)
-  |> E.A.fold_left(
-    XYShape.PointwiseCombination.combine(
-      \"+.",
-      XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
-    ),
-    XYShape.T.empty,
-  )
-}
-
-let combineShapesDiscreteContinuous = (
-  op: Operation.algebraicOperation,
-  discreteShape: PointSetTypes.xyShape,
-  continuousShape: PointSetTypes.xyShape,
-): PointSetTypes.xyShape => {
-  // each x pair is added/subtracted
-  let fn = Operation.Algebraic.toFn(op)
-
-  let discretePoints = Belt.Array.zip(discreteShape.xs, discreteShape.ys)
-  let continuousPoints = Belt.Array.zip(continuousShape.xs, continuousShape.ys)
-
-  let outXYShapes = switch op {
-  | #Add
-  | #Subtract =>
-    discretePoints->E.A2.fmap(((dx, dy)) =>
-      continuousPoints->E.A2.fmap(((cx, cy)) => (fn(dx, cx), dy *. cy))
-    )
-  | #Multiply
-  | #Power
-  | #Logarithm
-  | #Divide =>
-    discretePoints->E.A2.fmap(((dx, dy)) =>
-      continuousPoints->E.A2.fmap(((cx, cy)) => (fn(dx, cx), dy *. cy /. dx))
     )
   }
 

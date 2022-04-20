@@ -40,9 +40,9 @@ let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toPointSetDist
   | (Discrete(m1), Continuous(m2)) =>
-    Continuous.combineAlgebraicallyWithDiscreteFirst(op, m1, m2) |> Continuous.T.toPointSetDist
+    Continuous.combineAlgebraicallyWithDiscrete(op, m2, m1, true) |> Continuous.T.toPointSetDist
   | (Continuous(m1), Discrete(m2)) =>
-    Continuous.combineAlgebraicallyWithDiscreteSecond(op, m1, m2) |> Continuous.T.toPointSetDist
+    Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2, false) |> Continuous.T.toPointSetDist
   | (Discrete(m1), Discrete(m2)) =>
     Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toPointSetDist
   | (m1, m2) => Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2)) |> Mixed.T.toPointSetDist

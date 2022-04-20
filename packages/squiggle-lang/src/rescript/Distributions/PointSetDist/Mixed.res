@@ -242,15 +242,17 @@ let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =
   // continuous (*) continuous => continuous, but also
   // discrete (*) continuous => continuous (and vice versa). We have to take care of all combos and then combine them:
   let ccConvResult = Continuous.combineAlgebraically(op, t1.continuous, t2.continuous)
-  let dcConvResult = Continuous.combineAlgebraicallyWithDiscreteFirst(
+  let dcConvResult = Continuous.combineAlgebraicallyWithDiscrete(
     op,
-    t1.discrete,
     t2.continuous,
+    t1.discrete,
+    true,
   )
-  let cdConvResult = Continuous.combineAlgebraicallyWithDiscreteSecond(
+  let cdConvResult = Continuous.combineAlgebraicallyWithDiscrete(
     op,
     t1.continuous,
     t2.discrete,
+    false,
   )
   let continuousConvResult = Continuous.reduce(\"+.", [ccConvResult, dcConvResult, cdConvResult])
 
