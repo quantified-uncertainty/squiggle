@@ -7,11 +7,6 @@ import {
   // result,
 } from "../../src/js/index";
 
-export function testRunR(x: string): any {
-  //: result<squiggleExpression, errorValue> => {
-  return run(x, { sampleCount: 1000, xyPointLength: 100 });
-}
-
 export function testRun(x: string): squiggleExpression {
   let squiggleResult = run(x, { sampleCount: 1000, xyPointLength: 100 });
   // return squiggleResult.value

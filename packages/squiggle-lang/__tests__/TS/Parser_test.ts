@@ -9,9 +9,7 @@ import * as fc from "fast-check";
 
 describe("Squiggle's parser is whitespace insensitive", () => {
   test("when assigning a distribution to a name and calling that name", () => {
-    /*
-     * intersperse varying amounts of whitespace in a squiggle string
-     */
+    // intersperse varying amounts of whitespace in a squiggle string
     let squiggleString = (
       a: string,
       b: string,
