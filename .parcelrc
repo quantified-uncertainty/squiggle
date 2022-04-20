@@ -1,6 +1,0 @@
-{
-    "extends": "@parcel/config-default",
-    "transformers": {
-        "*.res": ["@parcel/transformer-raw"]
-    }
-}

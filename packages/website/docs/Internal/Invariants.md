@@ -1,5 +1,5 @@
 ---
-title: Statistical properties of algebraic combinations of distributions for property testing.
+title: Invariants
 urlcolor: blue
 author:
   - Nuño Sempere
@@ -7,7 +7,11 @@ author:
 abstract: This document outlines some properties about algebraic combinations of distributions. It is meant to facilitate property tests for [Squiggle](https://squiggle-language.com/), an estimation language for forecasters. So far, we are focusing on the means, the standard deviation and the shape of the pdfs.
 ---
 
+Invariants to check with property tests. 
+
 _This document right now is normative and aspirational, not a description of the testing that's currently done_.
+
+# Algebraic combinations
 
 The academic keyword to search for in relation to this document is "[algebra of random variables](https://wikiless.org/wiki/Algebra_of_random_variables?lang=en)". Squiggle doesn't yet support getting the standard deviation, denoted by $\sigma$, but such support could yet be added.
 
@@ -117,6 +121,20 @@ TODO
 ## Inverse cumulative density functions
 
 TODO
+
+# `pdf`, `cdf`, and `inv` 
+
+With $\forall dist, pdf := x \mapsto \texttt{pdf}(dist, x) \land cdf := x \mapsto \texttt{cdf}(dist, x) \land inv := p \mapsto \texttt{inv}(dist, p)$, 
+
+## `cdf` and `inv` are inverses
+$$
+\forall x \in (0,1), cdf(inv(x)) = x \land \forall x \in \texttt{dom}(cdf), x = inv(cdf(x))
+$$
+
+## The codomain of `cdf` equals the open interval `(0,1)` equals the codomain of `pdf`
+$$
+\texttt{cod}(cdf) = (0,1) = \texttt{cod}(pdf)
+$$
 
 # To do:
 
