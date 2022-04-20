@@ -2,3 +2,5 @@ dist
 lib
 *.bs.js
 *.gen.tsx
+.nyc_output/
+coverage/
