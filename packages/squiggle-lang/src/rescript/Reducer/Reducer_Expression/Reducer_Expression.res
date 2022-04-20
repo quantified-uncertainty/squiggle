@@ -44,7 +44,7 @@ let defaultBindings: T.bindings = Belt.Map.String.empty
 /*
   Recursively evaluate/reduce the expression (Lisp AST)
 */
-let rec reduceExpression = (expression: t, bindings: T.bindings): result<expressionValue, 'e> => {
+let reduceExpression = (expression: t, bindings: T.bindings): result<expressionValue, 'e> => {
   /*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
@@ -135,6 +135,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
         )
         racc->Result.flatMap(acc => acc->doMacroCall(bindings))
       }
+    | T.EBindings(bindings) => T.EBindings(bindings)->Ok
     }
 
   let rec reduceExpandedExpression = (expression: t): result<expressionValue, 'e> =>
@@ -155,6 +156,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
         )
         racc->Result.flatMap(acc => acc->reduceValueList)
       }
+    | T.EBindings(bindings) => RETodo("Cannot return bindings")->Error
     }
 
   let rExpandedExpression: result<t, 'e> = expression->seekMacros(bindings)
