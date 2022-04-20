@@ -247,7 +247,7 @@ let downsampleEquallyOverX = (length, t): t =>
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
 let combineAlgebraicallyWithDiscrete = (
-  op: Operation.algebraicOperation,
+  op: Operation.convolutionOperation,
   t1: t,
   t2: PointSetTypes.discreteShape,
   discreteFirst: bool,
@@ -271,8 +271,7 @@ let combineAlgebraicallyWithDiscrete = (
     )
 
     let combinedIntegralSum = switch op {
-    | #Multiply
-    | #Divide =>
+    | #Multiply =>
       Common.combineIntegralSums((a, b) => Some(a *. b), t1.integralSumCache, t2.integralSumCache)
     | _ => None
     }
@@ -282,7 +281,7 @@ let combineAlgebraicallyWithDiscrete = (
   }
 }
 
-let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t) => {
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t) => {
   let s1 = t1 |> getShape
   let s2 = t2 |> getShape
   let t1n = s1 |> XYShape.T.length

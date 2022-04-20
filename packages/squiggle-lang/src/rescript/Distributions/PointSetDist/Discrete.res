@@ -85,7 +85,7 @@ let updateIntegralCache = (integralCache, t: t): t => {
 
 /* This multiples all of the data points together and creates a new discrete distribution from the results.
  Data points at the same xs get added together. It may be a good idea to downsample t1 and t2 before and/or the result after. */
-let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t => {
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
   let t1s = t1 |> getShape
   let t2s = t2 |> getShape
   let t1n = t1s |> XYShape.T.length
@@ -97,7 +97,7 @@ let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =
     t2.integralSumCache,
   )
 
-  let fn = Operation.Algebraic.toFn(op)
+  let fn = Operation.Convolution.toFn(op)
   let xToYMap = E.FloatFloatMap.empty()
 
   for i in 0 to t1n - 1 {

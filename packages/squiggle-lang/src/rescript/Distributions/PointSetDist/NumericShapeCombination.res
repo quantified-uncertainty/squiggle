@@ -96,7 +96,7 @@ let toDiscretePointMassesFromTriangulars = (
 }
 
 let combineShapesContinuousContinuous = (
-  op: Operation.algebraicOperation,
+  op: Operation.convolutionOperation,
   s1: PointSetTypes.xyShape,
   s2: PointSetTypes.xyShape,
 ): PointSetTypes.xyShape => {
@@ -104,7 +104,6 @@ let combineShapesContinuousContinuous = (
   // if we multiply the two distributions, we should probably use lognormal filters.
   let t1m = toDiscretePointMassesFromTriangulars(s1)
   let t2m = switch op {
-  | #Divide => toDiscretePointMassesFromTriangulars(~inverse=true, s2)
   | _ => toDiscretePointMassesFromTriangulars(~inverse=false, s2)
   }
 
@@ -112,9 +111,6 @@ let combineShapesContinuousContinuous = (
   | #Add => (m1, m2) => m1 +. m2
   | #Subtract => (m1, m2) => m1 -. m2
   | #Multiply => (m1, m2) => m1 *. m2
-  | #Divide => (m1, mInv2) => m1 *. mInv2
-  | #Power => (m1, mInv2) => m1 ** mInv2
-  | #Logarithm => (m1, m2) => log(m1) /. log(m2)
   } // note: here, mInv2 = mean(1 / t2) ~= 1 / mean(t2)
 
   // TODO: Variances are for exponentatiation or logarithms are almost totally made up and very likely very wrong.
@@ -123,9 +119,6 @@ let combineShapesContinuousContinuous = (
   | #Add => (v1, v2, _, _) => v1 +. v2
   | #Subtract => (v1, v2, _, _) => v1 +. v2
   | #Multiply => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
-  | #Power => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
-  | #Logarithm => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
-  | #Divide => (v1, vInv2, m1, mInv2) => v1 *. vInv2 +. v1 *. mInv2 ** 2. +. vInv2 *. m1 ** 2.
   }
 
   // TODO: If operating on two positive-domain distributions, we should take that into account
@@ -199,13 +192,13 @@ let toDiscretePointMassesFromDiscrete = (s: PointSetTypes.xyShape): pointMassesW
 }
 
 let combineShapesContinuousDiscrete = (
-  op: Operation.algebraicOperation,
+  op: Operation.convolutionOperation,
   continuousShape: PointSetTypes.xyShape,
   discreteShape: PointSetTypes.xyShape,
   discreteFirst: bool,
 ): PointSetTypes.xyShape => {
   // each x pair is added/subtracted
-  let opFunc = Operation.Algebraic.toFn(op)
+  let opFunc = Operation.Convolution.toFn(op)
   let fn = discreteFirst ? (a, b) => opFunc(b, a) : opFunc
 
   let discretePoints = Belt.Array.zip(discreteShape.xs, discreteShape.ys)
@@ -217,10 +210,7 @@ let combineShapesContinuousDiscrete = (
     discretePoints->E.A2.fmap(((dx, dy)) =>
       continuousPoints->E.A2.fmap(((cx, cy)) => (fn(cx, dx), cy *. dy))
     )
-  | #Multiply
-  | #Power
-  | #Logarithm
-  | #Divide =>
+  | #Multiply =>
     discretePoints->E.A2.fmap(((dx, dy)) =>
       continuousPoints->E.A2.fmap(((cx, cy)) => (fn(cx, dx), cy *. dy /. dx))
     )

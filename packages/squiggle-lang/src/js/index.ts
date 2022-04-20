@@ -1,9 +1,4 @@
 import * as _ from "lodash";
-import type {
-  exportEnv,
-  exportDistribution,
-} from "../rescript/ProgramEvaluator.gen";
-export type { exportEnv, exportDistribution };
 import {
   genericDist,
   samplingParams,
@@ -48,7 +43,6 @@ import {
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
-import { pointSetDistFn } from "../rescript/OldInterpreter/DistPlus.bs";
 export type { samplingParams, errorValue };
 
 export let defaultSamplingInputs: samplingParams = {
@@ -99,7 +93,7 @@ export type squiggleExpression =
 export function run(
   squiggleString: string,
   samplingInputs?: samplingParams,
-  _environment?: exportEnv
+  _environment?: unknown
 ): result<squiggleExpression, errorValue> {
   let si: samplingParams = samplingInputs
     ? samplingInputs

@@ -158,7 +158,7 @@ module AlgebraicCombination = {
 
   let runConvolution = (
     toPointSet: toPointSetFn,
-    arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
+    arithmeticOperation: Operation.convolutionOperation,
     t1: t,
     t2: t,
   ) =>
@@ -207,15 +207,17 @@ module AlgebraicCombination = {
     | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
     | Some(Error(e)) => Error(Other(e))
     | None =>
-      switch chooseConvolutionOrMonteCarlo(t1, t2) {
-      | #CalculateWithMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-      | #CalculateWithConvolution =>
-        runConvolution(
-          toPointSetFn,
-          arithmeticOperation,
-          t1,
-          t2,
-        )->E.R2.fmap(r => DistributionTypes.PointSet(r))
+      switch arithmeticOperation {
+      | #Divide
+      | #Power
+      | #Logarithm =>
+        runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+      | (#Add | #Subtract | #Multiply) as op =>
+        switch chooseConvolutionOrMonteCarlo(t1, t2) {
+        | #CalculateWithMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+        | #CalculateWithConvolution =>
+          runConvolution(toPointSetFn, op, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(r))
+        }
       }
     }
   }

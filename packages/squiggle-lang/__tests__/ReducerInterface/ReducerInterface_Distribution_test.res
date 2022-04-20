@@ -67,7 +67,7 @@ describe("eval on distribution functions", () => {
     testEval("lognormal(10,2) / lognormal(5,2)", "Ok(Lognormal(5,2.8284271247461903))")
     testEval("lognormal(5, 2) / 2", "Ok(Lognormal(4.306852819440055,2))")
     testEval("2 / lognormal(5, 2)", "Ok(Lognormal(-4.306852819440055,2))")
-    testEval("2 / normal(10, 2)", "Ok(Point Set Distribution)")
+    testEval("2 / normal(10, 2)", "Ok(Sample Set Distribution)")
     testEval("normal(10, 2) / 2", "Ok(Normal(5,1))")
   })
   describe("truncate", () => {
@@ -77,21 +77,21 @@ describe("eval on distribution functions", () => {
   })
 
   describe("exp", () => {
-    testEval("exp(normal(5,2))", "Ok(Point Set Distribution)")
+    testEval("exp(normal(5,2))", "Ok(Sample Set Distribution)")
   })
 
   describe("pow", () => {
-    testEval("pow(3, uniform(5,8))", "Ok(Point Set Distribution)")
-    testEval("pow(uniform(5,8), 3)", "Ok(Point Set Distribution)")
+    testEval("pow(3, uniform(5,8))", "Ok(Sample Set Distribution)")
+    testEval("pow(uniform(5,8), 3)", "Ok(Sample Set Distribution)")
     testEval("pow(uniform(5,8), uniform(9, 10))", "Ok(Sample Set Distribution)")
   })
 
   describe("log", () => {
-    testEval("log(2, uniform(5,8))", "Ok(Point Set Distribution)")
-    testEval("log(normal(5,2), 3)", "Ok(Point Set Distribution)")
+    testEval("log(2, uniform(5,8))", "Ok(Sample Set Distribution)")
+    testEval("log(normal(5,2), 3)", "Ok(Sample Set Distribution)")
     testEval("log(normal(5,2), normal(10,1))", "Ok(Sample Set Distribution)")
-    testEval("log(uniform(5,8))", "Ok(Point Set Distribution)")
-    testEval("log10(uniform(5,8))", "Ok(Point Set Distribution)")
+    testEval("log(uniform(5,8))", "Ok(Sample Set Distribution)")
+    testEval("log10(uniform(5,8))", "Ok(Sample Set Distribution)")
   })
 
   describe("dotLog", () => {
