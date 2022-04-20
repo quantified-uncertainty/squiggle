@@ -149,6 +149,7 @@ module SymbolicConstructors = {
     | "uniform" => Ok(SymbolicDist.Uniform.make)
     | "beta" => Ok(SymbolicDist.Beta.make)
     | "lognormal" => Ok(SymbolicDist.Lognormal.make)
+    | "cauchy" => Ok(SymbolicDist.Cauchy.make)
     | "to" => Ok(SymbolicDist.From90thPercentile.make)
     | _ => Error("Unreachable state")
     }
