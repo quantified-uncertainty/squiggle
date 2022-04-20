@@ -86,7 +86,8 @@ module Exponential = {
 
 module Cauchy = {
   type t = cauchy
-  let make = (local, scale): symbolicDist => Ok(#Cauchy({local: local, scale: scale}))
+  let make = (local, scale): result<symbolicDist, string> => 
+    Ok(#Cauchy({local: local, scale: scale}))
   let pdf = (x, t: t) => Jstat.Cauchy.pdf(x, t.local, t.scale)
   let cdf = (x, t: t) => Jstat.Cauchy.cdf(x, t.local, t.scale)
   let inv = (p, t: t) => Jstat.Cauchy.inv(p, t.local, t.scale)
