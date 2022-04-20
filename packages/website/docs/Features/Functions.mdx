@@ -131,19 +131,31 @@ Using javascript's variable arguments notation, consider `mx(...dists, weights)`
 
 A horizontal right shift
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 + dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 + dist2`}
+/>
 
 ### Subtraction
 
 A horizontal left shift
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 - dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 - dist2`}
+/>
 
 ### Multiplication
 
 TODO: provide intuition pump for the semantics
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 * dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 * dist2`}
+/>
 
 We also provide concatenation of two distributions as a syntax sugar for `*`
 
@@ -153,27 +165,44 @@ We also provide concatenation of two distributions as a syntax sugar for `*`
 
 TODO: provide intuition pump for the semantics
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 / dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 / dist2`}
+/>
 
 ### Exponentiation
 
 TODO: provide intuition pump for the semantics
 
-<SquiggleEditor initialSquiggleString="(0.1 to 1) ^ beta(2, 3)" />
+<SquiggleEditor initialSquiggleString={`(0.1 to 1) ^ beta(2, 3)`} />
 
 ### Taking the base `e` exponential
 
-<SquiggleEditor initialSquiggleString="dist = triangular(1,2,3); exp(dist)" />
+<SquiggleEditor
+  initialSquiggleString={`dist = triangular(1,2,3)
+exp(dist)`}
+/>
 
 ### Taking logarithms
 
-<SquiggleEditor initialSquiggleString="dist = triangular(1,2,3); log(dist)" />
+<SquiggleEditor
+  initialSquiggleString={`dist = triangular(1,2,3)
+log(dist)`}
+/>
 
-<SquiggleEditor initialSquiggleString="dist = beta(1,2); log10(dist)" />
+<SquiggleEditor
+  initialSquiggleString={`dist = beta(1,2)
+log10(dist)`}
+/>
 
 Base `x`
 
-<SquiggleEditor initialSquiggleString="x = 2; dist = beta(2,3); log(dist, x)" />
+<SquiggleEditor
+  initialSquiggleString={`x = 2
+dist = beta(2,3)
+log(dist, x)`}
+/>
 
 #### Validity
 
@@ -186,31 +215,55 @@ Base `x`
 
 TODO: this isn't in the new interpreter/parser yet.
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 .+ dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 .+ dist2`}
+/>
 
 ### Pointwise subtraction
 
 TODO: this isn't in the new interpreter/parser yet.
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 .- dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 .- dist2`}
+/>
 
 ### Pointwise multiplication
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 .* dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 .* dist2`}
+/>
 
 ### Pointwise division
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 ./ dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 ./ dist2`}
+/>
 
 ### Pointwise exponentiation
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 .^ dist2" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 .^ dist2`}
+/>
 
 ### Pointwise logarithm
 
 TODO: write about the semantics and the case handling re scalar vs. dist and log base.
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dotLog(dist1, dist2)" />
+<SquiggleEditor
+  initialSquiggleString={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dotLog(dist1, dist2)`}
+/>
 
 ## Standard functions on distributions
 
