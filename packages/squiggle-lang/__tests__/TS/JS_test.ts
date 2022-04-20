@@ -4,7 +4,7 @@ import {
   resultMap,
   squiggleExpression,
   errorValueToString,
-} from "../src/js/index";
+} from "../../src/js/index";
 
 let testRun = (x: string): squiggleExpression => {
   let result = run(x, { sampleCount: 100, xyPointLength: 100 });
