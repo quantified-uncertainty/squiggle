@@ -83,8 +83,7 @@ let toPointSet = (
         pointSetDistLength: xyPointLength,
         kernelWidth: None,
       },
-    )
-    ->GenericDist_Types.Error.resultStringToResultError
+    )->GenericDist_Types.Error.resultStringToResultError
   }
 }
 
@@ -217,8 +216,6 @@ module AlgebraicCombination = {
       secondOperandIsGreaterThanZero,
       secondOperandHasMassAt1,
     ])
-    Js.log2("PMASS", toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Pdf(1.0)))
-    Js.log4("HIHI", items, t1, t2)
     switch items {
     | Error(r) => Some(r)
     | Ok([true, _, _]) => Some(Other("First input of logarithm must be fully greater than 0"))

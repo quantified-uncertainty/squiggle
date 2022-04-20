@@ -28,24 +28,9 @@ module Operation = {
     | Algebraic
     | Pointwise
 
-  type arithmeticOperation = [
-    | #Add
-    | #Multiply
-    | #Subtract
-    | #Divide
-    | #Power
-    | #Logarithm
-  ]
-
-  let arithmeticToFn = (arithmetic: arithmeticOperation) =>
-    switch arithmetic {
-    | #Add => \"+."
-    | #Multiply => \"*."
-    | #Subtract => \"-."
-    | #Power => \"**"
-    | #Divide => \"/."
-    | #Logarithm => (a, b) => log(a) /. log(b)
-    }
+  type arithmeticOperation = Operation.algebraicOperation
+  let arithmeticToFn = Operation.Algebraic.toFn
+  let arithmeticToString = Operation.Algebraic.toString
 
   type toFloat = [
     | #Cdf(float)
@@ -105,8 +90,8 @@ module Operation = {
     | ToString(ToString) => `toString`
     | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
     | ToBool(IsNormalized) => `isNormalized`
-    | ToDistCombination(Algebraic, _, _) => `algebraic`
-    | ToDistCombination(Pointwise, _, _) => `pointwise`
+    | ToDistCombination(Algebraic, operation, _) => `algebraic-${arithmeticToString(operation)}`
+    | ToDistCombination(Pointwise, operation, _) => `pointwise-${arithmeticToString(operation)}`
     }
 
   let toString = (d: genericFunctionCallInfo): string =>
