@@ -1,5 +1,16 @@
+// Types
+
 let emptyXYShape: PointSetTypes.xyShape = {xs: [], ys: []}
 exception LogicallyInconsistent(string)
+
+// Helpers
+
+let getArithmeticComplementOfDistributionForSubstraction = (
+  dist: PointSetTypes.xyShape,
+): PointSetTypes.xyShape => {
+  let newXs = Belt.Array.map(dist.xs, x => -.x)
+  {xs: newXs, ys: dist.ys}
+}
 
 let getApproximatePdfOfContinuousDistributionAtPoint = (
   dist: PointSetTypes.xyShape,
@@ -38,6 +49,8 @@ let getApproximatePdfOfContinuousDistributionAtPoint = (
 
   result
 }
+
+// Inner functions
 
 let addContinuousContinuous = (
   s1: PointSetTypes.xyShape,
@@ -87,12 +100,7 @@ let addContinuousContinuous = (
   {xs: newXs, ys: newYs}
 }
 
-let getArithmeticComplementOfDistributionForSubstraction = (
-  dist: PointSetTypes.xyShape,
-): PointSetTypes.xyShape => {
-  let newXs = Belt.Array.map(dist.xs, x => -.x)
-  {xs: newXs, ys: dist.ys}
-}
+// Main function
 
 let combineShapesContinuousContinuous = (
   op: Operation.algebraicOperation,
