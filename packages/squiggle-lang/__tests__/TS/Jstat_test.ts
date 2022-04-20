@@ -1,19 +1,6 @@
-import {
-  run,
-  Distribution,
-  squiggleExpression,
-  errorValueToString,
-  errorValue,
-  result,
-} from "../../src/js/index";
+import { errorValueToString } from "../../src/js/index";
 import * as fc from "fast-check";
-
-let testRun = (x: string): any => {
-  //result<squiggleExpression, errorValue> => {
-  return run(x, { sampleCount: 1000, xyPointLength: 100 });
-};
-
-let failDefault = () => expect("codepath should never").toBe("be reached");
+import { testRun } from "./TestHelpers";
 
 describe("Jstat: cumulative density function", () => {
   test("of a normal distribution at 3 stdevs to the right of the mean is within epsilon of 1", () => {

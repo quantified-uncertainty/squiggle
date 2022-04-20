@@ -5,11 +5,8 @@ import {
   errorValue,
   result,
 } from "../../src/js/index";
+import { testRun } from "./TestHelpers";
 import * as fc from "fast-check";
-
-let testRun = (x: string): result<squiggleExpression, errorValue> => {
-  return run(x, { sampleCount: 100, xyPointLength: 100 });
-};
 
 describe("Symbolic mean", () => {
   let triangularInputError = {

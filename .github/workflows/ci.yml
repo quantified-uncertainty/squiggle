@@ -81,6 +81,7 @@ jobs:
         run: yarn coverage:rescript:ci
       - name: Upload typescript coverage report
         run: yarn coverage:ts:ci
+
   components-lint:
     name: Components lint
     runs-on: ubuntu-latest

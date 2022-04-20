@@ -4,11 +4,8 @@ import {
   errorValue,
   result,
 } from "../../src/js/index";
+import { testRun } from "./TestHelpers";
 import * as fc from "fast-check";
-
-let testRun = (x: string): result<squiggleExpression, errorValue> => {
-  return run(x, { sampleCount: 1000, xyPointLength: 100 });
-};
 
 describe("Squiggle is whitespace insensitive", () => {
   test("when assigning a distribution to a name and calling that name", () => {

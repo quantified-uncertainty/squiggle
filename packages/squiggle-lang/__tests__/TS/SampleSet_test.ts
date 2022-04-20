@@ -1,18 +1,5 @@
-import {
-  run,
-  Distribution,
-  squiggleExpression,
-  errorValueToString,
-  errorValue,
-  result,
-} from "../../src/js/index";
+import { Distribution } from "../../src/js/index";
 import * as fc from "fast-check";
-
-let testRun = (x: string): result<squiggleExpression, errorValue> => {
-  return run(x, { sampleCount: 1000, xyPointLength: 100 });
-};
-
-let failDefault = () => expect("codepath should never").toBe("be reached");
 
 // Beware: float64Array makes it appear in an infinite loop.
 let arrayGen = () =>
