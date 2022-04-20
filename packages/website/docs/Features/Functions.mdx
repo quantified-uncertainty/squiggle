@@ -1,5 +1,5 @@
 ---
-title: Functions reference
+title: "Functions reference"
 sidebar_position: 7
 ---
 
@@ -62,7 +62,7 @@ and standard deviation, using `lognormalFromMeanAndStdDev`.
 
 The `beta(a, b)` function creates a beta distribution with parameters `a` and `b`:
 
-<SquiggleEditor initialSquiggleString="beta(20, 20)" />
+<SquiggleEditor initialSquiggleString="beta(1e1, 2e1)" />
 
 ### Validity
 
@@ -75,7 +75,7 @@ The `beta(a, b)` function creates a beta distribution with parameters `a` and `b
 The `exponential(rate)` function creates an exponential distribution with the given
 rate.
 
-<SquiggleEditor initialSquiggleString="exponential(1)" />
+<SquiggleEditor initialSquiggleString="exponential(1.11e0)" />
 
 ### Validity
 
@@ -127,29 +127,29 @@ Using javascript's variable arguments notation, consider `mx(...dists, weights)`
 
 ## Addition (horizontal right shift)
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 + dist2">
+<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 + dist2" />
 
 ## Subtraction (horizontal left shift)
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 - dist2">
+<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 - dist2" />
 
 ## Multiplication (??)
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 * dist2">
+<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 * dist2" />
 
 ## Division (???)
 
-<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 / dist2">
+<SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 / dist2" />
 
 ## Taking the base `e` exponential
 
-<SquiggleEditor initialSquiggleString="dist = triangular(1,2,3); exp(dist)">
+<SquiggleEditor initialSquiggleString="dist = triangular(1,2,3); exp(dist)" />
 
 ## Taking the base `e` and base `10` logarithm
 
-<SquiggleEditor initialSquiggleString="dist = triangular(1,2,3); log(dist)">
+<SquiggleEditor initialSquiggleString="dist = triangular(1,2,3); log(dist)" />
 
-<SquiggleEditor initialSquiggleString="dist = beta(1,2); log10(dist)">
+<SquiggleEditor initialSquiggleString="dist = beta(1,2); log10(dist)" />
 
 ### Validity
 
@@ -230,7 +230,7 @@ It is unary when you use an internal hardcoded number of samples
 
 <SquiggleEditor initialSquiggleString="toSampleSet(1e-1 to 1e0)" />
 
-And binary when you provide a number of samples (truncated)
+And binary when you provide a number of samples (floored)
 
 <SquiggleEditor initialSquiggleString="toSampleSet(1e-1 to 1e0, 1e2)" />
 
