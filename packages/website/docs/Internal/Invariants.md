@@ -7,7 +7,7 @@ author:
 abstract: This document outlines some properties about algebraic combinations of distributions. It is meant to facilitate property tests for [Squiggle](https://squiggle-language.com/), an estimation language for forecasters. So far, we are focusing on the means, the standard deviation and the shape of the pdfs.
 ---
 
-Invariants to check with property tests. 
+Invariants to check with property tests.
 
 _This document right now is normative and aspirational, not a description of the testing that's currently done_.
 
@@ -122,16 +122,18 @@ TODO
 
 TODO
 
-# `pdf`, `cdf`, and `inv` 
+# `pdf`, `cdf`, and `inv`
 
-With $\forall dist, pdf := x \mapsto \texttt{pdf}(dist, x) \land cdf := x \mapsto \texttt{cdf}(dist, x) \land inv := p \mapsto \texttt{inv}(dist, p)$, 
+With $\forall dist, pdf := x \mapsto \texttt{pdf}(dist, x) \land cdf := x \mapsto \texttt{cdf}(dist, x) \land inv := p \mapsto \texttt{inv}(dist, p)$,
 
 ## `cdf` and `inv` are inverses
+
 $$
 \forall x \in (0,1), cdf(inv(x)) = x \land \forall x \in \texttt{dom}(cdf), x = inv(cdf(x))
 $$
 
 ## The codomain of `cdf` equals the open interval `(0,1)` equals the codomain of `pdf`
+
 $$
 \texttt{cod}(cdf) = (0,1) = \texttt{cod}(pdf)
 $$
