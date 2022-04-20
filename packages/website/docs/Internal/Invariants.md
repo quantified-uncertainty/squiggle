@@ -11,13 +11,13 @@ Invariants to check with property tests.
 
 _This document right now is normative and aspirational, not a description of the testing that's currently done_.
 
-# Algebraic combinations
+## Algebraic combinations
 
 The academic keyword to search for in relation to this document is "[algebra of random variables](https://wikiless.org/wiki/Algebra_of_random_variables?lang=en)". Squiggle doesn't yet support getting the standard deviation, denoted by $\sigma$, but such support could yet be added.
 
-## Means and standard deviations
+### Means and standard deviations
 
-### Sums
+#### Sums
 
 $$
 mean(f+g) = mean(f) + mean(g)
@@ -33,7 +33,7 @@ $$
 mean(normal(a,b) + normal(c,d)) = mean(normal(a+c, \sqrt{b^2 + d^2}))
 $$
 
-### Subtractions
+#### Subtractions
 
 $$
 mean(f-g) = mean(f) - mean(g)
@@ -43,7 +43,7 @@ $$
 \sigma(f-g) = \sqrt{\sigma(f)^2 + \sigma(g)^2}
 $$
 
-### Multiplications
+#### Multiplications
 
 $$
 mean(f \cdot g) = mean(f) \cdot mean(g)
@@ -53,15 +53,15 @@ $$
 \sigma(f \cdot g) = \sqrt{ (\sigma(f)^2 + mean(f)) \cdot (\sigma(g)^2 + mean(g)) - (mean(f) \cdot mean(g))^2}
 $$
 
-### Divisions
+#### Divisions
 
 Divisions are tricky, and in general we don't have good expressions to characterize properties of ratios. In particular, the ratio of two normals is a Cauchy distribution, which doesn't have to have a mean.
 
-## Probability density functions (pdfs)
+### Probability density functions (pdfs)
 
 Specifying the pdf of the sum/multiplication/... of distributions as a function of the pdfs of the individual arguments can still be done. But it requires integration. My sense is that this is still doable, and I (Nuño) provide some _pseudocode_ to do this.
 
-### Sums
+#### Sums
 
 Let $f, g$ be two independently distributed functions. Then, the pdf of their sum, evaluated at a point $z$, expressed as $(f + g)(z)$, is given by:
 
@@ -114,31 +114,31 @@ let pdfOfSum = (pdf1, pdf2, cdf1, cdf2, z) => {
 };
 ```
 
-## Cumulative density functions
+### Cumulative density functions
 
 TODO
 
-## Inverse cumulative density functions
+### Inverse cumulative density functions
 
 TODO
 
-# `pdf`, `cdf`, and `inv`
+## `pdf`, `cdf`, and `inv`
 
 With $\forall dist, pdf := x \mapsto \texttt{pdf}(dist, x) \land cdf := x \mapsto \texttt{cdf}(dist, x) \land inv := p \mapsto \texttt{inv}(dist, p)$,
 
-## `cdf` and `inv` are inverses
+### `cdf` and `inv` are inverses
 
 $$
 \forall x \in (0,1), cdf(inv(x)) = x \land \forall x \in \texttt{dom}(cdf), x = inv(cdf(x))
 $$
 
-## The codomain of `cdf` equals the open interval `(0,1)` equals the codomain of `pdf`
+### The codomain of `cdf` equals the open interval `(0,1)` equals the codomain of `pdf`
 
 $$
 \texttt{cod}(cdf) = (0,1) = \texttt{cod}(pdf)
 $$
 
-# To do:
+## To do:
 
 - Provide sources or derivations, useful as this document becomes more complicated
 - Provide definitions for the probability density function, exponential, inverse, log, etc.
