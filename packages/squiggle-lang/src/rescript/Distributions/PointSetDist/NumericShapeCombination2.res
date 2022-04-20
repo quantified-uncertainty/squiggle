@@ -56,7 +56,7 @@ let addContinuousContinuous = (
 
   let lowerBound = mins1xs +. mins2xs
   let upperBound = maxs1xs +. maxs2xs
-  let numIntervals = 2 * Js.Math.max_int(len1, len2)
+  let numIntervals = 2 * Js.Math.max_int(len1, len2) // 5000
   let epsilon = (upperBound -. lowerBound) /. Belt.Int.toFloat(numIntervals) // Js.Math.pow_float(~base=2.0, ~exp=-16.0)
 
   let newXs: array<float> = Belt.Array.makeUninitializedUnsafe(numIntervals)
@@ -70,13 +70,14 @@ let addContinuousContinuous = (
   // The AMD Ryzen 7 processor in my computer can do around 300K million operations per second.
   // src: https://wikiless.org/wiki/Instructions_per_second?lang=en#Thousand_instructions_per_second_(TIPS/kIPS)
   for i in 0 to numIntervals - 1 {
-    newXs[i] = lowerBound +. float(i) *. epsilon
+    // where are the x points in the resulting distribution
+    let z = lowerBound +. float(i) *. epsilon
+    newXs[i] = z
     newYs[i] = 0.0
     for j in 0 to numIntervals - 1 {
-      let deltaYi =
-        getApproximatePdfOfS1AtPoint(lowerBound +. float(j) *. epsilon) *.
-        getApproximatePdfOfS2AtPoint(float(i) *. epsilon -. float(j) *. epsilon)
-      // lowerBound +. float(i) *. epsilon - (lowerBound +. float(j) *. epsilon)
+      // how fine-grained do we want our approximation of the integral to be.
+      let x = lowerBound +. float(j) *. epsilon
+      let deltaYi = getApproximatePdfOfS1AtPoint(x) *. getApproximatePdfOfS2AtPoint(z -. x)
       newYs[i] = newYs[i] +. deltaYi
     }
   }
