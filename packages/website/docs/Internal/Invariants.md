@@ -1,5 +1,5 @@
 ---
-title: Invariants
+title: Invariants of Probability Distributions
 urlcolor: blue
 author:
   - Nuño Sempere

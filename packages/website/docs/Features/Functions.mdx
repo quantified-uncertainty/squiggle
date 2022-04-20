@@ -42,7 +42,7 @@ The `lognormal(mu, sigma)` returns the log of a normal distribution with paramet
 
 An alternative format is also available. The `to` notation creates a lognormal
 distribution with a 90% confidence interval between the two numbers. We add
-this convinience as lognormal distributions are commonly used in practice.
+this convenience as lognormal distributions are commonly used in practice.
 
 <SquiggleEditor initialSquiggleString="2 to 10" />
 
@@ -50,6 +50,8 @@ this convinience as lognormal distributions are commonly used in practice.
 
 Furthermore, it's also possible to create a lognormal from it's actual mean
 and standard deviation, using `lognormalFromMeanAndStdDev`.
+
+TODO: interpreter/parser doesn't provide this in current `develop` branch
 
 <SquiggleEditor initialSquiggleString="lognormalFromMeanAndStdDev(20, 10)" />
 
@@ -62,7 +64,7 @@ and standard deviation, using `lognormalFromMeanAndStdDev`.
 
 The `beta(a, b)` function creates a beta distribution with parameters `a` and `b`:
 
-<SquiggleEditor initialSquiggleString="beta(1e1, 2e1)" />
+<SquiggleEditor initialSquiggleString="beta(10, 20)" />
 
 #### Validity
 
@@ -75,7 +77,7 @@ The `beta(a, b)` function creates a beta distribution with parameters `a` and `b
 The `exponential(rate)` function creates an exponential distribution with the given
 rate.
 
-<SquiggleEditor initialSquiggleString="exponential(1.11e0)" />
+<SquiggleEditor initialSquiggleString="exponential(1.11)" />
 
 #### Validity
 
@@ -125,29 +127,39 @@ Using javascript's variable arguments notation, consider `mx(...dists, weights)`
 
 - `dists.length == weights.length`
 
-### Addition (horizontal right shift)
+### Addition
+
+A horizontal right shift
 
 <SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 + dist2" />
 
-### Subtraction (horizontal left shift)
+### Subtraction
+
+A horizontal left shift
 
 <SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 - dist2" />
 
-### Multiplication (??)
+### Multiplication
+
+TODO: provide intuition pump for the semantics
 
 <SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 * dist2" />
 
 We also provide concatenation of two distributions as a syntax sugar for `*`
 
-<SquiggleEditor initialSquiggleString="(1e-1 to 1e0) triangular(1,2,3)" />
+<SquiggleEditor initialSquiggleString="(0.1 to 1) triangular(1,2,3)" />
 
-### Division (???)
+### Division
+
+TODO: provide intuition pump for the semantics
 
 <SquiggleEditor initialSquiggleString="dist1 = 1 to 10; dist2 = triangular(1,2,3); dist1 / dist2" />
 
-### Exponentiation (???)
+### Exponentiation
 
-<SquiggleEditor initialSquiggleString="(1e-1 to 1e0) ^ cauchy(1e0, 1e0)" />
+TODO: provide intuition pump for the semantics
+
+<SquiggleEditor initialSquiggleString="(0.1 to 1) ^ beta(2, 3)" />
 
 ### Taking the base `e` exponential
 
@@ -161,7 +173,8 @@ We also provide concatenation of two distributions as a syntax sugar for `*`
 
 Base `x`
 
-<SquiggleEditor initialSquiggleString="x = 2; dist = cauchy(1e0,1e0); log(dist, x)" />
+<SquiggleEditor initialSquiggleString="x = 2; dist = beta(2,3); log(dist, x)" />
+
 #### Validity
 
 - `x` must be a scalar
@@ -255,12 +268,13 @@ Some distribution operations (like horizontal shift) return an unnormalized dist
 
 We provide a `normalize` function
 
-<SquiggleEditor initialSquiggleString="normalize((1e-1 to 1e0) + triangular(1e-1, 1e0, 1e1))" />
+<SquiggleEditor initialSquiggleString="normalize((0.1 to 1) + triangular(0.1, 1, 10))" />
+
 #### Validity - Input to `normalize` must be a dist
 
 We provide a predicate `isNormalized`, for when we have simple control flow
 
-<SquiggleEditor initialSquiggleString="isNormalized((1e-1 to 1e0) * triangular(1e-1, 1e0, 1e1))" />
+<SquiggleEditor initialSquiggleString="isNormalized((0.1 to 1) * triangular(0.1, 1, 10))" />
 
 #### Validity
 
@@ -272,17 +286,17 @@ We provide a predicate `isNormalized`, for when we have simple control flow
 
 It is unary when you use an internal hardcoded number of samples
 
-<SquiggleEditor initialSquiggleString="toSampleSet(1e-1 to 1e0)" />
+<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1)" />
 
 And binary when you provide a number of samples (floored)
 
-<SquiggleEditor initialSquiggleString="toSampleSet(1e-1 to 1e0, 1e2)" />
+<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1, 100)" />
 
 ## `inspect`
 
 You may like to debug by right clicking your browser and using the _inspect_ functionality on the webpage, and viewing the _console_ tab. Then, wrap your squiggle output with `inspect` to log an internal representation.
 
-<SquiggleEditor initialSquiggleString="inspect(toSampleSet(1e-1 to 1e0, 1e2))" />
+<SquiggleEditor initialSquiggleString="inspect(toSampleSet(0.1 to 1, 100))" />
 
 Save for a logging side effect, `inspect` does nothing to input and returns it.
 
@@ -290,12 +304,12 @@ Save for a logging side effect, `inspect` does nothing to input and returns it.
 
 You can cut off from the left
 
-<SquiggleEditor initialSquiggleString="truncateLeft(1e-1 to 1e0, 5e-1)" />
+<SquiggleEditor initialSquiggleString="truncateLeft(0.1 to 1, 0.5)" />
 
 You can cut off from the right
 
-<SquiggleEditor initialSquiggleString="truncateLeft(1e-1 to 1e0, 1e1)" />
+<SquiggleEditor initialSquiggleString="truncateRight(0.1 to 1, 10)" />
 
 You can cut off from both sides
 
-<SquiggleEditor initialSquiggleString="truncate(1e-1 to 1e0, 5e-1, 1e1)" />
+<SquiggleEditor initialSquiggleString="truncate(0.1 to 1, 0.5, 1.5)" />
