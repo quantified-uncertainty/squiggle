@@ -2,8 +2,9 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
-import type { exportEnv } from "@quri/squiggle-lang";
 import styled from "styled-components";
+
+type exportEnv = unknown;
 
 export interface SquiggleEditorProps {
   /** The input string for squiggle */

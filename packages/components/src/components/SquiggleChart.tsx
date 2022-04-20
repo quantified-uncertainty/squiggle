@@ -6,11 +6,12 @@ import {
   errorValueToString,
   squiggleExpression,
 } from "@quri/squiggle-lang";
-import type { samplingParams, exportEnv } from "@quri/squiggle-lang";
+import type { samplingParams } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
 import { ErrorBox } from "./ErrorBox";
 import useSize from "@react-hook/size";
+type exportEnv = unknown;
 
 const variableBox = {
   Component: styled.div`
