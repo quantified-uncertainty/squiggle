@@ -182,7 +182,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     ->E.R.bind(r => r(f1))
     ->SymbolicConstructors.symbolicResultToOutput
   | (
-      ("normal" | "uniform" | "beta" | "lognormal" | "to") as fnName,
+      ("normal" | "uniform" | "beta" | "lognormal" | "cauchy" | "to") as fnName,
       [EvNumber(f1), EvNumber(f2)],
     ) =>
     SymbolicConstructors.twoFloat(fnName)
