@@ -142,7 +142,7 @@ let multiplyContinuousContinuous = (
       let absX = Js.Math.abs_float(x)
       if absX > epsilonForIgnoreInIntegral {
         let deltaYi =
-          getApproximatePdfOfS1AtPoint(x) *. getApproximatePdfOfS2AtPoint(z /. x) *. (1 /. x)
+          getApproximatePdfOfS1AtPoint(x) *. getApproximatePdfOfS2AtPoint(z /. x) *. (1.0 /. x)
         newYs[i] = newYs[i] +. deltaYi
       }
     }
