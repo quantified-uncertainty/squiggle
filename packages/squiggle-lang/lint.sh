@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Hat tip to @dfalling
 # https://forum.rescript-lang.org/t/rescript-9-1-how-can-we-format-to-standard-out/1590/2?u=quinn-dougherty
