@@ -229,7 +229,7 @@ module Zipped = {
 
 module PointwiseCombination = {
   // t1Interpolator and t2Interpolator are functions from XYShape.XtoY, e.g. linearBetweenPointsExtrapolateFlat.
-  let combine = %raw(` // : (float => float => float, T.t, T.t, bool) => T.t
+  let combine: ((float, float) => float, interpolator, T.t, T.t) => T.t = %raw(`
       // This function combines two xyShapes by looping through both of them simultaneously.
       // It always moves on to the next smallest x, whether that's in the first or second input's xs,
       // and interpolates the value on the other side, thus accumulating xs and ys.
