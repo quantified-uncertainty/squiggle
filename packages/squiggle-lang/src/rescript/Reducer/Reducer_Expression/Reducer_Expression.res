@@ -161,7 +161,7 @@ let externalBindingsToBindings = (externalBindings: externalBindings): T.binding
   Evaluates code with external bindings. External bindings are a record of expression values.
 */
 let evalWBindings = (code: string, externalBindings: externalBindings) => {
-  let bindings = externalBindings -> externalBindingsToBindings
+  let bindings = externalBindings->externalBindingsToBindings
   evalOuterWBindings_(code, bindings)
 }
 
@@ -169,11 +169,16 @@ let evalWBindings = (code: string, externalBindings: externalBindings) => {
   Evaluates code with external bindings. External bindings are a record of expression values.
   The code is a partial code as if it is cut from a larger code. Therefore all statments are assignments.
 */
-let evalPartialWBindings = (code: string, externalBindings: externalBindings): result<externalBindings, 'e> => {
-  let bindings = externalBindings -> externalBindingsToBindings
+let evalPartialWBindings = (code: string, externalBindings: externalBindings): result<
+  externalBindings,
+  'e,
+> => {
+  let bindings = externalBindings->externalBindingsToBindings
   let answer = evalPartialWBindings_(code, bindings)
-  answer->Result.flatMap(answer => switch answer {
+  answer->Result.flatMap(answer =>
+    switch answer {
     | EvRecord(aRecord) => Ok(aRecord)
     | _ => RETodo("TODO: External bindings must be returned")->Error
-  })
+    }
+  )
 }
