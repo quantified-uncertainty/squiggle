@@ -50,7 +50,15 @@ let defaultBindings: T.bindings = Belt.Map.String.empty
 /*
   Recursively evaluate/reduce the expression (Lisp AST)
 */
-let reduceExpression = (expression: t, bindings: T.bindings): result<expressionValue, 'e> => {
+let rec reduceExpression = (expression: t, bindings: T.bindings): result<expressionValue, 'e> => {
+  /*
+    Macros are like functions but instead of taking values as parameters,
+    they take expressions as parameters and return a new expression.
+    Macros are used to define language building blocks. They are like Lisp macros.
+ */
+  let doMacroCall = (list: list<t>, bindings: T.bindings): result<t, 'e> =>
+    Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(list, bindings, reduceExpression)
+
   /*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
@@ -59,14 +67,6 @@ let reduceExpression = (expression: t, bindings: T.bindings): result<expressionV
     | list{EvCall(fName), ...args} => (fName, args->Belt.List.toArray)->BuiltIn.dispatch
     | _ => valueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
     }
-
-  /*
-    Macros are like functions but instead of taking values as parameters,
-    they take expressions as parameters and return a new expression.
-    Macros are used to define language building blocks. They are like Lisp macros.
- */
-  let doMacroCall = (list: list<t>, bindings: T.bindings): result<t, 'e> =>
-    list->Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(bindings)
 
   let rec seekMacros = (expression: t, bindings: T.bindings): result<t, 'e> =>
     switch expression {

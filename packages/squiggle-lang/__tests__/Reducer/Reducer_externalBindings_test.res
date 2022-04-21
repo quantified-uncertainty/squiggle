@@ -14,6 +14,9 @@ describe("Parse for Bindings", () => {
     "y = x+1; y",
     "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :y (:add :x 1))) :y))",
     ) 
+})
+
+describe("Parse for Bindings", () => {
   testParsePartialToBe(
     "x",
     "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) :x) (:$exportVariablesExpression)))",
@@ -50,8 +53,12 @@ describe("Eval with Bindings", () => {
     ) 
 })
 
+/*
+    Partial code is a partial code fragment that is cut out from a larger code.
+    Therefore it does not end with an expression.
+*/
 Only.describe("Eval Partial", () => {
-  MyOnly.testEvalPartialBindingsToBe(
+  testEvalPartialBindingsToBe(
     //   A partial cannot end with an expression
     "x",
     list{("x", ExpressionValue.EvNumber(1.))},
@@ -60,17 +67,17 @@ Only.describe("Eval Partial", () => {
   testEvalPartialBindingsToBe(
     "y=x",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "????",
+    "Ok({x: 1, y: 1})",
     ) 
-  testEvalBindingsToBe(
+  testEvalPartialBindingsToBe(
     "y=x+1",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "????",
+    "Ok({x: 1, y: 2})",
     ) 
-  testEvalBindingsToBe(
+  MyOnly.testEvalPartialBindingsToBe(
     "y = x+1; z = y",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "????",
+    "Ok({x: 1, y: 2, z: 2})",
     ) 
 })
 

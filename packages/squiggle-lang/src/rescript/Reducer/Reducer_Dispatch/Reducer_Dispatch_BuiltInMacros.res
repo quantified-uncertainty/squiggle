@@ -1,14 +1,26 @@
+/*
+  Macros are like functions but instead of taking values as parameters,
+  they take expressions as parameters and return a new expression.
+  Macros are used to define language building blocks. They are like Lisp macros.
+*/
+module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
 module Result = Belt.Result
-module ExpressionT = Reducer_Expression_T
+
 open Reducer_ErrorValue
 
 type expression = ExpressionT.expression
 
-let dispatchMacroCall = (list: list<expression>, bindings: ExpressionT.bindings): result<
+type reducerFn = (
   expression,
-  'e,
-> => {
+  ExpressionT.bindings,
+) => result<ExpressionValue.expressionValue, errorValue>
+
+let dispatchMacroCall = (
+  list: list<expression>,
+  bindings: ExpressionT.bindings,
+  reduceExpression: reducerFn,
+): result<expression, 'e> => {
   let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings): result<
     expression,
     errorValue,
@@ -40,9 +52,16 @@ let dispatchMacroCall = (list: list<expression>, bindings: ExpressionT.bindings)
     | ExpressionT.EList(list{
         ExpressionT.EValue(EvCall("$let")),
         ExpressionT.EValue(EvSymbol(aSymbol)),
-        expression,
+        expressionToReduce,
       }) => {
-        let rNewExpression = replaceSymbols(expression, bindings)
+        let rNewExpressionToReduce = replaceSymbols(expressionToReduce, bindings)
+
+        let rNewValue =
+          rNewExpressionToReduce->Result.flatMap(newExpressionToReduce =>
+            reduceExpression(newExpressionToReduce, bindings)
+          )
+
+        let rNewExpression = rNewValue->Result.map(newValue => ExpressionT.EValue(newValue))
         rNewExpression->Result.map(newExpression =>
           Belt.Map.String.set(bindings, aSymbol, newExpression)->ExpressionT.EBindings
         )
@@ -51,35 +70,37 @@ let dispatchMacroCall = (list: list<expression>, bindings: ExpressionT.bindings)
     }
   }
 
-  let doBindExpression = (expression: expression, bindings: ExpressionT.bindings) => {
+  let doExportVariableExpression = (bindings: ExpressionT.bindings) => {
+    let emptyDictionary: Js.Dict.t<ExpressionValue.expressionValue> = Js.Dict.empty()
+    let reducedBindings = bindings->Belt.Map.String.keep((key, value) =>
+      switch value {
+      | ExpressionT.EValue(_) => true
+      | _ => false
+      }
+    )
+    let externalBindings = reducedBindings->Belt.Map.String.reduce(emptyDictionary, (
+      acc,
+      key,
+      expressionValue,
+    ) => {
+      let value = switch expressionValue {
+      | EValue(aValue) => aValue
+      | _ => EvSymbol("internal")
+      }
+      Js.Dict.set(acc, key, value)
+      acc
+    })
+    externalBindings->EvRecord->ExpressionT.EValue->Ok
+  }
+
+  let doBindExpression = (expression: expression, bindings: ExpressionT.bindings) =>
     switch expression {
     | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$let")), ..._}) =>
       REExpressionExpected->Error
+    | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$exportVariablesExpression"))}) =>
+      doExportVariableExpression(bindings)
     | _ => replaceSymbols(expression, bindings)
     }
-  }
-
-  let doExportVariableExpression = (bindings: ExpressionT.bindings) => {
-    let emptyDictionary: Js.Dict.t<ExpressionValue.expressionValue> = Js.Dict.empty()
-    let reducedBindings = bindings->Belt.Map.String.keep (
-      (key, value) =>
-        switch value {
-        | ExpressionT.EValue(_) => true
-        | _ => false
-        }
-    )
-    let externalBindings = reducedBindings->Belt.Map.String.reduce(
-      emptyDictionary,
-      (acc, key, expressionValue) => {
-        let value = switch expressionValue {
-          | EValue(aValue) => aValue
-          | _ => EvSymbol("internal")
-        }
-        Js.Dict.set(acc, key, value); acc
-      }
-    )
-    externalBindings->EvRecord->ExpressionT.EValue->Ok
-  }
 
   switch list {
   | list{ExpressionT.EValue(EvCall("$$bindings"))} => bindings->ExpressionT.EBindings->Ok
@@ -90,11 +111,6 @@ let dispatchMacroCall = (list: list<expression>, bindings: ExpressionT.bindings)
       statement,
     } =>
     doBindStatement(statement, bindings)
-  | list{
-      ExpressionT.EValue(EvCall("$$bindExpression")),
-      ExpressionT.EBindings(bindings),
-      ExpressionT.EList(list{EValue(EvCall("$exportVariableExpression")), ..._}),
-    } => doExportVariableExpression(bindings)
   | list{
       ExpressionT.EValue(EvCall("$$bindExpression")),
       ExpressionT.EBindings(bindings),
