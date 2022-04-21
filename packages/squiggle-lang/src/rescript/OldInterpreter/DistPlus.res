@@ -53,7 +53,7 @@ module T = Distributions.Dist({
   // This bit is kind of awkward, could probably use rethinking.
   let integral = (t: t) => updateShape(Continuous(t.integralCache), t)
 
-  let updateIntegralCache = (integralCache: option<PointSetTypes.continuousShape>, t) =>
+  let updateIntegralCache = (integralCache: option<PointSetTypes.continuousShape>, t: t) =>
     update(~integralCache=E.O.default(t.integralCache, integralCache), t)
 
   let downsample = (i, t): t => updateShape(t |> toPointSetDist |> PointSetDist.T.downsample(i), t)
