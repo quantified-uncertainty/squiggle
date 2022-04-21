@@ -6,7 +6,7 @@ import {
   errorValueToString,
   squiggleExpression,
 } from "@quri/squiggle-lang";
-import type { samplingParams, exportEnv } from "@quri/squiggle-lang";
+import type { samplingParams } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
 import { ErrorBox } from "./ErrorBox";
@@ -129,9 +129,9 @@ export interface SquiggleChartProps {
   /** If the result is a function, how many points along the function it samples */
   diagramCount?: number;
   /** variables declared before this expression */
-  environment?: exportEnv;
+  environment?: unknown;
   /** When the environment changes */
-  onEnvChange?(env: exportEnv): void;
+  onEnvChange?(env: unknown): void;
   /** CSS width of the element */
   width?: number;
   height?: number;
@@ -155,7 +155,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     sampleCount: sampleCount,
     xyPointLength: outputXYPoints,
   };
-  let expressionResult = run(squiggleString, samplingInputs, environment);
+  let expressionResult = run(squiggleString, samplingInputs);
   let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
     onEnvChange(environment);
