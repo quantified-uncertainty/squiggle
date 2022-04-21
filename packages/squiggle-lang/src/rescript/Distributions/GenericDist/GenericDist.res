@@ -101,10 +101,16 @@ let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<st
   )
 
 module Truncate = {
-  let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>
+  let trySymbolicSimplification = (
+    leftCutoff: option<float>,
+    rightCutoff: option<float>,
+    t: t,
+  ): option<t> =>
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, _) => None
-    | (lc, rc, Symbolic(#Uniform(u))) if lc < rc =>
+    | (Some(lc), Some(rc), Symbolic(#Uniform(u))) if lc < rc =>
+      Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(Some(lc), Some(rc), u))))
+    | (lc, rc, Symbolic(#Uniform(u))) =>
       Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))))
     | _ => None
     }
