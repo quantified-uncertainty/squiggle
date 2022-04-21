@@ -1,0 +1,39 @@
+---
+title: "Known Bugs"
+sidebar_position: 6
+---
+
+import { SquiggleEditor } from "../../src/components/SquiggleEditor";
+
+Much of the Squiggle math is imprecise. This can cause significant errors, so watch out.
+
+Below are some specific examples to watch for. We'll work on improving these over time and adding much better warnings and error management.
+
+## Mixtures of distributions with very different means
+
+If you take the pointwise mixture of two distributions with very different means, then the value of that gets fairly warped. 
+
+In the following case, the mean of the mixture should be equal to the sum of the means of the parts. These are shown as the first two displayed variables. These variables diverge as the underlying distributions change.
+
+<SquiggleEditor
+  initialSquiggleString={
+`dist1 = {value: normal(1,1), weight: 1}
+dist2 = {value: normal(100000000000,1), weight: 1}
+totalWeight = dist1.weight + dist2.weight
+distMixture = mixture(dist1.value, dist2.value, [dist1.weight, dist2.weight])
+mixtureMean = mean(distMixture)
+separateMeansCombined = (mean(dist1.value) * (dist1.weight) +  mean(dist2.value) * (dist2.weight))/totalWeight
+[mixtureMean, separateMeansCombined, distMixture]`}
+/>
+
+## Means of Sample Set Distributions
+
+The means of sample set distributions can vary dramatically, especially as the numbers get high.
+
+
+<SquiggleEditor
+  initialSquiggleString={
+`symbolicDist = 5 to 50333333
+symbolicSetDist = toSampleSet(symbolicDist)
+[mean(symbolicDist), mean(symbolicSetDist), symbolicDist, symbolicSetDist]`}
+/>
