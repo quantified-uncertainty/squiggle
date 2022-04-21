@@ -39,7 +39,7 @@ describe("Eval with Bindings", () => {
     Partial code is a partial code fragment that is cut out from a larger code.
     Therefore it does not end with an expression.
 */
-Only.describe("Eval Partial", () => {
+describe("Eval Partial", () => {
   testEvalPartialBindingsToBe(
     //   A partial cannot end with an expression
     "x",
@@ -52,7 +52,7 @@ Only.describe("Eval Partial", () => {
     list{("x", ExpressionValue.EvNumber(1.))},
     "Ok({x: 1, y: 2})",
   )
-  MyOnly.testEvalPartialBindingsToBe(
+  testEvalPartialBindingsToBe(
     "y = x+1; z = y",
     list{("x", ExpressionValue.EvNumber(1.))},
     "Ok({x: 1, y: 2, z: 2})",
