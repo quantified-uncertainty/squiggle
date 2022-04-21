@@ -155,18 +155,17 @@ let fromPartialNode = (mathJsNode: Parse.node): result<expression, errorValue> =
   Parse.castNodeType(mathJsNode)->Result.flatMap(typedMathJsNode => {
     let casePartialBlockNode = (bNode: Parse.blockNode) => {
       let blocksOrTags = bNode["blocks"]->Belt.Array.map(toTagOrNode)
-      let completed = Js.Array2.concatMany(
-        [BlockTag(ImportVariablesStatement)],
-        [blocksOrTags, [BlockTag(ExportVariablesExpression)]],
+      let completed = Js.Array2.concat(
+        blocksOrTags,
+        [BlockTag(ExportVariablesExpression)]
       )
       completed->caseTagOrNodes
     }
 
     let casePartialExpression = (node: Parse.node) => {
-      let completed = Js.Array2.concatMany(
-        [BlockTag(ImportVariablesStatement)],
-        [[BlockNode(node)], [BlockTag(ExportVariablesExpression)]],
-      )
+      let completed = 
+        [BlockNode(node), BlockTag(ExportVariablesExpression)]
+      
       completed->caseTagOrNodes
     }
 
@@ -182,15 +181,12 @@ let fromOuterNode = (mathJsNode: Parse.node): result<expression, errorValue> => 
   Parse.castNodeType(mathJsNode)->Result.flatMap(typedMathJsNode => {
     let casePartialBlockNode = (bNode: Parse.blockNode) => {
       let blocksOrTags = bNode["blocks"]->Belt.Array.map(toTagOrNode)
-      let completed = Js.Array2.concatMany([BlockTag(ImportVariablesStatement)], [blocksOrTags])
+      let completed = blocksOrTags
       completed->caseTagOrNodes
     }
 
     let casePartialExpression = (node: Parse.node) => {
-      let completed = Js.Array2.concatMany(
-        [BlockTag(ImportVariablesStatement)],
-        [[BlockNode(node)]],
-      )
+      let completed = [BlockNode(node)]
       completed->caseTagOrNodes
     }
 
