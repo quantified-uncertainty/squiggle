@@ -69,7 +69,7 @@ let toPointSet = (
   ~xyPointLength,
   ~sampleCount,
   ~xSelection: GenericDist_Types.Operation.pointsetXSelection=#ByWeight,
-  unit,
+  (),
 ): result<PointSetTypes.pointSetDist, error> => {
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
@@ -93,7 +93,7 @@ let toPointSet = (
   xyPointLength to be a bit longer than the eventual toSparkline downsampling. I chose 3 
   fairly arbitrarily.
  */
-let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, unit): result<string, error> =>
+let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<string, error> =>
   t
   ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
   ->E.R.bind(r =>

@@ -87,7 +87,6 @@ let stepwiseToLinear = (t: t): t =>
 // Note: This results in a distribution with as many points as the sum of those in t1 and t2.
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn: (t, t) => option<t>=(_, _) => None,
   ~distributionType: PointSetTypes.distributionType=#PDF,
   fn: (float, float) => float,
   t1: PointSetTypes.continuousShape,
@@ -143,14 +142,9 @@ let updateIntegralCache = (integralCache, t: t): t => {...t, integralCache: inte
 
 let reduce = (
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
-  ~integralCachesFn: (t, t) => option<t>=(_, _) => None,
   fn,
   continuousShapes,
-) =>
-  continuousShapes |> E.A.fold_left(
-    combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn),
-    empty,
-  )
+) => continuousShapes |> E.A.fold_left(combinePointwise(~integralSumCachesFn, fn), empty)
 
 let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t) =>
   make(

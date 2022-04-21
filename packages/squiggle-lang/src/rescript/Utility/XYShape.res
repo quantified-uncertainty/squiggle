@@ -199,7 +199,7 @@ module XtoY = {
 
   /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
    For discrete distributions, the probability density between points is zero, so we just return zero here. */
-  let discreteInterpolator: interpolator = (t: T.t, leftIndex: int, x: float) => 0.0
+  let discreteInterpolator: interpolator = (_: T.t, _: int, _: float) => 0.0
 }
 
 module XsConversion = {

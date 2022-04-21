@@ -15,7 +15,7 @@ type t = expression
 */
 let rec toString = expression =>
   switch expression {
-  | T.EBindings(bindings) => "$$bound"
+  | T.EBindings(_) => "$$bound"
   | T.EList(aList) =>
     `(${Belt.List.map(aList, aValue => toString(aValue))
       ->Extra.List.interperse(" ")
@@ -119,7 +119,7 @@ let reduceExpression = (expression: t, bindings: T.bindings): result<expressionV
 
   let rec seekMacros = (expression: t, bindings: T.bindings): result<t, 'e> =>
     switch expression {
-    | T.EValue(value) => expression->Ok
+    | T.EValue(_) => expression->Ok
     | T.EList(list) => {
         let racc: result<list<t>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
           racc,
@@ -156,7 +156,7 @@ let reduceExpression = (expression: t, bindings: T.bindings): result<expressionV
         )
         racc->Result.flatMap(acc => acc->reduceValueList)
       }
-    | T.EBindings(bindings) => RETodo("Cannot return bindings")->Error
+    | T.EBindings(_) => RETodo("Cannot return bindings")->Error
     }
 
   let rExpandedExpression: result<t, 'e> = expression->seekMacros(bindings)
