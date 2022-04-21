@@ -1,7 +1,7 @@
 open Jest
 open Reducer_TestHelpers
 
-Only.describe("Parse for Bindings", () => {
+describe("Parse for Bindings", () => {
   testParseOuterToBe(
     "x",
     "Ok((:$$bindExpression (:$$bindings) :x))",
@@ -32,22 +32,25 @@ Only.describe("Parse for Bindings", () => {
     ) 
 })
 
-Skip.describe("Eval for Bindings", () => {
+Only.describe("Eval with Bindings", () => {
   testEvalBindingsToBe(
     "x",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "????",
+    "Ok(1)",
     ) 
   testEvalBindingsToBe(
     "x+1",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "????",
+    "Ok(2)",
     ) 
   testEvalBindingsToBe(
     "y = x+1; y",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "????",
+    "Ok(2)",
     ) 
+})
+
+describe("Eval Partial", () => {
   testEvalPartialBindingsToBe(
     "x",
     list{("x", ExpressionValue.EvNumber(1.))},
