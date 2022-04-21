@@ -49,7 +49,7 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/quantified-uncertainty/squiggle/tree/master/packages/website/",
+            "https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/website/",
           remarkPlugins: [math],
           rehypePlugins: [katex],
         },
@@ -57,7 +57,7 @@ const config = {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            "https://github.com/quantified-uncertainty/squiggle/tree/master/packages/website/",
+            "https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/website/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
@@ -73,7 +73,7 @@ const config = {
         title: "Squiggle",
         logo: {
           alt: "Squiggle Logo",
-          src: "img/logo.svg",
+          src: "img/quri-logo.png",
         },
         items: [
           {
@@ -85,7 +85,7 @@ const config = {
           { to: "/blog", label: "Blog", position: "left" },
           { to: "/playground", label: "Playground", position: "left" },
           {
-            href: "https://github.com/QURIresearch/squiggle",
+            href: "https://github.com/quantified-uncertainty/squiggle",
             label: "GitHub",
             position: "right",
           },
@@ -103,7 +103,7 @@ const config = {
               },
               {
                 label: "GitHub",
-                href: "https://github.com/QURIresearch/squiggle",
+                href: "https://github.com/quantified-uncertainty/squiggle",
               },
             ],
           },

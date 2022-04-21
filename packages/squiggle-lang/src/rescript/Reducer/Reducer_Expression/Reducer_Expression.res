@@ -87,6 +87,7 @@ let reduceExpression = (expression: t, bindings: T.bindings): result<expressionV
         )
         racc->Result.flatMap(acc => acc->doMacroCall(bindings))
       }
+    | T.EBindings(bindings) => T.EBindings(bindings)->Ok
     }
 
   let rec reduceExpandedExpression = (expression: t): result<expressionValue, 'e> =>
