@@ -59,6 +59,28 @@ let dispatchMacroCall = (list: list<expression>, bindings: ExpressionT.bindings)
     }
   }
 
+  let doExportVariableExpression = (bindings: ExpressionT.bindings) => {
+    let emptyDictionary: Js.Dict.t<ExpressionValue.expressionValue> = Js.Dict.empty()
+    let reducedBindings = bindings->Belt.Map.String.keep (
+      (key, value) =>
+        switch value {
+        | ExpressionT.EValue(_) => true
+        | _ => false
+        }
+    )
+    let externalBindings = reducedBindings->Belt.Map.String.reduce(
+      emptyDictionary,
+      (acc, key, expressionValue) => {
+        let value = switch expressionValue {
+          | EValue(aValue) => aValue
+          | _ => EvSymbol("internal")
+        }
+        Js.Dict.set(acc, key, value); acc
+      }
+    )
+    externalBindings->EvRecord->ExpressionT.EValue->Ok
+  }
+
   switch list {
   | list{ExpressionT.EValue(EvCall("$$bindings"))} => bindings->ExpressionT.EBindings->Ok
 
@@ -68,6 +90,11 @@ let dispatchMacroCall = (list: list<expression>, bindings: ExpressionT.bindings)
       statement,
     } =>
     doBindStatement(statement, bindings)
+  | list{
+      ExpressionT.EValue(EvCall("$$bindExpression")),
+      ExpressionT.EBindings(bindings),
+      ExpressionT.EList(list{EValue(EvCall("$exportVariableExpression")), ..._}),
+    } => doExportVariableExpression(bindings)
   | list{
       ExpressionT.EValue(EvCall("$$bindExpression")),
       ExpressionT.EBindings(bindings),

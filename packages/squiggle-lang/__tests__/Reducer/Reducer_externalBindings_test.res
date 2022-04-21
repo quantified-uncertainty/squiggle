@@ -32,7 +32,7 @@ describe("Parse for Bindings", () => {
     ) 
 })
 
-Only.describe("Eval with Bindings", () => {
+describe("Eval with Bindings", () => {
   testEvalBindingsToBe(
     "x",
     list{("x", ExpressionValue.EvNumber(1.))},
@@ -50,11 +50,12 @@ Only.describe("Eval with Bindings", () => {
     ) 
 })
 
-describe("Eval Partial", () => {
-  testEvalPartialBindingsToBe(
+Only.describe("Eval Partial", () => {
+  MyOnly.testEvalPartialBindingsToBe(
+    //   A partial cannot end with an expression
     "x",
     list{("x", ExpressionValue.EvNumber(1.))},
-    "????",
+    "Error(Assignment expected)",
     ) 
   testEvalPartialBindingsToBe(
     "y=x",
