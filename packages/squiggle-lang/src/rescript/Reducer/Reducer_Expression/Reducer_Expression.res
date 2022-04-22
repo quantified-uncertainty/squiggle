@@ -148,7 +148,7 @@ let eval = (codeText: string) => {
   )
 }
 
-type externalBindings = Js.Dict.t<expressionValue>
+type externalBindings = ReducerInterface.ExpressionValue.externalBindings //Js.Dict.t<expressionValue>
 
 let externalBindingsToBindings = (externalBindings: externalBindings): T.bindings => {
   let keys = Js.Dict.keys(externalBindings)

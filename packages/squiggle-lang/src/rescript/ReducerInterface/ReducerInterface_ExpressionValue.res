@@ -16,6 +16,9 @@ type rec expressionValue =
   | EvString(string)
   | EvSymbol(string)
 
+@genType
+type externalBindings = Js.Dict.t<expressionValue>
+
 type functionCall = (string, array<expressionValue>)
 
 let rec toString = aValue =>

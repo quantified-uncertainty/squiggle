@@ -6,9 +6,9 @@ module Js = Reducer_Js
 module MathJs = Reducer_MathJs
 
 @genType
-type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type expressionValue = ReducerInterface.ExpressionValue.expressionValue
 @genType
-type externalBindings = Expression.externalBindings
+type externalBindings = ReducerInterface.ExpressionValue.externalBindings
 @genType
 let evaluate: string => result<expressionValue, Reducer_ErrorValue.errorValue>
 @genType
