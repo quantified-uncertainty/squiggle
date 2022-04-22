@@ -14673,6 +14673,11 @@ reading-time@^1.5.0:
   resolved "https://registry.yarnpkg.com/reading-time/-/reading-time-1.5.0.tgz#d2a7f1b6057cb2e169beaf87113cc3411b5bc5bb"
   integrity sha512-onYyVhBNr4CmAxFsKS7bz+uTLRakypIe4R+5A824vBSkQy/hB3fZepoVEf8OVAxzLvK+H/jm9TzpI3ETSm64Kg==
 
+reanalyze@^2.19.0:
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/reanalyze/-/reanalyze-2.19.0.tgz#b34b16bd7249a07dc931bb3cc58410247bb36a03"
+  integrity sha512-ycVr19BH6b2J70BmG6nUIzrFWiBNLUCmip6D2NEPLpnJimF6wagE+BIksI6vcTCovqWjgNMKhFCbZKwm+5/8VQ==
+
 rechoir@^0.6.2:
   version "0.6.2"
   resolved "https://registry.yarnpkg.com/rechoir/-/rechoir-0.6.2.tgz#85204b54dba82d5742e28c96756ef43af50e3384"
