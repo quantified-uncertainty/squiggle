@@ -56,7 +56,7 @@ module Algebraic = {
     | #Subtract => Ok(a -. b)
     | #Multiply => Ok(a *. b)
     | #Power =>
-      if a > 0.0 {
+      if a >= 0.0 {
         Ok(a ** b)
       } else {
         Error(ComplexNumberError)
@@ -68,7 +68,10 @@ module Algebraic = {
         Error(DivisionByZeroError)
       }
     | #Logarithm =>
-      if a > 0.0 && b > 0.0 {
+      if b == 1. {
+        Error(DivisionByZeroError)
+      }
+      else if a > 0.0 && b > 0.0 {
         Ok(log(a) /. log(b))
       } else {
         Error(ComplexNumberError)
