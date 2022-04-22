@@ -31,14 +31,13 @@
   "author": "Quantified Uncertainty Research Institute",
   "license": "MIT",
   "dependencies": {
-    "@glennsl/bs-json": "^5.0.2",
+    "bisect_ppx": "^2.7.1",
     "jstat": "^1.9.5",
     "lodash": "4.17.21",
     "mathjs": "10.5.0",
     "pdfast": "^0.2.0",
     "rationale": "0.2.0",
-    "rescript": "^9.1.4",
-    "bisect_ppx": "^2.7.1"
+    "rescript": "^9.1.4"
   },
   "devDependencies": {
     "@glennsl/rescript-jest": "^0.9.0",

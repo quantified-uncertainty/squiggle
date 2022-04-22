@@ -164,12 +164,7 @@ module T = Dist({
   // This pipes all ys (continuous and discrete) through fn.
   // If mapY is a linear operation, we might be able to update the integralSumCaches as well;
   // if not, they'll be set to None.
-  let mapY = (
-    ~integralSumCacheFn=previousIntegralSum => None,
-    ~integralCacheFn=previousIntegral => None,
-    ~fn,
-    t: t,
-  ): t => {
+  let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t): t => {
     let yMappedDiscrete: PointSetTypes.discreteShape =
       t.discrete
       |> Discrete.T.mapY(~fn)
@@ -271,16 +266,13 @@ let combinePointwise = (
   t2: t,
 ): t => {
   let reducedDiscrete =
-    [t1, t2]
-    |> E.A.fmap(toDiscrete)
-    |> E.A.O.concatSomes
-    |> Discrete.reduce(~integralSumCachesFn, ~integralCachesFn, fn)
+    [t1, t2] |> E.A.fmap(toDiscrete) |> E.A.O.concatSomes |> Discrete.reduce(~integralSumCachesFn)
 
   let reducedContinuous =
     [t1, t2]
     |> E.A.fmap(toContinuous)
     |> E.A.O.concatSomes
-    |> Continuous.reduce(~integralSumCachesFn, ~integralCachesFn, fn)
+    |> Continuous.reduce(~integralSumCachesFn, fn)
 
   let combinedIntegralSum = Common.combineIntegralSums(
     integralSumCachesFn,
