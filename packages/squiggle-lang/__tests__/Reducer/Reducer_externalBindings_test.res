@@ -10,7 +10,7 @@ describe("Parse for Bindings", () => {
   )
 })
 
-describe("Parse for Bindings", () => {
+describe("Parse Partial", () => {
   testParsePartialToBe(
     "x",
     "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) :x) (:$exportVariablesExpression)))",

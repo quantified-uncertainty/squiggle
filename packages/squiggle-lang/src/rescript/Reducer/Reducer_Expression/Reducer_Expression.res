@@ -122,7 +122,7 @@ let evalWBindingsExpression_ = (aExpression, bindings): result<expressionValue, 
 /*
   Evaluates MathJs code via Reducer using bindings and answers the result.
   When bindings are used, the code is a partial code as if it is cut from a larger code.
-  Therefore all statments are assignments.
+  Therefore all statements are assignments.
 */
 let evalPartialWBindings_ = (codeText: string, bindings: T.bindings) => {
   parsePartial(codeText)->Result.flatMap(expression =>
