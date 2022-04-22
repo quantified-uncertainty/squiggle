@@ -53,6 +53,15 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
     value->Ok
   }
 
+  let inspectPerformance = (value: expressionValue, label: string) => {
+    let _ = %raw("{performance} = require('perf_hooks')")
+    let start = %raw(`performance.now()`)
+    let finish = %raw(`performance.now()`)
+    let performance = finish - start
+    Js.log(`${label}: ${value->toString} performance: ${Js.String.make(performance)}ms`)
+    value->Ok
+  }
+
   switch call {
   | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
     arrayAtIndex(aValueArray, fIndex)
@@ -62,6 +71,7 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
   | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
   | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
+  | ("inspectPerformance", [value, EvString(label)]) => inspectPerformance(value, label)
   | call => callMathJs(call)
   }
 }
