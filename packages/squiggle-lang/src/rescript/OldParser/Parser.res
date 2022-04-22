@@ -270,7 +270,6 @@ let fromString2 = str => {
        which returns a JSON with (hopefully) a single-element array.
        This array element is the top-level node of a nested-object tree
        representing the functions/arguments/values/etc. in the string.
-
        The function MathJsonToMathJsAdt then recursively unpacks this JSON into a typed data structure we can use.
        Inside of this function, MathAdtToDistDst is called whenever a distribution function is encountered.
  */

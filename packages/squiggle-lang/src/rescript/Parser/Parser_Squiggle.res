@@ -3,9 +3,7 @@ let {dispatch} = module(ReducerInterface_GenericDistribution)
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
 module Grammar = {
-  type expressionValueOR = option<
-    result<ReducerInterface_ExpressionValue.expressionValue, Reducer_ErrorValue.errorValue>,
-  >
+  type expressionValueOR = option<result<expressionValue, Reducer_ErrorValue.errorValue>>
   let normalDist: t<expressionValueOR> = bind(Symbols.normalNode, _ =>
     bind(Symbols.openParen, _ =>
       bind(Primitive.natural, mean =>
@@ -61,17 +59,16 @@ module Grammar = {
   )
   and term: lazy_t<t<expressionValueOR>> = lazy bind(Lazy.force(factor), f =>
     choice(
-      bind(
-        Primitive.symbol("*"),
-        _ =>
-          bind(Lazy.force(term), t => {
-            let f' = retGenericDistOrRaise(f)
-            let t' = retGenericDistOrRaise(t)
-            returnP(dispatch(("multiply", [EvDistribution(f'), EvDistribution(t')])))
-          })),
-        returnP(f),
+      bind(Primitive.symbol("*"), _ =>
+        bind(Lazy.force(term), t => {
+          let f' = retGenericDistOrRaise(f)
+          let t' = retGenericDistOrRaise(t)
+          returnP(dispatch(("multiply", [EvDistribution(f'), EvDistribution(t')])))
+        })
       ),
+      returnP(f),
     )
+  )
   and factor: lazy_t<t<expressionValueOR>> = lazy choice(
     bind(Symbols.openParen, _ =>
       bind(Lazy.force(expr), e => bind(Symbols.closeParen, _ => returnP(e)))
