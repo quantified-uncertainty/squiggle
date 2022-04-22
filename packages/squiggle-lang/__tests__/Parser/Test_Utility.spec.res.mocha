@@ -1,0 +1,33 @@
+open RescriptMocha
+open Mocha
+
+describe("CharPredicates", () => {
+  describe("isDigit", () => {
+    it("should identify '3'", () => {
+      Assert.deep_equal(Utility.CharPredicates.isDigit('3'), true)
+    })
+    it("should identify '7'", () => {
+      Assert.deep_equal(Utility.CharPredicates.isDigit('7'), true)
+    })
+    it("should not identify 'a'", () => {
+      Assert.deep_equal(Utility.CharPredicates.isDigit('a'), false)
+    })
+  })
+  describe("isSpace", () => {
+    it("should identify newline", () => {
+      Assert.deep_equal(Utility.CharPredicates.isSpace('\n'), true)
+    })
+    it("should identify tab", () => {
+      Assert.deep_equal(Utility.CharPredicates.isSpace('\t'), true)
+    })
+  })
+})
+
+describe("other utilities", () => {
+  it("listStringFlattenTuple1 works", () => {
+    Assert.deep_equal(Utility.listStringFlattenTuple1((list{"abc", "def", "ghi"}, 1)), ("abcdefghi", 1))
+  })
+  it("listStringFlatten works", () => {
+    Assert.deep_equal(Utility.listStringFlatten(list{"abc", "def", "ghi"}), "abcdefghi")
+  })
+})

@@ -1,0 +1,128 @@
+open RescriptMocha
+open Mocha
+open Parsec
+
+describe("rudimentary combinators (ParserBase)", () => {
+  it("should return (1, abc)", () => {
+    // could be property test
+    Assert.deep_equal(parse(returnP(1), "abc"), list{(1, "abc")})
+  })
+  it("should return (a, bc)", () => {
+    // should be property test
+    Assert.deep_equal(parse(item, "abc"), list{('a', "bc")})
+  })
+  it("should return empty list", () => {
+    // should be property test
+    Assert.deep_equal(parse(failure, "abc"), list{})
+  })
+  it("should return empty list", () => {
+    // covered in a conditional of the property test
+    Assert.deep_equal(parse(item, ""), list{})
+  })
+})
+describe("Primitive", () => {
+  it("digit: should return (1, 23)", () => {
+    Assert.deep_equal(parse(Primitive.digit, "123"), list{('1', "23")})
+  })
+  it("digit: should return empty list", () => {
+    Assert.deep_equal(parse(Primitive.digit, "abc"), list{})
+  })
+  it("checkchar: should return empty list", () => {
+    Assert.deep_equal(parse(Primitive.checkchar('a'), "123"), list{})
+  })
+  it("checkstring: should split abcdef into (abc, def)", () => {
+    Assert.deep_equal(parse(Primitive.checkstring("abc"), "abcdef"), list{("abc", "def")})
+  })
+  it("checkstring: should return empty list", () => {
+    Assert.deep_equal(parse(Primitive.checkstring("abc"), "ab1234"), list{})
+  })
+  let manyRun: (t<char>, string) => list<(string, string)> = (p, str) => {
+    parse(Primitive.many(fmap(x => String.make(1, x), p)), str)
+  }
+  let many1Run: (t<char>, string) => list<(string, string)> = (p, str) => {
+    parse(Primitive.many1(fmap(x => String.make(1, x), p)), str)
+  }
+  it("many: should return (123,abc)", () => {
+    Assert.deep_equal(
+      manyRun(Primitive.digit, "123abc"),
+      list{("123", "abc")},
+    )
+  })
+  it("many (without run helper): should return (123, abc)", () => {
+    Assert.deep_equal(
+      parse(Primitive.many(Primitive.digitString), "123abc"),
+      list{("123", "abc")}
+    )
+  })
+  it("many: should return (<empt>, abcdef)", () => {
+    Assert.deep_equal(
+      manyRun(Primitive.digit, "abcdef"),
+      list{("", "abcdef")},
+    )
+  })
+  it("many1: should return empty list", () => {
+    Assert.deep_equal(
+      many1Run(Primitive.digit, "abcdef"),
+      list{}
+    )
+  })
+  it("many1: should return abcdef", () => {
+    Assert.deep_equal(
+      parse(Primitive.many1(Primitive.lowerString), "abcdef"),
+      list{("abcdef", "")}
+    )
+  })
+  it("many1: should return (abc, Def)", () => {
+    Assert.deep_equal(
+      parse(Primitive.many1(Primitive.lowerString), "abcDef"),
+      list{("abc", "Def")}
+    )
+  })
+  it("many: should return (abc, Def)", () => {
+    Assert.deep_equal(
+      parse(Primitive.many(Primitive.lowerString), "abcDef"),
+      list{("abc", "Def")}
+    )
+  })
+
+  it("nat: should return (123, _abc)", () => {
+    Assert.deep_equal(
+      parse(Primitive.nat, "123 abc"),
+      list{(123, " abc")}
+    )
+  })
+})
+
+describe("whitespace-insensitive lists", () => {
+  let ident: t<string> = bind(
+    Primitive.lower,
+    x => bind(
+      Primitive.many(Primitive.alphanumString),
+      xs => returnP(Js.String2.concat(String.make(1, x), xs))))
+
+  let identifier: t<string> = Primitive.token(ident)
+
+  describe("of strings (identifier)", () => {
+    let listStringParser: t<list<string>> = {
+      bind(
+        Primitive.symbol("list{"),
+        _ => {
+          bind(
+            identifier,
+            n => bind(
+              Primitive.many(bind(Primitive.symbol(","), _ => identifier)),
+              ns => bind(Primitive.symbol("}"), _ => returnP(list{n, ns}))
+            )
+          )
+        }
+      )
+    }
+
+    it("returns list{ab, cd, ef} (with newline) THIS TEST IS WRONG", () => {
+      Assert.deep_equal(
+        parse(listStringParser, " list{ ab \n, cd, ef } "),
+        list{(list{"ab", "cdef"}, "")}
+      )
+    })
+  })
+})

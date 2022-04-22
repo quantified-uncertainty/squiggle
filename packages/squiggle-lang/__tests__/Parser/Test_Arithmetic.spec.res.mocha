@@ -1,0 +1,51 @@
+open RescriptMocha
+open Mocha
+open Parsec
+
+describe("expressions of plus and times", () => {
+
+  let rec expr: lazy_t<t<int>> = lazy(bind(
+    Lazy.force(term),
+    t => choice(
+      bind(Primitive.symbol("+"), _ => bind(
+        Lazy.force(expr),
+        e => returnP(t + e)
+      )),
+      returnP(t)
+    )
+  ))
+  and term: lazy_t<t<int>> = lazy(bind(
+    Lazy.force(factor),
+    f => choice(
+      bind(Primitive.symbol("*"), _ => bind(
+        Lazy.force(term), t => returnP(f * t)
+      )),
+      returnP(f)
+    )
+  ))
+  and factor: lazy_t<t<int>> = lazy(choice(bind(Primitive.symbol("("), _ => bind(
+    Lazy.force(expr), e => bind(Primitive.symbol(")"), _ => returnP(e))
+  )), Primitive.natural))
+
+  let eval: string => int = xs => switch parse(Lazy.force(expr), xs) {
+      | list{(n, "")} => n
+      | list{(_, out)} => raise(Wrongo(`unconsumed input ${out}`))
+      | list{} => raise(Wrongo("invalid input"))
+      | _ => raise(Wrongo(wrongoMessage))
+  }
+  it("equals 3 at 1 + 2", () => {
+    Assert.deep_equal(eval("1 + 2"), 3)
+  })
+  it("equals 10 at 2 * 3 + 4", () => {
+    Assert.deep_equal(eval("2 \n * 3 \t +4"), 10)
+  })
+  it("equals 14 at 2 *(3 + 4)", () => {
+    Assert.deep_equal(eval("2 *(3 + 4)"), 14)
+  })
+//  it("raises Wrongo(unconsumed input -4) at 2*3-4", () => {
+//    Assert.throws(() => eval("2*3-4"), Js.Exn.asJsExn(Wrongo("unconsumed input -4")))
+//  })
+//  it("raises Wrongo(invalid input) at -1", () => {
+//    Assert.throws(() => eval("-1"), Js.Exn.asJsExn(Wrongo("invalid input")))
+//  })
+})
