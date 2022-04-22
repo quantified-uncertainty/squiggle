@@ -30,7 +30,6 @@
   "author": "Quantified Uncertainty Research Institute",
   "license": "MIT",
   "dependencies": {
-    "@glennsl/bs-json": "^5.0.2",
     "bisect_ppx": "^2.7.1",
     "jstat": "^1.9.5",
     "lodash": "4.17.21",
