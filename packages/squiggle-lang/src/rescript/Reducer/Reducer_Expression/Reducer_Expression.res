@@ -124,7 +124,7 @@ let evalUsingExternalBindingsExpression_ = (aExpression, bindings): result<expre
   When bindings are used, the code is a partial code as if it is cut from a larger code.
   Therefore all statements are assignments.
 */
-let evalPartialWBindings_ = (codeText: string, bindings: T.bindings) => {
+let evalPartialUsingExternalBindings_ = (codeText: string, bindings: T.bindings) => {
   parsePartial(codeText)->Result.flatMap(expression =>
     expression->evalUsingExternalBindingsExpression_(bindings)
   )
@@ -169,12 +169,12 @@ let evalUsingExternalBindings = (code: string, externalBindings: externalBinding
   Evaluates code with external bindings. External bindings are a record of expression values.
   The code is a partial code as if it is cut from a larger code. Therefore all statments are assignments.
 */
-let evalPartialWBindings = (code: string, externalBindings: externalBindings): result<
+let evalPartialUsingExternalBindings = (code: string, externalBindings: externalBindings): result<
   externalBindings,
   'e,
 > => {
   let bindings = externalBindings->externalBindingsToBindings
-  let answer = evalPartialWBindings_(code, bindings)
+  let answer = evalPartialUsingExternalBindings_(code, bindings)
   answer->Result.flatMap(answer =>
     switch answer {
     | EvRecord(aRecord) => Ok(aRecord)

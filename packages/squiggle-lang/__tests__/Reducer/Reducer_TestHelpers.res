@@ -24,7 +24,7 @@ let expectEvalPartialBindingsToBe = (
   bindings: Reducer.externalBindings,
   answer: string,
 ) =>
-  Reducer.evaluatePartialWBindings(expr, bindings)
+  Reducer.evaluatePartialUsingExternalBindings(expr, bindings)
   ->ExpressionValue.toStringResultRecord
   ->expect
   ->toBe(answer)

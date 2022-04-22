@@ -17,7 +17,7 @@ let evaluateUsingExternalBindings: (
   externalBindings,
 ) => result<expressionValue, Reducer_ErrorValue.errorValue>
 @genType
-let evaluatePartialWBindings: (
+let evaluatePartialUsingExternalBindings: (
   string,
   externalBindings,
 ) => result<externalBindings, Reducer_ErrorValue.errorValue>
