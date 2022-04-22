@@ -34,11 +34,6 @@ let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
 
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn: (
-    PointSetTypes.continuousShape,
-    PointSetTypes.continuousShape,
-  ) => option<PointSetTypes.continuousShape>=(_, _) => None,
-  fn,
   t1: PointSetTypes.discreteShape,
   t2: PointSetTypes.discreteShape,
 ): PointSetTypes.discreteShape => {
@@ -62,16 +57,8 @@ let combinePointwise = (
   )
 }
 
-let reduce = (
-  ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn=(_, _) => None,
-  fn,
-  discreteShapes,
-): PointSetTypes.discreteShape =>
-  discreteShapes |> E.A.fold_left(
-    combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn),
-    empty,
-  )
+let reduce = (~integralSumCachesFn=(_, _) => None, discreteShapes): PointSetTypes.discreteShape =>
+  discreteShapes |> E.A.fold_left(combinePointwise(~integralSumCachesFn), empty)
 
 let updateIntegralSumCache = (integralSumCache, t: t): t => {
   ...t,
