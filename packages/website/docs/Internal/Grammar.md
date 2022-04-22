@@ -26,7 +26,7 @@ Think of javascript's list unpacking notation to read our variable-argument func
 <expr> ::= <term> + <expr> | <term> - <expr> | <expr> .+ <expr> | <expr> .- <expr> | <term>
 <term> ::= <power> * <term> | <power> <term> | <power> / <term> | <power> .* <term> | <power ./ <term> | <power>
 <power> ::= <factor> ^ <power> | <factor> .^ <power> | <factor>
-<factor> ::= <number> | <bool> | <symbol> | ( <expr> ) | <symbol>(<symbol>)
+<factor> ::= <number> | <bool> | <symbol> | ( <expr> ) | <array> | <record> | <record>.<symbol> | <symbol> => <expr> | <symbol>(<symbol>) | <symbol>(<symbol>, <symbol>) | ...
 ```
 
 ## Data structures
@@ -41,7 +41,7 @@ Think of javascript's list unpacking notation to read our variable-argument func
 ```
 <statement> ::= <assign> | <assignFunction>
 <assign> ::= <symbol> = <expr>
-<assignFunction> ::= <symbol>(<symbol>) = <expr>
+<assignFunction> ::= <symbol>(<symbol>) = <expr> | <symbol>(<symbol>, <symbol>) = <expr> | ...
 ```
 
 ## A squiggle file
