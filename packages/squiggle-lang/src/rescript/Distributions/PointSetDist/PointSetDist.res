@@ -16,6 +16,13 @@ let fmap = ((fn1, fn2, fn3), t: t): t =>
   | Continuous(m) => Continuous(fn3(m))
   }
 
+let fmapResult = ((fn1, fn2, fn3), t: t): result<t, 'e> =>
+  switch t {
+  | Mixed(m) => fn1(m)->E.R2.fmap(x => PointSetTypes.Mixed(x))
+  | Discrete(m) => fn2(m)->E.R2.fmap(x => PointSetTypes.Discrete(x))
+  | Continuous(m) => fn3(m)->E.R2.fmap(x => PointSetTypes.Continuous(x))
+  }
+
 let toMixed = mapToAll((
   m => m,
   d =>
@@ -130,11 +137,24 @@ module T = Dist({
   let integralYtoX = f =>
     mapToAll((Mixed.T.Integral.yToX(f), Discrete.T.Integral.yToX(f), Continuous.T.Integral.yToX(f)))
   let maxX = mapToAll((Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX))
-  let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn) =>
+  let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn: float => float): (
+    t => t
+  ) =>
     fmap((
       Mixed.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
       Discrete.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
       Continuous.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
+    ))
+
+  let mapYResult = (
+    ~integralSumCacheFn=_ => None,
+    ~integralCacheFn=_ => None,
+    ~fn: float => result<float, 'e>,
+  ): (t => result<t, 'e>) =>
+    fmapResult((
+      Mixed.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, ~fn),
+      Discrete.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, ~fn),
+      Continuous.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, ~fn),
     ))
 
   let mean = (t: t): float =>
@@ -195,8 +215,16 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Mean => T.mean(s)
   }
 
-let toSparkline = (t: t, bucketCount) =>
+@genType
+type sparklineError = CannotSparklineDiscrete
+
+let sparklineErrorToString = (err: sparklineError): string =>
+  switch err {
+  | CannotSparklineDiscrete => "Cannot find the sparkline of a discrete distribution"
+  }
+
+let toSparkline = (t: t, bucketCount): result<string, sparklineError> =>
   T.toContinuous(t)
   ->E.O2.fmap(Continuous.downsampleEquallyOverX(bucketCount))
-  ->E.O2.toResult("toContinous Error: Could not convert into continuous distribution")
+  ->E.O2.toResult(CannotSparklineDiscrete)
   ->E.R2.fmap(r => Continuous.getShape(r).ys->Sparklines.create())

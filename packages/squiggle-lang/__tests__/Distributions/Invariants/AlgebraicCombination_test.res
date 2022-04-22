@@ -43,7 +43,7 @@ describe("(Algebraic) addition of distributions", () => {
     test("normal(mean=5) + normal(mean=20)", () => {
       normalDist5
       ->algebraicAdd(normalDist20)
-      ->E.R2.fmap(GenericDist_Types.Constructors.UsingDists.mean)
+      ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
       ->E.R2.fmap(run)
       ->E.R2.fmap(toFloat)
       ->E.R.toExn
@@ -57,7 +57,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         uniformDist
         ->algebraicAdd(betaDist)
-        ->E.R2.fmap(GenericDist_Types.Constructors.UsingDists.mean)
+        ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toExn
@@ -74,7 +74,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         betaDist
         ->algebraicAdd(uniformDist)
-        ->E.R2.fmap(GenericDist_Types.Constructors.UsingDists.mean)
+        ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toExn
@@ -95,7 +95,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           normalDist10 // this should be normal(10, sqrt(8))
           ->Ok
-          ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, x))
+          ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, x))
           ->E.R2.fmap(run)
           ->E.R2.fmap(toFloat)
           ->E.R.toOption
@@ -103,7 +103,7 @@ describe("(Algebraic) addition of distributions", () => {
         let calculated =
           normalDist5
           ->algebraicAdd(normalDist5)
-          ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, x))
+          ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, x))
           ->E.R2.fmap(run)
           ->E.R2.fmap(toFloat)
           ->E.R.toOption
@@ -126,7 +126,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist20
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1.9e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1.9e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -134,7 +134,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist10
         ->algebraicAdd(normalDist10)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1.9e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1.9e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -155,7 +155,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         uniformDist
         ->algebraicAdd(betaDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toExn
@@ -170,7 +170,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         betaDist
         ->algebraicAdd(uniformDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toExn
@@ -187,7 +187,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist10
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, x))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, x))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -195,7 +195,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist5
         ->algebraicAdd(normalDist5)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, x))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, x))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -217,7 +217,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist20
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1.25e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1.25e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -225,7 +225,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist10
         ->algebraicAdd(normalDist10)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1.25e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1.25e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -246,7 +246,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         uniformDist
         ->algebraicAdd(betaDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toExn
@@ -261,7 +261,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         betaDist
         ->algebraicAdd(uniformDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toExn
@@ -279,7 +279,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist10
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, x))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, x))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -287,7 +287,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist5
         ->algebraicAdd(normalDist5)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, x))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, x))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -309,7 +309,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist20
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 1e-1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 1e-1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -317,7 +317,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist10
         ->algebraicAdd(normalDist10)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 1e-1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 1e-1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -338,7 +338,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         uniformDist
         ->algebraicAdd(betaDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 2e-2))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 2e-2))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toExn
@@ -353,7 +353,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         betaDist
         ->algebraicAdd(uniformDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 2e-2))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 2e-2))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toExn

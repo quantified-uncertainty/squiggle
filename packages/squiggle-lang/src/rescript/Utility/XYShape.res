@@ -43,6 +43,10 @@ module T = {
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
   let mapX = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys}
   let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(fn, t.ys)}
+  let mapYResult = (fn: float => result<float, 'e>, t: t): result<t, 'e> => {
+    let mappedYs = E.A.fmap(fn, t.ys)
+    E.A.R.firstErrorOrOpen(mappedYs)->E.R2.fmap(y => {xs: t.xs, ys: y})
+  }
   let square = mapX(x => x ** 2.0)
   let zip = ({xs, ys}: t) => Belt.Array.zip(xs, ys)
   let fromArray = ((xs, ys)): t => {xs: xs, ys: ys}

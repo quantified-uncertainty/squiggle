@@ -15,7 +15,7 @@ open TestHelpers
 module Internals = {
   let epsilon = 5e1
 
-  let mean = GenericDist_Types.Constructors.UsingDists.mean
+  let mean = DistributionTypes.Constructors.UsingDists.mean
 
   let expectImpossiblePath: string => assertion = algebraicOp =>
     `${algebraicOp} has`->expect->toEqual("failed")

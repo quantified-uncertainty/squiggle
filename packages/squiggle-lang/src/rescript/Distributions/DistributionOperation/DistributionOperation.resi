@@ -4,7 +4,7 @@ type env = {
   xyPointLength: int,
 }
 
-open GenericDist_Types
+open DistributionTypes
 
 @genType
 type outputType =
@@ -15,15 +15,15 @@ type outputType =
   | GenDistError(error)
 
 @genType
-let run: (~env: env, GenericDist_Types.Operation.genericFunctionCallInfo) => outputType
+let run: (~env: env, DistributionTypes.DistributionOperation.genericFunctionCallInfo) => outputType
 let runFromDist: (
   ~env: env,
-  ~functionCallInfo: GenericDist_Types.Operation.fromDist,
+  ~functionCallInfo: DistributionTypes.DistributionOperation.fromDist,
   genericDist,
 ) => outputType
 let runFromFloat: (
   ~env: env,
-  ~functionCallInfo: GenericDist_Types.Operation.fromDist,
+  ~functionCallInfo: DistributionTypes.DistributionOperation.fromDist,
   float,
 ) => outputType
 
@@ -38,7 +38,7 @@ module Output: {
   let toBool: t => option<bool>
   let toBoolR: t => result<bool, error>
   let toError: t => option<error>
-  let fmap: (~env: env, t, GenericDist_Types.Operation.singleParamaterFunction) => t
+  let fmap: (~env: env, t, DistributionTypes.DistributionOperation.singleParamaterFunction) => t
 }
 
 module Constructors: {

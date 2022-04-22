@@ -14,7 +14,7 @@ let sampleN = (t: t, n) =>
   }
 
 let toSampleSetDist = (t: t, n) =>
-  SampleSetDist.make(sampleN(t, n))->GenericDist_Types.Error.resultStringToResultError
+  SampleSetDist.make(sampleN(t, n))->E.R2.errMap(DistributionTypes.sampleErrorToDistErr)
 
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
@@ -68,7 +68,7 @@ let toPointSet = (
   t,
   ~xyPointLength,
   ~sampleCount,
-  ~xSelection: GenericDist_Types.Operation.pointsetXSelection=#ByWeight,
+  ~xSelection: DistributionTypes.Operation.pointsetXSelection=#ByWeight,
   (),
 ): result<PointSetTypes.pointSetDist, error> => {
   switch (t: t) {
@@ -83,7 +83,7 @@ let toPointSet = (
         pointSetDistLength: xyPointLength,
         kernelWidth: None,
       },
-    )->GenericDist_Types.Error.resultStringToResultError
+    )->E.R2.errMap(x => DistributionTypes.PointSetConversionError(x))
   }
 }
 
@@ -97,7 +97,7 @@ let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<st
   t
   ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
   ->E.R.bind(r =>
-    r->PointSetDist.toSparkline(bucketCount)->GenericDist_Types.Error.resultStringToResultError
+    r->PointSetDist.toSparkline(bucketCount)->E.R2.errMap(x => DistributionTypes.SparklineError(x))
   )
 
 module Truncate = {
@@ -148,10 +148,10 @@ let truncate = Truncate.run
 */
 module AlgebraicCombination = {
   let tryAnalyticalSimplification = (
-    arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
+    arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
     t1: t,
     t2: t,
-  ): option<result<SymbolicDistTypes.symbolicDist, string>> =>
+  ): option<result<SymbolicDistTypes.symbolicDist, Operation.invalidOperationError>> =>
     switch (arithmeticOperation, t1, t2) {
     | (arithmeticOperation, Symbolic(d1), Symbolic(d2)) =>
       switch SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation) {
@@ -174,14 +174,14 @@ module AlgebraicCombination = {
 
   let runMonteCarlo = (
     toSampleSet: toSampleSetFn,
-    arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
+    arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
     t1: t,
     t2: t,
-  ) => {
+  ): result<t, error> => {
     let fn = Operation.Algebraic.toFn(arithmeticOperation)
     E.R.merge(toSampleSet(t1), toSampleSet(t2))
     ->E.R.bind(((t1, t2)) => {
-      SampleSetDist.map2(~fn, ~t1, ~t2)->GenericDist_Types.Error.resultStringToResultError
+      SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(x => DistributionTypes.OperationError(x))
     })
     ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
   }
@@ -224,7 +224,7 @@ module AlgebraicCombination = {
   ): result<t, error> => {
     switch tryAnalyticalSimplification(arithmeticOperation, t1, t2) {
     | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
-    | Some(Error(e)) => Error(Other(e))
+    | Some(Error(e)) => Error(OperationError(e))
     | None =>
       switch chooseConvolutionOrMonteCarlo(arithmeticOperation, t1, t2) {
       | MonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
@@ -247,7 +247,7 @@ let pointwiseCombination = (
   E.R.merge(toPointSetFn(t1), toPointSetFn(t2))
   ->E.R2.fmap(((t1, t2)) =>
     PointSetDist.combinePointwise(
-      GenericDist_Types.Operation.arithmeticToFn(arithmeticOperation),
+      DistributionTypes.Operation.arithmeticToFn(arithmeticOperation),
       t1,
       t2,
     )
@@ -258,23 +258,23 @@ let pointwiseCombination = (
 let pointwiseCombinationFloat = (
   t: t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
-  ~float: float,
+  ~arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
+  ~f: float,
 ): result<t, error> => {
   let m = switch arithmeticOperation {
   | #Add | #Subtract => Error(DistributionTypes.DistributionVerticalShiftIsInvalid)
   | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
-    toPointSetFn(t)->E.R2.fmap(t => {
+    toPointSetFn(t)->E.R.bind(t => {
       //TODO: Move to PointSet codebase
       let fn = (secondary, main) => Operation.Scale.toFn(arithmeticOperation, main, secondary)
       let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(arithmeticOperation)
       let integralCacheFn = Operation.Scale.toIntegralCacheFn(arithmeticOperation)
-      PointSetDist.T.mapY(
-        ~integralSumCacheFn=integralSumCacheFn(float),
-        ~integralCacheFn=integralCacheFn(float),
-        ~fn=fn(float),
+      PointSetDist.T.mapYResult(
+        ~integralSumCacheFn=integralSumCacheFn(f),
+        ~integralCacheFn=integralCacheFn(f),
+        ~fn=fn(f),
         t,
-      )
+      )->E.R2.errMap(x => DistributionTypes.OperationError(x))
     })
   }
   m->E.R2.fmap(r => DistributionTypes.PointSet(r))

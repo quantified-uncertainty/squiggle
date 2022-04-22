@@ -37,22 +37,42 @@ module Convolution = {
     }
 }
 
+@genType
+type invalidOperationError =
+  | DivisionByZeroError
+  | ComplexNumberError
+
+let invalidOperationErrorToString = (err: invalidOperationError): string =>
+  switch err {
+  | DivisionByZeroError => "Cannot divide by zero"
+  | ComplexNumberError => "Operation returned complex result"
+  }
+
 module Algebraic = {
   type t = algebraicOperation
-  let toFn: (t, float, float) => float = x =>
+  let toFn: (t, float, float) => result<float, invalidOperationError> = (x, a, b) =>
     switch x {
-    | #Add => \"+."
-    | #Subtract => \"-."
-    | #Multiply => \"*."
-    | #Power => \"**"
-    | #Divide => \"/."
-    | #Logarithm => (a, b) => log(a) /. log(b)
-    }
-
-  let applyFn = (t, f1, f2) =>
-    switch (t, f1, f2) {
-    | (#Divide, _, 0.) => Error("Cannot divide $v1 by zero.")
-    | _ => Ok(toFn(t, f1, f2))
+    | #Add => Ok(a +. b)
+    | #Subtract => Ok(a -. b)
+    | #Multiply => Ok(a *. b)
+    | #Power =>
+      if a > 0.0 {
+        Ok(a ** b)
+      } else {
+        Error(ComplexNumberError)
+      }
+    | #Divide =>
+      if b != 0.0 {
+        Ok(a /. b)
+      } else {
+        Error(DivisionByZeroError)
+      }
+    | #Logarithm =>
+      if a > 0.0 && b > 0.0 {
+        Ok(log(a) /. log(b))
+      } else {
+        Error(ComplexNumberError)
+      }
     }
 
   let toString = x =>
@@ -96,12 +116,27 @@ module DistToFloat = {
 // Note that different logarithms don't really do anything.
 module Scale = {
   type t = scaleOperation
-  let toFn = x =>
+  let toFn = (x: t, a: float, b: float): result<float, invalidOperationError> =>
     switch x {
-    | #Multiply => \"*."
-    | #Divide => \"/."
-    | #Power => \"**"
-    | #Logarithm => (a, b) => log(a) /. log(b)
+    | #Multiply => Ok(a *. b)
+    | #Divide =>
+      if b != 0.0 {
+        Ok(a /. b)
+      } else {
+        Error(DivisionByZeroError)
+      }
+    | #Power =>
+      if a > 0.0 {
+        Ok(a ** b)
+      } else {
+        Error(ComplexNumberError)
+      }
+    | #Logarithm =>
+      if a > 0.0 && b > 0.0 {
+        Ok(log(a) /. log(b))
+      } else {
+        Error(DivisionByZeroError)
+      }
     }
 
   let format = (operation: t, value, scaleBy) =>

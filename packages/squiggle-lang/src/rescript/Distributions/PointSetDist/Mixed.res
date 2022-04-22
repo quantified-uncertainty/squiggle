@@ -164,7 +164,12 @@ module T = Dist({
   // This pipes all ys (continuous and discrete) through fn.
   // If mapY is a linear operation, we might be able to update the integralSumCaches as well;
   // if not, they'll be set to None.
-  let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t): t => {
+  let mapY = (
+    ~integralSumCacheFn=_ => None,
+    ~integralCacheFn=_ => None,
+    ~fn: float => float,
+    t: t,
+  ): t => {
     let yMappedDiscrete: PointSetTypes.discreteShape =
       t.discrete
       |> Discrete.T.mapY(~fn)
@@ -185,6 +190,41 @@ module T = Dist({
       integralSumCache: E.O.bind(t.integralSumCache, integralSumCacheFn),
       integralCache: E.O.bind(t.integralCache, integralCacheFn),
     }
+  }
+
+  let mapYResult = (
+    ~integralSumCacheFn=_ => None,
+    ~integralCacheFn=_ => None,
+    ~fn: float => result<float, 'e>,
+    t: t,
+  ): result<t, 'e> => {
+    E.R.merge(
+      Discrete.T.mapYResult(~fn, t.discrete),
+      Continuous.T.mapYResult(~fn, t.continuous),
+    )->E.R2.fmap(((discreteMapped, continuousMapped)) => {
+      let yMappedDiscrete: PointSetTypes.discreteShape =
+        discreteMapped
+        |> Discrete.updateIntegralSumCache(
+          E.O.bind(t.discrete.integralSumCache, integralSumCacheFn),
+        )
+        |> Discrete.updateIntegralCache(E.O.bind(t.discrete.integralCache, integralCacheFn))
+
+      let yMappedContinuous: PointSetTypes.continuousShape =
+        continuousMapped
+        |> Continuous.updateIntegralSumCache(
+          E.O.bind(t.continuous.integralSumCache, integralSumCacheFn),
+        )
+        |> Continuous.updateIntegralCache(E.O.bind(t.continuous.integralCache, integralCacheFn))
+
+      (
+        {
+          discrete: yMappedDiscrete,
+          continuous: yMappedContinuous,
+          integralSumCache: E.O.bind(t.integralSumCache, integralSumCacheFn),
+          integralCache: E.O.bind(t.integralCache, integralCacheFn),
+        }: t
+      )
+    })
   }
 
   let mean = ({discrete, continuous}: t): float => {

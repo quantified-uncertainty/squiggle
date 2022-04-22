@@ -30,7 +30,7 @@ let toExt: option<'a> => 'a = E.O.toExt(
 describe("sparkline", () => {
   let runTest = (
     name: string,
-    dist: GenericDist_Types.genericDist,
+    dist: DistributionTypes.genericDist,
     expected: DistributionOperation.outputType,
   ) => {
     test(name, () => {

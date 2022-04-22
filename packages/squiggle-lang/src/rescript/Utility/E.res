@@ -152,6 +152,8 @@ module I = {
   let toString = Js.Int.toString
 }
 
+exception Assertion(string)
+
 /* R for Result */
 module R = {
   let result = Rationale.Result.result
@@ -159,6 +161,11 @@ module R = {
   let fmap = Rationale.Result.fmap
   let bind = Rationale.Result.bind
   let toExn = Belt.Result.getExn
+  let assertOk = (message: string, x: result<'a, 'b>): 'a =>
+    switch x {
+    | Ok(r) => r
+    | Error(_) => raise(Assertion(message))
+    }
   let default = (default, res: Belt.Result.t<'a, 'b>) =>
     switch res {
     | Ok(r) => r
@@ -210,10 +217,10 @@ module R2 = {
   let bind = (a, b) => R.bind(b, a)
 
   //Converts result type to change error type only
-  let errMap = (a, map) =>
+  let errMap = (a: result<'a, 'b>, map: 'b => 'c): result<'a, 'c> =>
     switch a {
     | Ok(r) => Ok(r)
-    | Error(e) => map(e)
+    | Error(e) => Error(map(e))
     }
 
   let fmap2 = (xR, f) =>
@@ -436,6 +443,7 @@ module A = {
         r |> Belt.Array.map(_, r => Belt.Result.getExn(r))
       bringErrorUp |> Belt.Result.map(_, forceOpen)
     }
+    let filterOk = (x: array<result<'a, 'b>>): array<'a> => fmap(R.toOption, x)->O.concatSomes
   }
 
   module Sorted = {

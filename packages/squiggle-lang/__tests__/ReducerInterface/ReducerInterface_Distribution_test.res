@@ -22,7 +22,7 @@ describe("eval on distribution functions", () => {
     testEval("mean(-normal(5,2))", "Ok(-5)")
   })
   describe("to", () => {
-    testEval("5 to 2", "Error(TODO: Low value must be less than high value.)")
+    testEval("5 to 2", "Error(Math Error: Low value must be less than high value.)")
     testEval("to(2,5)", "Ok(Lognormal(1.1512925464970227,0.27853260523016377))")
     testEval("to(-2,2)", "Ok(Normal(0,1.2159136638235384))")
   })
@@ -88,8 +88,14 @@ describe("eval on distribution functions", () => {
 
   describe("log", () => {
     testEval("log(2, uniform(5,8))", "Ok(Sample Set Distribution)")
-    testEval("log(normal(5,2), 3)", "Ok(Sample Set Distribution)")
-    testEval("log(normal(5,2), normal(10,1))", "Ok(Sample Set Distribution)")
+    testEval(
+      "log(normal(5,2), 3)",
+      "Error(Math Error: Operation Error: Operation returned complex result)",
+    )
+    testEval(
+      "log(normal(5,2), normal(10,1))",
+      "Error(Math Error: Operation Error: Operation returned complex result)",
+    )
     testEval("log(uniform(5,8))", "Ok(Sample Set Distribution)")
     testEval("log10(uniform(5,8))", "Ok(Sample Set Distribution)")
   })

@@ -146,7 +146,27 @@ let reduce = (
   continuousShapes,
 ) => continuousShapes |> E.A.fold_left(combinePointwise(~integralSumCachesFn, fn), empty)
 
-let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t) =>
+let mapYResult = (
+  ~integralSumCacheFn=_ => None,
+  ~integralCacheFn=_ => None,
+  ~fn: float => result<float, 'e>,
+  t: t,
+): result<t, 'e> =>
+  XYShape.T.mapYResult(fn, getShape(t))->E.R2.fmap(x =>
+    make(
+      ~interpolation=t.interpolation,
+      ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
+      ~integralCache=t.integralCache |> E.O.bind(_, integralCacheFn),
+      x,
+    )
+  )
+
+let mapY = (
+  ~integralSumCacheFn=_ => None,
+  ~integralCacheFn=_ => None,
+  ~fn: float => float,
+  t: t,
+): t =>
   make(
     ~interpolation=t.interpolation,
     ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
@@ -170,6 +190,7 @@ module T = Dist({
   let minX = shapeFn(XYShape.T.minX)
   let maxX = shapeFn(XYShape.T.maxX)
   let mapY = mapY
+  let mapYResult = mapYResult
   let updateIntegralCache = updateIntegralCache
   let toDiscreteProbabilityMassFraction = _ => 0.0
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Continuous(t)

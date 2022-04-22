@@ -53,4 +53,4 @@ type continuousShape = PointSetTypes.continuousShape
 let errorValueToString = Reducer_ErrorValue.errorToString
 
 @genType
-let distributionErrorToString = GenericDist_Types.Error.toString
+let distributionErrorToString = DistributionTypes.Error.toString

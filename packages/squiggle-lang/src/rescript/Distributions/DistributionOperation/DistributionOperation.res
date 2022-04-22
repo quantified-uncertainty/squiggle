@@ -1,4 +1,4 @@
-type functionCallInfo = GenericDist_Types.Operation.genericFunctionCallInfo
+type functionCallInfo = DistributionTypes.DistributionOperation.genericFunctionCallInfo
 type genericDist = DistributionTypes.genericDist
 type error = DistributionTypes.error
 
@@ -120,7 +120,10 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       (),
     )->OutputLocal.toDistR
 
-  let fromDistFn = (subFnName: GenericDist_Types.Operation.fromDist, dist: genericDist) => {
+  let fromDistFn = (
+    subFnName: DistributionTypes.DistributionOperation.fromDist,
+    dist: genericDist,
+  ) => {
     let response = switch subFnName {
     | ToFloat(distToFloatOperation) =>
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
@@ -162,9 +165,9 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->GenericDist.pointwiseCombination(~toPointSetFn, ~arithmeticOperation, ~t2)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Pointwise, arithmeticOperation, #Float(float)) =>
+    | ToDistCombination(Pointwise, arithmeticOperation, #Float(f)) =>
       dist
-      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~arithmeticOperation, ~float)
+      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~arithmeticOperation, ~f)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     }
@@ -192,7 +195,7 @@ module Output = {
   let fmap = (
     ~env,
     input: outputType,
-    functionCallInfo: GenericDist_Types.Operation.singleParamaterFunction,
+    functionCallInfo: DistributionTypes.DistributionOperation.singleParamaterFunction,
   ): outputType => {
     let newFnCall: result<functionCallInfo, error> = switch (functionCallInfo, input) {
     | (FromDist(fromDist), Dist(o)) => Ok(FromDist(fromDist, o))
@@ -205,11 +208,11 @@ module Output = {
   }
 }
 
-// See comment above GenericDist_Types.Constructors to explain the purpose of this module.
+// See comment above DistributionTypes.Constructors to explain the purpose of this module.
 // I tried having another internal module called UsingDists, similar to how its done in
-// GenericDist_Types.Constructors. However, this broke GenType for me, so beware.
+// DistributionTypes.Constructors. However, this broke GenType for me, so beware.
 module Constructors = {
-  module C = GenericDist_Types.Constructors.UsingDists
+  module C = DistributionTypes.Constructors.UsingDists
   open OutputLocal
   let mean = (~env, dist) => C.mean(dist)->run(~env)->toFloatR
   let sample = (~env, dist) => C.sample(dist)->run(~env)->toFloatR
