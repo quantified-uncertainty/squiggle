@@ -72,7 +72,7 @@ let dispatchMacroCall = (
 
   let doExportVariableExpression = (bindings: ExpressionT.bindings) => {
     let emptyDictionary: Js.Dict.t<ExpressionValue.expressionValue> = Js.Dict.empty()
-    let reducedBindings = bindings->Belt.Map.String.keep((key, value) =>
+    let reducedBindings = bindings->Belt.Map.String.keep((_key, value) =>
       switch value {
       | ExpressionT.EValue(_) => true
       | _ => false

@@ -2,7 +2,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
-import type { exportEnv } from "@quri/squiggle-lang";
 import styled from "styled-components";
 
 export interface SquiggleEditorProps {
@@ -21,9 +20,9 @@ export interface SquiggleEditorProps {
   /** If the result is a function, how many points along the function it samples */
   diagramCount?: number;
   /** The environment, other variables that were already declared */
-  environment?: exportEnv;
+  environment?: unknown;
   /** when the environment changes. Used again for notebook magic*/
-  onEnvChange?(env: exportEnv): void;
+  onEnvChange?(env: unknown): void;
   /** The width of the element */
   width: number;
 }

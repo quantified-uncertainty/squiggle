@@ -28,7 +28,7 @@ module Int = {
 }
 /* Utils */
 module U = {
-  let isEqual = (a, b) => a == b
+  let isEqual = \"=="
   let toA = a => [a]
   let id = e => e
 }
@@ -340,8 +340,6 @@ module A = {
   let reduce = Belt.Array.reduce
   let reducei = Belt.Array.reduceWithIndex
   let isEmpty = r => length(r) < 1
-  let min = a => get(a, 0) |> O.fmap(first => Belt.Array.reduce(a, first, (i, j) => i < j ? i : j))
-  let max = a => get(a, 0) |> O.fmap(first => Belt.Array.reduce(a, first, (i, j) => i > j ? i : j))
   let stableSortBy = Belt.SortArray.stableSortBy
   let toRanges = (a: array<'a>) =>
     switch a |> Belt.Array.length {
@@ -448,8 +446,11 @@ module A = {
       | (Some(min), Some(max)) => Some(max -. min)
       | _ => None
       }
+
+    let floatCompare: (float, float) => int = compare
+
     let binarySearchFirstElementGreaterIndex = (ar: array<'a>, el: 'a) => {
-      let el = Belt.SortArray.binarySearchBy(ar, el, compare)
+      let el = Belt.SortArray.binarySearchBy(ar, el, floatCompare)
       let el = el < 0 ? el * -1 - 1 : el
       switch el {
       | e if e >= length(ar) => #overMax
@@ -460,13 +461,13 @@ module A = {
 
     let concat = (t1: array<'a>, t2: array<'a>) => {
       let ts = Belt.Array.concat(t1, t2)
-      ts |> Array.fast_sort(compare)
+      ts |> Array.fast_sort(floatCompare)
       ts
     }
 
     let concatMany = (t1: array<array<'a>>) => {
       let ts = Belt.Array.concatMany(t1)
-      ts |> Array.fast_sort(compare)
+      ts |> Array.fast_sort(floatCompare)
       ts
     }
 
@@ -525,6 +526,9 @@ module A = {
         let diff = (max -. min) /. Belt.Float.fromInt(n - 1)
         Belt.Array.makeBy(n, i => min +. Belt.Float.fromInt(i) *. diff)
       }
+
+    let min = Js.Math.minMany_float
+    let max = Js.Math.maxMany_float
   }
 }
 

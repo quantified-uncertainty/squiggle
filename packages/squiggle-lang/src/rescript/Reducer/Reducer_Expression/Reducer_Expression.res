@@ -15,7 +15,7 @@ type t = expression
 */
 let rec toString = expression =>
   switch expression {
-  | T.EBindings(bindings) => "$$bound"
+  | T.EBindings(_) => "$$bound"
   | T.EList(aList) =>
     `(${Belt.List.map(aList, aValue => toString(aValue))
       ->Extra.List.interperse(" ")
