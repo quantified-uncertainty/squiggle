@@ -35,7 +35,7 @@ let toMixed = mapToAll((
 ))
 
 //TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
-let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =>
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toPointSetDist
@@ -59,13 +59,9 @@ let combinePointwise = (
 ) =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
-    PointSetTypes.Continuous(
-      Continuous.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, m1, m2),
-    )
+    PointSetTypes.Continuous(Continuous.combinePointwise(~integralSumCachesFn, fn, m1, m2))
   | (Discrete(m1), Discrete(m2)) =>
-    PointSetTypes.Discrete(
-      Discrete.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, m1, m2),
-    )
+    PointSetTypes.Discrete(Discrete.combinePointwise(~integralSumCachesFn, m1, m2))
   | (m1, m2) =>
     PointSetTypes.Mixed(
       Mixed.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, toMixed(m1), toMixed(m2)),
@@ -134,11 +130,7 @@ module T = Dist({
   let integralYtoX = f =>
     mapToAll((Mixed.T.Integral.yToX(f), Discrete.T.Integral.yToX(f), Continuous.T.Integral.yToX(f)))
   let maxX = mapToAll((Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX))
-  let mapY = (
-    ~integralSumCacheFn=previousIntegralSum => None,
-    ~integralCacheFn=previousIntegral => None,
-    ~fn,
-  ) =>
+  let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn) =>
     fmap((
       Mixed.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
       Discrete.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),

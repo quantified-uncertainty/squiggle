@@ -69,7 +69,7 @@ let toPointSet = (
   ~xyPointLength,
   ~sampleCount,
   ~xSelection: GenericDist_Types.Operation.pointsetXSelection=#ByWeight,
-  unit,
+  (),
 ): result<PointSetTypes.pointSetDist, error> => {
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
@@ -93,7 +93,7 @@ let toPointSet = (
   xyPointLength to be a bit longer than the eventual toSparkline downsampling. I chose 3 
   fairly arbitrarily.
  */
-let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, unit): result<string, error> =>
+let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<string, error> =>
   t
   ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
   ->E.R.bind(r =>
@@ -101,10 +101,16 @@ let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, unit): result<
   )
 
 module Truncate = {
-  let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>
+  let trySymbolicSimplification = (
+    leftCutoff: option<float>,
+    rightCutoff: option<float>,
+    t: t,
+  ): option<t> =>
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, _) => None
-    | (lc, rc, Symbolic(#Uniform(u))) if lc < rc =>
+    | (Some(lc), Some(rc), Symbolic(#Uniform(u))) if lc < rc =>
+      Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(Some(lc), Some(rc), u))))
+    | (lc, rc, Symbolic(#Uniform(u))) =>
       Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))))
     | _ => None
     }
@@ -158,7 +164,7 @@ module AlgebraicCombination = {
 
   let runConvolution = (
     toPointSet: toPointSetFn,
-    arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
+    arithmeticOperation: Operation.convolutionOperation,
     t1: t,
     t2: t,
   ) =>
@@ -191,10 +197,23 @@ module AlgebraicCombination = {
     | _ => 1000
     }
 
-  let chooseConvolutionOrMonteCarlo = (t2: t, t1: t) =>
-    expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > 10000
-      ? #CalculateWithMonteCarlo
-      : #CalculateWithConvolution
+  type calculationMethod = MonteCarlo | Convolution(Operation.convolutionOperation)
+
+  let chooseConvolutionOrMonteCarlo = (
+    op: Operation.algebraicOperation,
+    t2: t,
+    t1: t,
+  ): calculationMethod =>
+    switch op {
+    | #Divide
+    | #Power
+    | #Logarithm =>
+      MonteCarlo
+    | (#Add | #Subtract | #Multiply) as convOp =>
+      expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > 10000
+        ? MonteCarlo
+        : Convolution(convOp)
+    }
 
   let run = (
     t1: t,
@@ -207,15 +226,10 @@ module AlgebraicCombination = {
     | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
     | Some(Error(e)) => Error(Other(e))
     | None =>
-      switch chooseConvolutionOrMonteCarlo(t1, t2) {
-      | #CalculateWithMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-      | #CalculateWithConvolution =>
-        runConvolution(
-          toPointSetFn,
-          arithmeticOperation,
-          t1,
-          t2,
-        )->E.R2.fmap(r => DistributionTypes.PointSet(r))
+      switch chooseConvolutionOrMonteCarlo(arithmeticOperation, t1, t2) {
+      | MonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+      | Convolution(convOp) =>
+        runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(r))
       }
     }
   }

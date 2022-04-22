@@ -87,7 +87,6 @@ let stepwiseToLinear = (t: t): t =>
 // Note: This results in a distribution with as many points as the sum of those in t1 and t2.
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn: (t, t) => option<t>=(_, _) => None,
   ~distributionType: PointSetTypes.distributionType=#PDF,
   fn: (float, float) => float,
   t1: PointSetTypes.continuousShape,
@@ -143,14 +142,9 @@ let updateIntegralCache = (integralCache, t: t): t => {...t, integralCache: inte
 
 let reduce = (
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
-  ~integralCachesFn: (t, t) => option<t>=(_, _) => None,
   fn,
   continuousShapes,
-) =>
-  continuousShapes |> E.A.fold_left(
-    combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn),
-    empty,
-  )
+) => continuousShapes |> E.A.fold_left(combinePointwise(~integralSumCachesFn, fn), empty)
 
 let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t) =>
   make(
@@ -247,7 +241,7 @@ let downsampleEquallyOverX = (length, t): t =>
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
 let combineAlgebraicallyWithDiscrete = (
-  op: Operation.algebraicOperation,
+  op: Operation.convolutionOperation,
   t1: t,
   t2: PointSetTypes.discreteShape,
 ) => {
@@ -269,8 +263,7 @@ let combineAlgebraicallyWithDiscrete = (
     )
 
     let combinedIntegralSum = switch op {
-    | #Multiply
-    | #Divide =>
+    | #Multiply =>
       Common.combineIntegralSums((a, b) => Some(a *. b), t1.integralSumCache, t2.integralSumCache)
     | _ => None
     }
@@ -280,7 +273,7 @@ let combineAlgebraicallyWithDiscrete = (
   }
 }
 
-let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t) => {
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t) => {
   let s1 = t1 |> getShape
   let s2 = t2 |> getShape
   let t1n = s1 |> XYShape.T.length

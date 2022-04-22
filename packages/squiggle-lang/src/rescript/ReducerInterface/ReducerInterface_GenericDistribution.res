@@ -126,7 +126,7 @@ module Helpers = {
         | Error(err) => GenDistError(ArgumentError(err))
         }
       }
-    | Some(EvDistribution(b)) =>
+    | Some(EvDistribution(_)) =>
       switch parseDistributionArray(args) {
       | Ok(distributions) => mixtureWithDefaultWeights(distributions)
       | Error(err) => GenDistError(ArgumentError(err))
@@ -226,7 +226,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(10.0))->Some
   | ("unaryMinus", [EvDistribution(a)]) =>
     Helpers.twoDiststoDistFn(Algebraic, "multiply", a, GenericDist.fromFloat(-1.0))->Some
-  | (("add" | "multiply" | "subtract" | "divide" | "pow" | "log") as arithmetic, [a, b] as args) =>
+  | (("add" | "multiply" | "subtract" | "divide" | "pow" | "log") as arithmetic, [_, _] as args) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Algebraic, arithmetic, fst, snd)
     )
@@ -237,7 +237,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
       | "dotDivide"
       | "dotPow"
       | "dotLog") as arithmetic,
-      [a, b] as args,
+      [_, _] as args,
     ) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd)
