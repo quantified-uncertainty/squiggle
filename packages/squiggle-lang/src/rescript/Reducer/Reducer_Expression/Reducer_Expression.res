@@ -116,7 +116,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
   )
 }
 
-let evalWBindingsExpression_ = (aExpression, bindings): result<expressionValue, 'e> =>
+let evalUsingExternalBindingsExpression_ = (aExpression, bindings): result<expressionValue, 'e> =>
   reduceExpression(aExpression, bindings)
 
 /*
@@ -126,7 +126,7 @@ let evalWBindingsExpression_ = (aExpression, bindings): result<expressionValue, 
 */
 let evalPartialWBindings_ = (codeText: string, bindings: T.bindings) => {
   parsePartial(codeText)->Result.flatMap(expression =>
-    expression->evalWBindingsExpression_(bindings)
+    expression->evalUsingExternalBindingsExpression_(bindings)
   )
 }
 
@@ -136,7 +136,7 @@ let evalPartialWBindings_ = (codeText: string, bindings: T.bindings) => {
   Therefore all statments are assignments.
 */
 let evalOuterWBindings_ = (codeText: string, bindings: T.bindings) => {
-  parseOuter(codeText)->Result.flatMap(expression => expression->evalWBindingsExpression_(bindings))
+  parseOuter(codeText)->Result.flatMap(expression => expression->evalUsingExternalBindingsExpression_(bindings))
 }
 
 /*
@@ -144,7 +144,7 @@ let evalOuterWBindings_ = (codeText: string, bindings: T.bindings) => {
 */
 let eval = (codeText: string) => {
   parse(codeText)->Result.flatMap(expression =>
-    expression->evalWBindingsExpression_(defaultBindings)
+    expression->evalUsingExternalBindingsExpression_(defaultBindings)
   )
 }
 
@@ -160,7 +160,7 @@ let externalBindingsToBindings = (externalBindings: externalBindings): T.binding
 /*
   Evaluates code with external bindings. External bindings are a record of expression values.
 */
-let evalWBindings = (code: string, externalBindings: externalBindings) => {
+let evalUsingExternalBindings = (code: string, externalBindings: externalBindings) => {
   let bindings = externalBindings->externalBindingsToBindings
   evalOuterWBindings_(code, bindings)
 }

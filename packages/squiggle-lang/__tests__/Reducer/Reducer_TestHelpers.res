@@ -17,7 +17,7 @@ let expectEvalToBe = (expr: string, answer: string) =>
   Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
 
 let expectEvalBindingsToBe = (expr: string, bindings: Reducer.externalBindings, answer: string) =>
-  Reducer.evaluateWBindings(expr, bindings)->ExpressionValue.toStringResult->expect->toBe(answer)
+  Reducer.evaluateUsingExternalBindings(expr, bindings)->ExpressionValue.toStringResult->expect->toBe(answer)
 
 let expectEvalPartialBindingsToBe = (
   expr: string,

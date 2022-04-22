@@ -12,7 +12,7 @@ type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 @genType
 let evaluate: string => result<expressionValue, Reducer_ErrorValue.errorValue>
 @genType
-let evaluateWBindings: (
+let evaluateUsingExternalBindings: (
   string,
   externalBindings,
 ) => result<expressionValue, Reducer_ErrorValue.errorValue>
