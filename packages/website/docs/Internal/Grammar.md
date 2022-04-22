@@ -10,10 +10,11 @@ _In all likelihood the reference will have to be debugged as we see what tests p
 
 ## Lexical descriptions of constants and identifiers
 
-- `<number>` ::= `[-]? [0-9]+ (.[0-9]+)? | [-]? [0-9]+ (.[0-9]+)? [e] [-]? [0-9]+`
-- `<symbol>` ::= `[a-zA-Z]+ [a-zA-Z0-9]?`
-- `<baseDistribution>` ::= `normal(<number>, <number>) | beta(<number>, <number>) | triangular(<number>, <number>, <number>) | cauchy(<number>, <number>) | lognormal(<number>, <number>)) | uniform(<number>, <number>) | <number> to <number> | exponential(<number>)`
-- `<bool>` ::= `true | false`
+```
+<number> ::= [-]? [0-9]+ (.[0-9]+)? | [-]? [0-9]+ (.[0-9]+)? [e] [-]? [0-9]+
+<symbol> ::= [a-zA-Z]+ [a-zA-Z0-9]?
+<bool> ::= true | false
+```
 
 ## Expressions
 
@@ -22,10 +23,10 @@ The following gives no typing information. You can obey the grammar and still wr
 Think of javascript's list unpacking notation to read our variable-argument function `mixture`.
 
 ```
-<expr> ::= <term> + <expr> | <term> - <expr> | <expr> .+ <expr> | <expr> .- <expr> | <term> | sample(<baseDistribution>) | mixture(...<array>, <array>) | mx(...<array>, <array>) | exp(<expr>) | log(<expr>, <number>?) | log10(<expr>) | dotLog(<expr>, <number>?) | normalize(<expr>) | isNormalized(<expr>) | pdf(<expr>, <expr>) | cdf(<expr>, <expr>) | inv(<expr>, <expr>) | mean(<expr>) | truncate(<expr>, <expr>, <expr>) | truncateLeft(<expr>, <expr>) | truncateRight(<expr>, <expr>)
+<expr> ::= <term> + <expr> | <term> - <expr> | <expr> .+ <expr> | <expr> .- <expr> | <term>
 <term> ::= <power> * <term> | <power> <term> | <power> / <term> | <power> .* <term> | <power ./ <term> | <power>
 <power> ::= <factor> ^ <power> | <factor> .^ <power> | <factor>
-<factor> ::= <number> | <baseDistribution> | <bool> | <symbol> | ( <expr> )
+<factor> ::= <number> | <bool> | <symbol> | ( <expr> ) | <symbol>(<symbol>)
 ```
 
 ## Data structures
