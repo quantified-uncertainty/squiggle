@@ -221,7 +221,7 @@ module T = Dist({
   }
 })
 
-let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t => {
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
   // Discrete convolution can cause a huge increase in the number of samples,
   // so we'll first downsample.
 
