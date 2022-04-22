@@ -7,3 +7,5 @@ node_modules
 packages/*/node_modules
 packages/website/.docusaurus
 packages/squiggle-lang/lib
+packages/squiggle-lang/.nyc_output/
+packages/squiggle-lang/coverage/
