@@ -9,6 +9,13 @@ type algebraicOperation = [
   | #Power
   | #Logarithm
 ]
+
+type convolutionOperation = [
+  | #Add
+  | #Multiply
+  | #Subtract
+]
+
 @genType
 type pointwiseOperation = [#Add | #Multiply | #Power]
 type scaleOperation = [#Multiply | #Power | #Logarithm | #Divide]
@@ -19,6 +26,16 @@ type distToFloatOperation = [
   | #Mean
   | #Sample
 ]
+
+module Convolution = {
+  type t = convolutionOperation
+  let toFn: (t, float, float) => float = x =>
+    switch x {
+    | #Add => \"+."
+    | #Subtract => \"-."
+    | #Multiply => \"*."
+    }
+}
 
 module Algebraic = {
   type t = algebraicOperation

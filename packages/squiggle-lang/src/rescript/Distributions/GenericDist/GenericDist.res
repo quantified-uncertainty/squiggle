@@ -164,7 +164,7 @@ module AlgebraicCombination = {
 
   let runConvolution = (
     toPointSet: toPointSetFn,
-    arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
+    arithmeticOperation: Operation.convolutionOperation,
     t1: t,
     t2: t,
   ) =>
@@ -197,10 +197,23 @@ module AlgebraicCombination = {
     | _ => 1000
     }
 
-  let chooseConvolutionOrMonteCarlo = (t2: t, t1: t) =>
-    expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > 10000
-      ? #CalculateWithMonteCarlo
-      : #CalculateWithConvolution
+  type calculationMethod = MonteCarlo | Convolution(Operation.convolutionOperation)
+
+  let chooseConvolutionOrMonteCarlo = (
+    op: Operation.algebraicOperation,
+    t2: t,
+    t1: t,
+  ): calculationMethod =>
+    switch op {
+    | #Divide
+    | #Power
+    | #Logarithm =>
+      MonteCarlo
+    | (#Add | #Subtract | #Multiply) as convOp =>
+      expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > 10000
+        ? MonteCarlo
+        : Convolution(convOp)
+    }
 
   let run = (
     t1: t,
@@ -213,15 +226,10 @@ module AlgebraicCombination = {
     | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
     | Some(Error(e)) => Error(Other(e))
     | None =>
-      switch chooseConvolutionOrMonteCarlo(t1, t2) {
-      | #CalculateWithMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-      | #CalculateWithConvolution =>
-        runConvolution(
-          toPointSetFn,
-          arithmeticOperation,
-          t1,
-          t2,
-        )->E.R2.fmap(r => DistributionTypes.PointSet(r))
+      switch chooseConvolutionOrMonteCarlo(arithmeticOperation, t1, t2) {
+      | MonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+      | Convolution(convOp) =>
+        runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(r))
       }
     }
   }
