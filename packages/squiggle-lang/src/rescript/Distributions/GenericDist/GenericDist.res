@@ -151,7 +151,7 @@ module AlgebraicCombination = {
     arithmeticOperation: Operation.algebraicOperation,
     t1: t,
     t2: t,
-  ): option<result<SymbolicDistTypes.symbolicDist, Operation.Error.invalidOperationError>> =>
+  ): option<result<SymbolicDistTypes.symbolicDist, Operation.Error.t>> =>
     switch (arithmeticOperation, t1, t2) {
     | (arithmeticOperation, Symbolic(d1), Symbolic(d2)) =>
       switch SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation) {

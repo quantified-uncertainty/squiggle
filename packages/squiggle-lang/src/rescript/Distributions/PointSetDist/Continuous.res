@@ -88,7 +88,7 @@ let stepwiseToLinear = (t: t): t =>
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
   ~distributionType: PointSetTypes.distributionType=#PDF,
-  fn: (float, float) => result<float, Operation.Error.invalidOperationError>,
+  fn: (float, float) => result<float, Operation.Error.t>,
   t1: PointSetTypes.continuousShape,
   t2: PointSetTypes.continuousShape,
 ): result<PointSetTypes.continuousShape, 'e> => {

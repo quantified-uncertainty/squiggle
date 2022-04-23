@@ -83,11 +83,10 @@ let sampleN = (t: t, n) => {
 }
 
 //TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
-let map2 = (
-  ~fn: (float, float) => result<float, Operation.Error.invalidOperationError>,
-  ~t1: t,
-  ~t2: t,
-): result<t, Operation.Error.invalidOperationError> => {
+let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2: t): result<
+  t,
+  Operation.Error.t,
+> => {
   let samples = Belt.Array.zip(get(t1), get(t2))->E.A2.fmap(((a, b)) => fn(a, b))
 
   // This assertion should never be reached. In order for it to be reached, one

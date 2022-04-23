@@ -60,10 +60,10 @@ let combinePointwise = (
     PointSetTypes.continuousShape,
     PointSetTypes.continuousShape,
   ) => option<PointSetTypes.continuousShape>=(_, _) => None,
-  fn: (float, float) => result<float, Operation.Error.invalidOperationError>,
+  fn: (float, float) => result<float, Operation.Error.t>,
   t1: t,
   t2: t,
-): result<PointSetTypes.pointSetDist, Operation.Error.invalidOperationError> =>
+): result<PointSetTypes.pointSetDist, Operation.Error.t> =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combinePointwise(

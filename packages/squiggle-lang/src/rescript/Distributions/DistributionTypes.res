@@ -11,7 +11,7 @@ type error =
   | DistributionVerticalShiftIsInvalid
   | TooFewSamples
   | ArgumentError(string)
-  | OperationError(Operation.Error.invalidOperationError)
+  | OperationError(Operation.Error.t)
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
   | SparklineError(PointSetTypes.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
   | OtherError(string)
@@ -30,7 +30,7 @@ module Error = {
     | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift is Invalid"
     | ArgumentError(s) => `Argument Error ${s}`
     | TooFewSamples => "Too Few Samples"
-    | OperationError(err) => Operation.Error.invalidOperationErrorToString(err)
+    | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
     | OtherError(s) => s
