@@ -160,12 +160,12 @@ module R = {
   let id = e => e |> result(U.id, U.id)
   let fmap = Rationale.Result.fmap
   let bind = Rationale.Result.bind
-  let toExn = Belt.Result.getExn
-  let assertOk = (message: string, x: result<'a, 'b>): 'a =>
+  let toExn = (msg: string, x: result<'a, 'b>): 'a =>
     switch x {
     | Ok(r) => r
-    | Error(_) => raise(Assertion(message))
+    | Error(_) => raise(Assertion(msg))
     }
+
   let default = (default, res: Belt.Result.t<'a, 'b>) =>
     switch res {
     | Ok(r) => r

@@ -96,6 +96,6 @@ let map2 = (
   // I could prove this to the type system (say, creating a {first: float, second: float, ..., fifth: float, rest: array<float>}
   // But doing so would take too much time, so I'll leave it as an assertion
   E.A.R.firstErrorOrOpen(samples)->E.R2.fmap(x =>
-    E.R.assertOk("Input of samples should be larger than 5", make(x))
+    E.R.toExn("Input of samples should be larger than 5", make(x))
   )
 }

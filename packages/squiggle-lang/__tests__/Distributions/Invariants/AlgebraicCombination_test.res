@@ -46,7 +46,7 @@ describe("(Algebraic) addition of distributions", () => {
       ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
       ->E.R2.fmap(run)
       ->E.R2.fmap(toFloat)
-      ->E.R.toExn
+      ->E.R.toExn("Expected float", _)
       ->expect
       ->toBe(Some(2.5e1))
     })
@@ -60,7 +60,7 @@ describe("(Algebraic) addition of distributions", () => {
         ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -77,7 +77,7 @@ describe("(Algebraic) addition of distributions", () => {
         ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -158,7 +158,7 @@ describe("(Algebraic) addition of distributions", () => {
         ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -173,7 +173,7 @@ describe("(Algebraic) addition of distributions", () => {
         ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -249,7 +249,7 @@ describe("(Algebraic) addition of distributions", () => {
         ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -264,7 +264,7 @@ describe("(Algebraic) addition of distributions", () => {
         ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -341,7 +341,7 @@ describe("(Algebraic) addition of distributions", () => {
         ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 2e-2))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -356,7 +356,7 @@ describe("(Algebraic) addition of distributions", () => {
         ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 2e-2))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
