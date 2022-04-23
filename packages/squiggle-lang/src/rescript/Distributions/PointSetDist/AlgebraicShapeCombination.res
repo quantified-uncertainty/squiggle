@@ -230,13 +230,12 @@ let combineShapesContinuousDiscrete = (
           i,
           (
             fn(continuousShape.xs[i], discreteShape.xs[j]),
-            continuousShape.ys[i] *. discreteShape.ys[j] /. discreteShape.xs[j],
+            continuousShape.ys[i] *. discreteShape.ys[j] /. Js.Math.abs_float(discreteShape.xs[j]),
           ),
         ) |> ignore
         ()
       }
       Belt.Array.set(outXYShapes, j, dxyShape) |> ignore
-      ()
     }
   }
 
@@ -244,12 +243,11 @@ let combineShapesContinuousDiscrete = (
   |> E.A.fmap(XYShape.T.fromZippedArray)
   |> E.A.fold_left(
     (acc, x) =>
-      XYShape.PointwiseCombination.combine(
-        (a, b) => Ok(a +. b),
+      XYShape.PointwiseCombination.addCombine(
         XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
         acc,
         x,
-      )->E.R.toExn("Error, unexpected failure", _),
+      ),
     XYShape.T.empty,
   )
 }
