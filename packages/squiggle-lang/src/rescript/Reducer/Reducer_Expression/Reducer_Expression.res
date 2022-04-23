@@ -136,7 +136,9 @@ let evalPartialUsingExternalBindings_ = (codeText: string, bindings: T.bindings)
   Therefore all statments are assignments.
 */
 let evalOuterWBindings_ = (codeText: string, bindings: T.bindings) => {
-  parseOuter(codeText)->Result.flatMap(expression => expression->evalUsingExternalBindingsExpression_(bindings))
+  parseOuter(codeText)->Result.flatMap(expression =>
+    expression->evalUsingExternalBindingsExpression_(bindings)
+  )
 }
 
 /*
