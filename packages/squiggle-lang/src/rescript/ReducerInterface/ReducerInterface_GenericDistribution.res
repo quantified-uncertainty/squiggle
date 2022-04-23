@@ -24,7 +24,6 @@ module Helpers = {
     | "dotPow" => #Power
     | "multiply" => #Multiply
     | "dotMultiply" => #Multiply
-    | "dotLog" => #Logarithm
     | _ => #Multiply
     }
 
@@ -41,7 +40,7 @@ module Helpers = {
   }
 
   let toFloatFn = (
-    fnCall: DistributionTypes.Operation.toFloat,
+    fnCall: DistributionTypes.DistributionOperation.toFloat,
     dist: DistributionTypes.genericDist,
   ) => {
     FromDist(DistributionTypes.DistributionOperation.ToFloat(fnCall), dist)
@@ -243,15 +242,12 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
       | "dotMultiply"
       | "dotSubtract"
       | "dotDivide"
-      | "dotPow"
-      | "dotLog") as arithmetic,
+      | "dotPow") as arithmetic,
       [_, _] as args,
     ) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd)
     )
-  | ("dotLog", [EvDistribution(a)]) =>
-    Helpers.twoDiststoDistFn(Pointwise, "dotLog", a, GenericDist.fromFloat(Math.e))->Some
   | ("dotExp", [EvDistribution(a)]) =>
     Helpers.twoDiststoDistFn(Pointwise, "dotPow", GenericDist.fromFloat(Math.e), a)->Some
   | _ => None

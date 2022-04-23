@@ -50,7 +50,11 @@ module Internals = {
     let dist1 = dist1'->DistributionTypes.Symbolic
     let dist2 = dist2'->DistributionTypes.Symbolic
     let received =
-      distOp(dist1, dist2)->E.R2.fmap(mean)->E.R2.fmap(run)->E.R2.fmap(toFloat)->E.R.toExn("Expected float", _)
+      distOp(dist1, dist2)
+      ->E.R2.fmap(mean)
+      ->E.R2.fmap(run)
+      ->E.R2.fmap(toFloat)
+      ->E.R.toExn("Expected float", _)
     let expected = floatOp(runMean(dist1), runMean(dist2))
     switch received {
     | None => expectImpossiblePath(description)

@@ -243,10 +243,13 @@ let combineShapesContinuousDiscrete = (
   outXYShapes
   |> E.A.fmap(XYShape.T.fromZippedArray)
   |> E.A.fold_left(
-    XYShape.PointwiseCombination.combine(
-      \"+.",
-      XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
-    ),
+    (acc, x) =>
+      XYShape.PointwiseCombination.combine(
+        (a, b) => Ok(a +. b),
+        XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
+        acc,
+        x,
+      )->E.R.toExn("Error, unexpected failure", _),
     XYShape.T.empty,
   )
 }

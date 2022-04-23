@@ -192,6 +192,7 @@ module R = {
     | Ok(f) => fmap(f, a)
     | Error(err) => Error(err)
     }
+
   // (a1 -> a2 -> r) -> m a1 -> m a2 -> m r  // not in Rationale
   let liftM2: (('a, 'b) => 'c, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
     ap'(fmap(op, xR), yR)
@@ -444,6 +445,31 @@ module A = {
       bringErrorUp |> Belt.Result.map(_, forceOpen)
     }
     let filterOk = (x: array<result<'a, 'b>>): array<'a> => fmap(R.toOption, x)->O.concatSomes
+
+    let forM = (x: array<'a>, fn: 'a => result<'b, 'c>): result<array<'b>, 'c> =>
+      firstErrorOrOpen(fmap(fn, x))
+
+    let foldM = (fn: ('c, 'a) => result<'b, 'e>, init: 'c, x: array<'a>): result<'c, 'e> => {
+      let acc = ref(init)
+      let final = ref(Ok())
+      let break = ref(false)
+      let i = ref(0)
+
+      while break.contents != true && i.contents < length(x) {
+        switch fn(acc.contents, x[i.contents]) {
+        | Ok(r) => acc := r
+        | Error(err) => {
+            final := Error(err)
+            break := true
+          }
+        }
+        i := i.contents + 1
+      }
+      switch final.contents {
+      | Ok(_) => Ok(acc.contents)
+      | Error(err) => Error(err)
+      }
+    }
   }
 
   module Sorted = {

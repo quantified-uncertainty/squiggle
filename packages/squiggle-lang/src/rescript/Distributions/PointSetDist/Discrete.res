@@ -49,11 +49,11 @@ let combinePointwise = (
   make(
     ~integralSumCache=combinedIntegralSum,
     XYShape.PointwiseCombination.combine(
-      \"+.",
+      (a, b) => Ok(a +. b),
       XYShape.XtoY.discreteInterpolator,
       t1.xyShape,
       t2.xyShape,
-    ),
+    )->E.R.toExn("Addition operation should never fail", _),
   )
 }
 

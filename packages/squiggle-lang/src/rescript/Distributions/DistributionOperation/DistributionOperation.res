@@ -160,14 +160,14 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->GenericDist.algebraicCombination(~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Pointwise, arithmeticOperation, #Dist(t2)) =>
+    | ToDistCombination(Pointwise, algebraicCombination, #Dist(t2)) =>
       dist
-      ->GenericDist.pointwiseCombination(~toPointSetFn, ~arithmeticOperation, ~t2)
+      ->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination, ~t2)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Pointwise, arithmeticOperation, #Float(f)) =>
+    | ToDistCombination(Pointwise, algebraicCombination, #Float(f)) =>
       dist
-      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~arithmeticOperation, ~f)
+      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination, ~f)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     }

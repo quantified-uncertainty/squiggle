@@ -28,7 +28,7 @@ let toPointSet: (
   t,
   ~xyPointLength: int,
   ~sampleCount: int,
-  ~xSelection: DistributionTypes.Operation.pointsetXSelection=?,
+  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=?,
   unit,
 ) => result<PointSetTypes.pointSetDist, error>
 let toSparkline: (t, ~sampleCount: int, ~bucketCount: int=?, unit) => result<string, error>
@@ -45,21 +45,21 @@ let algebraicCombination: (
   t,
   ~toPointSetFn: toPointSetFn,
   ~toSampleSetFn: toSampleSetFn,
-  ~arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
+  ~arithmeticOperation: Operation.algebraicOperation,
   ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombination: (
   t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
+  ~algebraicCombination: Operation.algebraicOperation,
   ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombinationFloat: (
   t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
+  ~algebraicCombination: Operation.algebraicOperation,
   ~f: float,
 ) => result<t, error>
 

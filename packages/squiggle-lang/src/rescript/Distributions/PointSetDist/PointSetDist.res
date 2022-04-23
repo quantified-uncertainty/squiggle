@@ -60,19 +60,28 @@ let combinePointwise = (
     PointSetTypes.continuousShape,
     PointSetTypes.continuousShape,
   ) => option<PointSetTypes.continuousShape>=(_, _) => None,
-  fn,
+  fn: (float, float) => result<float, Operation.Error.invalidOperationError>,
   t1: t,
   t2: t,
-) =>
+): result<PointSetTypes.pointSetDist, Operation.Error.invalidOperationError> =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
-    PointSetTypes.Continuous(Continuous.combinePointwise(~integralSumCachesFn, fn, m1, m2))
+    Continuous.combinePointwise(
+      ~integralSumCachesFn,
+      fn,
+      m1,
+      m2,
+    )->E.R2.fmap(x => PointSetTypes.Continuous(x))
   | (Discrete(m1), Discrete(m2)) =>
-    PointSetTypes.Discrete(Discrete.combinePointwise(~integralSumCachesFn, m1, m2))
+    Ok(PointSetTypes.Discrete(Discrete.combinePointwise(~integralSumCachesFn, m1, m2)))
   | (m1, m2) =>
-    PointSetTypes.Mixed(
-      Mixed.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, toMixed(m1), toMixed(m2)),
-    )
+    Mixed.combinePointwise(
+      ~integralSumCachesFn,
+      ~integralCachesFn,
+      fn,
+      toMixed(m1),
+      toMixed(m2),
+    )->E.R2.fmap(x => PointSetTypes.Mixed(x))
   }
 
 module T = Dist({

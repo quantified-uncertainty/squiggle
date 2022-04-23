@@ -46,29 +46,13 @@ module Error = {
 }
 
 @genType
-module Operation = {
+module DistributionOperation = {
+  @genType
+  type pointsetXSelection = [#Linear | #ByWeight]
+
   type direction =
     | Algebraic
     | Pointwise
-
-  type arithmeticOperation = [
-    | #Add
-    | #Multiply
-    | #Subtract
-    | #Divide
-    | #Power
-    | #Logarithm
-  ]
-
-  let arithmeticToFn = (arithmetic: arithmeticOperation) =>
-    switch arithmetic {
-    | #Add => \"+."
-    | #Multiply => \"*."
-    | #Subtract => \"-."
-    | #Power => \"**"
-    | #Divide => \"/."
-    | #Logarithm => (a, b) => log(a) /. log(b)
-    }
 
   type toFloat = [
     | #Cdf(float)
@@ -78,11 +62,6 @@ module Operation = {
     | #Sample
   ]
 
-  @genType
-  type pointsetXSelection = [#Linear | #ByWeight]
-}
-
-module DistributionOperation = {
   type toDist =
     | Normalize
     | ToPointSet
@@ -99,13 +78,9 @@ module DistributionOperation = {
     | ToSparkline(int)
 
   type fromDist =
-    | ToFloat(Operation.toFloat)
+    | ToFloat(toFloat)
     | ToDist(toDist)
-    | ToDistCombination(
-        Operation.direction,
-        Operation.arithmeticOperation,
-        [#Dist(genericDist) | #Float(float)],
-      )
+    | ToDistCombination(direction, Operation.Algebraic.t, [#Dist(genericDist) | #Float(float)])
     | ToString(toString)
     | ToBool(toBool)
 

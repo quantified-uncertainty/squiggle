@@ -68,7 +68,7 @@ let toPointSet = (
   t,
   ~xyPointLength,
   ~sampleCount,
-  ~xSelection: DistributionTypes.Operation.pointsetXSelection=#ByWeight,
+  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=#ByWeight,
   (),
 ): result<PointSetTypes.pointSetDist, error> => {
   switch (t: t) {
@@ -148,7 +148,7 @@ let truncate = Truncate.run
 */
 module AlgebraicCombination = {
   let tryAnalyticalSimplification = (
-    arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
+    arithmeticOperation: Operation.algebraicOperation,
     t1: t,
     t2: t,
   ): option<result<SymbolicDistTypes.symbolicDist, Operation.Error.invalidOperationError>> =>
@@ -174,7 +174,7 @@ module AlgebraicCombination = {
 
   let runMonteCarlo = (
     toSampleSet: toSampleSetFn,
-    arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
+    arithmeticOperation: Operation.algebraicOperation,
     t1: t,
     t2: t,
   ): result<t, error> => {
@@ -241,27 +241,23 @@ let algebraicCombination = AlgebraicCombination.run
 let pointwiseCombination = (
   t1: t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation,
+  ~algebraicCombination: Operation.algebraicOperation,
   ~t2: t,
 ): result<t, error> => {
-  E.R.merge(toPointSetFn(t1), toPointSetFn(t2))
-  ->E.R2.fmap(((t1, t2)) =>
-    PointSetDist.combinePointwise(
-      DistributionTypes.Operation.arithmeticToFn(arithmeticOperation),
-      t1,
-      t2,
-    )
+  E.R.merge(toPointSetFn(t1), toPointSetFn(t2))->E.R.bind(((t1, t2)) =>
+    PointSetDist.combinePointwise(Operation.Algebraic.toFn(algebraicCombination), t1, t2)
+    ->E.R2.fmap(r => DistributionTypes.PointSet(r))
+    ->E.R2.errMap(err => DistributionTypes.OperationError(err))
   )
-  ->E.R2.fmap(r => DistributionTypes.PointSet(r))
 }
 
 let pointwiseCombinationFloat = (
   t: t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
+  ~algebraicCombination: Operation.algebraicOperation,
   ~f: float,
 ): result<t, error> => {
-  let m = switch arithmeticOperation {
+  let m = switch algebraicCombination {
   | #Add | #Subtract => Error(DistributionTypes.DistributionVerticalShiftIsInvalid)
   | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
     toPointSetFn(t)->E.R.bind(t => {

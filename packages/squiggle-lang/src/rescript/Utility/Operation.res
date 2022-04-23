@@ -51,6 +51,31 @@ module Error = {
     }
 }
 
+let power = (a: float, b: float): result<float, Error.invalidOperationError> =>
+  if a >= 0.0 {
+    Ok(a ** b)
+  } else {
+    Error(ComplexNumberError)
+  }
+
+let divide = (a: float, b: float): result<float, Error.invalidOperationError> =>
+  if b != 0.0 {
+    Ok(a /. b)
+  } else {
+    Error(DivisionByZeroError)
+  }
+
+let logarithm = (a: float, b: float): result<float, Error.invalidOperationError> =>
+  if b == 1. {
+    Error(DivisionByZeroError)
+  } else if b == 0. {
+    Ok(0.)
+  } else if a > 0.0 && b > 0.0 {
+    Ok(log(a) /. log(b))
+  } else {
+    Error(ComplexNumberError)
+  }
+
 module Algebraic = {
   type t = algebraicOperation
   let toFn: (t, float, float) => result<float, Error.invalidOperationError> = (x, a, b) =>
@@ -58,26 +83,9 @@ module Algebraic = {
     | #Add => Ok(a +. b)
     | #Subtract => Ok(a -. b)
     | #Multiply => Ok(a *. b)
-    | #Power =>
-      if a >= 0.0 {
-        Ok(a ** b)
-      } else {
-        Error(ComplexNumberError)
-      }
-    | #Divide =>
-      if b != 0.0 {
-        Ok(a /. b)
-      } else {
-        Error(DivisionByZeroError)
-      }
-    | #Logarithm =>
-      if b == 1. {
-        Error(DivisionByZeroError)
-      } else if a > 0.0 && b > 0.0 {
-        Ok(log(a) /. log(b))
-      } else {
-        Error(ComplexNumberError)
-      }
+    | #Power => power(a, b)
+    | #Divide => divide(a, b)
+    | #Logarithm => logarithm(a, b)
     }
 
   let toString = x =>
@@ -124,24 +132,9 @@ module Scale = {
   let toFn = (x: t, a: float, b: float): result<float, Error.invalidOperationError> =>
     switch x {
     | #Multiply => Ok(a *. b)
-    | #Divide =>
-      if b != 0.0 {
-        Ok(a /. b)
-      } else {
-        Error(DivisionByZeroError)
-      }
-    | #Power =>
-      if a > 0.0 {
-        Ok(a ** b)
-      } else {
-        Error(ComplexNumberError)
-      }
-    | #Logarithm =>
-      if a > 0.0 && b > 0.0 {
-        Ok(log(a) /. log(b))
-      } else {
-        Error(DivisionByZeroError)
-      }
+    | #Divide => divide(a, b)
+    | #Power => power(a, b)
+    | #Logarithm => logarithm(a, b)
     }
 
   let format = (operation: t, value, scaleBy) =>

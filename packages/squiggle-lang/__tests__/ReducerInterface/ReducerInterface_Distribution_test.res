@@ -97,12 +97,6 @@ describe("eval on distribution functions", () => {
     testEval("log10(uniform(5,8))", "Ok(Sample Set Distribution)")
   })
 
-  describe("dotLog", () => {
-    testEval("dotLog(normal(5,2), 3)", "Ok(Point Set Distribution)")
-    testEval("dotLog(normal(5,2), 3)", "Ok(Point Set Distribution)")
-    testEval("dotLog(normal(5,2), normal(10,1))", "Ok(Point Set Distribution)")
-  })
-
   describe("dotAdd", () => {
     testEval("dotAdd(normal(5,2), lognormal(10,2))", "Ok(Point Set Distribution)")
     testEval("dotAdd(normal(5,2), 3)", "Ok(Point Set Distribution)")

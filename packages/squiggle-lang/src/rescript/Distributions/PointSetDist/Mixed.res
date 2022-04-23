@@ -146,8 +146,7 @@ module T = Dist({
       let discreteIntegral = Continuous.stepwiseToLinear(Discrete.T.Integral.get(t.discrete))
 
       Continuous.make(
-        XYShape.PointwiseCombination.combine(
-          \"+.",
+        XYShape.PointwiseCombination.addCombine(
           XYShape.XtoY.continuousInterpolator(#Linear, #UseOutermostPoints),
           Continuous.getShape(continuousIntegral),
           Continuous.getShape(discreteIntegral),
@@ -280,7 +279,7 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
   let ccConvResult = Continuous.combineAlgebraically(op, t1.continuous, t2.continuous)
   let dcConvResult = Continuous.combineAlgebraicallyWithDiscrete(op, t2.continuous, t1.discrete)
   let cdConvResult = Continuous.combineAlgebraicallyWithDiscrete(op, t1.continuous, t2.discrete)
-  let continuousConvResult = Continuous.reduce(\"+.", [ccConvResult, dcConvResult, cdConvResult])
+  let continuousConvResult = Continuous.sum([ccConvResult, dcConvResult, cdConvResult])
 
   // ... finally, discrete (*) discrete => discrete, obviously:
   let discreteConvResult = Discrete.combineAlgebraically(op, t1.discrete, t2.discrete)
@@ -302,10 +301,10 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
   ~integralCachesFn=(_, _) => None,
-  fn,
+  fn: (float, float) => result<float, 'e>,
   t1: t,
   t2: t,
-): t => {
+): result<t, 'e> => {
   let reducedDiscrete =
     [t1, t2] |> E.A.fmap(toDiscrete) |> E.A.O.concatSomes |> Discrete.reduce(~integralSumCachesFn)
 
@@ -326,11 +325,12 @@ let combinePointwise = (
     t1.integralCache,
     t2.integralCache,
   )
-
-  make(
-    ~integralSumCache=combinedIntegralSum,
-    ~integralCache=combinedIntegral,
-    ~discrete=reducedDiscrete,
-    ~continuous=reducedContinuous,
+  reducedContinuous->E.R2.fmap(continuous =>
+    make(
+      ~integralSumCache=combinedIntegralSum,
+      ~integralCache=combinedIntegral,
+      ~discrete=reducedDiscrete,
+      ~continuous,
+    )
   )
 }
