@@ -51,7 +51,6 @@ describe("(Algebraic) addition of distributions", () => {
       ->toBe(Some(2.5e1))
     })
 
-
     test("uniform(low=9, high=10) + beta(alpha=2, beta=5)", () => {
       // let uniformMean = (9.0 +. 10.0) /. 2.0
       // let betaMean = 1.0 /. (1.0 +. 5.0 /. 2.0)

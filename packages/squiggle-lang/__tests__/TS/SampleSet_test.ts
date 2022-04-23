@@ -57,7 +57,7 @@ describe("cumulative density function", () => {
           { sampleCount: n, xyPointLength: 100 }
         );
         let cdfValue = dist.cdf(max).value;
-        expect(cdfValue).toBeCloseTo(1.0, 2)
+        expect(cdfValue).toBeCloseTo(1.0, 2);
       })
     );
   });
