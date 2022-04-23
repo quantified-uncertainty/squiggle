@@ -90,11 +90,11 @@ describe("eval on distribution functions", () => {
     testEval("log(2, uniform(5,8))", "Ok(Sample Set Distribution)")
     testEval(
       "log(normal(5,2), 3)",
-      "Error(Math Error: Operation Error: Operation returned complex result)",
+      "Error(Math Error: Operation returned complex result)",
     )
     testEval(
       "log(normal(5,2), normal(10,1))",
-      "Error(Math Error: Operation Error: Operation returned complex result)",
+      "Error(Math Error: Operation returned complex result)",
     )
     testEval("log(uniform(5,8))", "Ok(Sample Set Distribution)")
     testEval("log10(uniform(5,8))", "Ok(Sample Set Distribution)")
