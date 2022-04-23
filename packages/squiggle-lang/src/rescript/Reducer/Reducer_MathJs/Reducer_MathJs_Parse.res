@@ -11,11 +11,10 @@ type block = {"node": node}
 type blockNode = {...node, "blocks": array<block>}
 //conditionalNode
 type constantNode = {...node, "value": unit}
-//functionAssignmentNode
+type functionAssignmentNode = {...node, "name": string, "params": array<string>, "expr": node}
 type indexNode = {...node, "dimensions": array<node>}
 type objectNode = {...node, "properties": Js.Dict.t<node>}
 type accessorNode = {...node, "object": node, "index": indexNode, "name": string}
-
 type parenthesisNode = {...node, "content": node}
 //rangeNode
 //relationalNode
@@ -33,6 +32,7 @@ external castAssignmentNodeWAccessor: node => assignmentNodeWAccessor = "%identi
 external castAssignmentNodeWIndex: node => assignmentNodeWIndex = "%identity"
 external castBlockNode: node => blockNode = "%identity"
 external castConstantNode: node => constantNode = "%identity"
+external castFunctionAssignmentNode: node => functionAssignmentNode ="%identity"
 external castFunctionNode: node => functionNode = "%identity"
 external castIndexNode: node => indexNode = "%identity"
 external castObjectNode: node => objectNode = "%identity"
@@ -59,6 +59,7 @@ type mathJsNode =
   | MjAssignmentNode(assignmentNode)
   | MjBlockNode(blockNode)
   | MjConstantNode(constantNode)
+  | MjFunctionAssignmentNode(functionAssignmentNode)
   | MjFunctionNode(functionNode)
   | MjIndexNode(indexNode)
   | MjObjectNode(objectNode)
@@ -82,6 +83,7 @@ let castNodeType = (node: node) => {
   | "AssignmentNode" => node->decideAssignmentNode
   | "BlockNode" => node->castBlockNode->MjBlockNode->Ok
   | "ConstantNode" => node->castConstantNode->MjConstantNode->Ok
+  | "FunctionAssignmentNode" => node->castFunctionAssignmentNode->MjFunctionAssignmentNode->Ok
   | "FunctionNode" => node->castFunctionNode->MjFunctionNode->Ok
   | "IndexNode" => node->castIndexNode->MjIndexNode->Ok
   | "ObjectNode" => node->castObjectNode->MjObjectNode->Ok
@@ -118,6 +120,10 @@ let rec toString = (mathJsNode: mathJsNode): string => {
     ->Extra.Array.interperse(", ")
     ->Js.String.concatMany("")
 
+  let toStringFunctionAssignmentNode = (faNode: functionAssignmentNode): string => {
+    let paramNames = Js.Array2.toString(faNode["params"])
+    `${faNode["name"]} = (${paramNames}) => ${toStringMathJsNode(faNode["expr"])}`
+  } 
   let toStringFunctionNode = (fnode: functionNode): string =>
     `${fnode->nameOfFunctionNode}(${fnode["args"]->toStringNodeArray})`
 
@@ -152,6 +158,7 @@ let rec toString = (mathJsNode: mathJsNode): string => {
     `${aNode["object"]->toStringSymbolNode} = ${aNode["value"]->toStringMathJsNode}`
   | MjBlockNode(bNode) => `{${bNode["blocks"]->toStringBlocks}}`
   | MjConstantNode(cNode) => cNode["value"]->toStringValue
+  | MjFunctionAssignmentNode(faNode) => faNode->toStringFunctionAssignmentNode 
   | MjFunctionNode(fNode) => fNode->toStringFunctionNode
   | MjIndexNode(iNode) => iNode->toStringIndexNode
   | MjObjectNode(oNode) => oNode->toStringObjectNode
