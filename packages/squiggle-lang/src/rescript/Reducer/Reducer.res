@@ -5,8 +5,8 @@ module Extra = Reducer_Extra
 module Js = Reducer_Js
 module MathJs = Reducer_MathJs
 
-type expressionValue = Reducer_Expression.expressionValue
-type externalBindings = Expression.externalBindings
+type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 let evaluate = Expression.eval
 let evaluateUsingExternalBindings = Expression.evalUsingExternalBindings
 let evaluatePartialUsingExternalBindings = Expression.evalPartialUsingExternalBindings
