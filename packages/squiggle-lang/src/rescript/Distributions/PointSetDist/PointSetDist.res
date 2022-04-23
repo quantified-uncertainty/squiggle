@@ -215,16 +215,8 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Mean => T.mean(s)
   }
 
-@genType
-type sparklineError = CannotSparklineDiscrete
-
-let sparklineErrorToString = (err: sparklineError): string =>
-  switch err {
-  | CannotSparklineDiscrete => "Cannot find the sparkline of a discrete distribution"
-  }
-
-let toSparkline = (t: t, bucketCount): result<string, sparklineError> =>
+let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineError> =>
   T.toContinuous(t)
   ->E.O2.fmap(Continuous.downsampleEquallyOverX(bucketCount))
-  ->E.O2.toResult(CannotSparklineDiscrete)
+  ->E.O2.toResult(PointSetTypes.CannotSparklineDiscrete)
   ->E.R2.fmap(r => Continuous.getShape(r).ys->Sparklines.create())

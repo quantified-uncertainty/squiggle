@@ -11,15 +11,10 @@ type error =
   | DistributionVerticalShiftIsInvalid
   | TooFewSamples
   | ArgumentError(string)
-  | OperationError(Operation.invalidOperationError)
+  | OperationError(Operation.Error.invalidOperationError)
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
-  | SparklineError(PointSetDist.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
+  | SparklineError(PointSetTypes.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
   | Other(string)
-
-let sampleErrorToDistErr = (err: SampleSetDist.sampleSetError): error =>
-  switch err {
-  | TooFewSamples => TooFewSamples
-  }
 
 @genType
 module Error = {
@@ -35,14 +30,19 @@ module Error = {
     | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift is Invalid"
     | ArgumentError(s) => `Argument Error ${s}`
     | TooFewSamples => "Too Few Samples"
-    | OperationError(err) => Operation.invalidOperationErrorToString(err)
+    | OperationError(err) => Operation.Error.invalidOperationErrorToString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
-    | SparklineError(err) => PointSetDist.sparklineErrorToString(err)
+    | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
     | Other(s) => s
     }
 
   let resultStringToResultError: result<'a, string> => result<'a, error> = n =>
     n->E.R2.errMap(r => r->fromString)
+
+  let sampleErrorToDistErr = (err: SampleSetDist.sampleSetError): error =>
+    switch err {
+    | TooFewSamples => TooFewSamples
+    }
 }
 
 @genType

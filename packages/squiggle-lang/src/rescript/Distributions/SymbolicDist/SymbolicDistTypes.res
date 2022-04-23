@@ -45,6 +45,6 @@ type symbolicDist = [
 
 type analyticalSimplificationResult = [
   | #AnalyticalSolution(symbolicDist)
-  | #Error(Operation.invalidOperationError)
+  | #Error(Operation.Error.invalidOperationError)
   | #NoSolution
 ]

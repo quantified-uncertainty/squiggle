@@ -1,10 +1,23 @@
 @genType
-type sampleSetError = TooFewSamples
+module Error = {
+  @genType
+  type sampleSetError = TooFewSamples
 
-let sampleSetErrorToString = (err: sampleSetError): string =>
-  switch err {
-  | TooFewSamples => "Too few samples when constructing sample set"
-  }
+  let sampleSetErrorToString = (err: sampleSetError): string =>
+    switch err {
+    | TooFewSamples => "Too few samples when constructing sample set"
+    }
+
+  @genType
+  type pointsetConversionError = TooFewSamplesForConversionToPointSet
+
+  let pointsetConversionErrorToString = (err: pointsetConversionError) =>
+    switch err {
+    | TooFewSamplesForConversionToPointSet => "Too Few Samples to convert to point set"
+    }
+}
+
+include Error
 
 /*
 This is used as a smart constructor. The only way to create a SampleSetDist.t is to call
@@ -32,14 +45,6 @@ module T: {
 include T
 
 let length = (t: t) => get(t)->E.A.length
-
-@genType
-type pointsetConversionError = TooFewSamplesForConversionToPointSet
-
-let pointsetConversionErrorToString = (err: pointsetConversionError) =>
-  switch err {
-  | TooFewSamplesForConversionToPointSet => "Too Few Samples to convert to point set"
-  }
 
 /*
 TODO: Refactor to get a more precise estimate. Also, this code is just fairly messy, could use 
@@ -79,10 +84,10 @@ let sampleN = (t: t, n) => {
 
 //TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
 let map2 = (
-  ~fn: (float, float) => result<float, Operation.invalidOperationError>,
+  ~fn: (float, float) => result<float, Operation.Error.invalidOperationError>,
   ~t1: t,
   ~t2: t,
-): result<t, Operation.invalidOperationError> => {
+): result<t, Operation.Error.invalidOperationError> => {
   let samples = Belt.Array.zip(get(t1), get(t2))->E.A2.fmap(((a, b)) => fn(a, b))
 
   // This assertion should never be reached. In order for it to be reached, one

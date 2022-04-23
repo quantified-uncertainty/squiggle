@@ -38,19 +38,22 @@ module Convolution = {
 }
 
 @genType
-type invalidOperationError =
-  | DivisionByZeroError
-  | ComplexNumberError
+module Error = {
+  @genType
+  type invalidOperationError =
+    | DivisionByZeroError
+    | ComplexNumberError
 
-let invalidOperationErrorToString = (err: invalidOperationError): string =>
-  switch err {
-  | DivisionByZeroError => "Cannot divide by zero"
-  | ComplexNumberError => "Operation returned complex result"
-  }
+  let invalidOperationErrorToString = (err: invalidOperationError): string =>
+    switch err {
+    | DivisionByZeroError => "Cannot divide by zero"
+    | ComplexNumberError => "Operation returned complex result"
+    }
+}
 
 module Algebraic = {
   type t = algebraicOperation
-  let toFn: (t, float, float) => result<float, invalidOperationError> = (x, a, b) =>
+  let toFn: (t, float, float) => result<float, Error.invalidOperationError> = (x, a, b) =>
     switch x {
     | #Add => Ok(a +. b)
     | #Subtract => Ok(a -. b)
@@ -70,8 +73,7 @@ module Algebraic = {
     | #Logarithm =>
       if b == 1. {
         Error(DivisionByZeroError)
-      }
-      else if a > 0.0 && b > 0.0 {
+      } else if a > 0.0 && b > 0.0 {
         Ok(log(a) /. log(b))
       } else {
         Error(ComplexNumberError)
@@ -119,7 +121,7 @@ module DistToFloat = {
 // Note that different logarithms don't really do anything.
 module Scale = {
   type t = scaleOperation
-  let toFn = (x: t, a: float, b: float): result<float, invalidOperationError> =>
+  let toFn = (x: t, a: float, b: float): result<float, Error.invalidOperationError> =>
     switch x {
     | #Multiply => Ok(a *. b)
     | #Divide =>

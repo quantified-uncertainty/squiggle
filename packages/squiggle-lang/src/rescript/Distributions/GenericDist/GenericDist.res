@@ -14,7 +14,7 @@ let sampleN = (t: t, n) =>
   }
 
 let toSampleSetDist = (t: t, n) =>
-  SampleSetDist.make(sampleN(t, n))->E.R2.errMap(DistributionTypes.sampleErrorToDistErr)
+  SampleSetDist.make(sampleN(t, n))->E.R2.errMap(DistributionTypes.Error.sampleErrorToDistErr)
 
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
@@ -151,7 +151,7 @@ module AlgebraicCombination = {
     arithmeticOperation: DistributionTypes.Operation.arithmeticOperation,
     t1: t,
     t2: t,
-  ): option<result<SymbolicDistTypes.symbolicDist, Operation.invalidOperationError>> =>
+  ): option<result<SymbolicDistTypes.symbolicDist, Operation.Error.invalidOperationError>> =>
     switch (arithmeticOperation, t1, t2) {
     | (arithmeticOperation, Symbolic(d1), Symbolic(d2)) =>
       switch SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation) {
