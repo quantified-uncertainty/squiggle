@@ -14,13 +14,13 @@ type error =
   | OperationError(Operation.Error.invalidOperationError)
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
   | SparklineError(PointSetTypes.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
-  | Other(string)
+  | OtherError(string)
 
 @genType
 module Error = {
   type t = error
 
-  let fromString = (s: string): t => Other(s)
+  let fromString = (s: string): t => OtherError(s)
 
   @genType
   let toString = (err: error): string =>
@@ -33,7 +33,7 @@ module Error = {
     | OperationError(err) => Operation.Error.invalidOperationErrorToString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
-    | Other(s) => s
+    | OtherError(s) => s
     }
 
   let resultStringToResultError: result<'a, string> => result<'a, error> = n =>

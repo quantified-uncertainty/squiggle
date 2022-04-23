@@ -172,7 +172,7 @@ module SymbolicConstructors = {
   ): option<DistributionOperation.outputType> =>
     switch symbolicResult {
     | Ok(r) => Some(Dist(Symbolic(r)))
-    | Error(r) => Some(GenDistError(Other(r)))
+    | Error(r) => Some(GenDistError(OtherError(r)))
     }
 }
 

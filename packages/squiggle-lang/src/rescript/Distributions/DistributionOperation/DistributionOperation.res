@@ -201,8 +201,8 @@ module Output = {
     | (FromDist(fromDist), Dist(o)) => Ok(FromDist(fromDist, o))
     | (FromFloat(fromDist), Float(o)) => Ok(FromFloat(fromDist, o))
     | (_, GenDistError(r)) => Error(r)
-    | (FromDist(_), _) => Error(Other("Expected dist, got something else"))
-    | (FromFloat(_), _) => Error(Other("Expected float, got something else"))
+    | (FromDist(_), _) => Error(OtherError("Expected dist, got something else"))
+    | (FromFloat(_), _) => Error(OtherError("Expected float, got something else"))
     }
     newFnCall->E.R2.fmap(run(~env))->OutputLocal.fromResult
   }

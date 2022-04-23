@@ -284,7 +284,7 @@ let mixture = (
   ~pointwiseAddFn: pointwiseAddFn,
 ) => {
   if E.A.length(values) == 0 {
-    Error(DistributionTypes.Other("Mixture error: mixture must have at least 1 element"))
+    Error(DistributionTypes.OtherError("Mixture error: mixture must have at least 1 element"))
   } else {
     let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =
