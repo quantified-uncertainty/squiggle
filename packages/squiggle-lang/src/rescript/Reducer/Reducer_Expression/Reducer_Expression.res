@@ -16,6 +16,7 @@ type t = expression
 let rec toString = expression =>
   switch expression {
   | T.EBindings(_) => "$$bound"
+  | T.EParameters(params) => `(${Js.Array2.toString(params->Belt.List.toArray)})`
   | T.EList(aList) =>
     `(${Belt.List.map(aList, aValue => toString(aValue))
       ->Extra.List.interperse(" ")
@@ -72,6 +73,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
     switch expression {
     | T.EValue(_value) => expression->Ok
     | T.EBindings(_value) => expression->Ok
+    | T.EParameters(_value) => expression->Ok
     | T.EList(list) => {
         let racc: result<list<t>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
           racc,
@@ -108,6 +110,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
         racc->Result.flatMap(acc => acc->reduceValueList)
       }
     | EBindings(_bindings) => RETodo("Error: Bindings cannot be reduced to values")->Error
+    | EParameters(_parameters) => RETodo("Error: Lambda Parameters cannot be reduced to values")->Error
     }
 
   let rExpandedExpression: result<t, 'e> = expression->seekMacros(bindings)

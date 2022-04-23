@@ -99,6 +99,19 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
       })
     }
 
+    let caseFunctionAssignmentNode = faNode => {
+      let symbol = faNode["name"]->toEvSymbolValue
+      let rValueExpression = fromNode(faNode["expr"])
+
+      rValueExpression->Result.flatMap(valueExpression => {
+        let lispParams = faNode["params"]->Belt.List.fromArray->ExpressionT.EParameters
+        let rLambda = passToFunction("$lambda", list{lispParams, valueExpression}->Ok)
+        rLambda -> Result.flatMap( lambda => {
+          passToFunction("$let", list{symbol, lambda}->Ok)
+        })
+      })
+    }
+    
     let caseArrayNode = aNode => {
       aNode["items"]->Belt.List.fromArray->fromNodeList->Result.map(list => ExpressionT.EList(list))
     }
@@ -115,6 +128,7 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
     | MjBlockNode(bNode) => bNode["blocks"]->Belt.Array.map(toTagOrNode)->caseTagOrNodes
     | MjConstantNode(cNode) =>
       cNode["value"]->JavaScript.Gate.jsToEv->Result.flatMap(v => v->ExpressionT.EValue->Ok)
+    | MjFunctionAssignmentNode(faNode) => caseFunctionAssignmentNode(faNode)
     | MjFunctionNode(fNode) => fNode->caseFunctionNode
     | MjIndexNode(iNode) => caseIndexNode(iNode)
     | MjObjectNode(oNode) => caseObjectNode(oNode)

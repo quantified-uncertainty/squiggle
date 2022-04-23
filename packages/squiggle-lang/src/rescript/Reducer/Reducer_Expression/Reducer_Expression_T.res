@@ -11,5 +11,6 @@ open ReducerInterface.ExpressionValue
 type rec expression =
   | EList(list<expression>) // A list to map-reduce
   | EValue(expressionValue) // Irreducible built-in value. Reducer should not know the internals. External libraries are responsible
-  | EBindings(bindings) // let/def kind of statements return bindings
+  | EBindings(bindings) // $let kind of statements return bindings; for internal use only
+  | EParameters(list<string>) // for $defun; for internal use only
 and bindings = Belt.Map.String.t<expression>

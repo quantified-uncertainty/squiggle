@@ -33,6 +33,7 @@ let dispatchMacroCall = (
       }
     | ExpressionT.EValue(_) => expression->Ok
     | ExpressionT.EBindings(_) => expression->Ok
+    | ExpressionT.EParameters(_) => expression->Ok
     | ExpressionT.EList(list) => {
         let racc = list->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
           racc->Result.flatMap(acc => {
