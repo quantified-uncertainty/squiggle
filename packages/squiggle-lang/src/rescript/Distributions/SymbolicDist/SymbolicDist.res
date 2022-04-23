@@ -52,7 +52,7 @@ module Normal = {
     switch operation {
     | #Add => Some(#Normal({mean: n1 +. n2.mean, stdev: n2.stdev}))
     | #Subtract => Some(#Normal({mean: n1 -. n2.mean, stdev: n2.stdev}))
-    | #Multiply => Some(#Normal({mean: n1 *. n2.mean, stdev: n1 *. n2.stdev}))
+    | #Multiply => Some(#Normal({mean: n1 *. n2.mean, stdev: Js.Math.abs_float(n1) *. n2.stdev}))
     | _ => None
     }
 
@@ -60,8 +60,8 @@ module Normal = {
     switch operation {
     | #Add => Some(#Normal({mean: n1.mean +. n2, stdev: n1.stdev}))
     | #Subtract => Some(#Normal({mean: n1.mean -. n2, stdev: n1.stdev}))
-    | #Multiply => Some(#Normal({mean: n1.mean *. n2, stdev: n1.stdev *. n2}))
-    | #Divide => Some(#Normal({mean: n1.mean /. n2, stdev: n1.stdev /. n2}))
+    | #Multiply => Some(#Normal({mean: n1.mean *. n2, stdev: n1.stdev *. Js.Math.abs_float(n2)}))
+    | #Divide => Some(#Normal({mean: n1.mean /. n2, stdev: n1.stdev /. Js.Math.abs_float(n2)}))
     | _ => None
     }
 }
