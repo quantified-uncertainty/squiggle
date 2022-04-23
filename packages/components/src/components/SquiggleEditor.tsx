@@ -3,6 +3,7 @@ import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
 import styled from "styled-components";
+import type { squiggleExpression } from "@quri/squiggle-lang";
 
 export interface SquiggleEditorProps {
   /** The input string for squiggle */
@@ -22,7 +23,7 @@ export interface SquiggleEditorProps {
   /** The environment, other variables that were already declared */
   environment?: unknown;
   /** when the environment changes. Used again for notebook magic*/
-  onEnvChange?(env: unknown): void;
+  onChange?(expr: squiggleExpression): void;
   /** The width of the element */
   width: number;
 }
@@ -43,7 +44,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   diagramStart,
   diagramStop,
   diagramCount,
-  onEnvChange,
+  onChange,
   environment,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
@@ -69,7 +70,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         diagramStop={diagramStop}
         diagramCount={diagramCount}
         environment={environment}
-        onEnvChange={onEnvChange}
+        onChange={onChange}
       />
     </div>
   );
@@ -80,7 +81,7 @@ export function renderSquiggleEditorToDom(props: SquiggleEditorProps) {
   ReactDOM.render(
     <SquiggleEditor
       {...props}
-      onEnvChange={(env) => {
+      onChange={(expr) => {
         // Typescript complains on two levels here.
         //  - Div elements don't have a value property
         //  - Even if it did (like it was an input element), it would have to
@@ -96,10 +97,10 @@ export function renderSquiggleEditorToDom(props: SquiggleEditorProps) {
         //  viewof env = cell('normal(0,1)')
         //  to work
         // @ts-ignore
-        parent.value = env;
+        parent.value = expr;
 
         parent.dispatchEvent(new CustomEvent("input"));
-        if (props.onEnvChange) props.onEnvChange(env);
+        if (props.onChange) props.onChange(expr);
       }}
     />,
     parent
