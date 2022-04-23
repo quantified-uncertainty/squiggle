@@ -56,16 +56,16 @@ describe("Distribution", () => {
   );
 
   test("mean", () => {
-    expect(dist.mean().value).toBeCloseTo(3.737);
+    expect(dist.mean().value).toBeCloseTo(5.3913);
   });
   test("pdf", () => {
     expect(dist.pdf(5.0).value).toBeCloseTo(0.0431);
   });
   test("cdf", () => {
-    expect(dist.cdf(5.0).value).toBeCloseTo(0.155);
+    expect(dist.cdf(5.0).value).toBeCloseTo(0.224);
   });
   test("inv", () => {
-    expect(dist.inv(0.5).value).toBeCloseTo(9.458);
+    expect(dist.inv(0.5).value).toBeCloseTo(6.0);
   });
   test("toPointSet", () => {
     expect(
@@ -87,6 +87,6 @@ describe("Distribution", () => {
       resultMap(dist.pointwiseAdd(dist2), (r: Distribution) =>
         r.toSparkline(20)
       ).value
-    ).toEqual(Ok("▁▂▅██▅▅▅▆▇█▆▅▃▃▂▂▁▁▁"));
+    ).toEqual(Ok("▁▂▅█▇▅▅▆▇██▇▅▄▃▃▃▂▁▁"));
   });
 });
