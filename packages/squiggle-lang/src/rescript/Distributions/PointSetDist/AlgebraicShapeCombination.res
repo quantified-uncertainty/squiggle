@@ -191,12 +191,14 @@ let combineShapesContinuousDiscrete = (
   op: Operation.convolutionOperation,
   continuousShape: PointSetTypes.xyShape,
   discreteShape: PointSetTypes.xyShape,
+  flip: bool,
 ): PointSetTypes.xyShape => {
   let t1n = continuousShape |> XYShape.T.length
   let t2n = discreteShape |> XYShape.T.length
 
   // each x pair is added/subtracted
-  let fn = Operation.Convolution.toFn(op)
+  let opFunc = Operation.Convolution.toFn(op)
+  let fn = flip ? (a, b) => opFunc(b, a) : opFunc
 
   let outXYShapes: array<array<(float, float)>> = Belt.Array.makeUninitializedUnsafe(t2n)
 
