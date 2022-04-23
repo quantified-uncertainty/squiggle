@@ -20,6 +20,7 @@ describe("eval on distribution functions", () => {
   })
   describe("unaryMinus", () => {
     testEval("mean(-normal(5,2))", "Ok(-5)")
+    testEval("-normal(5,2)", "Ok(Normal(-5,2))")
   })
   describe("to", () => {
     testEval("5 to 2", "Error(Math Error: Low value must be less than high value.)")
