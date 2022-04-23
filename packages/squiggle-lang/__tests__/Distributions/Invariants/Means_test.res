@@ -84,14 +84,16 @@ let {testOperationMean, distributions, pairsOfDifferentDistributions, epsilon} =
 describe("Means are invariant", () => {
   describe("for addition", () => {
     let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", \"+.", ~epsilon)
+    let testAddInvariant = (t1, t2) =>
+      E.R.liftM2(testAdditionMean, t1, t2)->E.R.toExn("Means were not invariant", _)
 
     testAll("with two of the same distribution", distributions, dist => {
-      E.R.liftM2(testAdditionMean, dist, dist)->E.R.toExn("Means were not invariant", _)
+      testAddInvariant(dist, dist)
     })
 
     testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testAdditionMean, dist1, dist2)->E.R.toExn("Means were not invariant", _)
+      testAddInvariant(dist1, dist2)
     })
 
     testAll(
@@ -99,7 +101,7 @@ describe("Means are invariant", () => {
       pairsOfDifferentDistributions,
       dists => {
         let (dist1, dist2) = dists
-        E.R.liftM2(testAdditionMean, dist2, dist1)->E.R.toExn("Means were not invariant", _)
+        testAddInvariant(dist1, dist2)
       },
     )
   })
@@ -111,14 +113,16 @@ describe("Means are invariant", () => {
       \"-.",
       ~epsilon,
     )
+    let testSubtractInvariant = (t1, t2) =>
+      E.R.liftM2(testSubtractionMean, t1, t2)->E.R.toExn("Means were not invariant", _)
 
     testAll("with two of the same distribution", distributions, dist => {
-      E.R.liftM2(testSubtractionMean, dist, dist)->E.R.toExn("Means were not invariant", _)
+      testSubtractInvariant(dist, dist)
     })
 
     testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testSubtractionMean, dist1, dist2)->E.R.toExn("Means were not invariant", _)
+      testSubtractInvariant(dist1, dist2)
     })
 
     testAll(
@@ -126,7 +130,7 @@ describe("Means are invariant", () => {
       pairsOfDifferentDistributions,
       dists => {
         let (dist1, dist2) = dists
-        E.R.liftM2(testSubtractionMean, dist2, dist1)->E.R.toExn("Means were not invariant", _)
+        testSubtractInvariant(dist1, dist2)
       },
     )
   })
@@ -138,14 +142,16 @@ describe("Means are invariant", () => {
       \"*.",
       ~epsilon,
     )
+    let testMultiplicationInvariant = (t1, t2) =>
+      E.R.liftM2(testMultiplicationMean, t1, t2)->E.R.toExn("Means were not invariant", _)
 
     testAll("with two of the same distribution", distributions, dist => {
-      E.R.liftM2(testMultiplicationMean, dist, dist)->E.R.toExn("Means were not invariant", _)
+      testMultiplicationInvariant(dist, dist)
     })
 
     testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
       let (dist1, dist2) = dists
-      E.R.liftM2(testMultiplicationMean, dist1, dist2)->E.R.toExn("Means were not invariant", _)
+      testMultiplicationInvariant(dist1, dist2)
     })
 
     testAll(
@@ -153,7 +159,7 @@ describe("Means are invariant", () => {
       pairsOfDifferentDistributions,
       dists => {
         let (dist1, dist2) = dists
-        E.R.liftM2(testMultiplicationMean, dist2, dist1)->E.R.toExn("Means were not invariant", _)
+        testMultiplicationInvariant(dist1, dist2)
       },
     )
   })
