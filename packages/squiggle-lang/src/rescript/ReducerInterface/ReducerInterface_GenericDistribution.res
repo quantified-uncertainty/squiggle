@@ -24,13 +24,12 @@ module Helpers = {
     | "dotPow" => #Power
     | "multiply" => #Multiply
     | "dotMultiply" => #Multiply
-    | "dotLog" => #Logarithm
     | _ => #Multiply
     }
 
   let catchAndConvertTwoArgsToDists = (args: array<expressionValue>): option<(
-    GenericDist_Types.genericDist,
-    GenericDist_Types.genericDist,
+    DistributionTypes.genericDist,
+    DistributionTypes.genericDist,
   )> => {
     switch args {
     | [EvDistribution(a), EvDistribution(b)] => Some((a, b))
@@ -41,33 +40,41 @@ module Helpers = {
   }
 
   let toFloatFn = (
-    fnCall: GenericDist_Types.Operation.toFloat,
-    dist: GenericDist_Types.genericDist,
+    fnCall: DistributionTypes.DistributionOperation.toFloat,
+    dist: DistributionTypes.genericDist,
   ) => {
-    FromDist(GenericDist_Types.Operation.ToFloat(fnCall), dist)->runGenericOperation->Some
+    FromDist(DistributionTypes.DistributionOperation.ToFloat(fnCall), dist)
+    ->runGenericOperation
+    ->Some
   }
 
   let toStringFn = (
-    fnCall: GenericDist_Types.Operation.toString,
-    dist: GenericDist_Types.genericDist,
+    fnCall: DistributionTypes.DistributionOperation.toString,
+    dist: DistributionTypes.genericDist,
   ) => {
-    FromDist(GenericDist_Types.Operation.ToString(fnCall), dist)->runGenericOperation->Some
+    FromDist(DistributionTypes.DistributionOperation.ToString(fnCall), dist)
+    ->runGenericOperation
+    ->Some
   }
 
   let toBoolFn = (
-    fnCall: GenericDist_Types.Operation.toBool,
-    dist: GenericDist_Types.genericDist,
+    fnCall: DistributionTypes.DistributionOperation.toBool,
+    dist: DistributionTypes.genericDist,
   ) => {
-    FromDist(GenericDist_Types.Operation.ToBool(fnCall), dist)->runGenericOperation->Some
+    FromDist(DistributionTypes.DistributionOperation.ToBool(fnCall), dist)
+    ->runGenericOperation
+    ->Some
   }
 
-  let toDistFn = (fnCall: GenericDist_Types.Operation.toDist, dist) => {
-    FromDist(GenericDist_Types.Operation.ToDist(fnCall), dist)->runGenericOperation->Some
+  let toDistFn = (fnCall: DistributionTypes.DistributionOperation.toDist, dist) => {
+    FromDist(DistributionTypes.DistributionOperation.ToDist(fnCall), dist)
+    ->runGenericOperation
+    ->Some
   }
 
   let twoDiststoDistFn = (direction, arithmetic, dist1, dist2) => {
     FromDist(
-      GenericDist_Types.Operation.ToDistCombination(
+      DistributionTypes.DistributionOperation.ToDistCombination(
         direction,
         arithmeticMap(arithmetic),
         #Dist(dist2),
@@ -84,7 +91,7 @@ module Helpers = {
   let parseNumberArray = (ags: array<expressionValue>): Belt.Result.t<array<float>, string> =>
     E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
 
-  let parseDist = (args: expressionValue): Belt.Result.t<GenericDist_Types.genericDist, string> =>
+  let parseDist = (args: expressionValue): Belt.Result.t<DistributionTypes.genericDist, string> =>
     switch args {
     | EvDistribution(x) => Ok(x)
     | EvNumber(x) => Ok(GenericDist.fromFloat(x))
@@ -92,12 +99,12 @@ module Helpers = {
     }
 
   let parseDistributionArray = (ags: array<expressionValue>): Belt.Result.t<
-    array<GenericDist_Types.genericDist>,
+    array<DistributionTypes.genericDist>,
     string,
   > => E.A.fmap(parseDist, ags) |> E.A.R.firstErrorOrOpen
 
   let mixtureWithGivenWeights = (
-    distributions: array<GenericDist_Types.genericDist>,
+    distributions: array<DistributionTypes.genericDist>,
     weights: array<float>,
   ): DistributionOperation.outputType =>
     E.A.length(distributions) == E.A.length(weights)
@@ -107,7 +114,7 @@ module Helpers = {
         )
 
   let mixtureWithDefaultWeights = (
-    distributions: array<GenericDist_Types.genericDist>,
+    distributions: array<DistributionTypes.genericDist>,
   ): DistributionOperation.outputType => {
     let length = E.A.length(distributions)
     let weights = Belt.Array.make(length, 1.0 /. Belt.Int.toFloat(length))
@@ -165,7 +172,7 @@ module SymbolicConstructors = {
   ): option<DistributionOperation.outputType> =>
     switch symbolicResult {
     | Ok(r) => Some(Dist(Symbolic(r)))
-    | Error(r) => Some(GenDistError(Other(r)))
+    | Error(r) => Some(GenDistError(OtherError(r)))
     }
 }
 
@@ -235,15 +242,12 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
       | "dotMultiply"
       | "dotSubtract"
       | "dotDivide"
-      | "dotPow"
-      | "dotLog") as arithmetic,
+      | "dotPow") as arithmetic,
       [_, _] as args,
     ) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd)
     )
-  | ("dotLog", [EvDistribution(a)]) =>
-    Helpers.twoDiststoDistFn(Pointwise, "dotLog", a, GenericDist.fromFloat(Math.e))->Some
   | ("dotExp", [EvDistribution(a)]) =>
     Helpers.twoDiststoDistFn(Pointwise, "dotPow", GenericDist.fromFloat(Math.e), a)->Some
   | _ => None
@@ -259,12 +263,7 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | Float(d) => Ok(EvNumber(d))
   | String(d) => Ok(EvString(d))
   | Bool(d) => Ok(EvBool(d))
-  | GenDistError(NotYetImplemented) => Error(RETodo("Function not yet implemented"))
-  | GenDistError(Unreachable) => Error(RETodo("Unreachable"))
-  | GenDistError(DistributionVerticalShiftIsInvalid) =>
-    Error(RETodo("Distribution Vertical Shift Is Invalid"))
-  | GenDistError(ArgumentError(err)) => Error(RETodo("Argument Error: " ++ err))
-  | GenDistError(Other(s)) => Error(RETodo(s))
+  | GenDistError(err) => Error(REDistributionError(err))
   }
 
 let dispatch = call => {

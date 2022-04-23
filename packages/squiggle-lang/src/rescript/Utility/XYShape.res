@@ -43,6 +43,10 @@ module T = {
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
   let mapX = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys}
   let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(fn, t.ys)}
+  let mapYResult = (fn: float => result<float, 'e>, t: t): result<t, 'e> => {
+    let mappedYs = E.A.fmap(fn, t.ys)
+    E.A.R.firstErrorOrOpen(mappedYs)->E.R2.fmap(y => {xs: t.xs, ys: y})
+  }
   let square = mapX(x => x ** 2.0)
   let zip = ({xs, ys}: t) => Belt.Array.zip(xs, ys)
   let fromArray = ((xs, ys)): t => {xs: xs, ys: ys}
@@ -229,7 +233,12 @@ module Zipped = {
 
 module PointwiseCombination = {
   // t1Interpolator and t2Interpolator are functions from XYShape.XtoY, e.g. linearBetweenPointsExtrapolateFlat.
-  let combine: ((float, float) => float, interpolator, T.t, T.t) => T.t = %raw(`
+  let combine: (
+    (float, float) => result<float, Operation.Error.t>,
+    interpolator,
+    T.t,
+    T.t,
+  ) => result<T.t, Operation.Error.t> = %raw(`
       // This function combines two xyShapes by looping through both of them simultaneously.
       // It always moves on to the next smallest x, whether that's in the first or second input's xs,
       // and interpolates the value on the other side, thus accumulating xs and ys.
@@ -277,12 +286,27 @@ module PointwiseCombination = {
           }
 
           outX.push(x);
-          outY.push(fn(ya, yb));
+
+          // Here I check whether the operation was a success. If it was
+          // keep going. Otherwise, stop and throw the error back to user
+          let newY = fn(ya, yb);
+          if(newY.TAG === 0){
+            outY.push(newY._0);
+          }
+          else {
+            return newY;
+          }
         }
 
-        return {xs: outX, ys: outY};
+        return {TAG: 0, _0: {xs: outX, ys: outY}, [Symbol.for("name")]: "Ok"};
       }
     `)
+
+  let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
+    combine((a, b) => Ok(a +. b), interpolator, t1, t2)->E.R.toExn(
+      "Add operation should never fail",
+      _,
+    )
 
   let combineEvenXs = (~fn, ~xToYSelection, sampleCount, t1: T.t, t2: T.t) =>
     switch (E.A.length(t1.xs), E.A.length(t2.xs)) {

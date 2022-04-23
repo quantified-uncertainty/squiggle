@@ -88,10 +88,10 @@ let stepwiseToLinear = (t: t): t =>
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
   ~distributionType: PointSetTypes.distributionType=#PDF,
-  fn: (float, float) => float,
+  fn: (float, float) => result<float, Operation.Error.t>,
   t1: PointSetTypes.continuousShape,
   t2: PointSetTypes.continuousShape,
-): PointSetTypes.continuousShape => {
+): result<PointSetTypes.continuousShape, 'e> => {
   // If we're adding the distributions, and we know the total of each, then we
   // can just sum them up. Otherwise, all bets are off.
   let combinedIntegralSum = Common.combineIntegralSums(
@@ -119,9 +119,8 @@ let combinePointwise = (
 
   let interpolator = XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation)
 
-  make(
-    ~integralSumCache=combinedIntegralSum,
-    XYShape.PointwiseCombination.combine(fn, interpolator, t1.xyShape, t2.xyShape),
+  XYShape.PointwiseCombination.combine(fn, interpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
+    make(~integralSumCache=combinedIntegralSum, x)
   )
 }
 
@@ -140,13 +139,47 @@ let updateIntegralSumCache = (integralSumCache, t: t): t => {
 
 let updateIntegralCache = (integralCache, t: t): t => {...t, integralCache: integralCache}
 
+let sum = (
+  ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
+  continuousShapes,
+): t =>
+  continuousShapes |> E.A.fold_left(
+    (x, y) =>
+      combinePointwise(~integralSumCachesFn, (a, b) => Ok(a +. b), x, y)->E.R.toExn(
+        "Addition should never fail",
+        _,
+      ),
+    empty,
+  )
+
 let reduce = (
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
-  fn,
+  fn: (float, float) => result<float, 'e>,
   continuousShapes,
-) => continuousShapes |> E.A.fold_left(combinePointwise(~integralSumCachesFn, fn), empty)
+): result<t, 'e> =>
+  continuousShapes |> E.A.R.foldM(combinePointwise(~integralSumCachesFn, fn), empty)
 
-let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t) =>
+let mapYResult = (
+  ~integralSumCacheFn=_ => None,
+  ~integralCacheFn=_ => None,
+  ~fn: float => result<float, 'e>,
+  t: t,
+): result<t, 'e> =>
+  XYShape.T.mapYResult(fn, getShape(t))->E.R2.fmap(x =>
+    make(
+      ~interpolation=t.interpolation,
+      ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
+      ~integralCache=t.integralCache |> E.O.bind(_, integralCacheFn),
+      x,
+    )
+  )
+
+let mapY = (
+  ~integralSumCacheFn=_ => None,
+  ~integralCacheFn=_ => None,
+  ~fn: float => float,
+  t: t,
+): t =>
   make(
     ~interpolation=t.interpolation,
     ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
@@ -170,6 +203,7 @@ module T = Dist({
   let minX = shapeFn(XYShape.T.minX)
   let maxX = shapeFn(XYShape.T.maxX)
   let mapY = mapY
+  let mapYResult = mapYResult
   let updateIntegralCache = updateIntegralCache
   let toDiscreteProbabilityMassFraction = _ => 0.0
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Continuous(t)

@@ -10,7 +10,7 @@ type rec expressionValue =
   | EvArray(array<expressionValue>)
   | EvBool(bool)
   | EvCall(string) // External function call
-  | EvDistribution(GenericDist_Types.genericDist)
+  | EvDistribution(DistributionTypes.genericDist)
   | EvNumber(float)
   | EvRecord(Js.Dict.t<expressionValue>)
   | EvString(string)

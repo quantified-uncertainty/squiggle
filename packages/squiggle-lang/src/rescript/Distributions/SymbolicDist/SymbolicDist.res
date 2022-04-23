@@ -379,7 +379,7 @@ module T = {
   ): analyticalSimplificationResult =>
     switch (d1, d2) {
     | (#Float(v1), #Float(v2)) =>
-      switch Operation.Algebraic.applyFn(op, v1, v2) {
+      switch Operation.Algebraic.toFn(op, v1, v2) {
       | Ok(r) => #AnalyticalSolution(#Float(r))
       | Error(n) => #Error(n)
       }

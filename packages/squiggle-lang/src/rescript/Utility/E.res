@@ -152,13 +152,20 @@ module I = {
   let toString = Js.Int.toString
 }
 
+exception Assertion(string)
+
 /* R for Result */
 module R = {
   let result = Rationale.Result.result
   let id = e => e |> result(U.id, U.id)
   let fmap = Rationale.Result.fmap
   let bind = Rationale.Result.bind
-  let toExn = Belt.Result.getExn
+  let toExn = (msg: string, x: result<'a, 'b>): 'a =>
+    switch x {
+    | Ok(r) => r
+    | Error(_) => raise(Assertion(msg))
+    }
+
   let default = (default, res: Belt.Result.t<'a, 'b>) =>
     switch res {
     | Ok(r) => r
@@ -185,6 +192,7 @@ module R = {
     | Ok(f) => fmap(f, a)
     | Error(err) => Error(err)
     }
+
   // (a1 -> a2 -> r) -> m a1 -> m a2 -> m r  // not in Rationale
   let liftM2: (('a, 'b) => 'c, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
     ap'(fmap(op, xR), yR)
@@ -210,10 +218,10 @@ module R2 = {
   let bind = (a, b) => R.bind(b, a)
 
   //Converts result type to change error type only
-  let errMap = (a, map) =>
+  let errMap = (a: result<'a, 'b>, map: 'b => 'c): result<'a, 'c> =>
     switch a {
     | Ok(r) => Ok(r)
-    | Error(e) => map(e)
+    | Error(e) => Error(map(e))
     }
 
   let fmap2 = (xR, f) =>
@@ -435,6 +443,32 @@ module A = {
       let forceOpen = (r: array<Belt.Result.t<'a, 'b>>): array<'a> =>
         r |> Belt.Array.map(_, r => Belt.Result.getExn(r))
       bringErrorUp |> Belt.Result.map(_, forceOpen)
+    }
+    let filterOk = (x: array<result<'a, 'b>>): array<'a> => fmap(R.toOption, x)->O.concatSomes
+
+    let forM = (x: array<'a>, fn: 'a => result<'b, 'c>): result<array<'b>, 'c> =>
+      firstErrorOrOpen(fmap(fn, x))
+
+    let foldM = (fn: ('c, 'a) => result<'b, 'e>, init: 'c, x: array<'a>): result<'c, 'e> => {
+      let acc = ref(init)
+      let final = ref(Ok())
+      let break = ref(false)
+      let i = ref(0)
+
+      while break.contents != true && i.contents < length(x) {
+        switch fn(acc.contents, x[i.contents]) {
+        | Ok(r) => acc := r
+        | Error(err) => {
+            final := Error(err)
+            break := true
+          }
+        }
+        i := i.contents + 1
+      }
+      switch final.contents {
+      | Ok(_) => Ok(acc.contents)
+      | Error(err) => Error(err)
+      }
     }
   }
 
