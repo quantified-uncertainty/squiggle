@@ -21,7 +21,7 @@ let errorToString = err =>
   | REAssignmentExpected => "Assignment expected"
   | REExpressionExpected => "Expression expected"
   | REFunctionExpected(msg) => `Function expected: ${msg}`
-  | REDistributionError(err) => `Math Error: ${DistributionTypes.Error.toString(err)}`
+  | REDistributionError(err) => `Distribution Math Error: ${DistributionTypes.Error.toString(err)}`
   | REJavaScriptExn(omsg, oname) => {
       let answer = "JS Exception:"
       let answer = switch oname {
