@@ -43,16 +43,35 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
     | None => RERecordPropertyNotFound("Record property not found", sIndex)->Error
     }
 
+  let inspect = (value: expressionValue) => {
+    Js.log(`${value->toString}`)
+    value->Ok
+  }
+
+  let inspectLabel = (value: expressionValue, label: string) => {
+    Js.log(`${label}: ${value->toString}`)
+    value->Ok
+  }
+
+  let inspectPerformance = (value: expressionValue, label: string) => {
+    let _ = %raw("{performance} = require('perf_hooks')")
+    let start = %raw(`performance.now()`)
+    let finish = %raw(`performance.now()`)
+    let performance = finish - start
+    Js.log(`${label}: ${value->toString} performance: ${Js.String.make(performance)}ms`)
+    value->Ok
+  }
+
   switch call {
-  // | ("$constructRecord", pairArray)
-  // | ("$atIndex", [EvArray(anArray), EvNumber(fIndex)]) => arrayAtIndex(anArray, fIndex)
-  // | ("$atIndex", [EvRecord(aRecord), EvString(sIndex)]) => recordAtIndex(aRecord, sIndex)
-  | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
   | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
     arrayAtIndex(aValueArray, fIndex)
   | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
   | ("$atIndex", [obj, index]) =>
     (toStringWithType(obj) ++ "??~~~~" ++ toStringWithType(index))->EvString->Ok
+  | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
+  | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
+  | ("inspect", [value]) => inspect(value)
+  | ("inspectPerformance", [value, EvString(label)]) => inspectPerformance(value, label)
   | call => callMathJs(call)
   }
 }
