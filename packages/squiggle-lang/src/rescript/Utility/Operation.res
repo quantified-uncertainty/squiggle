@@ -76,7 +76,9 @@ let logarithm = (a: float, b: float): result<float, Error.invalidOperationError>
     Error(ComplexNumberError)
   }
 
+@genType
 module Algebraic = {
+  @genType
   type t = algebraicOperation
   let toFn: (t, float, float) => result<float, Error.invalidOperationError> = (x, a, b) =>
     switch x {
