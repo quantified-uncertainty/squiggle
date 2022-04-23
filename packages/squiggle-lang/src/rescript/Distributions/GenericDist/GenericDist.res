@@ -207,9 +207,10 @@ module AlgebraicCombination = {
     ])
     switch items {
     | Error(r) => Some(r)
-    | Ok([true, _]) => Some(ArgumentError("First input of logarithm must be fully greater than 0"))
+    | Ok([true, _]) =>
+      Some(LogarithmOfDistributionError("First input must completely greater than 0"))
     | Ok([false, true]) =>
-      Some(ArgumentError("Second input of logarithm must be fully greater than 0"))
+      Some(LogarithmOfDistributionError("Second input must completely greater than 0"))
     | Ok([false, false]) => None
     | Ok(_) => Some(Unreachable)
     }
