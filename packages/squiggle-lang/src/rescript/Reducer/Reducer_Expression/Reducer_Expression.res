@@ -93,6 +93,9 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
 
   let rec reduceExpandedExpression = (expression: t): result<expressionValue, 'e> =>
     switch expression {
+    // | T.EList(list{T.EValue(EvCall("$lambda")), T.EParameters(parameters), functionDefinition}) => {
+    //     let lambda = T.ELambda(parameters, functionDefinition)
+    //     lambda->Ok}
     | T.EValue(value) => value->Ok
     | T.EList(list) => {
         let racc: result<list<expressionValue>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
