@@ -44,7 +44,7 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
     }
 
   let inspect = (value: expressionValue) => {
-    Js.log(`${value->toString}`)
+    Js.log(value->toString)
     value->Ok
   }
 

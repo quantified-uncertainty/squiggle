@@ -106,12 +106,12 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
       rValueExpression->Result.flatMap(valueExpression => {
         let lispParams = faNode["params"]->Belt.List.fromArray->ExpressionT.EParameters
         let rLambda = passToFunction("$lambda", list{lispParams, valueExpression}->Ok)
-        rLambda -> Result.flatMap( lambda => {
+        rLambda->Result.flatMap(lambda => {
           passToFunction("$let", list{symbol, lambda}->Ok)
         })
       })
     }
-    
+
     let caseArrayNode = aNode => {
       aNode["items"]->Belt.List.fromArray->fromNodeList->Result.map(list => ExpressionT.EList(list))
     }

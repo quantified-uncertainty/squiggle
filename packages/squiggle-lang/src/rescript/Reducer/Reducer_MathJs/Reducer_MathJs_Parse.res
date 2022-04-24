@@ -32,7 +32,7 @@ external castAssignmentNodeWAccessor: node => assignmentNodeWAccessor = "%identi
 external castAssignmentNodeWIndex: node => assignmentNodeWIndex = "%identity"
 external castBlockNode: node => blockNode = "%identity"
 external castConstantNode: node => constantNode = "%identity"
-external castFunctionAssignmentNode: node => functionAssignmentNode ="%identity"
+external castFunctionAssignmentNode: node => functionAssignmentNode = "%identity"
 external castFunctionNode: node => functionNode = "%identity"
 external castIndexNode: node => indexNode = "%identity"
 external castObjectNode: node => objectNode = "%identity"
@@ -123,7 +123,7 @@ let rec toString = (mathJsNode: mathJsNode): string => {
   let toStringFunctionAssignmentNode = (faNode: functionAssignmentNode): string => {
     let paramNames = Js.Array2.toString(faNode["params"])
     `${faNode["name"]} = (${paramNames}) => ${toStringMathJsNode(faNode["expr"])}`
-  } 
+  }
   let toStringFunctionNode = (fnode: functionNode): string =>
     `${fnode->nameOfFunctionNode}(${fnode["args"]->toStringNodeArray})`
 
@@ -158,7 +158,7 @@ let rec toString = (mathJsNode: mathJsNode): string => {
     `${aNode["object"]->toStringSymbolNode} = ${aNode["value"]->toStringMathJsNode}`
   | MjBlockNode(bNode) => `{${bNode["blocks"]->toStringBlocks}}`
   | MjConstantNode(cNode) => cNode["value"]->toStringValue
-  | MjFunctionAssignmentNode(faNode) => faNode->toStringFunctionAssignmentNode 
+  | MjFunctionAssignmentNode(faNode) => faNode->toStringFunctionAssignmentNode
   | MjFunctionNode(fNode) => fNode->toStringFunctionNode
   | MjIndexNode(iNode) => iNode->toStringIndexNode
   | MjObjectNode(oNode) => oNode->toStringObjectNode
