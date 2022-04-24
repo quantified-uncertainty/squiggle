@@ -5,12 +5,16 @@
 module Extra_Array = Reducer_Extra_Array
 module ErrorValue = Reducer_ErrorValue
 
+@genType.opaque
+type internalCode = Object
+
 @genType
 type rec expressionValue =
   | EvArray(array<expressionValue>)
   | EvBool(bool)
   | EvCall(string) // External function call
   | EvDistribution(GenericDist_Types.genericDist)
+  | EvLambda(array<string>, internalCode)
   | EvNumber(float)
   | EvRecord(Js.Dict.t<expressionValue>)
   | EvString(string)
@@ -25,6 +29,7 @@ let rec toString = aValue =>
   switch aValue {
   | EvBool(aBool) => Js.String.make(aBool)
   | EvCall(fName) => `:${fName}`
+  | EvLambda(parameters, _internalCode) => `lambda(${Js.Array2.toString(parameters)}=>internal)`
   | EvNumber(aNumber) => Js.String.make(aNumber)
   | EvString(aString) => `'${aString}'`
   | EvSymbol(aString) => `:${aString}`
