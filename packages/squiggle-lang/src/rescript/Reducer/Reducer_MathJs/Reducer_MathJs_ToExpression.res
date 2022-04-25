@@ -116,6 +116,19 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
         rExpr
       }
     | MjBlockNode(bNode) => bNode["blocks"]->Belt.Array.map(toTagOrNode)->caseTagOrNodes
+    | MjConditionalNode(cndNode) => {
+        let rCondition = fromNode(cndNode["condition"])
+        let rTrueExpr = fromNode(cndNode["trueExpr"])
+        let rFalse = fromNode(cndNode["falseExpr"])
+
+        rCondition->Result.flatMap(condition =>
+          rTrueExpr->Result.flatMap(trueExpr =>
+            rFalse->Result.flatMap(falseExpr =>
+              Builder.passToFunction("$$ternary", list{condition, trueExpr, falseExpr})->Ok
+            )
+          )
+        )
+      }
     | MjConstantNode(cNode) =>
       cNode["value"]->JavaScript.Gate.jsToEv->Result.flatMap(v => v->ExpressionT.EValue->Ok)
     | MjFunctionAssignmentNode(faNode) => caseFunctionAssignmentNode(faNode)

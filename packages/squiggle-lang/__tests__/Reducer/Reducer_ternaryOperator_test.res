@@ -1,9 +1,9 @@
 open Jest
 open Reducer_TestHelpers
 
-Skip.describe("Parse ternary operator", () => {
-  testParseToBe("true ? 'YES' : 'NO'", "Ok('YES')")
-  testParseToBe("false ? 'YES' : 'NO'", "Ok('NO')")
+describe("Parse ternary operator", () => {
+  testParseToBe("true ? 'YES' : 'NO'", "Ok((:$$ternary true 'YES' 'NO'))")
+  testParseToBe("2>1 ? 'YES' : 'NO'", "Ok((:$$ternary (:larger 2 1) 'YES' 'NO'))")
 })
 
 Skip.describe("Evaluate ternary operator", () => {
