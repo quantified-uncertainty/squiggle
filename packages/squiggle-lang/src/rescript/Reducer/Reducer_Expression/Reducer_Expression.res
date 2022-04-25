@@ -1,9 +1,11 @@
+module Builder = Reducer_Expression_Builder
 module BuiltIn = Reducer_Dispatch_BuiltIn
 module ExpressionValue = ReducerInterface.ExpressionValue
 module Extra = Reducer_Extra
 module MathJs = Reducer_MathJs
 module Result = Belt.Result
 module T = Reducer_Expression_T
+
 open Reducer_ErrorValue
 
 type expression = T.expression
@@ -75,14 +77,11 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
     let bindings = Belt.List.reduce(zippedParameterList, defaultBindings, (a, (p, e)) =>
       a->Belt.Map.String.set(p, e->EValue)
     )
-    Js.log(`applyParametersToLambda: ${toString(expr)}`)
-    let inspectBindings =
-      bindings
-      ->Belt.Map.String.mapWithKey((k, v) => `${k}: ${toString(v)}`)
-      ->Belt.Map.String.valuesToArray
-      ->Js.Array2.toString
-    Js.log(`    inspectBindings: ${inspectBindings}`)
-    reduceExpression(expr, bindings)
+    let newExpression = Builder.passToFunction(
+      "$$bindExpression",
+      list{Builder.passToFunction("$$bindings", list{}), expr},
+    )
+    reduceExpression(newExpression, bindings)
   }
 
   /*
