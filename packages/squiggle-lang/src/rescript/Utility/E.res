@@ -338,6 +338,7 @@ module A = {
   let getBy = Belt.Array.getBy
   let last = a => get(a, length(a) - 1)
   let first = get(_, 0)
+  let has = (r, el) => Belt.Array.some(r, (x) => x == el)
   let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> O.isSome
   let fold_left = Array.fold_left
   let fold_right = Array.fold_right

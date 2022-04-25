@@ -6,11 +6,14 @@ module Result = Belt.Result
 type errorValue = ErrorValue.errorValue
 type expression = ExpressionT.expression
 
-let passToFunction = (fName: string, lispArgs: list<expression>): expression => {
-  let toEvCallValue = (name: string): expression => name->ExpressionValue.EvCall->ExpressionT.EValue
-  let fn = fName->toEvCallValue
-  list{fn, ...lispArgs}->ExpressionT.EList
-}
+let toEvCallValue = (name: string): expression => ExpressionT.EValue(ExpressionValue.EvCall(name))
 
-let toEvSymbolValue = (name: string): expression =>
-  name->ExpressionValue.EvSymbol->ExpressionT.EValue
+let toEvSymbolValue = (name: string): expression => ExpressionT.EValue(
+  ExpressionValue.EvSymbol(name),
+)
+
+//From Ozzie: I think this could really use a more descriptive name.
+let passToFunction = (fName: string, lispArgs: list<expression>): expression => {
+  let fn = toEvCallValue(fName)
+  ExpressionT.EList(list{fn, ...lispArgs})
+}

@@ -20,49 +20,11 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
   expression,
   errorValue,
 > => {
-  let getParameters = (bindings: ExpressionT.bindings): array<string> => {
-    let eParameters = Belt.Map.String.getWithDefault(bindings, "$parameters", EParameters([]))
-    switch eParameters {
-    | EParameters(parameters) => parameters
-    | _ => []
-    }
-  }
-
-  let putParameters = (
-    bindings: ExpressionT.bindings,
-    parameters: array<string>,
-  ): ExpressionT.bindings =>
-    Belt.Map.String.set(bindings, "$parameters", ExpressionT.EParameters(parameters))
-
-  let answerBindingIfNotParameter = (aSymbol, defaultExpression, parameters, bindings) =>
-    switch Js.Array2.some(parameters, a => a == aSymbol) {
-    | true => defaultExpression->Ok // We cannot bind the parameters with global values
-    | false =>
-      switch bindings->Belt.Map.String.get(aSymbol) {
-      | Some(boundExpression) => boundExpression->Ok
-      | None => RESymbolNotFound(aSymbol)->Error
-      }
-    }
-
-  let answerCallBindingIfNotParameter = (aSymbol, defaultExpression, parameters, bindings) =>
-    switch Js.Array2.some(parameters, a => a == aSymbol) {
-    | true => defaultExpression->Ok // We cannot bind the parameters with global values
-    | false =>
-      switch bindings->Belt.Map.String.get(aSymbol) {
-      | Some(boundExpression) => boundExpression->Ok
-      | None => defaultExpression->Ok
-      }
-    }
-
   switch expression {
-  | ExpressionT.EValue(EvSymbol(aSymbol)) => {
-      let parameters = getParameters(bindings)
-      answerBindingIfNotParameter(aSymbol, expression, parameters, bindings)
-    }
-  | ExpressionT.EValue(EvCall(aSymbol)) => {
-      let parameters = getParameters(bindings)
-      answerCallBindingIfNotParameter(aSymbol, expression, parameters, bindings)
-    }
+  | ExpressionT.EValue(EvSymbol(aSymbol)) =>
+    ExpressionT.Bindings.getResultIfNotInParameters(bindings, aSymbol)->E.O2.default(Ok(expression))
+  | ExpressionT.EValue(EvCall(aSymbol)) =>
+    ExpressionT.Bindings.getIfNotInParameters(bindings, aSymbol)->E.O2.default(expression)->Ok
   | ExpressionT.EValue(_) => expression->Ok
   | ExpressionT.EBindings(_) => expression->Ok
   | ExpressionT.EParameters(_) => expression->Ok
@@ -71,9 +33,7 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
       ExpressionT.EParameters(parameters),
       expr,
     }) => {
-      let oldParameters = getParameters(bindings)
-      let newParameters = oldParameters->Js.Array2.concat(parameters)
-      let newBindings = putParameters(bindings, newParameters)
+      let newBindings = ExpressionT.Bindings.Parameters.setArray(bindings, parameters)
       let rNewExpr = replaceSymbols(expr, newBindings)
       rNewExpr->Result.flatMap(newExpr =>
         ExpressionT.EList(list{
@@ -119,7 +79,7 @@ let dispatchMacroCall = (
 
         let rNewExpression = rNewValue->Result.map(newValue => ExpressionT.EValue(newValue))
         rNewExpression->Result.map(newExpression =>
-          Belt.Map.String.set(bindings, aSymbol, newExpression)->ExpressionT.EBindings
+          ExpressionT.Bindings.set(bindings, aSymbol, newExpression)->ExpressionT.EBindings
         )
       }
     | _ => REAssignmentExpected->Error
