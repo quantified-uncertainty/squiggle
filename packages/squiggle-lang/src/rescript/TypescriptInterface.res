@@ -54,3 +54,6 @@ let errorValueToString = Reducer_ErrorValue.errorToString
 
 @genType
 let distributionErrorToString = DistributionTypes.Error.toString
+
+@genType
+type internalCode = ReducerInterface_ExpressionValue.internalCode
