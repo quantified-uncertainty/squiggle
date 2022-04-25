@@ -14,7 +14,7 @@ type rec expressionValue =
   | EvBool(bool)
   | EvCall(string) // External function call
   | EvDistribution(GenericDist_Types.genericDist)
-  | EvLambda(array<string>, internalCode)
+  | EvLambda((array<string>, internalCode))
   | EvNumber(float)
   | EvRecord(Js.Dict.t<expressionValue>)
   | EvString(string)
@@ -29,7 +29,7 @@ let rec toString = aValue =>
   switch aValue {
   | EvBool(aBool) => Js.String.make(aBool)
   | EvCall(fName) => `:${fName}`
-  | EvLambda(parameters, _internalCode) => `lambda(${Js.Array2.toString(parameters)}=>internal)`
+  | EvLambda((parameters, _internalCode)) => `lambda(${Js.Array2.toString(parameters)}=>internal)`
   | EvNumber(aNumber) => Js.String.make(aNumber)
   | EvString(aString) => `'${aString}'`
   | EvSymbol(aString) => `:${aString}`
@@ -60,7 +60,7 @@ let toStringWithType = aValue =>
   | EvBool(_) => `Bool::${toString(aValue)}`
   | EvCall(_) => `Call::${toString(aValue)}`
   | EvDistribution(_) => `Distribution::${toString(aValue)}`
-  | EvLambda(_parameters, _internalCode) => `Lambda::${toString(aValue)}`
+  | EvLambda((_parameters, _internalCode)) => `Lambda::${toString(aValue)}`
   | EvNumber(_) => `Number::${toString(aValue)}`
   | EvRecord(_) => `Record::${toString(aValue)}`
   | EvString(_) => `String::${toString(aValue)}`

@@ -91,7 +91,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
     switch valueList {
     | list{EvCall(fName), ...args} => (fName, args->Belt.List.toArray)->BuiltIn.dispatch
     // "(lambda(x=>internal) param)"
-    | list{EvLambda(parameters, internal), ...args} =>
+    | list{EvLambda((parameters, internal)), ...args} =>
       applyParametersToLambda(internal, parameters, args)
     | _ => valueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
     }
@@ -121,7 +121,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
   let rec reduceExpandedExpression = (expression: t): result<expressionValue, 'e> =>
     switch expression {
     | T.EList(list{T.EValue(EvCall("$lambda")), T.EParameters(parameters), functionDefinition}) =>
-      EvLambda(parameters, functionDefinition->castExpressionToInternalCode)->Ok
+      EvLambda((parameters, functionDefinition->castExpressionToInternalCode))->Ok
     | T.EValue(value) => value->Ok
     | T.EList(list) => {
         let racc: result<list<expressionValue>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
