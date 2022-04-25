@@ -140,13 +140,13 @@ let dispatchMacroCall = (
       expressionValue,
     ) => {
       let value = switch expressionValue {
-      | EValue(aValue) => aValue
+      | ExpressionT.EValue(aValue) => aValue
       | _ => EvSymbol("internal")
       }
       Js.Dict.set(acc, key, value)
       acc
     })
-    externalBindings->EvRecord->ExpressionT.EValue->Ok
+    externalBindings->ExpressionValue.EvRecord->ExpressionT.EValue->Ok
   }
 
   let doBindExpression = (expression: expression, bindings: ExpressionT.bindings) =>
