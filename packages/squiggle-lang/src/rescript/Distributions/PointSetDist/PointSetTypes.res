@@ -94,3 +94,11 @@ module MixedPoint = {
 
   let add = combine2((a, b) => a +. b)
 }
+
+@genType
+type sparklineError = CannotSparklineDiscrete
+
+let sparklineErrorToString = (err: sparklineError): string =>
+  switch err {
+  | CannotSparklineDiscrete => "Cannot find the sparkline of a discrete distribution"
+  }

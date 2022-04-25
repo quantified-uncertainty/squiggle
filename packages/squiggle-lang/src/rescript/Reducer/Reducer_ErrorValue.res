@@ -9,6 +9,7 @@ type errorValue =
   | RERecordPropertyNotFound(string, string)
   | RESymbolNotFound(string)
   | RESyntaxError(string)
+  | REDistributionError(DistributionTypes.error)
   | RETodo(string) // To do
 
 type t = errorValue
@@ -20,6 +21,7 @@ let errorToString = err =>
   | REAssignmentExpected => "Assignment expected"
   | REExpressionExpected => "Expression expected"
   | REFunctionExpected(msg) => `Function expected: ${msg}`
+  | REDistributionError(err) => `Math Error: ${DistributionTypes.Error.toString(err)}`
   | REJavaScriptExn(omsg, oname) => {
       let answer = "JS Exception:"
       let answer = switch oname {

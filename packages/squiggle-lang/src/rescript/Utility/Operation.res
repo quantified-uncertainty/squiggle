@@ -37,22 +37,59 @@ module Convolution = {
     }
 }
 
-module Algebraic = {
-  type t = algebraicOperation
-  let toFn: (t, float, float) => float = x =>
-    switch x {
-    | #Add => \"+."
-    | #Subtract => \"-."
-    | #Multiply => \"*."
-    | #Power => \"**"
-    | #Divide => \"/."
-    | #Logarithm => (a, b) => log(a) /. log(b)
-    }
+type operationError =
+  | DivisionByZeroError
+  | ComplexNumberError
 
-  let applyFn = (t, f1, f2) =>
-    switch (t, f1, f2) {
-    | (#Divide, _, 0.) => Error("Cannot divide $v1 by zero.")
-    | _ => Ok(toFn(t, f1, f2))
+@genType
+module Error = {
+  @genType
+  type t = operationError
+
+  let toString = (err: t): string =>
+    switch err {
+    | DivisionByZeroError => "Cannot divide by zero"
+    | ComplexNumberError => "Operation returned complex result"
+    }
+}
+
+let power = (a: float, b: float): result<float, Error.t> =>
+  if a >= 0.0 {
+    Ok(a ** b)
+  } else {
+    Error(ComplexNumberError)
+  }
+
+let divide = (a: float, b: float): result<float, Error.t> =>
+  if b != 0.0 {
+    Ok(a /. b)
+  } else {
+    Error(DivisionByZeroError)
+  }
+
+let logarithm = (a: float, b: float): result<float, Error.t> =>
+  if b == 1. {
+    Error(DivisionByZeroError)
+  } else if b == 0. {
+    Ok(0.)
+  } else if a > 0.0 && b > 0.0 {
+    Ok(log(a) /. log(b))
+  } else {
+    Error(ComplexNumberError)
+  }
+
+@genType
+module Algebraic = {
+  @genType
+  type t = algebraicOperation
+  let toFn: (t, float, float) => result<float, Error.t> = (x, a, b) =>
+    switch x {
+    | #Add => Ok(a +. b)
+    | #Subtract => Ok(a -. b)
+    | #Multiply => Ok(a *. b)
+    | #Power => power(a, b)
+    | #Divide => divide(a, b)
+    | #Logarithm => logarithm(a, b)
     }
 
   let toString = x =>
@@ -96,12 +133,12 @@ module DistToFloat = {
 // Note that different logarithms don't really do anything.
 module Scale = {
   type t = scaleOperation
-  let toFn = x =>
+  let toFn = (x: t, a: float, b: float): result<float, Error.t> =>
     switch x {
-    | #Multiply => \"*."
-    | #Divide => \"/."
-    | #Power => \"**"
-    | #Logarithm => (a, b) => log(a) /. log(b)
+    | #Multiply => Ok(a *. b)
+    | #Divide => divide(a, b)
+    | #Power => power(a, b)
+    | #Logarithm => logarithm(a, b)
     }
 
   let format = (operation: t, value, scaleBy) =>

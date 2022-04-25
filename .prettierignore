@@ -9,3 +9,4 @@ packages/website/.docusaurus
 packages/squiggle-lang/lib
 packages/squiggle-lang/.nyc_output/
 packages/squiggle-lang/coverage/
+packages/squiggle-lang/.cache/

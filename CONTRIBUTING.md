@@ -16,7 +16,7 @@ Squiggle is currently pre-alpha.
 
 # Bug reports
 
-Anyone (with a github account) can file an issue at any time. Please allow Quinn, Sam, and Ozzie to triage, but otherwise just follow the suggestions in the issue templates. 
+Anyone (with a github account) can file an issue at any time. Please allow Quinn, Sam, and Ozzie to triage, but otherwise just follow the suggestions in the issue templates.
 
 # Project structure
 
@@ -46,11 +46,11 @@ You can't run `yarn` outside of a FHS shell. Additionally, you need to `patchelf
 ./nixos.sh
 ```
 
-Reasons for this are comments in the script. Then, you should be able to do all the package-level `yarn run` commands/scripts. 
+Reasons for this are comments in the script. Then, you should be able to do all the package-level `yarn run` commands/scripts.
 
 # Try not to push directly to develop
 
-If you absolutely must, please prefix your commit message with `hotfix: `. 
+If you absolutely must, please prefix your commit message with `hotfix: `.
 
 # Pull request protocol
 

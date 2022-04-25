@@ -9,6 +9,12 @@ module type dist = {
     ~fn: float => float,
     t,
   ) => t
+  let mapYResult: (
+    ~integralSumCacheFn: float => option<float>=?,
+    ~integralCacheFn: PointSetTypes.continuousShape => option<PointSetTypes.continuousShape>=?,
+    ~fn: float => result<float, 'e>,
+    t,
+  ) => result<t, 'e>
   let xToY: (float, t) => PointSetTypes.mixedPoint
   let toPointSetDist: t => PointSetTypes.pointSetDist
   let toContinuous: t => option<PointSetTypes.continuousShape>
@@ -37,6 +43,7 @@ module Dist = (T: dist) => {
   let integral = T.integral
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
   let mapY = T.mapY
+  let mapYResult = T.mapYResult
   let xToY = T.xToY
   let downsample = T.downsample
   let toPointSetDist = T.toPointSetDist

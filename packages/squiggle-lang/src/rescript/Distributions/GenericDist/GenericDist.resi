@@ -1,5 +1,5 @@
-type t = GenericDist_Types.genericDist
-type error = GenericDist_Types.error
+type t = DistributionTypes.genericDist
+type error = DistributionTypes.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
@@ -28,7 +28,7 @@ let toPointSet: (
   t,
   ~xyPointLength: int,
   ~sampleCount: int,
-  ~xSelection: GenericDist_Types.Operation.pointsetXSelection=?,
+  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=?,
   unit,
 ) => result<PointSetTypes.pointSetDist, error>
 let toSparkline: (t, ~sampleCount: int, ~bucketCount: int=?, unit) => result<string, error>
@@ -45,22 +45,22 @@ let algebraicCombination: (
   t,
   ~toPointSetFn: toPointSetFn,
   ~toSampleSetFn: toSampleSetFn,
-  ~arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
+  ~arithmeticOperation: Operation.algebraicOperation,
   ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombination: (
   t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
+  ~algebraicCombination: Operation.algebraicOperation,
   ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombinationFloat: (
   t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
-  ~float: float,
+  ~algebraicCombination: Operation.algebraicOperation,
+  ~f: float,
 ) => result<t, error>
 
 let mixture: (

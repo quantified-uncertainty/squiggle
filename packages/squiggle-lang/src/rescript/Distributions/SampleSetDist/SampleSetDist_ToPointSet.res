@@ -83,7 +83,7 @@ let toPointSetDist = (
   ~samples: Internals.T.t,
   ~samplingInputs: SamplingInputs.samplingInputs,
   (),
-) => {
+): Internals.Types.outputs => {
   Array.fast_sort(compare, samples)
   let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples)
   let length = samples |> E.A.length |> float_of_int
