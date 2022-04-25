@@ -54,11 +54,13 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
   }
 
   let inspectPerformance = (value: expressionValue, label: string) => {
-    let _ = %raw("{performance} = require('perf_hooks')")
-    let start = %raw(`performance.now()`)
-    let finish = %raw(`performance.now()`)
-    let performance = finish - start
-    Js.log(`${label}: ${value->toString} performance: ${Js.String.make(performance)}ms`)
+    // let _ = %raw("{performance} = require('perf_hooks')")
+    // let start = %raw(`performance.now()`)
+    // let finish = %raw(`performance.now()`)
+    // let performance = finish - start
+    // Js.log(`${label}: ${value->toString} performance: ${Js.String.make(performance)}ms`)
+    // TODO find a way of failing the hook gracefully, also needs a block parameter
+    Js.log(`${label}: ${value->toString}`)
     value->Ok
   }
 
