@@ -131,7 +131,7 @@ export interface SquiggleChartProps {
   /** variables declared before this expression */
   environment?: unknown;
   /** When the environment changes */
-  onEnvChange?(env: unknown): void;
+  onChange?(expr: squiggleExpression): void;
   /** CSS width of the element */
   width?: number;
   height?: number;
@@ -141,8 +141,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   sampleCount = 1000,
   outputXYPoints = 1000,
-  environment = [],
-  onEnvChange = () => {},
+  onChange = () => {},
   height = 60,
   width = NaN,
 }: SquiggleChartProps) => {
@@ -158,8 +157,8 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   let expressionResult = run(squiggleString, samplingInputs);
   let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
-    onEnvChange(environment);
     let expression = expressionResult.value;
+    onChange(expression);
     internal = (
       <SquiggleItem expression={expression} width={_width} height={height} />
     );
