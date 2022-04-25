@@ -12,6 +12,5 @@ open Reducer_TestHelpers
 describe("Debugging", () => {
   testEvalToBe("inspect(1)", "Ok(1)")
   testEvalToBe("inspect(1, \"one\")", "Ok(1)")
-  testEvalToBe("inspect(1, \"one\")", "Ok(1)")
   testEvalToBe("inspectPerformance(1, \"one\")", "Ok(1)")
 })
