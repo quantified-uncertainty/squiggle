@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-lang",
-  "version": "0.2.2",
+  "version": "0.2.5",
   "homepage": "https://squiggle-language.com",
   "scripts": {
     "build": "rescript build -with-deps",
