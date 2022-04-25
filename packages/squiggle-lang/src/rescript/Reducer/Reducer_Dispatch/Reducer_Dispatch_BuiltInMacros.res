@@ -44,6 +44,16 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
         }
       }
 
+  let answerCallBindingIfNotParameter = (aSymbol, defaultExpression, parameters, bindings) =>       
+    switch Js.Array2.some(parameters, a => a == aSymbol) {
+      | true => defaultExpression->Ok // We cannot bind the parameters with global values
+      | false =>
+        switch bindings->Belt.Map.String.get(aSymbol) {
+        | Some(boundExpression) => boundExpression->Ok
+        | None => defaultExpression->Ok
+        }
+      }
+
   switch expression {
   | ExpressionT.EValue(EvSymbol(aSymbol)) => {
       let parameters = getParameters(bindings)
@@ -51,7 +61,7 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
     }
   | ExpressionT.EValue(EvCall(aSymbol)) => {
       let parameters = getParameters(bindings)
-      answerBindingIfNotParameter(aSymbol, expression, parameters, bindings)
+      answerCallBindingIfNotParameter(aSymbol, expression, parameters, bindings)
     }
   | ExpressionT.EValue(_) => expression->Ok
   | ExpressionT.EBindings(_) => expression->Ok
