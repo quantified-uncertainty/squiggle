@@ -54,6 +54,7 @@ describe("eval on distribution functions", () => {
   describe("subtract", () => {
     testEval("10 - normal(5, 1)", "Ok(Normal(5,1))")
     testEval("normal(5, 1) - 10", "Ok(Normal(-5,1))")
+    testEval("mean(1 - toPointSet(normal(5, 2)))", "Ok(-4.002309896304692)")
   })
   describe("multiply", () => {
     testEval("normal(10, 2) * 2", "Ok(Normal(20,4))")
