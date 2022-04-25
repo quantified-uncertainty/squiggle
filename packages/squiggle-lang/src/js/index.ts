@@ -10,6 +10,7 @@ import {
   continuousShape,
   discreteShape,
   distributionErrorToString,
+  internalCode,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
@@ -80,10 +81,6 @@ type tagged<a, b> = { tag: a; value: b };
 function tag<a, b>(x: a, y: b): tagged<a, b> {
   return { tag: x, value: y };
 }
-
-export abstract class internalCode {
-  protected opaque!: any;
-} /* simulate opaque types */
 
 export type squiggleExpression =
   | tagged<"symbol", string>
