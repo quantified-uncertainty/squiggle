@@ -41,7 +41,6 @@
     "@storybook/react": "^6.4.22",
     "@types/styled-components": "^5.1.24",
     "@types/webpack": "^5.28.0",
-    "react-codejar": "^1.1.2",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.8",
     "webpack": "^5.72.0",
