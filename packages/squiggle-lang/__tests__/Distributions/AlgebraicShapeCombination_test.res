@@ -4,7 +4,7 @@ open TestHelpers
 describe("combine with discrete", () => {
   makeTest(
     "keep order when multiplying by negative number",
-    AlgebraicShapeCombination.checkOrdered(
+    AlgebraicShapeCombination.isOrdered(
       AlgebraicShapeCombination.combineShapesContinuousDiscrete(
         #Multiply,
         {xs: [0., 1.], ys: [1., 1.]},

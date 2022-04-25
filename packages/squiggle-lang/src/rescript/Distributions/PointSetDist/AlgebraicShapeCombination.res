@@ -255,4 +255,4 @@ let combineShapesContinuousDiscrete = (
   )
 }
 
-let checkOrdered = (a: XYShape.T.t): bool => a.xs[0] < a.xs[1]
+let isOrdered = (a: XYShape.T.t): bool => E.A.Sorted.Floats.isSorted(a.xs)
