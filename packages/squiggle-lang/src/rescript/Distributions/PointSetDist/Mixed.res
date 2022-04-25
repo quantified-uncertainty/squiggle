@@ -281,13 +281,13 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
     op,
     t2.continuous,
     t1.discrete,
-    true,
+    ~discretePosition=First,
   )
   let cdConvResult = Continuous.combineAlgebraicallyWithDiscrete(
     op,
     t1.continuous,
     t2.discrete,
-    false,
+    ~discretePosition=Second,
   )
   let continuousConvResult = Continuous.sum([ccConvResult, dcConvResult, cdConvResult])
 

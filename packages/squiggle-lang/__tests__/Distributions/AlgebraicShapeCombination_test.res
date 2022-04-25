@@ -9,7 +9,7 @@ describe("Combining Continuous and Discrete Distributions", () => {
         #Multiply,
         {xs: [0., 1.], ys: [1., 1.]},
         {xs: [-1.], ys: [1.]},
-        false
+        ~discretePosition=Second,
       ),
     ), // Multiply distribution by -1
     true,
