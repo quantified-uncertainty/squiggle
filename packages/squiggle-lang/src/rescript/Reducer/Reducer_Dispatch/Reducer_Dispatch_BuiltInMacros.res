@@ -34,25 +34,25 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
   ): ExpressionT.bindings =>
     Belt.Map.String.set(bindings, "$parameters", ExpressionT.EParameters(parameters))
 
-  let answerBindingIfNotParameter = (aSymbol, defaultExpression, parameters, bindings) =>       
+  let answerBindingIfNotParameter = (aSymbol, defaultExpression, parameters, bindings) =>
     switch Js.Array2.some(parameters, a => a == aSymbol) {
-      | true => defaultExpression->Ok // We cannot bind the parameters with global values
-      | false =>
-        switch bindings->Belt.Map.String.get(aSymbol) {
-        | Some(boundExpression) => boundExpression->Ok
-        | None => RESymbolNotFound(aSymbol)->Error
-        }
+    | true => defaultExpression->Ok // We cannot bind the parameters with global values
+    | false =>
+      switch bindings->Belt.Map.String.get(aSymbol) {
+      | Some(boundExpression) => boundExpression->Ok
+      | None => RESymbolNotFound(aSymbol)->Error
       }
+    }
 
-  let answerCallBindingIfNotParameter = (aSymbol, defaultExpression, parameters, bindings) =>       
+  let answerCallBindingIfNotParameter = (aSymbol, defaultExpression, parameters, bindings) =>
     switch Js.Array2.some(parameters, a => a == aSymbol) {
-      | true => defaultExpression->Ok // We cannot bind the parameters with global values
-      | false =>
-        switch bindings->Belt.Map.String.get(aSymbol) {
-        | Some(boundExpression) => boundExpression->Ok
-        | None => defaultExpression->Ok
-        }
+    | true => defaultExpression->Ok // We cannot bind the parameters with global values
+    | false =>
+      switch bindings->Belt.Map.String.get(aSymbol) {
+      | Some(boundExpression) => boundExpression->Ok
+      | None => defaultExpression->Ok
       }
+    }
 
   switch expression {
   | ExpressionT.EValue(EvSymbol(aSymbol)) => {

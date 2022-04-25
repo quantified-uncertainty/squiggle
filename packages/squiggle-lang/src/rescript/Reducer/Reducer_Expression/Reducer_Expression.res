@@ -12,7 +12,7 @@ type internalCode = ExpressionValue.internalCode
 type t = expression
 
 external castExpressionToInternalCode: expression => internalCode = "%identity"
-external castInternalCodeToInternalCode: internalCode => expression = "%identity"
+external castInternalCodeToExpression: internalCode => expression = "%identity"
 
 /*
   Shows the expression as text of expression
@@ -64,12 +64,36 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
   let doMacroCall = (list: list<t>, bindings: T.bindings): result<t, 'e> =>
     Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(list, bindings, reduceExpression)
 
+  let applyParametersToLambda = (
+    internal: internalCode,
+    parameters: array<string>,
+    args: list<expressionValue>,
+  ): result<expressionValue, 'e> => {
+    let expr = castInternalCodeToExpression(internal)
+    let parameterList = parameters->Belt.List.fromArray
+    let zippedParameterList = parameterList->Belt.List.zip(args)
+    let bindings = Belt.List.reduce(zippedParameterList, defaultBindings, (a, (p, e)) =>
+      a->Belt.Map.String.set(p, e->EValue)
+    )
+    Js.log(`applyParametersToLambda: ${toString(expr)}`)
+    let inspectBindings =
+      bindings
+      ->Belt.Map.String.mapWithKey((k, v) => `${k}: ${toString(v)}`)
+      ->Belt.Map.String.valuesToArray
+      ->Js.Array2.toString
+    Js.log(`    inspectBindings: ${inspectBindings}`)
+    reduceExpression(expr, bindings)
+  }
+
   /*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
   let reduceValueList = (valueList: list<expressionValue>): result<expressionValue, 'e> =>
     switch valueList {
     | list{EvCall(fName), ...args} => (fName, args->Belt.List.toArray)->BuiltIn.dispatch
+    // "(lambda(x=>internal) param)"
+    | list{EvLambda(parameters, internal), ...args} =>
+      applyParametersToLambda(internal, parameters, args)
     | _ => valueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
     }
 
@@ -97,11 +121,8 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
 
   let rec reduceExpandedExpression = (expression: t): result<expressionValue, 'e> =>
     switch expression {
-    | T.EList(list{
-        T.EValue(EvCall("$lambda")),
-        T.EParameters(parameters),
-        functionDefinition,
-      }) => EvLambda(parameters, functionDefinition->castExpressionToInternalCode)->Ok
+    | T.EList(list{T.EValue(EvCall("$lambda")), T.EParameters(parameters), functionDefinition}) =>
+      EvLambda(parameters, functionDefinition->castExpressionToInternalCode)->Ok
     | T.EValue(value) => value->Ok
     | T.EList(list) => {
         let racc: result<list<expressionValue>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
