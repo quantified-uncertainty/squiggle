@@ -25,7 +25,7 @@ module MyOnly = {
 }
 
 describe("MathJs parse", () => {
-  describe("literals operators paranthesis", () => {
+  describe("literals operators parenthesis", () => {
     testParse("1", "1")
     testParse("'hello'", "'hello'")
     testParse("true", "true")

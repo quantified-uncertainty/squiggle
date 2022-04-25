@@ -7,7 +7,7 @@ open Reducer_TestHelpers
 
     There is a second version of inspect that takes a label, which will print out the label and the value.
 
-    inpsectPerformace(expr, label) will print out the value of expr, the label, and the time it took to evaluate expr.
+    inspectPerformace(expr, label) will print out the value of expr, the label, and the time it took to evaluate expr.
 */
 describe("Debugging", () => {
   testEvalToBe("inspect(1)", "Ok(1)")
