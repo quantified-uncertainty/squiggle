@@ -1,8 +1,8 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.1.8",
-  "dependencies": {
-    "@quri/squiggle-lang": "0.2.2",
+  "version": "0.2.6",
+  "devDependencies": {
+    "@quri/squiggle-lang": "0.2.5",
     "@react-hook/size": "^2.1.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
