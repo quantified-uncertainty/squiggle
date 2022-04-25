@@ -217,7 +217,6 @@ let combineShapesContinuousDiscrete = (
             continuousShape.ys[i] *. discreteShape.ys[j],
           ),
         ) |> ignore
-        ()
       }
       Belt.Array.set(outXYShapes, j, dxyShape) |> ignore
       ()
@@ -227,9 +226,13 @@ let combineShapesContinuousDiscrete = (
       // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
       let dxyShape: array<(float, float)> = Belt.Array.makeUninitializedUnsafe(t1n)
       for i in 0 to t1n - 1 {
+        // If this operation would flip the x axis (such as -1 * normal(5, 2)),
+        // then we want to fill the shape in backwards to ensure all the points
+        // are still in the right order
+        let index = discreteShape.xs[j] > 0.0 ? i : t1n - 1 - i
         Belt.Array.set(
           dxyShape,
-          i,
+          index,
           (
             fn(continuousShape.xs[i], discreteShape.xs[j]),
             continuousShape.ys[i] *. discreteShape.ys[j] /. Js.Math.abs_float(discreteShape.xs[j]),
@@ -253,3 +256,5 @@ let combineShapesContinuousDiscrete = (
     XYShape.T.empty,
   )
 }
+
+let isOrdered = (a: XYShape.T.t): bool => E.A.Sorted.Floats.isSorted(a.xs)
