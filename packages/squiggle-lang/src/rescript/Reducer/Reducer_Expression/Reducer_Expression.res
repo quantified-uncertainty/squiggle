@@ -8,7 +8,11 @@ open Reducer_ErrorValue
 
 type expression = T.expression
 type expressionValue = ExpressionValue.expressionValue
+type internalCode = ExpressionValue.internalCode
 type t = expression
+
+external castExpressionToInternalCode: expression => internalCode = "%identity"
+external castInternalCodeToInternalCode: internalCode => expression = "%identity"
 
 /*
   Shows the expression as text of expression
@@ -16,7 +20,7 @@ type t = expression
 let rec toString = expression =>
   switch expression {
   | T.EBindings(_) => "$$bound"
-  | T.EParameters(params) => `(${Js.Array2.toString(params->Belt.List.toArray)})`
+  | T.EParameters(params) => `(${Js.Array2.toString(params)})`
   | T.EList(aList) =>
     `(${Belt.List.map(aList, aValue => toString(aValue))
       ->Extra.List.interperse(" ")
@@ -93,9 +97,11 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
 
   let rec reduceExpandedExpression = (expression: t): result<expressionValue, 'e> =>
     switch expression {
-    // | T.EList(list{T.EValue(EvCall("$lambda")), T.EParameters(parameters), functionDefinition}) => {
-    //     let lambda = T.ELambda(parameters, functionDefinition)
-    //     lambda->Ok}
+    | T.EList(list{
+        T.EValue(EvCall("$lambda")),
+        T.EParameters(parameters),
+        functionDefinition,
+      }) => EvLambda(parameters, functionDefinition->castExpressionToInternalCode)->Ok
     | T.EValue(value) => value->Ok
     | T.EList(list) => {
         let racc: result<list<expressionValue>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
@@ -113,7 +119,8 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
         racc->Result.flatMap(acc => acc->reduceValueList)
       }
     | EBindings(_bindings) => RETodo("Error: Bindings cannot be reduced to values")->Error
-    | EParameters(_parameters) => RETodo("Error: Lambda Parameters cannot be reduced to values")->Error
+    | EParameters(_parameters) =>
+      RETodo("Error: Lambda Parameters cannot be reduced to values")->Error
     }
 
   let rExpandedExpression: result<t, 'e> = expression->seekMacros(bindings)
@@ -142,7 +149,9 @@ let evalPartialUsingExternalBindings_ = (codeText: string, bindings: T.bindings)
   Therefore all statments are assignments.
 */
 let evalOuterWBindings_ = (codeText: string, bindings: T.bindings) => {
-  parseOuter(codeText)->Result.flatMap(expression => expression->evalUsingExternalBindingsExpression_(bindings))
+  parseOuter(codeText)->Result.flatMap(expression =>
+    expression->evalUsingExternalBindingsExpression_(bindings)
+  )
 }
 
 /*

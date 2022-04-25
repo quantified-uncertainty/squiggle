@@ -56,14 +56,15 @@ and toStringRecord = aRecord => {
 
 let toStringWithType = aValue =>
   switch aValue {
+  | EvArray(_) => `Array::${toString(aValue)}`
   | EvBool(_) => `Bool::${toString(aValue)}`
   | EvCall(_) => `Call::${toString(aValue)}`
+  | EvDistribution(_) => `Distribution::${toString(aValue)}`
+  | EvLambda(_parameters, _internalCode) => `Lambda::${toString(aValue)}`
   | EvNumber(_) => `Number::${toString(aValue)}`
+  | EvRecord(_) => `Record::${toString(aValue)}`
   | EvString(_) => `String::${toString(aValue)}`
   | EvSymbol(_) => `Symbol::${toString(aValue)}`
-  | EvArray(_) => `Array::${toString(aValue)}`
-  | EvRecord(_) => `Record::${toString(aValue)}`
-  | EvDistribution(_) => `Distribution::${toString(aValue)}`
   }
 
 let argsToString = (args: array<expressionValue>): string => {

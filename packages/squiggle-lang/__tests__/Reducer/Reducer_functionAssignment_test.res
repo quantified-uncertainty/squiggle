@@ -7,6 +7,6 @@ describe("Parse function assignment", () => {
   //MathJs does not allow blocks in function definitions
 })
 
-Skip.describe("Evaluate function assignment", () => {
-  testParseToBe("f(x)=x; f(1)", "Ok(1)")
+describe("Evaluate function assignment", () => {
+  testEvalToBe("f(x)=x; f(1)", "Ok(1)")
 })

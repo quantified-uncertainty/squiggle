@@ -104,7 +104,7 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
       let rValueExpression = fromNode(faNode["expr"])
 
       rValueExpression->Result.flatMap(valueExpression => {
-        let lispParams = faNode["params"]->Belt.List.fromArray->ExpressionT.EParameters
+        let lispParams = faNode["params"]->ExpressionT.EParameters
         let rLambda = passToFunction("$lambda", list{lispParams, valueExpression}->Ok)
         rLambda->Result.flatMap(lambda => {
           passToFunction("$let", list{symbol, lambda}->Ok)

@@ -20,28 +20,29 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
   expression,
   errorValue,
 > => {
-  let getParameters = (bindings: ExpressionT.bindings): list<string> => {
-    let eParameters = Belt.Map.String.getWithDefault(bindings, "$parameters", EParameters(list{}))
+  let getParameters = (bindings: ExpressionT.bindings): array<string> => {
+    let eParameters = Belt.Map.String.getWithDefault(bindings, "$parameters", EParameters([]))
     switch eParameters {
     | EParameters(parameters) => parameters
-    | _ => list{}
+    | _ => []
     }
   }
 
   let putParameters = (
     bindings: ExpressionT.bindings,
-    parameters: list<string>,
+    parameters: array<string>,
   ): ExpressionT.bindings =>
     Belt.Map.String.set(bindings, "$parameters", ExpressionT.EParameters(parameters))
+
   switch expression {
   | ExpressionT.EValue(EvSymbol(aSymbol)) => {
       let parameters = getParameters(bindings)
-      switch Belt.List.has(parameters, aSymbol, (a, b) => a == b) {
+      switch Js.Array2.some(parameters, a => a == aSymbol) {
       | true => expression->Ok // We cannot bind the parameters with global values
       | false =>
-    switch bindings->Belt.Map.String.get(aSymbol) {
-    | Some(boundExpression) => boundExpression->Ok
-    | None => RESymbolNotFound(aSymbol)->Error
+        switch bindings->Belt.Map.String.get(aSymbol) {
+        | Some(boundExpression) => boundExpression->Ok
+        | None => RESymbolNotFound(aSymbol)->Error
         }
       }
     }
@@ -54,14 +55,16 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
       expr,
     }) => {
       let oldParameters = getParameters(bindings)
-      let newParameters = oldParameters->Belt.List.concat(parameters)
+      let newParameters = oldParameters->Js.Array2.concat(parameters)
       let newBindings = putParameters(bindings, newParameters)
       let rNewExpr = replaceSymbols(expr, newBindings)
-      rNewExpr -> Result.flatMap(newExpr => ExpressionT.EList(list{
-        ExpressionT.EValue(EvCall("$lambda")),
-        ExpressionT.EParameters(parameters),
-        newExpr
-      })->Ok)
+      rNewExpr->Result.flatMap(newExpr =>
+        ExpressionT.EList(list{
+          ExpressionT.EValue(EvCall("$lambda")),
+          ExpressionT.EParameters(parameters),
+          newExpr,
+        })->Ok
+      )
     }
   | ExpressionT.EList(list) => {
       let racc = list->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
@@ -77,13 +80,12 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
     }
   }
 }
-  
+
 let dispatchMacroCall = (
   list: list<expression>,
   bindings: ExpressionT.bindings,
   reduceExpression: reducerFn,
 ): result<expression, 'e> => {
-
   let doBindStatement = (statement: expression, bindings: ExpressionT.bindings) => {
     switch statement {
     | ExpressionT.EList(list{
