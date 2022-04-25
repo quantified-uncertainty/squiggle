@@ -14,3 +14,6 @@ let passToFunction = (fName: string, lispArgs: list<expression>): expression => 
 
 let toEvSymbolValue = (name: string): expression =>
   name->ExpressionValue.EvSymbol->ExpressionT.EValue
+
+let asBindableExpression = (expr: expression): expression =>
+  passToFunction("$$bindExpression", list{passToFunction("$$bindings", list{}), expr})

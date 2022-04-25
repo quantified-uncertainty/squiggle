@@ -3,6 +3,7 @@
   they take expressions as parameters and return a new expression.
   Macros are used to define language building blocks. They are like Lisp macros.
 */
+module Builder = Reducer_Expression_Builder
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
 module Result = Belt.Result
@@ -164,6 +165,17 @@ let dispatchMacroCall = (
     falseExpression: expression,
     bindings: ExpressionT.bindings,
   ) => {
+    // let rCondition = conditionExpr->Builder.asBindableExpression->reduceExpression(bindings)
+    let xString = switch Belt.Map.String.get(bindings, "x") {
+    | Some(EValue(value)) => value->ExpressionValue.toString
+    | None => "x Not Found"
+    }
+    
+    let bindingsString= Belt.Map.String.toArray(bindings)->Js.Array2.map( keyValue => {
+      let (key, ExpressionT.EValue(value)) = keyValue
+      `${key} = ${value->ExpressionValue.toString}`
+    })->Js.Array2.toString
+    Js.log(`ternary; bindings: {${bindingsString}}`)
     let rCondition = conditionExpr->reduceExpression(bindings)
     rCondition->Result.flatMap(condition =>
       switch condition {
