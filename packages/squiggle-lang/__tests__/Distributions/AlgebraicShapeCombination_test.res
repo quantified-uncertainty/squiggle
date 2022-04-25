@@ -1,9 +1,9 @@
 open Jest
 open TestHelpers
 
-describe("combine with discrete", () => {
+describe("Combining Continuous and Discrete Distributions", () => {
   makeTest(
-    "keep order when multiplying by negative number",
+    "keep order of xs when multiplying by negative number",
     AlgebraicShapeCombination.isOrdered(
       AlgebraicShapeCombination.combineShapesContinuousDiscrete(
         #Multiply,
