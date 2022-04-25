@@ -158,6 +158,21 @@ let dispatchMacroCall = (
     | _ => replaceSymbols(expression, bindings)
     }
 
+  let doTernary = (
+    conditionExpr: expression,
+    trueExpression: expression,
+    falseExpression: expression,
+    bindings: ExpressionT.bindings,
+  ) => {
+    let rCondition = conditionExpr->reduceExpression(bindings)
+    rCondition->Result.flatMap(condition =>
+      switch condition {
+      | EvBool(true) => trueExpression->Ok
+      | EvBool(false) => falseExpression->Ok
+      | _ => RESyntaxError("Boolean value expected for conditional")->Error
+      }
+    )
+  }
   switch list {
   | list{ExpressionT.EValue(EvCall("$$bindings"))} => bindings->ExpressionT.EBindings->Ok
 
@@ -173,6 +188,8 @@ let dispatchMacroCall = (
       expression,
     } =>
     doBindExpression(expression, bindings)
+  | list{ExpressionT.EValue(EvCall("$$ternary")), conditionExpr, trueExpr, falseExpr} =>
+    doTernary(conditionExpr, trueExpr, falseExpr, bindings)
   | _ => list->ExpressionT.EList->Ok
   }
 }
