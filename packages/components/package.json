@@ -1,9 +1,15 @@
 {
   "name": "@quri/squiggle-components",
   "version": "0.2.6",
+  "dependencies": {
+    "antd": "^4.20.0",
+    "react-ace": "10.0.0",
+    "react-dom": "^18.0.0",
+    "styled-components": "^5.3.5",
+    "@react-hook/size": "^2.1.2"
+  },
   "devDependencies": {
     "@quri/squiggle-lang": "0.2.5",
-    "@react-hook/size": "^2.1.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^14.1.1",
@@ -12,15 +18,11 @@
     "@types/node": "^17.0.26",
     "@types/react": "^18.0.3",
     "@types/react-dom": "^18.0.2",
-    "antd": "^4.20.0",
     "cross-env": "^7.0.3",
     "lodash": "^4.17.21",
     "react": "^18.0.0",
-    "react-ace": "10.0.0",
-    "react-dom": "^18.0.0",
     "react-scripts": "5.0.1",
     "react-vega": "^7.5.0",
-    "styled-components": "^5.3.5",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.6.3",
     "vega": "^5.22.1",
