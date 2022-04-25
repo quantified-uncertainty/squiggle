@@ -187,16 +187,20 @@ let toDiscretePointMassesFromDiscrete = (s: PointSetTypes.xyShape): pointMassesW
   {n: n, masses: masses, means: means, variances: variances}
 }
 
+type argumentPosition = First | Second
+
 let combineShapesContinuousDiscrete = (
   op: Operation.convolutionOperation,
   continuousShape: PointSetTypes.xyShape,
   discreteShape: PointSetTypes.xyShape,
+  ~discretePosition: argumentPosition,
 ): PointSetTypes.xyShape => {
   let t1n = continuousShape |> XYShape.T.length
   let t2n = discreteShape |> XYShape.T.length
 
   // each x pair is added/subtracted
-  let fn = Operation.Convolution.toFn(op)
+  let opFunc = Operation.Convolution.toFn(op)
+  let fn = discretePosition == First ? (a, b) => opFunc(b, a) : opFunc
 
   let outXYShapes: array<array<(float, float)>> = Belt.Array.makeUninitializedUnsafe(t2n)
 
@@ -207,9 +211,13 @@ let combineShapesContinuousDiscrete = (
       // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
       let dxyShape: array<(float, float)> = Belt.Array.makeUninitializedUnsafe(t1n)
       for i in 0 to t1n - 1 {
+        // When this operation is flipped (like 1 - normal(5, 2)) then the
+        // x axis coordinates would all come out the wrong order. So we need
+        // to fill them out in the opposite direction
+        let index = discretePosition == First ? t1n - 1 - i : i
         Belt.Array.set(
           dxyShape,
-          i,
+          index,
           (
             fn(continuousShape.xs[i], discreteShape.xs[j]),
             continuousShape.ys[i] *. discreteShape.ys[j],

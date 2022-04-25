@@ -278,6 +278,7 @@ let combineAlgebraicallyWithDiscrete = (
   op: Operation.convolutionOperation,
   t1: t,
   t2: PointSetTypes.discreteShape,
+  ~discretePosition: AlgebraicShapeCombination.argumentPosition,
 ) => {
   let t1s = t1 |> getShape
   let t2s = t2.xyShape // TODO would like to use Discrete.getShape here, but current file structure doesn't allow for that
@@ -294,6 +295,7 @@ let combineAlgebraicallyWithDiscrete = (
       op,
       continuousAsLinear |> getShape,
       t2s,
+      ~discretePosition,
     )
 
     let combinedIntegralSum = switch op {
