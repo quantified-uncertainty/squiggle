@@ -75,7 +75,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings): result<express
     let parameterList = parameters->Belt.List.fromArray
     let zippedParameterList = parameterList->Belt.List.zip(args)
     let bindings = Belt.List.reduce(zippedParameterList, defaultBindings, (a, (p, e)) =>
-      a->Belt.Map.String.set(p, e->EValue)
+      a->Belt.Map.String.set(p, e->T.EValue)
     )
     let newExpression = Builder.passToFunction(
       "$$bindExpression",
