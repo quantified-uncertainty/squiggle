@@ -4,6 +4,7 @@
     "jsx": "react",
     "allowJs": true,
     "noImplicitAny": true,
+    "esModuleInterop": true,
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
