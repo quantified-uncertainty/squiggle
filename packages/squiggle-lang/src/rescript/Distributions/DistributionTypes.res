@@ -4,7 +4,7 @@ type genericDist =
   | SampleSet(SampleSetDist.t)
   | Symbolic(SymbolicDistTypes.symbolicDist)
 
-type asAlgebraicCombinationStrategy = AsDefault | AsSymbolic | AsMontecarlo | AsConvolution
+type asAlgebraicCombinationStrategy = AsDefault | AsSymbolic | AsMonteCarlo | AsConvolution
 
 @genType
 type error =
@@ -38,7 +38,7 @@ module Error = {
     | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
-    | RequestedStrategyInvalidError => `Requested mode invalid`
+    | RequestedStrategyInvalidError => `Requested strategy invalid`
     | OtherError(s) => s
     }
 
