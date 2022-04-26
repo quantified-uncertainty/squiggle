@@ -26,7 +26,11 @@ export function expectEqual(expression1: string, expression2: string) {
     console.log(`${expression1} === ${expression2}`);
     console.log(`${result1.value} === ${result2.value}`);
     console.log(`loss = ${loss}`);
-    console.log(`logloss = ${Math.log(loss)}`);
+    console.log(`logloss = ${Math.abs(Math.log(result1.value) - Math.log(result2.value))}`);
+    console.log()
+  }
+  else {
+    throw Error(`Expected both to be number, but got ${result1.tag} and ${result2.tag}`)
   }
 }
 
