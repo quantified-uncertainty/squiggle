@@ -271,7 +271,7 @@ module T = Dist({
 
 let isNormalized = (t: t): bool => {
   let areaUnderIntegral = t |> updateIntegralCache(Some(T.integral(t))) |> T.integralEndY
-  areaUnderIntegral -. 1. < 1e-7
+  areaUnderIntegral < 1. +. 1e-7 && areaUnderIntegral > 1. -. 1e-7
 }
 
 let downsampleEquallyOverX = (length, t): t =>
