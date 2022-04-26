@@ -4,6 +4,7 @@ type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
+type asMode = AsSymbolic | AsMontecarlo | AsConvolution
 
 let sampleN: (t, int) => array<float>
 
@@ -42,6 +43,7 @@ let truncate: (
 ) => result<t, error>
 
 let algebraicCombination: (
+  ~mode: asMode=?,
   t,
   ~toPointSetFn: toPointSetFn,
   ~toSampleSetFn: toSampleSetFn,

@@ -14,6 +14,7 @@ type error =
   | OperationError(Operation.Error.t)
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
   | SparklineError(PointSetTypes.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
+  | RequestedModeInvalidError
   | OtherError(string)
 
 @genType
@@ -33,6 +34,7 @@ module Error = {
     | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
+    | RequestedModeInvalidError => `Requested mode invalid`
     | OtherError(s) => s
     }
 

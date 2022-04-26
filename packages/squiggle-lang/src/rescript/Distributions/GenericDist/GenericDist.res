@@ -5,6 +5,7 @@ type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
+type asMode = AsSymbolic | AsMontecarlo | AsConvolution
 
 let sampleN = (t: t, n) =>
   switch t {
@@ -215,7 +216,7 @@ module AlgebraicCombination = {
         : Convolution(convOp)
     }
 
-  let run = (
+  let run' = (
     t1: t,
     ~toPointSetFn: toPointSetFn,
     ~toSampleSetFn: toSampleSetFn,
@@ -231,6 +232,21 @@ module AlgebraicCombination = {
       | Convolution(convOp) =>
         runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(r))
       }
+    }
+  }
+
+  let run = (
+    ~mode: option<asMode>=?,
+    t1: t,
+    ~toPointSetFn: toPointSetFn,
+    ~toSampleSetFn: toSampleSetFn,
+    ~arithmeticOperation,
+    ~t2: t,
+  ): result<t, error> => {
+    let algebraicResult = run'(t1, ~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
+    switch mode {
+    | Some(_) => algebraicResult
+    | None => Error(RequestedModeInvalidError)
     }
   }
 }
