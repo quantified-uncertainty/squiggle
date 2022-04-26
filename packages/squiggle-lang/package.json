@@ -43,7 +43,7 @@
     "@types/jest": "^27.4.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "codecov": "3.8.3",
-    "fast-check": "2.24.0",
+    "fast-check": "2.25.0",
     "gentype": "^4.3.0",
     "jest": "^27.5.1",
     "moduleserve": "0.9.1",
