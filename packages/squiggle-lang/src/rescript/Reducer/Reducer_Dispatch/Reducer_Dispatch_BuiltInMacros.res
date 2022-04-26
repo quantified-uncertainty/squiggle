@@ -90,7 +90,7 @@ let dispatchMacroCall = (
       Js.Dict.set(acc, key, value)
       acc
     })
-    externalBindings->EvRecord->ExpressionT.EValue->Ok
+    externalBindings->ExpressionValue.EvRecord->ExpressionT.EValue->Ok
   }
 
   let doBindExpression = (expression: expression, bindings: ExpressionT.bindings) =>
