@@ -1,4 +1,4 @@
-import { distributions, generateFloat, generateFloatRange } from "./generators";
+import { distributions, generateInt, generateFloatRange } from "./generators";
 import { test, expectEqual } from "./lib";
 
 let checkDistributionSame = (
@@ -21,7 +21,7 @@ Object.entries(distributions).map(([key, generator]) => {
     checkDistributionSame(distribution, (d: string) => `mean(${d})`));
 
   test(`cdf is the same for ${key} distribution under all distribution types`, () => {
-    let cdf_value = generateFloat();
+    let cdf_value = generateInt();
     checkDistributionSame(
       distribution,
       (d: string) => `cdf(${d}, ${cdf_value})`
@@ -29,7 +29,7 @@ Object.entries(distributions).map(([key, generator]) => {
   });
 
   test(`pdf is the same for ${key} distribution under all distribution types`, () => {
-    let pdf_value = generateFloat();
+    let pdf_value = generateInt();
     checkDistributionSame(
       distribution,
       (d: string) => `pdf(${d}, ${pdf_value})`

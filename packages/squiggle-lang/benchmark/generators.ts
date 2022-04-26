@@ -1,38 +1,39 @@
 export let generateFloatRange = (min: number, max: number): number =>
-  Math.floor(Math.random() * (max - min) + min);
+  Math.random() * (max - min) + min;
+export let generateIntRange = (min: number, max: number): number =>
+  Math.floor(generateFloatRange(min, max));
 
-export let generateFloatMin = (min: number): number =>
-  generateFloatRange(min, 100);
+export let generateIntMin = (min: number): number => generateIntRange(min, 100);
 
-export let generateFloat = (): number => generateFloatMin(-100);
+export let generateInt = (): number => generateIntMin(-100);
 
-let generatePositive = (): number => generateFloatMin(1);
+let generatePositiveInt = (): number => generateIntMin(1);
 
 export let generateNormal = (): string =>
-  `normal(${generateFloat()}, ${generatePositive()})`;
+  `normal(${generateInt()}, ${generatePositiveInt()})`;
 
 export let generateBeta = (): string =>
-  `beta(${generatePositive()}, ${generatePositive()})`;
+  `beta(${generatePositiveInt()}, ${generatePositiveInt()})`;
 
 export let generateLognormal = (): string =>
-  `lognormal(${generateFloat()}, ${generatePositive()})`;
+  `lognormal(${generateInt()}, ${generatePositiveInt()})`;
 
 export let generateExponential = (): string =>
-  `exponential(${generatePositive()})`;
+  `exponential(${generatePositiveInt()})`;
 
 export let generateUniform = (): string => {
-  let a = generateFloat();
-  let b = generateFloatMin(a + 1);
+  let a = generateInt();
+  let b = generateIntMin(a + 1);
   return `uniform(${a}, ${b})`;
 };
 export let generateCauchy = (): string => {
-  return `cauchy(${generateFloat()}, ${generatePositive()})`;
+  return `cauchy(${generateInt()}, ${generatePositiveInt()})`;
 };
 
 export let generateTriangular = (): string => {
-  let a = generateFloat();
-  let b = generateFloatMin(a + 1);
-  let c = generateFloatMin(b + 1);
+  let a = generateInt();
+  let b = generateIntMin(a + 1);
+  let c = generateIntMin(b + 1);
   return `triangular(${a}, ${b}, ${c})`;
 };
 
