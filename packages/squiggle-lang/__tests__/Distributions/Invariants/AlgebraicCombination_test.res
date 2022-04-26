@@ -65,8 +65,7 @@ describe("(Algebraic) addition of distributions", () => {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      // Answer found from WolframAlpha: ``mean(uniform(9,10)) + mean(betaDistribution(2,5))``
-      | Some(x) => x->expect->toBeSoCloseTo(9.786, ~digits=1) // (uniformMean +. betaMean)
+      | Some(x) => x->expect->toBeSoCloseTo(9.786831807237022, ~digits=1) // (uniformMean +. betaMean)
       }
     })
     test("beta(alpha=2, beta=5) + uniform(low=9, high=10)", () => {
@@ -83,7 +82,7 @@ describe("(Algebraic) addition of distributions", () => {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(9.786, ~digits=1) // (uniformMean +. betaMean)
+      | Some(x) => x->expect->toBeSoCloseTo(9.784290207736126, ~digits=1) // (uniformMean +. betaMean)
       }
     })
   })
@@ -164,7 +163,7 @@ describe("(Algebraic) addition of distributions", () => {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=4.
-      | Some(x) => x->expect->toBeSoCloseTo(1.025, ~digits=1)
+      | Some(x) => x->expect->toBeSoCloseTo(0.9677, ~digits=1)
       }
     })
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).pdf(10)", () => {
@@ -347,7 +346,7 @@ describe("(Algebraic) addition of distributions", () => {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(9.174960348568693, ~digits=0)
+      | Some(x) => x->expect->toBeSoCloseTo(9.18416389919939, ~digits=0)
       }
     })
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).inv(2e-2)", () => {
@@ -362,7 +361,7 @@ describe("(Algebraic) addition of distributions", () => {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(9.168291999681523, ~digits=0)
+      | Some(x) => x->expect->toBeSoCloseTo(9.190872365862756, ~digits=0)
       }
     })
   })

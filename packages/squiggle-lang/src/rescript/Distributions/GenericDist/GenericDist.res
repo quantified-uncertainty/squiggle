@@ -46,18 +46,25 @@ let toFloatOperation = (
   ~toPointSetFn: toPointSetFn,
   ~distToFloatOperation: Operation.distToFloatOperation,
 ) => {
-  let symbolicSolution = switch (t: t) {
-  | Symbolic(r) =>
-    switch SymbolicDist.T.operate(distToFloatOperation, r) {
-    | Ok(f) => Some(f)
-    | _ => None
-    }
+  let trySymbolicSolution = switch (t: t) {
+  | Symbolic(r) => SymbolicDist.T.operate(distToFloatOperation, r)->E.R.toOption
   | _ => None
   }
 
-  switch symbolicSolution {
+  let trySampleSetSolution = switch ((t: t), distToFloatOperation) {
+  | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
+  | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
+  | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
+  | _ => None
+  }
+
+  switch trySymbolicSolution {
   | Some(r) => Ok(r)
-  | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(distToFloatOperation))
+  | None =>
+    switch trySampleSetSolution {
+    | Some(r) => Ok(r)
+    | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(distToFloatOperation))
+    }
   }
 }
 
