@@ -14,7 +14,7 @@ let testRun = (x: string): squiggleExpression => {
 };
 
 export function test(name: string, fn: () => void) {
-  console.log(name);
+  console.log(chalk.cyan.bold(name));
   fn();
 }
 
