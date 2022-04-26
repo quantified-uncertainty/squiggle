@@ -14,9 +14,7 @@ describe("Converting from a sample set distribution", () => {
       integralSumCache: None,
       integralCache: None,
     }
-    let fullShape = Continuous.updateIntegralCache(Some(Continuous.T.integral(c)), c)
-    let endY = Continuous.T.integralEndY(fullShape)
 
-    expect(endY)->toBeCloseTo(1.)
+    expect(Continuous.isNormalized(c))->toBe(true)
   })
 })
