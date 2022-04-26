@@ -23,7 +23,10 @@ export function expectEqual(expression1: string, expression2: string) {
   let result2 = testRun(expression2);
   if (result1.tag === "number" && result2.tag === "number") {
     let loss = getLoss(result1.value, result2.value);
-    console.log(`${result1.value} === ${result2.value}\nLoss: ${loss}`);
+    console.log(`${expression1} === ${expression2}`);
+    console.log(`${result1.value} === ${result2.value}`);
+    console.log(`loss = ${loss}`);
+    console.log(`logloss = ${Math.log(loss)}`);
   }
 }
 

@@ -8,6 +8,7 @@
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
     "test:reducer": "jest __tests__/Reducer*/",
+    "benchmark": "ts-node benchmark/conversion_tests.ts",
     "test": "jest",
     "test:ts": "jest __tests__/TS/",
     "test:rescript": "jest --modulePathIgnorePatterns=__tests__/TS/*",
