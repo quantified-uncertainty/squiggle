@@ -1,6 +1,7 @@
 {
   "name": "@quri/squiggle-components",
   "version": "0.2.9",
+  "licence": "MIT",
   "dependencies": {
     "antd": "^4.20.1",
     "react-ace": "10.1.0",
