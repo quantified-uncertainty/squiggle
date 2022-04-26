@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-lang",
-  "version": "0.2.2",
+  "version": "0.2.5",
   "homepage": "https://squiggle-language.com",
   "scripts": {
     "build": "rescript build -with-deps",
@@ -29,16 +29,14 @@
   ],
   "author": "Quantified Uncertainty Research Institute",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "bisect_ppx": "^2.7.1",
     "jstat": "^1.9.5",
     "lodash": "4.17.21",
     "mathjs": "10.5.0",
     "pdfast": "^0.2.0",
     "rationale": "0.2.0",
-    "rescript": "^9.1.4"
-  },
-  "devDependencies": {
+    "rescript": "^9.1.4",
     "@glennsl/rescript-jest": "^0.9.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@types/jest": "^27.4.0",

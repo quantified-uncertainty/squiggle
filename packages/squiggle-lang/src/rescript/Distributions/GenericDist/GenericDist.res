@@ -193,6 +193,49 @@ module AlgebraicCombination = {
     ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
   }
 
+  /*
+     It would be good to also do a check to make sure that probability mass for the second
+     operand, at value 1.0, is 0 (or approximately 0). However, we'd ideally want to check 
+     that both the probability mass and the probability density are greater than zero.
+     Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
+ */
+  let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
+    let firstOperandIsGreaterThanZero =
+      toFloatOperation(t1, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
+        r > 0.
+      )
+    let secondOperandIsGreaterThanZero =
+      toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
+        r > 0.
+      )
+    let items = E.A.R.firstErrorOrOpen([
+      firstOperandIsGreaterThanZero,
+      secondOperandIsGreaterThanZero,
+    ])
+    switch items {
+    | Error(r) => Some(r)
+    | Ok([true, _]) =>
+      Some(LogarithmOfDistributionError("First input must completely greater than 0"))
+    | Ok([false, true]) =>
+      Some(LogarithmOfDistributionError("Second input must completely greater than 0"))
+    | Ok([false, false]) => None
+    | Ok(_) => Some(Unreachable)
+    }
+  }
+
+  let getInvalidOperationError = (
+    t1: t,
+    t2: t,
+    ~toPointSetFn: toPointSetFn,
+    ~arithmeticOperation,
+  ): option<error> => {
+    if arithmeticOperation == #Logarithm {
+      getLogarithmInputError(t1, t2, ~toPointSetFn)
+    } else {
+      None
+    }
+  }
+
   //I'm (Ozzie) really just guessing here, very little idea what's best
   let expectedConvolutionCost: t => int = x =>
     switch x {
@@ -233,10 +276,16 @@ module AlgebraicCombination = {
     | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
     | Some(Error(e)) => Error(OperationError(e))
     | None =>
-      switch chooseConvolutionOrMonteCarlo(arithmeticOperation, t1, t2) {
-      | MonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-      | Convolution(convOp) =>
-        runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(r))
+      switch getInvalidOperationError(t1, t2, ~toPointSetFn, ~arithmeticOperation) {
+      | Some(e) => Error(e)
+      | None =>
+        switch chooseConvolutionOrMonteCarlo(arithmeticOperation, t1, t2) {
+        | MonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+        | Convolution(convOp) =>
+          runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(
+            r,
+          ))
+        }
       }
     }
   }

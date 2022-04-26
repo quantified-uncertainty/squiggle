@@ -363,6 +363,9 @@ module A = {
       |> Rationale.Result.return
     }
 
+  let tail = Belt.Array.sliceToEnd(_, 1)
+
+  let zip = Belt.Array.zip
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {
     let maxLength = Int.max(length(array1), length(array2))
@@ -506,6 +509,9 @@ module A = {
     }
 
     module Floats = {
+      let isSorted = (ar: array<float>): bool =>
+        reduce(zip(ar, tail(ar)), true, (acc, (first, second)) => acc && first < second)
+
       let makeIncrementalUp = (a, b) =>
         Array.make(b - a + 1, a) |> Array.mapi((i, c) => c + i) |> Belt.Array.map(_, float_of_int)
 
