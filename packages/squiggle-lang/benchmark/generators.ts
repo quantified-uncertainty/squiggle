@@ -1,8 +1,12 @@
-export let generateFloat = (): number => Math.random() * 200 - 100;
-export let generateFloatMin = (min:number): number => Math.random() * (100 - min) + min;
-export let generateFloatRange = (min:number, max: number): number => Math.random() * (max - min) + min;
+export let generateFloatRange = (min: number, max: number): number =>
+  Math.floor(Math.random() * (max - min) + min);
 
-let generatePositive = (): number => Math.random() * 100;
+export let generateFloatMin = (min: number): number =>
+  generateFloatRange(min, 100);
+
+export let generateFloat = (): number => generateFloatMin(-100);
+
+let generatePositive = (): number => generateFloatMin(1);
 
 export let generateNormal = (): string =>
   `normal(${generateFloat()}, ${generatePositive()})`;
@@ -17,28 +21,27 @@ export let generateExponential = (): string =>
   `exponential(${generatePositive()})`;
 
 export let generateUniform = (): string => {
-  let a = generateFloat()
-  let b = generateFloatMin(a)
-  return `uniform(${a}, ${b})`
-}
+  let a = generateFloat();
+  let b = generateFloatMin(a + 1);
+  return `uniform(${a}, ${b})`;
+};
 export let generateCauchy = (): string => {
-  return `cauchy(${generateFloat()}, ${generatePositive()})`
-}
+  return `cauchy(${generateFloat()}, ${generatePositive()})`;
+};
 
 export let generateTriangular = (): string => {
-  let a = generateFloat()
-  let b = generateFloatMin(a)
-  let c = generateFloatMin(b)
-  return `triangular(${a}, ${b}, ${c})`
-}
+  let a = generateFloat();
+  let b = generateFloatMin(a + 1);
+  let c = generateFloatMin(b + 1);
+  return `triangular(${a}, ${b}, ${c})`;
+};
 
-export let distributions : {[key: string]: () => string} = { 
-  normal: generateNormal, 
-  beta: generateBeta, 
-  lognormal: generateLognormal, 
-  exponential: generateExponential, 
-  triangular: generateTriangular ,
+export let distributions: { [key: string]: () => string } = {
+  normal: generateNormal,
+  beta: generateBeta,
+  lognormal: generateLognormal,
+  exponential: generateExponential,
+  triangular: generateTriangular,
   cauchy: generateCauchy,
-  uniform: generateUniform
-}
-
+  uniform: generateUniform,
+};
