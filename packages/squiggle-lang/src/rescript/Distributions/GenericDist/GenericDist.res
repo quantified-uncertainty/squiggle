@@ -303,25 +303,6 @@ module AlgebraicCombination = {
       }
     }
   }
-
-  //  let run = (
-  //    ~mode: option<asMode>=?,
-  //    t1: t,
-  //    ~toPointSetFn: toPointSetFn,
-  //    ~toSampleSetFn: toSampleSetFn,
-  //    ~arithmeticOperation,
-  //    ~t2: t,
-  //  ): result<t, error> => {
-  //    let algebraicResult = run'(t1, ~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
-  //    switch (mode, algebraicResult) {
-  //    | (None, _)
-  //    | (Some(AsSymbolic), Ok(Symbolic(_)))
-  //    | (Some(AsMontecarlo), Ok(DistributionTypes.SampleSet(_)))
-  //    | (Some(AsConvolution), Ok(DistributionTypes.PointSet(_)))
-  //    | (Some(_), Error(_)) => algebraicResult
-  //    | (Some(_), Ok(_)) => Error(RequestedModeInvalidError)
-  //    }
-  //  }
 }
 
 let algebraicCombination = AlgebraicCombination.run
