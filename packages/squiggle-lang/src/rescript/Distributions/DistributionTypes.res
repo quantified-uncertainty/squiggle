@@ -15,6 +15,7 @@ type error =
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
   | SparklineError(PointSetTypes.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
   | RequestedModeInvalidError
+  | LogarithmOfDistributionError(string)
   | OtherError(string)
 
 @genType
@@ -30,6 +31,7 @@ module Error = {
     | Unreachable => "Unreachable"
     | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift is Invalid"
     | ArgumentError(s) => `Argument Error ${s}`
+    | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
     | TooFewSamples => "Too Few Samples"
     | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
