@@ -208,7 +208,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist)
   | ("exp", [EvDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
-    Helpers.twoDiststoDistFn(Algebraic, "pow", GenericDist.fromFloat(Math.e), a)->Some
+    Helpers.twoDiststoDistFn(Algebraic(AsDefault), "pow", GenericDist.fromFloat(Math.e), a)->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
@@ -228,14 +228,14 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist)
   | ("mx" | "mixture", args) => Helpers.mixture(args)->Some
   | ("log", [EvDistribution(a)]) =>
-    Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(Math.e))->Some
+    Helpers.twoDiststoDistFn(Algebraic(AsDefault), "log", a, GenericDist.fromFloat(Math.e))->Some
   | ("log10", [EvDistribution(a)]) =>
-    Helpers.twoDiststoDistFn(Algebraic, "log", a, GenericDist.fromFloat(10.0))->Some
+    Helpers.twoDiststoDistFn(Algebraic(AsDefault), "log", a, GenericDist.fromFloat(10.0))->Some
   | ("unaryMinus", [EvDistribution(a)]) =>
-    Helpers.twoDiststoDistFn(Algebraic, "multiply", a, GenericDist.fromFloat(-1.0))->Some
+    Helpers.twoDiststoDistFn(Algebraic(AsDefault), "multiply", a, GenericDist.fromFloat(-1.0))->Some
   | (("add" | "multiply" | "subtract" | "divide" | "pow" | "log") as arithmetic, [_, _] as args) =>
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
-      Helpers.twoDiststoDistFn(Algebraic, arithmetic, fst, snd)
+      Helpers.twoDiststoDistFn(Algebraic(AsDefault), arithmetic, fst, snd)
     )
   | (
       ("dotAdd"

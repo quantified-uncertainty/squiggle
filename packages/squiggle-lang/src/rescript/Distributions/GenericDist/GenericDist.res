@@ -5,7 +5,6 @@ type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
-type asMode = AsSymbolic | AsMontecarlo | AsConvolution
 
 let sampleN = (t: t, n) =>
   switch t {
@@ -243,7 +242,7 @@ module AlgebraicCombination = {
 
   type calculationMethod = MonteCarlo | Convolution(Operation.convolutionOperation)
 
-  let chooseConvolutionOrMonteCarlo = (
+  let chooseConvolutionOrMonteCarloDefault = (
     op: Operation.algebraicOperation,
     t2: t,
     t1: t,
@@ -259,7 +258,26 @@ module AlgebraicCombination = {
         : Convolution(convOp)
     }
 
-  let run' = (
+  let chooseConvolutionOrMonteCarlo = (
+    ~strat: DistributionTypes.asAlgebraicCombinationStrategy,
+    op: Operation.algebraicOperation,
+    t2: t,
+    t1: t,
+  ): result<calculationMethod, error> => {
+    switch strat {
+    | AsDefault => Ok(chooseConvolutionOrMonteCarloDefault(op, t2, t1))
+    | AsConvolution =>
+      switch op {
+      | #Divide | #Power | #Logarithm => Error(RequestedStrategyInvalidError)
+      | (#Add | #Subtract | #Multiply) as convOp => Ok(Convolution(convOp))
+      }
+    | AsMontecarlo => Ok(MonteCarlo)
+    | AsSymbolic => Error(RequestedStrategyInvalidError)
+    }
+  }
+
+  let run = (
+    ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
     t1: t,
     ~toPointSetFn: toPointSetFn,
     ~toSampleSetFn: toSampleSetFn,
@@ -273,35 +291,37 @@ module AlgebraicCombination = {
       switch getInvalidOperationError(t1, t2, ~toPointSetFn, ~arithmeticOperation) {
       | Some(e) => Error(e)
       | None =>
-        switch chooseConvolutionOrMonteCarlo(arithmeticOperation, t1, t2) {
-        | MonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-        | Convolution(convOp) =>
+        switch chooseConvolutionOrMonteCarlo(~strat=strategy, arithmeticOperation, t1, t2) {
+        | Ok(MonteCarlo) => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+        | Ok(Convolution(convOp)) =>
           runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(
             r,
           ))
+        | Error(RequestedStrategyInvalidError) => Error(RequestedStrategyInvalidError)
+        | Error(err) => Error(err)
         }
       }
     }
   }
 
-  let run = (
-    ~mode: option<asMode>=?,
-    t1: t,
-    ~toPointSetFn: toPointSetFn,
-    ~toSampleSetFn: toSampleSetFn,
-    ~arithmeticOperation,
-    ~t2: t,
-  ): result<t, error> => {
-    let algebraicResult = run'(t1, ~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
-    switch (mode, algebraicResult) {
-    | (None, _)
-    | (Some(AsSymbolic), Ok(Symbolic(_)))
-    | (Some(AsMontecarlo), Ok(DistributionTypes.SampleSet(_)))
-    | (Some(AsConvolution), Ok(DistributionTypes.PointSet(_)))
-    | (Some(_), Error(_)) => algebraicResult
-    | (Some(_), Ok(_)) => Error(RequestedModeInvalidError)
-    }
-  }
+  //  let run = (
+  //    ~mode: option<asMode>=?,
+  //    t1: t,
+  //    ~toPointSetFn: toPointSetFn,
+  //    ~toSampleSetFn: toSampleSetFn,
+  //    ~arithmeticOperation,
+  //    ~t2: t,
+  //  ): result<t, error> => {
+  //    let algebraicResult = run'(t1, ~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
+  //    switch (mode, algebraicResult) {
+  //    | (None, _)
+  //    | (Some(AsSymbolic), Ok(Symbolic(_)))
+  //    | (Some(AsMontecarlo), Ok(DistributionTypes.SampleSet(_)))
+  //    | (Some(AsConvolution), Ok(DistributionTypes.PointSet(_)))
+  //    | (Some(_), Error(_)) => algebraicResult
+  //    | (Some(_), Ok(_)) => Error(RequestedModeInvalidError)
+  //    }
+  //  }
 }
 
 let algebraicCombination = AlgebraicCombination.run
