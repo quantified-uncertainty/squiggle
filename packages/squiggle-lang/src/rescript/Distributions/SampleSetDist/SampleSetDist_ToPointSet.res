@@ -133,9 +133,17 @@ let toPointSetDist = (
     ~discrete=Some(discrete),
   )
 
+  /*
+   I'm surprised that this doesn't come out normalized. My guess is that the KDE library
+  we're using is standardizing on something else. If we ever change that library, we should
+  check to see if we still need to do this.
+ */
+
+  let normalizedPointSet = pointSetDist->E.O2.fmap(PointSetDist.T.normalize)
+
   let samplesParse: Internals.Types.outputs = {
     continuousParseParams: pdf |> E.O.fmap(snd),
-    pointSetDist: pointSetDist,
+    pointSetDist: normalizedPointSet,
   }
 
   samplesParse
