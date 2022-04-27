@@ -5,11 +5,12 @@ module Extra = Reducer_Extra
 module Js = Reducer_Js
 module MathJs = Reducer_MathJs
 
+type environment = ReducerInterface_ExpressionValue.environment
+type errorValue = Reducer_ErrorValue.errorValue
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
-let evaluate = Expression.eval
-let evaluateUsingExternalBindings = Expression.evalUsingExternalBindings
-let evaluatePartialUsingExternalBindings = Expression.evalPartialUsingExternalBindings
+let evaluate = Expression.evaluate
+let evaluateUsingOptions = Expression.evaluateUsingOptions
 let parse = Expression.parse
 let parseOuter = Expression.parseOuter
 let parsePartial = Expression.parsePartial

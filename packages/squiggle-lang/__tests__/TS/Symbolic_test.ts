@@ -12,7 +12,7 @@ describe("Symbolic mean", () => {
             expect(squiggleResult.value).toBeCloseTo((x + y + z) / 3);
           } catch (err) {
             expect((err as Error).message).toEqual(
-              "Expected squiggle expression to evaluate but got error: Math Error: Triangular values must be increasing order."
+              "Expected squiggle expression to evaluate but got error: Distribution Math Error: Triangular values must be increasing order."
             );
           }
         }

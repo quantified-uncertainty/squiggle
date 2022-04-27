@@ -14,8 +14,8 @@ type expressionValue = ExpressionValue.expressionValue
   Map external calls of Reducer
 */
 
-let dispatch = (call: ExpressionValue.functionCall, chain): result<expressionValue, 'e> =>
-  ReducerInterface_GenericDistribution.dispatch(call) |> E.O.default(chain(call))
+let dispatch = (call: ExpressionValue.functionCall, environment, chain): result<expressionValue, 'e> =>
+  ReducerInterface_GenericDistribution.dispatch(call, environment) |> E.O.default(chain(call, environment))
 /*
 If your dispatch is too big you can divide it into smaller dispatches and pass the call so that it gets called finally.
 

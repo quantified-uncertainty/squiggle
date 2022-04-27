@@ -10,10 +10,12 @@ module Result = Belt.Result
 open Reducer_ErrorValue
 
 type expression = ExpressionT.expression
+type environment = ExpressionValue.environment
 
 type reducerFn = (
   expression,
   ExpressionT.bindings,
+  environment,
 ) => result<ExpressionValue.expressionValue, errorValue>
 
 let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings): result<
@@ -101,6 +103,7 @@ let rec replaceSymbols = (expression: expression, bindings: ExpressionT.bindings
 let dispatchMacroCall = (
   list: list<expression>,
   bindings: ExpressionT.bindings,
+  environment,
   reduceExpression: reducerFn,
 ): result<expression, 'e> => {
   let doBindStatement = (statement: expression, bindings: ExpressionT.bindings) => {
@@ -114,7 +117,7 @@ let dispatchMacroCall = (
 
         let rNewValue =
           rNewExpressionToReduce->Result.flatMap(newExpressionToReduce =>
-            reduceExpression(newExpressionToReduce, bindings)
+            reduceExpression(newExpressionToReduce, bindings, environment)
           )
 
         let rNewExpression = rNewValue->Result.map(newValue => ExpressionT.EValue(newValue))
