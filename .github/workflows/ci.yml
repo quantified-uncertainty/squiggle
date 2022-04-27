@@ -9,6 +9,7 @@ on:
     branches:
       - master
       - develop
+      - reducer-dev
 
 jobs:
   pre_check:
