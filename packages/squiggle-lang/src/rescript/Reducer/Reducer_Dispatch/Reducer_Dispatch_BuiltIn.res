@@ -11,7 +11,7 @@ open Reducer_ErrorValue
 
 exception TestRescriptException
 
-let callInternal = (call: functionCall): result<'b, errorValue> => {
+let callInternal = (call: functionCall, _environment): result<'b, errorValue> => {
   let callMathJs = (call: functionCall): result<'b, errorValue> =>
     switch call {
     | ("javascriptraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
@@ -85,12 +85,12 @@ let callInternal = (call: functionCall): result<'b, errorValue> => {
 /*
   Reducer uses Result monad while reducing expressions
 */
-let dispatch = (call: functionCall): result<expressionValue, errorValue> =>
+let dispatch = (call: functionCall, environment): result<expressionValue, errorValue> =>
   try {
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), callInternal)
+    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternal)
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   | _ => RETodo("unhandled rescript exception")->Error

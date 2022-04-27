@@ -22,6 +22,9 @@ type rec expressionValue =
 
 @genType
 type externalBindings = Js.Dict.t<expressionValue>
+@genType
+let defaultExternalBindings: externalBindings = Js.Dict.empty()
+
 
 type functionCall = (string, array<expressionValue>)
 
@@ -84,3 +87,8 @@ let toStringResultRecord = x =>
   | Ok(a) => `Ok(${toStringRecord(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
+
+@genType
+type environment = {dummy: int}
+@genType
+let defaultEnvironment: environment = {dummy: 0}

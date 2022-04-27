@@ -180,7 +180,7 @@ module Math = {
   let e = 2.718281828459
 }
 
-let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
+let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment): option<
   DistributionOperation.outputType,
 > => {
   let (fnName, args) = call
@@ -266,6 +266,6 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-let dispatch = call => {
-  dispatchToGenericOutput(call)->E.O2.fmap(genericOutputToReducerValue)
+let dispatch = (call, environment) => {
+  dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
 }
