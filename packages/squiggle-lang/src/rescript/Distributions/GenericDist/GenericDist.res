@@ -247,11 +247,11 @@ module AlgebraicCombination = {
     arithmeticOperation: Operation.algebraicOperation,
     t1: t,
     t2: t,
-  ): option<SymbolicDistTypes.analyticalSimplificationResult> => {
+  ): SymbolicDistTypes.analyticalSimplificationResult => {
     switch (t1, t2) {
     | (DistributionTypes.Symbolic(d1), DistributionTypes.Symbolic(d2)) =>
-      Some(SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation))
-    | _ => None
+      SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation)
+    | _ => #NoSolution
     }
   }
 
@@ -263,20 +263,13 @@ module AlgebraicCombination = {
     ~t2: t,
   ): result<t, error> => {
     switch tryAnalyticalSimplification(arithmeticOperation, t1, t2) {
-    | Some(#AnalyticalSolution(symbolicDist)) => Ok(Symbolic(symbolicDist))
-    | Some(#Error(e)) => Error(OperationError(e))
-    | Some(#NoSolution)
-    | None =>
-      switch getInvalidOperationError(t1, t2, ~toPointSetFn, ~arithmeticOperation) {
-      | Some(e) => Error(e)
-      | None =>
-        switch chooseConvolutionOrMonteCarloDefault(arithmeticOperation, t1, t2) {
-        | MonteCarloStrat => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-        | ConvolutionStrat(convOp) =>
-          runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(
-            r,
-          ))
-        }
+    | #AnalyticalSolution(symbolicDist) => Ok(Symbolic(symbolicDist))
+    | #Error(e) => Error(OperationError(e))
+    | #NoSolution =>
+      switch chooseConvolutionOrMonteCarloDefault(arithmeticOperation, t1, t2) {
+      | MonteCarloStrat => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+      | ConvolutionStrat(convOp) =>
+        runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(r))
       }
     }
   }
@@ -289,27 +282,29 @@ module AlgebraicCombination = {
     ~arithmeticOperation: Operation.algebraicOperation,
     ~t2: t,
   ): result<t, error> => {
-    switch strategy {
-    | AsDefault => runDefault(t1, ~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
-    | AsSymbolic =>
+    let invalidOperationError = getInvalidOperationError(
+      t1,
+      t2,
+      ~toPointSetFn,
+      ~arithmeticOperation,
+    )
+    switch (invalidOperationError, strategy, arithmeticOperation) {
+    | (Some(e), _, _) => Error(e)
+    | (None, AsDefault, _) =>
+      runDefault(t1, ~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
+    | (None, AsMonteCarlo, _) => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+    | (None, AsSymbolic, _) =>
       switch tryAnalyticalSimplification(arithmeticOperation, t1, t2) {
-      | Some(#AnalyticalSolution(symbolicDist)) => Ok(Symbolic(symbolicDist))
-      | Some(#NoSolution) => Error(RequestedStrategyInvalidError(`No analytical solution`))
-      | None => Error(RequestedStrategyInvalidError("Inputs were not even symbolic"))
-      | Some(#Error(err)) => Error(OperationError(err))
+      | #AnalyticalSolution(symbolicDist) => Ok(Symbolic(symbolicDist))
+      | #NoSolution => Error(RequestedStrategyInvalidError(`No analytic solution for inputs`))
+      | #Error(err) => Error(OperationError(err))
       }
-    | AsConvolution => {
-        let errString = opString => `Can't convolve on ${opString}`
-        switch arithmeticOperation {
-        | (#Add | #Subtract | #Multiply) as convOp =>
-          runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(
-            r,
-          ))
-        | (#Divide | #Power | #Logarithm) as op =>
-          op->Operation.Algebraic.toString->errString->RequestedStrategyInvalidError->Error
-        }
+    | (None, AsConvolution, (#Divide | #Power | #Logarithm) as convOp) => {
+        let errString = `Can't convolve on ${Operation.Algebraic.toString(convOp)}`
+        Error(RequestedStrategyInvalidError(errString))
       }
-    | AsMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+    | (None, AsConvolution, (#Add | #Subtract | #Multiply) as convOp) =>
+      runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(r))
     }
   }
 }
