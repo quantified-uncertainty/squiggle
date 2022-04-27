@@ -58,14 +58,15 @@ describe("Distribution", () => {
   );
 
   test("mean", () => {
-    expect(dist.mean().value).toBeCloseTo(8.704375514292865);
+    expect(dist.mean().value).toBeCloseTo(9.5555555);
   });
   test("pdf", () => {
-    expect(dist.pdf(5.0).value).toBeCloseTo(0.052007455285386944, 1);
+    expect(dist.pdf(5.0).value).toBeCloseTo(0.10499097598222966, 1);
   });
   test("cdf", () => {
     expect(dist.cdf(5.0).value).toBeCloseTo(
-      dist1Samples.filter((x) => x <= 5).length / dist1SampleCount
+      dist1Samples.filter((x) => x <= 5).length / dist1SampleCount,
+      1
     );
   });
   test("inv", () => {
@@ -91,6 +92,6 @@ describe("Distribution", () => {
       resultMap(dist.pointwiseAdd(dist2), (r: Distribution) =>
         r.toSparkline(20)
       ).value
-    ).toEqual(Ok("▁▂▅██▅▅▅▆▆▇▅▄▃▃▂▂▁▁▁"));
+    ).toEqual(Ok("▁▂██▃▃▃▃▄▅▄▃▃▂▂▂▁▁▁▁"));
   });
 });
