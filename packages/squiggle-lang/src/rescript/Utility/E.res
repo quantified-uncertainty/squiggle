@@ -555,7 +555,7 @@ module A = {
 
     //Passing true for the exclusive parameter excludes both endpoints of the range.
     //https://jstat.github.io/all.html
-    let percentile = (a,b) => Jstat.percentile(a,b, false)
+    let percentile = (a, b) => Jstat.percentile(a, b, false)
 
     // Gives an array with all the differences between values
     // diff([1,5,3,7]) = [4,-2,4]
