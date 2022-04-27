@@ -4,6 +4,8 @@ type genericDist =
   | SampleSet(SampleSetDist.t)
   | Symbolic(SymbolicDistTypes.symbolicDist)
 
+type asAlgebraicCombinationStrategy = AsDefault | AsSymbolic | AsMonteCarlo | AsConvolution
+
 @genType
 type error =
   | NotYetImplemented
@@ -14,6 +16,7 @@ type error =
   | OperationError(Operation.Error.t)
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
   | SparklineError(PointSetTypes.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
+  | RequestedStrategyInvalidError(string)
   | LogarithmOfDistributionError(string)
   | OtherError(string)
 
@@ -35,6 +38,7 @@ module Error = {
     | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
+    | RequestedStrategyInvalidError(err) => `Requested strategy invalid: ${err}`
     | OtherError(s) => s
     }
 
@@ -53,7 +57,7 @@ module DistributionOperation = {
   type pointsetXSelection = [#Linear | #ByWeight]
 
   type direction =
-    | Algebraic
+    | Algebraic(asAlgebraicCombinationStrategy)
     | Pointwise
 
   type toFloat = [
@@ -110,7 +114,7 @@ module DistributionOperation = {
     | ToString(ToString) => `toString`
     | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
     | ToBool(IsNormalized) => `isNormalized`
-    | ToDistCombination(Algebraic, _, _) => `algebraic`
+    | ToDistCombination(Algebraic(_), _, _) => `algebraic`
     | ToDistCombination(Pointwise, _, _) => `pointwise`
     }
 
@@ -139,27 +143,27 @@ module Constructors = {
     let toString = (dist): t => FromDist(ToString(ToString), dist)
     let toSparkline = (dist, n): t => FromDist(ToString(ToSparkline(n)), dist)
     let algebraicAdd = (dist1, dist2: genericDist): t => FromDist(
-      ToDistCombination(Algebraic, #Add, #Dist(dist2)),
+      ToDistCombination(Algebraic(AsDefault), #Add, #Dist(dist2)),
       dist1,
     )
     let algebraicMultiply = (dist1, dist2): t => FromDist(
-      ToDistCombination(Algebraic, #Multiply, #Dist(dist2)),
+      ToDistCombination(Algebraic(AsDefault), #Multiply, #Dist(dist2)),
       dist1,
     )
     let algebraicDivide = (dist1, dist2): t => FromDist(
-      ToDistCombination(Algebraic, #Divide, #Dist(dist2)),
+      ToDistCombination(Algebraic(AsDefault), #Divide, #Dist(dist2)),
       dist1,
     )
     let algebraicSubtract = (dist1, dist2): t => FromDist(
-      ToDistCombination(Algebraic, #Subtract, #Dist(dist2)),
+      ToDistCombination(Algebraic(AsDefault), #Subtract, #Dist(dist2)),
       dist1,
     )
     let algebraicLogarithm = (dist1, dist2): t => FromDist(
-      ToDistCombination(Algebraic, #Logarithm, #Dist(dist2)),
+      ToDistCombination(Algebraic(AsDefault), #Logarithm, #Dist(dist2)),
       dist1,
     )
     let algebraicPower = (dist1, dist2): t => FromDist(
-      ToDistCombination(Algebraic, #Power, #Dist(dist2)),
+      ToDistCombination(Algebraic(AsDefault), #Power, #Dist(dist2)),
       dist1,
     )
     let pointwiseAdd = (dist1, dist2): t => FromDist(
