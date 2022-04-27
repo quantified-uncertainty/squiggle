@@ -186,13 +186,17 @@ module AlgebraicCombination = {
  */
   let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
     let firstOperandIsGreaterThanZero =
-      toFloatOperation(t1, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
-        r > 0.
-      )
+      toFloatOperation(
+        t1,
+        ~toPointSetFn,
+        ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
+      ) |> E.R.fmap(r => r > 0.)
     let secondOperandIsGreaterThanZero =
-      toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
-        r > 0.
-      )
+      toFloatOperation(
+        t2,
+        ~toPointSetFn,
+        ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
+      ) |> E.R.fmap(r => r > 0.)
     let items = E.A.R.firstErrorOrOpen([
       firstOperandIsGreaterThanZero,
       secondOperandIsGreaterThanZero,
@@ -224,12 +228,12 @@ module AlgebraicCombination = {
   //I'm (Ozzie) really just guessing here, very little idea what's best
   let expectedConvolutionCost: t => int = x =>
     switch x {
-    | Symbolic(#Float(_)) => 1
-    | Symbolic(_) => 1000
+    | Symbolic(#Float(_)) => MagicNumbers.OpCost.floatCost
+    | Symbolic(_) => MagicNumbers.OpCost.symbolicCost
     | PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
-    | PointSet(Mixed(_)) => 1000
-    | PointSet(Continuous(_)) => 1000
-    | _ => 1000
+    | PointSet(Mixed(_)) => MagicNumbers.OpCost.mixedCost
+    | PointSet(Continuous(_)) => MagicNumbers.OpCost.continuousCost
+    | _ => MagicNumbers.OpCost.wildcardCost
     }
 
   type calculationStrategy = MonteCarloStrat | ConvolutionStrat(Operation.convolutionOperation)
@@ -245,7 +249,7 @@ module AlgebraicCombination = {
     | #Logarithm =>
       MonteCarloStrat
     | (#Add | #Subtract | #Multiply) as convOp =>
-      expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > 10000
+      expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > MagicNumbers.OpCost.monteCarloCost
         ? MonteCarloStrat
         : ConvolutionStrat(convOp)
     }

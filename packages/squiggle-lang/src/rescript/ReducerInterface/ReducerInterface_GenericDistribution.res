@@ -1,12 +1,10 @@
 module ExpressionValue = ReducerInterface_ExpressionValue
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
-let defaultSampleCount = 10000
-
 let runGenericOperation = DistributionOperation.run(
   ~env={
-    sampleCount: defaultSampleCount,
-    xyPointLength: 1000,
+    sampleCount: MagicNumbers.Environment.defaultSampleCount,
+    xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
   },
 )
 
@@ -176,10 +174,6 @@ module SymbolicConstructors = {
     }
 }
 
-module Math = {
-  let e = 2.718281828459
-}
-
 let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
   DistributionOperation.outputType,
 > => {
@@ -208,7 +202,12 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist)
   | ("exp", [EvDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
-    Helpers.twoDiststoDistFn(Algebraic(AsDefault), "pow", GenericDist.fromFloat(Math.e), a)->Some
+    Helpers.twoDiststoDistFn(
+      Algebraic(AsDefault),
+      "pow",
+      GenericDist.fromFloat(MagicNumbers.Math.e),
+      a,
+    )->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
@@ -218,7 +217,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
   | ("toSampleSet", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist)
   | ("toSampleSet", [EvDistribution(dist)]) =>
-    Helpers.toDistFn(ToSampleSet(defaultSampleCount), dist)
+    Helpers.toDistFn(ToSampleSet(MagicNumbers.Environment.defaultSampleCount), dist)
   | ("inspect", [EvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist)
   | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Truncate(Some(float), None), dist)
@@ -228,7 +227,12 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist)
   | ("mx" | "mixture", args) => Helpers.mixture(args)->Some
   | ("log", [EvDistribution(a)]) =>
-    Helpers.twoDiststoDistFn(Algebraic(AsDefault), "log", a, GenericDist.fromFloat(Math.e))->Some
+    Helpers.twoDiststoDistFn(
+      Algebraic(AsDefault),
+      "log",
+      a,
+      GenericDist.fromFloat(MagicNumbers.Math.e),
+    )->Some
   | ("log10", [EvDistribution(a)]) =>
     Helpers.twoDiststoDistFn(Algebraic(AsDefault), "log", a, GenericDist.fromFloat(10.0))->Some
   | ("unaryMinus", [EvDistribution(a)]) =>
@@ -249,7 +253,12 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
       Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd)
     )
   | ("dotExp", [EvDistribution(a)]) =>
-    Helpers.twoDiststoDistFn(Pointwise, "dotPow", GenericDist.fromFloat(Math.e), a)->Some
+    Helpers.twoDiststoDistFn(
+      Pointwise,
+      "dotPow",
+      GenericDist.fromFloat(MagicNumbers.Math.e),
+      a,
+    )->Some
   | _ => None
   }
 }
