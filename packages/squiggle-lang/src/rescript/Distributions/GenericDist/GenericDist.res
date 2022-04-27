@@ -305,9 +305,8 @@ module AlgebraicCombination = {
           runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(
             r,
           ))
-        | #Divide => "divide"->errString->RequestedStrategyInvalidError->Error
-        | #Power => "power"->errString->RequestedStrategyInvalidError->Error
-        | #Logarithm => "logarithm"->errString->RequestedStrategyInvalidError->Error
+        | (#Divide | #Power | #Logarithm) as op =>
+          op->Operation.Algebraic.toString->errString->RequestedStrategyInvalidError->Error
         }
       }
     | AsMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
