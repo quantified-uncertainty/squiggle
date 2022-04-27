@@ -39,28 +39,6 @@ module Internals = {
   module T = {
     type t = array<float>
 
-    let splitContinuousAndDiscrete = (sortedArray: t) => {
-      let continuous = []
-      let discrete = E.FloatFloatMap.empty()
-      Belt.Array.forEachWithIndex(sortedArray, (index, element) => {
-        let maxIndex = (sortedArray |> Array.length) - 1
-        let possiblySimilarElements = switch index {
-        | 0 => [index + 1]
-        | n if n == maxIndex => [index - 1]
-        | _ => [index - 1, index + 1]
-        } |> Belt.Array.map(_, r => sortedArray[r])
-        let hasSimilarElement = Belt.Array.some(possiblySimilarElements, r => r == element)
-        hasSimilarElement
-          ? E.FloatFloatMap.increment(element, discrete)
-          : {
-              let _ = Js.Array.push(element, continuous)
-            }
-
-        ()
-      })
-      (continuous, discrete)
-    }
-
     let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
       let xyPointRange = E.A.Sorted.range(samples) |> E.O.default(0.0)
       let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints)
@@ -85,7 +63,8 @@ let toPointSetDist = (
   (),
 ): Internals.Types.outputs => {
   Array.fast_sort(compare, samples)
-  let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples)
+  let minDiscreteToKeep = max(2, E.A.length(samples) / 10);
+  let (continuousPart, discretePart) = E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(samples, minDiscreteToKeep)
   let length = samples |> E.A.length |> float_of_int
   let discrete: PointSetTypes.discreteShape =
     discretePart

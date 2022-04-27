@@ -8,7 +8,7 @@ module FloatFloatMap = {
   type t = Belt.MutableMap.t<Id.t, float, Id.identity>
 
   let fromArray = (ar: array<(float, float)>) => Belt.MutableMap.fromArray(ar, ~id=module(Id))
-  let toArray = (t: t) => Belt.MutableMap.toArray(t)
+  let toArray = (t: t): array<(float, float)> => Belt.MutableMap.toArray(t)
   let empty = () => Belt.MutableMap.make(~id=module(Id))
   let increment = (el, t: t) =>
     Belt.MutableMap.update(t, el, x =>
@@ -20,6 +20,10 @@ module FloatFloatMap = {
 
   let get = (el, t: t) => Belt.MutableMap.get(t, el)
   let fmap = (fn, t: t) => Belt.MutableMap.map(t, fn)
+  let partition = (fn, t: t) => {
+    let (match, noMatch) = Belt.Array.partition(toArray(t), fn)
+    (fromArray(match), fromArray(noMatch))
+  }
 }
 
 module Int = {
@@ -518,18 +522,17 @@ module A = {
       let makeIncrementalDown = (a, b) =>
         Array.make(a - b + 1, a) |> Array.mapi((i, c) => c - i) |> Belt.Array.map(_, float_of_int)
 
-      let split = (sortedArray: array<float>) => {
-        let continuous = []
+      let splitContinuousAndDiscreteForDuplicates = (sortedArray: array<float>) => {
+        let continuous: array<float> = []
         let discrete = FloatFloatMap.empty()
-        Belt.Array.forEachWithIndex(sortedArray, (_, element) => {
-          // let maxIndex = (sortedArray |> Array.length) - 1
-          // let possiblySimilarElements = switch index {
-          // | 0 => [index + 1]
-          // | n if n == maxIndex => [index - 1]
-          // | _ => [index - 1, index + 1]
-          // } |> Belt.Array.map(_, r => sortedArray[r])
-          // let hasSimilarElement = Belt.Array.some(possiblySimilarElements, r => r == element)
-          let hasSimilarElement = false
+        Belt.Array.forEachWithIndex(sortedArray, (index, element) => {
+          let maxIndex = (sortedArray |> Array.length) - 1
+          let possiblySimilarElements = switch index {
+          | 0 => [index + 1]
+          | n if n == maxIndex => [index - 1]
+          | _ => [index - 1, index + 1]
+          } |> Belt.Array.map(_, r => sortedArray[r])
+          let hasSimilarElement = Belt.Array.some(possiblySimilarElements, r => r == element)
           hasSimilarElement
             ? FloatFloatMap.increment(element, discrete)
             : {
@@ -540,6 +543,26 @@ module A = {
         })
 
         (continuous, discrete)
+      }
+
+      let splitContinuousAndDiscreteForMinWeight = (
+        sortedArray: array<float>,
+        minDiscreteWeight: int,
+      ) => {
+        let (continuous, discrete) = splitContinuousAndDiscreteForDuplicates(sortedArray)
+        let keepFn = v => Belt.Float.toInt(v) > minDiscreteWeight
+        let (discreteToKeep, discreteToIntegrate) = FloatFloatMap.partition(
+          ((_, v)) => keepFn(v),
+          discrete,
+        )
+        let newContinousSamples =
+          discreteToIntegrate->FloatFloatMap.toArray
+          |> fmap(((k, v)) => Belt.Array.makeBy(Belt.Float.toInt(v), _ => k))
+          |> Belt.Array.concatMany
+
+        let newContinuous = concat(continuous, newContinousSamples)
+        newContinuous |> Array.fast_sort(floatCompare)
+        (newContinuous, discreteToKeep)
       }
     }
   }
