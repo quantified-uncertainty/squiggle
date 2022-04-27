@@ -4088,10 +4088,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^16.9.19", "@types/react@^18.0.1", "@types/react@^18.0.3":
-  version "18.0.7"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.7.tgz#8437a226763adf854969954dfe582529a406cbad"
-  integrity sha512-CXSXHzTexlX9esf4ReIUJeaemKcmBEvYzxHDUk19c3BCcEGUvUjkeC3jkscPSfSaQ6SPDRNd/zMxi8oc/P1zxA==
+"@types/react@*", "@types/react@^16.9.19", "@types/react@^18.0.1", "@types/react@^18.0.8":
+  version "18.0.8"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.8.tgz#a051eb380a9fbcaa404550543c58e1cf5ce4ab87"
+  integrity sha512-+j2hk9BzCOrrOSJASi5XiOyBbERk9jG5O73Ya4M0env5Ixi6vUNli4qy994AINcEF+1IEHISYFfIT4zwr++LKw==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -8472,14 +8472,7 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-fast-check@2.25.0:
-  version "2.25.0"
-  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-2.25.0.tgz#5146601851bf3be0953bd17eb2b7d547936c6561"
-  integrity sha512-wRUT2KD2lAmT75WNIJIHECawoUUMHM0I5jrlLXGtGeqmPL8jl/EldUDjY1VCp6fDY8yflyfUeIOsOBrIbIiArg==
-  dependencies:
-    pure-rand "^5.0.1"
-
-fast-check@^2.17.0:
+fast-check@2.25.0, fast-check@^2.17.0:
   version "2.25.0"
   resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-2.25.0.tgz#5146601851bf3be0953bd17eb2b7d547936c6561"
   integrity sha512-wRUT2KD2lAmT75WNIJIHECawoUUMHM0I5jrlLXGtGeqmPL8jl/EldUDjY1VCp6fDY8yflyfUeIOsOBrIbIiArg==
