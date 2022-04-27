@@ -37,4 +37,5 @@ describe("Continuous and discrete splits", () => {
   )
   let toArr2 = discrete2 |> E.FloatFloatMap.toArray
   makeTest("splitMedium at count=500", toArr2 |> Belt.Array.length, 500)
+  // makeTest("foo", [] |> Belt.Array.length, 500)
 })

@@ -9,3 +9,7 @@ examples
 yarn.nix
 bsconfig.json
 tsconfig.json
+.nyc_outputs
+*.coverage
+_coverage
+coverage
