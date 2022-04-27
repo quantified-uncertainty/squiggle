@@ -22,7 +22,7 @@ argument allows you to pass an environment previously created by another `run`
 call. Passing this environment will mean that all previously declared variables
 in the previous environment will be made available.
 
-The return type of `run` is a bit complicated, and comes from auto generated js
+The return type of `run` is a bit complicated, and comes from auto generated `js`
 code that comes from rescript. We highly recommend using typescript when using
 this library to help navigate the return type.
 
