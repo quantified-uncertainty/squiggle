@@ -521,8 +521,8 @@ module A = {
       let split = (sortedArray: array<float>) => {
         let continuous = []
         let discrete = FloatFloatMap.empty()
-        Belt.Array.forEachWithIndex(sortedArray, (index, element) => {
-          let maxIndex = (sortedArray |> Array.length) - 1
+        Belt.Array.forEachWithIndex(sortedArray, (_, element) => {
+          // let maxIndex = (sortedArray |> Array.length) - 1
           // let possiblySimilarElements = switch index {
           // | 0 => [index + 1]
           // | n if n == maxIndex => [index - 1]
