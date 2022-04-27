@@ -521,14 +521,15 @@ module A = {
       let split = (sortedArray: array<float>) => {
         let continuous = []
         let discrete = FloatFloatMap.empty()
-        Belt.Array.forEachWithIndex(sortedArray, (index, element) => {
-          let maxIndex = (sortedArray |> Array.length) - 1
-          let possiblySimilarElements = switch index {
-          | 0 => [index + 1]
-          | n if n == maxIndex => [index - 1]
-          | _ => [index - 1, index + 1]
-          } |> Belt.Array.map(_, r => sortedArray[r])
-          let hasSimilarElement = Belt.Array.some(possiblySimilarElements, r => r == element)
+        Belt.Array.forEachWithIndex(sortedArray, (_, element) => {
+          // let maxIndex = (sortedArray |> Array.length) - 1
+          // let possiblySimilarElements = switch index {
+          // | 0 => [index + 1]
+          // | n if n == maxIndex => [index - 1]
+          // | _ => [index - 1, index + 1]
+          // } |> Belt.Array.map(_, r => sortedArray[r])
+          // let hasSimilarElement = Belt.Array.some(possiblySimilarElements, r => r == element)
+          let hasSimilarElement = false
           hasSimilarElement
             ? FloatFloatMap.increment(element, discrete)
             : {
@@ -544,9 +545,17 @@ module A = {
   }
 
   module Floats = {
-    let sum = Belt.Array.reduce(_, 0., (i, j) => i +. j)
-    let mean = a => sum(a) /. (Array.length(a) |> float_of_int)
+    let mean = Jstat.mean
+    let geomean = Jstat.geomean
+    let mode = Jstat.mode
+    let variance = Jstat.variance
+    let stdev = Jstat.stdev
+    let sum = Jstat.sum
     let random = Js.Math.random_int
+
+    //Passing true for the exclusive parameter excludes both endpoints of the range.
+    //https://jstat.github.io/all.html
+    let percentile = (a, b) => Jstat.percentile(a, b, false)
 
     // Gives an array with all the differences between values
     // diff([1,5,3,7]) = [4,-2,4]

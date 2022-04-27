@@ -98,3 +98,13 @@ let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2
     E.R.toExn("Input of samples should be larger than 5", make(x))
   )
 }
+
+let mean = t => T.get(t)->E.A.Floats.mean
+let geomean = t => T.get(t)->E.A.Floats.geomean
+let mode = t => T.get(t)->E.A.Floats.mode
+let sum = t => T.get(t)->E.A.Floats.sum
+let min = t => T.get(t)->E.A.Floats.min
+let max = t => T.get(t)->E.A.Floats.max
+let stdev = t => T.get(t)->E.A.Floats.stdev
+let variance = t => T.get(t)->E.A.Floats.variance
+let percentile = (t, f) => T.get(t)->E.A.Floats.percentile(f)

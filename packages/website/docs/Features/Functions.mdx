@@ -305,6 +305,16 @@ The `sample(distribution)` samples a given distribution.
 
 <SquiggleEditor initialSquiggleString="sample(normal(0, 10))" />
 
+## Converting between distribution formats
+
+Recall the [three formats of distributions](https://develop--squiggle-documentation.netlify.app/docs/Discussions/Three-Types-Of-Distributions). We can force any distribution into `SampleSet` format
+
+<SquiggleEditor initialSquiggleString="toSampleSet(normal(5, 10))" />
+
+Or `PointSet` format
+
+<SquiggleEditor initialSquiggleString="toPointSet(normal(5, 10))" />
+
 ## Normalization
 
 Some distribution operations (like horizontal shift) return an unnormalized distriibution.

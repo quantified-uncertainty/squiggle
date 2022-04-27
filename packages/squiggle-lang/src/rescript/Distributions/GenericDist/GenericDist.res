@@ -46,18 +46,25 @@ let toFloatOperation = (
   ~toPointSetFn: toPointSetFn,
   ~distToFloatOperation: Operation.distToFloatOperation,
 ) => {
-  let symbolicSolution = switch (t: t) {
-  | Symbolic(r) =>
-    switch SymbolicDist.T.operate(distToFloatOperation, r) {
-    | Ok(f) => Some(f)
-    | _ => None
-    }
+  let trySymbolicSolution = switch (t: t) {
+  | Symbolic(r) => SymbolicDist.T.operate(distToFloatOperation, r)->E.R.toOption
   | _ => None
   }
 
-  switch symbolicSolution {
+  let trySampleSetSolution = switch ((t: t), distToFloatOperation) {
+  | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
+  | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
+  | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
+  | _ => None
+  }
+
+  switch trySymbolicSolution {
   | Some(r) => Ok(r)
-  | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(distToFloatOperation))
+  | None =>
+    switch trySampleSetSolution {
+    | Some(r) => Ok(r)
+    | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(distToFloatOperation))
+    }
   }
 }
 
@@ -156,11 +163,11 @@ module AlgebraicCombination = {
  */
     let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
       let firstOperandIsGreaterThanZero =
-        toFloatOperation(t1, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
+        toFloatOperation(t1, ~toPointSetFn, ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten)) |> E.R.fmap(r =>
           r > 0.
         )
       let secondOperandIsGreaterThanZero =
-        toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
+        toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten)) |> E.R.fmap(r =>
           r > 0.
         )
       let items = E.A.R.firstErrorOrOpen([
@@ -231,12 +238,12 @@ module AlgebraicCombination = {
     //I'm (Ozzie) really just guessing here, very little idea what's best
     let expectedConvolutionCost: t => int = x =>
       switch x {
-      | Symbolic(#Float(_)) => 1
-      | Symbolic(_) => 1000
+      | Symbolic(#Float(_)) =>MagicNumbers.OpCost.floatCost
+      | Symbolic(_) =>MagicNumbers.OpCost.symbolicCost
       | PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
-      | PointSet(Mixed(_)) => 1000
-      | PointSet(Continuous(_)) => 1000
-      | _ => 1000
+      | PointSet(Mixed(_)) => MagicNumbers.OpCost.mixedCost
+      | PointSet(Continuous(_)) => MagicNumbers.OpCost.continuousCost
+      | _ => MagicNumbers.OpCost.wildcardCost
       }
 
     let run = (~t1: t, ~t2: t, ~arithmeticOperation): specificStrategy => {
@@ -246,7 +253,7 @@ module AlgebraicCombination = {
         #AsSymbolic
       | #NoSolution =>
         if Operation.Convolution.canDoAlgebraicOperation(arithmeticOperation) {
-          expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > 10000
+          expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > MagicNumbers.OpCost.monteCarloCost
             ? #AsMonteCarlo
             : #AsConvolution
         } else {
