@@ -1,13 +1,12 @@
 ---
 sidebar_position: 3
+title: Node Packages
 ---
-
-# Javascript Libraries
 
 There are two JavaScript packages currently available for Squiggle:
 
-- [`@quri/squiggle-lang`](https://www.npmjs.com/package/@quri/squiggle-lang)
-- [`@quri/squiggle-components`](https://www.npmjs.com/package/@quri/squiggle-components)
+- [`@quri/squiggle-lang`](https://www.npmjs.com/package/@quri/squiggle-lang) ![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)
+- [`@quri/squiggle-components`](https://www.npmjs.com/package/@quri/squiggle-components) ![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)
 
 Types are available for both packages.
 
@@ -24,7 +23,7 @@ call. Passing this environment will mean that all previously declared variables
 in the previous environment will be made available.
 
 The return type of `run` is a bit complicated, and comes from auto generated js
-code that comes from rescript. I highly recommend using typescript when using
+code that comes from rescript. We highly recommend using typescript when using
 this library to help navigate the return type.
 
 ## Squiggle Components

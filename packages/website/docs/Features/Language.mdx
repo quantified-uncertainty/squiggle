@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: Squiggle Language
+title: Language Basics
 ---
 
 import { SquiggleEditor } from "../../src/components/SquiggleEditor";
@@ -29,8 +29,8 @@ Some assignments are functions
 
 <SquiggleEditor
   initialSquiggleString={`ozzie_estimate(t) = lognormal(1, t ^ 1.01)
-  nuño_estimate(t) = mixture(0.5 to 2, normal(1, t ^ 1.25))
-  ozzie_estimate(5) * nuño_estimate(5.5)
+nuño_estimate(t) = mixture(0.5 to 2, normal(1, t ^ 1.25))
+ozzie_estimate(5) * nuño_estimate(5.5)
 `}
 />
 
@@ -46,6 +46,6 @@ A squiggle **record** is a key-value store with dot accessors.
 
 <SquiggleEditor
   initialSquiggleString={`d1 = {dist: normal(0, 1), weight: 0.25}
-  d2 = {dist: 5 to 6, weight: 0.75}
-  mx(d1.dist, d2.dist, [d1.weight, d2.weight])`}
+d2 = {dist: 5 to 6, weight: 0.75}
+mx(d1.dist, d2.dist, [d1.weight, d2.weight])`}
 />

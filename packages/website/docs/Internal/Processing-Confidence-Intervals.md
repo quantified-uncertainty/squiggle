@@ -1,6 +1,8 @@
-# Processing confidence intervals
+---
+title: Processing Confidence Intervals
+---
 
-This page explains what we are doing when we take a 95% confidence interval, and we get a mean and a standard deviation from it
+This page explains what we are doing when we take a 95% confidence interval, and we get a mean and a standard deviation from it.
 
 ## For normals
 
@@ -30,3 +32,5 @@ We can now look at the inverse cdf of a $Normal(0,1)$. We find that the 95% poin
 So then, if we take a $Normal(0,1)$ and we multiply it by $\frac{(high -. low)}{(2. *. 1.6448536269514722)}$, it's 90% confidence interval will be multiplied by the same amount. Then we just have to shift it by the mean to get our target normal.
 
 ## For lognormals
+
+TODO
