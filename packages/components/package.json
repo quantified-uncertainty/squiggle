@@ -5,7 +5,7 @@
   "dependencies": {
     "antd": "^4.20.1",
     "react-ace": "10.1.0",
-    "react-dom": "^18.0.0",
+    "react-dom": "^18.1.0",
     "@react-hook/size": "^2.1.2",
     "styled-components": "^5.3.5"
   },

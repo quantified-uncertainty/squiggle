@@ -4089,9 +4089,9 @@
     "@types/react" "*"
 
 "@types/react@*", "@types/react@^16.9.19", "@types/react@^18.0.1", "@types/react@^18.0.3":
-  version "18.0.7"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.7.tgz#8437a226763adf854969954dfe582529a406cbad"
-  integrity sha512-CXSXHzTexlX9esf4ReIUJeaemKcmBEvYzxHDUk19c3BCcEGUvUjkeC3jkscPSfSaQ6SPDRNd/zMxi8oc/P1zxA==
+  version "18.0.8"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.8.tgz#a051eb380a9fbcaa404550543c58e1cf5ce4ab87"
+  integrity sha512-+j2hk9BzCOrrOSJASi5XiOyBbERk9jG5O73Ya4M0env5Ixi6vUNli4qy994AINcEF+1IEHISYFfIT4zwr++LKw==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -8472,14 +8472,7 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-fast-check@2.25.0:
-  version "2.25.0"
-  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-2.25.0.tgz#5146601851bf3be0953bd17eb2b7d547936c6561"
-  integrity sha512-wRUT2KD2lAmT75WNIJIHECawoUUMHM0I5jrlLXGtGeqmPL8jl/EldUDjY1VCp6fDY8yflyfUeIOsOBrIbIiArg==
-  dependencies:
-    pure-rand "^5.0.1"
-
-fast-check@^2.17.0:
+fast-check@2.25.0, fast-check@^2.17.0:
   version "2.25.0"
   resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-2.25.0.tgz#5146601851bf3be0953bd17eb2b7d547936c6561"
   integrity sha512-wRUT2KD2lAmT75WNIJIHECawoUUMHM0I5jrlLXGtGeqmPL8jl/EldUDjY1VCp6fDY8yflyfUeIOsOBrIbIiArg==
@@ -14324,13 +14317,13 @@ react-docgen@^5.0.0:
     node-dir "^0.1.10"
     strip-indent "^3.0.0"
 
-react-dom@^18.0.0:
-  version "18.0.0"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.0.0.tgz#26b88534f8f1dbb80853e1eabe752f24100d8023"
-  integrity sha512-XqX7uzmFo0pUceWFCt7Gff6IyIMzFUn7QMZrbrQfGxtaxXZIcGQzoNpRLE3fQLnS4XzLLPMZX2T9TRcSrasicw==
+react-dom@^18.1.0:
+  version "18.1.0"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.1.0.tgz#7f6dd84b706408adde05e1df575b3a024d7e8a2f"
+  integrity sha512-fU1Txz7Budmvamp7bshe4Zi32d0ll7ect+ccxNu9FlObT605GOEB8BfO4tmRJ39R5Zj831VCpvQ05QPBW5yb+w==
   dependencies:
     loose-envify "^1.1.0"
-    scheduler "^0.21.0"
+    scheduler "^0.22.0"
 
 react-draggable@^4.4.3:
   version "4.4.4"
@@ -15233,10 +15226,10 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-scheduler@^0.21.0:
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.21.0.tgz#6fd2532ff5a6d877b6edb12f00d8ab7e8f308820"
-  integrity sha512-1r87x5fz9MXqswA2ERLo0EbOAU74DpIUO090gIasYTqlVoJeMcl+Z1Rg7WHz+qtPujhS/hGIt9kxZOYBV3faRQ==
+scheduler@^0.22.0:
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.22.0.tgz#83a5d63594edf074add9a7198b1bae76c3db01b8"
+  integrity sha512-6QAm1BgQI88NPYymgGQLCZgvep4FyePDWFpXVK+zNSUgHwlqpJy8VEh8Et0KxTACS4VWwMousBElAZOH9nkkoQ==
   dependencies:
     loose-envify "^1.1.0"
 
