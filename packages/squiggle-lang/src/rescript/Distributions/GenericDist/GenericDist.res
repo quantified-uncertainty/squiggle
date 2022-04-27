@@ -147,21 +147,6 @@ let truncate = Truncate.run
   TODO: It would be useful to be able to pass in a paramater to get this to run either with convolution or monte carlo.
 */
 module AlgebraicCombination = {
-  let tryAnalyticalSimplification = (
-    arithmeticOperation: Operation.algebraicOperation,
-    t1: t,
-    t2: t,
-  ): option<result<SymbolicDistTypes.symbolicDist, Operation.Error.t>> =>
-    switch (arithmeticOperation, t1, t2) {
-    | (arithmeticOperation, Symbolic(d1), Symbolic(d2)) =>
-      switch SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation) {
-      | #AnalyticalSolution(symbolicDist) => Some(Ok(symbolicDist))
-      | #Error(er) => Some(Error(er))
-      | #NoSolution => None
-      }
-    | _ => None
-    }
-
   let runConvolution = (
     toPointSet: toPointSetFn,
     arithmeticOperation: Operation.convolutionOperation,
@@ -186,6 +171,49 @@ module AlgebraicCombination = {
     ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
   }
 
+  /*
+     It would be good to also do a check to make sure that probability mass for the second
+     operand, at value 1.0, is 0 (or approximately 0). However, we'd ideally want to check 
+     that both the probability mass and the probability density are greater than zero.
+     Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
+ */
+  let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
+    let firstOperandIsGreaterThanZero =
+      toFloatOperation(t1, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
+        r > 0.
+      )
+    let secondOperandIsGreaterThanZero =
+      toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Cdf(1e-10)) |> E.R.fmap(r =>
+        r > 0.
+      )
+    let items = E.A.R.firstErrorOrOpen([
+      firstOperandIsGreaterThanZero,
+      secondOperandIsGreaterThanZero,
+    ])
+    switch items {
+    | Error(r) => Some(r)
+    | Ok([true, _]) =>
+      Some(LogarithmOfDistributionError("First input must completely greater than 0"))
+    | Ok([false, true]) =>
+      Some(LogarithmOfDistributionError("Second input must completely greater than 0"))
+    | Ok([false, false]) => None
+    | Ok(_) => Some(Unreachable)
+    }
+  }
+
+  let getInvalidOperationError = (
+    t1: t,
+    t2: t,
+    ~toPointSetFn: toPointSetFn,
+    ~arithmeticOperation,
+  ): option<error> => {
+    if arithmeticOperation == #Logarithm {
+      getLogarithmInputError(t1, t2, ~toPointSetFn)
+    } else {
+      None
+    }
+  }
+
   //I'm (Ozzie) really just guessing here, very little idea what's best
   let expectedConvolutionCost: t => int = x =>
     switch x {
@@ -197,25 +225,37 @@ module AlgebraicCombination = {
     | _ => 1000
     }
 
-  type calculationMethod = MonteCarlo | Convolution(Operation.convolutionOperation)
+  type calculationStrategy = MonteCarloStrat | ConvolutionStrat(Operation.convolutionOperation)
 
-  let chooseConvolutionOrMonteCarlo = (
+  let chooseConvolutionOrMonteCarloDefault = (
     op: Operation.algebraicOperation,
     t2: t,
     t1: t,
-  ): calculationMethod =>
+  ): calculationStrategy =>
     switch op {
     | #Divide
     | #Power
     | #Logarithm =>
-      MonteCarlo
+      MonteCarloStrat
     | (#Add | #Subtract | #Multiply) as convOp =>
       expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > 10000
-        ? MonteCarlo
-        : Convolution(convOp)
+        ? MonteCarloStrat
+        : ConvolutionStrat(convOp)
     }
 
-  let run = (
+  let tryAnalyticalSimplification = (
+    arithmeticOperation: Operation.algebraicOperation,
+    t1: t,
+    t2: t,
+  ): option<SymbolicDistTypes.analyticalSimplificationResult> => {
+    switch (t1, t2) {
+    | (DistributionTypes.Symbolic(d1), DistributionTypes.Symbolic(d2)) =>
+      Some(SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation))
+    | _ => None
+    }
+  }
+
+  let runDefault = (
     t1: t,
     ~toPointSetFn: toPointSetFn,
     ~toSampleSetFn: toSampleSetFn,
@@ -223,14 +263,53 @@ module AlgebraicCombination = {
     ~t2: t,
   ): result<t, error> => {
     switch tryAnalyticalSimplification(arithmeticOperation, t1, t2) {
-    | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
-    | Some(Error(e)) => Error(OperationError(e))
+    | Some(#AnalyticalSolution(symbolicDist)) => Ok(Symbolic(symbolicDist))
+    | Some(#Error(e)) => Error(OperationError(e))
+    | Some(#NoSolution)
     | None =>
-      switch chooseConvolutionOrMonteCarlo(arithmeticOperation, t1, t2) {
-      | MonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-      | Convolution(convOp) =>
-        runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(r))
+      switch getInvalidOperationError(t1, t2, ~toPointSetFn, ~arithmeticOperation) {
+      | Some(e) => Error(e)
+      | None =>
+        switch chooseConvolutionOrMonteCarloDefault(arithmeticOperation, t1, t2) {
+        | MonteCarloStrat => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+        | ConvolutionStrat(convOp) =>
+          runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(
+            r,
+          ))
+        }
       }
+    }
+  }
+
+  let run = (
+    ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
+    t1: t,
+    ~toPointSetFn: toPointSetFn,
+    ~toSampleSetFn: toSampleSetFn,
+    ~arithmeticOperation: Operation.algebraicOperation,
+    ~t2: t,
+  ): result<t, error> => {
+    switch strategy {
+    | AsDefault => runDefault(t1, ~toPointSetFn, ~toSampleSetFn, ~arithmeticOperation, ~t2)
+    | AsSymbolic =>
+      switch tryAnalyticalSimplification(arithmeticOperation, t1, t2) {
+      | Some(#AnalyticalSolution(symbolicDist)) => Ok(Symbolic(symbolicDist))
+      | Some(#NoSolution) => Error(RequestedStrategyInvalidError(`No analytical solution`))
+      | None => Error(RequestedStrategyInvalidError("Inputs were not even symbolic"))
+      | Some(#Error(err)) => Error(OperationError(err))
+      }
+    | AsConvolution => {
+        let errString = opString => `Can't convolve on ${opString}`
+        switch arithmeticOperation {
+        | (#Add | #Subtract | #Multiply) as convOp =>
+          runConvolution(toPointSetFn, convOp, t1, t2)->E.R2.fmap(r => DistributionTypes.PointSet(
+            r,
+          ))
+        | (#Divide | #Power | #Logarithm) as op =>
+          op->Operation.Algebraic.toString->errString->RequestedStrategyInvalidError->Error
+        }
+      }
+    | AsMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
     }
   }
 }

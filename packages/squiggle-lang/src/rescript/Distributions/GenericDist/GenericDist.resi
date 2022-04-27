@@ -42,6 +42,7 @@ let truncate: (
 ) => result<t, error>
 
 let algebraicCombination: (
+  ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
   t,
   ~toPointSetFn: toPointSetFn,
   ~toSampleSetFn: toSampleSetFn,
