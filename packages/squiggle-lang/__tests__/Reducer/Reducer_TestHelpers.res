@@ -6,11 +6,12 @@ open Jest
 open Expect
 
 let unwrapRecord = rValue =>
-  rValue->Belt.Result.flatMap(value => switch value {
-  | ExpressionValue.EvRecord(aRecord) => Ok(aRecord)
-  | _ => ErrorValue.RETodo("TODO: External bindings must be returned")->Error
-  }
-)
+  rValue->Belt.Result.flatMap(value =>
+    switch value {
+    | ExpressionValue.EvRecord(aRecord) => Ok(aRecord)
+    | _ => ErrorValue.RETodo("TODO: External bindings must be returned")->Error
+    }
+  )
 
 let expectParseToBe = (expr: string, answer: string) =>
   Reducer.parse(expr)->Expression.toStringResult->expect->toBe(answer)
@@ -25,7 +26,12 @@ let expectEvalToBe = (expr: string, answer: string) =>
   Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
 
 let expectEvalBindingsToBe = (expr: string, bindings: Reducer.externalBindings, answer: string) =>
-  Reducer.evaluateUsingOptions(expr, ~externalBindings=Some(bindings), ~isPartial=None, ~environment=None)
+  Reducer.evaluateUsingOptions(
+    expr,
+    ~externalBindings=Some(bindings),
+    ~isPartial=None,
+    ~environment=None,
+  )
   ->ExpressionValue.toStringResult
   ->expect
   ->toBe(answer)
@@ -35,7 +41,12 @@ let expectEvalPartialBindingsToBe = (
   bindings: Reducer.externalBindings,
   answer: string,
 ) =>
-  Reducer.evaluateUsingOptions(expr, ~externalBindings=Some(bindings), ~isPartial=Some(true), ~environment=None)
+  Reducer.evaluateUsingOptions(
+    expr,
+    ~externalBindings=Some(bindings),
+    ~isPartial=Some(true),
+    ~environment=None,
+  )
   ->unwrapRecord
   ->ExpressionValue.toStringResultRecord
   ->expect

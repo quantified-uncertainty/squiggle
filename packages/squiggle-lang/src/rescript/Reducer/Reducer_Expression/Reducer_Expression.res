@@ -60,20 +60,26 @@ let defaultBindings: T.bindings = Belt.Map.String.empty
 /*
   Recursively evaluate/reduce the expression (Lisp AST)
 */
-let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<expressionValue, 'e> => {
+let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<
+  expressionValue,
+  'e,
+> => {
   /*
     Macros are like functions but instead of taking values as parameters,
     they take expressions as parameters and return a new expression.
     Macros are used to define language building blocks. They are like Lisp macros.
  */
-  let doMacroCall = (list: list<t>, bindings: T.bindings, environment: environment): result<t, 'e> =>
+  let doMacroCall = (list: list<t>, bindings: T.bindings, environment: environment): result<
+    t,
+    'e,
+  > =>
     Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(list, bindings, environment, reduceExpression)
 
   let applyParametersToLambda = (
     internal: internalCode,
     parameters: array<string>,
     args: list<expressionValue>,
-    environment
+    environment,
   ): result<expressionValue, 'e> => {
     let expr = castInternalCodeToExpression(internal)
     let parameterList = parameters->Belt.List.fromArray
@@ -91,9 +97,13 @@ let rec reduceExpression = (expression: t, bindings: T.bindings, environment: en
   /*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
-  let reduceValueList = (valueList: list<expressionValue>, environment): result<expressionValue, 'e> =>
+  let reduceValueList = (valueList: list<expressionValue>, environment): result<
+    expressionValue,
+    'e,
+  > =>
     switch valueList {
-    | list{EvCall(fName), ...args} => (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment)
+    | list{EvCall(fName), ...args} =>
+      (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment)
     // "(lambda(x=>internal) param)"
     | list{EvLambda((parameters, internal)), ...args} =>
       applyParametersToLambda(internal, parameters, args, environment)
@@ -153,8 +163,10 @@ let rec reduceExpression = (expression: t, bindings: T.bindings, environment: en
   )
 }
 
-let evalUsingExternalBindingsExpression_ = (aExpression, bindings, environment): result<expressionValue, 'e> =>
-  reduceExpression(aExpression, bindings, environment)
+let evalUsingExternalBindingsExpression_ = (aExpression, bindings, environment): result<
+  expressionValue,
+  'e,
+> => reduceExpression(aExpression, bindings, environment)
 
 /*
   Evaluates MathJs code via Reducer using bindings and answers the result.
@@ -187,24 +199,24 @@ let externalBindingsToBindings = (externalBindings: externalBindings): T.binding
 }
 
 let evaluateUsingOptions = (
-  ~environment: option<ReducerInterface_ExpressionValue.environment>, 
-  ~externalBindings: option<ReducerInterface_ExpressionValue.externalBindings>, 
-  ~isPartial: option<bool>, 
-  code: string): result<expressionValue, errorValue> => {
-
+  ~environment: option<ReducerInterface_ExpressionValue.environment>,
+  ~externalBindings: option<ReducerInterface_ExpressionValue.externalBindings>,
+  ~isPartial: option<bool>,
+  code: string,
+): result<expressionValue, errorValue> => {
   let anEnvironment = switch environment {
-    | Some(env) => env
-    | None => ReducerInterface_ExpressionValue.defaultEnvironment
+  | Some(env) => env
+  | None => ReducerInterface_ExpressionValue.defaultEnvironment
   }
 
   let anExternalBindings = switch externalBindings {
-    | Some(bindings) => bindings
-    | None => ReducerInterface_ExpressionValue.defaultExternalBindings
+  | Some(bindings) => bindings
+  | None => ReducerInterface_ExpressionValue.defaultExternalBindings
   }
 
   let anIsPartial = switch isPartial {
-    | Some(isPartial) => isPartial
-    | None => false
+  | Some(isPartial) => isPartial
+  | None => false
   }
 
   let bindings = anExternalBindings->externalBindingsToBindings

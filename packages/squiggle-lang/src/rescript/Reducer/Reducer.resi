@@ -5,27 +5,23 @@ module Extra = Reducer_Extra
 module Js = Reducer_Js
 module MathJs = Reducer_MathJs
 
-@genType 
+@genType
 type environment = ReducerInterface_ExpressionValue.environment
-@genType 
+@genType
 type errorValue = Reducer_ErrorValue.errorValue
-@genType 
+@genType
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
-@genType 
+@genType
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 
-@genType 
+@genType
 let evaluateUsingOptions: (
-  ~environment: option<
-    QuriSquiggleLang.ReducerInterface_ExpressionValue.environment,
-  >,
-  ~externalBindings: option<
-    QuriSquiggleLang.ReducerInterface_ExpressionValue.externalBindings,
-  >,
+  ~environment: option<QuriSquiggleLang.ReducerInterface_ExpressionValue.environment>,
+  ~externalBindings: option<QuriSquiggleLang.ReducerInterface_ExpressionValue.externalBindings>,
   ~isPartial: option<bool>,
   string,
 ) => result<expressionValue, errorValue>
-@genType 
+@genType
 let evaluate: string => result<expressionValue, errorValue>
 
 let parse: string => result<Expression.expression, errorValue>

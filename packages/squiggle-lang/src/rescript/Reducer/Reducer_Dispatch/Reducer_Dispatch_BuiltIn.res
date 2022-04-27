@@ -56,7 +56,7 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
   /*
     NOTE: This function is cancelled. The related issue is
     https://github.com/webpack/webpack/issues/13435
-  */
+ */
   let inspectPerformance = (value: expressionValue, label: string) => {
     // let _ = %raw("{performance} = require('perf_hooks')")
     // let start = %raw(`performance.now()`)
