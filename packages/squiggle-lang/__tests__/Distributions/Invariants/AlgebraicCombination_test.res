@@ -65,7 +65,7 @@ describe("(Algebraic) addition of distributions", () => {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(9.78655777150074, ~digits=1) // (uniformMean +. betaMean)
+      | Some(x) => x->expect->toBeSoCloseTo(9.786831807237022, ~digits=1) // (uniformMean +. betaMean)
       }
     })
     test("beta(alpha=2, beta=5) + uniform(low=9, high=10)", () => {
@@ -82,7 +82,7 @@ describe("(Algebraic) addition of distributions", () => {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(9.786753454457116, ~digits=1) // (uniformMean +. betaMean)
+      | Some(x) => x->expect->toBeSoCloseTo(9.784290207736126, ~digits=1) // (uniformMean +. betaMean)
       }
     })
   })
@@ -162,6 +162,7 @@ describe("(Algebraic) addition of distributions", () => {
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
+      // sometimes it works with ~digits=4.
       // This value was calculated by a python script
       | Some(x) => x->expect->toBeSoCloseTo(0.979023, ~digits=0)
       }
@@ -360,7 +361,7 @@ describe("(Algebraic) addition of distributions", () => {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(9.174267267465632, ~digits=0)
+      | Some(x) => x->expect->toBeSoCloseTo(9.190872365862756, ~digits=0)
       }
     })
   })

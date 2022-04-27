@@ -59,13 +59,7 @@ describe("cumulative density function", () => {
           { sampleCount: n, xyPointLength: 100 }
         );
         let cdfValue = dist.cdf(max).value;
-        let min = Math.min(...xs);
-        let epsilon = 5e-3;
-        if (max - min < epsilon) {
-          expect(cdfValue).toBeLessThan(1 - epsilon);
-        } else {
-          expect(dist.cdf(max).value).toBeGreaterThan(1 - epsilon);
-        }
+        expect(cdfValue).toBeCloseTo(1.0, 2);
       })
     );
   });
