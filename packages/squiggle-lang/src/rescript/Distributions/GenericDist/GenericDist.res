@@ -163,13 +163,17 @@ module AlgebraicCombination = {
  */
     let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
       let firstOperandIsGreaterThanZero =
-        toFloatOperation(t1, ~toPointSetFn, ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten)) |> E.R.fmap(r =>
-          r > 0.
-        )
+        toFloatOperation(
+          t1,
+          ~toPointSetFn,
+          ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
+        ) |> E.R.fmap(r => r > 0.)
       let secondOperandIsGreaterThanZero =
-        toFloatOperation(t2, ~toPointSetFn, ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten)) |> E.R.fmap(r =>
-          r > 0.
-        )
+        toFloatOperation(
+          t2,
+          ~toPointSetFn,
+          ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
+        ) |> E.R.fmap(r => r > 0.)
       let items = E.A.R.firstErrorOrOpen([
         firstOperandIsGreaterThanZero,
         secondOperandIsGreaterThanZero,
@@ -238,8 +242,8 @@ module AlgebraicCombination = {
     //I'm (Ozzie) really just guessing here, very little idea what's best
     let expectedConvolutionCost: t => int = x =>
       switch x {
-      | Symbolic(#Float(_)) =>MagicNumbers.OpCost.floatCost
-      | Symbolic(_) =>MagicNumbers.OpCost.symbolicCost
+      | Symbolic(#Float(_)) => MagicNumbers.OpCost.floatCost
+      | Symbolic(_) => MagicNumbers.OpCost.symbolicCost
       | PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
       | PointSet(Mixed(_)) => MagicNumbers.OpCost.mixedCost
       | PointSet(Continuous(_)) => MagicNumbers.OpCost.continuousCost
@@ -253,7 +257,8 @@ module AlgebraicCombination = {
         #AsSymbolic
       | #NoSolution =>
         if Operation.Convolution.canDoAlgebraicOperation(arithmeticOperation) {
-          expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > MagicNumbers.OpCost.monteCarloCost
+          expectedConvolutionCost(t1) * expectedConvolutionCost(t2) >
+            MagicNumbers.OpCost.monteCarloCost
             ? #AsMonteCarlo
             : #AsConvolution
         } else {
