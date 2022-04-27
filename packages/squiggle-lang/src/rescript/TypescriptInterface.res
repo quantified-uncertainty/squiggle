@@ -32,7 +32,7 @@ let makeSampleSetDist = SampleSetDist.make
 let evaluate = Reducer.evaluate
 
 @genType
-let evaluateUsingExternalBindings = Reducer.evaluateUsingExternalBindings
+let evaluateUsingOptions = Reducer.evaluateUsingOptions
 
 @genType
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
