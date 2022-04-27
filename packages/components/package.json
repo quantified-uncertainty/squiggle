@@ -37,7 +37,7 @@
     "@types/react-dom": "^18.0.2",
     "cross-env": "^7.0.3",
     "lodash": "^4.17.21",
-    "react": "^18.0.0",
+    "react": "^18.1.0",
     "react-scripts": "5.0.1",
     "react-vega": "^7.5.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
