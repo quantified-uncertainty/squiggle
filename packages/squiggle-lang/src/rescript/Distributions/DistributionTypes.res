@@ -16,7 +16,7 @@ type error =
   | OperationError(Operation.Error.t)
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
   | SparklineError(PointSetTypes.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
-  | RequestedStrategyInvalidError
+  | RequestedStrategyInvalidError(string)
   | LogarithmOfDistributionError(string)
   | OtherError(string)
 
@@ -38,7 +38,7 @@ module Error = {
     | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
-    | RequestedStrategyInvalidError => `Requested strategy invalid`
+    | RequestedStrategyInvalidError(err) => `Requested strategy invalid: ${err}`
     | OtherError(s) => s
     }
 
