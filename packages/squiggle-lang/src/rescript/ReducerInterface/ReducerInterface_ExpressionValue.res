@@ -25,7 +25,6 @@ type externalBindings = Js.Dict.t<expressionValue>
 @genType
 let defaultExternalBindings: externalBindings = Js.Dict.empty()
 
-
 type functionCall = (string, array<expressionValue>)
 
 let rec toString = aValue =>
