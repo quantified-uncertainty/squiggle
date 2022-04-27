@@ -523,11 +523,11 @@ module A = {
         let discrete = FloatFloatMap.empty()
         Belt.Array.forEachWithIndex(sortedArray, (index, element) => {
           let maxIndex = (sortedArray |> Array.length) - 1
-          let possiblySimilarElements = switch index {
-          | 0 => [index + 1]
-          | n if n == maxIndex => [index - 1]
-          | _ => [index - 1, index + 1]
-          } |> Belt.Array.map(_, r => sortedArray[r])
+          // let possiblySimilarElements = switch index {
+          // | 0 => [index + 1]
+          // | n if n == maxIndex => [index - 1]
+          // | _ => [index - 1, index + 1]
+          // } |> Belt.Array.map(_, r => sortedArray[r])
           // let hasSimilarElement = Belt.Array.some(possiblySimilarElements, r => r == element)
           let hasSimilarElement = false
           hasSimilarElement
