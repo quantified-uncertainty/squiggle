@@ -3,9 +3,7 @@ import React, { FC, ReactElement, useState } from "react";
 import ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import CodeEditor from "./CodeEditor";
-// import { Form, Input, Row, Col } from "antd";
 import styled from "styled-components";
-// import "antd/dist/antd.css";
 
 interface FieldFloatProps {
   label: string;
@@ -14,14 +12,14 @@ interface FieldFloatProps {
   onChange: (value: number) => void;
 }
 
-const Input = styled.input``
+const Input = styled.input``;
 
-const FormItem = (props: {label:string, children:ReactElement}) => (
+const FormItem = (props: { label: string; children: ReactElement }) => (
   <div>
     <label>{props.label}</label>
     {props.children}
-    </div>
-)
+  </div>
+);
 
 function FieldFloat(Props: FieldFloatProps) {
   let [contents, setContents] = useState(Props.value + "");
@@ -74,8 +72,11 @@ const Display = styled.div<TitleProps>`
   max-height: ${(props) => props.maxHeight}px;
 `;
 
-const Row = styled.div``
-const Col = styled.div``
+const Row = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+`;
+const Col = styled.div``;
 
 let SquigglePlayground: FC<Props> = ({
   initialSquiggleString = "",
