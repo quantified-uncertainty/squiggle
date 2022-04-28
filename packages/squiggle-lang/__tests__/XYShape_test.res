@@ -18,21 +18,22 @@ let pointSetDist3: PointSetTypes.xyShape = {
   ys: [0.2, 0.5, 0.8],
 }
 
+let makeAndGetErrorString = (~xs, ~ys) =>
+  XYShape.T.make(~xs, ~ys)->E.R.getError->E.O2.fmap(XYShape.Error.toString)
+
 describe("XYShapes", () => {
   describe("Validator", () => {
-    makeTest("with no errors", XYShape.T.Validator.validate(pointSetDist1), None)
     makeTest(
-      "when empty",
-      XYShape.T.Validator.validate({xs: [], ys: []})->E.O2.fmap(Errors.toString),
-      Some("XYShape validate Xs is empty"),
+      "with no errors",
+      makeAndGetErrorString(~xs=[1.0, 4.0, 8.0], ~ys=[0.2, 0.4, 0.8]),
+      None,
     )
+    makeTest("when empty", makeAndGetErrorString(~xs=[], ~ys=[]), Some("Xs is empty"))
     makeTest(
       "when not sorted, different lengths, and not finite",
-      XYShape.T.Validator.validate({xs: [2.0, 1.0, infinity, 0.0], ys: [3.0, Js.Float._NaN]})->E.O2.fmap(
-        Errors.toString,
-      ),
+      makeAndGetErrorString(~xs=[2.0, 1.0, infinity, 0.0], ~ys=[3.0, Js.Float._NaN]),
       Some(
-        "Multiple Errors: [XYShape validate Xs is not sorted], [XYShape validate Xs and Ys have different lengths. Xs has length 4 and Ys has length 2], [XYShape validate Xs is not finite. Example value: Infinity], [XYShape validate Ys is not finite. Example value: NaN]",
+        "Multiple Errors: [Xs is not sorted], [Xs and Ys have different lengths. Xs has length 4 and Ys has length 2], [Xs is not finite. Example value: Infinity], [Ys is not finite. Example value: NaN]",
       ),
     )
   })

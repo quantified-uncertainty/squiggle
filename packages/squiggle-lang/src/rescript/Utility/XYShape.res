@@ -4,6 +4,42 @@ type xyShape = {
   ys: array<float>,
 }
 
+type propertyName = string
+
+@genType
+type rec error =
+  | NotSorted(propertyName)
+  | IsEmpty(propertyName)
+  | NotFinite(propertyName, float)
+  | DifferentLengths({p1Name: string, p2Name: string, p1Length: int, p2Length: int})
+  | MultipleErrors(array<error>)
+
+@genType
+module Error = {
+  let mapErrorArrayToError = (errors: array<error>): option<error> => {
+    switch errors {
+    | [] => None
+    | [error] => Some(error)
+    | _ => Some(MultipleErrors(errors))
+    }
+  }
+
+  let rec toString = (t: error) =>
+    switch t {
+    | NotSorted(propertyName) => `${propertyName} is not sorted`
+    | IsEmpty(propertyName) => `${propertyName} is empty`
+    | NotFinite(propertyName, exampleValue) =>
+      `${propertyName} is not finite. Example value: ${E.Float.toString(exampleValue)}`
+    | DifferentLengths({p1Name, p2Name, p1Length, p2Length}) =>
+      `${p1Name} and ${p2Name} have different lengths. ${p1Name} has length ${E.I.toString(
+          p1Length,
+        )} and ${p2Name} has length ${E.I.toString(p2Length)}`
+    | MultipleErrors(errors) =>
+      `Multiple Errors: ${E.A2.fmap(errors, toString)->E.A2.fmap(r => `[${r}]`)
+          |> E.A.joinWith(", ")}`
+    }
+}
+
 @genType
 type interpolationStrategy = [
   | #Stepwise
@@ -63,15 +99,10 @@ module T = {
 
   module Validator = {
     let fnName = "XYShape validate"
-    let property = (propertyName: string): Errors.property => {
-      fnName: fnName,
-      propertyName: propertyName,
-    }
-    let notSortedError = (p: string): Errors.error => NotSorted(property(p))
-    let notFiniteError = (p, exampleValue): Errors.error => NotFinite(property(p), exampleValue)
-    let isEmptyError = (propertyName): Errors.error => IsEmpty(property(propertyName))
-    let differentLengthsError = (t): Errors.error => DifferentLengths({
-      fnName: fnName,
+    let notSortedError = (p: string): error => NotSorted(p)
+    let notFiniteError = (p, exampleValue): error => NotFinite(p, exampleValue)
+    let isEmptyError = (propertyName): error => IsEmpty(propertyName)
+    let differentLengthsError = (t): error => DifferentLengths({
       p1Name: "Xs",
       p2Name: "Ys",
       p1Length: E.A.length(xs(t)),
@@ -92,7 +123,15 @@ module T = {
       let ysNotFinite = getNonFiniteYs(t)->E.O2.fmap(notFiniteError("Ys"))
       [xsNotSorted, xsEmpty, differentLengths, xsNotFinite, ysNotFinite]
       ->E.A.O.concatSomes
-      ->Errors.mapErrorArrayToError
+      ->Error.mapErrorArrayToError
+    }
+  }
+
+  let make = (~xs: array<float>, ~ys: array<float>) => {
+    let attempt: t = {xs: xs, ys: ys}
+    switch Validator.validate(attempt) {
+    | Some(error) => Error(error)
+    | None => Ok(attempt)
     }
   }
 }

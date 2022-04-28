@@ -162,6 +162,12 @@ exception Assertion(string)
 module R = {
   let result = Rationale.Result.result
   let id = e => e |> result(U.id, U.id)
+  let isOk = Belt.Result.isOk
+  let getError = (r: result<'a, 'b>) =>
+    switch r {
+    | Ok(_) => None
+    | Error(e) => Some(e)
+    }
   let fmap = Rationale.Result.fmap
   let bind = Rationale.Result.bind
   let toExn = (msg: string, x: result<'a, 'b>): 'a =>
