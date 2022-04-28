@@ -8,44 +8,42 @@ import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 The squiggle language has a very simple syntax. The best way to get to understand
 it is by simply looking at examples.
 
-## Expressions and statements
+## Expressions
 
-A squiggle **expression** is a value like a float or a distribution or a data structure like an array or a record.
+A distribution
 
 <SquiggleEditor initialSquiggleString={`mixture(1 to 2, 3, [0.3, 0.7])`} />
 
-The bottom line of your squiggle buffer should be an expression, which we evaluate (i.e., render). Sometimes we call the last expression of a squiggle file an _export_.
+A number
 
-A squiggle **assignment** is a statement, when you want to bind an expression to a name.
+<SquiggleEditor initialSquiggleString="4.321e-3" />
 
-<SquiggleEditor
-  initialSquiggleString={`value_of_work = 10 to 70
-value_of_work`}
-/>
-
-### Functions
-
-Some assignments are functions
-
-<SquiggleEditor
-  initialSquiggleString={`ozzie_estimate(t) = lognormal(1, t ^ 1.01)
-nuño_estimate(t) = mixture(0.5 to 2, normal(1, t ^ 1.25))
-ozzie_estimate(5) * nuño_estimate(5.5)
-`}
-/>
-
-## Data structures
-
-A squiggle **array** is a list of expressions, which is interpretable as an export.
+Arrays
 
 <SquiggleEditor
   initialSquiggleString={`[cauchy(1,1), 4, isNormalized(toPointSet(1 to 2))]`}
 />
 
-A squiggle **record** is a key-value store with dot accessors.
+Records
+
+<SquiggleEditor initialSquiggleString="d1 = {dist: normal(0, 1), weight: 0.25}" />
+
+## Statements
+
+A statement assigns expressions to names. It looks like `<symbol> = <expression>`
 
 <SquiggleEditor
-  initialSquiggleString={`d1 = {dist: normal(0, 1), weight: 0.25}
-d2 = {dist: 5 to 6, weight: 0.75}
-mx(d1.dist, d2.dist, [d1.weight, d2.weight])`}
+  initialSquiggleString={`value_of_work = 10 to 70
+5 + value_of_work / 75`}
+/>
+
+### Functions
+
+We can define functions
+
+<SquiggleEditor
+  initialSquiggleString={`ozzie_estimate(t) = lognormal(1, t ^ 1.01)
+nuño_estimate(t, m) = mixture(0.5 to 2, normal(m, t ^ 1.25))
+ozzie_estimate(5) * nuño_estimate(5.01, 1)
+`}
 />
