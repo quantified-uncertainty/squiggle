@@ -6,6 +6,24 @@ type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
+let isPointSet = (t: t) =>
+  switch t {
+  | PointSet(_) => true
+  | _ => false
+  }
+
+let isSampleSetSet = (t: t) =>
+  switch t {
+  | SampleSet(_) => true
+  | _ => false
+  }
+
+let isSymbolic = (t: t) =>
+  switch t {
+  | Symbolic(_) => true
+  | _ => false
+  }
+
 let sampleN = (t: t, n) =>
   switch t {
   | PointSet(r) => PointSetDist.sampleNRendered(n, r)
@@ -248,20 +266,24 @@ module AlgebraicCombination = {
       | _ => MagicNumbers.OpCost.wildcardCost
       }
 
+    let hasSampleSetDist = (t1: t, t2: t): bool => isSampleSetSet(t1) || isSampleSetSet(t2)
+
+    let convolutionIsFasterThanMonteCarlo = (t1: t, t2: t): bool =>
+      expectedConvolutionCost(t1) * expectedConvolutionCost(t2) < MagicNumbers.OpCost.monteCarloCost
+
+    let preferConvolutionToMonteCarlo = (t1, t2, arithmeticOperation) => {
+      !hasSampleSetDist(t1, t2) &&
+      Operation.Convolution.canDoAlgebraicOperation(arithmeticOperation) &&
+      convolutionIsFasterThanMonteCarlo(t1, t2)
+    }
+
     let run = (~t1: t, ~t2: t, ~arithmeticOperation): specificStrategy => {
       switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
       | #AnalyticalSolution(_)
       | #Error(_) =>
         #AsSymbolic
       | #NoSolution =>
-        if Operation.Convolution.canDoAlgebraicOperation(arithmeticOperation) {
-          expectedConvolutionCost(t1) * expectedConvolutionCost(t2) >
-            MagicNumbers.OpCost.monteCarloCost
-            ? #AsMonteCarlo
-            : #AsConvolution
-        } else {
-          #AsMonteCarlo
-        }
+        preferConvolutionToMonteCarlo(t1, t2, arithmeticOperation) ? #AsConvolution : #AsMonteCarlo
       }
     }
   }
