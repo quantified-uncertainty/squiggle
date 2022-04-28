@@ -43,6 +43,10 @@ module T = {
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
   let mapX = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys}
   let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(fn, t.ys)}
+  let mapYResult = (fn: float => result<float, 'e>, t: t): result<t, 'e> => {
+    let mappedYs = E.A.fmap(fn, t.ys)
+    E.A.R.firstErrorOrOpen(mappedYs)->E.R2.fmap(y => {xs: t.xs, ys: y})
+  }
   let square = mapX(x => x ** 2.0)
   let zip = ({xs, ys}: t) => Belt.Array.zip(xs, ys)
   let fromArray = ((xs, ys)): t => {xs: xs, ys: ys}
@@ -60,8 +64,8 @@ module T = {
 
 module Ts = {
   type t = T.ts
-  let minX = (t: t) => t |> E.A.fmap(T.minX) |> E.A.min |> extImp
-  let maxX = (t: t) => t |> E.A.fmap(T.maxX) |> E.A.max |> extImp
+  let minX = (t: t) => t |> E.A.fmap(T.minX) |> E.A.Floats.min
+  let maxX = (t: t) => t |> E.A.fmap(T.maxX) |> E.A.Floats.max
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let allXs = (t: t) => t |> E.A.fmap(T.xs) |> E.A.Sorted.concatMany
 }
@@ -199,7 +203,7 @@ module XtoY = {
 
   /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
    For discrete distributions, the probability density between points is zero, so we just return zero here. */
-  let discreteInterpolator: interpolator = (t: T.t, leftIndex: int, x: float) => 0.0
+  let discreteInterpolator: interpolator = (_: T.t, _: int, _: float) => 0.0
 }
 
 module XsConversion = {
@@ -220,8 +224,8 @@ module XsConversion = {
 
 module Zipped = {
   type zipped = array<(float, float)>
-  let compareYs = ((_, y1), (_, y2)) => y1 > y2 ? 1 : 0
-  let compareXs = ((x1, _), (x2, _)) => x1 > x2 ? 1 : 0
+  let compareYs = ((_, y1): (float, float), (_, y2): (float, float)) => y1 > y2 ? 1 : 0
+  let compareXs = ((x1, _): (float, float), (x2, _): (float, float)) => x1 > x2 ? 1 : 0
   let sortByY = (t: zipped) => t |> E.A.stableSortBy(_, compareYs)
   let sortByX = (t: zipped) => t |> E.A.stableSortBy(_, compareXs)
   let filterByX = (testFn: float => bool, t: zipped) => t |> E.A.filter(((x, _)) => testFn(x))
@@ -229,7 +233,12 @@ module Zipped = {
 
 module PointwiseCombination = {
   // t1Interpolator and t2Interpolator are functions from XYShape.XtoY, e.g. linearBetweenPointsExtrapolateFlat.
-  let combine = %raw(` // : (float => float => float, T.t, T.t, bool) => T.t
+  let combine: (
+    (float, float) => result<float, Operation.Error.t>,
+    interpolator,
+    T.t,
+    T.t,
+  ) => result<T.t, Operation.Error.t> = %raw(`
       // This function combines two xyShapes by looping through both of them simultaneously.
       // It always moves on to the next smallest x, whether that's in the first or second input's xs,
       // and interpolates the value on the other side, thus accumulating xs and ys.
@@ -277,12 +286,27 @@ module PointwiseCombination = {
           }
 
           outX.push(x);
-          outY.push(fn(ya, yb));
+
+          // Here I check whether the operation was a success. If it was
+          // keep going. Otherwise, stop and throw the error back to user
+          let newY = fn(ya, yb);
+          if(newY.TAG === 0){
+            outY.push(newY._0);
+          }
+          else {
+            return newY;
+          }
         }
 
-        return {xs: outX, ys: outY};
+        return {TAG: 0, _0: {xs: outX, ys: outY}, [Symbol.for("name")]: "Ok"};
       }
     `)
+
+  let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
+    combine((a, b) => Ok(a +. b), interpolator, t1, t2)->E.R.toExn(
+      "Add operation should never fail",
+      _,
+    )
 
   let combineEvenXs = (~fn, ~xToYSelection, sampleCount, t1: T.t, t2: T.t) =>
     switch (E.A.length(t1.xs), E.A.length(t2.xs)) {

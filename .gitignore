@@ -6,3 +6,4 @@ yarn-error.log
 .DS_Store
 **/.sync.ffs_db
 .direnv
+.log

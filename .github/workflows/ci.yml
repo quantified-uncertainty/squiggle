@@ -9,6 +9,7 @@ on:
     branches:
       - master
       - develop
+      - reducer-dev
 
 jobs:
   pre_check:
@@ -71,12 +72,16 @@ jobs:
         run: cd ../../ && yarn
       - name: Build rescript codebase
         run: yarn build
-      - name: Run tests
-        run: yarn test
+      - name: Run rescript tests
+        run: yarn test:rescript
+      - name: Run typescript tests
+        run: yarn test:ts
       - name: Run webpack
         run: yarn bundle
-      - name: Upload coverage report
-        run: yarn coverage:ci
+      - name: Upload rescript coverage report
+        run: yarn coverage:rescript:ci
+      - name: Upload typescript coverage report
+        run: yarn coverage:ts:ci
 
   components-lint:
     name: Components lint

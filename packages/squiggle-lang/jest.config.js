@@ -9,5 +9,6 @@ module.exports = {
     ".*Fixtures.bs.js",
     "/node_modules/",
     ".*Helpers.bs.js",
+    ".*Helpers.ts",
   ],
 };

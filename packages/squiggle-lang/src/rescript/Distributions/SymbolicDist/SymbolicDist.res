@@ -52,7 +52,7 @@ module Normal = {
     switch operation {
     | #Add => Some(#Normal({mean: n1 +. n2.mean, stdev: n2.stdev}))
     | #Subtract => Some(#Normal({mean: n1 -. n2.mean, stdev: n2.stdev}))
-    | #Multiply => Some(#Normal({mean: n1 *. n2.mean, stdev: n1 *. n2.stdev}))
+    | #Multiply => Some(#Normal({mean: n1 *. n2.mean, stdev: Js.Math.abs_float(n1) *. n2.stdev}))
     | _ => None
     }
 
@@ -60,8 +60,8 @@ module Normal = {
     switch operation {
     | #Add => Some(#Normal({mean: n1.mean +. n2, stdev: n1.stdev}))
     | #Subtract => Some(#Normal({mean: n1.mean -. n2, stdev: n1.stdev}))
-    | #Multiply => Some(#Normal({mean: n1.mean *. n2, stdev: n1.stdev *. n2}))
-    | #Divide => Some(#Normal({mean: n1.mean /. n2, stdev: n1.stdev /. n2}))
+    | #Multiply => Some(#Normal({mean: n1.mean *. n2, stdev: n1.stdev *. Js.Math.abs_float(n2)}))
+    | #Divide => Some(#Normal({mean: n1.mean /. n2, stdev: n1.stdev /. Js.Math.abs_float(n2)}))
     | _ => None
     }
 }
@@ -86,7 +86,10 @@ module Exponential = {
 
 module Cauchy = {
   type t = cauchy
-  let make = (local, scale): symbolicDist => #Cauchy({local: local, scale: scale})
+  let make = (local, scale): result<symbolicDist, string> =>
+    scale > 0.0
+      ? Ok(#Cauchy({local: local, scale: scale}))
+      : Error("Cauchy distribution scale parameter must larger than 0.")
   let pdf = (x, t: t) => Jstat.Cauchy.pdf(x, t.local, t.scale)
   let cdf = (x, t: t) => Jstat.Cauchy.cdf(x, t.local, t.scale)
   let inv = (p, t: t) => Jstat.Cauchy.inv(p, t.local, t.scale)
@@ -377,7 +380,7 @@ module T = {
   ): analyticalSimplificationResult =>
     switch (d1, d2) {
     | (#Float(v1), #Float(v2)) =>
-      switch Operation.Algebraic.applyFn(op, v1, v2) {
+      switch Operation.Algebraic.toFn(op, v1, v2) {
       | Ok(r) => #AnalyticalSolution(#Float(r))
       | Error(n) => #Error(n)
       }

@@ -87,12 +87,11 @@ let stepwiseToLinear = (t: t): t =>
 // Note: This results in a distribution with as many points as the sum of those in t1 and t2.
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn: (t, t) => option<t>=(_, _) => None,
   ~distributionType: PointSetTypes.distributionType=#PDF,
-  fn: (float, float) => float,
+  fn: (float, float) => result<float, Operation.Error.t>,
   t1: PointSetTypes.continuousShape,
   t2: PointSetTypes.continuousShape,
-): PointSetTypes.continuousShape => {
+): result<PointSetTypes.continuousShape, 'e> => {
   // If we're adding the distributions, and we know the total of each, then we
   // can just sum them up. Otherwise, all bets are off.
   let combinedIntegralSum = Common.combineIntegralSums(
@@ -120,9 +119,8 @@ let combinePointwise = (
 
   let interpolator = XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation)
 
-  make(
-    ~integralSumCache=combinedIntegralSum,
-    XYShape.PointwiseCombination.combine(fn, interpolator, t1.xyShape, t2.xyShape),
+  XYShape.PointwiseCombination.combine(fn, interpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
+    make(~integralSumCache=combinedIntegralSum, x)
   )
 }
 
@@ -141,18 +139,47 @@ let updateIntegralSumCache = (integralSumCache, t: t): t => {
 
 let updateIntegralCache = (integralCache, t: t): t => {...t, integralCache: integralCache}
 
-let reduce = (
+let sum = (
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
-  ~integralCachesFn: (t, t) => option<t>=(_, _) => None,
-  fn,
   continuousShapes,
-) =>
+): t =>
   continuousShapes |> E.A.fold_left(
-    combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn),
+    (x, y) =>
+      combinePointwise(~integralSumCachesFn, (a, b) => Ok(a +. b), x, y)->E.R.toExn(
+        "Addition should never fail",
+        _,
+      ),
     empty,
   )
 
-let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t) =>
+let reduce = (
+  ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
+  fn: (float, float) => result<float, 'e>,
+  continuousShapes,
+): result<t, 'e> =>
+  continuousShapes |> E.A.R.foldM(combinePointwise(~integralSumCachesFn, fn), empty)
+
+let mapYResult = (
+  ~integralSumCacheFn=_ => None,
+  ~integralCacheFn=_ => None,
+  ~fn: float => result<float, 'e>,
+  t: t,
+): result<t, 'e> =>
+  XYShape.T.mapYResult(fn, getShape(t))->E.R2.fmap(x =>
+    make(
+      ~interpolation=t.interpolation,
+      ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
+      ~integralCache=t.integralCache |> E.O.bind(_, integralCacheFn),
+      x,
+    )
+  )
+
+let mapY = (
+  ~integralSumCacheFn=_ => None,
+  ~integralCacheFn=_ => None,
+  ~fn: float => float,
+  t: t,
+): t =>
   make(
     ~interpolation=t.interpolation,
     ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
@@ -176,6 +203,7 @@ module T = Dist({
   let minX = shapeFn(XYShape.T.minX)
   let maxX = shapeFn(XYShape.T.maxX)
   let mapY = mapY
+  let mapYResult = mapYResult
   let updateIntegralCache = updateIntegralCache
   let toDiscreteProbabilityMassFraction = _ => 0.0
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Continuous(t)
@@ -241,15 +269,21 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
 })
 
+let isNormalized = (t: t): bool => {
+  let areaUnderIntegral = t |> updateIntegralCache(Some(T.integral(t))) |> T.integralEndY
+  areaUnderIntegral < 1. +. 1e-7 && areaUnderIntegral > 1. -. 1e-7
+}
+
 let downsampleEquallyOverX = (length, t): t =>
   t |> shapeMap(XYShape.XsConversion.proportionEquallyOverX(length))
 
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
 let combineAlgebraicallyWithDiscrete = (
-  op: Operation.algebraicOperation,
+  op: Operation.convolutionOperation,
   t1: t,
   t2: PointSetTypes.discreteShape,
+  ~discretePosition: AlgebraicShapeCombination.argumentPosition,
 ) => {
   let t1s = t1 |> getShape
   let t2s = t2.xyShape // TODO would like to use Discrete.getShape here, but current file structure doesn't allow for that
@@ -266,11 +300,11 @@ let combineAlgebraicallyWithDiscrete = (
       op,
       continuousAsLinear |> getShape,
       t2s,
+      ~discretePosition,
     )
 
     let combinedIntegralSum = switch op {
-    | #Multiply
-    | #Divide =>
+    | #Multiply =>
       Common.combineIntegralSums((a, b) => Some(a *. b), t1.integralSumCache, t2.integralSumCache)
     | _ => None
     }
@@ -280,7 +314,7 @@ let combineAlgebraicallyWithDiscrete = (
   }
 }
 
-let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t) => {
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t) => {
   let s1 = t1 |> getShape
   let s2 = t2 |> getShape
   let t1n = s1 |> XYShape.T.length

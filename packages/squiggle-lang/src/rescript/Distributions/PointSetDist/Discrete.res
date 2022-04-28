@@ -34,11 +34,6 @@ let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
 
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn: (
-    PointSetTypes.continuousShape,
-    PointSetTypes.continuousShape,
-  ) => option<PointSetTypes.continuousShape>=(_, _) => None,
-  fn,
   t1: PointSetTypes.discreteShape,
   t2: PointSetTypes.discreteShape,
 ): PointSetTypes.discreteShape => {
@@ -54,24 +49,16 @@ let combinePointwise = (
   make(
     ~integralSumCache=combinedIntegralSum,
     XYShape.PointwiseCombination.combine(
-      \"+.",
+      (a, b) => Ok(a +. b),
       XYShape.XtoY.discreteInterpolator,
       t1.xyShape,
       t2.xyShape,
-    ),
+    )->E.R.toExn("Addition operation should never fail", _),
   )
 }
 
-let reduce = (
-  ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn=(_, _) => None,
-  fn,
-  discreteShapes,
-): PointSetTypes.discreteShape =>
-  discreteShapes |> E.A.fold_left(
-    combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn),
-    empty,
-  )
+let reduce = (~integralSumCachesFn=(_, _) => None, discreteShapes): PointSetTypes.discreteShape =>
+  discreteShapes |> E.A.fold_left(combinePointwise(~integralSumCachesFn), empty)
 
 let updateIntegralSumCache = (integralSumCache, t: t): t => {
   ...t,
@@ -85,7 +72,7 @@ let updateIntegralCache = (integralCache, t: t): t => {
 
 /* This multiples all of the data points together and creates a new discrete distribution from the results.
  Data points at the same xs get added together. It may be a good idea to downsample t1 and t2 before and/or the result after. */
-let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t => {
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
   let t1s = t1 |> getShape
   let t2s = t2 |> getShape
   let t1n = t1s |> XYShape.T.length
@@ -97,7 +84,7 @@ let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =
     t2.integralSumCache,
   )
 
-  let fn = Operation.Algebraic.toFn(op)
+  let fn = Operation.Convolution.toFn(op)
   let xToYMap = E.FloatFloatMap.empty()
 
   for i in 0 to t1n - 1 {
@@ -116,7 +103,26 @@ let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =
   make(~integralSumCache=combinedIntegralSum, combinedShape)
 }
 
-let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn, t: t) =>
+let mapYResult = (
+  ~integralSumCacheFn=_ => None,
+  ~integralCacheFn=_ => None,
+  ~fn: float => result<float, 'e>,
+  t: t,
+): result<t, 'e> =>
+  XYShape.T.mapYResult(fn, getShape(t))->E.R2.fmap(x =>
+    make(
+      ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
+      ~integralCache=t.integralCache |> E.O.bind(_, integralCacheFn),
+      x,
+    )
+  )
+
+let mapY = (
+  ~integralSumCacheFn=_ => None,
+  ~integralCacheFn=_ => None,
+  ~fn: float => float,
+  t: t,
+): t =>
   make(
     ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
     ~integralCache=t.integralCache |> E.O.bind(_, integralCacheFn),
@@ -156,6 +162,7 @@ module T = Dist({
   let maxX = shapeFn(XYShape.T.maxX)
   let toDiscreteProbabilityMassFraction = _ => 1.0
   let mapY = mapY
+  let mapYResult = mapYResult
   let updateIntegralCache = updateIntegralCache
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Discrete(t)
   let toContinuous = _ => None

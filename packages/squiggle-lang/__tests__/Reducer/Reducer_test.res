@@ -1,15 +1,6 @@
 open Jest
 open Reducer_TestHelpers
 
-let testParseToBe = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
-
-let testDescriptionParseToBe = (desc, expr, answer) =>
-  test(desc, () => expectParseToBe(expr, answer))
-
-let testEvalToBe = (expr, answer) => test(expr, () => expectEvalToBe(expr, answer))
-
-let testDescriptionEvalToBe = (desc, expr, answer) => test(desc, () => expectEvalToBe(expr, answer))
-
 describe("reducer using mathjs parse", () => {
   // Test the MathJs parser compatibility
   // Those tests toString that there is a semantic mapping from MathJs to Expression

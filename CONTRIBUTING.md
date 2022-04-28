@@ -8,7 +8,7 @@ Squiggle is currently pre-alpha.
 
 # Quick links
 
-- [Roadmap to the alpha](https://github.com/QURIresearch/squiggle/projects/2)
+- [Roadmap to the alpha](https://github.com/orgs/quantified-uncertainty/projects/1)
 - The team presently communicates via the **EA Forecasting and Epistemics** slack (channels `#squiggle` and `#squiggle-ops`), you can track down an invite by reaching out to Ozzie Gooen
 - [Squiggle documentation](https://www.squiggle-language.com/docs/Language)
 - [Rescript documentation](https://rescript-lang.org/docs/manual/latest/introduction)
@@ -20,10 +20,9 @@ Anyone (with a github account) can file an issue at any time. Please allow Quinn
 
 # Project structure
 
-Squiggle is a **monorepo** with four **packages**.
+Squiggle is a **monorepo** with three **packages**.
 
 - **components** is where we improve reactive interfacing with Squiggle
-- **playground** is the site `playground.squiggle-language.com`
 - **squiggle-lang** is where the magic happens: probability distributions, the interpreter, etc.
 - **website** is the site `squiggle-language.com`
 
@@ -41,13 +40,17 @@ We aspire for `ci.yaml` and `README.md`s to be in one-to-one correspondence.
 
 ## If you're on NixOS
 
-You'll need to run a command like this in order to get `yarn build` to run, especially in `packages/squiggle-lang`.
+You can't run `yarn` outside of a FHS shell. Additionally, you need to `patchelf` some things. A script does everything for you.
 
 ```sh
-patchelf --set-interpreter $(patchelf --print-interpreter $(which mkdir)) ./node_modules/gentype/gentype.exe
+./nixos.sh
 ```
 
-See [here](https://github.com/NixOS/nixpkgs/issues/107375)
+Reasons for this are comments in the script. Then, you should be able to do all the package-level `yarn run` commands/scripts.
+
+# Try not to push directly to develop
+
+If you absolutely must, please prefix your commit message with `hotfix: `.
 
 # Pull request protocol
 

@@ -96,36 +96,25 @@ let toDiscretePointMassesFromTriangulars = (
 }
 
 let combineShapesContinuousContinuous = (
-  op: Operation.algebraicOperation,
+  op: Operation.convolutionOperation,
   s1: PointSetTypes.xyShape,
   s2: PointSetTypes.xyShape,
 ): PointSetTypes.xyShape => {
   // if we add the two distributions, we should probably use normal filters.
   // if we multiply the two distributions, we should probably use lognormal filters.
   let t1m = toDiscretePointMassesFromTriangulars(s1)
-  let t2m = switch op {
-  | #Divide => toDiscretePointMassesFromTriangulars(~inverse=true, s2)
-  | _ => toDiscretePointMassesFromTriangulars(~inverse=false, s2)
-  }
+  let t2m = toDiscretePointMassesFromTriangulars(~inverse=false, s2)
 
   let combineMeansFn = switch op {
   | #Add => (m1, m2) => m1 +. m2
   | #Subtract => (m1, m2) => m1 -. m2
   | #Multiply => (m1, m2) => m1 *. m2
-  | #Divide => (m1, mInv2) => m1 *. mInv2
-  | #Power => (m1, mInv2) => m1 ** mInv2
-  | #Logarithm => (m1, m2) => log(m1) /. log(m2)
   } // note: here, mInv2 = mean(1 / t2) ~= 1 / mean(t2)
 
-  // TODO: Variances are for exponentatiation or logarithms are almost totally made up and very likely very wrong.
-  // converts the variances and means of the two inputs into the variance of the output
   let combineVariancesFn = switch op {
   | #Add => (v1, v2, _, _) => v1 +. v2
   | #Subtract => (v1, v2, _, _) => v1 +. v2
   | #Multiply => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
-  | #Power => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
-  | #Logarithm => (v1, v2, m1, m2) => v1 *. v2 +. v1 *. m2 ** 2. +. v2 *. m1 ** 2.
-  | #Divide => (v1, vInv2, m1, mInv2) => v1 *. vInv2 +. v1 *. mInv2 ** 2. +. vInv2 *. m1 ** 2.
   }
 
   // TODO: If operating on two positive-domain distributions, we should take that into account
@@ -198,16 +187,20 @@ let toDiscretePointMassesFromDiscrete = (s: PointSetTypes.xyShape): pointMassesW
   {n: n, masses: masses, means: means, variances: variances}
 }
 
+type argumentPosition = First | Second
+
 let combineShapesContinuousDiscrete = (
-  op: Operation.algebraicOperation,
+  op: Operation.convolutionOperation,
   continuousShape: PointSetTypes.xyShape,
   discreteShape: PointSetTypes.xyShape,
+  ~discretePosition: argumentPosition,
 ): PointSetTypes.xyShape => {
   let t1n = continuousShape |> XYShape.T.length
   let t2n = discreteShape |> XYShape.T.length
 
   // each x pair is added/subtracted
-  let fn = Operation.Algebraic.toFn(op)
+  let opFunc = Operation.Convolution.toFn(op)
+  let fn = discretePosition == First ? (a, b) => opFunc(b, a) : opFunc
 
   let outXYShapes: array<array<(float, float)>> = Belt.Array.makeUninitializedUnsafe(t2n)
 
@@ -218,49 +211,56 @@ let combineShapesContinuousDiscrete = (
       // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
       let dxyShape: array<(float, float)> = Belt.Array.makeUninitializedUnsafe(t1n)
       for i in 0 to t1n - 1 {
+        // When this operation is flipped (like 1 - normal(5, 2)) then the
+        // x axis coordinates would all come out the wrong order. So we need
+        // to fill them out in the opposite direction
+        let index = discretePosition == First ? t1n - 1 - i : i
         Belt.Array.set(
           dxyShape,
-          i,
+          index,
           (
             fn(continuousShape.xs[i], discreteShape.xs[j]),
             continuousShape.ys[i] *. discreteShape.ys[j],
           ),
         ) |> ignore
-        ()
       }
       Belt.Array.set(outXYShapes, j, dxyShape) |> ignore
       ()
     }
-  | #Multiply
-  | #Power
-  | #Logarithm
-  | #Divide =>
+  | #Multiply =>
     for j in 0 to t2n - 1 {
       // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
       let dxyShape: array<(float, float)> = Belt.Array.makeUninitializedUnsafe(t1n)
       for i in 0 to t1n - 1 {
+        // If this operation would flip the x axis (such as -1 * normal(5, 2)),
+        // then we want to fill the shape in backwards to ensure all the points
+        // are still in the right order
+        let index = discreteShape.xs[j] > 0.0 ? i : t1n - 1 - i
         Belt.Array.set(
           dxyShape,
-          i,
+          index,
           (
             fn(continuousShape.xs[i], discreteShape.xs[j]),
-            continuousShape.ys[i] *. discreteShape.ys[j] /. discreteShape.xs[j],
+            continuousShape.ys[i] *. discreteShape.ys[j] /. Js.Math.abs_float(discreteShape.xs[j]),
           ),
         ) |> ignore
         ()
       }
       Belt.Array.set(outXYShapes, j, dxyShape) |> ignore
-      ()
     }
   }
 
   outXYShapes
   |> E.A.fmap(XYShape.T.fromZippedArray)
   |> E.A.fold_left(
-    XYShape.PointwiseCombination.combine(
-      \"+.",
-      XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
-    ),
+    (acc, x) =>
+      XYShape.PointwiseCombination.addCombine(
+        XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
+        acc,
+        x,
+      ),
     XYShape.T.empty,
   )
 }
+
+let isOrdered = (a: XYShape.T.t): bool => E.A.Sorted.Floats.isSorted(a.xs)

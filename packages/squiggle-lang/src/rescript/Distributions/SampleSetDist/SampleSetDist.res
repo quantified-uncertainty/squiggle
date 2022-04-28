@@ -1,3 +1,24 @@
+@genType
+module Error = {
+  @genType
+  type sampleSetError = TooFewSamples
+
+  let sampleSetErrorToString = (err: sampleSetError): string =>
+    switch err {
+    | TooFewSamples => "Too few samples when constructing sample set"
+    }
+
+  @genType
+  type pointsetConversionError = TooFewSamplesForConversionToPointSet
+
+  let pointsetConversionErrorToString = (err: pointsetConversionError) =>
+    switch err {
+    | TooFewSamplesForConversionToPointSet => "Too Few Samples to convert to point set"
+    }
+}
+
+include Error
+
 /*
 This is used as a smart constructor. The only way to create a SampleSetDist.t is to call
 this constructor.
@@ -8,7 +29,7 @@ module T: {
   //When we get a good functional library in TS, we could refactor that out.
   @genType
   type t = array<float>
-  let make: array<float> => result<t, string>
+  let make: array<float> => result<t, sampleSetError>
   let get: t => array<float>
 } = {
   type t = array<float>
@@ -16,7 +37,7 @@ module T: {
     if E.A.length(a) > 5 {
       Ok(a)
     } else {
-      Error("too small")
+      Error(TooFewSamples)
     }
   let get = (a: t) => a
 }
@@ -31,13 +52,13 @@ some refactoring.
 */
 let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs): result<
   PointSetTypes.pointSetDist,
-  string,
+  pointsetConversionError,
 > =>
   SampleSetDist_ToPointSet.toPointSetDist(
     ~samples=get(samples),
     ~samplingInputs,
     (),
-  ).pointSetDist->E.O2.toResult("Failed to convert to PointSetDist")
+  ).pointSetDist->E.O2.toResult(TooFewSamplesForConversionToPointSet)
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
@@ -62,7 +83,28 @@ let sampleN = (t: t, n) => {
 }
 
 //TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
-let map2 = (~fn: (float, float) => float, ~t1: t, ~t2: t) => {
+let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2: t): result<
+  t,
+  Operation.Error.t,
+> => {
   let samples = Belt.Array.zip(get(t1), get(t2))->E.A2.fmap(((a, b)) => fn(a, b))
-  make(samples)
+
+  // This assertion should never be reached. In order for it to be reached, one
+  // of the input parameters would need to be a sample set distribution with less
+  // than 6 samples. Which should be impossible due to the smart constructor.
+  // I could prove this to the type system (say, creating a {first: float, second: float, ..., fifth: float, rest: array<float>}
+  // But doing so would take too much time, so I'll leave it as an assertion
+  E.A.R.firstErrorOrOpen(samples)->E.R2.fmap(x =>
+    E.R.toExn("Input of samples should be larger than 5", make(x))
+  )
 }
+
+let mean = t => T.get(t)->E.A.Floats.mean
+let geomean = t => T.get(t)->E.A.Floats.geomean
+let mode = t => T.get(t)->E.A.Floats.mode
+let sum = t => T.get(t)->E.A.Floats.sum
+let min = t => T.get(t)->E.A.Floats.min
+let max = t => T.get(t)->E.A.Floats.max
+let stdev = t => T.get(t)->E.A.Floats.stdev
+let variance = t => T.get(t)->E.A.Floats.variance
+let percentile = (t, f) => T.get(t)->E.A.Floats.percentile(f)

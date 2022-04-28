@@ -6,6 +6,24 @@ type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
+let isPointSet = (t: t) =>
+  switch t {
+  | PointSet(_) => true
+  | _ => false
+  }
+
+let isSampleSetSet = (t: t) =>
+  switch t {
+  | SampleSet(_) => true
+  | _ => false
+  }
+
+let isSymbolic = (t: t) =>
+  switch t {
+  | Symbolic(_) => true
+  | _ => false
+  }
+
 let sampleN = (t: t, n) =>
   switch t {
   | PointSet(r) => PointSetDist.sampleNRendered(n, r)
@@ -14,7 +32,7 @@ let sampleN = (t: t, n) =>
   }
 
 let toSampleSetDist = (t: t, n) =>
-  SampleSetDist.make(sampleN(t, n))->GenericDist_Types.Error.resultStringToResultError
+  SampleSetDist.make(sampleN(t, n))->E.R2.errMap(DistributionTypes.Error.sampleErrorToDistErr)
 
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
@@ -46,18 +64,25 @@ let toFloatOperation = (
   ~toPointSetFn: toPointSetFn,
   ~distToFloatOperation: Operation.distToFloatOperation,
 ) => {
-  let symbolicSolution = switch (t: t) {
-  | Symbolic(r) =>
-    switch SymbolicDist.T.operate(distToFloatOperation, r) {
-    | Ok(f) => Some(f)
-    | _ => None
-    }
+  let trySymbolicSolution = switch (t: t) {
+  | Symbolic(r) => SymbolicDist.T.operate(distToFloatOperation, r)->E.R.toOption
   | _ => None
   }
 
-  switch symbolicSolution {
+  let trySampleSetSolution = switch ((t: t), distToFloatOperation) {
+  | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
+  | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
+  | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
+  | _ => None
+  }
+
+  switch trySymbolicSolution {
   | Some(r) => Ok(r)
-  | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(distToFloatOperation))
+  | None =>
+    switch trySampleSetSolution {
+    | Some(r) => Ok(r)
+    | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(distToFloatOperation))
+    }
   }
 }
 
@@ -68,8 +93,8 @@ let toPointSet = (
   t,
   ~xyPointLength,
   ~sampleCount,
-  ~xSelection: GenericDist_Types.Operation.pointsetXSelection=#ByWeight,
-  unit,
+  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=#ByWeight,
+  (),
 ): result<PointSetTypes.pointSetDist, error> => {
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
@@ -83,7 +108,7 @@ let toPointSet = (
         pointSetDistLength: xyPointLength,
         kernelWidth: None,
       },
-    )->GenericDist_Types.Error.resultStringToResultError
+    )->E.R2.errMap(x => DistributionTypes.PointSetConversionError(x))
   }
 }
 
@@ -93,18 +118,24 @@ let toPointSet = (
   xyPointLength to be a bit longer than the eventual toSparkline downsampling. I chose 3 
   fairly arbitrarily.
  */
-let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, unit): result<string, error> =>
+let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<string, error> =>
   t
   ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
   ->E.R.bind(r =>
-    r->PointSetDist.toSparkline(bucketCount)->GenericDist_Types.Error.resultStringToResultError
+    r->PointSetDist.toSparkline(bucketCount)->E.R2.errMap(x => DistributionTypes.SparklineError(x))
   )
 
 module Truncate = {
-  let trySymbolicSimplification = (leftCutoff, rightCutoff, t: t): option<t> =>
+  let trySymbolicSimplification = (
+    leftCutoff: option<float>,
+    rightCutoff: option<float>,
+    t: t,
+  ): option<t> =>
     switch (leftCutoff, rightCutoff, t) {
     | (None, None, _) => None
-    | (lc, rc, Symbolic(#Uniform(u))) if lc < rc =>
+    | (Some(lc), Some(rc), Symbolic(#Uniform(u))) if lc < rc =>
+      Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(Some(lc), Some(rc), u))))
+    | (lc, rc, Symbolic(#Uniform(u))) =>
       Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))))
     | _ => None
     }
@@ -137,85 +168,190 @@ let truncate = Truncate.run
    of a new variable that is the result of the operation on A and B.
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
    In general, this is implemented via convolution.
-
-  TODO: It would be useful to be able to pass in a paramater to get this to run either with convolution or monte carlo.
 */
 module AlgebraicCombination = {
-  let tryAnalyticalSimplification = (
-    arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
-    t1: t,
-    t2: t,
-  ): option<result<SymbolicDistTypes.symbolicDist, string>> =>
-    switch (arithmeticOperation, t1, t2) {
-    | (arithmeticOperation, Symbolic(d1), Symbolic(d2)) =>
-      switch SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation) {
-      | #AnalyticalSolution(symbolicDist) => Some(Ok(symbolicDist))
-      | #Error(er) => Some(Error(er))
-      | #NoSolution => None
+  module InputValidator = {
+    /*
+     It would be good to also do a check to make sure that probability mass for the second
+     operand, at value 1.0, is 0 (or approximately 0). However, we'd ideally want to check 
+     that both the probability mass and the probability density are greater than zero.
+     Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
+ */
+    let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
+      let firstOperandIsGreaterThanZero =
+        toFloatOperation(
+          t1,
+          ~toPointSetFn,
+          ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
+        ) |> E.R.fmap(r => r > 0.)
+      let secondOperandIsGreaterThanZero =
+        toFloatOperation(
+          t2,
+          ~toPointSetFn,
+          ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
+        ) |> E.R.fmap(r => r > 0.)
+      let items = E.A.R.firstErrorOrOpen([
+        firstOperandIsGreaterThanZero,
+        secondOperandIsGreaterThanZero,
+      ])
+      switch items {
+      | Error(r) => Some(r)
+      | Ok([true, _]) =>
+        Some(LogarithmOfDistributionError("First input must be completely greater than 0"))
+      | Ok([false, true]) =>
+        Some(LogarithmOfDistributionError("Second input must be completely greater than 0"))
+      | Ok([false, false]) => None
+      | Ok(_) => Some(Unreachable)
       }
-    | _ => None
     }
 
-  let runConvolution = (
-    toPointSet: toPointSetFn,
-    arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
-    t1: t,
-    t2: t,
-  ) =>
-    E.R.merge(toPointSet(t1), toPointSet(t2))->E.R2.fmap(((a, b)) =>
-      PointSetDist.combineAlgebraically(arithmeticOperation, a, b)
-    )
-
-  let runMonteCarlo = (
-    toSampleSet: toSampleSetFn,
-    arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
-    t1: t,
-    t2: t,
-  ) => {
-    let fn = Operation.Algebraic.toFn(arithmeticOperation)
-    E.R.merge(toSampleSet(t1), toSampleSet(t2))
-    ->E.R.bind(((t1, t2)) => {
-      SampleSetDist.map2(~fn, ~t1, ~t2)->GenericDist_Types.Error.resultStringToResultError
-    })
-    ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
+    let run = (t1: t, t2: t, ~toPointSetFn: toPointSetFn, ~arithmeticOperation): option<error> => {
+      if arithmeticOperation == #Logarithm {
+        getLogarithmInputError(t1, t2, ~toPointSetFn)
+      } else {
+        None
+      }
+    }
   }
 
-  //I'm (Ozzie) really just guessing here, very little idea what's best
-  let expectedConvolutionCost: t => int = x =>
-    switch x {
-    | Symbolic(#Float(_)) => 1
-    | Symbolic(_) => 1000
-    | PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
-    | PointSet(Mixed(_)) => 1000
-    | PointSet(Continuous(_)) => 1000
-    | _ => 1000
+  module StrategyCallOnValidatedInputs = {
+    let convolution = (
+      toPointSet: toPointSetFn,
+      arithmeticOperation: Operation.convolutionOperation,
+      t1: t,
+      t2: t,
+    ): result<t, error> =>
+      E.R.merge(toPointSet(t1), toPointSet(t2))
+      ->E.R2.fmap(((a, b)) => PointSetDist.combineAlgebraically(arithmeticOperation, a, b))
+      ->E.R2.fmap(r => DistributionTypes.PointSet(r))
+
+    let monteCarlo = (
+      toSampleSet: toSampleSetFn,
+      arithmeticOperation: Operation.algebraicOperation,
+      t1: t,
+      t2: t,
+    ): result<t, error> => {
+      let fn = Operation.Algebraic.toFn(arithmeticOperation)
+      E.R.merge(toSampleSet(t1), toSampleSet(t2))
+      ->E.R.bind(((t1, t2)) => {
+        SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+      })
+      ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
     }
 
-  let chooseConvolutionOrMonteCarlo = (t2: t, t1: t) =>
-    expectedConvolutionCost(t1) * expectedConvolutionCost(t2) > 10000
-      ? #CalculateWithMonteCarlo
-      : #CalculateWithConvolution
+    let symbolic = (
+      arithmeticOperation: Operation.algebraicOperation,
+      t1: t,
+      t2: t,
+    ): SymbolicDistTypes.analyticalSimplificationResult => {
+      switch (t1, t2) {
+      | (DistributionTypes.Symbolic(d1), DistributionTypes.Symbolic(d2)) =>
+        SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation)
+      | _ => #NoSolution
+      }
+    }
+  }
+
+  module StrategyChooser = {
+    type specificStrategy = [#AsSymbolic | #AsMonteCarlo | #AsConvolution]
+
+    //I'm (Ozzie) really just guessing here, very little idea what's best
+    let expectedConvolutionCost: t => int = x =>
+      switch x {
+      | Symbolic(#Float(_)) => MagicNumbers.OpCost.floatCost
+      | Symbolic(_) => MagicNumbers.OpCost.symbolicCost
+      | PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
+      | PointSet(Mixed(_)) => MagicNumbers.OpCost.mixedCost
+      | PointSet(Continuous(_)) => MagicNumbers.OpCost.continuousCost
+      | _ => MagicNumbers.OpCost.wildcardCost
+      }
+
+    let hasSampleSetDist = (t1: t, t2: t): bool => isSampleSetSet(t1) || isSampleSetSet(t2)
+
+    let convolutionIsFasterThanMonteCarlo = (t1: t, t2: t): bool =>
+      expectedConvolutionCost(t1) * expectedConvolutionCost(t2) < MagicNumbers.OpCost.monteCarloCost
+
+    let preferConvolutionToMonteCarlo = (t1, t2, arithmeticOperation) => {
+      !hasSampleSetDist(t1, t2) &&
+      Operation.Convolution.canDoAlgebraicOperation(arithmeticOperation) &&
+      convolutionIsFasterThanMonteCarlo(t1, t2)
+    }
+
+    let run = (~t1: t, ~t2: t, ~arithmeticOperation): specificStrategy => {
+      switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
+      | #AnalyticalSolution(_)
+      | #Error(_) =>
+        #AsSymbolic
+      | #NoSolution =>
+        preferConvolutionToMonteCarlo(t1, t2, arithmeticOperation) ? #AsConvolution : #AsMonteCarlo
+      }
+    }
+  }
+
+  let runStrategyOnValidatedInputs = (
+    ~t1: t,
+    ~t2: t,
+    ~arithmeticOperation,
+    ~strategy: StrategyChooser.specificStrategy,
+    ~toPointSetFn: toPointSetFn,
+    ~toSampleSetFn: toSampleSetFn,
+  ): result<t, error> => {
+    switch strategy {
+    | #AsMonteCarlo =>
+      StrategyCallOnValidatedInputs.monteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+    | #AsSymbolic =>
+      switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
+      | #AnalyticalSolution(symbolicDist) => Ok(Symbolic(symbolicDist))
+      | #Error(e) => Error(OperationError(e))
+      | #NoSolution => Error(Unreachable)
+      }
+    | #AsConvolution =>
+      switch Operation.Convolution.fromAlgebraicOperation(arithmeticOperation) {
+      | Some(convOp) => StrategyCallOnValidatedInputs.convolution(toPointSetFn, convOp, t1, t2)
+      | None => Error(Unreachable)
+      }
+    }
+  }
 
   let run = (
+    ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
     t1: t,
     ~toPointSetFn: toPointSetFn,
     ~toSampleSetFn: toSampleSetFn,
-    ~arithmeticOperation,
+    ~arithmeticOperation: Operation.algebraicOperation,
     ~t2: t,
   ): result<t, error> => {
-    switch tryAnalyticalSimplification(arithmeticOperation, t1, t2) {
-    | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
-    | Some(Error(e)) => Error(Other(e))
-    | None =>
-      switch chooseConvolutionOrMonteCarlo(t1, t2) {
-      | #CalculateWithMonteCarlo => runMonteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
-      | #CalculateWithConvolution =>
-        runConvolution(
-          toPointSetFn,
-          arithmeticOperation,
-          t1,
-          t2,
-        )->E.R2.fmap(r => DistributionTypes.PointSet(r))
+    let invalidOperationError = InputValidator.run(t1, t2, ~arithmeticOperation, ~toPointSetFn)
+    switch (invalidOperationError, strategy) {
+    | (Some(e), _) => Error(e)
+    | (None, AsDefault) => {
+        let chooseStrategy = StrategyChooser.run(~arithmeticOperation, ~t1, ~t2)
+        runStrategyOnValidatedInputs(
+          ~t1,
+          ~t2,
+          ~strategy=chooseStrategy,
+          ~arithmeticOperation,
+          ~toPointSetFn,
+          ~toSampleSetFn,
+        )
+      }
+    | (None, AsMonteCarlo) =>
+      StrategyCallOnValidatedInputs.monteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
+    | (None, AsSymbolic) =>
+      switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
+      | #AnalyticalSolution(symbolicDist) => Ok(Symbolic(symbolicDist))
+      | #NoSolution => Error(RequestedStrategyInvalidError(`No analytic solution for inputs`))
+      | #Error(err) => Error(OperationError(err))
+      }
+    | (None, AsConvolution) =>
+      switch Operation.Convolution.fromAlgebraicOperation(arithmeticOperation) {
+      | None => {
+          let errString = `Convolution not supported for ${Operation.Algebraic.toString(
+              arithmeticOperation,
+            )}`
+          Error(RequestedStrategyInvalidError(errString))
+        }
+      | Some(convOp) => StrategyCallOnValidatedInputs.convolution(toPointSetFn, convOp, t1, t2)
       }
     }
   }
@@ -227,40 +363,36 @@ let algebraicCombination = AlgebraicCombination.run
 let pointwiseCombination = (
   t1: t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation,
+  ~algebraicCombination: Operation.algebraicOperation,
   ~t2: t,
 ): result<t, error> => {
-  E.R.merge(toPointSetFn(t1), toPointSetFn(t2))
-  ->E.R2.fmap(((t1, t2)) =>
-    PointSetDist.combinePointwise(
-      GenericDist_Types.Operation.arithmeticToFn(arithmeticOperation),
-      t1,
-      t2,
-    )
+  E.R.merge(toPointSetFn(t1), toPointSetFn(t2))->E.R.bind(((t1, t2)) =>
+    PointSetDist.combinePointwise(Operation.Algebraic.toFn(algebraicCombination), t1, t2)
+    ->E.R2.fmap(r => DistributionTypes.PointSet(r))
+    ->E.R2.errMap(err => DistributionTypes.OperationError(err))
   )
-  ->E.R2.fmap(r => DistributionTypes.PointSet(r))
 }
 
 let pointwiseCombinationFloat = (
   t: t,
   ~toPointSetFn: toPointSetFn,
-  ~arithmeticOperation: GenericDist_Types.Operation.arithmeticOperation,
-  ~float: float,
+  ~algebraicCombination: Operation.algebraicOperation,
+  ~f: float,
 ): result<t, error> => {
-  let m = switch arithmeticOperation {
+  let m = switch algebraicCombination {
   | #Add | #Subtract => Error(DistributionTypes.DistributionVerticalShiftIsInvalid)
   | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
-    toPointSetFn(t)->E.R2.fmap(t => {
+    toPointSetFn(t)->E.R.bind(t => {
       //TODO: Move to PointSet codebase
       let fn = (secondary, main) => Operation.Scale.toFn(arithmeticOperation, main, secondary)
       let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(arithmeticOperation)
       let integralCacheFn = Operation.Scale.toIntegralCacheFn(arithmeticOperation)
-      PointSetDist.T.mapY(
-        ~integralSumCacheFn=integralSumCacheFn(float),
-        ~integralCacheFn=integralCacheFn(float),
-        ~fn=fn(float),
+      PointSetDist.T.mapYResult(
+        ~integralSumCacheFn=integralSumCacheFn(f),
+        ~integralCacheFn=integralCacheFn(f),
+        ~fn=fn(f),
         t,
-      )
+      )->E.R2.errMap(x => DistributionTypes.OperationError(x))
     })
   }
   m->E.R2.fmap(r => DistributionTypes.PointSet(r))
@@ -274,7 +406,7 @@ let mixture = (
   ~pointwiseAddFn: pointwiseAddFn,
 ) => {
   if E.A.length(values) == 0 {
-    Error(DistributionTypes.Other("Mixture error: mixture must have at least 1 element"))
+    Error(DistributionTypes.OtherError("Mixture error: mixture must have at least 1 element"))
   } else {
     let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =

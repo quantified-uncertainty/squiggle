@@ -12,7 +12,7 @@ type answer = {"value": unit}
  Rescript cannot type cast on basic values passed on their own.
  This is why we call evalua inside Javascript and wrap the result in an Object
  */
-let eval__ = %raw(`function (expr) { return {value: Mathjs.evaluate(expr)}; }`)
+let eval__: string => 'a = %raw(`function (expr) { return {value: Mathjs.evaluate(expr)}; }`)
 
 /*
   Call MathJs evaluate and return as a variant

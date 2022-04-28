@@ -16,6 +16,13 @@ let fmap = ((fn1, fn2, fn3), t: t): t =>
   | Continuous(m) => Continuous(fn3(m))
   }
 
+let fmapResult = ((fn1, fn2, fn3), t: t): result<t, 'e> =>
+  switch t {
+  | Mixed(m) => fn1(m)->E.R2.fmap(x => PointSetTypes.Mixed(x))
+  | Discrete(m) => fn2(m)->E.R2.fmap(x => PointSetTypes.Discrete(x))
+  | Continuous(m) => fn3(m)->E.R2.fmap(x => PointSetTypes.Continuous(x))
+  }
+
 let toMixed = mapToAll((
   m => m,
   d =>
@@ -35,13 +42,24 @@ let toMixed = mapToAll((
 ))
 
 //TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
-let combineAlgebraically = (op: Operation.algebraicOperation, t1: t, t2: t): t =>
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combineAlgebraically(op, m1, m2) |> Continuous.T.toPointSetDist
-  | (Continuous(m1), Discrete(m2))
-  | (Discrete(m2), Continuous(m1)) =>
-    Continuous.combineAlgebraicallyWithDiscrete(op, m1, m2) |> Continuous.T.toPointSetDist
+  | (Discrete(m1), Continuous(m2)) =>
+    Continuous.combineAlgebraicallyWithDiscrete(
+      op,
+      m2,
+      m1,
+      ~discretePosition=First,
+    ) |> Continuous.T.toPointSetDist
+  | (Continuous(m1), Discrete(m2)) =>
+    Continuous.combineAlgebraicallyWithDiscrete(
+      op,
+      m1,
+      m2,
+      ~discretePosition=Second,
+    ) |> Continuous.T.toPointSetDist
   | (Discrete(m1), Discrete(m2)) =>
     Discrete.combineAlgebraically(op, m1, m2) |> Discrete.T.toPointSetDist
   | (m1, m2) => Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2)) |> Mixed.T.toPointSetDist
@@ -53,23 +71,28 @@ let combinePointwise = (
     PointSetTypes.continuousShape,
     PointSetTypes.continuousShape,
   ) => option<PointSetTypes.continuousShape>=(_, _) => None,
-  fn,
+  fn: (float, float) => result<float, Operation.Error.t>,
   t1: t,
   t2: t,
-) =>
+): result<PointSetTypes.pointSetDist, Operation.Error.t> =>
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
-    PointSetTypes.Continuous(
-      Continuous.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, m1, m2),
-    )
+    Continuous.combinePointwise(
+      ~integralSumCachesFn,
+      fn,
+      m1,
+      m2,
+    )->E.R2.fmap(x => PointSetTypes.Continuous(x))
   | (Discrete(m1), Discrete(m2)) =>
-    PointSetTypes.Discrete(
-      Discrete.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, m1, m2),
-    )
+    Ok(PointSetTypes.Discrete(Discrete.combinePointwise(~integralSumCachesFn, m1, m2)))
   | (m1, m2) =>
-    PointSetTypes.Mixed(
-      Mixed.combinePointwise(~integralSumCachesFn, ~integralCachesFn, fn, toMixed(m1), toMixed(m2)),
-    )
+    Mixed.combinePointwise(
+      ~integralSumCachesFn,
+      ~integralCachesFn,
+      fn,
+      toMixed(m1),
+      toMixed(m2),
+    )->E.R2.fmap(x => PointSetTypes.Mixed(x))
   }
 
 module T = Dist({
@@ -134,15 +157,24 @@ module T = Dist({
   let integralYtoX = f =>
     mapToAll((Mixed.T.Integral.yToX(f), Discrete.T.Integral.yToX(f), Continuous.T.Integral.yToX(f)))
   let maxX = mapToAll((Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX))
-  let mapY = (
-    ~integralSumCacheFn=previousIntegralSum => None,
-    ~integralCacheFn=previousIntegral => None,
-    ~fn,
+  let mapY = (~integralSumCacheFn=_ => None, ~integralCacheFn=_ => None, ~fn: float => float): (
+    t => t
   ) =>
     fmap((
       Mixed.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
       Discrete.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
       Continuous.T.mapY(~integralSumCacheFn, ~integralCacheFn, ~fn),
+    ))
+
+  let mapYResult = (
+    ~integralSumCacheFn=_ => None,
+    ~integralCacheFn=_ => None,
+    ~fn: float => result<float, 'e>,
+  ): (t => result<t, 'e>) =>
+    fmapResult((
+      Mixed.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, ~fn),
+      Discrete.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, ~fn),
+      Continuous.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, ~fn),
     ))
 
   let mean = (t: t): float =>
@@ -203,8 +235,8 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Mean => T.mean(s)
   }
 
-let toSparkline = (t: t, bucketCount) =>
+let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineError> =>
   T.toContinuous(t)
   ->E.O2.fmap(Continuous.downsampleEquallyOverX(bucketCount))
-  ->E.O2.toResult("toContinous Error: Could not convert into continuous distribution")
+  ->E.O2.toResult(PointSetTypes.CannotSparklineDiscrete)
   ->E.R2.fmap(r => Continuous.getShape(r).ys->Sparklines.create())

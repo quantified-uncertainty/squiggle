@@ -43,10 +43,10 @@ describe("(Algebraic) addition of distributions", () => {
     test("normal(mean=5) + normal(mean=20)", () => {
       normalDist5
       ->algebraicAdd(normalDist20)
-      ->E.R2.fmap(GenericDist_Types.Constructors.UsingDists.mean)
+      ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
       ->E.R2.fmap(run)
       ->E.R2.fmap(toFloat)
-      ->E.R.toExn
+      ->E.R.toExn("Expected float", _)
       ->expect
       ->toBe(Some(2.5e1))
     })
@@ -57,15 +57,15 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         uniformDist
         ->algebraicAdd(betaDist)
-        ->E.R2.fmap(GenericDist_Types.Constructors.UsingDists.mean)
+        ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(0.01927225696028752, ~digits=1) // (uniformMean +. betaMean)
+      | Some(x) => x->expect->toBeSoCloseTo(9.786831807237022, ~digits=1) // (uniformMean +. betaMean)
       }
     })
     test("beta(alpha=2, beta=5) + uniform(low=9, high=10)", () => {
@@ -74,15 +74,15 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         betaDist
         ->algebraicAdd(uniformDist)
-        ->E.R2.fmap(GenericDist_Types.Constructors.UsingDists.mean)
+        ->E.R2.fmap(DistributionTypes.Constructors.UsingDists.mean)
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(0.019275414920485248, ~digits=1) // (uniformMean +. betaMean)
+      | Some(x) => x->expect->toBeSoCloseTo(9.784290207736126, ~digits=1) // (uniformMean +. betaMean)
       }
     })
   })
@@ -95,7 +95,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           normalDist10 // this should be normal(10, sqrt(8))
           ->Ok
-          ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, x))
+          ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, x))
           ->E.R2.fmap(run)
           ->E.R2.fmap(toFloat)
           ->E.R.toOption
@@ -103,7 +103,7 @@ describe("(Algebraic) addition of distributions", () => {
         let calculated =
           normalDist5
           ->algebraicAdd(normalDist5)
-          ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, x))
+          ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, x))
           ->E.R2.fmap(run)
           ->E.R2.fmap(toFloat)
           ->E.R.toOption
@@ -126,7 +126,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist20
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1.9e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1.9e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -134,7 +134,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist10
         ->algebraicAdd(normalDist10)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1.9e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1.9e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -155,30 +155,30 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         uniformDist
         ->algebraicAdd(betaDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=4.
-      | Some(x) => x->expect->toBeSoCloseTo(0.001978994877226945, ~digits=3)
+      // This value was calculated by a python script
+      | Some(x) => x->expect->toBeSoCloseTo(0.979023, ~digits=0)
       }
     })
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).pdf(10)", () => {
       let received =
         betaDist
         ->algebraicAdd(uniformDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.pdf(d, 1e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
-      // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
-      // sometimes it works with ~digits=4.
-      | Some(x) => x->expect->toBeSoCloseTo(0.001978994877226945, ~digits=3)
+      // This is nondeterministic.
+      | Some(x) => x->expect->toBeSoCloseTo(0.979023, ~digits=0)
       }
     })
   })
@@ -187,7 +187,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist10
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, x))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, x))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -195,7 +195,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist5
         ->algebraicAdd(normalDist5)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, x))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, x))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -217,7 +217,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist20
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1.25e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1.25e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -225,7 +225,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist10
         ->algebraicAdd(normalDist10)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1.25e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1.25e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -246,30 +246,30 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         uniformDist
         ->algebraicAdd(betaDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
-      // sometimes it works with ~digits=4.
-      | Some(x) => x->expect->toBeSoCloseTo(0.0013961779932477507, ~digits=3)
+      // The value was calculated externally using a python script
+      | Some(x) => x->expect->toBeSoCloseTo(0.71148, ~digits=1)
       }
     })
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).cdf(10)", () => {
       let received =
         betaDist
         ->algebraicAdd(uniformDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.cdf(d, 1e1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1e1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
-      // sometimes it works with ~digits=4.
-      | Some(x) => x->expect->toBeSoCloseTo(0.001388898111625753, ~digits=3)
+      // The value was calculated externally using a python script
+      | Some(x) => x->expect->toBeSoCloseTo(0.71148, ~digits=1)
       }
     })
   })
@@ -279,7 +279,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist10
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, x))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, x))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -287,7 +287,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist5
         ->algebraicAdd(normalDist5)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, x))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, x))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -309,7 +309,7 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         normalDist20
         ->Ok
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 1e-1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 1e-1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -317,7 +317,7 @@ describe("(Algebraic) addition of distributions", () => {
       let calculated =
         normalDist10
         ->algebraicAdd(normalDist10)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 1e-1))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 1e-1))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
         ->E.R.toOption
@@ -338,30 +338,30 @@ describe("(Algebraic) addition of distributions", () => {
       let received =
         uniformDist
         ->algebraicAdd(betaDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 2e-2))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 2e-2))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(10.927078217530806, ~digits=0)
+      | Some(x) => x->expect->toBeSoCloseTo(9.179319623146968, ~digits=0)
       }
     })
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).inv(2e-2)", () => {
       let received =
         betaDist
         ->algebraicAdd(uniformDist)
-        ->E.R2.fmap(d => GenericDist_Types.Constructors.UsingDists.inv(d, 2e-2))
+        ->E.R2.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 2e-2))
         ->E.R2.fmap(run)
         ->E.R2.fmap(toFloat)
-        ->E.R.toExn
+        ->E.R.toExn("Expected float", _)
       switch received {
       | None => "algebraicAdd has"->expect->toBe("failed")
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      | Some(x) => x->expect->toBeSoCloseTo(10.915396627014363, ~digits=0)
+      | Some(x) => x->expect->toBeSoCloseTo(9.190872365862756, ~digits=0)
       }
     })
   })

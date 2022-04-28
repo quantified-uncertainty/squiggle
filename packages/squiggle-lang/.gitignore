@@ -19,3 +19,5 @@ yarn-error.log
 dist
 *.coverage
 _coverage
+coverage
+.nyc_output/

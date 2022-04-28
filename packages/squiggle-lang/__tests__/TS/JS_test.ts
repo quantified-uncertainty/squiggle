@@ -4,7 +4,7 @@ import {
   resultMap,
   squiggleExpression,
   errorValueToString,
-} from "../src/js/index";
+} from "../../src/js/index";
 
 let testRun = (x: string): squiggleExpression => {
   let result = run(x, { sampleCount: 100, xyPointLength: 100 });
@@ -46,6 +46,8 @@ describe("Distribution", () => {
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
   //Also, note, the value should be created using makeSampleSetDist() later on.
   let env = { sampleCount: 8, xyPointLength: 100 };
+  let dist1Samples = [3, 4, 5, 6, 6, 7, 10, 15, 30];
+  let dist1SampleCount = dist1Samples.length;
   let dist = new Distribution(
     { tag: "SampleSet", value: [3, 4, 5, 6, 6, 7, 10, 15, 30] },
     env
@@ -56,16 +58,19 @@ describe("Distribution", () => {
   );
 
   test("mean", () => {
-    expect(dist.mean().value).toBeCloseTo(3.737);
+    expect(dist.mean().value).toBeCloseTo(9.5555555);
   });
   test("pdf", () => {
-    expect(dist.pdf(5.0).value).toBeCloseTo(0.0431);
+    expect(dist.pdf(5.0).value).toBeCloseTo(0.10499097598222966, 1);
   });
   test("cdf", () => {
-    expect(dist.cdf(5.0).value).toBeCloseTo(0.155);
+    expect(dist.cdf(5.0).value).toBeCloseTo(
+      dist1Samples.filter((x) => x <= 5).length / dist1SampleCount,
+      1
+    );
   });
   test("inv", () => {
-    expect(dist.inv(0.5).value).toBeCloseTo(9.458);
+    expect(dist.inv(0.5).value).toBeCloseTo(6);
   });
   test("toPointSet", () => {
     expect(
@@ -73,7 +78,7 @@ describe("Distribution", () => {
     ).toEqual(Ok("Point Set Distribution"));
   });
   test("toSparkline", () => {
-    expect(dist.toSparkline(20).value).toEqual("▁▁▃▅███▆▄▃▂▁▁▂▂▃▂▁▁▁");
+    expect(dist.toSparkline(20).value).toEqual("▁▁▃▇█▇▄▂▂▂▁▁▁▁▁▂▂▁▁▁");
   });
   test("algebraicAdd", () => {
     expect(
@@ -87,6 +92,6 @@ describe("Distribution", () => {
       resultMap(dist.pointwiseAdd(dist2), (r: Distribution) =>
         r.toSparkline(20)
       ).value
-    ).toEqual(Ok("▁▂▅██▅▅▅▆▇█▆▅▃▃▂▂▁▁▁"));
+    ).toEqual(Ok("▁▂██▃▃▃▃▄▅▄▃▃▂▂▂▁▁▁▁"));
   });
 });

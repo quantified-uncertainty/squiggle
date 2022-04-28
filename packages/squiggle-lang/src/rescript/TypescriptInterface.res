@@ -32,6 +32,9 @@ let makeSampleSetDist = SampleSetDist.make
 let evaluate = Reducer.evaluate
 
 @genType
+let evaluateUsingExternalBindings = Reducer.evaluateUsingExternalBindings
+
+@genType
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
 @genType
@@ -53,4 +56,4 @@ type continuousShape = PointSetTypes.continuousShape
 let errorValueToString = Reducer_ErrorValue.errorToString
 
 @genType
-let distributionErrorToString = GenericDist_Types.Error.toString
+let distributionErrorToString = DistributionTypes.Error.toString
