@@ -20,10 +20,12 @@ let rec toString = (t: error) =>
   | NotSorted({fnName, propertyName}) => `${fnName} ${propertyName} is not sorted`
   | IsEmpty({fnName, propertyName}) => `${fnName} ${propertyName} is empty`
   | NotFinite({fnName, propertyName}, exampleValue) =>
-    `${fnName}  ${propertyName} is not finite. Example value: ${E.Float.toString(exampleValue)}`
+    `${fnName} ${propertyName} is not finite. Example value: ${E.Float.toString(exampleValue)}`
   | DifferentLengths({fnName, p1Name, p2Name, p1Length, p2Length}) =>
     `${fnName} ${p1Name} and ${p2Name} have different lengths. ${p1Name} has length ${E.I.toString(
         p1Length,
       )} and ${p2Name} has length ${E.I.toString(p2Length)}`
-  | Multiple(errors) => `Multiple Errors: ${E.A2.fmap(errors, toString) |> E.A.joinWith(", ")}`
+  | Multiple(errors) =>
+    `Multiple Errors: ${E.A2.fmap(errors, toString)->E.A2.fmap(r => `[${r}]`)
+        |> E.A.joinWith(", ")}`
   }

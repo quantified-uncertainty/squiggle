@@ -500,7 +500,11 @@ module A = {
     let getBelowZero = (t: t) => Belt.Array.getBy(t, r => r < 0.0)
 
     let isSorted = (t: t): bool =>
-      reduce(zip(t, tail(t)), true, (acc, (first, second)) => acc && first < second)
+      if Array.length(t) < 1 {
+        true
+      } else {
+        reduce(zip(t, tail(t)), true, (acc, (first, second)) => acc && first < second)
+      }
 
     //Passing true for the exclusive parameter excludes both endpoints of the range.
     //https://jstat.github.io/all.html
@@ -618,7 +622,7 @@ module A = {
 module A2 = {
   let fmap = (a, b) => A.fmap(b, a)
   let joinWith = (a, b) => A.joinWith(b, a)
-  let filter = (a,b) => A.filter(b, a)
+  let filter = (a, b) => A.filter(b, a)
 }
 
 module JsArray = {
