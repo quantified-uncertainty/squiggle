@@ -15,7 +15,7 @@ yarn add @quri/squiggle-components
 
 Add to `App.js`:
 
-```sh
+```jsx
 import {SquiggleEditor} from '@quri/squiggle-components';
 <SquiggleEditor initialSquiggleString="x = beta(3, 10); x + 20" />
 ```
