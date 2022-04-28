@@ -20,7 +20,7 @@
   ],
   "suffix": ".bs.js",
   "namespace": true,
-  "bs-dependencies": ["@glennsl/rescript-jest", "rationale", "bisect_ppx"],
+  "bs-dependencies": ["@glennsl/rescript-jest", "bisect_ppx"],
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",

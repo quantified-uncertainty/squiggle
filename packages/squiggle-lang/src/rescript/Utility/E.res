@@ -1,4 +1,3 @@
-open Rationale.Function.Infix
 module FloatFloatMap = {
   module Id = Belt.Id.MakeComparable({
     type t = float
@@ -51,17 +50,59 @@ module O = {
     | None => rFn()
     }
   ()
-  let fmap = Rationale.Option.fmap
-  let bind = Rationale.Option.bind
-  let default = Rationale.Option.default
-  let isSome = Rationale.Option.isSome
-  let isNone = Rationale.Option.isNone
-  let toExn = Rationale.Option.toExn
-  let some = Rationale.Option.some
-  let firstSome = Rationale.Option.firstSome
-  let toExt = Rationale.Option.toExn // wanna flag this-- looks like a typo but `Rationale.OptiontoExt` doesn't exist.
-  let flatApply = (fn, b) => Rationale.Option.apply(fn, Some(b)) |> Rationale.Option.flatten
-  let flatten = Rationale.Option.flatten
+  let fmap = (f: 'a => 'b, x: option<'a>): option<'b> => {
+    switch x {
+    | None => None
+    | Some(x') => Some(f(x'))
+    }
+  }
+  let bind = (o, f) =>
+    switch o {
+    | None => None
+    | Some(a) => f(a)
+    }
+  let default = (d, o) =>
+    switch o {
+    | None => d
+    | Some(a) => a
+    }
+  let isSome = o =>
+    switch o {
+    | Some(_) => true
+    | _ => false
+    }
+  let isNone = o =>
+    switch o {
+    | None => true
+    | _ => false
+    }
+  let toExn = (err, o) =>
+    switch o {
+    | None => raise(Failure(err))
+    | Some(a) => a
+    }
+
+  let some = a => Some(a)
+  let firstSome = (a, b) =>
+    switch a {
+    | None => b
+    | _ => a
+    }
+
+  let toExt = toExn
+
+  let flatten = o =>
+    switch o {
+    | None => None
+    | Some(x) => x
+    }
+
+  let apply = (o, a) =>
+    switch o {
+    | Some(f) => bind(a, b => some(f(b)))
+    | _ => None
+    }
+  let flatApply = (fn, b) => apply(fn, Some(b)) |> flatten
 
   let toBool = opt =>
     switch opt {
@@ -109,6 +150,11 @@ module O2 = {
 
 /* Functions */
 module F = {
+  let pipe = (f, g, x) => g(f(x))
+  let compose = (f, g, x) => f(g(x))
+  let flip = (f, a, b) => f(b, a)
+  let always = (x, _y) => x
+
   let apply = (a, e) => a |> e
 
   let flatten2Callbacks = (fn1, fn2, fnlast) =>
@@ -156,10 +202,25 @@ exception Assertion(string)
 
 /* R for Result */
 module R = {
-  let result = Rationale.Result.result
+  open Belt.Result
+  let result = (okF, errF, r) =>
+    switch r {
+    | Ok(a) => okF(a)
+    | Error(err) => errF(err)
+    }
   let id = e => e |> result(U.id, U.id)
-  let fmap = Rationale.Result.fmap
-  let bind = Rationale.Result.bind
+  let fmap = (f: 'a => 'b, r: result<'a, 'c>): result<'b, 'c> => {
+    switch r {
+    | Ok(r') => Ok(f(r'))
+    | Error(err) => Error(err)
+    }
+  }
+  let bind = (r, f) =>
+    switch r {
+    | Ok(a) => f(a)
+    | Error(err) => Error(err)
+    }
+
   let toExn = (msg: string, x: result<'a, 'b>): 'a =>
     switch x {
     | Ok(r) => r
@@ -186,14 +247,17 @@ module R = {
   let errorIfCondition = (errorCondition, errorMessage, r) =>
     errorCondition(r) ? Error(errorMessage) : Ok(r)
 
-  let ap = Rationale.Result.ap
+  let ap = (r, a) =>
+    switch r {
+    | Ok(f) => Ok(f(a))
+    | Error(err) => Error(err)
+    }
   let ap' = (r, a) =>
     switch r {
     | Ok(f) => fmap(f, a)
     | Error(err) => Error(err)
     }
 
-  // (a1 -> a2 -> r) -> m a1 -> m a2 -> m r  // not in Rationale
   let liftM2: (('a, 'b) => 'c, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
     ap'(fmap(op, xR), yR)
   }
@@ -243,7 +307,7 @@ module S = {
 }
 
 module J = {
-  let toString = \"||>"(Js.Json.decodeString, O.default(""))
+  let toString = F.pipe(Js.Json.decodeString, O.default(""))
   let fromString = Js.Json.string
   let fromNumber = Js.Json.number
 
@@ -256,7 +320,7 @@ module J = {
 
     let toString = (str: option<'a>) =>
       switch str {
-      | Some(str) => Some(str |> \"||>"(Js.Json.decodeString, O.default("")))
+      | Some(str) => Some(str |> F.pipe(Js.Json.decodeString, O.default("")))
       | _ => None
       }
   }
@@ -276,29 +340,132 @@ module L = {
   let toArray = Array.of_list
   let fmapi = List.mapi
   let concat = List.concat
-  let drop = Rationale.RList.drop
-  let remove = Rationale.RList.remove
+  let concat' = (xs, ys) => List.append(ys, xs)
+
+  let rec drop = (i, xs) =>
+    switch (i, xs) {
+    | (_, list{}) => list{}
+    | (i, _) if i <= 0 => xs
+    | (i, list{_, ...b}) => drop(i - 1, b)
+    }
+
+  let append = (a, xs) => List.append(xs, list{a})
+  let take = {
+    let rec loop = (i, xs, acc) =>
+      switch (i, xs) {
+      | (i, _) if i <= 0 => acc
+      | (_, list{}) => acc
+      | (i, list{a, ...b}) => loop(i - 1, b, append(a, acc))
+      }
+    (i, xs) => loop(i, xs, list{})
+  }
+  let takeLast = (i, xs) => List.rev(xs) |> take(i) |> List.rev
+
+  let splitAt = (i, xs) => (take(i, xs), takeLast(List.length(xs) - i, xs))
+  let remove = (i, n, xs) => {
+    let (a, b) = splitAt(i, xs)
+    \"@"(a, drop(n, b))
+  }
+
   let find = List.find
   let filter = List.filter
   let for_all = List.for_all
   let exists = List.exists
   let sort = List.sort
   let length = List.length
-  let filter_opt = Rationale.RList.filter_opt
-  let uniqBy = Rationale.RList.uniqBy
-  let join = Rationale.RList.join
-  let head = Rationale.RList.head
-  let uniq = Rationale.RList.uniq
+
+  let filter_opt = xs => {
+    let rec loop = (l, acc) =>
+      switch l {
+      | list{} => acc
+      | list{hd, ...tl} =>
+        switch hd {
+        | None => loop(tl, acc)
+        | Some(x) => loop(tl, list{x, ...acc})
+        }
+      }
+    List.rev(loop(xs, list{}))
+  }
+
+  let containsWith = f => List.exists(f)
+
+  let uniqWithBy = (eq, f, xs) =>
+    List.fold_left(
+      ((acc, tacc), v) =>
+        containsWith(eq(f(v)), tacc) ? (acc, tacc) : (append(v, acc), append(f(v), tacc)),
+      (list{}, list{}),
+      xs,
+    ) |> fst
+
+  module Util = {
+    let eq = (a, b) => a == b
+  }
+  let uniqBy = (f, xs) => uniqWithBy(Util.eq, f, xs)
+  let join = j => List.fold_left((acc, v) => String.length(acc) == 0 ? v : acc ++ (j ++ v), "")
+  let head = xs =>
+    switch List.hd(xs) {
+    | exception _ => None
+    | a => Some(a)
+    }
+
+  let uniq = xs => uniqBy(x => x, xs)
+
   let flatten = List.flatten
-  let last = Rationale.RList.last
+  let last = xs => xs |> List.rev |> head
+
   let append = List.append
   let getBy = Belt.List.getBy
-  let dropLast = Rationale.RList.dropLast
-  let contains = Rationale.RList.contains
-  let without = Rationale.RList.without
-  let update = Rationale.RList.update
+
+  let dropLast = (i, xs) => take(List.length(xs) - i, xs)
+
+  let containsWith = f => List.exists(f)
+
+  let contains = x => containsWith(Util.eq(x))
+
+  let reject = pred => List.filter(x => !pred(x))
+  let tail = xs =>
+    switch List.tl(xs) {
+    | exception _ => None
+    | a => Some(a)
+    }
+
+  let init = xs => {
+    O.fmap(List.rev, xs |> List.rev |> tail)
+  }
+
+  let singleton = (x: 'a): list<'a> => list{x}
+
+  let adjust = (f, i, xs) => {
+    let (a, b) = splitAt(i + 1, xs)
+    switch a {
+    | _ if i < 0 => xs
+    | _ if i >= List.length(xs) => xs
+    | list{} => b
+    | list{a} => list{f(a), ...b}
+    | a =>
+      O.fmap(
+        concat'(b),
+        O.bind(init(a), x =>
+          O.fmap(F.flip(append, x), O.fmap(fmap(f), O.fmap(singleton, last(a))))
+        ),
+      ) |> O.default(xs)
+    }
+  }
+
+  let without = (exclude, xs) => reject(x => contains(x, exclude), xs)
+
+  let update = (x, i, xs) => adjust(F.always(x), i, xs)
+
   let iter = List.iter
-  let findIndex = Rationale.RList.findIndex
+  let findIndex = {
+    let rec loop = (pred, xs, i) =>
+      switch xs {
+      | list{} => None
+      | list{a, ...b} => pred(a) ? Some(i) : loop(pred, b, i + 1)
+      }
+    (pred, xs) => loop(pred, xs, 0)
+  }
+
   let headSafe = Belt.List.head
   let tailSafe = Belt.List.tail
   let headExn = Belt.List.headExn
@@ -360,7 +527,7 @@ module A = {
         Belt.Array.getUnsafe(a, index),
         Belt.Array.getUnsafe(a, index + 1),
       ))
-      |> Rationale.Result.return
+      |> (x => Ok(x))
     }
 
   let tail = Belt.Array.sliceToEnd(_, 1)
@@ -424,8 +591,8 @@ module A = {
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
       optionals
-      |> Js.Array.filter(Rationale.Option.isSome)
-      |> Js.Array.map(Rationale.Option.toExn("Warning: This should not have happened"))
+      |> Js.Array.filter(O.isSome)
+      |> Js.Array.map(O.toExn("Warning: This should not have happened"))
     let defaultEmpty = (o: option<array<'a>>): array<'a> =>
       switch o {
       | Some(o) => o
@@ -589,7 +756,7 @@ module A2 = {
 module JsArray = {
   let concatSomes = (optionals: Js.Array.t<option<'a>>): Js.Array.t<'a> =>
     optionals
-    |> Js.Array.filter(Rationale.Option.isSome)
-    |> Js.Array.map(Rationale.Option.toExn("Warning: This should not have happened"))
+    |> Js.Array.filter(O.isSome)
+    |> Js.Array.map(O.toExn("Warning: This should not have happened"))
   let filter = Js.Array.filter
 }
