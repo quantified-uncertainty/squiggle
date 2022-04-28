@@ -263,4 +263,4 @@ let combineShapesContinuousDiscrete = (
   )
 }
 
-let isOrdered = (a: XYShape.T.t): bool => E.A.Sorted.Floats.isSorted(a.xs)
+let isOrdered = (a: XYShape.T.t): bool => E.A.Floats.isSorted(a.xs)

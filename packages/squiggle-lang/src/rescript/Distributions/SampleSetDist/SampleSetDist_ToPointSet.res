@@ -85,7 +85,7 @@ let toPointSetDist = (
   (),
 ): Internals.Types.outputs => {
   Array.fast_sort(compare, samples)
-  let (continuousPart, discretePart) = E.A.Sorted.Floats.split(samples)
+  let (continuousPart, discretePart) = E.A.Sorted.split(samples)
   let length = samples |> E.A.length |> float_of_int
   let discrete: PointSetTypes.discreteShape =
     discretePart
