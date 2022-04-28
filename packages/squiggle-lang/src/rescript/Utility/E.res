@@ -1,3 +1,7 @@
+/*
+Some functions from modules `L`, `O`, and `R` below were copied directly from
+running `rescript convert -all` on Rationale https://github.com/jonlaing/rationale
+*/
 module FloatFloatMap = {
   module Id = Belt.Id.MakeComparable({
     type t = float
@@ -335,6 +339,9 @@ module JsDate = {
 
 /* List */
 module L = {
+  module Util = {
+    let eq = (a, b) => a == b
+  }
   let fmap = List.map
   let get = Belt.List.get
   let toArray = Array.of_list
@@ -397,11 +404,9 @@ module L = {
       xs,
     ) |> fst
 
-  module Util = {
-    let eq = (a, b) => a == b
-  }
   let uniqBy = (f, xs) => uniqWithBy(Util.eq, f, xs)
   let join = j => List.fold_left((acc, v) => String.length(acc) == 0 ? v : acc ++ (j ++ v), "")
+
   let head = xs =>
     switch List.hd(xs) {
     | exception _ => None
@@ -409,17 +414,12 @@ module L = {
     }
 
   let uniq = xs => uniqBy(x => x, xs)
-
   let flatten = List.flatten
   let last = xs => xs |> List.rev |> head
-
   let append = List.append
   let getBy = Belt.List.getBy
-
   let dropLast = (i, xs) => take(List.length(xs) - i, xs)
-
   let containsWith = f => List.exists(f)
-
   let contains = x => containsWith(Util.eq(x))
 
   let reject = pred => List.filter(x => !pred(x))
@@ -453,10 +453,9 @@ module L = {
   }
 
   let without = (exclude, xs) => reject(x => contains(x, exclude), xs)
-
   let update = (x, i, xs) => adjust(F.always(x), i, xs)
-
   let iter = List.iter
+
   let findIndex = {
     let rec loop = (pred, xs, i) =>
       switch xs {
