@@ -16,8 +16,8 @@ yarn add @quri/squiggle-components
 Add to `App.js`:
 
 ```jsx
-import {SquiggleEditor} from '@quri/squiggle-components';
-<SquiggleEditor initialSquiggleString="x = beta(3, 10); x + 20" />
+import { SquiggleEditor } from "@quri/squiggle-components";
+<SquiggleEditor initialSquiggleString="x = beta(3, 10); x + 20" />;
 ```
 
 # Build storybook for development
