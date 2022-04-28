@@ -7,7 +7,7 @@
     "build": "rescript build -with-deps && tsc",
     "bundle": "webpack",
     "start": "rescript build -w -with-deps",
-    "clean": "rescript clean",
+    "clean": "rescript clean && rm -r dist",
     "test:reducer": "jest __tests__/Reducer*/",
     "benchmark": "ts-node benchmark/conversion_tests.ts",
     "test": "jest",
