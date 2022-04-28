@@ -69,3 +69,6 @@ let mixture: (
   ~scaleMultiplyFn: scaleMultiplyFn,
   ~pointwiseAddFn: pointwiseAddFn,
 ) => result<t, error>
+
+let isSymbolic: t => bool
+let isPointSet: t => bool
