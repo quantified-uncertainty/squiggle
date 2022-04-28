@@ -28,11 +28,11 @@ describe("XYShapes", () => {
     )
     makeTest(
       "when not sorted, different lengths, and not finite",
-      XYShape.T.Validator.validate({xs: [2.0, 1.0, infinity, 0.0], ys: [3.0, infinity]})->E.O2.fmap(
+      XYShape.T.Validator.validate({xs: [2.0, 1.0, infinity, 0.0], ys: [3.0, Js.Float._NaN]})->E.O2.fmap(
         Errors.toString,
       ),
       Some(
-        "Multiple Errors: [XYShape validate Xs is not sorted], [XYShape validate Xs and Ys have different lengths. Xs has length 4 and Ys has length 2], [XYShape validate Xs is not finite. Example value: Infinity], [XYShape validate Ys is not finite. Example value: Infinity]",
+        "Multiple Errors: [XYShape validate Xs is not sorted], [XYShape validate Xs and Ys have different lengths. Xs has length 4 and Ys has length 2], [XYShape validate Xs is not finite. Example value: Infinity], [XYShape validate Ys is not finite. Example value: NaN]",
       ),
     )
   })
