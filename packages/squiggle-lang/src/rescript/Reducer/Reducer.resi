@@ -18,12 +18,9 @@ type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 let evaluateUsingOptions: (
   ~environment: option<QuriSquiggleLang.ReducerInterface_ExpressionValue.environment>,
   ~externalBindings: option<QuriSquiggleLang.ReducerInterface_ExpressionValue.externalBindings>,
-  ~isPartial: option<bool>,
   string,
 ) => result<expressionValue, errorValue>
 @genType
 let evaluate: string => result<expressionValue, errorValue>
 
 let parse: string => result<Expression.expression, errorValue>
-let parseOuter: string => result<Expression.expression, errorValue>
-let parsePartial: string => result<Expression.expression, errorValue>

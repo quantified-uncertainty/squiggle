@@ -1,37 +1,34 @@
-module Builder = Reducer_Expression_Builder
+/* * WARNING. DO NOT EDIT, BEAUTIFY, COMMENT ON OR REFACTOR THIS CODE. 
+We will stop using MathJs parser and
+this whole file will go to trash
+**/
 module ErrorValue = Reducer_ErrorValue
+module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
 module JavaScript = Reducer_Js
 module Parse = Reducer_MathJs_Parse
 module Result = Belt.Result
 
+type errorValue = ErrorValue.errorValue
 type expression = ExpressionT.expression
 type expressionValue = ExpressionValue.expressionValue
-type errorValue = ErrorValue.errorValue
 
-type blockTag =
-  | ImportVariablesStatement
-  | ExportVariablesExpression
-type tagOrNode =
-  | BlockTag(blockTag)
-  | BlockNode(Parse.node)
+let blockToNode = block => block["node"]
 
-let toTagOrNode = block => BlockNode(block["node"])
-
-let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
+let rec fromInnerNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
   Parse.castNodeType(mathJsNode)->Result.flatMap(typedMathJsNode => {
     let fromNodeList = (nodeList: list<Parse.node>): result<list<expression>, 'e> =>
       Belt.List.reduceReverse(nodeList, Ok(list{}), (racc, currNode) =>
         racc->Result.flatMap(acc =>
-          fromNode(currNode)->Result.map(currCode => list{currCode, ...acc})
+          fromInnerNode(currNode)->Result.map(currCode => list{currCode, ...acc})
         )
       )
 
     let caseFunctionNode = fNode => {
       let rLispArgs = fNode["args"]->Belt.List.fromArray->fromNodeList
-      rLispArgs->Result.flatMap(lispArgs =>
-        Builder.passToFunction(fNode->Parse.nameOfFunctionNode, lispArgs)->Ok
+      rLispArgs->Result.map(lispArgs =>
+        ExpressionBuilder.eFunction(fNode->Parse.nameOfFunctionNode, lispArgs)
       )
     }
 
@@ -42,18 +39,15 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
           (key: string, value: Parse.node),
         ) =>
           racc->Result.flatMap(acc =>
-            fromNode(value)->Result.map(valueExpression => {
+            fromInnerNode(value)->Result.map(valueExpression => {
               let entryCode =
-                list{
-                  key->ExpressionValue.EvString->ExpressionT.EValue,
-                  valueExpression,
-                }->ExpressionT.EList
+                list{ExpressionBuilder.eString(key), valueExpression}->ExpressionT.EList
               list{entryCode, ...acc}
             })
           )
         )
         rargs->Result.flatMap(args =>
-          Builder.passToFunction("$constructRecord", list{ExpressionT.EList(args)})->Ok
+          ExpressionBuilder.eFunction("$constructRecord", list{ExpressionT.EList(args)})->Ok
         ) // $constructRecord gets a single argument: List of key-value paiers
       }
 
@@ -66,7 +60,7 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
         Ok(list{}),
         (racc, currentPropertyMathJsNode) =>
           racc->Result.flatMap(acc =>
-            fromNode(currentPropertyMathJsNode)->Result.map(propertyCode => list{
+            fromInnerNode(currentPropertyMathJsNode)->Result.map(propertyCode => list{
               propertyCode,
               ...acc,
             })
@@ -77,28 +71,41 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
 
     let caseAccessorNode = (objectNode, indexNode) => {
       caseIndexNode(indexNode)->Result.flatMap(indexCode => {
-        fromNode(objectNode)->Result.flatMap(objectCode =>
-          Builder.passToFunction("$atIndex", list{objectCode, indexCode})->Ok
+        fromInnerNode(objectNode)->Result.flatMap(objectCode =>
+          ExpressionBuilder.eFunction("$atIndex", list{objectCode, indexCode})->Ok
         )
       })
     }
 
+    let caseBlock = (nodesArray: array<Parse.node>): result<expression, errorValue> => {
+      let rStatements: result<list<expression>, 'a> =
+        nodesArray
+        ->Belt.List.fromArray
+        ->Belt.List.reduceReverse(Ok(list{}), (racc, currNode) =>
+          racc->Result.flatMap(acc =>
+            fromInnerNode(currNode)->Result.map(currCode => list{currCode, ...acc})
+          )
+        )
+      rStatements->Result.map(statements => ExpressionBuilder.eBlock(statements))
+    }
+
     let caseAssignmentNode = aNode => {
-      let symbol = aNode["object"]["name"]->Builder.toEvSymbolValue
-      let rValueExpression = fromNode(aNode["value"])
-      rValueExpression->Result.flatMap(valueExpression =>
-        Builder.passToFunction("$let", list{symbol, valueExpression})->Ok
+      let symbolName = aNode["object"]["name"]
+      let rValueExpression = fromInnerNode(aNode["value"])
+      rValueExpression->Result.map(valueExpression =>
+        ExpressionBuilder.eLetStatement(symbolName, valueExpression)
       )
     }
 
     let caseFunctionAssignmentNode = faNode => {
-      let symbol = faNode["name"]->Builder.toEvSymbolValue
-      let rValueExpression = fromNode(faNode["expr"])
+      let symbol = faNode["name"]->ExpressionBuilder.eSymbol
+      let rValueExpression = fromInnerNode(faNode["expr"])
 
       rValueExpression->Result.flatMap(valueExpression => {
-        let lispParams = faNode["params"]->ExpressionT.EParameters
-        let lambda = Builder.passToFunction("$lambda", list{lispParams, valueExpression})
-        Builder.passToFunction("$let", list{symbol, lambda})->Ok
+        let lispParams = ExpressionBuilder.eArrayString(faNode["params"])
+        let valueBlock = ExpressionBuilder.eBlock(list{valueExpression})
+        let lambda = ExpressionBuilder.eFunction("$$lambda", list{lispParams, valueBlock})
+        ExpressionBuilder.eFunction("$let", list{symbol, lambda})->Ok
       })
     }
 
@@ -111,11 +118,11 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
     | MjArrayNode(aNode) => caseArrayNode(aNode)
     | MjAssignmentNode(aNode) => caseAssignmentNode(aNode)
     | MjSymbolNode(sNode) => {
-        let expr: expression = Builder.toEvSymbolValue(sNode["name"])
+        let expr: expression = ExpressionBuilder.eSymbol(sNode["name"])
         let rExpr: result<expression, errorValue> = expr->Ok
         rExpr
       }
-    | MjBlockNode(bNode) => bNode["blocks"]->Belt.Array.map(toTagOrNode)->caseTagOrNodes
+    | MjBlockNode(bNode) => bNode["blocks"]->Js.Array2.map(blockToNode)->caseBlock
     | MjConstantNode(cNode) =>
       cNode["value"]->JavaScript.Gate.jsToEv->Result.flatMap(v => v->ExpressionT.EValue->Ok)
     | MjFunctionAssignmentNode(faNode) => caseFunctionAssignmentNode(faNode)
@@ -123,78 +130,10 @@ let rec fromNode = (mathJsNode: Parse.node): result<expression, errorValue> =>
     | MjIndexNode(iNode) => caseIndexNode(iNode)
     | MjObjectNode(oNode) => caseObjectNode(oNode)
     | MjOperatorNode(opNode) => opNode->Parse.castOperatorNodeToFunctionNode->caseFunctionNode
-    | MjParenthesisNode(pNode) => pNode["content"]->fromNode
+    | MjParenthesisNode(pNode) => pNode["content"]->fromInnerNode
     }
     rFinalExpression
   })
-and caseTagOrNodes = (tagOrNodes): result<expression, errorValue> => {
-  let initialBindings = Builder.passToFunction("$$bindings", list{})->Ok
-  let lastIndex = Belt.Array.length(tagOrNodes) - 1
-  tagOrNodes->Belt.Array.reduceWithIndex(initialBindings, (rPreviousBindings, tagOrNode, i) => {
-    rPreviousBindings->Result.flatMap(previousBindings => {
-      let rStatement: result<expression, errorValue> = switch tagOrNode {
-      | BlockNode(node) => fromNode(node)
-      | BlockTag(tag) =>
-        switch tag {
-        | ImportVariablesStatement =>
-          Builder.passToFunction("$importVariablesStatement", list{})->Ok
-        | ExportVariablesExpression =>
-          Builder.passToFunction("$exportVariablesExpression", list{})->Ok
-        }
-      }
 
-      let bindName = if i == lastIndex {
-        "$$bindExpression"
-      } else {
-        "$$bindStatement"
-      }
-
-      rStatement->Result.flatMap((statement: expression) => {
-        Builder.passToFunction(bindName, list{previousBindings, statement})->Ok
-      })
-    })
-  })
-}
-
-let fromPartialNode = (mathJsNode: Parse.node): result<expression, errorValue> => {
-  Parse.castNodeType(mathJsNode)->Result.flatMap(typedMathJsNode => {
-    let casePartialBlockNode = (bNode: Parse.blockNode) => {
-      let blocksOrTags = bNode["blocks"]->Belt.Array.map(toTagOrNode)
-      let completed = Js.Array2.concat(blocksOrTags, [BlockTag(ExportVariablesExpression)])
-      completed->caseTagOrNodes
-    }
-
-    let casePartialExpression = (node: Parse.node) => {
-      let completed = [BlockNode(node), BlockTag(ExportVariablesExpression)]
-
-      completed->caseTagOrNodes
-    }
-
-    let rFinalExpression: result<expression, errorValue> = switch typedMathJsNode {
-    | MjBlockNode(bNode) => casePartialBlockNode(bNode)
-    | _ => casePartialExpression(mathJsNode)
-    }
-    rFinalExpression
-  })
-}
-
-let fromOuterNode = (mathJsNode: Parse.node): result<expression, errorValue> => {
-  Parse.castNodeType(mathJsNode)->Result.flatMap(typedMathJsNode => {
-    let casePartialBlockNode = (bNode: Parse.blockNode) => {
-      let blocksOrTags = bNode["blocks"]->Belt.Array.map(toTagOrNode)
-      let completed = blocksOrTags
-      completed->caseTagOrNodes
-    }
-
-    let casePartialExpression = (node: Parse.node) => {
-      let completed = [BlockNode(node)]
-      completed->caseTagOrNodes
-    }
-
-    let rFinalExpression: result<expression, errorValue> = switch typedMathJsNode {
-    | MjBlockNode(bNode) => casePartialBlockNode(bNode)
-    | _ => casePartialExpression(mathJsNode)
-    }
-    rFinalExpression
-  })
-}
+let fromNode = (node: Parse.node): result<expression, errorValue> =>
+  fromInnerNode(node)->Result.map(expr => ExpressionBuilder.eBlock(list{expr}))
