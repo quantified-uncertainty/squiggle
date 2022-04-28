@@ -14,6 +14,12 @@ type samplingParams = DistributionOperation.env
 type genericDist = DistributionTypes.genericDist
 
 @genType
+type sampleSetDist = SampleSetDist.t
+
+@genType
+type symbolicDist = SymbolicDistTypes.symbolicDist
+
+@genType
 type distributionError = DistributionTypes.error
 
 @genType

@@ -10,6 +10,9 @@ import {
   continuousShape,
   discreteShape,
   distributionErrorToString,
+  mixedShape,
+  sampleSetDist,
+  symbolicDist,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
@@ -49,67 +52,6 @@ export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
   xyPointLength: 10000,
 };
-
-import type { t as SampleSetDist_t } from "../rescript/Distributions/SampleSetDist/SampleSetDist.gen";
-import type { mixedShape } from "../rescript/Distributions/PointSetDist/PointSetTypes.gen";
-
-import type { symbolicDist as SymbolicDistTypes_symbolicDist } from "../rescript/Distributions/SymbolicDist/SymbolicDistTypes.gen";
-
-type rescriptPointSetDist =
-  | {
-      TAG: 0; // Mixed
-      _0: mixedShape;
-    }
-  | {
-      TAG: 1; // Discrete
-      _0: discreteShape;
-    }
-  | {
-      TAG: 2; // ContinuousShape
-      _0: continuousShape;
-    };
-
-type rescriptDist =
-  | { TAG: 0; _0: rescriptPointSetDist }
-  | { TAG: 1; _0: SampleSetDist_t }
-  | { TAG: 2; _0: SymbolicDistTypes_symbolicDist };
-
-// This is a raw rescript export. genType for some reason only converts half
-// the data structure into the format it claims it is. This here is so that
-// we can be guided in converting the other half
-type rescriptExport =
-  | {
-      TAG: 0; // EvArray
-      _0: rescriptExport[];
-    }
-  | {
-      TAG: 1; // EvBool
-      _0: boolean;
-    }
-  | {
-      TAG: 2; // EvCall
-      _0: string;
-    }
-  | {
-      TAG: 3; // EvDistribution
-      _0: rescriptDist;
-    }
-  | {
-      TAG: 4; // EvNumber
-      _0: number;
-    }
-  | {
-      TAG: 5; // EvRecord
-      _0: { [key: string]: rescriptExport };
-    }
-  | {
-      TAG: 6; // EvString
-      _0: string;
-    }
-  | {
-      TAG: 7; // EvSymbol
-      _0: string;
-    };
 
 export type result<a, b> =
   | {
@@ -163,7 +105,69 @@ export function run(
   return resultMap(result, (x) => createTsExport(x, si));
 }
 
-// Recript half converts recursive data structures
+function createTsExport(
+  x: expressionValue,
+  sampEnv: samplingParams
+): squiggleExpression {
+  switch (x.tag) {
+    case "EvArray":
+      // genType doesn't convert anything more than 2 layers down into {tag: x, value: x}
+      // format, leaving it as the raw values. This converts the raw values
+      // directly into typescript values.
+      //
+      // The casting here is because genType is about the types of the returned
+      // values, claiming they are fully recursive when that's not actually the
+      // case
+      return tag(
+        "array",
+        x.value.map((arrayItem): squiggleExpression => {
+          switch (arrayItem.tag) {
+            case "EvRecord":
+              return tag(
+                "record",
+                _.mapValues(arrayItem.value, (recordValue: unknown) =>
+                  convertRawToTypescript(recordValue as rescriptExport, sampEnv)
+                )
+              );
+            case "EvArray":
+              let y = arrayItem.value as unknown as rescriptExport[];
+              return tag(
+                "array",
+                y.map((childArrayItem) =>
+                  convertRawToTypescript(childArrayItem, sampEnv)
+                )
+              );
+            default:
+              return createTsExport(arrayItem, sampEnv);
+          }
+        })
+      );
+    case "EvBool":
+      return tag("boolean", x.value);
+    case "EvCall":
+      return tag("call", x.value);
+    case "EvDistribution":
+      return tag("distribution", new Distribution(x.value, sampEnv));
+    case "EvNumber":
+      return tag("number", x.value);
+    case "EvRecord":
+      // genType doesn't support records, so we have to do the raw conversion ourself
+      let result: tagged<"record", { [key: string]: squiggleExpression }> = tag(
+        "record",
+        _.mapValues(x.value, (x: unknown) =>
+          convertRawToTypescript(x as rescriptExport, sampEnv)
+        )
+      );
+      return result;
+    case "EvString":
+      return tag("string", x.value);
+    case "EvSymbol":
+      return tag("symbol", x.value);
+  }
+}
+
+// Helper functions to convert the recsript representations that genType doesn't
+// cover
 function convertRawToTypescript(
   result: rescriptExport,
   sampEnv: samplingParams
@@ -220,58 +224,59 @@ function convertRawDistributionToGenericDist(
   }
 }
 
-function createTsExport(
-  x: expressionValue,
-  sampEnv: samplingParams
-): squiggleExpression {
-  switch (x.tag) {
-    case "EvArray":
-      return tag(
-        "array",
-        x.value.map((arrayItem): squiggleExpression => {
-          switch (arrayItem.tag) {
-            case "EvRecord":
-              return tag(
-                "record",
-                _.mapValues(arrayItem.value, (recordValue: unknown) =>
-                  convertRawToTypescript(recordValue as rescriptExport, sampEnv)
-                )
-              );
-            case "EvArray":
-              let y = arrayItem.value as unknown as rescriptExport[];
-              return tag(
-                "array",
-                y.map((childArrayItem) =>
-                  convertRawToTypescript(childArrayItem, sampEnv)
-                )
-              );
-            default:
-              return createTsExport(arrayItem, sampEnv);
-          }
-        })
-      );
-    case "EvBool":
-      return tag("boolean", x.value);
-    case "EvCall":
-      return tag("call", x.value);
-    case "EvDistribution":
-      return tag("distribution", new Distribution(x.value, sampEnv));
-    case "EvNumber":
-      return tag("number", x.value);
-    case "EvRecord":
-      let result: tagged<"record", { [key: string]: squiggleExpression }> = tag(
-        "record",
-        _.mapValues(x.value, (x: unknown) =>
-          convertRawToTypescript(x as rescriptExport, sampEnv)
-        )
-      );
-      return result;
-    case "EvString":
-      return tag("string", x.value);
-    case "EvSymbol":
-      return tag("symbol", x.value);
-  }
-}
+// Raw rescript types.
+type rescriptExport =
+  | {
+      TAG: 0; // EvArray
+      _0: rescriptExport[];
+    }
+  | {
+      TAG: 1; // EvBool
+      _0: boolean;
+    }
+  | {
+      TAG: 2; // EvCall
+      _0: string;
+    }
+  | {
+      TAG: 3; // EvDistribution
+      _0: rescriptDist;
+    }
+  | {
+      TAG: 4; // EvNumber
+      _0: number;
+    }
+  | {
+      TAG: 5; // EvRecord
+      _0: { [key: string]: rescriptExport };
+    }
+  | {
+      TAG: 6; // EvString
+      _0: string;
+    }
+  | {
+      TAG: 7; // EvSymbol
+      _0: string;
+    };
+
+type rescriptDist =
+  | { TAG: 0; _0: rescriptPointSetDist }
+  | { TAG: 1; _0: sampleSetDist }
+  | { TAG: 2; _0: symbolicDist };
+
+type rescriptPointSetDist =
+  | {
+      TAG: 0; // Mixed
+      _0: mixedShape;
+    }
+  | {
+      TAG: 1; // Discrete
+      _0: discreteShape;
+    }
+  | {
+      TAG: 2; // ContinuousShape
+      _0: continuousShape;
+    };
 
 export function resultExn<a, c>(r: result<a, c>): a | c {
   return r.value;
