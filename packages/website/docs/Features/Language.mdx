@@ -5,9 +5,6 @@ title: Language Basics
 
 import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
-The squiggle language has a very simple syntax. The best way to get to understand
-it is by simply looking at examples.
-
 ## Expressions
 
 A distribution
@@ -21,12 +18,15 @@ A number
 Arrays
 
 <SquiggleEditor
-  initialSquiggleString={`[cauchy(1,1), 4, isNormalized(toPointSet(1 to 2))]`}
+  initialSquiggleString={`[beta(1,10), 4, isNormalized(toSampleSet(1 to 2))]`}
 />
 
 Records
 
-<SquiggleEditor initialSquiggleString="d1 = {dist: normal(0, 1), weight: 0.25}" />
+<SquiggleEditor
+  initialSquiggleString={`d = {dist: triangular(0, 1, 2), weight: 0.25}
+d.dist`}
+/>
 
 ## Statements
 
@@ -44,6 +44,10 @@ We can define functions
 <SquiggleEditor
   initialSquiggleString={`ozzie_estimate(t) = lognormal(1, t ^ 1.01)
 nuño_estimate(t, m) = mixture(0.5 to 2, normal(m, t ^ 1.25))
-ozzie_estimate(5) * nuño_estimate(5.01, 1)
-`}
+ozzie_estimate(5) * nuño_estimate(5.01, 1)`}
 />
+
+## See more
+
+- [Functions reference](https://squiggle-language.com/docs/Features/Functions)
+- [Gallery](https://squiggle-language.com/docs/Discussions/Gallery)
