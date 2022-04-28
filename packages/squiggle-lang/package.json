@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-lang",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
@@ -62,5 +62,5 @@
   },
   "source": "./src/js/index.ts",
   "main": "./dist/src/js/index.js",
-  "types": "./dist/js/index.d.ts"
+  "types": "./dist/src/js/index.d.ts"
 }
