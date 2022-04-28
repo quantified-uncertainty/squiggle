@@ -1,10 +1,10 @@
 {
   "name": "@quri/squiggle-lang",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "homepage": "https://squiggle-language.com",
   "licence": "MIT",
   "scripts": {
-    "build": "rescript build -with-deps",
+    "build": "rescript build -with-deps && tsc",
     "bundle": "webpack",
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean",
@@ -31,11 +31,15 @@
   ],
   "author": "Quantified Uncertainty Research Institute",
   "license": "MIT",
+  "dependencies": {
+    "rescript": "^9.1.4",
+    "jstat": "^1.9.5",
+    "pdfast": "^0.2.0",
+    "mathjs": "10.5.0"
+  },
   "devDependencies": {
     "bisect_ppx": "^2.7.1",
-    "jstat": "^1.9.5",
     "lodash": "4.17.21",
-    "rescript": "^9.1.4",
     "rescript-fast-check": "^1.1.1",
     "@glennsl/rescript-jest": "^0.9.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
@@ -46,10 +50,8 @@
     "fast-check": "2.25.0",
     "gentype": "^4.3.0",
     "jest": "^27.5.1",
-    "mathjs": "10.5.0",
     "moduleserve": "0.9.1",
     "nyc": "^15.1.0",
-    "pdfast": "^0.2.0",
     "reanalyze": "^2.19.0",
     "ts-jest": "^27.1.4",
     "ts-loader": "^9.2.8",
@@ -59,6 +61,6 @@
     "webpack-cli": "^4.9.2"
   },
   "source": "./src/js/index.ts",
-  "main": "./dist/bundle.js",
+  "main": "./dist/src/js/index.js",
   "types": "./dist/js/index.d.ts"
 }
