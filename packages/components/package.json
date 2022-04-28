@@ -5,7 +5,7 @@
   "dependencies": {
     "antd": "^4.20.1",
     "react-ace": "10.1.0",
-    "@quri/squiggle-lang": "0.2.6",
+    "@quri/squiggle-lang": "^0.2.6",
     "react-dom": "^18.1.0",
     "vega": "^5.22.1",
     "vega-embed": "^6.20.6",
