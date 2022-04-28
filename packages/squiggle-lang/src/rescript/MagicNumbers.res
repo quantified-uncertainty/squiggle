@@ -22,3 +22,16 @@ module OpCost = {
   let wildcardCost = 1000
   let monteCarloCost = Environment.defaultSampleCount
 }
+
+module ToPointSet = {
+  /*
+  This function chooses the minimum amount of duplicate samples that need
+  to exist in order for this to be considered discrete. The tricky thing 
+  is that there are some operations that create duplicate continuous samples, 
+  so we can't guarantee that these only will occur because the fundamental 
+  structure is meant to be discrete. I chose this heuristic because I think 
+  it would strike a reasonable trade-off, but I’m really unsure what’s 
+  best right now.
+ */
+  let minDiscreteToKeep = samples => max(20, E.A.length(samples) / 50)
+}
