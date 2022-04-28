@@ -476,6 +476,7 @@ module A = {
   }
 
   module Floats = {
+    type t = array<float>
     let mean = Jstat.mean
     let geomean = Jstat.geomean
     let mode = Jstat.mode
@@ -491,8 +492,11 @@ module A = {
       r
     }
 
-    let isSorted = (ar: array<float>): bool =>
-      reduce(zip(ar, tail(ar)), true, (acc, (first, second)) => acc && first < second)
+    let getNonFinite = (t: t) => Belt.Array.getBy(t, r => !Js.Float.isFinite(r))
+    let getBelowZero = (t: t) => Belt.Array.getBy(t, r => r < 0.0)
+
+    let isSorted = (t: t): bool =>
+      reduce(zip(t, tail(t)), true, (acc, (first, second)) => acc && first < second)
 
     //Passing true for the exclusive parameter excludes both endpoints of the range.
     //https://jstat.github.io/all.html
@@ -500,8 +504,8 @@ module A = {
 
     // Gives an array with all the differences between values
     // diff([1,5,3,7]) = [4,-2,4]
-    let diff = (arr: array<float>): array<float> =>
-      Belt.Array.zipBy(arr, Belt.Array.sliceToEnd(arr, 1), (left, right) => right -. left)
+    let diff = (t: t): array<float> =>
+      Belt.Array.zipBy(t, Belt.Array.sliceToEnd(t, 1), (left, right) => right -. left)
 
     exception RangeError(string)
     let range = (min: float, max: float, n: int): array<float> =>
@@ -574,7 +578,7 @@ module A = {
       }
     }
   }
-  module Sorted = Floats.Sorted;
+  module Sorted = Floats.Sorted
 }
 
 module A2 = {

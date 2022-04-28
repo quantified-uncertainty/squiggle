@@ -62,6 +62,16 @@ module T = {
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
 }
 
+module Validates = {
+  type t = T.t
+  let areXsSorted = (t:t) => E.A.Floats.isSorted(T.xs(t))
+  let validate = (t:t) => {
+    let xsNotSorted = E.A.Floats.isSorted(T.xs(t)) ? None : Some("Xs are not sorted")
+    let xsNotFinite = E.A.Floats.getNonFinite(T.xs(t)) |> E.O.fmap(r => `Xs contain non-finite values: ${E.Float.toString(r)}`)
+    let ysNotFinite = E.A.Floats.getNonFinite(T.ys(t)) |> E.O.fmap(r => `Ys contain non-finite values: ${E.Float.toString(r)}`)
+  }
+}
+
 module Ts = {
   type t = T.ts
   let minX = (t: t) => t |> E.A.fmap(T.minX) |> E.A.Floats.min
