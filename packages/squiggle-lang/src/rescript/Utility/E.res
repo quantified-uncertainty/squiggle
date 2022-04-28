@@ -550,7 +550,7 @@ module A = {
         minDiscreteWeight: int,
       ) => {
         let (continuous, discrete) = splitContinuousAndDiscreteForDuplicates(sortedArray)
-        let keepFn = v => Belt.Float.toInt(v) > minDiscreteWeight
+        let keepFn = v => Belt.Float.toInt(v) >= minDiscreteWeight
         let (discreteToKeep, discreteToIntegrate) = FloatFloatMap.partition(
           ((_, v)) => keepFn(v),
           discrete,

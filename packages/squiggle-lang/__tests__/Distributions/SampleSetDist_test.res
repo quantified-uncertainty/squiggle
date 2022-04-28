@@ -1,36 +1,27 @@
 open Jest
 open TestHelpers
 
+let prepareInputs = (ar, minWeight) =>
+  E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(ar, minWeight) |> (
+    ((c, disc)) => (c, disc |> E.FloatFloatMap.toArray)
+  )
+
 describe("Continuous and discrete splits", () => {
   makeTest(
-    "splits (1)",
-    E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight([1.432, 1.33455, 2.0], 2),
-    ([1.33455, 1.432, 2.0], E.FloatFloatMap.empty()),
-  )
-  makeTest(
-    "splits (2)",
-    E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(
-      [1.432, 1.33455, 2.0, 2.0, 2.0, 2.0],
-      2,
-    ) |> (((c, disc)) => (c, disc |> E.FloatFloatMap.toArray)),
-    ([1.33455, 1.432], [(2.0, 4.0)]),
+    "is empty, with no common elements",
+    prepareInputs([1.432, 1.33455, 2.0], 2),
+    ([1.33455, 1.432, 2.0], []),
   )
 
   makeTest(
-    "splits (3)",
-    E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(
-      [1.432, 1.33455, 2.0, 2.0, 3.5, 3.5, 3.5],
-      3,
-    ) |> (((c, disc)) => (c, disc |> E.FloatFloatMap.toArray)),
+    "only stores 3.5 as discrete when minWeight is 3",
+    prepareInputs([1.432, 1.33455, 2.0, 2.0, 3.5, 3.5, 3.5], 3),
     ([1.33455, 1.432, 2.0, 2.0], [(3.5, 3.0)]),
   )
 
   makeTest(
-    "splits (3)",
-    E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(
-      [1.432, 1.33455, 2.0, 2.0, 3.5, 3.5, 3.5],
-      5,
-    ) |> (((c, disc)) => (c, disc |> E.FloatFloatMap.toArray)),
+    "doesn't store 3.5 as discrete when minWeight is 5",
+    prepareInputs([1.432, 1.33455, 2.0, 2.0, 3.5, 3.5, 3.5], 5),
     ([1.33455, 1.432, 2.0, 2.0, 3.5, 3.5, 3.5], []),
   )
 
