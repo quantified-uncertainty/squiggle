@@ -217,6 +217,12 @@ module R = {
     | Error(err) => errF(err)
     }
   let id = e => e |> result(U.id, U.id)
+  let isOk = Belt.Result.isOk
+  let getError = (r: result<'a, 'b>) =>
+    switch r {
+    | Ok(_) => None
+    | Error(e) => Some(e)
+    }
   let fmap = (f: 'a => 'b, r: result<'a, 'c>): result<'b, 'c> => {
     switch r {
     | Ok(r') => Ok(f(r'))
@@ -645,42 +651,81 @@ module A = {
     }
   }
 
-  module Sorted = {
-    let min = first
-    let max = last
-    let range = (~min=min, ~max=max, a) =>
-      switch (min(a), max(a)) {
-      | (Some(min), Some(max)) => Some(max -. min)
-      | _ => None
-      }
+  module Floats = {
+    type t = array<float>
+    let mean = Jstat.mean
+    let geomean = Jstat.geomean
+    let mode = Jstat.mode
+    let variance = Jstat.variance
+    let stdev = Jstat.stdev
+    let sum = Jstat.sum
+    let random = Js.Math.random_int
 
     let floatCompare: (float, float) => int = compare
+    let sort = t => {
+      let r = t
+      r |> Array.fast_sort(floatCompare)
+      r
+    }
 
-    let binarySearchFirstElementGreaterIndex = (ar: array<'a>, el: 'a) => {
-      let el = Belt.SortArray.binarySearchBy(ar, el, floatCompare)
-      let el = el < 0 ? el * -1 - 1 : el
-      switch el {
-      | e if e >= length(ar) => #overMax
-      | e if e == 0 => #underMin
-      | e => #firstHigher(e)
+    let getNonFinite = (t: t) => Belt.Array.getBy(t, r => !Js.Float.isFinite(r))
+    let getBelowZero = (t: t) => Belt.Array.getBy(t, r => r < 0.0)
+
+    let isSorted = (t: t): bool =>
+      if Array.length(t) < 1 {
+        true
+      } else {
+        reduce(zip(t, tail(t)), true, (acc, (first, second)) => acc && first < second)
       }
-    }
 
-    let concat = (t1: array<'a>, t2: array<'a>) => {
-      let ts = Belt.Array.concat(t1, t2)
-      ts |> Array.fast_sort(floatCompare)
-      ts
-    }
+    //Passing true for the exclusive parameter excludes both endpoints of the range.
+    //https://jstat.github.io/all.html
+    let percentile = (a, b) => Jstat.percentile(a, b, false)
 
-    let concatMany = (t1: array<array<'a>>) => {
-      let ts = Belt.Array.concatMany(t1)
-      ts |> Array.fast_sort(floatCompare)
-      ts
-    }
+    // Gives an array with all the differences between values
+    // diff([1,5,3,7]) = [4,-2,4]
+    let diff = (t: t): array<float> =>
+      Belt.Array.zipBy(t, Belt.Array.sliceToEnd(t, 1), (left, right) => right -. left)
 
-    module Floats = {
-      let isSorted = (ar: array<float>): bool =>
-        reduce(zip(ar, tail(ar)), true, (acc, (first, second)) => acc && first < second)
+    exception RangeError(string)
+    let range = (min: float, max: float, n: int): array<float> =>
+      switch n {
+      | 0 => []
+      | 1 => [min]
+      | 2 => [min, max]
+      | _ if min == max => Belt.Array.make(n, min)
+      | _ if n < 0 => raise(RangeError("n must be greater than 0"))
+      | _ if min > max => raise(RangeError("Min value is less then max value"))
+      | _ =>
+        let diff = (max -. min) /. Belt.Float.fromInt(n - 1)
+        Belt.Array.makeBy(n, i => min +. Belt.Float.fromInt(i) *. diff)
+      }
+
+    let min = Js.Math.minMany_float
+    let max = Js.Math.maxMany_float
+
+    module Sorted = {
+      let min = first
+      let max = last
+      let range = (~min=min, ~max=max, a) =>
+        switch (min(a), max(a)) {
+        | (Some(min), Some(max)) => Some(max -. min)
+        | _ => None
+        }
+
+      let binarySearchFirstElementGreaterIndex = (ar: array<'a>, el: 'a) => {
+        let el = Belt.SortArray.binarySearchBy(ar, el, floatCompare)
+        let el = el < 0 ? el * -1 - 1 : el
+        switch el {
+        | e if e >= length(ar) => #overMax
+        | e if e == 0 => #underMin
+        | e => #firstHigher(e)
+        }
+      }
+
+      let concat = (t1: array<'a>, t2: array<'a>) => Belt.Array.concat(t1, t2)->sort
+
+      let concatMany = (t1: array<array<'a>>) => Belt.Array.concatMany(t1)->sort
 
       let makeIncrementalUp = (a, b) =>
         Array.make(b - a + 1, a) |> Array.mapi((i, c) => c + i) |> Belt.Array.map(_, float_of_int)
@@ -743,47 +788,13 @@ module A = {
       }
     }
   }
-
-  module Floats = {
-    let mean = Jstat.mean
-    let geomean = Jstat.geomean
-    let mode = Jstat.mode
-    let variance = Jstat.variance
-    let stdev = Jstat.stdev
-    let sum = Jstat.sum
-    let random = Js.Math.random_int
-
-    //Passing true for the exclusive parameter excludes both endpoints of the range.
-    //https://jstat.github.io/all.html
-    let percentile = (a, b) => Jstat.percentile(a, b, false)
-
-    // Gives an array with all the differences between values
-    // diff([1,5,3,7]) = [4,-2,4]
-    let diff = (arr: array<float>): array<float> =>
-      Belt.Array.zipBy(arr, Belt.Array.sliceToEnd(arr, 1), (left, right) => right -. left)
-
-    exception RangeError(string)
-    let range = (min: float, max: float, n: int): array<float> =>
-      switch n {
-      | 0 => []
-      | 1 => [min]
-      | 2 => [min, max]
-      | _ if min == max => Belt.Array.make(n, min)
-      | _ if n < 0 => raise(RangeError("n must be greater than 0"))
-      | _ if min > max => raise(RangeError("Min value is less then max value"))
-      | _ =>
-        let diff = (max -. min) /. Belt.Float.fromInt(n - 1)
-        Belt.Array.makeBy(n, i => min +. Belt.Float.fromInt(i) *. diff)
-      }
-
-    let min = Js.Math.minMany_float
-    let max = Js.Math.maxMany_float
-  }
+  module Sorted = Floats.Sorted
 }
 
 module A2 = {
   let fmap = (a, b) => A.fmap(b, a)
   let joinWith = (a, b) => A.joinWith(b, a)
+  let filter = (a, b) => A.filter(b, a)
 }
 
 module JsArray = {
