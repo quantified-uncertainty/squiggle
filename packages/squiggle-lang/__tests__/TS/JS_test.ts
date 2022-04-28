@@ -42,6 +42,39 @@ describe("Log function", () => {
   });
 });
 
+describe("Array", () => {
+  test("nested Array", () => {
+    expect(testRun("[[1]]")).toEqual({
+      tag: "array",
+      value: [
+        {
+          tag: "array",
+          value: [
+            {
+              tag: "number",
+              value: 1,
+            },
+          ],
+        },
+      ],
+    });
+  });
+});
+
+describe("Record", () => {
+  test("Return record", () => {
+    expect(testRun("{a: 1}")).toEqual({
+      tag: "record",
+      value: {
+        a: {
+          tag: "number",
+          value: 1,
+        },
+      },
+    });
+  });
+});
+
 describe("Distribution", () => {
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
   //Also, note, the value should be created using makeSampleSetDist() later on.
