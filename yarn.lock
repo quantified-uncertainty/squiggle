@@ -2400,18 +2400,17 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.5.tgz#db5a11bf66bdab39569719555b0f76e138d7bd64"
   integrity sha512-9X2obfABZuDVLCgPK9aX0a/x4jaOEweTTWE2+9sr0Qqqevj2Uv5XorvusThmc9XGYpS9yI+fhh8RTafBtGposw==
 
-"@quri/squiggle-lang@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@quri/squiggle-lang/-/squiggle-lang-0.2.5.tgz#368f0644290a0265696db7547ea31b0a0b55a69e"
-  integrity sha512-yBCqjieirDE4oDZVICGQh2r1A6vS6GM5y8Pc0IhHGnNBbs230iA/b+eytQTGbEE7yVEvHbDNBUoiB+B7sCPzaQ==
+"@quri/squiggle-components@0.2.9":
+  version "0.2.9"
+  resolved "https://registry.yarnpkg.com/@quri/squiggle-components/-/squiggle-components-0.2.9.tgz#9a2c7ce824ad59f980dc73e465676bd2563d409c"
+  integrity sha512-RpMTCzf7vBY+fatdjD+iFWkleMYOkJQN7kknZlLBriSo8Fy5KjhKghR+DotU+HE/2Yq1jUIveaIDF0XRBg+SVA==
   dependencies:
-    bisect_ppx "^2.7.1"
-    jstat "^1.9.5"
-    lodash "4.17.21"
-    mathjs "10.5.0"
-    pdfast "^0.2.0"
-    rationale "0.2.0"
-    rescript "^9.1.4"
+    "@react-hook/size" "^2.1.2"
+    antd "^4.20.0"
+    react "^18.0.0"
+    react-ace "10.0.0"
+    react-dom "^18.0.0"
+    styled-components "^5.3.5"
 
 "@react-hook/latest@^1.0.2":
   version "1.0.3"
@@ -5006,7 +5005,7 @@ ansi-to-html@^0.6.11:
   dependencies:
     entities "^2.0.0"
 
-antd@^4.20.1:
+antd@^4.20.0, antd@^4.20.1:
   version "4.20.1"
   resolved "https://registry.yarnpkg.com/antd/-/antd-4.20.1.tgz#6cd5a406c7172d61a5d0693ea52ee908650cf674"
   integrity sha512-asKxOV0a6AijqonbcXkO08/q+XvqS/HmGfaRIS6ZH1ALR3FS2q+kTW52rJZO9rfoOb/ldPhEBVSWiNrbiB+uCQ==
@@ -14041,11 +14040,6 @@ range-parser@^1.2.1, range-parser@~1.2.1:
   resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-1.2.1.tgz#3cf37023d199e1c24d1a55b84800c2f3e6468031"
   integrity sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==
 
-rationale@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/rationale/-/rationale-0.2.0.tgz#555ed4f3cc7cd0245faeac041d3769f1857e4f3d"
-  integrity sha512-Pd8w5Inv1JhTfRyx03zs486CEAn6UKXvvOtxVRLsewngsBSffo3MQwUKYS75L/8vPt98wmf7iaZROx362/f7Bw==
-
 raw-body@2.5.1:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/raw-body/-/raw-body-2.5.1.tgz#fe1b1628b181b700215e5fd42389f98b71392857"
@@ -14441,6 +14435,17 @@ rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-ace@10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/react-ace/-/react-ace-10.0.0.tgz#1760e302604cff35ba40963db43eb027513b6572"
+  integrity sha512-AUoA2OsKOCv8fXLqcFM232dF/Z8w14bwPUZ9z5I2zjBfqfZOZLqxnhXN+qKL6VrQXs1DLUvalGOuM5TABAFOCA==
+  dependencies:
+    ace-builds "^1.4.14"
+    diff-match-patch "^1.0.5"
+    lodash.get "^4.4.2"
+    lodash.isequal "^4.5.0"
+    prop-types "^15.7.2"
+
 react-ace@10.1.0:
   version "10.1.0"
   resolved "https://registry.yarnpkg.com/react-ace/-/react-ace-10.1.0.tgz#d348eac2b16475231779070b6cd16768deed565f"
@@ -14530,7 +14535,7 @@ react-docgen@^5.0.0:
     node-dir "^0.1.10"
     strip-indent "^3.0.0"
 
-react-dom@^18.1.0:
+react-dom@^18.0.0, react-dom@^18.1.0:
   version "18.1.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.1.0.tgz#7f6dd84b706408adde05e1df575b3a024d7e8a2f"
   integrity sha512-fU1Txz7Budmvamp7bshe4Zi32d0ll7ect+ccxNu9FlObT605GOEB8BfO4tmRJ39R5Zj831VCpvQ05QPBW5yb+w==
