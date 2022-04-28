@@ -150,8 +150,6 @@ let truncate = Truncate.run
    of a new variable that is the result of the operation on A and B.
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
    In general, this is implemented via convolution.
-
-  TODO: It would be useful to be able to pass in a paramater to get this to run either with convolution or monte carlo.
 */
 module AlgebraicCombination = {
   module InputValidator = {
@@ -181,9 +179,9 @@ module AlgebraicCombination = {
       switch items {
       | Error(r) => Some(r)
       | Ok([true, _]) =>
-        Some(LogarithmOfDistributionError("First input must completely greater than 0"))
+        Some(LogarithmOfDistributionError("First input must be completely greater than 0"))
       | Ok([false, true]) =>
-        Some(LogarithmOfDistributionError("Second input must completely greater than 0"))
+        Some(LogarithmOfDistributionError("Second input must be completely greater than 0"))
       | Ok([false, false]) => None
       | Ok(_) => Some(Unreachable)
       }
