@@ -2,7 +2,7 @@
   "name": "@quri/squiggle-lang",
   "version": "0.2.6",
   "homepage": "https://squiggle-language.com",
-  "licence": "MIT",
+  "license": "MIT",
   "scripts": {
     "build": "rescript build -with-deps && tsc",
     "bundle": "webpack",
