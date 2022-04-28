@@ -2,7 +2,7 @@ open Jest
 open TestHelpers
 
 let prepareInputs = (ar, minWeight) =>
-  E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(ar, minWeight) |> (
+  E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(ar, ~minDiscreteWeight=minWeight) |> (
     ((c, disc)) => (c, disc |> E.FloatFloatMap.toArray)
   )
 
@@ -33,14 +33,14 @@ describe("Continuous and discrete splits", () => {
 
   let (_, discrete1) = E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(
     makeDuplicatedArray(10),
-    2,
+    ~minDiscreteWeight=2,
   )
   let toArr1 = discrete1 |> E.FloatFloatMap.toArray
   makeTest("splitMedium at count=10", toArr1 |> Belt.Array.length, 10)
 
   let (_c, discrete2) = E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(
     makeDuplicatedArray(500),
-    2,
+    ~minDiscreteWeight=2,
   )
   let toArr2 = discrete2 |> E.FloatFloatMap.toArray
   makeTest("splitMedium at count=500", toArr2 |> Belt.Array.length, 500)

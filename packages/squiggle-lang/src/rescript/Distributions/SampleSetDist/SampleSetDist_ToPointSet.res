@@ -63,8 +63,11 @@ let toPointSetDist = (
   (),
 ): Internals.Types.outputs => {
   Array.fast_sort(compare, samples)
-  let minDiscreteToKeep = max(2, E.A.length(samples) / 10);
-  let (continuousPart, discretePart) = E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(samples, minDiscreteToKeep)
+  let minDiscreteToKeep = MagicNumbers.ToPointSet.minDiscreteToKeep(samples)
+  let (continuousPart, discretePart) = E.A.Sorted.Floats.splitContinuousAndDiscreteForMinWeight(
+    samples,
+    ~minDiscreteWeight=minDiscreteToKeep,
+  )
   let length = samples |> E.A.length |> float_of_int
   let discrete: PointSetTypes.discreteShape =
     discretePart
