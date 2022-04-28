@@ -1,12 +1,19 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.2.9",
-  "licence": "MIT",
+  "version": "0.2.13",
+  "license": "MIT",
   "dependencies": {
     "antd": "^4.20.1",
     "react-ace": "10.1.0",
+    "@quri/squiggle-lang": "^0.2.6",
     "react-dom": "^18.1.0",
+    "vega": "^5.22.1",
+    "vega-embed": "^6.20.6",
+    "vega-lite": "^5.2.0",
+    "react-vega": "^7.5.0",
+    "react": "^18.1.0",
     "@react-hook/size": "^2.1.2",
+    "lodash": "^4.17.21",
     "styled-components": "^5.3.5"
   },
   "devDependencies": {
@@ -26,31 +33,25 @@
     "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.8.1",
-    "@quri/squiggle-lang": "0.2.5",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^14.1.1",
     "@types/jest": "^27.4.0",
+    "web-vitals": "^2.1.4",
     "@types/lodash": "^4.14.182",
     "@types/node": "^17.0.29",
     "@types/react": "^18.0.3",
     "@types/react-dom": "^18.0.2",
     "cross-env": "^7.0.3",
-    "lodash": "^4.17.21",
-    "react": "^18.1.0",
     "react-scripts": "5.0.1",
-    "react-vega": "^7.5.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.6.3",
-    "vega": "^5.22.1",
-    "vega-embed": "^6.20.6",
-    "vega-lite": "^5.2.0",
-    "web-vitals": "^2.1.4",
     "webpack-cli": "^4.9.2"
   },
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
     "build": "tsc -b && build-storybook -s public",
+    "build:package": "tsc -b",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
     "lint": "prettier --check .",
@@ -88,6 +89,6 @@
     "@types/react": "17.0.43"
   },
   "source": "./src/index.ts",
-  "main": "dist/bundle.js",
+  "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts"
 }
