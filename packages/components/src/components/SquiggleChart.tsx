@@ -44,6 +44,8 @@ export const VariableBox: React.FC<{
   );
 };
 
+let RecordKeyHeader = styled.h3``;
+
 export interface SquiggleItemProps {
   /** The input string for squiggle */
   expression: squiggleExpression;
@@ -101,6 +103,17 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         <VariableBox heading="Array">
           {expression.value.map((r) => (
             <SquiggleItem expression={r} width={width - 20} height={50} />
+          ))}
+        </VariableBox>
+      );
+    case "record":
+      return (
+        <VariableBox heading="Record">
+          {Object.entries(expression.value).map(([key, r]) => (
+            <>
+              <RecordKeyHeader>{key}</RecordKeyHeader>
+              <SquiggleItem expression={r} width={width - 20} height={50} />
+            </>
           ))}
         </VariableBox>
       );

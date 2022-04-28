@@ -50,6 +50,67 @@ export let defaultSamplingInputs: samplingParams = {
   xyPointLength: 10000,
 };
 
+import type { t as SampleSetDist_t } from "../rescript/Distributions/SampleSetDist/SampleSetDist.gen";
+import type { mixedShape } from "../rescript/Distributions/PointSetDist/PointSetTypes.gen";
+
+import type { symbolicDist as SymbolicDistTypes_symbolicDist } from "../rescript/Distributions/SymbolicDist/SymbolicDistTypes.gen";
+
+type rescriptPointSetDist =
+  | {
+      TAG: 0; // Mixed
+      _0: mixedShape;
+    }
+  | {
+      TAG: 1; // Discrete
+      _0: discreteShape;
+    }
+  | {
+      TAG: 2; // ContinuousShape
+      _0: continuousShape;
+    };
+
+type rescriptDist =
+  | { TAG: 0; _0: rescriptPointSetDist }
+  | { TAG: 1; _0: SampleSetDist_t }
+  | { TAG: 2; _0: SymbolicDistTypes_symbolicDist };
+
+// This is a raw rescript export. genType for some reason only converts half
+// the data structure into the format it claims it is. This here is so that
+// we can be guided in converting the other half
+type rescriptExport =
+  | {
+      TAG: 0; // EvArray
+      _0: rescriptExport[];
+    }
+  | {
+      TAG: 1; // EvBool
+      _0: boolean;
+    }
+  | {
+      TAG: 2; // EvCall
+      _0: string;
+    }
+  | {
+      TAG: 3; // EvDistribution
+      _0: rescriptDist;
+    }
+  | {
+      TAG: 4; // EvNumber
+      _0: number;
+    }
+  | {
+      TAG: 5; // EvRecord
+      _0: { [key: string]: rescriptExport };
+    }
+  | {
+      TAG: 6; // EvString
+      _0: string;
+    }
+  | {
+      TAG: 7; // EvSymbol
+      _0: string;
+    };
+
 export type result<a, b> =
   | {
       tag: "Ok";
@@ -90,6 +151,7 @@ export type squiggleExpression =
   | tagged<"distribution", Distribution>
   | tagged<"number", number>
   | tagged<"record", { [key: string]: squiggleExpression }>;
+
 export function run(
   squiggleString: string,
   samplingInputs?: samplingParams
@@ -101,6 +163,63 @@ export function run(
   return resultMap(result, (x) => createTsExport(x, si));
 }
 
+// Recript half converts recursive data structures
+function convertRawToTypescript(
+  result: rescriptExport,
+  sampEnv: samplingParams
+): squiggleExpression {
+  switch (result.TAG) {
+    case 0: // EvArray
+      return tag(
+        "array",
+        result._0.map((x) => convertRawToTypescript(x, sampEnv))
+      );
+    case 1: // EvBool
+      return tag("boolean", result._0);
+    case 2: // EvCall
+      return tag("call", result._0);
+    case 3: // EvDistribution
+      return tag(
+        "distribution",
+        new Distribution(
+          convertRawDistributionToGenericDist(result._0),
+          sampEnv
+        )
+      );
+    case 4: // EvNumber
+      return tag("number", result._0);
+    case 5: // EvRecord
+      return tag(
+        "record",
+        _.mapValues(result._0, (x) => convertRawToTypescript(x, sampEnv))
+      );
+    case 6: // EvString
+      return tag("string", result._0);
+    case 7: // EvSymbol
+      return tag("symbol", result._0);
+  }
+}
+
+function convertRawDistributionToGenericDist(
+  result: rescriptDist
+): genericDist {
+  switch (result.TAG) {
+    case 0: // Point Set Dist
+      switch (result._0.TAG) {
+        case 0: // Mixed
+          return tag("PointSet", tag("Mixed", result._0._0));
+        case 1: // Discrete
+          return tag("PointSet", tag("Discrete", result._0._0));
+        case 2: // Continuous
+          return tag("PointSet", tag("Continuous", result._0._0));
+      }
+    case 1: // Sample Set Dist
+      return tag("SampleSet", result._0);
+    case 2: // Symbolic Dist
+      return tag("Symbolic", result._0);
+  }
+}
+
 function createTsExport(
   x: expressionValue,
   sampEnv: samplingParams
@@ -109,7 +228,27 @@ function createTsExport(
     case "EvArray":
       return tag(
         "array",
-        x.value.map((x) => createTsExport(x, sampEnv))
+        x.value.map((arrayItem): squiggleExpression => {
+          switch (arrayItem.tag) {
+            case "EvRecord":
+              return tag(
+                "record",
+                _.mapValues(arrayItem.value, (recordValue: unknown) =>
+                  convertRawToTypescript(recordValue as rescriptExport, sampEnv)
+                )
+              );
+            case "EvArray":
+              let y = arrayItem.value as unknown as rescriptExport[];
+              return tag(
+                "array",
+                y.map((childArrayItem) =>
+                  convertRawToTypescript(childArrayItem, sampEnv)
+                )
+              );
+            default:
+              return createTsExport(arrayItem, sampEnv);
+          }
+        })
       );
     case "EvBool":
       return tag("boolean", x.value);
@@ -120,10 +259,13 @@ function createTsExport(
     case "EvNumber":
       return tag("number", x.value);
     case "EvRecord":
-      return tag(
+      let result: tagged<"record", { [key: string]: squiggleExpression }> = tag(
         "record",
-        _.mapValues(x.value, (x) => createTsExport(x, sampEnv))
+        _.mapValues(x.value, (x: unknown) =>
+          convertRawToTypescript(x as rescriptExport, sampEnv)
+        )
       );
+      return result;
     case "EvString":
       return tag("string", x.value);
     case "EvSymbol":
