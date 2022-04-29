@@ -4,6 +4,7 @@ import {
   samplingParams,
   environment,
   evaluatePartialUsingExternalBindings,
+  evaluateUsingOptions,
   externalBindings,
   expressionValue,
   recordEV,
@@ -110,7 +111,10 @@ export function run(
     ? samplingInputs
     : defaultSamplingInputs;
   let e = environ ? environ : defaultEnvironment;
-  let res: result<expressionValue, errorValue> = eval(squiggleString); // , b, e);
+  let res: result<expressionValue, errorValue> = evaluateUsingOptions(
+    { externalBindings: b, environment: e },
+    squiggleString
+  ); // , b, e);
   return resultMap(res, (x) => createTsExport(x, si));
 }
 
