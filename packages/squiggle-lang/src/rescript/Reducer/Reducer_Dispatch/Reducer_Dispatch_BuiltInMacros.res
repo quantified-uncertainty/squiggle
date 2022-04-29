@@ -19,14 +19,10 @@ let dispatchMacroCall = (
   environment,
   reduceExpression: ExpressionT.reducerFn,
 ): result<expression, errorValue> => {
-  let doBindStatement = (bindingExpr: expression, statement: expression, environment) =>
+  let doBindStatement = (bindingExpr: expression, statement: expression, environment) => 
     switch statement {
     | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$let")), symbolExpr, statement}) => {
-        let rExternalBindingsValue = reduceExpression(
-          bindingExpr,
-          Bindings.defaultBindings,
-          environment,
-        )
+        let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
 
         rExternalBindingsValue->Result.flatMap(externalBindingsValue => {
           let newBindings = Bindings.fromValue(externalBindingsValue)
@@ -41,13 +37,15 @@ let dispatchMacroCall = (
       }
     | _ => REAssignmentExpected->Error
     }
+  
 
-  let doBindExpression = (bindingExpr: expression, statement: expression, environment) =>
+  let doBindExpression = (bindingExpr: expression, statement: expression, environment) => 
     switch statement {
     | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$let")), symbolExpr, statement}) => {
         let rExternalBindingsValue = reduceExpression(
           bindingExpr,
-          Bindings.defaultBindings,
+          Belt.Map.String.fromArray([("x", ExpressionValue.EvNumber(666.))]),
+          // bindingsToHandDown,
           environment,
         )
 
@@ -68,11 +66,7 @@ let dispatchMacroCall = (
         })
       }
     | _ => {
-        let rExternalBindingsValue = reduceExpression(
-          bindingExpr,
-          Bindings.defaultBindings,
-          environment,
-        )
+        let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
         rExternalBindingsValue->Result.flatMap(externalBindingsValue => {
           let newBindings = Bindings.fromValue(externalBindingsValue)
           let rNewStatement = Bindings.replaceSymbols(newBindings, statement)
@@ -80,7 +74,7 @@ let dispatchMacroCall = (
         })
       }
     }
-
+  
   let doBlock = (exprs: list<expression>, _bindings: ExpressionT.bindings, _environment): result<
     expression,
     errorValue,

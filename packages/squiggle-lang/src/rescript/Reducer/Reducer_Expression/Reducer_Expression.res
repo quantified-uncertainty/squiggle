@@ -32,7 +32,7 @@ let parse = (mathJsCode: string): result<t, errorValue> =>
 let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<
   expressionValue,
   'e,
-> => {
+> => 
   switch expression {
   | T.EValue(value) => value->Ok
   | T.EList(list) =>
@@ -46,7 +46,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings, environment: en
     | _ => reduceExpressionList(list, bindings, environment)
     }
   }
-}
+
 and reduceExpressionList = (
   expressions: list<t>,
   bindings: T.bindings,

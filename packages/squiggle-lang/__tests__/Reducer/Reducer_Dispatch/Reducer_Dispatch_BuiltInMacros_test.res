@@ -99,6 +99,27 @@ describe("block", () => {
   )
   // Empty block
   testMacro([], eBlock(list{}), "Ok(:undefined block)") //TODO: should be an error
+  //   :$$block (:$$block (:$let :y (:add :x 1)) :y)"
+  testMacro(
+    [],
+    eBlock(list{
+      eBlock(list{
+        eLetStatement("y", eFunction("add", list{eSymbol("x"), eNumber(1.)})),
+        eSymbol("y"),
+      }),
+    }),
+    "Ok((:$$bindExpression (:$$block (:$let :y (:add :x 1)) :y)))",
+  )
+  MyOnly.testMacroEval(
+    [("x", EvNumber(1.))],
+    eBlock(list{
+      eBlock(list{
+        eLetStatement("y", eFunction("add", list{eSymbol("x"), eNumber(1.)})),
+        eSymbol("y"),
+      }),
+    }),
+    "Ok(2)",
+  )
 })
 
 describe("lambda", () => {
