@@ -48,7 +48,12 @@ import {
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
-export type { samplingParams, errorValue, externalBindings as bindings };
+export type {
+  samplingParams,
+  errorValue,
+  externalBindings as bindings,
+  parameters,
+};
 
 export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
@@ -102,8 +107,8 @@ export function run(
   samplingInputs?: samplingParams,
   parameters?: parameters
 ): result<squiggleExpression, errorValue> {
-  let b = bindings ? bindings : {};
-  let p = parameters ? parameters : {};
+  let b = bindings ? bindings : defaultBindings;
+  let p = parameters ? parameters : defaultParameters;
   let si: samplingParams = samplingInputs
     ? samplingInputs
     : defaultSamplingInputs;
@@ -120,8 +125,8 @@ export function runPartial(
   _samplingInputs?: samplingParams,
   parameters?: parameters
 ): result<externalBindings, errorValue> {
-  let b = bindings ? bindings : {};
-  let p = parameters ? parameters : {};
+  let b = bindings ? bindings : defaultBindings;
+  let p = parameters ? parameters : defaultParameters;
 
   return evaluatePartialUsingExternalBindings(
     squiggleString,
@@ -143,6 +148,9 @@ function mergeParameters(
 }
 
 type parameters = { [key: string]: jsValue };
+
+export let defaultParameters: parameters = {};
+export let defaultBindings: externalBindings = {};
 
 type jsValue =
   | string

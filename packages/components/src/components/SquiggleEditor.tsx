@@ -3,8 +3,17 @@ import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
 import styled from "styled-components";
-import type { squiggleExpression, bindings } from "@quri/squiggle-lang";
-import { runPartial, errorValueToString } from "@quri/squiggle-lang";
+import type {
+  squiggleExpression,
+  bindings,
+  parameters,
+} from "@quri/squiggle-lang";
+import {
+  runPartial,
+  errorValueToString,
+  defaultParameters,
+  defaultBindings,
+} from "@quri/squiggle-lang";
 import { ErrorBox } from "./ErrorBox";
 
 export interface SquiggleEditorProps {
@@ -30,6 +39,8 @@ export interface SquiggleEditorProps {
   width: number;
   /** Previous variable declarations */
   bindings: bindings;
+  /** JS Imported parameters */
+  parameters: parameters;
 }
 
 const Input = styled.div`
@@ -50,7 +61,8 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   diagramCount,
   onChange,
   environment,
-  bindings = {},
+  bindings = defaultBindings,
+  parameters = defaultParameters,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
@@ -77,6 +89,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         environment={environment}
         onChange={onChange}
         bindings={bindings}
+        parameters={parameters}
       />
     </div>
   );
@@ -134,13 +147,16 @@ export interface SquigglePartialProps {
   /** The width of the element */
   width: number;
   /** Previously declared variables */
-  bindings: bindings;
+  bindings?: bindings;
+  /** Parameters imported from js */
+  parameters?: parameters;
 }
 
 export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   initialSquiggleString = "",
   onChange,
-  bindings,
+  bindings = defaultBindings,
+  parameters = defaultParameters,
 }: SquigglePartialProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   let squiggleResult = runPartial(expression, bindings);
