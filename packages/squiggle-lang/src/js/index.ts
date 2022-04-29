@@ -2,7 +2,8 @@ import * as _ from "lodash";
 import {
   genericDist,
   samplingParams,
-  evaluate,
+  evaluatePartialUsingExternalBindings,
+  externalBindings,
   expressionValue,
   errorValue,
   distributionError,
@@ -11,6 +12,9 @@ import {
   discreteShape,
   distributionErrorToString,
   internalCode,
+  mixedShape,
+  sampleSetDist,
+  symbolicDist,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
@@ -44,7 +48,7 @@ import {
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
-export type { samplingParams, errorValue };
+export type { samplingParams, errorValue, externalBindings as bindings };
 
 export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
@@ -92,15 +96,29 @@ export type squiggleExpression =
   | tagged<"distribution", Distribution>
   | tagged<"number", number>
   | tagged<"record", { [key: string]: squiggleExpression }>;
+
 export function run(
   squiggleString: string,
+  bindings?: externalBindings,
   samplingInputs?: samplingParams
 ): result<squiggleExpression, errorValue> {
+  let b = bindings ? bindings : {};
   let si: samplingParams = samplingInputs
     ? samplingInputs
     : defaultSamplingInputs;
-  let result: result<expressionValue, errorValue> = evaluate(squiggleString);
+
+  let result: result<expressionValue, errorValue> =
+    evaluateUsingExternalBindings(squiggleString, b);
   return resultMap(result, (x) => createTsExport(x, si));
+}
+
+// Run Partial. A partial is a block of code that doesn't return a value
+export function runPartial(
+  squiggleString: string,
+  bindings: externalBindings,
+  _samplingInputs?: samplingParams
+): result<externalBindings, errorValue> {
+  return evaluatePartialUsingExternalBindings(squiggleString, bindings);
 }
 
 function createTsExport(
@@ -109,9 +127,36 @@ function createTsExport(
 ): squiggleExpression {
   switch (x.tag) {
     case "EvArray":
+      // genType doesn't convert anything more than 2 layers down into {tag: x, value: x}
+      // format, leaving it as the raw values. This converts the raw values
+      // directly into typescript values.
+      //
+      // The casting here is because genType is about the types of the returned
+      // values, claiming they are fully recursive when that's not actually the
+      // case
       return tag(
         "array",
-        x.value.map((x) => createTsExport(x, sampEnv))
+        x.value.map((arrayItem): squiggleExpression => {
+          switch (arrayItem.tag) {
+            case "EvRecord":
+              return tag(
+                "record",
+                _.mapValues(arrayItem.value, (recordValue: unknown) =>
+                  convertRawToTypescript(recordValue as rescriptExport, sampEnv)
+                )
+              );
+            case "EvArray":
+              let y = arrayItem.value as unknown as rescriptExport[];
+              return tag(
+                "array",
+                y.map((childArrayItem) =>
+                  convertRawToTypescript(childArrayItem, sampEnv)
+                )
+              );
+            default:
+              return createTsExport(arrayItem, sampEnv);
+          }
+        })
       );
     case "EvBool":
       return tag("boolean", x.value);
@@ -124,16 +169,132 @@ function createTsExport(
     case "EvNumber":
       return tag("number", x.value);
     case "EvRecord":
-      return tag(
+      // genType doesn't support records, so we have to do the raw conversion ourself
+      let result: tagged<"record", { [key: string]: squiggleExpression }> = tag(
         "record",
-        _.mapValues(x.value, (x) => createTsExport(x, sampEnv))
+        _.mapValues(x.value, (x: unknown) =>
+          convertRawToTypescript(x as rescriptExport, sampEnv)
+        )
       );
+      return result;
     case "EvString":
       return tag("string", x.value);
     case "EvSymbol":
       return tag("symbol", x.value);
   }
 }
+
+// Helper functions to convert the rescript representations that genType doesn't
+// cover
+function convertRawToTypescript(
+  result: rescriptExport,
+  sampEnv: samplingParams
+): squiggleExpression {
+  switch (result.TAG) {
+    case 0: // EvArray
+      return tag(
+        "array",
+        result._0.map((x) => convertRawToTypescript(x, sampEnv))
+      );
+    case 1: // EvBool
+      return tag("boolean", result._0);
+    case 2: // EvCall
+      return tag("call", result._0);
+    case 3: // EvDistribution
+      return tag(
+        "distribution",
+        new Distribution(
+          convertRawDistributionToGenericDist(result._0),
+          sampEnv
+        )
+      );
+    case 4: // EvNumber
+      return tag("number", result._0);
+    case 5: // EvRecord
+      return tag(
+        "record",
+        _.mapValues(result._0, (x) => convertRawToTypescript(x, sampEnv))
+      );
+    case 6: // EvString
+      return tag("string", result._0);
+    case 7: // EvSymbol
+      return tag("symbol", result._0);
+  }
+}
+
+function convertRawDistributionToGenericDist(
+  result: rescriptDist
+): genericDist {
+  switch (result.TAG) {
+    case 0: // Point Set Dist
+      switch (result._0.TAG) {
+        case 0: // Mixed
+          return tag("PointSet", tag("Mixed", result._0._0));
+        case 1: // Discrete
+          return tag("PointSet", tag("Discrete", result._0._0));
+        case 2: // Continuous
+          return tag("PointSet", tag("Continuous", result._0._0));
+      }
+    case 1: // Sample Set Dist
+      return tag("SampleSet", result._0);
+    case 2: // Symbolic Dist
+      return tag("Symbolic", result._0);
+  }
+}
+
+// Raw rescript types.
+type rescriptExport =
+  | {
+      TAG: 0; // EvArray
+      _0: rescriptExport[];
+    }
+  | {
+      TAG: 1; // EvBool
+      _0: boolean;
+    }
+  | {
+      TAG: 2; // EvCall
+      _0: string;
+    }
+  | {
+      TAG: 3; // EvDistribution
+      _0: rescriptDist;
+    }
+  | {
+      TAG: 4; // EvNumber
+      _0: number;
+    }
+  | {
+      TAG: 5; // EvRecord
+      _0: { [key: string]: rescriptExport };
+    }
+  | {
+      TAG: 6; // EvString
+      _0: string;
+    }
+  | {
+      TAG: 7; // EvSymbol
+      _0: string;
+    };
+
+type rescriptDist =
+  | { TAG: 0; _0: rescriptPointSetDist }
+  | { TAG: 1; _0: sampleSetDist }
+  | { TAG: 2; _0: symbolicDist };
+
+type rescriptPointSetDist =
+  | {
+      TAG: 0; // Mixed
+      _0: mixedShape;
+    }
+  | {
+      TAG: 1; // Discrete
+      _0: discreteShape;
+    }
+  | {
+      TAG: 2; // ContinuousShape
+      _0: continuousShape;
+    };
 
 export function resultExn<a, c>(r: result<a, c>): a | c {
   return r.value;

@@ -92,11 +92,11 @@ describe("eval on distribution functions", () => {
     testEval("log(2, uniform(5,8))", "Ok(Sample Set Distribution)")
     testEval(
       "log(normal(5,2), 3)",
-      "Error(Distribution Math Error: Logarithm of input error: First input must completely greater than 0)",
+      "Error(Distribution Math Error: Logarithm of input error: First input must be completely greater than 0)",
     )
     testEval(
       "log(normal(5,2), normal(10,1))",
-      "Error(Distribution Math Error: Logarithm of input error: First input must completely greater than 0)",
+      "Error(Distribution Math Error: Logarithm of input error: First input must be completely greater than 0)",
     )
     testEval("log(uniform(5,8))", "Ok(Sample Set Distribution)")
     testEval("log10(uniform(5,8))", "Ok(Sample Set Distribution)")
