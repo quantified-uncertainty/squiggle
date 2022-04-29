@@ -1,12 +1,22 @@
 # Squiggle
 
 [![Packages check](https://github.com/quantified-uncertainty/squiggle/actions/workflows/ci.yml/badge.svg)](https://github.com/quantified-uncertainty/squiggle/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)](https://www.npmjs.com/package/@quri/squiggle-lang)
-[![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
+[![npm version - lang](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)](https://www.npmjs.com/package/@quri/squiggle-lang)
+[![npm version - components](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/quantified-uncertainty/squiggle/blob/develop/LICENSE)
 [![codecov](https://codecov.io/gh/quantified-uncertainty/squiggle/branch/develop/graph/badge.svg?token=QRLBL5CQ7C)](https://codecov.io/gh/quantified-uncertainty/squiggle)
 
-This is an experimental DSL/language for making probabilistic estimates. The full story can be found [here](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3).
+_An estimation language_.
+
+## Get started
+
+- [Gallery](https://www.squiggle-language.com/docs/Discussions/Gallery)
+- [Squiggle playground](https://squiggle-language.com/playground)
+- [Language basics](https://www.squiggle-language.com/docs/Features/Language)
+- [Squiggle functions source of truth](https://www.squiggle-language.com/docs/Features/Functions)
+- [Known bugs](https://www.squiggle-language.com/docs/Discussions/Bugs)
+- [Original lesswrong sequence](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3)
+- [Author your squiggle models as Observable notebooks](https://observablehq.com/@hazelfire/squiggle)
 
 ## Our deployments
 
@@ -27,7 +37,7 @@ the packages can be found in `packages`.
 - `@quri/squiggle-components` in `packages/components` contains React components that
   can be passed squiggle strings as props, and return a presentation of the result
   of the calculation.
-- `@quri/squiggle-website` in `packages/website` The main descriptive website for squiggle,
+- `packages/website` is the main descriptive website for squiggle,
   it is hosted at `squiggle-language.com`.
 
 The playground depends on the components library which then depends on the language. This means that if you wish to work on the components library, you will need to build (no need to bundle) the language, and as of this writing playground doesn't really work.
