@@ -41,7 +41,7 @@ export interface SquiggleEditorProps {
   /** Previous variable declarations */
   bindings: bindings;
   /** JS Imports */
-  imports: jsImports;
+  jsImports: jsImports;
 }
 
 const Input = styled.div`
@@ -63,7 +63,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   onChange,
   environment,
   bindings = defaultBindings,
-  imports = defaultImports,
+  jsImports = defaultImports,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
@@ -90,7 +90,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         environment={environment}
         onChange={onChange}
         bindings={bindings}
-        imports={imports}
+        jsImports={jsImports}
       />
     </div>
   );
@@ -150,7 +150,7 @@ export interface SquigglePartialProps {
   /** Previously declared variables */
   bindings?: bindings;
   /** Variables imported from js */
-  imports?: jsImports;
+  jsImports?: jsImports;
 }
 
 export let SquigglePartial: React.FC<SquigglePartialProps> = ({
@@ -159,7 +159,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   bindings = defaultBindings,
   sampleCount = 1000,
   outputXYPoints = 1000,
-  imports = defaultImports,
+  jsImports = defaultImports,
 }: SquigglePartialProps) => {
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
@@ -170,7 +170,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
     expression,
     bindings,
     samplingInputs,
-    imports
+    jsImports
   );
   if (squiggleResult.tag == "Ok") {
     if (onChange) onChange(squiggleResult.value);

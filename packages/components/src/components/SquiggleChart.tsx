@@ -154,7 +154,7 @@ export interface SquiggleChartProps {
   /** Bindings of previous variables declared */
   bindings?: bindings;
   /** JS imported parameters */
-  imports?: jsImports;
+  jsImports?: jsImports;
 }
 
 const ChartWrapper = styled.div`
@@ -170,14 +170,14 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   onChange = () => {},
   height = 60,
   bindings = defaultBindings,
-  imports = defaultImports,
+  jsImports = defaultImports,
   width = NaN,
 }: SquiggleChartProps) => {
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
     xyPointLength: outputXYPoints,
   };
-  let expressionResult = run(squiggleString, bindings, samplingInputs, imports);
+  let expressionResult = run(squiggleString, bindings, samplingInputs, jsImports);
   let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
     let expression = expressionResult.value;
