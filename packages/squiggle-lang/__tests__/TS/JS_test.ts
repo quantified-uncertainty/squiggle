@@ -1,23 +1,5 @@
-import {
-  run,
-  Distribution,
-  resultMap,
-  squiggleExpression,
-  errorValueToString,
-} from "../../src/js/index";
-
-let testRun = (x: string): squiggleExpression => {
-  let result = run(x, { sampleCount: 100, xyPointLength: 100 });
-  expect(result.tag).toEqual("Ok");
-  if (result.tag === "Ok") {
-    return result.value;
-  } else {
-    throw Error(
-      "Expected squiggle expression to evaluate but got error: " +
-        errorValueToString(result.value)
-    );
-  }
-};
+import { Distribution, resultMap } from "../../src/js/index";
+import { testRun, testRunPartial } from "./TestHelpers";
 
 function Ok<b>(x: b) {
   return { tag: "Ok", value: x };
@@ -71,6 +53,17 @@ describe("Record", () => {
           value: 1,
         },
       },
+    });
+  });
+});
+
+describe("Partials", () => {
+  test("Can pass variables between partials and cells", () => {
+    let bindings = testRunPartial(`x = 5`);
+    let bindings2 = testRunPartial(`y = x + 2`, bindings);
+    expect(testRun(`y + 3`, bindings2)).toEqual({
+      tag: "number",
+      value: 10,
     });
   });
 });
