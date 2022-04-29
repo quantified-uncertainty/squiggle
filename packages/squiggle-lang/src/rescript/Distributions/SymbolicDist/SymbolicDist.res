@@ -8,6 +8,7 @@ type normalError = NormalStandardDeviationGreaterThanZero(float)
 @genType
 type rec error =
   | NotFinite(string, string, float)
+  | DivideByZero(string)
   | NormalError(normalError)
   | MultipleErrors(array<error>)
 
@@ -19,38 +20,44 @@ module Error = {
     | _ => Some(MultipleErrors(errors))
     }
   }
+
+  let checkIsFinite = (value, fnName, propertyName) =>
+    E.Float.isFinite(value) ? None : Some(NotFinite(fnName, propertyName, value))
+
+  let divideByZero = (value, fnName) => 0.0 == value ? None : Some(DivideByZero(fnName))
 }
+
+let ifNoErrorsThanDo = (errors, fn) =>
+  errors->E.A.O.concatSomes->Error.mapErrorArrayToError->E.O.errorToResult(fn)
 
 module Normal = {
   type t = normal
-  let make = (~mean: float, ~stdev: float): result<symbolicDist, error> => {
-    let firstElementFinite = Js.Float.isFinite(mean)
-      ? Some(NotFinite("Normal", "mean", mean))
-      : None
-    let secondElementFinite = Js.Float.isFinite(stdev)
-      ? Some(NotFinite("Normal", "mean", mean))
-      : None
-    let stdevError =
-      stdev <= 0.0 ? Some(NormalError(NormalStandardDeviationGreaterThanZero(stdev))) : None
-
-    let error =
-      [firstElementFinite, secondElementFinite, stdevError]
-      ->E.A.O.concatSomes
-      ->Error.mapErrorArrayToError
-
-    switch error {
-    | Some(r) => Error(r)
-    | None => Ok(#Normal({mean: mean, stdev: stdev}))
-    }
-  }
   let dangerouslyMake = (~mean: float, ~stdev: float) => #Normal({mean: mean, stdev: stdev})
+  let inputValidation = (~mean, ~stdev) =>
+    [
+      Error.checkIsFinite(mean, "Normal", "mean"),
+      Error.checkIsFinite(stdev, "Normal", "stdev"),
+      stdev <= 0.0 ? Some(NormalError(NormalStandardDeviationGreaterThanZero(stdev))) : None,
+    ]
+    ->E.A.O.concatSomes
+    ->Error.mapErrorArrayToError
+
+  let make = (~mean: float, ~stdev: float): result<symbolicDist, error> =>
+    inputValidation(~mean, ~stdev)->E.O.errorToResult(() => Ok(dangerouslyMake(~mean, ~stdev)))
+
   let pdf = (x, t: t) => Jstat.Normal.pdf(x, t.mean, t.stdev)
   let cdf = (x, t: t) => Jstat.Normal.cdf(x, t.mean, t.stdev)
 
   let from90PercentCI = (low, high) => {
-    let mean = E.A.Floats.mean([low, high])
-    let stdev = (high -. low) /. (2. *. normal95confidencePoint)
-    dangerouslyMake(~mean, ~stdev)
+    let construct = () => {
+      let mean = E.A.Floats.mean([low, high])
+      let stdev = (high -. low) /. (2. *. normal95confidencePoint)
+      make(~mean, ~stdev)
+    }
+    [
+      Error.checkIsFinite(low, "Normal", "low"),
+      Error.checkIsFinite(high, "Normal", "high"),
+    ]->ifNoErrorsThanDo(construct)
   }
   let inv = (p, t: t) => Jstat.Normal.inv(p, t.mean, t.stdev)
   let sample = (t: t) => Jstat.Normal.sample(t.mean, t.stdev)
@@ -96,7 +103,12 @@ module Normal = {
     | #Add => Some(make(~mean=n1.mean +. n2, ~stdev=n1.stdev))
     | #Subtract => Some(make(~mean=n1.mean -. n2, ~stdev=n1.stdev))
     | #Multiply => Some(make(~mean=n1.mean *. n2, ~stdev=n1.stdev *. Js.Math.abs_float(n2)))
-    | #Divide => Some(make(~mean=n1.mean /. n2, ~stdev=n1.stdev /. Js.Math.abs_float(n2)))
+    | #Divide =>
+      [Error.divideByZero(n2, "Normal operateFloatSecond")]
+      ->ifNoErrorsThanDo(() => {
+        make(~mean=n1.mean /. n2, ~stdev=n1.stdev /. Js.Math.abs_float(n2))
+      })
+      ->Some
     | _ => None
     }
 }
@@ -265,7 +277,7 @@ module Float = {
 module From90thPercentile = {
   let make = (low, high) =>
     switch (low, high) {
-    | (low, high) if low <= 0.0 && low < high => Ok(Normal.from90PercentCI(low, high))
+    | (low, high) if low <= 0.0 && low < high => Normal.from90PercentCI(low, high)
     | (low, high) if low < high => Ok(Lognormal.from90PercentCI(low, high))
     | (_, _) => Error("Low value must be less than high value.")
     }

@@ -136,6 +136,13 @@ module O = {
     | None => Error(error)
     }
 
+  let errorToResult = (error: option<'a>, fn) => {
+    switch error {
+    | None => fn()
+    | Some(e) => Error(e)
+    }
+  }
+
   let compare = (compare, f1: option<float>, f2: option<float>) =>
     switch (f1, f2) {
     | (Some(f1), Some(f2)) => Some(compare(f1, f2) ? f1 : f2)
@@ -198,6 +205,13 @@ module Float = {
   let with3DigitsPrecision = Js.Float.toPrecisionWithPrecision(_, ~digits=3)
   let toFixed = Js.Float.toFixed
   let toString = Js.Float.toString
+  let isFinite = Js.Float.isFinite
+  let safeDivision = (num: float, denom: float) =>
+    if denom == 0.0 {
+      Error("Division by zero")
+    } else {
+      Ok(num /. denom)
+    }
 }
 
 module I = {
