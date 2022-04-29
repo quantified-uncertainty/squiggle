@@ -231,6 +231,8 @@ function convertRawToTypescript(
       return tag("string", result._0);
     case 7: // EvSymbol
       return tag("symbol", result._0);
+    case 8: // EvArrayString
+      return tag("arrayString", result._0);
   }
 }
 
@@ -287,6 +289,10 @@ type rescriptExport =
   | {
       TAG: 7; // EvSymbol
       _0: string;
+    }
+  | {
+      TAG: 8; // EvArrayString
+      _0: string[];
     };
 
 type rescriptDist =
