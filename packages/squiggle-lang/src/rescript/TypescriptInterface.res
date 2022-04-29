@@ -41,6 +41,12 @@ let evaluate = Reducer.evaluate
 let evaluateUsingExternalBindings = Reducer.evaluateUsingExternalBindings
 
 @genType
+let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
+
+@genType
+type externalBindings = Reducer.externalBindings
+
+@genType
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
 @genType

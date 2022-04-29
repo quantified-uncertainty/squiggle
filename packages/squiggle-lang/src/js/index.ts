@@ -2,7 +2,9 @@ import * as _ from "lodash";
 import {
   genericDist,
   samplingParams,
-  evaluate,
+  evaluateUsingExternalBindings,
+  evaluatePartialUsingExternalBindings,
+  externalBindings,
   expressionValue,
   errorValue,
   distributionError,
@@ -46,7 +48,7 @@ import {
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
-export type { samplingParams, errorValue };
+export type { samplingParams, errorValue, externalBindings as bindings };
 
 export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
@@ -96,13 +98,26 @@ export type squiggleExpression =
 
 export function run(
   squiggleString: string,
+  bindings?: externalBindings,
   samplingInputs?: samplingParams
 ): result<squiggleExpression, errorValue> {
+  let b = bindings ? bindings : {};
   let si: samplingParams = samplingInputs
     ? samplingInputs
     : defaultSamplingInputs;
-  let result: result<expressionValue, errorValue> = evaluate(squiggleString);
+
+  let result: result<expressionValue, errorValue> =
+    evaluateUsingExternalBindings(squiggleString, b);
   return resultMap(result, (x) => createTsExport(x, si));
+}
+
+// Run Partial. A partial is a block of code that doesn't return a value
+export function runPartial(
+  squiggleString: string,
+  bindings: externalBindings,
+  _samplingInputs?: samplingParams
+): result<externalBindings, errorValue> {
+  return evaluatePartialUsingExternalBindings(squiggleString, bindings);
 }
 
 function createTsExport(
@@ -166,7 +181,7 @@ function createTsExport(
   }
 }
 
-// Helper functions to convert the recsript representations that genType doesn't
+// Helper functions to convert the rescript representations that genType doesn't
 // cover
 function convertRawToTypescript(
   result: rescriptExport,

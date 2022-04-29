@@ -8,7 +8,7 @@ import {
 } from "../../src/js/index";
 
 export function testRun(x: string): squiggleExpression {
-  let squiggleResult = run(x, { sampleCount: 1000, xyPointLength: 100 });
+  let squiggleResult = run(x, {}, { sampleCount: 1000, xyPointLength: 100 });
   // return squiggleResult.value
   if (squiggleResult.tag === "Ok") {
     return squiggleResult.value;

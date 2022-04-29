@@ -89,6 +89,7 @@
     "@types/react": "17.0.43"
   },
   "source": "./src/index.ts",
+  "browser": "dist/bundle.js",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts"
 }
