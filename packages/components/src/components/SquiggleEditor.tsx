@@ -3,7 +3,9 @@ import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
 import styled from "styled-components";
-import type { squiggleExpression } from "@quri/squiggle-lang";
+import type { squiggleExpression, bindings } from "@quri/squiggle-lang";
+import { runPartial, errorValueToString } from "@quri/squiggle-lang";
+import { ErrorBox } from "./ErrorBox";
 
 export interface SquiggleEditorProps {
   /** The input string for squiggle */
@@ -26,6 +28,8 @@ export interface SquiggleEditorProps {
   onChange?(expr: squiggleExpression): void;
   /** The width of the element */
   width: number;
+  /** Previous variable declarations */
+  bindings: bindings;
 }
 
 const Input = styled.div`
@@ -46,6 +50,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   diagramCount,
   onChange,
   environment,
+  bindings = {},
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
@@ -71,6 +76,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         diagramCount={diagramCount}
         environment={environment}
         onChange={onChange}
+        bindings={bindings}
       />
     </div>
   );
@@ -101,6 +107,79 @@ export function renderSquiggleEditorToDom(props: SquiggleEditorProps) {
 
         parent.dispatchEvent(new CustomEvent("input"));
         if (props.onChange) props.onChange(expr);
+      }}
+    />,
+    parent
+  );
+  return parent;
+}
+
+export interface SquigglePartialProps {
+  /** The input string for squiggle */
+  initialSquiggleString?: string;
+  /** If the output requires monte carlo sampling, the amount of samples */
+  sampleCount?: number;
+  /** The amount of points returned to draw the distribution */
+  outputXYPoints?: number;
+  kernelWidth?: number;
+  pointDistLength?: number;
+  /** If the result is a function, where the function starts */
+  diagramStart?: number;
+  /** If the result is a function, where the function ends */
+  diagramStop?: number;
+  /** If the result is a function, how many points along the function it samples */
+  diagramCount?: number;
+  /** when the environment changes. Used again for notebook magic*/
+  onChange?(expr: bindings): void;
+  /** The width of the element */
+  width: number;
+  /** Previously declared variables */
+  bindings: bindings;
+}
+
+export let SquigglePartial: React.FC<SquigglePartialProps> = ({
+  initialSquiggleString = "",
+  onChange,
+  bindings,
+}: SquigglePartialProps) => {
+  let [expression, setExpression] = React.useState(initialSquiggleString);
+  let squiggleResult = runPartial(expression, bindings);
+  if (squiggleResult.tag == "Ok") {
+    if (onChange) onChange(squiggleResult.value);
+  }
+  return (
+    <div>
+      <Input>
+        <CodeEditor
+          value={expression}
+          onChange={setExpression}
+          oneLine={true}
+          showGutter={false}
+          height={20}
+        />
+      </Input>
+      {squiggleResult.tag == "Error" ? (
+        <ErrorBox heading="Error">
+          {errorValueToString(squiggleResult.value)}
+        </ErrorBox>
+      ) : (
+        <></>
+      )}
+    </div>
+  );
+};
+
+export function renderSquigglePartialToDom(props: SquigglePartialProps) {
+  let parent = document.createElement("div");
+  ReactDOM.render(
+    <SquigglePartial
+      {...props}
+      onChange={(bindings) => {
+        // @ts-ignore
+        parent.value = bindings;
+
+        parent.dispatchEvent(new CustomEvent("input"));
+        if (props.onChange) props.onChange(bindings);
       }}
     />,
     parent

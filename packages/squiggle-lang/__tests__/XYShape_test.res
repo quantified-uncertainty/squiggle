@@ -18,7 +18,26 @@ let pointSetDist3: PointSetTypes.xyShape = {
   ys: [0.2, 0.5, 0.8],
 }
 
+let makeAndGetErrorString = (~xs, ~ys) =>
+  XYShape.T.make(~xs, ~ys)->E.R.getError->E.O2.fmap(XYShape.Error.toString)
+
 describe("XYShapes", () => {
+  describe("Validator", () => {
+    makeTest(
+      "with no errors",
+      makeAndGetErrorString(~xs=[1.0, 4.0, 8.0], ~ys=[0.2, 0.4, 0.8]),
+      None,
+    )
+    makeTest("when empty", makeAndGetErrorString(~xs=[], ~ys=[]), Some("Xs is empty"))
+    makeTest(
+      "when not sorted, different lengths, and not finite",
+      makeAndGetErrorString(~xs=[2.0, 1.0, infinity, 0.0], ~ys=[3.0, Js.Float._NaN]),
+      Some(
+        "Multiple Errors: [Xs is not sorted], [Xs and Ys have different lengths. Xs has length 4 and Ys has length 2], [Xs is not finite. Example value: Infinity], [Ys is not finite. Example value: NaN]",
+      ),
+    )
+  })
+
   describe("logScorePoint", () => {
     makeTest("When identical", XYShape.logScorePoint(30, pointSetDist1, pointSetDist1), Some(0.0))
     makeTest(
@@ -32,16 +51,6 @@ describe("XYShapes", () => {
       Some(210.3721280423322),
     )
   })
-  // describe("transverse", () => {
-  //   makeTest(
-  //     "When very different",
-  //     XYShape.Transversal._transverse(
-  //       (aCurrent, aLast) => aCurrent +. aLast,
-  //       [|1.0, 2.0, 3.0, 4.0|],
-  //     ),
-  //     [|1.0, 3.0, 6.0, 10.0|],
-  //   )
-  // });
   describe("integrateWithTriangles", () =>
     makeTest(
       "integrates correctly",

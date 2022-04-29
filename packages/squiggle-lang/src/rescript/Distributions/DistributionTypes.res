@@ -19,6 +19,7 @@ type error =
   | RequestedStrategyInvalidError(string)
   | LogarithmOfDistributionError(string)
   | OtherError(string)
+  | XYShapeError(XYShape.error)
 
 @genType
 module Error = {
@@ -39,6 +40,7 @@ module Error = {
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
     | RequestedStrategyInvalidError(err) => `Requested strategy invalid: ${err}`
+    | XYShapeError(err) => `XY Shape Error: ${XYShape.Error.toString(err)}`
     | OtherError(s) => s
     }
 

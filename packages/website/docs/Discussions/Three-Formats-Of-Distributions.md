@@ -1,11 +1,9 @@
 ---
 sidebar_position: 5
+title: Three Formats of Distributions
+author: Ozzie Gooen
+date: 02-19-2022
 ---
-
-# Three Formats of Distributions
-
-_Author: Ozzie Gooen_  
-_Written on: Feb 19, 2022_
 
 Probability distributions have several subtle possible formats. Three important ones that we deal with in Squiggle are symbolic, sample set, and graph formats.
 

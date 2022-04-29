@@ -1,39 +1,53 @@
 ---
 sidebar_position: 2
+title: Language Basics
 ---
 
 import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
-# Squiggle Language
+## Expressions
 
-The squiggle language has a very simple syntax. The best way to get to understand
-it is by simply looking at examples.
+A distribution
 
-## Basic Language
+<SquiggleEditor initialSquiggleString={`mixture(1 to 2, 3, [0.3, 0.7])`} />
 
-As an example:
+A number
+
+<SquiggleEditor initialSquiggleString="4.321e-3" />
+
+Arrays
+
+<SquiggleEditor
+  initialSquiggleString={`[beta(1,10), 4, isNormalized(toSampleSet(1 to 2))]`}
+/>
+
+Records
+
+<SquiggleEditor
+  initialSquiggleString={`d = {dist: triangular(0, 1, 2), weight: 0.25}
+d.dist`}
+/>
+
+## Statements
+
+A statement assigns expressions to names. It looks like `<symbol> = <expression>`
 
 <SquiggleEditor
   initialSquiggleString={`value_of_work = 10 to 70
-value_of_work`}
+5 + value_of_work / 75`}
 />
 
-Squiggle can declare variables (`value_of_work = 10 to 70`) and declare exports
-(the lone `value_of_work` line). Variables can be used later in a squiggle program
-and even in other notebooks!
+### Functions
 
-An export is rendered to the output view so you can see your result.
-
-the exports can be expressions, such as:
-
-<SquiggleEditor initialSquiggleString="normal(0,1)" />
-
-## Functions
-
-Squiggle supports functions, including the rendering of functions:
+We can define functions
 
 <SquiggleEditor
-  initialSquiggleString={`ozzie_estimate(t) = lognormal({mean: 3 + (t+.1)^2.5, stdev: 8})
-ozzie_estimate
-`}
+  initialSquiggleString={`ozzie_estimate(t) = lognormal(1, t ^ 1.01)
+nuño_estimate(t, m) = mixture(0.5 to 2, normal(m, t ^ 1.25))
+ozzie_estimate(5) * nuño_estimate(5.01, 1)`}
 />
+
+## See more
+
+- [Functions reference](https://squiggle-language.com/docs/Features/Functions)
+- [Gallery](https://squiggle-language.com/docs/Discussions/Gallery)
