@@ -196,6 +196,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     ->SymbolicConstructors.symbolicResultToOutput
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist)
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist)
+  | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist)
   | ("toSparkline", [EvDistribution(dist)]) => Helpers.toStringFn(ToSparkline(20), dist)
   | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>

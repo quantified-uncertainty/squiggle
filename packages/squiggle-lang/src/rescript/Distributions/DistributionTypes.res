@@ -68,6 +68,7 @@ module DistributionOperation = {
     | #Pdf(float)
     | #Mean
     | #Sample
+    | #IntegralSum
   ]
 
   type toScaleFn = [
