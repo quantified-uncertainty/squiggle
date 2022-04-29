@@ -1,3 +1,4 @@
+let defaultEnv: DistributionOperation.env
 let dispatch: (
   ReducerInterface_ExpressionValue.functionCall,
   ReducerInterface_ExpressionValue.environment,

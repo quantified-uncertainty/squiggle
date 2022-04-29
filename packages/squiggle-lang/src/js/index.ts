@@ -2,9 +2,11 @@ import * as _ from "lodash";
 import {
   genericDist,
   samplingParams,
+  environment,
   evaluatePartialUsingExternalBindings,
   externalBindings,
   expressionValue,
+  recordEV,
   errorValue,
   distributionError,
   toPointSet,
@@ -15,6 +17,8 @@ import {
   mixedShape,
   sampleSetDist,
   symbolicDist,
+  defaultEnvironment,
+  defaultSamplingEnv,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
@@ -50,10 +54,7 @@ import {
 } from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
 export type { samplingParams, errorValue, externalBindings as bindings };
 
-export let defaultSamplingInputs: samplingParams = {
-  sampleCount: 10000,
-  xyPointLength: 10000,
-};
+export let defaultSamplingInputs: samplingParams = defaultSamplingEnv;
 
 export type result<a, b> =
   | {
@@ -90,8 +91,9 @@ export type squiggleExpression =
   | tagged<"symbol", string>
   | tagged<"string", string>
   | tagged<"call", string>
-  | tagged<"lambda", [string[], internalCode]>
+  | tagged<"lambda", [string[], recordEV, internalCode]>
   | tagged<"array", squiggleExpression[]>
+  | tagged<"arrayString", string[]>
   | tagged<"boolean", boolean>
   | tagged<"distribution", Distribution>
   | tagged<"number", number>
@@ -100,16 +102,16 @@ export type squiggleExpression =
 export function run(
   squiggleString: string,
   bindings?: externalBindings,
-  samplingInputs?: samplingParams
+  samplingInputs?: samplingParams,
+  environ?: environment
 ): result<squiggleExpression, errorValue> {
   let b = bindings ? bindings : {};
   let si: samplingParams = samplingInputs
     ? samplingInputs
     : defaultSamplingInputs;
-
-  let result: result<expressionValue, errorValue> =
-    evaluateUsingExternalBindings(squiggleString, b);
-  return resultMap(result, (x) => createTsExport(x, si));
+  let e = environ ? environ : defaultEnvironment;
+  let res: result<expressionValue, errorValue> = eval(squiggleString); // , b, e);
+  return resultMap(res, (x) => createTsExport(x, si));
 }
 
 // Run Partial. A partial is a block of code that doesn't return a value
@@ -118,7 +120,11 @@ export function runPartial(
   bindings: externalBindings,
   _samplingInputs?: samplingParams
 ): result<externalBindings, errorValue> {
-  return evaluatePartialUsingExternalBindings(squiggleString, bindings);
+  return evaluatePartialUsingExternalBindings(
+    squiggleString,
+    bindings,
+    defaultEnvironment
+  );
 }
 
 function createTsExport(
@@ -158,6 +164,8 @@ function createTsExport(
           }
         })
       );
+    case "EvArrayString":
+      return tag("arrayString", x.value);
     case "EvBool":
       return tag("boolean", x.value);
     case "EvCall":

@@ -50,6 +50,9 @@ type externalBindings = Reducer.externalBindings
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
 @genType
+type recordEV = ReducerInterface_ExpressionValue.record
+
+@genType
 type errorValue = Reducer_ErrorValue.errorValue
 
 @genType
@@ -72,3 +75,12 @@ let distributionErrorToString = DistributionTypes.Error.toString
 
 @genType
 type internalCode = ReducerInterface_ExpressionValue.internalCode
+
+@genType
+let defaultSamplingEnv = ReducerInterface_GenericDistribution.defaultEnv
+
+@genType
+type environment = ReducerInterface_ExpressionValue.environment
+
+@genType
+let defaultEnvironment = ReducerInterface_ExpressionValue.defaultEnvironment
