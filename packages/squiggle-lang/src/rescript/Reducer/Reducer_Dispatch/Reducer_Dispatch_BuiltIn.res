@@ -21,7 +21,7 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
     }
 
   let constructRecord = arrayOfPairs => {
-    Belt.Array.map(arrayOfPairs, pairValue => 
+    Belt.Array.map(arrayOfPairs, pairValue =>
       switch pairValue {
       | EvArray([EvString(key), valueValue]) => (key, valueValue)
       | _ => ("wrong key type", pairValue->toStringWithType->EvString)

@@ -28,14 +28,13 @@ module Helpers = {
   let catchAndConvertTwoArgsToDists = (args: array<expressionValue>): option<(
     DistributionTypes.genericDist,
     DistributionTypes.genericDist,
-  )> => 
+  )> =>
     switch args {
     | [EvDistribution(a), EvDistribution(b)] => Some((a, b))
     | [EvNumber(a), EvDistribution(b)] => Some((GenericDist.fromFloat(a), b))
     | [EvDistribution(a), EvNumber(b)] => Some((a, GenericDist.fromFloat(b)))
     | _ => None
     }
-  
 
   let toFloatFn = (
     fnCall: DistributionTypes.DistributionOperation.toFloat,
@@ -119,7 +118,7 @@ module Helpers = {
     mixtureWithGivenWeights(distributions, weights)
   }
 
-  let mixture = (args: array<expressionValue>): DistributionOperation.outputType => 
+  let mixture = (args: array<expressionValue>): DistributionOperation.outputType =>
     switch E.A.last(args) {
     | Some(EvArray(b)) => {
         let weights = parseNumberArray(b)
@@ -138,7 +137,6 @@ module Helpers = {
       }
     | _ => GenDistError(ArgumentError("Last argument of mx must be array or distribution"))
     }
-  
 }
 
 module SymbolicConstructors = {
