@@ -1,15 +1,33 @@
 import {
   run,
-  // Distribution,
+  runPartial,
+  bindings,
   squiggleExpression,
   errorValueToString,
-  // errorValue,
-  // result,
 } from "../../src/js/index";
 
-export function testRun(x: string): squiggleExpression {
-  let squiggleResult = run(x, {}, { sampleCount: 1000, xyPointLength: 100 });
+export function testRun(x: string, bindings = {}): squiggleExpression {
+  let squiggleResult = run(x, bindings, {
+    sampleCount: 1000,
+    xyPointLength: 100,
+  });
   // return squiggleResult.value
+  if (squiggleResult.tag === "Ok") {
+    return squiggleResult.value;
+  } else {
+    throw new Error(
+      `Expected squiggle expression to evaluate but got error: ${errorValueToString(
+        squiggleResult.value
+      )}`
+    );
+  }
+}
+
+export function testRunPartial(x: string, bindings: bindings = {}): bindings {
+  let squiggleResult = runPartial(x, bindings, {
+    sampleCount: 1000,
+    xyPointLength: 100,
+  });
   if (squiggleResult.tag === "Ok") {
     return squiggleResult.value;
   } else {
