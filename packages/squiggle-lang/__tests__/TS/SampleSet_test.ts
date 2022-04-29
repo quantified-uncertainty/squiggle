@@ -214,14 +214,15 @@ describe("mean is mean", () => {
 });
 
 describe("fromSamples function", () => {
-  test("gives a mean near the mean of the input", () => {
+  test.skip("gives a mean near the mean of the input", () => {
     fc.assert(
       fc.property(arrayGen(), (xs_) => {
         let xs = Array.from(xs_);
-        let squiggleString = `x = fromSamples($xs); mean(x)`;
-        let squiggleResult = testRun(squiggleString, {}, { xs: xs });
+        let xsString = xs.toString();
+        let squiggleString = `x = fromSamples([${xsString}]); mean(x)`;
+        let squiggleResult = testRun(squiggleString);
         let mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
-        expect(squiggleResult.value).toBeCloseTo(mean, 3);
+        expect(squiggleResult.value).toBeCloseTo(mean, 4);
       })
     );
   });
