@@ -3,19 +3,54 @@ open SymbolicDistTypes
 let normal95confidencePoint = 1.6448536269514722
 // explained in website/docs/internal/ProcessingConfidenceIntervals
 
+type normalError = NormalStandardDeviationGreaterThanZero(float)
+
+@genType
+type rec error =
+  | NotFinite(string, string, float)
+  | NormalError(normalError)
+  | MultipleErrors(array<error>)
+
+module Error = {
+  let mapErrorArrayToError = (errors: array<error>): option<error> => {
+    switch errors {
+    | [] => None
+    | [error] => Some(error)
+    | _ => Some(MultipleErrors(errors))
+    }
+  }
+}
+
 module Normal = {
   type t = normal
-  let make = (mean: float, stdev: float): result<symbolicDist, string> =>
-    stdev > 0.0
-      ? Ok(#Normal({mean: mean, stdev: stdev}))
-      : Error("Standard deviation of normal distribution must be larger than 0")
+  let make = (~mean: float, ~stdev: float): result<symbolicDist, error> => {
+    let firstElementFinite = Js.Float.isFinite(mean)
+      ? Some(NotFinite("Normal", "mean", mean))
+      : None
+    let secondElementFinite = Js.Float.isFinite(stdev)
+      ? Some(NotFinite("Normal", "mean", mean))
+      : None
+    let stdevError =
+      stdev <= 0.0 ? Some(NormalError(NormalStandardDeviationGreaterThanZero(stdev))) : None
+
+    let error =
+      [firstElementFinite, secondElementFinite, stdevError]
+      ->E.A.O.concatSomes
+      ->Error.mapErrorArrayToError
+
+    switch error {
+    | Some(r) => Error(r)
+    | None => Ok(#Normal({mean: mean, stdev: stdev}))
+    }
+  }
+  let dangerouslyMake = (~mean: float, ~stdev: float) => #Normal({mean: mean, stdev: stdev})
   let pdf = (x, t: t) => Jstat.Normal.pdf(x, t.mean, t.stdev)
   let cdf = (x, t: t) => Jstat.Normal.cdf(x, t.mean, t.stdev)
 
   let from90PercentCI = (low, high) => {
     let mean = E.A.Floats.mean([low, high])
     let stdev = (high -. low) /. (2. *. normal95confidencePoint)
-    #Normal({mean: mean, stdev: stdev})
+    dangerouslyMake(~mean, ~stdev)
   }
   let inv = (p, t: t) => Jstat.Normal.inv(p, t.mean, t.stdev)
   let sample = (t: t) => Jstat.Normal.sample(t.mean, t.stdev)
@@ -25,12 +60,12 @@ module Normal = {
   let add = (n1: t, n2: t) => {
     let mean = n1.mean +. n2.mean
     let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
-    #Normal({mean: mean, stdev: stdev})
+    dangerouslyMake(~mean, ~stdev)
   }
   let subtract = (n1: t, n2: t) => {
     let mean = n1.mean -. n2.mean
     let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
-    #Normal({mean: mean, stdev: stdev})
+    dangerouslyMake(~mean, ~stdev)
   }
 
   // TODO: is this useful here at all? would need the integral as well ...
@@ -38,7 +73,7 @@ module Normal = {
     let mean =
       (n1.mean *. n2.stdev ** 2. +. n2.mean *. n1.stdev ** 2.) /. (n1.stdev ** 2. +. n2.stdev ** 2.)
     let stdev = 1. /. (1. /. n1.stdev ** 2. +. 1. /. n2.stdev ** 2.)
-    #Normal({mean: mean, stdev: stdev})
+    make(~mean, ~stdev)
   }
 
   let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
@@ -50,18 +85,18 @@ module Normal = {
 
   let operateFloatFirst = (operation: Operation.Algebraic.t, n1: float, n2: t) =>
     switch operation {
-    | #Add => Some(#Normal({mean: n1 +. n2.mean, stdev: n2.stdev}))
-    | #Subtract => Some(#Normal({mean: n1 -. n2.mean, stdev: n2.stdev}))
-    | #Multiply => Some(#Normal({mean: n1 *. n2.mean, stdev: Js.Math.abs_float(n1) *. n2.stdev}))
+    | #Add => Some(make(~mean=n1 +. n2.mean, ~stdev=n2.stdev))
+    | #Subtract => Some(make(~mean=n1 -. n2.mean, ~stdev=n2.stdev))
+    | #Multiply => Some(make(~mean=n1 *. n2.mean, ~stdev=Js.Math.abs_float(n1) *. n2.stdev))
     | _ => None
     }
 
   let operateFloatSecond = (operation: Operation.Algebraic.t, n1: t, n2: float) =>
     switch operation {
-    | #Add => Some(#Normal({mean: n1.mean +. n2, stdev: n1.stdev}))
-    | #Subtract => Some(#Normal({mean: n1.mean -. n2, stdev: n1.stdev}))
-    | #Multiply => Some(#Normal({mean: n1.mean *. n2, stdev: n1.stdev *. Js.Math.abs_float(n2)}))
-    | #Divide => Some(#Normal({mean: n1.mean /. n2, stdev: n1.stdev /. Js.Math.abs_float(n2)}))
+    | #Add => Some(make(~mean=n1.mean +. n2, ~stdev=n1.stdev))
+    | #Subtract => Some(make(~mean=n1.mean -. n2, ~stdev=n1.stdev))
+    | #Multiply => Some(make(~mean=n1.mean *. n2, ~stdev=n1.stdev *. Js.Math.abs_float(n2)))
+    | #Divide => Some(make(~mean=n1.mean /. n2, ~stdev=n1.stdev /. Js.Math.abs_float(n2)))
     | _ => None
     }
 }
