@@ -4,12 +4,15 @@ import {
   bindings,
   squiggleExpression,
   errorValueToString,
+  defaultImports,
+  defaultBindings,
+  jsImports,
 } from "../../src/js/index";
 
 export function testRun(
   x: string,
-  bindings = {},
-  parameters = {}
+  bindings: bindings = defaultBindings,
+  imports: jsImports = defaultImports
 ): squiggleExpression {
   let squiggleResult = run(
     x,
@@ -18,9 +21,8 @@ export function testRun(
       sampleCount: 1000,
       xyPointLength: 100,
     },
-    parameters
+    imports
   );
-  // return squiggleResult.value
   if (squiggleResult.tag === "Ok") {
     return squiggleResult.value;
   } else {
@@ -34,8 +36,8 @@ export function testRun(
 
 export function testRunPartial(
   x: string,
-  bindings: bindings = {},
-  parameters = {}
+  bindings: bindings = defaultBindings,
+  imports: jsImports = defaultImports
 ): bindings {
   let squiggleResult = runPartial(
     x,
@@ -44,7 +46,7 @@ export function testRunPartial(
       sampleCount: 1000,
       xyPointLength: 100,
     },
-    parameters
+    imports
   );
   if (squiggleResult.tag === "Ok") {
     return squiggleResult.value;

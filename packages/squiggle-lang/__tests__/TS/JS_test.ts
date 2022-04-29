@@ -68,13 +68,13 @@ describe("Partials", () => {
   });
 });
 
-describe("Parameters", () => {
+describe("JS Imports", () => {
   test("Can pass parameters into partials and cells", () => {
     let bindings = testRunPartial(`y = $x + 2`, defaultBindings, { x: 1 });
     let bindings2 = testRunPartial(`z = y + $a`, bindings, { a: 3 });
     expect(testRun(`z`, bindings2)).toEqual({
       tag: "number",
-      value: 17,
+      value: 6,
     });
   });
   test("Complicated deep parameters", () => {

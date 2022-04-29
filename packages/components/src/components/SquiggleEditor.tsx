@@ -5,13 +5,14 @@ import { CodeEditor } from "./CodeEditor";
 import styled from "styled-components";
 import type {
   squiggleExpression,
+  samplingParams,
   bindings,
-  parameters,
+  jsImports,
 } from "@quri/squiggle-lang";
 import {
   runPartial,
   errorValueToString,
-  defaultParameters,
+  defaultImports,
   defaultBindings,
 } from "@quri/squiggle-lang";
 import { ErrorBox } from "./ErrorBox";
@@ -39,8 +40,8 @@ export interface SquiggleEditorProps {
   width: number;
   /** Previous variable declarations */
   bindings: bindings;
-  /** JS Imported parameters */
-  parameters: parameters;
+  /** JS Imports */
+  imports: jsImports;
 }
 
 const Input = styled.div`
@@ -62,7 +63,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   onChange,
   environment,
   bindings = defaultBindings,
-  parameters = defaultParameters,
+  imports = defaultImports,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
@@ -89,7 +90,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         environment={environment}
         onChange={onChange}
         bindings={bindings}
-        parameters={parameters}
+        imports={imports}
       />
     </div>
   );
@@ -148,18 +149,29 @@ export interface SquigglePartialProps {
   width: number;
   /** Previously declared variables */
   bindings?: bindings;
-  /** Parameters imported from js */
-  parameters?: parameters;
+  /** Variables imported from js */
+  imports?: jsImports;
 }
 
 export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   initialSquiggleString = "",
   onChange,
   bindings = defaultBindings,
-  parameters = defaultParameters,
+  sampleCount = 1000,
+  outputXYPoints = 1000,
+  imports = defaultImports,
 }: SquigglePartialProps) => {
+  let samplingInputs: samplingParams = {
+    sampleCount: sampleCount,
+    xyPointLength: outputXYPoints,
+  };
   let [expression, setExpression] = React.useState(initialSquiggleString);
-  let squiggleResult = runPartial(expression, bindings);
+  let squiggleResult = runPartial(
+    expression,
+    bindings,
+    samplingInputs,
+    imports
+  );
   if (squiggleResult.tag == "Ok") {
     if (onChange) onChange(squiggleResult.value);
   }

@@ -16,7 +16,7 @@ export type {
   samplingParams,
   errorValue,
   externalBindings as bindings,
-  parameters,
+  jsImports,
 };
 import {
   jsValueToBinding,
@@ -28,7 +28,7 @@ import {
 import { result, resultMap, tag, tagged } from "./types";
 import { Distribution } from "./distribution";
 
-export { Distribution, squiggleExpression, result };
+export { Distribution, squiggleExpression, result, resultMap };
 
 export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
@@ -39,16 +39,16 @@ export function run(
   squiggleString: string,
   bindings?: externalBindings,
   samplingInputs?: samplingParams,
-  parameters?: parameters
+  imports?: jsImports
 ): result<squiggleExpression, errorValue> {
   let b = bindings ? bindings : defaultBindings;
-  let p = parameters ? parameters : defaultParameters;
+  let i = imports ? imports : defaultImports;
   let si: samplingParams = samplingInputs
     ? samplingInputs
     : defaultSamplingInputs;
 
   let result: result<expressionValue, errorValue> =
-    evaluateUsingExternalBindings(squiggleString, mergeParameters(b, p));
+    evaluateUsingExternalBindings(squiggleString, mergeImports(b, i));
   return resultMap(result, (x) => createTsExport(x, si));
 }
 
@@ -57,33 +57,33 @@ export function runPartial(
   squiggleString: string,
   bindings?: externalBindings,
   _samplingInputs?: samplingParams,
-  parameters?: parameters
+  imports?: jsImports
 ): result<externalBindings, errorValue> {
   let b = bindings ? bindings : defaultBindings;
-  let p = parameters ? parameters : defaultParameters;
+  let i = imports ? imports : defaultImports;
 
   return evaluatePartialUsingExternalBindings(
     squiggleString,
-    mergeParameters(b, p)
+    mergeImports(b, i)
   );
 }
 
-function mergeParameters(
+function mergeImports(
   bindings: externalBindings,
-  parameters: parameters
+  imports: jsImports
 ): externalBindings {
-  let transformedParameters = Object.fromEntries(
-    Object.entries(parameters).map(([key, value]) => [
+  let transformedImports = Object.fromEntries(
+    Object.entries(imports).map(([key, value]) => [
       "$" + key,
       jsValueToBinding(value),
     ])
   );
-  return _.merge(bindings, transformedParameters);
+  return _.merge(bindings, transformedImports);
 }
 
-type parameters = { [key: string]: jsValue };
+type jsImports = { [key: string]: jsValue };
 
-export let defaultParameters: parameters = {};
+export let defaultImports: jsImports = {};
 export let defaultBindings: externalBindings = {};
 
 function createTsExport(
@@ -146,4 +146,3 @@ function createTsExport(
       return tag("symbol", x.value);
   }
 }
-
