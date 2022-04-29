@@ -211,6 +211,15 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
+  | ("scaleLog", [EvDistribution(dist)]) =>
+    Helpers.toDistFn(Scale(#Logarithm, MagicNumbers.Math.e), dist)
+  | ("scaleLog10", [EvDistribution(dist)]) => Helpers.toDistFn(Scale(#Logarithm, 10.0), dist)
+  | ("scaleLog", [EvDistribution(dist), EvNumber(float)]) =>
+    Helpers.toDistFn(Scale(#Logarithm, float), dist)
+  | ("scalePow", [EvDistribution(dist), EvNumber(float)]) =>
+    Helpers.toDistFn(Scale(#Power, float), dist)
+  | ("scaleExp", [EvDistribution(dist)]) =>
+    Helpers.toDistFn(Scale(#Power, MagicNumbers.Math.e), dist)
   | ("cdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist)
   | ("pdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Pdf(float), dist)
   | ("inv", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist)

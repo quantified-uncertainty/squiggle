@@ -366,6 +366,7 @@ let pointwiseCombination = (
   ~algebraicCombination: Operation.algebraicOperation,
   ~t2: t,
 ): result<t, error> => {
+  Js.log2("PointwiseCombination", algebraicCombination);
   E.R.merge(toPointSetFn(t1), toPointSetFn(t2))->E.R.bind(((t1, t2)) =>
     PointSetDist.combinePointwise(Operation.Algebraic.toFn(algebraicCombination), t1, t2)
     ->E.R2.fmap(r => DistributionTypes.PointSet(r))

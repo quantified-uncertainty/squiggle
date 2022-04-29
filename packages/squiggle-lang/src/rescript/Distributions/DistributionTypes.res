@@ -70,10 +70,16 @@ module DistributionOperation = {
     | #Sample
   ]
 
+  type toScaleFn = [
+    | #Power
+    | #Logarithm
+  ]
+
   type toDist =
     | Normalize
     | ToPointSet
     | ToSampleSet(int)
+    | Scale(toScaleFn, float)
     | Truncate(option<float>, option<float>)
     | Inspect
 
@@ -113,6 +119,8 @@ module DistributionOperation = {
     | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
     | ToDist(Truncate(_, _)) => `truncate`
     | ToDist(Inspect) => `inspect`
+    | ToDist(Scale(#Power, r)) => `scalePower(${E.Float.toFixed(r)})`
+    | ToDist(Scale(#Logarithm, r)) => `scaleLog(${E.Float.toFixed(r)})`
     | ToString(ToString) => `toString`
     | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
     | ToBool(IsNormalized) => `isNormalized`
@@ -142,6 +150,8 @@ module Constructors = {
     let toSampleSet = (dist, r): t => FromDist(ToDist(ToSampleSet(r)), dist)
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
+    let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
+    let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)
     let toString = (dist): t => FromDist(ToString(ToString), dist)
     let toSparkline = (dist, n): t => FromDist(ToString(ToSparkline(n)), dist)
     let algebraicAdd = (dist1, dist2: genericDist): t => FromDist(
