@@ -96,6 +96,7 @@ module T = {
   let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> Belt.Array.unzip |> fromArray
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
+  let filterYValues = (fn, t: t): t => t |> zip |> E.A.filter(((_,y)) => fn(y)) |> fromZippedArray
 
   module Validator = {
     let fnName = "XYShape validate"

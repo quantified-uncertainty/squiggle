@@ -59,6 +59,13 @@ let integralEndY = (t: t): float =>
 
 let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
+let logScore = (t1, t2, ~toPointSetFn: toPointSetFn): result<float, error> => {
+  let pointSets = E.R.merge(toPointSetFn(t1), toPointSetFn(t2))
+  pointSets |> E.R2.bind(((a, b)) =>
+    PointSetDist.T.logScore(a, b)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+  )
+}
+
 let toFloatOperation = (
   t,
   ~toPointSetFn: toPointSetFn,

@@ -36,6 +36,43 @@ let updateIntegralCache = (integralCache, t: t): t => {
   integralCache: integralCache,
 }
 
+let combinePointwise = (
+  ~integralSumCachesFn=(_, _) => None,
+  ~integralCachesFn=(_, _) => None,
+  fn: (float, float) => result<float, 'e>,
+  t1: t,
+  t2: t,
+): result<t, 'e> => {
+  let reducedDiscrete =
+    [t1, t2] |> E.A.fmap(toDiscrete) |> E.A.O.concatSomes |> Discrete.reduce(~integralSumCachesFn)
+
+  let reducedContinuous =
+    [t1, t2]
+    |> E.A.fmap(toContinuous)
+    |> E.A.O.concatSomes
+    |> Continuous.reduce(~integralSumCachesFn, fn)
+
+  let combinedIntegralSum = Common.combineIntegralSums(
+    integralSumCachesFn,
+    t1.integralSumCache,
+    t2.integralSumCache,
+  )
+
+  let combinedIntegral = Common.combineIntegrals(
+    integralCachesFn,
+    t1.integralCache,
+    t2.integralCache,
+  )
+  reducedContinuous->E.R2.fmap(continuous =>
+    make(
+      ~integralSumCache=combinedIntegralSum,
+      ~integralCache=combinedIntegral,
+      ~discrete=reducedDiscrete,
+      ~continuous,
+    )
+  )
+}
+
 module T = Dist({
   type t = PointSetTypes.mixedShape
   type integral = PointSetTypes.continuousShape
@@ -259,6 +296,12 @@ module T = Dist({
     | _ => XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
     }
   }
+
+  let logScore = (base: t, reference: t) => {
+    combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference) |> E.R.fmap(
+      integralEndY,
+    )
+  }
 })
 
 let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
@@ -306,41 +349,4 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
     integralSumCache: combinedIntegralSum,
     integralCache: None,
   }
-}
-
-let combinePointwise = (
-  ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn=(_, _) => None,
-  fn: (float, float) => result<float, 'e>,
-  t1: t,
-  t2: t,
-): result<t, 'e> => {
-  let reducedDiscrete =
-    [t1, t2] |> E.A.fmap(toDiscrete) |> E.A.O.concatSomes |> Discrete.reduce(~integralSumCachesFn)
-
-  let reducedContinuous =
-    [t1, t2]
-    |> E.A.fmap(toContinuous)
-    |> E.A.O.concatSomes
-    |> Continuous.reduce(~integralSumCachesFn, fn)
-
-  let combinedIntegralSum = Common.combineIntegralSums(
-    integralSumCachesFn,
-    t1.integralSumCache,
-    t2.integralSumCache,
-  )
-
-  let combinedIntegral = Common.combineIntegrals(
-    integralCachesFn,
-    t1.integralCache,
-    t2.integralCache,
-  )
-  reducedContinuous->E.R2.fmap(continuous =>
-    make(
-      ~integralSumCache=combinedIntegralSum,
-      ~integralCache=combinedIntegral,
-      ~discrete=reducedDiscrete,
-      ~continuous,
-    )
-  )
 }

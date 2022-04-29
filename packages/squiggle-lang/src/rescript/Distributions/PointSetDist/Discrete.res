@@ -34,6 +34,7 @@ let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
 
 let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
+  ~fn=(a, b) => Ok(a +. b),
   t1: PointSetTypes.discreteShape,
   t2: PointSetTypes.discreteShape,
 ): PointSetTypes.discreteShape => {
@@ -47,9 +48,8 @@ let combinePointwise = (
   // It could be done for pointwise additions, but is that ever needed?
 
   make(
-    ~integralSumCache=combinedIntegralSum,
     XYShape.PointwiseCombination.combine(
-      (a, b) => Ok(a +. b),
+      fn,
       XYShape.XtoY.discreteInterpolator,
       t1.xyShape,
       t2.xyShape,
@@ -220,5 +220,11 @@ module T = Dist({
   let variance = (t: t): float => {
     let getMeanOfSquares = t => t |> shapeMap(XYShape.T.square) |> mean
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
+  }
+
+  let logScore = (base: t, reference: t) => {
+    combinePointwise(~fn=PointSetDist_Scoring.LogScoring.logScore, base, reference)
+    |> integralEndY
+    |> (r => Ok(r))
   }
 })

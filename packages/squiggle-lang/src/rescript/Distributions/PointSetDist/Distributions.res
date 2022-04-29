@@ -33,6 +33,7 @@ module type dist = {
 
   let mean: t => float
   let variance: t => float
+  let logScore: (t,t) => result<float, Operation.Error.t>
 }
 
 module Dist = (T: dist) => {
@@ -55,6 +56,7 @@ module Dist = (T: dist) => {
   let mean = T.mean
   let variance = T.variance
   let integralEndY = T.integralEndY
+  let logScore = T.logScore
 
   let updateIntegralCache = T.updateIntegralCache
 

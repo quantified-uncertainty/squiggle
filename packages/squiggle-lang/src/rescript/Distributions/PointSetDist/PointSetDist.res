@@ -190,6 +190,18 @@ module T = Dist({
     | Discrete(m) => Discrete.T.variance(m)
     | Continuous(m) => Continuous.T.variance(m)
     }
+
+  let logScore = (t1: t, t2: t) =>
+    switch (t1, t2) {
+    | (Continuous(t1), Continuous(t2)) => Continuous.T.logScore(t1, t2)
+    | (Discrete(t1), Discrete(t2)) => Discrete.T.logScore(t1, t2)
+    | (Mixed(t1), Mixed(t2)) => Mixed.T.logScore(t1, t2)
+    | _ => {
+        let t1 = toMixed(t1)
+        let t2 = toMixed(t2)
+        Mixed.T.logScore(t1, t2)
+      }
+    }
 })
 
 let pdf = (f: float, t: t) => {

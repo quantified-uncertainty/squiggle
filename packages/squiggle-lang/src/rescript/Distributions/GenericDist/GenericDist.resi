@@ -23,6 +23,8 @@ let toFloatOperation: (
   ~distToFloatOperation: Operation.distToFloatOperation,
 ) => result<float, error>
 
+let logScore: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>
+
 @genType
 let toPointSet: (
   t,

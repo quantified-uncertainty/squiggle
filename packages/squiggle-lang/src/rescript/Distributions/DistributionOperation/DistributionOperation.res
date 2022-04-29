@@ -139,6 +139,10 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
         Dist(dist)
       }
     | ToDist(Normalize) => dist->GenericDist.normalize->Dist
+    | ToScore(LogScore(t2)) =>
+      GenericDist.logScore(dist, t2, ~toPointSetFn)
+      ->E.R2.fmap(r => Float(r))
+      ->OutputLocal.fromResult
     | ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
     | ToDist(Truncate(leftCutoff, rightCutoff)) =>
       GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
@@ -227,6 +231,7 @@ module Constructors = {
   let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
   let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
   let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
+  let logScore = (~env, dist1, dist2) => C.logScore(dist1, dist2)->run(~env)->toFloatR
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
   let truncate = (~env, dist, leftCutoff, rightCutoff) =>

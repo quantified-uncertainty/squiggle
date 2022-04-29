@@ -85,9 +85,12 @@ module DistributionOperation = {
     | ToString
     | ToSparkline(int)
 
+  type toScore = LogScore(genericDist)
+
   type fromDist =
     | ToFloat(toFloat)
     | ToDist(toDist)
+    | ToScore(toScore)
     | ToDistCombination(direction, Operation.Algebraic.t, [#Dist(genericDist) | #Float(float)])
     | ToString(toString)
     | ToBool(toBool)
@@ -108,6 +111,7 @@ module DistributionOperation = {
     | ToFloat(#Mean) => `mean`
     | ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
     | ToFloat(#Sample) => `sample`
+    | ToScore(LogScore(_)) => `logScore`
     | ToDist(Normalize) => `normalize`
     | ToDist(ToPointSet) => `toPointSet`
     | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
@@ -142,6 +146,7 @@ module Constructors = {
     let toSampleSet = (dist, r): t => FromDist(ToDist(ToSampleSet(r)), dist)
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
+    let logScore = (dist1, dist2): t => FromDist(ToScore(LogScore(dist2)), dist1)
     let toString = (dist): t => FromDist(ToString(ToString), dist)
     let toSparkline = (dist, n): t => FromDist(ToString(ToSparkline(n)), dist)
     let algebraicAdd = (dist1, dist2: genericDist): t => FromDist(

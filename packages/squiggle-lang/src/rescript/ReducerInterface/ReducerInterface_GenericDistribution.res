@@ -80,6 +80,7 @@ module Helpers = {
       dist1,
     )->runGenericOperation
   }
+
   let parseNumber = (args: expressionValue): Belt.Result.t<float, string> =>
     switch args {
     | EvNumber(x) => Ok(x)
@@ -209,6 +210,9 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
       a,
     )->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
+  | ("logScore", [EvDistribution(a), EvDistribution(b)]) => Some(
+      runGenericOperation(FromDist(ToScore(LogScore(b)), a)),
+    )
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
   | ("cdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist)

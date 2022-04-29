@@ -267,6 +267,12 @@ module T = Dist({
   }
   let variance = (t: t): float =>
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
+
+  let logScore = (base: t, reference: t) => {
+    combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference)
+    |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
+    |> E.R.fmap(integralEndY)
+  }
 })
 
 let isNormalized = (t: t): bool => {
