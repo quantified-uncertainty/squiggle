@@ -32,7 +32,7 @@ let parse = (mathJsCode: string): result<t, errorValue> =>
 let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<
   expressionValue,
   'e,
-> => 
+> =>
   switch expression {
   | T.EValue(value) => value->Ok
   | T.EList(list) =>
@@ -119,10 +119,15 @@ let evaluatePartialUsingExternalBindings = (
   externalBindings: ReducerInterface_ExpressionValue.externalBindings,
   environment: ReducerInterface_ExpressionValue.environment,
 ): result<externalBindings, errorValue> => {
-  let rAnswer = evaluateUsingOptions(~environment=Some(environment), ~externalBindings=Some(externalBindings), code)
+  let rAnswer = evaluateUsingOptions(
+    ~environment=Some(environment),
+    ~externalBindings=Some(externalBindings),
+    code,
+  )
   switch rAnswer {
-    | Ok(EvRecord(externalBindings)) => Ok(externalBindings)
-    | Ok(_) => Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`))
-    | Error(err) => err->Error
+  | Ok(EvRecord(externalBindings)) => Ok(externalBindings)
+  | Ok(_) =>
+    Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`))
+  | Error(err) => err->Error
   }
 }
