@@ -91,6 +91,7 @@ let toStringResultRecord = x =>
   }
 
 @genType
-type environment = {dummy: int}
+type environment = DistributionOperation.env
+
 @genType
-let defaultEnvironment: environment = {dummy: 0}
+let defaultEnvironment: environment = DistributionOperation.defaultEnv
