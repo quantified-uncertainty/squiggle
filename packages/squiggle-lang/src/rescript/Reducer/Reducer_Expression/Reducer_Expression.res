@@ -114,3 +114,15 @@ let evaluate = (code: string): result<expressionValue, errorValue> => {
   evaluateUsingOptions(~environment=None, ~externalBindings=None, code)
 }
 let eval = evaluate
+let evaluatePartialUsingExternalBindings = (
+  code: string,
+  externalBindings: ReducerInterface_ExpressionValue.externalBindings,
+  environment: ReducerInterface_ExpressionValue.environment,
+): result<externalBindings, errorValue> => {
+  let rAnswer = evaluateUsingOptions(~environment=Some(environment), ~externalBindings=Some(externalBindings), code)
+  switch rAnswer {
+    | Ok(EvRecord(externalBindings)) => Ok(externalBindings)
+    | Ok(_) => Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`))
+    | Error(err) => err->Error
+  }
+}

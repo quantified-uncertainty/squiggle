@@ -21,6 +21,12 @@ let evaluateUsingOptions: (
   string,
 ) => result<expressionValue, errorValue>
 @genType
+let evaluatePartialUsingExternalBindings: (
+  string,
+  QuriSquiggleLang.ReducerInterface_ExpressionValue.externalBindings,
+  QuriSquiggleLang.ReducerInterface_ExpressionValue.environment,
+) => result<externalBindings, errorValue>
+@genType
 let evaluate: string => result<expressionValue, errorValue>
 
 let parse: string => result<Expression.expression, errorValue>
