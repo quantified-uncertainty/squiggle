@@ -11,6 +11,5 @@ type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 let evaluate = Expression.evaluate
 let evaluateUsingOptions = Expression.evaluateUsingOptions
+let evaluatePartialUsingExternalBindings = Expression.evaluatePartialUsingExternalBindings
 let parse = Expression.parse
-let parseOuter = Expression.parseOuter
-let parsePartial = Expression.parsePartial

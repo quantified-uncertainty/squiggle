@@ -29,6 +29,18 @@ type distToFloatOperation = [
 
 module Convolution = {
   type t = convolutionOperation
+  //Only a selection of operations are supported by convolution.
+  let fromAlgebraicOperation = (op: algebraicOperation): option<convolutionOperation> =>
+    switch op {
+    | #Add => Some(#Add)
+    | #Subtract => Some(#Subtract)
+    | #Multiply => Some(#Multiply)
+    | #Divide | #Power | #Logarithm => None
+    }
+
+  let canDoAlgebraicOperation = (op: algebraicOperation): bool =>
+    fromAlgebraicOperation(op)->E.O.isSome
+
   let toFn: (t, float, float) => float = x =>
     switch x {
     | #Add => \"+."

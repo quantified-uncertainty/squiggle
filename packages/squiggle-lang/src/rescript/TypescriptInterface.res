@@ -14,6 +14,12 @@ type samplingParams = DistributionOperation.env
 type genericDist = DistributionTypes.genericDist
 
 @genType
+type sampleSetDist = SampleSetDist.t
+
+@genType
+type symbolicDist = SymbolicDistTypes.symbolicDist
+
+@genType
 type distributionError = DistributionTypes.error
 
 @genType
@@ -33,6 +39,12 @@ let evaluate = Reducer.evaluate
 
 @genType
 let evaluateUsingOptions = Reducer.evaluateUsingOptions
+
+@genType
+let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
+
+@genType
+type externalBindings = Reducer.externalBindings
 
 @genType
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
