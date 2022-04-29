@@ -177,7 +177,12 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     sampleCount: sampleCount,
     xyPointLength: outputXYPoints,
   };
-  let expressionResult = run(squiggleString, bindings, samplingInputs, jsImports);
+  let expressionResult = run(
+    squiggleString,
+    bindings,
+    samplingInputs,
+    jsImports
+  );
   let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
     let expression = expressionResult.value;
