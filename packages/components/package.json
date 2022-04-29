@@ -1,11 +1,10 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "license": "MIT",
   "dependencies": {
-    "antd": "^4.20.1",
     "react-ace": "10.1.0",
-    "@quri/squiggle-lang": "^0.2.6",
+    "@quri/squiggle-lang": "^0.2.7",
     "react-dom": "^18.1.0",
     "vega": "^5.22.1",
     "vega-embed": "^6.20.6",

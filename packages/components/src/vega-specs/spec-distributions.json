@@ -3,6 +3,7 @@
   "description": "A basic area chart example",
   "width": 500,
   "height": 100,
+  "autosize": "fit",
   "padding": 5,
   "data": [
     {

@@ -154,6 +154,12 @@ export interface SquiggleChartProps {
   bindings?: bindings;
 }
 
+const ChartWrapper = styled.div`
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+`;
+
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   sampleCount = 1000,
@@ -163,11 +169,6 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   bindings = {},
   width = NaN,
 }: SquiggleChartProps) => {
-  const target = React.useRef(null);
-  const [componentWidth] = useSize(target);
-  // I would have wanted to just use componentWidth, but this created infinite loops with SquiggleChart.stories.
-  //So you can manually add a width, as an escape hatch.
-  let _width = width || componentWidth;
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
     xyPointLength: outputXYPoints,
@@ -178,15 +179,14 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     let expression = expressionResult.value;
     onChange(expression);
     internal = (
-      <SquiggleItem expression={expression} width={_width} height={height} />
+      <SquiggleItem expression={expression} width={width} height={height} />
     );
   } else {
-    // At this point, we came across an error. What was our error?
     internal = (
       <ErrorBox heading={"Parse Error"}>
         {errorValueToString(expressionResult.value)}
       </ErrorBox>
     );
   }
-  return <div ref={target}>{internal}</div>;
+  return <ChartWrapper>{internal}</ChartWrapper>;
 };
