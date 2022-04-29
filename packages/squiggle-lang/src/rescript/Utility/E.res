@@ -350,7 +350,7 @@ module JsDate = {
 /* List */
 module L = {
   module Util = {
-    let eq = (a, b) => a == b
+    let eq = \"=="
   }
   let fmap = List.map
   let get = Belt.List.get
