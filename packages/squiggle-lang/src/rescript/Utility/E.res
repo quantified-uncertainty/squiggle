@@ -307,6 +307,8 @@ module R2 = {
     | Ok(x) => x->Ok
     | Error(x) => x->f->Error
     }
+
+  let toExn = (a, b) => R.toExn(b, a)
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>

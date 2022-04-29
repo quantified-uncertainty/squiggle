@@ -218,6 +218,17 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist)
   | ("toSampleSet", [EvDistribution(dist)]) =>
     Helpers.toDistFn(ToSampleSet(MagicNumbers.Environment.defaultSampleCount), dist)
+  | ("fromSamples", [EvArray(arr)]) =>
+    Helpers.toDistFn(
+      ToSampleSet(MagicNumbers.Environment.defaultSampleCount),
+      arr
+      ->Helpers.parseNumberArray
+      ->E.R2.fmap2(x => SampleSetDist.NonNumericInput(x))
+      ->E.R.bind(SampleSetDist.make)
+      ->E.R2.fmap(x => DistributionTypes.SampleSet(x))
+      // Raising here isn't ideal. This: GenDistError(SampleSetError(NonNumericInput("Something wasn't a number"))) would be proper.
+      ->E.R2.toExn("Something in the input wasn't a number"),
+    )
   | ("inspect", [EvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist)
   | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Truncate(Some(float), None), dist)

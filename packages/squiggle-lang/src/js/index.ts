@@ -31,6 +31,7 @@ import {
   Constructors_isNormalized,
   Constructors_toPointSet,
   Constructors_toSampleSet,
+  Constructors_fromSamples,
   Constructors_truncate,
   Constructors_inspect,
   Constructors_toString,
@@ -402,6 +403,10 @@ export class Distribution {
     return this.mapResultDist(
       Constructors_toSampleSet({ env: this.env }, this.t, n)
     );
+  }
+
+  fromSamples(n: Array<number>): result<Distribution, distributionError> {
+    return this.mapResultDist(Constructors_fromSamples({ env: this.env }, n));
   }
 
   truncate(
