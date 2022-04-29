@@ -68,6 +68,29 @@ describe("Partials", () => {
   });
 });
 
+describe("Parameters", () => {
+  test("Can pass parameters into partials and cells", () => {
+    let bindings = testRunPartial(`y = $x + 2`, {}, { x: 1 }); // y = 3
+    let bindings2 = testRunPartial(`z = $x + y * $a`, bindings, { a: 3 }); // z = 1 + 3 * 3 = 10
+    expect(testRun(`z + $x + $a + y`, bindings2)).toEqual({
+      tag: "number",
+      value: 17,
+    });
+  });
+  test("Complicated deep parameters", () => {
+    expect(
+      testRun(
+        `$x.y[0][0].w + $x.z + $u.v`,
+        {},
+        { x: { y: [[{ w: 1 }]], z: 2 }, u: { v: 3 } }
+      )
+    ).toEqual({
+      tag: "number",
+      value: 6,
+    });
+  });
+});
+
 describe("Distribution", () => {
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
   //Also, note, the value should be created using makeSampleSetDist() later on.

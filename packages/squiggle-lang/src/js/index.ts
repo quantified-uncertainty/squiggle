@@ -99,25 +99,71 @@ export type squiggleExpression =
 export function run(
   squiggleString: string,
   bindings?: externalBindings,
-  samplingInputs?: samplingParams
+  samplingInputs?: samplingParams,
+  parameters?: parameters
 ): result<squiggleExpression, errorValue> {
   let b = bindings ? bindings : {};
+  let p = parameters ? parameters : {};
   let si: samplingParams = samplingInputs
     ? samplingInputs
     : defaultSamplingInputs;
 
   let result: result<expressionValue, errorValue> =
-    evaluateUsingExternalBindings(squiggleString, b);
+    evaluateUsingExternalBindings(squiggleString, mergeParameters(b, p));
   return resultMap(result, (x) => createTsExport(x, si));
 }
 
 // Run Partial. A partial is a block of code that doesn't return a value
 export function runPartial(
   squiggleString: string,
-  bindings: externalBindings,
-  _samplingInputs?: samplingParams
+  bindings?: externalBindings,
+  _samplingInputs?: samplingParams,
+  parameters?: parameters
 ): result<externalBindings, errorValue> {
-  return evaluatePartialUsingExternalBindings(squiggleString, bindings);
+  let b = bindings ? bindings : {};
+  let p = parameters ? parameters : {};
+
+  return evaluatePartialUsingExternalBindings(
+    squiggleString,
+    mergeParameters(b, p)
+  );
+}
+
+function mergeParameters(
+  bindings: externalBindings,
+  parameters: parameters
+): externalBindings {
+  let transformedParemeters = Object.fromEntries(
+    Object.entries(parameters).map(([key, value]) => [
+      "$" + key,
+      jsValueToBinding(value),
+    ])
+  );
+  return _.merge(bindings, transformedParemeters);
+}
+
+type parameters = { [key: string]: jsValue };
+
+type jsValue =
+  | string
+  | number
+  | jsValue[]
+  | { [key: string]: jsValue }
+  | boolean;
+
+function jsValueToBinding(value: jsValue): rescriptExport {
+  if (typeof value === "boolean") {
+    return { TAG: 1, _0: value as boolean };
+  } else if (typeof value === "string") {
+    return { TAG: 6, _0: value as string };
+  } else if (typeof value === "number") {
+    return { TAG: 4, _0: value as number };
+  } else if (Array.isArray(value)) {
+    return { TAG: 0, _0: value.map(jsValueToBinding) };
+  } else {
+    // Record
+    return { TAG: 5, _0: _.mapValues(value, jsValueToBinding) };
+  }
 }
 
 function createTsExport(

@@ -6,11 +6,20 @@ import {
   errorValueToString,
 } from "../../src/js/index";
 
-export function testRun(x: string, bindings = {}): squiggleExpression {
-  let squiggleResult = run(x, bindings, {
-    sampleCount: 1000,
-    xyPointLength: 100,
-  });
+export function testRun(
+  x: string,
+  bindings = {},
+  parameters = {}
+): squiggleExpression {
+  let squiggleResult = run(
+    x,
+    bindings,
+    {
+      sampleCount: 1000,
+      xyPointLength: 100,
+    },
+    parameters
+  );
   // return squiggleResult.value
   if (squiggleResult.tag === "Ok") {
     return squiggleResult.value;
@@ -23,11 +32,20 @@ export function testRun(x: string, bindings = {}): squiggleExpression {
   }
 }
 
-export function testRunPartial(x: string, bindings: bindings = {}): bindings {
-  let squiggleResult = runPartial(x, bindings, {
-    sampleCount: 1000,
-    xyPointLength: 100,
-  });
+export function testRunPartial(
+  x: string,
+  bindings: bindings = {},
+  parameters = {}
+): bindings {
+  let squiggleResult = runPartial(
+    x,
+    bindings,
+    {
+      sampleCount: 1000,
+      xyPointLength: 100,
+    },
+    parameters
+  );
   if (squiggleResult.tag === "Ok") {
     return squiggleResult.value;
   } else {

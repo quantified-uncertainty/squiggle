@@ -19,6 +19,7 @@ let eval__: string => 'a = %raw(`function (expr) { return {value: Mathjs.evaluat
 */
 let eval = (expr: string): result<expressionValue, errorValue> => {
   try {
+    Js.log(expr)
     let answer = eval__(expr)
     answer["value"]->JavaScript.Gate.jsToEv
   } catch {
