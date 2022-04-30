@@ -144,8 +144,6 @@ export interface SquiggleChartProps {
   diagramStop?: number;
   /** If the result is a function, how many points along the function it samples */
   diagramCount?: number;
-  /** variables declared before this expression */
-  environment?: unknown;
   /** When the environment changes */
   onChange?(expr: squiggleExpression): void;
   /** CSS width of the element */
