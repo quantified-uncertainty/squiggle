@@ -5,8 +5,6 @@ sidebar_position: 7
 
 import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
-_The source of truth for this document is [this file of code](https://github.com/quantified-uncertainty/squiggle/blob/develop/packages/squiggle-lang/src/rescript/ReducerInterface/ReducerInterface_GenericDistribution.res)_
-
 ## Inventory distributions
 
 We provide starter distributions, computed symbolically.
@@ -255,8 +253,8 @@ dist1 .* dist2`}
 ### Pointwise division
 
 <SquiggleEditor
-  initialSquiggleString={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
+  initialSquiggleString={`dist1 = uniform(0,20)
+dist2 = normal(10,8)
 dist1 ./ dist2`}
 />
 
