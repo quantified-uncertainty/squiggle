@@ -154,12 +154,12 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
       ->E.R2.fmap(r => Dist(PointSet(r)))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#Logarithm, f)) => 
+    | ToDist(Scale(#Logarithm, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#Power, f)) => 
+    | ToDist(Scale(#Power, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Power, ~f)
       ->E.R2.fmap(r => Dist(r))
