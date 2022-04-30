@@ -17,7 +17,7 @@ Add to `App.js`:
 
 ```jsx
 import { SquiggleEditor } from "@quri/squiggle-components";
-<SquiggleEditor initialSquiggleString="x = beta($alpha, 10); x + $shift" jsImports={alpha: 3, shift: 20} />;
+<SquiggleEditor initialSquiggleString="x = beta($alpha, 10); x + $shift" jsImports={{alpha: 3, shift: 20}} />;
 ```
 
 # Build storybook for development
