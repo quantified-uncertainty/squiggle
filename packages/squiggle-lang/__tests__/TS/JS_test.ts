@@ -1,4 +1,4 @@
-import { Distribution, resultMap } from "../../src/js/index";
+import { Distribution, resultMap, defaultBindings } from "../../src/js/index";
 import { testRun, testRunPartial } from "./TestHelpers";
 
 function Ok<b>(x: b) {
@@ -64,6 +64,28 @@ describe("Partials", () => {
     expect(testRun(`y + 3`, bindings2)).toEqual({
       tag: "number",
       value: 10,
+    });
+  });
+});
+
+describe("JS Imports", () => {
+  test("Can pass parameters into partials and cells", () => {
+    let bindings = testRunPartial(`y = $x + 2`, defaultBindings, { x: 1 });
+    let bindings2 = testRunPartial(`z = y + $a`, bindings, { a: 3 });
+    expect(testRun(`z`, bindings2)).toEqual({
+      tag: "number",
+      value: 6,
+    });
+  });
+  test("Complicated deep parameters", () => {
+    expect(
+      testRun(`$x.y[0][0].w + $x.z + $u.v`, defaultBindings, {
+        x: { y: [[{ w: 1 }]], z: 2 },
+        u: { v: 3 },
+      })
+    ).toEqual({
+      tag: "number",
+      value: 6,
     });
   });
 });

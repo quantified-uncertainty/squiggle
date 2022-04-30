@@ -3,16 +3,17 @@ import _ from "lodash";
 import styled from "styled-components";
 import {
   run,
-  runPartial,
   errorValueToString,
   squiggleExpression,
   bindings,
   samplingParams,
+  jsImports,
+  defaultImports,
+  defaultBindings,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
 import { ErrorBox } from "./ErrorBox";
-import useSize from "@react-hook/size";
 
 const variableBox = {
   Component: styled.div`
@@ -152,6 +153,8 @@ export interface SquiggleChartProps {
   height?: number;
   /** Bindings of previous variables declared */
   bindings?: bindings;
+  /** JS imported parameters */
+  jsImports?: jsImports;
 }
 
 const ChartWrapper = styled.div`
@@ -166,14 +169,20 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   outputXYPoints = 1000,
   onChange = () => {},
   height = 60,
-  bindings = {},
+  bindings = defaultBindings,
+  jsImports = defaultImports,
   width = NaN,
 }: SquiggleChartProps) => {
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
     xyPointLength: outputXYPoints,
   };
-  let expressionResult = run(squiggleString, bindings, samplingInputs);
+  let expressionResult = run(
+    squiggleString,
+    bindings,
+    samplingInputs,
+    jsImports
+  );
   let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
     let expression = expressionResult.value;
