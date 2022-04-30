@@ -289,6 +289,13 @@ module R = {
     | Ok(r) => r->Ok
     | Error(x) => x->f->Error
     }
+
+  //I'm not sure what to call this.
+  let unify = (a: result<'a, 'b>, c: 'b => 'a): 'a =>
+    switch a {
+    | Ok(x) => x
+    | Error(x) => c(x)
+    }
 }
 
 module R2 = {

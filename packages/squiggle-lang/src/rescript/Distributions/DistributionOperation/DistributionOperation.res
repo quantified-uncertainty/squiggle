@@ -189,10 +189,9 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd)
     ->E.R2.fmap(r => Dist(r))
     ->OutputLocal.fromResult
-  | FromArray(xs) =>
-    xs
+  | FromSamples(xs) => xs
     ->SampleSetDist.make
-    ->E.R2.fmap2(x => DistributionTypes.SampleSetError(x))
+    ->E.R2.errMap(x => DistributionTypes.SampleSetError(x))
     ->E.R2.fmap(x => x->DistributionTypes.SampleSet->Dist)
     ->OutputLocal.fromResult
   }
