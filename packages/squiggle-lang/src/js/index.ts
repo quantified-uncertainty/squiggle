@@ -11,6 +11,7 @@ export {
   makeSampleSetDist,
   errorValueToString,
   distributionErrorToString,
+  distributionError,
 } from "../rescript/TypescriptInterface.gen";
 export type {
   samplingParams,

@@ -61,6 +61,7 @@ export const FunctionChart: React.FC<{
         distribution={mouseItem.value}
         width={400}
         height={140}
+        showSummary={false}
       />
     ) : (
       <></>

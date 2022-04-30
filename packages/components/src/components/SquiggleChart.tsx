@@ -54,12 +54,15 @@ export interface SquiggleItemProps {
   expression: squiggleExpression;
   width: number;
   height: number;
+  /** Whether to show a summary of statistics for distributions */
+  showSummary: boolean;
 }
 
 const SquiggleItem: React.FC<SquiggleItemProps> = ({
   expression,
   width,
   height,
+  showSummary,
 }: SquiggleItemProps) => {
   switch (expression.tag) {
     case "number":
@@ -83,6 +86,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
             distribution={expression.value}
             height={height}
             width={width}
+            showSummary={showSummary}
           />
         </VariableBox>
       );
@@ -105,7 +109,12 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox heading="Array">
           {expression.value.map((r) => (
-            <SquiggleItem expression={r} width={width - 20} height={50} />
+            <SquiggleItem
+              expression={r}
+              width={width - 20}
+              height={50}
+              showSummary={showSummary}
+            />
           ))}
         </VariableBox>
       );
@@ -115,16 +124,15 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           {Object.entries(expression.value).map(([key, r]) => (
             <>
               <RecordKeyHeader>{key}</RecordKeyHeader>
-              <SquiggleItem expression={r} width={width - 20} height={50} />
+              <SquiggleItem
+                expression={r}
+                width={width - 20}
+                height={50}
+                showSummary={showSummary}
+              />
             </>
           ))}
         </VariableBox>
-      );
-    default:
-      return (
-        <ErrorBox heading="No Viewer">
-          {"We don't currently have a working viewer for record types."}
-        </ErrorBox>
       );
   }
 };
@@ -155,6 +163,8 @@ export interface SquiggleChartProps {
   bindings?: bindings;
   /** JS imported parameters */
   jsImports?: jsImports;
+  /** Whether to show a summary of the distirbution */
+  showSummary?: boolean;
 }
 
 const ChartWrapper = styled.div`
@@ -172,6 +182,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   bindings = defaultBindings,
   jsImports = defaultImports,
   width = NaN,
+  showSummary = false,
 }: SquiggleChartProps) => {
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
@@ -188,7 +199,12 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     let expression = expressionResult.value;
     onChange(expression);
     internal = (
-      <SquiggleItem expression={expression} width={width} height={height} />
+      <SquiggleItem
+        expression={expression}
+        width={width}
+        height={height}
+        showSummary={showSummary}
+      />
     );
   } else {
     internal = (
