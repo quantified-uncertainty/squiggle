@@ -98,6 +98,19 @@ bound `a`, mode `b` and upper bound `c`.
 
 Squiggle, when the context is right, automatically casts a float to a constant distribution.
 
+## `fromSamples`
+
+The last distribution constructor takes an array of samples and constructs a sample set distribution.
+
+<SquiggleEditor initialSquiggleString="fromSamples([1,2,3,4,6,5,5,5])" />
+
+#### Validity
+
+For `fromSamples(xs)`,
+
+- `xs.length > 5`
+- Strictly every element of `xs` must be a number.
+
 ## Operating on distributions
 
 Here are the ways we combine distributions.
@@ -324,16 +337,6 @@ Above, we saw the unary `toSampleSet`, which uses an internal hardcoded number o
 #### Validity
 
 - Second argument to `toSampleSet` must be a number.
-
-## `fromSamples`
-
-<SquiggleEditor initialSquiggleString="fromSamples([1,2,3,4,6,5,5,5])" />
-#### Validity
-
-For `fromSamples(xs)`,
-
-- `xs.length > 5`
-- Strictly every element of `xs` must be a number.
 
 ## Normalization
 
