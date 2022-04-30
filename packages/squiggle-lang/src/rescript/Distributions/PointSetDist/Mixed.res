@@ -316,7 +316,10 @@ let combinePointwise = (
   t2: t,
 ): result<t, 'e> => {
   let reducedDiscrete =
-    [t1, t2] |> E.A.fmap(toDiscrete) |> E.A.O.concatSomes |> Discrete.reduce(~integralSumCachesFn)
+    [t1, t2]
+    |> E.A.fmap(toDiscrete)
+    |> E.A.O.concatSomes
+    |> Discrete.reduce(~integralSumCachesFn, fn)
 
   let reducedContinuous =
     [t1, t2]
@@ -335,11 +338,11 @@ let combinePointwise = (
     t1.integralCache,
     t2.integralCache,
   )
-  reducedContinuous->E.R2.fmap(continuous =>
+  E.R.merge(reducedContinuous, reducedDiscrete)->E.R2.fmap(((continuous, discrete)) =>
     make(
       ~integralSumCache=combinedIntegralSum,
       ~integralCache=combinedIntegral,
-      ~discrete=reducedDiscrete,
+      ~discrete,
       ~continuous,
     )
   )
