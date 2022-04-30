@@ -97,8 +97,8 @@ module DistributionOperation = {
   type genericFunctionCallInfo =
     | FromDist(fromDist, genericDist)
     | FromFloat(fromDist, float)
+    | FromSamples(array<float>)
     | Mixture(array<(genericDist, float)>)
-    | FromArray(SampleSetDist.t)
 
   let distCallToString = (distFunction: fromDist): string =>
     switch distFunction {
@@ -123,7 +123,7 @@ module DistributionOperation = {
     switch d {
     | FromDist(f, _) | FromFloat(f, _) => distCallToString(f)
     | Mixture(_) => `mixture`
-    | FromArray(_) => `samples`
+    | FromSamples(_) => `fromSamples`
     }
 }
 module Constructors = {
@@ -140,7 +140,7 @@ module Constructors = {
     let isNormalized = (dist): t => FromDist(ToBool(IsNormalized), dist)
     let toPointSet = (dist): t => FromDist(ToDist(ToPointSet), dist)
     let toSampleSet = (dist, r): t => FromDist(ToDist(ToSampleSet(r)), dist)
-    let fromSamples = (xs): t => FromArray(xs)
+    let fromSamples = (xs): t => FromSamples(xs)
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
     let toString = (dist): t => FromDist(ToString(ToString), dist)
