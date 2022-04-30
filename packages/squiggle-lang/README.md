@@ -3,22 +3,26 @@
 
 # Squiggle language
 
-## Use the `npm` package
+_An estimation language_
 
-For instance, in a fresh `create-react-app`, you can
+# Use the `npm` package
+
+For instance, in a javascript project, you can
 
 ```sh
 yarn add @quri/squiggle-lang
 ```
 
 ```js
-import {run} from '@quri/squiggle-lang';
-run("normal(0, 1) * fromSamples([-3,-2,-1,1,2,3,3,3,4,9]").value.value.toSparkline().value)
+import { run } from "@quri/squiggle-lang";
+run(
+  "normal(0, 1) * fromSamples([-3,-2,-1,1,2,3,3,3,4,9]"
+).value.value.toSparkline().value;
 ```
 
 **However, for most use cases you'll prefer to use our [library of react components](https://www.npmjs.com/package/@quri/squiggle-components)**, and let your app transitively depend on `@quri/squiggle-lang`.
 
-## Build for development
+# Build for development
 
 We assume that you ran `yarn` at the monorepo level.
 
@@ -38,7 +42,7 @@ yarn test
 yarn coverage:rescript; o _coverage/index.html  # produces coverage report and opens it in browser
 ```
 
-## Distributing this package or using this package from other monorepo packages
+# Distributing this package or using this package from other monorepo packages
 
 As it says in the other `packages/*/README.md`s, building this package is an essential step of building other packages.
 

@@ -1,9 +1,9 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "license": "MIT",
   "dependencies": {
-    "@quri/squiggle-lang": "^0.2.7",
+    "@quri/squiggle-lang": "^0.2.8",
     "@react-hook/size": "^2.1.2",
     "lodash": "^4.17.21",
     "react": "^18.1.0",
@@ -49,11 +49,11 @@
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
     "build": "tsc -b && build-storybook -s public",
-    "build:package": "tsc -b",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
     "lint": "prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepack": "yarn bundle && tsc -b"
   },
   "eslintConfig": {
     "extends": [
@@ -87,7 +87,7 @@
     "@types/react": "17.0.43"
   },
   "source": "./src/index.ts",
-  "browser": "dist/bundle.js",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts"
+  "browser": "./dist/bundle.js",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts"
 }
