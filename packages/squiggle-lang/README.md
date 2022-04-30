@@ -3,6 +3,21 @@
 
 # Squiggle language
 
+## Use the `npm` package
+
+For instance, in a fresh `create-react-app`, you can
+
+```sh
+yarn add @quri/squiggle-lang
+```
+
+```js
+import {run} from '@quri/squiggle-lang';
+run("normal(0, 1) * fromSamples([-3,-2,-1,1,2,3,3,3,4,9]").value.value.toSparkline().value)
+```
+
+**However, for most use cases you'll prefer to use our [library of react components](https://www.npmjs.com/package/@quri/squiggle-components)**, and let your app transitively depend on `@quri/squiggle-lang`.
+
 ## Build for development
 
 We assume that you ran `yarn` at the monorepo level.

@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-lang",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
@@ -24,6 +24,7 @@
     "format:rescript": "rescript format -all",
     "format:prettier": "prettier --write .",
     "format": "yarn format:rescript && yarn format:prettier",
+    "prepack": "yarn build && yarn test && yarn bundle",
     "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [
@@ -35,7 +36,7 @@
     "rescript": "^9.1.4",
     "jstat": "^1.9.5",
     "pdfast": "^0.2.0",
-    "mathjs": "10.5.0"
+    "mathjs": "^10.5.0"
   },
   "devDependencies": {
     "bisect_ppx": "^2.7.1",
@@ -61,6 +62,7 @@
     "webpack-cli": "^4.9.2"
   },
   "source": "./src/js/index.ts",
+  "browser": "./dist/bundle.js",
   "main": "./dist/src/js/index.js",
   "types": "./dist/src/js/index.d.ts"
 }
