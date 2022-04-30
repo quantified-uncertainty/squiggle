@@ -189,6 +189,11 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd)
     ->E.R2.fmap(r => Dist(r))
     ->OutputLocal.fromResult
+  | FromSamples(xs) => xs
+    ->SampleSetDist.make
+    ->E.R2.errMap(x => DistributionTypes.SampleSetError(x))
+    ->E.R2.fmap(x => x->DistributionTypes.SampleSet->Dist)
+    ->OutputLocal.fromResult
   }
 }
 
@@ -229,6 +234,7 @@ module Constructors = {
   let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
+  let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR
   let truncate = (~env, dist, leftCutoff, rightCutoff) =>
     C.truncate(dist, leftCutoff, rightCutoff)->run(~env)->toDistR
   let inspect = (~env, dist) => C.inspect(dist)->run(~env)->toDistR

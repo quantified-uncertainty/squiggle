@@ -98,6 +98,19 @@ bound `a`, mode `b` and upper bound `c`.
 
 Squiggle, when the context is right, automatically casts a float to a constant distribution.
 
+## `fromSamples`
+
+The last distribution constructor takes an array of samples and constructs a sample set distribution.
+
+<SquiggleEditor initialSquiggleString="fromSamples([1,2,3,4,6,5,5,5])" />
+
+#### Validity
+
+For `fromSamples(xs)`,
+
+- `xs.length > 5`
+- Strictly every element of `xs` must be a number.
+
 ## Operating on distributions
 
 Here are the ways we combine distributions.
@@ -315,6 +328,16 @@ Or `PointSet` format
 
 <SquiggleEditor initialSquiggleString="toPointSet(normal(5, 10))" />
 
+### `toSampleSet` has two signatures
+
+Above, we saw the unary `toSampleSet`, which uses an internal hardcoded number of samples. If you'd like to provide the number of samples, it has a binary signature as well (floored)
+
+<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1, 100.1)" />
+
+#### Validity
+
+- Second argument to `toSampleSet` must be a number.
+
 ## Normalization
 
 Some distribution operations (like horizontal shift) return an unnormalized distriibution.
@@ -332,18 +355,6 @@ We provide a predicate `isNormalized`, for when we have simple control flow
 #### Validity
 
 - Input to `isNormalized` must be a dist
-
-## Convert any distribution to a sample set distribution
-
-`toSampleSet` has two signatures
-
-It is unary when you use an internal hardcoded number of samples
-
-<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1)" />
-
-And binary when you provide a number of samples (floored)
-
-<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1, 100)" />
 
 ## `inspect`
 

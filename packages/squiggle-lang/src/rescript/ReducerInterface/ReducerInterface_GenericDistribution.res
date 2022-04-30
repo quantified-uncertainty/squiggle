@@ -218,6 +218,14 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist)
   | ("toSampleSet", [EvDistribution(dist)]) =>
     Helpers.toDistFn(ToSampleSet(MagicNumbers.Environment.defaultSampleCount), dist)
+  | ("fromSamples", [EvArray(inputArray)]) => {
+      let _wrapInputErrors = x => SampleSetDist.NonNumericInput(x)
+      let parsedArray = Helpers.parseNumberArray(inputArray)->E.R2.errMap(_wrapInputErrors)
+      switch parsedArray {
+      | Ok(array) => runGenericOperation(FromSamples(array))
+      | Error(e) => GenDistError(SampleSetError(e))
+      }->Some
+    }
   | ("inspect", [EvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist)
   | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Truncate(Some(float), None), dist)
