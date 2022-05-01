@@ -134,6 +134,7 @@ mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_co
 `normal(mean:number, standardDeviation:number)`
 
 Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
+
 <Tabs>
   <TabItem value="ex1" label="normal(5,1)" default>
     <SquiggleEditor initialSquiggleString="normal(5, 1)" />
@@ -152,7 +153,7 @@ Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distributio
 
 ## Log-normal
 
-`lognormal(mu: number, sigma: number)`   
+`lognormal(mu: number, sigma: number)`
 
 Creates a [log-normal distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) with the given mu and sigma.
 
@@ -168,23 +169,28 @@ Creates a [log-normal distribution](https://en.wikipedia.org/wiki/Log-normal_dis
 [Wikipedia](https://en.wikipedia.org/wiki/Log-normal_distribution)
 
 <details>
-  <summary>❓ Understanding <bold>mu</bold> and <bold>sigma</bold></summary>
+  <summary>
+    ❓ Understanding <bold>mu</bold> and <bold>sigma</bold>
+  </summary>
   <p>
-    The log of `lognormal(mu, sigma)` is a normal distribution with mean `mu` and standard deviation `sigma`. For example, these two distributions are identical:
+    The log of `lognormal(mu, sigma)` is a normal distribution with mean `mu`
+    and standard deviation `sigma`. For example, these two distributions are
+    identical:
   </p>
-<SquiggleEditor
-  initialSquiggleString={`normalMean = 10
+  <SquiggleEditor
+    initialSquiggleString={`normalMean = 10
 normalStdDev = 2
 logOfLognormal = log(lognormal(normalMean, normalStdDev))
 [logOfLognormal, normal(normalMean, normalStdDev)]`}
-/>
+  />
 </details>
 
 ## Uniform
 
 `uniform(low:number, high:number)`
 
-Creates a [uniform distribution](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) with the given low and high values.
+Creates a [uniform distribution](<https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)>) with the given low and high values.
+
 <SquiggleEditor initialSquiggleString="uniform(3,7)" />
 
 ### Arguments
@@ -194,16 +200,52 @@ Creates a [uniform distribution](https://en.wikipedia.org/wiki/Uniform_distribut
 
 <Admonition type="caution" title="Caution">
   <p>
-    While uniform distributions are very simple to understand, we find it rare to find uncertainties that actually look like this. Before using a uniform distribution, think hard about if you are really 100% confident that the paramater will not wind up being just outside the stated boundaries.
+    While uniform distributions are very simple to understand, we find it rare
+    to find uncertainties that actually look like this. Before using a uniform
+    distribution, think hard about if you are really 100% confident that the
+    paramater will not wind up being just outside the stated boundaries.
   </p>
-    
+
   <p>
-    One good example of a uniform distribution uncertainty would be clear physical limitations. You might have complete complete uncertainty on what time of day an event will occur, but can say with 100% confidence it will happen between the hours of 0:00 and 24:00. 
+    One good example of a uniform distribution uncertainty would be clear
+    physical limitations. You might have complete complete uncertainty on what
+    time of day an event will occur, but can say with 100% confidence it will
+    happen between the hours of 0:00 and 24:00.
   </p>
 </Admonition>
 
+## Delta
+
+`delta(value:number)`
+
+Creates a discrete distribution with all of its probability mass at point `value`.
+
+Numbers are often cast into delta distributions automatically. For example, in the function, 
+`mixture(1,2,normal(5,2))`, the first two arguments will get converted into delta distributions 
+with values at 1 and 2. Therefore, `mixture(1,2,normal(5,2))` is the same as `mixture(delta(1), delta(2),normal(5,2))`
+
+<Tabs>
+  <TabItem value="ex1" label="delta(3)" default>
+    <SquiggleEditor initialSquiggleString="delta(3)" />
+  </TabItem>
+  <TabItem value="ex3" label="mixture(1,3,5)">
+    <SquiggleEditor initialSquiggleString="mixture(1,3,5)" />
+  </TabItem>
+  <TabItem value="ex2" label="normal(5,2) * 6">
+    <SquiggleEditor initialSquiggleString="normal(5,2) * 6" />
+  </TabItem>
+  <TabItem value="ex4" label="normal(5,2) .* 6">
+    <SquiggleEditor initialSquiggleString="normal(5,2) .* 6" />
+  </TabItem>
+</Tabs>
+
+### Arguments
+
+- `value`: Number
+
 ## Beta
-``beta(alpha:number, beta:number)``  
+
+`beta(alpha:number, beta:number)`
 
 Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) with the given `alpha` and `beta` values. For a good summary of the beta distribution, see [this explanation](https://stats.stackexchange.com/a/47782) on Stack Overflow.
 
@@ -211,16 +253,16 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   <TabItem value="ex1" label="beta(10, 20)" default>
     <SquiggleEditor initialSquiggleString="beta(10,20)" />
   </TabItem>
-  <TabItem value="ex2" label="beta(1000, 1000)" >
+  <TabItem value="ex2" label="beta(1000, 1000)">
     <SquiggleEditor initialSquiggleString="beta(1000, 2000)" />
   </TabItem>
-  <TabItem value="ex3" label="beta(1, 10)" >
+  <TabItem value="ex3" label="beta(1, 10)">
     <SquiggleEditor initialSquiggleString="beta(1, 10)" />
   </TabItem>
-  <TabItem value="ex4" label="beta(10, 1)" >
+  <TabItem value="ex4" label="beta(10, 1)">
     <SquiggleEditor initialSquiggleString="beta(10, 1)" />
   </TabItem>
-  <TabItem value="ex5" label="beta(0.8, 0.8)" >
+  <TabItem value="ex5" label="beta(0.8, 0.8)">
     <SquiggleEditor initialSquiggleString="beta(0.8, 0.8)" />
   </TabItem>
 </Tabs>
@@ -232,47 +274,51 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
 
 <Admonition type="caution" title="Caution with small numbers">
   <p>
-    Squiggle struggles to show beta distributions when either alpha or beta are below 1.0. This is because the tails at ~0.0 and ~1.0 are very high. Using a log scale for the y-axis helps here.
+    Squiggle struggles to show beta distributions when either alpha or beta are
+    below 1.0. This is because the tails at ~0.0 and ~1.0 are very high. Using a
+    log scale for the y-axis helps here.
   </p>
-<details>
-  <summary>Examples</summary>
-<Tabs>
-  <TabItem value="ex1" label="beta(0.3, 0.3)" default>
-    <SquiggleEditor initialSquiggleString="beta(0.3, 0.3)" />
-  </TabItem>
-  <TabItem value="ex2" label="beta(0.5, 0.5)">
-    <SquiggleEditor initialSquiggleString="beta(0.5, 0.5)" />
-  </TabItem>
-  <TabItem value="ex3" label="beta(0.8, 0.8)">
-    <SquiggleEditor initialSquiggleString="beta(.8,.8)" />
-  </TabItem>
-  <TabItem value="ex4" label="beta(0.9, 0.9)">
-    <SquiggleEditor initialSquiggleString="beta(.9,.9)" />
-  </TabItem>
-</Tabs>
-</details>
+  <details>
+    <summary>Examples</summary>
+    <Tabs>
+      <TabItem value="ex1" label="beta(0.3, 0.3)" default>
+        <SquiggleEditor initialSquiggleString="beta(0.3, 0.3)" />
+      </TabItem>
+      <TabItem value="ex2" label="beta(0.5, 0.5)">
+        <SquiggleEditor initialSquiggleString="beta(0.5, 0.5)" />
+      </TabItem>
+      <TabItem value="ex3" label="beta(0.8, 0.8)">
+        <SquiggleEditor initialSquiggleString="beta(.8,.8)" />
+      </TabItem>
+      <TabItem value="ex4" label="beta(0.9, 0.9)">
+        <SquiggleEditor initialSquiggleString="beta(.9,.9)" />
+      </TabItem>
+    </Tabs>
+  </details>
 </Admonition>
 
 ## Exponential
 
-``exponential(rate:number)``
+`exponential(rate:number)`
 
 Creates an [exponential distribution](https://en.wikipedia.org/wiki/Exponential_distribution) with the given rate.
 
 <SquiggleEditor initialSquiggleString="exponential(4)" />
 
 ### Arguments
+
 - `rate`: Number greater than zero
 
 ## Triangular distribution
 
-``triangular(low:number, mode:number, high:number)``
+`triangular(low:number, mode:number, high:number)`
 
 Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_distribution) with the given low, mode, and high values.
 
 #### Validity
 
 ### Arguments
+
 - `low`: Number
 - `mode`: Number greater than `low`
 - `high`: Number greater than `mode`
@@ -281,11 +327,12 @@ Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_dis
 
 ## FromSamples
 
-``fromSamples(samples:number[])``
+`fromSamples(samples:number[])`
 
 Creates a sample set distribution using an array of samples.
 
 <SquiggleEditor initialSquiggleString="fromSamples([1,2,3,4,6,5,5,5])" />
 
 ### Arguments
+
 - `samples`: An array of at least 5 numbers.
