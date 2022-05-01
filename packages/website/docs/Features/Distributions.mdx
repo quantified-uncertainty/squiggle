@@ -26,7 +26,7 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
     lognormal distribution with 5th and 95th percentiles at 5 and 10.
     <SquiggleEditor initialSquiggleString="5 to 10" />
   </TabItem>
-  <TabItem value="ex3" label="to(5,10)" default>
+  <TabItem value="ex3" label="to(5,10)">
     `5 to 10` does the same thing as `to(5,10)`.
     <SquiggleEditor initialSquiggleString="to(5,10)" />
   </TabItem>
@@ -45,7 +45,7 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
 ### Arguments
 
 - `5thPercentile`: Float
-- `95thPercentile`: Float
+- `95thPercentile`: Float, greater than `5thPercentile`
 
 <Admonition type="tip" title="Tip">
   <p>
@@ -77,10 +77,10 @@ The `mixture` mixes combines multiple distributions to create a mixture. You can
   <TabItem value="ex1" label="Simple" default>
     <SquiggleEditor initialSquiggleString="mixture(1 to 2, 5 to 8, 9 to 10)" />
   </TabItem>
-  <TabItem value="ex2" label="With Weights" default>
+  <TabItem value="ex2" label="With Weights">
     <SquiggleEditor initialSquiggleString="mixture(1 to 2, 5 to 8, 9 to 10, [0.1, 0.1, 0.8])" />
   </TabItem>
-  <TabItem value="ex3" label="With Continuous and Discrete Inputs" default>
+  <TabItem value="ex3" label="With Continuous and Discrete Inputs">
     <SquiggleEditor initialSquiggleString="mixture(1 to 5, 8 to 10, 1, 3, 20)" />
   </TabItem>
 </Tabs>
@@ -137,11 +137,12 @@ mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_co
 
 `normal(mean:float, standardDeviation:float)`
 
+Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
 <Tabs>
   <TabItem value="ex1" label="normal(5,1)" default>
     <SquiggleEditor initialSquiggleString="normal(5, 1)" />
   </TabItem>
-  <TabItem value="ex2" label="normal(10m, 10m)" default>
+  <TabItem value="ex2" label="normal(100000000000, 100000000000)">
     <SquiggleEditor initialSquiggleString="normal(100000000000, 100000000000)" />
   </TabItem>
 </Tabs>
@@ -151,13 +152,13 @@ mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_co
 - `mean`: Float
 - `standard deviation`: Float greater than zero
 
-[Wikipedia entry](https://en.wikipedia.org/wiki/Normal_distribution)
+[Wikipedia](https://en.wikipedia.org/wiki/Normal_distribution)
 
 ## Log-normal
 
-The log of `lognormal(mu, sigma)` is a normal distribution with mean `mu` and standard deviation `sigma`.
+`lognormal(mu: float, sigma: float)`   
 
-`lognormal(mu: float, sigma: float)`
+Creates a [log-normal distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) with the given mu and sigma.
 
 <SquiggleEditor initialSquiggleString="lognormal(0, 0.7)" />
 
@@ -168,85 +169,124 @@ The log of `lognormal(mu, sigma)` is a normal distribution with mean `mu` and st
 
 [Wikipedia](https://en.wikipedia.org/wiki/Log-normal_distribution)
 
-An alternative format is also available. The `to` notation creates a lognormal
-distribution with a 90% confidence interval between the two numbers. We add
-this convenience as lognormal distributions are commonly used in practice.
+### Argument Alternatives
+`Mu` and `sigma` can be difficult to directly reason about. Because of this complexity, we recommend typically using the <a href="#to">to</a> syntax.
 
-<SquiggleEditor initialSquiggleString="2 to 10" />
-
-#### Future feature:
-
-Furthermore, it's also possible to create a lognormal from it's actual mean
-and standard deviation, using `lognormalFromMeanAndStdDev`.
-
-TODO: interpreter/parser doesn't provide this in current `develop` branch
-
-<SquiggleEditor initialSquiggleString="lognormalFromMeanAndStdDev(20, 10)" />
-
-#### Validity
-
-- `sigma > 0`
-- In `x to y` notation, `x < y`
+<details>
+  <summary>❓ Understanding <bold>mu</bold> and <bold>sigma</bold></summary>
+  <p>
+    The log of `lognormal(mu, sigma)` is a normal distribution with mean `mu` and standard deviation `sigma`. For example, these two distributions are identical:
+  </p>
+<SquiggleEditor
+  initialSquiggleString={`normalMean = 10
+normalStdDev = 2
+logOfLognormal = log(lognormal(normalMean, normalStdDev))
+[logOfLognormal, normal(normalMean, normalStdDev)]`}
+/>
+</details>
 
 ## Uniform
 
-`normal(low:float, high:float)`
+`uniform(low:float, high:float)`
 
-<Tabs>
-  <TabItem value="ex1" label="uniform(3,7)" default>
-    <SquiggleEditor initialSquiggleString="uniform(3,7)" />
-  </TabItem>
-  <TabItem value="ex2" label="invalid: uniform(7,5)" default>
-    <SquiggleEditor initialSquiggleString="uniform(7,5)" />
-  </TabItem>
-</Tabs>
+Creates a [uniform distribution](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) with the given low and high values.
+<SquiggleEditor initialSquiggleString="uniform(3,7)" />
 
 ### Arguments
 
 - `low`: Float
 - `high`: Float greater than `low`
 
+<Admonition type="caution" title="Caution">
+  <p>
+    While uniform distributions are very simple to understand, we find it rare to find uncertainties that actually look like this. Before using a uniform distribution, think hard about if you are really 100% confident that the paramater will not wind up being just outside the stated boundaries.
+  </p>
+    
+  <p>
+    One good example of a uniform distribution uncertainty would be clear physical limitations. You might have complete complete uncertainty on what time of day an event will occur, but can say with 100% confidence it will happen between the hours of 0:00 and 24:00. 
+  </p>
+</Admonition>
+
 ## Beta
+``beta(alpha:float, beta:float)``  
 
-The `beta(a, b)` function creates a beta distribution with parameters `a` and `b`:
+Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) with the given `alpha` and `beta` values. For a good summary of the beta distribution, see [this explanation](https://stats.stackexchange.com/a/47782) on Stack Overflow.
 
-<SquiggleEditor initialSquiggleString="beta(10, 20)" />
+<Tabs>
+  <TabItem value="ex1" label="beta(10, 20)" default>
+    <SquiggleEditor initialSquiggleString="beta(10,20)" />
+  </TabItem>
+  <TabItem value="ex2" label="beta(1000, 1000)" >
+    <SquiggleEditor initialSquiggleString="beta(1000, 2000)" />
+  </TabItem>
+  <TabItem value="ex3" label="beta(1, 10)" >
+    <SquiggleEditor initialSquiggleString="beta(1, 10)" />
+  </TabItem>
+  <TabItem value="ex4" label="beta(10, 1)" >
+    <SquiggleEditor initialSquiggleString="beta(10, 1)" />
+  </TabItem>
+  <TabItem value="ex5" label="beta(0.8, 0.8)" >
+    <SquiggleEditor initialSquiggleString="beta(0.8, 0.8)" />
+  </TabItem>
+</Tabs>
 
-#### Validity
+### Arguments
 
-- `a > 0`
-- `b > 0`
-- Empirically, we have noticed that numerical instability arises when `a < 1` or `b < 1`
+- `alpha`: Float greater than zero
+- `beta`: Float greater than zero
+
+<Admonition type="caution" title="Caution with small numbers">
+  <p>
+    Squiggle struggles to show beta distributions when either alpha or beta are below 1.0. This is because the tails at ~0.0 and ~1.0 are very high. Using a log scale for the y-axis helps here.
+  </p>
+<details>
+  <summary>Examples</summary>
+<Tabs>
+  <TabItem value="ex1" label="beta(0.3, 0.3)" default>
+    <SquiggleEditor initialSquiggleString="beta(0.3, 0.3)" />
+  </TabItem>
+  <TabItem value="ex2" label="beta(0.5, 0.5)">
+    <SquiggleEditor initialSquiggleString="beta(0.5, 0.5)" />
+  </TabItem>
+  <TabItem value="ex3" label="beta(0.8, 0.8)">
+    <SquiggleEditor initialSquiggleString="beta(.8,.8)" />
+  </TabItem>
+  <TabItem value="ex4" label="beta(0.9, 0.9)">
+    <SquiggleEditor initialSquiggleString="beta(.9,.9)" />
+  </TabItem>
+</Tabs>
+</details>
+</Admonition>
 
 ## Exponential
 
-The `exponential(rate)` function creates an exponential distribution with the given
-rate.
+``exponential(rate:float)``
 
-<SquiggleEditor initialSquiggleString="exponential(1.11)" />
+Creates an [exponential distribution](https://en.wikipedia.org/wiki/Exponential_distribution) with the given rate.
 
-#### Validity
+<SquiggleEditor initialSquiggleString="exponential(4)" />
 
-- `rate > 0`
+### Arguments
+- `rate`: Float greater than zero
 
 ## Triangular distribution
 
-The `triangular(a,b,c)` function creates a triangular distribution with lower
-bound `a`, mode `b` and upper bound `c`.
+``triangular(low:float, mode:float, high:float)``
+
+Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_distribution) with the given low, mode, and high values.
 
 #### Validity
 
-- `a < b < c`
+### Arguments
+- `low`: Float
+- `mode`: Float greater than `low`
+- `high`: Float greater than `mode`
 
 <SquiggleEditor initialSquiggleString="triangular(1, 2, 4)" />
 
-### Scalar (constant dist)
+## FromSamples
 
-Squiggle, when the context is right, automatically casts a float to a constant distribution.
-
-## `fromSamples`
-
-The last distribution constructor takes an array of samples and constructs a sample set distribution.
+Creates a sample set distribution using an array of samples.
 
 <SquiggleEditor initialSquiggleString="fromSamples([1,2,3,4,6,5,5,5])" />
 
