@@ -1,5 +1,5 @@
 ---
-title: "Creating Distributions"
+title: "Distribution Creation"
 sidebar_position: 8
 ---
 
@@ -13,8 +13,8 @@ import TabItem from "@theme/TabItem";
 
 ## To
 
-`(5thPercentile: float) to (95thPercentile: float)`  
-`to(5thPercentile: float, 95thPercentile: float)`
+`(5thPercentile: number) to (95thPercentile: number)`  
+`to(5thPercentile: number, 95thPercentile: number)`
 
 The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
 
@@ -44,8 +44,8 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
 
 ### Arguments
 
-- `5thPercentile`: Float
-- `95thPercentile`: Float, greater than `5thPercentile`
+- `5thPercentile`: number
+- `95thPercentile`: number, greater than `5thPercentile`
 
 <Admonition type="tip" title="Tip">
   <p>
@@ -68,8 +68,8 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
 
 ## Mixture
 
-`mixture(...distributions: Distribution[], weights?: float[])`  
-`mx(...distributions: Distribution[], weights?: float[])`
+`mixture(...distributions: Distribution[], weights?: number[])`  
+`mx(...distributions: Distribution[], weights?: number[])`
 
 The `mixture` mixes combines multiple distributions to create a mixture. You can optionally pass in a list of proportional weights.
 
@@ -87,8 +87,8 @@ The `mixture` mixes combines multiple distributions to create a mixture. You can
 
 ### Arguments
 
-- `distributions`: A set of distributions or floats, each passed as a paramater. Floats will be converted into Delta distributions.
-- `weights`: An optional array of floats, each representing the weight of its corresponding distribution. The weights will be re-scaled to add to `1.0`. If a weights array is provided, it must be the same length as the distribution paramaters.
+- `distributions`: A set of distributions or numbers, each passed as a paramater. Numbers will be converted into Delta distributions.
+- `weights`: An optional array of numbers, each representing the weight of its corresponding distribution. The weights will be re-scaled to add to `1.0`. If a weights array is provided, it must be the same length as the distribution paramaters.
 
 ### Aliases
 
@@ -100,7 +100,7 @@ The `mixture` mixes combines multiple distributions to create a mixture. You can
   <summary>🕐 Zero or Continuous</summary>
   <p>
     One common reason to have mixtures of continous and discrete distributions is to handle the special case of 0.
-    Say I want to model the time I will spend on some upcoming assignment. I think I have an 80% chance of doing it.
+    Say I want to model the time I will spend on some upcoming project. I think I have an 80% chance of doing it.
   </p>
 
   <p>
@@ -120,10 +120,6 @@ mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doin
   "just-in-case distribution". This latter distribution would have very low weight, but would be
   very wide, just in case they were dramatically off for some weird reason.
   </p>
-  <p>
-  One common reason to have mixtures of continous and discrete distributions is to handle the special case of 0.
-  Say I want to model the time I will spend on some upcoming assignment. I think I have an 80% chance of doing it.
-  </p>
 <SquiggleEditor
   initialSquiggleString={`forecast = 3 to 30
 chance_completely_wrong = 0.05
@@ -135,7 +131,7 @@ mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_co
 
 ## Normal
 
-`normal(mean:float, standardDeviation:float)`
+`normal(mean:number, standardDeviation:number)`
 
 Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
 <Tabs>
@@ -149,28 +145,27 @@ Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distributio
 
 ### Arguments
 
-- `mean`: Float
-- `standard deviation`: Float greater than zero
+- `mean`: Number
+- `standard deviation`: Number greater than zero
 
 [Wikipedia](https://en.wikipedia.org/wiki/Normal_distribution)
 
 ## Log-normal
 
-`lognormal(mu: float, sigma: float)`   
+`lognormal(mu: number, sigma: number)`   
 
 Creates a [log-normal distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) with the given mu and sigma.
+
+`Mu` and `sigma` can be difficult to directly reason about. Because of this complexity, we recommend typically using the <a href="#to">to</a> syntax instead of estimating `mu` and `sigma` directly.
 
 <SquiggleEditor initialSquiggleString="lognormal(0, 0.7)" />
 
 ### Arguments
 
-- `mu`: Float
-- `sigma`: Float greater than zero
+- `mu`: Number
+- `sigma`: Number greater than zero
 
 [Wikipedia](https://en.wikipedia.org/wiki/Log-normal_distribution)
-
-### Argument Alternatives
-`Mu` and `sigma` can be difficult to directly reason about. Because of this complexity, we recommend typically using the <a href="#to">to</a> syntax.
 
 <details>
   <summary>❓ Understanding <bold>mu</bold> and <bold>sigma</bold></summary>
@@ -187,15 +182,15 @@ logOfLognormal = log(lognormal(normalMean, normalStdDev))
 
 ## Uniform
 
-`uniform(low:float, high:float)`
+`uniform(low:number, high:number)`
 
 Creates a [uniform distribution](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) with the given low and high values.
 <SquiggleEditor initialSquiggleString="uniform(3,7)" />
 
 ### Arguments
 
-- `low`: Float
-- `high`: Float greater than `low`
+- `low`: Number
+- `high`: Number greater than `low`
 
 <Admonition type="caution" title="Caution">
   <p>
@@ -208,7 +203,7 @@ Creates a [uniform distribution](https://en.wikipedia.org/wiki/Uniform_distribut
 </Admonition>
 
 ## Beta
-``beta(alpha:float, beta:float)``  
+``beta(alpha:number, beta:number)``  
 
 Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) with the given `alpha` and `beta` values. For a good summary of the beta distribution, see [this explanation](https://stats.stackexchange.com/a/47782) on Stack Overflow.
 
@@ -232,8 +227,8 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
 
 ### Arguments
 
-- `alpha`: Float greater than zero
-- `beta`: Float greater than zero
+- `alpha`: Number greater than zero
+- `beta`: Number greater than zero
 
 <Admonition type="caution" title="Caution with small numbers">
   <p>
@@ -260,39 +255,37 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
 
 ## Exponential
 
-``exponential(rate:float)``
+``exponential(rate:number)``
 
 Creates an [exponential distribution](https://en.wikipedia.org/wiki/Exponential_distribution) with the given rate.
 
 <SquiggleEditor initialSquiggleString="exponential(4)" />
 
 ### Arguments
-- `rate`: Float greater than zero
+- `rate`: Number greater than zero
 
 ## Triangular distribution
 
-``triangular(low:float, mode:float, high:float)``
+``triangular(low:number, mode:number, high:number)``
 
 Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_distribution) with the given low, mode, and high values.
 
 #### Validity
 
 ### Arguments
-- `low`: Float
-- `mode`: Float greater than `low`
-- `high`: Float greater than `mode`
+- `low`: Number
+- `mode`: Number greater than `low`
+- `high`: Number greater than `mode`
 
 <SquiggleEditor initialSquiggleString="triangular(1, 2, 4)" />
 
 ## FromSamples
 
+``fromSamples(samples:number[])``
+
 Creates a sample set distribution using an array of samples.
 
 <SquiggleEditor initialSquiggleString="fromSamples([1,2,3,4,6,5,5,5])" />
 
-#### Validity
-
-For `fromSamples(xs)`,
-
-- `xs.length > 5`
-- Strictly every element of `xs` must be a number.
+### Arguments
+- `samples`: An array of at least 5 numbers.
