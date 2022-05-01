@@ -113,31 +113,6 @@ For `fromSamples(xs)`,
 
 Here are the ways we combine distributions.
 
-### Mixture of distributions
-
-The `mixture` function combines 2 or more other distributions to create a weighted
-combination of the two. The first positional arguments represent the distributions
-to be combined, and the last argument is how much to weigh every distribution in the
-combination.
-
-<SquiggleEditor initialSquiggleString="mixture(uniform(0,1), normal(1,1), [0.5, 0.5])" />
-
-It's possible to create discrete distributions using this method.
-
-<SquiggleEditor initialSquiggleString="mixture(0, 1, [0.2,0.8])" />
-
-As well as mixed distributions:
-
-<SquiggleEditor initialSquiggleString="mixture(3, 8, 1 to 10, [0.2, 0.3, 0.5])" />
-
-An alias of `mixture` is `mx`
-
-#### Validity
-
-Using javascript's variable arguments notation, consider `mx(...dists, weights)`:
-
-- `dists.length == weights.length`
-
 ### Addition
 
 A horizontal right shift
