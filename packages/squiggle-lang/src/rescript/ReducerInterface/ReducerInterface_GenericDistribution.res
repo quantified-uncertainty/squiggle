@@ -179,10 +179,12 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
 > => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("exponential" as fnName, [EvNumber(f1)]) =>
+  | ("exponential" as fnName, [EvNumber(f)]) =>
     SymbolicConstructors.oneFloat(fnName)
-    ->E.R.bind(r => r(f1))
+    ->E.R.bind(r => r(f))
     ->SymbolicConstructors.symbolicResultToOutput
+  | ("delta", [EvNumber(f)]) =>
+    SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | (
       ("normal" | "uniform" | "beta" | "lognormal" | "cauchy" | "to") as fnName,
       [EvNumber(f1), EvNumber(f2)],

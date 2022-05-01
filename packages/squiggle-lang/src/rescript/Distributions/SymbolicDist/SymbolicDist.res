@@ -219,6 +219,12 @@ module Uniform = {
 module Float = {
   type t = float
   let make = t => #Float(t)
+  let makeSafe = t =>
+    if E.Float.isFinite(t) {
+      Ok(#Float(t))
+    } else {
+      Error("Float must be finite")
+    }
   let pdf = (x, t: t) => x == t ? 1.0 : 0.0
   let cdf = (x, t: t) => x >= t ? 1.0 : 0.0
   let inv = (p, t: t) => p < t ? 0.0 : 1.0
