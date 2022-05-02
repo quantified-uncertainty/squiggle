@@ -130,6 +130,7 @@ module Helpers = {
         | Error(err) => GenDistError(ArgumentError(err))
         }
       }
+    | Some(EvNumber(_))
     | Some(EvDistribution(_)) =>
       switch parseDistributionArray(args) {
       | Ok(distributions) => mixtureWithDefaultWeights(distributions)
@@ -194,6 +195,7 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
     ->SymbolicConstructors.symbolicResultToOutput
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist)
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist)
+  | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist)
   | ("toSparkline", [EvDistribution(dist)]) => Helpers.toStringFn(ToSparkline(20), dist)
   | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
@@ -209,6 +211,15 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
+  | ("scaleLog", [EvDistribution(dist)]) =>
+    Helpers.toDistFn(Scale(#Logarithm, MagicNumbers.Math.e), dist)
+  | ("scaleLog10", [EvDistribution(dist)]) => Helpers.toDistFn(Scale(#Logarithm, 10.0), dist)
+  | ("scaleLog", [EvDistribution(dist), EvNumber(float)]) =>
+    Helpers.toDistFn(Scale(#Logarithm, float), dist)
+  | ("scalePow", [EvDistribution(dist), EvNumber(float)]) =>
+    Helpers.toDistFn(Scale(#Power, float), dist)
+  | ("scaleExp", [EvDistribution(dist)]) =>
+    Helpers.toDistFn(Scale(#Power, MagicNumbers.Math.e), dist)
   | ("cdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist)
   | ("pdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Pdf(float), dist)
   | ("inv", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist)
@@ -216,6 +227,14 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist)
   | ("toSampleSet", [EvDistribution(dist)]) =>
     Helpers.toDistFn(ToSampleSet(MagicNumbers.Environment.defaultSampleCount), dist)
+  | ("fromSamples", [EvArray(inputArray)]) => {
+      let _wrapInputErrors = x => SampleSetDist.NonNumericInput(x)
+      let parsedArray = Helpers.parseNumberArray(inputArray)->E.R2.errMap(_wrapInputErrors)
+      switch parsedArray {
+      | Ok(array) => runGenericOperation(FromSamples(array))
+      | Error(e) => GenDistError(SampleSetError(e))
+      }->Some
+    }
   | ("inspect", [EvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist)
   | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Truncate(Some(float), None), dist)

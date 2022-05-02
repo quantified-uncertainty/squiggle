@@ -26,10 +26,10 @@ let eFunction = (fName: string, lispArgs: list<expression>): expression => {
 }
 
 let eLambda = (parameters: array<string>, context, expr) =>
-  BExpressionValue.EvLambda(
-    parameters,
-    context,
-    expr->castExpressionToInternalCode,
+  BExpressionValue.EvLambda({
+    parameters: parameters,
+    context: context,
+    body: expr->castExpressionToInternalCode}
   )->BExpressionT.EValue
 
 let eNumber = aNumber => aNumber->BExpressionValue.EvNumber->BExpressionT.EValue

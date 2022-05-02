@@ -132,7 +132,8 @@ describe("parse on distribution functions", () => {
     testParse(
       ~skip=true,
       "normal(5,2) .- normal(5,1)",
-      "Ok((:$$block (:dotPow (:normal 5 2) (:normal 5 1))))",
+      "Ok((:$$block (:dotSubtract (:normal 5 2) (:normal 5 1))))",
+      // TODO: !!! returns "Ok((:$$block (:dotPow (:normal 5 2) (:normal 5 1))))"
     )
     testParse(
       "normal(5,2) .* normal(5,1)",
