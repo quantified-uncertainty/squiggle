@@ -166,7 +166,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   let [expression, setExpression] = React.useState(initialSquiggleString);
   let [error, setError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
+  let runSquiggleAndUpdateBindings = () => {
     let squiggleResult = runPartial(
       expression,
       bindings,
@@ -179,7 +179,9 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
     } else {
       setError(errorValueToString(squiggleResult.value));
     }
-  }, [expression]);
+  };
+
+  React.useEffect(runSquiggleAndUpdateBindings, [expression]);
 
   return (
     <div>
