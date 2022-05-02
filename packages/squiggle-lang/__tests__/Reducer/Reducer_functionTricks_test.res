@@ -38,7 +38,7 @@ describe("symbol not defined", () => {
   testEvalToBe("f(x)=x(1); f(2)", "Error(2 is not a function)")
 })
 
-Only.describe("call and bindings", () => {
+describe("call and bindings", () => {
   testEvalToBe("f(x)=x+1", "Ok({f: lambda(x=>internal code)})")
   testEvalToBe("f(x)=x+1; f(1)", "Ok(2)")
   testEvalToBe("f=1;y=2", "Ok({f: 1,y: 2})")
@@ -62,9 +62,11 @@ Only.describe("call and bindings", () => {
   testEvalToBe("f(x)=x+1; g(x)=f(x)+1; g(2)", "Ok(4)")
 })
 
-Skip.describe("function trics", () => {
-  MySkip.testParseToBe("f(x)=f(y)=2; f(2)", "????") // TODO: No multiple assignment
-  MySkip.testEvalToBe("f(x)=f(y)=2; f(2)", "????") // TODO: No multiple assignment
-  MySkip.testEvalToBe("y=2;g(x)=y+1;g(2)", "????") //TODO : y is not found
-  MySkip.testEvalToBe("y=2;g(x)=inspect(y)+1", "????") //TODO : 666
+describe("function trics", () => {
+  testParseToBe(
+      "f(x)=f(y)=2; f(2)", 
+      "Ok((:$$block (:$$block (:$let :f (:$$lambda [x] (:$$block (:$let :f (:$$lambda [y] (:$$block 2)))))) (:f 2))))") 
+  testEvalToBe("f(x)=f(y)=2; f(2)","Ok({f: lambda(y=>internal code),x: 2})") 
+  testEvalToBe("y=2;g(x)=y+1;g(2)", "Ok(3)") 
+  testEvalToBe("y=2;g(x)=inspect(y)+1", "Ok({g: lambda(x=>internal code),y: 2})") 
 })
