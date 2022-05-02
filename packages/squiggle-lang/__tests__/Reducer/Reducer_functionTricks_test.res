@@ -70,5 +70,5 @@ describe("function trics", () => {
   testEvalToBe("f(x)=f(y)=2; f(2)", "Ok({f: lambda(y=>internal code),x: 2})")
   testEvalToBe("y=2;g(x)=y+1;g(2)", "Ok(3)")
   testEvalToBe("y=2;g(x)=inspect(y)+1", "Ok({g: lambda(x=>internal code),y: 2})")
-  //testEvalToBe("f(x) = x(x); f(f)", "????") // TODO: Infinite loop. Any solution? Catching proper exception or timeout?
+  MySkip.testEvalToBe("f(x) = x(x); f(f)", "????") // TODO: Infinite loop. Any solution? Catching proper exception or timeout?
 })
