@@ -67,6 +67,8 @@ export interface SquiggleItemProps {
   height: number;
   /** Whether to show type information */
   showTypes?: boolean;
+  /** Whether to show users graph controls (scale etc) */
+  showControls?: boolean;
 }
 
 const SquiggleItem: React.FC<SquiggleItemProps> = ({
@@ -74,6 +76,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
   width,
   height,
   showTypes = false,
+  showControls = false,
 }: SquiggleItemProps) => {
   switch (expression.tag) {
     case "number":
@@ -100,6 +103,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
             distribution={expression.value}
             height={height}
             width={width}
+            showControls={showControls}
           />
         </VariableBox>
       );
@@ -185,6 +189,8 @@ export interface SquiggleChartProps {
   jsImports?: jsImports;
   /** Whether to show type information about returns, default false */
   showTypes?: boolean;
+  /** Whether to show graph controls (scale etc)*/
+  showControls?: boolean;
 }
 
 const ChartWrapper = styled.div`
@@ -203,6 +209,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   jsImports = defaultImports,
   width,
   showTypes = false,
+  showControls = false,
 }: SquiggleChartProps) => {
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
@@ -224,6 +231,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
         width={width}
         height={height}
         showTypes={showTypes}
+        showControls={showControls}
       />
     );
   } else {
