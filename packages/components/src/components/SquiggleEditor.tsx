@@ -166,10 +166,9 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   let [expression, setExpression] = React.useState(initialSquiggleString);
   let [error, setError] = React.useState<string | null>(null);
 
-  // Runs squiggle and updates state/calls props apprropriately
-  let runSquiggle = (newExpression: string) => {
+  React.useEffect(() => {
     let squiggleResult = runPartial(
-      newExpression,
+      expression,
       bindings,
       samplingInputs,
       jsImports
@@ -180,21 +179,14 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
     } else {
       setError(errorValueToString(squiggleResult.value));
     }
-  };
-
-  // Run this once on mount, so that the next cells can get relevent values
-  React.useEffect(() => runSquiggle(expression), []);
+  }, [expression]);
 
   return (
     <div>
       <Input>
         <CodeEditor
           value={expression}
-          onChange={(x) => {
-            // When the code changes, rerun squiggle and inform next cells
-            setExpression(x);
-            runSquiggle(x);
-          }}
+          onChange={setExpression}
           oneLine={true}
           showGutter={false}
           height={20}
