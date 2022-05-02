@@ -18,27 +18,45 @@ type DistributionChartProps = {
   distribution: Distribution;
   width?: number;
   height: number;
+  /** Whether to show the user graph controls (scale etc) */
+  showControls?: boolean;
 };
 
 export const DistributionChart: React.FC<DistributionChartProps> = ({
   distribution,
   height,
   width,
+  showControls = false,
 }: DistributionChartProps) => {
   let [isLogX, setLogX] = React.useState(false);
   let [isExpY, setExpY] = React.useState(false);
   let shape = distribution.pointSet();
   const [sized, _] = useSize((size) => {
-    var disableLog = false;
     if (shape.tag === "Ok") {
       let massBelow0 =
         shape.value.continuous.some((x) => x.x <= 0) ||
         shape.value.discrete.some((x) => x.x <= 0);
-      if (massBelow0) {
-        disableLog = true;
-      }
       let spec = buildVegaSpec(isLogX, isExpY);
       let widthProp = width ? width - 20 : size.width - 10;
+
+      // Check whether we should disable the checkbox
+      var logCheckbox = (
+        <CheckBox label="Log X scale" value={isLogX} onChange={setLogX} />
+      );
+      if (massBelow0) {
+        logCheckbox = (
+          <CheckBox
+            label="Log X scale"
+            value={isLogX}
+            onChange={setLogX}
+            disabled={true}
+            tooltip={
+              "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values."
+            }
+          />
+        );
+      }
+
       var result = (
         <div>
           <Vega
@@ -48,6 +66,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
             height={height}
             actions={false}
           />
+          {showControls && (
+            <div>
+              {logCheckbox}
+              <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
+            </div>
+          )}
         </div>
       );
     } else {
@@ -57,27 +81,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
         </ErrorBox>
       );
     }
-    return (
-      <>
-        {result}
-        <div>
-          {disableLog ? (
-            <CheckBox
-              label="Log X scale"
-              value={isLogX}
-              onChange={setLogX}
-              disabled={true}
-              tooltip={
-                "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values."
-              }
-            />
-          ) : (
-            <CheckBox label="Log X scale" value={isLogX} onChange={setLogX} />
-          )}
-          <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
-        </div>
-      </>
-    );
+
+    return result;
   });
   return sized;
 };

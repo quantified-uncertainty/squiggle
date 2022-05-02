@@ -42,6 +42,8 @@ export interface SquiggleEditorProps {
   jsImports?: jsImports;
   /** Whether to show detail about types of the returns, default false */
   showTypes?: boolean;
+  /** Whether to give users access to graph controls */
+  showControls: boolean;
 }
 
 const Input = styled.div`
@@ -64,6 +66,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   bindings = defaultBindings,
   jsImports = defaultImports,
   showTypes = false,
+  showControls = false,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
@@ -91,6 +94,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         bindings={bindings}
         jsImports={jsImports}
         showTypes={showTypes}
+        showControls={showControls}
       />
     </div>
   );
@@ -149,6 +153,8 @@ export interface SquigglePartialProps {
   bindings?: bindings;
   /** Variables imported from js */
   jsImports?: jsImports;
+  /** Whether to give users access to graph controls */
+  showControls?: boolean;
 }
 
 export let SquigglePartial: React.FC<SquigglePartialProps> = ({
