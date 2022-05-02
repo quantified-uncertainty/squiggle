@@ -63,7 +63,7 @@ let RecordKeyHeader = styled.h3``;
 export interface SquiggleItemProps {
   /** The input string for squiggle */
   expression: squiggleExpression;
-  width: number;
+  width?: number;
   height: number;
   /** Whether to show type information */
   showTypes?: boolean;
@@ -133,7 +133,11 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox heading="Array" showTypes={showTypes}>
           {expression.value.map((r) => (
-            <SquiggleItem expression={r} width={width - 20} height={50} />
+            <SquiggleItem
+              expression={r}
+              width={width !== undefined ? width - 20 : width}
+              height={50}
+            />
           ))}
         </VariableBox>
       );
@@ -143,7 +147,11 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           {Object.entries(expression.value).map(([key, r]) => (
             <>
               <RecordKeyHeader>{key}</RecordKeyHeader>
-              <SquiggleItem expression={r} width={width - 20} height={50} />
+              <SquiggleItem
+                expression={r}
+                width={width !== undefined ? width - 20 : width}
+                height={50}
+              />
             </>
           ))}
         </VariableBox>
@@ -193,7 +201,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   height = 60,
   bindings = defaultBindings,
   jsImports = defaultImports,
-  width = NaN,
+  width,
   showTypes = false,
 }: SquiggleChartProps) => {
   let samplingInputs: samplingParams = {

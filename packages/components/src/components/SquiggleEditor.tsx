@@ -52,7 +52,7 @@ const Input = styled.div`
 
 export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   initialSquiggleString = "",
-  width = 500,
+  width,
   sampleCount,
   outputXYPoints,
   kernelWidth,
