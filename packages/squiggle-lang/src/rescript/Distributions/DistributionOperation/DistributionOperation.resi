@@ -85,6 +85,10 @@ module Constructors: {
   @genType
   let algebraicPower: (~env: env, genericDist, genericDist) => result<genericDist, error>
   @genType
+  let scaleLogarithm: (~env: env, genericDist, float) => result<genericDist, error>
+  @genType
+  let scalePower: (~env: env, genericDist, float) => result<genericDist, error>
+  @genType
   let pointwiseAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>
   @genType
   let pointwiseMultiply: (~env: env, genericDist, genericDist) => result<genericDist, error>

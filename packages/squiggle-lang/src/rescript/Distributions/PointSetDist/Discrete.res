@@ -38,11 +38,11 @@ let combinePointwise = (
   t1: PointSetTypes.discreteShape,
   t2: PointSetTypes.discreteShape,
 ): result<PointSetTypes.discreteShape, 'e> => {
-  let combinedIntegralSum = Common.combineIntegralSums(
-    integralSumCachesFn,
-    t1.integralSumCache,
-    t2.integralSumCache,
-  )
+  //  let combinedIntegralSum = Common.combineIntegralSums(
+  //    integralSumCachesFn,
+  //    t1.integralSumCache,
+  //    t2.integralSumCache,
+  //  )
 
   // TODO: does it ever make sense to pointwise combine the integrals here?
   // It could be done for pointwise additions, but is that ever needed?

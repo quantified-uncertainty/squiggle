@@ -60,3 +60,19 @@ let cauchyMake = SymbolicDist.Cauchy.make
 let lognormalMake = SymbolicDist.Lognormal.make
 let triangularMake = SymbolicDist.Triangular.make
 let floatMake = SymbolicDist.Float.make
+
+let normalMakeR = (mean, stdev) =>
+  E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Normal.make(mean, stdev))
+let betaMakeR = (alpha, beta) =>
+  E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Beta.make(alpha, beta))
+let exponentialMakeR = rate =>
+  E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Exponential.make(rate))
+let uniformMakeR = (low, high) =>
+  E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Uniform.make(low, high))
+let cauchyMakeR = (local, rate) =>
+  E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Cauchy.make(local, rate))
+let lognormalMakeR = (mu, sigma) =>
+  E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Lognormal.make(mu, sigma))
+let triangularMakeR = (low, mode, high) =>
+  E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Triangular.make(low, mode, high))
+// let floatMakeR = x =>E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Float.make(x))

@@ -52,6 +52,7 @@ module Convolution = {
 type operationError =
   | DivisionByZeroError
   | ComplexNumberError
+  | InfinityError
 
 @genType
 module Error = {
@@ -62,6 +63,7 @@ module Error = {
     switch err {
     | DivisionByZeroError => "Cannot divide by zero"
     | ComplexNumberError => "Operation returned complex result"
+    | InfinityError => "Operation returned + or - infinity"
     }
 }
 
@@ -86,6 +88,8 @@ let logarithm = (a: float, b: float): result<float, Error.t> =>
     Ok(0.)
   } else if a > 0.0 && b > 0.0 {
     Ok(log(a) /. log(b))
+  } else if a == 0.0 {
+    Error(InfinityError)
   } else {
     Error(ComplexNumberError)
   }
@@ -150,7 +154,12 @@ module Scale = {
     | #Multiply => Ok(a *. b)
     | #Divide => divide(a, b)
     | #Power => power(a, b)
-    | #Logarithm => logarithm(a, b)
+    | #Logarithm =>
+      if a < MagicNumbers.Epsilon.seven {
+        Ok(0.0)
+      } else {
+        logarithm(a, b)
+      }
     }
 
   let format = (operation: t, value, scaleBy) =>

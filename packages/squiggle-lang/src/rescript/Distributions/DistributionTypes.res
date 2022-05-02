@@ -117,6 +117,7 @@ module DistributionOperation = {
     | ToFloat(#Mean) => `mean`
     | ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
     | ToFloat(#Sample) => `sample`
+    | ToFloat(#IntegralSum) => `integralSum`
     | ToScore(LogScore(_)) => `logScore`
     | ToDist(Normalize) => `normalize`
     | ToDist(ToPointSet) => `toPointSet`
