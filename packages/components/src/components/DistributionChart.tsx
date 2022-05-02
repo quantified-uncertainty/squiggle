@@ -24,9 +24,9 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   height,
   width,
 }: DistributionChartProps) => {
+  let [isLogX, setLogX] = React.useState(false);
+  let [isExpY, setExpY] = React.useState(false);
   const [sized, _] = useSize((size) => {
-    let [isLogX, setLogX] = React.useState(false);
-    let [isExpY, setExpY] = React.useState(false);
     let shape = distribution.pointSet();
     if (shape.tag === "Ok") {
       let spec = buildSpec(isLogX, isExpY, shape.value);
