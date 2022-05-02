@@ -11,6 +11,7 @@ export {
   makeSampleSetDist,
   errorValueToString,
   distributionErrorToString,
+  distributionError,
 } from "../rescript/TypescriptInterface.gen";
 export type {
   samplingParams,
@@ -26,9 +27,9 @@ import {
   convertRawToTypescript,
 } from "./rescript_interop";
 import { result, resultMap, tag, tagged } from "./types";
-import { Distribution } from "./distribution";
+import { Distribution, shape } from "./distribution";
 
-export { Distribution, squiggleExpression, result, resultMap };
+export { Distribution, squiggleExpression, result, resultMap, shape };
 
 export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
