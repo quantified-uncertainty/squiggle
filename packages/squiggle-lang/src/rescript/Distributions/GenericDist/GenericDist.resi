@@ -20,7 +20,7 @@ let isNormalized: t => bool
 let toFloatOperation: (
   t,
   ~toPointSetFn: toPointSetFn,
-  ~distToFloatOperation: Operation.distToFloatOperation,
+  ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
 ) => result<float, error>
 
 let logScore: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>

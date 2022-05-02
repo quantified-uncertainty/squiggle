@@ -1,23 +1,5 @@
-import {
-  run,
-  Distribution,
-  resultMap,
-  squiggleExpression,
-  errorValueToString,
-} from "../../src/js/index";
-
-let testRun = (x: string): squiggleExpression => {
-  let result = run(x, { sampleCount: 100, xyPointLength: 100 });
-  expect(result.tag).toEqual("Ok");
-  if (result.tag === "Ok") {
-    return result.value;
-  } else {
-    throw Error(
-      "Expected squiggle expression to evaluate but got error: " +
-        errorValueToString(result.value)
-    );
-  }
-};
+import { Distribution, resultMap, defaultBindings } from "../../src/js/index";
+import { testRun, testRunPartial } from "./TestHelpers";
 
 function Ok<b>(x: b) {
   return { tag: "Ok", value: x };
@@ -39,6 +21,72 @@ describe("Log function", () => {
   test("log(1) = 0", () => {
     let foo = testRun("log(1)");
     expect(foo).toEqual({ tag: "number", value: 0 });
+  });
+});
+
+describe("Array", () => {
+  test("nested Array", () => {
+    expect(testRun("[[1]]")).toEqual({
+      tag: "array",
+      value: [
+        {
+          tag: "array",
+          value: [
+            {
+              tag: "number",
+              value: 1,
+            },
+          ],
+        },
+      ],
+    });
+  });
+});
+
+describe("Record", () => {
+  test("Return record", () => {
+    expect(testRun("{a: 1}")).toEqual({
+      tag: "record",
+      value: {
+        a: {
+          tag: "number",
+          value: 1,
+        },
+      },
+    });
+  });
+});
+
+describe("Partials", () => {
+  test("Can pass variables between partials and cells", () => {
+    let bindings = testRunPartial(`x = 5`);
+    let bindings2 = testRunPartial(`y = x + 2`, bindings);
+    expect(testRun(`y + 3`, bindings2)).toEqual({
+      tag: "number",
+      value: 10,
+    });
+  });
+});
+
+describe("JS Imports", () => {
+  test("Can pass parameters into partials and cells", () => {
+    let bindings = testRunPartial(`y = $x + 2`, defaultBindings, { x: 1 });
+    let bindings2 = testRunPartial(`z = y + $a`, bindings, { a: 3 });
+    expect(testRun(`z`, bindings2)).toEqual({
+      tag: "number",
+      value: 6,
+    });
+  });
+  test("Complicated deep parameters", () => {
+    expect(
+      testRun(`$x.y[0][0].w + $x.z + $u.v`, defaultBindings, {
+        x: { y: [[{ w: 1 }]], z: 2 },
+        u: { v: 3 },
+      })
+    ).toEqual({
+      tag: "number",
+      value: 6,
+    });
   });
 });
 

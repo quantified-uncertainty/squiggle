@@ -158,6 +158,16 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
       ->E.R2.fmap(r => Dist(PointSet(r)))
       ->OutputLocal.fromResult
+    | ToDist(Scale(#Logarithm, f)) =>
+      dist
+      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
+      ->E.R2.fmap(r => Dist(r))
+      ->OutputLocal.fromResult
+    | ToDist(Scale(#Power, f)) =>
+      dist
+      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Power, ~f)
+      ->E.R2.fmap(r => Dist(r))
+      ->OutputLocal.fromResult
     | ToDistCombination(Algebraic(_), _, #Float(_)) => GenDistError(NotYetImplemented)
     | ToDistCombination(Algebraic(strategy), arithmeticOperation, #Dist(t2)) =>
       dist
@@ -192,6 +202,12 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
     dists
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd)
     ->E.R2.fmap(r => Dist(r))
+    ->OutputLocal.fromResult
+  | FromSamples(xs) =>
+    xs
+    ->SampleSetDist.make
+    ->E.R2.errMap(x => DistributionTypes.SampleSetError(x))
+    ->E.R2.fmap(x => x->DistributionTypes.SampleSet->Dist)
     ->OutputLocal.fromResult
   }
 }
@@ -234,6 +250,7 @@ module Constructors = {
   let logScore = (~env, dist1, dist2) => C.logScore(dist1, dist2)->run(~env)->toFloatR
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
+  let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR
   let truncate = (~env, dist, leftCutoff, rightCutoff) =>
     C.truncate(dist, leftCutoff, rightCutoff)->run(~env)->toDistR
   let inspect = (~env, dist) => C.inspect(dist)->run(~env)->toDistR

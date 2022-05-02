@@ -350,3 +350,43 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
     integralCache: None,
   }
 }
+
+let combinePointwise = (
+  ~integralSumCachesFn=(_, _) => None,
+  ~integralCachesFn=(_, _) => None,
+  fn: (float, float) => result<float, 'e>,
+  t1: t,
+  t2: t,
+): result<t, 'e> => {
+  let reducedDiscrete =
+    [t1, t2]
+    |> E.A.fmap(toDiscrete)
+    |> E.A.O.concatSomes
+    |> Discrete.reduce(~integralSumCachesFn, fn)
+
+  let reducedContinuous =
+    [t1, t2]
+    |> E.A.fmap(toContinuous)
+    |> E.A.O.concatSomes
+    |> Continuous.reduce(~integralSumCachesFn, fn)
+
+  let combinedIntegralSum = Common.combineIntegralSums(
+    integralSumCachesFn,
+    t1.integralSumCache,
+    t2.integralSumCache,
+  )
+
+  let combinedIntegral = Common.combineIntegrals(
+    integralCachesFn,
+    t1.integralCache,
+    t2.integralCache,
+  )
+  E.R.merge(reducedContinuous, reducedDiscrete)->E.R2.fmap(((continuous, discrete)) =>
+    make(
+      ~integralSumCache=combinedIntegralSum,
+      ~integralCache=combinedIntegral,
+      ~discrete,
+      ~continuous,
+    )
+  )
+}

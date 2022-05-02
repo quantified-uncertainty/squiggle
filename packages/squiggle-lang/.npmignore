@@ -2,7 +2,6 @@ node_modules
 shell.nix
 .cache
 .direnv
-src
 __tests__
 lib
 examples

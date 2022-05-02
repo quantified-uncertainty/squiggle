@@ -3,6 +3,7 @@
   "description": "A basic area chart example",
   "width": 500,
   "height": 100,
+  "autosize": "fit",
   "padding": 5,
   "data": [
     {
@@ -87,7 +88,7 @@
       "tickOpacity": 0.0,
       "domainColor": "#fff",
       "domainOpacity": 0.0,
-      "format": "~s",
+      "format": "~g",
       "tickCount": 10
     }
   ],

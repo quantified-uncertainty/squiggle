@@ -69,26 +69,31 @@ let logScore = (t1, t2, ~toPointSetFn: toPointSetFn): result<float, error> => {
 let toFloatOperation = (
   t,
   ~toPointSetFn: toPointSetFn,
-  ~distToFloatOperation: Operation.distToFloatOperation,
+  ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
 ) => {
-  let trySymbolicSolution = switch (t: t) {
-  | Symbolic(r) => SymbolicDist.T.operate(distToFloatOperation, r)->E.R.toOption
-  | _ => None
-  }
+  switch distToFloatOperation {
+  | #IntegralSum => Ok(integralEndY(t))
+  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Sample) as op => {
+      let trySymbolicSolution = switch (t: t) {
+      | Symbolic(r) => SymbolicDist.T.operate(op, r)->E.R.toOption
+      | _ => None
+      }
 
-  let trySampleSetSolution = switch ((t: t), distToFloatOperation) {
-  | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
-  | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
-  | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
-  | _ => None
-  }
+      let trySampleSetSolution = switch ((t: t), distToFloatOperation) {
+      | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
+      | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
+      | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
+      | _ => None
+      }
 
-  switch trySymbolicSolution {
-  | Some(r) => Ok(r)
-  | None =>
-    switch trySampleSetSolution {
-    | Some(r) => Ok(r)
-    | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(distToFloatOperation))
+      switch trySymbolicSolution {
+      | Some(r) => Ok(r)
+      | None =>
+        switch trySampleSetSolution {
+        | Some(r) => Ok(r)
+        | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(op))
+        }
+      }
     }
   }
 }

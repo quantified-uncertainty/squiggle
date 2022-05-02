@@ -1,8 +1,29 @@
-# Squiggle Components
+[![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/quantified-uncertainty/squiggle/blob/develop/LICENSE)
 
-This package contains all the components for squiggle. These can be used either as a library or hosted as a [storybook](https://storybook.js.org/).
+# Squiggle components
 
-# Build for development
+This package contains the react components for squiggle. These can be used either as a library or hosted as a [storybook](https://storybook.js.org/).
+
+# Usage in a `react` project
+
+For example, in a fresh `create-react-app` project
+
+```sh
+yarn add @quri/squiggle-components
+```
+
+Add to `App.js`:
+
+```jsx
+import { SquiggleEditor } from "@quri/squiggle-components";
+<SquiggleEditor
+  initialSquiggleString="x = beta($alpha, 10); x + $shift"
+  jsImports={{ alpha: 3, shift: 20 }}
+/>;
+```
+
+# Build storybook for development
 
 We assume that you had run `yarn` at monorepo level, installing dependencies.
 
@@ -19,11 +40,4 @@ Run a development server
 
 ```sh
 yarn start
-```
-
-And build artefacts for production,
-
-```sh
-yarn bundle  # builds components library
-yarn build  # builds storybook app
 ```

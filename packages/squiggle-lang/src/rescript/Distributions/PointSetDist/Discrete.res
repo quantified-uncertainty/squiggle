@@ -37,7 +37,7 @@ let combinePointwise = (
   ~fn=(a, b) => Ok(a +. b),
   t1: PointSetTypes.discreteShape,
   t2: PointSetTypes.discreteShape,
-): PointSetTypes.discreteShape => {
+): result<PointSetTypes.discreteShape, 'e> => {
   let combinedIntegralSum = Common.combineIntegralSums(
     integralSumCachesFn,
     t1.integralSumCache,
@@ -54,11 +54,17 @@ let combinePointwise = (
       t1.xyShape,
       t2.xyShape,
     )->E.R.toExn("Addition operation should never fail", _),
-  )
+  )->Ok
 }
 
-let reduce = (~integralSumCachesFn=(_, _) => None, discreteShapes): PointSetTypes.discreteShape =>
-  discreteShapes |> E.A.fold_left(combinePointwise(~integralSumCachesFn), empty)
+let reduce = (
+  ~integralSumCachesFn=(_, _) => None,
+  fn: (float, float) => result<float, 'e>,
+  discreteShapes: array<PointSetTypes.discreteShape>,
+): result<t, 'e> => {
+  let merge = combinePointwise(~integralSumCachesFn, fn)
+  discreteShapes |> E.A.R.foldM(merge, empty)
+}
 
 let updateIntegralSumCache = (integralSumCache, t: t): t => {
   ...t,
