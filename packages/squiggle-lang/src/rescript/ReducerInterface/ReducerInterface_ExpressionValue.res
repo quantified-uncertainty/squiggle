@@ -45,8 +45,7 @@ let rec toString = aValue =>
     }
   | EvBool(aBool) => Js.String.make(aBool)
   | EvCall(fName) => `:${fName}`
-  | EvLambda(lambdaValue) =>
-    `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
+  | EvLambda(lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
   | EvNumber(aNumber) => Js.String.make(aNumber)
   | EvString(aString) => `'${aString}'`
   | EvSymbol(aString) => `:${aString}`

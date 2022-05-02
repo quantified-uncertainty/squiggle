@@ -29,8 +29,8 @@ let eLambda = (parameters: array<string>, context, expr) =>
   BExpressionValue.EvLambda({
     parameters: parameters,
     context: context,
-    body: expr->castExpressionToInternalCode}
-  )->BExpressionT.EValue
+    body: expr->castExpressionToInternalCode,
+  })->BExpressionT.EValue
 
 let eNumber = aNumber => aNumber->BExpressionValue.EvNumber->BExpressionT.EValue
 
