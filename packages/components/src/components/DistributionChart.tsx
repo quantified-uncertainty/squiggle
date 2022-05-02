@@ -5,6 +5,7 @@ import { distributionErrorToString, result, shape } from "@quri/squiggle-lang";
 import { Vega, VisualizationSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
 import { ErrorBox } from "./ErrorBox";
+import { useSize } from "react-use";
 import {
   linearXScale,
   logXScale,
@@ -14,55 +15,57 @@ import {
 
 type DistributionChartProps = {
   distribution: Distribution;
-  width: number;
+  width?: number;
   height: number;
 };
 
 export const DistributionChart: React.FC<DistributionChartProps> = ({
   distribution,
-  width,
   height,
+  width,
 }: DistributionChartProps) => {
-  let [isLogX, setLogX] = React.useState(false);
-  let [isExpY, setExpY] = React.useState(false);
-  let shape = distribution.pointSet();
-  if (shape.tag === "Ok") {
-    let spec = buildSpec(isLogX, isExpY, shape.value);
-    if (spec.tag == "Ok") {
-      let widthProp = width ? width - 20 : undefined;
-      var result = (
-        <div>
-          <Vega
-            spec={spec.value}
-            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
-            width={widthProp}
-            height={height}
-            actions={false}
-          />
-        </div>
-      );
+  const [sized, _] = useSize((size) => {
+    let [isLogX, setLogX] = React.useState(false);
+    let [isExpY, setExpY] = React.useState(false);
+    let shape = distribution.pointSet();
+    if (shape.tag === "Ok") {
+      let spec = buildSpec(isLogX, isExpY, shape.value);
+      if (spec.tag == "Ok") {
+        let widthProp = width ? width - 20 : size.width - 10;
+        var result = (
+          <div>
+            <Vega
+              spec={spec.value}
+              data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+              width={widthProp}
+              height={height}
+              actions={false}
+            />
+          </div>
+        );
+      } else {
+        var result = (
+          <ErrorBox heading={spec.value.heading}>{spec.value.error}</ErrorBox>
+        );
+      }
     } else {
-      // Log scales don't work when you have points below 0
       var result = (
-        <ErrorBox heading={spec.value.heading}>{spec.value.error}</ErrorBox>
+        <ErrorBox heading="Distribution Error">
+          {distributionErrorToString(shape.value)}
+        </ErrorBox>
       );
     }
-  } else {
-    var result = (
-      <ErrorBox heading="Distribution Error">
-        {distributionErrorToString(shape.value)}
-      </ErrorBox>
+    return (
+      <>
+        {result}
+        <div>
+          <CheckBox label="Log X scale" value={isLogX} onChange={setLogX} />
+          <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
+        </div>
+      </>
     );
-  }
-  return (
-    <>
-      {result}
-      <div>
-        <CheckBox label="Log X scale" value={isLogX} onChange={setLogX} />
-        <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
-      </div>
-    </>
-  );
+  });
+  return sized;
 };
 
 type ViewError = { heading: string; error: string };
