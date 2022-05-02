@@ -1,8 +1,10 @@
 import * as _ from "lodash";
 import {
   samplingParams,
-  evaluateUsingExternalBindings,
+  environment,
+  defaultEnvironment,
   evaluatePartialUsingExternalBindings,
+  evaluateUsingOptions,
   externalBindings,
   expressionValue,
   errorValue,
@@ -39,33 +41,34 @@ export let defaultSamplingInputs: samplingParams = {
 export function run(
   squiggleString: string,
   bindings?: externalBindings,
-  samplingInputs?: samplingParams,
+  environment?: environment,
   imports?: jsImports
 ): result<squiggleExpression, errorValue> {
   let b = bindings ? bindings : defaultBindings;
   let i = imports ? imports : defaultImports;
-  let si: samplingParams = samplingInputs
-    ? samplingInputs
-    : defaultSamplingInputs;
-
-  let result: result<expressionValue, errorValue> =
-    evaluateUsingExternalBindings(squiggleString, mergeImports(b, i));
-  return resultMap(result, (x) => createTsExport(x, si));
+  let e = environment ? environment : defaultEnvironment;
+  let res: result<expressionValue, errorValue> = evaluateUsingOptions(
+    { externalBindings: mergeImports(b, i), environment: e },
+    squiggleString
+  );
+  return resultMap(res, (x) => createTsExport(x, e));
 }
 
 // Run Partial. A partial is a block of code that doesn't return a value
 export function runPartial(
   squiggleString: string,
   bindings?: externalBindings,
-  _samplingInputs?: samplingParams,
+  environment?: environment,
   imports?: jsImports
 ): result<externalBindings, errorValue> {
   let b = bindings ? bindings : defaultBindings;
   let i = imports ? imports : defaultImports;
+  let e = environment ? environment : defaultEnvironment;
 
   return evaluatePartialUsingExternalBindings(
     squiggleString,
-    mergeImports(b, i)
+    mergeImports(b, i),
+    e
   );
 }
 
@@ -89,7 +92,7 @@ export let defaultBindings: externalBindings = {};
 
 function createTsExport(
   x: expressionValue,
-  sampEnv: samplingParams
+  environment: environment
 ): squiggleExpression {
   switch (x.tag) {
     case "EvArray":
@@ -108,7 +111,10 @@ function createTsExport(
               return tag(
                 "record",
                 _.mapValues(arrayItem.value, (recordValue: unknown) =>
-                  convertRawToTypescript(recordValue as rescriptExport, sampEnv)
+                  convertRawToTypescript(
+                    recordValue as rescriptExport,
+                    environment
+                  )
                 )
               );
             case "EvArray":
@@ -116,20 +122,24 @@ function createTsExport(
               return tag(
                 "array",
                 y.map((childArrayItem) =>
-                  convertRawToTypescript(childArrayItem, sampEnv)
+                  convertRawToTypescript(childArrayItem, environment)
                 )
               );
             default:
-              return createTsExport(arrayItem, sampEnv);
+              return createTsExport(arrayItem, environment);
           }
         })
       );
+    case "EvArrayString":
+      return tag("arraystring", x.value);
     case "EvBool":
       return tag("boolean", x.value);
     case "EvCall":
       return tag("call", x.value);
+    case "EvLambda":
+      return tag("lambda", x.value);
     case "EvDistribution":
-      return tag("distribution", new Distribution(x.value, sampEnv));
+      return tag("distribution", new Distribution(x.value, environment));
     case "EvNumber":
       return tag("number", x.value);
     case "EvRecord":
@@ -137,7 +147,7 @@ function createTsExport(
       let result: tagged<"record", { [key: string]: squiggleExpression }> = tag(
         "record",
         _.mapValues(x.value, (x: unknown) =>
-          convertRawToTypescript(x as rescriptExport, sampEnv)
+          convertRawToTypescript(x as rescriptExport, environment)
         )
       );
       return result;

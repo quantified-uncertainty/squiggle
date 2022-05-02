@@ -38,7 +38,7 @@ let makeSampleSetDist = SampleSetDist.make
 let evaluate = Reducer.evaluate
 
 @genType
-let evaluateUsingExternalBindings = Reducer.evaluateUsingExternalBindings
+let evaluateUsingOptions = Reducer.evaluateUsingOptions
 
 @genType
 let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
@@ -48,6 +48,9 @@ type externalBindings = Reducer.externalBindings
 
 @genType
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+
+@genType
+type recordEV = ReducerInterface_ExpressionValue.record
 
 @genType
 type errorValue = Reducer_ErrorValue.errorValue
@@ -69,3 +72,15 @@ let errorValueToString = Reducer_ErrorValue.errorToString
 
 @genType
 let distributionErrorToString = DistributionTypes.Error.toString
+
+@genType
+type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
+
+@genType
+let defaultSamplingEnv = ReducerInterface_GenericDistribution.defaultEnv
+
+@genType
+type environment = ReducerInterface_ExpressionValue.environment
+
+@genType
+let defaultEnvironment = ReducerInterface_ExpressionValue.defaultEnvironment

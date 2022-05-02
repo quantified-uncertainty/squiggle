@@ -1,5 +1,5 @@
 open ReducerInterface.ExpressionValue
-module MathJs = Reducer.MathJs
+module MathJs = Reducer_MathJs
 module ErrorValue = Reducer.ErrorValue
 
 open Jest
