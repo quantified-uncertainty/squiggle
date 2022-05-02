@@ -1,10 +1,11 @@
 open Jest
 open Expect
 
-module Macro = Reducer_Expression_Macro
 module Bindings = Reducer_Expression_Bindings
 module Expression = Reducer_Expression
 module ExpressionValue = ReducerInterface_ExpressionValue
+module ExpressionWithContext = Reducer_ExpressionWithContext
+module Macro = Reducer_Expression_Macro
 module T = Reducer_Expression_T
 
 let testMacro_ = (
@@ -21,7 +22,7 @@ let testMacro_ = (
       ExpressionValue.defaultEnvironment,
       Expression.reduceExpression,
     )
-    ->T.toStringResult
+    ->ExpressionWithContext.toStringResult
     ->expect
     ->toEqual(expectedCode)
   )

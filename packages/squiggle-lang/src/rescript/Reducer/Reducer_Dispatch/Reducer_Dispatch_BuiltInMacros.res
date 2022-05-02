@@ -6,19 +6,22 @@
 module Bindings = Reducer_Expression_Bindings
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
+module ExpressionWithContext = Reducer_ExpressionWithContext
 module Result = Belt.Result
 open Reducer_Expression_ExpressionBuilder
 
-type expression = ExpressionT.expression
 type environment = ExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
+type expression = ExpressionT.expression
+type expressionValue = ExpressionValue.expressionValue
+type expressionWithContext = ExpressionWithContext.expressionWithContext
 
 let dispatchMacroCall = (
   macroExpression: expression,
   bindings: ExpressionT.bindings,
   environment,
   reduceExpression: ExpressionT.reducerFn,
-): result<expression, errorValue> => {
+): result<expressionWithContext, errorValue> => {
   let doBindStatement = (bindingExpr: expression, statement: expression, environment) =>
     switch statement {
     | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$let")), symbolExpr, statement}) => {
@@ -26,11 +29,23 @@ let dispatchMacroCall = (
 
         rExternalBindingsValue->Result.flatMap(externalBindingsValue => {
           let newBindings = Bindings.fromValue(externalBindingsValue)
+
+          // Js.log(
+          //   `bindStatement ${Bindings.toString(newBindings)}<==${ExpressionT.toString(
+          //       bindingExpr,
+          //     )} statement: $let ${ExpressionT.toString(symbolExpr)}=${ExpressionT.toString(
+          //       statement,
+          //     )}`,
+          // )
+
           let rNewStatement = Bindings.replaceSymbols(newBindings, statement)
           rNewStatement->Result.map(newStatement =>
-            eFunction(
-              "$setBindings",
-              list{newBindings->Bindings.toExternalBindings->eRecord, symbolExpr, newStatement},
+            ExpressionWithContext.withContext(
+              eFunction(
+                "$setBindings",
+                list{newBindings->Bindings.toExternalBindings->eRecord, symbolExpr, newStatement},
+              ),
+              newBindings,
             )
           )
         })
@@ -38,7 +53,10 @@ let dispatchMacroCall = (
     | _ => REAssignmentExpected->Error
     }
 
-  let doBindExpression = (bindingExpr: expression, statement: expression, environment) =>
+  let doBindExpression = (bindingExpr: expression, statement: expression, environment): result<
+    expressionWithContext,
+    errorValue,
+  > =>
     switch statement {
     | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$let")), symbolExpr, statement}) => {
         let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
@@ -47,35 +65,49 @@ let dispatchMacroCall = (
           let newBindings = Bindings.fromValue(externalBindingsValue)
           let rNewStatement = Bindings.replaceSymbols(newBindings, statement)
           rNewStatement->Result.map(newStatement =>
-            eFunction(
-              "$exportBindings",
-              list{
-                eFunction(
-                  "$setBindings",
-                  list{newBindings->Bindings.toExternalBindings->eRecord, symbolExpr, newStatement},
-                ),
-              },
+            ExpressionWithContext.withContext(
+              eFunction(
+                "$exportBindings",
+                list{
+                  eFunction(
+                    "$setBindings",
+                    list{
+                      newBindings->Bindings.toExternalBindings->eRecord,
+                      symbolExpr,
+                      newStatement,
+                    },
+                  ),
+                },
+              ),
+              newBindings,
             )
           )
         })
       }
     | _ => {
-        let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
+        let rExternalBindingsValue: result<expressionValue, errorValue> = reduceExpression(
+          bindingExpr,
+          bindings,
+          environment,
+        )
+
         rExternalBindingsValue->Result.flatMap(externalBindingsValue => {
           let newBindings = Bindings.fromValue(externalBindingsValue)
           let rNewStatement = Bindings.replaceSymbols(newBindings, statement)
-          rNewStatement
+          rNewStatement->Result.map(newStatement =>
+            ExpressionWithContext.withContext(newStatement, newBindings)
+          )
         })
       }
     }
 
   let doBlock = (exprs: list<expression>, _bindings: ExpressionT.bindings, _environment): result<
-    expression,
+    expressionWithContext,
     errorValue,
   > => {
     let exprsArray = Belt.List.toArray(exprs)
     let maxIndex = Js.Array2.length(exprsArray) - 1
-    exprsArray->Js.Array2.reducei((acc, statement, index) =>
+    let newStatement = exprsArray->Js.Array2.reducei((acc, statement, index) =>
       if index == 0 {
         if index == maxIndex {
           eBindExpressionDefault(statement)
@@ -87,16 +119,23 @@ let dispatchMacroCall = (
       } else {
         eBindStatement(acc, statement)
       }
-    , eSymbol("undefined block"))->Ok
+    , eSymbol("undefined block"))
+    ExpressionWithContext.noContext(newStatement)->Ok
   }
 
   let doLambdaDefinition = (
     bindings: ExpressionT.bindings,
     parameters: array<string>,
     lambdaDefinition: ExpressionT.expression,
-  ) => eLambda(parameters, bindings->Bindings.toExternalBindings, lambdaDefinition)->Ok
+  ) =>
+    ExpressionWithContext.noContext(
+      eLambda(parameters, bindings->Bindings.toExternalBindings, lambdaDefinition),
+    )->Ok
 
-  let expandExpressionList = (aList, bindings: ExpressionT.bindings, environment) =>
+  let expandExpressionList = (aList, bindings: ExpressionT.bindings, environment): result<
+    expressionWithContext,
+    errorValue,
+  > =>
     switch aList {
     | list{
         ExpressionT.EValue(EvCall("$$bindStatement")),
@@ -123,11 +162,11 @@ let dispatchMacroCall = (
         lambdaDefinition,
       } =>
       doLambdaDefinition(bindings, parameters, lambdaDefinition)
-    | _ => ExpressionT.EList(aList)->Ok
+    | _ => ExpressionWithContext.noContext(ExpressionT.EList(aList))->Ok
     }
 
   switch macroExpression {
   | EList(aList) => expandExpressionList(aList, bindings, environment)
-  | _ => macroExpression->Ok
+  | _ => ExpressionWithContext.noContext(macroExpression)->Ok
   }
 }

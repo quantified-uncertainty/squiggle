@@ -68,10 +68,8 @@ and replaceSymbolsOnExpressionList = (bindings, list) => {
 }
 and replaceSymbolOnValue = (bindings, evValue: expressionValue) =>
   switch evValue {
-  | EvSymbol(symbol) =>
-    Belt.Map.String.getWithDefault(bindings, symbol, evValue)->Ok
-  | EvCall(symbol) =>
-    Belt.Map.String.getWithDefault(bindings, symbol, evValue)->checkIfCallable
+  | EvSymbol(symbol) => Belt.Map.String.getWithDefault(bindings, symbol, evValue)->Ok
+  | EvCall(symbol) => Belt.Map.String.getWithDefault(bindings, symbol, evValue)->checkIfCallable
   | _ => evValue->Ok
   }
 and checkIfCallable = (evValue: expressionValue) =>
@@ -80,5 +78,8 @@ and checkIfCallable = (evValue: expressionValue) =>
   | _ => ErrorValue.RENotAFunction(ExpressionValue.toString(evValue))->Error
   }
 
-let toString = (bindings: ExpressionT.bindings) => 
+let toString = (bindings: ExpressionT.bindings) =>
   bindings->toExternalBindings->ExpressionValue.EvRecord->ExpressionValue.toString
+
+let externalBindingsToString = (externalBindings: externalBindings) =>
+  externalBindings->ExpressionValue.EvRecord->ExpressionValue.toString

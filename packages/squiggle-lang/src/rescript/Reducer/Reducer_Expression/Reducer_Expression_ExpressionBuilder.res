@@ -25,12 +25,18 @@ let eFunction = (fName: string, lispArgs: list<expression>): expression => {
   list{fn, ...lispArgs}->BExpressionT.EList
 }
 
-let eLambda = (parameters: array<string>, context, expr) =>
+let eLambda = (
+  parameters: array<string>,
+  context: BExpressionValue.externalBindings,
+  expr: expression,
+) => {
+  // Js.log(`eLambda context ${BBindings.externalBindingsToString(context)}`)
   BExpressionValue.EvLambda({
     parameters: parameters,
     context: context,
     body: expr->castExpressionToInternalCode,
   })->BExpressionT.EValue
+}
 
 let eNumber = aNumber => aNumber->BExpressionValue.EvNumber->BExpressionT.EValue
 

@@ -39,15 +39,27 @@ describe("symbol not defined", () => {
 })
 
 Only.describe("call and bindings", () => {
-  testEvalToBe("f(x)=x+1", "Ok({f: lambda(x=>internal code)})") 
-  testEvalToBe("f(x)=x+1; f(1)", "Ok(2)") 
+  testEvalToBe("f(x)=x+1", "Ok({f: lambda(x=>internal code)})")
+  testEvalToBe("f(x)=x+1; f(1)", "Ok(2)")
   testEvalToBe("f=1;y=2", "Ok({f: 1,y: 2})")
-  testEvalToBe("f(x)=x+1; y=f(1)", "Ok({f: lambda(x=>internal code),y: 2})") 
-  testEvalToBe("f(x)=x+1; y=f(1); f(1)", "Ok(2)") 
+  testEvalToBe("f(x)=x+1; y=f(1)", "Ok({f: lambda(x=>internal code),y: 2})")
+  testEvalToBe("f(x)=x+1; y=f(1); f(1)", "Ok(2)")
   testEvalToBe("f(x)=x+1; y=f(1); z=f(1)", "Ok({f: lambda(x=>internal code),y: 2,z: 2})")
-  testEvalToBe("f(x)=x+1; g(x)=f(x)+1", "Ok({f: lambda(x=>internal code),g: lambda(x=>internal code)})") //TODO: f is not found
-  MyOnly.testEvalToBe("f(x)=x+1; g(x)=f(x)+1; y=g(2)", "????") //TODO: f is not found
-  MySkip.testEvalToBe("f(x)=x+1; g(x)=f(x)+1; g(2)", "????") //TODO: f is not found
+  testEvalToBe(
+    "f(x)=x+1; g(x)=f(x)+1",
+    "Ok({f: lambda(x=>internal code),g: lambda(x=>internal code)})",
+  )
+  testParseToBe(
+    "f=99; g(x)=f; g(2)",
+    "Ok((:$$block (:$$block (:$let :f 99) (:$let :g (:$$lambda [x] (:$$block :f))) (:g 2))))",
+  )
+  testEvalToBe("f=99; g(x)=f; g(2)", "Ok(99)")
+  testEvalToBe("f(x)=x; g(x)=f(x); g(2)", "Ok(2)")
+  testEvalToBe(
+    "f(x)=x+1; g(x)=f(x)+1; y=g(2)",
+    "Ok({f: lambda(x=>internal code),g: lambda(x=>internal code),y: 4})",
+  )
+  testEvalToBe("f(x)=x+1; g(x)=f(x)+1; g(2)", "Ok(4)")
 })
 
 Skip.describe("function trics", () => {
