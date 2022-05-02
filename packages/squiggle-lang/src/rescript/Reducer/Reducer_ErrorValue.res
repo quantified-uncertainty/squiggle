@@ -8,6 +8,7 @@ type errorValue =
   | REFunctionExpected(string)
   | REJavaScriptExn(option<string>, option<string>) // Javascript Exception
   | REMacroNotFound(string)
+  | RENotAFunction(string)
   | RERecordPropertyNotFound(string, string)
   | RESymbolNotFound(string)
   | RESyntaxError(string)
@@ -40,6 +41,7 @@ let errorToString = err =>
       answer
     }
   | REMacroNotFound(macro) => `Macro not found: ${macro}`
+  | RENotAFunction(valueString) => `${valueString} is not a function`
   | RERecordPropertyNotFound(msg, index) => `${msg}: ${index}`
   | RESymbolNotFound(symbolName) => `${symbolName} is not defined`
   | RESyntaxError(desc) => `Syntax Error: ${desc}`
