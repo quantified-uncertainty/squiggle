@@ -68,7 +68,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
               onChange={setLogX}
               disabled={true}
               tooltip={
-                "Your distribution has mass lower than or equal to 0, cannot use log scale"
+                "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values."
               }
             />
           ) : (
