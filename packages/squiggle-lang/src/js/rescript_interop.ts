@@ -5,10 +5,9 @@ import {
   genericDist,
   environment,
   symbolicDist,
-  recordEV,
-  internalCode,
   discreteShape,
   continuousShape,
+  lambdaValue,
 } from "../rescript/TypescriptInterface.gen";
 import { Distribution } from "./distribution";
 import { tagged, tag } from "./types";
@@ -38,7 +37,7 @@ export type rescriptExport =
     }
   | {
       TAG: 5; // EvLambda
-      _0: [string[], recordEV, internalCode];
+      _0: lambdaValue;
     }
   | {
       TAG: 6; // EvNumber
@@ -80,7 +79,7 @@ export type squiggleExpression =
   | tagged<"symbol", string>
   | tagged<"string", string>
   | tagged<"call", string>
-  | tagged<"lambda", [string[], recordEV, internalCode]>
+  | tagged<"lambda", lambdaValue>
   | tagged<"array", squiggleExpression[]>
   | tagged<"arraystring", string[]>
   | tagged<"boolean", boolean>

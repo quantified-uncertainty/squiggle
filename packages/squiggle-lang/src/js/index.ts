@@ -8,15 +8,6 @@ import {
   externalBindings,
   expressionValue,
   errorValue,
-  distributionError,
-  toPointSet,
-  continuousShape,
-  discreteShape,
-  distributionErrorToString,
-  internalCode,
-  mixedShape,
-  sampleSetDist,
-  symbolicDist,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
@@ -45,48 +36,6 @@ export let defaultSamplingInputs: samplingParams = {
   sampleCount: 10000,
   xyPointLength: 10000,
 };
-
-export type result<a, b> =
-  | {
-      tag: "Ok";
-      value: a;
-    }
-  | {
-      tag: "Error";
-      value: b;
-    };
-
-export function resultMap<a, b, c>(
-  r: result<a, c>,
-  mapFn: (x: a) => b
-): result<b, c> {
-  if (r.tag === "Ok") {
-    return { tag: "Ok", value: mapFn(r.value) };
-  } else {
-    return r;
-  }
-}
-
-function Ok<a, b>(x: a): result<a, b> {
-  return { tag: "Ok", value: x };
-}
-
-type tagged<a, b> = { tag: a; value: b };
-
-function tag<a, b>(x: a, y: b): tagged<a, b> {
-  return { tag: x, value: y };
-}
-
-export type squiggleExpression =
-  | tagged<"symbol", string>
-  | tagged<"string", string>
-  | tagged<"call", string>
-  | tagged<"lambda", [string[], internalCode]>
-  | tagged<"array", squiggleExpression[]>
-  | tagged<"boolean", boolean>
-  | tagged<"distribution", Distribution>
-  | tagged<"number", number>
-  | tagged<"record", { [key: string]: squiggleExpression }>;
 
 export function run(
   squiggleString: string,

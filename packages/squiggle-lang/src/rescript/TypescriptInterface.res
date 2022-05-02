@@ -74,7 +74,7 @@ let errorValueToString = Reducer_ErrorValue.errorToString
 let distributionErrorToString = DistributionTypes.Error.toString
 
 @genType
-type internalCode = ReducerInterface_ExpressionValue.internalCode
+type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
 
 @genType
 let defaultSamplingEnv = ReducerInterface_GenericDistribution.defaultEnv
