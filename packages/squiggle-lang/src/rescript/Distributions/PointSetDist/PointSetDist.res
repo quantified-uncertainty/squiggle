@@ -84,7 +84,12 @@ let combinePointwise = (
       m2,
     )->E.R2.fmap(x => PointSetTypes.Continuous(x))
   | (Discrete(m1), Discrete(m2)) =>
-    Ok(PointSetTypes.Discrete(Discrete.combinePointwise(~integralSumCachesFn, m1, m2)))
+    Discrete.combinePointwise(
+      ~integralSumCachesFn,
+      fn,
+      m1,
+      m2,
+    )->E.R2.fmap(x => PointSetTypes.Discrete(x))
   | (m1, m2) =>
     Mixed.combinePointwise(
       ~integralSumCachesFn,

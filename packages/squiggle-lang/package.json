@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-lang",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
@@ -24,6 +24,7 @@
     "format:rescript": "rescript format -all",
     "format:prettier": "prettier --write .",
     "format": "yarn format:rescript && yarn format:prettier",
+    "prepack": "yarn build && yarn test && yarn bundle",
     "all": "yarn build && yarn bundle && yarn test"
   },
   "keywords": [
@@ -35,22 +36,22 @@
     "rescript": "^9.1.4",
     "jstat": "^1.9.5",
     "pdfast": "^0.2.0",
-    "mathjs": "10.5.0"
+    "mathjs": "^10.5.0"
   },
   "devDependencies": {
     "bisect_ppx": "^2.7.1",
-    "lodash": "4.17.21",
+    "lodash": "^4.17.21",
     "rescript-fast-check": "^1.1.1",
     "@glennsl/rescript-jest": "^0.9.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@types/jest": "^27.4.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "chalk": "^5.0.1",
-    "codecov": "3.8.3",
-    "fast-check": "2.25.0",
+    "codecov": "^3.8.3",
+    "fast-check": "^2.25.0",
     "gentype": "^4.3.0",
     "jest": "^27.5.1",
-    "moduleserve": "0.9.1",
+    "moduleserve": "^0.9.1",
     "nyc": "^15.1.0",
     "reanalyze": "^2.19.0",
     "ts-jest": "^27.1.4",

@@ -1,5 +1,5 @@
 import { Distribution } from "../../src/js/index";
-import { expectErrorToBeBounded, failDefault } from "./TestHelpers";
+import { expectErrorToBeBounded, failDefault, testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 
 // Beware: float64Array makes it appear in an infinite loop.
@@ -209,6 +209,21 @@ describe("mean is mean", () => {
           }
         }
       )
+    );
+  });
+});
+
+describe("fromSamples function", () => {
+  test.skip("gives a mean near the mean of the input", () => {
+    fc.assert(
+      fc.property(arrayGen(), (xs_) => {
+        let xs = Array.from(xs_);
+        let xsString = xs.toString();
+        let squiggleString = `x = fromSamples([${xsString}]); mean(x)`;
+        let squiggleResult = testRun(squiggleString);
+        let mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
+        expect(squiggleResult.value).toBeCloseTo(mean, 4);
+      })
     );
   });
 });

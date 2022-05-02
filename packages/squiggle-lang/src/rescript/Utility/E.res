@@ -289,6 +289,13 @@ module R = {
     | Ok(r) => r->Ok
     | Error(x) => x->f->Error
     }
+
+  //I'm not sure what to call this.
+  let unify = (a: result<'a, 'b>, c: 'b => 'a): 'a =>
+    switch a {
+    | Ok(x) => x
+    | Error(x) => c(x)
+    }
 }
 
 module R2 = {
@@ -307,6 +314,8 @@ module R2 = {
     | Ok(x) => x->Ok
     | Error(x) => x->f->Error
     }
+
+  let toExn = (a, b) => R.toExn(b, a)
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>
@@ -350,7 +359,7 @@ module JsDate = {
 /* List */
 module L = {
   module Util = {
-    let eq = (a, b) => a == b
+    let eq = \"=="
   }
   let fmap = List.map
   let get = Belt.List.get
