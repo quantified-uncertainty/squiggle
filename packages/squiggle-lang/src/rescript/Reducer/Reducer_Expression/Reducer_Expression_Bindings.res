@@ -1,3 +1,4 @@
+module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
 module Result = Belt.Result
@@ -67,7 +68,14 @@ and replaceSymbolsOnExpressionList = (bindings, list) => {
 }
 and replaceSymbolOnValue = (bindings, evValue: expressionValue) =>
   switch evValue {
-  | EvSymbol(symbol) | EvCall(symbol) =>
+  | EvSymbol(symbol) =>
     Belt.Map.String.getWithDefault(bindings, symbol, evValue)->Ok
+  | EvCall(symbol) =>
+    Belt.Map.String.getWithDefault(bindings, symbol, evValue)->checkIfCallable
   | _ => evValue->Ok
+  }
+and checkIfCallable = (evValue: expressionValue) =>
+  switch evValue {
+  | EvCall(_) | EvLambda(_) => evValue->Ok
+  | _ => ErrorValue.RENotAFunction(ExpressionValue.toString(evValue))->Error
   }

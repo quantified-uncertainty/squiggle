@@ -33,10 +33,12 @@ describe("Arity check", () => {
 describe("function trics", () => {
   testEvalToBe("f(x)=x(y); f(f)", "Error(y is not defined)")
   testEvalToBe("f(x)=x; f(f)", "Ok(lambda(x=>internal code))")
-  testEvalToBe("f(x)=x(y); f(z)", "Error(y is not defined)")
-  MySkip.testEvalToBe("f(x)=x(y); f(2)", "????") //prevent js error
+  testEvalToBe("f(x)=x(y); f(z)", "Error(z is not defined)")
+  testEvalToBe("f(x)=x(y); f(2)", "Error(2 is not a function)")
+  testEvalToBe("f(x)=x(1); f(2)", "Error(2 is not a function)")
+  MySkip.testParseToBe("f(x)=f(y)=2; f(2)", "????") 
   MySkip.testEvalToBe("f(x)=f(y)=2; f(2)", "????") //prevent multiple assignment
-  MySkip.testEvalToBe("f(x)=x+1; g(x)=f(x)+1;g(2)", "????") //TODO: f is not found
+  testEvalToBe("f(x)=x+1; g(x)=f(x)+1;g(2)", "????") //TODO: f is not found
   MySkip.testEvalToBe("y=2;g(x)=y+1;g(2)", "????") //TODO : y is not found
   MySkip.testEvalToBe("y=2;g(x)=inspect(y)+1", "????") //TODO : 666
 })

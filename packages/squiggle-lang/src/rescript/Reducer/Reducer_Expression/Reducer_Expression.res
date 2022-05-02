@@ -79,7 +79,12 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
 
   | list{EvLambda(lamdaCall), ...args} =>
     Lambda.doLambdaCall(lamdaCall, args, environment, reduceExpression)
-  | _ => valueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
+  | _ =>
+    valueList
+    ->Lambda.checkIfReduced
+    ->Result.flatMap(reducedValueList =>
+      reducedValueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
+    )
   }
 
 let evalUsingBindingsExpression_ = (aExpression, bindings, environment): result<
