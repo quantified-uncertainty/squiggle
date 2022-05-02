@@ -1,7 +1,7 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Distribution } from "@quri/squiggle-lang";
-import { distributionErrorToString, result, shape } from "@quri/squiggle-lang";
+import { distributionErrorToString } from "@quri/squiggle-lang";
 import { Vega, VisualizationSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
 import { ErrorBox } from "./ErrorBox";
@@ -12,6 +12,7 @@ import {
   linearYScale,
   expYScale,
 } from "./DistributionVegaScales";
+import styled from "styled-components";
 
 type DistributionChartProps = {
   distribution: Distribution;
@@ -26,28 +27,29 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
 }: DistributionChartProps) => {
   let [isLogX, setLogX] = React.useState(false);
   let [isExpY, setExpY] = React.useState(false);
+  let shape = distribution.pointSet();
   const [sized, _] = useSize((size) => {
-    let shape = distribution.pointSet();
+    var disableLog = false;
     if (shape.tag === "Ok") {
-      let spec = buildSpec(isLogX, isExpY, shape.value);
-      if (spec.tag == "Ok") {
-        let widthProp = width ? width - 20 : size.width - 10;
-        var result = (
-          <div>
-            <Vega
-              spec={spec.value}
-              data={{ con: shape.value.continuous, dis: shape.value.discrete }}
-              width={widthProp}
-              height={height}
-              actions={false}
-            />
-          </div>
-        );
-      } else {
-        var result = (
-          <ErrorBox heading={spec.value.heading}>{spec.value.error}</ErrorBox>
-        );
+      let massBelow0 =
+        shape.value.continuous.some((x) => x.x <= 0) ||
+        shape.value.discrete.some((x) => x.x <= 0);
+      if (massBelow0) {
+        disableLog = true;
       }
+      let spec = buildVegaSpec(isLogX, isExpY);
+      let widthProp = width ? width - 20 : size.width - 10;
+      var result = (
+        <div>
+          <Vega
+            spec={spec}
+            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+            width={widthProp}
+            height={height}
+            actions={false}
+          />
+        </div>
+      );
     } else {
       var result = (
         <ErrorBox heading="Distribution Error">
@@ -59,7 +61,19 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       <>
         {result}
         <div>
-          <CheckBox label="Log X scale" value={isLogX} onChange={setLogX} />
+          {disableLog ? (
+            <CheckBox
+              label="Log X scale"
+              value={isLogX}
+              onChange={setLogX}
+              disabled={true}
+              tooltip={
+                "Your distribution has mass lower than or equal to 0, cannot use log scale"
+              }
+            />
+          ) : (
+            <CheckBox label="Log X scale" value={isLogX} onChange={setLogX} />
+          )}
           <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
         </div>
       </>
@@ -68,44 +82,44 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   return sized;
 };
 
-type ViewError = { heading: string; error: string };
-
-function buildSpec(
-  isLogX: boolean,
-  isExpY: boolean,
-  shape: shape
-): result<VisualizationSpec, ViewError> {
-  let someBelow0 =
-    shape.continuous.some((x) => x.x <= 0) ||
-    shape.discrete.some((x) => x.x <= 0);
-  if (!(isLogX && someBelow0)) {
-    return {
-      tag: "Ok",
-      value: {
-        ...chartSpecification,
-        scales: [
-          isLogX ? logXScale : linearXScale,
-          isExpY ? expYScale : linearYScale,
-        ],
-      } as VisualizationSpec,
-    };
-  } else {
-    return {
-      tag: "Error",
-      value: {
-        heading: "Log Viewing error",
-        error:
-          "Distribution contains values lower than or equal to 0. Cannot view",
-      },
-    };
-  }
+function buildVegaSpec(isLogX: boolean, isExpY: boolean): VisualizationSpec {
+  return {
+    ...chartSpecification,
+    scales: [
+      isLogX ? logXScale : linearXScale,
+      isExpY ? expYScale : linearYScale,
+    ],
+  } as VisualizationSpec;
 }
 
-export const CheckBox = ({ label, onChange, value }) => {
+interface CheckBoxProps {
+  label: string;
+  onChange: (x: boolean) => void;
+  value: boolean;
+  disabled?: boolean;
+  tooltip?: string;
+}
+
+const Label = styled.label<{ disabled: boolean }>`
+  ${(props) => props.disabled && "color: #999;"}
+`;
+
+export const CheckBox = ({
+  label,
+  onChange,
+  value,
+  disabled = false,
+  tooltip,
+}: CheckBoxProps) => {
   return (
-    <span>
-      <input type="checkbox" value={value} onChange={() => onChange(!value)} />
-      <label>{label}</label>
+    <span title={tooltip}>
+      <input
+        type="checkbox"
+        value={value + ""}
+        onChange={() => onChange(!value)}
+        disabled={disabled}
+      />
+      <Label disabled={disabled}>{label}</Label>
     </span>
   );
 };
