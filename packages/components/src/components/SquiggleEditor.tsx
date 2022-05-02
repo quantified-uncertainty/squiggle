@@ -35,7 +35,7 @@ export interface SquiggleEditorProps {
   /** when the environment changes. Used again for notebook magic*/
   onChange?(expr: squiggleExpression): void;
   /** The width of the element */
-  width: number;
+  width?: number;
   /** Previous variable declarations */
   bindings?: bindings;
   /** JS Imports */
@@ -141,8 +141,6 @@ export interface SquigglePartialProps {
   diagramCount?: number;
   /** when the environment changes. Used again for notebook magic*/
   onChange?(expr: bindings): void;
-  /** The width of the element */
-  width: number;
   /** Previously declared variables */
   bindings?: bindings;
   /** Variables imported from js */
