@@ -8,8 +8,8 @@ open Jest
 open Expect
 open TestHelpers
 
-describe("", () => {
-  test("", () => {
+describe("Scale logarithm", () => {
+  test("mean of the base two scalar logarithm of an exponential(10)", () => {
     let scalelog = DistributionOperation.Constructors.scaleLogarithm(~env, mkExponential(10.0), 2.0)
 
     E.R2.bind(DistributionOperation.Constructors.mean(~env), scalelog)
