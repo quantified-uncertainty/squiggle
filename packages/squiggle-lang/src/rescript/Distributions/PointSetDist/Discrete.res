@@ -62,7 +62,7 @@ let reduce = (
   fn: (float, float) => result<float, 'e>,
   discreteShapes: array<PointSetTypes.discreteShape>,
 ): result<t, 'e> => {
-  let merge = combinePointwise(~integralSumCachesFn, fn)
+  let merge = combinePointwise(~integralSumCachesFn, ~fn)
   discreteShapes |> E.A.R.foldM(merge, empty)
 }
 
@@ -164,6 +164,7 @@ module T = Dist({
     }
 
   let integralEndY = (t: t) => t.integralSumCache |> E.O.default(t |> integral |> Continuous.lastY)
+  let integralEndYResult = (t: t) => t -> integralEndY -> Ok
   let minX = shapeFn(XYShape.T.minX)
   let maxX = shapeFn(XYShape.T.maxX)
   let toDiscreteProbabilityMassFraction = _ => 1.0
@@ -230,7 +231,7 @@ module T = Dist({
 
   let logScore = (base: t, reference: t) => {
     combinePointwise(~fn=PointSetDist_Scoring.LogScoring.logScore, base, reference)
-    |> integralEndY
-    |> (r => Ok(r))
+    |> E.R2.bind(integralEndYResult)
+    // |> (r => Ok(r))
   }
 })

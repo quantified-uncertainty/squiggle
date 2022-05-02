@@ -44,7 +44,7 @@ let combinePointwise = (
   t2: t,
 ): result<t, 'e> => {
   let reducedDiscrete =
-    [t1, t2] |> E.A.fmap(toDiscrete) |> E.A.O.concatSomes |> Discrete.reduce(~integralSumCachesFn)
+    [t1, t2] |> E.A.fmap(toDiscrete) |> E.A.O.concatSomes |> Discrete.reduce(~integralSumCachesFn, fn) |> E.R.toExn("foo")
 
   let reducedContinuous =
     [t1, t2]
