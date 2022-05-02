@@ -1,4 +1,4 @@
-module Parse = Reducer.MathJs.Parse
+module Parse = Reducer_MathJs.Parse
 module Result = Belt.Result
 
 open Jest
