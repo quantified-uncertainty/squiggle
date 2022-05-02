@@ -121,7 +121,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
               <RecordKeyHeader>{key}</RecordKeyHeader>
               <SquiggleItem
                 expression={r}
-                width={width !== undefined? width - 20 : width}
+                width={width !== undefined ? width - 20 : width}
                 height={50}
               />
             </>
