@@ -7,7 +7,7 @@ module ExpressionT = Reducer_Expression_T
 
 let exampleExpression = eNumber(1.)
 let exampleExpressionY = eSymbol("y")
-let exampleStatement = eLetStatement("y", eNumber(1.))
+let exampleStatementY = eLetStatement("y", eNumber(1.))
 let exampleStatementX = eLetStatement("y", eSymbol("x"))
 let exampleStatementZ = eLetStatement("z", eSymbol("y"))
 
@@ -16,9 +16,9 @@ testMacro([], exampleExpression, "Ok(1)")
 
 describe("bindStatement", () => {
   // A statement is bound by the bindings created by the previous statement
-  testMacro([], eBindStatement(eBindings([]), exampleStatement), "Ok((:$setBindings {} :y 1))")
+  testMacro([], eBindStatement(eBindings([]), exampleStatementY), "Ok((:$setBindings {} :y 1))")
   // Then it answers the bindings for the next statement when reduced
-  testMacroEval([], eBindStatement(eBindings([]), exampleStatement), "Ok({y: 1})")
+  testMacroEval([], eBindStatement(eBindings([]), exampleStatementY), "Ok({y: 1})")
   // Now let's feed a binding to see what happens
   testMacro(
     [],
@@ -30,7 +30,7 @@ describe("bindStatement", () => {
   // When bindings from previous statement are missing the context is injected. This must be the first statement of a block
   testMacro(
     [("z", EvNumber(99.))],
-    eBindStatementDefault(exampleStatement),
+    eBindStatementDefault(exampleStatementY),
     "Ok((:$setBindings {z: 99} :y 1))",
   )
 })
@@ -41,19 +41,19 @@ describe("bindExpression", () => {
   // When an let statement is the end expression then bindings are returned
   testMacro(
     [],
-    eBindExpression(eBindings([("x", EvNumber(2.))]), exampleStatement),
+    eBindExpression(eBindings([("x", EvNumber(2.))]), exampleStatementY),
     "Ok((:$exportBindings (:$setBindings {x: 2} :y 1)))",
   )
   // Now let's reduce that expression
   testMacroEval(
     [],
-    eBindExpression(eBindings([("x", EvNumber(2.))]), exampleStatement),
+    eBindExpression(eBindings([("x", EvNumber(2.))]), exampleStatementY),
     "Ok({x: 2,y: 1})",
   )
   // When bindings are missing the context is injected. This must be the first and last statement of a block
   testMacroEval(
     [("z", EvNumber(99.))],
-    eBindExpressionDefault(exampleStatement),
+    eBindExpressionDefault(exampleStatementY),
     "Ok({y: 1,z: 99})",
   )
 })
@@ -63,22 +63,22 @@ describe("block", () => {
   testMacro([], eBlock(list{exampleExpression}), "Ok((:$$bindExpression 1))")
   testMacroEval([], eBlock(list{exampleExpression}), "Ok(1)")
   // Block with a single statement
-  testMacro([], eBlock(list{exampleStatement}), "Ok((:$$bindExpression (:$let :y 1)))")
-  testMacroEval([], eBlock(list{exampleStatement}), "Ok({y: 1})")
+  testMacro([], eBlock(list{exampleStatementY}), "Ok((:$$bindExpression (:$let :y 1)))")
+  testMacroEval([], eBlock(list{exampleStatementY}), "Ok({y: 1})")
   // Block with a statement and an expression
   testMacro(
     [],
-    eBlock(list{exampleStatement, exampleExpressionY}),
+    eBlock(list{exampleStatementY, exampleExpressionY}),
     "Ok((:$$bindExpression (:$$bindStatement (:$let :y 1)) :y))",
   )
-  testMacroEval([], eBlock(list{exampleStatement, exampleExpressionY}), "Ok(1)")
+  testMacroEval([], eBlock(list{exampleStatementY, exampleExpressionY}), "Ok(1)")
   // Block with a statement and another statement
   testMacro(
     [],
-    eBlock(list{exampleStatement, exampleStatementZ}),
+    eBlock(list{exampleStatementY, exampleStatementZ}),
     "Ok((:$$bindExpression (:$$bindStatement (:$let :y 1)) (:$let :z :y)))",
   )
-  testMacroEval([], eBlock(list{exampleStatement, exampleStatementZ}), "Ok({y: 1,z: 1})")
+  testMacroEval([], eBlock(list{exampleStatementY, exampleStatementZ}), "Ok({y: 1,z: 1})")
   // Block inside a block
   testMacro(
     [],
