@@ -11,7 +11,7 @@ let exampleStatementY = eLetStatement("y", eNumber(1.))
 let exampleStatementX = eLetStatement("y", eSymbol("x"))
 let exampleStatementZ = eLetStatement("z", eSymbol("y"))
 
-// If it is not a mactro then it is not expanded
+// If it is not a macro then it is not expanded
 testMacro([], exampleExpression, "Ok(1)")
 
 describe("bindStatement", () => {
