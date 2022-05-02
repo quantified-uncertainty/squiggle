@@ -4,4 +4,5 @@ module LogScoring = {
   let logScore = (a: float, b: float): result<float, Operation.Error.t> => Ok(
     Js.Math.log2(Js.Math.abs_float(a /. b)),
   )
+  let multiply = (a: float, b: float): result<float, Operation.Error.t> => Ok(a *. b)
 }
