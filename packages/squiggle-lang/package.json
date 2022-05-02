@@ -57,7 +57,7 @@
     "nyc": "^15.1.0",
     "reanalyze": "^2.19.0",
     "ts-jest": "^27.1.4",
-    "ts-loader": "^9.2.8",
+    "ts-loader": "^9.3.0",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3",
     "webpack": "^5.72.0",
