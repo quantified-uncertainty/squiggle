@@ -212,9 +212,8 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
       a,
     )->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
-  | ("logScore", [EvDistribution(a), EvDistribution(b)]) => Some(
-      runGenericOperation(FromDist(ToScore(LogScore(b)), a)),
-    )
+  | ("logScore", [EvDistribution(a), EvDistribution(b)]) =>
+    Some(runGenericOperation(FromDist(ToScore(LogScore(b)), a)))
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
   | ("scaleLog", [EvDistribution(dist)]) =>

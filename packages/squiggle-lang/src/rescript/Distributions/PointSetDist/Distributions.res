@@ -33,7 +33,7 @@ module type dist = {
 
   let mean: t => float
   let variance: t => float
-  let logScore: (t,t) => result<float, Operation.Error.t>
+  let logScore: (t, t) => result<float, Operation.Error.t>
 }
 
 module Dist = (T: dist) => {
