@@ -43,6 +43,8 @@ function FieldFloat(Props: FieldFloatProps) {
 interface Props {
   initialSquiggleString?: string;
   height?: number;
+  showTypes?: boolean;
+  showControls?: boolean;
 }
 
 interface Props2 {
@@ -53,10 +55,6 @@ const ShowBox = styled.div<Props2>`
   border: 1px solid #eee;
   border-radius: 2px;
   height: ${(props) => props.height};
-`;
-
-const MyComponent = styled.div`
-  color: ${(props) => props.theme.colors.main};
 `;
 
 interface TitleProps {
@@ -81,6 +79,8 @@ const Col = styled.div``;
 let SquigglePlayground: FC<Props> = ({
   initialSquiggleString = "",
   height = 300,
+  showTypes = false,
+  showControls = false,
 }: Props) => {
   let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
   let [sampleCount, setSampleCount] = useState(1000);
@@ -112,6 +112,8 @@ let SquigglePlayground: FC<Props> = ({
               diagramCount={diagramCount}
               pointDistLength={pointDistLength}
               height={150}
+              showTypes={showTypes}
+              showControls={showControls}
             />
           </Display>
         </Col>
