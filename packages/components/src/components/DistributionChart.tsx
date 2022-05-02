@@ -6,6 +6,7 @@ import { distributionErrorToString } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
 import { ErrorBox } from "./ErrorBox";
+import { useSize } from 'react-use';
 
 let SquiggleVegaChart = createClassFromSpec({
   spec: chartSpecification as Spec,
@@ -22,39 +23,28 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   height,
   width,
 }: DistributionChartProps) => {
-  // This code with refs and effects is a bit messy, and it's because we were
-  // having a large amount of trouble getting vega charts to be responsive. This
-  // is the solution we ended up with
-  const ref = React.useRef(null);
-  const [actualWidth, setActualWidth] = React.useState(undefined);
 
-  React.useEffect(() => {
-    // @ts-ignore
-    let getWidth = () => (ref.current ? ref.current.offsetWidth : 0);
-
-    window.addEventListener("resize", () => setActualWidth(getWidth()));
-
-    setActualWidth(getWidth());
-  }, [ref.current]);
-
-  let shape = distribution.pointSet();
+  const [sized, _] = useSize((size) => {
+      let shape = distribution.pointSet();
+      let widthProp = width !== undefined ? width - 20 : size.width - 10;
   if (shape.tag === "Ok") {
-    let widthProp = width ? width - 20 : actualWidth;
-    console.log("widthProp", widthProp);
-    var result = (
+    return ( <div>
       <SquiggleVegaChart
         data={{ con: shape.value.continuous, dis: shape.value.discrete }}
         width={widthProp}
         height={height}
         actions={false}
       />
-    );
+      </div>
+      );
   } else {
-    var result = (
-      <ErrorBox heading="Distribution Error">
-        {distributionErrorToString(shape.value)}
-      </ErrorBox>
-    );
+      return (<div>
+        <ErrorBox heading="Distribution Error">
+          {distributionErrorToString(shape.value)}
+        </ErrorBox>
+      </div>
+      )
   }
-  return <div ref={ref}>{result}</div>;
+      })
+      return sized;
 };
