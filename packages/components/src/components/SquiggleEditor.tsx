@@ -32,16 +32,14 @@ export interface SquiggleEditorProps {
   diagramStop?: number;
   /** If the result is a function, how many points along the function it samples */
   diagramCount?: number;
-  /** The environment, other variables that were already declared */
-  environment?: unknown;
   /** when the environment changes. Used again for notebook magic*/
   onChange?(expr: squiggleExpression): void;
   /** The width of the element */
   width: number;
   /** Previous variable declarations */
-  bindings: bindings;
+  bindings?: bindings;
   /** JS Imports */
-  jsImports: jsImports;
+  jsImports?: jsImports;
 }
 
 const Input = styled.div`
@@ -52,7 +50,7 @@ const Input = styled.div`
 
 export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   initialSquiggleString = "",
-  width = 500,
+  width,
   sampleCount,
   outputXYPoints,
   kernelWidth,
@@ -61,7 +59,6 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   diagramStop,
   diagramCount,
   onChange,
-  environment,
   bindings = defaultBindings,
   jsImports = defaultImports,
 }: SquiggleEditorProps) => {
@@ -87,7 +84,6 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         diagramStart={diagramStart}
         diagramStop={diagramStop}
         diagramCount={diagramCount}
-        environment={environment}
         onChange={onChange}
         bindings={bindings}
         jsImports={jsImports}

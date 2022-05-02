@@ -52,7 +52,7 @@ let RecordKeyHeader = styled.h3``;
 export interface SquiggleItemProps {
   /** The input string for squiggle */
   expression: squiggleExpression;
-  width: number;
+  width?: number;
   height: number;
 }
 
@@ -105,7 +105,11 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox heading="Array">
           {expression.value.map((r) => (
-            <SquiggleItem expression={r} width={width - 20} height={50} />
+            <SquiggleItem
+              expression={r}
+              width={width ? width - 20 : width}
+              height={50}
+            />
           ))}
         </VariableBox>
       );
@@ -115,7 +119,11 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           {Object.entries(expression.value).map(([key, r]) => (
             <>
               <RecordKeyHeader>{key}</RecordKeyHeader>
-              <SquiggleItem expression={r} width={width - 20} height={50} />
+              <SquiggleItem
+                expression={r}
+                width={width ? width - 20 : width}
+                height={50}
+              />
             </>
           ))}
         </VariableBox>
@@ -144,8 +152,6 @@ export interface SquiggleChartProps {
   diagramStop?: number;
   /** If the result is a function, how many points along the function it samples */
   diagramCount?: number;
-  /** variables declared before this expression */
-  environment?: unknown;
   /** When the environment changes */
   onChange?(expr: squiggleExpression): void;
   /** CSS width of the element */
@@ -171,7 +177,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   height = 60,
   bindings = defaultBindings,
   jsImports = defaultImports,
-  width = NaN,
+  width,
 }: SquiggleChartProps) => {
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,

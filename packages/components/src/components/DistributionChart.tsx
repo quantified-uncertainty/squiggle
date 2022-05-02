@@ -6,7 +6,6 @@ import { distributionErrorToString } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
 import { ErrorBox } from "./ErrorBox";
-import styled from "styled-components";
 
 let SquiggleVegaChart = createClassFromSpec({
   spec: chartSpecification as Spec,
@@ -14,18 +13,34 @@ let SquiggleVegaChart = createClassFromSpec({
 
 type DistributionChartProps = {
   distribution: Distribution;
-  width: number;
+  width?: number;
   height: number;
 };
 
 export const DistributionChart: React.FC<DistributionChartProps> = ({
   distribution,
-  width,
   height,
+  width,
 }: DistributionChartProps) => {
+  // This code with refs and effects is a bit messy, and it's because we were
+  // having a large amount of trouble getting vega charts to be responsive. This
+  // is the solution we ended up with
+  const ref = React.useRef(null);
+  const [actualWidth, setActualWidth] = React.useState(undefined);
+
+  React.useEffect(() => {
+    // @ts-ignore
+    let getWidth = () => (ref.current ? ref.current.offsetWidth : 0);
+
+    window.addEventListener("resize", () => setActualWidth(getWidth()));
+
+    setActualWidth(getWidth());
+  }, [ref.current]);
+
   let shape = distribution.pointSet();
   if (shape.tag === "Ok") {
-    let widthProp = width ? width - 20 : undefined;
+    let widthProp = width ? width - 20 : actualWidth;
+    console.log("widthProp", widthProp);
     var result = (
       <SquiggleVegaChart
         data={{ con: shape.value.continuous, dis: shape.value.discrete }}
@@ -41,5 +56,5 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       </ErrorBox>
     );
   }
-  return result;
+  return <div ref={ref}>{result}</div>;
 };
