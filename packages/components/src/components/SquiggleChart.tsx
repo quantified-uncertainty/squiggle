@@ -141,6 +141,8 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={50}
+              showTypes={showTypes}
+              showControls={showControls}
             />
           ))}
         </VariableBox>
@@ -155,6 +157,8 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
                 height={50}
+                showTypes={showTypes}
+                showControls={showControls}
               />
             </>
           ))}
