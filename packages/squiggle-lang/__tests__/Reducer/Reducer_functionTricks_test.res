@@ -72,4 +72,6 @@ describe("function trics", () => {
   testEvalToBe("y=2;g(x)=inspect(y)+1", "Ok({g: lambda(x=>internal code),y: 2})")
   MySkip.testEvalToBe("f(x) = x(x); f(f)", "????") // TODO: Infinite loop. Any solution? Catching proper exception or timeout?
   MySkip.testEvalToBe("f(x, x)=x+x; f(1,2)", "????") // TODO: Duplicate parameters
+  MySkip.testEvalToBe("myadd(x,y)=x+y; z=[add]; z[0](3,2)", "????") //TODO: to fix with new parser
+  MySkip.testEvalToBe("myaddd(x,y)=x+y; z={x: add}; z.x(3,2)", "????") //TODO: to fix with new parser
 })
