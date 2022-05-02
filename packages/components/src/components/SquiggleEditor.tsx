@@ -164,33 +164,43 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
     xyPointLength: outputXYPoints,
   };
   let [expression, setExpression] = React.useState(initialSquiggleString);
-  let squiggleResult = runPartial(
-    expression,
-    bindings,
-    samplingInputs,
-    jsImports
-  );
-  if (squiggleResult.tag == "Ok") {
-    if (onChange) onChange(squiggleResult.value);
-  }
+  let [error, setError] = React.useState<string | null>(null);
+
+  // Runs squiggle and updates state/calls props apprropriately
+  let runSquiggle = (newExpression: string) => {
+    let squiggleResult = runPartial(
+      newExpression,
+      bindings,
+      samplingInputs,
+      jsImports
+    );
+    if (squiggleResult.tag == "Ok") {
+      if (onChange) onChange(squiggleResult.value);
+      setError(null);
+    } else {
+      setError(errorValueToString(squiggleResult.value));
+    }
+  };
+
+  // Run this once on mount, so that the next cells can get relevent values
+  React.useEffect(() => runSquiggle(expression), []);
+
   return (
     <div>
       <Input>
         <CodeEditor
           value={expression}
-          onChange={setExpression}
+          onChange={(x) => {
+            // When the code changes, rerun squiggle and inform next cells
+            setExpression(x);
+            runSquiggle(x);
+          }}
           oneLine={true}
           showGutter={false}
           height={20}
         />
       </Input>
-      {squiggleResult.tag == "Error" ? (
-        <ErrorBox heading="Error">
-          {errorValueToString(squiggleResult.value)}
-        </ErrorBox>
-      ) : (
-        <></>
-      )}
+      {error !== null ? <ErrorBox heading="Error">{error}</ErrorBox> : <></>}
     </div>
   );
 };
