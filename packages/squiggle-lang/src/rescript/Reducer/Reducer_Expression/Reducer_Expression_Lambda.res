@@ -30,6 +30,6 @@ let applyParametersToLambda = (
   reducer(newExpression, bindings, environment)
 }
 
-let doLambdaCall = ((parameters, context, internal), args, environment, reducer) => {
-  applyParametersToLambda(internal, parameters, args, context, environment, reducer)
+let doLambdaCall = (lambdaValue: ExpressionValue.lambdaValue, args, environment, reducer) => {
+  applyParametersToLambda(lambdaValue.body, lambdaValue.parameters, args, lambdaValue.context, environment, reducer)
 }
