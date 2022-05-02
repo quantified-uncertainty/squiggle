@@ -1,7 +1,7 @@
 import { testRun } from "./TestHelpers";
 
 describe("KL divergence", () => {
-  test("by integral solver agrees with analytical", () => {
+  test.skip("by integral solver agrees with analytical", () => {
     let squiggleStringKL = `prediction=normal(4, 1)
              answer=normal(1,1)
              logSubtraction=dotSubtract(scaleLog(answer),scaleLog(prediction))
