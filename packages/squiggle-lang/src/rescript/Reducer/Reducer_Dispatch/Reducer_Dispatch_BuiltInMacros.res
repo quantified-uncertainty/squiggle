@@ -41,12 +41,7 @@ let dispatchMacroCall = (
   let doBindExpression = (bindingExpr: expression, statement: expression, environment) =>
     switch statement {
     | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$let")), symbolExpr, statement}) => {
-        let rExternalBindingsValue = reduceExpression(
-          bindingExpr,
-          Belt.Map.String.fromArray([("x", ExpressionValue.EvNumber(666.))]),
-          // bindingsToHandDown,
-          environment,
-        )
+        let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
 
         rExternalBindingsValue->Result.flatMap(externalBindingsValue => {
           let newBindings = Bindings.fromValue(externalBindingsValue)

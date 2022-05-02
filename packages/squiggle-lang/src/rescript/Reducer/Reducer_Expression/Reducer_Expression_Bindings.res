@@ -79,3 +79,6 @@ and checkIfCallable = (evValue: expressionValue) =>
   | EvCall(_) | EvLambda(_) => evValue->Ok
   | _ => ErrorValue.RENotAFunction(ExpressionValue.toString(evValue))->Error
   }
+
+let toString = (bindings: ExpressionT.bindings) => 
+  bindings->toExternalBindings->ExpressionValue.EvRecord->ExpressionValue.toString
