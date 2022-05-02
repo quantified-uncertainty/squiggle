@@ -40,6 +40,8 @@ export interface SquiggleEditorProps {
   bindings?: bindings;
   /** JS Imports */
   jsImports?: jsImports;
+  /** Whether to show detail about types of the returns, default false */
+  showTypes?: boolean;
 }
 
 const Input = styled.div`
@@ -61,6 +63,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   onChange,
   bindings = defaultBindings,
   jsImports = defaultImports,
+  showTypes = false,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
@@ -87,6 +90,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         onChange={onChange}
         bindings={bindings}
         jsImports={jsImports}
+        showTypes={showTypes}
       />
     </div>
   );
