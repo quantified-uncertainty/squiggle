@@ -159,7 +159,9 @@ Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distributio
 
 Creates a [log-normal distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) with the given mu and sigma.
 
-`Mu` and `sigma` can be difficult to directly reason about. Because of this complexity, we recommend typically using the <a href="#to">to</a> syntax instead of estimating `mu` and `sigma` directly.
+`Mu` and `sigma` represent the mean and standard deviation of the normal which results when
+you take the log of our lognormal distribution. They can be difficult to directly reason about.
+Because of this complexity, we recommend typically using the <a href="#to">to</a> syntax instead of estimating `mu` and `sigma` directly.
 
 <SquiggleEditor initialSquiggleString="lognormal(0, 0.7)" />
 

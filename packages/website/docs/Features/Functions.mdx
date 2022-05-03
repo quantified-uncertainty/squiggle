@@ -11,7 +11,9 @@ Here are the ways we combine distributions.
 
 ### Addition
 
-A horizontal right shift
+A horizontal right shift. The addition operation represents the distribution of the sum of
+the value of one random sample chosen from the first distribution and the value one random sample
+chosen from the second distribution.
 
 <SquiggleEditor
   initialSquiggleString={`dist1 = 1 to 10
@@ -21,7 +23,9 @@ dist1 + dist2`}
 
 ### Subtraction
 
-A horizontal left shift
+A horizontal left shift. A horizontal right shift. The substraction operation represents
+the distribution of the value of one random sample chosen from the first distribution minus
+the value of one random sample chosen from the second distribution.
 
 <SquiggleEditor
   initialSquiggleString={`dist1 = 1 to 10
@@ -31,7 +35,9 @@ dist1 - dist2`}
 
 ### Multiplication
 
-TODO: provide intuition pump for the semantics
+A proportional scaling. The addition operation represents the distribution of the multiplication of
+the value of one random sample chosen from the first distribution times the value one random sample
+chosen from the second distribution.
 
 <SquiggleEditor
   initialSquiggleString={`dist1 = 1 to 10
@@ -45,7 +51,11 @@ We also provide concatenation of two distributions as a syntax sugar for `*`
 
 ### Division
 
-TODO: provide intuition pump for the semantics
+A proportional scaling (normally a shrinking if the second distribution has values higher than 1).
+The addition operation represents the distribution of the division of
+the value of one random sample chosen from the first distribution over the value one random sample
+chosen from the second distribution. If the second distribution has some values near zero, it
+tends to be particularly unstable.
 
 <SquiggleEditor
   initialSquiggleString={`dist1 = 1 to 10
@@ -55,7 +65,9 @@ dist1 / dist2`}
 
 ### Exponentiation
 
-TODO: provide intuition pump for the semantics
+A projection over a contracted x-axis. The exponentiation operation represents the distribution of
+the exponentiation of the value of one random sample chosen from the first distribution to the power of
+the value one random sample chosen from the second distribution.
 
 <SquiggleEditor initialSquiggleString={`(0.1 to 1) ^ beta(2, 3)`} />
 
@@ -67,6 +79,8 @@ exp(dist)`}
 />
 
 ### Taking logarithms
+
+A projection over a stretched x-axis.
 
 <SquiggleEditor
   initialSquiggleString={`dist = triangular(1,2,3)
@@ -92,6 +106,8 @@ log(dist, x)`}
 - See [the current discourse](https://github.com/quantified-uncertainty/squiggle/issues/304)
 
 ### Pointwise addition
+
+For every point on the x-axis, operate the corresponding points in the y axis of the pdf.
 
 **Pointwise operations are done with `PointSetDist` internals rather than `SampleSetDist` internals**.
 
@@ -166,7 +182,8 @@ or all values lower than x. It is the inverse of `inv`.
 ### Inverse CDF
 
 The `inv(dist, prob)` gives the value x or which the probability for all values
-lower than x is equal to prob. It is the inverse of `cdf`.
+lower than x is equal to prob. It is the inverse of `cdf`. In the literature, it
+is also known as the quantiles function.
 
 <SquiggleEditor initialSquiggleString="inv(normal(0,1),0.5)" />
 
@@ -201,7 +218,7 @@ Or `PointSet` format
 
 Above, we saw the unary `toSampleSet`, which uses an internal hardcoded number of samples. If you'd like to provide the number of samples, it has a binary signature as well (floored)
 
-<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1, 100.1)" />
+<SquiggleEditor initialSquiggleString="[toSampleSet(0.1 to 1, 100.1), toSampleSet(0.1 to 1, 5000), toSampleSet(0.1 to 1, 20000)]" />
 
 #### Validity
 
@@ -241,7 +258,7 @@ You can cut off from the left
 
 You can cut off from the right
 
-<SquiggleEditor initialSquiggleString="truncateRight(0.1 to 1, 10)" />
+<SquiggleEditor initialSquiggleString="truncateRight(0.1 to 1, 0.5)" />
 
 You can cut off from both sides
 
