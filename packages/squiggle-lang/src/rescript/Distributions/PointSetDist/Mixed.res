@@ -302,9 +302,20 @@ module T = Dist({
   }
 
   let logScore = (base: t, reference: t) => {
-    combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference) |> E.R.fmap(
-      integralEndY,
-    )
+    let referenceIsZero = switch Distributions.Common.isZeroEverywhere(
+      PointSetTypes.Mixed(reference),
+    ) {
+    | Mixed(b) => b
+    | _ => false
+    }
+    if referenceIsZero {
+      Ok(0.0)
+    } else {
+      E.R2.bind(
+        combinePointwise(PointSetDist_Scoring.LogScoring.multiply, reference),
+        combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference),
+      ) |> E.R.fmap(integralEndY)
+    }
   }
 })
 

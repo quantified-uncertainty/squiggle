@@ -606,6 +606,9 @@ module A = {
   let filter = Js.Array.filter
   let joinWith = Js.Array.joinWith
 
+  let all = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) == length(xs)
+  let any = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) > 0
+
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
       optionals

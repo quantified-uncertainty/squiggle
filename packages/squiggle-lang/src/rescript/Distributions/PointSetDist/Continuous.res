@@ -271,12 +271,22 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
 
   let logScore = (base: t, reference: t) => {
-    E.R2.bind(
-      combinePointwise(PointSetDist_Scoring.LogScoring.multiply, reference),
-      combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference),
-    )
-    |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
-    |> E.R.fmap(integralEndY)
+    let referenceIsZero = switch Distributions.Common.isZeroEverywhere(
+      PointSetTypes.Continuous(reference),
+    ) {
+    | Continuous(b) => b
+    | _ => false
+    }
+    if referenceIsZero {
+      Ok(0.0)
+    } else {
+      E.R2.bind(
+        combinePointwise(PointSetDist_Scoring.LogScoring.multiply, reference),
+        combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference),
+      )
+      |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
+      |> E.R.fmap(integralEndY)
+    }
   }
 })
 
