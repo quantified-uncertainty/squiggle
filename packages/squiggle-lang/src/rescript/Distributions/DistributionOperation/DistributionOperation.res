@@ -9,6 +9,11 @@ type env = {
   xyPointLength: int,
 }
 
+let defaultEnv = {
+  sampleCount: 10000,
+  xyPointLength: 10000,
+}
+
 type outputType =
   | Dist(genericDist)
   | Float(float)

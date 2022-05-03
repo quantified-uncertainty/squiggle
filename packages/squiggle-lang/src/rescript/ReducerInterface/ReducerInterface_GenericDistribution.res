@@ -1,12 +1,12 @@
 module ExpressionValue = ReducerInterface_ExpressionValue
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
-let runGenericOperation = DistributionOperation.run(
-  ~env={
-    sampleCount: MagicNumbers.Environment.defaultSampleCount,
-    xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
-  },
-)
+let defaultEnv: DistributionOperation.env = {
+  sampleCount: MagicNumbers.Environment.defaultSampleCount,
+  xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
+}
+
+let runGenericOperation = DistributionOperation.run(~env=defaultEnv)
 
 module Helpers = {
   let arithmeticMap = r =>
@@ -28,14 +28,13 @@ module Helpers = {
   let catchAndConvertTwoArgsToDists = (args: array<expressionValue>): option<(
     DistributionTypes.genericDist,
     DistributionTypes.genericDist,
-  )> => {
+  )> =>
     switch args {
     | [EvDistribution(a), EvDistribution(b)] => Some((a, b))
     | [EvNumber(a), EvDistribution(b)] => Some((GenericDist.fromFloat(a), b))
     | [EvDistribution(a), EvNumber(b)] => Some((a, GenericDist.fromFloat(b)))
     | _ => None
     }
-  }
 
   let toFloatFn = (
     fnCall: DistributionTypes.DistributionOperation.toFloat,
@@ -120,7 +119,7 @@ module Helpers = {
     mixtureWithGivenWeights(distributions, weights)
   }
 
-  let mixture = (args: array<expressionValue>): DistributionOperation.outputType => {
+  let mixture = (args: array<expressionValue>): DistributionOperation.outputType =>
     switch E.A.last(args) {
     | Some(EvArray(b)) => {
         let weights = parseNumberArray(b)
@@ -140,7 +139,6 @@ module Helpers = {
       }
     | _ => GenDistError(ArgumentError("Last argument of mx must be array or distribution"))
     }
-  }
 }
 
 module SymbolicConstructors = {
@@ -176,7 +174,7 @@ module SymbolicConstructors = {
     }
 }
 
-let dispatchToGenericOutput = (call: ExpressionValue.functionCall): option<
+let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment): option<
   DistributionOperation.outputType,
 > => {
   let (fnName, args) = call
@@ -297,6 +295,6 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-let dispatch = call => {
-  dispatchToGenericOutput(call)->E.O2.fmap(genericOutputToReducerValue)
+let dispatch = (call, environment) => {
+  dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
 }

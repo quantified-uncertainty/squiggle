@@ -141,6 +141,8 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={50}
+              showTypes={showTypes}
+              showControls={showControls}
             />
           ))}
         </VariableBox>
@@ -155,10 +157,24 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
                 height={50}
+                showTypes={showTypes}
+                showControls={showControls}
               />
             </>
           ))}
         </VariableBox>
+      );
+    case "arraystring":
+      return (
+        <VariableBox heading="Array String" showTypes={showTypes}>
+          {expression.value.map((r) => `"${r}"`)}
+        </VariableBox>
+      );
+    case "lambda":
+      return (
+        <ErrorBox heading="No Viewer">
+          There is no viewer currently available for function types.
+        </ErrorBox>
       );
   }
 };

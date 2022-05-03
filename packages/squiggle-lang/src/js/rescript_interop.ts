@@ -3,10 +3,11 @@ import {
   mixedShape,
   sampleSetDist,
   genericDist,
-  samplingParams,
+  environment,
   symbolicDist,
   discreteShape,
   continuousShape,
+  lambdaValue,
 } from "../rescript/TypescriptInterface.gen";
 import { Distribution } from "./distribution";
 import { tagged, tag } from "./types";
@@ -19,31 +20,39 @@ export type rescriptExport =
       _0: rescriptExport[];
     }
   | {
-      TAG: 1; // EvBool
+      TAG: 1; // EvString
+      _0: string[];
+    }
+  | {
+      TAG: 2; // EvBool
       _0: boolean;
     }
   | {
-      TAG: 2; // EvCall
+      TAG: 3; // EvCall
       _0: string;
     }
   | {
-      TAG: 3; // EvDistribution
+      TAG: 4; // EvDistribution
       _0: rescriptDist;
     }
   | {
-      TAG: 4; // EvNumber
+      TAG: 5; // EvLambda
+      _0: lambdaValue;
+    }
+  | {
+      TAG: 6; // EvNumber
       _0: number;
     }
   | {
-      TAG: 5; // EvRecord
+      TAG: 7; // EvRecord
       _0: { [key: string]: rescriptExport };
     }
   | {
-      TAG: 6; // EvString
+      TAG: 8; // EvString
       _0: string;
     }
   | {
-      TAG: 7; // EvSymbol
+      TAG: 9; // EvSymbol
       _0: string;
     };
 
@@ -70,7 +79,9 @@ export type squiggleExpression =
   | tagged<"symbol", string>
   | tagged<"string", string>
   | tagged<"call", string>
+  | tagged<"lambda", lambdaValue>
   | tagged<"array", squiggleExpression[]>
+  | tagged<"arraystring", string[]>
   | tagged<"boolean", boolean>
   | tagged<"distribution", Distribution>
   | tagged<"number", number>
@@ -78,36 +89,40 @@ export type squiggleExpression =
 
 export function convertRawToTypescript(
   result: rescriptExport,
-  sampEnv: samplingParams
+  environment: environment
 ): squiggleExpression {
   switch (result.TAG) {
     case 0: // EvArray
       return tag(
         "array",
-        result._0.map((x) => convertRawToTypescript(x, sampEnv))
+        result._0.map((x) => convertRawToTypescript(x, environment))
       );
-    case 1: // EvBool
+    case 1: // EvArrayString
+      return tag("arraystring", result._0);
+    case 2: // EvBool
       return tag("boolean", result._0);
-    case 2: // EvCall
+    case 3: // EvCall
       return tag("call", result._0);
-    case 3: // EvDistribution
+    case 4: // EvDistribution
       return tag(
         "distribution",
         new Distribution(
           convertRawDistributionToGenericDist(result._0),
-          sampEnv
+          environment
         )
       );
-    case 4: // EvNumber
+    case 5: // EvDistribution
+      return tag("lambda", result._0);
+    case 6: // EvNumber
       return tag("number", result._0);
-    case 5: // EvRecord
+    case 7: // EvRecord
       return tag(
         "record",
-        _.mapValues(result._0, (x) => convertRawToTypescript(x, sampEnv))
+        _.mapValues(result._0, (x) => convertRawToTypescript(x, environment))
       );
-    case 6: // EvString
+    case 8: // EvString
       return tag("string", result._0);
-    case 7: // EvSymbol
+    case 9: // EvSymbol
       return tag("symbol", result._0);
   }
 }
@@ -141,15 +156,15 @@ export type jsValue =
 
 export function jsValueToBinding(value: jsValue): rescriptExport {
   if (typeof value === "boolean") {
-    return { TAG: 1, _0: value as boolean };
+    return { TAG: 2, _0: value as boolean };
   } else if (typeof value === "string") {
-    return { TAG: 6, _0: value as string };
+    return { TAG: 8, _0: value as string };
   } else if (typeof value === "number") {
-    return { TAG: 4, _0: value as number };
+    return { TAG: 6, _0: value as number };
   } else if (Array.isArray(value)) {
     return { TAG: 0, _0: value.map(jsValueToBinding) };
   } else {
     // Record
-    return { TAG: 5, _0: _.mapValues(value, jsValueToBinding) };
+    return { TAG: 7, _0: _.mapValues(value, jsValueToBinding) };
   }
 }
