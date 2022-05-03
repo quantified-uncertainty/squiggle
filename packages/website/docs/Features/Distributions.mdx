@@ -220,9 +220,12 @@ Creates a [uniform distribution](<https://en.wikipedia.org/wiki/Uniform_distribu
 
 Creates a discrete distribution with all of its probability mass at point `value`.
 
-Numbers are often cast into delta distributions automatically. For example, in the function, 
-`mixture(1,2,normal(5,2))`, the first two arguments will get converted into delta distributions 
-with values at 1 and 2. Therefore, `mixture(1,2,normal(5,2))` is the same as `mixture(delta(1), delta(2),normal(5,2))`
+Few Squiggle users call the function `delta()` directly. Numbers are converted into delta distributions automatically, when it is appropriate.
+
+For example, in the function `mixture(1,2,normal(5,2))`, the first two arguments will get converted into delta distributions
+with values at 1 and 2. Therefore, this is the same as `mixture(delta(1),delta(2),normal(5,2))`.
+
+`Delta()` distributions are currently the only discrete distributions accessible in Squiggle.
 
 <Tabs>
   <TabItem value="ex1" label="delta(3)" default>
@@ -234,8 +237,11 @@ with values at 1 and 2. Therefore, `mixture(1,2,normal(5,2))` is the same as `mi
   <TabItem value="ex2" label="normal(5,2) * 6">
     <SquiggleEditor initialSquiggleString="normal(5,2) * 6" />
   </TabItem>
-  <TabItem value="ex4" label="normal(5,2) .* 6">
-    <SquiggleEditor initialSquiggleString="normal(5,2) .* 6" />
+  <TabItem value="ex4" label="dotAdd(normal(5,2), 6)">
+    <SquiggleEditor initialSquiggleString="dotAdd(normal(5,2), 6)" />
+  </TabItem>
+  <TabItem value="ex5" label="dotMultiply(normal(5,2), 6)">
+    <SquiggleEditor initialSquiggleString="dotMultiply(normal(5,2), 6)" />
   </TabItem>
 </Tabs>
 
@@ -315,8 +321,6 @@ Creates an [exponential distribution](https://en.wikipedia.org/wiki/Exponential_
 
 Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_distribution) with the given low, mode, and high values.
 
-#### Validity
-
 ### Arguments
 
 - `low`: Number
@@ -336,3 +340,16 @@ Creates a sample set distribution using an array of samples.
 ### Arguments
 
 - `samples`: An array of at least 5 numbers.
+
+<Admonition type="caution" title="Caution!">
+  <p>
+    Samples are converted into{" "}
+    <a href="https://en.wikipedia.org/wiki/Probability_density_function">PDF</a>{" "}
+    shapes automatically using{" "}
+    <a href="https://en.wikipedia.org/wiki/Kernel_density_estimation">
+      kernel density estimation
+    </a>{" "}
+    and an approximated bandwidth. Eventually Squiggle will allow for more
+    specificity.
+  </p>
+</Admonition>
