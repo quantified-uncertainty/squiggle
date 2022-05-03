@@ -22,17 +22,19 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
 
 <Tabs>
   <TabItem value="ex1" label="5 to 10" default>
-    When `5 to 10` is entered, both numbers are positive, so it generates a
-    lognormal distribution with 5th and 95th percentiles at 5 and 10.
+    When <code>5 to 10</code> is entered, both numbers are positive, so it
+    generates a lognormal distribution with 5th and 95th percentiles at 5 and
+    10.
     <SquiggleEditor initialSquiggleString="5 to 10" />
   </TabItem>
   <TabItem value="ex3" label="to(5,10)">
-    `5 to 10` does the same thing as `to(5,10)`.
+    <code>5 to 10</code> does the same thing as <code>to(5,10)</code>.
     <SquiggleEditor initialSquiggleString="to(5,10)" />
   </TabItem>
   <TabItem value="ex2" label="-5 to 5">
-    When `-5 to 5` is entered, there's negative values, so it generates a normal
-    distribution. This has 5th and 95th percentiles at 5 and 10.
+    When <code>-5 to 5</code> is entered, there's negative values, so it
+    generates a normal distribution. This has 5th and 95th percentiles at 5 and
+    10.
     <SquiggleEditor initialSquiggleString="-5 to -3" />
   </TabItem>
   <TabItem value="ex4" label="1 to 10000">
@@ -173,9 +175,10 @@ Creates a [log-normal distribution](https://en.wikipedia.org/wiki/Log-normal_dis
     ❓ Understanding <bold>mu</bold> and <bold>sigma</bold>
   </summary>
   <p>
-    The log of `lognormal(mu, sigma)` is a normal distribution with mean `mu`
-    and standard deviation `sigma`. For example, these two distributions are
-    identical:
+    The log of <code>lognormal(mu, sigma)</code> is a normal distribution with
+    mean <code>mu</code>
+    and standard deviation <code>sigma</code>. For example, these two distributions
+    are identical:
   </p>
   <SquiggleEditor
     initialSquiggleString={`normalMean = 10
