@@ -3,7 +3,7 @@ import {
   genericDist,
   continuousShape,
   discreteShape,
-  samplingParams,
+  environment,
   distributionError,
   toPointSet,
   distributionErrorToString,
@@ -51,9 +51,9 @@ export type shape = {
 
 export class Distribution {
   t: genericDist;
-  env: samplingParams;
+  env: environment;
 
-  constructor(t: genericDist, env: samplingParams) {
+  constructor(t: genericDist, env: environment) {
     this.t = t;
     this.env = env;
     return this;

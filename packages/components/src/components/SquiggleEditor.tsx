@@ -40,6 +40,10 @@ export interface SquiggleEditorProps {
   bindings?: bindings;
   /** JS Imports */
   jsImports?: jsImports;
+  /** Whether to show detail about types of the returns, default false */
+  showTypes?: boolean;
+  /** Whether to give users access to graph controls */
+  showControls: boolean;
 }
 
 const Input = styled.div`
@@ -50,7 +54,7 @@ const Input = styled.div`
 
 export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   initialSquiggleString = "",
-  width = 500,
+  width,
   sampleCount,
   outputXYPoints,
   kernelWidth,
@@ -61,6 +65,8 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   onChange,
   bindings = defaultBindings,
   jsImports = defaultImports,
+  showTypes = false,
+  showControls = false,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
@@ -87,6 +93,8 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         onChange={onChange}
         bindings={bindings}
         jsImports={jsImports}
+        showTypes={showTypes}
+        showControls={showControls}
       />
     </div>
   );
@@ -145,6 +153,8 @@ export interface SquigglePartialProps {
   bindings?: bindings;
   /** Variables imported from js */
   jsImports?: jsImports;
+  /** Whether to give users access to graph controls */
+  showControls?: boolean;
 }
 
 export let SquigglePartial: React.FC<SquigglePartialProps> = ({
@@ -160,15 +170,25 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
     xyPointLength: outputXYPoints,
   };
   let [expression, setExpression] = React.useState(initialSquiggleString);
-  let squiggleResult = runPartial(
-    expression,
-    bindings,
-    samplingInputs,
-    jsImports
-  );
-  if (squiggleResult.tag == "Ok") {
-    if (onChange) onChange(squiggleResult.value);
-  }
+  let [error, setError] = React.useState<string | null>(null);
+
+  let runSquiggleAndUpdateBindings = () => {
+    let squiggleResult = runPartial(
+      expression,
+      bindings,
+      samplingInputs,
+      jsImports
+    );
+    if (squiggleResult.tag == "Ok") {
+      if (onChange) onChange(squiggleResult.value);
+      setError(null);
+    } else {
+      setError(errorValueToString(squiggleResult.value));
+    }
+  };
+
+  React.useEffect(runSquiggleAndUpdateBindings, [expression]);
+
   return (
     <div>
       <Input>
@@ -180,13 +200,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
           height={20}
         />
       </Input>
-      {squiggleResult.tag == "Error" ? (
-        <ErrorBox heading="Error">
-          {errorValueToString(squiggleResult.value)}
-        </ErrorBox>
-      ) : (
-        <></>
-      )}
+      {error !== null ? <ErrorBox heading="Error">{error}</ErrorBox> : <></>}
     </div>
   );
 };

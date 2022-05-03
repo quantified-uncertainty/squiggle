@@ -5,37 +5,50 @@
 module Extra_Array = Reducer_Extra_Array
 module ErrorValue = Reducer_ErrorValue
 
+@genType.opaque
+type internalCode = Object
+
 @genType
 type rec expressionValue =
   | EvArray(array<expressionValue>)
+  | EvArrayString(array<string>)
   | EvBool(bool)
   | EvCall(string) // External function call
   | EvDistribution(DistributionTypes.genericDist)
+  | EvLambda(lambdaValue)
   | EvNumber(float)
-  | EvRecord(Js.Dict.t<expressionValue>)
+  | EvRecord(record)
   | EvString(string)
   | EvSymbol(string)
+and record = Js.Dict.t<expressionValue>
+and externalBindings = record
+and lambdaValue = {
+  parameters: array<string>,
+  context: externalBindings,
+  body: internalCode,
+}
 
 @genType
-type externalBindings = Js.Dict.t<expressionValue>
+let defaultExternalBindings: externalBindings = Js.Dict.empty()
 
 type functionCall = (string, array<expressionValue>)
 
 let rec toString = aValue =>
   switch aValue {
+  | EvArray(anArray) => {
+      let args = anArray->Js.Array2.map(each => toString(each))->Js.Array2.toString
+      `[${args}]`
+    }
+  | EvArrayString(anArray) => {
+      let args = anArray->Js.Array2.toString
+      `[${args}]`
+    }
   | EvBool(aBool) => Js.String.make(aBool)
   | EvCall(fName) => `:${fName}`
+  | EvLambda(lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
   | EvNumber(aNumber) => Js.String.make(aNumber)
   | EvString(aString) => `'${aString}'`
   | EvSymbol(aString) => `:${aString}`
-  | EvArray(anArray) => {
-      let args =
-        anArray
-        ->Belt.Array.map(each => toString(each))
-        ->Extra_Array.interperse(", ")
-        ->Js.String.concatMany("")
-      `[${args}]`
-    }
   | EvRecord(aRecord) => aRecord->toStringRecord
   | EvDistribution(dist) => GenericDist.toString(dist)
   }
@@ -43,26 +56,27 @@ and toStringRecord = aRecord => {
   let pairs =
     aRecord
     ->Js.Dict.entries
-    ->Belt.Array.map(((eachKey, eachValue)) => `${eachKey}: ${toString(eachValue)}`)
-    ->Extra_Array.interperse(", ")
-    ->Js.String.concatMany("")
+    ->Js.Array2.map(((eachKey, eachValue)) => `${eachKey}: ${toString(eachValue)}`)
+    ->Js.Array2.toString
   `{${pairs}}`
 }
 
 let toStringWithType = aValue =>
   switch aValue {
+  | EvArray(_) => `Array::${toString(aValue)}`
+  | EvArrayString(_) => `ArrayString::${toString(aValue)}`
   | EvBool(_) => `Bool::${toString(aValue)}`
   | EvCall(_) => `Call::${toString(aValue)}`
+  | EvDistribution(_) => `Distribution::${toString(aValue)}`
+  | EvLambda(_) => `Lambda::${toString(aValue)}`
   | EvNumber(_) => `Number::${toString(aValue)}`
+  | EvRecord(_) => `Record::${toString(aValue)}`
   | EvString(_) => `String::${toString(aValue)}`
   | EvSymbol(_) => `Symbol::${toString(aValue)}`
-  | EvArray(_) => `Array::${toString(aValue)}`
-  | EvRecord(_) => `Record::${toString(aValue)}`
-  | EvDistribution(_) => `Distribution::${toString(aValue)}`
   }
 
 let argsToString = (args: array<expressionValue>): string => {
-  args->Belt.Array.map(arg => arg->toString)->Extra_Array.interperse(", ")->Js.String.concatMany("")
+  args->Js.Array2.map(arg => arg->toString)->Js.Array2.toString
 }
 
 let toStringFunctionCall = ((fn, args)): string => `${fn}(${argsToString(args)})`
@@ -78,3 +92,9 @@ let toStringResultRecord = x =>
   | Ok(a) => `Ok(${toStringRecord(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
+
+@genType
+type environment = DistributionOperation.env
+
+@genType
+let defaultEnvironment: environment = DistributionOperation.defaultEnv

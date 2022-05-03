@@ -4,6 +4,9 @@ type env = {
   xyPointLength: int,
 }
 
+@genType
+let defaultEnv: env
+
 open DistributionTypes
 
 @genType
