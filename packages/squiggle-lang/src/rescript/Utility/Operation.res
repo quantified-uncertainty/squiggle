@@ -53,6 +53,7 @@ type operationError =
   | DivisionByZeroError
   | ComplexNumberError
   | InfinityError
+  | NegativeInfinityError
 
 @genType
 module Error = {
@@ -63,7 +64,8 @@ module Error = {
     switch err {
     | DivisionByZeroError => "Cannot divide by zero"
     | ComplexNumberError => "Operation returned complex result"
-    | InfinityError => "Operation returned + or - infinity"
+    | InfinityError => "Operation returned positive infinity"
+    | NegativeInfinityError => "Operation returned negative infinity"
     }
 }
 
@@ -89,7 +91,7 @@ let logarithm = (a: float, b: float): result<float, Error.t> =>
   } else if a > 0.0 && b > 0.0 {
     Ok(log(a) /. log(b))
   } else if a == 0.0 {
-    Error(InfinityError)
+    Error(NegativeInfinityError)
   } else {
     Error(ComplexNumberError)
   }

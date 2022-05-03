@@ -233,6 +233,5 @@ module T = Dist({
     combinePointwise(~fn=PointSetDist_Scoring.LogScoring.logScore, base, reference) |> E.R2.bind(
       integralEndYResult,
     )
-    // |> (r => Ok(r))
   }
 })
