@@ -12,7 +12,6 @@ type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 @genType
 type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
 
-
 @genType
 let evaluateUsingOptions: (
   ~environment: option<QuriSquiggleLang.ReducerInterface_ExpressionValue.environment>,
