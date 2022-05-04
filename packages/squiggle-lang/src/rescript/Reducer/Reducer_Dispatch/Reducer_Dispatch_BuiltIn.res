@@ -1,6 +1,9 @@
-module ExternalLibrary = ReducerInterface.ExternalLibrary
-module MathJs = Reducer_MathJs
 module Bindings = Reducer_Expression_Bindings
+module ExpressionT = Reducer_Expression_T
+module ExternalLibrary = ReducerInterface.ExternalLibrary
+module Lambda = Reducer_Expression_Lambda
+module MathJs = Reducer_MathJs
+module Result = Belt.Result
 open ReducerInterface.ExpressionValue
 open Reducer_ErrorValue
 
@@ -12,7 +15,10 @@ open Reducer_ErrorValue
 
 exception TestRescriptException
 
-let callInternal = (call: functionCall, _environment): result<'b, errorValue> => {
+let callInternal = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
+  'b,
+  errorValue,
+> => {
   let callMathJs = (call: functionCall): result<'b, errorValue> =>
     switch call {
     | ("javascriptraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
@@ -54,21 +60,6 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
     value->Ok
   }
 
-  /*
-    NOTE: This function is cancelled. The related issue is
-    https://github.com/webpack/webpack/issues/13435
- */
-  let inspectPerformance = (value: expressionValue, label: string) => {
-    // let _ = %raw("{performance} = require('perf_hooks')")
-    // let start = %raw(`performance.now()`)
-    // let finish = %raw(`performance.now()`)
-    // let performance = finish - start
-    // Js.log(`${label}: ${value->toString} performance: ${Js.String.make(performance)}ms`)
-    // TODO find a way of failing the hook gracefully, also needs a block parameter
-    Js.log(`${label}: ${value->toString}`)
-    value->Ok
-  }
-
   let doSetBindings = (
     externalBindings: externalBindings,
     symbol: string,
@@ -83,19 +74,65 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
 
   let doExportBindings = (externalBindings: externalBindings) => EvRecord(externalBindings)->Ok
 
+  let doKeepArray = (aValueArray, aLambdaValue) => {
+    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
+      rAcc->Result.flatMap(acc => {
+        let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
+        rNewElem->Result.map(newElem =>
+          switch newElem {
+          | EvBool(true) => list{elem, ...acc}
+          | _ => acc
+          }
+        )
+      })
+    )
+    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->EvArray)
+  }
+
+  let doMapArray = (aValueArray, aLambdaValue) => {
+    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
+      rAcc->Result.flatMap(acc => {
+        let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
+        rNewElem->Result.map(newElem => list{newElem, ...acc})
+      })
+    )
+    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->EvArray)
+  }
+
+  let doReduceArray = (aValueArray, initialValue, aLambdaValue) => {
+    aValueArray->Belt.Array.reduce(Ok(initialValue), (rAcc, elem) =>
+      rAcc->Result.flatMap(acc =>
+        Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, environment, reducer)
+      )
+    )
+  }
+
+  let doReduceReverseArray = (aValueArray, initialValue, aLambdaValue) => {
+    aValueArray->Belt.Array.reduceReverse(Ok(initialValue), (rAcc, elem) =>
+      rAcc->Result.flatMap(acc =>
+        Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, environment, reducer)
+      )
+    )
+  }
+
   switch call {
   | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
     arrayAtIndex(aValueArray, fIndex)
   | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
-  | ("$atIndex", [obj, index]) =>
-    (toStringWithType(obj) ++ "??~~~~" ++ toStringWithType(index))->EvString->Ok
   | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
-  | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
-  | ("inspect", [value]) => inspect(value)
-  | ("inspectPerformance", [value, EvString(label)]) => inspectPerformance(value, label)
+  | ("$exportBindings", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
   | ("$setBindings", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>
     doSetBindings(externalBindings, symbol, value)
-  | ("$exportBindings", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
+  | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
+  | ("inspect", [value]) => inspect(value)
+  | ("keep", [EvArray(aValueArray), EvLambda(aLambdaValue)]) =>
+    doKeepArray(aValueArray, aLambdaValue)
+  | ("map", [EvArray(aValueArray), EvLambda(aLambdaValue)]) => doMapArray(aValueArray, aLambdaValue)
+  | ("reduce", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>
+    doReduceArray(aValueArray, initialValue, aLambdaValue)
+  | ("reduceReverse", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>
+    doReduceReverseArray(aValueArray, initialValue, aLambdaValue)
+  | ("reverse", [EvArray(aValueArray)]) => aValueArray->Belt.Array.reverse->EvArray->Ok
   | call => callMathJs(call)
   }
 }
@@ -103,12 +140,16 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
 /*
   Reducer uses Result monad while reducing expressions
 */
-let dispatch = (call: functionCall, environment): result<expressionValue, errorValue> =>
+let dispatch = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
+  expressionValue,
+  errorValue,
+> =>
   try {
+    let callInternalWithReducer = (call, environment) => callInternal(call, environment, reducer)
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternal)
+    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternalWithReducer)
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   | _ => RETodo("unhandled rescript exception")->Error

@@ -55,6 +55,5 @@ let applyParametersToLambda = (
   )
 }
 
-let doLambdaCall = (lambdaValue: ExpressionValue.lambdaValue, args, environment, reducer) => {
+let doLambdaCall = (lambdaValue: ExpressionValue.lambdaValue, args, environment, reducer) =>
   applyParametersToLambda(lambdaValue, args, environment, reducer)
-}
