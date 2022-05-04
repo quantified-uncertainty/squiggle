@@ -132,6 +132,23 @@ let dispatchMacroCall = (
       eLambda(parameters, bindings->Bindings.toExternalBindings, lambdaDefinition),
     )->Ok
 
+  let doTernary = (
+    condition: expression,
+    ifTrue: expression,
+    ifFalse: expression,
+    bindings: ExpressionT.bindings,
+    environment,
+  ): result<expressionWithContext, errorValue> => {
+    let rCondition = reduceExpression(condition, bindings, environment)
+    rCondition->Result.flatMap(conditionValue =>
+      switch conditionValue {
+      | ExpressionValue.EvBool(false) => ExpressionWithContext.noContext(ifFalse)->Ok
+      | ExpressionValue.EvBool(true) => ExpressionWithContext.noContext(ifTrue)->Ok
+      | _ => REExpectedType("Boolean")->Error
+      }
+    )
+  }
+
   let expandExpressionList = (aList, bindings: ExpressionT.bindings, environment): result<
     expressionWithContext,
     errorValue,
@@ -162,6 +179,8 @@ let dispatchMacroCall = (
         lambdaDefinition,
       } =>
       doLambdaDefinition(bindings, parameters, lambdaDefinition)
+    | list{ExpressionT.EValue(EvCall("$$ternary")), condition, ifTrue, ifFalse} =>
+      doTernary(condition, ifTrue, ifFalse, bindings, environment)
     | _ => ExpressionWithContext.noContext(ExpressionT.EList(aList))->Ok
     }
 

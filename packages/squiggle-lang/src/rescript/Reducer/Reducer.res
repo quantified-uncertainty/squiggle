@@ -19,12 +19,7 @@ let foreignFunctionInterface = (
   argArray: array<expressionValue>,
   environment: ExpressionValue.environment,
 ) => {
-  Lambda.foreignFunctionInterface(
-    lambdaValue,
-    argArray,
-    environment,
-    Expression.reduceExpression,
-  )
+  Lambda.foreignFunctionInterface(lambdaValue, argArray, environment, Expression.reduceExpression)
 }
 
 let defaultEnvironment = ExpressionValue.defaultEnvironment
