@@ -54,7 +54,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
       </variableBox.Component>
     );
   } else {
-    return <>{children}</>;
+    return <div>{children}</div>;
   }
 };
 
