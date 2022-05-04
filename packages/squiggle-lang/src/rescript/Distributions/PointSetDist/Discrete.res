@@ -239,10 +239,9 @@ module T = Dist({
     if referenceIsZero {
       Ok(0.0)
     } else {
-      E.R2.bind(
-        combinePointwise(~fn=PointSetDist_Scoring.LogScoring.multiply, reference),
-        combinePointwise(~fn=PointSetDist_Scoring.LogScoring.logScore, base, reference),
-      ) |> E.R2.bind(integralEndYResult)
+      combinePointwise(~fn=PointSetDist_Scoring.LogScoring.logScore, base, reference) |> E.R2.bind(
+        integralEndYResult,
+      )
     }
   }
 })

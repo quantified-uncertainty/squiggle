@@ -311,10 +311,9 @@ module T = Dist({
     if referenceIsZero {
       Ok(0.0)
     } else {
-      E.R2.bind(
-        combinePointwise(PointSetDist_Scoring.LogScoring.multiply, reference),
-        combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference),
-      ) |> E.R.fmap(integralEndY)
+      combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference) |> E.R.fmap(
+        integralEndY,
+      )
     }
   }
 })

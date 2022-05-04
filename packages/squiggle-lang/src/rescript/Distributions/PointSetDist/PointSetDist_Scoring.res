@@ -8,7 +8,7 @@ module LogScoring = {
       Error(Operation.DivisionByZeroError)
     } else {
       let quot = a /. b
-      quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(logFn(quot))
+      quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(b *. logFn(quot))
     }
   let multiply = (a: float, b: float): result<float, Operation.Error.t> => Ok(a *. b)
 }
