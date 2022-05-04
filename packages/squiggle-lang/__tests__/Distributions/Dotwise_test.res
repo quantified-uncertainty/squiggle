@@ -9,7 +9,7 @@ describe("dotSubtract", () => {
   test("mean of normal minus exponential (unit)", () => {
     let mean = 0.0
     let rate = 10.0
-
+    exception MeanFailed
     let dotDifference = DistributionOperation.Constructors.pointwiseSubtract(
       ~env,
       mkNormal(mean, 1.0),
@@ -19,7 +19,7 @@ describe("dotSubtract", () => {
     let meanAnalytical = mean -. 1.0 /. rate
     switch meanResult {
     | Ok(meanValue) => meanValue->expect->toBeCloseTo(meanAnalytical)
-    | Error(err) => err->expect->toBe(DistributionTypes.OperationError(DivisionByZeroError))
+    | Error(_) => raise(MeanFailed)
     }
   })
   Skip.test("mean of normal minus exponential (property)", () => {

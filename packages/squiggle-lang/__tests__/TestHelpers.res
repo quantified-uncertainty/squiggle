@@ -70,4 +70,3 @@ let cauchyMakeR = (local, rate) => fmapGenDist(SymbolicDist.Cauchy.make(local, r
 let lognormalMakeR = (mu, sigma) => fmapGenDist(SymbolicDist.Lognormal.make(mu, sigma))
 let triangularMakeR = (low, mode, high) =>
   fmapGenDist(SymbolicDist.Triangular.make(low, mode, high))
-// let floatMakeR = x =>E.R.fmap(s => DistributionTypes.Symbolic(s), SymbolicDist.Float.make(x))
