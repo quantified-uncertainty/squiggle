@@ -311,9 +311,11 @@ module T = Dist({
     if referenceIsZero {
       Ok(0.0)
     } else {
-      combinePointwise(PointSetDist_Scoring.KLDivergence.logScore, base, reference) |> E.R.fmap(
-        integralEndY,
-      )
+      combinePointwise(
+        PointSetDist_Scoring.KLDivergence.logScore(~eps=MagicNumbers.Epsilon.ten),
+        base,
+        reference,
+      ) |> E.R.fmap(integralEndY)
     }
   }
 })

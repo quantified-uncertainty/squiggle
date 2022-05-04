@@ -280,7 +280,11 @@ module T = Dist({
     if referenceIsZero {
       Ok(0.0)
     } else {
-      combinePointwise(PointSetDist_Scoring.KLDivergence.logScore, base, reference)
+      combinePointwise(
+        PointSetDist_Scoring.KLDivergence.logScore(~eps=MagicNumbers.Epsilon.seven),
+        base,
+        reference,
+      )
       |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
       |> E.R.fmap(integralEndY)
     }
@@ -289,7 +293,8 @@ module T = Dist({
 
 let isNormalized = (t: t): bool => {
   let areaUnderIntegral = t |> updateIntegralCache(Some(T.integral(t))) |> T.integralEndY
-  areaUnderIntegral < 1. +. 1e-7 && areaUnderIntegral > 1. -. 1e-7
+  areaUnderIntegral < 1. +. MagicNumbers.Epsilon.seven &&
+    areaUnderIntegral > 1. -. MagicNumbers.Epsilon.seven
 }
 
 let downsampleEquallyOverX = (length, t): t =>

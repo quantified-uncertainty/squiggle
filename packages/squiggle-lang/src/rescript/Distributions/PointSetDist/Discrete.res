@@ -240,7 +240,7 @@ module T = Dist({
       Ok(0.0)
     } else {
       combinePointwise(
-        ~fn=PointSetDist_Scoring.KLDivergence.logScore,
+        ~fn=PointSetDist_Scoring.KLDivergence.logScore(~eps=MagicNumbers.Epsilon.ten),
         base,
         reference,
       ) |> E.R2.bind(integralEndYResult)
