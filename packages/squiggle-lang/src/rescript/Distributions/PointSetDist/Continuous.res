@@ -281,7 +281,7 @@ module T = Dist({
       Ok(0.0)
     } else {
       combinePointwise(
-        PointSetDist_Scoring.KLDivergence.logScore(~eps=MagicNumbers.Epsilon.seven),
+        PointSetDist_Scoring.KLDivergence.logScore(~eps=MagicNumbers.Epsilon.ten),
         base,
         reference,
       )

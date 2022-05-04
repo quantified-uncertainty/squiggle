@@ -6,7 +6,7 @@ module KLDivergence = {
     if a == 0.0 {
       Error(Operation.NegativeInfinityError)
     } else if b == 0.0 {
-      Error(Operation.DivisionByZeroError)
+      Ok(b)
     } else {
       let quot = a /. b
       quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(b *. logFn(quot))

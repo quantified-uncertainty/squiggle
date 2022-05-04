@@ -164,12 +164,7 @@ module Scale = {
     | #Multiply => Ok(a *. b)
     | #Divide => divide(a, b)
     | #Power => power(a, b)
-    | #Logarithm =>
-      if a < MagicNumbers.Epsilon.ten {
-        Error(NegativeInfinityError)
-      } else {
-        logarithm(a, b)
-      }
+    | #Logarithm => logarithm(a, b)
     | #LogarithmWithThreshold(eps) =>
       if a < eps {
         Ok(0.0)
