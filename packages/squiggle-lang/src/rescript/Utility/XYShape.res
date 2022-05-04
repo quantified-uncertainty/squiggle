@@ -4,6 +4,42 @@ type xyShape = {
   ys: array<float>,
 }
 
+type propertyName = string
+
+@genType
+type rec error =
+  | NotSorted(propertyName)
+  | IsEmpty(propertyName)
+  | NotFinite(propertyName, float)
+  | DifferentLengths({p1Name: string, p2Name: string, p1Length: int, p2Length: int})
+  | MultipleErrors(array<error>)
+
+@genType
+module Error = {
+  let mapErrorArrayToError = (errors: array<error>): option<error> => {
+    switch errors {
+    | [] => None
+    | [error] => Some(error)
+    | _ => Some(MultipleErrors(errors))
+    }
+  }
+
+  let rec toString = (t: error) =>
+    switch t {
+    | NotSorted(propertyName) => `${propertyName} is not sorted`
+    | IsEmpty(propertyName) => `${propertyName} is empty`
+    | NotFinite(propertyName, exampleValue) =>
+      `${propertyName} is not finite. Example value: ${E.Float.toString(exampleValue)}`
+    | DifferentLengths({p1Name, p2Name, p1Length, p2Length}) =>
+      `${p1Name} and ${p2Name} have different lengths. ${p1Name} has length ${E.I.toString(
+          p1Length,
+        )} and ${p2Name} has length ${E.I.toString(p2Length)}`
+    | MultipleErrors(errors) =>
+      `Multiple Errors: ${E.A2.fmap(errors, toString)->E.A2.fmap(r => `[${r}]`)
+          |> E.A.joinWith(", ")}`
+    }
+}
+
 @genType
 type interpolationStrategy = [
   | #Stepwise
@@ -60,6 +96,44 @@ module T = {
   let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> Belt.Array.unzip |> fromArray
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
+
+  module Validator = {
+    let fnName = "XYShape validate"
+    let notSortedError = (p: string): error => NotSorted(p)
+    let notFiniteError = (p, exampleValue): error => NotFinite(p, exampleValue)
+    let isEmptyError = (propertyName): error => IsEmpty(propertyName)
+    let differentLengthsError = (t): error => DifferentLengths({
+      p1Name: "Xs",
+      p2Name: "Ys",
+      p1Length: E.A.length(xs(t)),
+      p2Length: E.A.length(ys(t)),
+    })
+
+    let areXsSorted = (t: t) => E.A.Floats.isSorted(xs(t))
+    let areXsEmpty = (t: t) => E.A.length(xs(t)) == 0
+    let getNonFiniteXs = (t: t) => t->xs->E.A.Floats.getNonFinite
+    let getNonFiniteYs = (t: t) => t->ys->E.A.Floats.getNonFinite
+
+    let validate = (t: t) => {
+      let xsNotSorted = areXsSorted(t) ? None : Some(notSortedError("Xs"))
+      let xsEmpty = areXsEmpty(t) ? Some(isEmptyError("Xs")) : None
+      let differentLengths =
+        E.A.length(xs(t)) !== E.A.length(ys(t)) ? Some(differentLengthsError(t)) : None
+      let xsNotFinite = getNonFiniteXs(t)->E.O2.fmap(notFiniteError("Xs"))
+      let ysNotFinite = getNonFiniteYs(t)->E.O2.fmap(notFiniteError("Ys"))
+      [xsNotSorted, xsEmpty, differentLengths, xsNotFinite, ysNotFinite]
+      ->E.A.O.concatSomes
+      ->Error.mapErrorArrayToError
+    }
+  }
+
+  let make = (~xs: array<float>, ~ys: array<float>) => {
+    let attempt: t = {xs: xs, ys: ys}
+    switch Validator.validate(attempt) {
+    | Some(error) => Error(error)
+    | None => Ok(attempt)
+    }
+  }
 }
 
 module Ts = {

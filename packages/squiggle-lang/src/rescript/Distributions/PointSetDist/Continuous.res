@@ -156,8 +156,10 @@ let reduce = (
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
   fn: (float, float) => result<float, 'e>,
   continuousShapes,
-): result<t, 'e> =>
-  continuousShapes |> E.A.R.foldM(combinePointwise(~integralSumCachesFn, fn), empty)
+): result<t, 'e> => {
+  let merge = combinePointwise(~integralSumCachesFn, fn)
+  continuousShapes |> E.A.R.foldM(merge, empty)
+}
 
 let mapYResult = (
   ~integralSumCacheFn=_ => None,

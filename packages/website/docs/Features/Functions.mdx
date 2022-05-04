@@ -5,131 +5,15 @@ sidebar_position: 7
 
 import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
-_The source of truth for this document is [this file of code](https://github.com/quantified-uncertainty/squiggle/blob/develop/packages/squiggle-lang/src/rescript/ReducerInterface/ReducerInterface_GenericDistribution.res)_
-
-## Inventory distributions
-
-We provide starter distributions, computed symbolically.
-
-### Normal distribution
-
-The `normal(mean, sd)` function creates a normal distribution with the given mean
-and standard deviation.
-
-<SquiggleEditor initialSquiggleString="normal(5, 1)" />
-
-#### Validity
-
-- `sd > 0`
-
-### Uniform distribution
-
-The `uniform(low, high)` function creates a uniform distribution between the
-two given numbers.
-
-<SquiggleEditor initialSquiggleString="uniform(3, 7)" />
-
-#### Validity
-
-- `low < high`
-
-### Lognormal distribution
-
-The `lognormal(mu, sigma)` returns the log of a normal distribution with parameters
-`mu` and `sigma`. The log of `lognormal(mu, sigma)` is a normal distribution with mean `mu` and standard deviation `sigma`.
-
-<SquiggleEditor initialSquiggleString="lognormal(0, 0.7)" />
-
-An alternative format is also available. The `to` notation creates a lognormal
-distribution with a 90% confidence interval between the two numbers. We add
-this convenience as lognormal distributions are commonly used in practice.
-
-<SquiggleEditor initialSquiggleString="2 to 10" />
-
-#### Future feature:
-
-Furthermore, it's also possible to create a lognormal from it's actual mean
-and standard deviation, using `lognormalFromMeanAndStdDev`.
-
-TODO: interpreter/parser doesn't provide this in current `develop` branch
-
-<SquiggleEditor initialSquiggleString="lognormalFromMeanAndStdDev(20, 10)" />
-
-#### Validity
-
-- `sigma > 0`
-- In `x to y` notation, `x < y`
-
-### Beta distribution
-
-The `beta(a, b)` function creates a beta distribution with parameters `a` and `b`:
-
-<SquiggleEditor initialSquiggleString="beta(10, 20)" />
-
-#### Validity
-
-- `a > 0`
-- `b > 0`
-- Empirically, we have noticed that numerical instability arises when `a < 1` or `b < 1`
-
-### Exponential distribution
-
-The `exponential(rate)` function creates an exponential distribution with the given
-rate.
-
-<SquiggleEditor initialSquiggleString="exponential(1.11)" />
-
-#### Validity
-
-- `rate > 0`
-
-### Triangular distribution
-
-The `triangular(a,b,c)` function creates a triangular distribution with lower
-bound `a`, mode `b` and upper bound `c`.
-
-#### Validity
-
-- `a < b < c`
-
-<SquiggleEditor initialSquiggleString="triangular(1, 2, 4)" />
-
-### Scalar (constant dist)
-
-Squiggle, when the context is right, automatically casts a float to a constant distribution.
-
 ## Operating on distributions
 
 Here are the ways we combine distributions.
 
-### Mixture of distributions
-
-The `mixture` function combines 2 or more other distributions to create a weighted
-combination of the two. The first positional arguments represent the distributions
-to be combined, and the last argument is how much to weigh every distribution in the
-combination.
-
-<SquiggleEditor initialSquiggleString="mixture(uniform(0,1), normal(1,1), [0.5, 0.5])" />
-
-It's possible to create discrete distributions using this method.
-
-<SquiggleEditor initialSquiggleString="mixture(0, 1, [0.2,0.8])" />
-
-As well as mixed distributions:
-
-<SquiggleEditor initialSquiggleString="mixture(3, 8, 1 to 10, [0.2, 0.3, 0.5])" />
-
-An alias of `mixture` is `mx`
-
-#### Validity
-
-Using javascript's variable arguments notation, consider `mx(...dists, weights)`:
-
-- `dists.length == weights.length`
-
 ### Addition
 
-A horizontal right shift
+A horizontal right shift. The addition operation represents the distribution of the sum of
+the value of one random sample chosen from the first distribution and the value one random sample
+chosen from the second distribution.
 
 <SquiggleEditor
   initialSquiggleString={`dist1 = 1 to 10
@@ -139,7 +23,9 @@ dist1 + dist2`}
 
 ### Subtraction
 
-A horizontal left shift
+A horizontal left shift. A horizontal right shift. The substraction operation represents
+the distribution of the value of one random sample chosen from the first distribution minus
+the value of one random sample chosen from the second distribution.
 
 <SquiggleEditor
   initialSquiggleString={`dist1 = 1 to 10
@@ -149,7 +35,9 @@ dist1 - dist2`}
 
 ### Multiplication
 
-TODO: provide intuition pump for the semantics
+A proportional scaling. The addition operation represents the distribution of the multiplication of
+the value of one random sample chosen from the first distribution times the value one random sample
+chosen from the second distribution.
 
 <SquiggleEditor
   initialSquiggleString={`dist1 = 1 to 10
@@ -163,7 +51,11 @@ We also provide concatenation of two distributions as a syntax sugar for `*`
 
 ### Division
 
-TODO: provide intuition pump for the semantics
+A proportional scaling (normally a shrinking if the second distribution has values higher than 1).
+The addition operation represents the distribution of the division of
+the value of one random sample chosen from the first distribution over the value one random sample
+chosen from the second distribution. If the second distribution has some values near zero, it
+tends to be particularly unstable.
 
 <SquiggleEditor
   initialSquiggleString={`dist1 = 1 to 10
@@ -173,7 +65,9 @@ dist1 / dist2`}
 
 ### Exponentiation
 
-TODO: provide intuition pump for the semantics
+A projection over a contracted x-axis. The exponentiation operation represents the distribution of
+the exponentiation of the value of one random sample chosen from the first distribution to the power of
+the value one random sample chosen from the second distribution.
 
 <SquiggleEditor initialSquiggleString={`(0.1 to 1) ^ beta(2, 3)`} />
 
@@ -185,6 +79,8 @@ exp(dist)`}
 />
 
 ### Taking logarithms
+
+A projection over a stretched x-axis.
 
 <SquiggleEditor
   initialSquiggleString={`dist = triangular(1,2,3)
@@ -210,6 +106,8 @@ log(dist, x)`}
 - See [the current discourse](https://github.com/quantified-uncertainty/squiggle/issues/304)
 
 ### Pointwise addition
+
+For every point on the x-axis, operate the corresponding points in the y axis of the pdf.
 
 **Pointwise operations are done with `PointSetDist` internals rather than `SampleSetDist` internals**.
 
@@ -242,8 +140,8 @@ dist1 .* dist2`}
 ### Pointwise division
 
 <SquiggleEditor
-  initialSquiggleString={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
+  initialSquiggleString={`dist1 = uniform(0,20)
+dist2 = normal(10,8)
 dist1 ./ dist2`}
 />
 
@@ -284,7 +182,8 @@ or all values lower than x. It is the inverse of `inv`.
 ### Inverse CDF
 
 The `inv(dist, prob)` gives the value x or which the probability for all values
-lower than x is equal to prob. It is the inverse of `cdf`.
+lower than x is equal to prob. It is the inverse of `cdf`. In the literature, it
+is also known as the quantiles function.
 
 <SquiggleEditor initialSquiggleString="inv(normal(0,1),0.5)" />
 
@@ -315,6 +214,16 @@ Or `PointSet` format
 
 <SquiggleEditor initialSquiggleString="toPointSet(normal(5, 10))" />
 
+### `toSampleSet` has two signatures
+
+Above, we saw the unary `toSampleSet`, which uses an internal hardcoded number of samples. If you'd like to provide the number of samples, it has a binary signature as well (floored)
+
+<SquiggleEditor initialSquiggleString="[toSampleSet(0.1 to 1, 100.1), toSampleSet(0.1 to 1, 5000), toSampleSet(0.1 to 1, 20000)]" />
+
+#### Validity
+
+- Second argument to `toSampleSet` must be a number.
+
 ## Normalization
 
 Some distribution operations (like horizontal shift) return an unnormalized distriibution.
@@ -333,18 +242,6 @@ We provide a predicate `isNormalized`, for when we have simple control flow
 
 - Input to `isNormalized` must be a dist
 
-## Convert any distribution to a sample set distribution
-
-`toSampleSet` has two signatures
-
-It is unary when you use an internal hardcoded number of samples
-
-<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1)" />
-
-And binary when you provide a number of samples (floored)
-
-<SquiggleEditor initialSquiggleString="toSampleSet(0.1 to 1, 100)" />
-
 ## `inspect`
 
 You may like to debug by right clicking your browser and using the _inspect_ functionality on the webpage, and viewing the _console_ tab. Then, wrap your squiggle output with `inspect` to log an internal representation.
@@ -361,7 +258,7 @@ You can cut off from the left
 
 You can cut off from the right
 
-<SquiggleEditor initialSquiggleString="truncateRight(0.1 to 1, 10)" />
+<SquiggleEditor initialSquiggleString="truncateRight(0.1 to 1, 0.5)" />
 
 You can cut off from both sides
 

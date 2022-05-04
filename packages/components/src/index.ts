@@ -1,7 +1,9 @@
 export { SquiggleChart } from "./components/SquiggleChart";
 export {
   SquiggleEditor,
+  SquigglePartial,
   renderSquiggleEditorToDom,
+  renderSquigglePartialToDom,
 } from "./components/SquiggleEditor";
 import SquigglePlayground, {
   renderSquigglePlaygroundToDom,

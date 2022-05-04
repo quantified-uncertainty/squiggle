@@ -1,11 +1,9 @@
 import _ from "lodash";
-import React, { FC, useState } from "react";
+import React, { FC, ReactElement, useState } from "react";
 import ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import CodeEditor from "./CodeEditor";
-import { Form, Input, Row, Col } from "antd";
 import styled from "styled-components";
-import "antd/dist/antd.css";
 
 interface FieldFloatProps {
   label: string;
@@ -14,10 +12,19 @@ interface FieldFloatProps {
   onChange: (value: number) => void;
 }
 
+const Input = styled.input``;
+
+const FormItem = (props: { label: string; children: ReactElement }) => (
+  <div>
+    <label>{props.label}</label>
+    {props.children}
+  </div>
+);
+
 function FieldFloat(Props: FieldFloatProps) {
   let [contents, setContents] = useState(Props.value + "");
   return (
-    <Form.Item label={Props.label}>
+    <FormItem label={Props.label}>
       <Input
         value={contents}
         className={Props.className ? Props.className : ""}
@@ -29,13 +36,15 @@ function FieldFloat(Props: FieldFloatProps) {
           }
         }}
       />
-    </Form.Item>
+    </FormItem>
   );
 }
 
 interface Props {
   initialSquiggleString?: string;
   height?: number;
+  showTypes?: boolean;
+  showControls?: boolean;
 }
 
 interface Props2 {
@@ -46,10 +55,6 @@ const ShowBox = styled.div<Props2>`
   border: 1px solid #eee;
   border-radius: 2px;
   height: ${(props) => props.height};
-`;
-
-const MyComponent = styled.div`
-  color: ${(props) => props.theme.colors.main};
 `;
 
 interface TitleProps {
@@ -65,9 +70,17 @@ const Display = styled.div<TitleProps>`
   max-height: ${(props) => props.maxHeight}px;
 `;
 
+const Row = styled.div`
+  display: grid;
+  grid-template-columns: 50% 50%;
+`;
+const Col = styled.div``;
+
 let SquigglePlayground: FC<Props> = ({
   initialSquiggleString = "",
   height = 300,
+  showTypes = false,
+  showControls = false,
 }: Props) => {
   let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
   let [sampleCount, setSampleCount] = useState(1000);
@@ -79,7 +92,7 @@ let SquigglePlayground: FC<Props> = ({
   return (
     <ShowBox height={height}>
       <Row>
-        <Col span={12}>
+        <Col>
           <CodeEditor
             value={squiggleString}
             onChange={setSquiggleString}
@@ -88,7 +101,7 @@ let SquigglePlayground: FC<Props> = ({
             height={height - 3}
           />
         </Col>
-        <Col span={12}>
+        <Col>
           <Display maxHeight={height - 3}>
             <SquiggleChart
               squiggleString={squiggleString}
@@ -99,6 +112,8 @@ let SquigglePlayground: FC<Props> = ({
               diagramCount={diagramCount}
               pointDistLength={pointDistLength}
               height={150}
+              showTypes={showTypes}
+              showControls={showControls}
             />
           </Display>
         </Col>

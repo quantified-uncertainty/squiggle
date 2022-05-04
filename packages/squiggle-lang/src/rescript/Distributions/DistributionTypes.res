@@ -11,7 +11,7 @@ type error =
   | NotYetImplemented
   | Unreachable
   | DistributionVerticalShiftIsInvalid
-  | TooFewSamples
+  | SampleSetError(SampleSetDist.sampleSetError)
   | ArgumentError(string)
   | OperationError(Operation.Error.t)
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
@@ -19,6 +19,7 @@ type error =
   | RequestedStrategyInvalidError(string)
   | LogarithmOfDistributionError(string)
   | OtherError(string)
+  | XYShapeError(XYShape.error)
 
 @genType
 module Error = {
@@ -34,21 +35,20 @@ module Error = {
     | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift is Invalid"
     | ArgumentError(s) => `Argument Error ${s}`
     | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
-    | TooFewSamples => "Too Few Samples"
+    | SampleSetError(TooFewSamples) => "Too Few Samples"
+    | SampleSetError(NonNumericInput(err)) => `Found a non-number in input: ${err}`
     | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
     | RequestedStrategyInvalidError(err) => `Requested strategy invalid: ${err}`
+    | XYShapeError(err) => `XY Shape Error: ${XYShape.Error.toString(err)}`
     | OtherError(s) => s
     }
 
   let resultStringToResultError: result<'a, string> => result<'a, error> = n =>
     n->E.R2.errMap(r => r->fromString)
 
-  let sampleErrorToDistErr = (err: SampleSetDist.sampleSetError): error =>
-    switch err {
-    | TooFewSamples => TooFewSamples
-    }
+  let sampleErrorToDistErr = (err: SampleSetDist.sampleSetError): error => SampleSetError(err)
 }
 
 @genType
@@ -66,12 +66,19 @@ module DistributionOperation = {
     | #Pdf(float)
     | #Mean
     | #Sample
+    | #IntegralSum
+  ]
+
+  type toScaleFn = [
+    | #Power
+    | #Logarithm
   ]
 
   type toDist =
     | Normalize
     | ToPointSet
     | ToSampleSet(int)
+    | Scale(toScaleFn, float)
     | Truncate(option<float>, option<float>)
     | Inspect
 
@@ -97,6 +104,7 @@ module DistributionOperation = {
   type genericFunctionCallInfo =
     | FromDist(fromDist, genericDist)
     | FromFloat(fromDist, float)
+    | FromSamples(array<float>)
     | Mixture(array<(genericDist, float)>)
 
   let distCallToString = (distFunction: fromDist): string =>
@@ -106,11 +114,14 @@ module DistributionOperation = {
     | ToFloat(#Mean) => `mean`
     | ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
     | ToFloat(#Sample) => `sample`
+    | ToFloat(#IntegralSum) => `integralSum`
     | ToDist(Normalize) => `normalize`
     | ToDist(ToPointSet) => `toPointSet`
     | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
     | ToDist(Truncate(_, _)) => `truncate`
     | ToDist(Inspect) => `inspect`
+    | ToDist(Scale(#Power, r)) => `scalePower(${E.Float.toFixed(r)})`
+    | ToDist(Scale(#Logarithm, r)) => `scaleLog(${E.Float.toFixed(r)})`
     | ToString(ToString) => `toString`
     | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
     | ToBool(IsNormalized) => `isNormalized`
@@ -122,6 +133,7 @@ module DistributionOperation = {
     switch d {
     | FromDist(f, _) | FromFloat(f, _) => distCallToString(f)
     | Mixture(_) => `mixture`
+    | FromSamples(_) => `fromSamples`
     }
 }
 module Constructors = {
@@ -138,8 +150,11 @@ module Constructors = {
     let isNormalized = (dist): t => FromDist(ToBool(IsNormalized), dist)
     let toPointSet = (dist): t => FromDist(ToDist(ToPointSet), dist)
     let toSampleSet = (dist, r): t => FromDist(ToDist(ToSampleSet(r)), dist)
+    let fromSamples = (xs): t => FromSamples(xs)
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
+    let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
+    let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)
     let toString = (dist): t => FromDist(ToString(ToString), dist)
     let toSparkline = (dist, n): t => FromDist(ToString(ToSparkline(n)), dist)
     let algebraicAdd = (dist1, dist2: genericDist): t => FromDist(

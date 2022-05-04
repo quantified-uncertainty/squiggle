@@ -4,6 +4,9 @@ type env = {
   xyPointLength: int,
 }
 
+@genType
+let defaultEnv: env
+
 open DistributionTypes
 
 @genType
@@ -60,6 +63,8 @@ module Constructors: {
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>
   @genType
   let toSampleSet: (~env: env, genericDist, int) => result<genericDist, error>
+  @genType
+  let fromSamples: (~env: env, SampleSetDist.t) => result<genericDist, error>
   @genType
   let truncate: (~env: env, genericDist, option<float>, option<float>) => result<genericDist, error>
   @genType

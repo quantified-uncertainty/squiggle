@@ -10,46 +10,39 @@ describe("reducer using mathjs parse", () => {
   // Those tests toString that we are converting mathjs parse tree to what we need
 
   describe("expressions", () => {
-    testParseToBe("1", "Ok(1)")
-    testParseToBe("(1)", "Ok(1)")
-    testParseToBe("1+2", "Ok((:add 1 2))")
-    testParseToBe("1+2", "Ok((:add 1 2))")
-    testParseToBe("1+2", "Ok((:add 1 2))")
-    testParseToBe("1+2*3", "Ok((:add 1 (:multiply 2 3)))")
+    testParseToBe("1", "Ok((:$$block 1))")
+    testParseToBe("(1)", "Ok((:$$block 1))")
+    testParseToBe("1+2", "Ok((:$$block (:add 1 2)))")
+    testParseToBe("1+2*3", "Ok((:$$block (:add 1 (:multiply 2 3))))")
   })
   describe("arrays", () => {
     //Note. () is a empty list in Lisp
     //  The only builtin structure in Lisp is list. There are no arrays
     //  [1,2,3] becomes (1 2 3)
-    testDescriptionParseToBe("empty", "[]", "Ok(())")
-    testParseToBe("[1, 2, 3]", "Ok((1 2 3))")
-    testParseToBe("['hello', 'world']", "Ok(('hello' 'world'))")
-    testDescriptionParseToBe("index", "([0,1,2])[1]", "Ok((:$atIndex (0 1 2) (1)))")
+    testDescriptionParseToBe("empty", "[]", "Ok((:$$block ()))")
+    testParseToBe("[1, 2, 3]", "Ok((:$$block (1 2 3)))")
+    testParseToBe("['hello', 'world']", "Ok((:$$block ('hello' 'world')))")
+    testDescriptionParseToBe("index", "([0,1,2])[1]", "Ok((:$$block (:$atIndex (0 1 2) (1))))")
   })
   describe("records", () => {
-    testDescriptionParseToBe("define", "{a: 1, b: 2}", "Ok((:$constructRecord (('a' 1) ('b' 2))))")
+    testDescriptionParseToBe(
+      "define",
+      "{a: 1, b: 2}",
+      "Ok((:$$block (:$constructRecord (('a' 1) ('b' 2)))))",
+    )
     testDescriptionParseToBe(
       "use",
       "{a: 1, b: 2}.a",
-      "Ok((:$atIndex (:$constructRecord (('a' 1) ('b' 2))) ('a')))",
+      "Ok((:$$block (:$atIndex (:$constructRecord (('a' 1) ('b' 2))) ('a'))))",
     )
   })
   describe("multi-line", () => {
-    testParseToBe("1; 2", "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) 1) 2))")
-    testParseToBe(
-      "1+1; 2+1",
-      "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:add 1 1)) (:add 2 1)))",
-    )
+    testParseToBe("1; 2", "Ok((:$$block (:$$block 1 2)))")
+    testParseToBe("1+1; 2+1", "Ok((:$$block (:$$block (:add 1 1) (:add 2 1))))")
   })
   describe("assignment", () => {
-    testParseToBe(
-      "x=1; x",
-      "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :x 1)) :x))",
-    )
-    testParseToBe(
-      "x=1+1; x+1",
-      "Ok((:$$bindExpression (:$$bindStatement (:$$bindings) (:$let :x (:add 1 1))) (:add :x 1)))",
-    )
+    testParseToBe("x=1; x", "Ok((:$$block (:$$block (:$let :x 1) :x)))")
+    testParseToBe("x=1+1; x+1", "Ok((:$$block (:$$block (:$let :x (:add 1 1)) (:add :x 1))))")
   })
 })
 
@@ -70,13 +63,13 @@ describe("eval", () => {
   })
   describe("arrays", () => {
     test("empty array", () => expectEvalToBe("[]", "Ok([])"))
-    testEvalToBe("[1, 2, 3]", "Ok([1, 2, 3])")
-    testEvalToBe("['hello', 'world']", "Ok(['hello', 'world'])")
+    testEvalToBe("[1, 2, 3]", "Ok([1,2,3])")
+    testEvalToBe("['hello', 'world']", "Ok(['hello','world'])")
     testEvalToBe("([0,1,2])[1]", "Ok(1)")
     testDescriptionEvalToBe("index not found", "([0,1,2])[10]", "Error(Array index not found: 10)")
   })
   describe("records", () => {
-    test("define", () => expectEvalToBe("{a: 1, b: 2}", "Ok({a: 1, b: 2})"))
+    test("define", () => expectEvalToBe("{a: 1, b: 2}", "Ok({a: 1,b: 2})"))
     test("index", () => expectEvalToBe("{a: 1}.a", "Ok(1)"))
     test("index not found", () => expectEvalToBe("{a: 1}.b", "Error(Record property not found: b)"))
   })
@@ -91,7 +84,7 @@ describe("eval", () => {
     testEvalToBe("x=1; y=x+1; y+1", "Ok(3)")
     testEvalToBe("1; x=1", "Error(Assignment expected)")
     testEvalToBe("1; 1", "Error(Assignment expected)")
-    testEvalToBe("x=1; x=1", "Error(Expression expected)")
+    testEvalToBe("x=1; x=1", "Ok({x: 1})")
   })
 })
 

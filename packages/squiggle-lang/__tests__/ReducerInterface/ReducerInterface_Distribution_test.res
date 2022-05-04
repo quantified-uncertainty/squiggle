@@ -30,6 +30,7 @@ describe("eval on distribution functions", () => {
   describe("mean", () => {
     testEval("mean(normal(5,2))", "Ok(5)")
     testEval("mean(lognormal(1,2))", "Ok(20.085536923187668)")
+    testEval("mean(gamma(5,5))", "Ok(25)")
   })
   describe("toString", () => {
     testEval("toString(normal(5,2))", "Ok('Normal(5,2)')")
@@ -119,27 +120,34 @@ describe("eval on distribution functions", () => {
 
 describe("parse on distribution functions", () => {
   describe("power", () => {
-    testParse("normal(5,2) ^ normal(5,1)", "Ok((:pow (:normal 5 2) (:normal 5 1)))")
-    testParse("3 ^ normal(5,1)", "Ok((:pow 3 (:normal 5 1)))")
-    testParse("normal(5,2) ^ 3", "Ok((:pow (:normal 5 2) 3))")
+    testParse("normal(5,2) ^ normal(5,1)", "Ok((:$$block (:pow (:normal 5 2) (:normal 5 1))))")
+    testParse("3 ^ normal(5,1)", "Ok((:$$block (:pow 3 (:normal 5 1))))")
+    testParse("normal(5,2) ^ 3", "Ok((:$$block (:pow (:normal 5 2) 3)))")
   })
   describe("subtraction", () => {
-    testParse("10 - normal(5,1)", "Ok((:subtract 10 (:normal 5 1)))")
-    testParse("normal(5,1) - 10", "Ok((:subtract (:normal 5 1) 10))")
+    testParse("10 - normal(5,1)", "Ok((:$$block (:subtract 10 (:normal 5 1))))")
+    testParse("normal(5,1) - 10", "Ok((:$$block (:subtract (:normal 5 1) 10)))")
   })
   describe("pointwise arithmetic expressions", () => {
     testParse(~skip=true, "normal(5,2) .+ normal(5,1)", "Ok((:dotAdd (:normal 5 2) (:normal 5 1)))")
     testParse(
       ~skip=true,
       "normal(5,2) .- normal(5,1)",
-      "Ok((:dotSubtract (:normal 5 2) (:normal 5 1)))",
+      "Ok((:$$block (:dotSubtract (:normal 5 2) (:normal 5 1))))",
+      // TODO: !!! returns "Ok((:$$block (:dotPow (:normal 5 2) (:normal 5 1))))"
     )
-    testParse("normal(5,2) .* normal(5,1)", "Ok((:dotMultiply (:normal 5 2) (:normal 5 1)))")
-    testParse("normal(5,2) ./ normal(5,1)", "Ok((:dotDivide (:normal 5 2) (:normal 5 1)))")
-    testParse("normal(5,2) .^ normal(5,1)", "Ok((:dotPow (:normal 5 2) (:normal 5 1)))")
+    testParse(
+      "normal(5,2) .* normal(5,1)",
+      "Ok((:$$block (:dotMultiply (:normal 5 2) (:normal 5 1))))",
+    )
+    testParse(
+      "normal(5,2) ./ normal(5,1)",
+      "Ok((:$$block (:dotDivide (:normal 5 2) (:normal 5 1))))",
+    )
+    testParse("normal(5,2) .^ normal(5,1)", "Ok((:$$block (:dotPow (:normal 5 2) (:normal 5 1))))")
   })
   describe("equality", () => {
-    testParse("5 == normal(5,2)", "Ok((:equal 5 (:normal 5 2)))")
+    testParse("5 == normal(5,2)", "Ok((:$$block (:equal 5 (:normal 5 2))))")
   })
   describe("pointwise adding two normals", () => {
     testParse(~skip=true, "normal(5,2) .+ normal(5,1)", "Ok((:dotAdd (:normal 5 2) (:normal 5 1)))")

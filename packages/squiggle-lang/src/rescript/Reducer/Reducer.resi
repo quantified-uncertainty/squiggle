@@ -1,26 +1,43 @@
-module Dispatch = Reducer_Dispatch
 module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
-module Extra = Reducer_Extra
-module Js = Reducer_Js
-module MathJs = Reducer_MathJs
 
+@genType
+type environment = ReducerInterface_ExpressionValue.environment
+@genType
+type errorValue = Reducer_ErrorValue.errorValue
 @genType
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 @genType
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 @genType
-let evaluate: string => result<expressionValue, Reducer_ErrorValue.errorValue>
+type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
+
 @genType
-let evaluateUsingExternalBindings: (
+let evaluateUsingOptions: (
+  ~environment: option<QuriSquiggleLang.ReducerInterface_ExpressionValue.environment>,
+  ~externalBindings: option<QuriSquiggleLang.ReducerInterface_ExpressionValue.externalBindings>,
   string,
-  externalBindings,
-) => result<expressionValue, Reducer_ErrorValue.errorValue>
+) => result<expressionValue, errorValue>
 @genType
 let evaluatePartialUsingExternalBindings: (
   string,
-  externalBindings,
-) => result<externalBindings, Reducer_ErrorValue.errorValue>
-let parse: string => result<Expression.expression, ErrorValue.errorValue>
-let parseOuter: string => result<Expression.expression, ErrorValue.errorValue>
-let parsePartial: string => result<Expression.expression, ErrorValue.errorValue>
+  QuriSquiggleLang.ReducerInterface_ExpressionValue.externalBindings,
+  QuriSquiggleLang.ReducerInterface_ExpressionValue.environment,
+) => result<externalBindings, errorValue>
+@genType
+let evaluate: string => result<expressionValue, errorValue>
+
+let parse: string => result<Expression.expression, errorValue>
+
+@genType
+let foreignFunctionInterface: (
+  QuriSquiggleLang.ReducerInterface_ExpressionValue.lambdaValue,
+  array<QuriSquiggleLang.ReducerInterface_ExpressionValue.expressionValue>,
+  QuriSquiggleLang.ReducerInterface_ExpressionValue.environment,
+) => result<expressionValue, errorValue>
+
+@genType
+let defaultEnvironment: environment
+
+@genType
+let defaultExternalBindings: externalBindings

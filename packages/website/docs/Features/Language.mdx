@@ -7,21 +7,21 @@ import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
 ## Expressions
 
-A distribution
+### Distributions
 
 <SquiggleEditor initialSquiggleString={`mixture(1 to 2, 3, [0.3, 0.7])`} />
 
-A number
+### Numbers
 
-<SquiggleEditor initialSquiggleString="4.321e-3" />
+<SquiggleEditor initialSquiggleString="4.32" />
 
-Arrays
+### Arrays
 
 <SquiggleEditor
   initialSquiggleString={`[beta(1,10), 4, isNormalized(toSampleSet(1 to 2))]`}
 />
 
-Records
+### Records
 
 <SquiggleEditor
   initialSquiggleString={`d = {dist: triangular(0, 1, 2), weight: 0.25}
@@ -42,9 +42,9 @@ A statement assigns expressions to names. It looks like `<symbol> = <expression>
 We can define functions
 
 <SquiggleEditor
-  initialSquiggleString={`ozzie_estimate(t) = lognormal(1, t ^ 1.01)
-nuño_estimate(t, m) = mixture(0.5 to 2, normal(m, t ^ 1.25))
-ozzie_estimate(5) * nuño_estimate(5.01, 1)`}
+  initialSquiggleString={`ozzie_estimate(t) = lognormal(t^(1.1), 0.5)
+nuno_estimate(t, m) = mixture(normal(-5, 1), lognormal(m, t / 1.25))
+ozzie_estimate(1) * nuno_estimate(1, 1)`}
 />
 
 ## See more

@@ -1,11 +1,12 @@
 @genType
 module Error = {
   @genType
-  type sampleSetError = TooFewSamples
+  type sampleSetError = TooFewSamples | NonNumericInput(string)
 
   let sampleSetErrorToString = (err: sampleSetError): string =>
     switch err {
     | TooFewSamples => "Too few samples when constructing sample set"
+    | NonNumericInput(err) => `Found a non-number in input: ${err}`
     }
 
   @genType
