@@ -1,6 +1,7 @@
 module ExternalLibrary = ReducerInterface.ExternalLibrary
 module MathJs = Reducer_MathJs
 module Bindings = Reducer_Expression_Bindings
+module Lambda = Reducer_Expression_Lambda
 open ReducerInterface.ExpressionValue
 open Reducer_ErrorValue
 
@@ -54,21 +55,6 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
     value->Ok
   }
 
-  /*
-    NOTE: This function is cancelled. The related issue is
-    https://github.com/webpack/webpack/issues/13435
- */
-  let inspectPerformance = (value: expressionValue, label: string) => {
-    // let _ = %raw("{performance} = require('perf_hooks')")
-    // let start = %raw(`performance.now()`)
-    // let finish = %raw(`performance.now()`)
-    // let performance = finish - start
-    // Js.log(`${label}: ${value->toString} performance: ${Js.String.make(performance)}ms`)
-    // TODO find a way of failing the hook gracefully, also needs a block parameter
-    Js.log(`${label}: ${value->toString}`)
-    value->Ok
-  }
-
   let doSetBindings = (
     externalBindings: externalBindings,
     symbol: string,
@@ -83,19 +69,25 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
 
   let doExportBindings = (externalBindings: externalBindings) => EvRecord(externalBindings)->Ok
 
+  // let doMapArray = (aValueArray, aLambdaValue) => {
+  //   aValueArray->Belt.Array.reduceReverse(
+  //     Ok(list{}),
+  //     (rAcc, elem) => R
+  //   )
+  // }
+  // let doReduceArray(aValueArray, initialValue, aLambdaValue)
+
   switch call {
-  | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
-    arrayAtIndex(aValueArray, fIndex)
+  // | ("$atIndex", [obj, index]) =>    (toStringWithType(obj) ++ "??~~~~" ++ toStringWithType(index))->EvString->Ok
+  | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>    arrayAtIndex(aValueArray, fIndex)
   | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
-  | ("$atIndex", [obj, index]) =>
-    (toStringWithType(obj) ++ "??~~~~" ++ toStringWithType(index))->EvString->Ok
   | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
+  | ("$exportBindings", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
+  | ("$setBindings", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>    doSetBindings(externalBindings, symbol, value)
   | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
-  | ("inspectPerformance", [value, EvString(label)]) => inspectPerformance(value, label)
-  | ("$setBindings", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>
-    doSetBindings(externalBindings, symbol, value)
-  | ("$exportBindings", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
+  // | ("map", [EvArray(aValueArray), EvLambda(lambdaValue)]) => doMapArray(aValueArray, aLambdaValue)
+  // | ("reduce", [EvArray(aValueArray), initialValue, EvLambda(lambdaValue)]) => doReduceArray(aValueArray, initialValue, aLambdaValue)
   | call => callMathJs(call)
   }
 }
