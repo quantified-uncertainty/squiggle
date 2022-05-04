@@ -311,7 +311,7 @@ module T = Dist({
     if referenceIsZero {
       Ok(0.0)
     } else {
-      combinePointwise(PointSetDist_Scoring.LogScoring.logScore, base, reference) |> E.R.fmap(
+      combinePointwise(PointSetDist_Scoring.KLDivergence.logScore, base, reference) |> E.R.fmap(
         integralEndY,
       )
     }

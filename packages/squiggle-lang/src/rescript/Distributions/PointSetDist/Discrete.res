@@ -239,7 +239,7 @@ module T = Dist({
     if referenceIsZero {
       Ok(0.0)
     } else {
-      combinePointwise(~fn=PointSetDist_Scoring.LogScoring.logScore, base, reference) |> E.R2.bind(
+      combinePointwise(~fn=PointSetDist_Scoring.KLDivergence.logScore, base, reference) |> E.R2.bind(
         integralEndYResult,
       )
     }
