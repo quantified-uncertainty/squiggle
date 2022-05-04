@@ -9,3 +9,8 @@ describe("map reduce", () => {
   testEvalToBe("arr=[1,2,3]; reverse(arr)", "Ok([3,2,1])")
   testEvalToBe("check(x)=(x==2);arr=[1,2,3]; keep(arr,check)", "Ok([2])")
 })
+
+Skip.describe("map reduce (sam)", () => {
+  testEvalToBe("addone(x)=x+1; map(2, addone)", "Error???")
+  testEvalToBe("addone(x)=x+1; map(2, {x: addone})", "Error???")
+})
