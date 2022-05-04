@@ -46,7 +46,7 @@
     "rescript-fast-check": "^1.1.1",
     "@glennsl/rescript-jest": "^0.9.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@types/jest": "^27.4.0",
+    "@types/jest": "^27.5.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "chalk": "^5.0.1",
     "codecov": "^3.8.3",
