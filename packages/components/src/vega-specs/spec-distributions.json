@@ -48,7 +48,7 @@
             "value": 0
           },
           "fill": {
-            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: '#4C78A8'}] }"
+            "value": "#4C78A8"
           },
           "interpolate": {
             "value": "monotone"
