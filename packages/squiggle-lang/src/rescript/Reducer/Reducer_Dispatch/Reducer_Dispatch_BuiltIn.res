@@ -3,6 +3,7 @@ module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
+module Result = Belt.Result
 open ReducerInterface.ExpressionValue
 open Reducer_ErrorValue
 
@@ -14,7 +15,7 @@ open Reducer_ErrorValue
 
 exception TestRescriptException
 
-let callInternal = (call: functionCall, _environment, _reducer: ExpressionT.reducerFn): result<
+let callInternal = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
   'b,
   errorValue,
 > => {
@@ -73,16 +74,48 @@ let callInternal = (call: functionCall, _environment, _reducer: ExpressionT.redu
 
   let doExportBindings = (externalBindings: externalBindings) => EvRecord(externalBindings)->Ok
 
-  // let doMapArray = (aValueArray, aLambdaValue) => {
-  //   aValueArray->Belt.Array.reduceReverse(
-  //     Ok(list{}),
-  //     (rAcc, elem) => R
-  //   )
-  // }
-  // let doReduceArray(aValueArray, initialValue, aLambdaValue)
+  let doKeepArray = (aValueArray, aLambdaValue) => {
+    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
+      rAcc->Result.flatMap(acc => {
+        let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
+        rNewElem->Result.map(newElem =>
+          switch newElem {
+          | EvBool(true) => list{elem, ...acc}
+          | _ => acc
+          }
+        )
+      })
+    )
+    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->EvArray)
+  }
+
+  let doMapArray = (aValueArray, aLambdaValue) => {
+    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
+      rAcc->Result.flatMap(acc => {
+        let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
+        rNewElem->Result.map(newElem => list{newElem, ...acc})
+      })
+    )
+    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->EvArray)
+  }
+
+  let doReduceArray = (aValueArray, initialValue, aLambdaValue) => {
+    aValueArray->Belt.Array.reduce(Ok(initialValue), (rAcc, elem) =>
+      rAcc->Result.flatMap(acc =>
+        Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, environment, reducer)
+      )
+    )
+  }
+
+  let doReduceReverseArray = (aValueArray, initialValue, aLambdaValue) => {
+    aValueArray->Belt.Array.reduceReverse(Ok(initialValue), (rAcc, elem) =>
+      rAcc->Result.flatMap(acc =>
+        Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, environment, reducer)
+      )
+    )
+  }
 
   switch call {
-  // | ("$atIndex", [obj, index]) =>    (toStringWithType(obj) ++ "??~~~~" ++ toStringWithType(index))->EvString->Ok
   | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
     arrayAtIndex(aValueArray, fIndex)
   | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
@@ -92,8 +125,14 @@ let callInternal = (call: functionCall, _environment, _reducer: ExpressionT.redu
     doSetBindings(externalBindings, symbol, value)
   | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
-  // | ("map", [EvArray(aValueArray), EvLambda(lambdaValue)]) => doMapArray(aValueArray, aLambdaValue)
-  // | ("reduce", [EvArray(aValueArray), initialValue, EvLambda(lambdaValue)]) => doReduceArray(aValueArray, initialValue, aLambdaValue)
+  | ("keep", [EvArray(aValueArray), EvLambda(aLambdaValue)]) =>
+    doKeepArray(aValueArray, aLambdaValue)
+  | ("map", [EvArray(aValueArray), EvLambda(aLambdaValue)]) => doMapArray(aValueArray, aLambdaValue)
+  | ("reduce", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>
+    doReduceArray(aValueArray, initialValue, aLambdaValue)
+  | ("reduceReverse", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>
+    doReduceReverseArray(aValueArray, initialValue, aLambdaValue)
+  | ("reverse", [EvArray(aValueArray)]) => aValueArray->Belt.Array.reverse->EvArray->Ok
   | call => callMathJs(call)
   }
 }
