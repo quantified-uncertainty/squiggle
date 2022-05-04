@@ -216,6 +216,27 @@ module Uniform = {
   }
 }
 
+module Gamma = {
+  type t = gamma
+  let make = (shape: float, scale: float) => {
+    if shape > 0. {
+      if scale > 0. {
+        Ok(#Gamma({shape: shape, scale: scale}))
+      } else {
+        Error("scale must be larger than 0")
+      }
+    } else {
+      Error("shape must be larger than 0")
+    }
+  }
+  let pdf = (x: float, t: t) => Jstat.Gamma.pdf(x, t.shape, t.scale)
+  let cdf = (x: float, t: t) => Jstat.Gamma.cdf(x, t.shape, t.scale)
+  let inv = (p: float, t: t) => Jstat.Gamma.inv(p, t.shape, t.scale)
+  let sample = (t: t) => Jstat.Gamma.sample(t.shape, t.scale)
+  let mean = (t: t) => Ok(Jstat.Gamma.mean(t.shape, t.scale))
+  let toString = ({shape, scale}: t) => j`($shape, $scale)`
+}
+
 module Float = {
   type t = float
   let make = t => #Float(t)
@@ -252,6 +273,7 @@ module T = {
     | #Triangular(n) => Triangular.pdf(x, n)
     | #Exponential(n) => Exponential.pdf(x, n)
     | #Cauchy(n) => Cauchy.pdf(x, n)
+    | #Gamma(n) => Gamma.pdf(x, n)
     | #Lognormal(n) => Lognormal.pdf(x, n)
     | #Uniform(n) => Uniform.pdf(x, n)
     | #Beta(n) => Beta.pdf(x, n)
@@ -264,6 +286,7 @@ module T = {
     | #Triangular(n) => Triangular.cdf(x, n)
     | #Exponential(n) => Exponential.cdf(x, n)
     | #Cauchy(n) => Cauchy.cdf(x, n)
+    | #Gamma(n) => Gamma.cdf(x, n)
     | #Lognormal(n) => Lognormal.cdf(x, n)
     | #Uniform(n) => Uniform.cdf(x, n)
     | #Beta(n) => Beta.cdf(x, n)
@@ -276,6 +299,7 @@ module T = {
     | #Triangular(n) => Triangular.inv(x, n)
     | #Exponential(n) => Exponential.inv(x, n)
     | #Cauchy(n) => Cauchy.inv(x, n)
+    | #Gamma(n) => Gamma.inv(x, n)
     | #Lognormal(n) => Lognormal.inv(x, n)
     | #Uniform(n) => Uniform.inv(x, n)
     | #Beta(n) => Beta.inv(x, n)
@@ -288,6 +312,7 @@ module T = {
     | #Triangular(n) => Triangular.sample(n)
     | #Exponential(n) => Exponential.sample(n)
     | #Cauchy(n) => Cauchy.sample(n)
+    | #Gamma(n) => Gamma.sample(n)
     | #Lognormal(n) => Lognormal.sample(n)
     | #Uniform(n) => Uniform.sample(n)
     | #Beta(n) => Beta.sample(n)
@@ -310,6 +335,7 @@ module T = {
     | #Exponential(n) => Exponential.toString(n)
     | #Cauchy(n) => Cauchy.toString(n)
     | #Normal(n) => Normal.toString(n)
+    | #Gamma(n) => Gamma.toString(n)
     | #Lognormal(n) => Lognormal.toString(n)
     | #Uniform(n) => Uniform.toString(n)
     | #Beta(n) => Beta.toString(n)
@@ -323,6 +349,7 @@ module T = {
     | #Cauchy(n) => Cauchy.inv(minCdfValue, n)
     | #Normal(n) => Normal.inv(minCdfValue, n)
     | #Lognormal(n) => Lognormal.inv(minCdfValue, n)
+    | #Gamma(n) => Gamma.inv(minCdfValue, n)
     | #Uniform({low}) => low
     | #Beta(n) => Beta.inv(minCdfValue, n)
     | #Float(n) => n
@@ -334,6 +361,7 @@ module T = {
     | #Exponential(n) => Exponential.inv(maxCdfValue, n)
     | #Cauchy(n) => Cauchy.inv(maxCdfValue, n)
     | #Normal(n) => Normal.inv(maxCdfValue, n)
+    | #Gamma(n) => Gamma.inv(maxCdfValue, n)
     | #Lognormal(n) => Lognormal.inv(maxCdfValue, n)
     | #Beta(n) => Beta.inv(maxCdfValue, n)
     | #Uniform({high}) => high
@@ -349,6 +377,7 @@ module T = {
     | #Lognormal(n) => Lognormal.mean(n)
     | #Beta(n) => Beta.mean(n)
     | #Uniform(n) => Uniform.mean(n)
+    | #Gamma(n) => Gamma.mean(n)
     | #Float(n) => Float.mean(n)
     }
 
