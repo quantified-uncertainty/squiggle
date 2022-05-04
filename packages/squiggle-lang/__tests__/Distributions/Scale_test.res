@@ -24,7 +24,7 @@ describe("Scale logarithm", () => {
     let meanAnalytical = -.Js.Math.log2(high -. low) /. 2.0 *. (high ** 2.0 -. low ** 2.0) // -. Js.Math.log2(high -. low)
     switch meanResult {
     | Ok(meanValue) => meanValue->expect->toBeCloseTo(meanAnalytical)
-    | Error(err) => err->expect->toBe(DistributionTypes.OperationError(NegativeInfinityError))
+    | Error(err) => err->expect->toEqual(DistributionTypes.OperationError(NegativeInfinityError))
     }
   })
 })

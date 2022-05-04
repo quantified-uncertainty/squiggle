@@ -144,7 +144,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
         Dist(dist)
       }
     | ToDist(Normalize) => dist->GenericDist.normalize->Dist
-    | ToScore(LogScore(t2)) =>
+    | ToScore(KLDivergence(t2)) =>
       GenericDist.logScore(dist, t2, ~toPointSetFn)
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
