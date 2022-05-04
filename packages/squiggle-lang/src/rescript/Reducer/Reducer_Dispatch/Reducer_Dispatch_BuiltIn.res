@@ -1,7 +1,8 @@
-module ExternalLibrary = ReducerInterface.ExternalLibrary
-module MathJs = Reducer_MathJs
 module Bindings = Reducer_Expression_Bindings
+module ExpressionT = Reducer_Expression_T
+module ExternalLibrary = ReducerInterface.ExternalLibrary
 module Lambda = Reducer_Expression_Lambda
+module MathJs = Reducer_MathJs
 open ReducerInterface.ExpressionValue
 open Reducer_ErrorValue
 
@@ -13,7 +14,10 @@ open Reducer_ErrorValue
 
 exception TestRescriptException
 
-let callInternal = (call: functionCall, _environment): result<'b, errorValue> => {
+let callInternal = (call: functionCall, _environment, _reducer: ExpressionT.reducerFn): result<
+  'b,
+  errorValue,
+> => {
   let callMathJs = (call: functionCall): result<'b, errorValue> =>
     switch call {
     | ("javascriptraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
@@ -79,11 +83,13 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
 
   switch call {
   // | ("$atIndex", [obj, index]) =>    (toStringWithType(obj) ++ "??~~~~" ++ toStringWithType(index))->EvString->Ok
-  | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>    arrayAtIndex(aValueArray, fIndex)
+  | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
+    arrayAtIndex(aValueArray, fIndex)
   | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
   | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
   | ("$exportBindings", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
-  | ("$setBindings", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>    doSetBindings(externalBindings, symbol, value)
+  | ("$setBindings", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>
+    doSetBindings(externalBindings, symbol, value)
   | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
   // | ("map", [EvArray(aValueArray), EvLambda(lambdaValue)]) => doMapArray(aValueArray, aLambdaValue)
@@ -95,12 +101,16 @@ let callInternal = (call: functionCall, _environment): result<'b, errorValue> =>
 /*
   Reducer uses Result monad while reducing expressions
 */
-let dispatch = (call: functionCall, environment): result<expressionValue, errorValue> =>
+let dispatch = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
+  expressionValue,
+  errorValue,
+> =>
   try {
+    let callInternalWithReducer = (call, environment) => callInternal(call, environment, reducer)
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternal)
+    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternalWithReducer)
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   | _ => RETodo("unhandled rescript exception")->Error

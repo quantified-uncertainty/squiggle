@@ -77,7 +77,8 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
   'e,
 > =>
   switch valueList {
-  | list{EvCall(fName), ...args} => (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment)
+  | list{EvCall(fName), ...args} =>
+    (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
 
   | list{EvLambda(lamdaCall), ...args} =>
     Lambda.doLambdaCall(lamdaCall, args, environment, reduceExpression)
