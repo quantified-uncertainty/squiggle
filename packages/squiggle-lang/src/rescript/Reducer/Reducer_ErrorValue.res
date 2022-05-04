@@ -13,6 +13,7 @@ type errorValue =
   | RESymbolNotFound(string)
   | RESyntaxError(string)
   | RETodo(string) // To do
+  | REExpectedType(string)
 
 type t = errorValue
 
@@ -46,4 +47,5 @@ let errorToString = err =>
   | RESymbolNotFound(symbolName) => `${symbolName} is not defined`
   | RESyntaxError(desc) => `Syntax Error: ${desc}`
   | RETodo(msg) => `TODO: ${msg}`
+  | REExpectedType(typeName) => `Expected type: ${typeName}`
   }

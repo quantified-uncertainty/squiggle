@@ -66,4 +66,9 @@ describe("MathJs parse", () => {
   describe("comments", () => {
     testDescriptionParse("define", "1 # This is a comment", "1")
   })
+
+  describe("ternary operator", () => {
+    testParse("1 ? 2 : 3", "ternary(1, 2, 3)")
+    testParse("1 ? 2 : 3 ? 4 : 5", "ternary(1, 2, ternary(3, 4, 5))")
+  })
 })
