@@ -113,6 +113,20 @@ let rec fromInnerNode = (mathJsNode: Parse.node): result<expression, errorValue>
       aNode["items"]->Belt.List.fromArray->fromNodeList->Result.map(list => ExpressionT.EList(list))
     }
 
+    let caseConditionalNode = cndNode => {
+      let rCondition = fromInnerNode(cndNode["condition"])
+      let rTrueExpr = fromInnerNode(cndNode["trueExpr"])
+      let rFalse = fromInnerNode(cndNode["falseExpr"])
+
+      rCondition->Result.flatMap(condition =>
+        rTrueExpr->Result.flatMap(trueExpr =>
+          rFalse->Result.flatMap(falseExpr =>
+            ExpressionBuilder.eFunction("$$ternary", list{condition, trueExpr, falseExpr})->Ok
+          )
+        )
+      )
+    }
+
     let rFinalExpression: result<expression, errorValue> = switch typedMathJsNode {
     | MjAccessorNode(aNode) => caseAccessorNode(aNode["object"], aNode["index"])
     | MjArrayNode(aNode) => caseArrayNode(aNode)
@@ -123,6 +137,7 @@ let rec fromInnerNode = (mathJsNode: Parse.node): result<expression, errorValue>
         rExpr
       }
     | MjBlockNode(bNode) => bNode["blocks"]->Js.Array2.map(blockToNode)->caseBlock
+    | MjConditionalNode(cndNode) => caseConditionalNode(cndNode)
     | MjConstantNode(cNode) =>
       cNode["value"]->JavaScript.Gate.jsToEv->Result.flatMap(v => v->ExpressionT.EValue->Ok)
     | MjFunctionAssignmentNode(faNode) => caseFunctionAssignmentNode(faNode)
