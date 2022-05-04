@@ -157,8 +157,8 @@ module Scale = {
     | #Divide => divide(a, b)
     | #Power => power(a, b)
     | #Logarithm =>
-      if a < MagicNumbers.Epsilon.seven {
-        Ok(0.0)
+      if a < MagicNumbers.Epsilon.ten {
+        Error(NegativeInfinityError)
       } else {
         logarithm(a, b)
       }
