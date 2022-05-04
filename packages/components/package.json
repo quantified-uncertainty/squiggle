@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "license": "MIT",
   "dependencies": {
     "@quri/squiggle-lang": "^0.2.8",
