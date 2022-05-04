@@ -145,7 +145,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       }
     | ToDist(Normalize) => dist->GenericDist.normalize->Dist
     | ToScore(KLDivergence(t2)) =>
-      GenericDist.logScore(dist, t2, ~toPointSetFn)
+      GenericDist.klDivergence(dist, t2, ~toPointSetFn)
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
     | ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
@@ -162,6 +162,15 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       dist
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
       ->E.R2.fmap(r => Dist(PointSet(r)))
+      ->OutputLocal.fromResult
+    | ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
+      dist
+      ->GenericDist.pointwiseCombinationFloat(
+        ~toPointSetFn,
+        ~algebraicCombination=#LogarithmWithThreshold(eps),
+        ~f,
+      )
+      ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | ToDist(Scale(#Logarithm, f)) =>
       dist

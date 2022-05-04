@@ -23,7 +23,7 @@ let toFloatOperation: (
   ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
 ) => result<float, error>
 
-let logScore: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>
+let klDivergence: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>
 
 @genType
 let toPointSet: (

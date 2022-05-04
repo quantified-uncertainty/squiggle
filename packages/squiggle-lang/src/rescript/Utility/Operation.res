@@ -8,6 +8,7 @@ type algebraicOperation = [
   | #Divide
   | #Power
   | #Logarithm
+  | #LogarithmWithThreshold(float)
 ]
 
 type convolutionOperation = [
@@ -18,7 +19,7 @@ type convolutionOperation = [
 
 @genType
 type pointwiseOperation = [#Add | #Multiply | #Power]
-type scaleOperation = [#Multiply | #Power | #Logarithm | #Divide]
+type scaleOperation = [#Multiply | #Power | #Logarithm | #LogarithmWithThreshold(float) | #Divide]
 type distToFloatOperation = [
   | #Pdf(float)
   | #Cdf(float)
@@ -35,7 +36,7 @@ module Convolution = {
     | #Add => Some(#Add)
     | #Subtract => Some(#Subtract)
     | #Multiply => Some(#Multiply)
-    | #Divide | #Power | #Logarithm => None
+    | #Divide | #Power | #Logarithm | #LogarithmWithThreshold(_) => None
     }
 
   let canDoAlgebraicOperation = (op: algebraicOperation): bool =>
@@ -108,6 +109,12 @@ module Algebraic = {
     | #Power => power(a, b)
     | #Divide => divide(a, b)
     | #Logarithm => logarithm(a, b)
+    | #LogarithmWithThreshold(eps) =>
+      if a < eps {
+        Ok(0.0)
+      } else {
+        logarithm(a, b)
+      }
     }
 
   let toString = x =>
@@ -118,6 +125,7 @@ module Algebraic = {
     | #Power => "**"
     | #Divide => "/"
     | #Logarithm => "log"
+    | #LogarithmWithThreshold(_) => "log"
     }
 
   let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
@@ -162,6 +170,12 @@ module Scale = {
       } else {
         logarithm(a, b)
       }
+    | #LogarithmWithThreshold(eps) =>
+      if a < eps {
+        Ok(0.0)
+      } else {
+        logarithm(a, b)
+      }
     }
 
   let format = (operation: t, value, scaleBy) =>
@@ -170,14 +184,14 @@ module Scale = {
     | #Divide => j`verticalDivide($value, $scaleBy) `
     | #Power => j`verticalPower($value, $scaleBy) `
     | #Logarithm => j`verticalLog($value, $scaleBy) `
+    | #LogarithmWithThreshold(eps) => j`verticalLog($value, $scaleBy, epsilon=$eps) `
     }
 
   let toIntegralSumCacheFn = x =>
     switch x {
     | #Multiply => (a, b) => Some(a *. b)
     | #Divide => (a, b) => Some(a /. b)
-    | #Power => (_, _) => None
-    | #Logarithm => (_, _) => None
+    | #Power | #Logarithm | #LogarithmWithThreshold(_) => (_, _) => None
     }
 
   let toIntegralCacheFn = x =>
@@ -186,6 +200,7 @@ module Scale = {
     | #Divide => (_, _) => None
     | #Power => (_, _) => None
     | #Logarithm => (_, _) => None
+    | #LogarithmWithThreshold(_) => (_, _) => None
     }
 }
 

@@ -222,6 +222,8 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
   | ("scaleLog10", [EvDistribution(dist)]) => Helpers.toDistFn(Scale(#Logarithm, 10.0), dist)
   | ("scaleLog", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Scale(#Logarithm, float), dist)
+  | ("scaleLogWithThreshold", [EvDistribution(dist), EvNumber(base), EvNumber(eps)]) =>
+    Helpers.toDistFn(Scale(#LogarithmWithThreshold(eps), base), dist)
   | ("scalePow", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Scale(#Power, float), dist)
   | ("scaleExp", [EvDistribution(dist)]) =>

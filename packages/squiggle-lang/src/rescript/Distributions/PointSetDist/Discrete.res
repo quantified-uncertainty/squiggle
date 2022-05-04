@@ -229,7 +229,7 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
   }
 
-  let logScore = (base: t, reference: t) => {
+  let klDivergence = (base: t, reference: t) => {
     let referenceIsZero = switch Distributions.Common.isZeroEverywhere(
       PointSetTypes.Discrete(reference),
     ) {

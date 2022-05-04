@@ -301,7 +301,7 @@ module T = Dist({
     }
   }
 
-  let logScore = (base: t, reference: t) => {
+  let klDivergence = (base: t, reference: t) => {
     let referenceIsZero = switch Distributions.Common.isZeroEverywhere(
       PointSetTypes.Mixed(reference),
     ) {

@@ -72,6 +72,7 @@ module DistributionOperation = {
   type toScaleFn = [
     | #Power
     | #Logarithm
+    | #LogarithmWithThreshold(float)
   ]
 
   type toDist =
@@ -126,6 +127,8 @@ module DistributionOperation = {
     | ToDist(Inspect) => `inspect`
     | ToDist(Scale(#Power, r)) => `scalePower(${E.Float.toFixed(r)})`
     | ToDist(Scale(#Logarithm, r)) => `scaleLog(${E.Float.toFixed(r)})`
+    | ToDist(Scale(#LogarithmWithThreshold(eps), r)) =>
+      `scaleLogWithThreshold(${E.Float.toFixed(r)}, epsilon=${E.Float.toFixed(eps)})`
     | ToString(ToString) => `toString`
     | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
     | ToBool(IsNormalized) => `isNormalized`
@@ -160,6 +163,10 @@ module Constructors = {
     let logScore = (dist1, dist2): t => FromDist(ToScore(KLDivergence(dist2)), dist1)
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
     let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)
+    let scaleLogarithmWithThreshold = (dist, n, eps): t => FromDist(
+      ToDist(Scale(#LogarithmWithThreshold(eps), n)),
+      dist,
+    )
     let toString = (dist): t => FromDist(ToString(ToString), dist)
     let toSparkline = (dist, n): t => FromDist(ToString(ToSparkline(n)), dist)
     let algebraicAdd = (dist1, dist2: genericDist): t => FromDist(
