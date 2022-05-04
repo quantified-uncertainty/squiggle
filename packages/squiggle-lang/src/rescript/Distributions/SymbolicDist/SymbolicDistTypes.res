@@ -31,6 +31,11 @@ type triangular = {
   high: float,
 }
 
+type gamma = {
+  shape: float,
+  scale: float,
+}
+
 @genType
 type symbolicDist = [
   | #Normal(normal)
@@ -40,6 +45,7 @@ type symbolicDist = [
   | #Exponential(exponential)
   | #Cauchy(cauchy)
   | #Triangular(triangular)
+  | #Gamma(gamma)
   | #Float(float)
 ]
 
