@@ -16,33 +16,33 @@ testMacro([], exampleExpression, "Ok(1)")
 
 describe("bindStatement", () => {
   // A statement is bound by the bindings created by the previous statement
-  testMacro([], eBindStatement(eBindings([]), exampleStatementY), "Ok((:$setBindings {} :y 1))")
+  testMacro([], eBindStatement(eBindings([]), exampleStatementY), "Ok((:$setBindings {} :y 1) context: {})")
   // Then it answers the bindings for the next statement when reduced
   testMacroEval([], eBindStatement(eBindings([]), exampleStatementY), "Ok({y: 1})")
   // Now let's feed a binding to see what happens
   testMacro(
     [],
     eBindStatement(eBindings([("x", EvNumber(2.))]), exampleStatementX),
-    "Ok((:$setBindings {x: 2} :y 2))",
+    "Ok((:$setBindings {x: 2} :y 2) context: {x: 2})",
   )
   // An expression does not return a binding, thus error
-  testMacro([], eBindStatement(eBindings([]), exampleExpression), "Error(Assignment expected)")
+  testMacro([], eBindStatement(eBindings([]), exampleExpression), "Assignment expected")
   // When bindings from previous statement are missing the context is injected. This must be the first statement of a block
   testMacro(
     [("z", EvNumber(99.))],
     eBindStatementDefault(exampleStatementY),
-    "Ok((:$setBindings {z: 99} :y 1))",
+   "Ok((:$setBindings {z: 99} :y 1) context: {z: 99})",
   )
 })
 
 describe("bindExpression", () => {
   // x is simply bound in the expression
-  testMacro([], eBindExpression(eBindings([("x", EvNumber(2.))]), eSymbol("x")), "Ok(2)")
+  testMacro([], eBindExpression(eBindings([("x", EvNumber(2.))]), eSymbol("x")), "Ok(2 context: {x: 2})")
   // When an let statement is the end expression then bindings are returned
   testMacro(
     [],
     eBindExpression(eBindings([("x", EvNumber(2.))]), exampleStatementY),
-    "Ok((:$exportBindings (:$setBindings {x: 2} :y 1)))",
+    "Ok((:$exportBindings (:$setBindings {x: 2} :y 1)) context: {x: 2})",
   )
   // Now let's reduce that expression
   testMacroEval(
@@ -110,7 +110,7 @@ describe("block", () => {
     }),
     "Ok((:$$bindExpression (:$$block (:$let :y (:add :x 1)) :y)))",
   )
-  MyOnly.testMacroEval(
+  testMacroEval(
     [("x", EvNumber(1.))],
     eBlock(list{
       eBlock(list{
@@ -125,7 +125,7 @@ describe("block", () => {
 describe("lambda", () => {
   // assign a lambda to a variable
   let lambdaExpression = eFunction("$$lambda", list{eArrayString(["y"]), exampleExpressionY})
-  testMacro([], lambdaExpression, "Ok(lambda(y=>internal))")
+  testMacro([], lambdaExpression, "Ok(lambda(y=>internal code))")
   // call a lambda
   let callLambdaExpression = list{lambdaExpression, eNumber(1.)}->ExpressionT.EList
   testMacro([], callLambdaExpression, "Ok(((:$$lambda [y] :y) 1))")

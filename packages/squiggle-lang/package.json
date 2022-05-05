@@ -4,6 +4,7 @@
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
+    "peggy": "peggy --cache ",
     "build": "yarn build:rescript && yarn build:typescript",
     "build:rescript": "rescript build -with-deps",
     "build:typescript": "tsc",

@@ -13,6 +13,8 @@ open Reducer_ErrorValue
   DO NOT try to add external function mapping here!
 */
 
+//TODO: pow to xor
+
 exception TestRescriptException
 
 let callInternal = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
@@ -116,9 +118,9 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   }
 
   switch call {
-  | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
-    arrayAtIndex(aValueArray, fIndex)
-  | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
+  | ("$atIndex", [EvArray(aValueArray), EvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
+  | ("$atIndex", [EvRecord(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
+  | ("$constructArray", [EvArray(aValueArray)]) => EvArray(aValueArray)->Ok
   | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
   | ("$exportBindings", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
   | ("$setBindings", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>

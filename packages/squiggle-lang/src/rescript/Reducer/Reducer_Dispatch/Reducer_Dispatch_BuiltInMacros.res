@@ -4,6 +4,7 @@
   Macros are used to define language building blocks. They are like Lisp macros.
 */
 module Bindings = Reducer_Expression_Bindings
+module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
@@ -139,7 +140,8 @@ let dispatchMacroCall = (
     bindings: ExpressionT.bindings,
     environment,
   ): result<expressionWithContext, errorValue> => {
-    let rCondition = reduceExpression(condition, bindings, environment)
+    let blockCondition = ExpressionBuilder.eBlock(list{condition})
+    let rCondition = reduceExpression(blockCondition, bindings, environment)
     rCondition->Result.flatMap(conditionValue =>
       switch conditionValue {
       | ExpressionValue.EvBool(false) => ExpressionWithContext.noContext(ifFalse)->Ok
