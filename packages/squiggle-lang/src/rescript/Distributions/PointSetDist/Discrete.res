@@ -229,21 +229,11 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
   }
 
-  let klDivergence = (base: t, reference: t) => {
-    let referenceIsZero = switch Distributions.Common.isZeroEverywhere(
-      PointSetTypes.Discrete(reference),
-    ) {
-    | Discrete(b) => b
-    | _ => false
-    }
-    if referenceIsZero {
-      Ok(0.0)
-    } else {
-      combinePointwise(
-        ~fn=PointSetDist_Scoring.KLDivergence.logScore(~eps=MagicNumbers.Epsilon.ten),
-        base,
-        reference,
-      ) |> E.R2.bind(integralEndYResult)
-    }
+  let klDivergence = (prediction: t, answer: t) => {
+    combinePointwise(
+      ~fn=PointSetDist_Scoring.KLDivergence.integrand,
+      prediction,
+      answer,
+    ) |> E.R2.bind(integralEndYResult)
   }
 })

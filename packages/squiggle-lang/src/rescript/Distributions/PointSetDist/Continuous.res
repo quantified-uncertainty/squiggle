@@ -270,24 +270,10 @@ module T = Dist({
   let variance = (t: t): float =>
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
 
-  let klDivergence = (base: t, reference: t) => {
-    let referenceIsZero = switch Distributions.Common.isZeroEverywhere(
-      PointSetTypes.Continuous(reference),
-    ) {
-    | Continuous(b) => b
-    | _ => false
-    }
-    if referenceIsZero {
-      Ok(0.0)
-    } else {
-      combinePointwise(
-        PointSetDist_Scoring.KLDivergence.logScore(~eps=MagicNumbers.Epsilon.ten),
-        base,
-        reference,
-      )
-      |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
-      |> E.R.fmap(integralEndY)
-    }
+  let klDivergence = (prediction: t, answer: t) => {
+    combinePointwise(PointSetDist_Scoring.KLDivergence.integrand, prediction, answer)
+    |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
+    |> E.R.fmap(integralEndY)
   }
 })
 

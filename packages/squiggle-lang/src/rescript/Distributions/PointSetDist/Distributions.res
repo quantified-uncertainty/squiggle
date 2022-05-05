@@ -96,18 +96,4 @@ module Common = {
       None
     | (Some(s1), Some(s2)) => combineFn(s1, s2)
     }
-
-  let isZeroEverywhere = (d: PointSetTypes.pointSetDist) => {
-    let isZero = (x: float): bool => x == 0.0
-    PointSetTypes.ShapeMonad.fmap(
-      d,
-      (
-        mixed =>
-          E.A.all(isZero, mixed.continuous.xyShape.ys) &&
-          E.A.all(isZero, mixed.discrete.xyShape.ys),
-        disc => E.A.all(isZero, disc.xyShape.ys),
-        cont => E.A.all(isZero, cont.xyShape.ys),
-      ),
-    )
-  }
 }

@@ -10,8 +10,8 @@ type env = {
 }
 
 let defaultEnv = {
-  sampleCount: 10000,
-  xyPointLength: 10000,
+  sampleCount: MagicNumbers.Environment.defaultSampleCount,
+  xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
 
 type outputType =
@@ -128,7 +128,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
   let fromDistFn = (
     subFnName: DistributionTypes.DistributionOperation.fromDist,
     dist: genericDist,
-  ) => {
+  ): outputType => {
     let response = switch subFnName {
     | ToFloat(distToFloatOperation) =>
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
@@ -261,7 +261,7 @@ module Constructors = {
   let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
   let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
   let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
-  let logScore = (~env, dist1, dist2) => C.logScore(dist1, dist2)->run(~env)->toFloatR
+  let klDivergence = (~env, dist1, dist2) => C.klDivergence(dist1, dist2)->run(~env)->toFloatR
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
   let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR

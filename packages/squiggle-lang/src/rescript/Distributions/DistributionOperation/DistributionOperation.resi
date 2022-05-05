@@ -60,7 +60,7 @@ module Constructors: {
   @genType
   let isNormalized: (~env: env, genericDist) => result<bool, error>
   @genType
-  let logScore: (~env: env, genericDist, genericDist) => result<float, error>
+  let klDivergence: (~env: env, genericDist, genericDist) => result<float, error>
   @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>
   @genType

@@ -202,9 +202,9 @@ module T = Dist({
     | (Discrete(t1), Discrete(t2)) => Discrete.T.klDivergence(t1, t2)
     | (Mixed(t1), Mixed(t2)) => Mixed.T.klDivergence(t1, t2)
     | _ => {
-        let t1 = toMixed(t1)
-        let t2 = toMixed(t2)
-        Mixed.T.klDivergence(t1, t2)
+        let t1' = toMixed(t1)
+        let t2' = toMixed(t2)
+        Mixed.T.klDivergence(t1', t2')
       }
     }
 })

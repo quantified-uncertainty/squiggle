@@ -468,7 +468,7 @@ module Range = {
   // TODO: I think this isn't needed by any functions anymore.
   let stepsToContinuous = t => {
     // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
-    let diff = T.xTotalRange(t) |> (r => r *. 0.00001)
+    let diff = T.xTotalRange(t) |> (r => r *. MagicNumbers.Epsilon.five)
     let items = switch E.A.toRanges(Belt.Array.zip(t.xs, t.ys)) {
     | Ok(items) =>
       Some(

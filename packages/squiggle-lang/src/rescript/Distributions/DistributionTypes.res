@@ -160,7 +160,7 @@ module Constructors = {
     let fromSamples = (xs): t => FromSamples(xs)
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
-    let logScore = (dist1, dist2): t => FromDist(ToScore(KLDivergence(dist2)), dist1)
+    let klDivergence = (dist1, dist2): t => FromDist(ToScore(KLDivergence(dist2)), dist1)
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
     let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)
     let scaleLogarithmWithThreshold = (dist, n, eps): t => FromDist(

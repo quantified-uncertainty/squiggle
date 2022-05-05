@@ -301,22 +301,10 @@ module T = Dist({
     }
   }
 
-  let klDivergence = (base: t, reference: t) => {
-    let referenceIsZero = switch Distributions.Common.isZeroEverywhere(
-      PointSetTypes.Mixed(reference),
-    ) {
-    | Mixed(b) => b
-    | _ => false
-    }
-    if referenceIsZero {
-      Ok(0.0)
-    } else {
-      combinePointwise(
-        PointSetDist_Scoring.KLDivergence.logScore(~eps=MagicNumbers.Epsilon.ten),
-        base,
-        reference,
-      ) |> E.R.fmap(integralEndY)
-    }
+  let klDivergence = (prediction: t, answer: t) => {
+    combinePointwise(PointSetDist_Scoring.KLDivergence.integrand, prediction, answer) |> E.R.fmap(
+      integralEndY,
+    )
   }
 })
 
