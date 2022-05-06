@@ -390,7 +390,9 @@ module PointwiseCombination = {
       }
     `)
 
-  // This function is used for kl divergence
+  /*
+    This is from an approach to kl divergence that was ultimately rejected. Leaving it in for now because it may help us factor `combine` out of raw javascript soon.
+ */
   let combineAlongSupportOfSecondArgument0: (
     (float, float) => result<float, Operation.Error.t>,
     interpolator,
@@ -450,7 +452,6 @@ module PointwiseCombination = {
         }
       | None => ()
       }
-      // Js.Console.log(newYs)
     }
     T.filterOkYs(newXs, newYs)->Ok
   }
@@ -489,6 +490,7 @@ module PointwiseCombination = {
     result
   }
 
+  // This function is used for klDivergence
   let combineAlongSupportOfSecondArgument: (
     (float, float) => result<float, Operation.Error.t>,
     T.t,

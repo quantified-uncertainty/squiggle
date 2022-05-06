@@ -271,17 +271,6 @@ module T = Dist({
   let variance = (t: t): float =>
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
 
-  // let klDivergence0 = (prediction: t, answer: t) => {
-  //   combinePointwise(
-  //     ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument,
-  //     PointSetDist_Scoring.KLDivergence.integrand,
-  //     prediction,
-  //     answer,
-  //   )
-  //   |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
-  //   |> E.R.fmap(integralEndY)
-  // }
-
   let klDivergence = (prediction: t, answer: t) => {
     let newShape = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument(
       PointSetDist_Scoring.KLDivergence.integrand,

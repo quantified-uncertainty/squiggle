@@ -47,9 +47,6 @@ describe("kl divergence", () => {
       (stdev2 ** 2.0 +. (mean2 -. mean1) ** 2.0) /. (2.0 *. stdev1 ** 2.0) -. 0.5
     let kl = E.R.liftJoin2(klDivergence, prediction, answer)
 
-    // Js.Console.log2("Analytical: ", analyticalKl)
-    // Js.Console.log2("Computed: ", kl)
-
     switch kl {
     | Ok(kl') => kl'->expect->toBeCloseTo(analyticalKl)
     | Error(err) => {

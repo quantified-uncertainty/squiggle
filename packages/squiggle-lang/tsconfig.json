@@ -15,5 +15,10 @@
   },
   "target": "ES6",
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts", "webpack.config.js"]
+  "exclude": [
+    "../../node_modules",
+    "node_modules",
+    "**/*.spec.ts",
+    "webpack.config.js"
+  ]
 }

@@ -3,17 +3,25 @@ open Expect
 open TestHelpers
 
 describe("Scale logarithm", () => {
-  //   test("mean of the base e scalar logarithm of an exponential(10)", () => {
-  //    let rate = 10.0
-  //    let scalelog = DistributionOperation.Constructors.scaleLogarithm(~env, mkExponential(rate), MagicNumbers.Math.e)
-  //
-  //    let meanResult = E.R2.bind(DistributionOperation.Constructors.mean(~env), scalelog)
-  //    let meanAnalytical = Js.Math.log(rate /. MagicNumbers.Math.e)
-  //    switch meanResult {
-  //      | Ok(meanValue) => meanValue -> expect -> toBeCloseTo(meanAnalytical)
-  //      | Error(err) => err -> expect -> toBe(DistributionTypes.OperationError(DivisionByZeroError))
-  //    }
-  //  })
+  /* These tests may not be important, because scalelog isn't normalized
+  The first one may be failing for a number of reasons.
+ */
+  Skip.test("mean of the base e scalar logarithm of an exponential(10)", () => {
+    let rate = 10.0
+    let scalelog = DistributionOperation.Constructors.scaleLogarithm(
+      ~env,
+      mkExponential(rate),
+      MagicNumbers.Math.e,
+    )
+
+    let meanResult = E.R2.bind(DistributionOperation.Constructors.mean(~env), scalelog)
+    // expected value of log of exponential distribution.
+    let meanAnalytical = Js.Math.log(rate) +. 1.0
+    switch meanResult {
+    | Ok(meanValue) => meanValue->expect->toBeCloseTo(meanAnalytical)
+    | Error(err) => err->expect->toBe(DistributionTypes.OperationError(DivisionByZeroError))
+    }
+  })
   let low = 10.0
   let high = 100.0
   let scalelog = DistributionOperation.Constructors.scaleLogarithm(~env, mkUniform(low, high), 2.0)
