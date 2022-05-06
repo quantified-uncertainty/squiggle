@@ -15,7 +15,6 @@
     "test": "jest",
     "test:ts": "jest __tests__/TS/",
     "test:rescript": "jest --modulePathIgnorePatterns=__tests__/TS/*",
-    "test:kldivergence": "jest __tests__/Distributions/KlDivergence_test.*",
     "test:watch": "jest --watchAll",
     "coverage:rescript": "rm -f *.coverage; yarn clean; BISECT_ENABLE=yes yarn build; yarn test:rescript; bisect-ppx-report html",
     "coverage:ts": "yarn clean; yarn build; nyc --reporter=lcov yarn test:ts",
