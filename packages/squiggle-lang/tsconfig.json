@@ -11,8 +11,7 @@
     "outDir": "./dist",
     "declarationDir": "./dist",
     "declaration": true,
-    "composite": true,
-    "skipLibCheck": true
+    "composite": true
   },
   "target": "ES6",
   "include": ["src/**/*"],
