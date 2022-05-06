@@ -12,8 +12,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@docusaurus/core": "2.0.0-beta.19",
-    "@docusaurus/preset-classic": "2.0.0-beta.19",
+    "@docusaurus/core": "2.0.0-beta.20",
+    "@docusaurus/preset-classic": "2.0.0-beta.20",
     "@quri/squiggle-components": "0.2.9",
     "clsx": "^1.1.1",
     "prism-react-renderer": "^1.2.1",
