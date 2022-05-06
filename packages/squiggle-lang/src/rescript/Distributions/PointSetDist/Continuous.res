@@ -86,6 +86,7 @@ let stepwiseToLinear = (t: t): t =>
 
 // Note: This results in a distribution with as many points as the sum of those in t1 and t2.
 let combinePointwise = (
+  ~combiner=XYShape.PointwiseCombination.combine,
   ~integralSumCachesFn=(_, _) => None,
   ~distributionType: PointSetTypes.distributionType=#PDF,
   fn: (float, float) => result<float, Operation.Error.t>,
@@ -119,7 +120,7 @@ let combinePointwise = (
 
   let interpolator = XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation)
 
-  XYShape.PointwiseCombination.combine(fn, interpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
+  combiner(fn, interpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
     make(~integralSumCache=combinedIntegralSum, x)
   )
 }
@@ -271,7 +272,12 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
 
   let klDivergence = (prediction: t, answer: t) => {
-    combinePointwise(PointSetDist_Scoring.KLDivergence.integrand, prediction, answer)
+    combinePointwise(
+      ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument,
+      PointSetDist_Scoring.KLDivergence.integrand,
+      prediction,
+      answer,
+    )
     |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
     |> E.R.fmap(integralEndY)
   }

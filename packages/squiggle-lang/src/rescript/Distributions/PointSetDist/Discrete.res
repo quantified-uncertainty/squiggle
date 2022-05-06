@@ -33,6 +33,7 @@ let shapeFn = (fn, t: t) => t |> getShape |> fn
 let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
 
 let combinePointwise = (
+  ~combiner=XYShape.PointwiseCombination.combine,
   ~integralSumCachesFn=(_, _) => None,
   ~fn=(a, b) => Ok(a +. b),
   t1: PointSetTypes.discreteShape,
@@ -48,12 +49,10 @@ let combinePointwise = (
   // It could be done for pointwise additions, but is that ever needed?
 
   make(
-    XYShape.PointwiseCombination.combine(
-      fn,
-      XYShape.XtoY.discreteInterpolator,
-      t1.xyShape,
-      t2.xyShape,
-    )->E.R.toExn("Addition operation should never fail", _),
+    combiner(fn, XYShape.XtoY.discreteInterpolator, t1.xyShape, t2.xyShape)->E.R.toExn(
+      "Addition operation should never fail",
+      _,
+    ),
   )->Ok
 }
 
@@ -231,6 +230,7 @@ module T = Dist({
 
   let klDivergence = (prediction: t, answer: t) => {
     combinePointwise(
+      ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument,
       ~fn=PointSetDist_Scoring.KLDivergence.integrand,
       prediction,
       answer,

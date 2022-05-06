@@ -48,7 +48,7 @@ let combinePointwise = (
     |> E.A.fmap(toDiscrete)
     |> E.A.O.concatSomes
     |> Discrete.reduce(~integralSumCachesFn, fn)
-    |> E.R.toExn("foo")
+    |> E.R.toExn("Theoretically unreachable state")
 
   let reducedContinuous =
     [t1, t2]
