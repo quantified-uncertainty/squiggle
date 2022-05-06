@@ -55,6 +55,7 @@ type operationError =
   | ComplexNumberError
   | InfinityError
   | NegativeInfinityError
+  | LogicallyInconsistentPathwayError
 
 @genType
 module Error = {
@@ -67,6 +68,7 @@ module Error = {
     | ComplexNumberError => "Operation returned complex result"
     | InfinityError => "Operation returned positive infinity"
     | NegativeInfinityError => "Operation returned negative infinity"
+    | LogicallyInconsistentPathwayError => "This pathway should have been logically unreachable"
     }
 }
 

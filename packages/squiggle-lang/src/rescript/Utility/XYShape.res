@@ -455,25 +455,60 @@ module PointwiseCombination = {
     T.filterOkYs(newXs, newYs)->Ok
   }
 
-  let iterpolator2: (xyShape, float) => option<float> = (dist: xyShape, x: float) => {
-    let l = E.A.length(dist.xs)
-    let firstPoint = dist.xs[0]
-    let lastPoint = dist.xs[l - 1]
-    switch (firstPoint < x, lastPoint > x) {
-    | (false, false) => Some(0.0)
-    | (false, true) => Some(0.0)
-    | (true, false) => Some(0.0)
-    | (true, true) => None
+  let getApproximatePdfOfContinuousDistributionAtPoint: (xyShape, float) => option<float> = (
+    dist: xyShape,
+    point: float,
+  ) => {
+    let closestFromBelowIndex = E.A.reducei(dist.xs, None, (accumulator, item, index) =>
+      item < point ? Some(index) : accumulator
+    ) // This could be made more efficient by taking advantage of the fact that these are ordered
+    let closestFromAboveIndexOption = Belt.Array.getIndexBy(dist.xs, item => item > point)
+
+    let weightedMean = (
+      point: float,
+      closestFromBelow: float,
+      closestFromAbove: float,
+      valueclosestFromBelow,
+      valueclosestFromAbove,
+    ): float => {
+      let distance = closestFromAbove -. closestFromBelow
+      let w1 = (point -. closestFromBelow) /. distance
+      let w2 = (closestFromAbove -. point) /. distance
+      let result = w1 *. valueclosestFromAbove +. w2 *. valueclosestFromBelow
+      result
     }
+
+    let result = switch (closestFromBelowIndex, closestFromAboveIndexOption) {
+    | (None, None) => None // all are smaller, and all are larger
+    | (None, Some(i)) => Some(0.0) // none are smaller, all are larger
+    | (Some(i), None) => Some(0.0) // all are smaller, none are larger
+    | (Some(i), Some(j)) =>
+      Some(weightedMean(point, dist.xs[i], dist.xs[j], dist.ys[i], dist.ys[j])) // there is a lowerBound and an upperBound.
+    }
+
+    result
   }
 
   let combineAlongSupportOfSecondArgument2: (
     (float, float) => result<float, Operation.Error.t>,
-    interpolator,
     T.t,
     T.t,
-  ) => result<T.t, Operation.Error.t> = (fn, interpolator, t1, t2) => {
-    T.filterOkYs([], [])->Ok
+  ) => result<T.t, Operation.Error.t> = (fn, prediction, answer) => {
+    let newXs = answer.xs
+    let combineWithFn = (x: float, i: int) => {
+      let answerX = x
+      let answerY = answer.ys[i]
+      let predictionY = getApproximatePdfOfContinuousDistributionAtPoint(prediction, answerX)
+      let wrappedResult = E.O.fmap(x => fn(x, answerY), predictionY)
+      let result = switch wrappedResult {
+      | Some(x) => x
+      | None => Error(Operation.LogicallyInconsistentPathwayError)
+      }
+      result
+    }
+    let newYs = Js.Array.mapi((x, i) => combineWithFn(x, i), answer.xs)
+
+    T.filterOkYs(newXs, newYs)->Ok
   }
 
   let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
