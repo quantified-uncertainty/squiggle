@@ -455,6 +455,27 @@ module PointwiseCombination = {
     T.filterOkYs(newXs, newYs)->Ok
   }
 
+  let iterpolator2: (xyShape, float) => option<float> = (dist: xyShape, x: float) => {
+    let l = E.A.length(dist.xs)
+    let firstPoint = dist.xs[0]
+    let lastPoint = dist.xs[l - 1]
+    switch (firstPoint < x, lastPoint > x) {
+    | (false, false) => Some(0.0)
+    | (false, true) => Some(0.0)
+    | (true, false) => Some(0.0)
+    | (true, true) => None
+    }
+  }
+
+  let combineAlongSupportOfSecondArgument2: (
+    (float, float) => result<float, Operation.Error.t>,
+    interpolator,
+    T.t,
+    T.t,
+  ) => result<T.t, Operation.Error.t> = (fn, interpolator, t1, t2) => {
+    T.filterOkYs([], [])->Ok
+  }
+
   let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
     combine((a, b) => Ok(a +. b), interpolator, t1, t2)->E.R.toExn(
       "Add operation should never fail",
