@@ -404,17 +404,18 @@ module PointwiseCombination = {
     let minX = t2.xs[0]
     let maxX = t2.xs[l2 - 1]
     while j.contents < l2 - 1 && i.contents < l1 - 1 {
-      let (x, y1, y2) = {
+      let someTuple = {
         let x1 = t1.xs[i.contents + 1]
         let x2 = t2.xs[j.contents + 1]
-        /* if t1 has to catch up to t2 */ if (
+        if (
+          /* if t1 has to catch up to t2 */
           i.contents < l1 - 1 && j.contents < l2 && x1 < x2 && minX <= x1 && x2 <= maxX
         ) {
           i := i.contents + 1
           let x = x1
           let y1 = t1.ys[i.contents]
           let y2 = interpolator(t2, j.contents, x)
-          (x, y1, y2)
+          Some((x, y1, y2))
         } else if (
           /* if t2 has to catch up to t1 */
           i.contents < l1 && j.contents < l2 - 1 && x1 > x2 && x2 >= minX && maxX >= x1
@@ -423,7 +424,7 @@ module PointwiseCombination = {
           let x = x2
           let y1 = interpolator(t1, i.contents, x)
           let y2 = t2.ys[j.contents]
-          (x, y1, y2)
+          Some((x, y1, y2))
         } else if (
           /* move both ahead if they are equal */
           i.contents < l1 - 1 && j.contents < l2 - 1 && x1 == x2 && x1 >= minX && maxX >= x2
@@ -433,17 +434,23 @@ module PointwiseCombination = {
           let x = x1
           let y1 = t1.ys[i.contents]
           let y2 = t2.ys[j.contents]
-          (x, y1, y2)
+          Some((x, y1, y2))
         } else {
           i := i.contents + 1
-          (0.0, 0.0, 0.0) // for the function I have in mind, this will error out
+          None
+          // (0.0, 0.0, 0.0) // for the function I have in mind, this will error out
           // exception PointwiseCombinationError
           // raise(PointwiseCombinationError)
         }
       }
+      switch someTuple {
+      | Some((x, y1, y2)) => {
+          let _ = Js.Array.push(fn(y1, y2), newYs)
+          let _ = Js.Array.push(x, newXs)
+        }
+      | None => ()
+      }
       // Js.Console.log(newYs)
-      let _ = Js.Array.push(fn(y1, y2), newYs)
-      let _ = Js.Array.push(x, newXs)
     }
     T.filterOkYs(newXs, newYs)->Ok
   }
