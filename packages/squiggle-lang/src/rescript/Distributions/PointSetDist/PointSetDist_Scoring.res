@@ -10,6 +10,6 @@ module KLDivergence = {
       Error(Operation.NegativeInfinityError)
     } else {
       let quot = predictionElement /. answerElement
-      quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(answerElement *. logFn(quot))
+      quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(-.answerElement *. logFn(quot))
     }
 }
