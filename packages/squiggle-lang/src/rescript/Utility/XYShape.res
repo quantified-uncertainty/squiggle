@@ -391,7 +391,7 @@ module PointwiseCombination = {
     `)
 
   // This function is used for kl divergence
-  let combineAlongSupportOfSecondArgument0: (
+  let combineAlongSupportOfSecondArgument: (
     (float, float) => result<float, Operation.Error.t>,
     interpolator,
     T.t,
@@ -489,12 +489,11 @@ module PointwiseCombination = {
     result
   }
 
-  let combineAlongSupportOfSecondArgument: (
+  let combineAlongSupportOfSecondArgument2: (
     (float, float) => result<float, Operation.Error.t>,
-    interpolator,
     T.t,
     T.t,
-  ) => result<T.t, Operation.Error.t> = (fn, interpolator, prediction, answer) => {
+  ) => result<T.t, Operation.Error.t> = (fn, prediction, answer) => {
     let combineWithFn = (x: float, i: int) => {
       let answerX = x
       let answerY = answer.ys[i]
