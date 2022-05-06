@@ -230,7 +230,7 @@ module T = Dist({
 
   let klDivergence = (prediction: t, answer: t) => {
     combinePointwise(
-      ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument,
+      ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0,
       ~fn=PointSetDist_Scoring.KLDivergence.integrand,
       prediction,
       answer,

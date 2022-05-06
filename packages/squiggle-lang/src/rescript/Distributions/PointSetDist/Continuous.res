@@ -271,38 +271,30 @@ module T = Dist({
   let variance = (t: t): float =>
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
 
-  let klDivergence0 = (prediction: t, answer: t) => {
-    combinePointwise(
-      ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument,
-      PointSetDist_Scoring.KLDivergence.integrand,
-      prediction,
-      answer,
-    )
-    |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
-    |> E.R.fmap(integralEndY)
-  }
+  // let klDivergence0 = (prediction: t, answer: t) => {
+  //   combinePointwise(
+  //     ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument,
+  //     PointSetDist_Scoring.KLDivergence.integrand,
+  //     prediction,
+  //     answer,
+  //   )
+  //   |> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
+  //   |> E.R.fmap(integralEndY)
+  // }
 
   let klDivergence = (prediction: t, answer: t) => {
-    let newShape = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument2(
+    let newShape = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument(
       PointSetDist_Scoring.KLDivergence.integrand,
       prediction.xyShape,
       answer.xyShape,
     )
-    let generateContinuousDistFromXYShape: XYShape.xyShape => t = xyShape => {
+    let xyShapeToContinuous: XYShape.xyShape => t = xyShape => {
       xyShape: xyShape,
       interpolation: #Linear,
       integralSumCache: None,
       integralCache: None,
     }
-    let _ = Js.Console.log2("prediction", prediction)
-    let _ = Js.Console.log2("answer", answer)
-    let _ = Js.Console.log2("newShape", newShape)
-    switch newShape {
-    | Ok(tshape) => Ok(integralEndY(generateContinuousDistFromXYShape(tshape)))
-    | Error(errormessage) => Error(errormessage)
-    }
-    //|> E.R.fmap(shapeMap(XYShape.T.filterYValues(Js.Float.isFinite)))
-    //|> E.R.fmap(integralEndY)
+    newShape->E.R2.fmap(x => x->xyShapeToContinuous->integralEndY)
   }
 })
 

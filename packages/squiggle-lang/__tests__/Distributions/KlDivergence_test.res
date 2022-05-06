@@ -70,13 +70,14 @@ describe("kl divergence", () => {
     let prediction =
       normalMakeR(mean1, stdev1)->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
     let answer = normalMakeR(mean2, stdev2)->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
+    // https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians
     let analyticalKl =
       Js.Math.log(stdev1 /. stdev2) +.
       (stdev2 ** 2.0 +. (mean2 -. mean1) ** 2.0) /. (2.0 *. stdev1 ** 2.0) -. 0.5
     let kl = E.R.liftJoin2(klDivergence, prediction, answer)
 
-    Js.Console.log2("Analytical: ", analyticalKl)
-    Js.Console.log2("Computed: ", kl)
+    // Js.Console.log2("Analytical: ", analyticalKl)
+    // Js.Console.log2("Computed: ", kl)
 
     switch kl {
     | Ok(kl') => kl'->expect->toBeCloseTo(analyticalKl)
@@ -91,7 +92,7 @@ describe("kl divergence", () => {
 describe("combine along support test", () => {
   Skip.test("combine along support test", _ => {
     // doesn't matter
-    let combineAlongSupportOfSecondArgument = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument
+    let combineAlongSupportOfSecondArgument = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0
     let lowAnswer = 0.0
     let highAnswer = 1.0
     let lowPrediction = 0.0

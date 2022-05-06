@@ -391,7 +391,7 @@ module PointwiseCombination = {
     `)
 
   // This function is used for kl divergence
-  let combineAlongSupportOfSecondArgument: (
+  let combineAlongSupportOfSecondArgument0: (
     (float, float) => result<float, Operation.Error.t>,
     interpolator,
     T.t,
@@ -455,14 +455,14 @@ module PointwiseCombination = {
     T.filterOkYs(newXs, newYs)->Ok
   }
 
-  let getApproximatePdfOfContinuousDistributionAtPoint: (xyShape, float) => option<float> = (
-    dist: xyShape,
-    point: float,
+  let approximatePdfOfContinuousDistributionAtPoint: (xyShape, float) => option<float> = (
+    distShape,
+    point,
   ) => {
-    let closestFromBelowIndex = E.A.reducei(dist.xs, None, (accumulator, item, index) =>
+    let closestFromBelowIndex = E.A.reducei(distShape.xs, None, (accumulator, item, index) =>
       item < point ? Some(index) : accumulator
     ) // This could be made more efficient by taking advantage of the fact that these are ordered
-    let closestFromAboveIndexOption = Belt.Array.getIndexBy(dist.xs, item => item > point)
+    let closestFromAboveIndexOption = Belt.Array.getIndexBy(distShape.xs, item => item > point)
 
     let weightedMean = (
       point: float,
@@ -480,30 +480,28 @@ module PointwiseCombination = {
 
     let result = switch (closestFromBelowIndex, closestFromAboveIndexOption) {
     | (None, None) => None // all are smaller, and all are larger
-    | (None, Some(i)) => Some(0.0) // none are smaller, all are larger
-    | (Some(i), None) => Some(0.0) // all are smaller, none are larger
+    | (None, Some(_)) => Some(0.0) // none are smaller, all are larger
+    | (Some(_), None) => Some(0.0) // all are smaller, none are larger
     | (Some(i), Some(j)) =>
-      Some(weightedMean(point, dist.xs[i], dist.xs[j], dist.ys[i], dist.ys[j])) // there is a lowerBound and an upperBound.
+      Some(weightedMean(point, distShape.xs[i], distShape.xs[j], distShape.ys[i], distShape.ys[j])) // there is a lowerBound and an upperBound.
     }
 
     result
   }
 
-  let combineAlongSupportOfSecondArgument2: (
+  let combineAlongSupportOfSecondArgument: (
     (float, float) => result<float, Operation.Error.t>,
     T.t,
     T.t,
   ) => result<T.t, Operation.Error.t> = (fn, prediction, answer) => {
-    let combineWithFn = (x: float, i: int) => {
-      let answerX = x
+    let combineWithFn = (answerX: float, i: int) => {
       let answerY = answer.ys[i]
-      let predictionY = getApproximatePdfOfContinuousDistributionAtPoint(prediction, answerX)
+      let predictionY = approximatePdfOfContinuousDistributionAtPoint(prediction, answerX)
       let wrappedResult = E.O.fmap(x => fn(x, answerY), predictionY)
-      let result = switch wrappedResult {
+      switch wrappedResult {
       | Some(x) => x
       | None => Error(Operation.LogicallyInconsistentPathwayError)
       }
-      result
     }
     let newYsWithError = Js.Array.mapi((x, i) => combineWithFn(x, i), answer.xs)
     let newYsOrError = E.A.R.firstErrorOrOpen(newYsWithError)
@@ -512,7 +510,6 @@ module PointwiseCombination = {
     | Error(b) => Error(b)
     }
 
-    // T.filterOkYs(newXs, newYs)->Ok
     result
   }
 
