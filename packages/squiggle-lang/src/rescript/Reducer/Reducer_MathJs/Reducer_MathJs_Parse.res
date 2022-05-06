@@ -9,7 +9,7 @@ type node = {"type": string, "isNode": bool, "comment": string}
 type arrayNode = {...node, "items": array<node>}
 type block = {"node": node}
 type blockNode = {...node, "blocks": array<block>}
-//conditionalNode
+type conditionalNode = {...node, "condition": node, "trueExpr": node, "falseExpr": node}
 type constantNode = {...node, "value": unit}
 type functionAssignmentNode = {...node, "name": string, "params": array<string>, "expr": node}
 type indexNode = {...node, "dimensions": array<node>}
@@ -31,6 +31,7 @@ external castAssignmentNode: node => assignmentNode = "%identity"
 external castAssignmentNodeWAccessor: node => assignmentNodeWAccessor = "%identity"
 external castAssignmentNodeWIndex: node => assignmentNodeWIndex = "%identity"
 external castBlockNode: node => blockNode = "%identity"
+external castConditionalNode: node => conditionalNode = "%identity"
 external castConstantNode: node => constantNode = "%identity"
 external castFunctionAssignmentNode: node => functionAssignmentNode = "%identity"
 external castFunctionNode: node => functionNode = "%identity"
@@ -58,6 +59,7 @@ type mathJsNode =
   | MjArrayNode(arrayNode)
   | MjAssignmentNode(assignmentNode)
   | MjBlockNode(blockNode)
+  | MjConditionalNode(conditionalNode)
   | MjConstantNode(constantNode)
   | MjFunctionAssignmentNode(functionAssignmentNode)
   | MjFunctionNode(functionNode)
@@ -82,6 +84,7 @@ let castNodeType = (node: node) => {
   | "ArrayNode" => node->castArrayNode->MjArrayNode->Ok
   | "AssignmentNode" => node->decideAssignmentNode
   | "BlockNode" => node->castBlockNode->MjBlockNode->Ok
+  | "ConditionalNode" => node->castConditionalNode->MjConditionalNode->Ok
   | "ConstantNode" => node->castConstantNode->MjConstantNode->Ok
   | "FunctionAssignmentNode" => node->castFunctionAssignmentNode->MjFunctionAssignmentNode->Ok
   | "FunctionNode" => node->castFunctionNode->MjFunctionNode->Ok
@@ -157,6 +160,10 @@ let rec toString = (mathJsNode: mathJsNode): string => {
   | MjAssignmentNode(aNode) =>
     `${aNode["object"]->toStringSymbolNode} = ${aNode["value"]->toStringMathJsNode}`
   | MjBlockNode(bNode) => `{${bNode["blocks"]->toStringBlocks}}`
+  | MjConditionalNode(cNode) =>
+    `ternary(${toStringMathJsNode(cNode["condition"])}, ${toStringMathJsNode(
+        cNode["trueExpr"],
+      )}, ${toStringMathJsNode(cNode["falseExpr"])})`
   | MjConstantNode(cNode) => cNode["value"]->toStringValue
   | MjFunctionAssignmentNode(faNode) => faNode->toStringFunctionAssignmentNode
   | MjFunctionNode(fNode) => fNode->toStringFunctionNode

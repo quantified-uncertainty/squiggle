@@ -62,7 +62,7 @@ describe("call and bindings", () => {
   testEvalToBe("f(x)=x+1; g(x)=f(x)+1; g(2)", "Ok(4)")
 })
 
-describe("function trics", () => {
+describe("function tricks", () => {
   testParseToBe(
     "f(x)=f(y)=2; f(2)",
     "Ok((:$$block (:$$block (:$let :f (:$$lambda [x] (:$$block (:$let :f (:$$lambda [y] (:$$block 2)))))) (:f 2))))",

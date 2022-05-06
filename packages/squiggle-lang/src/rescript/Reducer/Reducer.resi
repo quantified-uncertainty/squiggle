@@ -9,6 +9,8 @@ type errorValue = Reducer_ErrorValue.errorValue
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 @genType
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
+@genType
+type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
 
 @genType
 let evaluateUsingOptions: (
@@ -26,3 +28,16 @@ let evaluatePartialUsingExternalBindings: (
 let evaluate: string => result<expressionValue, errorValue>
 
 let parse: string => result<Expression.expression, errorValue>
+
+@genType
+let foreignFunctionInterface: (
+  QuriSquiggleLang.ReducerInterface_ExpressionValue.lambdaValue,
+  array<QuriSquiggleLang.ReducerInterface_ExpressionValue.expressionValue>,
+  QuriSquiggleLang.ReducerInterface_ExpressionValue.environment,
+) => result<expressionValue, errorValue>
+
+@genType
+let defaultEnvironment: environment
+
+@genType
+let defaultExternalBindings: externalBindings

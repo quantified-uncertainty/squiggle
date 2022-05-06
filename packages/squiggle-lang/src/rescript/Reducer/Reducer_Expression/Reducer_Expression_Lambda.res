@@ -57,3 +57,13 @@ let applyParametersToLambda = (
 
 let doLambdaCall = (lambdaValue: ExpressionValue.lambdaValue, args, environment, reducer) =>
   applyParametersToLambda(lambdaValue, args, environment, reducer)
+
+let foreignFunctionInterface = (
+  lambdaValue: ExpressionValue.lambdaValue,
+  argArray: array<expressionValue>,
+  environment: ExpressionValue.environment,
+  reducer: ExpressionT.reducerFn,
+): result<expressionValue, 'e> => {
+  let args = argArray->Belt.List.fromArray
+  applyParametersToLambda(lambdaValue, args, environment, reducer)
+}
