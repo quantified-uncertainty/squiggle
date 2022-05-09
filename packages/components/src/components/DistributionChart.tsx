@@ -17,6 +17,7 @@ import {
   expYScale,
 } from "./DistributionVegaScales";
 import styled from "styled-components";
+import { NumberShower } from "./NumberShower";
 
 type DistributionChartProps = {
   distribution: Distribution;
@@ -179,24 +180,18 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
   distribution,
 }: SummaryTableProps) => {
   let mean = distribution.mean();
-  let median = distribution.inv(0.5);
   let p5 = distribution.inv(0.05);
   let p10 = distribution.inv(0.1);
-  let Q1 = distribution.inv(0.25);
-  let Q3 = distribution.inv(0.75);
+  let p25 = distribution.inv(0.25);
+  let p50 = distribution.inv(0.5);
+  let p75 = distribution.inv(0.75);
   let p90 = distribution.inv(0.9);
   let p95 = distribution.inv(0.95);
   let unwrapResult = (
     x: result<number, distributionError>
   ): React.ReactNode => {
     if (x.tag === "Ok") {
-      return (
-        <span>
-          {Intl.NumberFormat("en-US", { maximumSignificantDigits: 3 }).format(
-            x.value
-          )}
-        </span>
-      );
+      return <NumberShower number={x.value} />;
     } else {
       return (
         <ErrorBox heading="Distribution Error">
@@ -225,9 +220,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
           <Cell>{unwrapResult(mean)}</Cell>
           <Cell>{unwrapResult(p5)}</Cell>
           <Cell>{unwrapResult(p10)}</Cell>
-          <Cell>{unwrapResult(Q1)}</Cell>
-          <Cell>{unwrapResult(median)}</Cell>
-          <Cell>{unwrapResult(Q3)}</Cell>
+          <Cell>{unwrapResult(p25)}</Cell>
+          <Cell>{unwrapResult(p50)}</Cell>
+          <Cell>{unwrapResult(p75)}</Cell>
           <Cell>{unwrapResult(p90)}</Cell>
           <Cell>{unwrapResult(p95)}</Cell>
         </Row>
