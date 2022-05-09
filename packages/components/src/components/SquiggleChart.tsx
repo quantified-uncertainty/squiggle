@@ -65,6 +65,8 @@ export interface SquiggleItemProps {
   expression: squiggleExpression;
   width?: number;
   height: number;
+  /** Whether to show a summary of statistics for distributions */
+  showSummary: boolean;
   /** Whether to show type information */
   showTypes?: boolean;
   /** Whether to show users graph controls (scale etc) */
@@ -75,6 +77,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
   expression,
   width,
   height,
+  showSummary,
   showTypes = false,
   showControls = false,
 }: SquiggleItemProps) => {
@@ -103,6 +106,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
             distribution={expression.value}
             height={height}
             width={width}
+            showSummary={showSummary}
             showControls={showControls}
           />
         </VariableBox>
@@ -143,6 +147,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
               height={50}
               showTypes={showTypes}
               showControls={showControls}
+              showSummary={showSummary}
             />
           ))}
         </VariableBox>
@@ -158,6 +163,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
                 width={width !== undefined ? width - 20 : width}
                 height={50}
                 showTypes={showTypes}
+                showSummary={showSummary}
                 showControls={showControls}
               />
             </>
@@ -203,6 +209,8 @@ export interface SquiggleChartProps {
   bindings?: bindings;
   /** JS imported parameters */
   jsImports?: jsImports;
+  /** Whether to show a summary of the distirbution */
+  showSummary?: boolean;
   /** Whether to show type information about returns, default false */
   showTypes?: boolean;
   /** Whether to show graph controls (scale etc)*/
@@ -223,6 +231,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   height = 60,
   bindings = defaultBindings,
   jsImports = defaultImports,
+  showSummary = false,
   width,
   showTypes = false,
   showControls = false,
@@ -246,6 +255,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
         expression={expression}
         width={width}
         height={height}
+        showSummary={showSummary}
         showTypes={showTypes}
         showControls={showControls}
       />
