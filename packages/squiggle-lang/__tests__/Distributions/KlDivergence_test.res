@@ -19,7 +19,7 @@ describe("kl divergence on continuous distributions", () => {
       let analyticalKl = Js.Math.log((highPrediction -. lowPrediction) /. (highAnswer -. lowAnswer))
       let kl = E.R.liftJoin2(klDivergence, prediction, answer)
       switch kl {
-      | Ok(kl') => kl'->expect->toBeCloseTo(analyticalKl)
+      | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=7)
       | Error(err) => {
           Js.Console.log(DistributionTypes.Error.toString(err))
           raise(KlFailed)
@@ -51,7 +51,7 @@ describe("kl divergence on continuous distributions", () => {
     let kl = E.R.liftJoin2(klDivergence, prediction, answer)
 
     switch kl {
-    | Ok(kl') => kl'->expect->toBeCloseTo(analyticalKl)
+    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=3)
     | Error(err) => {
         Js.Console.log(DistributionTypes.Error.toString(err))
         raise(KlFailed)
@@ -78,9 +78,9 @@ describe("kl divergence on discrete distributions", () => {
     | (Dist(prediction'), Dist(answer')) => klDivergence(prediction', answer')
     | _ => raise(MixtureFailed)
     }
-    let analyticalKl = Js.Math.log(2.0 /. 3.0)
+    let analyticalKl = Js.Math.log(3.0 /. 2.0)
     switch kl {
-    | Ok(kl') => kl'->expect->toBeCloseTo(analyticalKl)
+    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=7)
     | Error(err) =>
       Js.Console.log(DistributionTypes.Error.toString(err))
       raise(KlFailed)

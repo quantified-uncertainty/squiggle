@@ -229,11 +229,25 @@ module T = Dist({
   }
 
   let klDivergence = (prediction: t, answer: t) => {
-    combinePointwise(
-      ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0,
-      ~fn=PointSetDist_Scoring.KLDivergence.integrand,
-      prediction,
-      answer,
-    ) |> E.R2.bind(integralEndYResult)
+    let massOrZero = (t: t, x: float): float => {
+      let i = E.A.findIndex(x' => x' == x, t.xyShape.xs)
+      switch i {
+      | None => 0.0
+      | Some(i') => t.xyShape.ys[i']
+      }
+    }
+    let predictionNewYs = E.A.fmap(massOrZero(answer), prediction.xyShape.xs)
+    let integrand = XYShape.PointwiseCombination.combine(
+      PointSetDist_Scoring.KLDivergence.integrand,
+      XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero),
+      {XYShape.xs: answer.xyShape.xs, XYShape.ys: predictionNewYs},
+      answer.xyShape,
+    )
+    let xyShapeToDiscrete: XYShape.xyShape => t = xyShape => {
+      xyShape: xyShape,
+      integralSumCache: None,
+      integralCache: None,
+    }
+    integrand->E.R2.fmap(x => x->xyShapeToDiscrete->integralEndY)
   }
 })

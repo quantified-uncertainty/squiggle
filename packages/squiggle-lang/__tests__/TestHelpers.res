@@ -51,6 +51,7 @@ let mkExponential = rate => DistributionTypes.Symbolic(#Exponential({rate: rate}
 let mkUniform = (low, high) => DistributionTypes.Symbolic(#Uniform({low: low, high: high}))
 let mkCauchy = (local, scale) => DistributionTypes.Symbolic(#Cauchy({local: local, scale: scale}))
 let mkLognormal = (mu, sigma) => DistributionTypes.Symbolic(#Lognormal({mu: mu, sigma: sigma}))
+let mkDirac = x => DistributionTypes.Symbolic(#Float(x))
 
 let normalMake = SymbolicDist.Normal.make
 let betaMake = SymbolicDist.Beta.make
