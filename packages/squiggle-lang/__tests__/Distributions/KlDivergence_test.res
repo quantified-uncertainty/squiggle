@@ -27,8 +27,11 @@ describe("kl divergence", () => {
       }
     })
   }
+  // The pair on the right (the answer) can be wider than the pair on the left (the prediction), but not the other way around.
   testUniform(0.0, 1.0, -1.0, 2.0)
-  testUniform(0.0, 1.0, 0.0, 2.0)
+  testUniform(0.0, 1.0, 0.0, 2.0) // equal left endpoints
+  testUniform(0.0, 1.0, -1.0, 1.0) // equal rightendpoints
+  testUniform(0.0, 1e1, 0.0, 1e1) // equal (klDivergence = 0)
   // testUniform(-1.0, 1.0, 0.0, 2.0)
 
   test("of two normals is equal to the formula", () => {
@@ -58,6 +61,7 @@ describe("kl divergence", () => {
 })
 
 describe("combine along support test", () => {
+  // This tests the version of the function that we're NOT using. Haven't deleted the test in case we use the code later.
   test("combine along support test", _ => {
     let combineAlongSupportOfSecondArgument = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0
     let lowAnswer = 0.0

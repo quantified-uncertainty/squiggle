@@ -56,6 +56,7 @@ type operationError =
   | InfinityError
   | NegativeInfinityError
   | LogicallyInconsistentPathwayError
+  | NotYetImplemented // should be removed when `klDivergence` for mixed and discrete is implemented.
 
 @genType
 module Error = {
@@ -69,6 +70,7 @@ module Error = {
     | InfinityError => "Operation returned positive infinity"
     | NegativeInfinityError => "Operation returned negative infinity"
     | LogicallyInconsistentPathwayError => "This pathway should have been logically unreachable"
+    | NotYetImplemented => "This pathway is not yet implemented"
     }
 }
 
