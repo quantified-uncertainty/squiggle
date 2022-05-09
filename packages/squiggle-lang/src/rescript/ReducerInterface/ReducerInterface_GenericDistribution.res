@@ -120,24 +120,39 @@ module Helpers = {
   }
 
   let mixture = (args: array<expressionValue>): DistributionOperation.outputType =>
-    switch E.A.last(args) {
-    | Some(EvArray(b)) => {
-        let weights = parseNumberArray(b)
-        let distributions = parseDistributionArray(
-          Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
-        )
-        switch E.R.merge(distributions, weights) {
-        | Ok(d, w) => mixtureWithGivenWeights(d, w)
+    switch args {
+    | [EvArray(distributions)] =>
+      switch parseDistributionArray(distributions) {
+      | Ok(distrs) => mixtureWithDefaultWeights(distrs)
+      | Error(err) => err->ArgumentError->GenDistError
+      }
+    | [EvArray(distributions), EvArray(weights)] =>
+      switch (parseDistributionArray(distributions), parseNumberArray(weights)) {
+      | (Ok(distrs), Ok(wghts)) => mixtureWithGivenWeights(distrs, wghts)
+      | (Error(err), Ok(_)) => err->ArgumentError->GenDistError
+      | (Ok(_), Error(err)) => err->ArgumentError->GenDistError
+      | (Error(err1), Error(err2)) => `${err1}|${err2}`->ArgumentError->GenDistError
+      }
+    | _ =>
+      switch E.A.last(args) {
+      | Some(EvArray(b)) => {
+          let weights = parseNumberArray(b)
+          let distributions = parseDistributionArray(
+            Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
+          )
+          switch E.R.merge(distributions, weights) {
+          | Ok(d, w) => mixtureWithGivenWeights(d, w)
+          | Error(err) => GenDistError(ArgumentError(err))
+          }
+        }
+      | Some(EvNumber(_))
+      | Some(EvDistribution(_)) =>
+        switch parseDistributionArray(args) {
+        | Ok(distributions) => mixtureWithDefaultWeights(distributions)
         | Error(err) => GenDistError(ArgumentError(err))
         }
+      | _ => GenDistError(ArgumentError("Last argument of mx must be array or distribution"))
       }
-    | Some(EvNumber(_))
-    | Some(EvDistribution(_)) =>
-      switch parseDistributionArray(args) {
-      | Ok(distributions) => mixtureWithDefaultWeights(distributions)
-      | Error(err) => GenDistError(ArgumentError(err))
-      }
-    | _ => GenDistError(ArgumentError("Last argument of mx must be array or distribution"))
     }
 }
 
