@@ -86,7 +86,7 @@ let combinePointwise = (
   | (Discrete(m1), Discrete(m2)) =>
     Discrete.combinePointwise(
       ~integralSumCachesFn,
-      fn,
+      ~fn,
       m1,
       m2,
     )->E.R2.fmap(x => PointSetTypes.Discrete(x))
@@ -194,6 +194,12 @@ module T = Dist({
     | Mixed(m) => Mixed.T.variance(m)
     | Discrete(m) => Discrete.T.variance(m)
     | Continuous(m) => Continuous.T.variance(m)
+    }
+
+  let klDivergence = (t1: t, t2: t) =>
+    switch (t1, t2) {
+    | (Continuous(t1), Continuous(t2)) => Continuous.T.klDivergence(t1, t2)
+    | _ => Error(NotYetImplemented)
     }
 })
 

@@ -38,7 +38,7 @@
     "rescript": "^9.1.4",
     "jstat": "^1.9.5",
     "pdfast": "^0.2.0",
-    "mathjs": "^10.5.0"
+    "mathjs": "10.5.0"
   },
   "devDependencies": {
     "bisect_ppx": "^2.7.1",

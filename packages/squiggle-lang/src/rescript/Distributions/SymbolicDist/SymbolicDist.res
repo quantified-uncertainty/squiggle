@@ -396,8 +396,9 @@ module T = {
     | (#ByWeight, #Uniform(n)) =>
       // In `ByWeight mode, uniform distributions get special treatment because we need two x's
       // on either side for proper rendering (just left and right of the discontinuities).
-      let dx = 0.00001 *. (n.high -. n.low)
-      [n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx]
+      let distance = n.high -. n.low
+      let dx = MagicNumbers.Epsilon.ten *. distance
+      [n.low -. dx, n.low, n.low +. dx, n.high -. dx, n.high, n.high +. dx]
     | (#ByWeight, _) =>
       let ys = E.A.Floats.range(minCdfValue, maxCdfValue, n)
       ys |> E.A.fmap(y => inv(y, dist))

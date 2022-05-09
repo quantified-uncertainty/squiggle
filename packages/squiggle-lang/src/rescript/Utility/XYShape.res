@@ -96,7 +96,21 @@ module T = {
   let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> Belt.Array.unzip |> fromArray
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
-
+  let filterYValues = (fn, t: t): t => t |> zip |> E.A.filter(((_, y)) => fn(y)) |> fromZippedArray
+  let filterOkYs = (xs: array<float>, ys: array<result<float, 'b>>): t => {
+    let n = E.A.length(xs) // Assume length(xs) == length(ys)
+    let newXs = []
+    let newYs = []
+    for i in 0 to n - 1 {
+      switch ys[i] {
+      | Ok(y) =>
+        let _ = Js.Array.push(xs[i], newXs)
+        let _ = Js.Array.push(y, newYs)
+      | Error(_) => ()
+      }
+    }
+    {xs: newXs, ys: newYs}
+  }
   module Validator = {
     let fnName = "XYShape validate"
     let notSortedError = (p: string): error => NotSorted(p)
@@ -376,6 +390,90 @@ module PointwiseCombination = {
       }
     `)
 
+  /*
+    This is from an approach to kl divergence that was ultimately rejected. Leaving it in for now because it may help us factor `combine` out of raw javascript soon.
+ */
+  let combineAlongSupportOfSecondArgument0: (
+    (float, float) => result<float, Operation.Error.t>,
+    interpolator,
+    T.t,
+    T.t,
+  ) => result<T.t, Operation.Error.t> = (fn, interpolator, t1, t2) => {
+    let newYs = []
+    let newXs = []
+    let (l1, l2) = (E.A.length(t1.xs), E.A.length(t2.xs))
+    let (i, j) = (ref(0), ref(0))
+    let minX = t2.xs[0]
+    let maxX = t2.xs[l2 - 1]
+    while j.contents < l2 - 1 && i.contents < l1 - 1 {
+      let someTuple = {
+        let x1 = t1.xs[i.contents + 1]
+        let x2 = t2.xs[j.contents + 1]
+        if (
+          /* if t1 has to catch up to t2 */
+          i.contents < l1 - 1 && j.contents < l2 && x1 < x2 && minX <= x1 && x2 <= maxX
+        ) {
+          i := i.contents + 1
+          let x = x1
+          let y1 = t1.ys[i.contents]
+          let y2 = interpolator(t2, j.contents, x)
+          Some((x, y1, y2))
+        } else if (
+          /* if t2 has to catch up to t1 */
+          i.contents < l1 && j.contents < l2 - 1 && x1 > x2 && x2 >= minX && maxX >= x1
+        ) {
+          j := j.contents + 1
+          let x = x2
+          let y1 = interpolator(t1, i.contents, x)
+          let y2 = t2.ys[j.contents]
+          Some((x, y1, y2))
+        } else if (
+          /* move both ahead if they are equal */
+          i.contents < l1 - 1 && j.contents < l2 - 1 && x1 == x2 && x1 >= minX && maxX >= x2
+        ) {
+          i := i.contents + 1
+          j := j.contents + 1
+          let x = x1
+          let y1 = t1.ys[i.contents]
+          let y2 = t2.ys[j.contents]
+          Some((x, y1, y2))
+        } else {
+          i := i.contents + 1
+          None
+        }
+      }
+      switch someTuple {
+      | Some((x, y1, y2)) => {
+          let _ = Js.Array.push(fn(y1, y2), newYs)
+          let _ = Js.Array.push(x, newXs)
+        }
+      | None => ()
+      }
+    }
+    T.filterOkYs(newXs, newYs)->Ok
+  }
+
+  // This function is used for klDivergence
+  let combineAlongSupportOfSecondArgument: (
+    (float, float) => result<float, Operation.Error.t>,
+    T.t,
+    T.t,
+  ) => result<T.t, Operation.Error.t> = (fn, prediction, answer) => {
+    let combineWithFn = (answerX: float, i: int) => {
+      let answerY = answer.ys[i]
+      let predictionY = XtoY.linear(answerX, prediction)
+      fn(predictionY, answerY)
+    }
+    let newYsWithError = Js.Array.mapi((x, i) => combineWithFn(x, i), answer.xs)
+    let newYsOrError = E.A.R.firstErrorOrOpen(newYsWithError)
+    let result = switch newYsOrError {
+    | Ok(a) => Ok({xs: answer.xs, ys: a})
+    | Error(b) => Error(b)
+    }
+
+    result
+  }
+
   let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
     combine((a, b) => Ok(a +. b), interpolator, t1, t2)->E.R.toExn(
       "Add operation should never fail",
@@ -467,7 +565,7 @@ module Range = {
   // TODO: I think this isn't needed by any functions anymore.
   let stepsToContinuous = t => {
     // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
-    let diff = T.xTotalRange(t) |> (r => r *. 0.00001)
+    let diff = T.xTotalRange(t) |> (r => r *. MagicNumbers.Epsilon.five)
     let items = switch E.A.toRanges(Belt.Array.zip(t.xs, t.ys)) {
     | Ok(items) =>
       Some(
@@ -488,25 +586,6 @@ module Range = {
     }
   }
 }
-
-let pointLogScore = (prediction, answer) =>
-  switch answer {
-  | 0. => 0.0
-  | answer => answer *. Js.Math.log2(Js.Math.abs_float(prediction /. answer))
-  }
-
-let logScorePoint = (sampleCount, t1, t2) =>
-  PointwiseCombination.combineEvenXs(
-    ~fn=pointLogScore,
-    ~xToYSelection=XtoY.linear,
-    sampleCount,
-    t1,
-    t2,
-  )
-  |> Range.integrateWithTriangles
-  |> E.O.fmap(T.accumulateYs(\"+."))
-  |> E.O.fmap(Pairs.last)
-  |> E.O.fmap(Pairs.y)
 
 module Analysis = {
   let getVarianceDangerously = (t: 't, mean: 't => float, getMeanOfSquares: 't => float): float => {

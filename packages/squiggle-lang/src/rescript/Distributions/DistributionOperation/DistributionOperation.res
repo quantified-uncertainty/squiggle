@@ -10,8 +10,8 @@ type env = {
 }
 
 let defaultEnv = {
-  sampleCount: 10000,
-  xyPointLength: 10000,
+  sampleCount: MagicNumbers.Environment.defaultSampleCount,
+  xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
 
 type outputType =
@@ -128,7 +128,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
   let fromDistFn = (
     subFnName: DistributionTypes.DistributionOperation.fromDist,
     dist: genericDist,
-  ) => {
+  ): outputType => {
     let response = switch subFnName {
     | ToFloat(distToFloatOperation) =>
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
@@ -144,6 +144,10 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
         Dist(dist)
       }
     | ToDist(Normalize) => dist->GenericDist.normalize->Dist
+    | ToScore(KLDivergence(t2)) =>
+      GenericDist.klDivergence(dist, t2, ~toPointSetFn)
+      ->E.R2.fmap(r => Float(r))
+      ->OutputLocal.fromResult
     | ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
     | ToDist(Truncate(leftCutoff, rightCutoff)) =>
       GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
@@ -158,6 +162,15 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       dist
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
       ->E.R2.fmap(r => Dist(PointSet(r)))
+      ->OutputLocal.fromResult
+    | ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
+      dist
+      ->GenericDist.pointwiseCombinationFloat(
+        ~toPointSetFn,
+        ~algebraicCombination=#LogarithmWithThreshold(eps),
+        ~f,
+      )
+      ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | ToDist(Scale(#Logarithm, f)) =>
       dist
@@ -248,6 +261,7 @@ module Constructors = {
   let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
   let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
   let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
+  let klDivergence = (~env, dist1, dist2) => C.klDivergence(dist1, dist2)->run(~env)->toFloatR
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
   let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR
@@ -266,6 +280,8 @@ module Constructors = {
   let algebraicLogarithm = (~env, dist1, dist2) =>
     C.algebraicLogarithm(dist1, dist2)->run(~env)->toDistR
   let algebraicPower = (~env, dist1, dist2) => C.algebraicPower(dist1, dist2)->run(~env)->toDistR
+  let scalePower = (~env, dist, n) => C.scalePower(dist, n)->run(~env)->toDistR
+  let scaleLogarithm = (~env, dist, n) => C.scaleLogarithm(dist, n)->run(~env)->toDistR
   let pointwiseAdd = (~env, dist1, dist2) => C.pointwiseAdd(dist1, dist2)->run(~env)->toDistR
   let pointwiseMultiply = (~env, dist1, dist2) =>
     C.pointwiseMultiply(dist1, dist2)->run(~env)->toDistR

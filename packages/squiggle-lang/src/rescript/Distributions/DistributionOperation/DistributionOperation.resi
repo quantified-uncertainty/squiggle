@@ -60,6 +60,8 @@ module Constructors: {
   @genType
   let isNormalized: (~env: env, genericDist) => result<bool, error>
   @genType
+  let klDivergence: (~env: env, genericDist, genericDist) => result<float, error>
+  @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>
   @genType
   let toSampleSet: (~env: env, genericDist, int) => result<genericDist, error>
@@ -85,6 +87,10 @@ module Constructors: {
   let algebraicLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
   @genType
   let algebraicPower: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  @genType
+  let scaleLogarithm: (~env: env, genericDist, float) => result<genericDist, error>
+  @genType
+  let scalePower: (~env: env, genericDist, float) => result<genericDist, error>
   @genType
   let pointwiseAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>
   @genType

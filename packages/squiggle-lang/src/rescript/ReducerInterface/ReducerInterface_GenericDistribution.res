@@ -79,6 +79,7 @@ module Helpers = {
       dist1,
     )->runGenericOperation
   }
+
   let parseNumber = (args: expressionValue): Belt.Result.t<float, string> =>
     switch args {
     | EvNumber(x) => Ok(x)
@@ -212,6 +213,8 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
       a,
     )->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
+  | ("klDivergence", [EvDistribution(a), EvDistribution(b)]) =>
+    Some(runGenericOperation(FromDist(ToScore(KLDivergence(b)), a)))
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
   | ("scaleLog", [EvDistribution(dist)]) =>
@@ -219,6 +222,8 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
   | ("scaleLog10", [EvDistribution(dist)]) => Helpers.toDistFn(Scale(#Logarithm, 10.0), dist)
   | ("scaleLog", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Scale(#Logarithm, float), dist)
+  | ("scaleLogWithThreshold", [EvDistribution(dist), EvNumber(base), EvNumber(eps)]) =>
+    Helpers.toDistFn(Scale(#LogarithmWithThreshold(eps), base), dist)
   | ("scalePow", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Scale(#Power, float), dist)
   | ("scaleExp", [EvDistribution(dist)]) =>

@@ -6,6 +6,7 @@ module Math = {
 module Epsilon = {
   let ten = 1e-10
   let seven = 1e-7
+  let five = 1e-5
 }
 
 module Environment = {
