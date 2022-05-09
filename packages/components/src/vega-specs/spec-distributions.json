@@ -3,7 +3,6 @@
   "description": "A basic area chart example",
   "width": 500,
   "height": 100,
-  "autosize": "fit",
   "padding": 5,
   "data": [
     {
@@ -13,72 +12,8 @@
       "name": "dis"
     }
   ],
-  "signals": [
-    {
-      "name": "xscale",
-      "description": "The transform of the x scale",
-      "value": false,
-      "bind": {
-        "input": "checkbox",
-        "name": "log x scale"
-      }
-    },
-    {
-      "name": "yscale",
-      "description": "The transform of the y scale",
-      "value": false,
-      "bind": {
-        "input": "checkbox",
-        "name": "log y scale"
-      }
-    }
-  ],
-  "scales": [
-    {
-      "name": "xscale",
-      "type": "pow",
-      "exponent": {
-        "signal": "xscale ? 0.1 : 1"
-      },
-      "range": "width",
-      "zero": false,
-      "nice": false,
-      "domain": {
-        "fields": [
-          {
-            "data": "con",
-            "field": "x"
-          },
-          {
-            "data": "dis",
-            "field": "x"
-          }
-        ]
-      }
-    },
-    {
-      "name": "yscale",
-      "type": "pow",
-      "exponent": {
-        "signal": "yscale ? 0.1 : 1"
-      },
-      "range": "height",
-      "nice": true,
-      "zero": true,
-      "domain": {
-        "fields": [
-          {
-            "data": "con",
-            "field": "y"
-          },
-          {
-            "data": "dis",
-            "field": "y"
-          }
-        ]
-      }
-    }
-  ],
+  "signals": [],
+  "scales": [],
   "axes": [
     {
       "orient": "bottom",
@@ -113,7 +48,7 @@
             "value": 0
           },
           "fill": {
-            "signal": "{gradient: 'linear', x1: 1, y1: 1, x2: 0, y2: 1, stops: [ {offset: 0.0, color: '#4C78A8'}] }"
+            "value": "#4C78A8"
           },
           "interpolate": {
             "value": "monotone"

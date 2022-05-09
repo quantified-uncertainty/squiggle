@@ -33,18 +33,29 @@ const variableBox = {
   `,
 };
 
-export const VariableBox: React.FC<{
+interface VariableBoxProps {
   heading: string;
   children: React.ReactNode;
-}> = ({ heading = "Error", children }) => {
-  return (
-    <variableBox.Component>
-      <variableBox.Heading>
-        <h3>{heading}</h3>
-      </variableBox.Heading>
-      <variableBox.Body>{children}</variableBox.Body>
-    </variableBox.Component>
-  );
+  showTypes?: boolean;
+}
+
+export const VariableBox: React.FC<VariableBoxProps> = ({
+  heading = "Error",
+  children,
+  showTypes = false,
+}: VariableBoxProps) => {
+  if (showTypes) {
+    return (
+      <variableBox.Component>
+        <variableBox.Heading>
+          <h3>{heading}</h3>
+        </variableBox.Heading>
+        <variableBox.Body>{children}</variableBox.Body>
+      </variableBox.Component>
+    );
+  } else {
+    return <div>{children}</div>;
+  }
 };
 
 let RecordKeyHeader = styled.h3``;
@@ -52,10 +63,14 @@ let RecordKeyHeader = styled.h3``;
 export interface SquiggleItemProps {
   /** The input string for squiggle */
   expression: squiggleExpression;
-  width: number;
+  width?: number;
   height: number;
   /** Whether to show a summary of statistics for distributions */
   showSummary: boolean;
+  /** Whether to show type information */
+  showTypes?: boolean;
+  /** Whether to show users graph controls (scale etc) */
+  showControls?: boolean;
 }
 
 const SquiggleItem: React.FC<SquiggleItemProps> = ({
@@ -63,19 +78,24 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
   width,
   height,
   showSummary,
+  showTypes = false,
+  showControls = false,
 }: SquiggleItemProps) => {
   switch (expression.tag) {
     case "number":
       return (
-        <VariableBox heading="Number">
+        <VariableBox heading="Number" showTypes={showTypes}>
           <NumberShower precision={3} number={expression.value} />
         </VariableBox>
       );
     case "distribution": {
       let distType = expression.value.type();
       return (
-        <VariableBox heading={`Distribution (${distType})`}>
-          {distType === "Symbolic" ? (
+        <VariableBox
+          heading={`Distribution (${distType})`}
+          showTypes={showTypes}
+        >
+          {distType === "Symbolic" && showTypes ? (
             <>
               <div>{expression.value.toString()}</div>
             </>
@@ -87,32 +107,46 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
             height={height}
             width={width}
             showSummary={showSummary}
+            showControls={showControls}
           />
         </VariableBox>
       );
     }
     case "string":
       return (
-        <VariableBox heading="String">{`"${expression.value}"`}</VariableBox>
+        <VariableBox
+          heading="String"
+          showTypes={showTypes}
+        >{`"${expression.value}"`}</VariableBox>
       );
     case "boolean":
       return (
-        <VariableBox heading="Boolean">
+        <VariableBox heading="Boolean" showTypes={showTypes}>
           {expression.value.toString()}
         </VariableBox>
       );
     case "symbol":
-      return <VariableBox heading="Symbol">{expression.value}</VariableBox>;
+      return (
+        <VariableBox heading="Symbol" showTypes={showTypes}>
+          {expression.value}
+        </VariableBox>
+      );
     case "call":
-      return <VariableBox heading="Call">{expression.value}</VariableBox>;
+      return (
+        <VariableBox heading="Call" showTypes={showTypes}>
+          {expression.value}
+        </VariableBox>
+      );
     case "array":
       return (
-        <VariableBox heading="Array">
+        <VariableBox heading="Array" showTypes={showTypes}>
           {expression.value.map((r) => (
             <SquiggleItem
               expression={r}
-              width={width - 20}
+              width={width !== undefined ? width - 20 : width}
               height={50}
+              showTypes={showTypes}
+              showControls={showControls}
               showSummary={showSummary}
             />
           ))}
@@ -120,19 +154,33 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       );
     case "record":
       return (
-        <VariableBox heading="Record">
+        <VariableBox heading="Record" showTypes={showTypes}>
           {Object.entries(expression.value).map(([key, r]) => (
             <>
               <RecordKeyHeader>{key}</RecordKeyHeader>
               <SquiggleItem
                 expression={r}
-                width={width - 20}
+                width={width !== undefined ? width - 20 : width}
                 height={50}
+                showTypes={showTypes}
                 showSummary={showSummary}
+                showControls={showControls}
               />
             </>
           ))}
         </VariableBox>
+      );
+    case "arraystring":
+      return (
+        <VariableBox heading="Array String" showTypes={showTypes}>
+          {expression.value.map((r) => `"${r}"`)}
+        </VariableBox>
+      );
+    case "lambda":
+      return (
+        <ErrorBox heading="No Viewer">
+          There is no viewer currently available for function types.
+        </ErrorBox>
       );
   }
 };
@@ -152,8 +200,6 @@ export interface SquiggleChartProps {
   diagramStop?: number;
   /** If the result is a function, how many points along the function it samples */
   diagramCount?: number;
-  /** variables declared before this expression */
-  environment?: unknown;
   /** When the environment changes */
   onChange?(expr: squiggleExpression): void;
   /** CSS width of the element */
@@ -165,6 +211,10 @@ export interface SquiggleChartProps {
   jsImports?: jsImports;
   /** Whether to show a summary of the distirbution */
   showSummary?: boolean;
+  /** Whether to show type information about returns, default false */
+  showTypes?: boolean;
+  /** Whether to show graph controls (scale etc)*/
+  showControls?: boolean;
 }
 
 const ChartWrapper = styled.div`
@@ -181,8 +231,10 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   height = 60,
   bindings = defaultBindings,
   jsImports = defaultImports,
-  width = NaN,
   showSummary = false,
+  width,
+  showTypes = false,
+  showControls = false,
 }: SquiggleChartProps) => {
   let samplingInputs: samplingParams = {
     sampleCount: sampleCount,
@@ -204,6 +256,8 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
         width={width}
         height={height}
         showSummary={showSummary}
+        showTypes={showTypes}
+        showControls={showControls}
       />
     );
   } else {

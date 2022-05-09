@@ -1,34 +1,21 @@
+module Bindings = Reducer_Expression_Bindings
 module BuiltIn = Reducer_Dispatch_BuiltIn
+module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionValue = ReducerInterface.ExpressionValue
 module Extra = Reducer_Extra
+module Lambda = Reducer_Expression_Lambda
+module Macro = Reducer_Expression_Macro
 module MathJs = Reducer_MathJs
 module Result = Belt.Result
 module T = Reducer_Expression_T
-open Reducer_ErrorValue
 
+type environment = ReducerInterface_ExpressionValue.environment
+type errorValue = Reducer_ErrorValue.errorValue
 type expression = T.expression
-type expressionValue = ExpressionValue.expressionValue
+type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type externalBindings = ReducerInterface_ExpressionValue.externalBindings
+type internalCode = ReducerInterface_ExpressionValue.internalCode
 type t = expression
-
-/*
-  Shows the expression as text of expression
-*/
-let rec toString = expression =>
-  switch expression {
-  | T.EBindings(_) => "$$bound"
-  | T.EList(aList) =>
-    `(${Belt.List.map(aList, aValue => toString(aValue))
-      ->Extra.List.interperse(" ")
-      ->Belt.List.toArray
-      ->Js.String.concatMany("")})`
-  | EValue(aValue) => ExpressionValue.toString(aValue)
-  }
-
-let toStringResult = codeResult =>
-  switch codeResult {
-  | Ok(a) => `Ok(${toString(a)})`
-  | Error(m) => `Error(${Js.String.make(m)})`
-  }
 
 /*
   Converts a MathJs code to expression
@@ -39,148 +26,116 @@ let parse_ = (expr: string, parser, converter): result<t, errorValue> =>
 let parse = (mathJsCode: string): result<t, errorValue> =>
   mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromNode)
 
-let parsePartial = (mathJsCode: string): result<t, errorValue> =>
-  mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromPartialNode)
-
-let parseOuter = (mathJsCode: string): result<t, errorValue> =>
-  mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromOuterNode)
-
-let defaultBindings: T.bindings = Belt.Map.String.empty
-
 /*
   Recursively evaluate/reduce the expression (Lisp AST)
 */
-let rec reduceExpression = (expression: t, bindings: T.bindings): result<expressionValue, 'e> => {
-  /*
-    Macros are like functions but instead of taking values as parameters,
-    they take expressions as parameters and return a new expression.
-    Macros are used to define language building blocks. They are like Lisp macros.
- */
-  let doMacroCall = (list: list<t>, bindings: T.bindings): result<t, 'e> =>
-    Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(list, bindings, reduceExpression)
+let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<
+  expressionValue,
+  'e,
+> => {
+  // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
+  switch expression {
+  | T.EValue(value) => value->Ok
+  | T.EList(list) =>
+    switch list {
+    | list{EValue(EvCall(fName)), ..._args} =>
+      switch Macro.isMacroName(fName) {
+      // A macro expands then reduces itself
+      | true => Macro.doMacroCall(expression, bindings, environment, reduceExpression)
+      | false => reduceExpressionList(list, bindings, environment)
+      }
+    | _ => reduceExpressionList(list, bindings, environment)
+    }
+  }
+}
 
-  /*
+and reduceExpressionList = (
+  expressions: list<t>,
+  bindings: T.bindings,
+  environment: environment,
+): result<expressionValue, 'e> => {
+  let racc: result<list<expressionValue>, 'e> = expressions->Belt.List.reduceReverse(Ok(list{}), (
+    racc,
+    each: expression,
+  ) =>
+    racc->Result.flatMap(acc => {
+      each
+      ->reduceExpression(bindings, environment)
+      ->Result.map(newNode => {
+        acc->Belt.List.add(newNode)
+      })
+    })
+  )
+  racc->Result.flatMap(acc => acc->reduceValueList(environment))
+}
+
+/*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
-  let reduceValueList = (valueList: list<expressionValue>): result<expressionValue, 'e> =>
-    switch valueList {
-    | list{EvCall(fName), ...args} => (fName, args->Belt.List.toArray)->BuiltIn.dispatch
-    | _ => valueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
-    }
+and reduceValueList = (valueList: list<expressionValue>, environment): result<
+  expressionValue,
+  'e,
+> =>
+  switch valueList {
+  | list{EvCall(fName), ...args} =>
+    (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
 
-  let rec seekMacros = (expression: t, bindings: T.bindings): result<t, 'e> =>
-    switch expression {
-    | T.EValue(_value) => expression->Ok
-    | T.EBindings(_value) => expression->Ok
-    | T.EList(list) => {
-        let racc: result<list<t>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
-          racc,
-          each: expression,
-        ) =>
-          racc->Result.flatMap(acc => {
-            each
-            ->seekMacros(bindings)
-            ->Result.flatMap(newNode => {
-              acc->Belt.List.add(newNode)->Ok
-            })
-          })
-        )
-        racc->Result.flatMap(acc => acc->doMacroCall(bindings))
-      }
-    }
+  | list{EvLambda(lamdaCall), ...args} =>
+    Lambda.doLambdaCall(lamdaCall, args, environment, reduceExpression)
+  | _ =>
+    valueList
+    ->Lambda.checkIfReduced
+    ->Result.flatMap(reducedValueList =>
+      reducedValueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
+    )
+  }
 
-  let rec reduceExpandedExpression = (expression: t): result<expressionValue, 'e> =>
-    switch expression {
-    | T.EValue(value) => value->Ok
-    | T.EList(list) => {
-        let racc: result<list<expressionValue>, 'e> = list->Belt.List.reduceReverse(Ok(list{}), (
-          racc,
-          each: expression,
-        ) =>
-          racc->Result.flatMap(acc => {
-            each
-            ->reduceExpandedExpression
-            ->Result.flatMap(newNode => {
-              acc->Belt.List.add(newNode)->Ok
-            })
-          })
-        )
-        racc->Result.flatMap(acc => acc->reduceValueList)
-      }
-    | EBindings(_bindings) => RETodo("Error: Bindings cannot be reduced to values")->Error
-    }
+let evalUsingBindingsExpression_ = (aExpression, bindings, environment): result<
+  expressionValue,
+  'e,
+> => reduceExpression(aExpression, bindings, environment)
 
-  let rExpandedExpression: result<t, 'e> = expression->seekMacros(bindings)
-  rExpandedExpression->Result.flatMap(expandedExpression =>
-    expandedExpression->reduceExpandedExpression
-  )
-}
+let evaluateUsingOptions = (
+  ~environment: option<ReducerInterface_ExpressionValue.environment>,
+  ~externalBindings: option<ReducerInterface_ExpressionValue.externalBindings>,
+  code: string,
+): result<expressionValue, errorValue> => {
+  let anEnvironment = switch environment {
+  | Some(env) => env
+  | None => ReducerInterface_ExpressionValue.defaultEnvironment
+  }
 
-let evalUsingExternalBindingsExpression_ = (aExpression, bindings): result<expressionValue, 'e> =>
-  reduceExpression(aExpression, bindings)
+  let anExternalBindings = switch externalBindings {
+  | Some(bindings) => bindings
+  | None => ReducerInterface_ExpressionValue.defaultExternalBindings
+  }
 
-/*
-  Evaluates MathJs code via Reducer using bindings and answers the result.
-  When bindings are used, the code is a partial code as if it is cut from a larger code.
-  Therefore all statements are assignments.
-*/
-let evalPartialUsingExternalBindings_ = (codeText: string, bindings: T.bindings) => {
-  parsePartial(codeText)->Result.flatMap(expression =>
-    expression->evalUsingExternalBindingsExpression_(bindings)
-  )
-}
+  let bindings = anExternalBindings->Bindings.fromExternalBindings
 
-/*
-  Evaluates MathJs code via Reducer using bindings and answers the result.
-  When bindings are used, the code is a partial code as if it is cut from a larger code.
-  Therefore all statments are assignments.
-*/
-let evalOuterWBindings_ = (codeText: string, bindings: T.bindings) => {
-  parseOuter(codeText)->Result.flatMap(expression =>
-    expression->evalUsingExternalBindingsExpression_(bindings)
-  )
+  parse(code)->Result.flatMap(expr => evalUsingBindingsExpression_(expr, bindings, anEnvironment))
 }
 
 /*
   Evaluates MathJs code and bindings via Reducer and answers the result
 */
-let eval = (codeText: string) => {
-  parse(codeText)->Result.flatMap(expression =>
-    expression->evalUsingExternalBindingsExpression_(defaultBindings)
+let evaluate = (code: string): result<expressionValue, errorValue> => {
+  evaluateUsingOptions(~environment=None, ~externalBindings=None, code)
+}
+let eval = evaluate
+let evaluatePartialUsingExternalBindings = (
+  code: string,
+  externalBindings: ReducerInterface_ExpressionValue.externalBindings,
+  environment: ReducerInterface_ExpressionValue.environment,
+): result<externalBindings, errorValue> => {
+  let rAnswer = evaluateUsingOptions(
+    ~environment=Some(environment),
+    ~externalBindings=Some(externalBindings),
+    code,
   )
-}
-
-type externalBindings = ReducerInterface.ExpressionValue.externalBindings //Js.Dict.t<expressionValue>
-
-let externalBindingsToBindings = (externalBindings: externalBindings): T.bindings => {
-  let keys = Js.Dict.keys(externalBindings)
-  keys->Belt.Array.reduce(defaultBindings, (acc, key) => {
-    let value = Js.Dict.unsafeGet(externalBindings, key)
-    acc->Belt.Map.String.set(key, T.EValue(value))
-  })
-}
-/*
-  Evaluates code with external bindings. External bindings are a record of expression values.
-*/
-let evalUsingExternalBindings = (code: string, externalBindings: externalBindings) => {
-  let bindings = externalBindings->externalBindingsToBindings
-  evalOuterWBindings_(code, bindings)
-}
-
-/*
-  Evaluates code with external bindings. External bindings are a record of expression values.
-  The code is a partial code as if it is cut from a larger code. Therefore all statments are assignments.
-*/
-let evalPartialUsingExternalBindings = (code: string, externalBindings: externalBindings): result<
-  externalBindings,
-  'e,
-> => {
-  let bindings = externalBindings->externalBindingsToBindings
-  let answer = evalPartialUsingExternalBindings_(code, bindings)
-  answer->Result.flatMap(answer =>
-    switch answer {
-    | EvRecord(aRecord) => Ok(aRecord)
-    | _ => RETodo("TODO: External bindings must be returned")->Error
-    }
-  )
+  switch rAnswer {
+  | Ok(EvRecord(externalBindings)) => Ok(externalBindings)
+  | Ok(_) =>
+    Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`))
+  | Error(err) => err->Error
+  }
 }

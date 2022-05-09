@@ -81,6 +81,14 @@ module Binomial = {
   @module("jstat") @scope("binomial") external cdf: (float, float, float) => float = "cdf"
 }
 
+module Gamma = {
+  @module("jstat") @scope("gamma") external pdf: (float, float, float) => float = "pdf"
+  @module("jstat") @scope("gamma") external cdf: (float, float, float) => float = "cdf"
+  @module("jstat") @scope("gamma") external inv: (float, float, float) => float = "inv"
+  @module("jstat") @scope("gamma") external mean: (float, float) => float = "mean"
+  @module("jstat") @scope("gamma") external sample: (float, float) => float = "sample"
+}
+
 @module("jstat") external sum: array<float> => float = "sum"
 @module("jstat") external product: array<float> => float = "product"
 @module("jstat") external min: array<float> => float = "min"

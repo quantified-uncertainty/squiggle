@@ -11,7 +11,7 @@ _Symbolic_ formats are just the math equations. `normal(5,3)` is the symbolic re
 
 When you sample distributions (usually starting with symbolic formats), you get lists of samples. Monte Carlo techniques return lists of samples. Let’s call this the “_Sample Set_” format.
 
-Lastly is what I’ll refer to as the _Graph_ format. It describes the coordinates, or the shape, of the distribution. You can save these formats in JSON, for instance, like, `{xs: [1, 2, 3, 4…], ys: [.0001, .0003, .002, …]}`.
+Lastly is what I’ll refer to as the _Graph_ format. It describes the coordinates, or the shape, of the distribution. You can save these formats in JSON, for instance, like, `{xs: [1, 2, 3, 4, …], ys: [.0001, .0003, .002, …]}`.
 
 Symbolic, Sample Set, and Graph formats all have very different advantages and disadvantages.
 
@@ -19,7 +19,7 @@ Note that the name "Symbolic" is fairly standard, but I haven't found common nam
 
 ## Symbolic Formats
 
-**TLDR**  
+**TL;DR**  
 Mathematical representations. Require analytic solutions. These are often ideal where they can be applied, but apply to very few actual functions. Typically used sparsely, except for the starting distributions (before any computation is performed).
 
 **Examples**  
@@ -28,9 +28,6 @@ Mathematical representations. Require analytic solutions. These are often ideal 
 
 **How to Do Computation**  
 To perform calculations of symbolic systems, you need to find analytical solutions. For example, there are equations to find the pdf or cdf of most distribution shapes at any point. There are also lots of simplifications that could be done in particular situations. For example, there’s an analytical solution for combining normal distributions.
-
-**Special: The Metalog Distribution**  
-The Metalog distribution seems like it can represent almost any reasonable distribution. It’s symbolic. This is great for storage, but it’s not clear if it helps with calculation. My impression is that we don’t have symbolic ways of doing most functions (addition, multiplication, etc) on metalog distributions. Also, note that it can take a fair bit of computation to fit a shape to the Metalog distribution.
 
 **Advantages**
 
@@ -54,10 +51,14 @@ The Metalog distribution seems like it can represent almost any reasonable distr
 **How to Visualize**  
 Convert to graph, then display that. (Optionally, you can also convert to samples, then display those using a histogram, but this is often worse you have both options.)
 
+**Bonus: The Metalog Distribution**
+
+The Metalog distribution seems like it can represent almost any reasonable distribution. It’s symbolic. This is great for storage, but it’s not clear if it helps with calculation. My impression is that we don’t have symbolic ways of doing most functions (addition, multiplication, etc) on metalog distributions. Also, note that it can take a fair bit of computation to fit a shape to the Metalog distribution.
+
 ## Graph Formats
 
-**TLDR**  
-Lists of the x-y coordinates of the shape of a distribution. (Usually the pdf, which is more compressed than the cdf). Some key functions (like pdf, cdf) and manipulations can work on almost any graphally-described distribution.
+**TL;DR**  
+Lists of the x-y coordinates of the shape of a distribution. (Usually the pdf, which is more compressed than the cdf). Some key functions (like pdf, cdf) and manipulations can work on almost any graphically-described distribution.
 
 **Alternative Names:**  
 Grid, Mesh, Graph, Vector, Pdf, PdfCoords/PdfPoints, Discretised, Bezier, Curve  
@@ -77,7 +78,7 @@ Use graph techniques. These can be fairly computationally-intensive (particularl
 
 **Disadvantages**
 
-- Most calculations are infeasible/impossible to perform graphally. In these cases, you need to use sampling.
+- Most calculations are infeasible/impossible to perform graphically. In these cases, you need to use sampling.
 - Not as accurate or fast as symbolic methods, where the symbolic methods are applicable.
 - The tails get cut off, which is subideal. It’s assumed that the value of the pdf outside of the bounded range is exactly 0, which is not correct. (Note: If you have ideas on how to store graph formats that don’t cut off tails, let me know)
 
@@ -108,7 +109,7 @@ Use graph techniques. These can be fairly computationally-intensive (particularl
 
 ## Sample Set Formats
 
-**TLDR**  
+**TL;DR**  
 Random samples. Use Monte Carlo simulation to perform calculations. This is the predominant technique using Monte Carlo methods; in these cases, most nodes are essentially represented as sample sets. [Guesstimate](https://www.getguesstimate.com/) works this way.
 
 **How to Do Computation**  

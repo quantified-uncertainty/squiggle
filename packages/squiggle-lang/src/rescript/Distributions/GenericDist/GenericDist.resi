@@ -20,8 +20,10 @@ let isNormalized: t => bool
 let toFloatOperation: (
   t,
   ~toPointSetFn: toPointSetFn,
-  ~distToFloatOperation: Operation.distToFloatOperation,
+  ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
 ) => result<float, error>
+
+let klDivergence: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>
 
 @genType
 let toPointSet: (

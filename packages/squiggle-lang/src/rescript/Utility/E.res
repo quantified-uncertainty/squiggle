@@ -198,6 +198,7 @@ module Float = {
   let with3DigitsPrecision = Js.Float.toPrecisionWithPrecision(_, ~digits=3)
   let toFixed = Js.Float.toFixed
   let toString = Js.Float.toString
+  let isFinite = Js.Float.isFinite
 }
 
 module I = {
@@ -289,6 +290,13 @@ module R = {
     | Ok(r) => r->Ok
     | Error(x) => x->f->Error
     }
+
+  //I'm not sure what to call this.
+  let unify = (a: result<'a, 'b>, c: 'b => 'a): 'a =>
+    switch a {
+    | Ok(x) => x
+    | Error(x) => c(x)
+    }
 }
 
 module R2 = {
@@ -307,6 +315,8 @@ module R2 = {
     | Ok(x) => x->Ok
     | Error(x) => x->f->Error
     }
+
+  let toExn = (a, b) => R.toExn(b, a)
 }
 
 let safe_fn_of_string = (fn, s: string): option<'a> =>
@@ -596,6 +606,9 @@ module A = {
     )
   let filter = Js.Array.filter
   let joinWith = Js.Array.joinWith
+
+  let all = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) == length(xs)
+  let any = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) > 0
 
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>

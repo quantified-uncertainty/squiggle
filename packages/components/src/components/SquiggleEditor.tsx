@@ -32,16 +32,18 @@ export interface SquiggleEditorProps {
   diagramStop?: number;
   /** If the result is a function, how many points along the function it samples */
   diagramCount?: number;
-  /** The environment, other variables that were already declared */
-  environment?: unknown;
   /** when the environment changes. Used again for notebook magic*/
   onChange?(expr: squiggleExpression): void;
   /** The width of the element */
-  width: number;
+  width?: number;
   /** Previous variable declarations */
-  bindings: bindings;
+  bindings?: bindings;
   /** JS Imports */
-  jsImports: jsImports;
+  jsImports?: jsImports;
+  /** Whether to show detail about types of the returns, default false */
+  showTypes?: boolean;
+  /** Whether to give users access to graph controls */
+  showControls: boolean;
 }
 
 const Input = styled.div`
@@ -52,7 +54,7 @@ const Input = styled.div`
 
 export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   initialSquiggleString = "",
-  width = 500,
+  width,
   sampleCount,
   outputXYPoints,
   kernelWidth,
@@ -61,9 +63,10 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   diagramStop,
   diagramCount,
   onChange,
-  environment,
   bindings = defaultBindings,
   jsImports = defaultImports,
+  showTypes = false,
+  showControls = false,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   return (
@@ -87,10 +90,11 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         diagramStart={diagramStart}
         diagramStop={diagramStop}
         diagramCount={diagramCount}
-        environment={environment}
         onChange={onChange}
         bindings={bindings}
         jsImports={jsImports}
+        showTypes={showTypes}
+        showControls={showControls}
       />
     </div>
   );
@@ -145,12 +149,12 @@ export interface SquigglePartialProps {
   diagramCount?: number;
   /** when the environment changes. Used again for notebook magic*/
   onChange?(expr: bindings): void;
-  /** The width of the element */
-  width: number;
   /** Previously declared variables */
   bindings?: bindings;
   /** Variables imported from js */
   jsImports?: jsImports;
+  /** Whether to give users access to graph controls */
+  showControls?: boolean;
 }
 
 export let SquigglePartial: React.FC<SquigglePartialProps> = ({
@@ -166,15 +170,25 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
     xyPointLength: outputXYPoints,
   };
   let [expression, setExpression] = React.useState(initialSquiggleString);
-  let squiggleResult = runPartial(
-    expression,
-    bindings,
-    samplingInputs,
-    jsImports
-  );
-  if (squiggleResult.tag == "Ok") {
-    if (onChange) onChange(squiggleResult.value);
-  }
+  let [error, setError] = React.useState<string | null>(null);
+
+  let runSquiggleAndUpdateBindings = () => {
+    let squiggleResult = runPartial(
+      expression,
+      bindings,
+      samplingInputs,
+      jsImports
+    );
+    if (squiggleResult.tag == "Ok") {
+      if (onChange) onChange(squiggleResult.value);
+      setError(null);
+    } else {
+      setError(errorValueToString(squiggleResult.value));
+    }
+  };
+
+  React.useEffect(runSquiggleAndUpdateBindings, [expression]);
+
   return (
     <div>
       <Input>
@@ -186,13 +200,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
           height={20}
         />
       </Input>
-      {squiggleResult.tag == "Error" ? (
-        <ErrorBox heading="Error">
-          {errorValueToString(squiggleResult.value)}
-        </ErrorBox>
-      ) : (
-        <></>
-      )}
+      {error !== null ? <ErrorBox heading="Error">{error}</ErrorBox> : <></>}
     </div>
   );
 };

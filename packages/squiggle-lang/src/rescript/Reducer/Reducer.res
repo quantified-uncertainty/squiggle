@@ -1,15 +1,27 @@
-module Dispatch = Reducer_Dispatch
 module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
-module Extra = Reducer_Extra
-module Js = Reducer_Js
-module MathJs = Reducer_MathJs
+module ExpressionValue = ReducerInterface_ExpressionValue
+module Lambda = Reducer_Expression_Lambda
 
-type expressionValue = Reducer_Expression.expressionValue
-type externalBindings = Expression.externalBindings
-let evaluate = Expression.eval
-let evaluateUsingExternalBindings = Expression.evalUsingExternalBindings
-let evaluatePartialUsingExternalBindings = Expression.evalPartialUsingExternalBindings
+type environment = ReducerInterface_ExpressionValue.environment
+type errorValue = Reducer_ErrorValue.errorValue
+type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type externalBindings = ReducerInterface_ExpressionValue.externalBindings
+type lambdaValue = ExpressionValue.lambdaValue
+
+let evaluate = Expression.evaluate
+let evaluateUsingOptions = Expression.evaluateUsingOptions
+let evaluatePartialUsingExternalBindings = Expression.evaluatePartialUsingExternalBindings
 let parse = Expression.parse
-let parseOuter = Expression.parseOuter
-let parsePartial = Expression.parsePartial
+
+let foreignFunctionInterface = (
+  lambdaValue: lambdaValue,
+  argArray: array<expressionValue>,
+  environment: ExpressionValue.environment,
+) => {
+  Lambda.foreignFunctionInterface(lambdaValue, argArray, environment, Expression.reduceExpression)
+}
+
+let defaultEnvironment = ExpressionValue.defaultEnvironment
+
+let defaultExternalBindings = ExpressionValue.defaultExternalBindings

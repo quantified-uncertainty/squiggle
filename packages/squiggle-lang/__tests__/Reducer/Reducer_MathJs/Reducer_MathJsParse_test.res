@@ -1,4 +1,4 @@
-module Parse = Reducer.MathJs.Parse
+module Parse = Reducer_MathJs.Parse
 module Result = Belt.Result
 
 open Jest
@@ -18,8 +18,14 @@ module MySkip = {
     Skip.test(desc, () => expectParseToBe(expr, answer))
 }
 
+module MyOnly = {
+  let testParse = (expr, answer) => Only.test(expr, () => expectParseToBe(expr, answer))
+  let testDescriptionParse = (desc, expr, answer) =>
+    Only.test(desc, () => expectParseToBe(expr, answer))
+}
+
 describe("MathJs parse", () => {
-  describe("literals operators paranthesis", () => {
+  describe("literals operators parenthesis", () => {
     testParse("1", "1")
     testParse("'hello'", "'hello'")
     testParse("true", "true")
@@ -40,15 +46,15 @@ describe("MathJs parse", () => {
   })
 
   describe("functions", () => {
-    MySkip.testParse("identity(x) = x", "???")
-    MySkip.testParse("identity(x)", "???")
+    testParse("identity(x) = x", "identity = (x) => x")
+    testParse("identity(x)", "identity(x)")
   })
 
   describe("arrays", () => {
     testDescriptionParse("empty", "[]", "[]")
     testDescriptionParse("define", "[0, 1, 2]", "[0, 1, 2]")
     testDescriptionParse("define with strings", "['hello', 'world']", "['hello', 'world']")
-    MySkip.testParse("range(0, 4)", "range(0, 4)")
+    testParse("range(0, 4)", "range(0, 4)")
     testDescriptionParse("index", "([0,1,2])[1]", "([0, 1, 2])[1]")
   })
 
@@ -58,11 +64,11 @@ describe("MathJs parse", () => {
   })
 
   describe("comments", () => {
-    MySkip.testDescriptionParse("define", "# This is a comment", "???")
+    testDescriptionParse("define", "1 # This is a comment", "1")
   })
 
-  describe("if statement", () => {
-    // TODO Tertiary operator instead
-    MySkip.testDescriptionParse("define", "if (true) { 1 } else { 0 }", "???")
+  describe("ternary operator", () => {
+    testParse("1 ? 2 : 3", "ternary(1, 2, 3)")
+    testParse("1 ? 2 : 3 ? 4 : 5", "ternary(1, 2, ternary(3, 4, 5))")
   })
 })
