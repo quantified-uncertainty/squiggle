@@ -40,18 +40,11 @@ function FieldFloat(Props: FieldFloatProps) {
   );
 }
 
-interface Props {
-  initialSquiggleString?: string;
-  height?: number;
-  showTypes?: boolean;
-  showControls?: boolean;
-}
-
-interface Props2 {
+interface ShowBoxProps {
   height: number;
 }
 
-const ShowBox = styled.div<Props2>`
+const ShowBox = styled.div<ShowBoxProps>`
   border: 1px solid #eee;
   border-radius: 2px;
   height: ${(props) => props.height};
@@ -76,12 +69,26 @@ const Row = styled.div`
 `;
 const Col = styled.div``;
 
-let SquigglePlayground: FC<Props> = ({
+interface PlaygroundProps {
+  /** The initial squiggle string to put in the playground */
+  initialSquiggleString?: string;
+  /** How many pixels high is the playground */
+  height?: number;
+  /** Whether to show the types of outputs in the playground */
+  showTypes?: boolean;
+  /** Whether to show the log scale controls in the playground */
+  showControls?: boolean;
+  /** Whether to show the summary table in the playground */
+  showSummary?: boolean;
+}
+
+let SquigglePlayground: FC<PlaygroundProps> = ({
   initialSquiggleString = "",
   height = 300,
   showTypes = false,
   showControls = false,
-}: Props) => {
+  showSummary = false,
+}: PlaygroundProps) => {
   let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
   let [sampleCount, setSampleCount] = useState(1000);
   let [outputXYPoints, setOutputXYPoints] = useState(1000);
@@ -114,6 +121,7 @@ let SquigglePlayground: FC<Props> = ({
               height={150}
               showTypes={showTypes}
               showControls={showControls}
+              showSummary={showSummary}
             />
           </Display>
         </Col>
@@ -122,7 +130,7 @@ let SquigglePlayground: FC<Props> = ({
   );
 };
 export default SquigglePlayground;
-export function renderSquigglePlaygroundToDom(props: Props) {
+export function renderSquigglePlaygroundToDom(props: PlaygroundProps) {
   let parent = document.createElement("div");
   ReactDOM.render(<SquigglePlayground {...props} />, parent);
   return parent;

@@ -44,7 +44,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
         shape.value.continuous.some((x) => x.x <= 0) ||
         shape.value.discrete.some((x) => x.x <= 0);
       let spec = buildVegaSpec(isLogX, isExpY);
-      let widthProp = width ? width - 20 : size.width - 10;
+      let widthProp = width ? width : size.width;
 
       // Check whether we should disable the checkbox
       var logCheckbox = (
@@ -65,11 +65,11 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       }
 
       var result = (
-        <div>
+        <ChartContainer width={widthProp + "px"}>
           <Vega
             spec={spec}
             data={{ con: shape.value.continuous, dis: shape.value.discrete }}
-            width={widthProp}
+            width={widthProp - 10}
             height={height}
             actions={false}
           />
@@ -80,7 +80,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
               <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
             </div>
           )}
-        </div>
+        </ChartContainer>
       );
     } else {
       var result = (
@@ -94,6 +94,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   });
   return sized;
 };
+
+type ChartContainerProps = { width: string };
+
+let ChartContainer = styled.div<ChartContainerProps>`
+  width: ${(props) => props.width};
+`;
 
 function buildVegaSpec(isLogX: boolean, isExpY: boolean): VisualizationSpec {
   return {
@@ -141,10 +147,33 @@ type SummaryTableProps = {
   distribution: Distribution;
 };
 
-const Table = styled.table``;
+const Table = styled.table`
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+  text-align: center;
+  border-style: hidden;
+`;
+
+const TableHead = styled.thead`
+  border-bottom: 1px solid rgb(141 149 167);
+`;
+
+const TableHeadCell = styled.th`
+  border-right: 1px solid rgb(141 149 167);
+  border-left: 1px solid rgb(141 149 167);
+  padding: 0.3em;
+`;
+
+const TableBody = styled.tbody``;
+
 const Row = styled.tr``;
-const Cell = styled.td``;
-const TableHeader = styled.th``;
+
+const Cell = styled.td`
+  padding: 0.3em;
+  border-right: 1px solid rgb(141 149 167);
+  border-left: 1px solid rgb(141 149 167);
+`;
 
 const SummaryTable: React.FC<SummaryTableProps> = ({
   distribution,
@@ -179,26 +208,30 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
 
   return (
     <Table>
-      <Row>
-        <TableHeader>{"Mean"}</TableHeader>
-        <TableHeader>{"5%"}</TableHeader>
-        <TableHeader>{"10%"}</TableHeader>
-        <TableHeader>{"Q1 (25%)"}</TableHeader>
-        <TableHeader>{"Median (50%)"}</TableHeader>
-        <TableHeader>{"Q3 (75%)"}</TableHeader>
-        <TableHeader>{"90%"}</TableHeader>
-        <TableHeader>{"95%"}</TableHeader>
-      </Row>
-      <Row>
-        <Cell>{unwrapResult(mean)}</Cell>
-        <Cell>{unwrapResult(p5)}</Cell>
-        <Cell>{unwrapResult(p10)}</Cell>
-        <Cell>{unwrapResult(Q1)}</Cell>
-        <Cell>{unwrapResult(median)}</Cell>
-        <Cell>{unwrapResult(Q3)}</Cell>
-        <Cell>{unwrapResult(p90)}</Cell>
-        <Cell>{unwrapResult(p95)}</Cell>
-      </Row>
+      <TableHead>
+        <Row>
+          <TableHeadCell>{"Mean"}</TableHeadCell>
+          <TableHeadCell>{"5%"}</TableHeadCell>
+          <TableHeadCell>{"10%"}</TableHeadCell>
+          <TableHeadCell>{"25%"}</TableHeadCell>
+          <TableHeadCell>{"50%"}</TableHeadCell>
+          <TableHeadCell>{"75%"}</TableHeadCell>
+          <TableHeadCell>{"90%"}</TableHeadCell>
+          <TableHeadCell>{"95%"}</TableHeadCell>
+        </Row>
+      </TableHead>
+      <TableBody>
+        <Row>
+          <Cell>{unwrapResult(mean)}</Cell>
+          <Cell>{unwrapResult(p5)}</Cell>
+          <Cell>{unwrapResult(p10)}</Cell>
+          <Cell>{unwrapResult(Q1)}</Cell>
+          <Cell>{unwrapResult(median)}</Cell>
+          <Cell>{unwrapResult(Q3)}</Cell>
+          <Cell>{unwrapResult(p90)}</Cell>
+          <Cell>{unwrapResult(p95)}</Cell>
+        </Row>
+      </TableBody>
     </Table>
   );
 };
