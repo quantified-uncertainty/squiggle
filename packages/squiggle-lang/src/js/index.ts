@@ -48,7 +48,7 @@ export function run(
   let i = imports ? imports : defaultImports;
   let e = environment ? environment : defaultEnvironment;
   let res: result<expressionValue, errorValue> = evaluateUsingOptions(
-    { externalBindings: mergeImports(b, i), environment: e },
+    { externalBindings: mergeImportsWithBindings(b, i), environment: e },
     squiggleString
   );
   return resultMap(res, (x) => createTsExport(x, e));
@@ -67,12 +67,12 @@ export function runPartial(
 
   return evaluatePartialUsingExternalBindings(
     squiggleString,
-    mergeImports(b, i),
+    mergeImportsWithBindings(b, i),
     e
   );
 }
 
-function mergeImports(
+function mergeImportsWithBindings(
   bindings: externalBindings,
   imports: jsImports
 ): externalBindings {
@@ -89,6 +89,12 @@ type jsImports = { [key: string]: jsValue };
 
 export let defaultImports: jsImports = {};
 export let defaultBindings: externalBindings = {};
+
+export function mergeBindings(
+  allBindings: externalBindings[]
+): externalBindings {
+  return allBindings.reduce((acc, x) => ({ ...acc, ...x }));
+}
 
 function createTsExport(
   x: expressionValue,

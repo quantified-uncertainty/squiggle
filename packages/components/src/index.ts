@@ -9,3 +9,5 @@ import SquigglePlayground, {
   renderSquigglePlaygroundToDom,
 } from "./components/SquigglePlayground";
 export { SquigglePlayground, renderSquigglePlaygroundToDom };
+
+export { mergeBindings } from "@quri/squiggle-lang";
