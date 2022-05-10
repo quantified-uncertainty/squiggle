@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 4
 title: Three Formats of Distributions
 author: Ozzie Gooen
 date: 02-19-2022
