@@ -36,7 +36,7 @@ export {
   shape,
   lambdaValue,
   environment,
-  defaultEnvironment
+  defaultEnvironment,
 };
 
 export let defaultSamplingInputs: environment = {
