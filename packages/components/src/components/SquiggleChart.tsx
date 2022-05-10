@@ -10,6 +10,7 @@ import {
   jsImports,
   defaultImports,
   defaultBindings,
+  defaultEnvironment,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
@@ -204,7 +205,7 @@ export interface SquiggleChartProps {
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
   /** The amount of points returned to draw the distribution */
-  environment: environment;
+  environment?: environment;
   /** If the result is a function, where the function starts, ends and the amount of stops */
   chartSettings?: FunctionChartSettings;
   /** When the environment changes */
@@ -245,6 +246,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   chartSettings = defaultChartSettings,
 }: SquiggleChartProps) => {
   let expressionResult = run(squiggleString, bindings, environment, jsImports);
+  let e = environment ? environment : defaultEnvironment;
   let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
     let expression = expressionResult.value;
@@ -258,7 +260,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
         showTypes={showTypes}
         showControls={showControls}
         chartSettings={chartSettings}
-        environment={environment}
+        environment={e}
       />
     );
   } else {
