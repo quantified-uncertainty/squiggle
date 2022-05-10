@@ -4,6 +4,11 @@ import ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import CodeEditor from "./CodeEditor";
 import styled from "styled-components";
+import {
+  defaultBindings,
+  environment,
+  defaultImports,
+} from "@quri/squiggle-lang";
 
 interface FieldFloatProps {
   label: string;
@@ -89,6 +94,15 @@ let SquigglePlayground: FC<Props> = ({
   let [diagramStart, setDiagramStart] = useState(0);
   let [diagramStop, setDiagramStop] = useState(10);
   let [diagramCount, setDiagramCount] = useState(20);
+  let chartSettings = {
+    start: diagramStart,
+    stop: diagramStop,
+    count: diagramCount,
+  };
+  let env: environment = {
+    sampleCount: sampleCount,
+    xyPointLength: outputXYPoints,
+  };
   return (
     <ShowBox height={height}>
       <Row>
@@ -105,15 +119,13 @@ let SquigglePlayground: FC<Props> = ({
           <Display maxHeight={height - 3}>
             <SquiggleChart
               squiggleString={squiggleString}
-              sampleCount={sampleCount}
-              outputXYPoints={outputXYPoints}
-              diagramStart={diagramStart}
-              diagramStop={diagramStop}
-              diagramCount={diagramCount}
-              pointDistLength={pointDistLength}
+              environment={env}
+              chartSettings={chartSettings}
               height={150}
               showTypes={showTypes}
               showControls={showControls}
+              bindings={defaultBindings}
+              jsImports={defaultImports}
             />
           </Display>
         </Col>
