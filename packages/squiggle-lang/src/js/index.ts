@@ -1,6 +1,5 @@
 import * as _ from "lodash";
 import {
-  samplingParams,
   environment,
   defaultEnvironment,
   evaluatePartialUsingExternalBindings,
@@ -8,6 +7,7 @@ import {
   externalBindings,
   expressionValue,
   errorValue,
+  foreignFunctionInterface,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
@@ -15,25 +15,31 @@ export {
   distributionErrorToString,
   distributionError,
 } from "../rescript/TypescriptInterface.gen";
-export type {
-  samplingParams,
-  errorValue,
-  externalBindings as bindings,
-  jsImports,
-};
+export type { errorValue, externalBindings as bindings, jsImports };
 import {
   jsValueToBinding,
+  jsValueToExpressionValue,
   jsValue,
   rescriptExport,
   squiggleExpression,
   convertRawToTypescript,
+  lambdaValue,
 } from "./rescript_interop";
 import { result, resultMap, tag, tagged } from "./types";
 import { Distribution, shape } from "./distribution";
 
-export { Distribution, squiggleExpression, result, resultMap, shape };
+export {
+  Distribution,
+  squiggleExpression,
+  result,
+  resultMap,
+  shape,
+  lambdaValue,
+  environment,
+  defaultEnvironment,
+};
 
-export let defaultSamplingInputs: samplingParams = {
+export let defaultSamplingInputs: environment = {
   sampleCount: 10000,
   xyPointLength: 10000,
 };
@@ -70,6 +76,20 @@ export function runPartial(
     mergeImportsWithBindings(b, i),
     e
   );
+}
+
+export function runForeign(
+  fn: lambdaValue,
+  args: jsValue[],
+  environment?: environment
+): result<squiggleExpression, errorValue> {
+  let e = environment ? environment : defaultEnvironment;
+  let res: result<expressionValue, errorValue> = foreignFunctionInterface(
+    fn,
+    args.map(jsValueToExpressionValue),
+    e
+  );
+  return resultMap(res, (x) => createTsExport(x, e));
 }
 
 function mergeImportsWithBindings(

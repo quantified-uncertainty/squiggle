@@ -84,3 +84,6 @@ type environment = ReducerInterface_ExpressionValue.environment
 
 @genType
 let defaultEnvironment = ReducerInterface_ExpressionValue.defaultEnvironment
+
+@genType
+let foreignFunctionInterface = Reducer.foreignFunctionInterface
