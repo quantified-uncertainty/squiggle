@@ -48,12 +48,7 @@ let combinePointwise = (
   // TODO: does it ever make sense to pointwise combine the integrals here?
   // It could be done for pointwise additions, but is that ever needed?
 
-  make(
-    combiner(fn, XYShape.XtoY.discreteInterpolator, t1.xyShape, t2.xyShape)->E.R.toExn(
-      "Logically unreachable?",
-      _,
-    ),
-  )->Ok
+  combiner(fn, XYShape.XtoY.discreteInterpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(make)
 }
 
 let reduce = (

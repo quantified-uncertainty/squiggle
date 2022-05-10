@@ -2,7 +2,7 @@ open Jest
 open Expect
 open TestHelpers
 
-describe("kl divergence on continuous distributions", () => {
+describe("klDivergence: continuous -> continuous -> float", () => {
   let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
   exception KlFailed
 
@@ -60,7 +60,7 @@ describe("kl divergence on continuous distributions", () => {
   })
 })
 
-describe("kl divergence on discrete distributions", () => {
+describe("klDivergence: discrete -> discrete -> float", () => {
   let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
   let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
   exception KlFailed
@@ -71,13 +71,17 @@ describe("kl divergence on discrete distributions", () => {
   let point1 = mkDelta(float1)
   let point2 = mkDelta(float2)
   let point3 = mkDelta(float3)
-  test("finite kl divergence", () => {
-    let answer = [(point1, 1e0), (point2, 1e0)]->mixture->run
-    let prediction = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
-    let kl = switch (prediction, answer) {
-    | (Dist(prediction'), Dist(answer')) => klDivergence(prediction', answer')
-    | _ => raise(MixtureFailed)
-    }
+  let a' = [(point1, 1e0), (point2, 1e0)]->mixture->run
+  let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
+  let (a, b) = switch (a', b') {
+  | (Dist(a''), Dist(b'')) => (a'', b'')
+  | _ => raise(MixtureFailed)
+  }
+  test("is finite", () => {
+    let prediction = b
+    let answer = a
+    let kl = klDivergence(prediction, answer)
+    // Sigma_{i \in 1..2} 0.5 * log(0.5 / 0.33333)
     let analyticalKl = Js.Math.log(3.0 /. 2.0)
     switch kl {
     | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=7)
@@ -86,13 +90,10 @@ describe("kl divergence on discrete distributions", () => {
       raise(KlFailed)
     }
   })
-  test("infinite kl divergence", () => {
-    let prediction = [(point1, 1e0), (point2, 1e0)]->mixture->run
-    let answer = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
-    let kl = switch (prediction, answer) {
-    | (Dist(prediction'), Dist(answer')) => klDivergence(prediction', answer')
-    | _ => raise(MixtureFailed)
-    }
+  test("is infinite", () => {
+    let prediction = a
+    let answer = b
+    let kl = klDivergence(prediction, answer)
     switch kl {
     | Ok(kl') => kl'->expect->toEqual(infinity)
     | Error(err) =>
@@ -102,7 +103,7 @@ describe("kl divergence on discrete distributions", () => {
   })
 })
 
-describe("combineAlongSupportOfSecondArgument", () => {
+describe("combineAlongSupportOfSecondArgument0", () => {
   // This tests the version of the function that we're NOT using. Haven't deleted the test in case we use the code later.
   test("test on two uniforms", _ => {
     let combineAlongSupportOfSecondArgument = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0
