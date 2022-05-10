@@ -41,7 +41,9 @@ export interface SquiggleEditorProps {
   /** Whether to show detail about types of the returns, default false */
   showTypes?: boolean;
   /** Whether to give users access to graph controls */
-  showControls: boolean;
+  showControls?: boolean;
+  /** Whether to show a summary table */
+  showSummary?: boolean;
 }
 
 const Input = styled.div`
@@ -63,6 +65,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   jsImports = defaultImports,
   showTypes = false,
   showControls = false,
+  showSummary = false,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
   let chartSettings = {
@@ -96,6 +99,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
         jsImports={jsImports}
         showTypes={showTypes}
         showControls={showControls}
+        showSummary={showSummary}
       />
     </div>
   );
