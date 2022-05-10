@@ -5,6 +5,8 @@
 
 This package contains the react components for squiggle. These can be used either as a library or hosted as a [storybook](https://storybook.js.org/).
 
+The `@quri/squiggle-components` package offers several components and utilities for people who want to embed Squiggle components into websites.
+
 # Usage in a `react` project
 
 For example, in a fresh `create-react-app` project

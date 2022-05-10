@@ -120,7 +120,8 @@ module Helpers = {
   }
 
   let mixture = (args: array<expressionValue>): DistributionOperation.outputType => {
-    let error = (err: string): DistributionOperation.outputType => err->ArgumentError->GenDistError
+    let error = (err: string): DistributionOperation.outputType =>
+      err->DistributionTypes.ArgumentError->GenDistError
     switch args {
     | [EvArray(distributions)] =>
       switch parseDistributionArray(distributions) {

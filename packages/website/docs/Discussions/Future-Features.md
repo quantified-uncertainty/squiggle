@@ -1,8 +1,7 @@
 ---
-sidebar_position: 4
+title: Future Features
+sidebar_position: 3
 ---
-
-# Future Features
 
 Squiggle is still very early. The main first goal is to become stable. This means having a clean codebase, having decent test coverage, and having a syntax we are reasonably confident in. Later on, there are many other features that will be interesting to explore.
 
