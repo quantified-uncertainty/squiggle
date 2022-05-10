@@ -35,7 +35,7 @@ import {
   Constructors_pointwiseSubtract,
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
-} from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
+} from "../rescript/Distributions/DistributionOperation.gen";
 
 export type point = { x: number; y: number };
 
