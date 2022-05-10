@@ -1,17 +1,23 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import type { Distribution, errorValue, result } from "@quri/squiggle-lang";
+import {
+  Distribution,
+  result,
+  lambdaValue,
+  environment,
+  runForeign,
+  errorValueToString,
+} from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import { DistributionChart } from "./DistributionChart";
+import { NumberShower } from "./NumberShower";
 import { ErrorBox } from "./ErrorBox";
 
 let SquigglePercentilesChart = createClassFromSpec({
   spec: percentilesSpec as Spec,
 });
-
-type distPlusFn = (a: number) => result<Distribution, errorValue>;
 
 const _rangeByCount = (start: number, stop: number, count: number) => {
   const step = (stop - start) / (count - 1);
@@ -27,38 +33,36 @@ function unwrap<a, b>(x: result<a, b>): a {
     throw Error("FAILURE TO UNWRAP");
   }
 }
+export type FunctionChartSettings = {
+  start: number;
+  stop: number;
+  count: number;
+};
 
-function mapFilter<a, b>(xs: a[], f: (x: a) => b | undefined): b[] {
-  let initial: b[] = [];
-  return xs.reduce((previous, current) => {
-    let value: b | undefined = f(current);
-    if (value !== undefined) {
-      return previous.concat([value]);
-    } else {
-      return previous;
-    }
-  }, initial);
+interface FunctionChartProps {
+  fn: lambdaValue;
+  chartSettings: FunctionChartSettings;
+  environment: environment;
 }
 
-export const FunctionChart: React.FC<{
-  distPlusFn: distPlusFn;
-  diagramStart: number;
-  diagramStop: number;
-  diagramCount: number;
-}> = ({ distPlusFn, diagramStart, diagramStop, diagramCount }) => {
+export const FunctionChart: React.FC<FunctionChartProps> = ({
+  fn,
+  chartSettings,
+  environment,
+}: FunctionChartProps) => {
   let [mouseOverlay, setMouseOverlay] = React.useState(0);
-  function handleHover(...args) {
-    setMouseOverlay(args[1]);
+  function handleHover(_name: string, value: unknown) {
+    setMouseOverlay(value as number);
   }
   function handleOut() {
     setMouseOverlay(NaN);
   }
   const signalListeners = { mousemove: handleHover, mouseout: handleOut };
-  let mouseItem = distPlusFn(mouseOverlay);
+  let mouseItem = runForeign(fn, [mouseOverlay], environment);
   let showChart =
-    mouseItem.tag === "Ok" ? (
+    mouseItem.tag === "Ok" && mouseItem.value.tag == "distribution" ? (
       <DistributionChart
-        distribution={mouseItem.value}
+        distribution={mouseItem.value.value}
         width={400}
         height={140}
         showSummary={false}
@@ -66,13 +70,49 @@ export const FunctionChart: React.FC<{
     ) : (
       <></>
     );
-  let data1 = _rangeByCount(diagramStart, diagramStop, diagramCount);
-  let valueData = mapFilter(data1, (x) => {
-    let result = distPlusFn(x);
+  let data1 = _rangeByCount(
+    chartSettings.start,
+    chartSettings.stop,
+    chartSettings.count
+  );
+  type point = { x: number; value: result<Distribution, string> };
+  let valueData: point[] = data1.map((x) => {
+    let result = runForeign(fn, [x], environment);
     if (result.tag === "Ok") {
-      return { x: x, value: result.value };
+      if (result.value.tag == "distribution") {
+        return { x, value: { tag: "Ok", value: result.value.value } };
+      } else {
+        return {
+          x,
+          value: {
+            tag: "Error",
+            value:
+              "Cannot currently render functions that don't return distributions",
+          },
+        };
+      }
+    } else {
+      return {
+        x,
+        value: { tag: "Error", value: errorValueToString(result.value) },
+      };
     }
-  }).map(({ x, value }) => {
+  });
+
+  let initialPartition: [
+    { x: number; value: Distribution }[],
+    { x: number; value: string }[]
+  ] = [[], []];
+  let [functionImage, errors] = valueData.reduce((acc, current) => {
+    if (current.value.tag === "Ok") {
+      acc[0].push({ x: current.x, value: current.value.value });
+    } else {
+      acc[1].push({ x: current.x, value: current.value.value });
+    }
+    return acc;
+  }, initialPartition);
+
+  let percentiles = functionImage.map(({ x, value }) => {
     return {
       x: x,
       p1: unwrap(value.inv(0.01)),
@@ -91,24 +131,25 @@ export const FunctionChart: React.FC<{
     };
   });
 
-  let errorData = mapFilter(data1, (x) => {
-    let result = distPlusFn(x);
-    if (result.tag === "Error") {
-      return { x: x, error: result.value };
-    }
-  });
-  let error2 = _.groupBy(errorData, (x) => x.error);
+  let groupedErrors = _.groupBy(errors, (x) => x.value);
   return (
     <>
       <SquigglePercentilesChart
-        data={{ facet: valueData }}
+        data={{ facet: percentiles }}
         actions={false}
         signalListeners={signalListeners}
       />
       {showChart}
-      {_.keysIn(error2).map((k) => (
-        <ErrorBox heading={k}>
-          {`Values: [${error2[k].map((r) => r.x.toFixed(2)).join(",")}]`}
+      {_.entries(groupedErrors).map(([errorName, errorPoints]) => (
+        <ErrorBox heading={errorName}>
+          Values:{" "}
+          {errorPoints
+            .map((r) => <NumberShower number={r.x} />)
+            .reduce((a, b) => (
+              <>
+                {a}, {b}
+              </>
+            ))}
         </ErrorBox>
       ))}
     </>

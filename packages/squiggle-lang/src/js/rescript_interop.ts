@@ -1,5 +1,6 @@
 import * as _ from "lodash";
 import {
+  expressionValue,
   mixedShape,
   sampleSetDist,
   genericDist,
@@ -87,6 +88,8 @@ export type squiggleExpression =
   | tagged<"number", number>
   | tagged<"record", { [key: string]: squiggleExpression }>;
 
+export { lambdaValue };
+
 export function convertRawToTypescript(
   result: rescriptExport,
   environment: environment
@@ -166,5 +169,23 @@ export function jsValueToBinding(value: jsValue): rescriptExport {
   } else {
     // Record
     return { TAG: 7, _0: _.mapValues(value, jsValueToBinding) };
+  }
+}
+
+export function jsValueToExpressionValue(value: jsValue): expressionValue {
+  if (typeof value === "boolean") {
+    return { tag: "EvBool", value: value as boolean };
+  } else if (typeof value === "string") {
+    return { tag: "EvString", value: value as string };
+  } else if (typeof value === "number") {
+    return { tag: "EvNumber", value: value as number };
+  } else if (Array.isArray(value)) {
+    return { tag: "EvArray", value: value.map(jsValueToExpressionValue) };
+  } else {
+    // Record
+    return {
+      tag: "EvRecord",
+      value: _.mapValues(value, jsValueToExpressionValue),
+    };
   }
 }

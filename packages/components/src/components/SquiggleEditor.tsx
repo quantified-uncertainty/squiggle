@@ -5,7 +5,7 @@ import { CodeEditor } from "./CodeEditor";
 import styled from "styled-components";
 import type {
   squiggleExpression,
-  samplingParams,
+  environment,
   bindings,
   jsImports,
 } from "@quri/squiggle-lang";
@@ -24,8 +24,6 @@ export interface SquiggleEditorProps {
   sampleCount?: number;
   /** The amount of points returned to draw the distribution */
   outputXYPoints?: number;
-  kernelWidth?: number;
-  pointDistLength?: number;
   /** If the result is a function, where the function starts */
   diagramStart?: number;
   /** If the result is a function, where the function ends */
@@ -57,13 +55,11 @@ const Input = styled.div`
 export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   initialSquiggleString = "",
   width,
-  sampleCount,
-  outputXYPoints,
-  kernelWidth,
-  pointDistLength,
-  diagramStart,
-  diagramStop,
-  diagramCount,
+  sampleCount = 1000,
+  outputXYPoints = 1000,
+  diagramStart = 0,
+  diagramStop = 10,
+  diagramCount = 100,
   onChange,
   bindings = defaultBindings,
   jsImports = defaultImports,
@@ -72,6 +68,15 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   showSummary = false,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
+  let chartSettings = {
+    start: diagramStart,
+    stop: diagramStop,
+    count: diagramCount,
+  };
+  let env: environment = {
+    sampleCount: sampleCount,
+    xyPointLength: outputXYPoints,
+  };
   return (
     <div>
       <Input>
@@ -85,14 +90,10 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
       </Input>
       <SquiggleChart
         width={width}
+        environment={env}
         squiggleString={expression}
         sampleCount={sampleCount}
-        outputXYPoints={outputXYPoints}
-        kernelWidth={kernelWidth}
-        pointDistLength={pointDistLength}
-        diagramStart={diagramStart}
-        diagramStop={diagramStop}
-        diagramCount={diagramCount}
+        chartSettings={chartSettings}
         onChange={onChange}
         bindings={bindings}
         jsImports={jsImports}
@@ -169,7 +170,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   outputXYPoints = 1000,
   jsImports = defaultImports,
 }: SquigglePartialProps) => {
-  let samplingInputs: samplingParams = {
+  let samplingInputs: environment = {
     sampleCount: sampleCount,
     xyPointLength: outputXYPoints,
   };
