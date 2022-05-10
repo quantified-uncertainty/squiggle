@@ -302,9 +302,10 @@ module T = Dist({
   }
 
   let klDivergence = (prediction: t, answer: t) => {
-    combinePointwise(PointSetDist_Scoring.KLDivergence.integrand, prediction, answer) |> E.R.fmap(
-      integralEndY,
-    )
+    Error(Operation.NotYetImplemented)
+    //    combinePointwise(PointSetDist_Scoring.KLDivergence.integrand, prediction, answer) |> E.R.fmap(
+    //     integralEndY,
+    //   )
   }
 })
 

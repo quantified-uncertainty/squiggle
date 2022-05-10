@@ -48,12 +48,7 @@ let combinePointwise = (
   // TODO: does it ever make sense to pointwise combine the integrals here?
   // It could be done for pointwise additions, but is that ever needed?
 
-  make(
-    combiner(fn, XYShape.XtoY.discreteInterpolator, t1.xyShape, t2.xyShape)->E.R.toExn(
-      "Addition operation should never fail",
-      _,
-    ),
-  )->Ok
+  combiner(fn, XYShape.XtoY.discreteInterpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(make)
 }
 
 let reduce = (
@@ -163,7 +158,6 @@ module T = Dist({
     }
 
   let integralEndY = (t: t) => t.integralSumCache |> E.O.default(t |> integral |> Continuous.lastY)
-  let integralEndYResult = (t: t) => t->integralEndY->Ok
   let minX = shapeFn(XYShape.T.minX)
   let maxX = shapeFn(XYShape.T.maxX)
   let toDiscreteProbabilityMassFraction = _ => 1.0
@@ -230,10 +224,9 @@ module T = Dist({
 
   let klDivergence = (prediction: t, answer: t) => {
     combinePointwise(
-      ~combiner=XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0,
       ~fn=PointSetDist_Scoring.KLDivergence.integrand,
       prediction,
       answer,
-    ) |> E.R2.bind(integralEndYResult)
+    )->E.R2.fmap(integralEndY)
   }
 })

@@ -1,8 +1,9 @@
 open Jest
 open Expect
 open TestHelpers
+open GenericDist_Fixtures
 
-describe("kl divergence", () => {
+describe("klDivergence: continuous -> continuous -> float", () => {
   let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
   exception KlFailed
 
@@ -19,7 +20,7 @@ describe("kl divergence", () => {
       let analyticalKl = Js.Math.log((highPrediction -. lowPrediction) /. (highAnswer -. lowAnswer))
       let kl = E.R.liftJoin2(klDivergence, prediction, answer)
       switch kl {
-      | Ok(kl') => kl'->expect->toBeCloseTo(analyticalKl)
+      | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=7)
       | Error(err) => {
           Js.Console.log(DistributionTypes.Error.toString(err))
           raise(KlFailed)
@@ -51,7 +52,7 @@ describe("kl divergence", () => {
     let kl = E.R.liftJoin2(klDivergence, prediction, answer)
 
     switch kl {
-    | Ok(kl') => kl'->expect->toBeCloseTo(analyticalKl)
+    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=3)
     | Error(err) => {
         Js.Console.log(DistributionTypes.Error.toString(err))
         raise(KlFailed)
@@ -60,9 +61,44 @@ describe("kl divergence", () => {
   })
 })
 
-describe("combine along support test", () => {
+describe("klDivergence: discrete -> discrete -> float", () => {
+  let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
+  let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
+  let a' = [(point1, 1e0), (point2, 1e0)]->mixture->run
+  let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
+  let (a, b) = switch (a', b') {
+  | (Dist(a''), Dist(b'')) => (a'', b'')
+  | _ => raise(MixtureFailed)
+  }
+  test("agrees with analytical answer when finite", () => {
+    let prediction = b
+    let answer = a
+    let kl = klDivergence(prediction, answer)
+    // Sigma_{i \in 1..2} 0.5 * log(0.5 / 0.33333)
+    let analyticalKl = Js.Math.log(3.0 /. 2.0)
+    switch kl {
+    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=7)
+    | Error(err) =>
+      Js.Console.log(DistributionTypes.Error.toString(err))
+      raise(KlFailed)
+    }
+  })
+  test("returns infinity when infinite", () => {
+    let prediction = a
+    let answer = b
+    let kl = klDivergence(prediction, answer)
+    switch kl {
+    | Ok(kl') => kl'->expect->toEqual(infinity)
+    | Error(err) =>
+      Js.Console.log(DistributionTypes.Error.toString(err))
+      raise(KlFailed)
+    }
+  })
+})
+
+describe("combineAlongSupportOfSecondArgument0", () => {
   // This tests the version of the function that we're NOT using. Haven't deleted the test in case we use the code later.
-  test("combine along support test", _ => {
+  test("test on two uniforms", _ => {
     let combineAlongSupportOfSecondArgument = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0
     let lowAnswer = 0.0
     let highAnswer = 1.0
@@ -97,6 +133,7 @@ describe("combine along support test", () => {
             2.0 *. MagicNumbers.Epsilon.ten,
             1.0 -. MagicNumbers.Epsilon.ten,
             1.0,
+            1.0 +. MagicNumbers.Epsilon.ten,
           ],
           ys: [
             -0.34657359027997264,
@@ -104,6 +141,7 @@ describe("combine along support test", () => {
             -0.34657359027997264,
             -0.34657359027997264,
             -0.34657359027997264,
+            infinity,
           ],
         }),
       ),
