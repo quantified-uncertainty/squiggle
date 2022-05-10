@@ -68,9 +68,9 @@ describe("kl divergence on discrete distributions", () => {
   let float1 = 1.0
   let float2 = 2.0
   let float3 = 3.0
-  let point1 = mkDirac(float1)
-  let point2 = mkDirac(float2)
-  let point3 = mkDirac(float3)
+  let point1 = mkDelta(float1)
+  let point2 = mkDelta(float2)
+  let point3 = mkDelta(float3)
   test("finite kl divergence", () => {
     let answer = [(point1, 1e0), (point2, 1e0)]->mixture->run
     let prediction = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
@@ -94,7 +94,7 @@ describe("kl divergence on discrete distributions", () => {
     | _ => raise(MixtureFailed)
     }
     switch kl {
-    | Ok(kl') => kl'->expect->toEqual(neg_infinity)
+    | Ok(kl') => kl'->expect->toEqual(infinity)
     | Error(err) =>
       Js.Console.log(DistributionTypes.Error.toString(err))
       raise(KlFailed)
@@ -102,9 +102,9 @@ describe("kl divergence on discrete distributions", () => {
   })
 })
 
-describe("combine along support test", () => {
+describe("combineAlongSupportOfSecondArgument", () => {
   // This tests the version of the function that we're NOT using. Haven't deleted the test in case we use the code later.
-  test("combine along support test", _ => {
+  test("test on two uniforms", _ => {
     let combineAlongSupportOfSecondArgument = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0
     let lowAnswer = 0.0
     let highAnswer = 1.0

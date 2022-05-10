@@ -50,7 +50,7 @@ let combinePointwise = (
 
   make(
     combiner(fn, XYShape.XtoY.discreteInterpolator, t1.xyShape, t2.xyShape)->E.R.toExn(
-      "Addition operation should never fail",
+      "Logically unreachable?",
       _,
     ),
   )->Ok
@@ -163,7 +163,6 @@ module T = Dist({
     }
 
   let integralEndY = (t: t) => t.integralSumCache |> E.O.default(t |> integral |> Continuous.lastY)
-  let integralEndYResult = (t: t) => t->integralEndY->Ok
   let minX = shapeFn(XYShape.T.minX)
   let maxX = shapeFn(XYShape.T.maxX)
   let toDiscreteProbabilityMassFraction = _ => 1.0
@@ -229,25 +228,10 @@ module T = Dist({
   }
 
   let klDivergence = (prediction: t, answer: t) => {
-    let massOrZero = (t: t, x: float): float => {
-      let i = E.A.findIndex(x' => x' == x, t.xyShape.xs)
-      switch i {
-      | None => 0.0
-      | Some(i') => t.xyShape.ys[i']
-      }
-    }
-    let predictionNewYs = E.A.fmap(massOrZero(answer), prediction.xyShape.xs)
-    let integrand = XYShape.PointwiseCombination.combine(
-      PointSetDist_Scoring.KLDivergence.integrand,
-      XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero),
-      {XYShape.xs: answer.xyShape.xs, XYShape.ys: predictionNewYs},
-      answer.xyShape,
-    )
-    let xyShapeToDiscrete: XYShape.xyShape => t = xyShape => {
-      xyShape: xyShape,
-      integralSumCache: None,
-      integralCache: None,
-    }
-    integrand->E.R2.fmap(x => x->xyShapeToDiscrete->integralEndY)
+    combinePointwise(
+      ~fn=PointSetDist_Scoring.KLDivergence.integrand,
+      prediction,
+      answer,
+    )->E.R2.fmap(integralEndY)
   }
 })
