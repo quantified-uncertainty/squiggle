@@ -1,6 +1,7 @@
 open Jest
 open Expect
 open TestHelpers
+open GenericDist_Fixtures
 
 describe("klDivergence: continuous -> continuous -> float", () => {
   let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
@@ -63,21 +64,13 @@ describe("klDivergence: continuous -> continuous -> float", () => {
 describe("klDivergence: discrete -> discrete -> float", () => {
   let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
   let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
-  exception KlFailed
-  exception MixtureFailed
-  let float1 = 1.0
-  let float2 = 2.0
-  let float3 = 3.0
-  let point1 = mkDelta(float1)
-  let point2 = mkDelta(float2)
-  let point3 = mkDelta(float3)
   let a' = [(point1, 1e0), (point2, 1e0)]->mixture->run
   let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
   let (a, b) = switch (a', b') {
   | (Dist(a''), Dist(b'')) => (a'', b'')
   | _ => raise(MixtureFailed)
   }
-  test("is finite", () => {
+  test("agrees with analytical answer when finite", () => {
     let prediction = b
     let answer = a
     let kl = klDivergence(prediction, answer)
@@ -90,7 +83,7 @@ describe("klDivergence: discrete -> discrete -> float", () => {
       raise(KlFailed)
     }
   })
-  test("is infinite", () => {
+  test("returns infinity when infinite", () => {
     let prediction = a
     let answer = b
     let kl = klDivergence(prediction, answer)
