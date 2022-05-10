@@ -213,15 +213,15 @@ export interface SquiggleChartProps {
   width?: number;
   height?: number;
   /** Bindings of previous variables declared */
-  bindings: bindings;
+  bindings?: bindings;
   /** JS imported parameters */
   jsImports: jsImports;
   /** Whether to show a summary of the distirbution */
   showSummary?: boolean;
   /** Whether to show type information about returns, default false */
-  showTypes: boolean;
+  showTypes?: boolean;
   /** Whether to show graph controls (scale etc)*/
-  showControls: boolean;
+  showControls?: boolean;
 }
 
 const ChartWrapper = styled.div`
