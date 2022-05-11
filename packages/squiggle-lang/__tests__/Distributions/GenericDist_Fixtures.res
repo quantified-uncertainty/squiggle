@@ -11,6 +11,7 @@ let triangularDist: DistributionTypes.genericDist = Symbolic(
 )
 let exponentialDist: DistributionTypes.genericDist = Symbolic(#Exponential({rate: 2.0}))
 let uniformDist: DistributionTypes.genericDist = Symbolic(#Uniform({low: 9.0, high: 10.0}))
+let uniformDist2: DistributionTypes.genericDist = Symbolic(#Uniform({low: 8.0, high: 11.0}))
 let floatDist: DistributionTypes.genericDist = Symbolic(#Float(1e1))
 
 exception KlFailed

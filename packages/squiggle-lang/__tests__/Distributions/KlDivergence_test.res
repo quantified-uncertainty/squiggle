@@ -121,8 +121,13 @@ describe("klDivergence: mixed -> mixed -> float", () => {
   let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
   let a' = [(point1, 1e0), (uniformDist, 1e0)]->mixture->run
   let b' = [(point1, 1e0), (floatDist, 1e0), (normalDist10, 1e0)]->mixture->run
-  let (a, b) = switch (a', b') {
-  | (Dist(a''), Dist(b'')) => (a'', b'')
+  let c' = [(point1, 1e0), (point2, 1e0), (point3, 1e0), (uniformDist, 1e0)]->mixture->run
+  let d' =
+    [(point1, 1e0), (point2, 1e0), (point3, 1e0), (floatDist, 1e0), (uniformDist2, 1e0)]
+    ->mixture
+    ->run
+  let (a, b, c, d) = switch (a', b', c', d') {
+  | (Dist(a''), Dist(b''), Dist(c''), Dist(d'')) => (a'', b'', c'', d'')
   | _ => raise(MixtureFailed)
   }
   test("finite klDivergence return is correct", () => {
@@ -130,11 +135,11 @@ describe("klDivergence: mixed -> mixed -> float", () => {
     let answer = a
     let kl = klDivergence(prediction, answer)
     // high = 10; low = 9; mean = 10; stdev = 2
-    let analyticalKlContinuousPart = klNormalUniform(10.0, 2.0, 9.0, 10.0)
-    let analyticalKlDiscretePart = Js.Math.log(2.0 /. 3.0) /. 2.0
+    let analyticalKlContinuousPart = klNormalUniform(10.0, 2.0, 9.0, 10.0) /. 2.0
+    let analyticalKlDiscretePart = 1.0 /. 2.0 *. Js.Math.log(2.0 /. 1.0)
     switch kl {
     | Ok(kl') =>
-      kl'->expect->toBeSoCloseTo(analyticalKlContinuousPart +. analyticalKlDiscretePart, ~digits=0)
+      kl'->expect->toBeSoCloseTo(analyticalKlContinuousPart +. analyticalKlDiscretePart, ~digits=1)
     | Error(err) =>
       Js.Console.log(DistributionTypes.Error.toString(err))
       raise(KlFailed)
@@ -146,6 +151,20 @@ describe("klDivergence: mixed -> mixed -> float", () => {
     let kl = klDivergence(prediction, answer)
     switch kl {
     | Ok(kl') => kl'->expect->toEqual(infinity)
+    | Error(err) =>
+      Js.Console.log(DistributionTypes.Error.toString(err))
+      raise(KlFailed)
+    }
+  })
+  test("finite klDivergence return is correct", () => {
+    let prediction = d
+    let answer = c
+    let kl = klDivergence(prediction, answer)
+    let analyticalKlContinuousPart = Js.Math.log((11.0 -. 8.0) /. (10.0 -. 9.0)) /. 4.0 // 4 = length of c' array
+    let analyticalKlDiscretePart = 3.0 /. 4.0 *. Js.Math.log(4.0 /. 3.0)
+    switch kl {
+    | Ok(kl') =>
+      kl'->expect->toBeSoCloseTo(analyticalKlContinuousPart +. analyticalKlDiscretePart, ~digits=1)
     | Error(err) =>
       Js.Console.log(DistributionTypes.Error.toString(err))
       raise(KlFailed)
