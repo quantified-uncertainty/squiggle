@@ -69,7 +69,7 @@ describe("klDivergence: continuous -> continuous -> float", () => {
       2.0 ** 2.0 *.
       (10.0 ** 2.0 -. (10.0 +. 9.0) *. 10.0 +. (9.0 ** 2.0 +. 10.0 *. 9.0 +. 10.0 ** 2.0) /. 3.0)
     switch kl {
-    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=1)
+    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=3)
     | Error(err) => {
         Js.Console.log(DistributionTypes.Error.toString(err))
         raise(KlFailed)

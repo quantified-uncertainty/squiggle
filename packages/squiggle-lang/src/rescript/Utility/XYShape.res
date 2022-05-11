@@ -453,6 +453,44 @@ module PointwiseCombination = {
     T.filterOkYs(newXs, newYs)->Ok
   }
 
+  let enrichXyShape = (t: T.t): T.t => {
+    let length = E.A.length(t.xs)
+    Js.Console.log(length)
+    let points = switch length < MagicNumbers.Environment.defaultXYPointLength {
+    | true =>
+      Belt.Int.fromFloat(
+        Belt.Float.fromInt(
+          MagicNumbers.Environment.enrichmentFactor * MagicNumbers.Environment.defaultXYPointLength,
+        ) /.
+        Belt.Float.fromInt(length),
+      )
+    | false => MagicNumbers.Environment.enrichmentFactor
+    }
+
+    let getInBetween = (x1: float, x2: float): array<float> => {
+      let newPointsArray = Belt.Array.makeBy(points - 1, i => i)
+      // don't repeat the x2 point, it will be gotten in the next iteration.
+      let result = Js.Array.mapi((pos, i) =>
+        switch i {
+        | 0 => x1
+        | _ =>
+          x1 *.
+          (Belt.Float.fromInt(points) -. Belt.Float.fromInt(pos)) /.
+          Belt.Float.fromInt(points) +. x2 *. Belt.Float.fromInt(pos) /. Belt.Float.fromInt(points)
+        }
+      , newPointsArray)
+      result
+    }
+    let newXsUnflattened = Js.Array.mapi((x, i) =>
+      switch i < length - 1 {
+      | true => getInBetween(x, t.xs[i + 1])
+      | false => [x]
+      }
+    , t.xs)
+    let newXs = Belt.Array.concatMany(newXsUnflattened)
+    let newYs = E.A.fmap(x => XtoY.linear(x, t), newXs) //XtoY.linear(newXs)
+    {xs: newXs, ys: newYs}
+  }
   // This function is used for klDivergence
   let combineAlongSupportOfSecondArgument: (
     (float, float) => result<float, Operation.Error.t>,
