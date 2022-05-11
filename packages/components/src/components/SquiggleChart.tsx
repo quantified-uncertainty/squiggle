@@ -216,7 +216,7 @@ export interface SquiggleChartProps {
   /** Bindings of previous variables declared */
   bindings?: bindings;
   /** JS imported parameters */
-  jsImports: jsImports;
+  jsImports?: jsImports;
   /** Whether to show a summary of the distirbution */
   showSummary?: boolean;
   /** Whether to show type information about returns, default false */
