@@ -468,18 +468,24 @@ module PointwiseCombination = {
     }
 
     let getInBetween = (x1: float, x2: float): array<float> => {
-      let newPointsArray = Belt.Array.makeBy(points - 1, i => i)
-      // don't repeat the x2 point, it will be gotten in the next iteration.
-      let result = Js.Array.mapi((pos, i) =>
-        switch i {
-        | 0 => x1
-        | _ =>
-          x1 *.
-          (Belt.Float.fromInt(points) -. Belt.Float.fromInt(pos)) /.
-          Belt.Float.fromInt(points) +. x2 *. Belt.Float.fromInt(pos) /. Belt.Float.fromInt(points)
+      switch x1 -. x2 > 2.0 *. MagicNumbers.Epsilon.seven {
+      | false => [x1]
+      | true => {
+          let newPointsArray = Belt.Array.makeBy(points - 1, i => i)
+          // don't repeat the x2 point, it will be gotten in the next iteration.
+          let result = Js.Array.mapi((pos, i) =>
+            switch i {
+            | 0 => x1
+            | _ =>
+              x1 *.
+              (Belt.Float.fromInt(points) -. Belt.Float.fromInt(pos)) /.
+              Belt.Float.fromInt(points) +.
+                x2 *. Belt.Float.fromInt(pos) /. Belt.Float.fromInt(points)
+            }
+          , newPointsArray)
+          result
         }
-      , newPointsArray)
-      result
+      }
     }
     let newXsUnflattened = Js.Array.mapi((x, i) =>
       switch i < length - 2 {
