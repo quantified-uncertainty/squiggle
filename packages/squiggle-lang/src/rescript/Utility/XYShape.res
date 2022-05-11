@@ -482,13 +482,13 @@ module PointwiseCombination = {
       result
     }
     let newXsUnflattened = Js.Array.mapi((x, i) =>
-      switch i < length - 1 {
+      switch i < length - 2 {
       | true => getInBetween(x, t.xs[i + 1])
       | false => [x]
       }
     , t.xs)
     let newXs = Belt.Array.concatMany(newXsUnflattened)
-    let newYs = E.A.fmap(x => XtoY.linear(x, t), newXs) //XtoY.linear(newXs)
+    let newYs = E.A.fmap(x => XtoY.linear(x, t), newXs)
     {xs: newXs, ys: newYs}
   }
   // This function is used for klDivergence
