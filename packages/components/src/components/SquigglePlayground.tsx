@@ -134,8 +134,6 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
               bindings={defaultBindings}
               jsImports={defaultImports}
               showSummary={showSummary}
-              bindings={defaultBindings}
-              jsImports={defaultImports}
             />
           </Display>
         </Col>

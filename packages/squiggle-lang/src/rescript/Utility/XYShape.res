@@ -453,46 +453,37 @@ module PointwiseCombination = {
     T.filterOkYs(newXs, newYs)->Ok
   }
 
+  // Nuño wrote this function to try to increase precision, but it didn't work.
   let enrichXyShape = (t: T.t): T.t => {
+    let enrichmentFactor = 10
     let length = E.A.length(t.xs)
-    Js.Console.log(length)
-    let points = switch length < MagicNumbers.Environment.defaultXYPointLength {
-    | true =>
-      Belt.Int.fromFloat(
-        Belt.Float.fromInt(
-          MagicNumbers.Environment.enrichmentFactor * MagicNumbers.Environment.defaultXYPointLength,
-        ) /.
-        Belt.Float.fromInt(length),
-      )
-    | false => MagicNumbers.Environment.enrichmentFactor
-    }
+    let points =
+      length < MagicNumbers.Environment.defaultXYPointLength
+        ? enrichmentFactor * MagicNumbers.Environment.defaultXYPointLength / length
+        : enrichmentFactor
 
     let getInBetween = (x1: float, x2: float): array<float> => {
-      switch x1 -. x2 > 2.0 *. MagicNumbers.Epsilon.seven {
-      | false => [x1]
-      | true => {
-          let newPointsArray = Belt.Array.makeBy(points - 1, i => i)
-          // don't repeat the x2 point, it will be gotten in the next iteration.
-          let result = Js.Array.mapi((pos, i) =>
-            switch i {
-            | 0 => x1
-            | _ =>
-              x1 *.
-              (Belt.Float.fromInt(points) -. Belt.Float.fromInt(pos)) /.
-              Belt.Float.fromInt(points) +.
-                x2 *. Belt.Float.fromInt(pos) /. Belt.Float.fromInt(points)
-            }
-          , newPointsArray)
-          result
-        }
+      if abs_float(x1 -. x2) < 2.0 *. MagicNumbers.Epsilon.seven {
+        [x1]
+      } else {
+        let newPointsArray = Belt.Array.makeBy(points - 1, i => i)
+        // don't repeat the x2 point, it will be gotten in the next iteration.
+        let result = Js.Array.mapi((pos, i) =>
+          if i == 0 {
+            x1
+          } else {
+            let points' = Belt.Float.fromInt(points)
+            let pos' = Belt.Float.fromInt(pos)
+            x1 *. (points' -. pos') /. points' +. x2 *. pos' /. points'
+          }
+        , newPointsArray)
+        result
       }
     }
-    let newXsUnflattened = Js.Array.mapi((x, i) =>
-      switch i < length - 2 {
-      | true => getInBetween(x, t.xs[i + 1])
-      | false => [x]
-      }
-    , t.xs)
+    let newXsUnflattened = Js.Array.mapi(
+      (x, i) => i < length - 2 ? getInBetween(x, t.xs[i + 1]) : [x],
+      t.xs,
+    )
     let newXs = Belt.Array.concatMany(newXsUnflattened)
     let newYs = E.A.fmap(x => XtoY.linear(x, t), newXs)
     {xs: newXs, ys: newYs}
