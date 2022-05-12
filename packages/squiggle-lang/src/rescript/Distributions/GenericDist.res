@@ -60,10 +60,10 @@ let integralEndY = (t: t): float =>
 let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
 module Score = {
-  let klDivergence = (t1, t2, ~toPointSetFn: toPointSetFn): result<float, error> => {
-    let pointSets = E.R.merge(toPointSetFn(t1), toPointSetFn(t2))
-    pointSets |> E.R2.bind(((a, b)) =>
-      PointSetDist.T.klDivergence(a, b)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+  let klDivergence = (prediction, answer, ~toPointSetFn: toPointSetFn): result<float, error> => {
+    let pointSets = E.R.merge(toPointSetFn(prediction), toPointSetFn(answer))
+    pointSets |> E.R2.bind(((predi, ans)) =>
+      PointSetDist.T.klDivergence(predi, ans)->E.R2.errMap(x => DistributionTypes.OperationError(x))
     )
   }
 

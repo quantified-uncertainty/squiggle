@@ -169,7 +169,10 @@ module Helpers = {
       E.A.Floats.range(a, b, MagicNumbers.Environment.defaultXYPointLength)
     | _ => []
     }
-    {xs: xs, ys: E.A.fmap(fn, xs)}->Continuous.make->Continuous->DistributionTypes.PointSet
+    {xs: xs, ys: E.A.fmap(fn, xs)}
+    ->Continuous.make
+    ->PointSetTypes.Continuous
+    ->DistributionTypes.PointSet
   }
 }
 
