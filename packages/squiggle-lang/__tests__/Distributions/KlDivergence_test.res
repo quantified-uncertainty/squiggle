@@ -3,9 +3,15 @@ open Expect
 open TestHelpers
 open GenericDist_Fixtures
 
+// integral from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx
+let klNormalUniform = (mean, stdev, low, high): float =>
+  -.Js.Math.log((high -. low) /. Js.Math.sqrt(2.0 *. MagicNumbers.Math.pi *. stdev ** 2.0)) +.
+  1.0 /.
+  stdev ** 2.0 *.
+  (mean ** 2.0 -. (high +. low) *. mean +. (low ** 2.0 +. high *. low +. high ** 2.0) /. 3.0)
+
 describe("klDivergence: continuous -> continuous -> float", () => {
   let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
-  exception KlFailed
 
   let testUniform = (lowAnswer, highAnswer, lowPrediction, highPrediction) => {
     test("of two uniforms is equal to the analytic expression", () => {
@@ -59,6 +65,20 @@ describe("klDivergence: continuous -> continuous -> float", () => {
       }
     }
   })
+
+  test("of a normal and a uniform is equal to the formula", () => {
+    let prediction = normalDist10
+    let answer = uniformDist
+    let kl = klDivergence(prediction, answer)
+    let analyticalKl = klNormalUniform(10.0, 2.0, 9.0, 10.0)
+    switch kl {
+    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=1)
+    | Error(err) => {
+        Js.Console.log(DistributionTypes.Error.toString(err))
+        raise(KlFailed)
+      }
+    }
+  })
 })
 
 describe("klDivergence: discrete -> discrete -> float", () => {
@@ -89,6 +109,64 @@ describe("klDivergence: discrete -> discrete -> float", () => {
     let kl = klDivergence(prediction, answer)
     switch kl {
     | Ok(kl') => kl'->expect->toEqual(infinity)
+    | Error(err) =>
+      Js.Console.log(DistributionTypes.Error.toString(err))
+      raise(KlFailed)
+    }
+  })
+})
+
+describe("klDivergence: mixed -> mixed -> float", () => {
+  let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
+  let mixture' = a => DistributionTypes.DistributionOperation.Mixture(a)
+  let mixture = a => {
+    let dist' = a->mixture'->run
+    switch dist' {
+    | Dist(dist) => dist
+    | _ => raise(MixtureFailed)
+    }
+  }
+  let a = [(point1, 1.0), (uniformDist, 1.0)]->mixture
+  let b = [(point1, 1.0), (floatDist, 1.0), (normalDist10, 1.0)]->mixture
+  let c = [(point1, 1.0), (point2, 1.0), (point3, 1.0), (uniformDist, 1.0)]->mixture
+  let d =
+    [(point1, 1.0), (point2, 1.0), (point3, 1.0), (floatDist, 1.0), (uniformDist2, 1.0)]->mixture
+
+  test("finite klDivergence produces correct answer", () => {
+    let prediction = b
+    let answer = a
+    let kl = klDivergence(prediction, answer)
+    // high = 10; low = 9; mean = 10; stdev = 2
+    let analyticalKlContinuousPart = klNormalUniform(10.0, 2.0, 9.0, 10.0) /. 2.0
+    let analyticalKlDiscretePart = 1.0 /. 2.0 *. Js.Math.log(2.0 /. 1.0)
+    switch kl {
+    | Ok(kl') =>
+      kl'->expect->toBeSoCloseTo(analyticalKlContinuousPart +. analyticalKlDiscretePart, ~digits=1)
+    | Error(err) =>
+      Js.Console.log(DistributionTypes.Error.toString(err))
+      raise(KlFailed)
+    }
+  })
+  test("returns infinity when infinite", () => {
+    let prediction = a
+    let answer = b
+    let kl = klDivergence(prediction, answer)
+    switch kl {
+    | Ok(kl') => kl'->expect->toEqual(infinity)
+    | Error(err) =>
+      Js.Console.log(DistributionTypes.Error.toString(err))
+      raise(KlFailed)
+    }
+  })
+  test("finite klDivergence produces correct answer", () => {
+    let prediction = d
+    let answer = c
+    let kl = klDivergence(prediction, answer)
+    let analyticalKlContinuousPart = Js.Math.log((11.0 -. 8.0) /. (10.0 -. 9.0)) /. 4.0 // 4 = length of c' array
+    let analyticalKlDiscretePart = 3.0 /. 4.0 *. Js.Math.log(4.0 /. 3.0)
+    switch kl {
+    | Ok(kl') =>
+      kl'->expect->toBeSoCloseTo(analyticalKlContinuousPart +. analyticalKlDiscretePart, ~digits=1)
     | Error(err) =>
       Js.Console.log(DistributionTypes.Error.toString(err))
       raise(KlFailed)

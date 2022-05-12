@@ -200,6 +200,7 @@ module T = Dist({
     switch (t1, t2) {
     | (Continuous(t1), Continuous(t2)) => Continuous.T.klDivergence(t1, t2)
     | (Discrete(t1), Discrete(t2)) => Discrete.T.klDivergence(t1, t2)
+    | (Mixed(t1), Mixed(t2)) => Mixed.T.klDivergence(t1, t2)
     | _ => Error(NotYetImplemented)
     }
 })
