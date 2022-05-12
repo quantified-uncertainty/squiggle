@@ -62,6 +62,8 @@ module Constructors: {
   @genType
   let klDivergence: (~env: env, genericDist, genericDist) => result<float, error>
   @genType
+  let logScore: (~env: env, genericDist, genericDist, float) => result<float, error>
+  @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>
   @genType
   let toSampleSet: (~env: env, genericDist, int) => result<genericDist, error>

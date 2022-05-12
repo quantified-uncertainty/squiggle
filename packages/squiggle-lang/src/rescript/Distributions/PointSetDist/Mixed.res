@@ -309,9 +309,6 @@ module T = Dist({
   let logScore = (prior: t, prediction: t, answer: float) => {
     Error(Operation.NotYetImplemented)
   }
-  let logScoreAgainstImproperPrior = (prediction: t, answer: float) => {
-    Error(Operation.NotYetImplemented)
-  }
 })
 
 let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {

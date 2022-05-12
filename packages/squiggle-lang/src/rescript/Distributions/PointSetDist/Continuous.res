@@ -287,10 +287,6 @@ module T = Dist({
     )
     newShape->E.R2.fmap(x => x->make->integralEndY)
   }
-  let logScoreAgainstImproperPrior = (prediction: t, answer: float) => {
-    let prior = make({xs: prediction.xyShape.xs, ys: E.A.fmap(_ => 1.0, prediction.xyShape.xs)})
-    logScore(prior, prediction, answer)
-  }
 })
 
 let isNormalized = (t: t): bool => {

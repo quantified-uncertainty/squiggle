@@ -157,6 +157,20 @@ module Helpers = {
       }
     }
   }
+  let constructNonNormalizedPointSet = (
+    ~supportOf: DistributionTypes.genericDist,
+    fn: float => float,
+  ): option<DistributionTypes.genericDist> => {
+    switch supportOf {
+    | PointSet(Continuous(dist)) =>
+      {xs: dist.xyShape.xs, ys: E.A.fmap(fn, dist.xyShape.xs)}
+      ->Continuous.make
+      ->Continuous
+      ->PointSet
+      ->Some
+    | _ => None
+    }
+  }
 }
 
 module SymbolicConstructors = {
@@ -219,7 +233,8 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist)
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist)
-  | ("toSparkline", [EvDistribution(dist)]) => Helpers.toStringFn(ToSparkline(20), dist)
+  | ("toSparkline", [EvDistribution(dist)]) =>
+    Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist)
   | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist)
   | ("exp", [EvDistribution(a)]) =>
@@ -233,6 +248,21 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
   | ("klDivergence", [EvDistribution(a), EvDistribution(b)]) =>
     Some(runGenericOperation(FromDist(ToScore(KLDivergence(b)), a)))
+  | ("logScore", [EvDistribution(prior), EvDistribution(prediction), EvNumber(answer)])
+  | (
+    "logScore",
+    [EvDistribution(prior), EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
+  ) =>
+    Some(runGenericOperation(FromDist(ToScore(LogScore(prediction, answer)), prior)))
+  | ("logScoreAgainstImproperPrior", [EvDistribution(prediction), EvNumber(answer)])
+  | (
+    "logScoreAgainstImproperPrior",
+    [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
+  ) =>
+    E.O.fmap(
+      d => runGenericOperation(FromDist(ToScore(LogScore(prediction, answer)), d)),
+      Helpers.constructNonNormalizedPointSet(~supportOf=prediction, _ => 1.0),
+    )
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
   | ("scaleLog", [EvDistribution(dist)]) =>

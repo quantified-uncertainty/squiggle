@@ -232,7 +232,4 @@ module T = Dist({
   let logScore = (prior: t, prediction: t, answer: float) => {
     Error(Operation.NotYetImplemented)
   }
-  let logScoreAgainstImproperPrior = (prediction: t, answer: float) => {
-    Error(Operation.NotYetImplemented)
-  }
 })
