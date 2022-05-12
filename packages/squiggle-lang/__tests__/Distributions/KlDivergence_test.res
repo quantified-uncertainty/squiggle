@@ -3,7 +3,7 @@ open Expect
 open TestHelpers
 open GenericDist_Fixtures
 
-// integral of from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx
+// integral from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx
 let klNormalUniform = (mean, stdev, low, high): float =>
   -.Js.Math.log((high -. low) /. Js.Math.sqrt(2.0 *. MagicNumbers.Math.pi *. stdev ** 2.0)) +.
   1.0 /.
@@ -118,18 +118,20 @@ describe("klDivergence: discrete -> discrete -> float", () => {
 
 describe("klDivergence: mixed -> mixed -> float", () => {
   let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
-  let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
-  let a' = [(point1, 1.0), (uniformDist, 1.0)]->mixture->run
-  let b' = [(point1, 1.0), (floatDist, 1.0), (normalDist10, 1.0)]->mixture->run
-  let c' = [(point1, 1.0), (point2, 1.0), (point3, 1.0), (uniformDist, 1.0)]->mixture->run
-  let d' =
-    [(point1, 1.0), (point2, 1.0), (point3, 1.0), (floatDist, 1.0), (uniformDist2, 1.0)]
-    ->mixture
-    ->run
-  let (a, b, c, d) = switch (a', b', c', d') {
-  | (Dist(a''), Dist(b''), Dist(c''), Dist(d'')) => (a'', b'', c'', d'')
-  | _ => raise(MixtureFailed)
+  let mixture' = a => DistributionTypes.DistributionOperation.Mixture(a)
+  let mixture = a => {
+    let dist' = a->mixture'->run
+    switch dist' {
+    | Dist(dist) => dist
+    | _ => raise(MixtureFailed)
+    }
   }
+  let a = [(point1, 1.0), (uniformDist, 1.0)]->mixture
+  let b = [(point1, 1.0), (floatDist, 1.0), (normalDist10, 1.0)]->mixture
+  let c = [(point1, 1.0), (point2, 1.0), (point3, 1.0), (uniformDist, 1.0)]->mixture
+  let d =
+    [(point1, 1.0), (point2, 1.0), (point3, 1.0), (floatDist, 1.0), (uniformDist2, 1.0)]->mixture
+
   test("finite klDivergence produces correct answer", () => {
     let prediction = b
     let answer = a
