@@ -453,14 +453,15 @@ module PointwiseCombination = {
     T.filterOkYs(newXs, newYs)->Ok
   }
 
-  // Nuño wrote this function to try to increase precision, but it didn't work.
+  // *Dead code*: Nuño wrote this function to try to increase precision, but it didn't work.
+  // If another traveler comes through with a similar idea, we hope this implementation will help them.
   let enrichXyShape = (t: T.t): T.t => {
-    let enrichmentFactor = 10
+    let defaultEnrichmentFactor = 10
     let length = E.A.length(t.xs)
     let points =
       length < MagicNumbers.Environment.defaultXYPointLength
-        ? enrichmentFactor * MagicNumbers.Environment.defaultXYPointLength / length
-        : enrichmentFactor
+        ? defaultEnrichmentFactor * MagicNumbers.Environment.defaultXYPointLength / length
+        : defaultEnrichmentFactor
 
     let getInBetween = (x1: float, x2: float): array<float> => {
       if abs_float(x1 -. x2) < 2.0 *. MagicNumbers.Epsilon.seven {

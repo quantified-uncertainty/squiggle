@@ -272,14 +272,10 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
 
   let klDivergence = (prediction: t, answer: t) => {
-    let enrich = true
-    let enrichedAnswer = enrich
-      ? XYShape.PointwiseCombination.enrichXyShape(answer.xyShape)
-      : answer.xyShape //
     let newShape = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument(
       PointSetDist_Scoring.KLDivergence.integrand,
       prediction.xyShape,
-      enrichedAnswer,
+      answer.xyShape,
     )
     let xyShapeToContinuous: XYShape.xyShape => t = xyShape => {
       xyShape: xyShape,

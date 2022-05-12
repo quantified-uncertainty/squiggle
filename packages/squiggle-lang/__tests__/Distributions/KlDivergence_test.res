@@ -119,18 +119,18 @@ describe("klDivergence: discrete -> discrete -> float", () => {
 describe("klDivergence: mixed -> mixed -> float", () => {
   let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
   let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
-  let a' = [(point1, 1e0), (uniformDist, 1e0)]->mixture->run
-  let b' = [(point1, 1e0), (floatDist, 1e0), (normalDist10, 1e0)]->mixture->run
-  let c' = [(point1, 1e0), (point2, 1e0), (point3, 1e0), (uniformDist, 1e0)]->mixture->run
+  let a' = [(point1, 1.0), (uniformDist, 1.0)]->mixture->run
+  let b' = [(point1, 1.0), (floatDist, 1.0), (normalDist10, 1.0)]->mixture->run
+  let c' = [(point1, 1.0), (point2, 1.0), (point3, 1.0), (uniformDist, 1.0)]->mixture->run
   let d' =
-    [(point1, 1e0), (point2, 1e0), (point3, 1e0), (floatDist, 1e0), (uniformDist2, 1e0)]
+    [(point1, 1.0), (point2, 1.0), (point3, 1.0), (floatDist, 1.0), (uniformDist2, 1.0)]
     ->mixture
     ->run
   let (a, b, c, d) = switch (a', b', c', d') {
   | (Dist(a''), Dist(b''), Dist(c''), Dist(d'')) => (a'', b'', c'', d'')
   | _ => raise(MixtureFailed)
   }
-  test("finite klDivergence return is correct", () => {
+  test("finite klDivergence produces correct answer", () => {
     let prediction = b
     let answer = a
     let kl = klDivergence(prediction, answer)
@@ -156,7 +156,7 @@ describe("klDivergence: mixed -> mixed -> float", () => {
       raise(KlFailed)
     }
   })
-  test("finite klDivergence return is correct", () => {
+  test("finite klDivergence produces correct answer", () => {
     let prediction = d
     let answer = c
     let kl = klDivergence(prediction, answer)
