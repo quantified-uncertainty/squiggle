@@ -196,13 +196,22 @@ module T = Dist({
     | Continuous(m) => Continuous.T.variance(m)
     }
 
-  let klDivergence = (t1: t, t2: t) =>
-    switch (t1, t2) {
+  let klDivergence = (prediction: t, answer: t) =>
+    switch (prediction, answer) {
     | (Continuous(t1), Continuous(t2)) => Continuous.T.klDivergence(t1, t2)
     | (Discrete(t1), Discrete(t2)) => Discrete.T.klDivergence(t1, t2)
-    | (Mixed(t1), Mixed(t2)) => Mixed.T.klDivergence(t1, t2)
-    | _ => Error(NotYetImplemented)
+    | (m1, m2) => Mixed.T.klDivergence(m1->toMixed, m2->toMixed)
     }
+
+  let logScore = (prior: t, prediction: t, answer: float) => {
+    switch (prior, prediction) {
+    | (Continuous(t1), Continuous(t2)) => Continuous.T.logScore(t1, t2, answer)
+    | _ => Error(Operation.NotYetImplemented)
+    }
+  }
+  let logScoreAgainstImproperPrior = (prediction: t, answer: float) => {
+    Error(Operation.NotYetImplemented)
+  }
 })
 
 let pdf = (f: float, t: t) => {

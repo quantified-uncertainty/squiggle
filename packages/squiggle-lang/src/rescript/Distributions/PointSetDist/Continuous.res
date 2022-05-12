@@ -277,13 +277,19 @@ module T = Dist({
       prediction.xyShape,
       answer.xyShape,
     )
-    let xyShapeToContinuous: XYShape.xyShape => t = xyShape => {
-      xyShape: xyShape,
-      interpolation: #Linear,
-      integralSumCache: None,
-      integralCache: None,
-    }
-    newShape->E.R2.fmap(x => x->xyShapeToContinuous->integralEndY)
+    newShape->E.R2.fmap(x => x->make->integralEndY)
+  }
+  let logScore = (prior: t, prediction: t, answer: float) => {
+    let newShape = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument(
+      PointSetDist_Scoring.LogScore.integrand(~answer),
+      prior.xyShape,
+      prediction.xyShape,
+    )
+    newShape->E.R2.fmap(x => x->make->integralEndY)
+  }
+  let logScoreAgainstImproperPrior = (prediction: t, answer: float) => {
+    let prior = make({xs: prediction.xyShape.xs, ys: E.A.fmap(_ => 1.0, prediction.xyShape.xs)})
+    logScore(prior, prediction, answer)
   }
 })
 

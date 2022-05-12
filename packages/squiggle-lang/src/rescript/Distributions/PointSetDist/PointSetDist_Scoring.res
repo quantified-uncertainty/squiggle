@@ -14,3 +14,20 @@ module KLDivergence = {
       quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(-.answerElement *. logFn(quot))
     }
 }
+
+/*
+
+*/
+module LogScore = {
+  let logFn = Js.Math.log
+  let integrand = (priorElement: float, predictionElement: float, ~answer: float) => {
+    if answer == 0.0 {
+      Ok(0.0)
+    } else if predictionElement == 0.0 {
+      Ok(infinity)
+    } else {
+      let quot = predictionElement /. priorElement
+      quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(-.answer *. logFn(quot /. answer))
+    }
+  }
+}
