@@ -453,8 +453,10 @@ module PointwiseCombination = {
     T.filterOkYs(newXs, newYs)->Ok
   }
 
-  // *Dead code*: Nuño wrote this function to try to increase precision, but it didn't work.
-  // If another traveler comes through with a similar idea, we hope this implementation will help them.
+  /* *Dead code*: Nuño wrote this function to try to increase precision, but it didn't work.
+     If another traveler comes through with a similar idea, we hope this implementation will help them.
+     By "enrich" we mean to increase granularity.
+ */
   let enrichXyShape = (t: T.t): T.t => {
     let defaultEnrichmentFactor = 10
     let length = E.A.length(t.xs)
