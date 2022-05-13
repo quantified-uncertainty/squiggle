@@ -76,28 +76,32 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
     chartSettings.count
   );
   type point = { x: number; value: result<Distribution, string> };
-  let valueData: point[] = data1.map((x) => {
-    let result = runForeign(fn, [x], environment);
-    if (result.tag === "Ok") {
-      if (result.value.tag == "distribution") {
-        return { x, value: { tag: "Ok", value: result.value.value } };
-      } else {
-        return {
-          x,
-          value: {
-            tag: "Error",
-            value:
-              "Cannot currently render functions that don't return distributions",
-          },
-        };
-      }
-    } else {
-      return {
-        x,
-        value: { tag: "Error", value: errorValueToString(result.value) },
-      };
-    }
-  });
+  let valueData: point[] = React.useMemo(
+    () =>
+      data1.map((x) => {
+        let result = runForeign(fn, [x], environment);
+        if (result.tag === "Ok") {
+          if (result.value.tag == "distribution") {
+            return { x, value: { tag: "Ok", value: result.value.value } };
+          } else {
+            return {
+              x,
+              value: {
+                tag: "Error",
+                value:
+                  "Cannot currently render functions that don't return distributions",
+              },
+            };
+          }
+        } else {
+          return {
+            x,
+            value: { tag: "Error", value: errorValueToString(result.value) },
+          };
+        }
+      }),
+    [environment, fn]
+  );
 
   let initialPartition: [
     { x: number; value: Distribution }[],
