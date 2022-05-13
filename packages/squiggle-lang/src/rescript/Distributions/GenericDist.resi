@@ -26,9 +26,9 @@ let toFloatOperation: (
 module Score: {
   let klDivergence: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>
   let logScoreWithPointResolution: (
-    option<t>,
     t,
     float,
+    option<t>,
     ~toPointSetFn: toPointSetFn,
   ) => result<float, error>
 }

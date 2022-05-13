@@ -91,7 +91,7 @@ module DistributionOperation = {
     | ToString
     | ToSparkline(int)
 
-  type toScore = KLDivergence(genericDist) | LogScore(genericDist, float)
+  type toScore = KLDivergence(genericDist) | LogScore(float, option<genericDist>)
 
   type fromDist =
     | ToFloat(toFloat)
@@ -120,7 +120,7 @@ module DistributionOperation = {
     | ToFloat(#Sample) => `sample`
     | ToFloat(#IntegralSum) => `integralSum`
     | ToScore(KLDivergence(_)) => `klDivergence`
-    | ToScore(LogScore(_, x)) => `logScore against ${E.Float.toFixed(x)}`
+    | ToScore(LogScore(x, _)) => `logScore against ${E.Float.toFixed(x)}`
     | ToDist(Normalize) => `normalize`
     | ToDist(ToPointSet) => `toPointSet`
     | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`

@@ -251,27 +251,34 @@ let rec dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environm
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist)
   | ("klDivergence", [EvDistribution(a), EvDistribution(b)]) =>
     Some(runGenericOperation(FromDist(ToScore(KLDivergence(b)), a)))
-  | ("logScore", [EvDistribution(prior), EvDistribution(prediction), EvNumber(answer)])
   | (
-    "logScore",
-    [EvDistribution(prior), EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
+    "logScoreWithPointResolution",
+    [EvDistribution(prediction), EvNumber(answer), EvDistribution(prior)],
+  )
+  | (
+    "logScoreWithPointResolution",
+    [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer))), EvDistribution(prior)],
   ) =>
-    runGenericOperation(FromDist(ToScore(LogScore(prediction, answer)), prior))->Some
-  | ("logScore", [EvRecord(r)]) =>
-    recurRecordArgs("logScore", ["prior", "prediction", "answer"], r, _environment)
-  | ("increment", [EvNumber(x)]) => (x +. 1.0)->DistributionOperation.Float->Some
-  | ("increment", [EvRecord(r)]) => recurRecordArgs("increment", ["incrementee"], r, _environment)
-  | ("logScoreAgainstImproperPrior", [EvDistribution(prediction), EvNumber(answer)])
+    runGenericOperation(FromDist(ToScore(LogScore(answer, prior->Some)), prediction))->Some
+  | ("logScoreWithPointResolution", [EvDistribution(prediction), EvNumber(answer)])
   | (
-    "logScoreAgainstImproperPrior",
+    "logScoreWithPointResolution",
     [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
   ) =>
-    runGenericOperation(
-      FromDist(
-        ToScore(LogScore(prediction, answer)),
-        Helpers.constructNonNormalizedPointSet(~supportOf=prediction, _ => 1.0),
+    runGenericOperation(FromDist(ToScore(LogScore(answer, None)), prediction))->Some
+  | ("logScore", [EvRecord(r)]) =>
+    [
+      recurRecordArgs(
+        "logScoreWithPointResolution",
+        ["estimate", "answer", "prior"],
+        r,
+        _environment,
       ),
-    )->Some
+      recurRecordArgs("klDivergence", ["estimate", "answer"], r, _environment),
+      recurRecordArgs("logScoreWithPointResolution", ["estimate", "answer"], r, _environment),
+    ]->E.A.O.firstSome
+  | ("increment", [EvNumber(x)]) => (x +. 1.0)->DistributionOperation.Float->Some // this tests recurRecordArgs function
+  | ("increment", [EvRecord(r)]) => recurRecordArgs("increment", ["incrementee"], r, _environment)
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist)
   | ("scaleLog", [EvDistribution(dist)]) =>

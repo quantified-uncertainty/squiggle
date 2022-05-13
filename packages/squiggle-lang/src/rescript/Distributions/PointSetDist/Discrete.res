@@ -229,7 +229,7 @@ module T = Dist({
       answer,
     )->E.R2.fmap(integralEndY)
   }
-  let logScoreWithPointResolution = (prior: option<t>, prediction: t, answer: float) => {
+  let logScoreWithPointResolution = (prediction: t, answer: float, prior: option<t>) => {
     Error(Operation.NotYetImplemented)
   }
 })

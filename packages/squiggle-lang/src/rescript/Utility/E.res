@@ -631,6 +631,17 @@ module A = {
         }
       }
     }
+    let rec firstSome = (optionals: array<option<'a>>): option<'a> => {
+      let optionals' = optionals->Belt.List.fromArray
+      switch optionals' {
+      | list{} => None
+      | list{x, ...xs} =>
+        switch x {
+        | Some(_) => x
+        | None => xs->Belt.List.toArray->firstSome
+        }
+      }
+    }
   }
 
   module R = {

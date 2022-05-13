@@ -34,7 +34,7 @@ module type dist = {
   let mean: t => float
   let variance: t => float
   let klDivergence: (t, t) => result<float, Operation.Error.t>
-  let logScoreWithPointResolution: (option<t>, t, float) => result<float, Operation.Error.t>
+  let logScoreWithPointResolution: (t, float, option<t>) => result<float, Operation.Error.t>
 }
 
 module Dist = (T: dist) => {
