@@ -620,6 +620,17 @@ module A = {
       | Some(o) => o
       | None => []
       }
+    let rec arrSomeToSomeArr = (optionals: array<option<'a>>): option<array<'a>> => {
+      let optionals' = optionals->Belt.List.fromArray
+      switch optionals' {
+      | list{} => []->Some
+      | list{x, ...xs} =>
+        switch x {
+        | Some(_) => xs->Belt.List.toArray->arrSomeToSomeArr
+        | None => None
+        }
+      }
+    }
   }
 
   module R = {
