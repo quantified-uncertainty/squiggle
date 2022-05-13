@@ -145,10 +145,10 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       />
       {showChart}
       {_.entries(groupedErrors).map(([errorName, errorPoints]) => (
-        <ErrorBox heading={errorName}>
+        <ErrorBox key={errorName} heading={errorName}>
           Values:{" "}
           {errorPoints
-            .map((r) => <NumberShower number={r.x} />)
+            .map((r, i) => <NumberShower key={i} number={r.x} />)
             .reduce((a, b) => (
               <>
                 {a}, {b}

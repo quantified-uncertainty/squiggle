@@ -148,8 +148,9 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "array":
       return (
         <VariableBox heading="Array" showTypes={showTypes}>
-          {expression.value.map((r) => (
+          {expression.value.map((r, i) => (
             <SquiggleItem
+              key={i}
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={50}
@@ -166,7 +167,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox heading="Record" showTypes={showTypes}>
           {Object.entries(expression.value).map(([key, r]) => (
-            <>
+            <div key={key}>
               <RecordKeyHeader>{key}</RecordKeyHeader>
               <SquiggleItem
                 expression={r}
@@ -178,14 +179,14 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
                 chartSettings={chartSettings}
                 environment={environment}
               />
-            </>
+            </div>
           ))}
         </VariableBox>
       );
     case "arraystring":
       return (
         <VariableBox heading="Array String" showTypes={showTypes}>
-          {expression.value.map((r) => `"${r}"`)}
+          {expression.value.map((r) => `"${r}"`).join(", ")}
         </VariableBox>
       );
     case "lambda":
