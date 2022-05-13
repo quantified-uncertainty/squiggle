@@ -1,11 +1,6 @@
 module ExpressionValue = ReducerInterface_ExpressionValue
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
-let defaultEnv: DistributionOperation.env = {
-  sampleCount: MagicNumbers.Environment.defaultSampleCount,
-  xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
-}
-
 module Helpers = {
   let arithmeticMap = r =>
     switch r {
