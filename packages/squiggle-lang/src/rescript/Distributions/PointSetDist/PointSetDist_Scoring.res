@@ -18,16 +18,32 @@ module KLDivergence = {
 /*
 
 */
-module LogScore = {
+module LogScoreWithPointResolution = {
   let logFn = Js.Math.log
-  let integrand = (priorElement: float, predictionElement: float, ~answer: float) => {
-    if answer == 0.0 {
-      Ok(0.0)
-    } else if predictionElement == 0.0 {
-      Ok(infinity)
+  let score = (
+    ~priorPdf: option<float => float>,
+    ~predictionPdf: float => float,
+    ~answer: float,
+  ): result<float, Operation.Error.t> => {
+    let numer = answer->predictionPdf
+    if numer < 0.0 {
+      Operation.ComplexNumberError->Error
+    } else if numer == 0.0 {
+      infinity->Ok
     } else {
-      let quot = predictionElement /. priorElement
-      quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(-.answer *. logFn(quot /. answer))
+      -.(
+        switch priorPdf {
+        | None => numer->logFn
+        | Some(f) => {
+            let priorDensityOfAnswer = f(answer)
+            if priorDensityOfAnswer == 0.0 {
+              neg_infinity
+            } else {
+              (numer /. priorDensityOfAnswer)->logFn
+            }
+          }
+        }
+      )->Ok
     }
   }
 }

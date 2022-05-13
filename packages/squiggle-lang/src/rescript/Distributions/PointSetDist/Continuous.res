@@ -279,13 +279,10 @@ module T = Dist({
     )
     newShape->E.R2.fmap(x => x->make->integralEndY)
   }
-  let logScore = (prior: t, prediction: t, answer: float) => {
-    let newShape = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument(
-      PointSetDist_Scoring.LogScore.integrand(~answer),
-      prior.xyShape,
-      prediction.xyShape,
-    )
-    newShape->E.R2.fmap(x => x->make->integralEndY)
+  let logScoreWithPointResolution = (prior: option<t>, prediction: t, answer: float) => {
+    let priorPdf = prior->E.O2.fmap((shape, x) => XYShape.XtoY.linear(x, shape.xyShape))
+    let predictionPdf = x => XYShape.XtoY.linear(x, prediction.xyShape)
+    PointSetDist_Scoring.LogScoreWithPointResolution.score(~priorPdf, ~predictionPdf, ~answer)
   }
 })
 
