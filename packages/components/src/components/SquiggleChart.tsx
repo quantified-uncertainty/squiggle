@@ -193,7 +193,10 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         <FunctionChart
           fn={expression.value}
           chartSettings={chartSettings}
-          environment={{ sampleCount: environment.sampleCount / 10, xyPointLength: environment.xyPointLength / 10 }}
+          environment={{
+            sampleCount: environment.sampleCount / 10,
+            xyPointLength: environment.xyPointLength / 10,
+          }}
         />
       );
   }
