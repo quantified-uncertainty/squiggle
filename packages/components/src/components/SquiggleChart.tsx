@@ -194,7 +194,10 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         <FunctionChart
           fn={expression.value}
           chartSettings={chartSettings}
-          environment={environment}
+          environment={{
+            sampleCount: environment.sampleCount / 10,
+            xyPointLength: environment.xyPointLength / 10,
+          }}
         />
       );
   }
@@ -232,7 +235,8 @@ const ChartWrapper = styled.div`
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 `;
 
-let defaultChartSettings = { start: 0, stop: 10, count: 100 };
+let defaultChartSettings = { start: 0, stop: 10, count: 20 };
+
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   environment,
