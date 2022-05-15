@@ -33,7 +33,6 @@
     "Rescript"
   ],
   "author": "Quantified Uncertainty Research Institute",
-  "license": "MIT",
   "dependencies": {
     "rescript": "^9.1.4",
     "jstat": "^1.9.5",
