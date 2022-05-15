@@ -216,6 +216,25 @@ module Uniform = {
   }
 }
 
+module Bernoulli = {
+  type t = bernoulli
+  let make = p =>
+    p >= 0.0 && p <= 1.0
+      ? Ok(#Bernoulli({p: p}))
+      : Error("Beta distribution parameters must be positive")
+  let pmf = (x, t: t) => Stdlib.Bernoulli.pmf(x, t.p)
+  let pdf = (x, t: t) => Stdlib.Bernoulli.pmf(x, t.p)
+  let cdf = (x, t: t) => Stdlib.Bernoulli.cdf(x, t.p)
+  let inv = (p, t: t) => Stdlib.Bernoulli.quantile(p, t.p)
+  let mean = (t: t) => Ok(Stdlib.Bernoulli.mean(t.p))
+  let sample = (t: t) => {
+    let s = Uniform.sample(({low: 0.0, high: 1.0}));
+    inv(s,t)
+  }
+  let toString = ({p}: t) => j`Bernoulli($p)`
+}
+
+
 module Gamma = {
   type t = gamma
   let make = (shape: float, scale: float) => {
@@ -278,6 +297,7 @@ module T = {
     | #Uniform(n) => Uniform.pdf(x, n)
     | #Beta(n) => Beta.pdf(x, n)
     | #Float(n) => Float.pdf(x, n)
+    | #Bernoulli(n) => Bernoulli.pdf(x, n)
     }
 
   let cdf = (x, dist) =>
@@ -291,6 +311,7 @@ module T = {
     | #Uniform(n) => Uniform.cdf(x, n)
     | #Beta(n) => Beta.cdf(x, n)
     | #Float(n) => Float.cdf(x, n)
+    | #Bernoulli(n) => Bernoulli.cdf(x, n)
     }
 
   let inv = (x, dist) =>
@@ -304,6 +325,7 @@ module T = {
     | #Uniform(n) => Uniform.inv(x, n)
     | #Beta(n) => Beta.inv(x, n)
     | #Float(n) => Float.inv(x, n)
+    | #Bernoulli(n) => Bernoulli.inv(x, n)
     }
 
   let sample: symbolicDist => float = x =>
@@ -317,6 +339,7 @@ module T = {
     | #Uniform(n) => Uniform.sample(n)
     | #Beta(n) => Beta.sample(n)
     | #Float(n) => Float.sample(n)
+    | #Bernoulli(n) => Bernoulli.sample(n)
     }
 
   let doN = (n, fn) => {
@@ -340,6 +363,7 @@ module T = {
     | #Uniform(n) => Uniform.toString(n)
     | #Beta(n) => Beta.toString(n)
     | #Float(n) => Float.toString(n)
+    | #Bernoulli(n) => Bernoulli.toString(n)
     }
 
   let min: symbolicDist => float = x =>
@@ -351,6 +375,7 @@ module T = {
     | #Lognormal(n) => Lognormal.inv(minCdfValue, n)
     | #Gamma(n) => Gamma.inv(minCdfValue, n)
     | #Uniform({low}) => low
+    | #Bernoulli(n) => 0.0
     | #Beta(n) => Beta.inv(minCdfValue, n)
     | #Float(n) => n
     }
@@ -364,6 +389,7 @@ module T = {
     | #Gamma(n) => Gamma.inv(maxCdfValue, n)
     | #Lognormal(n) => Lognormal.inv(maxCdfValue, n)
     | #Beta(n) => Beta.inv(maxCdfValue, n)
+    | #Bernoulli(n) => 1.0
     | #Uniform({high}) => high
     | #Float(n) => n
     }
@@ -379,6 +405,7 @@ module T = {
     | #Uniform(n) => Uniform.mean(n)
     | #Gamma(n) => Gamma.mean(n)
     | #Float(n) => Float.mean(n)
+    | #Bernoulli(n) => Bernoulli.mean(n)
     }
 
   let operate = (distToFloatOp: Operation.distToFloatOperation, s) =>
@@ -454,6 +481,8 @@ module T = {
   ): PointSetTypes.pointSetDist =>
     switch d {
     | #Float(v) => Discrete(Discrete.make(~integralSumCache=Some(1.0), {xs: [v], ys: [1.0]}))
+    | #Bernoulli(v) =>
+      Discrete(Discrete.make(~integralSumCache=Some(1.0), {xs: [0.0, 1.0], ys: [1.0 -. v.p, v.p]}))
     | _ =>
       let xs = interpolateXs(~xSelection, d, sampleCount)
       let ys = xs |> E.A.fmap(x => pdf(x, d))
