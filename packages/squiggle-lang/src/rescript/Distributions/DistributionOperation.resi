@@ -14,6 +14,7 @@ type outputType =
   | Dist(genericDist)
   | Float(float)
   | String(string)
+  | FloatArray(array<float>)
   | Bool(bool)
   | GenDistError(error)
 

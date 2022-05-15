@@ -216,6 +216,9 @@ let dispatchToGenericOutput = (call: ExpressionValue.functionCall, _environment)
     ->E.R.bind(r => r(f1, f2, f3))
     ->SymbolicConstructors.symbolicResultToOutput
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist)
+  | ("sampleN", [EvDistribution(dist), EvNumber(n)]) => Some(
+      FloatArray(GenericDist.sampleN(dist, Belt.Int.fromFloat(n))),
+    )
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist)
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist)
@@ -315,6 +318,7 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | Float(d) => Ok(EvNumber(d))
   | String(d) => Ok(EvString(d))
   | Bool(d) => Ok(EvBool(d))
+  | FloatArray(d) => Ok(EvArray(d |> E.A.fmap(r =>ReducerInterface_ExpressionValue.EvNumber(r))))
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
