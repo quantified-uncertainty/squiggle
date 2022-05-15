@@ -7,6 +7,8 @@ import {
   lambdaValue,
   environment,
   runForeign,
+  squiggleExpression,
+  errorValue,
   errorValueToString,
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
@@ -45,6 +47,23 @@ interface FunctionChartProps {
   environment: environment;
 }
 
+type percentiles = {
+  x: number;
+  p1: number;
+  p5: number;
+  p10: number;
+  p20: number;
+  p30: number;
+  p40: number;
+  p50: number;
+  p60: number;
+  p70: number;
+  p80: number;
+  p90: number;
+  p95: number;
+  p99: number;
+}[];
+
 export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
   chartSettings,
@@ -58,7 +77,9 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
     setMouseOverlay(NaN);
   }
   const signalListeners = { mousemove: handleHover, mouseout: handleOut };
-  let mouseItem = runForeign(fn, [mouseOverlay], environment);
+  let mouseItem: result<squiggleExpression, errorValue> = !!mouseOverlay
+    ? runForeign(fn, [mouseOverlay], { sampleCount: 10000, xyPointLength: 1000 })
+    : { tag: "Error", value: { tag: "REExpectedType", value: "Expected float, got NaN" } };
   let showChart =
     mouseItem.tag === "Ok" && mouseItem.value.tag == "distribution" ? (
       <DistributionChart
@@ -76,86 +97,75 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
     chartSettings.count
   );
   type point = { x: number; value: result<Distribution, string> };
-  let valueData: point[] = React.useMemo(
-    () =>
-      data1.map((x) => {
-        let result = runForeign(fn, [x], environment);
-        if (result.tag === "Ok") {
-          if (result.value.tag == "distribution") {
-            return { x, value: { tag: "Ok", value: result.value.value } };
-          } else {
-            return {
-              x,
-              value: {
-                tag: "Error",
-                value:
-                  "Cannot currently render functions that don't return distributions",
-              },
-            };
-          }
+
+  let getPercentiles: () => percentiles = () => {
+    let valueData:any = data1.map((x) => {
+      let result = runForeign(fn, [x], environment);
+      if (result.tag === "Ok") {
+        if (result.value.tag == "distribution") {
+          return { x, value: { tag: "Ok", value: result.value.value } };
         } else {
           return {
             x,
-            value: { tag: "Error", value: errorValueToString(result.value) },
+            value: {
+              tag: "Error",
+              value:
+                "Cannot currently render functions that don't return distributions",
+            },
           };
         }
-      }),
-    [environment, fn]
-  );
+      } else {
+        return {
+          x,
+          value: { tag: "Error", value: errorValueToString(result.value) },
+        };
+      }
+    });
+    let initialPartition: [
+      { x: number; value: Distribution }[],
+      { x: number; value: string }[]
+    ] = [[], []];
+    let [functionImage, errors] = valueData.reduce((acc, current) => {
+      if (current.value.tag === "Ok") {
+        acc[0].push({ x: current.x, value: current.value.value });
+      } else {
+        acc[1].push({ x: current.x, value: current.value.value });
+      }
+      return acc;
+    }, initialPartition);
 
-  let initialPartition: [
-    { x: number; value: Distribution }[],
-    { x: number; value: string }[]
-  ] = [[], []];
-  let [functionImage, errors] = valueData.reduce((acc, current) => {
-    if (current.value.tag === "Ok") {
-      acc[0].push({ x: current.x, value: current.value.value });
-    } else {
-      acc[1].push({ x: current.x, value: current.value.value });
-    }
-    return acc;
-  }, initialPartition);
+    let percentiles:percentiles = functionImage.map(({ x, value }) => {
+      let toPointSet: Distribution = unwrap(value.toPointSet());
+      return {
+        x: x,
+        p1: unwrap(toPointSet.inv(0.01)),
+        p5: unwrap(toPointSet.inv(0.05)),
+        p10: unwrap(toPointSet.inv(0.12)),
+        p20: unwrap(toPointSet.inv(0.2)),
+        p30: unwrap(toPointSet.inv(0.3)),
+        p40: unwrap(toPointSet.inv(0.4)),
+        p50: unwrap(toPointSet.inv(0.5)),
+        p60: unwrap(toPointSet.inv(0.6)),
+        p70: unwrap(toPointSet.inv(0.7)),
+        p80: unwrap(toPointSet.inv(0.8)),
+        p90: unwrap(toPointSet.inv(0.9)),
+        p95: unwrap(toPointSet.inv(0.95)),
+        p99: unwrap(toPointSet.inv(0.99)),
+      };
+    });
+    return percentiles;
+  };
 
-  let percentiles = functionImage.map(({ x, value }) => {
-    return {
-      x: x,
-      p1: unwrap(value.inv(0.01)),
-      p5: unwrap(value.inv(0.05)),
-      p10: unwrap(value.inv(0.12)),
-      p20: unwrap(value.inv(0.2)),
-      p30: unwrap(value.inv(0.3)),
-      p40: unwrap(value.inv(0.4)),
-      p50: unwrap(value.inv(0.5)),
-      p60: unwrap(value.inv(0.6)),
-      p70: unwrap(value.inv(0.7)),
-      p80: unwrap(value.inv(0.8)),
-      p90: unwrap(value.inv(0.9)),
-      p95: unwrap(value.inv(0.95)),
-      p99: unwrap(value.inv(0.99)),
-    };
-  });
+  let _getPercentiles = React.useMemo(getPercentiles, [environment, fn])
 
-  let groupedErrors = _.groupBy(errors, (x) => x.value);
   return (
     <>
       <SquigglePercentilesChart
-        data={{ facet: percentiles }}
+        data={{ facet: _getPercentiles }}
         actions={false}
         signalListeners={signalListeners}
       />
       {showChart}
-      {_.entries(groupedErrors).map(([errorName, errorPoints]) => (
-        <ErrorBox key={errorName} heading={errorName}>
-          Values:{" "}
-          {errorPoints
-            .map((r, i) => <NumberShower key={i} number={r.x} />)
-            .reduce((a, b) => (
-              <>
-                {a}, {b}
-              </>
-            ))}
-        </ErrorBox>
-      ))}
     </>
   );
 };

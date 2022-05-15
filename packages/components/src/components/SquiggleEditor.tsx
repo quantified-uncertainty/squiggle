@@ -56,7 +56,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   environment,
   diagramStart = 0,
   diagramStop = 10,
-  diagramCount = 100,
+  diagramCount = 20,
   onChange,
   bindings = defaultBindings,
   jsImports = defaultImports,
