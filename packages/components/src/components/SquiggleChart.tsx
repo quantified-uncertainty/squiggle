@@ -10,6 +10,7 @@ import {
   jsImports,
   defaultImports,
   defaultBindings,
+  defaultEnvironment,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
@@ -235,7 +236,6 @@ const ChartWrapper = styled.div`
 `;
 
 let defaultChartSettings = { start: 0, stop: 10, count: 20 };
-let defaultEnvironment = { sampleCount: 10000, xyPointLength: 1000 };
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",

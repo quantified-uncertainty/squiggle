@@ -74,12 +74,13 @@ type errors = _.Dictionary<
 type point = { x: number; value: result<Distribution, string> };
 
 let getPercentiles = ({ chartSettings, fn, environment }) => {
-  let data1 = _rangeByCount(
+  let chartPointsToRender = _rangeByCount(
     chartSettings.start,
     chartSettings.stop,
     chartSettings.count
   );
-  let valueData: point[] = data1.map((x) => {
+
+  let chartPointsData: point[] = chartPointsToRender.map((x) => {
     let result = runForeign(fn, [x], environment);
     if (result.tag === "Ok") {
       if (result.value.tag == "distribution") {
@@ -101,11 +102,13 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
       };
     }
   });
+
   let initialPartition: [
     { x: number; value: Distribution }[],
     { x: number; value: string }[]
   ] = [[], []];
-  let [functionImage, errors] = valueData.reduce((acc, current) => {
+
+  let [functionImage, errors] = chartPointsData.reduce((acc, current) => {
     if (current.value.tag === "Ok") {
       acc[0].push({ x: current.x, value: current.value.value });
     } else {
@@ -113,7 +116,9 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
     }
     return acc;
   }, initialPartition);
+
   let groupedErrors: errors = _.groupBy(errors, (x) => x.value);
+
   let percentiles: percentiles = functionImage.map(({ x, value }) => {
     // We convert it to to a pointSet distribution first, so that in case its a sample set
     // distribution, it doesn't internally convert it to a pointSet distribution for every
@@ -123,7 +128,7 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
       x: x,
       p1: unwrap(toPointSet.inv(0.01)),
       p5: unwrap(toPointSet.inv(0.05)),
-      p10: unwrap(toPointSet.inv(0.12)),
+      p10: unwrap(toPointSet.inv(0.1)),
       p20: unwrap(toPointSet.inv(0.2)),
       p30: unwrap(toPointSet.inv(0.3)),
       p40: unwrap(toPointSet.inv(0.4)),
@@ -136,6 +141,7 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
       p99: unwrap(toPointSet.inv(0.99)),
     };
   });
+
   return { percentiles, errors: groupedErrors };
 };
 
@@ -153,13 +159,13 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   }
   const signalListeners = { mousemove: handleHover, mouseout: handleOut };
   let mouseItem: result<squiggleExpression, errorValue> = !!mouseOverlay
-    ? runForeign(fn, [mouseOverlay], {
-        sampleCount: 10000,
-        xyPointLength: 1000,
-      })
+    ? runForeign(fn, [mouseOverlay], environment)
     : {
         tag: "Error",
-        value: { tag: "REExpectedType", value: "Expected float, got NaN" },
+        value: {
+          tag: "REExpectedType",
+          value: "Hover x-coordinate returned NaN. Expected a number.",
+        },
       };
   let showChart =
     mouseItem.tag === "Ok" && mouseItem.value.tag == "distribution" ? (
@@ -173,7 +179,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       <></>
     );
 
-  let _getPercentiles = React.useMemo(
+  let getPercentilesMemoized = React.useMemo(
     () => getPercentiles({ chartSettings, fn, environment }),
     [environment, fn]
   );
@@ -181,23 +187,25 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   return (
     <>
       <SquigglePercentilesChart
-        data={{ facet: _getPercentiles.percentiles }}
+        data={{ facet: getPercentilesMemoized.percentiles }}
         actions={false}
         signalListeners={signalListeners}
       />
       {showChart}
-      {_.entries(_getPercentiles.errors).map(([errorName, errorPoints]) => (
-        <ErrorBox key={errorName} heading={errorName}>
-          Values:{" "}
-          {errorPoints
-            .map((r, i) => <NumberShower key={i} number={r.x} />)
-            .reduce((a, b) => (
-              <>
-                {a}, {b}
-              </>
-            ))}
-        </ErrorBox>
-      ))}
+      {_.entries(getPercentilesMemoized.errors).map(
+        ([errorName, errorPoints]) => (
+          <ErrorBox key={errorName} heading={errorName}>
+            Values:{" "}
+            {errorPoints
+              .map((r, i) => <NumberShower key={i} number={r.x} />)
+              .reduce((a, b) => (
+                <>
+                  {a}, {b}
+                </>
+              ))}
+          </ErrorBox>
+        )
+      )}
     </>
   );
 };
