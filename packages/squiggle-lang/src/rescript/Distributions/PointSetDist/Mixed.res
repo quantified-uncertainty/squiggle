@@ -302,10 +302,9 @@ module T = Dist({
   }
 
   let klDivergence = (prediction: t, answer: t) => {
-    Error(Operation.NotYetImplemented)
-    //    combinePointwise(PointSetDist_Scoring.KLDivergence.integrand, prediction, answer) |> E.R.fmap(
-    //     integralEndY,
-    //   )
+    let klDiscretePart = Discrete.T.klDivergence(prediction.discrete, answer.discrete)
+    let klContinuousPart = Continuous.T.klDivergence(prediction.continuous, answer.continuous)
+    E.R.merge(klDiscretePart, klContinuousPart)->E.R2.fmap(t => fst(t) +. snd(t))
   }
 })
 
