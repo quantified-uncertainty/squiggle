@@ -83,6 +83,17 @@ let sampleN = (t: t, n) => {
   }
 }
 
+let samplesMap = (~fn: (float) => result<float, Operation.Error.t>, t: t): result<
+  t,
+  Operation.Error.t,
+> => {
+  let samples = T.get(t)->E.A2.fmap(fn)
+
+  E.A.R.firstErrorOrOpen(samples)->E.R2.fmap(x =>
+    E.R.toExn("Input of samples should be larger than 5", make(x))
+  )
+}
+
 //TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
 let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2: t): result<
   t,
