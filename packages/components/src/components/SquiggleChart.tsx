@@ -10,7 +10,6 @@ import {
   jsImports,
   defaultImports,
   defaultBindings,
-  defaultEnvironment,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
@@ -194,7 +193,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         <FunctionChart
           fn={expression.value}
           chartSettings={chartSettings}
-          environment={{ sampleCount: environment.sampleCount / 10, xyPointLength: environment.sampleCount / 10 }}
+          environment={{ sampleCount: environment.sampleCount / 10, xyPointLength: environment.xyPointLength / 10 }}
         />
       );
   }
@@ -233,6 +232,8 @@ const ChartWrapper = styled.div`
 `;
 
 let defaultChartSettings = { start: 0, stop: 10, count: 20 };
+let defaultEnvironment = { sampleCount: 10000, xyPointLength: 1000 };
+
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   environment,
@@ -247,7 +248,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   chartSettings = defaultChartSettings,
 }: SquiggleChartProps) => {
   let expressionResult = run(squiggleString, bindings, environment, jsImports);
-  let e = environment ? environment : { sampleCount: 100000, xyPointLength: 1000 };
+  let e = environment ? environment : defaultEnvironment;
   let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
     let expression = expressionResult.value;
