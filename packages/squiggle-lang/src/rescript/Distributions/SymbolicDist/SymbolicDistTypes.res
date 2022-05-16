@@ -36,6 +36,11 @@ type gamma = {
   scale: float,
 }
 
+type logistic = {
+  location: float,
+  scale: float,
+}
+
 type bernoulli = {p: float}
 
 @genType
@@ -50,6 +55,7 @@ type symbolicDist = [
   | #Gamma(gamma)
   | #Float(float)
   | #Bernoulli(bernoulli)
+  | #Logistic(logistic)
 ]
 
 type analyticalSimplificationResult = [

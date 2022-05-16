@@ -178,6 +178,7 @@ module SymbolicConstructors = {
     | "uniform" => Ok(SymbolicDist.Uniform.make)
     | "beta" => Ok(SymbolicDist.Beta.make)
     | "lognormal" => Ok(SymbolicDist.Lognormal.make)
+    | "logistic" => Ok(SymbolicDist.Logistic.make)
     | "cauchy" => Ok(SymbolicDist.Cauchy.make)
     | "gamma" => Ok(SymbolicDist.Gamma.make)
     | "to" => Ok(SymbolicDist.From90thPercentile.make)
@@ -212,7 +213,14 @@ let dispatchToGenericOutput = (
   | ("delta", [EvNumber(f)]) =>
     SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | (
-      ("normal" | "uniform" | "beta" | "lognormal" | "cauchy" | "gamma" | "to") as fnName,
+      ("normal"
+      | "uniform"
+      | "beta"
+      | "lognormal"
+      | "cauchy"
+      | "gamma"
+      | "to"
+      | "logistic") as fnName,
       [EvNumber(f1), EvNumber(f2)],
     ) =>
     SymbolicConstructors.twoFloat(fnName)
