@@ -36,6 +36,8 @@ type gamma = {
   scale: float,
 }
 
+type bernoulli = {p: float}
+
 @genType
 type symbolicDist = [
   | #Normal(normal)
@@ -47,6 +49,7 @@ type symbolicDist = [
   | #Triangular(triangular)
   | #Gamma(gamma)
   | #Float(float)
+  | #Bernoulli(bernoulli)
 ]
 
 type analyticalSimplificationResult = [
