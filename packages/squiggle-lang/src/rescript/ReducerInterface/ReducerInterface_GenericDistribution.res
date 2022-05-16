@@ -186,6 +186,7 @@ module SymbolicConstructors = {
   let oneFloat = name =>
     switch name {
     | "exponential" => Ok(SymbolicDist.Exponential.make)
+    | "bernoulli" => Ok(SymbolicDist.Bernoulli.make)
     | _ => Error("Unreachable state")
     }
 
@@ -195,6 +196,7 @@ module SymbolicConstructors = {
     | "uniform" => Ok(SymbolicDist.Uniform.make)
     | "beta" => Ok(SymbolicDist.Beta.make)
     | "lognormal" => Ok(SymbolicDist.Lognormal.make)
+    | "logistic" => Ok(SymbolicDist.Logistic.make)
     | "cauchy" => Ok(SymbolicDist.Cauchy.make)
     | "gamma" => Ok(SymbolicDist.Gamma.make)
     | "to" => Ok(SymbolicDist.From90thPercentile.make)
@@ -222,14 +224,21 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("exponential" as fnName, [EvNumber(f)]) =>
+  | (("exponential" | "bernoulli") as fnName, [EvNumber(f)]) =>
     SymbolicConstructors.oneFloat(fnName)
     ->E.R.bind(r => r(f))
     ->SymbolicConstructors.symbolicResultToOutput
   | ("delta", [EvNumber(f)]) =>
     SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | (
-      ("normal" | "uniform" | "beta" | "lognormal" | "cauchy" | "gamma" | "to") as fnName,
+      ("normal"
+      | "uniform"
+      | "beta"
+      | "lognormal"
+      | "cauchy"
+      | "gamma"
+      | "to"
+      | "logistic") as fnName,
       [EvNumber(f1), EvNumber(f2)],
     ) =>
     SymbolicConstructors.twoFloat(fnName)
@@ -240,6 +249,8 @@ let dispatchToGenericOutput = (
     ->E.R.bind(r => r(f1, f2, f3))
     ->SymbolicConstructors.symbolicResultToOutput
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist, ~env)
+  | ("sampleN", [EvDistribution(dist), EvNumber(n)]) =>
+    Some(FloatArray(GenericDist.sampleN(dist, Belt.Int.fromFloat(n))))
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist, ~env)
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
@@ -373,6 +384,7 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | Float(d) => Ok(EvNumber(d))
   | String(d) => Ok(EvString(d))
   | Bool(d) => Ok(EvBool(d))
+  | FloatArray(d) => Ok(EvArray(d |> E.A.fmap(r => ReducerInterface_ExpressionValue.EvNumber(r))))
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
