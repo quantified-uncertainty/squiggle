@@ -4,6 +4,7 @@ type errorValue =
   | REArrayIndexNotFound(string, int)
   | REAssignmentExpected
   | REDistributionError(DistributionTypes.error)
+  | REOperationError(Operation.operationError)
   | REExpressionExpected
   | REFunctionExpected(string)
   | REJavaScriptExn(option<string>, option<string>) // Javascript Exception
@@ -29,6 +30,7 @@ let errorToString = err =>
   | REExpressionExpected => "Expression expected"
   | REFunctionExpected(msg) => `Function expected: ${msg}`
   | REDistributionError(err) => `Distribution Math Error: ${DistributionTypes.Error.toString(err)}`
+  | REOperationError(err) => `Math Error: ${Operation.Error.toString(err)}`
   | REJavaScriptExn(omsg, oname) => {
       let answer = "JS Exception:"
       let answer = switch oname {

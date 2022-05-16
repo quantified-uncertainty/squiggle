@@ -83,7 +83,7 @@ let sampleN = (t: t, n) => {
   }
 }
 
-let samplesMap = (~fn: (float) => result<float, Operation.Error.t>, t: t): result<
+let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): result<
   t,
   Operation.Error.t,
 > => {

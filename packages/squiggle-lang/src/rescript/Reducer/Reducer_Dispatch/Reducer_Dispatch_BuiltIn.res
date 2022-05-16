@@ -103,12 +103,11 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     let fn = r =>
       switch Lambda.doLambdaCall(aLambdaValue, list{EvNumber(r)}, environment, reducer) {
       | Ok(EvNumber(f)) => Ok(f)
-      | _ => Error(Operation.NotYetImplemented)
+      | _ => Error(Operation.SampleMapNeedsNtoNFunction)
       }
-    let newDist = SampleSetDist.samplesMap(~fn, sampleSetDist)
-    switch newDist {
+    switch SampleSetDist.samplesMap(~fn, sampleSetDist) {
     | Ok(r) => Ok(EvDistribution(SampleSet(r)))
-    | Error(r) => Error(RETodo(""))
+    | Error(r) => Error(REOperationError(r))
     }
   }
 

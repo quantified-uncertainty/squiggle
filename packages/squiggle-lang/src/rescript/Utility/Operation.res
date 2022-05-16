@@ -56,6 +56,7 @@ type operationError =
   | InfinityError
   | NegativeInfinityError
   | LogicallyInconsistentPathwayError
+  | SampleMapNeedsNtoNFunction
   | NotYetImplemented // should be removed when `klDivergence` for mixed and discrete is implemented.
 
 @genType
@@ -70,6 +71,7 @@ module Error = {
     | InfinityError => "Operation returned positive infinity"
     | NegativeInfinityError => "Operation returned negative infinity"
     | LogicallyInconsistentPathwayError => "This pathway should have been logically unreachable"
+    | SampleMapNeedsNtoNFunction => "SampleMap needs a function that converts a number to a number"
     | NotYetImplemented => "This pathway is not yet implemented"
     }
 }
