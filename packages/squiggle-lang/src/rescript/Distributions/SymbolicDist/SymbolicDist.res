@@ -216,6 +216,24 @@ module Uniform = {
   }
 }
 
+module Logistic = {
+  type t = logistic
+  let make = (location, scale) =>
+    scale > 0.0
+      ? Ok(#Logistic({location: location, scale: scale}))
+      : Error("Scale must be positive")
+
+  let pdf = (x, t: t) => Stdlib.Logistic.pdf(x, t.location, t.scale)
+  let cdf = (x, t: t) => Stdlib.Logistic.cdf(x, t.location, t.scale)
+  let inv = (p, t: t) => Stdlib.Logistic.quantile(p, t.location, t.scale)
+  let sample = (t: t) => {
+    let s = Uniform.sample({low: 0.0, high: 1.0})
+    inv(s, t)
+  }
+  let mean = (t: t) => Ok(Stdlib.Logistic.mean(t.location, t.scale))
+  let toString = ({location, scale}: t) => j`Logistic($location,$scale)`
+}
+
 module Bernoulli = {
   type t = bernoulli
   let make = p =>
@@ -304,6 +322,7 @@ module T = {
     | #Cauchy(n) => Cauchy.pdf(x, n)
     | #Gamma(n) => Gamma.pdf(x, n)
     | #Lognormal(n) => Lognormal.pdf(x, n)
+    | #Logistic(n) => Logistic.pdf(x, n)
     | #Uniform(n) => Uniform.pdf(x, n)
     | #Beta(n) => Beta.pdf(x, n)
     | #Float(n) => Float.pdf(x, n)
@@ -317,6 +336,7 @@ module T = {
     | #Exponential(n) => Exponential.cdf(x, n)
     | #Cauchy(n) => Cauchy.cdf(x, n)
     | #Gamma(n) => Gamma.cdf(x, n)
+    | #Logistic(n) => Logistic.cdf(x, n)
     | #Lognormal(n) => Lognormal.cdf(x, n)
     | #Uniform(n) => Uniform.cdf(x, n)
     | #Beta(n) => Beta.cdf(x, n)
@@ -331,6 +351,7 @@ module T = {
     | #Exponential(n) => Exponential.inv(x, n)
     | #Cauchy(n) => Cauchy.inv(x, n)
     | #Gamma(n) => Gamma.inv(x, n)
+    | #Logistic(n) => Logistic.inv(x, n)
     | #Lognormal(n) => Lognormal.inv(x, n)
     | #Uniform(n) => Uniform.inv(x, n)
     | #Beta(n) => Beta.inv(x, n)
@@ -345,6 +366,7 @@ module T = {
     | #Exponential(n) => Exponential.sample(n)
     | #Cauchy(n) => Cauchy.sample(n)
     | #Gamma(n) => Gamma.sample(n)
+    | #Logistic(n) => Logistic.sample(n)
     | #Lognormal(n) => Lognormal.sample(n)
     | #Uniform(n) => Uniform.sample(n)
     | #Beta(n) => Beta.sample(n)
@@ -369,6 +391,7 @@ module T = {
     | #Cauchy(n) => Cauchy.toString(n)
     | #Normal(n) => Normal.toString(n)
     | #Gamma(n) => Gamma.toString(n)
+    | #Logistic(n) => Logistic.toString(n)
     | #Lognormal(n) => Lognormal.toString(n)
     | #Uniform(n) => Uniform.toString(n)
     | #Beta(n) => Beta.toString(n)
@@ -383,6 +406,7 @@ module T = {
     | #Cauchy(n) => Cauchy.inv(minCdfValue, n)
     | #Normal(n) => Normal.inv(minCdfValue, n)
     | #Lognormal(n) => Lognormal.inv(minCdfValue, n)
+    | #Logistic(n) => Logistic.inv(minCdfValue, n)
     | #Gamma(n) => Gamma.inv(minCdfValue, n)
     | #Uniform({low}) => low
     | #Bernoulli(n) => Bernoulli.min(n)
@@ -398,6 +422,7 @@ module T = {
     | #Normal(n) => Normal.inv(maxCdfValue, n)
     | #Gamma(n) => Gamma.inv(maxCdfValue, n)
     | #Lognormal(n) => Lognormal.inv(maxCdfValue, n)
+    | #Logistic(n) => Logistic.inv(maxCdfValue, n)
     | #Beta(n) => Beta.inv(maxCdfValue, n)
     | #Bernoulli(n) => Bernoulli.max(n)
     | #Uniform({high}) => high
@@ -412,6 +437,7 @@ module T = {
     | #Normal(n) => Normal.mean(n)
     | #Lognormal(n) => Lognormal.mean(n)
     | #Beta(n) => Beta.mean(n)
+    | #Logistic(n) => Logistic.mean(n)
     | #Uniform(n) => Uniform.mean(n)
     | #Gamma(n) => Gamma.mean(n)
     | #Bernoulli(n) => Bernoulli.mean(n)
