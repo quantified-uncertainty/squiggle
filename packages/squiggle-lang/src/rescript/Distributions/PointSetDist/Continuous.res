@@ -279,7 +279,7 @@ module T = Dist({
     )
     newShape->E.R2.fmap(x => x->make->integralEndY)
   }
-  let logScoreWithPointResolution = (prediction: t, answer: float, prior: option<t>) => {
+  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
     let priorPdf = prior->E.O2.fmap((shape, x) => XYShape.XtoY.linear(x, shape.xyShape))
     let predictionPdf = x => XYShape.XtoY.linear(x, prediction.xyShape)
     PointSetDist_Scoring.LogScoreWithPointResolution.score(~priorPdf, ~predictionPdf, ~answer)

@@ -65,9 +65,9 @@ module Constructors: {
   @genType
   let logScoreWithPointResolution: (
     ~env: env,
-    genericDist,
-    float,
-    option<genericDist>,
+    ~prediction: genericDist,
+    ~answer: float,
+    ~prior: option<genericDist>,
   ) => result<float, error>
   @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>

@@ -162,24 +162,6 @@ module Helpers = {
       }
     }
   }
-  let constructNonNormalizedPointSet = (
-    ~supportOf: DistributionTypes.genericDist,
-    fn: float => float,
-    env: DistributionOperation.env,
-  ): DistributionTypes.genericDist => {
-    let cdf = x => toFloatFn(#Cdf(x), supportOf, ~env)
-    let leftEndpoint = cdf(MagicNumbers.Epsilon.ten)
-    let rightEndpoint = cdf(1.0 -. MagicNumbers.Epsilon.ten)
-    let xs = switch (leftEndpoint, rightEndpoint) {
-    | (Some(Float(a)), Some(Float(b))) =>
-      E.A.Floats.range(a, b, MagicNumbers.Environment.defaultXYPointLength)
-    | _ => []
-    }
-    {xs: xs, ys: E.A.fmap(fn, xs)}
-    ->Continuous.make
-    ->PointSetTypes.Continuous
-    ->DistributionTypes.PointSet
-  }
 
   let klDivergenceWithPrior = (
     prediction: DistributionTypes.genericDist,

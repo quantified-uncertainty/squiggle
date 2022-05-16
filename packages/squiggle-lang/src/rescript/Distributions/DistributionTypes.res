@@ -162,9 +162,9 @@ module Constructors = {
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
     let klDivergence = (dist1, dist2): t => FromDist(ToScore(KLDivergence(dist2)), dist1)
-    let logScoreWithPointResolution = (prior, prediction, answer): t => FromDist(
-      ToScore(LogScore(prediction, answer)),
-      prior,
+    let logScoreWithPointResolution = (~prediction, ~answer, ~prior): t => FromDist(
+      ToScore(LogScore(answer, prior)),
+      prediction,
     )
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
     let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)

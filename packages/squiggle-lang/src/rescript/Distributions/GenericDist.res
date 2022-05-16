@@ -68,18 +68,21 @@ module Score = {
   }
 
   let logScoreWithPointResolution = (
-    prediction,
-    answer,
-    prior,
+    ~prediction: DistributionTypes.genericDist,
+    ~answer: float,
+    ~prior: option<DistributionTypes.genericDist>,
     ~toPointSetFn: toPointSetFn,
   ): result<float, error> => {
     switch prior {
     | Some(prior') =>
-      E.R.merge(toPointSetFn(prior'), toPointSetFn(prediction))->E.R.bind(((a, b)) =>
+      E.R.merge(toPointSetFn(prior'), toPointSetFn(prediction))->E.R.bind(((
+        prior'',
+        prediction'',
+      )) =>
         PointSetDist.T.logScoreWithPointResolution(
-          b,
-          answer,
-          a->Some,
+          ~prediction=prediction'',
+          ~answer,
+          ~prior=prior''->Some,
         )->E.R2.errMap(x => DistributionTypes.OperationError(x))
       )
     | None =>
@@ -87,9 +90,9 @@ module Score = {
       ->toPointSetFn
       ->E.R.bind(x =>
         PointSetDist.T.logScoreWithPointResolution(
-          x,
-          answer,
-          None,
+          ~prediction=x,
+          ~answer,
+          ~prior=None,
         )->E.R2.errMap(x => DistributionTypes.OperationError(x))
       )
     }

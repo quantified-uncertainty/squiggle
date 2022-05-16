@@ -24,7 +24,7 @@ module LogScoreWithPointResolution = {
   ): result<float, Operation.Error.t> => {
     let numerator = answer->predictionPdf
     if numerator < 0.0 {
-      Operation.ComplexNumberError->Error
+      Operation.PdfInvalidError->Error
     } else if numerator == 0.0 {
       infinity->Ok
     } else {

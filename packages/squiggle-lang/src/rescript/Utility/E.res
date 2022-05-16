@@ -620,6 +620,7 @@ module A = {
       | Some(o) => o
       | None => []
       }
+    // REturns `None` there are no non-`None` elements
     let rec arrSomeToSomeArr = (optionals: array<option<'a>>): option<array<'a>> => {
       let optionals' = optionals->Belt.List.fromArray
       switch optionals' {
@@ -631,17 +632,7 @@ module A = {
         }
       }
     }
-    let rec firstSome = (optionals: array<option<'a>>): option<'a> => {
-      let optionals' = optionals->Belt.List.fromArray
-      switch optionals' {
-      | list{} => None
-      | list{x, ...xs} =>
-        switch x {
-        | Some(_) => x
-        | None => xs->Belt.List.toArray->firstSome
-        }
-      }
-    }
+    let firstSome = x => Belt.Array.getBy(x, O.isSome)
   }
 
   module R = {

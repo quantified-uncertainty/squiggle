@@ -55,7 +55,7 @@ type operationError =
   | ComplexNumberError
   | InfinityError
   | NegativeInfinityError
-  | LogicallyInconsistentPathwayError
+  | PdfInvalidError
   | NotYetImplemented // should be removed when `klDivergence` for mixed and discrete is implemented.
 
 @genType
@@ -69,7 +69,7 @@ module Error = {
     | ComplexNumberError => "Operation returned complex result"
     | InfinityError => "Operation returned positive infinity"
     | NegativeInfinityError => "Operation returned negative infinity"
-    | LogicallyInconsistentPathwayError => "This pathway should have been logically unreachable"
+    | PdfInvalidError => "This Pdf is invalid"
     | NotYetImplemented => "This pathway is not yet implemented"
     }
 }

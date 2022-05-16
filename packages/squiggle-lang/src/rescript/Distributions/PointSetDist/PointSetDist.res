@@ -203,11 +203,12 @@ module T = Dist({
     | (m1, m2) => Mixed.T.klDivergence(m1->toMixed, m2->toMixed)
     }
 
-  let logScoreWithPointResolution = (prediction: t, answer: float, prior: option<t>) => {
+  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
     switch (prior, prediction) {
     | (Some(Continuous(t1)), Continuous(t2)) =>
-      Continuous.T.logScoreWithPointResolution(t2, answer, t1->Some)
-    | (None, Continuous(t2)) => Continuous.T.logScoreWithPointResolution(t2, answer, None)
+      Continuous.T.logScoreWithPointResolution(~prediction=t2, ~answer, ~prior=t1->Some)
+    | (None, Continuous(t2)) =>
+      Continuous.T.logScoreWithPointResolution(~prediction=t2, ~answer, ~prior=None)
     | _ => Error(Operation.NotYetImplemented)
     }
   }
