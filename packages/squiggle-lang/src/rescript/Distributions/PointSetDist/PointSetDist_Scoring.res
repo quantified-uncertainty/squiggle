@@ -15,9 +15,6 @@ module KLDivergence = {
     }
 }
 
-/*
-
-*/
 module LogScoreWithPointResolution = {
   let logFn = Js.Math.log
   let score = (
@@ -25,21 +22,21 @@ module LogScoreWithPointResolution = {
     ~predictionPdf: float => float,
     ~answer: float,
   ): result<float, Operation.Error.t> => {
-    let numer = answer->predictionPdf
-    if numer < 0.0 {
+    let numerator = answer->predictionPdf
+    if numerator < 0.0 {
       Operation.ComplexNumberError->Error
-    } else if numer == 0.0 {
+    } else if numerator == 0.0 {
       infinity->Ok
     } else {
       -.(
         switch priorPdf {
-        | None => numer->logFn
+        | None => numerator->logFn
         | Some(f) => {
             let priorDensityOfAnswer = f(answer)
             if priorDensityOfAnswer == 0.0 {
               neg_infinity
             } else {
-              (numer /. priorDensityOfAnswer)->logFn
+              (numerator /. priorDensityOfAnswer)->logFn
             }
           }
         }
