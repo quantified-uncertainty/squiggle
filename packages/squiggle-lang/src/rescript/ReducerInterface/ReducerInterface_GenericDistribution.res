@@ -260,20 +260,20 @@ let dispatchToGenericOutput = (
   | ("klDivergence", [EvDistribution(a), EvDistribution(b)]) =>
     Some(DistributionOperation.run(FromDist(ToScore(KLDivergence(b)), a), ~env))
   | (
-    "logScoreWithPointResolution",
+    "logScoreWithPointAnswer",
     [EvDistribution(prediction), EvNumber(answer), EvDistribution(prior)],
   )
   | (
-    "logScoreWithPointResolution",
+    "logScoreWithPointAnswer",
     [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer))), EvDistribution(prior)],
   ) =>
     DistributionOperation.run(
       FromDist(ToScore(LogScore(answer, prior->Some)), prediction),
       ~env,
     )->Some
-  | ("logScoreWithPointResolution", [EvDistribution(prediction), EvNumber(answer)])
+  | ("logScoreWithPointAnswer", [EvDistribution(prediction), EvNumber(answer)])
   | (
-    "logScoreWithPointResolution",
+    "logScoreWithPointAnswer",
     [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
   ) =>
     DistributionOperation.run(FromDist(ToScore(LogScore(answer, None)), prediction), ~env)->Some
