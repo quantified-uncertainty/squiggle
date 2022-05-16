@@ -345,3 +345,103 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
 let dispatch = (call, environment) => {
   dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
 }
+
+let twoNumbers = Inputs.fn("normal", [Inputs.numberLike, Inputs.numberLike])
+
+let meanStdevRecord = Inputs.fn(
+  "normal",
+  Inputs.record([
+    Inputs.recordParam("mean", Inputs.numberLike),
+    Inputs.recordParam("stdev", Inputs.numberLike),
+  ]),
+)
+let percentilesRecord = Inputs.fn(
+  "normal",
+  Inputs.record([
+    Inputs.recordParam("p5", Inputs.numberLike),
+    Inputs.recordParam("p95", Inputs.numberLike),
+  ]),
+)
+let twoNumberInputs = switch inputs {
+| (Number(n1), Number(n2)) => Ok(n1, n2)
+| _ => Error("Wrong inputs / Logically impossible")
+}
+
+//Note: I'm not sure if this "Optional" would work.
+let twoNumberInputsWithOptional = switch inputs {
+| (Number(n1), Number(n2), Optional(Number(n3))) => Ok(n1, n2, n3)
+| _ => Error("Wrong inputs / Logically impossible")
+}
+
+makeDefinition(
+  ~name="normal()",
+  ~output=Outputs.distribution,
+  ~documentation=`
+    Creates a normal distribution with the given mean and standard deviation.
+  `,
+  ~run=[
+    (
+      twoNumbers,
+      inputs => twoNumberInputs(inputs)->E.R.fmap((mean, stdev) => Normal.make(mean, stdev)),
+    ),
+    (meanStdevRecord, twoNumberInputs(inputs)->E.R.fmap((mean, stdev) => Normal.make(mean, stdev))),
+    (
+      percentilesRecord,
+      twoNumberInputs(inputs)->E.R.fmap((p5, p95) => Normal.makeFromPercentiles(p5, p95)),
+    ),
+  ],
+)
+
+let twoNumbers = Inputs.fn("normal", [Inputs.distOrNumber, Inputs.distOrNumber])
+
+let meanStdevRecord = Inputs.fn(
+  "normal",
+  Inputs.record([
+    Inputs.recordParam("mean", Inputs.distOrNumber),
+    Inputs.recordParam("stdev", Inputs.distOrNumber),
+  ]),
+)
+let percentilesRecord = Inputs.fn(
+  "normal",
+  Inputs.record([
+    Inputs.recordParam("p5", Inputs.distOrNumber),
+    Inputs.recordParam("p95", Inputs.distOrNumber),
+  ]),
+)
+let twoNumberInputs = switch inputs {
+| (DistOrNumber(n1), DistOrNumber(n2)) => Ok(n1, n2)
+| _ => Error("Wrong inputs / Logically impossible")
+}
+
+//Note: I'm not sure if this "Optional" would work.
+let twoNumberInputsWithOptional = switch inputs {
+| (DistOrNumber(n1), DistOrNumber(n2), Optional(DistOrNumber(n3))) => Ok(n1, n2, n3)
+| _ => Error("Wrong inputs / Logically impossible")
+}
+
+let twoDistOrStdev = (a1, a2, fn) => {
+  switch (a1, a2) {
+  | (Number(a1), Number(a2)) => fn(a1, a2)
+  | (Dist(a1), Number(a2)) => a1->sampleMap(r => fn(r, a2) |> sample)
+  | (Number(a1), Dist(a2)) => a2->sampleMap(r => fn(a1, r) |> sample)
+  | (Dist(a2), Dist(a2)) => SampleSetDist.map2(a1, a2, (m, s) => fn(m, s) |> sample)
+  }
+}
+
+let convertTwoInputs = (inputs, fn) =>
+  twoNumberInputs(inputs)->E.R.fmap((mean, stdev) => {
+    twoDistOrStdev(mean, stdev, Normal.make)
+  })
+
+makeDefinition(
+  ~name="normal()",
+  ~output=Outputs.distribution,
+  ~documentation=`
+    Creates a normal distribution with the given mean and standard deviation.
+  `,
+  ~run=[
+    (twoNumbers, inputs => convertTwoInputs(inputs, Normal.make)),
+    (meanStdevRecord, inputs => convertTwoInputs(inputs, Normal.make)),
+    (percentilesRecord, inputs => convertTwoInputs(inputs, Normal.makeFromPercentiles)),
+  ],
+)
