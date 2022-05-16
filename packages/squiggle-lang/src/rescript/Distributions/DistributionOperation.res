@@ -146,7 +146,16 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       }
     | ToDist(Normalize) => dist->GenericDist.normalize->Dist
     | ToScore(KLDivergence(t2)) =>
-      GenericDist.klDivergence(dist, t2, ~toPointSetFn)
+      GenericDist.Score.klDivergence(dist, t2, ~toPointSetFn)
+      ->E.R2.fmap(r => Float(r))
+      ->OutputLocal.fromResult
+    | ToScore(LogScore(answer, prior)) =>
+      GenericDist.Score.logScoreWithPointResolution(
+        ~prediction=dist,
+        ~answer,
+        ~prior,
+        ~toPointSetFn,
+      )
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
     | ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
@@ -263,6 +272,12 @@ module Constructors = {
   let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
   let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
   let klDivergence = (~env, dist1, dist2) => C.klDivergence(dist1, dist2)->run(~env)->toFloatR
+  let logScoreWithPointResolution = (
+    ~env,
+    ~prediction: DistributionTypes.genericDist,
+    ~answer: float,
+    ~prior: option<DistributionTypes.genericDist>,
+  ) => C.logScoreWithPointResolution(~prediction, ~answer, ~prior)->run(~env)->toFloatR
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
   let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR
