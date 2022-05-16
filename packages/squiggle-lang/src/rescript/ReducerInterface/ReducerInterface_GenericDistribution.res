@@ -165,7 +165,7 @@ module Helpers = {
   let constructNonNormalizedPointSet = (
     ~supportOf: DistributionTypes.genericDist,
     fn: float => float,
-    env: DistributionOperation.env
+    env: DistributionOperation.env,
   ): DistributionTypes.genericDist => {
     let cdf = x => toFloatFn(#Cdf(x), supportOf, ~env)
     let leftEndpoint = cdf(MagicNumbers.Epsilon.ten)
@@ -216,7 +216,7 @@ module SymbolicConstructors = {
     }
 }
 
-let rec dispatchToGenericOutput = (
+let dispatchToGenericOutput = (
   call: ExpressionValue.functionCall,
   env: DistributionOperation.env,
 ): option<DistributionOperation.outputType> => {
@@ -243,7 +243,8 @@ let rec dispatchToGenericOutput = (
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist, ~env)
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
-  | ("toSparkline", [EvDistribution(dist)]) => Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
+  | ("toSparkline", [EvDistribution(dist)]) =>
+    Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
   | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
   | ("exp", [EvDistribution(a)]) =>
@@ -266,26 +267,16 @@ let rec dispatchToGenericOutput = (
     "logScoreWithPointResolution",
     [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer))), EvDistribution(prior)],
   ) =>
-    DistributionOperation.run(FromDist(ToScore(LogScore(answer, prior->Some)), prediction), ~env)->Some
+    DistributionOperation.run(
+      FromDist(ToScore(LogScore(answer, prior->Some)), prediction),
+      ~env,
+    )->Some
   | ("logScoreWithPointResolution", [EvDistribution(prediction), EvNumber(answer)])
   | (
     "logScoreWithPointResolution",
     [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
   ) =>
     DistributionOperation.run(FromDist(ToScore(LogScore(answer, None)), prediction), ~env)->Some
-  | ("logScore", [EvRecord(r)]) =>
-    [
-      recurRecordArgs(
-        "logScoreWithPointResolution",
-        ["estimate", "answer", "prior"],
-        r,
-        env,
-      ),
-      recurRecordArgs("klDivergence", ["estimate", "answer"], r, env),
-      recurRecordArgs("logScoreWithPointResolution", ["estimate", "answer"], r, env),
-    ]->E.A.O.firstSome
-  | ("increment", [EvNumber(x)]) => (x +. 1.0)->DistributionOperation.Float->Some // this tests recurRecordArgs function
-  | ("increment", [EvRecord(r)]) => recurRecordArgs("increment", ["incrementee"], r, env)
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
   | ("scaleLog", [EvDistribution(dist)]) =>
@@ -372,16 +363,6 @@ let rec dispatchToGenericOutput = (
   | _ => None
   }
 }
-and recurRecordArgs = (
-  fnName: string,
-  argNames: array<string>,
-  args: ExpressionValue.record,
-  env: DistributionOperation.env,
-): option<DistributionOperation.outputType> =>
-  // argNames -> E.A2.fmap(x => Js.Dict.get(args, x)) -> E.A.O.arrSomeToSomeArr -> E.O.bind(a => dispatchToGenericOutput((fnName, a), _environment))
-  argNames
-  ->E.A2.fmap(x => Js.Dict.unsafeGet(args, x))
-  ->(a => dispatchToGenericOutput((fnName, a), env))
 
 let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   expressionValue,
