@@ -107,7 +107,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
       }
     switch SampleSetDist.samplesMap(~fn, sampleSetDist) {
     | Ok(r) => Ok(EvDistribution(SampleSet(r)))
-    | Error(r) => Error(REOperationError(r))
+    | Error(r) => Error(REDistributionError(SampleSetError(r)))
     }
   }
 

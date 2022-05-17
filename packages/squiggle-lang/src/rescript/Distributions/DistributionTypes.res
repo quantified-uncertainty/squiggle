@@ -37,6 +37,7 @@ module Error = {
     | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
     | SampleSetError(TooFewSamples) => "Too Few Samples"
     | SampleSetError(NonNumericInput(err)) => `Found a non-number in input: ${err}`
+    | SampleSetError(OperationError(err)) => Operation.Error.toString(err)
     | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
