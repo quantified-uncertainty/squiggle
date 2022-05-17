@@ -92,7 +92,7 @@ module DistributionOperation = {
     | ToString
     | ToSparkline(int)
 
-  type toScore = KLDivergence(genericDist)
+  type toScore = KLDivergence(genericDist) | LogScore(float, option<genericDist>)
 
   type fromDist =
     | ToFloat(toFloat)
@@ -121,6 +121,7 @@ module DistributionOperation = {
     | ToFloat(#Sample) => `sample`
     | ToFloat(#IntegralSum) => `integralSum`
     | ToScore(KLDivergence(_)) => `klDivergence`
+    | ToScore(LogScore(x, _)) => `logScore against ${E.Float.toFixed(x)}`
     | ToDist(Normalize) => `normalize`
     | ToDist(ToPointSet) => `toPointSet`
     | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
@@ -162,6 +163,10 @@ module Constructors = {
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
     let klDivergence = (dist1, dist2): t => FromDist(ToScore(KLDivergence(dist2)), dist1)
+    let logScoreWithPointResolution = (~prediction, ~answer, ~prior): t => FromDist(
+      ToScore(LogScore(answer, prior)),
+      prediction,
+    )
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
     let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)
     let scaleLogarithmWithThreshold = (dist, n, eps): t => FromDist(

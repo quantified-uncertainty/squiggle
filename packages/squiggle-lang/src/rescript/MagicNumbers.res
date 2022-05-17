@@ -12,6 +12,7 @@ module Epsilon = {
 module Environment = {
   let defaultXYPointLength = 1000
   let defaultSampleCount = 10000
+  let sparklineLength = 20
 }
 
 module OpCost = {

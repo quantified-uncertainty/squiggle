@@ -1,5 +1,5 @@
 module ExpressionValue = ReducerInterface_ExpressionValue
-type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type expressionValue = ExpressionValue.expressionValue
 
 module Helpers = {
   let arithmeticMap = r =>
@@ -162,12 +162,27 @@ module Helpers = {
       }
     }
   }
+
+  let klDivergenceWithPrior = (
+    prediction: DistributionTypes.genericDist,
+    answer: DistributionTypes.genericDist,
+    prior: DistributionTypes.genericDist,
+    env: DistributionOperation.env,
+  ) => {
+    let term1 = DistributionOperation.Constructors.klDivergence(~env, prediction, answer)
+    let term2 = DistributionOperation.Constructors.klDivergence(~env, prior, answer)
+    switch E.R.merge(term1, term2)->E.R2.fmap(((a, b)) => a -. b) {
+    | Ok(x) => x->DistributionOperation.Float->Some
+    | Error(_) => None
+    }
+  }
 }
 
 module SymbolicConstructors = {
   let oneFloat = name =>
     switch name {
     | "exponential" => Ok(SymbolicDist.Exponential.make)
+    | "bernoulli" => Ok(SymbolicDist.Bernoulli.make)
     | _ => Error("Unreachable state")
     }
 
@@ -177,6 +192,7 @@ module SymbolicConstructors = {
     | "uniform" => Ok(SymbolicDist.Uniform.make)
     | "beta" => Ok(SymbolicDist.Beta.make)
     | "lognormal" => Ok(SymbolicDist.Lognormal.make)
+    | "logistic" => Ok(SymbolicDist.Logistic.make)
     | "cauchy" => Ok(SymbolicDist.Cauchy.make)
     | "gamma" => Ok(SymbolicDist.Gamma.make)
     | "to" => Ok(SymbolicDist.From90thPercentile.make)
@@ -204,14 +220,21 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("exponential" as fnName, [EvNumber(f)]) =>
+  | (("exponential" | "bernoulli") as fnName, [EvNumber(f)]) =>
     SymbolicConstructors.oneFloat(fnName)
     ->E.R.bind(r => r(f))
     ->SymbolicConstructors.symbolicResultToOutput
   | ("delta", [EvNumber(f)]) =>
     SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | (
-      ("normal" | "uniform" | "beta" | "lognormal" | "cauchy" | "gamma" | "to") as fnName,
+      ("normal"
+      | "uniform"
+      | "beta"
+      | "lognormal"
+      | "cauchy"
+      | "gamma"
+      | "to"
+      | "logistic") as fnName,
       [EvNumber(f1), EvNumber(f2)],
     ) =>
     SymbolicConstructors.twoFloat(fnName)
@@ -227,7 +250,8 @@ let dispatchToGenericOutput = (
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist, ~env)
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
-  | ("toSparkline", [EvDistribution(dist)]) => Helpers.toStringFn(ToSparkline(20), dist, ~env)
+  | ("toSparkline", [EvDistribution(dist)]) =>
+    Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
   | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
   | ("exp", [EvDistribution(a)]) =>
@@ -240,8 +264,28 @@ let dispatchToGenericOutput = (
       ~env,
     )->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
-  | ("klDivergence", [EvDistribution(a), EvDistribution(b)]) =>
-    Some(DistributionOperation.run(FromDist(ToScore(KLDivergence(b)), a), ~env))
+  | ("klDivergence", [EvDistribution(prediction), EvDistribution(answer)]) =>
+    Some(DistributionOperation.run(FromDist(ToScore(KLDivergence(answer)), prediction), ~env))
+  | ("klDivergence", [EvDistribution(prediction), EvDistribution(answer), EvDistribution(prior)]) =>
+    Helpers.klDivergenceWithPrior(prediction, answer, prior, env)
+  | (
+    "logScoreWithPointAnswer",
+    [EvDistribution(prediction), EvNumber(answer), EvDistribution(prior)],
+  )
+  | (
+    "logScoreWithPointAnswer",
+    [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer))), EvDistribution(prior)],
+  ) =>
+    DistributionOperation.run(
+      FromDist(ToScore(LogScore(answer, prior->Some)), prediction),
+      ~env,
+    )->Some
+  | ("logScoreWithPointAnswer", [EvDistribution(prediction), EvNumber(answer)])
+  | (
+    "logScoreWithPointAnswer",
+    [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
+  ) =>
+    DistributionOperation.run(FromDist(ToScore(LogScore(answer, None)), prediction), ~env)->Some
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
   | ("scaleLog", [EvDistribution(dist)]) =>

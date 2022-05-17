@@ -59,11 +59,44 @@ let integralEndY = (t: t): float =>
 
 let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
-let klDivergence = (t1, t2, ~toPointSetFn: toPointSetFn): result<float, error> => {
-  let pointSets = E.R.merge(toPointSetFn(t1), toPointSetFn(t2))
-  pointSets |> E.R2.bind(((a, b)) =>
-    PointSetDist.T.klDivergence(a, b)->E.R2.errMap(x => DistributionTypes.OperationError(x))
-  )
+module Score = {
+  let klDivergence = (prediction, answer, ~toPointSetFn: toPointSetFn): result<float, error> => {
+    let pointSets = E.R.merge(toPointSetFn(prediction), toPointSetFn(answer))
+    pointSets |> E.R2.bind(((predi, ans)) =>
+      PointSetDist.T.klDivergence(predi, ans)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+    )
+  }
+
+  let logScoreWithPointResolution = (
+    ~prediction: DistributionTypes.genericDist,
+    ~answer: float,
+    ~prior: option<DistributionTypes.genericDist>,
+    ~toPointSetFn: toPointSetFn,
+  ): result<float, error> => {
+    switch prior {
+    | Some(prior') =>
+      E.R.merge(toPointSetFn(prior'), toPointSetFn(prediction))->E.R.bind(((
+        prior'',
+        prediction'',
+      )) =>
+        PointSetDist.T.logScoreWithPointResolution(
+          ~prediction=prediction'',
+          ~answer,
+          ~prior=prior''->Some,
+        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
+      )
+    | None =>
+      prediction
+      ->toPointSetFn
+      ->E.R.bind(x =>
+        PointSetDist.T.logScoreWithPointResolution(
+          ~prediction=x,
+          ~answer,
+          ~prior=None,
+        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
+      )
+    }
+  }
 }
 
 let toFloatOperation = (
