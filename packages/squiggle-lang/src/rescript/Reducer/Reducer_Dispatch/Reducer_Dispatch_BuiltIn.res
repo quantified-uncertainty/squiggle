@@ -99,6 +99,18 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->EvArray)
   }
 
+  let doMapSampleSetDist = (sampleSetDist: SampleSetDist.t, aLambdaValue) => {
+    let fn = r =>
+      switch Lambda.doLambdaCall(aLambdaValue, list{EvNumber(r)}, environment, reducer) {
+      | Ok(EvNumber(f)) => Ok(f)
+      | _ => Error(Operation.SampleMapNeedsNtoNFunction)
+      }
+    switch SampleSetDist.samplesMap(~fn, sampleSetDist) {
+    | Ok(r) => Ok(EvDistribution(SampleSet(r)))
+    | Error(r) => Error(REDistributionError(SampleSetError(r)))
+    }
+  }
+
   let doReduceArray = (aValueArray, initialValue, aLambdaValue) => {
     aValueArray->Belt.Array.reduce(Ok(initialValue), (rAcc, elem) =>
       rAcc->Result.flatMap(acc =>
@@ -128,6 +140,8 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("keep", [EvArray(aValueArray), EvLambda(aLambdaValue)]) =>
     doKeepArray(aValueArray, aLambdaValue)
   | ("map", [EvArray(aValueArray), EvLambda(aLambdaValue)]) => doMapArray(aValueArray, aLambdaValue)
+  | ("mapSamples", [EvDistribution(SampleSet(dist)), EvLambda(aLambdaValue)]) =>
+    doMapSampleSetDist(dist, aLambdaValue)
   | ("reduce", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>
     doReduceArray(aValueArray, initialValue, aLambdaValue)
   | ("reduceReverse", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>

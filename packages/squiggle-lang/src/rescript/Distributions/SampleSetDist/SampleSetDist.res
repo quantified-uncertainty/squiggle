@@ -1,12 +1,14 @@
 @genType
 module Error = {
   @genType
-  type sampleSetError = TooFewSamples | NonNumericInput(string)
+  type sampleSetError =
+    TooFewSamples | NonNumericInput(string) | OperationError(Operation.operationError)
 
   let sampleSetErrorToString = (err: sampleSetError): string =>
     switch err {
     | TooFewSamples => "Too few samples when constructing sample set"
     | NonNumericInput(err) => `Found a non-number in input: ${err}`
+    | OperationError(err) => Operation.Error.toString(err)
     }
 
   @genType
@@ -16,6 +18,8 @@ module Error = {
     switch err {
     | TooFewSamplesForConversionToPointSet => "Too Few Samples to convert to point set"
     }
+
+  let fromOperationError = e => OperationError(e)
 }
 
 include Error
@@ -83,6 +87,14 @@ let sampleN = (t: t, n) => {
   }
 }
 
+let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): result<
+  t,
+  sampleSetError,
+> => {
+  let samples = T.get(t)->E.A2.fmap(fn)
+  E.A.R.firstErrorOrOpen(samples)->E.R2.errMap(Error.fromOperationError) |> E.R2.bind(make)
+}
+
 //TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
 let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2: t): result<
   t,
@@ -96,7 +108,7 @@ let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2
   // I could prove this to the type system (say, creating a {first: float, second: float, ..., fifth: float, rest: array<float>}
   // But doing so would take too much time, so I'll leave it as an assertion
   E.A.R.firstErrorOrOpen(samples)->E.R2.fmap(x =>
-    E.R.toExn("Input of samples should be larger than 5", make(x))
+    E.R.toExnFnString(Error.sampleSetErrorToString, make(x))
   )
 }
 

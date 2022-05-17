@@ -235,13 +235,16 @@ module R = {
     | Ok(a) => f(a)
     | Error(err) => Error(err)
     }
-
   let toExn = (msg: string, x: result<'a, 'b>): 'a =>
     switch x {
     | Ok(r) => r
     | Error(_) => raise(Assertion(msg))
     }
-
+  let toExnFnString = (errorToStringFn, o) =>
+    switch o {
+    | Ok(r) => r
+    | Error(r) => raise(Assertion(errorToStringFn(r)))
+    }
   let default = (default, res: Belt.Result.t<'a, 'b>) =>
     switch res {
     | Ok(r) => r
