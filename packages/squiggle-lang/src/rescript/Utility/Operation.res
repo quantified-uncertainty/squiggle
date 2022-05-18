@@ -55,6 +55,7 @@ type operationError =
   | ComplexNumberError
   | InfinityError
   | NegativeInfinityError
+  | SampleMapNeedsNtoNFunction
   | PdfInvalidError
   | NotYetImplemented // should be removed when `klDivergence` for mixed and discrete is implemented.
 
@@ -69,6 +70,7 @@ module Error = {
     | ComplexNumberError => "Operation returned complex result"
     | InfinityError => "Operation returned positive infinity"
     | NegativeInfinityError => "Operation returned negative infinity"
+    | SampleMapNeedsNtoNFunction => "SampleMap needs a function that converts a number to a number"
     | PdfInvalidError => "This Pdf is invalid"
     | NotYetImplemented => "This pathway is not yet implemented"
     }

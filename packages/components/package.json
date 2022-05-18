@@ -17,7 +17,7 @@
     "vega-lite": "^5.2.0"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
+    "@babel/plugin-proposal-private-property-in-object": "^7.17.12",
     "@storybook/addon-actions": "^6.4.22",
     "@storybook/addon-essentials": "^6.4.22",
     "@storybook/addon-links": "^6.4.22",
@@ -31,7 +31,7 @@
     "@testing-library/user-event": "^14.2.0",
     "@types/jest": "^27.5.0",
     "@types/lodash": "^4.14.182",
-    "@types/node": "^17.0.33",
+    "@types/node": "^17.0.34",
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.4",
     "@types/styled-components": "^5.1.24",
