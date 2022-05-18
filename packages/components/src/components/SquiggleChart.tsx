@@ -6,14 +6,16 @@ import {
   errorValueToString,
   squiggleExpression,
   bindings,
-  samplingParams,
+  environment,
   jsImports,
   defaultImports,
   defaultBindings,
+  defaultEnvironment,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
 import { ErrorBox } from "./ErrorBox";
+import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
 
 const variableBox = {
   Component: styled.div`
@@ -36,7 +38,7 @@ const variableBox = {
 interface VariableBoxProps {
   heading: string;
   children: React.ReactNode;
-  showTypes?: boolean;
+  showTypes: boolean;
 }
 
 export const VariableBox: React.FC<VariableBoxProps> = ({
@@ -54,7 +56,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
       </variableBox.Component>
     );
   } else {
-    return <>{children}</>;
+    return <div>{children}</div>;
   }
 };
 
@@ -65,18 +67,27 @@ export interface SquiggleItemProps {
   expression: squiggleExpression;
   width?: number;
   height: number;
+  /** Whether to show a summary of statistics for distributions */
+  showSummary: boolean;
   /** Whether to show type information */
-  showTypes?: boolean;
+  showTypes: boolean;
   /** Whether to show users graph controls (scale etc) */
-  showControls?: boolean;
+  showControls: boolean;
+  /** Settings for displaying functions */
+  chartSettings: FunctionChartSettings;
+  /** Environment for further function executions */
+  environment: environment;
 }
 
 const SquiggleItem: React.FC<SquiggleItemProps> = ({
   expression,
   width,
   height,
+  showSummary,
   showTypes = false,
   showControls = false,
+  chartSettings,
+  environment,
 }: SquiggleItemProps) => {
   switch (expression.tag) {
     case "number":
@@ -103,6 +114,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
             distribution={expression.value}
             height={height}
             width={width}
+            showSummary={showSummary}
             showControls={showControls}
           />
         </VariableBox>
@@ -136,13 +148,17 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "array":
       return (
         <VariableBox heading="Array" showTypes={showTypes}>
-          {expression.value.map((r) => (
+          {expression.value.map((r, i) => (
             <SquiggleItem
+              key={i}
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={50}
               showTypes={showTypes}
               showControls={showControls}
+              chartSettings={chartSettings}
+              environment={environment}
+              showSummary={showSummary}
             />
           ))}
         </VariableBox>
@@ -151,30 +167,38 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox heading="Record" showTypes={showTypes}>
           {Object.entries(expression.value).map(([key, r]) => (
-            <>
+            <div key={key}>
               <RecordKeyHeader>{key}</RecordKeyHeader>
               <SquiggleItem
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
                 height={50}
                 showTypes={showTypes}
+                showSummary={showSummary}
                 showControls={showControls}
+                chartSettings={chartSettings}
+                environment={environment}
               />
-            </>
+            </div>
           ))}
         </VariableBox>
       );
     case "arraystring":
       return (
         <VariableBox heading="Array String" showTypes={showTypes}>
-          {expression.value.map((r) => `"${r}"`)}
+          {expression.value.map((r) => `"${r}"`).join(", ")}
         </VariableBox>
       );
     case "lambda":
       return (
-        <ErrorBox heading="No Viewer">
-          There is no viewer currently available for function types.
-        </ErrorBox>
+        <FunctionChart
+          fn={expression.value}
+          chartSettings={chartSettings}
+          environment={{
+            sampleCount: environment.sampleCount / 10,
+            xyPointLength: environment.xyPointLength / 10,
+          }}
+        />
       );
   }
 };
@@ -185,15 +209,9 @@ export interface SquiggleChartProps {
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
   /** The amount of points returned to draw the distribution */
-  outputXYPoints?: number;
-  kernelWidth?: number;
-  pointDistLength?: number;
-  /** If the result is a function, where the function starts */
-  diagramStart?: number;
-  /** If the result is a function, where the function ends */
-  diagramStop?: number;
-  /** If the result is a function, how many points along the function it samples */
-  diagramCount?: number;
+  environment?: environment;
+  /** If the result is a function, where the function starts, ends and the amount of stops */
+  chartSettings?: FunctionChartSettings;
   /** When the environment changes */
   onChange?(expr: squiggleExpression): void;
   /** CSS width of the element */
@@ -203,6 +221,8 @@ export interface SquiggleChartProps {
   bindings?: bindings;
   /** JS imported parameters */
   jsImports?: jsImports;
+  /** Whether to show a summary of the distirbution */
+  showSummary?: boolean;
   /** Whether to show type information about returns, default false */
   showTypes?: boolean;
   /** Whether to show graph controls (scale etc)*/
@@ -215,28 +235,23 @@ const ChartWrapper = styled.div`
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 `;
 
+let defaultChartSettings = { start: 0, stop: 10, count: 20 };
+
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
-  sampleCount = 1000,
-  outputXYPoints = 1000,
+  environment,
   onChange = () => {},
   height = 60,
   bindings = defaultBindings,
   jsImports = defaultImports,
+  showSummary = false,
   width,
   showTypes = false,
   showControls = false,
+  chartSettings = defaultChartSettings,
 }: SquiggleChartProps) => {
-  let samplingInputs: samplingParams = {
-    sampleCount: sampleCount,
-    xyPointLength: outputXYPoints,
-  };
-  let expressionResult = run(
-    squiggleString,
-    bindings,
-    samplingInputs,
-    jsImports
-  );
+  let expressionResult = run(squiggleString, bindings, environment, jsImports);
+  let e = environment ? environment : defaultEnvironment;
   let internal: JSX.Element;
   if (expressionResult.tag === "Ok") {
     let expression = expressionResult.value;
@@ -246,8 +261,11 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
         expression={expression}
         width={width}
         height={height}
+        showSummary={showSummary}
         showTypes={showTypes}
         showControls={showControls}
+        chartSettings={chartSettings}
+        environment={e}
       />
     );
   } else {

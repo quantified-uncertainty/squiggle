@@ -38,19 +38,6 @@ describe("XYShapes", () => {
     )
   })
 
-  describe("logScorePoint", () => {
-    makeTest("When identical", XYShape.logScorePoint(30, pointSetDist1, pointSetDist1), Some(0.0))
-    makeTest(
-      "When similar",
-      XYShape.logScorePoint(30, pointSetDist1, pointSetDist2),
-      Some(1.658971191043856),
-    )
-    makeTest(
-      "When very different",
-      XYShape.logScorePoint(30, pointSetDist1, pointSetDist3),
-      Some(210.3721280423322),
-    )
-  })
   describe("integrateWithTriangles", () =>
     makeTest(
       "integrates correctly",

@@ -1,4 +1,9 @@
-import { Distribution, resultMap, defaultBindings } from "../../src/js/index";
+import {
+  Distribution,
+  resultMap,
+  defaultBindings,
+  mergeBindings,
+} from "../../src/js/index";
 import { testRun, testRunPartial } from "./TestHelpers";
 
 function Ok<b>(x: b) {
@@ -64,6 +69,17 @@ describe("Partials", () => {
     expect(testRun(`y + 3`, bindings2)).toEqual({
       tag: "number",
       value: 10,
+    });
+  });
+  test("Can merge bindings from three partials", () => {
+    let bindings1 = testRunPartial(`x = 1`);
+    let bindings2 = testRunPartial(`y = 2`);
+    let bindings3 = testRunPartial(`z = 3`);
+    expect(
+      testRun(`x + y + z`, mergeBindings([bindings1, bindings2, bindings3]))
+    ).toEqual({
+      tag: "number",
+      value: 6,
     });
   });
 });

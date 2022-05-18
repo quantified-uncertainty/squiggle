@@ -5,7 +5,7 @@ import { CodeEditor } from "./CodeEditor";
 import styled from "styled-components";
 import type {
   squiggleExpression,
-  samplingParams,
+  environment,
   bindings,
   jsImports,
 } from "@quri/squiggle-lang";
@@ -21,11 +21,7 @@ export interface SquiggleEditorProps {
   /** The input string for squiggle */
   initialSquiggleString?: string;
   /** If the output requires monte carlo sampling, the amount of samples */
-  sampleCount?: number;
-  /** The amount of points returned to draw the distribution */
-  outputXYPoints?: number;
-  kernelWidth?: number;
-  pointDistLength?: number;
+  environment?: environment;
   /** If the result is a function, where the function starts */
   diagramStart?: number;
   /** If the result is a function, where the function ends */
@@ -43,7 +39,9 @@ export interface SquiggleEditorProps {
   /** Whether to show detail about types of the returns, default false */
   showTypes?: boolean;
   /** Whether to give users access to graph controls */
-  showControls: boolean;
+  showControls?: boolean;
+  /** Whether to show a summary table */
+  showSummary?: boolean;
 }
 
 const Input = styled.div`
@@ -55,20 +53,23 @@ const Input = styled.div`
 export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   initialSquiggleString = "",
   width,
-  sampleCount,
-  outputXYPoints,
-  kernelWidth,
-  pointDistLength,
-  diagramStart,
-  diagramStop,
-  diagramCount,
+  environment,
+  diagramStart = 0,
+  diagramStop = 10,
+  diagramCount = 20,
   onChange,
   bindings = defaultBindings,
   jsImports = defaultImports,
   showTypes = false,
   showControls = false,
+  showSummary = false,
 }: SquiggleEditorProps) => {
   let [expression, setExpression] = React.useState(initialSquiggleString);
+  let chartSettings = {
+    start: diagramStart,
+    stop: diagramStop,
+    count: diagramCount,
+  };
   return (
     <div>
       <Input>
@@ -82,19 +83,15 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
       </Input>
       <SquiggleChart
         width={width}
+        environment={environment}
         squiggleString={expression}
-        sampleCount={sampleCount}
-        outputXYPoints={outputXYPoints}
-        kernelWidth={kernelWidth}
-        pointDistLength={pointDistLength}
-        diagramStart={diagramStart}
-        diagramStop={diagramStop}
-        diagramCount={diagramCount}
+        chartSettings={chartSettings}
         onChange={onChange}
         bindings={bindings}
         jsImports={jsImports}
         showTypes={showTypes}
         showControls={showControls}
+        showSummary={showSummary}
       />
     </div>
   );
@@ -136,11 +133,7 @@ export interface SquigglePartialProps {
   /** The input string for squiggle */
   initialSquiggleString?: string;
   /** If the output requires monte carlo sampling, the amount of samples */
-  sampleCount?: number;
-  /** The amount of points returned to draw the distribution */
-  outputXYPoints?: number;
-  kernelWidth?: number;
-  pointDistLength?: number;
+  environment?: environment;
   /** If the result is a function, where the function starts */
   diagramStart?: number;
   /** If the result is a function, where the function ends */
@@ -161,14 +154,9 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   initialSquiggleString = "",
   onChange,
   bindings = defaultBindings,
-  sampleCount = 1000,
-  outputXYPoints = 1000,
+  environment,
   jsImports = defaultImports,
 }: SquigglePartialProps) => {
-  let samplingInputs: samplingParams = {
-    sampleCount: sampleCount,
-    xyPointLength: outputXYPoints,
-  };
   let [expression, setExpression] = React.useState(initialSquiggleString);
   let [error, setError] = React.useState<string | null>(null);
 
@@ -176,7 +164,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
     let squiggleResult = runPartial(
       expression,
       bindings,
-      samplingInputs,
+      environment,
       jsImports
     );
     if (squiggleResult.tag == "Ok") {

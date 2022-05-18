@@ -40,8 +40,6 @@ the packages can be found in `packages`.
 - `packages/website` is the main descriptive website for squiggle,
   it is hosted at `squiggle-language.com`.
 
-The playground depends on the components library which then depends on the language. This means that if you wish to work on the components library, you will need to build (no need to bundle) the language, and as of this writing playground doesn't really work.
-
 # Develop
 
 For any project in the repo, begin by running `yarn` in the top level

@@ -33,29 +33,22 @@ let shapeFn = (fn, t: t) => t |> getShape |> fn
 let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
 
 let combinePointwise = (
+  ~combiner=XYShape.PointwiseCombination.combine,
   ~integralSumCachesFn=(_, _) => None,
-  fn,
+  ~fn=(a, b) => Ok(a +. b),
   t1: PointSetTypes.discreteShape,
   t2: PointSetTypes.discreteShape,
 ): result<PointSetTypes.discreteShape, 'e> => {
-  let combinedIntegralSum = Common.combineIntegralSums(
-    integralSumCachesFn,
-    t1.integralSumCache,
-    t2.integralSumCache,
-  )
+  //  let combinedIntegralSum = Common.combineIntegralSums(
+  //    integralSumCachesFn,
+  //    t1.integralSumCache,
+  //    t2.integralSumCache,
+  //  )
 
   // TODO: does it ever make sense to pointwise combine the integrals here?
   // It could be done for pointwise additions, but is that ever needed?
 
-  make(
-    ~integralSumCache=combinedIntegralSum,
-    XYShape.PointwiseCombination.combine(
-      fn,
-      XYShape.XtoY.discreteInterpolator,
-      t1.xyShape,
-      t2.xyShape,
-    )->E.R.toExn("Addition operation should never fail", _),
-  )->Ok
+  combiner(fn, XYShape.XtoY.discreteInterpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(make)
 }
 
 let reduce = (
@@ -63,7 +56,7 @@ let reduce = (
   fn: (float, float) => result<float, 'e>,
   discreteShapes: array<PointSetTypes.discreteShape>,
 ): result<t, 'e> => {
-  let merge = combinePointwise(~integralSumCachesFn, fn)
+  let merge = combinePointwise(~integralSumCachesFn, ~fn)
   discreteShapes |> E.A.R.foldM(merge, empty)
 }
 
@@ -227,5 +220,16 @@ module T = Dist({
   let variance = (t: t): float => {
     let getMeanOfSquares = t => t |> shapeMap(XYShape.T.square) |> mean
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
+  }
+
+  let klDivergence = (prediction: t, answer: t) => {
+    combinePointwise(
+      ~fn=PointSetDist_Scoring.KLDivergence.integrand,
+      prediction,
+      answer,
+    )->E.R2.fmap(integralEndY)
+  }
+  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
+    Error(Operation.NotYetImplemented)
   }
 })

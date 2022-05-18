@@ -10,7 +10,11 @@ export default function PlaygroundPage() {
           maxWidth: 2000,
         }}
       >
-        <SquigglePlayground initialSquiggleString="normal(0,1)" height={700} />
+        <SquigglePlayground
+          initialSquiggleString="normal(0,1)"
+          height={700}
+          showTypes={true}
+        />
       </div>
     </Layout>
   );

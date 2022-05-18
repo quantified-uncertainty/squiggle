@@ -9,8 +9,8 @@ const path = require("path");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "Squiggle (alpha)",
-  tagline: "Estimation language for forecasters",
+  title: "Squiggle",
+  tagline: "An estimation language for forecasters",
   url: "https://squiggle-language.com",
   baseUrl: "/",
   onBrokenLinks: "throw",

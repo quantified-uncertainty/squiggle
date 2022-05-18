@@ -37,6 +37,7 @@ module Error = {
     | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
     | SampleSetError(TooFewSamples) => "Too Few Samples"
     | SampleSetError(NonNumericInput(err)) => `Found a non-number in input: ${err}`
+    | SampleSetError(OperationError(err)) => Operation.Error.toString(err)
     | OperationError(err) => Operation.Error.toString(err)
     | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
     | SparklineError(err) => PointSetTypes.sparklineErrorToString(err)
@@ -72,6 +73,7 @@ module DistributionOperation = {
   type toScaleFn = [
     | #Power
     | #Logarithm
+    | #LogarithmWithThreshold(float)
   ]
 
   type toDist =
@@ -90,9 +92,12 @@ module DistributionOperation = {
     | ToString
     | ToSparkline(int)
 
+  type toScore = KLDivergence(genericDist) | LogScore(float, option<genericDist>)
+
   type fromDist =
     | ToFloat(toFloat)
     | ToDist(toDist)
+    | ToScore(toScore)
     | ToDistCombination(direction, Operation.Algebraic.t, [#Dist(genericDist) | #Float(float)])
     | ToString(toString)
     | ToBool(toBool)
@@ -115,6 +120,8 @@ module DistributionOperation = {
     | ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
     | ToFloat(#Sample) => `sample`
     | ToFloat(#IntegralSum) => `integralSum`
+    | ToScore(KLDivergence(_)) => `klDivergence`
+    | ToScore(LogScore(x, _)) => `logScore against ${E.Float.toFixed(x)}`
     | ToDist(Normalize) => `normalize`
     | ToDist(ToPointSet) => `toPointSet`
     | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
@@ -122,6 +129,8 @@ module DistributionOperation = {
     | ToDist(Inspect) => `inspect`
     | ToDist(Scale(#Power, r)) => `scalePower(${E.Float.toFixed(r)})`
     | ToDist(Scale(#Logarithm, r)) => `scaleLog(${E.Float.toFixed(r)})`
+    | ToDist(Scale(#LogarithmWithThreshold(eps), r)) =>
+      `scaleLogWithThreshold(${E.Float.toFixed(r)}, epsilon=${E.Float.toFixed(eps)})`
     | ToString(ToString) => `toString`
     | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
     | ToBool(IsNormalized) => `isNormalized`
@@ -153,8 +162,17 @@ module Constructors = {
     let fromSamples = (xs): t => FromSamples(xs)
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
+    let klDivergence = (dist1, dist2): t => FromDist(ToScore(KLDivergence(dist2)), dist1)
+    let logScoreWithPointResolution = (~prediction, ~answer, ~prior): t => FromDist(
+      ToScore(LogScore(answer, prior)),
+      prediction,
+    )
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
     let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)
+    let scaleLogarithmWithThreshold = (dist, n, eps): t => FromDist(
+      ToDist(Scale(#LogarithmWithThreshold(eps), n)),
+      dist,
+    )
     let toString = (dist): t => FromDist(ToString(ToString), dist)
     let toSparkline = (dist, n): t => FromDist(ToString(ToSparkline(n)), dist)
     let algebraicAdd = (dist1, dist2: genericDist): t => FromDist(

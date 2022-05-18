@@ -235,13 +235,16 @@ module R = {
     | Ok(a) => f(a)
     | Error(err) => Error(err)
     }
-
   let toExn = (msg: string, x: result<'a, 'b>): 'a =>
     switch x {
     | Ok(r) => r
     | Error(_) => raise(Assertion(msg))
     }
-
+  let toExnFnString = (errorToStringFn, o) =>
+    switch o {
+    | Ok(r) => r
+    | Error(r) => raise(Assertion(errorToStringFn(r)))
+    }
   let default = (default, res: Belt.Result.t<'a, 'b>) =>
     switch res {
     | Ok(r) => r
@@ -607,6 +610,9 @@ module A = {
   let filter = Js.Array.filter
   let joinWith = Js.Array.joinWith
 
+  let all = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) == length(xs)
+  let any = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) > 0
+
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
       optionals
@@ -617,6 +623,19 @@ module A = {
       | Some(o) => o
       | None => []
       }
+    // REturns `None` there are no non-`None` elements
+    let rec arrSomeToSomeArr = (optionals: array<option<'a>>): option<array<'a>> => {
+      let optionals' = optionals->Belt.List.fromArray
+      switch optionals' {
+      | list{} => []->Some
+      | list{x, ...xs} =>
+        switch x {
+        | Some(_) => xs->Belt.List.toArray->arrSomeToSomeArr
+        | None => None
+        }
+      }
+    }
+    let firstSome = x => Belt.Array.getBy(x, O.isSome)
   }
 
   module R = {

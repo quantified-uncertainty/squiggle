@@ -23,6 +23,16 @@ let toFloatOperation: (
   ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
 ) => result<float, error>
 
+module Score: {
+  let klDivergence: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>
+  let logScoreWithPointResolution: (
+    ~prediction: t,
+    ~answer: float,
+    ~prior: option<t>,
+    ~toPointSetFn: toPointSetFn,
+  ) => result<float, error>
+}
+
 @genType
 let toPointSet: (
   t,

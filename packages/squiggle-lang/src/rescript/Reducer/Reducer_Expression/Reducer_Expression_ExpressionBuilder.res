@@ -14,7 +14,7 @@ let eArray = anArray => anArray->BExpressionValue.EvArray->BExpressionT.EValue
 let eArrayString = anArray => anArray->BExpressionValue.EvArrayString->BExpressionT.EValue
 
 let eBindings = (anArray: array<(string, BExpressionValue.expressionValue)>) =>
-  anArray->Js.Dict.fromArray->EvRecord->BExpressionT.EValue
+  anArray->Js.Dict.fromArray->BExpressionValue.EvRecord->BExpressionT.EValue
 
 let eBool = aBool => aBool->BExpressionValue.EvBool->BExpressionT.EValue
 

@@ -77,10 +77,13 @@ let distributionErrorToString = DistributionTypes.Error.toString
 type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
 
 @genType
-let defaultSamplingEnv = ReducerInterface_GenericDistribution.defaultEnv
+let defaultSamplingEnv = DistributionOperation.defaultEnv
 
 @genType
 type environment = ReducerInterface_ExpressionValue.environment
 
 @genType
 let defaultEnvironment = ReducerInterface_ExpressionValue.defaultEnvironment
+
+@genType
+let foreignFunctionInterface = Reducer.foreignFunctionInterface
