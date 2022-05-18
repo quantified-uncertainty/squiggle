@@ -95,9 +95,13 @@ module FnDefinition = {
     if E.A.length(f.inputs) !== E.A.length(args) {
       None
     } else {
-      E.A.zip(inputTypes, args)
+      let foo = E.A.zip(inputTypes, args)
+      ->(e => {Js.log2("Here", e); e})
       ->E.A2.fmap(((input, arg)) => matchInput(input, arg))
-      ->E.A.O.arrSomeToSomeArr
+      ->(e => {Js.log2("Here2", e); e})
+      ->E.A.O.openIfAllSome
+      ->(e => {Js.log2("Here3", e); e});
+      foo
     }
   }
 
@@ -117,7 +121,9 @@ module FnDefinition = {
   }
 
   let run = (f: fnDefinition, args: array<expressionValue>) => {
+      Js.log3("Run", f, args)
     let argValues = getArgValues(f, args)
+      Js.log2("RunArgValues", argValues)
     switch argValues {
     | Some(values) => f.run(values)
     | None => Error("Impossible")
@@ -227,17 +233,21 @@ module Registry = {
 
   let matchAndRun = (r: registry, fnName: string, args: array<expressionValue>) => {
     switch findMatches(r, fnName, args) {
-    | Match.FullMatch(m) => fullMatchToDef(r, m)->E.O2.fmap(FnDefinition.run(_, args))
+    | Match.FullMatch(m) => fullMatchToDef(r, m)->E.O2.fmap(r => {
+        FnDefinition.run(r, args)
+    })
     | _ => None
     }
   }
 }
 
-let twoNumberInputs = (inputs: array<value>) =>
+let twoNumberInputs = (inputs: array<value>) =>{
+    Js.log2("HII",inputs);
   switch inputs {
   | [Number(n1), Number(n2)] => Ok(n1, n2)
   | _ => Error("Wrong inputs / Logically impossible")
   }
+}
 
 let twoNumberInputsRecord = (v1, v2, inputs: array<value>) =>
   switch inputs {
@@ -270,7 +280,7 @@ let normal = Function.make(
     ),
     Function.makeDefinition("normal", [I_Record([("p5", I_Numeric), ("p95", I_Numeric)])], inputs =>
       twoNumberInputsRecord("p5", "p95", inputs)->E.R.bind(((mean, stdev)) =>
-        meanStdev(mean, stdev)
+        Ok(p5and95(mean, stdev))
       )
     ),
   ],

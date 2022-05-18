@@ -646,6 +646,14 @@ module A = {
       O.flatten(getByOpen(r, l => l(), O.isSome))
 
     let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->O2.default(default)
+
+    let openIfAllSome = (optionals: array<option<'a>>): option<array<'a>> => {
+      if all(O.isSome, optionals) {
+        Some(optionals |> fmap(O.toExn("Warning: This should not have happened")))
+      } else {
+        None
+      }
+    }
   }
 
   module R = {

@@ -227,8 +227,8 @@ let dispatchToGenericOutput = (
   | ("delta", [EvNumber(f)]) =>
     SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | (
-      ("normal"
-      | "uniform"
+      (
+       "uniform"
       | "beta"
       | "lognormal"
       | "cauchy"
@@ -386,6 +386,19 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-let dispatch = (call, environment) => {
-  dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
+let registered = [FunctionRegistry.normal]
+
+let tryRegistry = (call:ExpressionValue.functionCall) => {
+  let (fnName, args) = call;
+  let response = FunctionRegistry.Registry.matchAndRun(registered, fnName, args)
+  let foo = response -> E.O2.fmap(r => r->E.R2.errMap(s => Reducer_ErrorValue.RETodo(s)))
+  foo
+}
+
+let dispatch = (call:ExpressionValue.functionCall, environment) => {
+  let regularDispatch = dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
+  switch(regularDispatch){
+    | Some(x) => Some(x)
+    | None => tryRegistry(call)
+  }
 }
