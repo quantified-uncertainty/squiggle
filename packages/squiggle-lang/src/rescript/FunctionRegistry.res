@@ -258,10 +258,22 @@ let p5and95 = (p5, p95) => contain(SymbolicDist.Normal.from90PercentCI(p5, p95))
 let convertTwoInputs = (inputs: array<value>): result<expressionValue, string> =>
   twoNumberInputs(inputs)->E.R.bind(((mean, stdev)) => meanStdev(mean, stdev))
 
+// let twoDistOrStdev = (a1:distOrNumber, a2:distOrNumber, fn) => {
+//   switch (a1, a2) {
+//   | (Number(a1), Number(a2)) => fn(a1, a2)
+//   | (Dist(a1), Number(a2)) => toSampleSetDist(a1, 1000)->sampleMap(r => fn(r, a2) |> sample)
+//   | (Number(a1), Dist(a2)) => toSampleSetDist(a2, 1000)->sampleMap(r => fn(a1, r) |> sample)
+//   | (Dist(a1), Dist(a2)) => SampleSetDist.map2(a1, a2, (m, s) => fn(m, s) |> sample)
+//   }
+// }
+
 let normal = Function.make(
   "Normal",
   [
     Function.makeDefinition("normal", [I_Numeric, I_Numeric], inputs =>
+      twoNumberInputs(inputs)->E.R.bind(((mean, stdev)) => meanStdev(mean, stdev))
+    ),
+    Function.makeDefinition("normal", [I_DistOrNumber, I_DistOrNumber], inputs =>
       twoNumberInputs(inputs)->E.R.bind(((mean, stdev)) => meanStdev(mean, stdev))
     ),
     Function.makeDefinition(
