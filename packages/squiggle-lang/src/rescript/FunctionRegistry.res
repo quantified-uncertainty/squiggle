@@ -95,13 +95,9 @@ module FnDefinition = {
     if E.A.length(f.inputs) !== E.A.length(args) {
       None
     } else {
-      let foo = E.A.zip(inputTypes, args)
-      ->(e => {Js.log2("Here", e); e})
+      E.A.zip(inputTypes, args)
       ->E.A2.fmap(((input, arg)) => matchInput(input, arg))
-      ->(e => {Js.log2("Here2", e); e})
       ->E.A.O.openIfAllSome
-      ->(e => {Js.log2("Here3", e); e});
-      foo
     }
   }
 
@@ -121,9 +117,7 @@ module FnDefinition = {
   }
 
   let run = (f: fnDefinition, args: array<expressionValue>) => {
-      Js.log3("Run", f, args)
     let argValues = getArgValues(f, args)
-      Js.log2("RunArgValues", argValues)
     switch argValues {
     | Some(values) => f.run(values)
     | None => Error("Impossible")
@@ -233,16 +227,16 @@ module Registry = {
 
   let matchAndRun = (r: registry, fnName: string, args: array<expressionValue>) => {
     switch findMatches(r, fnName, args) {
-    | Match.FullMatch(m) => fullMatchToDef(r, m)->E.O2.fmap(r => {
+    | Match.FullMatch(m) =>
+      fullMatchToDef(r, m)->E.O2.fmap(r => {
         FnDefinition.run(r, args)
-    })
+      })
     | _ => None
     }
   }
 }
 
-let twoNumberInputs = (inputs: array<value>) =>{
-    Js.log2("HII",inputs);
+let twoNumberInputs = (inputs: array<value>) => {
   switch inputs {
   | [Number(n1), Number(n2)] => Ok(n1, n2)
   | _ => Error("Wrong inputs / Logically impossible")
@@ -279,9 +273,36 @@ let normal = Function.make(
         ),
     ),
     Function.makeDefinition("normal", [I_Record([("p5", I_Numeric), ("p95", I_Numeric)])], inputs =>
-      twoNumberInputsRecord("p5", "p95", inputs)->E.R.bind(((mean, stdev)) =>
-        Ok(p5and95(mean, stdev))
-      )
+      twoNumberInputsRecord("p5", "p95", inputs)->E.R.bind(((v1, v2)) => Ok(p5and95(v1, v2)))
     ),
   ],
 )
+
+let logNormal = Function.make(
+  "Lognormal",
+  [
+    Function.makeDefinition("lognormal", [I_Numeric, I_Numeric], inputs =>
+      twoNumberInputs(inputs)->E.R.bind(((mu, sigma)) =>
+        SymbolicDist.Lognormal.make(mu, sigma)->E.R2.fmap(contain)
+      )
+    ),
+    Function.makeDefinition(
+      "lognormal",
+      [I_Record([("p5", I_Numeric), ("p95", I_Numeric)])],
+      inputs =>
+        twoNumberInputsRecord("p5", "p95", inputs)->E.R.bind(((p5, p95)) => Ok(
+          contain(SymbolicDist.Lognormal.from90PercentCI(p5, p95)),
+        )),
+    ),
+    Function.makeDefinition(
+      "lognormal",
+      [I_Record([("mean", I_Numeric), ("stdev", I_Numeric)])],
+      inputs =>
+        twoNumberInputsRecord("mean", "stdev", inputs)->E.R.bind(((mean, stdev)) =>
+          SymbolicDist.Lognormal.fromMeanAndStdev(mean, stdev)->E.R2.fmap(contain)
+        ),
+    ),
+  ],
+)
+
+let allFunctions = [normal, logNormal]
