@@ -1,7 +1,7 @@
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
 type rec itype =
-  I_Number | I_DistOrNumber | I_Record(iRecord) | I_Array(array<itype>) | I_Option(itype)
+  I_Number | I_Numeric | I_DistOrNumber | I_Record(iRecord) | I_Array(array<itype>) | I_Option(itype)
 and iRecord = array<iRecordParam>
 and iRecordParam = (string, itype)
 
@@ -28,6 +28,8 @@ let rec matchInput = (input: itype, r: expressionValue): option<value> =>
   | (I_Number, EvNumber(f)) => Some(Number(f))
   | (I_DistOrNumber, EvNumber(f)) => Some(DistOrNumber(Number(f)))
   | (I_DistOrNumber, EvDistribution(f)) => Some(DistOrNumber(Dist(f)))
+  | (I_Numeric, EvNumber(f)) => Some(Number(f))
+  | (I_Numeric, EvDistribution(Symbolic(#Float(f)))) => Some((Number(f)))
   | (I_Option(v), _) => Some(Option(matchInput(v, r)))
   | (I_Record(recordParams), EvRecord(record)) => {
       let getAndMatch = (name, input) =>
@@ -80,34 +82,10 @@ let matchSingle = (f: fnDefinition, fnName: string, args: array<expressionValue>
   }
 }
 
-let getByOpen = (a,op,bin) => switch(E.A.getBy(a, r => bin(op(r)))) {
-  | Some(r) => Some(op(r))
-  | None => None
-}
-
 let match = (f: function, fnName: string, args: array<expressionValue>) => {
-  let matchedDefinition = E.A.getBy(f.definitions, r => isFullMatch(matchSingle(r, fnName, args)))
-  switch matchedDefinition {
-  | Some(matchedDefinition) => {
-      let match = matchSingle(matchedDefinition, fnName, args)
-      switch match {
-      | Match(a, b) => Ok(Match(a, b))
-      | _ => Error("Should be Impossible")
-      }
-    }
-  | None => {
-      let matchedNameDefinition = E.A.getBy(f.definitions, r =>
-        isNameMatchOnly(matchSingle(r, fnName, args))
-      )
-      let foo = switch matchedNameDefinition {
-      | Some(matchedNameDefinition) =>
-        switch matchSingle(matchedNameDefinition, fnName, args) {
-        | SameNameDifferentArguments(r) => Ok(SameNameDifferentArguments(r))
-        | _ => Error("Should be Impossible")
-        }
-      | _ => Ok(DifferentName)
-      }
-      foo
-    }
-  }
+  let matchedDefinition = () =>
+    E.A.getByOpen(f.definitions, r => matchSingle(r, fnName, args), isFullMatch)
+  let getMatchedNameOnlyDefinition = () =>
+    E.A.getByOpen(f.definitions, r => matchSingle(r, fnName, args), isNameMatchOnly)
+  E.A.O.firstSomeFnWithDefault([matchedDefinition, getMatchedNameOnlyDefinition], DifferentName)
 }

@@ -549,6 +549,12 @@ module A = {
       |> (x => Ok(x))
     }
 
+  let getByOpen = (a, op, bin) =>
+    switch getBy(a, r => bin(op(r))) {
+    | Some(r) => Some(op(r))
+    | None => None
+    }
+
   let tail = Belt.Array.sliceToEnd(_, 1)
 
   let zip = Belt.Array.zip
@@ -633,6 +639,11 @@ module A = {
       }
     }
     let firstSome = x => Belt.Array.getBy(x, O.isSome)
+
+    let firstSomeFn = (r: array<unit => option<'a>>): option<'a> =>
+      O.flatten(getByOpen(r, l => l(), O.isSome))
+
+    let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->O2.default(default)
   }
 
   module R = {
