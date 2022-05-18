@@ -522,6 +522,7 @@ module A = {
   let unsafe_get = Array.unsafe_get
   let get = Belt.Array.get
   let getBy = Belt.Array.getBy
+  let getIndexBy = Belt.Array.getIndexBy
   let last = a => get(a, length(a) - 1)
   let first = get(_, 0)
   let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> O.isSome
@@ -535,6 +536,7 @@ module A = {
   let reducei = Belt.Array.reduceWithIndex
   let isEmpty = r => length(r) < 1
   let stableSortBy = Belt.SortArray.stableSortBy
+  let toNoneIfEmpty = r => isEmpty(r) ? None : Some(r)
   let toRanges = (a: array<'a>) =>
     switch a |> Belt.Array.length {
     | 0
@@ -830,6 +832,7 @@ module A = {
 
 module A2 = {
   let fmap = (a, b) => A.fmap(b, a)
+  let fmapi = (a, b) => A.fmapi(b, a)
   let joinWith = (a, b) => A.joinWith(b, a)
   let filter = (a, b) => A.filter(b, a)
 }
