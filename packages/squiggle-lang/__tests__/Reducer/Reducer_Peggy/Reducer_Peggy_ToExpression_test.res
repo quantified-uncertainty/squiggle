@@ -80,6 +80,7 @@ describe("Peggy to Expression", () => {
       (),
     ) // Function definitions become lambda assignments
     testToExpression("identity(x)", "(:$$block (:identity :x))", ()) // Note value returns error properly
+    testToExpression("f(x) = x> 2 ? 0 : 1; f(3)", "(:$$block (:$let :f (:$$lambda [x] (:$$block (:$$ternary (:larger :x 2) 0 1)))) (:f 3))", ~v="0", ())
   })
 
   describe("arrays", () => {
@@ -183,6 +184,7 @@ describe("Peggy to Expression", () => {
       ~v="{x: 1,y: 99}",
       (),
     )
+
   })
 
   describe("lambda", () => {
