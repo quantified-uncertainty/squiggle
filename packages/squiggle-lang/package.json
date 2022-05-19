@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "peggy": "peggy --cache ",
+    "build:peggy": "find . -type f -name *.peggy -exec yarn run peggy {} \\;",
     "build": "yarn build:rescript && yarn build:typescript",
     "build:rescript": "rescript build -with-deps",
     "build:typescript": "tsc",
