@@ -105,6 +105,11 @@ describe("Peggy parse", () => {
     testParse("1 // This is a line comment", "{1}")
     testParse("1 /* This is a multi line comment */", "{1}")
     testParse("/* This is a multi line comment */ 1", "{1}")
+    testParse(`
+    /* This is 
+    a multi line 
+    comment */
+    1`, "{1}")
   })
 
   describe("ternary operator", () => {
