@@ -167,13 +167,17 @@ describe("Peggy parse", () => {
   describe("pipe", () => {
     testParse("1 -> add(2)", "{(::add 1 2)}")
     testParse("-1 -> add(2)", "{(::add (::unaryMinus 1) 2)}")
+    testParse("-a[1] -> add(2)", "{(::add (::unaryMinus (::$atIndex :a 1)) 2)}")
+    testParse("-f(1) -> add(2)", "{(::add (::unaryMinus (::f 1)) 2)}")
+    testParse("1 + 2 -> add(3)", "{(::add 1 (::add 2 3))}")
     testParse("1 -> add(2) * 3", "{(::multiply (::add 1 2) 3)}")
     testParse("1 -> subtract(2)", "{(::subtract 1 2)}")
     testParse("-1 -> subtract(2)", "{(::subtract (::unaryMinus 1) 2)}")
     testParse("1 -> subtract(2) * 3", "{(::multiply (::subtract 1 2) 3)}")
   })
 
-  describe("elixir pipe", () => {
+  describe("elixir pipe", () => { 
+    //handled together with -> so there is no need for seperate tests
     testParse("1 |> add(2)", "{(::add 1 2)}")
   })
 
