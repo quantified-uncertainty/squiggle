@@ -61,7 +61,6 @@ describe("Peggy parse", () => {
     testParse("1 * 2 - 3 ./ 4", "{(::subtract (::multiply 1 2) (::dotDivide 3 4))}")
     testParse("1 * 2 - 3 * 4^5", "{(::subtract (::multiply 1 2) (::multiply 3 (::pow 4 5)))}")
     testParse("1 * 2 - 3 * 4^5^6", "{(::subtract (::multiply 1 2) (::multiply 3 (::pow (::pow 4 5) 6)))}")
-    testParse("1 * 2 - 3 * 4^5^6", "{(::subtract (::multiply 1 2) (::multiply 3 (::pow (::pow 4 5) 6)))}")
     testParse("1 * -a[-2]", "{(::multiply 1 (::unaryMinus (::$atIndex :a (::unaryMinus 2))))}")
   })
 
@@ -92,6 +91,13 @@ describe("Peggy parse", () => {
     testParse("{a: 1, b: 2}", "{(::$constructRecord ('a': 1 'b': 2))}")
     testParse("{1+0: 1, 2+0: 2}", "{(::$constructRecord ((::add 1 0): 1 (::add 2 0): 2))}") // key can be any expression
     testParse("record.property", "{(::$atIndex :record 'property')}")
+  })
+
+  describe("post operators", ()=>{
+    //function call, array and record access are post operators with higher priority than unary operators
+    testParse("a==!b(1)", "{(::equal :a (::not (::b 1)))}")
+    testParse("a==!b[1]", "{(::equal :a (::not (::$atIndex :b 1)))}")
+    testParse("a==!b.one", "{(::equal :a (::not (::$atIndex :b 'one')))}")
   })
 
   describe("comments", () => {
