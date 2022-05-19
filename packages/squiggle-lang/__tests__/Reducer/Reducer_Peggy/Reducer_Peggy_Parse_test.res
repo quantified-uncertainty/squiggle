@@ -199,4 +199,31 @@ describe("Peggy parse", () => {
   })
 })
 
+describe("parsing new line", ()=>{
+  testParse(`
+  a + 
+  b`, "{(::add :a :b)}")
+  testParse(`
+  x=
+  1`, "{:x = {1}}")
+  testParse(`
+  x=1
+  y=2`, "{:x = {1}; :y = {2}}")
+  testParse(`
+  x={
+   y=2;
+   y }
+  x`, "{:x = {:y = {2}; :y}; :x}")
+  testParse(`
+  x={
+   y=2
+   y }
+  x`, "{:x = {:y = {2}; :y}; :x}")
+  MySkip.testParse(`
+  x={
+   y=2
+   y 
+   }
+  x`, "{:x = {:y = {2}; :y}; :x}") //FIXME: Bracket after new line is not parsed
+})
 
