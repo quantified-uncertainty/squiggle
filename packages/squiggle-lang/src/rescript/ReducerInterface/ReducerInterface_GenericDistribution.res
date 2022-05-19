@@ -234,6 +234,7 @@ let dispatchToGenericOutput = (
       | "lognormal"
       | "cauchy"
       | "gamma"
+      | "credibleIntervalToDistribution"
       | "to"
       | "logistic") as fnName,
       [EvNumber(f1), EvNumber(f2)],
