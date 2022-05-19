@@ -78,16 +78,16 @@ describe("Peggy parse", () => {
   })
 
   describe("ternary operator", () => {
-    testParse("1 ? 2 : 3", "{(::$$ternary 1 2 3)}")
-    testParse("1 ? 2 : 3 ? 4 : 5", "{(::$$ternary 1 2 (::$$ternary 3 4 5))}") // nested ternary
+    testParse("true ? 2 : 3", "{(::$$ternary true 2 3)}")
+    testParse("false ? 2 : false ? 4 : 5", "{(::$$ternary false 2 (::$$ternary false 4 5))}") // nested ternary
   })
 
   describe("if then else", () => {
-    testParse("if 1 then 2 else 3", "{(::$$ternary 1 {2} {3})}")
-    testParse("if 1 then {2} else {3}", "{(::$$ternary 1 {2} {3})}")
+    testParse("if true then 2 else 3", "{(::$$ternary true {2} {3})}")
+    testParse("if false then {2} else {3}", "{(::$$ternary false {2} {3})}")
     testParse(
-      "if 1 then {2} else if 3 then {4} else {5}",
-      "{(::$$ternary 1 {2} (::$$ternary 3 {4} {5}))}",
+      "if false then {2} else if false then {4} else {5}",
+      "{(::$$ternary false {2} (::$$ternary false {4} {5}))}",
     ) //nested if
   })
 
