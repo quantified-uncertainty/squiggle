@@ -224,11 +224,37 @@ describe("parsing new line", ()=>{
    y=2
    y }
   x`, "{:x = {:y = {2}; :y}; :x}")
-  MySkip.testParse(`
+  testParse(`
   x={
    y=2
    y 
    }
-  x`, "{:x = {:y = {2}; :y}; :x}") //FIXME: Bracket after new line is not parsed
+  x`, "{:x = {:y = {2}; :y}; :x}")
+  testParse(`
+  x=1
+  y=2
+  z=3
+  `, "{:x = {1}; :y = {2}; :z = {3}}")
+  testParse(`
+  f={
+    x=1
+    y=2
+    z=3
+    x+y+z
+  }
+  `, "{:f = {:x = {1}; :y = {2}; :z = {3}; (::add (::add :x :y) :z)}}")
+  testParse(`
+    a |>
+    b |>
+    c |>
+    d 
+  `, "{(::d (::c (::b :a)))}")
+  testParse(`
+    a |>
+    b |>
+    c |>
+    d +
+    e
+  `, "{(::add (::d (::c (::b :a))) :e)}")
 })
 

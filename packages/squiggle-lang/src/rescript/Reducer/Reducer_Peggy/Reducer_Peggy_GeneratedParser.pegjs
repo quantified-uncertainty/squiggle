@@ -76,19 +76,15 @@ outerBlock
     { return nodeBlock([finalExpression])}
     
 innerBlockOrExpression  
-  = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _ '}'
-	  { statements.push(finalExpression) 
-    	return nodeBlock(statements) }
-  / '{' _nl finalExpression: expression  _ '}'
-	  { return nodeBlock([finalExpression]) }
+  = quotedInnerBlock
   / finalExpression: expression
     { return nodeBlock([finalExpression])}
 
 quotedInnerBlock  
-  = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _ '}'
+  = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
 	  { statements.push(finalExpression) 
     	return nodeBlock(statements) }
-  / '{' _nl finalExpression: expression  _ '}'
+  / '{' _nl finalExpression: expression  _nl '}'
 	  { return nodeBlock([finalExpression]) }
 
 array_statements
