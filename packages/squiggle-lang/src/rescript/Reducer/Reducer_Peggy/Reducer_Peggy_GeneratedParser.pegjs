@@ -66,7 +66,7 @@
 start
   = _nl start:outerBlock _nl finalComment?  {return start}
 
-zeroOMoreArgumentsBlock = innerBlock / lambda
+zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
 
 outerBlock 
 	= statements:array_statements  finalExpression: (statementSeparator @expression)?
@@ -75,14 +75,21 @@ outerBlock
   / finalExpression: expression
     { return nodeBlock([finalExpression])}
     
-innerBlock  
-  = '{' _ statements:array_statements  finalExpression: (statementSeparator @expression)  _ '}'
+innerBlockOrExpression  
+  = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _ '}'
 	  { statements.push(finalExpression) 
     	return nodeBlock(statements) }
-  / '{' _ finalExpression: expression  _ '}'
+  / '{' _nl finalExpression: expression  _ '}'
 	  { return nodeBlock([finalExpression]) }
   / finalExpression: expression
     { return nodeBlock([finalExpression])}
+
+quotedInnerBlock  
+  = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _ '}'
+	  { statements.push(finalExpression) 
+    	return nodeBlock(statements) }
+  / '{' _nl finalExpression: expression  _ '}'
+	  { return nodeBlock([finalExpression]) }
 
 array_statements
   = head:statement tail:(statementSeparator @array_statements )
@@ -95,12 +102,12 @@ statement
   / defunStatement
 
 letStatement 
-  = variable:identifier _ '=' _nl value:zeroOMoreArgumentsBlock
+  = variable:identifier _ '=' _nl value:zeroOMoreArgumentsBlockOrExpression
 
   { return nodeLetStatment(variable, value) }
 
 defunStatement
-  = variable:identifier '(' _nl args:array_parameters _nl ')' _ '=' _nl body:innerBlock
+  = variable:identifier '(' _nl args:array_parameters _nl ')' _ '=' _nl body:innerBlockOrExpression
     { var value = nodeLambda(args, body)
       return nodeLetStatment(variable, value) }
 
@@ -112,8 +119,8 @@ expression = ifthenelse / ternary / logicalAdditive
 
 ifthenelse 
   = 'if' __nl condition:logicalAdditive 
-  	__nl 'then' __nl trueExpression:innerBlock 
-    __nl 'else' __nl falseExpression:(ifthenelse/innerBlock)
+  	__nl 'then' __nl trueExpression:innerBlockOrExpression 
+    __nl 'else' __nl falseExpression:(ifthenelse/innerBlockOrExpression)
     { return nodeTernary(condition, trueExpression, falseExpression) }
   
 ternary 
@@ -258,6 +265,7 @@ valueConstructor
   = recordConstructor
   / arrayConstructor
   / lambda
+  / quotedInnerBlock 
 
 lambda  
   = '{' _nl '|' _nl args:array_parameters _nl '|' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
@@ -301,7 +309,7 @@ __nl 'whitespace or newline'
   = (whiteSpaceCharactersOrComment / commentOrNewLine )+
 
 statementSeparator 'statement separator'
-	= _ (';'/ commentOrNewLine)+ _
+	= _ (';'/ commentOrNewLine)+ _nl
 
   commentOrNewLine = finalComment? newLine 
 
