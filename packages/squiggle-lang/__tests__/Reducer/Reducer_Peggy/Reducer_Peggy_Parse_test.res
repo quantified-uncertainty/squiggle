@@ -95,6 +95,9 @@ describe("Peggy parse", () => {
     testParse("1 -> add(2)", "{(::add 1 2)}")
     testParse("-1 -> add(2)", "{(::add (::unaryMinus 1) 2)}")
     testParse("1 -> add(2) * 3", "{(::multiply (::add 1 2) 3)}")
+    testParse("1 -> subtract(2)", "{(::subtract 1 2)}")
+    testParse("-1 -> subtract(2)", "{(::subtract (::unaryMinus 1) 2)}")
+    testParse("1 -> subtract(2) * 3", "{(::multiply (::subtract 1 2) 3)}")
   })
 
   describe("elixir pipe", () => {
