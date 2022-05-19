@@ -61,6 +61,7 @@ describe("Peggy parse", () => {
     testParse("1 * 2 - 3 ./ 4", "{(::subtract (::multiply 1 2) (::dotDivide 3 4))}")
     testParse("1 * 2 - 3 * 4^5", "{(::subtract (::multiply 1 2) (::multiply 3 (::pow 4 5)))}")
     testParse("1 * 2 - 3 * 4^5^6", "{(::subtract (::multiply 1 2) (::multiply 3 (::pow (::pow 4 5) 6)))}")
+    testParse("1 * 2 - 3 * 4^5^6", "{(::subtract (::multiply 1 2) (::multiply 3 (::pow (::pow 4 5) 6)))}")
     testParse("1 * -a[-2]", "{(::multiply 1 (::unaryMinus (::$atIndex :a (::unaryMinus 2))))}")
   })
 
@@ -185,6 +186,10 @@ describe("Peggy parse", () => {
     testParse("myadd(x,y)=x+y; z=myadd; z", "{:myadd = {|:x,:y| {(::add :x :y)}}; :z = {:myadd}; :z}")
     testParse("myadd(x,y)=x+y; z=[myadd]; z", "{:myadd = {|:x,:y| {(::add :x :y)}}; :z = {(::$constructArray (:myadd))}; :z}")
     testParse("myaddd(x,y)=x+y; z={x: myaddd}; z", "{:myaddd = {|:x,:y| {(::add :x :y)}}; :z = {(::$constructRecord ('x': :myaddd))}; :z}")
+    testParse("f({|x| x+1})", "{(::f {|:x| {(::add :x 1)}})}")
+    testParse("map(arr, {|x| x+1})", "{(::map :arr {|:x| {(::add :x 1)}})}")
+    testParse("map([1,2,3], {|x| x+1})", "{(::map (::$constructArray (1 2 3)) {|:x| {(::add :x 1)}})}")
+    testParse("[1,2,3]->map({|x| x+1})", "{(::map (::$constructArray (1 2 3)) {|:x| {(::add :x 1)}})}")
   })
 })
 
