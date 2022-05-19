@@ -188,14 +188,15 @@ module SymbolicConstructors = {
 
   let twoFloat = name =>
     switch name {
-    | "normal" => Ok(SymbolicDist.Normal.make)
-    | "uniform" => Ok(SymbolicDist.Uniform.make)
     | "beta" => Ok(SymbolicDist.Beta.make)
-    | "lognormal" => Ok(SymbolicDist.Lognormal.make)
-    | "logistic" => Ok(SymbolicDist.Logistic.make)
     | "cauchy" => Ok(SymbolicDist.Cauchy.make)
+    | "credibleIntervalToDistribution" => Ok(SymbolicDist.From90thPercentile.make)
     | "gamma" => Ok(SymbolicDist.Gamma.make)
-    | "to" => Ok(SymbolicDist.From90thPercentile.make)
+    | "logistic" => Ok(SymbolicDist.Logistic.make)
+    | "lognormal" => Ok(SymbolicDist.Lognormal.make)
+    | "normal" => Ok(SymbolicDist.Normal.make)
+    | "to" => Ok(SymbolicDist.From90thPercentile.make) // as credibleIntervalToDistribution is defined "to" might be redundant
+    | "uniform" => Ok(SymbolicDist.Uniform.make)
     | _ => Error("Unreachable state")
     }
 
