@@ -124,14 +124,14 @@ ternary
     { return nodeTernary(condition, trueExpression, falseExpression) }
 
 logicalAdditive
-  = head:logicalMultiplicative tail:(_ operator:'&&' _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})* 
+  = head:logicalMultiplicative tail:(_ operator:'||' _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return makeFunctionCall(toFunction[element.operator], [result, element.right])
     }, head)}
 
 // start binary operators
 logicalMultiplicative
-  = head:equality tail:(_ operator:'||' _nl arg:equality {return {operator: operator, right: arg}})* 
+  = head:equality tail:(_ operator:'&&' _nl arg:equality {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return makeFunctionCall(toFunction[element.operator], [result, element.right])
     }, head)}

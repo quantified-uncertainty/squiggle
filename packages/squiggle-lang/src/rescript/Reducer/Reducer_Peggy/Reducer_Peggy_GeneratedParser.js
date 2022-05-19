@@ -245,8 +245,8 @@ function peg$parse(input, options) {
   var peg$c8 = "else";
   var peg$c9 = "?";
   var peg$c10 = ":";
-  var peg$c11 = "&&";
-  var peg$c12 = "||";
+  var peg$c11 = "||";
+  var peg$c12 = "&&";
   var peg$c13 = "==";
   var peg$c14 = "!=";
   var peg$c15 = "<=";
@@ -303,8 +303,8 @@ function peg$parse(input, options) {
   var peg$e8 = peg$literalExpectation("else", false);
   var peg$e9 = peg$literalExpectation("?", false);
   var peg$e10 = peg$literalExpectation(":", false);
-  var peg$e11 = peg$literalExpectation("&&", false);
-  var peg$e12 = peg$literalExpectation("||", false);
+  var peg$e11 = peg$literalExpectation("||", false);
+  var peg$e12 = peg$literalExpectation("&&", false);
   var peg$e13 = peg$literalExpectation("==", false);
   var peg$e14 = peg$literalExpectation("!=", false);
   var peg$e15 = peg$literalExpectation("<=", false);

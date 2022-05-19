@@ -135,32 +135,33 @@ describe("Peggy parse", () => {
   describe("logical", () => {
     testParse("true || false", "{(::or true false)}")
     testParse("true && false", "{(::and true false)}")
-    testParse("a && b || c", "{(::and :a (::or :b :c))}")
-    testParse("a && b || c && d", "{(::and (::and :a (::or :b :c)) :d)}")
-    testParse("a && !b || c", "{(::and :a (::or (::not :b) :c))}")
-    testParse("a && b==c || d", "{(::and :a (::or (::equal :b :c) :d))}")
-    testParse("a && b!=c || d", "{(::and :a (::or (::unequal :b :c) :d))}")
-    testParse("a && !(b==c) || d", "{(::and :a (::or (::not (::equal :b :c)) :d))}")
-    testParse("a && b>=c || d", "{(::and :a (::or (::largerEq :b :c) :d))}")
-    testParse("a && !(b>=c) || d", "{(::and :a (::or (::not (::largerEq :b :c)) :d))}")
-    testParse("a && b<=c || d", "{(::and :a (::or (::smallerEq :b :c) :d))}")
-    testParse("a && b>c || d", "{(::and :a (::or (::larger :b :c) :d))}")
-    testParse("a && b<c || d", "{(::and :a (::or (::smaller :b :c) :d))}")
-    testParse("a && b<c[i] || d", "{(::and :a (::or (::smaller :b (::$atIndex :c :i)) :d))}")
-    testParse("a && b<c.i || d", "{(::and :a (::or (::smaller :b (::$atIndex :c 'i')) :d))}")
-    testParse("a && b<c(i) || d", "{(::and :a (::or (::smaller :b (::c :i)) :d))}")
-    testParse("a && b<1+2 || d", "{(::and :a (::or (::smaller :b (::add 1 2)) :d))}")
+    testParse("a * b + c", "{(::add (::multiply :a :b) :c)}") // for comparison
+    testParse("a && b || c", "{(::or (::and :a :b) :c)}")
+    testParse("a && b || c && d", "{(::or (::and :a :b) (::and :c :d))}")
+    testParse("a && !b || c", "{(::or (::and :a (::not :b)) :c)}")
+    testParse("a && b==c || d", "{(::or (::and :a (::equal :b :c)) :d)}")
+    testParse("a && b!=c || d", "{(::or (::and :a (::unequal :b :c)) :d)}")
+    testParse("a && !(b==c) || d", "{(::or (::and :a (::not (::equal :b :c))) :d)}")
+    testParse("a && b>=c || d", "{(::or (::and :a (::largerEq :b :c)) :d)}")
+    testParse("a && !(b>=c) || d", "{(::or (::and :a (::not (::largerEq :b :c))) :d)}")
+    testParse("a && b<=c || d", "{(::or (::and :a (::smallerEq :b :c)) :d)}")
+    testParse("a && b>c || d", "{(::or (::and :a (::larger :b :c)) :d)}")
+    testParse("a && b<c || d", "{(::or (::and :a (::smaller :b :c)) :d)}")
+    testParse("a && b<c[i] || d", "{(::or (::and :a (::smaller :b (::$atIndex :c :i))) :d)}")
+    testParse("a && b<c.i || d", "{(::or (::and :a (::smaller :b (::$atIndex :c 'i'))) :d)}")
+    testParse("a && b<c(i) || d", "{(::or (::and :a (::smaller :b (::c :i))) :d)}")
+    testParse("a && b<1+2 || d", "{(::or (::and :a (::smaller :b (::add 1 2))) :d)}")
     testParse(
       "a && b<1+2*3 || d",
-      "{(::and :a (::or (::smaller :b (::add 1 (::multiply 2 3))) :d))}",
+      "{(::or (::and :a (::smaller :b (::add 1 (::multiply 2 3)))) :d)}",
     )
     testParse(
       "a && b<1+2*-3+4 || d",
-      "{(::and :a (::or (::smaller :b (::add (::add 1 (::multiply 2 (::unaryMinus 3))) 4)) :d))}",
+      "{(::or (::and :a (::smaller :b (::add (::add 1 (::multiply 2 (::unaryMinus 3))) 4))) :d)}",
     )
     testParse(
       "a && b<1+2*3 || d ? true : false",
-      "{(::$$ternary (::and :a (::or (::smaller :b (::add 1 (::multiply 2 3))) :d)) true false)}",
+      "{(::$$ternary (::or (::and :a (::smaller :b (::add 1 (::multiply 2 3)))) :d) true false)}",
     )
   })
 
