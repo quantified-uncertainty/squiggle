@@ -77,7 +77,7 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
   | list{EvCall(fName), ...args} =>
     (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
 
-  | list{EvLambda(_lamdaCall)} =>
+  | list{EvLambda(_)} =>
     valueList
     ->Lambda.checkIfReduced
     ->Result.flatMap(reducedValueList =>
@@ -119,7 +119,7 @@ let evaluateUsingOptions = (
 }
 
 /*
-  Evaluates MathJs code and bindings via Reducer and answers the result
+  Evaluates Squiggle code and bindings via Reducer and answers the result
 */
 let evaluate = (code: string): result<expressionValue, errorValue> => {
   evaluateUsingOptions(~environment=None, ~externalBindings=None, code)
