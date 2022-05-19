@@ -299,6 +299,41 @@ describe("parsing new line", () => {
   )
   testParse(
     `
+  f={
+    x=1
+    y=2
+    z=3
+    x+y+z
+  }
+  g=f+4
+  g
+  `,
+    "{:f = {:x = {1}; :y = {2}; :z = {3}; (::add (::add :x :y) :z)}; :g = {(::add :f 4)}; :g}",
+  )
+  testParse(
+    `
+  f =
+    {
+      x=1; //x
+      y=2  //y
+      z=
+        3
+      x+
+        y+
+        z
+    }
+  g =
+    f +
+      4
+  g ->
+    h ->
+    p ->
+    q 
+  `,
+    "{:f = {:x = {1}; :y = {2}; :z = {3}; (::add (::add :x :y) :z)}; :g = {(::add :f 4)}; (::q (::p (::h :g)))}",
+  )
+  testParse(
+    `
     a |>
     b |>
     c |>
