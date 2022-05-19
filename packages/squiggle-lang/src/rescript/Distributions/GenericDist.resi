@@ -6,6 +6,7 @@ type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
 let sampleN: (t, int) => array<float>
+let sample: t => float
 
 let toSampleSetDist: (t, int) => Belt.Result.t<QuriSquiggleLang.SampleSetDist.t, error>
 

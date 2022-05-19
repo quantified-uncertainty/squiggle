@@ -24,12 +24,15 @@ let isSymbolic = (t: t) =>
   | _ => false
   }
 
+
 let sampleN = (t: t, n) =>
   switch t {
   | PointSet(r) => PointSetDist.sampleNRendered(n, r)
   | Symbolic(r) => SymbolicDist.T.sampleN(n, r)
   | SampleSet(r) => SampleSetDist.sampleN(r, n)
   }
+
+let sample = (t: t) => sampleN(t, 1) -> E.A.first |> E.O.toExn("Should not have happened")
 
 let toSampleSetDist = (t: t, n) =>
   SampleSetDist.make(sampleN(t, n))->E.R2.errMap(DistributionTypes.Error.sampleErrorToDistErr)
