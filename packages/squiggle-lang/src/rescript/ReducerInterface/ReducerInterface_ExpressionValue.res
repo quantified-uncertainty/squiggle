@@ -90,7 +90,7 @@ let toStringResult = x =>
 let toStringResultOkless = codeResult =>
   switch codeResult {
   | Ok(a) => toString(a)
-  | Error(m) =>  `Error(${ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
 let toStringResultRecord = x =>

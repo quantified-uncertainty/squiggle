@@ -16,7 +16,11 @@ testMacro([], exampleExpression, "Ok(1)")
 
 describe("bindStatement", () => {
   // A statement is bound by the bindings created by the previous statement
-  testMacro([], eBindStatement(eBindings([]), exampleStatementY), "Ok((:$setBindings {} :y 1) context: {})")
+  testMacro(
+    [],
+    eBindStatement(eBindings([]), exampleStatementY),
+    "Ok((:$setBindings {} :y 1) context: {})",
+  )
   // Then it answers the bindings for the next statement when reduced
   testMacroEval([], eBindStatement(eBindings([]), exampleStatementY), "Ok({y: 1})")
   // Now let's feed a binding to see what happens
@@ -31,13 +35,17 @@ describe("bindStatement", () => {
   testMacro(
     [("z", EvNumber(99.))],
     eBindStatementDefault(exampleStatementY),
-   "Ok((:$setBindings {z: 99} :y 1) context: {z: 99})",
+    "Ok((:$setBindings {z: 99} :y 1) context: {z: 99})",
   )
 })
 
 describe("bindExpression", () => {
   // x is simply bound in the expression
-  testMacro([], eBindExpression(eBindings([("x", EvNumber(2.))]), eSymbol("x")), "Ok(2 context: {x: 2})")
+  testMacro(
+    [],
+    eBindExpression(eBindings([("x", EvNumber(2.))]), eSymbol("x")),
+    "Ok(2 context: {x: 2})",
+  )
   // When an let statement is the end expression then bindings are returned
   testMacro(
     [],

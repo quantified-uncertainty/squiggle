@@ -5,7 +5,6 @@ module Parse = Reducer_Peggy_Parse
 type expression = ExpressionT.expression
 
 let rec fromNode = (node: Parse.node): expression => {
-
   let caseBlock = nodeBlock =>
     ExpressionBuilder.eBlock(nodeBlock["statements"]->Js.Array2.map(fromNode)->Belt.List.fromArray)
 

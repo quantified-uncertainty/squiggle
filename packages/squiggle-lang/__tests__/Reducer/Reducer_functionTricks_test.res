@@ -68,21 +68,23 @@ describe("function tricks", () => {
   testEvalToBe("y=2;g(x)=inspect(y)+1", "Ok({g: lambda(x=>internal code),y: 2})")
   MySkip.testEvalToBe("f(x) = x(x); f(f)", "????") // TODO: Infinite loop. Any solution? Catching proper exception or timeout?
   MySkip.testEvalToBe("f(x, x)=x+x; f(1,2)", "????") // TODO: Duplicate parameters
-  testEvalToBe("myadd(x,y)=x+y; z=myadd; z", "Ok(lambda(x,y=>internal code))") 
-  testEvalToBe("myadd(x,y)=x+y; z=myadd; z(1, 1)", "Ok(2)") 
+  testEvalToBe("myadd(x,y)=x+y; z=myadd; z", "Ok(lambda(x,y=>internal code))")
+  testEvalToBe("myadd(x,y)=x+y; z=myadd; z(1, 1)", "Ok(2)")
 })
 
 describe("lambda in structures", () => {
-  testEvalToBe("myadd(x,y)=x+y; z=[myadd]", "Ok({myadd: lambda(x,y=>internal code),z: [lambda(x,y=>internal code)]})")
-  testEvalToBe("myadd(x,y)=x+y; z=[myadd]; z[0]", "Ok(lambda(x,y=>internal code))") 
-  testEvalToBe("myadd(x,y)=x+y; z=[myadd]; z[0](3,2)", "Ok(5)") 
-  testEvalToBe("myaddd(x,y)=x+y; z={x: myaddd}; z", "Ok({x: lambda(x,y=>internal code)})") 
-  testEvalToBe("myaddd(x,y)=x+y; z={x: myaddd}; z.x", "Ok(lambda(x,y=>internal code))") 
-  testEvalToBe("myaddd(x,y)=x+y; z={x: myaddd}; z.x(3,2)", "Ok(5)") 
+  testEvalToBe(
+    "myadd(x,y)=x+y; z=[myadd]",
+    "Ok({myadd: lambda(x,y=>internal code),z: [lambda(x,y=>internal code)]})",
+  )
+  testEvalToBe("myadd(x,y)=x+y; z=[myadd]; z[0]", "Ok(lambda(x,y=>internal code))")
+  testEvalToBe("myadd(x,y)=x+y; z=[myadd]; z[0](3,2)", "Ok(5)")
+  testEvalToBe("myaddd(x,y)=x+y; z={x: myaddd}; z", "Ok({x: lambda(x,y=>internal code)})")
+  testEvalToBe("myaddd(x,y)=x+y; z={x: myaddd}; z.x", "Ok(lambda(x,y=>internal code))")
+  testEvalToBe("myaddd(x,y)=x+y; z={x: myaddd}; z.x(3,2)", "Ok(5)")
 })
 
 describe("ternary and bindings", () => {
   testEvalToBe("f(x)=x ? 1 : 0; f(true)", "Ok(1)")
   testEvalToBe("f(x)=x>2 ? 1 : 0; f(3)", "Ok(1)")
 })
-
