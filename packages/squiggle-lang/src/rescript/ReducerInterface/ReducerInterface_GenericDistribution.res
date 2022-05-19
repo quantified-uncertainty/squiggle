@@ -387,13 +387,12 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-let registered = FunctionRegistry.allFunctions
+let registered = FunctionRegistry_Library.allFunctions
 
-let tryRegistry = (call: ExpressionValue.functionCall) => {
-  let (fnName, args) = call
-  let response = FunctionRegistry.Registry.matchAndRun(registered, fnName, args)
-  let foo = response->E.O2.fmap(r => r->E.R2.errMap(s => Reducer_ErrorValue.RETodo(s)))
-  foo
+let tryRegistry = ((fnName, args): ExpressionValue.functionCall) => {
+  FunctionRegistry_Core.Registry.matchAndRun(registered, fnName, args)->E.O2.fmap(
+    E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
+  )
 }
 
 let dispatch = (call: ExpressionValue.functionCall, environment) => {
