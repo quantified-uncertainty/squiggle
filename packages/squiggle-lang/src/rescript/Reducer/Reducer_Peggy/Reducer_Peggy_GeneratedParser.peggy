@@ -198,13 +198,15 @@ postOperator = indexedValue
 
 indexedValue
   = collectionElement
-  / maybeRecordElement
+  / recordElement
+  / atom
 
   collectionElement
-    = head:maybeRecordElement &('['/'(')
+    = head:atom &('['/'('/'.')
       tail:(
         _ '[' _nl arg:expression  _nl ']' {return {fn: postOperatorToFunction['[]'], args: [arg]}}
       / _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: postOperatorToFunction['()'], args: args}}
+      / '.' arg:$dollarIdentifier {return {fn: postOperatorToFunction['[]'], args: [nodeString(arg)]}}
       )* 
     { return tail.reduce(function(result, element) {
         return makeFunctionCall(element.fn, [result, ...element.args])
@@ -214,16 +216,12 @@ indexedValue
       = head:expression tail:(_ ',' _nl @expression)* 
       { return [head, ...tail]; }
 
-maybeRecordElement
-  = recordElement
-  / atom
-
-  recordElement
-    = head:dollarIdentifier &'.' 
-      tail:(_ '.' _nl arg:$dollarIdentifier {return {fn: postOperatorToFunction['.'],  args: [nodeString(arg)]}})* 
-    { return tail.reduce(function(result, element) {
-        return makeFunctionCall(element.fn, [result, ...element.args])
-      }, head)}
+recordElement
+  = head:dollarIdentifier &'.' 
+    tail:(_ '.' _nl arg:$dollarIdentifier {return {fn: postOperatorToFunction['.'],  args: [nodeString(arg)]}})* 
+  { return tail.reduce(function(result, element) {
+      return makeFunctionCall(element.fn, [result, ...element.args])
+    }, head)}
 
 atom
   = '(' _nl expression:expression _nl ')' {return expression}
