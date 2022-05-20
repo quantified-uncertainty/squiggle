@@ -186,19 +186,6 @@ module SymbolicConstructors = {
     | _ => Error("Unreachable state")
     }
 
-  let twoFloat = name =>
-    switch name {
-    | "normal" => Ok(SymbolicDist.Normal.make)
-    | "uniform" => Ok(SymbolicDist.Uniform.make)
-    | "beta" => Ok(SymbolicDist.Beta.make)
-    | "lognormal" => Ok(SymbolicDist.Lognormal.make)
-    | "logistic" => Ok(SymbolicDist.Logistic.make)
-    | "cauchy" => Ok(SymbolicDist.Cauchy.make)
-    | "gamma" => Ok(SymbolicDist.Gamma.make)
-    | "to" => Ok(SymbolicDist.From90thPercentile.make)
-    | _ => Error("Unreachable state")
-    }
-
   let threeFloat = name =>
     switch name {
     | "triangular" => Ok(SymbolicDist.Triangular.make)
@@ -226,19 +213,6 @@ let dispatchToGenericOutput = (
     ->SymbolicConstructors.symbolicResultToOutput
   | ("delta", [EvNumber(f)]) =>
     SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
-  | (
-      ("uniform"
-      | "beta"
-      | "lognormal"
-      | "cauchy"
-      | "gamma"
-      | "to"
-      | "logistic") as fnName,
-      [EvNumber(f1), EvNumber(f2)],
-    ) =>
-    SymbolicConstructors.twoFloat(fnName)
-    ->E.R.bind(r => r(f1, f2))
-    ->SymbolicConstructors.symbolicResultToOutput
   | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>
     SymbolicConstructors.threeFloat(fnName)
     ->E.R.bind(r => r(f1, f2, f3))

@@ -3,65 +3,57 @@ open FunctionRegistry_Helpers
 
 let twoArgs = (fn, (a1, a2)) => fn(a1, a2)
 
-let process = (~fn, r) =>
-  r->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_))
-
 module NormalFn = {
   let fnName = "normal"
-  let mainInputType = I_DistOrNumber
 
   let toFn = Function.make(
     ~name="Normal",
     ~definitions=[
-      Function.makeDefinition(~name=fnName, ~inputs=[mainInputType, mainInputType], ~run=inputs => {
-        inputs->Prepare.twoDistOrNumber->process(~fn=twoArgs(SymbolicDist.Normal.make))
-      }),
-      Function.makeDefinition(
-        ~name=fnName,
-        ~inputs=[I_Record([("mean", mainInputType), ("stdev", mainInputType)])],
-        ~run=inputs =>
-          inputs->Prepare.twoDistOrNumberFromRecord->process(~fn=twoArgs(SymbolicDist.Normal.make)),
-      ),
-      Function.makeDefinition(
-        ~name=fnName,
-        ~inputs=[I_Record([("p5", mainInputType), ("p95", mainInputType)])],
-        ~run=inputs =>
-          inputs
-          ->Prepare.twoDistOrNumberFromRecord
-          ->process(~fn=r => twoArgs(SymbolicDist.Normal.from90PercentCI, r)->Ok),
-      ),
+      TwoArgDist.mkRegular(fnName, twoArgs(SymbolicDist.Normal.make)),
+      TwoArgDist.mkDef90th(fnName, r => twoArgs(SymbolicDist.Normal.from90PercentCI, r)->Ok),
+      TwoArgDist.mkDefMeanStdev(fnName, twoArgs(SymbolicDist.Normal.make)),
     ],
   )
 }
 
 module LognormalFn = {
   let fnName = "lognormal"
-  let mainInputType = I_DistOrNumber
 
   let toFn = Function.make(
     ~name="Lognormal",
     ~definitions=[
-      Function.makeDefinition(~name=fnName, ~inputs=[mainInputType, mainInputType], ~run=inputs =>
-        inputs->Prepare.twoDistOrNumber->process(~fn=twoArgs(SymbolicDist.Lognormal.make))
-      ),
-      Function.makeDefinition(
-        ~name=fnName,
-        ~inputs=[I_Record([("p5", mainInputType), ("p95", mainInputType)])],
-        ~run=inputs =>
-          inputs
-          ->Prepare.twoDistOrNumberFromRecord
-          ->process(~fn=r => twoArgs(SymbolicDist.Lognormal.from90PercentCI, r)->Ok),
-      ),
-      Function.makeDefinition(
-        ~name=fnName,
-        ~inputs=[I_Record([("mean", mainInputType), ("stdev", mainInputType)])],
-        ~run=inputs =>
-          inputs
-          ->Prepare.twoDistOrNumberFromRecord
-          ->process(~fn=twoArgs(SymbolicDist.Lognormal.fromMeanAndStdev)),
-      ),
+      TwoArgDist.mkRegular(fnName, twoArgs(SymbolicDist.Lognormal.make)),
+      TwoArgDist.mkDef90th(fnName, r => twoArgs(SymbolicDist.Lognormal.from90PercentCI, r)->Ok),
+      TwoArgDist.mkDefMeanStdev(fnName, twoArgs(SymbolicDist.Lognormal.fromMeanAndStdev)),
     ],
   )
 }
+
+let more = [
+  Function.make(
+    ~name="Uniform",
+    ~definitions=[TwoArgDist.mkRegular("uniform", twoArgs(SymbolicDist.Uniform.make))],
+  ),
+  Function.make(
+    ~name="Beta",
+    ~definitions=[TwoArgDist.mkRegular("beta", twoArgs(SymbolicDist.Beta.make))],
+  ),
+  Function.make(
+    ~name="Cauchy",
+    ~definitions=[TwoArgDist.mkRegular("cauchy", twoArgs(SymbolicDist.Cauchy.make))],
+  ),
+  Function.make(
+    ~name="Gamma",
+    ~definitions=[TwoArgDist.mkRegular("gamma", twoArgs(SymbolicDist.Gamma.make))],
+  ),
+  Function.make(
+    ~name="Logistic",
+    ~definitions=[TwoArgDist.mkRegular("logistic", twoArgs(SymbolicDist.Logistic.make))],
+  ),
+  Function.make(
+    ~name="To",
+    ~definitions=[TwoArgDist.mkRegular("cauchy", twoArgs(SymbolicDist.From90thPercentile.make))],
+  )
+]
 
 let allFunctions = [NormalFn.toFn, LognormalFn.toFn]

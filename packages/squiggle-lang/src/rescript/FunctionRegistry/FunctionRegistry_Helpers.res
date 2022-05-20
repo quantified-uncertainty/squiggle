@@ -89,3 +89,30 @@ module Process = {
     twoDistsOrNumbersToDist(~fn=r => r->fn->E.R2.fmap(Wrappers.symbolic), ~values)
   }
 }
+
+module TwoArgDist = {
+  let process = (~fn, r) =>
+    r->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_))
+
+  let mkRegular = (name, fn) => {
+    Function.makeDefinition(~name, ~inputs=[I_DistOrNumber, I_DistOrNumber], ~run=inputs =>
+      inputs->Prepare.twoDistOrNumber->process(~fn)
+    )
+  }
+
+  let mkDef90th = (name, fn) => {
+    Function.makeDefinition(
+      ~name,
+      ~inputs=[I_Record([("p5", I_DistOrNumber), ("p95", I_DistOrNumber)])],
+      ~run=inputs => inputs->Prepare.twoDistOrNumberFromRecord->process(~fn),
+    )
+  }
+
+  let mkDefMeanStdev = (name, fn) => {
+    Function.makeDefinition(
+      ~name,
+      ~inputs=[I_Record([("mean", I_DistOrNumber), ("stdev", I_DistOrNumber)])],
+      ~run=inputs => inputs->Prepare.twoDistOrNumberFromRecord->process(~fn),
+    )
+  }
+}
