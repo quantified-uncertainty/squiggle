@@ -31,9 +31,9 @@
   }
 
   var postOperatorToFunction = {
-    '.': '$atIndex',
+    '.': '$_atIndex_$',
     '()': '$$_applyAll_$$',
-    '[]': '$atIndex',
+    '[]': '$_atIndex_$',
   }
 
   function nodeBlock(statements) {return{type: 'Block', statements: statements}}
@@ -275,9 +275,9 @@ lambda
 
 arrayConstructor 'array'
   = '[' _nl ']'
-    { return makeFunctionCall('$constructArray', [nodeExpression([])])}
+    { return makeFunctionCall('$_constructArray_$', [nodeExpression([])])}
   / '[' _nl args:array_elements _nl ']' 
-    { return makeFunctionCall('$constructArray', [nodeExpression(args)])}
+    { return makeFunctionCall('$_constructArray_$', [nodeExpression(args)])}
 
   array_elements 
     = head:expression tail:(_ ',' _nl @expression)* 
@@ -285,7 +285,7 @@ arrayConstructor 'array'
 
 recordConstructor  'record'
   = '{' _nl args:array_recordArguments _nl '}' 
-  { return makeFunctionCall('$constructRecord', [nodeExpression(args)])}
+  { return makeFunctionCall('$_constructRecord_$', [nodeExpression(args)])}
 
   array_recordArguments 
     = head:keyValuePair tail:(_ ',' _nl @keyValuePair)* 

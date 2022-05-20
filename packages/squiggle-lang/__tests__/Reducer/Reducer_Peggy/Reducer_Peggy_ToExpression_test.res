@@ -53,48 +53,48 @@ describe("Peggy to Expression", () => {
     testToExpression("-1", "(:$$_block_$$ (:unaryMinus 1))", ~v="-1", ())
     testToExpression("!true", "(:$$_block_$$ (:not true))", ~v="false", ())
     testToExpression("1 + -1", "(:$$_block_$$ (:add 1 (:unaryMinus 1)))", ~v="0", ())
-    testToExpression("-a[0]", "(:$$_block_$$ (:unaryMinus (:$atIndex :a 0)))", ())
+    testToExpression("-a[0]", "(:$$_block_$$ (:unaryMinus (:$_atIndex_$ :a 0)))", ())
   })
 
   describe("multi-line", () => {
-    testToExpression("x=1; 2", "(:$$_block_$$ (:$let :x (:$$_block_$$ 1)) 2)", ~v="2", ())
+    testToExpression("x=1; 2", "(:$$_block_$$ (:$_let_$ :x (:$$_block_$$ 1)) 2)", ~v="2", ())
     testToExpression(
       "x=1; y=2",
-      "(:$$_block_$$ (:$let :x (:$$_block_$$ 1)) (:$let :y (:$$_block_$$ 2)))",
+      "(:$$_block_$$ (:$_let_$ :x (:$$_block_$$ 1)) (:$_let_$ :y (:$$_block_$$ 2)))",
       ~v="{x: 1,y: 2}",
       (),
     )
   })
 
   describe("variables", () => {
-    testToExpression("x = 1", "(:$$_block_$$ (:$let :x (:$$_block_$$ 1)))", ~v="{x: 1}", ())
+    testToExpression("x = 1", "(:$$_block_$$ (:$_let_$ :x (:$$_block_$$ 1)))", ~v="{x: 1}", ())
     testToExpression("x", "(:$$_block_$$ :x)", ~v=":x", ()) //TODO: value should return error
-    testToExpression("x = 1; x", "(:$$_block_$$ (:$let :x (:$$_block_$$ 1)) :x)", ~v="1", ())
+    testToExpression("x = 1; x", "(:$$_block_$$ (:$_let_$ :x (:$$_block_$$ 1)) :x)", ~v="1", ())
   })
 
   describe("functions", () => {
     testToExpression(
       "identity(x) = x",
-      "(:$$_block_$$ (:$let :identity (:$$_lambda_$$ [x] (:$$_block_$$ :x))))",
+      "(:$$_block_$$ (:$_let_$ :identity (:$$_lambda_$$ [x] (:$$_block_$$ :x))))",
       ~v="{identity: lambda(x=>internal code)}",
       (),
     ) // Function definitions become lambda assignments
     testToExpression("identity(x)", "(:$$_block_$$ (:identity :x))", ()) // Note value returns error properly
-    testToExpression("f(x) = x> 2 ? 0 : 1; f(3)", "(:$$_block_$$ (:$let :f (:$$_lambda_$$ [x] (:$$_block_$$ (:$$_ternary_$$ (:larger :x 2) 0 1)))) (:f 3))", ~v="0", ())
+    testToExpression("f(x) = x> 2 ? 0 : 1; f(3)", "(:$$_block_$$ (:$_let_$ :f (:$$_lambda_$$ [x] (:$$_block_$$ (:$$_ternary_$$ (:larger :x 2) 0 1)))) (:f 3))", ~v="0", ())
   })
 
   describe("arrays", () => {
-    testToExpression("[]", "(:$$_block_$$ (:$constructArray ()))", ~v="[]", ())
-    testToExpression("[0, 1, 2]", "(:$$_block_$$ (:$constructArray (0 1 2)))", ~v="[0,1,2]", ())
+    testToExpression("[]", "(:$$_block_$$ (:$_constructArray_$ ()))", ~v="[]", ())
+    testToExpression("[0, 1, 2]", "(:$$_block_$$ (:$_constructArray_$ (0 1 2)))", ~v="[0,1,2]", ())
     testToExpression(
       "['hello', 'world']",
-      "(:$$_block_$$ (:$constructArray ('hello' 'world')))",
+      "(:$$_block_$$ (:$_constructArray_$ ('hello' 'world')))",
       ~v="['hello','world']",
       (),
     )
     testToExpression(
       "([0,1,2])[1]",
-      "(:$$_block_$$ (:$atIndex (:$constructArray (0 1 2)) 1))",
+      "(:$$_block_$$ (:$_atIndex_$ (:$_constructArray_$ (0 1 2)) 1))",
       ~v="1",
       (),
     )
@@ -103,19 +103,19 @@ describe("Peggy to Expression", () => {
   describe("records", () => {
     testToExpression(
       "{a: 1, b: 2}",
-      "(:$$_block_$$ (:$constructRecord (('a' 1) ('b' 2))))",
+      "(:$$_block_$$ (:$_constructRecord_$ (('a' 1) ('b' 2))))",
       ~v="{a: 1,b: 2}",
       (),
     )
     testToExpression(
       "{1+0: 1, 2+0: 2}",
-      "(:$$_block_$$ (:$constructRecord (((:add 1 0) 1) ((:add 2 0) 2))))",
+      "(:$$_block_$$ (:$_constructRecord_$ (((:add 1 0) 1) ((:add 2 0) 2))))",
       (),
     ) // key can be any expression
-    testToExpression("record.property", "(:$$_block_$$ (:$atIndex :record 'property'))", ())
+    testToExpression("record.property", "(:$$_block_$$ (:$_atIndex_$ :record 'property'))", ())
     testToExpression(
       "record={property: 1}; record.property",
-      "(:$$_block_$$ (:$let :record (:$$_block_$$ (:$constructRecord (('property' 1))))) (:$atIndex :record 'property'))",
+      "(:$$_block_$$ (:$_let_$ :record (:$$_block_$$ (:$_constructRecord_$ (('property' 1))))) (:$_atIndex_$ :record 'property'))",
       ~v="1",
       (),
     )
@@ -180,7 +180,7 @@ describe("Peggy to Expression", () => {
     // Like lambdas they have a local scope.
     testToExpression(
       "y=99; x={y=1; y}",
-      "(:$$_block_$$ (:$let :y (:$$_block_$$ 99)) (:$let :x (:$$_block_$$ (:$let :y (:$$_block_$$ 1)) :y)))",
+      "(:$$_block_$$ (:$_let_$ :y (:$$_block_$$ 99)) (:$_let_$ :x (:$$_block_$$ (:$_let_$ :y (:$$_block_$$ 1)) :y)))",
       ~v="{x: 1,y: 99}",
       (),
     )
@@ -196,19 +196,19 @@ describe("Peggy to Expression", () => {
     )
     testToExpression(
       "f={|x| x}",
-      "(:$$_block_$$ (:$let :f (:$$_block_$$ (:$$_lambda_$$ [x] (:$$_block_$$ :x)))))",
+      "(:$$_block_$$ (:$_let_$ :f (:$$_block_$$ (:$$_lambda_$$ [x] (:$$_block_$$ :x)))))",
       ~v="{f: lambda(x=>internal code)}",
       (),
     )
     testToExpression(
       "f(x)=x",
-      "(:$$_block_$$ (:$let :f (:$$_lambda_$$ [x] (:$$_block_$$ :x))))",
+      "(:$$_block_$$ (:$_let_$ :f (:$$_lambda_$$ [x] (:$$_block_$$ :x))))",
       ~v="{f: lambda(x=>internal code)}",
       (),
     ) // Function definitions are lambda assignments
     testToExpression(
       "f(x)=x ? 1 : 0",
-      "(:$$_block_$$ (:$let :f (:$$_lambda_$$ [x] (:$$_block_$$ (:$$_ternary_$$ :x 1 0)))))",
+      "(:$$_block_$$ (:$_let_$ :f (:$$_lambda_$$ [x] (:$$_block_$$ (:$$_ternary_$$ :x 1 0)))))",
       ~v="{f: lambda(x=>internal code)}",
       (),
     )

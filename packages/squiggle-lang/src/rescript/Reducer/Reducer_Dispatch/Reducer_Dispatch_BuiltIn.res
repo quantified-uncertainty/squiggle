@@ -130,12 +130,12 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   }
 
   switch call {
-  | ("$atIndex", [EvArray(aValueArray), EvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
-  | ("$atIndex", [EvRecord(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
-  | ("$constructArray", [EvArray(aValueArray)]) => EvArray(aValueArray)->Ok
-  | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
-  | ("$exportBindings", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
-  | ("$setBindings", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>
+  | ("$_atIndex_$", [EvArray(aValueArray), EvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
+  | ("$_atIndex_$", [EvRecord(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
+  | ("$_constructArray_$", [EvArray(aValueArray)]) => EvArray(aValueArray)->Ok
+  | ("$_constructRecord_$", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
+  | ("$_exportBindings_$", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
+  | ("$_setBindings_$", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>
     doSetBindings(externalBindings, symbol, value)
   | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)

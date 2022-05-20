@@ -51,7 +51,7 @@ let eList = (list: list<expression>): expression => list->BExpressionT.EList
 let eBlock = (exprs: list<expression>): expression => eFunction("$$_block_$$", exprs)
 
 let eLetStatement = (symbol: string, valueExpression: expression): expression =>
-  eFunction("$let", list{eSymbol(symbol), valueExpression})
+  eFunction("$_let_$", list{eSymbol(symbol), valueExpression})
 
 let eBindStatement = (bindingExpr: expression, letStatement: expression): expression =>
   eFunction("$$_bindStatement_$$", list{bindingExpr, letStatement})

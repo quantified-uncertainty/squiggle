@@ -49,8 +49,8 @@ describe("Peggy parse", () => {
     testParse("-1", "{(::unaryMinus 1)}")
     testParse("!true", "{(::not true)}")
     testParse("1 + -1", "{(::add 1 (::unaryMinus 1))}")
-    testParse("-a[0]", "{(::unaryMinus (::$atIndex :a 0))}")
-    testParse("!a[0]", "{(::not (::$atIndex :a 0))}")
+    testParse("-a[0]", "{(::unaryMinus (::$_atIndex_$ :a 0))}")
+    testParse("!a[0]", "{(::not (::$_atIndex_$ :a 0))}")
   })
 
   describe("multiplicative", () => {
@@ -75,7 +75,7 @@ describe("Peggy parse", () => {
       "1 * 2 - 3 * 4^5^6",
       "{(::subtract (::multiply 1 2) (::multiply 3 (::pow (::pow 4 5) 6)))}",
     )
-    testParse("1 * -a[-2]", "{(::multiply 1 (::unaryMinus (::$atIndex :a (::unaryMinus 2))))}")
+    testParse("1 * -a[-2]", "{(::multiply 1 (::unaryMinus (::$_atIndex_$ :a (::unaryMinus 2))))}")
   })
 
   describe("multi-line", () => {
@@ -95,23 +95,23 @@ describe("Peggy parse", () => {
   })
 
   describe("arrays", () => {
-    testParse("[]", "{(::$constructArray ())}")
-    testParse("[0, 1, 2]", "{(::$constructArray (0 1 2))}")
-    testParse("['hello', 'world']", "{(::$constructArray ('hello' 'world'))}")
-    testParse("([0,1,2])[1]", "{(::$atIndex (::$constructArray (0 1 2)) 1)}")
+    testParse("[]", "{(::$_constructArray_$ ())}")
+    testParse("[0, 1, 2]", "{(::$_constructArray_$ (0 1 2))}")
+    testParse("['hello', 'world']", "{(::$_constructArray_$ ('hello' 'world'))}")
+    testParse("([0,1,2])[1]", "{(::$_atIndex_$ (::$_constructArray_$ (0 1 2)) 1)}")
   })
 
   describe("records", () => {
-    testParse("{a: 1, b: 2}", "{(::$constructRecord ('a': 1 'b': 2))}")
-    testParse("{1+0: 1, 2+0: 2}", "{(::$constructRecord ((::add 1 0): 1 (::add 2 0): 2))}") // key can be any expression
-    testParse("record.property", "{(::$atIndex :record 'property')}")
+    testParse("{a: 1, b: 2}", "{(::$_constructRecord_$ ('a': 1 'b': 2))}")
+    testParse("{1+0: 1, 2+0: 2}", "{(::$_constructRecord_$ ((::add 1 0): 1 (::add 2 0): 2))}") // key can be any expression
+    testParse("record.property", "{(::$_atIndex_$ :record 'property')}")
   })
 
   describe("post operators", () => {
     //function call, array and record access are post operators with higher priority than unary operators
     testParse("a==!b(1)", "{(::equal :a (::not (::b 1)))}")
-    testParse("a==!b[1]", "{(::equal :a (::not (::$atIndex :b 1)))}")
-    testParse("a==!b.one", "{(::equal :a (::not (::$atIndex :b 'one')))}")
+    testParse("a==!b[1]", "{(::equal :a (::not (::$_atIndex_$ :b 1)))}")
+    testParse("a==!b.one", "{(::equal :a (::not (::$_atIndex_$ :b 'one')))}")
   })
 
   describe("comments", () => {
@@ -158,8 +158,8 @@ describe("Peggy parse", () => {
     testParse("a && b<=c || d", "{(::or (::and :a (::smallerEq :b :c)) :d)}")
     testParse("a && b>c || d", "{(::or (::and :a (::larger :b :c)) :d)}")
     testParse("a && b<c || d", "{(::or (::and :a (::smaller :b :c)) :d)}")
-    testParse("a && b<c[i] || d", "{(::or (::and :a (::smaller :b (::$atIndex :c :i))) :d)}")
-    testParse("a && b<c.i || d", "{(::or (::and :a (::smaller :b (::$atIndex :c 'i'))) :d)}")
+    testParse("a && b<c[i] || d", "{(::or (::and :a (::smaller :b (::$_atIndex_$ :c :i))) :d)}")
+    testParse("a && b<c.i || d", "{(::or (::and :a (::smaller :b (::$_atIndex_$ :c 'i'))) :d)}")
     testParse("a && b<c(i) || d", "{(::or (::and :a (::smaller :b (::c :i))) :d)}")
     testParse("a && b<1+2 || d", "{(::or (::and :a (::smaller :b (::add 1 2))) :d)}")
     testParse(
@@ -179,7 +179,7 @@ describe("Peggy parse", () => {
   describe("pipe", () => {
     testParse("1 -> add(2)", "{(::add 1 2)}")
     testParse("-1 -> add(2)", "{(::add (::unaryMinus 1) 2)}")
-    testParse("-a[1] -> add(2)", "{(::add (::unaryMinus (::$atIndex :a 1)) 2)}")
+    testParse("-a[1] -> add(2)", "{(::add (::unaryMinus (::$_atIndex_$ :a 1)) 2)}")
     testParse("-f(1) -> add(2)", "{(::add (::unaryMinus (::f 1)) 2)}")
     testParse("1 + 2 -> add(3)", "{(::add 1 (::add 2 3))}")
     testParse("1 -> add(2) * 3", "{(::multiply (::add 1 2) 3)}")
@@ -198,11 +198,11 @@ describe("Peggy parse", () => {
     testParse("-1 to -2", "{(::credibleIntervalToDistribution (::unaryMinus 1) (::unaryMinus 2))}") // lower than unary
     testParse(
       "a[1] to a[2]",
-      "{(::credibleIntervalToDistribution (::$atIndex :a 1) (::$atIndex :a 2))}",
+      "{(::credibleIntervalToDistribution (::$_atIndex_$ :a 1) (::$_atIndex_$ :a 2))}",
     ) // lower than post
     testParse(
       "a.p1 to a.p2",
-      "{(::credibleIntervalToDistribution (::$atIndex :a 'p1') (::$atIndex :a 'p2'))}",
+      "{(::credibleIntervalToDistribution (::$_atIndex_$ :a 'p1') (::$_atIndex_$ :a 'p2'))}",
     ) // lower than post
     testParse("1 to 2 + 3", "{(::add (::credibleIntervalToDistribution 1 2) 3)}") // higher than binary operators
     testParse(
@@ -231,21 +231,21 @@ describe("Peggy parse", () => {
     )
     testParse(
       "myadd(x,y)=x+y; z=[myadd]; z",
-      "{:myadd = {|:x,:y| {(::add :x :y)}}; :z = {(::$constructArray (:myadd))}; :z}",
+      "{:myadd = {|:x,:y| {(::add :x :y)}}; :z = {(::$_constructArray_$ (:myadd))}; :z}",
     )
     testParse(
       "myaddd(x,y)=x+y; z={x: myaddd}; z",
-      "{:myaddd = {|:x,:y| {(::add :x :y)}}; :z = {(::$constructRecord ('x': :myaddd))}; :z}",
+      "{:myaddd = {|:x,:y| {(::add :x :y)}}; :z = {(::$_constructRecord_$ ('x': :myaddd))}; :z}",
     )
     testParse("f({|x| x+1})", "{(::f {|:x| {(::add :x 1)}})}")
     testParse("map(arr, {|x| x+1})", "{(::map :arr {|:x| {(::add :x 1)}})}")
     testParse(
       "map([1,2,3], {|x| x+1})",
-      "{(::map (::$constructArray (1 2 3)) {|:x| {(::add :x 1)}})}",
+      "{(::map (::$_constructArray_$ (1 2 3)) {|:x| {(::add :x 1)}})}",
     )
     testParse(
       "[1,2,3]->map({|x| x+1})",
-      "{(::map (::$constructArray (1 2 3)) {|:x| {(::add :x 1)}})}",
+      "{(::map (::$_constructArray_$ (1 2 3)) {|:x| {(::add :x 1)}})}",
     )
   })
 })

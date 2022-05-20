@@ -19,7 +19,7 @@ describe("bindStatement", () => {
   testMacro(
     [],
     eBindStatement(eBindings([]), exampleStatementY),
-    "Ok((:$setBindings {} :y 1) context: {})",
+    "Ok((:$_setBindings_$ {} :y 1) context: {})",
   )
   // Then it answers the bindings for the next statement when reduced
   testMacroEval([], eBindStatement(eBindings([]), exampleStatementY), "Ok({y: 1})")
@@ -27,7 +27,7 @@ describe("bindStatement", () => {
   testMacro(
     [],
     eBindStatement(eBindings([("x", EvNumber(2.))]), exampleStatementX),
-    "Ok((:$setBindings {x: 2} :y 2) context: {x: 2})",
+    "Ok((:$_setBindings_$ {x: 2} :y 2) context: {x: 2})",
   )
   // An expression does not return a binding, thus error
   testMacro([], eBindStatement(eBindings([]), exampleExpression), "Assignment expected")
@@ -35,7 +35,7 @@ describe("bindStatement", () => {
   testMacro(
     [("z", EvNumber(99.))],
     eBindStatementDefault(exampleStatementY),
-    "Ok((:$setBindings {z: 99} :y 1) context: {z: 99})",
+    "Ok((:$_setBindings_$ {z: 99} :y 1) context: {z: 99})",
   )
 })
 
@@ -50,7 +50,7 @@ describe("bindExpression", () => {
   testMacro(
     [],
     eBindExpression(eBindings([("x", EvNumber(2.))]), exampleStatementY),
-    "Ok((:$exportBindings (:$setBindings {x: 2} :y 1)) context: {x: 2})",
+    "Ok((:$_exportBindings_$ (:$_setBindings_$ {x: 2} :y 1)) context: {x: 2})",
   )
   // Now let's reduce that expression
   testMacroEval(
@@ -71,20 +71,20 @@ describe("block", () => {
   testMacro([], eBlock(list{exampleExpression}), "Ok((:$$_bindExpression_$$ 1))")
   testMacroEval([], eBlock(list{exampleExpression}), "Ok(1)")
   // Block with a single statement
-  testMacro([], eBlock(list{exampleStatementY}), "Ok((:$$_bindExpression_$$ (:$let :y 1)))")
+  testMacro([], eBlock(list{exampleStatementY}), "Ok((:$$_bindExpression_$$ (:$_let_$ :y 1)))")
   testMacroEval([], eBlock(list{exampleStatementY}), "Ok({y: 1})")
   // Block with a statement and an expression
   testMacro(
     [],
     eBlock(list{exampleStatementY, exampleExpressionY}),
-    "Ok((:$$_bindExpression_$$ (:$$_bindStatement_$$ (:$let :y 1)) :y))",
+    "Ok((:$$_bindExpression_$$ (:$$_bindStatement_$$ (:$_let_$ :y 1)) :y))",
   )
   testMacroEval([], eBlock(list{exampleStatementY, exampleExpressionY}), "Ok(1)")
   // Block with a statement and another statement
   testMacro(
     [],
     eBlock(list{exampleStatementY, exampleStatementZ}),
-    "Ok((:$$_bindExpression_$$ (:$$_bindStatement_$$ (:$let :y 1)) (:$let :z :y)))",
+    "Ok((:$$_bindExpression_$$ (:$$_bindStatement_$$ (:$_let_$ :y 1)) (:$_let_$ :z :y)))",
   )
   testMacroEval([], eBlock(list{exampleStatementY, exampleStatementZ}), "Ok({y: 1,z: 1})")
   // Block inside a block
@@ -98,7 +98,7 @@ describe("block", () => {
   testMacro(
     [],
     eBlock(list{eLetStatement("z", eBlock(list{eBlock(list{exampleExpressionY})}))}),
-    "Ok((:$$_bindExpression_$$ (:$let :z (:$$_block_$$ (:$$_block_$$ :y)))))",
+    "Ok((:$$_bindExpression_$$ (:$_let_$ :z (:$$_block_$$ (:$$_block_$$ :y)))))",
   )
   testMacroEval(
     [],
@@ -107,7 +107,7 @@ describe("block", () => {
   )
   // Empty block
   testMacro([], eBlock(list{}), "Ok(:undefined block)") //TODO: should be an error
-  //   :$$_block_$$ (:$$_block_$$ (:$let :y (:add :x 1)) :y)"
+  //   :$$_block_$$ (:$$_block_$$ (:$_let_$ :y (:add :x 1)) :y)"
   testMacro(
     [],
     eBlock(list{
@@ -116,7 +116,7 @@ describe("block", () => {
         eSymbol("y"),
       }),
     }),
-    "Ok((:$$_bindExpression_$$ (:$$_block_$$ (:$let :y (:add :x 1)) :y)))",
+    "Ok((:$$_bindExpression_$$ (:$$_block_$$ (:$_let_$ :y (:add :x 1)) :y)))",
   )
   testMacroEval(
     [("x", EvNumber(1.))],

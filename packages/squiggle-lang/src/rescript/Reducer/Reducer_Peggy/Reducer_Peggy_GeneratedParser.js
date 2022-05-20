@@ -35,9 +35,9 @@
   }
 
   var postOperatorToFunction = {
-    '.': '$atIndex',
+    '.': '$_atIndex_$',
     '()': '$$_applyAll_$$',
-    '[]': '$atIndex',
+    '[]': '$_atIndex_$',
   }
 
   function nodeBlock(statements) {return{type: 'Block', statements: statements}}
@@ -405,9 +405,9 @@ function peg$parse(input, options) {
   var peg$f29 = function(args, statements, finalExpression) { statements.push(finalExpression) 
       	return nodeLambda(args, nodeBlock(statements)) };
   var peg$f30 = function(args, finalExpression) { return nodeLambda(args, nodeBlock([finalExpression])) };
-  var peg$f31 = function() { return makeFunctionCall('$constructArray', [nodeExpression([])])};
-  var peg$f32 = function(args) { return makeFunctionCall('$constructArray', [nodeExpression(args)])};
-  var peg$f33 = function(args) { return makeFunctionCall('$constructRecord', [nodeExpression(args)])};
+  var peg$f31 = function() { return makeFunctionCall('$_constructArray_$', [nodeExpression([])])};
+  var peg$f32 = function(args) { return makeFunctionCall('$_constructArray_$', [nodeExpression(args)])};
+  var peg$f33 = function(args) { return makeFunctionCall('$_constructRecord_$', [nodeExpression(args)])};
   var peg$f34 = function(key, value) { return nodeKeyValue(key, value)};
 
   var peg$currPos = 0;

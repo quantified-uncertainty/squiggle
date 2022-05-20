@@ -51,7 +51,7 @@ describe("call and bindings", () => {
   )
   testParseToBe(
     "f=99; g(x)=f; g(2)",
-    "Ok((:$$_block_$$ (:$let :f (:$$_block_$$ 99)) (:$let :g (:$$_lambda_$$ [x] (:$$_block_$$ :f))) (:g 2)))",
+    "Ok((:$$_block_$$ (:$_let_$ :f (:$$_block_$$ 99)) (:$_let_$ :g (:$$_lambda_$$ [x] (:$$_block_$$ :f))) (:g 2)))",
   )
   testEvalToBe("f=99; g(x)=f; g(2)", "Ok(99)")
   testEvalToBe("f(x)=x; g(x)=f(x); g(2)", "Ok(2)")

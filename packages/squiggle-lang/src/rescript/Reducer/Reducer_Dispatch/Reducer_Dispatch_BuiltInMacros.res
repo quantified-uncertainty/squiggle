@@ -25,7 +25,7 @@ let dispatchMacroCall = (
 ): result<expressionWithContext, errorValue> => {
   let doBindStatement = (bindingExpr: expression, statement: expression, environment) =>
     switch statement {
-    | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$let")), symbolExpr, statement}) => {
+    | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$_let_$")), symbolExpr, statement}) => {
         let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
 
         rExternalBindingsValue->Result.flatMap(externalBindingsValue => {
@@ -34,7 +34,7 @@ let dispatchMacroCall = (
           // Js.log(
           //   `bindStatement ${Bindings.toString(newBindings)}<==${ExpressionT.toString(
           //       bindingExpr,
-          //     )} statement: $let ${ExpressionT.toString(symbolExpr)}=${ExpressionT.toString(
+          //     )} statement: $_let_$ ${ExpressionT.toString(symbolExpr)}=${ExpressionT.toString(
           //       statement,
           //     )}`,
           // )
@@ -43,7 +43,7 @@ let dispatchMacroCall = (
           rNewStatement->Result.map(newStatement =>
             ExpressionWithContext.withContext(
               eFunction(
-                "$setBindings",
+                "$_setBindings_$",
                 list{newBindings->Bindings.toExternalBindings->eRecord, symbolExpr, newStatement},
               ),
               newBindings,
@@ -59,7 +59,7 @@ let dispatchMacroCall = (
     errorValue,
   > =>
     switch statement {
-    | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$let")), symbolExpr, statement}) => {
+    | ExpressionT.EList(list{ExpressionT.EValue(EvCall("$_let_$")), symbolExpr, statement}) => {
         let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
 
         rExternalBindingsValue->Result.flatMap(externalBindingsValue => {
@@ -68,10 +68,10 @@ let dispatchMacroCall = (
           rNewStatement->Result.map(newStatement =>
             ExpressionWithContext.withContext(
               eFunction(
-                "$exportBindings",
+                "$_exportBindings_$",
                 list{
                   eFunction(
-                    "$setBindings",
+                    "$_setBindings_$",
                     list{
                       newBindings->Bindings.toExternalBindings->eRecord,
                       symbolExpr,
