@@ -10,6 +10,21 @@ type rec itype =
 and iRecord = array<iRecordParam>
 and iRecordParam = (string, itype)
 
+module Itype = {
+  let rec toString = (t: itype) =>
+    switch t {
+    | I_Number => "number"
+    | I_Numeric => "numeric"
+    | I_DistOrNumber => "distOrNumber"
+    | I_Record(r) => {
+        let input = ((name, itype): iRecordParam) => `${name}: ${toString(itype)}`
+        `record({${r->E.A2.fmap(input)->E.A2.joinWith(", ")}})`
+      }
+    | I_Array(r) => `record(${r->E.A2.fmap(toString)->E.A2.joinWith(", ")})`
+    | I_Option(v) => `option(${toString(v)})`
+    }
+}
+
 type rec value =
   | Number(float)
   | Dist(DistributionTypes.genericDist)
@@ -202,7 +217,7 @@ module Matcher = {
       }
     }
 
-    let fullMatchToDef = (registry: registry, {fnName, inputIndex}: RegistryMatch.match): option<
+    let matchToDef = (registry: registry, {fnName, inputIndex}: RegistryMatch.match): option<
       fnDefinition,
     > =>
       registry
@@ -212,9 +227,10 @@ module Matcher = {
 }
 
 module FnDefinition = {
-  let getArgValues = (f: fnDefinition, args: array<expressionValue>): option<array<value>> => {
-    let mainInputTypes = f.inputs
-    if E.A.length(f.inputs) !== E.A.length(args) {
+  type t = fnDefinition
+  let getArgValues = (t: t, args: array<expressionValue>): option<array<value>> => {
+    let mainInputTypes = t.inputs
+    if E.A.length(t.inputs) !== E.A.length(args) {
       None
     } else {
       E.A.zip(mainInputTypes, args)
@@ -222,10 +238,13 @@ module FnDefinition = {
       ->E.A.O.openIfAllSome
     }
   }
-  let run = (f: fnDefinition, args: array<expressionValue>) => {
-    let argValues = getArgValues(f, args)
+
+  let defToString = (t: t) => t.inputs->E.A2.fmap(Itype.toString)->E.A2.joinWith(", ")
+
+  let run = (t: t, args: array<expressionValue>) => {
+    let argValues = getArgValues(t, args)
     switch argValues {
-    | Some(values) => f.run(values)
+    | Some(values) => t.run(values)
     | None => Error("Impossible")
     }
   }
@@ -247,11 +266,19 @@ module Function = {
 
 module Registry = {
   let matchAndRun = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let matchToDef = m => Matcher.Registry.matchToDef(r, m)
+    let showNameMatchDefinitions = matches => {
+      let defs =
+        matches
+        ->E.A2.fmap(matchToDef)
+        ->E.A.O.concatSomes
+        ->E.A2.fmap(r => `[${fnName}(${FnDefinition.defToString(r)})]`)
+        ->E.A2.joinWith("; ")
+      `There are function matches for ${fnName}(), but with different arguments: ${defs}`
+    }
     switch Matcher.Registry.findMatches(r, fnName, args) {
-    | Matcher.Match.FullMatch(m) =>
-      Matcher.Registry.fullMatchToDef(r, m)->E.O2.fmap(r => {
-        FnDefinition.run(r, args)
-      })
+    | Matcher.Match.FullMatch(match) => match->matchToDef->E.O2.fmap(FnDefinition.run(_, args))
+    | SameNameDifferentArguments(m) => Some(Error(showNameMatchDefinitions(m)))
     | _ => None
     }
   }
