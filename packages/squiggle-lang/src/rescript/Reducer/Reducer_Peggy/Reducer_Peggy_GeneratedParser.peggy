@@ -98,14 +98,15 @@ statement
   / defunStatement
 
 letStatement 
-  = variable:identifier _ '=' _nl value:zeroOMoreArgumentsBlockOrExpression
-
+  = variable:identifier _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
   { return nodeLetStatment(variable, value) }
 
 defunStatement
-  = variable:identifier '(' _nl args:array_parameters _nl ')' _ '=' _nl body:innerBlockOrExpression
+  = variable:identifier '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     { var value = nodeLambda(args, body)
       return nodeLetStatment(variable, value) }
+
+  assignmentOp "assignment" = '='
 
 array_parameters 
   = head:dollarIdentifier tail:(_ ',' _nl @dollarIdentifier)* 
@@ -124,51 +125,67 @@ ternary
     { return nodeTernary(condition, trueExpression, falseExpression) }
 
 logicalAdditive
-  = head:logicalMultiplicative tail:(_ operator:'||' _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})* 
+  = head:logicalMultiplicative tail:(_ operator:logicalAdditiveOp _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return makeFunctionCall(toFunction[element.operator], [result, element.right])
     }, head)}
+
+  logicalAdditiveOp "operator" = '||'
 
 // start binary operators
 logicalMultiplicative
-  = head:equality tail:(_ operator:'&&' _nl arg:equality {return {operator: operator, right: arg}})* 
+  = head:equality tail:(_ operator:logicalMultiplicativeOp _nl arg:equality {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return makeFunctionCall(toFunction[element.operator], [result, element.right])
     }, head)}
 
+  logicalMultiplicativeOp "operator" = '&&'
+
 equality
-  = left:relational _ operator:('=='/'!=') _nl right:relational 
+  = left:relational _ operator:equalityOp _nl right:relational 
   { return makeFunctionCall(toFunction[operator], [left, right])}
   / relational  
  
+ equalityOp "operator" = '=='/'!='
+
 relational
-  = left:additive _ operator:('<='/'<'/'>='/'>') _nl right:additive 
+  = left:additive _ operator:relationalOp _nl right:additive 
   { return makeFunctionCall(toFunction[operator], [left, right])}
   / additive
 
+  relationalOp "operator" = '<='/'<'/'>='/'>'
+
 additive
-  = head:multiplicative tail:(_ operator:('+' / '-' / '.+' / '.-') _nl arg:multiplicative {return {operator: operator, right: arg}})* 
+  = head:multiplicative tail:(_ operator:additiveOp _nl arg:multiplicative {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return makeFunctionCall(toFunction[element.operator], [result, element.right])
     }, head)}
+
+  additiveOp "operator" = '+' / '-' / '.+' / '.-'
 
 multiplicative
-  = head:power tail:(_ operator:('*' / '/' / '.*' / './') _nl arg:power {return {operator: operator, right: arg}})* 
+  = head:power tail:(_ operator:multiplicativeOp _nl arg:power {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return makeFunctionCall(toFunction[element.operator], [result, element.right])
     }, head)}
+
+  multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
-  = head:credibleInterval tail:(_ operator:('^' / '.^') _nl arg:credibleInterval {return {operator: operator, right: arg}})* 
+  = head:credibleInterval tail:(_ operator:powerOp _nl arg:credibleInterval {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return makeFunctionCall(toFunction[element.operator], [result, element.right])
     }, head)}
 
+  powerOp "operator" = '^' / '.^'
+
 credibleInterval
-  = head:chainFunctionCall tail:(__ operator:('to') __nl arg:chainFunctionCall {return {operator: operator, right: arg}})* 
+  = head:chainFunctionCall tail:(__ operator:credibleIntervalOp __nl arg:chainFunctionCall {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return makeFunctionCall(toFunction[element.operator], [result, element.right])
     }, head)}
+
+    credibleIntervalOp "operator" = 'to'
 
 chainFunctionCall
   = head:unary tail:(_ ('->'/'|>') _nl chained:chainedFunction {return chained})* 
@@ -191,7 +208,7 @@ unary
   { return makeFunctionCall(unaryToFunction[unaryOperator], [right])}
   / postOperator
   
-  unaryOperator 
+  unaryOperator "unary operator"
   = ('-' / '.-' / '!' ) 
 
 postOperator = indexedValue
@@ -296,7 +313,7 @@ recordConstructor  'record'
     = key:expression _ ':' _nl value:expression 
     { return nodeKeyValue(key, value)}
     
-_ 'optional whitespace'
+_ 'whitespace'
   = whiteSpaceCharactersOrComment*
 
 _nl 'optional whitespace or newline'
