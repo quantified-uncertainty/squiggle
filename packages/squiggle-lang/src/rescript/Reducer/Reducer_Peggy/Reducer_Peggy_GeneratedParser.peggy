@@ -108,7 +108,7 @@ defunStatement
       return nodeLetStatment(variable, value) }
 
 array_parameters 
-  = head:identifier tail:(_ ',' _nl @identifier)* 
+  = head:dollarIdentifier tail:(_ ',' _nl @dollarIdentifier)* 
   { return [head, ...tail]; }
 
 expression = ifthenelse / ternary / logicalAdditive
@@ -177,11 +177,11 @@ chainFunctionCall
     }, head)}
 
   chainedFunction
-    = fn:identifier '(' _nl args:array_functionArguments _nl ')' 
+    = fn:dollarIdentifier '(' _nl args:array_functionArguments _nl ')' 
       { return {fnName: fn.value, args: args}}
-      / fn:identifier '(' _nl ')' 
+      / fn:dollarIdentifier '(' _nl ')' 
       { return {fnName: fn.value, args: []}}
-      / fn:identifier
+      / fn:dollarIdentifier
       { return {fnName: fn.value, args: []}}
 
 // end of binary operators
@@ -219,8 +219,8 @@ maybeRecordElement
   / atom
 
   recordElement
-    = head:identifier &'.' 
-      tail:(_ '.' _nl arg:$identifier {return {fn: postOperatorToFunction['.'],  args: [nodeString(arg)]}})* 
+    = head:dollarIdentifier &'.' 
+      tail:(_ '.' _nl arg:$dollarIdentifier {return {fn: postOperatorToFunction['.'],  args: [nodeString(arg)]}})* 
     { return tail.reduce(function(result, element) {
         return makeFunctionCall(element.fn, [result, ...element.args])
       }, head)}
@@ -236,10 +236,13 @@ basicLiteral
   / float
   / integer
   / boolean
-  / identifier
+  / dollarIdentifier
 
 identifier 'identifier'
-  = identifier:([_a-z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
+  = ([_a-z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
+
+dollarIdentifier '$identifier'
+  = ([\$_a-z]+[\$_a-z0-9]i*) {return nodeIdentifier(text())} 
 
 string 'string'
   = characters:("'" @([^'])* "'") {return nodeString(characters.join(''))} 
