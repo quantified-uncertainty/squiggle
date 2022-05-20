@@ -253,6 +253,13 @@ module R = {
     | (_, Error(e)) => Error(e)
     | (Ok(a), Ok(b)) => Ok((a, b))
     }
+  let merge3 = (a, b, c) =>
+    switch (a, b, c) {
+    | (Error(e), _, _) => Error(e)
+    | (_, Error(e), _) => Error(e)
+    | (_, _, Error(e)) => Error(e)
+    | (Ok(a), Ok(b), Ok(c)) => Ok((a, b, c))
+    }
   let toOption = (e: Belt.Result.t<'a, 'b>) =>
     switch e {
     | Ok(r) => Some(r)
@@ -531,10 +538,13 @@ module A = {
   let keepMap = Belt.Array.keepMap
   let slice = Belt.Array.slice
   let init = Array.init
+  let filter = (fn, xs) => Belt.Array.keep(xs, fn)
   let reduce = Belt.Array.reduce
   let reducei = Belt.Array.reduceWithIndex
   let isEmpty = r => length(r) < 1
   let stableSortBy = Belt.SortArray.stableSortBy
+  let find = (f: 'a => bool, xs: array<'a>) => first(filter(f, xs))
+    
   let toRanges = (a: array<'a>) =>
     switch a |> Belt.Array.length {
     | 0

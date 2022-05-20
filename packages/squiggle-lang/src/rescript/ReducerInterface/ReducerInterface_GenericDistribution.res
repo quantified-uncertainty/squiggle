@@ -1,5 +1,6 @@
 module ExpressionValue = ReducerInterface_ExpressionValue
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type argumentError = DistributionTypes.argumentError
 
 module Helpers = {
   let arithmeticMap = r =>
@@ -80,25 +81,25 @@ module Helpers = {
     )->DistributionOperation.run(~env)
   }
 
-  let parseNumber = (args: expressionValue): Belt.Result.t<float, string> =>
+  let parseNumber = (args: expressionValue): Belt.Result.t<float, argumentError> =>
     switch args {
     | EvNumber(x) => Ok(x)
-    | _ => Error("Not a number")
+    | _ => Error(OtherArgumentError("Not a number"))
     }
 
-  let parseNumberArray = (ags: array<expressionValue>): Belt.Result.t<array<float>, string> =>
+  let parseNumberArray = (ags: array<expressionValue>): Belt.Result.t<array<float>, argumentError> =>
     E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
 
-  let parseDist = (args: expressionValue): Belt.Result.t<DistributionTypes.genericDist, string> =>
+  let parseDist = (args: expressionValue): Belt.Result.t<DistributionTypes.genericDist, argumentError> =>
     switch args {
     | EvDistribution(x) => Ok(x)
     | EvNumber(x) => Ok(GenericDist.fromFloat(x))
-    | _ => Error("Not a distribution")
+    | _ => Error(OtherArgumentError("Not a distribution"))
     }
 
   let parseDistributionArray = (ags: array<expressionValue>): Belt.Result.t<
     array<DistributionTypes.genericDist>,
-    string,
+    argumentError,
   > => E.A.fmap(parseDist, ags) |> E.A.R.firstErrorOrOpen
 
   let mixtureWithGivenWeights = (
@@ -109,7 +110,7 @@ module Helpers = {
     E.A.length(distributions) == E.A.length(weights)
       ? Mixture(Belt.Array.zip(distributions, weights))->DistributionOperation.run(~env)
       : GenDistError(
-          ArgumentError("Error, mixture call has different number of distributions and weights"),
+          ArgumentError(OtherArgumentError("Error, mixture call has different number of distributions and weights"))
         )
 
   let mixtureWithDefaultWeights = (
@@ -125,7 +126,7 @@ module Helpers = {
     args: array<expressionValue>,
     ~env: DistributionOperation.env,
   ): DistributionOperation.outputType => {
-    let error = (err: string): DistributionOperation.outputType =>
+    let error = (err: DistributionTypes.argumentError): DistributionOperation.outputType =>
       err->DistributionTypes.ArgumentError->GenDistError
     switch args {
     | [EvArray(distributions)] =>
@@ -138,7 +139,7 @@ module Helpers = {
       | (Ok(distrs), Ok(wghts)) => mixtureWithGivenWeights(distrs, wghts, ~env)
       | (Error(err), Ok(_)) => error(err)
       | (Ok(_), Error(err)) => error(err)
-      | (Error(err1), Error(err2)) => error(`${err1}|${err2}`)
+      | (Error(err1), Error(err2)) => error(err1)
       }
     | _ =>
       switch E.A.last(args) {
@@ -158,36 +159,19 @@ module Helpers = {
         | Ok(distributions) => mixtureWithDefaultWeights(distributions, ~env)
         | Error(err) => error(err)
         }
-      | _ => error("Last argument of mx must be array or distribution")
+      | _ => error(OtherArgumentError("Last argument of mx must be array or distribution"))
       }
     }
   }
 }
 
 module SymbolicConstructors = {
-  let oneFloat = name =>
-    switch name {
-    | "exponential" => Ok(SymbolicDist.Exponential.make)
-    | _ => Error("Unreachable state")
-    }
-
-  let twoFloat = name =>
-    switch name {
-    | "normal" => Ok(SymbolicDist.Normal.make)
-    | "uniform" => Ok(SymbolicDist.Uniform.make)
-    | "beta" => Ok(SymbolicDist.Beta.make)
-    | "lognormal" => Ok(SymbolicDist.Lognormal.make)
-    | "cauchy" => Ok(SymbolicDist.Cauchy.make)
-    | "gamma" => Ok(SymbolicDist.Gamma.make)
-    | "to" => Ok(SymbolicDist.From90thPercentile.make)
-    | _ => Error("Unreachable state")
-    }
-
-  let threeFloat = name =>
-    switch name {
-    | "triangular" => Ok(SymbolicDist.Triangular.make)
-    | _ => Error("Unreachable state")
-    }
+  let checkSymbolicConstructors = (call: ExpressionValue.functionCall) : option<result<SymbolicDistTypes.symbolicDist, argumentError>> => {
+    let (fnName, args) = call
+    let function = E.A.find((ReducerInterface_FunctionParser.Function(name, argsParser)) => name == fnName, ReducerInterface_FunctionParser.allFunctions)
+    E.O.fmap((ReducerInterface_FunctionParser.Function(_, argsParser)) => argsParser(args), function)
+  }
+    
 
   let symbolicResultToOutput = (
     symbolicResult: result<SymbolicDistTypes.symbolicDist, string>,
@@ -204,23 +188,8 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("exponential" as fnName, [EvNumber(f)]) =>
-    SymbolicConstructors.oneFloat(fnName)
-    ->E.R.bind(r => r(f))
-    ->SymbolicConstructors.symbolicResultToOutput
   | ("delta", [EvNumber(f)]) =>
     SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
-  | (
-      ("normal" | "uniform" | "beta" | "lognormal" | "cauchy" | "gamma" | "to") as fnName,
-      [EvNumber(f1), EvNumber(f2)],
-    ) =>
-    SymbolicConstructors.twoFloat(fnName)
-    ->E.R.bind(r => r(f1, f2))
-    ->SymbolicConstructors.symbolicResultToOutput
-  | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>
-    SymbolicConstructors.threeFloat(fnName)
-    ->E.R.bind(r => r(f1, f2, f3))
-    ->SymbolicConstructors.symbolicResultToOutput
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist, ~env)
   | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist, ~env)
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
@@ -323,7 +292,7 @@ let dispatchToGenericOutput = (
       a,
       ~env,
     )->Some
-  | _ => None
+  | _ => checkSymbolicConstructors(call)
   }
 }
 

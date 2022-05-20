@@ -5,10 +5,8 @@ let normal95confidencePoint = 1.6448536269514722
 
 module Normal = {
   type t = normal
-  let make = (mean: float, stdev: float): result<symbolicDist, string> =>
-    stdev > 0.0
-      ? Ok(#Normal({mean: mean, stdev: stdev}))
-      : Error("Standard deviation of normal distribution must be larger than 0")
+  let make = (mean: SafeFloat.finite, stdev: SafeFloat.positive): symbolicDist =>
+      #Normal({mean: SafeFloat.Finite.toFloat(mean), stdev: SafeFloat.Positive.toFloat(stdev)})
   let pdf = (x, t: t) => Jstat.Normal.pdf(x, t.mean, t.stdev)
   let cdf = (x, t: t) => Jstat.Normal.cdf(x, t.mean, t.stdev)
 
@@ -68,14 +66,10 @@ module Normal = {
 
 module Exponential = {
   type t = exponential
-  let make = (rate: float): result<symbolicDist, string> =>
-    rate > 0.0
-      ? Ok(
+  let make = (rate: SafeFloat.positive): symbolicDist =>
           #Exponential({
-            rate: rate,
-          }),
-        )
-      : Error("Exponential distributions rate must be larger than 0.")
+            rate: SafeFloat.Positive.toFloat(rate),
+          })
   let pdf = (x, t: t) => Jstat.Exponential.pdf(x, t.rate)
   let cdf = (x, t: t) => Jstat.Exponential.cdf(x, t.rate)
   let inv = (p, t: t) => Jstat.Exponential.inv(p, t.rate)
@@ -86,10 +80,8 @@ module Exponential = {
 
 module Cauchy = {
   type t = cauchy
-  let make = (local, scale): result<symbolicDist, string> =>
-    scale > 0.0
-      ? Ok(#Cauchy({local: local, scale: scale}))
-      : Error("Cauchy distribution scale parameter must larger than 0.")
+  let make = (local: SafeFloat.finite, scale: SafeFloat.positive): symbolicDist =>
+      #Cauchy({local: SafeFloat.Finite.toFloat(local), scale: SafeFloat.Positive.toFloat(scale)})
   let pdf = (x, t: t) => Jstat.Cauchy.pdf(x, t.local, t.scale)
   let cdf = (x, t: t) => Jstat.Cauchy.cdf(x, t.local, t.scale)
   let inv = (p, t: t) => Jstat.Cauchy.inv(p, t.local, t.scale)
@@ -100,10 +92,12 @@ module Cauchy = {
 
 module Triangular = {
   type t = triangular
-  let make = (low, medium, high): result<symbolicDist, string> =>
-    low < medium && medium < high
-      ? Ok(#Triangular({low: low, medium: medium, high: high}))
-      : Error("Triangular values must be increasing order.")
+  let make = (low: SafeFloat.finite, medium: SafeFloat.finite, high: SafeFloat.finite): result<symbolicDist, DistributionTypes.argumentError> =>{
+    let (l, m, h) = (SafeFloat.Finite.toFloat(low), SafeFloat.Finite.toFloat(medium), SafeFloat.Finite.toFloat(high))
+    l < m && m < h
+      ? Ok(#Triangular({low: l, medium: m, high: h}))
+      : Error(OtherArgumentError("Triangular values must be increasing order."))
+    }
   let pdf = (x, t: t) => Jstat.Triangular.pdf(x, t.low, t.high, t.medium) // not obvious in jstat docs that high comes before medium?
   let cdf = (x, t: t) => Jstat.Triangular.cdf(x, t.low, t.high, t.medium)
   let inv = (p, t: t) => Jstat.Triangular.inv(p, t.low, t.high, t.medium)
@@ -114,10 +108,8 @@ module Triangular = {
 
 module Beta = {
   type t = beta
-  let make = (alpha, beta) =>
-    alpha > 0.0 && beta > 0.0
-      ? Ok(#Beta({alpha: alpha, beta: beta}))
-      : Error("Beta distribution parameters must be positive")
+  let make = (alpha: SafeFloat.positive, beta: SafeFloat.positive) =>
+      #Beta({alpha: SafeFloat.Positive.toFloat(alpha), beta: SafeFloat.Positive.toFloat(beta)})
   let pdf = (x, t: t) => Jstat.Beta.pdf(x, t.alpha, t.beta)
   let cdf = (x, t: t) => Jstat.Beta.cdf(x, t.alpha, t.beta)
   let inv = (p, t: t) => Jstat.Beta.inv(p, t.alpha, t.beta)
@@ -128,10 +120,8 @@ module Beta = {
 
 module Lognormal = {
   type t = lognormal
-  let make = (mu, sigma) =>
-    sigma > 0.0
-      ? Ok(#Lognormal({mu: mu, sigma: sigma}))
-      : Error("Lognormal standard deviation must be larger than 0")
+  let make = (mu: SafeFloat.finite, sigma: SafeFloat.positive) =>
+      #Lognormal({mu: SafeFloat.Finite.toFloat(mu), sigma: SafeFloat.Positive.toFloat(sigma)})
   let pdf = (x, t: t) => Jstat.Lognormal.pdf(x, t.mu, t.sigma)
   let cdf = (x, t: t) => Jstat.Lognormal.cdf(x, t.mu, t.sigma)
   let inv = (p, t: t) => Jstat.Lognormal.inv(p, t.mu, t.sigma)
@@ -199,8 +189,16 @@ module Lognormal = {
 
 module Uniform = {
   type t = uniform
-  let make = (low, high) =>
-    high > low ? Ok(#Uniform({low: low, high: high})) : Error("High must be larger than low")
+  let make = (low: SafeFloat.finite, high: SafeFloat.finite) => {
+     let l = SafeFloat.Finite.toFloat(low)
+     let h = SafeFloat.Finite.toFloat(high)
+    if h > l {
+      Ok(#Uniform({low: l, high: h})) 
+    }
+    else {
+      Error(DistributionTypes.OtherArgumentError("High must be larger than low"))
+    }
+  }
 
   let pdf = (x, t: t) => Jstat.Uniform.pdf(x, t.low, t.high)
   let cdf = (x, t: t) => Jstat.Uniform.cdf(x, t.low, t.high)
@@ -218,16 +216,8 @@ module Uniform = {
 
 module Gamma = {
   type t = gamma
-  let make = (shape: float, scale: float) => {
-    if shape > 0. {
-      if scale > 0. {
-        Ok(#Gamma({shape: shape, scale: scale}))
-      } else {
-        Error("scale must be larger than 0")
-      }
-    } else {
-      Error("shape must be larger than 0")
-    }
+  let make = (shape: SafeFloat.positive, scale: SafeFloat.positive) => {
+    #Gamma({shape: SafeFloat.Positive.toFloat(shape), scale: SafeFloat.Positive.toFloat(scale)})
   }
   let pdf = (x: float, t: t) => Jstat.Gamma.pdf(x, t.shape, t.scale)
   let cdf = (x: float, t: t) => Jstat.Gamma.cdf(x, t.shape, t.scale)
@@ -255,12 +245,16 @@ module Float = {
 }
 
 module From90thPercentile = {
-  let make = (low, high) =>
-    switch (low, high) {
-    | (low, high) if low <= 0.0 && low < high => Ok(Normal.from90PercentCI(low, high))
-    | (low, high) if low < high => Ok(Lognormal.from90PercentCI(low, high))
-    | (_, _) => Error("Low value must be less than high value.")
+  let make = (low: SafeFloat.positive, high: SafeFloat.positive) : result<SymbolicDistTypes.symbolicDist, DistributionTypes.argumentError> => {
+    let l = SafeFloat.Positive.toFloat(low)
+    let h = SafeFloat.Positive.toFloat(high)
+    if l < h {
+      Ok(Lognormal.from90PercentCI(l, h))
     }
+    else {
+      Error(OtherArgumentError("Low value must be less than high value."))
+    }
+  }
 }
 
 module T = {

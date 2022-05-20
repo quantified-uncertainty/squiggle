@@ -6,13 +6,63 @@ type genericDist =
 
 type asAlgebraicCombinationStrategy = AsDefault | AsSymbolic | AsMonteCarlo | AsConvolution
 
+type expressionType =
+  | ArrayType
+  | ArrayStringType
+  | BoolType
+  | CallType
+  | DistributionType
+  | LambdaType
+  | NumberType
+  | RecordType
+  | StringType
+  | SymbolType
+
+type argumentError = 
+    | WrongTypeError(expressionType, expressionType)
+    | IncorrectNumberOfArgumentsError(int, int)
+    | MustBeFinite
+    | MustBePositive
+    | OtherArgumentError(string)
+
+module ArgumentError = {
+
+  type t = argumentError
+
+  let expressionTypeToString = (eType: expressionType): string => 
+    switch eType {
+    | ArrayType => "array"
+    | ArrayStringType => "arraystring"
+    | BoolType => "boolean"
+    | CallType => "call"
+    | DistributionType => "distribution"
+    | LambdaType => "lambda"
+    | NumberType => "number"
+    | RecordType => "record"
+    | StringType => "string"
+    | SymbolType => "symbol"
+    }
+
+  let toString = (err: t) : string => 
+    switch err {
+    | WrongTypeError(expected, actual) => 
+        `Argument has wrong type. Expected ${expressionTypeToString(expected)} but got ${expressionTypeToString(actual)}`
+    | IncorrectNumberOfArgumentsError(expected, actual) => `Expected ${Belt.Int.toString(expected)} arguments but got ${Belt.Int.toString(actual)}`
+    | MustBeFinite => "Argument must be finite"
+    | MustBePositive => "Argument must be positive"
+    | OtherArgumentError(msg) => msg
+    }
+}
+
+
+
 @genType
 type error =
   | NotYetImplemented
   | Unreachable
   | DistributionVerticalShiftIsInvalid
   | SampleSetError(SampleSetDist.sampleSetError)
-  | ArgumentError(string)
+  | ArgumentError(ArgumentError.t)
   | OperationError(Operation.Error.t)
   | PointSetConversionError(SampleSetDist.pointsetConversionError)
   | SparklineError(PointSetTypes.sparklineError) // This type of error is for when we find a sparkline of a discrete distribution. This should probably at some point be actually implemented
@@ -33,7 +83,7 @@ module Error = {
     | NotYetImplemented => "Function Not Yet Implemented"
     | Unreachable => "Unreachable"
     | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift is Invalid"
-    | ArgumentError(s) => `Argument Error ${s}`
+    | ArgumentError(s) => ArgumentError.toString(s)
     | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
     | SampleSetError(TooFewSamples) => "Too Few Samples"
     | SampleSetError(NonNumericInput(err)) => `Found a non-number in input: ${err}`
@@ -50,6 +100,7 @@ module Error = {
 
   let sampleErrorToDistErr = (err: SampleSetDist.sampleSetError): error => SampleSetError(err)
 }
+
 
 @genType
 module DistributionOperation = {
