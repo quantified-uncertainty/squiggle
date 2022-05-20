@@ -14,7 +14,7 @@ let rec fromNode = (node: Parse.node): expression => {
       ->Js.Array2.map((argNode: Parse.nodeIdentifier) => argNode["value"])
       ->ExpressionBuilder.eArrayString
     let body = nodeLambda["body"]->caseBlock
-    ExpressionBuilder.eFunction("$$lambda", list{args, body})
+    ExpressionBuilder.eFunction("$$_lambda_$$", list{args, body})
   }
 
   switch Parse.castNodeType(node) {
@@ -37,7 +37,7 @@ let rec fromNode = (node: Parse.node): expression => {
   | PgNodeString(nodeString) => ExpressionBuilder.eString(nodeString["value"])
   | PgNodeTernary(nodeTernary) =>
     ExpressionBuilder.eFunction(
-      "$$ternary",
+      "$$_ternary_$$",
       list{
         fromNode(nodeTernary["condition"]),
         fromNode(nodeTernary["trueExpression"]),

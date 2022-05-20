@@ -32,7 +32,7 @@
 
   var postOperatorToFunction = {
     '.': '$atIndex',
-    '()': '$$applyAll',
+    '()': '$$_applyAll_$$',
     '[]': '$atIndex',
   }
 
@@ -42,10 +42,10 @@
   function nodeExpression(args) {return {type: 'Expression', nodes: args}}
   function nodeFloat(value) {return {type: 'Float', value: value}}
   function makeFunctionCall(fn, args) {
-    if (fn === '$$applyAll') {
+    if (fn === '$$_applyAll_$$') {
       // Any list of values is applied from left to right anyway. 
       // Like in Haskell and Lisp.
-      // So we remove the redundant $$applyAll.
+      // So we remove the redundant $$_applyAll_$$.
       if (args[0].type === "Identifier") {args[0].type = "CallIdentifier"}
       return nodeExpression(args) 
     } else {

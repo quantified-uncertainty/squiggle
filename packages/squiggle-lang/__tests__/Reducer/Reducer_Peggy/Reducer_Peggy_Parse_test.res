@@ -130,16 +130,16 @@ describe("Peggy parse", () => {
   })
 
   describe("ternary operator", () => {
-    testParse("true ? 2 : 3", "{(::$$ternary true 2 3)}")
-    testParse("false ? 2 : false ? 4 : 5", "{(::$$ternary false 2 (::$$ternary false 4 5))}") // nested ternary
+    testParse("true ? 2 : 3", "{(::$$_ternary_$$ true 2 3)}")
+    testParse("false ? 2 : false ? 4 : 5", "{(::$$_ternary_$$ false 2 (::$$_ternary_$$ false 4 5))}") // nested ternary
   })
 
   describe("if then else", () => {
-    testParse("if true then 2 else 3", "{(::$$ternary true {2} {3})}")
-    testParse("if false then {2} else {3}", "{(::$$ternary false {2} {3})}")
+    testParse("if true then 2 else 3", "{(::$$_ternary_$$ true {2} {3})}")
+    testParse("if false then {2} else {3}", "{(::$$_ternary_$$ false {2} {3})}")
     testParse(
       "if false then {2} else if false then {4} else {5}",
-      "{(::$$ternary false {2} (::$$ternary false {4} {5}))}",
+      "{(::$$_ternary_$$ false {2} (::$$_ternary_$$ false {4} {5}))}",
     ) //nested if
   })
 
@@ -172,7 +172,7 @@ describe("Peggy parse", () => {
     )
     testParse(
       "a && b<1+2*3 || d ? true : false",
-      "{(::$$ternary (::or (::and :a (::smaller :b (::add 1 (::multiply 2 3)))) :d) true false)}",
+      "{(::$$_ternary_$$ (::or (::and :a (::smaller :b (::add 1 (::multiply 2 3)))) :d) true false)}",
     )
   })
 
@@ -221,7 +221,7 @@ describe("Peggy parse", () => {
     testParse("{|x| x}", "{{|:x| {:x}}}")
     testParse("f={|x| x}", "{:f = {{|:x| {:x}}}}")
     testParse("f(x)=x", "{:f = {|:x| {:x}}}") // Function definitions are lambda assignments
-    testParse("f(x)=x ? 1 : 0", "{:f = {|:x| {(::$$ternary :x 1 0)}}}") // Function definitions are lambda assignments
+    testParse("f(x)=x ? 1 : 0", "{:f = {|:x| {(::$$_ternary_$$ :x 1 0)}}}") // Function definitions are lambda assignments
   })
 
   describe("Using lambda as value", () => {

@@ -92,7 +92,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
     pgToString(PgNodeIdentifier(node["variable"])) ++ " = " ++ toString(node["value"])
   | PgNodeString(node) => `'${node["value"]->Js.String.make}'`
   | PgNodeTernary(node) =>
-    "(::$$ternary " ++
+    "(::$$_ternary_$$ " ++
     toString(node["condition"]) ++
     " " ++
     toString(node["trueExpression"]) ++

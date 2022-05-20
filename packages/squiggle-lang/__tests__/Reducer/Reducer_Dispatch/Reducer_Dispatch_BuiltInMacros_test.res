@@ -68,37 +68,37 @@ describe("bindExpression", () => {
 
 describe("block", () => {
   // Block with a single expression
-  testMacro([], eBlock(list{exampleExpression}), "Ok((:$$bindExpression 1))")
+  testMacro([], eBlock(list{exampleExpression}), "Ok((:$$_bindExpression_$$ 1))")
   testMacroEval([], eBlock(list{exampleExpression}), "Ok(1)")
   // Block with a single statement
-  testMacro([], eBlock(list{exampleStatementY}), "Ok((:$$bindExpression (:$let :y 1)))")
+  testMacro([], eBlock(list{exampleStatementY}), "Ok((:$$_bindExpression_$$ (:$let :y 1)))")
   testMacroEval([], eBlock(list{exampleStatementY}), "Ok({y: 1})")
   // Block with a statement and an expression
   testMacro(
     [],
     eBlock(list{exampleStatementY, exampleExpressionY}),
-    "Ok((:$$bindExpression (:$$bindStatement (:$let :y 1)) :y))",
+    "Ok((:$$_bindExpression_$$ (:$$_bindStatement_$$ (:$let :y 1)) :y))",
   )
   testMacroEval([], eBlock(list{exampleStatementY, exampleExpressionY}), "Ok(1)")
   // Block with a statement and another statement
   testMacro(
     [],
     eBlock(list{exampleStatementY, exampleStatementZ}),
-    "Ok((:$$bindExpression (:$$bindStatement (:$let :y 1)) (:$let :z :y)))",
+    "Ok((:$$_bindExpression_$$ (:$$_bindStatement_$$ (:$let :y 1)) (:$let :z :y)))",
   )
   testMacroEval([], eBlock(list{exampleStatementY, exampleStatementZ}), "Ok({y: 1,z: 1})")
   // Block inside a block
   testMacro(
     [],
     eBlock(list{eBlock(list{exampleExpression})}),
-    "Ok((:$$bindExpression (:$$block 1)))",
+    "Ok((:$$_bindExpression_$$ (:$$_block_$$ 1)))",
   )
   testMacroEval([], eBlock(list{eBlock(list{exampleExpression})}), "Ok(1)")
   // Block assigned to a variable
   testMacro(
     [],
     eBlock(list{eLetStatement("z", eBlock(list{eBlock(list{exampleExpressionY})}))}),
-    "Ok((:$$bindExpression (:$let :z (:$$block (:$$block :y)))))",
+    "Ok((:$$_bindExpression_$$ (:$let :z (:$$_block_$$ (:$$_block_$$ :y)))))",
   )
   testMacroEval(
     [],
@@ -107,7 +107,7 @@ describe("block", () => {
   )
   // Empty block
   testMacro([], eBlock(list{}), "Ok(:undefined block)") //TODO: should be an error
-  //   :$$block (:$$block (:$let :y (:add :x 1)) :y)"
+  //   :$$_block_$$ (:$$_block_$$ (:$let :y (:add :x 1)) :y)"
   testMacro(
     [],
     eBlock(list{
@@ -116,7 +116,7 @@ describe("block", () => {
         eSymbol("y"),
       }),
     }),
-    "Ok((:$$bindExpression (:$$block (:$let :y (:add :x 1)) :y)))",
+    "Ok((:$$_bindExpression_$$ (:$$_block_$$ (:$let :y (:add :x 1)) :y)))",
   )
   testMacroEval(
     [("x", EvNumber(1.))],
@@ -132,17 +132,17 @@ describe("block", () => {
 
 describe("lambda", () => {
   // assign a lambda to a variable
-  let lambdaExpression = eFunction("$$lambda", list{eArrayString(["y"]), exampleExpressionY})
+  let lambdaExpression = eFunction("$$_lambda_$$", list{eArrayString(["y"]), exampleExpressionY})
   testMacro([], lambdaExpression, "Ok(lambda(y=>internal code))")
   // call a lambda
   let callLambdaExpression = list{lambdaExpression, eNumber(1.)}->ExpressionT.EList
-  testMacro([], callLambdaExpression, "Ok(((:$$lambda [y] :y) 1))")
+  testMacro([], callLambdaExpression, "Ok(((:$$_lambda_$$ [y] :y) 1))")
   testMacroEval([], callLambdaExpression, "Ok(1)")
   // Parameters shadow the outer scope
   testMacroEval([("y", EvNumber(666.))], callLambdaExpression, "Ok(1)")
   // When not shadowed by the parameters, the outer scope variables are available
   let lambdaExpression = eFunction(
-    "$$lambda",
+    "$$_lambda_$$",
     list{eArrayString(["z"]), eFunction("add", list{eSymbol("y"), eSymbol("z")})},
   )
   let callLambdaExpression = eList(list{lambdaExpression, eNumber(1.)})

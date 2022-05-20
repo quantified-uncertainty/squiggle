@@ -48,19 +48,19 @@ let eSymbol = (name: string): expression => name->BExpressionValue.EvSymbol->BEx
 
 let eList = (list: list<expression>): expression => list->BExpressionT.EList
 
-let eBlock = (exprs: list<expression>): expression => eFunction("$$block", exprs)
+let eBlock = (exprs: list<expression>): expression => eFunction("$$_block_$$", exprs)
 
 let eLetStatement = (symbol: string, valueExpression: expression): expression =>
   eFunction("$let", list{eSymbol(symbol), valueExpression})
 
 let eBindStatement = (bindingExpr: expression, letStatement: expression): expression =>
-  eFunction("$$bindStatement", list{bindingExpr, letStatement})
+  eFunction("$$_bindStatement_$$", list{bindingExpr, letStatement})
 
 let eBindStatementDefault = (letStatement: expression): expression =>
-  eFunction("$$bindStatement", list{letStatement})
+  eFunction("$$_bindStatement_$$", list{letStatement})
 
 let eBindExpression = (bindingExpr: expression, expression: expression): expression =>
-  eFunction("$$bindExpression", list{bindingExpr, expression})
+  eFunction("$$_bindExpression_$$", list{bindingExpr, expression})
 
 let eBindExpressionDefault = (expression: expression): expression =>
-  eFunction("$$bindExpression", list{expression})
+  eFunction("$$_bindExpression_$$", list{expression})
