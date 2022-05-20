@@ -174,7 +174,8 @@ let dispatchMacroCall = (
     | list{ExpressionT.EValue(EvCall("$$_bindExpression_$$")), expression} =>
       // bindings of the context are used when there is no binding expression
       doBindExpression(eRecord(Bindings.toExternalBindings(bindings)), expression, environment)
-    | list{ExpressionT.EValue(EvCall("$$_block_$$")), ...exprs} => doBlock(exprs, bindings, environment)
+    | list{ExpressionT.EValue(EvCall("$$_block_$$")), ...exprs} =>
+      doBlock(exprs, bindings, environment)
     | list{
         ExpressionT.EValue(EvCall("$$_lambda_$$")),
         ExpressionT.EValue(EvArrayString(parameters)),

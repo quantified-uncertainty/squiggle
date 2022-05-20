@@ -147,7 +147,10 @@ describe("parse on distribution functions", () => {
       "normal(5,2) ./ normal(5,1)",
       "Ok((:$$_block_$$ (:dotDivide (:normal 5 2) (:normal 5 1))))",
     )
-    testParse("normal(5,2) .^ normal(5,1)", "Ok((:$$_block_$$ (:dotPow (:normal 5 2) (:normal 5 1))))")
+    testParse(
+      "normal(5,2) .^ normal(5,1)",
+      "Ok((:$$_block_$$ (:dotPow (:normal 5 2) (:normal 5 1))))",
+    )
   })
   describe("equality", () => {
     testParse("5 == normal(5,2)", "Ok((:$$_block_$$ (:equal 5 (:normal 5 2))))")

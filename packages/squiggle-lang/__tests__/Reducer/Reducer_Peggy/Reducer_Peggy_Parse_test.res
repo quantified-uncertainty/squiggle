@@ -131,7 +131,10 @@ describe("Peggy parse", () => {
 
   describe("ternary operator", () => {
     testParse("true ? 2 : 3", "{(::$$_ternary_$$ true 2 3)}")
-    testParse("false ? 2 : false ? 4 : 5", "{(::$$_ternary_$$ false 2 (::$$_ternary_$$ false 4 5))}") // nested ternary
+    testParse(
+      "false ? 2 : false ? 4 : 5",
+      "{(::$$_ternary_$$ false 2 (::$$_ternary_$$ false 4 5))}",
+    ) // nested ternary
   })
 
   describe("if then else", () => {
@@ -188,7 +191,7 @@ describe("Peggy parse", () => {
     testParse("1 -> subtract(2) * 3", "{(::multiply (::subtract 1 2) 3)}")
   })
 
-  describe("elixir pipe", () => { 
+  describe("elixir pipe", () => {
     //handled together with -> so there is no need for seperate tests
     testParse("1 |> add(2)", "{(::add 1 2)}")
   })
