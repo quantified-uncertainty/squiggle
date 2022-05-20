@@ -246,13 +246,16 @@ string 'string'
   / characters:('"' @([^"])* '"') {return nodeString(characters.join(''))}
 
 integer 'integer'
-  = digits:[0-9]+![.] 
+  = d+ !"\." ![e]i
   { return nodeInteger(parseInt(text()))} 
   
 float 'float'
-  = ([0-9]+[.][0-9]*) 
+  = $(((d+ "\." d*) / ("\." d+)) floatExponent? / d+ floatExponent)
   { return nodeFloat(parseFloat(text()))} 
 
+	floatExponent = [e]i '-'? d+
+	d = [0-9]
+    
 boolean 'boolean'
   = ('true'/'false') 
   { return nodeBoolean(text() === 'true')}   

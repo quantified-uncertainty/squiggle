@@ -23,6 +23,17 @@ module MyOnly = {
 }
 
 describe("Peggy parse", () => {
+  describe("float", () => {
+    testParse("1.", "{1}")
+    testParse("1.1", "{1.1}")
+    testParse(".1", "{0.1}")
+    testParse("0.1", "{0.1}")
+    testParse("1e1", "{10}")
+    testParse("1e-1", "{0.1}")
+    testParse(".1e1", "{1}")
+    testParse("0.1e1", "{1}")
+  })
+
   describe("literals operators parenthesis", () => {
     // Note that there is always an outer block. Otherwise, external bindings are ignrored at the first statement
     testParse("1", "{1}")
