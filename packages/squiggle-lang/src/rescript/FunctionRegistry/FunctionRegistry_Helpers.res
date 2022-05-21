@@ -41,8 +41,9 @@ module Process = {
   let twoDistsOrNumbersToDist = (
     ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
     ~values: (frValueDistOrNumber, frValueDistOrNumber),
+    ~env: DistributionOperation.env,
   ): result<DistributionTypes.genericDist, string> => {
-    let toSampleSet = r => GenericDist.toSampleSetDist(r, 1000)
+    let toSampleSet = r => GenericDist.toSampleSetDist(r, env.sampleCount)
     let mapFnResult = r =>
       switch r {
       | Ok(r) => Ok(GenericDist.sample(r))
@@ -90,14 +91,14 @@ module Process = {
 }
 
 module TwoArgDist = {
-  let process = (~fn, r) =>
+  let process = (~fn, ~env, r) =>
     r
-    ->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_))
+    ->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_, ~env))
     ->E.R2.fmap(Wrappers.evDistribution)
 
   let mkRegular = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber], ~run=inputs =>
-      inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn)
+    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber], ~run=(inputs, env) =>
+      inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env)
     )
   }
 
@@ -105,7 +106,7 @@ module TwoArgDist = {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
-      ~run=inputs => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn),
+      ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
     )
   }
 
@@ -113,7 +114,7 @@ module TwoArgDist = {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
-      ~run=inputs => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn),
+      ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
     )
   }
 }

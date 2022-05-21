@@ -31,7 +31,7 @@ and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.g
 type fnDefinition = {
   name: string,
   inputs: array<frType>,
-  run: array<frValue> => result<expressionValue, string>,
+  run: (array<frValue>, DistributionOperation.env) => result<expressionValue, string>,
 }
 
 type function = {
@@ -248,10 +248,10 @@ module FnDefinition = {
     t.name ++ `(${inputs})`
   }
 
-  let run = (t: t, args: array<expressionValue>) => {
+  let run = (t: t, args: array<expressionValue>, env: DistributionOperation.env) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
-    | Some(values) => t.run(values)
+    | Some(values) => t.run(values, env)
     | None => Error("Incorrect Types")
     }
   }
@@ -278,7 +278,12 @@ module Registry = {
   to the registry, then it's possible that there could be a match after the registry is 
   called. However, for now, we could just call the registry last.
  */
-  let matchAndRun = (r: registry, fnName: string, args: array<expressionValue>) => {
+  let matchAndRun = (
+    r: registry,
+    fnName: string,
+    args: array<expressionValue>,
+    env: DistributionOperation.env,
+  ) => {
     let matchToDef = m => Matcher.Registry.matchToDef(r, m)
     let showNameMatchDefinitions = matches => {
       let defs =
@@ -291,7 +296,7 @@ module Registry = {
       `There are function matches for ${fnName}(), but with different arguments: ${defs}`
     }
     switch Matcher.Registry.findMatches(r, fnName, args) {
-    | Matcher.Match.FullMatch(match) => match->matchToDef->E.O2.fmap(FnDefinition.run(_, args))
+    | Matcher.Match.FullMatch(match) => match->matchToDef->E.O2.fmap(FnDefinition.run(_, args, env))
     | SameNameDifferentArguments(m) => Some(Error(showNameMatchDefinitions(m)))
     | _ => None
     }

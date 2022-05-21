@@ -363,8 +363,8 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
 
 let registered = FunctionRegistry_Library.allFunctions
 
-let tryRegistry = ((fnName, args): ExpressionValue.functionCall) => {
-  FunctionRegistry_Core.Registry.matchAndRun(registered, fnName, args)->E.O2.fmap(
+let tryRegistry = ((fnName, args): ExpressionValue.functionCall, env) => {
+  FunctionRegistry_Core.Registry.matchAndRun(registered, fnName, args, env)->E.O2.fmap(
     E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
   )
 }
@@ -374,6 +374,6 @@ let dispatch = (call: ExpressionValue.functionCall, environment) => {
     dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
   switch regularDispatch {
   | Some(x) => Some(x)
-  | None => tryRegistry(call)
+  | None => tryRegistry(call, environment)
   }
 }
