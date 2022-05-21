@@ -56,8 +56,8 @@ module FRType = {
     | FRTypeOption(v) => `option(${toString(v)})`
     }
 
-  let rec matchWithExpressionValue = (input: t, r: expressionValue): option<frValue> =>
-    switch (input, r) {
+  let rec matchWithExpressionValue = (t: t, r: expressionValue): option<frValue> =>
+    switch (t, r) {
     | (FRTypeNumber, EvNumber(f)) => Some(FRValueNumber(f))
     | (FRTypeDistOrNumber, EvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
     | (FRTypeDistOrNumber, EvDistribution(Symbolic(#Float(f)))) =>
@@ -94,6 +94,11 @@ module FRType = {
   }
 }
 
+/*
+  This module, Matcher, is fairly lengthy. However, only two functions from it
+  are meant to be used outside of it. These are findMatches and matchToDef in Matches.Registry.
+  The rest of it is just called from those two functions.
+*/
 module Matcher = {
   module MatchSimple = {
     type t = DifferentName | SameNameDifferentArguments | FullMatch
@@ -185,21 +190,18 @@ module Matcher = {
   }
 
   module Registry = {
-    let findExactMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let _findExactMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
       let functionMatchPairs = r->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
-      let getFullMatch = E.A.getBy(functionMatchPairs, ((_, match: Function.match)) =>
-        Match.isFullMatch(match)
-      )
-      let fullMatch: option<RegistryMatch.match> = getFullMatch->E.O.bind(((fn, match)) =>
+      let fullMatch = functionMatchPairs->E.A.getBy(((_, match)) => Match.isFullMatch(match))
+      fullMatch->E.O.bind(((fn, match)) =>
         switch match {
         | FullMatch(index) => Some(RegistryMatch.makeMatch(fn.name, index))
         | _ => None
         }
       )
-      fullMatch
     }
 
-    let findNameMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let _findNameMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
       let functionMatchPairs = r->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
       let getNameMatches =
         functionMatchPairs
@@ -219,10 +221,10 @@ module Matcher = {
     }
 
     let findMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
-      switch findExactMatches(r, fnName, args) {
+      switch _findExactMatches(r, fnName, args) {
       | Some(r) => Match.FullMatch(r)
       | None =>
-        switch findNameMatches(r, fnName, args) {
+        switch _findNameMatches(r, fnName, args) {
         | Some(r) => Match.SameNameDifferentArguments(r)
         | None => Match.DifferentName
         }
@@ -241,7 +243,10 @@ module Matcher = {
 module FnDefinition = {
   type t = fnDefinition
 
-  let defToString = (t: t) => t.inputs->E.A2.fmap(FRType.toString)->E.A2.joinWith(", ")
+  let toString = (t: t) => {
+    let inputs = t.inputs->E.A2.fmap(FRType.toString)->E.A2.joinWith(", ")
+    t.name ++ `(${inputs})`
+  }
 
   let run = (t: t, args: array<expressionValue>) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
@@ -251,7 +256,7 @@ module FnDefinition = {
     }
   }
 
-  let make = (~name, ~inputs, ~run): fnDefinition => {
+  let make = (~name, ~inputs, ~run): t => {
     name: name,
     inputs: inputs,
     run: run,
@@ -259,7 +264,9 @@ module FnDefinition = {
 }
 
 module Function = {
-  let make = (~name, ~definitions): function => {
+  type t = function
+
+  let make = (~name, ~definitions): t => {
     name: name,
     definitions: definitions,
   }
@@ -278,7 +285,8 @@ module Registry = {
         matches
         ->E.A2.fmap(matchToDef)
         ->E.A.O.concatSomes
-        ->E.A2.fmap(r => `[${fnName}(${FnDefinition.defToString(r)})]`)
+        ->E.A2.fmap(FnDefinition.toString)
+        ->E.A2.fmap(r => `[${r}]`)
         ->E.A2.joinWith("; ")
       `There are function matches for ${fnName}(), but with different arguments: ${defs}`
     }

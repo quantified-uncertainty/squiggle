@@ -9,44 +9,43 @@ module Wrappers = {
 }
 
 module Prepare = {
-  let recordWithTwoArgsToValues = (inputs: array<frValue>): result<array<frValue>, string> =>
-    switch inputs {
-    | [FRValueRecord([(_, n1), (_, n2)])] => Ok([n1, n2])
-    | _ => Error(impossibleError)
-    }
+  type ts = array<frValue>
+  type err = string
 
-  let twoNumberInputs = (inputs: array<frValue>): result<(float, float), string> => {
-    switch inputs {
-    | [FRValueNumber(n1), FRValueNumber(n2)] => Ok(n1, n2)
-    | _ => Error(impossibleError)
-    }
-  }
-
-  let twoDistOrNumber = (values: array<frValue>): result<
-    (frValueDistOrNumber, frValueDistOrNumber),
-    string,
-  > => {
-    switch values {
-    | [FRValueDistOrNumber(a1), FRValueDistOrNumber(a2)] => Ok(a1, a2)
-    | _ => Error(impossibleError)
+  module ToValueArray = {
+    module Record = {
+      let twoArgs = (inputs: ts): result<ts, err> =>
+        switch inputs {
+        | [FRValueRecord([(_, n1), (_, n2)])] => Ok([n1, n2])
+        | _ => Error(impossibleError)
+        }
     }
   }
 
-  let twoDistOrNumberFromRecord = (values: array<frValue>) =>
-    values->recordWithTwoArgsToValues->E.R.bind(twoDistOrNumber)
+  module ToValueTuple = {
+    let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> => {
+      switch values {
+      | [FRValueDistOrNumber(a1), FRValueDistOrNumber(a2)] => Ok(a1, a2)
+      | _ => Error(impossibleError)
+      }
+    }
+
+    module Record = {
+      let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
+        values->ToValueArray.Record.twoArgs->E.R.bind(twoDistOrNumber)
+    }
+  }
 }
 
 module Process = {
   let twoDistsOrNumbersToDist = (
     ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
     ~values: (frValueDistOrNumber, frValueDistOrNumber),
-  ) => {
+  ): result<DistributionTypes.genericDist, string> => {
     let toSampleSet = r => GenericDist.toSampleSetDist(r, 1000)
-    let sampleSetToExpressionValue = (
-      b: Belt.Result.t<QuriSquiggleLang.SampleSetDist.t, QuriSquiggleLang.DistributionTypes.error>,
-    ) =>
+    let sampleSetToExpressionValue = (b: Belt.Result.t<SampleSetDist.t, DistributionTypes.error>) =>
       switch b {
-      | Ok(r) => Ok(ReducerInterface_ExpressionValue.EvDistribution(SampleSet(r)))
+      | Ok(r) => Ok(DistributionTypes.SampleSet(r))
       | Error(d) => Error(DistributionTypes.Error.toString(d))
       }
 
@@ -56,9 +55,11 @@ module Process = {
       | Error(r) => Error(Operation.Other(r))
       }
 
-    let singleVarSample = (a, fn) => {
+    let singleVarSample = (dist, fn) => {
       let sampleSetResult =
-        toSampleSet(a) |> E.R2.bind(dist =>
+        dist
+        ->toSampleSet
+        ->E.R.bind(dist =>
           SampleSetDist.samplesMap(
             ~fn=f => fn(f)->mapFnResult,
             dist,
@@ -68,7 +69,7 @@ module Process = {
     }
 
     switch values {
-    | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))->E.R2.fmap(Wrappers.evDistribution)
+    | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))
     | (FRValueDist(a1), FRValueNumber(a2)) => singleVarSample(a1, r => fn((r, a2)))
     | (FRValueNumber(a1), FRValueDist(a2)) => singleVarSample(a2, r => fn((a1, r)))
     | (FRValueDist(a1), FRValueDist(a2)) => {
@@ -89,17 +90,20 @@ module Process = {
     ~fn: ((float, float)) => result<SymbolicDistTypes.symbolicDist, string>,
     ~values,
   ) => {
-    twoDistsOrNumbersToDist(~fn=r => r->fn->E.R2.fmap(Wrappers.symbolic), ~values)
+    let newFn = r => fn(r)->E.R2.fmap(Wrappers.symbolic)
+    twoDistsOrNumbersToDist(~fn=newFn, ~values)
   }
 }
 
 module TwoArgDist = {
   let process = (~fn, r) =>
-    r->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_))
+    r
+    ->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_))
+    ->E.R2.fmap(Wrappers.evDistribution)
 
   let mkRegular = (name, fn) => {
     FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber], ~run=inputs =>
-      inputs->Prepare.twoDistOrNumber->process(~fn)
+      inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn)
     )
   }
 
@@ -107,7 +111,7 @@ module TwoArgDist = {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
-      ~run=inputs => inputs->Prepare.twoDistOrNumberFromRecord->process(~fn),
+      ~run=inputs => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn),
     )
   }
 
@@ -115,7 +119,7 @@ module TwoArgDist = {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
-      ~run=inputs => inputs->Prepare.twoDistOrNumberFromRecord->process(~fn),
+      ~run=inputs => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn),
     )
   }
 }

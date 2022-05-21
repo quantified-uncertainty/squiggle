@@ -1,7 +1,7 @@
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
 
-let twoArgs = (fn, (a1, a2)) => fn(a1, a2)
+let twoArgs = E.Tuple2.toFnCall
 
 module NormalFn = {
   let fnName = "normal"
@@ -56,4 +56,4 @@ let more = [
   ),
 ]
 
-let allFunctions = [NormalFn.toFn, LognormalFn.toFn]
+let allFunctions = E.A.append([NormalFn.toFn, LognormalFn.toFn], more)

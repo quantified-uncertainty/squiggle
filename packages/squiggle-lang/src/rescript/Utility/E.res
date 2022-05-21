@@ -52,6 +52,7 @@ module Tuple2 = {
     let (_, b) = v
     b
   }
+  let toFnCall = (fn, (a1, a2)) => fn(a1, a2)
 }
 
 module O = {
