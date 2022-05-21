@@ -279,12 +279,12 @@ module Registry = {
   called. However, for now, we could just call the registry last.
  */
   let matchAndRun = (
-    r: registry,
-    fnName: string,
-    args: array<expressionValue>,
-    env: DistributionOperation.env,
+    ~registry: registry,
+    ~fnName: string,
+    ~args: array<expressionValue>,
+    ~env: DistributionOperation.env,
   ) => {
-    let matchToDef = m => Matcher.Registry.matchToDef(r, m)
+    let matchToDef = m => Matcher.Registry.matchToDef(registry, m)
     let showNameMatchDefinitions = matches => {
       let defs =
         matches
@@ -295,7 +295,7 @@ module Registry = {
         ->E.A2.joinWith("; ")
       `There are function matches for ${fnName}(), but with different arguments: ${defs}`
     }
-    switch Matcher.Registry.findMatches(r, fnName, args) {
+    switch Matcher.Registry.findMatches(registry, fnName, args) {
     | Matcher.Match.FullMatch(match) => match->matchToDef->E.O2.fmap(FnDefinition.run(_, args, env))
     | SameNameDifferentArguments(m) => Some(Error(showNameMatchDefinitions(m)))
     | _ => None
