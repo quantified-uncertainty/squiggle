@@ -29,3 +29,9 @@ describe("builtin exception", () => {
     expectEvalToBe("testZadanga(1)", "Error(JS Exception: Error: Undefined function testZadanga)")
   )
 })
+
+Skip.describe("error reporting from collection functions", () => {
+  testEval("arr = [normal(3,2)]; map(arr, zarathsuzaWasHere)", "") 
+  // FIXME: returns "Error(Function not found: map(Array,Symbol))"
+  // Actually this error is correct but not informative
+})

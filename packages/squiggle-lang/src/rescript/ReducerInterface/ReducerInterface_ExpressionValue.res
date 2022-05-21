@@ -104,3 +104,52 @@ type environment = DistributionOperation.env
 
 @genType
 let defaultEnvironment: environment = DistributionOperation.defaultEnv
+
+type expresionValueType =
+  | EvtArray
+  | EvtArrayString
+  | EvtBool
+  | EvtCall
+  | EvtDistribution
+  | EvtLambda
+  | EvtNumber
+  | EvtRecord
+  | EvtString
+  | EvtSymbol
+
+type functionCallSignature = CallSignature(string, array<expresionValueType>)
+type functionDefinitionSignature = FunctionDefinitionSignature(functionCallSignature, expresionValueType)
+
+let valueToValueType = (value) => switch value {
+  | EvArray(_) => EvtArray
+  | EvArrayString(_) => EvtArray
+  | EvBool(_) => EvtBool
+  | EvCall(_) => EvtCall
+  | EvDistribution(_) => EvtDistribution
+  | EvLambda(_) => EvtLambda
+  | EvNumber(_) => EvtNumber
+  | EvRecord(_) => EvtRecord
+  | EvString(_) => EvtArray
+  | EvSymbol(_) => EvtSymbol}
+
+let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
+  let (fn, args) = functionCall
+  CallSignature(fn, args->Js.Array2.map(valueToValueType))}
+
+let valueTypeToString = (valueType: expresionValueType): string =>
+  switch valueType {
+  | EvtArray => `Array`
+  | EvtArrayString => `ArrayString`
+  | EvtBool => `Bool`
+  | EvtCall => `Call`
+  | EvtDistribution => `Distribution`
+  | EvtLambda => `Lambda`
+  | EvtNumber => `Number`
+  | EvtRecord => `Record`
+  | EvtString => `String`
+  | EvtSymbol => `Symbol`
+  }
+
+let functionCallSignatureToString = (functionCallSignature: functionCallSignature): string => {
+  let CallSignature(fn, args) = functionCallSignature
+  `${fn}(${args->Js.Array2.map(valueTypeToString)->Js.Array2.toString})`}

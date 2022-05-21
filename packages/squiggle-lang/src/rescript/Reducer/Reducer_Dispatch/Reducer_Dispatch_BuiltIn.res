@@ -149,7 +149,8 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("reduceReverse", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>
     doReduceReverseArray(aValueArray, initialValue, aLambdaValue)
   | ("reverse", [EvArray(aValueArray)]) => aValueArray->Belt.Array.reverse->EvArray->Ok
-  | call => callMathJs(call)
+  | (_, [EvBool(_)])  | (_, [EvNumber(_)]) | (_, [EvString(_)]) | (_, [EvBool(_), EvBool(_)])  | (_, [EvNumber(_), EvNumber(_)]) | (_, [EvString(_), EvString(_)]) => callMathJs(call)
+  | call => Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString)) // Report full type signature as error
   }
 }
 

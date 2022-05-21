@@ -7,6 +7,7 @@ type errorValue =
   | REOperationError(Operation.operationError)
   | REExpressionExpected
   | REFunctionExpected(string)
+  | REFunctionNotFound(string)
   | REJavaScriptExn(option<string>, option<string>) // Javascript Exception
   | REMacroNotFound(string)
   | RENotAFunction(string)
@@ -29,6 +30,7 @@ let errorToString = err =>
   | REAssignmentExpected => "Assignment expected"
   | REExpressionExpected => "Expression expected"
   | REFunctionExpected(msg) => `Function expected: ${msg}`
+  | REFunctionNotFound(msg) => `Function not found: ${msg}`
   | REDistributionError(err) => `Distribution Math Error: ${DistributionTypes.Error.toString(err)}`
   | REOperationError(err) => `Math Error: ${Operation.Error.toString(err)}`
   | REJavaScriptExn(omsg, oname) => {
