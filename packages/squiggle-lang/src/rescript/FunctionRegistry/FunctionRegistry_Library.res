@@ -53,7 +53,7 @@ let more = [
   Function.make(
     ~name="To",
     ~definitions=[TwoArgDist.mkRegular("to", twoArgs(SymbolicDist.From90thPercentile.make))],
-  )
+  ),
 ]
 
 let allFunctions = [NormalFn.toFn, LognormalFn.toFn]
