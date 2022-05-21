@@ -1,42 +1,38 @@
 type expressionValue = ReducerInterface_ExpressionValue.expressionValue
 
-type rec itype =
-  | I_Number
-  | I_Numeric
-  | I_DistOrNumber
-  | I_Record(iRecord)
-  | I_Array(array<itype>)
-  | I_Option(itype)
-and iRecord = array<iRecordParam>
-and iRecordParam = (string, itype)
+/*
+  Function Registry "Type". A type, without any other information.
+  Like, #Float
+*/
+type rec frType =
+  | FRTypeNumber
+  | FRTypeNumeric
+  | FRTypeDistOrNumber
+  | FRTypeRecord(frTypeRecord)
+  | FRTypeArray(array<frType>)
+  | FRTypeOption(frType)
+and frTypeRecord = array<frTypeRecordParam>
+and frTypeRecordParam = (string, frType)
 
-module Itype = {
-  let rec toString = (t: itype) =>
-    switch t {
-    | I_Number => "number"
-    | I_Numeric => "numeric"
-    | I_DistOrNumber => "distOrNumber"
-    | I_Record(r) => {
-        let input = ((name, itype): iRecordParam) => `${name}: ${toString(itype)}`
-        `record({${r->E.A2.fmap(input)->E.A2.joinWith(", ")}})`
-      }
-    | I_Array(r) => `record(${r->E.A2.fmap(toString)->E.A2.joinWith(", ")})`
-    | I_Option(v) => `option(${toString(v)})`
-    }
+/*
+  Function Registry "Value". A type, with the information of that type.
+  Like, #Float(40.0)
+*/
+type rec frValue =
+  | FRValueNumber(float)
+  | FRValueDist(DistributionTypes.genericDist)
+  | FRValueOption(option<frValue>)
+  | FRValueDistOrNumber(frValueDistOrNumber)
+  | FRValueRecord(frValueRecord)
+and frValueRecord = array<frValueRecordParam>
+and frValueRecordParam = (string, frValue)
+and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.genericDist)
+
+type fnDefinition = {
+  name: string,
+  inputs: array<frType>,
+  run: array<frValue> => result<expressionValue, string>,
 }
-
-type rec value =
-  | Number(float)
-  | Dist(DistributionTypes.genericDist)
-  | Option(option<value>)
-  | DistOrNumber(distOrNumber)
-  | Record(record)
-and record = array<(string, value)>
-and distOrNumber = Number(float) | Dist(DistributionTypes.genericDist)
-
-type runFn = array<value> => result<expressionValue, string>
-
-type fnDefinition = {name: string, inputs: array<itype>, run: runFn}
 
 type function = {
   name: string,
@@ -45,31 +41,58 @@ type function = {
 
 type registry = array<function>
 
-let rec matchInput = (input: itype, r: expressionValue): option<value> =>
-  switch (input, r) {
-  | (I_Number, EvNumber(f)) => Some(Number(f))
-  | (I_DistOrNumber, EvNumber(f)) => Some(DistOrNumber(Number(f)))
-  | (I_DistOrNumber, EvDistribution(Symbolic(#Float(f)))) => Some(DistOrNumber(Number(f)))
-  | (I_DistOrNumber, EvDistribution(f)) => Some(DistOrNumber(Dist(f)))
-  | (I_Numeric, EvNumber(f)) => Some(Number(f))
-  | (I_Numeric, EvDistribution(Symbolic(#Float(f)))) => Some(Number(f))
-  | (I_Option(v), _) => Some(Option(matchInput(v, r)))
-  | (I_Record(recordParams), EvRecord(record)) => {
-      let getAndMatch = (name, input) =>
-        E.Dict.get(record, name)->E.O.bind(v => matchInput(input, v))
-      let arrayOfNameValues: array<(Js.Dict.key, option<value>)> =
-        recordParams->E.A2.fmap(((name, input)) => (name, getAndMatch(name, input)))
-      let hasNullValues = E.A.hasBy(arrayOfNameValues, ((_, value)) => E.O.isNone(value))
-      if hasNullValues {
-        None
-      } else {
-        arrayOfNameValues
-        ->E.A2.fmap(((name, value)) => (name, value->E.O2.toExn("")))
-        ->(r => Some(Record(r)))
+module FRType = {
+  type t = frType
+  let rec toString = (t: t) =>
+    switch t {
+    | FRTypeNumber => "number"
+    | FRTypeNumeric => "numeric"
+    | FRTypeDistOrNumber => "frValueDistOrNumber"
+    | FRTypeRecord(r) => {
+        let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
+        `record({${r->E.A2.fmap(input)->E.A2.joinWith(", ")}})`
       }
+    | FRTypeArray(r) => `record(${r->E.A2.fmap(toString)->E.A2.joinWith(", ")})`
+    | FRTypeOption(v) => `option(${toString(v)})`
     }
-  | _ => None
+
+  let rec matchWithExpressionValue = (input: t, r: expressionValue): option<frValue> =>
+    switch (input, r) {
+    | (FRTypeNumber, EvNumber(f)) => Some(FRValueNumber(f))
+    | (FRTypeDistOrNumber, EvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
+    | (FRTypeDistOrNumber, EvDistribution(Symbolic(#Float(f)))) =>
+      Some(FRValueDistOrNumber(FRValueNumber(f)))
+    | (FRTypeDistOrNumber, EvDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
+    | (FRTypeNumeric, EvNumber(f)) => Some(FRValueNumber(f))
+    | (FRTypeNumeric, EvDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
+    | (FRTypeOption(v), _) => Some(FRValueOption(matchWithExpressionValue(v, r)))
+    | (FRTypeRecord(recordParams), EvRecord(record)) => {
+        let getAndMatch = (name, input) =>
+          E.Dict.get(record, name)->E.O.bind(matchWithExpressionValue(input))
+        //All names in the type must be present. If any are missing, the corresponding
+        //value will be None, and this function would return None.
+        let namesAndValues: array<option<(Js.Dict.key, frValue)>> =
+          recordParams->E.A2.fmap(((name, input)) =>
+            getAndMatch(name, input)->E.O2.fmap(match => (name, match))
+          )
+        namesAndValues->E.A.O.openIfAllSome->E.O2.fmap(r => FRValueRecord(r))
+      }
+    | _ => None
+    }
+
+  let matchWithExpressionValueArray = (inputs: array<t>, args: array<expressionValue>): option<
+    array<frValue>,
+  > => {
+    let isSameLength = E.A.length(inputs) == E.A.length(args)
+    if !isSameLength {
+      None
+    } else {
+      E.A.zip(inputs, args)
+      ->E.A2.fmap(((input, arg)) => matchWithExpressionValue(input, arg))
+      ->E.A.O.openIfAllSome
+    }
   }
+}
 
 module Matcher = {
   module MatchSimple = {
@@ -107,19 +130,8 @@ module Matcher = {
   module FnDefinition = {
     type definitionMatch = MatchSimple.t
 
-    let getArgValues = (f: fnDefinition, args: array<expressionValue>): option<array<value>> => {
-      let mainInputTypes = f.inputs
-      if E.A.length(f.inputs) !== E.A.length(args) {
-        None
-      } else {
-        E.A.zip(mainInputTypes, args)
-        ->E.A2.fmap(((input, arg)) => matchInput(input, arg))
-        ->E.A.O.openIfAllSome
-      }
-    }
-
     let matchAssumingSameName = (f: fnDefinition, args: array<expressionValue>) => {
-      switch getArgValues(f, args) {
+      switch FRType.matchWithExpressionValueArray(f.inputs, args) {
       | Some(_) => MatchSimple.FullMatch
       | None => MatchSimple.SameNameDifferentArguments
       }
@@ -228,43 +240,37 @@ module Matcher = {
 
 module FnDefinition = {
   type t = fnDefinition
-  let getArgValues = (t: t, args: array<expressionValue>): option<array<value>> => {
-    let mainInputTypes = t.inputs
-    if E.A.length(t.inputs) !== E.A.length(args) {
-      None
-    } else {
-      E.A.zip(mainInputTypes, args)
-      ->E.A2.fmap(((input, arg)) => matchInput(input, arg))
-      ->E.A.O.openIfAllSome
-    }
-  }
 
-  let defToString = (t: t) => t.inputs->E.A2.fmap(Itype.toString)->E.A2.joinWith(", ")
+  let defToString = (t: t) => t.inputs->E.A2.fmap(FRType.toString)->E.A2.joinWith(", ")
 
   let run = (t: t, args: array<expressionValue>) => {
-    let argValues = getArgValues(t, args)
+    let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
     | Some(values) => t.run(values)
-    | None => Error("Impossible")
+    | None => Error("Incorrect Types")
     }
   }
-}
 
-module Function = {
-  type definitionId = int
-  let make = (~name, ~definitions): function => {
-    name: name,
-    definitions: definitions,
-  }
-
-  let makeDefinition = (~name, ~inputs, ~run): fnDefinition => {
+  let make = (~name, ~inputs, ~run): fnDefinition => {
     name: name,
     inputs: inputs,
     run: run,
   }
 }
 
+module Function = {
+  let make = (~name, ~definitions): function => {
+    name: name,
+    definitions: definitions,
+  }
+}
+
 module Registry = {
+  /*
+  There's a (potential+minor) bug here: If a function definition is called outside of the calls 
+  to the registry, then it's possible that there could be a match after the registry is 
+  called. However, for now, we could just call the registry last.
+ */
   let matchAndRun = (r: registry, fnName: string, args: array<expressionValue>) => {
     let matchToDef = m => Matcher.Registry.matchToDef(r, m)
     let showNameMatchDefinitions = matches => {

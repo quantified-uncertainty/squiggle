@@ -2,6 +2,9 @@
 Some functions from modules `L`, `O`, and `R` below were copied directly from
 running `rescript convert -all` on Rationale https://github.com/jonlaing/rationale
 */
+
+let equals = (a,b) => a === b
+
 module FloatFloatMap = {
   module Id = Belt.Id.MakeComparable({
     type t = float

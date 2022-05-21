@@ -52,7 +52,7 @@ let more = [
   ),
   Function.make(
     ~name="To",
-    ~definitions=[TwoArgDist.mkRegular("cauchy", twoArgs(SymbolicDist.From90thPercentile.make))],
+    ~definitions=[TwoArgDist.mkRegular("to", twoArgs(SymbolicDist.From90thPercentile.make))],
   )
 ]
 

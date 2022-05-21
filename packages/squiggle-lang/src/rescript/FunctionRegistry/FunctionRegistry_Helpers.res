@@ -9,34 +9,37 @@ module Wrappers = {
 }
 
 module Prepare = {
-  let recordWithTwoArgsToValues = (inputs: array<value>): result<array<value>, string> =>
+  let recordWithTwoArgsToValues = (inputs: array<frValue>): result<array<frValue>, string> =>
     switch inputs {
-    | [Record([(_, n1), (_, n2)])] => Ok([n1, n2])
+    | [FRValueRecord([(_, n1), (_, n2)])] => Ok([n1, n2])
     | _ => Error(impossibleError)
     }
 
-  let twoNumberInputs = (inputs: array<value>): result<(float, float), string> => {
+  let twoNumberInputs = (inputs: array<frValue>): result<(float, float), string> => {
     switch inputs {
-    | [Number(n1), Number(n2)] => Ok(n1, n2)
+    | [FRValueNumber(n1), FRValueNumber(n2)] => Ok(n1, n2)
     | _ => Error(impossibleError)
     }
   }
 
-  let twoDistOrNumber = (values: array<value>): result<(distOrNumber, distOrNumber), string> => {
+  let twoDistOrNumber = (values: array<frValue>): result<
+    (frValueDistOrNumber, frValueDistOrNumber),
+    string,
+  > => {
     switch values {
-    | [DistOrNumber(a1), DistOrNumber(a2)] => Ok(a1, a2)
+    | [FRValueDistOrNumber(a1), FRValueDistOrNumber(a2)] => Ok(a1, a2)
     | _ => Error(impossibleError)
     }
   }
 
-  let twoDistOrNumberFromRecord = (values: array<value>) =>
+  let twoDistOrNumberFromRecord = (values: array<frValue>) =>
     values->recordWithTwoArgsToValues->E.R.bind(twoDistOrNumber)
 }
 
 module Process = {
   let twoDistsOrNumbersToDist = (
     ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
-    ~values: (distOrNumber, distOrNumber),
+    ~values: (frValueDistOrNumber, frValueDistOrNumber),
   ) => {
     let toSampleSet = r => GenericDist.toSampleSetDist(r, 1000)
     let sampleSetToExpressionValue = (
@@ -65,10 +68,10 @@ module Process = {
     }
 
     switch values {
-    | (Number(a1), Number(a2)) => fn((a1, a2))->E.R2.fmap(Wrappers.evDistribution)
-    | (Dist(a1), Number(a2)) => singleVarSample(a1, r => fn((r, a2)))
-    | (Number(a1), Dist(a2)) => singleVarSample(a2, r => fn((a1, r)))
-    | (Dist(a1), Dist(a2)) => {
+    | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))->E.R2.fmap(Wrappers.evDistribution)
+    | (FRValueDist(a1), FRValueNumber(a2)) => singleVarSample(a1, r => fn((r, a2)))
+    | (FRValueNumber(a1), FRValueDist(a2)) => singleVarSample(a2, r => fn((a1, r)))
+    | (FRValueDist(a1), FRValueDist(a2)) => {
         let altFn = (a, b) => fn((a, b))->mapFnResult
         let sampleSetResult =
           E.R.merge(toSampleSet(a1), toSampleSet(a2))
@@ -95,23 +98,23 @@ module TwoArgDist = {
     r->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_))
 
   let mkRegular = (name, fn) => {
-    Function.makeDefinition(~name, ~inputs=[I_DistOrNumber, I_DistOrNumber], ~run=inputs =>
+    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber], ~run=inputs =>
       inputs->Prepare.twoDistOrNumber->process(~fn)
     )
   }
 
   let mkDef90th = (name, fn) => {
-    Function.makeDefinition(
+    FnDefinition.make(
       ~name,
-      ~inputs=[I_Record([("p5", I_DistOrNumber), ("p95", I_DistOrNumber)])],
+      ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
       ~run=inputs => inputs->Prepare.twoDistOrNumberFromRecord->process(~fn),
     )
   }
 
   let mkDefMeanStdev = (name, fn) => {
-    Function.makeDefinition(
+    FnDefinition.make(
       ~name,
-      ~inputs=[I_Record([("mean", I_DistOrNumber), ("stdev", I_DistOrNumber)])],
+      ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
       ~run=inputs => inputs->Prepare.twoDistOrNumberFromRecord->process(~fn),
     )
   }
