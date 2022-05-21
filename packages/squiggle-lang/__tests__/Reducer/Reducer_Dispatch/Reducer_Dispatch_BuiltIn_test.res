@@ -30,8 +30,12 @@ describe("builtin exception", () => {
   )
 })
 
-Skip.describe("error reporting from collection functions", () => {
-  testEval("arr = [normal(3,2)]; map(arr, zarathsuzaWasHere)", "") 
+describe("error reporting from collection functions", () => {
+  testEval("arr=[1,2,3]; map(arr, {|x| x*2})", "Ok([2,4,6])")
+  testEval(
+    "arr = [normal(3,2)]; map(arr, zarathsuzaWasHere)",
+    "Error(zarathsuzaWasHere is not defined)",
+  )
   // FIXME: returns "Error(Function not found: map(Array,Symbol))"
   // Actually this error is correct but not informative
 })

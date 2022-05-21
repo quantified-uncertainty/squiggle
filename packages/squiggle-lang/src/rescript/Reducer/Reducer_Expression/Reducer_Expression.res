@@ -76,17 +76,30 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
   'e,
 > =>
   switch valueList {
-  | list{EvCall(fName), ...args} =>
-    (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
+  | list{EvCall(fName), ...args} => {
+      let rCheckedArgs = switch fName == "$_setBindings_$" {
+      | false => args->Lambda.checkIfReduced
+      | true => args->Ok
+      }
 
+      rCheckedArgs->Result.flatMap(checkedArgs =>
+        (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
+      )
+    }
   | list{EvLambda(_)} =>
+    // TODO: remove on solving issue#558
     valueList
     ->Lambda.checkIfReduced
     ->Result.flatMap(reducedValueList =>
       reducedValueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
     )
   | list{EvLambda(lamdaCall), ...args} =>
-    Lambda.doLambdaCall(lamdaCall, args, environment, reduceExpression)
+    args
+    ->Lambda.checkIfReduced
+    ->Result.flatMap(checkedArgs =>
+      Lambda.doLambdaCall(lamdaCall, checkedArgs, environment, reduceExpression)
+    )
+
   | _ =>
     valueList
     ->Lambda.checkIfReduced

@@ -118,9 +118,11 @@ type expresionValueType =
   | EvtSymbol
 
 type functionCallSignature = CallSignature(string, array<expresionValueType>)
-type functionDefinitionSignature = FunctionDefinitionSignature(functionCallSignature, expresionValueType)
+type functionDefinitionSignature =
+  FunctionDefinitionSignature(functionCallSignature, expresionValueType)
 
-let valueToValueType = (value) => switch value {
+let valueToValueType = value =>
+  switch value {
   | EvArray(_) => EvtArray
   | EvArrayString(_) => EvtArray
   | EvBool(_) => EvtBool
@@ -130,11 +132,13 @@ let valueToValueType = (value) => switch value {
   | EvNumber(_) => EvtNumber
   | EvRecord(_) => EvtRecord
   | EvString(_) => EvtArray
-  | EvSymbol(_) => EvtSymbol}
+  | EvSymbol(_) => EvtSymbol
+  }
 
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
   let (fn, args) = functionCall
-  CallSignature(fn, args->Js.Array2.map(valueToValueType))}
+  CallSignature(fn, args->Js.Array2.map(valueToValueType))
+}
 
 let valueTypeToString = (valueType: expresionValueType): string =>
   switch valueType {
@@ -152,4 +156,5 @@ let valueTypeToString = (valueType: expresionValueType): string =>
 
 let functionCallSignatureToString = (functionCallSignature: functionCallSignature): string => {
   let CallSignature(fn, args) = functionCallSignature
-  `${fn}(${args->Js.Array2.map(valueTypeToString)->Js.Array2.toString})`}
+  `${fn}(${args->Js.Array2.map(valueTypeToString)->Js.Array2.toString})`
+}

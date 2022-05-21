@@ -25,7 +25,7 @@ describe("Arity check", () => {
   )
   testEvalToBe("f(x)=x; f(f)", "Ok(lambda(x=>internal code))")
   testEvalToBe(
-    "f(x,y)=x(y); f(z)",
+    "f(x,y)=x(y); f(1)",
     "Error(2 arguments expected. Instead 1 argument(s) were passed.)",
   )
 })
