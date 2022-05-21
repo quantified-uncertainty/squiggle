@@ -43,12 +43,6 @@ module Process = {
     ~values: (frValueDistOrNumber, frValueDistOrNumber),
   ): result<DistributionTypes.genericDist, string> => {
     let toSampleSet = r => GenericDist.toSampleSetDist(r, 1000)
-    let sampleSetToExpressionValue = (b: Belt.Result.t<SampleSetDist.t, DistributionTypes.error>) =>
-      switch b {
-      | Ok(r) => Ok(DistributionTypes.SampleSet(r))
-      | Error(d) => Error(DistributionTypes.Error.toString(d))
-      }
-
     let mapFnResult = r =>
       switch r {
       | Ok(r) => Ok(GenericDist.sample(r))
@@ -56,33 +50,33 @@ module Process = {
       }
 
     let singleVarSample = (dist, fn) => {
-      let sampleSetResult =
-        dist
-        ->toSampleSet
-        ->E.R.bind(dist =>
-          SampleSetDist.samplesMap(
-            ~fn=f => fn(f)->mapFnResult,
-            dist,
-          )->E.R2.errMap(r => DistributionTypes.SampleSetError(r))
-        )
-      sampleSetResult->sampleSetToExpressionValue
+      switch toSampleSet(dist) {
+      | Ok(dist) =>
+        switch SampleSetDist.samplesMap(~fn=f => fn(f)->mapFnResult, dist) {
+        | Ok(r) => Ok(DistributionTypes.SampleSet(r))
+        | Error(r) => Error(DistributionTypes.Error.toString(DistributionTypes.SampleSetError(r)))
+        }
+      | Error(r) => Error(DistributionTypes.Error.toString(r))
+      }
+    }
+
+    let twoVarSample = (dist1, dist2, fn) => {
+      let altFn = (a, b) => fn((a, b))->mapFnResult
+      switch E.R.merge(toSampleSet(dist1), toSampleSet(dist2)) {
+      | Ok((t1, t2)) =>
+        switch SampleSetDist.map2(~fn=altFn, ~t1, ~t2) {
+        | Ok(r) => Ok(DistributionTypes.SampleSet(r))
+        | Error(r) => Error(Operation.Error.toString(r))
+        }
+      | Error(r) => Error(DistributionTypes.Error.toString(r))
+      }
     }
 
     switch values {
     | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))
     | (FRValueDist(a1), FRValueNumber(a2)) => singleVarSample(a1, r => fn((r, a2)))
     | (FRValueNumber(a1), FRValueDist(a2)) => singleVarSample(a2, r => fn((a1, r)))
-    | (FRValueDist(a1), FRValueDist(a2)) => {
-        let altFn = (a, b) => fn((a, b))->mapFnResult
-        let sampleSetResult =
-          E.R.merge(toSampleSet(a1), toSampleSet(a2))
-          ->E.R2.errMap(DistributionTypes.Error.toString)
-          ->E.R.bind(((t1, t2)) => {
-            SampleSetDist.map2(~fn=altFn, ~t1, ~t2)->E.R2.errMap(Operation.Error.toString)
-          })
-          ->E.R2.errMap(r => DistributionTypes.OtherError(r))
-        sampleSetResult->sampleSetToExpressionValue
-      }
+    | (FRValueDist(a1), FRValueDist(a2)) => twoVarSample(a1, a2, fn)
     }
   }
 
