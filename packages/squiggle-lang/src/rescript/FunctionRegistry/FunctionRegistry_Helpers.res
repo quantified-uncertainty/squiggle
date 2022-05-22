@@ -96,13 +96,13 @@ module TwoArgDist = {
     ->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_, ~env))
     ->E.R2.fmap(Wrappers.evDistribution)
 
-  let mkRegular = (name, fn) => {
+  let make = (name, fn) => {
     FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber], ~run=(inputs, env) =>
       inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env)
     )
   }
 
-  let mkDef90th = (name, fn) => {
+  let makeRecordP5P95 = (name, fn) => {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
@@ -110,7 +110,7 @@ module TwoArgDist = {
     )
   }
 
-  let mkDefMeanStdev = (name, fn) => {
+  let makeRecordMeanStdev = (name, fn) => {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
