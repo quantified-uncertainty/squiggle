@@ -833,3 +833,46 @@ module JsArray = {
     |> Js.Array.map(O.toExn("Warning: This should not have happened"))
   let filter = Js.Array.filter
 }
+
+module Duration = {
+  //Stores in Unix milliseconds
+  type t = float
+  let minute = Belt.Float.fromInt(60 * 1000)
+  let hour = Belt.Float.fromInt(60 * 60 * 1000)
+  let day = Belt.Float.fromInt(24 * 60 * 60 * 1000)
+  let year = Belt.Float.fromInt(24 * 60 * 60 * 1000 * 365)
+  let fromFloat = (f: float): t => f
+  let toFloat = (d: t): float => d
+  let fromHours = (h: float): t => h *. hour
+  let fromDays = (d: float): t => d *. day
+  let fromYears = (y: float): t => y *. year
+  let toHours = (t: t): float => t /. hour
+  let toDays = (t: t): float => t /. day
+  let toYears = (t: t): float => t /. year
+  let toString = (t: t) => `${Float.with2DigitsPrecision(t)}ms`
+  let add = (t1, t2): t => t1 +. t2
+  let subtract = (t1, t2): t => t1 -. t2
+  let multiply = (t1, t2): t => t1 *. t2
+  let divide = (t1, t2): t => t1 /. t2
+}
+
+module Date = {
+  type t = Js.Date.t
+  type year
+  let makeWithYM = Js.Date.makeWithYM
+  let toString = Js.Date.toString
+  let fromFloat = Js.Date.fromFloat
+  let toFloat = Js.Date.getTime
+  let fmap = (t: t, fn: float => float) => t->toFloat->fn->fromFloat
+  let subtract = (t1: t, t2: t) => {
+    let (f1, f2) = (toFloat(t1), toFloat(t2))
+    let diff = f1 -. f2
+    if diff < 0.0 {
+      Error("Cannot subtract a date by one that is in its future")
+    } else {
+      Ok(Duration.fromFloat(diff))
+    }
+  }
+  let addDuration = (t: t, duration: Duration.t) => fmap(t, t => t +. duration)
+  let subtractDuration = (t: t, duration: Duration.t) => fmap(t, t => t -. duration)
+}

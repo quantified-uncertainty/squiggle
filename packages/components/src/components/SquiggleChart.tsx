@@ -189,6 +189,18 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           {expression.value.map((r) => `"${r}"`).join(", ")}
         </VariableBox>
       );
+    case "date":
+      return (
+        <VariableBox heading="Date" showTypes={showTypes}>
+          {expression.value.toString()}
+        </VariableBox>
+      );
+    case "timeDuration":
+      return (
+        <VariableBox heading="Time Duration" showTypes={showTypes}>
+          <NumberShower precision={3} number={expression.value} />
+        </VariableBox>
+      );
     case "lambda":
       return (
         <FunctionChart
