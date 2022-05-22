@@ -21,9 +21,7 @@ type t = expression
   Converts a Squigle code to expression
 */
 let parse = (peggyCode: string): result<t, errorValue> =>
-  peggyCode
-  ->Reducer_Peggy_Parse.parse
-  ->Result.map(node => Reducer_Peggy_ToExpression.fromNode(node))
+  peggyCode->Reducer_Peggy_Parse.parse->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
 /*
   Recursively evaluate/reduce the expression (Lisp AST)

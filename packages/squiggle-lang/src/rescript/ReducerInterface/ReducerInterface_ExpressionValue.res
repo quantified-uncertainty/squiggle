@@ -87,7 +87,7 @@ let toStringResult = x =>
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
-let toStringResultOkless = codeResult =>
+let toStringResultOkless = (codeResult: result<expressionValue, ErrorValue.errorValue>): string =>
   switch codeResult {
   | Ok(a) => toString(a)
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
@@ -105,7 +105,7 @@ type environment = DistributionOperation.env
 @genType
 let defaultEnvironment: environment = DistributionOperation.defaultEnv
 
-type expresionValueType =
+type expressionValueType =
   | EvtArray
   | EvtArrayString
   | EvtBool
@@ -117,9 +117,9 @@ type expresionValueType =
   | EvtString
   | EvtSymbol
 
-type functionCallSignature = CallSignature(string, array<expresionValueType>)
+type functionCallSignature = CallSignature(string, array<expressionValueType>)
 type functionDefinitionSignature =
-  FunctionDefinitionSignature(functionCallSignature, expresionValueType)
+  FunctionDefinitionSignature(functionCallSignature, expressionValueType)
 
 let valueToValueType = value =>
   switch value {
@@ -140,7 +140,7 @@ let functionCallToCallSignature = (functionCall: functionCall): functionCallSign
   CallSignature(fn, args->Js.Array2.map(valueToValueType))
 }
 
-let valueTypeToString = (valueType: expresionValueType): string =>
+let valueTypeToString = (valueType: expressionValueType): string =>
   switch valueType {
   | EvtArray => `Array`
   | EvtArrayString => `ArrayString`
