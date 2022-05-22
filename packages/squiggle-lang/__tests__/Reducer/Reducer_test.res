@@ -1,55 +1,9 @@
 open Jest
 open Reducer_TestHelpers
 
-describe("reducer using mathjs parse", () => {
-  // Test the MathJs parser compatibility
-  // Those tests toString that there is a semantic mapping from MathJs to Expression
-  // Reducer.parse is called by Reducer.eval
-  // See https://mathjs.org/docs/expressions/syntax.html
-  // See https://mathjs.org/docs/reference/functions.html
-  // Those tests toString that we are converting mathjs parse tree to what we need
-
-  describe("expressions", () => {
-    testParseToBe("1", "Ok((:$$block 1))")
-    testParseToBe("(1)", "Ok((:$$block 1))")
-    testParseToBe("1+2", "Ok((:$$block (:add 1 2)))")
-    testParseToBe("1+2*3", "Ok((:$$block (:add 1 (:multiply 2 3))))")
-  })
-  describe("arrays", () => {
-    //Note. () is a empty list in Lisp
-    //  The only builtin structure in Lisp is list. There are no arrays
-    //  [1,2,3] becomes (1 2 3)
-    testDescriptionParseToBe("empty", "[]", "Ok((:$$block ()))")
-    testParseToBe("[1, 2, 3]", "Ok((:$$block (1 2 3)))")
-    testParseToBe("['hello', 'world']", "Ok((:$$block ('hello' 'world')))")
-    testDescriptionParseToBe("index", "([0,1,2])[1]", "Ok((:$$block (:$atIndex (0 1 2) (1))))")
-  })
-  describe("records", () => {
-    testDescriptionParseToBe(
-      "define",
-      "{a: 1, b: 2}",
-      "Ok((:$$block (:$constructRecord (('a' 1) ('b' 2)))))",
-    )
-    testDescriptionParseToBe(
-      "use",
-      "{a: 1, b: 2}.a",
-      "Ok((:$$block (:$atIndex (:$constructRecord (('a' 1) ('b' 2))) ('a'))))",
-    )
-  })
-  describe("multi-line", () => {
-    testParseToBe("1; 2", "Ok((:$$block (:$$block 1 2)))")
-    testParseToBe("1+1; 2+1", "Ok((:$$block (:$$block (:add 1 1) (:add 2 1))))")
-  })
-  describe("assignment", () => {
-    testParseToBe("x=1; x", "Ok((:$$block (:$$block (:$let :x 1) :x)))")
-    testParseToBe("x=1+1; x+1", "Ok((:$$block (:$$block (:$let :x (:add 1 1)) (:add :x 1))))")
-  })
-})
-
 describe("eval", () => {
   // All MathJs operators and functions are builtin for string, float and boolean
   // .e.g + - / * > >= < <= == /= not and or
-  // See https://mathjs.org/docs/expressions/syntax.html
   // See https://mathjs.org/docs/reference/functions.html
   describe("expressions", () => {
     testEvalToBe("1", "Ok(1)")
@@ -70,20 +24,21 @@ describe("eval", () => {
   })
   describe("records", () => {
     test("define", () => expectEvalToBe("{a: 1, b: 2}", "Ok({a: 1,b: 2})"))
-    test("index", () => expectEvalToBe("{a: 1}.a", "Ok(1)"))
-    test("index not found", () => expectEvalToBe("{a: 1}.b", "Error(Record property not found: b)"))
+    test("index", () => expectEvalToBe("r = {a: 1}; r.a", "Ok(1)"))
+    test("index", () => expectEvalToBe("r = {a: 1}; r.b", "Error(Record property not found: b)"))
+    testEvalError("{a: 1}.b") // invalid syntax
   })
 
   describe("multi-line", () => {
-    testEvalToBe("1; 2", "Error(Assignment expected)")
-    testEvalToBe("1+1; 2+1", "Error(Assignment expected)")
+    testEvalError("1; 2")
+    testEvalError("1+1; 2+1")
   })
   describe("assignment", () => {
     testEvalToBe("x=1; x", "Ok(1)")
     testEvalToBe("x=1+1; x+1", "Ok(3)")
     testEvalToBe("x=1; y=x+1; y+1", "Ok(3)")
-    testEvalToBe("1; x=1", "Error(Assignment expected)")
-    testEvalToBe("1; 1", "Error(Assignment expected)")
+    testEvalError("1; x=1")
+    testEvalError("1; 1")
     testEvalToBe("x=1; x=1", "Ok({x: 1})")
   })
 })
@@ -94,9 +49,9 @@ describe("test exceptions", () => {
     "javascriptraise('div by 0')",
     "Error(JS Exception: Error: 'div by 0')",
   )
-  testDescriptionEvalToBe(
-    "rescript exception",
-    "rescriptraise()",
-    "Error(TODO: unhandled rescript exception)",
-  )
+  // testDescriptionEvalToBe(
+  //   "rescript exception",
+  //   "rescriptraise()",
+  //   "Error(TODO: unhandled rescript exception)",
+  // )
 })

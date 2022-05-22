@@ -4,6 +4,8 @@
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
+    "peggy": "peggy --cache ",
+    "build:peggy": "find . -type f -name *.peggy -exec yarn run peggy {} \\;",
     "build": "yarn build:rescript && yarn build:typescript",
     "build:rescript": "rescript build -with-deps",
     "build:typescript": "tsc",
@@ -54,6 +56,7 @@
     "lodash": "^4.17.21",
     "moduleserve": "^0.9.1",
     "nyc": "^15.1.0",
+    "peggy": "^1.2.0",
     "reanalyze": "^2.19.0",
     "rescript-fast-check": "^1.1.1",
     "ts-jest": "^27.1.4",

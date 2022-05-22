@@ -13,6 +13,8 @@ open Reducer_ErrorValue
   DO NOT try to add external function mapping here!
 */
 
+//TODO: pow to xor
+
 exception TestRescriptException
 
 let callInternal = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
@@ -128,12 +130,12 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   }
 
   switch call {
-  | ("$atIndex", [EvArray(aValueArray), EvArray([EvNumber(fIndex)])]) =>
-    arrayAtIndex(aValueArray, fIndex)
-  | ("$atIndex", [EvRecord(dict), EvArray([EvString(sIndex)])]) => recordAtIndex(dict, sIndex)
-  | ("$constructRecord", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
-  | ("$exportBindings", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
-  | ("$setBindings", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>
+  | ("$_atIndex_$", [EvArray(aValueArray), EvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
+  | ("$_atIndex_$", [EvRecord(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
+  | ("$_constructArray_$", [EvArray(aValueArray)]) => EvArray(aValueArray)->Ok
+  | ("$_constructRecord_$", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
+  | ("$_exportBindings_$", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
+  | ("$_setBindings_$", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>
     doSetBindings(externalBindings, symbol, value)
   | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
@@ -147,7 +149,15 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("reduceReverse", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>
     doReduceReverseArray(aValueArray, initialValue, aLambdaValue)
   | ("reverse", [EvArray(aValueArray)]) => aValueArray->Belt.Array.reverse->EvArray->Ok
-  | call => callMathJs(call)
+  | (_, [EvBool(_)])
+  | (_, [EvNumber(_)])
+  | (_, [EvString(_)])
+  | (_, [EvBool(_), EvBool(_)])
+  | (_, [EvNumber(_), EvNumber(_)])
+  | (_, [EvString(_), EvString(_)]) =>
+    callMathJs(call)
+  | call =>
+    Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString)) // Report full type signature as error
   }
 }
 
