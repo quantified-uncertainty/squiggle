@@ -4,9 +4,9 @@
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
-    "peggy": "peggy --cache ",
-    "build:peggy": "find . -type f -name *.peggy -exec yarn run peggy {} \\;",
-    "build": "yarn build:rescript && yarn build:typescript",
+    "peggy": "peggy --cache",
+    "build": "yarn build:peggy && yarn build:rescript && yarn build:typescript",
+    "build:peggy": "find . -type f -name *.peggy -exec yarn peggy {} \\;",
     "build:rescript": "rescript build -with-deps",
     "build:typescript": "tsc",
     "bundle": "webpack",

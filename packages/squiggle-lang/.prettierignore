@@ -5,3 +5,4 @@ lib
 .nyc_output/
 coverage/
 .cache/
+Reducer_Peggy_GeneratedParser.js
