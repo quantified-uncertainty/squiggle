@@ -849,23 +849,27 @@ module Duration = {
   let toHours = (t: t): float => t /. hour
   let toDays = (t: t): float => t /. day
   let toYears = (t: t): float => t /. year
+
   let toString = (t: t): string => {
+    let shouldPluralize = f => f != 1.0
+    let display = (f: float, s: string) =>
+      `${Float.with3DigitsPrecision(f)} ${s}${shouldPluralize(f) ? "s" : ""}`
     if t >= year {
-      Float.with3DigitsPrecision(t /. year) ++ " years"
+      display(t /. year, "year")
     } else if t >= day {
-      Float.with3DigitsPrecision(t /. day) ++ " days"
+      display(t /. day, "day")
     } else if t >= hour {
-      Float.with3DigitsPrecision(t /. hour) ++ " hours"
+      display(t /. hour, "hour")
     } else if t >= minute {
-      Float.with3DigitsPrecision(t /. minute) ++ " minutes"
+      display(t /. minute, "minute")
     } else {
       Float.toFixed(t) ++ "ms"
     }
   }
-  let add = (t1, t2): t => t1 +. t2
-  let subtract = (t1, t2): t => t1 -. t2
-  let multiply = (t1, t2): t => t1 *. t2
-  let divide = (t1, t2): t => t1 /. t2
+  let add = (t1: t, t2: t): t => t1 +. t2
+  let subtract = (t1: t, t2: t): t => t1 -. t2
+  let multiply = (t1: t, t2: t): t => t1 *. t2
+  let divide = (t1: t, t2: t): t => t1 /. t2
 }
 
 module Date = {
@@ -899,7 +903,7 @@ module Date = {
     }
   }
   let makeFromYear = (year: float): result<t, string> => {
-    let floor = year -> Js.Math.floor_float
+    let floor = year->Js.Math.floor_float
     makeWithYearInt(Belt.Float.toInt(floor))->R2.fmap(earlyDate => {
       let diff = year -. floor
       earlyDate->addDuration(diff *. Duration.year)

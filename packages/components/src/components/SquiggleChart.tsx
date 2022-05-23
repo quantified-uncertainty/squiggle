@@ -195,7 +195,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           {expression.value.toDateString()}
         </VariableBox>
       );
-    case "timeDuration":{
+    case "timeDuration": {
       return (
         <VariableBox heading="Time Duration" showTypes={showTypes}>
           <NumberShower precision={3} number={expression.value} />
