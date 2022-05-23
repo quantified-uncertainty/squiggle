@@ -179,27 +179,6 @@ module Helpers = {
 }
 
 module SymbolicConstructors = {
-  let oneFloat = name =>
-    switch name {
-    | "exponential" => Ok(SymbolicDist.Exponential.make)
-    | "bernoulli" => Ok(SymbolicDist.Bernoulli.make)
-    | _ => Error("Unreachable state")
-    }
-
-  let twoFloat = name =>
-    switch name {
-    | "beta" => Ok(SymbolicDist.Beta.make)
-    | "cauchy" => Ok(SymbolicDist.Cauchy.make)
-    | "credibleIntervalToDistribution" => Ok(SymbolicDist.From90thPercentile.make)
-    | "gamma" => Ok(SymbolicDist.Gamma.make)
-    | "logistic" => Ok(SymbolicDist.Logistic.make)
-    | "lognormal" => Ok(SymbolicDist.Lognormal.make)
-    | "normal" => Ok(SymbolicDist.Normal.make)
-    | "to" => Ok(SymbolicDist.From90thPercentile.make) // as credibleIntervalToDistribution is defined "to" might be redundant
-    | "uniform" => Ok(SymbolicDist.Uniform.make)
-    | _ => Error("Unreachable state")
-    }
-
   let threeFloat = name =>
     switch name {
     | "triangular" => Ok(SymbolicDist.Triangular.make)
@@ -221,27 +200,8 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | (("exponential" | "bernoulli") as fnName, [EvNumber(f)]) =>
-    SymbolicConstructors.oneFloat(fnName)
-    ->E.R.bind(r => r(f))
-    ->SymbolicConstructors.symbolicResultToOutput
   | ("delta", [EvNumber(f)]) =>
     SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
-  | (
-      ("normal"
-      | "uniform"
-      | "beta"
-      | "lognormal"
-      | "cauchy"
-      | "gamma"
-      | "credibleIntervalToDistribution"
-      | "to"
-      | "logistic") as fnName,
-      [EvNumber(f1), EvNumber(f2)],
-    ) =>
-    SymbolicConstructors.twoFloat(fnName)
-    ->E.R.bind(r => r(f1, f2))
-    ->SymbolicConstructors.symbolicResultToOutput
   | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>
     SymbolicConstructors.threeFloat(fnName)
     ->E.R.bind(r => r(f1, f2, f3))
@@ -390,6 +350,20 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-let dispatch = (call, environment) => {
-  dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
+// I expect that it's important to build this first, so it doesn't get recalculated for each tryRegistry() call.
+let registry = FunctionRegistry_Library.registry
+
+let tryRegistry = ((fnName, args): ExpressionValue.functionCall, env) => {
+  FunctionRegistry_Core.Registry.matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
+    E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
+  )
+}
+
+let dispatch = (call: ExpressionValue.functionCall, environment) => {
+  let regularDispatch =
+    dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
+  switch regularDispatch {
+  | Some(x) => Some(x)
+  | None => tryRegistry(call, environment)
+  }
 }

@@ -2,6 +2,9 @@
 Some functions from modules `L`, `O`, and `R` below were copied directly from
 running `rescript convert -all` on Rationale https://github.com/jonlaing/rationale
 */
+
+let equals = (a, b) => a === b
+
 module FloatFloatMap = {
   module Id = Belt.Id.MakeComparable({
     type t = float
@@ -49,6 +52,7 @@ module Tuple2 = {
     let (_, b) = v
     b
   }
+  let toFnCall = (fn, (a1, a2)) => fn(a1, a2)
 }
 
 module O = {
@@ -525,6 +529,7 @@ module A = {
   let unsafe_get = Array.unsafe_get
   let get = Belt.Array.get
   let getBy = Belt.Array.getBy
+  let getIndexBy = Belt.Array.getIndexBy
   let last = a => get(a, length(a) - 1)
   let first = get(_, 0)
   let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> O.isSome
@@ -538,6 +543,7 @@ module A = {
   let reducei = Belt.Array.reduceWithIndex
   let isEmpty = r => length(r) < 1
   let stableSortBy = Belt.SortArray.stableSortBy
+  let toNoneIfEmpty = r => isEmpty(r) ? None : Some(r)
   let toRanges = (a: array<'a>) =>
     switch a |> Belt.Array.length {
     | 0
@@ -550,6 +556,12 @@ module A = {
         Belt.Array.getUnsafe(a, index + 1),
       ))
       |> (x => Ok(x))
+    }
+
+  let getByOpen = (a, op, bin) =>
+    switch getBy(a, r => bin(op(r))) {
+    | Some(r) => Some(op(r))
+    | None => None
     }
 
   let tail = Belt.Array.sliceToEnd(_, 1)
@@ -636,6 +648,19 @@ module A = {
       }
     }
     let firstSome = x => Belt.Array.getBy(x, O.isSome)
+
+    let firstSomeFn = (r: array<unit => option<'a>>): option<'a> =>
+      O.flatten(getByOpen(r, l => l(), O.isSome))
+
+    let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->O2.default(default)
+
+    let openIfAllSome = (optionals: array<option<'a>>): option<array<'a>> => {
+      if all(O.isSome, optionals) {
+        Some(optionals |> fmap(O.toExn("Warning: This should not have happened")))
+      } else {
+        None
+      }
+    }
   }
 
   module R = {
@@ -822,6 +847,7 @@ module A = {
 
 module A2 = {
   let fmap = (a, b) => A.fmap(b, a)
+  let fmapi = (a, b) => A.fmapi(b, a)
   let joinWith = (a, b) => A.joinWith(b, a)
   let filter = (a, b) => A.filter(b, a)
 }
@@ -832,4 +858,10 @@ module JsArray = {
     |> Js.Array.filter(O.isSome)
     |> Js.Array.map(O.toExn("Warning: This should not have happened"))
   let filter = Js.Array.filter
+}
+
+module Dict = {
+  type t<'a> = Js.Dict.t<'a>
+  let get = Js.Dict.get
+  let keys = Js.Dict.keys
 }
