@@ -22,7 +22,7 @@
     "@storybook/addon-essentials": "^6.5.3",
     "@storybook/addon-links": "^6.5.4",
     "@storybook/builder-webpack5": "^6.5.3",
-    "@storybook/manager-webpack5": "^6.5.3",
+    "@storybook/manager-webpack5": "^6.5.4",
     "@storybook/node-logger": "^6.5.4",
     "@storybook/preset-create-react-app": "^4.1.0",
     "@storybook/react": "^6.5.3",
