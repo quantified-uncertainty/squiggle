@@ -252,11 +252,8 @@ describe("Peggy parse", () => {
     )
   })
   describe("unit", () => {
-    testParse("1m", "{(::multiply 1 (::$valueOfUnit 'm'))}")
-    testParse(
-      "1m+2cm",
-      "{(::add (::multiply 1 (::$valueOfUnit 'm')) (::multiply 2 (::$valueOfUnit 'cm')))}",
-    )
+    testParse("1m", "{(::fromUnit_m 1)}")
+    testParse("1m+2cm", "{(::add (::fromUnit_m 1) (::fromUnit_cm 2))}")
   })
 })
 

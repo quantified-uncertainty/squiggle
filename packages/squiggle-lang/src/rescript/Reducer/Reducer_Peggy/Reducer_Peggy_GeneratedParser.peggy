@@ -267,8 +267,7 @@ number = number:(float / integer) unit:identifier?
     if (unit === null)
       { return number }
     else
-      { return makeFunctionCall('multiply', 
-          [number, makeFunctionCall('$valueOfUnit', [nodeString(unit.value)])]) 
+      { return makeFunctionCall('fromUnit_'+unit.value, [number]) 
       }
   }
 

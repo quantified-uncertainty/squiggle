@@ -11,3 +11,4 @@ packages/squiggle-lang/.nyc_output/
 packages/squiggle-lang/coverage/
 packages/squiggle-lang/.cache/
 packages/website/build/
+packages/squiggle-lang/src/rescript/Reducer/Reducer_Peggy/Reducer_Peggy_GeneratedParser.js
