@@ -23,7 +23,7 @@ describe("eval on distribution functions", () => {
     testEval("-normal(5,2)", "Ok(Normal(-5,2))")
   })
   describe("to", () => {
-    testEval("5 to 2", "Error(Distribution Math Error: Low value must be less than high value.)")
+    testEval("5 to 2", "Error(TODO: Low value must be less than high value.)")
     testEval("to(2,5)", "Ok(Lognormal(1.1512925464970227,0.27853260523016377))")
     testEval("to(-2,2)", "Ok(Normal(0,1.2159136638235384))")
   })

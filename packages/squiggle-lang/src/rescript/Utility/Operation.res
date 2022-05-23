@@ -58,6 +58,7 @@ type operationError =
   | SampleMapNeedsNtoNFunction
   | PdfInvalidError
   | NotYetImplemented // should be removed when `klDivergence` for mixed and discrete is implemented.
+  | Other(string)
 
 @genType
 module Error = {
@@ -73,6 +74,7 @@ module Error = {
     | SampleMapNeedsNtoNFunction => "SampleMap needs a function that converts a number to a number"
     | PdfInvalidError => "This Pdf is invalid"
     | NotYetImplemented => "This pathway is not yet implemented"
+    | Other(t) => t
     }
 }
 

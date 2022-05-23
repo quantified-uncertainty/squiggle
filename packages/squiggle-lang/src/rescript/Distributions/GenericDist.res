@@ -31,6 +31,8 @@ let sampleN = (t: t, n) =>
   | SampleSet(r) => SampleSetDist.sampleN(r, n)
   }
 
+let sample = (t: t) => sampleN(t, 1)->E.A.first |> E.O.toExn("Should not have happened")
+
 let toSampleSetDist = (t: t, n) =>
   SampleSetDist.make(sampleN(t, n))->E.R2.errMap(DistributionTypes.Error.sampleErrorToDistErr)
 
