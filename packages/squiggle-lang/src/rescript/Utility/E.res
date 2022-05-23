@@ -843,9 +843,11 @@ module Duration = {
   let year = Belt.Float.fromInt(24 * 60 * 60 * 1000) *. 365.25
   let fromFloat = (f: float): t => f
   let toFloat = (d: t): float => d
+  let fromMinutes = (h: float): t => h *. minute
   let fromHours = (h: float): t => h *. hour
   let fromDays = (d: float): t => d *. day
   let fromYears = (y: float): t => y *. year
+  let toMinutes = (t: t): float => t /. minute
   let toHours = (t: t): float => t /. hour
   let toDays = (t: t): float => t /. day
   let toYears = (t: t): float => t /. year
@@ -854,13 +856,14 @@ module Duration = {
     let shouldPluralize = f => f != 1.0
     let display = (f: float, s: string) =>
       `${Float.with3DigitsPrecision(f)} ${s}${shouldPluralize(f) ? "s" : ""}`
-    if t >= year {
+    let abs = Js.Math.abs_float(t)
+    if abs >= year {
       display(t /. year, "year")
-    } else if t >= day {
+    } else if abs >= day {
       display(t /. day, "day")
-    } else if t >= hour {
+    } else if abs >= hour {
       display(t /. hour, "hour")
-    } else if t >= minute {
+    } else if abs >= minute {
       display(t /. minute, "minute")
     } else {
       Float.toFixed(t) ++ "ms"
@@ -868,8 +871,8 @@ module Duration = {
   }
   let add = (t1: t, t2: t): t => t1 +. t2
   let subtract = (t1: t, t2: t): t => t1 -. t2
-  let multiply = (t1: t, t2: t): t => t1 *. t2
-  let divide = (t1: t, t2: t): t => t1 /. t2
+  let multiply = (t1: t, t2: float): t => t1 *. t2
+  let divide = (t1: t, t2: float): t => t1 /. t2
 }
 
 module Date = {
