@@ -42,6 +42,12 @@ let toStringResult = codeResult =>
   | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
   }
 
+let toStringResultOkless = codeResult =>
+  switch codeResult {
+  | Ok(a) => toString(a)
+  | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
+  }
+
 let inspect = (expr: expression): expression => {
   Js.log(toString(expr))
   expr

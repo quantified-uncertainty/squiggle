@@ -44,6 +44,9 @@ let registry = [
   ),
   Function.make(
     ~name="To",
-    ~definitions=[TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make))],
+    ~definitions=[TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make)), 
+    TwoArgDist.make("credibleIntervalToDistribution", twoArgs(SymbolicDist.From90thPercentile.make))
+    ],
+
   ),
 ]
