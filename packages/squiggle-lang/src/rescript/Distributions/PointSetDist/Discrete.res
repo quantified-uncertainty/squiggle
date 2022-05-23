@@ -222,14 +222,14 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
   }
 
-  let klDivergence = (prediction: t, answer: t) => {
-    combinePointwise(
-      ~fn=PointSetDist_Scoring.KLDivergence.integrand,
-      prediction,
-      answer,
-    )->E.R2.fmap(integralEndY)
-  }
-  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
-    Error(Operation.NotYetImplemented)
-  }
+  //  let klDivergence = (prediction: t, answer: t) => {
+  //    combinePointwise(
+  //      ~fn=PointSetDist_Scoring.KLDivergence.integrand,
+  //      prediction,
+  //      answer,
+  //    )->E.R2.fmap(integralEndY)
+  //  }
+  //  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
+  //    Error(Operation.NotYetImplemented)
+  //  }
 })

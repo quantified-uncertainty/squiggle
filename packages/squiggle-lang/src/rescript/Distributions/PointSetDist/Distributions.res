@@ -33,12 +33,12 @@ module type dist = {
 
   let mean: t => float
   let variance: t => float
-  let klDivergence: (t, t) => result<float, Operation.Error.t>
-  let logScoreWithPointResolution: (
-    ~prediction: t,
-    ~answer: float,
-    ~prior: option<t>,
-  ) => result<float, Operation.Error.t>
+  //  let klDivergence: (t, t) => result<float, Operation.Error.t>
+  //  let logScoreWithPointResolution: (
+  //    ~prediction: t,
+  //    ~answer: float,
+  //    ~prior: option<t>,
+  //  ) => result<float, Operation.Error.t>
 }
 
 module Dist = (T: dist) => {
@@ -61,8 +61,8 @@ module Dist = (T: dist) => {
   let mean = T.mean
   let variance = T.variance
   let integralEndY = T.integralEndY
-  let klDivergence = T.klDivergence
-  let logScoreWithPointResolution = T.logScoreWithPointResolution
+  //  let klDivergence = T.klDivergence
+  //  let logScoreWithPointResolution = T.logScoreWithPointResolution
 
   let updateIntegralCache = T.updateIntegralCache
 

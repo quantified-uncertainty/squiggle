@@ -196,23 +196,26 @@ module T = Dist({
     | Continuous(m) => Continuous.T.variance(m)
     }
 
-  let klDivergence = (prediction: t, answer: t) =>
-    switch (prediction, answer) {
-    | (Continuous(t1), Continuous(t2)) => Continuous.T.klDivergence(t1, t2)
-    | (Discrete(t1), Discrete(t2)) => Discrete.T.klDivergence(t1, t2)
-    | (m1, m2) => Mixed.T.klDivergence(m1->toMixed, m2->toMixed)
-    }
-
-  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
-    switch (prior, prediction) {
-    | (Some(Continuous(t1)), Continuous(t2)) =>
-      Continuous.T.logScoreWithPointResolution(~prediction=t2, ~answer, ~prior=t1->Some)
-    | (None, Continuous(t2)) =>
-      Continuous.T.logScoreWithPointResolution(~prediction=t2, ~answer, ~prior=None)
-    | _ => Error(Operation.NotYetImplemented)
-    }
-  }
+  //  let klDivergence = (prediction: t, answer: t) =>
+  //    switch (prediction, answer) {
+  //    | (Continuous(t1), Continuous(t2)) => Continuous.T.klDivergence(t1, t2)
+  //    | (Discrete(t1), Discrete(t2)) => Discrete.T.klDivergence(t1, t2)
+  //    | (m1, m2) => Mixed.T.klDivergence(m1->toMixed, m2->toMixed)
+  //    }
+  //
+  //  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
+  //    switch (prior, prediction) {
+  //    | (Some(Continuous(t1)), Continuous(t2)) =>
+  //      Continuous.T.logScoreWithPointResolution(~prediction=t2, ~answer, ~prior=t1->Some)
+  //    | (None, Continuous(t2)) =>
+  //      Continuous.T.logScoreWithPointResolution(~prediction=t2, ~answer, ~prior=None)
+  //    | _ => Error(Operation.NotYetImplemented)
+  //    }
+  //  }
 })
+
+let logScore = (args: PointSetDist_Scoring.scoreArgs): result<float, Operation.Error.t> =>
+  PointSetDist_Scoring.logScore(args)
 
 let pdf = (f: float, t: t) => {
   let mixedPoint: PointSetTypes.mixedPoint = T.xToY(f, t)
