@@ -873,18 +873,6 @@ module Date = {
   type t = Js.Date.t
   let toFloat = Js.Date.getTime
   let getFullYear = Js.Date.getFullYear
-
-  //The Js.Date.makeWithYM function accepts a float, but only treats it as a whole number.
-  //Our version takes an integer to make this distinction clearer.
-  let makeWithYear = (y: int): result<t, string> => {
-    if y < 100 {
-      Error("Year must be over 100")
-    } else if y > 200000 {
-      Error("Year must be less than 200000")
-    } else {
-      Ok(Js.Date.makeWithYM(~year=Belt.Float.fromInt(y), ~month=0.0, ()))
-    }
-  }
   let toString = Js.Date.toDateString
   let fromFloat = Js.Date.fromFloat
   let fmap = (t: t, fn: float => float) => t->toFloat->fn->fromFloat
@@ -899,4 +887,22 @@ module Date = {
   }
   let addDuration = (t: t, duration: Duration.t) => fmap(t, t => t +. duration)
   let subtractDuration = (t: t, duration: Duration.t) => fmap(t, t => t -. duration)
+  //The Js.Date.makeWithYM function accepts a float, but only treats it as a whole number.
+  //Our version takes an integer to make this distinction clearer.
+  let makeWithYearInt = (y: int): result<t, string> => {
+    if y < 100 {
+      Error("Year must be over 100")
+    } else if y > 200000 {
+      Error("Year must be less than 200000")
+    } else {
+      Ok(Js.Date.makeWithYM(~year=Belt.Float.fromInt(y), ~month=0.0, ()))
+    }
+  }
+  let makeFromYear = (year: float): result<t, string> => {
+    let floor = year -> Js.Math.floor_float
+    makeWithYearInt(Belt.Float.toInt(floor))->R2.fmap(earlyDate => {
+      let diff = year -. floor
+      earlyDate->addDuration(diff *. Duration.year)
+    })
+  }
 }

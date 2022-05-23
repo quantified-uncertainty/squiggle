@@ -7,7 +7,7 @@ let dateDispatch = (call: ExpressionValue.functionCall, env: DistributionOperati
   switch call {
   | ("toString", [EvDate(t)]) => EvString(E.Date.toString(t))->Ok->Some
   | ("makeDateFromYear", [EvNumber(year)]) =>
-    switch E.Date.makeWithYear(Belt.Float.toInt(year)) {
+    switch E.Date.makeFromYear(year) {
     | Ok(t) => EvDate(t)->Ok->Some
     | Error(e) => RETodo(e)->Error->Some
     }
