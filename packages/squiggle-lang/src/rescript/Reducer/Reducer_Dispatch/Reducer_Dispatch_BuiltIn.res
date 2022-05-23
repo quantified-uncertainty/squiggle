@@ -129,6 +129,23 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     )
   }
 
+  let doValueOfUnit = (aUnit: string) =>
+    switch aUnit {
+    | "nm" => 0.000000001->EvNumber->Ok
+    | "um" => 0.000001->EvNumber->Ok
+    | "mm" => 0.001->EvNumber->Ok
+    | "cm" => 0.01->EvNumber->Ok
+    | "dm" => 0.1->EvNumber->Ok
+    | "m" => 1.->EvNumber->Ok
+    | "dam" => 10.->EvNumber->Ok
+    | "hm" => 100.->EvNumber->Ok
+    | "km" => 1000.->EvNumber->Ok
+    | "Mm" => 1000000.->EvNumber->Ok
+    | "Gm" => 1000000000.->EvNumber->Ok
+    | "Tm" => 1000000000000.->EvNumber->Ok
+    | _ => REUnitNotFound(aUnit)->Error
+    }
+
   switch call {
   | ("$_atIndex_$", [EvArray(aValueArray), EvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
   | ("$_atIndex_$", [EvRecord(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
@@ -137,6 +154,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("$_exportBindings_$", [EvRecord(externalBindings)]) => doExportBindings(externalBindings)
   | ("$_setBindings_$", [EvRecord(externalBindings), EvSymbol(symbol), value]) =>
     doSetBindings(externalBindings, symbol, value)
+  | ("$valueOfUnit", [EvString(aUnit)]) => doValueOfUnit(aUnit)
   | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
   | ("keep", [EvArray(aValueArray), EvLambda(aLambdaValue)]) =>

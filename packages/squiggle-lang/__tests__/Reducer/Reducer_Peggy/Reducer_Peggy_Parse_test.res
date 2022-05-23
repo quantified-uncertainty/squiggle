@@ -251,6 +251,13 @@ describe("Peggy parse", () => {
       "{(::map (::$_constructArray_$ (1 2 3)) {|:x| {(::add :x 1)}})}",
     )
   })
+  describe("unit", () => {
+    testParse("1m", "{(::multiply 1 (::$valueOfUnit 'm'))}")
+    testParse(
+      "1m+2cm",
+      "{(::add (::multiply 1 (::$valueOfUnit 'm')) (::multiply 2 (::$valueOfUnit 'cm')))}",
+    )
+  })
 })
 
 describe("parsing new line", () => {

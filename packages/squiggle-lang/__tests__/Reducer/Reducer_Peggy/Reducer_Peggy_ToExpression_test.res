@@ -217,4 +217,8 @@ describe("Peggy to Expression", () => {
       (),
     )
   })
+
+  describe("unit", () => {
+    testToExpression("1m", "(:$$_block_$$ (:multiply 1 (:$valueOfUnit 'm')))", ~v="1", ())
+  })
 })
