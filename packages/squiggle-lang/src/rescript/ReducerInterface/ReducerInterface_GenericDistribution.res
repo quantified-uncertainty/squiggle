@@ -179,13 +179,6 @@ module Helpers = {
 }
 
 module SymbolicConstructors = {
-  let oneFloat = name =>
-    switch name {
-    | "exponential" => Ok(SymbolicDist.Exponential.make)
-    | "bernoulli" => Ok(SymbolicDist.Bernoulli.make)
-    | _ => Error("Unreachable state")
-    }
-
   let threeFloat = name =>
     switch name {
     | "triangular" => Ok(SymbolicDist.Triangular.make)
@@ -207,10 +200,6 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | (("exponential" | "bernoulli") as fnName, [EvNumber(f)]) =>
-    SymbolicConstructors.oneFloat(fnName)
-    ->E.R.bind(r => r(f))
-    ->SymbolicConstructors.symbolicResultToOutput
   | ("delta", [EvNumber(f)]) =>
     SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>

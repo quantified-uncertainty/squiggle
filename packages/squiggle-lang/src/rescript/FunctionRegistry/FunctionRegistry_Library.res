@@ -8,7 +8,9 @@ let registry = [
     ~name="Normal",
     ~definitions=[
       TwoArgDist.make("normal", twoArgs(SymbolicDist.Normal.make)),
-      TwoArgDist.makeRecordP5P95("normal", r => twoArgs(SymbolicDist.Normal.from90PercentCI, r)->Ok),
+      TwoArgDist.makeRecordP5P95("normal", r =>
+        twoArgs(SymbolicDist.Normal.from90PercentCI, r)->Ok
+      ),
       TwoArgDist.makeRecordMeanStdev("normal", twoArgs(SymbolicDist.Normal.make)),
     ],
   ),
@@ -44,9 +46,20 @@ let registry = [
   ),
   Function.make(
     ~name="To",
-    ~definitions=[TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make)), 
-    TwoArgDist.make("credibleIntervalToDistribution", twoArgs(SymbolicDist.From90thPercentile.make))
+    ~definitions=[
+      TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make)),
+      TwoArgDist.make(
+        "credibleIntervalToDistribution",
+        twoArgs(SymbolicDist.From90thPercentile.make),
+      ),
     ],
-
+  ),
+  Function.make(
+    ~name="Exponential",
+    ~definitions=[OneArgDist.make("exponential", SymbolicDist.Exponential.make)],
+  ),
+  Function.make(
+    ~name="Bernoulli",
+    ~definitions=[OneArgDist.make("bernoulli", SymbolicDist.Bernoulli.make)],
   ),
 ]

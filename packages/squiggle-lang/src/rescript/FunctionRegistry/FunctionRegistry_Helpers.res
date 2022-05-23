@@ -5,7 +5,7 @@ let impossibleError = "Wrong inputs / Logically impossible"
 module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)
   let evDistribution = r => ReducerInterface_ExpressionValue.EvDistribution(r)
-  let symbolicEvDistribution = r => r->Symbolic->evDistribution
+  let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
 }
 
 module Prepare = {
@@ -30,6 +30,13 @@ module Prepare = {
       }
     }
 
+    let oneDistOrNumber = (values: ts): result<frValueDistOrNumber, err> => {
+      switch values {
+      | [FRValueDistOrNumber(a1)] => Ok(a1)
+      | _ => Error(impossibleError)
+      }
+    }
+
     module Record = {
       let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
         values->ToValueArray.Record.twoArgs->E.R.bind(twoDistOrNumber)
@@ -38,62 +45,78 @@ module Prepare = {
 }
 
 module Process = {
-  let twoDistsOrNumbersToDist = (
-    ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
-    ~values: (frValueDistOrNumber, frValueDistOrNumber),
-    ~env: DistributionOperation.env,
-  ): result<DistributionTypes.genericDist, string> => {
-    let toSampleSet = r => GenericDist.toSampleSetDist(r, env.sampleCount)
-    let mapFnResult = r =>
-      switch r {
-      | Ok(r) => Ok(GenericDist.sample(r))
-      | Error(r) => Error(Operation.Other(r))
-      }
+  module DistOrNumberToDist = {
+    module Helpers = {
+      let toSampleSet = (r, env: DistributionOperation.env) =>
+        GenericDist.toSampleSetDist(r, env.sampleCount)
 
-    let singleVarSample = (dist, fn) => {
-      switch toSampleSet(dist) {
-      | Ok(dist) =>
-        switch SampleSetDist.samplesMap(~fn=f => fn(f)->mapFnResult, dist) {
-        | Ok(r) => Ok(DistributionTypes.SampleSet(r))
-        | Error(r) => Error(DistributionTypes.Error.toString(DistributionTypes.SampleSetError(r)))
+      let mapFnResult = r =>
+        switch r {
+        | Ok(r) => Ok(GenericDist.sample(r))
+        | Error(r) => Error(Operation.Other(r))
         }
-      | Error(r) => Error(DistributionTypes.Error.toString(r))
-      }
-    }
 
-    let twoVarSample = (dist1, dist2, fn) => {
-      let altFn = (a, b) => fn((a, b))->mapFnResult
-      switch E.R.merge(toSampleSet(dist1), toSampleSet(dist2)) {
-      | Ok((t1, t2)) =>
-        switch SampleSetDist.map2(~fn=altFn, ~t1, ~t2) {
-        | Ok(r) => Ok(DistributionTypes.SampleSet(r))
-        | Error(r) => Error(Operation.Error.toString(r))
+      let wrapSymbolic = (fn, r) => r->fn->E.R2.fmap(Wrappers.symbolic)
+
+      let singleVarSample = (dist, fn, env) => {
+        switch toSampleSet(dist, env) {
+        | Ok(dist) =>
+          switch SampleSetDist.samplesMap(~fn=f => fn(f)->mapFnResult, dist) {
+          | Ok(r) => Ok(DistributionTypes.SampleSet(r))
+          | Error(r) => Error(DistributionTypes.Error.toString(DistributionTypes.SampleSetError(r)))
+          }
+        | Error(r) => Error(DistributionTypes.Error.toString(r))
         }
-      | Error(r) => Error(DistributionTypes.Error.toString(r))
+      }
+
+      let twoVarSample = (dist1, dist2, fn, env) => {
+        let altFn = (a, b) => fn((a, b))->mapFnResult
+        switch E.R.merge(toSampleSet(dist1, env), toSampleSet(dist2, env)) {
+        | Ok((t1, t2)) =>
+          switch SampleSetDist.map2(~fn=altFn, ~t1, ~t2) {
+          | Ok(r) => Ok(DistributionTypes.SampleSet(r))
+          | Error(r) => Error(Operation.Error.toString(r))
+          }
+        | Error(r) => Error(DistributionTypes.Error.toString(r))
+        }
       }
     }
 
-    switch values {
-    | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))
-    | (FRValueDist(a1), FRValueNumber(a2)) => singleVarSample(a1, r => fn((r, a2)))
-    | (FRValueNumber(a1), FRValueDist(a2)) => singleVarSample(a2, r => fn((a1, r)))
-    | (FRValueDist(a1), FRValueDist(a2)) => twoVarSample(a1, a2, fn)
+    let oneValue = (
+      ~fn: float => result<DistributionTypes.genericDist, string>,
+      ~value: frValueDistOrNumber,
+      ~env: DistributionOperation.env,
+    ): result<DistributionTypes.genericDist, string> => {
+      switch value {
+      | FRValueNumber(a1) => fn(a1)
+      | FRValueDist(a1) => Helpers.singleVarSample(a1, r => fn(r), env)
+      }
     }
-  }
 
-  let twoDistsOrNumbersToDistUsingSymbolicDist = (
-    ~fn: ((float, float)) => result<SymbolicDistTypes.symbolicDist, string>,
-    ~values,
-  ) => {
-    let newFn = r => fn(r)->E.R2.fmap(Wrappers.symbolic)
-    twoDistsOrNumbersToDist(~fn=newFn, ~values)
+    let oneValueUsingSymbolicDist = (~fn, ~value) => oneValue(~fn=Helpers.wrapSymbolic(fn), ~value)
+
+    let twoValues = (
+      ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
+      ~values: (frValueDistOrNumber, frValueDistOrNumber),
+      ~env: DistributionOperation.env,
+    ): result<DistributionTypes.genericDist, string> => {
+      switch values {
+      | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))
+      | (FRValueDist(a1), FRValueNumber(a2)) => Helpers.singleVarSample(a1, r => fn((r, a2)), env)
+      | (FRValueNumber(a1), FRValueDist(a2)) => Helpers.singleVarSample(a2, r => fn((a1, r)), env)
+      | (FRValueDist(a1), FRValueDist(a2)) => Helpers.twoVarSample(a1, a2, fn, env)
+      }
+    }
+
+    let twoValuesUsingSymbolicDist = (~fn, ~values) =>
+      twoValues(~fn=Helpers.wrapSymbolic(fn), ~values)
   }
 }
 
 module TwoArgDist = {
   let process = (~fn, ~env, r) =>
     r
-    ->E.R.bind(Process.twoDistsOrNumbersToDistUsingSymbolicDist(~fn, ~values=_, ~env))
+    ->E.R.bind(Process.DistOrNumberToDist.twoValuesUsingSymbolicDist(~fn, ~values=_, ~env))
     ->E.R2.fmap(Wrappers.evDistribution)
 
   let make = (name, fn) => {
@@ -117,5 +140,17 @@ module TwoArgDist = {
       ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
     )
   }
+}
 
+module OneArgDist = {
+  let process = (~fn, ~env, r) =>
+    r
+    ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
+    ->E.R2.fmap(Wrappers.evDistribution)
+
+  let make = (name, fn) => {
+    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber], ~run=(inputs, env) =>
+      inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env)
+    )
+  }
 }

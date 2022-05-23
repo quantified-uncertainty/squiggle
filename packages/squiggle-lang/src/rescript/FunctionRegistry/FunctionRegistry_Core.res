@@ -133,8 +133,6 @@ module Matcher = {
   }
 
   module FnDefinition = {
-    type definitionMatch = MatchSimple.t
-
     let matchAssumingSameName = (f: fnDefinition, args: array<expressionValue>) => {
       switch FRType.matchWithExpressionValueArray(f.inputs, args) {
       | Some(_) => MatchSimple.FullMatch
@@ -185,7 +183,6 @@ module Matcher = {
       fnName: string,
       inputIndex: int,
     }
-    type t = Match.t<array<match>, match>
     let makeMatch = (fnName: string, inputIndex: int) => {fnName: fnName, inputIndex: inputIndex}
   }
 

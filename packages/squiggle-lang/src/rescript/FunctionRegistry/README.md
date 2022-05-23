@@ -37,7 +37,7 @@ The Function name is just there for future documentation. The function defintion
 ## Key Files
 
 **FunctionRegistry_Core**
-Key types, internal functionality, and a ``Registry`` module with a ``matchAndRun`` function to call function definitions. 
+Key types, internal functionality, and a `Registry` module with a `matchAndRun` function to call function definitions.
 
 **FunctionRegistry_Library**
 A list of all the Functions defined in the Function Registry.

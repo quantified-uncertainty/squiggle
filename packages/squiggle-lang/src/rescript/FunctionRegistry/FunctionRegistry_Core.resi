@@ -33,7 +33,6 @@ type function = {
 
 type registry = array<function>
 
-
 // Note: The function "name" is just used for documentation purposes
 module Function: {
   type t = function
