@@ -840,7 +840,7 @@ module Duration = {
   let minute = Belt.Float.fromInt(60 * 1000)
   let hour = Belt.Float.fromInt(60 * 60 * 1000)
   let day = Belt.Float.fromInt(24 * 60 * 60 * 1000)
-  let year = Belt.Float.fromInt(24 * 60 * 60 * 1000 * 365)
+  let year = Belt.Float.fromInt(24 * 60 * 60 * 1000) *. 365.25
   let fromFloat = (f: float): t => f
   let toFloat = (d: t): float => d
   let fromHours = (h: float): t => h *. hour
@@ -849,7 +849,19 @@ module Duration = {
   let toHours = (t: t): float => t /. hour
   let toDays = (t: t): float => t /. day
   let toYears = (t: t): float => t /. year
-  let toString = (t: t) => `${Float.with2DigitsPrecision(t)}ms`
+  let toString = (t: t): string => {
+    if t >= year {
+      Float.with3DigitsPrecision(t /. year) ++ " years"
+    } else if t >= day {
+      Float.with3DigitsPrecision(t /. day) ++ " days"
+    } else if t >= hour {
+      Float.with3DigitsPrecision(t /. hour) ++ " hours"
+    } else if t >= minute {
+      Float.with3DigitsPrecision(t /. minute) ++ " minutes"
+    } else {
+      Float.toFixed(t) ++ "ms"
+    }
+  }
   let add = (t1, t2): t => t1 +. t2
   let subtract = (t1, t2): t => t1 -. t2
   let multiply = (t1, t2): t => t1 *. t2
@@ -857,12 +869,24 @@ module Duration = {
 }
 
 module Date = {
+  //The Rescript/JS implementation of Date is pretty mediocre. It would be good to improve upon later.
   type t = Js.Date.t
-  type year
-  let makeWithYM = Js.Date.makeWithYM
-  let toString = Js.Date.toString
-  let fromFloat = Js.Date.fromFloat
   let toFloat = Js.Date.getTime
+  let getFullYear = Js.Date.getFullYear
+
+  //The Js.Date.makeWithYM function accepts a float, but only treats it as a whole number.
+  //Our version takes an integer to make this distinction clearer.
+  let makeWithYear = (y: int): result<t, string> => {
+    if y < 100 {
+      Error("Year must be over 100")
+    } else if y > 200000 {
+      Error("Year must be less than 200000")
+    } else {
+      Ok(Js.Date.makeWithYM(~year=Belt.Float.fromInt(y), ~month=0.0, ()))
+    }
+  }
+  let toString = Js.Date.toDateString
+  let fromFloat = Js.Date.fromFloat
   let fmap = (t: t, fn: float => float) => t->toFloat->fn->fromFloat
   let subtract = (t1: t, t2: t) => {
     let (f1, f2) = (toFloat(t1), toFloat(t2))

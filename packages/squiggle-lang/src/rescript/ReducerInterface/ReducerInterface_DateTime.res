@@ -7,7 +7,10 @@ let dateDispatch = (call: ExpressionValue.functionCall, env: DistributionOperati
   switch call {
   | ("toString", [EvDate(t)]) => EvString(E.Date.toString(t))->Ok->Some
   | ("makeDateFromYear", [EvNumber(year)]) =>
-    EvDate(E.Date.makeWithYM(~year, ~month=0.0, ()))->Ok->Some
+    switch E.Date.makeWithYear(Belt.Float.toInt(year)) {
+    | Ok(t) => EvDate(t)->Ok->Some
+    | Error(e) => RETodo(e)->Error->Some
+    }
   | ("fromMilliseconds", [EvNumber(f)]) => EvDate(E.Date.fromFloat(f))->Ok->Some
   | ("toMilliseconds", [EvDate(f)]) => EvNumber(E.Date.toFloat(f))->Ok->Some
   | ("subtract", [EvDate(d1), EvDate(d2)]) =>
@@ -22,14 +25,16 @@ let dateDispatch = (call: ExpressionValue.functionCall, env: DistributionOperati
   }
 }
 
-let durationDispatch = (call: ExpressionValue.functionCall, env: DistributionOperation.env): option<
+let durationDispatch = (call: ExpressionValue.functionCall, _: DistributionOperation.env): option<
   result<expressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
 > => {
   switch call {
   | ("toString", [EvTimeDuration(t)]) => EvString(E.Duration.toString(t))->Ok->Some
   | ("hours", [EvNumber(f)]) => EvTimeDuration(E.Duration.fromHours(f))->Ok->Some
+  | ("days", [EvNumber(f)]) => EvTimeDuration(E.Duration.fromDays(f))->Ok->Some
   | ("years", [EvNumber(f)]) => EvTimeDuration(E.Duration.fromYears(f))->Ok->Some
   | ("toHours", [EvTimeDuration(f)]) => EvNumber(E.Duration.toHours(f))->Ok->Some
+  | ("toDays", [EvTimeDuration(f)]) => EvNumber(E.Duration.toDays(f))->Ok->Some
   | ("toYears", [EvTimeDuration(f)]) => EvNumber(E.Duration.toYears(f))->Ok->Some
   | (
       ("add" | "subtract" | "multiply" | "divide") as op,
