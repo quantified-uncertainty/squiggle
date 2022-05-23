@@ -248,8 +248,7 @@ basicValue = valueConstructor / basicLiteral
  
 basicLiteral
   = string
-  / float
-  / integer
+  / number
   / boolean
   / dollarIdentifier
 
@@ -262,6 +261,15 @@ dollarIdentifier '$identifier'
 string 'string'
   = characters:("'" @([^'])* "'") {return nodeString(characters.join(''))} 
   / characters:('"' @([^"])* '"') {return nodeString(characters.join(''))}
+
+number = number:(float / integer) unit:identifier?
+  { 
+    if (unit === null)
+      { return number }
+    else
+      { return makeFunctionCall('fromUnit_'+unit.value, [number]) 
+      }
+  }
 
 integer 'integer'
   = d+ !"\." ![e]i
