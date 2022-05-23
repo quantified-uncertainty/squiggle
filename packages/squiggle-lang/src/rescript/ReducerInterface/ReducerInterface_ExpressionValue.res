@@ -53,8 +53,8 @@ let rec toString = aValue =>
   | EvSymbol(aString) => `:${aString}`
   | EvRecord(aRecord) => aRecord->toStringRecord
   | EvDistribution(dist) => GenericDist.toString(dist)
-  | EvDate(date) => E.Date.toString(date)
-  | EvTimeDuration(t) => E.Duration.toString(t)
+  | EvDate(date) => DateTime.Date.toString(date)
+  | EvTimeDuration(t) => DateTime.Duration.toString(t)
   }
 and toStringRecord = aRecord => {
   let pairs =
