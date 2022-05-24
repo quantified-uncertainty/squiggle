@@ -4,18 +4,19 @@ type errorValue =
   | REArrayIndexNotFound(string, int)
   | REAssignmentExpected
   | REDistributionError(DistributionTypes.error)
-  | REOperationError(Operation.operationError)
+  | REExpectedType(string)
   | REExpressionExpected
   | REFunctionExpected(string)
   | REFunctionNotFound(string)
   | REJavaScriptExn(option<string>, option<string>) // Javascript Exception
   | REMacroNotFound(string)
   | RENotAFunction(string)
+  | REOperationError(Operation.operationError)
   | RERecordPropertyNotFound(string, string)
   | RESymbolNotFound(string)
   | RESyntaxError(string)
   | RETodo(string) // To do
-  | REExpectedType(string)
+  | REUnitNotFound(string)
 
 type t = errorValue
 
@@ -52,4 +53,5 @@ let errorToString = err =>
   | RESyntaxError(desc) => `Syntax Error: ${desc}`
   | RETodo(msg) => `TODO: ${msg}`
   | REExpectedType(typeName) => `Expected type: ${typeName}`
+  | REUnitNotFound(unitName) => `Unit not found: ${unitName}`
   }
