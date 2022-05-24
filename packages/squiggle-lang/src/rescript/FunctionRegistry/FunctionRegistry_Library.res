@@ -3,7 +3,27 @@ open FunctionRegistry_Helpers
 
 let twoArgs = E.Tuple2.toFnCall
 
+// ~run=(inputs, env) => switch(inputs->FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs){
+//   | (FRTypeArray(records), FRValueLambdaValue(fn)) => {
+//     records->E.A.fmap2(r => r->FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs->FunctionRegistry_Helpers.Prepare)
+//     })
+//   }
+// let variant = FRTypeVariant(["Numeric", "Date"])
+let recordType = FRTypeRecord([("min", FRTypeNumber), ("max", FRTypeNumber)])
 let registry = [
+  Function.make(
+    ~name="FnMake",
+    ~definitions=[
+      FnDefinition.make(
+        ~name="declareFn",
+        ~inputs=[FRTypeRecord([("inputs", FRTypeArray(recordType))])],
+        ~run=(inputs, _) => {
+          let foo = FunctionRegistry_Core.FRType.matchReverse(inputs->E.A.unsafe_get(0))
+          foo->Ok
+        }
+      ),
+    ],
+  ),
   Function.make(
     ~name="Normal",
     ~definitions=[
