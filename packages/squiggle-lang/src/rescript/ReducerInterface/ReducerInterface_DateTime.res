@@ -1,11 +1,11 @@
 module ExpressionValue = ReducerInterface_ExpressionValue
 type expressionValue = ExpressionValue.expressionValue
 
-let dateDispatch = (call: ExpressionValue.functionCall, env: DistributionOperation.env): option<
+let dateDispatch = (call: ExpressionValue.functionCall, _: DistributionOperation.env): option<
   result<expressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
 > => {
   switch call {
-  | ("toString", [EvDate(t)]) => EvString(DateTime.Date.toString(t))->Ok->Some
+  | ("toString", [EvDate(t)]) => ExpressionValue.EvString(DateTime.Date.toString(t))->Ok->Some
   | ("makeDateFromYear", [EvNumber(year)]) =>
     switch DateTime.Date.makeFromYear(year) {
     | Ok(t) => EvDate(t)->Ok->Some

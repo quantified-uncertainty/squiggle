@@ -96,7 +96,7 @@ export type squiggleExpression =
   | tagged<"number", number>
   | tagged<"date", Date>
   | tagged<"timeDuration", number>
-  | tagged<"record", { [key: string]: squiggleExpression }>
+  | tagged<"record", { [key: string]: squiggleExpression }>;
 
 export { lambdaValue };
 
