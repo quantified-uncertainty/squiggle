@@ -90,3 +90,15 @@ let defaultEnvironment = ReducerInterface_ExpressionValue.defaultEnvironment
 
 @genType
 let foreignFunctionInterface = Reducer.foreignFunctionInterface
+
+@genType
+type declarationContinuousArg = Declaration.continuousArg
+
+@genType
+type continuousDeclaration<'a> = Declaration.continuousDeclaration<'a>
+
+@genType
+type relativeComparisonDeclaration<'a> = Declaration.relativeComparisonDeclaration<'a>
+
+@genType
+type declaration<'a> = Declaration.declaration<'a>
