@@ -22,6 +22,7 @@ type rec expressionValue =
   | EvSymbol(string)
   | EvDate(Js.Date.t)
   | EvTimeDuration(float)
+  | EvDeclaration(lambdaDeclaration)
 and record = Js.Dict.t<expressionValue>
 and externalBindings = record
 and lambdaValue = {
@@ -29,6 +30,7 @@ and lambdaValue = {
   context: externalBindings,
   body: internalCode,
 }
+and lambdaDeclaration = Declaration.declaration<lambdaValue>
 
 @genType
 let defaultExternalBindings: externalBindings = Js.Dict.empty()
@@ -55,6 +57,7 @@ let rec toString = aValue =>
   | EvDistribution(dist) => GenericDist.toString(dist)
   | EvDate(date) => DateTime.Date.toString(date)
   | EvTimeDuration(t) => DateTime.Duration.toString(t)
+  | EvDeclaration(t) => "Declaration"
   }
 and toStringRecord = aRecord => {
   let pairs =
@@ -79,6 +82,7 @@ let toStringWithType = aValue =>
   | EvSymbol(_) => `Symbol::${toString(aValue)}`
   | EvDate(_) => `Date::${toString(aValue)}`
   | EvTimeDuration(_) => `Date::${toString(aValue)}`
+  | EvDeclaration(_) => `Declaration::${toString(aValue)}`
   }
 
 let argsToString = (args: array<expressionValue>): string => {
