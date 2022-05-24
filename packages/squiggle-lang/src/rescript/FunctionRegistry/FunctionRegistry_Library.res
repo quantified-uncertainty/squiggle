@@ -3,25 +3,55 @@ open FunctionRegistry_Helpers
 
 let twoArgs = E.Tuple2.toFnCall
 
-// ~run=(inputs, env) => switch(inputs->FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs){
-//   | (FRTypeArray(records), FRValueLambdaValue(fn)) => {
-//     records->E.A.fmap2(r => r->FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs->FunctionRegistry_Helpers.Prepare)
-//     })
-//   }
-// let variant = FRTypeVariant(["Numeric", "Date"])
-let recordType = FRTypeRecord([("min", FRTypeNumber), ("max", FRTypeNumber)])
+module FnDeclaration = {
+  type range = {min: float, max: float}
+  let makeRange = (min, max) => {min: min, max: max}
+  type t = {
+    fn: ReducerInterface_ExpressionValue.lambdaValue,
+    args: array<range>,
+  }
+
+  let validate = (def: t) => {
+    let {parameters, _} = def.fn
+    E.A.length(parameters) == E.A.length(def.args)
+  }
+
+  let frType = FRTypeRecord([
+    ("fn", FRTypeLambda),
+    ("inputs", FRTypeArray(FRTypeRecord([("min", FRTypeNumber), ("max", FRTypeNumber)]))),
+  ])
+
+  let fromExpressionValue = (e: expressionValue) => {
+    let values = FunctionRegistry_Core.FRType.matchWithExpressionValue(frType, e)
+    switch values->E.O2.fmap(r =>
+      FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs([r])
+    ) {
+    | Some(Ok([FRValueLambda(lambda), FRValueArray(inputs)])) => {
+        open FunctionRegistry_Helpers.Prepare
+        let getMinMax = arg => 
+          ToValueArray.Record.toArgs([arg])
+          ->E.R.bind(ToValueTuple.twoNumbers)
+          ->E.R2.fmap(((min, max)) => makeRange(min, max))
+        inputs
+        ->E.A2.fmap(getMinMax)
+        ->E.A.R.firstErrorOrOpen
+        ->E.R2.fmap(args => {fn: lambda, args: args})
+      }
+    | _ => Error("Error")
+    }
+  }
+}
+
 let registry = [
   Function.make(
     ~name="FnMake",
     ~definitions=[
-      FnDefinition.make(
-        ~name="declareFn",
-        ~inputs=[FRTypeRecord([("inputs", FRTypeArray(recordType))])],
-        ~run=(inputs, _) => {
-          let foo = FunctionRegistry_Core.FRType.matchReverse(inputs->E.A.unsafe_get(0))
-          foo->Ok
-        }
-      ),
+      FnDefinition.make(~name="declareFn", ~inputs=[FnDeclaration.frType], ~run=(inputs, _) => {
+        let result = inputs->E.A.unsafe_get(0)->FunctionRegistry_Core.FRType.matchReverse->Ok
+        let foo = result->E.R2.fmap(FnDeclaration.fromExpressionValue)
+        Js.log2("HIHIHI", foo)
+        result
+      }),
     ],
   ),
   Function.make(
