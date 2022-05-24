@@ -77,6 +77,9 @@ let distributionErrorToString = DistributionTypes.Error.toString
 type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
 
 @genType
+type lambdaDeclaration = ReducerInterface_ExpressionValue.lambdaDeclaration
+
+@genType
 let defaultSamplingEnv = DistributionOperation.defaultEnv
 
 @genType

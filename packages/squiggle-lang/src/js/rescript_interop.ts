@@ -9,6 +9,7 @@ import {
   discreteShape,
   continuousShape,
   lambdaValue,
+  lambdaDeclaration
 } from "../rescript/TypescriptInterface.gen";
 import { Distribution } from "./distribution";
 import { tagged, tag } from "./types";
@@ -63,6 +64,10 @@ export type rescriptExport =
   | {
       TAG: 11; // EvTimeDuration
       _0: number;
+    }
+  | {
+      TAG: 12; // EvDeclaration
+      _0: lambdaDeclaration;
     };
 
 type rescriptDist =
@@ -96,6 +101,7 @@ export type squiggleExpression =
   | tagged<"number", number>
   | tagged<"date", Date>
   | tagged<"timeDuration", number>
+  | tagged<"lambdaDeclaration", lambdaDeclaration>
   | tagged<"record", { [key: string]: squiggleExpression }>;
 
 export { lambdaValue };
@@ -141,6 +147,8 @@ export function convertRawToTypescript(
       return tag("date", result._0);
     case 11: // EvTimeDuration
       return tag("number", result._0);
+    case 12: // EvDeclaration
+      return tag("lambdaDeclaration", result._0);
   }
 }
 

@@ -185,5 +185,7 @@ function createTsExport(
       return tag("date", x.value);
     case "EvTimeDuration":
       return tag("timeDuration", x.value);
+    case "EvDeclaration":
+      return tag("lambdaDeclaration", x.value);
   }
 }

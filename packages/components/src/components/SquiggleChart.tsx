@@ -202,6 +202,25 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         </VariableBox>
       );
     }
+    case "lambdaDeclaration": {
+      switch (expression.value.tag) {
+        case "Continuous": {
+          return (
+            <FunctionChart
+              fn={expression.value.value.fn}
+              chartSettings={chartSettings}
+              environment={{
+                sampleCount: environment.sampleCount / 10,
+                xyPointLength: environment.xyPointLength / 10,
+              }}
+            />
+          );
+        }
+        case "RelativeComparison": {
+          return <></>;
+        }
+      }
+    }
     case "lambda":
       return (
         <FunctionChart
