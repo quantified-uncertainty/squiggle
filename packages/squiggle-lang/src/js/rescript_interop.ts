@@ -55,6 +55,14 @@ export type rescriptExport =
   | {
       TAG: 9; // EvSymbol
       _0: string;
+    }
+  | {
+      TAG: 10; // EvDate
+      _0: Date;
+    }
+  | {
+      TAG: 11; // EvTimeDuration
+      _0: number;
     };
 
 type rescriptDist =
@@ -86,6 +94,8 @@ export type squiggleExpression =
   | tagged<"boolean", boolean>
   | tagged<"distribution", Distribution>
   | tagged<"number", number>
+  | tagged<"date", Date>
+  | tagged<"timeDuration", number>
   | tagged<"record", { [key: string]: squiggleExpression }>;
 
 export { lambdaValue };
@@ -127,6 +137,10 @@ export function convertRawToTypescript(
       return tag("string", result._0);
     case 9: // EvSymbol
       return tag("symbol", result._0);
+    case 10: // EvDate
+      return tag("date", result._0);
+    case 11: // EvTimeDuration
+      return tag("number", result._0);
   }
 }
 

@@ -181,5 +181,9 @@ function createTsExport(
       return tag("string", x.value);
     case "EvSymbol":
       return tag("symbol", x.value);
+    case "EvDate":
+      return tag("date", x.value);
+    case "EvTimeDuration":
+      return tag("timeDuration", x.value);
   }
 }
