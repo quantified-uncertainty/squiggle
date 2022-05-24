@@ -20,6 +20,8 @@ type rec expressionValue =
   | EvRecord(record)
   | EvString(string)
   | EvSymbol(string)
+  | EvDate(Js.Date.t)
+  | EvTimeDuration(float)
 and record = Js.Dict.t<expressionValue>
 and externalBindings = record
 and lambdaValue = {
@@ -51,6 +53,8 @@ let rec toString = aValue =>
   | EvSymbol(aString) => `:${aString}`
   | EvRecord(aRecord) => aRecord->toStringRecord
   | EvDistribution(dist) => GenericDist.toString(dist)
+  | EvDate(date) => DateTime.Date.toString(date)
+  | EvTimeDuration(t) => DateTime.Duration.toString(t)
   }
 and toStringRecord = aRecord => {
   let pairs =
@@ -73,6 +77,8 @@ let toStringWithType = aValue =>
   | EvRecord(_) => `Record::${toString(aValue)}`
   | EvString(_) => `String::${toString(aValue)}`
   | EvSymbol(_) => `Symbol::${toString(aValue)}`
+  | EvDate(_) => `Date::${toString(aValue)}`
+  | EvTimeDuration(_) => `Date::${toString(aValue)}`
   }
 
 let argsToString = (args: array<expressionValue>): string => {
@@ -116,6 +122,8 @@ type expressionValueType =
   | EvtRecord
   | EvtString
   | EvtSymbol
+  | EvtDate
+  | EvtTimeDuration
 
 type functionCallSignature = CallSignature(string, array<expressionValueType>)
 type functionDefinitionSignature =
@@ -133,6 +141,8 @@ let valueToValueType = value =>
   | EvRecord(_) => EvtRecord
   | EvString(_) => EvtArray
   | EvSymbol(_) => EvtSymbol
+  | EvDate(_) => EvtDate
+  | EvTimeDuration(_) => EvtTimeDuration
   }
 
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
@@ -152,6 +162,8 @@ let valueTypeToString = (valueType: expressionValueType): string =>
   | EvtRecord => `Record`
   | EvtString => `String`
   | EvtSymbol => `Symbol`
+  | EvtDate => `Date`
+  | EvtTimeDuration => `Duration`
   }
 
 let functionCallSignatureToString = (functionCallSignature: functionCallSignature): string => {
