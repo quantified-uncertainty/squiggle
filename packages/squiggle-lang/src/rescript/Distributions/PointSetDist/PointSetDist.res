@@ -66,6 +66,7 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
   }
 
 let combinePointwise = (
+  ~combiner=XYShape.PointwiseCombination.combine,
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
   ~integralCachesFn: (
     PointSetTypes.continuousShape,
@@ -78,6 +79,7 @@ let combinePointwise = (
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combinePointwise(
+      ~combiner,
       ~integralSumCachesFn,
       fn,
       m1,
@@ -85,6 +87,7 @@ let combinePointwise = (
     )->E.R2.fmap(x => PointSetTypes.Continuous(x))
   | (Discrete(m1), Discrete(m2)) =>
     Discrete.combinePointwise(
+      ~combiner,
       ~integralSumCachesFn,
       ~fn,
       m1,

@@ -60,42 +60,44 @@ module Constructors: {
   let normalize: (~env: env, genericDist) => result<genericDist, error>
   @genType
   let isNormalized: (~env: env, genericDist) => result<bool, error>
-  @genType
-  let logScore_DistEstimateDistAnswer: (~env: env, genericDist, genericDist) => result<float, error>
-  @genType
-  let logScore_DistEstimateDistAnswerWithPrior: (
-    ~env: env,
-    genericDist,
-    genericDist,
-    DistributionTypes.DistributionOperation.scoreDistOrScalar,
-  ) => result<float, error>
-  @genType
-  let logScore_DistEstimateScalarAnswer: (~env: env, genericDist, float) => result<float, error>
-  @genType
-  let logScore_DistEstimateScalarAnswerWithPrior: (
-    ~env: env,
-    genericDist,
-    float,
-    DistributionTypes.DistributionOperation.scoreDistOrScalar,
-  ) => result<float, error>
-  @genType
-  let logScore_ScalarEstimateDistAnswer: (~env: env, float, genericDist) => result<float, error>
-  @genType
-  let logScore_ScalarEstimateDistAnswerWithPrior: (
-    ~env: env,
-    float,
-    genericDist,
-    DistributionTypes.DistributionOperation.scoreDistOrScalar,
-  ) => result<float, error>
-  @genType
-  let logScore_ScalarEstimateScalarAnswer: (~env: env, float, float) => result<float, error>
-  @genType
-  let logScore_ScalarEstimateScalarAnswerWithPrior: (
-    ~env: env,
-    float,
-    float,
-    DistributionTypes.DistributionOperation.scoreDistOrScalar,
-  ) => result<float, error>
+  module LogScore: {
+    @genType
+    let distEstimateDistAnswer: (~env: env, genericDist, genericDist) => result<float, error>
+    @genType
+    let distEstimateDistAnswerWithPrior: (
+      ~env: env,
+      genericDist,
+      genericDist,
+      DistributionTypes.DistributionOperation.scoreDistOrScalar,
+    ) => result<float, error>
+    @genType
+    let distEstimateScalarAnswer: (~env: env, genericDist, float) => result<float, error>
+    @genType
+    let distEstimateScalarAnswerWithPrior: (
+      ~env: env,
+      genericDist,
+      float,
+      DistributionTypes.DistributionOperation.scoreDistOrScalar,
+    ) => result<float, error>
+    @genType
+    let scalarEstimateDistAnswer: (~env: env, float, genericDist) => result<float, error>
+    @genType
+    let scalarEstimateDistAnswerWithPrior: (
+      ~env: env,
+      float,
+      genericDist,
+      DistributionTypes.DistributionOperation.scoreDistOrScalar,
+    ) => result<float, error>
+    @genType
+    let scalarEstimateScalarAnswer: (~env: env, float, float) => result<float, error>
+    @genType
+    let scalarEstimateScalarAnswerWithPrior: (
+      ~env: env,
+      float,
+      float,
+      DistributionTypes.DistributionOperation.scoreDistOrScalar,
+    ) => result<float, error>
+  }
   @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>
   @genType

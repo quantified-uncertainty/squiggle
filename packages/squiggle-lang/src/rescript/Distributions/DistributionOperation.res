@@ -262,22 +262,24 @@ module Constructors = {
   let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
   let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
   let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
-  let logScore_DistEstimateDistAnswer = (~env, estimate, answer) =>
-    C.logScore_DistEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
-  let logScore_DistEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
-    C.logScore_DistEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
-  let logScore_DistEstimateScalarAnswer = (~env, estimate, answer) =>
-    C.logScore_DistEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
-  let logScore_DistEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
-    C.logScore_DistEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
-  let logScore_ScalarEstimateDistAnswer = (~env, estimate, answer) =>
-    C.logScore_ScalarEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
-  let logScore_ScalarEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
-    C.logScore_ScalarEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
-  let logScore_ScalarEstimateScalarAnswer = (~env, estimate, answer) =>
-    C.logScore_ScalarEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
-  let logScore_ScalarEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
-    C.logScore_ScalarEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+  module LogScore = {
+    let distEstimateDistAnswer = (~env, estimate, answer) =>
+      C.LogScore.distEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
+    let distEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
+      C.LogScore.distEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+    let distEstimateScalarAnswer = (~env, estimate, answer) =>
+      C.LogScore.distEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
+    let distEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
+      C.LogScore.distEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+    let scalarEstimateDistAnswer = (~env, estimate, answer) =>
+      C.LogScore.scalarEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
+    let scalarEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
+      C.LogScore.scalarEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+    let scalarEstimateScalarAnswer = (~env, estimate, answer) =>
+      C.LogScore.scalarEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
+    let scalarEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
+      C.LogScore.scalarEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+  }
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
   let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR

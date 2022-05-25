@@ -3,7 +3,7 @@ open Expect
 open TestHelpers
 open GenericDist_Fixtures
 
-let klDivergence = DistributionOperation.Constructors.logScore_DistEstimateDistAnswer(~env)
+let klDivergence = DistributionOperation.Constructors.LogScore.distEstimateDistAnswer(~env)
 // integral from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx
 let klNormalUniform = (mean, stdev, low, high): float =>
   -.Js.Math.log((high -. low) /. Js.Math.sqrt(2.0 *. MagicNumbers.Math.pi *. stdev ** 2.0)) +.
@@ -194,7 +194,7 @@ describe("combineAlongSupportOfSecondArgument0", () => {
 
     let result = switch (answerWrapped, predictionWrapped) {
     | (Ok(Dist(PointSet(Continuous(a)))), Ok(Dist(PointSet(Continuous(b))))) =>
-      Some(combineAlongSupportOfSecondArgument(integrand, interpolator, a.xyShape, b.xyShape))
+      Some(combineAlongSupportOfSecondArgument(interpolator, integrand, a.xyShape, b.xyShape))
     | _ => None
     }
     result

@@ -322,8 +322,8 @@ module Zipped = {
 module PointwiseCombination = {
   // t1Interpolator and t2Interpolator are functions from XYShape.XtoY, e.g. linearBetweenPointsExtrapolateFlat.
   let combine: (
-    (float, float) => result<float, Operation.Error.t>,
     interpolator,
+    (float, float) => result<float, Operation.Error.t>,
     T.t,
     T.t,
   ) => result<T.t, Operation.Error.t> = %raw(`
@@ -332,7 +332,7 @@ module PointwiseCombination = {
       // and interpolates the value on the other side, thus accumulating xs and ys.
       // This is written in raw JS because this can still be a bottleneck, and using refs for the i and j indices is quite painful.
 
-      function(fn, interpolator, t1, t2) {
+      function(interpolator, fn, t1, t2) {
         let t1n = t1.xs.length;
         let t2n = t2.xs.length;
         let outX = [];
@@ -394,11 +394,11 @@ module PointwiseCombination = {
     This is from an approach to kl divergence that was ultimately rejected. Leaving it in for now because it may help us factor `combine` out of raw javascript soon.
  */
   let combineAlongSupportOfSecondArgument0: (
-    (float, float) => result<float, Operation.Error.t>,
     interpolator,
+    (float, float) => result<float, Operation.Error.t>,
     T.t,
     T.t,
-  ) => result<T.t, Operation.Error.t> = (fn, interpolator, t1, t2) => {
+  ) => result<T.t, Operation.Error.t> = (interpolator, fn, t1, t2) => {
     let newYs = []
     let newXs = []
     let (l1, l2) = (E.A.length(t1.xs), E.A.length(t2.xs))
@@ -493,27 +493,23 @@ module PointwiseCombination = {
   }
   // This function is used for klDivergence
   let combineAlongSupportOfSecondArgument: (
+    interpolator,
     (float, float) => result<float, Operation.Error.t>,
     T.t,
     T.t,
-  ) => result<T.t, Operation.Error.t> = (fn, prediction, answer) => {
+  ) => result<T.t, Operation.Error.t> = (interpolator, fn, prediction, answer) => {
     let combineWithFn = (answerX: float, i: int) => {
       let answerY = answer.ys[i]
-      let predictionY = XtoY.linear(answerX, prediction)
+      // let predictionY = XtoY.linear(answerX, prediction)
+      let predictionY = interpolator(prediction, i, answerX)
       fn(predictionY, answerY)
     }
     let newYsWithError = Js.Array.mapi((x, i) => combineWithFn(x, i), answer.xs)
-    let newYsOrError = E.A.R.firstErrorOrOpen(newYsWithError)
-    let result = switch newYsOrError {
-    | Ok(a) => Ok({xs: answer.xs, ys: a})
-    | Error(b) => Error(b)
-    }
-
-    result
+    E.A.R.firstErrorOrOpen(newYsWithError)->E.R2.fmap(ys => {xs: answer.xs, ys: ys})
   }
 
   let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
-    combine((a, b) => Ok(a +. b), interpolator, t1, t2)->E.R.toExn(
+    combine(interpolator, (a, b) => Ok(a +. b), t1, t2)->E.R.toExn(
       "Add operation should never fail",
       _,
     )

@@ -120,7 +120,7 @@ let combinePointwise = (
 
   let interpolator = XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation)
 
-  combiner(fn, interpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
+  combiner(interpolator, fn, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
     make(~integralSumCache=combinedIntegralSum, x)
   )
 }
