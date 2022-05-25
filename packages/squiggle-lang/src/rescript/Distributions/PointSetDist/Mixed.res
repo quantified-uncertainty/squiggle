@@ -300,12 +300,6 @@ module T = Dist({
     | _ => XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
     }
   }
-
-  //  let klDivergence = (prediction: t, answer: t) => {
-  //    let klDiscretePart = Discrete.T.klDivergence(prediction.discrete, answer.discrete)
-  //    let klContinuousPart = Continuous.T.klDivergence(prediction.continuous, answer.continuous)
-  //    E.R.merge(klDiscretePart, klContinuousPart)->E.R2.fmap(t => fst(t) +. snd(t))
-  //  }
 })
 
 let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {

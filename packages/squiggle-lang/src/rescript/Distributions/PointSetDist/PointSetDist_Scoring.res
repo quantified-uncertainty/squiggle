@@ -34,9 +34,9 @@ module WithDistAnswer = {
     Operation.Error.t,
   > =>
     switch (estimate, answer) {
-    | (Continuous(_), Continuous(_)) =>
+    | (Continuous(_), Continuous(_))
+    | (Discrete(_), Discrete(_)) =>
       combineFn(integrand, estimate, answer)->E.R2.fmap(integrateFn)
-    | (Discrete(_), Discrete(_)) => combineFn(integrand, estimate, answer)->E.R2.fmap(integrateFn)
     | (_, _) =>
       let esti = estimate->toMixedFn
       let answ = answer->toMixedFn

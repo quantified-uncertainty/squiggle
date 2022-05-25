@@ -491,22 +491,6 @@ module PointwiseCombination = {
     let newYs = E.A.fmap(x => XtoY.linear(x, t), newXs)
     {xs: newXs, ys: newYs}
   }
-  // This function is used for klDivergence
-  let combineAlongSupportOfSecondArgument: (
-    interpolator,
-    (float, float) => result<float, Operation.Error.t>,
-    T.t,
-    T.t,
-  ) => result<T.t, Operation.Error.t> = (interpolator, fn, prediction, answer) => {
-    let combineWithFn = (answerX: float, i: int) => {
-      let answerY = answer.ys[i]
-      // let predictionY = XtoY.linear(answerX, prediction)
-      let predictionY = interpolator(prediction, i, answerX)
-      fn(predictionY, answerY)
-    }
-    let newYsWithError = Js.Array.mapi((x, i) => combineWithFn(x, i), answer.xs)
-    E.A.R.firstErrorOrOpen(newYsWithError)->E.R2.fmap(ys => {xs: answer.xs, ys: ys})
-  }
 
   let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
     combine(interpolator, (a, b) => Ok(a +. b), t1, t2)->E.R.toExn(
