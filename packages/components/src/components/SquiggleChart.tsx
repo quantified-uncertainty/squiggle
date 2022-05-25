@@ -12,7 +12,6 @@ import {
   defaultBindings,
   defaultEnvironment,
   continuousDeclaration,
-  declarationContinuousArg,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
@@ -20,23 +19,29 @@ import { ErrorBox } from "./ErrorBox";
 import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
 
 function getRange<a>(x: continuousDeclaration<a>) {
-  let first = x.args[0]
-  switch(first.tag){
-    case "Float": {return{floats: {min: first.value.min, max: first.value.max}}}
-    case "Time": {return{time: {min: first.value.min, max: first.value.max}}}
+  let first = x.args[0];
+  switch (first.tag) {
+    case "Float": {
+      return { floats: { min: first.value.min, max: first.value.max } };
+    }
+    case "Time": {
+      return { time: { min: first.value.min, max: first.value.max } };
+    }
   }
 }
-function getChartSettings<a>(x: continuousDeclaration<a>):FunctionChartSettings {
-  console.log("HERE")
-  let foo = getRange(x)
-  console.log("HIHI", foo)
-  let min = foo.floats ? foo.floats.min : 0
-  let max = foo.floats ? foo.floats.max : 10
-  return ({
+function getChartSettings<a>(
+  x: continuousDeclaration<a>
+): FunctionChartSettings {
+  console.log("HERE");
+  let foo = getRange(x);
+  console.log("HIHI", foo);
+  let min = foo.floats ? foo.floats.min : 0;
+  let max = foo.floats ? foo.floats.max : 10;
+  return {
     start: min,
     stop: max,
     count: 20,
-  })
+  };
 }
 
 const variableBox = {
@@ -230,7 +235,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           return (
             <FunctionChart
               fn={expression.value.value.fn}
-              chartSettings={chartSettings}
+              chartSettings={getChartSettings(expression.value.value)}
               environment={{
                 sampleCount: environment.sampleCount / 10,
                 xyPointLength: environment.xyPointLength / 10,

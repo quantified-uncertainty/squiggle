@@ -33,8 +33,9 @@ let registry = [
   Function.make(
     ~name="FnMake",
     ~definitions=[
-      FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => 
+      FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
         inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
+      }
       ),
     ],
   ),
