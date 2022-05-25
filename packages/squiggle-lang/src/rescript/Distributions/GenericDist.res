@@ -128,26 +128,27 @@ module Score = {
     ~answ: scoreDistOrScalar,
     ~prior: option<scoreDistOrScalar>,
   ): result<PointSetDist_Scoring.scoreArgs, error> => {
-    let toPointSetFn = toPointSet(
-      ~xyPointLength=MagicNumbers.Environment.defaultXYPointLength,
-      ~sampleCount=MagicNumbers.Environment.defaultSampleCount,
-      ~xSelection=#ByWeight,
-    )
+    let toPointSetFn = t =>
+      toPointSet(
+        t,
+        ~xyPointLength=MagicNumbers.Environment.defaultXYPointLength,
+        ~sampleCount=MagicNumbers.Environment.defaultSampleCount,
+        ~xSelection=#ByWeight,
+        (),
+      )
     let prior': option<result<pointSet_ScoreDistOrScalar, error>> = switch prior {
     | None => None
-    | Some(Score_Dist(d)) => toPointSetFn(d, ())->E.R.bind(x => x->D->Ok)->Some
+    | Some(Score_Dist(d)) => toPointSetFn(d)->E.R.bind(x => x->D->Ok)->Some
     | Some(Score_Scalar(s)) => s->S->Ok->Some
     }
     let twoDists = (esti': t, answ': t): result<
       (PointSetTypes.pointSetDist, PointSetTypes.pointSetDist),
       error,
-    > => E.R.merge(toPointSetFn(esti', ()), toPointSetFn(answ', ()))
+    > => E.R.merge(toPointSetFn(esti'), toPointSetFn(answ'))
     switch (esti, answ, prior') {
     | (Score_Dist(esti'), Score_Dist(answ'), None) =>
-      twoDists(esti', answ')->E.R.bind(((esti'', answ'')) =>
-        {estimate: esti'', answer: answ'', prior: None}
-        ->PointSetDist_Scoring.DistEstimateDistAnswer
-        ->Ok
+      twoDists(esti', answ')->E.R2.fmap(((esti'', answ'')) =>
+        {estimate: esti'', answer: answ'', prior: None}->PointSetDist_Scoring.DistEstimateDistAnswer
       )
     | (Score_Dist(esti'), Score_Dist(answ'), Some(Ok(D(prior'')))) =>
       twoDists(esti', answ')->E.R.bind(((esti'', answ'')) =>
@@ -157,25 +158,25 @@ module Score = {
       )
     | (Score_Dist(_), _, Some(Ok(S(_)))) => DistributionTypes.Unreachable->Error
     | (Score_Dist(esti'), Score_Scalar(answ'), None) =>
-      toPointSetFn(esti', ())->E.R.bind(esti'' =>
+      toPointSetFn(esti')->E.R.bind(esti'' =>
         {estimate: esti'', answer: answ', prior: None}
         ->PointSetDist_Scoring.DistEstimateScalarAnswer
         ->Ok
       )
     | (Score_Dist(esti'), Score_Scalar(answ'), Some(Ok(D(prior'')))) =>
-      toPointSetFn(esti', ())->E.R.bind(esti'' =>
+      toPointSetFn(esti')->E.R.bind(esti'' =>
         {estimate: esti'', answer: answ', prior: Some(prior'')}
         ->PointSetDist_Scoring.DistEstimateScalarAnswer
         ->Ok
       )
     | (Score_Scalar(esti'), Score_Dist(answ'), None) =>
-      toPointSetFn(answ', ())->E.R.bind(answ'' =>
+      toPointSetFn(answ')->E.R.bind(answ'' =>
         {estimate: esti', answer: answ'', prior: None}
         ->PointSetDist_Scoring.ScalarEstimateDistAnswer
         ->Ok
       )
     | (Score_Scalar(esti'), Score_Dist(answ'), Some(Ok(S(prior'')))) =>
-      toPointSetFn(answ', ())->E.R.bind(answ'' =>
+      toPointSetFn(answ')->E.R.bind(answ'' =>
         {estimate: esti', answer: answ'', prior: Some(prior'')}
         ->PointSetDist_Scoring.ScalarEstimateDistAnswer
         ->Ok
