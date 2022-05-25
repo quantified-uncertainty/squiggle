@@ -21,7 +21,7 @@ module Declaration = {
         ->E.A2.fmap(getMinMax)
         ->E.A.R.firstErrorOrOpen
         ->E.R2.fmap(args => ReducerInterface_ExpressionValue.EvDeclaration(
-          Declaration.ContinuousDeclaration.make(lambda, args),
+          Declaration.make(lambda, args),
         ))
       }
     | _ => Error("Error")
@@ -35,8 +35,7 @@ let registry = [
     ~definitions=[
       FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
         inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
-      }
-      ),
+      }),
     ],
   ),
   Function.make(

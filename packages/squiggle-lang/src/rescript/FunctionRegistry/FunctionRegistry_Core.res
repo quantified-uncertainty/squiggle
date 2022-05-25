@@ -78,9 +78,9 @@ module FRType = {
     | (FRTypeOption(v), _) => Some(FRValueOption(matchWithExpressionValue(v, r)))
     | (FRTypeLambda, EvLambda(f)) => Some(FRValueLambda(f))
     | (FRTypeArray(intendedType), EvArray(elements)) => {
-      let el = elements->E.A2.fmap(matchWithExpressionValue(intendedType))
-      E.A.O.openIfAllSome(el)->E.O2.fmap(r => FRValueArray(r))
-    }
+        let el = elements->E.A2.fmap(matchWithExpressionValue(intendedType))
+        E.A.O.openIfAllSome(el)->E.O2.fmap(r => FRValueArray(r))
+      }
     | (FRTypeRecord(recordParams), EvRecord(record)) => {
         let getAndMatch = (name, input) =>
           E.Dict.get(record, name)->E.O.bind(matchWithExpressionValue(input))
@@ -96,23 +96,24 @@ module FRType = {
     }
 
   let rec matchReverse = (e: frValue): expressionValue =>
-  switch(e){
-    | FRValueNumber(f) => (EvNumber(f))
+    switch e {
+    | FRValueNumber(f) => EvNumber(f)
     | FRValueDistOrNumber(FRValueNumber(n)) => EvNumber(n)
     | FRValueDistOrNumber(FRValueDist(n)) => EvDistribution(n)
     | FRValueDist(dist) => EvDistribution(dist)
     | FRValueOption(Some(r)) => matchReverse(r)
     | FRValueArray(elements) => EvArray(elements->E.A2.fmap(matchReverse))
     | FRValueRecord(frValueRecord) => {
-      let record = frValueRecord->E.A2.fmap(((name, value)) => (name, matchReverse(value)))->E.Dict.fromArray
-      EvRecord(record)
-    }
+        let record =
+          frValueRecord->E.A2.fmap(((name, value)) => (name, matchReverse(value)))->E.Dict.fromArray
+        EvRecord(record)
+      }
     | FRValueLambda(l) => EvLambda(l)
     | FRValueString(string) => EvString(string)
     | FRValueVariant(string) => EvString(string)
-  }
+    }
 
-    // | FRValueOption(None) => break
+  // | FRValueOption(None) => break
   let matchWithExpressionValueArray = (inputs: array<t>, args: array<expressionValue>): option<
     array<frValue>,
   > => {

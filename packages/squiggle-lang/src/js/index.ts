@@ -14,9 +14,8 @@ export {
   errorValueToString,
   distributionErrorToString,
   distributionError,
-  continuousDeclaration,
-  relativeComparisonDeclaration,
-  declarationContinuousArg,
+  declarationArg,
+  declaration,
 } from "../rescript/TypescriptInterface.gen";
 export type { errorValue, externalBindings as bindings, jsImports };
 import {

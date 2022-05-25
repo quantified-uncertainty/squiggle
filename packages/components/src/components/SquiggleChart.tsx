@@ -11,14 +11,15 @@ import {
   defaultImports,
   defaultBindings,
   defaultEnvironment,
-  continuousDeclaration,
+  declarationArg,
+  declaration
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
 import { ErrorBox } from "./ErrorBox";
 import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
 
-function getRange<a>(x: continuousDeclaration<a>) {
+function getRange<a>(x: declaration<a>) {
   let first = x.args[0];
   switch (first.tag) {
     case "Float": {
@@ -30,7 +31,7 @@ function getRange<a>(x: continuousDeclaration<a>) {
   }
 }
 function getChartSettings<a>(
-  x: continuousDeclaration<a>
+  x: declaration<a>
 ): FunctionChartSettings {
   let range = getRange(x);
   let min = range.floats ? range.floats.min : 0;
@@ -240,27 +241,17 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         />
       );
     case "lambdaDeclaration": {
-      switch (expression.value.tag) {
-        case "Continuous": {
           return (
             <FunctionChart
-              fn={expression.value.value.fn}
-              chartSettings={getChartSettings(expression.value.value)}
+              fn={expression.value.fn}
+              chartSettings={getChartSettings(expression.value)}
               environment={{
                 sampleCount: environment.sampleCount / 10,
                 xyPointLength: environment.xyPointLength / 10,
               }}
             />
           );
-        }
-        case "RelativeComparison": {
-          return <>"Relative"</>;
-        }
-        default: {
-          return <>LambdaDeclaration: Should be unreachable</>;
-        }
       }
-    }
     default: {
       return <>Should be unreachable</>;
     }
