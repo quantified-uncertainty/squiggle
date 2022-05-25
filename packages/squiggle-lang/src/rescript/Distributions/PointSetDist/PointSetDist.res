@@ -215,7 +215,7 @@ module T = Dist({
 })
 
 let logScore = (args: PointSetDist_Scoring.scoreArgs): result<float, Operation.Error.t> =>
-  PointSetDist_Scoring.logScore(args)
+  PointSetDist_Scoring.logScore(args, ~combineFn=combinePointwise, ~integrateFn=T.integralEndY)
 
 let pdf = (f: float, t: t) => {
   let mixedPoint: PointSetTypes.mixedPoint = T.xToY(f, t)

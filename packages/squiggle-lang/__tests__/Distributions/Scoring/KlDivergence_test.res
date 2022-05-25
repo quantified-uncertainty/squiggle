@@ -3,6 +3,7 @@ open Expect
 open TestHelpers
 open GenericDist_Fixtures
 
+let klDivergence = DistributionOperation.Constructors.logScore_DistEstimateDistAnswer(~env)
 // integral from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx
 let klNormalUniform = (mean, stdev, low, high): float =>
   -.Js.Math.log((high -. low) /. Js.Math.sqrt(2.0 *. MagicNumbers.Math.pi *. stdev ** 2.0)) +.
@@ -11,8 +12,6 @@ let klNormalUniform = (mean, stdev, low, high): float =>
   (mean ** 2.0 -. (high +. low) *. mean +. (low ** 2.0 +. high *. low +. high ** 2.0) /. 3.0)
 
 describe("klDivergence: continuous -> continuous -> float", () => {
-  let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
-
   let testUniform = (lowAnswer, highAnswer, lowPrediction, highPrediction) => {
     test("of two uniforms is equal to the analytic expression", () => {
       let answer =
@@ -82,7 +81,6 @@ describe("klDivergence: continuous -> continuous -> float", () => {
 })
 
 describe("klDivergence: discrete -> discrete -> float", () => {
-  let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
   let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
   let a' = [(point1, 1e0), (point2, 1e0)]->mixture->run
   let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
@@ -117,7 +115,6 @@ describe("klDivergence: discrete -> discrete -> float", () => {
 })
 
 describe("klDivergence: mixed -> mixed -> float", () => {
-  let klDivergence = DistributionOperation.Constructors.klDivergence(~env)
   let mixture' = a => DistributionTypes.DistributionOperation.Mixture(a)
   let mixture = a => {
     let dist' = a->mixture'->run
@@ -193,7 +190,7 @@ describe("combineAlongSupportOfSecondArgument0", () => {
     let predictionWrapped = E.R.fmap(a => run(FromDist(ToDist(ToPointSet), a)), prediction)
 
     let interpolator = XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero)
-    let integrand = PointSetDist_Scoring.KLDivergence.integrand
+    let integrand = PointSetDist_Scoring.WithDistAnswer.integrand
 
     let result = switch (answerWrapped, predictionWrapped) {
     | (Ok(Dist(PointSet(Continuous(a)))), Ok(Dist(PointSet(Continuous(b))))) =>

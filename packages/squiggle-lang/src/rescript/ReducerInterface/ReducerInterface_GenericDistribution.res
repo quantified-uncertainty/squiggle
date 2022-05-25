@@ -162,20 +162,6 @@ module Helpers = {
       }
     }
   }
-
-  let klDivergenceWithPrior = (
-    prediction: DistributionTypes.genericDist,
-    answer: DistributionTypes.genericDist,
-    prior: DistributionTypes.genericDist,
-    env: DistributionOperation.env,
-  ) => {
-    let term1 = DistributionOperation.Constructors.klDivergence(~env, prediction, answer)
-    let term2 = DistributionOperation.Constructors.klDivergence(~env, prior, answer)
-    switch E.R.merge(term1, term2)->E.R2.fmap(((a, b)) => a -. b) {
-    | Ok(x) => x->DistributionOperation.Float->Some
-    | Error(_) => None
-    }
-  }
 }
 
 module SymbolicConstructors = {
@@ -226,28 +212,20 @@ let dispatchToGenericOutput = (
       ~env,
     )->Some
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
-  | ("klDivergence", [EvDistribution(prediction), EvDistribution(answer)]) =>
-    Some(DistributionOperation.run(FromDist(ToScore(KLDivergence(answer)), prediction), ~env))
-  | ("klDivergence", [EvDistribution(prediction), EvDistribution(answer), EvDistribution(prior)]) =>
-    Helpers.klDivergenceWithPrior(prediction, answer, prior, env)
-  | (
-    "logScoreWithPointAnswer",
-    [EvDistribution(prediction), EvNumber(answer), EvDistribution(prior)],
-  )
-  | (
-    "logScoreWithPointAnswer",
-    [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer))), EvDistribution(prior)],
-  ) =>
-    DistributionOperation.run(
-      FromDist(ToScore(LogScore(answer, prior->Some)), prediction),
-      ~env,
-    )->Some
-  | ("logScoreWithPointAnswer", [EvDistribution(prediction), EvNumber(answer)])
-  | (
-    "logScoreWithPointAnswer",
-    [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
-  ) =>
-    DistributionOperation.run(FromDist(ToScore(LogScore(answer, None)), prediction), ~env)->Some
+  | ("klDivergence", [EvDistribution(estimate), EvDistribution(answer)]) =>
+    Some(
+      DistributionOperation.run(
+        FromDist(ToScore(LogScore(Score_Dist(answer), None)), estimate),
+        ~env,
+      ),
+    )
+  | ("klDivergence", [EvDistribution(estimate), EvDistribution(answer), EvDistribution(prior)]) =>
+    Some(
+      DistributionOperation.run(
+        FromDist(ToScore(LogScore(Score_Dist(answer), Some(Score_Dist(prior)))), estimate),
+        ~env,
+      ),
+    )
   | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
   | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
   | ("scaleLog", [EvDistribution(dist)]) =>

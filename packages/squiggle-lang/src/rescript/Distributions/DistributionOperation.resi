@@ -61,13 +61,40 @@ module Constructors: {
   @genType
   let isNormalized: (~env: env, genericDist) => result<bool, error>
   @genType
-  let klDivergence: (~env: env, genericDist, genericDist) => result<float, error>
+  let logScore_DistEstimateDistAnswer: (~env: env, genericDist, genericDist) => result<float, error>
   @genType
-  let logScoreWithPointResolution: (
+  let logScore_DistEstimateDistAnswerWithPrior: (
     ~env: env,
-    ~prediction: genericDist,
-    ~answer: float,
-    ~prior: option<genericDist>,
+    genericDist,
+    genericDist,
+    DistributionTypes.DistributionOperation.scoreDistOrScalar,
+  ) => result<float, error>
+  @genType
+  let logScore_DistEstimateScalarAnswer: (~env: env, genericDist, float) => result<float, error>
+  @genType
+  let logScore_DistEstimateScalarAnswerWithPrior: (
+    ~env: env,
+    genericDist,
+    float,
+    DistributionTypes.DistributionOperation.scoreDistOrScalar,
+  ) => result<float, error>
+  @genType
+  let logScore_ScalarEstimateDistAnswer: (~env: env, float, genericDist) => result<float, error>
+  @genType
+  let logScore_ScalarEstimateDistAnswerWithPrior: (
+    ~env: env,
+    float,
+    genericDist,
+    DistributionTypes.DistributionOperation.scoreDistOrScalar,
+  ) => result<float, error>
+  @genType
+  let logScore_ScalarEstimateScalarAnswer: (~env: env, float, float) => result<float, error>
+  @genType
+  let logScore_ScalarEstimateScalarAnswerWithPrior: (
+    ~env: env,
+    float,
+    float,
+    DistributionTypes.DistributionOperation.scoreDistOrScalar,
   ) => result<float, error>
   @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>

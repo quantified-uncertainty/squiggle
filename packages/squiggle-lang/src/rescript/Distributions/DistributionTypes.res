@@ -92,7 +92,9 @@ module DistributionOperation = {
     | ToString
     | ToSparkline(int)
 
-  type toScore = KLDivergence(genericDist) | LogScore(float, option<genericDist>)
+  type scoreDistOrScalar = Score_Dist(genericDist) | Score_Scalar(float)
+
+  type toScore = LogScore(scoreDistOrScalar, option<scoreDistOrScalar>)
 
   type fromDist =
     | ToFloat(toFloat)
@@ -120,8 +122,7 @@ module DistributionOperation = {
     | ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
     | ToFloat(#Sample) => `sample`
     | ToFloat(#IntegralSum) => `integralSum`
-    | ToScore(KLDivergence(_)) => `klDivergence`
-    | ToScore(LogScore(x, _)) => `logScore against ${E.Float.toFixed(x)}`
+    | ToScore(_) => `logScore`
     | ToDist(Normalize) => `normalize`
     | ToDist(ToPointSet) => `toPointSet`
     | ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
@@ -162,10 +163,37 @@ module Constructors = {
     let fromSamples = (xs): t => FromSamples(xs)
     let truncate = (dist, left, right): t => FromDist(ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
-    let klDivergence = (dist1, dist2): t => FromDist(ToScore(KLDivergence(dist2)), dist1)
-    let logScoreWithPointResolution = (~prediction, ~answer, ~prior): t => FromDist(
-      ToScore(LogScore(answer, prior)),
-      prediction,
+    let logScore_DistEstimateDistAnswer = (estimate, answer): t => FromDist(
+      ToScore(LogScore(Score_Dist(answer), None)),
+      estimate,
+    )
+    let logScore_DistEstimateDistAnswerWithPrior = (estimate, answer, prior): t => FromDist(
+      ToScore(LogScore(Score_Dist(answer), Some(prior))),
+      estimate,
+    )
+    let logScore_DistEstimateScalarAnswer = (estimate, answer): t => FromDist(
+      ToScore(LogScore(Score_Scalar(answer), None)),
+      estimate,
+    )
+    let logScore_DistEstimateScalarAnswerWithPrior = (estimate, answer, prior): t => FromDist(
+      ToScore(LogScore(Score_Scalar(answer), Some(prior))),
+      estimate,
+    )
+    let logScore_ScalarEstimateDistAnswer = (estimate, answer): t => FromFloat(
+      ToScore(LogScore(Score_Dist(answer), None)),
+      estimate,
+    )
+    let logScore_ScalarEstimateDistAnswerWithPrior = (estimate, answer, prior): t => FromFloat(
+      ToScore(LogScore(Score_Dist(answer), Some(prior))),
+      estimate,
+    )
+    let logScore_ScalarEstimateScalarAnswer = (estimate, answer): t => FromFloat(
+      ToScore(LogScore(Score_Scalar(answer), None)),
+      estimate,
+    )
+    let logScore_ScalarEstimateScalarAnswerWithPrior = (estimate, answer, prior): t => FromFloat(
+      ToScore(LogScore(Score_Scalar(answer), Some(prior))),
+      estimate,
     )
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
     let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)

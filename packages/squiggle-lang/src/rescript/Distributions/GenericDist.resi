@@ -25,12 +25,10 @@ let toFloatOperation: (
 ) => result<float, error>
 
 module Score: {
-  let klDivergence: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>
-  let logScoreWithPointResolution: (
-    ~prediction: t,
-    ~answer: float,
-    ~prior: option<t>,
-    ~toPointSetFn: toPointSetFn,
+  let logScore: (
+    ~estimate: DistributionTypes.DistributionOperation.scoreDistOrScalar,
+    ~answer: DistributionTypes.DistributionOperation.scoreDistOrScalar,
+    ~prior: option<DistributionTypes.DistributionOperation.scoreDistOrScalar>,
   ) => result<float, error>
 }
 

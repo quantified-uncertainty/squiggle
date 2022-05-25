@@ -61,46 +61,6 @@ let integralEndY = (t: t): float =>
 
 let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
-module Score = {
-  let klDivergence = (prediction, answer, ~toPointSetFn: toPointSetFn): result<float, error> => {
-    let pointSets = E.R.merge(toPointSetFn(prediction), toPointSetFn(answer))
-    pointSets |> E.R2.bind(((predi, ans)) =>
-      PointSetDist.T.klDivergence(predi, ans)->E.R2.errMap(x => DistributionTypes.OperationError(x))
-    )
-  }
-
-  let logScoreWithPointResolution = (
-    ~prediction: DistributionTypes.genericDist,
-    ~answer: float,
-    ~prior: option<DistributionTypes.genericDist>,
-    ~toPointSetFn: toPointSetFn,
-  ): result<float, error> => {
-    switch prior {
-    | Some(prior') =>
-      E.R.merge(toPointSetFn(prior'), toPointSetFn(prediction))->E.R.bind(((
-        prior'',
-        prediction'',
-      )) =>
-        PointSetDist.T.logScoreWithPointResolution(
-          ~prediction=prediction'',
-          ~answer,
-          ~prior=prior''->Some,
-        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
-      )
-    | None =>
-      prediction
-      ->toPointSetFn
-      ->E.R.bind(x =>
-        PointSetDist.T.logScoreWithPointResolution(
-          ~prediction=x,
-          ~answer,
-          ~prior=None,
-        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
-      )
-    }
-  }
-}
-
 let toFloatOperation = (
   t,
   ~toPointSetFn: toPointSetFn,
@@ -159,6 +119,125 @@ let toPointSet = (
   }
 }
 
+module Score = {
+  type scoreDistOrScalar = DistributionTypes.DistributionOperation.scoreDistOrScalar
+
+  type pointSet_ScoreDistOrScalar = D(PointSetTypes.pointSetDist) | S(float)
+  let argsMake = (
+    ~esti: scoreDistOrScalar,
+    ~answ: scoreDistOrScalar,
+    ~prior: option<scoreDistOrScalar>,
+  ): result<PointSetDist_Scoring.scoreArgs, error> => {
+    let toPointSetFn = toPointSet(
+      ~xyPointLength=MagicNumbers.Environment.defaultXYPointLength,
+      ~sampleCount=MagicNumbers.Environment.defaultSampleCount,
+      ~xSelection=#ByWeight,
+    )
+    let prior': option<result<pointSet_ScoreDistOrScalar, error>> = switch prior {
+    | None => None
+    | Some(Score_Dist(d)) => toPointSetFn(d, ())->E.R.bind(x => x->D->Ok)->Some
+    | Some(Score_Scalar(s)) => s->S->Ok->Some
+    }
+    let twoDists = (esti': t, answ': t): result<
+      (PointSetTypes.pointSetDist, PointSetTypes.pointSetDist),
+      error,
+    > => E.R.merge(toPointSetFn(esti', ()), toPointSetFn(answ', ()))
+    switch (esti, answ, prior') {
+    | (Score_Dist(esti'), Score_Dist(answ'), None) =>
+      twoDists(esti', answ')->E.R.bind(((esti'', answ'')) =>
+        {estimate: esti'', answer: answ'', prior: None}
+        ->PointSetDist_Scoring.DistEstimateDistAnswer
+        ->Ok
+      )
+    | (Score_Dist(esti'), Score_Dist(answ'), Some(Ok(D(prior'')))) =>
+      twoDists(esti', answ')->E.R.bind(((esti'', answ'')) =>
+        {estimate: esti'', answer: answ'', prior: Some(prior'')}
+        ->PointSetDist_Scoring.DistEstimateDistAnswer
+        ->Ok
+      )
+    | (Score_Dist(esti'), Score_Scalar(answ'), None) =>
+      toPointSetFn(esti', ())->E.R.bind(esti'' =>
+        {estimate: esti'', answer: answ', prior: None}
+        ->PointSetDist_Scoring.DistEstimateScalarAnswer
+        ->Ok
+      )
+    | (Score_Dist(esti'), Score_Scalar(answ'), Some(Ok(D(prior'')))) =>
+      toPointSetFn(esti', ())->E.R.bind(esti'' =>
+        {estimate: esti'', answer: answ', prior: Some(prior'')}
+        ->PointSetDist_Scoring.DistEstimateScalarAnswer
+        ->Ok
+      )
+    | (Score_Scalar(esti'), Score_Dist(answ'), None) =>
+      toPointSetFn(answ', ())->E.R.bind(answ'' =>
+        {estimate: esti', answer: answ'', prior: None}
+        ->PointSetDist_Scoring.ScalarEstimateDistAnswer
+        ->Ok
+      )
+    | (Score_Scalar(esti'), Score_Dist(answ'), Some(Ok(S(prior'')))) =>
+      toPointSetFn(answ', ())->E.R.bind(answ'' =>
+        {estimate: esti', answer: answ'', prior: Some(prior'')}
+        ->PointSetDist_Scoring.ScalarEstimateDistAnswer
+        ->Ok
+      )
+    | (Score_Scalar(esti'), Score_Scalar(answ'), None) =>
+      {estimate: esti', answer: answ', prior: None}
+      ->PointSetDist_Scoring.ScalarEstimateScalarAnswer
+      ->Ok
+    | (Score_Scalar(esti'), Score_Scalar(answ'), Some(Ok(S(prior'')))) =>
+      {estimate: esti', answer: answ', prior: prior''->Some}
+      ->PointSetDist_Scoring.ScalarEstimateScalarAnswer
+      ->Ok
+    | (_, _, Some(Error(err))) => err->Error
+    }
+  }
+
+  let logScore = (
+    ~estimate: scoreDistOrScalar,
+    ~answer: scoreDistOrScalar,
+    ~prior: option<scoreDistOrScalar>,
+  ): result<float, error> =>
+    argsMake(~esti=estimate, ~answ=answer, ~prior)->E.R.bind(x =>
+      x->PointSetDist.logScore->E.R2.errMap(y => DistributionTypes.OperationError(y))
+    )
+
+  //  let klDivergence = (prediction, answer, ~toPointSetFn: toPointSetFn): result<float, error> => {
+  //    let pointSets = E.R.merge(toPointSetFn(prediction), toPointSetFn(answer))
+  //    pointSets |> E.R2.bind(((predi, ans)) =>
+  //      PointSetDist.T.klDivergence(predi, ans)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+  //    )
+  //  }
+  //
+  //  let logScoreWithPointResolution = (
+  //    ~prediction: DistributionTypes.genericDist,
+  //    ~answer: float,
+  //    ~prior: option<DistributionTypes.genericDist>,
+  //    ~toPointSetFn: toPointSetFn,
+  //  ): result<float, error> => {
+  //    switch prior {
+  //    | Some(prior') =>
+  //      E.R.merge(toPointSetFn(prior'), toPointSetFn(prediction))->E.R.bind(((
+  //        prior'',
+  //        prediction'',
+  //      )) =>
+  //        PointSetDist.T.logScoreWithPointResolution(
+  //          ~prediction=prediction'',
+  //          ~answer,
+  //          ~prior=prior''->Some,
+  //        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
+  //      )
+  //    | None =>
+  //      prediction
+  //      ->toPointSetFn
+  //      ->E.R.bind(x =>
+  //        PointSetDist.T.logScoreWithPointResolution(
+  //          ~prediction=x,
+  //          ~answer,
+  //          ~prior=None,
+  //        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
+  //      )
+  //    }
+  //  }
+}
 /*
   PointSetDist.toSparkline calls "downsampleEquallyOverX", which downsamples it to n=bucketCount.
   It first needs a pointSetDist, so we convert to a pointSetDist. In this process we want the 

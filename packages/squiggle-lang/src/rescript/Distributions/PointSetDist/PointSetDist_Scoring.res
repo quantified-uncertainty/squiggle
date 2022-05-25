@@ -2,6 +2,7 @@ type t = PointSetTypes.pointSetDist
 type continuousShape = PointSetTypes.continuousShape
 type discreteShape = PointSetTypes.discreteShape
 type mixedShape = PointSetTypes.mixedShape
+
 type scalar = float
 type abstractScoreArgs<'a, 'b> = {estimate: 'a, answer: 'b, prior: option<'a>}
 type scoreArgs =
@@ -9,6 +10,7 @@ type scoreArgs =
   | DistEstimateScalarAnswer(abstractScoreArgs<t, scalar>)
   | ScalarEstimateDistAnswer(abstractScoreArgs<scalar, t>)
   | ScalarEstimateScalarAnswer(abstractScoreArgs<scalar, scalar>)
+
 let logFn = Js.Math.log // base e
 let minusScaledLogOfQuot = (~esti, ~answ): result<float, Operation.Error.t> => {
   let quot = esti /. answ
@@ -56,7 +58,7 @@ module WithScalarAnswer = {
   }
   let scoreWithPrior' = (
     ~estimatePdf: float => float,
-    ~answer: float,
+    ~answer: scalar,
     ~priorPdf: float => float,
   ): result<float, Operation.Error.t> => {
     let numerator = answer->estimatePdf
@@ -69,23 +71,44 @@ module WithScalarAnswer = {
       minusScaledLogOfQuot(~esti=numerator, ~answ=priorDensityOfAnswer)
     }
   }
-  let score = (~estimate: t, ~answer: t, ~mapper): result<float, Operation.Error.t> => {
-    let pdf = (shape, ~x) => XYShape.XtoY.linear(x, shape.xyShape)
-    let estimatePdf = mapper((x => pdf(~x), x => pdf(~x), x => pdf(~x)))
+  let score = (~estimate: t, ~answer: scalar): result<float, Operation.Error.t> => {
+    let estimatePdf = x =>
+      switch estimate {
+      | Continuous(esti) => XYShape.XtoY.linear(x, esti.xyShape)
+      | Discrete(esti) => XYShape.XtoY.linear(x, esti.xyShape)
+      | Mixed(esti) =>
+        XYShape.XtoY.linear(x, esti.continuous.xyShape) +.
+        XYShape.XtoY.linear(x, esti.discrete.xyShape)
+      }
+
     score'(~estimatePdf, ~answer)
   }
-  let scoreWithPrior = (~estimate: t, ~answer: t, ~prior: t, ~mapper): result<
+  let scoreWithPrior = (~estimate: t, ~answer: scalar, ~prior: t): result<
     float,
     Operation.Error.t,
   > => {
-    let estimatePdf = x => XYShape.XtoY.linear(x, estimate.xyShape)
-    let priorPdf = x => XYShape.XtoY.linear(x, prior.xyShape)
+    let estimatePdf = x =>
+      switch estimate {
+      | Continuous(esti) => XYShape.XtoY.linear(x, esti.xyShape)
+      | Discrete(esti) => XYShape.XtoY.linear(x, esti.xyShape)
+      | Mixed(esti) =>
+        XYShape.XtoY.linear(x, esti.continuous.xyShape) +.
+        XYShape.XtoY.linear(x, esti.discrete.xyShape)
+      }
+    let priorPdf = x =>
+      switch prior {
+      | Continuous(prio) => XYShape.XtoY.linear(x, prio.xyShape)
+      | Discrete(prio) => XYShape.XtoY.linear(x, prio.xyShape)
+      | Mixed(prio) =>
+        XYShape.XtoY.linear(x, prio.continuous.xyShape) +.
+        XYShape.XtoY.linear(x, prio.discrete.xyShape)
+      }
     scoreWithPrior'(~estimatePdf, ~answer, ~priorPdf)
   }
 }
 
 module TwoScalars = {
-  let score = (~estimate: float, ~answer: float) =>
+  let score = (~estimate: scalar, ~answer: scalar) =>
     if answer == 0.0 {
       0.0->Ok
     } else if estimate == 0.0 {
@@ -107,9 +130,9 @@ module TwoScalars = {
 let logScore = (args: scoreArgs, ~combineFn, ~integrateFn): result<float, Operation.Error.t> =>
   switch args {
   | DistEstimateDistAnswer({estimate, answer, prior: None}) =>
-    WithDistAnswer.sum(~estimate, ~answer, ~integrateFn)
+    WithDistAnswer.sum(~estimate, ~answer, ~integrateFn, ~combineFn)
   | DistEstimateDistAnswer({estimate, answer, prior: Some(prior)}) =>
-    WithDistAnswer.sumWithPrior(~estimate, ~answer, ~prior, ~integrateFn)
+    WithDistAnswer.sumWithPrior(~estimate, ~answer, ~prior, ~integrateFn, ~combineFn)
   | DistEstimateScalarAnswer({estimate, answer, prior: None}) =>
     WithScalarAnswer.score(~estimate, ~answer)
   | DistEstimateScalarAnswer({estimate, answer, prior: Some(prior)}) =>

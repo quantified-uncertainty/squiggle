@@ -145,18 +145,9 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
         Dist(dist)
       }
     | ToDist(Normalize) => dist->GenericDist.normalize->Dist
-    | ToScore(KLDivergence(t2)) =>
-      GenericDist.Score.klDivergence(dist, t2, ~toPointSetFn)
-      ->E.R2.fmap(r => Float(r))
-      ->OutputLocal.fromResult
     | ToScore(LogScore(answer, prior)) =>
-      GenericDist.Score.logScoreWithPointResolution(
-        ~prediction=dist,
-        ~answer,
-        ~prior,
-        ~toPointSetFn,
-      )
-      ->E.R2.fmap(r => Float(r))
+      GenericDist.Score.logScore(~estimate=Score_Dist(dist), ~answer, ~prior)
+      ->E.R2.fmap(s => Float(s))
       ->OutputLocal.fromResult
     | ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
     | ToDist(Truncate(leftCutoff, rightCutoff)) =>
@@ -271,13 +262,22 @@ module Constructors = {
   let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
   let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
   let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
-  let klDivergence = (~env, dist1, dist2) => C.klDivergence(dist1, dist2)->run(~env)->toFloatR
-  let logScoreWithPointResolution = (
-    ~env,
-    ~prediction: DistributionTypes.genericDist,
-    ~answer: float,
-    ~prior: option<DistributionTypes.genericDist>,
-  ) => C.logScoreWithPointResolution(~prediction, ~answer, ~prior)->run(~env)->toFloatR
+  let logScore_DistEstimateDistAnswer = (~env, estimate, answer) =>
+    C.logScore_DistEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
+  let logScore_DistEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
+    C.logScore_DistEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+  let logScore_DistEstimateScalarAnswer = (~env, estimate, answer) =>
+    C.logScore_DistEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
+  let logScore_DistEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
+    C.logScore_DistEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+  let logScore_ScalarEstimateDistAnswer = (~env, estimate, answer) =>
+    C.logScore_ScalarEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
+  let logScore_ScalarEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
+    C.logScore_ScalarEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+  let logScore_ScalarEstimateScalarAnswer = (~env, estimate, answer) =>
+    C.logScore_ScalarEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
+  let logScore_ScalarEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
+    C.logScore_ScalarEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
   let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR
