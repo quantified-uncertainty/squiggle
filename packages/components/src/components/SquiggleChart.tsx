@@ -32,11 +32,9 @@ function getRange<a>(x: continuousDeclaration<a>) {
 function getChartSettings<a>(
   x: continuousDeclaration<a>
 ): FunctionChartSettings {
-  console.log("HERE");
-  let foo = getRange(x);
-  console.log("HIHI", foo);
-  let min = foo.floats ? foo.floats.min : 0;
-  let max = foo.floats ? foo.floats.max : 10;
+  let range = getRange(x);
+  let min = range.floats ? range.floats.min : 0;
+  let max = range.floats ? range.floats.max : 10;
   return {
     start: min,
     stop: max,
@@ -208,6 +206,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
               />
             </div>
           ))}
+          )
         </VariableBox>
       );
     case "arraystring":
@@ -229,6 +228,17 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         </VariableBox>
       );
     }
+    case "lambda":
+      return (
+        <FunctionChart
+          fn={expression.value}
+          chartSettings={chartSettings}
+          environment={{
+            sampleCount: environment.sampleCount / 10,
+            xyPointLength: environment.xyPointLength / 10,
+          }}
+        />
+      );
     case "lambdaDeclaration": {
       switch (expression.value.tag) {
         case "Continuous": {
@@ -244,21 +254,16 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           );
         }
         case "RelativeComparison": {
-          return <></>;
+          return <>"Relative"</>;
+        }
+        default: {
+          return <>LambdaDeclaration: Should be unreachable</>;
         }
       }
     }
-    case "lambda":
-      return (
-        <FunctionChart
-          fn={expression.value}
-          chartSettings={chartSettings}
-          environment={{
-            sampleCount: environment.sampleCount / 10,
-            xyPointLength: environment.xyPointLength / 10,
-          }}
-        />
-      );
+    default: {
+      return <>Should be unreachable</>;
+    }
   }
 };
 
