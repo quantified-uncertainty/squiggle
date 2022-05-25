@@ -29,8 +29,26 @@ module WithDistAnswer = {
       minusScaledLogOfQuot(~esti=estimateElement, ~answ=answerElement)
     }
 
-  let sum = (~estimate: t, ~answer: t, ~combineFn, ~integrateFn) =>
-    combineFn(integrand, estimate, answer)->E.R2.fmap(integrateFn)
+  let rec sum = (~estimate: t, ~answer: t, ~combineFn, ~integrateFn) =>
+    switch (estimate, answer) {
+    | ((Continuous(_) | Discrete(_)) as esti, (Continuous(_) | Discrete(_)) as answ) =>
+      combineFn(integrand, esti, answ)->E.R2.fmap(integrateFn)
+    | (Mixed(esti), Mixed(answ)) =>
+      E.R.merge(
+        sum(
+          ~estimate=Discrete(esti.discrete),
+          ~answer=Discrete(answ.discrete),
+          ~combineFn,
+          ~integrateFn,
+        ),
+        sum(
+          ~estimate=Continuous(esti.continuous),
+          ~answer=Continuous(answ.continuous),
+          ~combineFn,
+          ~integrateFn,
+        ),
+      )->E.R2.fmap(((discretePart, continuousPart)) => discretePart +. continuousPart)
+    }
 
   let sumWithPrior = (~estimate: t, ~answer: t, ~prior: t, ~combineFn, ~integrateFn): result<
     float,

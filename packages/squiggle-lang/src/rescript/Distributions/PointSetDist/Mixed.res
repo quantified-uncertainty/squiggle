@@ -306,9 +306,6 @@ module T = Dist({
   //    let klContinuousPart = Continuous.T.klDivergence(prediction.continuous, answer.continuous)
   //    E.R.merge(klDiscretePart, klContinuousPart)->E.R2.fmap(t => fst(t) +. snd(t))
   //  }
-  //  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
-  //    Error(Operation.NotYetImplemented)
-  //  }
 })
 
 let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
