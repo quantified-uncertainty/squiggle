@@ -57,7 +57,7 @@ describe("klDivergence: continuous -> continuous -> float", () => {
     let kl = E.R.liftJoin2(klDivergence, prediction, answer)
 
     switch kl {
-    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=3)
+    | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=2)
     | Error(err) => {
         Js.Console.log(DistributionTypes.Error.toString(err))
         raise(KlFailed)

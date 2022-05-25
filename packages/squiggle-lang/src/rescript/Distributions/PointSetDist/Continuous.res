@@ -270,20 +270,6 @@ module T = Dist({
   }
   let variance = (t: t): float =>
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
-
-  //  let klDivergence = (prediction: t, answer: t) => {
-  //    let newShape = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument(
-  //      PointSetDist_Scoring.KLDivergence.integrand,
-  //      prediction.xyShape,
-  //      answer.xyShape,
-  //    )
-  //    newShape->E.R2.fmap(x => x->make->integralEndY)
-  //  }
-  //  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
-  //    let priorPdf = prior->E.O2.fmap((shape, x) => XYShape.XtoY.linear(x, shape.xyShape))
-  //    let predictionPdf = x => XYShape.XtoY.linear(x, prediction.xyShape)
-  //    PointSetDist_Scoring.LogScoreWithPointResolution.score(~priorPdf, ~predictionPdf, ~answer)
-  //  }
 })
 
 let isNormalized = (t: t): bool => {

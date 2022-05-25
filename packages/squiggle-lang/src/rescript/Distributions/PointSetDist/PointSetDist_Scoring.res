@@ -1,7 +1,4 @@
 type t = PointSetTypes.pointSetDist
-type continuousShape = PointSetTypes.continuousShape
-type discreteShape = PointSetTypes.discreteShape
-type mixedShape = PointSetTypes.mixedShape
 
 type scalar = float
 type abstractScoreArgs<'a, 'b> = {estimate: 'a, answer: 'b, prior: option<'a>}
@@ -71,14 +68,14 @@ module WithScalarAnswer = {
       minusScaledLogOfQuot(~esti=numerator, ~answ=priorDensityOfAnswer)
     }
   }
+
+  let sum = (mp: PointSetTypes.MixedPoint.t): float => mp.continuous +. mp.discrete
   let score = (~estimate: t, ~answer: scalar): result<float, Operation.Error.t> => {
     let estimatePdf = x =>
       switch estimate {
-      | Continuous(esti) => XYShape.XtoY.linear(x, esti.xyShape)
-      | Discrete(esti) => XYShape.XtoY.linear(x, esti.xyShape)
-      | Mixed(esti) =>
-        XYShape.XtoY.linear(x, esti.continuous.xyShape) +.
-        XYShape.XtoY.linear(x, esti.discrete.xyShape)
+      | Continuous(esti) => Continuous.T.xToY(x, esti)->sum
+      | Discrete(esti) => Discrete.T.xToY(x, esti)->sum
+      | Mixed(esti) => Mixed.T.xToY(x, esti)->sum
       }
 
     score'(~estimatePdf, ~answer)
@@ -89,19 +86,15 @@ module WithScalarAnswer = {
   > => {
     let estimatePdf = x =>
       switch estimate {
-      | Continuous(esti) => XYShape.XtoY.linear(x, esti.xyShape)
-      | Discrete(esti) => XYShape.XtoY.linear(x, esti.xyShape)
-      | Mixed(esti) =>
-        XYShape.XtoY.linear(x, esti.continuous.xyShape) +.
-        XYShape.XtoY.linear(x, esti.discrete.xyShape)
+      | Continuous(esti) => Continuous.T.xToY(x, esti)->sum
+      | Discrete(esti) => Discrete.T.xToY(x, esti)->sum
+      | Mixed(esti) => Mixed.T.xToY(x, esti)->sum
       }
     let priorPdf = x =>
       switch prior {
-      | Continuous(prio) => XYShape.XtoY.linear(x, prio.xyShape)
-      | Discrete(prio) => XYShape.XtoY.linear(x, prio.xyShape)
-      | Mixed(prio) =>
-        XYShape.XtoY.linear(x, prio.continuous.xyShape) +.
-        XYShape.XtoY.linear(x, prio.discrete.xyShape)
+      | Continuous(prio) => Continuous.T.xToY(x, prio)->sum
+      | Discrete(prio) => Discrete.T.xToY(x, prio)->sum
+      | Mixed(prio) => Mixed.T.xToY(x, prio)->sum
       }
     scoreWithPrior'(~estimatePdf, ~answer, ~priorPdf)
   }

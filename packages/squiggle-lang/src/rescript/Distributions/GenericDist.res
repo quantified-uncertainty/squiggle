@@ -155,6 +155,7 @@ module Score = {
         ->PointSetDist_Scoring.DistEstimateDistAnswer
         ->Ok
       )
+    | (Score_Dist(_), _, Some(Ok(S(_)))) => DistributionTypes.Unreachable->Error
     | (Score_Dist(esti'), Score_Scalar(answ'), None) =>
       toPointSetFn(esti', ())->E.R.bind(esti'' =>
         {estimate: esti'', answer: answ', prior: None}
@@ -179,6 +180,7 @@ module Score = {
         ->PointSetDist_Scoring.ScalarEstimateDistAnswer
         ->Ok
       )
+    | (Score_Scalar(_), _, Some(Ok(D(_)))) => DistributionTypes.Unreachable->Error
     | (Score_Scalar(esti'), Score_Scalar(answ'), None) =>
       {estimate: esti', answer: answ', prior: None}
       ->PointSetDist_Scoring.ScalarEstimateScalarAnswer
@@ -199,44 +201,6 @@ module Score = {
     argsMake(~esti=estimate, ~answ=answer, ~prior)->E.R.bind(x =>
       x->PointSetDist.logScore->E.R2.errMap(y => DistributionTypes.OperationError(y))
     )
-
-  //  let klDivergence = (prediction, answer, ~toPointSetFn: toPointSetFn): result<float, error> => {
-  //    let pointSets = E.R.merge(toPointSetFn(prediction), toPointSetFn(answer))
-  //    pointSets |> E.R2.bind(((predi, ans)) =>
-  //      PointSetDist.T.klDivergence(predi, ans)->E.R2.errMap(x => DistributionTypes.OperationError(x))
-  //    )
-  //  }
-  //
-  //  let logScoreWithPointResolution = (
-  //    ~prediction: DistributionTypes.genericDist,
-  //    ~answer: float,
-  //    ~prior: option<DistributionTypes.genericDist>,
-  //    ~toPointSetFn: toPointSetFn,
-  //  ): result<float, error> => {
-  //    switch prior {
-  //    | Some(prior') =>
-  //      E.R.merge(toPointSetFn(prior'), toPointSetFn(prediction))->E.R.bind(((
-  //        prior'',
-  //        prediction'',
-  //      )) =>
-  //        PointSetDist.T.logScoreWithPointResolution(
-  //          ~prediction=prediction'',
-  //          ~answer,
-  //          ~prior=prior''->Some,
-  //        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
-  //      )
-  //    | None =>
-  //      prediction
-  //      ->toPointSetFn
-  //      ->E.R.bind(x =>
-  //        PointSetDist.T.logScoreWithPointResolution(
-  //          ~prediction=x,
-  //          ~answer,
-  //          ~prior=None,
-  //        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
-  //      )
-  //    }
-  //  }
 }
 /*
   PointSetDist.toSparkline calls "downsampleEquallyOverX", which downsamples it to n=bucketCount.
