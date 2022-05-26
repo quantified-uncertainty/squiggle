@@ -2,19 +2,14 @@ import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
 import {
-  Distribution,
   result,
   lambdaValue,
   environment,
   runForeign,
-  squiggleExpression,
-  errorValue,
   errorValueToString,
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as lineChartSpec from "../vega-specs/spec-line-chart.json";
-import { DistributionChart } from "./DistributionChart";
-import { NumberShower } from "./NumberShower";
 import { ErrorBox } from "./ErrorBox";
 
 let SquiggleLineChart = createClassFromSpec({
@@ -28,20 +23,13 @@ const _rangeByCount = (start: number, stop: number, count: number) => {
   return result;
 };
 
-function unwrap<a, b>(x: result<a, b>): a {
-  if (x.tag === "Ok") {
-    return x.value;
-  } else {
-    throw Error("FAILURE TO UNWRAP");
-  }
-}
 export type FunctionChartSettings = {
   start: number;
   stop: number;
   count: number;
 };
 
-interface FunctionChartProps {
+interface FunctionChart1NumberProps {
   fn: lambdaValue;
   chartSettings: FunctionChartSettings;
   environment: environment;
@@ -70,8 +58,7 @@ let getFunctionImage = ({ chartSettings, fn, environment }) => {
           x,
           value: {
             tag: "Error",
-            value:
-              "Cannot currently render functions that don't return distributions",
+            value: "This component expected number outputs",
           },
         };
       }
@@ -100,30 +87,12 @@ let getFunctionImage = ({ chartSettings, fn, environment }) => {
   return { errors, functionImage };
 };
 
-export const FunctionChart1Number: React.FC<FunctionChartProps> = ({
+export const FunctionChart1Number: React.FC<FunctionChart1NumberProps> = ({
   fn,
   chartSettings,
   environment,
   height,
-}: FunctionChartProps) => {
-  let [mouseOverlay, setMouseOverlay] = React.useState(0);
-  function handleHover(_name: string, value: unknown) {
-    setMouseOverlay(value as number);
-  }
-  function handleOut() {
-    setMouseOverlay(NaN);
-  }
-  const signalListeners = { mousemove: handleHover, mouseout: handleOut };
-  let mouseItem: result<squiggleExpression, errorValue> = !!mouseOverlay
-    ? runForeign(fn, [mouseOverlay], environment)
-    : {
-        tag: "Error",
-        value: {
-          tag: "REExpectedType",
-          value: "Hover x-coordinate returned NaN. Expected a number.",
-        },
-      };
-
+}: FunctionChart1NumberProps) => {
   let getFunctionImageMemoized = React.useMemo(
     () => getFunctionImage({ chartSettings, fn, environment }),
     [environment, fn]
@@ -139,7 +108,6 @@ export const FunctionChart1Number: React.FC<FunctionChartProps> = ({
         data={{ facet: data }}
         height={height}
         actions={false}
-        signalListeners={signalListeners}
       />
       {getFunctionImageMemoized.errors.map(({ x, value }) => (
         <ErrorBox key={x} heading={value}>

@@ -41,7 +41,7 @@ export type FunctionChartSettings = {
   count: number;
 };
 
-interface FunctionChartProps {
+interface FunctionChart1DistProps {
   fn: lambdaValue;
   chartSettings: FunctionChartSettings;
   environment: environment;
@@ -146,12 +146,12 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
   return { percentiles, errors: groupedErrors };
 };
 
-export const FunctionChart1Dist: React.FC<FunctionChartProps> = ({
+export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   fn,
   chartSettings,
   environment,
   height,
-}: FunctionChartProps) => {
+}: FunctionChart1DistProps) => {
   let [mouseOverlay, setMouseOverlay] = React.useState(0);
   function handleHover(_name: string, value: unknown) {
     setMouseOverlay(value as number);
