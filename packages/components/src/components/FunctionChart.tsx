@@ -45,6 +45,7 @@ interface FunctionChartProps {
   fn: lambdaValue;
   chartSettings: FunctionChartSettings;
   environment: environment;
+  height: number;
 }
 
 type percentiles = {
@@ -149,6 +150,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
   chartSettings,
   environment,
+  height
 }: FunctionChartProps) => {
   let [mouseOverlay, setMouseOverlay] = React.useState(0);
   function handleHover(_name: string, value: unknown) {
@@ -172,7 +174,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       <DistributionChart
         distribution={mouseItem.value.value}
         width={400}
-        height={140}
+        height={50}
         showSummary={false}
       />
     ) : (
@@ -188,6 +190,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
     <>
       <SquigglePercentilesChart
         data={{ facet: getPercentilesMemoized.percentiles }}
+        height={height}
         actions={false}
         signalListeners={signalListeners}
       />

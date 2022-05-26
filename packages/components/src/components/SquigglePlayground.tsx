@@ -3,7 +3,11 @@ import React, { FC, ReactElement, useState } from "react";
 import ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import CodeEditor from "./CodeEditor";
+import JsonEditor from "./JsonEditor";
 import styled from "styled-components";
+import { useForm, useWatch } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   defaultBindings,
   environment,
@@ -87,6 +91,32 @@ interface PlaygroundProps {
   showSummary?: boolean;
 }
 
+const schema = yup
+  .object()
+  .shape({
+    sampleCount: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(1000000),
+    xyPointLength: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(10000),
+    chartHeight: yup.number().required().positive().integer().default(350),
+    showTypes: yup.boolean(),
+    showControls: yup.boolean(),
+    showSummary: yup.boolean(),
+  })
+  .required();
+
 let SquigglePlayground: FC<PlaygroundProps> = ({
   initialSquiggleString = "",
   height = 300,
@@ -95,9 +125,12 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   showSummary = false,
 }: PlaygroundProps) => {
   let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
-  let [sampleCount, setSampleCount] = useState(1000);
-  let [outputXYPoints, setOutputXYPoints] = useState(1000);
-  let [pointDistLength, setPointDistLength] = useState(1000);
+  let [importString, setImportString] = useState("{}");
+  let [imports, setImports] = useState({});
+  let [importsAreValid, setImportsAreValid] = useState(true);
+  let [showTypesInput, setShowTypesInput] = useState(showTypes);
+  let [showControlsInput, setShowControlsInput] = useState(showControls);
+  let [showSummaryInput, setShowSummaryInput] = useState(showSummary);
   let [diagramStart, setDiagramStart] = useState(0);
   let [diagramStop, setDiagramStop] = useState(10);
   let [diagramCount, setDiagramCount] = useState(20);
@@ -106,12 +139,46 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     stop: diagramStop,
     count: diagramCount,
   };
+  const {
+    register,
+    formState: { errors },
+    control,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      sampleCount: 1000,
+      xyPointLength: 1000,
+      chartHeight: 150,
+      showTypes: showTypes,
+      showControls: showControls,
+      showSummary: showSummary,
+    },
+  });
+  const foo = useWatch({
+    control,
+  });
   let env: environment = {
-    sampleCount: sampleCount,
-    xyPointLength: outputXYPoints,
+    sampleCount: Number(foo.sampleCount),
+    xyPointLength: Number(foo.xyPointLength),
+  };
+  let getChangeJson = (r: string) => {
+    setImportString(r);
+    try {
+      setImports(JSON.parse(r));
+      setImportsAreValid(true);
+    } catch (e) {
+      setImportsAreValid(false);
+    }
+    ("");
   };
   return (
     <ShowBox height={height}>
+      <input type="number" {...register("sampleCount")} />
+      <input type="number" {...register("xyPointLength")} />
+      <input type="number" {...register("chartHeight")} />
+      <input type="checkbox" {...register("showTypes")} />
+      <input type="checkbox" {...register("showControls")} />
+      <input type="checkbox" {...register("showSummary")} />
       <Row>
         <Col>
           <CodeEditor
@@ -121,6 +188,14 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
             showGutter={true}
             height={height - 3}
           />
+          <JsonEditor
+            value={importString}
+            onChange={getChangeJson}
+            oneLine={false}
+            showGutter={true}
+            height={100}
+          />
+          {importsAreValid ? "Valid" : "INVALID"}
         </Col>
         <Col>
           <Display maxHeight={height - 3}>
@@ -128,12 +203,12 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
               squiggleString={squiggleString}
               environment={env}
               chartSettings={chartSettings}
-              height={150}
-              showTypes={showTypes}
-              showControls={showControls}
+              height={foo.chartHeight}
+              showTypes={foo.showTypes}
+              showControls={foo.showControls}
               bindings={defaultBindings}
-              jsImports={defaultImports}
-              showSummary={showSummary}
+              jsImports={imports}
+              showSummary={foo.showSummary}
             />
           </Display>
         </Col>
