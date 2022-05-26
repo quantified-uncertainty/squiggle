@@ -51,10 +51,13 @@ interface FunctionChartProps {
 type point = { x: number; value: result<number, string> };
 
 let getFunctionImage = ({ chartSettings, fn, environment }) => {
+  //We adjust the count, because the count is made for distributions, which are much more expensive to estimate
+  let adjustedCount = chartSettings.count * 20;
+
   let chartPointsToRender = _rangeByCount(
     chartSettings.start,
     chartSettings.stop,
-    chartSettings.count
+    adjustedCount
   );
 
   let chartPointsData: point[] = chartPointsToRender.map((x) => {

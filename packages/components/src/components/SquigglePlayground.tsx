@@ -78,7 +78,8 @@ interface RowProps {
 
 const Row = styled.div<RowProps>`
   display: grid;
-  grid-template-columns: ${(p) => p.leftPercentage}% ${(p) => 100 - p.leftPercentage}%;
+  grid-template-columns: ${(p) => p.leftPercentage}% ${(p) =>
+      100 - p.leftPercentage}%;
 `;
 const Col = styled.div``;
 
@@ -115,10 +116,18 @@ const schema = yup
       .min(10)
       .max(10000),
     chartHeight: yup.number().required().positive().integer().default(350),
-    leftSize: yup.number().required().positive().integer().min(10).max(100).default(50),
+    leftSizePercent: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .min(10)
+      .max(100)
+      .default(50),
     showTypes: yup.boolean(),
     showControls: yup.boolean(),
     showSummary: yup.boolean(),
+    showSettingsPage: yup.boolean().default(false),
   })
   .required();
 
@@ -133,9 +142,6 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   let [importString, setImportString] = useState("{}");
   let [imports, setImports] = useState({});
   let [importsAreValid, setImportsAreValid] = useState(true);
-  let [showTypesInput, setShowTypesInput] = useState(showTypes);
-  let [showControlsInput, setShowControlsInput] = useState(showControls);
-  let [showSummaryInput, setShowSummaryInput] = useState(showSummary);
   let [diagramStart, setDiagramStart] = useState(0);
   let [diagramStop, setDiagramStop] = useState(10);
   let [diagramCount, setDiagramCount] = useState(20);
@@ -157,7 +163,8 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
       showTypes: showTypes,
       showControls: showControls,
       showSummary: showSummary,
-      leftSize: 50,
+      leftSizePercent: 50,
+      showSettingsPage: false,
     },
   });
   const vars = useWatch({
@@ -178,30 +185,36 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   };
   return (
     <ShowBox height={height}>
-      <input type="number" {...register("sampleCount")} />
-      <input type="number" {...register("xyPointLength")} />
-      <input type="number" {...register("chartHeight")} />
-      <input type="number" {...register("leftSize")} />
-      <input type="checkbox" {...register("showTypes")} />
-      <input type="checkbox" {...register("showControls")} />
-      <input type="checkbox" {...register("showSummary")} />
-      <Row leftPercentage={vars.leftSize || 50}>
+              <input type="checkbox" {...register("showSettingsPage")} />
+      <Row leftPercentage={vars.leftSizePercent || 50}>
         <Col>
-          <CodeEditor
-            value={squiggleString}
-            onChange={setSquiggleString}
-            oneLine={false}
-            showGutter={true}
-            height={height - 3}
-          />
-          <JsonEditor
-            value={importString}
-            onChange={getChangeJson}
-            oneLine={false}
-            showGutter={true}
-            height={100}
-          />
-          {importsAreValid ? "Valid" : "INVALID"}
+          {vars.showSettingsPage ? (
+            <div>
+              <input type="number" {...register("sampleCount")} />
+              <input type="number" {...register("xyPointLength")} />
+              <input type="number" {...register("chartHeight")} />
+              <input type="number" {...register("leftSizePercent")} />
+              <input type="checkbox" {...register("showTypes")} />
+              <input type="checkbox" {...register("showControls")} />
+              <input type="checkbox" {...register("showSummary")} />
+              <JsonEditor
+                value={importString}
+                onChange={getChangeJson}
+                oneLine={false}
+                showGutter={true}
+                height={100}
+              />
+              {importsAreValid ? "Valid" : "Invalid"}
+            </div>
+          ) : (
+            <CodeEditor
+              value={squiggleString}
+              onChange={setSquiggleString}
+              oneLine={false}
+              showGutter={true}
+              height={height - 3}
+            />
+          )}
         </Col>
         <Col>
           <Display maxHeight={height - 3}>

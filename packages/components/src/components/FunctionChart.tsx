@@ -1,5 +1,4 @@
 import * as React from "react";
-import _ from "lodash";
 import type { Spec } from "vega";
 import {
   Distribution,
@@ -31,8 +30,19 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   environment,
   height,
 }: FunctionChartProps) => {
-  let result = runForeign(fn, [chartSettings.start], environment);
-  let resultType = result.tag === "Ok" ? result.value.tag : "Error";
+  let result1 = runForeign(fn, [chartSettings.start], environment);
+  let result2 = runForeign(fn, [chartSettings.stop], environment);
+  let getValidResult = () => {
+    if (result1.tag === "Ok") {
+      return result1;
+    } else if (result2.tag === "Ok") {
+      return result2;
+    } else {
+      return result1;
+    }
+  };
+  let validResult = getValidResult();
+  let resultType = validResult.tag === "Ok" ? validResult.value.tag : "Error";
 
   let comp = () => {
     switch (resultType) {

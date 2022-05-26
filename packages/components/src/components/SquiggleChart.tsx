@@ -172,7 +172,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
               <SquiggleItem
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
-                height={50}
+                height={height / 3}
                 showTypes={showTypes}
                 showSummary={showSummary}
                 showControls={showControls}
@@ -204,15 +204,17 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "lambda":
       return (
-        <FunctionChart
-          fn={expression.value}
-          chartSettings={chartSettings}
-          height={height}
-          environment={{
-            sampleCount: environment.sampleCount / 10,
-            xyPointLength: environment.xyPointLength / 10,
-          }}
-        />
+        <VariableBox heading="Function" showTypes={showTypes}>
+          <FunctionChart
+            fn={expression.value}
+            chartSettings={chartSettings}
+            height={height}
+            environment={{
+              sampleCount: environment.sampleCount / 10,
+              xyPointLength: environment.xyPointLength / 10,
+            }}
+          />
+        </VariableBox>
       );
   }
 };
@@ -255,7 +257,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   environment,
   onChange = () => {},
-  height = 60,
+  height = 200,
   bindings = defaultBindings,
   jsImports = defaultImports,
   showSummary = false,
