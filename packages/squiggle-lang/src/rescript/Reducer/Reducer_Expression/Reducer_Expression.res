@@ -75,9 +75,9 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
 > =>
   switch valueList {
   | list{EvCall(fName), ...args} => {
-      let rCheckedArgs = switch fName == "$_setBindings_$" {
-      | false => args->Lambda.checkIfReduced
-      | true => args->Ok
+      let rCheckedArgs = switch fName {
+      | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args->Ok
+      | _ => args->Lambda.checkIfReduced
       }
 
       rCheckedArgs->Result.flatMap(checkedArgs =>

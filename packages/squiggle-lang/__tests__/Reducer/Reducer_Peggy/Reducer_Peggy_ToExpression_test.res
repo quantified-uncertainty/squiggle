@@ -1,41 +1,5 @@
-module Expression = Reducer_Expression
-module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface_ExpressionValue
-module Parse = Reducer_Peggy_Parse
-module ToExpression = Reducer_Peggy_ToExpression
-module Result = Belt.Result
-
 open Jest
-open Expect
-
-let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
-  let rExpr = Parse.parse(expr)->Result.map(ToExpression.fromNode)
-  let a1 = rExpr->ExpressionT.toStringResultOkless
-  if v == "_" {
-    a1->expect->toBe(answer)
-  } else {
-    let a2 =
-      rExpr
-      ->Result.flatMap(expr =>
-        Expression.reduceExpression(expr, Belt.Map.String.empty, ExpressionValue.defaultEnvironment)
-      )
-      ->ExpressionValue.toStringResultOkless
-    (a1, a2)->expect->toEqual((answer, v))
-  }
-}
-
-let testToExpression = (expr, answer, ~v="_", ()) =>
-  test(expr, () => expectToExpressionToBe(expr, answer, ~v, ()))
-
-module MySkip = {
-  let testToExpression = (expr, answer, ~v="_", ()) =>
-    Skip.test(expr, () => expectToExpressionToBe(expr, answer, ~v, ()))
-}
-
-module MyOnly = {
-  let testToExpression = (expr, answer, ~v="_", ()) =>
-    Only.test(expr, () => expectToExpressionToBe(expr, answer, ~v, ()))
-}
+open Reducer_Peggy_TestHelpers
 
 describe("Peggy to Expression", () => {
   describe("literals operators parenthesis", () => {

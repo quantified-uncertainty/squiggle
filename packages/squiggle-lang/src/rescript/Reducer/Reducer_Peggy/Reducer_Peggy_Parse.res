@@ -24,6 +24,7 @@ type nodeLambda = {...node, "args": array<nodeIdentifier>, "body": nodeBlock}
 type nodeLetStatement = {...node, "variable": nodeIdentifier, "value": node}
 type nodeString = {...node, "value": string}
 type nodeTernary = {...node, "condition": node, "trueExpression": node, "falseExpression": node}
+type nodeTypeIdentifier = {...node, "value": string}
 
 type peggyNode =
   | PgNodeBlock(nodeBlock)
@@ -38,6 +39,7 @@ type peggyNode =
   | PgNodeLetStatement(nodeLetStatement)
   | PgNodeString(nodeString)
   | PgNodeTernary(nodeTernary)
+  | PgNodeTypeIdentifier(nodeTypeIdentifier)
 
 external castNodeBlock: node => nodeBlock = "%identity"
 external castNodeBoolean: node => nodeBoolean = "%identity"
@@ -51,6 +53,7 @@ external castNodeLambda: node => nodeLambda = "%identity"
 external castNodeLetStatement: node => nodeLetStatement = "%identity"
 external castNodeString: node => nodeString = "%identity"
 external castNodeTernary: node => nodeTernary = "%identity"
+external castNodeTypeIdentifier: node => nodeTypeIdentifier = "%identity"
 
 exception UnsupportedPeggyNodeType(string) // This should never happen; programming error
 let castNodeType = (node: node) =>
@@ -67,6 +70,7 @@ let castNodeType = (node: node) =>
   | "LetStatement" => node->castNodeLetStatement->PgNodeLetStatement
   | "String" => node->castNodeString->PgNodeString
   | "Ternary" => node->castNodeTernary->PgNodeTernary
+  | "TypeIdentifier" => node->castNodeTypeIdentifier->PgNodeTypeIdentifier
   | _ => raise(UnsupportedPeggyNodeType(node["type"]))
   }
 
@@ -98,6 +102,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
     toString(node["trueExpression"]) ++
     " " ++
     toString(node["falseExpression"]) ++ ")"
+  | PgNodeTypeIdentifier(node) => `#${node["value"]}`
   }
 }
 and toString = (node: node): string => node->castNodeType->pgToString

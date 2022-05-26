@@ -189,5 +189,7 @@ function createTsExport(
       return tag("timeDuration", x.value);
     case "EvDeclaration":
       return tag("lambdaDeclaration", x.value);
+    case "EvTypeIdentifier":
+      return tag("typeIdentifier", x.value);
   }
 }
