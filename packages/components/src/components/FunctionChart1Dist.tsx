@@ -150,7 +150,7 @@ export const FunctionChart1Dist: React.FC<FunctionChartProps> = ({
   fn,
   chartSettings,
   environment,
-  height
+  height,
 }: FunctionChartProps) => {
   let [mouseOverlay, setMouseOverlay] = React.useState(0);
   function handleHover(_name: string, value: unknown) {

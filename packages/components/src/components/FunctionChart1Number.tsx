@@ -129,7 +129,10 @@ export const FunctionChart1Number: React.FC<FunctionChartProps> = ({
     [environment, fn]
   );
 
-  let data = getFunctionImageMemoized.functionImage.map(({x, value}) => ({x, y:value}))
+  let data = getFunctionImageMemoized.functionImage.map(({ x, value }) => ({
+    x,
+    y: value,
+  }));
   return (
     <>
       <SquiggleLineChart

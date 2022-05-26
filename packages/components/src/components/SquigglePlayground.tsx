@@ -185,7 +185,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   };
   return (
     <ShowBox height={height}>
-              <input type="checkbox" {...register("showSettingsPage")} />
+      <input type="checkbox" {...register("showSettingsPage")} />
       <Row leftPercentage={vars.leftSizePercent || 50}>
         <Col>
           {vars.showSettingsPage ? (

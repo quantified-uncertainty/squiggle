@@ -4,10 +4,7 @@ import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
-import {
-  jsImports,
-  defaultImports,
-} from "@quri/squiggle-lang";
+import { jsImports, defaultImports } from "@quri/squiggle-lang";
 
 interface CodeEditorProps {
   value: string;
