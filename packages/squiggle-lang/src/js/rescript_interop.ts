@@ -102,7 +102,7 @@ type rescriptDeclarationArg =
       max: number;
     }
   | {
-      TAG: 1; // Float
+      TAG: 1; // Date
       min: Date;
       max: Date;
     };

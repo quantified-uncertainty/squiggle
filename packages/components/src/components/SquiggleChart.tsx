@@ -12,7 +12,7 @@ import {
   defaultBindings,
   defaultEnvironment,
   declarationArg,
-  declaration
+  declaration,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
@@ -25,14 +25,12 @@ function getRange<a>(x: declaration<a>) {
     case "Float": {
       return { floats: { min: first.value.min, max: first.value.max } };
     }
-    case "Time": {
-      return { time: { min: first.value.min, max: first.value.max } };
+    case "Date": {
+      return { time: { min: first.value.min, max: first.value.max} };
     }
   }
 }
-function getChartSettings<a>(
-  x: declaration<a>
-): FunctionChartSettings {
+function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
   let range = getRange(x);
   let min = range.floats ? range.floats.min : 0;
   let max = range.floats ? range.floats.max : 10;
@@ -207,7 +205,6 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
               />
             </div>
           ))}
-          )
         </VariableBox>
       );
     case "arraystring":
@@ -241,17 +238,17 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         />
       );
     case "lambdaDeclaration": {
-          return (
-            <FunctionChart
-              fn={expression.value.fn}
-              chartSettings={getChartSettings(expression.value)}
-              environment={{
-                sampleCount: environment.sampleCount / 10,
-                xyPointLength: environment.xyPointLength / 10,
-              }}
-            />
-          );
-      }
+      return (
+        <FunctionChart
+          fn={expression.value.fn}
+          chartSettings={getChartSettings(expression.value)}
+          environment={{
+            sampleCount: environment.sampleCount / 10,
+            xyPointLength: environment.xyPointLength / 10,
+          }}
+        />
+      );
+    }
     default: {
       return <>Should be unreachable</>;
     }

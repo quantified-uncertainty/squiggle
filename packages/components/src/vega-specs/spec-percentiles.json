@@ -75,6 +75,7 @@
       "name": "xscale",
       "type": "linear",
       "nice": true,
+      "zero": false,
       "domain": {
         "data": "facet",
         "field": "x"
