@@ -11,7 +11,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
   defaultBindings,
   environment,
-  defaultImports,
 } from "@quri/squiggle-lang";
 
 interface FieldFloatProps {
@@ -131,9 +130,19 @@ const schema = yup
   })
   .required();
 
+type InputProps = {
+  label: string;
+};
+const InputItem: React.FC<InputProps> = ({ label, children }) => (
+  <div>
+    <label>{label}</label>
+    {children}
+  </div>
+);
+
 let SquigglePlayground: FC<PlaygroundProps> = ({
   initialSquiggleString = "",
-  height = 300,
+  height = 500,
   showTypes = false,
   showControls = false,
   showSummary = false,
@@ -189,23 +198,45 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
       <Row leftPercentage={vars.leftSizePercent || 50}>
         <Col>
           {vars.showSettingsPage ? (
-            <div>
-              <input type="number" {...register("sampleCount")} />
-              <input type="number" {...register("xyPointLength")} />
-              <input type="number" {...register("chartHeight")} />
-              <input type="number" {...register("leftSizePercent")} />
-              <input type="checkbox" {...register("showTypes")} />
-              <input type="checkbox" {...register("showControls")} />
-              <input type="checkbox" {...register("showSummary")} />
-              <JsonEditor
-                value={importString}
-                onChange={getChangeJson}
-                oneLine={false}
-                showGutter={true}
-                height={100}
-              />
-              {importsAreValid ? "Valid" : "Invalid"}
-            </div>
+            <>
+              <InputItem label="Sample Count">
+                <input type="number" {...register("sampleCount")} />
+              </InputItem>
+              <InputItem label="XYPointLength Count">
+                <input type="number" {...register("xyPointLength")} />
+              </InputItem>
+              <InputItem label="Chart Height (in Pixels)">
+                <input type="number" {...register("chartHeight")} />
+              </InputItem>
+              <InputItem label="Show Types">
+                <input type="checkbox" {...register("showTypes")} />
+              </InputItem>
+              <InputItem label="Show Controls">
+                <input type="checkbox" {...register("showControls")} />
+              </InputItem>
+              <InputItem label="Show Summary Statistics">
+                <input type="checkbox" {...register("showSummary")} />
+              </InputItem>
+              <InputItem label="Editor Width">
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  className="slider"
+                  {...register("leftSizePercent")}
+                />
+              </InputItem>
+              <InputItem label="Json Editor for imports">
+                <JsonEditor
+                  value={importString}
+                  onChange={getChangeJson}
+                  oneLine={false}
+                  showGutter={true}
+                  height={100}
+                />
+                {importsAreValid ? "Valid" : "Invalid"}
+              </InputItem>
+            </>
           ) : (
             <CodeEditor
               value={squiggleString}
