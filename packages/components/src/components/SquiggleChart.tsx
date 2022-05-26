@@ -228,6 +228,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "lambda":
       return (
+        <VariableBox heading="Function" showTypes={showTypes}>
         <FunctionChart
           fn={expression.value}
           chartSettings={chartSettings}
@@ -236,9 +237,11 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
             xyPointLength: environment.xyPointLength / 10,
           }}
         />
+        </VariableBox>
       );
     case "lambdaDeclaration": {
       return (
+        <VariableBox heading="Function Declaration" showTypes={showTypes}>
         <FunctionChart
           fn={expression.value.fn}
           chartSettings={getChartSettings(expression.value)}
@@ -247,6 +250,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
             xyPointLength: environment.xyPointLength / 10,
           }}
         />
+        </VariableBox>
       );
     }
     default: {
