@@ -72,9 +72,13 @@ const Display = styled.div<TitleProps>`
   max-height: ${(props) => props.maxHeight}px;
 `;
 
-const Row = styled.div`
+interface RowProps {
+  readonly leftPercentage: number;
+}
+
+const Row = styled.div<RowProps>`
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: ${(p) => p.leftPercentage}% ${(p) => 100 - p.leftPercentage}%;
 `;
 const Col = styled.div``;
 
@@ -111,6 +115,7 @@ const schema = yup
       .min(10)
       .max(10000),
     chartHeight: yup.number().required().positive().integer().default(350),
+    leftSize: yup.number().required().positive().integer().min(10).max(100).default(50),
     showTypes: yup.boolean(),
     showControls: yup.boolean(),
     showSummary: yup.boolean(),
@@ -152,14 +157,15 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
       showTypes: showTypes,
       showControls: showControls,
       showSummary: showSummary,
+      leftSize: 50,
     },
   });
-  const foo = useWatch({
+  const vars = useWatch({
     control,
   });
   let env: environment = {
-    sampleCount: Number(foo.sampleCount),
-    xyPointLength: Number(foo.xyPointLength),
+    sampleCount: Number(vars.sampleCount),
+    xyPointLength: Number(vars.xyPointLength),
   };
   let getChangeJson = (r: string) => {
     setImportString(r);
@@ -169,17 +175,17 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     } catch (e) {
       setImportsAreValid(false);
     }
-    ("");
   };
   return (
     <ShowBox height={height}>
       <input type="number" {...register("sampleCount")} />
       <input type="number" {...register("xyPointLength")} />
       <input type="number" {...register("chartHeight")} />
+      <input type="number" {...register("leftSize")} />
       <input type="checkbox" {...register("showTypes")} />
       <input type="checkbox" {...register("showControls")} />
       <input type="checkbox" {...register("showSummary")} />
-      <Row>
+      <Row leftPercentage={vars.leftSize || 50}>
         <Col>
           <CodeEditor
             value={squiggleString}
@@ -203,12 +209,12 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
               squiggleString={squiggleString}
               environment={env}
               chartSettings={chartSettings}
-              height={foo.chartHeight}
-              showTypes={foo.showTypes}
-              showControls={foo.showControls}
+              height={vars.chartHeight}
+              showTypes={vars.showTypes}
+              showControls={vars.showControls}
               bindings={defaultBindings}
               jsImports={imports}
-              showSummary={foo.showSummary}
+              showSummary={vars.showSummary}
             />
           </Display>
         </Col>
