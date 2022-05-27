@@ -101,15 +101,33 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->EvArray)
   }
 
-  let doMapSampleSetDist = (sampleSetDist: SampleSetDist.t, aLambdaValue) => {
-    let fn = r =>
-      switch Lambda.doLambdaCall(aLambdaValue, list{EvNumber(r)}, environment, reducer) {
+  module SampleMap = {
+    type t = SampleSetDist.t
+    let doLambdaCall = (aLambdaValue, list) =>
+      switch Lambda.doLambdaCall(aLambdaValue, list, environment, reducer) {
       | Ok(EvNumber(f)) => Ok(f)
       | _ => Error(Operation.SampleMapNeedsNtoNFunction)
       }
-    switch SampleSetDist.samplesMap(~fn, sampleSetDist) {
-    | Ok(r) => Ok(EvDistribution(SampleSet(r)))
-    | Error(r) => Error(REDistributionError(SampleSetError(r)))
+
+    let toType = r =>
+      switch r {
+      | Ok(r) => Ok(EvDistribution(SampleSet(r)))
+      | Error(r) => Error(REDistributionError(SampleSetError(r)))
+      }
+
+    let map1 = (sampleSetDist: t, aLambdaValue) => {
+      let fn = r => doLambdaCall(aLambdaValue, list{EvNumber(r)})
+      toType(SampleSetDist.samplesMap(~fn, sampleSetDist))
+    }
+
+    let map2 = (t1: t, t2: t, aLambdaValue) => {
+      let fn = (a, b) => doLambdaCall(aLambdaValue, list{EvNumber(a), EvNumber(b)})
+      SampleSetDist.map2(~fn, ~t1, ~t2)->toType
+    }
+
+    let map3 = (t1: t, t2: t, t3: t, aLambdaValue) => {
+      let fn = (a, b, c) => doLambdaCall(aLambdaValue, list{EvNumber(a), EvNumber(b), EvNumber(c)})
+      SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
     }
   }
 
@@ -143,7 +161,22 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     doKeepArray(aValueArray, aLambdaValue)
   | ("map", [EvArray(aValueArray), EvLambda(aLambdaValue)]) => doMapArray(aValueArray, aLambdaValue)
   | ("mapSamples", [EvDistribution(SampleSet(dist)), EvLambda(aLambdaValue)]) =>
-    doMapSampleSetDist(dist, aLambdaValue)
+    SampleMap.map1(dist, aLambdaValue)
+  | (
+      "mapSamples2",
+      [EvDistribution(SampleSet(dist1)), EvDistribution(SampleSet(dist2)), EvLambda(aLambdaValue)],
+    ) =>
+    SampleMap.map2(dist1, dist2, aLambdaValue)
+  | (
+      "mapSamples3",
+      [
+        EvDistribution(SampleSet(dist1)),
+        EvDistribution(SampleSet(dist2)),
+        EvDistribution(SampleSet(dist3)),
+        EvLambda(aLambdaValue),
+      ],
+    ) =>
+    SampleMap.map3(dist1, dist2, dist3, aLambdaValue)
   | ("reduce", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>
     doReduceArray(aValueArray, initialValue, aLambdaValue)
   | ("reduceReverse", [EvArray(aValueArray), initialValue, EvLambda(aLambdaValue)]) =>

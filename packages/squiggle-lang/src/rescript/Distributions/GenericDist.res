@@ -281,7 +281,7 @@ module AlgebraicCombination = {
       let fn = Operation.Algebraic.toFn(arithmeticOperation)
       E.R.merge(toSampleSet(t1), toSampleSet(t2))
       ->E.R.bind(((t1, t2)) => {
-        SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+        SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(x => DistributionTypes.SampleSetError(x))
       })
       ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
     }

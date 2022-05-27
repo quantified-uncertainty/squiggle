@@ -75,7 +75,7 @@ module Process = {
         | Ok((t1, t2)) =>
           switch SampleSetDist.map2(~fn=altFn, ~t1, ~t2) {
           | Ok(r) => Ok(DistributionTypes.SampleSet(r))
-          | Error(r) => Error(Operation.Error.toString(r))
+          | Error(r) => Error(SampleSetDist.Error.toString(r))
           }
         | Error(r) => Error(DistributionTypes.Error.toString(r))
         }
