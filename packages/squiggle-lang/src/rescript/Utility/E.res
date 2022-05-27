@@ -567,6 +567,10 @@ module A = {
   let tail = Belt.Array.sliceToEnd(_, 1)
 
   let zip = Belt.Array.zip
+  let zip3 = (a, b, c) =>
+    Belt.Array.zip(a, b)
+    -> Belt.Array.zip(c)
+    -> Belt.Array.map((((v1, v2), v3)) => (v1, v2, v3))
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {
     let maxLength = Int.max(length(array1), length(array2))

@@ -100,7 +100,25 @@ let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2
   t,
   Operation.Error.t,
 > => {
-  let samples = Belt.Array.zip(get(t1), get(t2))->E.A2.fmap(((a, b)) => fn(a, b))
+  let samples = E.A.zip(get(t1), get(t2))->E.A2.fmap(((a, b)) => fn(a, b))
+
+  // This assertion should never be reached. In order for it to be reached, one
+  // of the input parameters would need to be a sample set distribution with less
+  // than 6 samples. Which should be impossible due to the smart constructor.
+  // I could prove this to the type system (say, creating a {first: float, second: float, ..., fifth: float, rest: array<float>}
+  // But doing so would take too much time, so I'll leave it as an assertion
+  E.A.R.firstErrorOrOpen(samples)->E.R2.fmap(x =>
+    E.R.toExnFnString(Error.sampleSetErrorToString, make(x))
+  )
+}
+
+let map3 = (
+  ~fn: (float, float, float) => result<float, Operation.Error.t>,
+  ~t1: t,
+  ~t2: t,
+  ~t3: t,
+): result<t, Operation.Error.t> => {
+  let samples = E.A.zip3(get(t1), get(t2), get(t3))->E.A2.fmap(((a, b, c)) => fn(a, b, c))
 
   // This assertion should never be reached. In order for it to be reached, one
   // of the input parameters would need to be a sample set distribution with less
