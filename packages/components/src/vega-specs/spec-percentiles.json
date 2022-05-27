@@ -87,10 +87,10 @@
       "type": "linear",
       "range": "height",
       "nice": true,
-      "zero": true,
+      "zero": false,
       "domain": {
         "data": "facet",
-        "field": "p99"
+        "fields": ["p1", "p99"]
       }
     }
   ],
@@ -114,12 +114,14 @@
       "tickOpacity": 0.0,
       "domainColor": "#727d93",
       "domainOpacity": 0.1,
+      "format": ".9~s",
       "tickCount": 5
     },
     {
       "orient": "left",
       "scale": "yscale",
       "grid": false,
+      "format": ".9~s",
       "labelColor": "#727d93",
       "tickColor": "#fff",
       "tickOpacity": 0.0,
