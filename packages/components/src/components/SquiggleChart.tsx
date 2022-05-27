@@ -26,7 +26,7 @@ function getRange<a>(x: declaration<a>) {
       return { floats: { min: first.value.min, max: first.value.max } };
     }
     case "Date": {
-      return { time: { min: first.value.min, max: first.value.max} };
+      return { time: { min: first.value.min, max: first.value.max } };
     }
   }
 }
@@ -229,27 +229,27 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "lambda":
       return (
         <VariableBox heading="Function" showTypes={showTypes}>
-        <FunctionChart
-          fn={expression.value}
-          chartSettings={chartSettings}
-          environment={{
-            sampleCount: environment.sampleCount / 10,
-            xyPointLength: environment.xyPointLength / 10,
-          }}
-        />
+          <FunctionChart
+            fn={expression.value}
+            chartSettings={chartSettings}
+            environment={{
+              sampleCount: environment.sampleCount / 10,
+              xyPointLength: environment.xyPointLength / 10,
+            }}
+          />
         </VariableBox>
       );
     case "lambdaDeclaration": {
       return (
         <VariableBox heading="Function Declaration" showTypes={showTypes}>
-        <FunctionChart
-          fn={expression.value.fn}
-          chartSettings={getChartSettings(expression.value)}
-          environment={{
-            sampleCount: environment.sampleCount / 10,
-            xyPointLength: environment.xyPointLength / 10,
-          }}
-        />
+          <FunctionChart
+            fn={expression.value.fn}
+            chartSettings={getChartSettings(expression.value)}
+            environment={{
+              sampleCount: environment.sampleCount / 10,
+              xyPointLength: environment.xyPointLength / 10,
+            }}
+          />
         </VariableBox>
       );
     }
