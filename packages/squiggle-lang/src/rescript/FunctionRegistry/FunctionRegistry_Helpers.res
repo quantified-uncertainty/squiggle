@@ -9,6 +9,7 @@ module Wrappers = {
 }
 
 module Prepare = {
+  type t = frValue
   type ts = array<frValue>
   type err = string
 
@@ -23,6 +24,14 @@ module Prepare = {
       let toArgs = (inputs: ts): result<ts, err> =>
         switch inputs {
         | [FRValueRecord(args)] => args->E.A2.fmap(((_, b)) => b)->Ok
+        | _ => Error(impossibleError)
+        }
+    }
+
+    module Array = {
+      let openA = (inputs: t): result<ts, err> =>
+        switch inputs {
+        | FRValueArray(n) => Ok(n)
         | _ => Error(impossibleError)
         }
     }
