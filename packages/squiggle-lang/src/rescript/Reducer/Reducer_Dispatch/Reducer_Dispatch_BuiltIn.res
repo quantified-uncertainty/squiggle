@@ -122,12 +122,12 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
     let map2 = (t1: t, t2: t, aLambdaValue) => {
       let fn = (a, b) => doLambdaCall(aLambdaValue, list{EvNumber(a), EvNumber(b)})
-      SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(SampleSetDist.Error.fromOperationError)->toType
+      SampleSetDist.map2(~fn, ~t1, ~t2)->toType
     }
 
     let map3 = (t1: t, t2: t, t3: t, aLambdaValue) => {
       let fn = (a, b, c) => doLambdaCall(aLambdaValue, list{EvNumber(a), EvNumber(b), EvNumber(c)})
-      SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->E.R2.errMap(SampleSetDist.Error.fromOperationError)->toType
+      SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
     }
   }
 

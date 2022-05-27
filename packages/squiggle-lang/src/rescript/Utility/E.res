@@ -55,6 +55,10 @@ module Tuple2 = {
   let toFnCall = (fn, (a1, a2)) => fn(a1, a2)
 }
 
+module Tuple3 = {
+  let toFnCall = (fn, (a1, a2, a3)) => fn(a1, a2, a3)
+}
+
 module O = {
   let dimap = (sFn, rFn, e) =>
     switch e {
