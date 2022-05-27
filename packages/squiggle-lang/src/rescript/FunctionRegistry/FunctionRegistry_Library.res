@@ -43,9 +43,7 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
   let expressionValue =
     xyCoords
     ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-    ->E.R2.fmap(r => ReducerInterface_ExpressionValue.EvDistribution(
-      PointSet(makeDist(r)),
-    ))
+    ->E.R2.fmap(r => ReducerInterface_ExpressionValue.EvDistribution(PointSet(makeDist(r))))
   expressionValue
 }
 
