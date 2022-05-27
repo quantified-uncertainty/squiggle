@@ -11,7 +11,6 @@ type rec frType =
   | FRTypeLambda
   | FRTypeRecord(frTypeRecord)
   | FRTypeArray(frType)
-  | FRTypeOption(frType)
   | FRTypeString
   | FRTypeVariant(array<string>)
 and frTypeRecord = array<frTypeRecordParam>
@@ -24,7 +23,6 @@ and frTypeRecordParam = (string, frType)
 type rec frValue =
   | FRValueNumber(float)
   | FRValueDist(DistributionTypes.genericDist)
-  | FRValueOption(option<frValue>)
   | FRValueArray(array<frValue>)
   | FRValueDistOrNumber(frValueDistOrNumber)
   | FRValueRecord(frValueRecord)
@@ -60,7 +58,6 @@ module FRType = {
         `record({${r->E.A2.fmap(input)->E.A2.joinWith(", ")}})`
       }
     | FRTypeArray(r) => `record(${toString(r)})`
-    | FRTypeOption(v) => `option(${toString(v)})`
     | FRTypeLambda => `lambda`
     | FRTypeString => `string`
     | FRTypeVariant(_) => "variant"
@@ -75,7 +72,6 @@ module FRType = {
     | (FRTypeDistOrNumber, EvDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
     | (FRTypeNumeric, EvNumber(f)) => Some(FRValueNumber(f))
     | (FRTypeNumeric, EvDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
-    | (FRTypeOption(v), _) => Some(FRValueOption(matchWithExpressionValue(v, r)))
     | (FRTypeLambda, EvLambda(f)) => Some(FRValueLambda(f))
     | (FRTypeArray(intendedType), EvArray(elements)) => {
         let el = elements->E.A2.fmap(matchWithExpressionValue(intendedType))
@@ -101,7 +97,6 @@ module FRType = {
     | FRValueDistOrNumber(FRValueNumber(n)) => EvNumber(n)
     | FRValueDistOrNumber(FRValueDist(n)) => EvDistribution(n)
     | FRValueDist(dist) => EvDistribution(dist)
-    | FRValueOption(Some(r)) => matchReverse(r)
     | FRValueArray(elements) => EvArray(elements->E.A2.fmap(matchReverse))
     | FRValueRecord(frValueRecord) => {
         let record =
@@ -113,7 +108,6 @@ module FRType = {
     | FRValueVariant(string) => EvString(string)
     }
 
-  // | FRValueOption(None) => break
   let matchWithExpressionValueArray = (inputs: array<t>, args: array<expressionValue>): option<
     array<frValue>,
   > => {

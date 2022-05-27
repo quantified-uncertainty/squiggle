@@ -57,7 +57,7 @@ let rec toString = aValue =>
   | EvDistribution(dist) => GenericDist.toString(dist)
   | EvDate(date) => DateTime.Date.toString(date)
   | EvTimeDuration(t) => DateTime.Duration.toString(t)
-  | EvDeclaration(t) => "Declaration"
+  | EvDeclaration(d) => Declaration.toString(d, r => toString(EvLambda(r)))
   }
 and toStringRecord = aRecord => {
   let pairs =
@@ -128,6 +128,7 @@ type expressionValueType =
   | EvtSymbol
   | EvtDate
   | EvtTimeDuration
+  | EvtDeclaration
 
 type functionCallSignature = CallSignature(string, array<expressionValueType>)
 type functionDefinitionSignature =
@@ -147,6 +148,7 @@ let valueToValueType = value =>
   | EvSymbol(_) => EvtSymbol
   | EvDate(_) => EvtDate
   | EvTimeDuration(_) => EvtTimeDuration
+  | EvDeclaration(_) => EvtDeclaration
   }
 
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
@@ -168,6 +170,7 @@ let valueTypeToString = (valueType: expressionValueType): string =>
   | EvtSymbol => `Symbol`
   | EvtDate => `Date`
   | EvtTimeDuration => `Duration`
+  | EvtDeclaration => `Declaration`
   }
 
 let functionCallSignatureToString = (functionCallSignature: functionCallSignature): string => {
