@@ -23,7 +23,7 @@
       "tickOpacity": 0.0,
       "domainColor": "#fff",
       "domainOpacity": 0.0,
-      "format": "~g",
+      "format": ".9~s",
       "tickCount": 10
     }
   ],

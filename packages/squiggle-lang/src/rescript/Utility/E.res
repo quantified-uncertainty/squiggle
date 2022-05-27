@@ -870,4 +870,5 @@ module Dict = {
   type t<'a> = Js.Dict.t<'a>
   let get = Js.Dict.get
   let keys = Js.Dict.keys
+  let fromArray = Js.Dict.fromArray
 }

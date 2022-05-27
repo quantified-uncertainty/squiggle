@@ -3,7 +3,42 @@ open FunctionRegistry_Helpers
 
 let twoArgs = E.Tuple2.toFnCall
 
+module Declaration = {
+  let frType = FRTypeRecord([
+    ("fn", FRTypeLambda),
+    ("inputs", FRTypeArray(FRTypeRecord([("min", FRTypeNumber), ("max", FRTypeNumber)]))),
+  ])
+
+  let fromExpressionValue = (e: frValue): result<expressionValue, string> => {
+    switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs([e]) {
+    | Ok([FRValueLambda(lambda), FRValueArray(inputs)]) => {
+        open FunctionRegistry_Helpers.Prepare
+        let getMinMax = arg =>
+          ToValueArray.Record.toArgs([arg])
+          ->E.R.bind(ToValueTuple.twoNumbers)
+          ->E.R2.fmap(((min, max)) => Declaration.ContinuousFloatArg.make(min, max))
+        inputs
+        ->E.A2.fmap(getMinMax)
+        ->E.A.R.firstErrorOrOpen
+        ->E.R2.fmap(args => ReducerInterface_ExpressionValue.EvDeclaration(
+          Declaration.make(lambda, args),
+        ))
+      }
+    | Error(r) => Error(r)
+    | Ok(_) => Error(FunctionRegistry_Helpers.impossibleError)
+    }
+  }
+}
+
 let registry = [
+  Function.make(
+    ~name="FnMake",
+    ~definitions=[
+      FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
+        inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
+      }),
+    ],
+  ),
   Function.make(
     ~name="Normal",
     ~definitions=[

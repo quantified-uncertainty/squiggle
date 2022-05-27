@@ -19,6 +19,12 @@ module Prepare = {
         | [FRValueRecord([(_, n1), (_, n2)])] => Ok([n1, n2])
         | _ => Error(impossibleError)
         }
+
+      let toArgs = (inputs: ts): result<ts, err> =>
+        switch inputs {
+        | [FRValueRecord(args)] => args->E.A2.fmap(((_, b)) => b)->Ok
+        | _ => Error(impossibleError)
+        }
     }
   }
 
@@ -26,6 +32,13 @@ module Prepare = {
     let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> => {
       switch values {
       | [FRValueDistOrNumber(a1), FRValueDistOrNumber(a2)] => Ok(a1, a2)
+      | _ => Error(impossibleError)
+      }
+    }
+
+    let twoNumbers = (values: ts): result<(float, float), err> => {
+      switch values {
+      | [FRValueNumber(a1), FRValueNumber(a2)] => Ok(a1, a2)
       | _ => Error(impossibleError)
       }
     }

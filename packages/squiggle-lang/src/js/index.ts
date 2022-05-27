@@ -14,6 +14,8 @@ export {
   errorValueToString,
   distributionErrorToString,
   distributionError,
+  declarationArg,
+  declaration,
 } from "../rescript/TypescriptInterface.gen";
 export type { errorValue, externalBindings as bindings, jsImports };
 import {
@@ -185,5 +187,7 @@ function createTsExport(
       return tag("date", x.value);
     case "EvTimeDuration":
       return tag("timeDuration", x.value);
+    case "EvDeclaration":
+      return tag("lambdaDeclaration", x.value);
   }
 }

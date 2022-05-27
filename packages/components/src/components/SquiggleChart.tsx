@@ -11,11 +11,35 @@ import {
   defaultImports,
   defaultBindings,
   defaultEnvironment,
+  declarationArg,
+  declaration,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
 import { ErrorBox } from "./ErrorBox";
 import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
+
+function getRange<a>(x: declaration<a>) {
+  let first = x.args[0];
+  switch (first.tag) {
+    case "Float": {
+      return { floats: { min: first.value.min, max: first.value.max } };
+    }
+    case "Date": {
+      return { time: { min: first.value.min, max: first.value.max } };
+    }
+  }
+}
+function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
+  let range = getRange(x);
+  let min = range.floats ? range.floats.min : 0;
+  let max = range.floats ? range.floats.max : 10;
+  return {
+    start: min,
+    stop: max,
+    count: 20,
+  };
+}
 
 const variableBox = {
   Component: styled.div`
@@ -216,6 +240,24 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           />
         </VariableBox>
       );
+    case "lambdaDeclaration": {
+      return (
+        <VariableBox heading="Function Declaration" showTypes={showTypes}>
+          <FunctionChart
+            fn={expression.value.fn}
+            chartSettings={getChartSettings(expression.value)}
+            height={height}
+            environment={{
+              sampleCount: environment.sampleCount / 10,
+              xyPointLength: environment.xyPointLength / 10,
+            }}
+          />
+        </VariableBox>
+      );
+    }
+    default: {
+      return <>Should be unreachable</>;
+    }
   }
 };
 

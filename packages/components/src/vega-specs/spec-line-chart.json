@@ -20,6 +20,7 @@
       "name": "x",
       "type": "linear",
       "nice": true,
+      "zero": false,
       "domain": {
         "data": "facet",
         "field": "x"
@@ -31,7 +32,7 @@
       "type": "linear",
       "range": "height",
       "nice": true,
-      "zero": true,
+      "zero": false,
       "domain": {
         "data": "facet",
         "field": "y"
@@ -58,6 +59,7 @@
       "tickOpacity": 0.0,
       "domainColor": "#727d93",
       "domainOpacity": 0.1,
+      "format": ".9~s",
       "tickCount": 5
     },
     {
@@ -69,6 +71,7 @@
       "tickOpacity": 0.0,
       "domainColor": "#727d93",
       "domainOpacity": 0.1,
+      "format": ".9~s",
       "tickCount": 5
     }
   ],
