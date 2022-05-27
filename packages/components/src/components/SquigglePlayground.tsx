@@ -8,10 +8,7 @@ import styled from "styled-components";
 import { useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  defaultBindings,
-  environment,
-} from "@quri/squiggle-lang";
+import { defaultBindings, environment } from "@quri/squiggle-lang";
 
 interface FieldFloatProps {
   label: string;
@@ -132,7 +129,9 @@ const schema = yup
 
 type InputProps = {
   label: string;
+  children: ReactElement;
 };
+
 const InputItem: React.FC<InputProps> = ({ label, children }) => (
   <div>
     <label>{label}</label>
@@ -227,14 +226,16 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
                 />
               </InputItem>
               <InputItem label="Json Editor for imports">
-                <JsonEditor
-                  value={importString}
-                  onChange={getChangeJson}
-                  oneLine={false}
-                  showGutter={true}
-                  height={100}
-                />
-                {importsAreValid ? "Valid" : "Invalid"}
+                <>
+                  <JsonEditor
+                    value={importString}
+                    onChange={getChangeJson}
+                    oneLine={false}
+                    showGutter={true}
+                    height={100}
+                  />
+                  {importsAreValid ? "Valid" : "Invalid"}
+                </>
               </InputItem>
             </>
           ) : (
