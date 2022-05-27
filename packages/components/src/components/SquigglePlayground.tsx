@@ -3,12 +3,12 @@ import React, { FC, ReactElement, useState } from "react";
 import ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import CodeEditor from "./CodeEditor";
+import JsonEditor from "./JsonEditor";
 import styled from "styled-components";
-import {
-  defaultBindings,
-  environment,
-  defaultImports,
-} from "@quri/squiggle-lang";
+import { useForm, useWatch } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { defaultBindings, environment } from "@quri/squiggle-lang";
 
 interface FieldFloatProps {
   label: string;
@@ -68,9 +68,14 @@ const Display = styled.div<TitleProps>`
   max-height: ${(props) => props.maxHeight}px;
 `;
 
-const Row = styled.div`
+interface RowProps {
+  readonly leftPercentage: number;
+}
+
+const Row = styled.div<RowProps>`
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: ${(p) => p.leftPercentage}% ${(p) =>
+      100 - p.leftPercentage}%;
 `;
 const Col = styled.div``;
 
@@ -87,17 +92,64 @@ interface PlaygroundProps {
   showSummary?: boolean;
 }
 
+const schema = yup
+  .object()
+  .shape({
+    sampleCount: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(1000000),
+    xyPointLength: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(10000),
+    chartHeight: yup.number().required().positive().integer().default(350),
+    leftSizePercent: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .min(10)
+      .max(100)
+      .default(50),
+    showTypes: yup.boolean(),
+    showControls: yup.boolean(),
+    showSummary: yup.boolean(),
+    showSettingsPage: yup.boolean().default(false),
+  })
+  .required();
+
+type InputProps = {
+  label: string;
+  children: ReactElement;
+};
+
+const InputItem: React.FC<InputProps> = ({ label, children }) => (
+  <div>
+    <label>{label}</label>
+    {children}
+  </div>
+);
+
 let SquigglePlayground: FC<PlaygroundProps> = ({
   initialSquiggleString = "",
-  height = 300,
+  height = 500,
   showTypes = false,
   showControls = false,
   showSummary = false,
 }: PlaygroundProps) => {
   let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
-  let [sampleCount, setSampleCount] = useState(1000);
-  let [outputXYPoints, setOutputXYPoints] = useState(1000);
-  let [pointDistLength, setPointDistLength] = useState(1000);
+  let [importString, setImportString] = useState("{}");
+  let [imports, setImports] = useState({});
+  let [importsAreValid, setImportsAreValid] = useState(true);
   let [diagramStart, setDiagramStart] = useState(0);
   let [diagramStop, setDiagramStop] = useState(10);
   let [diagramCount, setDiagramCount] = useState(20);
@@ -106,21 +158,95 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     stop: diagramStop,
     count: diagramCount,
   };
+  const {
+    register,
+    formState: { errors },
+    control,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      sampleCount: 1000,
+      xyPointLength: 1000,
+      chartHeight: 150,
+      showTypes: showTypes,
+      showControls: showControls,
+      showSummary: showSummary,
+      leftSizePercent: 50,
+      showSettingsPage: false,
+    },
+  });
+  const vars = useWatch({
+    control,
+  });
   let env: environment = {
-    sampleCount: sampleCount,
-    xyPointLength: outputXYPoints,
+    sampleCount: Number(vars.sampleCount),
+    xyPointLength: Number(vars.xyPointLength),
+  };
+  let getChangeJson = (r: string) => {
+    setImportString(r);
+    try {
+      setImports(JSON.parse(r));
+      setImportsAreValid(true);
+    } catch (e) {
+      setImportsAreValid(false);
+    }
   };
   return (
     <ShowBox height={height}>
-      <Row>
+      <input type="checkbox" {...register("showSettingsPage")} />
+      <Row leftPercentage={vars.leftSizePercent || 50}>
         <Col>
-          <CodeEditor
-            value={squiggleString}
-            onChange={setSquiggleString}
-            oneLine={false}
-            showGutter={true}
-            height={height - 3}
-          />
+          {vars.showSettingsPage ? (
+            <>
+              <InputItem label="Sample Count">
+                <input type="number" {...register("sampleCount")} />
+              </InputItem>
+              <InputItem label="XYPointLength Count">
+                <input type="number" {...register("xyPointLength")} />
+              </InputItem>
+              <InputItem label="Chart Height (in Pixels)">
+                <input type="number" {...register("chartHeight")} />
+              </InputItem>
+              <InputItem label="Show Types">
+                <input type="checkbox" {...register("showTypes")} />
+              </InputItem>
+              <InputItem label="Show Controls">
+                <input type="checkbox" {...register("showControls")} />
+              </InputItem>
+              <InputItem label="Show Summary Statistics">
+                <input type="checkbox" {...register("showSummary")} />
+              </InputItem>
+              <InputItem label="Editor Width">
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  className="slider"
+                  {...register("leftSizePercent")}
+                />
+              </InputItem>
+              <InputItem label="Json Editor for imports">
+                <>
+                  <JsonEditor
+                    value={importString}
+                    onChange={getChangeJson}
+                    oneLine={false}
+                    showGutter={true}
+                    height={100}
+                  />
+                  {importsAreValid ? "Valid" : "Invalid"}
+                </>
+              </InputItem>
+            </>
+          ) : (
+            <CodeEditor
+              value={squiggleString}
+              onChange={setSquiggleString}
+              oneLine={false}
+              showGutter={true}
+              height={height - 3}
+            />
+          )}
         </Col>
         <Col>
           <Display maxHeight={height - 3}>
@@ -128,12 +254,12 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
               squiggleString={squiggleString}
               environment={env}
               chartSettings={chartSettings}
-              height={150}
-              showTypes={showTypes}
-              showControls={showControls}
+              height={vars.chartHeight}
+              showTypes={vars.showTypes}
+              showControls={vars.showControls}
               bindings={defaultBindings}
-              jsImports={defaultImports}
-              showSummary={showSummary}
+              jsImports={imports}
+              showSummary={vars.showSummary}
             />
           </Display>
         </Col>
