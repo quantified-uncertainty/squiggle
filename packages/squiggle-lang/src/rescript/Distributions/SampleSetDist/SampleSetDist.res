@@ -22,10 +22,10 @@ module Error = {
   let fromOperationError = e => OperationError(e)
 
   let toString = (err: sampleSetError) => {
-    switch(err){
-      | TooFewSamples => "Too few samples when constructing sample set"
-      | NonNumericInput(err) => `Found a non-number in input: ${err}`
-      | OperationError(err) => Operation.Error.toString(err)
+    switch err {
+    | TooFewSamples => "Too few samples when constructing sample set"
+    | NonNumericInput(err) => `Found a non-number in input: ${err}`
+    | OperationError(err) => Operation.Error.toString(err)
     }
   }
 }
