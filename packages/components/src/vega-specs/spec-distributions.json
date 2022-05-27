@@ -82,6 +82,9 @@
           "y2": {
             "scale": "yscale",
             "value": 0
+          },
+          "fill": {
+            "value": "#2f65a7"
           }
         }
       }

@@ -196,7 +196,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
               <SquiggleItem
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
-                height={50}
+                height={height / 3}
                 showTypes={showTypes}
                 showSummary={showSummary}
                 showControls={showControls}
@@ -232,6 +232,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           <FunctionChart
             fn={expression.value}
             chartSettings={chartSettings}
+            height={height}
             environment={{
               sampleCount: environment.sampleCount / 10,
               xyPointLength: environment.xyPointLength / 10,
@@ -245,6 +246,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           <FunctionChart
             fn={expression.value.fn}
             chartSettings={getChartSettings(expression.value)}
+            height={height}
             environment={{
               sampleCount: environment.sampleCount / 10,
               xyPointLength: environment.xyPointLength / 10,
@@ -297,7 +299,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
   environment,
   onChange = () => {},
-  height = 60,
+  height = 200,
   bindings = defaultBindings,
   jsImports = defaultImports,
   showSummary = false,
