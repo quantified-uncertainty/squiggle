@@ -24,7 +24,8 @@ module Declaration = {
           Declaration.make(lambda, args),
         ))
       }
-    | _ => Error("Error")
+    | Error(r) => Error(r)
+    | Ok(_) => Error(FunctionRegistry_Helpers.impossibleError)
     }
   }
 }
