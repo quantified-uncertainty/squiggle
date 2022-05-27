@@ -33,6 +33,7 @@
       "from": {
         "data": "con"
       },
+      "interpolate": "linear",
       "encode": {
         "update": {
           "x": {
@@ -51,7 +52,7 @@
             "value": "#4C78A8"
           },
           "interpolate": {
-            "value": "monotone"
+            "value": "linear"
           },
           "fillOpacity": {
             "value": 1

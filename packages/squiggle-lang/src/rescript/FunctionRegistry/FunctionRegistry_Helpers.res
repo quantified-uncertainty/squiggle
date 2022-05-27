@@ -64,6 +64,22 @@ module Prepare = {
         values->ToValueArray.Record.twoArgs->E.R.bind(twoDistOrNumber)
     }
   }
+
+  module ToArrayRecordPairs = {
+    let twoArgs = (input: t): result<(array<ts>), err> => {
+      let array = input->ToValueArray.Array.openA
+      let pairs =
+        array->E.R.bind(pairs =>
+          pairs
+          ->E.A2.fmap(xyCoord =>
+            [xyCoord]
+            ->ToValueArray.Record.twoArgs
+          )
+          ->E.A.R.firstErrorOrOpen
+        )
+      pairs
+    }
+  }
 }
 
 module Process = {
