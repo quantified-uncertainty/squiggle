@@ -144,8 +144,14 @@ let dispatchMacroCall = (
     let rCondition = reduceExpression(blockCondition, bindings, environment)
     rCondition->Result.flatMap(conditionValue =>
       switch conditionValue {
-      | ExpressionValue.EvBool(false) => ExpressionWithContext.noContext(ifFalse)->Ok
-      | ExpressionValue.EvBool(true) => ExpressionWithContext.noContext(ifTrue)->Ok
+      | ExpressionValue.EvBool(false) => {
+          let ifFalseBlock = eBlock(list{ifFalse})
+          ExpressionWithContext.withContext(ifFalseBlock, bindings)->Ok
+        }
+      | ExpressionValue.EvBool(true) => {
+          let ifTrueBlock = eBlock(list{ifTrue})
+          ExpressionWithContext.withContext(ifTrueBlock, bindings)->Ok
+        }
       | _ => REExpectedType("Boolean")->Error
       }
     )

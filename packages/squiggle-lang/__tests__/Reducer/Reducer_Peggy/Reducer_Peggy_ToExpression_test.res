@@ -148,6 +148,29 @@ describe("Peggy to Expression", () => {
       ~v="0",
       (),
     ) // nested ternary
+    describe("ternary bindings", () => {
+      testToExpression(
+        // expression binding
+        "f(a) = a > 5 ? 1 : 0; f(6)",
+        "(:$$_block_$$ (:$_let_$ :f (:$$_lambda_$$ [a] (:$$_block_$$ (:$$_ternary_$$ (:larger :a 5) 1 0)))) (:f 6))",
+        ~v="1",
+        (),
+      )
+      testToExpression(
+        // when true binding
+        "f(a) = a > 5 ? a : 0; f(6)",
+        "(:$$_block_$$ (:$_let_$ :f (:$$_lambda_$$ [a] (:$$_block_$$ (:$$_ternary_$$ (:larger :a 5) :a 0)))) (:f 6))",
+        ~v="6",
+        (),
+      )
+      testToExpression(
+        // when false binding
+        "f(a) = a < 5 ? 1 : a; f(6)",
+        "(:$$_block_$$ (:$_let_$ :f (:$$_lambda_$$ [a] (:$$_block_$$ (:$$_ternary_$$ (:smaller :a 5) 1 :a)))) (:f 6))",
+        ~v="6",
+        (),
+      )
+    })
   })
 
   describe("if then else", () => {
