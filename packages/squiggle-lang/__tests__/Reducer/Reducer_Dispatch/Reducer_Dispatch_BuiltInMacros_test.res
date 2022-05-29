@@ -88,11 +88,7 @@ describe("block", () => {
   )
   testMacroEval([], eBlock(list{exampleStatementY, exampleStatementZ}), "Ok({y: 1,z: 1})")
   // Block inside a block
-  testMacro(
-    [],
-    eBlock(list{eBlock(list{exampleExpression})}),
-    "Ok((:$$_bindExpression_$$ {1}))",
-  )
+  testMacro([], eBlock(list{eBlock(list{exampleExpression})}), "Ok((:$$_bindExpression_$$ {1}))")
   testMacroEval([], eBlock(list{eBlock(list{exampleExpression})}), "Ok(1)")
   // Block assigned to a variable
   testMacro(

@@ -58,12 +58,7 @@ describe("Peggy to Expression", () => {
 
   describe("multi-line", () => {
     testToExpression("x=1; 2", "{(:$_let_$ :x {1}); 2}", ~v="2", ())
-    testToExpression(
-      "x=1; y=2",
-      "{(:$_let_$ :x {1}); (:$_let_$ :y {2})}",
-      ~v="{x: 1,y: 2}",
-      (),
-    )
+    testToExpression("x=1; y=2", "{(:$_let_$ :x {1}); (:$_let_$ :y {2})}", ~v="{x: 1,y: 2}", ())
   })
 
   describe("variables", () => {
@@ -97,12 +92,7 @@ describe("Peggy to Expression", () => {
       ~v="['hello','world']",
       (),
     )
-    testToExpression(
-      "([0,1,2])[1]",
-      "{(:$_atIndex_$ (:$_constructArray_$ (0 1 2)) 1)}",
-      ~v="1",
-      (),
-    )
+    testToExpression("([0,1,2])[1]", "{(:$_atIndex_$ (:$_constructArray_$ (0 1 2)) 1)}", ~v="1", ())
   })
 
   describe("records", () => {
@@ -174,16 +164,8 @@ describe("Peggy to Expression", () => {
   })
 
   describe("if then else", () => {
-    testToExpression(
-      "if true then 2 else 3",
-      "{(:$$_ternary_$$ true {2} {3})}",
-      (),
-    )
-    testToExpression(
-      "if true then {2} else {3}",
-      "{(:$$_ternary_$$ true {2} {3})}",
-      (),
-    )
+    testToExpression("if true then 2 else 3", "{(:$$_ternary_$$ true {2} {3})}", ())
+    testToExpression("if true then {2} else {3}", "{(:$$_ternary_$$ true {2} {3})}", ())
     testToExpression(
       "if false then {2} else if false then {4} else {5}",
       "{(:$$_ternary_$$ false {2} (:$$_ternary_$$ false {4} {5}))}",
@@ -215,12 +197,7 @@ describe("Peggy to Expression", () => {
   })
 
   describe("lambda", () => {
-    testToExpression(
-      "{|x| x}",
-      "{(:$$_lambda_$$ [x] {:x})}",
-      ~v="lambda(x=>internal code)",
-      (),
-    )
+    testToExpression("{|x| x}", "{(:$$_lambda_$$ [x] {:x})}", ~v="lambda(x=>internal code)", ())
     testToExpression(
       "f={|x| x}",
       "{(:$_let_$ :f {(:$$_lambda_$$ [x] {:x})})}",

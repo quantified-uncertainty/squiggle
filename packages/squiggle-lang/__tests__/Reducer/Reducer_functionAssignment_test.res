@@ -3,10 +3,7 @@ open Reducer_TestHelpers
 
 describe("Parse function assignment", () => {
   testParseToBe("f(x)=x", "Ok({(:$_let_$ :f (:$$_lambda_$$ [x] {:x}))})")
-  testParseToBe(
-    "f(x)=2*x",
-    "Ok({(:$_let_$ :f (:$$_lambda_$$ [x] {(:multiply 2 :x)}))})",
-  )
+  testParseToBe("f(x)=2*x", "Ok({(:$_let_$ :f (:$$_lambda_$$ [x] {(:multiply 2 :x)}))})")
   //MathJs does not allow blocks in function definitions
 })
 
