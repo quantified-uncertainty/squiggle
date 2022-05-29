@@ -11,7 +11,7 @@ module Internals = {
 
     type outputs = {
       continuousParseParams: option<samplingStats>,
-      pointSetDist: option<PointSetTypes.pointSetDist>,
+      pointSetDist: result<PointSetTypes.pointSetDist, string>,
     }
   }
 
@@ -32,8 +32,13 @@ module Internals = {
   }
 
   module KDE = {
-    let normalSampling = (samples, outputXYPoints, kernelWidth) =>
-      samples |> JS.samplesToContinuousPdf(_, outputXYPoints, kernelWidth) |> JS.jsToDist
+    let normalSampling = (samples, outputXYPoints, kernelWidth): result<
+      PointSetTypes.xyShape,
+      string,
+    > => {
+      let foo = samples |> JS.samplesToContinuousPdf(_, outputXYPoints, kernelWidth) |> JS.jsToDist
+      Ok(foo)
+    }
   }
 
   module T = {
@@ -52,8 +57,9 @@ module Internals = {
       xWidthToUnitWidth(samples, outputXYPoints, suggestedXWidth)
     }
 
-    let kde = (~samples, ~outputXYPoints, width) =>
+    let kde = (~samples, ~outputXYPoints, width) => {
       KDE.normalSampling(samples, outputXYPoints, width)
+    }
   }
 }
 
@@ -68,6 +74,7 @@ let toPointSetDist = (
     samples,
     ~minDiscreteWeight=minDiscreteToKeep,
   )
+  Js.log3("Split", continuousPart, discretePart)
   let length = samples |> E.A.length |> float_of_int
   let discrete: PointSetTypes.discreteShape =
     discretePart
@@ -99,34 +106,49 @@ let toPointSetDist = (
             bandwidthXImplemented: usedWidth,
             bandwidthUnitImplemented: usedUnitWidth,
           }
-          continuousPart
-          |> Internals.T.kde(
-            ~samples=_,
-            ~outputXYPoints=samplingInputs.outputXYPoints,
-            Internals.T.formatUnitWidth(usedUnitWidth),
-          )
-          |> Continuous.make
-          |> (r => Some((r, samplingStats)))
+          let foo =
+            continuousPart |> Internals.T.kde(
+              ~samples=_,
+              ~outputXYPoints=samplingInputs.outputXYPoints,
+              Internals.T.formatUnitWidth(usedUnitWidth),
+            )
+          foo->E.R2.fmap(r => (Continuous.make(r), samplingStats))
         }
-      : None
+      : Error("Bad Stuff")
 
-  let pointSetDist = MixedShapeBuilder.buildSimple(
-    ~continuous=pdf |> E.O.fmap(fst),
-    ~discrete=Some(discrete),
-  )
+  let pointSetDist =
+    pdf |> E.R2.bind(_pdf =>
+      MixedShapeBuilder.buildSimple(
+        ~continuous=Some(fst(_pdf)),
+        ~discrete=Some(discrete),
+      ) |> E.O.toResult("BadMan")
+    )
 
-  /*
-   I'm surprised that this doesn't come out normalized. My guess is that the KDE library
-  we're using is standardizing on something else. If we ever change that library, we should
-  check to see if we still need to do this.
- */
-
-  let normalizedPointSet = pointSetDist->E.O2.fmap(PointSetDist.T.normalize)
-
-  let samplesParse: Internals.Types.outputs = {
-    continuousParseParams: pdf |> E.O.fmap(snd),
-    pointSetDist: normalizedPointSet,
+  let foo = switch pdf {
+  | Ok(pdf) => {
+      let pointSetDist =
+        MixedShapeBuilder.buildSimple(
+          ~continuous=Some(fst(pdf)),
+          ~discrete=Some(discrete),
+        ) |> E.O.toResult("BadMan")
+      switch pointSetDist {
+      | Ok(pointSetDist) => {
+          /*
+            I'm surprised that this doesn't come out normalized. My guess is that the KDE library
+            we're using is standardizing on something else. If we ever change that library, we should
+            check to see if we still need to do this.
+          */
+          let normalized = PointSetDist.T.normalize(pointSetDist)
+          let samplesParse: Internals.Types.outputs = {
+            continuousParseParams: snd(pdf)->Some,
+            pointSetDist: Ok(PointSetDist.T.normalize(pointSetDist)),
+          }
+          Ok(samplesParse)
+        }
+      | Error(r) => Error(r)
+      }
+    }
+  | Error(r) => Error(r)
   }
-
-  samplesParse
+  foo
 }

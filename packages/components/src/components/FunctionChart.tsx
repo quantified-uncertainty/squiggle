@@ -1,5 +1,5 @@
 import * as React from "react";
-import { lambdaValue, environment, runForeign } from "@quri/squiggle-lang";
+import { lambdaValue, environment, runForeign, errorValueToString } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
 import { ErrorBox } from "./ErrorBox";
@@ -35,38 +35,42 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
     }
   };
   let validResult = getValidResult();
-  let resultType = validResult.tag === "Ok" ? validResult.value.tag : "Error";
 
   let component = () => {
-    switch (resultType) {
-      case "distribution":
+    switch (validResult.tag) {
+      case "Ok": {
+        switch (validResult.value.tag) {
+          case "distribution":
+            return (
+              <FunctionChart1Dist
+                fn={fn}
+                chartSettings={chartSettings}
+                environment={environment}
+                height={height}
+              />
+            );
+          case "number":
+            return (
+              <FunctionChart1Number
+                fn={fn}
+                chartSettings={chartSettings}
+                environment={environment}
+                height={height}
+              />
+            );
+          default:
+            return (
+              <ErrorBox heading="No Viewer">
+                There is no function visualization for this type of function
+              </ErrorBox>
+            );
+        }
+      }
+      case "Error": {
         return (
-          <FunctionChart1Dist
-            fn={fn}
-            chartSettings={chartSettings}
-            environment={environment}
-            height={height}
-          />
+          <ErrorBox heading="Error">The function failed to be run {errorValueToString(validResult.value)}</ErrorBox>
         );
-      case "number":
-        return (
-          <FunctionChart1Number
-            fn={fn}
-            chartSettings={chartSettings}
-            environment={environment}
-            height={height}
-          />
-        );
-      case "Error":
-        return (
-          <ErrorBox heading="Error">The function failed to be run</ErrorBox>
-        );
-      default:
-        return (
-          <ErrorBox heading="No Viewer">
-            There is no function visualization for this type of function
-          </ErrorBox>
-        );
+      }
     }
   };
 
