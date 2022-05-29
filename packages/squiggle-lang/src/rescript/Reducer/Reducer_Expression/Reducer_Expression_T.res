@@ -28,6 +28,11 @@ type reducerFn = (
 */
 let rec toString = expression =>
   switch expression {
+  | EList(list{EValue(EvCall("$$_block_$$")), ...statements}) =>
+    `{${Belt.List.map(statements, aValue => toString(aValue))
+      ->Extra.List.interperse("; ")
+      ->Belt.List.toArray
+      ->Js.String.concatMany("")}}`
   | EList(aList) =>
     `(${Belt.List.map(aList, aValue => toString(aValue))
       ->Extra.List.interperse(" ")

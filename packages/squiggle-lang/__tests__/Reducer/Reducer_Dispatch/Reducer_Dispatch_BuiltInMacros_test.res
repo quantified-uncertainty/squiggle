@@ -91,14 +91,14 @@ describe("block", () => {
   testMacro(
     [],
     eBlock(list{eBlock(list{exampleExpression})}),
-    "Ok((:$$_bindExpression_$$ (:$$_block_$$ 1)))",
+    "Ok((:$$_bindExpression_$$ {1}))",
   )
   testMacroEval([], eBlock(list{eBlock(list{exampleExpression})}), "Ok(1)")
   // Block assigned to a variable
   testMacro(
     [],
     eBlock(list{eLetStatement("z", eBlock(list{eBlock(list{exampleExpressionY})}))}),
-    "Ok((:$$_bindExpression_$$ (:$_let_$ :z (:$$_block_$$ (:$$_block_$$ :y)))))",
+    "Ok((:$$_bindExpression_$$ (:$_let_$ :z {{:y}})))",
   )
   testMacroEval(
     [],
@@ -116,7 +116,7 @@ describe("block", () => {
         eSymbol("y"),
       }),
     }),
-    "Ok((:$$_bindExpression_$$ (:$$_block_$$ (:$_let_$ :y (:add :x 1)) :y)))",
+    "Ok((:$$_bindExpression_$$ {(:$_let_$ :y (:add :x 1)); :y}))",
   )
   testMacroEval(
     [("x", EvNumber(1.))],
