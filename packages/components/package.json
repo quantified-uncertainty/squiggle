@@ -10,7 +10,7 @@
     "react": "^18.1.0",
     "react-ace": "^10.1.0",
     "react-dom": "^18.1.0",
-    "react-hook-form": "^7.31.2",
+    "react-hook-form": "^7.31.3",
     "react-use": "^17.4.0",
     "react-vega": "^7.5.1",
     "vega": "^5.22.1",
