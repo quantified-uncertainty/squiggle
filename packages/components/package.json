@@ -3,6 +3,8 @@
   "version": "0.2.20",
   "license": "MIT",
   "dependencies": {
+    "@headlessui/react": "^1.6.4",
+    "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^2.8.10",
     "@quri/squiggle-lang": "^0.2.8",
     "@react-hook/size": "^2.1.2",

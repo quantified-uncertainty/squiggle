@@ -54,7 +54,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
     return (
       <div className="bg-white border border-grey-200 m-2">
         <div className="border-b border-grey-200 p-3">
-          <h3>{heading}</h3>
+          <h3 className="font-mono">{heading}</h3>
         </div>
         <div className="p-3">{children}</div>
       </div>
