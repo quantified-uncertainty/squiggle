@@ -11,6 +11,7 @@ import { defaultBindings, environment } from "@quri/squiggle-lang";
 import { Tab } from "@headlessui/react";
 import { CodeIcon } from "@heroicons/react/solid";
 import { CogIcon } from "@heroicons/react/solid";
+import { Fragment } from "react";
 
 interface ShowBoxProps {
   height: number;
@@ -104,50 +105,6 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function Example() {
-  return (
-    <div>
-      <div className="sm:hidden">
-        <label htmlFor="tabs" className="sr-only">
-          Select a tab
-        </label>
-        {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-        <select
-          id="tabs"
-          name="tabs"
-          className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          defaultValue={"Editor"}
-        >
-          {tabs.map((tab) => (
-            <option key={tab.name}>{tab.name}</option>
-          ))}
-        </select>
-      </div>
-      <div className="hidden sm:block">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-            {tabs.map((tab) => (
-              <a
-                key={tab.name}
-                href={tab.href}
-                className={classNames(
-                  tab.current
-                    ? "border-indigo-500 text-indigo-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
-                  "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                )}
-                aria-current={tab.current ? "page" : undefined}
-              >
-                {tab.name}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 let SquigglePlayground: FC<PlaygroundProps> = ({
   initialSquiggleString = "",
   height = 500,
@@ -197,47 +154,60 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     }
   };
 
-  let tab = (key, icon) => (
-    <Tab
-      key={key}
-      className={({ selected }) =>
-        classNames(
-          "whitespace-nowrap pb-1 pt-2 px-1 border-b-2 font-medium text-sm focus-within:outline-none group inline-flex items-center",
-          selected
-            ? "border-slate-400 text-gray-500"
-            : "border-transparent text-gray-400 hover:text-gray-600 hover:border-slate-300"
-        )
-      }
-    >
-      {icon}
-      <span>{key}</span>
-    </Tab>
-  );
+  // className="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-4 w-4"
+  let tab = (key) => {
+    let iconStyle = (isSelected) =>
+      classNames(
+        "-ml-0.5 mr-2 h-4 w-4 ",
+        isSelected ? "text-teal-500" : "text-gray-500 group-hover:text-gray-900"
+      );
+    return (
+      <Tab key={key} as={Fragment}>
+        {({ selected }) => (
+          <button
+            className={classNames(
+              "flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100 ",
+              selected ? "" : ""
+            )}
+          >
+            <span
+              className={classNames(
+                "p-1 pl-2.5 pr-3.5 rounded-md flex items-center text-sm font-medium",
+                selected
+                  ? "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
+                  : ""
+              )}
+            >
+              {key === "Code" ? (
+                <CodeIcon className={iconStyle(selected)} />
+              ) : (
+                <CogIcon className={iconStyle(selected)} />
+              )}
+              <span
+                className={classNames(
+                  "",
+                  selected
+                    ? "text-gray-900"
+                    : "text-gray-600 group-hover:text-gray-900"
+                )}
+              >
+                {key}
+              </span>
+            </span>
+          </button>
+        )}
+      </Tab>
+    );
+  };
 
   return (
-    <div className="border border-slate-300 rounded-sm">
-      <Tab.Group>
-        <div className="bg-slate-200 rounded-tl-sm rounded-tr-sm">
-          <div className="pb-3 pl-3">
-            <div className="border-b border-gray-200">
-              <Tab.List className="-mb-px flex space-x-4">
-                {tab(
-                  "Code",
-                  <CodeIcon
-                    className="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-4 w-4"
-                    aria-hidden="true"
-                  />
-                )}
-                {tab(
-                  "Settings",
-                  <CogIcon
-                    className="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-4 w-4"
-                    aria-hidden="true"
-                  />
-                )}
-              </Tab.List>
-            </div>
-          </div>
+    <Tab.Group>
+      <div className="border border-slate-300 rounded-sm flex-col flex">
+        <div className="border-b border-slate-300 rounded-tl-sm rounded-tr-sm p-2">
+            <Tab.List className="p-0.5 rounded-lg bg-slate-200 hover:bg-slate-300 inline-flex">
+              {tab("Code")}
+              {tab("Settings")}
+            </Tab.List>
         </div>
         <div className="flex" style={{ height: height + "px" }}>
           <div className="w-1/2">
@@ -374,8 +344,8 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
             </div>
           </div>
         </div>
-      </Tab.Group>
-    </div>
+      </div>
+    </Tab.Group>
   );
 };
 export default SquigglePlayground;
