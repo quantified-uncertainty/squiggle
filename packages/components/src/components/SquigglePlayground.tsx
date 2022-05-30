@@ -162,7 +162,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     let iconStyle = (isSelected) =>
       classNames(
         "-ml-0.5 mr-2 h-4 w-4 ",
-        isSelected ? "text-teal-500" : "text-gray-500 group-hover:text-gray-900"
+        isSelected ? "text-slate-500" : "text-gray-400 group-hover:text-gray-900"
       );
 
     let icon = (selected) =>
@@ -177,10 +177,8 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
       <Tab key={key} as={Fragment}>
         {({ selected }) => (
           <button
-            className={classNames(
-              "flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100 ",
-              selected ? "" : ""
-            )}
+            className=
+              "flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100 "
           >
             <span
               className={classNames(
@@ -212,7 +210,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     <Tab.Group>
       <div className=" flex-col flex">
         <div className="pb-4">
-          <Tab.List className="p-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 inline-flex">
+          <Tab.List className="p-0.5 rounded-md bg-slate-100 hover:bg-slate-200 inline-flex">
             {tab("Code", "code")}
             {tab("Sampling Settings", "cog")}
             {tab("View Settings", "squareBar")}
@@ -355,7 +353,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
             </Tab.Panels>
           </div>
 
-          <div className="w-1/2 border-l border-gray-300 p-2">
+          <div className="w-1/2 p-2 pl-4">
             <div style={{ maxHeight: height + "px" }}>
               <SquiggleChart
                 squiggleString={squiggleString}
