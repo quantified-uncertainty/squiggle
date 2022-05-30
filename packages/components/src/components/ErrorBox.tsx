@@ -6,7 +6,7 @@ export const ErrorBox: React.FC<{
   children: React.ReactNode;
 }> = ({ heading = "Error", children }) => {
   return (
-    <div className="rounded-md bg-red-100 p-4 m-4">
+    <div className="rounded-md bg-red-100 p-4">
       <div className="flex">
         <div className="flex-shrink-0">
           <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />

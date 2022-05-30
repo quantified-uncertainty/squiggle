@@ -11,7 +11,10 @@ import { defaultBindings, environment } from "@quri/squiggle-lang";
 import { Tab } from "@headlessui/react";
 import { CodeIcon } from "@heroicons/react/solid";
 import { CogIcon } from "@heroicons/react/solid";
+import { ChartSquareBarIcon } from "@heroicons/react/solid";
+import { CurrencyDollarIcon } from "@heroicons/react/solid";
 import { Fragment } from "react";
+import { ErrorBox } from "./ErrorBox";
 
 interface ShowBoxProps {
   height: number;
@@ -155,12 +158,21 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   };
 
   // className="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-4 w-4"
-  let tab = (key) => {
+  let tab = (key, iconName) => {
     let iconStyle = (isSelected) =>
       classNames(
         "-ml-0.5 mr-2 h-4 w-4 ",
         isSelected ? "text-teal-500" : "text-gray-500 group-hover:text-gray-900"
       );
+
+    let icon = (selected) =>
+      ({
+        code: <CodeIcon className={iconStyle(selected)} />,
+        cog: <CogIcon className={iconStyle(selected)} />,
+        squareBar: <ChartSquareBarIcon className={iconStyle(selected)} />,
+        dollar: <CurrencyDollarIcon className={iconStyle(selected)} />,
+      }[iconName]);
+
     return (
       <Tab key={key} as={Fragment}>
         {({ selected }) => (
@@ -178,11 +190,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
                   : ""
               )}
             >
-              {key === "Code" ? (
-                <CodeIcon className={iconStyle(selected)} />
-              ) : (
-                <CogIcon className={iconStyle(selected)} />
-              )}
+              {icon(selected)}
               <span
                 className={classNames(
                   "",
@@ -202,128 +210,147 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
 
   return (
     <Tab.Group>
-      <div className="border border-slate-300 rounded-sm flex-col flex">
-        <div className="border-b border-slate-300 rounded-tl-sm rounded-tr-sm p-2">
-            <Tab.List className="p-0.5 rounded-lg bg-slate-200 hover:bg-slate-300 inline-flex">
-              {tab("Code")}
-              {tab("Settings")}
-            </Tab.List>
+      <div className=" flex-col flex">
+        <div className="pb-4">
+          <Tab.List className="p-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 inline-flex">
+            {tab("Code", "code")}
+            {tab("Sampling Settings", "cog")}
+            {tab("View Settings", "squareBar")}
+            {tab("Input Variables", "dollar")}
+          </Tab.List>
         </div>
         <div className="flex" style={{ height: height + "px" }}>
           <div className="w-1/2">
             <Tab.Panels>
               <Tab.Panel>
-                <CodeEditor
-                  value={squiggleString}
-                  onChange={setSquiggleString}
-                  oneLine={false}
-                  showGutter={true}
-                  height={height - 1}
-                />
+                <div className="border border-slate-200">
+                  <CodeEditor
+                    value={squiggleString}
+                    onChange={setSquiggleString}
+                    oneLine={false}
+                    showGutter={true}
+                    height={height - 1}
+                  />
+                </div>
               </Tab.Panel>
+
               <Tab.Panel>
-                <>
-                  <form className="space-y-6 p-3">
-                    <InputItem label="Sample Count">
-                      <>
-                        <input
-                          type="number"
-                          {...register("sampleCount")}
-                          className={numberStyle}
-                        />
-                        <p className="mt-2 text-sm text-gray-500">
-                          How many samples to use for Monte Carlo simulations.
-                          This can be overridden by specific programs.
-                        </p>
-                      </>
-                    </InputItem>
-                    <InputItem label="Coordinate Count (For PointSet Shapes)">
-                      <>
-                        <input
-                          type="number"
-                          {...register("xyPointLength")}
-                          className={numberStyle}
-                        />
-                        <p className="mt-2 text-sm text-gray-500">
-                          When distributions are converted into PointSet shapes,
-                          we need to know how many coordinates to use.
-                        </p>
-                      </>
-                    </InputItem>
-                    <InputItem label="Chart Height (in Pixels)">
+                <form className="space-y-6 p-3">
+                  <InputItem label="Sample Count">
+                    <>
                       <input
                         type="number"
-                        {...register("chartHeight")}
+                        {...register("sampleCount")}
                         className={numberStyle}
                       />
-                    </InputItem>
-                    <InputItem label="Editor Width">
+                      <p className="mt-2 text-sm text-gray-500">
+                        How many samples to use for Monte Carlo simulations.
+                        This can be overridden by specific programs.
+                      </p>
+                    </>
+                  </InputItem>
+                  <InputItem label="Coordinate Count (For PointSet Shapes)">
+                    <>
                       <input
-                        type="range"
-                        min="1"
-                        max="100"
-                        className="slider"
-                        {...register("leftSizePercent")}
+                        type="number"
+                        {...register("xyPointLength")}
+                        className={numberStyle}
                       />
-                    </InputItem>
-                    <fieldset className="space-y-2">
-                      <div className="relative flex items-start">
-                        <div className="flex items-center h-5">
-                          <input
-                            type="checkbox"
-                            {...register("showTypes")}
-                            className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                          />
-                        </div>
-                        <div className="ml-3 text-sm">
-                          <label className="font-medium text-gray-700">
-                            Type Names
-                          </label>
-                        </div>
-                      </div>
-                      <div className="relative flex items-start">
-                        <div className="flex items-center h-5">
-                          <input
-                            type="checkbox"
-                            {...register("showControls")}
-                            className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                          />
-                        </div>
-                        <div className="ml-3 text-sm">
-                          <label className="font-medium text-gray-700">
-                            X-Y Coordinate Scales
-                          </label>
-                        </div>
-                      </div>
-                      <div className="relative flex items-start">
-                        <div className="flex items-center h-5">
-                          <input
-                            type="checkbox"
-                            {...register("showSummary")}
-                            className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                          />
-                        </div>
-                        <div className="ml-3 text-sm">
-                          <label className="font-medium text-gray-700">
-                            Summary Statistics
-                          </label>
-                        </div>
-                      </div>
-                    </fieldset>
-                    <InputItem label="Json Editor for imports">
-                      <>
-                        <JsonEditor
-                          value={importString}
-                          onChange={getChangeJson}
-                          oneLine={false}
-                          showGutter={true}
-                          height={100}
+                      <p className="mt-2 text-sm text-gray-500">
+                        When distributions are converted into PointSet shapes,
+                        we need to know how many coordinates to use.
+                      </p>
+                    </>
+                  </InputItem>
+                </form>
+              </Tab.Panel>
+
+              <Tab.Panel>
+                <form className="space-y-6 p-3">
+                  <InputItem label="Chart Height (in Pixels)">
+                    <input
+                      type="number"
+                      {...register("chartHeight")}
+                      className={numberStyle}
+                    />
+                  </InputItem>
+                  <InputItem label="Editor Width">
+                    <input
+                      type="range"
+                      min="1"
+                      max="100"
+                      className="slider"
+                      {...register("leftSizePercent")}
+                    />
+                  </InputItem>
+                  <fieldset className="space-y-2">
+                    <div className="relative flex items-start">
+                      <div className="flex items-center h-5">
+                        <input
+                          type="checkbox"
+                          {...register("showTypes")}
+                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
                         />
-                        {importsAreValid ? "Valid" : "Invalid"}
-                      </>
-                    </InputItem>
-                  </form>
-                </>
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">
+                          Type Names
+                        </label>
+                      </div>
+                    </div>
+                    <div className="relative flex items-start">
+                      <div className="flex items-center h-5">
+                        <input
+                          type="checkbox"
+                          {...register("showControls")}
+                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">
+                          X-Y Coordinate Scales
+                        </label>
+                      </div>
+                    </div>
+                    <div className="relative flex items-start">
+                      <div className="flex items-center h-5">
+                        <input
+                          type="checkbox"
+                          {...register("showSummary")}
+                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">
+                          Summary Statistics
+                        </label>
+                      </div>
+                    </div>
+                  </fieldset>
+                </form>
+              </Tab.Panel>
+
+              <Tab.Panel>
+                <InputItem label="Json Editor for imports">
+                  <>
+                    <JsonEditor
+                      value={importString}
+                      onChange={getChangeJson}
+                      oneLine={false}
+                      showGutter={true}
+                      height={100}
+                    />
+                    {importsAreValid ? (
+                      "Valid"
+                    ) : (
+                      <div className="p-2">
+                        <ErrorBox heading="Invalid JSON">
+                          You must use valid json in this editor.
+                        </ErrorBox>
+                      </div>
+                    )}
+                  </>
+                </InputItem>
               </Tab.Panel>
             </Tab.Panels>
           </div>
