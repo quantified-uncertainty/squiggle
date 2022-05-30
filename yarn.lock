@@ -2828,16 +2828,16 @@
     regenerator-runtime "^0.13.7"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-links@^6.5.4":
-  version "6.5.4"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-links/-/addon-links-6.5.4.tgz#51e2944ba2ba45d70b6debacbc0f5d8ad664f62b"
-  integrity sha512-mJcg4Gpo7P6TFdyWpE2DQcMwSjfotPST3y713Ircgc+sYOouIPRdrxGpdvhLWWncsC5wK/z2xZyYtBWPNiKN/g==
+"@storybook/addon-links@^6.5.6":
+  version "6.5.6"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-links/-/addon-links-6.5.6.tgz#1074d239c3c9c8b7168d20c9cc20b8918e4993a6"
+  integrity sha512-a4+9HLc6+M9qv5Fvezoc8AJYze8HDfHlsEFvCY1AtQiyVEmxFRNBdAp6w+/teNzihXWY78EKRcGM0jjyt+9mWg==
   dependencies:
-    "@storybook/addons" "6.5.4"
-    "@storybook/client-logger" "6.5.4"
-    "@storybook/core-events" "6.5.4"
+    "@storybook/addons" "6.5.6"
+    "@storybook/client-logger" "6.5.6"
+    "@storybook/core-events" "6.5.6"
     "@storybook/csf" "0.0.2--canary.4566f4d.1"
-    "@storybook/router" "6.5.4"
+    "@storybook/router" "6.5.6"
     "@types/qs" "^6.9.5"
     core-js "^3.8.2"
     global "^4.4.0"
@@ -12042,10 +12042,10 @@ markdown-escapes@^1.0.0:
   resolved "https://registry.yarnpkg.com/markdown-escapes/-/markdown-escapes-1.0.4.tgz#c95415ef451499d7602b91095f3c8e8975f78535"
   integrity sha512-8z4efJYk43E0upd0NbVXwgSTQs6cT3T06etieCMEg7dRbzCbxUCK/GHlX8mhHRDcp+OLlHkPKsvqQTCvsRl2cg==
 
-mathjs@^10.5.2:
-  version "10.5.2"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-10.5.2.tgz#bf0618b99b662a3af8a2613b6489ec0422314b08"
-  integrity sha512-yLl2yA597A+07+xsOgy1+pq/m4ZokQceWQbB9OsIkK2guCpA2Px9k11zul93eJAA0WUFZiMK6VcruY9ZBbSKjA==
+mathjs@^10.6.0:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-10.6.0.tgz#7d9a36fa98c727d05fadadf1f4dba99fff071ab9"
+  integrity sha512-4oI0CSX7LtcyexTSLV8uo+llj8hB5LvVE9ApjN6rBjBplQaZ4/Gr3jh0zEla9+KaCig5wonZ9oFKD+GKXFL8hg==
   dependencies:
     "@babel/runtime" "^7.17.9"
     complex.js "^2.1.1"
@@ -14833,10 +14833,10 @@ reading-time@^1.5.0:
   resolved "https://registry.yarnpkg.com/reading-time/-/reading-time-1.5.0.tgz#d2a7f1b6057cb2e169beaf87113cc3411b5bc5bb"
   integrity sha512-onYyVhBNr4CmAxFsKS7bz+uTLRakypIe4R+5A824vBSkQy/hB3fZepoVEf8OVAxzLvK+H/jm9TzpI3ETSm64Kg==
 
-reanalyze@^2.19.0:
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/reanalyze/-/reanalyze-2.19.0.tgz#b34b16bd7249a07dc931bb3cc58410247bb36a03"
-  integrity sha512-ycVr19BH6b2J70BmG6nUIzrFWiBNLUCmip6D2NEPLpnJimF6wagE+BIksI6vcTCovqWjgNMKhFCbZKwm+5/8VQ==
+reanalyze@^2.22.0:
+  version "2.22.0"
+  resolved "https://registry.yarnpkg.com/reanalyze/-/reanalyze-2.22.0.tgz#068cfb354b6e9aa95ceb8dbb04329a67b4a90494"
+  integrity sha512-VNwTXBsyuUbCkmcb2GkYYjQxv3NQW4CombkNd+n5E+YWNqF5LLFi1N5bETR09C2hbuOE1fM6RTJKgbijZX7jyA==
 
 rechoir@^0.6.2:
   version "0.6.2"
