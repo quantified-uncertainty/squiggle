@@ -57,7 +57,7 @@
     "moduleserve": "^0.9.1",
     "nyc": "^15.1.0",
     "peggy": "^2.0.0",
-    "reanalyze": "^2.19.0",
+    "reanalyze": "^2.22.0",
     "rescript-fast-check": "^1.1.1",
     "ts-jest": "^27.1.4",
     "ts-loader": "^9.3.0",
