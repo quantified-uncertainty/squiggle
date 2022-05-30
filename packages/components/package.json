@@ -21,7 +21,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.17.12",
     "@storybook/addon-actions": "^6.5.6",
-    "@storybook/addon-essentials": "^6.5.4",
+    "@storybook/addon-essentials": "^6.5.6",
     "@storybook/addon-links": "^6.5.4",
     "@storybook/builder-webpack5": "^6.5.4",
     "@storybook/manager-webpack5": "^6.5.6",
