@@ -51,7 +51,7 @@
     "chalk": "^5.0.1",
     "codecov": "^3.8.3",
     "fast-check": "^2.25.0",
-    "gentype": "^4.3.0",
+    "gentype": "^4.4.0",
     "jest": "^27.5.1",
     "lodash": "^4.17.21",
     "moduleserve": "^0.9.1",
