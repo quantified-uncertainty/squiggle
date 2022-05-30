@@ -12821,10 +12821,10 @@ markdown-escapes@^1.0.0:
   resolved "https://registry.yarnpkg.com/markdown-escapes/-/markdown-escapes-1.0.4.tgz#c95415ef451499d7602b91095f3c8e8975f78535"
   integrity sha512-8z4efJYk43E0upd0NbVXwgSTQs6cT3T06etieCMEg7dRbzCbxUCK/GHlX8mhHRDcp+OLlHkPKsvqQTCvsRl2cg==
 
-mathjs@^10.5.2:
-  version "10.5.2"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-10.5.2.tgz#bf0618b99b662a3af8a2613b6489ec0422314b08"
-  integrity sha512-yLl2yA597A+07+xsOgy1+pq/m4ZokQceWQbB9OsIkK2guCpA2Px9k11zul93eJAA0WUFZiMK6VcruY9ZBbSKjA==
+mathjs@^10.6.0:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-10.6.0.tgz#7d9a36fa98c727d05fadadf1f4dba99fff071ab9"
+  integrity sha512-4oI0CSX7LtcyexTSLV8uo+llj8hB5LvVE9ApjN6rBjBplQaZ4/Gr3jh0zEla9+KaCig5wonZ9oFKD+GKXFL8hg==
   dependencies:
     "@babel/runtime" "^7.17.9"
     complex.js "^2.1.1"
