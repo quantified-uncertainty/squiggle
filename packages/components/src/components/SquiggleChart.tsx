@@ -1,6 +1,5 @@
 import * as React from "react";
 import _ from "lodash";
-import styled from "styled-components";
 import {
   run,
   errorValueToString,
@@ -11,7 +10,6 @@ import {
   defaultImports,
   defaultBindings,
   defaultEnvironment,
-  declarationArg,
   declaration,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
@@ -41,24 +39,6 @@ function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
   };
 }
 
-const variableBox = {
-  Component: styled.div`
-    background: white;
-    border: 1px solid #eee;
-    border-radius: 2px;
-    margin-bottom: 0.4em;
-  `,
-  Heading: styled.div`
-    border-bottom: 1px solid #eee;
-    padding-left: 0.8em;
-    padding-right: 0.8em;
-    padding-top: 0.1em;
-  `,
-  Body: styled.div`
-    padding: 0.4em 0.8em;
-  `,
-};
-
 interface VariableBoxProps {
   heading: string;
   children: React.ReactNode;
@@ -72,19 +52,17 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 }: VariableBoxProps) => {
   if (showTypes) {
     return (
-      <variableBox.Component>
-        <variableBox.Heading>
+      <div className="bg-white border border-grey-200 m-2">
+        <div className="border-b border-grey-200 p-3">
           <h3>{heading}</h3>
-        </variableBox.Heading>
-        <variableBox.Body>{children}</variableBox.Body>
-      </variableBox.Component>
+        </div>
+        <div className="p-3">{children}</div>
+      </div>
     );
   } else {
     return <div>{children}</div>;
   }
 };
-
-let RecordKeyHeader = styled.h3``;
 
 export interface SquiggleItemProps {
   /** The input string for squiggle */
@@ -192,7 +170,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         <VariableBox heading="Record" showTypes={showTypes}>
           {Object.entries(expression.value).map(([key, r]) => (
             <div key={key}>
-              <RecordKeyHeader>{key}</RecordKeyHeader>
+              <h3>{key}</h3>
               <SquiggleItem
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
@@ -287,12 +265,6 @@ export interface SquiggleChartProps {
   showControls?: boolean;
 }
 
-const ChartWrapper = styled.div`
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-`;
-
 let defaultChartSettings = { start: 0, stop: 10, count: 20 };
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
@@ -333,5 +305,5 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
       </ErrorBox>
     );
   }
-  return <ChartWrapper>{internal}</ChartWrapper>;
+  return internal;
 };

@@ -4,80 +4,35 @@ import ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import CodeEditor from "./CodeEditor";
 import JsonEditor from "./JsonEditor";
-import styled from "styled-components";
 import { useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { defaultBindings, environment } from "@quri/squiggle-lang";
 
-interface FieldFloatProps {
-  label: string;
-  className?: string;
-  value: number;
-  onChange: (value: number) => void;
+interface ShowBoxProps {
+  height: number;
+  children: React.ReactNode;
 }
 
-const Input = styled.input``;
-
-const FormItem = (props: { label: string; children: ReactElement }) => (
-  <div>
-    <label>{props.label}</label>
-    {props.children}
+const ShowBox: React.FC<ShowBoxProps> = ({ height, children }) => (
+  <div className="border border-grey-100" style={{ height: height + "px" }}>
+    {children}
   </div>
 );
 
-function FieldFloat(Props: FieldFloatProps) {
-  let [contents, setContents] = useState(Props.value + "");
-  return (
-    <FormItem label={Props.label}>
-      <Input
-        value={contents}
-        className={Props.className ? Props.className : ""}
-        onChange={(e) => {
-          setContents(e.target.value);
-          let result = parseFloat(contents);
-          if (_.isFinite(result)) {
-            Props.onChange(result);
-          }
-        }}
-      />
-    </FormItem>
-  );
-}
-
-interface ShowBoxProps {
-  height: number;
-}
-
-const ShowBox = styled.div<ShowBoxProps>`
-  border: 1px solid #eee;
-  border-radius: 2px;
-  height: ${(props) => props.height};
-`;
-
 interface TitleProps {
   readonly maxHeight: number;
+  children: React.ReactNode;
 }
 
-const Display = styled.div<TitleProps>`
-  background: #f6f6f6;
-  border-left: 1px solid #eee;
-  height: 100vh;
-  padding: 3px;
-  overflow-y: auto;
-  max-height: ${(props) => props.maxHeight}px;
-`;
-
-interface RowProps {
-  readonly leftPercentage: number;
-}
-
-const Row = styled.div<RowProps>`
-  display: grid;
-  grid-template-columns: ${(p) => p.leftPercentage}% ${(p) =>
-      100 - p.leftPercentage}%;
-`;
-const Col = styled.div``;
+const Display: React.FC<TitleProps> = ({ maxHeight, children }) => (
+  <div
+    className="bg-gray-50 border-l border-grey-100 p-2"
+    style={{ maxHeight: maxHeight + "px" }}
+  >
+    {children}
+  </div>
+);
 
 interface PlaygroundProps {
   /** The initial squiggle string to put in the playground */
@@ -158,11 +113,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     stop: diagramStop,
     count: diagramCount,
   };
-  const {
-    register,
-    formState: { errors },
-    control,
-  } = useForm({
+  const { register, control } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       sampleCount: 1000,
@@ -194,8 +145,8 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   return (
     <ShowBox height={height}>
       <input type="checkbox" {...register("showSettingsPage")} />
-      <Row leftPercentage={vars.leftSizePercent || 50}>
-        <Col>
+      <div className="columns-2">
+        <div className="break-inside-avoid">
           {vars.showSettingsPage ? (
             <>
               <InputItem label="Sample Count">
@@ -247,8 +198,8 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
               height={height - 3}
             />
           )}
-        </Col>
-        <Col>
+        </div>
+        <div>
           <Display maxHeight={height - 3}>
             <SquiggleChart
               squiggleString={squiggleString}
@@ -262,8 +213,8 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
               showSummary={vars.showSummary}
             />
           </Display>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </ShowBox>
   );
 };
