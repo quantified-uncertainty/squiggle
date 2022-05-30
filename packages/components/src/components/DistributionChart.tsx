@@ -164,10 +164,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
     }
   };
 
-  let TableHeadCell: React.FC<{}> = ({ children }) => (
-    <th className="border border-slate-400 bg-slate-50 p-4">{children}</th>
-  );
-  let Cell: React.FC<{}> = ({ children }) => (
+  let TableHeadCell: React.FC<{ children: React.ReactNode }> = ({
+    children,
+  }) => <th className="border border-slate-400 bg-slate-50 p-4">{children}</th>;
+  let Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <td className="border border-slate-400 p-4">{children}</td>
   );
 
