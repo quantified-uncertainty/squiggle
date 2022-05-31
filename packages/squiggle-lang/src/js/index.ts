@@ -1,18 +1,22 @@
 import * as _ from "lodash";
-import {
+import type {
   environment,
+  expressionValue,
+  externalBindings,
+  errorValue,
+} from "../rescript/TypescriptInterface.gen";
+import {
   defaultEnvironment,
   evaluatePartialUsingExternalBindings,
   evaluateUsingOptions,
-  externalBindings,
-  expressionValue,
-  errorValue,
   foreignFunctionInterface,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
   errorValueToString,
   distributionErrorToString,
+} from "../rescript/TypescriptInterface.gen";
+export type {
   distributionError,
   declarationArg,
   declaration,
@@ -30,16 +34,8 @@ import {
 import { result, resultMap, tag, tagged } from "./types";
 import { Distribution, shape } from "./distribution";
 
-export {
-  Distribution,
-  squiggleExpression,
-  result,
-  resultMap,
-  shape,
-  lambdaValue,
-  environment,
-  defaultEnvironment,
-};
+export { Distribution, resultMap, defaultEnvironment };
+export type { result, shape, environment, lambdaValue, squiggleExpression };
 
 export let defaultSamplingInputs: environment = {
   sampleCount: 10000,
