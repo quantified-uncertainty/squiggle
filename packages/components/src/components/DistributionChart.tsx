@@ -45,6 +45,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
         shape.value.discrete.some((x) => x.x <= 0);
       let spec = buildVegaSpec(isLogX, isExpY);
       let widthProp = width ? width : size.width;
+      if (widthProp < 20) {
+        console.warn(`Width of Distribution is set to ${widthProp}, which is too small`)
+        widthProp = 20
+      }
 
       // Check whether we should disable the checkbox
       var logCheckbox = (
