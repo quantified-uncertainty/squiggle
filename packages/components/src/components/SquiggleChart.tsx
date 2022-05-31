@@ -95,7 +95,9 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "number":
       return (
         <VariableBox heading="Number" showTypes={showTypes}>
-          <NumberShower precision={3} number={expression.value} />
+          <div className="font-semibold text-slate-600">
+            <NumberShower precision={3} number={expression.value} />
+          </div>
         </VariableBox>
       );
     case "distribution": {
@@ -124,10 +126,13 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "string":
       return (
-        <VariableBox
-          heading="String"
-          showTypes={showTypes}
-        >{`"${expression.value}"`}</VariableBox>
+        <VariableBox heading="String" showTypes={showTypes}>
+          <span className="text-slate-400">"</span>
+          <span className="text-slate-600 font-semibold">
+            {expression.value}
+          </span>
+          <span className="text-slate-400">"</span>
+        </VariableBox>
       );
     case "boolean":
       return (
@@ -138,7 +143,12 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "symbol":
       return (
         <VariableBox heading="Symbol" showTypes={showTypes}>
+          <span className="text-slate-500 mr-2">
+          Undefined Symbol:
+          </span>
+          <span className="text-slate-600">
           {expression.value}
+          </span>
         </VariableBox>
       );
     case "call":
@@ -169,18 +179,22 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox heading="Record" showTypes={showTypes}>
           {Object.entries(expression.value).map(([key, r]) => (
-            <div key={key}>
-              <h3>{key}</h3>
-              <SquiggleItem
-                expression={r}
-                width={width !== undefined ? width - 20 : width}
-                height={height / 3}
-                showTypes={showTypes}
-                showSummary={showSummary}
-                showControls={showControls}
-                chartSettings={chartSettings}
-                environment={environment}
-              />
+            <div key={key} className="flex flex-row pt-1">
+              <div className="flex-none pr-2">
+                <h3 className="text-slate-500 font-mono">{key}:</h3>
+              </div>
+              <div className="pl-2 pr-2 mb-2 grow bg-gray-50 border border-gray-100 rounded-sm">
+                <SquiggleItem
+                  expression={r}
+                  width={width !== undefined ? width - 20 : width}
+                  height={height / 3}
+                  showTypes={showTypes}
+                  showSummary={showSummary}
+                  showControls={showControls}
+                  chartSettings={chartSettings}
+                  environment={environment}
+                />
+              </div>
             </div>
           ))}
         </VariableBox>
@@ -207,6 +221,9 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "lambda":
       return (
         <VariableBox heading="Function" showTypes={showTypes}>
+          <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${expression.value.parameters.join(
+            ","
+          )})`}</div>
           <FunctionChart
             fn={expression.value}
             chartSettings={chartSettings}
