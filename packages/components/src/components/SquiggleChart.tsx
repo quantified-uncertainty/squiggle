@@ -143,12 +143,8 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "symbol":
       return (
         <VariableBox heading="Symbol" showTypes={showTypes}>
-          <span className="text-slate-500 mr-2">
-          Undefined Symbol:
-          </span>
-          <span className="text-slate-600">
-          {expression.value}
-          </span>
+          <span className="text-slate-500 mr-2">Undefined Symbol:</span>
+          <span className="text-slate-600">{expression.value}</span>
         </VariableBox>
       );
     case "call":
@@ -161,17 +157,24 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox heading="Array" showTypes={showTypes}>
           {expression.value.map((r, i) => (
-            <SquiggleItem
-              key={i}
-              expression={r}
-              width={width !== undefined ? width - 20 : width}
-              height={50}
-              showTypes={showTypes}
-              showControls={showControls}
-              chartSettings={chartSettings}
-              environment={environment}
-              showSummary={showSummary}
-            />
+            <div key={i} className="flex flex-row pt-1">
+              <div className="flex-none bg-slate-100 rounded-sm pl-1" style={{"paddingRight": "0.25rem"}}>
+                <h3 className="text-slate-400 font-mono">{i}</h3>
+              </div>
+              <div className="pl-2 pr-2 mb-2 grow ">
+                <SquiggleItem
+                  key={i}
+                  expression={r}
+                  width={width !== undefined ? width - 20 : width}
+                  height={50}
+                  showTypes={showTypes}
+                  showControls={showControls}
+                  chartSettings={chartSettings}
+                  environment={environment}
+                  showSummary={showSummary}
+                />
+              </div>
+            </div>
           ))}
         </VariableBox>
       );
