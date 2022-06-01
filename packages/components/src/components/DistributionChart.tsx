@@ -8,7 +8,7 @@ import {
 } from "@quri/squiggle-lang";
 import { Vega, VisualizationSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
-import { ErrorBox } from "./ErrorBox";
+import { ErrorAlert } from "./Alert";
 import { useSize } from "react-use";
 import {
   linearXScale,
@@ -90,9 +90,9 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       );
     } else {
       var result = (
-        <ErrorBox heading="Distribution Error">
+        <ErrorAlert heading="Distribution Error">
           {distributionErrorToString(shape.value)}
-        </ErrorBox>
+        </ErrorAlert>
       );
     }
 
@@ -161,9 +161,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
       return <NumberShower number={x.value} />;
     } else {
       return (
-        <ErrorBox heading="Distribution Error">
+        <ErrorAlert heading="Distribution Error">
           {distributionErrorToString(x.value)}
-        </ErrorBox>
+        </ErrorAlert>
       );
     }
   };

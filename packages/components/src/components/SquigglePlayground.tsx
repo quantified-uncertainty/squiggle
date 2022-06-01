@@ -14,25 +14,7 @@ import { CogIcon } from "@heroicons/react/solid";
 import { ChartSquareBarIcon } from "@heroicons/react/solid";
 import { CurrencyDollarIcon } from "@heroicons/react/solid";
 import { Fragment } from "react";
-import { ErrorBox } from "./ErrorBox";
-
-interface ShowBoxProps {
-  height: number;
-  children: React.ReactNode;
-}
-
-const ShowBox: React.FC<ShowBoxProps> = ({ height, children }) => (
-  <div className="border border-gray-500">{children}</div>
-);
-
-interface TitleProps {
-  readonly maxHeight: number;
-  children: React.ReactNode;
-}
-
-const Display: React.FC<TitleProps> = ({ maxHeight, children }) => (
-  <div style={{ maxHeight: maxHeight + "px" }}>{children}</div>
-);
+import { ErrorAlert, SuccessAlert } from "./Alert";
 
 interface PlaygroundProps {
   /** The initial squiggle string to put in the playground */
@@ -79,6 +61,27 @@ const schema = yup
     showControls: yup.boolean(),
     showSummary: yup.boolean(),
     showSettingsPage: yup.boolean().default(false),
+    diagramStart: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(0)
+      .min(0),
+    diagramStop: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(10)
+      .min(0),
+    diagramCount: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(20)
+      .min(2),
   })
   .required();
 
@@ -88,7 +91,7 @@ type InputProps = {
 };
 
 const InputItem: React.FC<InputProps> = ({ label, children }) => (
-  <div className="col-span-3">
+  <div className="col-span-4">
     <label className="block text-sm font-medium text-gray-600">{label}</label>
     <div className="mt-1">{children}</div>
   </div>
@@ -96,15 +99,8 @@ const InputItem: React.FC<InputProps> = ({ label, children }) => (
 
 let numberStyle =
   "max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md";
-let checkboxStyle =
-  "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded";
 
-const tabs = [
-  { name: "Editor", href: "#", current: true },
-  { name: "Settings", href: "#", current: false },
-];
-
-function classNames(...classes) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -119,14 +115,6 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   let [importString, setImportString] = useState("{}");
   let [imports, setImports] = useState({});
   let [importsAreValid, setImportsAreValid] = useState(true);
-  let [diagramStart, setDiagramStart] = useState(0);
-  let [diagramStop, setDiagramStop] = useState(10);
-  let [diagramCount, setDiagramCount] = useState(20);
-  let chartSettings = {
-    start: diagramStart,
-    stop: diagramStop,
-    count: diagramCount,
-  };
   const { register, control } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -138,11 +126,19 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
       showSummary: showSummary,
       leftSizePercent: 50,
       showSettingsPage: false,
+      diagramStart: 0,
+      diagramStop: 10,
+      diagramCount: 20,
     },
   });
   const vars = useWatch({
     control,
   });
+  let chartSettings = {
+    start: Number(vars.diagramStart),
+    stop: Number(vars.diagramStop),
+    count: Number(vars.diagramCount),
+  };
   let env: environment = {
     sampleCount: Number(vars.sampleCount),
     xyPointLength: Number(vars.xyPointLength),
@@ -157,15 +153,16 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     }
   };
 
-  // className="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-4 w-4"
-  let tab = (key, iconName) => {
-    let iconStyle = (isSelected) =>
+  let tab = (key: string, iconName: string) => {
+    let iconStyle = (isSelected: boolean) =>
       classNames(
         "-ml-0.5 mr-2 h-4 w-4 ",
-        isSelected ? "text-slate-500" : "text-gray-400 group-hover:text-gray-900"
+        isSelected
+          ? "text-slate-500"
+          : "text-gray-400 group-hover:text-gray-900"
       );
 
-    let icon = (selected) =>
+    let icon = (selected: boolean) =>
       ({
         code: <CodeIcon className={iconStyle(selected)} />,
         cog: <CogIcon className={iconStyle(selected)} />,
@@ -176,10 +173,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
     return (
       <Tab key={key} as={Fragment}>
         {({ selected }) => (
-          <button
-            className=
-              "flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100 "
-          >
+          <button className="flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100 ">
             <span
               className={classNames(
                 "p-1 pl-2.5 pr-3.5 rounded-md flex items-center text-sm font-medium",
@@ -190,12 +184,11 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
             >
               {icon(selected)}
               <span
-                className={classNames(
-                  "",
+                className={
                   selected
                     ? "text-gray-900"
                     : "text-gray-600 group-hover:text-gray-900"
-                )}
+                }
               >
                 {key}
               </span>
@@ -233,7 +226,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
               </Tab.Panel>
 
               <Tab.Panel>
-                <form className="space-y-6 p-3">
+                <div className="space-y-6 p-3">
                   <InputItem label="Sample Count">
                     <>
                       <input
@@ -243,7 +236,8 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
                       />
                       <p className="mt-2 text-sm text-gray-500">
                         How many samples to use for Monte Carlo simulations.
-                        This can be overridden by specific programs.
+                        This can occasionally be overridden by specific Squiggle
+                        programs.
                       </p>
                     </>
                   </InputItem>
@@ -260,42 +254,43 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
                       </p>
                     </>
                   </InputItem>
-                </form>
+                </div>
               </Tab.Panel>
 
               <Tab.Panel>
-                <form className="space-y-6 p-3">
-                  <InputItem label="Chart Height (in Pixels)">
-                    <input
-                      type="number"
-                      {...register("chartHeight")}
-                      className={numberStyle}
-                    />
-                  </InputItem>
-                  <InputItem label="Editor Width">
-                    <input
-                      type="range"
-                      min="1"
-                      max="100"
-                      className="slider"
-                      {...register("leftSizePercent")}
-                    />
-                  </InputItem>
-                  <fieldset className="space-y-2">
-                    <div className="relative flex items-start">
-                      <div className="flex items-center h-5">
-                        <input
-                          type="checkbox"
-                          {...register("showTypes")}
-                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label className="font-medium text-gray-700">
-                          Type Names
-                        </label>
-                      </div>
+                <div className="space-y-6 divide-y divide-gray-200">
+                  <div className="space-y-2">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 pb-2">
+                      General Display Settings
+                    </h3>
+                    <InputItem label="Chart Height (in pixels)">
+                      <input
+                        type="number"
+                        {...register("chartHeight")}
+                        className={numberStyle}
+                      />
+                    </InputItem>
+                    <div className="relative flex items-start pt-3">
+                    <div className="flex items-center h-5">
+                      <input
+                        type="checkbox"
+                        {...register("showTypes")}
+                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                      />
                     </div>
+                    <div className="ml-3 text-sm">
+                      <label className="font-medium text-gray-700">
+                        Show information about displayed types.
+                      </label>
+                    </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-8">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 pb-2">
+                      Distribution Display Settings
+                    </h3>
+
                     <div className="relative flex items-start">
                       <div className="flex items-center h-5">
                         <input
@@ -306,7 +301,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
                       </div>
                       <div className="ml-3 text-sm">
                         <label className="font-medium text-gray-700">
-                          X-Y Coordinate Scales
+                          Show toggles to adjust scale of x and y axes
                         </label>
                       </div>
                     </div>
@@ -320,35 +315,83 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
                       </div>
                       <div className="ml-3 text-sm">
                         <label className="font-medium text-gray-700">
-                          Summary Statistics
+                          Show summary statistics
                         </label>
                       </div>
                     </div>
-                  </fieldset>
-                </form>
+                  </div>
+
+                  <div className="space-y-2 pt-8">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 pb-2">
+                      Function Display Settings
+                    </h3>
+
+                    <p className="mt-2 text-sm text-gray-500">
+                      When displaying functions of single variables that return
+                      numbers or distributions, we need to use defaults for the
+                      x-axis. We need to select a minimum and maximum value of x
+                      to sample, and a number n of the number of points to
+                      sample.
+                    </p>
+                    <div className="pt-4 grid grid-cols-1 gap-y-4 gap-x-4">
+                      <InputItem label="Min X Value">
+                        <input
+                          type="number"
+                          {...register("diagramStart")}
+                          className={numberStyle}
+                        />
+                      </InputItem>
+                      <InputItem label="Max X Value">
+                        <input
+                          type="number"
+                          {...register("diagramStop")}
+                          className={numberStyle}
+                        />
+                      </InputItem>
+                      <InputItem label="Points between X min and X max to sample">
+                        <input
+                          type="number"
+                          {...register("diagramCount")}
+                          className={numberStyle}
+                        />
+                      </InputItem>
+                    </div>
+                  </div>
+                </div>
               </Tab.Panel>
 
               <Tab.Panel>
-                <InputItem label="Json Editor for imports">
-                  <>
-                    <JsonEditor
-                      value={importString}
-                      onChange={getChangeJson}
-                      oneLine={false}
-                      showGutter={true}
-                      height={100}
-                    />
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Import Variables from JSON
+                </h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  You can import variables from JSON into your Squiggle code.
+                  Variables are accessed with dollar signs. For example,
+                  "timeNow" would be accessed as "$timeNow".
+                </p>
+                <>
+
+                <div className="border border-slate-200 mt-6 mb-2">
+                  <JsonEditor
+                    value={importString}
+                    onChange={getChangeJson}
+                    oneLine={false}
+                    showGutter={true}
+                    height={150}
+                  />
+                </div>
+                  <div className="p-1 pt-2">
                     {importsAreValid ? (
-                      "Valid"
+                      <SuccessAlert heading="Valid Json">
+                        <></>
+                      </SuccessAlert>
                     ) : (
-                      <div className="p-2">
-                        <ErrorBox heading="Invalid JSON">
-                          You must use valid json in this editor.
-                        </ErrorBox>
-                      </div>
+                      <ErrorAlert heading="Invalid JSON">
+                        You must use valid json in this editor.
+                      </ErrorAlert>
                     )}
-                  </>
-                </InputItem>
+                  </div>
+                </>
               </Tab.Panel>
             </Tab.Panels>
           </div>

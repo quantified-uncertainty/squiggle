@@ -15,7 +15,7 @@ import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import { DistributionChart } from "./DistributionChart";
 import { NumberShower } from "./NumberShower";
-import { ErrorBox } from "./ErrorBox";
+import { ErrorAlert } from "./Alert";
 
 let SquigglePercentilesChart = createClassFromSpec({
   spec: percentilesSpec as Spec,
@@ -197,7 +197,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
       {showChart}
       {_.entries(getPercentilesMemoized.errors).map(
         ([errorName, errorPoints]) => (
-          <ErrorBox key={errorName} heading={errorName}>
+          <ErrorAlert key={errorName} heading={errorName}>
             Values:{" "}
             {errorPoints
               .map((r, i) => <NumberShower key={i} number={r.x} />)
@@ -206,7 +206,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
                   {a}, {b}
                 </>
               ))}
-          </ErrorBox>
+          </ErrorAlert>
         )
       )}
     </>

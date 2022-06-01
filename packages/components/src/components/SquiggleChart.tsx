@@ -14,7 +14,7 @@ import {
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
 import { DistributionChart } from "./DistributionChart";
-import { ErrorBox } from "./ErrorBox";
+import { ErrorAlert } from "./Alert";
 import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
 
 function getRange<a>(x: declaration<a>) {
@@ -320,9 +320,9 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     );
   } else {
     internal = (
-      <ErrorBox heading={"Parse Error"}>
+      <ErrorAlert heading={"Parse Error"}>
         {errorValueToString(expressionResult.value)}
-      </ErrorBox>
+      </ErrorAlert>
     );
   }
   return internal;
