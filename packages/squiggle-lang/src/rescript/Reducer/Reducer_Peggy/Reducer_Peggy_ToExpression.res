@@ -44,5 +44,7 @@ let rec fromNode = (node: Parse.node): expression => {
         fromNode(nodeTernary["falseExpression"]),
       },
     )
+  | PgNodeTypeIdentifier(nodeTypeIdentifier) =>
+    ExpressionBuilder.eTypeIdentifier(nodeTypeIdentifier["value"])
   }
 }
