@@ -71,7 +71,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
     default:
       return (
         <MessageAlert heading="Function Display Not Supported">
-          There is no function visualization for this type of output
+          There is no function visualization for this type of output: <span className="font-bold">{resultType}</span>
         </MessageAlert>
       );
   }
