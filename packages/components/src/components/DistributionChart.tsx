@@ -8,7 +8,7 @@ import {
 } from "@quri/squiggle-lang";
 import { Vega, VisualizationSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
-import { ErrorBox } from "./ErrorBox";
+import { ErrorAlert } from "./Alert";
 import { useSize } from "react-use";
 import {
   linearXScale,
@@ -45,6 +45,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
         shape.value.discrete.some((x) => x.x <= 0);
       let spec = buildVegaSpec(isLogX, isExpY);
       let widthProp = width ? width : size.width;
+      if (widthProp < 20) {
+        console.warn(
+          `Width of Distribution is set to ${widthProp}, which is too small`
+        );
+        widthProp = 20;
+      }
 
       // Check whether we should disable the checkbox
       var logCheckbox = (
@@ -86,9 +92,9 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       );
     } else {
       var result = (
-        <ErrorBox heading="Distribution Error">
+        <ErrorAlert heading="Distribution Error">
           {distributionErrorToString(shape.value)}
-        </ErrorBox>
+        </ErrorAlert>
       );
     }
 
@@ -157,18 +163,24 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
       return <NumberShower number={x.value} />;
     } else {
       return (
-        <ErrorBox heading="Distribution Error">
+        <ErrorAlert heading="Distribution Error">
           {distributionErrorToString(x.value)}
-        </ErrorBox>
+        </ErrorAlert>
       );
     }
   };
 
   let TableHeadCell: React.FC<{ children: React.ReactNode }> = ({
     children,
-  }) => <th className="border border-slate-400 bg-slate-50 p-4">{children}</th>;
+  }) => (
+    <th className="border border-slate-200 bg-slate-50 py-1 px-2 text-slate-500 font-semibold">
+      {children}
+    </th>
+  );
   let Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <td className="border border-slate-400 p-4">{children}</td>
+    <td className="border border-slate-200 py-1 px-2 text-slate-900 ">
+      {children}
+    </td>
   );
 
   return (

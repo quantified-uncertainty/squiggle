@@ -29,6 +29,7 @@ export let CodeEditor: FC<CodeEditorProps> = ({
       mode="golang"
       theme="github"
       width={"100%"}
+      fontSize={14}
       height={String(height) + "px"}
       minLines={oneLine ? lineCount : undefined}
       maxLines={oneLine ? lineCount : undefined}

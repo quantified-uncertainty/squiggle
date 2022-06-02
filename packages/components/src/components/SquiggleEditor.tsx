@@ -14,7 +14,7 @@ import {
   defaultImports,
   defaultBindings,
 } from "@quri/squiggle-lang";
-import { ErrorBox } from "./ErrorBox";
+import { ErrorAlert } from "./Alert";
 
 export interface SquiggleEditorProps {
   /** The input string for squiggle */
@@ -181,7 +181,11 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
           height={20}
         />
       </div>
-      {error !== null ? <ErrorBox heading="Error">{error}</ErrorBox> : <></>}
+      {error !== null ? (
+        <ErrorAlert heading="Error">{error}</ErrorAlert>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };
