@@ -10,7 +10,7 @@ import {
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as lineChartSpec from "../vega-specs/spec-line-chart.json";
-import { ErrorBox } from "./ErrorBox";
+import { ErrorAlert } from "./Alert";
 
 let SquiggleLineChart = createClassFromSpec({
   spec: lineChartSpec as Spec,
@@ -110,9 +110,9 @@ export const FunctionChart1Number: React.FC<FunctionChart1NumberProps> = ({
         actions={false}
       />
       {getFunctionImageMemoized.errors.map(({ x, value }) => (
-        <ErrorBox key={x} heading={value}>
+        <ErrorAlert key={x} heading={value}>
           Error at point ${x}
-        </ErrorBox>
+        </ErrorAlert>
       ))}
     </>
   );

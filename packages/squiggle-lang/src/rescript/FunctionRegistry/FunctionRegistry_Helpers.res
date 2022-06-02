@@ -9,6 +9,7 @@ module Wrappers = {
 }
 
 module Prepare = {
+  type t = frValue
   type ts = array<frValue>
   type err = string
 
@@ -23,6 +24,14 @@ module Prepare = {
       let toArgs = (inputs: ts): result<ts, err> =>
         switch inputs {
         | [FRValueRecord(args)] => args->E.A2.fmap(((_, b)) => b)->Ok
+        | _ => Error(impossibleError)
+        }
+    }
+
+    module Array = {
+      let openA = (inputs: t): result<ts, err> =>
+        switch inputs {
+        | FRValueArray(n) => Ok(n)
         | _ => Error(impossibleError)
         }
     }
@@ -53,6 +62,19 @@ module Prepare = {
     module Record = {
       let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
         values->ToValueArray.Record.twoArgs->E.R.bind(twoDistOrNumber)
+    }
+  }
+
+  module ToArrayRecordPairs = {
+    let twoArgs = (input: t): result<array<ts>, err> => {
+      let array = input->ToValueArray.Array.openA
+      let pairs =
+        array->E.R.bind(pairs =>
+          pairs
+          ->E.A2.fmap(xyCoord => [xyCoord]->ToValueArray.Record.twoArgs)
+          ->E.A.R.firstErrorOrOpen
+        )
+      pairs
     }
   }
 }

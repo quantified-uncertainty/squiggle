@@ -2,7 +2,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { SquiggleChart } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
-import styled from "styled-components";
 import type {
   squiggleExpression,
   environment,
@@ -15,7 +14,7 @@ import {
   defaultImports,
   defaultBindings,
 } from "@quri/squiggle-lang";
-import { ErrorBox } from "./ErrorBox";
+import { ErrorAlert } from "./Alert";
 
 export interface SquiggleEditorProps {
   /** The input string for squiggle */
@@ -44,12 +43,6 @@ export interface SquiggleEditorProps {
   showSummary?: boolean;
 }
 
-const Input = styled.div`
-  border: 1px solid #ddd;
-  padding: 0.3em 0.3em;
-  margin-bottom: 1em;
-`;
-
 export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   initialSquiggleString = "",
   width,
@@ -72,7 +65,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   };
   return (
     <div>
-      <Input>
+      <div className="border border-grey-200 p-2 m-4">
         <CodeEditor
           value={expression}
           onChange={setExpression}
@@ -80,7 +73,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
           showGutter={false}
           height={20}
         />
-      </Input>
+      </div>
       <SquiggleChart
         width={width}
         environment={environment}
@@ -179,7 +172,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
 
   return (
     <div>
-      <Input>
+      <div className="border border-grey-200 p-2 m-4">
         <CodeEditor
           value={expression}
           onChange={setExpression}
@@ -187,8 +180,12 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
           showGutter={false}
           height={20}
         />
-      </Input>
-      {error !== null ? <ErrorBox heading="Error">{error}</ErrorBox> : <></>}
+      </div>
+      {error !== null ? (
+        <ErrorAlert heading="Error">{error}</ErrorAlert>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };
