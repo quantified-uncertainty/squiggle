@@ -198,7 +198,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   };
 
   let samplingSettings = (
-    <div className="space-y-6 p-3">
+    <div className="space-y-6 p-3 max-w-xl">
       <InputItem label="Sample Count">
         <>
           <input
@@ -229,7 +229,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   );
 
   let viewSettings = (
-    <div className="space-y-6 divide-y divide-gray-200">
+    <div className="space-y-6 p-3 divide-y divide-gray-200 max-w-xl">
       <div className="space-y-2">
         <h3 className="text-lg leading-6 font-medium text-gray-900 pb-2">
           General Display Settings
@@ -331,7 +331,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
   );
 
   let inputVariableSettings = (
-    <>
+    <div className="space-y-6 p-3 max-w-3xl">
       <h3 className="text-lg leading-6 font-medium text-gray-900">
         Import Variables from JSON
       </h3>
@@ -360,7 +360,7 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
           </ErrorAlert>
         )}
       </div>
-    </>
+    </div>
   );
 
   return (
