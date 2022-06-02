@@ -1,5 +1,9 @@
 import * as React from "react";
-import { XCircleIcon, InformationCircleIcon, CheckCircleIcon } from "@heroicons/react/solid";
+import {
+  XCircleIcon,
+  InformationCircleIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/solid";
 
 export const Alert: React.FC<{
   heading: string;
@@ -53,7 +57,12 @@ export const MessageAlert: React.FC<{
     backgroundColor="bg-slate-100"
     headingColor="text-slate-700"
     bodyColor="text-slate-700"
-    icon={<InformationCircleIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />}
+    icon={
+      <InformationCircleIcon
+        className="h-5 w-5 text-slate-400"
+        aria-hidden="true"
+      />
+    }
   />
 );
 
@@ -67,6 +76,8 @@ export const SuccessAlert: React.FC<{
     backgroundColor="bg-green-50"
     headingColor="text-green-800"
     bodyColor="text-green-700"
-    icon={<CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />}
+    icon={
+      <CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
+    }
   />
 );

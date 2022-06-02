@@ -104,7 +104,12 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-let tab = (key: string, iconName: string) => {
+type StyledTabProps = {
+  name: string;
+  iconName: string;
+};
+
+const StyledTab: React.FC<StyledTabProps> = ({ name, iconName }) => {
   let iconStyle = (isSelected: boolean) =>
     classNames(
       "-ml-0.5 mr-2 h-4 w-4 ",
@@ -120,7 +125,7 @@ let tab = (key: string, iconName: string) => {
     }[iconName]);
 
   return (
-    <Tab key={key} as={Fragment}>
+    <Tab key={name} as={Fragment}>
       {({ selected }) => (
         <button className="flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100 ">
           <span
@@ -139,7 +144,7 @@ let tab = (key: string, iconName: string) => {
                   : "text-gray-600 group-hover:text-gray-900"
               }
             >
-              {key}
+              {name}
             </span>
           </span>
         </button>
@@ -368,10 +373,10 @@ let SquigglePlayground: FC<PlaygroundProps> = ({
       <div className=" flex-col flex">
         <div className="pb-4">
           <Tab.List className="p-0.5 rounded-md bg-slate-100 hover:bg-slate-200 inline-flex">
-            {tab("Code", "code")}
-            {tab("Sampling Settings", "cog")}
-            {tab("View Settings", "squareBar")}
-            {tab("Input Variables", "dollar")}
+            <StyledTab name="Code" iconName="code" />
+            <StyledTab name="Sampling Settings" iconName="cog" />
+            <StyledTab name="View Settings" iconName="squareBar" />
+            <StyledTab name="Input Variables" iconName="dollar" />
           </Tab.List>
         </div>
         <div className="flex" style={{ height: height + "px" }}>

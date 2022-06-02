@@ -158,10 +158,10 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         <VariableBox heading="Array" showTypes={showTypes}>
           {expression.value.map((r, i) => (
             <div key={i} className="flex flex-row pt-1">
-              <div className="flex-none bg-slate-100 rounded-sm pl-1" style={{"paddingRight": "0.25rem"}}>
+              <div className="flex-none bg-slate-100 rounded-sm px-1">
                 <h3 className="text-slate-400 font-mono">{i}</h3>
               </div>
-              <div className="pl-2 pr-2 mb-2 grow ">
+              <div className="px-2 mb-2 grow ">
                 <SquiggleItem
                   key={i}
                   expression={r}

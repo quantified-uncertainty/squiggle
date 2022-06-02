@@ -65,7 +65,9 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
         />
       );
     case "Error":
-      return <ErrorAlert heading="Error">The function failed to be run</ErrorAlert>;
+      return (
+        <ErrorAlert heading="Error">The function failed to be run</ErrorAlert>
+      );
     default:
       return (
         <MessageAlert heading="Function Display Not Supported">

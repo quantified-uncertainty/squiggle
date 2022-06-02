@@ -181,7 +181,11 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
           height={20}
         />
       </div>
-      {error !== null ? <ErrorAlert heading="Error">{error}</ErrorAlert> : <></>}
+      {error !== null ? (
+        <ErrorAlert heading="Error">{error}</ErrorAlert>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };
