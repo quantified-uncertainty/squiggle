@@ -46,8 +46,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       let spec = buildVegaSpec(isLogX, isExpY);
       let widthProp = width ? width : size.width;
       if (widthProp < 20) {
-        console.warn(`Width of Distribution is set to ${widthProp}, which is too small`)
-        widthProp = 20
+        console.warn(
+          `Width of Distribution is set to ${widthProp}, which is too small`
+        );
+        widthProp = 20;
       }
 
       // Check whether we should disable the checkbox
@@ -170,9 +172,15 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
 
   let TableHeadCell: React.FC<{ children: React.ReactNode }> = ({
     children,
-  }) => <th className="border border-slate-400 bg-slate-50 p-4">{children}</th>;
+  }) => (
+    <th className="border border-slate-200 bg-slate-50 pt-1 pb-1 pl-2 pr-2 text-slate-500 font-semibold">
+      {children}
+    </th>
+  );
   let Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <td className="border border-slate-400 p-4">{children}</td>
+    <td className="border border-slate-200 pt-1 pb-1 pl-2 pr-2 text-slate-900 ">
+      {children}
+    </td>
   );
 
   return (
