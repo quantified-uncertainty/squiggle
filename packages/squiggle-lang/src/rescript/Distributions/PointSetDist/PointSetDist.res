@@ -231,9 +231,8 @@ let doN = (n, fn) => {
 }
 
 let sample = (t: t): float => {
-  let randomItem = Random.float(1.)
-  let bar = t |> T.Integral.yToX(randomItem)
-  bar
+  let randomItem = Random.float(1.0)
+  t |> T.Integral.yToX(randomItem)
 }
 
 let isFloat = (t: t) =>

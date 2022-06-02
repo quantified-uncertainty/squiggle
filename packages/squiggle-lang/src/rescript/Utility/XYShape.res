@@ -148,6 +148,11 @@ module T = {
     | None => Ok(attempt)
     }
   }
+
+  let makeFromZipped = (values: array<(float, float)>) => {
+    let (xs, ys) = E.A.unzip(values)
+    make(~xs, ~ys)
+  }
 }
 
 module Ts = {

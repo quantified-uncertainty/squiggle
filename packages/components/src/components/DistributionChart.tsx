@@ -8,7 +8,7 @@ import {
 } from "@quri/squiggle-lang";
 import { Vega, VisualizationSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
-import { ErrorBox } from "./ErrorBox";
+import { ErrorAlert } from "./Alert";
 import { useSize } from "react-use";
 import {
   linearXScale,
@@ -16,7 +16,6 @@ import {
   linearYScale,
   expYScale,
 } from "./DistributionVegaScales";
-import styled from "styled-components";
 import { NumberShower } from "./NumberShower";
 
 type DistributionChartProps = {
@@ -46,6 +45,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
         shape.value.discrete.some((x) => x.x <= 0);
       let spec = buildVegaSpec(isLogX, isExpY);
       let widthProp = width ? width : size.width;
+      if (widthProp < 20) {
+        console.warn(
+          `Width of Distribution is set to ${widthProp}, which is too small`
+        );
+        widthProp = 20;
+      }
 
       // Check whether we should disable the checkbox
       var logCheckbox = (
@@ -66,7 +71,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       }
 
       var result = (
-        <ChartContainer width={widthProp + "px"}>
+        <div style={{ width: widthProp + "px" }}>
           <Vega
             spec={spec}
             data={{ con: shape.value.continuous, dis: shape.value.discrete }}
@@ -74,20 +79,22 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
             height={height}
             actions={false}
           />
-          {showSummary && <SummaryTable distribution={distribution} />}
+          <div className="flex justify-center">
+            {showSummary && <SummaryTable distribution={distribution} />}
+          </div>
           {showControls && (
             <div>
               {logCheckbox}
               <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
             </div>
           )}
-        </ChartContainer>
+        </div>
       );
     } else {
       var result = (
-        <ErrorBox heading="Distribution Error">
+        <ErrorAlert heading="Distribution Error">
           {distributionErrorToString(shape.value)}
-        </ErrorBox>
+        </ErrorAlert>
       );
     }
 
@@ -95,12 +102,6 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   });
   return sized;
 };
-
-type ChartContainerProps = { width: string };
-
-let ChartContainer = styled.div<ChartContainerProps>`
-  width: ${(props) => props.width};
-`;
 
 function buildVegaSpec(isLogX: boolean, isExpY: boolean): VisualizationSpec {
   return {
@@ -120,10 +121,6 @@ interface CheckBoxProps {
   tooltip?: string;
 }
 
-const Label = styled.label<{ disabled: boolean }>`
-  ${(props) => props.disabled && "color: #999;"}
-`;
-
 export const CheckBox = ({
   label,
   onChange,
@@ -139,7 +136,7 @@ export const CheckBox = ({
         onChange={() => onChange(!value)}
         disabled={disabled}
       />
-      <Label disabled={disabled}>{label}</Label>
+      <label className={disabled ? "text-slate-400" : ""}> {label}</label>
     </span>
   );
 };
@@ -147,34 +144,6 @@ export const CheckBox = ({
 type SummaryTableProps = {
   distribution: Distribution;
 };
-
-const Table = styled.table`
-  margin-left: auto;
-  margin-right: auto;
-  border-collapse: collapse;
-  text-align: center;
-  border-style: hidden;
-`;
-
-const TableHead = styled.thead`
-  border-bottom: 1px solid rgb(141 149 167);
-`;
-
-const TableHeadCell = styled.th`
-  border-right: 1px solid rgb(141 149 167);
-  border-left: 1px solid rgb(141 149 167);
-  padding: 0.3em;
-`;
-
-const TableBody = styled.tbody``;
-
-const Row = styled.tr``;
-
-const Cell = styled.td`
-  padding: 0.3em;
-  border-right: 1px solid rgb(141 149 167);
-  border-left: 1px solid rgb(141 149 167);
-`;
 
 const SummaryTable: React.FC<SummaryTableProps> = ({
   distribution,
@@ -194,17 +163,30 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
       return <NumberShower number={x.value} />;
     } else {
       return (
-        <ErrorBox heading="Distribution Error">
+        <ErrorAlert heading="Distribution Error">
           {distributionErrorToString(x.value)}
-        </ErrorBox>
+        </ErrorAlert>
       );
     }
   };
 
+  let TableHeadCell: React.FC<{ children: React.ReactNode }> = ({
+    children,
+  }) => (
+    <th className="border border-slate-200 bg-slate-50 py-1 px-2 text-slate-500 font-semibold">
+      {children}
+    </th>
+  );
+  let Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <td className="border border-slate-200 py-1 px-2 text-slate-900 ">
+      {children}
+    </td>
+  );
+
   return (
-    <Table>
-      <TableHead>
-        <Row>
+    <table className="border border-collapse border-slate-400">
+      <thead className="bg-slate-50">
+        <tr>
           <TableHeadCell>{"Mean"}</TableHeadCell>
           <TableHeadCell>{"5%"}</TableHeadCell>
           <TableHeadCell>{"10%"}</TableHeadCell>
@@ -213,10 +195,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
           <TableHeadCell>{"75%"}</TableHeadCell>
           <TableHeadCell>{"90%"}</TableHeadCell>
           <TableHeadCell>{"95%"}</TableHeadCell>
-        </Row>
-      </TableHead>
-      <TableBody>
-        <Row>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
           <Cell>{unwrapResult(mean)}</Cell>
           <Cell>{unwrapResult(p5)}</Cell>
           <Cell>{unwrapResult(p10)}</Cell>
@@ -225,8 +207,8 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
           <Cell>{unwrapResult(p75)}</Cell>
           <Cell>{unwrapResult(p90)}</Cell>
           <Cell>{unwrapResult(p95)}</Cell>
-        </Row>
-      </TableBody>
-    </Table>
+        </tr>
+      </tbody>
+    </table>
   );
 };

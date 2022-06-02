@@ -30,9 +30,46 @@ module Declaration = {
   }
 }
 
+let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
+  let array = inputs->E.A.unsafe_get(0)->Prepare.ToValueArray.Array.openA
+  let xyCoords =
+    array->E.R.bind(xyCoords =>
+      xyCoords
+      ->E.A2.fmap(xyCoord =>
+        [xyCoord]->Prepare.ToValueArray.Record.twoArgs->E.R.bind(Prepare.ToValueTuple.twoNumbers)
+      )
+      ->E.A.R.firstErrorOrOpen
+    )
+  let expressionValue =
+    xyCoords
+    ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
+    ->E.R2.fmap(r => ReducerInterface_ExpressionValue.EvDistribution(PointSet(makeDist(r))))
+  expressionValue
+}
+
 let registry = [
   Function.make(
-    ~name="FnMake",
+    ~name="toContinuousPointSet",
+    ~definitions=[
+      FnDefinition.make(
+        ~name="toContinuousPointSet",
+        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
+        ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="toDiscretePointSet",
+    ~definitions=[
+      FnDefinition.make(
+        ~name="toDiscretePointSet",
+        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
+        ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="Declaration",
     ~definitions=[
       FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
         inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
