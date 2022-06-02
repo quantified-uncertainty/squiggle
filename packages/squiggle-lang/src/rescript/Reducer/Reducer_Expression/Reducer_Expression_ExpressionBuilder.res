@@ -64,3 +64,6 @@ let eBindExpression = (bindingExpr: expression, expression: expression): express
 
 let eBindExpressionDefault = (expression: expression): expression =>
   eFunction("$$_bindExpression_$$", list{expression})
+
+let eTypeIdentifier = (name: string): expression =>
+  name->BExpressionValue.EvTypeIdentifier->BExpressionT.EValue
