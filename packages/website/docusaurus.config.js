@@ -20,7 +20,6 @@ const config = {
   projectName: "squiggle", // Usually your repo name.
 
   plugins: [
-    "docusaurus-tailwindcss",
     () => ({
       configureWebpack(config, isServer, utils, content) {
         return {
@@ -61,7 +60,7 @@ const config = {
             "https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/website/",
         },
         theme: {
-          customCss: require.resolve("./src/css/custom.css"),
+          customCss: [require.resolve("./src/css/custom.css")],
         },
       }),
     ],
