@@ -10,23 +10,32 @@ export const Alert: React.FC<{
   backgroundColor: string;
   headingColor: string;
   bodyColor: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
+  icon: (props: React.ComponentProps<"svg">) => JSX.Element;
+  iconColor: string;
+  children?: React.ReactNode;
 }> = ({
   heading = "Error",
   backgroundColor,
   headingColor,
   bodyColor,
-  icon,
+  icon: Icon,
+  iconColor,
   children,
 }) => {
   return (
     <div className={`rounded-md p-4 ${backgroundColor}`}>
       <div className="flex">
-        <div className="flex-shrink-0">{icon}</div>
+        <Icon
+          className={`h-5 w-5 flex-shrink-0 ${iconColor}`}
+          aria-hidden="true"
+        />
         <div className="ml-3">
-          <h3 className={`text-sm font-medium ${headingColor}`}>{heading}</h3>
-          <div className={`mt-2 text-sm ${bodyColor}`}>{children}</div>
+          <header className={`text-sm font-medium ${headingColor}`}>
+            {heading}
+          </header>
+          {children && React.Children.count(children) ? (
+            <div className={`mt-2 text-sm ${bodyColor}`}>{children}</div>
+          ) : null}
         </div>
       </div>
     </div>
@@ -35,49 +44,42 @@ export const Alert: React.FC<{
 
 export const ErrorAlert: React.FC<{
   heading: string;
-  children: React.ReactNode;
-}> = ({ heading = "Error", children }) => (
+  children?: React.ReactNode;
+}> = (props) => (
   <Alert
-    heading={heading}
-    children={children}
+    {...props}
     backgroundColor="bg-red-100"
     headingColor="text-red-800"
     bodyColor="text-red-700"
-    icon={<XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />}
+    icon={XCircleIcon}
+    iconColor="text-red-400"
   />
 );
 
 export const MessageAlert: React.FC<{
   heading: string;
-  children: React.ReactNode;
-}> = ({ heading = "Error", children }) => (
+  children?: React.ReactNode;
+}> = (props) => (
   <Alert
-    heading={heading}
-    children={children}
+    {...props}
     backgroundColor="bg-slate-100"
     headingColor="text-slate-700"
     bodyColor="text-slate-700"
-    icon={
-      <InformationCircleIcon
-        className="h-5 w-5 text-slate-400"
-        aria-hidden="true"
-      />
-    }
+    icon={InformationCircleIcon}
+    iconColor="text-slate-400"
   />
 );
 
 export const SuccessAlert: React.FC<{
   heading: string;
-  children: React.ReactNode;
-}> = ({ heading = "Error", children }) => (
+  children?: React.ReactNode;
+}> = (props) => (
   <Alert
-    heading={heading}
-    children={children}
+    {...props}
     backgroundColor="bg-green-50"
     headingColor="text-green-800"
     bodyColor="text-green-700"
-    icon={
-      <CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
-    }
+    icon={CheckCircleIcon}
+    iconColor="text-green-400"
   />
 );

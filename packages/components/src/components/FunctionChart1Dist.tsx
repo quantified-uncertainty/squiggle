@@ -151,7 +151,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   chartSettings,
   environment,
   height,
-}: FunctionChart1DistProps) => {
+}) => {
   let [mouseOverlay, setMouseOverlay] = React.useState(0);
   function handleHover(_name: string, value: unknown) {
     setMouseOverlay(value as number);
@@ -170,16 +170,14 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
         },
       };
   let showChart =
-    mouseItem.tag === "Ok" && mouseItem.value.tag == "distribution" ? (
+    mouseItem.tag === "Ok" && mouseItem.value.tag === "distribution" ? (
       <DistributionChart
         distribution={mouseItem.value.value}
         width={400}
         height={50}
         showSummary={false}
       />
-    ) : (
-      <></>
-    );
+    ) : null;
 
   let getPercentilesMemoized = React.useMemo(
     () => getPercentiles({ chartSettings, fn, environment }),

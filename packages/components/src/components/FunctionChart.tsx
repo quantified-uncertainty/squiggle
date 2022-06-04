@@ -22,7 +22,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   chartSettings,
   environment,
   height,
-}: FunctionChartProps) => {
+}) => {
   if (fn.parameters.length > 1) {
     return (
       <MessageAlert heading="Function Display Not Supported">
