@@ -200,8 +200,6 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("delta", [EvNumber(f)]) =>
-    SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>
     SymbolicConstructors.threeFloat(fnName)
     ->E.R.bind(r => r(f1, f2, f3))

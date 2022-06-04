@@ -55,7 +55,7 @@ module FRType = {
     switch t {
     | FRTypeNumber => "number"
     | FRTypeNumeric => "numeric"
-    | FRTypeDistOrNumber => "frValueDistOrNumber"
+    | FRTypeDistOrNumber => "distribution|number"
     | FRTypeRecord(r) => {
         let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
         `{${r->E.A2.fmap(input)->E.A2.joinWith(", ")}}`

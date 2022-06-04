@@ -133,6 +133,12 @@ to(5,10)
     (),
   ),
   Function.make(
+    ~name="PointMass",
+    ~examples=`pointMass(0.5)`,
+    ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.makeSafe)],
+    (),
+  ),
+  Function.make(
     ~name="toContinuousPointSet",
     ~description="Converts a set of points to a continuous distribution",
     ~examples=`toContinuousPointSet([

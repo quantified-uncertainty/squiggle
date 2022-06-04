@@ -1,7 +1,8 @@
 ---
-sidebar_position: 5
-title: API
+sidebar_position: 1
+title: Distribution Creation
 ---
+
 ## Normal Distribution
 
 **Definitions**  

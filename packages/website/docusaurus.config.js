@@ -20,7 +20,6 @@ const config = {
   projectName: "squiggle", // Usually your repo name.
 
   plugins: [
-    "docusaurus-tailwindcss",
     () => ({
       configureWebpack(config, isServer, utils, content) {
         return {
