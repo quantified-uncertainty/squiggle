@@ -20,25 +20,6 @@ const config = {
   projectName: "squiggle", // Usually your repo name.
 
   plugins: [
-    "docusaurus-tailwindcss",
-    () => ({
-      configureWebpack(config, isServer, utils, content) {
-        return {
-          resolve: {
-            alias: {
-              "@quri/squiggle-components": path.resolve(
-                __dirname,
-                "../components/src"
-              ),
-              "@quri/squiggle-lang": path.resolve(
-                __dirname,
-                "../squiggle-lang/src/js"
-              ),
-            },
-          },
-        };
-      },
-    }),
   ],
 
   presets: [
