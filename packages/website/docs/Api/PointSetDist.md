@@ -9,13 +9,11 @@ title: Point Set Distribution
 (list<{x: number, y: number}>): pointSetDist
 ```
 
-
 ### makeDiscrete
 
 ```javascript
 (list<{x: number, y: number}>): pointSetDist
 ```
-
 
 ### map
 

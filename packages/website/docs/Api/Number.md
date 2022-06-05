@@ -3,13 +3,11 @@ sidebar_position: 6
 title: Number
 ---
 
-
 ### ceil
 
 ```javascript
 (number): number
 ```
-
 
 ### floor
 
@@ -17,13 +15,11 @@ title: Number
 (number): number
 ```
 
-
 ### abs
 
 ```javascript
 (number): number
 ```
-
 
 ### round
 
@@ -31,13 +27,11 @@ title: Number
 (number): number
 ```
 
-
 ### max
 
 ```javascript
 (list<number>): number
 ```
-
 
 ### maxBy
 
@@ -45,13 +39,11 @@ title: Number
 (list<number>, fn(element)):number
 ```
 
-
 ### min
 
 ```javascript
 (list<number>): number
 ```
-
 
 ### minBy
 
@@ -59,20 +51,17 @@ title: Number
 (list<number>, fn(element)):number
 ```
 
-
 ### random
 
 ```javascript
-number
+number;
 ```
-
 
 ### randomInt
 
 ```javascript
-number
+number;
 ```
-
 
 ### mean
 
@@ -80,13 +69,11 @@ number
 (list<number>): number
 ```
 
-
 ### median
 
 ```javascript
 (list<number>): number
 ```
-
 
 ### mode
 
@@ -94,13 +81,11 @@ number
 (list<number>): number
 ```
 
-
 ### std
 
 ```javascript
 (list<number>): number
 ```
-
 
 ### variance
 
@@ -108,13 +93,11 @@ number
 (list<number>): number
 ```
 
-
 ### unaryMinus
 
 ```javascript
 (number): number
 ```
-
 
 ### equal
 
@@ -122,13 +105,11 @@ number
 (number, number): boolean
 ```
 
-
 ### add
 
 ```javascript
 (number, number): number
 ```
-
 
 ### sum
 
@@ -136,13 +117,11 @@ number
 (number, number): number
 ```
 
-
 ### multiply
 
 ```javascript
 (number, number): number
 ```
-
 
 ### product
 
@@ -150,13 +129,11 @@ number
 (number, number): number
 ```
 
-
 ### subtract
 
 ```javascript
 (number, number): number
 ```
-
 
 ### divide
 
@@ -164,13 +141,11 @@ number
 (number, number): number
 ```
 
-
 ### pow
 
 ```javascript
 (number, number): number
 ```
-
 
 ### exp
 
@@ -178,13 +153,11 @@ number
 (number): number
 ```
 
-
 ### log
 
 ```javascript
 (number, number=Math.e): number
 ```
-
 
 ### log10
 

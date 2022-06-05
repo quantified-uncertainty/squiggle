@@ -9,13 +9,11 @@ title: Duration
 (duration):string
 ```
 
-
 ### minutes
 
 ```javascript
 (number):duration
 ```
-
 
 ### hours
 
@@ -23,13 +21,11 @@ title: Duration
 (number):duration
 ```
 
-
 ### days
 
 ```javascript
 (number):duration
 ```
-
 
 ### years
 
@@ -37,13 +33,11 @@ title: Duration
 (number):duration
 ```
 
-
 ### toHours
 
 ```javascript
 (duration):number
 ```
-
 
 ### toMinutes
 
@@ -51,13 +45,11 @@ title: Duration
 (duration):number
 ```
 
-
 ### toDays
 
 ```javascript
 (duration):number
 ```
-
 
 ### toYears
 
@@ -65,13 +57,11 @@ title: Duration
 (duration):number
 ```
 
-
 ### add
 
 ```javascript
 (duration, duration):duration
 ```
-
 
 ### subtract
 
@@ -79,13 +69,11 @@ title: Duration
 (duration, duration):duration
 ```
 
-
 ### multiply
 
 ```javascript
 (duration, duration):duration
 ```
-
 
 ### divide
 

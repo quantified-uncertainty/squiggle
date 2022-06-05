@@ -5,115 +5,136 @@ title: Distribution Creation
 
 ## Normal Distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-normal(frValueDistOrNumber, frValueDistOrNumber)
+normal(frValueDistOrNumber, frValueDistOrNumber);
 ```
+
 ```javascript
 normal(dict<{p5: frValueDistOrNumber, p95: frValueDistOrNumber}>)
 ```
+
 ```javascript
 normal(dict<{mean: frValueDistOrNumber, stdev: frValueDistOrNumber}>)
 ```
 
 **Examples**
+
 ```javascript
-normal(5,1)
-normal({p5: 4, p95: 10})
-normal({mean: 5, stdev: 2})
+normal(5, 1);
+normal({ p5: 4, p95: 10 });
+normal({ mean: 5, stdev: 2 });
 ```
 
 ## Lognormal Distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-lognormal(frValueDistOrNumber, frValueDistOrNumber)
+lognormal(frValueDistOrNumber, frValueDistOrNumber);
 ```
+
 ```javascript
 lognormal(dict<{p5: frValueDistOrNumber, p95: frValueDistOrNumber}>)
 ```
+
 ```javascript
 lognormal(dict<{mean: frValueDistOrNumber, stdev: frValueDistOrNumber}>)
 ```
 
 **Examples**
+
 ```javascript
-lognormal(0.5, 0.8)
-lognormal({p5: 4, p95: 10})
-lognormal({mean: 5, stdev: 2})
+lognormal(0.5, 0.8);
+lognormal({ p5: 4, p95: 10 });
+lognormal({ mean: 5, stdev: 2 });
 ```
 
 ## Uniform Distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-uniform(frValueDistOrNumber, frValueDistOrNumber)
+uniform(frValueDistOrNumber, frValueDistOrNumber);
 ```
 
 **Examples**
+
 ```javascript
-uniform(10, 12)
+uniform(10, 12);
 ```
 
 ## Beta Distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-beta(frValueDistOrNumber, frValueDistOrNumber)
+beta(frValueDistOrNumber, frValueDistOrNumber);
 ```
 
 **Examples**
+
 ```javascript
-beta(20, 25)
+beta(20, 25);
 ```
 
 ## Cauchy Distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-cauchy(frValueDistOrNumber, frValueDistOrNumber)
+cauchy(frValueDistOrNumber, frValueDistOrNumber);
 ```
 
 **Examples**
+
 ```javascript
-cauchy(5, 1)
+cauchy(5, 1);
 ```
 
 ## Gamma Distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-gamma(frValueDistOrNumber, frValueDistOrNumber)
+gamma(frValueDistOrNumber, frValueDistOrNumber);
 ```
 
 **Examples**
+
 ```javascript
-gamma(5, 1)
+gamma(5, 1);
 ```
 
 ## Logistic Distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-logistic(frValueDistOrNumber, frValueDistOrNumber)
+logistic(frValueDistOrNumber, frValueDistOrNumber);
 ```
 
 **Examples**
+
 ```javascript
-gamma(5, 1)
+gamma(5, 1);
 ```
 
 ## To (Distribution)
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-to(frValueDistOrNumber, frValueDistOrNumber)
+to(frValueDistOrNumber, frValueDistOrNumber);
 ```
+
 ```javascript
-credibleIntervalToDistribution(frValueDistOrNumber, frValueDistOrNumber)
+credibleIntervalToDistribution(frValueDistOrNumber, frValueDistOrNumber);
 ```
 
 **Examples**
+
 ```javascript
 5 to 10
 to(5,10)
@@ -122,73 +143,86 @@ to(5,10)
 
 ## Exponential
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-exponential(frValueDistOrNumber)
+exponential(frValueDistOrNumber);
 ```
 
 **Examples**
+
 ```javascript
-exponential(2)
+exponential(2);
 ```
 
 ## Bernoulli
 
-**Definitions**  
+**Definitions**
+
 ```javascript
-bernoulli(frValueDistOrNumber)
+bernoulli(frValueDistOrNumber);
 ```
 
 **Examples**
+
 ```javascript
-bernoulli(0.5)
+bernoulli(0.5);
 ```
 
 ## toContinuousPointSet
+
 Converts a set of points to a continuous distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
 toContinuousPointSet(array<dict<{x: numeric, y: numeric}>>)
 ```
 
 **Examples**
+
 ```javascript
 toContinuousPointSet([
-  {x: 0, y: 0.1},
-  {x: 1, y: 0.2},
-  {x: 2, y: 0.15},
-  {x:3, y: 0.1}
-])
+  { x: 0, y: 0.1 },
+  { x: 1, y: 0.2 },
+  { x: 2, y: 0.15 },
+  { x: 3, y: 0.1 },
+]);
 ```
 
 ## toDiscretePointSet
+
 Converts a set of points to a discrete distribution
 
-**Definitions**  
+**Definitions**
+
 ```javascript
 toDiscretePointSet(array<dict<{x: numeric, y: numeric}>>)
 ```
 
 **Examples**
+
 ```javascript
 toDiscretePointSet([
-  {x: 0, y: 0.1},
-  {x: 1, y: 0.2},
-  {x: 2, y: 0.15},
-  {x:3, y: 0.1}
-])
+  { x: 0, y: 0.1 },
+  { x: 1, y: 0.2 },
+  { x: 2, y: 0.15 },
+  { x: 3, y: 0.1 },
+]);
 ```
 
 ## Declaration (Continuous Function)
+
 Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.
 
-**Definitions**  
+**Definitions**
+
 ```javascript
 declareFn(dict<{fn: lambda, inputs: array<dict<{min: number, max: number}>>}>)
 ```
 
 **Examples**
+
 ```javascript
 declareFn({
   fn: {|a,b| a },

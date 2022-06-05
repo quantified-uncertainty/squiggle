@@ -2,6 +2,7 @@
 sidebar_position: 2
 title: Distribution
 ---
+
 ## Main
 
 ### mixture
@@ -11,11 +12,13 @@ title: Distribution
 ```
 
 **Examples**
+
 ```javascript
-mixture(normal(5,1), normal(10,1)) 
+mixture(normal(5, 1), normal(10, 1));
 ```
 
 ### sample
+
 Get one random sample from the distribution
 
 ```javascript
@@ -23,11 +26,13 @@ Get one random sample from the distribution
 ```
 
 **Examples**
+
 ```javascript
-sample(normal(5,2))
+sample(normal(5, 2));
 ```
 
 ### sampleN
+
 Get n random samples from the distribution
 
 ```javascript
@@ -35,11 +40,13 @@ Get n random samples from the distribution
 ```
 
 **Examples**
+
 ```javascript
-sample(normal(5,2), 100)
+sample(normal(5, 2), 100);
 ```
 
 ### mean
+
 Get the distribution mean
 
 ```javascript
@@ -47,8 +54,9 @@ Get the distribution mean
 ```
 
 **Examples**
+
 ```javascript
-mean(normal(5,2))
+mean(normal(5, 2));
 ```
 
 ### stdev
@@ -57,20 +65,17 @@ mean(normal(5,2))
 (distribution):number
 ```
 
-
 ### variance
 
 ```javascript
 (distribution):number
 ```
 
-
 ### mode
 
 ```javascript
 (distribution):number
 ```
-
 
 ### cdf
 
@@ -79,8 +84,9 @@ mean(normal(5,2))
 ```
 
 **Examples**
+
 ```javascript
-cdf(normal(5,2), 3)
+cdf(normal(5, 2), 3);
 ```
 
 ### pdf
@@ -90,8 +96,9 @@ cdf(normal(5,2), 3)
 ```
 
 **Examples**
+
 ```javascript
-pdf(normal(5,2), 3)
+pdf(normal(5, 2), 3);
 ```
 
 ### pmf
@@ -101,8 +108,9 @@ pdf(normal(5,2), 3)
 ```
 
 **Examples**
+
 ```javascript
-pmf(bernoulli(0.3), 0) // 0.7
+pmf(bernoulli(0.3), 0); // 0.7
 ```
 
 ### inv
@@ -112,11 +120,13 @@ pmf(bernoulli(0.3), 0) // 0.7
 ```
 
 **Examples**
+
 ```javascript
-inv(normal(5,2), 0.5)
+inv(normal(5, 2), 0.5);
 ```
 
 ### toPointSet
+
 Converts a distribution to the pointSet format
 
 ```javascript
@@ -124,11 +134,13 @@ Converts a distribution to the pointSet format
 ```
 
 **Examples**
+
 ```javascript
-toPointSet(normal(5,2))
+toPointSet(normal(5, 2));
 ```
 
 ### toSampleSet
+
 Converts a distribution to the sampleSet format, with n samples
 
 ```javascript
@@ -136,11 +148,13 @@ Converts a distribution to the sampleSet format, with n samples
 ```
 
 **Examples**
+
 ```javascript
-toSampleSet(normal(5,2))
+toSampleSet(normal(5, 2));
 ```
 
 ### truncateLeft
+
 Truncates the left side of a distribution. Returns either a pointSet distribution or a symbolic distribution.
 
 ```javascript
@@ -148,11 +162,13 @@ Truncates the left side of a distribution. Returns either a pointSet distributio
 ```
 
 **Examples**
+
 ```javascript
-truncateLeft(normal(5,2), 3)
+truncateLeft(normal(5, 2), 3);
 ```
 
 ### truncateRight
+
 Truncates the right side of a distribution. Returns either a pointSet distribution or a symbolic distribution.
 
 ```javascript
@@ -160,11 +176,13 @@ Truncates the right side of a distribution. Returns either a pointSet distributi
 ```
 
 **Examples**
+
 ```javascript
-truncateLeft(normal(5,2), 6)
+truncateLeft(normal(5, 2), 6);
 ```
 
 ### klDivergence
+
 Kullback–Leibler divergence between two distributions
 
 ```javascript
@@ -172,8 +190,9 @@ Kullback–Leibler divergence between two distributions
 ```
 
 **Examples**
+
 ```javascript
-klDivergence(normal(5,2), normal(5,4)) // returns 0.57
+klDivergence(normal(5, 2), normal(5, 4)); // returns 0.57
 ```
 
 ### logScore
@@ -183,8 +202,9 @@ klDivergence(normal(5,2), normal(5,4)) // returns 0.57
 ```
 
 **Examples**
+
 ```javascript
-logScore({estimate: normal(5,2), prior: normal(5.5,4), answer: 2.3})
+logScore({ estimate: normal(5, 2), prior: normal(5.5, 4), answer: 2.3 });
 ```
 
 ### toString
@@ -194,11 +214,13 @@ logScore({estimate: normal(5,2), prior: normal(5.5,4), answer: 2.3})
 ```
 
 **Examples**
+
 ```javascript
-toString(normal(5,2))
+toString(normal(5, 2));
 ```
 
 ### toSparkline
+
 Produce a sparkline of length n
 
 ```javascript
@@ -206,11 +228,13 @@ Produce a sparkline of length n
 ```
 
 **Examples**
+
 ```javascript
-toSparkline(normal(5,2), 10)
+toSparkline(normal(5, 2), 10);
 ```
 
 ### inspect
+
 Prints the value of the distribution to the Javascript console, then returns the distribution.
 
 ```javascript
@@ -218,11 +242,13 @@ Prints the value of the distribution to the Javascript console, then returns the
 ```
 
 **Examples**
+
 ```javascript
-inspect(normal(5,2))
+inspect(normal(5, 2));
 ```
 
 ### normalize
+
 Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1.
 
 ```javascript
@@ -230,11 +256,13 @@ Normalize a distribution. This means scaling it appropriately so that it's cumul
 ```
 
 **Examples**
+
 ```javascript
-normalize(normal(5,2))
+normalize(normal(5, 2));
 ```
 
 ### isNormalized
+
 Check of a distribution is normalized. Most distributions are typically normalized, but there are some commands that could produce non-normalized distributions.
 
 ```javascript
@@ -242,11 +270,13 @@ Check of a distribution is normalized. Most distributions are typically normaliz
 ```
 
 **Examples**
+
 ```javascript
-isNormalized(normal(5,2)) // returns true
+isNormalized(normal(5, 2)); // returns true
 ```
 
 ### integralSum
+
 Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.
 
 ```javascript
@@ -254,8 +284,9 @@ Get the sum of the integral of a distribution. If the distribution is normalized
 ```
 
 **Examples**
+
 ```javascript
-integralSum(normal(5,2))
+integralSum(normal(5, 2));
 ```
 
 ### add
@@ -264,13 +295,11 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### sum
 
 ```javascript
 (list<distributionLike>): distribution
 ```
-
 
 ### multiply
 
@@ -278,13 +307,11 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### product
 
 ```javascript
 (list<distributionLike>): distribution
 ```
-
 
 ### subtract
 
@@ -292,13 +319,11 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### divide
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
-
 
 ### pow
 
@@ -306,13 +331,11 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### exp
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
-
 
 ### log
 
@@ -320,13 +343,11 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### log10
 
 ```javascript
 (distributionLike, distributionLike):distribution
 ```
-
 
 ### unaryMinus
 
@@ -334,13 +355,11 @@ integralSum(normal(5,2))
 (distribution):distribution
 ```
 
-
 ### dotAdd
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
-
 
 ### dotSum
 
@@ -348,13 +367,11 @@ integralSum(normal(5,2))
 (list<distributionLike>): distribution
 ```
 
-
 ### dotMultiply
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
-
 
 ### dotProduct
 
@@ -362,13 +379,11 @@ integralSum(normal(5,2))
 (list<distributionLike>): distribution
 ```
 
-
 ### dotSubtract
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
-
 
 ### dotDivide
 
@@ -376,13 +391,11 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### dotPow
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
-
 
 ### dotExp
 
@@ -390,13 +403,11 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### scaleMultiply
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
-
 
 ### scalePow
 
@@ -404,13 +415,11 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### scaleExp
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
-
 
 ### scaleLog
 
@@ -418,17 +427,14 @@ integralSum(normal(5,2))
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### scaleLog10
 
 ```javascript
 (distributionLike, distributionLike): distribution
 ```
 
-
 ### scaleLogWithThreshold
 
 ```javascript
 (distributionLike, distributionLike, number): distribution
 ```
-
