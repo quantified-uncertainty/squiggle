@@ -2,26 +2,24 @@
 sidebar_position: 2
 title: Distribution
 ---
+## Main
 
+### mixture
 
-## mixture
-
-**Definition**  
 ```javascript
-mixture(...distributions, weights:list<float>):distribution
+(...distributionLike, weights:list<float>):distribution
 ```
 
 **Examples**
 ```javascript
-mixture(normal(5,1), normal(10,1))
+mixture(normal(5,1), normal(10,1)) 
 ```
 
-## sample
+### sample
 Get one random sample from the distribution
 
-**Definition**  
 ```javascript
-sample(distribution):number
+(distribution):number
 ```
 
 **Examples**
@@ -29,12 +27,11 @@ sample(distribution):number
 sample(normal(5,2))
 ```
 
-## sampleN
+### sampleN
 Get n random samples from the distribution
 
-**Definition**  
 ```javascript
-sample(distribution, number):list<number>
+(distribution, number):list<number>
 ```
 
 **Examples**
@@ -42,12 +39,11 @@ sample(distribution, number):list<number>
 sample(normal(5,2), 100)
 ```
 
-## mean
+### mean
 Get the distribution mean
 
-**Definition**  
 ```javascript
-mean(distribution):number
+(distribution):number
 ```
 
 **Examples**
@@ -55,11 +51,31 @@ mean(distribution):number
 mean(normal(5,2))
 ```
 
-## cdf
+### stdev
 
-**Definition**  
 ```javascript
-cdf(distribution, number):number
+(distribution):number
+```
+
+
+### variance
+
+```javascript
+(distribution):number
+```
+
+
+### mode
+
+```javascript
+(distribution):number
+```
+
+
+### cdf
+
+```javascript
+(distribution, number):number
 ```
 
 **Examples**
@@ -67,11 +83,10 @@ cdf(distribution, number):number
 cdf(normal(5,2), 3)
 ```
 
-## pdf
+### pdf
 
-**Definition**  
 ```javascript
-pdf(distribution, number):number
+(distribution, number):number
 ```
 
 **Examples**
@@ -79,11 +94,21 @@ pdf(distribution, number):number
 pdf(normal(5,2), 3)
 ```
 
-## inv
+### pmf
 
-**Definition**  
 ```javascript
-inv(distribution, number):number
+(distribution, number):number
+```
+
+**Examples**
+```javascript
+pmf(bernoulli(0.3), 0) // 0.7
+```
+
+### inv
+
+```javascript
+(distribution, number):number
 ```
 
 **Examples**
@@ -91,12 +116,11 @@ inv(distribution, number):number
 inv(normal(5,2), 0.5)
 ```
 
-## toPointSet
+### toPointSet
 Converts a distribution to the pointSet format
 
-**Definition**  
 ```javascript
-toPointSet(distribution):pointSetDistribution
+(distribution):pointSetDistribution
 ```
 
 **Examples**
@@ -104,12 +128,11 @@ toPointSet(distribution):pointSetDistribution
 toPointSet(normal(5,2))
 ```
 
-## toSampleSet
+### toSampleSet
 Converts a distribution to the sampleSet format, with n samples
 
-**Definition**  
 ```javascript
-toSampleSet(distribution,n):sampleSetDistribution
+(distribution,n):sampleSetribution
 ```
 
 **Examples**
@@ -117,12 +140,11 @@ toSampleSet(distribution,n):sampleSetDistribution
 toSampleSet(normal(5,2))
 ```
 
-## truncateLeft
+### truncateLeft
 Truncates the left side of a distribution. Returns either a pointSet distribution or a symbolic distribution.
 
-**Definition**  
 ```javascript
-truncateLeft(distribution, l:number):distribution
+(distribution, l:number, {normalize: boolean=true}):distribution
 ```
 
 **Examples**
@@ -130,12 +152,11 @@ truncateLeft(distribution, l:number):distribution
 truncateLeft(normal(5,2), 3)
 ```
 
-## truncateRight
+### truncateRight
 Truncates the right side of a distribution. Returns either a pointSet distribution or a symbolic distribution.
 
-**Definition**  
 ```javascript
-truncateRight(distribution, r:number):distribution
+(distribution, r:number, {normalize: boolean=true}):distribution
 ```
 
 **Examples**
@@ -143,12 +164,11 @@ truncateRight(distribution, r:number):distribution
 truncateLeft(normal(5,2), 6)
 ```
 
-## klDivergence
+### klDivergence
 Kullback–Leibler divergence between two distributions
 
-**Definition**  
 ```javascript
-klDivergence(distribution, distribution):number
+(distribution, distribution):number
 ```
 
 **Examples**
@@ -156,23 +176,21 @@ klDivergence(distribution, distribution):number
 klDivergence(normal(5,2), normal(5,4)) // returns 0.57
 ```
 
-## logScoreWithPointAnswer
+### logScore
 
-**Definition**  
 ```javascript
-logScoreWithPointAnswer(distribution, number):number
+({estimate: distribution, prior?: distribution, answer: distribution|number}):number
 ```
 
 **Examples**
 ```javascript
-logScoreWithPointAnswer(normal(5,2), 3) // returns 2.11
+logScore({estimate: normal(5,2), prior: normal(5.5,4), answer: 2.3})
 ```
 
-## toString
+### toString
 
-**Definition**  
 ```javascript
-toString(distribution):string
+(distribution):string
 ```
 
 **Examples**
@@ -180,25 +198,23 @@ toString(distribution):string
 toString(normal(5,2))
 ```
 
-## toSparkline
+### toSparkline
 Produce a sparkline of length n
 
-**Definition**  
 ```javascript
-toSparkline(distribution, n=20):string
+(distribution, n=20):string
 ```
 
 **Examples**
 ```javascript
-toSparkline(normal(5,2), 10):string
+toSparkline(normal(5,2), 10)
 ```
 
-## inspect
+### inspect
 Prints the value of the distribution to the Javascript console, then returns the distribution.
 
-**Definition**  
 ```javascript
-inspect(distribution):distribution
+(distribution):distribution
 ```
 
 **Examples**
@@ -206,12 +222,11 @@ inspect(distribution):distribution
 inspect(normal(5,2))
 ```
 
-## normalize
+### normalize
 Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1.
 
-**Definition**  
 ```javascript
-normalize(distribution):distribution
+(distribution):distribution
 ```
 
 **Examples**
@@ -219,12 +234,11 @@ normalize(distribution):distribution
 normalize(normal(5,2))
 ```
 
-## isNormalized
+### isNormalized
 Check of a distribution is normalized. Most distributions are typically normalized, but there are some commands that could produce non-normalized distributions.
 
-**Definition**  
 ```javascript
-isNormalized(distribution):bool
+(distribution):bool
 ```
 
 **Examples**
@@ -232,12 +246,11 @@ isNormalized(distribution):bool
 isNormalized(normal(5,2)) // returns true
 ```
 
-## integralSum
+### integralSum
 Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.
 
-**Definition**  
 ```javascript
-integralSum(distribution):number
+(distribution):number
 ```
 
 **Examples**
@@ -245,190 +258,177 @@ integralSum(distribution):number
 integralSum(normal(5,2))
 ```
 
-## log
+### add
 
-**Definition**  
 ```javascript
-log(distribution):distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## log10
+### sum
 
-**Definition**  
 ```javascript
-log10(distribution):distribution
+(list<distributionLike>): distribution
 ```
 
 
-## unaryMinus
+### multiply
 
-**Definition**  
 ```javascript
-unaryMinus(distribution):distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## add
+### product
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(list<distributionLike>): distribution
 ```
 
 
-## multiply
+### subtract
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## subtract
+### divide
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## divide
+### pow
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## pow
+### exp
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## dotAdd
+### log
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## dotMultiply
+### log10
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike):distribution
 ```
 
 
-## dotSubtract
+### unaryMinus
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distribution):distribution
 ```
 
 
-## dotDivide
+### dotAdd
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## dotPow
+### dotSum
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(list<distributionLike>): distribution
 ```
 
 
-## dotExp
+### dotMultiply
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## scaleLog
+### dotProduct
 
-**Definition**  
 ```javascript
-scaleLog(distribution): distribution
+(list<distributionLike>): distribution
 ```
 
 
-## scaleLog10
+### dotSubtract
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## scaleLogWithThreshold
+### dotDivide
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## scalePow
+### dotPow
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## scaleExp
+### dotExp
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## toInternalSampleArray
-Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toInternalSampleArray() maintains order and length.
+### scaleMultiply
 
-**Definition**  
 ```javascript
-toInternalSampleArray(sampleSetDist):list<number>
-```
-
-**Examples**
-```javascript
-toInternalSampleArray(toSampleSet(normal(5,2)))
-```
-
-## mapSamples
-
-**Definition**  
-```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## mapSamples2
+### scalePow
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
 
 
-## mapSamples3
+### scaleExp
 
-**Definition**  
 ```javascript
-dotSubtract(distribution, distribution): distribution
+(distributionLike, distributionLike): distribution
 ```
+
+
+### scaleLog
+
+```javascript
+(distributionLike, distributionLike): distribution
+```
+
+
+### scaleLog10
+
+```javascript
+(distributionLike, distributionLike): distribution
+```
+
+
+### scaleLogWithThreshold
+
+```javascript
+(distributionLike, distributionLike, number): distribution
+```
+
