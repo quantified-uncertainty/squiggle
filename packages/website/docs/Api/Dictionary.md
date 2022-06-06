@@ -4,49 +4,55 @@ title: Dictionary
 ---
 
 ### toString
-
-```javascript
-(dict<a>):string
 ```
+toString: (dict<'a>) => string
+```
+
+
 
 ### get
-
-```javascript
-(dict<a>, string):a
 ```
+Dict.get: (dict<'a>, string) => a
+```
+
+
 
 ### set
-
-```javascript
-(dict<a>, string, a):a
 ```
+Dict.set: (dict<'a>, string, a) => a
+```
+
+
 
 ### toPairs
-
-```javascript
-(dict<a>):list<list<string|a>>
 ```
+Dict.toPairs: (dict<'a>) => list<list<string|a>>
+```
+
+
 
 ### keys
-
-```javascript
-(dict<a>):list<string>
 ```
+Dict.keys: (dict<'a>) => list<string>
+```
+
+
 
 ### values
-
-```javascript
-(dict<a>):list<a>
 ```
+Dict.values: (dict<'a>) => list<'a>
+```
+
+
 
 ### merge
-
-```javascript
-(dict<a>, dict<b>):dict<a|b>
+```
+Dict.merge: (dict<'a>, dict<'b>) => dict<'a|b>
 ```
 
-### mergeMany
 
-```javascript
-(list<dict<a>>):dict<a>
+
+### mergeMany
+```
+Dict.mergeMany: (list<dict<'a>>) => dict<'a>
 ```

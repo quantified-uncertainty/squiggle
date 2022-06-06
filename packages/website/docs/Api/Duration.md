@@ -4,79 +4,90 @@ title: Duration
 ---
 
 ### toString
-
-```javascript
-(duration):string
 ```
+toString: (duration) => string
+```
+
+
 
 ### minutes
-
-```javascript
-(number):duration
 ```
+minutes: (number) => duration
+```
+
+
 
 ### hours
-
-```javascript
-(number):duration
 ```
+hours: (number) => duration
+```
+
+
 
 ### days
-
-```javascript
-(number):duration
 ```
+days: (number) => duration
+```
+
+
 
 ### years
-
-```javascript
-(number):duration
 ```
+years: (number) => duration
+```
+
+
 
 ### toHours
-
-```javascript
-(duration):number
 ```
+Duration.toHours: (duration) => number
+```
+
+
 
 ### toMinutes
-
-```javascript
-(duration):number
 ```
+Duration.toMinutes: (duration) => number
+```
+
+
 
 ### toDays
-
-```javascript
-(duration):number
 ```
+Duration.toDays: (duration) => number
+```
+
+
 
 ### toYears
-
-```javascript
-(duration):number
 ```
+Duration.toYears: (duration) => number
+```
+
+
 
 ### add
-
-```javascript
-(duration, duration):duration
 ```
+add: (duration, duration) => duration
+```
+
+
 
 ### subtract
-
-```javascript
-(duration, duration):duration
 ```
+subtract: (duration, duration) => duration
+```
+
+
 
 ### multiply
-
-```javascript
-(duration, duration):duration
+```
+multiply: (duration, duration) => duration
 ```
 
-### divide
 
-```javascript
-(duration, duration):duration
+
+### divide
+```
+divide: (duration, duration) => duration
 ```
