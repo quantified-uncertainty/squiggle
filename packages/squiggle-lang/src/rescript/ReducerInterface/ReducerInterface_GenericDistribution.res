@@ -350,20 +350,5 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-// I expect that it's important to build this first, so it doesn't get recalculated for each tryRegistry() call.
-let registry = FunctionRegistry_Library.registry
-
-let tryRegistry = ((fnName, args): ExpressionValue.functionCall, env) => {
-  FunctionRegistry_Core.Registry.matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
-    E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
-  )
-}
-
-let dispatch = (call: ExpressionValue.functionCall, environment) => {
-  let regularDispatch =
-    dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
-  switch regularDispatch {
-  | Some(x) => Some(x)
-  | None => tryRegistry(call, environment)
-  }
-}
+let dispatch = (call: ExpressionValue.functionCall, environment) =>
+  dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
