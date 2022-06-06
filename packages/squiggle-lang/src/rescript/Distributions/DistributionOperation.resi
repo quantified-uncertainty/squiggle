@@ -49,6 +49,10 @@ module Constructors: {
   @genType
   let mean: (~env: env, genericDist) => result<float, error>
   @genType
+  let stdev: (~env: env, genericDist) => result<float, error>
+  @genType
+  let variance: (~env: env, genericDist) => result<float, error>
+  @genType
   let sample: (~env: env, genericDist) => result<float, error>
   @genType
   let cdf: (~env: env, genericDist, float) => result<float, error>
