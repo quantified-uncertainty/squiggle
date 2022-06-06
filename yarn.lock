@@ -7043,7 +7043,7 @@ commander@^8.0.0, commander@^8.3.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-8.3.0.tgz#4837ea1b2da67b9c616a67afbb0fafee567bca66"
   integrity sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==
 
-commander@^9.2.0:
+commander@^9.3.0:
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-9.3.0.tgz#f619114a5a2d2054e0d9ff1b31d5ccf89255e26b"
   integrity sha512-hv95iU5uXPbK83mjrJKuZyFM/LBAoCV/XhVGkS5Je6tl7sxr6A0ITMw5WoRV46/UaJ46Nllm3Xt7IaJhXTIkzw==
@@ -13586,12 +13586,12 @@ pdfast@^0.2.0:
   resolved "https://registry.yarnpkg.com/pdfast/-/pdfast-0.2.0.tgz#8cbc556e1bf2522177787c0de2e0d4373ba885c9"
   integrity sha1-jLxVbhvyUiF3eHwN4uDUNzuohck=
 
-peggy@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/peggy/-/peggy-2.0.0.tgz#878f3c25719bc6d44a84c04069cfab8cfd043215"
-  integrity sha512-bvK2jdxHWpxb+0DxD6ibq+iNppJl3UtMSdRwyOvVYc3O3lFM/0oyqcF1Ggwwb2/JS9hrKsPnR0Eheys0J+ykEA==
+peggy@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/peggy/-/peggy-2.0.1.tgz#d9bfde03b18d6ec2b9b85b2aa5af51577850152c"
+  integrity sha512-mBqfmdUAOVn7RILpXTbcRBhLfTR4Go0SresSnivGDdRylBOyVFJncFiVyCNNpPWq8HmgeRleXHs/Go4o8kQVXA==
   dependencies:
-    commander "^9.2.0"
+    commander "^9.3.0"
     source-map-generator "0.8.0"
 
 performance-now@^2.1.0:
