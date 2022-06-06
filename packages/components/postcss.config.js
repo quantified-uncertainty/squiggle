@@ -3,5 +3,5 @@ module.exports = {
     tailwindcss: {},
     autoprefixer: {},
     cssnano: {},
-  }
-}
+  },
+};

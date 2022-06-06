@@ -19,8 +19,7 @@ const config = {
   organizationName: "quantified-uncertainty", // Usually your GitHub org/user name.
   projectName: "squiggle", // Usually your repo name.
 
-  plugins: [
-  ],
+  plugins: [],
 
   presets: [
     [
@@ -42,7 +41,10 @@ const config = {
             "https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/website/",
         },
         theme: {
-          customCss: require.resolve("./src/css/custom.css"),
+          customCss: [
+            require.resolve("./src/css/custom.css"),
+            require.resolve("@quri/squiggle-components/dist/main.css"),
+          ],
         },
       }),
     ],
