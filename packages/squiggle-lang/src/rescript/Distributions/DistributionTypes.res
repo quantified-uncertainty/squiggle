@@ -30,9 +30,9 @@ module Error = {
   @genType
   let toString = (err: error): string =>
     switch err {
-    | NotYetImplemented => "Function Not Yet Implemented"
+    | NotYetImplemented => "Function not yet implemented"
     | Unreachable => "Unreachable"
-    | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift is Invalid"
+    | DistributionVerticalShiftIsInvalid => "Distribution vertical shift is invalid"
     | ArgumentError(s) => `Argument Error ${s}`
     | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
     | SampleSetError(TooFewSamples) => "Too Few Samples"
@@ -68,6 +68,11 @@ module DistributionOperation = {
     | #Mean
     | #Sample
     | #IntegralSum
+    | #Mode
+    | #Stdev
+    | #Min
+    | #Max
+    | #Variance
   ]
 
   type toScaleFn = [
@@ -117,6 +122,11 @@ module DistributionOperation = {
     | ToFloat(#Cdf(r)) => `cdf(${E.Float.toFixed(r)})`
     | ToFloat(#Inv(r)) => `inv(${E.Float.toFixed(r)})`
     | ToFloat(#Mean) => `mean`
+    | ToFloat(#Min) => `min`
+    | ToFloat(#Max) => `max`
+    | ToFloat(#Stdev) => `stdev`
+    | ToFloat(#Variance) => `variance`
+    | ToFloat(#Mode) => `mode`
     | ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
     | ToFloat(#Sample) => `sample`
     | ToFloat(#IntegralSum) => `integralSum`

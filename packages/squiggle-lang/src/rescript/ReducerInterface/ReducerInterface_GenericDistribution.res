@@ -209,7 +209,18 @@ let dispatchToGenericOutput = (
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist, ~env)
   | ("sampleN", [EvDistribution(dist), EvNumber(n)]) =>
     Some(FloatArray(GenericDist.sampleN(dist, Belt.Int.fromFloat(n))))
-  | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist, ~env)
+  | (("mean" | "stdev" | "variance" | "min" | "max" | "mode") as op, [EvDistribution(dist)]) => {
+      let fn = switch op {
+      | "mean" => #Mean
+      | "stdev" => #Stdev
+      | "variance" => #Variance
+      | "min" => #Min
+      | "max" => #Max
+      | "mode" => #Mode
+      | _ => #Mean
+      }
+      Helpers.toFloatFn(fn, dist, ~env)
+    }
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
   | ("toSparkline", [EvDistribution(dist)]) =>
