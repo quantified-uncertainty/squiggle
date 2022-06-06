@@ -57,8 +57,8 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   showControls = false,
   showSummary = false,
 }: SquiggleEditorProps) => {
-  let [expression, setExpression] = React.useState(initialSquiggleString);
-  let chartSettings = {
+  const [expression, setExpression] = React.useState(initialSquiggleString);
+  const chartSettings = {
     start: diagramStart,
     stop: diagramStop,
     count: diagramCount,
@@ -150,17 +150,17 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   environment,
   jsImports = defaultImports,
 }: SquigglePartialProps) => {
-  let [expression, setExpression] = React.useState(initialSquiggleString);
-  let [error, setError] = React.useState<string | null>(null);
+  const [expression, setExpression] = React.useState(initialSquiggleString);
+  const [error, setError] = React.useState<string | null>(null);
 
-  let runSquiggleAndUpdateBindings = () => {
-    let squiggleResult = runPartial(
+  const runSquiggleAndUpdateBindings = () => {
+    const squiggleResult = runPartial(
       expression,
       bindings,
       environment,
       jsImports
     );
-    if (squiggleResult.tag == "Ok") {
+    if (squiggleResult.tag === "Ok") {
       if (onChange) onChange(squiggleResult.value);
       setError(null);
     } else {
@@ -181,11 +181,7 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
           height={20}
         />
       </div>
-      {error !== null ? (
-        <ErrorAlert heading="Error">{error}</ErrorAlert>
-      ) : (
-        <></>
-      )}
+      {error !== null ? <ErrorAlert heading="Error">{error}</ErrorAlert> : null}
     </div>
   );
 };

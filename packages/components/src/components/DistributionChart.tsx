@@ -1,5 +1,4 @@
 import * as React from "react";
-import _ from "lodash";
 import {
   Distribution,
   result,
@@ -34,71 +33,64 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   showSummary,
   width,
   showControls = false,
-}: DistributionChartProps) => {
-  let [isLogX, setLogX] = React.useState(false);
-  let [isExpY, setExpY] = React.useState(false);
-  let shape = distribution.pointSet();
-  const [sized, _] = useSize((size) => {
-    if (shape.tag === "Ok") {
-      let massBelow0 =
-        shape.value.continuous.some((x) => x.x <= 0) ||
-        shape.value.discrete.some((x) => x.x <= 0);
-      let spec = buildVegaSpec(isLogX, isExpY);
-      let widthProp = width ? width : size.width;
-      if (widthProp < 20) {
-        console.warn(
-          `Width of Distribution is set to ${widthProp}, which is too small`
-        );
-        widthProp = 20;
-      }
-
-      // Check whether we should disable the checkbox
-      var logCheckbox = (
-        <CheckBox label="Log X scale" value={isLogX} onChange={setLogX} />
-      );
-      if (massBelow0) {
-        logCheckbox = (
-          <CheckBox
-            label="Log X scale"
-            value={isLogX}
-            onChange={setLogX}
-            disabled={true}
-            tooltip={
-              "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values."
-            }
-          />
-        );
-      }
-
-      var result = (
-        <div style={{ width: widthProp + "px" }}>
-          <Vega
-            spec={spec}
-            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
-            width={widthProp - 10}
-            height={height}
-            actions={false}
-          />
-          <div className="flex justify-center">
-            {showSummary && <SummaryTable distribution={distribution} />}
-          </div>
-          {showControls && (
-            <div>
-              {logCheckbox}
-              <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
-            </div>
-          )}
-        </div>
-      );
-    } else {
-      var result = (
+}) => {
+  const [isLogX, setLogX] = React.useState(false);
+  const [isExpY, setExpY] = React.useState(false);
+  const shape = distribution.pointSet();
+  const [sized] = useSize((size) => {
+    if (shape.tag === "Error") {
+      return (
         <ErrorAlert heading="Distribution Error">
           {distributionErrorToString(shape.value)}
         </ErrorAlert>
       );
     }
 
-    return result;
+    const massBelow0 =
+      shape.value.continuous.some((x) => x.x <= 0) ||
+      shape.value.discrete.some((x) => x.x <= 0);
+    const spec = buildVegaSpec(isLogX, isExpY);
+
+    let widthProp = width ? width : size.width;
+    if (widthProp < 20) {
+      console.warn(
+        `Width of Distribution is set to ${widthProp}, which is too small`
+      );
+      widthProp = 20;
+    }
+
+    return (
+      <div style={{ width: widthProp }}>
+        <Vega
+          spec={spec}
+          data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+          width={widthProp - 10}
+          height={height}
+          actions={false}
+        />
+        <div className="flex justify-center">
+          {showSummary && <SummaryTable distribution={distribution} />}
+        </div>
+        {showControls && (
+          <div>
+            <CheckBox
+              label="Log X scale"
+              value={isLogX}
+              onChange={setLogX}
+              // Check whether we should disable the checkbox
+              {...(massBelow0
+                ? {
+                    disabled: true,
+                    tooltip:
+                      "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
+                  }
+                : {})}
+            />
+            <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
+          </div>
+        )}
+      </div>
+    );
   });
   return sized;
 };
@@ -121,13 +113,13 @@ interface CheckBoxProps {
   tooltip?: string;
 }
 
-export const CheckBox = ({
+export const CheckBox: React.FC<CheckBoxProps> = ({
   label,
   onChange,
   value,
   disabled = false,
   tooltip,
-}: CheckBoxProps) => {
+}) => {
   return (
     <span title={tooltip}>
       <input
@@ -141,22 +133,35 @@ export const CheckBox = ({
   );
 };
 
+const TableHeadCell: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <th className="border border-slate-200 bg-slate-50 py-1 px-2 text-slate-500 font-semibold">
+    {children}
+  </th>
+);
+
+const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <td className="border border-slate-200 py-1 px-2 text-slate-900">
+    {children}
+  </td>
+);
+
 type SummaryTableProps = {
   distribution: Distribution;
 };
 
-const SummaryTable: React.FC<SummaryTableProps> = ({
-  distribution,
-}: SummaryTableProps) => {
-  let mean = distribution.mean();
-  let p5 = distribution.inv(0.05);
-  let p10 = distribution.inv(0.1);
-  let p25 = distribution.inv(0.25);
-  let p50 = distribution.inv(0.5);
-  let p75 = distribution.inv(0.75);
-  let p90 = distribution.inv(0.9);
-  let p95 = distribution.inv(0.95);
-  let unwrapResult = (
+const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
+  const mean = distribution.mean();
+  const p5 = distribution.inv(0.05);
+  const p10 = distribution.inv(0.1);
+  const p25 = distribution.inv(0.25);
+  const p50 = distribution.inv(0.5);
+  const p75 = distribution.inv(0.75);
+  const p90 = distribution.inv(0.9);
+  const p95 = distribution.inv(0.95);
+
+  const unwrapResult = (
     x: result<number, distributionError>
   ): React.ReactNode => {
     if (x.tag === "Ok") {
@@ -169,19 +174,6 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
       );
     }
   };
-
-  let TableHeadCell: React.FC<{ children: React.ReactNode }> = ({
-    children,
-  }) => (
-    <th className="border border-slate-200 bg-slate-50 py-1 px-2 text-slate-500 font-semibold">
-      {children}
-    </th>
-  );
-  let Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <td className="border border-slate-200 py-1 px-2 text-slate-900 ">
-      {children}
-    </td>
-  );
 
   return (
     <table className="border border-collapse border-slate-400">

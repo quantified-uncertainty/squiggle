@@ -14,15 +14,15 @@ interface CodeEditorProps {
   showGutter?: boolean;
 }
 
-export let JsonEditor: FC<CodeEditorProps> = ({
+export const JsonEditor: FC<CodeEditorProps> = ({
   value,
   onChange,
   oneLine = false,
   showGutter = false,
   height,
-}: CodeEditorProps) => {
-  let lineCount = value.split("\n").length;
-  let id = _.uniqueId();
+}) => {
+  const lineCount = value.split("\n").length;
+  const id = _.uniqueId();
   return (
     <AceEditor
       value={value}
@@ -47,5 +47,3 @@ export let JsonEditor: FC<CodeEditorProps> = ({
     />
   );
 };
-
-export default JsonEditor;
