@@ -161,6 +161,8 @@ module Constructors = {
   module UsingDists = {
     @genType
     let mean = (dist): t => FromDist(ToFloat(#Mean), dist)
+    let stdev = (dist): t => FromDist(ToFloat(#Stdev), dist)
+    let variance = (dist): t => FromDist(ToFloat(#Variance), dist)
     let sample = (dist): t => FromDist(ToFloat(#Sample), dist)
     let cdf = (dist, x): t => FromDist(ToFloat(#Cdf(x)), dist)
     let inv = (dist, x): t => FromDist(ToFloat(#Inv(x)), dist)
