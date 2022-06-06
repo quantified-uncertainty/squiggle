@@ -154,5 +154,7 @@ jobs:
         run: cd ../../ && yarn
       - name: Build rescript in squiggle-lang
         run: cd ../squiggle-lang && yarn build
+      - name: Build components
+        run: cd ../components && yarn build
       - name: Build website assets
         run: yarn build
