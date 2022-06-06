@@ -153,6 +153,7 @@ type SummaryTableProps = {
 
 const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
   const mean = distribution.mean();
+  const stdev = distribution.stdev();
   const p5 = distribution.inv(0.05);
   const p10 = distribution.inv(0.1);
   const p25 = distribution.inv(0.25);
@@ -160,6 +161,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
   const p75 = distribution.inv(0.75);
   const p90 = distribution.inv(0.9);
   const p95 = distribution.inv(0.95);
+
+  const hasResult = (x: result<number, distributionError>): boolean =>
+    x.tag === "Ok";
 
   const unwrapResult = (
     x: result<number, distributionError>
@@ -180,6 +184,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
       <thead className="bg-slate-50">
         <tr>
           <TableHeadCell>{"Mean"}</TableHeadCell>
+          {hasResult(stdev) && <TableHeadCell>{"Stdev"}</TableHeadCell>}
           <TableHeadCell>{"5%"}</TableHeadCell>
           <TableHeadCell>{"10%"}</TableHeadCell>
           <TableHeadCell>{"25%"}</TableHeadCell>
@@ -192,6 +197,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
       <tbody>
         <tr>
           <Cell>{unwrapResult(mean)}</Cell>
+          {hasResult(stdev) && <Cell>{unwrapResult(stdev)}</Cell>}
           <Cell>{unwrapResult(p5)}</Cell>
           <Cell>{unwrapResult(p10)}</Cell>
           <Cell>{unwrapResult(p25)}</Cell>
