@@ -49,7 +49,7 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
 
 let registry = [
   Function.make(
-    ~name="Normal Distribution",
+    ~name="Normal",
     ~examples=`normal(5,1)
 normal({p5: 4, p95: 10})
 normal({mean: 5, stdev: 2})`,
@@ -63,7 +63,7 @@ normal({mean: 5, stdev: 2})`,
     (),
   ),
   Function.make(
-    ~name="Lognormal Distribution",
+    ~name="Lognormal",
     ~examples=`lognormal(0.5, 0.8)
 lognormal({p5: 4, p95: 10})
 lognormal({mean: 5, stdev: 2})`,
@@ -77,31 +77,31 @@ lognormal({mean: 5, stdev: 2})`,
     (),
   ),
   Function.make(
-    ~name="Uniform Distribution",
+    ~name="Uniform",
     ~examples=`uniform(10, 12)`,
     ~definitions=[TwoArgDist.make("uniform", twoArgs(SymbolicDist.Uniform.make))],
     (),
   ),
   Function.make(
-    ~name="Beta Distribution",
+    ~name="Beta",
     ~examples=`beta(20, 25)`,
     ~definitions=[TwoArgDist.make("beta", twoArgs(SymbolicDist.Beta.make))],
     (),
   ),
   Function.make(
-    ~name="Cauchy Distribution",
+    ~name="Cauchy",
     ~examples=`cauchy(5, 1)`,
     ~definitions=[TwoArgDist.make("cauchy", twoArgs(SymbolicDist.Cauchy.make))],
     (),
   ),
   Function.make(
-    ~name="Gamma Distribution",
+    ~name="Gamma",
     ~examples=`gamma(5, 1)`,
     ~definitions=[TwoArgDist.make("gamma", twoArgs(SymbolicDist.Gamma.make))],
     (),
   ),
   Function.make(
-    ~name="Logistic Distribution",
+    ~name="Logistic",
     ~examples=`gamma(5, 1)`,
     ~definitions=[TwoArgDist.make("logistic", twoArgs(SymbolicDist.Logistic.make))],
     (),

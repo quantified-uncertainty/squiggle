@@ -1,0 +1,176 @@
+---
+sidebar_position: 6
+title: List
+---
+
+### make
+```javascript
+make: (number, 'a) => list<'a> (number, number => a) => list<'a> (pointSetDist) => list<number>
+```
+
+
+
+### toString
+```typescript
+toString: (list<'a>) => string
+```
+
+
+
+### length
+```typescript
+length: (list<'a>) => number
+```
+
+
+
+### get
+```typescript
+get: (list<'a>, number) => 'a
+```
+
+
+
+### find
+```typescript
+find: (list<'a>, 'a => bool) => 'a
+```
+
+
+
+### filter
+```typescript
+filter: (list<'a>, 'a => bool) => 'a
+```
+
+
+
+### set
+```typescript
+set: (list<'a>, number, 'a) => 'a
+```
+
+
+
+### shuffle
+```typescript
+shuffle: (list<'a>) => list<'a>
+```
+
+
+
+### reverse
+```typescript
+reverse: (list<'a>) => list<'a>
+```
+
+
+
+### range
+```typescript
+range: (low:number, high:number, increment?:number=1.0) => list<number>
+```
+
+
+
+### zip
+```typescript
+zip: (list<'a>, list<'b>) => list<list<'a|b>>
+```
+
+
+
+### unzip
+```typescript
+unzip: (list<list<'a|b>>) => list<list<'a>, list<'b>>
+```
+
+
+
+### concat
+```typescript
+concat: (list<'a>, list<'b>) => list<'a|b>
+```
+
+
+
+### concatMany
+```typescript
+concatMany: (list<list<'a>>) => list<'a>
+```
+
+
+
+### slice
+```typescript
+slice: 
+```
+
+
+
+### map
+```typescript
+map: (list<'a>, a => b) => list<'b>
+```
+
+
+
+### reduce
+```typescript
+reduce: 
+```
+
+
+### reduceRight
+```typescript
+reduceRight: 
+```
+
+
+
+### includes
+```typescript
+includes: (list<'a>, 'a => bool) => boolean
+```
+
+
+
+### every
+```typescript
+every: (list<'a>, 'a => bool) => boolean
+```
+
+
+
+### truncate
+```typescript
+truncate: (list<'a>, number) => list<'a>
+```
+
+
+
+### uniq
+```typescript
+uniq: (list<'a>) => list<'a>
+```
+
+
+
+### first
+```typescript
+first: (list<'a>) => 'a
+```
+
+
+
+### last
+```typescript
+last: (list<'a>) => 'a
+```
+
+
+
+### sort
+```typescript
+sort: (list<'a>) => list<'a>
+```

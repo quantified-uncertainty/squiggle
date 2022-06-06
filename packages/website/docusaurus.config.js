@@ -82,6 +82,12 @@ const config = {
             position: "left",
             label: "Documentation",
           },
+          {
+            type: "doc",
+            docId: "Api/Dictionary",
+            position: "left",
+            label: "API",
+          },
           { to: "/blog", label: "Blog", position: "left" },
           { to: "/playground", label: "Playground", position: "left" },
           {

@@ -1,6 +1,6 @@
 ---
-sidebar_position: 9
-title: Dict
+sidebar_position: 1
+title: Dictionary
 ---
 
 ### toString
