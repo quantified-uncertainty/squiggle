@@ -264,6 +264,9 @@ basicLiteral
 identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
 
+unitIdentifier 'identifier'
+  = ([_a-zA-Z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
+
 dollarIdentifier '$identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) {return nodeIdentifier(text())} 
 
@@ -271,7 +274,7 @@ string 'string'
   = characters:("'" @([^'])* "'") {return nodeString(characters.join(''))} 
   / characters:('"' @([^"])* '"') {return nodeString(characters.join(''))}
 
-number = number:(float / integer) unit:identifier?
+number = number:(float / integer) unit:unitIdentifier?
   { 
     if (unit === null)
       { return number }
