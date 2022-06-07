@@ -5,6 +5,8 @@ let impossibleError = "Wrong inputs / Logically impossible"
 module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)
   let evDistribution = r => ReducerInterface_ExpressionValue.EvDistribution(r)
+  let evNumber = r => ReducerInterface_ExpressionValue.EvNumber(r)
+  let evArray = r => ReducerInterface_ExpressionValue.EvArray(r)
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
 }
 
@@ -75,6 +77,21 @@ module Prepare = {
           ->E.A.R.firstErrorOrOpen
         )
       pairs
+    }
+  }
+
+  let oneNumber = (values: t): result<float, err> => {
+    switch values {
+    | FRValueNumber(a1) => Ok(a1)
+    | _ => Error(impossibleError)
+    }
+  }
+
+  module ToTypedArray = {
+    let numbers = (inputs: ts): result<array<float>, err> => {
+      let openNumbers = (elements: array<t>) =>
+        elements->E.A2.fmap(oneNumber)->E.A.R.firstErrorOrOpen
+      inputs->E.A.unsafe_get(0)->ToValueArray.Array.openA->E.R.bind(openNumbers)
     }
   }
 }
@@ -183,9 +200,25 @@ module OneArgDist = {
     ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
     ->E.R2.fmap(Wrappers.evDistribution)
 
-  let make = (name, fn) => {
+  let make = (name, fn) =>
     FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber], ~run=(inputs, env) =>
       inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env)
     )
+}
+
+module ArrayNumberDist = {
+  let make = (name, fn) => {
+    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeNumber)], ~run=(inputs, _) =>
+      Prepare.ToTypedArray.numbers(inputs)->E.R2.fmap(fn)
+    )
   }
+}
+
+module NumberToNumber = {
+  let make = (name, fn) =>
+    FnDefinition.make(~name, ~inputs=[FRTypeNumber], ~run=(inputs, _) => {
+      let num =
+        inputs->E.A.unsafe_get(0)->Prepare.oneNumber->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+      num
+    })
 }

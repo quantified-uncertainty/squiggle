@@ -134,4 +134,84 @@ let registry = [
     ~name="Bernoulli",
     ~definitions=[OneArgDist.make("bernoulli", SymbolicDist.Bernoulli.make)],
   ),
+  Function.make(
+    ~name="Floor",
+    ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)]
+  ),
+  Function.make(
+    ~name="Ceiling",
+    ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)]
+  ),
+  Function.make(
+    ~name="Absolute Value",
+    ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)]
+  ),
+  Function.make(
+    ~name="Exponent",
+    ~definitions=[NumberToNumber.make("exp", Js.Math.exp)]
+  ),
+  Function.make(
+    ~name="Log",
+    ~definitions=[NumberToNumber.make("log", Js.Math.log)]
+  ),
+  Function.make(
+    ~name="Log Base 10",
+    ~definitions=[NumberToNumber.make("log10", Js.Math.log10)]
+  ),
+  Function.make(
+    ~name="Log Base 2",
+    ~definitions=[NumberToNumber.make("log2", Js.Math.log2)]
+  ),
+  Function.make(
+    ~name="Round",
+    ~definitions=[NumberToNumber.make("round", Js.Math.round)]
+  ),
+  Function.make(
+    ~name="Sum",
+    ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber)],
+  ),
+  Function.make(
+    ~name="Product",
+    ~definitions=[ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber)],
+  ),
+  Function.make(
+    ~name="Min",
+    ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber)],
+  ),
+  Function.make(
+    ~name="Max",
+    ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber)],
+  ),
+  Function.make(
+    ~name="Mean",
+    ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber)],
+  ),
+  Function.make(
+    ~name="Geometric Mean",
+    ~definitions=[ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber)],
+  ),
+  Function.make(
+    ~name="Standard Deviation",
+    ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber)],
+  ),
+  Function.make(
+    ~name="Variance",
+    ~definitions=[ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber)],
+  ),
+  Function.make(
+    ~name="Sort",
+    ~definitions=[
+      ArrayNumberDist.make("sort", r =>
+        r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="Reverse",
+    ~definitions=[
+      ArrayNumberDist.make("reverse", r =>
+        r->Belt_Array.reverse->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray
+      ),
+    ],
+  ),
 ]

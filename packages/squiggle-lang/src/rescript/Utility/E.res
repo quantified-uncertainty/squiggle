@@ -720,6 +720,7 @@ module A = {
     let variance = Jstat.variance
     let stdev = Jstat.stdev
     let sum = Jstat.sum
+    let product = Jstat.product
     let random = Js.Math.random_int
 
     let floatCompare: (float, float) => int = compare
