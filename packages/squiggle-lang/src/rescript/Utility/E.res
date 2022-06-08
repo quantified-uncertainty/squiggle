@@ -207,6 +207,7 @@ module Float = {
   let toFixed = Js.Float.toFixed
   let toString = Js.Float.toString
   let isFinite = Js.Float.isFinite
+  let toInt = Belt.Float.toInt
 }
 
 module I = {

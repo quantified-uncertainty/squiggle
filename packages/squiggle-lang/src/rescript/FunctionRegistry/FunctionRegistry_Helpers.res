@@ -54,6 +54,13 @@ module Prepare = {
       }
     }
 
+    let threeNumbers = (values: ts): result<(float, float, float), err> => {
+      switch values {
+      | [FRValueNumber(a1), FRValueNumber(a2), FRValueNumber(a3)] => Ok(a1, a2, a3)
+      | _ => Error(impossibleError)
+      }
+    }
+
     let oneDistOrNumber = (values: ts): result<frValueDistOrNumber, err> => {
       switch values {
       | [FRValueDistOrNumber(a1)] => Ok(a1)
