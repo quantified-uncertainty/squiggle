@@ -147,41 +147,63 @@ let registry = [
   Function.make(~name="Round", ~definitions=[NumberToNumber.make("round", Js.Math.round)]),
   Function.make(
     ~name="Sum",
-    ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber)],
+    ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber->Ok)],
   ),
   Function.make(
     ~name="Product",
-    ~definitions=[ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber)],
+    ~definitions=[
+      ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber->Ok),
+    ],
   ),
   Function.make(
     ~name="Min",
-    ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber)],
+    ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber->Ok)],
   ),
   Function.make(
     ~name="Max",
-    ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber)],
+    ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber->Ok)],
   ),
   Function.make(
     ~name="Mean",
-    ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber)],
+    ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber->Ok)],
   ),
   Function.make(
     ~name="Geometric Mean",
-    ~definitions=[ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber)],
+    ~definitions=[
+      ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber->Ok),
+    ],
   ),
   Function.make(
     ~name="Standard Deviation",
-    ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber)],
+    ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok)],
   ),
   Function.make(
     ~name="Variance",
-    ~definitions=[ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber)],
+    ~definitions=[
+      ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok),
+    ],
+  ),
+  Function.make(
+    ~name="First",
+    ~definitions=[
+      ArrayNumberDist.make2("first", r =>
+        r->E.A.first |> E.O.toResult(impossibleError) |> E.R.fmap(Wrappers.evNumber)
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="Last",
+    ~definitions=[
+      ArrayNumberDist.make2("last", r =>
+        r->E.A.last |> E.O.toResult(impossibleError) |> E.R.fmap(Wrappers.evNumber)
+      ),
+    ],
   ),
   Function.make(
     ~name="Sort",
     ~definitions=[
       ArrayNumberDist.make("sort", r =>
-        r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray
+        r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
   ),
@@ -189,7 +211,23 @@ let registry = [
     ~name="Reverse",
     ~definitions=[
       ArrayNumberDist.make("reverse", r =>
-        r->Belt_Array.reverse->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray
+        r->Belt_Array.reverse->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="Cumulative Sum",
+    ~definitions=[
+      ArrayNumberDist.make("cumsum", r =>
+        r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="Diff",
+    ~definitions=[
+      ArrayNumberDist.make("diff", r =>
+        r->E.A.Floats.diff->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
   ),
@@ -296,7 +334,8 @@ let registry = [
           ->E.A.R.firstErrorOrOpen
           ->E.R2.fmap(Js.Dict.fromArray)
           ->E.R2.fmap(Wrappers.evRecord)
-        inputs->E.A.unsafe_get(0)->Prepare.ToValueArray.Array.arrayOfArrays |> E.R2.bind(convertInternalItems)
+        inputs->E.A.unsafe_get(0)->Prepare.ToValueArray.Array.arrayOfArrays
+          |> E.R2.bind(convertInternalItems)
       }),
     ],
   ),

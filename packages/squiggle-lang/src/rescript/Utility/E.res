@@ -751,6 +751,9 @@ module A = {
     let diff = (t: t): array<float> =>
       Belt.Array.zipBy(t, Belt.Array.sliceToEnd(t, 1), (left, right) => right -. left)
 
+    let cumsum = (t: t): array<float> => accumulate((a, b) => a +. b, t)
+    let cumProd = (t: t): array<float> => accumulate((a, b) => a *. b, t)
+
     exception RangeError(string)
     let range = (min: float, max: float, n: int): array<float> =>
       switch n {
