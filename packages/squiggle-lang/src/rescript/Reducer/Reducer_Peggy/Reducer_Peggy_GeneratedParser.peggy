@@ -224,30 +224,22 @@ postOperator = indexedValue
 
 indexedValue
   = collectionElement
-  / recordElement
   / atom
 
-  collectionElement
-    = head:atom &('['/'('/'.')
-      tail:(
-        _ '[' _nl arg:expression  _nl ']' {return {fn: postOperatorToFunction['[]'], args: [arg]}}
-      / _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: postOperatorToFunction['()'], args: args}}
-      / '.' arg:$dollarIdentifier {return {fn: postOperatorToFunction['[]'], args: [nodeString(arg)]}}
-      )* 
-    { return tail.reduce(function(result, element) {
-        return makeFunctionCall(element.fn, [result, ...element.args])
-      }, head)}
+collectionElement
+  = head:atom &('['/'('/'.')
+    tail:(
+      _ '[' _nl arg:expression  _nl ']' {return {fn: postOperatorToFunction['[]'], args: [arg]}}
+    / _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: postOperatorToFunction['()'], args: args}}
+    / '.' arg:$dollarIdentifier {return {fn: postOperatorToFunction['[]'], args: [nodeString(arg)]}}
+    )* 
+  { return tail.reduce(function(result, element) {
+      return makeFunctionCall(element.fn, [result, ...element.args])
+    }, head)}
 
     array_functionArguments 
       = head:expression tail:(_ ',' _nl @expression)* 
       { return [head, ...tail]; }
-
-recordElement
-  = head:dollarIdentifier &'.' 
-    tail:(_ '.' _nl arg:$dollarIdentifier {return {fn: postOperatorToFunction['.'],  args: [nodeString(arg)]}})* 
-  { return tail.reduce(function(result, element) {
-      return makeFunctionCall(element.fn, [result, ...element.args])
-    }, head)}
 
 atom
   = '(' _nl expression:expression _nl ')' {return expression}
@@ -259,7 +251,17 @@ basicLiteral
   = string
   / number
   / boolean
+  / dollarIdentifierWithModule
   / dollarIdentifier
+
+dollarIdentifierWithModule 'identifier'
+  = head:moduleIdentifier 
+    tail:('.' _nl @moduleIdentifier)* '.' _nl 
+    final:dollarIdentifier
+  { tail.push(final);
+    return tail.reduce(function(result, element) {
+      return makeFunctionCall(postOperatorToFunction['[]'], [result, element])
+    }, head)}
 
 identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
@@ -269,6 +271,10 @@ unitIdentifier 'identifier'
 
 dollarIdentifier '$identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) {return nodeIdentifier(text())} 
+
+moduleIdentifier 'identifier'
+  = ([A-Z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
+
 
 string 'string'
   = characters:("'" @([^'])* "'") {return nodeString(characters.join(''))} 
@@ -338,7 +344,7 @@ recordConstructor  'record'
 _ 'whitespace'
   = whiteSpaceCharactersOrComment*
 
-_nl 'optional whitespace or newline'
+_nl 'whitespace or newline'
   = (whiteSpaceCharactersOrComment / commentOrNewLine)*
 
 __ 'whitespace'
