@@ -62,7 +62,7 @@ module FRType = {
         let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
         `record({${r->E.A2.fmap(input)->E.A2.joinWith(", ")}})`
       }
-    | FRTypeArray(r) => `record(${toString(r)})`
+    | FRTypeArray(r) => `list(${toString(r)})`
     | FRTypeLambda => `lambda`
     | FRTypeString => `string`
     | FRTypeVariant(_) => "variant"
@@ -73,6 +73,7 @@ module FRType = {
   let rec toFrValue = (r: expressionValue): option<frValue> =>
     switch r {
     | EvNumber(f) => Some(FRValueNumber(f))
+    | EvString(f) => Some(FRValueString(f))
     | EvDistribution(f) => Some(FRValueDistOrNumber(FRValueDist(f)))
     | EvLambda(f) => Some(FRValueLambda(f))
     | EvArray(elements) =>
@@ -88,6 +89,7 @@ module FRType = {
   let rec matchWithExpressionValue = (t: t, r: expressionValue): option<frValue> =>
     switch (t, r) {
     | (FRTypeAny, f) => toFrValue(f)
+    | (FRTypeString, EvString(f)) => Some(FRValueString(f))
     | (FRTypeNumber, EvNumber(f)) => Some(FRValueNumber(f))
     | (FRTypeDistOrNumber, EvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
     | (FRTypeDistOrNumber, EvDistribution(Symbolic(#Float(f)))) =>

@@ -214,7 +214,7 @@ let registry = [
       ),
     ],
   ),
-  //TODO: Make sure that two functions cant have the same name. This causes chaos elsewhere.
+  //TODO: Make sure that two functions can't have the same name. This causes chaos elsewhere.
   Function.make(
     ~name="Dict.mergeMany",
     ~definitions=[
@@ -228,6 +228,76 @@ let registry = [
         ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
         ->E.R2.fmap(Wrappers.evRecord)
       ),
+    ],
+  ),
+  Function.make(
+    ~name="Dict.keys",
+    ~definitions=[
+      FnDefinition.make(~name="keys", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
+        switch inputs {
+        | [FRValueDict(d1)] => Js.Dict.keys(d1)->E.A2.fmap(Wrappers.evString)->Wrappers.evArray->Ok
+        | _ => Error(impossibleError)
+        }
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="Dict.values",
+    ~definitions=[
+      FnDefinition.make(~name="values", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
+        switch inputs {
+        | [FRValueDict(d1)] =>
+          Js.Dict.values(d1)
+          ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
+          ->Wrappers.evArray
+          ->Ok
+        | _ => Error(impossibleError)
+        }
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="Dict.toList",
+    ~definitions=[
+      FnDefinition.make(~name="toList", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
+        switch inputs {
+        | [FRValueDict(dict)] =>
+          dict
+          ->Js.Dict.entries
+          ->E.A2.fmap(((key, value)) =>
+            Wrappers.evArray([
+              Wrappers.evString(key),
+              FunctionRegistry_Core.FRType.matchReverse(value),
+            ])
+          )
+          ->Wrappers.evArray
+          ->Ok
+        | _ => Error(impossibleError)
+        }
+      ),
+    ],
+  ),
+  Function.make(
+    ~name="Dict.fromList",
+    ~definitions=[
+      FnDefinition.make(~name="fromList", ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))], ~run=(
+        inputs,
+        _,
+      ) => {
+        let convertInternalItems = items =>
+          items
+          ->E.A2.fmap(item => {
+            switch item {
+            | [FRValueString(string), value] =>
+              (string, FunctionRegistry_Core.FRType.matchReverse(value))->Ok
+            | _ => Error(impossibleError)
+            }
+          })
+          ->E.A.R.firstErrorOrOpen
+          ->E.R2.fmap(Js.Dict.fromArray)
+          ->E.R2.fmap(Wrappers.evRecord)
+        inputs->E.A.unsafe_get(0)->Prepare.ToValueArray.Array.arrayOfArrays |> E.R2.bind(convertInternalItems)
+      }),
     ],
   ),
   Function.make(
