@@ -7,6 +7,7 @@ module Wrappers = {
   let evDistribution = r => ReducerInterface_ExpressionValue.EvDistribution(r)
   let evNumber = r => ReducerInterface_ExpressionValue.EvNumber(r)
   let evArray = r => ReducerInterface_ExpressionValue.EvArray(r)
+  let evRecord = r => ReducerInterface_ExpressionValue.EvRecord(r)
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
 }
 
@@ -94,11 +95,25 @@ module Prepare = {
     }
   }
 
+  let oneDict = (values: t): result<Js.Dict.t<frValue>, err> => {
+    switch values {
+    | FRValueDict(a1) => Ok(a1)
+    | _ => Error(impossibleError)
+    }
+  }
+
   module ToTypedArray = {
     let numbers = (inputs: ts): result<array<float>, err> => {
       let openNumbers = (elements: array<t>) =>
         elements->E.A2.fmap(oneNumber)->E.A.R.firstErrorOrOpen
       inputs->E.A.unsafe_get(0)->ToValueArray.Array.openA->E.R.bind(openNumbers)
+    }
+
+    let dicts = (inputs: ts): Belt.Result.t<array<Js.Dict.t<frValue>>, err> => {
+      Js.log2("HIHIHI", "HI")
+      let openDicts = (elements: array<t>) => elements->E.A2.fmap(oneDict)->E.A.R.firstErrorOrOpen
+      Js.log2("Inputs?", inputs);
+      inputs->E.A.unsafe_get(0)->ToValueArray.Array.openA->E.R.bind(openDicts)
     }
   }
 }

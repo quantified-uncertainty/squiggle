@@ -540,6 +540,7 @@ module A = {
   let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> O.isSome
   let fold_left = Array.fold_left
   let fold_right = Array.fold_right
+  let concat = Belt.Array.concat
   let concatMany = Belt.Array.concatMany
   let keepMap = Belt.Array.keepMap
   let slice = Belt.Array.slice
@@ -874,4 +875,7 @@ module Dict = {
   let get = Js.Dict.get
   let keys = Js.Dict.keys
   let fromArray = Js.Dict.fromArray
+  let toArray = Js.Dict.entries
+  let concat = (a, b) => A.concat(toArray(a), toArray(b))->fromArray
+  let concatMany = ts => ts->A2.fmap(toArray)->A.concatMany->fromArray
 }

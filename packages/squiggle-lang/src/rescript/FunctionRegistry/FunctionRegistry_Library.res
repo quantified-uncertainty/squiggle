@@ -194,6 +194,43 @@ let registry = [
     ],
   ),
   Function.make(
+    ~name="Dict.merge",
+    ~definitions=[
+      FnDefinition.make(
+        ~name="merge",
+        ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
+        ~run=(inputs, _) => {
+          switch inputs {
+          | [FRValueDict(d1), FRValueDict(d2)] => {
+              let newDict =
+                E.Dict.concat(d1, d2) |> Js.Dict.map((. r) =>
+                  FunctionRegistry_Core.FRType.matchReverse(r)
+                )
+              newDict->Wrappers.evRecord->Ok
+            }
+          | _ => Error(impossibleError)
+          }
+        },
+      ),
+    ],
+  ),
+  //TODO: Make sure that two functions cant have the same name. This causes chaos elsewhere.
+  Function.make(
+    ~name="Dict.mergeMany",
+    ~definitions=[
+      FnDefinition.make(~name="mergeMany", ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))], ~run=(
+        inputs,
+        _,
+      ) =>
+        inputs
+        ->Prepare.ToTypedArray.dicts
+        ->E.R2.fmap(E.Dict.concatMany)
+        ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
+        ->E.R2.fmap(Wrappers.evRecord)
+      ),
+    ],
+  ),
+  Function.make(
     ~name="List.make",
     ~definitions=[
       //Todo: If the second item is a function with no args, it could be nice to run this function and return the result.

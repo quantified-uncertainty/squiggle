@@ -100,7 +100,8 @@ module FRType = {
         let el = elements->E.A2.fmap(matchWithExpressionValue(intendedType))
         E.A.O.openIfAllSome(el)->E.O2.fmap(r => FRValueArray(r))
       }
-    | (FRTypeDict(r), EvRecord(record)) => record
+    | (FRTypeDict(r), EvRecord(record)) =>
+      record
       ->Js.Dict.entries
       ->E.A2.fmap(((key, item)) => matchWithExpressionValue(r, item)->E.O2.fmap(o => (key, o)))
       ->E.A.O.openIfAllSome
@@ -133,7 +134,10 @@ module FRType = {
       }
     | FRValueDict(frValueRecord) => {
         let record =
-          frValueRecord->Js.Dict.entries->E.A2.fmap(((name, value)) => (name, matchReverse(value)))->E.Dict.fromArray
+          frValueRecord
+          ->Js.Dict.entries
+          ->E.A2.fmap(((name, value)) => (name, matchReverse(value)))
+          ->E.Dict.fromArray
         EvRecord(record)
       }
     | FRValueLambda(l) => EvLambda(l)
