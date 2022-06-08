@@ -449,6 +449,8 @@ module T = {
     | #Cdf(f) => Ok(cdf(f, s))
     | #Pdf(f) => Ok(pdf(f, s))
     | #Inv(f) => Ok(inv(f, s))
+    | #Min => Ok(min(s))
+    | #Max => Ok(max(s))
     | #Sample => Ok(sample(s))
     | #Mean => mean(s)
     }

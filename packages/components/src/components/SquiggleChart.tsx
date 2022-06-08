@@ -1,5 +1,4 @@
 import * as React from "react";
-import _ from "lodash";
 import {
   run,
   errorValueToString,
@@ -28,6 +27,7 @@ function getRange<a>(x: declaration<a>) {
     }
   }
 }
+
 function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
   let range = getRange(x);
   let min = range.floats ? range.floats.min : 0;
@@ -49,12 +49,12 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
   heading = "Error",
   children,
   showTypes = false,
-}: VariableBoxProps) => {
+}) => {
   if (showTypes) {
     return (
       <div className="bg-white border border-grey-200 m-2">
         <div className="border-b border-grey-200 p-3">
-          <h3 className="font-mono">{heading}</h3>
+          <header className="font-mono">{heading}</header>
         </div>
         <div className="p-3">{children}</div>
       </div>
@@ -90,7 +90,7 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
   showControls = false,
   chartSettings,
   environment,
-}: SquiggleItemProps) => {
+}) => {
   switch (expression.tag) {
     case "number":
       return (
@@ -108,12 +108,8 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
           showTypes={showTypes}
         >
           {distType === "Symbolic" && showTypes ? (
-            <>
-              <div>{expression.value.toString()}</div>
-            </>
-          ) : (
-            <></>
-          )}
+            <div>{expression.value.toString()}</div>
+          ) : null}
           <DistributionChart
             distribution={expression.value}
             height={height}
@@ -157,11 +153,11 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox heading="Array" showTypes={showTypes}>
           {expression.value.map((r, i) => (
-            <div key={i} className="flex flex-row pt-1">
+            <div key={i} className="flex pt-1">
               <div className="flex-none bg-slate-100 rounded-sm px-1">
-                <h3 className="text-slate-400 font-mono">{i}</h3>
+                <header className="text-slate-400 font-mono">{i}</header>
               </div>
-              <div className="px-2 mb-2 grow ">
+              <div className="px-2 mb-2 grow">
                 <SquiggleItem
                   key={i}
                   expression={r}
@@ -181,25 +177,27 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "record":
       return (
         <VariableBox heading="Record" showTypes={showTypes}>
-          {Object.entries(expression.value).map(([key, r]) => (
-            <div key={key} className="flex flex-row pt-1">
-              <div className="flex-none pr-2">
-                <h3 className="text-slate-500 font-mono">{key}:</h3>
+          <div className="space-y-3">
+            {Object.entries(expression.value).map(([key, r]) => (
+              <div key={key} className="flex space-x-2">
+                <div className="flex-none">
+                  <header className="text-slate-500 font-mono">{key}:</header>
+                </div>
+                <div className="px-2 grow bg-gray-50 border border-gray-100 rounded-sm">
+                  <SquiggleItem
+                    expression={r}
+                    width={width !== undefined ? width - 20 : width}
+                    height={height / 3}
+                    showTypes={showTypes}
+                    showSummary={showSummary}
+                    showControls={showControls}
+                    chartSettings={chartSettings}
+                    environment={environment}
+                  />
+                </div>
               </div>
-              <div className="pl-2 pr-2 mb-2 grow bg-gray-50 border border-gray-100 rounded-sm">
-                <SquiggleItem
-                  expression={r}
-                  width={width !== undefined ? width - 20 : width}
-                  height={height / 3}
-                  showTypes={showTypes}
-                  showSummary={showSummary}
-                  showControls={showControls}
-                  chartSettings={chartSettings}
-                  environment={environment}
-                />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </VariableBox>
       );
     case "arraystring":
@@ -285,7 +283,7 @@ export interface SquiggleChartProps {
   showControls?: boolean;
 }
 
-let defaultChartSettings = { start: 0, stop: 10, count: 20 };
+const defaultChartSettings = { start: 0, stop: 10, count: 20 };
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   squiggleString = "",
@@ -299,31 +297,29 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   showTypes = false,
   showControls = false,
   chartSettings = defaultChartSettings,
-}: SquiggleChartProps) => {
+}) => {
   let expressionResult = run(squiggleString, bindings, environment, jsImports);
-  let e = environment ? environment : defaultEnvironment;
-  let internal: JSX.Element;
-  if (expressionResult.tag === "Ok") {
-    let expression = expressionResult.value;
-    onChange(expression);
-    internal = (
-      <SquiggleItem
-        expression={expression}
-        width={width}
-        height={height}
-        showSummary={showSummary}
-        showTypes={showTypes}
-        showControls={showControls}
-        chartSettings={chartSettings}
-        environment={e}
-      />
-    );
-  } else {
-    internal = (
+  if (expressionResult.tag !== "Ok") {
+    return (
       <ErrorAlert heading={"Parse Error"}>
         {errorValueToString(expressionResult.value)}
       </ErrorAlert>
     );
   }
-  return internal;
+
+  let e = environment ?? defaultEnvironment;
+  let expression = expressionResult.value;
+  onChange(expression);
+  return (
+    <SquiggleItem
+      expression={expression}
+      width={width}
+      height={height}
+      showSummary={showSummary}
+      showTypes={showTypes}
+      showControls={showControls}
+      chartSettings={chartSettings}
+      environment={e}
+    />
+  );
 };

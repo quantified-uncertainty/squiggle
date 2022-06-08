@@ -1,5 +1,4 @@
 import * as React from "react";
-import _ from "lodash";
 
 const orderOfMagnitudeNum = (n: number) => {
   return Math.pow(10, n);
@@ -74,25 +73,23 @@ export interface NumberShowerProps {
   precision?: number;
 }
 
-export let NumberShower: React.FC<NumberShowerProps> = ({
+export const NumberShower: React.FC<NumberShowerProps> = ({
   number,
   precision = 2,
-}: NumberShowerProps) => {
-  let numberWithPresentation = numberShow(number, precision);
+}) => {
+  const numberWithPresentation = numberShow(number, precision);
   return (
     <span>
       {numberWithPresentation.value}
       {numberWithPresentation.symbol}
       {numberWithPresentation.power ? (
         <span>
-          {"\u00b710"}
+          {"\u00b7" /* dot symbol */}10
           <span style={{ fontSize: "0.6em", verticalAlign: "super" }}>
             {numberWithPresentation.power}
           </span>
         </span>
-      ) : (
-        <></>
-      )}
+      ) : null}
     </span>
   );
 };

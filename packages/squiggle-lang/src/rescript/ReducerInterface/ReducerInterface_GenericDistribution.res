@@ -209,7 +209,18 @@ let dispatchToGenericOutput = (
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist, ~env)
   | ("sampleN", [EvDistribution(dist), EvNumber(n)]) =>
     Some(FloatArray(GenericDist.sampleN(dist, Belt.Int.fromFloat(n))))
-  | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist, ~env)
+  | (("mean" | "stdev" | "variance" | "min" | "max" | "mode") as op, [EvDistribution(dist)]) => {
+      let fn = switch op {
+      | "mean" => #Mean
+      | "stdev" => #Stdev
+      | "variance" => #Variance
+      | "min" => #Min
+      | "max" => #Max
+      | "mode" => #Mode
+      | _ => #Mean
+      }
+      Helpers.toFloatFn(fn, dist, ~env)
+    }
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
   | ("toSparkline", [EvDistribution(dist)]) =>
@@ -350,20 +361,5 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-// I expect that it's important to build this first, so it doesn't get recalculated for each tryRegistry() call.
-let registry = FunctionRegistry_Library.registry
-
-let tryRegistry = ((fnName, args): ExpressionValue.functionCall, env) => {
-  FunctionRegistry_Core.Registry.matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
-    E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
-  )
-}
-
-let dispatch = (call: ExpressionValue.functionCall, environment) => {
-  let regularDispatch =
-    dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
-  switch regularDispatch {
-  | Some(x) => Some(x)
-  | None => tryRegistry(call, environment)
-  }
-}
+let dispatch = (call: ExpressionValue.functionCall, environment) =>
+  dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)

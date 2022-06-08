@@ -232,6 +232,7 @@ describe("Peggy parse", () => {
   })
   describe("unit", () => {
     testParse("1m", "{(::fromUnit_m 1)}")
+    testParse("1M", "{(::fromUnit_M 1)}")
     testParse("1m+2cm", "{(::add (::fromUnit_m 1) (::fromUnit_cm 2))}")
   })
 })

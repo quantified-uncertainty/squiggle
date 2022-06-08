@@ -1,24 +1,26 @@
 const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   mode: "production",
   devtool: "source-map",
   profile: true,
-  entry: "./src/index.ts",
+  entry: ["./src/index.ts", "./src/tailwind.css"],
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         loader: "ts-loader",
-        options: { projectReferences: true, transpileOnly: true },
+        options: { projectReferences: true },
         exclude: /node_modules/,
       },
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
       },
     ],
   },
+  plugins: [new MiniCssExtractPlugin()],
   resolve: {
     extensions: [".js", ".tsx", ".ts"],
     alias: {
