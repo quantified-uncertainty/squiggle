@@ -200,7 +200,13 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
   showControls = false,
   showSummary = false,
 }) => {
-  const [squiggleString, setSquiggleString] = useState(initialSquiggleString);
+  const [editorExpression, setEditorExpression] = React.useState(
+    initialSquiggleString
+  );
+  const [intoSquiggleExpression, setIntoSquiggleExpression] = React.useState(
+    initialSquiggleString
+  );
+  const [intoSquiggleTimeout, setIntoSquiggleTimeout] = React.useState(null);
   const [importString, setImportString] = useState("{}");
   const [imports, setImports] = useState({});
   const [importsAreValid, setImportsAreValid] = useState(true);
@@ -231,6 +237,14 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
   const env: environment = {
     sampleCount: Number(vars.sampleCount),
     xyPointLength: Number(vars.xyPointLength),
+  };
+  const setEditorExpressionAndFeedIntoSquiggleWithDebouncing = (value) => {
+    setEditorExpression(value);
+    clearTimeout(intoSquiggleTimeout);
+    const newTimeout = setTimeout(() => {
+      setIntoSquiggleExpression(value);
+    }, 500);
+    setIntoSquiggleTimeout(newTimeout);
   };
   const getChangeJson = (r: string) => {
     setImportString(r);
@@ -393,8 +407,10 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
             <Tab.Panel>
               <div className="border border-slate-200">
                 <CodeEditor
-                  value={squiggleString}
-                  onChange={setSquiggleString}
+                  value={editorExpression}
+                  onChange={
+                    setEditorExpressionAndFeedIntoSquiggleWithDebouncing
+                  }
                   oneLine={false}
                   showGutter={true}
                   height={height - 1}
@@ -410,7 +426,7 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
         <div className="w-1/2 p-2 pl-4">
           <div style={{ maxHeight: height }}>
             <SquiggleChart
-              squiggleString={squiggleString}
+              squiggleString={intoSquiggleExpression}
               environment={env}
               chartSettings={chartSettings}
               height={vars.chartHeight}

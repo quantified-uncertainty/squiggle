@@ -57,18 +57,32 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   showControls = false,
   showSummary = false,
 }: SquiggleEditorProps) => {
-  const [expression, setExpression] = React.useState(initialSquiggleString);
+  const [editorExpression, setEditorExpression] = React.useState(
+    initialSquiggleString
+  );
+  const [intoSquiggleExpression, setIntoSquiggleExpression] = React.useState(
+    initialSquiggleString
+  );
+  const [intoSquiggleTimeout, setIntoSquiggleTimeout] = React.useState(null);
   const chartSettings = {
     start: diagramStart,
     stop: diagramStop,
     count: diagramCount,
   };
+  const setEditorExpressionAndFeedIntoSquiggleWithDebouncing = (value) => {
+    setEditorExpression(value);
+    clearTimeout(intoSquiggleTimeout);
+    const newTimeout = setTimeout(() => {
+      setIntoSquiggleExpression(value);
+    }, 500);
+    setIntoSquiggleTimeout(newTimeout);
+  };
   return (
     <div>
       <div className="border border-grey-200 p-2 m-4">
         <CodeEditor
-          value={expression}
-          onChange={setExpression}
+          value={editorExpression}
+          onChange={setEditorExpressionAndFeedIntoSquiggleWithDebouncing}
           oneLine={true}
           showGutter={false}
           height={20}
@@ -77,7 +91,7 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
       <SquiggleChart
         width={width}
         environment={environment}
-        squiggleString={expression}
+        squiggleString={intoSquiggleExpression}
         chartSettings={chartSettings}
         onChange={onChange}
         bindings={bindings}
