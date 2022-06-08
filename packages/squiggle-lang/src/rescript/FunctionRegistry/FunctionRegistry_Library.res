@@ -224,6 +224,14 @@ let registry = [
     ],
   ),
   Function.make(
+    ~name="Cumulative Prod",
+    ~definitions=[
+      ArrayNumberDist.make("cumprod", r =>
+        r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+      ),
+    ],
+  ),
+  Function.make(
     ~name="Diff",
     ~definitions=[
       ArrayNumberDist.make("diff", r =>
