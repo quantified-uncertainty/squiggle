@@ -187,5 +187,7 @@ function createTsExport(
       return tag("lambdaDeclaration", x.value);
     case "EvTypeIdentifier":
       return tag("typeIdentifier", x.value);
+    case "EvModule":
+      return tag("module", x.value);
   }
 }
