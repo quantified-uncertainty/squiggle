@@ -4,5 +4,5 @@
 
 /* necessary hack because scoped preflight in ./base.css has higher specificity */
 .ace_cursor {
-    border-left: 2px solid !important;
+  border-left: 2px solid !important;
 }
