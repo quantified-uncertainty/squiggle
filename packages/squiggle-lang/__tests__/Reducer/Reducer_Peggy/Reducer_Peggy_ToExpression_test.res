@@ -181,4 +181,8 @@ describe("Peggy to Expression", () => {
       (),
     )
   })
+
+  describe("module", () => {
+    testToExpression("Math.pi", "{(:$_atIndex_$ :Math 'pi')}", ())
+  })
 })
