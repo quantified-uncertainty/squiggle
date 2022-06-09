@@ -4,6 +4,7 @@ import {
   InformationCircleIcon,
   CheckCircleIcon,
 } from "@heroicons/react/solid";
+import clsx from "clsx";
 
 export const Alert: React.FC<{
   heading: string;
@@ -23,18 +24,18 @@ export const Alert: React.FC<{
   children,
 }) => {
   return (
-    <div className={`rounded-md p-4 ${backgroundColor}`}>
+    <div className={clsx("rounded-md p-4", backgroundColor)}>
       <div className="flex">
         <Icon
-          className={`h-5 w-5 flex-shrink-0 ${iconColor}`}
+          className={clsx("h-5 w-5 flex-shrink-0", iconColor)}
           aria-hidden="true"
         />
         <div className="ml-3">
-          <header className={`text-sm font-medium ${headingColor}`}>
+          <header className={clsx("text-sm font-medium", headingColor)}>
             {heading}
           </header>
           {children && React.Children.count(children) ? (
-            <div className={`mt-2 text-sm ${bodyColor}`}>{children}</div>
+            <div className={clsx("mt-2 text-sm", bodyColor)}>{children}</div>
           ) : null}
         </div>
       </div>

@@ -9,6 +9,8 @@ import { Vega, VisualizationSpec } from "react-vega";
 import * as chartSpecification from "../vega-specs/spec-distributions.json";
 import { ErrorAlert } from "./Alert";
 import { useSize } from "react-use";
+import clsx from "clsx";
+
 import {
   linearXScale,
   logXScale,
@@ -128,7 +130,7 @@ export const CheckBox: React.FC<CheckBoxProps> = ({
         onChange={() => onChange(!value)}
         disabled={disabled}
       />
-      <label className={disabled ? "text-slate-400" : ""}> {label}</label>
+      <label className={clsx(disabled && "text-slate-400")}> {label}</label>
     </span>
   );
 };
