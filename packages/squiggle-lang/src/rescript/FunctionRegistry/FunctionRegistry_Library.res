@@ -31,7 +31,7 @@ module Declaration = {
 }
 
 let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
-  let array = inputs->E.A.unsafe_get(0)->Prepare.ToValueArray.Array.openA
+  let array = inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.openA)
   let xyCoords =
     array->E.R.bind(xyCoords =>
       xyCoords
@@ -72,7 +72,7 @@ let registry = [
     ~name="Declaration",
     ~definitions=[
       FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
-        inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
+        inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
       }),
     ],
   ),
@@ -342,7 +342,7 @@ let registry = [
           ->E.A.R.firstErrorOrOpen
           ->E.R2.fmap(Js.Dict.fromArray)
           ->E.R2.fmap(Wrappers.evRecord)
-        inputs->E.A.unsafe_get(0)->Prepare.ToValueArray.Array.arrayOfArrays
+        inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.arrayOfArrays)
           |> E.R2.bind(convertInternalItems)
       }),
     ],
@@ -364,7 +364,7 @@ let registry = [
     ],
   ),
   Function.make(
-    ~name="Range",
+    ~name="upTo",
     ~definitions=[
       FnDefinition.make(~name="upTo", ~inputs=[FRTypeNumber, FRTypeNumber], ~run=(inputs, _) =>
         inputs

@@ -12,6 +12,8 @@ module Wrappers = {
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
 }
 
+let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleError)
+
 module Prepare = {
   type t = frValue
   type ts = array<frValue>
@@ -113,12 +115,12 @@ module Prepare = {
     let numbers = (inputs: ts): result<array<float>, err> => {
       let openNumbers = (elements: array<t>) =>
         elements->E.A2.fmap(oneNumber)->E.A.R.firstErrorOrOpen
-      inputs->E.A.unsafe_get(0)->ToValueArray.Array.openA->E.R.bind(openNumbers)
+      inputs->getOrError(0)->E.R.bind(ToValueArray.Array.openA)->E.R.bind(openNumbers)
     }
 
     let dicts = (inputs: ts): Belt.Result.t<array<Js.Dict.t<frValue>>, err> => {
       let openDicts = (elements: array<t>) => elements->E.A2.fmap(oneDict)->E.A.R.firstErrorOrOpen
-      inputs->E.A.unsafe_get(0)->ToValueArray.Array.openA->E.R.bind(openDicts)
+      inputs->getOrError(0)->E.R.bind(ToValueArray.Array.openA)->E.R.bind(openDicts)
     }
   }
 }
@@ -253,8 +255,10 @@ module ArrayNumberDist = {
 module NumberToNumber = {
   let make = (name, fn) =>
     FnDefinition.make(~name, ~inputs=[FRTypeNumber], ~run=(inputs, _) => {
-      let num =
-        inputs->E.A.unsafe_get(0)->Prepare.oneNumber->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
-      num
+      inputs
+      ->getOrError(0)
+      ->E.R.bind(Prepare.oneNumber)
+      ->E.R2.fmap(fn)
+      ->E.R2.fmap(Wrappers.evNumber)
     })
 }
