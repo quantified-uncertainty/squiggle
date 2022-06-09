@@ -75,9 +75,9 @@ export type rescriptExport =
       _0: string;
     }
   | {
-    TAG: 14; // EvModule
-    _0: { [key: string]: rescriptExport };
-  };
+      TAG: 14; // EvModule
+      _0: { [key: string]: rescriptExport };
+    };
 
 type rescriptDist =
   | { TAG: 0; _0: rescriptPointSetDist }
@@ -184,7 +184,7 @@ export function convertRawToTypescript(
       return tag("typeIdentifier", result._0);
     case 14: // EvModule
       return tag(
-        "module", 
+        "module",
         _.mapValues(result._0, (x) => convertRawToTypescript(x, environment))
       );
   }

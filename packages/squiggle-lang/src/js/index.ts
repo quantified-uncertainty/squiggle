@@ -188,7 +188,10 @@ function createTsExport(
     case "EvTypeIdentifier":
       return tag("typeIdentifier", x.value);
     case "EvModule":
-      let moduleResult: tagged<"module", { [key: string]: squiggleExpression }> = tag(
+      let moduleResult: tagged<
+        "module",
+        { [key: string]: squiggleExpression }
+      > = tag(
         "module",
         _.mapValues(x.value, (x: unknown) =>
           convertRawToTypescript(x as rescriptExport, environment)
