@@ -16,7 +16,6 @@
     "@docusaurus/preset-classic": "2.0.0-beta.21",
     "@quri/squiggle-components": "^0.2.20",
     "clsx": "^1.1.1",
-    "docusaurus-tailwindcss": "^0.1.0",
     "hast-util-is-element": "2.1.2",
     "prism-react-renderer": "^1.3.3",
     "react": "^18.1.0",

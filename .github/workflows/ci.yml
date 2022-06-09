@@ -100,7 +100,7 @@ jobs:
         uses: creyD/prettier_action@v4.2
         with:
           dry: true
-          prettier_options: --check packages/components
+          prettier_options: --check packages/components --ignore-path packages/components/.prettierignore
 
   components-bundle-build:
     name: Components bundle and build

@@ -265,6 +265,8 @@ module Constructors = {
   module C = DistributionTypes.Constructors.UsingDists
   open OutputLocal
   let mean = (~env, dist) => C.mean(dist)->run(~env)->toFloatR
+  let stdev = (~env, dist) => C.stdev(dist)->run(~env)->toFloatR
+  let variance = (~env, dist) => C.variance(dist)->run(~env)->toFloatR
   let sample = (~env, dist) => C.sample(dist)->run(~env)->toFloatR
   let cdf = (~env, dist, f) => C.cdf(dist, f)->run(~env)->toFloatR
   let inv = (~env, dist, f) => C.inv(dist, f)->run(~env)->toFloatR

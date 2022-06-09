@@ -1,2 +1,3 @@
 dist/
 storybook-static
+src/styles/base.css

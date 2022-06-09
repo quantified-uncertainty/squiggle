@@ -26,6 +26,8 @@ type distToFloatOperation = [
   | #Inv(float)
   | #Mean
   | #Sample
+  | #Min
+  | #Max
 ]
 
 module Convolution = {
