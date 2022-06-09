@@ -15,6 +15,7 @@ import {
   defaultBindings,
 } from "@quri/squiggle-lang";
 import { ErrorAlert } from "./Alert";
+import { SquiggleContainer } from "./SquiggleContainer";
 
 export interface SquiggleEditorProps {
   /** The input string for squiggle */
@@ -64,29 +65,31 @@ export let SquiggleEditor: React.FC<SquiggleEditorProps> = ({
     count: diagramCount,
   };
   return (
-    <div>
-      <div className="border border-grey-200 p-2 m-4">
-        <CodeEditor
-          value={expression}
-          onChange={setExpression}
-          oneLine={true}
-          showGutter={false}
-          height={20}
+    <SquiggleContainer>
+      <div>
+        <div className="border border-grey-200 p-2 m-4">
+          <CodeEditor
+            value={expression}
+            onChange={setExpression}
+            oneLine={true}
+            showGutter={false}
+            height={20}
+          />
+        </div>
+        <SquiggleChart
+          width={width}
+          environment={environment}
+          squiggleString={expression}
+          chartSettings={chartSettings}
+          onChange={onChange}
+          bindings={bindings}
+          jsImports={jsImports}
+          showTypes={showTypes}
+          showControls={showControls}
+          showSummary={showSummary}
         />
       </div>
-      <SquiggleChart
-        width={width}
-        environment={environment}
-        squiggleString={expression}
-        chartSettings={chartSettings}
-        onChange={onChange}
-        bindings={bindings}
-        jsImports={jsImports}
-        showTypes={showTypes}
-        showControls={showControls}
-        showSummary={showSummary}
-      />
-    </div>
+    </SquiggleContainer>
   );
 };
 
@@ -171,18 +174,22 @@ export let SquigglePartial: React.FC<SquigglePartialProps> = ({
   React.useEffect(runSquiggleAndUpdateBindings, [expression]);
 
   return (
-    <div>
-      <div className="border border-grey-200 p-2 m-4">
-        <CodeEditor
-          value={expression}
-          onChange={setExpression}
-          oneLine={true}
-          showGutter={false}
-          height={20}
-        />
+    <SquiggleContainer>
+      <div>
+        <div className="border border-grey-200 p-2 m-4">
+          <CodeEditor
+            value={expression}
+            onChange={setExpression}
+            oneLine={true}
+            showGutter={false}
+            height={20}
+          />
+        </div>
+        {error !== null ? (
+          <ErrorAlert heading="Error">{error}</ErrorAlert>
+        ) : null}
       </div>
-      {error !== null ? <ErrorAlert heading="Error">{error}</ErrorAlert> : null}
-    </div>
+    </SquiggleContainer>
   );
 };
 

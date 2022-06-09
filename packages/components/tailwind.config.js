@@ -3,5 +3,6 @@ module.exports = {
   theme: {
     extend: {},
   },
+  important: ".squiggle",
   plugins: [require("@tailwindcss/forms")],
 };
