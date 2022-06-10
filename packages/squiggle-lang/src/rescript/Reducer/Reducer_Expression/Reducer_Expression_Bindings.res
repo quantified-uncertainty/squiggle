@@ -2,25 +2,25 @@ module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
 module Result = Belt.Result
-module BindingsManager = Reducer_Manager_Bindings
+module Bindings = Reducer_Category_Bindings
 
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression
 type expressionValue = ExpressionValue.expressionValue
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 
-let emptyBindings = Reducer_Manager_Bindings.emptyBindings
+let emptyBindings = Reducer_Category_Bindings.emptyBindings
 
-let typeAliasesKey = BindingsManager.typeAliasesKey
-let typeReferencesKey = BindingsManager.typeReferencesKey
+let typeAliasesKey = Bindings.typeAliasesKey
+let typeReferencesKey = Bindings.typeReferencesKey
 
 let toExternalBindings = (bindings: ExpressionT.bindings): externalBindings =>
-  BindingsManager.toRecord(bindings)
+  Bindings.toRecord(bindings)
 
 let fromExternalBindings = (externalBindings: externalBindings): ExpressionT.bindings =>
-  BindingsManager.fromRecord(externalBindings)
+  Bindings.fromRecord(externalBindings)
 
-let fromValue = (aValue: expressionValue) => BindingsManager.fromExpressionValue(aValue)
+let fromValue = (aValue: expressionValue) => Bindings.fromExpressionValue(aValue)
 
 let isMacroName = (fName: string): bool => fName->Js.String2.startsWith("$$")
 

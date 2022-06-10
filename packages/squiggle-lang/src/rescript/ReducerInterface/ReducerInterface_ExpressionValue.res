@@ -4,7 +4,6 @@
 */
 module Extra_Array = Reducer_Extra_Array
 module ErrorValue = Reducer_ErrorValue
-
 @genType.opaque
 type internalCode = Object
 
@@ -33,9 +32,6 @@ and lambdaValue = {
   body: internalCode,
 }
 and lambdaDeclaration = Declaration.declaration<lambdaValue>
-
-@genType
-let defaultExternalBindings: externalBindings = Js.Dict.empty()
 
 type functionCall = (string, array<expressionValue>)
 

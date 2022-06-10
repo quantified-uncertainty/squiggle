@@ -1,4 +1,4 @@
-include Reducer_Manager_Module
+include Reducer_Category_Module // Bindings inherit from Module
 
 open ReducerInterface_ExpressionValue
 
