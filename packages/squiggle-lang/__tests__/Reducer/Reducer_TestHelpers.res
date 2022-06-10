@@ -19,6 +19,9 @@ let expectParseToBe = (expr: string, answer: string) =>
 let expectEvalToBe = (expr: string, answer: string) =>
   Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
 
+let expectEvalError = (expr: string) =>
+  Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toMatch("Error\(")
+
 let expectEvalBindingsToBe = (expr: string, bindings: Reducer.externalBindings, answer: string) =>
   Reducer.evaluateUsingOptions(expr, ~externalBindings=Some(bindings), ~environment=None)
   ->ExpressionValue.toStringResult
@@ -29,6 +32,7 @@ let testParseToBe = (expr, answer) => test(expr, () => expectParseToBe(expr, ans
 let testDescriptionParseToBe = (desc, expr, answer) =>
   test(desc, () => expectParseToBe(expr, answer))
 
+let testEvalError = expr => test(expr, () => expectEvalError(expr))
 let testEvalToBe = (expr, answer) => test(expr, () => expectEvalToBe(expr, answer))
 let testDescriptionEvalToBe = (desc, expr, answer) => test(desc, () => expectEvalToBe(expr, answer))
 let testEvalBindingsToBe = (expr, bindingsList, answer) =>

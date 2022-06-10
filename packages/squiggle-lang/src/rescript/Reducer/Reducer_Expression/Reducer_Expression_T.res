@@ -28,6 +28,11 @@ type reducerFn = (
 */
 let rec toString = expression =>
   switch expression {
+  | EList(list{EValue(EvCall("$$_block_$$")), ...statements}) =>
+    `{${Belt.List.map(statements, aValue => toString(aValue))
+      ->Extra.List.interperse("; ")
+      ->Belt.List.toArray
+      ->Js.String.concatMany("")}}`
   | EList(aList) =>
     `(${Belt.List.map(aList, aValue => toString(aValue))
       ->Extra.List.interperse(" ")
@@ -39,6 +44,12 @@ let rec toString = expression =>
 let toStringResult = codeResult =>
   switch codeResult {
   | Ok(a) => `Ok(${toString(a)})`
+  | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
+  }
+
+let toStringResultOkless = codeResult =>
+  switch codeResult {
+  | Ok(a) => toString(a)
   | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
   }
 

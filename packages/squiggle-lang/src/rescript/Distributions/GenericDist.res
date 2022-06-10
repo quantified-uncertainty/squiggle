@@ -31,6 +31,8 @@ let sampleN = (t: t, n) =>
   | SampleSet(r) => SampleSetDist.sampleN(r, n)
   }
 
+let sample = (t: t) => sampleN(t, 1)->E.A.first |> E.O.toExn("Should not have happened")
+
 let toSampleSetDist = (t: t, n) =>
   SampleSetDist.make(sampleN(t, n))->E.R2.errMap(DistributionTypes.Error.sampleErrorToDistErr)
 
@@ -59,6 +61,46 @@ let integralEndY = (t: t): float =>
 
 let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
+module Score = {
+  let klDivergence = (prediction, answer, ~toPointSetFn: toPointSetFn): result<float, error> => {
+    let pointSets = E.R.merge(toPointSetFn(prediction), toPointSetFn(answer))
+    pointSets |> E.R2.bind(((predi, ans)) =>
+      PointSetDist.T.klDivergence(predi, ans)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+    )
+  }
+
+  let logScoreWithPointResolution = (
+    ~prediction: DistributionTypes.genericDist,
+    ~answer: float,
+    ~prior: option<DistributionTypes.genericDist>,
+    ~toPointSetFn: toPointSetFn,
+  ): result<float, error> => {
+    switch prior {
+    | Some(prior') =>
+      E.R.merge(toPointSetFn(prior'), toPointSetFn(prediction))->E.R.bind(((
+        prior'',
+        prediction'',
+      )) =>
+        PointSetDist.T.logScoreWithPointResolution(
+          ~prediction=prediction'',
+          ~answer,
+          ~prior=prior''->Some,
+        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
+      )
+    | None =>
+      prediction
+      ->toPointSetFn
+      ->E.R.bind(x =>
+        PointSetDist.T.logScoreWithPointResolution(
+          ~prediction=x,
+          ~answer,
+          ~prior=None,
+        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
+      )
+    }
+  }
+}
+
 let toFloatOperation = (
   t,
   ~toPointSetFn: toPointSetFn,
@@ -66,7 +108,7 @@ let toFloatOperation = (
 ) => {
   switch distToFloatOperation {
   | #IntegralSum => Ok(integralEndY(t))
-  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Sample) as op => {
+  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Sample | #Min | #Max) as op => {
       let trySymbolicSolution = switch (t: t) {
       | Symbolic(r) => SymbolicDist.T.operate(op, r)->E.R.toOption
       | _ => None
@@ -76,6 +118,8 @@ let toFloatOperation = (
       | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
       | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
       | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
+      | (SampleSet(sampleSet), #Min) => SampleSetDist.min(sampleSet)->Some
+      | (SampleSet(sampleSet), #Max) => SampleSetDist.max(sampleSet)->Some
       | _ => None
       }
 
@@ -87,6 +131,16 @@ let toFloatOperation = (
         | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(op))
         }
       }
+    }
+  | (#Stdev | #Variance | #Mode) as op =>
+    switch t {
+    | SampleSet(s) =>
+      switch op {
+      | #Stdev => SampleSetDist.stdev(s)->Ok
+      | #Variance => SampleSetDist.variance(s)->Ok
+      | #Mode => SampleSetDist.mode(s)->Ok
+      }
+    | _ => Error(DistributionTypes.NotYetImplemented)
     }
   }
 }
@@ -239,7 +293,7 @@ module AlgebraicCombination = {
       let fn = Operation.Algebraic.toFn(arithmeticOperation)
       E.R.merge(toSampleSet(t1), toSampleSet(t2))
       ->E.R.bind(((t1, t2)) => {
-        SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+        SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(x => DistributionTypes.SampleSetError(x))
       })
       ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
     }
@@ -384,14 +438,12 @@ let pointwiseCombinationFloat = (
   ~algebraicCombination: Operation.algebraicOperation,
   ~f: float,
 ): result<t, error> => {
-  let m = switch algebraicCombination {
-  | #Add | #Subtract => Error(DistributionTypes.DistributionVerticalShiftIsInvalid)
-  | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
+  let executeCombination = arithOp =>
     toPointSetFn(t)->E.R.bind(t => {
       //TODO: Move to PointSet codebase
-      let fn = (secondary, main) => Operation.Scale.toFn(arithmeticOperation, main, secondary)
-      let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(arithmeticOperation)
-      let integralCacheFn = Operation.Scale.toIntegralCacheFn(arithmeticOperation)
+      let fn = (secondary, main) => Operation.Scale.toFn(arithOp, main, secondary)
+      let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(arithOp)
+      let integralCacheFn = Operation.Scale.toIntegralCacheFn(arithOp)
       PointSetDist.T.mapYResult(
         ~integralSumCacheFn=integralSumCacheFn(f),
         ~integralCacheFn=integralCacheFn(f),
@@ -399,6 +451,11 @@ let pointwiseCombinationFloat = (
         t,
       )->E.R2.errMap(x => DistributionTypes.OperationError(x))
     })
+  let m = switch algebraicCombination {
+  | #Add | #Subtract => Error(DistributionTypes.DistributionVerticalShiftIsInvalid)
+  | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
+    executeCombination(arithmeticOperation)
+  | #LogarithmWithThreshold(eps) => executeCombination(#LogarithmWithThreshold(eps))
   }
   m->E.R2.fmap(r => DistributionTypes.PointSet(r))
 }

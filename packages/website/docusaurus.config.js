@@ -9,8 +9,8 @@ const path = require("path");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "Squiggle (alpha)",
-  tagline: "Estimation language for forecasters",
+  title: "Squiggle",
+  tagline: "An estimation language for forecasters",
   url: "https://squiggle-language.com",
   baseUrl: "/",
   onBrokenLinks: "throw",
@@ -19,26 +19,7 @@ const config = {
   organizationName: "quantified-uncertainty", // Usually your GitHub org/user name.
   projectName: "squiggle", // Usually your repo name.
 
-  plugins: [
-    () => ({
-      configureWebpack(config, isServer, utils, content) {
-        return {
-          resolve: {
-            alias: {
-              "@quri/squiggle-components": path.resolve(
-                __dirname,
-                "../components/src"
-              ),
-              "@quri/squiggle-lang": path.resolve(
-                __dirname,
-                "../squiggle-lang/src/js"
-              ),
-            },
-          },
-        };
-      },
-    }),
-  ],
+  plugins: [],
 
   presets: [
     [
@@ -60,7 +41,10 @@ const config = {
             "https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/website/",
         },
         theme: {
-          customCss: require.resolve("./src/css/custom.css"),
+          customCss: [
+            require.resolve("./src/css/custom.css"),
+            require.resolve("@quri/squiggle-components/dist/main.css"),
+          ],
         },
       }),
     ],

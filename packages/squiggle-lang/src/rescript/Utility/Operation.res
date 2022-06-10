@@ -8,6 +8,7 @@ type algebraicOperation = [
   | #Divide
   | #Power
   | #Logarithm
+  | #LogarithmWithThreshold(float)
 ]
 
 type convolutionOperation = [
@@ -18,13 +19,15 @@ type convolutionOperation = [
 
 @genType
 type pointwiseOperation = [#Add | #Multiply | #Power]
-type scaleOperation = [#Multiply | #Power | #Logarithm | #Divide]
+type scaleOperation = [#Multiply | #Power | #Logarithm | #LogarithmWithThreshold(float) | #Divide]
 type distToFloatOperation = [
   | #Pdf(float)
   | #Cdf(float)
   | #Inv(float)
   | #Mean
   | #Sample
+  | #Min
+  | #Max
 ]
 
 module Convolution = {
@@ -35,7 +38,7 @@ module Convolution = {
     | #Add => Some(#Add)
     | #Subtract => Some(#Subtract)
     | #Multiply => Some(#Multiply)
-    | #Divide | #Power | #Logarithm => None
+    | #Divide | #Power | #Logarithm | #LogarithmWithThreshold(_) => None
     }
 
   let canDoAlgebraicOperation = (op: algebraicOperation): bool =>
@@ -52,6 +55,12 @@ module Convolution = {
 type operationError =
   | DivisionByZeroError
   | ComplexNumberError
+  | InfinityError
+  | NegativeInfinityError
+  | SampleMapNeedsNtoNFunction
+  | PdfInvalidError
+  | NotYetImplemented // should be removed when `klDivergence` for mixed and discrete is implemented.
+  | Other(string)
 
 @genType
 module Error = {
@@ -62,6 +71,12 @@ module Error = {
     switch err {
     | DivisionByZeroError => "Cannot divide by zero"
     | ComplexNumberError => "Operation returned complex result"
+    | InfinityError => "Operation returned positive infinity"
+    | NegativeInfinityError => "Operation returned negative infinity"
+    | SampleMapNeedsNtoNFunction => "SampleMap needs a function that converts a number to a number"
+    | PdfInvalidError => "This Pdf is invalid"
+    | NotYetImplemented => "This pathway is not yet implemented"
+    | Other(t) => t
     }
 }
 
@@ -86,6 +101,8 @@ let logarithm = (a: float, b: float): result<float, Error.t> =>
     Ok(0.)
   } else if a > 0.0 && b > 0.0 {
     Ok(log(a) /. log(b))
+  } else if a == 0.0 {
+    Error(NegativeInfinityError)
   } else {
     Error(ComplexNumberError)
   }
@@ -102,6 +119,12 @@ module Algebraic = {
     | #Power => power(a, b)
     | #Divide => divide(a, b)
     | #Logarithm => logarithm(a, b)
+    | #LogarithmWithThreshold(eps) =>
+      if a < eps {
+        Ok(0.0)
+      } else {
+        logarithm(a, b)
+      }
     }
 
   let toString = x =>
@@ -112,6 +135,7 @@ module Algebraic = {
     | #Power => "**"
     | #Divide => "/"
     | #Logarithm => "log"
+    | #LogarithmWithThreshold(_) => "log"
     }
 
   let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
@@ -151,6 +175,12 @@ module Scale = {
     | #Divide => divide(a, b)
     | #Power => power(a, b)
     | #Logarithm => logarithm(a, b)
+    | #LogarithmWithThreshold(eps) =>
+      if a < eps {
+        Ok(0.0)
+      } else {
+        logarithm(a, b)
+      }
     }
 
   let format = (operation: t, value, scaleBy) =>
@@ -159,14 +189,14 @@ module Scale = {
     | #Divide => j`verticalDivide($value, $scaleBy) `
     | #Power => j`verticalPower($value, $scaleBy) `
     | #Logarithm => j`verticalLog($value, $scaleBy) `
+    | #LogarithmWithThreshold(eps) => j`verticalLog($value, $scaleBy, epsilon=$eps) `
     }
 
   let toIntegralSumCacheFn = x =>
     switch x {
     | #Multiply => (a, b) => Some(a *. b)
     | #Divide => (a, b) => Some(a /. b)
-    | #Power => (_, _) => None
-    | #Logarithm => (_, _) => None
+    | #Power | #Logarithm | #LogarithmWithThreshold(_) => (_, _) => None
     }
 
   let toIntegralCacheFn = x =>
@@ -175,6 +205,7 @@ module Scale = {
     | #Divide => (_, _) => None
     | #Power => (_, _) => None
     | #Logarithm => (_, _) => None
+    | #LogarithmWithThreshold(_) => (_, _) => None
     }
 }
 

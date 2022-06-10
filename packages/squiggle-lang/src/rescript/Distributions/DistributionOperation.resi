@@ -14,6 +14,7 @@ type outputType =
   | Dist(genericDist)
   | Float(float)
   | String(string)
+  | FloatArray(array<float>)
   | Bool(bool)
   | GenDistError(error)
 
@@ -48,6 +49,10 @@ module Constructors: {
   @genType
   let mean: (~env: env, genericDist) => result<float, error>
   @genType
+  let stdev: (~env: env, genericDist) => result<float, error>
+  @genType
+  let variance: (~env: env, genericDist) => result<float, error>
+  @genType
   let sample: (~env: env, genericDist) => result<float, error>
   @genType
   let cdf: (~env: env, genericDist, float) => result<float, error>
@@ -59,6 +64,15 @@ module Constructors: {
   let normalize: (~env: env, genericDist) => result<genericDist, error>
   @genType
   let isNormalized: (~env: env, genericDist) => result<bool, error>
+  @genType
+  let klDivergence: (~env: env, genericDist, genericDist) => result<float, error>
+  @genType
+  let logScoreWithPointResolution: (
+    ~env: env,
+    ~prediction: genericDist,
+    ~answer: float,
+    ~prior: option<genericDist>,
+  ) => result<float, error>
   @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>
   @genType
@@ -85,6 +99,10 @@ module Constructors: {
   let algebraicLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
   @genType
   let algebraicPower: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  @genType
+  let scaleLogarithm: (~env: env, genericDist, float) => result<genericDist, error>
+  @genType
+  let scalePower: (~env: env, genericDist, float) => result<genericDist, error>
   @genType
   let pointwiseAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>
   @genType

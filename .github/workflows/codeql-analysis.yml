@@ -12,12 +12,6 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches:
-      - master
-      - production
-      - staging
-      - develop
   schedule:
     - cron: "42 19 * * 0"
 

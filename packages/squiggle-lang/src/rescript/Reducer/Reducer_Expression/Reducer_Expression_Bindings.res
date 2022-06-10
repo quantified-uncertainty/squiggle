@@ -10,13 +10,8 @@ type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 
 let defaultBindings: ExpressionT.bindings = Belt.Map.String.empty
 
-let fromExternalBindings = (externalBindings: externalBindings): ExpressionT.bindings => {
-  let keys = Js.Dict.keys(externalBindings)
-  keys->Belt.Array.reduce(defaultBindings, (acc, key) => {
-    let value = Js.Dict.unsafeGet(externalBindings, key)
-    acc->Belt.Map.String.set(key, value)
-  })
-}
+let typeAliasesKey = "_typeAliases_"
+let typeReferencesKey = "_typeReferences_"
 
 let toExternalBindings = (bindings: ExpressionT.bindings): externalBindings => {
   let keys = Belt.Map.String.keysToArray(bindings)
@@ -25,6 +20,50 @@ let toExternalBindings = (bindings: ExpressionT.bindings): externalBindings => {
     Js.Dict.set(acc, key, value)
     acc
   })
+}
+
+let fromExternalBindings_ = (externalBindings: externalBindings): ExpressionT.bindings => {
+  let keys = Js.Dict.keys(externalBindings)
+  keys->Belt.Array.reduce(defaultBindings, (acc, key) => {
+    let value = Js.Dict.unsafeGet(externalBindings, key)
+    acc->Belt.Map.String.set(key, value)
+  })
+}
+
+let fromExternalBindings = (externalBindings: externalBindings): ExpressionT.bindings => {
+  // TODO: This code will be removed in the future when maps are used instead of records. Please don't mind this function for now.
+
+  let internalBindings0 = fromExternalBindings_(externalBindings)
+
+  let oExistingTypeAliases = Belt.Map.String.get(internalBindings0, typeAliasesKey)
+  let internalBindings1 = Belt.Option.mapWithDefault(
+    oExistingTypeAliases,
+    internalBindings0,
+    existingTypeAliases => {
+      let newTypeAliases = switch existingTypeAliases {
+      | EvRecord(actualTypeAliases) =>
+        actualTypeAliases->fromExternalBindings_->toExternalBindings->ExpressionValue.EvRecord
+      | _ => existingTypeAliases
+      }
+      Belt.Map.String.set(internalBindings0, typeAliasesKey, newTypeAliases)
+    },
+  )
+
+  let oExistingTypeReferences = Belt.Map.String.get(internalBindings1, typeReferencesKey)
+  let internalBindings2 = Belt.Option.mapWithDefault(
+    oExistingTypeReferences,
+    internalBindings1,
+    existingTypeReferences => {
+      let newTypeReferences = switch existingTypeReferences {
+      | EvRecord(actualTypeReferences) =>
+        actualTypeReferences->fromExternalBindings_->toExternalBindings->ExpressionValue.EvRecord
+      | _ => existingTypeReferences
+      }
+      Belt.Map.String.set(internalBindings0, typeReferencesKey, newTypeReferences)
+    },
+  )
+
+  internalBindings2
 }
 
 let fromValue = (aValue: expressionValue) =>

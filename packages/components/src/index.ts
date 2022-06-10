@@ -5,7 +5,10 @@ export {
   renderSquiggleEditorToDom,
   renderSquigglePartialToDom,
 } from "./components/SquiggleEditor";
-import SquigglePlayground, {
+export {
+  default as SquigglePlayground,
   renderSquigglePlaygroundToDom,
 } from "./components/SquigglePlayground";
-export { SquigglePlayground, renderSquigglePlaygroundToDom };
+export { SquiggleContainer } from "./components/SquiggleContainer";
+
+export { mergeBindings } from "@quri/squiggle-lang";

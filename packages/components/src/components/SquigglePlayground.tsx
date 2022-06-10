@@ -1,129 +1,434 @@
-import _ from "lodash";
-import React, { FC, ReactElement, useState } from "react";
+import React, { FC, Fragment, useState } from "react";
 import ReactDOM from "react-dom";
-import { SquiggleChart } from "./SquiggleChart";
-import CodeEditor from "./CodeEditor";
-import styled from "styled-components";
+import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Tab } from "@headlessui/react";
+import {
+  ChartSquareBarIcon,
+  CodeIcon,
+  CogIcon,
+  CurrencyDollarIcon,
+} from "@heroicons/react/solid";
+import clsx from "clsx";
 
-interface FieldFloatProps {
-  label: string;
-  className?: string;
-  value: number;
-  onChange: (value: number) => void;
+import { defaultBindings, environment } from "@quri/squiggle-lang";
+
+import { SquiggleChart } from "./SquiggleChart";
+import { CodeEditor } from "./CodeEditor";
+import { JsonEditor } from "./JsonEditor";
+import { ErrorAlert, SuccessAlert } from "./Alert";
+import { SquiggleContainer } from "./SquiggleContainer";
+
+interface PlaygroundProps {
+  /** The initial squiggle string to put in the playground */
+  initialSquiggleString?: string;
+  /** How many pixels high is the playground */
+  height?: number;
+  /** Whether to show the types of outputs in the playground */
+  showTypes?: boolean;
+  /** Whether to show the log scale controls in the playground */
+  showControls?: boolean;
+  /** Whether to show the summary table in the playground */
+  showSummary?: boolean;
 }
 
-const Input = styled.input``;
+const schema = yup
+  .object()
+  .shape({
+    sampleCount: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(1000000),
+    xyPointLength: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(10000),
+    chartHeight: yup.number().required().positive().integer().default(350),
+    leftSizePercent: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .min(10)
+      .max(100)
+      .default(50),
+    showTypes: yup.boolean(),
+    showControls: yup.boolean(),
+    showSummary: yup.boolean(),
+    showSettingsPage: yup.boolean().default(false),
+    diagramStart: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(0)
+      .min(0),
+    diagramStop: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(10)
+      .min(0),
+    diagramCount: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(20)
+      .min(2),
+  })
+  .required();
 
-const FormItem = (props: { label: string; children: ReactElement }) => (
+type StyledTabProps = {
+  name: string;
+  icon: (props: React.ComponentProps<"svg">) => JSX.Element;
+};
+
+const StyledTab: React.FC<StyledTabProps> = ({ name, icon: Icon }) => {
+  return (
+    <Tab key={name} as={Fragment}>
+      {({ selected }) => (
+        <button className="group flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100">
+          <span
+            className={clsx(
+              "p-1 pl-2.5 pr-3.5 rounded-md flex items-center text-sm font-medium",
+              selected && "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
+            )}
+          >
+            <Icon
+              className={clsx(
+                "-ml-0.5 mr-2 h-4 w-4",
+                selected
+                  ? "text-slate-500"
+                  : "text-gray-400 group-hover:text-gray-900"
+              )}
+            />
+            <span
+              className={clsx(
+                selected
+                  ? "text-gray-900"
+                  : "text-gray-600 group-hover:text-gray-900"
+              )}
+            >
+              {name}
+            </span>
+          </span>
+        </button>
+      )}
+    </Tab>
+  );
+};
+
+const HeadedSection: FC<{ title: string; children: React.ReactNode }> = ({
+  title,
+  children,
+}) => (
   <div>
-    <label>{props.label}</label>
-    {props.children}
+    <header className="text-lg leading-6 font-medium text-gray-900">
+      {title}
+    </header>
+    <div className="mt-4">{children}</div>
   </div>
 );
 
-function FieldFloat(Props: FieldFloatProps) {
-  let [contents, setContents] = useState(Props.value + "");
+const Text: FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p className="text-sm text-gray-500">{children}</p>
+);
+
+function InputItem<T>({
+  name,
+  label,
+  type,
+  register,
+}: {
+  name: Path<T>;
+  label: string;
+  type: "number";
+  register: UseFormRegister<T>;
+}) {
   return (
-    <FormItem label={Props.label}>
-      <Input
-        value={contents}
-        className={Props.className ? Props.className : ""}
-        onChange={(e) => {
-          setContents(e.target.value);
-          let result = parseFloat(contents);
-          if (_.isFinite(result)) {
-            Props.onChange(result);
-          }
-        }}
+    <label className="block">
+      <div className="text-sm font-medium text-gray-600 mb-1">{label}</div>
+      <input
+        type={type}
+        {...register(name)}
+        className="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
       />
-    </FormItem>
+    </label>
   );
 }
 
-interface Props {
-  initialSquiggleString?: string;
-  height?: number;
-  showTypes?: boolean;
-  showControls?: boolean;
+function Checkbox<T>({
+  name,
+  label,
+  register,
+}: {
+  name: Path<T>;
+  label: string;
+  register: UseFormRegister<T>;
+}) {
+  return (
+    <label className="flex items-center">
+      <input
+        type="checkbox"
+        {...register(name)}
+        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+      />
+      {/* Clicking on the div makes the checkbox lose focus while mouse button is pressed, leading to annoying blinking; I couldn't figure out how to fix this. */}
+      <div className="ml-3 text-sm font-medium text-gray-700">{label}</div>
+    </label>
+  );
 }
 
-interface Props2 {
-  height: number;
-}
-
-const ShowBox = styled.div<Props2>`
-  border: 1px solid #eee;
-  border-radius: 2px;
-  height: ${(props) => props.height};
-`;
-
-interface TitleProps {
-  readonly maxHeight: number;
-}
-
-const Display = styled.div<TitleProps>`
-  background: #f6f6f6;
-  border-left: 1px solid #eee;
-  height: 100vh;
-  padding: 3px;
-  overflow-y: auto;
-  max-height: ${(props) => props.maxHeight}px;
-`;
-
-const Row = styled.div`
-  display: grid;
-  grid-template-columns: 50% 50%;
-`;
-const Col = styled.div``;
-
-let SquigglePlayground: FC<Props> = ({
+const SquigglePlayground: FC<PlaygroundProps> = ({
   initialSquiggleString = "",
-  height = 300,
+  height = 500,
   showTypes = false,
   showControls = false,
-}: Props) => {
-  let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
-  let [sampleCount, setSampleCount] = useState(1000);
-  let [outputXYPoints, setOutputXYPoints] = useState(1000);
-  let [pointDistLength, setPointDistLength] = useState(1000);
-  let [diagramStart, setDiagramStart] = useState(0);
-  let [diagramStop, setDiagramStop] = useState(10);
-  let [diagramCount, setDiagramCount] = useState(20);
-  return (
-    <ShowBox height={height}>
-      <Row>
-        <Col>
-          <CodeEditor
-            value={squiggleString}
-            onChange={setSquiggleString}
-            oneLine={false}
-            showGutter={true}
-            height={height - 3}
+  showSummary = false,
+}) => {
+  const [squiggleString, setSquiggleString] = useState(initialSquiggleString);
+  const [importString, setImportString] = useState("{}");
+  const [imports, setImports] = useState({});
+  const [importsAreValid, setImportsAreValid] = useState(true);
+  const { register, control } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      sampleCount: 1000,
+      xyPointLength: 1000,
+      chartHeight: 150,
+      showTypes: showTypes,
+      showControls: showControls,
+      showSummary: showSummary,
+      leftSizePercent: 50,
+      showSettingsPage: false,
+      diagramStart: 0,
+      diagramStop: 10,
+      diagramCount: 20,
+    },
+  });
+  const vars = useWatch({
+    control,
+  });
+  const chartSettings = {
+    start: Number(vars.diagramStart),
+    stop: Number(vars.diagramStop),
+    count: Number(vars.diagramCount),
+  };
+  const env: environment = {
+    sampleCount: Number(vars.sampleCount),
+    xyPointLength: Number(vars.xyPointLength),
+  };
+  const getChangeJson = (r: string) => {
+    setImportString(r);
+    try {
+      setImports(JSON.parse(r));
+      setImportsAreValid(true);
+    } catch (e) {
+      setImportsAreValid(false);
+    }
+  };
+
+  const samplingSettings = (
+    <div className="space-y-6 p-3 max-w-xl">
+      <div>
+        <InputItem
+          name="sampleCount"
+          type="number"
+          label="Sample Count"
+          register={register}
+        />
+        <div className="mt-2">
+          <Text>
+            How many samples to use for Monte Carlo simulations. This can
+            occasionally be overridden by specific Squiggle programs.
+          </Text>
+        </div>
+      </div>
+      <div>
+        <InputItem
+          name="xyPointLength"
+          type="number"
+          register={register}
+          label="Coordinate Count (For PointSet Shapes)"
+        />
+        <div className="mt-2">
+          <Text>
+            When distributions are converted into PointSet shapes, we need to
+            know how many coordinates to use.
+          </Text>
+        </div>
+      </div>
+    </div>
+  );
+
+  const viewSettings = (
+    <div className="space-y-6 p-3 divide-y divide-gray-200 max-w-xl">
+      <HeadedSection title="General Display Settings">
+        <div className="space-y-4">
+          <InputItem
+            name="chartHeight"
+            type="number"
+            register={register}
+            label="Chart Height (in pixels)"
           />
-        </Col>
-        <Col>
-          <Display maxHeight={height - 3}>
-            <SquiggleChart
-              squiggleString={squiggleString}
-              sampleCount={sampleCount}
-              outputXYPoints={outputXYPoints}
-              diagramStart={diagramStart}
-              diagramStop={diagramStop}
-              diagramCount={diagramCount}
-              pointDistLength={pointDistLength}
-              height={150}
-              showTypes={showTypes}
-              showControls={showControls}
+          <Checkbox
+            name="showTypes"
+            register={register}
+            label="Show information about displayed types"
+          />
+        </div>
+      </HeadedSection>
+
+      <div className="pt-8">
+        <HeadedSection title="Distribution Display Settings">
+          <div className="space-y-2">
+            <Checkbox
+              register={register}
+              name="showControls"
+              label="Show toggles to adjust scale of x and y axes"
             />
-          </Display>
-        </Col>
-      </Row>
-    </ShowBox>
+            <Checkbox
+              register={register}
+              name="showSummary"
+              label="Show summary statistics"
+            />
+          </div>
+        </HeadedSection>
+      </div>
+
+      <div className="pt-8">
+        <HeadedSection title="Function Display Settings">
+          <div className="space-y-6">
+            <Text>
+              When displaying functions of single variables that return numbers
+              or distributions, we need to use defaults for the x-axis. We need
+              to select a minimum and maximum value of x to sample, and a number
+              n of the number of points to sample.
+            </Text>
+            <div className="space-y-4">
+              <InputItem
+                type="number"
+                name="diagramStart"
+                register={register}
+                label="Min X Value"
+              />
+              <InputItem
+                type="number"
+                name="diagramStop"
+                register={register}
+                label="Max X Value"
+              />
+              <InputItem
+                type="number"
+                name="diagramCount"
+                register={register}
+                label="Points between X min and X max to sample"
+              />
+            </div>
+          </div>
+        </HeadedSection>
+      </div>
+    </div>
+  );
+
+  const inputVariableSettings = (
+    <div className="p-3 max-w-3xl">
+      <HeadedSection title="Import Variables from JSON">
+        <div className="space-y-6">
+          <Text>
+            You can import variables from JSON into your Squiggle code.
+            Variables are accessed with dollar signs. For example, "timeNow"
+            would be accessed as "$timeNow".
+          </Text>
+          <div className="border border-slate-200 mt-6 mb-2">
+            <JsonEditor
+              value={importString}
+              onChange={getChangeJson}
+              oneLine={false}
+              showGutter={true}
+              height={150}
+            />
+          </div>
+          <div className="p-1 pt-2">
+            {importsAreValid ? (
+              <SuccessAlert heading="Valid JSON" />
+            ) : (
+              <ErrorAlert heading="Invalid JSON">
+                You must use valid JSON in this editor.
+              </ErrorAlert>
+            )}
+          </div>
+        </div>
+      </HeadedSection>
+    </div>
+  );
+
+  return (
+    <SquiggleContainer>
+      <Tab.Group>
+        <div className="pb-4">
+          <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
+            <StyledTab name="Code" icon={CodeIcon} />
+            <StyledTab name="Sampling Settings" icon={CogIcon} />
+            <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+            <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+          </Tab.List>
+        </div>
+        <div className="flex" style={{ height }}>
+          <div className="w-1/2">
+            <Tab.Panels>
+              <Tab.Panel>
+                <div className="border border-slate-200">
+                  <CodeEditor
+                    value={squiggleString}
+                    onChange={setSquiggleString}
+                    oneLine={false}
+                    showGutter={true}
+                    height={height - 1}
+                  />
+                </div>
+              </Tab.Panel>
+              <Tab.Panel>{samplingSettings}</Tab.Panel>
+              <Tab.Panel>{viewSettings}</Tab.Panel>
+              <Tab.Panel>{inputVariableSettings}</Tab.Panel>
+            </Tab.Panels>
+          </div>
+
+          <div className="w-1/2 p-2 pl-4">
+            <div style={{ maxHeight: height }}>
+              <SquiggleChart
+                squiggleString={squiggleString}
+                environment={env}
+                chartSettings={chartSettings}
+                height={vars.chartHeight}
+                showTypes={vars.showTypes}
+                showControls={vars.showControls}
+                bindings={defaultBindings}
+                jsImports={imports}
+                showSummary={vars.showSummary}
+              />
+            </div>
+          </div>
+        </div>
+      </Tab.Group>
+    </SquiggleContainer>
   );
 };
+
 export default SquigglePlayground;
-export function renderSquigglePlaygroundToDom(props: Props) {
-  let parent = document.createElement("div");
+export function renderSquigglePlaygroundToDom(props: PlaygroundProps) {
+  const parent = document.createElement("div");
   ReactDOM.render(<SquigglePlayground {...props} />, parent);
   return parent;
 }

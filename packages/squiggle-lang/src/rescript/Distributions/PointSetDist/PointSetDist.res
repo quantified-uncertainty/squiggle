@@ -86,7 +86,7 @@ let combinePointwise = (
   | (Discrete(m1), Discrete(m2)) =>
     Discrete.combinePointwise(
       ~integralSumCachesFn,
-      fn,
+      ~fn,
       m1,
       m2,
     )->E.R2.fmap(x => PointSetTypes.Discrete(x))
@@ -195,6 +195,23 @@ module T = Dist({
     | Discrete(m) => Discrete.T.variance(m)
     | Continuous(m) => Continuous.T.variance(m)
     }
+
+  let klDivergence = (prediction: t, answer: t) =>
+    switch (prediction, answer) {
+    | (Continuous(t1), Continuous(t2)) => Continuous.T.klDivergence(t1, t2)
+    | (Discrete(t1), Discrete(t2)) => Discrete.T.klDivergence(t1, t2)
+    | (m1, m2) => Mixed.T.klDivergence(m1->toMixed, m2->toMixed)
+    }
+
+  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
+    switch (prior, prediction) {
+    | (Some(Continuous(t1)), Continuous(t2)) =>
+      Continuous.T.logScoreWithPointResolution(~prediction=t2, ~answer, ~prior=t1->Some)
+    | (None, Continuous(t2)) =>
+      Continuous.T.logScoreWithPointResolution(~prediction=t2, ~answer, ~prior=None)
+    | _ => Error(Operation.NotYetImplemented)
+    }
+  }
 })
 
 let pdf = (f: float, t: t) => {
@@ -214,9 +231,8 @@ let doN = (n, fn) => {
 }
 
 let sample = (t: t): float => {
-  let randomItem = Random.float(1.)
-  let bar = t |> T.Integral.yToX(randomItem)
-  bar
+  let randomItem = Random.float(1.0)
+  t |> T.Integral.yToX(randomItem)
 }
 
 let isFloat = (t: t) =>
@@ -238,6 +254,8 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Inv(f) => inv(f, s)
   | #Sample => sample(s)
   | #Mean => T.mean(s)
+  | #Min => T.minX(s)
+  | #Max => T.maxX(s)
   }
 
 let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineError> =>

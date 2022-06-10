@@ -4,16 +4,19 @@ type errorValue =
   | REArrayIndexNotFound(string, int)
   | REAssignmentExpected
   | REDistributionError(DistributionTypes.error)
+  | REExpectedType(string)
   | REExpressionExpected
   | REFunctionExpected(string)
+  | REFunctionNotFound(string)
   | REJavaScriptExn(option<string>, option<string>) // Javascript Exception
   | REMacroNotFound(string)
   | RENotAFunction(string)
+  | REOperationError(Operation.operationError)
   | RERecordPropertyNotFound(string, string)
   | RESymbolNotFound(string)
   | RESyntaxError(string)
   | RETodo(string) // To do
-  | REExpectedType(string)
+  | REUnitNotFound(string)
 
 type t = errorValue
 
@@ -28,7 +31,9 @@ let errorToString = err =>
   | REAssignmentExpected => "Assignment expected"
   | REExpressionExpected => "Expression expected"
   | REFunctionExpected(msg) => `Function expected: ${msg}`
+  | REFunctionNotFound(msg) => `Function not found: ${msg}`
   | REDistributionError(err) => `Distribution Math Error: ${DistributionTypes.Error.toString(err)}`
+  | REOperationError(err) => `Math Error: ${Operation.Error.toString(err)}`
   | REJavaScriptExn(omsg, oname) => {
       let answer = "JS Exception:"
       let answer = switch oname {
@@ -48,4 +53,5 @@ let errorToString = err =>
   | RESyntaxError(desc) => `Syntax Error: ${desc}`
   | RETodo(msg) => `TODO: ${msg}`
   | REExpectedType(typeName) => `Expected type: ${typeName}`
+  | REUnitNotFound(unitName) => `Unit not found: ${unitName}`
   }

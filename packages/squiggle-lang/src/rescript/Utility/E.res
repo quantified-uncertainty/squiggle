@@ -2,6 +2,9 @@
 Some functions from modules `L`, `O`, and `R` below were copied directly from
 running `rescript convert -all` on Rationale https://github.com/jonlaing/rationale
 */
+
+let equals = (a, b) => a === b
+
 module FloatFloatMap = {
   module Id = Belt.Id.MakeComparable({
     type t = float
@@ -49,6 +52,11 @@ module Tuple2 = {
     let (_, b) = v
     b
   }
+  let toFnCall = (fn, (a1, a2)) => fn(a1, a2)
+}
+
+module Tuple3 = {
+  let toFnCall = (fn, (a1, a2, a3)) => fn(a1, a2, a3)
 }
 
 module O = {
@@ -199,6 +207,7 @@ module Float = {
   let toFixed = Js.Float.toFixed
   let toString = Js.Float.toString
   let isFinite = Js.Float.isFinite
+  let toInt = Belt.Float.toInt
 }
 
 module I = {
@@ -235,13 +244,16 @@ module R = {
     | Ok(a) => f(a)
     | Error(err) => Error(err)
     }
-
   let toExn = (msg: string, x: result<'a, 'b>): 'a =>
     switch x {
     | Ok(r) => r
     | Error(_) => raise(Assertion(msg))
     }
-
+  let toExnFnString = (errorToStringFn, o) =>
+    switch o {
+    | Ok(r) => r
+    | Error(r) => raise(Assertion(errorToStringFn(r)))
+    }
   let default = (default, res: Belt.Result.t<'a, 'b>) =>
     switch res {
     | Ok(r) => r
@@ -522,11 +534,13 @@ module A = {
   let unsafe_get = Array.unsafe_get
   let get = Belt.Array.get
   let getBy = Belt.Array.getBy
+  let getIndexBy = Belt.Array.getIndexBy
   let last = a => get(a, length(a) - 1)
   let first = get(_, 0)
   let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> O.isSome
   let fold_left = Array.fold_left
   let fold_right = Array.fold_right
+  let concat = Belt.Array.concat
   let concatMany = Belt.Array.concatMany
   let keepMap = Belt.Array.keepMap
   let slice = Belt.Array.slice
@@ -535,6 +549,7 @@ module A = {
   let reducei = Belt.Array.reduceWithIndex
   let isEmpty = r => length(r) < 1
   let stableSortBy = Belt.SortArray.stableSortBy
+  let toNoneIfEmpty = r => isEmpty(r) ? None : Some(r)
   let toRanges = (a: array<'a>) =>
     switch a |> Belt.Array.length {
     | 0
@@ -549,9 +564,18 @@ module A = {
       |> (x => Ok(x))
     }
 
+  let getByOpen = (a, op, bin) =>
+    switch getBy(a, r => bin(op(r))) {
+    | Some(r) => Some(op(r))
+    | None => None
+    }
+
   let tail = Belt.Array.sliceToEnd(_, 1)
 
   let zip = Belt.Array.zip
+  let unzip = Belt.Array.unzip
+  let zip3 = (a, b, c) =>
+    Belt.Array.zip(a, b)->Belt.Array.zip(c)->Belt.Array.map((((v1, v2), v3)) => (v1, v2, v3))
   // This zips while taking the longest elements of each array.
   let zipMaxLength = (array1, array2) => {
     let maxLength = Int.max(length(array1), length(array2))
@@ -607,6 +631,9 @@ module A = {
   let filter = Js.Array.filter
   let joinWith = Js.Array.joinWith
 
+  let all = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) == length(xs)
+  let any = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) > 0
+
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
       optionals
@@ -617,6 +644,32 @@ module A = {
       | Some(o) => o
       | None => []
       }
+    // REturns `None` there are no non-`None` elements
+    let rec arrSomeToSomeArr = (optionals: array<option<'a>>): option<array<'a>> => {
+      let optionals' = optionals->Belt.List.fromArray
+      switch optionals' {
+      | list{} => []->Some
+      | list{x, ...xs} =>
+        switch x {
+        | Some(_) => xs->Belt.List.toArray->arrSomeToSomeArr
+        | None => None
+        }
+      }
+    }
+    let firstSome = x => Belt.Array.getBy(x, O.isSome)
+
+    let firstSomeFn = (r: array<unit => option<'a>>): option<'a> =>
+      O.flatten(getByOpen(r, l => l(), O.isSome))
+
+    let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->O2.default(default)
+
+    let openIfAllSome = (optionals: array<option<'a>>): option<array<'a>> => {
+      if all(O.isSome, optionals) {
+        Some(optionals |> fmap(O.toExn("Warning: This should not have happened")))
+      } else {
+        None
+      }
+    }
   }
 
   module R = {
@@ -669,6 +722,7 @@ module A = {
     let variance = Jstat.variance
     let stdev = Jstat.stdev
     let sum = Jstat.sum
+    let product = Jstat.product
     let random = Js.Math.random_int
 
     let floatCompare: (float, float) => int = compare
@@ -696,6 +750,9 @@ module A = {
     // diff([1,5,3,7]) = [4,-2,4]
     let diff = (t: t): array<float> =>
       Belt.Array.zipBy(t, Belt.Array.sliceToEnd(t, 1), (left, right) => right -. left)
+
+    let cumsum = (t: t): array<float> => accumulate((a, b) => a +. b, t)
+    let cumProd = (t: t): array<float> => accumulate((a, b) => a *. b, t)
 
     exception RangeError(string)
     let range = (min: float, max: float, n: int): array<float> =>
@@ -803,6 +860,7 @@ module A = {
 
 module A2 = {
   let fmap = (a, b) => A.fmap(b, a)
+  let fmapi = (a, b) => A.fmapi(b, a)
   let joinWith = (a, b) => A.joinWith(b, a)
   let filter = (a, b) => A.filter(b, a)
 }
@@ -813,4 +871,14 @@ module JsArray = {
     |> Js.Array.filter(O.isSome)
     |> Js.Array.map(O.toExn("Warning: This should not have happened"))
   let filter = Js.Array.filter
+}
+
+module Dict = {
+  type t<'a> = Js.Dict.t<'a>
+  let get = Js.Dict.get
+  let keys = Js.Dict.keys
+  let fromArray = Js.Dict.fromArray
+  let toArray = Js.Dict.entries
+  let concat = (a, b) => A.concat(toArray(a), toArray(b))->fromArray
+  let concatMany = ts => ts->A2.fmap(toArray)->A.concatMany->fromArray
 }

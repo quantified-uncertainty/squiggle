@@ -18,13 +18,10 @@ type internalCode = ReducerInterface_ExpressionValue.internalCode
 type t = expression
 
 /*
-  Converts a MathJs code to expression
+  Converts a Squigle code to expression
 */
-let parse_ = (expr: string, parser, converter): result<t, errorValue> =>
-  expr->parser->Result.flatMap(node => converter(node))
-
-let parse = (mathJsCode: string): result<t, errorValue> =>
-  mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromNode)
+let parse = (peggyCode: string): result<t, errorValue> =>
+  peggyCode->Reducer_Peggy_Parse.parse->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
 /*
   Recursively evaluate/reduce the expression (Lisp AST)
@@ -77,11 +74,30 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
   'e,
 > =>
   switch valueList {
-  | list{EvCall(fName), ...args} =>
-    (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
+  | list{EvCall(fName), ...args} => {
+      let rCheckedArgs = switch fName {
+      | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args->Ok
+      | _ => args->Lambda.checkIfReduced
+      }
 
+      rCheckedArgs->Result.flatMap(checkedArgs =>
+        (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
+      )
+    }
+  | list{EvLambda(_)} =>
+    // TODO: remove on solving issue#558
+    valueList
+    ->Lambda.checkIfReduced
+    ->Result.flatMap(reducedValueList =>
+      reducedValueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
+    )
   | list{EvLambda(lamdaCall), ...args} =>
-    Lambda.doLambdaCall(lamdaCall, args, environment, reduceExpression)
+    args
+    ->Lambda.checkIfReduced
+    ->Result.flatMap(checkedArgs =>
+      Lambda.doLambdaCall(lamdaCall, checkedArgs, environment, reduceExpression)
+    )
+
   | _ =>
     valueList
     ->Lambda.checkIfReduced
@@ -116,7 +132,7 @@ let evaluateUsingOptions = (
 }
 
 /*
-  Evaluates MathJs code and bindings via Reducer and answers the result
+  Evaluates Squiggle code and bindings via Reducer and answers the result
 */
 let evaluate = (code: string): result<expressionValue, errorValue> => {
   evaluateUsingOptions(~environment=None, ~externalBindings=None, code)

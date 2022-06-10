@@ -17,11 +17,25 @@ describe("builtin", () => {
   testEval("1-1", "Ok(0)")
   testEval("2>1", "Ok(true)")
   testEval("concat('a','b')", "Ok('ab')")
+  testEval(
+    "addOne(t)=t+1; toInternalSampleArray(mapSamples(fromSamples([1,2,3,4,5,6]), addOne))",
+    "Ok([2,3,4,5,6,7])",
+  )
 })
 
 describe("builtin exception", () => {
   //It's a pity that MathJs does not return error position
   test("MathJs Exception", () =>
-    expectEvalToBe("testZadanga()", "Error(JS Exception: Error: Undefined function testZadanga)")
+    expectEvalToBe("testZadanga(1)", "Error(JS Exception: Error: Undefined function testZadanga)")
   )
+})
+
+describe("error reporting from collection functions", () => {
+  testEval("arr=[1,2,3]; map(arr, {|x| x*2})", "Ok([2,4,6])")
+  testEval(
+    "arr = [normal(3,2)]; map(arr, zarathsuzaWasHere)",
+    "Error(zarathsuzaWasHere is not defined)",
+  )
+  // FIXME: returns "Error(Function not found: map(Array,Symbol))"
+  // Actually this error is correct but not informative
 })

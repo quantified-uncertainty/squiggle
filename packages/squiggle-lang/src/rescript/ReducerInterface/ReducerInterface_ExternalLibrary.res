@@ -14,13 +14,27 @@ type expressionValue = ExpressionValue.expressionValue
   Map external calls of Reducer
 */
 
+// I expect that it's important to build this first, so it doesn't get recalculated for each tryRegistry() call.
+let registry = FunctionRegistry_Library.registry
+
+let tryRegistry = ((fnName, args): ExpressionValue.functionCall, env) => {
+  FunctionRegistry_Core.Registry.matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
+    E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
+  )
+}
+
 let dispatch = (call: ExpressionValue.functionCall, environment, chain): result<
   expressionValue,
   'e,
-> =>
-  ReducerInterface_GenericDistribution.dispatch(call, environment) |> E.O.default(
-    chain(call, environment),
-  )
+> => {
+  E.A.O.firstSomeFn([
+    () => ReducerInterface_GenericDistribution.dispatch(call, environment),
+    () => ReducerInterface_Date.dispatch(call, environment),
+    () => ReducerInterface_Duration.dispatch(call, environment),
+    () => ReducerInterface_Number.dispatch(call, environment),
+    () => tryRegistry(call, environment),
+  ])->E.O2.default(chain(call, environment))
+}
 /*
 If your dispatch is too big you can divide it into smaller dispatches and pass the call so that it gets called finally.
 

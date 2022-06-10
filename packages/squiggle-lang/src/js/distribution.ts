@@ -11,6 +11,7 @@ import {
 import { result, resultMap, Ok } from "./types";
 import {
   Constructors_mean,
+  Constructors_stdev,
   Constructors_sample,
   Constructors_pdf,
   Constructors_cdf,
@@ -35,7 +36,7 @@ import {
   Constructors_pointwiseSubtract,
   Constructors_pointwiseLogarithm,
   Constructors_pointwisePower,
-} from "../rescript/Distributions/DistributionOperation/DistributionOperation.gen";
+} from "../rescript/Distributions/DistributionOperation.gen";
 
 export type point = { x: number; y: number };
 
@@ -67,6 +68,10 @@ export class Distribution {
 
   mean(): result<number, distributionError> {
     return Constructors_mean({ env: this.env }, this.t);
+  }
+
+  stdev(): result<number, distributionError> {
+    return Constructors_stdev({ env: this.env }, this.t);
   }
 
   sample(): result<number, distributionError> {

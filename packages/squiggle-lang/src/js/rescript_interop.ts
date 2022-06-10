@@ -1,5 +1,6 @@
 import * as _ from "lodash";
-import {
+import type {
+  expressionValue,
   mixedShape,
   sampleSetDist,
   genericDist,
@@ -8,6 +9,8 @@ import {
   discreteShape,
   continuousShape,
   lambdaValue,
+  lambdaDeclaration,
+  declarationArg,
 } from "../rescript/TypescriptInterface.gen";
 import { Distribution } from "./distribution";
 import { tagged, tag } from "./types";
@@ -54,6 +57,22 @@ export type rescriptExport =
   | {
       TAG: 9; // EvSymbol
       _0: string;
+    }
+  | {
+      TAG: 10; // EvDate
+      _0: Date;
+    }
+  | {
+      TAG: 11; // EvTimeDuration
+      _0: number;
+    }
+  | {
+      TAG: 12; // EvDeclaration
+      _0: rescriptLambdaDeclaration;
+    }
+  | {
+      TAG: 13; // EvTypeIdentifier
+      _0: string;
     };
 
 type rescriptDist =
@@ -75,6 +94,23 @@ type rescriptPointSetDist =
       _0: continuousShape;
     };
 
+type rescriptLambdaDeclaration = {
+  readonly fn: lambdaValue;
+  readonly args: rescriptDeclarationArg[];
+};
+
+type rescriptDeclarationArg =
+  | {
+      TAG: 0; // Float
+      min: number;
+      max: number;
+    }
+  | {
+      TAG: 1; // Date
+      min: Date;
+      max: Date;
+    };
+
 export type squiggleExpression =
   | tagged<"symbol", string>
   | tagged<"string", string>
@@ -85,7 +121,13 @@ export type squiggleExpression =
   | tagged<"boolean", boolean>
   | tagged<"distribution", Distribution>
   | tagged<"number", number>
-  | tagged<"record", { [key: string]: squiggleExpression }>;
+  | tagged<"date", Date>
+  | tagged<"timeDuration", number>
+  | tagged<"lambdaDeclaration", lambdaDeclaration>
+  | tagged<"record", { [key: string]: squiggleExpression }>
+  | tagged<"typeIdentifier", string>;
+
+export { lambdaValue };
 
 export function convertRawToTypescript(
   result: rescriptExport,
@@ -124,6 +166,28 @@ export function convertRawToTypescript(
       return tag("string", result._0);
     case 9: // EvSymbol
       return tag("symbol", result._0);
+    case 10: // EvDate
+      return tag("date", result._0);
+    case 11: // EvTimeDuration
+      return tag("number", result._0);
+    case 12: // EvDeclaration
+      return tag("lambdaDeclaration", {
+        fn: result._0.fn,
+        args: result._0.args.map(convertDeclaration),
+      });
+    case 13: // EvSymbol
+      return tag("typeIdentifier", result._0);
+  }
+}
+
+function convertDeclaration(
+  declarationArg: rescriptDeclarationArg
+): declarationArg {
+  switch (declarationArg.TAG) {
+    case 0: // Float
+      return tag("Float", { min: declarationArg.min, max: declarationArg.max });
+    case 1: // Date
+      return tag("Date", { min: declarationArg.min, max: declarationArg.max });
   }
 }
 
@@ -166,5 +230,23 @@ export function jsValueToBinding(value: jsValue): rescriptExport {
   } else {
     // Record
     return { TAG: 7, _0: _.mapValues(value, jsValueToBinding) };
+  }
+}
+
+export function jsValueToExpressionValue(value: jsValue): expressionValue {
+  if (typeof value === "boolean") {
+    return { tag: "EvBool", value: value as boolean };
+  } else if (typeof value === "string") {
+    return { tag: "EvString", value: value as string };
+  } else if (typeof value === "number") {
+    return { tag: "EvNumber", value: value as number };
+  } else if (Array.isArray(value)) {
+    return { tag: "EvArray", value: value.map(jsValueToExpressionValue) };
+  } else {
+    // Record
+    return {
+      tag: "EvRecord",
+      value: _.mapValues(value, jsValueToExpressionValue),
+    };
   }
 }

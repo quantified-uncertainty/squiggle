@@ -1,0 +1,8 @@
+@import "./base.css";
+@tailwind components;
+@tailwind utilities;
+
+/* necessary hack because scoped preflight in ./base.css has higher specificity */
+.ace_cursor {
+  border-left: 2px solid !important;
+}

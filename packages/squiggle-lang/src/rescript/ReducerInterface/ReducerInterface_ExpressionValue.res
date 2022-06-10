@@ -20,6 +20,10 @@ type rec expressionValue =
   | EvRecord(record)
   | EvString(string)
   | EvSymbol(string)
+  | EvDate(Js.Date.t)
+  | EvTimeDuration(float)
+  | EvDeclaration(lambdaDeclaration)
+  | EvTypeIdentifier(string)
 and record = Js.Dict.t<expressionValue>
 and externalBindings = record
 and lambdaValue = {
@@ -27,6 +31,7 @@ and lambdaValue = {
   context: externalBindings,
   body: internalCode,
 }
+and lambdaDeclaration = Declaration.declaration<lambdaValue>
 
 @genType
 let defaultExternalBindings: externalBindings = Js.Dict.empty()
@@ -51,6 +56,10 @@ let rec toString = aValue =>
   | EvSymbol(aString) => `:${aString}`
   | EvRecord(aRecord) => aRecord->toStringRecord
   | EvDistribution(dist) => GenericDist.toString(dist)
+  | EvDate(date) => DateTime.Date.toString(date)
+  | EvTimeDuration(t) => DateTime.Duration.toString(t)
+  | EvDeclaration(d) => Declaration.toString(d, r => toString(EvLambda(r)))
+  | EvTypeIdentifier(id) => `#${id}`
   }
 and toStringRecord = aRecord => {
   let pairs =
@@ -73,6 +82,10 @@ let toStringWithType = aValue =>
   | EvRecord(_) => `Record::${toString(aValue)}`
   | EvString(_) => `String::${toString(aValue)}`
   | EvSymbol(_) => `Symbol::${toString(aValue)}`
+  | EvDate(_) => `Date::${toString(aValue)}`
+  | EvTimeDuration(_) => `Date::${toString(aValue)}`
+  | EvDeclaration(_) => `Declaration::${toString(aValue)}`
+  | EvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
   }
 
 let argsToString = (args: array<expressionValue>): string => {
@@ -87,6 +100,12 @@ let toStringResult = x =>
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
+let toStringResultOkless = (codeResult: result<expressionValue, ErrorValue.errorValue>): string =>
+  switch codeResult {
+  | Ok(a) => toString(a)
+  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
+  }
+
 let toStringResultRecord = x =>
   switch x {
   | Ok(a) => `Ok(${toStringRecord(a)})`
@@ -98,3 +117,69 @@ type environment = DistributionOperation.env
 
 @genType
 let defaultEnvironment: environment = DistributionOperation.defaultEnv
+
+type expressionValueType =
+  | EvtArray
+  | EvtArrayString
+  | EvtBool
+  | EvtCall
+  | EvtDistribution
+  | EvtLambda
+  | EvtNumber
+  | EvtRecord
+  | EvtString
+  | EvtSymbol
+  | EvtDate
+  | EvtTimeDuration
+  | EvtDeclaration
+  | EvtTypeIdentifier
+
+type functionCallSignature = CallSignature(string, array<expressionValueType>)
+type functionDefinitionSignature =
+  FunctionDefinitionSignature(functionCallSignature, expressionValueType)
+
+let valueToValueType = value =>
+  switch value {
+  | EvArray(_) => EvtArray
+  | EvArrayString(_) => EvtArray
+  | EvBool(_) => EvtBool
+  | EvCall(_) => EvtCall
+  | EvDistribution(_) => EvtDistribution
+  | EvLambda(_) => EvtLambda
+  | EvNumber(_) => EvtNumber
+  | EvRecord(_) => EvtRecord
+  | EvString(_) => EvtArray
+  | EvSymbol(_) => EvtSymbol
+  | EvDate(_) => EvtDate
+  | EvTimeDuration(_) => EvtTimeDuration
+  | EvDeclaration(_) => EvtDeclaration
+  | EvTypeIdentifier(_) => EvtTypeIdentifier
+  }
+
+let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
+  let (fn, args) = functionCall
+  CallSignature(fn, args->Js.Array2.map(valueToValueType))
+}
+
+let valueTypeToString = (valueType: expressionValueType): string =>
+  switch valueType {
+  | EvtArray => `Array`
+  | EvtArrayString => `ArrayString`
+  | EvtBool => `Bool`
+  | EvtCall => `Call`
+  | EvtDistribution => `Distribution`
+  | EvtLambda => `Lambda`
+  | EvtNumber => `Number`
+  | EvtRecord => `Record`
+  | EvtString => `String`
+  | EvtSymbol => `Symbol`
+  | EvtDate => `Date`
+  | EvtTimeDuration => `Duration`
+  | EvtDeclaration => `Declaration`
+  | EvtTypeIdentifier => `TypeIdentifier`
+  }
+
+let functionCallSignatureToString = (functionCallSignature: functionCallSignature): string => {
+  let CallSignature(fn, args) = functionCallSignature
+  `${fn}(${args->Js.Array2.map(valueTypeToString)->Js.Array2.toString})`
+}
