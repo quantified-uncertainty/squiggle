@@ -5,8 +5,14 @@ let impossibleError = "Wrong inputs / Logically impossible"
 module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)
   let evDistribution = r => ReducerInterface_ExpressionValue.EvDistribution(r)
+  let evNumber = r => ReducerInterface_ExpressionValue.EvNumber(r)
+  let evArray = r => ReducerInterface_ExpressionValue.EvArray(r)
+  let evRecord = r => ReducerInterface_ExpressionValue.EvRecord(r)
+  let evString = r => ReducerInterface_ExpressionValue.EvString(r)
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
 }
+
+let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleError)
 
 module Prepare = {
   type t = frValue
@@ -34,6 +40,12 @@ module Prepare = {
         | FRValueArray(n) => Ok(n)
         | _ => Error(impossibleError)
         }
+
+      let arrayOfArrays = (inputs: t): result<array<ts>, err> =>
+        switch inputs {
+        | FRValueArray(n) => n->E.A2.fmap(openA)->E.A.R.firstErrorOrOpen
+        | _ => Error(impossibleError)
+        }
     }
   }
 
@@ -48,6 +60,13 @@ module Prepare = {
     let twoNumbers = (values: ts): result<(float, float), err> => {
       switch values {
       | [FRValueNumber(a1), FRValueNumber(a2)] => Ok(a1, a2)
+      | _ => Error(impossibleError)
+      }
+    }
+
+    let threeNumbers = (values: ts): result<(float, float, float), err> => {
+      switch values {
+      | [FRValueNumber(a1), FRValueNumber(a2), FRValueNumber(a3)] => Ok(a1, a2, a3)
       | _ => Error(impossibleError)
       }
     }
@@ -75,6 +94,33 @@ module Prepare = {
           ->E.A.R.firstErrorOrOpen
         )
       pairs
+    }
+  }
+
+  let oneNumber = (values: t): result<float, err> => {
+    switch values {
+    | FRValueNumber(a1) => Ok(a1)
+    | _ => Error(impossibleError)
+    }
+  }
+
+  let oneDict = (values: t): result<Js.Dict.t<frValue>, err> => {
+    switch values {
+    | FRValueDict(a1) => Ok(a1)
+    | _ => Error(impossibleError)
+    }
+  }
+
+  module ToTypedArray = {
+    let numbers = (inputs: ts): result<array<float>, err> => {
+      let openNumbers = (elements: array<t>) =>
+        elements->E.A2.fmap(oneNumber)->E.A.R.firstErrorOrOpen
+      inputs->getOrError(0)->E.R.bind(ToValueArray.Array.openA)->E.R.bind(openNumbers)
+    }
+
+    let dicts = (inputs: ts): Belt.Result.t<array<Js.Dict.t<frValue>>, err> => {
+      let openDicts = (elements: array<t>) => elements->E.A2.fmap(oneDict)->E.A.R.firstErrorOrOpen
+      inputs->getOrError(0)->E.R.bind(ToValueArray.Array.openA)->E.R.bind(openDicts)
     }
   }
 }
@@ -183,9 +229,36 @@ module OneArgDist = {
     ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
     ->E.R2.fmap(Wrappers.evDistribution)
 
-  let make = (name, fn) => {
+  let make = (name, fn) =>
     FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber], ~run=(inputs, env) =>
       inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env)
     )
+}
+
+module ArrayNumberDist = {
+  let make = (name, fn) => {
+    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeNumber)], ~run=(inputs, _) =>
+      Prepare.ToTypedArray.numbers(inputs)
+      ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
+      ->E.R.bind(fn)
+    )
   }
+  let make2 = (name, fn) => {
+    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeAny)], ~run=(inputs, _) =>
+      Prepare.ToTypedArray.numbers(inputs)
+      ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
+      ->E.R.bind(fn)
+    )
+  }
+}
+
+module NumberToNumber = {
+  let make = (name, fn) =>
+    FnDefinition.make(~name, ~inputs=[FRTypeNumber], ~run=(inputs, _) => {
+      inputs
+      ->getOrError(0)
+      ->E.R.bind(Prepare.oneNumber)
+      ->E.R2.fmap(fn)
+      ->E.R2.fmap(Wrappers.evNumber)
+    })
 }

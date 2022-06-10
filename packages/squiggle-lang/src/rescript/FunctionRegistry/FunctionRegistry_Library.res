@@ -31,7 +31,7 @@ module Declaration = {
 }
 
 let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
-  let array = inputs->E.A.unsafe_get(0)->Prepare.ToValueArray.Array.openA
+  let array = inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.openA)
   let xyCoords =
     array->E.R.bind(xyCoords =>
       xyCoords
@@ -48,6 +48,37 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
 }
 
 let registry = [
+  Function.make(
+    ~name="toContinuousPointSet",
+    ~definitions=[
+      FnDefinition.make(
+        ~name="toContinuousPointSet",
+        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
+        ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="toDiscretePointSet",
+    ~definitions=[
+      FnDefinition.make(
+        ~name="toDiscretePointSet",
+        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
+        ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Declaration",
+    ~definitions=[
+      FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
+        inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
+      }),
+    ],
+    (),
+  ),
   Function.make(
     ~name="Normal",
     ~examples=`normal(5,1)
@@ -190,6 +221,285 @@ to(5,10)
       }),
     ],
     ~isExperimental=true,
+    (),
+  ),
+  Function.make(
+    ~name="Floor",
+    ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)],
+    (),
+  ),
+  Function.make(
+    ~name="Ceiling",
+    ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
+    (),
+  ),
+  Function.make(
+    ~name="Absolute Value",
+    ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)],
+    (),
+  ),
+  Function.make(~name="Exponent", ~definitions=[NumberToNumber.make("exp", Js.Math.exp)], ()),
+  Function.make(~name="Log", ~definitions=[NumberToNumber.make("log", Js.Math.log)], ()),
+  Function.make(
+    ~name="Log Base 10",
+    ~definitions=[NumberToNumber.make("log10", Js.Math.log10)],
+    (),
+  ),
+  Function.make(~name="Log Base 2", ~definitions=[NumberToNumber.make("log2", Js.Math.log2)], ()),
+  Function.make(~name="Round", ~definitions=[NumberToNumber.make("round", Js.Math.round)], ()),
+  Function.make(
+    ~name="Sum",
+    ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber->Ok)],
+    (),
+  ),
+  Function.make(
+    ~name="Product",
+    ~definitions=[
+      ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber->Ok),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Min",
+    ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber->Ok)],
+    (),
+  ),
+  Function.make(
+    ~name="Max",
+    ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber->Ok)],
+    (),
+  ),
+  Function.make(
+    ~name="Mean",
+    ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber->Ok)],
+    (),
+  ),
+  Function.make(
+    ~name="Geometric Mean",
+    ~definitions=[
+      ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber->Ok),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Standard Deviation",
+    ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok)],
+    (),
+  ),
+  Function.make(
+    ~name="Variance",
+    ~definitions=[
+      ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="First",
+    ~definitions=[
+      ArrayNumberDist.make2("first", r =>
+        r->E.A.first |> E.O.toResult(impossibleError) |> E.R.fmap(Wrappers.evNumber)
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Last",
+    ~definitions=[
+      ArrayNumberDist.make2("last", r =>
+        r->E.A.last |> E.O.toResult(impossibleError) |> E.R.fmap(Wrappers.evNumber)
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Sort",
+    ~definitions=[
+      ArrayNumberDist.make("sort", r =>
+        r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Reverse",
+    ~definitions=[
+      ArrayNumberDist.make("reverse", r =>
+        r->Belt_Array.reverse->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Cumulative Sum",
+    ~definitions=[
+      ArrayNumberDist.make("cumsum", r =>
+        r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Cumulative Prod",
+    ~definitions=[
+      ArrayNumberDist.make("cumprod", r =>
+        r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Diff",
+    ~definitions=[
+      ArrayNumberDist.make("diff", r =>
+        r->E.A.Floats.diff->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Dict.merge",
+    ~definitions=[
+      FnDefinition.make(
+        ~name="merge",
+        ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
+        ~run=(inputs, _) => {
+          switch inputs {
+          | [FRValueDict(d1), FRValueDict(d2)] => {
+              let newDict =
+                E.Dict.concat(d1, d2) |> Js.Dict.map((. r) =>
+                  FunctionRegistry_Core.FRType.matchReverse(r)
+                )
+              newDict->Wrappers.evRecord->Ok
+            }
+          | _ => Error(impossibleError)
+          }
+        },
+      ),
+    ],
+    (),
+  ),
+  //TODO: Make sure that two functions can't have the same name. This causes chaos elsewhere.
+  Function.make(
+    ~name="Dict.mergeMany",
+    ~definitions=[
+      FnDefinition.make(~name="mergeMany", ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))], ~run=(
+        inputs,
+        _,
+      ) =>
+        inputs
+        ->Prepare.ToTypedArray.dicts
+        ->E.R2.fmap(E.Dict.concatMany)
+        ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
+        ->E.R2.fmap(Wrappers.evRecord)
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Dict.keys",
+    ~definitions=[
+      FnDefinition.make(~name="keys", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
+        switch inputs {
+        | [FRValueDict(d1)] => Js.Dict.keys(d1)->E.A2.fmap(Wrappers.evString)->Wrappers.evArray->Ok
+        | _ => Error(impossibleError)
+        }
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Dict.values",
+    ~definitions=[
+      FnDefinition.make(~name="values", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
+        switch inputs {
+        | [FRValueDict(d1)] =>
+          Js.Dict.values(d1)
+          ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
+          ->Wrappers.evArray
+          ->Ok
+        | _ => Error(impossibleError)
+        }
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Dict.toList",
+    ~definitions=[
+      FnDefinition.make(~name="dictToList", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
+        switch inputs {
+        | [FRValueDict(dict)] =>
+          dict
+          ->Js.Dict.entries
+          ->E.A2.fmap(((key, value)) =>
+            Wrappers.evArray([
+              Wrappers.evString(key),
+              FunctionRegistry_Core.FRType.matchReverse(value),
+            ])
+          )
+          ->Wrappers.evArray
+          ->Ok
+        | _ => Error(impossibleError)
+        }
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Dict.fromList",
+    ~definitions=[
+      FnDefinition.make(~name="dictFromList", ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))], ~run=(
+        inputs,
+        _,
+      ) => {
+        let convertInternalItems = items =>
+          items
+          ->E.A2.fmap(item => {
+            switch item {
+            | [FRValueString(string), value] =>
+              (string, FunctionRegistry_Core.FRType.matchReverse(value))->Ok
+            | _ => Error(impossibleError)
+            }
+          })
+          ->E.A.R.firstErrorOrOpen
+          ->E.R2.fmap(Js.Dict.fromArray)
+          ->E.R2.fmap(Wrappers.evRecord)
+        inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.arrayOfArrays)
+          |> E.R2.bind(convertInternalItems)
+      }),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="List.make",
+    ~definitions=[
+      //Todo: If the second item is a function with no args, it could be nice to run this function and return the result.
+      FnDefinition.make(~name="listMake", ~inputs=[FRTypeNumber, FRTypeAny], ~run=(inputs, _) => {
+        switch inputs {
+        | [FRValueNumber(number), value] =>
+          Belt.Array.make(E.Float.toInt(number), value)
+          ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
+          ->Wrappers.evArray
+          ->Ok
+        | _ => Error(impossibleError)
+        }
+      }),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="upTo",
+    ~definitions=[
+      FnDefinition.make(~name="upTo", ~inputs=[FRTypeNumber, FRTypeNumber], ~run=(inputs, _) =>
+        inputs
+        ->Prepare.ToValueTuple.twoNumbers
+        ->E.R2.fmap(((low, high)) =>
+          E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)
+          ->E.A2.fmap(Wrappers.evNumber)
+          ->Wrappers.evArray
+        )
+      ),
+    ],
     (),
   ),
 ]
