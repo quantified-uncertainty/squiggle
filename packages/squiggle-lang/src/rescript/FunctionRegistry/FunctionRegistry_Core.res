@@ -10,8 +10,10 @@ type rec frType =
   | FRTypeDistOrNumber
   | FRTypeLambda
   | FRTypeRecord(frTypeRecord)
+  | FRTypeDict(frType)
   | FRTypeArray(frType)
   | FRTypeString
+  | FRTypeAny
   | FRTypeVariant(array<string>)
 and frTypeRecord = array<frTypeRecordParam>
 and frTypeRecordParam = (string, frType)
@@ -29,8 +31,11 @@ type rec frValue =
   | FRValueLambda(ReducerInterface_ExpressionValue.lambdaValue)
   | FRValueString(string)
   | FRValueVariant(string)
+  | FRValueAny(frValue)
+  | FRValueDict(Js.Dict.t<frValue>)
 and frValueRecord = array<frValueRecordParam>
 and frValueRecordParam = (string, frValue)
+and frValueDictParam = (string, frValue)
 and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.genericDist)
 
 type fnDefinition = {
@@ -57,14 +62,34 @@ module FRType = {
         let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
         `record({${r->E.A2.fmap(input)->E.A2.joinWith(", ")}})`
       }
-    | FRTypeArray(r) => `record(${toString(r)})`
+    | FRTypeArray(r) => `list(${toString(r)})`
     | FRTypeLambda => `lambda`
     | FRTypeString => `string`
     | FRTypeVariant(_) => "variant"
+    | FRTypeDict(r) => `dict(${toString(r)})`
+    | FRTypeAny => `any`
+    }
+
+  let rec toFrValue = (r: expressionValue): option<frValue> =>
+    switch r {
+    | EvNumber(f) => Some(FRValueNumber(f))
+    | EvString(f) => Some(FRValueString(f))
+    | EvDistribution(f) => Some(FRValueDistOrNumber(FRValueDist(f)))
+    | EvLambda(f) => Some(FRValueLambda(f))
+    | EvArray(elements) =>
+      elements->E.A2.fmap(toFrValue)->E.A.O.openIfAllSome->E.O2.fmap(r => FRValueArray(r))
+    | EvRecord(record) =>
+      Js.Dict.entries(record)
+      ->E.A2.fmap(((key, item)) => item->toFrValue->E.O2.fmap(o => (key, o)))
+      ->E.A.O.openIfAllSome
+      ->E.O2.fmap(r => FRValueRecord(r))
+    | _ => None
     }
 
   let rec matchWithExpressionValue = (t: t, r: expressionValue): option<frValue> =>
     switch (t, r) {
+    | (FRTypeAny, f) => toFrValue(f)
+    | (FRTypeString, EvString(f)) => Some(FRValueString(f))
     | (FRTypeNumber, EvNumber(f)) => Some(FRValueNumber(f))
     | (FRTypeDistOrNumber, EvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
     | (FRTypeDistOrNumber, EvDistribution(Symbolic(#Float(f)))) =>
@@ -77,6 +102,12 @@ module FRType = {
         let el = elements->E.A2.fmap(matchWithExpressionValue(intendedType))
         E.A.O.openIfAllSome(el)->E.O2.fmap(r => FRValueArray(r))
       }
+    | (FRTypeDict(r), EvRecord(record)) =>
+      record
+      ->Js.Dict.entries
+      ->E.A2.fmap(((key, item)) => matchWithExpressionValue(r, item)->E.O2.fmap(o => (key, o)))
+      ->E.A.O.openIfAllSome
+      ->E.O2.fmap(r => FRValueDict(Js.Dict.fromArray(r)))
     | (FRTypeRecord(recordParams), EvRecord(record)) => {
         let getAndMatch = (name, input) =>
           E.Dict.get(record, name)->E.O.bind(matchWithExpressionValue(input))
@@ -103,9 +134,18 @@ module FRType = {
           frValueRecord->E.A2.fmap(((name, value)) => (name, matchReverse(value)))->E.Dict.fromArray
         EvRecord(record)
       }
+    | FRValueDict(frValueRecord) => {
+        let record =
+          frValueRecord
+          ->Js.Dict.entries
+          ->E.A2.fmap(((name, value)) => (name, matchReverse(value)))
+          ->E.Dict.fromArray
+        EvRecord(record)
+      }
     | FRValueLambda(l) => EvLambda(l)
     | FRValueString(string) => EvString(string)
     | FRValueVariant(string) => EvString(string)
+    | FRValueAny(f) => matchReverse(f)
     }
 
   let matchWithExpressionValueArray = (inputs: array<t>, args: array<expressionValue>): option<

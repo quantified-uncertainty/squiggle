@@ -207,6 +207,7 @@ module Float = {
   let toFixed = Js.Float.toFixed
   let toString = Js.Float.toString
   let isFinite = Js.Float.isFinite
+  let toInt = Belt.Float.toInt
 }
 
 module I = {
@@ -539,6 +540,7 @@ module A = {
   let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> O.isSome
   let fold_left = Array.fold_left
   let fold_right = Array.fold_right
+  let concat = Belt.Array.concat
   let concatMany = Belt.Array.concatMany
   let keepMap = Belt.Array.keepMap
   let slice = Belt.Array.slice
@@ -720,6 +722,7 @@ module A = {
     let variance = Jstat.variance
     let stdev = Jstat.stdev
     let sum = Jstat.sum
+    let product = Jstat.product
     let random = Js.Math.random_int
 
     let floatCompare: (float, float) => int = compare
@@ -747,6 +750,9 @@ module A = {
     // diff([1,5,3,7]) = [4,-2,4]
     let diff = (t: t): array<float> =>
       Belt.Array.zipBy(t, Belt.Array.sliceToEnd(t, 1), (left, right) => right -. left)
+
+    let cumsum = (t: t): array<float> => accumulate((a, b) => a +. b, t)
+    let cumProd = (t: t): array<float> => accumulate((a, b) => a *. b, t)
 
     exception RangeError(string)
     let range = (min: float, max: float, n: int): array<float> =>
@@ -872,4 +878,7 @@ module Dict = {
   let get = Js.Dict.get
   let keys = Js.Dict.keys
   let fromArray = Js.Dict.fromArray
+  let toArray = Js.Dict.entries
+  let concat = (a, b) => A.concat(toArray(a), toArray(b))->fromArray
+  let concatMany = ts => ts->A2.fmap(toArray)->A.concatMany->fromArray
 }
