@@ -305,7 +305,7 @@ let registry = [
   Function.make(
     ~name="Dict.toList",
     ~definitions=[
-      FnDefinition.make(~name="toList", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
+      FnDefinition.make(~name="dictToList", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
         switch inputs {
         | [FRValueDict(dict)] =>
           dict
@@ -326,7 +326,7 @@ let registry = [
   Function.make(
     ~name="Dict.fromList",
     ~definitions=[
-      FnDefinition.make(~name="fromList", ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))], ~run=(
+      FnDefinition.make(~name="dictFromList", ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))], ~run=(
         inputs,
         _,
       ) => {
