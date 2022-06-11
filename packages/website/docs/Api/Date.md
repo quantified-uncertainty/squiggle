@@ -27,8 +27,8 @@ subtract: (date, duration) => date
 ```
 
 ```js
-makeFromYear(2040) - makeFromYear(2020) // 20 years
-makeFromYear(2040) - years(20) // 2020
+makeFromYear(2040) - makeFromYear(2020); // 20 years
+makeFromYear(2040) - years(20); // 2020
 ```
 
 ### add

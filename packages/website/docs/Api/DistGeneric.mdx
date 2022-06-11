@@ -257,7 +257,7 @@ sampleN: (distribution, number) => list<number>
 **Examples**
 
 ```javascript
-sample: (normal(5, 2), 100);
+sample: normal(5, 2), 100;
 ```
 
 ### mean
@@ -265,49 +265,49 @@ sample: (normal(5, 2), 100);
 Get the distribution mean
 
 ```javascript
-mean: (distribution) => number
+mean: (distribution) => number;
 ```
 
 **Examples**
 
 ```javascript
-mean: (normal(5, 2));
+mean: normal(5, 2);
 ```
 
 ### stdev
 
 ```javascript
-stdev: (distribution) => number
+stdev: (distribution) => number;
 ```
 
 ### variance
 
 ```javascript
-variance: (distribution) => number
+variance: (distribution) => number;
 ```
 
 ### mode
 
 ```javascript
-mode: (distribution) => number
+mode: (distribution) => number;
 ```
 
 ### cdf
 
 ```javascript
-cdf: (distribution, number) => number
+cdf: (distribution, number) => number;
 ```
 
 **Examples**
 
 ```javascript
-cdf: (normal(5, 2), 3);
+cdf: normal(5, 2), 3;
 ```
 
 ### pdf
 
 ```javascript
-pdf: (distribution, number) => number
+pdf: (distribution, number) => number;
 ```
 
 **Examples**
@@ -319,7 +319,7 @@ pdf(normal(5, 2), 3);
 ### inv
 
 ```javascript
-inv: (distribution, number) => number
+inv: (distribution, number) => number;
 ```
 
 **Examples**
@@ -333,7 +333,7 @@ inv(normal(5, 2), 0.5);
 Converts a distribution to the pointSet format
 
 ```javascript
-toPointSet: (distribution) => pointSetDistribution
+toPointSet: (distribution) => pointSetDistribution;
 ```
 
 **Examples**
@@ -347,7 +347,7 @@ toPointSet(normal(5, 2));
 Converts a distribution to the sampleSet format, with n samples
 
 ```javascript
-toSampleSet: (distribution,number) => sampleSetDistribution
+toSampleSet: (distribution, number) => sampleSetDistribution;
 ```
 
 **Examples**
@@ -391,7 +391,7 @@ truncateLeft(normal(5, 2), 6);
 Kullback–Leibler divergence between two distributions
 
 ```javascript
-klDivergence: (distribution, distribution) => number
+klDivergence: (distribution, distribution) => number;
 ```
 
 **Examples**
@@ -405,7 +405,7 @@ klDivergence(normal(5, 2), normal(5, 4)); // returns 0.57
 ### toString
 
 ```javascript
-toString: (distribution) => string
+toString: (distribution) => string;
 ```
 
 **Examples**
@@ -419,7 +419,7 @@ toString(normal(5, 2));
 Produce a sparkline of length n
 
 ```javascript
-toSparkline: (distribution, n=20) => string
+toSparkline: (distribution, n = 20) => string;
 ```
 
 **Examples**
@@ -433,7 +433,7 @@ toSparkline(normal(5, 2), 10);
 Prints the value of the distribution to the Javascript console, then returns the distribution.
 
 ```javascript
-inspect: (distribution) => distribution
+inspect: (distribution) => distribution;
 ```
 
 **Examples**
@@ -449,7 +449,7 @@ inspect(normal(5, 2));
 Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1.
 
 ```javascript
-normalize: (distribution) => distribution
+normalize: (distribution) => distribution;
 ```
 
 **Examples**
@@ -463,7 +463,7 @@ normalize(normal(5, 2));
 Check of a distribution is normalized. Most distributions are typically normalized, but there are some commands that could produce non-normalized distributions.
 
 ```javascript
-isNormalized: (distribution) => bool
+isNormalized: (distribution) => bool;
 ```
 
 **Examples**
@@ -477,7 +477,7 @@ isNormalized(normal(5, 2)); // returns true
 Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.
 
 ```javascript
-integralSum: (distribution) => number
+integralSum: (distribution) => number;
 ```
 
 **Examples**
@@ -491,7 +491,7 @@ integralSum(normal(5, 2));
 ### add
 
 ```javascript
-add: (distributionLike, distributionLike) => distribution
+add: (distributionLike, distributionLike) => distribution;
 ```
 
 ### sum
@@ -503,7 +503,7 @@ sum: (list<distributionLike>) => distribution
 ### multiply
 
 ```javascript
-multiply: (distributionLike, distributionLike) => distribution
+multiply: (distributionLike, distributionLike) => distribution;
 ```
 
 ### product
@@ -515,43 +515,43 @@ product: (list<distributionLike>) => distribution
 ### subtract
 
 ```javascript
-subtract: (distributionLike, distributionLike) => distribution
+subtract: (distributionLike, distributionLike) => distribution;
 ```
 
 ### divide
 
 ```javascript
-divide: (distributionLike, distributionLike) => distribution
+divide: (distributionLike, distributionLike) => distribution;
 ```
 
 ### pow
 
 ```javascript
-pow: (distributionLike, distributionLike) => distribution
+pow: (distributionLike, distributionLike) => distribution;
 ```
 
 ### exp
 
 ```javascript
-exp: (distributionLike, distributionLike) => distribution
+exp: (distributionLike, distributionLike) => distribution;
 ```
 
 ### log
 
 ```javascript
-log: (distributionLike, distributionLike) => distribution
+log: (distributionLike, distributionLike) => distribution;
 ```
 
 ### log10
 
 ```javascript
-log10: (distributionLike, distributionLike) => distribution
+log10: (distributionLike, distributionLike) => distribution;
 ```
 
 ### unaryMinus
 
 ```javascript
-unaryMinus: (distribution) => distribution
+unaryMinus: (distribution) => distribution;
 ```
 
 ## Pointwise Operations
@@ -559,37 +559,37 @@ unaryMinus: (distribution) => distribution
 ### dotAdd
 
 ```javascript
-dotAdd: (distributionLike, distributionLike) => distribution
+dotAdd: (distributionLike, distributionLike) => distribution;
 ```
 
 ### dotMultiply
 
 ```javascript
-dotMultiply: (distributionLike, distributionLike) => distribution
+dotMultiply: (distributionLike, distributionLike) => distribution;
 ```
 
 ### dotSubtract
 
 ```javascript
-dotSubtract: (distributionLike, distributionLike) => distribution
+dotSubtract: (distributionLike, distributionLike) => distribution;
 ```
 
 ### dotDivide
 
 ```javascript
-dotDivide: (distributionLike, distributionLike) => distribution
+dotDivide: (distributionLike, distributionLike) => distribution;
 ```
 
 ### dotPow
 
 ```javascript
-dotPow: (distributionLike, distributionLike) => distribution
+dotPow: (distributionLike, distributionLike) => distribution;
 ```
 
 ### dotExp
 
 ```javascript
-dotExp: (distributionLike, distributionLike) => distribution
+dotExp: (distributionLike, distributionLike) => distribution;
 ```
 
 ## Scale Operations
@@ -597,31 +597,31 @@ dotExp: (distributionLike, distributionLike) => distribution
 ### scaleMultiply
 
 ```javascript
-scaleMultiply: (distributionLike, number) => distribution
+scaleMultiply: (distributionLike, number) => distribution;
 ```
 
 ### scalePow
 
 ```javascript
-scalePow: (distributionLike, number) => distribution
+scalePow: (distributionLike, number) => distribution;
 ```
 
 ### scaleExp
 
 ```javascript
-scaleExp: (distributionLike, number) => distribution
+scaleExp: (distributionLike, number) => distribution;
 ```
 
 ### scaleLog
 
 ```javascript
-scaleLog: (distributionLike, number) => distribution
+scaleLog: (distributionLike, number) => distribution;
 ```
 
 ### scaleLog10
 
 ```javascript
-scaleLog10: (distributionLike, number) => distribution
+scaleLog10: (distributionLike, number) => distribution;
 ```
 
 ## Special
