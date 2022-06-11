@@ -1,179 +1,81 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 title: List
 ---
 
-## make
+### make
 ```
 List.make: (number, 'a) => list<'a>
-List.make: (number, number => a) => list<'a>
-List.make: (pointSetDist) => list<number>
+```
+Returns an array of size ``n`` filled with value ``e``. 
+
+```js
+List.make(4, 1) // creates the list [1,1,1,1]
 ```
 
-
+See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#make)
 
 ### toString
 ```
-List.toString: (list<'a>) => string
+toString: (list<'a>) => string
 ```
-
-
 
 ### length
 ```
-List.length: (list<'a>) => number
+length: (list<'a>) => number
 ```
 
-
-
-### get
+### up to
 ```
-List.get: (list<'a>, number) => 'a
+List.upTo: (low:number, high:number) => list<number>
 ```
-
-
-
-### find
-```
-List.find: (list<'a>, 'a => bool) => 'a
+```js
+List.upTo(0, 5) // creates the list [0,1,2,3,4,5]
 ```
 
-
-
-### filter
-```
-List.filter: (list<'a>, 'a => bool) => 'a
-```
-
-
-
-### set
-```
-List.set: (list<'a>, number, 'a) => 'a
-```
-
-
-
-### shuffle
-```
-List.shuffle: (list<'a>) => list<'a>
-```
-
-
-
-### reverse
-```
-List.reverse: (list<'a>) => list<'a>
-```
-
-
-
-### range
-```
-List.range: (low:number, high:number, increment?:number=1.0) => list<number>
-```
-
-
-
-### zip
-```
-List.zip: (list<'a>, list<'b>) => list<list<'a|b>>
-```
-
-
-
-### unzip
-```
-List.unzip: (list<list<'a|b>>) => list<list<'a>, list<'b>>
-```
-
-
-
-### concat
-```
-List.concat: (list<'a>, list<'b>) => list<'a|b>
-```
-
-
-
-### concatMany
-```
-List.concatMany: (list<list<'a>>) => list<'a>
-```
-
-
-
-### slice
-```
-List.slice: 
-```
-
-
-
-### map
-```
-List.map: (list<'a>, a => b) => list<'b>
-```
-
-
-
-### reduce
-```
-List.reduce: 
-```
-
-
-
-### reduceRight
-```
-List.reduceRight: 
-```
-
-
-
-### includes
-```
-List.includes: (list<'a>, 'a => bool) => boolean
-```
-
-
-
-### every
-```
-List.every: (list<'a>, 'a => bool) => boolean
-```
-
-
-
-### truncate
-```
-List.truncate: (list<'a>, number) => list<'a>
-```
-
-
-
-### uniq
-```
-List.uniq: (list<'a>) => list<'a>
-```
-
-
+Syntax taken from [Ruby](https://apidock.com/ruby/v2_5_5/Integer/upto). 
 
 ### first
 ```
-List.first: (list<'a>) => 'a
+first: (list<'a>) => 'a
 ```
-
-
 
 ### last
 ```
-List.last: (list<'a>) => 'a
+last: (list<'a>) => 'a
 ```
 
-
-
-### sort
+### reverse
 ```
-List.sort: (list<'a>) => list<'a>
+reverse: (list<'a>) => list<'a>
 ```
+
+### map
+```
+map: (list<'a>, a => b) => list<'b>
+```
+
+See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#map).
+
+### reduce
+```
+reduce: (list<'b>, 'a, ('a, 'b) => 'a) => 'a 
+```
+``reduce(arr, init, f)``
+
+Applies ``f`` to each element of ``arr``. The function ``f`` has two paramaters, an accumulator and the next value from the array.
+
+```js
+reduce([2, 3, 4], 1, {|acc, value| acc + value}) == 10
+```
+
+See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#reduce).
+
+### reduce reverse
+```
+reduceReverse: (list<'b>, 'a, ('a, 'b) => 'a) => 'a 
+```
+
+Works like ``reduce``, but the function is applied to each item from the last back to the first.
+
+See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#reducereverse).

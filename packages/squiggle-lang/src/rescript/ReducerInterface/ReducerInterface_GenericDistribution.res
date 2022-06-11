@@ -277,7 +277,7 @@ let dispatchToGenericOutput = (
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist, ~env)
   | ("toSampleSet", [EvDistribution(dist)]) =>
     Helpers.toDistFn(ToSampleSet(env.sampleCount), dist, ~env)
-  | ("toInternalSampleArray", [EvDistribution(SampleSet(dist))]) =>
+  | ("toList", [EvDistribution(SampleSet(dist))]) =>
     Some(FloatArray(SampleSetDist.T.get(dist)))
   | ("fromSamples", [EvArray(inputArray)]) => {
       let _wrapInputErrors = x => SampleSetDist.NonNumericInput(x)

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 title: Duration
 ---
 
@@ -8,86 +8,62 @@ title: Duration
 toString: (duration) => string
 ```
 
-
-
 ### minutes
 ```
 minutes: (number) => duration
 ```
-
-
 
 ### hours
 ```
 hours: (number) => duration
 ```
 
-
-
 ### days
 ```
 days: (number) => duration
 ```
-
-
 
 ### years
 ```
 years: (number) => duration
 ```
 
-
-
 ### toHours
 ```
-Duration.toHours: (duration) => number
+toHours: (duration) => number
 ```
-
-
 
 ### toMinutes
 ```
-Duration.toMinutes: (duration) => number
+toMinutes: (duration) => number
 ```
-
-
 
 ### toDays
 ```
-Duration.toDays: (duration) => number
+toDays: (duration) => number
 ```
-
-
 
 ### toYears
 ```
-Duration.toYears: (duration) => number
+toYears: (duration) => number
 ```
-
-
 
 ### add
 ```
 add: (duration, duration) => duration
 ```
 
-
-
 ### subtract
 ```
 subtract: (duration, duration) => duration
 ```
 
-
-
 ### multiply
 ```
-multiply: (duration, duration) => duration
+multiply: (duration, number) => duration
 ```
-
-
 
 ### divide
 ```
-divide: (duration, duration) => duration
+divide: (duration, number) => duration
 ```

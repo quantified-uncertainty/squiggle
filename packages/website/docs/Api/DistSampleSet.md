@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 title: Sample Set Distribution
 ---
 
@@ -10,27 +10,10 @@ SampleSet.make: (() => number) => sampleSet
 SampleSet.make: (list<number>) => sampleSet
 ```
 
-
-
-### kde
-```
-SampleSet.kde: (sampleSet) => pointSetDist
-```
-
-
-
-### toEmpiricalPdf
-```
-SampleSet.toEmpiricalPdf: (sampleSet) => pointSetDist
-```
-
-
-
 ### map
 ```
 SampleSet.map: (sampleSet, (number => number)) => sampleSet
 ```
-
 
 
 ### map2
@@ -38,30 +21,20 @@ SampleSet.map: (sampleSet, (number => number)) => sampleSet
 SampleSet.map2: (sampleSet, sampleSet, ((number, number) => number)) => sampleSet
 ```
 
-
-
 ### map3
 ```
 SampleSet.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => number)) => sampleSet
 ```
 
 
-
-### correlation
+### toList
 ```
-SampleSet.correlation: (sampleSet, sampleSet) => number
+SampleSet.toList: (sampleSet) => list<number>
 ```
-
-
-
-### toInternalSampleArray
-```
-SampleSet.toInternalSampleArray: (sampleSet) => list<number>
-```
-Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toInternalSampleArray() maintains order and length.Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toInternalSampleArray() maintains order and length.
+Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length. Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length.
 
 
 **Examples**
 ```
-toInternalSampleArray(toSampleSet(normal(5,2)))
+toList(toSampleSet(normal(5,2)))
 ```

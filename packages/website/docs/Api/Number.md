@@ -1,166 +1,136 @@
 ---
-sidebar_position: 8
+sidebar_position: 9
 title: Number
 ---
 
 ### ceil
 
 ```javascript
-(number): number
+ceil: (number) => number
 ```
 
 ### floor
 
 ```javascript
-(number): number
+floor: (number) => number
 ```
 
 ### abs
 
 ```javascript
-(number): number
+abs: (number) => number
 ```
 
 ### round
 
 ```javascript
-(number): number
+round: (number) => number
 ```
 
 ### max
 
 ```javascript
-(list<number>): number
-```
-
-### maxBy
-
-```javascript
-(list<number>, fn(element)):number
+max: (list<number>) => number
 ```
 
 ### min
 
 ```javascript
-(list<number>): number
-```
-
-### minBy
-
-```javascript
-(list<number>, fn(element)):number
-```
-
-### random
-
-```javascript
-number;
-```
-
-### randomInt
-
-```javascript
-number;
+min: (list<number>) => number
 ```
 
 ### mean
 
 ```javascript
-(list<number>): number
+mean: (list<number>) => number
 ```
 
-### median
+### stdev
 
 ```javascript
-(list<number>): number
-```
-
-### mode
-
-```javascript
-(list<number>): number
-```
-
-### std
-
-```javascript
-(list<number>): number
+stdev: (list<number>) => number
 ```
 
 ### variance
 
 ```javascript
-(list<number>): number
+variance: (list<number>) => number
 ```
 
 ### unaryMinus
 
 ```javascript
-(number): number
+unaryMinus: (number) => number
 ```
 
 ### equal
 
 ```javascript
-(number, number): boolean
+equal: (number, number) => boolean
 ```
 
 ### add
 
 ```javascript
-(number, number): number
+add: (number, number) => number
 ```
 
 ### sum
 
 ```javascript
-(number, number): number
+sum: (list<number>) => number
+```
+
+### cumulative sum
+
+```
+cumsum: (list<number>) => list<number>
 ```
 
 ### multiply
 
 ```javascript
-(number, number): number
+multiply: (number, number) => number
 ```
 
 ### product
 
 ```javascript
-(number, number): number
+product: (list<number>) => number
+```
+
+### cumulative product
+
+```
+cumprod: (list<number>) => list<number>
 ```
 
 ### subtract
 
 ```javascript
-(number, number): number
+subtract: (number, number) => number
 ```
 
 ### divide
 
 ```javascript
-(number, number): number
+divide: (number, number) => number
 ```
 
 ### pow
 
 ```javascript
-(number, number): number
+pow: (number, number) => number
 ```
 
 ### exp
 
 ```javascript
-(number): number
+exp: (number) => number
 ```
 
 ### log
 
 ```javascript
-(number, number=Math.e): number
-```
-
-### log10
-
-```javascript
-(number): number
+log: (number) => number
 ```
