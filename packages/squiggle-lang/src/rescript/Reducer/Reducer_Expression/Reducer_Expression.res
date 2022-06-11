@@ -123,7 +123,7 @@ let evaluateUsingOptions = (
 
   let anExternalBindings = switch externalBindings {
   | Some(bindings) => bindings
-  | None => ReducerInterface_ExpressionValue.defaultExternalBindings
+  | None => ReducerInterface_DefaultExternalBindings.defaultExternalBindings
   }
 
   let bindings = anExternalBindings->Bindings.fromExternalBindings

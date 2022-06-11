@@ -34,6 +34,8 @@ let rec fromNode = (node: Parse.node): expression => {
       nodeLetStatement["variable"]["value"],
       fromNode(nodeLetStatement["value"]),
     )
+  | PgNodeModuleIdentifier(nodeModuleIdentifier) =>
+    ExpressionBuilder.eIdentifier(nodeModuleIdentifier["value"])
   | PgNodeString(nodeString) => ExpressionBuilder.eString(nodeString["value"])
   | PgNodeTernary(nodeTernary) =>
     ExpressionBuilder.eFunction(

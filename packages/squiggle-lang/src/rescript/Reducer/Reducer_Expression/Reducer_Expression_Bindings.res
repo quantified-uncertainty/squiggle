@@ -2,77 +2,25 @@ module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
 module Result = Belt.Result
+module Bindings = Reducer_Category_Bindings
 
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression
 type expressionValue = ExpressionValue.expressionValue
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
 
-let defaultBindings: ExpressionT.bindings = Belt.Map.String.empty
+let emptyBindings = Reducer_Category_Bindings.emptyBindings
 
-let typeAliasesKey = "_typeAliases_"
-let typeReferencesKey = "_typeReferences_"
+let typeAliasesKey = Bindings.typeAliasesKey
+let typeReferencesKey = Bindings.typeReferencesKey
 
-let toExternalBindings = (bindings: ExpressionT.bindings): externalBindings => {
-  let keys = Belt.Map.String.keysToArray(bindings)
-  keys->Belt.Array.reduce(Js.Dict.empty(), (acc, key) => {
-    let value = bindings->Belt.Map.String.getExn(key)
-    Js.Dict.set(acc, key, value)
-    acc
-  })
-}
+let toExternalBindings = (bindings: ExpressionT.bindings): externalBindings =>
+  Bindings.toRecord(bindings)
 
-let fromExternalBindings_ = (externalBindings: externalBindings): ExpressionT.bindings => {
-  let keys = Js.Dict.keys(externalBindings)
-  keys->Belt.Array.reduce(defaultBindings, (acc, key) => {
-    let value = Js.Dict.unsafeGet(externalBindings, key)
-    acc->Belt.Map.String.set(key, value)
-  })
-}
+let fromExternalBindings = (externalBindings: externalBindings): ExpressionT.bindings =>
+  Bindings.fromRecord(externalBindings)
 
-let fromExternalBindings = (externalBindings: externalBindings): ExpressionT.bindings => {
-  // TODO: This code will be removed in the future when maps are used instead of records. Please don't mind this function for now.
-
-  let internalBindings0 = fromExternalBindings_(externalBindings)
-
-  let oExistingTypeAliases = Belt.Map.String.get(internalBindings0, typeAliasesKey)
-  let internalBindings1 = Belt.Option.mapWithDefault(
-    oExistingTypeAliases,
-    internalBindings0,
-    existingTypeAliases => {
-      let newTypeAliases = switch existingTypeAliases {
-      | EvRecord(actualTypeAliases) =>
-        actualTypeAliases->fromExternalBindings_->toExternalBindings->ExpressionValue.EvRecord
-      | _ => existingTypeAliases
-      }
-      Belt.Map.String.set(internalBindings0, typeAliasesKey, newTypeAliases)
-    },
-  )
-
-  let oExistingTypeReferences = Belt.Map.String.get(internalBindings1, typeReferencesKey)
-  let internalBindings2 = Belt.Option.mapWithDefault(
-    oExistingTypeReferences,
-    internalBindings1,
-    existingTypeReferences => {
-      let newTypeReferences = switch existingTypeReferences {
-      | EvRecord(actualTypeReferences) =>
-        actualTypeReferences->fromExternalBindings_->toExternalBindings->ExpressionValue.EvRecord
-      | _ => existingTypeReferences
-      }
-      Belt.Map.String.set(internalBindings0, typeReferencesKey, newTypeReferences)
-    },
-  )
-
-  internalBindings2
-}
-
-let fromValue = (aValue: expressionValue) =>
-  switch aValue {
-  | EvRecord(externalBindings) => fromExternalBindings(externalBindings)
-  | _ => defaultBindings
-  }
-
-let externalFromArray = anArray => Js.Dict.fromArray(anArray)
+let fromValue = (aValue: expressionValue) => Bindings.fromExpressionValue(aValue)
 
 let isMacroName = (fName: string): bool => fName->Js.String2.startsWith("$$")
 

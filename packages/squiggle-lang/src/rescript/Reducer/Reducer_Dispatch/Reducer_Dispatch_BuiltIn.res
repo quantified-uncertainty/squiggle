@@ -256,6 +256,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
   switch call {
   | ("$_atIndex_$", [EvArray(aValueArray), EvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
+  | ("$_atIndex_$", [EvModule(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
   | ("$_atIndex_$", [EvRecord(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
   | ("$_constructArray_$", [EvArray(aValueArray)]) => EvArray(aValueArray)->Ok
   | ("$_constructRecord_$", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)

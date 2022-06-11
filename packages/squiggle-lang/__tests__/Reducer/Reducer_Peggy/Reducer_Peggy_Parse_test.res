@@ -235,6 +235,9 @@ describe("Peggy parse", () => {
     testParse("1M", "{(::fromUnit_M 1)}")
     testParse("1m+2cm", "{(::add (::fromUnit_m 1) (::fromUnit_cm 2))}")
   })
+  describe("Module", () => {
+    testParse("Math.pi", "{(::$_atIndex_$ @Math 'pi')}")
+  })
 })
 
 describe("parsing new line", () => {

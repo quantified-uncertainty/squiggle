@@ -64,6 +64,7 @@
     return {type: 'KeyValue', key: key, value: value}}  
   function nodeLambda(args, body) {return {type: 'Lambda', args: args, body: body}}
   function nodeLetStatment(variable, value) {return {type: 'LetStatement', variable: variable, value: value}}
+  function nodeModuleIdentifier(value) {return {type: 'ModuleIdentifier', value: value}}
   function nodeString(value) {return {type: 'String', value: value}}
   function nodeTernary(condition, trueExpression, falseExpression) {return {type: 'Ternary', condition: condition, trueExpression: trueExpression, falseExpression: falseExpression}}
   
@@ -256,11 +257,11 @@ basicLiteral
 
 dollarIdentifierWithModule 'identifier'
   = head:moduleIdentifier 
-    tail:('.' _nl @moduleIdentifier)* '.' _nl 
-    final:dollarIdentifier
+    tail:('.' _nl @$moduleIdentifier)* '.' _nl 
+    final:$dollarIdentifier
   { tail.push(final);
     return tail.reduce(function(result, element) {
-      return makeFunctionCall(postOperatorToFunction['[]'], [result, element])
+      return makeFunctionCall(postOperatorToFunction['[]'], [result, nodeString(element)])
     }, head)}
 
 identifier 'identifier'
@@ -273,7 +274,7 @@ dollarIdentifier '$identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) {return nodeIdentifier(text())} 
 
 moduleIdentifier 'identifier'
-  = ([A-Z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
+  = ([A-Z]+[_a-z0-9]i*) {return nodeModuleIdentifier(text())} 
 
 
 string 'string'
