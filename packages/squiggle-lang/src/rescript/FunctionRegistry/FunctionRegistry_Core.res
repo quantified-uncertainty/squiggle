@@ -47,6 +47,9 @@ type fnDefinition = {
 type function = {
   name: string,
   definitions: array<fnDefinition>,
+  examples: option<string>,
+  description: option<string>,
+  isExperimental: bool,
 }
 
 type registry = array<function>
@@ -57,10 +60,10 @@ module FRType = {
     switch t {
     | FRTypeNumber => "number"
     | FRTypeNumeric => "numeric"
-    | FRTypeDistOrNumber => "frValueDistOrNumber"
+    | FRTypeDistOrNumber => "distribution|number"
     | FRTypeRecord(r) => {
         let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
-        `record({${r->E.A2.fmap(input)->E.A2.joinWith(", ")}})`
+        `{${r->E.A2.fmap(input)->E.A2.joinWith(", ")}}`
       }
     | FRTypeArray(r) => `list(${toString(r)})`
     | FRTypeLambda => `lambda`
@@ -331,13 +334,34 @@ module FnDefinition = {
 module Function = {
   type t = function
 
-  let make = (~name, ~definitions): t => {
+  type functionJson = {
+    name: string,
+    definitions: array<string>,
+    examples: option<string>,
+    description: option<string>,
+    isExperimental: bool,
+  }
+
+  let make = (~name, ~definitions, ~examples=?, ~description=?, ~isExperimental=false, ()): t => {
     name: name,
     definitions: definitions,
+    examples: examples,
+    isExperimental: isExperimental,
+    description: description,
+  }
+
+  let toJson = (t: t): functionJson => {
+    name: t.name,
+    definitions: t.definitions->E.A2.fmap(FnDefinition.toString),
+    examples: t.examples,
+    description: t.description,
+    isExperimental: t.isExperimental,
   }
 }
 
 module Registry = {
+  let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
+
   /*
   There's a (potential+minor) bug here: If a function definition is called outside of the calls 
   to the registry, then it's possible that there could be a match after the registry is 
@@ -350,6 +374,7 @@ module Registry = {
     ~env: DistributionOperation.env,
   ) => {
     let matchToDef = m => Matcher.Registry.matchToDef(registry, m)
+    //Js.log(toSimple(registry))
     let showNameMatchDefinitions = matches => {
       let defs =
         matches

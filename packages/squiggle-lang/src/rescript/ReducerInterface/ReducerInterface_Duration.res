@@ -27,6 +27,7 @@ let dispatch = (call: EV.functionCall, _: DistributionOperation.env): option<
     EV.EvTimeDuration(DateTime.Duration.multiply(d1, d2))->Ok->Some
   | ("divide", [EvTimeDuration(d1), EvNumber(d2)]) =>
     EV.EvTimeDuration(DateTime.Duration.divide(d1, d2))->Ok->Some
+  | ("divide", [EvTimeDuration(d1), EvTimeDuration(d2)]) => EV.EvNumber(d1 /. d2)->Ok->Some
   | _ => None
   }
 }
