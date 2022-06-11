@@ -256,6 +256,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
   switch call {
   | ("$_atIndex_$", [EvArray(aValueArray), EvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
+  | ("$_atIndex_$", [EvModule(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
   | ("$_atIndex_$", [EvRecord(dict), EvString(sIndex)]) => recordAtIndex(dict, sIndex)
   | ("$_constructArray_$", [EvArray(aValueArray)]) => EvArray(aValueArray)->Ok
   | ("$_constructRecord_$", [EvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
@@ -281,12 +282,12 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("$_typeModifier_opaque_$", [EvRecord(typeRecord)]) => typeModifier_opaque_update(typeRecord)
   | ("$_typeOr_$", [EvArray(arr)]) => typeOr(EvArray(arr))
   | ("$_typeFunction_$", [EvArray(arr)]) => typeFunction(arr)
-  | ("add", [EvArray(aValueArray), EvArray(bValueArray)]) => doAddArray(aValueArray, bValueArray)
-  | ("add", [EvString(aValueString), EvString(bValueString)]) =>
+  | ("concat", [EvArray(aValueArray), EvArray(bValueArray)]) => doAddArray(aValueArray, bValueArray)
+  | ("concat", [EvString(aValueString), EvString(bValueString)]) =>
     doAddString(aValueString, bValueString)
   | ("inspect", [value, EvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
-  | ("keep", [EvArray(aValueArray), EvLambda(aLambdaValue)]) =>
+  | ("filter", [EvArray(aValueArray), EvLambda(aLambdaValue)]) =>
     doKeepArray(aValueArray, aLambdaValue)
   | ("map", [EvArray(aValueArray), EvLambda(aLambdaValue)]) => doMapArray(aValueArray, aLambdaValue)
   | ("mapSamples", [EvDistribution(SampleSet(dist)), EvLambda(aLambdaValue)]) =>

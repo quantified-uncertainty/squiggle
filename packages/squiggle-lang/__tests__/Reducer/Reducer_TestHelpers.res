@@ -1,6 +1,7 @@
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface.ExpressionValue
 module ErrorValue = Reducer_ErrorValue
+module Bindings = Reducer_Category_Bindings
 
 open Jest
 open Expect
@@ -17,7 +18,11 @@ let expectParseToBe = (expr: string, answer: string) =>
   Reducer.parse(expr)->ExpressionT.toStringResult->expect->toBe(answer)
 
 let expectEvalToBe = (expr: string, answer: string) =>
-  Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
+  Reducer.evaluate(expr)
+  ->Reducer_Helpers.rRemoveDefaults
+  ->ExpressionValue.toStringResult
+  ->expect
+  ->toBe(answer)
 
 let expectEvalError = (expr: string) =>
   Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toMatch("Error\(")

@@ -22,6 +22,7 @@ type nodeInteger = {...node, "value": int}
 type nodeKeyValue = {...node, "key": node, "value": node}
 type nodeLambda = {...node, "args": array<nodeIdentifier>, "body": nodeBlock}
 type nodeLetStatement = {...node, "variable": nodeIdentifier, "value": node}
+type nodeModuleIdentifier = {...node, "value": string}
 type nodeString = {...node, "value": string}
 type nodeTernary = {...node, "condition": node, "trueExpression": node, "falseExpression": node}
 type nodeTypeIdentifier = {...node, "value": string}
@@ -37,6 +38,7 @@ type peggyNode =
   | PgNodeKeyValue(nodeKeyValue)
   | PgNodeLambda(nodeLambda)
   | PgNodeLetStatement(nodeLetStatement)
+  | PgNodeModuleIdentifier(nodeModuleIdentifier)
   | PgNodeString(nodeString)
   | PgNodeTernary(nodeTernary)
   | PgNodeTypeIdentifier(nodeTypeIdentifier)
@@ -51,6 +53,7 @@ external castNodeInteger: node => nodeInteger = "%identity"
 external castNodeKeyValue: node => nodeKeyValue = "%identity"
 external castNodeLambda: node => nodeLambda = "%identity"
 external castNodeLetStatement: node => nodeLetStatement = "%identity"
+external castNodeModuleIdentifier: node => nodeModuleIdentifier = "%identity"
 external castNodeString: node => nodeString = "%identity"
 external castNodeTernary: node => nodeTernary = "%identity"
 external castNodeTypeIdentifier: node => nodeTypeIdentifier = "%identity"
@@ -68,6 +71,7 @@ let castNodeType = (node: node) =>
   | "KeyValue" => node->castNodeKeyValue->PgNodeKeyValue
   | "Lambda" => node->castNodeLambda->PgNodeLambda
   | "LetStatement" => node->castNodeLetStatement->PgNodeLetStatement
+  | "ModuleIdentifier" => node->castNodeModuleIdentifier->PgNodeModuleIdentifier
   | "String" => node->castNodeString->PgNodeString
   | "Ternary" => node->castNodeTernary->PgNodeTernary
   | "TypeIdentifier" => node->castNodeTypeIdentifier->PgNodeTypeIdentifier
@@ -94,6 +98,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
     "{|" ++ node["args"]->argsToString ++ "| " ++ pgToString(PgNodeBlock(node["body"])) ++ "}"
   | PgNodeLetStatement(node) =>
     pgToString(PgNodeIdentifier(node["variable"])) ++ " = " ++ toString(node["value"])
+  | PgNodeModuleIdentifier(node) => `@${node["value"]}`
   | PgNodeString(node) => `'${node["value"]->Js.String.make}'`
   | PgNodeTernary(node) =>
     "(::$$_ternary_$$ " ++

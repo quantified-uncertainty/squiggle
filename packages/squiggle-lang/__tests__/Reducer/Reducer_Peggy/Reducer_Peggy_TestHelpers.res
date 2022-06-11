@@ -23,8 +23,13 @@ let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
     let a2 =
       rExpr
       ->Result.flatMap(expr =>
-        Expression.reduceExpression(expr, Belt.Map.String.empty, ExpressionValue.defaultEnvironment)
+        Expression.reduceExpression(
+          expr,
+          ReducerInterface_DefaultExternalBindings.defaultInternalBindings,
+          ExpressionValue.defaultEnvironment,
+        )
       )
+      ->Reducer_Helpers.rRemoveDefaults
       ->ExpressionValue.toStringResultOkless
     (a1, a2)->expect->toEqual((answer, v))
   }

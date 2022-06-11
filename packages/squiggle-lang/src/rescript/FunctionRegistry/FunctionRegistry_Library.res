@@ -57,6 +57,7 @@ let registry = [
         ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="toDiscretePointSet",
@@ -67,6 +68,7 @@ let registry = [
         ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Declaration",
@@ -75,9 +77,13 @@ let registry = [
         inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
       }),
     ],
+    (),
   ),
   Function.make(
     ~name="Normal",
+    ~examples=`normal(5,1)
+normal({p5: 4, p95: 10})
+normal({mean: 5, stdev: 2})`,
     ~definitions=[
       TwoArgDist.make("normal", twoArgs(SymbolicDist.Normal.make)),
       TwoArgDist.makeRecordP5P95("normal", r =>
@@ -85,9 +91,13 @@ let registry = [
       ),
       TwoArgDist.makeRecordMeanStdev("normal", twoArgs(SymbolicDist.Normal.make)),
     ],
+    (),
   ),
   Function.make(
     ~name="Lognormal",
+    ~examples=`lognormal(0.5, 0.8)
+lognormal({p5: 4, p95: 10})
+lognormal({mean: 5, stdev: 2})`,
     ~definitions=[
       TwoArgDist.make("lognormal", twoArgs(SymbolicDist.Lognormal.make)),
       TwoArgDist.makeRecordP5P95("lognormal", r =>
@@ -95,29 +105,43 @@ let registry = [
       ),
       TwoArgDist.makeRecordMeanStdev("lognormal", twoArgs(SymbolicDist.Lognormal.fromMeanAndStdev)),
     ],
+    (),
   ),
   Function.make(
     ~name="Uniform",
+    ~examples=`uniform(10, 12)`,
     ~definitions=[TwoArgDist.make("uniform", twoArgs(SymbolicDist.Uniform.make))],
+    (),
   ),
   Function.make(
     ~name="Beta",
+    ~examples=`beta(20, 25)`,
     ~definitions=[TwoArgDist.make("beta", twoArgs(SymbolicDist.Beta.make))],
+    (),
   ),
   Function.make(
     ~name="Cauchy",
+    ~examples=`cauchy(5, 1)`,
     ~definitions=[TwoArgDist.make("cauchy", twoArgs(SymbolicDist.Cauchy.make))],
+    (),
   ),
   Function.make(
     ~name="Gamma",
+    ~examples=`gamma(5, 1)`,
     ~definitions=[TwoArgDist.make("gamma", twoArgs(SymbolicDist.Gamma.make))],
+    (),
   ),
   Function.make(
     ~name="Logistic",
+    ~examples=`gamma(5, 1)`,
     ~definitions=[TwoArgDist.make("logistic", twoArgs(SymbolicDist.Logistic.make))],
+    (),
   ),
   Function.make(
-    ~name="To",
+    ~name="To (Distribution)",
+    ~examples=`5 to 10
+to(5,10)
+-5 to 5`,
     ~definitions=[
       TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make)),
       TwoArgDist.make(
@@ -125,63 +149,149 @@ let registry = [
         twoArgs(SymbolicDist.From90thPercentile.make),
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Exponential",
+    ~examples=`exponential(2)`,
     ~definitions=[OneArgDist.make("exponential", SymbolicDist.Exponential.make)],
+    (),
   ),
   Function.make(
     ~name="Bernoulli",
+    ~examples=`bernoulli(0.5)`,
     ~definitions=[OneArgDist.make("bernoulli", SymbolicDist.Bernoulli.make)],
+    (),
   ),
-  Function.make(~name="Floor", ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)]),
-  Function.make(~name="Ceiling", ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)]),
+  Function.make(
+    ~name="PointMass",
+    ~examples=`pointMass(0.5)`,
+    ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.makeSafe)],
+    (),
+  ),
+  Function.make(
+    ~name="toContinuousPointSet",
+    ~description="Converts a set of points to a continuous distribution",
+    ~examples=`toContinuousPointSet([
+  {x: 0, y: 0.1},
+  {x: 1, y: 0.2},
+  {x: 2, y: 0.15},
+  {x: 3, y: 0.1}
+])`,
+    ~definitions=[
+      FnDefinition.make(
+        ~name="toContinuousPointSet",
+        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
+        ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="toDiscretePointSet",
+    ~description="Converts a set of points to a discrete distribution",
+    ~examples=`toDiscretePointSet([
+  {x: 0, y: 0.1},
+  {x: 1, y: 0.2},
+  {x: 2, y: 0.15},
+  {x: 3, y: 0.1}
+])`,
+    ~definitions=[
+      FnDefinition.make(
+        ~name="toDiscretePointSet",
+        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
+        ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="Declaration (Continuous Function)",
+    ~description="Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.",
+    ~examples=`declareFn({
+  fn: {|a,b| a },
+  inputs: [
+    {min: 0, max: 100},
+    {min: 30, max: 50}
+  ]
+})`,
+    ~definitions=[
+      FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
+        inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
+      }),
+    ],
+    ~isExperimental=true,
+    (),
+  ),
+  Function.make(
+    ~name="Floor",
+    ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)],
+    (),
+  ),
+  Function.make(
+    ~name="Ceiling",
+    ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
+    (),
+  ),
   Function.make(
     ~name="Absolute Value",
     ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)],
+    (),
   ),
-  Function.make(~name="Exponent", ~definitions=[NumberToNumber.make("exp", Js.Math.exp)]),
-  Function.make(~name="Log", ~definitions=[NumberToNumber.make("log", Js.Math.log)]),
-  Function.make(~name="Log Base 10", ~definitions=[NumberToNumber.make("log10", Js.Math.log10)]),
-  Function.make(~name="Log Base 2", ~definitions=[NumberToNumber.make("log2", Js.Math.log2)]),
-  Function.make(~name="Round", ~definitions=[NumberToNumber.make("round", Js.Math.round)]),
+  Function.make(~name="Exponent", ~definitions=[NumberToNumber.make("exp", Js.Math.exp)], ()),
+  Function.make(~name="Log", ~definitions=[NumberToNumber.make("log", Js.Math.log)], ()),
+  Function.make(
+    ~name="Log Base 10",
+    ~definitions=[NumberToNumber.make("log10", Js.Math.log10)],
+    (),
+  ),
+  Function.make(~name="Log Base 2", ~definitions=[NumberToNumber.make("log2", Js.Math.log2)], ()),
+  Function.make(~name="Round", ~definitions=[NumberToNumber.make("round", Js.Math.round)], ()),
   Function.make(
     ~name="Sum",
     ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber->Ok)],
+    (),
   ),
   Function.make(
     ~name="Product",
     ~definitions=[
       ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber->Ok),
     ],
+    (),
   ),
   Function.make(
     ~name="Min",
     ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber->Ok)],
+    (),
   ),
   Function.make(
     ~name="Max",
     ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber->Ok)],
+    (),
   ),
   Function.make(
     ~name="Mean",
     ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber->Ok)],
+    (),
   ),
   Function.make(
     ~name="Geometric Mean",
     ~definitions=[
       ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber->Ok),
     ],
+    (),
   ),
   Function.make(
     ~name="Standard Deviation",
     ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok)],
+    (),
   ),
   Function.make(
     ~name="Variance",
     ~definitions=[
       ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok),
     ],
+    (),
   ),
   Function.make(
     ~name="First",
@@ -190,6 +300,7 @@ let registry = [
         r->E.A.first |> E.O.toResult(impossibleError) |> E.R.fmap(Wrappers.evNumber)
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Last",
@@ -198,6 +309,7 @@ let registry = [
         r->E.A.last |> E.O.toResult(impossibleError) |> E.R.fmap(Wrappers.evNumber)
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Sort",
@@ -206,6 +318,7 @@ let registry = [
         r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Reverse",
@@ -214,6 +327,7 @@ let registry = [
         r->Belt_Array.reverse->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Cumulative Sum",
@@ -222,6 +336,7 @@ let registry = [
         r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Cumulative Prod",
@@ -230,6 +345,7 @@ let registry = [
         r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Diff",
@@ -238,6 +354,7 @@ let registry = [
         r->E.A.Floats.diff->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Dict.merge",
@@ -259,6 +376,7 @@ let registry = [
         },
       ),
     ],
+    (),
   ),
   //TODO: Make sure that two functions can't have the same name. This causes chaos elsewhere.
   Function.make(
@@ -275,6 +393,7 @@ let registry = [
         ->E.R2.fmap(Wrappers.evRecord)
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Dict.keys",
@@ -286,6 +405,7 @@ let registry = [
         }
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Dict.values",
@@ -301,6 +421,7 @@ let registry = [
         }
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Dict.toList",
@@ -322,6 +443,7 @@ let registry = [
         }
       ),
     ],
+    (),
   ),
   Function.make(
     ~name="Dict.fromList",
@@ -346,6 +468,7 @@ let registry = [
           |> E.R2.bind(convertInternalItems)
       }),
     ],
+    (),
   ),
   Function.make(
     ~name="List.make",
@@ -362,6 +485,7 @@ let registry = [
         }
       }),
     ],
+    (),
   ),
   Function.make(
     ~name="upTo",
@@ -376,5 +500,6 @@ let registry = [
         )
       ),
     ],
+    (),
   ),
 ]
