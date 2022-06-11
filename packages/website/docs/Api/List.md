@@ -10,7 +10,7 @@ List.make: (number, 'a) => list<'a>
 Returns an array of size ``n`` filled with value ``e``. 
 
 ```js
-List.make(4, 1) // creates the list [1,1,1,1]
+List.make(4, 1) // creates the list [1, 1, 1, 1]
 ```
 
 See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#make)
@@ -30,7 +30,7 @@ length: (list<'a>) => number
 List.upTo: (low:number, high:number) => list<number>
 ```
 ```js
-List.upTo(0, 5) // creates the list [0,1,2,3,4,5]
+List.upTo(0, 5) // creates the list [0, 1, 2, 3, 4, 5]
 ```
 
 Syntax taken from [Ruby](https://apidock.com/ruby/v2_5_5/Integer/upto). 

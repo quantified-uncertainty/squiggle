@@ -32,7 +32,7 @@ Dict.keys({foo: 3, bar: 20}) // ["foo", "bar"]
 Dict.values: (dict<'a>) => list<'a>
 ```
 ```js
-Dict.values({foo: 3, bar: 20}) // [3,20]
+Dict.values({foo: 3, bar: 20}) // [3, 20]
 ```
 
 ### merge
