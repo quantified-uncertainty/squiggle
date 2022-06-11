@@ -350,7 +350,7 @@ module Function = {
     description: description,
   }
 
-  let toSimple = (t: t): functionJson => {
+  let toJson = (t: t): functionJson => {
     name: t.name,
     definitions: t.definitions->E.A2.fmap(FnDefinition.toString),
     examples: t.examples,
@@ -360,7 +360,7 @@ module Function = {
 }
 
 module Registry = {
-  let toSimple = (r: registry) => r->E.A2.fmap(Function.toSimple)
+  let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
 
   /*
   There's a (potential+minor) bug here: If a function definition is called outside of the calls 
@@ -374,7 +374,7 @@ module Registry = {
     ~env: DistributionOperation.env,
   ) => {
     let matchToDef = m => Matcher.Registry.matchToDef(registry, m)
-    Js.log(toSimple(registry))
+    //Js.log(toSimple(registry))
     let showNameMatchDefinitions = matches => {
       let defs =
         matches

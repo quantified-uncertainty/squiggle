@@ -14,15 +14,15 @@ import TOCInline from "@theme/TOCInline";
 **Definitions**
 
 ```javascript
-normal: (frValueDistOrNumber, frValueDistOrNumber);
+normal: (frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 ```javascript
-normal: (dict<{p5: frValueDistOrNumber, p95: frValueDistOrNumber}>)
+normal: (dict<{p5: frValueDistOrNumber, p95: frValueDistOrNumber}>) => distribution
 ```
 
 ```javascript
-normal: (dict<{mean: frValueDistOrNumber, stdev: frValueDistOrNumber}>)
+normal: (dict<{mean: frValueDistOrNumber, stdev: frValueDistOrNumber}>) => distribution
 ```
 
 **Examples**
@@ -38,15 +38,15 @@ normal({ mean: 5, stdev: 2 });
 **Definitions**
 
 ```javascript
-lognormal: (frValueDistOrNumber, frValueDistOrNumber);
+lognormal: (frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 ```javascript
-lognormal: (dict<{p5: frValueDistOrNumber, p95: frValueDistOrNumber}>)
+lognormal: (dict<{p5: frValueDistOrNumber, p95: frValueDistOrNumber}>) => distribution
 ```
 
 ```javascript
-lognormal: (dict<{mean: frValueDistOrNumber, stdev: frValueDistOrNumber}>)
+lognormal: (dict<{mean: frValueDistOrNumber, stdev: frValueDistOrNumber}>) => distribution
 ```
 
 **Examples**
@@ -62,7 +62,7 @@ lognormal({ mean: 5, stdev: 2 });
 **Definitions**
 
 ```javascript
-uniform: (frValueDistOrNumber, frValueDistOrNumber);
+uniform: (frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 **Examples**
@@ -76,7 +76,7 @@ uniform(10, 12);
 **Definitions**
 
 ```javascript
-beta: (frValueDistOrNumber, frValueDistOrNumber);
+beta: (frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 **Examples**
@@ -90,7 +90,7 @@ beta(20, 25);
 **Definitions**
 
 ```javascript
-cauchy: (frValueDistOrNumber, frValueDistOrNumber);
+cauchy: (frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 **Examples**
@@ -104,7 +104,7 @@ cauchy(5, 1);
 **Definitions**
 
 ```javascript
-gamma: (frValueDistOrNumber, frValueDistOrNumber);
+gamma: (frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 **Examples**
@@ -118,7 +118,7 @@ gamma(5, 1);
 **Definitions**
 
 ```javascript
-logistic: (frValueDistOrNumber, frValueDistOrNumber);
+logistic: (frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 **Examples**
@@ -132,11 +132,11 @@ gamma(5, 1);
 **Definitions**
 
 ```javascript
-to: (frValueDistOrNumber, frValueDistOrNumber);
+to: (frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 ```javascript
-credibleIntervalToDistribution(frValueDistOrNumber, frValueDistOrNumber);
+credibleIntervalToDistribution(frValueDistOrNumber, frValueDistOrNumber) => distribution;
 ```
 
 **Examples**
@@ -152,7 +152,7 @@ to(5,10)
 **Definitions**
 
 ```javascript
-exponential: (frValueDistOrNumber);
+exponential: (frValueDistOrNumber) => distribution;
 ```
 
 **Examples**
@@ -166,7 +166,7 @@ exponential(2);
 **Definitions**
 
 ```javascript
-bernoulli: (frValueDistOrNumber);
+bernoulli: (frValueDistOrNumber) => distribution;
 ```
 
 **Examples**
@@ -182,7 +182,7 @@ Converts a set of points to a continuous distribution
 **Definitions**
 
 ```javascript
-toContinuousPointSet: (array<dict<{x: numeric, y: numeric}>>)
+toContinuousPointSet: (array<dict<{x: numeric, y: numeric}>>) => distribution
 ```
 
 **Examples**
@@ -203,7 +203,7 @@ Converts a set of points to a discrete distribution
 **Definitions**
 
 ```javascript
-toDiscretePointSet: (array<dict<{x: numeric, y: numeric}>>)
+toDiscretePointSet: (array<dict<{x: numeric, y: numeric}>>) => distribution
 ```
 
 **Examples**
@@ -251,7 +251,7 @@ sample(normal(5, 2));
 Get n random samples from the distribution
 
 ```javascript
-sampleN: (distribution, number):list<number>
+sampleN: (distribution, number) => list<number>
 ```
 
 **Examples**
@@ -313,7 +313,7 @@ pdf: (distribution, number) => number
 **Examples**
 
 ```javascript
-pdf: (normal(5, 2), 3);
+pdf(normal(5, 2), 3);
 ```
 
 ### inv
@@ -333,7 +333,7 @@ inv(normal(5, 2), 0.5);
 Converts a distribution to the pointSet format
 
 ```javascript
-toPointSet: (distribution):pointSetDistribution
+toPointSet: (distribution) => pointSetDistribution
 ```
 
 **Examples**
@@ -347,7 +347,7 @@ toPointSet(normal(5, 2));
 Converts a distribution to the sampleSet format, with n samples
 
 ```javascript
-toSampleSet: (distribution,number):sampleSetDistribution
+toSampleSet: (distribution,number) => sampleSetDistribution
 ```
 
 **Examples**
@@ -405,7 +405,7 @@ klDivergence(normal(5, 2), normal(5, 4)); // returns 0.57
 ### toString
 
 ```javascript
-: (distribution) => string
+toString: (distribution) => string
 ```
 
 **Examples**
@@ -463,7 +463,7 @@ normalize(normal(5, 2));
 Check of a distribution is normalized. Most distributions are typically normalized, but there are some commands that could produce non-normalized distributions.
 
 ```javascript
-isNormalized: (distribution):bool
+isNormalized: (distribution) => bool
 ```
 
 **Examples**
@@ -631,7 +631,7 @@ scaleLog10: (distributionLike, number) => distribution
 Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.
 
 ```javascript
-declareFn: (dict<{fn: lambda, inputs: array<dict<{min: number, max: number}>>}>)
+declareFn: (dict<{fn: lambda, inputs: array<dict<{min: number, max: number}>>}>) => declaration
 ```
 
 **Examples**
