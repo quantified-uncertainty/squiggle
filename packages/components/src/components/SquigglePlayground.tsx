@@ -10,6 +10,7 @@ import {
   CogIcon,
   CurrencyDollarIcon,
 } from "@heroicons/react/solid";
+import clsx from "clsx";
 
 import { defaultBindings, environment } from "@quri/squiggle-lang";
 
@@ -17,6 +18,7 @@ import { SquiggleChart } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
 import { JsonEditor } from "./JsonEditor";
 import { ErrorAlert, SuccessAlert } from "./Alert";
+import { SquiggleContainer } from "./SquiggleContainer";
 
 interface PlaygroundProps {
   /** The initial squiggle string to put in the playground */
@@ -87,10 +89,6 @@ const schema = yup
   })
   .required();
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
 type StyledTabProps = {
   name: string;
   icon: (props: React.ComponentProps<"svg">) => JSX.Element;
@@ -102,15 +100,13 @@ const StyledTab: React.FC<StyledTabProps> = ({ name, icon: Icon }) => {
       {({ selected }) => (
         <button className="group flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100">
           <span
-            className={classNames(
+            className={clsx(
               "p-1 pl-2.5 pr-3.5 rounded-md flex items-center text-sm font-medium",
-              selected
-                ? "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
-                : ""
+              selected && "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
             )}
           >
             <Icon
-              className={classNames(
+              className={clsx(
                 "-ml-0.5 mr-2 h-4 w-4",
                 selected
                   ? "text-slate-500"
@@ -118,11 +114,11 @@ const StyledTab: React.FC<StyledTabProps> = ({ name, icon: Icon }) => {
               )}
             />
             <span
-              className={
+              className={clsx(
                 selected
                   ? "text-gray-900"
                   : "text-gray-600 group-hover:text-gray-900"
-              }
+              )}
             >
               {name}
             </span>
@@ -160,13 +156,14 @@ function InputItem<T>({
   type: "number";
   register: UseFormRegister<T>;
 }) {
-  const numberStyle =
-    "max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md";
-
   return (
     <label className="block">
       <div className="text-sm font-medium text-gray-600 mb-1">{label}</div>
-      <input type={type} {...register(name)} className={numberStyle} />
+      <input
+        type={type}
+        {...register(name)}
+        className="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+      />
     </label>
   );
 }
@@ -378,54 +375,57 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
   );
 
   return (
-    <Tab.Group>
-      <div className="pb-4">
-        <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
-          <StyledTab name="Code" icon={CodeIcon} />
-          <StyledTab name="Sampling Settings" icon={CogIcon} />
-          <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-          <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-        </Tab.List>
-      </div>
-      <div className="flex" style={{ height }}>
-        <div className="w-1/2">
-          <Tab.Panels>
-            <Tab.Panel>
-              <div className="border border-slate-200">
-                <CodeEditor
-                  value={squiggleString}
-                  onChange={setSquiggleString}
-                  oneLine={false}
-                  showGutter={true}
-                  height={height - 1}
-                />
-              </div>
-            </Tab.Panel>
-            <Tab.Panel>{samplingSettings}</Tab.Panel>
-            <Tab.Panel>{viewSettings}</Tab.Panel>
-            <Tab.Panel>{inputVariableSettings}</Tab.Panel>
-          </Tab.Panels>
+    <SquiggleContainer>
+      <Tab.Group>
+        <div className="pb-4">
+          <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
+            <StyledTab name="Code" icon={CodeIcon} />
+            <StyledTab name="Sampling Settings" icon={CogIcon} />
+            <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+            <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+          </Tab.List>
         </div>
+        <div className="flex" style={{ height }}>
+          <div className="w-1/2">
+            <Tab.Panels>
+              <Tab.Panel>
+                <div className="border border-slate-200">
+                  <CodeEditor
+                    value={squiggleString}
+                    onChange={setSquiggleString}
+                    oneLine={false}
+                    showGutter={true}
+                    height={height - 1}
+                  />
+                </div>
+              </Tab.Panel>
+              <Tab.Panel>{samplingSettings}</Tab.Panel>
+              <Tab.Panel>{viewSettings}</Tab.Panel>
+              <Tab.Panel>{inputVariableSettings}</Tab.Panel>
+            </Tab.Panels>
+          </div>
 
-        <div className="w-1/2 p-2 pl-4">
-          <div style={{ maxHeight: height }}>
-            <SquiggleChart
-              squiggleString={squiggleString}
-              environment={env}
-              chartSettings={chartSettings}
-              height={vars.chartHeight}
-              showTypes={vars.showTypes}
-              showControls={vars.showControls}
-              bindings={defaultBindings}
-              jsImports={imports}
-              showSummary={vars.showSummary}
-            />
+          <div className="w-1/2 p-2 pl-4">
+            <div style={{ maxHeight: height }}>
+              <SquiggleChart
+                squiggleString={squiggleString}
+                environment={env}
+                chartSettings={chartSettings}
+                height={vars.chartHeight}
+                showTypes={vars.showTypes}
+                showControls={vars.showControls}
+                bindings={defaultBindings}
+                jsImports={imports}
+                showSummary={vars.showSummary}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </Tab.Group>
+      </Tab.Group>
+    </SquiggleContainer>
   );
 };
+
 export default SquigglePlayground;
 export function renderSquigglePlaygroundToDom(props: PlaygroundProps) {
   const parent = document.createElement("div");

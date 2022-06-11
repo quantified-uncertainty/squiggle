@@ -5,7 +5,7 @@ module.exports = {
   mode: "production",
   devtool: "source-map",
   profile: true,
-  entry: ["./src/index.ts", "./src/tailwind.css"],
+  entry: ["./src/index.ts", "./src/styles/main.css"],
   module: {
     rules: [
       {
