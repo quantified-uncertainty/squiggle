@@ -66,7 +66,7 @@ const config = {
           },
           {
             type: "doc",
-            docId: "Api/Dictionary",
+            docId: "Api/DistGeneric",
             position: "left",
             label: "API",
           },
