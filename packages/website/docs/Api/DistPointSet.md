@@ -41,7 +41,7 @@ PointSet.makeDiscrete: (list<{x: number, y: number}>) => pointSetDist
 ```
 
 ```javascript
-toDiscretePointSet([
+PointSet.makeDiscrete([
   { x: 0, y: 0.1 },
   { x: 1, y: 0.2 },
   { x: 2, y: 0.15 },
