@@ -18,9 +18,7 @@ const config = {
   favicon: "img/favicon.ico",
   organizationName: "quantified-uncertainty", // Usually your GitHub org/user name.
   projectName: "squiggle", // Usually your repo name.
-
   plugins: [],
-
   presets: [
     [
       "classic",
@@ -65,6 +63,12 @@ const config = {
             docId: "Introduction",
             position: "left",
             label: "Documentation",
+          },
+          {
+            type: "doc",
+            docId: "Api/Dictionary",
+            position: "left",
+            label: "API",
           },
           { to: "/blog", label: "Blog", position: "left" },
           { to: "/playground", label: "Playground", position: "left" },

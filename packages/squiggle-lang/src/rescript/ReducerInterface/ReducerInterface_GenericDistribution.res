@@ -200,8 +200,6 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("delta", [EvNumber(f)]) =>
-    SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>
     SymbolicConstructors.threeFloat(fnName)
     ->E.R.bind(r => r(f1, f2, f3))
@@ -279,8 +277,7 @@ let dispatchToGenericOutput = (
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist, ~env)
   | ("toSampleSet", [EvDistribution(dist)]) =>
     Helpers.toDistFn(ToSampleSet(env.sampleCount), dist, ~env)
-  | ("toInternalSampleArray", [EvDistribution(SampleSet(dist))]) =>
-    Some(FloatArray(SampleSetDist.T.get(dist)))
+  | ("toList", [EvDistribution(SampleSet(dist))]) => Some(FloatArray(SampleSetDist.T.get(dist)))
   | ("fromSamples", [EvArray(inputArray)]) => {
       let _wrapInputErrors = x => SampleSetDist.NonNumericInput(x)
       let parsedArray = Helpers.parseNumberArray(inputArray)->E.R2.errMap(_wrapInputErrors)

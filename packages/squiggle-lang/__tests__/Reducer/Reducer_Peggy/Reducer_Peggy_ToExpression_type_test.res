@@ -88,8 +88,8 @@ describe("Peggy Types to Expression", () => {
   })
   describe("squiggle expressions in type modifiers", () => {
     testToExpression(
-      "odds1 = [1,3,5]; odds2 = [7, 9]; type odds = number<-memberOf(odds1 + odds2)",
-      "{(:$_let_$ :odds1 {(:$_constructArray_$ (1 3 5))}); (:$_let_$ :odds2 {(:$_constructArray_$ (7 9))}); (:$_typeAlias_$ #odds (:$_typeModifier_memberOf_$ #number (:add :odds1 :odds2)))}",
+      "odds1 = [1,3,5]; odds2 = [7, 9]; type odds = number<-memberOf(concat(odds1, odds2))",
+      "{(:$_let_$ :odds1 {(:$_constructArray_$ (1 3 5))}); (:$_let_$ :odds2 {(:$_constructArray_$ (7 9))}); (:$_typeAlias_$ #odds (:$_typeModifier_memberOf_$ #number (:concat :odds1 :odds2)))}",
       ~v="{_typeAliases_: {odds: {typeTag: 'typeIdentifier',typeIdentifier: #number,memberOf: [1,3,5,7,9]}},odds1: [1,3,5],odds2: [7,9]}",
       (),
     )
