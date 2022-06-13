@@ -25,7 +25,7 @@ let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
       ->Result.flatMap(expr =>
         Expression.reduceExpression(
           expr,
-          ReducerInterface_DefaultExternalBindings.defaultInternalBindings,
+          ReducerInterface_StdLib.internalStdLib,
           ExpressionValue.defaultEnvironment,
         )
       )

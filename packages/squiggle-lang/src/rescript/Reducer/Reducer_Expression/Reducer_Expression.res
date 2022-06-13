@@ -116,14 +116,20 @@ let evaluateUsingOptions = (
   ~externalBindings: option<ReducerInterface_ExpressionValue.externalBindings>,
   code: string,
 ): result<expressionValue, errorValue> => {
-  let anEnvironment = switch environment {
-  | Some(env) => env
-  | None => ReducerInterface_ExpressionValue.defaultEnvironment
-  }
+  let anEnvironment = Belt.Option.getWithDefault(
+    environment,
+    ReducerInterface_ExpressionValue.defaultEnvironment,
+  )
 
   let anExternalBindings = switch externalBindings {
-  | Some(bindings) => bindings
-  | None => ReducerInterface_DefaultExternalBindings.defaultExternalBindings
+  | Some(bindings) => {
+      let cloneLib = ReducerInterface_StdLib.externalStdLib->Reducer_Category_Bindings.cloneRecord
+      Js.Dict.entries(bindings)->Js.Array2.reduce((acc, (key, value)) => {
+        acc->Js.Dict.set(key, value)
+        acc
+      }, cloneLib)
+    }
+  | None => ReducerInterface_StdLib.externalStdLib
   }
 
   let bindings = anExternalBindings->Bindings.fromExternalBindings

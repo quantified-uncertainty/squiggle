@@ -29,6 +29,7 @@ let expectEvalError = (expr: string) =>
 
 let expectEvalBindingsToBe = (expr: string, bindings: Reducer.externalBindings, answer: string) =>
   Reducer.evaluateUsingOptions(expr, ~externalBindings=Some(bindings), ~environment=None)
+  ->Reducer_Helpers.rRemoveDefaults
   ->ExpressionValue.toStringResult
   ->expect
   ->toBe(answer)
