@@ -6,7 +6,8 @@ title: Date
 Squiggle date types are a very simple implementation on [Javascript's Date type](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date). It's mainly here for early experimentation. There are more relevant functions for the [Duration](/docs/Api/Duration) type.
 
 ### makeFromYear
-(Now ``makeDateFromYear``)
+
+(Now `makeDateFromYear`)
 
 ```
 Date.makeFromYear: (number) => date

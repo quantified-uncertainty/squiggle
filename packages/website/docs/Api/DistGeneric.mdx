@@ -3,10 +3,10 @@ sidebar_position: 3
 title: Distribution
 ---
 
-Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions. 
-These subtypes are [point set](/docs/Api/DistPointSet), [sample set](/docs/Api/DistSampleSet), and symbolic. The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions). 
+Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
+These subtypes are [point set](/docs/Api/DistPointSet), [sample set](/docs/Api/DistSampleSet), and symbolic. The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
 
-Several functions below only can work on particular distribution formats. 
+Several functions below only can work on particular distribution formats.
 For example, scoring and pointwise math requires the point set format. When this happens, the types are automatically converted to the correct format. These conversions are lossy.
 
 import TOCInline from "@theme/TOCInline"
@@ -15,7 +15,7 @@ import TOCInline from "@theme/TOCInline"
 
 ## Distribution Creation
 
-These are functions for creating primative distributions. Many of these could optionally take in distributions as inputs; in these cases, Monte Carlo Sampling will be used to generate the greater distribution. This can be used for simple hierarchical models.
+These are functions for creating primative distributions. Many of these could optionally take in distributions as inputs. In these cases, Monte Carlo Sampling will be used to generate the greater distribution. This can be used for simple hierarchical models.
 
 See a longer tutorial on creating distributions [here](/docs/Guides/DistributionCreation).
 
@@ -155,7 +155,7 @@ The `to` function is an easy way to generate simple distributions using predicte
 
 If both values are above zero, a `lognormal` distribution is used. If not, a `normal` distribution is used.
 
-``To`` is an alias for ``credibleIntervalToDistribution``. However, because of its frequent use, it is recommended to use the shorter name.
+`To` is an alias for `credibleIntervalToDistribution`. However, because of its frequent use, it is recommended to use the shorter name.
 
 ```
 to: (distribution|number, distribution|number) => distribution
@@ -169,7 +169,6 @@ credibleIntervalToDistribution(distribution|number, distribution|number) => dist
 to(5,10)
 -5 to 5
 ```
-
 
 ### mixture
 
@@ -239,8 +238,8 @@ stdev: (distribution) => number
 ```
 
 ### variance
-Variance. Similar to stdev, only works now on sample set distributions.
 
+Variance. Similar to stdev, only works now on sample set distributions.
 
 ```
 variance: (distribution) => number
@@ -305,6 +304,7 @@ toPointSet(normal(5, 2))
 ```
 
 ### toSampleSet
+
 **TODO: Will soon be called "SampleSet.make"**
 
 Converts a distribution to the sampleSet format, with n samples
@@ -451,7 +451,7 @@ integralSum(normal(5, 2))
 
 Regular arithmetic operations cover the basic mathematical operations on distributions. They work much like their equivalent operations on numbers.
 
-The infixes ``+``,``-``, ``*``, ``/``, ``^``, ``-`` are supported for addition, subtraction, multiplication, division, power, and unaryMinus.
+The infixes `+`,`-`, `*`, `/`, `^`, `-` are supported for addition, subtraction, multiplication, division, power, and unaryMinus.
 
 ```javascript
 pointMass(5 + 10) == pointMass(5) + pointMass(10)
@@ -466,11 +466,12 @@ add: (distributionLike, distributionLike) => distribution
 **Examples**
 
 ```javascript
-normal(0,1) + normal(1,3) // returns normal(1, 3.16...)
-add(normal(0,1), normal(1,3)) // returns normal(1, 3.16...)
+normal(0, 1) + normal(1, 3) // returns normal(1, 3.16...)
+add(normal(0, 1), normal(1, 3)) // returns normal(1, 3.16...)
 ```
 
 ### sum
+
 **Todo: Not yet implemented for distributions**
 
 ```
@@ -480,7 +481,7 @@ sum: (list<distributionLike>) => distribution
 **Examples**
 
 ```javascript
-sum([normal(0,1), normal(1,3), uniform(10,1)])
+sum([normal(0, 1), normal(1, 3), uniform(10, 1)])
 ```
 
 ### multiply
@@ -540,8 +541,8 @@ unaryMinus: (distribution) => distribution
 **Examples**
 
 ```javascript
--(normal(5,2)) // same as normal(-5, 2)
-unaryMinus(normal(5,2)) // same as normal(-5, 2)
+-normal(5, 2) // same as normal(-5, 2)
+unaryMinus(normal(5, 2)) // same as normal(-5, 2)
 ```
 
 ## Pointwise Arithmetic Operations

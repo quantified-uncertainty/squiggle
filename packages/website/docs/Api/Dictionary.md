@@ -8,6 +8,7 @@ Squiggle dictionaries work similar to Python dictionaries. The syntax is similar
 Dictionaries are unordered and duplicates are not allowed. They are meant to be immutable, like most types in Squiggle.
 
 **Example**
+
 ```javascript
 valueFromOfficeItems = {
   keyboard: 1,
