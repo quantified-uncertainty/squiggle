@@ -24,4 +24,4 @@ let foreignFunctionInterface = (
 
 let defaultEnvironment = ExpressionValue.defaultEnvironment
 
-let defaultExternalBindings = ReducerInterface_DefaultExternalBindings.defaultExternalBindings
+let defaultExternalBindings = ReducerInterface_StdLib.externalStdLib
