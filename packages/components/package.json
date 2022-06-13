@@ -55,7 +55,7 @@
     "web-vitals": "^2.1.4",
     "webpack": "^5.73.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.0"
+    "webpack-dev-server": "^4.9.2"
   },
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
