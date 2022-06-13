@@ -19,7 +19,7 @@ These are functions for creating primative distributions. Many of these could op
 
 See a longer tutorial on creating distributions [here](/docs/Guides/DistributionCreation).
 
-### Normal
+### normal
 
 **Definitions**
 
@@ -39,7 +39,7 @@ normal(5 to 10, normal(3, 2))
 normal({ mean: uniform(5, 9), stdev: 3 })
 ```
 
-### Lognormal
+### lognormal
 
 **Definitions**
 
@@ -57,7 +57,7 @@ lognormal({ p5: 4, p95: 10 })
 lognormal({ mean: 5, stdev: 2 })
 ```
 
-### Uniform
+### uniform
 
 **Definitions**
 
@@ -71,7 +71,7 @@ uniform: (distribution|number, distribution|number) => distribution
 uniform(10, 12)
 ```
 
-### Beta
+### beta
 
 **Definitions**
 
@@ -85,7 +85,7 @@ beta: (distribution|number, distribution|number) => distribution
 beta(20, 25)
 ```
 
-### Cauchy
+### cauchy
 
 **Definitions**
 
@@ -99,7 +99,7 @@ cauchy: (distribution|number, distribution|number) => distribution
 cauchy(5, 1)
 ```
 
-### Gamma
+### gamma
 
 **Definitions**
 
@@ -127,13 +127,55 @@ logistic: (distribution|number, distribution|number) => distribution
 gamma(5, 1)
 ```
 
-### To (Distribution)
+### exponential
+
+**Definitions**
+
+```javascript
+exponential: (distribution|number) => distribution
+```
+
+**Examples**
+
+```javascript
+exponential(2)
+```
+
+### bernoulli
+
+**Definitions**
+
+```javascript
+bernoulli: (distribution|number) => distribution
+```
+
+**Examples**
+
+```javascript
+bernoulli(0.5)
+```
+
+### triangular
+
+**Definitions**
+
+```javascript
+triangular: (number, number, number) => distribution
+```
+
+**Examples**
+
+```javascript
+triangular(5, 10, 20)
+```
+
+### To / credibleIntervalToDistribution
 
 The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
 
 If both values are above zero, a `lognormal` distribution is used. If not, a `normal` distribution is used.
 
-**Definitions**
+``To`` is an alias for ``credibleIntervalToDistribution``. However, because of its frequent use, it is recommended to use the shorter name.
 
 ```javascript
 to: (distribution|number, distribution|number) => distribution
@@ -148,35 +190,6 @@ to(5,10)
 -5 to 5
 ```
 
-### Exponential
-
-**Definitions**
-
-```javascript
-exponential: (distribution|number) => distribution
-```
-
-**Examples**
-
-```javascript
-exponential(2)
-```
-
-### Bernoulli
-
-**Definitions**
-
-```javascript
-bernoulli: (distribution|number) => distribution
-```
-
-**Examples**
-
-```javascript
-bernoulli(0.5)
-```
-
-## Functions
 
 ### mixture
 
@@ -192,6 +205,8 @@ mixture(normal(5, 1), normal(10, 1), 8)
 mx(normal(5, 1), normal(10, 1), [0.3, 0.7])
 mx([normal(5, 1), normal(10, 1)], [0.3, 0.7])
 ```
+
+## Functions
 
 ### sample
 
