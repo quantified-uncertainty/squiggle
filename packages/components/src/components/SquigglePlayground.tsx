@@ -162,7 +162,7 @@ function InputItem<T>({
       <input
         type={type}
         {...register(name)}
-        className="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+        className="form-input max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
       />
     </label>
   );
@@ -182,7 +182,7 @@ function Checkbox<T>({
       <input
         type="checkbox"
         {...register(name)}
-        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+        className="form-checkbox focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
       />
       {/* Clicking on the div makes the checkbox lose focus while mouse button is pressed, leading to annoying blinking; I couldn't figure out how to fix this. */}
       <div className="ml-3 text-sm font-medium text-gray-700">{label}</div>
