@@ -2,6 +2,13 @@
 sidebar_position: 4
 title: Point Set Distribution
 ---
+:::danger
+  These functions aren't yet implemented with these specific names. This should be changed soon
+:::
+
+Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
+
+One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.
 
 ### make
 

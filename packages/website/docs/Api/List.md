@@ -3,13 +3,21 @@ sidebar_position: 7
 title: List
 ---
 
+Squiggle lists are a lot like Python lists or Ruby arrays. They accept all types.
+
+```javascript
+myList = [3, normal(5,2), "random"]
+```
+
 ### make
+
+**Note: currently just called ``makeList``, without the preix**
 
 ```
 List.make: (number, 'a) => list<'a>
 ```
 
-Returns an array of size `n` filled with value `e`.
+Returns an array of size `n` filled with the value.
 
 ```js
 List.make(4, 1); // creates the list [1, 1, 1, 1]
@@ -30,6 +38,8 @@ length: (list<'a>) => number
 ```
 
 ### up to
+
+**Note: currently just called ``upTo``, without the preix**
 
 ```
 List.upTo: (low:number, high:number) => list<number>
