@@ -3,13 +3,14 @@ sidebar_position: 3
 title: Distribution
 ---
 
+import Admonition from "@theme/Admonition";
+import TOCInline from "@theme/TOCInline";
+
 Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
 These subtypes are [point set](/docs/Api/DistPointSet), [sample set](/docs/Api/DistSampleSet), and symbolic. The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
 
 Several functions below only can work on particular distribution formats.
 For example, scoring and pointwise math requires the point set format. When this happens, the types are automatically converted to the correct format. These conversions are lossy.
-
-import TOCInline from "@theme/TOCInline"
 
 <TOCInline toc={toc} />
 
@@ -48,9 +49,9 @@ lognormal: (dict<{mean: distribution|number, stdev: distribution|number}>) => di
 **Examples**
 
 ```javascript
-lognormal(0.5, 0.8)
-lognormal({ p5: 4, p95: 10 })
-lognormal({ mean: 5, stdev: 2 })
+lognormal(0.5, 0.8);
+lognormal({ p5: 4, p95: 10 });
+lognormal({ mean: 5, stdev: 2 });
 ```
 
 ### uniform
@@ -62,7 +63,7 @@ uniform: (distribution|number, distribution|number) => distribution
 **Examples**
 
 ```javascript
-uniform(10, 12)
+uniform(10, 12);
 ```
 
 ### beta
@@ -74,7 +75,7 @@ beta: (distribution|number, distribution|number) => distribution
 **Examples**
 
 ```javascript
-beta(20, 25)
+beta(20, 25);
 ```
 
 ### cauchy
@@ -86,7 +87,7 @@ cauchy: (distribution|number, distribution|number) => distribution
 **Examples**
 
 ```javascript
-cauchy(5, 1)
+cauchy(5, 1);
 ```
 
 ### gamma
@@ -97,11 +98,11 @@ gamma: (distribution|number, distribution|number) => distribution
 
 **Examples**
 
-```javascript
-gamma(5, 1)
+```js
+gamma(5, 1);
 ```
 
-### Logistic
+### logistic
 
 ```
 logistic: (distribution|number, distribution|number) => distribution
@@ -110,7 +111,7 @@ logistic: (distribution|number, distribution|number) => distribution
 **Examples**
 
 ```javascript
-gamma(5, 1)
+gamma(5, 1);
 ```
 
 ### exponential
@@ -122,7 +123,7 @@ exponential: (distribution|number) => distribution
 **Examples**
 
 ```javascript
-exponential(2)
+exponential(2);
 ```
 
 ### bernoulli
@@ -134,22 +135,22 @@ bernoulli: (distribution|number) => distribution
 **Examples**
 
 ```javascript
-bernoulli(0.5)
+bernoulli(0.5);
 ```
 
 ### triangular
 
 ```javascript
-triangular: (number, number, number) => distribution
+triangular: (number, number, number) => distribution;
 ```
 
 **Examples**
 
 ```javascript
-triangular(5, 10, 20)
+triangular(5, 10, 20);
 ```
 
-### To / credibleIntervalToDistribution
+### to / credibleIntervalToDistribution
 
 The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
 
@@ -180,9 +181,9 @@ mixture: (list<distributionLike>, weights?:list<float>) => distribution
 **Examples**
 
 ```javascript
-mixture(normal(5, 1), normal(10, 1), 8)
-mx(normal(5, 1), normal(10, 1), [0.3, 0.7])
-mx([normal(5, 1), normal(10, 1)], [0.3, 0.7])
+mixture(normal(5, 1), normal(10, 1), 8);
+mx(normal(5, 1), normal(10, 1), [0.3, 0.7]);
+mx([normal(5, 1), normal(10, 1)], [0.3, 0.7]);
 ```
 
 ## Functions
@@ -198,7 +199,7 @@ sample: (distribution) => number
 **Examples**
 
 ```javascript
-sample(normal(5, 2))
+sample(normal(5, 2));
 ```
 
 ### sampleN
@@ -212,7 +213,7 @@ sampleN: (distribution, number) => list<number>
 **Examples**
 
 ```javascript
-sampleN(normal(5, 2), 100)
+sampleN(normal(5, 2), 100);
 ```
 
 ### mean
@@ -226,7 +227,7 @@ mean: (distribution) => number
 **Examples**
 
 ```javascript
-mean(normal(5, 2))
+mean(normal(5, 2));
 ```
 
 ### stdev
@@ -260,7 +261,7 @@ cdf: (distribution, number) => number
 **Examples**
 
 ```javascript
-cdf(normal(5, 2), 3)
+cdf(normal(5, 2), 3);
 ```
 
 ### pdf
@@ -272,7 +273,7 @@ pdf: (distribution, number) => number
 **Examples**
 
 ```javascript
-pdf(normal(5, 2), 3)
+pdf(normal(5, 2), 3);
 ```
 
 ### quantile
@@ -284,7 +285,7 @@ quantile: (distribution, number) => number
 **Examples**
 
 ```javascript
-quantile(normal(5, 2), 0.5)
+quantile(normal(5, 2), 0.5);
 ```
 
 ### toPointSet
@@ -300,7 +301,7 @@ toPointSet: (distribution) => pointSetDistribution
 **Examples**
 
 ```javascript
-toPointSet(normal(5, 2))
+toPointSet(normal(5, 2));
 ```
 
 ### toSampleSet
@@ -316,7 +317,7 @@ toSampleSet: (distribution, number) => sampleSetDistribution
 **Examples**
 
 ```javascript
-toSampleSet(normal(5, 2), 1000)
+toSampleSet(normal(5, 2), 1000);
 ```
 
 ### truncateLeft
@@ -330,7 +331,7 @@ truncateLeft: (distribution, l => number) => distribution
 **Examples**
 
 ```javascript
-truncateLeft(normal(5, 2), 3)
+truncateLeft(normal(5, 2), 3);
 ```
 
 ### truncateRight
@@ -344,7 +345,7 @@ truncateRight: (distribution, r => number) => distribution
 **Examples**
 
 ```javascript
-truncateLeft(normal(5, 2), 6)
+truncateLeft(normal(5, 2), 6);
 ```
 
 ### klDivergence
@@ -358,7 +359,7 @@ klDivergence: (distribution, distribution) => number
 **Examples**
 
 ```javascript
-klDivergence(normal(5, 2), normal(5, 4)) // returns 0.57
+klDivergence(normal(5, 2), normal(5, 4)); // returns 0.57
 ```
 
 ## Display
@@ -372,26 +373,26 @@ toString: (distribution) => string
 **Examples**
 
 ```javascript
-toString(normal(5, 2))
+toString(normal(5, 2));
 ```
 
-### toSparkline
+### sparkline
 
-Produce a sparkline of length n
+Produce a sparkline of length n. For example, `▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁`. These can be useful for testing or quick text visualizations.
 
 ```
-toSparkline: (distribution, n = 20) => string
+sparkline: (distribution, n = 20) => string
 ```
 
 **Examples**
 
 ```javascript
-toSparkline(normal(5, 2), 10)
+toSparkline(truncateLeft(normal(5, 2), 3), 20); // produces ▁▇█████▇▅▄▃▂▂▁▁▁▁▁▁▁
 ```
 
 ### inspect
 
-Prints the value of the distribution to the Javascript console, then returns the distribution.
+Prints the value of the distribution to the Javascript console, then returns the distribution. Useful for debugging.
 
 ```
 inspect: (distribution) => distribution
@@ -400,10 +401,14 @@ inspect: (distribution) => distribution
 **Examples**
 
 ```javascript
-inspect(normal(5, 2))
+inspect(normal(5, 2)); // logs "normal(5, 2)" to the javascript console and returns the distribution.
 ```
 
 ## Normalization
+
+There are some situations where computation will return unnormalized distributions. This means that their cumulative sums are not equal to 1.0. Unnormalized distributions are not valid for many relevant functions; for example, klDivergence and scoring.
+
+The only functions that do not return normalized distributions are the pointwise arithmetic operations and the scalewise arithmetic operations. If you use these functions, it is recommended that you consider normalizing the resulting distributions.
 
 ### normalize
 
@@ -416,7 +421,7 @@ normalize: (distribution) => distribution
 **Examples**
 
 ```javascript
-normalize(normal(5, 2))
+normalize(normal(5, 2));
 ```
 
 ### isNormalized
@@ -430,12 +435,14 @@ isNormalized: (distribution) => bool
 **Examples**
 
 ```javascript
-isNormalized(normal(5, 2)) // returns true
+isNormalized(normal(5, 2)); // returns true
 ```
 
 ### integralSum
 
-Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.
+**Note: If you have suggestions for better names for this, please let us know.**
+
+Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.0. This is useful for understanding unnormalized distributions.
 
 ```
 integralSum: (distribution) => number
@@ -444,17 +451,17 @@ integralSum: (distribution) => number
 **Examples**
 
 ```javascript
-integralSum(normal(5, 2))
+integralSum(normal(5, 2));
 ```
 
 ## Regular Arithmetic Operations
 
 Regular arithmetic operations cover the basic mathematical operations on distributions. They work much like their equivalent operations on numbers.
 
-The infixes `+`,`-`, `*`, `/`, `^`, `-` are supported for addition, subtraction, multiplication, division, power, and unaryMinus.
+The infixes `+`,`-`, `*`, `/`, `^` are supported for addition, subtraction, multiplication, division, power, and unaryMinus.
 
 ```javascript
-pointMass(5 + 10) == pointMass(5) + pointMass(10)
+pointMass(5 + 10) == pointMass(5) + pointMass(10);
 ```
 
 ### add
@@ -466,13 +473,13 @@ add: (distributionLike, distributionLike) => distribution
 **Examples**
 
 ```javascript
-normal(0, 1) + normal(1, 3) // returns normal(1, 3.16...)
-add(normal(0, 1), normal(1, 3)) // returns normal(1, 3.16...)
+normal(0, 1) + normal(1, 3); // returns normal(1, 3.16...)
+add(normal(0, 1), normal(1, 3)); // returns normal(1, 3.16...)
 ```
 
 ### sum
 
-**Todo: Not yet implemented for distributions**
+**Todo: Not yet implemented**
 
 ```
 sum: (list<distributionLike>) => distribution
@@ -481,7 +488,7 @@ sum: (list<distributionLike>) => distribution
 **Examples**
 
 ```javascript
-sum([normal(0, 1), normal(1, 3), uniform(10, 1)])
+sum([normal(0, 1), normal(1, 3), uniform(10, 1)]);
 ```
 
 ### multiply
@@ -541,11 +548,26 @@ unaryMinus: (distribution) => distribution
 **Examples**
 
 ```javascript
--normal(5, 2) // same as normal(-5, 2)
-unaryMinus(normal(5, 2)) // same as normal(-5, 2)
+-normal(5, 2); // same as normal(-5, 2)
+unaryMinus(normal(5, 2)); // same as normal(-5, 2)
 ```
 
 ## Pointwise Arithmetic Operations
+
+<Admonition type="caution" title="Unnormalized Results">
+  <p>
+    Pointwise arithmetic operations typically return unnormalized or completely
+    invalid distributions. For example, the operation{" "}
+    <code>normal(5,2) .- uniform(10,12)</code> results in a distribution-like
+    object with negative probability mass.
+  </p>
+</Admonition>
+
+Pointwise arithmetic operations cover the standard arithmetic operations, but work in a different way than the regular operations. These operate on the y-values of the distributions instead of the x-values. A pointwise addition would add the y-values of two distributions.
+
+The infixes `.+`,`.-`, `.*`, `./`, `.^` are supported for their respective operations.
+
+The `mixture` methods works with pointwise addition.
 
 ### dotAdd
 
@@ -585,10 +607,20 @@ dotExp: (distributionLike, distributionLike) => distribution
 
 ## Scale Arithmetic Operations
 
-### scaleMultiply
+<Admonition type="caution" title="Likely to change">
+  <p>
+    We're planning on removing scale operations in favor of more general
+    functions soon.
+  </p>
+</Admonition>
 
-```
-scaleMultiply: (distributionLike, number) => distribution
+Scale operations are similar to pointwise operations, but operate on a constant y-value instead of y-values coming from a distribution. You can think about this as scaling a distribution vertically by a constant.
+
+The following items would be equivalent.
+
+```js
+scalePow(normal(5,2), 2)
+mapY(normal(5,2), {|y| y ^ 2}) // Not yet available
 ```
 
 ### scalePow
@@ -619,7 +651,9 @@ scaleLog10: (distributionLike, number) => distribution
 
 ### Declaration (Continuous Functions)
 
-Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.
+Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making formal predictions. It allows you to limit the domain that your prediction will be used and scored within.
+
+Declarations are currently experimental and will likely be removed or changed in the future.
 
 ```
 declareFn: (dict<{fn: lambda, inputs: array<dict<{min: number, max: number}>>}>) => declaration

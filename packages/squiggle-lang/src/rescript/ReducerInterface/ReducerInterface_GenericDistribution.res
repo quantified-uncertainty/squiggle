@@ -221,9 +221,9 @@ let dispatchToGenericOutput = (
     }
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
-  | ("toSparkline", [EvDistribution(dist)]) =>
+  | ("sparkline", [EvDistribution(dist)]) =>
     Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
-  | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
+  | ("sparkline", [EvDistribution(dist), EvNumber(n)]) =>
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
   | ("exp", [EvDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
