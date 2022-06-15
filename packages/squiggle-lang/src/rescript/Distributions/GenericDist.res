@@ -214,7 +214,9 @@ module Truncate = {
       | Some(r) => Ok(r)
       | None =>
         toPointSetFn(t)->E.R2.fmap(t => {
-          DistributionTypes.PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize)
+          DistributionTypes.PointSet(
+            PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize,
+          )
         })
       }
     }
