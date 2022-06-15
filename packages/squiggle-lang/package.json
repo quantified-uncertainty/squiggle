@@ -39,6 +39,7 @@
     "@stdlib/stats": "^0.0.13",
     "jstat": "^1.9.5",
     "mathjs": "^10.6.0",
+    "lodash": "^4.17.21",
     "pdfast": "^0.2.0",
     "rescript": "^9.1.4"
   },
@@ -53,7 +54,6 @@
     "fast-check": "^2.25.0",
     "gentype": "^4.4.0",
     "jest": "^27.5.1",
-    "lodash": "^4.17.21",
     "moduleserve": "^0.9.1",
     "nyc": "^15.1.0",
     "peggy": "^2.0.1",
