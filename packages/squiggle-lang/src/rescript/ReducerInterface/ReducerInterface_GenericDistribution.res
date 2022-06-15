@@ -221,9 +221,9 @@ let dispatchToGenericOutput = (
     }
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
-  | ("toSparkline", [EvDistribution(dist)]) =>
+  | ("sparkline", [EvDistribution(dist)]) =>
     Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
-  | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
+  | ("sparkline", [EvDistribution(dist), EvNumber(n)]) =>
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
   | ("exp", [EvDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
@@ -273,6 +273,8 @@ let dispatchToGenericOutput = (
   | ("cdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist, ~env)
   | ("pdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Pdf(float), dist, ~env)
   | ("inv", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist, ~env)
+  | ("quantile", [EvDistribution(dist), EvNumber(float)]) =>
+    Helpers.toFloatFn(#Inv(float), dist, ~env)
   | ("toSampleSet", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist, ~env)
   | ("toSampleSet", [EvDistribution(dist)]) =>

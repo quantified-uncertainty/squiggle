@@ -1,5 +1,5 @@
 ---
-title: "Functions Reference"
+title: "Distribution Functions"
 sidebar_position: 3
 ---
 
@@ -170,7 +170,7 @@ given point x.
 ### Cumulative density function
 
 The `cdf(dist, x)` gives the cumulative probability of the distribution
-or all values lower than x. It is the inverse of `inv`.
+or all values lower than x. It is the inverse of `quantile`.
 
 <SquiggleEditor initialSquiggleString="cdf(normal(0,1),0)" />
 
@@ -179,13 +179,13 @@ or all values lower than x. It is the inverse of `inv`.
 - `x` must be a scalar
 - `dist` must be a distribution
 
-### Inverse CDF
+### Quantile
 
-The `inv(dist, prob)` gives the value x or which the probability for all values
+The `quantile(dist, prob)` gives the value x or which the probability for all values
 lower than x is equal to prob. It is the inverse of `cdf`. In the literature, it
 is also known as the quantiles function.
 
-<SquiggleEditor initialSquiggleString="inv(normal(0,1),0.5)" />
+<SquiggleEditor initialSquiggleString="quantile(normal(0,1),0.5)" />
 
 #### Validity
 
