@@ -1,19 +1,24 @@
-module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface.ExpressionValue
+// Reducer_Helpers
 module ErrorValue = Reducer_ErrorValue
-module Bindings = Reducer_Category_Bindings
+module ExternalExpressionValue = ReducerInterface.ExternalExpressionValue
+module InternalExpressionValue = ReducerInterface.InternalExpressionValue
+module Module = Reducer_Category_Module
 
-let removeDefaults = (ev: ExpressionT.expressionValue): ExpressionT.expressionValue =>
-  switch ev {
-  | EvRecord(extbindings) => {
-      let bindings: Bindings.t = Bindings.fromRecord(extbindings)
-      let keys = Js.Dict.keys(Reducer.defaultExternalBindings)
-      Belt.Map.String.keep(bindings, (key, _value) => {
-        let removeThis = Js.Array2.includes(keys, key)
-        !removeThis
-      })->Bindings.toExpressionValue
-    }
+let removeDefaultsInternal = (iev: InternalExpressionValue.expressionValue) => {
+  switch iev {
+  | InternalExpressionValue.IevModule(nameSpace) =>
+    Module.removeOther(
+      nameSpace,
+      ReducerInterface.StdLib.internalStdLib,
+    )->InternalExpressionValue.IevModule
   | value => value
   }
+}
 
-let rRemoveDefaults = r => Belt.Result.map(r, ev => removeDefaults(ev))
+let removeDefaultsExternal = (
+  ev: ExternalExpressionValue.expressionValue,
+): ExternalExpressionValue.expressionValue =>
+  ev->InternalExpressionValue.toInternal->removeDefaultsInternal->InternalExpressionValue.toExternal
+
+let rRemoveDefaultsInternal = r => Belt.Result.map(r, removeDefaultsInternal)
+let rRemoveDefaultsExternal = r => Belt.Result.map(r, removeDefaultsExternal)

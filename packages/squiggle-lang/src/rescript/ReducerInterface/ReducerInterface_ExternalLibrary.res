@@ -1,4 +1,4 @@
-module ExpressionValue = ReducerInterface_ExpressionValue
+module ExpressionValue = ReducerInterface_InternalExpressionValue
 
 type expressionValue = ExpressionValue.expressionValue
 

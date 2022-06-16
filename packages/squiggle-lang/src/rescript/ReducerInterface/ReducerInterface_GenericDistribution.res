@@ -1,4 +1,4 @@
-module ExpressionValue = ReducerInterface_ExpressionValue
+module ExpressionValue = ReducerInterface_InternalExpressionValue
 type expressionValue = ExpressionValue.expressionValue
 
 module Helpers = {
@@ -23,9 +23,9 @@ module Helpers = {
     DistributionTypes.genericDist,
   )> =>
     switch args {
-    | [EvDistribution(a), EvDistribution(b)] => Some((a, b))
-    | [EvNumber(a), EvDistribution(b)] => Some((GenericDist.fromFloat(a), b))
-    | [EvDistribution(a), EvNumber(b)] => Some((a, GenericDist.fromFloat(b)))
+    | [IevDistribution(a), IevDistribution(b)] => Some((a, b))
+    | [IevNumber(a), IevDistribution(b)] => Some((GenericDist.fromFloat(a), b))
+    | [IevDistribution(a), IevNumber(b)] => Some((a, GenericDist.fromFloat(b)))
     | _ => None
     }
 
@@ -82,7 +82,7 @@ module Helpers = {
 
   let parseNumber = (args: expressionValue): Belt.Result.t<float, string> =>
     switch args {
-    | EvNumber(x) => Ok(x)
+    | IevNumber(x) => Ok(x)
     | _ => Error("Not a number")
     }
 
@@ -91,8 +91,8 @@ module Helpers = {
 
   let parseDist = (args: expressionValue): Belt.Result.t<DistributionTypes.genericDist, string> =>
     switch args {
-    | EvDistribution(x) => Ok(x)
-    | EvNumber(x) => Ok(GenericDist.fromFloat(x))
+    | IevDistribution(x) => Ok(x)
+    | IevNumber(x) => Ok(GenericDist.fromFloat(x))
     | _ => Error("Not a distribution")
     }
 
@@ -128,12 +128,12 @@ module Helpers = {
     let error = (err: string): DistributionOperation.outputType =>
       err->DistributionTypes.ArgumentError->GenDistError
     switch args {
-    | [EvArray(distributions)] =>
+    | [IevArray(distributions)] =>
       switch parseDistributionArray(distributions) {
       | Ok(distrs) => mixtureWithDefaultWeights(distrs, ~env)
       | Error(err) => error(err)
       }
-    | [EvArray(distributions), EvArray(weights)] =>
+    | [IevArray(distributions), IevArray(weights)] =>
       switch (parseDistributionArray(distributions), parseNumberArray(weights)) {
       | (Ok(distrs), Ok(wghts)) => mixtureWithGivenWeights(distrs, wghts, ~env)
       | (Error(err), Ok(_)) => error(err)
@@ -142,7 +142,7 @@ module Helpers = {
       }
     | _ =>
       switch E.A.last(args) {
-      | Some(EvArray(b)) => {
+      | Some(IevArray(b)) => {
           let weights = parseNumberArray(b)
           let distributions = parseDistributionArray(
             Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
@@ -152,8 +152,8 @@ module Helpers = {
           | Error(err) => error(err)
           }
         }
-      | Some(EvNumber(_))
-      | Some(EvDistribution(_)) =>
+      | Some(IevNumber(_))
+      | Some(IevDistribution(_)) =>
         switch parseDistributionArray(args) {
         | Ok(distributions) => mixtureWithDefaultWeights(distributions, ~env)
         | Error(err) => error(err)
@@ -200,14 +200,14 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>
+  | ("triangular" as fnName, [IevNumber(f1), IevNumber(f2), IevNumber(f3)]) =>
     SymbolicConstructors.threeFloat(fnName)
     ->E.R.bind(r => r(f1, f2, f3))
     ->SymbolicConstructors.symbolicResultToOutput
-  | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist, ~env)
-  | ("sampleN", [EvDistribution(dist), EvNumber(n)]) =>
+  | ("sample", [IevDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist, ~env)
+  | ("sampleN", [IevDistribution(dist), IevNumber(n)]) =>
     Some(FloatArray(GenericDist.sampleN(dist, Belt.Int.fromFloat(n))))
-  | (("mean" | "stdev" | "variance" | "min" | "max" | "mode") as op, [EvDistribution(dist)]) => {
+  | (("mean" | "stdev" | "variance" | "min" | "max" | "mode") as op, [IevDistribution(dist)]) => {
       let fn = switch op {
       | "mean" => #Mean
       | "stdev" => #Stdev
@@ -219,13 +219,13 @@ let dispatchToGenericOutput = (
       }
       Helpers.toFloatFn(fn, dist, ~env)
     }
-  | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
-  | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
-  | ("toSparkline", [EvDistribution(dist)]) =>
+  | ("integralSum", [IevDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
+  | ("toString", [IevDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
+  | ("toSparkline", [IevDistribution(dist)]) =>
     Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
-  | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
+  | ("toSparkline", [IevDistribution(dist), IevNumber(n)]) =>
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
-  | ("exp", [EvDistribution(a)]) =>
+  | ("exp", [IevDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
     Helpers.twoDiststoDistFn(
       Algebraic(AsDefault),
@@ -234,51 +234,58 @@ let dispatchToGenericOutput = (
       a,
       ~env,
     )->Some
-  | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
-  | ("klDivergence", [EvDistribution(prediction), EvDistribution(answer)]) =>
+  | ("normalize", [IevDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
+  | ("klDivergence", [IevDistribution(prediction), IevDistribution(answer)]) =>
     Some(DistributionOperation.run(FromDist(ToScore(KLDivergence(answer)), prediction), ~env))
-  | ("klDivergence", [EvDistribution(prediction), EvDistribution(answer), EvDistribution(prior)]) =>
+  | (
+      "klDivergence",
+      [IevDistribution(prediction), IevDistribution(answer), IevDistribution(prior)],
+    ) =>
     Helpers.klDivergenceWithPrior(prediction, answer, prior, env)
   | (
     "logScoreWithPointAnswer",
-    [EvDistribution(prediction), EvNumber(answer), EvDistribution(prior)],
+    [IevDistribution(prediction), IevNumber(answer), IevDistribution(prior)],
   )
   | (
     "logScoreWithPointAnswer",
-    [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer))), EvDistribution(prior)],
+    [
+      IevDistribution(prediction),
+      IevDistribution(Symbolic(#Float(answer))),
+      IevDistribution(prior),
+    ],
   ) =>
     DistributionOperation.run(
       FromDist(ToScore(LogScore(answer, prior->Some)), prediction),
       ~env,
     )->Some
-  | ("logScoreWithPointAnswer", [EvDistribution(prediction), EvNumber(answer)])
+  | ("logScoreWithPointAnswer", [IevDistribution(prediction), IevNumber(answer)])
   | (
     "logScoreWithPointAnswer",
-    [EvDistribution(prediction), EvDistribution(Symbolic(#Float(answer)))],
+    [IevDistribution(prediction), IevDistribution(Symbolic(#Float(answer)))],
   ) =>
     DistributionOperation.run(FromDist(ToScore(LogScore(answer, None)), prediction), ~env)->Some
-  | ("isNormalized", [EvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
-  | ("toPointSet", [EvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
-  | ("scaleLog", [EvDistribution(dist)]) =>
+  | ("isNormalized", [IevDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
+  | ("toPointSet", [IevDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
+  | ("scaleLog", [IevDistribution(dist)]) =>
     Helpers.toDistFn(Scale(#Logarithm, MagicNumbers.Math.e), dist, ~env)
-  | ("scaleLog10", [EvDistribution(dist)]) => Helpers.toDistFn(Scale(#Logarithm, 10.0), dist, ~env)
-  | ("scaleLog", [EvDistribution(dist), EvNumber(float)]) =>
+  | ("scaleLog10", [IevDistribution(dist)]) => Helpers.toDistFn(Scale(#Logarithm, 10.0), dist, ~env)
+  | ("scaleLog", [IevDistribution(dist), IevNumber(float)]) =>
     Helpers.toDistFn(Scale(#Logarithm, float), dist, ~env)
-  | ("scaleLogWithThreshold", [EvDistribution(dist), EvNumber(base), EvNumber(eps)]) =>
+  | ("scaleLogWithThreshold", [IevDistribution(dist), IevNumber(base), IevNumber(eps)]) =>
     Helpers.toDistFn(Scale(#LogarithmWithThreshold(eps), base), dist, ~env)
-  | ("scalePow", [EvDistribution(dist), EvNumber(float)]) =>
+  | ("scalePow", [IevDistribution(dist), IevNumber(float)]) =>
     Helpers.toDistFn(Scale(#Power, float), dist, ~env)
-  | ("scaleExp", [EvDistribution(dist)]) =>
+  | ("scaleExp", [IevDistribution(dist)]) =>
     Helpers.toDistFn(Scale(#Power, MagicNumbers.Math.e), dist, ~env)
-  | ("cdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist, ~env)
-  | ("pdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Pdf(float), dist, ~env)
-  | ("inv", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist, ~env)
-  | ("toSampleSet", [EvDistribution(dist), EvNumber(float)]) =>
+  | ("cdf", [IevDistribution(dist), IevNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist, ~env)
+  | ("pdf", [IevDistribution(dist), IevNumber(float)]) => Helpers.toFloatFn(#Pdf(float), dist, ~env)
+  | ("inv", [IevDistribution(dist), IevNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist, ~env)
+  | ("toSampleSet", [IevDistribution(dist), IevNumber(float)]) =>
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist, ~env)
-  | ("toSampleSet", [EvDistribution(dist)]) =>
+  | ("toSampleSet", [IevDistribution(dist)]) =>
     Helpers.toDistFn(ToSampleSet(env.sampleCount), dist, ~env)
-  | ("toList", [EvDistribution(SampleSet(dist))]) => Some(FloatArray(SampleSetDist.T.get(dist)))
-  | ("fromSamples", [EvArray(inputArray)]) => {
+  | ("toList", [IevDistribution(SampleSet(dist))]) => Some(FloatArray(SampleSetDist.T.get(dist)))
+  | ("fromSamples", [IevArray(inputArray)]) => {
       let _wrapInputErrors = x => SampleSetDist.NonNumericInput(x)
       let parsedArray = Helpers.parseNumberArray(inputArray)->E.R2.errMap(_wrapInputErrors)
       switch parsedArray {
@@ -286,15 +293,15 @@ let dispatchToGenericOutput = (
       | Error(e) => GenDistError(SampleSetError(e))
       }->Some
     }
-  | ("inspect", [EvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist, ~env)
-  | ("truncateLeft", [EvDistribution(dist), EvNumber(float)]) =>
+  | ("inspect", [IevDistribution(dist)]) => Helpers.toDistFn(Inspect, dist, ~env)
+  | ("truncateLeft", [IevDistribution(dist), IevNumber(float)]) =>
     Helpers.toDistFn(Truncate(Some(float), None), dist, ~env)
-  | ("truncateRight", [EvDistribution(dist), EvNumber(float)]) =>
+  | ("truncateRight", [IevDistribution(dist), IevNumber(float)]) =>
     Helpers.toDistFn(Truncate(None, Some(float)), dist, ~env)
-  | ("truncate", [EvDistribution(dist), EvNumber(float1), EvNumber(float2)]) =>
+  | ("truncate", [IevDistribution(dist), IevNumber(float1), IevNumber(float2)]) =>
     Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist, ~env)
   | ("mx" | "mixture", args) => Helpers.mixture(args, ~env)->Some
-  | ("log", [EvDistribution(a)]) =>
+  | ("log", [IevDistribution(a)]) =>
     Helpers.twoDiststoDistFn(
       Algebraic(AsDefault),
       "log",
@@ -302,7 +309,7 @@ let dispatchToGenericOutput = (
       GenericDist.fromFloat(MagicNumbers.Math.e),
       ~env,
     )->Some
-  | ("log10", [EvDistribution(a)]) =>
+  | ("log10", [IevDistribution(a)]) =>
     Helpers.twoDiststoDistFn(
       Algebraic(AsDefault),
       "log",
@@ -310,7 +317,7 @@ let dispatchToGenericOutput = (
       GenericDist.fromFloat(10.0),
       ~env,
     )->Some
-  | ("unaryMinus", [EvDistribution(a)]) =>
+  | ("unaryMinus", [IevDistribution(a)]) =>
     Helpers.twoDiststoDistFn(
       Algebraic(AsDefault),
       "multiply",
@@ -333,7 +340,7 @@ let dispatchToGenericOutput = (
     Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
       Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd, ~env)
     )
-  | ("dotExp", [EvDistribution(a)]) =>
+  | ("dotExp", [IevDistribution(a)]) =>
     Helpers.twoDiststoDistFn(
       Pointwise,
       "dotPow",
@@ -350,11 +357,12 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   Reducer_ErrorValue.errorValue,
 > =>
   switch o {
-  | Dist(d) => Ok(ReducerInterface_ExpressionValue.EvDistribution(d))
-  | Float(d) => Ok(EvNumber(d))
-  | String(d) => Ok(EvString(d))
-  | Bool(d) => Ok(EvBool(d))
-  | FloatArray(d) => Ok(EvArray(d |> E.A.fmap(r => ReducerInterface_ExpressionValue.EvNumber(r))))
+  | Dist(d) => Ok(ReducerInterface_InternalExpressionValue.IevDistribution(d))
+  | Float(d) => Ok(IevNumber(d))
+  | String(d) => Ok(IevString(d))
+  | Bool(d) => Ok(IevBool(d))
+  | FloatArray(d) =>
+    Ok(IevArray(d |> E.A.fmap(r => ReducerInterface_InternalExpressionValue.IevNumber(r))))
   | GenDistError(err) => Error(REDistributionError(err))
   }
 

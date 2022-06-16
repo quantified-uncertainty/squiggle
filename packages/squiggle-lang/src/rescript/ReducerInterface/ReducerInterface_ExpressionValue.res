@@ -68,25 +68,6 @@ and toStringRecord = aRecord => {
   `{${pairs}}`
 }
 
-let toStringWithType = aValue =>
-  switch aValue {
-  | EvArray(_) => `Array::${toString(aValue)}`
-  | EvArrayString(_) => `ArrayString::${toString(aValue)}`
-  | EvBool(_) => `Bool::${toString(aValue)}`
-  | EvCall(_) => `Call::${toString(aValue)}`
-  | EvDistribution(_) => `Distribution::${toString(aValue)}`
-  | EvLambda(_) => `Lambda::${toString(aValue)}`
-  | EvNumber(_) => `Number::${toString(aValue)}`
-  | EvRecord(_) => `Record::${toString(aValue)}`
-  | EvString(_) => `String::${toString(aValue)}`
-  | EvSymbol(_) => `Symbol::${toString(aValue)}`
-  | EvDate(_) => `Date::${toString(aValue)}`
-  | EvTimeDuration(_) => `Date::${toString(aValue)}`
-  | EvDeclaration(_) => `Declaration::${toString(aValue)}`
-  | EvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
-  | EvModule(_) => `Module::${toString(aValue)}`
-  }
-
 let argsToString = (args: array<expressionValue>): string => {
   args->Js.Array2.map(arg => arg->toString)->Js.Array2.toString
 }
@@ -99,17 +80,17 @@ let toStringResult = x =>
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
-let toStringResultOkless = (codeResult: result<expressionValue, ErrorValue.errorValue>): string =>
-  switch codeResult {
-  | Ok(a) => toString(a)
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
-  }
+// let toStringResultOkless = (codeResult: result<expressionValue, ErrorValue.errorValue>): string =>
+//   switch codeResult {
+//   | Ok(a) => toString(a)
+//   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
+//   }
 
-let toStringResultRecord = x =>
-  switch x {
-  | Ok(a) => `Ok(${toStringRecord(a)})`
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
-  }
+// let toStringResultRecord = x =>
+//   switch x {
+//   | Ok(a) => `Ok(${toStringRecord(a)})`
+//   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
+//   }
 
 @genType
 type environment = DistributionOperation.env
@@ -141,14 +122,14 @@ type functionDefinitionSignature =
 let valueToValueType = value =>
   switch value {
   | EvArray(_) => EvtArray
-  | EvArrayString(_) => EvtArray
+  | EvArrayString(_) => EvtArrayString
   | EvBool(_) => EvtBool
   | EvCall(_) => EvtCall
   | EvDistribution(_) => EvtDistribution
   | EvLambda(_) => EvtLambda
   | EvNumber(_) => EvtNumber
   | EvRecord(_) => EvtRecord
-  | EvString(_) => EvtArray
+  | EvString(_) => EvtString
   | EvSymbol(_) => EvtSymbol
   | EvDate(_) => EvtDate
   | EvTimeDuration(_) => EvtTimeDuration

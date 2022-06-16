@@ -1,4 +1,4 @@
-module EV = ReducerInterface_ExpressionValue
+module EV = ReducerInterface_InternalExpressionValue
 type expressionValue = EV.expressionValue
 
 module ScientificUnit = {
@@ -37,9 +37,9 @@ let dispatch = (call: EV.functionCall, _: DistributionOperation.env): option<
       | "fromUnit_G"
       | "fromUnit_T"
       | "fromUnit_P") as op,
-      [EvNumber(f)],
+      [IevNumber(f)],
     ) =>
-    op->ScientificUnit.getMultiplier->E.O2.fmap(multiplier => EV.EvNumber(f *. multiplier)->Ok)
+    op->ScientificUnit.getMultiplier->E.O2.fmap(multiplier => EV.IevNumber(f *. multiplier)->Ok)
   | _ => None
   }
 }

@@ -3,12 +3,13 @@
   they take expressions as parameters and return a new expression.
   Macros are used to define language building blocks. They are like Lisp macros.
 */
-module Bindings = Reducer_Expression_Bindings
+module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module ErrorValue = Reducer_ErrorValue
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface.ExpressionValue
+module ExpressionValue = ReducerInterface_InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
+module Module = Reducer_Category_Module
 module Result = Belt.Result
 open Reducer_Expression_ExpressionBuilder
 
@@ -27,13 +28,13 @@ let dispatchMacroCall = (
   let useExpressionToSetBindings = (bindingExpr: expression, environment, statement, newCode) => {
     let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
 
-    rExternalBindingsValue->Result.flatMap(externalBindingsValue => {
-      let newBindings = Bindings.fromValue(externalBindingsValue)
+    rExternalBindingsValue->Result.flatMap(nameSpaceValue => {
+      let newBindings = Module.fromExpressionValue(nameSpaceValue)
 
-      let rNewStatement = Bindings.replaceSymbols(newBindings, statement)
+      let rNewStatement = BindingsReplacer.replaceSymbols(newBindings, statement)
       rNewStatement->Result.map(boundStatement =>
         ExpressionWithContext.withContext(
-          newCode(newBindings->Bindings.toExternalBindings->eRecord, boundStatement),
+          newCode(newBindings->eModule, boundStatement),
           newBindings,
         )
       )
@@ -51,7 +52,7 @@ let dispatchMacroCall = (
   let doBindStatement = (bindingExpr: expression, statement: expression, environment) => {
     let defaultStatement = ErrorValue.REAssignmentExpected->Error
     switch statement {
-    | ExpressionT.EList(list{ExpressionT.EValue(EvCall(callName)), symbolExpr, statement}) => {
+    | ExpressionT.EList(list{ExpressionT.EValue(IevCall(callName)), symbolExpr, statement}) => {
         let setBindingsFn = correspondingSetBindingsFn(callName)
         if setBindingsFn !== "" {
           useExpressionToSetBindings(bindingExpr, environment, statement, (
@@ -77,7 +78,7 @@ let dispatchMacroCall = (
       ) => boundStatement)
 
     switch statement {
-    | ExpressionT.EList(list{ExpressionT.EValue(EvCall(callName)), symbolExpr, statement}) => {
+    | ExpressionT.EList(list{ExpressionT.EValue(IevCall(callName)), symbolExpr, statement}) => {
         let setBindingsFn = correspondingSetBindingsFn(callName)
         if setBindingsFn !== "" {
           useExpressionToSetBindings(bindingExpr, environment, statement, (
@@ -123,10 +124,7 @@ let dispatchMacroCall = (
     bindings: ExpressionT.bindings,
     parameters: array<string>,
     lambdaDefinition: ExpressionT.expression,
-  ) =>
-    ExpressionWithContext.noContext(
-      eLambda(parameters, bindings->Bindings.toExternalBindings, lambdaDefinition),
-    )->Ok
+  ) => ExpressionWithContext.noContext(eLambda(parameters, bindings, lambdaDefinition))->Ok
 
   let doTernary = (
     condition: expression,
@@ -139,11 +137,11 @@ let dispatchMacroCall = (
     let rCondition = reduceExpression(blockCondition, bindings, environment)
     rCondition->Result.flatMap(conditionValue =>
       switch conditionValue {
-      | ExpressionValue.EvBool(false) => {
+      | ExpressionValue.IevBool(false) => {
           let ifFalseBlock = eBlock(list{ifFalse})
           ExpressionWithContext.withContext(ifFalseBlock, bindings)->Ok
         }
-      | ExpressionValue.EvBool(true) => {
+      | ExpressionValue.IevBool(true) => {
           let ifTrueBlock = eBlock(list{ifTrue})
           ExpressionWithContext.withContext(ifTrueBlock, bindings)->Ok
         }
@@ -158,32 +156,32 @@ let dispatchMacroCall = (
   > =>
     switch aList {
     | list{
-        ExpressionT.EValue(EvCall("$$_bindStatement_$$")),
+        ExpressionT.EValue(IevCall("$$_bindStatement_$$")),
         bindingExpr: ExpressionT.expression,
         statement,
       } =>
       doBindStatement(bindingExpr, statement, environment)
-    | list{ExpressionT.EValue(EvCall("$$_bindStatement_$$")), statement} =>
+    | list{ExpressionT.EValue(IevCall("$$_bindStatement_$$")), statement} =>
       // bindings of the context are used when there is no binding expression
-      doBindStatement(eRecord(Bindings.toExternalBindings(bindings)), statement, environment)
+      doBindStatement(eModule(bindings), statement, environment)
     | list{
-        ExpressionT.EValue(EvCall("$$_bindExpression_$$")),
+        ExpressionT.EValue(IevCall("$$_bindExpression_$$")),
         bindingExpr: ExpressionT.expression,
         expression,
       } =>
       doBindExpression(bindingExpr, expression, environment)
-    | list{ExpressionT.EValue(EvCall("$$_bindExpression_$$")), expression} =>
+    | list{ExpressionT.EValue(IevCall("$$_bindExpression_$$")), expression} =>
       // bindings of the context are used when there is no binding expression
-      doBindExpression(eRecord(Bindings.toExternalBindings(bindings)), expression, environment)
-    | list{ExpressionT.EValue(EvCall("$$_block_$$")), ...exprs} =>
+      doBindExpression(eModule(bindings), expression, environment)
+    | list{ExpressionT.EValue(IevCall("$$_block_$$")), ...exprs} =>
       doBlock(exprs, bindings, environment)
     | list{
-        ExpressionT.EValue(EvCall("$$_lambda_$$")),
-        ExpressionT.EValue(EvArrayString(parameters)),
+        ExpressionT.EValue(IevCall("$$_lambda_$$")),
+        ExpressionT.EValue(IevArrayString(parameters)),
         lambdaDefinition,
       } =>
       doLambdaDefinition(bindings, parameters, lambdaDefinition)
-    | list{ExpressionT.EValue(EvCall("$$_ternary_$$")), condition, ifTrue, ifFalse} =>
+    | list{ExpressionT.EValue(IevCall("$$_ternary_$$")), condition, ifTrue, ifFalse} =>
       doTernary(condition, ifTrue, ifFalse, bindings, environment)
     | _ => ExpressionWithContext.noContext(ExpressionT.EList(aList))->Ok
     }

@@ -1,20 +1,21 @@
-module Bindings = Reducer_Expression_Bindings
+module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module BuiltIn = Reducer_Dispatch_BuiltIn
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
-module ExpressionValue = ReducerInterface.ExpressionValue
 module Extra = Reducer_Extra
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 module Macro = Reducer_Expression_Macro
 module MathJs = Reducer_MathJs
+module Module = Reducer_Category_Module
 module Result = Belt.Result
 module T = Reducer_Expression_T
 
-type environment = ReducerInterface_ExpressionValue.environment
+type environment = InternalExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = T.expression
-type expressionValue = ReducerInterface_ExpressionValue.expressionValue
-type externalBindings = ReducerInterface_ExpressionValue.externalBindings
-type internalCode = ReducerInterface_ExpressionValue.internalCode
+type expressionValue = InternalExpressionValue.expressionValue
+type externalExpressionValue = ReducerInterface_ExpressionValue.expressionValue
+type tmpExternalBindings = InternalExpressionValue.tmpExternalBindings
 type t = expression
 
 /*
@@ -35,7 +36,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings, environment: en
   | T.EValue(value) => value->Ok
   | T.EList(list) =>
     switch list {
-    | list{EValue(EvCall(fName)), ..._args} =>
+    | list{EValue(IevCall(fName)), ..._args} =>
       switch Macro.isMacroName(fName) {
       // A macro expands then reduces itself
       | true => Macro.doMacroCall(expression, bindings, environment, reduceExpression)
@@ -74,7 +75,7 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
   'e,
 > =>
   switch valueList {
-  | list{EvCall(fName), ...args} => {
+  | list{IevCall(fName), ...args} => {
       let rCheckedArgs = switch fName {
       | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args->Ok
       | _ => args->Lambda.checkIfReduced
@@ -84,14 +85,14 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
         (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
       )
     }
-  | list{EvLambda(_)} =>
+  | list{IevLambda(_)} =>
     // TODO: remove on solving issue#558
     valueList
     ->Lambda.checkIfReduced
     ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
+      reducedValueList->Belt.List.toArray->InternalExpressionValue.IevArray->Ok
     )
-  | list{EvLambda(lamdaCall), ...args} =>
+  | list{IevLambda(lamdaCall), ...args} =>
     args
     ->Lambda.checkIfReduced
     ->Result.flatMap(checkedArgs =>
@@ -102,7 +103,7 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
     valueList
     ->Lambda.checkIfReduced
     ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
+      reducedValueList->Belt.List.toArray->InternalExpressionValue.IevArray->Ok
     )
   }
 
@@ -115,40 +116,35 @@ let evaluateUsingOptions = (
   ~environment: option<ReducerInterface_ExpressionValue.environment>,
   ~externalBindings: option<ReducerInterface_ExpressionValue.externalBindings>,
   code: string,
-): result<expressionValue, errorValue> => {
+): result<externalExpressionValue, errorValue> => {
   let anEnvironment = Belt.Option.getWithDefault(
     environment,
     ReducerInterface_ExpressionValue.defaultEnvironment,
   )
 
-  let anExternalBindings = switch externalBindings {
-  | Some(bindings) => {
-      let cloneLib = ReducerInterface_StdLib.externalStdLib->Reducer_Category_Bindings.cloneRecord
-      Js.Dict.entries(bindings)->Js.Array2.reduce((acc, (key, value)) => {
-        acc->Js.Dict.set(key, value)
-        acc
-      }, cloneLib)
-    }
-  | None => ReducerInterface_StdLib.externalStdLib
-  }
+  let mergedBindings: InternalExpressionValue.nameSpace = Module.merge(
+    ReducerInterface_StdLib.internalStdLib,
+    Belt.Option.map(externalBindings, Module.fromTypeScriptBindings)->Belt.Option.getWithDefault(
+      Module.emptyModule,
+    ),
+  )
 
-  let bindings = anExternalBindings->Bindings.fromExternalBindings
-
-  parse(code)->Result.flatMap(expr => evalUsingBindingsExpression_(expr, bindings, anEnvironment))
+  parse(code)
+  ->Result.flatMap(expr => evalUsingBindingsExpression_(expr, mergedBindings, anEnvironment))
+  ->Result.map(ReducerInterface_InternalExpressionValue.toExternal)
 }
 
 /*
-  Evaluates Squiggle code and bindings via Reducer and answers the result
+  Ievaluates Squiggle code and bindings via Reducer and answers the result
 */
-let evaluate = (code: string): result<expressionValue, errorValue> => {
+let evaluate = (code: string): result<externalExpressionValue, errorValue> => {
   evaluateUsingOptions(~environment=None, ~externalBindings=None, code)
 }
-let eval = evaluate
 let evaluatePartialUsingExternalBindings = (
   code: string,
   externalBindings: ReducerInterface_ExpressionValue.externalBindings,
   environment: ReducerInterface_ExpressionValue.environment,
-): result<externalBindings, errorValue> => {
+): result<ReducerInterface_ExpressionValue.externalBindings, errorValue> => {
   let rAnswer = evaluateUsingOptions(
     ~environment=Some(environment),
     ~externalBindings=Some(externalBindings),

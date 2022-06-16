@@ -1,26 +1,14 @@
 module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface.ExpressionValue
+module ExpressionValue = ReducerInterface_InternalExpressionValue
 module Result = Belt.Result
-module Bindings = Reducer_Category_Bindings
+module Module = Reducer_Category_Module
 
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression
 type expressionValue = ExpressionValue.expressionValue
+type tmpExternalBindings = ReducerInterface_InternalExpressionValue.tmpExternalBindings
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
-
-let emptyBindings = Reducer_Category_Bindings.emptyBindings
-
-let typeAliasesKey = Bindings.typeAliasesKey
-let typeReferencesKey = Bindings.typeReferencesKey
-
-let toExternalBindings = (bindings: ExpressionT.bindings): externalBindings =>
-  Bindings.toRecord(bindings)
-
-let fromExternalBindings = (externalBindings: externalBindings): ExpressionT.bindings =>
-  Bindings.fromRecord(externalBindings)
-
-let fromValue = (aValue: expressionValue) => Bindings.fromExpressionValue(aValue)
 
 let isMacroName = (fName: string): bool => fName->Js.String2.startsWith("$$")
 
@@ -33,7 +21,7 @@ let rec replaceSymbols = (bindings: ExpressionT.bindings, expression: expression
     replaceSymbolOnValue(bindings, value)->Result.map(evValue => evValue->ExpressionT.EValue)
   | ExpressionT.EList(list) =>
     switch list {
-    | list{EValue(EvCall(fName)), ..._args} =>
+    | list{EValue(IevCall(fName)), ..._args} =>
       switch isMacroName(fName) {
       // A macro reduces itself so we dont dive in it
       | true => expression->Ok
@@ -55,18 +43,12 @@ and replaceSymbolsOnExpressionList = (bindings, list) => {
 }
 and replaceSymbolOnValue = (bindings, evValue: expressionValue) =>
   switch evValue {
-  | EvSymbol(symbol) => Belt.Map.String.getWithDefault(bindings, symbol, evValue)->Ok
-  | EvCall(symbol) => Belt.Map.String.getWithDefault(bindings, symbol, evValue)->checkIfCallable
+  | IevSymbol(symbol) => Module.getWithDefault(bindings, symbol, evValue)->Ok
+  | IevCall(symbol) => Module.getWithDefault(bindings, symbol, evValue)->checkIfCallable
   | _ => evValue->Ok
   }
 and checkIfCallable = (evValue: expressionValue) =>
   switch evValue {
-  | EvCall(_) | EvLambda(_) => evValue->Ok
+  | IevCall(_) | IevLambda(_) => evValue->Ok
   | _ => ErrorValue.RENotAFunction(ExpressionValue.toString(evValue))->Error
   }
-
-let toString = (bindings: ExpressionT.bindings) =>
-  bindings->toExternalBindings->ExpressionValue.EvRecord->ExpressionValue.toString
-
-let externalBindingsToString = (externalBindings: externalBindings) =>
-  externalBindings->ExpressionValue.EvRecord->ExpressionValue.toString

@@ -1,13 +1,14 @@
 module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
-module ExpressionValue = ReducerInterface_ExpressionValue
+module ExternalExpressionValue = ReducerInterface_ExpressionValue
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 
-type environment = ReducerInterface_ExpressionValue.environment
+type environment = ReducerInterface_InternalExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
-type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type expressionValue = ExternalExpressionValue.expressionValue
 type externalBindings = ReducerInterface_ExpressionValue.externalBindings
-type lambdaValue = ExpressionValue.lambdaValue
+type lambdaValue = ExternalExpressionValue.lambdaValue
 
 let evaluate = Expression.evaluate
 let evaluateUsingOptions = Expression.evaluateUsingOptions
@@ -15,13 +16,20 @@ let evaluatePartialUsingExternalBindings = Expression.evaluatePartialUsingExtern
 let parse = Expression.parse
 
 let foreignFunctionInterface = (
-  lambdaValue: lambdaValue,
+  lambdaValue: ExternalExpressionValue.lambdaValue,
   argArray: array<expressionValue>,
-  environment: ExpressionValue.environment,
+  environment: ExternalExpressionValue.environment,
 ) => {
-  Lambda.foreignFunctionInterface(lambdaValue, argArray, environment, Expression.reduceExpression)
+  let internallambdaValue = InternalExpressionValue.lambdaValueToInternal(lambdaValue)
+  let internalArgArray = argArray->Js.Array2.map(InternalExpressionValue.toInternal)
+  Lambda.foreignFunctionInterface(
+    internallambdaValue,
+    internalArgArray,
+    environment,
+    Expression.reduceExpression,
+  )->Belt.Result.map(InternalExpressionValue.toExternal)
 }
 
-let defaultEnvironment = ExpressionValue.defaultEnvironment
+let defaultEnvironment = ExternalExpressionValue.defaultEnvironment
 
 let defaultExternalBindings = ReducerInterface_StdLib.externalStdLib

@@ -1,4 +1,6 @@
 let dispatch: (
-  ReducerInterface_ExpressionValue.functionCall,
+  ReducerInterface_InternalExpressionValue.functionCall,
   ReducerInterface_ExpressionValue.environment,
-) => option<result<ReducerInterface_ExpressionValue.expressionValue, Reducer_ErrorValue.errorValue>>
+) => option<
+  result<ReducerInterface_InternalExpressionValue.expressionValue, Reducer_ErrorValue.errorValue>,
+>
