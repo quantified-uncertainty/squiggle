@@ -31,6 +31,9 @@ interface PlaygroundProps {
   showControls?: boolean;
   /** Whether to show the summary table in the playground */
   showSummary?: boolean;
+  /** If code is set, component becomes controlled */
+  code?: string;
+  onCodeChange?(expr: string): void;
 }
 
 const schema = yup
@@ -196,8 +199,12 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
   showTypes = false,
   showControls = false,
   showSummary = false,
+  code: controlledCode,
+  onCodeChange,
 }) => {
-  const [squiggleString, setSquiggleString] = useState(initialSquiggleString);
+  const [uncontrolledCode, setUncontrolledCode] = useState(
+    initialSquiggleString
+  );
   const [importString, setImportString] = useState("{}");
   const [imports, setImports] = useState({});
   const [importsAreValid, setImportsAreValid] = useState(true);
@@ -238,6 +245,8 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
       setImportsAreValid(false);
     }
   };
+
+  const code = controlledCode ?? uncontrolledCode;
 
   const samplingSettings = (
     <div className="space-y-6 p-3 max-w-xl">
@@ -391,8 +400,14 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
               <Tab.Panel>
                 <div className="border border-slate-200">
                   <CodeEditor
-                    value={squiggleString}
-                    onChange={setSquiggleString}
+                    value={code}
+                    onChange={(newCode) => {
+                      if (controlledCode === undefined) {
+                        // uncontrolled mode
+                        setUncontrolledCode(newCode);
+                      }
+                      onCodeChange?.(newCode);
+                    }}
                     oneLine={false}
                     showGutter={true}
                     height={height - 1}
@@ -408,7 +423,7 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
           <div className="w-1/2 p-2 pl-4">
             <div style={{ maxHeight: height }}>
               <SquiggleChart
-                squiggleString={squiggleString}
+                squiggleString={code}
                 environment={env}
                 chartSettings={chartSettings}
                 height={vars.chartHeight}
