@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.2.20",
+  "version": "0.2.22",
   "license": "MIT",
   "dependencies": {
     "@headlessui/react": "^1.6.4",

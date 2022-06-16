@@ -4,8 +4,10 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
   mode: "production",
   devtool: "source-map",
-  profile: true,
-  entry: ["./src/index.ts", "./src/styles/main.css"],
+  entry: {
+    main: ["./src/index.ts"],
+    style: ["./src/styles/main.css"],
+  },
   module: {
     rules: [
       {
@@ -20,7 +22,11 @@ module.exports = {
       },
     ],
   },
-  plugins: [new MiniCssExtractPlugin()],
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+    }),
+  ],
   resolve: {
     extensions: [".js", ".tsx", ".ts"],
     alias: {
@@ -28,7 +34,7 @@ module.exports = {
     },
   },
   output: {
-    filename: "bundle.js",
+    filename: "[name].js",
     path: path.resolve(__dirname, "dist"),
     library: {
       name: "squiggle_components",
