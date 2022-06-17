@@ -252,10 +252,10 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     default: {
       return (
-        <>
+        <div>
           <span>No display for type: </span>{" "}
           <span className="font-semibold text-slate-600">{expression.tag}</span>
-        </>
+        </div>
       );
     }
   }

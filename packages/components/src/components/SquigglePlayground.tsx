@@ -384,25 +384,31 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     </div>
   );
 
+  const InFirstTab: React.FC<{ children: React.ReactNode }> = ({
+    children,
+  }) => (
+    <Tab.Panels>
+      <Tab.Panel>{children}</Tab.Panel>
+      <Tab.Panel>{samplingSettings}</Tab.Panel>
+      <Tab.Panel>{viewSettings}</Tab.Panel>
+      <Tab.Panel>{inputVariableSettings}</Tab.Panel>
+    </Tab.Panels>
+  );
+
   let withEditor = (
     <div className="flex mt-1" style={{ height }}>
       <div className="w-1/2">
-        <Tab.Panels>
-          <Tab.Panel>
-            <div className="border border-slate-200">
-              <CodeEditor
-                value={squiggleString}
-                onChange={setSquiggleString}
-                oneLine={false}
-                showGutter={true}
-                height={height - 1}
-              />
-            </div>
-          </Tab.Panel>
-          <Tab.Panel>{samplingSettings}</Tab.Panel>
-          <Tab.Panel>{viewSettings}</Tab.Panel>
-          <Tab.Panel>{inputVariableSettings}</Tab.Panel>
-        </Tab.Panels>
+        <InFirstTab>
+          <div className="border border-slate-200">
+            <CodeEditor
+              value={squiggleString}
+              onChange={setSquiggleString}
+              oneLine={false}
+              showGutter={true}
+              height={height - 1}
+            />
+          </div>
+        </InFirstTab>
       </div>
 
       <div className="w-1/2 p-2 pl-4">
@@ -423,24 +429,19 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   let withoutEditor = (
     <div className="mt-3">
-      <Tab.Panels>
-        <Tab.Panel>
-          <SquiggleChart
-            squiggleString={squiggleString}
-            environment={env}
-            chartSettings={chartSettings}
-            height={vars.chartHeight}
-            showTypes={vars.showTypes}
-            showControls={vars.showControls}
-            bindings={defaultBindings}
-            jsImports={imports}
-            showSummary={vars.showSummary}
-          />
-        </Tab.Panel>
-        <Tab.Panel>{samplingSettings}</Tab.Panel>
-        <Tab.Panel>{viewSettings}</Tab.Panel>
-        <Tab.Panel>{inputVariableSettings}</Tab.Panel>
-      </Tab.Panels>
+      <InFirstTab>
+        <SquiggleChart
+          squiggleString={squiggleString}
+          environment={env}
+          chartSettings={chartSettings}
+          height={vars.chartHeight}
+          showTypes={vars.showTypes}
+          showControls={vars.showControls}
+          bindings={defaultBindings}
+          jsImports={imports}
+          showSummary={vars.showSummary}
+        />
+      </InFirstTab>
     </div>
   );
 
