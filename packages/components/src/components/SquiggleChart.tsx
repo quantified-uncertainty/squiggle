@@ -251,8 +251,20 @@ const SquiggleItem: React.FC<SquiggleItemProps> = ({
         </VariableBox>
       );
     }
+    case "module": {
+      return (
+        <VariableBox heading="Module" showTypes={showTypes}>
+          <span className="text-slate-600 font-semibold">Internal Module</span>
+        </VariableBox>
+      );
+    }
     default: {
-      return <>Should be unreachable</>;
+      return (
+        <>
+          <span>No display for type: </span>{" "}
+          <span className="font-semibold text-slate-600">{expression.tag}</span>
+        </>
+      );
     }
   }
 };
