@@ -32,6 +32,10 @@ interface PlaygroundProps {
   showControls?: boolean;
   /** Whether to show the summary table in the playground */
   showSummary?: boolean;
+  /** If code is set, component becomes controlled */
+  code?: string;
+  onCodeChange?(expr: string): void;
+  /** Should we show the editor? */
   showEditor?: boolean;
 }
 
@@ -199,9 +203,13 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   showTypes = false,
   showControls = false,
   showSummary = false,
+  code: controlledCode,
+  onCodeChange,
   showEditor = true,
 }) => {
-  const [squiggleString, setSquiggleString] = useState(initialSquiggleString);
+  const [uncontrolledCode, setUncontrolledCode] = useState(
+    initialSquiggleString
+  );
   const [importString, setImportString] = useState("{}");
   const [imports, setImports] = useState({});
   const [importsAreValid, setImportsAreValid] = useState(true);
@@ -243,6 +251,8 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       setImportsAreValid(false);
     }
   };
+
+  const code = controlledCode ?? uncontrolledCode;
 
   const samplingSettings = (
     <div className="space-y-6 p-3 max-w-xl">
@@ -395,14 +405,34 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     </Tab.Panels>
   );
 
+  let squiggleChart = (
+    <SquiggleChart
+      squiggleString={code}
+      environment={env}
+      chartSettings={chartSettings}
+      height={vars.chartHeight}
+      showTypes={vars.showTypes}
+      showControls={vars.showControls}
+      showSummary={vars.showSummary}
+      bindings={defaultBindings}
+      jsImports={imports}
+    />
+  );
+
   let withEditor = (
     <div className="flex mt-1" style={{ height }}>
       <div className="w-1/2">
         <InFirstTab>
           <div className="border border-slate-200">
             <CodeEditor
-              value={squiggleString}
-              onChange={setSquiggleString}
+              value={code}
+              onChange={(newCode) => {
+                if (controlledCode === undefined) {
+                  // uncontrolled mode
+                  setUncontrolledCode(newCode);
+                }
+                onCodeChange?.(newCode);
+              }}
               oneLine={false}
               showGutter={true}
               height={height - 1}
@@ -411,37 +441,13 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
         </InFirstTab>
       </div>
 
-      <div className="w-1/2 p-2 pl-4">
-        <SquiggleChart
-          squiggleString={squiggleString}
-          environment={env}
-          chartSettings={chartSettings}
-          height={vars.chartHeight}
-          showTypes={vars.showTypes}
-          showControls={vars.showControls}
-          showSummary={vars.showSummary}
-          bindings={defaultBindings}
-          jsImports={imports}
-        />
-      </div>
+      <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
     </div>
   );
 
   let withoutEditor = (
     <div className="mt-3">
-      <InFirstTab>
-        <SquiggleChart
-          squiggleString={squiggleString}
-          environment={env}
-          chartSettings={chartSettings}
-          height={vars.chartHeight}
-          showTypes={vars.showTypes}
-          showControls={vars.showControls}
-          bindings={defaultBindings}
-          jsImports={imports}
-          showSummary={vars.showSummary}
-        />
-      </InFirstTab>
+      <InFirstTab>{squiggleChart}</InFirstTab>
     </div>
   );
 
