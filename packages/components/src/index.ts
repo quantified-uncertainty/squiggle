@@ -6,7 +6,7 @@ export {
   renderSquigglePartialToDom,
 } from "./components/SquiggleEditor";
 export {
-  default as SquigglePlayground,
+  SquigglePlayground,
   renderSquigglePlaygroundToDom,
 } from "./components/SquigglePlayground";
 export { SquiggleContainer } from "./components/SquiggleContainer";
