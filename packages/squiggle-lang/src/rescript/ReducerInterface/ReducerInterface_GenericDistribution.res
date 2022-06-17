@@ -266,6 +266,8 @@ let dispatchToGenericOutput = (
     Helpers.toDistFn(Scale(#Logarithm, float), dist, ~env)
   | ("scaleLogWithThreshold", [EvDistribution(dist), EvNumber(base), EvNumber(eps)]) =>
     Helpers.toDistFn(Scale(#LogarithmWithThreshold(eps), base), dist, ~env)
+  | ("scaleMultiply", [EvDistribution(dist), EvNumber(float)]) =>
+    Helpers.toDistFn(Scale(#Multiply, float), dist, ~env)
   | ("scalePow", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Scale(#Power, float), dist, ~env)
   | ("scaleExp", [EvDistribution(dist)]) =>
