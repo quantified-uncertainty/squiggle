@@ -9,6 +9,7 @@ import {
   CodeIcon,
   CogIcon,
   CurrencyDollarIcon,
+  EyeIcon,
 } from "@heroicons/react/solid";
 import clsx from "clsx";
 
@@ -31,6 +32,7 @@ interface PlaygroundProps {
   showControls?: boolean;
   /** Whether to show the summary table in the playground */
   showSummary?: boolean;
+  showEditor?: boolean;
 }
 
 const schema = yup
@@ -64,6 +66,7 @@ const schema = yup
     showTypes: yup.boolean(),
     showControls: yup.boolean(),
     showSummary: yup.boolean(),
+    showEditor: yup.boolean(),
     showSettingsPage: yup.boolean().default(false),
     diagramStart: yup
       .number()
@@ -196,6 +199,7 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
   showTypes = false,
   showControls = false,
   showSummary = false,
+  showEditor = true,
 }) => {
   const [squiggleString, setSquiggleString] = useState(initialSquiggleString);
   const [importString, setImportString] = useState("{}");
@@ -210,6 +214,7 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
       showTypes: showTypes,
       showControls: showControls,
       showSummary: showSummary,
+      showEditor: showEditor,
       leftSizePercent: 50,
       showSettingsPage: false,
       diagramStart: 0,
@@ -276,6 +281,11 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
     <div className="space-y-6 p-3 divide-y divide-gray-200 max-w-xl">
       <HeadedSection title="General Display Settings">
         <div className="space-y-4">
+          <Checkbox
+            name="showEditor"
+            register={register}
+            label="Show code editor on left"
+          />
           <InputItem
             name="chartHeight"
             type="number"
@@ -374,52 +384,78 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
     </div>
   );
 
+  let withEditor = (
+    <div className="flex" style={{ height }}>
+      <div className="w-1/2">
+        <Tab.Panels>
+          <Tab.Panel>
+            <div className="border border-slate-200">
+              <CodeEditor
+                value={squiggleString}
+                onChange={setSquiggleString}
+                oneLine={false}
+                showGutter={true}
+                height={height - 1}
+              />
+            </div>
+          </Tab.Panel>
+          <Tab.Panel>{samplingSettings}</Tab.Panel>
+          <Tab.Panel>{viewSettings}</Tab.Panel>
+          <Tab.Panel>{inputVariableSettings}</Tab.Panel>
+        </Tab.Panels>
+      </div>
+
+      <div className="w-1/2 p-2 pl-4">
+        <SquiggleChart
+          squiggleString={squiggleString}
+          environment={env}
+          chartSettings={chartSettings}
+          height={vars.chartHeight}
+          showTypes={vars.showTypes}
+          showControls={vars.showControls}
+          bindings={defaultBindings}
+          jsImports={imports}
+          showSummary={vars.showSummary}
+        />
+      </div>
+    </div>
+  );
+
+  let withoutEditor = (
+    <Tab.Panels>
+      <Tab.Panel>
+        <SquiggleChart
+          squiggleString={squiggleString}
+          environment={env}
+          chartSettings={chartSettings}
+          height={vars.chartHeight}
+          showTypes={vars.showTypes}
+          showControls={vars.showControls}
+          bindings={defaultBindings}
+          jsImports={imports}
+          showSummary={vars.showSummary}
+        />
+      </Tab.Panel>
+      <Tab.Panel>{samplingSettings}</Tab.Panel>
+      <Tab.Panel>{viewSettings}</Tab.Panel>
+      <Tab.Panel>{inputVariableSettings}</Tab.Panel>
+    </Tab.Panels>
+  );
+
   return (
     <SquiggleContainer>
       <Tab.Group>
         <div className="pb-4">
-          <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
-            <StyledTab name="Code" icon={CodeIcon} />
+          <Tab.List className="flex w-fit p-0.5 mt-2 mb-1 rounded-md bg-slate-100 hover:bg-slate-200">
+            <StyledTab
+              name={vars.showEditor ? "Code" : "Display"}
+              icon={vars.showEditor ? CodeIcon : EyeIcon}
+            />
             <StyledTab name="Sampling Settings" icon={CogIcon} />
             <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
             <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
           </Tab.List>
-        </div>
-        <div className="flex" style={{ height }}>
-          <div className="w-1/2">
-            <Tab.Panels>
-              <Tab.Panel>
-                <div className="border border-slate-200">
-                  <CodeEditor
-                    value={squiggleString}
-                    onChange={setSquiggleString}
-                    oneLine={false}
-                    showGutter={true}
-                    height={height - 1}
-                  />
-                </div>
-              </Tab.Panel>
-              <Tab.Panel>{samplingSettings}</Tab.Panel>
-              <Tab.Panel>{viewSettings}</Tab.Panel>
-              <Tab.Panel>{inputVariableSettings}</Tab.Panel>
-            </Tab.Panels>
-          </div>
-
-          <div className="w-1/2 p-2 pl-4">
-            <div style={{ maxHeight: height }}>
-              <SquiggleChart
-                squiggleString={squiggleString}
-                environment={env}
-                chartSettings={chartSettings}
-                height={vars.chartHeight}
-                showTypes={vars.showTypes}
-                showControls={vars.showControls}
-                bindings={defaultBindings}
-                jsImports={imports}
-                showSummary={vars.showSummary}
-              />
-            </div>
-          </div>
+          {vars.showEditor ? withEditor : withoutEditor}
         </div>
       </Tab.Group>
     </SquiggleContainer>
