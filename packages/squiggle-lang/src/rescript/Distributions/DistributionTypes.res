@@ -76,6 +76,7 @@ module DistributionOperation = {
   ]
 
   type toScaleFn = [
+    | #Multiply
     | #Power
     | #Logarithm
     | #LogarithmWithThreshold(float)
@@ -138,11 +139,12 @@ module DistributionOperation = {
     | ToDist(Truncate(_, _)) => `truncate`
     | ToDist(Inspect) => `inspect`
     | ToDist(Scale(#Power, r)) => `scalePower(${E.Float.toFixed(r)})`
+    | ToDist(Scale(#Multiply, r)) => `scaleMultiply(${E.Float.toFixed(r)})`
     | ToDist(Scale(#Logarithm, r)) => `scaleLog(${E.Float.toFixed(r)})`
     | ToDist(Scale(#LogarithmWithThreshold(eps), r)) =>
       `scaleLogWithThreshold(${E.Float.toFixed(r)}, epsilon=${E.Float.toFixed(eps)})`
     | ToString(ToString) => `toString`
-    | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
+    | ToString(ToSparkline(n)) => `sparkline(${E.I.toString(n)})`
     | ToBool(IsNormalized) => `isNormalized`
     | ToDistCombination(Algebraic(_), _, _) => `algebraic`
     | ToDistCombination(Pointwise, _, _) => `pointwise`
@@ -179,6 +181,7 @@ module Constructors = {
       ToScore(LogScore(answer, prior)),
       prediction,
     )
+    let scaleMultiply = (dist, n): t => FromDist(ToDist(Scale(#Multiply, n)), dist)
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
     let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)
     let scaleLogarithmWithThreshold = (dist, n, eps): t => FromDist(

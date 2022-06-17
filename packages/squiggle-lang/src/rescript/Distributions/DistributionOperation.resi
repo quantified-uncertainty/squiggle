@@ -102,6 +102,8 @@ module Constructors: {
   @genType
   let scaleLogarithm: (~env: env, genericDist, float) => result<genericDist, error>
   @genType
+  let scaleMultiply: (~env: env, genericDist, float) => result<genericDist, error>
+  @genType
   let scalePower: (~env: env, genericDist, float) => result<genericDist, error>
   @genType
   let pointwiseAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>

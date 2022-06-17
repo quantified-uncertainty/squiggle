@@ -27,6 +27,11 @@ const sidebars = {
       label: "Introduction",
     },
     {
+      type: "doc",
+      id: "Node-Packages",
+      label: "Node Packages",
+    },
+    {
       type: "category",
       label: "Guides",
       items: [
