@@ -1,5 +1,5 @@
 import _ from "lodash";
-import React, { FC, useMemo } from "react";
+import React, { FC } from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-golang";
@@ -21,15 +21,14 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   showGutter = false,
   height,
 }) => {
-  const lineCount = value.split("\n").length;
-  const id = useMemo(() => _.uniqueId(), []);
-
+  let lineCount = value.split("\n").length;
+  let id = _.uniqueId();
   return (
     <AceEditor
       value={value}
       mode="golang"
       theme="github"
-      width="100%"
+      width={"100%"}
       fontSize={14}
       height={String(height) + "px"}
       minLines={oneLine ? lineCount : undefined}

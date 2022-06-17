@@ -190,7 +190,7 @@ function Checkbox<T>({
   );
 }
 
-export const SquigglePlayground: FC<PlaygroundProps> = ({
+const SquigglePlayground: FC<PlaygroundProps> = ({
   initialSquiggleString = "",
   height = 500,
   showTypes = false,
@@ -207,9 +207,9 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       sampleCount: 1000,
       xyPointLength: 1000,
       chartHeight: 150,
-      showTypes,
-      showControls,
-      showSummary,
+      showTypes: showTypes,
+      showControls: showControls,
+      showSummary: showSummary,
       leftSizePercent: 50,
       showSettingsPage: false,
       diagramStart: 0,
@@ -414,9 +414,9 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
                 height={vars.chartHeight}
                 showTypes={vars.showTypes}
                 showControls={vars.showControls}
-                showSummary={vars.showSummary}
                 bindings={defaultBindings}
                 jsImports={imports}
+                showSummary={vars.showSummary}
               />
             </div>
           </div>
@@ -426,6 +426,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   );
 };
 
+export default SquigglePlayground;
 export function renderSquigglePlaygroundToDom(props: PlaygroundProps) {
   const parent = document.createElement("div");
   ReactDOM.render(<SquigglePlayground {...props} />, parent);
