@@ -385,7 +385,7 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
   );
 
   let withEditor = (
-    <div className="flex" style={{ height }}>
+    <div className="flex mt-1" style={{ height }}>
       <div className="w-1/2">
         <Tab.Panels>
           <Tab.Panel>
@@ -422,31 +422,33 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
   );
 
   let withoutEditor = (
-    <Tab.Panels>
-      <Tab.Panel>
-        <SquiggleChart
-          squiggleString={squiggleString}
-          environment={env}
-          chartSettings={chartSettings}
-          height={vars.chartHeight}
-          showTypes={vars.showTypes}
-          showControls={vars.showControls}
-          bindings={defaultBindings}
-          jsImports={imports}
-          showSummary={vars.showSummary}
-        />
-      </Tab.Panel>
-      <Tab.Panel>{samplingSettings}</Tab.Panel>
-      <Tab.Panel>{viewSettings}</Tab.Panel>
-      <Tab.Panel>{inputVariableSettings}</Tab.Panel>
-    </Tab.Panels>
+    <div className="mt-3">
+      <Tab.Panels>
+        <Tab.Panel>
+          <SquiggleChart
+            squiggleString={squiggleString}
+            environment={env}
+            chartSettings={chartSettings}
+            height={vars.chartHeight}
+            showTypes={vars.showTypes}
+            showControls={vars.showControls}
+            bindings={defaultBindings}
+            jsImports={imports}
+            showSummary={vars.showSummary}
+          />
+        </Tab.Panel>
+        <Tab.Panel>{samplingSettings}</Tab.Panel>
+        <Tab.Panel>{viewSettings}</Tab.Panel>
+        <Tab.Panel>{inputVariableSettings}</Tab.Panel>
+      </Tab.Panels>
+    </div>
   );
 
   return (
     <SquiggleContainer>
       <Tab.Group>
         <div className="pb-4">
-          <Tab.List className="flex w-fit p-0.5 mt-2 mb-1 rounded-md bg-slate-100 hover:bg-slate-200">
+          <Tab.List className="flex w-fit p-0.5 mt-2 rounded-md bg-slate-100 hover:bg-slate-200">
             <StyledTab
               name={vars.showEditor ? "Code" : "Display"}
               icon={vars.showEditor ? CodeIcon : EyeIcon}
