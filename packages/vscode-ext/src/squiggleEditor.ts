@@ -119,8 +119,8 @@ export class SquiggleEditorProvider implements vscode.CustomTextEditorProvider {
 				<link href="${styleUri}" rel="stylesheet" />
 				<title>Squiggle Editor</title>
 			</head>
-			<body>
-				<div id="root" style="background-color: white;"></div>
+			<body style="background-color: white;">
+				<div id="root"></div>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;
