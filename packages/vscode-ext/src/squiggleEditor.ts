@@ -85,18 +85,23 @@ export class SquiggleEditorProvider implements vscode.CustomTextEditorProvider {
   private getHtmlForWebview(webview: vscode.Webview): string {
     // Local path to main script run in the webview
 
-    const bundleUri = webview.asWebviewUri(
+    const styleUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this.context.extensionUri,
-        "media",
-        "components-bundle.js"
+        "media/vendor/components.css"
       )
     );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "components.css")
-    );
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "wysiwyg.js")
+
+    const scriptUris = [
+      // vendor files are copied over by `yarn run compile`
+      "media/vendor/react.js",
+      "media/vendor/react-dom.js",
+      "media/vendor/components.js",
+      "media/wysiwyg.js",
+    ].map((script) =>
+      webview.asWebviewUri(
+        vscode.Uri.joinPath(this.context.extensionUri, script)
+      )
     );
 
     // Use a nonce to whitelist which scripts can be run
@@ -113,15 +118,14 @@ export class SquiggleEditorProvider implements vscode.CustomTextEditorProvider {
 				-->
 				<meta http-equiv="Content-Security-Policy" content="script-src 'nonce-${nonce}' 'unsafe-eval';">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script nonce="${nonce}" src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
-        <script nonce="${nonce}" src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-        <script nonce="${nonce}" src="${bundleUri}"></script>
 				<link href="${styleUri}" rel="stylesheet" />
 				<title>Squiggle Editor</title>
 			</head>
-			<body style="background-color: white;">
+			<body style="background-color: white; color: black; padding: 12px">
 				<div id="root"></div>
-				<script nonce="${nonce}" src="${scriptUri}"></script>
+        ${scriptUris.map(
+          (uri) => `<script nonce="${nonce}" src="${uri}"></script>`
+        )}
 			</body>
 			</html>`;
   }

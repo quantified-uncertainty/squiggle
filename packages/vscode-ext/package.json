@@ -30,11 +30,12 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./ && (cd ../components && yarn all) && cp ../components/dist/bundle.js media/components-bundle.js && cp ../components/dist/main.css media/components.css",
+    "compile:tsc": "tsc -p ./",
+    "compile:vendor": "(cd ../components && yarn run build) && mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js",
+    "compile": "yarn run compile:tsc && yarn run compile:vendor",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "lint": "eslint src --ext ts"
   },
   "devDependencies": {
     "@types/vscode": "^1.68.0",
