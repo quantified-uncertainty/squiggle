@@ -2,7 +2,13 @@
   "name": "vscode-squiggle",
   "displayName": "Squiggle",
   "description": "Squiggle language support",
-  "version": "0.0.1",
+  "license": "MIT",
+  "version": "0.0.2",
+  "publisher": "berekuk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quantified-uncertainty/squiggle.git"
+  },
   "engines": {
     "vscode": "^1.68.0"
   },

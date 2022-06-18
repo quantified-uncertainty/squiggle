@@ -123,9 +123,9 @@ export class SquiggleEditorProvider implements vscode.CustomTextEditorProvider {
 			</head>
 			<body style="background-color: white; color: black; padding: 12px">
 				<div id="root"></div>
-        ${scriptUris.map(
-          (uri) => `<script nonce="${nonce}" src="${uri}"></script>`
-        )}
+        ${scriptUris
+          .map((uri) => `<script nonce="${nonce}" src="${uri}"></script>`)
+          .join("")}
 			</body>
 			</html>`;
   }
