@@ -3,17 +3,19 @@
   "displayName": "Squiggle",
   "description": "Squiggle language support",
   "license": "MIT",
-  "version": "0.0.2",
-  "publisher": "berekuk",
+  "version": "0.0.3",
+  "publisher": "QURI",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/quantified-uncertainty/squiggle.git"
   },
+  "icon": "media/vendor/icon.png",
   "engines": {
     "vscode": "^1.68.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Visualization"
   ],
   "activationEvents": [
     "onCustomEditor:squiggle.wysiwyg"
@@ -37,7 +39,7 @@
   "scripts": {
     "vscode:prepublish": "yarn run compile",
     "compile:tsc": "tsc -p ./",
-    "compile:vendor": "(cd ../components && yarn run build) && mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js",
+    "compile:vendor": "(cd ../components && yarn run build) && mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/quri-logo.png media/vendor/icon.png",
     "compile": "yarn run compile:tsc && yarn run compile:vendor",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
