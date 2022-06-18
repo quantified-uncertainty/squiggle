@@ -394,18 +394,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     </div>
   );
 
-  const InFirstTab: React.FC<{ children: React.ReactNode }> = ({
-    children,
-  }) => (
-    <Tab.Panels>
-      <Tab.Panel>{children}</Tab.Panel>
-      <Tab.Panel>{samplingSettings}</Tab.Panel>
-      <Tab.Panel>{viewSettings}</Tab.Panel>
-      <Tab.Panel>{inputVariableSettings}</Tab.Panel>
-    </Tab.Panels>
-  );
-
-  let squiggleChart = (
+  const squiggleChart = (
     <SquiggleChart
       squiggleString={code}
       environment={env}
@@ -419,37 +408,43 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     />
   );
 
-  let withEditor = (
-    <div className="flex mt-1" style={{ height }}>
-      <div className="w-1/2">
-        <InFirstTab>
-          <div className="border border-slate-200">
-            <CodeEditor
-              value={code}
-              onChange={(newCode) => {
-                if (controlledCode === undefined) {
-                  // uncontrolled mode
-                  setUncontrolledCode(newCode);
-                }
-                onCodeChange?.(newCode);
-              }}
-              oneLine={false}
-              showGutter={true}
-              height={height - 1}
-            />
-          </div>
-        </InFirstTab>
-      </div>
+  const firstTab = vars.showEditor ? (
+    <div className="border border-slate-200">
+      <CodeEditor
+        value={code}
+        onChange={(newCode) => {
+          if (controlledCode === undefined) {
+            // uncontrolled mode
+            setUncontrolledCode(newCode);
+          }
+          onCodeChange?.(newCode);
+        }}
+        oneLine={false}
+        showGutter={true}
+        height={height - 1}
+      />
+    </div>
+  ) : (
+    squiggleChart
+  );
 
+  const tabs = (
+    <Tab.Panels>
+      <Tab.Panel>{firstTab}</Tab.Panel>
+      <Tab.Panel>{samplingSettings}</Tab.Panel>
+      <Tab.Panel>{viewSettings}</Tab.Panel>
+      <Tab.Panel>{inputVariableSettings}</Tab.Panel>
+    </Tab.Panels>
+  );
+
+  const withEditor = (
+    <div className="flex mt-1" style={{ height }}>
+      <div className="w-1/2">{tabs}</div>
       <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
     </div>
   );
 
-  let withoutEditor = (
-    <div className="mt-3">
-      <InFirstTab>{squiggleChart}</InFirstTab>
-    </div>
-  );
+  const withoutEditor = <div className="mt-3">{tabs}</div>;
 
   return (
     <SquiggleContainer>
