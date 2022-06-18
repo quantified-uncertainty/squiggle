@@ -438,7 +438,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   );
 
   const withEditor = (
-    <div className="flex mt-1" style={{ height }}>
+    <div className="flex mt-1">
       <div className="w-1/2">{tabs}</div>
       <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
     </div>
