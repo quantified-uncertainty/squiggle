@@ -12,7 +12,6 @@
     "lodash": "^4.17.21",
     "react": "^18.1.0",
     "react-ace": "^10.1.0",
-    "react-dom": "^18.1.0",
     "react-hook-form": "^7.32.0",
     "react-use": "^17.4.0",
     "react-vega": "^7.5.1",
@@ -46,6 +45,8 @@
     "postcss-cli": "^9.1.0",
     "postcss-import": "^14.1.0",
     "postcss-loader": "^7.0.0",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
     "react-scripts": "^5.0.1",
     "style-loader": "^3.3.1",
     "tailwindcss": "^3.1.2",
@@ -56,6 +57,10 @@
     "webpack": "^5.73.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.2"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17 || ^18",
+    "react-dom": "^16.8.0 || ^17 || ^18"
   },
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
