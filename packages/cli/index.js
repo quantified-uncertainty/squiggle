@@ -8,8 +8,16 @@ import chalk from "chalk";
 import { Command } from "commander";
 import glob from "glob";
 
-function run(fileName) {
+const processFile = (fileName, seen = []) => {
+  const normalizedFileName = path.resolve(fileName);
+  if (seen.includes(normalizedFileName)) {
+    throw new Error(`Recursive dependency for file ${fileName}`);
+  }
+
   const fileContents = fs.readFileSync(fileName, "utf-8");
+  if (!fileName.endsWith(".squiggleU")) {
+    return fileContents;
+  }
 
   const regex = /\@import\(\s*([^)]+?)\s*\)/g;
   const matches = Array.from(fileContents.matchAll(regex)).map((r) =>
@@ -23,19 +31,9 @@ function run(fileName) {
     const rename = r[1];
     const item = fs.statSync(importFileName);
     if (item.isFile()) {
-      const data = fs.readFileSync(
-        importFileName,
-        { encoding: "utf8" },
-        function (err, _data) {
-          if (err) {
-            console.log(`Error importing ${importFileName}: `, err);
-            return false;
-          }
-          return _data;
-        }
-      );
+      const data = processFile(importFileName, [...seen, normalizedFileName]);
       if (data) {
-        let importString = `${rename} = {\n${indentString(data, 2)}\n}`;
+        const importString = `${rename} = {\n${indentString(data, 2)}\n}\n`;
         appendings.push(importString);
       }
     } else {
@@ -52,26 +50,31 @@ function run(fileName) {
   const imports = appendings.join("\n");
 
   const newerContent = imports.concat(newContent);
-  const parsedPath = path.parse(fileName)
-  const newFilename = parsedPath.dir + "/" + parsedPath.name + ".squiggle";
-  fs.writeFileSync(newFilename, newerContent);
-  console.log(chalk.cyan(`Updated ${fileName} -> ${newFilename}`));
-}
+  return newerContent;
+};
 
-function compile() {
+const run = (fileName) => {
+  const content = processFile(fileName);
+  const parsedPath = path.parse(path.resolve(fileName));
+  const newFilename = `${parsedPath.dir}/${parsedPath.name}.squiggle`;
+  fs.writeFileSync(newFilename, content);
+  console.log(chalk.cyan(`Updated ${fileName} -> ${newFilename}`));
+};
+
+const compile = () => {
   glob("**/*.squiggleU", (_err, files) => {
     files.forEach(run);
   });
-}
+};
 
-function watch() {
+const watch = () => {
   chokidar
     .watch("**.squiggleU")
     .on("ready", () => console.log(chalk.green("Ready!")))
     .on("change", (event, _) => {
-        run(event);
+      run(event);
     });
-}
+};
 
 const program = new Command();
 
@@ -83,15 +86,11 @@ program
 program
   .command("watch")
   .description("watch files and compile on the fly")
-  .action(() => {
-    watch();
-  });
+  .action(watch);
 
 program
   .command("compile")
   .description("compile all .squiggleU files into .squiggle files")
-  .action(() => {
-    compile();
-  });
+  .action(compile);
 
 program.parse();
