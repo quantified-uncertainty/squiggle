@@ -64,7 +64,10 @@
   },
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
-    "build": "tsc -b && postcss ./src/styles/main.css -o ./dist/main.css && build-storybook -s public",
+    "build:cjs": "tsc -b",
+    "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
+    "build:storybook": "build-storybook -s public",
+    "build": "yarn run build:cjs && yarn run build:css && yarn run build:storybook",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
     "lint": "prettier --check .",
