@@ -1,22 +1,21 @@
 {
-    "name": "squiggle-cli-experimental",
-    "version": "0.0.3",
-    "main": "index.js",
-    "homepage": "https://squiggle-language.com",
-    "author": "Quantified Uncertainty Research Institute",
-    "bin": "index.js",
-    "type": "module",
-    "scripts": {
-      "start": "node ."
-    },
-    "license": "MIT",
-    "dependencies": {
-      "chalk": "^5.0.1",
-      "chokidar": "^3.5.3",
-      "commander": "^9.3.0",
-      "fs": "^0.0.1-security",
-      "glob": "^8.0.3",
-      "indent-string": "^5.0.0"
-    }
+  "name": "squiggle-cli-experimental",
+  "version": "0.0.3",
+  "main": "index.js",
+  "homepage": "https://squiggle-language.com",
+  "author": "Quantified Uncertainty Research Institute",
+  "bin": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ."
+  },
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.0.1",
+    "chokidar": "^3.5.3",
+    "commander": "^9.3.0",
+    "fs": "^0.0.1-security",
+    "glob": "^8.0.3",
+    "indent-string": "^5.0.0"
   }
-  
+}
