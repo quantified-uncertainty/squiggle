@@ -7,7 +7,7 @@
     "lint:all": "prettier --check . && cd packages/squiggle-lang && yarn lint:rescript"
   },
   "devDependencies": {
-    "prettier": "^2.6.2"
+    "prettier": "^2.7.1"
   },
   "workspaces": [
     "packages/*"
