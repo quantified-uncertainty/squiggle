@@ -20,6 +20,14 @@ module Error = {
     }
 
   let fromOperationError = e => OperationError(e)
+
+  let toString = (err: sampleSetError) => {
+    switch err {
+    | TooFewSamples => "Too few samples when constructing sample set"
+    | NonNumericInput(err) => `Found a non-number in input: ${err}`
+    | OperationError(err) => Operation.Error.toString(err)
+    }
+  }
 }
 
 include Error
@@ -87,30 +95,27 @@ let sampleN = (t: t, n) => {
   }
 }
 
+let _fromSampleResultArray = (samples: array<result<float, QuriSquiggleLang.Operation.Error.t>>) =>
+  E.A.R.firstErrorOrOpen(samples)->E.R2.errMap(Error.fromOperationError) |> E.R2.bind(make)
+
 let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): result<
   t,
   sampleSetError,
-> => {
-  let samples = T.get(t)->E.A2.fmap(fn)
-  E.A.R.firstErrorOrOpen(samples)->E.R2.errMap(Error.fromOperationError) |> E.R2.bind(make)
-}
+> => T.get(t)->E.A2.fmap(fn)->_fromSampleResultArray
 
 //TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
 let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2: t): result<
   t,
-  Operation.Error.t,
-> => {
-  let samples = Belt.Array.zip(get(t1), get(t2))->E.A2.fmap(((a, b)) => fn(a, b))
+  sampleSetError,
+> => E.A.zip(get(t1), get(t2))->E.A2.fmap(E.Tuple2.toFnCall(fn))->_fromSampleResultArray
 
-  // This assertion should never be reached. In order for it to be reached, one
-  // of the input parameters would need to be a sample set distribution with less
-  // than 6 samples. Which should be impossible due to the smart constructor.
-  // I could prove this to the type system (say, creating a {first: float, second: float, ..., fifth: float, rest: array<float>}
-  // But doing so would take too much time, so I'll leave it as an assertion
-  E.A.R.firstErrorOrOpen(samples)->E.R2.fmap(x =>
-    E.R.toExnFnString(Error.sampleSetErrorToString, make(x))
-  )
-}
+let map3 = (
+  ~fn: (float, float, float) => result<float, Operation.Error.t>,
+  ~t1: t,
+  ~t2: t,
+  ~t3: t,
+): result<t, sampleSetError> =>
+  E.A.zip3(get(t1), get(t2), get(t3))->E.A2.fmap(E.Tuple3.toFnCall(fn))->_fromSampleResultArray
 
 let mean = t => T.get(t)->E.A.Floats.mean
 let geomean = t => T.get(t)->E.A.Floats.geomean

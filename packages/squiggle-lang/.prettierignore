@@ -3,6 +3,6 @@ lib
 *.bs.js
 *.gen.tsx
 .nyc_output/
-coverage/
+_coverage/
 .cache/
 Reducer_Peggy_GeneratedParser.js

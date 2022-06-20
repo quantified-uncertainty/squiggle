@@ -68,7 +68,7 @@ let toFloatOperation = (
 ) => {
   switch distToFloatOperation {
   | #IntegralSum => Ok(integralEndY(t))
-  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Sample) as op => {
+  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Sample | #Min | #Max) as op => {
       let trySymbolicSolution = switch (t: t) {
       | Symbolic(r) => SymbolicDist.T.operate(op, r)->E.R.toOption
       | _ => None
@@ -78,6 +78,8 @@ let toFloatOperation = (
       | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
       | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
       | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
+      | (SampleSet(sampleSet), #Min) => SampleSetDist.min(sampleSet)->Some
+      | (SampleSet(sampleSet), #Max) => SampleSetDist.max(sampleSet)->Some
       | _ => None
       }
 
@@ -89,6 +91,16 @@ let toFloatOperation = (
         | None => toPointSetFn(t)->E.R2.fmap(PointSetDist.operate(op))
         }
       }
+    }
+  | (#Stdev | #Variance | #Mode) as op =>
+    switch t {
+    | SampleSet(s) =>
+      switch op {
+      | #Stdev => SampleSetDist.stdev(s)->Ok
+      | #Variance => SampleSetDist.variance(s)->Ok
+      | #Mode => SampleSetDist.mode(s)->Ok
+      }
+    | _ => Error(DistributionTypes.NotYetImplemented)
     }
   }
 }
@@ -244,7 +256,9 @@ module Truncate = {
       | Some(r) => Ok(r)
       | None =>
         toPointSetFn(t)->E.R2.fmap(t => {
-          DistributionTypes.PointSet(PointSetDist.T.truncate(leftCutoff, rightCutoff, t))
+          DistributionTypes.PointSet(
+            PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize,
+          )
         })
       }
     }
@@ -323,7 +337,7 @@ module AlgebraicCombination = {
       let fn = Operation.Algebraic.toFn(arithmeticOperation)
       E.R.merge(toSampleSet(t1), toSampleSet(t2))
       ->E.R.bind(((t1, t2)) => {
-        SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(x => DistributionTypes.OperationError(x))
+        SampleSetDist.map2(~fn, ~t1, ~t2)->E.R2.errMap(x => DistributionTypes.SampleSetError(x))
       })
       ->E.R2.fmap(r => DistributionTypes.SampleSet(r))
     }

@@ -1,26 +1,5 @@
-module Parse = Reducer_Peggy_Parse
-module Result = Belt.Result
-
 open Jest
-open Expect
-
-let expectParseToBe = (expr, answer) =>
-  Parse.parse(expr)->Parse.toStringResult->expect->toBe(answer)
-
-let testParse = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
-
-module MySkip = {
-  let testParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
-
-  let testDescriptionParse = (desc, expr, answer) =>
-    Skip.test(desc, () => expectParseToBe(expr, answer))
-}
-
-module MyOnly = {
-  let testParse = (expr, answer) => Only.test(expr, () => expectParseToBe(expr, answer))
-  let testDescriptionParse = (desc, expr, answer) =>
-    Only.test(desc, () => expectParseToBe(expr, answer))
-}
+open Reducer_Peggy_TestHelpers
 
 describe("Peggy parse", () => {
   describe("float", () => {
@@ -253,7 +232,11 @@ describe("Peggy parse", () => {
   })
   describe("unit", () => {
     testParse("1m", "{(::fromUnit_m 1)}")
+    testParse("1M", "{(::fromUnit_M 1)}")
     testParse("1m+2cm", "{(::add (::fromUnit_m 1) (::fromUnit_cm 2))}")
+  })
+  describe("Module", () => {
+    testParse("Math.pi", "{(::$_atIndex_$ @Math 'pi')}")
   })
 })
 

@@ -49,6 +49,10 @@ module Constructors: {
   @genType
   let mean: (~env: env, genericDist) => result<float, error>
   @genType
+  let stdev: (~env: env, genericDist) => result<float, error>
+  @genType
+  let variance: (~env: env, genericDist) => result<float, error>
+  @genType
   let sample: (~env: env, genericDist) => result<float, error>
   @genType
   let cdf: (~env: env, genericDist, float) => result<float, error>
@@ -126,6 +130,8 @@ module Constructors: {
   let algebraicPower: (~env: env, genericDist, genericDist) => result<genericDist, error>
   @genType
   let scaleLogarithm: (~env: env, genericDist, float) => result<genericDist, error>
+  @genType
+  let scaleMultiply: (~env: env, genericDist, float) => result<genericDist, error>
   @genType
   let scalePower: (~env: env, genericDist, float) => result<genericDist, error>
   @genType

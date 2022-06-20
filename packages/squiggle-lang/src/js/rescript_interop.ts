@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import {
+import type {
   expressionValue,
   mixedShape,
   sampleSetDist,
@@ -9,6 +9,8 @@ import {
   discreteShape,
   continuousShape,
   lambdaValue,
+  lambdaDeclaration,
+  declarationArg,
 } from "../rescript/TypescriptInterface.gen";
 import { Distribution } from "./distribution";
 import { tagged, tag } from "./types";
@@ -63,6 +65,18 @@ export type rescriptExport =
   | {
       TAG: 11; // EvTimeDuration
       _0: number;
+    }
+  | {
+      TAG: 12; // EvDeclaration
+      _0: rescriptLambdaDeclaration;
+    }
+  | {
+      TAG: 13; // EvTypeIdentifier
+      _0: string;
+    }
+  | {
+      TAG: 14; // EvModule
+      _0: { [key: string]: rescriptExport };
     };
 
 type rescriptDist =
@@ -84,6 +98,23 @@ type rescriptPointSetDist =
       _0: continuousShape;
     };
 
+type rescriptLambdaDeclaration = {
+  readonly fn: lambdaValue;
+  readonly args: rescriptDeclarationArg[];
+};
+
+type rescriptDeclarationArg =
+  | {
+      TAG: 0; // Float
+      min: number;
+      max: number;
+    }
+  | {
+      TAG: 1; // Date
+      min: Date;
+      max: Date;
+    };
+
 export type squiggleExpression =
   | tagged<"symbol", string>
   | tagged<"string", string>
@@ -96,7 +127,10 @@ export type squiggleExpression =
   | tagged<"number", number>
   | tagged<"date", Date>
   | tagged<"timeDuration", number>
-  | tagged<"record", { [key: string]: squiggleExpression }>;
+  | tagged<"lambdaDeclaration", lambdaDeclaration>
+  | tagged<"record", { [key: string]: squiggleExpression }>
+  | tagged<"typeIdentifier", string>
+  | tagged<"module", { [key: string]: squiggleExpression }>;
 
 export { lambdaValue };
 
@@ -141,6 +175,29 @@ export function convertRawToTypescript(
       return tag("date", result._0);
     case 11: // EvTimeDuration
       return tag("number", result._0);
+    case 12: // EvDeclaration
+      return tag("lambdaDeclaration", {
+        fn: result._0.fn,
+        args: result._0.args.map(convertDeclaration),
+      });
+    case 13: // EvSymbol
+      return tag("typeIdentifier", result._0);
+    case 14: // EvModule
+      return tag(
+        "module",
+        _.mapValues(result._0, (x) => convertRawToTypescript(x, environment))
+      );
+  }
+}
+
+function convertDeclaration(
+  declarationArg: rescriptDeclarationArg
+): declarationArg {
+  switch (declarationArg.TAG) {
+    case 0: // Float
+      return tag("Float", { min: declarationArg.min, max: declarationArg.max });
+    case 1: // Date
+      return tag("Date", { min: declarationArg.min, max: declarationArg.max });
   }
 }
 

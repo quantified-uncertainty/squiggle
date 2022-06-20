@@ -225,9 +225,8 @@ let doN = (n, fn) => {
 }
 
 let sample = (t: t): float => {
-  let randomItem = Random.float(1.)
-  let bar = t |> T.Integral.yToX(randomItem)
-  bar
+  let randomItem = Random.float(1.0)
+  t |> T.Integral.yToX(randomItem)
 }
 
 let isFloat = (t: t) =>
@@ -249,6 +248,8 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Inv(f) => inv(f, s)
   | #Sample => sample(s)
   | #Mean => T.mean(s)
+  | #Min => T.minX(s)
+  | #Max => T.maxX(s)
   }
 
 let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineError> =>

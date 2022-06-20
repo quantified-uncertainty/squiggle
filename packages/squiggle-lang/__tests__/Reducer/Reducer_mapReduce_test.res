@@ -7,7 +7,7 @@ describe("map reduce", () => {
   testEvalToBe("change(acc,x)=acc*x+x; arr=[1,2,3]; reduce(arr, 0, change)", "Ok(15)")
   testEvalToBe("change(acc,x)=acc*x+x; arr=[1,2,3]; reduceReverse(arr, 0, change)", "Ok(9)")
   testEvalToBe("arr=[1,2,3]; reverse(arr)", "Ok([3,2,1])")
-  testEvalToBe("check(x)=(x==2);arr=[1,2,3]; keep(arr,check)", "Ok([2])")
+  testEvalToBe("check(x)=(x==2);arr=[1,2,3]; filter(arr,check)", "Ok([2])")
 })
 
 Skip.describe("map reduce (sam)", () => {

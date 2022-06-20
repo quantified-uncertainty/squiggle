@@ -1,19 +1,25 @@
 import * as _ from "lodash";
-import {
+import type {
   environment,
+  expressionValue,
+  externalBindings,
+  errorValue,
+} from "../rescript/TypescriptInterface.gen";
+import {
   defaultEnvironment,
   evaluatePartialUsingExternalBindings,
   evaluateUsingOptions,
-  externalBindings,
-  expressionValue,
-  errorValue,
   foreignFunctionInterface,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
   errorValueToString,
   distributionErrorToString,
+} from "../rescript/TypescriptInterface.gen";
+export type {
   distributionError,
+  declarationArg,
+  declaration,
 } from "../rescript/TypescriptInterface.gen";
 export type { errorValue, externalBindings as bindings, jsImports };
 import {
@@ -28,16 +34,8 @@ import {
 import { result, resultMap, tag, tagged } from "./types";
 import { Distribution, shape } from "./distribution";
 
-export {
-  Distribution,
-  squiggleExpression,
-  result,
-  resultMap,
-  shape,
-  lambdaValue,
-  environment,
-  defaultEnvironment,
-};
+export { Distribution, resultMap, defaultEnvironment };
+export type { result, shape, environment, lambdaValue, squiggleExpression };
 
 export let defaultSamplingInputs: environment = {
   sampleCount: 10000,
@@ -185,5 +183,20 @@ function createTsExport(
       return tag("date", x.value);
     case "EvTimeDuration":
       return tag("timeDuration", x.value);
+    case "EvDeclaration":
+      return tag("lambdaDeclaration", x.value);
+    case "EvTypeIdentifier":
+      return tag("typeIdentifier", x.value);
+    case "EvModule":
+      let moduleResult: tagged<
+        "module",
+        { [key: string]: squiggleExpression }
+      > = tag(
+        "module",
+        _.mapValues(x.value, (x: unknown) =>
+          convertRawToTypescript(x as rescriptExport, environment)
+        )
+      );
+      return moduleResult;
   }
 }

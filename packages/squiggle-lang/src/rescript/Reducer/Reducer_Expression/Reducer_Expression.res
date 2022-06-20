@@ -75,9 +75,9 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
 > =>
   switch valueList {
   | list{EvCall(fName), ...args} => {
-      let rCheckedArgs = switch fName == "$_setBindings_$" {
-      | false => args->Lambda.checkIfReduced
-      | true => args->Ok
+      let rCheckedArgs = switch fName {
+      | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args->Ok
+      | _ => args->Lambda.checkIfReduced
       }
 
       rCheckedArgs->Result.flatMap(checkedArgs =>
@@ -116,14 +116,20 @@ let evaluateUsingOptions = (
   ~externalBindings: option<ReducerInterface_ExpressionValue.externalBindings>,
   code: string,
 ): result<expressionValue, errorValue> => {
-  let anEnvironment = switch environment {
-  | Some(env) => env
-  | None => ReducerInterface_ExpressionValue.defaultEnvironment
-  }
+  let anEnvironment = Belt.Option.getWithDefault(
+    environment,
+    ReducerInterface_ExpressionValue.defaultEnvironment,
+  )
 
   let anExternalBindings = switch externalBindings {
-  | Some(bindings) => bindings
-  | None => ReducerInterface_ExpressionValue.defaultExternalBindings
+  | Some(bindings) => {
+      let cloneLib = ReducerInterface_StdLib.externalStdLib->Reducer_Category_Bindings.cloneRecord
+      Js.Dict.entries(bindings)->Js.Array2.reduce((acc, (key, value)) => {
+        acc->Js.Dict.set(key, value)
+        acc
+      }, cloneLib)
+    }
+  | None => ReducerInterface_StdLib.externalStdLib
   }
 
   let bindings = anExternalBindings->Bindings.fromExternalBindings

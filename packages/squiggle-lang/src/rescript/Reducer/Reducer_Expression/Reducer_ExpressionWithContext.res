@@ -22,11 +22,16 @@ let callReducer = (
   bindings: bindings,
   environment: environment,
   reducer: reducerFn,
-): result<expressionValue, errorValue> =>
+): result<expressionValue, errorValue> => {
   switch expressionWithContext {
-  | ExpressionNoContext(expr) => reducer(expr, bindings, environment)
-  | ExpressionWithContext(expr, context) => reducer(expr, context, environment)
+  | ExpressionNoContext(expr) =>
+    // Js.log(`callReducer: bindings ${Bindings.toString(bindings)} expr ${ExpressionT.toString(expr)}`)
+    reducer(expr, bindings, environment)
+  | ExpressionWithContext(expr, context) =>
+    // Js.log(`callReducer: context ${Bindings.toString(context)} expr ${ExpressionT.toString(expr)}`)
+    reducer(expr, context, environment)
   }
+}
 
 let withContext = (expression, context) => ExpressionWithContext(expression, context)
 let noContext = expression => ExpressionNoContext(expression)

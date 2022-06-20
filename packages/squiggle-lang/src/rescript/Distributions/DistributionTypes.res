@@ -30,9 +30,9 @@ module Error = {
   @genType
   let toString = (err: error): string =>
     switch err {
-    | NotYetImplemented => "Function Not Yet Implemented"
+    | NotYetImplemented => "Function not yet implemented"
     | Unreachable => "Unreachable"
-    | DistributionVerticalShiftIsInvalid => "Distribution Vertical Shift is Invalid"
+    | DistributionVerticalShiftIsInvalid => "Distribution vertical shift is invalid"
     | ArgumentError(s) => `Argument Error ${s}`
     | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
     | SampleSetError(TooFewSamples) => "Too Few Samples"
@@ -68,9 +68,15 @@ module DistributionOperation = {
     | #Mean
     | #Sample
     | #IntegralSum
+    | #Mode
+    | #Stdev
+    | #Min
+    | #Max
+    | #Variance
   ]
 
   type toScaleFn = [
+    | #Multiply
     | #Power
     | #Logarithm
     | #LogarithmWithThreshold(float)
@@ -119,6 +125,11 @@ module DistributionOperation = {
     | ToFloat(#Cdf(r)) => `cdf(${E.Float.toFixed(r)})`
     | ToFloat(#Inv(r)) => `inv(${E.Float.toFixed(r)})`
     | ToFloat(#Mean) => `mean`
+    | ToFloat(#Min) => `min`
+    | ToFloat(#Max) => `max`
+    | ToFloat(#Stdev) => `stdev`
+    | ToFloat(#Variance) => `variance`
+    | ToFloat(#Mode) => `mode`
     | ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
     | ToFloat(#Sample) => `sample`
     | ToFloat(#IntegralSum) => `integralSum`
@@ -129,11 +140,12 @@ module DistributionOperation = {
     | ToDist(Truncate(_, _)) => `truncate`
     | ToDist(Inspect) => `inspect`
     | ToDist(Scale(#Power, r)) => `scalePower(${E.Float.toFixed(r)})`
+    | ToDist(Scale(#Multiply, r)) => `scaleMultiply(${E.Float.toFixed(r)})`
     | ToDist(Scale(#Logarithm, r)) => `scaleLog(${E.Float.toFixed(r)})`
     | ToDist(Scale(#LogarithmWithThreshold(eps), r)) =>
       `scaleLogWithThreshold(${E.Float.toFixed(r)}, epsilon=${E.Float.toFixed(eps)})`
     | ToString(ToString) => `toString`
-    | ToString(ToSparkline(n)) => `toSparkline(${E.I.toString(n)})`
+    | ToString(ToSparkline(n)) => `sparkline(${E.I.toString(n)})`
     | ToBool(IsNormalized) => `isNormalized`
     | ToDistCombination(Algebraic(_), _, _) => `algebraic`
     | ToDistCombination(Pointwise, _, _) => `pointwise`
@@ -152,6 +164,8 @@ module Constructors = {
   module UsingDists = {
     @genType
     let mean = (dist): t => FromDist(ToFloat(#Mean), dist)
+    let stdev = (dist): t => FromDist(ToFloat(#Stdev), dist)
+    let variance = (dist): t => FromDist(ToFloat(#Variance), dist)
     let sample = (dist): t => FromDist(ToFloat(#Sample), dist)
     let cdf = (dist, x): t => FromDist(ToFloat(#Cdf(x)), dist)
     let inv = (dist, x): t => FromDist(ToFloat(#Inv(x)), dist)
@@ -197,6 +211,7 @@ module Constructors = {
         estimate,
       )
     }
+    let scaleMultiply = (dist, n): t => FromDist(ToDist(Scale(#Multiply, n)), dist)
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)
     let scaleLogarithm = (dist, n): t => FromDist(ToDist(Scale(#Logarithm, n)), dist)
     let scaleLogarithmWithThreshold = (dist, n, eps): t => FromDist(

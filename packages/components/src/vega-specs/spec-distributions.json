@@ -23,7 +23,7 @@
       "tickOpacity": 0.0,
       "domainColor": "#fff",
       "domainOpacity": 0.0,
-      "format": "~g",
+      "format": ".9~s",
       "tickCount": 10
     }
   ],
@@ -33,6 +33,7 @@
       "from": {
         "data": "con"
       },
+      "interpolate": "linear",
       "encode": {
         "update": {
           "x": {
@@ -48,10 +49,10 @@
             "value": 0
           },
           "fill": {
-            "value": "#4C78A8"
+            "value": "#739ECC"
           },
           "interpolate": {
-            "value": "monotone"
+            "value": "linear"
           },
           "fillOpacity": {
             "value": 1
@@ -82,6 +83,9 @@
           "y2": {
             "scale": "yscale",
             "value": 0
+          },
+          "fill": {
+            "value": "#2f65a7"
           }
         }
       }

@@ -186,8 +186,6 @@ let dispatchToGenericOutput = (
 ): option<DistributionOperation.outputType> => {
   let (fnName, args) = call
   switch (fnName, args) {
-  | ("delta", [EvNumber(f)]) =>
-    SymbolicDist.Float.makeSafe(f)->SymbolicConstructors.symbolicResultToOutput
   | ("triangular" as fnName, [EvNumber(f1), EvNumber(f2), EvNumber(f3)]) =>
     SymbolicConstructors.threeFloat(fnName)
     ->E.R.bind(r => r(f1, f2, f3))
@@ -195,12 +193,23 @@ let dispatchToGenericOutput = (
   | ("sample", [EvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist, ~env)
   | ("sampleN", [EvDistribution(dist), EvNumber(n)]) =>
     Some(FloatArray(GenericDist.sampleN(dist, Belt.Int.fromFloat(n))))
-  | ("mean", [EvDistribution(dist)]) => Helpers.toFloatFn(#Mean, dist, ~env)
+  | (("mean" | "stdev" | "variance" | "min" | "max" | "mode") as op, [EvDistribution(dist)]) => {
+      let fn = switch op {
+      | "mean" => #Mean
+      | "stdev" => #Stdev
+      | "variance" => #Variance
+      | "min" => #Min
+      | "max" => #Max
+      | "mode" => #Mode
+      | _ => #Mean
+      }
+      Helpers.toFloatFn(fn, dist, ~env)
+    }
   | ("integralSum", [EvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [EvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
-  | ("toSparkline", [EvDistribution(dist)]) =>
+  | ("sparkline", [EvDistribution(dist)]) =>
     Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
-  | ("toSparkline", [EvDistribution(dist), EvNumber(n)]) =>
+  | ("sparkline", [EvDistribution(dist), EvNumber(n)]) =>
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
   | ("exp", [EvDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
@@ -232,6 +241,8 @@ let dispatchToGenericOutput = (
     Helpers.toDistFn(Scale(#Logarithm, float), dist, ~env)
   | ("scaleLogWithThreshold", [EvDistribution(dist), EvNumber(base), EvNumber(eps)]) =>
     Helpers.toDistFn(Scale(#LogarithmWithThreshold(eps), base), dist, ~env)
+  | ("scaleMultiply", [EvDistribution(dist), EvNumber(float)]) =>
+    Helpers.toDistFn(Scale(#Multiply, float), dist, ~env)
   | ("scalePow", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(Scale(#Power, float), dist, ~env)
   | ("scaleExp", [EvDistribution(dist)]) =>
@@ -239,12 +250,13 @@ let dispatchToGenericOutput = (
   | ("cdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist, ~env)
   | ("pdf", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Pdf(float), dist, ~env)
   | ("inv", [EvDistribution(dist), EvNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist, ~env)
+  | ("quantile", [EvDistribution(dist), EvNumber(float)]) =>
+    Helpers.toFloatFn(#Inv(float), dist, ~env)
   | ("toSampleSet", [EvDistribution(dist), EvNumber(float)]) =>
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist, ~env)
   | ("toSampleSet", [EvDistribution(dist)]) =>
     Helpers.toDistFn(ToSampleSet(env.sampleCount), dist, ~env)
-  | ("toInternalSampleArray", [EvDistribution(SampleSet(dist))]) =>
-    Some(FloatArray(SampleSetDist.T.get(dist)))
+  | ("toList", [EvDistribution(SampleSet(dist))]) => Some(FloatArray(SampleSetDist.T.get(dist)))
   | ("fromSamples", [EvArray(inputArray)]) => {
       let _wrapInputErrors = x => SampleSetDist.NonNumericInput(x)
       let parsedArray = Helpers.parseNumberArray(inputArray)->E.R2.errMap(_wrapInputErrors)
@@ -325,20 +337,5 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-// I expect that it's important to build this first, so it doesn't get recalculated for each tryRegistry() call.
-let registry = FunctionRegistry_Library.registry
-
-let tryRegistry = ((fnName, args): ExpressionValue.functionCall, env) => {
-  FunctionRegistry_Core.Registry.matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
-    E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
-  )
-}
-
-let dispatch = (call: ExpressionValue.functionCall, environment) => {
-  let regularDispatch =
-    dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)
-  switch regularDispatch {
-  | Some(x) => Some(x)
-  | None => tryRegistry(call, environment)
-  }
-}
+let dispatch = (call: ExpressionValue.functionCall, environment) =>
+  dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)

@@ -173,6 +173,11 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       )
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
+    | ToDist(Scale(#Multiply, f)) =>
+      dist
+      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Multiply, ~f)
+      ->E.R2.fmap(r => Dist(r))
+      ->OutputLocal.fromResult
     | ToDist(Scale(#Logarithm, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
@@ -256,6 +261,8 @@ module Constructors = {
   module C = DistributionTypes.Constructors.UsingDists
   open OutputLocal
   let mean = (~env, dist) => C.mean(dist)->run(~env)->toFloatR
+  let stdev = (~env, dist) => C.stdev(dist)->run(~env)->toFloatR
+  let variance = (~env, dist) => C.variance(dist)->run(~env)->toFloatR
   let sample = (~env, dist) => C.sample(dist)->run(~env)->toFloatR
   let cdf = (~env, dist, f) => C.cdf(dist, f)->run(~env)->toFloatR
   let inv = (~env, dist, f) => C.inv(dist, f)->run(~env)->toFloatR
@@ -298,6 +305,7 @@ module Constructors = {
   let algebraicLogarithm = (~env, dist1, dist2) =>
     C.algebraicLogarithm(dist1, dist2)->run(~env)->toDistR
   let algebraicPower = (~env, dist1, dist2) => C.algebraicPower(dist1, dist2)->run(~env)->toDistR
+  let scaleMultiply = (~env, dist, n) => C.scaleMultiply(dist, n)->run(~env)->toDistR
   let scalePower = (~env, dist, n) => C.scalePower(dist, n)->run(~env)->toDistR
   let scaleLogarithm = (~env, dist, n) => C.scaleLogarithm(dist, n)->run(~env)->toDistR
   let pointwiseAdd = (~env, dist1, dist2) => C.pointwiseAdd(dist1, dist2)->run(~env)->toDistR

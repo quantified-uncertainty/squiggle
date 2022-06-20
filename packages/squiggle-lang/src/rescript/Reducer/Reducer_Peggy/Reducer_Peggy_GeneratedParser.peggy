@@ -36,11 +36,6 @@
     '[]': '$_atIndex_$',
   }
 
-  function nodeBlock(statements) {return{type: 'Block', statements: statements}}
-  function nodeBoolean(value) {return {type: 'Boolean', value: value}}
-  function nodeCallIndentifier(value) {return {type: 'CallIdentifier', value: value}}
-  function nodeExpression(args) {return {type: 'Expression', nodes: args}}
-  function nodeFloat(value) {return {type: 'Float', value: value}}
   function makeFunctionCall(fn, args) {
     if (fn === '$$_applyAll_$$') {
       // Any list of values is applied from left to right anyway. 
@@ -52,6 +47,16 @@
       return nodeExpression([nodeCallIndentifier(fn), ...args]) 
     }
   }
+
+  function apply(fn, arg) { return makeFunctionCall(fn, [arg]); }
+  function constructArray(elems)  { return apply('$_constructArray_$', nodeExpression(elems)); }
+  function constructRecord(elems) { return apply('$_constructRecord_$', nodeExpression(elems)); }
+
+  function nodeBlock(statements) {return{type: 'Block', statements: statements}}
+  function nodeBoolean(value) {return {type: 'Boolean', value: value}}
+  function nodeCallIndentifier(value) {return {type: 'CallIdentifier', value: value}}
+  function nodeExpression(args) {return {type: 'Expression', nodes: args}}
+  function nodeFloat(value) {return {type: 'Float', value: value}}
   function nodeIdentifier(value) {return {type: 'Identifier', value: value}}
   function nodeInteger(value) {return {type: 'Integer', value: value}}
   function nodeKeyValue(key, value) { 
@@ -59,11 +64,15 @@
     return {type: 'KeyValue', key: key, value: value}}  
   function nodeLambda(args, body) {return {type: 'Lambda', args: args, body: body}}
   function nodeLetStatment(variable, value) {return {type: 'LetStatement', variable: variable, value: value}}
+  function nodeModuleIdentifier(value) {return {type: 'ModuleIdentifier', value: value}}
   function nodeString(value) {return {type: 'String', value: value}}
   function nodeTernary(condition, trueExpression, falseExpression) {return {type: 'Ternary', condition: condition, trueExpression: trueExpression, falseExpression: falseExpression}}
+  
+  function nodeTypeIdentifier(typeValue) {return {type: 'TypeIdentifier', value: typeValue}}
 }}
 
 start
+  // = _nl start:typeExpression _nl finalComment?  {return start}
   = _nl start:outerBlock _nl finalComment?  {return start}
 
 zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
@@ -96,6 +105,7 @@ array_statements
 statement 
   = letStatement
   / defunStatement
+  / typeStatement
 
 letStatement 
   = variable:identifier _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
@@ -205,7 +215,7 @@ chainFunctionCall
 
 unary
   = unaryOperator:unaryOperator _nl right:(unary/postOperator)
-  { return makeFunctionCall(unaryToFunction[unaryOperator], [right])}
+  { return apply(unaryToFunction[unaryOperator], right)}
   / postOperator
   
   unaryOperator "unary operator"
@@ -215,30 +225,22 @@ postOperator = indexedValue
 
 indexedValue
   = collectionElement
-  / recordElement
   / atom
 
-  collectionElement
-    = head:atom &('['/'('/'.')
-      tail:(
-        _ '[' _nl arg:expression  _nl ']' {return {fn: postOperatorToFunction['[]'], args: [arg]}}
-      / _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: postOperatorToFunction['()'], args: args}}
-      / '.' arg:$dollarIdentifier {return {fn: postOperatorToFunction['[]'], args: [nodeString(arg)]}}
-      )* 
-    { return tail.reduce(function(result, element) {
-        return makeFunctionCall(element.fn, [result, ...element.args])
-      }, head)}
+collectionElement
+  = head:atom &('['/'('/'.')
+    tail:(
+      _ '[' _nl arg:expression  _nl ']' {return {fn: postOperatorToFunction['[]'], args: [arg]}}
+    / _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: postOperatorToFunction['()'], args: args}}
+    / '.' arg:$dollarIdentifier {return {fn: postOperatorToFunction['[]'], args: [nodeString(arg)]}}
+    )* 
+  { return tail.reduce(function(result, element) {
+      return makeFunctionCall(element.fn, [result, ...element.args])
+    }, head)}
 
     array_functionArguments 
       = head:expression tail:(_ ',' _nl @expression)* 
       { return [head, ...tail]; }
-
-recordElement
-  = head:dollarIdentifier &'.' 
-    tail:(_ '.' _nl arg:$dollarIdentifier {return {fn: postOperatorToFunction['.'],  args: [nodeString(arg)]}})* 
-  { return tail.reduce(function(result, element) {
-      return makeFunctionCall(element.fn, [result, ...element.args])
-    }, head)}
 
 atom
   = '(' _nl expression:expression _nl ')' {return expression}
@@ -250,24 +252,41 @@ basicLiteral
   = string
   / number
   / boolean
+  / dollarIdentifierWithModule
   / dollarIdentifier
+
+dollarIdentifierWithModule 'identifier'
+  = head:moduleIdentifier 
+    tail:('.' _nl @$moduleIdentifier)* '.' _nl 
+    final:$dollarIdentifier
+  { tail.push(final);
+    return tail.reduce(function(result, element) {
+      return makeFunctionCall(postOperatorToFunction['[]'], [result, nodeString(element)])
+    }, head)}
 
 identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
 
+unitIdentifier 'identifier'
+  = ([_a-zA-Z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
+
 dollarIdentifier '$identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) {return nodeIdentifier(text())} 
+
+moduleIdentifier 'identifier'
+  = ([A-Z]+[_a-z0-9]i*) {return nodeModuleIdentifier(text())} 
+
 
 string 'string'
   = characters:("'" @([^'])* "'") {return nodeString(characters.join(''))} 
   / characters:('"' @([^"])* '"') {return nodeString(characters.join(''))}
 
-number = number:(float / integer) unit:identifier?
+number = number:(float / integer) unit:unitIdentifier?
   { 
     if (unit === null)
       { return number }
     else
-      { return makeFunctionCall('fromUnit_'+unit.value, [number]) 
+      { return apply('fromUnit_'+unit.value, number) 
       }
   }
 
@@ -301,9 +320,9 @@ lambda
 
 arrayConstructor 'array'
   = '[' _nl ']'
-    { return makeFunctionCall('$_constructArray_$', [nodeExpression([])])}
+    { return constructArray([]); }
   / '[' _nl args:array_elements _nl ']' 
-    { return makeFunctionCall('$_constructArray_$', [nodeExpression(args)])}
+    { return constructArray(args); }
 
   array_elements 
     = head:expression tail:(_ ',' _nl @expression)* 
@@ -311,7 +330,7 @@ arrayConstructor 'array'
 
 recordConstructor  'record'
   = '{' _nl args:array_recordArguments _nl '}' 
-  { return makeFunctionCall('$_constructRecord_$', [nodeExpression(args)])}
+  { return constructRecord(args); }
 
   array_recordArguments 
     = head:keyValuePair tail:(_ ',' _nl @keyValuePair)* 
@@ -320,11 +339,13 @@ recordConstructor  'record'
   keyValuePair 
     = key:expression _ ':' _nl value:expression 
     { return nodeKeyValue(key, value)}
-    
+
+// Separators
+
 _ 'whitespace'
   = whiteSpaceCharactersOrComment*
 
-_nl 'optional whitespace or newline'
+_nl 'whitespace or newline'
   = (whiteSpaceCharactersOrComment / commentOrNewLine)*
 
 __ 'whitespace'
@@ -351,4 +372,79 @@ statementSeparator 'statement separator'
     newLine "newline"
       = [\n\r]
 
+// Types
+
+noArguments = ('(' _nl ')' )?
+
+typeIdentifier 'type identifier'
+  = ([a-z]+[_a-z0-9]i*) {return nodeTypeIdentifier(text())} 
+
+typeConstructorIdentifier 'type constructor identifier'
+  = ([A-Z]+[_a-z0-9]i*) {return nodeTypeIdentifier(text())} 
+
+typeExpression = typePostModifierExpression
+
+typePostModifierExpression = head:typeOr tail:(_ '$' _nl @typeModifier)*
+  { 
+    return tail.reduce((result, element) => {
+      return makeFunctionCall('$_typeModifier_'+element.modifier.value+'_$', [result, ...element.args])
+    }, head)
+  }
+
+typeOr = head:typeFunction tail:(_ '|' _nl @typeFunction)*
+  { return tail.length === 0 ? head : apply('$_typeOr_$', constructArray([head, ...tail])); }
+
+typeFunction = head:typeModifierExpression tail:(_ '=>' _nl @typeModifierExpression)*    
+  { return tail.length === 0 ? head : apply( '$_typeFunction_$', constructArray([head, ...tail])); }
+
+typeModifierExpression = head:basicType tail:(_ '<-' _nl @typeModifier)* 
+  { 
+    return tail.reduce((result, element) => {
+      return makeFunctionCall('$_typeModifier_'+element.modifier.value+'_$', [result, ...element.args])
+    }, head)
+  }
+
+  typeModifier 
+    = modifier:identifier _ '(' _nl args:array_elements _nl ')' 
+      { return {modifier: modifier, args: args}; }
+    / modifier:identifier _ noArguments
+      { return {modifier: modifier, args: []}; }
   
+basicType = typeConstructor / typeArray / typeRecord / typeInParanthesis / typeIdentifier
+
+typeArray = '[' _nl elem:typeExpression _nl ']' 
+  {return apply('$_typeArray_$', elem)}
+
+typeRecord = '{' _nl elems:array_typeRecordArguments _nl '}' 
+  { return apply('$_typeRecord_$', constructRecord(elems)); }  
+
+  array_typeRecordArguments 
+    = head:typeKeyValuePair tail:(_ ',' _nl @typeKeyValuePair)* 
+    { return [head, ...tail]; }
+
+  typeKeyValuePair 
+    = key:identifier _ ':' _nl value:typeExpression 
+    { return nodeKeyValue(key, value)}
+
+typeConstructor 
+  = constructor:typeConstructorIdentifier _ '(' _nl args:array_types _nl ')' 
+    { return makeFunctionCall('$_typeConstructor_$', [constructor, constructArray(args)]); }
+  / constructor:typeConstructorIdentifier _ noArguments
+    { return makeFunctionCall('$_typeConstructor_$', [constructor, constructArray([])]); }
+
+  array_types = head:typeExpression tail:(_ ',' _nl @typeExpression)* 
+    { return [head, ...tail]; }
+
+typeStatement = typeAliasStatement / typeOfStatement
+typeAliasStatement = 'type' __nl typeIdentifier:typeIdentifier _nl '=' _nl typeExpression:typeExpression 
+  { return makeFunctionCall('$_typeAlias_$', [typeIdentifier, typeExpression])}
+typeOfStatement = identifier:identifier _ ':' _nl typeExpression:typeExpression
+  { return makeFunctionCall('$_typeOf_$', [identifier, typeExpression])}
+
+typeInParanthesis = '(' _nl typeExpression:typeExpression _nl ')' {return typeExpression}
+
+// TODO: min max example
+// TODO: Example of foo = {a: 2, b: 5}; type fooKeys = string $ memberOf(foo->keys)
+// TODO: Example of memberOf( [1,2,3] )
+// TODO: Example of $ 
+// TODO: Cons(a, list) | EmptyList

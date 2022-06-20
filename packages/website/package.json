@@ -12,16 +12,16 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@docusaurus/core": "2.0.0-beta.20",
-    "@docusaurus/preset-classic": "2.0.0-beta.20",
+    "@docusaurus/core": "2.0.0-beta.21",
+    "@docusaurus/preset-classic": "2.0.0-beta.21",
     "@quri/squiggle-components": "^0.2.20",
     "clsx": "^1.1.1",
+    "hast-util-is-element": "2.1.2",
     "prism-react-renderer": "^1.3.3",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "remark-math": "^3",
     "rehype-katex": "^5",
-    "hast-util-is-element": "2.1.2"
+    "remark-math": "^3"
   },
   "browserslist": {
     "production": [

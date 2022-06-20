@@ -18,28 +18,7 @@ const config = {
   favicon: "img/favicon.ico",
   organizationName: "quantified-uncertainty", // Usually your GitHub org/user name.
   projectName: "squiggle", // Usually your repo name.
-
-  plugins: [
-    () => ({
-      configureWebpack(config, isServer, utils, content) {
-        return {
-          resolve: {
-            alias: {
-              "@quri/squiggle-components": path.resolve(
-                __dirname,
-                "../components/src"
-              ),
-              "@quri/squiggle-lang": path.resolve(
-                __dirname,
-                "../squiggle-lang/src/js"
-              ),
-            },
-          },
-        };
-      },
-    }),
-  ],
-
+  plugins: [],
   presets: [
     [
       "classic",
@@ -60,7 +39,10 @@ const config = {
             "https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/website/",
         },
         theme: {
-          customCss: require.resolve("./src/css/custom.css"),
+          customCss: [
+            require.resolve("./src/css/custom.css"),
+            require.resolve("@quri/squiggle-components/dist/main.css"),
+          ],
         },
       }),
     ],
@@ -81,6 +63,12 @@ const config = {
             docId: "Introduction",
             position: "left",
             label: "Documentation",
+          },
+          {
+            type: "doc",
+            docId: "Api/DistGeneric",
+            position: "left",
+            label: "API",
           },
           { to: "/blog", label: "Blog", position: "left" },
           { to: "/playground", label: "Playground", position: "left" },

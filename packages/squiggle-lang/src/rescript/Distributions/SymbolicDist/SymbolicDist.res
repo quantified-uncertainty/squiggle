@@ -295,7 +295,7 @@ module Float = {
   let inv = (p, t: t) => p < t ? 0.0 : 1.0
   let mean = (t: t) => Ok(t)
   let sample = (t: t) => t
-  let toString = (t: t) => j`Delta($t)`
+  let toString = (t: t) => j`PointMass($t)`
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Discrete(
     Discrete.make(~integralSumCache=Some(1.0), {xs: [t], ys: [1.0]}),
   )
@@ -449,6 +449,8 @@ module T = {
     | #Cdf(f) => Ok(cdf(f, s))
     | #Pdf(f) => Ok(pdf(f, s))
     | #Inv(f) => Ok(inv(f, s))
+    | #Min => Ok(min(s))
+    | #Max => Ok(max(s))
     | #Sample => Ok(sample(s))
     | #Mean => mean(s)
     }
