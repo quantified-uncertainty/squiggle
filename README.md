@@ -17,6 +17,7 @@ _An estimation language_.
 - [Known bugs](https://www.squiggle-language.com/docs/Discussions/Bugs)
 - [Original lesswrong sequence](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3)
 - [Author your squiggle models as Observable notebooks](https://observablehq.com/@hazelfire/squiggle)
+- [Use squiggle in VS Code](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
 
 ## Our deployments
 
@@ -39,6 +40,7 @@ the packages can be found in `packages`.
   of the calculation.
 - `packages/website` is the main descriptive website for squiggle,
   it is hosted at `squiggle-language.com`.
+- `packages/vscode-ext` is the VS Code extension for writing estimation functions.
 
 # Develop
 

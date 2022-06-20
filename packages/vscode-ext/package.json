@@ -43,7 +43,8 @@
     "compile": "yarn run compile:tsc && yarn run compile:vendor",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "format": "eslint src --ext ts --fix"
   },
   "devDependencies": {
     "@types/vscode": "^1.68.0",
