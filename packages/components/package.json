@@ -16,7 +16,7 @@
     "react-use": "^17.4.0",
     "react-vega": "^7.5.1",
     "vega": "^5.22.1",
-    "vega-embed": "^6.20.6",
+    "vega-embed": "^6.21.0",
     "vega-lite": "^5.2.0",
     "yup": "^0.32.11"
   },
