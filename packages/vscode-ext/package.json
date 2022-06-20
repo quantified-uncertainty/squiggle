@@ -31,7 +31,8 @@
         ],
         "aliases": [
           "Squiggle"
-        ]
+        ],
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
