@@ -46,7 +46,7 @@ const SquiggleChart = dynamic(
 
 export function DynamicSquiggleChart({ squiggleString }) {
   if (squiggleString == "") {
-    return "";
+    return null;
   } else {
     return (
         <SquiggleChart
