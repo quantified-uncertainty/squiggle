@@ -1,14 +1,5 @@
 import * as vscode from "vscode";
-
-function getNonce() {
-  let text = "";
-  const possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}
+import { getWebviewContent } from "./utils";
 
 export class SquiggleEditorProvider implements vscode.CustomTextEditorProvider {
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
@@ -26,8 +17,6 @@ export class SquiggleEditorProvider implements vscode.CustomTextEditorProvider {
 
   /**
    * Called when our custom editor is opened.
-   *
-   *
    */
   public async resolveCustomTextEditor(
     document: vscode.TextDocument,
@@ -37,7 +26,12 @@ export class SquiggleEditorProvider implements vscode.CustomTextEditorProvider {
     webviewPanel.webview.options = {
       enableScripts: true,
     };
-    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+    webviewPanel.webview.html = getWebviewContent({
+      webview: webviewPanel.webview,
+      script: "media/wysiwygWebview.js",
+      title: "Squiggle Editor",
+      context: this.context,
+    });
 
     function updateWebview() {
       webviewPanel.webview.postMessage({
@@ -77,57 +71,6 @@ export class SquiggleEditorProvider implements vscode.CustomTextEditorProvider {
     });
 
     updateWebview();
-  }
-
-  /**
-   * Get the static html used for the editor webviews.
-   */
-  private getHtmlForWebview(webview: vscode.Webview): string {
-    // Local path to main script run in the webview
-
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this.context.extensionUri,
-        "media/vendor/components.css"
-      )
-    );
-
-    const scriptUris = [
-      // vendor files are copied over by `yarn run compile`
-      "media/vendor/react.js",
-      "media/vendor/react-dom.js",
-      "media/vendor/components.js",
-      "media/wysiwyg.js",
-    ].map((script) =>
-      webview.asWebviewUri(
-        vscode.Uri.joinPath(this.context.extensionUri, script)
-      )
-    );
-
-    // Use a nonce to whitelist which scripts can be run
-    const nonce = getNonce();
-
-    return /* html */ `
-			<!doctype html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<!--
-				Use a content security policy to only allow loading images from https or from our extension directory,
-				and only allow scripts that have a specific nonce.
-				-->
-				<meta http-equiv="Content-Security-Policy" content="script-src 'nonce-${nonce}' 'unsafe-eval';">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<link href="${styleUri}" rel="stylesheet" />
-				<title>Squiggle Editor</title>
-			</head>
-			<body style="background-color: white; color: black; padding: 12px">
-				<div id="root"></div>
-        ${scriptUris
-          .map((uri) => `<script nonce="${nonce}" src="${uri}"></script>`)
-          .join("")}
-			</body>
-			</html>`;
   }
 
   private updateTextDocument(document: vscode.TextDocument, text: string) {
