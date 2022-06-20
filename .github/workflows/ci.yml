@@ -20,6 +20,7 @@ jobs:
       should_skip_components: ${{ steps.skip_components_check.outputs.should_skip }}
       should_skip_website: ${{ steps.skip_website_check.outputs.should_skip }}
       should_skip_vscodeext: ${{ steps.skip_vscodeext_check.outputs.should_skip }}
+      should_skip_cli: ${{ steps.skip_cli_check.outputs.should_skip }}
     steps:
       - id: skip_lang_check
         name: Check if the changes are about squiggle-lang src files
@@ -41,6 +42,11 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
           paths: '["packages/vscode-ext/**"]'
+      - id: skip_cli_check
+        name: Check if the changes are about cli src files
+        uses: fkirc/skip-duplicate-actions@v3.4.1
+        with:
+          paths: '["packages/cli/**"]'
 
   lang-lint:
     name: Language lint
@@ -196,3 +202,20 @@ jobs:
         run: cd ../../ && yarn
       - name: Build
         run: yarn compile
+
+  cli-lint:
+    name: CLI lint
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_cli != 'true' }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/cli
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check javascript, typescript, and markdown lint
+        uses: creyD/prettier_action@v4.2
+        with:
+          dry: true
+          prettier_options: --check packages/cli
