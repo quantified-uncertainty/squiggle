@@ -16,6 +16,7 @@ repository:
       - include: "#string"
       - include: "#block"
       - include: "#function-call"
+      - include: "#keywords"
   let:
     match: ^\s*(\w+)\s*=
     captures:
@@ -78,6 +79,9 @@ repository:
         name: punctuation.definition.block.squiggle
     patterns:
       - include: "$self"
+  keywords:
+    match: \b(if|then|else|to)\b
+    name: keyword.control.squiggle
   integer:
     match: \b\d+([_a-zA-Z]+[_a-zA-Z0-9]*)?
     name: constant.numeric.integer.squiggle
