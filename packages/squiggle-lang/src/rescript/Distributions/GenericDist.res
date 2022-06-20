@@ -183,18 +183,8 @@ module Score = {
         ->PointSetDist_Scoring.DistEstimateScalarAnswer
         ->Ok
       )
-    | (Score_Scalar(esti'), Score_Dist(answ'), None) =>
-      toPointSetFn(answ')->E.R.bind(answ'' =>
-        {estimate: esti', answer: answ'', prior: None}
-        ->PointSetDist_Scoring.ScalarEstimateDistAnswer
-        ->Ok
-      )
-    | (Score_Scalar(esti'), Score_Dist(answ'), Some(Ok(PSScalar(prior'')))) =>
-      toPointSetFn(answ')->E.R.bind(answ'' =>
-        {estimate: esti', answer: answ'', prior: Some(prior'')}
-        ->PointSetDist_Scoring.ScalarEstimateDistAnswer
-        ->Ok
-      )
+    | (Score_Scalar(_), Score_Dist(_), None) => NotYetImplemented->Error
+    | (Score_Scalar(_), Score_Dist(_), Some(Ok(PSScalar(_)))) => NotYetImplemented->Error
     | (Score_Scalar(_), _, Some(Ok(PSDist(_)))) => DistributionTypes.Unreachable->Error
     | (Score_Scalar(esti'), Score_Scalar(answ'), None) =>
       {estimate: esti', answer: answ', prior: None}
