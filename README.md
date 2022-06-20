@@ -41,6 +41,7 @@ the packages can be found in `packages`.
 - `packages/website` is the main descriptive website for squiggle,
   it is hosted at `squiggle-language.com`.
 - `packages/vscode-ext` is the VS Code extension for writing estimation functions.
+- `packages/cli` is an experimental way of using imports in squiggle, which is also on [npm](https://www.npmjs.com/package/squiggle-cli-experimental).
 
 # Develop
 
