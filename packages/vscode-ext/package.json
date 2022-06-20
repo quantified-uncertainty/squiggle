@@ -18,10 +18,22 @@
     "Visualization"
   ],
   "activationEvents": [
-    "onCustomEditor:squiggle.wysiwyg"
+    "onCustomEditor:squiggle.wysiwyg",
+    "onCommand:squiggle.preview"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "squiggle",
+        "extensions": [
+          ".squiggle"
+        ],
+        "aliases": [
+          "Squiggle"
+        ]
+      }
+    ],
     "customEditors": [
       {
         "viewType": "squiggle.wysiwyg",
@@ -31,10 +43,41 @@
             "filenamePattern": "*.squiggle"
           }
         ],
-        "priority": "default"
+        "priority": "option"
       }
     ],
-    "commands": []
+    "commands": [
+      {
+        "command": "squiggle.preview",
+        "title": "Open Preview",
+        "category": "Squiggle",
+        "when": "editorLangId == squiggle",
+        "icon": "$(open-preview)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "squiggle.preview",
+          "when": "editorLangId == squiggle",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "squiggle.preview",
+          "when": "editorLangId == squiggle"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "squiggle.preview",
+        "key": "ctrl+k v",
+        "mac": "cmd+k v",
+        "when": "editorLangId == squiggle"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
