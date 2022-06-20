@@ -115,11 +115,20 @@ module WithScalarAnswer = {
       }
     _score(~estimatePdf, ~answer)
   }
+  /*
+  let score1 = (~estimate: pointSetDist, ~answer: scalar): result<score, Operation.Error.t> => {
+    let probabilityAssignedToAnswer = Ok(1.0)
+  }
+ */
 
   let scoreWithPrior = (~estimate: pointSetDist, ~answer: scalar, ~prior: pointSetDist): result<
     score,
     Operation.Error.t,
   > => {
+    E.R.merge(score(~estimate, ~answer), score(~estimate=prior, ~answer))->E.R2.fmap(((s1, s2)) =>
+      s1 -. s2
+    )
+    /*
     let _scoreWithPrior = (
       ~estimatePdf: float => float,
       ~answer: scalar,
@@ -132,7 +141,6 @@ module WithScalarAnswer = {
       } else if numerator == 0.0 || priorDensityOfAnswer == 0.0 {
         infinity->Ok
       } else {
-        minusScaledLogOfQuotient(~esti=numerator, ~answ=priorDensityOfAnswer)
       }
     }
 
@@ -149,6 +157,7 @@ module WithScalarAnswer = {
       | Mixed(prio) => Mixed.T.xToY(x, prio)->sum
       }
     _scoreWithPrior(~estimatePdf, ~answer, ~priorPdf)
+ */
   }
 }
 
