@@ -3,7 +3,7 @@
   "displayName": "Squiggle",
   "description": "Squiggle language support",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "publisher": "QURI",
   "repository": {
     "type": "git",
@@ -143,8 +143,5 @@
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
     "typescript": "^4.7.4"
-  },
-  "dependencies": {
-    "vscode-uri": "^3.0.3"
   }
 }
