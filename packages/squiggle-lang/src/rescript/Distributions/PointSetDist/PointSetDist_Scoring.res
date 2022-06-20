@@ -129,7 +129,7 @@ module WithScalarAnswer = {
       s1 -. s2
     )
     /*
-    let _scoreWithPrior = (
+     let _scoreWithPrior = (
       ~estimatePdf: float => float,
       ~answer: scalar,
       ~priorPdf: float => float,
@@ -141,6 +141,7 @@ module WithScalarAnswer = {
       } else if numerator == 0.0 || priorDensityOfAnswer == 0.0 {
         infinity->Ok
       } else {
+        // 
       }
     }
 
@@ -157,11 +158,30 @@ module WithScalarAnswer = {
       | Mixed(prio) => Mixed.T.xToY(x, prio)->sum
       }
     _scoreWithPrior(~estimatePdf, ~answer, ~priorPdf)
- */
+*/
   }
 }
 
+// For mixed discrete answer
+// (prediction, answer) => sum(answer.map(a => a.probability * WithScalarAnswer.score(prediction, a.value)))
+
 module TwoScalars = {
+  // You will almost never want to use this.
+  let score = (~estimate: scalar, ~answer: scalar) => {
+    if estimate == answer {
+      0.0->Ok
+    } else {
+      infinity->Ok // - log(0)
+    }
+  }
+
+  let scoreWithPrior = (~estimate: scalar, ~answer: scalar, ~prior: scalar) => {
+    E.R.merge(score(~estimate, ~answer), score(~estimate=prior, ~answer))->E.R2.fmap(((s1, s2)) =>
+      s1 -. s2
+    )
+    // unclear what this should give if both are wrong: infinity-infinity. Maybe some warning??
+  }
+  /*
   let score = (~estimate: scalar, ~answer: scalar) =>
     if answer == 0.0 {
       0.0->Ok
@@ -179,6 +199,7 @@ module TwoScalars = {
     } else {
       minusScaledLogOfQuotient(~esti=estimate /. prior, ~answ=answer)
     }
+ */
 }
 
 let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<
