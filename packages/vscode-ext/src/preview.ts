@@ -30,6 +30,8 @@ export const registerPreviewCommand = (context: vscode.ExtensionContext) => {
         panel.webview.postMessage({
           type: "update",
           text: editor.document.getText(),
+          showSettings:
+            vscode.workspace.getConfiguration("squiggle").playground,
         });
       };
 

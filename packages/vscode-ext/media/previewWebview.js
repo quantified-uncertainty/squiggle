@@ -1,19 +1,17 @@
-// based on https://github.com/microsoft/vscode-extension-samples/blob/main/custom-editor-sample/media/catScratch.js
 (function () {
-  console.log("hello world");
   const vscode = acquireVsCodeApi();
 
   const container = document.getElementById("root");
 
   const root = ReactDOM.createRoot(container);
-  function updateContent(text) {
+  function updateContent(text, showSettings) {
     root.render(
       React.createElement(squiggle_components.SquigglePlayground, {
         code: text,
-        onCodeChange: (code) => {
-          vscode.postMessage({ type: "edit", text: code });
-        },
         showEditor: false,
+        showTypes: Boolean(showSettings.showTypes),
+        showControls: Boolean(showSettings.showControls),
+        showSummary: Boolean(showSettings.showSummary),
       })
     );
   }
@@ -23,14 +21,14 @@
     const message = event.data; // The json data that the extension sent
     switch (message.type) {
       case "update":
-        const text = message.text;
+        const { text, showSettings } = message;
 
         // Update our webview's content
-        updateContent(text);
+        updateContent(text, showSettings);
 
         // Then persist state information.
         // This state is returned in the call to `vscode.getState` below when a webview is reloaded.
-        vscode.setState({ text });
+        vscode.setState({ text, showSettings });
 
         return;
     }
@@ -38,6 +36,6 @@
 
   const state = vscode.getState();
   if (state) {
-    updateContent(state.text);
+    updateContent(state.text, state.showSettings);
   }
 })();

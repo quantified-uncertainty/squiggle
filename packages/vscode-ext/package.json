@@ -77,7 +77,27 @@
         "mac": "cmd+k v",
         "when": "editorLangId == squiggle"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Squiggle",
+      "properties": {
+        "squiggle.playground.showTypes": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to show the types of outputs in the playground"
+        },
+        "squiggle.playground.showControls": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to show the log scale controls in the playground"
+        },
+        "squiggle.playground.showSummary": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to show the summary table in the playground"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
