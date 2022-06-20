@@ -25,6 +25,43 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 />;
 ```
 
+# Usage in a Nextjs project
+
+For now, `squiggle-components` requires the `window` property, so using the package in nextjs requires dynamic loading:
+
+```
+
+import React from "react";
+import { SquiggleChart } from "@quri/squiggle-components";
+
+import dynamic from "next/dynamic";
+
+const SquiggleChart = dynamic(
+  () => import("@quri/squiggle-components").then((mod) => mod.SquiggleChart),
+  {
+    loading: () => <p>Loading...</p>,
+    ssr: false,
+  }
+);
+
+export function DynamicSquiggleChart({ squiggleString }) {
+  if (squiggleString == "") {
+    return "";
+  } else {
+    return (
+        <SquiggleChart
+          squiggleString={squiggleString}
+          width={445}
+          height={200}
+          showSummary={true}
+          showTypes={true}
+        />
+    );
+  }
+}
+
+```
+
 # Build storybook for development
 
 We assume that you had run `yarn` at monorepo level, installing dependencies.
