@@ -124,7 +124,7 @@ module WithScalarAnswer = {
       ~estimatePdf: float => float,
       ~answer: scalar,
       ~priorPdf: float => float,
-    ): result<float, Operation.Error.t> => {
+    ): result<score, Operation.Error.t> => {
       let numerator = answer->estimatePdf
       let priorDensityOfAnswer = answer->priorPdf
       if numerator < 0.0 || priorDensityOfAnswer < 0.0 {
@@ -162,7 +162,7 @@ module TwoScalars = {
       minusScaledLogOfQuotient(~esti=estimate, ~answ=answer)
     }
 
-  let scoreWithPrior = (~estimate: float, ~answer: float, ~prior: float) =>
+  let scoreWithPrior = (~estimate: scalar, ~answer: scalar, ~prior: scalar) =>
     if answer == 0.0 {
       0.0->Ok
     } else if estimate == 0.0 || prior == 0.0 {
