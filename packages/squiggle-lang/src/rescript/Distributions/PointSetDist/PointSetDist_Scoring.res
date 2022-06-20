@@ -132,7 +132,7 @@ module WithScalarAnswer = {
       } else if numerator == 0.0 || priorDensityOfAnswer == 0.0 {
         infinity->Ok
       } else {
-        minusScaledLogOfQuot(~esti=numerator, ~answ=priorDensityOfAnswer)
+        minusScaledLogOfQuotient(~esti=numerator, ~answ=priorDensityOfAnswer)
       }
     }
 
@@ -172,7 +172,7 @@ module TwoScalars = {
     }
 }
 
-let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<(t, t), 'e> =>
+let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<(pointSetDist, pointSetDist), 'e> =>
   E.R.merge(toPointSetFn(estimate, ()), toPointSetFn(answer, ()))
 
 let logScore = (args: scoreArgs, ~combineFn, ~integrateFn, ~toMixedFn): result<

@@ -92,7 +92,7 @@ module DistributionOperation = {
     | ToString
     | ToSparkline(int)
 
-  type genericDistOrScalar = GDist(genericDist) | GScalar(float)
+  type genericDistOrScalar = Score_Dist(genericDist) | Score_Scalar(float)
 
   type toScore = LogScore(genericDistOrScalar, option<genericDistOrScalar>)
 
@@ -165,35 +165,35 @@ module Constructors = {
     let inspect = (dist): t => FromDist(ToDist(Inspect), dist)
     module LogScore = {
       let distEstimateDistAnswer = (estimate, answer): t => FromDist(
-        ToScore(LogScore(GDist(answer), None)),
+        ToScore(LogScore(Score_Dist(answer), None)),
         estimate,
       )
       let distEstimateDistAnswerWithPrior = (estimate, answer, prior): t => FromDist(
-        ToScore(LogScore(GDist(answer), Some(prior))),
+        ToScore(LogScore(Score_Dist(answer), Some(prior))),
         estimate,
       )
       let distEstimateScalarAnswer = (estimate, answer): t => FromDist(
-        ToScore(LogScore(GScalar(answer), None)),
+        ToScore(LogScore(Score_Scalar(answer), None)),
         estimate,
       )
       let distEstimateScalarAnswerWithPrior = (estimate, answer, prior): t => FromDist(
-        ToScore(LogScore(GScalar(answer), Some(prior))),
+        ToScore(LogScore(Score_Scalar(answer), Some(prior))),
         estimate,
       )
       let scalarEstimateDistAnswer = (estimate, answer): t => FromFloat(
-        ToScore(LogScore(GDist(answer), None)),
+        ToScore(LogScore(Score_Dist(answer), None)),
         estimate,
       )
       let scalarEstimateDistAnswerWithPrior = (estimate, answer, prior): t => FromFloat(
-        ToScore(LogScore(GDist(answer), Some(prior))),
+        ToScore(LogScore(Score_Dist(answer), Some(prior))),
         estimate,
       )
       let scalarEstimateScalarAnswer = (estimate, answer): t => FromFloat(
-        ToScore(LogScore(GScalar(answer), None)),
+        ToScore(LogScore(Score_Scalar(answer), None)),
         estimate,
       )
       let scalarEstimateScalarAnswerWithPrior = (estimate, answer, prior): t => FromFloat(
-        ToScore(LogScore(GScalar(answer), Some(prior))),
+        ToScore(LogScore(Score_Scalar(answer), Some(prior))),
         estimate,
       )
     }
