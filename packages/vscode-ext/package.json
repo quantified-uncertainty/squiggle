@@ -33,11 +33,26 @@
           "Squiggle"
         ],
         "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "squiggleU",
+        "extensions": [
+          ".squiggleU"
+        ],
+        "aliases": [
+          "SquiggleU"
+        ],
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
         "language": "squiggle",
+        "scopeName": "source.squiggle",
+        "path": "./syntaxes/squiggle.tmLanguage.json"
+      },
+      {
+        "language": "squiggleU",
         "scopeName": "source.squiggle",
         "path": "./syntaxes/squiggle.tmLanguage.json"
       }
