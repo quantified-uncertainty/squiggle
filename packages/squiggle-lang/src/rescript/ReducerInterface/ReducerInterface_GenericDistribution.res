@@ -223,7 +223,10 @@ let dispatchToGenericOutput = (
   | ("normalize", [EvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
   | ("klDivergence", [EvDistribution(estimate), EvDistribution(answer)]) =>
     Some(
-      DistributionOperation.run(FromDist(ToScore(LogScore(Score_Dist(answer), None)), estimate), ~env),
+      DistributionOperation.run(
+        FromDist(ToScore(LogScore(Score_Dist(answer), None)), estimate),
+        ~env,
+      ),
     )
   | ("klDivergence", [EvDistribution(estimate), EvDistribution(answer), EvDistribution(prior)]) =>
     Some(

@@ -164,8 +164,11 @@ module Score = {
       )
     | (Score_Dist(esti'), Score_Dist(answ'), Some(Ok(PSDist(prior'')))) =>
       twoDists(~toPointSetFn, esti', answ')->E.R2.fmap(((esti'', answ'')) =>
-        {estimate: esti'', answer: answ'', prior: Some(prior'')}
-        ->PointSetDist_Scoring.DistEstimateDistAnswer
+        {
+          estimate: esti'',
+          answer: answ'',
+          prior: Some(prior''),
+        }->PointSetDist_Scoring.DistEstimateDistAnswer
       )
     | (Score_Dist(_), _, Some(Ok(PSScalar(_)))) => DistributionTypes.Unreachable->Error
     | (Score_Dist(esti'), Score_Scalar(answ'), None) =>
@@ -177,19 +180,20 @@ module Score = {
     | (Score_Dist(esti'), Score_Scalar(answ'), Some(Ok(PSDist(prior'')))) =>
       toPointSetFn(esti')->E.R.bind(esti'' =>
         {estimate: esti'', answer: answ', prior: Some(prior'')}
-          ->PointSetDist_Scoring.DistEstimateScalarAnswer
-        -> Ok
+        ->PointSetDist_Scoring.DistEstimateScalarAnswer
+        ->Ok
       )
     | (Score_Scalar(esti'), Score_Dist(answ'), None) =>
       toPointSetFn(answ')->E.R.bind(answ'' =>
         {estimate: esti', answer: answ'', prior: None}
-          ->PointSetDist_Scoring.ScalarEstimateDistAnswer
-        -> Ok
+        ->PointSetDist_Scoring.ScalarEstimateDistAnswer
+        ->Ok
       )
     | (Score_Scalar(esti'), Score_Dist(answ'), Some(Ok(PSScalar(prior'')))) =>
       toPointSetFn(answ')->E.R.bind(answ'' =>
         {estimate: esti', answer: answ'', prior: Some(prior'')}
-        ->PointSetDist_Scoring.ScalarEstimateDistAnswer->Ok
+        ->PointSetDist_Scoring.ScalarEstimateDistAnswer
+        ->Ok
       )
     | (Score_Scalar(_), _, Some(Ok(PSDist(_)))) => DistributionTypes.Unreachable->Error
     | (Score_Scalar(esti'), Score_Scalar(answ'), None) =>

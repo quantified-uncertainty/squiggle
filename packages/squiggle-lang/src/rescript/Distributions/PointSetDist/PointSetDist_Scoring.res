@@ -172,8 +172,10 @@ module TwoScalars = {
     }
 }
 
-let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<(pointSetDist, pointSetDist), 'e> =>
-  E.R.merge(toPointSetFn(estimate, ()), toPointSetFn(answer, ()))
+let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<
+  (pointSetDist, pointSetDist),
+  'e,
+> => E.R.merge(toPointSetFn(estimate, ()), toPointSetFn(answer, ()))
 
 let logScore = (args: scoreArgs, ~combineFn, ~integrateFn, ~toMixedFn): result<
   float,
