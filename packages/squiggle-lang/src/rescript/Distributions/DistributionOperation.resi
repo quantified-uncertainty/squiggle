@@ -68,7 +68,7 @@ module Constructors: {
       ~env: env,
       genericDist,
       genericDist,
-      DistributionTypes.DistributionOperation.scoreDistOrScalar,
+      DistributionTypes.DistributionOperation.genericDistOrScalar,
     ) => result<float, error>
     @genType
     let distEstimateScalarAnswer: (~env: env, genericDist, float) => result<float, error>
@@ -77,7 +77,7 @@ module Constructors: {
       ~env: env,
       genericDist,
       float,
-      DistributionTypes.DistributionOperation.scoreDistOrScalar,
+      DistributionTypes.DistributionOperation.genericDistOrScalar,
     ) => result<float, error>
     @genType
     let scalarEstimateDistAnswer: (~env: env, float, genericDist) => result<float, error>
@@ -86,7 +86,7 @@ module Constructors: {
       ~env: env,
       float,
       genericDist,
-      DistributionTypes.DistributionOperation.scoreDistOrScalar,
+      DistributionTypes.DistributionOperation.genericDistOrScalar,
     ) => result<float, error>
     @genType
     let scalarEstimateScalarAnswer: (~env: env, float, float) => result<float, error>
@@ -95,7 +95,7 @@ module Constructors: {
       ~env: env,
       float,
       float,
-      DistributionTypes.DistributionOperation.scoreDistOrScalar,
+      DistributionTypes.DistributionOperation.genericDistOrScalar,
     ) => result<float, error>
   }
   @genType

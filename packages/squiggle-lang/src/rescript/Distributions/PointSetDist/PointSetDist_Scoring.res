@@ -9,7 +9,7 @@ type scoreArgs =
   | ScalarEstimateScalarAnswer(abstractScoreArgs<scalar, scalar>)
 
 let logFn = Js.Math.log // base e
-let minusScaledLogOfQuot = (~esti, ~answ): result<float, Operation.Error.t> => {
+let minusScaledLogOfQuotient = (~esti, ~answ): result<float, Operation.Error.t> => {
   let quot = esti /. answ
   quot < 0.0 ? Error(Operation.ComplexNumberError) : Ok(-.answ *. logFn(quot))
 }
@@ -26,7 +26,7 @@ module WithDistAnswer = {
     } else if estimateElement == 0.0 {
       Ok(infinity)
     } else {
-      minusScaledLogOfQuot(~esti=estimateElement, ~answ=answerElement)
+      minusScaledLogOfQuotient(~esti=estimateElement, ~answ=answerElement)
     }
 
   let rec sum = (~estimate: t, ~answer: t, ~combineFn, ~integrateFn, ~toMixedFn): result<
@@ -109,7 +109,7 @@ module WithScalarAnswer = {
     } else if numerator == 0.0 || priorDensityOfAnswer == 0.0 {
       infinity->Ok
     } else {
-      minusScaledLogOfQuot(~esti=numerator, ~answ=priorDensityOfAnswer)
+      minusScaledLogOfQuotient(~esti=numerator, ~answ=priorDensityOfAnswer)
     }
   }
 
@@ -151,7 +151,7 @@ module TwoScalars = {
     } else if estimate == 0.0 {
       infinity->Ok
     } else {
-      minusScaledLogOfQuot(~esti=estimate, ~answ=answer)
+      minusScaledLogOfQuotient(~esti=estimate, ~answ=answer)
     }
 
   let scoreWithPrior = (~estimate: float, ~answer: float, ~prior: float) =>
@@ -160,9 +160,12 @@ module TwoScalars = {
     } else if estimate == 0.0 || prior == 0.0 {
       infinity->Ok
     } else {
-      minusScaledLogOfQuot(~esti=estimate /. prior, ~answ=answer)
+      minusScaledLogOfQuotient(~esti=estimate /. prior, ~answ=answer)
     }
 }
+
+let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<(t, t), 'e> =>
+  E.R.merge(toPointSetFn(estimate, ()), toPointSetFn(answer, ()))
 
 let logScore = (args: scoreArgs, ~combineFn, ~integrateFn, ~toMixedFn): result<
   float,
