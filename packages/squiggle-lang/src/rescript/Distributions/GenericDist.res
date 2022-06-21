@@ -172,16 +172,20 @@ module Score = {
       )
     | (Score_Dist(_), _, Some(Ok(PSScalar(_)))) => DistributionTypes.Unreachable->Error
     | (Score_Dist(esti'), Score_Scalar(answ'), None) =>
-      toPointSetFn(esti')->E.R.bind(esti'' =>
-        {estimate: esti'', answer: answ', prior: None}
-        ->PointSetDist_Scoring.DistEstimateScalarAnswer
-        ->Ok
+      toPointSetFn(esti')->E.R2.fmap(esti'' =>
+        {
+          estimate: esti'',
+          answer: answ',
+          prior: None,
+        }->PointSetDist_Scoring.DistEstimateScalarAnswer
       )
     | (Score_Dist(esti'), Score_Scalar(answ'), Some(Ok(PSDist(prior'')))) =>
-      toPointSetFn(esti')->E.R.bind(esti'' =>
-        {estimate: esti'', answer: answ', prior: Some(prior'')}
-        ->PointSetDist_Scoring.DistEstimateScalarAnswer
-        ->Ok
+      toPointSetFn(esti')->E.R2.fmap(esti'' =>
+        {
+          estimate: esti'',
+          answer: answ',
+          prior: Some(prior''),
+        }->PointSetDist_Scoring.DistEstimateScalarAnswer
       )
     | (Score_Scalar(_), Score_Dist(_), None) => NotYetImplemented->Error
     | (Score_Scalar(_), Score_Dist(_), Some(Ok(PSScalar(_)))) => NotYetImplemented->Error
