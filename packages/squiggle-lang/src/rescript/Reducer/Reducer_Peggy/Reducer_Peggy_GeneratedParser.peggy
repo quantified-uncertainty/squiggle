@@ -268,7 +268,7 @@ identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
 
 unitIdentifier 'identifier'
-  = ([_a-df-zA-DF-Z]+[_a-z0-9]i*) {return nodeIdentifier(text())}
+  = ([_a-zA-Z]+[_a-z0-9]i*) {return nodeIdentifier(text())} 
 
 dollarIdentifier '$identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) {return nodeIdentifier(text())} 
