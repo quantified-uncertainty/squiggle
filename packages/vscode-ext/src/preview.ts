@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import * as uri from "vscode-uri";
+import * as path from "path";
 import { getWebviewContent } from "./utils";
 
 export const registerPreviewCommand = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.commands.registerTextEditorCommand("squiggle.preview", (editor) => {
       // Create and show a new webview
-      const title = `Preview ${uri.Utils.basename(editor.document.uri)}`;
+      const title = `Preview ${path.basename(editor.document.uri.path)}`;
 
       const panel = vscode.window.createWebviewPanel(
         "squigglePreview",
