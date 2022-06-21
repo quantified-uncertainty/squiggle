@@ -16,7 +16,7 @@ module ScientificUnit = {
     }
 
   let getMultiplier = (r: string) => {
-    let match = Js.String2.match_(r, %re(`/fromUnit_([_a-zA-Z]*)/`))
+    let match = Js.String2.match_(r, %re(`/fromUnit_([a-zA-Z]*)/`))
     switch match {
     | Some([_, unit]) => nameToMultiplier(unit)
     | _ => None
