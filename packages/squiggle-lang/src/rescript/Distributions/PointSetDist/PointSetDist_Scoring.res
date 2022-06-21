@@ -93,33 +93,32 @@ module WithDistAnswer = {
 module WithScalarAnswer = {
   let sum = (mp: PointSetTypes.MixedPoint.t): float => mp.continuous +. mp.discrete
   let score = (~estimate: pointSetDist, ~answer: scalar): result<score, Operation.Error.t> => {
-    let _score = (~estimatePdf: float => float, ~answer: float): result<
+    let _score = (~estimatePdf: float => option<float>, ~answer: float): result<
       score,
       Operation.Error.t,
     > => {
       let density = answer->estimatePdf
-      if density < 0.0 {
-        Operation.PdfInvalidError->Error
-      } else if density == 0.0 {
-        infinity->Ok
-      } else {
-        density->logFn->(x => -.x)->Ok
+      switch density {
+      | None => Operation.PdfInvalidError->Error
+      | Some(density') =>
+        if density' < 0.0 {
+          Operation.PdfInvalidError->Error
+        } else if density' == 0.0 {
+          infinity->Ok
+        } else {
+          density'->logFn->(x => -.x)->Ok
+        }
       }
     }
 
     let estimatePdf = x =>
       switch estimate {
-      | Continuous(esti) => Continuous.T.xToY(x, esti)->sum
-      | Discrete(esti) => Discrete.T.xToY(x, esti)->sum
-      | Mixed(esti) => Mixed.T.xToY(x, esti)->sum
+      | Continuous(esti) => Continuous.T.xToY(x, esti)->sum->Some
+      | Discrete(esti) => Discrete.T.xToY(x, esti)->sum->Some
+      | Mixed(_) => None
       }
     _score(~estimatePdf, ~answer)
   }
-  /*
-  let score1 = (~estimate: pointSetDist, ~answer: scalar): result<score, Operation.Error.t> => {
-    let probabilityAssignedToAnswer = Ok(1.0)
-  }
- */
 
   let scoreWithPrior = (~estimate: pointSetDist, ~answer: scalar, ~prior: pointSetDist): result<
     score,
@@ -128,47 +127,13 @@ module WithScalarAnswer = {
     E.R.merge(score(~estimate, ~answer), score(~estimate=prior, ~answer))->E.R2.fmap(((s1, s2)) =>
       s1 -. s2
     )
-    /*
-     let _scoreWithPrior = (
-      ~estimatePdf: float => float,
-      ~answer: scalar,
-      ~priorPdf: float => float,
-    ): result<score, Operation.Error.t> => {
-      let numerator = answer->estimatePdf
-      let priorDensityOfAnswer = answer->priorPdf
-      if numerator < 0.0 || priorDensityOfAnswer < 0.0 {
-        Operation.PdfInvalidError->Error
-      } else if numerator == 0.0 || priorDensityOfAnswer == 0.0 {
-        infinity->Ok
-      } else {
-        // 
-      }
-    }
-
-    let estimatePdf = x =>
-      switch estimate {
-      | Continuous(esti) => Continuous.T.xToY(x, esti)->sum
-      | Discrete(esti) => Discrete.T.xToY(x, esti)->sum
-      | Mixed(esti) => Mixed.T.xToY(x, esti)->sum
-      }
-    let priorPdf = x =>
-      switch prior {
-      | Continuous(prio) => Continuous.T.xToY(x, prio)->sum
-      | Discrete(prio) => Discrete.T.xToY(x, prio)->sum
-      | Mixed(prio) => Mixed.T.xToY(x, prio)->sum
-      }
-    _scoreWithPrior(~estimatePdf, ~answer, ~priorPdf)
-*/
   }
 }
-
-// For mixed discrete answer
-// (prediction, answer) => sum(answer.map(a => a.probability * WithScalarAnswer.score(prediction, a.value)))
 
 module TwoScalars = {
   // You will almost never want to use this.
   let score = (~estimate: scalar, ~answer: scalar) => {
-    if estimate == answer {
+    if Js.Math.abs_float(estimate -. answer) < MagicNumbers.Epsilon.ten {
       0.0->Ok
     } else {
       infinity->Ok // - log(0)
@@ -178,28 +143,8 @@ module TwoScalars = {
   let scoreWithPrior = (~estimate: scalar, ~answer: scalar, ~prior: scalar) => {
     E.R.merge(score(~estimate, ~answer), score(~estimate=prior, ~answer))->E.R2.fmap(((s1, s2)) =>
       s1 -. s2
-    )
-    // unclear what this should give if both are wrong: infinity-infinity. Maybe some warning??
+    ) // This will presently NaN if both are wrong: infinity-infinity.
   }
-  /*
-  let score = (~estimate: scalar, ~answer: scalar) =>
-    if answer == 0.0 {
-      0.0->Ok
-    } else if estimate == 0.0 {
-      infinity->Ok
-    } else {
-      minusScaledLogOfQuotient(~esti=estimate, ~answ=answer)
-    }
-
-  let scoreWithPrior = (~estimate: scalar, ~answer: scalar, ~prior: scalar) =>
-    if answer == 0.0 {
-      0.0->Ok
-    } else if estimate == 0.0 || prior == 0.0 {
-      infinity->Ok
-    } else {
-      minusScaledLogOfQuotient(~esti=estimate /. prior, ~answ=answer)
-    }
- */
 }
 
 let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<
