@@ -10,10 +10,6 @@ describe("Scalar manipulation is well-modeled by javascript math", () => {
         let squiggleResult = testRun(squiggleString);
         if (x == 0) {
           expect(squiggleResult.value).toEqual(-Infinity);
-        } else if (x < 0) {
-          expect(squiggleResult.value).toEqual(
-            "somemessage (confused why a test case hasn't pointed out to me that this message is bogus)"
-          );
         } else {
           expect(squiggleResult.value).toEqual(Math.log(x));
         }
