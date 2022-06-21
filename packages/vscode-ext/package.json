@@ -3,7 +3,7 @@
   "displayName": "Squiggle",
   "description": "Squiggle language support",
   "license": "MIT",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "publisher": "QURI",
   "repository": {
     "type": "git",
@@ -18,10 +18,11 @@
     "Visualization"
   ],
   "activationEvents": [
+    "onLanguage:squiggle",
     "onCustomEditor:squiggle.wysiwyg",
     "onCommand:squiggle.preview"
   ],
-  "main": "./out/extension.js",
+  "main": "./client/out/extension.js",
   "contributes": {
     "languages": [
       {
@@ -130,8 +131,9 @@
     "compile": "yarn run compile:tsc && yarn run compile:grammar && yarn run compile:vendor",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
-    "lint": "eslint src --ext ts",
-    "format": "eslint src --ext ts --fix"
+    "lint": "eslint client/src server/src --ext ts",
+    "format": "eslint client/src server/src --ext ts --fix",
+    "package": "npx vsce package --yarn"
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
@@ -142,6 +144,13 @@
     "eslint": "^8.18.0",
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "vsce-yarn-patch": "^1.66.2"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.0.1",
+    "vscode-languageserver": "^7.0.0",
+    "vscode-languageserver-textdocument": "^1.0.5",
+    "@quri/squiggle-lang": "^0.2.11"
   }
 }
