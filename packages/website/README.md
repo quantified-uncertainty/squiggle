@@ -6,10 +6,12 @@ This website is built using [Docusaurus 2](https://docusaurus.io/), a modern sta
 
 We assume you ran `yarn` at monorepo level.
 
-The website depends on `squiggle-lang`, which you have to build manually.
+The website depends on `squiggle-lang` and `components`, which you have to build manually.
 
 ```sh
 cd ../squiggle-lang
+yarn build
+cd ../components
 yarn build
 ```
 
