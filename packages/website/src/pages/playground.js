@@ -1,23 +1,29 @@
+import { deflate, inflate } from "pako";
+import { toByteArray, fromByteArray } from "base64-js";
 import React from "react";
 import Layout from "@theme/Layout";
 import { SquigglePlayground } from "../components/SquigglePlayground";
 
 function getHashData() {
-  if (typeof window === "undefined") {
+  if (typeof window === "undefined" || !window.location.hash) {
     return {};
   }
   try {
-    return JSON.parse(window.decodeURIComponent(window.location.hash.slice(1)));
+    const compressed = toByteArray(
+      decodeURIComponent(window.location.hash.slice(1))
+    );
+    const text = inflate(compressed, { to: "string" });
+    return JSON.parse(text);
   } catch (err) {
     console.error(err);
     return {};
   }
 }
 
-function setHashData(Data) {
-  window.location.hash = window.encodeURIComponent(
-    JSON.stringify({ ...getHashData(), ...Data })
-  );
+function setHashData(data) {
+  const text = JSON.stringify({ ...getHashData(), ...data });
+  const compressed = deflate(text, { level: 9 });
+  window.location.hash = encodeURIComponent(fromByteArray(compressed));
 }
 
 export default function PlaygroundPage() {
