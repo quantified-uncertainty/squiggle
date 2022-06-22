@@ -23,7 +23,11 @@ function getHashData() {
 function setHashData(data) {
   const text = JSON.stringify({ ...getHashData(), ...data });
   const compressed = deflate(text, { level: 9 });
-  window.location.hash = encodeURIComponent(fromByteArray(compressed));
+  window.history.replaceState(
+    undefined,
+    "",
+    "#" + encodeURIComponent(fromByteArray(compressed))
+  );
 }
 
 export default function PlaygroundPage() {
