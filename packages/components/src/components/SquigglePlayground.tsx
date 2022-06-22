@@ -238,7 +238,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   useEffect(() => {
     onSettingsChange?.(vars);
-  }, [vars]);
+  }, [vars, onSettingsChange]);
 
   const chartSettings = {
     start: Number(vars.diagramStart),

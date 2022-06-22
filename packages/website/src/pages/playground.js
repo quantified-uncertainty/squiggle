@@ -4,13 +4,18 @@ import React from "react";
 import Layout from "@theme/Layout";
 import { SquigglePlayground } from "../components/SquigglePlayground";
 
+const HASH_PREFIX = "#code=";
 function getHashData() {
-  if (typeof window === "undefined" || !window.location.hash) {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  const hash = window.location.hash;
+  if (!hash.startsWith(HASH_PREFIX)) {
     return {};
   }
   try {
     const compressed = toByteArray(
-      decodeURIComponent(window.location.hash.slice(1))
+      decodeURIComponent(hash.slice(HASH_PREFIX.length))
     );
     const text = inflate(compressed, { to: "string" });
     return JSON.parse(text);
@@ -26,7 +31,7 @@ function setHashData(data) {
   window.history.replaceState(
     undefined,
     "",
-    "#" + encodeURIComponent(fromByteArray(compressed))
+    HASH_PREFIX + encodeURIComponent(fromByteArray(compressed))
   );
 }
 
