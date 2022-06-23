@@ -13,7 +13,10 @@ import {
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
-import { DistributionChart } from "./DistributionChart";
+import {
+  DistributionChart,
+  DistributionPlottingSettings,
+} from "./DistributionChart";
 import { NumberShower } from "./NumberShower";
 import { ErrorAlert } from "./Alert";
 
@@ -44,6 +47,7 @@ export type FunctionChartSettings = {
 interface FunctionChart1DistProps {
   fn: lambdaValue;
   chartSettings: FunctionChartSettings;
+  distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;
   height: number;
 }
@@ -150,6 +154,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   fn,
   chartSettings,
   environment,
+  distributionPlotSettings,
   height,
 }) => {
   let [mouseOverlay, setMouseOverlay] = React.useState(0);
@@ -175,7 +180,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
         distribution={mouseItem.value.value}
         width={400}
         height={50}
-        showSummary={false}
+        {...distributionPlotSettings}
       />
     ) : null;
 

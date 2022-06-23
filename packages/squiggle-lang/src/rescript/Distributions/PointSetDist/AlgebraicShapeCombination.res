@@ -214,7 +214,7 @@ let combineShapesContinuousDiscrete = (
         // When this operation is flipped (like 1 - normal(5, 2)) then the
         // x axis coordinates would all come out the wrong order. So we need
         // to fill them out in the opposite direction
-        let index = discretePosition == First ? t1n - 1 - i : i
+        let index = discretePosition == First && op == #Subtract ? t1n - 1 - i : i
         Belt.Array.set(
           dxyShape,
           index,

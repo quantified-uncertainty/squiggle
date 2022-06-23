@@ -2,6 +2,7 @@ import * as React from "react";
 import { lambdaValue, environment, runForeign } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
+import { DistributionPlottingSettings } from "./DistributionChart";
 import { ErrorAlert, MessageAlert } from "./Alert";
 
 export type FunctionChartSettings = {
@@ -13,6 +14,7 @@ export type FunctionChartSettings = {
 interface FunctionChartProps {
   fn: lambdaValue;
   chartSettings: FunctionChartSettings;
+  distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;
   height: number;
 }
@@ -21,6 +23,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
   chartSettings,
   environment,
+  distributionPlotSettings,
   height,
 }) => {
   if (fn.parameters.length > 1) {
@@ -53,6 +56,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
           chartSettings={chartSettings}
           environment={environment}
           height={height}
+          distributionPlotSettings={distributionPlotSettings}
         />
       );
     case "number":

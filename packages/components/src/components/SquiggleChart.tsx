@@ -37,6 +37,10 @@ export interface SquiggleChartProps {
   showTypes?: boolean;
   /** Whether to show graph controls (scale etc)*/
   showControls?: boolean;
+  /** Set the x scale to be logarithmic by deault */
+  logX?: boolean;
+  /** Set the y scale to be exponential by deault */
+  expY?: boolean;
 }
 
 const defaultOnChange = () => {};
@@ -53,6 +57,8 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   width,
   showTypes = false,
   showControls = false,
+  logX = false,
+  expY = false,
   chartSettings = defaultChartSettings,
 }) => {
   const { result } = useSquiggle({
@@ -67,14 +73,20 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     return <SquiggleErrorAlert error={result.value} />;
   }
 
+  let distributionPlotSettings = {
+    showControls,
+    showSummary,
+    logX,
+    expY,
+  };
+
   return (
     <SquiggleItem
       expression={result.value}
       width={width}
       height={height}
-      showSummary={showSummary}
+      distributionPlotSettings={distributionPlotSettings}
       showTypes={showTypes}
-      showControls={showControls}
       chartSettings={chartSettings}
       environment={environment ?? defaultEnvironment}
     />
