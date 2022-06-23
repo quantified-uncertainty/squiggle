@@ -19,25 +19,38 @@ import {
 } from "./DistributionVegaScales";
 import { NumberShower } from "./NumberShower";
 
-type DistributionChartProps = {
-  distribution: Distribution;
-  width?: number;
-  height: number;
+export type DistributionPlottingSettings = {
   /** Whether to show a summary of means, stdev, percentiles etc */
   showSummary: boolean;
   /** Whether to show the user graph controls (scale etc) */
-  showControls?: boolean;
+  showControls: boolean;
+  /** Set the x scale to be logarithmic by deault */
+  logX: boolean;
+  /** Set the y scale to be exponential by deault */
+  expY: boolean;
 };
+
+export type DistributionChartProps = {
+  distribution: Distribution;
+  width?: number;
+  height: number;
+} & DistributionPlottingSettings;
 
 export const DistributionChart: React.FC<DistributionChartProps> = ({
   distribution,
   height,
   showSummary,
   width,
-  showControls = false,
+  showControls,
+  logX,
+  expY,
 }) => {
-  const [isLogX, setLogX] = React.useState(false);
-  const [isExpY, setExpY] = React.useState(false);
+  const [isLogX, setLogX] = React.useState(logX);
+  const [isExpY, setExpY] = React.useState(expY);
+
+  React.useEffect(() => setLogX(logX), [logX]);
+  React.useEffect(() => setExpY(expY), [expY]);
+
   const shape = distribution.pointSet();
   const [sized] = useSize((size) => {
     if (shape.tag === "Error") {
@@ -126,7 +139,7 @@ export const CheckBox: React.FC<CheckBoxProps> = ({
     <span title={tooltip}>
       <input
         type="checkbox"
-        value={value + ""}
+        checked={value}
         onChange={() => onChange(!value)}
         disabled={disabled}
         className="form-checkbox"

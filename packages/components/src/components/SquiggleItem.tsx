@@ -5,7 +5,10 @@ import {
   declaration,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "./NumberShower";
-import { DistributionChart } from "./DistributionChart";
+import {
+  DistributionChart,
+  DistributionPlottingSettings,
+} from "./DistributionChart";
 import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
 
 function getRange<a>(x: declaration<a>) {
@@ -61,12 +64,9 @@ export interface SquiggleItemProps {
   expression: squiggleExpression;
   width?: number;
   height: number;
-  /** Whether to show a summary of statistics for distributions */
-  showSummary: boolean;
+  distributionPlotSettings: DistributionPlottingSettings;
   /** Whether to show type information */
   showTypes: boolean;
-  /** Whether to show users graph controls (scale etc) */
-  showControls: boolean;
   /** Settings for displaying functions */
   chartSettings: FunctionChartSettings;
   /** Environment for further function executions */
@@ -77,9 +77,8 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
   expression,
   width,
   height,
-  showSummary,
+  distributionPlotSettings,
   showTypes = false,
-  showControls = false,
   chartSettings,
   environment,
 }) => {
@@ -104,10 +103,9 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
           ) : null}
           <DistributionChart
             distribution={expression.value}
+            {...distributionPlotSettings}
             height={height}
             width={width}
-            showSummary={showSummary}
-            showControls={showControls}
           />
         </VariableBox>
       );
@@ -155,11 +153,10 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
                   expression={r}
                   width={width !== undefined ? width - 20 : width}
                   height={50}
+                  distributionPlotSettings={distributionPlotSettings}
                   showTypes={showTypes}
-                  showControls={showControls}
                   chartSettings={chartSettings}
                   environment={environment}
-                  showSummary={showSummary}
                 />
               </div>
             </div>
@@ -181,8 +178,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
                     width={width !== undefined ? width - 20 : width}
                     height={height / 3}
                     showTypes={showTypes}
-                    showSummary={showSummary}
-                    showControls={showControls}
+                    distributionPlotSettings={distributionPlotSettings}
                     chartSettings={chartSettings}
                     environment={environment}
                   />
@@ -220,6 +216,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
           <FunctionChart
             fn={expression.value}
             chartSettings={chartSettings}
+            distributionPlotSettings={distributionPlotSettings}
             height={height}
             environment={{
               sampleCount: environment.sampleCount / 10,
@@ -234,6 +231,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
           <FunctionChart
             fn={expression.value.fn}
             chartSettings={getChartSettings(expression.value)}
+            distributionPlotSettings={distributionPlotSettings}
             height={height}
             environment={{
               sampleCount: environment.sampleCount / 10,
