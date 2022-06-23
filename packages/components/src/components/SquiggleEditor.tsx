@@ -54,6 +54,10 @@ export interface SquiggleEditorProps {
   showControls?: boolean;
   /** Whether to show a summary table */
   showSummary?: boolean;
+  /** Whether to log the x coordinate on distribution charts */
+  logX?: boolean;
+  /** Whether to exp the y coordinate on distribution charts */
+  expY?: boolean;
 }
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
@@ -69,8 +73,14 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   showTypes = false,
   showControls = false,
   showSummary = false,
+  logX = false,
+  expY = false,
 }: SquiggleEditorProps) => {
   const [code, setCode] = useState(initialSquiggleString);
+  React.useEffect(
+    () => setCode(initialSquiggleString),
+    [initialSquiggleString]
+  );
 
   const { result, observableRef } = useSquiggle({
     code,
@@ -86,6 +96,13 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
     count: diagramCount,
   };
 
+  const distributionPlotSettings = {
+    showControls,
+    showSummary,
+    logX,
+    expY,
+  };
+
   return (
     <div ref={observableRef}>
       <SquiggleContainer>
@@ -95,9 +112,8 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
             expression={result.value}
             width={width}
             height={200}
-            showSummary={showSummary}
+            distributionPlotSettings={distributionPlotSettings}
             showTypes={showTypes}
-            showControls={showControls}
             chartSettings={chartSettings}
             environment={environment ?? defaultEnvironment}
           />
@@ -136,6 +152,10 @@ export const SquigglePartial: React.FC<SquigglePartialProps> = ({
   jsImports = defaultImports,
 }: SquigglePartialProps) => {
   const [code, setCode] = useState(initialSquiggleString);
+  React.useEffect(
+    () => setCode(initialSquiggleString),
+    [initialSquiggleString]
+  );
 
   const { result, observableRef } = useSquigglePartial({
     code,
