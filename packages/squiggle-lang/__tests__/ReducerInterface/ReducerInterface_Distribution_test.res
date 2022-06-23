@@ -80,6 +80,7 @@ describe("eval on distribution functions", () => {
     testEval("truncateLeft(normal(5,2), 3)", "Ok(Point Set Distribution)")
     testEval("truncateRight(normal(5,2), 3)", "Ok(Point Set Distribution)")
     testEval("truncate(normal(5,2), 3, 8)", "Ok(Point Set Distribution)")
+    testEval("isNormalized(truncate(normal(5,2), 3, 8))", "Ok(true)")
   })
 
   describe("exp", () => {
