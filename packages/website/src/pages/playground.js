@@ -1,8 +1,52 @@
+import { deflate, inflate } from "pako";
+import { toByteArray, fromByteArray } from "base64-js";
 import React from "react";
 import Layout from "@theme/Layout";
 import { SquigglePlayground } from "../components/SquigglePlayground";
 
+const HASH_PREFIX = "#code=";
+function getHashData() {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  const hash = window.location.hash;
+  if (!hash.startsWith(HASH_PREFIX)) {
+    return {};
+  }
+  try {
+    const compressed = toByteArray(
+      decodeURIComponent(hash.slice(HASH_PREFIX.length))
+    );
+    const text = inflate(compressed, { to: "string" });
+    return JSON.parse(text);
+  } catch (err) {
+    console.error(err);
+    return {};
+  }
+}
+
+function setHashData(data) {
+  const text = JSON.stringify({ ...getHashData(), ...data });
+  const compressed = deflate(text, { level: 9 });
+  window.history.replaceState(
+    undefined,
+    "",
+    HASH_PREFIX + encodeURIComponent(fromByteArray(compressed))
+  );
+}
+
 export default function PlaygroundPage() {
+  const playgroundProps = {
+    initialSquiggleString: "normal(0,1)",
+    height: 700,
+    showTypes: true,
+    ...getHashData(),
+    onCodeChange: (code) => setHashData({ initialSquiggleString: code }),
+    onSettingsChange: (settings) => {
+      const { showTypes, showControls, showSummary, showEditor } = settings;
+      setHashData({ showTypes, showControls, showSummary, showEditor });
+    },
+  };
   return (
     <Layout title="Playground" description="Squiggle Playground">
       <div
@@ -10,11 +54,7 @@ export default function PlaygroundPage() {
           maxWidth: 2000,
         }}
       >
-        <SquigglePlayground
-          initialSquiggleString="normal(0,1)"
-          height={700}
-          showTypes={true}
-        />
+        <SquigglePlayground {...playgroundProps} />
       </div>
     </Layout>
   );

@@ -19,25 +19,38 @@ import {
 } from "./DistributionVegaScales";
 import { NumberShower } from "./NumberShower";
 
-type DistributionChartProps = {
-  distribution: Distribution;
-  width?: number;
-  height: number;
+export type DistributionPlottingSettings = {
   /** Whether to show a summary of means, stdev, percentiles etc */
   showSummary: boolean;
   /** Whether to show the user graph controls (scale etc) */
-  showControls?: boolean;
+  showControls: boolean;
+  /** Set the x scale to be logarithmic by deault */
+  logX: boolean;
+  /** Set the y scale to be exponential by deault */
+  expY: boolean;
 };
+
+export type DistributionChartProps = {
+  distribution: Distribution;
+  width?: number;
+  height: number;
+} & DistributionPlottingSettings;
 
 export const DistributionChart: React.FC<DistributionChartProps> = ({
   distribution,
   height,
   showSummary,
   width,
-  showControls = false,
+  showControls,
+  logX,
+  expY,
 }) => {
-  const [isLogX, setLogX] = React.useState(false);
-  const [isExpY, setExpY] = React.useState(false);
+  const [isLogX, setLogX] = React.useState(logX);
+  const [isExpY, setExpY] = React.useState(expY);
+
+  React.useEffect(() => setLogX(logX), [logX]);
+  React.useEffect(() => setExpY(expY), [expY]);
+
   const shape = distribution.pointSet();
   const [sized] = useSize((size) => {
     if (shape.tag === "Error") {
@@ -63,13 +76,19 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
 
     return (
       <div style={{ width: widthProp }}>
-        <Vega
-          spec={spec}
-          data={{ con: shape.value.continuous, dis: shape.value.discrete }}
-          width={widthProp - 10}
-          height={height}
-          actions={false}
-        />
+        {!(isLogX && massBelow0) ? (
+          <Vega
+            spec={spec}
+            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+            width={widthProp - 10}
+            height={height}
+            actions={false}
+          />
+        ) : (
+          <ErrorAlert heading="Log Domain Error">
+            Cannot graph distribution with negative values on logarithmic scale.
+          </ErrorAlert>
+        )}
         <div className="flex justify-center">
           {showSummary && <SummaryTable distribution={distribution} />}
         </div>
@@ -126,7 +145,7 @@ export const CheckBox: React.FC<CheckBoxProps> = ({
     <span title={tooltip}>
       <input
         type="checkbox"
-        value={value + ""}
+        checked={value}
         onChange={() => onChange(!value)}
         disabled={disabled}
         className="form-checkbox"
