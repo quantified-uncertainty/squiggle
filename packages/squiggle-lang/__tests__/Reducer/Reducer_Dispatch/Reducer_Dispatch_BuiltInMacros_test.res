@@ -26,14 +26,14 @@ describe("bindStatement", () => {
   // Now let's feed a binding to see what happens
   testMacro(
     [],
-    eBindStatement(eBindings([("x", IevNumber(2.))]), exampleStatementX),
+    eBindStatement(eBindings([("x", IEvNumber(2.))]), exampleStatementX),
     "Ok((:$_setBindings_$ @{x: 2} :y 2) context: @{x: 2})",
   )
   // An expression does not return a binding, thus error
   testMacro([], eBindStatement(eBindings([]), exampleExpression), "Assignment expected")
   // When bindings from previous statement are missing the context is injected. This must be the first statement of a block
   testMacro(
-    [("z", IevNumber(99.))],
+    [("z", IEvNumber(99.))],
     eBindStatementDefault(exampleStatementY),
     "Ok((:$_setBindings_$ @{z: 99} :y 1) context: @{z: 99})",
   )
@@ -43,24 +43,24 @@ describe("bindExpression", () => {
   // x is simply bound in the expression
   testMacro(
     [],
-    eBindExpression(eBindings([("x", IevNumber(2.))]), eSymbol("x")),
+    eBindExpression(eBindings([("x", IEvNumber(2.))]), eSymbol("x")),
     "Ok(2 context: @{x: 2})",
   )
   // When an let statement is the end expression then bindings are returned
   testMacro(
     [],
-    eBindExpression(eBindings([("x", IevNumber(2.))]), exampleStatementY),
+    eBindExpression(eBindings([("x", IEvNumber(2.))]), exampleStatementY),
     "Ok((:$_exportBindings_$ (:$_setBindings_$ @{x: 2} :y 1)) context: @{x: 2})",
   )
   // Now let's reduce that expression
   testMacroEval(
     [],
-    eBindExpression(eBindings([("x", IevNumber(2.))]), exampleStatementY),
+    eBindExpression(eBindings([("x", IEvNumber(2.))]), exampleStatementY),
     "Ok(@{x: 2,y: 1})",
   )
   // When bindings are missing the context is injected. This must be the first and last statement of a block
   testMacroEval(
-    [("z", IevNumber(99.))],
+    [("z", IEvNumber(99.))],
     eBindExpressionDefault(exampleStatementY),
     "Ok(@{y: 1,z: 99})",
   )
@@ -115,7 +115,7 @@ describe("block", () => {
     "Ok((:$$_bindExpression_$$ {(:$_let_$ :y (:add :x 1)); :y}))",
   )
   testMacroEval(
-    [("x", IevNumber(1.))],
+    [("x", IEvNumber(1.))],
     eBlock(list{
       eBlock(list{
         eLetStatement("y", eFunction("add", list{eSymbol("x"), eNumber(1.)})),
@@ -135,12 +135,12 @@ describe("lambda", () => {
   testMacro([], callLambdaExpression, "Ok(((:$$_lambda_$$ [y] :y) 1))")
   testMacroEval([], callLambdaExpression, "Ok(1)")
   // Parameters shadow the outer scope
-  testMacroEval([("y", IevNumber(666.))], callLambdaExpression, "Ok(1)")
+  testMacroEval([("y", IEvNumber(666.))], callLambdaExpression, "Ok(1)")
   // When not shadowed by the parameters, the outer scope variables are available
   let lambdaExpression = eFunction(
     "$$_lambda_$$",
     list{eArrayString(["z"]), eFunction("add", list{eSymbol("y"), eSymbol("z")})},
   )
   let callLambdaExpression = eList(list{lambdaExpression, eNumber(1.)})
-  testMacroEval([("y", IevNumber(666.))], callLambdaExpression, "Ok(667)")
+  testMacroEval([("y", IEvNumber(666.))], callLambdaExpression, "Ok(667)")
 })

@@ -10,7 +10,7 @@ let isOfResolvedType = (aType, aValue) => {
   }
 
   switch aType {
-  | IevTypeIdentifier(aTypeIdentifier) => caseTypeIdentifier(aTypeIdentifier, aValue)
+  | IEvTypeIdentifier(aTypeIdentifier) => caseTypeIdentifier(aTypeIdentifier, aValue)
   | _ => false
   }
 }

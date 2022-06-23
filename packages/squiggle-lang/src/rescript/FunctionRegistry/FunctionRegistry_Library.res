@@ -20,7 +20,7 @@ module Declaration = {
         inputs
         ->E.A2.fmap(getMinMax)
         ->E.A.R.firstErrorOrOpen
-        ->E.R2.fmap(args => ReducerInterface_InternalExpressionValue.IevDeclaration(
+        ->E.R2.fmap(args => ReducerInterface_InternalExpressionValue.IEvDeclaration(
           Declaration.make(lambda, args),
         ))
       }
@@ -43,7 +43,7 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
   let expressionValue =
     xyCoords
     ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-    ->E.R2.fmap(r => ReducerInterface_InternalExpressionValue.IevDistribution(
+    ->E.R2.fmap(r => ReducerInterface_InternalExpressionValue.IEvDistribution(
       PointSet(makeDist(r)),
     ))
   expressionValue

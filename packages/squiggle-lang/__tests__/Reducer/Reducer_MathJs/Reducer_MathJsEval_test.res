@@ -5,14 +5,14 @@ open Jest
 open ExpectJs
 
 describe("eval", () => {
-  test("Number", () => expect(MathJs.Eval.eval("1"))->toEqual(Ok(IevNumber(1.))))
-  test("Number expr", () => expect(MathJs.Eval.eval("1-1"))->toEqual(Ok(IevNumber(0.))))
-  test("String", () => expect(MathJs.Eval.eval("'hello'"))->toEqual(Ok(IevString("hello"))))
+  test("Number", () => expect(MathJs.Eval.eval("1"))->toEqual(Ok(IEvNumber(1.))))
+  test("Number expr", () => expect(MathJs.Eval.eval("1-1"))->toEqual(Ok(IEvNumber(0.))))
+  test("String", () => expect(MathJs.Eval.eval("'hello'"))->toEqual(Ok(IEvString("hello"))))
   test("String expr", () =>
-    expect(MathJs.Eval.eval("concat('hello ','world')"))->toEqual(Ok(IevString("hello world")))
+    expect(MathJs.Eval.eval("concat('hello ','world')"))->toEqual(Ok(IEvString("hello world")))
   )
-  test("Boolean", () => expect(MathJs.Eval.eval("true"))->toEqual(Ok(IevBool(true))))
-  test("Boolean expr", () => expect(MathJs.Eval.eval("2>1"))->toEqual(Ok(IevBool(true))))
+  test("Boolean", () => expect(MathJs.Eval.eval("true"))->toEqual(Ok(IEvBool(true))))
+  test("Boolean expr", () => expect(MathJs.Eval.eval("2>1"))->toEqual(Ok(IEvBool(true))))
 })
 
 describe("errors", () => {

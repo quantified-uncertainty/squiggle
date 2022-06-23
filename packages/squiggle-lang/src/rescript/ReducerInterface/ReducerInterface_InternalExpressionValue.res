@@ -7,21 +7,21 @@ type environment = ExternalExpressionValue.environment
 let defaultEnvironment = ExternalExpressionValue.defaultEnvironment
 
 type rec expressionValue =
-  | IevArray(array<expressionValue>) // FIXME: Convert
-  | IevArrayString(array<string>) // FIXME: Convert
-  | IevBool(bool)
-  | IevCall(string) // External function call
-  | IevDate(Js.Date.t)
-  | IevDeclaration(lambdaDeclaration)
-  | IevDistribution(DistributionTypes.genericDist)
-  | IevLambda(lambdaValue)
-  | IevModule(nameSpace) // FIXME: Convert
-  | IevNumber(float)
-  | IevRecord(map)
-  | IevString(string)
-  | IevSymbol(string)
-  | IevTimeDuration(float)
-  | IevTypeIdentifier(string)
+  | IEvArray(array<expressionValue>) // FIXME: Convert
+  | IEvArrayString(array<string>) // FIXME: Convert
+  | IEvBool(bool)
+  | IEvCall(string) // External function call
+  | IEvDate(Js.Date.t)
+  | IEvDeclaration(lambdaDeclaration)
+  | IEvDistribution(DistributionTypes.genericDist)
+  | IEvLambda(lambdaValue)
+  | IEvModule(nameSpace) // FIXME: Convert
+  | IEvNumber(float)
+  | IEvRecord(map)
+  | IEvString(string)
+  | IEvSymbol(string)
+  | IEvTimeDuration(float)
+  | IEvTypeIdentifier(string)
 and map = Belt.Map.String.t<expressionValue>
 and nameSpace = NameSpace(Belt.Map.String.t<expressionValue>)
 and tmpExternalBindings = Js.Dict.t<expressionValue> // FIXME: Remove
@@ -38,27 +38,27 @@ type functionCall = (string, array<expressionValue>)
 
 let rec toString = aValue =>
   switch aValue {
-  | IevArray(anArray) => {
+  | IEvArray(anArray) => {
       let args = anArray->Js.Array2.map(each => toString(each))->Js.Array2.toString
       `[${args}]`
     }
-  | IevArrayString(anArray) => {
+  | IEvArrayString(anArray) => {
       let args = anArray->Js.Array2.toString
       `[${args}]`
     }
-  | IevBool(aBool) => Js.String.make(aBool)
-  | IevCall(fName) => `:${fName}`
-  | IevDate(date) => DateTime.Date.toString(date)
-  | IevDeclaration(d) => Declaration.toString(d, r => toString(IevLambda(r)))
-  | IevDistribution(dist) => GenericDist.toString(dist)
-  | IevLambda(lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
-  | IevModule(m) => `@${m->toStringNameSpace}`
-  | IevNumber(aNumber) => Js.String.make(aNumber)
-  | IevRecord(aMap) => aMap->toStringMap
-  | IevString(aString) => `'${aString}'`
-  | IevSymbol(aString) => `:${aString}`
-  | IevTimeDuration(t) => DateTime.Duration.toString(t)
-  | IevTypeIdentifier(id) => `#${id}`
+  | IEvBool(aBool) => Js.String.make(aBool)
+  | IEvCall(fName) => `:${fName}`
+  | IEvDate(date) => DateTime.Date.toString(date)
+  | IEvDeclaration(d) => Declaration.toString(d, r => toString(IEvLambda(r)))
+  | IEvDistribution(dist) => GenericDist.toString(dist)
+  | IEvLambda(lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
+  | IEvModule(m) => `@${m->toStringNameSpace}`
+  | IEvNumber(aNumber) => Js.String.make(aNumber)
+  | IEvRecord(aMap) => aMap->toStringMap
+  | IEvString(aString) => `'${aString}'`
+  | IEvSymbol(aString) => `:${aString}`
+  | IEvTimeDuration(t) => DateTime.Duration.toString(t)
+  | IEvTypeIdentifier(id) => `#${id}`
   }
 and toStringMap = aMap => {
   let pairs =
@@ -75,21 +75,21 @@ and toStringNameSpace = nameSpace => {
 
 let toStringWithType = aValue =>
   switch aValue {
-  | IevArray(_) => `Array::${toString(aValue)}`
-  | IevArrayString(_) => `ArrayString::${toString(aValue)}`
-  | IevBool(_) => `Bool::${toString(aValue)}`
-  | IevCall(_) => `Call::${toString(aValue)}`
-  | IevDistribution(_) => `Distribution::${toString(aValue)}`
-  | IevLambda(_) => `Lambda::${toString(aValue)}`
-  | IevNumber(_) => `Number::${toString(aValue)}`
-  | IevRecord(_) => `Record::${toString(aValue)}`
-  | IevString(_) => `String::${toString(aValue)}`
-  | IevSymbol(_) => `Symbol::${toString(aValue)}`
-  | IevDate(_) => `Date::${toString(aValue)}`
-  | IevTimeDuration(_) => `Date::${toString(aValue)}`
-  | IevDeclaration(_) => `Declaration::${toString(aValue)}`
-  | IevTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
-  | IevModule(_) => `Module::${toString(aValue)}`
+  | IEvArray(_) => `Array::${toString(aValue)}`
+  | IEvArrayString(_) => `ArrayString::${toString(aValue)}`
+  | IEvBool(_) => `Bool::${toString(aValue)}`
+  | IEvCall(_) => `Call::${toString(aValue)}`
+  | IEvDistribution(_) => `Distribution::${toString(aValue)}`
+  | IEvLambda(_) => `Lambda::${toString(aValue)}`
+  | IEvNumber(_) => `Number::${toString(aValue)}`
+  | IEvRecord(_) => `Record::${toString(aValue)}`
+  | IEvString(_) => `String::${toString(aValue)}`
+  | IEvSymbol(_) => `Symbol::${toString(aValue)}`
+  | IEvDate(_) => `Date::${toString(aValue)}`
+  | IEvTimeDuration(_) => `Date::${toString(aValue)}`
+  | IEvDeclaration(_) => `Declaration::${toString(aValue)}`
+  | IEvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
+  | IEvModule(_) => `Module::${toString(aValue)}`
   }
 
 let argsToString = (args: array<expressionValue>): string => {
@@ -139,21 +139,21 @@ type functionDefinitionSignature =
 
 let valueToValueType = value =>
   switch value {
-  | IevArray(_) => EvtArray
-  | IevArrayString(_) => EvtArrayString
-  | IevBool(_) => EvtBool
-  | IevCall(_) => EvtCall
-  | IevDistribution(_) => EvtDistribution
-  | IevLambda(_) => EvtLambda
-  | IevNumber(_) => EvtNumber
-  | IevRecord(_) => EvtRecord
-  | IevString(_) => EvtString
-  | IevSymbol(_) => EvtSymbol
-  | IevDate(_) => EvtDate
-  | IevTimeDuration(_) => EvtTimeDuration
-  | IevDeclaration(_) => EvtDeclaration
-  | IevTypeIdentifier(_) => EvtTypeIdentifier
-  | IevModule(_) => EvtModule
+  | IEvArray(_) => EvtArray
+  | IEvArrayString(_) => EvtArrayString
+  | IEvBool(_) => EvtBool
+  | IEvCall(_) => EvtCall
+  | IEvDistribution(_) => EvtDistribution
+  | IEvLambda(_) => EvtLambda
+  | IEvNumber(_) => EvtNumber
+  | IEvRecord(_) => EvtRecord
+  | IEvString(_) => EvtString
+  | IEvSymbol(_) => EvtSymbol
+  | IEvDate(_) => EvtDate
+  | IEvTimeDuration(_) => EvtTimeDuration
+  | IEvDeclaration(_) => EvtDeclaration
+  | IEvTypeIdentifier(_) => EvtTypeIdentifier
+  | IEvModule(_) => EvtModule
   }
 
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
@@ -187,25 +187,25 @@ let functionCallSignatureToString = (functionCallSignature: functionCallSignatur
 
 let rec toExternal = (iev: expressionValue): ExternalExpressionValue.expressionValue => {
   switch iev {
-  | IevArray(v) => v->Belt.Array.map(e => toExternal(e))->EvArray
-  | IevArrayString(v) => EvArrayString(v)
-  | IevBool(v) => EvBool(v)
-  | IevCall(v) => EvCall(v)
-  | IevDistribution(v) => EvDistribution(v)
-  | IevLambda(v) => EvLambda(lambdaValueToExternal(v))
-  | IevNumber(v) => EvNumber(v)
-  | IevRecord(v) => v->mapToExternal->EvRecord
-  | IevString(v) => EvString(v)
-  | IevSymbol(v) => EvSymbol(v)
-  | IevDate(v) => EvDate(v)
-  | IevTimeDuration(v) => EvTimeDuration(v)
-  | IevDeclaration(v) => {
+  | IEvArray(v) => v->Belt.Array.map(e => toExternal(e))->EvArray
+  | IEvArrayString(v) => EvArrayString(v)
+  | IEvBool(v) => EvBool(v)
+  | IEvCall(v) => EvCall(v)
+  | IEvDistribution(v) => EvDistribution(v)
+  | IEvLambda(v) => EvLambda(lambdaValueToExternal(v))
+  | IEvNumber(v) => EvNumber(v)
+  | IEvRecord(v) => v->mapToExternal->EvRecord
+  | IEvString(v) => EvString(v)
+  | IEvSymbol(v) => EvSymbol(v)
+  | IEvDate(v) => EvDate(v)
+  | IEvTimeDuration(v) => EvTimeDuration(v)
+  | IEvDeclaration(v) => {
       let fn = lambdaValueToExternal(v.fn)
       let args = v.args
       EvDeclaration({fn: fn, args: args})
     }
-  | IevTypeIdentifier(v) => EvTypeIdentifier(v)
-  | IevModule(v) => v->nameSpaceToTypeScriptBindings->EvModule
+  | IEvTypeIdentifier(v) => EvTypeIdentifier(v)
+  | IEvModule(v) => v->nameSpaceToTypeScriptBindings->EvModule
   }
 }
 and mapToExternal = v =>
@@ -225,25 +225,25 @@ and nameSpaceToTypeScriptBindings = (
 
 let rec toInternal = (ev: ExternalExpressionValue.expressionValue): expressionValue => {
   switch ev {
-  | EvArray(v) => v->Belt.Array.map(e => toInternal(e))->IevArray
-  | EvArrayString(v) => IevArrayString(v)
-  | EvBool(v) => IevBool(v)
-  | EvCall(v) => IevCall(v)
-  | EvDistribution(v) => IevDistribution(v)
-  | EvLambda(v) => IevLambda(lambdaValueToInternal(v))
-  | EvNumber(v) => IevNumber(v)
-  | EvRecord(v) => v->recordToInternal->IevRecord
-  | EvString(v) => IevString(v)
-  | EvSymbol(v) => IevSymbol(v)
-  | EvDate(v) => IevDate(v)
-  | EvTimeDuration(v) => IevTimeDuration(v)
+  | EvArray(v) => v->Belt.Array.map(e => toInternal(e))->IEvArray
+  | EvArrayString(v) => IEvArrayString(v)
+  | EvBool(v) => IEvBool(v)
+  | EvCall(v) => IEvCall(v)
+  | EvDistribution(v) => IEvDistribution(v)
+  | EvLambda(v) => IEvLambda(lambdaValueToInternal(v))
+  | EvNumber(v) => IEvNumber(v)
+  | EvRecord(v) => v->recordToInternal->IEvRecord
+  | EvString(v) => IEvString(v)
+  | EvSymbol(v) => IEvSymbol(v)
+  | EvDate(v) => IEvDate(v)
+  | EvTimeDuration(v) => IEvTimeDuration(v)
   | EvDeclaration(v) => {
       let fn = lambdaValueToInternal(v.fn)
       let args = v.args
-      IevDeclaration({fn: fn, args: args})
+      IEvDeclaration({fn: fn, args: args})
     }
-  | EvTypeIdentifier(v) => IevTypeIdentifier(v)
-  | EvModule(v) => v->nameSpaceFromTypeScriptBindings->IevModule
+  | EvTypeIdentifier(v) => IEvTypeIdentifier(v)
+  | EvModule(v) => v->nameSpaceFromTypeScriptBindings->IEvModule
   }
 }
 and recordToInternal = v =>

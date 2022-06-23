@@ -32,12 +32,12 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   let constructRecord = arrayOfPairs => {
     Belt.Array.map(arrayOfPairs, pairValue =>
       switch pairValue {
-      | IevArray([IevString(key), valueValue]) => (key, valueValue)
-      | _ => ("wrong key type", pairValue->toStringWithType->IevString)
+      | IEvArray([IEvString(key), valueValue]) => (key, valueValue)
+      | _ => ("wrong key type", pairValue->toStringWithType->IEvString)
       }
     )
     ->Belt.Map.String.fromArray
-    ->IevRecord
+    ->IEvRecord
     ->Ok
   }
 
@@ -62,11 +62,11 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   let doAddArray = (originalA, b) => {
     let a = originalA->Js.Array2.copy
     let _ = Js.Array2.pushMany(a, b)
-    a->IevArray->Ok
+    a->IEvArray->Ok
   }
   let doAddString = (a, b) => {
     let answer = Js.String2.concat(a, b)
-    answer->IevString->Ok
+    answer->IEvString->Ok
   }
 
   let inspect = (value: expressionValue) => {
@@ -80,14 +80,14 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   }
 
   let doSetBindings = (bindings: nameSpace, symbol: string, value: expressionValue) => {
-    Module.set(bindings, symbol, value)->IevModule->Ok
+    Module.set(bindings, symbol, value)->IEvModule->Ok
   }
 
   let doSetTypeAliasBindings = (bindings: nameSpace, symbol: string, value: expressionValue) =>
-    Module.setTypeAlias(bindings, symbol, value)->IevModule->Ok
+    Module.setTypeAlias(bindings, symbol, value)->IEvModule->Ok
 
   let doSetTypeOfBindings = (bindings: nameSpace, symbol: string, value: expressionValue) =>
-    Module.setTypeOf(bindings, symbol, value)->IevModule->Ok
+    Module.setTypeOf(bindings, symbol, value)->IEvModule->Ok
 
   let doExportBindings = (bindings: nameSpace) => bindings->Module.toExpressionValue->Ok
 
@@ -97,13 +97,13 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
         let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
         rNewElem->Result.map(newElem =>
           switch newElem {
-          | IevBool(true) => list{elem, ...acc}
+          | IEvBool(true) => list{elem, ...acc}
           | _ => acc
           }
         )
       })
     )
-    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->IevArray)
+    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->IEvArray)
   }
 
   let doMapArray = (aValueArray, aLambdaValue) => {
@@ -113,36 +113,36 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
         rNewElem->Result.map(newElem => list{newElem, ...acc})
       })
     )
-    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->IevArray)
+    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->IEvArray)
   }
 
   module SampleMap = {
     type t = SampleSetDist.t
     let doLambdaCall = (aLambdaValue, list) =>
       switch Lambda.doLambdaCall(aLambdaValue, list, environment, reducer) {
-      | Ok(IevNumber(f)) => Ok(f)
+      | Ok(IEvNumber(f)) => Ok(f)
       | _ => Error(Operation.SampleMapNeedsNtoNFunction)
       }
 
     let toType = r =>
       switch r {
-      | Ok(r) => Ok(IevDistribution(SampleSet(r)))
+      | Ok(r) => Ok(IEvDistribution(SampleSet(r)))
       | Error(r) => Error(REDistributionError(SampleSetError(r)))
       }
 
     let map1 = (sampleSetDist: t, aLambdaValue) => {
-      let fn = r => doLambdaCall(aLambdaValue, list{IevNumber(r)})
+      let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)})
       toType(SampleSetDist.samplesMap(~fn, sampleSetDist))
     }
 
     let map2 = (t1: t, t2: t, aLambdaValue) => {
-      let fn = (a, b) => doLambdaCall(aLambdaValue, list{IevNumber(a), IevNumber(b)})
+      let fn = (a, b) => doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b)})
       SampleSetDist.map2(~fn, ~t1, ~t2)->toType
     }
 
     let map3 = (t1: t, t2: t, t3: t, aLambdaValue) => {
       let fn = (a, b, c) =>
-        doLambdaCall(aLambdaValue, list{IevNumber(a), IevNumber(b), IevNumber(c)})
+        doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b), IEvNumber(c)})
       SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
     }
   }
@@ -165,127 +165,127 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
   let typeModifier_memberOf = (aType, anArray) => {
     let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IevString("typeIdentifier")),
+      ("typeTag", IEvString("typeIdentifier")),
       ("typeIdentifier", aType),
     ])
-    newRecord->Belt.Map.String.set("memberOf", anArray)->IevRecord->Ok
+    newRecord->Belt.Map.String.set("memberOf", anArray)->IEvRecord->Ok
   }
   let typeModifier_memberOf_update = (aRecord, anArray) => {
-    aRecord->Belt.Map.String.set("memberOf", anArray)->IevRecord->Ok
+    aRecord->Belt.Map.String.set("memberOf", anArray)->IEvRecord->Ok
   }
 
   let typeModifier_min = (aType, value) => {
     let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IevString("typeIdentifier")),
+      ("typeTag", IEvString("typeIdentifier")),
       ("typeIdentifier", aType),
     ])
-    newRecord->Belt.Map.String.set("min", value)->IevRecord->Ok
+    newRecord->Belt.Map.String.set("min", value)->IEvRecord->Ok
   }
   let typeModifier_min_update = (aRecord, value) => {
-    aRecord->Belt.Map.String.set("min", value)->IevRecord->Ok
+    aRecord->Belt.Map.String.set("min", value)->IEvRecord->Ok
   }
 
   let typeModifier_max = (aType, value) => {
     let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IevString("typeIdentifier")),
+      ("typeTag", IEvString("typeIdentifier")),
       ("typeIdentifier", aType),
     ])
-    newRecord->Belt.Map.String.set("max", value)->IevRecord->Ok
+    newRecord->Belt.Map.String.set("max", value)->IEvRecord->Ok
   }
   let typeModifier_max_update = (aRecord, value) =>
-    aRecord->Belt.Map.String.set("max", value)->IevRecord->Ok
+    aRecord->Belt.Map.String.set("max", value)->IEvRecord->Ok
 
   let typeModifier_opaque_update = aRecord =>
-    aRecord->Belt.Map.String.set("opaque", IevBool(true))->IevRecord->Ok
+    aRecord->Belt.Map.String.set("opaque", IEvBool(true))->IEvRecord->Ok
 
   let typeOr = evArray => {
     let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IevString("typeOr")),
+      ("typeTag", IEvString("typeOr")),
       ("typeOr", evArray),
     ])
-    newRecord->IevRecord->Ok
+    newRecord->IEvRecord->Ok
   }
   let typeFunction = anArray => {
     let output = Belt.Array.getUnsafe(anArray, Js.Array2.length(anArray) - 1)
     let inputs = Js.Array2.slice(anArray, ~start=0, ~end_=-1)
     let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IevString("typeFunction")),
-      ("inputs", IevArray(inputs)),
+      ("typeTag", IEvString("typeFunction")),
+      ("inputs", IEvArray(inputs)),
       ("output", output),
     ])
-    newRecord->IevRecord->Ok
+    newRecord->IEvRecord->Ok
   }
 
   switch call {
-  | ("$_atIndex_$", [IevArray(aValueArray), IevNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
-  | ("$_atIndex_$", [IevModule(dict), IevString(sIndex)]) => moduleAtIndex(dict, sIndex)
-  | ("$_atIndex_$", [IevRecord(dict), IevString(sIndex)]) => recordAtIndex(dict, sIndex)
-  | ("$_constructArray_$", [IevArray(aValueArray)]) => IevArray(aValueArray)->Ok
-  | ("$_constructRecord_$", [IevArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
-  | ("$_exportBindings_$", [IevModule(nameSpace)]) => doExportBindings(nameSpace)
-  | ("$_setBindings_$", [IevModule(nameSpace), IevSymbol(symbol), value]) =>
+  | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
+  | ("$_atIndex_$", [IEvModule(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
+  | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
+  | ("$_constructArray_$", [IEvArray(aValueArray)]) => IEvArray(aValueArray)->Ok
+  | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
+  | ("$_exportBindings_$", [IEvModule(nameSpace)]) => doExportBindings(nameSpace)
+  | ("$_setBindings_$", [IEvModule(nameSpace), IEvSymbol(symbol), value]) =>
     doSetBindings(nameSpace, symbol, value)
-  | ("$_setTypeAliasBindings_$", [IevModule(nameSpace), IevTypeIdentifier(symbol), value]) =>
+  | ("$_setTypeAliasBindings_$", [IEvModule(nameSpace), IEvTypeIdentifier(symbol), value]) =>
     doSetTypeAliasBindings(nameSpace, symbol, value)
-  | ("$_setTypeOfBindings_$", [IevModule(nameSpace), IevSymbol(symbol), value]) =>
+  | ("$_setTypeOfBindings_$", [IEvModule(nameSpace), IEvSymbol(symbol), value]) =>
     doSetTypeOfBindings(nameSpace, symbol, value)
-  | ("$_typeModifier_memberOf_$", [IevTypeIdentifier(typeIdentifier), IevArray(arr)]) =>
-    typeModifier_memberOf(IevTypeIdentifier(typeIdentifier), IevArray(arr))
-  | ("$_typeModifier_memberOf_$", [IevRecord(typeRecord), IevArray(arr)]) =>
-    typeModifier_memberOf_update(typeRecord, IevArray(arr))
-  | ("$_typeModifier_min_$", [IevTypeIdentifier(typeIdentifier), value]) =>
-    typeModifier_min(IevTypeIdentifier(typeIdentifier), value)
-  | ("$_typeModifier_min_$", [IevRecord(typeRecord), value]) =>
+  | ("$_typeModifier_memberOf_$", [IEvTypeIdentifier(typeIdentifier), IEvArray(arr)]) =>
+    typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))
+  | ("$_typeModifier_memberOf_$", [IEvRecord(typeRecord), IEvArray(arr)]) =>
+    typeModifier_memberOf_update(typeRecord, IEvArray(arr))
+  | ("$_typeModifier_min_$", [IEvTypeIdentifier(typeIdentifier), value]) =>
+    typeModifier_min(IEvTypeIdentifier(typeIdentifier), value)
+  | ("$_typeModifier_min_$", [IEvRecord(typeRecord), value]) =>
     typeModifier_min_update(typeRecord, value)
-  | ("$_typeModifier_max_$", [IevTypeIdentifier(typeIdentifier), value]) =>
-    typeModifier_max(IevTypeIdentifier(typeIdentifier), value)
-  | ("$_typeModifier_max_$", [IevRecord(typeRecord), value]) =>
+  | ("$_typeModifier_max_$", [IEvTypeIdentifier(typeIdentifier), value]) =>
+    typeModifier_max(IEvTypeIdentifier(typeIdentifier), value)
+  | ("$_typeModifier_max_$", [IEvRecord(typeRecord), value]) =>
     typeModifier_max_update(typeRecord, value)
-  | ("$_typeModifier_opaque_$", [IevRecord(typeRecord)]) => typeModifier_opaque_update(typeRecord)
-  | ("$_typeOr_$", [IevArray(arr)]) => typeOr(IevArray(arr))
-  | ("$_typeFunction_$", [IevArray(arr)]) => typeFunction(arr)
-  | ("concat", [IevArray(aValueArray), IevArray(bValueArray)]) =>
+  | ("$_typeModifier_opaque_$", [IEvRecord(typeRecord)]) => typeModifier_opaque_update(typeRecord)
+  | ("$_typeOr_$", [IEvArray(arr)]) => typeOr(IEvArray(arr))
+  | ("$_typeFunction_$", [IEvArray(arr)]) => typeFunction(arr)
+  | ("concat", [IEvArray(aValueArray), IEvArray(bValueArray)]) =>
     doAddArray(aValueArray, bValueArray)
-  | ("concat", [IevString(aValueString), IevString(bValueString)]) =>
+  | ("concat", [IEvString(aValueString), IEvString(bValueString)]) =>
     doAddString(aValueString, bValueString)
-  | ("inspect", [value, IevString(label)]) => inspectLabel(value, label)
+  | ("inspect", [value, IEvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
-  | ("filter", [IevArray(aValueArray), IevLambda(aLambdaValue)]) =>
+  | ("filter", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
     doKeepArray(aValueArray, aLambdaValue)
-  | ("map", [IevArray(aValueArray), IevLambda(aLambdaValue)]) =>
+  | ("map", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
     doMapArray(aValueArray, aLambdaValue)
-  | ("mapSamples", [IevDistribution(SampleSet(dist)), IevLambda(aLambdaValue)]) =>
+  | ("mapSamples", [IEvDistribution(SampleSet(dist)), IEvLambda(aLambdaValue)]) =>
     SampleMap.map1(dist, aLambdaValue)
   | (
       "mapSamples2",
       [
-        IevDistribution(SampleSet(dist1)),
-        IevDistribution(SampleSet(dist2)),
-        IevLambda(aLambdaValue),
+        IEvDistribution(SampleSet(dist1)),
+        IEvDistribution(SampleSet(dist2)),
+        IEvLambda(aLambdaValue),
       ],
     ) =>
     SampleMap.map2(dist1, dist2, aLambdaValue)
   | (
       "mapSamples3",
       [
-        IevDistribution(SampleSet(dist1)),
-        IevDistribution(SampleSet(dist2)),
-        IevDistribution(SampleSet(dist3)),
-        IevLambda(aLambdaValue),
+        IEvDistribution(SampleSet(dist1)),
+        IEvDistribution(SampleSet(dist2)),
+        IEvDistribution(SampleSet(dist3)),
+        IEvLambda(aLambdaValue),
       ],
     ) =>
     SampleMap.map3(dist1, dist2, dist3, aLambdaValue)
-  | ("reduce", [IevArray(aValueArray), initialValue, IevLambda(aLambdaValue)]) =>
+  | ("reduce", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
     doReduceArray(aValueArray, initialValue, aLambdaValue)
-  | ("reduceReverse", [IevArray(aValueArray), initialValue, IevLambda(aLambdaValue)]) =>
+  | ("reduceReverse", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
     doReduceReverseArray(aValueArray, initialValue, aLambdaValue)
-  | ("reverse", [IevArray(aValueArray)]) => aValueArray->Belt.Array.reverse->IevArray->Ok
-  | (_, [IevBool(_)])
-  | (_, [IevNumber(_)])
-  | (_, [IevString(_)])
-  | (_, [IevBool(_), IevBool(_)])
-  | (_, [IevNumber(_), IevNumber(_)])
-  | (_, [IevString(_), IevString(_)]) =>
+  | ("reverse", [IEvArray(aValueArray)]) => aValueArray->Belt.Array.reverse->IEvArray->Ok
+  | (_, [IEvBool(_)])
+  | (_, [IEvNumber(_)])
+  | (_, [IEvString(_)])
+  | (_, [IEvBool(_), IEvBool(_)])
+  | (_, [IEvNumber(_), IEvNumber(_)])
+  | (_, [IEvString(_), IEvString(_)]) =>
     callMathJs(call)
   | call =>
     Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString)) // Report full type signature as error

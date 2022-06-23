@@ -6,11 +6,11 @@ module Module = Reducer_Category_Module
 
 let removeDefaultsInternal = (iev: InternalExpressionValue.expressionValue) => {
   switch iev {
-  | InternalExpressionValue.IevModule(nameSpace) =>
+  | InternalExpressionValue.IEvModule(nameSpace) =>
     Module.removeOther(
       nameSpace,
       ReducerInterface.StdLib.internalStdLib,
-    )->InternalExpressionValue.IevModule
+    )->InternalExpressionValue.IEvModule
   | value => value
   }
 }

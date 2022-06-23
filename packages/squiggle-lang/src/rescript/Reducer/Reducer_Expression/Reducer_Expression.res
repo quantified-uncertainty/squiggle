@@ -36,7 +36,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings, environment: en
   | T.EValue(value) => value->Ok
   | T.EList(list) =>
     switch list {
-    | list{EValue(IevCall(fName)), ..._args} =>
+    | list{EValue(IEvCall(fName)), ..._args} =>
       switch Macro.isMacroName(fName) {
       // A macro expands then reduces itself
       | true => Macro.doMacroCall(expression, bindings, environment, reduceExpression)
@@ -75,7 +75,7 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
   'e,
 > =>
   switch valueList {
-  | list{IevCall(fName), ...args} => {
+  | list{IEvCall(fName), ...args} => {
       let rCheckedArgs = switch fName {
       | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args->Ok
       | _ => args->Lambda.checkIfReduced
@@ -85,14 +85,14 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
         (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
       )
     }
-  | list{IevLambda(_)} =>
+  | list{IEvLambda(_)} =>
     // TODO: remove on solving issue#558
     valueList
     ->Lambda.checkIfReduced
     ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->InternalExpressionValue.IevArray->Ok
+      reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
     )
-  | list{IevLambda(lamdaCall), ...args} =>
+  | list{IEvLambda(lamdaCall), ...args} =>
     args
     ->Lambda.checkIfReduced
     ->Result.flatMap(checkedArgs =>
@@ -103,7 +103,7 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
     valueList
     ->Lambda.checkIfReduced
     ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->InternalExpressionValue.IevArray->Ok
+      reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
     )
   }
 
@@ -135,7 +135,7 @@ let evaluateUsingOptions = (
 }
 
 /*
-  Ievaluates Squiggle code and bindings via Reducer and answers the result
+  IEvaluates Squiggle code and bindings via Reducer and answers the result
 */
 let evaluate = (code: string): result<externalExpressionValue, errorValue> => {
   evaluateUsingOptions(~environment=None, ~externalBindings=None, code)

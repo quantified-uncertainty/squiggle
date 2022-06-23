@@ -29,7 +29,7 @@ let checkIfReduced = (args: list<expressionValue>) =>
   args->Belt.List.reduceReverse(Ok(list{}), (rAcc, arg) =>
     rAcc->Result.flatMap(acc =>
       switch arg {
-      | IevSymbol(symbol) => ErrorValue.RESymbolNotFound(symbol)->Error
+      | IEvSymbol(symbol) => ErrorValue.RESymbolNotFound(symbol)->Error
       | _ => list{arg, ...acc}->Ok
       }
     )

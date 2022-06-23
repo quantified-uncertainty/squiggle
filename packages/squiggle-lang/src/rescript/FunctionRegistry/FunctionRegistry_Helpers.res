@@ -4,11 +4,11 @@ let impossibleError = "Wrong inputs / Logically impossible"
 
 module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)
-  let evDistribution = r => ReducerInterface_InternalExpressionValue.IevDistribution(r)
-  let evNumber = r => ReducerInterface_InternalExpressionValue.IevNumber(r)
-  let evArray = r => ReducerInterface_InternalExpressionValue.IevArray(r)
-  let evRecord = r => ReducerInterface_InternalExpressionValue.IevRecord(r)
-  let evString = r => ReducerInterface_InternalExpressionValue.IevString(r)
+  let evDistribution = r => ReducerInterface_InternalExpressionValue.IEvDistribution(r)
+  let evNumber = r => ReducerInterface_InternalExpressionValue.IEvNumber(r)
+  let evArray = r => ReducerInterface_InternalExpressionValue.IEvArray(r)
+  let evRecord = r => ReducerInterface_InternalExpressionValue.IEvRecord(r)
+  let evString = r => ReducerInterface_InternalExpressionValue.IEvString(r)
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
 }
 

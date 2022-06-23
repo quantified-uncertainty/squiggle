@@ -11,7 +11,7 @@ let getType = (nameSpace: t, id: string) => {
   let NameSpace(container) = nameSpace
   Belt.Map.String.get(container, typeAliasesKey)->Belt.Option.flatMap(aliases =>
     switch aliases {
-    | IevRecord(r) => Belt.Map.String.get(r, id)
+    | IEvRecord(r) => Belt.Map.String.get(r, id)
     | _ => None
     }
   )
@@ -21,7 +21,7 @@ let getTypeOf = (nameSpace: t, id: string) => {
   let NameSpace(container) = nameSpace
   Belt.Map.String.get(container, typeReferencesKey)->Belt.Option.flatMap(defs =>
     switch defs {
-    | IevRecord(r) => Belt.Map.String.get(r, id)
+    | IEvRecord(r) => Belt.Map.String.get(r, id)
     | _ => None
     }
   )
@@ -41,23 +41,23 @@ let emptyMap: map = Belt.Map.String.empty
 
 let setTypeAlias = (nameSpace: t, id: string, value): t => {
   let NameSpace(container) = nameSpace
-  let rValue = Belt.Map.String.getWithDefault(container, typeAliasesKey, IevRecord(emptyMap))
+  let rValue = Belt.Map.String.getWithDefault(container, typeAliasesKey, IEvRecord(emptyMap))
   let r = switch rValue {
-  | IevRecord(r) => r
+  | IEvRecord(r) => r
   | _ => emptyMap
   }
-  let r2 = Belt.Map.String.set(r, id, value)->IevRecord
+  let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
   Belt.Map.String.set(container, typeAliasesKey, r2)->NameSpace
 }
 
 let setTypeOf = (nameSpace: t, id: string, value): t => {
   let NameSpace(container) = nameSpace
-  let rValue = Belt.Map.String.getWithDefault(container, typeReferencesKey, IevRecord(emptyMap))
+  let rValue = Belt.Map.String.getWithDefault(container, typeReferencesKey, IEvRecord(emptyMap))
   let r = switch rValue {
-  | IevRecord(r) => r
+  | IEvRecord(r) => r
   | _ => emptyMap
   }
-  let r2 = Belt.Map.String.set(r, id, value)->IevRecord
+  let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
   Belt.Map.String.set(container, typeReferencesKey, r2)->NameSpace
 }
 
@@ -71,10 +71,10 @@ let emptyModule: t = NameSpace(Belt.Map.String.empty)
 let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
 let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
 
-let toExpressionValue = (nameSpace: t): expressionValue => IevModule(nameSpace)
+let toExpressionValue = (nameSpace: t): expressionValue => IEvModule(nameSpace)
 let fromExpressionValue = (aValue: expressionValue): t =>
   switch aValue {
-  | IevModule(nameSpace) => nameSpace
+  | IEvModule(nameSpace) => nameSpace
   | _ => emptyModule
   }
 
@@ -106,7 +106,7 @@ let define = (nameSpace: t, identifier: string, ev: expressionValue): t => {
   Belt.Map.String.set(container, identifier, ev)->NameSpace // TODO build lambda for polymorphic functions here
 }
 let defineNumber = (nameSpace: t, identifier: string, value: float): t =>
-  nameSpace->define(identifier, IevNumber(value))
+  nameSpace->define(identifier, IEvNumber(value))
 
 let defineModule = (nameSpace: t, identifier: string, value: t): t =>
   nameSpace->define(identifier, toExpressionValue(value))

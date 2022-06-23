@@ -37,9 +37,9 @@ let dispatch = (call: EV.functionCall, _: DistributionOperation.env): option<
       | "fromUnit_G"
       | "fromUnit_T"
       | "fromUnit_P") as op,
-      [IevNumber(f)],
+      [IEvNumber(f)],
     ) =>
-    op->ScientificUnit.getMultiplier->E.O2.fmap(multiplier => EV.IevNumber(f *. multiplier)->Ok)
+    op->ScientificUnit.getMultiplier->E.O2.fmap(multiplier => EV.IEvNumber(f *. multiplier)->Ok)
   | _ => None
   }
 }

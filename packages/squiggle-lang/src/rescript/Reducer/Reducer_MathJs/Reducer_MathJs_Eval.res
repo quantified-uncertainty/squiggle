@@ -20,7 +20,7 @@ let eval__: string => 'a = %raw(`function (expr) { return {value: Mathjs.evaluat
 let eval = (expr: string): result<expressionValue, errorValue> => {
   try {
     let answer = eval__(expr)
-    answer["value"]->JavaScript.Gate.jsToIev
+    answer["value"]->JavaScript.Gate.jsToIEv
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   }

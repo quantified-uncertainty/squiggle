@@ -75,13 +75,13 @@ module FRType = {
 
   let rec toFrValue = (r: expressionValue): option<frValue> =>
     switch r {
-    | IevNumber(f) => Some(FRValueNumber(f))
-    | IevString(f) => Some(FRValueString(f))
-    | IevDistribution(f) => Some(FRValueDistOrNumber(FRValueDist(f)))
-    | IevLambda(f) => Some(FRValueLambda(f))
-    | IevArray(elements) =>
+    | IEvNumber(f) => Some(FRValueNumber(f))
+    | IEvString(f) => Some(FRValueString(f))
+    | IEvDistribution(f) => Some(FRValueDistOrNumber(FRValueDist(f)))
+    | IEvLambda(f) => Some(FRValueLambda(f))
+    | IEvArray(elements) =>
       elements->E.A2.fmap(toFrValue)->E.A.O.openIfAllSome->E.O2.fmap(r => FRValueArray(r))
-    | IevRecord(map) =>
+    | IEvRecord(map) =>
       Belt.Map.String.toArray(map)
       ->E.A2.fmap(((key, item)) => item->toFrValue->E.O2.fmap(o => (key, o)))
       ->E.A.O.openIfAllSome
@@ -92,26 +92,26 @@ module FRType = {
   let rec matchWithExpressionValue = (t: t, r: expressionValue): option<frValue> =>
     switch (t, r) {
     | (FRTypeAny, f) => toFrValue(f)
-    | (FRTypeString, IevString(f)) => Some(FRValueString(f))
-    | (FRTypeNumber, IevNumber(f)) => Some(FRValueNumber(f))
-    | (FRTypeDistOrNumber, IevNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
-    | (FRTypeDistOrNumber, IevDistribution(Symbolic(#Float(f)))) =>
+    | (FRTypeString, IEvString(f)) => Some(FRValueString(f))
+    | (FRTypeNumber, IEvNumber(f)) => Some(FRValueNumber(f))
+    | (FRTypeDistOrNumber, IEvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
+    | (FRTypeDistOrNumber, IEvDistribution(Symbolic(#Float(f)))) =>
       Some(FRValueDistOrNumber(FRValueNumber(f)))
-    | (FRTypeDistOrNumber, IevDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
-    | (FRTypeNumeric, IevNumber(f)) => Some(FRValueNumber(f))
-    | (FRTypeNumeric, IevDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
-    | (FRTypeLambda, IevLambda(f)) => Some(FRValueLambda(f))
-    | (FRTypeArray(intendedType), IevArray(elements)) => {
+    | (FRTypeDistOrNumber, IEvDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
+    | (FRTypeNumeric, IEvNumber(f)) => Some(FRValueNumber(f))
+    | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
+    | (FRTypeLambda, IEvLambda(f)) => Some(FRValueLambda(f))
+    | (FRTypeArray(intendedType), IEvArray(elements)) => {
         let el = elements->E.A2.fmap(matchWithExpressionValue(intendedType))
         E.A.O.openIfAllSome(el)->E.O2.fmap(r => FRValueArray(r))
       }
-    | (FRTypeDict(r), IevRecord(map)) =>
+    | (FRTypeDict(r), IEvRecord(map)) =>
       map
       ->Belt.Map.String.toArray
       ->E.A2.fmap(((key, item)) => matchWithExpressionValue(r, item)->E.O2.fmap(o => (key, o)))
       ->E.A.O.openIfAllSome
       ->E.O2.fmap(r => FRValueDict(Js.Dict.fromArray(r)))
-    | (FRTypeRecord(recordParams), IevRecord(map)) => {
+    | (FRTypeRecord(recordParams), IEvRecord(map)) => {
         let getAndMatch = (name, input) =>
           Belt.Map.String.get(map, name)->E.O.bind(matchWithExpressionValue(input))
         //All names in the type must be present. If any are missing, the corresponding
@@ -127,17 +127,17 @@ module FRType = {
 
   let rec matchReverse = (e: frValue): expressionValue =>
     switch e {
-    | FRValueNumber(f) => IevNumber(f)
-    | FRValueDistOrNumber(FRValueNumber(n)) => IevNumber(n)
-    | FRValueDistOrNumber(FRValueDist(n)) => IevDistribution(n)
-    | FRValueDist(dist) => IevDistribution(dist)
-    | FRValueArray(elements) => IevArray(elements->E.A2.fmap(matchReverse))
+    | FRValueNumber(f) => IEvNumber(f)
+    | FRValueDistOrNumber(FRValueNumber(n)) => IEvNumber(n)
+    | FRValueDistOrNumber(FRValueDist(n)) => IEvDistribution(n)
+    | FRValueDist(dist) => IEvDistribution(dist)
+    | FRValueArray(elements) => IEvArray(elements->E.A2.fmap(matchReverse))
     | FRValueRecord(frValueRecord) => {
         let map =
           frValueRecord
           ->E.A2.fmap(((name, value)) => (name, matchReverse(value)))
           ->Belt.Map.String.fromArray
-        IevRecord(map)
+        IEvRecord(map)
       }
     | FRValueDict(frValueRecord) => {
         let map =
@@ -145,11 +145,11 @@ module FRType = {
           ->Js.Dict.entries
           ->E.A2.fmap(((name, value)) => (name, matchReverse(value)))
           ->Belt.Map.String.fromArray
-        IevRecord(map)
+        IEvRecord(map)
       }
-    | FRValueLambda(l) => IevLambda(l)
-    | FRValueString(string) => IevString(string)
-    | FRValueVariant(string) => IevString(string)
+    | FRValueLambda(l) => IEvLambda(l)
+    | FRValueString(string) => IEvString(string)
+    | FRValueVariant(string) => IEvString(string)
     | FRValueAny(f) => matchReverse(f)
     }
 

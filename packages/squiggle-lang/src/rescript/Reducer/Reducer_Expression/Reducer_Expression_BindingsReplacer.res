@@ -21,7 +21,7 @@ let rec replaceSymbols = (bindings: ExpressionT.bindings, expression: expression
     replaceSymbolOnValue(bindings, value)->Result.map(evValue => evValue->ExpressionT.EValue)
   | ExpressionT.EList(list) =>
     switch list {
-    | list{EValue(IevCall(fName)), ..._args} =>
+    | list{EValue(IEvCall(fName)), ..._args} =>
       switch isMacroName(fName) {
       // A macro reduces itself so we dont dive in it
       | true => expression->Ok
@@ -43,12 +43,12 @@ and replaceSymbolsOnExpressionList = (bindings, list) => {
 }
 and replaceSymbolOnValue = (bindings, evValue: expressionValue) =>
   switch evValue {
-  | IevSymbol(symbol) => Module.getWithDefault(bindings, symbol, evValue)->Ok
-  | IevCall(symbol) => Module.getWithDefault(bindings, symbol, evValue)->checkIfCallable
+  | IEvSymbol(symbol) => Module.getWithDefault(bindings, symbol, evValue)->Ok
+  | IEvCall(symbol) => Module.getWithDefault(bindings, symbol, evValue)->checkIfCallable
   | _ => evValue->Ok
   }
 and checkIfCallable = (evValue: expressionValue) =>
   switch evValue {
-  | IevCall(_) | IevLambda(_) => evValue->Ok
+  | IEvCall(_) | IEvLambda(_) => evValue->Ok
   | _ => ErrorValue.RENotAFunction(ExpressionValue.toString(evValue))->Error
   }
