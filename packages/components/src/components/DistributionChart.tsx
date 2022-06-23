@@ -76,13 +76,19 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
 
     return (
       <div style={{ width: widthProp }}>
-        <Vega
-          spec={spec}
-          data={{ con: shape.value.continuous, dis: shape.value.discrete }}
-          width={widthProp - 10}
-          height={height}
-          actions={false}
-        />
+        {!(isLogX && massBelow0) ? (
+          <Vega
+            spec={spec}
+            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+            width={widthProp - 10}
+            height={height}
+            actions={false}
+          />
+        ) : (
+          <ErrorAlert heading="Log Domain Error">
+            Cannot graph distribution with negative values on logarithmic scale.
+          </ErrorAlert>
+        )}
         <div className="flex justify-center">
           {showSummary && <SummaryTable distribution={distribution} />}
         </div>
