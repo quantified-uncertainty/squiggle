@@ -221,9 +221,9 @@ let dispatchToGenericOutput = (
     }
   | ("integralSum", [IevDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
   | ("toString", [IevDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
-  | ("toSparkline", [IevDistribution(dist)]) =>
+  | ("sparkline", [IevDistribution(dist)]) =>
     Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
-  | ("toSparkline", [IevDistribution(dist), IevNumber(n)]) =>
+  | ("sparkline", [IevDistribution(dist), IevNumber(n)]) =>
     Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
   | ("exp", [IevDistribution(a)]) =>
     // https://mathjs.org/docs/reference/functions/exp.html
@@ -273,6 +273,8 @@ let dispatchToGenericOutput = (
     Helpers.toDistFn(Scale(#Logarithm, float), dist, ~env)
   | ("scaleLogWithThreshold", [IevDistribution(dist), IevNumber(base), IevNumber(eps)]) =>
     Helpers.toDistFn(Scale(#LogarithmWithThreshold(eps), base), dist, ~env)
+  | ("scaleMultiply", [IevDistribution(dist), IevNumber(float)]) =>
+    Helpers.toDistFn(Scale(#Multiply, float), dist, ~env)
   | ("scalePow", [IevDistribution(dist), IevNumber(float)]) =>
     Helpers.toDistFn(Scale(#Power, float), dist, ~env)
   | ("scaleExp", [IevDistribution(dist)]) =>
@@ -280,6 +282,8 @@ let dispatchToGenericOutput = (
   | ("cdf", [IevDistribution(dist), IevNumber(float)]) => Helpers.toFloatFn(#Cdf(float), dist, ~env)
   | ("pdf", [IevDistribution(dist), IevNumber(float)]) => Helpers.toFloatFn(#Pdf(float), dist, ~env)
   | ("inv", [IevDistribution(dist), IevNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist, ~env)
+  | ("quantile", [IevDistribution(dist), IevNumber(float)]) =>
+    Helpers.toFloatFn(#Inv(float), dist, ~env)
   | ("toSampleSet", [IevDistribution(dist), IevNumber(float)]) =>
     Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist, ~env)
   | ("toSampleSet", [IevDistribution(dist)]) =>

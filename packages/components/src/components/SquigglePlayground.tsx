@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useState } from "react";
+import React, { FC, Fragment, useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
@@ -9,6 +9,7 @@ import {
   CodeIcon,
   CogIcon,
   CurrencyDollarIcon,
+  EyeIcon,
 } from "@heroicons/react/solid";
 import clsx from "clsx";
 
@@ -31,6 +32,12 @@ interface PlaygroundProps {
   showControls?: boolean;
   /** Whether to show the summary table in the playground */
   showSummary?: boolean;
+  /** If code is set, component becomes controlled */
+  code?: string;
+  onCodeChange?(expr: string): void;
+  onSettingsChange?(settings: any): void;
+  /** Should we show the editor? */
+  showEditor?: boolean;
 }
 
 const schema = yup
@@ -64,6 +71,7 @@ const schema = yup
     showTypes: yup.boolean(),
     showControls: yup.boolean(),
     showSummary: yup.boolean(),
+    showEditor: yup.boolean(),
     showSettingsPage: yup.boolean().default(false),
     diagramStart: yup
       .number()
@@ -162,7 +170,7 @@ function InputItem<T>({
       <input
         type={type}
         {...register(name)}
-        className="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+        className="form-input max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
       />
     </label>
   );
@@ -182,7 +190,7 @@ function Checkbox<T>({
       <input
         type="checkbox"
         {...register(name)}
-        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+        className="form-checkbox focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
       />
       {/* Clicking on the div makes the checkbox lose focus while mouse button is pressed, leading to annoying blinking; I couldn't figure out how to fix this. */}
       <div className="ml-3 text-sm font-medium text-gray-700">{label}</div>
@@ -190,14 +198,20 @@ function Checkbox<T>({
   );
 }
 
-const SquigglePlayground: FC<PlaygroundProps> = ({
+export const SquigglePlayground: FC<PlaygroundProps> = ({
   initialSquiggleString = "",
   height = 500,
   showTypes = false,
   showControls = false,
   showSummary = false,
+  code: controlledCode,
+  onCodeChange,
+  onSettingsChange,
+  showEditor = true,
 }) => {
-  const [squiggleString, setSquiggleString] = useState(initialSquiggleString);
+  const [uncontrolledCode, setUncontrolledCode] = useState(
+    initialSquiggleString
+  );
   const [importString, setImportString] = useState("{}");
   const [imports, setImports] = useState({});
   const [importsAreValid, setImportsAreValid] = useState(true);
@@ -210,6 +224,7 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
       showTypes: showTypes,
       showControls: showControls,
       showSummary: showSummary,
+      showEditor: showEditor,
       leftSizePercent: 50,
       showSettingsPage: false,
       diagramStart: 0,
@@ -220,6 +235,11 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
   const vars = useWatch({
     control,
   });
+
+  useEffect(() => {
+    onSettingsChange?.(vars);
+  }, [vars, onSettingsChange]);
+
   const chartSettings = {
     start: Number(vars.diagramStart),
     stop: Number(vars.diagramStop),
@@ -238,6 +258,8 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
       setImportsAreValid(false);
     }
   };
+
+  const code = controlledCode ?? uncontrolledCode;
 
   const samplingSettings = (
     <div className="space-y-6 p-3 max-w-xl">
@@ -276,6 +298,11 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
     <div className="space-y-6 p-3 divide-y divide-gray-200 max-w-xl">
       <HeadedSection title="General Display Settings">
         <div className="space-y-4">
+          <Checkbox
+            name="showEditor"
+            register={register}
+            label="Show code editor on left"
+          />
           <InputItem
             name="chartHeight"
             type="number"
@@ -374,59 +401,78 @@ const SquigglePlayground: FC<PlaygroundProps> = ({
     </div>
   );
 
+  const squiggleChart = (
+    <SquiggleChart
+      squiggleString={code}
+      environment={env}
+      chartSettings={chartSettings}
+      height={vars.chartHeight}
+      showTypes={vars.showTypes}
+      showControls={vars.showControls}
+      showSummary={vars.showSummary}
+      bindings={defaultBindings}
+      jsImports={imports}
+    />
+  );
+
+  const firstTab = vars.showEditor ? (
+    <div className="border border-slate-200">
+      <CodeEditor
+        value={code}
+        onChange={(newCode) => {
+          if (controlledCode === undefined) {
+            // uncontrolled mode
+            setUncontrolledCode(newCode);
+          }
+          onCodeChange?.(newCode);
+        }}
+        oneLine={false}
+        showGutter={true}
+        height={height - 1}
+      />
+    </div>
+  ) : (
+    squiggleChart
+  );
+
+  const tabs = (
+    <Tab.Panels>
+      <Tab.Panel>{firstTab}</Tab.Panel>
+      <Tab.Panel>{samplingSettings}</Tab.Panel>
+      <Tab.Panel>{viewSettings}</Tab.Panel>
+      <Tab.Panel>{inputVariableSettings}</Tab.Panel>
+    </Tab.Panels>
+  );
+
+  const withEditor = (
+    <div className="flex mt-1">
+      <div className="w-1/2">{tabs}</div>
+      <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
+    </div>
+  );
+
+  const withoutEditor = <div className="mt-3">{tabs}</div>;
+
   return (
     <SquiggleContainer>
       <Tab.Group>
         <div className="pb-4">
-          <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
-            <StyledTab name="Code" icon={CodeIcon} />
+          <Tab.List className="flex w-fit p-0.5 mt-2 rounded-md bg-slate-100 hover:bg-slate-200">
+            <StyledTab
+              name={vars.showEditor ? "Code" : "Display"}
+              icon={vars.showEditor ? CodeIcon : EyeIcon}
+            />
             <StyledTab name="Sampling Settings" icon={CogIcon} />
             <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
             <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
           </Tab.List>
-        </div>
-        <div className="flex" style={{ height }}>
-          <div className="w-1/2">
-            <Tab.Panels>
-              <Tab.Panel>
-                <div className="border border-slate-200">
-                  <CodeEditor
-                    value={squiggleString}
-                    onChange={setSquiggleString}
-                    oneLine={false}
-                    showGutter={true}
-                    height={height - 1}
-                  />
-                </div>
-              </Tab.Panel>
-              <Tab.Panel>{samplingSettings}</Tab.Panel>
-              <Tab.Panel>{viewSettings}</Tab.Panel>
-              <Tab.Panel>{inputVariableSettings}</Tab.Panel>
-            </Tab.Panels>
-          </div>
-
-          <div className="w-1/2 p-2 pl-4">
-            <div style={{ maxHeight: height }}>
-              <SquiggleChart
-                squiggleString={squiggleString}
-                environment={env}
-                chartSettings={chartSettings}
-                height={vars.chartHeight}
-                showTypes={vars.showTypes}
-                showControls={vars.showControls}
-                bindings={defaultBindings}
-                jsImports={imports}
-                showSummary={vars.showSummary}
-              />
-            </div>
-          </div>
+          {vars.showEditor ? withEditor : withoutEditor}
         </div>
       </Tab.Group>
     </SquiggleContainer>
   );
 };
 
-export default SquigglePlayground;
 export function renderSquigglePlaygroundToDom(props: PlaygroundProps) {
   const parent = document.createElement("div");
   ReactDOM.render(<SquigglePlayground {...props} />, parent);

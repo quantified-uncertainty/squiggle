@@ -122,14 +122,14 @@ TODO
 
 TODO
 
-## `pdf`, `cdf`, and `inv`
+## `pdf`, `cdf`, and `quantile`
 
-With $\forall dist, pdf := x \mapsto \texttt{pdf}(dist, x) \land cdf := x \mapsto \texttt{cdf}(dist, x) \land inv := p \mapsto \texttt{inv}(dist, p)$,
+With $\forall dist, pdf := x \mapsto \texttt{pdf}(dist, x) \land cdf := x \mapsto \texttt{cdf}(dist, x) \land quantile := p \mapsto \texttt{quantile}(dist, p)$,
 
-### `cdf` and `inv` are inverses
+### `cdf` and `quantile` are inverses
 
 $$
-\forall x \in (0,1), cdf(inv(x)) = x \land \forall x \in \texttt{dom}(cdf), x = inv(cdf(x))
+\forall x \in (0,1), cdf(quantile(x)) = x \land \forall x \in \texttt{dom}(cdf), x = quantile(cdf(x))
 $$
 
 ### The codomain of `cdf` equals the open interval `(0,1)` equals the codomain of `pdf`

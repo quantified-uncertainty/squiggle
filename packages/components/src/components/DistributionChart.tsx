@@ -129,6 +129,7 @@ export const CheckBox: React.FC<CheckBoxProps> = ({
         value={value + ""}
         onChange={() => onChange(!value)}
         disabled={disabled}
+        className="form-checkbox"
       />
       <label className={clsx(disabled && "text-slate-400")}> {label}</label>
     </span>

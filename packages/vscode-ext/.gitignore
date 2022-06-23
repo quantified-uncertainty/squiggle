@@ -1,0 +1,4 @@
+/media/vendor
+/out
+/*.vsix
+/syntaxes/*.json

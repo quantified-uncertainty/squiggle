@@ -1,8 +1,24 @@
+/*
+Fork of tailwind's preflight with `.squiggle` scoping.
+*/
 @import "./base.css";
+/*
+Fork of https://github.com/tailwindlabs/tailwindcss-forms styles (with strategy: "class"), but with `.squiggle` scoping.
+This is necessary because tailwindcss-forms's css specificity is lower than preflight's specificity (`padding: 0` and so on),
+so unscoped forms css with scoped preflight css, and there's no setting for scoping.
+*/
+@import "./forms.css";
+
+/*
+This doesn't include tailwind's original preflight (it's disabled in tailwind.config.js),
+but this line is still necessary for proper initialization of `--tw-*` variables.
+*/
+@tailwind base;
+
 @tailwind components;
 @tailwind utilities;
 
-/* necessary hack because scoped preflight in ./base.css has higher specificity */
+/* Necessary hack because scoped preflight in ./base.css has higher specificity. */
 .ace_cursor {
   border-left: 2px solid !important;
 }

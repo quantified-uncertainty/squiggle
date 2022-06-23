@@ -1,3 +1,4 @@
 dist/
 storybook-static
 src/styles/base.css
+src/styles/forms.css
