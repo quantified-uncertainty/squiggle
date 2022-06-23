@@ -14,4 +14,16 @@ describe("Combining Continuous and Discrete Distributions", () => {
     ), // Multiply distribution by -1
     true,
   )
+  makeTest(
+    "keep order of xs when first number is discrete and adding",
+    AlgebraicShapeCombination.isOrdered(
+      AlgebraicShapeCombination.combineShapesContinuousDiscrete(
+        #Add,
+        {xs: [0., 1.], ys: [1., 1.]},
+        {xs: [1.], ys: [1.]},
+        ~discretePosition=First,
+      ),
+    ), // 1 + distribution
+    true,
+  )
 })
