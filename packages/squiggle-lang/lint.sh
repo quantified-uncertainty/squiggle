@@ -19,7 +19,7 @@ do
   fi
 done
 
-files=`ls src/rescript/**/**/*.resi src/rescript/**/*.resi`  # src/rescript/*/resi
+files=`ls src/rescript/**/*.resi`  # src/rescript/*/resi
 for file in $files
 do
   current=`cat $file`

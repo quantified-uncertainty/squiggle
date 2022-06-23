@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useState } from "react";
+import React, { FC, Fragment, useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
@@ -32,9 +32,14 @@ interface PlaygroundProps {
   showControls?: boolean;
   /** Whether to show the summary table in the playground */
   showSummary?: boolean;
+  /** Whether to log the x coordinate on distribution charts */
+  logX?: boolean;
+  /** Whether to exp the y coordinate on distribution charts */
+  expY?: boolean;
   /** If code is set, component becomes controlled */
   code?: string;
   onCodeChange?(expr: string): void;
+  onSettingsChange?(settings: any): void;
   /** Should we show the editor? */
   showEditor?: boolean;
 }
@@ -71,6 +76,8 @@ const schema = yup
     showControls: yup.boolean(),
     showSummary: yup.boolean(),
     showEditor: yup.boolean(),
+    logX: yup.boolean(),
+    expY: yup.boolean(),
     showSettingsPage: yup.boolean().default(false),
     diagramStart: yup
       .number()
@@ -203,8 +210,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   showTypes = false,
   showControls = false,
   showSummary = false,
+  logX = false,
+  expY = false,
   code: controlledCode,
   onCodeChange,
+  onSettingsChange,
   showEditor = true,
 }) => {
   const [uncontrolledCode, setUncontrolledCode] = useState(
@@ -219,10 +229,12 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       sampleCount: 1000,
       xyPointLength: 1000,
       chartHeight: 150,
-      showTypes: showTypes,
-      showControls: showControls,
-      showSummary: showSummary,
-      showEditor: showEditor,
+      showTypes,
+      showControls,
+      logX,
+      expY,
+      showSummary,
+      showEditor,
       leftSizePercent: 50,
       showSettingsPage: false,
       diagramStart: 0,
@@ -233,6 +245,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   const vars = useWatch({
     control,
   });
+
+  useEffect(() => {
+    onSettingsChange?.(vars);
+  }, [vars, onSettingsChange]);
+
   const chartSettings = {
     start: Number(vars.diagramStart),
     stop: Number(vars.diagramStop),
@@ -313,6 +330,16 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       <div className="pt-8">
         <HeadedSection title="Distribution Display Settings">
           <div className="space-y-2">
+            <Checkbox
+              register={register}
+              name="logX"
+              label="Show x scale logarithmically"
+            />
+            <Checkbox
+              register={register}
+              name="expY"
+              label="Show y scale exponentially"
+            />
             <Checkbox
               register={register}
               name="showControls"
@@ -403,6 +430,8 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       showTypes={vars.showTypes}
       showControls={vars.showControls}
       showSummary={vars.showSummary}
+      logX={vars.logX}
+      expY={vars.expY}
       bindings={defaultBindings}
       jsImports={imports}
     />
