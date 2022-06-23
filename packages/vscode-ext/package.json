@@ -125,11 +125,11 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile:tsc": "tsc -p ./",
+    "compile:tsc": "tsc -b",
     "compile:grammar": "js-yaml syntaxes/squiggle.tmLanguage.yaml >syntaxes/squiggle.tmLanguage.json",
     "compile:vendor": "(cd ../squiggle-lang && yarn run build) && (cd ../components && yarn run bundle && yarn run build:css) && mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/quri-logo.png media/vendor/icon.png",
     "compile": "yarn run compile:tsc && yarn run compile:grammar && yarn run compile:vendor",
-    "watch": "tsc -watch -p ./",
+    "watch": "tsc -b -watch",
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint client/src server/src --ext ts",
     "format": "eslint client/src server/src --ext ts --fix",

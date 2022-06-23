@@ -45,12 +45,8 @@ connection.onInitialize((params: InitializeParams) => {
 async function validateSquiggleDocument(
   textDocument: TextDocument
 ): Promise<void> {
-  // The validator creates diagnostics for all uppercase words length 2 and more
   const text = textDocument.getText();
-  const pattern = /\b[A-Z]{2,}\b/g;
-  let m: RegExpExecArray | null;
 
-  let problems = 0;
   const diagnostics: Diagnostic[] = [];
 
   const parseResult = parse(text);
