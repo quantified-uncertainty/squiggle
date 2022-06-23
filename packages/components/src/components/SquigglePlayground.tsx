@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useState } from "react";
+import React, { FC, Fragment, useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
@@ -35,6 +35,7 @@ interface PlaygroundProps {
   /** If code is set, component becomes controlled */
   code?: string;
   onCodeChange?(expr: string): void;
+  onSettingsChange?(settings: any): void;
   /** Should we show the editor? */
   showEditor?: boolean;
 }
@@ -205,6 +206,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   showSummary = false,
   code: controlledCode,
   onCodeChange,
+  onSettingsChange,
   showEditor = true,
 }) => {
   const [uncontrolledCode, setUncontrolledCode] = useState(
@@ -233,6 +235,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   const vars = useWatch({
     control,
   });
+
+  useEffect(() => {
+    onSettingsChange?.(vars);
+  }, [vars, onSettingsChange]);
+
   const chartSettings = {
     start: Number(vars.diagramStart),
     stop: Number(vars.diagramStop),
