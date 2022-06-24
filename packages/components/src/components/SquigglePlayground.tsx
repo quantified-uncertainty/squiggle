@@ -1,5 +1,4 @@
 import React, { FC, Fragment, useState, useEffect } from "react";
-import ReactDOM from "react-dom";
 import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -250,11 +249,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     onSettingsChange?.(vars);
   }, [vars, onSettingsChange]);
 
-  const chartSettings = {
-    start: Number(vars.diagramStart),
-    stop: Number(vars.diagramStop),
-    count: Number(vars.diagramCount),
-  };
   const env: environment = {
     sampleCount: Number(vars.sampleCount),
     xyPointLength: Number(vars.xyPointLength),
@@ -425,7 +419,9 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     <SquiggleChart
       squiggleString={code}
       environment={env}
-      chartSettings={chartSettings}
+      diagramStart={Number(vars.diagramStart)}
+      diagramStop={Number(vars.diagramStop)}
+      diagramCount={Number(vars.diagramCount)}
       height={vars.chartHeight}
       showTypes={vars.showTypes}
       showControls={vars.showControls}
@@ -494,9 +490,3 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     </SquiggleContainer>
   );
 };
-
-export function renderSquigglePlaygroundToDom(props: PlaygroundProps) {
-  const parent = document.createElement("div");
-  ReactDOM.render(<SquigglePlayground {...props} />, parent);
-  return parent;
-}
