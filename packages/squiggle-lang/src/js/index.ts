@@ -129,30 +129,13 @@ function createTsExport(
       // case
       return tag(
         "array",
-        x.value.map((arrayItem): squiggleExpression => {
-          switch (arrayItem.tag) {
-            case "EvRecord":
-              return tag(
-                "record",
-                _.mapValues(arrayItem.value, (recordValue: unknown) =>
-                  convertRawToTypescript(
-                    recordValue as rescriptExport,
-                    environment
-                  )
-                )
-              );
-            case "EvArray":
-              let y = arrayItem.value as unknown as rescriptExport[];
-              return tag(
-                "array",
-                y.map((childArrayItem) =>
-                  convertRawToTypescript(childArrayItem, environment)
-                )
-              );
-            default:
-              return createTsExport(arrayItem, environment);
-          }
-        })
+        x.value.map(
+          (arrayItem): squiggleExpression =>
+            convertRawToTypescript(
+              arrayItem as unknown as rescriptExport,
+              environment
+            )
+        )
       );
     case "EvArrayString":
       return tag("arraystring", x.value);
