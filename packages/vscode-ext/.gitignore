@@ -1,4 +1,5 @@
 /media/vendor
-/out
+/client/out
+/server/out
 /*.vsix
 /syntaxes/*.json
