@@ -41,9 +41,11 @@ export interface SquiggleChartProps {
   logX?: boolean;
   /** Set the y scale to be exponential by deault */
   expY?: boolean;
+  /** Display 94% interval; useful for thin lognormals */
+  truncateTo95ci?: boolean;
 }
 
-const defaultOnChange = () => {};
+const defaultOnChange = () => { };
 const defaultChartSettings = { start: 0, stop: 10, count: 20 };
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
@@ -59,6 +61,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   showControls = false,
   logX = false,
   expY = false,
+  truncateTo95ci = false,
   chartSettings = defaultChartSettings,
 }) => {
   const { result } = useSquiggle({
@@ -78,6 +81,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
     showSummary,
     logX,
     expY,
+    truncateTo95ci,
   };
 
   return (

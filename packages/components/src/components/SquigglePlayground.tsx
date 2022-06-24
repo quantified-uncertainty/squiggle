@@ -36,6 +36,8 @@ interface PlaygroundProps {
   logX?: boolean;
   /** Whether to exp the y coordinate on distribution charts */
   expY?: boolean;
+  /** Display 94% interval; useful for thin lognormals */
+  truncateTo95ci?: boolean;
   /** If code is set, component becomes controlled */
   code?: string;
   onCodeChange?(expr: string): void;
@@ -78,6 +80,7 @@ const schema = yup
     showEditor: yup.boolean(),
     logX: yup.boolean(),
     expY: yup.boolean(),
+    truncateTo95ci: yup.boolean(),
     showSettingsPage: yup.boolean().default(false),
     diagramStart: yup
       .number()
@@ -212,6 +215,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   showSummary = false,
   logX = false,
   expY = false,
+  truncateTo95ci = false,
   code: controlledCode,
   onCodeChange,
   onSettingsChange,
@@ -233,6 +237,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       showControls,
       logX,
       expY,
+      truncateTo95ci,
       showSummary,
       showEditor,
       leftSizePercent: 50,
@@ -342,6 +347,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
             />
             <Checkbox
               register={register}
+              name="truncateTo95ci"
+              label="Show 95th percentile confidence interval (useful for thin lognormals)"
+            />
+            <Checkbox
+              register={register}
               name="showControls"
               label="Show toggles to adjust scale of x and y axes"
             />
@@ -432,6 +442,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       showSummary={vars.showSummary}
       logX={vars.logX}
       expY={vars.expY}
+      truncateTo95ci={vars.truncateTo95ci}
       bindings={defaultBindings}
       jsImports={imports}
     />

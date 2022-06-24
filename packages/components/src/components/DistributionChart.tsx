@@ -28,6 +28,7 @@ export type DistributionPlottingSettings = {
   logX: boolean;
   /** Set the y scale to be exponential by deault */
   expY: boolean;
+  truncateTo95ci: boolean;
 };
 
 export type DistributionChartProps = {
@@ -44,6 +45,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   showControls,
   logX,
   expY,
+  truncateTo95ci,
 }) => {
   const [isLogX, setLogX] = React.useState(logX);
   const [isExpY, setExpY] = React.useState(expY);
@@ -51,8 +53,41 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   React.useEffect(() => setLogX(logX), [logX]);
   React.useEffect(() => setExpY(expY), [expY]);
 
-  const shape = distribution.pointSet();
   const [sized] = useSize((size) => {
+
+    const p3wrapped = distribution.inv(0.025);
+    const p97wrapped = distribution.inv(0.975);
+    if (p3wrapped.tag == "Error") {
+      return <ErrorAlert heading="Distribution Calculation Error">
+        {distributionErrorToString(p3wrapped.value)}
+      </ErrorAlert>
+    } else if (p97wrapped.tag == "Error") {
+      return <ErrorAlert heading="Distribution Calculation Error">
+        {distributionErrorToString(p97wrapped.value)}
+      </ErrorAlert>
+    }
+    const p3 = p3wrapped.value
+    const p97 = p97wrapped.value
+
+    const truncatedDistributionWrapper = distribution.truncate(p3, p97)
+    if (truncatedDistributionWrapper.tag == "Error") {
+      return <ErrorAlert heading="Distribution Truncation For Display Error">
+        {distributionErrorToString(truncatedDistributionWrapper.value)}
+      </ErrorAlert>
+    }
+    const truncatedDistribution = truncatedDistributionWrapper.value
+
+    const shape = distribution.pointSet();
+    const shapeTruncated = truncatedDistribution.pointSet();// distribution.pointSet();
+
+    if (shapeTruncated.tag === "Error") {
+      return (
+        <ErrorAlert heading="Distribution Error">
+          {distributionErrorToString(shapeTruncated.value)}
+        </ErrorAlert>
+      );
+    }
+
     if (shape.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
@@ -79,7 +114,11 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
         {!(isLogX && massBelow0) ? (
           <Vega
             spec={spec}
-            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+            data={
+              truncateTo95ci ?
+                { con: shapeTruncated.value.continuous, dis: shapeTruncated.value.discrete }
+                : { con: shape.value.continuous, dis: shape.value.discrete }
+            }
             width={widthProp - 10}
             height={height}
             actions={false}
@@ -101,10 +140,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
               // Check whether we should disable the checkbox
               {...(massBelow0
                 ? {
-                    disabled: true,
-                    tooltip:
-                      "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
-                  }
+                  disabled: true,
+                  tooltip:
+                    "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
+                }
                 : {})}
             />
             <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
