@@ -244,7 +244,28 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     case "module": {
       return (
         <VariableBox heading="Module" showTypes={showTypes}>
-          <span className="text-slate-600 font-semibold">Internal Module</span>
+          <div className="space-y-3">
+            {Object.entries(expression.value)
+              .filter(([key, r]) => key !== "Math")
+              .map(([key, r]) => (
+                <div key={key} className="flex space-x-2">
+                  <div className="flex-none">
+                    <header className="text-slate-500 font-mono">{key}:</header>
+                  </div>
+                  <div className="px-2 grow bg-gray-50 border border-gray-100 rounded-sm">
+                    <SquiggleItem
+                      expression={r}
+                      width={width !== undefined ? width - 20 : width}
+                      height={height / 3}
+                      showTypes={showTypes}
+                      distributionPlotSettings={distributionPlotSettings}
+                      chartSettings={chartSettings}
+                      environment={environment}
+                    />
+                  </div>
+                </div>
+              ))}
+          </div>
         </VariableBox>
       );
     }
