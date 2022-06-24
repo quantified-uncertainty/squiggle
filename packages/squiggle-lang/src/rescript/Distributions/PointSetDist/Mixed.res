@@ -1,3 +1,5 @@
+@@warning("-27") //TODO: Remove and fix the warning
+@@warning("-32") //TODO: Remove and fix the warning
 open Distributions
 
 type t = PointSetTypes.mixedShape

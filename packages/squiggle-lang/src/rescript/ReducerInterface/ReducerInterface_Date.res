@@ -1,27 +1,27 @@
-module EV = ReducerInterface_ExpressionValue
-type expressionValue = EV.expressionValue
+module IEV = ReducerInterface_InternalExpressionValue
+type internalExpressionValue = IEV.t
 
-let dispatch = (call: EV.functionCall, _: DistributionOperation.env): option<
-  result<expressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
+let dispatch = (call: IEV.functionCall, _: DistributionOperation.env): option<
+  result<internalExpressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
 > => {
   switch call {
-  | ("toString", [EvDate(t)]) => EV.EvString(DateTime.Date.toString(t))->Ok->Some
-  | ("makeDateFromYear", [EvNumber(year)]) =>
+  | ("toString", [IEvDate(t)]) => IEV.IEvString(DateTime.Date.toString(t))->Ok->Some
+  | ("makeDateFromYear", [IEvNumber(year)]) =>
     switch DateTime.Date.makeFromYear(year) {
-    | Ok(t) => EV.EvDate(t)->Ok->Some
+    | Ok(t) => IEV.IEvDate(t)->Ok->Some
     | Error(e) => Reducer_ErrorValue.RETodo(e)->Error->Some
     }
-  | ("dateFromNumber", [EvNumber(f)]) => EV.EvDate(DateTime.Date.fromFloat(f))->Ok->Some
-  | ("toNumber", [EvDate(f)]) => EV.EvNumber(DateTime.Date.toFloat(f))->Ok->Some
-  | ("subtract", [EvDate(d1), EvDate(d2)]) =>
+  | ("dateFromNumber", [IEvNumber(f)]) => IEV.IEvDate(DateTime.Date.fromFloat(f))->Ok->Some
+  | ("toNumber", [IEvDate(f)]) => IEV.IEvNumber(DateTime.Date.toFloat(f))->Ok->Some
+  | ("subtract", [IEvDate(d1), IEvDate(d2)]) =>
     switch DateTime.Date.subtract(d1, d2) {
-    | Ok(d) => EV.EvTimeDuration(d)->Ok
+    | Ok(d) => IEV.IEvTimeDuration(d)->Ok
     | Error(e) => Error(RETodo(e))
     }->Some
-  | ("subtract", [EvDate(d1), EvTimeDuration(d2)]) =>
-    EV.EvDate(DateTime.Date.subtractDuration(d1, d2))->Ok->Some
-  | ("add", [EvDate(d1), EvTimeDuration(d2)]) =>
-    EV.EvDate(DateTime.Date.addDuration(d1, d2))->Ok->Some
+  | ("subtract", [IEvDate(d1), IEvTimeDuration(d2)]) =>
+    IEV.IEvDate(DateTime.Date.subtractDuration(d1, d2))->Ok->Some
+  | ("add", [IEvDate(d1), IEvTimeDuration(d2)]) =>
+    IEV.IEvDate(DateTime.Date.addDuration(d1, d2))->Ok->Some
   | _ => None
   }
 }

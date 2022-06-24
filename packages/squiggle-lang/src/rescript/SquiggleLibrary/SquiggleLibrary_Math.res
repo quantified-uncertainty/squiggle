@@ -1,4 +1,4 @@
-module Bindings = Reducer_Category_Bindings
+module Bindings = Reducer_Category_Module
 module Module = Reducer_Category_Module
 
 let availableNumbers: array<(string, float)> = [
@@ -14,10 +14,10 @@ let availableNumbers: array<(string, float)> = [
   ("tau", 6.283185307179586),
 ]
 
-let mathBindings: Bindings.ExpressionT.bindings =
+let mathBindings: Bindings.t =
   availableNumbers
-  ->E.A2.fmap(((name, v)) => (name, ReducerInterface_ExpressionValue.EvNumber(v)))
-  ->Belt.Map.String.fromArray
+  ->E.A2.fmap(((name, v)) => (name, ReducerInterface_InternalExpressionValue.IEvNumber(v)))
+  ->Bindings.fromArray
 
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
   previousBindings->Bindings.defineModule("Math", mathBindings)
