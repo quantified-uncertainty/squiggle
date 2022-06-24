@@ -59,7 +59,7 @@ export interface SquiggleEditorProps {
   /** Whether to exp the y coordinate on distribution charts */
   expY?: boolean;
   /** Display 94% interval; useful for thin lognormals */
-  truncateTo95ci?: boolean;
+  truncateToNthci?: number;
 }
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
@@ -77,7 +77,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
   showSummary = false,
   logX = false,
   expY = false,
-  truncateTo95ci = false,
+  truncateToNthci = 100,
 }: SquiggleEditorProps) => {
   const [code, setCode] = useState(initialSquiggleString);
   React.useEffect(
@@ -104,7 +104,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
     showSummary,
     logX,
     expY,
-    truncateTo95ci,
+    truncateToNthci,
   };
 
   return (

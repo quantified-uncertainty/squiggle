@@ -37,7 +37,7 @@ interface PlaygroundProps {
   /** Whether to exp the y coordinate on distribution charts */
   expY?: boolean;
   /** Display 94% interval; useful for thin lognormals */
-  truncateTo95ci?: boolean;
+  truncateToNthci?: number;
   /** If code is set, component becomes controlled */
   code?: string;
   onCodeChange?(expr: string): void;
@@ -80,7 +80,7 @@ const schema = yup
     showEditor: yup.boolean(),
     logX: yup.boolean(),
     expY: yup.boolean(),
-    truncateTo95ci: yup.boolean(),
+    truncateToNthci: yup.number().required().min(0).max(100).default(100),
     showSettingsPage: yup.boolean().default(false),
     diagramStart: yup
       .number()
@@ -215,7 +215,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   showSummary = false,
   logX = false,
   expY = false,
-  truncateTo95ci = false,
+  truncateToNthci = 100,
   code: controlledCode,
   onCodeChange,
   onSettingsChange,
@@ -237,7 +237,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       showControls,
       logX,
       expY,
-      truncateTo95ci,
+      truncateToNthci,
       showSummary,
       showEditor,
       leftSizePercent: 50,
@@ -345,10 +345,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
               name="expY"
               label="Show y scale exponentially"
             />
-            <Checkbox
+            <InputItem
+              name="truncateToNthci"
+              type="number"
               register={register}
-              name="truncateTo95ci"
-              label="Show 95th percentile confidence interval (useful for thin lognormals)"
+              label="Show nth percentile confidence interval (useful for thin lognormals)"
             />
             <Checkbox
               register={register}
@@ -442,7 +443,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       showSummary={vars.showSummary}
       logX={vars.logX}
       expY={vars.expY}
-      truncateTo95ci={vars.truncateTo95ci}
+      truncateToNthci={vars.truncateToNthci}
       bindings={defaultBindings}
       jsImports={imports}
     />

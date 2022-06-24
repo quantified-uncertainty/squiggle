@@ -28,7 +28,7 @@ export type DistributionPlottingSettings = {
   logX: boolean;
   /** Set the y scale to be exponential by deault */
   expY: boolean;
-  truncateTo95ci: boolean;
+  truncateToNthci: number;
 };
 
 export type DistributionChartProps = {
@@ -45,7 +45,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   showControls,
   logX,
   expY,
-  truncateTo95ci,
+  truncateToNthci,
 }) => {
   const [isLogX, setLogX] = React.useState(logX);
   const [isExpY, setExpY] = React.useState(expY);
@@ -54,25 +54,33 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   React.useEffect(() => setExpY(expY), [expY]);
 
   const [sized] = useSize((size) => {
-    const p3wrapped = distribution.inv(0.025);
-    const p97wrapped = distribution.inv(0.975);
-    if (p3wrapped.tag == "Error") {
+    const delta = truncateToNthci / 100 / 2;
+    if (truncateToNthci <= 0 || truncateToNthci > 100) {
       return (
-        <ErrorAlert heading="Distribution Calculation Error">
-          {distributionErrorToString(p3wrapped.value)}
-        </ErrorAlert>
-      );
-    } else if (p97wrapped.tag == "Error") {
-      return (
-        <ErrorAlert heading="Distribution Calculation Error">
-          {distributionErrorToString(p97wrapped.value)}
+        <ErrorAlert heading="Confidence interval error">
+          {"Confidence interval must be between 0 and 100"}
         </ErrorAlert>
       );
     }
-    const p3 = p3wrapped.value;
-    const p97 = p97wrapped.value;
+    const pMinwrapped = distribution.inv(0.5 - delta);
+    const pMaxwrapped = distribution.inv(0.5 + delta);
+    if (pMinwrapped.tag == "Error") {
+      return (
+        <ErrorAlert heading="Distribution Calculation Error">
+          {distributionErrorToString(pMinwrapped.value)}
+        </ErrorAlert>
+      );
+    } else if (pMaxwrapped.tag == "Error") {
+      return (
+        <ErrorAlert heading="Distribution Calculation Error">
+          {distributionErrorToString(pMaxwrapped.value)}
+        </ErrorAlert>
+      );
+    }
+    const pMin = pMinwrapped.value;
+    const pMax = pMaxwrapped.value;
 
-    const truncatedDistributionWrapper = distribution.truncate(p3, p97);
+    const truncatedDistributionWrapper = distribution.truncate(pMin, pMax);
     if (truncatedDistributionWrapper.tag == "Error") {
       return (
         <ErrorAlert heading="Distribution Truncation For Display Error">
@@ -120,7 +128,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
           <Vega
             spec={spec}
             data={
-              truncateTo95ci
+              truncateToNthci != 100
                 ? {
                     con: shapeTruncated.value.continuous,
                     dis: shapeTruncated.value.discrete,
