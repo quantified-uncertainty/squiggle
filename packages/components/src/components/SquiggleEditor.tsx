@@ -104,7 +104,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
     showSummary,
     logX,
     expY,
-    truncateTo95ci
+    truncateTo95ci,
   };
 
   return (

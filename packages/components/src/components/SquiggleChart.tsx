@@ -45,7 +45,7 @@ export interface SquiggleChartProps {
   truncateTo95ci?: boolean;
 }
 
-const defaultOnChange = () => { };
+const defaultOnChange = () => {};
 const defaultChartSettings = { start: 0, stop: 10, count: 20 };
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
