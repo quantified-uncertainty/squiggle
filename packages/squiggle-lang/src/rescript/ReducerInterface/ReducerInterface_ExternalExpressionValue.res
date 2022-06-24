@@ -8,8 +8,8 @@ module ErrorValue = Reducer_ErrorValue
 type internalCode = Object
 
 @genType
-type rec expressionValue =
-  | EvArray(array<expressionValue>)
+type rec externalExpressionValue =
+  | EvArray(array<externalExpressionValue>)
   | EvArrayString(array<string>)
   | EvBool(bool)
   | EvCall(string) // External function call
@@ -24,7 +24,7 @@ type rec expressionValue =
   | EvDeclaration(lambdaDeclaration)
   | EvTypeIdentifier(string)
   | EvModule(record)
-and record = Js.Dict.t<expressionValue>
+and record = Js.Dict.t<externalExpressionValue>
 and externalBindings = record
 and lambdaValue = {
   parameters: array<string>,
@@ -33,7 +33,10 @@ and lambdaValue = {
 }
 and lambdaDeclaration = Declaration.declaration<lambdaValue>
 
-type functionCall = (string, array<expressionValue>)
+@genType
+type t = externalExpressionValue
+
+type functionCall = (string, array<externalExpressionValue>)
 
 let rec toString = aValue =>
   switch aValue {
@@ -68,7 +71,7 @@ and toStringRecord = aRecord => {
   `{${pairs}}`
 }
 
-let argsToString = (args: array<expressionValue>): string => {
+let argsToString = (args: array<externalExpressionValue>): string => {
   args->Js.Array2.map(arg => arg->toString)->Js.Array2.toString
 }
 
@@ -79,18 +82,6 @@ let toStringResult = x =>
   | Ok(a) => `Ok(${toString(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
-
-// let toStringResultOkless = (codeResult: result<expressionValue, ErrorValue.errorValue>): string =>
-//   switch codeResult {
-//   | Ok(a) => toString(a)
-//   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
-//   }
-
-// let toStringResultRecord = x =>
-//   switch x {
-//   | Ok(a) => `Ok(${toStringRecord(a)})`
-//   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
-//   }
 
 @genType
 type environment = DistributionOperation.env

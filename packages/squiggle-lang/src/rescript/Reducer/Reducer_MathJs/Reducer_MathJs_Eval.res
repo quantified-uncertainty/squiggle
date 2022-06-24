@@ -17,7 +17,7 @@ let eval__: string => 'a = %raw(`function (expr) { return {value: Mathjs.evaluat
 /*
   Call MathJs evaluate and return as a variant
 */
-let eval = (expr: string): result<expressionValue, errorValue> => {
+let eval = (expr: string): result<internalExpressionValue, errorValue> => {
   try {
     let answer = eval__(expr)
     answer["value"]->JavaScript.Gate.jsToIEv

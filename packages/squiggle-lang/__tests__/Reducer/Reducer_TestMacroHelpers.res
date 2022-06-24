@@ -12,7 +12,7 @@ module Module = Reducer_Category_Module
 
 let testMacro_ = (
   tester,
-  bindArray: array<(string, InternalExpressionValue.expressionValue)>,
+  bindArray: array<(string, InternalExpressionValue.t)>,
   expr: T.expression,
   expectedCode: string,
 ) => {
@@ -32,7 +32,7 @@ let testMacro_ = (
 
 let testMacroEval_ = (
   tester,
-  bindArray: array<(string, InternalExpressionValue.expressionValue)>,
+  bindArray: array<(string, InternalExpressionValue.t)>,
   expr: T.expression,
   expectedValue: string,
 ) => {
@@ -51,24 +51,24 @@ let testMacroEval_ = (
 }
 
 let testMacro = (
-  bindArray: array<(string, InternalExpressionValue.expressionValue)>,
+  bindArray: array<(string, InternalExpressionValue.t)>,
   expr: T.expression,
   expectedExpr: string,
 ) => testMacro_(test, bindArray, expr, expectedExpr)
 let testMacroEval = (
-  bindArray: array<(string, InternalExpressionValue.expressionValue)>,
+  bindArray: array<(string, InternalExpressionValue.t)>,
   expr: T.expression,
   expectedValue: string,
 ) => testMacroEval_(test, bindArray, expr, expectedValue)
 
 module MySkip = {
   let testMacro = (
-    bindArray: array<(string, InternalExpressionValue.expressionValue)>,
+    bindArray: array<(string, InternalExpressionValue.t)>,
     expr: T.expression,
     expectedExpr: string,
   ) => testMacro_(Skip.test, bindArray, expr, expectedExpr)
   let testMacroEval = (
-    bindArray: array<(string, InternalExpressionValue.expressionValue)>,
+    bindArray: array<(string, InternalExpressionValue.t)>,
     expr: T.expression,
     expectedValue: string,
   ) => testMacroEval_(Skip.test, bindArray, expr, expectedValue)
@@ -76,12 +76,12 @@ module MySkip = {
 
 module MyOnly = {
   let testMacro = (
-    bindArray: array<(string, InternalExpressionValue.expressionValue)>,
+    bindArray: array<(string, InternalExpressionValue.t)>,
     expr: T.expression,
     expectedExpr: string,
   ) => testMacro_(Only.test, bindArray, expr, expectedExpr)
   let testMacroEval = (
-    bindArray: array<(string, InternalExpressionValue.expressionValue)>,
+    bindArray: array<(string, InternalExpressionValue.t)>,
     expr: T.expression,
     expectedValue: string,
   ) => testMacroEval_(Only.test, bindArray, expr, expectedValue)

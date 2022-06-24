@@ -41,7 +41,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     ->Ok
   }
 
-  let arrayAtIndex = (aValueArray: array<expressionValue>, fIndex: float) =>
+  let arrayAtIndex = (aValueArray: array<internalExpressionValue>, fIndex: float) =>
     switch Belt.Array.get(aValueArray, Belt.Int.fromFloat(fIndex)) {
     | Some(value) => value->Ok
     | None => REArrayIndexNotFound("Array index not found", Belt.Int.fromFloat(fIndex))->Error
@@ -53,7 +53,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     | None => RERecordPropertyNotFound("Module property not found", sIndex)->Error
     }
 
-  let recordAtIndex = (dict: Belt.Map.String.t<expressionValue>, sIndex) =>
+  let recordAtIndex = (dict: Belt.Map.String.t<internalExpressionValue>, sIndex) =>
     switch Belt.Map.String.get(dict, sIndex) {
     | Some(value) => value->Ok
     | None => RERecordPropertyNotFound("Record property not found", sIndex)->Error
@@ -69,24 +69,27 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     answer->IEvString->Ok
   }
 
-  let inspect = (value: expressionValue) => {
+  let inspect = (value: internalExpressionValue) => {
     Js.log(value->toString)
     value->Ok
   }
 
-  let inspectLabel = (value: expressionValue, label: string) => {
+  let inspectLabel = (value: internalExpressionValue, label: string) => {
     Js.log(`${label}: ${value->toString}`)
     value->Ok
   }
 
-  let doSetBindings = (bindings: nameSpace, symbol: string, value: expressionValue) => {
+  let doSetBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) => {
     Module.set(bindings, symbol, value)->IEvModule->Ok
   }
 
-  let doSetTypeAliasBindings = (bindings: nameSpace, symbol: string, value: expressionValue) =>
-    Module.setTypeAlias(bindings, symbol, value)->IEvModule->Ok
+  let doSetTypeAliasBindings = (
+    bindings: nameSpace,
+    symbol: string,
+    value: internalExpressionValue,
+  ) => Module.setTypeAlias(bindings, symbol, value)->IEvModule->Ok
 
-  let doSetTypeOfBindings = (bindings: nameSpace, symbol: string, value: expressionValue) =>
+  let doSetTypeOfBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) =>
     Module.setTypeOf(bindings, symbol, value)->IEvModule->Ok
 
   let doExportBindings = (bindings: nameSpace) => bindings->Module.toExpressionValue->Ok
@@ -296,7 +299,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   Reducer uses Result monad while reducing expressions
 */
 let dispatch = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
-  expressionValue,
+  internalExpressionValue,
   errorValue,
 > =>
   try {

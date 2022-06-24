@@ -1,4 +1,4 @@
-type expressionValue = ReducerInterface_InternalExpressionValue.expressionValue
+type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
 
 /*
   Function Registry "Type". A type, without any other information.
@@ -41,7 +41,7 @@ and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.g
 type fnDefinition = {
   name: string,
   inputs: array<frType>,
-  run: (array<frValue>, DistributionOperation.env) => result<expressionValue, string>,
+  run: (array<frValue>, DistributionOperation.env) => result<internalExpressionValue, string>,
 }
 
 type function = {
@@ -73,7 +73,7 @@ module FRType = {
     | FRTypeAny => `any`
     }
 
-  let rec toFrValue = (r: expressionValue): option<frValue> =>
+  let rec toFrValue = (r: internalExpressionValue): option<frValue> =>
     switch r {
     | IEvNumber(f) => Some(FRValueNumber(f))
     | IEvString(f) => Some(FRValueString(f))
@@ -89,7 +89,7 @@ module FRType = {
     | _ => None
     }
 
-  let rec matchWithExpressionValue = (t: t, r: expressionValue): option<frValue> =>
+  let rec matchWithExpressionValue = (t: t, r: internalExpressionValue): option<frValue> =>
     switch (t, r) {
     | (FRTypeAny, f) => toFrValue(f)
     | (FRTypeString, IEvString(f)) => Some(FRValueString(f))
@@ -125,7 +125,7 @@ module FRType = {
     | _ => None
     }
 
-  let rec matchReverse = (e: frValue): expressionValue =>
+  let rec matchReverse = (e: frValue): internalExpressionValue =>
     switch e {
     | FRValueNumber(f) => IEvNumber(f)
     | FRValueDistOrNumber(FRValueNumber(n)) => IEvNumber(n)
@@ -153,9 +153,10 @@ module FRType = {
     | FRValueAny(f) => matchReverse(f)
     }
 
-  let matchWithExpressionValueArray = (inputs: array<t>, args: array<expressionValue>): option<
-    array<frValue>,
-  > => {
+  let matchWithExpressionValueArray = (
+    inputs: array<t>,
+    args: array<internalExpressionValue>,
+  ): option<array<frValue>> => {
     let isSameLength = E.A.length(inputs) == E.A.length(args)
     if !isSameLength {
       None
@@ -206,14 +207,14 @@ module Matcher = {
   }
 
   module FnDefinition = {
-    let matchAssumingSameName = (f: fnDefinition, args: array<expressionValue>) => {
+    let matchAssumingSameName = (f: fnDefinition, args: array<internalExpressionValue>) => {
       switch FRType.matchWithExpressionValueArray(f.inputs, args) {
       | Some(_) => MatchSimple.FullMatch
       | None => MatchSimple.SameNameDifferentArguments
       }
     }
 
-    let match = (f: fnDefinition, fnName: string, args: array<expressionValue>) => {
+    let match = (f: fnDefinition, fnName: string, args: array<internalExpressionValue>) => {
       if f.name !== fnName {
         MatchSimple.DifferentName
       } else {
@@ -226,7 +227,7 @@ module Matcher = {
     type definitionId = int
     type match = Match.t<array<definitionId>, definitionId>
 
-    let match = (f: function, fnName: string, args: array<expressionValue>): match => {
+    let match = (f: function, fnName: string, args: array<internalExpressionValue>): match => {
       let matchedDefinition = () =>
         E.A.getIndexBy(f.definitions, r =>
           MatchSimple.isFullMatch(FnDefinition.match(r, fnName, args))
@@ -260,7 +261,7 @@ module Matcher = {
   }
 
   module Registry = {
-    let _findExactMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let _findExactMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
       let functionMatchPairs = r->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
       let fullMatch = functionMatchPairs->E.A.getBy(((_, match)) => Match.isFullMatch(match))
       fullMatch->E.O.bind(((fn, match)) =>
@@ -271,7 +272,7 @@ module Matcher = {
       )
     }
 
-    let _findNameMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let _findNameMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
       let functionMatchPairs = r->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
       let getNameMatches =
         functionMatchPairs
@@ -290,7 +291,7 @@ module Matcher = {
       E.A.toNoneIfEmpty(matches)
     }
 
-    let findMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let findMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
       switch _findExactMatches(r, fnName, args) {
       | Some(r) => Match.FullMatch(r)
       | None =>
@@ -318,7 +319,7 @@ module FnDefinition = {
     t.name ++ `(${inputs})`
   }
 
-  let run = (t: t, args: array<expressionValue>, env: DistributionOperation.env) => {
+  let run = (t: t, args: array<internalExpressionValue>, env: DistributionOperation.env) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
     | Some(values) => t.run(values, env)
@@ -372,7 +373,7 @@ module Registry = {
   let matchAndRun = (
     ~registry: registry,
     ~fnName: string,
-    ~args: array<expressionValue>,
+    ~args: array<internalExpressionValue>,
     ~env: DistributionOperation.env,
   ) => {
     let matchToDef = m => Matcher.Registry.matchToDef(registry, m)

@@ -9,13 +9,16 @@ module Result = Belt.Result
 type environment = ReducerInterface_InternalExpressionValue.environment
 type expression = ExpressionT.expression
 type expressionOrFFI = ExpressionT.expressionOrFFI
-type expressionValue = ReducerInterface_InternalExpressionValue.expressionValue
+type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
 // type tmpExternalBindings = ReducerInterface_InternalExpressionValue.tmpExternalBindings
 type internalCode = ReducerInterface_InternalExpressionValue.internalCode
 
 external castInternalCodeToExpression: internalCode => expressionOrFFI = "%identity"
 
-let checkArity = (lambdaValue: ExpressionValue.lambdaValue, args: list<expressionValue>) => {
+let checkArity = (
+  lambdaValue: ExpressionValue.lambdaValue,
+  args: list<internalExpressionValue>,
+) => {
   let argsLength = Belt.List.length(args)
   let parametersLength = Js.Array2.length(lambdaValue.parameters)
   if argsLength !== parametersLength {
@@ -25,7 +28,7 @@ let checkArity = (lambdaValue: ExpressionValue.lambdaValue, args: list<expressio
   }
 }
 
-let checkIfReduced = (args: list<expressionValue>) =>
+let checkIfReduced = (args: list<internalExpressionValue>) =>
   args->Belt.List.reduceReverse(Ok(list{}), (rAcc, arg) =>
     rAcc->Result.flatMap(acc =>
       switch arg {
@@ -55,7 +58,7 @@ let applyParametersToLambda = (
   args,
   environment,
   reducer: ExpressionT.reducerFn,
-): result<expressionValue, 'e> => {
+): result<internalExpressionValue, 'e> => {
   checkArity(lambdaValue, args)->Result.flatMap(args =>
     checkIfReduced(args)->Result.flatMap(args => {
       let exprOrFFI = castInternalCodeToExpression(lambdaValue.body)
@@ -72,10 +75,10 @@ let doLambdaCall = (lambdaValue: ExpressionValue.lambdaValue, args, environment,
 
 let foreignFunctionInterface = (
   lambdaValue: ExpressionValue.lambdaValue,
-  argArray: array<expressionValue>,
+  argArray: array<internalExpressionValue>,
   environment: ExpressionValue.environment,
   reducer: ExpressionT.reducerFn,
-): result<expressionValue, 'e> => {
+): result<internalExpressionValue, 'e> => {
   let args = argArray->Belt.List.fromArray
   applyParametersToLambda(lambdaValue, args, environment, reducer)
 }

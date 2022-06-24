@@ -13,9 +13,8 @@ module T = Reducer_Expression_T
 type environment = InternalExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = T.expression
-type expressionValue = InternalExpressionValue.expressionValue
-type externalExpressionValue = ReducerInterface_ExpressionValue.expressionValue
-type tmpExternalBindings = InternalExpressionValue.tmpExternalBindings
+type internalExpressionValue = InternalExpressionValue.t
+type externalExpressionValue = ReducerInterface_ExternalExpressionValue.t
 type t = expression
 
 /*
@@ -28,7 +27,7 @@ let parse = (peggyCode: string): result<t, errorValue> =>
   Recursively evaluate/reduce the expression (Lisp AST)
 */
 let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<
-  expressionValue,
+  internalExpressionValue,
   'e,
 > => {
   // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
@@ -51,11 +50,11 @@ and reduceExpressionList = (
   expressions: list<t>,
   bindings: T.bindings,
   environment: environment,
-): result<expressionValue, 'e> => {
-  let racc: result<list<expressionValue>, 'e> = expressions->Belt.List.reduceReverse(Ok(list{}), (
-    racc,
-    each: expression,
-  ) =>
+): result<internalExpressionValue, 'e> => {
+  let racc: result<
+    list<internalExpressionValue>,
+    'e,
+  > = expressions->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
     racc->Result.flatMap(acc => {
       each
       ->reduceExpression(bindings, environment)
@@ -70,8 +69,8 @@ and reduceExpressionList = (
 /*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
-and reduceValueList = (valueList: list<expressionValue>, environment): result<
-  expressionValue,
+and reduceValueList = (valueList: list<internalExpressionValue>, environment): result<
+  internalExpressionValue,
   'e,
 > =>
   switch valueList {
@@ -108,18 +107,18 @@ and reduceValueList = (valueList: list<expressionValue>, environment): result<
   }
 
 let evalUsingBindingsExpression_ = (aExpression, bindings, environment): result<
-  expressionValue,
+  internalExpressionValue,
   'e,
 > => reduceExpression(aExpression, bindings, environment)
 
 let evaluateUsingOptions = (
-  ~environment: option<ReducerInterface_ExpressionValue.environment>,
-  ~externalBindings: option<ReducerInterface_ExpressionValue.externalBindings>,
+  ~environment: option<ReducerInterface_ExternalExpressionValue.environment>,
+  ~externalBindings: option<ReducerInterface_ExternalExpressionValue.externalBindings>,
   code: string,
 ): result<externalExpressionValue, errorValue> => {
   let anEnvironment = Belt.Option.getWithDefault(
     environment,
-    ReducerInterface_ExpressionValue.defaultEnvironment,
+    ReducerInterface_ExternalExpressionValue.defaultEnvironment,
   )
 
   let mergedBindings: InternalExpressionValue.nameSpace = Module.merge(
@@ -142,9 +141,9 @@ let evaluate = (code: string): result<externalExpressionValue, errorValue> => {
 }
 let evaluatePartialUsingExternalBindings = (
   code: string,
-  externalBindings: ReducerInterface_ExpressionValue.externalBindings,
-  environment: ReducerInterface_ExpressionValue.environment,
-): result<ReducerInterface_ExpressionValue.externalBindings, errorValue> => {
+  externalBindings: ReducerInterface_ExternalExpressionValue.externalBindings,
+  environment: ReducerInterface_ExternalExpressionValue.environment,
+): result<ReducerInterface_ExternalExpressionValue.externalBindings, errorValue> => {
   let rAnswer = evaluateUsingOptions(
     ~environment=Some(environment),
     ~externalBindings=Some(externalBindings),

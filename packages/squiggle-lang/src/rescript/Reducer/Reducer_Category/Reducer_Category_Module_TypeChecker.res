@@ -14,8 +14,3 @@ let isOfResolvedType = (aType, aValue) => {
   | _ => false
   }
 }
-
-// let compileTypeExpression = (typeExpression: string, bindings: ExpressionT.bindings, reducerFn: ExpressionT.reducerFn) => {
-//     statement = `type compiled=${typeExpression}`
-
-// }

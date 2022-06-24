@@ -47,10 +47,10 @@ let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalB
 type externalBindings = Reducer.externalBindings
 
 @genType
-type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type expressionValue = ReducerInterface_ExternalExpressionValue.t
 
 @genType
-type recordEV = ReducerInterface_ExpressionValue.record
+type recordEV = ReducerInterface_ExternalExpressionValue.record
 
 @genType
 type errorValue = Reducer_ErrorValue.errorValue
@@ -74,19 +74,19 @@ let errorValueToString = Reducer_ErrorValue.errorToString
 let distributionErrorToString = DistributionTypes.Error.toString
 
 @genType
-type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
+type lambdaValue = ReducerInterface_ExternalExpressionValue.lambdaValue
 
 @genType
-type lambdaDeclaration = ReducerInterface_ExpressionValue.lambdaDeclaration
+type lambdaDeclaration = ReducerInterface_ExternalExpressionValue.lambdaDeclaration
 
 @genType
 let defaultSamplingEnv = DistributionOperation.defaultEnv
 
 @genType
-type environment = ReducerInterface_ExpressionValue.environment
+type environment = ReducerInterface_ExternalExpressionValue.environment
 
 @genType
-let defaultEnvironment = ReducerInterface_ExpressionValue.defaultEnvironment
+let defaultEnvironment = ReducerInterface_ExternalExpressionValue.defaultEnvironment
 
 @genType
 let foreignFunctionInterface = Reducer.foreignFunctionInterface

@@ -1,14 +1,13 @@
 module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface_InternalExpressionValue
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Result = Belt.Result
 module Module = Reducer_Category_Module
 
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression
-type expressionValue = ExpressionValue.expressionValue
-type tmpExternalBindings = ReducerInterface_InternalExpressionValue.tmpExternalBindings
-type externalBindings = ReducerInterface_ExpressionValue.externalBindings
+type internalExpressionValue = InternalExpressionValue.t
+type externalBindings = ReducerInterface_ExternalExpressionValue.externalBindings
 
 let isMacroName = (fName: string): bool => fName->Js.String2.startsWith("$$")
 
@@ -41,14 +40,14 @@ and replaceSymbolsOnExpressionList = (bindings, list) => {
   )
   racc->Result.map(acc => acc->ExpressionT.EList)
 }
-and replaceSymbolOnValue = (bindings, evValue: expressionValue) =>
+and replaceSymbolOnValue = (bindings, evValue: internalExpressionValue) =>
   switch evValue {
   | IEvSymbol(symbol) => Module.getWithDefault(bindings, symbol, evValue)->Ok
   | IEvCall(symbol) => Module.getWithDefault(bindings, symbol, evValue)->checkIfCallable
   | _ => evValue->Ok
   }
-and checkIfCallable = (evValue: expressionValue) =>
+and checkIfCallable = (evValue: internalExpressionValue) =>
   switch evValue {
   | IEvCall(_) | IEvLambda(_) => evValue->Ok
-  | _ => ErrorValue.RENotAFunction(ExpressionValue.toString(evValue))->Error
+  | _ => ErrorValue.RENotAFunction(InternalExpressionValue.toString(evValue))->Error
   }

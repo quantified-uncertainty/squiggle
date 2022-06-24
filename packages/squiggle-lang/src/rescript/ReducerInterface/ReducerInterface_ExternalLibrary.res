@@ -1,6 +1,6 @@
-module ExpressionValue = ReducerInterface_InternalExpressionValue
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
-type expressionValue = ExpressionValue.expressionValue
+type internalExpressionValue = InternalExpressionValue.t
 
 // module Sample = {
 //   // In real life real libraries should be somewhere else
@@ -17,14 +17,14 @@ type expressionValue = ExpressionValue.expressionValue
 // I expect that it's important to build this first, so it doesn't get recalculated for each tryRegistry() call.
 let registry = FunctionRegistry_Library.registry
 
-let tryRegistry = ((fnName, args): ExpressionValue.functionCall, env) => {
+let tryRegistry = ((fnName, args): InternalExpressionValue.functionCall, env) => {
   FunctionRegistry_Core.Registry.matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
     E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
   )
 }
 
-let dispatch = (call: ExpressionValue.functionCall, environment, chain): result<
-  expressionValue,
+let dispatch = (call: InternalExpressionValue.functionCall, environment, chain): result<
+  internalExpressionValue,
   'e,
 > => {
   E.A.O.firstSomeFn([

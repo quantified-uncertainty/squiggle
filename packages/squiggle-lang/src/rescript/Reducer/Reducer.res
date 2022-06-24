@@ -1,13 +1,13 @@
 module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
-module ExternalExpressionValue = ReducerInterface_ExpressionValue
+module ExternalExpressionValue = ReducerInterface_ExternalExpressionValue
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 
 type environment = ReducerInterface_InternalExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
-type expressionValue = ExternalExpressionValue.expressionValue
-type externalBindings = ReducerInterface_ExpressionValue.externalBindings
+type expressionValue = ExternalExpressionValue.t
+type externalBindings = ReducerInterface_ExternalExpressionValue.externalBindings
 type lambdaValue = ExternalExpressionValue.lambdaValue
 
 let evaluate = Expression.evaluate

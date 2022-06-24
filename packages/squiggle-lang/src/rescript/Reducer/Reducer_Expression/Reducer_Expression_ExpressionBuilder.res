@@ -1,7 +1,7 @@
 module BBindingsReplacer = Reducer_Expression_BindingsReplacer
 module BErrorValue = Reducer_ErrorValue
 module BExpressionT = Reducer_Expression_T
-module BExpressionValue = ReducerInterface_InternalExpressionValue
+module BInternalExpressionValue = ReducerInterface_InternalExpressionValue
 module BModule = Reducer_Category_Module
 
 type errorValue = BErrorValue.errorValue
@@ -12,16 +12,17 @@ type internalCode = ReducerInterface_InternalExpressionValue.internalCode
 
 external castExpressionToInternalCode: expressionOrFFI => internalCode = "%identity"
 
-let eArray = anArray => anArray->BExpressionValue.IEvArray->BExpressionT.EValue
+let eArray = anArray => anArray->BInternalExpressionValue.IEvArray->BExpressionT.EValue
 
-let eArrayString = anArray => anArray->BExpressionValue.IEvArrayString->BExpressionT.EValue
+let eArrayString = anArray => anArray->BInternalExpressionValue.IEvArrayString->BExpressionT.EValue
 
-let eBindings = (anArray: array<(string, BExpressionValue.expressionValue)>) =>
+let eBindings = (anArray: array<(string, BInternalExpressionValue.t)>) =>
   anArray->BModule.fromArray->BModule.toExpressionValue->BExpressionT.EValue
 
-let eBool = aBool => aBool->BExpressionValue.IEvBool->BExpressionT.EValue
+let eBool = aBool => aBool->BInternalExpressionValue.IEvBool->BExpressionT.EValue
 
-let eCall = (name: string): expression => name->BExpressionValue.IEvCall->BExpressionT.EValue
+let eCall = (name: string): expression =>
+  name->BInternalExpressionValue.IEvCall->BExpressionT.EValue
 
 let eFunction = (fName: string, lispArgs: list<expression>): expression => {
   let fn = fName->eCall
@@ -30,10 +31,10 @@ let eFunction = (fName: string, lispArgs: list<expression>): expression => {
 
 let eLambda = (
   parameters: array<string>,
-  context: BExpressionValue.nameSpace,
+  context: BInternalExpressionValue.nameSpace,
   expr: expression,
 ) => {
-  BExpressionValue.IEvLambda({
+  BInternalExpressionValue.IEvLambda({
     parameters: parameters,
     context: context,
     body: NotFFI(expr)->castExpressionToInternalCode,
@@ -42,27 +43,28 @@ let eLambda = (
 
 let eLambdaFFI = (parameters: array<string>, ffiFn: ffiFn) => {
   let context = BModule.emptyModule
-  BExpressionValue.IEvLambda({
+  BInternalExpressionValue.IEvLambda({
     parameters: parameters,
     context: context,
     body: FFI(ffiFn)->castExpressionToInternalCode,
   })->BExpressionT.EValue
 }
 
-let eNumber = aNumber => aNumber->BExpressionValue.IEvNumber->BExpressionT.EValue
+let eNumber = aNumber => aNumber->BInternalExpressionValue.IEvNumber->BExpressionT.EValue
 
-let eRecord = aMap => aMap->BExpressionValue.IEvRecord->BExpressionT.EValue
+let eRecord = aMap => aMap->BInternalExpressionValue.IEvRecord->BExpressionT.EValue
 
-let eString = aString => aString->BExpressionValue.IEvString->BExpressionT.EValue
+let eString = aString => aString->BInternalExpressionValue.IEvString->BExpressionT.EValue
 
-let eSymbol = (name: string): expression => name->BExpressionValue.IEvSymbol->BExpressionT.EValue
+let eSymbol = (name: string): expression =>
+  name->BInternalExpressionValue.IEvSymbol->BExpressionT.EValue
 
 let eList = (list: list<expression>): expression => list->BExpressionT.EList
 
 let eBlock = (exprs: list<expression>): expression => eFunction("$$_block_$$", exprs)
 
-let eModule = (nameSpace: BExpressionValue.nameSpace): expression =>
-  nameSpace->BExpressionValue.IEvModule->BExpressionT.EValue
+let eModule = (nameSpace: BInternalExpressionValue.nameSpace): expression =>
+  nameSpace->BInternalExpressionValue.IEvModule->BExpressionT.EValue
 
 let eLetStatement = (symbol: string, valueExpression: expression): expression =>
   eFunction("$_let_$", list{eSymbol(symbol), valueExpression})
@@ -80,7 +82,7 @@ let eBindExpressionDefault = (expression: expression): expression =>
   eFunction("$$_bindExpression_$$", list{expression})
 
 let eIdentifier = (name: string): expression =>
-  name->BExpressionValue.IEvSymbol->BExpressionT.EValue
+  name->BInternalExpressionValue.IEvSymbol->BExpressionT.EValue
 
 let eTypeIdentifier = (name: string): expression =>
-  name->BExpressionValue.IEvTypeIdentifier->BExpressionT.EValue
+  name->BInternalExpressionValue.IEvTypeIdentifier->BExpressionT.EValue

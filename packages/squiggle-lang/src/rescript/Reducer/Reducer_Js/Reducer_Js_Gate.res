@@ -8,7 +8,7 @@ external castString: unit => string = "%identity"
 /*
   As JavaScript returns us any type, we need to type check and cast type propertype before using it
 */
-let jsToIEv = (jsValue): result<expressionValue, errorValue> =>
+let jsToIEv = (jsValue): result<internalExpressionValue, errorValue> =>
   switch Js.typeof(jsValue) {
   | "boolean" => jsValue->castBool->IEvBool->Ok
   | "number" => jsValue->castNumber->IEvNumber->Ok

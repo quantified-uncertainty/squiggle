@@ -1,5 +1,5 @@
-module ExpressionValue = ReducerInterface_InternalExpressionValue
-type expressionValue = ExpressionValue.expressionValue
+module IEV = ReducerInterface_InternalExpressionValue
+type internalExpressionValue = IEV.t
 
 module Helpers = {
   let arithmeticMap = r =>
@@ -18,7 +18,7 @@ module Helpers = {
     | _ => #Multiply
     }
 
-  let catchAndConvertTwoArgsToDists = (args: array<expressionValue>): option<(
+  let catchAndConvertTwoArgsToDists = (args: array<internalExpressionValue>): option<(
     DistributionTypes.genericDist,
     DistributionTypes.genericDist,
   )> =>
@@ -80,23 +80,28 @@ module Helpers = {
     )->DistributionOperation.run(~env)
   }
 
-  let parseNumber = (args: expressionValue): Belt.Result.t<float, string> =>
+  let parseNumber = (args: internalExpressionValue): Belt.Result.t<float, string> =>
     switch args {
     | IEvNumber(x) => Ok(x)
     | _ => Error("Not a number")
     }
 
-  let parseNumberArray = (ags: array<expressionValue>): Belt.Result.t<array<float>, string> =>
-    E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
+  let parseNumberArray = (ags: array<internalExpressionValue>): Belt.Result.t<
+    array<float>,
+    string,
+  > => E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
 
-  let parseDist = (args: expressionValue): Belt.Result.t<DistributionTypes.genericDist, string> =>
+  let parseDist = (args: internalExpressionValue): Belt.Result.t<
+    DistributionTypes.genericDist,
+    string,
+  > =>
     switch args {
     | IEvDistribution(x) => Ok(x)
     | IEvNumber(x) => Ok(GenericDist.fromFloat(x))
     | _ => Error("Not a distribution")
     }
 
-  let parseDistributionArray = (ags: array<expressionValue>): Belt.Result.t<
+  let parseDistributionArray = (ags: array<internalExpressionValue>): Belt.Result.t<
     array<DistributionTypes.genericDist>,
     string,
   > => E.A.fmap(parseDist, ags) |> E.A.R.firstErrorOrOpen
@@ -122,7 +127,7 @@ module Helpers = {
   }
 
   let mixture = (
-    args: array<expressionValue>,
+    args: array<internalExpressionValue>,
     ~env: DistributionOperation.env,
   ): DistributionOperation.outputType => {
     let error = (err: string): DistributionOperation.outputType =>
@@ -194,10 +199,9 @@ module SymbolicConstructors = {
     }
 }
 
-let dispatchToGenericOutput = (
-  call: ExpressionValue.functionCall,
-  env: DistributionOperation.env,
-): option<DistributionOperation.outputType> => {
+let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperation.env): option<
+  DistributionOperation.outputType,
+> => {
   let (fnName, args) = call
   switch (fnName, args) {
   | ("triangular" as fnName, [IEvNumber(f1), IEvNumber(f2), IEvNumber(f3)]) =>
@@ -357,7 +361,7 @@ let dispatchToGenericOutput = (
 }
 
 let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
-  expressionValue,
+  internalExpressionValue,
   Reducer_ErrorValue.errorValue,
 > =>
   switch o {
@@ -370,5 +374,5 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   | GenDistError(err) => Error(REDistributionError(err))
   }
 
-let dispatch = (call: ExpressionValue.functionCall, environment) =>
+let dispatch = (call: IEV.functionCall, environment) =>
   dispatchToGenericOutput(call, environment)->E.O2.fmap(genericOutputToReducerValue)

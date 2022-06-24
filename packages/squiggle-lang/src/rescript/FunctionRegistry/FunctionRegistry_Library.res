@@ -9,7 +9,7 @@ module Declaration = {
     ("inputs", FRTypeArray(FRTypeRecord([("min", FRTypeNumber), ("max", FRTypeNumber)]))),
   ])
 
-  let fromExpressionValue = (e: frValue): result<expressionValue, string> => {
+  let fromExpressionValue = (e: frValue): result<internalExpressionValue, string> => {
     switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs([e]) {
     | Ok([FRValueLambda(lambda), FRValueArray(inputs)]) => {
         open FunctionRegistry_Helpers.Prepare

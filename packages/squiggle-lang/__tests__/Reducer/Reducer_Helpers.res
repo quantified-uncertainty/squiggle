@@ -4,7 +4,7 @@ module ExternalExpressionValue = ReducerInterface.ExternalExpressionValue
 module InternalExpressionValue = ReducerInterface.InternalExpressionValue
 module Module = Reducer_Category_Module
 
-let removeDefaultsInternal = (iev: InternalExpressionValue.expressionValue) => {
+let removeDefaultsInternal = (iev: InternalExpressionValue.t) => {
   switch iev {
   | InternalExpressionValue.IEvModule(nameSpace) =>
     Module.removeOther(
@@ -15,9 +15,7 @@ let removeDefaultsInternal = (iev: InternalExpressionValue.expressionValue) => {
   }
 }
 
-let removeDefaultsExternal = (
-  ev: ExternalExpressionValue.expressionValue,
-): ExternalExpressionValue.expressionValue =>
+let removeDefaultsExternal = (ev: ExternalExpressionValue.t): ExternalExpressionValue.t =>
   ev->InternalExpressionValue.toInternal->removeDefaultsInternal->InternalExpressionValue.toExternal
 
 let rRemoveDefaultsInternal = r => Belt.Result.map(r, removeDefaultsInternal)

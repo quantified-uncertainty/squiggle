@@ -7,16 +7,15 @@ module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module ErrorValue = Reducer_ErrorValue
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface_InternalExpressionValue
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
 module Module = Reducer_Category_Module
 module Result = Belt.Result
 open Reducer_Expression_ExpressionBuilder
 
-type environment = ExpressionValue.environment
+type environment = InternalExpressionValue.environment
 type errorValue = ErrorValue.errorValue
 type expression = ExpressionT.expression
-type expressionValue = ExpressionValue.expressionValue
 type expressionWithContext = ExpressionWithContext.expressionWithContext
 
 let dispatchMacroCall = (
@@ -137,11 +136,11 @@ let dispatchMacroCall = (
     let rCondition = reduceExpression(blockCondition, bindings, environment)
     rCondition->Result.flatMap(conditionValue =>
       switch conditionValue {
-      | ExpressionValue.IEvBool(false) => {
+      | InternalExpressionValue.IEvBool(false) => {
           let ifFalseBlock = eBlock(list{ifFalse})
           ExpressionWithContext.withContext(ifFalseBlock, bindings)->Ok
         }
-      | ExpressionValue.IEvBool(true) => {
+      | InternalExpressionValue.IEvBool(true) => {
           let ifTrueBlock = eBlock(list{ifTrue})
           ExpressionWithContext.withContext(ifTrueBlock, bindings)->Ok
         }

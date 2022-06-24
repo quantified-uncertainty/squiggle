@@ -71,8 +71,8 @@ let emptyModule: t = NameSpace(Belt.Map.String.empty)
 let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
 let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
 
-let toExpressionValue = (nameSpace: t): expressionValue => IEvModule(nameSpace)
-let fromExpressionValue = (aValue: expressionValue): t =>
+let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvModule(nameSpace)
+let fromExpressionValue = (aValue: internalExpressionValue): t =>
   switch aValue {
   | IEvModule(nameSpace) => nameSpace
   | _ => emptyModule
@@ -101,7 +101,7 @@ let removeOther = (nameSpace: t, other: t): t => {
 }
 
 // -- Module definition
-let define = (nameSpace: t, identifier: string, ev: expressionValue): t => {
+let define = (nameSpace: t, identifier: string, ev: internalExpressionValue): t => {
   let NameSpace(container) = nameSpace
   Belt.Map.String.set(container, identifier, ev)->NameSpace // TODO build lambda for polymorphic functions here
 }

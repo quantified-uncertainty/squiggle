@@ -9,19 +9,19 @@
 module Extra = Reducer_Extra
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
-type expressionValue = InternalExpressionValue.expressionValue
+type internalExpressionValue = InternalExpressionValue.t
 type environment = ReducerInterface_InternalExpressionValue.environment
 
 type rec expression =
   | EList(list<expression>) // A list to map-reduce
-  | EValue(expressionValue) // Irreducible built-in value. Reducer should not know the internals. External libraries are responsible
+  | EValue(internalExpressionValue) // Irreducible built-in value. Reducer should not know the internals. External libraries are responsible
 and bindings = InternalExpressionValue.nameSpace
 
 type reducerFn = (
   expression,
   bindings,
   environment,
-) => result<expressionValue, Reducer_ErrorValue.errorValue>
+) => result<internalExpressionValue, Reducer_ErrorValue.errorValue>
 
 /*
   Converts the expression to String
@@ -67,9 +67,9 @@ let inspectResult = (r: result<expression, Reducer_ErrorValue.errorValue>): resu
 }
 
 type ffiFn = (
-  array<expressionValue>,
+  array<internalExpressionValue>,
   environment,
-) => result<expressionValue, Reducer_ErrorValue.errorValue>
+) => result<internalExpressionValue, Reducer_ErrorValue.errorValue>
 
 type expressionOrFFI =
   | NotFFI(expression)
