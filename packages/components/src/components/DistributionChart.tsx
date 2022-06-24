@@ -38,8 +38,32 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
 }) => {
   const [isLogX, setLogX] = React.useState(false);
   const [isExpY, setExpY] = React.useState(false);
-  const shape = distribution.pointSet();
+
   const [sized] = useSize((size) => {
+
+    const p3wrapped = distribution.inv(0.03);
+    const p97wrapped = distribution.inv(0.97);
+    if (p3wrapped.tag == "Error") {
+      return <ErrorAlert heading="Distribution Calculation Error">
+        {distributionErrorToString(p3wrapped.value)}
+      </ErrorAlert>
+    } else if (p97wrapped.tag == "Error") {
+      return <ErrorAlert heading="Distribution Calculation Error">
+        {distributionErrorToString(p97wrapped.value)}
+      </ErrorAlert>
+    }
+    const p3 = p3wrapped.value
+    const p97 = p97wrapped.value
+
+    const truncatedDistributionWrapper = distribution.truncate(p3, p97)
+    if (truncatedDistributionWrapper.tag == "Error") {
+      return <ErrorAlert heading="Distribution Truncation For Display Error">
+        {distributionErrorToString(truncatedDistributionWrapper.value)}
+      </ErrorAlert>
+    }
+    const truncatedDistribution = truncatedDistributionWrapper.value
+
+    const shape = truncatedDistribution.pointSet(); //distribution.pointSet();
     if (shape.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
@@ -82,10 +106,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
               // Check whether we should disable the checkbox
               {...(massBelow0
                 ? {
-                    disabled: true,
-                    tooltip:
-                      "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
-                  }
+                  disabled: true,
+                  tooltip:
+                    "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
+                }
                 : {})}
             />
             <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
@@ -158,12 +182,12 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
   const mean = distribution.mean();
   const stdev = distribution.stdev();
   const p5 = distribution.inv(0.05);
-  const p10 = distribution.inv(0.1);
+  const p30 = distribution.inv(0.1);
   const p25 = distribution.inv(0.25);
   const p50 = distribution.inv(0.5);
   const p75 = distribution.inv(0.75);
   const p90 = distribution.inv(0.9);
-  const p95 = distribution.inv(0.95);
+  const p97 = distribution.inv(0.95);
 
   const hasResult = (x: result<number, distributionError>): boolean =>
     x.tag === "Ok";
@@ -202,12 +226,12 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
           <Cell>{unwrapResult(mean)}</Cell>
           {hasResult(stdev) && <Cell>{unwrapResult(stdev)}</Cell>}
           <Cell>{unwrapResult(p5)}</Cell>
-          <Cell>{unwrapResult(p10)}</Cell>
+          <Cell>{unwrapResult(p30)}</Cell>
           <Cell>{unwrapResult(p25)}</Cell>
           <Cell>{unwrapResult(p50)}</Cell>
           <Cell>{unwrapResult(p75)}</Cell>
           <Cell>{unwrapResult(p90)}</Cell>
-          <Cell>{unwrapResult(p95)}</Cell>
+          <Cell>{unwrapResult(p97)}</Cell>
         </tr>
       </tbody>
     </table>
