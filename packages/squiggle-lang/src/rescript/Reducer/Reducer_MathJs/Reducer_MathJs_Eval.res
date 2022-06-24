@@ -1,5 +1,5 @@
 module JavaScript = Reducer_Js
-open ReducerInterface.ExpressionValue
+open ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
 @module("mathjs") external dummy_: string => unit = "evaluate"
@@ -17,10 +17,10 @@ let eval__: string => 'a = %raw(`function (expr) { return {value: Mathjs.evaluat
 /*
   Call MathJs evaluate and return as a variant
 */
-let eval = (expr: string): result<expressionValue, errorValue> => {
+let eval = (expr: string): result<internalExpressionValue, errorValue> => {
   try {
     let answer = eval__(expr)
-    answer["value"]->JavaScript.Gate.jsToEv
+    answer["value"]->JavaScript.Gate.jsToIEv
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   }

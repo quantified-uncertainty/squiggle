@@ -1,33 +1,36 @@
-module EV = ReducerInterface_ExpressionValue
-type expressionValue = EV.expressionValue
+module IEV = ReducerInterface_InternalExpressionValue
+type internalExpressionValue = IEV.t
 
-let dispatch = (call: EV.functionCall, _: DistributionOperation.env): option<
-  result<expressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
+let dispatch = (call: IEV.functionCall, _: DistributionOperation.env): option<
+  result<internalExpressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
 > => {
   switch call {
-  | ("toString", [EvTimeDuration(t)]) => EV.EvString(DateTime.Duration.toString(t))->Ok->Some
-  | ("minutes", [EvNumber(f)]) => EV.EvTimeDuration(DateTime.Duration.fromMinutes(f))->Ok->Some
-  | ("fromUnit_minutes", [EvNumber(f)]) =>
-    EV.EvTimeDuration(DateTime.Duration.fromMinutes(f))->Ok->Some
-  | ("hours", [EvNumber(f)]) => EV.EvTimeDuration(DateTime.Duration.fromHours(f))->Ok->Some
-  | ("fromUnit_hours", [EvNumber(f)]) => EV.EvTimeDuration(DateTime.Duration.fromHours(f))->Ok->Some
-  | ("days", [EvNumber(f)]) => EV.EvTimeDuration(DateTime.Duration.fromDays(f))->Ok->Some
-  | ("fromUnit_days", [EvNumber(f)]) => EV.EvTimeDuration(DateTime.Duration.fromDays(f))->Ok->Some
-  | ("years", [EvNumber(f)]) => EV.EvTimeDuration(DateTime.Duration.fromYears(f))->Ok->Some
-  | ("fromUnit_years", [EvNumber(f)]) => EV.EvTimeDuration(DateTime.Duration.fromYears(f))->Ok->Some
-  | ("toHours", [EvTimeDuration(f)]) => EV.EvNumber(DateTime.Duration.toHours(f))->Ok->Some
-  | ("toMinutes", [EvTimeDuration(f)]) => EV.EvNumber(DateTime.Duration.toMinutes(f))->Ok->Some
-  | ("toDays", [EvTimeDuration(f)]) => EV.EvNumber(DateTime.Duration.toDays(f))->Ok->Some
-  | ("toYears", [EvTimeDuration(f)]) => EV.EvNumber(DateTime.Duration.toYears(f))->Ok->Some
-  | ("add", [EvTimeDuration(d1), EvTimeDuration(d2)]) =>
-    EV.EvTimeDuration(DateTime.Duration.add(d1, d2))->Ok->Some
-  | ("subtract", [EvTimeDuration(d1), EvTimeDuration(d2)]) =>
-    EV.EvTimeDuration(DateTime.Duration.subtract(d1, d2))->Ok->Some
-  | ("multiply", [EvTimeDuration(d1), EvNumber(d2)]) =>
-    EV.EvTimeDuration(DateTime.Duration.multiply(d1, d2))->Ok->Some
-  | ("divide", [EvTimeDuration(d1), EvNumber(d2)]) =>
-    EV.EvTimeDuration(DateTime.Duration.divide(d1, d2))->Ok->Some
-  | ("divide", [EvTimeDuration(d1), EvTimeDuration(d2)]) => EV.EvNumber(d1 /. d2)->Ok->Some
+  | ("toString", [IEvTimeDuration(t)]) => IEV.IEvString(DateTime.Duration.toString(t))->Ok->Some
+  | ("minutes", [IEvNumber(f)]) => IEV.IEvTimeDuration(DateTime.Duration.fromMinutes(f))->Ok->Some
+  | ("fromUnit_minutes", [IEvNumber(f)]) =>
+    IEV.IEvTimeDuration(DateTime.Duration.fromMinutes(f))->Ok->Some
+  | ("hours", [IEvNumber(f)]) => IEV.IEvTimeDuration(DateTime.Duration.fromHours(f))->Ok->Some
+  | ("fromUnit_hours", [IEvNumber(f)]) =>
+    IEV.IEvTimeDuration(DateTime.Duration.fromHours(f))->Ok->Some
+  | ("days", [IEvNumber(f)]) => IEV.IEvTimeDuration(DateTime.Duration.fromDays(f))->Ok->Some
+  | ("fromUnit_days", [IEvNumber(f)]) =>
+    IEV.IEvTimeDuration(DateTime.Duration.fromDays(f))->Ok->Some
+  | ("years", [IEvNumber(f)]) => IEV.IEvTimeDuration(DateTime.Duration.fromYears(f))->Ok->Some
+  | ("fromUnit_years", [IEvNumber(f)]) =>
+    IEV.IEvTimeDuration(DateTime.Duration.fromYears(f))->Ok->Some
+  | ("toHours", [IEvTimeDuration(f)]) => IEV.IEvNumber(DateTime.Duration.toHours(f))->Ok->Some
+  | ("toMinutes", [IEvTimeDuration(f)]) => IEV.IEvNumber(DateTime.Duration.toMinutes(f))->Ok->Some
+  | ("toDays", [IEvTimeDuration(f)]) => IEV.IEvNumber(DateTime.Duration.toDays(f))->Ok->Some
+  | ("toYears", [IEvTimeDuration(f)]) => IEV.IEvNumber(DateTime.Duration.toYears(f))->Ok->Some
+  | ("add", [IEvTimeDuration(d1), IEvTimeDuration(d2)]) =>
+    IEV.IEvTimeDuration(DateTime.Duration.add(d1, d2))->Ok->Some
+  | ("subtract", [IEvTimeDuration(d1), IEvTimeDuration(d2)]) =>
+    IEV.IEvTimeDuration(DateTime.Duration.subtract(d1, d2))->Ok->Some
+  | ("multiply", [IEvTimeDuration(d1), IEvNumber(d2)]) =>
+    IEV.IEvTimeDuration(DateTime.Duration.multiply(d1, d2))->Ok->Some
+  | ("divide", [IEvTimeDuration(d1), IEvNumber(d2)]) =>
+    IEV.IEvTimeDuration(DateTime.Duration.divide(d1, d2))->Ok->Some
+  | ("divide", [IEvTimeDuration(d1), IEvTimeDuration(d2)]) => IEV.IEvNumber(d1 /. d2)->Ok->Some
   | _ => None
   }
 }

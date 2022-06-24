@@ -1,4 +1,4 @@
-module ExpressionValue = ReducerInterface.ExpressionValue
+module ExpressionValue = ReducerInterface.ExternalExpressionValue
 
 open Jest
 open Expect

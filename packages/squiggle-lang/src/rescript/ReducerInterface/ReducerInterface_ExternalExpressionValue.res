@@ -8,8 +8,8 @@ module ErrorValue = Reducer_ErrorValue
 type internalCode = Object
 
 @genType
-type rec expressionValue =
-  | EvArray(array<expressionValue>)
+type rec externalExpressionValue =
+  | EvArray(array<externalExpressionValue>)
   | EvArrayString(array<string>)
   | EvBool(bool)
   | EvCall(string) // External function call
@@ -24,7 +24,7 @@ type rec expressionValue =
   | EvDeclaration(lambdaDeclaration)
   | EvTypeIdentifier(string)
   | EvModule(record)
-and record = Js.Dict.t<expressionValue>
+and record = Js.Dict.t<externalExpressionValue>
 and externalBindings = record
 and lambdaValue = {
   parameters: array<string>,
@@ -33,7 +33,10 @@ and lambdaValue = {
 }
 and lambdaDeclaration = Declaration.declaration<lambdaValue>
 
-type functionCall = (string, array<expressionValue>)
+@genType
+type t = externalExpressionValue
+
+type functionCall = (string, array<externalExpressionValue>)
 
 let rec toString = aValue =>
   switch aValue {
@@ -68,26 +71,7 @@ and toStringRecord = aRecord => {
   `{${pairs}}`
 }
 
-let toStringWithType = aValue =>
-  switch aValue {
-  | EvArray(_) => `Array::${toString(aValue)}`
-  | EvArrayString(_) => `ArrayString::${toString(aValue)}`
-  | EvBool(_) => `Bool::${toString(aValue)}`
-  | EvCall(_) => `Call::${toString(aValue)}`
-  | EvDistribution(_) => `Distribution::${toString(aValue)}`
-  | EvLambda(_) => `Lambda::${toString(aValue)}`
-  | EvNumber(_) => `Number::${toString(aValue)}`
-  | EvRecord(_) => `Record::${toString(aValue)}`
-  | EvString(_) => `String::${toString(aValue)}`
-  | EvSymbol(_) => `Symbol::${toString(aValue)}`
-  | EvDate(_) => `Date::${toString(aValue)}`
-  | EvTimeDuration(_) => `Date::${toString(aValue)}`
-  | EvDeclaration(_) => `Declaration::${toString(aValue)}`
-  | EvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
-  | EvModule(_) => `Module::${toString(aValue)}`
-  }
-
-let argsToString = (args: array<expressionValue>): string => {
+let argsToString = (args: array<externalExpressionValue>): string => {
   args->Js.Array2.map(arg => arg->toString)->Js.Array2.toString
 }
 
@@ -96,18 +80,6 @@ let toStringFunctionCall = ((fn, args)): string => `${fn}(${argsToString(args)})
 let toStringResult = x =>
   switch x {
   | Ok(a) => `Ok(${toString(a)})`
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
-  }
-
-let toStringResultOkless = (codeResult: result<expressionValue, ErrorValue.errorValue>): string =>
-  switch codeResult {
-  | Ok(a) => toString(a)
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
-  }
-
-let toStringResultRecord = x =>
-  switch x {
-  | Ok(a) => `Ok(${toStringRecord(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
@@ -141,14 +113,14 @@ type functionDefinitionSignature =
 let valueToValueType = value =>
   switch value {
   | EvArray(_) => EvtArray
-  | EvArrayString(_) => EvtArray
+  | EvArrayString(_) => EvtArrayString
   | EvBool(_) => EvtBool
   | EvCall(_) => EvtCall
   | EvDistribution(_) => EvtDistribution
   | EvLambda(_) => EvtLambda
   | EvNumber(_) => EvtNumber
   | EvRecord(_) => EvtRecord
-  | EvString(_) => EvtArray
+  | EvString(_) => EvtString
   | EvSymbol(_) => EvtSymbol
   | EvDate(_) => EvtDate
   | EvTimeDuration(_) => EvtTimeDuration
