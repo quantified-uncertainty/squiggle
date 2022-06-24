@@ -10,6 +10,7 @@ import {
   evaluatePartialUsingExternalBindings,
   evaluateUsingOptions,
   foreignFunctionInterface,
+  parse as parseRescript,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
@@ -31,7 +32,7 @@ import {
   convertRawToTypescript,
   lambdaValue,
 } from "./rescript_interop";
-import { result, resultMap, tag, tagged } from "./types";
+import { Ok, result, resultMap, tag, tagged } from "./types";
 import { Distribution, shape } from "./distribution";
 
 export { Distribution, resultMap, defaultEnvironment };
@@ -56,6 +57,23 @@ export function run(
     squiggleString
   );
   return resultMap(res, (x) => createTsExport(x, e));
+}
+
+export function parse(
+  squiggleString: string
+): result<null, Extract<errorValue, { tag: "RESyntaxError" }>> {
+  const maybeExpression = parseRescript(squiggleString);
+  if (maybeExpression.tag === "Ok") {
+    return Ok(null); // TODO - return AST
+  } else {
+    if (
+      typeof maybeExpression.value !== "object" ||
+      maybeExpression.value.tag !== "RESyntaxError"
+    ) {
+      throw new Error("Expected syntax error");
+    }
+    return { tag: "Error", value: maybeExpression.value };
+  }
 }
 
 // Run Partial. A partial is a block of code that doesn't return a value

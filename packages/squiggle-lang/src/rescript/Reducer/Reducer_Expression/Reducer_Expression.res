@@ -157,7 +157,7 @@ let evaluatePartialUsingExternalBindings = (
   switch rAnswer {
   | Ok(EvRecord(externalBindings)) => Ok(externalBindings)
   | Ok(_) =>
-    Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`))
+    Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`, None))
   | Error(err) => err->Error
   }
 }

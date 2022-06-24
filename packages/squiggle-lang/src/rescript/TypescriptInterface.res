@@ -41,6 +41,9 @@ let evaluate = Reducer.evaluate
 let evaluateUsingOptions = Reducer.evaluateUsingOptions
 
 @genType
+let parse = Reducer_Peggy_Parse.parse
+
+@genType
 let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
 
 @genType
