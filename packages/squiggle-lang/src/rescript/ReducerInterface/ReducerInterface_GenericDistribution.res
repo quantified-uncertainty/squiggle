@@ -228,7 +228,10 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
   | ("klDivergence", [IEvDistribution(prediction), IEvDistribution(answer)]) =>
     Some(
       DistributionOperation.run(
-        FromDist(ToScore(LogScore(DistributionTypes.Score_Dist(answer), None)), prediction),
+        FromDist(
+          ToScore(LogScore(DistributionTypes.DistributionOperation.Score_Dist(answer), None)),
+          prediction,
+        ),
         ~env,
       ),
     )
@@ -241,8 +244,8 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
         FromDist(
           ToScore(
             LogScore(
-              DistributionTypes.Score_Dist(answer),
-              Some(DistributionTypes.Score_Dist(prior)),
+              DistributionTypes.DistributionOperation.Score_Dist(answer),
+              Some(DistributionTypes.DistributionOperation.Score_Dist(prior)),
             ),
           ),
           prediction,
@@ -266,8 +269,8 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
       FromDist(
         ToScore(
           LogScore(
-            DistributionTypes.Score_Scalar(answer),
-            DistributionTypes.Score_Dist(prior)->Some,
+            DistributionTypes.DistributionOperation.Score_Scalar(answer),
+            DistributionTypes.DistributionOperation.Score_Dist(prior)->Some,
           ),
         ),
         prediction,
@@ -280,7 +283,10 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
     [IEvDistribution(prediction), IEvDistribution(Symbolic(#Float(answer)))],
   ) =>
     DistributionOperation.run(
-      FromDist(ToScore(LogScore(DistributionTypes.Score_Scalar(answer), None)), prediction),
+      FromDist(
+        ToScore(LogScore(DistributionTypes.DistributionOperation.Score_Scalar(answer), None)),
+        prediction,
+      ),
       ~env,
     )->Some
   | ("isNormalized", [IEvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
