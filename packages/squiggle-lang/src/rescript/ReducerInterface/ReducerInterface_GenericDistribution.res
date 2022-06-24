@@ -226,16 +226,22 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
     )->Some
   | ("normalize", [IEvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
   | ("klDivergence", [IEvDistribution(prediction), IEvDistribution(answer)]) =>
-    Some(DistributionOperation.run(FromDist(ToScore(LogScore(Score_Dist(answer), None), prediction), ~env))
+    Some(
+      DistributionOperation.run(
+        FromDist(ToScore(LogScore(Score_Dist(answer), None)), prediction),
+        ~env,
+      ),
+    )
   | (
       "klDivergence",
       [IEvDistribution(prediction), IEvDistribution(answer), IEvDistribution(prior)],
     ) =>
-         Some(
-           DistributionOperation.run(
-             FromDist(ToScore(LogScore(Score_Dist(answer), Some(Score_Dist(prior)))), estimate), ~env
-           )
-         )
+    Some(
+      DistributionOperation.run(
+        FromDist(ToScore(LogScore(Score_Dist(answer), Some(Score_Dist(prior)))), prediction),
+        ~env,
+      ),
+    )
   | (
     "logScoreWithPointAnswer",
     [IEvDistribution(prediction), IEvNumber(answer), IEvDistribution(prior)],
@@ -249,7 +255,7 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
     ],
   ) =>
     DistributionOperation.run(
-      FromDist(ToScore(LogScore(answer, prior->Some)), prediction),
+      FromDist(ToScore(LogScore(Score_Scalar(answer), Score_Dist(prior)->Some)), prediction),
       ~env,
     )->Some
   | ("logScoreWithPointAnswer", [IEvDistribution(prediction), IEvNumber(answer)])
@@ -257,7 +263,10 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
     "logScoreWithPointAnswer",
     [IEvDistribution(prediction), IEvDistribution(Symbolic(#Float(answer)))],
   ) =>
-    DistributionOperation.run(FromDist(ToScore(LogScore(answer, None)), prediction), ~env)->Some
+    DistributionOperation.run(
+      FromDist(ToScore(LogScore(Score_Scalar(answer), None)), prediction),
+      ~env,
+    )->Some
   | ("isNormalized", [IEvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
   | ("toPointSet", [IEvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
   | ("scaleLog", [IEvDistribution(dist)]) =>
