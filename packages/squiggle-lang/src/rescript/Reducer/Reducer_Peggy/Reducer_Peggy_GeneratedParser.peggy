@@ -1,7 +1,7 @@
 // Try in https://peggyjs.org/online
 
 {{
-  import * as h from './helpers';
+  const h = require('./helpers');
 }}
 
 start
