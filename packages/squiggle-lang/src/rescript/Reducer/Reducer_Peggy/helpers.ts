@@ -94,6 +94,7 @@ type NodeKeyValue = {
 type NodeString = {
   type: "String";
   value: string;
+  location?: LocationRange;
 };
 
 type NodeBoolean = {
