@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useState, useEffect } from "react";
+import React, { FC, Fragment, useState, useEffect, useMemo } from "react";
 import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { useMaybeControlledValue } from "../lib/hooks";
@@ -6,10 +6,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Tab } from "@headlessui/react";
 import {
   ChartSquareBarIcon,
+  CheckCircleIcon,
   CodeIcon,
   CogIcon,
   CurrencyDollarIcon,
   EyeIcon,
+  PauseIcon,
+  PlayIcon,
+  RefreshIcon,
 } from "@heroicons/react/solid";
 import clsx from "clsx";
 
@@ -20,6 +24,7 @@ import { CodeEditor } from "./CodeEditor";
 import { JsonEditor } from "./JsonEditor";
 import { ErrorAlert, SuccessAlert } from "./Alert";
 import { SquiggleContainer } from "./SquiggleContainer";
+import { Toggle } from "./ui/Toggle";
 
 interface PlaygroundProps {
   /** The initial squiggle string to put in the playground */
@@ -110,7 +115,7 @@ type StyledTabProps = {
 
 const StyledTab: React.FC<StyledTabProps> = ({ name, icon: Icon }) => {
   return (
-    <Tab key={name} as={Fragment}>
+    <Tab as={Fragment}>
       {({ selected }) => (
         <button className="group flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100">
           <span
@@ -204,6 +209,53 @@ function Checkbox<T>({
   );
 }
 
+const PlayControls: React.FC<{
+  autoplay: boolean;
+  isStale: boolean;
+  onAutoplayChange: (value: boolean) => void;
+  onPlay: () => void;
+}> = ({ autoplay, isStale, onAutoplayChange, onPlay }) => {
+  const [playing, setPlaying] = useState(false);
+
+  const play = () => {
+    setPlaying(true);
+  };
+
+  // this is tricky; we need to render PlayControls first to make sure that the icon is spinning,
+  // and only then call onPlay (which freezes the UI)
+  useEffect(() => {
+    if (!autoplay && playing) {
+      onPlay();
+      setPlaying(false);
+    }
+    // don't add onPlay to the deps below
+  }, [autoplay, playing]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const CurrentPlayIcon = playing ? RefreshIcon : PlayIcon;
+
+  return (
+    <div className="flex space-x-1 items-center">
+      {autoplay ? null : (
+        <button onClick={play}>
+          <CurrentPlayIcon
+            className={clsx(
+              "w-8 h-8",
+              playing && "animate-spin",
+              isStale ? "text-indigo-500" : "text-gray-400"
+            )}
+          />
+        </button>
+      )}
+      <Toggle
+        texts={["Autoplay", "Paused"]}
+        icons={[CheckCircleIcon, PauseIcon]}
+        status={autoplay}
+        onChange={onAutoplayChange}
+      />
+    </div>
+  );
+};
+
 export const SquigglePlayground: FC<PlaygroundProps> = ({
   defaultCode = "",
   height = 500,
@@ -225,7 +277,14 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   const [importString, setImportString] = useState("{}");
   const [imports, setImports] = useState({});
   const [importsAreValid, setImportsAreValid] = useState(true);
-  const { register, control } = useForm({
+
+  const [renderedCode, setRenderedCode] = useState(""); // used only if autoplay is false
+
+  const {
+    register,
+    control,
+    setValue: setFormValue,
+  } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       sampleCount: 1000,
@@ -242,6 +301,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       diagramStart: 0,
       diagramStop: 10,
       diagramCount: 20,
+      autoplay: true,
     },
   });
   const vars = useWatch({
@@ -252,10 +312,14 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     onSettingsChange?.(vars);
   }, [vars, onSettingsChange]);
 
-  const env: environment = {
-    sampleCount: Number(vars.sampleCount),
-    xyPointLength: Number(vars.xyPointLength),
-  };
+  const env: environment = useMemo(
+    () => ({
+      sampleCount: Number(vars.sampleCount),
+      xyPointLength: Number(vars.xyPointLength),
+    }),
+    [vars.sampleCount, vars.xyPointLength]
+  );
+
   const getChangeJson = (r: string) => {
     setImportString(r);
     try {
@@ -418,7 +482,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const squiggleChart = (
     <SquiggleChart
-      code={code}
+      code={vars.autoplay ? code : renderedCode}
       environment={env}
       diagramStart={Number(vars.diagramStart)}
       diagramStop={Number(vars.diagramStop)}
@@ -470,15 +534,28 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     <SquiggleContainer>
       <Tab.Group>
         <div className="pb-4">
-          <Tab.List className="flex w-fit p-0.5 mt-2 rounded-md bg-slate-100 hover:bg-slate-200">
-            <StyledTab
-              name={vars.showEditor ? "Code" : "Display"}
-              icon={vars.showEditor ? CodeIcon : EyeIcon}
+          <div className="flex justify-between items-center mt-2">
+            <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
+              <StyledTab
+                name={vars.showEditor ? "Code" : "Display"}
+                icon={vars.showEditor ? CodeIcon : EyeIcon}
+              />
+              <StyledTab name="Sampling Settings" icon={CogIcon} />
+              <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+              <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+            </Tab.List>
+            <PlayControls
+              autoplay={vars.autoplay || false}
+              isStale={!vars.autoplay && renderedCode !== code}
+              onPlay={() => {
+                setRenderedCode(code);
+              }}
+              onAutoplayChange={(newValue) => {
+                if (!newValue) setRenderedCode(code);
+                setFormValue("autoplay", newValue);
+              }}
             />
-            <StyledTab name="Sampling Settings" icon={CogIcon} />
-            <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-            <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-          </Tab.List>
+          </div>
           {vars.showEditor ? withEditor : withoutEditor}
         </div>
       </Tab.Group>
