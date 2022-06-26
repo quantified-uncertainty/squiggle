@@ -330,6 +330,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     }
   };
 
+  const manualPlay = () => {
+    if (vars.autoplay) return; // should we allow reruns even in autoplay mode?
+    setRenderedCode(code); // TODO - force play even if code hasn't changed
+  };
+
   const samplingSettings = (
     <div className="space-y-6 p-3 max-w-xl">
       <div>
@@ -503,6 +508,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       <CodeEditor
         value={code ?? ""}
         onChange={setCode}
+        onSubmit={manualPlay}
         oneLine={false}
         showGutter={true}
         height={height - 1}
@@ -547,9 +553,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
             <PlayControls
               autoplay={vars.autoplay || false}
               isStale={!vars.autoplay && renderedCode !== code}
-              onPlay={() => {
-                setRenderedCode(code);
-              }}
+              onPlay={manualPlay}
               onAutoplayChange={(newValue) => {
                 if (!newValue) setRenderedCode(code);
                 setFormValue("autoplay", newValue);
