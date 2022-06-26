@@ -6,7 +6,6 @@ type abstractScoreArgs<'a, 'b> = {estimate: 'a, answer: 'b, prior: option<'a>}
 type scoreArgs =
   | DistEstimateDistAnswer(abstractScoreArgs<pointSetDist, pointSetDist>)
   | DistEstimateScalarAnswer(abstractScoreArgs<pointSetDist, scalar>)
-  | ScalarEstimateScalarAnswer(abstractScoreArgs<scalar, scalar>)
 
 let logFn = Js.Math.log // base e
 let minusScaledLogOfQuotient = (~esti, ~answ): result<float, Operation.Error.t> => {
@@ -130,23 +129,6 @@ module WithScalarAnswer = {
   }
 }
 
-module TwoScalars = {
-  // You will almost never want to use this.
-  let score = (~estimate: scalar, ~answer: scalar) => {
-    if Js.Math.abs_float(estimate -. answer) < MagicNumbers.Epsilon.ten {
-      0.0->Ok
-    } else {
-      infinity->Ok // - log(0)
-    }
-  }
-
-  let scoreWithPrior = (~estimate: scalar, ~answer: scalar, ~prior: scalar) => {
-    E.R.merge(score(~estimate, ~answer), score(~estimate=prior, ~answer))->E.R2.fmap(((s1, s2)) =>
-      s1 -. s2
-    ) // This will presently NaN if both are wrong: infinity-infinity.
-  }
-}
-
 let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<
   (pointSetDist, pointSetDist),
   'e,
@@ -165,8 +147,4 @@ let logScore = (args: scoreArgs, ~combineFn, ~integrateFn, ~toMixedFn): result<
     WithScalarAnswer.score(~estimate, ~answer)
   | DistEstimateScalarAnswer({estimate, answer, prior: Some(prior)}) =>
     WithScalarAnswer.scoreWithPrior(~estimate, ~answer, ~prior)
-  | ScalarEstimateScalarAnswer({estimate, answer, prior: None}) =>
-    TwoScalars.score(~estimate, ~answer)
-  | ScalarEstimateScalarAnswer({estimate, answer, prior: Some(prior)}) =>
-    TwoScalars.scoreWithPrior(~estimate, ~answer, ~prior)
   }

@@ -190,14 +190,7 @@ module Score = {
     | (Score_Scalar(_), Score_Dist(_), None) => NotYetImplemented->Error
     | (Score_Scalar(_), Score_Dist(_), Some(Ok(PSScalar(_)))) => NotYetImplemented->Error
     | (Score_Scalar(_), _, Some(Ok(PSDist(_)))) => DistributionTypes.Unreachable->Error
-    | (Score_Scalar(esti'), Score_Scalar(answ'), None) =>
-      {estimate: esti', answer: answ', prior: None}
-      ->PointSetDist_Scoring.ScalarEstimateScalarAnswer
-      ->Ok
-    | (Score_Scalar(esti'), Score_Scalar(answ'), Some(Ok(PSScalar(prior'')))) =>
-      {estimate: esti', answer: answ', prior: prior''->Some}
-      ->PointSetDist_Scoring.ScalarEstimateScalarAnswer
-      ->Ok
+    | (Score_Scalar(_), Score_Scalar(_), _) => NotYetImplemented->Error
     | (_, _, Some(Error(err))) => err->Error
     }
   }
