@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { parse } from "@quri/squiggle-lang";
 import { AnyPeggyNode } from "@quri/squiggle-lang/dist/src/rescript/Reducer/Reducer_Peggy/helpers";
 
-const tokenTypes = ["class", "interface", "enum", "function", "variable"];
+const tokenTypes = ["enum", "function", "variable", "property"];
 const tokenModifiers = ["declaration", "documentation"];
 const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
 
@@ -51,11 +51,17 @@ const populateTokensBuilder = (
       populateTokensBuilder(tokensBuilder, node.falseExpression);
       break;
     case "KeyValue":
-      populateTokensBuilder(tokensBuilder, node.key);
+      if (node.key.type === "String" && node.key.location) {
+        tokensBuilder.push(convertRange(node.key.location), "property", [
+          "declaration",
+        ]);
+      } else {
+        populateTokensBuilder(tokensBuilder, node.key);
+      }
       populateTokensBuilder(tokensBuilder, node.value);
       break;
     case "Identifier":
-      tokensBuilder.push(convertRange(node.location), "variable", []);
+      tokensBuilder.push(convertRange(node.location), "variable");
       break;
   }
 };
