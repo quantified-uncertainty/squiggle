@@ -42,7 +42,7 @@
     "@stdlib/stats": "^0.0.13",
     "jstat": "^1.9.5",
     "lodash": "^4.17.21",
-    "mathjs": "^10.6.0",
+    "mathjs": "^10.6.3",
     "pdfast": "^0.2.0"
   },
   "devDependencies": {
