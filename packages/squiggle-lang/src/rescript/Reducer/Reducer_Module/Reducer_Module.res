@@ -1,5 +1,6 @@
 module ExpressionT = Reducer_Expression_T
 open ReducerInterface_InternalExpressionValue
+
 let expressionValueToString = toString
 
 type t = ReducerInterface_InternalExpressionValue.nameSpace
@@ -66,7 +67,7 @@ let set = (nameSpace: t, id: string, value): t => {
   Belt.Map.String.set(container, id, value)->NameSpace
 }
 
-let emptyModule: t = NameSpace(Belt.Map.String.empty)
+let emptyModule: t = NameSpace(emptyMap)
 
 let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
 let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
@@ -100,13 +101,25 @@ let removeOther = (nameSpace: t, other: t): t => {
   })->NameSpace
 }
 
+external castExpressionToInternalCode: ExpressionT.expressionOrFFI => internalCode = "%identity"
+let eLambdaFFIValue = (ffiFn: ExpressionT.ffiFn) => {
+  IEvLambda({
+    parameters: [],
+    context: emptyModule,
+    body: FFI(ffiFn)->castExpressionToInternalCode,
+  })
+}
+
 // -- Module definition
 let define = (nameSpace: t, identifier: string, ev: internalExpressionValue): t => {
   let NameSpace(container) = nameSpace
-  Belt.Map.String.set(container, identifier, ev)->NameSpace // TODO build lambda for polymorphic functions here
+  Belt.Map.String.set(container, identifier, ev)->NameSpace
 }
 let defineNumber = (nameSpace: t, identifier: string, value: float): t =>
   nameSpace->define(identifier, IEvNumber(value))
 
 let defineModule = (nameSpace: t, identifier: string, value: t): t =>
   nameSpace->define(identifier, toExpressionValue(value))
+
+let defineFFI = (nameSpace: t, identifier: string, value: ExpressionT.ffiFn): t =>
+  nameSpace->define(identifier, value->eLambdaFFIValue)

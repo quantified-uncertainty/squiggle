@@ -6,7 +6,7 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 module Macro = Reducer_Expression_Macro
 module MathJs = Reducer_MathJs
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 module Result = Belt.Result
 module T = Reducer_Expression_T
 

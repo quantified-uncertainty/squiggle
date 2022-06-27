@@ -1,4 +1,4 @@
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 
 let internalStdLib = Module.emptyModule->SquiggleLibrary_Math.makeBindings
 

@@ -3,7 +3,7 @@ module ErrorValue = Reducer_ErrorValue
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface_InternalExpressionValue
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 module Result = Belt.Result
 
 type environment = ReducerInterface_InternalExpressionValue.environment

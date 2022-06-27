@@ -2,7 +2,7 @@
 module ErrorValue = Reducer_ErrorValue
 module ExternalExpressionValue = ReducerInterface.ExternalExpressionValue
 module InternalExpressionValue = ReducerInterface.InternalExpressionValue
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 
 let removeDefaultsInternal = (iev: InternalExpressionValue.t) => {
   switch iev {

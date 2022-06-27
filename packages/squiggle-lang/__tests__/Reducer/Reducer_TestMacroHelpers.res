@@ -8,7 +8,7 @@ module InternalExpressionValue = ReducerInterface.InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
 module Macro = Reducer_Expression_Macro
 module T = Reducer_Expression_T
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 
 let testMacro_ = (
   tester,
