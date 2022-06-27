@@ -16,7 +16,7 @@ If you take the pointwise mixture of two distributions with very different means
 In the following case, the mean of the mixture should be equal to the sum of the means of the parts. These are shown as the first two displayed variables. These variables diverge as the underlying distributions change.
 
 <SquiggleEditor
-  squiggleString={`dist1 = {value: normal(1,1), weight: 1}
+  defaultCode={`dist1 = {value: normal(1,1), weight: 1}
 dist2 = {value: normal(100000000000,1), weight: 1}
 totalWeight = dist1.weight + dist2.weight
 distMixture = mixture(dist1.value, dist2.value, [dist1.weight, dist2.weight])
@@ -30,7 +30,7 @@ separateMeansCombined = (mean(dist1.value) * (dist1.weight) +  mean(dist2.value)
 The means of sample set distributions can vary dramatically, especially as the numbers get high.
 
 <SquiggleEditor
-  squiggleString={`symbolicDist = 5 to 50333333
+  defaultCode={`symbolicDist = 5 to 50333333
 sampleSetDist = toSampleSet(symbolicDist)
 [mean(symbolicDist), mean(sampleSetDist), symbolicDist, sampleSetDist]`}
 />

@@ -22,27 +22,41 @@ const WrappedCodeEditor: React.FC<{
   </div>
 );
 
-export type SquiggleEditorProps = SquiggleChartProps;
+export type SquiggleEditorProps = SquiggleChartProps & {
+  defaultCode?: string;
+  onCodeChange?: (code: string) => void;
+};
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
-  const { squiggleString = "" } = props;
-  const [code, setCode] = useState(squiggleString);
-  React.useEffect(() => setCode(squiggleString), [squiggleString]);
+  let defaultCode = props.defaultCode ?? "";
+  const [uncontrolledCode, setCode] = useState(defaultCode);
+  let code = props.code ?? uncontrolledCode;
 
-  let chartProps = { ...props, squiggleString: code };
+  let chartProps = { ...props, code };
   return (
     <SquiggleContainer>
-      <WrappedCodeEditor code={code} setCode={setCode} />
+      <WrappedCodeEditor
+        code={code}
+        setCode={(code) => {
+          if (props.onCodeChange) props.onCodeChange(code);
+
+          if (props.code === undefined) setCode(code);
+        }}
+      />
       <SquiggleChart {...chartProps} />
     </SquiggleContainer>
   );
 };
 
 export interface SquigglePartialProps {
-  /** The input string for squiggle */
-  squiggleString?: string;
+  /** The text inside the input (controlled) */
+  code?: string;
+  /** The default text inside the input (unControlled) */
+  defaultCode?: string;
   /** when the environment changes. Used again for notebook magic*/
   onChange?(expr: bindings | undefined): void;
+  /** When the code changes */
+  onCodeChange?(code: string): void;
   /** Previously declared variables */
   bindings?: bindings;
   /** If the output requires monte carlo sampling, the amount of samples */
@@ -52,17 +66,19 @@ export interface SquigglePartialProps {
 }
 
 export const SquigglePartial: React.FC<SquigglePartialProps> = ({
-  squiggleString = "",
+  code,
+  defaultCode = "",
   onChange,
+  onCodeChange,
   bindings = defaultBindings,
   environment,
   jsImports = defaultImports,
 }: SquigglePartialProps) => {
-  const [code, setCode] = useState(squiggleString);
-  React.useEffect(() => setCode(squiggleString), [squiggleString]);
+  const [uncontrolledCode, setCode] = useState(defaultCode);
+  let codeProp = code ?? uncontrolledCode;
 
   const result = useSquigglePartial({
-    code,
+    code: codeProp,
     bindings,
     environment,
     jsImports,
@@ -71,7 +87,14 @@ export const SquigglePartial: React.FC<SquigglePartialProps> = ({
 
   return (
     <SquiggleContainer>
-      <WrappedCodeEditor code={code} setCode={setCode} />
+      <WrappedCodeEditor
+        code={codeProp}
+        setCode={(code) => {
+          if (onCodeChange) onCodeChange(code);
+
+          if (code === undefined) setCode(code);
+        }}
+      />
       {result.tag !== "Ok" ? <SquiggleErrorAlert error={result.value} /> : null}
     </SquiggleContainer>
   );

@@ -14,7 +14,7 @@ import { SquiggleItem } from "./SquiggleItem";
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
-  squiggleString?: string;
+  code?: string;
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
   /** The amount of points returned to draw the distribution */
@@ -49,7 +49,7 @@ export interface SquiggleChartProps {
 const defaultOnChange = () => {};
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = ({
-  squiggleString = "",
+  code = "",
   environment,
   onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
   height = 200,
@@ -66,7 +66,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = ({
   diagramCount = 100,
 }) => {
   const result = useSquiggle({
-    code: squiggleString,
+    code,
     bindings,
     environment,
     jsImports,

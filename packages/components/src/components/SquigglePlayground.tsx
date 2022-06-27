@@ -22,7 +22,7 @@ import { SquiggleContainer } from "./SquiggleContainer";
 
 interface PlaygroundProps {
   /** The initial squiggle string to put in the playground */
-  initialSquiggleString?: string;
+  defaultCode?: string;
   /** How many pixels high is the playground */
   height?: number;
   /** Whether to show the types of outputs in the playground */
@@ -204,7 +204,7 @@ function Checkbox<T>({
 }
 
 export const SquigglePlayground: FC<PlaygroundProps> = ({
-  initialSquiggleString = "",
+  defaultCode = "",
   height = 500,
   showTypes = false,
   showControls = false,
@@ -216,9 +216,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   onSettingsChange,
   showEditor = true,
 }) => {
-  const [uncontrolledCode, setUncontrolledCode] = useState(
-    initialSquiggleString
-  );
+  const [uncontrolledCode, setUncontrolledCode] = useState(defaultCode);
   const [importString, setImportString] = useState("{}");
   const [imports, setImports] = useState({});
   const [importsAreValid, setImportsAreValid] = useState(true);
@@ -417,7 +415,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const squiggleChart = (
     <SquiggleChart
-      squiggleString={code}
+      code={code}
       environment={env}
       diagramStart={Number(vars.diagramStart)}
       diagramStop={Number(vars.diagramStop)}
