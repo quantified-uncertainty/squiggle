@@ -133,6 +133,7 @@ module Beta = {
   }
 
   let fromMeanAndStdev = (mean, stdev) => {
+    // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
     let var = stdev *. stdev
     let sampleSize = mean *. (1.0 -. mean) /. var
     mean->fromMeanAndSampleSize(sampleSize)
