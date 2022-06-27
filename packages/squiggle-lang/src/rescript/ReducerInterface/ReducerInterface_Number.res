@@ -1,5 +1,5 @@
-module EV = ReducerInterface_ExpressionValue
-type expressionValue = EV.expressionValue
+module IEV = ReducerInterface_InternalExpressionValue
+type internalExpressionValue = IEV.t
 
 module ScientificUnit = {
   let nameToMultiplier = str =>
@@ -24,8 +24,8 @@ module ScientificUnit = {
   }
 }
 
-let dispatch = (call: EV.functionCall, _: DistributionOperation.env): option<
-  result<expressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
+let dispatch = (call: IEV.functionCall, _: DistributionOperation.env): option<
+  result<internalExpressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
 > => {
   switch call {
   | (
@@ -37,9 +37,9 @@ let dispatch = (call: EV.functionCall, _: DistributionOperation.env): option<
       | "fromUnit_G"
       | "fromUnit_T"
       | "fromUnit_P") as op,
-      [EvNumber(f)],
+      [IEvNumber(f)],
     ) =>
-    op->ScientificUnit.getMultiplier->E.O2.fmap(multiplier => EV.EvNumber(f *. multiplier)->Ok)
+    op->ScientificUnit.getMultiplier->E.O2.fmap(multiplier => IEV.IEvNumber(f *. multiplier)->Ok)
   | _ => None
   }
 }

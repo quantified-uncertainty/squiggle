@@ -22,11 +22,11 @@ describe("Peggy to Expression", () => {
 
   describe("multi-line", () => {
     testToExpression("x=1; 2", "{(:$_let_$ :x {1}); 2}", ~v="2", ())
-    testToExpression("x=1; y=2", "{(:$_let_$ :x {1}); (:$_let_$ :y {2})}", ~v="{x: 1,y: 2}", ())
+    testToExpression("x=1; y=2", "{(:$_let_$ :x {1}); (:$_let_$ :y {2})}", ~v="@{x: 1,y: 2}", ())
   })
 
   describe("variables", () => {
-    testToExpression("x = 1", "{(:$_let_$ :x {1})}", ~v="{x: 1}", ())
+    testToExpression("x = 1", "{(:$_let_$ :x {1})}", ~v="@{x: 1}", ())
     testToExpression("x", "{:x}", ~v=":x", ()) //TODO: value should return error
     testToExpression("x = 1; x", "{(:$_let_$ :x {1}); :x}", ~v="1", ())
   })
@@ -35,7 +35,7 @@ describe("Peggy to Expression", () => {
     testToExpression(
       "identity(x) = x",
       "{(:$_let_$ :identity (:$$_lambda_$$ [x] {:x}))}",
-      ~v="{identity: lambda(x=>internal code)}",
+      ~v="@{identity: lambda(x=>internal code)}",
       (),
     ) // Function definitions become lambda assignments
     testToExpression("identity(x)", "{(:identity :x)}", ()) // Note value returns error properly
@@ -155,7 +155,7 @@ describe("Peggy to Expression", () => {
     testToExpression(
       "y=99; x={y=1; y}",
       "{(:$_let_$ :y {99}); (:$_let_$ :x {(:$_let_$ :y {1}); :y})}",
-      ~v="{x: 1,y: 99}",
+      ~v="@{x: 1,y: 99}",
       (),
     )
   })
@@ -165,19 +165,19 @@ describe("Peggy to Expression", () => {
     testToExpression(
       "f={|x| x}",
       "{(:$_let_$ :f {(:$$_lambda_$$ [x] {:x})})}",
-      ~v="{f: lambda(x=>internal code)}",
+      ~v="@{f: lambda(x=>internal code)}",
       (),
     )
     testToExpression(
       "f(x)=x",
       "{(:$_let_$ :f (:$$_lambda_$$ [x] {:x}))}",
-      ~v="{f: lambda(x=>internal code)}",
+      ~v="@{f: lambda(x=>internal code)}",
       (),
     ) // Function definitions are lambda assignments
     testToExpression(
       "f(x)=x ? 1 : 0",
       "{(:$_let_$ :f (:$$_lambda_$$ [x] {(:$$_ternary_$$ :x 1 0)}))}",
-      ~v="{f: lambda(x=>internal code)}",
+      ~v="@{f: lambda(x=>internal code)}",
       (),
     )
   })

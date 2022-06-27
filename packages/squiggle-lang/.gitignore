@@ -22,3 +22,4 @@ _coverage
 coverage
 .nyc_output/
 src/rescript/Reducer/Reducer_Peggy/Reducer_Peggy_GeneratedParser.js
+src/rescript/Reducer/Reducer_Peggy/helpers.js

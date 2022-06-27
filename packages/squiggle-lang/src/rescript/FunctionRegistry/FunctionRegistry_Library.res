@@ -9,7 +9,7 @@ module Declaration = {
     ("inputs", FRTypeArray(FRTypeRecord([("min", FRTypeNumber), ("max", FRTypeNumber)]))),
   ])
 
-  let fromExpressionValue = (e: frValue): result<expressionValue, string> => {
+  let fromExpressionValue = (e: frValue): result<internalExpressionValue, string> => {
     switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs([e]) {
     | Ok([FRValueLambda(lambda), FRValueArray(inputs)]) => {
         open FunctionRegistry_Helpers.Prepare
@@ -20,7 +20,7 @@ module Declaration = {
         inputs
         ->E.A2.fmap(getMinMax)
         ->E.A.R.firstErrorOrOpen
-        ->E.R2.fmap(args => ReducerInterface_ExpressionValue.EvDeclaration(
+        ->E.R2.fmap(args => ReducerInterface_InternalExpressionValue.IEvDeclaration(
           Declaration.make(lambda, args),
         ))
       }
@@ -43,7 +43,9 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
   let expressionValue =
     xyCoords
     ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-    ->E.R2.fmap(r => ReducerInterface_ExpressionValue.EvDistribution(PointSet(makeDist(r))))
+    ->E.R2.fmap(r => ReducerInterface_InternalExpressionValue.IEvDistribution(
+      PointSet(makeDist(r)),
+    ))
   expressionValue
 }
 
@@ -369,7 +371,7 @@ to(5,10)
                 E.Dict.concat(d1, d2) |> Js.Dict.map((. r) =>
                   FunctionRegistry_Core.FRType.matchReverse(r)
                 )
-              newDict->Wrappers.evRecord->Ok
+              newDict->Js.Dict.entries->Belt.Map.String.fromArray->Wrappers.evRecord->Ok
             }
           | _ => Error(impossibleError)
           }
@@ -390,6 +392,7 @@ to(5,10)
         ->Prepare.ToTypedArray.dicts
         ->E.R2.fmap(E.Dict.concatMany)
         ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
+        ->E.R2.fmap(r => r->Js.Dict.entries->Belt.Map.String.fromArray)
         ->E.R2.fmap(Wrappers.evRecord)
       ),
     ],
@@ -462,7 +465,7 @@ to(5,10)
             }
           })
           ->E.A.R.firstErrorOrOpen
-          ->E.R2.fmap(Js.Dict.fromArray)
+          ->E.R2.fmap(Belt.Map.String.fromArray)
           ->E.R2.fmap(Wrappers.evRecord)
         inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.arrayOfArrays)
           |> E.R2.bind(convertInternalItems)

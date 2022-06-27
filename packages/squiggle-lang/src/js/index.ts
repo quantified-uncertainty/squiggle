@@ -10,7 +10,6 @@ import {
   evaluatePartialUsingExternalBindings,
   evaluateUsingOptions,
   foreignFunctionInterface,
-  parse as parseRescript,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
@@ -32,11 +31,13 @@ import {
   convertRawToTypescript,
   lambdaValue,
 } from "./rescript_interop";
-import { Ok, result, resultMap, tag, tagged } from "./types";
+import { result, resultMap, tag, tagged } from "./types";
 import { Distribution, shape } from "./distribution";
 
 export { Distribution, resultMap, defaultEnvironment };
 export type { result, shape, environment, lambdaValue, squiggleExpression };
+
+export { parse } from "./parse";
 
 export let defaultSamplingInputs: environment = {
   sampleCount: 10000,
@@ -57,23 +58,6 @@ export function run(
     squiggleString
   );
   return resultMap(res, (x) => createTsExport(x, e));
-}
-
-export function parse(
-  squiggleString: string
-): result<null, Extract<errorValue, { tag: "RESyntaxError" }>> {
-  const maybeExpression = parseRescript(squiggleString);
-  if (maybeExpression.tag === "Ok") {
-    return Ok(null); // TODO - return AST
-  } else {
-    if (
-      typeof maybeExpression.value !== "object" ||
-      maybeExpression.value.tag !== "RESyntaxError"
-    ) {
-      throw new Error("Expected syntax error");
-    }
-    return { tag: "Error", value: maybeExpression.value };
-  }
 }
 
 // Run Partial. A partial is a block of code that doesn't return a value
@@ -147,30 +131,13 @@ function createTsExport(
       // case
       return tag(
         "array",
-        x.value.map((arrayItem): squiggleExpression => {
-          switch (arrayItem.tag) {
-            case "EvRecord":
-              return tag(
-                "record",
-                _.mapValues(arrayItem.value, (recordValue: unknown) =>
-                  convertRawToTypescript(
-                    recordValue as rescriptExport,
-                    environment
-                  )
-                )
-              );
-            case "EvArray":
-              let y = arrayItem.value as unknown as rescriptExport[];
-              return tag(
-                "array",
-                y.map((childArrayItem) =>
-                  convertRawToTypescript(childArrayItem, environment)
-                )
-              );
-            default:
-              return createTsExport(arrayItem, environment);
-          }
-        })
+        x.value.map(
+          (arrayItem): squiggleExpression =>
+            convertRawToTypescript(
+              arrayItem as unknown as rescriptExport,
+              environment
+            )
+        )
       );
     case "EvArrayString":
       return tag("arraystring", x.value);

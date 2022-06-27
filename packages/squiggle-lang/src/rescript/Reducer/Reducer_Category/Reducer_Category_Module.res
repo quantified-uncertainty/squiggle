@@ -1,33 +1,112 @@
 module ExpressionT = Reducer_Expression_T
-open ReducerInterface_ExpressionValue
+open ReducerInterface_InternalExpressionValue
 let expressionValueToString = toString
 
-type t = ExpressionT.bindings
+type t = ReducerInterface_InternalExpressionValue.nameSpace
 
 let typeAliasesKey = "_typeAliases_"
 let typeReferencesKey = "_typeReferences_"
 
-let emptyModule: t = Belt.Map.String.empty
+let getType = (nameSpace: t, id: string) => {
+  let NameSpace(container) = nameSpace
+  Belt.Map.String.get(container, typeAliasesKey)->Belt.Option.flatMap(aliases =>
+    switch aliases {
+    | IEvRecord(r) => Belt.Map.String.get(r, id)
+    | _ => None
+    }
+  )
+}
 
-let cloneRecord = (r: record): record => r->Js.Dict.entries->Js.Dict.fromArray
-let fromRecord = (r: record): t => Js.Dict.entries(r)->Belt.Map.String.fromArray
-let toRecord = (container: t): record => Belt.Map.String.toArray(container)->Js.Dict.fromArray
+let getTypeOf = (nameSpace: t, id: string) => {
+  let NameSpace(container) = nameSpace
+  Belt.Map.String.get(container, typeReferencesKey)->Belt.Option.flatMap(defs =>
+    switch defs {
+    | IEvRecord(r) => Belt.Map.String.get(r, id)
+    | _ => None
+    }
+  )
+}
 
-let toExpressionValue = (container: t): expressionValue => EvModule(toRecord(container))
-let fromExpressionValue = (aValue: expressionValue): t =>
+let getWithDefault = (nameSpace: t, id: string, default) => {
+  let NameSpace(container) = nameSpace
+  Belt.Map.String.getWithDefault(container, id, default)
+}
+
+let get = (nameSpace: t, id: string) => {
+  let NameSpace(container) = nameSpace
+  Belt.Map.String.get(container, id)
+}
+
+let emptyMap: map = Belt.Map.String.empty
+
+let setTypeAlias = (nameSpace: t, id: string, value): t => {
+  let NameSpace(container) = nameSpace
+  let rValue = Belt.Map.String.getWithDefault(container, typeAliasesKey, IEvRecord(emptyMap))
+  let r = switch rValue {
+  | IEvRecord(r) => r
+  | _ => emptyMap
+  }
+  let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
+  Belt.Map.String.set(container, typeAliasesKey, r2)->NameSpace
+}
+
+let setTypeOf = (nameSpace: t, id: string, value): t => {
+  let NameSpace(container) = nameSpace
+  let rValue = Belt.Map.String.getWithDefault(container, typeReferencesKey, IEvRecord(emptyMap))
+  let r = switch rValue {
+  | IEvRecord(r) => r
+  | _ => emptyMap
+  }
+  let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
+  Belt.Map.String.set(container, typeReferencesKey, r2)->NameSpace
+}
+
+let set = (nameSpace: t, id: string, value): t => {
+  let NameSpace(container) = nameSpace
+  Belt.Map.String.set(container, id, value)->NameSpace
+}
+
+let emptyModule: t = NameSpace(Belt.Map.String.empty)
+
+let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
+let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
+
+let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvModule(nameSpace)
+let fromExpressionValue = (aValue: internalExpressionValue): t =>
   switch aValue {
-  | EvModule(r) => fromRecord(r)
+  | IEvModule(nameSpace) => nameSpace
   | _ => emptyModule
   }
 
-let toString = (container: t): string => container->toRecord->EvRecord->expressionValueToString
+let fromArray = a => Belt.Map.String.fromArray(a)->NameSpace
+
+let merge = (nameSpace: t, other: t): t => {
+  let NameSpace(container) = nameSpace
+  let NameSpace(otherContainer) = other
+  otherContainer
+  ->Belt.Map.String.reduce(container, (container, key, value) =>
+    Belt.Map.String.set(container, key, value)
+  )
+  ->NameSpace
+}
+
+let removeOther = (nameSpace: t, other: t): t => {
+  let NameSpace(container) = nameSpace
+  let NameSpace(otherContainer) = other
+  let keys = Belt.Map.String.keysToArray(otherContainer)
+  Belt.Map.String.keep(container, (key, _value) => {
+    let removeThis = Js.Array2.includes(keys, key)
+    !removeThis
+  })->NameSpace
+}
 
 // -- Module definition
-let define = (container: t, identifier: string, ev: expressionValue): t =>
-  Belt.Map.String.set(container, identifier, ev) // TODO build lambda for polymorphic functions here
+let define = (nameSpace: t, identifier: string, ev: internalExpressionValue): t => {
+  let NameSpace(container) = nameSpace
+  Belt.Map.String.set(container, identifier, ev)->NameSpace // TODO build lambda for polymorphic functions here
+}
+let defineNumber = (nameSpace: t, identifier: string, value: float): t =>
+  nameSpace->define(identifier, IEvNumber(value))
 
-let defineNumber = (container: t, identifier: string, value: float): t =>
-  container->define(identifier, EvNumber(value))
-
-let defineModule = (container: t, identifier: string, value: t): t =>
-  container->define(identifier, toExpressionValue(value))
+let defineModule = (nameSpace: t, identifier: string, value: t): t =>
+  nameSpace->define(identifier, toExpressionValue(value))

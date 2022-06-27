@@ -1,4 +1,4 @@
-open ReducerInterface.ExpressionValue
+open ReducerInterface.ExternalExpressionValue
 open Jest
 open Expect
 

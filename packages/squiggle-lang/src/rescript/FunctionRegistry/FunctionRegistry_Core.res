@@ -1,4 +1,4 @@
-type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
 
 /*
   Function Registry "Type". A type, without any other information.
@@ -28,7 +28,7 @@ type rec frValue =
   | FRValueArray(array<frValue>)
   | FRValueDistOrNumber(frValueDistOrNumber)
   | FRValueRecord(frValueRecord)
-  | FRValueLambda(ReducerInterface_ExpressionValue.lambdaValue)
+  | FRValueLambda(ReducerInterface_InternalExpressionValue.lambdaValue)
   | FRValueString(string)
   | FRValueVariant(string)
   | FRValueAny(frValue)
@@ -41,7 +41,7 @@ and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.g
 type fnDefinition = {
   name: string,
   inputs: array<frType>,
-  run: (array<frValue>, DistributionOperation.env) => result<expressionValue, string>,
+  run: (array<frValue>, DistributionOperation.env) => result<internalExpressionValue, string>,
 }
 
 type function = {
@@ -73,47 +73,47 @@ module FRType = {
     | FRTypeAny => `any`
     }
 
-  let rec toFrValue = (r: expressionValue): option<frValue> =>
+  let rec toFrValue = (r: internalExpressionValue): option<frValue> =>
     switch r {
-    | EvNumber(f) => Some(FRValueNumber(f))
-    | EvString(f) => Some(FRValueString(f))
-    | EvDistribution(f) => Some(FRValueDistOrNumber(FRValueDist(f)))
-    | EvLambda(f) => Some(FRValueLambda(f))
-    | EvArray(elements) =>
+    | IEvNumber(f) => Some(FRValueNumber(f))
+    | IEvString(f) => Some(FRValueString(f))
+    | IEvDistribution(f) => Some(FRValueDistOrNumber(FRValueDist(f)))
+    | IEvLambda(f) => Some(FRValueLambda(f))
+    | IEvArray(elements) =>
       elements->E.A2.fmap(toFrValue)->E.A.O.openIfAllSome->E.O2.fmap(r => FRValueArray(r))
-    | EvRecord(record) =>
-      Js.Dict.entries(record)
+    | IEvRecord(map) =>
+      Belt.Map.String.toArray(map)
       ->E.A2.fmap(((key, item)) => item->toFrValue->E.O2.fmap(o => (key, o)))
       ->E.A.O.openIfAllSome
       ->E.O2.fmap(r => FRValueRecord(r))
     | _ => None
     }
 
-  let rec matchWithExpressionValue = (t: t, r: expressionValue): option<frValue> =>
+  let rec matchWithExpressionValue = (t: t, r: internalExpressionValue): option<frValue> =>
     switch (t, r) {
     | (FRTypeAny, f) => toFrValue(f)
-    | (FRTypeString, EvString(f)) => Some(FRValueString(f))
-    | (FRTypeNumber, EvNumber(f)) => Some(FRValueNumber(f))
-    | (FRTypeDistOrNumber, EvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
-    | (FRTypeDistOrNumber, EvDistribution(Symbolic(#Float(f)))) =>
+    | (FRTypeString, IEvString(f)) => Some(FRValueString(f))
+    | (FRTypeNumber, IEvNumber(f)) => Some(FRValueNumber(f))
+    | (FRTypeDistOrNumber, IEvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
+    | (FRTypeDistOrNumber, IEvDistribution(Symbolic(#Float(f)))) =>
       Some(FRValueDistOrNumber(FRValueNumber(f)))
-    | (FRTypeDistOrNumber, EvDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
-    | (FRTypeNumeric, EvNumber(f)) => Some(FRValueNumber(f))
-    | (FRTypeNumeric, EvDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
-    | (FRTypeLambda, EvLambda(f)) => Some(FRValueLambda(f))
-    | (FRTypeArray(intendedType), EvArray(elements)) => {
+    | (FRTypeDistOrNumber, IEvDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
+    | (FRTypeNumeric, IEvNumber(f)) => Some(FRValueNumber(f))
+    | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
+    | (FRTypeLambda, IEvLambda(f)) => Some(FRValueLambda(f))
+    | (FRTypeArray(intendedType), IEvArray(elements)) => {
         let el = elements->E.A2.fmap(matchWithExpressionValue(intendedType))
         E.A.O.openIfAllSome(el)->E.O2.fmap(r => FRValueArray(r))
       }
-    | (FRTypeDict(r), EvRecord(record)) =>
-      record
-      ->Js.Dict.entries
+    | (FRTypeDict(r), IEvRecord(map)) =>
+      map
+      ->Belt.Map.String.toArray
       ->E.A2.fmap(((key, item)) => matchWithExpressionValue(r, item)->E.O2.fmap(o => (key, o)))
       ->E.A.O.openIfAllSome
       ->E.O2.fmap(r => FRValueDict(Js.Dict.fromArray(r)))
-    | (FRTypeRecord(recordParams), EvRecord(record)) => {
+    | (FRTypeRecord(recordParams), IEvRecord(map)) => {
         let getAndMatch = (name, input) =>
-          E.Dict.get(record, name)->E.O.bind(matchWithExpressionValue(input))
+          Belt.Map.String.get(map, name)->E.O.bind(matchWithExpressionValue(input))
         //All names in the type must be present. If any are missing, the corresponding
         //value will be None, and this function would return None.
         let namesAndValues: array<option<(Js.Dict.key, frValue)>> =
@@ -125,35 +125,38 @@ module FRType = {
     | _ => None
     }
 
-  let rec matchReverse = (e: frValue): expressionValue =>
+  let rec matchReverse = (e: frValue): internalExpressionValue =>
     switch e {
-    | FRValueNumber(f) => EvNumber(f)
-    | FRValueDistOrNumber(FRValueNumber(n)) => EvNumber(n)
-    | FRValueDistOrNumber(FRValueDist(n)) => EvDistribution(n)
-    | FRValueDist(dist) => EvDistribution(dist)
-    | FRValueArray(elements) => EvArray(elements->E.A2.fmap(matchReverse))
+    | FRValueNumber(f) => IEvNumber(f)
+    | FRValueDistOrNumber(FRValueNumber(n)) => IEvNumber(n)
+    | FRValueDistOrNumber(FRValueDist(n)) => IEvDistribution(n)
+    | FRValueDist(dist) => IEvDistribution(dist)
+    | FRValueArray(elements) => IEvArray(elements->E.A2.fmap(matchReverse))
     | FRValueRecord(frValueRecord) => {
-        let record =
-          frValueRecord->E.A2.fmap(((name, value)) => (name, matchReverse(value)))->E.Dict.fromArray
-        EvRecord(record)
+        let map =
+          frValueRecord
+          ->E.A2.fmap(((name, value)) => (name, matchReverse(value)))
+          ->Belt.Map.String.fromArray
+        IEvRecord(map)
       }
     | FRValueDict(frValueRecord) => {
-        let record =
+        let map =
           frValueRecord
           ->Js.Dict.entries
           ->E.A2.fmap(((name, value)) => (name, matchReverse(value)))
-          ->E.Dict.fromArray
-        EvRecord(record)
+          ->Belt.Map.String.fromArray
+        IEvRecord(map)
       }
-    | FRValueLambda(l) => EvLambda(l)
-    | FRValueString(string) => EvString(string)
-    | FRValueVariant(string) => EvString(string)
+    | FRValueLambda(l) => IEvLambda(l)
+    | FRValueString(string) => IEvString(string)
+    | FRValueVariant(string) => IEvString(string)
     | FRValueAny(f) => matchReverse(f)
     }
 
-  let matchWithExpressionValueArray = (inputs: array<t>, args: array<expressionValue>): option<
-    array<frValue>,
-  > => {
+  let matchWithExpressionValueArray = (
+    inputs: array<t>,
+    args: array<internalExpressionValue>,
+  ): option<array<frValue>> => {
     let isSameLength = E.A.length(inputs) == E.A.length(args)
     if !isSameLength {
       None
@@ -204,14 +207,14 @@ module Matcher = {
   }
 
   module FnDefinition = {
-    let matchAssumingSameName = (f: fnDefinition, args: array<expressionValue>) => {
+    let matchAssumingSameName = (f: fnDefinition, args: array<internalExpressionValue>) => {
       switch FRType.matchWithExpressionValueArray(f.inputs, args) {
       | Some(_) => MatchSimple.FullMatch
       | None => MatchSimple.SameNameDifferentArguments
       }
     }
 
-    let match = (f: fnDefinition, fnName: string, args: array<expressionValue>) => {
+    let match = (f: fnDefinition, fnName: string, args: array<internalExpressionValue>) => {
       if f.name !== fnName {
         MatchSimple.DifferentName
       } else {
@@ -224,7 +227,7 @@ module Matcher = {
     type definitionId = int
     type match = Match.t<array<definitionId>, definitionId>
 
-    let match = (f: function, fnName: string, args: array<expressionValue>): match => {
+    let match = (f: function, fnName: string, args: array<internalExpressionValue>): match => {
       let matchedDefinition = () =>
         E.A.getIndexBy(f.definitions, r =>
           MatchSimple.isFullMatch(FnDefinition.match(r, fnName, args))
@@ -258,7 +261,7 @@ module Matcher = {
   }
 
   module Registry = {
-    let _findExactMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let _findExactMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
       let functionMatchPairs = r->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
       let fullMatch = functionMatchPairs->E.A.getBy(((_, match)) => Match.isFullMatch(match))
       fullMatch->E.O.bind(((fn, match)) =>
@@ -269,7 +272,7 @@ module Matcher = {
       )
     }
 
-    let _findNameMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let _findNameMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
       let functionMatchPairs = r->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
       let getNameMatches =
         functionMatchPairs
@@ -288,7 +291,7 @@ module Matcher = {
       E.A.toNoneIfEmpty(matches)
     }
 
-    let findMatches = (r: registry, fnName: string, args: array<expressionValue>) => {
+    let findMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
       switch _findExactMatches(r, fnName, args) {
       | Some(r) => Match.FullMatch(r)
       | None =>
@@ -316,7 +319,7 @@ module FnDefinition = {
     t.name ++ `(${inputs})`
   }
 
-  let run = (t: t, args: array<expressionValue>, env: DistributionOperation.env) => {
+  let run = (t: t, args: array<internalExpressionValue>, env: DistributionOperation.env) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
     | Some(values) => t.run(values, env)
@@ -370,7 +373,7 @@ module Registry = {
   let matchAndRun = (
     ~registry: registry,
     ~fnName: string,
-    ~args: array<expressionValue>,
+    ~args: array<internalExpressionValue>,
     ~env: DistributionOperation.env,
   ) => {
     let matchToDef = m => Matcher.Registry.matchToDef(registry, m)

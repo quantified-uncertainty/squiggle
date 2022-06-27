@@ -5,8 +5,10 @@
   "license": "MIT",
   "scripts": {
     "peggy": "peggy --cache",
+    "rescript": "rescript",
     "build": "yarn build:peggy && yarn build:rescript && yarn build:typescript",
-    "build:peggy": "find . -type f -name *.peggy -exec yarn peggy {} \\;",
+    "build:peggy:helpers": "tsc --module commonjs --outDir src/rescript/Reducer/Reducer_Peggy/ src/rescript/Reducer/Reducer_Peggy/helpers.ts",
+    "build:peggy": "yarn build:peggy:helpers && find . -type f -name *.peggy -exec yarn peggy {} \\;",
     "build:rescript": "rescript build -with-deps",
     "build:typescript": "tsc",
     "bundle": "webpack",
