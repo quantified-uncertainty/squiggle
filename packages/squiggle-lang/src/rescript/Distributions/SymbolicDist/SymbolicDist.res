@@ -124,6 +124,19 @@ module Beta = {
   let sample = (t: t) => Jstat.Beta.sample(t.alpha, t.beta)
   let mean = (t: t) => Ok(Jstat.Beta.mean(t.alpha, t.beta))
   let toString = ({alpha, beta}: t) => j`Beta($alpha,$beta)`
+
+  let fromMeanAndSampleSize = (mean, sampleSize) => {
+    // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_sample_size
+    let alpha = mean *. sampleSize
+    let beta = (1.0 -. mean) *. sampleSize
+    alpha->make(beta)
+  }
+
+  let fromMeanAndStdev = (mean, stdev) => {
+    let var = stdev *. stdev
+    let sampleSize = mean *. (1.0 -. mean) /. var
+    mean->fromMeanAndSampleSize(sampleSize)
+  }
 }
 
 module Lognormal = {
