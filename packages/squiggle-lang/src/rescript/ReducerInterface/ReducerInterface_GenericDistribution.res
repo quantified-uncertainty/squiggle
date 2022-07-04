@@ -34,9 +34,7 @@ module Helpers = {
     dist: DistributionTypes.genericDist,
     ~env: DistributionOperation.env,
   ) => {
-    FromDist(DistributionTypes.DistributionOperation.ToFloat(fnCall), dist)
-    ->DistributionOperation.run(~env)
-    ->Some
+    FromDist(#ToFloat(fnCall), dist)->DistributionOperation.run(~env)->Some
   }
 
   let toStringFn = (
@@ -44,9 +42,7 @@ module Helpers = {
     dist: DistributionTypes.genericDist,
     ~env: DistributionOperation.env,
   ) => {
-    FromDist(DistributionTypes.DistributionOperation.ToString(fnCall), dist)
-    ->DistributionOperation.run(~env)
-    ->Some
+    FromDist(#ToString(fnCall), dist)->DistributionOperation.run(~env)->Some
   }
 
   let toBoolFn = (
@@ -54,9 +50,7 @@ module Helpers = {
     dist: DistributionTypes.genericDist,
     ~env: DistributionOperation.env,
   ) => {
-    FromDist(DistributionTypes.DistributionOperation.ToBool(fnCall), dist)
-    ->DistributionOperation.run(~env)
-    ->Some
+    FromDist(#ToBool(fnCall), dist)->DistributionOperation.run(~env)->Some
   }
 
   let toDistFn = (
@@ -64,18 +58,12 @@ module Helpers = {
     dist,
     ~env: DistributionOperation.env,
   ) => {
-    FromDist(DistributionTypes.DistributionOperation.ToDist(fnCall), dist)
-    ->DistributionOperation.run(~env)
-    ->Some
+    FromDist(#ToDist(fnCall), dist)->DistributionOperation.run(~env)->Some
   }
 
   let twoDiststoDistFn = (direction, arithmetic, dist1, dist2, ~env: DistributionOperation.env) => {
     FromDist(
-      DistributionTypes.DistributionOperation.ToDistCombination(
-        direction,
-        arithmeticMap(arithmetic),
-        #Dist(dist2),
-      ),
+      #ToDistCombination(direction, arithmeticMap(arithmetic), #Dist(dist2)),
       dist1,
     )->DistributionOperation.run(~env)
   }
@@ -229,7 +217,7 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
     Some(
       DistributionOperation.run(
         FromDist(
-          ToScore(LogScore(DistributionTypes.DistributionOperation.Score_Dist(answer), None)),
+          #ToScore(LogScore(DistributionTypes.DistributionOperation.Score_Dist(answer), None)),
           prediction,
         ),
         ~env,
@@ -242,7 +230,7 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
     Some(
       DistributionOperation.run(
         FromDist(
-          ToScore(
+          #ToScore(
             LogScore(
               DistributionTypes.DistributionOperation.Score_Dist(answer),
               Some(DistributionTypes.DistributionOperation.Score_Dist(prior)),
@@ -267,7 +255,7 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
   ) =>
     DistributionOperation.run(
       FromDist(
-        ToScore(
+        #ToScore(
           LogScore(
             DistributionTypes.DistributionOperation.Score_Scalar(answer),
             DistributionTypes.DistributionOperation.Score_Dist(prior)->Some,
@@ -284,7 +272,7 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
   ) =>
     DistributionOperation.run(
       FromDist(
-        ToScore(LogScore(DistributionTypes.DistributionOperation.Score_Scalar(answer), None)),
+        #ToScore(LogScore(DistributionTypes.DistributionOperation.Score_Scalar(answer), None)),
         prediction,
       ),
       ~env,

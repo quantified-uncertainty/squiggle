@@ -186,8 +186,8 @@ describe("combineAlongSupportOfSecondArgument0", () => {
       uniformMakeR(lowPrediction, highPrediction)->E.R2.errMap(s => DistributionTypes.ArgumentError(
         s,
       ))
-    let answerWrapped = E.R.fmap(a => run(FromDist(ToDist(ToPointSet), a)), answer)
-    let predictionWrapped = E.R.fmap(a => run(FromDist(ToDist(ToPointSet), a)), prediction)
+    let answerWrapped = E.R.fmap(a => run(FromDist(#ToDist(ToPointSet), a)), answer)
+    let predictionWrapped = E.R.fmap(a => run(FromDist(#ToDist(ToPointSet), a)), prediction)
 
     let interpolator = XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero)
     let integrand = PointSetDist_Scoring.WithDistAnswer.integrand

@@ -101,14 +101,14 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
   }
 
   let toPointSetFn = r => {
-    switch reCall(~functionCallInfo=FromDist(ToDist(ToPointSet), r), ()) {
+    switch reCall(~functionCallInfo=FromDist(#ToDist(ToPointSet), r), ()) {
     | Dist(PointSet(p)) => Ok(p)
     | e => Error(OutputLocal.toErrorOrUnreachable(e))
     }
   }
 
   let toSampleSetFn = r => {
-    switch reCall(~functionCallInfo=FromDist(ToDist(ToSampleSet(sampleCount)), r), ()) {
+    switch reCall(~functionCallInfo=FromDist(#ToDist(ToSampleSet(sampleCount)), r), ()) {
     | Dist(SampleSet(p)) => Ok(p)
     | e => Error(OutputLocal.toErrorOrUnreachable(e))
     }
@@ -116,13 +116,13 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
 
   let scaleMultiply = (r, weight) =>
     reCall(
-      ~functionCallInfo=FromDist(ToDistCombination(Pointwise, #Multiply, #Float(weight)), r),
+      ~functionCallInfo=FromDist(#ToDistCombination(Pointwise, #Multiply, #Float(weight)), r),
       (),
     )->OutputLocal.toDistR
 
   let pointwiseAdd = (r1, r2) =>
     reCall(
-      ~functionCallInfo=FromDist(ToDistCombination(Pointwise, #Add, #Dist(r2)), r1),
+      ~functionCallInfo=FromDist(#ToDistCombination(Pointwise, #Add, #Dist(r2)), r1),
       (),
     )->OutputLocal.toDistR
 
@@ -131,40 +131,40 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
     dist: genericDist,
   ): outputType => {
     let response = switch subFnName {
-    | ToFloat(distToFloatOperation) =>
+    | #ToFloat(distToFloatOperation) =>
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
-    | ToString(ToString) => dist->GenericDist.toString->String
-    | ToString(ToSparkline(bucketCount)) =>
+    | #ToString(ToString) => dist->GenericDist.toString->String
+    | #ToString(ToSparkline(bucketCount)) =>
       GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
       ->E.R2.fmap(r => String(r))
       ->OutputLocal.fromResult
-    | ToDist(Inspect) => {
+    | #ToDist(Inspect) => {
         Js.log2("Console log requested: ", dist)
         Dist(dist)
       }
-    | ToDist(Normalize) => dist->GenericDist.normalize->Dist
-    | ToScore(LogScore(answer, prior)) =>
+    | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
+    | #ToScore(LogScore(answer, prior)) =>
       GenericDist.Score.logScore(~estimate=Score_Dist(dist), ~answer, ~prior)
       ->E.R2.fmap(s => Float(s))
       ->OutputLocal.fromResult
-    | ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
-    | ToDist(Truncate(leftCutoff, rightCutoff)) =>
+    | #ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
+    | #ToDist(Truncate(leftCutoff, rightCutoff)) =>
       GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDist(ToSampleSet(n)) =>
+    | #ToDist(ToSampleSet(n)) =>
       dist
       ->GenericDist.toSampleSetDist(n)
       ->E.R2.fmap(r => Dist(SampleSet(r)))
       ->OutputLocal.fromResult
-    | ToDist(ToPointSet) =>
+    | #ToDist(ToPointSet) =>
       dist
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
       ->E.R2.fmap(r => Dist(PointSet(r)))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
+    | #ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(
         ~toPointSetFn,
@@ -173,23 +173,23 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       )
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#Multiply, f)) =>
+    | #ToDist(Scale(#Multiply, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Multiply, ~f)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#Logarithm, f)) =>
+    | #ToDist(Scale(#Logarithm, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#Power, f)) =>
+    | #ToDist(Scale(#Power, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Power, ~f)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Algebraic(_), _, #Float(_)) => GenDistError(NotYetImplemented)
-    | ToDistCombination(Algebraic(strategy), arithmeticOperation, #Dist(t2)) =>
+    | #ToDistCombination(Algebraic(_), _, #Float(_)) => GenDistError(NotYetImplemented)
+    | #ToDistCombination(Algebraic(strategy), arithmeticOperation, #Dist(t2)) =>
       dist
       ->GenericDist.algebraicCombination(
         ~strategy,
@@ -200,12 +200,12 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       )
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Pointwise, algebraicCombination, #Dist(t2)) =>
+    | #ToDistCombination(Pointwise, algebraicCombination, #Dist(t2)) =>
       dist
       ->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination, ~t2)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Pointwise, algebraicCombination, #Float(f)) =>
+    | #ToDistCombination(Pointwise, algebraicCombination, #Float(f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination, ~f)
       ->E.R2.fmap(r => Dist(r))
@@ -216,8 +216,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
 
   switch functionCallInfo {
   | FromDist(subFnName, dist) => fromDistFn(subFnName, dist)
-  | FromFloat(subFnName, float) =>
-    reCall(~functionCallInfo=FromDist(subFnName, GenericDist.fromFloat(float)), ())
+  | FromFloat(subFnName, x) => reCall(~functionCallInfo=FromFloat(subFnName, x), ())
   | Mixture(dists) =>
     dists
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd)

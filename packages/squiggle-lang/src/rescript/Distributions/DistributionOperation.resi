@@ -27,7 +27,7 @@ let runFromDist: (
 ) => outputType
 let runFromFloat: (
   ~env: env,
-  ~functionCallInfo: DistributionTypes.DistributionOperation.fromDist,
+  ~functionCallInfo: DistributionTypes.DistributionOperation.fromFloat,
   float,
 ) => outputType
 
