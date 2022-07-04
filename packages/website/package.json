@@ -16,7 +16,7 @@
     "@docusaurus/preset-classic": "2.0.0-beta.21",
     "@quri/squiggle-components": "^0.2.20",
     "base64-js": "^1.5.1",
-    "clsx": "^1.1.1",
+    "clsx": "^1.2.0",
     "hast-util-is-element": "2.1.2",
     "pako": "^2.0.4",
     "prism-react-renderer": "^1.3.5",
