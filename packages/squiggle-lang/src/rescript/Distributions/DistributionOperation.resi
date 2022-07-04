@@ -83,24 +83,6 @@ module Constructors: {
       float,
       DistributionTypes.DistributionOperation.genericDistOrScalar,
     ) => result<float, error>
-    @genType
-    let scalarEstimateDistAnswer: (~env: env, float, genericDist) => result<float, error>
-    @genType
-    let scalarEstimateDistAnswerWithPrior: (
-      ~env: env,
-      float,
-      genericDist,
-      DistributionTypes.DistributionOperation.genericDistOrScalar,
-    ) => result<float, error>
-    @genType
-    let scalarEstimateScalarAnswer: (~env: env, float, float) => result<float, error>
-    @genType
-    let scalarEstimateScalarAnswerWithPrior: (
-      ~env: env,
-      float,
-      float,
-      DistributionTypes.DistributionOperation.genericDistOrScalar,
-    ) => result<float, error>
   }
   @genType
   let toPointSet: (~env: env, genericDist) => result<genericDist, error>

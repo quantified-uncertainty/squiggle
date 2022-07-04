@@ -194,22 +194,6 @@ module Constructors = {
         ToScore(LogScore(Score_Scalar(answer), Some(prior))),
         estimate,
       )
-      let scalarEstimateDistAnswer = (estimate, answer): t => FromFloat(
-        ToScore(LogScore(Score_Dist(answer), None)),
-        estimate,
-      )
-      let scalarEstimateDistAnswerWithPrior = (estimate, answer, prior): t => FromFloat(
-        ToScore(LogScore(Score_Dist(answer), Some(prior))),
-        estimate,
-      )
-      let scalarEstimateScalarAnswer = (estimate, answer): t => FromFloat(
-        ToScore(LogScore(Score_Scalar(answer), None)),
-        estimate,
-      )
-      let scalarEstimateScalarAnswerWithPrior = (estimate, answer, prior): t => FromFloat(
-        ToScore(LogScore(Score_Scalar(answer), Some(prior))),
-        estimate,
-      )
     }
     let scaleMultiply = (dist, n): t => FromDist(ToDist(Scale(#Multiply, n)), dist)
     let scalePower = (dist, n): t => FromDist(ToDist(Scale(#Power, n)), dist)

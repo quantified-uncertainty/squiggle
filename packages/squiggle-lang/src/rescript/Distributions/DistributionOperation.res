@@ -278,14 +278,6 @@ module Constructors = {
       C.LogScore.distEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
     let distEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
       C.LogScore.distEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
-    let scalarEstimateDistAnswer = (~env, estimate, answer) =>
-      C.LogScore.scalarEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
-    let scalarEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
-      C.LogScore.scalarEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
-    let scalarEstimateScalarAnswer = (~env, estimate, answer) =>
-      C.LogScore.scalarEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
-    let scalarEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
-      C.LogScore.scalarEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
   }
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR

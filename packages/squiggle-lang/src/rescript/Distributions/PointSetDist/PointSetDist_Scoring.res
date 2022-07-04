@@ -4,8 +4,8 @@ type scalar = float
 type score = float
 type abstractScoreArgs<'a, 'b> = {estimate: 'a, answer: 'b, prior: option<'a>}
 type scoreArgs =
-  | DistEstimateDistAnswer(abstractScoreArgs<pointSetDist, pointSetDist>)
-  | DistEstimateScalarAnswer(abstractScoreArgs<pointSetDist, scalar>)
+  | DistAnswer(abstractScoreArgs<pointSetDist, pointSetDist>)
+  | ScalarAnswer(abstractScoreArgs<pointSetDist, scalar>)
 
 let logFn = Js.Math.log // base e
 let minusScaledLogOfQuotient = (~esti, ~answ): result<float, Operation.Error.t> => {
@@ -139,12 +139,11 @@ let logScore = (args: scoreArgs, ~combineFn, ~integrateFn, ~toMixedFn): result<
   Operation.Error.t,
 > =>
   switch args {
-  | DistEstimateDistAnswer({estimate, answer, prior: None}) =>
+  | DistAnswer({estimate, answer, prior: None}) =>
     WithDistAnswer.sum(~estimate, ~answer, ~integrateFn, ~combineFn, ~toMixedFn)
-  | DistEstimateDistAnswer({estimate, answer, prior: Some(prior)}) =>
+  | DistAnswer({estimate, answer, prior: Some(prior)}) =>
     WithDistAnswer.sumWithPrior(~estimate, ~answer, ~prior, ~integrateFn, ~combineFn, ~toMixedFn)
-  | DistEstimateScalarAnswer({estimate, answer, prior: None}) =>
-    WithScalarAnswer.score(~estimate, ~answer)
-  | DistEstimateScalarAnswer({estimate, answer, prior: Some(prior)}) =>
+  | ScalarAnswer({estimate, answer, prior: None}) => WithScalarAnswer.score(~estimate, ~answer)
+  | ScalarAnswer({estimate, answer, prior: Some(prior)}) =>
     WithScalarAnswer.scoreWithPrior(~estimate, ~answer, ~prior)
   }
