@@ -129,14 +129,18 @@ module Beta = {
     // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_sample_size
     let alpha = mean *. sampleSize
     let beta = (1.0 -. mean) *. sampleSize
-    alpha->make(beta)
+    make(alpha, beta)
   }
 
   let fromMeanAndStdev = (mean, stdev) => {
     // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
-    let var = stdev *. stdev
-    let sampleSize = mean *. (1.0 -. mean) /. var -. 1.0
-    mean->fromMeanAndSampleSize(sampleSize)
+    if !(0.0 < stdev && stdev <= 0.5) || !(0.0 <= mean && mean <= 1.0) {
+      "Beta mean must be in [0,1] and stdev must be in (1,0.5]"->Error
+    } else {
+      let var = stdev *. stdev
+      let sampleSize = mean *. (1.0 -. mean) /. var -. 1.0
+      fromMeanAndSampleSize(mean, sampleSize)
+    }
   }
 }
 
