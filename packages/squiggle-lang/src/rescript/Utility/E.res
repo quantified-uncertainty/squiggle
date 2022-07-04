@@ -35,6 +35,7 @@ module FloatFloatMap = {
 module Int = {
   let max = (i1: int, i2: int) => i1 > i2 ? i1 : i2
   let random = (~min, ~max) => Js.Math.random_int(min, max)
+  let toFloat = Belt.Int.toFloat
 }
 /* Utils */
 module U = {
@@ -362,13 +363,6 @@ module J = {
   }
 }
 
-module JsDate = {
-  let fromString = Js.Date.fromString
-  let now = Js.Date.now
-  let make = Js.Date.make
-  let valueOf = Js.Date.valueOf
-}
-
 /* List */
 module L = {
   module Util = {
@@ -634,6 +628,15 @@ module A = {
   let all = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) == length(xs)
   let any = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) > 0
 
+  let cartesianProductMany = (combinations: array<array<'a>>) => {
+    let appendCombination = (l: array<array<'a>>, l': array<'a>): array<array<'a>> =>
+      l |> fmap(lEl => l' |> fmap(l'El => concat(lEl, [l'El]))) |> concatMany
+    let laterCombinations = Belt.Array.sliceToEnd(combinations, 1)
+    let startArray = combinations->unsafe_get(0) |> fmap(r => [r])
+    let results = reduce(laterCombinations, startArray, appendCombination)
+    results
+  }
+
   module O = {
     let concatSomes = (optionals: array<option<'a>>): array<'a> =>
       optionals
@@ -881,4 +884,13 @@ module Dict = {
   let toArray = Js.Dict.entries
   let concat = (a, b) => A.concat(toArray(a), toArray(b))->fromArray
   let concatMany = ts => ts->A2.fmap(toArray)->A.concatMany->fromArray
+}
+
+module JsDate = {
+  let fromString = Js.Date.fromString
+  let now = Js.Date.now
+  let make = Js.Date.make
+  let valueOf = Js.Date.valueOf
+  let fromFloat = Js.Date.fromFloat
+  let range = (min, max, n) => A.Floats.range(valueOf(min), valueOf(max), n) |> A.fmap(fromFloat)
 }
