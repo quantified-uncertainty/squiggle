@@ -7,7 +7,8 @@
     "peggy": "peggy --cache",
     "rescript": "rescript",
     "build": "yarn build:peggy && yarn build:rescript && yarn build:typescript",
-    "build:peggy": "find . -type f -name *.peggy -exec yarn peggy {} \\;",
+    "build:peggy:helpers": "tsc --module commonjs --outDir src/rescript/Reducer/Reducer_Peggy/ src/rescript/Reducer/Reducer_Peggy/helpers.ts",
+    "build:peggy": "yarn build:peggy:helpers && find . -type f -name *.peggy -exec yarn peggy {} \\;",
     "build:rescript": "rescript build -with-deps",
     "build:typescript": "tsc",
     "bundle": "webpack",
@@ -41,7 +42,7 @@
     "@stdlib/stats": "^0.0.13",
     "jstat": "^1.9.5",
     "lodash": "^4.17.21",
-    "mathjs": "^10.6.0",
+    "mathjs": "^10.6.3",
     "pdfast": "^0.2.0"
   },
   "devDependencies": {
@@ -52,7 +53,7 @@
     "bisect_ppx": "^2.7.1",
     "chalk": "^5.0.1",
     "codecov": "^3.8.3",
-    "fast-check": "^3.0.0",
+    "fast-check": "^3.0.1",
     "gentype": "^4.4.0",
     "jest": "^27.5.1",
     "moduleserve": "^0.9.1",

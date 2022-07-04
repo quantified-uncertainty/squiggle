@@ -13,6 +13,10 @@ import { parse } from "@quri/squiggle-lang";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 
+// Documentation:
+// - https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+// - https://microsoft.github.io/language-server-protocol/specifications/specification-current
+
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
@@ -23,17 +27,7 @@ documents.onDidChangeContent((change) => {
   validateSquiggleDocument(change.document);
 });
 
-let hasDiagnosticRelatedInformationCapability = false;
-
 connection.onInitialize((params: InitializeParams) => {
-  const capabilities = params.capabilities;
-
-  hasDiagnosticRelatedInformationCapability = !!(
-    capabilities.textDocument &&
-    capabilities.textDocument.publishDiagnostics &&
-    capabilities.textDocument.publishDiagnostics.relatedInformation
-  );
-
   const result: InitializeResult = {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
