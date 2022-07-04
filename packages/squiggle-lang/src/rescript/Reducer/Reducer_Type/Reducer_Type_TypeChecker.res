@@ -1,5 +1,3 @@
-//TODO: Work in progress. Code is commented to make an a release of other features
-
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module T = Reducer_Type_T
@@ -42,6 +40,7 @@ let rec isOfResolvedIType = (anIType: T.iType, aValue): result<bool, typeErrorVa
 
   switch anIType {
   | ItTypeIdentifier(name) => caseTypeIdentifier(name, aValue)
+  // TODO: Work in progress. Code is commented to make an a release of other features
   // | ItModifiedType({modifiedType: anIType}) => raise(Reducer_Exception.ImpossibleException)
   // | ItTypeOr({typeOr: anITypeArray}) => raise(Reducer_Exception.ImpossibleException)
   // | ItTypeFunction({inputs: anITypeArray, output: anIType}) =>
@@ -56,6 +55,7 @@ let rec isOfResolvedIType = (anIType: T.iType, aValue): result<bool, typeErrorVa
 let isOfResolvedType = (aType: InternalExpressionValue.t, aValue): result<bool, typeErrorValue> =>
   aType->T.fromIEvValue->isOfResolvedIType(aValue)
 
+// TODO: Work in progress. Code is commented to make an a release of other features
 // let checkArguments = (
 //   evFunctionType: InternalExpressionValue.t,
 //   args: array<InternalExpressionValue.t>,
