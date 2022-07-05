@@ -10,7 +10,6 @@ type environment = ReducerInterface_InternalExpressionValue.environment
 type expression = ExpressionT.expression
 type expressionOrFFI = ExpressionT.expressionOrFFI
 type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
-// type tmpExternalBindings = ReducerInterface_InternalExpressionValue.tmpExternalBindings
 type internalCode = ReducerInterface_InternalExpressionValue.internalCode
 
 external castInternalCodeToExpression: internalCode => expressionOrFFI = "%identity"
