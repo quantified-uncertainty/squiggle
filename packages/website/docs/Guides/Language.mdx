@@ -9,22 +9,22 @@ import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
 ### Distributions
 
-<SquiggleEditor initialSquiggleString={`mixture(1 to 2, 3, [0.3, 0.7])`} />
+<SquiggleEditor defaultCode={`mixture(1 to 2, 3, [0.3, 0.7])`} />
 
 ### Numbers
 
-<SquiggleEditor initialSquiggleString="4.32" />
+<SquiggleEditor defaultCode="4.32" />
 
 ### Arrays
 
 <SquiggleEditor
-  initialSquiggleString={`[beta(1,10), 4, isNormalized(toSampleSet(1 to 2))]`}
+  defaultCode={`[beta(1,10), 4, isNormalized(toSampleSet(1 to 2))]`}
 />
 
 ### Records
 
 <SquiggleEditor
-  initialSquiggleString={`d = {dist: triangular(0, 1, 2), weight: 0.25}
+  defaultCode={`d = {dist: triangular(0, 1, 2), weight: 0.25}
 d.dist`}
 />
 
@@ -33,7 +33,7 @@ d.dist`}
 A statement assigns expressions to names. It looks like `<symbol> = <expression>`
 
 <SquiggleEditor
-  initialSquiggleString={`value_of_work = 10 to 70
+  defaultCode={`value_of_work = 10 to 70
 5 + value_of_work / 75`}
 />
 
@@ -42,7 +42,7 @@ A statement assigns expressions to names. It looks like `<symbol> = <expression>
 We can define functions
 
 <SquiggleEditor
-  initialSquiggleString={`ozzie_estimate(t) = lognormal(t^(1.1), 0.5)
+  defaultCode={`ozzie_estimate(t) = lognormal(t^(1.1), 0.5)
 nuno_estimate(t, m) = mixture(normal(-5, 1), lognormal(m, t / 1.25))
 ozzie_estimate(1) * nuno_estimate(1, 1)`}
 />

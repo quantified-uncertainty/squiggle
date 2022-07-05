@@ -1,7 +1,7 @@
 import React, { FC, Fragment, useState, useEffect } from "react";
-import ReactDOM from "react-dom";
 import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
+import { useMaybeControlledValue } from "../lib/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Tab } from "@headlessui/react";
 import {
@@ -23,7 +23,7 @@ import { SquiggleContainer } from "./SquiggleContainer";
 
 interface PlaygroundProps {
   /** The initial squiggle string to put in the playground */
-  initialSquiggleString?: string;
+  defaultCode?: string;
   /** How many pixels high is the playground */
   height?: number;
   /** Whether to show the types of outputs in the playground */
@@ -205,7 +205,7 @@ function Checkbox<T>({
 }
 
 export const SquigglePlayground: FC<PlaygroundProps> = ({
-  initialSquiggleString = "",
+  defaultCode = "",
   height = 500,
   showTypes = false,
   showControls = false,
@@ -217,9 +217,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   onSettingsChange,
   showEditor = true,
 }) => {
-  const [uncontrolledCode, setUncontrolledCode] = useState(
-    initialSquiggleString
-  );
+  const [code, setCode] = useMaybeControlledValue({
+    value: controlledCode,
+    defaultValue: defaultCode,
+    onChange: onCodeChange,
+  });
   const [importString, setImportString] = useState("{}");
   const [imports, setImports] = useState({});
   const [importsAreValid, setImportsAreValid] = useState(true);
@@ -250,11 +252,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     onSettingsChange?.(vars);
   }, [vars, onSettingsChange]);
 
-  const chartSettings = {
-    start: Number(vars.diagramStart),
-    stop: Number(vars.diagramStop),
-    count: Number(vars.diagramCount),
-  };
   const env: environment = {
     sampleCount: Number(vars.sampleCount),
     xyPointLength: Number(vars.xyPointLength),
@@ -268,8 +265,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       setImportsAreValid(false);
     }
   };
-
-  const code = controlledCode ?? uncontrolledCode;
 
   const samplingSettings = (
     <div className="space-y-6 p-3 max-w-xl">
@@ -423,9 +418,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const squiggleChart = (
     <SquiggleChart
-      squiggleString={code}
+      code={code}
       environment={env}
-      chartSettings={chartSettings}
+      diagramStart={Number(vars.diagramStart)}
+      diagramStop={Number(vars.diagramStop)}
+      diagramCount={Number(vars.diagramCount)}
       height={vars.chartHeight}
       showTypes={vars.showTypes}
       showControls={vars.showControls}
@@ -440,14 +437,8 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   const firstTab = vars.showEditor ? (
     <div className="border border-slate-200">
       <CodeEditor
-        value={code}
-        onChange={(newCode) => {
-          if (controlledCode === undefined) {
-            // uncontrolled mode
-            setUncontrolledCode(newCode);
-          }
-          onCodeChange?.(newCode);
-        }}
+        value={code ?? ""}
+        onChange={setCode}
         oneLine={false}
         showGutter={true}
         height={height - 1}
@@ -494,9 +485,3 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     </SquiggleContainer>
   );
 };
-
-export function renderSquigglePlaygroundToDom(props: PlaygroundProps) {
-  const parent = document.createElement("div");
-  ReactDOM.render(<SquigglePlayground {...props} />, parent);
-  return parent;
-}

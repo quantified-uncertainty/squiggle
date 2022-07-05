@@ -20,7 +20,7 @@ Add to `App.js`:
 ```jsx
 import { SquiggleEditor } from "@quri/squiggle-components";
 <SquiggleEditor
-  initialSquiggleString="x = beta($alpha, 10); x + $shift"
+  defaultCode="x = beta($alpha, 10); x + $shift"
   jsImports={{ alpha: 3, shift: 20 }}
 />;
 ```
@@ -50,7 +50,7 @@ export function DynamicSquiggleChart({ squiggleString }) {
   } else {
     return (
         <SquiggleChart
-          squiggleString={squiggleString}
+          defaultCode={squiggleString}
           width={445}
           height={200}
           showSummary={true}

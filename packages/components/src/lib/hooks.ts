@@ -5,7 +5,7 @@ import {
   run,
   runPartial,
 } from "@quri/squiggle-lang";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type SquiggleArgs<T extends ReturnType<typeof run | typeof runPartial>> = {
   code: string;
@@ -19,26 +19,10 @@ const useSquiggleAny = <T extends ReturnType<typeof run | typeof runPartial>>(
   args: SquiggleArgs<T>,
   f: (...args: Parameters<typeof run>) => T
 ) => {
-  //  We're using observable, where div elements can have a `value` property:
-  // https://observablehq.com/@observablehq/introduction-to-views
-  //
-  //  This is here to get the 'viewof' part of:
-  //  viewof env = cell('normal(0,1)')
-  //  to work
-  const ref = useRef<
-    HTMLDivElement & { value?: Extract<T, { tag: "Ok" }>["value"] }
-  >(null);
   const result: T = useMemo<T>(
     () => f(args.code, args.bindings, args.environment, args.jsImports),
     [f, args.code, args.bindings, args.environment, args.jsImports]
   );
-
-  useEffect(() => {
-    if (!ref.current) return;
-    ref.current.value = result.tag === "Ok" ? result.value : undefined;
-
-    ref.current.dispatchEvent(new CustomEvent("input"));
-  }, [result]);
 
   const { onChange } = args;
 
@@ -46,10 +30,7 @@ const useSquiggleAny = <T extends ReturnType<typeof run | typeof runPartial>>(
     onChange?.(result.tag === "Ok" ? result.value : undefined);
   }, [result, onChange]);
 
-  return {
-    result, // squiggleExpression or externalBindings
-    observableRef: ref, // can be passed to outermost <div> if you want to use your component as an observablehq's view
-  };
+  return result;
 };
 
 export const useSquigglePartial = (
@@ -61,3 +42,23 @@ export const useSquigglePartial = (
 export const useSquiggle = (args: SquiggleArgs<ReturnType<typeof run>>) => {
   return useSquiggleAny(args, run);
 };
+
+type ControlledValueArgs<T> = {
+  value?: T;
+  defaultValue: T;
+  onChange?: (x: T) => void;
+};
+export function useMaybeControlledValue<T>(
+  args: ControlledValueArgs<T>
+): [T, (x: T) => void] {
+  let [uncontrolledValue, setUncontrolledValue] = useState(args.defaultValue);
+  let value = args.value ?? uncontrolledValue;
+  let onChange = (newValue: T) => {
+    if (args.value === undefined) {
+      // uncontrolled mode
+      setUncontrolledValue(newValue);
+    }
+    args.onChange?.(newValue);
+  };
+  return [value, onChange];
+}

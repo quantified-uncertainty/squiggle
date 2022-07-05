@@ -14,7 +14,20 @@ the distribution.
   <Story
     name="Normal"
     args={{
-      initialSquiggleString: "normal(5,2)",
+      defaultCode: "normal(5,2)",
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+It's also possible to create a controlled version of the same component
+
+<Canvas>
+  <Story
+    name="Controlled"
+    args={{
+      code: "normal(5,2)",
     }}
   >
     {Template.bind({})}
@@ -27,7 +40,7 @@ You can also name variables like so:
   <Story
     name="Variables"
     args={{
-      initialSquiggleString: "x = 2\nnormal(x,2)",
+      defaultCode: "x = 2\nnormal(x,2)",
     }}
   >
     {Template.bind({})}
