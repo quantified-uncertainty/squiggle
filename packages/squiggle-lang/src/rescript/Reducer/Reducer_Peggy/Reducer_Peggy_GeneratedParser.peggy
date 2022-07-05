@@ -154,9 +154,7 @@ unary
   unaryOperator "unary operator"
   = ('-' / '.-' / '!' ) 
 
-postOperator = indexedValue
-
-indexedValue
+postOperator
   = collectionElement
   / atom
 
