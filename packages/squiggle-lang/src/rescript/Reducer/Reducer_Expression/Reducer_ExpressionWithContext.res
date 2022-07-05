@@ -1,16 +1,16 @@
-module Bindings = Reducer_Expression_Bindings
+module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface.ExpressionValue
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Result = Belt.Result
+module Module = Reducer_Category_Module
 
 type bindings = ExpressionT.bindings
 type context = bindings
-type environment = ExpressionValue.environment
+type environment = InternalExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression
-type expressionValue = ExpressionValue.expressionValue
-type externalBindings = ReducerInterface_ExpressionValue.externalBindings
+type internalExpressionValue = InternalExpressionValue.t
 type reducerFn = ExpressionT.reducerFn
 
 type expressionWithContext =
@@ -22,7 +22,7 @@ let callReducer = (
   bindings: bindings,
   environment: environment,
   reducer: reducerFn,
-): result<expressionValue, errorValue> => {
+): result<internalExpressionValue, errorValue> => {
   switch expressionWithContext {
   | ExpressionNoContext(expr) =>
     // Js.log(`callReducer: bindings ${Bindings.toString(bindings)} expr ${ExpressionT.toString(expr)}`)
@@ -40,7 +40,9 @@ let toString = expressionWithContext =>
   switch expressionWithContext {
   | ExpressionNoContext(expr) => ExpressionT.toString(expr)
   | ExpressionWithContext(expr, context) =>
-    `${ExpressionT.toString(expr)} context: ${Bindings.toString(context)}`
+    `${ExpressionT.toString(expr)} context: ${context
+      ->Module.toExpressionValue
+      ->InternalExpressionValue.toString}`
   }
 
 let toStringResult = rExpressionWithContext =>

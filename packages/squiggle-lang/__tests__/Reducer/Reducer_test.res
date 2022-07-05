@@ -39,7 +39,7 @@ describe("eval", () => {
     testEvalToBe("x=1; y=x+1; y+1", "Ok(3)")
     testEvalError("1; x=1")
     testEvalError("1; 1")
-    testEvalToBe("x=1; x=1", "Ok({x: 1})")
+    testEvalToBe("x=1; x=1", "Ok(@{x: 1})")
   })
 })
 

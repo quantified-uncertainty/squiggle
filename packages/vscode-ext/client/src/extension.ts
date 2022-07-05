@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { startClient, stopClient } from "./client";
 
 import { SquiggleEditorProvider } from "./editor";
+import { registerSemanticHighlight } from "./highlight";
 import { registerPreviewCommand } from "./preview";
 
 // this method is called when your extension is activated
@@ -12,6 +13,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(SquiggleEditorProvider.register(context));
 
   registerPreviewCommand(context);
+
+  registerSemanticHighlight();
 
   startClient(context);
 }

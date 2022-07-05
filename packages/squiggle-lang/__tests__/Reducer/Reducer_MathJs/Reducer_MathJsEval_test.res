@@ -1,4 +1,3 @@
-open ReducerInterface.ExpressionValue
 module MathJs = Reducer_MathJs
 module ErrorValue = Reducer.ErrorValue
 
@@ -6,14 +5,14 @@ open Jest
 open ExpectJs
 
 describe("eval", () => {
-  test("Number", () => expect(MathJs.Eval.eval("1"))->toEqual(Ok(EvNumber(1.))))
-  test("Number expr", () => expect(MathJs.Eval.eval("1-1"))->toEqual(Ok(EvNumber(0.))))
-  test("String", () => expect(MathJs.Eval.eval("'hello'"))->toEqual(Ok(EvString("hello"))))
+  test("Number", () => expect(MathJs.Eval.eval("1"))->toEqual(Ok(IEvNumber(1.))))
+  test("Number expr", () => expect(MathJs.Eval.eval("1-1"))->toEqual(Ok(IEvNumber(0.))))
+  test("String", () => expect(MathJs.Eval.eval("'hello'"))->toEqual(Ok(IEvString("hello"))))
   test("String expr", () =>
-    expect(MathJs.Eval.eval("concat('hello ','world')"))->toEqual(Ok(EvString("hello world")))
+    expect(MathJs.Eval.eval("concat('hello ','world')"))->toEqual(Ok(IEvString("hello world")))
   )
-  test("Boolean", () => expect(MathJs.Eval.eval("true"))->toEqual(Ok(EvBool(true))))
-  test("Boolean expr", () => expect(MathJs.Eval.eval("2>1"))->toEqual(Ok(EvBool(true))))
+  test("Boolean", () => expect(MathJs.Eval.eval("true"))->toEqual(Ok(IEvBool(true))))
+  test("Boolean expr", () => expect(MathJs.Eval.eval("2>1"))->toEqual(Ok(IEvBool(true))))
 })
 
 describe("errors", () => {

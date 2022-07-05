@@ -1,6 +1,6 @@
 module Expression = Reducer_Expression
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface_ExpressionValue
+module ExpressionValue = ReducerInterface.InternalExpressionValue
 module Parse = Reducer_Peggy_Parse
 module Result = Belt.Result
 module ToExpression = Reducer_Peggy_ToExpression
@@ -29,7 +29,7 @@ let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
           ExpressionValue.defaultEnvironment,
         )
       )
-      ->Reducer_Helpers.rRemoveDefaults
+      ->Reducer_Helpers.rRemoveDefaultsInternal
       ->ExpressionValue.toStringResultOkless
     (a1, a2)->expect->toEqual((answer, v))
   }
