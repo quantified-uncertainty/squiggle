@@ -30,7 +30,7 @@ export type SquiggleEditorProps = SquiggleChartProps & {
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   const [code, setCode] = useMaybeControlledValue({
     value: props.code,
-    defaultValue: props.defaultCode,
+    defaultValue: props.defaultCode ?? "",
     onChange: props.onCodeChange,
   });
 
