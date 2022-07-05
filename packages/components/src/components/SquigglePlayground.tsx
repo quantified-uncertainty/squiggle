@@ -86,7 +86,6 @@ const schema = yup.object({}).shape({
   diagramStart: yup.number().required().positive().integer().default(0).min(0),
   diagramStop: yup.number().required().positive().integer().default(10).min(0),
   diagramCount: yup.number().required().positive().integer().default(20).min(2),
-  autoplay: yup.boolean().required(),
 });
 
 type FormFields = yup.InferType<typeof schema>;
@@ -306,36 +305,76 @@ const InputVariablesSettings: React.FC<{
   );
 };
 
-const PlayControls: React.FC<{
-  autoplay: boolean;
-  playing: boolean;
-  stale: boolean;
-  onAutoplayChange: (value: boolean) => void;
-  play: () => void;
-}> = ({ autoplay, playing, stale, onAutoplayChange, play }) => {
-  const CurrentPlayIcon = playing ? RefreshIcon : PlayIcon;
+const RunControls: React.FC<{
+  autorunMode: boolean;
+  isRunning: boolean;
+  isStale: boolean;
+  onAutorunModeChange: (value: boolean) => void;
+  run: () => void;
+}> = ({ autorunMode, isRunning, isStale, onAutorunModeChange, run }) => {
+  const CurrentPlayIcon = isRunning ? RefreshIcon : PlayIcon;
 
   return (
     <div className="flex space-x-1 items-center">
-      {autoplay ? null : (
-        <button onClick={play}>
+      {autorunMode ? null : (
+        <button onClick={run}>
           <CurrentPlayIcon
             className={clsx(
               "w-8 h-8",
-              playing && "animate-spin",
-              stale ? "text-indigo-500" : "text-gray-400"
+              isRunning && "animate-spin",
+              isStale ? "text-indigo-500" : "text-gray-400"
             )}
           />
         </button>
       )}
       <Toggle
-        texts={["Autoplay", "Paused"]}
+        texts={["Autorun", "Paused"]}
         icons={[CheckCircleIcon, PauseIcon]}
-        status={autoplay}
-        onChange={onAutoplayChange}
+        status={autorunMode}
+        onChange={onAutorunModeChange}
       />
     </div>
   );
+};
+
+const useRunnerState = (code: string) => {
+  const [autorunMode, setAutorunMode] = useState(true);
+  const [renderedCode, setRenderedCode] = useState(code); // used in manual run mode only
+  const [isRunning, setIsRunning] = useState(false); // used in manual run mode only
+
+  // This part is tricky and fragile; we need to re-render first to make sure that the icon is spinning,
+  // and only then evaluate the squiggle code (which freezes the UI).
+  // Also note that `useEffect` execution order matters here.
+  // Hopefully it'll all go away after we make squiggle code evaluation async.
+  useEffect(() => {
+    if (renderedCode === code && isRunning) {
+      // It's not possible to put this after `setRenderedCode(code)` below because React would apply
+      // `setIsRunning` and `setRenderedCode` together and spinning icon will disappear immediately.
+      setIsRunning(false);
+    }
+  }, [renderedCode, code, isRunning]);
+
+  useEffect(() => {
+    if (!autorunMode && isRunning) {
+      setRenderedCode(code); // TODO - force run even if code hasn't changed
+    }
+  }, [autorunMode, code, isRunning]);
+
+  const run = () => {
+    // The rest will be handled by useEffects above, but we need to update the spinner first.
+    setIsRunning(true);
+  };
+
+  return {
+    run,
+    renderedCode: autorunMode ? code : renderedCode,
+    isRunning,
+    autorunMode,
+    setAutorunMode: (newValue: boolean) => {
+      if (!newValue) setRenderedCode(code);
+      setAutorunMode(newValue);
+    },
+  };
 };
 
 export const SquigglePlayground: FC<PlaygroundProps> = ({
@@ -356,15 +395,10 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     defaultValue: defaultCode,
     onChange: onCodeChange,
   });
-  const [renderedCode, setRenderedCode] = useState(""); // used only if autoplay is false
 
   const [imports, setImports] = useState({});
 
-  const {
-    register,
-    control,
-    setValue: setFormValue,
-  } = useForm({
+  const { register, control } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       sampleCount: 1000,
@@ -381,7 +415,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       diagramStart: 0,
       diagramStop: 10,
       diagramCount: 20,
-      autoplay: true,
     },
   });
   const vars = useWatch({
@@ -400,38 +433,12 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     [vars.sampleCount, vars.xyPointLength]
   );
 
-  const [playing, setPlaying] = useState(false); // used in manual play mode only
-
-  // This part is tricky and fragile; we need to re-render first to make sure that the icon is spinning,
-  // and only then evaluate the squiggle code (which freezes the UI).
-  // Also note that `useEffect` execution order matters here.
-  // Hopefully it'll all go away after we make squiggle code evaluation async.
-  useEffect(() => {
-    if (renderedCode === code && playing) {
-      // It's not possible to put this after `setRenderedCode(code)` below because React would apply
-      // `setPlaying` and `setRenderedCode` together and spinning icon will disappear immediately.
-      setPlaying(false);
-    }
-  }, [renderedCode, code, playing]);
-
-  useEffect(() => {
-    if (!vars.autoplay && playing) {
-      setRenderedCode(code); // TODO - force play even if code hasn't changed
-    }
-  }, [vars.autoplay, code, playing]);
-
-  const play = () => {
-    setPlaying(true);
-  };
-
-  const manualPlay = () => {
-    if (vars.autoplay) return; // should we allow reruns even in autoplay mode?
-    setRenderedCode(code); // TODO - force play even if code hasn't changed
-  };
+  const { run, autorunMode, setAutorunMode, isRunning, renderedCode } =
+    useRunnerState(code);
 
   const squiggleChart = (
     <SquiggleChart
-      code={vars.autoplay ? code : renderedCode}
+      code={renderedCode}
       environment={env}
       diagramStart={Number(vars.diagramStart)}
       diagramStop={Number(vars.diagramStop)}
@@ -450,9 +457,9 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   const firstTab = vars.showEditor ? (
     <div className="border border-slate-200">
       <CodeEditor
-        value={code ?? ""}
+        value={code}
         onChange={setCode}
-        onSubmit={play}
+        onSubmit={run}
         oneLine={false}
         showGutter={true}
         height={height - 1}
@@ -503,15 +510,12 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
               <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
               <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
             </StyledTab.List>
-            <PlayControls
-              autoplay={vars.autoplay || false}
-              stale={!vars.autoplay && renderedCode !== code}
-              play={play}
-              playing={playing}
-              onAutoplayChange={(newValue) => {
-                if (!newValue) setRenderedCode(code);
-                setFormValue("autoplay", newValue);
-              }}
+            <RunControls
+              autorunMode={autorunMode}
+              isStale={renderedCode !== code}
+              run={run}
+              isRunning={isRunning}
+              onAutorunModeChange={setAutorunMode}
             />
           </div>
           {vars.showEditor ? withEditor : withoutEditor}
