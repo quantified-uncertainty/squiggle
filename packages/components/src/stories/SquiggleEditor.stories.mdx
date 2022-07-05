@@ -21,6 +21,19 @@ the distribution.
   </Story>
 </Canvas>
 
+It's also possible to create a controlled version of the same component
+
+<Canvas>
+  <Story
+    name="Controlled"
+    args={{
+      code: "normal(5,2)",
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
 You can also name variables like so:
 
 <Canvas>

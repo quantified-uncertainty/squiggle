@@ -1,6 +1,7 @@
 import React, { FC, Fragment, useState, useEffect } from "react";
 import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
+import { useMaybeControlledValue } from "../lib/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Tab } from "@headlessui/react";
 import {
@@ -216,7 +217,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   onSettingsChange,
   showEditor = true,
 }) => {
-  const [uncontrolledCode, setUncontrolledCode] = useState(defaultCode);
+  const [code, setCode] = useMaybeControlledValue({
+    value: controlledCode,
+    defaultValue: defaultCode,
+    onChange: onCodeChange,
+  });
   const [importString, setImportString] = useState("{}");
   const [imports, setImports] = useState({});
   const [importsAreValid, setImportsAreValid] = useState(true);
@@ -260,8 +265,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       setImportsAreValid(false);
     }
   };
-
-  const code = controlledCode ?? uncontrolledCode;
 
   const samplingSettings = (
     <div className="space-y-6 p-3 max-w-xl">
@@ -434,14 +437,8 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   const firstTab = vars.showEditor ? (
     <div className="border border-slate-200">
       <CodeEditor
-        value={code}
-        onChange={(newCode) => {
-          if (controlledCode === undefined) {
-            // uncontrolled mode
-            setUncontrolledCode(newCode);
-          }
-          onCodeChange?.(newCode);
-        }}
+        value={code ?? ""}
+        onChange={setCode}
         oneLine={false}
         showGutter={true}
         height={height - 1}

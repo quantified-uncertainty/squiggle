@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { CodeEditor } from "./CodeEditor";
 import { environment, bindings, jsImports } from "@quri/squiggle-lang";
 import { defaultImports, defaultBindings } from "@quri/squiggle-lang";
 import { SquiggleContainer } from "./SquiggleContainer";
 import { SquiggleChart, SquiggleChartProps } from "./SquiggleChart";
-import { useSquigglePartial } from "../lib/hooks";
+import { useSquigglePartial, useMaybeControlledValue } from "../lib/hooks";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
 
 const WrappedCodeEditor: React.FC<{
@@ -28,21 +28,16 @@ export type SquiggleEditorProps = SquiggleChartProps & {
 };
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
-  let defaultCode = props.defaultCode ?? "";
-  const [uncontrolledCode, setCode] = useState(defaultCode);
-  let code = props.code ?? uncontrolledCode;
+  const [code, setCode] = useMaybeControlledValue({
+    value: props.code,
+    defaultValue: props.defaultCode,
+    onChange: props.onCodeChange,
+  });
 
   let chartProps = { ...props, code };
   return (
     <SquiggleContainer>
-      <WrappedCodeEditor
-        code={code}
-        setCode={(code) => {
-          if (props.onCodeChange) props.onCodeChange(code);
-
-          if (props.code === undefined) setCode(code);
-        }}
-      />
+      <WrappedCodeEditor code={code} setCode={setCode} />
       <SquiggleChart {...chartProps} />
     </SquiggleContainer>
   );
@@ -66,7 +61,7 @@ export interface SquigglePartialProps {
 }
 
 export const SquigglePartial: React.FC<SquigglePartialProps> = ({
-  code,
+  code: controlledCode,
   defaultCode = "",
   onChange,
   onCodeChange,
@@ -74,11 +69,14 @@ export const SquigglePartial: React.FC<SquigglePartialProps> = ({
   environment,
   jsImports = defaultImports,
 }: SquigglePartialProps) => {
-  const [uncontrolledCode, setCode] = useState(defaultCode);
-  let codeProp = code ?? uncontrolledCode;
+  const [code, setCode] = useMaybeControlledValue<string>({
+    value: controlledCode,
+    defaultValue: defaultCode,
+    onChange: onCodeChange,
+  });
 
   const result = useSquigglePartial({
-    code: codeProp,
+    code,
     bindings,
     environment,
     jsImports,
@@ -87,14 +85,7 @@ export const SquigglePartial: React.FC<SquigglePartialProps> = ({
 
   return (
     <SquiggleContainer>
-      <WrappedCodeEditor
-        code={codeProp}
-        setCode={(code) => {
-          if (onCodeChange) onCodeChange(code);
-
-          if (code === undefined) setCode(code);
-        }}
-      />
+      <WrappedCodeEditor code={code} setCode={setCode} />
       {result.tag !== "Ok" ? <SquiggleErrorAlert error={result.value} /> : null}
     </SquiggleContainer>
   );
