@@ -24,6 +24,8 @@ module FooImplementation = {
     `I am ${a->Js.Float.toString}-bar and I am ${b->Js.Float.toString}-bar`
 }
 
+// There is a potential for type modules to define lift functions
+// for their own type to get rid of switch statements.
 module FooFFI = {
   let makeFoo: ExpressionT.optionFfiFn = (args: array<InternalExpressionValue.t>, environment) => {
     switch args {
