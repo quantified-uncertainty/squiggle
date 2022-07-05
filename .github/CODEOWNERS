@@ -9,8 +9,8 @@
 # This also holds true for GitHub teams.
 
 # Rescript 
-*.res @OAGr @quinn-dougherty
-*.resi @OAGr @quinn-dougherty
+*.res @OAGr
+*.resi @OAGr
 
 # Typescript 
 *.tsx @Hazelfire @OAGr
