@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { motion } from "framer-motion";
 import React from "react";
 
 type IconType = (props: React.ComponentProps<"svg">) => JSX.Element;
@@ -18,7 +19,9 @@ export const Toggle: React.FC<Props> = ({
 }) => {
   const CurrentIcon = status ? OnIcon : OffIcon;
   return (
-    <button
+    <motion.button
+      layout
+      transition={{ duration: 0.2 }}
       className={clsx(
         "rounded-full py-1 bg-indigo-500 text-white text-xs font-semibold flex items-center space-x-1",
         status ? "bg-indigo-500" : "bg-gray-400",
@@ -27,8 +30,12 @@ export const Toggle: React.FC<Props> = ({
       )}
       onClick={() => onChange(!status)}
     >
-      <CurrentIcon className="w-6 h-6" />
-      <span>{status ? onText : offText}</span>
-    </button>
+      <motion.div layout transition={{ duration: 0.2 }}>
+        <CurrentIcon className="w-6 h-6" />
+      </motion.div>
+      <motion.span layout transition={{ duration: 0.2 }}>
+        {status ? onText : offText}
+      </motion.span>
+    </motion.button>
   );
 };
