@@ -19,12 +19,19 @@ let checkArity = (
   lambdaValue: ExpressionValue.lambdaValue,
   args: list<internalExpressionValue>,
 ) => {
-  let argsLength = Belt.List.length(args)
-  let parametersLength = Js.Array2.length(lambdaValue.parameters)
-  if argsLength !== parametersLength {
-    ErrorValue.REArityError(None, parametersLength, argsLength)->Error
-  } else {
-    args->Ok
+  let reallyCheck = {
+    let argsLength = Belt.List.length(args)
+    let parametersLength = Js.Array2.length(lambdaValue.parameters)
+    if argsLength !== parametersLength {
+      ErrorValue.REArityError(None, parametersLength, argsLength)->Error
+    } else {
+      args->Ok
+    }
+  }
+  let exprOrFFI = castInternalCodeToExpression(lambdaValue.body)
+  switch exprOrFFI {
+  | NotFFI(_) => reallyCheck
+  | FFI(_) => args->Ok
   }
 }
 

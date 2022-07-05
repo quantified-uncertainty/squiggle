@@ -1,4 +1,6 @@
 module ExpressionT = Reducer_Expression_T
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
+open Reducer_ErrorValue
 open ReducerInterface_InternalExpressionValue
 
 let expressionValueToString = toString
@@ -68,6 +70,7 @@ let set = (nameSpace: t, id: string, value): t => {
 }
 
 let emptyModule: t = NameSpace(emptyMap)
+let emptyBindings = emptyModule
 
 let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
 let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
@@ -110,16 +113,50 @@ let eLambdaFFIValue = (ffiFn: ExpressionT.ffiFn) => {
   })
 }
 
+let functionNotFoundError = (call: functionCall) =>
+  REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString)->Error
+
+let functionNotFoundErrorFFIFn = (functionName: string): ExpressionT.ffiFn => {
+  (args: array<internalExpressionValue>, _environment: environment): result<
+    internalExpressionValue,
+    errorValue,
+  > => {
+    let call = (functionName, args)
+    functionNotFoundError(call)
+  }
+}
+
+let convertOptionToFfiFn = (
+  myFunctionName: string,
+  myFunction: ExpressionT.optionFfiFn,
+): ExpressionT.ffiFn => {
+  (args: array<InternalExpressionValue.t>, environment) => {
+    myFunction(args, environment)
+    ->Belt.Option.map(v => v->Ok)
+    ->Belt.Option.getWithDefault(functionNotFoundErrorFFIFn(myFunctionName)(args, environment))
+  }
+}
+
 // -- Module definition
 let define = (nameSpace: t, identifier: string, ev: internalExpressionValue): t => {
   let NameSpace(container) = nameSpace
   Belt.Map.String.set(container, identifier, ev)->NameSpace
 }
+
 let defineNumber = (nameSpace: t, identifier: string, value: float): t =>
   nameSpace->define(identifier, IEvNumber(value))
+
+let defineString = (nameSpace: t, identifier: string, value: string): t =>
+  nameSpace->define(identifier, IEvString(value))
+
+let defineBool = (nameSpace: t, identifier: string, value: bool): t =>
+  nameSpace->define(identifier, IEvBool(value))
 
 let defineModule = (nameSpace: t, identifier: string, value: t): t =>
   nameSpace->define(identifier, toExpressionValue(value))
 
-let defineFFI = (nameSpace: t, identifier: string, value: ExpressionT.ffiFn): t =>
-  nameSpace->define(identifier, value->eLambdaFFIValue)
+let defineFunction = (nameSpace: t, identifier: string, value: ExpressionT.optionFfiFn): t => {
+  nameSpace->define(identifier, convertOptionToFfiFn(identifier, value)->eLambdaFFIValue)
+}
+
+let emptyStdLib: t = emptyModule->defineBool("stdlib", true)
