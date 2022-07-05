@@ -1,6 +1,5 @@
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
-// open ReducerInterface_InternalExpressionValue
 
 type expression = ExpressionT.expression
 
