@@ -48,57 +48,59 @@ export interface SquiggleChartProps {
 
 const defaultOnChange = () => {};
 
-export const SquiggleChart: React.FC<SquiggleChartProps> = ({
-  code = "",
-  environment,
-  onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
-  height = 200,
-  bindings = defaultBindings,
-  jsImports = defaultImports,
-  showSummary = false,
-  width,
-  showTypes = false,
-  showControls = false,
-  logX = false,
-  expY = false,
-  diagramStart = 0,
-  diagramStop = 10,
-  diagramCount = 100,
-}) => {
-  const result = useSquiggle({
-    code,
-    bindings,
+export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
+  ({
+    code = "",
     environment,
-    jsImports,
-    onChange,
-  });
+    onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
+    height = 200,
+    bindings = defaultBindings,
+    jsImports = defaultImports,
+    showSummary = false,
+    width,
+    showTypes = false,
+    showControls = false,
+    logX = false,
+    expY = false,
+    diagramStart = 0,
+    diagramStop = 10,
+    diagramCount = 100,
+  }) => {
+    const result = useSquiggle({
+      code,
+      bindings,
+      environment,
+      jsImports,
+      onChange,
+    });
 
-  if (result.tag !== "Ok") {
-    return <SquiggleErrorAlert error={result.value} />;
+    if (result.tag !== "Ok") {
+      return <SquiggleErrorAlert error={result.value} />;
+    }
+
+    let distributionPlotSettings = {
+      showControls,
+      showSummary,
+      logX,
+      expY,
+    };
+
+    let chartSettings = {
+      start: diagramStart,
+      stop: diagramStop,
+      count: diagramCount,
+    };
+
+    return (
+      <SquiggleItem
+        expression={result.value}
+        width={width}
+        height={height}
+        distributionPlotSettings={distributionPlotSettings}
+        showTypes={showTypes}
+        chartSettings={chartSettings}
+        environment={environment ?? defaultEnvironment}
+      />
+    );
   }
-
-  let distributionPlotSettings = {
-    showControls,
-    showSummary,
-    logX,
-    expY,
-  };
-
-  let chartSettings = {
-    start: diagramStart,
-    stop: diagramStop,
-    count: diagramCount,
-  };
-
-  return (
-    <SquiggleItem
-      expression={result.value}
-      width={width}
-      height={height}
-      distributionPlotSettings={distributionPlotSettings}
-      showTypes={showTypes}
-      chartSettings={chartSettings}
-      environment={environment ?? defaultEnvironment}
-    />
-  );
-};
+);
