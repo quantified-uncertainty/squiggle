@@ -134,8 +134,10 @@ module Beta = {
 
   let fromMeanAndStdev = (mean, stdev) => {
     // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
-    if !(0.0 < stdev && stdev <= 0.5) || !(0.0 <= mean && mean <= 1.0) {
-      "Beta mean must be in [0,1] and stdev must be in (1,0.5]"->Error
+    if !(0.0 < stdev && stdev <= 0.5) {
+      Error("Stdev must be in in between 0 and 0.5.")
+    } else if !(0.0 <= mean && mean <= 1.0) {
+      Error("Mean must be in between 0 and 1.0.")
     } else {
       let var = stdev *. stdev
       let sampleSize = mean *. (1.0 -. mean) /. var -. 1.0
