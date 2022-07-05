@@ -12,10 +12,10 @@ open Expect
 // ----------------------
 
 module FooImplementation = {
-  // As this is a Rescript module, functions can use other functions in this module 
-  // and in other stdLib modules implemented this way. 
-  // Embedding function definitions in to switch statements is a bad practice 
-  // - to reduce line count or to   
+  // As this is a Rescript module, functions can use other functions in this module
+  // and in other stdLib modules implemented this way.
+  // Embedding function definitions in to switch statements is a bad practice
+  // - to reduce line count or to
   let fooNumber = 0.0
   let fooString = "Foo String"
   let fooBool = true
