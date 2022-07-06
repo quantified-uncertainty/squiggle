@@ -37,7 +37,7 @@ function setHashData(data) {
 
 export default function PlaygroundPage() {
   const playgroundProps = {
-    initialSquiggleString: "normal(0,1)",
+    defaultCode: "normal(0,1)",
     height: 700,
     showTypes: true,
     ...getHashData(),

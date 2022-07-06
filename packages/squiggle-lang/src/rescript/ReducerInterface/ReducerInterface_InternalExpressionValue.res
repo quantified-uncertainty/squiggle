@@ -7,8 +7,8 @@ type environment = ExternalExpressionValue.environment
 let defaultEnvironment = ExternalExpressionValue.defaultEnvironment
 
 type rec t =
-  | IEvArray(array<t>) // FIXME: Convert
-  | IEvArrayString(array<string>) // FIXME: Convert
+  | IEvArray(array<t>) // FIXME: Convert to MapInt
+  | IEvArrayString(array<string>)
   | IEvBool(bool)
   | IEvCall(string) // External function call
   | IEvDate(Js.Date.t)
@@ -21,6 +21,7 @@ type rec t =
   | IEvString(string)
   | IEvSymbol(string)
   | IEvTimeDuration(float)
+  | IEvType(map)
   | IEvTypeIdentifier(string)
 and map = Belt.Map.String.t<t>
 and nameSpace = NameSpace(Belt.Map.String.t<t>)
@@ -56,6 +57,7 @@ let rec toString = aValue =>
   | IEvRecord(aMap) => aMap->toStringMap
   | IEvString(aString) => `'${aString}'`
   | IEvSymbol(aString) => `:${aString}`
+  | IEvType(aMap) => aMap->toStringMap
   | IEvTimeDuration(t) => DateTime.Duration.toString(t)
   | IEvTypeIdentifier(id) => `#${id}`
   }
@@ -78,17 +80,18 @@ let toStringWithType = aValue =>
   | IEvArrayString(_) => `ArrayString::${toString(aValue)}`
   | IEvBool(_) => `Bool::${toString(aValue)}`
   | IEvCall(_) => `Call::${toString(aValue)}`
+  | IEvDate(_) => `Date::${toString(aValue)}`
+  | IEvDeclaration(_) => `Declaration::${toString(aValue)}`
   | IEvDistribution(_) => `Distribution::${toString(aValue)}`
   | IEvLambda(_) => `Lambda::${toString(aValue)}`
+  | IEvModule(_) => `Module::${toString(aValue)}`
   | IEvNumber(_) => `Number::${toString(aValue)}`
   | IEvRecord(_) => `Record::${toString(aValue)}`
   | IEvString(_) => `String::${toString(aValue)}`
   | IEvSymbol(_) => `Symbol::${toString(aValue)}`
-  | IEvDate(_) => `Date::${toString(aValue)}`
   | IEvTimeDuration(_) => `Date::${toString(aValue)}`
-  | IEvDeclaration(_) => `Declaration::${toString(aValue)}`
+  | IEvType(_) => `Type::${toString(aValue)}`
   | IEvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
-  | IEvModule(_) => `Module::${toString(aValue)}`
   }
 
 let argsToString = (args: array<t>): string => {
@@ -120,17 +123,18 @@ type internalExpressionValueType =
   | EvtArrayString
   | EvtBool
   | EvtCall
+  | EvtDate
+  | EvtDeclaration
   | EvtDistribution
   | EvtLambda
+  | EvtModule
   | EvtNumber
   | EvtRecord
   | EvtString
   | EvtSymbol
-  | EvtDate
   | EvtTimeDuration
-  | EvtDeclaration
+  | EvtType
   | EvtTypeIdentifier
-  | EvtModule
 
 type functionCallSignature = CallSignature(string, array<internalExpressionValueType>)
 type functionDefinitionSignature =
@@ -142,17 +146,18 @@ let valueToValueType = value =>
   | IEvArrayString(_) => EvtArrayString
   | IEvBool(_) => EvtBool
   | IEvCall(_) => EvtCall
+  | IEvDate(_) => EvtDate
+  | IEvDeclaration(_) => EvtDeclaration
   | IEvDistribution(_) => EvtDistribution
   | IEvLambda(_) => EvtLambda
+  | IEvModule(_) => EvtModule
   | IEvNumber(_) => EvtNumber
   | IEvRecord(_) => EvtRecord
   | IEvString(_) => EvtString
   | IEvSymbol(_) => EvtSymbol
-  | IEvDate(_) => EvtDate
   | IEvTimeDuration(_) => EvtTimeDuration
-  | IEvDeclaration(_) => EvtDeclaration
+  | IEvType(_) => EvtType
   | IEvTypeIdentifier(_) => EvtTypeIdentifier
-  | IEvModule(_) => EvtModule
   }
 
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
@@ -166,17 +171,18 @@ let valueTypeToString = (valueType: internalExpressionValueType): string =>
   | EvtArrayString => `ArrayString`
   | EvtBool => `Bool`
   | EvtCall => `Call`
+  | EvtDate => `Date`
+  | EvtDeclaration => `Declaration`
   | EvtDistribution => `Distribution`
   | EvtLambda => `Lambda`
+  | EvtModule => `Module`
   | EvtNumber => `Number`
   | EvtRecord => `Record`
   | EvtString => `String`
   | EvtSymbol => `Symbol`
-  | EvtDate => `Date`
   | EvtTimeDuration => `Duration`
-  | EvtDeclaration => `Declaration`
+  | EvtType => `Type`
   | EvtTypeIdentifier => `TypeIdentifier`
-  | EvtModule => `Module`
   }
 
 let functionCallSignatureToString = (functionCallSignature: functionCallSignature): string => {
@@ -190,6 +196,11 @@ let rec toExternal = (iev: t): ExternalExpressionValue.t => {
   | IEvArrayString(v) => EvArrayString(v)
   | IEvBool(v) => EvBool(v)
   | IEvCall(v) => EvCall(v)
+  | IEvDeclaration(v) => {
+      let fn = lambdaValueToExternal(v.fn)
+      let args = v.args
+      EvDeclaration({fn: fn, args: args})
+    }
   | IEvDistribution(v) => EvDistribution(v)
   | IEvLambda(v) => EvLambda(lambdaValueToExternal(v))
   | IEvNumber(v) => EvNumber(v)
@@ -198,11 +209,7 @@ let rec toExternal = (iev: t): ExternalExpressionValue.t => {
   | IEvSymbol(v) => EvSymbol(v)
   | IEvDate(v) => EvDate(v)
   | IEvTimeDuration(v) => EvTimeDuration(v)
-  | IEvDeclaration(v) => {
-      let fn = lambdaValueToExternal(v.fn)
-      let args = v.args
-      EvDeclaration({fn: fn, args: args})
-    }
+  | IEvType(v) => v->mapToExternal->EvType
   | IEvTypeIdentifier(v) => EvTypeIdentifier(v)
   | IEvModule(v) => v->nameSpaceToTypeScriptBindings->EvModule
   }
@@ -228,21 +235,22 @@ let rec toInternal = (ev: ExternalExpressionValue.t): t => {
   | EvArrayString(v) => IEvArrayString(v)
   | EvBool(v) => IEvBool(v)
   | EvCall(v) => IEvCall(v)
-  | EvDistribution(v) => IEvDistribution(v)
-  | EvLambda(v) => IEvLambda(lambdaValueToInternal(v))
-  | EvNumber(v) => IEvNumber(v)
-  | EvRecord(v) => v->recordToInternal->IEvRecord
-  | EvString(v) => IEvString(v)
-  | EvSymbol(v) => IEvSymbol(v)
   | EvDate(v) => IEvDate(v)
-  | EvTimeDuration(v) => IEvTimeDuration(v)
   | EvDeclaration(v) => {
       let fn = lambdaValueToInternal(v.fn)
       let args = v.args
       IEvDeclaration({fn: fn, args: args})
     }
-  | EvTypeIdentifier(v) => IEvTypeIdentifier(v)
+  | EvDistribution(v) => IEvDistribution(v)
+  | EvLambda(v) => IEvLambda(lambdaValueToInternal(v))
   | EvModule(v) => v->nameSpaceFromTypeScriptBindings->IEvModule
+  | EvNumber(v) => IEvNumber(v)
+  | EvRecord(v) => v->recordToInternal->IEvRecord
+  | EvString(v) => IEvString(v)
+  | EvSymbol(v) => IEvSymbol(v)
+  | EvTimeDuration(v) => IEvTimeDuration(v)
+  | EvType(v) => v->recordToInternal->IEvType
+  | EvTypeIdentifier(v) => IEvTypeIdentifier(v)
   }
 }
 and recordToInternal = v =>

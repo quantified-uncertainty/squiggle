@@ -129,6 +129,7 @@ export type squiggleExpression =
   | tagged<"timeDuration", number>
   | tagged<"lambdaDeclaration", lambdaDeclaration>
   | tagged<"record", { [key: string]: squiggleExpression }>
+  | tagged<"type", { [key: string]: squiggleExpression }>
   | tagged<"typeIdentifier", string>
   | tagged<"module", { [key: string]: squiggleExpression }>;
 

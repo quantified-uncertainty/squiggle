@@ -71,6 +71,8 @@ type ffiFn = (
   environment,
 ) => result<internalExpressionValue, Reducer_ErrorValue.errorValue>
 
+type optionFfiFn = (array<internalExpressionValue>, environment) => option<internalExpressionValue>
+
 type expressionOrFFI =
   | NotFFI(expression)
   | FFI(ffiFn)

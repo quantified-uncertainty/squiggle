@@ -70,12 +70,14 @@ uniform(10, 12);
 
 ```
 beta: (distribution|number, distribution|number) => distribution
+beta: (dict<{mean: distribution|number, stdev: distribution|number}>) => distribution
 ```
 
 **Examples**
 
 ```javascript
 beta(20, 25);
+beta({ mean: 0.39, stdev: 0.1 });
 ```
 
 ### cauchy

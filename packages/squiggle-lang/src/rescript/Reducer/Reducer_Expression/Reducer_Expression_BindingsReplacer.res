@@ -2,7 +2,7 @@ module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Result = Belt.Result
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression

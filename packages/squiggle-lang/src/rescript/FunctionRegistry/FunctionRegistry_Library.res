@@ -117,8 +117,12 @@ lognormal({mean: 5, stdev: 2})`,
   ),
   Function.make(
     ~name="Beta",
-    ~examples=`beta(20, 25)`,
-    ~definitions=[TwoArgDist.make("beta", twoArgs(SymbolicDist.Beta.make))],
+    ~examples=`beta(20, 25)
+beta({mean: 0.39, stdev: 0.1})`,
+    ~definitions=[
+      TwoArgDist.make("beta", twoArgs(SymbolicDist.Beta.make)),
+      TwoArgDist.makeRecordMeanStdev("beta", twoArgs(SymbolicDist.Beta.fromMeanAndStdev)),
+    ],
     (),
   ),
   Function.make(
