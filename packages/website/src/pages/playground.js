@@ -36,11 +36,16 @@ function setHashData(data) {
 }
 
 export default function PlaygroundPage() {
+  const hashData = getHashData();
+  if (hashData.initialSquiggleString) {
+    hashData.defaultCode = String(hashData.initialSquiggleString);
+    delete hashData.initialSquiggleString;
+  }
   const playgroundProps = {
     defaultCode: "normal(0,1)",
     height: 700,
     showTypes: true,
-    ...getHashData(),
+    ...hashData,
     onCodeChange: (code) => setHashData({ initialSquiggleString: code }),
     onSettingsChange: (settings) => {
       const { showTypes, showControls, showSummary, showEditor } = settings;
