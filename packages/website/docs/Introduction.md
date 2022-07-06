@@ -10,7 +10,7 @@ Squiggle is an _estimation language_, and a syntax for _calculating and expressi
 - [Gallery](./Discussions/Gallery)
 - [Squiggle playground](/playground)
 - [Language basics](./Guides/Language)
-- [Squiggle functions source of truth](./docs/Guides/Functions)
+- [Squiggle functions source of truth](./Guides/Functions)
 - [Known bugs](./Discussions/Bugs)
 - [Original lesswrong sequence](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3)
 - [Author your squiggle models as Observable notebooks](https://observablehq.com/@hazelfire/squiggle)

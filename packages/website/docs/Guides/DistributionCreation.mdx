@@ -259,6 +259,7 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
 ## Beta
 
 `beta(alpha:number, beta:number)`
+`beta({mean: number, stdev: number})`
 
 Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) with the given `alpha` and `beta` values. For a good summary of the beta distribution, see [this explanation](https://stats.stackexchange.com/a/47782) on Stack Overflow.
 
@@ -277,6 +278,12 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   </TabItem>
   <TabItem value="ex5" label="beta(0.8, 0.8)">
     <SquiggleEditor defaultCode="beta(0.8, 0.8)" />
+  </TabItem>
+  <TabItem
+    value="from mean and standard deviation"
+    label="beta({mean: 0.39, stdev: 0.1})"
+  >
+    <SquiggleEditor initialSquiggleString="beta({mean: 0.39, stdev: 0.1})" />
   </TabItem>
 </Tabs>
 
