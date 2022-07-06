@@ -154,9 +154,7 @@ unary
   unaryOperator "unary operator"
   = ('-' / '.-' / '!' ) 
 
-postOperator = indexedValue
-
-indexedValue
+postOperator
   = collectionElement
   / atom
 
@@ -343,10 +341,17 @@ typeModifierExpression = head:basicType tail:(_ '<-' _nl @typeModifier)*
     / modifier:identifier _ noArguments
       { return {modifier: modifier, args: []}; }
   
-basicType = typeConstructor / typeArray / typeRecord / typeInParanthesis / typeIdentifier
+basicType = typeConstructor / typeArray / typeTuple / typeRecord / typeInParanthesis / typeIdentifier
 
 typeArray = '[' _nl elem:typeExpression _nl ']' 
   {return h.apply('$_typeArray_$', elem)}
+
+typeTuple = '[' _nl elems:array_typeTupleArguments _nl ']' 
+  { return h.apply('$_typeTuple_$', h.constructArray(elems))}
+
+  array_typeTupleArguments
+    = head:typeExpression tail:(_ ',' _nl @typeExpression)* 
+    { return [head, ...tail]; }
 
 typeRecord = '{' _nl elems:array_typeRecordArguments _nl '}' 
   { return h.apply('$_typeRecord_$', h.constructRecord(elems)); }  
@@ -375,9 +380,3 @@ typeOfStatement = identifier:identifier _ ':' _nl typeExpression:typeExpression
   { return h.makeFunctionCall('$_typeOf_$', [identifier, typeExpression])}
 
 typeInParanthesis = '(' _nl typeExpression:typeExpression _nl ')' {return typeExpression}
-
-// TODO: min max example
-// TODO: Example of foo = {a: 2, b: 5}; type fooKeys = string $ memberOf(foo->keys)
-// TODO: Example of memberOf( [1,2,3] )
-// TODO: Example of $ 
-// TODO: Cons(a, list) | EmptyList

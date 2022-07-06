@@ -9,7 +9,7 @@ module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 module Result = Belt.Result
 open Reducer_Expression_ExpressionBuilder
 
