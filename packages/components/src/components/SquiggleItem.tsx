@@ -43,7 +43,7 @@ interface VariableBoxProps {
   showTypes: boolean;
 }
 
-export const VariableBox: React.FC<VariableBoxProps> = ({
+const VariableBox: React.FC<VariableBoxProps> = ({
   name,
   heading = "Error",
   children,
@@ -51,13 +51,11 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   return (
-    <motion.div
-      layout="position"
-      transition={{ type: "spring", bounce: 0, duration: 0.2 }}
-    >
+    <motion.div layout transition={{ type: "tween" }}>
       {name || showTypes ? (
         <motion.header
           layout="position"
+          transition={{ type: "tween" }}
           className="inline-flex space-x-1 text-slate-500 font-mono text-sm cursor-pointer"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
@@ -69,11 +67,34 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
         </motion.header>
       ) : null}
       {isCollapsed ? null : (
-        <motion.div layout="position">{children}</motion.div>
+        <motion.div layout="position" transition={{ type: "tween" }}>
+          {children}
+        </motion.div>
       )}
     </motion.div>
   );
 };
+
+const VariableList: React.FC<{
+  name?: string;
+  heading: string;
+  showTypes: boolean;
+  children: React.ReactNode;
+}> = ({ name, heading, showTypes, children }) => (
+  <VariableBox name={name} heading={heading} showTypes={showTypes}>
+    <motion.div
+      layout="position"
+      transition={{ type: "tween" }}
+      className={clsx(
+        "space-y-3",
+        name ? "border-l pl-4" : null,
+        name || showTypes ? "pt-1 mt-1" : null
+      )}
+    >
+      <LayoutGroup>{children}</LayoutGroup>
+    </motion.div>
+  </VariableBox>
+);
 
 export interface SquiggleItemProps {
   /** The output of squiggle's run */
@@ -217,90 +238,60 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "module": {
       return (
-        <VariableBox name={name} heading="Module" showTypes={showTypes}>
-          <div
-            className={clsx(
-              "space-y-3",
-              name ? "border-l pl-4" : null,
-              name || showTypes ? "pt-1 mt-1" : null
-            )}
-          >
-            <LayoutGroup>
-              {Object.entries(expression.value)
-                .filter(([key, r]) => key !== "Math")
-                .map(([key, r]) => (
-                  <SquiggleItem
-                    key={key}
-                    name={key}
-                    expression={r}
-                    width={width !== undefined ? width - 20 : width}
-                    height={height / 3}
-                    showTypes={showTypes}
-                    distributionPlotSettings={distributionPlotSettings}
-                    chartSettings={chartSettings}
-                    environment={environment}
-                  />
-                ))}
-            </LayoutGroup>
-          </div>
-        </VariableBox>
+        <VariableList name={name} heading="Module" showTypes={showTypes}>
+          {Object.entries(expression.value)
+            .filter(([key, r]) => key !== "Math")
+            .map(([key, r]) => (
+              <SquiggleItem
+                key={key}
+                name={key}
+                expression={r}
+                width={width !== undefined ? width - 20 : width}
+                height={height / 3}
+                showTypes={showTypes}
+                distributionPlotSettings={distributionPlotSettings}
+                chartSettings={chartSettings}
+                environment={environment}
+              />
+            ))}
+        </VariableList>
       );
     }
     case "record":
       return (
-        <VariableBox name={name} heading="Record" showTypes={showTypes}>
-          <div
-            className={clsx(
-              "space-y-3",
-              name ? "border-l pl-4" : null,
-              name || showTypes ? "pt-1 mt-1" : null
-            )}
-          >
-            <LayoutGroup>
-              {Object.entries(expression.value).map(([key, r]) => (
-                <SquiggleItem
-                  key={key}
-                  name={key}
-                  expression={r}
-                  width={width !== undefined ? width - 20 : width}
-                  height={height / 3}
-                  showTypes={showTypes}
-                  distributionPlotSettings={distributionPlotSettings}
-                  chartSettings={chartSettings}
-                  environment={environment}
-                />
-              ))}
-            </LayoutGroup>
-          </div>
-        </VariableBox>
+        <VariableList name={name} heading="Record" showTypes={showTypes}>
+          {Object.entries(expression.value).map(([key, r]) => (
+            <SquiggleItem
+              key={key}
+              name={key}
+              expression={r}
+              width={width !== undefined ? width - 20 : width}
+              height={height / 3}
+              showTypes={showTypes}
+              distributionPlotSettings={distributionPlotSettings}
+              chartSettings={chartSettings}
+              environment={environment}
+            />
+          ))}
+        </VariableList>
       );
     case "array":
       return (
-        <VariableBox name={name} heading="Array" showTypes={showTypes}>
-          <div
-            className={clsx(
-              "space-y-3",
-              name ? "border-l pl-4" : null,
-              name || showTypes ? "pt-1 mt-1" : null
-            )}
-          >
-            <LayoutGroup>
-              {expression.value.map((r, i) => (
-                <SquiggleItem
-                  key={i}
-                  name={String(i)}
-                  expression={r}
-                  width={width !== undefined ? width - 20 : width}
-                  height={50}
-                  distributionPlotSettings={distributionPlotSettings}
-                  showTypes={showTypes}
-                  chartSettings={chartSettings}
-                  environment={environment}
-                />
-              ))}
-            </LayoutGroup>
-          </div>
-        </VariableBox>
+        <VariableList name={name} heading="Array" showTypes={showTypes}>
+          {expression.value.map((r, i) => (
+            <SquiggleItem
+              key={i}
+              name={String(i)}
+              expression={r}
+              width={width !== undefined ? width - 20 : width}
+              height={50}
+              distributionPlotSettings={distributionPlotSettings}
+              showTypes={showTypes}
+              chartSettings={chartSettings}
+              environment={environment}
+            />
+          ))}
+        </VariableList>
       );
     default: {
       return (
