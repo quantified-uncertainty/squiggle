@@ -39,6 +39,8 @@ and frValueDictParam = (string, frValue)
 and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.genericDist)
 
 type fnDefinition = {
+  nameSpace: option<string>,
+  requiresNamespace: bool,
   name: string,
   inputs: array<frType>,
   run: (array<frValue>, DistributionOperation.env) => result<internalExpressionValue, string>,
@@ -327,8 +329,10 @@ module FnDefinition = {
     }
   }
 
-  let make = (~name, ~inputs, ~run): t => {
+  let make = (~nameSpace=None, ~requiresNamespace=true, ~name, ~inputs, ~run, ()): t => {
     name: name,
+    nameSpace: nameSpace,
+    requiresNamespace: requiresNamespace,
     inputs: inputs,
     run: run,
   }

@@ -201,8 +201,11 @@ module TwoArgDist = {
     ->E.R2.fmap(Wrappers.evDistribution)
 
   let make = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber], ~run=(inputs, env) =>
-      inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env)
+    FnDefinition.make(
+      ~name,
+      ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber],
+      ~run=(inputs, env) => inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env),
+      (),
     )
   }
 
@@ -211,6 +214,7 @@ module TwoArgDist = {
       ~name,
       ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
       ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
+      (),
     )
   }
 
@@ -219,6 +223,7 @@ module TwoArgDist = {
       ~name,
       ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
       ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
+      (),
     )
   }
 }
@@ -230,35 +235,51 @@ module OneArgDist = {
     ->E.R2.fmap(Wrappers.evDistribution)
 
   let make = (name, fn) =>
-    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber], ~run=(inputs, env) =>
-      inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env)
+    FnDefinition.make(
+      ~name,
+      ~inputs=[FRTypeDistOrNumber],
+      ~run=(inputs, env) => inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env),
+      (),
     )
 }
 
 module ArrayNumberDist = {
   let make = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeNumber)], ~run=(inputs, _) =>
-      Prepare.ToTypedArray.numbers(inputs)
-      ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-      ->E.R.bind(fn)
+    FnDefinition.make(
+      ~name,
+      ~inputs=[FRTypeArray(FRTypeNumber)],
+      ~run=(inputs, _) =>
+        Prepare.ToTypedArray.numbers(inputs)
+        ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
+        ->E.R.bind(fn),
+      (),
     )
   }
   let make2 = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeAny)], ~run=(inputs, _) =>
-      Prepare.ToTypedArray.numbers(inputs)
-      ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-      ->E.R.bind(fn)
+    FnDefinition.make(
+      ~name,
+      ~inputs=[FRTypeArray(FRTypeAny)],
+      ~run=(inputs, _) =>
+        Prepare.ToTypedArray.numbers(inputs)
+        ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
+        ->E.R.bind(fn),
+      (),
     )
   }
 }
 
 module NumberToNumber = {
   let make = (name, fn) =>
-    FnDefinition.make(~name, ~inputs=[FRTypeNumber], ~run=(inputs, _) => {
-      inputs
-      ->getOrError(0)
-      ->E.R.bind(Prepare.oneNumber)
-      ->E.R2.fmap(fn)
-      ->E.R2.fmap(Wrappers.evNumber)
-    })
+    FnDefinition.make(
+      ~name,
+      ~inputs=[FRTypeNumber],
+      ~run=(inputs, _) => {
+        inputs
+        ->getOrError(0)
+        ->E.R.bind(Prepare.oneNumber)
+        ->E.R2.fmap(fn)
+        ->E.R2.fmap(Wrappers.evNumber)
+      },
+      (),
+    )
 }

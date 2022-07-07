@@ -54,9 +54,12 @@ let registry = [
     ~name="toContinuousPointSet",
     ~definitions=[
       FnDefinition.make(
-        ~name="toContinuousPointSet",
+        ~nameSpace=Some("PointSet"),
+        ~requiresNamespace=true,
+        ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        (),
       ),
     ],
     (),
@@ -65,9 +68,12 @@ let registry = [
     ~name="toDiscretePointSet",
     ~definitions=[
       FnDefinition.make(
-        ~name="toDiscretePointSet",
+        ~nameSpace=Some("PointSet"),
+        ~requiresNamespace=true,
+        ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+        ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        (),
       ),
     ],
     (),
@@ -75,9 +81,14 @@ let registry = [
   Function.make(
     ~name="Declaration",
     ~definitions=[
-      FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
-        inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
-      }),
+      FnDefinition.make(
+        ~name="declareFn",
+        ~inputs=[Declaration.frType],
+        ~run=(inputs, _) => {
+          inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
+        },
+        (),
+      ),
     ],
     (),
   ),
@@ -189,6 +200,7 @@ to(5,10)
         ~name="toContinuousPointSet",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        (),
       ),
     ],
     (),
@@ -207,6 +219,7 @@ to(5,10)
         ~name="toDiscretePointSet",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+        (),
       ),
     ],
     (),
@@ -222,9 +235,14 @@ to(5,10)
   ]
 })`,
     ~definitions=[
-      FnDefinition.make(~name="declareFn", ~inputs=[Declaration.frType], ~run=(inputs, _) => {
-        inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
-      }),
+      FnDefinition.make(
+        ~name="declareFn",
+        ~inputs=[Declaration.frType],
+        ~run=(inputs, _) => {
+          inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
+        },
+        (),
+      ),
     ],
     ~isExperimental=true,
     (),
@@ -366,6 +384,8 @@ to(5,10)
     ~name="Dict.merge",
     ~definitions=[
       FnDefinition.make(
+        ~nameSpace=Some("Dict"),
+        ~requiresNamespace=true,
         ~name="merge",
         ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
         ~run=(inputs, _) => {
@@ -380,6 +400,7 @@ to(5,10)
           | _ => Error(impossibleError)
           }
         },
+        (),
       ),
     ],
     (),
@@ -388,16 +409,19 @@ to(5,10)
   Function.make(
     ~name="Dict.mergeMany",
     ~definitions=[
-      FnDefinition.make(~name="mergeMany", ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))], ~run=(
-        inputs,
-        _,
-      ) =>
-        inputs
-        ->Prepare.ToTypedArray.dicts
-        ->E.R2.fmap(E.Dict.concatMany)
-        ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
-        ->E.R2.fmap(r => r->Js.Dict.entries->Belt.Map.String.fromArray)
-        ->E.R2.fmap(Wrappers.evRecord)
+      FnDefinition.make(
+        ~nameSpace=Some("Dict"),
+        ~requiresNamespace=true,
+        ~name="mergeMany",
+        ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
+        ~run=(inputs, _) =>
+          inputs
+          ->Prepare.ToTypedArray.dicts
+          ->E.R2.fmap(E.Dict.concatMany)
+          ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
+          ->E.R2.fmap(r => r->Js.Dict.entries->Belt.Map.String.fromArray)
+          ->E.R2.fmap(Wrappers.evRecord),
+        (),
       ),
     ],
     (),
@@ -405,11 +429,18 @@ to(5,10)
   Function.make(
     ~name="Dict.keys",
     ~definitions=[
-      FnDefinition.make(~name="keys", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
-        switch inputs {
-        | [FRValueDict(d1)] => Js.Dict.keys(d1)->E.A2.fmap(Wrappers.evString)->Wrappers.evArray->Ok
-        | _ => Error(impossibleError)
-        }
+      FnDefinition.make(
+        ~nameSpace=Some("Dict"),
+        ~requiresNamespace=true,
+        ~name="keys",
+        ~inputs=[FRTypeDict(FRTypeAny)],
+        ~run=(inputs, _) =>
+          switch inputs {
+          | [FRValueDict(d1)] =>
+            Js.Dict.keys(d1)->E.A2.fmap(Wrappers.evString)->Wrappers.evArray->Ok
+          | _ => Error(impossibleError)
+          },
+        (),
       ),
     ],
     (),
@@ -417,15 +448,21 @@ to(5,10)
   Function.make(
     ~name="Dict.values",
     ~definitions=[
-      FnDefinition.make(~name="values", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
-        switch inputs {
-        | [FRValueDict(d1)] =>
-          Js.Dict.values(d1)
-          ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
-          ->Wrappers.evArray
-          ->Ok
-        | _ => Error(impossibleError)
-        }
+      FnDefinition.make(
+        ~nameSpace=Some("Dict"),
+        ~requiresNamespace=true,
+        ~name="values",
+        ~inputs=[FRTypeDict(FRTypeAny)],
+        ~run=(inputs, _) =>
+          switch inputs {
+          | [FRValueDict(d1)] =>
+            Js.Dict.values(d1)
+            ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
+            ->Wrappers.evArray
+            ->Ok
+          | _ => Error(impossibleError)
+          },
+        (),
       ),
     ],
     (),
@@ -433,21 +470,27 @@ to(5,10)
   Function.make(
     ~name="Dict.toList",
     ~definitions=[
-      FnDefinition.make(~name="dictToList", ~inputs=[FRTypeDict(FRTypeAny)], ~run=(inputs, _) =>
-        switch inputs {
-        | [FRValueDict(dict)] =>
-          dict
-          ->Js.Dict.entries
-          ->E.A2.fmap(((key, value)) =>
-            Wrappers.evArray([
-              Wrappers.evString(key),
-              FunctionRegistry_Core.FRType.matchReverse(value),
-            ])
-          )
-          ->Wrappers.evArray
-          ->Ok
-        | _ => Error(impossibleError)
-        }
+      FnDefinition.make(
+        ~nameSpace=Some("Dict"),
+        ~requiresNamespace=true,
+        ~name="toList",
+        ~inputs=[FRTypeDict(FRTypeAny)],
+        ~run=(inputs, _) =>
+          switch inputs {
+          | [FRValueDict(dict)] =>
+            dict
+            ->Js.Dict.entries
+            ->E.A2.fmap(((key, value)) =>
+              Wrappers.evArray([
+                Wrappers.evString(key),
+                FunctionRegistry_Core.FRType.matchReverse(value),
+              ])
+            )
+            ->Wrappers.evArray
+            ->Ok
+          | _ => Error(impossibleError)
+          },
+        (),
       ),
     ],
     (),
@@ -455,25 +498,29 @@ to(5,10)
   Function.make(
     ~name="Dict.fromList",
     ~definitions=[
-      FnDefinition.make(~name="dictFromList", ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))], ~run=(
-        inputs,
-        _,
-      ) => {
-        let convertInternalItems = items =>
-          items
-          ->E.A2.fmap(item => {
-            switch item {
-            | [FRValueString(string), value] =>
-              (string, FunctionRegistry_Core.FRType.matchReverse(value))->Ok
-            | _ => Error(impossibleError)
-            }
-          })
-          ->E.A.R.firstErrorOrOpen
-          ->E.R2.fmap(Belt.Map.String.fromArray)
-          ->E.R2.fmap(Wrappers.evRecord)
-        inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.arrayOfArrays)
-          |> E.R2.bind(convertInternalItems)
-      }),
+      FnDefinition.make(
+        ~nameSpace=Some("Dict"),
+        ~requiresNamespace=true,
+        ~name="fromList",
+        ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
+        ~run=(inputs, _) => {
+          let convertInternalItems = items =>
+            items
+            ->E.A2.fmap(item => {
+              switch item {
+              | [FRValueString(string), value] =>
+                (string, FunctionRegistry_Core.FRType.matchReverse(value))->Ok
+              | _ => Error(impossibleError)
+              }
+            })
+            ->E.A.R.firstErrorOrOpen
+            ->E.R2.fmap(Belt.Map.String.fromArray)
+            ->E.R2.fmap(Wrappers.evRecord)
+          inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.arrayOfArrays)
+            |> E.R2.bind(convertInternalItems)
+        },
+        (),
+      ),
     ],
     (),
   ),
@@ -481,30 +528,43 @@ to(5,10)
     ~name="List.make",
     ~definitions=[
       //Todo: If the second item is a function with no args, it could be nice to run this function and return the result.
-      FnDefinition.make(~name="listMake", ~inputs=[FRTypeNumber, FRTypeAny], ~run=(inputs, _) => {
-        switch inputs {
-        | [FRValueNumber(number), value] =>
-          Belt.Array.make(E.Float.toInt(number), value)
-          ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
-          ->Wrappers.evArray
-          ->Ok
-        | _ => Error(impossibleError)
-        }
-      }),
+      FnDefinition.make(
+        ~nameSpace=Some("List"),
+        ~requiresNamespace=true,
+        ~name="make",
+        ~inputs=[FRTypeNumber, FRTypeAny],
+        ~run=(inputs, _) => {
+          switch inputs {
+          | [FRValueNumber(number), value] =>
+            Belt.Array.make(E.Float.toInt(number), value)
+            ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
+            ->Wrappers.evArray
+            ->Ok
+          | _ => Error(impossibleError)
+          }
+        },
+        (),
+      ),
     ],
     (),
   ),
   Function.make(
     ~name="upTo",
     ~definitions=[
-      FnDefinition.make(~name="upTo", ~inputs=[FRTypeNumber, FRTypeNumber], ~run=(inputs, _) =>
-        inputs
-        ->Prepare.ToValueTuple.twoNumbers
-        ->E.R2.fmap(((low, high)) =>
-          E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)
-          ->E.A2.fmap(Wrappers.evNumber)
-          ->Wrappers.evArray
-        )
+      FnDefinition.make(
+        ~nameSpace=Some("List"),
+        ~requiresNamespace=true,
+        ~name="upTo",
+        ~inputs=[FRTypeNumber, FRTypeNumber],
+        ~run=(inputs, _) =>
+          inputs
+          ->Prepare.ToValueTuple.twoNumbers
+          ->E.R2.fmap(((low, high)) =>
+            E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)
+            ->E.A2.fmap(Wrappers.evNumber)
+            ->Wrappers.evArray
+          ),
+        (),
       ),
     ],
     (),
