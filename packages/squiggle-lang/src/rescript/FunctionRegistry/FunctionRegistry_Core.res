@@ -329,6 +329,12 @@ module FnDefinition = {
     }
   }
 
+  let toFfiFn = (t: t): Reducer_Expression_T.optionFfiFn =>
+    (args, environment) => run(t, args, environment)->E.R.toOption
+
+  let toLambda = (t: t) =>
+    Reducer_Module.convertOptionToFfiFn(t.name, toFfiFn(t))->Reducer_Module.eLambdaFFIValue
+
   let make = (~nameSpace=None, ~requiresNamespace=true, ~name, ~inputs, ~run, ()): t => {
     name: name,
     nameSpace: nameSpace,
@@ -368,6 +374,7 @@ module Function = {
 
 module Registry = {
   let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
+  let definitions = (r: registry) => r->E.A2.fmap(d => d.definitions)->E.A.concatMany
 
   /*
   There's a (potential+minor) bug here: If a function definition is called outside of the calls 
@@ -397,5 +404,28 @@ module Registry = {
     | SameNameDifferentArguments(m) => Some(Error(showNameMatchDefinitions(m)))
     | _ => None
     }
+  }
+
+  let allNamespaces = (t: registry) =>
+    t
+    ->E.A2.fmap(r => r.definitions)
+    ->Belt.Array.concatMany
+    ->E.A2.fmap(r => r.nameSpace)
+    ->E.A.O.concatSomes
+    ->E.A.uniq
+
+  let makeModules = (t: registry) => {
+    let nameSpaces = allNamespaces(t)
+    nameSpaces->E.A2.fmap(nameSpace => {
+      let definitions = t->definitions->E.A2.filter(d => d.nameSpace === Some(nameSpace))
+      
+      // E.A.reduce(definitions, Reducer_Module.emptyStdLib, (acc, d) => {
+      //   let name = d.name
+      //   let definition = FnDefinition.toLambda(d)
+      //   let foo = Reducer_Module.defineFunction("Fhi", definition)
+      // })
+      // let module = Module.make(nameSpace, functions)
+      // module
+    })
   }
 }
