@@ -106,8 +106,6 @@ export interface SquiggleItemProps {
   width?: number;
   height: number;
   distributionPlotSettings: DistributionPlottingSettings;
-  /** Whether to show type information; deprecated */
-  showTypes?: boolean;
   /** Settings for displaying functions */
   chartSettings: FunctionChartSettings;
   /** Environment for further function executions */
@@ -120,7 +118,6 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
   width,
   height,
   distributionPlotSettings,
-  showTypes = false,
   chartSettings,
   environment,
 }) => {

@@ -32,8 +32,6 @@ interface PlaygroundProps {
   defaultCode?: string;
   /** How many pixels high is the playground */
   height?: number;
-  /** Whether to show the types of outputs in the playground */
-  showTypes?: boolean;
   /** Whether to show the log scale controls in the playground */
   showControls?: boolean;
   /** Whether to show the summary table in the playground */
@@ -76,7 +74,6 @@ const schema = yup.object({}).shape({
     .min(10)
     .max(100)
     .default(50),
-  showTypes: yup.boolean().required(),
   showControls: yup.boolean().required(),
   showSummary: yup.boolean().required(),
   showEditor: yup.boolean().required(),
@@ -180,11 +177,6 @@ const ViewSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
           type="number"
           register={register}
           label="Chart Height (in pixels)"
-        />
-        <Checkbox
-          name="showTypes"
-          register={register}
-          label="Show information about displayed types"
         />
       </div>
     </HeadedSection>
@@ -380,7 +372,6 @@ const useRunnerState = (code: string) => {
 export const SquigglePlayground: FC<PlaygroundProps> = ({
   defaultCode = "",
   height = 500,
-  showTypes = false,
   showControls = false,
   showSummary = false,
   logX = false,
@@ -404,7 +395,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       sampleCount: 1000,
       xyPointLength: 1000,
       chartHeight: 150,
-      showTypes,
       showControls,
       logX,
       expY,
@@ -444,7 +434,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       diagramStop={Number(vars.diagramStop)}
       diagramCount={Number(vars.diagramCount)}
       height={vars.chartHeight}
-      showTypes={vars.showTypes}
       showControls={vars.showControls}
       showSummary={vars.showSummary}
       logX={vars.logX}

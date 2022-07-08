@@ -44,12 +44,11 @@ export default function PlaygroundPage() {
   const playgroundProps = {
     defaultCode: "normal(0,1)",
     height: 700,
-    showTypes: true,
     ...hashData,
     onCodeChange: (code) => setHashData({ initialSquiggleString: code }),
     onSettingsChange: (settings) => {
-      const { showTypes, showControls, showSummary, showEditor } = settings;
-      setHashData({ showTypes, showControls, showSummary, showEditor });
+      const { showControls, showSummary, showEditor } = settings;
+      setHashData({ showControls, showSummary, showEditor });
     },
   };
   return (

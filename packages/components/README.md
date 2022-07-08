@@ -54,7 +54,6 @@ export function DynamicSquiggleChart({ squiggleString }) {
           width={445}
           height={200}
           showSummary={true}
-          showTypes={true}
         />
     );
   }
