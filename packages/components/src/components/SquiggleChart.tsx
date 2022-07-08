@@ -10,7 +10,7 @@ import {
 } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
-import { SquiggleItem } from "./SquiggleItem";
+import { SquiggleViewer } from "./SquiggleViewer";
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
@@ -71,26 +71,22 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       onChange,
     });
 
-    if (result.tag !== "Ok") {
-      return <SquiggleErrorAlert error={result.value} />;
-    }
-
-    let distributionPlotSettings = {
+    const distributionPlotSettings = {
       showControls,
       showSummary,
       logX,
       expY,
     };
 
-    let chartSettings = {
+    const chartSettings = {
       start: diagramStart,
       stop: diagramStop,
       count: diagramCount,
     };
 
     return (
-      <SquiggleItem
-        expression={result.value}
+      <SquiggleViewer
+        result={result}
         width={width}
         height={height}
         distributionPlotSettings={distributionPlotSettings}

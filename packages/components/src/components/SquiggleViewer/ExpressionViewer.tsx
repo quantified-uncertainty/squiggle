@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   squiggleExpression,
   environment,
   declaration,
 } from "@quri/squiggle-lang";
-import { NumberShower } from "./NumberShower";
+import { NumberShower } from "../NumberShower";
 import {
   DistributionChart,
   DistributionPlottingSettings,
-} from "./DistributionChart";
-import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
+} from "../DistributionChart";
+import { FunctionChart, FunctionChartSettings } from "../FunctionChart";
 import clsx from "clsx";
-import { Tooltip } from "./ui/Tooltip";
+import { VariableBox } from "./VariableBox";
 
 function getRange<a>(x: declaration<a>) {
   const first = x.args[0];
@@ -36,73 +36,23 @@ function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
   };
 }
 
-interface VariableBoxProps {
-  name?: string;
-  heading: string;
-  children: React.ReactNode;
-}
-
-const VariableBox: React.FC<VariableBoxProps> = ({
-  name,
-  heading = "Error",
-  children,
-}) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const toggleCollapsed = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
-  return (
-    <div>
-      <div>
-        {name ? (
-          <header
-            className="inline-flex space-x-1 text-slate-500 font-mono text-sm cursor-pointer"
-            onClick={toggleCollapsed}
-          >
-            {name ? (
-              <Tooltip text={heading}>
-                <span>{name}:</span>
-              </Tooltip>
-            ) : null}
-            {isCollapsed ? (
-              <span className="bg-slate-200 rounded p-0.5 font-xs">...</span>
-            ) : null}
-          </header>
-        ) : null}
-        {isCollapsed ? null : (
-          <div className="flex w-full">
-            {name ? (
-              <div
-                className="border-l-2 border-slate-200 hover:border-green-600 w-4 cursor-pointer"
-                onClick={toggleCollapsed}
-              ></div>
-            ) : null}
-            <div className="grow">{children}</div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
 const VariableList: React.FC<{
-  name?: string;
+  path: string[];
   heading: string;
   children: React.ReactNode;
-}> = ({ name, heading, children }) => (
-  <VariableBox name={name} heading={heading}>
-    <div className={clsx("space-y-3", name ? "pt-1 mt-1" : null)}>
+}> = ({ path, heading, children }) => (
+  <VariableBox path={path} heading={heading}>
+    <div className={clsx("space-y-3", path.length ? "pt-1 mt-1" : null)}>
       {children}
     </div>
   </VariableBox>
 );
 
-export interface SquiggleItemProps {
+export interface Props {
   /** The output of squiggle's run */
   expression: squiggleExpression;
-  name?: string;
+  /** Path to the current item, e.g. `['foo', 'bar', '3']` for `foo.bar[3]`; can be empty on the top-level item. */
+  path: string[];
   width?: number;
   height: number;
   distributionPlotSettings: DistributionPlottingSettings;
@@ -112,8 +62,8 @@ export interface SquiggleItemProps {
   environment: environment;
 }
 
-export const SquiggleItem: React.FC<SquiggleItemProps> = ({
-  name,
+export const ExpressionViewer: React.FC<Props> = ({
+  path,
   expression,
   width,
   height,
@@ -124,7 +74,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
   switch (expression.tag) {
     case "number":
       return (
-        <VariableBox name={name} heading="Number">
+        <VariableBox path={path} heading="Number">
           <div className="font-semibold text-slate-600">
             <NumberShower precision={3} number={expression.value} />
           </div>
@@ -134,7 +84,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
       const distType = expression.value.type();
       return (
         <VariableBox
-          name={name}
+          path={path}
           heading={`Distribution (${distType})\n${
             distType === "Symbolic" ? expression.value.toString() : ""
           }`}
@@ -150,7 +100,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "string":
       return (
-        <VariableBox name={name} heading="String">
+        <VariableBox path={path} heading="String">
           <span className="text-slate-400">"</span>
           <span className="text-slate-600 font-semibold font-mono">
             {expression.value}
@@ -160,45 +110,45 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
       );
     case "boolean":
       return (
-        <VariableBox name={name} heading="Boolean">
+        <VariableBox path={path} heading="Boolean">
           {expression.value.toString()}
         </VariableBox>
       );
     case "symbol":
       return (
-        <VariableBox name={name} heading="Symbol">
+        <VariableBox path={path} heading="Symbol">
           <span className="text-slate-500 mr-2">Undefined Symbol:</span>
           <span className="text-slate-600">{expression.value}</span>
         </VariableBox>
       );
     case "call":
       return (
-        <VariableBox name={name} heading="Call">
+        <VariableBox path={path} heading="Call">
           {expression.value}
         </VariableBox>
       );
     case "arraystring":
       return (
-        <VariableBox name={name} heading="Array String">
+        <VariableBox path={path} heading="Array String">
           {expression.value.map((r) => `"${r}"`).join(", ")}
         </VariableBox>
       );
     case "date":
       return (
-        <VariableBox name={name} heading="Date">
+        <VariableBox path={path} heading="Date">
           {expression.value.toDateString()}
         </VariableBox>
       );
     case "timeDuration": {
       return (
-        <VariableBox name={name} heading="Time Duration">
+        <VariableBox path={path} heading="Time Duration">
           <NumberShower precision={3} number={expression.value} />
         </VariableBox>
       );
     }
     case "lambda":
       return (
-        <VariableBox name={name} heading="Function">
+        <VariableBox path={path} heading="Function">
           <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${expression.value.parameters.join(
             ","
           )})`}</div>
@@ -216,7 +166,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
       );
     case "lambdaDeclaration": {
       return (
-        <VariableBox name={name} heading="Function Declaration">
+        <VariableBox path={path} heading="Function Declaration">
           <FunctionChart
             fn={expression.value.fn}
             chartSettings={getChartSettings(expression.value)}
@@ -232,13 +182,13 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "module": {
       return (
-        <VariableList name={name} heading="Module">
+        <VariableList path={path} heading="Module">
           {Object.entries(expression.value)
             .filter(([key, r]) => key !== "Math")
             .map(([key, r]) => (
-              <SquiggleItem
+              <ExpressionViewer
                 key={key}
-                name={key}
+                path={[...path, key]}
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
                 height={height / 3}
@@ -252,11 +202,11 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "record":
       return (
-        <VariableList name={name} heading="Record">
+        <VariableList path={path} heading="Record">
           {Object.entries(expression.value).map(([key, r]) => (
-            <SquiggleItem
+            <ExpressionViewer
               key={key}
-              name={key}
+              path={[...path, key]}
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={height / 3}
@@ -269,11 +219,11 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
       );
     case "array":
       return (
-        <VariableList name={name} heading="Array">
+        <VariableList path={path} heading="Array">
           {expression.value.map((r, i) => (
-            <SquiggleItem
+            <ExpressionViewer
               key={i}
-              name={String(i)}
+              path={[...path, String(i)]}
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={50}
