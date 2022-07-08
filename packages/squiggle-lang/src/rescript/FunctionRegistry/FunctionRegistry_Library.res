@@ -72,7 +72,7 @@ let registry = [
         ~requiresNamespace=true,
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
         (),
       ),
     ],

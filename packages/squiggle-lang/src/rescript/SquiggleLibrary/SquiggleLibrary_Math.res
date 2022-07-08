@@ -20,4 +20,6 @@ let mathBindings: Bindings.t =
   ->Bindings.fromArray
 
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
-  previousBindings->Bindings.defineModule("Math", mathBindings)
+  previousBindings
+  ->Bindings.defineModule("Math", mathBindings)
+  ->FunctionRegistry_Core.Registry.makeModules(FunctionRegistry_Library.registry)

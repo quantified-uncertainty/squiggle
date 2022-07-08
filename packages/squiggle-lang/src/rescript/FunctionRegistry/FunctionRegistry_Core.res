@@ -414,18 +414,18 @@ module Registry = {
     ->E.A.O.concatSomes
     ->E.A.uniq
 
-  let makeModules = (t: registry) => {
+  let makeModules = (prevBindings: Reducer_Module.t, t: registry): Reducer_Module.t => {
     let nameSpaces = allNamespaces(t)
-    nameSpaces->E.A2.fmap(nameSpace => {
+    let nameSpaceBindings = nameSpaces->E.A2.fmap(nameSpace => {
       let definitions = t->definitions->E.A2.filter(d => d.nameSpace === Some(nameSpace))
-      
-      // E.A.reduce(definitions, Reducer_Module.emptyStdLib, (acc, d) => {
-      //   let name = d.name
-      //   let definition = FnDefinition.toLambda(d)
-      //   let foo = Reducer_Module.defineFunction("Fhi", definition)
-      // })
-      // let module = Module.make(nameSpace, functions)
-      // module
+
+      let newModule = E.A.reduce(definitions, Reducer_Module.emptyStdLib, (acc, d) => {
+        acc->Reducer_Module.defineFunction(d.name, FnDefinition.toFfiFn(d))
+      })
+      (nameSpace, newModule)
     })
+    E.A.reduce(nameSpaceBindings, prevBindings, (acc, (name, fn)) =>
+      acc->Reducer_Module.defineModule(name, fn)
+    )
   }
 }
