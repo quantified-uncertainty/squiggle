@@ -48,24 +48,41 @@ const VariableBox: React.FC<VariableBoxProps> = ({
   children,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const toggleCollapsed = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
     <div>
-      {name ? (
-        <header
-          className="inline-flex space-x-1 text-slate-500 font-mono text-sm cursor-pointer"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          {name ? (
-            <Tooltip text={heading}>
-              <span>{name}:</span>
-            </Tooltip>
-          ) : null}
-          {isCollapsed ? (
-            <span className="bg-slate-200 rounded p-0.5 font-xs">...</span>
-          ) : null}
-        </header>
-      ) : null}
-      {isCollapsed ? null : <div>{children}</div>}
+      <div>
+        {name ? (
+          <header
+            className="inline-flex space-x-1 text-slate-500 font-mono text-sm cursor-pointer"
+            onClick={toggleCollapsed}
+          >
+            {name ? (
+              <Tooltip text={heading}>
+                <span>{name}:</span>
+              </Tooltip>
+            ) : null}
+            {isCollapsed ? (
+              <span className="bg-slate-200 rounded p-0.5 font-xs">...</span>
+            ) : null}
+          </header>
+        ) : null}
+        {isCollapsed ? null : (
+          <div className="flex w-full">
+            {name ? (
+              <div
+                className="border-l-2 border-slate-200 hover:border-green-600 w-4 cursor-pointer"
+                onClick={toggleCollapsed}
+              ></div>
+            ) : null}
+            <div className="grow">{children}</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -76,7 +93,7 @@ const VariableList: React.FC<{
   children: React.ReactNode;
 }> = ({ name, heading, children }) => (
   <VariableBox name={name} heading={heading}>
-    <div className={clsx("space-y-3", name ? "border-l pl-4 pt-1 mt-1" : null)}>
+    <div className={clsx("space-y-3", name ? "pt-1 mt-1" : null)}>
       {children}
     </div>
   </VariableBox>
