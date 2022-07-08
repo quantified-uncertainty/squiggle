@@ -11,7 +11,7 @@ import {
 } from "./DistributionChart";
 import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
 import clsx from "clsx";
-import { LayoutGroup, motion } from "framer-motion";
+import { Tooltip } from "./ui/Tooltip";
 
 function getRange<a>(x: declaration<a>) {
   const first = x.args[0];
@@ -40,59 +40,45 @@ interface VariableBoxProps {
   name?: string;
   heading: string;
   children: React.ReactNode;
-  showTypes: boolean;
 }
 
 const VariableBox: React.FC<VariableBoxProps> = ({
   name,
   heading = "Error",
   children,
-  showTypes = false,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   return (
-    <motion.div layout transition={{ type: "tween" }}>
-      {name || showTypes ? (
-        <motion.header
-          layout="position"
-          transition={{ type: "tween" }}
+    <div>
+      {name ? (
+        <header
           className="inline-flex space-x-1 text-slate-500 font-mono text-sm cursor-pointer"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
-          {name ? <span>{name}:</span> : null}
-          {showTypes ? <span>{heading}</span> : null}
+          {name ? (
+            <Tooltip text={heading}>
+              <span>{name}:</span>
+            </Tooltip>
+          ) : null}
           {isCollapsed ? (
             <span className="bg-slate-200 rounded p-0.5 font-xs">...</span>
           ) : null}
-        </motion.header>
+        </header>
       ) : null}
-      {isCollapsed ? null : (
-        <motion.div layout="position" transition={{ type: "tween" }}>
-          {children}
-        </motion.div>
-      )}
-    </motion.div>
+      {isCollapsed ? null : <div>{children}</div>}
+    </div>
   );
 };
 
 const VariableList: React.FC<{
   name?: string;
   heading: string;
-  showTypes: boolean;
   children: React.ReactNode;
-}> = ({ name, heading, showTypes, children }) => (
-  <VariableBox name={name} heading={heading} showTypes={showTypes}>
-    <motion.div
-      layout="position"
-      transition={{ type: "tween" }}
-      className={clsx(
-        "space-y-3",
-        name ? "border-l pl-4" : null,
-        name || showTypes ? "pt-1 mt-1" : null
-      )}
-    >
-      <LayoutGroup>{children}</LayoutGroup>
-    </motion.div>
+}> = ({ name, heading, children }) => (
+  <VariableBox name={name} heading={heading}>
+    <div className={clsx("space-y-3", name ? "border-l pl-4 pt-1 mt-1" : null)}>
+      {children}
+    </div>
   </VariableBox>
 );
 
@@ -103,8 +89,8 @@ export interface SquiggleItemProps {
   width?: number;
   height: number;
   distributionPlotSettings: DistributionPlottingSettings;
-  /** Whether to show type information */
-  showTypes: boolean;
+  /** Whether to show type information; deprecated */
+  showTypes?: boolean;
   /** Settings for displaying functions */
   chartSettings: FunctionChartSettings;
   /** Environment for further function executions */
@@ -124,7 +110,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
   switch (expression.tag) {
     case "number":
       return (
-        <VariableBox name={name} heading="Number" showTypes={showTypes}>
+        <VariableBox name={name} heading="Number">
           <div className="font-semibold text-slate-600">
             <NumberShower precision={3} number={expression.value} />
           </div>
@@ -135,12 +121,10 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
       return (
         <VariableBox
           name={name}
-          heading={`Distribution (${distType})`}
-          showTypes={showTypes}
+          heading={`Distribution (${distType})\n${
+            distType === "Symbolic" ? expression.value.toString() : ""
+          }`}
         >
-          {distType === "Symbolic" && showTypes ? (
-            <div>{expression.value.toString()}</div>
-          ) : null}
           <DistributionChart
             distribution={expression.value}
             {...distributionPlotSettings}
@@ -152,7 +136,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "string":
       return (
-        <VariableBox name={name} heading="String" showTypes={showTypes}>
+        <VariableBox name={name} heading="String">
           <span className="text-slate-400">"</span>
           <span className="text-slate-600 font-semibold font-mono">
             {expression.value}
@@ -162,45 +146,45 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
       );
     case "boolean":
       return (
-        <VariableBox name={name} heading="Boolean" showTypes={showTypes}>
+        <VariableBox name={name} heading="Boolean">
           {expression.value.toString()}
         </VariableBox>
       );
     case "symbol":
       return (
-        <VariableBox name={name} heading="Symbol" showTypes={showTypes}>
+        <VariableBox name={name} heading="Symbol">
           <span className="text-slate-500 mr-2">Undefined Symbol:</span>
           <span className="text-slate-600">{expression.value}</span>
         </VariableBox>
       );
     case "call":
       return (
-        <VariableBox name={name} heading="Call" showTypes={showTypes}>
+        <VariableBox name={name} heading="Call">
           {expression.value}
         </VariableBox>
       );
     case "arraystring":
       return (
-        <VariableBox name={name} heading="Array String" showTypes={showTypes}>
+        <VariableBox name={name} heading="Array String">
           {expression.value.map((r) => `"${r}"`).join(", ")}
         </VariableBox>
       );
     case "date":
       return (
-        <VariableBox name={name} heading="Date" showTypes={showTypes}>
+        <VariableBox name={name} heading="Date">
           {expression.value.toDateString()}
         </VariableBox>
       );
     case "timeDuration": {
       return (
-        <VariableBox name={name} heading="Time Duration" showTypes={showTypes}>
+        <VariableBox name={name} heading="Time Duration">
           <NumberShower precision={3} number={expression.value} />
         </VariableBox>
       );
     }
     case "lambda":
       return (
-        <VariableBox name={name} heading="Function" showTypes={showTypes}>
+        <VariableBox name={name} heading="Function">
           <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${expression.value.parameters.join(
             ","
           )})`}</div>
@@ -218,11 +202,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
       );
     case "lambdaDeclaration": {
       return (
-        <VariableBox
-          name={name}
-          heading="Function Declaration"
-          showTypes={showTypes}
-        >
+        <VariableBox name={name} heading="Function Declaration">
           <FunctionChart
             fn={expression.value.fn}
             chartSettings={getChartSettings(expression.value)}
@@ -238,7 +218,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "module": {
       return (
-        <VariableList name={name} heading="Module" showTypes={showTypes}>
+        <VariableList name={name} heading="Module">
           {Object.entries(expression.value)
             .filter(([key, r]) => key !== "Math")
             .map(([key, r]) => (
@@ -248,7 +228,6 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
                 height={height / 3}
-                showTypes={showTypes}
                 distributionPlotSettings={distributionPlotSettings}
                 chartSettings={chartSettings}
                 environment={environment}
@@ -259,7 +238,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
     }
     case "record":
       return (
-        <VariableList name={name} heading="Record" showTypes={showTypes}>
+        <VariableList name={name} heading="Record">
           {Object.entries(expression.value).map(([key, r]) => (
             <SquiggleItem
               key={key}
@@ -267,7 +246,6 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={height / 3}
-              showTypes={showTypes}
               distributionPlotSettings={distributionPlotSettings}
               chartSettings={chartSettings}
               environment={environment}
@@ -277,7 +255,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
       );
     case "array":
       return (
-        <VariableList name={name} heading="Array" showTypes={showTypes}>
+        <VariableList name={name} heading="Array">
           {expression.value.map((r, i) => (
             <SquiggleItem
               key={i}
@@ -286,7 +264,6 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
               width={width !== undefined ? width - 20 : width}
               height={50}
               distributionPlotSettings={distributionPlotSettings}
-              showTypes={showTypes}
               chartSettings={chartSettings}
               environment={environment}
             />

@@ -3,6 +3,8 @@
   "version": "0.2.20",
   "license": "MIT",
   "dependencies": {
+    "@floating-ui/react-dom": "^0.7.2",
+    "@floating-ui/react-dom-interactions": "^0.6.6",
     "@headlessui/react": "^1.6.5",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^2.9.3",
