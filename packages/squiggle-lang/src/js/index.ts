@@ -172,6 +172,15 @@ function createTsExport(
       return tag("lambdaDeclaration", x.value);
     case "EvTypeIdentifier":
       return tag("typeIdentifier", x.value);
+    case "EvType":
+      let typeResult: tagged<"type", { [key: string]: squiggleExpression }> =
+        tag(
+          "type",
+          _.mapValues(x.value, (x: unknown) =>
+            convertRawToTypescript(x as rescriptExport, environment)
+          )
+        );
+      return typeResult;
     case "EvModule":
       let moduleResult: tagged<
         "module",

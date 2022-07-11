@@ -1,5 +1,5 @@
-module Bindings = Reducer_Category_Module
-module Module = Reducer_Category_Module
+module Bindings = Reducer_Module
+module Module = Reducer_Module
 
 let availableNumbers: array<(string, float)> = [
   ("pi", Js.Math._PI),

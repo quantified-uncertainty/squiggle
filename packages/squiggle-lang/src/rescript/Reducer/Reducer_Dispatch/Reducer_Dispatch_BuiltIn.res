@@ -3,8 +3,9 @@ module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 module Result = Belt.Result
+module TypeBuilder = Reducer_Type_TypeBuilder
 open ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
@@ -166,59 +167,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     )
   }
 
-  let typeModifier_memberOf = (aType, anArray) => {
-    let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IEvString("typeIdentifier")),
-      ("typeIdentifier", aType),
-    ])
-    newRecord->Belt.Map.String.set("memberOf", anArray)->IEvRecord->Ok
-  }
-  let typeModifier_memberOf_update = (aRecord, anArray) => {
-    aRecord->Belt.Map.String.set("memberOf", anArray)->IEvRecord->Ok
-  }
-
-  let typeModifier_min = (aType, value) => {
-    let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IEvString("typeIdentifier")),
-      ("typeIdentifier", aType),
-    ])
-    newRecord->Belt.Map.String.set("min", value)->IEvRecord->Ok
-  }
-  let typeModifier_min_update = (aRecord, value) => {
-    aRecord->Belt.Map.String.set("min", value)->IEvRecord->Ok
-  }
-
-  let typeModifier_max = (aType, value) => {
-    let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IEvString("typeIdentifier")),
-      ("typeIdentifier", aType),
-    ])
-    newRecord->Belt.Map.String.set("max", value)->IEvRecord->Ok
-  }
-  let typeModifier_max_update = (aRecord, value) =>
-    aRecord->Belt.Map.String.set("max", value)->IEvRecord->Ok
-
-  let typeModifier_opaque_update = aRecord =>
-    aRecord->Belt.Map.String.set("opaque", IEvBool(true))->IEvRecord->Ok
-
-  let typeOr = evArray => {
-    let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IEvString("typeOr")),
-      ("typeOr", evArray),
-    ])
-    newRecord->IEvRecord->Ok
-  }
-  let typeFunction = anArray => {
-    let output = Belt.Array.getUnsafe(anArray, Js.Array2.length(anArray) - 1)
-    let inputs = Js.Array2.slice(anArray, ~start=0, ~end_=-1)
-    let newRecord = Belt.Map.String.fromArray([
-      ("typeTag", IEvString("typeFunction")),
-      ("inputs", IEvArray(inputs)),
-      ("output", output),
-    ])
-    newRecord->IEvRecord->Ok
-  }
-
   switch call {
   | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
   | ("$_atIndex_$", [IEvModule(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
@@ -233,20 +181,24 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("$_setTypeOfBindings_$", [IEvModule(nameSpace), IEvSymbol(symbol), value]) =>
     doSetTypeOfBindings(nameSpace, symbol, value)
   | ("$_typeModifier_memberOf_$", [IEvTypeIdentifier(typeIdentifier), IEvArray(arr)]) =>
-    typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))
-  | ("$_typeModifier_memberOf_$", [IEvRecord(typeRecord), IEvArray(arr)]) =>
-    typeModifier_memberOf_update(typeRecord, IEvArray(arr))
+    TypeBuilder.typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))
+  | ("$_typeModifier_memberOf_$", [IEvType(typeRecord), IEvArray(arr)]) =>
+    TypeBuilder.typeModifier_memberOf_update(typeRecord, IEvArray(arr))
   | ("$_typeModifier_min_$", [IEvTypeIdentifier(typeIdentifier), value]) =>
-    typeModifier_min(IEvTypeIdentifier(typeIdentifier), value)
-  | ("$_typeModifier_min_$", [IEvRecord(typeRecord), value]) =>
-    typeModifier_min_update(typeRecord, value)
+    TypeBuilder.typeModifier_min(IEvTypeIdentifier(typeIdentifier), value)
+  | ("$_typeModifier_min_$", [IEvType(typeRecord), value]) =>
+    TypeBuilder.typeModifier_min_update(typeRecord, value)
   | ("$_typeModifier_max_$", [IEvTypeIdentifier(typeIdentifier), value]) =>
-    typeModifier_max(IEvTypeIdentifier(typeIdentifier), value)
-  | ("$_typeModifier_max_$", [IEvRecord(typeRecord), value]) =>
-    typeModifier_max_update(typeRecord, value)
-  | ("$_typeModifier_opaque_$", [IEvRecord(typeRecord)]) => typeModifier_opaque_update(typeRecord)
-  | ("$_typeOr_$", [IEvArray(arr)]) => typeOr(IEvArray(arr))
-  | ("$_typeFunction_$", [IEvArray(arr)]) => typeFunction(arr)
+    TypeBuilder.typeModifier_max(IEvTypeIdentifier(typeIdentifier), value)
+  | ("$_typeModifier_max_$", [IEvType(typeRecord), value]) =>
+    TypeBuilder.typeModifier_max_update(typeRecord, value)
+  | ("$_typeModifier_opaque_$", [IEvType(typeRecord)]) =>
+    TypeBuilder.typeModifier_opaque_update(typeRecord)
+  | ("$_typeOr_$", [IEvArray(arr)]) => TypeBuilder.typeOr(IEvArray(arr))
+  | ("$_typeFunction_$", [IEvArray(arr)]) => TypeBuilder.typeFunction(arr)
+  | ("$_typeTuple_$", [IEvArray(elems)]) => TypeBuilder.typeTuple(elems)
+  | ("$_typeArray_$", [elem]) => TypeBuilder.typeArray(elem)
+  | ("$_typeRecord_$", [IEvArray(arrayOfPairs)]) => TypeBuilder.typeRecord(arrayOfPairs)
   | ("concat", [IEvArray(aValueArray), IEvArray(bValueArray)]) =>
     doAddArray(aValueArray, bValueArray)
   | ("concat", [IEvString(aValueString), IEvString(bValueString)]) =>

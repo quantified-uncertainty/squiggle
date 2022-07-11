@@ -3,14 +3,13 @@ module ErrorValue = Reducer_ErrorValue
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface_InternalExpressionValue
-module Module = Reducer_Category_Module
+module Module = Reducer_Module
 module Result = Belt.Result
 
 type environment = ReducerInterface_InternalExpressionValue.environment
 type expression = ExpressionT.expression
 type expressionOrFFI = ExpressionT.expressionOrFFI
 type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
-// type tmpExternalBindings = ReducerInterface_InternalExpressionValue.tmpExternalBindings
 type internalCode = ReducerInterface_InternalExpressionValue.internalCode
 
 external castInternalCodeToExpression: internalCode => expressionOrFFI = "%identity"
@@ -19,12 +18,19 @@ let checkArity = (
   lambdaValue: ExpressionValue.lambdaValue,
   args: list<internalExpressionValue>,
 ) => {
-  let argsLength = Belt.List.length(args)
-  let parametersLength = Js.Array2.length(lambdaValue.parameters)
-  if argsLength !== parametersLength {
-    ErrorValue.REArityError(None, parametersLength, argsLength)->Error
-  } else {
-    args->Ok
+  let reallyCheck = {
+    let argsLength = Belt.List.length(args)
+    let parametersLength = Js.Array2.length(lambdaValue.parameters)
+    if argsLength !== parametersLength {
+      ErrorValue.REArityError(None, parametersLength, argsLength)->Error
+    } else {
+      args->Ok
+    }
+  }
+  let exprOrFFI = castInternalCodeToExpression(lambdaValue.body)
+  switch exprOrFFI {
+  | NotFFI(_) => reallyCheck
+  | FFI(_) => args->Ok
   }
 }
 
