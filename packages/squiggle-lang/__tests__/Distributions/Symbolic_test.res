@@ -85,7 +85,7 @@ describe("(Symbolic) mean", () => {
       let betaDistribution = SymbolicDist.Beta.fromMeanAndStdev(mean, stdev)
       let meanValue =
         betaDistribution->E.R2.fmap(d =>
-          run(FromDist(ToFloat(#Mean), d->DistributionTypes.Symbolic))
+          run(FromDist(#ToFloat(#Mean), d->DistributionTypes.Symbolic))
         )
       switch meanValue {
       | Ok(value) => value->unpackFloat->expect->toBeCloseTo(mean)
