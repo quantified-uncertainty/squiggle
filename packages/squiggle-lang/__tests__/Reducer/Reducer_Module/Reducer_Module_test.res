@@ -22,6 +22,13 @@ module FooImplementation = {
   let makeFoo = (a: string, b: string, _environment): string => `I am ${a}-foo and I am ${b}-foo`
   let makeBar = (a: float, b: float, _environment): string =>
     `I am ${a->Js.Float.toString}-bar and I am ${b->Js.Float.toString}-bar`
+  // You can also define functions that has their internal errors
+  let makeReturningError = (_a: float, _b: float, _environment): result<float, ErrorValue.t> =>
+    if false {
+      0.->Ok
+    } else {
+      ErrorValue.RETodo("test error")->Error
+    }
 }
 
 // There is a potential for type modules to define lift functions
@@ -38,6 +45,17 @@ module FooFFI = {
     | [IEvNumber(a), IEvNumber(b)] => FooImplementation.makeBar(a, b, environment)->IEvString->Some
     | _ => None
     }
+  let makeReturningError: ExpressionT.optionFfiFnReturningResult = (
+    args: array<InternalExpressionValue.t>,
+    environment,
+  ) =>
+    switch args {
+    | [IEvNumber(a), IEvNumber(b)] =>
+      FooImplementation.makeReturningError(a, b, environment)
+      ->Belt.Result.map(v => v->InternalExpressionValue.IEvNumber)
+      ->Some
+    | _ => None
+    }
 }
 
 let fooModule: Module.t =
@@ -47,6 +65,7 @@ let fooModule: Module.t =
   ->Module.defineBool("fooBool", FooImplementation.fooBool)
   ->Module.defineFunction("makeFoo", FooFFI.makeFoo)
   ->Module.defineFunction("makeBar", FooFFI.makeBar)
+  ->Module.defineFunctionReturningResult("makeReturningError", FooFFI.makeReturningError)
 
 let makeBindings = (prevBindings: Bindings.t): Bindings.t =>
   prevBindings->Module.defineModule("Foo", fooModule)

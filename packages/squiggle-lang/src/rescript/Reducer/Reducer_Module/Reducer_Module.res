@@ -126,6 +126,17 @@ let functionNotFoundErrorFFIFn = (functionName: string): ExpressionT.ffiFn => {
   }
 }
 
+let convertOptionToFfiFnReturningResult = (
+  myFunctionName: string,
+  myFunction: ExpressionT.optionFfiFnReturningResult,
+): ExpressionT.ffiFn => {
+  (args: array<InternalExpressionValue.t>, environment) => {
+    myFunction(args, environment)->Belt.Option.getWithDefault(
+      functionNotFoundErrorFFIFn(myFunctionName)(args, environment),
+    )
+  }
+}
+
 let convertOptionToFfiFn = (
   myFunctionName: string,
   myFunction: ExpressionT.optionFfiFn,
@@ -159,4 +170,15 @@ let defineFunction = (nameSpace: t, identifier: string, value: ExpressionT.optio
   nameSpace->define(identifier, convertOptionToFfiFn(identifier, value)->eLambdaFFIValue)
 }
 
-let emptyStdLib: t = emptyModule->defineBool("stdlib", true)
+let defineFunctionReturningResult = (
+  nameSpace: t,
+  identifier: string,
+  value: ExpressionT.optionFfiFnReturningResult,
+): t => {
+  nameSpace->define(
+    identifier,
+    convertOptionToFfiFnReturningResult(identifier, value)->eLambdaFFIValue,
+  )
+}
+
+let emptyStdLib: t = emptyModule->defineBool("_standardLibrary", true)
