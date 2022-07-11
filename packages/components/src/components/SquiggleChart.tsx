@@ -60,29 +60,30 @@ export interface SquiggleChartProps {
 
 const defaultOnChange = () => {};
 
-export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(({
-  code = "",
-  environment,
-  onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
-  height = 200,
-  bindings = defaultBindings,
-  jsImports = defaultImports,
-  showSummary = false,
-  width,
-  showTypes = false,
-  showControls = false,
-  logX = false,
-  expY = false,
-  diagramStart = 0,
-  diagramStop = 10,
-  diagramCount = 100,
-  tickFormat,
-  minX,
-  maxX,
-  color,
-  title,
-  distributionChartActions,
-}) => {
+export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
+  ({
+    code = "",
+    environment,
+    onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
+    height = 200,
+    bindings = defaultBindings,
+    jsImports = defaultImports,
+    showSummary = false,
+    width,
+    showTypes = false,
+    showControls = false,
+    logX = false,
+    expY = false,
+    diagramStart = 0,
+    diagramStop = 10,
+    diagramCount = 100,
+    tickFormat,
+    minX,
+    maxX,
+    color,
+    title,
+    distributionChartActions,
+  }) => {
     const result = useSquiggle({
       code,
       bindings,

@@ -114,11 +114,11 @@ export function buildVegaSpec(
   } = specOptions;
 
   let xScale = logX ? logXScale : linearXScale;
-  if (minX !== undefined) {
+  if (minX !== undefined && Number.isFinite(minX)) {
     xScale = { ...xScale, domainMin: minX };
   }
 
-  if (maxX !== undefined) {
+  if (maxX !== undefined && Number.isFinite(maxX)) {
     xScale = { ...xScale, domainMax: maxX };
   }
 

@@ -18,7 +18,7 @@ import clsx from "clsx";
 
 import { defaultBindings, environment } from "@quri/squiggle-lang";
 
-import { SquiggleChart } from "./SquiggleChart";
+import { SquiggleChart, SquiggleChartProps } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
 import { JsonEditor } from "./JsonEditor";
 import { ErrorAlert, SuccessAlert } from "./Alert";
@@ -27,28 +27,16 @@ import { Toggle } from "./ui/Toggle";
 import { Checkbox } from "./ui/Checkbox";
 import { StyledTab } from "./ui/StyledTab";
 
-interface PlaygroundProps {
+type PlaygroundProps = SquiggleChartProps & {
   /** The initial squiggle string to put in the playground */
   defaultCode?: string;
   /** How many pixels high is the playground */
-  height?: number;
-  /** Whether to show the types of outputs in the playground */
-  showTypes?: boolean;
-  /** Whether to show the log scale controls in the playground */
-  showControls?: boolean;
-  /** Whether to show the summary table in the playground */
-  showSummary?: boolean;
-  /** Whether to log the x coordinate on distribution charts */
-  logX?: boolean;
-  /** Whether to exp the y coordinate on distribution charts */
-  expY?: boolean;
-  /** If code is set, component becomes controlled */
-  code?: string;
   onCodeChange?(expr: string): void;
+  /* When settings change */
   onSettingsChange?(settings: any): void;
   /** Should we show the editor? */
   showEditor?: boolean;
-}
+};
 
 const schema = yup.object({}).shape({
   sampleCount: yup
@@ -82,6 +70,12 @@ const schema = yup.object({}).shape({
   showEditor: yup.boolean().required(),
   logX: yup.boolean().required(),
   expY: yup.boolean().required(),
+  tickFormat: yup.string().default(".9~s"),
+  title: yup.string(),
+  color: yup.string().default("#739ECC").required(),
+  minX: yup.number(),
+  maxX: yup.number(),
+  distributionChartActions: yup.boolean(),
   showSettingsPage: yup.boolean().default(false),
   diagramStart: yup.number().required().positive().integer().default(0).min(0),
   diagramStop: yup.number().required().positive().integer().default(10).min(0),
@@ -114,7 +108,7 @@ function InputItem<T>({
 }: {
   name: Path<T>;
   label: string;
-  type: "number";
+  type: "number" | "text" | "color";
   register: UseFormRegister<T>;
 }) {
   return (
@@ -122,7 +116,7 @@ function InputItem<T>({
       <div className="text-sm font-medium text-gray-600 mb-1">{label}</div>
       <input
         type={type}
-        {...register(name)}
+        {...register(name, { valueAsNumber: type === "number" })}
         className="form-input max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
       />
     </label>
@@ -204,6 +198,11 @@ const ViewSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
           />
           <Checkbox
             register={register}
+            name="distributionChartActions"
+            label="Show vega chart controls"
+          />
+          <Checkbox
+            register={register}
             name="showControls"
             label="Show toggles to adjust scale of x and y axes"
           />
@@ -211,6 +210,36 @@ const ViewSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
             register={register}
             name="showSummary"
             label="Show summary statistics"
+          />
+          <InputItem
+            name="minX"
+            type="number"
+            register={register}
+            label="The minimum of the charted distribution domain"
+          />
+          <InputItem
+            name="maxX"
+            type="number"
+            register={register}
+            label="The maximum of the charted distribution domain"
+          />
+          <InputItem
+            name="title"
+            type="text"
+            register={register}
+            label="The title shown on the distribution"
+          />
+          <InputItem
+            name="tickFormat"
+            type="text"
+            register={register}
+            label="The format that the ticks are rendered"
+          />
+          <InputItem
+            name="color"
+            type="color"
+            register={register}
+            label="The color of the charted distribution"
           />
         </div>
       </HeadedSection>
@@ -385,6 +414,12 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   showSummary = false,
   logX = false,
   expY = false,
+  title,
+  minX,
+  maxX,
+  color = "#739ECC",
+  tickFormat = ".9~s",
+  distributionChartActions,
   code: controlledCode,
   onCodeChange,
   onSettingsChange,
@@ -408,6 +443,12 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       showControls,
       logX,
       expY,
+      title,
+      minX,
+      maxX,
+      color,
+      tickFormat,
+      distributionChartActions,
       showSummary,
       showEditor,
       leftSizePercent: 50,
@@ -440,15 +481,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     <SquiggleChart
       code={renderedCode}
       environment={env}
-      diagramStart={Number(vars.diagramStart)}
-      diagramStop={Number(vars.diagramStop)}
-      diagramCount={Number(vars.diagramCount)}
-      height={vars.chartHeight}
-      showTypes={vars.showTypes}
-      showControls={vars.showControls}
-      showSummary={vars.showSummary}
-      logX={vars.logX}
-      expY={vars.expY}
+      {...vars}
       bindings={defaultBindings}
       jsImports={imports}
     />
@@ -496,6 +529,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const withoutEditor = <div className="mt-3">{tabs}</div>;
 
+  console.log(vars);
   return (
     <SquiggleContainer>
       <StyledTab.Group>
