@@ -15004,10 +15004,10 @@ react-use@^17.4.0:
     ts-easing "^0.2.0"
     tslib "^2.1.0"
 
-react-vega@^7.5.1:
-  version "7.5.1"
-  resolved "https://registry.yarnpkg.com/react-vega/-/react-vega-7.5.1.tgz#574ada8b53aa8bdae61a286c1e0fb5a8efdbd064"
-  integrity sha512-pbcSrLsqmUP2+1v+/im99GdGompT0jJwJo9Cjq3QQ9URUYMuEEvfTCergEtfVRcBjC6bPTN6sLbe+8yQSqB4jg==
+react-vega@^7.6.0:
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/react-vega/-/react-vega-7.6.0.tgz#b791c944046b20e02d366c7d0f8dcc21bdb4a6bb"
+  integrity sha512-2oMML4wH9qWLnZPRxJm06ozwrVN/K+nkjqdI5/ofWWsrBnnH4iB9rRKrsV8px0nlWgZrwfdCH4g5RUiyyJHWSA==
   dependencies:
     "@types/react" "*"
     fast-deep-equal "^3.1.1"
