@@ -1,18 +1,11 @@
-import React, { useState } from "react";
-import * as ReactDOM from "react-dom";
+import React from "react";
 import { CodeEditor } from "./CodeEditor";
-import {
-  squiggleExpression,
-  environment,
-  bindings,
-  jsImports,
-  defaultEnvironment,
-} from "@quri/squiggle-lang";
+import { environment, bindings, jsImports } from "@quri/squiggle-lang";
 import { defaultImports, defaultBindings } from "@quri/squiggle-lang";
 import { SquiggleContainer } from "./SquiggleContainer";
-import { useSquiggle, useSquigglePartial } from "../lib/hooks";
+import { SquiggleChart, SquiggleChartProps } from "./SquiggleChart";
+import { useSquigglePartial, useMaybeControlledValue } from "../lib/hooks";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
-import { SquiggleItem } from "./SquiggleItem";
 
 const WrappedCodeEditor: React.FC<{
   code: string;
@@ -29,113 +22,36 @@ const WrappedCodeEditor: React.FC<{
   </div>
 );
 
-export interface SquiggleEditorProps {
-  /** The input string for squiggle */
-  initialSquiggleString?: string;
-  /** The width of the element */
-  width?: number;
-  /** If the result is a function, where the function starts */
-  diagramStart?: number;
-  /** If the result is a function, where the function ends */
-  diagramStop?: number;
-  /** If the result is a function, how many points along the function it samples */
-  diagramCount?: number;
-  /** When the environment changes. Used again for notebook magic */
-  onChange?(expr: squiggleExpression | undefined): void;
-  /** Previous variable declarations */
-  bindings?: bindings;
-  /** If the output requires monte carlo sampling, the amount of samples */
-  environment?: environment;
-  /** JS Imports */
-  jsImports?: jsImports;
-  /** Whether to show detail about types of the returns, default false */
-  showTypes?: boolean;
-  /** Whether to give users access to graph controls */
-  showControls?: boolean;
-  /** Whether to show a summary table */
-  showSummary?: boolean;
-  /** Whether to log the x coordinate on distribution charts */
-  logX?: boolean;
-  /** Whether to exp the y coordinate on distribution charts */
-  expY?: boolean;
-}
+export type SquiggleEditorProps = SquiggleChartProps & {
+  defaultCode?: string;
+  onCodeChange?: (code: string) => void;
+};
 
-export const SquiggleEditor: React.FC<SquiggleEditorProps> = ({
-  initialSquiggleString = "",
-  width,
-  diagramStart = 0,
-  diagramStop = 10,
-  diagramCount = 20,
-  onChange,
-  bindings = defaultBindings,
-  environment,
-  jsImports = defaultImports,
-  showTypes = false,
-  showControls = false,
-  showSummary = false,
-  logX = false,
-  expY = false,
-}: SquiggleEditorProps) => {
-  const [code, setCode] = useState(initialSquiggleString);
-  React.useEffect(
-    () => setCode(initialSquiggleString),
-    [initialSquiggleString]
-  );
-
-  const { result, observableRef } = useSquiggle({
-    code,
-    bindings,
-    environment,
-    jsImports,
-    onChange,
+export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
+  const [code, setCode] = useMaybeControlledValue({
+    value: props.code,
+    defaultValue: props.defaultCode ?? "",
+    onChange: props.onCodeChange,
   });
 
-  const chartSettings = {
-    start: diagramStart,
-    stop: diagramStop,
-    count: diagramCount,
-  };
-
-  const distributionPlotSettings = {
-    showControls,
-    showSummary,
-    logX,
-    expY,
-  };
-
+  let chartProps = { ...props, code };
   return (
-    <div ref={observableRef}>
-      <SquiggleContainer>
-        <WrappedCodeEditor code={code} setCode={setCode} />
-        {result.tag === "Ok" ? (
-          <SquiggleItem
-            expression={result.value}
-            width={width}
-            height={200}
-            distributionPlotSettings={distributionPlotSettings}
-            showTypes={showTypes}
-            chartSettings={chartSettings}
-            environment={environment ?? defaultEnvironment}
-          />
-        ) : (
-          <SquiggleErrorAlert error={result.value} />
-        )}
-      </SquiggleContainer>
-    </div>
+    <SquiggleContainer>
+      <WrappedCodeEditor code={code} setCode={setCode} />
+      <SquiggleChart {...chartProps} />
+    </SquiggleContainer>
   );
 };
 
-export function renderSquiggleEditorToDom(props: SquiggleEditorProps) {
-  const parent = document.createElement("div");
-  ReactDOM.render(<SquiggleEditor {...props} />, parent);
-  return parent;
-}
-
 export interface SquigglePartialProps {
-  /** The input string for squiggle */
-  initialSquiggleString?: string;
+  /** The text inside the input (controlled) */
+  code?: string;
+  /** The default text inside the input (unControlled) */
+  defaultCode?: string;
   /** when the environment changes. Used again for notebook magic*/
   onChange?(expr: bindings | undefined): void;
+  /** When the code changes */
+  onCodeChange?(code: string): void;
   /** Previously declared variables */
   bindings?: bindings;
   /** If the output requires monte carlo sampling, the amount of samples */
@@ -145,19 +61,21 @@ export interface SquigglePartialProps {
 }
 
 export const SquigglePartial: React.FC<SquigglePartialProps> = ({
-  initialSquiggleString = "",
+  code: controlledCode,
+  defaultCode = "",
   onChange,
+  onCodeChange,
   bindings = defaultBindings,
   environment,
   jsImports = defaultImports,
 }: SquigglePartialProps) => {
-  const [code, setCode] = useState(initialSquiggleString);
-  React.useEffect(
-    () => setCode(initialSquiggleString),
-    [initialSquiggleString]
-  );
+  const [code, setCode] = useMaybeControlledValue<string>({
+    value: controlledCode,
+    defaultValue: defaultCode,
+    onChange: onCodeChange,
+  });
 
-  const { result, observableRef } = useSquigglePartial({
+  const result = useSquigglePartial({
     code,
     bindings,
     environment,
@@ -166,19 +84,9 @@ export const SquigglePartial: React.FC<SquigglePartialProps> = ({
   });
 
   return (
-    <div ref={observableRef}>
-      <SquiggleContainer>
-        <WrappedCodeEditor code={code} setCode={setCode} />
-        {result.tag !== "Ok" ? (
-          <SquiggleErrorAlert error={result.value} />
-        ) : null}
-      </SquiggleContainer>
-    </div>
+    <SquiggleContainer>
+      <WrappedCodeEditor code={code} setCode={setCode} />
+      {result.tag !== "Ok" ? <SquiggleErrorAlert error={result.value} /> : null}
+    </SquiggleContainer>
   );
 };
-
-export function renderSquigglePartialToDom(props: SquigglePartialProps) {
-  const parent = document.createElement("div");
-  ReactDOM.render(<SquigglePartial {...props} />, parent);
-  return parent;
-}

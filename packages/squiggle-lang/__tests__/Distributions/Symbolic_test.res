@@ -78,6 +78,23 @@ describe("(Symbolic) mean", () => {
   })
 
   testAll(
+    "of beta distributions from mean and standard dev",
+    list{(0.39, 0.1), (0.08, 0.1), (0.8, 0.3)},
+    tup => {
+      let (mean, stdev) = tup
+      let betaDistribution = SymbolicDist.Beta.fromMeanAndStdev(mean, stdev)
+      let meanValue =
+        betaDistribution->E.R2.fmap(d =>
+          run(FromDist(ToFloat(#Mean), d->DistributionTypes.Symbolic))
+        )
+      switch meanValue {
+      | Ok(value) => value->unpackFloat->expect->toBeCloseTo(mean)
+      | Error(err) => err->expect->toBe("shouldn't happen")
+      }
+    },
+  )
+
+  testAll(
     "of lognormal distributions",
     list{(2.0, 4.0), (1e-7, 1e-2), (-1e6, 10.0), (1e3, -1e2), (-1e8, -1e4), (1e2, 1e-5)},
     tup => {
