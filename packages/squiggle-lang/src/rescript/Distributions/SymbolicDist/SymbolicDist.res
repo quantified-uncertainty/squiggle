@@ -331,9 +331,6 @@ module From90thPercentile = {
 }
 
 module T = {
-  let minCdfValue = 0.0001
-  let maxCdfValue = 0.9999
-
   let pdf = (x, dist) =>
     switch dist {
     | #Normal(n) => Normal.pdf(x, n)
@@ -419,35 +416,39 @@ module T = {
     | #Bernoulli(n) => Bernoulli.toString(n)
     }
 
-  let min: symbolicDist => float = x =>
+  let min = (~percentile: float, x: symbolicDist): float => {
+    let minCdf = (1. -. percentile) /. 2.
     switch x {
     | #Triangular({low}) => low
-    | #Exponential(n) => Exponential.inv(minCdfValue, n)
-    | #Cauchy(n) => Cauchy.inv(minCdfValue, n)
-    | #Normal(n) => Normal.inv(minCdfValue, n)
-    | #Lognormal(n) => Lognormal.inv(minCdfValue, n)
-    | #Logistic(n) => Logistic.inv(minCdfValue, n)
-    | #Gamma(n) => Gamma.inv(minCdfValue, n)
+    | #Exponential(n) => Exponential.inv(minCdf, n)
+    | #Cauchy(n) => Cauchy.inv(minCdf, n)
+    | #Normal(n) => Normal.inv(minCdf, n)
+    | #Lognormal(n) => Lognormal.inv(minCdf, n)
+    | #Logistic(n) => Logistic.inv(minCdf, n)
+    | #Gamma(n) => Gamma.inv(minCdf, n)
     | #Uniform({low}) => low
     | #Bernoulli(n) => Bernoulli.min(n)
-    | #Beta(n) => Beta.inv(minCdfValue, n)
+    | #Beta(n) => Beta.inv(minCdf, n)
     | #Float(n) => n
     }
+  }
 
-  let max: symbolicDist => float = x =>
+  let max = (~percentile: float, x: symbolicDist): float => {
+    let maxCdf = 1. -. (1. -. percentile) /. 2.
     switch x {
     | #Triangular(n) => n.high
-    | #Exponential(n) => Exponential.inv(maxCdfValue, n)
-    | #Cauchy(n) => Cauchy.inv(maxCdfValue, n)
-    | #Normal(n) => Normal.inv(maxCdfValue, n)
-    | #Gamma(n) => Gamma.inv(maxCdfValue, n)
-    | #Lognormal(n) => Lognormal.inv(maxCdfValue, n)
-    | #Logistic(n) => Logistic.inv(maxCdfValue, n)
-    | #Beta(n) => Beta.inv(maxCdfValue, n)
+    | #Exponential(n) => Exponential.inv(maxCdf, n)
+    | #Cauchy(n) => Cauchy.inv(maxCdf, n)
+    | #Normal(n) => Normal.inv(maxCdf, n)
+    | #Gamma(n) => Gamma.inv(maxCdf, n)
+    | #Lognormal(n) => Lognormal.inv(maxCdf, n)
+    | #Logistic(n) => Logistic.inv(maxCdf, n)
+    | #Beta(n) => Beta.inv(maxCdf, n)
     | #Bernoulli(n) => Bernoulli.max(n)
     | #Uniform({high}) => high
     | #Float(n) => n
     }
+  }
 
   let mean: symbolicDist => result<float, string> = x =>
     switch x {
@@ -469,15 +470,20 @@ module T = {
     | #Cdf(f) => Ok(cdf(f, s))
     | #Pdf(f) => Ok(pdf(f, s))
     | #Inv(f) => Ok(inv(f, s))
-    | #Min => Ok(min(s))
-    | #Max => Ok(max(s))
+    | #Min(percentile) => Ok(min(~percentile, s))
+    | #Max(percentile) => Ok(min(~percentile, s))
     | #Sample => Ok(sample(s))
     | #Mean => mean(s)
     }
 
-  let interpolateXs = (~xSelection: [#Linear | #ByWeight]=#Linear, dist: symbolicDist, n) =>
+  let interpolateXs = (
+    ~percentile: float,
+    ~xSelection: [#Linear | #ByWeight]=#Linear,
+    dist: symbolicDist,
+    n,
+  ) => {
     switch (xSelection, dist) {
-    | (#Linear, _) => E.A.Floats.range(min(dist), max(dist), n)
+    | (#Linear, _) => E.A.Floats.range(min(~percentile, dist), max(~percentile, dist), n)
     | (#ByWeight, #Uniform(n)) =>
       // In `ByWeight mode, uniform distributions get special treatment because we need two x's
       // on either side for proper rendering (just left and right of the discontinuities).
@@ -485,9 +491,12 @@ module T = {
       let dx = MagicNumbers.Epsilon.ten *. distance
       [n.low -. dx, n.low, n.low +. dx, n.high -. dx, n.high, n.high +. dx]
     | (#ByWeight, _) =>
-      let ys = E.A.Floats.range(minCdfValue, maxCdfValue, n)
+      let minCdf = (1. -. percentile) /. 2.
+      let maxCdf = 1. -. minCdf
+      let ys = E.A.Floats.range(minCdf, maxCdf, n)
       ys |> E.A.fmap(y => inv(y, dist))
     }
+  }
 
   /* Calling e.g. "Normal.operate" returns an optional that wraps a result.
      If the optional is None, there is no valid analytic solution. If it Some, it
@@ -533,6 +542,7 @@ module T = {
     }
 
   let toPointSetDist = (
+    ~percentile: float,
     ~xSelection=#ByWeight,
     sampleCount,
     d: symbolicDist,
@@ -541,7 +551,7 @@ module T = {
     | #Float(v) => Float.toPointSetDist(v)
     | #Bernoulli(v) => Bernoulli.toPointSetDist(v)
     | _ =>
-      let xs = interpolateXs(~xSelection, d, sampleCount)
+      let xs = interpolateXs(~percentile, ~xSelection, d, sampleCount)
       let ys = xs |> E.A.fmap(x => pdf(x, d))
       Continuous(Continuous.make(~integralSumCache=Some(1.0), {xs: xs, ys: ys}))
     }

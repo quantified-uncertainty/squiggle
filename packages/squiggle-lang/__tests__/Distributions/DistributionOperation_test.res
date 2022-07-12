@@ -1,10 +1,6 @@
 open Jest
 open Expect
-
-let env: DistributionOperation.env = {
-  sampleCount: 100,
-  xyPointLength: 100,
-}
+open TestHelpers
 
 let {
   normalDist5,

@@ -108,7 +108,7 @@ let toFloatOperation = (
 ) => {
   switch distToFloatOperation {
   | #IntegralSum => Ok(integralEndY(t))
-  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Sample | #Min | #Max) as op => {
+  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Sample | #Min(_) | #Max(_)) as op => {
       let trySymbolicSolution = switch (t: t) {
       | Symbolic(r) => SymbolicDist.T.operate(op, r)->E.R.toOption
       | _ => None
@@ -118,8 +118,8 @@ let toFloatOperation = (
       | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
       | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
       | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
-      | (SampleSet(sampleSet), #Min) => SampleSetDist.min(sampleSet)->Some
-      | (SampleSet(sampleSet), #Max) => SampleSetDist.max(sampleSet)->Some
+      | (SampleSet(sampleSet), #Min(_)) => SampleSetDist.min(sampleSet)->Some
+      | (SampleSet(sampleSet), #Max(_)) => SampleSetDist.max(sampleSet)->Some
       | _ => None
       }
 
@@ -150,6 +150,7 @@ let toFloatOperation = (
 // Also, change the outputXYPoints/pointSetDistLength details
 let toPointSet = (
   t,
+  ~percentile: float,
   ~xyPointLength,
   ~sampleCount,
   ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=#ByWeight,
@@ -157,7 +158,7 @@ let toPointSet = (
 ): result<PointSetTypes.pointSetDist, error> => {
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
-  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, xyPointLength, r))
+  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~percentile, ~xSelection, xyPointLength, r))
   | SampleSet(r) =>
     SampleSetDist.toPointSetDist(
       ~samples=r,
@@ -177,9 +178,12 @@ let toPointSet = (
   xyPointLength to be a bit longer than the eventual toSparkline downsampling. I chose 3 
   fairly arbitrarily.
  */
-let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<string, error> =>
+let toSparkline = (t: t, ~percentile: float, ~sampleCount: int, ~bucketCount: int=20, ()): result<
+  string,
+  error,
+> =>
   t
-  ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
+  ->toPointSet(~percentile, ~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
   ->E.R.bind(r =>
     r->PointSetDist.toSparkline(bucketCount)->E.R2.errMap(x => DistributionTypes.SparklineError(x))
   )

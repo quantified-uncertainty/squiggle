@@ -30,6 +30,7 @@ let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Ou
 let fnImage = (theFn, inps) => Js.Array.map(theFn, inps)
 
 let env: DistributionOperation.env = {
+  percentile: 0.9998,
   sampleCount: MagicNumbers.Environment.defaultSampleCount,
   xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }

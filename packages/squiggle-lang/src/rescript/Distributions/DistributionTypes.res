@@ -70,8 +70,8 @@ module DistributionOperation = {
     | #IntegralSum
     | #Mode
     | #Stdev
-    | #Min
-    | #Max
+    | #Min(float)
+    | #Max(float)
     | #Variance
   ]
 
@@ -123,8 +123,8 @@ module DistributionOperation = {
     | ToFloat(#Cdf(r)) => `cdf(${E.Float.toFixed(r)})`
     | ToFloat(#Inv(r)) => `inv(${E.Float.toFixed(r)})`
     | ToFloat(#Mean) => `mean`
-    | ToFloat(#Min) => `min`
-    | ToFloat(#Max) => `max`
+    | ToFloat(#Min(_)) => `min`
+    | ToFloat(#Max(_)) => `max`
     | ToFloat(#Stdev) => `stdev`
     | ToFloat(#Variance) => `variance`
     | ToFloat(#Mode) => `mode`

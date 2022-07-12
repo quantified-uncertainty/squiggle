@@ -39,20 +39,17 @@ export type { result, shape, environment, lambdaValue, squiggleExpression };
 
 export { parse } from "./parse";
 
-export let defaultSamplingInputs: environment = {
-  sampleCount: 10000,
-  xyPointLength: 10000,
-};
-
 export function run(
   squiggleString: string,
   bindings?: externalBindings,
-  environment?: environment,
+  environment?: Partial<environment>,
   imports?: jsImports
 ): result<squiggleExpression, errorValue> {
   let b = bindings ? bindings : defaultBindings;
   let i = imports ? imports : defaultImports;
-  let e = environment ? environment : defaultEnvironment;
+  let e = environment
+    ? _.merge(defaultEnvironment, environment)
+    : defaultEnvironment;
   let res: result<expressionValue, errorValue> = evaluateUsingOptions(
     { externalBindings: mergeImportsWithBindings(b, i), environment: e },
     squiggleString
@@ -64,12 +61,14 @@ export function run(
 export function runPartial(
   squiggleString: string,
   bindings?: externalBindings,
-  environment?: environment,
+  environment?: Partial<environment>,
   imports?: jsImports
 ): result<externalBindings, errorValue> {
   let b = bindings ? bindings : defaultBindings;
   let i = imports ? imports : defaultImports;
-  let e = environment ? environment : defaultEnvironment;
+  let e = environment
+    ? _.merge(defaultEnvironment, environment)
+    : defaultEnvironment;
 
   return evaluatePartialUsingExternalBindings(
     squiggleString,

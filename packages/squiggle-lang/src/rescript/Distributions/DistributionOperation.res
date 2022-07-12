@@ -5,11 +5,13 @@ type error = DistributionTypes.error
 // TODO: It could be great to use a cache for some calculations (basically, do memoization). Also, better analytics/tracking could go a long way.
 
 type env = {
+  percentile: float,
   sampleCount: int,
   xyPointLength: int,
 }
 
 let defaultEnv = {
+  percentile: 0.9998,
   sampleCount: MagicNumbers.Environment.defaultSampleCount,
   xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
@@ -137,7 +139,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->OutputLocal.fromResult
     | ToString(ToString) => dist->GenericDist.toString->String
     | ToString(ToSparkline(bucketCount)) =>
-      GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
+      GenericDist.toSparkline(dist, ~percentile=env.percentile, ~sampleCount, ~bucketCount, ())
       ->E.R2.fmap(r => String(r))
       ->OutputLocal.fromResult
     | ToDist(Inspect) => {
@@ -170,7 +172,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       ->OutputLocal.fromResult
     | ToDist(ToPointSet) =>
       dist
-      ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
+      ->GenericDist.toPointSet(~percentile=env.percentile, ~xyPointLength, ~sampleCount, ())
       ->E.R2.fmap(r => Dist(PointSet(r)))
       ->OutputLocal.fromResult
     | ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>

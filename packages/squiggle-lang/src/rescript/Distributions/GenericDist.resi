@@ -37,12 +37,19 @@ module Score: {
 @genType
 let toPointSet: (
   t,
+  ~percentile: float,
   ~xyPointLength: int,
   ~sampleCount: int,
   ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=?,
   unit,
 ) => result<PointSetTypes.pointSetDist, error>
-let toSparkline: (t, ~sampleCount: int, ~bucketCount: int=?, unit) => result<string, error>
+let toSparkline: (
+  t,
+  ~percentile: float,
+  ~sampleCount: int,
+  ~bucketCount: int=?,
+  unit,
+) => result<string, error>
 
 let truncate: (
   t,

@@ -55,6 +55,7 @@ const schema = yup.object({}).shape({
     .default(1000)
     .min(10)
     .max(10000),
+  percentile: yup.number().required().positive().default(0.9998).min(0).max(1),
   chartHeight: yup.number().required().positive().integer().default(350),
   leftSizePercent: yup
     .number()
@@ -152,6 +153,20 @@ const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
         <Text>
           When distributions are converted into PointSet shapes, we need to know
           how many coordinates to use.
+        </Text>
+      </div>
+    </div>
+    <div>
+      <InputItem
+        name="percentile"
+        type="number"
+        label="Symbolic Distribution Percentile"
+        register={register}
+      />
+      <div className="mt-2">
+        <Text>
+          When converting symbolic distributions to PointSet distributions, what
+          percentile to sample the points within.
         </Text>
       </div>
     </div>
@@ -436,6 +451,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   const { register, control } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
+      percentile: 0.9998,
       sampleCount: 1000,
       xyPointLength: 1000,
       chartHeight: 150,
@@ -468,6 +484,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const env: environment = useMemo(
     () => ({
+      percentile: Number(vars.percentile),
       sampleCount: Number(vars.sampleCount),
       xyPointLength: Number(vars.xyPointLength),
     }),

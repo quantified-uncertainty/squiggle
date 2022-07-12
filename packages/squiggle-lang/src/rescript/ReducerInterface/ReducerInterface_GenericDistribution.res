@@ -216,8 +216,8 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
       | "mean" => #Mean
       | "stdev" => #Stdev
       | "variance" => #Variance
-      | "min" => #Min
-      | "max" => #Max
+      | "min" => #Min(env.percentile)
+      | "max" => #Max(env.percentile)
       | "mode" => #Mode
       | _ => #Mean
       }

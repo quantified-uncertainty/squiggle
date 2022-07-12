@@ -254,8 +254,8 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Inv(f) => inv(f, s)
   | #Sample => sample(s)
   | #Mean => T.mean(s)
-  | #Min => T.minX(s)
-  | #Max => T.maxX(s)
+  | #Min(_) => T.minX(s)
+  | #Max(_) => T.maxX(s)
   }
 
 let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineError> =>

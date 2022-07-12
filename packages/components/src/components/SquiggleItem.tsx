@@ -219,6 +219,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
             distributionPlotSettings={distributionPlotSettings}
             height={height}
             environment={{
+              ...environment,
               sampleCount: environment.sampleCount / 10,
               xyPointLength: environment.xyPointLength / 10,
             }}
@@ -234,6 +235,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
             distributionPlotSettings={distributionPlotSettings}
             height={height}
             environment={{
+              ...environment,
               sampleCount: environment.sampleCount / 10,
               xyPointLength: environment.xyPointLength / 10,
             }}
@@ -246,7 +248,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
         <VariableBox heading="Module" showTypes={showTypes}>
           <div className="space-y-3">
             {Object.entries(expression.value)
-              .filter(([key, r]) => key !== "Math")
+              .filter(([key, _]) => key !== "Math")
               .map(([key, r]) => (
                 <div key={key} className="flex space-x-2">
                   <div className="flex-none">

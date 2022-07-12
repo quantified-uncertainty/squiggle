@@ -105,14 +105,7 @@ export class Distribution {
   }
 
   pointSet(): result<shape, distributionError> {
-    let pointSet = toPointSet(
-      this.t,
-      {
-        xyPointLength: this.env.xyPointLength,
-        sampleCount: this.env.sampleCount,
-      },
-      undefined
-    );
+    let pointSet = toPointSet(this.t, this.env, undefined);
     if (pointSet.tag === "Ok") {
       let distribution = pointSet.value;
       if (distribution.tag === "Continuous") {

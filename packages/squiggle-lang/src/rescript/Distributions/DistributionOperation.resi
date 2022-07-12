@@ -1,5 +1,6 @@
 @genType
 type env = {
+  percentile: float,
   sampleCount: int,
   xyPointLength: int,
 }
