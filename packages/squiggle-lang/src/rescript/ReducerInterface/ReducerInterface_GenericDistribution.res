@@ -231,10 +231,7 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
       DistributionOperation.run(
         FromDist(
           #ToScore(
-            LogScore(
-              DistributionTypes.DistributionOperation.Score_Dist(answer),
-              Some(DistributionTypes.DistributionOperation.Score_Dist(prior)),
-            ),
+            LogScore(DistributionTypes.DistributionOperation.Score_Dist(answer), Some(prior)),
           ),
           prediction,
         ),
@@ -256,10 +253,7 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
     DistributionOperation.run(
       FromDist(
         #ToScore(
-          LogScore(
-            DistributionTypes.DistributionOperation.Score_Scalar(answer),
-            DistributionTypes.DistributionOperation.Score_Dist(prior)->Some,
-          ),
+          LogScore(DistributionTypes.DistributionOperation.Score_Scalar(answer), prior->Some),
         ),
         prediction,
       ),

@@ -72,7 +72,7 @@ module Constructors: {
       ~env: env,
       genericDist,
       genericDist,
-      DistributionTypes.DistributionOperation.genericDistOrScalar,
+      genericDist,
     ) => result<float, error>
     @genType
     let distEstimateScalarAnswer: (~env: env, genericDist, float) => result<float, error>
@@ -81,7 +81,7 @@ module Constructors: {
       ~env: env,
       genericDist,
       float,
-      DistributionTypes.DistributionOperation.genericDistOrScalar,
+      genericDist,
     ) => result<float, error>
   }
   @genType

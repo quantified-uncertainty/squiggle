@@ -26,9 +26,9 @@ let toFloatOperation: (
 
 module Score: {
   let logScore: (
-    ~estimate: DistributionTypes.DistributionOperation.genericDistOrScalar,
+    ~estimate: t,
     ~answer: DistributionTypes.DistributionOperation.genericDistOrScalar,
-    ~prior: option<DistributionTypes.DistributionOperation.genericDistOrScalar>,
+    ~prior: option<t>,
   ) => result<float, error>
 }
 

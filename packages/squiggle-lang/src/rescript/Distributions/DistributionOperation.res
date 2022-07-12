@@ -146,7 +146,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       }
     | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
     | #ToScore(LogScore(answer, prior)) =>
-      GenericDist.Score.logScore(~estimate=Score_Dist(dist), ~answer, ~prior)
+      GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior)
       ->E.R2.fmap(s => Float(s))
       ->OutputLocal.fromResult
     | #ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool

@@ -19,7 +19,7 @@ module WithDistAnswer = {
     float,
     Operation.Error.t,
   > =>
-    // We decided that negative infinity, not an error at answerElement = 0.0, is a desirable value.
+    // We decided that 0.0, not an error at answerElement = 0.0, is a desirable value.
     if answerElement == 0.0 {
       Ok(0.0)
     } else if estimateElement == 0.0 {
