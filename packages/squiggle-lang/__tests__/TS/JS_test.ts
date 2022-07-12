@@ -3,6 +3,7 @@ import {
   resultMap,
   defaultBindings,
   mergeBindings,
+  defaultEnvironment,
 } from "../../src/js/index";
 import { testRun, testRunPartial } from "./TestHelpers";
 
@@ -109,7 +110,7 @@ describe("JS Imports", () => {
 describe("Distribution", () => {
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
   //Also, note, the value should be created using makeSampleSetDist() later on.
-  let env = { sampleCount: 8, xyPointLength: 100 };
+  let env = { ...defaultEnvironment, sampleCount: 8, xyPointLength: 100 };
   let dist1Samples = [3, 4, 5, 6, 6, 7, 10, 15, 30];
   let dist1SampleCount = dist1Samples.length;
   let dist = new Distribution(

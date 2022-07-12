@@ -1,4 +1,4 @@
-import { Distribution } from "../../src/js/index";
+import { Distribution, defaultEnvironment } from "../../src/js/index";
 import { expectErrorToBeBounded, failDefault, testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 
@@ -16,6 +16,7 @@ let arrayGen = () =>
     );
 describe("cumulative density function", () => {
   let n = 10000;
+  let env = { ...defaultEnvironment, sampleCount: n, xyPointLength: 100 };
 
   // We should fix this.
   test.skip("'s codomain is bounded above", () => {
@@ -23,10 +24,7 @@ describe("cumulative density function", () => {
       fc.property(arrayGen(), fc.float(), (xs_, x) => {
         let xs = Array.from(xs_);
         // Should compute with squiggle strings once interpreter has `sample`
-        let dist = new Distribution(
-          { tag: "SampleSet", value: xs },
-          { sampleCount: n, xyPointLength: 100 }
-        );
+        let dist = new Distribution({ tag: "SampleSet", value: xs }, env);
         let cdfValue = dist.cdf(x).value;
         let epsilon = 5e-7;
         expect(cdfValue).toBeLessThanOrEqual(1 + epsilon);
@@ -39,10 +37,7 @@ describe("cumulative density function", () => {
       fc.property(arrayGen(), fc.float(), (xs_, x) => {
         let xs = Array.from(xs_);
         // Should compute with squiggle strings once interpreter has `sample`
-        let dist = new Distribution(
-          { tag: "SampleSet", value: xs },
-          { sampleCount: n, xyPointLength: 100 }
-        );
+        let dist = new Distribution({ tag: "SampleSet", value: xs }, env);
         let cdfValue = dist.cdf(x).value;
         expect(cdfValue).toBeGreaterThanOrEqual(0);
       })
@@ -57,10 +52,7 @@ describe("cumulative density function", () => {
         let xs = Array.from(xs_);
         let max = Math.max(...xs);
         // Should compute with squiggle strings once interpreter has `sample`
-        let dist = new Distribution(
-          { tag: "SampleSet", value: xs },
-          { sampleCount: n, xyPointLength: 100 }
-        );
+        let dist = new Distribution({ tag: "SampleSet", value: xs }, env);
         let cdfValue = dist.cdf(max).value;
         expect(cdfValue).toBeCloseTo(1.0, 2);
       })
@@ -74,10 +66,7 @@ describe("cumulative density function", () => {
         let xs = Array.from(xs_);
         let min = Math.min(...xs);
         // Should compute with squiggle strings once interpreter has `sample`
-        let dist = new Distribution(
-          { tag: "SampleSet", value: xs },
-          { sampleCount: n, xyPointLength: 100 }
-        );
+        let dist = new Distribution({ tag: "SampleSet", value: xs }, env);
         let cdfValue = dist.cdf(min).value;
         let max = Math.max(...xs);
         let epsilon = 5e-3;
@@ -95,10 +84,7 @@ describe("cumulative density function", () => {
     fc.assert(
       fc.property(arrayGen(), fc.float(), (xs_, x) => {
         let xs = Array.from(xs_);
-        let dist = new Distribution(
-          { tag: "SampleSet", value: xs },
-          { sampleCount: n, xyPointLength: 100 }
-        );
+        let dist = new Distribution({ tag: "SampleSet", value: xs }, env);
         let cdfValue = dist.cdf(x).value;
         let max = Math.max(...xs);
         if (x > max) {
@@ -117,10 +103,7 @@ describe("cumulative density function", () => {
     fc.assert(
       fc.property(arrayGen(), fc.float(), (xs_, x) => {
         let xs = Array.from(xs_);
-        let dist = new Distribution(
-          { tag: "SampleSet", value: xs },
-          { sampleCount: n, xyPointLength: 100 }
-        );
+        let dist = new Distribution({ tag: "SampleSet", value: xs }, env);
         let cdfValue = dist.cdf(x).value;
         expect(cdfValue).toBeGreaterThanOrEqual(0);
       })
@@ -131,6 +114,7 @@ describe("cumulative density function", () => {
 // I no longer believe this is true.
 describe("probability density function", () => {
   let n = 1000;
+  let env = { ...defaultEnvironment, sampleCount: n, xyPointLength: 100 };
 
   test.skip("assigns to the max at most the weight of the mean", () => {
     fc.assert(
@@ -139,10 +123,7 @@ describe("probability density function", () => {
         let max = Math.max(...xs);
         let mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
         // Should be from squiggleString once interpreter exposes sampleset
-        let dist = new Distribution(
-          { tag: "SampleSet", value: xs },
-          { sampleCount: n, xyPointLength: 100 }
-        );
+        let dist = new Distribution({ tag: "SampleSet", value: xs }, env);
         let pdfValueMean = dist.pdf(mean).value;
         let pdfValueMax = dist.pdf(max).value;
         if (typeof pdfValueMean == "number" && typeof pdfValueMax == "number") {
@@ -166,7 +147,7 @@ describe("mean is mean", () => {
           let n = xs.length;
           let dist = new Distribution(
             { tag: "SampleSet", value: xs },
-            { sampleCount: 2 * n, xyPointLength: 4 * n }
+            { ...defaultEnvironment, sampleCount: 2 * n, xyPointLength: 4 * n }
           );
           let mean = dist.mean();
           if (typeof mean.value == "number") {
@@ -193,7 +174,11 @@ describe("mean is mean", () => {
           let n = xs.length;
           let dist = new Distribution(
             { tag: "SampleSet", value: xs },
-            { sampleCount: Math.floor(n / 2), xyPointLength: 4 * n }
+            {
+              ...defaultEnvironment,
+              sampleCount: Math.floor(n / 2),
+              xyPointLength: 4 * n,
+            }
           );
           let mean = dist.mean();
           if (typeof mean.value == "number") {
