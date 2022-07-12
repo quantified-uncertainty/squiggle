@@ -4,6 +4,7 @@ import {
   result,
   distributionError,
   distributionErrorToString,
+  squiggleExpression,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -23,16 +24,58 @@ export type DistributionPlottingSettings = {
   showControls: boolean;
 } & DistributionChartSpecOptions;
 
+export type Plot = {
+  distributions: Distribution[];
+};
+
 export type DistributionChartProps = {
-  distribution: Distribution;
+  plot: Plot;
   width?: number;
   height: number;
   actions?: boolean;
 } & DistributionPlottingSettings;
 
+export function defaultPlot(distribution: Distribution): Plot {
+  return { distributions: [distribution] };
+}
+export function makePlot(expression: {
+  [key: string]: squiggleExpression;
+}): Plot | void {
+  if (expression["distributions"].tag === "array") {
+    let distributions: Distribution[] = expression["distributions"].value
+      .map((x) => {
+        if (x.tag === "distribution") {
+          return x.value;
+        }
+      })
+      .filter((x): x is Distribution => x !== undefined);
+    return { distributions };
+  }
+}
+function all(arr: boolean[]): boolean {
+  return arr.reduce((x, y) => x && y, true);
+}
+
+function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
+  if (x.length === 0) {
+    return { tag: "Ok", value: [] };
+  } else {
+    if (x[0].tag === "Error") {
+      return x[0];
+    } else {
+      let rest = flattenResult(x.splice(1));
+      if (rest.tag === "Error") {
+        return rest;
+      } else {
+        return { tag: "Ok", value: [x[0].value].concat(rest.value) };
+      }
+    }
+  }
+}
+
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const {
-    distribution,
+    plot,
     height,
     showSummary,
     width,
@@ -47,19 +90,23 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   React.useEffect(() => setLogX(logX), [logX]);
   React.useEffect(() => setExpY(expY), [expY]);
 
-  const shape = distribution.pointSet();
   const [sized] = useSize((size) => {
-    if (shape.tag === "Error") {
+    let shapes = flattenResult(plot.distributions.map((x) => x.pointSet()));
+    if (shapes.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(shape.value)}
+          {distributionErrorToString(shapes.value)}
         </ErrorAlert>
       );
     }
 
-    const massBelow0 =
-      shape.value.continuous.some((x) => x.x <= 0) ||
-      shape.value.discrete.some((x) => x.x <= 0);
+    const massBelow0 = all(
+      shapes.value.map(
+        (shape) =>
+          shape.continuous.some((x) => x.x <= 0) ||
+          shape.discrete.some((x) => x.x <= 0)
+      )
+    );
     const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
@@ -69,13 +116,20 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
       widthProp = 20;
     }
+    let continuousPoints = shapes.value.flatMap((shape, i) =>
+      shape.continuous.map((point) => ({ ...point, name: i + 1 }))
+    );
+    let discretePoints = shapes.value.flatMap((shape, i) =>
+      shape.discrete.map((point) => ({ ...point, name: i + 1 }))
+    );
 
+    console.log(continuousPoints);
     return (
       <div style={{ width: widthProp }}>
         {!(isLogX && massBelow0) ? (
           <Vega
             spec={spec}
-            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+            data={{ con: continuousPoints, dis: discretePoints }}
             width={widthProp - 10}
             height={height}
             actions={actions}
@@ -86,7 +140,9 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
           </ErrorAlert>
         )}
         <div className="flex justify-center">
-          {showSummary && <SummaryTable distribution={distribution} />}
+          {showSummary && plot.distributions.length == 1 && (
+            <SummaryTable distribution={plot.distributions[0]} />
+          )}
         </div>
         {showControls && (
           <div>

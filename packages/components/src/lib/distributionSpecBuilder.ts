@@ -137,7 +137,21 @@ export function buildVegaSpec(
       },
     ],
     signals: [],
-    scales: [xScale, expY ? expYScale : linearYScale],
+    scales: [
+      xScale,
+      expY ? expYScale : linearYScale,
+      {
+        name: "color",
+        type: "ordinal",
+        domain: {
+          fields: [
+            { data: "con", field: "name" },
+            { data: "dis", field: "name" },
+          ],
+        },
+        range: { scheme: "category20b" },
+      },
+    ],
     axes: [
       {
         orient: "bottom",
@@ -153,33 +167,48 @@ export function buildVegaSpec(
     ],
     marks: [
       {
-        type: "area",
+        name: "group",
+        type: "group",
         from: {
-          data: "con",
-        },
-        encode: {
-          update: {
-            interpolate: { value: "linear" },
-            x: {
-              scale: "xscale",
-              field: "x",
-            },
-            y: {
-              scale: "yscale",
-              field: "y",
-            },
-            y2: {
-              scale: "yscale",
-              value: 0,
-            },
-            fill: {
-              value: color,
-            },
-            fillOpacity: {
-              value: 1,
-            },
+          facet: {
+            name: "faceted_path_main",
+            data: "con",
+            groupby: ["name"],
           },
         },
+        marks: [
+          {
+            name: "distribution_charts",
+            type: "area",
+            from: {
+              data: "faceted_path_main",
+            },
+            encode: {
+              update: {
+                interpolate: { value: "linear" },
+                x: {
+                  scale: "xscale",
+                  field: "x",
+                },
+                y: {
+                  scale: "yscale",
+                  field: "y",
+                },
+                y2: {
+                  scale: "yscale",
+                  value: 0,
+                },
+                fill: {
+                  field: "name",
+                  scale: "color",
+                },
+                fillOpacity: {
+                  value: 1,
+                },
+              },
+            },
+          },
+        ],
       },
       {
         type: "rect",

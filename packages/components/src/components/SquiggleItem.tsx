@@ -8,6 +8,8 @@ import { NumberShower } from "./NumberShower";
 import {
   DistributionChart,
   DistributionPlottingSettings,
+  makePlot,
+  defaultPlot,
 } from "./DistributionChart";
 import { FunctionChart, FunctionChartSettings } from "./FunctionChart";
 
@@ -102,7 +104,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
             <div>{expression.value.toString()}</div>
           ) : null}
           <DistributionChart
-            distribution={expression.value}
+            plot={defaultPlot(expression.value)}
             {...distributionPlotSettings}
             height={height}
             width={width}
@@ -164,6 +166,17 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
         </VariableBox>
       );
     case "record":
+      let plot = makePlot(expression.value);
+      if (plot) {
+        return (
+          <DistributionChart
+            plot={plot}
+            {...distributionPlotSettings}
+            height={height}
+            width={width}
+          />
+        );
+      }
       return (
         <VariableBox heading="Record" showTypes={showTypes}>
           <div className="space-y-3">
@@ -246,7 +259,7 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
         <VariableBox heading="Module" showTypes={showTypes}>
           <div className="space-y-3">
             {Object.entries(expression.value)
-              .filter(([key, r]) => key !== "Math")
+              .filter(([key, _]) => key !== "Math")
               .map(([key, r]) => (
                 <div key={key} className="flex space-x-2">
                   <div className="flex-none">
