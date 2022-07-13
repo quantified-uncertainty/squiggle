@@ -547,6 +547,7 @@ module A = {
   let init = Array.init
   let reduce = Belt.Array.reduce
   let reducei = Belt.Array.reduceWithIndex
+  let some = Belt.Array.some
   let isEmpty = r => length(r) < 1
   let stableSortBy = Belt.SortArray.stableSortBy
   let toNoneIfEmpty = r => isEmpty(r) ? None : Some(r)

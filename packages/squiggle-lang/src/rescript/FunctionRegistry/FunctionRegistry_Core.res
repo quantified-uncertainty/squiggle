@@ -8,6 +8,7 @@ type rec frType =
   | FRTypeNumber
   | FRTypeNumeric
   | FRTypeDistOrNumber
+  | FRTypeDist
   | FRTypeLambda
   | FRTypeRecord(frTypeRecord)
   | FRTypeDict(frType)
@@ -41,7 +42,7 @@ and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.g
 type fnDefinition = {
   name: string,
   inputs: array<frType>,
-  run: (array<frValue>, DistributionOperation.env) => result<internalExpressionValue, string>,
+  run: (array<frValue>, GenericDist.env) => result<internalExpressionValue, string>,
 }
 
 type function = {
@@ -60,6 +61,7 @@ module FRType = {
     switch t {
     | FRTypeNumber => "number"
     | FRTypeNumeric => "numeric"
+    | FRTypeDist => "distribution"
     | FRTypeDistOrNumber => "distribution|number"
     | FRTypeRecord(r) => {
         let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
@@ -98,6 +100,7 @@ module FRType = {
     | (FRTypeDistOrNumber, IEvDistribution(Symbolic(#Float(f)))) =>
       Some(FRValueDistOrNumber(FRValueNumber(f)))
     | (FRTypeDistOrNumber, IEvDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
+    | (FRTypeDist, IEvDistribution(f)) => Some(FRValueDist(f))
     | (FRTypeNumeric, IEvNumber(f)) => Some(FRValueNumber(f))
     | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
     | (FRTypeLambda, IEvLambda(f)) => Some(FRValueLambda(f))
@@ -319,7 +322,7 @@ module FnDefinition = {
     t.name ++ `(${inputs})`
   }
 
-  let run = (t: t, args: array<internalExpressionValue>, env: DistributionOperation.env) => {
+  let run = (t: t, args: array<internalExpressionValue>, env: GenericDist.env) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
     | Some(values) => t.run(values, env)
@@ -374,7 +377,7 @@ module Registry = {
     ~registry: registry,
     ~fnName: string,
     ~args: array<internalExpressionValue>,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ) => {
     let matchToDef = m => Matcher.Registry.matchToDef(registry, m)
     //Js.log(toSimple(registry))

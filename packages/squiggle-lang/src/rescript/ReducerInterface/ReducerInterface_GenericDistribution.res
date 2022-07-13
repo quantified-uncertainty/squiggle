@@ -32,50 +32,38 @@ module Helpers = {
   let toFloatFn = (
     fnCall: DistributionTypes.DistributionOperation.toFloat,
     dist: DistributionTypes.genericDist,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ) => {
-    FromDist(DistributionTypes.DistributionOperation.ToFloat(fnCall), dist)
-    ->DistributionOperation.run(~env)
-    ->Some
+    FromDist(#ToFloat(fnCall), dist)->DistributionOperation.run(~env)->Some
   }
 
   let toStringFn = (
     fnCall: DistributionTypes.DistributionOperation.toString,
     dist: DistributionTypes.genericDist,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ) => {
-    FromDist(DistributionTypes.DistributionOperation.ToString(fnCall), dist)
-    ->DistributionOperation.run(~env)
-    ->Some
+    FromDist(#ToString(fnCall), dist)->DistributionOperation.run(~env)->Some
   }
 
   let toBoolFn = (
     fnCall: DistributionTypes.DistributionOperation.toBool,
     dist: DistributionTypes.genericDist,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ) => {
-    FromDist(DistributionTypes.DistributionOperation.ToBool(fnCall), dist)
-    ->DistributionOperation.run(~env)
-    ->Some
+    FromDist(#ToBool(fnCall), dist)->DistributionOperation.run(~env)->Some
   }
 
   let toDistFn = (
     fnCall: DistributionTypes.DistributionOperation.toDist,
     dist,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ) => {
-    FromDist(DistributionTypes.DistributionOperation.ToDist(fnCall), dist)
-    ->DistributionOperation.run(~env)
-    ->Some
+    FromDist(#ToDist(fnCall), dist)->DistributionOperation.run(~env)->Some
   }
 
-  let twoDiststoDistFn = (direction, arithmetic, dist1, dist2, ~env: DistributionOperation.env) => {
+  let twoDiststoDistFn = (direction, arithmetic, dist1, dist2, ~env: GenericDist.env) => {
     FromDist(
-      DistributionTypes.DistributionOperation.ToDistCombination(
-        direction,
-        arithmeticMap(arithmetic),
-        #Dist(dist2),
-      ),
+      #ToDistCombination(direction, arithmeticMap(arithmetic), #Dist(dist2)),
       dist1,
     )->DistributionOperation.run(~env)
   }
@@ -109,7 +97,7 @@ module Helpers = {
   let mixtureWithGivenWeights = (
     distributions: array<DistributionTypes.genericDist>,
     weights: array<float>,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ): DistributionOperation.outputType =>
     E.A.length(distributions) == E.A.length(weights)
       ? Mixture(Belt.Array.zip(distributions, weights))->DistributionOperation.run(~env)
@@ -119,7 +107,7 @@ module Helpers = {
 
   let mixtureWithDefaultWeights = (
     distributions: array<DistributionTypes.genericDist>,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ): DistributionOperation.outputType => {
     let length = E.A.length(distributions)
     let weights = Belt.Array.make(length, 1.0 /. Belt.Int.toFloat(length))
@@ -128,7 +116,7 @@ module Helpers = {
 
   let mixture = (
     args: array<internalExpressionValue>,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ): DistributionOperation.outputType => {
     let error = (err: string): DistributionOperation.outputType =>
       err->DistributionTypes.ArgumentError->GenDistError
@@ -167,20 +155,6 @@ module Helpers = {
       }
     }
   }
-
-  let klDivergenceWithPrior = (
-    prediction: DistributionTypes.genericDist,
-    answer: DistributionTypes.genericDist,
-    prior: DistributionTypes.genericDist,
-    env: DistributionOperation.env,
-  ) => {
-    let term1 = DistributionOperation.Constructors.klDivergence(~env, prediction, answer)
-    let term2 = DistributionOperation.Constructors.klDivergence(~env, prior, answer)
-    switch E.R.merge(term1, term2)->E.R2.fmap(((a, b)) => a -. b) {
-    | Ok(x) => x->DistributionOperation.Float->Some
-    | Error(_) => None
-    }
-  }
 }
 
 module SymbolicConstructors = {
@@ -199,7 +173,7 @@ module SymbolicConstructors = {
     }
 }
 
-let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperation.env): option<
+let dispatchToGenericOutput = (call: IEV.functionCall, env: GenericDist.env): option<
   DistributionOperation.outputType,
 > => {
   let (fnName, args) = call
@@ -239,35 +213,6 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: DistributionOperatio
       ~env,
     )->Some
   | ("normalize", [IEvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
-  | ("klDivergence", [IEvDistribution(prediction), IEvDistribution(answer)]) =>
-    Some(DistributionOperation.run(FromDist(ToScore(KLDivergence(answer)), prediction), ~env))
-  | (
-      "klDivergence",
-      [IEvDistribution(prediction), IEvDistribution(answer), IEvDistribution(prior)],
-    ) =>
-    Helpers.klDivergenceWithPrior(prediction, answer, prior, env)
-  | (
-    "logScoreWithPointAnswer",
-    [IEvDistribution(prediction), IEvNumber(answer), IEvDistribution(prior)],
-  )
-  | (
-    "logScoreWithPointAnswer",
-    [
-      IEvDistribution(prediction),
-      IEvDistribution(Symbolic(#Float(answer))),
-      IEvDistribution(prior),
-    ],
-  ) =>
-    DistributionOperation.run(
-      FromDist(ToScore(LogScore(answer, prior->Some)), prediction),
-      ~env,
-    )->Some
-  | ("logScoreWithPointAnswer", [IEvDistribution(prediction), IEvNumber(answer)])
-  | (
-    "logScoreWithPointAnswer",
-    [IEvDistribution(prediction), IEvDistribution(Symbolic(#Float(answer)))],
-  ) =>
-    DistributionOperation.run(FromDist(ToScore(LogScore(answer, None)), prediction), ~env)->Some
   | ("isNormalized", [IEvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
   | ("toPointSet", [IEvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
   | ("scaleLog", [IEvDistribution(dist)]) =>

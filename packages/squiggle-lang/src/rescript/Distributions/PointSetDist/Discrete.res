@@ -49,7 +49,7 @@ let combinePointwise = (
   // TODO: does it ever make sense to pointwise combine the integrals here?
   // It could be done for pointwise additions, but is that ever needed?
 
-  combiner(fn, XYShape.XtoY.discreteInterpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(make)
+  combiner(XYShape.XtoY.discreteInterpolator, fn, t1.xyShape, t2.xyShape)->E.R2.fmap(make)
 }
 
 let reduce = (
@@ -221,16 +221,5 @@ module T = Dist({
   let variance = (t: t): float => {
     let getMeanOfSquares = t => t |> shapeMap(XYShape.T.square) |> mean
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
-  }
-
-  let klDivergence = (prediction: t, answer: t) => {
-    combinePointwise(
-      ~fn=PointSetDist_Scoring.KLDivergence.integrand,
-      prediction,
-      answer,
-    )->E.R2.fmap(integralEndY)
-  }
-  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
-    Error(Operation.NotYetImplemented)
   }
 })

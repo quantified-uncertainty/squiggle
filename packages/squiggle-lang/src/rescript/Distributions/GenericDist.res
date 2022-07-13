@@ -6,6 +6,11 @@ type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
+type env = {
+  sampleCount: int,
+  xyPointLength: int,
+}
+
 let isPointSet = (t: t) =>
   switch t {
   | PointSet(_) => true
@@ -60,46 +65,6 @@ let integralEndY = (t: t): float =>
   }
 
 let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
-
-module Score = {
-  let klDivergence = (prediction, answer, ~toPointSetFn: toPointSetFn): result<float, error> => {
-    let pointSets = E.R.merge(toPointSetFn(prediction), toPointSetFn(answer))
-    pointSets |> E.R2.bind(((predi, ans)) =>
-      PointSetDist.T.klDivergence(predi, ans)->E.R2.errMap(x => DistributionTypes.OperationError(x))
-    )
-  }
-
-  let logScoreWithPointResolution = (
-    ~prediction: DistributionTypes.genericDist,
-    ~answer: float,
-    ~prior: option<DistributionTypes.genericDist>,
-    ~toPointSetFn: toPointSetFn,
-  ): result<float, error> => {
-    switch prior {
-    | Some(prior') =>
-      E.R.merge(toPointSetFn(prior'), toPointSetFn(prediction))->E.R.bind(((
-        prior'',
-        prediction'',
-      )) =>
-        PointSetDist.T.logScoreWithPointResolution(
-          ~prediction=prediction'',
-          ~answer,
-          ~prior=prior''->Some,
-        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
-      )
-    | None =>
-      prediction
-      ->toPointSetFn
-      ->E.R.bind(x =>
-        PointSetDist.T.logScoreWithPointResolution(
-          ~prediction=x,
-          ~answer,
-          ~prior=None,
-        )->E.R2.errMap(x => DistributionTypes.OperationError(x))
-      )
-    }
-  }
-}
 
 let toFloatOperation = (
   t,
@@ -171,6 +136,70 @@ let toPointSet = (
   }
 }
 
+module Score = {
+  type genericDistOrScalar = DistributionTypes.DistributionOperation.genericDistOrScalar
+
+  let argsMake = (~esti: t, ~answ: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
+    PointSetDist_Scoring.scoreArgs,
+    error,
+  > => {
+    let toPointSetFn = t =>
+      toPointSet(
+        t,
+        ~xyPointLength=env.xyPointLength,
+        ~sampleCount=env.sampleCount,
+        ~xSelection=#ByWeight,
+        (),
+      )
+    let prior': option<result<PointSetTypes.pointSetDist, error>> = switch prior {
+    | None => None
+    | Some(d) => toPointSetFn(d)->Some
+    }
+    let twoDists = (~toPointSetFn, esti': t, answ': t): result<
+      (PointSetTypes.pointSetDist, PointSetTypes.pointSetDist),
+      error,
+    > => E.R.merge(toPointSetFn(esti'), toPointSetFn(answ'))
+    switch (esti, answ, prior') {
+    | (esti', Score_Dist(answ'), None) =>
+      twoDists(~toPointSetFn, esti', answ')->E.R2.fmap(((esti'', answ'')) =>
+        {estimate: esti'', answer: answ'', prior: None}->PointSetDist_Scoring.DistAnswer
+      )
+    | (esti', Score_Dist(answ'), Some(Ok(prior''))) =>
+      twoDists(~toPointSetFn, esti', answ')->E.R2.fmap(((esti'', answ'')) =>
+        {
+          estimate: esti'',
+          answer: answ'',
+          prior: Some(prior''),
+        }->PointSetDist_Scoring.DistAnswer
+      )
+    | (esti', Score_Scalar(answ'), None) =>
+      toPointSetFn(esti')->E.R2.fmap(esti'' =>
+        {
+          estimate: esti'',
+          answer: answ',
+          prior: None,
+        }->PointSetDist_Scoring.ScalarAnswer
+      )
+    | (esti', Score_Scalar(answ'), Some(Ok(prior''))) =>
+      toPointSetFn(esti')->E.R2.fmap(esti'' =>
+        {
+          estimate: esti'',
+          answer: answ',
+          prior: Some(prior''),
+        }->PointSetDist_Scoring.ScalarAnswer
+      )
+    | (_, _, Some(Error(err))) => err->Error
+    }
+  }
+
+  let logScore = (~estimate: t, ~answer: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
+    float,
+    error,
+  > =>
+    argsMake(~esti=estimate, ~answ=answer, ~prior, ~env)->E.R.bind(x =>
+      x->PointSetDist.logScore->E.R2.errMap(y => DistributionTypes.OperationError(y))
+    )
+}
 /*
   PointSetDist.toSparkline calls "downsampleEquallyOverX", which downsamples it to n=bucketCount.
   It first needs a pointSetDist, so we convert to a pointSetDist. In this process we want the 
