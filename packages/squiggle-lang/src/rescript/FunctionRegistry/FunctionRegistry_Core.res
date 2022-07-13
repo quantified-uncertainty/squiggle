@@ -8,6 +8,7 @@ type rec frType =
   | FRTypeNumber
   | FRTypeNumeric
   | FRTypeDistOrNumber
+  | FRTypeDist
   | FRTypeLambda
   | FRTypeRecord(frTypeRecord)
   | FRTypeDict(frType)
@@ -60,6 +61,7 @@ module FRType = {
     switch t {
     | FRTypeNumber => "number"
     | FRTypeNumeric => "numeric"
+    | FRTypeDist => "distribution"
     | FRTypeDistOrNumber => "distribution|number"
     | FRTypeRecord(r) => {
         let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
@@ -98,6 +100,7 @@ module FRType = {
     | (FRTypeDistOrNumber, IEvDistribution(Symbolic(#Float(f)))) =>
       Some(FRValueDistOrNumber(FRValueNumber(f)))
     | (FRTypeDistOrNumber, IEvDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
+    | (FRTypeDist, IEvDistribution(f)) => Some(FRValueDist(f))
     | (FRTypeNumeric, IEvNumber(f)) => Some(FRValueNumber(f))
     | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
     | (FRTypeLambda, IEvLambda(f)) => Some(FRValueLambda(f))
