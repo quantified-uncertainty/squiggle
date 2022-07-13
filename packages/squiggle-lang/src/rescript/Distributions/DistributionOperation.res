@@ -6,7 +6,7 @@ type error = DistributionTypes.error
 
 type env = GenericDist.env
 
-let defaultEnv:env = {
+let defaultEnv: env = {
   sampleCount: MagicNumbers.Environment.defaultSampleCount,
   xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
@@ -90,7 +90,7 @@ module OutputLocal = {
     }
 }
 
-let rec run = (~env:env, functionCallInfo: functionCallInfo): outputType => {
+let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
   let {sampleCount, xyPointLength} = env
 
   let reCall = (~env=env, ~functionCallInfo=functionCallInfo, ()) => {

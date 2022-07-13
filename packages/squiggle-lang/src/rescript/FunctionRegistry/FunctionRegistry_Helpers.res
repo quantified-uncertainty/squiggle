@@ -63,7 +63,10 @@ module Prepare = {
       }
     }
 
-    let twoDist = (values: ts): result<(DistributionTypes.genericDist, DistributionTypes.genericDist), err> => {
+    let twoDist = (values: ts): result<
+      (DistributionTypes.genericDist, DistributionTypes.genericDist),
+      err,
+    > => {
       switch values {
       | [FRValueDist(a1), FRValueDist(a2)] => Ok(a1, a2)
       | _ => Error(impossibleError)
@@ -95,8 +98,10 @@ module Prepare = {
       let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
         values->ToValueArray.Record.twoArgs->E.R.bind(twoDistOrNumber)
 
-      let twoDist = (values: ts): result<(DistributionTypes.genericDist, DistributionTypes.genericDist), err> =>
-        values->ToValueArray.Record.twoArgs->E.R.bind(twoDist)
+      let twoDist = (values: ts): result<
+        (DistributionTypes.genericDist, DistributionTypes.genericDist),
+        err,
+      > => values->ToValueArray.Record.twoArgs->E.R.bind(twoDist)
     }
   }
 
@@ -144,8 +149,7 @@ module Prepare = {
 module Process = {
   module DistOrNumberToDist = {
     module Helpers = {
-      let toSampleSet = (r, env: GenericDist.env) =>
-        GenericDist.toSampleSetDist(r, env.sampleCount)
+      let toSampleSet = (r, env: GenericDist.env) => GenericDist.toSampleSetDist(r, env.sampleCount)
 
       let mapFnResult = r =>
         switch r {

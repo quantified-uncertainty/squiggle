@@ -192,12 +192,10 @@ module Score = {
     }
   }
 
-  let logScore = (
-    ~estimate: t,
-    ~answer: genericDistOrScalar,
-    ~prior: option<t>,
-    ~env: env,
-  ): result<float, error> =>
+  let logScore = (~estimate: t, ~answer: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
+    float,
+    error,
+  > =>
     argsMake(~esti=estimate, ~answ=answer, ~prior, ~env)->E.R.bind(x =>
       x->PointSetDist.logScore->E.R2.errMap(y => DistributionTypes.OperationError(y))
     )

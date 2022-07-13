@@ -32,7 +32,7 @@ module Score: {
     ~estimate: t,
     ~answer: DistributionTypes.DistributionOperation.genericDistOrScalar,
     ~prior: option<t>,
-    ~env: env
+    ~env: env,
   ) => result<float, error>
 }
 
