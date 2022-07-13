@@ -215,31 +215,31 @@ const ViewSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
             name="minX"
             type="number"
             register={register}
-            label="The minimum of the charted distribution domain"
+            label="Min X Value"
           />
           <InputItem
             name="maxX"
             type="number"
             register={register}
-            label="The maximum of the charted distribution domain"
+            label="Max X Value"
           />
           <InputItem
             name="title"
             type="text"
             register={register}
-            label="The title shown on the distribution"
+            label="Title"
           />
           <InputItem
             name="tickFormat"
             type="text"
             register={register}
-            label="The format that the ticks are rendered"
+            label="Tick Format"
           />
           <InputItem
             name="color"
             type="color"
             register={register}
-            label="The color of the charted distribution"
+            label="Color"
           />
         </div>
       </HeadedSection>
@@ -521,7 +521,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   );
 
   const withEditor = (
-    <div className="flex mt-1">
+    <div className="flex mt-2">
       <div className="w-1/2">{tabs}</div>
       <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
     </div>
