@@ -24,7 +24,7 @@ module ScientificUnit = {
   }
 }
 
-let dispatch = (call: IEV.functionCall, _: DistributionOperation.env): option<
+let dispatch = (call: IEV.functionCall, _: GenericDist.env): option<
   result<internalExpressionValue, QuriSquiggleLang.Reducer_ErrorValue.errorValue>,
 > => {
   switch call {

@@ -3,7 +3,7 @@ import { Canvas, Meta, Story, Props } from "@storybook/addon-docs";
 
 <Meta title="Squiggle/SquiggleChart" component={SquiggleChart} />
 
-export const Template = SquiggleChart;
+export const Template = (props) => <SquiggleChart {...props} />;
 /* 
   We have to hardcode a width here, because otherwise some interaction with
   Storybook creates an infinite loop with the internal width

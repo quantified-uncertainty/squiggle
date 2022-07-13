@@ -5,6 +5,9 @@ type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
+@genType
+type env = {sampleCount: int, xyPointLength: int}
+
 let sampleN: (t, int) => array<float>
 let sample: t => float
 
@@ -25,12 +28,11 @@ let toFloatOperation: (
 ) => result<float, error>
 
 module Score: {
-  let klDivergence: (t, t, ~toPointSetFn: toPointSetFn) => result<float, error>
-  let logScoreWithPointResolution: (
-    ~prediction: t,
-    ~answer: float,
+  let logScore: (
+    ~estimate: t,
+    ~answer: DistributionTypes.DistributionOperation.genericDistOrScalar,
     ~prior: option<t>,
-    ~toPointSetFn: toPointSetFn,
+    ~env: env,
   ) => result<float, error>
 }
 

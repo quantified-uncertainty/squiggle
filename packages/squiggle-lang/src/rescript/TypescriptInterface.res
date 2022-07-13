@@ -8,7 +8,7 @@ The below few seem to work fine. In the future there's definitely more work to d
 */
 
 @genType
-type samplingParams = DistributionOperation.env
+type samplingParams = GenericDist.env
 
 @genType
 type genericDist = DistributionTypes.genericDist
