@@ -42,27 +42,105 @@ export function defaultPlot(distribution: Distribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
 }
 
-export function makePlot(expression: {
+function error<a, b>(err: b): result<a, b> {
+  return { tag: "Error", value: err };
+}
+
+function ok<a, b>(x: a): result<a, b> {
+  return { tag: "Ok", value: x };
+}
+
+function parseString(expr: squiggleExpression): result<string, string> {
+  if (expr.tag === "string") {
+    return ok(expr.value);
+  } else {
+    return error("Expression was not string");
+  }
+}
+
+function parseRecord(
+  expr: squiggleExpression
+): result<{ [key: string]: squiggleExpression }, string> {
+  if (expr.tag === "record") {
+    return ok(expr.value);
+  } else {
+    return error("Expression was not a record");
+  }
+}
+
+function parseDistribution(
+  expr: squiggleExpression
+): result<Distribution, string> {
+  if (expr.tag === "distribution") {
+    return ok(expr.value);
+  } else {
+    return error("Expression was not a distribution");
+  }
+}
+
+function parseArray(
+  expr: squiggleExpression
+): result<squiggleExpression[], string> {
+  if (expr.tag === "array") {
+    return ok(expr.value);
+  } else {
+    return error("Expression was not a distribution");
+  }
+}
+
+function parseField<a>(
+  record: { [key: string]: squiggleExpression },
+  field: string,
+  parser: (expr: squiggleExpression) => result<a, string>
+): result<a, string> {
+  if (record[field]) {
+    return parser(record[field]);
+  } else {
+    return error("record does not have field " + field);
+  }
+}
+
+function resultBind<a, b, c>(
+  x: result<a, b>,
+  fn: (y: a) => result<c, b>
+): result<c, b> {
+  if (x.tag === "Ok") {
+    return fn(x.value);
+  } else {
+    return x;
+  }
+}
+
+function parseLabeledDistribution(
+  x: squiggleExpression
+): result<LabeledDistribution, string> {
+  return resultBind(parseRecord(x), (record) =>
+    resultBind(parseField(record, "name", parseString), (name) =>
+      resultBind(
+        parseField(record, "distribution", parseDistribution),
+        (distribution) => ok({ name, distribution })
+      )
+    )
+  );
+}
+
+function parsePlot(record: {
+  [key: string]: squiggleExpression;
+}): result<Plot, string> {
+  return resultBind(parseField(record, "distributions", parseArray), (array) =>
+    resultBind(
+      flattenResult(array.map(parseLabeledDistribution)),
+      (distributions) => ok({ distributions })
+    )
+  );
+}
+
+export function makePlot(record: {
   [key: string]: squiggleExpression;
 }): Plot | void {
-  if (expression["distributions"].tag === "array") {
-    let distributions: LabeledDistribution[] = expression["distributions"].value
-      .map((x) => {
-        if (
-          x.tag === "record" &&
-          x.value["name"] &&
-          x.value["name"].tag === "string" &&
-          x.value["distribution"] &&
-          x.value["distribution"].tag === "distribution"
-        ) {
-          return {
-            name: x.value["name"].value,
-            distribution: x.value["distribution"].value,
-          };
-        }
-      })
-      .filter((x): x is LabeledDistribution => x !== undefined);
-    return { distributions };
+  const plotResult = parsePlot(record);
+  if (plotResult.tag == "Ok") {
+    return plotResult.value;
   }
 }
 function all(arr: boolean[]): boolean {
