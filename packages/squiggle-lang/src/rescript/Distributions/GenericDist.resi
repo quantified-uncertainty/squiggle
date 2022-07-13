@@ -5,6 +5,9 @@ type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
+@genType
+type env = {sampleCount: int, xyPointLength: int}
+
 let sampleN: (t, int) => array<float>
 let sample: t => float
 
@@ -26,9 +29,10 @@ let toFloatOperation: (
 
 module Score: {
   let logScore: (
-    ~estimate: DistributionTypes.DistributionOperation.genericDistOrScalar,
+    ~estimate: t,
     ~answer: DistributionTypes.DistributionOperation.genericDistOrScalar,
-    ~prior: option<DistributionTypes.DistributionOperation.genericDistOrScalar>,
+    ~prior: option<t>,
+    ~env: env
   ) => result<float, error>
 }
 

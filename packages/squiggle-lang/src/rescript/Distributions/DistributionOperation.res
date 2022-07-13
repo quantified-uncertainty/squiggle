@@ -4,12 +4,9 @@ type error = DistributionTypes.error
 
 // TODO: It could be great to use a cache for some calculations (basically, do memoization). Also, better analytics/tracking could go a long way.
 
-type env = {
-  sampleCount: int,
-  xyPointLength: int,
-}
+type env = GenericDist.env
 
-let defaultEnv = {
+let defaultEnv:env = {
   sampleCount: MagicNumbers.Environment.defaultSampleCount,
   xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
@@ -93,7 +90,7 @@ module OutputLocal = {
     }
 }
 
-let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
+let rec run = (~env:env, functionCallInfo: functionCallInfo): outputType => {
   let {sampleCount, xyPointLength} = env
 
   let reCall = (~env=env, ~functionCallInfo=functionCallInfo, ()) => {
@@ -146,7 +143,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       }
     | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
     | #ToScore(LogScore(answer, prior)) =>
-      GenericDist.Score.logScore(~estimate=Score_Dist(dist), ~answer, ~prior)
+      GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior, ~env)
       ->E.R2.fmap(s => Float(s))
       ->OutputLocal.fromResult
     | #ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool

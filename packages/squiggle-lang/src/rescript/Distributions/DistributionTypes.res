@@ -100,7 +100,7 @@ module DistributionOperation = {
 
   type genericDistOrScalar = Score_Dist(genericDist) | Score_Scalar(float)
 
-  type toScore = LogScore(genericDistOrScalar, option<genericDistOrScalar>)
+  type toScore = LogScore(genericDistOrScalar, option<genericDist>)
 
   type fromFloat = [
     | #ToFloat(toFloat)

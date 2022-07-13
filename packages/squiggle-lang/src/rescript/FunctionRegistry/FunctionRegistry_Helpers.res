@@ -27,6 +27,12 @@ module Prepare = {
         | _ => Error(impossibleError)
         }
 
+      let threeArgs = (inputs: ts): result<ts, err> =>
+        switch inputs {
+        | [FRValueRecord([(_, n1), (_, n2), (_, n3)])] => Ok([n1, n2, n3])
+        | _ => Error(impossibleError)
+        }
+
       let toArgs = (inputs: ts): result<ts, err> =>
         switch inputs {
         | [FRValueRecord(args)] => args->E.A2.fmap(((_, b)) => b)->Ok
@@ -57,6 +63,13 @@ module Prepare = {
       }
     }
 
+    let twoDist = (values: ts): result<(DistributionTypes.genericDist, DistributionTypes.genericDist), err> => {
+      switch values {
+      | [FRValueDist(a1), FRValueDist(a2)] => Ok(a1, a2)
+      | _ => Error(impossibleError)
+      }
+    }
+
     let twoNumbers = (values: ts): result<(float, float), err> => {
       switch values {
       | [FRValueNumber(a1), FRValueNumber(a2)] => Ok(a1, a2)
@@ -81,6 +94,9 @@ module Prepare = {
     module Record = {
       let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
         values->ToValueArray.Record.twoArgs->E.R.bind(twoDistOrNumber)
+
+      let twoDist = (values: ts): result<(DistributionTypes.genericDist, DistributionTypes.genericDist), err> =>
+        values->ToValueArray.Record.twoArgs->E.R.bind(twoDist)
     }
   }
 
@@ -128,7 +144,7 @@ module Prepare = {
 module Process = {
   module DistOrNumberToDist = {
     module Helpers = {
-      let toSampleSet = (r, env: DistributionOperation.env) =>
+      let toSampleSet = (r, env: GenericDist.env) =>
         GenericDist.toSampleSetDist(r, env.sampleCount)
 
       let mapFnResult = r =>
@@ -166,7 +182,7 @@ module Process = {
     let oneValue = (
       ~fn: float => result<DistributionTypes.genericDist, string>,
       ~value: frValueDistOrNumber,
-      ~env: DistributionOperation.env,
+      ~env: GenericDist.env,
     ): result<DistributionTypes.genericDist, string> => {
       switch value {
       | FRValueNumber(a1) => fn(a1)
@@ -179,7 +195,7 @@ module Process = {
     let twoValues = (
       ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
       ~values: (frValueDistOrNumber, frValueDistOrNumber),
-      ~env: DistributionOperation.env,
+      ~env: GenericDist.env,
     ): result<DistributionTypes.genericDist, string> => {
       switch values {
       | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))

@@ -1,7 +1,7 @@
 open Jest
 open Expect
 
-let env: DistributionOperation.env = {
+let env: GenericDist.env = {
   sampleCount: 100,
   xyPointLength: 100,
 }

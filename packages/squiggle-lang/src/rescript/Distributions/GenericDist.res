@@ -6,6 +6,11 @@ type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
+type env = {
+  sampleCount: int,
+  xyPointLength: int,
+}
+
 let isPointSet = (t: t) =>
   switch t {
   | PointSet(_) => true
@@ -133,36 +138,33 @@ let toPointSet = (
 
 module Score = {
   type genericDistOrScalar = DistributionTypes.DistributionOperation.genericDistOrScalar
-  type pointSet_ScoreDistOrScalar = PSDist(PointSetTypes.pointSetDist) | PSScalar(float)
 
-  let argsMake = (
-    ~esti: genericDistOrScalar,
-    ~answ: genericDistOrScalar,
-    ~prior: option<genericDistOrScalar>,
-  ): result<PointSetDist_Scoring.scoreArgs, error> => {
+  let argsMake = (~esti: t, ~answ: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
+    PointSetDist_Scoring.scoreArgs,
+    error,
+  > => {
     let toPointSetFn = t =>
       toPointSet(
         t,
-        ~xyPointLength=MagicNumbers.Environment.defaultXYPointLength,
-        ~sampleCount=MagicNumbers.Environment.defaultSampleCount,
+        ~xyPointLength=env.xyPointLength,
+        ~sampleCount=env.sampleCount,
         ~xSelection=#ByWeight,
         (),
       )
-    let prior': option<result<pointSet_ScoreDistOrScalar, error>> = switch prior {
+    let prior': option<result<PointSetTypes.pointSetDist, error>> = switch prior {
     | None => None
-    | Some(Score_Dist(d)) => toPointSetFn(d)->E.R.bind(x => x->PSDist->Ok)->Some
-    | Some(Score_Scalar(s)) => s->PSScalar->Ok->Some
+    | Some(d) => toPointSetFn(d)->Some
     }
     let twoDists = (~toPointSetFn, esti': t, answ': t): result<
       (PointSetTypes.pointSetDist, PointSetTypes.pointSetDist),
       error,
     > => E.R.merge(toPointSetFn(esti'), toPointSetFn(answ'))
     switch (esti, answ, prior') {
-    | (Score_Dist(esti'), Score_Dist(answ'), None) =>
+    | (esti', Score_Dist(answ'), None) =>
       twoDists(~toPointSetFn, esti', answ')->E.R2.fmap(((esti'', answ'')) =>
         {estimate: esti'', answer: answ'', prior: None}->PointSetDist_Scoring.DistAnswer
       )
-    | (Score_Dist(esti'), Score_Dist(answ'), Some(Ok(PSDist(prior'')))) =>
+    | (esti', Score_Dist(answ'), Some(Ok(prior''))) =>
       twoDists(~toPointSetFn, esti', answ')->E.R2.fmap(((esti'', answ'')) =>
         {
           estimate: esti'',
@@ -170,8 +172,7 @@ module Score = {
           prior: Some(prior''),
         }->PointSetDist_Scoring.DistAnswer
       )
-    | (Score_Dist(_), _, Some(Ok(PSScalar(_)))) => DistributionTypes.Unreachable->Error
-    | (Score_Dist(esti'), Score_Scalar(answ'), None) =>
+    | (esti', Score_Scalar(answ'), None) =>
       toPointSetFn(esti')->E.R2.fmap(esti'' =>
         {
           estimate: esti'',
@@ -179,7 +180,7 @@ module Score = {
           prior: None,
         }->PointSetDist_Scoring.ScalarAnswer
       )
-    | (Score_Dist(esti'), Score_Scalar(answ'), Some(Ok(PSDist(prior'')))) =>
+    | (esti', Score_Scalar(answ'), Some(Ok(prior''))) =>
       toPointSetFn(esti')->E.R2.fmap(esti'' =>
         {
           estimate: esti'',
@@ -187,20 +188,17 @@ module Score = {
           prior: Some(prior''),
         }->PointSetDist_Scoring.ScalarAnswer
       )
-    | (Score_Scalar(_), Score_Dist(_), None) => NotYetImplemented->Error
-    | (Score_Scalar(_), Score_Dist(_), Some(Ok(PSScalar(_)))) => NotYetImplemented->Error
-    | (Score_Scalar(_), _, Some(Ok(PSDist(_)))) => DistributionTypes.Unreachable->Error
-    | (Score_Scalar(_), Score_Scalar(_), _) => NotYetImplemented->Error
     | (_, _, Some(Error(err))) => err->Error
     }
   }
 
   let logScore = (
-    ~estimate: genericDistOrScalar,
+    ~estimate: t,
     ~answer: genericDistOrScalar,
-    ~prior: option<genericDistOrScalar>,
+    ~prior: option<t>,
+    ~env: env,
   ): result<float, error> =>
-    argsMake(~esti=estimate, ~answ=answer, ~prior)->E.R.bind(x =>
+    argsMake(~esti=estimate, ~answ=answer, ~prior, ~env)->E.R.bind(x =>
       x->PointSetDist.logScore->E.R2.errMap(y => DistributionTypes.OperationError(y))
     )
 }
