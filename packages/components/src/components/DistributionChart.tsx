@@ -218,7 +218,6 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     const domain = shapes.value.flatMap((shape) =>
       shape.discrete.concat(shape.continuous)
     );
-    console.log(shapes.value);
 
     return (
       <div style={{ width: widthProp }}>

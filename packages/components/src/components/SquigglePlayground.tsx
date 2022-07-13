@@ -529,7 +529,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const withoutEditor = <div className="mt-3">{tabs}</div>;
 
-  console.log(vars);
   return (
     <SquiggleContainer>
       <StyledTab.Group>
