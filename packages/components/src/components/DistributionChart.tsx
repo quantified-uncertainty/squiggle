@@ -5,6 +5,7 @@ import {
   distributionError,
   distributionErrorToString,
   squiggleExpression,
+  resultMap,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -24,8 +25,10 @@ export type DistributionPlottingSettings = {
   showControls: boolean;
 } & DistributionChartSpecOptions;
 
+export type LabeledDistribution = { name: string; distribution: Distribution };
+
 export type Plot = {
-  distributions: Distribution[];
+  distributions: LabeledDistribution[];
 };
 
 export type DistributionChartProps = {
@@ -36,19 +39,29 @@ export type DistributionChartProps = {
 } & DistributionPlottingSettings;
 
 export function defaultPlot(distribution: Distribution): Plot {
-  return { distributions: [distribution] };
+  return { distributions: [{ name: "default", distribution }] };
 }
+
 export function makePlot(expression: {
   [key: string]: squiggleExpression;
 }): Plot | void {
   if (expression["distributions"].tag === "array") {
-    let distributions: Distribution[] = expression["distributions"].value
+    let distributions: LabeledDistribution[] = expression["distributions"].value
       .map((x) => {
-        if (x.tag === "distribution") {
-          return x.value;
+        if (
+          x.tag === "record" &&
+          x.value["name"] &&
+          x.value["name"].tag === "string" &&
+          x.value["distribution"] &&
+          x.value["distribution"].tag === "distribution"
+        ) {
+          return {
+            name: x.value["name"].value,
+            distribution: x.value["distribution"].value,
+          };
         }
       })
-      .filter((x): x is Distribution => x !== undefined);
+      .filter((x): x is LabeledDistribution => x !== undefined);
     return { distributions };
   }
 }
@@ -91,7 +104,15 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   React.useEffect(() => setExpY(expY), [expY]);
 
   const [sized] = useSize((size) => {
-    let shapes = flattenResult(plot.distributions.map((x) => x.pointSet()));
+    let shapes = flattenResult(
+      plot.distributions.map((x) =>
+        resultMap(x.distribution.pointSet(), (shape) => ({
+          name: x.name,
+          continuous: shape.continuous,
+          discrete: shape.discrete,
+        }))
+      )
+    );
     if (shapes.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
@@ -116,20 +137,17 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
       widthProp = 20;
     }
-    let continuousPoints = shapes.value.flatMap((shape, i) =>
-      shape.continuous.map((point) => ({ ...point, name: i + 1 }))
+    const domain = shapes.value.flatMap((shape) =>
+      shape.discrete.concat(shape.continuous)
     );
-    let discretePoints = shapes.value.flatMap((shape, i) =>
-      shape.discrete.map((point) => ({ ...point, name: i + 1 }))
-    );
+    console.log(shapes.value);
 
-    console.log(continuousPoints);
     return (
       <div style={{ width: widthProp }}>
         {!(isLogX && massBelow0) ? (
           <Vega
             spec={spec}
-            data={{ con: continuousPoints, dis: discretePoints }}
+            data={{ data: shapes.value, domain }}
             width={widthProp - 10}
             height={height}
             actions={actions}
@@ -141,7 +159,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         )}
         <div className="flex justify-center">
           {showSummary && plot.distributions.length == 1 && (
-            <SummaryTable distribution={plot.distributions[0]} />
+            <SummaryTable distribution={plot.distributions[0].distribution} />
           )}
         </div>
         {showControls && (

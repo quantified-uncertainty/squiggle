@@ -25,36 +25,14 @@ export let linearXScale: LinearScale = {
   range: "width",
   zero: false,
   nice: false,
-  domain: {
-    fields: [
-      {
-        data: "con",
-        field: "x",
-      },
-      {
-        data: "dis",
-        field: "x",
-      },
-    ],
-  },
+  domain: { data: "domain", field: "x" },
 };
 export let linearYScale: LinearScale = {
   name: "yscale",
   type: "linear",
   range: "height",
   zero: false,
-  domain: {
-    fields: [
-      {
-        data: "con",
-        field: "y",
-      },
-      {
-        data: "dis",
-        field: "y",
-      },
-    ],
-  },
+  domain: { data: "domain", field: "y" },
 };
 
 export let logXScale: LogScale = {
@@ -65,18 +43,7 @@ export let logXScale: LogScale = {
   base: 10,
   nice: false,
   clamp: true,
-  domain: {
-    fields: [
-      {
-        data: "con",
-        field: "x",
-      },
-      {
-        data: "dis",
-        field: "x",
-      },
-    ],
-  },
+  domain: { data: "domain", field: "x" },
 };
 
 export let expYScale: PowScale = {
@@ -86,24 +53,13 @@ export let expYScale: PowScale = {
   range: "height",
   zero: false,
   nice: false,
-  domain: {
-    fields: [
-      {
-        data: "con",
-        field: "y",
-      },
-      {
-        data: "dis",
-        field: "y",
-      },
-    ],
-  },
+  domain: { data: "domain", field: "y" },
 };
 
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
-  let {
+  const {
     format = ".9~s",
     color = "#739ECC",
     title,
@@ -130,10 +86,10 @@ export function buildVegaSpec(
     padding: 5,
     data: [
       {
-        name: "con",
+        name: "data",
       },
       {
-        name: "dis",
+        name: "domain",
       },
     ],
     signals: [],
@@ -144,12 +100,10 @@ export function buildVegaSpec(
         name: "color",
         type: "ordinal",
         domain: {
-          fields: [
-            { data: "con", field: "name" },
-            { data: "dis", field: "name" },
-          ],
+          data: "data",
+          field: "name",
         },
-        range: { scheme: "category20b" },
+        range: { scheme: "category10" },
       },
     ],
     axes: [
@@ -167,108 +121,131 @@ export function buildVegaSpec(
     ],
     marks: [
       {
-        name: "group",
+        name: "all_distributions",
         type: "group",
         from: {
           facet: {
-            name: "faceted_path_main",
-            data: "con",
+            name: "distribution_facet",
+            data: "data",
             groupby: ["name"],
           },
         },
         marks: [
           {
-            name: "distribution_charts",
-            type: "area",
+            name: "continuous_distribution",
+            type: "group",
             from: {
-              data: "faceted_path_main",
-            },
-            encode: {
-              update: {
-                interpolate: { value: "linear" },
-                x: {
-                  scale: "xscale",
-                  field: "x",
-                },
-                y: {
-                  scale: "yscale",
-                  field: "y",
-                },
-                y2: {
-                  scale: "yscale",
-                  value: 0,
-                },
-                fill: {
-                  field: "name",
-                  scale: "color",
-                },
-                fillOpacity: {
-                  value: 1,
-                },
+              facet: {
+                name: "continuous_facet",
+                data: "distribution_facet",
+                field: "continuous",
               },
             },
+            encode: {
+              update: {},
+            },
+            marks: [
+              {
+                name: "continuous_area",
+                type: "area",
+                from: {
+                  data: "continuous_facet",
+                },
+                encode: {
+                  update: {
+                    interpolate: { value: "linear" },
+                    x: {
+                      scale: "xscale",
+                      field: "x",
+                    },
+                    y: {
+                      scale: "yscale",
+                      field: "y",
+                    },
+                    fill: {
+                      scale: "color",
+                      field: { parent: "name" },
+                    },
+                    y2: {
+                      scale: "yscale",
+                      value: 0,
+                    },
+                    fillOpacity: {
+                      value: 1,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: "discrete_distribution",
+            type: "group",
+            from: {
+              facet: {
+                name: "discrete_facet",
+                data: "distribution_facet",
+                field: "discrete",
+              },
+            },
+            marks: [
+              {
+                type: "rect",
+                from: {
+                  data: "discrete_facet",
+                },
+                encode: {
+                  enter: {
+                    width: {
+                      value: 1,
+                    },
+                  },
+                  update: {
+                    x: {
+                      scale: "xscale",
+                      field: "x",
+                    },
+                    y: {
+                      scale: "yscale",
+                      field: "y",
+                    },
+                    y2: {
+                      scale: "yscale",
+                      value: 0,
+                    },
+                  },
+                },
+              },
+              {
+                type: "symbol",
+                from: {
+                  data: "discrete_facet",
+                },
+                encode: {
+                  enter: {
+                    shape: {
+                      value: "circle",
+                    },
+                    size: [{ value: 100 }],
+                    tooltip: {
+                      signal: "datum.y",
+                    },
+                  },
+                  update: {
+                    x: {
+                      scale: "xscale",
+                      field: "x",
+                    },
+                    y: {
+                      scale: "yscale",
+                      field: "y",
+                    },
+                  },
+                },
+              },
+            ],
           },
         ],
-      },
-      {
-        type: "rect",
-        from: {
-          data: "dis",
-        },
-        encode: {
-          enter: {
-            width: {
-              value: 1,
-            },
-          },
-          update: {
-            x: {
-              scale: "xscale",
-              field: "x",
-            },
-            y: {
-              scale: "yscale",
-              field: "y",
-            },
-            y2: {
-              scale: "yscale",
-              value: 0,
-            },
-            fill: {
-              value: "#2f65a7",
-            },
-          },
-        },
-      },
-      {
-        type: "symbol",
-        from: {
-          data: "dis",
-        },
-        encode: {
-          enter: {
-            shape: {
-              value: "circle",
-            },
-            size: [{ value: 100 }],
-            tooltip: {
-              signal: "datum.y",
-            },
-          },
-          update: {
-            x: {
-              scale: "xscale",
-              field: "x",
-            },
-            y: {
-              scale: "yscale",
-              field: "y",
-            },
-            fill: {
-              value: "#1e4577",
-            },
-          },
-        },
       },
     ],
   };
