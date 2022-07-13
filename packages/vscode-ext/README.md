@@ -25,6 +25,9 @@ Check out the full list of Squiggle settings in the main VS Code settings.
 
 ## Usage
 
+After loading a `.squiggle` file, an "Open Preview" button will appear. If you click it, the squiggle model will be shown, and updated as you edit and save you file.
+
+![](./images/extension-screenshot.png)
 
 ## Build locally
 
