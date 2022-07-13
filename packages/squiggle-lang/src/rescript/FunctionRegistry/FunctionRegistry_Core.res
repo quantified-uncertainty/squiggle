@@ -42,7 +42,7 @@ and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.g
 type fnDefinition = {
   name: string,
   inputs: array<frType>,
-  run: (array<frValue>, DistributionOperation.env) => result<internalExpressionValue, string>,
+  run: (array<frValue>, GenericDist.env) => result<internalExpressionValue, string>,
 }
 
 type function = {
@@ -322,7 +322,7 @@ module FnDefinition = {
     t.name ++ `(${inputs})`
   }
 
-  let run = (t: t, args: array<internalExpressionValue>, env: DistributionOperation.env) => {
+  let run = (t: t, args: array<internalExpressionValue>, env: GenericDist.env) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
     | Some(values) => t.run(values, env)
@@ -377,7 +377,7 @@ module Registry = {
     ~registry: registry,
     ~fnName: string,
     ~args: array<internalExpressionValue>,
-    ~env: DistributionOperation.env,
+    ~env: GenericDist.env,
   ) => {
     let matchToDef = m => Matcher.Registry.matchToDef(registry, m)
     //Js.log(toSimple(registry))

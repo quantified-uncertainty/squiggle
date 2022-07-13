@@ -6,6 +6,11 @@ type toSampleSetFn = t => result<SampleSetDist.t, error>
 type scaleMultiplyFn = (t, float) => result<t, error>
 type pointwiseAddFn = (t, t) => result<t, error>
 
+type env = {
+  sampleCount: int,
+  xyPointLength: int,
+}
+
 let isPointSet = (t: t) =>
   switch t {
   | PointSet(_) => true
@@ -134,15 +139,15 @@ let toPointSet = (
 module Score = {
   type genericDistOrScalar = DistributionTypes.DistributionOperation.genericDistOrScalar
 
-  let argsMake = (~esti: t, ~answ: genericDistOrScalar, ~prior: option<t>): result<
+  let argsMake = (~esti: t, ~answ: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
     PointSetDist_Scoring.scoreArgs,
     error,
   > => {
     let toPointSetFn = t =>
       toPointSet(
         t,
-        ~xyPointLength=MagicNumbers.Environment.defaultXYPointLength,
-        ~sampleCount=MagicNumbers.Environment.defaultSampleCount,
+        ~xyPointLength=env.xyPointLength,
+        ~sampleCount=env.sampleCount,
         ~xSelection=#ByWeight,
         (),
       )
@@ -187,11 +192,13 @@ module Score = {
     }
   }
 
-  let logScore = (~estimate: t, ~answer: genericDistOrScalar, ~prior: option<t>): result<
-    float,
-    error,
-  > =>
-    argsMake(~esti=estimate, ~answ=answer, ~prior)->E.R.bind(x =>
+  let logScore = (
+    ~estimate: t,
+    ~answer: genericDistOrScalar,
+    ~prior: option<t>,
+    ~env: env,
+  ): result<float, error> =>
+    argsMake(~esti=estimate, ~answ=answer, ~prior, ~env)->E.R.bind(x =>
       x->PointSetDist.logScore->E.R2.errMap(y => DistributionTypes.OperationError(y))
     )
 }

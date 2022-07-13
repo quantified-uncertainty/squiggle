@@ -144,7 +144,7 @@ module Prepare = {
 module Process = {
   module DistOrNumberToDist = {
     module Helpers = {
-      let toSampleSet = (r, env: DistributionOperation.env) =>
+      let toSampleSet = (r, env: GenericDist.env) =>
         GenericDist.toSampleSetDist(r, env.sampleCount)
 
       let mapFnResult = r =>
@@ -182,7 +182,7 @@ module Process = {
     let oneValue = (
       ~fn: float => result<DistributionTypes.genericDist, string>,
       ~value: frValueDistOrNumber,
-      ~env: DistributionOperation.env,
+      ~env: GenericDist.env,
     ): result<DistributionTypes.genericDist, string> => {
       switch value {
       | FRValueNumber(a1) => fn(a1)
@@ -195,7 +195,7 @@ module Process = {
     let twoValues = (
       ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
       ~values: (frValueDistOrNumber, frValueDistOrNumber),
-      ~env: DistributionOperation.env,
+      ~env: GenericDist.env,
     ): result<DistributionTypes.genericDist, string> => {
       switch values {
       | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))

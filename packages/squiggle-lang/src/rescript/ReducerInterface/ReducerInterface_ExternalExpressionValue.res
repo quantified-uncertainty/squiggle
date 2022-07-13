@@ -86,7 +86,7 @@ let toStringResult = x =>
   }
 
 @genType
-type environment = DistributionOperation.env
+type environment = GenericDist.env
 
 @genType
 let defaultEnvironment: environment = DistributionOperation.defaultEnv

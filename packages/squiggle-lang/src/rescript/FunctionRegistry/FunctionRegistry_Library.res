@@ -511,8 +511,8 @@ to(5,10)
   ),
 ]
 
-let runScoring = (estimate, answer, prior) => {
-  GenericDist.Score.logScore(~estimate, ~answer, ~prior)
+let runScoring = (estimate, answer, prior, env) => {
+  GenericDist.Score.logScore(~estimate, ~answer, ~prior, ~env)
   ->E.R2.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
   ->E.R2.errMap(DistributionTypes.Error.toString)
 }
@@ -530,16 +530,16 @@ let scoreFunctions = [
             ("prior", FRTypeDist),
           ]),
         ],
-        ~run=(inputs, _) => {
+        ~run=(inputs, env) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(inputs) {
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d)), FRValueDist(prior)]) =>
-            runScoring(estimate, Score_Dist(d), Some(prior))
+            runScoring(estimate, Score_Dist(d), Some(prior), env)
           | Ok([
               FRValueDist(estimate),
               FRValueDistOrNumber(FRValueNumber(d)),
               FRValueDist(prior),
             ]) =>
-            runScoring(estimate, Score_Scalar(d), Some(prior))
+            runScoring(estimate, Score_Scalar(d), Some(prior), env)
           | Error(e) => Error(e)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
@@ -548,17 +548,26 @@ let scoreFunctions = [
       FnDefinition.make(
         ~name="logScore",
         ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
-        ~run=(inputs, _) => {
+        ~run=(inputs, env) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(inputs) {
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d))]) =>
-            runScoring(estimate, Score_Dist(d), None)
+            runScoring(estimate, Score_Dist(d), None, env)
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueNumber(d))]) =>
-            runScoring(estimate, Score_Scalar(d), None)
+            runScoring(estimate, Score_Scalar(d), None, env)
           | Error(e) => Error(e)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
         },
       ),
+      FnDefinition.make(~name="klDivergence", ~inputs=[FRTypeDist, FRTypeDist], ~run=(
+        inputs,
+        env,
+      ) => {
+        switch inputs {
+        | [FRValueDist(estimate), FRValueDist(d)] => runScoring(estimate, Score_Dist(d), None, env)
+        | _ => Error(FunctionRegistry_Helpers.impossibleError)
+        }
+      }),
     ],
     (),
   ),
