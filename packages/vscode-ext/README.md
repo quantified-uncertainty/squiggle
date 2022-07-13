@@ -15,19 +15,19 @@ You can install this extension by going to the "extensions" tab, searching for "
 
 ![](./images/vs-code-install.png)
 
-### Configuration
+## Usage
+
+After loading a `.squiggle` file, an "Open Preview" button will appear. If you click it, the squiggle model will be shown, and updated as you edit and save you file.
+
+![](./images/extension-screenshot.png)
+
+### Configuration (optional)
 
 Some preview settings, e.g. whether to show the summary table or types of outputs, can be configurable on in the VS Code settings and persist between different preview sessions. The VS Code settings can be accessed with the shortcut `Ctrl+,` with `Ctrl+Shift+P` + searching "Open Settings", or by accessing a file like `$HOME/.config/Code/User/settings.json` in Linux (see [here](https://stackoverflow.com/questions/65908987/how-can-i-open-visual-studio-codes-settings-json-file)) for other operating systems. 
 
 ![](./images/vs-code-settings.png)
 
 Check out the full list of Squiggle settings in the main VS Code settings.
-
-## Usage
-
-After loading a `.squiggle` file, an "Open Preview" button will appear. If you click it, the squiggle model will be shown, and updated as you edit and save you file.
-
-![](./images/extension-screenshot.png)
 
 ## Build locally
 
