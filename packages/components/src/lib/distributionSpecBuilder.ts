@@ -213,6 +213,10 @@ export function buildVegaSpec(
                       scale: "yscale",
                       value: 0,
                     },
+                    fill: {
+                      scale: "color",
+                      field: { parent: "name" },
+                    },
                   },
                 },
               },
@@ -239,6 +243,10 @@ export function buildVegaSpec(
                     y: {
                       scale: "yscale",
                       field: "y",
+                    },
+                    fill: {
+                      scale: "color",
+                      field: { parent: "name" },
                     },
                   },
                 },
