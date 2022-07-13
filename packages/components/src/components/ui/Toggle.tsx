@@ -23,8 +23,8 @@ export const Toggle: React.FC<Props> = ({
       layout
       transition={{ duration: 0.2 }}
       className={clsx(
-        "rounded-full py-1 bg-indigo-500 text-white text-xs font-semibold flex items-center space-x-1",
-        status ? "bg-indigo-500" : "bg-gray-400",
+        "rounded-md py-0.5 bg-slate-500 text-white text-xs font-semibold flex items-center space-x-1",
+        status ? "bg-slate-500" : "bg-gray-400",
         status ? "pl-1 pr-3" : "pl-3 pr-1",
         !status && "flex-row-reverse space-x-reverse"
       )}
