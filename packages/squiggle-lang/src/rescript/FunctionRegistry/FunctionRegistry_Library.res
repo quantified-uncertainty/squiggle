@@ -506,6 +506,21 @@ module Dict = {
       ->E.A2.fmap(((key, value)) => Wrappers.evArray([IEvString(key), value]))
       ->Wrappers.evArray
 
+    let fromList = (items: array<internalExpressionValue>): result<
+      internalExpressionValue,
+      string,
+    > =>
+      items
+      ->E.A2.fmap(item => {
+        switch (item: internalExpressionValue) {
+        | IEvArray([IEvString(string), value]) => (string, value)->Ok
+        | _ => Error(impossibleError)
+        }
+      })
+      ->E.A.R.firstErrorOrOpen
+      ->E.R2.fmap(Belt.Map.String.fromArray)
+      ->E.R2.fmap(Wrappers.evRecord)
+
     let merge = (a: t, b: t): internalExpressionValue => IEvRecord(
       Belt.Map.String.merge(a, b, (_, _, c) => c),
     )
@@ -621,22 +636,11 @@ module Dict = {
           ~requiresNamespace=true,
           ~name="fromList",
           ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
-          ~run=(_, inputs, _) => {
-            let convertInternalItems = items =>
-              items
-              ->E.A2.fmap(item => {
-                switch item {
-                | [FRValueString(string), value] =>
-                  (string, FunctionRegistry_Core.FRType.matchReverse(value))->Ok
-                | _ => Error(impossibleError)
-                }
-              })
-              ->E.A.R.firstErrorOrOpen
-              ->E.R2.fmap(Belt.Map.String.fromArray)
-              ->E.R2.fmap(Wrappers.evRecord)
-            inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.arrayOfArrays)
-              |> E.R2.bind(convertInternalItems)
-          },
+          ~run=(inputs, _, _) =>
+            switch inputs {
+            | [IEvArray(items)] => Internals.fromList(items)
+            | _ => Error(impossibleError)
+            },
           (),
         ),
       ],
