@@ -49,143 +49,225 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
   expressionValue
 }
 
-let registryStart = [
-  Function.make(
-    ~name="toContinuousPointSet",
-    ~definitions=[
+module PointSet = {
+  let nameSpace = Some("PointSet")
+  let requiresNamespace = true
+  let library = [
+    Function.make(
+      ~name="PointSet.makeContinuous",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace,
+          ~name="makeContinuous",
+          ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
+          ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="PointSet.makeDiscrete",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace,
+          ~name="makeDiscrete",
+          ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
+          ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+          (),
+        ),
+      ],
+      (),
+    ),
+  ]
+}
+
+module Functionn = {
+  let nameSpace = Some("Function")
+  let library = [
+    Function.make(
+      ~name="Function.declare",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=true,
+          ~name="declare",
+          ~inputs=[Declaration.frType],
+          ~run=(inputs, _) => {
+            inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
+          },
+          (),
+        ),
+      ],
+      (),
+    ),
+  ]
+}
+
+module DistributionCreation = {
+  let nameSpace = Some("Dist")
+  module TwoArgDist = {
+    let process = (~fn, ~env, r) =>
+      r
+      ->E.R.bind(Process.DistOrNumberToDist.twoValuesUsingSymbolicDist(~fn, ~values=_, ~env))
+      ->E.R2.fmap(Wrappers.evDistribution)
+
+    let make = (name, fn) => {
       FnDefinition.make(
-        ~nameSpace=Some("PointSet"),
-        ~requiresNamespace=true,
-        ~name="makeContinuous",
-        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        ~nameSpace,
+        ~requiresNamespace=false,
+        ~name,
+        ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber],
+        ~run=(inputs, env) => inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env),
         (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="toDiscretePointSet",
-    ~definitions=[
+      )
+    }
+
+    let makeRecordP5P95 = (name, fn) => {
       FnDefinition.make(
-        ~nameSpace=Some("PointSet"),
-        ~requiresNamespace=true,
-        ~name="makeDiscrete",
-        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+        ~nameSpace,
+        ~requiresNamespace=false,
+        ~name,
+        ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
+        ~run=(inputs, env) =>
+          inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
         (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Declaration",
-    ~definitions=[
+      )
+    }
+
+    let makeRecordMeanStdev = (name, fn) => {
       FnDefinition.make(
-        ~name="declareFn",
-        ~inputs=[Declaration.frType],
-        ~run=(inputs, _) => {
-          inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
-        },
+        ~name,
+        ~nameSpace,
+        ~requiresNamespace=false,
+        ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
+        ~run=(inputs, env) =>
+          inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
         (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Normal",
-    ~examples=`normal(5,1)
+      )
+    }
+  }
+
+  module OneArgDist = {
+    let process = (~fn, ~env, r) =>
+      r
+      ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
+      ->E.R2.fmap(Wrappers.evDistribution)
+
+    let make = (name, fn) =>
+      FnDefinition.make(
+        ~nameSpace,
+        ~requiresNamespace=false,
+        ~name,
+        ~inputs=[FRTypeDistOrNumber],
+        ~run=(inputs, env) => inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env),
+        (),
+      )
+  }
+  let library = [
+    Function.make(
+      ~name="Normal",
+      ~examples=`normal(5,1)
 normal({p5: 4, p95: 10})
 normal({mean: 5, stdev: 2})`,
-    ~definitions=[
-      TwoArgDist.make("normal", twoArgs(SymbolicDist.Normal.make)),
-      TwoArgDist.makeRecordP5P95("normal", r =>
-        twoArgs(SymbolicDist.Normal.from90PercentCI, r)->Ok
-      ),
-      TwoArgDist.makeRecordMeanStdev("normal", twoArgs(SymbolicDist.Normal.make)),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Lognormal",
-    ~examples=`lognormal(0.5, 0.8)
+      ~definitions=[
+        TwoArgDist.make("normal", twoArgs(SymbolicDist.Normal.make)),
+        // TwoArgDist.makeRecordP5P95("normal", r =>
+        //   twoArgs(SymbolicDist.Normal.from90PercentCI, r)->Ok
+        // ),
+        // TwoArgDist.makeRecordMeanStdev("normal", twoArgs(SymbolicDist.Normal.make)),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Lognormal",
+      ~examples=`lognormal(0.5, 0.8)
 lognormal({p5: 4, p95: 10})
 lognormal({mean: 5, stdev: 2})`,
-    ~definitions=[
-      TwoArgDist.make("lognormal", twoArgs(SymbolicDist.Lognormal.make)),
-      TwoArgDist.makeRecordP5P95("lognormal", r =>
-        twoArgs(SymbolicDist.Lognormal.from90PercentCI, r)->Ok
-      ),
-      TwoArgDist.makeRecordMeanStdev("lognormal", twoArgs(SymbolicDist.Lognormal.fromMeanAndStdev)),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Uniform",
-    ~examples=`uniform(10, 12)`,
-    ~definitions=[TwoArgDist.make("uniform", twoArgs(SymbolicDist.Uniform.make))],
-    (),
-  ),
-  Function.make(
-    ~name="Beta",
-    ~examples=`beta(20, 25)
+      ~definitions=[
+        TwoArgDist.make("lognormal", twoArgs(SymbolicDist.Lognormal.make)),
+        TwoArgDist.makeRecordP5P95("lognormal", r =>
+          twoArgs(SymbolicDist.Lognormal.from90PercentCI, r)->Ok
+        ),
+        TwoArgDist.makeRecordMeanStdev(
+          "lognormal",
+          twoArgs(SymbolicDist.Lognormal.fromMeanAndStdev),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Uniform",
+      ~examples=`uniform(10, 12)`,
+      ~definitions=[TwoArgDist.make("uniform", twoArgs(SymbolicDist.Uniform.make))],
+      (),
+    ),
+    Function.make(
+      ~name="Beta",
+      ~examples=`beta(20, 25)
 beta({mean: 0.39, stdev: 0.1})`,
-    ~definitions=[
-      TwoArgDist.make("beta", twoArgs(SymbolicDist.Beta.make)),
-      TwoArgDist.makeRecordMeanStdev("beta", twoArgs(SymbolicDist.Beta.fromMeanAndStdev)),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Cauchy",
-    ~examples=`cauchy(5, 1)`,
-    ~definitions=[TwoArgDist.make("cauchy", twoArgs(SymbolicDist.Cauchy.make))],
-    (),
-  ),
-  Function.make(
-    ~name="Gamma",
-    ~examples=`gamma(5, 1)`,
-    ~definitions=[TwoArgDist.make("gamma", twoArgs(SymbolicDist.Gamma.make))],
-    (),
-  ),
-  Function.make(
-    ~name="Logistic",
-    ~examples=`gamma(5, 1)`,
-    ~definitions=[TwoArgDist.make("logistic", twoArgs(SymbolicDist.Logistic.make))],
-    (),
-  ),
-  Function.make(
-    ~name="To (Distribution)",
-    ~examples=`5 to 10
+      ~definitions=[
+        TwoArgDist.make("beta", twoArgs(SymbolicDist.Beta.make)),
+        TwoArgDist.makeRecordMeanStdev("beta", twoArgs(SymbolicDist.Beta.fromMeanAndStdev)),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Cauchy",
+      ~examples=`cauchy(5, 1)`,
+      ~definitions=[TwoArgDist.make("cauchy", twoArgs(SymbolicDist.Cauchy.make))],
+      (),
+    ),
+    Function.make(
+      ~name="Gamma",
+      ~examples=`gamma(5, 1)`,
+      ~definitions=[TwoArgDist.make("gamma", twoArgs(SymbolicDist.Gamma.make))],
+      (),
+    ),
+    Function.make(
+      ~name="Logistic",
+      ~examples=`gamma(5, 1)`,
+      ~definitions=[TwoArgDist.make("logistic", twoArgs(SymbolicDist.Logistic.make))],
+      (),
+    ),
+    Function.make(
+      ~name="To (Distribution)",
+      ~examples=`5 to 10
 to(5,10)
 -5 to 5`,
-    ~definitions=[
-      TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make)),
-      TwoArgDist.make(
-        "credibleIntervalToDistribution",
-        twoArgs(SymbolicDist.From90thPercentile.make),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Exponential",
-    ~examples=`exponential(2)`,
-    ~definitions=[OneArgDist.make("exponential", SymbolicDist.Exponential.make)],
-    (),
-  ),
-  Function.make(
-    ~name="Bernoulli",
-    ~examples=`bernoulli(0.5)`,
-    ~definitions=[OneArgDist.make("bernoulli", SymbolicDist.Bernoulli.make)],
-    (),
-  ),
-  Function.make(
-    ~name="PointMass",
-    ~examples=`pointMass(0.5)`,
-    ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.makeSafe)],
-    (),
-  ),
+      ~definitions=[
+        TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make)),
+        TwoArgDist.make(
+          "credibleIntervalToDistribution",
+          twoArgs(SymbolicDist.From90thPercentile.make),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Exponential",
+      ~examples=`exponential(2)`,
+      ~definitions=[OneArgDist.make("exponential", SymbolicDist.Exponential.make)],
+      (),
+    ),
+    Function.make(
+      ~name="Bernoulli",
+      ~examples=`bernoulli(0.5)`,
+      ~definitions=[OneArgDist.make("bernoulli", SymbolicDist.Bernoulli.make)],
+      (),
+    ),
+    Function.make(
+      ~name="PointMass",
+      ~examples=`pointMass(0.5)`,
+      ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.makeSafe)],
+      (),
+    ),
+  ]
+}
+
+let registryStart = [
   Function.make(
     ~name="toContinuousPointSet",
     ~description="Converts a set of points to a continuous distribution",
@@ -247,390 +329,528 @@ to(5,10)
     ~isExperimental=true,
     (),
   ),
-  Function.make(
-    ~name="Floor",
-    ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)],
-    (),
-  ),
-  Function.make(
-    ~name="Ceiling",
-    ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
-    (),
-  ),
-  Function.make(
-    ~name="Absolute Value",
-    ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)],
-    (),
-  ),
-  Function.make(~name="Exponent", ~definitions=[NumberToNumber.make("exp", Js.Math.exp)], ()),
-  Function.make(~name="Log", ~definitions=[NumberToNumber.make("log", Js.Math.log)], ()),
-  Function.make(
-    ~name="Log Base 10",
-    ~definitions=[NumberToNumber.make("log10", Js.Math.log10)],
-    (),
-  ),
-  Function.make(~name="Log Base 2", ~definitions=[NumberToNumber.make("log2", Js.Math.log2)], ()),
-  Function.make(~name="Round", ~definitions=[NumberToNumber.make("round", Js.Math.round)], ()),
-  Function.make(
-    ~name="Sum",
-    ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber->Ok)],
-    (),
-  ),
-  Function.make(
-    ~name="Product",
-    ~definitions=[
-      ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber->Ok),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Min",
-    ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber->Ok)],
-    (),
-  ),
-  Function.make(
-    ~name="Max",
-    ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber->Ok)],
-    (),
-  ),
-  Function.make(
-    ~name="Mean",
-    ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber->Ok)],
-    (),
-  ),
-  Function.make(
-    ~name="Geometric Mean",
-    ~definitions=[
-      ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber->Ok),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Standard Deviation",
-    ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok)],
-    (),
-  ),
-  Function.make(
-    ~name="Variance",
-    ~definitions=[
-      ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="First",
-    ~definitions=[
-      ArrayNumberDist.make2("first", r =>
-        r->E.A.first |> E.O.toResult(impossibleError) |> E.R.fmap(Wrappers.evNumber)
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Last",
-    ~definitions=[
-      ArrayNumberDist.make2("last", r =>
-        r->E.A.last |> E.O.toResult(impossibleError) |> E.R.fmap(Wrappers.evNumber)
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Sort",
-    ~definitions=[
-      ArrayNumberDist.make("sort", r =>
-        r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Reverse",
-    ~definitions=[
-      ArrayNumberDist.make("reverse", r =>
-        r->Belt_Array.reverse->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Cumulative Sum",
-    ~definitions=[
-      ArrayNumberDist.make("cumsum", r =>
-        r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Cumulative Prod",
-    ~definitions=[
-      ArrayNumberDist.make("cumprod", r =>
-        r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Diff",
-    ~definitions=[
-      ArrayNumberDist.make("diff", r =>
-        r->E.A.Floats.diff->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Dict.merge",
-    ~definitions=[
-      FnDefinition.make(
-        ~nameSpace=Some("Dict"),
-        ~requiresNamespace=true,
-        ~name="merge",
-        ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _) => {
-          switch inputs {
-          | [FRValueDict(d1), FRValueDict(d2)] => {
-              let newDict =
-                E.Dict.concat(d1, d2) |> Js.Dict.map((. r) =>
-                  FunctionRegistry_Core.FRType.matchReverse(r)
-                )
-              newDict->Js.Dict.entries->Belt.Map.String.fromArray->Wrappers.evRecord->Ok
-            }
-          | _ => Error(impossibleError)
-          }
-        },
-        (),
-      ),
-    ],
-    (),
-  ),
-  //TODO: Make sure that two functions can't have the same name. This causes chaos elsewhere.
-  Function.make(
-    ~name="Dict.mergeMany",
-    ~definitions=[
-      FnDefinition.make(
-        ~nameSpace=Some("Dict"),
-        ~requiresNamespace=true,
-        ~name="mergeMany",
-        ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
-        ~run=(inputs, _) =>
-          inputs
-          ->Prepare.ToTypedArray.dicts
-          ->E.R2.fmap(E.Dict.concatMany)
-          ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
-          ->E.R2.fmap(r => r->Js.Dict.entries->Belt.Map.String.fromArray)
-          ->E.R2.fmap(Wrappers.evRecord),
-        (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Dict.keys",
-    ~definitions=[
-      FnDefinition.make(
-        ~nameSpace=Some("Dict"),
-        ~requiresNamespace=true,
-        ~name="keys",
-        ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _) =>
-          switch inputs {
-          | [FRValueDict(d1)] =>
-            Js.Dict.keys(d1)->E.A2.fmap(Wrappers.evString)->Wrappers.evArray->Ok
-          | _ => Error(impossibleError)
-          },
-        (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Dict.values",
-    ~definitions=[
-      FnDefinition.make(
-        ~nameSpace=Some("Dict"),
-        ~requiresNamespace=true,
-        ~name="values",
-        ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _) =>
-          switch inputs {
-          | [FRValueDict(d1)] =>
-            Js.Dict.values(d1)
-            ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
-            ->Wrappers.evArray
-            ->Ok
-          | _ => Error(impossibleError)
-          },
-        (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Dict.toList",
-    ~definitions=[
-      FnDefinition.make(
-        ~nameSpace=Some("Dict"),
-        ~requiresNamespace=true,
-        ~name="toList",
-        ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _) =>
-          switch inputs {
-          | [FRValueDict(dict)] =>
-            dict
-            ->Js.Dict.entries
-            ->E.A2.fmap(((key, value)) =>
-              Wrappers.evArray([
-                Wrappers.evString(key),
-                FunctionRegistry_Core.FRType.matchReverse(value),
-              ])
-            )
-            ->Wrappers.evArray
-            ->Ok
-          | _ => Error(impossibleError)
-          },
-        (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="Dict.fromList",
-    ~definitions=[
-      FnDefinition.make(
-        ~nameSpace=Some("Dict"),
-        ~requiresNamespace=true,
-        ~name="fromList",
-        ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
-        ~run=(inputs, _) => {
-          let convertInternalItems = items =>
-            items
-            ->E.A2.fmap(item => {
-              switch item {
-              | [FRValueString(string), value] =>
-                (string, FunctionRegistry_Core.FRType.matchReverse(value))->Ok
-              | _ => Error(impossibleError)
-              }
-            })
-            ->E.A.R.firstErrorOrOpen
-            ->E.R2.fmap(Belt.Map.String.fromArray)
-            ->E.R2.fmap(Wrappers.evRecord)
-          inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.arrayOfArrays)
-            |> E.R2.bind(convertInternalItems)
-        },
-        (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="List.make",
-    ~definitions=[
-      //Todo: If the second item is a function with no args, it could be nice to run this function and return the result.
-      FnDefinition.make(
-        ~nameSpace=Some("List"),
-        ~requiresNamespace=true,
-        ~name="make",
-        ~inputs=[FRTypeNumber, FRTypeAny],
-        ~run=(inputs, _) => {
-          switch inputs {
-          | [FRValueNumber(number), value] =>
-            Belt.Array.make(E.Float.toInt(number), value)
-            ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
-            ->Wrappers.evArray
-            ->Ok
-          | _ => Error(impossibleError)
-          }
-        },
-        (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="upTo",
-    ~definitions=[
-      FnDefinition.make(
-        ~nameSpace=Some("List"),
-        ~requiresNamespace=true,
-        ~name="upTo",
-        ~inputs=[FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _) =>
-          inputs
-          ->Prepare.ToValueTuple.twoNumbers
-          ->E.R2.fmap(((low, high)) =>
-            E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)
-            ->E.A2.fmap(Wrappers.evNumber)
-            ->Wrappers.evArray
-          ),
-        (),
-      ),
-    ],
-    (),
-  ),
 ]
 
-let runScoring = (estimate, answer, prior, env) => {
-  GenericDist.Score.logScore(~estimate, ~answer, ~prior, ~env)
-  ->E.R2.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
-  ->E.R2.errMap(DistributionTypes.Error.toString)
+module Number = {
+  let nameSpace = Some("Number")
+  let requiresNamespace = false
+
+  module NumberToNumber = {
+    let make = (name, fn) =>
+      FnDefinition.make(
+        ~nameSpace,
+        ~requiresNamespace,
+        ~name,
+        ~inputs=[FRTypeNumber],
+        ~run=(inputs, _) => {
+          inputs
+          ->getOrError(0)
+          ->E.R.bind(Prepare.oneNumber)
+          ->E.R2.fmap(fn)
+          ->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+  }
+
+  module ArrayNumberDist = {
+    let make = (name, fn) => {
+      FnDefinition.make(
+        ~nameSpace,
+        ~requiresNamespace=false,
+        ~name,
+        ~inputs=[FRTypeArray(FRTypeNumber)],
+        ~run=(inputs, _) =>
+          Prepare.ToTypedArray.numbers(inputs)
+          ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
+          ->E.R.bind(fn),
+        (),
+      )
+    }
+    let make2 = (name, fn) => {
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeArray(FRTypeAny)],
+        ~run=(inputs, _) =>
+          Prepare.ToTypedArray.numbers(inputs)
+          ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
+          ->E.R.bind(fn),
+        (),
+      )
+    }
+  }
+
+  let library = [
+    Function.make(
+      ~name="Floor",
+      ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)],
+      (),
+    ),
+    Function.make(
+      ~name="Ceiling",
+      ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
+      (),
+    ),
+    Function.make(
+      ~name="Absolute Value",
+      ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)],
+      (),
+    ),
+    Function.make(~name="Exponent", ~definitions=[NumberToNumber.make("exp", Js.Math.exp)], ()),
+    Function.make(~name="Log", ~definitions=[NumberToNumber.make("log", Js.Math.log)], ()),
+    Function.make(
+      ~name="Log Base 10",
+      ~definitions=[NumberToNumber.make("log10", Js.Math.log10)],
+      (),
+    ),
+    Function.make(~name="Log Base 2", ~definitions=[NumberToNumber.make("log2", Js.Math.log2)], ()),
+    Function.make(~name="Round", ~definitions=[NumberToNumber.make("round", Js.Math.round)], ()),
+    Function.make(
+      ~name="Sum",
+      ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber->Ok)],
+      (),
+    ),
+    Function.make(
+      ~name="Product",
+      ~definitions=[
+        ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber->Ok),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Min",
+      ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber->Ok)],
+      (),
+    ),
+    Function.make(
+      ~name="Max",
+      ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber->Ok)],
+      (),
+    ),
+    Function.make(
+      ~name="Mean",
+      ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber->Ok)],
+      (),
+    ),
+    Function.make(
+      ~name="Geometric Mean",
+      ~definitions=[
+        ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber->Ok),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Standard Deviation",
+      ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok)],
+      (),
+    ),
+    Function.make(
+      ~name="Variance",
+      ~definitions=[
+        ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Sort",
+      ~definitions=[
+        ArrayNumberDist.make("sort", r =>
+          r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Cumulative Sum",
+      ~definitions=[
+        ArrayNumberDist.make("cumsum", r =>
+          r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Cumulative Prod",
+      ~definitions=[
+        ArrayNumberDist.make("cumprod", r =>
+          r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="Diff",
+      ~definitions=[
+        ArrayNumberDist.make("diff", r =>
+          r->E.A.Floats.diff->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        ),
+      ],
+      (),
+    ),
+  ]
 }
 
-let scoreFunctions = [
-  Function.make(
-    ~name="Score",
-    ~definitions=[
-      FnDefinition.make(
-        ~name="logScore",
-        ~inputs=[
-          FRTypeRecord([
-            ("estimate", FRTypeDist),
-            ("answer", FRTypeDistOrNumber),
-            ("prior", FRTypeDist),
-          ]),
-        ],
-        ~run=(inputs, env) => {
-          switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(inputs) {
-          | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d)), FRValueDist(prior)]) =>
-            runScoring(estimate, Score_Dist(d), Some(prior), env)
-          | Ok([
-              FRValueDist(estimate),
-              FRValueDistOrNumber(FRValueNumber(d)),
-              FRValueDist(prior),
-            ]) =>
-            runScoring(estimate, Score_Scalar(d), Some(prior), env)
-          | Error(e) => Error(e)
-          | _ => Error(FunctionRegistry_Helpers.impossibleError)
-          }
-        },
-      ),
-      FnDefinition.make(
-        ~name="logScore",
-        ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
-        ~run=(inputs, env) => {
-          switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(inputs) {
-          | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d))]) =>
-            runScoring(estimate, Score_Dist(d), None, env)
-          | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueNumber(d))]) =>
-            runScoring(estimate, Score_Scalar(d), None, env)
-          | Error(e) => Error(e)
-          | _ => Error(FunctionRegistry_Helpers.impossibleError)
-          }
-        },
-      ),
-      FnDefinition.make(~name="klDivergence", ~inputs=[FRTypeDist, FRTypeDist], ~run=(
-        inputs,
-        env,
-      ) => {
-        switch inputs {
-        | [FRValueDist(estimate), FRValueDist(d)] => runScoring(estimate, Score_Dist(d), None, env)
-        | _ => Error(FunctionRegistry_Helpers.impossibleError)
-        }
-      }),
-    ],
-    (),
-  ),
-]
+module Dict = {
+  let nameSpace = Some("Dict")
+  let library = [
+    Function.make(
+      ~name="merge",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=true,
+          ~name="merge",
+          ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
+          ~run=(inputs, _) => {
+            switch inputs {
+            | [FRValueDict(d1), FRValueDict(d2)] => {
+                let newDict =
+                  E.Dict.concat(d1, d2) |> Js.Dict.map((. r) =>
+                    FunctionRegistry_Core.FRType.matchReverse(r)
+                  )
+                newDict->Js.Dict.entries->Belt.Map.String.fromArray->Wrappers.evRecord->Ok
+              }
+            | _ => Error(impossibleError)
+            }
+          },
+          (),
+        ),
+      ],
+      (),
+    ),
+    //TODO: Make sure that two functions can't have the same name. This causes chaos elsewhere.
+    Function.make(
+      ~name="mergeMany",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=true,
+          ~name="mergeMany",
+          ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
+          ~run=(inputs, _) =>
+            inputs
+            ->Prepare.ToTypedArray.dicts
+            ->E.R2.fmap(E.Dict.concatMany)
+            ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
+            ->E.R2.fmap(r => r->Js.Dict.entries->Belt.Map.String.fromArray)
+            ->E.R2.fmap(Wrappers.evRecord),
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="keys",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=true,
+          ~name="keys",
+          ~inputs=[FRTypeDict(FRTypeAny)],
+          ~run=(inputs, _) =>
+            switch inputs {
+            | [FRValueDict(d1)] =>
+              Js.Dict.keys(d1)->E.A2.fmap(Wrappers.evString)->Wrappers.evArray->Ok
+            | _ => Error(impossibleError)
+            },
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="values",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=true,
+          ~name="values",
+          ~inputs=[FRTypeDict(FRTypeAny)],
+          ~run=(inputs, _) =>
+            switch inputs {
+            | [FRValueDict(d1)] =>
+              Js.Dict.values(d1)
+              ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
+              ->Wrappers.evArray
+              ->Ok
+            | _ => Error(impossibleError)
+            },
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="toList",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=true,
+          ~name="toList",
+          ~inputs=[FRTypeDict(FRTypeAny)],
+          ~run=(inputs, _) =>
+            switch inputs {
+            | [FRValueDict(dict)] =>
+              dict
+              ->Js.Dict.entries
+              ->E.A2.fmap(((key, value)) =>
+                Wrappers.evArray([
+                  Wrappers.evString(key),
+                  FunctionRegistry_Core.FRType.matchReverse(value),
+                ])
+              )
+              ->Wrappers.evArray
+              ->Ok
+            | _ => Error(impossibleError)
+            },
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="fromList",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=true,
+          ~name="fromList",
+          ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
+          ~run=(inputs, _) => {
+            let convertInternalItems = items =>
+              items
+              ->E.A2.fmap(item => {
+                switch item {
+                | [FRValueString(string), value] =>
+                  (string, FunctionRegistry_Core.FRType.matchReverse(value))->Ok
+                | _ => Error(impossibleError)
+                }
+              })
+              ->E.A.R.firstErrorOrOpen
+              ->E.R2.fmap(Belt.Map.String.fromArray)
+              ->E.R2.fmap(Wrappers.evRecord)
+            inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.arrayOfArrays)
+              |> E.R2.bind(convertInternalItems)
+          },
+          (),
+        ),
+      ],
+      (),
+    ),
+  ]
+}
 
-let registry = E.A.append(registryStart, scoreFunctions)
+module List = {
+  let nameSpace = Some("List")
+  let requiresNamespace = true
+
+  let library = [
+    Function.make(
+      ~name="List.make",
+      ~definitions=[
+        //Todo: If the second item is a function with no args, it could be nice to run this function and return the result.
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace,
+          ~name="make",
+          ~inputs=[FRTypeNumber, FRTypeAny],
+          ~run=(inputs, _) => {
+            switch inputs {
+            | [FRValueNumber(number), value] =>
+              Belt.Array.make(E.Float.toInt(number), value)
+              ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
+              ->Wrappers.evArray
+              ->Ok
+            | _ => Error(impossibleError)
+            }
+          },
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="List.upTo",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace,
+          ~name="upTo",
+          ~inputs=[FRTypeNumber, FRTypeNumber],
+          ~run=(inputs, _) =>
+            inputs
+            ->Prepare.ToValueTuple.twoNumbers
+            ->E.R2.fmap(((low, high)) =>
+              E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)
+              ->E.A2.fmap(Wrappers.evNumber)
+              ->Wrappers.evArray
+            ),
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="List.first",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace,
+          ~name="first",
+          ~inputs=[FRTypeArray(FRTypeAny)],
+          ~run=(inputs, _) =>
+            switch inputs {
+            | [FRValueArray(array)] =>
+              E.A.first(array)
+              |> E.O.toResult("No first element")
+              |> E.R.fmap(FunctionRegistry_Core.FRType.matchReverse)
+            | _ => Error(impossibleError)
+            },
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="List.last",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=false,
+          ~name="last",
+          ~inputs=[FRTypeArray(FRTypeAny)],
+          ~run=(inputs, _) =>
+            switch inputs {
+            | [FRValueArray(array)] =>
+              E.A.last(array)
+              |> E.O.toResult("No first element")
+              |> E.R.fmap(FunctionRegistry_Core.FRType.matchReverse)
+            | _ => Error(impossibleError)
+            },
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="List.reverse",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace=false,
+          ~name="last",
+          ~inputs=[FRTypeArray(FRTypeAny)],
+          ~run=(inputs, _) =>
+            switch inputs {
+            | [FRValueArray(array)] =>
+              Belt.Array.reverse(array)
+              ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
+              ->Wrappers.evArray
+              ->Ok
+            | _ => Error(impossibleError)
+            },
+          (),
+        ),
+      ],
+      (),
+    ),
+  ]
+}
+
+module Scoring = {
+  let nameSpace = Some("Dist")
+  let requiresNamespace = false
+
+  let runScoring = (estimate, answer, prior, env) => {
+    GenericDist.Score.logScore(~estimate, ~answer, ~prior, ~env)
+    ->E.R2.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
+    ->E.R2.errMap(DistributionTypes.Error.toString)
+  }
+
+  let library = [
+    Function.make(
+      ~name="logScore",
+      ~definitions=[
+        FnDefinition.make(
+          ~nameSpace,
+          ~requiresNamespace,
+          ~name="logScore",
+          ~inputs=[
+            FRTypeRecord([
+              ("estimate", FRTypeDist),
+              ("answer", FRTypeDistOrNumber),
+              ("prior", FRTypeDist),
+            ]),
+          ],
+          ~run=(inputs, env) => {
+            switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(inputs) {
+            | Ok([
+                FRValueDist(estimate),
+                FRValueDistOrNumber(FRValueDist(d)),
+                FRValueDist(prior),
+              ]) =>
+              runScoring(estimate, Score_Dist(d), Some(prior), env)
+            | Ok([
+                FRValueDist(estimate),
+                FRValueDistOrNumber(FRValueNumber(d)),
+                FRValueDist(prior),
+              ]) =>
+              runScoring(estimate, Score_Scalar(d), Some(prior), env)
+            | Error(e) => Error(e)
+            | _ => Error(FunctionRegistry_Helpers.impossibleError)
+            }
+          },
+          (),
+        ),
+        FnDefinition.make(
+          ~name="logScore",
+          ~nameSpace,
+          ~requiresNamespace,
+          ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
+          ~run=(inputs, env) => {
+            switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(inputs) {
+            | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d))]) =>
+              runScoring(estimate, Score_Dist(d), None, env)
+            | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueNumber(d))]) =>
+              runScoring(estimate, Score_Scalar(d), None, env)
+            | Error(e) => Error(e)
+            | _ => Error(FunctionRegistry_Helpers.impossibleError)
+            }
+          },
+          (),
+        ),
+      ],
+      (),
+    ),
+    Function.make(
+      ~name="klDivergence",
+      ~definitions=[
+        FnDefinition.make(
+          ~name="klDivergence",
+          ~nameSpace,
+          ~requiresNamespace,
+          ~inputs=[FRTypeDist, FRTypeDist],
+          ~run=(inputs, env) => {
+            switch inputs {
+            | [FRValueDist(estimate), FRValueDist(d)] =>
+              runScoring(estimate, Score_Dist(d), None, env)
+            | _ => Error(FunctionRegistry_Helpers.impossibleError)
+            }
+          },
+          (),
+        ),
+      ],
+      (),
+    ),
+  ]
+}
+
+let registry = Belt.Array.concatMany([
+  PointSet.library,
+  Functionn.library,
+  Number.library,
+  Dict.library,
+  List.library,
+  DistributionCreation.library,
+  Scoring.library,
+])
