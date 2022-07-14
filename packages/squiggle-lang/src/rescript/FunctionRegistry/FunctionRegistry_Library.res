@@ -89,6 +89,15 @@ module Functionn = {
   let library = [
     Function.make(
       ~name="Function.declare",
+      ~description="Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.",
+      ~examples=`declareFn({
+  fn: {|a,b| a },
+  inputs: [
+    {min: 0, max: 100},
+    {min: 30, max: 50}
+  ]
+})`,
+      ~isExperimental=true,
       ~definitions=[
         FnDefinition.make(
           ~nameSpace,
@@ -174,10 +183,10 @@ normal({p5: 4, p95: 10})
 normal({mean: 5, stdev: 2})`,
       ~definitions=[
         TwoArgDist.make("normal", twoArgs(SymbolicDist.Normal.make)),
-        // TwoArgDist.makeRecordP5P95("normal", r =>
-        //   twoArgs(SymbolicDist.Normal.from90PercentCI, r)->Ok
-        // ),
-        // TwoArgDist.makeRecordMeanStdev("normal", twoArgs(SymbolicDist.Normal.make)),
+        TwoArgDist.makeRecordP5P95("normal", r =>
+          twoArgs(SymbolicDist.Normal.from90PercentCI, r)->Ok
+        ),
+        TwoArgDist.makeRecordMeanStdev("normal", twoArgs(SymbolicDist.Normal.make)),
       ],
       (),
     ),
@@ -304,29 +313,6 @@ let registryStart = [
         (),
       ),
     ],
-    (),
-  ),
-  Function.make(
-    ~name="Declaration (Continuous Function)",
-    ~description="Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.",
-    ~examples=`declareFn({
-  fn: {|a,b| a },
-  inputs: [
-    {min: 0, max: 100},
-    {min: 30, max: 50}
-  ]
-})`,
-    ~definitions=[
-      FnDefinition.make(
-        ~name="declareFn",
-        ~inputs=[Declaration.frType],
-        ~run=(_, inputs, _) => {
-          inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
-        },
-        (),
-      ),
-    ],
-    ~isExperimental=true,
     (),
   ),
 ]
