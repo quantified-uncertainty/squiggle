@@ -30,28 +30,29 @@ module Declaration = {
   }
 }
 
-let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
-  let array = inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.openA)
-  let xyCoords =
-    array->E.R.bind(xyCoords =>
-      xyCoords
-      ->E.A2.fmap(xyCoord =>
-        [xyCoord]->Prepare.ToValueArray.Record.twoArgs->E.R.bind(Prepare.ToValueTuple.twoNumbers)
-      )
-      ->E.A.R.firstErrorOrOpen
-    )
-  let expressionValue =
-    xyCoords
-    ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-    ->E.R2.fmap(r => ReducerInterface_InternalExpressionValue.IEvDistribution(
-      PointSet(makeDist(r)),
-    ))
-  expressionValue
-}
-
 module PointSet = {
   let nameSpace = Some("PointSet")
   let requiresNamespace = true
+
+  let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
+    let array = inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.openA)
+    let xyCoords =
+      array->E.R.bind(xyCoords =>
+        xyCoords
+        ->E.A2.fmap(xyCoord =>
+          [xyCoord]->Prepare.ToValueArray.Record.twoArgs->E.R.bind(Prepare.ToValueTuple.twoNumbers)
+        )
+        ->E.A.R.firstErrorOrOpen
+      )
+    let expressionValue =
+      xyCoords
+      ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
+      ->E.R2.fmap(r => ReducerInterface_InternalExpressionValue.IEvDistribution(
+        PointSet(makeDist(r)),
+      ))
+    expressionValue
+  }
+
   let library = [
     Function.make(
       ~name="PointSet.makeContinuous",
@@ -90,13 +91,15 @@ module Functionn = {
     Function.make(
       ~name="Function.declare",
       ~description="Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.",
-      ~examples=`declareFn({
+      ~examples=[
+        `declareFn({
   fn: {|a,b| a },
   inputs: [
     {min: 0, max: 100},
     {min: 30, max: 50}
   ]
 })`,
+      ],
       ~isExperimental=true,
       ~definitions=[
         FnDefinition.make(
@@ -175,12 +178,11 @@ module DistributionCreation = {
         (),
       )
   }
+
   let library = [
     Function.make(
       ~name="Normal",
-      ~examples=`normal(5,1)
-normal({p5: 4, p95: 10})
-normal({mean: 5, stdev: 2})`,
+      ~examples=["normal(5,1)", "normal({p5: 4, p95: 10})", "normal({mean: 5, stdev: 2})"],
       ~definitions=[
         TwoArgDist.make("normal", twoArgs(SymbolicDist.Normal.make)),
         TwoArgDist.makeRecordP5P95("normal", r =>
@@ -192,9 +194,11 @@ normal({mean: 5, stdev: 2})`,
     ),
     Function.make(
       ~name="Lognormal",
-      ~examples=`lognormal(0.5, 0.8)
-lognormal({p5: 4, p95: 10})
-lognormal({mean: 5, stdev: 2})`,
+      ~examples=[
+        "lognormal(0.5, 0.8)",
+        "lognormal({p5: 4, p95: 10})",
+        "lognormal({mean: 5, stdev: 2})"
+      ],
       ~definitions=[
         TwoArgDist.make("lognormal", twoArgs(SymbolicDist.Lognormal.make)),
         TwoArgDist.makeRecordP5P95("lognormal", r =>
@@ -209,14 +213,13 @@ lognormal({mean: 5, stdev: 2})`,
     ),
     Function.make(
       ~name="Uniform",
-      ~examples=`uniform(10, 12)`,
+      ~examples=[`uniform(10, 12)`],
       ~definitions=[TwoArgDist.make("uniform", twoArgs(SymbolicDist.Uniform.make))],
       (),
     ),
     Function.make(
       ~name="Beta",
-      ~examples=`beta(20, 25)
-beta({mean: 0.39, stdev: 0.1})`,
+      ~examples=[`beta(20, 25)`, `beta({mean: 0.39, stdev: 0.1})`],
       ~definitions=[
         TwoArgDist.make("beta", twoArgs(SymbolicDist.Beta.make)),
         TwoArgDist.makeRecordMeanStdev("beta", twoArgs(SymbolicDist.Beta.fromMeanAndStdev)),
@@ -225,27 +228,25 @@ beta({mean: 0.39, stdev: 0.1})`,
     ),
     Function.make(
       ~name="Cauchy",
-      ~examples=`cauchy(5, 1)`,
+      ~examples=[`cauchy(5, 1)`],
       ~definitions=[TwoArgDist.make("cauchy", twoArgs(SymbolicDist.Cauchy.make))],
       (),
     ),
     Function.make(
       ~name="Gamma",
-      ~examples=`gamma(5, 1)`,
+      ~examples=[`gamma(5, 1)`],
       ~definitions=[TwoArgDist.make("gamma", twoArgs(SymbolicDist.Gamma.make))],
       (),
     ),
     Function.make(
       ~name="Logistic",
-      ~examples=`gamma(5, 1)`,
+      ~examples=[`logistic(5, 1)`],
       ~definitions=[TwoArgDist.make("logistic", twoArgs(SymbolicDist.Logistic.make))],
       (),
     ),
     Function.make(
       ~name="To (Distribution)",
-      ~examples=`5 to 10
-to(5,10)
--5 to 5`,
+      ~examples=[`5 to 10`, `to(5,10)`, `-5 to 5`],
       ~definitions=[
         TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make)),
         TwoArgDist.make(
@@ -257,65 +258,24 @@ to(5,10)
     ),
     Function.make(
       ~name="Exponential",
-      ~examples=`exponential(2)`,
+      ~examples=[`exponential(2)`],
       ~definitions=[OneArgDist.make("exponential", SymbolicDist.Exponential.make)],
       (),
     ),
     Function.make(
       ~name="Bernoulli",
-      ~examples=`bernoulli(0.5)`,
+      ~examples=[`bernoulli(0.5)`],
       ~definitions=[OneArgDist.make("bernoulli", SymbolicDist.Bernoulli.make)],
       (),
     ),
     Function.make(
       ~name="PointMass",
-      ~examples=`pointMass(0.5)`,
+      ~examples=[`pointMass(0.5)`],
       ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.makeSafe)],
       (),
     ),
   ]
 }
-
-let registryStart = [
-  Function.make(
-    ~name="toContinuousPointSet",
-    ~description="Converts a set of points to a continuous distribution",
-    ~examples=`toContinuousPointSet([
-  {x: 0, y: 0.1},
-  {x: 1, y: 0.2},
-  {x: 2, y: 0.15},
-  {x: 3, y: 0.1}
-])`,
-    ~definitions=[
-      FnDefinition.make(
-        ~name="toContinuousPointSet",
-        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
-        (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="toDiscretePointSet",
-    ~description="Converts a set of points to a discrete distribution",
-    ~examples=`toDiscretePointSet([
-  {x: 0, y: 0.1},
-  {x: 1, y: 0.2},
-  {x: 2, y: 0.15},
-  {x: 3, y: 0.1}
-])`,
-    ~definitions=[
-      FnDefinition.make(
-        ~name="toDiscretePointSet",
-        ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
-        (),
-      ),
-    ],
-    (),
-  ),
-]
 
 module Number = {
   let nameSpace = Some("Number")

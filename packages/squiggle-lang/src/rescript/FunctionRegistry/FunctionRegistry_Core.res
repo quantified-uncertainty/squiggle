@@ -50,7 +50,7 @@ type fnDefinition = {
 type function = {
   name: string,
   definitions: array<fnDefinition>,
-  examples: option<string>,
+  examples: array<string>,
   description: option<string>,
   isExperimental: bool,
 }
@@ -353,7 +353,7 @@ module Function = {
   type functionJson = {
     name: string,
     definitions: array<string>,
-    examples: option<string>,
+    examples: array<string>,
     description: option<string>,
     isExperimental: bool,
   }
@@ -361,7 +361,7 @@ module Function = {
   let make = (~name, ~definitions, ~examples=?, ~description=?, ~isExperimental=false, ()): t => {
     name: name,
     definitions: definitions,
-    examples: examples,
+    examples: examples |> E.O.default([]),
     isExperimental: isExperimental,
     description: description,
   }
