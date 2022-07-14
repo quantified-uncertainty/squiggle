@@ -44,7 +44,7 @@ type fnDefinition = {
   requiresNamespace: bool,
   name: string,
   inputs: array<frType>,
-  run: (array<frValue>, GenericDist.env) => result<internalExpressionValue, string>,
+  run: (array<internalExpressionValue>, array<frValue>, GenericDist.env)=> result<internalExpressionValue, string>
 }
 
 type function = {
@@ -327,7 +327,7 @@ module FnDefinition = {
   let run = (t: t, args: array<internalExpressionValue>, env: GenericDist.env) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
-    | Some(values) => t.run(values, env)
+    | Some(values) => t.run(args, values, env)
     | None => Error("Incorrect Types")
     }
   }

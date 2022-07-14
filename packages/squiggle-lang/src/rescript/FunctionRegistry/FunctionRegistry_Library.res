@@ -61,7 +61,7 @@ module PointSet = {
           ~requiresNamespace,
           ~name="makeContinuous",
           ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-          ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+          ~run=(_, inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
           (),
         ),
       ],
@@ -75,7 +75,7 @@ module PointSet = {
           ~requiresNamespace,
           ~name="makeDiscrete",
           ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-          ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+          ~run=(_, inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
           (),
         ),
       ],
@@ -95,7 +95,7 @@ module Functionn = {
           ~requiresNamespace=true,
           ~name="declare",
           ~inputs=[Declaration.frType],
-          ~run=(inputs, _) => {
+          ~run=(_, inputs, _) => {
             inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
           },
           (),
@@ -120,7 +120,7 @@ module DistributionCreation = {
         ~requiresNamespace=false,
         ~name,
         ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber],
-        ~run=(inputs, env) => inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env),
+        ~run=(_, inputs, env) => inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env),
         (),
       )
     }
@@ -131,7 +131,7 @@ module DistributionCreation = {
         ~requiresNamespace=false,
         ~name,
         ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
-        ~run=(inputs, env) =>
+        ~run=(_, inputs, env) =>
           inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
         (),
       )
@@ -143,7 +143,7 @@ module DistributionCreation = {
         ~nameSpace,
         ~requiresNamespace=false,
         ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
-        ~run=(inputs, env) =>
+        ~run=(_, inputs, env) =>
           inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
         (),
       )
@@ -162,7 +162,7 @@ module DistributionCreation = {
         ~requiresNamespace=false,
         ~name,
         ~inputs=[FRTypeDistOrNumber],
-        ~run=(inputs, env) => inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env),
+        ~run=(_, inputs, env) => inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env),
         (),
       )
   }
@@ -281,7 +281,7 @@ let registryStart = [
       FnDefinition.make(
         ~name="toContinuousPointSet",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        ~run=(_, inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
         (),
       ),
     ],
@@ -300,7 +300,7 @@ let registryStart = [
       FnDefinition.make(
         ~name="toDiscretePointSet",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+        ~run=(_, inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
         (),
       ),
     ],
@@ -320,7 +320,7 @@ let registryStart = [
       FnDefinition.make(
         ~name="declareFn",
         ~inputs=[Declaration.frType],
-        ~run=(inputs, _) => {
+        ~run=(_, inputs, _) => {
           inputs->E.A.unsafe_get(0)->Declaration.fromExpressionValue
         },
         (),
@@ -342,7 +342,7 @@ module Number = {
         ~requiresNamespace,
         ~name,
         ~inputs=[FRTypeNumber],
-        ~run=(inputs, _) => {
+        ~run=(_, inputs, _) => {
           inputs
           ->getOrError(0)
           ->E.R.bind(Prepare.oneNumber)
@@ -360,7 +360,7 @@ module Number = {
         ~requiresNamespace=false,
         ~name,
         ~inputs=[FRTypeArray(FRTypeNumber)],
-        ~run=(inputs, _) =>
+        ~run=(_, inputs, _) =>
           Prepare.ToTypedArray.numbers(inputs)
           ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
           ->E.R.bind(fn),
@@ -371,7 +371,7 @@ module Number = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeArray(FRTypeAny)],
-        ~run=(inputs, _) =>
+        ~run=(_, inputs, _) =>
           Prepare.ToTypedArray.numbers(inputs)
           ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
           ->E.R.bind(fn),
@@ -492,6 +492,32 @@ module Number = {
 
 module Dict = {
   let nameSpace = Some("Dict")
+  module Internals = {
+    type t = ReducerInterface_InternalExpressionValue.map
+
+    let keys = (a: t): internalExpressionValue => IEvArray(
+      Belt.Map.String.keysToArray(a)->E.A2.fmap(Wrappers.evString),
+    )
+
+    let values = (a: t): internalExpressionValue => IEvArray(Belt.Map.String.valuesToArray(a))
+
+    let toList = (a: t): internalExpressionValue =>
+      Belt.Map.String.toArray(a)
+      ->E.A2.fmap(((key, value)) => Wrappers.evArray([IEvString(key), value]))
+      ->Wrappers.evArray
+
+    let merge = (a: t, b: t): internalExpressionValue => IEvRecord(
+      Belt.Map.String.merge(a, b, (_, _, c) => c),
+    )
+
+    //Belt.Map.String has a function for mergeMany, but I couldn't understand how to use it yet.
+    let mergeMany = (a: array<t>): internalExpressionValue => {
+      let mergedValues =
+        a->E.A2.fmap(Belt.Map.String.toArray)->Belt.Array.concatMany->Belt.Map.String.fromArray
+      IEvRecord(mergedValues)
+    }
+  }
+
   let library = [
     Function.make(
       ~name="merge",
@@ -501,15 +527,9 @@ module Dict = {
           ~requiresNamespace=true,
           ~name="merge",
           ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
-          ~run=(inputs, _) => {
+          ~run=(inputs, _, _) => {
             switch inputs {
-            | [FRValueDict(d1), FRValueDict(d2)] => {
-                let newDict =
-                  E.Dict.concat(d1, d2) |> Js.Dict.map((. r) =>
-                    FunctionRegistry_Core.FRType.matchReverse(r)
-                  )
-                newDict->Js.Dict.entries->Belt.Map.String.fromArray->Wrappers.evRecord->Ok
-              }
+            | [IEvRecord(d1), IEvRecord(d2)] => Internals.merge(d1, d2)->Ok
             | _ => Error(impossibleError)
             }
           },
@@ -518,7 +538,7 @@ module Dict = {
       ],
       (),
     ),
-    //TODO: Make sure that two functions can't have the same name. This causes chaos elsewhere.
+    //TODO: Change to use new mergeMany() function.
     Function.make(
       ~name="mergeMany",
       ~definitions=[
@@ -527,7 +547,7 @@ module Dict = {
           ~requiresNamespace=true,
           ~name="mergeMany",
           ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
-          ~run=(inputs, _) =>
+          ~run=(_, inputs, _) =>
             inputs
             ->Prepare.ToTypedArray.dicts
             ->E.R2.fmap(E.Dict.concatMany)
@@ -547,10 +567,9 @@ module Dict = {
           ~requiresNamespace=true,
           ~name="keys",
           ~inputs=[FRTypeDict(FRTypeAny)],
-          ~run=(inputs, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
-            | [FRValueDict(d1)] =>
-              Js.Dict.keys(d1)->E.A2.fmap(Wrappers.evString)->Wrappers.evArray->Ok
+            | [IEvRecord(d1)] => Internals.keys(d1)->Ok
             | _ => Error(impossibleError)
             },
           (),
@@ -566,13 +585,9 @@ module Dict = {
           ~requiresNamespace=true,
           ~name="values",
           ~inputs=[FRTypeDict(FRTypeAny)],
-          ~run=(inputs, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
-            | [FRValueDict(d1)] =>
-              Js.Dict.values(d1)
-              ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
-              ->Wrappers.evArray
-              ->Ok
+            | [IEvRecord(d1)] => Internals.values(d1)->Ok
             | _ => Error(impossibleError)
             },
           (),
@@ -588,19 +603,9 @@ module Dict = {
           ~requiresNamespace=true,
           ~name="toList",
           ~inputs=[FRTypeDict(FRTypeAny)],
-          ~run=(inputs, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
-            | [FRValueDict(dict)] =>
-              dict
-              ->Js.Dict.entries
-              ->E.A2.fmap(((key, value)) =>
-                Wrappers.evArray([
-                  Wrappers.evString(key),
-                  FunctionRegistry_Core.FRType.matchReverse(value),
-                ])
-              )
-              ->Wrappers.evArray
-              ->Ok
+            | [IEvRecord(dict)] => dict->Internals.toList->Ok
             | _ => Error(impossibleError)
             },
           (),
@@ -616,7 +621,7 @@ module Dict = {
           ~requiresNamespace=true,
           ~name="fromList",
           ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
-          ~run=(inputs, _) => {
+          ~run=(_, inputs, _) => {
             let convertInternalItems = items =>
               items
               ->E.A2.fmap(item => {
@@ -644,6 +649,29 @@ module List = {
   let nameSpace = Some("List")
   let requiresNamespace = true
 
+  module Internals = {
+    let makeFromNumber = (
+      n: float,
+      value: internalExpressionValue,
+    ): internalExpressionValue => IEvArray(Belt.Array.make(E.Float.toInt(n), value))
+
+    let upTo = (low: float, high: float): internalExpressionValue => IEvArray(
+      E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)->E.A2.fmap(
+        Wrappers.evNumber,
+      ),
+    )
+
+    let first = (v: array<internalExpressionValue>): result<internalExpressionValue, string> =>
+      v->E.A.first |> E.O.toResult("No first element")
+
+    let last = (v: array<internalExpressionValue>): result<internalExpressionValue, string> =>
+      v->E.A.last |> E.O.toResult("No last element")
+
+    let reverse = (array: array<internalExpressionValue>): internalExpressionValue => IEvArray(
+      Belt.Array.reverse(array),
+    )
+  }
+
   let library = [
     Function.make(
       ~name="List.make",
@@ -654,13 +682,9 @@ module List = {
           ~requiresNamespace,
           ~name="make",
           ~inputs=[FRTypeNumber, FRTypeAny],
-          ~run=(inputs, _) => {
+          ~run=(inputs, _, _) => {
             switch inputs {
-            | [FRValueNumber(number), value] =>
-              Belt.Array.make(E.Float.toInt(number), value)
-              ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
-              ->Wrappers.evArray
-              ->Ok
+            | [IEvNumber(number), value] => Internals.makeFromNumber(number, value)->Ok
             | _ => Error(impossibleError)
             }
           },
@@ -677,14 +701,10 @@ module List = {
           ~requiresNamespace,
           ~name="upTo",
           ~inputs=[FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, _) =>
+          ~run=(_, inputs, _) =>
             inputs
             ->Prepare.ToValueTuple.twoNumbers
-            ->E.R2.fmap(((low, high)) =>
-              E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)
-              ->E.A2.fmap(Wrappers.evNumber)
-              ->Wrappers.evArray
-            ),
+            ->E.R2.fmap(((low, high)) => Internals.upTo(low, high)),
           (),
         ),
       ],
@@ -698,12 +718,9 @@ module List = {
           ~requiresNamespace,
           ~name="first",
           ~inputs=[FRTypeArray(FRTypeAny)],
-          ~run=(inputs, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
-            | [FRValueArray(array)] =>
-              E.A.first(array)
-              |> E.O.toResult("No first element")
-              |> E.R.fmap(FunctionRegistry_Core.FRType.matchReverse)
+            | [IEvArray(array)] => Internals.first(array)
             | _ => Error(impossibleError)
             },
           (),
@@ -719,12 +736,9 @@ module List = {
           ~requiresNamespace=false,
           ~name="last",
           ~inputs=[FRTypeArray(FRTypeAny)],
-          ~run=(inputs, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
-            | [FRValueArray(array)] =>
-              E.A.last(array)
-              |> E.O.toResult("No first element")
-              |> E.R.fmap(FunctionRegistry_Core.FRType.matchReverse)
+            | [IEvArray(array)] => Internals.last(array)
             | _ => Error(impossibleError)
             },
           (),
@@ -738,15 +752,11 @@ module List = {
         FnDefinition.make(
           ~nameSpace,
           ~requiresNamespace=false,
-          ~name="last",
+          ~name="reverse",
           ~inputs=[FRTypeArray(FRTypeAny)],
-          ~run=(inputs, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
-            | [FRValueArray(array)] =>
-              Belt.Array.reverse(array)
-              ->E.A2.fmap(FunctionRegistry_Core.FRType.matchReverse)
-              ->Wrappers.evArray
-              ->Ok
+            | [IEvArray(array)] => Internals.reverse(array)->Ok
             | _ => Error(impossibleError)
             },
           (),
@@ -782,7 +792,7 @@ module Scoring = {
               ("prior", FRTypeDist),
             ]),
           ],
-          ~run=(inputs, env) => {
+          ~run=(_, inputs, env) => {
             switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(inputs) {
             | Ok([
                 FRValueDist(estimate),
@@ -807,7 +817,7 @@ module Scoring = {
           ~nameSpace,
           ~requiresNamespace,
           ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
-          ~run=(inputs, env) => {
+          ~run=(_, inputs, env) => {
             switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(inputs) {
             | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d))]) =>
               runScoring(estimate, Score_Dist(d), None, env)
@@ -830,7 +840,7 @@ module Scoring = {
           ~nameSpace,
           ~requiresNamespace,
           ~inputs=[FRTypeDist, FRTypeDist],
-          ~run=(inputs, env) => {
+          ~run=(_, inputs, env) => {
             switch inputs {
             | [FRValueDist(estimate), FRValueDist(d)] =>
               runScoring(estimate, Score_Dist(d), None, env)
