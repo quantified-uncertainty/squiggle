@@ -17,7 +17,7 @@ import {
   DistributionChartSpecOptions,
 } from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
-import { Plot, parsePlot } from "../lib/plotting";
+import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult, all } from "../lib/utility";
 
 export type DistributionPlottingSettings = {
