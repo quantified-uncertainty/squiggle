@@ -40,16 +40,20 @@ and frValueDictParam = (string, frValue)
 and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.genericDist)
 
 type fnDefinition = {
-  nameSpace: option<string>,
   requiresNamespace: bool,
   name: string,
   inputs: array<frType>,
-  run: (array<internalExpressionValue>, array<frValue>, GenericDist.env)=> result<internalExpressionValue, string>
+  run: (
+    array<internalExpressionValue>,
+    array<frValue>,
+    GenericDist.env,
+  ) => result<internalExpressionValue, string>,
 }
 
 type function = {
   name: string,
   definitions: array<fnDefinition>,
+  nameSpace: string,
   examples: array<string>,
   description: option<string>,
   isExperimental: bool,
@@ -338,9 +342,8 @@ module FnDefinition = {
   let toLambda = (t: t) =>
     Reducer_Module.convertOptionToFfiFn(t.name, toFfiFn(t))->Reducer_Module.eLambdaFFIValue
 
-  let make = (~nameSpace=None, ~requiresNamespace=true, ~name, ~inputs, ~run, ()): t => {
+  let make = (~requiresNamespace=true, ~name, ~inputs, ~run, ()): t => {
     name: name,
-    nameSpace: nameSpace,
     requiresNamespace: requiresNamespace,
     inputs: inputs,
     run: run,
@@ -358,8 +361,17 @@ module Function = {
     isExperimental: bool,
   }
 
-  let make = (~name, ~definitions, ~examples=?, ~description=?, ~isExperimental=false, ()): t => {
+  let make = (
+    ~name,
+    ~nameSpace,
+    ~definitions,
+    ~examples=?,
+    ~description=?,
+    ~isExperimental=false,
+    (),
+  ): t => {
     name: name,
+    nameSpace: nameSpace,
     definitions: definitions,
     examples: examples |> E.O.default([]),
     isExperimental: isExperimental,
@@ -377,7 +389,8 @@ module Function = {
 
 module Registry = {
   let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
-  let definitions = (r: registry) => r->E.A2.fmap(d => d.definitions)->E.A.concatMany
+  let definitionsWithFunctions = (r: registry) =>
+    r->E.A2.fmap(fn => fn.definitions->E.A2.fmap(def => (def, fn)))->E.A.concatMany
 
   /*
   There's a (potential+minor) bug here: If a function definition is called outside of the calls 
@@ -409,21 +422,17 @@ module Registry = {
     }
   }
 
-  let allNamespaces = (t: registry) =>
-    t
-    ->E.A2.fmap(r => r.definitions)
-    ->Belt.Array.concatMany
-    ->E.A2.fmap(r => r.nameSpace)
-    ->E.A.O.concatSomes
-    ->E.A.uniq
+  //todo: get namespace from project.
+  let allNamespaces = (t: registry) => t->E.A2.fmap(r => r.nameSpace)->E.A.uniq
 
   let makeModules = (prevBindings: Reducer_Module.t, t: registry): Reducer_Module.t => {
     let nameSpaces = allNamespaces(t)
     let nameSpaceBindings = nameSpaces->E.A2.fmap(nameSpace => {
-      let definitions = t->definitions->E.A2.filter(d => d.nameSpace === Some(nameSpace))
+      let definitions =
+        t->definitionsWithFunctions->E.A2.filter(((_, fn)) => fn.nameSpace === nameSpace)
 
-      let newModule = E.A.reduce(definitions, Reducer_Module.emptyStdLib, (acc, d) => {
-        acc->Reducer_Module.defineFunction(d.name, FnDefinition.toFfiFn(d))
+      let newModule = E.A.reduce(definitions, Reducer_Module.emptyStdLib, (acc, (def, _)) => {
+        acc->Reducer_Module.defineFunction(def.name, FnDefinition.toFfiFn(def))
       })
       (nameSpace, newModule)
     })
