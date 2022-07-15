@@ -19,6 +19,7 @@ let mathBindings: Bindings.t =
   ->E.A2.fmap(((name, v)) => (name, ReducerInterface_InternalExpressionValue.IEvNumber(v)))
   ->Bindings.fromArray
 
+//TODO: This should be in a different place.
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
   previousBindings
   ->Bindings.defineModule("Math", mathBindings)

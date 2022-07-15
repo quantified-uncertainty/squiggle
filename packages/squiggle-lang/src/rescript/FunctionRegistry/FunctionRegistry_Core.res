@@ -328,6 +328,14 @@ module FnDefinition = {
     t.name ++ `(${inputs})`
   }
 
+  let isMatch = (t: t, args: array<internalExpressionValue>) => {
+    let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
+    switch argValues {
+    | Some(values) => true
+    | None => false
+    }
+  }
+
   let run = (t: t, args: array<internalExpressionValue>, env: GenericDist.env) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
@@ -387,6 +395,32 @@ module Function = {
   }
 }
 
+module NameSpace = {
+  type t = {name: string, functions: array<function>}
+  let definitions = (t: t) => t.functions->E.A2.fmap(f => f.definitions)->E.A.concatMany
+  let uniqueFnNames = (t: t) => definitions(t)->E.A2.fmap(r => r.name)->E.A.uniq
+  let nameToDefinitions = (t: t, name: string) => definitions(t)->E.A2.filter(r => r.name == name)
+
+  //todo: It could be good to set a warning if two definitions are both valid, but I don't expect this often.
+  let nameFfiFn = (t: t, name: string): Reducer_Expression_T.optionFfiFn => {
+    (args, environment) => {
+      let definitions =
+        nameToDefinitions(t, name)->E.A2.fmap((def, ()) =>
+          FnDefinition.isMatch(def, args)
+            ? FnDefinition.run(def, args, environment) |> E.R.toOption
+            : None
+        )
+      E.A.O.firstSomeFn(definitions)
+    }
+  }
+
+  let toModule = (t: t): Reducer_Module.t =>
+    E.A.reduce(uniqueFnNames(t), Reducer_Module.emptyStdLib, (acc, uniqueName) => {
+      let relevantDefinitions = nameFfiFn(t, uniqueName)
+      acc->Reducer_Module.defineFunction(uniqueName, relevantDefinitions)
+    })
+}
+
 module Registry = {
   let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
   let definitionsWithFunctions = (r: registry) =>
@@ -428,13 +462,11 @@ module Registry = {
   let makeModules = (prevBindings: Reducer_Module.t, t: registry): Reducer_Module.t => {
     let nameSpaces = allNamespaces(t)
     let nameSpaceBindings = nameSpaces->E.A2.fmap(nameSpace => {
-      let definitions =
-        t->definitionsWithFunctions->E.A2.filter(((_, fn)) => fn.nameSpace === nameSpace)
-
-      let newModule = E.A.reduce(definitions, Reducer_Module.emptyStdLib, (acc, (def, _)) => {
-        acc->Reducer_Module.defineFunction(def.name, FnDefinition.toFfiFn(def))
-      })
-      (nameSpace, newModule)
+      let foo: NameSpace.t = {
+        name: nameSpace,
+        functions: t->E.A2.filter(r => r.nameSpace == nameSpace),
+      }
+      (nameSpace, NameSpace.toModule(foo))
     })
     E.A.reduce(nameSpaceBindings, prevBindings, (acc, (name, fn)) =>
       acc->Reducer_Module.defineModule(name, fn)
