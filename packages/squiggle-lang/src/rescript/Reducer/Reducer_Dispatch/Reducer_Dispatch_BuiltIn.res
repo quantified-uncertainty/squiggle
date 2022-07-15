@@ -198,7 +198,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("$_typeFunction_$", [IEvArray(arr)]) => TypeBuilder.typeFunction(arr)
   | ("$_typeTuple_$", [IEvArray(elems)]) => TypeBuilder.typeTuple(elems)
   | ("$_typeArray_$", [elem]) => TypeBuilder.typeArray(elem)
-  | ("$_typeRecord_$", [IEvArray(arrayOfPairs)]) => TypeBuilder.typeRecord(arrayOfPairs)
+  | ("$_typeRecord_$", [IEvRecord(propertyMap)]) => TypeBuilder.typeRecord(propertyMap)
   | ("concat", [IEvArray(aValueArray), IEvArray(bValueArray)]) =>
     doAddArray(aValueArray, bValueArray)
   | ("concat", [IEvString(aValueString), IEvString(bValueString)]) =>

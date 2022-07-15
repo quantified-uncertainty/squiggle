@@ -1,13 +1,10 @@
-module ExpressionT = Reducer_Expression_T
+// module ErrorValue = Reducer_ErrorValue
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module T = Reducer_Type_T
-module TypeBuilder = Reducer_Type_TypeBuilder
+// module TypeBuilder = Reducer_Type_TypeBuilder
 open InternalExpressionValue
 
-type typeErrorValue =
-  | TypeError(T.iType, InternalExpressionValue.t)
-  | TypeErrorWithPosition(T.iType, InternalExpressionValue.t, int)
-  | TypeErrorWithProperty(T.iType, InternalExpressionValue.t, string)
+type typeErrorValue = TypeError(T.t, InternalExpressionValue.t)
 
 let rec isOfResolvedIType = (anIType: T.iType, aValue): result<bool, typeErrorValue> => {
   let caseTypeIdentifier = (anUpperTypeName, aValue) => {
@@ -24,16 +21,16 @@ let rec isOfResolvedIType = (anIType: T.iType, aValue): result<bool, typeErrorVa
       Belt.Result.flatMap(acc, _ =>
         switch Belt.Map.String.get(map, property) {
         | Some(propertyValue) => isOfResolvedIType(propertyType, propertyValue)
-        | None => TypeErrorWithProperty(anIType, evValue, property)->Error
+        | None => TypeError(anIType, evValue)->Error
         }
       )
     })
   }
   let _caseArray = (anIType, evValue, elementType, anArray) => {
-    Belt.Array.reduceWithIndex(anArray, Ok(true), (acc, element, index) => {
+    Belt.Array.reduceWithIndex(anArray, Ok(true), (acc, element, _index) => {
       switch isOfResolvedIType(elementType, element) {
       | Ok(_) => acc
-      | Error(_) => TypeErrorWithPosition(anIType, evValue, index)->Error
+      | Error(_) => TypeError(anIType, evValue)->Error
       }
     })
   }
@@ -48,12 +45,12 @@ let rec isOfResolvedIType = (anIType: T.iType, aValue): result<bool, typeErrorVa
   // | ItTypeArray({element: anIType}) => raise(Reducer_Exception.ImpossibleException)
   // | ItTypeTuple({elements: anITypeArray}) => raise(Reducer_Exception.ImpossibleException)
   // | ItTypeRecord({properties: anITypeMap}) => raise(Reducer_Exception.ImpossibleException)
-  | _ => raise(Reducer_Exception.ImpossibleException)
+  | _ => raise(Reducer_Exception.ImpossibleException("Reducer_TypeChecker-isOfResolvedIType"))
   }
 }
 
-let isOfResolvedType = (aType: InternalExpressionValue.t, aValue): result<bool, typeErrorValue> =>
-  aType->T.fromIEvValue->isOfResolvedIType(aValue)
+// let isOfResolvedType = (aType: InternalExpressionValue.t, aValue): result<bool, typeErrorValue> =>
+//   aType->T.fromIEvValue->isOfResolvedIType(aValue)
 
 // TODO: Work in progress. Code is commented to make an a release of other features
 // let checkArguments = (
@@ -70,12 +67,5 @@ let isOfResolvedType = (aType: InternalExpressionValue.t, aValue): result<bool, 
 //   | _ => raise(Reducer_Exception.ImpossibleException)
 //   }
 //   let rTupleType = TypeBuilder.typeTuple(inputs)
-//   Belt.Result.flatMap(rTupleType, tuppleType => isOfResolvedType(tuppleType, args->IEvArray))
+//   Belt.Result.flatMap(rTupleType, tupleType => isOfResolvedType(tupleType, args->IEvArray))
 // }
-
-// let compileTypeExpression = (typeExpression: string, bindings: ExpressionT.bindings, reducerFn: ExpressionT.reducerFn) => {
-//     statement = `type compiled=${typeExpression}`
-
-// }
-
-//TODO: asGuard
