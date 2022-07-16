@@ -63,8 +63,8 @@ describe("Peggy parse type", () => {
       "{(::$_typeOf_$ :weekend (::$_typeOr_$ (::$_constructArray_$ ((::$_typeConstructor_$ #Saturday (::$_constructArray_$ ())) (::$_typeConstructor_$ #Sunday (::$_constructArray_$ ()))))))}",
     )
   })
-  describe("type paranthesis", () => {
-    //$ is introduced to avoid paranthesis
+  describe("type parenthesis", () => {
+    //$ is introduced to avoid parenthesis
     testParse(
       "answer: (number|string)<-opaque",
       "{(::$_typeOf_$ :answer (::$_typeModifier_opaque_$ (::$_typeOr_$ (::$_constructArray_$ (#number #string)))))}",

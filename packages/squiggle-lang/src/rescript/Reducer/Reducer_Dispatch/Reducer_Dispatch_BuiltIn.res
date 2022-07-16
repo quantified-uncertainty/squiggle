@@ -10,8 +10,8 @@ open ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
 /*
-  MathJs provides default implementations for builtins
-  This is where all the expected builtins like + = * / sin cos log ln etc are handled
+  MathJs provides default implementations for built-ins
+  This is where all the expected built-ins like + = * / sin cos log ln etc are handled
   DO NOT try to add external function mapping here!
 */
 
