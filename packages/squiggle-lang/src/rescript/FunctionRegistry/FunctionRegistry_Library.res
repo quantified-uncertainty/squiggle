@@ -120,6 +120,12 @@ module Functionn = {
 
 module DistributionCreation = {
   let nameSpace = "Dist"
+  let output = ReducerInterface_InternalExpressionValue.EvtDistribution
+
+  let fnMake = (~name, ~examples, ~definitions) => {
+    Function.make(~name, ~nameSpace, ~output, ~examples, ~definitions, ())
+  }
+
   module TwoArgDist = {
     let process = (~fn, ~env, r) =>
       r
@@ -176,9 +182,8 @@ module DistributionCreation = {
   }
 
   let library = [
-    Function.make(
+    fnMake(
       ~name="normal",
-      ~nameSpace,
       ~examples=["normal(5,1)", "normal({p5: 4, p95: 10})", "normal({mean: 5, stdev: 2})"],
       ~definitions=[
         TwoArgDist.make("normal", twoArgs(SymbolicDist.Normal.make)),
@@ -187,11 +192,9 @@ module DistributionCreation = {
         ),
         TwoArgDist.makeRecordMeanStdev("normal", twoArgs(SymbolicDist.Normal.make)),
       ],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="lognormal",
-      ~nameSpace,
       ~examples=[
         "lognormal(0.5, 0.8)",
         "lognormal({p5: 4, p95: 10})",
@@ -207,49 +210,37 @@ module DistributionCreation = {
           twoArgs(SymbolicDist.Lognormal.fromMeanAndStdev),
         ),
       ],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="uniform",
-      ~nameSpace,
       ~examples=[`uniform(10, 12)`],
       ~definitions=[TwoArgDist.make("uniform", twoArgs(SymbolicDist.Uniform.make))],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="beta",
-      ~nameSpace,
       ~examples=[`beta(20, 25)`, `beta({mean: 0.39, stdev: 0.1})`],
       ~definitions=[
         TwoArgDist.make("beta", twoArgs(SymbolicDist.Beta.make)),
         TwoArgDist.makeRecordMeanStdev("beta", twoArgs(SymbolicDist.Beta.fromMeanAndStdev)),
       ],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="cauchy",
-      ~nameSpace,
       ~examples=[`cauchy(5, 1)`],
       ~definitions=[TwoArgDist.make("cauchy", twoArgs(SymbolicDist.Cauchy.make))],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="gamma",
-      ~nameSpace,
       ~examples=[`gamma(5, 1)`],
       ~definitions=[TwoArgDist.make("gamma", twoArgs(SymbolicDist.Gamma.make))],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="logistic",
-      ~nameSpace,
       ~examples=[`logistic(5, 1)`],
       ~definitions=[TwoArgDist.make("logistic", twoArgs(SymbolicDist.Logistic.make))],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="to (distribution)",
-      ~nameSpace,
       ~examples=[`5 to 10`, `to(5,10)`, `-5 to 5`],
       ~definitions=[
         TwoArgDist.make("to", twoArgs(SymbolicDist.From90thPercentile.make)),
@@ -258,28 +249,21 @@ module DistributionCreation = {
           twoArgs(SymbolicDist.From90thPercentile.make),
         ),
       ],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="exponential",
-      ~nameSpace,
       ~examples=[`exponential(2)`],
       ~definitions=[OneArgDist.make("exponential", SymbolicDist.Exponential.make)],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="bernoulli",
-      ~nameSpace,
       ~examples=[`bernoulli(0.5)`],
       ~definitions=[OneArgDist.make("bernoulli", SymbolicDist.Bernoulli.make)],
-      (),
     ),
-    Function.make(
+    fnMake(
       ~name="pointMass",
-      ~nameSpace,
       ~examples=[`pointMass(0.5)`],
       ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.makeSafe)],
-      (),
     ),
   ]
 }
@@ -335,60 +319,80 @@ module Number = {
     Function.make(
       ~name="floor",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`floor(3.5)`],
       ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)],
       (),
     ),
     Function.make(
       ~name="ceiling",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`ceiling(3.5)`],
       ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
       (),
     ),
     Function.make(
       ~name="absolute value",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`abs(3.5)`],
       ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)],
       (),
     ),
     Function.make(
       ~name="exponent",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`exp(3.5)`],
       ~definitions=[NumberToNumber.make("exp", Js.Math.exp)],
       (),
     ),
     Function.make(
       ~name="log",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`log(3.5)`],
       ~definitions=[NumberToNumber.make("log", Js.Math.log)],
       (),
     ),
     Function.make(
       ~name="log base 10",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`log10(3.5)`],
       ~definitions=[NumberToNumber.make("log10", Js.Math.log10)],
       (),
     ),
     Function.make(
       ~name="log base 2",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`log2(3.5)`],
       ~definitions=[NumberToNumber.make("log2", Js.Math.log2)],
       (),
     ),
     Function.make(
       ~name="round",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`round(3.5)`],
       ~definitions=[NumberToNumber.make("round", Js.Math.round)],
       (),
     ),
     Function.make(
       ~name="sum",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`sum([3,5,2])`],
       ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
       ~name="product",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`product([3,5,2])`],
       ~definitions=[
         ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber->Ok),
       ],
@@ -397,24 +401,32 @@ module Number = {
     Function.make(
       ~name="min",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`min([3,5,2])`],
       ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
       ~name="max",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`max([3,5,2])`],
       ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
       ~name="mean",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`mean([3,5,2])`],
       ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
       ~name="geometric mean",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`geomean([3,5,2])`],
       ~definitions=[
         ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber->Ok),
       ],
@@ -423,12 +435,16 @@ module Number = {
     Function.make(
       ~name="standard deviation",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`stdev([3,5,2,3,5])`],
       ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
       ~name="variance",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[`variance([3,5,2,3,5])`],
       ~definitions=[
         ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok),
       ],
@@ -437,6 +453,8 @@ module Number = {
     Function.make(
       ~name="sort",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`sort([3,5,2,3,5])`],
       ~definitions=[
         ArrayNumberDist.make("sort", r =>
           r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
@@ -447,6 +465,8 @@ module Number = {
     Function.make(
       ~name="cumulative sum",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`cumsum([3,5,2,3,5])`],
       ~definitions=[
         ArrayNumberDist.make("cumsum", r =>
           r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
@@ -457,6 +477,8 @@ module Number = {
     Function.make(
       ~name="cumulative prod",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`cumprod([3,5,2,3,5])`],
       ~definitions=[
         ArrayNumberDist.make("cumprod", r =>
           r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
@@ -467,6 +489,8 @@ module Number = {
     Function.make(
       ~name="diff",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`diff([3,5,2,3,5])`],
       ~definitions=[
         ArrayNumberDist.make("diff", r =>
           r->E.A.Floats.diff->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
@@ -524,6 +548,8 @@ module Dict = {
     Function.make(
       ~name="merge",
       ~nameSpace,
+      ~output=EvtRecord,
+      ~examples=[`Dict.merge({a: 1, b: 2}, {c: 3, d: 4})`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace=true,
@@ -544,6 +570,8 @@ module Dict = {
     Function.make(
       ~name="mergeMany",
       ~nameSpace,
+      ~output=EvtRecord,
+      ~examples=[`Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}])`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace=true,
@@ -564,6 +592,8 @@ module Dict = {
     Function.make(
       ~name="keys",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`Dict.keys({a: 1, b: 2})`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace=true,
@@ -582,6 +612,8 @@ module Dict = {
     Function.make(
       ~name="values",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`Dict.values({a: 1, b: 2})`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace=true,
@@ -600,6 +632,8 @@ module Dict = {
     Function.make(
       ~name="toList",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`Dict.toList({a: 1, b: 2})`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace=true,
@@ -618,6 +652,8 @@ module Dict = {
     Function.make(
       ~name="fromList",
       ~nameSpace,
+      ~output=EvtRecord,
+      ~examples=[`Dict.fromList({a: 1, b: 2})`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace=true,
@@ -667,6 +703,8 @@ module List = {
     Function.make(
       ~name="make",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`List.make(2, "testValue")`],
       ~definitions=[
         //Todo: If the second item is a function with no args, it could be nice to run this function and return the result.
         FnDefinition.make(
@@ -687,6 +725,8 @@ module List = {
     Function.make(
       ~name="upTo",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`List.upTo(1,4)`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace,
@@ -704,6 +744,7 @@ module List = {
     Function.make(
       ~name="first",
       ~nameSpace,
+      ~examples=[`List.first([1,4,5])`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace,
@@ -722,6 +763,7 @@ module List = {
     Function.make(
       ~name="last",
       ~nameSpace,
+      ~examples=[`List.last([1,4,5])`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace=false,
@@ -740,6 +782,8 @@ module List = {
     Function.make(
       ~name="reverse",
       ~nameSpace,
+      ~output=EvtArray,
+      ~examples=[`List.reverse([1,4,5])`],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace=false,
@@ -772,6 +816,12 @@ module Scoring = {
     Function.make(
       ~name="logScore",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[
+        "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1)}, prior: normal(5.5,3)})",
+        "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1)}})",
+        "Dist.logScore({estimate: normal(5,2), answer: 4.5})",
+      ],
       ~definitions=[
         FnDefinition.make(
           ~requiresNamespace,
@@ -825,6 +875,10 @@ module Scoring = {
     Function.make(
       ~name="klDivergence",
       ~nameSpace,
+      ~output=EvtNumber,
+      ~examples=[
+        "Dist.klDivergence(normal(5,2), normal(5,1.5)",
+      ],
       ~definitions=[
         FnDefinition.make(
           ~name="klDivergence",
