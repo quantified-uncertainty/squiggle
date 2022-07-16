@@ -55,7 +55,7 @@ module PointSet = {
 
   let library = [
     Function.make(
-      ~name="PointSet.makeContinuous",
+      ~name="makeContinuous",
       ~nameSpace,
       ~definitions=[
         FnDefinition.make(
@@ -69,7 +69,7 @@ module PointSet = {
       (),
     ),
     Function.make(
-      ~name="PointSet.makeDiscrete",
+      ~name="makeDiscrete",
       ~nameSpace,
       ~definitions=[
         FnDefinition.make(
@@ -89,7 +89,7 @@ module Functionn = {
   let nameSpace = "Function"
   let library = [
     Function.make(
-      ~name="Function.declare",
+      ~name="declare",
       ~nameSpace,
       ~description="Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.",
       ~examples=[
@@ -177,7 +177,7 @@ module DistributionCreation = {
 
   let library = [
     Function.make(
-      ~name="Normal",
+      ~name="normal",
       ~nameSpace,
       ~examples=["normal(5,1)", "normal({p5: 4, p95: 10})", "normal({mean: 5, stdev: 2})"],
       ~definitions=[
@@ -190,7 +190,7 @@ module DistributionCreation = {
       (),
     ),
     Function.make(
-      ~name="Lognormal",
+      ~name="lognormal",
       ~nameSpace,
       ~examples=[
         "lognormal(0.5, 0.8)",
@@ -210,14 +210,14 @@ module DistributionCreation = {
       (),
     ),
     Function.make(
-      ~name="Uniform",
+      ~name="uniform",
       ~nameSpace,
       ~examples=[`uniform(10, 12)`],
       ~definitions=[TwoArgDist.make("uniform", twoArgs(SymbolicDist.Uniform.make))],
       (),
     ),
     Function.make(
-      ~name="Beta",
+      ~name="beta",
       ~nameSpace,
       ~examples=[`beta(20, 25)`, `beta({mean: 0.39, stdev: 0.1})`],
       ~definitions=[
@@ -227,28 +227,28 @@ module DistributionCreation = {
       (),
     ),
     Function.make(
-      ~name="Cauchy",
+      ~name="cauchy",
       ~nameSpace,
       ~examples=[`cauchy(5, 1)`],
       ~definitions=[TwoArgDist.make("cauchy", twoArgs(SymbolicDist.Cauchy.make))],
       (),
     ),
     Function.make(
-      ~name="Gamma",
+      ~name="gamma",
       ~nameSpace,
       ~examples=[`gamma(5, 1)`],
       ~definitions=[TwoArgDist.make("gamma", twoArgs(SymbolicDist.Gamma.make))],
       (),
     ),
     Function.make(
-      ~name="Logistic",
+      ~name="logistic",
       ~nameSpace,
       ~examples=[`logistic(5, 1)`],
       ~definitions=[TwoArgDist.make("logistic", twoArgs(SymbolicDist.Logistic.make))],
       (),
     ),
     Function.make(
-      ~name="To (Distribution)",
+      ~name="to (distribution)",
       ~nameSpace,
       ~examples=[`5 to 10`, `to(5,10)`, `-5 to 5`],
       ~definitions=[
@@ -261,21 +261,21 @@ module DistributionCreation = {
       (),
     ),
     Function.make(
-      ~name="Exponential",
+      ~name="exponential",
       ~nameSpace,
       ~examples=[`exponential(2)`],
       ~definitions=[OneArgDist.make("exponential", SymbolicDist.Exponential.make)],
       (),
     ),
     Function.make(
-      ~name="Bernoulli",
+      ~name="bernoulli",
       ~nameSpace,
       ~examples=[`bernoulli(0.5)`],
       ~definitions=[OneArgDist.make("bernoulli", SymbolicDist.Bernoulli.make)],
       (),
     ),
     Function.make(
-      ~name="PointMass",
+      ~name="pointMass",
       ~nameSpace,
       ~examples=[`pointMass(0.5)`],
       ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.makeSafe)],
@@ -333,61 +333,61 @@ module Number = {
 
   let library = [
     Function.make(
-      ~name="Floor",
+      ~name="floor",
       ~nameSpace,
       ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)],
       (),
     ),
     Function.make(
-      ~name="Ceiling",
+      ~name="ceiling",
       ~nameSpace,
       ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
       (),
     ),
     Function.make(
-      ~name="Absolute Value",
+      ~name="absolute value",
       ~nameSpace,
       ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)],
       (),
     ),
     Function.make(
-      ~name="Exponent",
+      ~name="exponent",
       ~nameSpace,
       ~definitions=[NumberToNumber.make("exp", Js.Math.exp)],
       (),
     ),
     Function.make(
-      ~name="Log",
+      ~name="log",
       ~nameSpace,
       ~definitions=[NumberToNumber.make("log", Js.Math.log)],
       (),
     ),
     Function.make(
-      ~name="Log Base 10",
+      ~name="log base 10",
       ~nameSpace,
       ~definitions=[NumberToNumber.make("log10", Js.Math.log10)],
       (),
     ),
     Function.make(
-      ~name="Log Base 2",
+      ~name="log base 2",
       ~nameSpace,
       ~definitions=[NumberToNumber.make("log2", Js.Math.log2)],
       (),
     ),
     Function.make(
-      ~name="Round",
+      ~name="round",
       ~nameSpace,
       ~definitions=[NumberToNumber.make("round", Js.Math.round)],
       (),
     ),
     Function.make(
-      ~name="Sum",
+      ~name="sum",
       ~nameSpace,
       ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
-      ~name="Product",
+      ~name="product",
       ~nameSpace,
       ~definitions=[
         ArrayNumberDist.make("product", r => r->E.A.Floats.product->Wrappers.evNumber->Ok),
@@ -395,25 +395,25 @@ module Number = {
       (),
     ),
     Function.make(
-      ~name="Min",
+      ~name="min",
       ~nameSpace,
       ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
-      ~name="Max",
+      ~name="max",
       ~nameSpace,
       ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
-      ~name="Mean",
+      ~name="mean",
       ~nameSpace,
       ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
-      ~name="Geometric Mean",
+      ~name="geometric mean",
       ~nameSpace,
       ~definitions=[
         ArrayNumberDist.make("geomean", r => r->E.A.Floats.geomean->Wrappers.evNumber->Ok),
@@ -421,13 +421,13 @@ module Number = {
       (),
     ),
     Function.make(
-      ~name="Standard Deviation",
+      ~name="standard deviation",
       ~nameSpace,
       ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok)],
       (),
     ),
     Function.make(
-      ~name="Variance",
+      ~name="variance",
       ~nameSpace,
       ~definitions=[
         ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok),
@@ -435,7 +435,7 @@ module Number = {
       (),
     ),
     Function.make(
-      ~name="Sort",
+      ~name="sort",
       ~nameSpace,
       ~definitions=[
         ArrayNumberDist.make("sort", r =>
@@ -445,7 +445,7 @@ module Number = {
       (),
     ),
     Function.make(
-      ~name="Cumulative Sum",
+      ~name="cumulative sum",
       ~nameSpace,
       ~definitions=[
         ArrayNumberDist.make("cumsum", r =>
@@ -455,7 +455,7 @@ module Number = {
       (),
     ),
     Function.make(
-      ~name="Cumulative Prod",
+      ~name="cumulative prod",
       ~nameSpace,
       ~definitions=[
         ArrayNumberDist.make("cumprod", r =>
@@ -465,7 +465,7 @@ module Number = {
       (),
     ),
     Function.make(
-      ~name="Diff",
+      ~name="diff",
       ~nameSpace,
       ~definitions=[
         ArrayNumberDist.make("diff", r =>
@@ -665,7 +665,7 @@ module List = {
 
   let library = [
     Function.make(
-      ~name="List.make",
+      ~name="make",
       ~nameSpace,
       ~definitions=[
         //Todo: If the second item is a function with no args, it could be nice to run this function and return the result.
@@ -685,7 +685,7 @@ module List = {
       (),
     ),
     Function.make(
-      ~name="List.upTo",
+      ~name="upTo",
       ~nameSpace,
       ~definitions=[
         FnDefinition.make(
@@ -702,7 +702,7 @@ module List = {
       (),
     ),
     Function.make(
-      ~name="List.first",
+      ~name="first",
       ~nameSpace,
       ~definitions=[
         FnDefinition.make(
@@ -720,7 +720,7 @@ module List = {
       (),
     ),
     Function.make(
-      ~name="List.last",
+      ~name="last",
       ~nameSpace,
       ~definitions=[
         FnDefinition.make(
@@ -738,7 +738,7 @@ module List = {
       (),
     ),
     Function.make(
-      ~name="List.reverse",
+      ~name="reverse",
       ~nameSpace,
       ~definitions=[
         FnDefinition.make(

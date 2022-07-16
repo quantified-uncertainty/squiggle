@@ -1,4 +1,5 @@
 type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
+type internalExpressionValueType = ReducerInterface_InternalExpressionValue.internalExpressionValueType
 
 /*
   Function Registry "Type". A type, without any other information.
@@ -54,6 +55,7 @@ type function = {
   name: string,
   definitions: array<fnDefinition>,
   nameSpace: string,
+  output: option<internalExpressionValueType>,
   examples: array<string>,
   description: option<string>,
   isExperimental: bool,
@@ -374,6 +376,7 @@ module Function = {
     ~nameSpace,
     ~definitions,
     ~examples=?,
+    ~output=?,
     ~description=?,
     ~isExperimental=false,
     (),
@@ -381,6 +384,7 @@ module Function = {
     name: name,
     nameSpace: nameSpace,
     definitions: definitions,
+    output: output,
     examples: examples |> E.O.default([]),
     isExperimental: isExperimental,
     description: description,
