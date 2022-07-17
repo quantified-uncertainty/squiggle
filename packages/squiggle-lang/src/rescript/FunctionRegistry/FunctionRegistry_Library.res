@@ -7,3 +7,5 @@ let registry = Belt.Array.concatMany([
   FR_Pointset.library,
   FR_Scoring.library,
 ])
+
+let dispatch = FunctionRegistry_Core.Registry.dispatch(registry)

@@ -21,6 +21,4 @@ let mathBindings: Bindings.t =
 
 //TODO: This should be in a different place.
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
-  previousBindings
-  ->Bindings.defineModule("Math", mathBindings)
-  ->FunctionRegistry_Core.Registry.makeModules(FunctionRegistry_Library.registry)
+  previousBindings->Bindings.defineModule("Math", mathBindings)

@@ -429,7 +429,7 @@ module NameSpace = {
 module Registry = {
   let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
 
-  let exportedSubset = (r: registry): registry => r |> E.A.filter(r => !r.requiresNamespace)
+  let _exportedSubset = (r: registry): registry => r |> E.A.filter(r => !r.requiresNamespace)
 
   let definitionsWithFunctions = (r: registry) =>
     r->E.A2.fmap(fn => fn.definitions->E.A2.fmap(def => (def, fn)))->E.A.concatMany
@@ -439,7 +439,7 @@ module Registry = {
   to the registry, then it's possible that there could be a match after the registry is 
   called. However, for now, we could just call the registry last.
  */
-  let matchAndRun = (
+  let _matchAndRun = (
     ~registry: registry,
     ~fnName: string,
     ~args: array<internalExpressionValue>,
@@ -463,9 +463,15 @@ module Registry = {
     }
   }
 
+  let dispatch = (registry, (fnName, args): ReducerInterface_InternalExpressionValue.functionCall, env) => {
+    _matchAndRun(~registry=_exportedSubset(registry), ~fnName, ~args, ~env)->E.O2.fmap(
+      E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
+    )
+  }
+
   let allNamespaces = (t: registry) => t->E.A2.fmap(r => r.nameSpace)->E.A.uniq
 
-  let makeModules = (prevBindings: Reducer_Module.t, t: registry): Reducer_Module.t => {
+  let makeBindings = (prevBindings: Reducer_Module.t, t: registry): Reducer_Module.t => {
     let nameSpaces = allNamespaces(t)
     let nameSpaceBindings = nameSpaces->E.A2.fmap(nameSpace => {
       let namespaceModule: NameSpace.t = {

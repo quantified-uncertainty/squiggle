@@ -50,8 +50,7 @@ module FooImplementation = {
   let library = [fn]
 }
 
-let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
-  previousBindings->FunctionRegistry_Core.Registry.makeModules(FooImplementation.library)
+let makeBindings = FunctionRegistry_Core.Registry.makeBindings(_, FooImplementation.library)
 
 let stdLibWithFoo = Bindings.emptyBindings->makeBindings
 
