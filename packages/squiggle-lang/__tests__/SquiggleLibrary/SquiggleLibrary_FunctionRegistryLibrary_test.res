@@ -12,16 +12,20 @@ describe("Fn auto-testing", () => {
     expectEvalToBeOk(r)
   })
 
-  // testAll(
-  //   "tests of type",
-  //   E.A.to_list(FunctionRegistry_Core.Registry.allExamplesWithFns(registry)),
-  //   ((fn, example)) => {
-  //     let responseType =
-  //       example
-  //       ->Reducer.evaluate
-  //       ->E.R2.fmap(ReducerInterface_InternalExpressionValue.externalValueToValueType)
-  //     let expectedOutputType = fn.output |> E.O.toExn("")
-  //     expect(responseType)->toEqual(Ok(expectedOutputType))
-  //   },
-  // )
+  testAll(
+    "tests of type",
+    E.A.to_list(
+      FunctionRegistry_Core.Registry.allExamplesWithFns(registry)->E.A2.filter(((fn, _)) =>
+        E.O.isSome(fn.output)
+      ),
+    ),
+    ((fn, example)) => {
+      let responseType =
+        example
+        ->Reducer.evaluate
+        ->E.R2.fmap(ReducerInterface_InternalExpressionValue.externalValueToValueType)
+      let expectedOutputType = fn.output |> E.O.toExn("")
+      expect(responseType)->toEqual(Ok(expectedOutputType))
+    },
+  )
 })

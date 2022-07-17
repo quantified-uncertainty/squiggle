@@ -67,12 +67,12 @@ let evalToStringResultWithFoo = sourceCode =>
   evalWithFoo(sourceCode)->InternalExpressionValue.toStringResult
 
 describe("Module", () => {
-  test("add(1,2)", () => {
-    let result = evalToStringResultWithFoo("Foo.add(1,2)")
+  test("add2(1,2)", () => {
+    let result = evalToStringResultWithFoo("Foo.add2(1,2)")
     expect(result)->toEqual("Ok(3)")
   })
-  test("add(1,2,3)", () => {
-    let result = evalToStringResultWithFoo("Foo.add(1,2,3)")
+  test("add3(1,2,3)", () => {
+    let result = evalToStringResultWithFoo("Foo.add3(1,2,3)")
     expect(result)->toEqual("Ok(6)")
   })
 })

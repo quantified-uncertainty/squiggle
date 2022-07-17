@@ -35,9 +35,10 @@ let library = [
     ~name="declare",
     ~nameSpace,
     ~requiresNamespace=true,
+    ~output=EvtDeclaration,
     ~description="Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.",
     ~examples=[
-      `declareFn({
+      `Function.declare({
   fn: {|a,b| a },
   inputs: [
     {min: 0, max: 100},

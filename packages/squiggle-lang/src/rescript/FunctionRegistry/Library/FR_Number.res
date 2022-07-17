@@ -60,7 +60,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~output=EvtNumber,
-    ~examples=[`ceiling(3.5)`],
+    ~examples=[`ceil(3.5)`],
     ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
     (),
   ),

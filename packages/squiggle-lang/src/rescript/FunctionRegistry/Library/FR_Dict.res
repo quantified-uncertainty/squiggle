@@ -151,7 +151,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace=true,
     ~output=EvtRecord,
-    ~examples=[`Dict.fromList({a: 1, b: 2})`],
+    ~examples=[`Dict.fromList([["a", 1], ["b", 2]])`],
     ~definitions=[
       FnDefinition.make(
         ~name="fromList",

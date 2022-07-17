@@ -16,8 +16,8 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[
-      "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1)}, prior: normal(5.5,3)})",
-      "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1)}})",
+      "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1), prior: normal(5.5,3)})",
+      "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1)})",
       "Dist.logScore({estimate: normal(5,2), answer: 4.5})",
     ],
     ~definitions=[
@@ -69,7 +69,7 @@ let library = [
     ~nameSpace,
     ~output=EvtNumber,
     ~requiresNamespace,
-    ~examples=["Dist.klDivergence(normal(5,2), normal(5,1.5)"],
+    ~examples=["Dist.klDivergence(normal(5,2), normal(5,1.5))"],
     ~definitions=[
       FnDefinition.make(
         ~name="klDivergence",
