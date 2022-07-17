@@ -1,7 +1,7 @@
 open FunctionRegistry_Core
 
 let nameSpace = "Dist"
-let requiresNamespace = false
+let requiresNamespace = true
 
 let runScoring = (estimate, answer, prior, env) => {
   GenericDist.Score.logScore(~estimate, ~answer, ~prior, ~env)
@@ -13,6 +13,7 @@ let library = [
   Function.make(
     ~name="logScore",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[
       "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1)}, prior: normal(5.5,3)})",
@@ -21,7 +22,6 @@ let library = [
     ],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace,
         ~name="logScore",
         ~inputs=[
           FRTypeRecord([
@@ -48,7 +48,6 @@ let library = [
       ),
       FnDefinition.make(
         ~name="logScore",
-        ~requiresNamespace,
         ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
         ~run=(_, inputs, env) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(inputs) {
@@ -69,11 +68,11 @@ let library = [
     ~name="klDivergence",
     ~nameSpace,
     ~output=EvtNumber,
+    ~requiresNamespace,
     ~examples=["Dist.klDivergence(normal(5,2), normal(5,1.5)"],
     ~definitions=[
       FnDefinition.make(
         ~name="klDivergence",
-        ~requiresNamespace,
         ~inputs=[FRTypeDist, FRTypeDist],
         ~run=(_, inputs, env) => {
           switch inputs {

@@ -18,9 +18,12 @@ type internalExpressionValue = InternalExpressionValue.t
 let registry = FunctionRegistry_Library.registry
 
 let tryRegistry = ((fnName, args): InternalExpressionValue.functionCall, env) => {
-  FunctionRegistry_Core.Registry.matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
-    E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
-  )
+  FunctionRegistry_Core.Registry.matchAndRun(
+    ~registry=FunctionRegistry_Core.Registry.exportedSubset(registry),
+    ~fnName,
+    ~args,
+    ~env,
+  )->E.O2.fmap(E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)))
 }
 
 let dispatch = (call: InternalExpressionValue.functionCall, environment, chain): result<

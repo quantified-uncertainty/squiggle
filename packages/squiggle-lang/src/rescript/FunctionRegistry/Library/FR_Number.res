@@ -7,7 +7,6 @@ let requiresNamespace = false
 module NumberToNumber = {
   let make = (name, fn) =>
     FnDefinition.make(
-      ~requiresNamespace,
       ~name,
       ~inputs=[FRTypeNumber],
       ~run=(_, inputs, _) => {
@@ -24,7 +23,6 @@ module NumberToNumber = {
 module ArrayNumberDist = {
   let make = (name, fn) => {
     FnDefinition.make(
-      ~requiresNamespace=false,
       ~name,
       ~inputs=[FRTypeArray(FRTypeNumber)],
       ~run=(_, inputs, _) =>
@@ -51,6 +49,7 @@ let library = [
   Function.make(
     ~name="floor",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`floor(3.5)`],
     ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)],
@@ -59,6 +58,7 @@ let library = [
   Function.make(
     ~name="ceiling",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`ceiling(3.5)`],
     ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
@@ -67,6 +67,7 @@ let library = [
   Function.make(
     ~name="absolute value",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`abs(3.5)`],
     ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)],
@@ -75,6 +76,7 @@ let library = [
   Function.make(
     ~name="exponent",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`exp(3.5)`],
     ~definitions=[NumberToNumber.make("exp", Js.Math.exp)],
@@ -83,6 +85,7 @@ let library = [
   Function.make(
     ~name="log",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`log(3.5)`],
     ~definitions=[NumberToNumber.make("log", Js.Math.log)],
@@ -91,6 +94,7 @@ let library = [
   Function.make(
     ~name="log base 10",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`log10(3.5)`],
     ~definitions=[NumberToNumber.make("log10", Js.Math.log10)],
@@ -99,6 +103,7 @@ let library = [
   Function.make(
     ~name="log base 2",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`log2(3.5)`],
     ~definitions=[NumberToNumber.make("log2", Js.Math.log2)],
@@ -107,6 +112,7 @@ let library = [
   Function.make(
     ~name="round",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`round(3.5)`],
     ~definitions=[NumberToNumber.make("round", Js.Math.round)],
@@ -115,6 +121,7 @@ let library = [
   Function.make(
     ~name="sum",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`sum([3,5,2])`],
     ~definitions=[ArrayNumberDist.make("sum", r => r->E.A.Floats.sum->Wrappers.evNumber->Ok)],
@@ -123,6 +130,7 @@ let library = [
   Function.make(
     ~name="product",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`product([3,5,2])`],
     ~definitions=[
@@ -133,6 +141,7 @@ let library = [
   Function.make(
     ~name="min",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`min([3,5,2])`],
     ~definitions=[ArrayNumberDist.make("min", r => r->E.A.Floats.min->Wrappers.evNumber->Ok)],
@@ -141,6 +150,7 @@ let library = [
   Function.make(
     ~name="max",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`max([3,5,2])`],
     ~definitions=[ArrayNumberDist.make("max", r => r->E.A.Floats.max->Wrappers.evNumber->Ok)],
@@ -149,6 +159,7 @@ let library = [
   Function.make(
     ~name="mean",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`mean([3,5,2])`],
     ~definitions=[ArrayNumberDist.make("mean", r => r->E.A.Floats.mean->Wrappers.evNumber->Ok)],
@@ -157,6 +168,7 @@ let library = [
   Function.make(
     ~name="geometric mean",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`geomean([3,5,2])`],
     ~definitions=[
@@ -167,6 +179,7 @@ let library = [
   Function.make(
     ~name="standard deviation",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`stdev([3,5,2,3,5])`],
     ~definitions=[ArrayNumberDist.make("stdev", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok)],
@@ -175,6 +188,7 @@ let library = [
   Function.make(
     ~name="variance",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`variance([3,5,2,3,5])`],
     ~definitions=[
@@ -185,6 +199,7 @@ let library = [
   Function.make(
     ~name="sort",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtArray,
     ~examples=[`sort([3,5,2,3,5])`],
     ~definitions=[
@@ -197,6 +212,7 @@ let library = [
   Function.make(
     ~name="cumulative sum",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtArray,
     ~examples=[`cumsum([3,5,2,3,5])`],
     ~definitions=[
@@ -209,6 +225,7 @@ let library = [
   Function.make(
     ~name="cumulative prod",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtArray,
     ~examples=[`cumprod([3,5,2,3,5])`],
     ~definitions=[
@@ -221,6 +238,7 @@ let library = [
   Function.make(
     ~name="diff",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtArray,
     ~examples=[`diff([3,5,2,3,5])`],
     ~definitions=[

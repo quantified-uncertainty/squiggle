@@ -41,7 +41,6 @@ and frValueDictParam = (string, frValue)
 and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.genericDist)
 
 type fnDefinition = {
-  requiresNamespace: bool,
   name: string,
   inputs: array<frType>,
   run: (
@@ -54,6 +53,7 @@ type fnDefinition = {
 type function = {
   name: string,
   definitions: array<fnDefinition>,
+  requiresNamespace: bool,
   nameSpace: string,
   output: option<internalExpressionValueType>,
   examples: array<string>,
@@ -352,9 +352,8 @@ module FnDefinition = {
   let toLambda = (t: t) =>
     Reducer_Module.convertOptionToFfiFn(t.name, toFfiFn(t))->Reducer_Module.eLambdaFFIValue
 
-  let make = (~requiresNamespace=true, ~name, ~inputs, ~run, ()): t => {
+  let make = (~name, ~inputs, ~run, ()): t => {
     name: name,
-    requiresNamespace: requiresNamespace,
     inputs: inputs,
     run: run,
   }
@@ -374,6 +373,7 @@ module Function = {
   let make = (
     ~name,
     ~nameSpace,
+    ~requiresNamespace,
     ~definitions,
     ~examples=?,
     ~output=?,
@@ -387,6 +387,7 @@ module Function = {
     output: output,
     examples: examples |> E.O.default([]),
     isExperimental: isExperimental,
+    requiresNamespace: requiresNamespace,
     description: description,
   }
 
@@ -427,6 +428,9 @@ module NameSpace = {
 
 module Registry = {
   let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
+
+  let exportedSubset = (r: registry): registry => r |> E.A.filter(r => !r.requiresNamespace)
+
   let definitionsWithFunctions = (r: registry) =>
     r->E.A2.fmap(fn => fn.definitions->E.A2.fmap(def => (def, fn)))->E.A.concatMany
 
@@ -442,7 +446,6 @@ module Registry = {
     ~env: GenericDist.env,
   ) => {
     let matchToDef = m => Matcher.Registry.matchToDef(registry, m)
-    //Js.log(toSimple(registry))
     let showNameMatchDefinitions = matches => {
       let defs =
         matches
@@ -460,17 +463,16 @@ module Registry = {
     }
   }
 
-  //todo: get namespace from project.
   let allNamespaces = (t: registry) => t->E.A2.fmap(r => r.nameSpace)->E.A.uniq
 
   let makeModules = (prevBindings: Reducer_Module.t, t: registry): Reducer_Module.t => {
     let nameSpaces = allNamespaces(t)
     let nameSpaceBindings = nameSpaces->E.A2.fmap(nameSpace => {
-      let foo: NameSpace.t = {
+      let namespaceModule: NameSpace.t = {
         name: nameSpace,
         functions: t->E.A2.filter(r => r.nameSpace == nameSpace),
       }
-      (nameSpace, NameSpace.toModule(foo))
+      (nameSpace, NameSpace.toModule(namespaceModule))
     })
     E.A.reduce(nameSpaceBindings, prevBindings, (acc, (name, fn)) =>
       acc->Reducer_Module.defineModule(name, fn)

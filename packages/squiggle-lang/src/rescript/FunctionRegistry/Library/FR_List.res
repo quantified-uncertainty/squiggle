@@ -29,12 +29,12 @@ let library = [
   Function.make(
     ~name="make",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtArray,
     ~examples=[`List.make(2, "testValue")`],
     ~definitions=[
       //Todo: If the second item is a function with no args, it could be nice to run this function and return the result.
       FnDefinition.make(
-        ~requiresNamespace,
         ~name="make",
         ~inputs=[FRTypeNumber, FRTypeAny],
         ~run=(inputs, _, _) => {
@@ -51,11 +51,11 @@ let library = [
   Function.make(
     ~name="upTo",
     ~nameSpace,
+    ~requiresNamespace,
     ~output=EvtArray,
     ~examples=[`List.upTo(1,4)`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace,
         ~name="upTo",
         ~inputs=[FRTypeNumber, FRTypeNumber],
         ~run=(_, inputs, _) =>
@@ -70,10 +70,10 @@ let library = [
   Function.make(
     ~name="first",
     ~nameSpace,
+    ~requiresNamespace,
     ~examples=[`List.first([1,4,5])`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace,
         ~name="first",
         ~inputs=[FRTypeArray(FRTypeAny)],
         ~run=(inputs, _, _) =>
@@ -89,10 +89,10 @@ let library = [
   Function.make(
     ~name="last",
     ~nameSpace,
+    ~requiresNamespace,
     ~examples=[`List.last([1,4,5])`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=false,
         ~name="last",
         ~inputs=[FRTypeArray(FRTypeAny)],
         ~run=(inputs, _, _) =>
@@ -109,10 +109,10 @@ let library = [
     ~name="reverse",
     ~nameSpace,
     ~output=EvtArray,
+    ~requiresNamespace=false,
     ~examples=[`List.reverse([1,4,5])`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=false,
         ~name="reverse",
         ~inputs=[FRTypeArray(FRTypeAny)],
         ~run=(inputs, _, _) =>

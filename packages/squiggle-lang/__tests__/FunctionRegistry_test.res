@@ -18,11 +18,11 @@ module FooImplementation = {
   let fn = Function.make(
     ~name="add",
     ~nameSpace="Foo",
+    ~requiresNamespace=false,
     ~examples=["Foo.add(1, 2)", "Foo.add(1, 2, 3)"],
     ~output=EvtNumber,
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=false,
         ~name="add",
         ~inputs=[FRTypeNumber, FRTypeNumber],
         ~run=(_, inputs, _) =>
@@ -33,7 +33,6 @@ module FooImplementation = {
         (),
       ),
       FnDefinition.make(
-        ~requiresNamespace=true,
         ~name="add",
         ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
         ~run=(_, inputs, _) =>

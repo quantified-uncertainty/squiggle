@@ -5,9 +5,10 @@ let twoArgs = E.Tuple2.toFnCall
 module DistributionCreation = {
   let nameSpace = "Dist"
   let output = ReducerInterface_InternalExpressionValue.EvtDistribution
+  let requiresNamespace = false
 
   let fnMake = (~name, ~examples, ~definitions) => {
-    Function.make(~name, ~nameSpace, ~output, ~examples, ~definitions, ())
+    Function.make(~name, ~nameSpace, ~output, ~examples, ~definitions, ~requiresNamespace, ())
   }
 
   module TwoArgDist = {
@@ -18,7 +19,6 @@ module DistributionCreation = {
 
     let make = (name, fn) => {
       FnDefinition.make(
-        ~requiresNamespace=false,
         ~name,
         ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber],
         ~run=(_, inputs, env) => inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env),
@@ -28,7 +28,6 @@ module DistributionCreation = {
 
     let makeRecordP5P95 = (name, fn) => {
       FnDefinition.make(
-        ~requiresNamespace=false,
         ~name,
         ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
         ~run=(_, inputs, env) =>
@@ -40,7 +39,6 @@ module DistributionCreation = {
     let makeRecordMeanStdev = (name, fn) => {
       FnDefinition.make(
         ~name,
-        ~requiresNamespace=false,
         ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
         ~run=(_, inputs, env) =>
           inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
@@ -57,7 +55,6 @@ module DistributionCreation = {
 
     let make = (name, fn) =>
       FnDefinition.make(
-        ~requiresNamespace=false,
         ~name,
         ~inputs=[FRTypeDistOrNumber],
         ~run=(_, inputs, env) => inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env),

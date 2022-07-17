@@ -34,6 +34,7 @@ let library = [
   Function.make(
     ~name="declare",
     ~nameSpace,
+    ~requiresNamespace=true,
     ~description="Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.",
     ~examples=[
       `declareFn({
@@ -47,7 +48,6 @@ let library = [
     ~isExperimental=true,
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=true,
         ~name="declare",
         ~inputs=[Declaration.frType],
         ~run=(_, inputs, _) => {

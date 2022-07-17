@@ -5,5 +5,5 @@ let registry = Belt.Array.concatMany([
   FR_List.library,
   FR_Number.library,
   FR_Pointset.library,
-  FR_Scoring.library
+  FR_Scoring.library,
 ])

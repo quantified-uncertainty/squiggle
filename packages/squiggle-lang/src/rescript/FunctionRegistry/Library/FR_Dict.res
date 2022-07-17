@@ -45,11 +45,11 @@ let library = [
   Function.make(
     ~name="merge",
     ~nameSpace,
+    ~requiresNamespace=true,
     ~output=EvtRecord,
     ~examples=[`Dict.merge({a: 1, b: 2}, {c: 3, d: 4})`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=true,
         ~name="merge",
         ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
         ~run=(inputs, _, _) => {
@@ -67,11 +67,11 @@ let library = [
   Function.make(
     ~name="mergeMany",
     ~nameSpace,
+    ~requiresNamespace=true,
     ~output=EvtRecord,
     ~examples=[`Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}])`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=true,
         ~name="mergeMany",
         ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
         ~run=(_, inputs, _) =>
@@ -89,11 +89,11 @@ let library = [
   Function.make(
     ~name="keys",
     ~nameSpace,
+    ~requiresNamespace=true,
     ~output=EvtArray,
     ~examples=[`Dict.keys({a: 1, b: 2})`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=true,
         ~name="keys",
         ~inputs=[FRTypeDict(FRTypeAny)],
         ~run=(inputs, _, _) =>
@@ -109,11 +109,11 @@ let library = [
   Function.make(
     ~name="values",
     ~nameSpace,
+    ~requiresNamespace=true,
     ~output=EvtArray,
     ~examples=[`Dict.values({a: 1, b: 2})`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=true,
         ~name="values",
         ~inputs=[FRTypeDict(FRTypeAny)],
         ~run=(inputs, _, _) =>
@@ -129,11 +129,11 @@ let library = [
   Function.make(
     ~name="toList",
     ~nameSpace,
+    ~requiresNamespace=true,
     ~output=EvtArray,
     ~examples=[`Dict.toList({a: 1, b: 2})`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=true,
         ~name="toList",
         ~inputs=[FRTypeDict(FRTypeAny)],
         ~run=(inputs, _, _) =>
@@ -149,11 +149,11 @@ let library = [
   Function.make(
     ~name="fromList",
     ~nameSpace,
+    ~requiresNamespace=true,
     ~output=EvtRecord,
     ~examples=[`Dict.fromList({a: 1, b: 2})`],
     ~definitions=[
       FnDefinition.make(
-        ~requiresNamespace=true,
         ~name="fromList",
         ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
         ~run=(inputs, _, _) =>
