@@ -192,7 +192,7 @@ let library = [
     ~output=EvtNumber,
     ~examples=[`variance([3,5,2,3,5])`],
     ~definitions=[
-      ArrayNumberDist.make("variance", r => r->E.A.Floats.stdev->Wrappers.evNumber->Ok),
+      ArrayNumberDist.make("variance", r => r->E.A.Floats.variance->Wrappers.evNumber->Ok),
     ],
     (),
   ),
@@ -217,7 +217,7 @@ let library = [
     ~examples=[`cumsum([3,5,2,3,5])`],
     ~definitions=[
       ArrayNumberDist.make("cumsum", r =>
-        r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        r->E.A.Floats.cumSum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
     (),
@@ -230,7 +230,7 @@ let library = [
     ~examples=[`cumprod([3,5,2,3,5])`],
     ~definitions=[
       ArrayNumberDist.make("cumprod", r =>
-        r->E.A.Floats.cumsum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        r->E.A.Floats.cumProd->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
     (),

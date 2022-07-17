@@ -15,7 +15,6 @@
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean && rm -rf dist",
     "test:reducer": "jest __tests__/Reducer*/",
-    "test:reducer2": "jest __tests__/FunctionRegistry_test",
     "benchmark": "ts-node benchmark/conversion_tests.ts",
     "test": "jest",
     "test:ts": "jest __tests__/TS/",
