@@ -430,7 +430,8 @@ module Registry = {
   let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
 
   let allExamples = (r: registry) => r->E.A2.fmap(r => r.examples)->E.A.concatMany
-  let allExamplesWithFns = (r: registry) => r->E.A2.fmap(fn => (fn.examples->E.A2.fmap(example => (fn, example))))->E.A.concatMany
+  let allExamplesWithFns = (r: registry) =>
+    r->E.A2.fmap(fn => fn.examples->E.A2.fmap(example => (fn, example)))->E.A.concatMany
 
   let _exportedSubset = (r: registry): registry => r |> E.A.filter(r => !r.requiresNamespace)
 
