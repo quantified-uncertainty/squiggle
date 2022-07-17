@@ -429,6 +429,9 @@ module NameSpace = {
 module Registry = {
   let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
 
+  let allExamples = (r: registry) => r->E.A2.fmap(r => r.examples)->E.A.concatMany
+  let allExamplesWithFns = (r: registry) => r->E.A2.fmap(fn => (fn.examples->E.A2.fmap(example => (fn, example))))->E.A.concatMany
+
   let _exportedSubset = (r: registry): registry => r |> E.A.filter(r => !r.requiresNamespace)
 
   let definitionsWithFunctions = (r: registry) =>
@@ -463,7 +466,11 @@ module Registry = {
     }
   }
 
-  let dispatch = (registry, (fnName, args): ReducerInterface_InternalExpressionValue.functionCall, env) => {
+  let dispatch = (
+    registry,
+    (fnName, args): ReducerInterface_InternalExpressionValue.functionCall,
+    env,
+  ) => {
     _matchAndRun(~registry=_exportedSubset(registry), ~fnName, ~args, ~env)->E.O2.fmap(
       E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
     )

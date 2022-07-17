@@ -160,6 +160,26 @@ let valueToValueType = value =>
   | IEvTypeIdentifier(_) => EvtTypeIdentifier
   }
 
+let externalValueToValueType = (value: ExternalExpressionValue.t) =>
+  switch value {
+  | EvArray(_) => EvtArray
+  | EvArrayString(_) => EvtArrayString
+  | EvBool(_) => EvtBool
+  | EvCall(_) => EvtCall
+  | EvDate(_) => EvtDate
+  | EvDeclaration(_) => EvtDeclaration
+  | EvDistribution(_) => EvtDistribution
+  | EvLambda(_) => EvtLambda
+  | EvModule(_) => EvtModule
+  | EvNumber(_) => EvtNumber
+  | EvRecord(_) => EvtRecord
+  | EvString(_) => EvtString
+  | EvSymbol(_) => EvtSymbol
+  | EvTimeDuration(_) => EvtTimeDuration
+  | EvType(_) => EvtType
+  | EvTypeIdentifier(_) => EvtTypeIdentifier
+  }
+
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
   let (fn, args) = functionCall
   CallSignature(fn, args->Js.Array2.map(valueToValueType))

@@ -15,15 +15,15 @@ module FooImplementation = {
   open FunctionRegistry_Core
   open FunctionRegistry_Helpers
 
-  let fn = Function.make(
+  let fn1 = Function.make(
     ~name="add",
     ~nameSpace="Foo",
     ~requiresNamespace=false,
-    ~examples=["Foo.add(1, 2)", "Foo.add(1, 2, 3)"],
+    ~examples=["Foo.add2(1, 2)", "Foo.add3(1, 2, 3)"],
     ~output=EvtNumber,
     ~definitions=[
       FnDefinition.make(
-        ~name="add",
+        ~name="add2",
         ~inputs=[FRTypeNumber, FRTypeNumber],
         ~run=(_, inputs, _) =>
           switch inputs {
@@ -33,7 +33,7 @@ module FooImplementation = {
         (),
       ),
       FnDefinition.make(
-        ~name="add",
+        ~name="add3",
         ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
         ~run=(_, inputs, _) =>
           switch inputs {
@@ -47,7 +47,7 @@ module FooImplementation = {
     (),
   )
 
-  let library = [fn]
+  let library = [fn1]
 }
 
 let makeBindings = FunctionRegistry_Core.Registry.makeBindings(_, FooImplementation.library)
@@ -78,7 +78,7 @@ describe("Module", () => {
 })
 
 describe("Fn auto-testing", () => {
-  let items = FooImplementation.fn.examples->E.A.to_list
+  let items = FooImplementation.fn1.examples->E.A.to_list
 
   testAll("tests of validity", items, r => {
     expect(r->evalWithFoo->E.R.isOk)->toEqual(true)
@@ -87,7 +87,7 @@ describe("Fn auto-testing", () => {
   testAll("tests of type", items, r => {
     let responseType =
       r->evalWithFoo->E.R2.fmap(ReducerInterface_InternalExpressionValue.valueToValueType)
-    let expectedOutputType = FooImplementation.fn.output |> E.O.toExn("")
+    let expectedOutputType = FooImplementation.fn1.output |> E.O.toExn("")
     expect(responseType)->toEqual(Ok(expectedOutputType))
   })
 })
