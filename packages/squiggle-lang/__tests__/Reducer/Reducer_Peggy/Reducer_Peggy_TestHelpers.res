@@ -4,6 +4,7 @@ module ExpressionValue = ReducerInterface.InternalExpressionValue
 module Parse = Reducer_Peggy_Parse
 module Result = Belt.Result
 module ToExpression = Reducer_Peggy_ToExpression
+module Bindings = Reducer_Bindings
 
 open Jest
 open Expect
