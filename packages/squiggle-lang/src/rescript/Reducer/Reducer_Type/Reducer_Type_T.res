@@ -11,6 +11,7 @@ type rec iType =
   | ItTypeRecord({properties: Belt.Map.String.t<iType>})
 
 type t = iType
+type typeErrorValue = TypeMismatch(t, InternalExpressionValue.t)
 
 let rec toString = (t: t): string => {
   switch t {

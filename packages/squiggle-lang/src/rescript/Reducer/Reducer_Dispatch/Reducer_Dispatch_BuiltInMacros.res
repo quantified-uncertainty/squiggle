@@ -144,7 +144,7 @@ let dispatchMacroCall = (
           let ifTrueBlock = eBlock(list{ifTrue})
           ExpressionWithContext.withContext(ifTrueBlock, bindings)->Ok
         }
-      | _ => REExpectedType("Boolean")->Error
+      | _ => REExpectedType("Boolean", "")->Error
       }
     )
   }
