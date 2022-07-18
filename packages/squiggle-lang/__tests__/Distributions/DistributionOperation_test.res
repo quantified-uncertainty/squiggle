@@ -1,7 +1,7 @@
 open Jest
 open Expect
 
-let env: DistributionOperation.env = {
+let env: GenericDist.env = {
   sampleCount: 100,
   xyPointLength: 100,
 }
@@ -34,7 +34,7 @@ describe("sparkline", () => {
     expected: DistributionOperation.outputType,
   ) => {
     test(name, () => {
-      let result = DistributionOperation.run(~env, FromDist(ToString(ToSparkline(20)), dist))
+      let result = DistributionOperation.run(~env, FromDist(#ToString(ToSparkline(20)), dist))
       expect(result)->toEqual(expected)
     })
   }
@@ -81,8 +81,8 @@ describe("sparkline", () => {
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {
     let result =
-      run(FromDist(ToDist(ToPointSet), normalDist5))
-      ->outputMap(FromDist(ToFloat(#Mean)))
+      run(FromDist(#ToDist(ToPointSet), normalDist5))
+      ->outputMap(FromDist(#ToFloat(#Mean)))
       ->toFloat
       ->toExt
     expect(result)->toBeSoCloseTo(5.0, ~digits=0)
@@ -90,10 +90,10 @@ describe("toPointSet", () => {
 
   test("on sample set", () => {
     let result =
-      run(FromDist(ToDist(ToPointSet), normalDist5))
-      ->outputMap(FromDist(ToDist(ToSampleSet(1000))))
-      ->outputMap(FromDist(ToDist(ToPointSet)))
-      ->outputMap(FromDist(ToFloat(#Mean)))
+      run(FromDist(#ToDist(ToPointSet), normalDist5))
+      ->outputMap(FromDist(#ToDist(ToSampleSet(1000))))
+      ->outputMap(FromDist(#ToDist(ToPointSet)))
+      ->outputMap(FromDist(#ToFloat(#Mean)))
       ->toFloat
       ->toExt
     expect(result)->toBeSoCloseTo(5.0, ~digits=-1)

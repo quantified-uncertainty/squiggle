@@ -1,11 +1,5 @@
 @genType
-type env = {
-  sampleCount: int,
-  xyPointLength: int,
-}
-
-@genType
-let defaultEnv: env
+let defaultEnv: GenericDist.env
 
 open DistributionTypes
 
@@ -19,15 +13,18 @@ type outputType =
   | GenDistError(error)
 
 @genType
-let run: (~env: env, DistributionTypes.DistributionOperation.genericFunctionCallInfo) => outputType
+let run: (
+  ~env: GenericDist.env,
+  DistributionTypes.DistributionOperation.genericFunctionCallInfo,
+) => outputType
 let runFromDist: (
-  ~env: env,
+  ~env: GenericDist.env,
   ~functionCallInfo: DistributionTypes.DistributionOperation.fromDist,
   genericDist,
 ) => outputType
 let runFromFloat: (
-  ~env: env,
-  ~functionCallInfo: DistributionTypes.DistributionOperation.fromDist,
+  ~env: GenericDist.env,
+  ~functionCallInfo: DistributionTypes.DistributionOperation.fromFloat,
   float,
 ) => outputType
 
@@ -42,79 +39,147 @@ module Output: {
   let toBool: t => option<bool>
   let toBoolR: t => result<bool, error>
   let toError: t => option<error>
-  let fmap: (~env: env, t, DistributionTypes.DistributionOperation.singleParamaterFunction) => t
+  let fmap: (
+    ~env: GenericDist.env,
+    t,
+    DistributionTypes.DistributionOperation.singleParamaterFunction,
+  ) => t
 }
 
 module Constructors: {
   @genType
-  let mean: (~env: env, genericDist) => result<float, error>
+  let mean: (~env: GenericDist.env, genericDist) => result<float, error>
   @genType
-  let stdev: (~env: env, genericDist) => result<float, error>
+  let stdev: (~env: GenericDist.env, genericDist) => result<float, error>
   @genType
-  let variance: (~env: env, genericDist) => result<float, error>
+  let variance: (~env: GenericDist.env, genericDist) => result<float, error>
   @genType
-  let sample: (~env: env, genericDist) => result<float, error>
+  let sample: (~env: GenericDist.env, genericDist) => result<float, error>
   @genType
-  let cdf: (~env: env, genericDist, float) => result<float, error>
+  let cdf: (~env: GenericDist.env, genericDist, float) => result<float, error>
   @genType
-  let inv: (~env: env, genericDist, float) => result<float, error>
+  let inv: (~env: GenericDist.env, genericDist, float) => result<float, error>
   @genType
-  let pdf: (~env: env, genericDist, float) => result<float, error>
+  let pdf: (~env: GenericDist.env, genericDist, float) => result<float, error>
   @genType
-  let normalize: (~env: env, genericDist) => result<genericDist, error>
+  let normalize: (~env: GenericDist.env, genericDist) => result<genericDist, error>
   @genType
-  let isNormalized: (~env: env, genericDist) => result<bool, error>
+  let isNormalized: (~env: GenericDist.env, genericDist) => result<bool, error>
+  module LogScore: {
+    @genType
+    let distEstimateDistAnswer: (
+      ~env: GenericDist.env,
+      genericDist,
+      genericDist,
+    ) => result<float, error>
+    @genType
+    let distEstimateDistAnswerWithPrior: (
+      ~env: GenericDist.env,
+      genericDist,
+      genericDist,
+      genericDist,
+    ) => result<float, error>
+    @genType
+    let distEstimateScalarAnswer: (
+      ~env: GenericDist.env,
+      genericDist,
+      float,
+    ) => result<float, error>
+    @genType
+    let distEstimateScalarAnswerWithPrior: (
+      ~env: GenericDist.env,
+      genericDist,
+      float,
+      genericDist,
+    ) => result<float, error>
+  }
   @genType
-  let klDivergence: (~env: env, genericDist, genericDist) => result<float, error>
+  let toPointSet: (~env: GenericDist.env, genericDist) => result<genericDist, error>
   @genType
-  let logScoreWithPointResolution: (
-    ~env: env,
-    ~prediction: genericDist,
-    ~answer: float,
-    ~prior: option<genericDist>,
-  ) => result<float, error>
+  let toSampleSet: (~env: GenericDist.env, genericDist, int) => result<genericDist, error>
   @genType
-  let toPointSet: (~env: env, genericDist) => result<genericDist, error>
+  let fromSamples: (~env: GenericDist.env, SampleSetDist.t) => result<genericDist, error>
   @genType
-  let toSampleSet: (~env: env, genericDist, int) => result<genericDist, error>
+  let truncate: (
+    ~env: GenericDist.env,
+    genericDist,
+    option<float>,
+    option<float>,
+  ) => result<genericDist, error>
   @genType
-  let fromSamples: (~env: env, SampleSetDist.t) => result<genericDist, error>
+  let inspect: (~env: GenericDist.env, genericDist) => result<genericDist, error>
   @genType
-  let truncate: (~env: env, genericDist, option<float>, option<float>) => result<genericDist, error>
+  let toString: (~env: GenericDist.env, genericDist) => result<string, error>
   @genType
-  let inspect: (~env: env, genericDist) => result<genericDist, error>
+  let toSparkline: (~env: GenericDist.env, genericDist, int) => result<string, error>
   @genType
-  let toString: (~env: env, genericDist) => result<string, error>
+  let algebraicAdd: (~env: GenericDist.env, genericDist, genericDist) => result<genericDist, error>
   @genType
-  let toSparkline: (~env: env, genericDist, int) => result<string, error>
+  let algebraicMultiply: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let algebraicAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let algebraicDivide: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let algebraicMultiply: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let algebraicSubtract: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let algebraicDivide: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let algebraicLogarithm: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let algebraicSubtract: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let algebraicPower: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let algebraicLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let scaleLogarithm: (~env: GenericDist.env, genericDist, float) => result<genericDist, error>
   @genType
-  let algebraicPower: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let scaleMultiply: (~env: GenericDist.env, genericDist, float) => result<genericDist, error>
   @genType
-  let scaleLogarithm: (~env: env, genericDist, float) => result<genericDist, error>
+  let scalePower: (~env: GenericDist.env, genericDist, float) => result<genericDist, error>
   @genType
-  let scaleMultiply: (~env: env, genericDist, float) => result<genericDist, error>
+  let pointwiseAdd: (~env: GenericDist.env, genericDist, genericDist) => result<genericDist, error>
   @genType
-  let scalePower: (~env: env, genericDist, float) => result<genericDist, error>
+  let pointwiseMultiply: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let pointwiseAdd: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let pointwiseDivide: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let pointwiseMultiply: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let pointwiseSubtract: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let pointwiseDivide: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let pointwiseLogarithm: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
   @genType
-  let pointwiseSubtract: (~env: env, genericDist, genericDist) => result<genericDist, error>
-  @genType
-  let pointwiseLogarithm: (~env: env, genericDist, genericDist) => result<genericDist, error>
-  @genType
-  let pointwisePower: (~env: env, genericDist, genericDist) => result<genericDist, error>
+  let pointwisePower: (
+    ~env: GenericDist.env,
+    genericDist,
+    genericDist,
+  ) => result<genericDist, error>
 }
