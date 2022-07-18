@@ -187,13 +187,16 @@ basicLiteral
   / dollarIdentifier
 
 dollarIdentifierWithModule 'identifier'
-  = head:moduleIdentifier 
+  = head:$moduleIdentifier 
     tail:('.' _nl @$moduleIdentifier)* '.' _nl 
     final:$dollarIdentifier
-  { tail.push(final);
-    return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.postOperatorToFunction['[]'], [result, h.nodeString(element)])
-    }, head)}
+  { 
+    let modifiers = [...tail]
+    modifiers.unshift(head)
+    modifiers.push(final)
+    let modifiedIdentifier = modifiers.join('.')
+    return h.nodeIdentifier(modifiedIdentifier)
+  }
 
 identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) {return h.nodeIdentifier(text(), location())} 

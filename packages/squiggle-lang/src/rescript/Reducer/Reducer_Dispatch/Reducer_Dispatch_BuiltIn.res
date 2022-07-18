@@ -3,7 +3,7 @@ module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 module Result = Belt.Result
 module TypeBuilder = Reducer_Type_TypeBuilder
 open ReducerInterface_InternalExpressionValue
@@ -49,9 +49,9 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     }
 
   let moduleAtIndex = (nameSpace: nameSpace, sIndex) =>
-    switch Module.get(nameSpace, sIndex) {
+    switch Bindings.get(nameSpace, sIndex) {
     | Some(value) => value->Ok
-    | None => RERecordPropertyNotFound("Module property not found", sIndex)->Error
+    | None => RERecordPropertyNotFound("Bindings property not found", sIndex)->Error
     }
 
   let recordAtIndex = (dict: Belt.Map.String.t<internalExpressionValue>, sIndex) =>
@@ -81,19 +81,19 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   }
 
   let doSetBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) => {
-    Module.set(bindings, symbol, value)->IEvModule->Ok
+    Bindings.set(bindings, symbol, value)->IEvBindings->Ok
   }
 
   let doSetTypeAliasBindings = (
     bindings: nameSpace,
     symbol: string,
     value: internalExpressionValue,
-  ) => Module.setTypeAlias(bindings, symbol, value)->IEvModule->Ok
+  ) => Bindings.setTypeAlias(bindings, symbol, value)->IEvBindings->Ok
 
   let doSetTypeOfBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) =>
-    Module.setTypeOf(bindings, symbol, value)->IEvModule->Ok
+    Bindings.setTypeOf(bindings, symbol, value)->IEvBindings->Ok
 
-  let doExportBindings = (bindings: nameSpace) => bindings->Module.toExpressionValue->Ok
+  let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
 
   let doKeepArray = (aValueArray, aLambdaValue) => {
     let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
@@ -169,16 +169,16 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
   switch call {
   | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
-  | ("$_atIndex_$", [IEvModule(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
+  | ("$_atIndex_$", [IEvBindings(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
   | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
   | ("$_constructArray_$", [IEvArray(aValueArray)]) => IEvArray(aValueArray)->Ok
   | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
-  | ("$_exportBindings_$", [IEvModule(nameSpace)]) => doExportBindings(nameSpace)
-  | ("$_setBindings_$", [IEvModule(nameSpace), IEvSymbol(symbol), value]) =>
+  | ("$_exportBindings_$", [IEvBindings(nameSpace)]) => doExportBindings(nameSpace)
+  | ("$_setBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
     doSetBindings(nameSpace, symbol, value)
-  | ("$_setTypeAliasBindings_$", [IEvModule(nameSpace), IEvTypeIdentifier(symbol), value]) =>
+  | ("$_setTypeAliasBindings_$", [IEvBindings(nameSpace), IEvTypeIdentifier(symbol), value]) =>
     doSetTypeAliasBindings(nameSpace, symbol, value)
-  | ("$_setTypeOfBindings_$", [IEvModule(nameSpace), IEvSymbol(symbol), value]) =>
+  | ("$_setTypeOfBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
     doSetTypeOfBindings(nameSpace, symbol, value)
   | ("$_typeModifier_memberOf_$", [IEvTypeIdentifier(typeIdentifier), IEvArray(arr)]) =>
     TypeBuilder.typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))

@@ -2,7 +2,7 @@ module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Result = Belt.Result
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression
@@ -42,8 +42,8 @@ and replaceSymbolsOnExpressionList = (bindings, list) => {
 }
 and replaceSymbolOnValue = (bindings, evValue: internalExpressionValue) =>
   switch evValue {
-  | IEvSymbol(symbol) => Module.getWithDefault(bindings, symbol, evValue)->Ok
-  | IEvCall(symbol) => Module.getWithDefault(bindings, symbol, evValue)->checkIfCallable
+  | IEvSymbol(symbol) => Bindings.getWithDefault(bindings, symbol, evValue)->Ok
+  | IEvCall(symbol) => Bindings.getWithDefault(bindings, symbol, evValue)->checkIfCallable
   | _ => evValue->Ok
   }
 and checkIfCallable = (evValue: internalExpressionValue) =>

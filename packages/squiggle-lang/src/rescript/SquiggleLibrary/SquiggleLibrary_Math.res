@@ -1,17 +1,16 @@
-module Bindings = Reducer_Module
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 
 let availableNumbers: array<(string, float)> = [
-  ("pi", Js.Math._PI),
-  ("e", Js.Math._E),
-  ("ln2", Js.Math._LN2),
-  ("ln10", Js.Math._LN10),
-  ("log2e", Js.Math._LOG2E),
-  ("log10e", Js.Math._LOG10E),
-  ("sqrt2", Js.Math._SQRT2),
-  ("sqrt1_2", Js.Math._SQRT1_2),
-  ("phi", 1.618033988749895),
-  ("tau", 6.283185307179586),
+  ("Math.pi", Js.Math._PI),
+  ("Math.e", Js.Math._E),
+  ("Math.ln2", Js.Math._LN2),
+  ("Math.ln10", Js.Math._LN10),
+  ("Math.log2e", Js.Math._LOG2E),
+  ("Math.log10e", Js.Math._LOG10E),
+  ("Math.sqrt2", Js.Math._SQRT2),
+  ("Math.sqrt1_2", Js.Math._SQRT1_2),
+  ("Math.phi", 1.618033988749895),
+  ("Math.tau", 6.283185307179586),
 ]
 
 let mathBindings: Bindings.t =
@@ -21,4 +20,4 @@ let mathBindings: Bindings.t =
 
 //TODO: This should be in a different place.
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
-  previousBindings->Bindings.defineModule("Math", mathBindings)
+  previousBindings->Bindings.merge(mathBindings)
