@@ -255,11 +255,10 @@ let dispatch = (call: functionCall, environment, reducer: ExpressionT.reducerFn)
   errorValue,
 > =>
   try {
-    let callInternalWithReducer = (call, environment) => callInternal(call, environment, reducer)
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternalWithReducer)
+    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, reducer, callInternal)
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   | _ => RETodo("unhandled rescript exception")->Error
