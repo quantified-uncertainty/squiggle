@@ -303,10 +303,13 @@ module Matcher = {
     }
 
     let findMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
-      switch _findExactMatches(r, fnName, args) {
+      let fnNameInParts = Js.String.split(".", fnName)
+      let fnToSearch = E.A.get(fnNameInParts, 1) |> E.O.default(fnNameInParts[0])
+
+      switch _findExactMatches(r, fnToSearch, args) {
       | Some(r) => Match.FullMatch(r)
       | None =>
-        switch _findNameMatches(r, fnName, args) {
+        switch _findNameMatches(r, fnToSearch, args) {
         | Some(r) => Match.SameNameDifferentArguments(r)
         | None => Match.DifferentName
         }
@@ -348,9 +351,6 @@ module FnDefinition = {
 
   let toFfiFn = (t: t): Reducer_Expression_T.optionFfiFn =>
     (args, environment) => run(t, args, environment)->E.R.toOption
-
-  let toLambda = (t: t) =>
-    Reducer_Module.convertOptionToFfiFn(t.name, toFfiFn(t))->Reducer_Module.eLambdaFFIValue
 
   let make = (~name, ~inputs, ~run, ()): t => {
     name: name,
@@ -405,39 +405,40 @@ module NameSpace = {
   let definitions = (t: t) => t.functions->E.A2.fmap(f => f.definitions)->E.A.concatMany
   let uniqueFnNames = (t: t) => definitions(t)->E.A2.fmap(r => r.name)->E.A.uniq
   let nameToDefinitions = (t: t, name: string) => definitions(t)->E.A2.filter(r => r.name == name)
-
-  //todo: It could be good to set a warning if two definitions are both valid, but I don't expect this often.
-  let nameFfiFn = (t: t, name: string): Reducer_Expression_T.optionFfiFn => {
-    (args, environment) => {
-      let definitions =
-        nameToDefinitions(t, name)->E.A2.fmap((def, ()) =>
-          FnDefinition.isMatch(def, args)
-            ? FnDefinition.run(def, args, environment) |> E.R.toOption
-            : None
-        )
-      E.A.O.firstSomeFn(definitions)
-    }
-  }
-
-  let toModule = (t: t): Reducer_Module.t =>
-    E.A.reduce(uniqueFnNames(t), Reducer_Module.emptyStdLib, (acc, uniqueName) => {
-      let relevantDefinitions = nameFfiFn(t, uniqueName)
-      acc->Reducer_Module.defineFunction(uniqueName, relevantDefinitions)
-    })
 }
 
 module Registry = {
   let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
-
   let allExamples = (r: registry) => r->E.A2.fmap(r => r.examples)->E.A.concatMany
   let allExamplesWithFns = (r: registry) =>
     r->E.A2.fmap(fn => fn.examples->E.A2.fmap(example => (fn, example)))->E.A.concatMany
 
+  let allDefinitionsWithFns = (r: registry) =>
+    r->E.A2.fmap(fn => fn.definitions->E.A2.fmap(definitions => (fn, definitions)))->E.A.concatMany
+
+  let cache = (r: registry): Js.Dict.t<array<Function.t>> => {
+    let functionsWithFnNames =
+      allDefinitionsWithFns(r)
+      ->E.A2.fmap(((fn, def)) => {
+        let nameWithNamespace = `${fn.nameSpace}.${def.name}`
+        let nameWithoutNamespace = def.name
+        fn.requiresNamespace
+          ? [(nameWithNamespace, fn)]
+          : [(nameWithNamespace, fn), (nameWithoutNamespace, fn)]
+      })
+      ->E.A.concatMany
+    let uniqueNames = functionsWithFnNames->E.A2.fmap(((name, _)) => name)->E.A.uniq
+    let cacheAsArray: array<(string, array<function>)> = uniqueNames->E.A2.fmap(uniqueName => {
+      let relevantItems =
+        E.A2.filter(functionsWithFnNames, ((defName, _)) => defName == uniqueName)->E.A2.fmap(
+          E.Tuple2.second,
+        )
+      (uniqueName, relevantItems)
+    })
+    cacheAsArray->Js.Dict.fromArray
+  }
+
   let _exportedSubset = (r: registry): registry => r |> E.A.filter(r => !r.requiresNamespace)
-
-  let definitionsWithFunctions = (r: registry) =>
-    r->E.A2.fmap(fn => fn.definitions->E.A2.fmap(def => (def, fn)))->E.A.concatMany
-
   /*
   There's a (potential+minor) bug here: If a function definition is called outside of the calls 
   to the registry, then it's possible that there could be a match after the registry is 
@@ -449,7 +450,10 @@ module Registry = {
     ~args: array<internalExpressionValue>,
     ~env: GenericDist.env,
   ) => {
-    let matchToDef = m => Matcher.Registry.matchToDef(registry, m)
+    let cc = cache(registry)
+    let relevantFunctions = Js.Dict.get(cc, fnName) |> E.O.default([])
+
+    let matchToDef = m => Matcher.Registry.matchToDef(relevantFunctions, m)
     let showNameMatchDefinitions = matches => {
       let defs =
         matches
@@ -460,7 +464,8 @@ module Registry = {
         ->E.A2.joinWith("; ")
       `There are function matches for ${fnName}(), but with different arguments: ${defs}`
     }
-    switch Matcher.Registry.findMatches(registry, fnName, args) {
+
+    switch Matcher.Registry.findMatches(relevantFunctions, fnName, args) {
     | Matcher.Match.FullMatch(match) => match->matchToDef->E.O2.fmap(FnDefinition.run(_, args, env))
     | SameNameDifferentArguments(m) => Some(Error(showNameMatchDefinitions(m)))
     | _ => None
@@ -474,22 +479,6 @@ module Registry = {
   ) => {
     _matchAndRun(~registry=_exportedSubset(registry), ~fnName, ~args, ~env)->E.O2.fmap(
       E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
-    )
-  }
-
-  let allNamespaces = (t: registry) => t->E.A2.fmap(r => r.nameSpace)->E.A.uniq
-
-  let makeBindings = (prevBindings: Reducer_Module.t, t: registry): Reducer_Module.t => {
-    let nameSpaces = allNamespaces(t)
-    let nameSpaceBindings = nameSpaces->E.A2.fmap(nameSpace => {
-      let namespaceModule: NameSpace.t = {
-        name: nameSpace,
-        functions: t->E.A2.filter(r => r.nameSpace == nameSpace),
-      }
-      (nameSpace, NameSpace.toModule(namespaceModule))
-    })
-    E.A.reduce(nameSpaceBindings, prevBindings, (acc, (name, fn)) =>
-      acc->Reducer_Module.defineModule(name, fn)
     )
   }
 }
