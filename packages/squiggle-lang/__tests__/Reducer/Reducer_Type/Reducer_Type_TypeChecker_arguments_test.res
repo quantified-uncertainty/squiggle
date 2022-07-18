@@ -35,18 +35,7 @@ let myCheckArguments = (aTypeSourceCode: string, sourceCode: string): string =>
 let myCheckArgumentsExpectEqual = (aTypeSourceCode, sourceCode, answer) =>
   expect(myCheckArguments(aTypeSourceCode, sourceCode))->toEqual(answer)
 
-let _myCheckArgumentsTest = (test, aTypeSourceCode, sourceCode, answer) =>
+let myCheckArgumentsTest = (test, aTypeSourceCode, sourceCode, answer) =>
   test(aTypeSourceCode, () => myCheckArgumentsExpectEqual(aTypeSourceCode, sourceCode, answer))
 
-let myCheckArgumentsTest = (aTypeSourceCode, sourceCode, answer) =>
-  _myCheckArgumentsTest(test, aTypeSourceCode, sourceCode, answer)
-module MySkip = {
-  let myCheckArgumentsTest = (aTypeSourceCode, sourceCode, answer) =>
-    _myCheckArgumentsTest(Skip.test, aTypeSourceCode, sourceCode, answer)
-}
-module MyOnly = {
-  let myCheckArgumentsTest = (aTypeSourceCode, sourceCode, answer) =>
-    _myCheckArgumentsTest(Only.test, aTypeSourceCode, sourceCode, answer)
-}
-
-myCheckArgumentsTest("number=>number=>number", "[1,2]", "Ok")
+myCheckArgumentsTest(test, "number=>number=>number", "[1,2]", "Ok")
