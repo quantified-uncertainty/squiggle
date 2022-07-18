@@ -8,7 +8,7 @@ module InternalExpressionValue = ReducerInterface.InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
 module Macro = Reducer_Expression_Macro
 module T = Reducer_Expression_T
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 
 let testMacro_ = (
   tester,
@@ -16,7 +16,7 @@ let testMacro_ = (
   expr: T.expression,
   expectedCode: string,
 ) => {
-  let bindings = Module.fromArray(bindArray)
+  let bindings = Bindings.fromArray(bindArray)
   tester(expr->T.toString, () =>
     expr
     ->Macro.expandMacroCall(
@@ -36,7 +36,7 @@ let testMacroEval_ = (
   expr: T.expression,
   expectedValue: string,
 ) => {
-  let bindings = Module.fromArray(bindArray)
+  let bindings = Bindings.fromArray(bindArray)
   tester(expr->T.toString, () =>
     expr
     ->Macro.doMacroCall(

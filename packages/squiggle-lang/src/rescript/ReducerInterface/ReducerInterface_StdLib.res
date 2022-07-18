@@ -1,6 +1,6 @@
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 
-let internalStdLib = Module.emptyModule->SquiggleLibrary_Math.makeBindings
+let internalStdLib = Bindings.emptyBindings->SquiggleLibrary_Math.makeBindings
 
 @genType
-let externalStdLib = internalStdLib->Module.toTypeScriptBindings
+let externalStdLib = internalStdLib->Bindings.toTypeScriptBindings
