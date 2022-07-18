@@ -41,10 +41,10 @@ let checkModifier = (
   }
 
 let checkModifiers = (
-  modifiers: Belt.Map.String.t<InternalExpressionValue.t>,
+  contracts: Belt.Map.String.t<InternalExpressionValue.t>,
   aValue: InternalExpressionValue.t,
 ): bool => {
-  modifiers->Belt.Map.String.reduce(true, (acc, key, modifierArg) =>
+  contracts->Belt.Map.String.reduce(true, (acc, key, modifierArg) =>
     switch acc {
     | true => checkModifier(key, modifierArg, aValue)
     | _ => acc

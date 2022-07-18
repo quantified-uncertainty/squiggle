@@ -1,7 +1,7 @@
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module T = Reducer_Type_T
-module TypeModifiers = Reducer_Type_Modifiers
+module TypeContracts = Reducer_Type_Contracts
 open InternalExpressionValue
 
 let rec isITypeOf = (anIType: T.iType, aValue): result<bool, T.typeErrorValue> => {
@@ -92,11 +92,11 @@ let rec isITypeOf = (anIType: T.iType, aValue): result<bool, T.typeErrorValue> =
   let caseModifiedType = (
     anIType: T.iType,
     modifiedType: T.iType,
-    modifiers: Belt.Map.String.t<InternalExpressionValue.t>,
+    contracts: Belt.Map.String.t<InternalExpressionValue.t>,
     aValue: InternalExpressionValue.t,
   ) => {
     isITypeOf(modifiedType, aValue)->Belt.Result.flatMap(_result => {
-      if TypeModifiers.checkModifiers(modifiers, aValue) {
+      if TypeContracts.checkModifiers(contracts, aValue) {
         Ok(true)
       } else {
         T.TypeMismatch(anIType, aValue)->Error
@@ -106,8 +106,8 @@ let rec isITypeOf = (anIType: T.iType, aValue): result<bool, T.typeErrorValue> =
 
   switch anIType {
   | ItTypeIdentifier(name) => caseTypeIdentifier(name, aValue)
-  | ItModifiedType({modifiedType, modifiers}) =>
-    caseModifiedType(anIType, modifiedType, modifiers, aValue) //{modifiedType: iType, modifiers: Belt.Map.String.t<InternalExpressionValue.t>}
+  | ItModifiedType({modifiedType, contracts}) =>
+    caseModifiedType(anIType, modifiedType, contracts, aValue) //{modifiedType: iType, contracts: Belt.Map.String.t<InternalExpressionValue.t>}
   | ItTypeOr({typeOr}) => caseOr(anIType, typeOr, aValue)
   | ItTypeFunction(_) =>
     raise(
