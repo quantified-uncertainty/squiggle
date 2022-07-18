@@ -1,6 +1,6 @@
 module Expression = Reducer_Expression
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 module T = Reducer_Type_T
 module TypeCompile = Reducer_Type_Compile
 

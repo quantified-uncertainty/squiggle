@@ -3,7 +3,6 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
 open Jest
 open Reducer_Peggy_TestHelpers
-open Expect
 
 describe("Peggy to Expression", () => {
   describe("literals operators parenthesis", () => {

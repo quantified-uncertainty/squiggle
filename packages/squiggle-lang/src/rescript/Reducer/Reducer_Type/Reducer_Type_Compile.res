@@ -1,7 +1,7 @@
 module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 module T = Reducer_Type_T
 
 let ievFromTypeExpression = (
@@ -11,11 +11,15 @@ let ievFromTypeExpression = (
   let sIndex = "compiled"
   let sourceCode = `type ${sIndex}=${typeExpressionSourceCode}`
   Reducer_Expression.parse(sourceCode)->Belt.Result.flatMap(expr => {
-    let rContext = reducerFn(expr, Module.emptyBindings, InternalExpressionValue.defaultEnvironment)
+    let rContext = reducerFn(
+      expr,
+      Bindings.emptyBindings,
+      InternalExpressionValue.defaultEnvironment,
+    )
     Belt.Result.map(rContext, context =>
       switch context {
-      | IEvModule(nameSpace) =>
-        switch Module.getType(nameSpace, sIndex) {
+      | IEvBindings(nameSpace) =>
+        switch Bindings.getType(nameSpace, sIndex) {
         | Some(value) => value
         | None => raise(Reducer_Exception.ImpossibleException("Reducer_Type_Compile-none"))
         }

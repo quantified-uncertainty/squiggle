@@ -2,7 +2,7 @@ module Expression = Reducer_Expression
 module ExpressionT = Reducer_Expression_T
 module ErrorValue = Reducer_ErrorValue
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 module T = Reducer_Type_T
 module TypeChecker = Reducer_Type_TypeChecker
 
@@ -16,7 +16,7 @@ let checkArgumentsSourceCode = (aTypeSourceCode: string, sourceCode: string): re
   let reducerFn = Expression.reduceExpression
   let rResult =
     Reducer.parse(sourceCode)->Belt.Result.flatMap(expr =>
-      reducerFn(expr, Module.emptyBindings, InternalExpressionValue.defaultEnvironment)
+      reducerFn(expr, Bindings.emptyBindings, InternalExpressionValue.defaultEnvironment)
     )
   rResult->Belt.Result.flatMap(result =>
     switch result {
