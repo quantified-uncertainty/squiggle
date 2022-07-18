@@ -3,7 +3,7 @@ open InternalExpressionValue
 
 type rec iType =
   | ItTypeIdentifier(string)
-  | ItModifiedType({modifiedType: iType, modifiers: Belt.Map.String.t<InternalExpressionValue.t>})
+  | ItModifiedType({modifiedType: iType, contracts: Belt.Map.String.t<InternalExpressionValue.t>})
   | ItTypeOr({typeOr: array<iType>})
   | ItTypeFunction({inputs: array<iType>, output: iType})
   | ItTypeArray({element: iType})
@@ -16,8 +16,8 @@ type typeErrorValue = TypeMismatch(t, InternalExpressionValue.t)
 let rec toString = (t: t): string => {
   switch t {
   | ItTypeIdentifier(s) => s
-  | ItModifiedType({modifiedType, modifiers}) =>
-    `${toString(modifiedType)}${modifiers->Belt.Map.String.reduce("", (acc, k, v) =>
+  | ItModifiedType({modifiedType, contracts}) =>
+    `${toString(modifiedType)}${contracts->Belt.Map.String.reduce("", (acc, k, v) =>
         Js.String2.concatMany(acc, ["<-", k, "(", InternalExpressionValue.toString(v), ")"])
       )}`
   | ItTypeOr({typeOr}) => `(${Js.Array2.map(typeOr, toString)->Js.Array2.joinWith(" | ")})`
@@ -82,7 +82,7 @@ let rec fromTypeMap = typeMap => {
     default,
   )
 
-  let modifiers =
+  let contracts =
     typeMap->Belt.Map.String.keep((k, _v) => ["min", "max", "memberOf"]->Js.Array2.includes(k))
 
   let makeIt = switch evTypeTag {
@@ -96,9 +96,9 @@ let rec fromTypeMap = typeMap => {
   | _ => raise(Reducer_Exception.ImpossibleException("Reducer_Type_T-evTypeTag"))
   }
 
-  Belt.Map.String.isEmpty(modifiers)
+  Belt.Map.String.isEmpty(contracts)
     ? makeIt
-    : ItModifiedType({modifiedType: makeIt, modifiers: modifiers})
+    : ItModifiedType({modifiedType: makeIt, contracts: contracts})
 }
 
 and fromIEvValue = (ievValue: InternalExpressionValue.t): iType =>

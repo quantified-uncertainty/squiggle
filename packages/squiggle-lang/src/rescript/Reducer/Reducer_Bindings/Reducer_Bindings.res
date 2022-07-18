@@ -1,3 +1,6 @@
+// Only Bindings as the global module is supported
+// Other module operations such as import export will be prepreocessed jobs
+
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
@@ -75,10 +78,10 @@ let emptyBindings = emptyModule
 let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
 let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
 
-let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvModule(nameSpace)
+let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvBindings(nameSpace)
 let fromExpressionValue = (aValue: internalExpressionValue): t =>
   switch aValue {
-  | IEvModule(nameSpace) => nameSpace
+  | IEvBindings(nameSpace) => nameSpace
   | _ => emptyModule
   }
 
