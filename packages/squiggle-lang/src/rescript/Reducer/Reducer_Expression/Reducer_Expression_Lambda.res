@@ -3,7 +3,7 @@ module ErrorValue = Reducer_ErrorValue
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface_InternalExpressionValue
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 module Result = Belt.Result
 
 type environment = ReducerInterface_InternalExpressionValue.environment
@@ -50,7 +50,7 @@ let caseNotFFI = (lambdaValue: ExpressionValue.lambdaValue, expr, args, environm
   let bindings = Belt.List.reduce(zippedParameterList, lambdaValue.context, (
     acc,
     (variable, variableValue),
-  ) => acc->Module.set(variable, variableValue))
+  ) => acc->Bindings.set(variable, variableValue))
   let newExpression = ExpressionBuilder.eBlock(list{expr})
   reducer(newExpression, bindings, environment)
 }
