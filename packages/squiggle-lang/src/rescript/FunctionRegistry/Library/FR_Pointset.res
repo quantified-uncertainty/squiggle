@@ -1,7 +1,7 @@
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
 
-let nameSpace = "PointSet"
+let nameSpace = "Pointset"
 let requiresNamespace = true
 
 let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
@@ -28,6 +28,15 @@ let library = [
     ~name="makeContinuous",
     ~nameSpace,
     ~requiresNamespace,
+    ~examples=[
+      `Pointset.makeContinuous([
+        {x: 0, y: 0.2},
+        {x: 1, y: 0.7},
+        {x: 2, y: 0.8},
+        {x: 3, y: 0.2}
+      ])`,
+    ],
+    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="makeContinuous",
@@ -42,6 +51,15 @@ let library = [
     ~name="makeDiscrete",
     ~nameSpace,
     ~requiresNamespace,
+    ~examples=[
+      `Pointset.makeDiscrete([
+        {x: 0, y: 0.2},
+        {x: 1, y: 0.7},
+        {x: 2, y: 0.8},
+        {x: 3, y: 0.2}
+      ])`,
+    ],
+    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="makeDiscrete",

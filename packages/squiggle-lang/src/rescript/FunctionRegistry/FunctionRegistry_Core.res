@@ -333,7 +333,7 @@ module FnDefinition = {
   let isMatch = (t: t, args: array<internalExpressionValue>) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
-    | Some(values) => true
+    | Some(_) => true
     | None => false
     }
   }
