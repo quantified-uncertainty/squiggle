@@ -21,6 +21,10 @@ describe("builtin", () => {
     "addOne(t)=t+1; toList(mapSamples(fromSamples([1,2,3,4,5,6]), addOne))",
     "Ok([2,3,4,5,6,7])",
   )
+  testEval(
+    "toList(mapSamplesN([fromSamples([1,2,3,4,5,6]), fromSamples([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
+    "Ok([6,5,4,4,5,6])",
+  )
 })
 
 describe("builtin exception", () => {
