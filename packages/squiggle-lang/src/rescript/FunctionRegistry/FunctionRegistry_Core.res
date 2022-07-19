@@ -274,8 +274,7 @@ module Matcher = {
 
   module Registry = {
     let _findExactMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
-      let functionMatchPairs =
-        r.functions->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
+      let functionMatchPairs = r.functions->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
       let fullMatch = functionMatchPairs->E.A.getBy(((_, match)) => Match.isFullMatch(match))
       fullMatch->E.O.bind(((fn, match)) =>
         switch match {
@@ -416,9 +415,10 @@ module Registry = {
     r.functions->E.A2.fmap(fn => fn.examples->E.A2.fmap(example => (fn, example)))->E.A.concatMany
 
   let buildFnNameDict = (r: array<function>): fnNameDict => {
-    let allDefinitionsWithFns = r
-    ->E.A2.fmap(fn => fn.definitions->E.A2.fmap(definitions => (fn, definitions)))
-    ->E.A.concatMany
+    let allDefinitionsWithFns =
+      r
+      ->E.A2.fmap(fn => fn.definitions->E.A2.fmap(definitions => (fn, definitions)))
+      ->E.A.concatMany
     let functionsWithFnNames =
       allDefinitionsWithFns
       ->E.A2.fmap(((fn, def)) => {
@@ -440,7 +440,7 @@ module Registry = {
     cacheAsArray->Js.Dict.fromArray
   }
 
-  let make = (fns: array<function>):registry => {
+  let make = (fns: array<function>): registry => {
     let dict = buildFnNameDict(fns)
     {functions: fns, fnNameDict: dict}
   }
