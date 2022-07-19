@@ -31,7 +31,7 @@ export let linearYScale: LinearScale = {
   name: "yscale",
   type: "linear",
   range: "height",
-  zero: false,
+  zero: true,
   domain: { data: "domain", field: "y" },
 };
 
@@ -51,7 +51,7 @@ export let expYScale: PowScale = {
   type: "pow",
   exponent: 0.1,
   range: "height",
-  zero: false,
+  zero: true,
   nice: false,
   domain: { data: "domain", field: "y" },
 };

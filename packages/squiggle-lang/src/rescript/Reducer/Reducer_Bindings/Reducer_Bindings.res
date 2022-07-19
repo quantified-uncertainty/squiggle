@@ -75,10 +75,10 @@ let emptyBindings = emptyModule
 let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
 let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
 
-let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvModule(nameSpace)
+let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvBindings(nameSpace)
 let fromExpressionValue = (aValue: internalExpressionValue): t =>
   switch aValue {
-  | IEvModule(nameSpace) => nameSpace
+  | IEvBindings(nameSpace) => nameSpace
   | _ => emptyModule
   }
 

@@ -2,7 +2,7 @@ module BBindingsReplacer = Reducer_Expression_BindingsReplacer
 module BErrorValue = Reducer_ErrorValue
 module BExpressionT = Reducer_Expression_T
 module BInternalExpressionValue = ReducerInterface_InternalExpressionValue
-module BModule = Reducer_Module
+module BBindings = Reducer_Bindings
 
 type errorValue = BErrorValue.errorValue
 type expression = BExpressionT.expression
@@ -15,7 +15,7 @@ let eArray = anArray => anArray->BInternalExpressionValue.IEvArray->BExpressionT
 let eArrayString = anArray => anArray->BInternalExpressionValue.IEvArrayString->BExpressionT.EValue
 
 let eBindings = (anArray: array<(string, BInternalExpressionValue.t)>) =>
-  anArray->BModule.fromArray->BModule.toExpressionValue->BExpressionT.EValue
+  anArray->BBindings.fromArray->BBindings.toExpressionValue->BExpressionT.EValue
 
 let eBool = aBool => aBool->BInternalExpressionValue.IEvBool->BExpressionT.EValue
 
@@ -35,12 +35,12 @@ let eLambda = (
   BInternalExpressionValue.IEvLambda({
     parameters: parameters,
     context: context,
-    body: NotFFI(expr)->BModule.castExpressionToInternalCode,
+    body: NotFFI(expr)->BBindings.castExpressionToInternalCode,
   })->BExpressionT.EValue
 }
 
 let eLambdaFFI = (ffiFn: ffiFn) => {
-  ffiFn->BModule.eLambdaFFIValue->BExpressionT.EValue
+  ffiFn->BBindings.eLambdaFFIValue->BExpressionT.EValue
 }
 
 let eNumber = aNumber => aNumber->BInternalExpressionValue.IEvNumber->BExpressionT.EValue
@@ -57,7 +57,7 @@ let eList = (list: list<expression>): expression => list->BExpressionT.EList
 let eBlock = (exprs: list<expression>): expression => eFunction("$$_block_$$", exprs)
 
 let eModule = (nameSpace: BInternalExpressionValue.nameSpace): expression =>
-  nameSpace->BInternalExpressionValue.IEvModule->BExpressionT.EValue
+  nameSpace->BInternalExpressionValue.IEvBindings->BExpressionT.EValue
 
 let eLetStatement = (symbol: string, valueExpression: expression): expression =>
   eFunction("$_let_$", list{eSymbol(symbol), valueExpression})
