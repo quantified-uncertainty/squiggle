@@ -41,6 +41,8 @@ type logistic = {
   scale: float,
 }
 
+type metalog = {terms: array<float>}
+
 type bernoulli = {p: float}
 
 @genType
@@ -56,6 +58,7 @@ type symbolicDist = [
   | #Float(float)
   | #Bernoulli(bernoulli)
   | #Logistic(logistic)
+  | #Metalog(metalog)
 ]
 
 type analyticalSimplificationResult = [

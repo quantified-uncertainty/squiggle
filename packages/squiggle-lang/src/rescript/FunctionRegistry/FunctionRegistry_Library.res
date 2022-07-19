@@ -139,8 +139,18 @@ beta({mean: 0.39, stdev: 0.1})`,
   ),
   Function.make(
     ~name="Logistic",
-    ~examples=`gamma(5, 1)`,
+    ~examples=`logistic(5, 1)`,
     ~definitions=[TwoArgDist.make("logistic", twoArgs(SymbolicDist.Logistic.make))],
+    (),
+  ),
+  Function.make(
+    ~name="Metalog",
+    ~examples=`metalog([1, 2, 3])`,
+    ~definitions=[
+      ArrayNumberDist.make("metalog", x =>
+        SymbolicDist.Metalog.make(x)->E.R2.fmap(x => Wrappers.symbolic(x)->Wrappers.evDistribution)
+      ),
+    ],
     (),
   ),
   Function.make(
