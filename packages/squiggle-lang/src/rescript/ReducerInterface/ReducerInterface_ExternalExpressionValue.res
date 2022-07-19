@@ -25,6 +25,7 @@ type rec externalExpressionValue =
   | EvTypeIdentifier(string)
   | EvModule(record)
   | EvType(record)
+  | EvVoid
 and record = Js.Dict.t<externalExpressionValue>
 and externalBindings = record
 and lambdaValue = {
@@ -63,6 +64,7 @@ let rec toString = aValue =>
   | EvTimeDuration(t) => DateTime.Duration.toString(t)
   | EvType(t) => `type${t->toStringRecord}`
   | EvTypeIdentifier(id) => `#${id}`
+  | EvVoid => `()`
   }
 and toStringRecord = aRecord => {
   let pairs =
