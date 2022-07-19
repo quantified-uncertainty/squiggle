@@ -438,7 +438,6 @@ module Registry = {
     cacheAsArray->Js.Dict.fromArray
   }
 
-  let _exportedSubset = (r: registry): registry => r |> E.A.filter(r => !r.requiresNamespace)
   /*
   There's a (potential+minor) bug here: If a function definition is called outside of the calls 
   to the registry, then it's possible that there could be a match after the registry is 
@@ -477,7 +476,7 @@ module Registry = {
     (fnName, args): ReducerInterface_InternalExpressionValue.functionCall,
     env,
   ) => {
-    _matchAndRun(~registry=_exportedSubset(registry), ~fnName, ~args, ~env)->E.O2.fmap(
+    _matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
       E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
     )
   }
