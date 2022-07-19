@@ -19,15 +19,6 @@ open Reducer_ErrorValue
 
 exception TestRescriptException
 
-let parseSampleSetArray = (arr: array<internalExpressionValue>): option<array<SampleSetDist.t>> => {
-  let parseSampleSet = (value: internalExpressionValue): option<SampleSetDist.t> =>
-    switch value {
-    | IEvDistribution(SampleSet(dist)) => Some(dist)
-    | _ => None
-    }
-  E.A.O.openIfAllSome(E.A.fmap(parseSampleSet, arr))
-}
-
 let callInternal = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
   'b,
   errorValue,
@@ -159,9 +150,25 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
       SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
     }
 
-    let mapN = (t1: array<t>, aLambdaValue) => {
-      let fn = a => doLambdaCall(aLambdaValue, list{IEvArray(E.A.fmap(x => IEvNumber(x), a))})
-      SampleSetDist.mapN(~fn, ~t1)->toType
+    let mapN = (aValueArray: array<internalExpressionValue>, aLambdaValue) => {
+      switch parseSampleSetArray(aValueArray) {
+      | Some(t1) =>
+        let fn = a => doLambdaCall(aLambdaValue, list{IEvArray(E.A.fmap(x => IEvNumber(x), a))})
+        SampleSetDist.mapN(~fn, ~t1)->toType
+      | None =>
+        Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString))
+      }
+    }
+
+    let parseSampleSetArray = (arr: array<internalExpressionValue>): option<
+      array<SampleSetDist.t>,
+    > => {
+      let parseSampleSet = (value: internalExpressionValue): option<SampleSetDist.t> =>
+        switch value {
+        | IEvDistribution(SampleSet(dist)) => Some(dist)
+        | _ => None
+        }
+      E.A.O.openIfAllSome(E.A.fmap(parseSampleSet, arr))
     }
   }
 
@@ -245,11 +252,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     ) =>
     SampleMap.map3(dist1, dist2, dist3, aLambdaValue)
   | ("mapSamplesN", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
-    switch parseSampleSetArray(aValueArray) {
-    | Some(sampleSetArr) => SampleMap.mapN(sampleSetArr, aLambdaValue)
-    | None =>
-      Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString))
-    }
+    SampleMap.mapN(aValueArray, aLambdaValue)
   | ("reduce", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
     doReduceArray(aValueArray, initialValue, aLambdaValue)
   | ("reduceReverse", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
@@ -281,8 +284,5 @@ let dispatch = (call: functionCall, environment, reducer: ExpressionT.reducerFn)
     ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternalWithReducer)
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
-  | err => {
-      Js.Console.log(err)
-      RETodo("unhandled rescript exception")->Error
-    }
+  | _ => RETodo("unhandled rescript exception")->Error
   }
