@@ -109,22 +109,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
       | Error(r) => Error(REDistributionError(SampleSetError(r)))
       }
 
-    let map1 = (sampleSetDist: t, aLambdaValue) => {
-      let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)})
-      toType(SampleSetDist.samplesMap(~fn, sampleSetDist))
-    }
-
-    let map2 = (t1: t, t2: t, aLambdaValue) => {
-      let fn = (a, b) => doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b)})
-      SampleSetDist.map2(~fn, ~t1, ~t2)->toType
-    }
-
-    let map3 = (t1: t, t2: t, t3: t, aLambdaValue) => {
-      let fn = (a, b, c) =>
-        doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b), IEvNumber(c)})
-      SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
-    }
-
     let parseSampleSetArray = (arr: array<internalExpressionValue>): option<
       array<SampleSetDist.t>,
     > => {
@@ -185,29 +169,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     doAddString(aValueString, bValueString)
   | ("inspect", [value, IEvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
-  | ("mapSamples", [IEvDistribution(SampleSet(dist)), IEvLambda(aLambdaValue)]) =>
-    SampleMap.map1(dist, aLambdaValue)
-  | (
-      "mapSamples2",
-      [
-        IEvDistribution(SampleSet(dist1)),
-        IEvDistribution(SampleSet(dist2)),
-        IEvLambda(aLambdaValue),
-      ],
-    ) =>
-    SampleMap.map2(dist1, dist2, aLambdaValue)
-  | (
-      "mapSamples3",
-      [
-        IEvDistribution(SampleSet(dist1)),
-        IEvDistribution(SampleSet(dist2)),
-        IEvDistribution(SampleSet(dist3)),
-        IEvLambda(aLambdaValue),
-      ],
-    ) =>
-    SampleMap.map3(dist1, dist2, dist3, aLambdaValue)
-  | ("mapSamplesN", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
-    SampleMap.mapN(aValueArray, aLambdaValue)
   | (_, [IEvBool(_)])
   | (_, [IEvNumber(_)])
   | (_, [IEvString(_)])

@@ -67,12 +67,12 @@ module Internals = {
           environment,
           reducer,
         )
-        rNewElem->E.R2.fmap(newElem =>
+        rNewElem->E.R2.fmap(newElem => {
           switch newElem {
           | IEvBool(true) => list{elem, ...acc}
           | _ => acc
           }
-        )
+        })
       })
     )
     rMappedList->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)

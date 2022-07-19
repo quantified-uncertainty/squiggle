@@ -70,4 +70,33 @@ let library = [
     ],
     (),
   ),
+  Function.make(
+    ~name="maked",
+    ~nameSpace,
+    ~requiresNamespace,
+    ~examples=[`Pointset.maked(normal(5,2))`],
+    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~definitions=[
+      FnDefinition.make(
+        ~name="maked",
+        ~inputs=[FRTypeDist],
+        ~run=(_, inputs, env, _) =>
+          switch inputs {
+          | [FRValueDist(dist)] =>
+            GenericDist.toPointSet(
+              dist,
+              ~xyPointLength=env.xyPointLength,
+              ~sampleCount=env.sampleCount,
+              (),
+            )
+            ->E.R2.fmap(Wrappers.pointSet)
+            ->E.R2.fmap(Wrappers.evDistribution)
+            ->E.R2.errMap(_ => "")
+          | _ => Error(impossibleError)
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
 ]
