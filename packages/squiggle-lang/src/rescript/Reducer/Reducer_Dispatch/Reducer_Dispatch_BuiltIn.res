@@ -10,8 +10,8 @@ open ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
 /*
-  MathJs provides default implementations for builtins
-  This is where all the expected builtins like + = * / sin cos log ln etc are handled
+  MathJs provides default implementations for built-ins
+  This is where all the expected built-ins like + = * / sin cos log ln etc are handled
   DO NOT try to add external function mapping here!
 */
 
@@ -219,7 +219,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("$_typeFunction_$", [IEvArray(arr)]) => TypeBuilder.typeFunction(arr)
   | ("$_typeTuple_$", [IEvArray(elems)]) => TypeBuilder.typeTuple(elems)
   | ("$_typeArray_$", [elem]) => TypeBuilder.typeArray(elem)
-  | ("$_typeRecord_$", [IEvArray(arrayOfPairs)]) => TypeBuilder.typeRecord(arrayOfPairs)
+  | ("$_typeRecord_$", [IEvRecord(propertyMap)]) => TypeBuilder.typeRecord(propertyMap)
   | ("concat", [IEvArray(aValueArray), IEvArray(bValueArray)]) =>
     doAddArray(aValueArray, bValueArray)
   | ("concat", [IEvString(aValueString), IEvString(bValueString)]) =>
@@ -277,11 +277,10 @@ let dispatch = (call: functionCall, environment, reducer: ExpressionT.reducerFn)
   errorValue,
 > =>
   try {
-    let callInternalWithReducer = (call, environment) => callInternal(call, environment, reducer)
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternalWithReducer)
+    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, reducer, callInternal)
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   | _ => RETodo("unhandled rescript exception")->Error

@@ -23,7 +23,7 @@ let tryRegistry = ((fnName, args): InternalExpressionValue.functionCall, env) =>
   )
 }
 
-let dispatch = (call: InternalExpressionValue.functionCall, environment, chain): result<
+let dispatch = (call: InternalExpressionValue.functionCall, environment, reducer, chain): result<
   internalExpressionValue,
   'e,
 > => {
@@ -33,7 +33,7 @@ let dispatch = (call: InternalExpressionValue.functionCall, environment, chain):
     () => ReducerInterface_Duration.dispatch(call, environment),
     () => ReducerInterface_Number.dispatch(call, environment),
     () => tryRegistry(call, environment),
-  ])->E.O2.default(chain(call, environment))
+  ])->E.O2.default(chain(call, environment, reducer))
 }
 /*
 If your dispatch is too big you can divide it into smaller dispatches and pass the call so that it gets called finally.

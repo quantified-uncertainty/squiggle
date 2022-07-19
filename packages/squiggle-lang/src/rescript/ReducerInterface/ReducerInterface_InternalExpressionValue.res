@@ -84,7 +84,7 @@ let toStringWithType = aValue =>
   | IEvDeclaration(_) => `Declaration::${toString(aValue)}`
   | IEvDistribution(_) => `Distribution::${toString(aValue)}`
   | IEvLambda(_) => `Lambda::${toString(aValue)}`
-  | IEvBindings(_) => `Module::${toString(aValue)}`
+  | IEvBindings(_) => `Bindings::${toString(aValue)}`
   | IEvNumber(_) => `Number::${toString(aValue)}`
   | IEvRecord(_) => `Record::${toString(aValue)}`
   | IEvString(_) => `String::${toString(aValue)}`
