@@ -654,27 +654,3 @@ scaleLog: (distributionLike, number) => distribution
 ```
 scaleLog10: (distributionLike, number) => distribution
 ```
-
-## Special
-
-### Declaration (Continuous Functions)
-
-Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making formal predictions. It allows you to limit the domain that your prediction will be used and scored within.
-
-Declarations are currently experimental and will likely be removed or changed in the future.
-
-```
-declareFn: (dict<{fn: lambda, inputs: array<dict<{min: number, max: number}>>}>) => declaration
-```
-
-**Examples**
-
-```javascript
-declareFn({
-  fn: {|a,b| a },
-  inputs: [
-    {min: 0, max: 100},
-    {min: 30, max: 50}
-  ]
-})
-```

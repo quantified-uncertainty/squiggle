@@ -172,7 +172,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Sampleset.mapN([Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2))], {|x| max(x)`,
+      `Sampleset.mapN([Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2))], {|x| max(x)})`,
     ],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
