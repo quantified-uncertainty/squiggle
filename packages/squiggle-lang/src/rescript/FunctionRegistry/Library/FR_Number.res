@@ -9,7 +9,7 @@ module NumberToNumber = {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeNumber],
-      ~run=(_, inputs, _) => {
+      ~run=(_, inputs, _, _) => {
         inputs
         ->getOrError(0)
         ->E.R.bind(Prepare.oneNumber)
@@ -25,7 +25,7 @@ module ArrayNumberDist = {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeArray(FRTypeNumber)],
-      ~run=(_, inputs, _) =>
+      ~run=(_, inputs, _, _) =>
         Prepare.ToTypedArray.numbers(inputs)
         ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
         ->E.R.bind(fn),
@@ -36,7 +36,7 @@ module ArrayNumberDist = {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeArray(FRTypeAny)],
-      ~run=(_, inputs, _) =>
+      ~run=(_, inputs, _, _) =>
         Prepare.ToTypedArray.numbers(inputs)
         ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
         ->E.R.bind(fn),

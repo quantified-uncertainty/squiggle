@@ -41,7 +41,7 @@ let library = [
       FnDefinition.make(
         ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        ~run=(_, inputs, _, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
         (),
       ),
     ],
@@ -64,7 +64,7 @@ let library = [
       FnDefinition.make(
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+        ~run=(_, inputs, _, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
         (),
       ),
     ],

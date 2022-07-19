@@ -37,7 +37,7 @@ let library = [
       FnDefinition.make(
         ~name="make",
         ~inputs=[FRTypeNumber, FRTypeAny],
-        ~run=(inputs, _, _) => {
+        ~run=(inputs, _, _, _) => {
           switch inputs {
           | [IEvNumber(number), value] => Internals.makeFromNumber(number, value)->Ok
           | _ => Error(impossibleError)
@@ -58,7 +58,7 @@ let library = [
       FnDefinition.make(
         ~name="upTo",
         ~inputs=[FRTypeNumber, FRTypeNumber],
-        ~run=(_, inputs, _) =>
+        ~run=(_, inputs, _, _) =>
           inputs
           ->Prepare.ToValueTuple.twoNumbers
           ->E.R2.fmap(((low, high)) => Internals.upTo(low, high)),
@@ -76,7 +76,7 @@ let library = [
       FnDefinition.make(
         ~name="first",
         ~inputs=[FRTypeArray(FRTypeAny)],
-        ~run=(inputs, _, _) =>
+        ~run=(inputs, _, _, _) =>
           switch inputs {
           | [IEvArray(array)] => Internals.first(array)
           | _ => Error(impossibleError)
@@ -95,7 +95,7 @@ let library = [
       FnDefinition.make(
         ~name="last",
         ~inputs=[FRTypeArray(FRTypeAny)],
-        ~run=(inputs, _, _) =>
+        ~run=(inputs, _, _, _) =>
           switch inputs {
           | [IEvArray(array)] => Internals.last(array)
           | _ => Error(impossibleError)
@@ -115,7 +115,7 @@ let library = [
       FnDefinition.make(
         ~name="reverse",
         ~inputs=[FRTypeArray(FRTypeAny)],
-        ~run=(inputs, _, _) =>
+        ~run=(inputs, _, _, _) =>
           switch inputs {
           | [IEvArray(array)] => Internals.reverse(array)->Ok
           | _ => Error(impossibleError)

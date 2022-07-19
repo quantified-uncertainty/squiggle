@@ -47,6 +47,7 @@ type fnDefinition = {
     array<internalExpressionValue>,
     array<frValue>,
     GenericDist.env,
+    Reducer_Expression_T.reducerFn,
   ) => result<internalExpressionValue, string>,
 }
 
@@ -342,10 +343,15 @@ module FnDefinition = {
     }
   }
 
-  let run = (t: t, args: array<internalExpressionValue>, env: GenericDist.env) => {
+  let run = (
+    t: t,
+    args: array<internalExpressionValue>,
+    env: GenericDist.env,
+    reducer: Reducer_Expression_T.reducerFn,
+  ) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
-    | Some(values) => t.run(args, values, env)
+    | Some(values) => t.run(args, values, env, reducer)
     | None => Error("Incorrect Types")
     }
   }
@@ -452,6 +458,7 @@ module Registry = {
     ~fnName: string,
     ~args: array<internalExpressionValue>,
     ~env: GenericDist.env,
+    ~reducer: Reducer_Expression_T.reducerFn,
   ) => {
     let relevantFunctions = Js.Dict.get(registry.fnNameDict, fnName) |> E.O.default([])
     let modified = {functions: relevantFunctions, fnNameDict: registry.fnNameDict}
@@ -468,7 +475,8 @@ module Registry = {
     }
 
     switch Matcher.Registry.findMatches(modified, fnName, args) {
-    | Matcher.Match.FullMatch(match) => match->matchToDef->E.O2.fmap(FnDefinition.run(_, args, env))
+    | Matcher.Match.FullMatch(match) =>
+      match->matchToDef->E.O2.fmap(FnDefinition.run(_, args, env, reducer))
     | SameNameDifferentArguments(m) => Some(Error(showNameMatchDefinitions(m)))
     | _ => None
     }
@@ -478,8 +486,9 @@ module Registry = {
     registry,
     (fnName, args): ReducerInterface_InternalExpressionValue.functionCall,
     env,
+    reducer: Reducer_Expression_T.reducerFn,
   ) => {
-    _matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
+    _matchAndRun(~registry, ~fnName, ~args, ~env, ~reducer)->E.O2.fmap(
       E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
     )
   }
