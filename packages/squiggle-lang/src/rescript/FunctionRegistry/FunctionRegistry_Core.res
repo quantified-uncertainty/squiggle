@@ -350,9 +350,6 @@ module FnDefinition = {
     }
   }
 
-  let toFfiFn = (t: t): Reducer_Expression_T.optionFfiFn =>
-    (args, environment) => run(t, args, environment)->E.R.toOption
-
   let make = (~name, ~inputs, ~run, ()): t => {
     name: name,
     inputs: inputs,
@@ -414,7 +411,7 @@ module Registry = {
   let allExamplesWithFns = (r: registry) =>
     r.functions->E.A2.fmap(fn => fn.examples->E.A2.fmap(example => (fn, example)))->E.A.concatMany
 
-  let buildFnNameDict = (r: array<function>): fnNameDict => {
+  let _buildFnNameDict = (r: array<function>): fnNameDict => {
     let allDefinitionsWithFns =
       r
       ->E.A2.fmap(fn => fn.definitions->E.A2.fmap(definitions => (fn, definitions)))
@@ -441,7 +438,7 @@ module Registry = {
   }
 
   let make = (fns: array<function>): registry => {
-    let dict = buildFnNameDict(fns)
+    let dict = _buildFnNameDict(fns)
     {functions: fns, fnNameDict: dict}
   }
 
