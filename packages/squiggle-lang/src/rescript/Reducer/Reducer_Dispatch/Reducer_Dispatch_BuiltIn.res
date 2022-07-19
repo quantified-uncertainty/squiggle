@@ -95,31 +95,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
   let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
 
-  let doKeepArray = (aValueArray, aLambdaValue) => {
-    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
-      rAcc->Result.flatMap(acc => {
-        let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
-        rNewElem->Result.map(newElem =>
-          switch newElem {
-          | IEvBool(true) => list{elem, ...acc}
-          | _ => acc
-          }
-        )
-      })
-    )
-    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->IEvArray)
-  }
-
-  let doMapArray = (aValueArray, aLambdaValue) => {
-    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
-      rAcc->Result.flatMap(acc => {
-        let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
-        rNewElem->Result.map(newElem => list{newElem, ...acc})
-      })
-    )
-    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->IEvArray)
-  }
-
   module SampleMap = {
     type t = SampleSetDist.t
     let doLambdaCall = (aLambdaValue, list) =>
@@ -172,22 +147,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     }
   }
 
-  let doReduceArray = (aValueArray, initialValue, aLambdaValue) => {
-    aValueArray->Belt.Array.reduce(Ok(initialValue), (rAcc, elem) =>
-      rAcc->Result.flatMap(acc =>
-        Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, environment, reducer)
-      )
-    )
-  }
-
-  let doReduceReverseArray = (aValueArray, initialValue, aLambdaValue) => {
-    aValueArray->Belt.Array.reduceReverse(Ok(initialValue), (rAcc, elem) =>
-      rAcc->Result.flatMap(acc =>
-        Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, environment, reducer)
-      )
-    )
-  }
-
   switch call {
   | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
   | ("$_atIndex_$", [IEvBindings(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
@@ -226,10 +185,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     doAddString(aValueString, bValueString)
   | ("inspect", [value, IEvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
-  | ("filter", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
-    doKeepArray(aValueArray, aLambdaValue)
-  | ("map", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
-    doMapArray(aValueArray, aLambdaValue)
   | ("mapSamples", [IEvDistribution(SampleSet(dist)), IEvLambda(aLambdaValue)]) =>
     SampleMap.map1(dist, aLambdaValue)
   | (
@@ -253,11 +208,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     SampleMap.map3(dist1, dist2, dist3, aLambdaValue)
   | ("mapSamplesN", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
     SampleMap.mapN(aValueArray, aLambdaValue)
-  | ("reduce", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
-    doReduceArray(aValueArray, initialValue, aLambdaValue)
-  | ("reduceReverse", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
-    doReduceReverseArray(aValueArray, initialValue, aLambdaValue)
-  | ("reverse", [IEvArray(aValueArray)]) => aValueArray->Belt.Array.reverse->IEvArray->Ok
   | (_, [IEvBool(_)])
   | (_, [IEvNumber(_)])
   | (_, [IEvString(_)])
