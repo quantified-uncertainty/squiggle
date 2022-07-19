@@ -4,7 +4,7 @@ type internalExpressionValue = InternalExpressionValue.t
 /*
   Map external calls of Reducer
 */
-let dispatch = (call: InternalExpressionValue.functionCall, environment, chain): result<
+let dispatch = (call: InternalExpressionValue.functionCall, environment, reducer, chain): result<
   internalExpressionValue,
   'e,
 > => {
@@ -14,7 +14,7 @@ let dispatch = (call: InternalExpressionValue.functionCall, environment, chain):
     () => ReducerInterface_Duration.dispatch(call, environment),
     () => ReducerInterface_Number.dispatch(call, environment),
     () => FunctionRegistry_Library.dispatch(call, environment),
-  ])->E.O2.default(chain(call, environment))
+  ])->E.O2.default(chain(call, environment, reducer))
 }
 
 /*

@@ -223,7 +223,7 @@ export function buildVegaSpec(
             },
             size: [{ value: 100 }],
             tooltip: {
-              signal: "datum.y",
+              signal: "{ probability: datum.y, value: datum.x }",
             },
           },
           update: {

@@ -3,12 +3,41 @@ open InternalExpressionValue
 
 type rec iType =
   | ItTypeIdentifier(string)
-  | ItModifiedType({modifiedType: iType})
+  | ItModifiedType({modifiedType: iType, contracts: Belt.Map.String.t<InternalExpressionValue.t>})
   | ItTypeOr({typeOr: array<iType>})
   | ItTypeFunction({inputs: array<iType>, output: iType})
   | ItTypeArray({element: iType})
   | ItTypeTuple({elements: array<iType>})
   | ItTypeRecord({properties: Belt.Map.String.t<iType>})
+
+type t = iType
+type typeErrorValue = TypeMismatch(t, InternalExpressionValue.t)
+
+let rec toString = (t: t): string => {
+  switch t {
+  | ItTypeIdentifier(s) => s
+  | ItModifiedType({modifiedType, contracts}) =>
+    `${toString(modifiedType)}${contracts->Belt.Map.String.reduce("", (acc, k, v) =>
+        Js.String2.concatMany(acc, ["<-", k, "(", InternalExpressionValue.toString(v), ")"])
+      )}`
+  | ItTypeOr({typeOr}) => `(${Js.Array2.map(typeOr, toString)->Js.Array2.joinWith(" | ")})`
+  | ItTypeFunction({inputs, output}) =>
+    `(${inputs->Js.Array2.map(toString)->Js.Array2.joinWith(" => ")} => ${toString(output)})`
+  | ItTypeArray({element}) => `[${toString(element)}]`
+  | ItTypeTuple({elements}) => `[${Js.Array2.map(elements, toString)->Js.Array2.joinWith(", ")}]`
+  | ItTypeRecord({properties}) =>
+    `{${properties
+      ->Belt.Map.String.toArray
+      ->Js.Array2.map(((k, v)) => Js.String2.concatMany(k, [": ", toString(v)]))
+      ->Js.Array2.joinWith(", ")}}`
+  }
+}
+
+let toStringResult = (rt: result<t, ErrorValue.t>) =>
+  switch rt {
+  | Ok(t) => toString(t)
+  | Error(e) => ErrorValue.errorToString(e)
+  }
 
 let rec fromTypeMap = typeMap => {
   let default = IEvString("")
@@ -52,31 +81,39 @@ let rec fromTypeMap = typeMap => {
     "properties",
     default,
   )
-  //TODO: map type modifiers
-  switch evTypeTag {
-  | IEvString("typeIdentifier") => ItModifiedType({modifiedType: fromIEvValue(evTypeIdentifier)})
+
+  let contracts =
+    typeMap->Belt.Map.String.keep((k, _v) => ["min", "max", "memberOf"]->Js.Array2.includes(k))
+
+  let makeIt = switch evTypeTag {
+  | IEvString("typeIdentifier") => fromIEvValue(evTypeIdentifier)
   | IEvString("typeOr") => ItTypeOr({typeOr: fromIEvArray(evTypeOr)})
   | IEvString("typeFunction") =>
     ItTypeFunction({inputs: fromIEvArray(evInputs), output: fromIEvValue(evOutput)})
   | IEvString("typeArray") => ItTypeArray({element: fromIEvValue(evElement)})
   | IEvString("typeTuple") => ItTypeTuple({elements: fromIEvArray(evElements)})
   | IEvString("typeRecord") => ItTypeRecord({properties: fromIEvRecord(evProperties)})
-  | _ => raise(Reducer_Exception.ImpossibleException)
+  | _ => raise(Reducer_Exception.ImpossibleException("Reducer_Type_T-evTypeTag"))
   }
+
+  Belt.Map.String.isEmpty(contracts)
+    ? makeIt
+    : ItModifiedType({modifiedType: makeIt, contracts: contracts})
 }
-and fromIEvValue = (ievValue: InternalExpressionValue.t) =>
+
+and fromIEvValue = (ievValue: InternalExpressionValue.t): iType =>
   switch ievValue {
   | IEvTypeIdentifier(typeIdentifier) => ItTypeIdentifier({typeIdentifier})
   | IEvType(typeMap) => fromTypeMap(typeMap)
-  | _ => raise(Reducer_Exception.ImpossibleException)
+  | _ => raise(Reducer_Exception.ImpossibleException("Reducer_Type_T-ievValue"))
   }
 and fromIEvArray = (ievArray: InternalExpressionValue.t) =>
   switch ievArray {
   | IEvArray(array) => array->Belt.Array.map(fromIEvValue)
-  | _ => raise(Reducer_Exception.ImpossibleException)
+  | _ => raise(Reducer_Exception.ImpossibleException("Reducer_Type_T-ievArray"))
   }
 and fromIEvRecord = (ievRecord: InternalExpressionValue.t) =>
   switch ievRecord {
   | IEvRecord(record) => record->Belt.Map.String.map(fromIEvValue)
-  | _ => raise(Reducer_Exception.ImpossibleException)
+  | _ => raise(Reducer_Exception.ImpossibleException("Reducer_Type_T-ievRecord"))
   }

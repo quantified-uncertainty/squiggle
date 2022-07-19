@@ -56,7 +56,7 @@ let typeFunction = anArray => {
 
 let typeArray = element => {
   let newRecord = Belt.Map.String.fromArray([
-    ("typeTag", IEvString("typeTuple")),
+    ("typeTag", IEvString("typeArray")),
     ("element", element),
   ])
   newRecord->IEvType->Ok
@@ -64,22 +64,14 @@ let typeArray = element => {
 
 let typeTuple = anArray => {
   let newRecord = Belt.Map.String.fromArray([
-    ("typeTag", IEvString("typeArray")),
+    ("typeTag", IEvString("typeTuple")),
     ("elements", IEvArray(anArray)),
   ])
   newRecord->IEvType->Ok
 }
 
-let typeRecord = arrayOfPairs => {
-  let newProperties =
-    Belt.Array.map(arrayOfPairs, pairValue =>
-      switch pairValue {
-      | IEvArray([IEvString(key), valueValue]) => (key, valueValue)
-      | _ => ("wrong key type", pairValue->toStringWithType->IEvString)
-      }
-    )
-    ->Belt.Map.String.fromArray
-    ->IEvRecord
+let typeRecord = propertyMap => {
+  let newProperties = propertyMap->IEvRecord
   let newRecord = Belt.Map.String.fromArray([
     ("typeTag", IEvString("typeRecord")),
     ("properties", newProperties),
