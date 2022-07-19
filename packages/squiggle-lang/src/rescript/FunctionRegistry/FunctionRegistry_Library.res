@@ -1,4 +1,4 @@
-let registry = Belt.Array.concatMany([
+let fnList = Belt.Array.concatMany([
   FR_Dict.library,
   FR_Dist.library,
   FR_Fn.library,
@@ -8,4 +8,5 @@ let registry = Belt.Array.concatMany([
   FR_Scoring.library,
 ])
 
+let registry = FunctionRegistry_Core.Registry.make(fnList)
 let dispatch = FunctionRegistry_Core.Registry.dispatch(registry)

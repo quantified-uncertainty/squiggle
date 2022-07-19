@@ -61,7 +61,8 @@ type function = {
   isExperimental: bool,
 }
 
-type registry = array<function>
+type fnNameDict = Js.Dict.t<array<function>>
+type registry = {functions: array<function>, fnNameDict: fnNameDict}
 
 module FRType = {
   type t = frType
@@ -273,7 +274,8 @@ module Matcher = {
 
   module Registry = {
     let _findExactMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
-      let functionMatchPairs = r->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
+      let functionMatchPairs =
+        r.functions->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
       let fullMatch = functionMatchPairs->E.A.getBy(((_, match)) => Match.isFullMatch(match))
       fullMatch->E.O.bind(((fn, match)) =>
         switch match {
@@ -284,7 +286,7 @@ module Matcher = {
     }
 
     let _findNameMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
-      let functionMatchPairs = r->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
+      let functionMatchPairs = r.functions->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
       let getNameMatches =
         functionMatchPairs
         ->E.A2.fmap(((fn, match)) => Match.isNameMatchOnly(match) ? Some((fn, match)) : None)
@@ -319,7 +321,7 @@ module Matcher = {
     let matchToDef = (registry: registry, {fnName, inputIndex}: RegistryMatch.match): option<
       fnDefinition,
     > =>
-      registry
+      registry.functions
       ->E.A.getBy(fn => fn.name === fnName)
       ->E.O.bind(fn => E.A.get(fn.definitions, inputIndex))
   }
@@ -408,17 +410,17 @@ module NameSpace = {
 }
 
 module Registry = {
-  let toJson = (r: registry) => r->E.A2.fmap(Function.toJson)
-  let allExamples = (r: registry) => r->E.A2.fmap(r => r.examples)->E.A.concatMany
+  let toJson = (r: registry) => r.functions->E.A2.fmap(Function.toJson)
+  let allExamples = (r: registry) => r.functions->E.A2.fmap(r => r.examples)->E.A.concatMany
   let allExamplesWithFns = (r: registry) =>
-    r->E.A2.fmap(fn => fn.examples->E.A2.fmap(example => (fn, example)))->E.A.concatMany
+    r.functions->E.A2.fmap(fn => fn.examples->E.A2.fmap(example => (fn, example)))->E.A.concatMany
 
-  let allDefinitionsWithFns = (r: registry) =>
-    r->E.A2.fmap(fn => fn.definitions->E.A2.fmap(definitions => (fn, definitions)))->E.A.concatMany
-
-  let cache = (r: registry): Js.Dict.t<array<Function.t>> => {
+  let buildFnNameDict = (r: array<function>): fnNameDict => {
+    let allDefinitionsWithFns = r
+    ->E.A2.fmap(fn => fn.definitions->E.A2.fmap(definitions => (fn, definitions)))
+    ->E.A.concatMany
     let functionsWithFnNames =
-      allDefinitionsWithFns(r)
+      allDefinitionsWithFns
       ->E.A2.fmap(((fn, def)) => {
         let nameWithNamespace = `${fn.nameSpace}.${def.name}`
         let nameWithoutNamespace = def.name
@@ -438,6 +440,11 @@ module Registry = {
     cacheAsArray->Js.Dict.fromArray
   }
 
+  let make = (fns: array<function>):registry => {
+    let dict = buildFnNameDict(fns)
+    {functions: fns, fnNameDict: dict}
+  }
+
   /*
   There's a (potential+minor) bug here: If a function definition is called outside of the calls 
   to the registry, then it's possible that there could be a match after the registry is 
@@ -449,10 +456,9 @@ module Registry = {
     ~args: array<internalExpressionValue>,
     ~env: GenericDist.env,
   ) => {
-    let cc = cache(registry)
-    let relevantFunctions = Js.Dict.get(cc, fnName) |> E.O.default([])
-
-    let matchToDef = m => Matcher.Registry.matchToDef(relevantFunctions, m)
+    let relevantFunctions = Js.Dict.get(registry.fnNameDict, fnName) |> E.O.default([])
+    let modified = {functions: relevantFunctions, fnNameDict: registry.fnNameDict}
+    let matchToDef = m => Matcher.Registry.matchToDef(registry, m)
     let showNameMatchDefinitions = matches => {
       let defs =
         matches
@@ -464,7 +470,7 @@ module Registry = {
       `There are function matches for ${fnName}(), but with different arguments: ${defs}`
     }
 
-    switch Matcher.Registry.findMatches(relevantFunctions, fnName, args) {
+    switch Matcher.Registry.findMatches(modified, fnName, args) {
     | Matcher.Match.FullMatch(match) => match->matchToDef->E.O2.fmap(FnDefinition.run(_, args, env))
     | SameNameDifferentArguments(m) => Some(Error(showNameMatchDefinitions(m)))
     | _ => None
