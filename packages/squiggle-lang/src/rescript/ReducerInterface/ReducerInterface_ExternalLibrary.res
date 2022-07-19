@@ -1,28 +1,9 @@
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-
 type internalExpressionValue = InternalExpressionValue.t
-
-// module Sample = {
-//   // In real life real libraries should be somewhere else
-//   /*
-//     For an example of mapping polymorphic custom functions. To be deleted after real integration
-//  */
-//   let customAdd = (a: float, b: float): float => {a +. b}
-// }
 
 /*
   Map external calls of Reducer
 */
-
-// I expect that it's important to build this first, so it doesn't get recalculated for each tryRegistry() call.
-let registry = FunctionRegistry_Library.registry
-
-let tryRegistry = ((fnName, args): InternalExpressionValue.functionCall, env) => {
-  FunctionRegistry_Core.Registry.matchAndRun(~registry, ~fnName, ~args, ~env)->E.O2.fmap(
-    E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
-  )
-}
-
 let dispatch = (call: InternalExpressionValue.functionCall, environment, reducer, chain): result<
   internalExpressionValue,
   'e,
@@ -32,9 +13,10 @@ let dispatch = (call: InternalExpressionValue.functionCall, environment, reducer
     () => ReducerInterface_Date.dispatch(call, environment),
     () => ReducerInterface_Duration.dispatch(call, environment),
     () => ReducerInterface_Number.dispatch(call, environment),
-    () => tryRegistry(call, environment),
+    () => FunctionRegistry_Library.dispatch(call, environment),
   ])->E.O2.default(chain(call, environment, reducer))
 }
+
 /*
 If your dispatch is too big you can divide it into smaller dispatches and pass the call so that it gets called finally.
 
