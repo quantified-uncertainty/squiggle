@@ -261,6 +261,9 @@ module Metalog = {
       ? Ok(#Metalog({terms: terms}))
       : Error("Metalog must have 2 or more terms")
 
+  // The flagship of the Metalog distribution. This is taken from:
+  // http://www.metalogdistributions.com/equations/unboundedmetalog.html
+  // keep in mind that in JS, arrays are 0 indexed, so i = k - 1
   let inv = (p, t: t) => {
     let logy = log(p /. (1. -. p))
     E.A.Floats.sum(Js.Array.mapi((term, i) =>
@@ -280,6 +283,11 @@ module Metalog = {
       , t.terms))
   }
 
+  // The inverse quantile density function, the derivative of above. Taken from:
+  // http://www.metalogdistributions.com/equations/unboundedmetalog.html
+  // Keep in mind here that people often find the reciprocal of this value. I don't
+  // because it's easier to code this way and then just find the reciprocal at
+  // the very end
   let invderiv = (y: float, t: t): float => E.A.Floats.sum(Js.Array.mapi((term, i) => {
         let k = Belt.Int.toFloat(i) +. 1.
         if i == 0 {
@@ -299,18 +307,9 @@ module Metalog = {
         }
       }, t.terms))
 
-  let rec improveCdfGuess = (guess: float, roundsLeft: int, target: float, t: t) =>
-    if roundsLeft == 0 {
-      guess
-    } else {
-      improveCdfGuess(
-        guess -. (inv(guess, t) -. target) /. invderiv(guess, t),
-        roundsLeft - 1,
-        target,
-        t,
-      )
-    }
-
+  // Simply approximates cdf values by bisection on the inv function over 50 rounds, starting at
+  // a guess of 0.5. This use to be newton's method to approximate the CDF. However,
+  // I found that this is as easy if not faster and easier to understand.
   let cdf = (x: float, t: t): float => {
     let guess = ref(0.5)
     let bisection_rounds = 50
@@ -325,6 +324,10 @@ module Metalog = {
     guess.contents
   }
 
+  // The pdf first gets the cdf at x, then finds the density of that percentile
+  // See the notes at the bottom of this:
+  // http://www.metalogdistributions.com/equations/unboundedmetalog.html
+  // to see the logic behind this
   let pdf = (x: float, t: t): float => 1. /. invderiv(cdf(x, t), t)
 
   let sample = (t: t) => inv(Jstat.Uniform.sample(0., 1.), t)
@@ -332,8 +335,10 @@ module Metalog = {
   let toString = ({terms}: t) =>
     j`Metalog([${Js.Array.joinWith(", ", Js.Array.map(Belt.Float.toString, terms))}])`
 
-  let meanSteps = 1000
+  // The mean of a metalog is simply the total integral of the inverse function.
+  // Discussed here: http://www.metalogdistributions.com/moments.html
   let mean = (t: t) => {
+    let meanSteps = 1000
     let stepCountFloat = Belt.Int.toFloat(meanSteps)
     let range = E.A.Floats.range(0. +. 1. /. stepCountFloat, 1. -. 1. /. stepCountFloat, meanSteps)
     Ok(E.A.Floats.sum(E.A.fmap(x => inv(x, t) /. stepCountFloat, range)))
