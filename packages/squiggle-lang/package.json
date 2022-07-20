@@ -15,6 +15,7 @@
     "start": "rescript build -w -with-deps",
     "clean": "rescript clean && rm -rf dist",
     "test:reducer": "jest __tests__/Reducer*/",
+    "test:current": "jest __tests__/SquiggleLibrary/SquiggleLibrary_FunctionRegistryLibrary_test.bs.js",
     "benchmark": "ts-node benchmark/conversion_tests.ts",
     "test": "jest",
     "test:ts": "jest __tests__/TS/",

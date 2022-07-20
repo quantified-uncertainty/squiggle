@@ -74,7 +74,7 @@ let library = [
     ~name="fromDist",
     ~nameSpace,
     ~requiresNamespace=true,
-    ~examples=[`PointSet.fromDist(normal(5,2))`],
+    ~examples=[`Pointset.fromDist(normal(5,2))`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(

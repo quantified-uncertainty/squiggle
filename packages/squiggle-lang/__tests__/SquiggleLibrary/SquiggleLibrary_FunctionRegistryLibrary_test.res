@@ -59,6 +59,7 @@ describe("FunctionRegistry Library", () => {
     )
     testEvalToBe("Dist.logScore({estimate: normal(5,2), answer: 4.5})", "Ok(1.6433360626394853)")
     testEvalToBe("Dist.klDivergence(normal(5,2), normal(5,1.5))", "Ok(0.06874342818671068)")
+    testEvalToBe("Sampleset.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
   })
 
   describe("Fn auto-testing", () => {

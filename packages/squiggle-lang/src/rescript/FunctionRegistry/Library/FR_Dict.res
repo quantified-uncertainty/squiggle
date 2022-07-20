@@ -156,11 +156,12 @@ let library = [
       FnDefinition.make(
         ~name="fromList",
         ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _, _) =>{
           switch inputs {
           | [IEvArray(items)] => Internals.fromList(items)
           | _ => Error(impossibleError)
-          },
+          }
+        },
         (),
       ),
     ],

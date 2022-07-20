@@ -170,6 +170,7 @@ module FRType = {
     inputs: array<t>,
     args: array<internalExpressionValue>,
   ): option<array<frValue>> => {
+    // Js.log3("Matching", inputs, args)
     let isSameLength = E.A.length(inputs) == E.A.length(args)
     if !isSameLength {
       None
@@ -240,53 +241,82 @@ module Matcher = {
     type definitionId = int
     type match = Match.t<array<definitionId>, definitionId>
 
-    let match = (f: function, fnName: string, args: array<internalExpressionValue>): match => {
-      let matchedDefinition = () =>
-        E.A.getIndexBy(f.definitions, r =>
-          MatchSimple.isFullMatch(FnDefinition.match(r, fnName, args))
-        ) |> E.O.fmap(r => Match.FullMatch(r))
-      let getMatchedNameOnlyDefinition = () => {
-        let nameMatchIndexes =
-          f.definitions
-          ->E.A2.fmapi((index, r) =>
-            MatchSimple.isNameMatchOnly(FnDefinition.match(r, fnName, args)) ? Some(index) : None
+    let match = (
+      f: function,
+      namespace: option<string>,
+      fnName: string,
+      args: array<internalExpressionValue>,
+    ): match => {
+      switch namespace {
+      | Some(ns) if ns !== f.nameSpace => Match.DifferentName
+      | _ => {
+          let matchedDefinition = () =>
+            E.A.getIndexBy(f.definitions, r =>
+              MatchSimple.isFullMatch(FnDefinition.match(r, fnName, args))
+            ) |> E.O.fmap(r => Match.FullMatch(r))
+          let getMatchedNameOnlyDefinition = () => {
+            let nameMatchIndexes =
+              f.definitions
+              ->E.A2.fmapi((index, r) =>
+                MatchSimple.isNameMatchOnly(FnDefinition.match(r, fnName, args))
+                  ? Some(index)
+                  : None
+              )
+              ->E.A.O.concatSomes
+            switch nameMatchIndexes {
+            | [] => None
+            | elements => Some(Match.SameNameDifferentArguments(elements))
+            }
+          }
+
+          E.A.O.firstSomeFnWithDefault(
+            [matchedDefinition, getMatchedNameOnlyDefinition],
+            Match.DifferentName,
           )
-          ->E.A.O.concatSomes
-        switch nameMatchIndexes {
-        | [] => None
-        | elements => Some(Match.SameNameDifferentArguments(elements))
         }
       }
-
-      E.A.O.firstSomeFnWithDefault(
-        [matchedDefinition, getMatchedNameOnlyDefinition],
-        Match.DifferentName,
-      )
     }
   }
 
   module RegistryMatch = {
     type match = {
+      namespace: option<string>,
       fnName: string,
       inputIndex: int,
     }
-    let makeMatch = (fnName: string, inputIndex: int) => {fnName: fnName, inputIndex: inputIndex}
+    let makeMatch = (namespace: option<string>, fnName: string, inputIndex: int) => {
+      namespace: namespace,
+      fnName: fnName,
+      inputIndex: inputIndex,
+    }
   }
 
   module Registry = {
-    let _findExactMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
-      let functionMatchPairs = r.functions->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
+    let _findExactMatches = (
+      r: registry,
+      namespace: option<string>,
+      fnName: string,
+      args: array<internalExpressionValue>,
+    ) => {
+      let functionMatchPairs =
+        r.functions->E.A2.fmap(l => (l, Function.match(l, namespace, fnName, args)))
       let fullMatch = functionMatchPairs->E.A.getBy(((_, match)) => Match.isFullMatch(match))
       fullMatch->E.O.bind(((fn, match)) =>
         switch match {
-        | FullMatch(index) => Some(RegistryMatch.makeMatch(fn.name, index))
+        | FullMatch(index) => Some(RegistryMatch.makeMatch(namespace, fn.name, index))
         | _ => None
         }
       )
     }
 
-    let _findNameMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
-      let functionMatchPairs = r.functions->E.A2.fmap(l => (l, Function.match(l, fnName, args)))
+    let _findNameMatches = (
+      r: registry,
+      namespace: option<string>,
+      fnName: string,
+      args: array<internalExpressionValue>,
+    ) => {
+      let functionMatchPairs =
+        r.functions->E.A2.fmap(l => (l, Function.match(l, namespace, fnName, args)))
       let getNameMatches =
         functionMatchPairs
         ->E.A2.fmap(((fn, match)) => Match.isNameMatchOnly(match) ? Some((fn, match)) : None)
@@ -296,7 +326,7 @@ module Matcher = {
         ->E.A2.fmap(((fn, match)) =>
           switch match {
           | SameNameDifferentArguments(indexes) =>
-            indexes->E.A2.fmap(index => RegistryMatch.makeMatch(fn.name, index))
+            indexes->E.A2.fmap(index => RegistryMatch.makeMatch(namespace, fn.name, index))
           | _ => []
           }
         )
@@ -307,22 +337,29 @@ module Matcher = {
     let findMatches = (r: registry, fnName: string, args: array<internalExpressionValue>) => {
       let fnNameInParts = Js.String.split(".", fnName)
       let fnToSearch = E.A.get(fnNameInParts, 1) |> E.O.default(fnNameInParts[0])
+      let nameSpace = E.A.length(fnNameInParts) > 1 ? Some(fnNameInParts[0]) : None
 
-      switch _findExactMatches(r, fnToSearch, args) {
+      switch _findExactMatches(r, nameSpace, fnToSearch, args) {
       | Some(r) => Match.FullMatch(r)
       | None =>
-        switch _findNameMatches(r, fnToSearch, args) {
+        switch _findNameMatches(r, nameSpace, fnToSearch, args) {
         | Some(r) => Match.SameNameDifferentArguments(r)
         | None => Match.DifferentName
         }
       }
     }
 
-    let matchToDef = (registry: registry, {fnName, inputIndex}: RegistryMatch.match): option<
-      fnDefinition,
-    > =>
+    let matchToDef = (
+      registry: registry,
+      {namespace, fnName, inputIndex}: RegistryMatch.match,
+    ): option<fnDefinition> =>
       registry.functions
-      ->E.A.getBy(fn => fn.name === fnName)
+      ->E.A.getBy(fn => {
+        switch namespace {
+        | Some(ns) => ns === fn.nameSpace && fnName === fn.name
+        | _ => fnName === fn.name
+        }
+      })
       ->E.O.bind(fn => E.A.get(fn.definitions, inputIndex))
   }
 }
@@ -473,6 +510,8 @@ module Registry = {
         ->E.A2.joinWith("; ")
       `There are function matches for ${fnName}(), but with different arguments: ${defs}`
     }
+
+    let match = Matcher.Registry.findMatches(modified, fnName, args)
 
     switch Matcher.Registry.findMatches(modified, fnName, args) {
     | Matcher.Match.FullMatch(match) =>

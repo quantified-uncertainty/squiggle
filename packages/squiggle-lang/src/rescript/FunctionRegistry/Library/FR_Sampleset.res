@@ -90,19 +90,19 @@ let library = [
     (),
   ),
   Function.make(
-    ~name="fromLlist",
+    ~name="fromList",
     ~nameSpace,
     ~requiresNamespace=true,
-    ~examples=[`Sampleset.fromLlist([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
+    ~examples=[`Sampleset.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
-        ~name="fromLlist",
+        ~name="fromList",
         ~inputs=[FRTypeArray(FRTypeNumber)],
         ~run=(_, inputs, _, _) => {
           let sampleSet =
             Prepare.ToTypedArray.numbers(inputs) |> E.R2.bind(r =>
-              SampleSetDist.make(r)->E.R2.errMap(_ => "")
+              SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??")
             )
           sampleSet->E.R2.fmap(Wrappers.sampleSet)->E.R2.fmap(Wrappers.evDistribution)
         },
@@ -112,14 +112,14 @@ let library = [
     (),
   ),
   Function.make(
-    ~name="toLlist",
+    ~name="toList",
     ~nameSpace,
     ~requiresNamespace=false,
-    ~examples=[`Sampleset.toLlist(Sampleset.maker(normal(5,2))`],
+    ~examples=[`Sampleset.toList(Sampleset.fromDist(normal(5,2)))`],
     ~output=ReducerInterface_InternalExpressionValue.EvtArray,
     ~definitions=[
       FnDefinition.make(
-        ~name="toLlist",
+        ~name="toList",
         ~inputs=[FRTypeDist],
         ~run=(inputs, _, _, _) =>
           switch inputs {
@@ -133,14 +133,14 @@ let library = [
     (),
   ),
   Function.make(
-    ~name="mapp",
+    ~name="map",
     ~nameSpace,
     ~requiresNamespace,
-    ~examples=[`Sampleset.mapp(Sampleset.maker(normal(5,2)), {|x| x + 1})`],
+    ~examples=[`Sampleset.map(Sampleset.fromDist(normal(5,2)), {|x| x + 1})`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
-        ~name="mapp",
+        ~name="map",
         ~inputs=[FRTypeDist, FRTypeLambda],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
@@ -158,7 +158,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Sampleset.map2(Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2)), {|x, y| x + y})`,
+      `Sampleset.map2(Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2)), {|x, y| x + y})`,
     ],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
@@ -186,7 +186,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Sampleset.map3(Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2)), {|x, y, z| max([x,y,z]))`,
+      `Sampleset.map3(Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2)), {|x, y, z| max([x,y,z])})`,
     ],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
@@ -214,7 +214,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Sampleset.mapN([Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2)), Sampleset.maker(normal(5,2))], {|x| max(x)})`,
+      `Sampleset.mapN([Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2))], {|x| max(x)})`,
     ],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
@@ -224,7 +224,9 @@ let library = [
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(dists), IEvLambda(lambda)] =>
-            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(e => {Js.log2("HI", e); "AHHH doesn't work"})
+            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(e => {
+              "AHHH doesn't work"
+            })
           | _ => Error(impossibleError)
           },
         (),
