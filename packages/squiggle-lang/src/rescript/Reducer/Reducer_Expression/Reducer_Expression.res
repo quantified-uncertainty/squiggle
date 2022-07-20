@@ -6,7 +6,7 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 module Macro = Reducer_Expression_Macro
 module MathJs = Reducer_MathJs
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 module Result = Belt.Result
 module T = Reducer_Expression_T
 
@@ -121,10 +121,10 @@ let evaluateUsingOptions = (
     ReducerInterface_ExternalExpressionValue.defaultEnvironment,
   )
 
-  let mergedBindings: InternalExpressionValue.nameSpace = Module.merge(
+  let mergedBindings: InternalExpressionValue.nameSpace = Bindings.merge(
     ReducerInterface_StdLib.internalStdLib,
-    Belt.Option.map(externalBindings, Module.fromTypeScriptBindings)->Belt.Option.getWithDefault(
-      Module.emptyModule,
+    Belt.Option.map(externalBindings, Bindings.fromTypeScriptBindings)->Belt.Option.getWithDefault(
+      Bindings.emptyModule,
     ),
   )
 

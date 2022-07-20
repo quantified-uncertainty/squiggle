@@ -1,3 +1,6 @@
+// Only Bindings as the global module is supported
+// Other module operations such as import export will be prepreocessed jobs
+
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
@@ -75,10 +78,10 @@ let emptyBindings = emptyModule
 let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
 let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
 
-let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvModule(nameSpace)
+let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvBindings(nameSpace)
 let fromExpressionValue = (aValue: internalExpressionValue): t =>
   switch aValue {
-  | IEvModule(nameSpace) => nameSpace
+  | IEvBindings(nameSpace) => nameSpace
   | _ => emptyModule
   }
 
@@ -126,6 +129,17 @@ let functionNotFoundErrorFFIFn = (functionName: string): ExpressionT.ffiFn => {
   }
 }
 
+let convertOptionToFfiFnReturningResult = (
+  myFunctionName: string,
+  myFunction: ExpressionT.optionFfiFnReturningResult,
+): ExpressionT.ffiFn => {
+  (args: array<InternalExpressionValue.t>, environment) => {
+    myFunction(args, environment)->Belt.Option.getWithDefault(
+      functionNotFoundErrorFFIFn(myFunctionName)(args, environment),
+    )
+  }
+}
+
 let convertOptionToFfiFn = (
   myFunctionName: string,
   myFunction: ExpressionT.optionFfiFn,
@@ -159,4 +173,15 @@ let defineFunction = (nameSpace: t, identifier: string, value: ExpressionT.optio
   nameSpace->define(identifier, convertOptionToFfiFn(identifier, value)->eLambdaFFIValue)
 }
 
-let emptyStdLib: t = emptyModule->defineBool("stdlib", true)
+let defineFunctionReturningResult = (
+  nameSpace: t,
+  identifier: string,
+  value: ExpressionT.optionFfiFnReturningResult,
+): t => {
+  nameSpace->define(
+    identifier,
+    convertOptionToFfiFnReturningResult(identifier, value)->eLambdaFFIValue,
+  )
+}
+
+let emptyStdLib: t = emptyModule->defineBool("_standardLibrary", true)

@@ -41,6 +41,18 @@ export interface SquiggleChartProps {
   logX?: boolean;
   /** Set the y scale to be exponential by deault */
   expY?: boolean;
+  /** How to format numbers on the x axis */
+  tickFormat?: string;
+  /** Title of the graphed distribution */
+  title?: string;
+  /** Color of the graphed distribution */
+  color?: string;
+  /** Specify the lower bound of the x scale */
+  minX?: number;
+  /** Specify the upper bound of the x scale */
+  maxX?: number;
+  /** Whether to show vega actions to the user, so they can copy the chart spec */
+  distributionChartActions?: boolean;
 }
 
 const defaultOnChange = () => {};
@@ -61,6 +73,12 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     diagramStart = 0,
     diagramStop = 10,
     diagramCount = 100,
+    tickFormat,
+    minX,
+    maxX,
+    color,
+    title,
+    distributionChartActions,
   }) => {
     const result = useSquiggle({
       code,
@@ -75,6 +93,12 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       showSummary,
       logX,
       expY,
+      format: tickFormat,
+      minX,
+      maxX,
+      color,
+      title,
+      actions: distributionChartActions,
     };
 
     const chartSettings = {

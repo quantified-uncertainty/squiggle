@@ -3,7 +3,7 @@ module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Result = Belt.Result
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 
 type bindings = ExpressionT.bindings
 type context = bindings
@@ -41,7 +41,7 @@ let toString = expressionWithContext =>
   | ExpressionNoContext(expr) => ExpressionT.toString(expr)
   | ExpressionWithContext(expr, context) =>
     `${ExpressionT.toString(expr)} context: ${context
-      ->Module.toExpressionValue
+      ->Bindings.toExpressionValue
       ->InternalExpressionValue.toString}`
   }
 

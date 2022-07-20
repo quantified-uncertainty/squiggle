@@ -88,7 +88,7 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
   let chartPointsData: point[] = chartPointsToRender.map((x) => {
     let result = runForeign(fn, [x], environment);
     if (result.tag === "Ok") {
-      if (result.value.tag == "distribution") {
+      if (result.value.tag === "distribution") {
         return { x, value: { tag: "Ok", value: result.value.value } };
       } else {
         return {
@@ -165,12 +165,14 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
     setMouseOverlay(NaN);
   }
   const signalListeners = { mousemove: handleHover, mouseout: handleOut };
+
+  //TODO: This custom error handling is a bit hacky and should be improved.
   let mouseItem: result<squiggleExpression, errorValue> = !!mouseOverlay
     ? runForeign(fn, [mouseOverlay], environment)
     : {
         tag: "Error",
         value: {
-          tag: "REExpectedType",
+          tag: "RETodo",
           value: "Hover x-coordinate returned NaN. Expected a number.",
         },
       };

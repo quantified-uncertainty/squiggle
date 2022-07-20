@@ -1,9 +1,12 @@
+module Bindings = Reducer_Bindings
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
+
 open Jest
 open Reducer_Peggy_TestHelpers
 
 describe("Peggy to Expression", () => {
   describe("literals operators parenthesis", () => {
-    // Note that there is always an outer block. Otherwise, external bindings are ignrored at the first statement
+    // Note that there is always an outer block. Otherwise, external bindings are ignored at the first statement
     testToExpression("1", "{1}", ~v="1", ())
     testToExpression("'hello'", "{'hello'}", ~v="'hello'", ())
     testToExpression("true", "{true}", ~v="true", ())
@@ -183,6 +186,14 @@ describe("Peggy to Expression", () => {
   })
 
   describe("module", () => {
-    testToExpression("Math.pi", "{(:$_atIndex_$ :Math 'pi')}", ~v="3.141592653589793", ())
+    // testToExpression("Math.pi", "{:Math.pi}", ~v="3.141592653589793", ())
+    // Only.test("stdlibrary", () => {
+    //   ReducerInterface_StdLib.internalStdLib
+    //   ->IEvBindings
+    //   ->InternalExpressionValue.toString
+    //   ->expect
+    //   ->toBe("")
+    // })
+    testToExpression("Math.pi", "{:Math.pi}", ~v="3.141592653589793", ())
   })
 })

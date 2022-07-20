@@ -15,7 +15,7 @@ type rec t =
   | IEvDeclaration(lambdaDeclaration)
   | IEvDistribution(DistributionTypes.genericDist)
   | IEvLambda(lambdaValue)
-  | IEvModule(nameSpace)
+  | IEvBindings(nameSpace)
   | IEvNumber(float)
   | IEvRecord(map)
   | IEvString(string)
@@ -52,7 +52,7 @@ let rec toString = aValue =>
   | IEvDeclaration(d) => Declaration.toString(d, r => toString(IEvLambda(r)))
   | IEvDistribution(dist) => GenericDist.toString(dist)
   | IEvLambda(lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
-  | IEvModule(m) => `@${m->toStringNameSpace}`
+  | IEvBindings(m) => `@${m->toStringNameSpace}`
   | IEvNumber(aNumber) => Js.String.make(aNumber)
   | IEvRecord(aMap) => aMap->toStringMap
   | IEvString(aString) => `'${aString}'`
@@ -84,7 +84,7 @@ let toStringWithType = aValue =>
   | IEvDeclaration(_) => `Declaration::${toString(aValue)}`
   | IEvDistribution(_) => `Distribution::${toString(aValue)}`
   | IEvLambda(_) => `Lambda::${toString(aValue)}`
-  | IEvModule(_) => `Module::${toString(aValue)}`
+  | IEvBindings(_) => `Bindings::${toString(aValue)}`
   | IEvNumber(_) => `Number::${toString(aValue)}`
   | IEvRecord(_) => `Record::${toString(aValue)}`
   | IEvString(_) => `String::${toString(aValue)}`
@@ -150,7 +150,7 @@ let valueToValueType = value =>
   | IEvDeclaration(_) => EvtDeclaration
   | IEvDistribution(_) => EvtDistribution
   | IEvLambda(_) => EvtLambda
-  | IEvModule(_) => EvtModule
+  | IEvBindings(_) => EvtModule
   | IEvNumber(_) => EvtNumber
   | IEvRecord(_) => EvtRecord
   | IEvString(_) => EvtString
@@ -158,6 +158,26 @@ let valueToValueType = value =>
   | IEvTimeDuration(_) => EvtTimeDuration
   | IEvType(_) => EvtType
   | IEvTypeIdentifier(_) => EvtTypeIdentifier
+  }
+
+let externalValueToValueType = (value: ExternalExpressionValue.t) =>
+  switch value {
+  | EvArray(_) => EvtArray
+  | EvArrayString(_) => EvtArrayString
+  | EvBool(_) => EvtBool
+  | EvCall(_) => EvtCall
+  | EvDate(_) => EvtDate
+  | EvDeclaration(_) => EvtDeclaration
+  | EvDistribution(_) => EvtDistribution
+  | EvLambda(_) => EvtLambda
+  | EvModule(_) => EvtModule
+  | EvNumber(_) => EvtNumber
+  | EvRecord(_) => EvtRecord
+  | EvString(_) => EvtString
+  | EvSymbol(_) => EvtSymbol
+  | EvTimeDuration(_) => EvtTimeDuration
+  | EvType(_) => EvtType
+  | EvTypeIdentifier(_) => EvtTypeIdentifier
   }
 
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
@@ -211,7 +231,7 @@ let rec toExternal = (iev: t): ExternalExpressionValue.t => {
   | IEvTimeDuration(v) => EvTimeDuration(v)
   | IEvType(v) => v->mapToExternal->EvType
   | IEvTypeIdentifier(v) => EvTypeIdentifier(v)
-  | IEvModule(v) => v->nameSpaceToTypeScriptBindings->EvModule
+  | IEvBindings(v) => v->nameSpaceToTypeScriptBindings->EvModule
   }
 }
 and mapToExternal = v =>
@@ -243,7 +263,7 @@ let rec toInternal = (ev: ExternalExpressionValue.t): t => {
     }
   | EvDistribution(v) => IEvDistribution(v)
   | EvLambda(v) => IEvLambda(lambdaValueToInternal(v))
-  | EvModule(v) => v->nameSpaceFromTypeScriptBindings->IEvModule
+  | EvModule(v) => v->nameSpaceFromTypeScriptBindings->IEvBindings
   | EvNumber(v) => IEvNumber(v)
   | EvRecord(v) => v->recordToInternal->IEvRecord
   | EvString(v) => IEvString(v)

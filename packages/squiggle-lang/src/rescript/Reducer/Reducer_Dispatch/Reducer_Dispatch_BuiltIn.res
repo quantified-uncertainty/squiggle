@@ -3,15 +3,15 @@ module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 module Result = Belt.Result
 module TypeBuilder = Reducer_Type_TypeBuilder
 open ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
 /*
-  MathJs provides default implementations for builtins
-  This is where all the expected builtins like + = * / sin cos log ln etc are handled
+  MathJs provides default implementations for built-ins
+  This is where all the expected built-ins like + = * / sin cos log ln etc are handled
   DO NOT try to add external function mapping here!
 */
 
@@ -49,9 +49,9 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     }
 
   let moduleAtIndex = (nameSpace: nameSpace, sIndex) =>
-    switch Module.get(nameSpace, sIndex) {
+    switch Bindings.get(nameSpace, sIndex) {
     | Some(value) => value->Ok
-    | None => RERecordPropertyNotFound("Module property not found", sIndex)->Error
+    | None => RERecordPropertyNotFound("Bindings property not found", sIndex)->Error
     }
 
   let recordAtIndex = (dict: Belt.Map.String.t<internalExpressionValue>, sIndex) =>
@@ -81,19 +81,19 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   }
 
   let doSetBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) => {
-    Module.set(bindings, symbol, value)->IEvModule->Ok
+    Bindings.set(bindings, symbol, value)->IEvBindings->Ok
   }
 
   let doSetTypeAliasBindings = (
     bindings: nameSpace,
     symbol: string,
     value: internalExpressionValue,
-  ) => Module.setTypeAlias(bindings, symbol, value)->IEvModule->Ok
+  ) => Bindings.setTypeAlias(bindings, symbol, value)->IEvBindings->Ok
 
   let doSetTypeOfBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) =>
-    Module.setTypeOf(bindings, symbol, value)->IEvModule->Ok
+    Bindings.setTypeOf(bindings, symbol, value)->IEvBindings->Ok
 
-  let doExportBindings = (bindings: nameSpace) => bindings->Module.toExpressionValue->Ok
+  let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
 
   let doKeepArray = (aValueArray, aLambdaValue) => {
     let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
@@ -149,6 +149,27 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
         doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b), IEvNumber(c)})
       SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
     }
+
+    let parseSampleSetArray = (arr: array<internalExpressionValue>): option<
+      array<SampleSetDist.t>,
+    > => {
+      let parseSampleSet = (value: internalExpressionValue): option<SampleSetDist.t> =>
+        switch value {
+        | IEvDistribution(SampleSet(dist)) => Some(dist)
+        | _ => None
+        }
+      E.A.O.openIfAllSome(E.A.fmap(parseSampleSet, arr))
+    }
+
+    let mapN = (aValueArray: array<internalExpressionValue>, aLambdaValue) => {
+      switch parseSampleSetArray(aValueArray) {
+      | Some(t1) =>
+        let fn = a => doLambdaCall(aLambdaValue, list{IEvArray(E.A.fmap(x => IEvNumber(x), a))})
+        SampleSetDist.mapN(~fn, ~t1)->toType
+      | None =>
+        Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString))
+      }
+    }
   }
 
   let doReduceArray = (aValueArray, initialValue, aLambdaValue) => {
@@ -169,16 +190,16 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
   switch call {
   | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
-  | ("$_atIndex_$", [IEvModule(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
+  | ("$_atIndex_$", [IEvBindings(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
   | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
   | ("$_constructArray_$", [IEvArray(aValueArray)]) => IEvArray(aValueArray)->Ok
   | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
-  | ("$_exportBindings_$", [IEvModule(nameSpace)]) => doExportBindings(nameSpace)
-  | ("$_setBindings_$", [IEvModule(nameSpace), IEvSymbol(symbol), value]) =>
+  | ("$_exportBindings_$", [IEvBindings(nameSpace)]) => doExportBindings(nameSpace)
+  | ("$_setBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
     doSetBindings(nameSpace, symbol, value)
-  | ("$_setTypeAliasBindings_$", [IEvModule(nameSpace), IEvTypeIdentifier(symbol), value]) =>
+  | ("$_setTypeAliasBindings_$", [IEvBindings(nameSpace), IEvTypeIdentifier(symbol), value]) =>
     doSetTypeAliasBindings(nameSpace, symbol, value)
-  | ("$_setTypeOfBindings_$", [IEvModule(nameSpace), IEvSymbol(symbol), value]) =>
+  | ("$_setTypeOfBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
     doSetTypeOfBindings(nameSpace, symbol, value)
   | ("$_typeModifier_memberOf_$", [IEvTypeIdentifier(typeIdentifier), IEvArray(arr)]) =>
     TypeBuilder.typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))
@@ -198,7 +219,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("$_typeFunction_$", [IEvArray(arr)]) => TypeBuilder.typeFunction(arr)
   | ("$_typeTuple_$", [IEvArray(elems)]) => TypeBuilder.typeTuple(elems)
   | ("$_typeArray_$", [elem]) => TypeBuilder.typeArray(elem)
-  | ("$_typeRecord_$", [IEvArray(arrayOfPairs)]) => TypeBuilder.typeRecord(arrayOfPairs)
+  | ("$_typeRecord_$", [IEvRecord(propertyMap)]) => TypeBuilder.typeRecord(propertyMap)
   | ("concat", [IEvArray(aValueArray), IEvArray(bValueArray)]) =>
     doAddArray(aValueArray, bValueArray)
   | ("concat", [IEvString(aValueString), IEvString(bValueString)]) =>
@@ -230,6 +251,8 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
       ],
     ) =>
     SampleMap.map3(dist1, dist2, dist3, aLambdaValue)
+  | ("mapSamplesN", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
+    SampleMap.mapN(aValueArray, aLambdaValue)
   | ("reduce", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
     doReduceArray(aValueArray, initialValue, aLambdaValue)
   | ("reduceReverse", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
@@ -246,7 +269,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString)) // Report full type signature as error
   }
 }
-
 /*
   Reducer uses Result monad while reducing expressions
 */
@@ -255,11 +277,10 @@ let dispatch = (call: functionCall, environment, reducer: ExpressionT.reducerFn)
   errorValue,
 > =>
   try {
-    let callInternalWithReducer = (call, environment) => callInternal(call, environment, reducer)
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, callInternalWithReducer)
+    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, reducer, callInternal)
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   | _ => RETodo("unhandled rescript exception")->Error

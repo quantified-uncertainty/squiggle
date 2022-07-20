@@ -5,18 +5,15 @@ import {
   distributionError,
   distributionErrorToString,
 } from "@quri/squiggle-lang";
-import { Vega, VisualizationSpec } from "react-vega";
-import * as chartSpecification from "../vega-specs/spec-distributions.json";
+import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
 import { useSize } from "react-use";
 import clsx from "clsx";
 
 import {
-  linearXScale,
-  logXScale,
-  linearYScale,
-  expYScale,
-} from "./DistributionVegaScales";
+  buildVegaSpec,
+  DistributionChartSpecOptions,
+} from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
 
 export type DistributionPlottingSettings = {
@@ -24,27 +21,26 @@ export type DistributionPlottingSettings = {
   showSummary: boolean;
   /** Whether to show the user graph controls (scale etc) */
   showControls: boolean;
-  /** Set the x scale to be logarithmic by deault */
-  logX: boolean;
-  /** Set the y scale to be exponential by deault */
-  expY: boolean;
-};
+} & DistributionChartSpecOptions;
 
 export type DistributionChartProps = {
   distribution: Distribution;
   width?: number;
   height: number;
+  actions?: boolean;
 } & DistributionPlottingSettings;
 
-export const DistributionChart: React.FC<DistributionChartProps> = ({
-  distribution,
-  height,
-  showSummary,
-  width,
-  showControls,
-  logX,
-  expY,
-}) => {
+export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
+  const {
+    distribution,
+    height,
+    showSummary,
+    width,
+    showControls,
+    logX,
+    expY,
+    actions = false,
+  } = props;
   const [isLogX, setLogX] = React.useState(logX);
   const [isExpY, setExpY] = React.useState(expY);
 
@@ -64,7 +60,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
     const massBelow0 =
       shape.value.continuous.some((x) => x.x <= 0) ||
       shape.value.discrete.some((x) => x.x <= 0);
-    const spec = buildVegaSpec(isLogX, isExpY);
+    const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
     if (widthProp < 20) {
@@ -82,7 +78,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
             data={{ con: shape.value.continuous, dis: shape.value.discrete }}
             width={widthProp - 10}
             height={height}
-            actions={false}
+            actions={actions}
           />
         ) : (
           <ErrorAlert heading="Log Domain Error">
@@ -115,16 +111,6 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   });
   return sized;
 };
-
-function buildVegaSpec(isLogX: boolean, isExpY: boolean): VisualizationSpec {
-  return {
-    ...chartSpecification,
-    scales: [
-      isLogX ? logXScale : linearXScale,
-      isExpY ? expYScale : linearYScale,
-    ],
-  } as VisualizationSpec;
-}
 
 interface CheckBoxProps {
   label: string;

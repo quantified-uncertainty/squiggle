@@ -27,6 +27,12 @@ module Prepare = {
         | _ => Error(impossibleError)
         }
 
+      let threeArgs = (inputs: ts): result<ts, err> =>
+        switch inputs {
+        | [FRValueRecord([(_, n1), (_, n2), (_, n3)])] => Ok([n1, n2, n3])
+        | _ => Error(impossibleError)
+        }
+
       let toArgs = (inputs: ts): result<ts, err> =>
         switch inputs {
         | [FRValueRecord(args)] => args->E.A2.fmap(((_, b)) => b)->Ok
@@ -57,6 +63,16 @@ module Prepare = {
       }
     }
 
+    let twoDist = (values: ts): result<
+      (DistributionTypes.genericDist, DistributionTypes.genericDist),
+      err,
+    > => {
+      switch values {
+      | [FRValueDist(a1), FRValueDist(a2)] => Ok(a1, a2)
+      | _ => Error(impossibleError)
+      }
+    }
+
     let twoNumbers = (values: ts): result<(float, float), err> => {
       switch values {
       | [FRValueNumber(a1), FRValueNumber(a2)] => Ok(a1, a2)
@@ -81,6 +97,11 @@ module Prepare = {
     module Record = {
       let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
         values->ToValueArray.Record.twoArgs->E.R.bind(twoDistOrNumber)
+
+      let twoDist = (values: ts): result<
+        (DistributionTypes.genericDist, DistributionTypes.genericDist),
+        err,
+      > => values->ToValueArray.Record.twoArgs->E.R.bind(twoDist)
     }
   }
 
@@ -128,8 +149,7 @@ module Prepare = {
 module Process = {
   module DistOrNumberToDist = {
     module Helpers = {
-      let toSampleSet = (r, env: DistributionOperation.env) =>
-        GenericDist.toSampleSetDist(r, env.sampleCount)
+      let toSampleSet = (r, env: GenericDist.env) => GenericDist.toSampleSetDist(r, env.sampleCount)
 
       let mapFnResult = r =>
         switch r {
@@ -166,7 +186,7 @@ module Process = {
     let oneValue = (
       ~fn: float => result<DistributionTypes.genericDist, string>,
       ~value: frValueDistOrNumber,
-      ~env: DistributionOperation.env,
+      ~env: GenericDist.env,
     ): result<DistributionTypes.genericDist, string> => {
       switch value {
       | FRValueNumber(a1) => fn(a1)
@@ -179,7 +199,7 @@ module Process = {
     let twoValues = (
       ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
       ~values: (frValueDistOrNumber, frValueDistOrNumber),
-      ~env: DistributionOperation.env,
+      ~env: GenericDist.env,
     ): result<DistributionTypes.genericDist, string> => {
       switch values {
       | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))
@@ -192,73 +212,4 @@ module Process = {
     let twoValuesUsingSymbolicDist = (~fn, ~values) =>
       twoValues(~fn=Helpers.wrapSymbolic(fn), ~values)
   }
-}
-
-module TwoArgDist = {
-  let process = (~fn, ~env, r) =>
-    r
-    ->E.R.bind(Process.DistOrNumberToDist.twoValuesUsingSymbolicDist(~fn, ~values=_, ~env))
-    ->E.R2.fmap(Wrappers.evDistribution)
-
-  let make = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber], ~run=(inputs, env) =>
-      inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env)
-    )
-  }
-
-  let makeRecordP5P95 = (name, fn) => {
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
-      ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
-    )
-  }
-
-  let makeRecordMeanStdev = (name, fn) => {
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
-      ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
-    )
-  }
-}
-
-module OneArgDist = {
-  let process = (~fn, ~env, r) =>
-    r
-    ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
-    ->E.R2.fmap(Wrappers.evDistribution)
-
-  let make = (name, fn) =>
-    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber], ~run=(inputs, env) =>
-      inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env)
-    )
-}
-
-module ArrayNumberDist = {
-  let make = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeNumber)], ~run=(inputs, _) =>
-      Prepare.ToTypedArray.numbers(inputs)
-      ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-      ->E.R.bind(fn)
-    )
-  }
-  let make2 = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeAny)], ~run=(inputs, _) =>
-      Prepare.ToTypedArray.numbers(inputs)
-      ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-      ->E.R.bind(fn)
-    )
-  }
-}
-
-module NumberToNumber = {
-  let make = (name, fn) =>
-    FnDefinition.make(~name, ~inputs=[FRTypeNumber], ~run=(inputs, _) => {
-      inputs
-      ->getOrError(0)
-      ->E.R.bind(Prepare.oneNumber)
-      ->E.R2.fmap(fn)
-      ->E.R2.fmap(Wrappers.evNumber)
-    })
 }

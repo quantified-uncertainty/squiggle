@@ -2,15 +2,15 @@
 module ErrorValue = Reducer_ErrorValue
 module ExternalExpressionValue = ReducerInterface.ExternalExpressionValue
 module InternalExpressionValue = ReducerInterface.InternalExpressionValue
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 
 let removeDefaultsInternal = (iev: InternalExpressionValue.t) => {
   switch iev {
-  | InternalExpressionValue.IEvModule(nameSpace) =>
-    Module.removeOther(
+  | InternalExpressionValue.IEvBindings(nameSpace) =>
+    Bindings.removeOther(
       nameSpace,
       ReducerInterface.StdLib.internalStdLib,
-    )->InternalExpressionValue.IEvModule
+    )->InternalExpressionValue.IEvBindings
   | value => value
   }
 }

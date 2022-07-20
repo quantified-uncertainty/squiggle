@@ -9,7 +9,7 @@ module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
-module Module = Reducer_Module
+module Bindings = Reducer_Bindings
 module Result = Belt.Result
 open Reducer_Expression_ExpressionBuilder
 
@@ -28,7 +28,7 @@ let dispatchMacroCall = (
     let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, environment)
 
     rExternalBindingsValue->Result.flatMap(nameSpaceValue => {
-      let newBindings = Module.fromExpressionValue(nameSpaceValue)
+      let newBindings = Bindings.fromExpressionValue(nameSpaceValue)
 
       let rNewStatement = BindingsReplacer.replaceSymbols(newBindings, statement)
       rNewStatement->Result.map(boundStatement =>
@@ -144,7 +144,7 @@ let dispatchMacroCall = (
           let ifTrueBlock = eBlock(list{ifTrue})
           ExpressionWithContext.withContext(ifTrueBlock, bindings)->Ok
         }
-      | _ => REExpectedType("Boolean")->Error
+      | _ => REExpectedType("Boolean", "")->Error
       }
     )
   }
