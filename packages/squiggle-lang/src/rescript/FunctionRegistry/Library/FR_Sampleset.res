@@ -90,14 +90,57 @@ let library = [
     (),
   ),
   Function.make(
-    ~name="map",
+    ~name="fromLlist",
     ~nameSpace,
-    ~requiresNamespace,
-    ~examples=[`Sampleset.map(Sampleset.maker(normal(5,2)), {|x| x + 1})`],
+    ~requiresNamespace=true,
+    ~examples=[`Sampleset.fromLlist([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
-        ~name="map",
+        ~name="fromLlist",
+        ~inputs=[FRTypeArray(FRTypeNumber)],
+        ~run=(_, inputs, _, _) => {
+          let sampleSet =
+            Prepare.ToTypedArray.numbers(inputs) |> E.R2.bind(r =>
+              SampleSetDist.make(r)->E.R2.errMap(_ => "")
+            )
+          sampleSet->E.R2.fmap(Wrappers.sampleSet)->E.R2.fmap(Wrappers.evDistribution)
+        },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="toLlist",
+    ~nameSpace,
+    ~requiresNamespace=false,
+    ~examples=[`Sampleset.toLlist(Sampleset.maker(normal(5,2))`],
+    ~output=ReducerInterface_InternalExpressionValue.EvtArray,
+    ~definitions=[
+      FnDefinition.make(
+        ~name="toLlist",
+        ~inputs=[FRTypeDist],
+        ~run=(inputs, _, _, _) =>
+          switch inputs {
+          | [IEvDistribution(SampleSet(dist))] =>
+            dist->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+          | _ => Error(impossibleError)
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="mapp",
+    ~nameSpace,
+    ~requiresNamespace,
+    ~examples=[`Sampleset.mapp(Sampleset.maker(normal(5,2)), {|x| x + 1})`],
+    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~definitions=[
+      FnDefinition.make(
+        ~name="mapp",
         ~inputs=[FRTypeDist, FRTypeLambda],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
@@ -123,7 +166,6 @@ let library = [
         ~name="map2",
         ~inputs=[FRTypeDist, FRTypeDist, FRTypeLambda],
         ~run=(inputs, _, env, reducer) => {
-          Js.log2("WHY DIDNT IT MATCH", inputs)
           switch inputs {
           | [
               IEvDistribution(SampleSet(dist1)),
@@ -182,7 +224,7 @@ let library = [
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(dists), IEvLambda(lambda)] =>
-            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(_ => "")
+            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(e => {Js.log2("HI", e); "AHHH doesn't work"})
           | _ => Error(impossibleError)
           },
         (),

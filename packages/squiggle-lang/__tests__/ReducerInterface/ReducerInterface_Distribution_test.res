@@ -41,12 +41,6 @@ describe("eval on distribution functions", () => {
   describe("normalize", () => {
     testEval("normalize(normal(5,2))", "Ok(Normal(5,2))")
   })
-  describe("toPointSet", () => {
-    testEval("toPointSet(normal(5,2))", "Ok(Point Set Distribution)")
-  })
-  describe("toSampleSet", () => {
-    testEval("toSampleSet(normal(5,2), 100)", "Ok(Sample Set Distribution)")
-  })
   describe("add", () => {
     testEval("add(normal(5,2), normal(10,2))", "Ok(Normal(15,2.8284271247461903))")
     testEval("add(normal(5,2), lognormal(10,2))", "Ok(Sample Set Distribution)")

@@ -34,8 +34,6 @@ PointSet.makeContinuous([
 
 ### makeDiscrete
 
-Converts a set of x-y coordinates directly into a discrete distribution.
-
 ```
 PointSet.makeDiscrete: (list<{x: number, y: number}>) => pointSetDist
 ```
