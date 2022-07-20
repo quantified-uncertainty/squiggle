@@ -200,6 +200,12 @@ export const SquiggleItem: React.FC<SquiggleItemProps> = ({
           {expression.value.toDateString()}
         </VariableBox>
       );
+    case "void":
+      return (
+        <VariableBox heading="Void" showTypes={showTypes}>
+          {"Void"}
+        </VariableBox>
+      );
     case "timeDuration": {
       return (
         <VariableBox heading="Time Duration" showTypes={showTypes}>
