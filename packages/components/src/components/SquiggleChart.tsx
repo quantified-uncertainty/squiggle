@@ -9,7 +9,6 @@ import {
   defaultEnvironment,
 } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
-import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
 import { SquiggleViewer } from "./SquiggleViewer";
 
 export interface SquiggleChartProps {

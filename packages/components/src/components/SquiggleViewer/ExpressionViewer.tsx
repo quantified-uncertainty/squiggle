@@ -1,17 +1,11 @@
 import React from "react";
-import {
-  squiggleExpression,
-  environment,
-  declaration,
-} from "@quri/squiggle-lang";
+import { squiggleExpression, declaration } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
-import {
-  DistributionChart,
-  DistributionPlottingSettings,
-} from "../DistributionChart";
+import { DistributionChart } from "../DistributionChart";
 import { FunctionChart, FunctionChartSettings } from "../FunctionChart";
 import clsx from "clsx";
 import { VariableBox } from "./VariableBox";
+import { ItemSettingsMenu } from "./ItemSettingsMenu";
 
 function getRange<a>(x: declaration<a>) {
   const first = x.args[0];
@@ -42,9 +36,11 @@ const VariableList: React.FC<{
   children: React.ReactNode;
 }> = ({ path, heading, children }) => (
   <VariableBox path={path} heading={heading}>
-    <div className={clsx("space-y-3", path.length ? "pt-1 mt-1" : null)}>
-      {children}
-    </div>
+    {() => (
+      <div className={clsx("space-y-3", path.length ? "pt-1 mt-1" : null)}>
+        {children}
+      </div>
+    )}
   </VariableBox>
 );
 
@@ -55,11 +51,6 @@ export interface Props {
   path: string[];
   width?: number;
   height: number;
-  distributionPlotSettings: DistributionPlottingSettings;
-  /** Settings for displaying functions */
-  chartSettings: FunctionChartSettings;
-  /** Environment for further function executions */
-  environment: environment;
 }
 
 export const ExpressionViewer: React.FC<Props> = ({
@@ -67,17 +58,16 @@ export const ExpressionViewer: React.FC<Props> = ({
   expression,
   width,
   height,
-  distributionPlotSettings,
-  chartSettings,
-  environment,
 }) => {
   switch (expression.tag) {
     case "number":
       return (
         <VariableBox path={path} heading="Number">
-          <div className="font-semibold text-slate-600">
-            <NumberShower precision={3} number={expression.value} />
-          </div>
+          {() => (
+            <div className="font-semibold text-slate-600">
+              <NumberShower precision={3} number={expression.value} />
+            </div>
+          )}
         </VariableBox>
       );
     case "distribution": {
@@ -88,95 +78,134 @@ export const ExpressionViewer: React.FC<Props> = ({
           heading={`Distribution (${distType})\n${
             distType === "Symbolic" ? expression.value.toString() : ""
           }`}
+          dropdownMenu={({ settings, setSettings }) => {
+            return (
+              <ItemSettingsMenu settings={settings} setSettings={setSettings} />
+            );
+          }}
         >
-          <DistributionChart
-            distribution={expression.value}
-            {...distributionPlotSettings}
-            height={height}
-            width={width}
-          />
+          {(settings) => {
+            return (
+              <DistributionChart
+                distribution={expression.value}
+                {...settings.distributionPlotSettings}
+                height={height}
+                width={width}
+              />
+            );
+          }}
         </VariableBox>
       );
     }
     case "string":
       return (
         <VariableBox path={path} heading="String">
-          <span className="text-slate-400">"</span>
-          <span className="text-slate-600 font-semibold font-mono">
-            {expression.value}
-          </span>
-          <span className="text-slate-400">"</span>
+          {() => (
+            <>
+              <span className="text-slate-400">"</span>
+              <span className="text-slate-600 font-semibold font-mono">
+                {expression.value}
+              </span>
+              <span className="text-slate-400">"</span>
+            </>
+          )}
         </VariableBox>
       );
     case "boolean":
       return (
         <VariableBox path={path} heading="Boolean">
-          {expression.value.toString()}
+          {() => expression.value.toString()}
         </VariableBox>
       );
     case "symbol":
       return (
         <VariableBox path={path} heading="Symbol">
-          <span className="text-slate-500 mr-2">Undefined Symbol:</span>
-          <span className="text-slate-600">{expression.value}</span>
+          {() => (
+            <>
+              <span className="text-slate-500 mr-2">Undefined Symbol:</span>
+              <span className="text-slate-600">{expression.value}</span>
+            </>
+          )}
         </VariableBox>
       );
     case "call":
       return (
         <VariableBox path={path} heading="Call">
-          {expression.value}
+          {() => expression.value}
         </VariableBox>
       );
     case "arraystring":
       return (
         <VariableBox path={path} heading="Array String">
-          {expression.value.map((r) => `"${r}"`).join(", ")}
+          {() => expression.value.map((r) => `"${r}"`).join(", ")}
         </VariableBox>
       );
     case "date":
       return (
         <VariableBox path={path} heading="Date">
-          {expression.value.toDateString()}
+          {() => expression.value.toDateString()}
         </VariableBox>
       );
     case "timeDuration": {
       return (
         <VariableBox path={path} heading="Time Duration">
-          <NumberShower precision={3} number={expression.value} />
+          {() => <NumberShower precision={3} number={expression.value} />}
         </VariableBox>
       );
     }
     case "lambda":
       return (
-        <VariableBox path={path} heading="Function">
-          <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${expression.value.parameters.join(
-            ","
-          )})`}</div>
-          <FunctionChart
-            fn={expression.value}
-            chartSettings={chartSettings}
-            distributionPlotSettings={distributionPlotSettings}
-            height={height}
-            environment={{
-              sampleCount: environment.sampleCount / 10,
-              xyPointLength: environment.xyPointLength / 10,
-            }}
-          />
+        <VariableBox
+          path={path}
+          heading="Function"
+          dropdownMenu={({ settings, setSettings }) => {
+            return (
+              <ItemSettingsMenu settings={settings} setSettings={setSettings} />
+            );
+          }}
+        >
+          {(settings) => (
+            <>
+              <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${expression.value.parameters.join(
+                ","
+              )})`}</div>
+              <FunctionChart
+                fn={expression.value}
+                chartSettings={settings.chartSettings}
+                distributionPlotSettings={settings.distributionPlotSettings}
+                height={height}
+                environment={{
+                  sampleCount: settings.environment.sampleCount / 10,
+                  xyPointLength: settings.environment.xyPointLength / 10,
+                }}
+              />
+            </>
+          )}
         </VariableBox>
       );
     case "lambdaDeclaration": {
       return (
-        <VariableBox path={path} heading="Function Declaration">
-          <FunctionChart
-            fn={expression.value.fn}
-            chartSettings={getChartSettings(expression.value)}
-            distributionPlotSettings={distributionPlotSettings}
-            height={height}
-            environment={{
-              sampleCount: environment.sampleCount / 10,
-              xyPointLength: environment.xyPointLength / 10,
-            }}
-          />
+        <VariableBox
+          path={path}
+          heading="Function Declaration"
+          dropdownMenu={({ settings, setSettings }) => {
+            return (
+              <ItemSettingsMenu settings={settings} setSettings={setSettings} />
+            );
+          }}
+        >
+          {(settings) => (
+            <FunctionChart
+              fn={expression.value.fn}
+              chartSettings={getChartSettings(expression.value)}
+              distributionPlotSettings={settings.distributionPlotSettings}
+              height={height}
+              environment={{
+                sampleCount: settings.environment.sampleCount / 10,
+                xyPointLength: settings.environment.xyPointLength / 10,
+              }}
+            />
+          )}
         </VariableBox>
       );
     }
@@ -192,9 +221,6 @@ export const ExpressionViewer: React.FC<Props> = ({
                 expression={r}
                 width={width !== undefined ? width - 20 : width}
                 height={height / 3}
-                distributionPlotSettings={distributionPlotSettings}
-                chartSettings={chartSettings}
-                environment={environment}
               />
             ))}
         </VariableList>
@@ -210,9 +236,6 @@ export const ExpressionViewer: React.FC<Props> = ({
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={height / 3}
-              distributionPlotSettings={distributionPlotSettings}
-              chartSettings={chartSettings}
-              environment={environment}
             />
           ))}
         </VariableList>
@@ -227,9 +250,6 @@ export const ExpressionViewer: React.FC<Props> = ({
               expression={r}
               width={width !== undefined ? width - 20 : width}
               height={50}
-              distributionPlotSettings={distributionPlotSettings}
-              chartSettings={chartSettings}
-              environment={environment}
             />
           ))}
         </VariableList>

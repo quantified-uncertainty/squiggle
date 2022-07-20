@@ -4,7 +4,12 @@ import { DistributionPlottingSettings } from "../DistributionChart";
 import { FunctionChartSettings } from "../FunctionChart";
 import { ExpressionViewer } from "./ExpressionViewer";
 import { ViewerContext } from "./ViewerContext";
-import { Path, pathAsString } from "./utils";
+import {
+  LocalItemSettings,
+  MergedItemSettings,
+  Path,
+  pathAsString,
+} from "./utils";
 import { useSquiggle } from "../../lib/hooks";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert";
 
@@ -20,15 +25,11 @@ type Props = {
   environment: environment;
 };
 
-type ItemSettings = {
-  collapsed: boolean;
-};
-
 type Settings = {
-  [k: string]: ItemSettings;
+  [k: string]: LocalItemSettings;
 };
 
-const defaultSettings: ItemSettings = { collapsed: false };
+const defaultSettings: LocalItemSettings = { collapsed: false };
 
 export const SquiggleViewer: React.FC<Props> = ({
   result,
@@ -38,6 +39,7 @@ export const SquiggleViewer: React.FC<Props> = ({
   chartSettings,
   environment,
 }) => {
+  // can't store settings in the state because we don't want to rerender the entire tree on every change
   const settingsRef = useRef<Settings>({});
 
   const getSettings = useCallback(
@@ -48,10 +50,32 @@ export const SquiggleViewer: React.FC<Props> = ({
   );
 
   const setSettings = useCallback(
-    (path: Path, value: ItemSettings) => {
+    (path: Path, value: LocalItemSettings) => {
       settingsRef.current[pathAsString(path)] = value;
     },
     [settingsRef]
+  );
+
+  const getMergedSettings = useCallback(
+    (path: Path) => {
+      const localSettings = getSettings(path);
+      const result: MergedItemSettings = {
+        distributionPlotSettings: {
+          ...distributionPlotSettings,
+          ...(localSettings.distributionPlotSettings || {}),
+        },
+        chartSettings: {
+          ...chartSettings,
+          ...(localSettings.chartSettings || {}),
+        },
+        environment: {
+          ...environment,
+          ...(localSettings.environment || {}),
+        },
+      };
+      return result;
+    },
+    [distributionPlotSettings, chartSettings, environment, getSettings]
   );
 
   return (
@@ -59,6 +83,7 @@ export const SquiggleViewer: React.FC<Props> = ({
       value={{
         getSettings,
         setSettings,
+        getMergedSettings,
       }}
     >
       {result.tag === "Ok" ? (
@@ -67,9 +92,6 @@ export const SquiggleViewer: React.FC<Props> = ({
           expression={result.value}
           width={width}
           height={height}
-          distributionPlotSettings={distributionPlotSettings}
-          chartSettings={chartSettings}
-          environment={environment}
         />
       ) : (
         <SquiggleErrorAlert error={result.value} />

@@ -15,12 +15,12 @@ interface Props {
 }
 
 export const Tooltip: React.FC<Props> = ({ text, children }) => {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { x, y, reference, floating, strategy, context } = useFloating({
     placement: "top",
-    open,
-    onOpenChange: setOpen,
+    open: isOpen,
+    onOpenChange: setIsOpen,
     middleware: [shift()],
   });
 
@@ -37,7 +37,7 @@ export const Tooltip: React.FC<Props> = ({ text, children }) => {
         getReferenceProps({ ref: reference, ...children.props })
       )}
       <AnimatePresence>
-        {open && (
+        {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
