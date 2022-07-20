@@ -71,14 +71,14 @@ let library = [
     (),
   ),
   Function.make(
-    ~name="maked",
+    ~name="fromDist",
     ~nameSpace,
-    ~requiresNamespace,
-    ~examples=[`Pointset.maked(normal(5,2))`],
+    ~requiresNamespace=true,
+    ~examples=[`PointSet.fromDist(normal(5,2))`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
-        ~name="maked",
+        ~name="fromDist",
         ~inputs=[FRTypeDist],
         ~run=(_, inputs, env, _) =>
           switch inputs {

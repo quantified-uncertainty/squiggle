@@ -13,36 +13,27 @@ Monte Carlo calculations typically result in sample set distributions.
 
 All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.
 
-### make
-
+### fromDist
 ```
-SampleSet.make: (distribution) => sampleSet
-SampleSet.make: (list<number>) => sampleSet
-SampleSet.make: (() => number) => sampleSet // not yet implemented
+Sampleset.fromDist: (list<number>) => sampleSet
 ```
 
-### map
-
+### fromList
 ```
-SampleSet.map: (sampleSet, (number => number)) => sampleSet
-```
-
-### map2
-
-```
-SampleSet.map2: (sampleSet, sampleSet, ((number, number) => number)) => sampleSet
+Sampleset.fromList: (list<number>) => sampleSet
 ```
 
-### map3
+### fromFn  
 
+(Not yet implemented)
 ```
-SampleSet.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => number)) => sampleSet
+Sampleset.fromFn: (() => number) => sampleSet
 ```
 
 ### toList
 
 ```
-SampleSet.toList: (sampleSet) => list<number>
+Sampleset.toList: (sampleSet) => list<number>
 ```
 
 Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length.
@@ -51,4 +42,22 @@ Gets the internal samples of a sampleSet distribution. This is separate from the
 
 ```
 toList(toSampleSet(normal(5,2)))
+```
+
+### map
+
+```
+Sampleset.map: (sampleSet, (number => number)) => sampleSet
+```
+
+### map2
+
+```
+Sampleset.map2: (sampleSet, sampleSet, ((number, number) => number)) => sampleSet
+```
+
+### map3
+
+```
+Sampleset.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => number)) => sampleSet
 ```

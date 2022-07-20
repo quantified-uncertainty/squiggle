@@ -7,12 +7,12 @@ Point set distributions are one of the three distribution formats. They are stor
 
 One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.
 
-### make
+### fromDist
 
 Converts the distribution in question into a point set distribution. If the distribution is symbolic, then it does this by taking the quantiles. If the distribution is a sample set, then it uses a version of kernel density estimation to approximate the point set format. One complication of this latter process is that if there is a high proportion of overlapping samples (samples that are exactly the same as each other), it will convert these samples into discrete point masses. Eventually we'd like to add further methods to help adjust this process.
 
 ```
-PointSet.make: (distribution) => pointSetDist
+PointSet.fromDist: (distribution) => pointSetDist
 ```
 
 ### makeContinuous

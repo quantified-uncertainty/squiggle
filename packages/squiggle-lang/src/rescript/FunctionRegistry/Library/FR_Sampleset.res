@@ -66,14 +66,14 @@ module Internal = {
 
 let library = [
   Function.make(
-    ~name="maker",
+    ~name="fromDist",
     ~nameSpace,
-    ~requiresNamespace,
-    ~examples=[`Sampleset.maker(normal(5,2))`],
+    ~requiresNamespace=true,
+    ~examples=[`Sampleset.fromDist(normal(5,2))`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
-        ~name="maker",
+        ~name="fromDist",
         ~inputs=[FRTypeDist],
         ~run=(_, inputs, env, _) =>
           switch inputs {
