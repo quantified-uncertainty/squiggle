@@ -131,7 +131,8 @@ export type squiggleExpression =
   | tagged<"record", { [key: string]: squiggleExpression }>
   | tagged<"type", { [key: string]: squiggleExpression }>
   | tagged<"typeIdentifier", string>
-  | tagged<"module", { [key: string]: squiggleExpression }>;
+  | tagged<"module", { [key: string]: squiggleExpression }>
+  | tagged<"void", string>;
 
 export { lambdaValue };
 
