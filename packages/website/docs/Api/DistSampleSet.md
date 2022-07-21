@@ -62,5 +62,5 @@ SampleSet.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => n
 ### mapN
 
 ```
-Sampleset.mapN: (list<sampleSet>, (list<sampleSet> => number)) => sampleSet
+SampleSet.mapN: (list<sampleSet>, (list<sampleSet> => number)) => sampleSet
 ```
