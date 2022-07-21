@@ -30,7 +30,7 @@ let library = [
             ("prior", FRTypeDist),
           ]),
         ],
-        ~run=(_, inputs, env) => {
+        ~run=(_, inputs, env, _) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(inputs) {
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d)), FRValueDist(prior)]) =>
             runScoring(estimate, Score_Dist(d), Some(prior), env)
@@ -49,7 +49,7 @@ let library = [
       FnDefinition.make(
         ~name="logScore",
         ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
-        ~run=(_, inputs, env) => {
+        ~run=(_, inputs, env, _) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(inputs) {
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d))]) =>
             runScoring(estimate, Score_Dist(d), None, env)
@@ -74,7 +74,7 @@ let library = [
       FnDefinition.make(
         ~name="klDivergence",
         ~inputs=[FRTypeDist, FRTypeDist],
-        ~run=(_, inputs, env) => {
+        ~run=(_, inputs, env, _) => {
           switch inputs {
           | [FRValueDist(estimate), FRValueDist(d)] =>
             runScoring(estimate, Score_Dist(d), None, env)

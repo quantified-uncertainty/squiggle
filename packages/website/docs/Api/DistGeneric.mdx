@@ -364,6 +364,26 @@ klDivergence: (distribution, distribution) => number
 klDivergence(normal(5, 2), normal(5, 4)); // returns 0.57
 ```
 
+### logScore
+
+A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
+
+Note that it is fairly slow.
+
+```
+logScore: ({estimate: distribution, ?prior: distribution, answer: distribution|number}) => number
+```
+
+**Examples**
+
+```javascript
+Dist.logScore({
+  estimate: normal(5, 2),
+  answer: normal(4.5, 1.2),
+  prior: normal(6, 4),
+}); // returns -0.597.57
+```
+
 ## Display
 
 ### toString
@@ -414,7 +434,7 @@ The only functions that do not return normalized distributions are the pointwise
 
 ### normalize
 
-Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1.
+Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1. This only impacts Pointset distributions, because those are the only ones that can be non-normlized.
 
 ```
 normalize: (distribution) => distribution
@@ -605,76 +625,4 @@ dotPow: (distributionLike, distributionLike) => distribution
 
 ```
 dotExp: (distributionLike, distributionLike) => distribution
-```
-
-## Scale Arithmetic Operations
-
-<Admonition type="caution" title="Likely to change">
-  <p>
-    We're planning on removing scale operations in favor of more general
-    functions soon.
-  </p>
-</Admonition>
-
-Scale operations are similar to pointwise operations, but operate on a constant y-value instead of y-values coming from a distribution. You can think about this as scaling a distribution vertically by a constant.
-
-The following items would be equivalent.
-
-```js
-scalePow(normal(5,2), 2)
-mapY(normal(5,2), {|y| y ^ 2}) // Not yet available
-```
-
-### scaleMultiply
-
-```
-scaleMultiply: (distributionLike, number) => distribution
-```
-
-### scalePow
-
-```
-scalePow: (distributionLike, number) => distribution
-```
-
-### scaleExp
-
-```
-scaleExp: (distributionLike, number) => distribution
-```
-
-### scaleLog
-
-```
-scaleLog: (distributionLike, number) => distribution
-```
-
-### scaleLog10
-
-```
-scaleLog10: (distributionLike, number) => distribution
-```
-
-## Special
-
-### Declaration (Continuous Functions)
-
-Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making formal predictions. It allows you to limit the domain that your prediction will be used and scored within.
-
-Declarations are currently experimental and will likely be removed or changed in the future.
-
-```
-declareFn: (dict<{fn: lambda, inputs: array<dict<{min: number, max: number}>>}>) => declaration
-```
-
-**Examples**
-
-```javascript
-declareFn({
-  fn: {|a,b| a },
-  inputs: [
-    {min: 0, max: 100},
-    {min: 30, max: 50}
-  ]
-})
 ```

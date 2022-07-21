@@ -51,7 +51,7 @@ let library = [
       FnDefinition.make(
         ~name="declare",
         ~inputs=[Declaration.frType],
-        ~run=(_, inputs, _) => {
+        ~run=(_, inputs, _, _) => {
           inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
         },
         (),

@@ -20,6 +20,7 @@
     "test:ts": "jest __tests__/TS/",
     "test:rescript": "jest --modulePathIgnorePatterns=__tests__/TS/*",
     "test:watch": "jest --watchAll",
+    "test:fnRegistry": "jest __tests__/SquiggleLibrary/SquiggleLibrary_FunctionRegistryLibrary_test.bs.js",
     "coverage:rescript": "rm -f *.coverage && yarn clean && BISECT_ENABLE=yes yarn build && yarn test:rescript && bisect-ppx-report html",
     "coverage:ts": "yarn clean && yarn build && nyc --reporter=lcov yarn test:ts",
     "coverage:rescript:ci": "yarn clean && BISECT_ENABLE=yes yarn build:rescript && yarn test:rescript && bisect-ppx-report send-to Codecov",

@@ -95,33 +95,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
   let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
 
-  let doKeepArray = (aValueArray, aLambdaValue) => {
-    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
-      rAcc->Result.flatMap(acc => {
-        let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
-        rNewElem->Result.map(newElem =>
-          switch newElem {
-          | IEvBool(true) => list{elem, ...acc}
-          | _ => acc
-          }
-        )
-      })
-    )
-    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->IEvArray)
-  }
-
-  let doMapArray = (aValueArray, aLambdaValue) => {
-    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
-      rAcc->Result.flatMap(acc => {
-        let rNewElem = Lambda.doLambdaCall(aLambdaValue, list{elem}, environment, reducer)
-        rNewElem->Result.map(newElem => list{newElem, ...acc})
-      })
-    )
-    rMappedList->Result.map(mappedList => mappedList->Belt.List.toArray->IEvArray)
-  }
-
   module SampleMap = {
-    type t = SampleSetDist.t
     let doLambdaCall = (aLambdaValue, list) =>
       switch Lambda.doLambdaCall(aLambdaValue, list, environment, reducer) {
       | Ok(IEvNumber(f)) => Ok(f)
@@ -133,22 +107,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
       | Ok(r) => Ok(IEvDistribution(SampleSet(r)))
       | Error(r) => Error(REDistributionError(SampleSetError(r)))
       }
-
-    let map1 = (sampleSetDist: t, aLambdaValue) => {
-      let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)})
-      toType(SampleSetDist.samplesMap(~fn, sampleSetDist))
-    }
-
-    let map2 = (t1: t, t2: t, aLambdaValue) => {
-      let fn = (a, b) => doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b)})
-      SampleSetDist.map2(~fn, ~t1, ~t2)->toType
-    }
-
-    let map3 = (t1: t, t2: t, t3: t, aLambdaValue) => {
-      let fn = (a, b, c) =>
-        doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b), IEvNumber(c)})
-      SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
-    }
 
     let parseSampleSetArray = (arr: array<internalExpressionValue>): option<
       array<SampleSetDist.t>,
@@ -170,22 +128,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
         Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString))
       }
     }
-  }
-
-  let doReduceArray = (aValueArray, initialValue, aLambdaValue) => {
-    aValueArray->Belt.Array.reduce(Ok(initialValue), (rAcc, elem) =>
-      rAcc->Result.flatMap(acc =>
-        Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, environment, reducer)
-      )
-    )
-  }
-
-  let doReduceReverseArray = (aValueArray, initialValue, aLambdaValue) => {
-    aValueArray->Belt.Array.reduceReverse(Ok(initialValue), (rAcc, elem) =>
-      rAcc->Result.flatMap(acc =>
-        Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, environment, reducer)
-      )
-    )
   }
 
   switch call {
@@ -226,38 +168,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
     doAddString(aValueString, bValueString)
   | ("inspect", [value, IEvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
-  | ("filter", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
-    doKeepArray(aValueArray, aLambdaValue)
-  | ("map", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
-    doMapArray(aValueArray, aLambdaValue)
-  | ("mapSamples", [IEvDistribution(SampleSet(dist)), IEvLambda(aLambdaValue)]) =>
-    SampleMap.map1(dist, aLambdaValue)
-  | (
-      "mapSamples2",
-      [
-        IEvDistribution(SampleSet(dist1)),
-        IEvDistribution(SampleSet(dist2)),
-        IEvLambda(aLambdaValue),
-      ],
-    ) =>
-    SampleMap.map2(dist1, dist2, aLambdaValue)
-  | (
-      "mapSamples3",
-      [
-        IEvDistribution(SampleSet(dist1)),
-        IEvDistribution(SampleSet(dist2)),
-        IEvDistribution(SampleSet(dist3)),
-        IEvLambda(aLambdaValue),
-      ],
-    ) =>
-    SampleMap.map3(dist1, dist2, dist3, aLambdaValue)
-  | ("mapSamplesN", [IEvArray(aValueArray), IEvLambda(aLambdaValue)]) =>
-    SampleMap.mapN(aValueArray, aLambdaValue)
-  | ("reduce", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
-    doReduceArray(aValueArray, initialValue, aLambdaValue)
-  | ("reduceReverse", [IEvArray(aValueArray), initialValue, IEvLambda(aLambdaValue)]) =>
-    doReduceReverseArray(aValueArray, initialValue, aLambdaValue)
-  | ("reverse", [IEvArray(aValueArray)]) => aValueArray->Belt.Array.reverse->IEvArray->Ok
   | (_, [IEvBool(_)])
   | (_, [IEvNumber(_)])
   | (_, [IEvString(_)])
