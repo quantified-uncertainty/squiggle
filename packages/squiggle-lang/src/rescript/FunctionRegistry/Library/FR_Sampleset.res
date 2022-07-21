@@ -28,8 +28,8 @@ module Internal = {
     reducer,
   ) => {
     let sampleCount = env.sampleCount
-    let fn = (r) => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, env, reducer)
-    Belt_Array.makeBy(sampleCount, (r) => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
+    let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, env, reducer)
+    Belt_Array.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
   }
 
   let map1 = (sampleSetDist: t, aLambdaValue, env, reducer) => {
@@ -125,7 +125,7 @@ let library = [
   Function.make(
     ~name="toList",
     ~nameSpace,
-    ~requiresNamespace=false,
+    ~requiresNamespace=true,
     ~examples=[`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
     ~output=ReducerInterface_InternalExpressionValue.EvtArray,
     ~definitions=[
@@ -146,9 +146,9 @@ let library = [
   Function.make(
     ~name="fromFn",
     ~nameSpace,
-    ~requiresNamespace=false,
-    ~examples=[`SampleSet.fromFn(sample(normal(5,2)))`],
-    ~output=ReducerInterface_InternalExpressionValue.EvtArray,
+    ~requiresNamespace=true,
+    ~examples=[`SampleSet.fromFn({|| sample(normal(5,2))})`],
+    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="fromFn",

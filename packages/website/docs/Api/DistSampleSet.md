@@ -3,10 +3,6 @@ sidebar_position: 5
 title: Sample Set Distribution
 ---
 
-:::danger
-These functions aren't yet implemented with these specific names. This should be added soon.
-:::
-
 Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers. It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
 
 Monte Carlo calculations typically result in sample set distributions.
@@ -25,9 +21,8 @@ Sampleset.fromList: (list<number>) => sampleSet
 
 ### fromFn  
 
-(Not yet implemented)
 ```
-Sampleset.fromFn: (() => number) => sampleSet
+Sampleset.fromFn: ((float) => number) => sampleSet
 ```
 
 ### toList
@@ -60,4 +55,10 @@ Sampleset.map2: (sampleSet, sampleSet, ((number, number) => number)) => sampleSe
 
 ```
 Sampleset.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => number)) => sampleSet
+```
+
+### mapN
+
+```
+Sampleset.mapN: (list<sampleSet>, (list<sampleSet> => number)) => sampleSet
 ```

@@ -68,7 +68,7 @@ describe("FunctionRegistry Library", () => {
       "Ok([2,3,4,5,6,7])",
     )
     testEvalToBe(
-      "toList(SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
+      "SampleSet.toList(SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
       "Ok([6,5,4,4,5,6])",
     )
   })

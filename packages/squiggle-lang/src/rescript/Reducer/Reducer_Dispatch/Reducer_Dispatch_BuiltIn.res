@@ -96,7 +96,6 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
 
   module SampleMap = {
-    type t = SampleSetDist.t
     let doLambdaCall = (aLambdaValue, list) =>
       switch Lambda.doLambdaCall(aLambdaValue, list, environment, reducer) {
       | Ok(IEvNumber(f)) => Ok(f)

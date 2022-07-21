@@ -170,7 +170,6 @@ module FRType = {
     inputs: array<t>,
     args: array<internalExpressionValue>,
   ): option<array<frValue>> => {
-    // Js.log3("Matching", inputs, args)
     let isSameLength = E.A.length(inputs) == E.A.length(args)
     if !isSameLength {
       None
@@ -186,6 +185,9 @@ module FRType = {
   This module, Matcher, is fairly lengthy. However, only two functions from it
   are meant to be used outside of it. These are findMatches and matchToDef in Matches.Registry.
   The rest of it is just called from those two functions.
+
+  Update: This really should be completely re-done sometime, and tested. It works, but it's pretty messy. I'm sure
+  there are internal bugs, but the end functionality works, so I'm not too worried.
 */
 module Matcher = {
   module MatchSimple = {
@@ -243,11 +245,11 @@ module Matcher = {
 
     let match = (
       f: function,
-      namespace: option<string>,
+      nameSpace: option<string>,
       fnName: string,
       args: array<internalExpressionValue>,
     ): match => {
-      switch namespace {
+      switch nameSpace {
       | Some(ns) if ns !== f.nameSpace => Match.DifferentName
       | _ => {
           let matchedDefinition = () =>
@@ -280,12 +282,12 @@ module Matcher = {
 
   module RegistryMatch = {
     type match = {
-      namespace: string,
+      nameSpace: string,
       fnName: string,
       inputIndex: int,
     }
-    let makeMatch = (namespace: string, fnName: string, inputIndex: int) => {
-      namespace: namespace,
+    let makeMatch = (nameSpace: string, fnName: string, inputIndex: int) => {
+      nameSpace: nameSpace,
       fnName: fnName,
       inputIndex: inputIndex,
     }
@@ -294,12 +296,12 @@ module Matcher = {
   module Registry = {
     let _findExactMatches = (
       r: registry,
-      namespace: option<string>,
+      nameSpace: option<string>,
       fnName: string,
       args: array<internalExpressionValue>,
     ) => {
       let functionMatchPairs =
-        r.functions->E.A2.fmap(l => (l, Function.match(l, namespace, fnName, args)))
+        r.functions->E.A2.fmap(l => (l, Function.match(l, nameSpace, fnName, args)))
       let fullMatch = functionMatchPairs->E.A.getBy(((_, match)) => Match.isFullMatch(match))
       fullMatch->E.O.bind(((fn, match)) =>
         switch match {
@@ -311,12 +313,12 @@ module Matcher = {
 
     let _findNameMatches = (
       r: registry,
-      namespace: option<string>,
+      nameSpace: option<string>,
       fnName: string,
       args: array<internalExpressionValue>,
     ) => {
       let functionMatchPairs =
-        r.functions->E.A2.fmap(l => (l, Function.match(l, namespace, fnName, args)))
+        r.functions->E.A2.fmap(l => (l, Function.match(l, nameSpace, fnName, args)))
       let getNameMatches =
         functionMatchPairs
         ->E.A2.fmap(((fn, match)) => Match.isNameMatchOnly(match) ? Some((fn, match)) : None)
@@ -351,11 +353,11 @@ module Matcher = {
 
     let matchToDef = (
       registry: registry,
-      {namespace, fnName, inputIndex}: RegistryMatch.match,
+      {nameSpace, fnName, inputIndex}: RegistryMatch.match,
     ): option<fnDefinition> =>
       registry.functions
       ->E.A.getBy(fn => {
-        namespace === fn.nameSpace && fnName === fn.name
+        nameSpace === fn.nameSpace && fnName === fn.name
       })
       ->E.O.bind(fn => E.A.get(fn.definitions, inputIndex))
   }
@@ -507,8 +509,6 @@ module Registry = {
         ->E.A2.joinWith("; ")
       `There are function matches for ${fnName}(), but with different arguments: ${defs}`
     }
-
-    // let match = Matcher.Registry.findMatches(modified, fnName, args); Js.log2("Match", match)
 
     switch Matcher.Registry.findMatches(modified, fnName, args) {
     | Matcher.Match.FullMatch(match) =>
