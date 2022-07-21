@@ -12,25 +12,25 @@ All regular distribution function work on sample set distributions. In addition,
 ### fromDist
 
 ```
-Sampleset.fromDist: (list<number>) => sampleSet
+SampleSet.fromDist: (list<number>) => sampleSet
 ```
 
 ### fromList
 
 ```
-Sampleset.fromList: (list<number>) => sampleSet
+SampleSet.fromList: (list<number>) => sampleSet
 ```
 
 ### fromFn
 
 ```
-Sampleset.fromFn: ((float) => number) => sampleSet
+SampleSet.fromFn: ((float) => number) => sampleSet
 ```
 
 ### toList
 
 ```
-Sampleset.toList: (sampleSet) => list<number>
+SampleSet.toList: (sampleSet) => list<number>
 ```
 
 Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length.
@@ -44,19 +44,19 @@ toList(toSampleSet(normal(5,2)))
 ### map
 
 ```
-Sampleset.map: (sampleSet, (number => number)) => sampleSet
+SampleSet.map: (sampleSet, (number => number)) => sampleSet
 ```
 
 ### map2
 
 ```
-Sampleset.map2: (sampleSet, sampleSet, ((number, number) => number)) => sampleSet
+SampleSet.map2: (sampleSet, sampleSet, ((number, number) => number)) => sampleSet
 ```
 
 ### map3
 
 ```
-Sampleset.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => number)) => sampleSet
+SampleSet.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => number)) => sampleSet
 ```
 
 ### mapN
