@@ -377,7 +377,11 @@ logScore: ({estimate: distribution, ?prior: distribution, answer: distribution|n
 **Examples**
 
 ```javascript
-Dist.logScore({estimate: normal(5, 2), answer: normal(4.5, 1.2), prior: normal(6,4)}); // returns -0.597.57
+Dist.logScore({
+  estimate: normal(5, 2),
+  answer: normal(4.5, 1.2),
+  prior: normal(6, 4),
+}); // returns -0.597.57
 ```
 
 ## Display

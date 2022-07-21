@@ -10,16 +10,18 @@ Monte Carlo calculations typically result in sample set distributions.
 All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.
 
 ### fromDist
+
 ```
 Sampleset.fromDist: (list<number>) => sampleSet
 ```
 
 ### fromList
+
 ```
 Sampleset.fromList: (list<number>) => sampleSet
 ```
 
-### fromFn  
+### fromFn
 
 ```
 Sampleset.fromFn: ((float) => number) => sampleSet
