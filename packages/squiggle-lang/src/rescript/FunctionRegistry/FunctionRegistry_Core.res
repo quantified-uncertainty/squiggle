@@ -280,11 +280,11 @@ module Matcher = {
 
   module RegistryMatch = {
     type match = {
-      namespace: option<string>,
+      namespace: string,
       fnName: string,
       inputIndex: int,
     }
-    let makeMatch = (namespace: option<string>, fnName: string, inputIndex: int) => {
+    let makeMatch = (namespace: string, fnName: string, inputIndex: int) => {
       namespace: namespace,
       fnName: fnName,
       inputIndex: inputIndex,
@@ -303,7 +303,7 @@ module Matcher = {
       let fullMatch = functionMatchPairs->E.A.getBy(((_, match)) => Match.isFullMatch(match))
       fullMatch->E.O.bind(((fn, match)) =>
         switch match {
-        | FullMatch(index) => Some(RegistryMatch.makeMatch(namespace, fn.name, index))
+        | FullMatch(index) => Some(RegistryMatch.makeMatch(fn.nameSpace, fn.name, index))
         | _ => None
         }
       )
@@ -326,7 +326,7 @@ module Matcher = {
         ->E.A2.fmap(((fn, match)) =>
           switch match {
           | SameNameDifferentArguments(indexes) =>
-            indexes->E.A2.fmap(index => RegistryMatch.makeMatch(namespace, fn.name, index))
+            indexes->E.A2.fmap(index => RegistryMatch.makeMatch(fn.nameSpace, fn.name, index))
           | _ => []
           }
         )
@@ -355,10 +355,7 @@ module Matcher = {
     ): option<fnDefinition> =>
       registry.functions
       ->E.A.getBy(fn => {
-        switch namespace {
-        | Some(ns) => ns === fn.nameSpace && fnName === fn.name
-        | _ => fnName === fn.name
-        }
+        namespace === fn.nameSpace && fnName === fn.name
       })
       ->E.O.bind(fn => E.A.get(fn.definitions, inputIndex))
   }
@@ -511,7 +508,7 @@ module Registry = {
       `There are function matches for ${fnName}(), but with different arguments: ${defs}`
     }
 
-    let match = Matcher.Registry.findMatches(modified, fnName, args)
+    // let match = Matcher.Registry.findMatches(modified, fnName, args); Js.log2("Match", match)
 
     switch Matcher.Registry.findMatches(modified, fnName, args) {
     | Matcher.Match.FullMatch(match) =>
