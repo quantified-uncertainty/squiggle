@@ -290,38 +290,6 @@ quantile: (distribution, number) => number
 quantile(normal(5, 2), 0.5);
 ```
 
-### toPointSet
-
-**TODO: Will soon be called "PointSet.make"**
-
-Converts a distribution to the pointSet format.
-
-```
-toPointSet: (distribution) => pointSetDistribution
-```
-
-**Examples**
-
-```javascript
-toPointSet(normal(5, 2));
-```
-
-### toSampleSet
-
-**TODO: Will soon be called "SampleSet.make"**
-
-Converts a distribution to the sampleSet format, with n samples.
-
-```
-toSampleSet: (distribution, number) => sampleSetDistribution
-```
-
-**Examples**
-
-```javascript
-toSampleSet(normal(5, 2), 1000);
-```
-
 ### truncateLeft
 
 Truncates the left side of a distribution. Returns either a pointSet distribution or a symbolic distribution.
@@ -410,20 +378,6 @@ sparkline: (distribution, n = 20) => string
 
 ```javascript
 toSparkline(truncateLeft(normal(5, 2), 3), 20); // produces ▁▇█████▇▅▄▃▂▂▁▁▁▁▁▁▁
-```
-
-### inspect
-
-Prints the value of the distribution to the Javascript console, then returns the distribution. Useful for debugging.
-
-```
-inspect: (distribution) => distribution
-```
-
-**Examples**
-
-```javascript
-inspect(normal(5, 2)); // logs "normal(5, 2)" to the javascript console and returns the distribution.
 ```
 
 ## Normalization
