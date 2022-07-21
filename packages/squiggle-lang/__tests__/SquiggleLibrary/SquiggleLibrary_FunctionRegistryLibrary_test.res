@@ -60,14 +60,14 @@ describe("FunctionRegistry Library", () => {
     )
     testEvalToBe("Dist.logScore({estimate: normal(5,2), answer: 4.5})", "Ok(1.6433360626394853)")
     testEvalToBe("Dist.klDivergence(normal(5,2), normal(5,1.5))", "Ok(0.06874342818671068)")
-    testEvalToBe("Sampleset.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
-    testEvalToBe("Sampleset.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
+    testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
+    testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
     testEvalToBe(
-      "addOne(t)=t+1; Sampleset.toList(Sampleset.map(Sampleset.fromList([1,2,3,4,5,6]), addOne))",
+      "addOne(t)=t+1; SampleSet.toList(SampleSet.map(SampleSet.fromList([1,2,3,4,5,6]), addOne))",
       "Ok([2,3,4,5,6,7])",
     )
     testEvalToBe(
-      "toList(Sampleset.mapN([Sampleset.fromList([1,2,3,4,5,6]), Sampleset.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
+      "toList(SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
       "Ok([6,5,4,4,5,6])",
     )
   })

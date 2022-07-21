@@ -1,7 +1,7 @@
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
 
-let nameSpace = "Sampleset"
+let nameSpace = "SampleSet"
 let requiresNamespace = true
 
 module Internal = {
@@ -69,7 +69,7 @@ let library = [
     ~name="fromDist",
     ~nameSpace,
     ~requiresNamespace=true,
-    ~examples=[`Sampleset.fromDist(normal(5,2))`],
+    ~examples=[`SampleSet.fromDist(normal(5,2))`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
@@ -93,7 +93,7 @@ let library = [
     ~name="fromList",
     ~nameSpace,
     ~requiresNamespace=true,
-    ~examples=[`Sampleset.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
+    ~examples=[`SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
@@ -115,7 +115,7 @@ let library = [
     ~name="toList",
     ~nameSpace,
     ~requiresNamespace=false,
-    ~examples=[`Sampleset.toList(Sampleset.fromDist(normal(5,2)))`],
+    ~examples=[`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
     ~output=ReducerInterface_InternalExpressionValue.EvtArray,
     ~definitions=[
       FnDefinition.make(
@@ -136,7 +136,7 @@ let library = [
     ~name="map",
     ~nameSpace,
     ~requiresNamespace,
-    ~examples=[`Sampleset.map(Sampleset.fromDist(normal(5,2)), {|x| x + 1})`],
+    ~examples=[`SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
@@ -158,7 +158,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Sampleset.map2(Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2)), {|x, y| x + y})`,
+      `SampleSet.map2(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), {|x, y| x + y})`,
     ],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
@@ -186,7 +186,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Sampleset.map3(Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2)), {|x, y, z| max([x,y,z])})`,
+      `SampleSet.map3(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), {|x, y, z| max([x,y,z])})`,
     ],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
@@ -214,7 +214,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Sampleset.mapN([Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2)), Sampleset.fromDist(normal(5,2))], {|x| max(x)})`,
+      `SampleSet.mapN([SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2))], {|x| max(x)})`,
     ],
     ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
     ~definitions=[
