@@ -62,6 +62,7 @@ describe("FunctionRegistry Library", () => {
     testEvalToBe("Dist.klDivergence(normal(5,2), normal(5,1.5))", "Ok(0.06874342818671068)")
     testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
     testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
+    testEvalToBe("SampleSet.fromFn({|| sample(normal(5,2))})", "Ok(Sample Set Distribution)")
     testEvalToBe(
       "addOne(t)=t+1; SampleSet.toList(SampleSet.map(SampleSet.fromList([1,2,3,4,5,6]), addOne))",
       "Ok([2,3,4,5,6,7])",

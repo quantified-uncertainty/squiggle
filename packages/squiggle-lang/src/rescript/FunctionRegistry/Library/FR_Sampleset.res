@@ -21,6 +21,17 @@ module Internal = {
     | Error(r) => Error(REDistributionError(SampleSetError(r)))
     }
 
+  //TODO: I don't know why this seems to need at least one input
+  let fromFn = (
+    aLambdaValue,
+    env: ReducerInterface_InternalExpressionValue.environment,
+    reducer,
+  ) => {
+    let sampleCount = env.sampleCount
+    let fn = (r) => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, env, reducer)
+    Belt_Array.makeBy(sampleCount, (r) => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
+  }
+
   let map1 = (sampleSetDist: t, aLambdaValue, env, reducer) => {
     let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, env, reducer)
     SampleSetDist.samplesMap(~fn, sampleSetDist)->toType
@@ -125,6 +136,30 @@ let library = [
           switch inputs {
           | [IEvDistribution(SampleSet(dist))] =>
             dist->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+          | _ => Error(impossibleError)
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="fromFn",
+    ~nameSpace,
+    ~requiresNamespace=false,
+    ~examples=[`SampleSet.fromFn(sample(normal(5,2)))`],
+    ~output=ReducerInterface_InternalExpressionValue.EvtArray,
+    ~definitions=[
+      FnDefinition.make(
+        ~name="fromFn",
+        ~inputs=[FRTypeLambda],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [IEvLambda(lambda)] =>
+            switch Internal.fromFn(lambda, env, reducer) {
+            | Ok(r) => Ok(r->Wrappers.sampleSet->Wrappers.evDistribution)
+            | Error(_) => Error("issue")
+            }
           | _ => Error(impossibleError)
           },
         (),
