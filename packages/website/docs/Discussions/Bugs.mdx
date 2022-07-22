@@ -31,6 +31,6 @@ The means of sample set distributions can vary dramatically, especially as the n
 
 <SquiggleEditor
   defaultCode={`symbolicDist = 5 to 50333333
-sampleSetDist = toSampleSet(symbolicDist)
+sampleSetDist = SampleSet.fromDist(symbolicDist)
 [mean(symbolicDist), mean(sampleSetDist), symbolicDist, sampleSetDist]`}
 />

@@ -208,21 +208,15 @@ The `sample(distribution)` samples a given distribution.
 
 Recall the [three formats of distributions](https://develop--squiggle-documentation.netlify.app/docs/Discussions/Three-Types-Of-Distributions). We can force any distribution into `SampleSet` format
 
-<SquiggleEditor defaultCode="toSampleSet(normal(5, 10))" />
+<SquiggleEditor defaultCode="PointSet.fromDist(normal(5, 10))" />
 
 Or `PointSet` format
 
-<SquiggleEditor defaultCode="toPointSet(normal(5, 10))" />
-
-### `toSampleSet` has two signatures
-
-Above, we saw the unary `toSampleSet`, which uses an internal hardcoded number of samples. If you'd like to provide the number of samples, it has a binary signature as well (floored)
-
-<SquiggleEditor defaultCode="[toSampleSet(0.1 to 1, 100.1), toSampleSet(0.1 to 1, 5000), toSampleSet(0.1 to 1, 20000)]" />
+<SquiggleEditor defaultCode="PointSet.fromDist(normal(5, 10))" />
 
 #### Validity
 
-- Second argument to `toSampleSet` must be a number.
+- Second argument to `SampleSet.fromDist` must be a number.
 
 ## Normalization
 
@@ -246,7 +240,7 @@ We provide a predicate `isNormalized`, for when we have simple control flow
 
 You may like to debug by right clicking your browser and using the _inspect_ functionality on the webpage, and viewing the _console_ tab. Then, wrap your squiggle output with `inspect` to log an internal representation.
 
-<SquiggleEditor defaultCode="inspect(toSampleSet(0.1 to 1, 100))" />
+<SquiggleEditor defaultCode="inspect(SampleSet.fromDist(0.1 to 1))" />
 
 Save for a logging side effect, `inspect` does nothing to input and returns it.
 

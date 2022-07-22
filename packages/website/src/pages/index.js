@@ -13,10 +13,9 @@ function HomepageHeader() {
       <div className="container">
         <h1 className="hero__title">{siteConfig.title}</h1>
         <p className="hero__subtitle">
-          <i>Early access</i>
+          Early Access
         </p>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}></div>
+        <p className="hero__subtitle2">{siteConfig.tagline}</p>
       </div>
     </header>
   );
