@@ -47,8 +47,8 @@ export default function PlaygroundPage() {
     ...hashData,
     onCodeChange: (code) => setHashData({ initialSquiggleString: code }),
     onSettingsChange: (settings) => {
-      const { showControls, showSummary, showEditor } = settings;
-      setHashData({ showControls, showSummary, showEditor });
+      const { showSummary, showEditor } = settings;
+      setHashData({ showSummary, showEditor });
     },
   };
   return (

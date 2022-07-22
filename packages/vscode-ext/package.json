@@ -105,11 +105,6 @@
     "configuration": {
       "title": "Squiggle",
       "properties": {
-        "squiggle.playground.showControls": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether to show the log scale controls in the playground"
-        },
         "squiggle.playground.showSummary": {
           "type": "boolean",
           "default": false,
