@@ -213,3 +213,7 @@ export function nodeTernary(
 export function nodeTypeIdentifier(typeValue: string) {
   return { type: "TypeIdentifier", value: typeValue };
 }
+
+export function nodeVoid() {
+  return { type: "Void" };
+}

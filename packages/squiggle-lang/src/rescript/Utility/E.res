@@ -546,6 +546,7 @@ module A = {
   let slice = Belt.Array.slice
   let init = Array.init
   let reduce = Belt.Array.reduce
+  let reduceReverse = Belt.Array.reduceReverse
   let reducei = Belt.Array.reduceWithIndex
   let some = Belt.Array.some
   let isEmpty = r => length(r) < 1

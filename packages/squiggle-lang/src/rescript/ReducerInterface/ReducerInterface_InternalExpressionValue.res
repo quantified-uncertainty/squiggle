@@ -23,6 +23,7 @@ type rec t =
   | IEvTimeDuration(float)
   | IEvType(map)
   | IEvTypeIdentifier(string)
+  | IEvVoid
 and map = Belt.Map.String.t<t>
 and nameSpace = NameSpace(Belt.Map.String.t<t>)
 and lambdaValue = {
@@ -60,6 +61,7 @@ let rec toString = aValue =>
   | IEvType(aMap) => aMap->toStringMap
   | IEvTimeDuration(t) => DateTime.Duration.toString(t)
   | IEvTypeIdentifier(id) => `#${id}`
+  | IEvVoid => `()`
   }
 and toStringMap = aMap => {
   let pairs =
@@ -92,6 +94,7 @@ let toStringWithType = aValue =>
   | IEvTimeDuration(_) => `Date::${toString(aValue)}`
   | IEvType(_) => `Type::${toString(aValue)}`
   | IEvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
+  | IEvVoid => `Void`
   }
 
 let argsToString = (args: array<t>): string => {
@@ -135,6 +138,7 @@ type internalExpressionValueType =
   | EvtTimeDuration
   | EvtType
   | EvtTypeIdentifier
+  | EvtVoid
 
 type functionCallSignature = CallSignature(string, array<internalExpressionValueType>)
 type functionDefinitionSignature =
@@ -158,6 +162,7 @@ let valueToValueType = value =>
   | IEvTimeDuration(_) => EvtTimeDuration
   | IEvType(_) => EvtType
   | IEvTypeIdentifier(_) => EvtTypeIdentifier
+  | IEvVoid => EvtVoid
   }
 
 let externalValueToValueType = (value: ExternalExpressionValue.t) =>
@@ -178,6 +183,7 @@ let externalValueToValueType = (value: ExternalExpressionValue.t) =>
   | EvTimeDuration(_) => EvtTimeDuration
   | EvType(_) => EvtType
   | EvTypeIdentifier(_) => EvtTypeIdentifier
+  | EvVoid => EvtVoid
   }
 
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
@@ -203,6 +209,7 @@ let valueTypeToString = (valueType: internalExpressionValueType): string =>
   | EvtTimeDuration => `Duration`
   | EvtType => `Type`
   | EvtTypeIdentifier => `TypeIdentifier`
+  | EvtVoid => `Void`
   }
 
 let functionCallSignatureToString = (functionCallSignature: functionCallSignature): string => {
@@ -232,6 +239,7 @@ let rec toExternal = (iev: t): ExternalExpressionValue.t => {
   | IEvType(v) => v->mapToExternal->EvType
   | IEvTypeIdentifier(v) => EvTypeIdentifier(v)
   | IEvBindings(v) => v->nameSpaceToTypeScriptBindings->EvModule
+  | IEvVoid => EvVoid
   }
 }
 and mapToExternal = v =>
@@ -271,6 +279,7 @@ let rec toInternal = (ev: ExternalExpressionValue.t): t => {
   | EvTimeDuration(v) => IEvTimeDuration(v)
   | EvType(v) => v->recordToInternal->IEvType
   | EvTypeIdentifier(v) => IEvTypeIdentifier(v)
+  | EvVoid => IEvVoid
   }
 }
 and recordToInternal = v =>

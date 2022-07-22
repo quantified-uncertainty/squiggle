@@ -48,5 +48,6 @@ let rec fromNode = (node: Parse.node): expression => {
     )
   | PgNodeTypeIdentifier(nodeTypeIdentifier) =>
     ExpressionBuilder.eTypeIdentifier(nodeTypeIdentifier["value"])
+  | PgNodeVoid(_) => ExpressionBuilder.eVoid
   }
 }

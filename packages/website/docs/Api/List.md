@@ -11,8 +11,6 @@ myList = [3, normal(5, 2), "random"];
 
 ### make
 
-**Note: currently just called `makeList`, without the preix**
-
 ```
 List.make: (number, 'a) => list<'a>
 ```
@@ -37,9 +35,7 @@ toString: (list<'a>) => string
 length: (list<'a>) => number
 ```
 
-### up to
-
-**Note: currently just called `upTo`, without the preix**
+### upTo
 
 ```
 List.upTo: (low:number, high:number) => list<number>

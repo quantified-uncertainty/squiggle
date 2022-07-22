@@ -154,6 +154,12 @@ export const ExpressionViewer: React.FC<Props> = ({
           {() => expression.value.toDateString()}
         </VariableBox>
       );
+    case "void":
+      return (
+        <VariableBox path={path} heading="Void">
+          {() => "Void"}
+        </VariableBox>
+      );
     case "timeDuration": {
       return (
         <VariableBox path={path} heading="Time Duration">
