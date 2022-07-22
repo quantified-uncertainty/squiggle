@@ -33,6 +33,7 @@ const ItemSettingsModal: React.FC<Props & { close: () => void }> = ({
   const { register, watch } = useForm({
     resolver: yupResolver(viewSettingsSchema),
     defaultValues: {
+      // this is a mess and should be fixed
       showEditor: true, // doesn't matter
       chartHeight: mergedSettings.height,
       showSummary: mergedSettings.distributionPlotSettings.showSummary,

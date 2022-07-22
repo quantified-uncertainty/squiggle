@@ -22,6 +22,9 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 }) => {
   const { setSettings, getSettings, getMergedSettings } =
     useContext(ViewerContext);
+
+  // Since ViewerContext doesn't keep the actual settings, VariableBox won't rerender when setSettings is called.
+  // So we use `forceUpdate` to force rerendering.
   const [_, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const settings = getSettings(path);

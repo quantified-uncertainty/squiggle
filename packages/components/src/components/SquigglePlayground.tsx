@@ -328,6 +328,8 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       <StyledTab.Panel>
         <ViewSettings
           register={
+            // This is dangerous, but doesn't cause any problems.
+            // I tried to make `ViewSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
             register as unknown as UseFormRegister<
               yup.InferType<typeof viewSettingsSchema>
             >
