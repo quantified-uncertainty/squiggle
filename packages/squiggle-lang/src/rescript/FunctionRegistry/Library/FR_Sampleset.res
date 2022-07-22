@@ -259,7 +259,7 @@ let library = [
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(dists), IEvLambda(lambda)] =>
-            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(e => {
+            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(_e => {
               "AHHH doesn't work"
             })
           | _ => Error(impossibleError)
