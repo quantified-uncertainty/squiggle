@@ -236,7 +236,7 @@ export const ExpressionViewer: React.FC<Props> = ({
         <VariableList path={path} heading="Module">
           {(settings) =>
             Object.entries(expression.value)
-              .filter(([key, r]) => key !== "Math")
+              .filter(([key, r]) => !key.match(/^(Math|System)\./))
               .map(([key, r]) => (
                 <ExpressionViewer
                   key={key}
