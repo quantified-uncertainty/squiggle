@@ -72,10 +72,11 @@ export const SquiggleViewer: React.FC<Props> = ({
           ...environment,
           ...(localSettings.environment || {}),
         },
+        height: localSettings.height || height,
       };
       return result;
     },
-    [distributionPlotSettings, chartSettings, environment, getSettings]
+    [distributionPlotSettings, chartSettings, environment, height, getSettings]
   );
 
   return (
@@ -87,12 +88,7 @@ export const SquiggleViewer: React.FC<Props> = ({
       }}
     >
       {result.tag === "Ok" ? (
-        <ExpressionViewer
-          path={[]}
-          expression={result.value}
-          width={width}
-          height={height}
-        />
+        <ExpressionViewer path={[]} expression={result.value} width={width} />
       ) : (
         <SquiggleErrorAlert error={result.value} />
       )}

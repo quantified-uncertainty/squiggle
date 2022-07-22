@@ -3,22 +3,21 @@ import { Tooltip } from "../ui/Tooltip";
 import { LocalItemSettings, MergedItemSettings } from "./utils";
 import { ViewerContext } from "./ViewerContext";
 
-type DropdownMenuParams = {
-  settings: LocalItemSettings;
-  setSettings: (value: LocalItemSettings) => void;
+type SettingsMenuParams = {
+  onChange: () => void; // used to notify VariableBox that settings have changed, so that VariableBox could re-render itself
 };
 
 type VariableBoxProps = {
   path: string[];
   heading: string;
-  dropdownMenu?: (params: DropdownMenuParams) => React.ReactNode;
+  renderSettingsMenu?: (params: SettingsMenuParams) => React.ReactNode;
   children: (settings: MergedItemSettings) => React.ReactNode;
 };
 
 export const VariableBox: React.FC<VariableBoxProps> = ({
   path,
   heading = "Error",
-  dropdownMenu,
+  renderSettingsMenu,
   children,
 }) => {
   const { setSettings, getSettings, getMergedSettings } =
@@ -57,8 +56,8 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
           >
             ...
           </span>
-        ) : dropdownMenu ? (
-          dropdownMenu({ settings, setSettings: setSettingsAndUpdate })
+        ) : renderSettingsMenu ? (
+          renderSettingsMenu({ onChange: forceUpdate })
         ) : null}
       </header>
       {settings.collapsed ? null : (

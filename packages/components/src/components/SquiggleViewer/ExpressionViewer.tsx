@@ -6,6 +6,8 @@ import { FunctionChart, FunctionChartSettings } from "../FunctionChart";
 import clsx from "clsx";
 import { VariableBox } from "./VariableBox";
 import { ItemSettingsMenu } from "./ItemSettingsMenu";
+import { hasMassBelowZero } from "../../lib/distributionUtils";
+import { MergedItemSettings } from "./utils";
 
 function getRange<a>(x: declaration<a>) {
   const first = x.args[0];
@@ -33,12 +35,12 @@ function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
 const VariableList: React.FC<{
   path: string[];
   heading: string;
-  children: React.ReactNode;
+  children: (settings: MergedItemSettings) => React.ReactNode;
 }> = ({ path, heading, children }) => (
   <VariableBox path={path} heading={heading}>
-    {() => (
+    {(settings) => (
       <div className={clsx("space-y-3", path.length ? "pt-1 mt-1" : null)}>
-        {children}
+        {children(settings)}
       </div>
     )}
   </VariableBox>
@@ -50,14 +52,12 @@ export interface Props {
   /** Path to the current item, e.g. `['foo', 'bar', '3']` for `foo.bar[3]`; can be empty on the top-level item. */
   path: string[];
   width?: number;
-  height: number;
 }
 
 export const ExpressionViewer: React.FC<Props> = ({
   path,
   expression,
   width,
-  height,
 }) => {
   switch (expression.tag) {
     case "number":
@@ -78,9 +78,17 @@ export const ExpressionViewer: React.FC<Props> = ({
           heading={`Distribution (${distType})\n${
             distType === "Symbolic" ? expression.value.toString() : ""
           }`}
-          dropdownMenu={({ settings, setSettings }) => {
+          renderSettingsMenu={({ onChange }) => {
+            const shape = expression.value.pointSet();
             return (
-              <ItemSettingsMenu settings={settings} setSettings={setSettings} />
+              <ItemSettingsMenu
+                path={path}
+                onChange={onChange}
+                disableLogX={
+                  shape.tag === "Ok" && hasMassBelowZero(shape.value)
+                }
+                withFunctionSettings={false}
+              />
             );
           }}
         >
@@ -89,7 +97,7 @@ export const ExpressionViewer: React.FC<Props> = ({
               <DistributionChart
                 distribution={expression.value}
                 {...settings.distributionPlotSettings}
-                height={height}
+                height={settings.height}
                 width={width}
               />
             );
@@ -158,9 +166,13 @@ export const ExpressionViewer: React.FC<Props> = ({
         <VariableBox
           path={path}
           heading="Function"
-          dropdownMenu={({ settings, setSettings }) => {
+          renderSettingsMenu={({ onChange }) => {
             return (
-              <ItemSettingsMenu settings={settings} setSettings={setSettings} />
+              <ItemSettingsMenu
+                path={path}
+                onChange={onChange}
+                withFunctionSettings={true}
+              />
             );
           }}
         >
@@ -173,7 +185,7 @@ export const ExpressionViewer: React.FC<Props> = ({
                 fn={expression.value}
                 chartSettings={settings.chartSettings}
                 distributionPlotSettings={settings.distributionPlotSettings}
-                height={height}
+                height={settings.height}
                 environment={{
                   sampleCount: settings.environment.sampleCount / 10,
                   xyPointLength: settings.environment.xyPointLength / 10,
@@ -188,9 +200,13 @@ export const ExpressionViewer: React.FC<Props> = ({
         <VariableBox
           path={path}
           heading="Function Declaration"
-          dropdownMenu={({ settings, setSettings }) => {
+          renderSettingsMenu={({ onChange }) => {
             return (
-              <ItemSettingsMenu settings={settings} setSettings={setSettings} />
+              <ItemSettingsMenu
+                onChange={onChange}
+                path={path}
+                withFunctionSettings={true}
+              />
             );
           }}
         >
@@ -199,7 +215,7 @@ export const ExpressionViewer: React.FC<Props> = ({
               fn={expression.value.fn}
               chartSettings={getChartSettings(expression.value)}
               distributionPlotSettings={settings.distributionPlotSettings}
-              height={height}
+              height={settings.height}
               environment={{
                 sampleCount: settings.environment.sampleCount / 10,
                 xyPointLength: settings.environment.xyPointLength / 10,
@@ -212,46 +228,49 @@ export const ExpressionViewer: React.FC<Props> = ({
     case "module": {
       return (
         <VariableList path={path} heading="Module">
-          {Object.entries(expression.value)
-            .filter(([key, r]) => key !== "Math")
-            .map(([key, r]) => (
-              <ExpressionViewer
-                key={key}
-                path={[...path, key]}
-                expression={r}
-                width={width !== undefined ? width - 20 : width}
-                height={height / 3}
-              />
-            ))}
+          {(settings) =>
+            Object.entries(expression.value)
+              .filter(([key, r]) => key !== "Math")
+              .map(([key, r]) => (
+                <ExpressionViewer
+                  key={key}
+                  path={[...path, key]}
+                  expression={r}
+                  width={width !== undefined ? width - 20 : width}
+                />
+              ))
+          }
         </VariableList>
       );
     }
     case "record":
       return (
         <VariableList path={path} heading="Record">
-          {Object.entries(expression.value).map(([key, r]) => (
-            <ExpressionViewer
-              key={key}
-              path={[...path, key]}
-              expression={r}
-              width={width !== undefined ? width - 20 : width}
-              height={height / 3}
-            />
-          ))}
+          {(settings) =>
+            Object.entries(expression.value).map(([key, r]) => (
+              <ExpressionViewer
+                key={key}
+                path={[...path, key]}
+                expression={r}
+                width={width !== undefined ? width - 20 : width}
+              />
+            ))
+          }
         </VariableList>
       );
     case "array":
       return (
         <VariableList path={path} heading="Array">
-          {expression.value.map((r, i) => (
-            <ExpressionViewer
-              key={i}
-              path={[...path, String(i)]}
-              expression={r}
-              width={width !== undefined ? width - 20 : width}
-              height={50}
-            />
-          ))}
+          {(settings) =>
+            expression.value.map((r, i) => (
+              <ExpressionViewer
+                key={i}
+                path={[...path, String(i)]}
+                expression={r}
+                width={width !== undefined ? width - 20 : width}
+              />
+            ))
+          }
         </VariableList>
       );
     default: {

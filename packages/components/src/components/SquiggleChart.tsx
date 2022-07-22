@@ -35,8 +35,6 @@ export interface SquiggleChartProps {
   jsImports?: jsImports;
   /** Whether to show a summary of the distribution */
   showSummary?: boolean;
-  /** Whether to show graph controls (scale etc)*/
-  showControls?: boolean;
   /** Set the x scale to be logarithmic by deault */
   logX?: boolean;
   /** Set the y scale to be exponential by deault */
@@ -67,7 +65,6 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     jsImports = defaultImports,
     showSummary = false,
     width,
-    showControls = false,
     logX = false,
     expY = false,
     diagramStart = 0,
@@ -89,7 +86,6 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     });
 
     const distributionPlotSettings = {
-      showControls,
       showSummary,
       logX,
       expY,

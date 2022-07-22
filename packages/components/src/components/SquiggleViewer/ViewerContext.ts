@@ -23,11 +23,11 @@ export const ViewerContext = React.createContext<ViewerContextShape>({
     },
     distributionPlotSettings: {
       showSummary: false,
-      showControls: false,
       logX: false,
       expY: false,
     },
     environment: defaultEnvironment,
+    height: 150,
   }),
   setSettings() {},
 });
