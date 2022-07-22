@@ -47,7 +47,7 @@ dist1 * dist2`}
 
 We also provide concatenation of two distributions as a syntax sugar for `*`
 
-<SquiggleEditor defaultCode="(0.1 to 1) triangular(1,2,3)" />
+<SquiggleEditor defaultCode="(0.1 to 1) * triangular(1,2,3)" />
 
 ### Division
 
@@ -88,16 +88,13 @@ log(dist)`}
 />
 
 <SquiggleEditor
-  defaultCode={`dist = beta(1,2)
-log10(dist)`}
+  defaultCode={`log10(5 to 10)`}
 />
 
 Base `x`
 
 <SquiggleEditor
-  defaultCode={`x = 2
-dist = beta(2,3)
-log(dist, x)`}
+  defaultCode={`log(5 to 10, 2)`}
 />
 
 #### Validity
@@ -114,9 +111,7 @@ For every point on the x-axis, operate the corresponding points in the y axis of
 TODO: this isn't in the new interpreter/parser yet.
 
 <SquiggleEditor
-  defaultCode={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
-dist1 .+ dist2`}
+  defaultCode={`(1 to 10) .+ triangular(1,2,3)`}
 />
 
 ### Pointwise subtraction
@@ -124,33 +119,26 @@ dist1 .+ dist2`}
 TODO: this isn't in the new interpreter/parser yet.
 
 <SquiggleEditor
-  defaultCode={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
-dist1 .- dist2`}
+  defaultCode={`(1 to 10) .- triangular(1,2,3)`}
 />
 
 ### Pointwise multiplication
 
 <SquiggleEditor
-  defaultCode={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
-dist1 .* dist2`}
+  defaultCode={`(1 to 10) .* triangular(1,2,3)`}
 />
+
 
 ### Pointwise division
 
 <SquiggleEditor
-  defaultCode={`dist1 = uniform(0,20)
-dist2 = normal(10,8)
-dist1 ./ dist2`}
+  defaultCode={`(uniform(0,10)) ./ normal(10,4)`}
 />
 
 ### Pointwise exponentiation
 
 <SquiggleEditor
-  defaultCode={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
-dist1 .^ dist2`}
+  defaultCode={`(1 to 10) .^ triangular(1,2,3)`}
 />
 
 ## Standard functions on distributions

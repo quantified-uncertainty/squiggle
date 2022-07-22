@@ -23,12 +23,6 @@ Squiggle is still very early. The main first goal is to become stable. This mean
 
 ## Distribution Features
 
-`Distribution.fromSamples([])`  
-Converts a list of samples, for example, from Guesstimate, into a distribution shape. Maybe takes a list of optional parameters.
-
-`Distribution.fromCoordinates({xs, ys})`  
-Convert XY coordinates into a distribution. Figure out a good way to do this for continuous, discrete, and mixed distributions.
-
 [Metalog Distribution](https://en.wikipedia.org/wiki/Metalog_distribution)  
 Add the Metalog distribution, and some convenient methods for generating these distributions. This might be a bit tricky because we might need or build a library to fit data. There's no Metalog javascript library yet, this would be pretty useful. There's already a Metalog library in Python, so that one could be used for inspiration.
 
