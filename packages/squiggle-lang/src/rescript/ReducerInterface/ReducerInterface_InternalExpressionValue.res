@@ -183,6 +183,7 @@ let externalValueToValueType = (value: ExternalExpressionValue.t) =>
   | EvTimeDuration(_) => EvtTimeDuration
   | EvType(_) => EvtType
   | EvTypeIdentifier(_) => EvtTypeIdentifier
+  | EvVoid => EvtVoid
   }
 
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {

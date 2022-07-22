@@ -119,7 +119,7 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
       E.A.O.openIfAllSome(E.A.fmap(parseSampleSet, arr))
     }
 
-    let mapN = (aValueArray: array<internalExpressionValue>, aLambdaValue) => {
+    let _mapN = (aValueArray: array<internalExpressionValue>, aLambdaValue) => {
       switch parseSampleSetArray(aValueArray) {
       | Some(t1) =>
         let fn = a => doLambdaCall(aLambdaValue, list{IEvArray(E.A.fmap(x => IEvNumber(x), a))})
