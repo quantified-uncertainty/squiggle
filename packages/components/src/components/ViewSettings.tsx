@@ -33,10 +33,12 @@ type FormFields = yup.InferType<typeof viewSettingsSchema>;
 export const ViewSettings: React.FC<{
   withShowEditorSetting?: boolean;
   withFunctionSettings?: boolean;
+  disableLogXSetting?: boolean;
   register: UseFormRegister<FormFields>;
 }> = ({
   withShowEditorSetting = true,
   withFunctionSettings = true,
+  disableLogXSetting,
   register,
 }) => {
   return (
@@ -66,6 +68,12 @@ export const ViewSettings: React.FC<{
               register={register}
               name="logX"
               label="Show x scale logarithmically"
+              disabled={disableLogXSetting}
+              tooltip={
+                disableLogXSetting
+                  ? "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values."
+                  : undefined
+              }
             />
             <Checkbox
               register={register}

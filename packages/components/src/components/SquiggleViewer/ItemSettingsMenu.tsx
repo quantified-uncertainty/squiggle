@@ -87,6 +87,7 @@ const ItemSettingsModal: React.FC<Props & { close: () => void }> = ({
           register={register}
           withShowEditorSetting={false}
           withFunctionSettings={withFunctionSettings}
+          disableLogXSetting={disableLogX}
         />
       </Modal.Body>
     </Modal>
