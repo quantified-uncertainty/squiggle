@@ -10,7 +10,8 @@ const path = require("path");
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Squiggle",
-  tagline: "A simple programming language for intuitive probabilistic estimation",
+  tagline:
+    "A simple programming language for intuitive probabilistic estimation",
   url: "https://squiggle-language.com",
   baseUrl: "/",
   onBrokenLinks: "throw",

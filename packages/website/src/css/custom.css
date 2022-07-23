@@ -4,7 +4,7 @@
  * work well for content-centric websites.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Lato:wght@100;400;700;900&family=Lora:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Lato:wght@100;400;700;900&family=Lora:wght@400;500;600&display=swap");
 
 /* You can override the default Infima variables here. */
 :root {
@@ -40,7 +40,7 @@ html[data-theme="dark"] .docusaurus-highlight-code-line {
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-.hero h1{
+.hero h1 {
   font-size: 4em;
   font-weight: 900;
   margin-bottom: 0.5rem;
@@ -56,7 +56,7 @@ html[data-theme="dark"] .docusaurus-highlight-code-line {
 
 .hero__subtitle {
   color: #888;
-  font-size:1.25em;
+  font-size: 1.25em;
 }
 
 .hero__subtitle2 {
@@ -79,7 +79,8 @@ h2 {
   font-weight: 600;
 }
 
-.menu__link, .navbar__item {
+.menu__link,
+.navbar__item {
   font-family: "Lora", serif;
 }
 

@@ -87,15 +87,11 @@ A projection over a stretched x-axis.
 log(dist)`}
 />
 
-<SquiggleEditor
-  defaultCode={`log10(5 to 10)`}
-/>
+<SquiggleEditor defaultCode={`log10(5 to 10)`} />
 
 Base `x`
 
-<SquiggleEditor
-  defaultCode={`log(5 to 10, 2)`}
-/>
+<SquiggleEditor defaultCode={`log(5 to 10, 2)`} />
 
 #### Validity
 
@@ -110,36 +106,25 @@ For every point on the x-axis, operate the corresponding points in the y axis of
 
 TODO: this isn't in the new interpreter/parser yet.
 
-<SquiggleEditor
-  defaultCode={`(1 to 10) .+ triangular(1,2,3)`}
-/>
+<SquiggleEditor defaultCode={`(1 to 10) .+ triangular(1,2,3)`} />
 
 ### Pointwise subtraction
 
 TODO: this isn't in the new interpreter/parser yet.
 
-<SquiggleEditor
-  defaultCode={`(1 to 10) .- triangular(1,2,3)`}
-/>
+<SquiggleEditor defaultCode={`(1 to 10) .- triangular(1,2,3)`} />
 
 ### Pointwise multiplication
 
-<SquiggleEditor
-  defaultCode={`(1 to 10) .* triangular(1,2,3)`}
-/>
-
+<SquiggleEditor defaultCode={`(1 to 10) .* triangular(1,2,3)`} />
 
 ### Pointwise division
 
-<SquiggleEditor
-  defaultCode={`(uniform(0,10)) ./ normal(10,4)`}
-/>
+<SquiggleEditor defaultCode={`(uniform(0,10)) ./ normal(10,4)`} />
 
 ### Pointwise exponentiation
 
-<SquiggleEditor
-  defaultCode={`(1 to 10) .^ triangular(1,2,3)`}
-/>
+<SquiggleEditor defaultCode={`(1 to 10) .^ triangular(1,2,3)`} />
 
 ## Standard functions on distributions
 

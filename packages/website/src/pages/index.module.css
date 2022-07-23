@@ -8,7 +8,7 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  background: rgb(255, 246, 237)
+  background: rgb(255, 246, 237);
 }
 
 @media screen and (max-width: 966px) {
