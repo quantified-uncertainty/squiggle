@@ -4,27 +4,29 @@
  * work well for content-centric websites.
  */
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Lato:wght@100;400;700;900&family=Lora:wght@400;500;600&display=swap");
+
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2488df;
-  --ifm-color-primary-dark: #176fcd;
-  --ifm-color-primary-darker: #1f58cb;
-  --ifm-color-primary-darkest: #1e2672;
-  --ifm-color-primary-light: #49acd3;
-  --ifm-color-primary-lighter: #4fb1c7;
-  --ifm-color-primary-lightest: #3dbfd3;
+  --ifm-color-primary: #e74c0f;
+  --ifm-color-primary-dark: #bb4b05;
+  --ifm-color-primary-darker: #9d0c02;
+  --ifm-color-primary-darkest: #5d2200;
+  --ifm-color-primary-light: #e6a036;
+  --ifm-color-primary-lighter: #e79d1d;
+  --ifm-color-primary-lightest: #f5e191;
   --ifm-code-font-size: 95%;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 html[data-theme="dark"] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: #df774d;
+  --ifm-color-primary-dark: #db8651;
+  --ifm-color-primary-darker: #d7584f;
+  --ifm-color-primary-darkest: #b3693e;
+  --ifm-color-primary-light: #edb25a;
+  --ifm-color-primary-lighter: #ebd489;
+  --ifm-color-primary-lightest: #faf2d4;
 }
 
 .docusaurus-highlight-code-line {
@@ -36,4 +38,56 @@ html[data-theme="dark"] {
 
 html[data-theme="dark"] .docusaurus-highlight-code-line {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+.hero h1 {
+  font-size: 4em;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+  color: rgb(230, 72, 79);
+  font-family: "Lato", sans-serif;
+}
+
+.navbar__title {
+  font-family: "Lato", sans-serif;
+  font-weight: 900;
+  color: rgb(205, 88, 53);
+}
+
+.hero__subtitle {
+  color: #888;
+  font-size: 1.25em;
+}
+
+.hero__subtitle2 {
+  color: #ba3e3e;
+  font-size: 1.5em;
+  font-family: "Lora";
+  font-weight: 500;
+  margin-top: 1em;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 500px;
+}
+
+h1 {
+  font-family: "Lora", serif;
+  font-size: 2.5em;
+}
+
+h2 {
+  font-weight: 600;
+}
+
+.menu__link,
+.navbar__item {
+  font-family: "Lora", serif;
+}
+
+.navbar__item {
+  font-weight: 700;
+}
+
+:root {
+  /* --ifm-font-family-base: 'Lora'; */
 }

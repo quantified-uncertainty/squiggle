@@ -56,6 +56,7 @@ export default function PlaygroundPage() {
       <div
         style={{
           maxWidth: 2000,
+          padding: 8,
         }}
       >
         <SquigglePlayground {...playgroundProps} />

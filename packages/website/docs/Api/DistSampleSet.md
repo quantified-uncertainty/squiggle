@@ -38,7 +38,7 @@ Gets the internal samples of a sampleSet distribution. This is separate from the
 **Examples**
 
 ```
-toList(toSampleSet(normal(5,2)))
+toList(SampleSet.fromDist(normal(5,2)))
 ```
 
 ### map
