@@ -1,9 +1,9 @@
 .container {
-    /* height must be set explicitly */
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* height must be set explicitly */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon {
