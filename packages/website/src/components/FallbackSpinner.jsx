@@ -3,7 +3,7 @@ import { RefreshIcon } from "@heroicons/react/solid";
 import styles from "./FallbackSpinner.module.css";
 
 export const FallbackSpinner = ({ height }) => {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(/* false */ true);
   useEffect(() => {
     setTimeout(() => {
       setShow(true);
