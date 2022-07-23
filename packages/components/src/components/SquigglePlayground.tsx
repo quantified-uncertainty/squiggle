@@ -533,7 +533,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     <SquiggleContainer>
       <StyledTab.Group>
         <div className="pb-4">
-          <div className="flex justify-between items-center mt-2">
+          <div className="flex justify-between items-center">
             <StyledTab.List>
               <StyledTab
                 name={vars.showEditor ? "Code" : "Display"}
