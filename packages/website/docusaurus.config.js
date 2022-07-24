@@ -56,7 +56,7 @@ const config = {
         title: "Squiggle",
         logo: {
           alt: "Squiggle Logo",
-          src: "img/quri-logo.png",
+          src: "img/squiggle-logo.png",
         },
         items: [
           {
