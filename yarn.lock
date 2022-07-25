@@ -4796,7 +4796,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^18.0.9":
+"@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.9":
   version "18.0.15"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.15.tgz#d355644c26832dc27f3e6cbf0c4f4603fc4ab7fe"
   integrity sha512-iz3BtLuIYH1uWdsv6wXYdhozhqj20oD4/Hk2DNXIn1kFsmp9x8d9QB6FnPhfkbhd2PgEONt9Q1x/ebkwjfFLow==
@@ -9207,10 +9207,10 @@ fast-check@^2.17.0:
   dependencies:
     pure-rand "^5.0.1"
 
-fast-check@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.0.1.tgz#b9e7b57c4643a4e62893aca85e21c270591d0eac"
-  integrity sha512-AriFDYpYVOBynpPZq/quxSLumFOo2hPB2H5Nz2vc1QlNfjOaA62zX8USNXcOY5nwKHEq7lZ84dG9M1W+LAND1g==
+fast-check@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.1.0.tgz#0c958b6592f45fb66ea291a0bd1be2e7045f7e57"
+  integrity sha512-LHM6ZiznfQ5ZxReDUZnlKzSI/nlwCdfwaQ6qrCYBIkuWT6PfI3GOK/O2Xj50DF9oC0HIP22vbbHA8v4itAiyGA==
   dependencies:
     pure-rand "^5.0.1"
 
@@ -15225,7 +15225,7 @@ react-vega@^7.6.0:
     prop-types "^15.8.1"
     vega-embed "^6.5.1"
 
-react@^18.1.0:
+react@^18.0.0, react@^18.1.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
