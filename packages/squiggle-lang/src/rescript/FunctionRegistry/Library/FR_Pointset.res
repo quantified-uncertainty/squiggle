@@ -34,13 +34,13 @@ let library = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(_, inputs, env, _) =>
+        ~run=(_, inputs, accessors, _) =>
           switch inputs {
           | [FRValueDist(dist)] =>
             GenericDist.toPointSet(
               dist,
-              ~xyPointLength=env.xyPointLength,
-              ~sampleCount=env.sampleCount,
+              ~xyPointLength=accessors.environment.xyPointLength,
+              ~sampleCount=accessors.environment.sampleCount,
               (),
             )
             ->E.R2.fmap(Wrappers.pointSet)

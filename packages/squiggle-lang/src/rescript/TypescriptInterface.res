@@ -34,17 +34,17 @@ type resultString = result<string, distributionError>
 @genType
 let makeSampleSetDist = SampleSetDist.make
 
-@genType
-let evaluate = Reducer.evaluate
+// @genType
+// let evaluate = Reducer.evaluate
 
-@genType
-let evaluateUsingOptions = Reducer.evaluateUsingOptions
+// @genType
+// let evaluateUsingOptions = Reducer.evaluateUsingOptions
 
 @genType
 let parse = Reducer_Peggy_Parse.parse
 
-@genType
-let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
+// @genType
+// let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
 
 @genType
 type externalBindings = Reducer.externalBindings
@@ -91,8 +91,8 @@ type environment = ReducerInterface_ExternalExpressionValue.environment
 @genType
 let defaultEnvironment = ReducerInterface_ExternalExpressionValue.defaultEnvironment
 
-@genType
-let foreignFunctionInterface = Reducer.foreignFunctionInterface
+// @genType
+// let foreignFunctionInterface = Reducer.foreignFunctionInterface
 
 @genType
 type declarationArg = Declaration.arg

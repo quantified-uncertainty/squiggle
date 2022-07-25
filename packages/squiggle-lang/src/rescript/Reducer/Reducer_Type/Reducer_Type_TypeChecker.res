@@ -1,5 +1,7 @@
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
+module ProjectReducerFnT = ReducerProject_ReducerFn_T
 module T = Reducer_Type_T
 module TypeContracts = Reducer_Type_Contracts
 open InternalExpressionValue
@@ -124,7 +126,7 @@ let rec isITypeOf = (anIType: T.iType, aValue): result<bool, T.typeErrorValue> =
 let isTypeOf = (
   typeExpressionSourceCode: string,
   aValue: InternalExpressionValue.t,
-  reducerFn: ExpressionT.reducerFn,
+  reducerFn: ProjectReducerFnT.t,
 ): result<InternalExpressionValue.t, ErrorValue.t> => {
   switch typeExpressionSourceCode->Reducer_Type_Compile.fromTypeExpression(reducerFn) {
   | Ok(anIType) =>
@@ -152,7 +154,7 @@ let checkITypeArguments = (anIType: T.iType, args: array<InternalExpressionValue
 let checkArguments = (
   typeExpressionSourceCode: string,
   args: array<InternalExpressionValue.t>,
-  reducerFn: ExpressionT.reducerFn,
+  reducerFn: ProjectReducerFnT.t,
 ): result<InternalExpressionValue.t, ErrorValue.t> => {
   switch typeExpressionSourceCode->Reducer_Type_Compile.fromTypeExpression(reducerFn) {
   | Ok(anIType) =>

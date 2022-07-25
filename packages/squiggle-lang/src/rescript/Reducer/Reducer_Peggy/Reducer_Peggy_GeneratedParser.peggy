@@ -9,12 +9,25 @@ start
 
 zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
 
+//   { return h.makeFunctionCall('$_typeOf_$', [identifier, typeExpression])}
+// {return [h.nodeVoid()];}
 outerBlock 
   = statements:array_statements  finalExpression: (statementSeparator @expression)?
-    { if (finalExpression != null) { statements.push(finalExpression) }
-        return h.nodeBlock(statements) }
+    { if (finalExpression != null) 
+        { 
+          var newFinalExpression = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), finalExpression]);
+          statements.push(newFinalExpression);
+        }
+      else 
+        {
+          var newFinalStatement = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), h.nodeVoid()]);
+          statements.push(newFinalStatement);
+        }
+      return h.nodeBlock(statements) }
   / finalExpression: expression
-    { return h.nodeBlock([finalExpression])}
+    { 
+      var newFinalExpression = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), finalExpression]);
+      return h.nodeBlock([newFinalExpression])}
     
 innerBlockOrExpression  
   = quotedInnerBlock

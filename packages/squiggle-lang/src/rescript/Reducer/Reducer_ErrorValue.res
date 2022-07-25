@@ -3,7 +3,7 @@ type location
 
 @genType
 type errorValue =
-  | REArityError(option<string>, int, int) //TODO: Binding a lambda to a variable should record the variable name in lambda for error reporting
+  | REArityError(option<string>, int, int)
   | REArrayIndexNotFound(string, int)
   | REAssignmentExpected
   | REDistributionError(DistributionTypes.error)

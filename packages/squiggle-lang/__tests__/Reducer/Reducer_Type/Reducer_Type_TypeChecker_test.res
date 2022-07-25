@@ -5,6 +5,7 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Bindings = Reducer_Bindings
 module T = Reducer_Type_T
 module TypeChecker = Reducer_Type_TypeChecker
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 
 open Jest
 open Expect
@@ -16,10 +17,10 @@ let isTypeOfSourceCode = (aTypeSourceCode: string, sourceCode: string): result<
   'v,
   ErrorValue.t,
 > => {
-  let reducerFn = Expression.reduceExpression
+  let reducerFn = Expression.reduceExpressionInProject
   let rResult =
-    Reducer.parse(sourceCode)->Belt.Result.flatMap(expr =>
-      reducerFn(expr, Bindings.emptyBindings, InternalExpressionValue.defaultEnvironment)
+    Expression.BackCompatible.parse(sourceCode)->Belt.Result.flatMap(expr =>
+      reducerFn(expr, Bindings.emptyBindings, ProjectAccessorsT.identityAccessors)
     )
   rResult->Belt.Result.flatMap(result => TypeChecker.isTypeOf(aTypeSourceCode, result, reducerFn))
 }

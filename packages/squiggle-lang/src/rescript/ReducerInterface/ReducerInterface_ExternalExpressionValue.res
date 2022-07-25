@@ -92,6 +92,18 @@ let toStringResult = x =>
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
+let toStringOptionResult = x =>
+  switch x {
+  | Some(a) => toStringResult(a)
+  | None => `None`
+  }
+
+let toStringOption = x =>
+  switch x {
+  | Some(a) => toString(a)
+  | None => `None`
+  }
+
 @genType
 type environment = GenericDist.env
 

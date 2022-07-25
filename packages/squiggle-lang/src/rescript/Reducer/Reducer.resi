@@ -1,7 +1,7 @@
 module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
 
-@genType
+@genType0
 type environment = ReducerInterface_ExternalExpressionValue.environment
 @genType
 type errorValue = Reducer_ErrorValue.errorValue
@@ -12,34 +12,34 @@ type externalBindings = ReducerInterface_ExternalExpressionValue.externalBinding
 @genType
 type lambdaValue = ReducerInterface_ExternalExpressionValue.lambdaValue
 
-@genType
-let evaluateUsingOptions: (
-  ~environment: option<QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.environment>,
-  ~externalBindings: option<
-    QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.externalBindings,
-  >,
-  string,
-) => result<expressionValue, errorValue>
-@genType
-let evaluatePartialUsingExternalBindings: (
-  string,
-  QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.externalBindings,
-  QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.environment,
-) => result<externalBindings, errorValue>
-@genType
-let evaluate: string => result<expressionValue, errorValue>
+// @genType
+// let evaluateUsingOptions: (
+//   ~environment: option<QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.environment>,
+//   ~externalBindings: option<
+//     QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.externalBindings,
+//   >,
+//   string,
+// ) => result<expressionValue, errorValue>
+// @genType
+// let evaluatePartialUsingExternalBindings: (
+//   string,
+//   QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.externalBindings,
+//   QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.environment,
+// ) => result<externalBindings, errorValue>
+// @genType
+// let evaluate: string => result<expressionValue, errorValue>
 
-let parse: string => result<Expression.expression, errorValue>
+// let parse: string => result<Expression.t, errorValue>
 
-@genType
-let foreignFunctionInterface: (
-  QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.lambdaValue,
-  array<QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.t>,
-  QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.environment,
-) => result<expressionValue, errorValue>
+// @genType
+// let foreignFunctionInterface: (
+//   QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.lambdaValue,
+//   array<QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.t>,
+//   QuriSquiggleLang.ReducerInterface_ExternalExpressionValue.environment,
+// ) => result<expressionValue, errorValue>
 
 @genType
 let defaultEnvironment: environment
 
-@genType
-let defaultExternalBindings: externalBindings
+// @genType
+// let defaultExternalBindings: externalBindings

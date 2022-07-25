@@ -1,10 +1,14 @@
-module ExpressionValue = ReducerInterface.ExternalExpressionValue
+module ExpressionValue = ReducerInterface.InternalExpressionValue
+module Expression = Reducer_Expression
 
 open Jest
 open Expect
 
-let expectEvalToBe = (expr: string, answer: string) =>
-  Reducer.evaluate(expr)->ExpressionValue.toStringResult->expect->toBe(answer)
+let expectEvalToBe = (sourceCode: string, answer: string) =>
+  Expression.BackCompatible.evaluateString(sourceCode)
+  ->ExpressionValue.toStringResult
+  ->expect
+  ->toBe(answer)
 
 let testEval = (expr, answer) => test(expr, () => expectEvalToBe(expr, answer))
 
