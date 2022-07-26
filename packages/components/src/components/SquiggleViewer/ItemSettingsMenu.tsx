@@ -131,6 +131,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
     if (!ref.current) return;
     window.scroll({
       top: ref.current.getBoundingClientRect().y + window.scrollY,
+      behavior: "smooth",
     });
   };
 
