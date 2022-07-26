@@ -146,11 +146,23 @@ export const Modal: ModalType = ({ children, container, close }) => {
 
   React.useEffect(() => {
     document.body.appendChild(el);
-
     return () => {
       document.body.removeChild(el);
     };
   }, [el]);
+
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        close();
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [close]);
 
   const modal = (
     <SquiggleContainer>
