@@ -165,16 +165,14 @@ export const Modal: ModalType = ({ children, container, close }) => {
   }, [close]);
 
   const modal = (
-    <SquiggleContainer>
-      <ModalContext.Provider value={{ close }}>
-        <div className="squiggle">
-          <div className="fixed inset-0 z-40 flex justify-center items-center">
-            <Overlay />
-            <ModalWindow container={container}>{children}</ModalWindow>
-          </div>
+    <ModalContext.Provider value={{ close }}>
+      <div className="squiggle">
+        <div className="fixed inset-0 z-40 flex justify-center items-center">
+          <Overlay />
+          <ModalWindow container={container}>{children}</ModalWindow>
         </div>
-      </ModalContext.Provider>
-    </SquiggleContainer>
+      </div>
+    </ModalContext.Provider>
   );
 
   return ReactDOM.createPortal(modal, container || el);

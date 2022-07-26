@@ -54,7 +54,7 @@ export const Tooltip: React.FC<Props> = ({ text, children }) => {
               },
             })}
           >
-            <pre>{text}</pre>
+            <div className="font-mono whitespace-pre">{text}</div>
           </motion.div>
         )}
       </AnimatePresence>
