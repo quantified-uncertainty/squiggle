@@ -9,6 +9,7 @@ type ViewerContextShape = {
   getSettings(path: Path): LocalItemSettings;
   getMergedSettings(path: Path): MergedItemSettings;
   setSettings(path: Path, value: LocalItemSettings): void;
+  enableLocalSettings: boolean; // show local settings icon in the UI
 };
 
 export const ViewerContext = React.createContext<ViewerContextShape>({
@@ -30,4 +31,5 @@ export const ViewerContext = React.createContext<ViewerContextShape>({
     height: 150,
   }),
   setSettings() {},
+  enableLocalSettings: false,
 });

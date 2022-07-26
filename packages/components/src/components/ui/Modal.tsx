@@ -1,20 +1,35 @@
 import { motion } from "framer-motion";
-import * as React from "react";
+import React, { useContext } from "react";
 import * as ReactDOM from "react-dom";
 import { XIcon } from "@heroicons/react/solid";
+import { SquiggleContainer } from "../SquiggleContainer";
+import clsx from "clsx";
+import { useWindowScroll, useWindowSize } from "react-use";
+import { rectToClientRect } from "@floating-ui/core";
 
-const Overlay: React.FC = () => (
-  <motion.div
-    className="absolute inset-0 -z-10 bg-black"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 0.3 }}
-  />
-);
+type ModalContextShape = {
+  close: () => void;
+};
+const ModalContext = React.createContext<ModalContextShape>({
+  close: () => undefined,
+});
+
+const Overlay: React.FC = () => {
+  const { close } = useContext(ModalContext);
+  return (
+    <motion.div
+      className="absolute inset-0 -z-10 bg-black"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.1 }}
+      onClick={close}
+    />
+  );
+};
 
 const ModalHeader: React.FC<{
-  close: () => void;
   children: React.ReactNode;
-}> = ({ children, close }) => {
+}> = ({ children }) => {
+  const { close } = useContext(ModalContext);
   return (
     <header className="px-5 py-3 border-b border-gray-200 font-bold flex items-center justify-between">
       <div>{children}</div>
@@ -41,22 +56,92 @@ const ModalFooter: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="px-5 py-3 border-t border-gray-200">{children}</div>
 );
 
-const ModalWindow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div
-    className="bg-white rounded shadow-toast overflow-auto flex flex-col mx-2 w-96"
-    style={{ maxHeight: "calc(100% - 20px)", maxWidth: "calc(100% - 20px)" }}
-  >
-    {children}
-  </div>
-);
+const ModalWindow: React.FC<{
+  children: React.ReactNode;
+  container?: HTMLElement;
+}> = ({ children, container }) => {
+  // This component works in two possible modes:
+  // 1. container mode - the modal is rendered inside a container element
+  // 2. centered mode - the modal is rendered in the middle of the screen
+  // The mode is determined by the presence of the `container` prop and by whether the available space is large enough to fit the modal.
 
-type ModalType = React.FC<{ children: React.ReactNode }> & {
+  // Necessary for container mode - need to reposition the modal on scroll and resize events.
+  useWindowSize();
+  useWindowScroll();
+
+  let position:
+    | {
+        left: number;
+        top: number;
+        maxWidth: number;
+        maxHeight: number;
+        transform: string;
+      }
+    | undefined;
+
+  const { clientWidth: screenWidth, clientHeight: screenHeight } =
+    document.documentElement;
+  if (container) {
+    const rect = container?.getBoundingClientRect();
+
+    // If available space in `visibleRect` is smaller than these, fallback to positioning in the middle of the screen.
+    const minWidth = 384; // matches the w-96 below
+    const minHeight = 300;
+    const offset = 8;
+
+    const visibleRect = {
+      left: Math.max(rect.left, 0),
+      right: Math.min(rect.right, screenWidth),
+      top: Math.max(rect.top, 0),
+      bottom: Math.min(rect.bottom, screenHeight),
+    };
+    const maxWidth = visibleRect.right - visibleRect.left - 2 * offset;
+    const maxHeight = visibleRect.bottom - visibleRect.top - 2 * offset;
+
+    const center = {
+      left: visibleRect.left + (visibleRect.right - visibleRect.left) / 2,
+      top: visibleRect.top + (visibleRect.bottom - visibleRect.top) / 2,
+    };
+    position = {
+      left: center.left,
+      top: center.top,
+      transform: "translate(-50%, -50%)",
+      maxWidth,
+      maxHeight,
+    };
+    if (maxWidth < minWidth || maxHeight < minHeight) {
+      position = undefined; // modal is hard to fit in the container, fallback to positioning it in the middle of the screen
+    }
+  }
+  return (
+    <div
+      className={clsx(
+        "bg-white rounded-md shadow-toast flex flex-col overflow-auto border w-96",
+        position ? "fixed" : null
+      )}
+      style={
+        position ?? {
+          maxHeight: "calc(100% - 20px)",
+          maxWidth: "calc(100% - 20px)",
+        }
+      }
+    >
+      {children}
+    </div>
+  );
+};
+
+type ModalType = React.FC<{
+  children: React.ReactNode;
+  container?: HTMLElement; // if specified, modal will be positioned over the visible part of the container, if it's not too small
+  close: () => void;
+}> & {
   Body: typeof ModalBody;
   Footer: typeof ModalFooter;
   Header: typeof ModalHeader;
 };
 
-export const Modal: ModalType = ({ children }) => {
+export const Modal: ModalType = ({ children, container, close }) => {
   const [el] = React.useState(() => document.createElement("div"));
 
   React.useEffect(() => {
@@ -68,15 +153,19 @@ export const Modal: ModalType = ({ children }) => {
   }, [el]);
 
   const modal = (
-    <div className="squiggle">
-      <div className="fixed inset-0 z-40 flex justify-center items-center">
-        <Overlay />
-        <ModalWindow>{children}</ModalWindow>
-      </div>
-    </div>
+    <SquiggleContainer>
+      <ModalContext.Provider value={{ close }}>
+        <div className="squiggle">
+          <div className="fixed inset-0 z-40 flex justify-center items-center">
+            <Overlay />
+            <ModalWindow container={container}>{children}</ModalWindow>
+          </div>
+        </div>
+      </ModalContext.Provider>
+    </SquiggleContainer>
   );
 
-  return ReactDOM.createPortal(modal, el);
+  return ReactDOM.createPortal(modal, container || el);
 };
 
 Modal.Body = ModalBody;

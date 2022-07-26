@@ -51,6 +51,7 @@ export interface SquiggleChartProps {
   maxX?: number;
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;
+  enableLocalSettings?: boolean;
 }
 
 const defaultOnChange = () => {};
@@ -76,6 +77,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     color,
     title,
     distributionChartActions,
+    enableLocalSettings = false,
   }) => {
     const result = useSquiggle({
       code,
@@ -111,6 +113,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
         distributionPlotSettings={distributionPlotSettings}
         chartSettings={chartSettings}
         environment={environment ?? defaultEnvironment}
+        enableLocalSettings={enableLocalSettings}
       />
     );
   }

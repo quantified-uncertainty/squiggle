@@ -23,6 +23,7 @@ type Props = {
   chartSettings: FunctionChartSettings;
   /** Environment for further function executions */
   environment: environment;
+  enableLocalSettings?: boolean;
 };
 
 type Settings = {
@@ -38,6 +39,7 @@ export const SquiggleViewer: React.FC<Props> = ({
   distributionPlotSettings,
   chartSettings,
   environment,
+  enableLocalSettings = false,
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
   const settingsRef = useRef<Settings>({});
@@ -85,6 +87,7 @@ export const SquiggleViewer: React.FC<Props> = ({
         getSettings,
         setSettings,
         getMergedSettings,
+        enableLocalSettings,
       }}
     >
       {result.tag === "Ok" ? (

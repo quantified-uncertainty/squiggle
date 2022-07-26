@@ -1,4 +1,11 @@
-import React, { FC, useState, useEffect, useMemo } from "react";
+import React, {
+  FC,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import { useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { useMaybeControlledValue } from "../lib/hooks";
@@ -229,6 +236,13 @@ const useRunnerState = (code: string) => {
   };
 };
 
+type PlaygroundContextShape = {
+  getLeftPanelElement: () => HTMLDivElement | undefined;
+};
+export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
+  getLeftPanelElement: () => undefined,
+});
+
 export const SquigglePlayground: FC<PlaygroundProps> = ({
   defaultCode = "",
   height = 500,
@@ -301,6 +315,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       {...vars}
       bindings={defaultBindings}
       jsImports={imports}
+      enableLocalSettings={true}
     />
   );
 
@@ -345,40 +360,54 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     </StyledTab.Panels>
   );
 
+  const leftPanelRef = useRef<HTMLDivElement | null>(null);
+
   const withEditor = (
     <div className="flex mt-2">
-      <div className="w-1/2">{tabs}</div>
+      <div
+        className="w-1/2 relative"
+        style={{ minHeight: height }}
+        ref={leftPanelRef}
+      >
+        {tabs}
+      </div>
       <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
     </div>
   );
 
   const withoutEditor = <div className="mt-3">{tabs}</div>;
 
+  const getLeftPanelElement = useCallback(() => {
+    return leftPanelRef.current ?? undefined;
+  }, []);
+
   return (
     <SquiggleContainer>
-      <StyledTab.Group>
-        <div className="pb-4">
-          <div className="flex justify-between items-center">
-            <StyledTab.List>
-              <StyledTab
-                name={vars.showEditor ? "Code" : "Display"}
-                icon={vars.showEditor ? CodeIcon : EyeIcon}
+      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+        <StyledTab.Group>
+          <div className="pb-4">
+            <div className="flex justify-between items-center">
+              <StyledTab.List>
+                <StyledTab
+                  name={vars.showEditor ? "Code" : "Display"}
+                  icon={vars.showEditor ? CodeIcon : EyeIcon}
+                />
+                <StyledTab name="Sampling Settings" icon={CogIcon} />
+                <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+              </StyledTab.List>
+              <RunControls
+                autorunMode={autorunMode}
+                isStale={renderedCode !== code}
+                run={run}
+                isRunning={isRunning}
+                onAutorunModeChange={setAutorunMode}
               />
-              <StyledTab name="Sampling Settings" icon={CogIcon} />
-              <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-              <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-            </StyledTab.List>
-            <RunControls
-              autorunMode={autorunMode}
-              isStale={renderedCode !== code}
-              run={run}
-              isRunning={isRunning}
-              onAutorunModeChange={setAutorunMode}
-            />
+            </div>
+            {vars.showEditor ? withEditor : withoutEditor}
           </div>
-          {vars.showEditor ? withEditor : withoutEditor}
-        </div>
-      </StyledTab.Group>
+        </StyledTab.Group>
+      </PlaygroundContext.Provider>
     </SquiggleContainer>
   );
 };
