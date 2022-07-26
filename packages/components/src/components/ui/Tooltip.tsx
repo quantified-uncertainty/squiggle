@@ -1,6 +1,7 @@
 import React, { cloneElement, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  flip,
   shift,
   useDismiss,
   useFloating,
@@ -21,7 +22,7 @@ export const Tooltip: React.FC<Props> = ({ text, children }) => {
     placement: "top",
     open: isOpen,
     onOpenChange: setIsOpen,
-    middleware: [shift()],
+    middleware: [shift(), flip()],
   });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
