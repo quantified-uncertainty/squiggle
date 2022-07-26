@@ -67,7 +67,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
         <div className="flex w-full">
           {path.length ? (
             <div
-              className="border-l-2 border-slate-200 hover:border-green-600 w-4 cursor-pointer"
+              className="border-l-2 border-slate-200 hover:border-indigo-600 w-4 cursor-pointer"
               onClick={toggleCollapsed}
             ></div>
           ) : null}
