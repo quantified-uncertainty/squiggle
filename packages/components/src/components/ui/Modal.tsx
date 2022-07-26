@@ -2,10 +2,8 @@ import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import * as ReactDOM from "react-dom";
 import { XIcon } from "@heroicons/react/solid";
-import { SquiggleContainer } from "../SquiggleContainer";
 import clsx from "clsx";
 import { useWindowScroll, useWindowSize } from "react-use";
-import { rectToClientRect } from "@floating-ui/core";
 
 type ModalContextShape = {
   close: () => void;
@@ -79,15 +77,16 @@ const ModalWindow: React.FC<{
       }
     | undefined;
 
-  const { clientWidth: screenWidth, clientHeight: screenHeight } =
-    document.documentElement;
-  if (container) {
-    const rect = container?.getBoundingClientRect();
+  // If available space in `visibleRect` is smaller than these, fallback to positioning in the middle of the screen.
+  const minWidth = 384;
+  const minHeight = 300;
+  const offset = 8;
+  const naturalWidth = 576; // maximum possible width; modal tries to take this much space, but can be smaller
 
-    // If available space in `visibleRect` is smaller than these, fallback to positioning in the middle of the screen.
-    const minWidth = 384; // matches the w-96 below
-    const minHeight = 300;
-    const offset = 8;
+  if (container) {
+    const { clientWidth: screenWidth, clientHeight: screenHeight } =
+      document.documentElement;
+    const rect = container?.getBoundingClientRect();
 
     const visibleRect = {
       left: Math.max(rect.left, 0),
@@ -116,15 +115,17 @@ const ModalWindow: React.FC<{
   return (
     <div
       className={clsx(
-        "bg-white rounded-md shadow-toast flex flex-col overflow-auto border w-96",
+        "bg-white rounded-md shadow-toast flex flex-col overflow-auto border",
         position ? "fixed" : null
       )}
-      style={
-        position ?? {
+      style={{
+        width: naturalWidth,
+        ...(position ?? {
           maxHeight: "calc(100% - 20px)",
           maxWidth: "calc(100% - 20px)",
-        }
-      }
+          width: naturalWidth,
+        }),
+      }}
     >
       {children}
     </div>
