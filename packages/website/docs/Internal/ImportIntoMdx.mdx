@@ -1,0 +1,37 @@
+---
+title: How to import squiggle files into `.mdx` documents
+sidebar_position: 5
+---
+
+import { SquiggleEditorImportedBindings } from "../../src/components/SquiggleEditor";
+
+_Proof of concept_
+
+## Consider the following squiggle file
+
+In our docusaurus repo, we have a static asset called `demo.squiggle`. It looks like this
+
+```js
+x = 1 to 2
+y = {a: x, b: 1e1}
+f(t) = normal(t, 1.1)
+z = y.b * y.a
+```
+
+We can call `f(z)` upon the assignments in `demo.squiggle` like so:
+
+```jsx
+import { SquiggleEditorImportedBindings } from "../../src/components/SquiggleEditor";
+
+<SquiggleEditorImportedBindings
+  defaultCode={"f(z)"}
+  bindingsImportFile={"../../squiggle/demo.squiggle"}
+/>;
+```
+
+Which would then look exactly like
+
+<SquiggleEditorImportedBindings
+  defaultCode={"f(z)"}
+  bindingsImportFile={"../../squiggle/demo.squiggle"}
+/>
