@@ -4,9 +4,7 @@ import type { SquiggleEditorProps } from "./SquiggleEditor";
 import { runPartial, defaultBindings } from "@quri/squiggle-lang";
 import type { result, errorValue, bindings } from "@quri/squiggle-lang";
 
-function resultDefault(
-  x: result<bindings, errorValue>,
-): bindings {
+function resultDefault(x: result<bindings, errorValue>): bindings {
   switch (x.tag) {
     case "Ok":
       return x.value;
