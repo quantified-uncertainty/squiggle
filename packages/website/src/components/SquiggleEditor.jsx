@@ -12,3 +12,15 @@ export function SquiggleEditor(props) {
     </BrowserOnly>
   );
 }
+
+export function SquiggleEditorImportedBindings(props) {
+  return (
+    <BrowserOnly fallback={<FallbackSpinner height={292} />}>
+      {() => {
+        const LibComponent =
+          require("@quri/squiggle-components").SquiggleEditorImportedBindings;
+        return <LibComponent {...props} />;
+      }}
+    </BrowserOnly>
+  );
+}
