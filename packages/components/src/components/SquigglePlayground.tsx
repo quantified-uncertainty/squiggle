@@ -188,10 +188,7 @@ const RunControls: React.FC<{
       )}
       <Toggle
         texts={["Autorun", "Paused"]}
-        icons={[
-          CheckCircleIcon, // note: we could replace this icon with RefreshIcon when spin is on, but that would cause blinking on each keystroke
-          PauseIcon,
-        ]}
+        icons={[CheckCircleIcon, PauseIcon]}
         status={autorunMode}
         onChange={onAutorunModeChange}
         spinIcon={isRunning}
@@ -280,15 +277,20 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const squiggleChart =
     renderedCode === "" ? null : (
-      <SquiggleChart
-        code={renderedCode}
-        executionId={executionId}
-        environment={env}
-        {...vars}
-        bindings={defaultBindings}
-        jsImports={imports}
-        enableLocalSettings={true}
-      />
+      <div className="relative">
+        {isRunning ? (
+          <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
+        ) : null}
+        <SquiggleChart
+          code={renderedCode}
+          executionId={executionId}
+          environment={env}
+          {...vars}
+          bindings={defaultBindings}
+          jsImports={imports}
+          enableLocalSettings={true}
+        />
+      </div>
     );
 
   const firstTab = vars.showEditor ? (

@@ -1,3 +1,4 @@
+import { RefreshIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
 import React from "react";
 
@@ -29,8 +30,16 @@ export const Toggle: React.FC<Props> = ({
       )}
       onClick={() => onChange(!status)}
     >
-      <div>
-        <CurrentIcon className={clsx("w-6 h-6", spinIcon && "animate-spin")} />
+      <div className="relative w-6 h-6" key={String(spinIcon)}>
+        <CurrentIcon
+          className={clsx(
+            "w-6 h-6 absolute opacity-100",
+            spinIcon && "animate-hide"
+          )}
+        />
+        {spinIcon && (
+          <RefreshIcon className="w-6 h-6 absolute opacity-0 animate-appear-and-spin" />
+        )}
       </div>
       <span>{status ? onText : offText}</span>
     </button>
