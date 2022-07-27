@@ -6,13 +6,12 @@ import type { result, errorValue, bindings } from "@quri/squiggle-lang";
 
 function resultDefault(
   x: result<bindings, errorValue>,
-  defaul: bindings
 ): bindings {
   switch (x.tag) {
     case "Ok":
       return x.value;
     case "Error":
-      return defaul;
+      return defaultBindings;
   }
 }
 
@@ -31,12 +30,11 @@ export const SquiggleEditorImportedBindings: React.FC<
   SquiggleEditorImportedBindingsProps
 > = (props) => {
   const [bindingsResult, setBindingsResult] = React.useState({
-    tag: "Ok" as "Ok",
+    tag: "Ok",
     value: defaultBindings,
   } as result<bindings, errorValue>);
   React.useEffect(() => {
     async function retrieveBindings(fileName: string) {
-      //: Promise<result<bindings, errorValue>> {
       let contents = await fetch(fileName).then((response) => {
         return response.text();
       });
@@ -44,7 +42,7 @@ export const SquiggleEditorImportedBindings: React.FC<
     }
     retrieveBindings(props.bindingsImportFile);
   }, []);
-  const deliveredBindings = resultDefault(bindingsResult, {});
+  const deliveredBindings = resultDefault(bindingsResult);
   const newProps = replaceBindings(props, deliveredBindings);
   return <SquiggleEditor {...newProps} />;
 };
