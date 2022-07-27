@@ -46,11 +46,11 @@ voidStatement
       return h.nodeLetStatement(variable, value); }
 
 letStatement 
-  = variable:identifier _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
+  = variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
     { return h.nodeLetStatement(variable, value) }
 
 defunStatement
-  = variable:identifier '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = variable:variable '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     { var value = h.nodeLambda(args, body)
       return h.nodeLetStatement(variable, value) }
 
@@ -144,11 +144,11 @@ chainFunctionCall
     }, head)}
 
   chainedFunction
-    = fn:dollarIdentifier '(' _nl args:array_functionArguments _nl ')' 
+    = fn:variable '(' _nl args:array_functionArguments _nl ')' 
       { return {fnName: fn.value, args: args}}
-      / fn:dollarIdentifier '(' _nl ')' 
+      / fn:variable '(' _nl ')' 
       { return {fnName: fn.value, args: []}}
-      / fn:dollarIdentifier
+      / fn:variable
       { return {fnName: fn.value, args: []}}
 
 // end of binary operators
@@ -192,12 +192,13 @@ basicLiteral
   = string
   / number
   / boolean
-  / dollarIdentifierWithModule
-  / dollarIdentifier
+  / variable
   / voidLiteral
 
 voidLiteral 'void'
   = "()" {return h.nodeVoid();}
+
+variable = dollarIdentifierWithModule / dollarIdentifier
 
 dollarIdentifierWithModule 'identifier'
   = head:$moduleIdentifier 
