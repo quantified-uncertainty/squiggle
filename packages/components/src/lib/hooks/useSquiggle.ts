@@ -5,7 +5,7 @@ import {
   run,
   runPartial,
 } from "@quri/squiggle-lang";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 type SquiggleArgs<T extends ReturnType<typeof run | typeof runPartial>> = {
   code: string;
@@ -42,23 +42,3 @@ export const useSquigglePartial = (
 export const useSquiggle = (args: SquiggleArgs<ReturnType<typeof run>>) => {
   return useSquiggleAny(args, run);
 };
-
-type ControlledValueArgs<T> = {
-  value?: T;
-  defaultValue: T;
-  onChange?: (x: T) => void;
-};
-export function useMaybeControlledValue<T>(
-  args: ControlledValueArgs<T>
-): [T, (x: T) => void] {
-  let [uncontrolledValue, setUncontrolledValue] = useState(args.defaultValue);
-  let value = args.value ?? uncontrolledValue;
-  let onChange = (newValue: T) => {
-    if (args.value === undefined) {
-      // uncontrolled mode
-      setUncontrolledValue(newValue);
-    }
-    args.onChange?.(newValue);
-  };
-  return [value, onChange];
-}

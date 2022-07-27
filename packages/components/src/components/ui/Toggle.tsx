@@ -8,13 +8,15 @@ type Props = {
   onChange: (status: boolean) => void;
   texts: [string, string];
   icons: [IconType, IconType];
+  spinIcon?: boolean;
 };
 
 export const Toggle: React.FC<Props> = ({
-  texts: [onText, offText],
-  icons: [OnIcon, OffIcon],
   status,
   onChange,
+  texts: [onText, offText],
+  icons: [OnIcon, OffIcon],
+  spinIcon,
 }) => {
   const CurrentIcon = status ? OnIcon : OffIcon;
   return (
@@ -28,7 +30,7 @@ export const Toggle: React.FC<Props> = ({
       onClick={() => onChange(!status)}
     >
       <div>
-        <CurrentIcon className="w-6 h-6" />
+        <CurrentIcon className={clsx("w-6 h-6", spinIcon && "animate-spin")} />
       </div>
       <span>{status ? onText : offText}</span>
     </button>
