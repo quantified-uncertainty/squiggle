@@ -54,6 +54,7 @@ const config = {
     ({
       navbar: {
         title: "Squiggle",
+        hideOnScroll: true,
         logo: {
           alt: "Squiggle Logo",
           src: "img/squiggle-logo.png",

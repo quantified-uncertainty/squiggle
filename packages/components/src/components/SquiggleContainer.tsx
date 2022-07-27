@@ -13,6 +13,7 @@ const SquiggleContext = React.createContext<SquiggleContextShape>({
 
 export const SquiggleContainer: React.FC<Props> = ({ children }) => {
   const context = useContext(SquiggleContext);
+
   if (context.containerized) {
     return <>{children}</>;
   } else {
