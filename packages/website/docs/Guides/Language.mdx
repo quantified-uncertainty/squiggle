@@ -47,6 +47,19 @@ f`}
 
 <SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
 
+### Comments
+
+<SquiggleEditor defaultCode={`// This is a single-line comment
+/*
+This is a multiple
+-line comment.
+*/
+`} />
+
+### Pipes
+
+<SquiggleEditor defaultCode={`normal(5,2) |> truncateLeft(3) |> SampleSet.fromDist`} />
+
 ## See more
 
 - [Distribution creation](./DistributionCreation)

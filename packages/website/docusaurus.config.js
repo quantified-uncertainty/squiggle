@@ -61,7 +61,7 @@ const config = {
         items: [
           {
             type: "doc",
-            docId: "Introduction",
+            docId: "Overview",
             position: "left",
             label: "Documentation",
           },
@@ -81,6 +81,11 @@ const config = {
           {
             href: "https://github.com/quantified-uncertainty/squiggle",
             label: "GitHub",
+            position: "right",
+          },
+          {
+            href: "https://quantifieduncertainty.org/",
+            label: "QURI",
             position: "right",
           },
         ],
