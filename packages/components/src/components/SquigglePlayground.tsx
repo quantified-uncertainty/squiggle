@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
-import { useMaybeControlledValue } from "../lib/hooks";
+import { useMaybeControlledValue, useRunnerState } from "../lib/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   ChartSquareBarIcon,
@@ -191,49 +191,10 @@ const RunControls: React.FC<{
         icons={[CheckCircleIcon, PauseIcon]}
         status={autorunMode}
         onChange={onAutorunModeChange}
+        spinIcon={autorunMode && isRunning}
       />
     </div>
   );
-};
-
-const useRunnerState = (code: string) => {
-  const [autorunMode, setAutorunMode] = useState(true);
-  const [renderedCode, setRenderedCode] = useState(code); // used in manual run mode only
-  const [isRunning, setIsRunning] = useState(false); // used in manual run mode only
-
-  // This part is tricky and fragile; we need to re-render first to make sure that the icon is spinning,
-  // and only then evaluate the squiggle code (which freezes the UI).
-  // Also note that `useEffect` execution order matters here.
-  // Hopefully it'll all go away after we make squiggle code evaluation async.
-  useEffect(() => {
-    if (renderedCode === code && isRunning) {
-      // It's not possible to put this after `setRenderedCode(code)` below because React would apply
-      // `setIsRunning` and `setRenderedCode` together and spinning icon will disappear immediately.
-      setIsRunning(false);
-    }
-  }, [renderedCode, code, isRunning]);
-
-  useEffect(() => {
-    if (!autorunMode && isRunning) {
-      setRenderedCode(code); // TODO - force run even if code hasn't changed
-    }
-  }, [autorunMode, code, isRunning]);
-
-  const run = () => {
-    // The rest will be handled by useEffects above, but we need to update the spinner first.
-    setIsRunning(true);
-  };
-
-  return {
-    run,
-    renderedCode: autorunMode ? code : renderedCode,
-    isRunning,
-    autorunMode,
-    setAutorunMode: (newValue: boolean) => {
-      if (!newValue) setRenderedCode(code);
-      setAutorunMode(newValue);
-    },
-  };
 };
 
 type PlaygroundContextShape = {
@@ -305,19 +266,32 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     [vars.sampleCount, vars.xyPointLength]
   );
 
-  const { run, autorunMode, setAutorunMode, isRunning, renderedCode } =
-    useRunnerState(code);
+  const {
+    run,
+    autorunMode,
+    setAutorunMode,
+    isRunning,
+    renderedCode,
+    executionId,
+  } = useRunnerState(code);
 
-  const squiggleChart = (
-    <SquiggleChart
-      code={renderedCode}
-      environment={env}
-      {...vars}
-      bindings={defaultBindings}
-      jsImports={imports}
-      enableLocalSettings={true}
-    />
-  );
+  const squiggleChart =
+    renderedCode === "" ? null : (
+      <div className="relative">
+        {isRunning ? (
+          <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
+        ) : null}
+        <SquiggleChart
+          code={renderedCode}
+          executionId={executionId}
+          environment={env}
+          {...vars}
+          bindings={defaultBindings}
+          jsImports={imports}
+          enableLocalSettings={true}
+        />
+      </div>
+    );
 
   const firstTab = vars.showEditor ? (
     <div className="border border-slate-200">
