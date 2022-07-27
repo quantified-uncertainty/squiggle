@@ -100,12 +100,15 @@ export let expYScale: PowScale = {
   },
 };
 
+export const defaultTickFormat = ".9~s";
+export const defaultColor = "#739ECC";
+
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
   let {
-    format = ".9~s",
-    color = "#739ECC",
+    format = defaultTickFormat,
+    color = defaultColor,
     title,
     minX,
     maxX,
