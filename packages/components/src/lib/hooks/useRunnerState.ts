@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useLayoutEffect, useReducer } from "react";
 
 type State = {
   autorunMode: boolean;
@@ -10,7 +10,7 @@ type State = {
 
 const buildInitialState = (code: string): State => ({
   autorunMode: true,
-  renderedCode: code,
+  renderedCode: "",
   runningState: "none",
   executionId: 1,
 });
@@ -62,9 +62,13 @@ const reducer = (state: State, action: Action): State => {
 export const useRunnerState = (code: string) => {
   const [state, dispatch] = useReducer(reducer, buildInitialState(code));
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (state.runningState === "prepared") {
-      dispatch({ type: "RUN", code });
+      // this is necessary for async playground loading - otherwise it executes the code synchronously on the initial load
+      // (it's surprising that this is necessary, but empirically it _is_ necessary, both with `useEffect` and `useLayoutEffect`)
+      setTimeout(() => {
+        dispatch({ type: "RUN", code });
+      }, 0);
     } else if (state.runningState === "run") {
       dispatch({ type: "STOP_RUN" });
     }

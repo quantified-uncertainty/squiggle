@@ -278,17 +278,18 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     executionId,
   } = useRunnerState(code);
 
-  const squiggleChart = (
-    <SquiggleChart
-      code={renderedCode}
-      executionId={executionId}
-      environment={env}
-      {...vars}
-      bindings={defaultBindings}
-      jsImports={imports}
-      enableLocalSettings={true}
-    />
-  );
+  const squiggleChart =
+    renderedCode === "" ? null : (
+      <SquiggleChart
+        code={renderedCode}
+        executionId={executionId}
+        environment={env}
+        {...vars}
+        bindings={defaultBindings}
+        jsImports={imports}
+        enableLocalSettings={true}
+      />
+    );
 
   const firstTab = vars.showEditor ? (
     <div className="border border-slate-200">
