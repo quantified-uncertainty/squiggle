@@ -191,7 +191,7 @@ const RunControls: React.FC<{
         icons={[CheckCircleIcon, PauseIcon]}
         status={autorunMode}
         onChange={onAutorunModeChange}
-        spinIcon={isRunning}
+        spinIcon={autorunMode && isRunning}
       />
     </div>
   );
