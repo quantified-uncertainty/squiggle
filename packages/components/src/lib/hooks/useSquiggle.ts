@@ -9,6 +9,7 @@ import { useEffect, useMemo } from "react";
 
 type SquiggleArgs<T extends ReturnType<typeof run | typeof runPartial>> = {
   code: string;
+  executionId?: number;
   bindings?: bindings;
   jsImports?: jsImports;
   environment?: environment;
@@ -21,7 +22,15 @@ const useSquiggleAny = <T extends ReturnType<typeof run | typeof runPartial>>(
 ) => {
   const result: T = useMemo<T>(
     () => f(args.code, args.bindings, args.environment, args.jsImports),
-    [f, args.code, args.bindings, args.environment, args.jsImports]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      f,
+      args.code,
+      args.bindings,
+      args.environment,
+      args.jsImports,
+      args.executionId,
+    ]
   );
 
   const { onChange } = args;

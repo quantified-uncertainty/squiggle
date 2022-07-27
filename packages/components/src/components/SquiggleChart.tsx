@@ -14,6 +14,8 @@ import { SquiggleViewer } from "./SquiggleViewer";
 export interface SquiggleChartProps {
   /** The input string for squiggle */
   code?: string;
+  /** Allows to re-run the code if code hasn't changed */
+  executionId?: number;
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
   /** The amount of points returned to draw the distribution */
@@ -59,6 +61,7 @@ const defaultOnChange = () => {};
 export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
   ({
     code = "",
+    executionId = 0,
     environment,
     onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
     height = 200,

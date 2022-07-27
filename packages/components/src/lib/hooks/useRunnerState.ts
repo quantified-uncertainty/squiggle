@@ -3,15 +3,16 @@ import { useEffect, useReducer } from "react";
 type State = {
   autorunMode: boolean;
   renderedCode: string;
-  isRunning: boolean;
+  // "prepared" is for rendering a spinner; "run" for executing squiggle code; then it gets back to "none" on the next render
+  runningState: "none" | "prepared" | "run";
   executionId: number;
 };
 
-const buildInitialState = (code: string) => ({
+const buildInitialState = (code: string): State => ({
   autorunMode: true,
   renderedCode: code,
-  isRunning: false,
-  executionId: 0,
+  runningState: "none",
+  executionId: 1,
 });
 
 type Action =
@@ -41,18 +42,19 @@ const reducer = (state: State, action: Action): State => {
     case "PREPARE_RUN":
       return {
         ...state,
-        isRunning: true,
+        runningState: "prepared",
       };
     case "RUN":
       return {
         ...state,
+        runningState: "run",
         renderedCode: action.code,
         executionId: state.executionId + 1,
       };
     case "STOP_RUN":
       return {
         ...state,
-        isRunning: false,
+        runningState: "none",
       };
   }
 };
@@ -61,21 +63,23 @@ export const useRunnerState = (code: string) => {
   const [state, dispatch] = useReducer(reducer, buildInitialState(code));
 
   useEffect(() => {
-    if (state.isRunning) {
-      if (state.renderedCode !== code) {
-        dispatch({ type: "RUN", code });
-      } else {
-        dispatch({ type: "STOP_RUN" });
-      }
+    if (state.runningState === "prepared") {
+      dispatch({ type: "RUN", code });
+    } else if (state.runningState === "run") {
+      dispatch({ type: "STOP_RUN" });
     }
-  }, [state.isRunning, state.renderedCode, code]);
+  }, [state.runningState, code]);
 
   const run = () => {
     // The rest will be handled by dispatches above on following renders, but we need to update the spinner first.
     dispatch({ type: "PREPARE_RUN" });
   };
 
-  if (state.autorunMode && state.renderedCode !== code && !state.isRunning) {
+  if (
+    state.autorunMode &&
+    state.renderedCode !== code &&
+    state.runningState === "none"
+  ) {
     run();
   }
 
@@ -83,7 +87,7 @@ export const useRunnerState = (code: string) => {
     run,
     autorunMode: state.autorunMode,
     renderedCode: state.renderedCode,
-    isRunning: state.isRunning,
+    isRunning: state.runningState !== "none",
     executionId: state.executionId,
     setAutorunMode: (newValue: boolean) => {
       dispatch({ type: "SET_AUTORUN_MODE", value: newValue, code });

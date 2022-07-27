@@ -269,12 +269,19 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     [vars.sampleCount, vars.xyPointLength]
   );
 
-  const { run, autorunMode, setAutorunMode, isRunning, renderedCode } =
-    useRunnerState(code);
+  const {
+    run,
+    autorunMode,
+    setAutorunMode,
+    isRunning,
+    renderedCode,
+    executionId,
+  } = useRunnerState(code);
 
   const squiggleChart = (
     <SquiggleChart
       code={renderedCode}
+      executionId={executionId}
       environment={env}
       {...vars}
       bindings={defaultBindings}
