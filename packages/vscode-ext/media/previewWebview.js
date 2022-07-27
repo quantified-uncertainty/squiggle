@@ -9,8 +9,6 @@
       React.createElement(squiggle_components.SquigglePlayground, {
         code: text,
         showEditor: false,
-        showTypes: Boolean(showSettings.showTypes),
-        showControls: Boolean(showSettings.showControls),
         showSummary: Boolean(showSettings.showSummary),
       })
     );

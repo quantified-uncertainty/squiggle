@@ -9,8 +9,7 @@ import {
   defaultEnvironment,
 } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
-import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
-import { SquiggleItem } from "./SquiggleItem";
+import { SquiggleViewer } from "./SquiggleViewer";
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
@@ -36,10 +35,6 @@ export interface SquiggleChartProps {
   jsImports?: jsImports;
   /** Whether to show a summary of the distribution */
   showSummary?: boolean;
-  /** Whether to show type information about returns, default false */
-  showTypes?: boolean;
-  /** Whether to show graph controls (scale etc)*/
-  showControls?: boolean;
   /** Set the x scale to be logarithmic by deault */
   logX?: boolean;
   /** Set the y scale to be exponential by deault */
@@ -56,6 +51,7 @@ export interface SquiggleChartProps {
   maxX?: number;
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;
+  enableLocalSettings?: boolean;
 }
 
 const defaultOnChange = () => {};
@@ -70,8 +66,6 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     jsImports = defaultImports,
     showSummary = false,
     width,
-    showTypes = false,
-    showControls = false,
     logX = false,
     expY = false,
     diagramStart = 0,
@@ -83,6 +77,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     color,
     title,
     distributionChartActions,
+    enableLocalSettings = false,
   }) => {
     const result = useSquiggle({
       code,
@@ -92,12 +87,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       onChange,
     });
 
-    if (result.tag !== "Ok") {
-      return <SquiggleErrorAlert error={result.value} />;
-    }
-
-    let distributionPlotSettings = {
-      showControls,
+    const distributionPlotSettings = {
       showSummary,
       logX,
       expY,
@@ -109,21 +99,21 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       actions: distributionChartActions,
     };
 
-    let chartSettings = {
+    const chartSettings = {
       start: diagramStart,
       stop: diagramStop,
       count: diagramCount,
     };
 
     return (
-      <SquiggleItem
-        expression={result.value}
+      <SquiggleViewer
+        result={result}
         width={width}
         height={height}
         distributionPlotSettings={distributionPlotSettings}
-        showTypes={showTypes}
         chartSettings={chartSettings}
         environment={environment ?? defaultEnvironment}
+        enableLocalSettings={enableLocalSettings}
       />
     );
   }

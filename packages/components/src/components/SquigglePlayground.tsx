@@ -1,5 +1,12 @@
-import React, { FC, useState, useEffect, useMemo } from "react";
-import { Path, useForm, UseFormRegister, useWatch } from "react-hook-form";
+import React, {
+  FC,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
+import { useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { useMaybeControlledValue, useRunnerState } from "../lib/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -24,13 +31,19 @@ import { JsonEditor } from "./JsonEditor";
 import { ErrorAlert, SuccessAlert } from "./Alert";
 import { SquiggleContainer } from "./SquiggleContainer";
 import { Toggle } from "./ui/Toggle";
-import { Checkbox } from "./ui/Checkbox";
 import { StyledTab } from "./ui/StyledTab";
+import { InputItem } from "./ui/InputItem";
+import { Text } from "./ui/Text";
+import { ViewSettings, viewSettingsSchema } from "./ViewSettings";
+import { HeadedSection } from "./ui/HeadedSection";
+import {
+  defaultColor,
+  defaultTickFormat,
+} from "../lib/distributionSpecBuilder";
 
 type PlaygroundProps = SquiggleChartProps & {
   /** The initial squiggle string to put in the playground */
   defaultCode?: string;
-  /** How many pixels high is the playground */
   onCodeChange?(expr: string): void;
   /* When settings change */
   onSettingsChange?(settings: any): void;
@@ -38,90 +51,29 @@ type PlaygroundProps = SquiggleChartProps & {
   showEditor?: boolean;
 };
 
-const schema = yup.object({}).shape({
-  sampleCount: yup
-    .number()
-    .required()
-    .positive()
-    .integer()
-    .default(1000)
-    .min(10)
-    .max(1000000),
-  xyPointLength: yup
-    .number()
-    .required()
-    .positive()
-    .integer()
-    .default(1000)
-    .min(10)
-    .max(10000),
-  chartHeight: yup.number().required().positive().integer().default(350),
-  leftSizePercent: yup
-    .number()
-    .required()
-    .positive()
-    .integer()
-    .min(10)
-    .max(100)
-    .default(50),
-  showTypes: yup.boolean().required(),
-  showControls: yup.boolean().required(),
-  showSummary: yup.boolean().required(),
-  showEditor: yup.boolean().required(),
-  logX: yup.boolean().required(),
-  expY: yup.boolean().required(),
-  tickFormat: yup.string().default(".9~s"),
-  title: yup.string(),
-  color: yup.string().default("#739ECC").required(),
-  minX: yup.number(),
-  maxX: yup.number(),
-  distributionChartActions: yup.boolean(),
-  showSettingsPage: yup.boolean().default(false),
-  diagramStart: yup.number().required().positive().integer().default(0).min(0),
-  diagramStop: yup.number().required().positive().integer().default(10).min(0),
-  diagramCount: yup.number().required().positive().integer().default(20).min(2),
-});
+const schema = yup
+  .object({})
+  .shape({
+    sampleCount: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(1000000),
+    xyPointLength: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(10000),
+  })
+  .concat(viewSettingsSchema);
 
 type FormFields = yup.InferType<typeof schema>;
-
-const HeadedSection: FC<{ title: string; children: React.ReactNode }> = ({
-  title,
-  children,
-}) => (
-  <div>
-    <header className="text-lg leading-6 font-medium text-gray-900">
-      {title}
-    </header>
-    <div className="mt-4">{children}</div>
-  </div>
-);
-
-const Text: FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="text-sm text-gray-500">{children}</p>
-);
-
-function InputItem<T>({
-  name,
-  label,
-  type,
-  register,
-}: {
-  name: Path<T>;
-  label: string;
-  type: "number" | "text" | "color";
-  register: UseFormRegister<T>;
-}) {
-  return (
-    <label className="block">
-      <div className="text-sm font-medium text-gray-600 mb-1">{label}</div>
-      <input
-        type={type}
-        {...register(name, { valueAsNumber: type === "number" })}
-        className="form-input max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
-      />
-    </label>
-  );
-}
 
 const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
   register,
@@ -154,128 +106,6 @@ const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
           how many coordinates to use.
         </Text>
       </div>
-    </div>
-  </div>
-);
-
-const ViewSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
-  register,
-}) => (
-  <div className="space-y-6 p-3 divide-y divide-gray-200 max-w-xl">
-    <HeadedSection title="General Display Settings">
-      <div className="space-y-4">
-        <Checkbox
-          name="showEditor"
-          register={register}
-          label="Show code editor on left"
-        />
-        <InputItem
-          name="chartHeight"
-          type="number"
-          register={register}
-          label="Chart Height (in pixels)"
-        />
-        <Checkbox
-          name="showTypes"
-          register={register}
-          label="Show information about displayed types"
-        />
-      </div>
-    </HeadedSection>
-
-    <div className="pt-8">
-      <HeadedSection title="Distribution Display Settings">
-        <div className="space-y-2">
-          <Checkbox
-            register={register}
-            name="logX"
-            label="Show x scale logarithmically"
-          />
-          <Checkbox
-            register={register}
-            name="expY"
-            label="Show y scale exponentially"
-          />
-          <Checkbox
-            register={register}
-            name="distributionChartActions"
-            label="Show vega chart controls"
-          />
-          <Checkbox
-            register={register}
-            name="showControls"
-            label="Show toggles to adjust scale of x and y axes"
-          />
-          <Checkbox
-            register={register}
-            name="showSummary"
-            label="Show summary statistics"
-          />
-          <InputItem
-            name="minX"
-            type="number"
-            register={register}
-            label="Min X Value"
-          />
-          <InputItem
-            name="maxX"
-            type="number"
-            register={register}
-            label="Max X Value"
-          />
-          <InputItem
-            name="title"
-            type="text"
-            register={register}
-            label="Title"
-          />
-          <InputItem
-            name="tickFormat"
-            type="text"
-            register={register}
-            label="Tick Format"
-          />
-          <InputItem
-            name="color"
-            type="color"
-            register={register}
-            label="Color"
-          />
-        </div>
-      </HeadedSection>
-    </div>
-
-    <div className="pt-8">
-      <HeadedSection title="Function Display Settings">
-        <div className="space-y-6">
-          <Text>
-            When displaying functions of single variables that return numbers or
-            distributions, we need to use defaults for the x-axis. We need to
-            select a minimum and maximum value of x to sample, and a number n of
-            the number of points to sample.
-          </Text>
-          <div className="space-y-4">
-            <InputItem
-              type="number"
-              name="diagramStart"
-              register={register}
-              label="Min X Value"
-            />
-            <InputItem
-              type="number"
-              name="diagramStop"
-              register={register}
-              label="Max X Value"
-            />
-            <InputItem
-              type="number"
-              name="diagramCount"
-              register={register}
-              label="Points between X min and X max to sample"
-            />
-          </div>
-        </div>
-      </HeadedSection>
     </div>
   </div>
 );
@@ -370,19 +200,24 @@ const RunControls: React.FC<{
   );
 };
 
+type PlaygroundContextShape = {
+  getLeftPanelElement: () => HTMLDivElement | undefined;
+};
+export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
+  getLeftPanelElement: () => undefined,
+});
+
 export const SquigglePlayground: FC<PlaygroundProps> = ({
   defaultCode = "",
   height = 500,
-  showTypes = false,
-  showControls = false,
   showSummary = false,
   logX = false,
   expY = false,
   title,
   minX,
   maxX,
-  color = "#739ECC",
-  tickFormat = ".9~s",
+  color = defaultColor,
+  tickFormat = defaultTickFormat,
   distributionChartActions,
   code: controlledCode,
   onCodeChange,
@@ -403,8 +238,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       sampleCount: 1000,
       xyPointLength: 1000,
       chartHeight: 150,
-      showTypes,
-      showControls,
       logX,
       expY,
       title,
@@ -415,8 +248,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       distributionChartActions,
       showSummary,
       showEditor,
-      leftSizePercent: 50,
-      showSettingsPage: false,
       diagramStart: 0,
       diagramStop: 10,
       diagramCount: 20,
@@ -448,6 +279,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       {...vars}
       bindings={defaultBindings}
       jsImports={imports}
+      enableLocalSettings={true}
     />
   );
 
@@ -473,7 +305,15 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
         <SamplingSettings register={register} />
       </StyledTab.Panel>
       <StyledTab.Panel>
-        <ViewSettings register={register} />
+        <ViewSettings
+          register={
+            // This is dangerous, but doesn't cause any problems.
+            // I tried to make `ViewSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
+            register as unknown as UseFormRegister<
+              yup.InferType<typeof viewSettingsSchema>
+            >
+          }
+        />
       </StyledTab.Panel>
       <StyledTab.Panel>
         <InputVariablesSettings
@@ -484,40 +324,54 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     </StyledTab.Panels>
   );
 
+  const leftPanelRef = useRef<HTMLDivElement | null>(null);
+
   const withEditor = (
     <div className="flex mt-2">
-      <div className="w-1/2">{tabs}</div>
+      <div
+        className="w-1/2 relative"
+        style={{ minHeight: height }}
+        ref={leftPanelRef}
+      >
+        {tabs}
+      </div>
       <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
     </div>
   );
 
   const withoutEditor = <div className="mt-3">{tabs}</div>;
 
+  const getLeftPanelElement = useCallback(() => {
+    return leftPanelRef.current ?? undefined;
+  }, []);
+
   return (
     <SquiggleContainer>
-      <StyledTab.Group>
-        <div className="pb-4">
-          <div className="flex justify-between items-center">
-            <StyledTab.List>
-              <StyledTab
-                name={vars.showEditor ? "Code" : "Display"}
-                icon={vars.showEditor ? CodeIcon : EyeIcon}
+      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+        <StyledTab.Group>
+          <div className="pb-4">
+            <div className="flex justify-between items-center">
+              <StyledTab.List>
+                <StyledTab
+                  name={vars.showEditor ? "Code" : "Display"}
+                  icon={vars.showEditor ? CodeIcon : EyeIcon}
+                />
+                <StyledTab name="Sampling Settings" icon={CogIcon} />
+                <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+              </StyledTab.List>
+              <RunControls
+                autorunMode={autorunMode}
+                isStale={renderedCode !== code}
+                run={run}
+                isRunning={isRunning}
+                onAutorunModeChange={setAutorunMode}
               />
-              <StyledTab name="Sampling Settings" icon={CogIcon} />
-              <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-              <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-            </StyledTab.List>
-            <RunControls
-              autorunMode={autorunMode}
-              isStale={renderedCode !== code}
-              run={run}
-              isRunning={isRunning}
-              onAutorunModeChange={setAutorunMode}
-            />
+            </div>
+            {vars.showEditor ? withEditor : withoutEditor}
           </div>
-          {vars.showEditor ? withEditor : withoutEditor}
-        </div>
-      </StyledTab.Group>
+        </StyledTab.Group>
+      </PlaygroundContext.Provider>
     </SquiggleContainer>
   );
 };
