@@ -3,9 +3,60 @@ sidebar_position: 1
 title: Overview
 ---
 
+import { SquiggleEditor } from "../src/components/SquiggleEditor";
+
 Squiggle is a minimalist programming language for probabilistic estimation. It's meant for intuitively-driven quantitative estimation instead of data analysis or data-driven statistical techniques.
 
 The basics of Squiggle are fairly straightforward. This can be enough for many models. The more advanced functionality can take some time to learn.
+
+## Simple example
+Say you're trying to estimate the number of piano tuners in New York City. You can build a simple model of this, like so.  
+(Tip: This is interactive! Feel free to modify the code directly.)
+
+<SquiggleEditor defaultCode={`
+// Piano tuners in NYC over the next 5 years
+populationOfNewYork2022 = 8.1M to 8.4M // This means that you're 90% confident the value is between 8.1 and 8.4 Million.\n
+proportionOfPopulationWithPianos = {
+    percentage = (.2 to 1)
+    percentage * 0.01
+} // We assume there are almost no people with multiple pianos\n
+pianoTunersPerPiano = {
+    pianosPerPianoTuner = 2k to 50k // This is artificially narrow, to help graphics later
+    1 / pianosPerPianoTuner
+} \n
+totalTunersIn2022 = populationOfNewYork2022 * proportionOfPopulationWithPianos * pianoTunersPerPiano
+totalTunersIn2022
+`} />
+
+--- 
+
+Now let's take this a bit further. Let's imagine that you think that NYC will grow over time, and you'd like to estimate the number of piano tuners for every point in time for the next few years.
+
+<SquiggleEditor defaultCode={`// Piano tuners in NYC over the next 5 years
+populationOfNewYork2022 = 8.1M to 8.4M\n
+proportionOfPopulationWithPianos = {
+    percentage = (.2 to 1)
+    percentage * 0.01
+} // We assume there are almost no people with multiple pianos\n
+pianoTunersPerPiano = {
+    pianosPerPianoTuner = 2k to 50k // This is artificially narrow, to help graphics later
+    1 / pianosPerPianoTuner
+} \n
+//Time in years after 2022
+populationAtTime(t) = {
+    averageYearlyPercentageChange = -0.01 to 0.05 // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
+    populationOfNewYork2022 * ((averageYearlyPercentageChange + 1) ^ t)
+}\n
+median(v) = quantile(v, .5)
+totalTunersAtTime(t) = populationAtTime(t) * proportionOfPopulationWithPianos * pianoTunersPerPiano\n
+{
+    populationAtTime: populationAtTime,
+    totalTunersAtTimeMedian: {|t| median(totalTunersAtTime(t))}
+}`} />
+
+If you haven't noticed yet, you can hover over the `populationAtTime` graph to see the distribution of population at different points in time.
+
+
 
 ## Using Squiggle
 You can currently interact with Squiggle in a few ways:
@@ -21,13 +72,6 @@ All of the components used in the playground and documentation are available in 
 
 **[Visual Studio Code Extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)**  
 There's a simple [VS Code extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle) for running and visualizing Squiggle code. We find that VS Code is a useful editor for managing larger Squiggle setups.
-
-## Very simple model
-
-```squiggle
-//Write comments like this
-/* 
-```
 
 ## Squiggle Vs. Other Tools
 
