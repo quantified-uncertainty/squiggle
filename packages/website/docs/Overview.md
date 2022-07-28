@@ -22,6 +22,13 @@ All of the components used in the playground and documentation are available in 
 **[Visual Studio Code Extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)**  
 There's a simple [VS Code extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle) for running and visualizing Squiggle code. We find that VS Code is a useful editor for managing larger Squiggle setups.
 
+## Very simple model
+
+```squiggle
+//Write comments like this
+/* 
+```
+
 ## Squiggle Vs. Other Tools
 
 ### What Squiggle Is
