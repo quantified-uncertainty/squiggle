@@ -7,10 +7,15 @@ open InternalExpressionValue
 let rec isITypeOf = (anIType: T.iType, aValue): result<bool, T.typeErrorValue> => {
   let caseTypeIdentifier = (anUpperTypeName, aValue) => {
     let aTypeName = anUpperTypeName->Js.String2.toLowerCase
-    let valueTypeName = aValue->valueToValueType->valueTypeToString->Js.String2.toLowerCase
-    switch aTypeName == valueTypeName {
-    | true => Ok(true)
-    | false => T.TypeMismatch(anIType, aValue)->Error
+    switch aTypeName {
+    | "any" => Ok(true)
+    | _ => {
+        let valueTypeName = aValue->valueToValueType->valueTypeToString->Js.String2.toLowerCase
+        switch aTypeName == valueTypeName {
+        | true => Ok(true)
+        | false => T.TypeMismatch(anIType, aValue)->Error
+        }
+      }
     }
   }
 
