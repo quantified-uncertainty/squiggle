@@ -13,6 +13,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
   ChartSquareBarIcon,
   CheckCircleIcon,
+  ClipboardCopyIcon,
   CodeIcon,
   CogIcon,
   CurrencyDollarIcon,
@@ -40,6 +41,7 @@ import {
   defaultColor,
   defaultTickFormat,
 } from "../lib/distributionSpecBuilder";
+import { Button } from "./ui/Button";
 
 type PlaygroundProps = SquiggleChartProps & {
   /** The initial squiggle string to put in the playground */
@@ -49,6 +51,8 @@ type PlaygroundProps = SquiggleChartProps & {
   onSettingsChange?(settings: any): void;
   /** Should we show the editor? */
   showEditor?: boolean;
+  /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
+  showShareButton?: boolean;
 };
 
 const schema = yup
@@ -197,6 +201,29 @@ const RunControls: React.FC<{
   );
 };
 
+const ShareButton: React.FC = () => {
+  const [isCopied, setIsCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText((window.top || window).location.href);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 1000);
+  };
+  return (
+    <div className="w-36">
+      <Button onClick={copy} wide>
+        {isCopied ? (
+          "Copied to clipboard!"
+        ) : (
+          <div className="flex items-center space-x-1">
+            <ClipboardCopyIcon className="w-4 h-4" />
+            <span>Copy share link</span>
+          </div>
+        )}
+      </Button>
+    </div>
+  );
+};
+
 type PlaygroundContextShape = {
   getLeftPanelElement: () => HTMLDivElement | undefined;
 };
@@ -220,6 +247,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   onCodeChange,
   onSettingsChange,
   showEditor = true,
+  showShareButton = false,
 }) => {
   const [code, setCode] = useMaybeControlledValue({
     value: controlledCode,
@@ -370,13 +398,16 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
                 <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
                 <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
               </StyledTab.List>
-              <RunControls
-                autorunMode={autorunMode}
-                isStale={renderedCode !== code}
-                run={run}
-                isRunning={isRunning}
-                onAutorunModeChange={setAutorunMode}
-              />
+              <div className="flex space-x-2 items-center">
+                <RunControls
+                  autorunMode={autorunMode}
+                  isStale={renderedCode !== code}
+                  run={run}
+                  isRunning={isRunning}
+                  onAutorunModeChange={setAutorunMode}
+                />
+                {showShareButton && <ShareButton />}
+              </div>
             </div>
             {vars.showEditor ? withEditor : withoutEditor}
           </div>

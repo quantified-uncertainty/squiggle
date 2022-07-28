@@ -44,6 +44,7 @@ export default function PlaygroundPage() {
   const playgroundProps = {
     defaultCode: "normal(0,1)",
     height: 700,
+    showShareButton: true,
     ...hashData,
     onCodeChange: (code) => setHashData({ initialSquiggleString: code }),
     onSettingsChange: (settings) => {
