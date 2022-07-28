@@ -9,11 +9,14 @@ Squiggle is still very early. The main first goal is to become stable (to reach 
 
 - Tables / Matrices
 - A simple type system
-- A simple time library & notation
 - Optional and default paramaters for functions
 - A notation to limit the domain of functions. For example, maybe a function only applies for t=[2 to 20]
+- Some story for tests
+- Much better code editor integration
 
 ## Distribution Features
+
+There are many important distribution types that Squiggle doesn't yet support. Some key functions we'd like include:
 
 [Metalog Distribution](https://en.wikipedia.org/wiki/Metalog_distribution)  
 Add the Metalog distribution, and some convenient methods for generating these distributions. This might be a bit tricky because we might need or build a library to fit data. There's no Metalog javascript library yet, this would be pretty useful. There's already a Metalog library in Python, so that one could be used for inspiration.
@@ -26,9 +29,6 @@ Takes a distribution and smoothens it. For example, [Elicit Forecast](https://fo
 **Probabilities**  
 Right now Squiggle mostly works with probability distributions only, but it should also work smoothly with probabilities.
 
-**Importance & quality scores**  
-Workflows/functionality to declare the importance and coveredness of each part of the paramater space. For example, some subsets of the paramater space of a function might be much more important to get right than others. Similarly, the analyst might be much more certain about some parts than others. Ideally. they could decline sections.
-
 **An interface to interpret & score Squiggle files**  
 Squiggle functions need to be aggregated and scored. This should be done outside one Squiggle file. Maybe this should also be done in Squiggle, or maybe it should be done using Javascript.
 
@@ -37,6 +37,9 @@ My guess is that there should eventually be some way for people to declare that 
 Of course, we'd also need good math for how the scoring should work, exactly.
 
 This interface should also be able to handle changing Squiggle values. This is because people would be likely to want to update their functions over time, and that should be taken into account for scoring.
+
+**Importance & quality scores**  
+Workflows/functionality to declare the importance and coveredness of each part of the paramater space. For example, some subsets of the paramater space of a function might be much more important to get right than others. Similarly, the analyst might be much more certain about some parts than others. Ideally. they could decline sections.
 
 **Static / Sensitivity Analysis**  
 Guesstimate has Sensitivity analysis that's pretty useful. This could be quite feasible to add, though it will likely require some thinking.
@@ -47,14 +50,5 @@ It might be useful to allow people to annotate functions and variables with long
 **Randomness Seeds**  
 Right now, Monte Carlo simulations are totally random. It would be nicer to be able to enter a seed somehow in order to control the randomness. Or, with the same seed, the function should always return the same values. This would make debugging and similar easier.
 
-## Major Standard Language Features
-
-- Some testing story.
-
-### Distributions
-
-```js
-cauchy();
-pareto();
-metalog();
-```
+**Caching/Memoization**  
+There are many performance improvements that Squiggle could have. We'll get to some of them eventually.
