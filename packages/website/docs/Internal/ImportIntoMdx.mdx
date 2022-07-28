@@ -3,7 +3,7 @@ title: How to import squiggle files into `.mdx` documents
 sidebar_position: 5
 ---
 
-import { SquiggleEditorWithImportedBindings } from "@quri/squiggle-components";
+import { SquiggleEditorWithImportedBindings } from "../../src/components/SquiggleEditor";
 
 _Proof of concept_
 
@@ -21,7 +21,7 @@ z = y.b * y.a
 We can call `f(z)` upon the assignments in `demo.squiggle` like so:
 
 ```jsx
-import { SquiggleEditorWithImportedBindings } from "@quri/squiggle-components";
+import { SquiggleEditorWithImportedBindings } from "../../src/components/SquiggleEditor";
 
 <SquiggleEditorWithImportedBindings
   defaultCode={"f(z)"}
