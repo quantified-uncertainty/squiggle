@@ -9,7 +9,7 @@ Features:
 - Preview `.squiggle` files in a preview pane
 - Syntax highlighting for `.squiggle` and `.squiggleU` files
 
-## Installation 
+## Installation
 
 You can install this extension by going to the "extensions" tab, searching for "Squiggle", and then installing it.
 
@@ -23,7 +23,7 @@ After loading a `.squiggle` file, an "Open Preview" button will appear. If you c
 
 ### Configuration (optional)
 
-Some preview settings, e.g. whether to show the summary table or types of outputs, can be configurable on in the VS Code settings and persist between different preview sessions. The VS Code settings can be accessed with the shortcut `Ctrl+,` with `Ctrl+Shift+P` + searching "Open Settings", or by accessing a file like `$HOME/.config/Code/User/settings.json` in Linux (see [here](https://stackoverflow.com/questions/65908987/how-can-i-open-visual-studio-codes-settings-json-file)) for other operating systems. 
+Some preview settings, e.g. whether to show the summary table or types of outputs, can be configurable on in the VS Code settings and persist between different preview sessions. The VS Code settings can be accessed with the shortcut `Ctrl+,` with `Ctrl+Shift+P` + searching "Open Settings", or by accessing a file like `$HOME/.config/Code/User/settings.json` in Linux (see [here](https://stackoverflow.com/questions/65908987/how-can-i-open-visual-studio-codes-settings-json-file)) for other operating systems.
 
 ![](./images/vs-code-settings.png)
 
