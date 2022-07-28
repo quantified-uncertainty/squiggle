@@ -34,7 +34,14 @@ export const SquiggleEditorWithImportedBindings: React.FC<
       let contents = await fetch(fileName).then((response) => {
         return response.text();
       });
-      setBindingsResult(runPartial(contents));
+      setBindingsResult(
+        runPartial(
+          contents,
+          editorProps.bindings,
+          editorProps.environment,
+          editorProps.jsImports
+        )
+      );
     }
     retrieveBindings(bindingsImportUrl);
   }, [bindingsImportUrl]);
