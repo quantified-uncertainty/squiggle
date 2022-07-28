@@ -1,10 +1,13 @@
+@gentype.import("peggy") @genType.as("LocationRange")
+type location
+
 @genType
 type errorValue =
   | REArityError(option<string>, int, int) //TODO: Binding a lambda to a variable should record the variable name in lambda for error reporting
   | REArrayIndexNotFound(string, int)
   | REAssignmentExpected
   | REDistributionError(DistributionTypes.error)
-  | REExpectedType(string)
+  | REExpectedType(string, string)
   | REExpressionExpected
   | REFunctionExpected(string)
   | REFunctionNotFound(string)
@@ -14,7 +17,7 @@ type errorValue =
   | REOperationError(Operation.operationError)
   | RERecordPropertyNotFound(string, string)
   | RESymbolNotFound(string)
-  | RESyntaxError(string)
+  | RESyntaxError(string, option<location>)
   | RETodo(string) // To do
   | REUnitNotFound(string)
 
@@ -50,8 +53,8 @@ let errorToString = err =>
   | RENotAFunction(valueString) => `${valueString} is not a function`
   | RERecordPropertyNotFound(msg, index) => `${msg}: ${index}`
   | RESymbolNotFound(symbolName) => `${symbolName} is not defined`
-  | RESyntaxError(desc) => `Syntax Error: ${desc}`
+  | RESyntaxError(desc, _) => `Syntax Error: ${desc}`
   | RETodo(msg) => `TODO: ${msg}`
-  | REExpectedType(typeName) => `Expected type: ${typeName}`
+  | REExpectedType(typeName, valueString) => `Expected type: ${typeName} but got: ${valueString}`
   | REUnitNotFound(unitName) => `Unit not found: ${unitName}`
   }

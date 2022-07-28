@@ -3,5 +3,5 @@
 */
 module ExtraList = Reducer_Extra_List
 
-let interperse = (anArray, seperator) =>
-  anArray->Belt.List.fromArray->ExtraList.interperse(seperator)->Belt.List.toArray
+let intersperse = (anArray, seperator) =>
+  anArray->Belt.List.fromArray->ExtraList.intersperse(seperator)->Belt.List.toArray

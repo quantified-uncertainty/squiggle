@@ -10,7 +10,8 @@ const path = require("path");
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Squiggle",
-  tagline: "An estimation language for forecasters",
+  tagline:
+    "A simple programming language for intuitive probabilistic estimation",
   url: "https://squiggle-language.com",
   baseUrl: "/",
   onBrokenLinks: "throw",
@@ -53,6 +54,7 @@ const config = {
     ({
       navbar: {
         title: "Squiggle",
+        hideOnScroll: true,
         logo: {
           alt: "Squiggle Logo",
           src: "img/quri-logo.png",
@@ -72,6 +74,11 @@ const config = {
           },
           { to: "/blog", label: "Blog", position: "left" },
           { to: "/playground", label: "Playground", position: "left" },
+          {
+            href: "https://github.com/quantified-uncertainty/squiggle/discussions",
+            label: "Issues & Discussion",
+            position: "right",
+          },
           {
             href: "https://github.com/quantified-uncertainty/squiggle",
             label: "GitHub",

@@ -1,3 +1,5 @@
+@@warning("-27") //TODO: Remove and fix the warning
+@@warning("-32") //TODO: Remove and fix the warning
 open Distributions
 
 type t = PointSetTypes.mixedShape
@@ -299,15 +301,6 @@ module T = Dist({
     | 0.0 => Continuous.T.variance(continuous)
     | _ => XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
     }
-  }
-
-  let klDivergence = (prediction: t, answer: t) => {
-    let klDiscretePart = Discrete.T.klDivergence(prediction.discrete, answer.discrete)
-    let klContinuousPart = Continuous.T.klDivergence(prediction.continuous, answer.continuous)
-    E.R.merge(klDiscretePart, klContinuousPart)->E.R2.fmap(t => fst(t) +. snd(t))
-  }
-  let logScoreWithPointResolution = (~prediction: t, ~answer: float, ~prior: option<t>) => {
-    Error(Operation.NotYetImplemented)
   }
 })
 

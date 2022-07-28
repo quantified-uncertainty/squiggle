@@ -1,7 +1,13 @@
 import * as React from "react";
-import { lambdaValue, environment, runForeign } from "@quri/squiggle-lang";
+import {
+  lambdaValue,
+  environment,
+  runForeign,
+  errorValueToString,
+} from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
+import { DistributionPlottingSettings } from "./DistributionChart";
 import { ErrorAlert, MessageAlert } from "./Alert";
 
 export type FunctionChartSettings = {
@@ -13,6 +19,7 @@ export type FunctionChartSettings = {
 interface FunctionChartProps {
   fn: lambdaValue;
   chartSettings: FunctionChartSettings;
+  distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;
   height: number;
 }
@@ -21,6 +28,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
   chartSettings,
   environment,
+  distributionPlotSettings,
   height,
 }) => {
   if (fn.parameters.length > 1) {
@@ -42,10 +50,16 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
     }
   };
   const validResult = getValidResult();
-  const resultType =
-    validResult.tag === "Ok" ? validResult.value.tag : ("Error" as const);
 
-  switch (resultType) {
+  if (validResult.tag === "Error") {
+    return (
+      <ErrorAlert heading="Error">
+        {errorValueToString(validResult.value)}
+      </ErrorAlert>
+    );
+  }
+
+  switch (validResult.value.tag) {
     case "distribution":
       return (
         <FunctionChart1Dist
@@ -53,6 +67,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
           chartSettings={chartSettings}
           environment={environment}
           height={height}
+          distributionPlotSettings={distributionPlotSettings}
         />
       );
     case "number":
@@ -64,15 +79,11 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
           height={height}
         />
       );
-    case "Error":
-      return (
-        <ErrorAlert heading="Error">The function failed to be run</ErrorAlert>
-      );
     default:
       return (
         <MessageAlert heading="Function Display Not Supported">
           There is no function visualization for this type of output:{" "}
-          <span className="font-bold">{resultType}</span>
+          <span className="font-bold">{validResult.value.tag}</span>
         </MessageAlert>
       );
   }

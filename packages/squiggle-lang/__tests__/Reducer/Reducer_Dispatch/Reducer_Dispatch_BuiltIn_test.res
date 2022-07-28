@@ -1,4 +1,4 @@
-module ExpressionValue = ReducerInterface.ExpressionValue
+module ExpressionValue = ReducerInterface.ExternalExpressionValue
 
 open Jest
 open Expect
@@ -17,10 +17,6 @@ describe("builtin", () => {
   testEval("1-1", "Ok(0)")
   testEval("2>1", "Ok(true)")
   testEval("concat('a','b')", "Ok('ab')")
-  testEval(
-    "addOne(t)=t+1; toList(mapSamples(fromSamples([1,2,3,4,5,6]), addOne))",
-    "Ok([2,3,4,5,6,7])",
-  )
 })
 
 describe("builtin exception", () => {

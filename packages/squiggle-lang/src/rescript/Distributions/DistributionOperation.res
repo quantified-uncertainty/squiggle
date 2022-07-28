@@ -4,12 +4,9 @@ type error = DistributionTypes.error
 
 // TODO: It could be great to use a cache for some calculations (basically, do memoization). Also, better analytics/tracking could go a long way.
 
-type env = {
-  sampleCount: int,
-  xyPointLength: int,
-}
+type env = GenericDist.env
 
-let defaultEnv = {
+let defaultEnv: env = {
   sampleCount: MagicNumbers.Environment.defaultSampleCount,
   xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
@@ -93,7 +90,7 @@ module OutputLocal = {
     }
 }
 
-let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
+let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
   let {sampleCount, xyPointLength} = env
 
   let reCall = (~env=env, ~functionCallInfo=functionCallInfo, ()) => {
@@ -101,14 +98,14 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
   }
 
   let toPointSetFn = r => {
-    switch reCall(~functionCallInfo=FromDist(ToDist(ToPointSet), r), ()) {
+    switch reCall(~functionCallInfo=FromDist(#ToDist(ToPointSet), r), ()) {
     | Dist(PointSet(p)) => Ok(p)
     | e => Error(OutputLocal.toErrorOrUnreachable(e))
     }
   }
 
   let toSampleSetFn = r => {
-    switch reCall(~functionCallInfo=FromDist(ToDist(ToSampleSet(sampleCount)), r), ()) {
+    switch reCall(~functionCallInfo=FromDist(#ToDist(ToSampleSet(sampleCount)), r), ()) {
     | Dist(SampleSet(p)) => Ok(p)
     | e => Error(OutputLocal.toErrorOrUnreachable(e))
     }
@@ -116,13 +113,13 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
 
   let scaleMultiply = (r, weight) =>
     reCall(
-      ~functionCallInfo=FromDist(ToDistCombination(Pointwise, #Multiply, #Float(weight)), r),
+      ~functionCallInfo=FromDist(#ToDistCombination(Pointwise, #Multiply, #Float(weight)), r),
       (),
     )->OutputLocal.toDistR
 
   let pointwiseAdd = (r1, r2) =>
     reCall(
-      ~functionCallInfo=FromDist(ToDistCombination(Pointwise, #Add, #Dist(r2)), r1),
+      ~functionCallInfo=FromDist(#ToDistCombination(Pointwise, #Add, #Dist(r2)), r1),
       (),
     )->OutputLocal.toDistR
 
@@ -131,49 +128,40 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
     dist: genericDist,
   ): outputType => {
     let response = switch subFnName {
-    | ToFloat(distToFloatOperation) =>
+    | #ToFloat(distToFloatOperation) =>
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
       ->E.R2.fmap(r => Float(r))
       ->OutputLocal.fromResult
-    | ToString(ToString) => dist->GenericDist.toString->String
-    | ToString(ToSparkline(bucketCount)) =>
+    | #ToString(ToString) => dist->GenericDist.toString->String
+    | #ToString(ToSparkline(bucketCount)) =>
       GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
       ->E.R2.fmap(r => String(r))
       ->OutputLocal.fromResult
-    | ToDist(Inspect) => {
+    | #ToDist(Inspect) => {
         Js.log2("Console log requested: ", dist)
         Dist(dist)
       }
-    | ToDist(Normalize) => dist->GenericDist.normalize->Dist
-    | ToScore(KLDivergence(t2)) =>
-      GenericDist.Score.klDivergence(dist, t2, ~toPointSetFn)
-      ->E.R2.fmap(r => Float(r))
+    | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
+    | #ToScore(LogScore(answer, prior)) =>
+      GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior, ~env)
+      ->E.R2.fmap(s => Float(s))
       ->OutputLocal.fromResult
-    | ToScore(LogScore(answer, prior)) =>
-      GenericDist.Score.logScoreWithPointResolution(
-        ~prediction=dist,
-        ~answer,
-        ~prior,
-        ~toPointSetFn,
-      )
-      ->E.R2.fmap(r => Float(r))
-      ->OutputLocal.fromResult
-    | ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
-    | ToDist(Truncate(leftCutoff, rightCutoff)) =>
+    | #ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
+    | #ToDist(Truncate(leftCutoff, rightCutoff)) =>
       GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDist(ToSampleSet(n)) =>
+    | #ToDist(ToSampleSet(n)) =>
       dist
       ->GenericDist.toSampleSetDist(n)
       ->E.R2.fmap(r => Dist(SampleSet(r)))
       ->OutputLocal.fromResult
-    | ToDist(ToPointSet) =>
+    | #ToDist(ToPointSet) =>
       dist
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
       ->E.R2.fmap(r => Dist(PointSet(r)))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
+    | #ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(
         ~toPointSetFn,
@@ -182,18 +170,23 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       )
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#Logarithm, f)) =>
+    | #ToDist(Scale(#Multiply, f)) =>
+      dist
+      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Multiply, ~f)
+      ->E.R2.fmap(r => Dist(r))
+      ->OutputLocal.fromResult
+    | #ToDist(Scale(#Logarithm, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDist(Scale(#Power, f)) =>
+    | #ToDist(Scale(#Power, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Power, ~f)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Algebraic(_), _, #Float(_)) => GenDistError(NotYetImplemented)
-    | ToDistCombination(Algebraic(strategy), arithmeticOperation, #Dist(t2)) =>
+    | #ToDistCombination(Algebraic(_), _, #Float(_)) => GenDistError(NotYetImplemented)
+    | #ToDistCombination(Algebraic(strategy), arithmeticOperation, #Dist(t2)) =>
       dist
       ->GenericDist.algebraicCombination(
         ~strategy,
@@ -204,12 +197,12 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
       )
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Pointwise, algebraicCombination, #Dist(t2)) =>
+    | #ToDistCombination(Pointwise, algebraicCombination, #Dist(t2)) =>
       dist
       ->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination, ~t2)
       ->E.R2.fmap(r => Dist(r))
       ->OutputLocal.fromResult
-    | ToDistCombination(Pointwise, algebraicCombination, #Float(f)) =>
+    | #ToDistCombination(Pointwise, algebraicCombination, #Float(f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination, ~f)
       ->E.R2.fmap(r => Dist(r))
@@ -220,8 +213,7 @@ let rec run = (~env, functionCallInfo: functionCallInfo): outputType => {
 
   switch functionCallInfo {
   | FromDist(subFnName, dist) => fromDistFn(subFnName, dist)
-  | FromFloat(subFnName, float) =>
-    reCall(~functionCallInfo=FromDist(subFnName, GenericDist.fromFloat(float)), ())
+  | FromFloat(subFnName, x) => reCall(~functionCallInfo=FromFloat(subFnName, x), ())
   | Mixture(dists) =>
     dists
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd)
@@ -273,13 +265,16 @@ module Constructors = {
   let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
   let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
   let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
-  let klDivergence = (~env, dist1, dist2) => C.klDivergence(dist1, dist2)->run(~env)->toFloatR
-  let logScoreWithPointResolution = (
-    ~env,
-    ~prediction: DistributionTypes.genericDist,
-    ~answer: float,
-    ~prior: option<DistributionTypes.genericDist>,
-  ) => C.logScoreWithPointResolution(~prediction, ~answer, ~prior)->run(~env)->toFloatR
+  module LogScore = {
+    let distEstimateDistAnswer = (~env, estimate, answer) =>
+      C.LogScore.distEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
+    let distEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
+      C.LogScore.distEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+    let distEstimateScalarAnswer = (~env, estimate, answer) =>
+      C.LogScore.distEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
+    let distEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
+      C.LogScore.distEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+  }
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
   let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR
@@ -298,6 +293,7 @@ module Constructors = {
   let algebraicLogarithm = (~env, dist1, dist2) =>
     C.algebraicLogarithm(dist1, dist2)->run(~env)->toDistR
   let algebraicPower = (~env, dist1, dist2) => C.algebraicPower(dist1, dist2)->run(~env)->toDistR
+  let scaleMultiply = (~env, dist, n) => C.scaleMultiply(dist, n)->run(~env)->toDistR
   let scalePower = (~env, dist, n) => C.scalePower(dist, n)->run(~env)->toDistR
   let scaleLogarithm = (~env, dist, n) => C.scaleLogarithm(dist, n)->run(~env)->toDistR
   let pointwiseAdd = (~env, dist1, dist2) => C.pointwiseAdd(dist1, dist2)->run(~env)->toDistR

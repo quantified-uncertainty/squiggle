@@ -19,7 +19,6 @@ exception MixtureFailed
 let float1 = 1.0
 let float2 = 2.0
 let float3 = 3.0
-let {mkDelta} = module(TestHelpers)
-let point1 = mkDelta(float1)
-let point2 = mkDelta(float2)
-let point3 = mkDelta(float3)
+let point1 = TestHelpers.mkDelta(float1)
+let point2 = TestHelpers.mkDelta(float2)
+let point3 = TestHelpers.mkDelta(float3)

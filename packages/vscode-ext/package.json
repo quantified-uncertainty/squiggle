@@ -1,0 +1,146 @@
+{
+  "name": "vscode-squiggle",
+  "displayName": "Squiggle",
+  "description": "Squiggle language support",
+  "license": "MIT",
+  "version": "0.2.0",
+  "publisher": "QURI",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quantified-uncertainty/squiggle.git"
+  },
+  "icon": "media/vendor/icon.png",
+  "engines": {
+    "vscode": "^1.68.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "activationEvents": [
+    "onLanguage:squiggle",
+    "onCustomEditor:squiggle.wysiwyg",
+    "onCommand:squiggle.preview"
+  ],
+  "main": "./client/out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "squiggle",
+        "extensions": [
+          ".squiggle"
+        ],
+        "aliases": [
+          "Squiggle"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "squiggleU",
+        "extensions": [
+          ".squiggleU"
+        ],
+        "aliases": [
+          "SquiggleU"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "squiggle",
+        "scopeName": "source.squiggle",
+        "path": "./syntaxes/squiggle.tmLanguage.json"
+      },
+      {
+        "language": "squiggleU",
+        "scopeName": "source.squiggle",
+        "path": "./syntaxes/squiggle.tmLanguage.json"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "squiggle.wysiwyg",
+        "displayName": "Squiggle WYSIWYG",
+        "selector": [
+          {
+            "filenamePattern": "*.squiggle"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "commands": [
+      {
+        "command": "squiggle.preview",
+        "title": "Open Preview",
+        "category": "Squiggle",
+        "when": "editorLangId == squiggle",
+        "icon": "$(open-preview)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "squiggle.preview",
+          "when": "editorLangId == squiggle",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "squiggle.preview",
+          "when": "editorLangId == squiggle"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "squiggle.preview",
+        "key": "ctrl+k v",
+        "mac": "cmd+k v",
+        "when": "editorLangId == squiggle"
+      }
+    ],
+    "configuration": {
+      "title": "Squiggle",
+      "properties": {
+        "squiggle.playground.showSummary": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to show the summary table in the playground"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile:tsc": "tsc -b",
+    "compile:grammar": "js-yaml syntaxes/squiggle.tmLanguage.yaml >syntaxes/squiggle.tmLanguage.json",
+    "compile:vendor": "(cd ../squiggle-lang && yarn run build) && (cd ../components && yarn run bundle && yarn run build:css) && mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/quri-logo.png media/vendor/icon.png",
+    "compile": "yarn run compile:vendor && yarn run compile:grammar && yarn run compile:tsc",
+    "watch": "tsc -b -watch",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint client/src server/src --ext ts",
+    "format": "eslint client/src server/src --ext ts --fix",
+    "package": "npx vsce package --yarn"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.69.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.7",
+    "@typescript-eslint/parser": "^5.30.7",
+    "eslint": "^8.20.0",
+    "glob": "^8.0.3",
+    "js-yaml": "^4.1.0",
+    "typescript": "^4.7.4",
+    "vsce-yarn-patch": "^1.66.2"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.0.2",
+    "vscode-languageserver": "^8.0.2",
+    "vscode-languageserver-textdocument": "^1.0.5",
+    "@quri/squiggle-lang": "^0.2.11"
+  }
+}

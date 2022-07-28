@@ -5,39 +5,38 @@ import {
   distributionError,
   distributionErrorToString,
 } from "@quri/squiggle-lang";
-import { Vega, VisualizationSpec } from "react-vega";
-import * as chartSpecification from "../vega-specs/spec-distributions.json";
+import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
 import { useSize } from "react-use";
-import clsx from "clsx";
 
 import {
-  linearXScale,
-  logXScale,
-  linearYScale,
-  expYScale,
-} from "./DistributionVegaScales";
+  buildVegaSpec,
+  DistributionChartSpecOptions,
+} from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
+import { hasMassBelowZero } from "../lib/distributionUtils";
 
-type DistributionChartProps = {
+export type DistributionPlottingSettings = {
+  /** Whether to show a summary of means, stdev, percentiles etc */
+  showSummary: boolean;
+  actions?: boolean;
+} & DistributionChartSpecOptions;
+
+export type DistributionChartProps = {
   distribution: Distribution;
   width?: number;
   height: number;
-  /** Whether to show a summary of means, stdev, percentiles etc */
-  showSummary: boolean;
-  /** Whether to show the user graph controls (scale etc) */
-  showControls?: boolean;
-};
+} & DistributionPlottingSettings;
 
-export const DistributionChart: React.FC<DistributionChartProps> = ({
-  distribution,
-  height,
-  showSummary,
-  width,
-  showControls = false,
-}) => {
-  const [isLogX, setLogX] = React.useState(false);
-  const [isExpY, setExpY] = React.useState(false);
+export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
+  const {
+    distribution,
+    height,
+    showSummary,
+    width,
+    logX,
+    actions = false,
+  } = props;
   const shape = distribution.pointSet();
   const [sized] = useSize((size) => {
     if (shape.tag === "Error") {
@@ -48,10 +47,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       );
     }
 
-    const massBelow0 =
-      shape.value.continuous.some((x) => x.x <= 0) ||
-      shape.value.discrete.some((x) => x.x <= 0);
-    const spec = buildVegaSpec(isLogX, isExpY);
+    const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
     if (widthProp < 20) {
@@ -63,77 +59,26 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
 
     return (
       <div style={{ width: widthProp }}>
-        <Vega
-          spec={spec}
-          data={{ con: shape.value.continuous, dis: shape.value.discrete }}
-          width={widthProp - 10}
-          height={height}
-          actions={false}
-        />
+        {logX && hasMassBelowZero(shape.value) ? (
+          <ErrorAlert heading="Log Domain Error">
+            Cannot graph distribution with negative values on logarithmic scale.
+          </ErrorAlert>
+        ) : (
+          <Vega
+            spec={spec}
+            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+            width={widthProp - 10}
+            height={height}
+            actions={actions}
+          />
+        )}
         <div className="flex justify-center">
           {showSummary && <SummaryTable distribution={distribution} />}
         </div>
-        {showControls && (
-          <div>
-            <CheckBox
-              label="Log X scale"
-              value={isLogX}
-              onChange={setLogX}
-              // Check whether we should disable the checkbox
-              {...(massBelow0
-                ? {
-                    disabled: true,
-                    tooltip:
-                      "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
-                  }
-                : {})}
-            />
-            <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
-          </div>
-        )}
       </div>
     );
   });
   return sized;
-};
-
-function buildVegaSpec(isLogX: boolean, isExpY: boolean): VisualizationSpec {
-  return {
-    ...chartSpecification,
-    scales: [
-      isLogX ? logXScale : linearXScale,
-      isExpY ? expYScale : linearYScale,
-    ],
-  } as VisualizationSpec;
-}
-
-interface CheckBoxProps {
-  label: string;
-  onChange: (x: boolean) => void;
-  value: boolean;
-  disabled?: boolean;
-  tooltip?: string;
-}
-
-export const CheckBox: React.FC<CheckBoxProps> = ({
-  label,
-  onChange,
-  value,
-  disabled = false,
-  tooltip,
-}) => {
-  return (
-    <span title={tooltip}>
-      <input
-        type="checkbox"
-        value={value + ""}
-        onChange={() => onChange(!value)}
-        disabled={disabled}
-        className="form-checkbox"
-      />
-      <label className={clsx(disabled && "text-slate-400")}> {label}</label>
-    </span>
-  );
 };
 
 const TableHeadCell: React.FC<{ children: React.ReactNode }> = ({

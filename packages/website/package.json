@@ -12,14 +12,17 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@docusaurus/core": "2.0.0-beta.21",
-    "@docusaurus/preset-classic": "2.0.0-beta.21",
-    "@quri/squiggle-components": "^0.2.20",
-    "clsx": "^1.1.1",
+    "@docusaurus/core": "2.0.0-rc.1",
+    "@docusaurus/preset-classic": "2.0.0-rc.1",
+    "@heroicons/react": "^1.0.6",
+    "@quri/squiggle-components": "^0.2.23",
+    "base64-js": "^1.5.1",
+    "clsx": "^1.2.1",
     "hast-util-is-element": "2.1.2",
-    "prism-react-renderer": "^1.3.3",
+    "pako": "^2.0.4",
+    "prism-react-renderer": "^1.3.5",
     "react": "^18.1.0",
-    "react-dom": "^18.1.0",
+    "react-dom": "^18.2.0",
     "rehype-katex": "^5",
     "remark-math": "^3"
   },

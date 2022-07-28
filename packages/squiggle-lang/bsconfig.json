@@ -31,6 +31,7 @@
       "basic": false
     }
   },
+  "external-stdlib": "@rescript/std",
   "refmt": 3,
   "warnings": {
     "number": "+A-42-48-9-30-4"

@@ -7,45 +7,45 @@ import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
 ## Expressions
 
-### Distributions
-
-<SquiggleEditor initialSquiggleString={`mixture(1 to 2, 3, [0.3, 0.7])`} />
-
 ### Numbers
 
-<SquiggleEditor initialSquiggleString="4.32" />
+<SquiggleEditor defaultCode="4.32" />
 
-### Arrays
+### Distributions
 
 <SquiggleEditor
-  initialSquiggleString={`[beta(1,10), 4, isNormalized(toSampleSet(1 to 2))]`}
+  defaultCode={`a = normal(4,2)
+b = 30 to 50
+c = lognormal({mean:90, stdev: 7})
+d = mixture(a,b,c, [0.3, 0.3, .4])
+{a:a, b:b, c:c, d:d}`}
 />
 
-### Records
+### Lists
 
 <SquiggleEditor
-  initialSquiggleString={`d = {dist: triangular(0, 1, 2), weight: 0.25}
+  defaultCode={`[beta(1,10), 4, isNormalized(SampleSet.fromDist(1 to 2))]`}
+/>
+
+<SquiggleEditor defaultCode={`List.make(5,1)`} />
+
+### Dictionaries
+
+<SquiggleEditor
+  defaultCode={`d = {dist: triangular(0, 1, 2), weight: 0.25}
 d.dist`}
-/>
-
-## Statements
-
-A statement assigns expressions to names. It looks like `<symbol> = <expression>`
-
-<SquiggleEditor
-  initialSquiggleString={`value_of_work = 10 to 70
-5 + value_of_work / 75`}
 />
 
 ### Functions
 
-We can define functions
-
 <SquiggleEditor
-  initialSquiggleString={`ozzie_estimate(t) = lognormal(t^(1.1), 0.5)
-nuno_estimate(t, m) = mixture(normal(-5, 1), lognormal(m, t / 1.25))
-ozzie_estimate(1) * nuno_estimate(1, 1)`}
+  defaultCode={`f(t) = normal(t^2, t^1.2+.01)
+f`}
 />
+
+### Anonymous Functions
+
+<SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
 
 ## See more
 

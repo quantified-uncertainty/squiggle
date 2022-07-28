@@ -5,11 +5,19 @@ type node = {"type": string}
 
 @module("./Reducer_Peggy_GeneratedParser.js") external parse__: string => node = "parse"
 
+type withLocation = {"location": Reducer_ErrorValue.location}
+external castWithLocation: Js.Exn.t => withLocation = "%identity"
+
+let syntaxErrorToLocation = (error: Js.Exn.t): Reducer_ErrorValue.location =>
+  castWithLocation(error)["location"]
+
+@genType
 let parse = (expr: string): result<node, errorValue> =>
   try {
     Ok(parse__(expr))
   } catch {
-  | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
+  | Js.Exn.Error(obj) =>
+    RESyntaxError(Belt.Option.getExn(Js.Exn.message(obj)), syntaxErrorToLocation(obj)->Some)->Error
   }
 
 type nodeBlock = {...node, "statements": array<node>}
@@ -26,6 +34,7 @@ type nodeModuleIdentifier = {...node, "value": string}
 type nodeString = {...node, "value": string}
 type nodeTernary = {...node, "condition": node, "trueExpression": node, "falseExpression": node}
 type nodeTypeIdentifier = {...node, "value": string}
+type nodeVoid = node
 
 type peggyNode =
   | PgNodeBlock(nodeBlock)
@@ -42,6 +51,7 @@ type peggyNode =
   | PgNodeString(nodeString)
   | PgNodeTernary(nodeTernary)
   | PgNodeTypeIdentifier(nodeTypeIdentifier)
+  | PgNodeVoid(nodeVoid)
 
 external castNodeBlock: node => nodeBlock = "%identity"
 external castNodeBoolean: node => nodeBoolean = "%identity"
@@ -57,6 +67,7 @@ external castNodeModuleIdentifier: node => nodeModuleIdentifier = "%identity"
 external castNodeString: node => nodeString = "%identity"
 external castNodeTernary: node => nodeTernary = "%identity"
 external castNodeTypeIdentifier: node => nodeTypeIdentifier = "%identity"
+external castNodeVoid: node => nodeVoid = "%identity"
 
 exception UnsupportedPeggyNodeType(string) // This should never happen; programming error
 let castNodeType = (node: node) =>
@@ -75,6 +86,7 @@ let castNodeType = (node: node) =>
   | "String" => node->castNodeString->PgNodeString
   | "Ternary" => node->castNodeTernary->PgNodeTernary
   | "TypeIdentifier" => node->castNodeTypeIdentifier->PgNodeTypeIdentifier
+  | "Void" => node->castNodeVoid->PgNodeVoid
   | _ => raise(UnsupportedPeggyNodeType(node["type"]))
   }
 
@@ -83,7 +95,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
     args->Js.Array2.map(arg => PgNodeIdentifier(arg)->pgToString)->Js.Array2.toString
 
   let nodesToStringUsingSeparator = (nodes: array<node>, separator: string): string =>
-    nodes->Js.Array2.map(toString)->Extra.Array.interperse(separator)->Js.String.concatMany("")
+    nodes->Js.Array2.map(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
   switch peggyNode {
   | PgNodeBlock(node) => "{" ++ node["statements"]->nodesToStringUsingSeparator("; ") ++ "}"
@@ -108,6 +120,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
     " " ++
     toString(node["falseExpression"]) ++ ")"
   | PgNodeTypeIdentifier(node) => `#${node["value"]}`
+  | PgNodeVoid(_node) => "()"
   }
 }
 and toString = (node: node): string => node->castNodeType->pgToString
