@@ -8,7 +8,7 @@ import type {
   bindings as bindingsType,
 } from "@quri/squiggle-lang";
 
-function resultDefault(x: result<bindingsType, errorValue>): bindings {
+function resultDefault(x: result<bindingsType, errorValue>): bindingsType {
   switch (x.tag) {
     case "Ok":
       return x.value;
