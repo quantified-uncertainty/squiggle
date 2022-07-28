@@ -149,6 +149,13 @@ let checkITypeArguments = (anIType: T.iType, args: array<InternalExpressionValue
   }
 }
 
+let checkITypeArgumentsBool = (anIType: T.iType, args: array<InternalExpressionValue.t>): bool => {
+  switch checkITypeArguments(anIType, args) {
+  | Ok(_) => true
+  | _ => false
+  }
+}
+
 let checkArguments = (
   typeExpressionSourceCode: string,
   args: array<InternalExpressionValue.t>,
