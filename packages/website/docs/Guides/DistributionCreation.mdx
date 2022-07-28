@@ -17,7 +17,7 @@ The `to` function is an easy way to generate simple distributions using predicte
 
 If both values are above zero, a `lognormal` distribution is used. If not, a `normal` distribution is used.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="5 to 10" default>
     When <code>5 to 10</code> is entered, both numbers are positive, so it
     generates a lognormal distribution with 5th and 95th percentiles at 5 and
@@ -74,7 +74,7 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
 
 The `mixture` mixes combines multiple distributions to create a mixture. You can optionally pass in a list of proportional weights.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="Simple" default>
     <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10)" />
   </TabItem>
@@ -139,7 +139,7 @@ mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_co
 
 Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="normal(5,1)" default>
     <SquiggleEditor defaultCode="normal(5, 1)" />
   </TabItem>
@@ -234,7 +234,7 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
 
 `pointMass()` distributions are currently the only discrete distributions accessible in Squiggle.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="pointMass(3)" default>
     <SquiggleEditor defaultCode="pointMass(3)" />
   </TabItem>
@@ -263,7 +263,7 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
 
 Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) with the given `alpha` and `beta` values. For a good summary of the beta distribution, see [this explanation](https://stats.stackexchange.com/a/47782) on Stack Overflow.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="beta(10, 20)" default>
     <SquiggleEditor defaultCode="beta(10,20)" />
   </TabItem>
@@ -300,7 +300,7 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   </p>
   <details>
     <summary>Examples</summary>
-    <Tabs>
+    <Tabs lazy>
       <TabItem value="ex1" label="beta(0.3, 0.3)" default>
         <SquiggleEditor defaultCode="beta(0.3, 0.3)" />
       </TabItem>
