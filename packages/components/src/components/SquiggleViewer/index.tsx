@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from "react";
 import { environment } from "@quri/squiggle-lang";
-import { DistributionPlottingSettings } from "../DistributionChart";
-import { FunctionChartSettings } from "../FunctionChart";
+import { PlotSettings } from "../DistributionChart";
+import { FunctionSettings } from "../FunctionChart";
 import { ExpressionViewer } from "./ExpressionViewer";
 import { ViewerContext } from "./ViewerContext";
 import {
@@ -18,9 +18,8 @@ type Props = {
   result: ReturnType<typeof useSquiggle>;
   width?: number;
   height: number;
-  distributionPlotSettings: DistributionPlottingSettings;
-  /** Settings for displaying functions */
-  chartSettings: FunctionChartSettings;
+  plotSettings: PlotSettings;
+  functionSettings: FunctionSettings;
   /** Environment for further function executions */
   environment: environment;
   enableLocalSettings?: boolean;
@@ -36,8 +35,8 @@ export const SquiggleViewer: React.FC<Props> = ({
   result,
   width,
   height,
-  distributionPlotSettings,
-  chartSettings,
+  plotSettings,
+  functionSettings,
   environment,
   enableLocalSettings = false,
 }) => {
@@ -62,13 +61,13 @@ export const SquiggleViewer: React.FC<Props> = ({
     (path: Path) => {
       const localSettings = getSettings(path);
       const result: MergedItemSettings = {
-        distributionPlotSettings: {
-          ...distributionPlotSettings,
-          ...(localSettings.distributionPlotSettings || {}),
+        plotSettings: {
+          ...plotSettings,
+          ...(localSettings.plotSettings || {}),
         },
-        chartSettings: {
-          ...chartSettings,
-          ...(localSettings.chartSettings || {}),
+        functionSettings: {
+          ...functionSettings,
+          ...(localSettings.functionSettings || {}),
         },
         environment: {
           ...environment,
@@ -78,7 +77,7 @@ export const SquiggleViewer: React.FC<Props> = ({
       };
       return result;
     },
-    [distributionPlotSettings, chartSettings, environment, height, getSettings]
+    [plotSettings, functionSettings, environment, height, getSettings]
   );
 
   return (

@@ -1,5 +1,7 @@
 import { defaultEnvironment } from "@quri/squiggle-lang";
 import React from "react";
+import { plotSettingsFromPartial } from "../DistributionChart";
+import { functionSettingsFromPartial } from "../FunctionChart";
 import { LocalItemSettings, MergedItemSettings, Path } from "./utils";
 
 type ViewerContextShape = {
@@ -17,16 +19,8 @@ export const ViewerContext = React.createContext<ViewerContextShape>({
   getMergedSettings: () => ({
     collapsed: false,
     // copy-pasted from SquiggleChart
-    chartSettings: {
-      start: 0,
-      stop: 10,
-      count: 100,
-    },
-    distributionPlotSettings: {
-      showSummary: false,
-      logX: false,
-      expY: false,
-    },
+    plotSettings: plotSettingsFromPartial({}),
+    functionSettings: functionSettingsFromPartial({}),
     environment: defaultEnvironment,
     height: 150,
   }),

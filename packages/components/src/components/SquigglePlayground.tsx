@@ -6,7 +6,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { useForm, UseFormRegister, useWatch } from "react-hook-form";
+import { useForm, UseFormRegister } from "react-hook-form";
 import * as yup from "yup";
 import { useMaybeControlledValue, useRunnerState } from "../lib/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -36,10 +36,8 @@ import { InputItem } from "./ui/InputItem";
 import { Text } from "./ui/Text";
 import { ViewSettings, viewSettingsSchema } from "./ViewSettings";
 import { HeadedSection } from "./ui/HeadedSection";
-import {
-  defaultColor,
-  defaultTickFormat,
-} from "../lib/distributionSpecBuilder";
+import { plotSettingsFromPartial } from "./DistributionChart";
+import { functionSettingsFromPartial } from "./FunctionChart";
 
 type PlaygroundProps = SquiggleChartProps & {
   /** The initial squiggle string to put in the playground */
@@ -52,24 +50,25 @@ type PlaygroundProps = SquiggleChartProps & {
 };
 
 const schema = yup
-  .object({})
-  .shape({
-    sampleCount: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(1000)
-      .min(10)
-      .max(1000000),
-    xyPointLength: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(1000)
-      .min(10)
-      .max(10000),
+  .object({
+    sampleSettings: yup.object({
+      sampleCount: yup
+        .number()
+        .required()
+        .positive()
+        .integer()
+        .default(1000)
+        .min(10)
+        .max(1000000),
+      xyPointLength: yup
+        .number()
+        .required()
+        .positive()
+        .integer()
+        .default(1000)
+        .min(10)
+        .max(10000),
+    }),
   })
   .concat(viewSettingsSchema);
 
@@ -81,7 +80,7 @@ const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
   <div className="space-y-6 p-3 max-w-xl">
     <div>
       <InputItem
-        name="sampleCount"
+        name="sampleSettings.sampleCount"
         type="number"
         label="Sample Count"
         register={register}
@@ -95,7 +94,7 @@ const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
     </div>
     <div>
       <InputItem
-        name="xyPointLength"
+        name="sampleSettings.xyPointLength"
         type="number"
         register={register}
         label="Coordinate Count (For PointSet Shapes)"
@@ -207,15 +206,8 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
 export const SquigglePlayground: FC<PlaygroundProps> = ({
   defaultCode = "",
   height = 500,
-  showSummary = false,
-  logX = false,
-  expY = false,
-  title,
-  minX,
-  maxX,
-  color = defaultColor,
-  tickFormat = defaultTickFormat,
-  distributionChartActions,
+  plotSettings: initialPlotSettings,
+  functionSettings: initialFunctionSettings,
   code: controlledCode,
   onCodeChange,
   onSettingsChange,
@@ -229,41 +221,40 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const [imports, setImports] = useState({});
 
-  const { register, control } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
+  const defaultValues = {
+    chartHeight: 150,
+    showEditor,
+    sampleSettings: {
       sampleCount: 1000,
       xyPointLength: 1000,
-      chartHeight: 150,
-      logX,
-      expY,
-      title,
-      minX,
-      maxX,
-      color,
-      tickFormat,
-      distributionChartActions,
-      showSummary,
-      showEditor,
-      diagramStart: 0,
-      diagramStop: 10,
-      diagramCount: 20,
     },
-  });
-  const vars = useWatch({
-    control,
-  });
+    plotSettings: plotSettingsFromPartial(initialPlotSettings || {}),
+    functionSettings: functionSettingsFromPartial(
+      initialFunctionSettings || {}
+    ),
+  };
 
+  const { register, watch, getValues } = useForm<FormFields>({
+    resolver: yupResolver(schema),
+    defaultValues,
+  });
+  watch();
+
+  const [settings, setSettings] = useState(() => getValues());
   useEffect(() => {
-    onSettingsChange?.(vars);
-  }, [vars, onSettingsChange]);
+    const subscription = watch(() => {
+      setSettings(getValues());
+      onSettingsChange?.(getValues());
+    });
+    return () => subscription.unsubscribe();
+  }, [onSettingsChange, getValues, watch]);
 
   const env: environment = useMemo(
     () => ({
-      sampleCount: Number(vars.sampleCount),
-      xyPointLength: Number(vars.xyPointLength),
+      sampleCount: Number(settings.sampleSettings.sampleCount),
+      xyPointLength: Number(settings.sampleSettings.xyPointLength),
     }),
-    [vars.sampleCount, vars.xyPointLength]
+    [settings.sampleSettings.sampleCount, settings.sampleSettings.xyPointLength]
   );
 
   const {
@@ -285,7 +276,8 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
           code={renderedCode}
           executionId={executionId}
           environment={env}
-          {...vars}
+          plotSettings={settings.plotSettings}
+          functionSettings={settings.functionSettings}
           bindings={defaultBindings}
           jsImports={imports}
           enableLocalSettings={true}
@@ -293,7 +285,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       </div>
     );
 
-  const firstTab = vars.showEditor ? (
+  const firstTab = settings.showEditor ? (
     <div className="border border-slate-200">
       <CodeEditor
         value={code}
@@ -363,8 +355,8 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
             <div className="flex justify-between items-center">
               <StyledTab.List>
                 <StyledTab
-                  name={vars.showEditor ? "Code" : "Display"}
-                  icon={vars.showEditor ? CodeIcon : EyeIcon}
+                  name={settings.showEditor ? "Code" : "Display"}
+                  icon={settings.showEditor ? CodeIcon : EyeIcon}
                 />
                 <StyledTab name="Sampling Settings" icon={CogIcon} />
                 <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
@@ -378,7 +370,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
                 onAutorunModeChange={setAutorunMode}
               />
             </div>
-            {vars.showEditor ? withEditor : withoutEditor}
+            {settings.showEditor ? withEditor : withoutEditor}
           </div>
         </StyledTab.Group>
       </PlaygroundContext.Provider>

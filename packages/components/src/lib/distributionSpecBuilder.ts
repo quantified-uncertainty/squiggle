@@ -2,20 +2,20 @@ import { VisualizationSpec } from "react-vega";
 import type { LogScale, LinearScale, PowScale } from "vega";
 
 export type DistributionChartSpecOptions = {
-  /** Set the x scale to be logarithmic by deault */
+  /** Set the x scale to be logarithmic by default */
   logX: boolean;
-  /** Set the y scale to be exponential by deault */
+  /** Set the y scale to be exponential by default */
   expY: boolean;
   /** The minimum x coordinate shown on the chart */
   minX?: number;
   /** The maximum x coordinate shown on the chart */
   maxX?: number;
   /** The color of the chart */
-  color?: string;
+  color: string;
   /** The title of the chart */
-  title?: string;
-  /** The formatting of the ticks */
-  format?: string;
+  title: string;
+  /** How to format numbers on the x axis */
+  tickFormat: string;
 };
 
 export let linearXScale: LinearScale = {
@@ -100,21 +100,10 @@ export let expYScale: PowScale = {
   },
 };
 
-export const defaultTickFormat = ".9~s";
-export const defaultColor = "#739ECC";
-
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
-  let {
-    format = defaultTickFormat,
-    color = defaultColor,
-    title,
-    minX,
-    maxX,
-    logX,
-    expY,
-  } = specOptions;
+  let { tickFormat, color, title, minX, maxX, logX, expY } = specOptions;
 
   let xScale = logX ? logXScale : linearXScale;
   if (minX !== undefined && Number.isFinite(minX)) {
@@ -150,7 +139,7 @@ export function buildVegaSpec(
         tickOpacity: 0.0,
         domainColor: "#fff",
         domainOpacity: 0.0,
-        format: format,
+        format: tickFormat,
         tickCount: 10,
       },
     ],

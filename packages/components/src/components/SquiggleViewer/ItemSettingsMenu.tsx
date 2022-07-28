@@ -3,13 +3,13 @@ import React, { useContext, useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Modal } from "../ui/Modal";
-import { ViewSettings, viewSettingsSchema } from "../ViewSettings";
+import {
+  ViewSettings,
+  ViewSettingsFormFields,
+  viewSettingsSchema,
+} from "../ViewSettings";
 import { Path, pathAsString } from "./utils";
 import { ViewerContext } from "./ViewerContext";
-import {
-  defaultColor,
-  defaultTickFormat,
-} from "../../lib/distributionSpecBuilder";
 import { PlaygroundContext } from "../SquigglePlayground";
 
 type Props = {
@@ -34,48 +34,25 @@ const ItemSettingsModal: React.FC<
 
   const mergedSettings = getMergedSettings(path);
 
-  const { register, watch } = useForm({
+  const { register, watch } = useForm<ViewSettingsFormFields>({
     resolver: yupResolver(viewSettingsSchema),
     defaultValues: {
-      // this is a mess and should be fixed
       showEditor: true, // doesn't matter
       chartHeight: mergedSettings.height,
-      showSummary: mergedSettings.distributionPlotSettings.showSummary,
-      logX: mergedSettings.distributionPlotSettings.logX,
-      expY: mergedSettings.distributionPlotSettings.expY,
-      tickFormat:
-        mergedSettings.distributionPlotSettings.format || defaultTickFormat,
-      title: mergedSettings.distributionPlotSettings.title,
-      color: mergedSettings.distributionPlotSettings.color || defaultColor,
-      minX: mergedSettings.distributionPlotSettings.minX,
-      maxX: mergedSettings.distributionPlotSettings.maxX,
-      distributionChartActions: mergedSettings.distributionPlotSettings.actions,
-      diagramStart: mergedSettings.chartSettings.start,
-      diagramStop: mergedSettings.chartSettings.stop,
-      diagramCount: mergedSettings.chartSettings.count,
+      plotSettings: mergedSettings.plotSettings,
+      functionSettings: mergedSettings.functionSettings,
     },
   });
+
   useEffect(() => {
     const subscription = watch((vars) => {
       const settings = getSettings(path); // get the latest version
       setSettings(path, {
         ...settings,
-        distributionPlotSettings: {
-          showSummary: vars.showSummary,
-          logX: vars.logX,
-          expY: vars.expY,
-          format: vars.tickFormat,
-          title: vars.title,
-          color: vars.color,
-          minX: vars.minX,
-          maxX: vars.maxX,
-          actions: vars.distributionChartActions,
-        },
-        chartSettings: {
-          start: vars.diagramStart,
-          stop: vars.diagramStop,
-          count: vars.diagramCount,
-        },
+        // vars should be defined and react-hook-form is too conservative with its types so these `?.` are ok... hopefully.
+        // This might cause a bug in the future. I don't really understand why react-hook-form needs to return partials here.
+        plotSettings: vars?.plotSettings,
+        functionSettings: vars?.functionSettings,
       });
       onChange();
     });
@@ -141,13 +118,13 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
         className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500"
         onClick={() => setIsOpen(!isOpen)}
       />
-      {settings.distributionPlotSettings || settings.chartSettings ? (
+      {settings.plotSettings || settings.functionSettings ? (
         <button
           onClick={() => {
             setSettings(props.path, {
               ...settings,
-              distributionPlotSettings: undefined,
-              chartSettings: undefined,
+              plotSettings: undefined,
+              functionSettings: undefined,
             });
             props.onChange();
           }}

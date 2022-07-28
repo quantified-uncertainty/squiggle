@@ -7,28 +7,42 @@ import {
 } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
-import { DistributionPlottingSettings } from "./DistributionChart";
+import { PlotSettings } from "./DistributionChart";
 import { ErrorAlert, MessageAlert } from "./Alert";
 
-export type FunctionChartSettings = {
+export type FunctionSettings = {
+  /** Where the function domain starts */
   start: number;
+  /** Where the function domain ends */
   stop: number;
+  /** The amount of stops sampled */
   count: number;
 };
 
 interface FunctionChartProps {
   fn: lambdaValue;
-  chartSettings: FunctionChartSettings;
-  distributionPlotSettings: DistributionPlottingSettings;
+  functionSettings: FunctionSettings;
+  plotSettings: PlotSettings;
   environment: environment;
   height: number;
 }
 
+export const functionSettingsFromPartial = (
+  partial: Partial<FunctionSettings>
+): FunctionSettings => {
+  return {
+    start: 0,
+    stop: 10,
+    count: 20,
+    ...partial,
+  };
+};
+
 export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
-  chartSettings,
+  functionSettings,
   environment,
-  distributionPlotSettings,
+  plotSettings,
   height,
 }) => {
   if (fn.parameters.length > 1) {
@@ -38,8 +52,8 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
-  const result1 = runForeign(fn, [chartSettings.start], environment);
-  const result2 = runForeign(fn, [chartSettings.stop], environment);
+  const result1 = runForeign(fn, [functionSettings.start], environment);
+  const result2 = runForeign(fn, [functionSettings.stop], environment);
   const getValidResult = () => {
     if (result1.tag === "Ok") {
       return result1;
@@ -64,17 +78,17 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       return (
         <FunctionChart1Dist
           fn={fn}
-          chartSettings={chartSettings}
+          chartSettings={functionSettings}
           environment={environment}
           height={height}
-          distributionPlotSettings={distributionPlotSettings}
+          distributionPlotSettings={plotSettings}
         />
       );
     case "number":
       return (
         <FunctionChart1Number
           fn={fn}
-          chartSettings={chartSettings}
+          chartSettings={functionSettings}
           environment={environment}
           height={height}
         />

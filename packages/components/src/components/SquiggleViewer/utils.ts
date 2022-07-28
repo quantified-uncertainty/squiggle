@@ -1,18 +1,18 @@
-import { DistributionPlottingSettings } from "../DistributionChart";
-import { FunctionChartSettings } from "../FunctionChart";
+import { PlotSettings } from "../DistributionChart";
+import { FunctionSettings } from "../FunctionChart";
 import { environment } from "@quri/squiggle-lang";
 
 export type LocalItemSettings = {
   collapsed: boolean;
-  distributionPlotSettings?: Partial<DistributionPlottingSettings>;
-  chartSettings?: Partial<FunctionChartSettings>;
+  plotSettings?: Partial<PlotSettings>;
+  functionSettings?: Partial<FunctionSettings>;
   height?: number;
   environment?: Partial<environment>;
 };
 
 export type MergedItemSettings = {
-  distributionPlotSettings: DistributionPlottingSettings;
-  chartSettings: FunctionChartSettings;
+  plotSettings: PlotSettings;
+  functionSettings: FunctionSettings;
   height: number;
   environment: environment;
 };

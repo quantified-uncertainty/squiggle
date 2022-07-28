@@ -2,7 +2,7 @@ import React from "react";
 import { squiggleExpression, declaration } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
 import { DistributionChart } from "../DistributionChart";
-import { FunctionChart, FunctionChartSettings } from "../FunctionChart";
+import { FunctionChart, FunctionSettings } from "../FunctionChart";
 import clsx from "clsx";
 import { VariableBox } from "./VariableBox";
 import { ItemSettingsMenu } from "./ItemSettingsMenu";
@@ -21,7 +21,7 @@ function getRange<a>(x: declaration<a>) {
   }
 }
 
-function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
+function getFunctionSettings<a>(x: declaration<a>): FunctionSettings {
   const range = getRange(x);
   const min = range.floats ? range.floats.min : 0;
   const max = range.floats ? range.floats.max : 10;
@@ -96,7 +96,7 @@ export const ExpressionViewer: React.FC<Props> = ({
             return (
               <DistributionChart
                 distribution={expression.value}
-                {...settings.distributionPlotSettings}
+                settings={settings.plotSettings}
                 height={settings.height}
                 width={width}
               />
@@ -189,8 +189,8 @@ export const ExpressionViewer: React.FC<Props> = ({
               )})`}</div>
               <FunctionChart
                 fn={expression.value}
-                chartSettings={settings.chartSettings}
-                distributionPlotSettings={settings.distributionPlotSettings}
+                functionSettings={settings.functionSettings}
+                plotSettings={settings.plotSettings}
                 height={settings.height}
                 environment={{
                   sampleCount: settings.environment.sampleCount / 10,
@@ -219,8 +219,8 @@ export const ExpressionViewer: React.FC<Props> = ({
           {(settings) => (
             <FunctionChart
               fn={expression.value.fn}
-              chartSettings={getChartSettings(expression.value)}
-              distributionPlotSettings={settings.distributionPlotSettings}
+              functionSettings={getFunctionSettings(expression.value)}
+              plotSettings={settings.plotSettings}
               height={settings.height}
               environment={{
                 sampleCount: settings.environment.sampleCount / 10,

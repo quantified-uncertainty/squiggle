@@ -16,27 +16,43 @@ import {
 import { NumberShower } from "./NumberShower";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 
-export type DistributionPlottingSettings = {
+export type PlotSettings = {
   /** Whether to show a summary of means, stdev, percentiles etc */
   showSummary: boolean;
-  actions?: boolean;
+  /** Whether to show vega actions to the user, so they can copy the chart spec */
+  actions: boolean;
 } & DistributionChartSpecOptions;
+
+export const plotSettingsFromPartial = (
+  partial: Partial<PlotSettings>
+): PlotSettings => {
+  return {
+    showSummary: false,
+    logX: false,
+    expY: false,
+    color: "#739ECC",
+    tickFormat: ".9~s",
+    title: "",
+    actions: false,
+    ...partial,
+  };
+};
 
 export type DistributionChartProps = {
   distribution: Distribution;
   width?: number;
   height: number;
-} & DistributionPlottingSettings;
+  settings: PlotSettings;
+};
 
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const {
     distribution,
     height,
-    showSummary,
     width,
-    logX,
-    actions = false,
+    settings: { showSummary, logX, actions },
   } = props;
+
   const shape = distribution.pointSet();
   const [sized] = useSize((size) => {
     if (shape.tag === "Error") {
@@ -47,7 +63,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
     }
 
-    const spec = buildVegaSpec(props);
+    const spec = buildVegaSpec(props.settings);
 
     let widthProp = width ? width : size.width;
     if (widthProp < 20) {
@@ -131,15 +147,15 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
     <table className="border border-collapse border-slate-400">
       <thead className="bg-slate-50">
         <tr>
-          <TableHeadCell>{"Mean"}</TableHeadCell>
-          {hasResult(stdev) && <TableHeadCell>{"Stdev"}</TableHeadCell>}
-          <TableHeadCell>{"5%"}</TableHeadCell>
-          <TableHeadCell>{"10%"}</TableHeadCell>
-          <TableHeadCell>{"25%"}</TableHeadCell>
-          <TableHeadCell>{"50%"}</TableHeadCell>
-          <TableHeadCell>{"75%"}</TableHeadCell>
-          <TableHeadCell>{"90%"}</TableHeadCell>
-          <TableHeadCell>{"95%"}</TableHeadCell>
+          <TableHeadCell>Mean</TableHeadCell>
+          {hasResult(stdev) && <TableHeadCell>Stdev</TableHeadCell>}
+          <TableHeadCell>5%</TableHeadCell>
+          <TableHeadCell>10%</TableHeadCell>
+          <TableHeadCell>25%</TableHeadCell>
+          <TableHeadCell>50%</TableHeadCell>
+          <TableHeadCell>75%</TableHeadCell>
+          <TableHeadCell>90%</TableHeadCell>
+          <TableHeadCell>95%</TableHeadCell>
         </tr>
       </thead>
       <tbody>

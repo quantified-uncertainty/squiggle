@@ -5,36 +5,36 @@ import { InputItem } from "./ui/InputItem";
 import { Checkbox } from "./ui/Checkbox";
 import { HeadedSection } from "./ui/HeadedSection";
 import { Text } from "./ui/Text";
-import {
-  defaultColor,
-  defaultTickFormat,
-} from "../lib/distributionSpecBuilder";
 
 export const viewSettingsSchema = yup.object({}).shape({
   chartHeight: yup.number().required().positive().integer().default(350),
-  showSummary: yup.boolean().required(),
   showEditor: yup.boolean().required(),
-  logX: yup.boolean().required(),
-  expY: yup.boolean().required(),
-  tickFormat: yup.string().default(defaultTickFormat),
-  title: yup.string(),
-  color: yup.string().default(defaultColor).required(),
-  minX: yup.number(),
-  maxX: yup.number(),
-  distributionChartActions: yup.boolean(),
-  diagramStart: yup.number().required().positive().integer().default(0).min(0),
-  diagramStop: yup.number().required().positive().integer().default(10).min(0),
-  diagramCount: yup.number().required().positive().integer().default(20).min(2),
+  plotSettings: yup.object({
+    showSummary: yup.boolean().required(),
+    logX: yup.boolean().required(),
+    expY: yup.boolean().required(),
+    tickFormat: yup.string().required(),
+    title: yup.string().default(""),
+    color: yup.string().required(),
+    minX: yup.number(),
+    maxX: yup.number(),
+    actions: yup.boolean().required(),
+  }),
+  functionSettings: yup.object({
+    start: yup.number().required().positive().integer().default(0).min(0),
+    stop: yup.number().required().positive().integer().default(10).min(0),
+    count: yup.number().required().positive().integer().default(20).min(2),
+  }),
 });
 
-type FormFields = yup.InferType<typeof viewSettingsSchema>;
+export type ViewSettingsFormFields = yup.InferType<typeof viewSettingsSchema>;
 
 // This component is used in two places: for global settings in SquigglePlayground, and for item-specific settings in modal dialogs.
 export const ViewSettings: React.FC<{
   withShowEditorSetting?: boolean;
   withFunctionSettings?: boolean;
   disableLogXSetting?: boolean;
-  register: UseFormRegister<FormFields>;
+  register: UseFormRegister<ViewSettingsFormFields>;
 }> = ({
   withShowEditorSetting = true,
   withFunctionSettings = true,
@@ -66,7 +66,7 @@ export const ViewSettings: React.FC<{
           <div className="space-y-2">
             <Checkbox
               register={register}
-              name="logX"
+              name="plotSettings.logX"
               label="Show x scale logarithmically"
               disabled={disableLogXSetting}
               tooltip={
@@ -77,45 +77,45 @@ export const ViewSettings: React.FC<{
             />
             <Checkbox
               register={register}
-              name="expY"
+              name="plotSettings.expY"
               label="Show y scale exponentially"
             />
             <Checkbox
               register={register}
-              name="distributionChartActions"
+              name="plotSettings.actions"
               label="Show vega chart controls"
             />
             <Checkbox
               register={register}
-              name="showSummary"
+              name="plotSettings.showSummary"
               label="Show summary statistics"
             />
             <InputItem
-              name="minX"
+              name="plotSettings.minX"
               type="number"
               register={register}
               label="Min X Value"
             />
             <InputItem
-              name="maxX"
+              name="plotSettings.maxX"
               type="number"
               register={register}
               label="Max X Value"
             />
             <InputItem
-              name="title"
+              name="plotSettings.title"
               type="text"
               register={register}
               label="Title"
             />
             <InputItem
-              name="tickFormat"
+              name="plotSettings.tickFormat"
               type="text"
               register={register}
               label="Tick Format"
             />
             <InputItem
-              name="color"
+              name="plotSettings.color"
               type="color"
               register={register}
               label="Color"
@@ -137,19 +137,19 @@ export const ViewSettings: React.FC<{
               <div className="space-y-4">
                 <InputItem
                   type="number"
-                  name="diagramStart"
+                  name="functionSettings.start"
                   register={register}
                   label="Min X Value"
                 />
                 <InputItem
                   type="number"
-                  name="diagramStop"
+                  name="functionSettings.stop"
                   register={register}
                   label="Max X Value"
                 />
                 <InputItem
                   type="number"
-                  name="diagramCount"
+                  name="functionSettings.count"
                   register={register}
                   label="Points between X min and X max to sample"
                 />

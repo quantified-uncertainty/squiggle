@@ -13,12 +13,10 @@ import {
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
-import {
-  DistributionChart,
-  DistributionPlottingSettings,
-} from "./DistributionChart";
+import { DistributionChart, PlotSettings } from "./DistributionChart";
 import { NumberShower } from "./NumberShower";
 import { ErrorAlert } from "./Alert";
+import { FunctionSettings } from "./FunctionChart";
 
 let SquigglePercentilesChart = createClassFromSpec({
   spec: percentilesSpec as Spec,
@@ -38,16 +36,11 @@ function unwrap<a, b>(x: result<a, b>): a {
     throw Error("FAILURE TO UNWRAP");
   }
 }
-export type FunctionChartSettings = {
-  start: number;
-  stop: number;
-  count: number;
-};
 
 interface FunctionChart1DistProps {
   fn: lambdaValue;
-  chartSettings: FunctionChartSettings;
-  distributionPlotSettings: DistributionPlottingSettings;
+  chartSettings: FunctionSettings;
+  distributionPlotSettings: PlotSettings;
   environment: environment;
   height: number;
 }
@@ -182,7 +175,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
         distribution={mouseItem.value.value}
         width={400}
         height={50}
-        {...distributionPlotSettings}
+        settings={distributionPlotSettings}
       />
     ) : null;
 
