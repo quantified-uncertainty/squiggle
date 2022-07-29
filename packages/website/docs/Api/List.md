@@ -73,6 +73,14 @@ map: (list<'a>, a => b) => list<'b>
 
 See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#map).
 
+### filter
+
+```
+filter: (list<'a>, 'a => bool) => list<'a>
+```
+
+See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/latest/api/belt/array#keep), which is functionally equivalent.
+
 ### reduce
 
 ```
