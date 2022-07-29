@@ -10,10 +10,12 @@ Squiggle is a minimalist programming language for probabilistic estimation. It's
 The basics of Squiggle are fairly straightforward. This can be enough for many models. The more advanced functionality can take some time to learn.
 
 ## Simple example
+
 Say you're trying to estimate the number of piano tuners in New York City. You can build a simple model of this, like so.  
 (Tip: This is interactive! Feel free to modify the code directly.)
 
-<SquiggleEditor defaultCode={`
+<SquiggleEditor
+  defaultCode={`
 // Piano tuners in NYC over the next 5 years
 populationOfNewYork2022 = 8.1M to 8.4M // This means that you're 90% confident the value is between 8.1 and 8.4 Million.\n
 proportionOfPopulationWithPianos = {
@@ -26,13 +28,15 @@ pianoTunersPerPiano = {
 } \n
 totalTunersIn2022 = populationOfNewYork2022 * proportionOfPopulationWithPianos * pianoTunersPerPiano
 totalTunersIn2022
-`} />
+`}
+/>
 
---- 
+---
 
 Now let's take this a bit further. Let's imagine that you think that NYC will grow over time, and you'd like to estimate the number of piano tuners for every point in time for the next few years.
 
-<SquiggleEditor defaultCode={`// Piano tuners in NYC over the next 5 years
+<SquiggleEditor
+  defaultCode={`// Piano tuners in NYC over the next 5 years
 populationOfNewYork2022 = 8.1M to 8.4M\n
 proportionOfPopulationWithPianos = {
     percentage = (.2 to 1)
@@ -52,13 +56,13 @@ totalTunersAtTime(t) = populationAtTime(t) * proportionOfPopulationWithPianos * 
 {
     populationAtTime: populationAtTime,
     totalTunersAtTimeMedian: {|t| median(totalTunersAtTime(t))}
-}`} />
+}`}
+/>
 
 If you haven't noticed yet, you can hover over the `populationAtTime` graph to see the distribution of population at different points in time.
 
-
-
 ## Using Squiggle
+
 You can currently interact with Squiggle in a few ways:
 
 **[Playground](/playground)**  
@@ -68,7 +72,7 @@ The [Squiggle Playground](/playground) is a nice tool for working with small mod
 There's a simple [VS Code extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle) for running and visualizing Squiggle code. We find that VS Code is a useful editor for managing larger Squiggle setups.
 
 **[Typescript Library](https://www.npmjs.com/package/@quri/squiggle-lang)**  
-Squiggle is built using [Rescript](https://rescript-lang.org/), and is accessible via a simple Typescript library. You can use this library to either run Squiggle code in full, or to call select specific functions within Squiggle (though this latter functionality is very minimal). 
+Squiggle is built using [Rescript](https://rescript-lang.org/), and is accessible via a simple Typescript library. You can use this library to either run Squiggle code in full, or to call select specific functions within Squiggle (though this latter functionality is very minimal).
 
 **[React Components Library](https://www.npmjs.com/package/@quri/squiggle-components)**  
 All of the components used in the playground and documentation are available in a separate component NPM repo. You can see the full Storybook of components [here](https://squiggle-components.netlify.app).
@@ -93,13 +97,15 @@ You can use Squiggle Components in Observable notebooks. Sam Nolan put together 
 - A visually-driven tool. (See [Guesstimate](https://www.getguesstimate.com/) and [Causal](https://causal.app/))
 
 ### Strengths
+
 - Simple and readable syntax, especially for dealing with probabilistic math.
 - Fast for relatively small models. Strong for rapid prototyping.
-- Optimized for using some numeric and symbolic approaches, not just Monte Carlo. 
+- Optimized for using some numeric and symbolic approaches, not just Monte Carlo.
 - Embeddable in Javascript.
 - Free and open-source.
 
-### Weaknesses 
+### Weaknesses
+
 - Limited scientific capabilities.
 - Much slower than serious probabilistic programming languages on sizeable models.
 - Can't do Bayesian backwards inference.
@@ -109,4 +115,5 @@ You can use Squiggle Components in Observable notebooks. Sam Nolan put together 
 - Generally not as easy to use as Guesstimate or Causal, especially for non programmers.
 
 ## Organization
+
 Squiggle is one of the main projects of [The Quantified Uncertainty Research Institute](https://quantifieduncertainty.org/). QURI is a nonprofit funded primarily by [Effective Altruist](https://www.effectivealtruism.org/) donors.

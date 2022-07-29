@@ -35,7 +35,9 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
     <SquiggleEditor defaultCode="-5 to -3" />
   </TabItem>
   <TabItem value="ex4" label="1 to 10000">
-    It's very easy to generate distributions with very long tails. These can be impossible to see without changing view settings. (These settings are available in the Playground, but not this smaller editor component)
+    It's very easy to generate distributions with very long tails. These can be
+    impossible to see without changing view settings. (These settings are
+    available in the Playground, but not this smaller editor component)
     <SquiggleEditor defaultCode="1 to 10000" />
   </TabItem>
 </Tabs>
@@ -69,7 +71,7 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
 `mixture(...distributions: Distribution[], weights?: number[])`  
 `mx(...distributions: Distribution[], weights?: number[])`  
 `mixture(distributions: Distributions[], weights?: number[])`  
-`mx(distributions: Distributions[], weights?: number[])`  
+`mx(distributions: Distributions[], weights?: number[])`
 
 The `mixture` mixes combines multiple distributions to create a mixture. You can optionally pass in a list of proportional weights.
 
@@ -283,10 +285,7 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   <TabItem value="ex5" label="beta(0.8, 0.8)">
     <SquiggleEditor defaultCode="beta(0.8, 0.8)" />
   </TabItem>
-  <TabItem
-    value="ex6"
-    label="beta({mean: 0.39, stdev: 0.1})"
-  >
+  <TabItem value="ex6" label="beta({mean: 0.39, stdev: 0.1})">
     <SquiggleEditor defaultCode="beta({mean: 0.39, stdev: 0.1})" />
   </TabItem>
 </Tabs>
@@ -378,12 +377,14 @@ Creates a sample set distribution using an array of samples.
 
 Creates a continuous point set distribution using a list of points.
 
-<SquiggleEditor defaultCode={`PointSet.makeContinuous([
+<SquiggleEditor
+  defaultCode={`PointSet.makeContinuous([
   { x: 0, y: 0.1 },
   { x: 1, y: 0.2 },
   { x: 2, y: 0.15 },
   { x: 3, y: 0.1 }
-])`} />
+])`}
+/>
 
 ### Arguments
 
@@ -395,12 +396,14 @@ Creates a continuous point set distribution using a list of points.
 
 Creates a discrete point set distribution using a list of points.
 
-<SquiggleEditor defaultCode={`PointSet.makeDiscrete([
+<SquiggleEditor
+  defaultCode={`PointSet.makeDiscrete([
   { x: 0, y: 0.1 },
   { x: 1, y: 0.2 },
   { x: 2, y: 0.15 },
   { x: 3, y: 0.1 }
-])`} />
+])`}
+/>
 
 ### Arguments
 
