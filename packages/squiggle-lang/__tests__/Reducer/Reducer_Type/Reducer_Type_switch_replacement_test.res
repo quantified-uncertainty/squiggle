@@ -103,7 +103,7 @@ let _dispatch = (
   chain,
 ): result<internalExpressionValue, 'e> => {
   let dispatchChainPiece = makeMyDispatchChainPiece(reducer)
-  dispatchChainPiece(call, environment)->E.O2.default(chain(call, environment, reducer))
+  dispatchChainPiece(call, environment)->E.O2.defaultFn(() => chain(call, environment, reducer))
 }
 
 // What is important about this implementation?
