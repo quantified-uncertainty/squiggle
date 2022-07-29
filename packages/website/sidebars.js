@@ -28,8 +28,8 @@ const sidebars = {
     },
     {
       type: "doc",
-      id: "Node-Packages",
-      label: "Node Packages",
+      id: "Integrations",
+      label: "Integrations",
     },
     {
       type: "category",
