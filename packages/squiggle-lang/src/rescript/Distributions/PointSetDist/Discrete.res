@@ -158,7 +158,8 @@ module T = Dist({
       Continuous.make(~interpolation=#Stepwise, integralShape)
     }
 
-  let integralEndY = (t: t) => t.integralSumCache |> E.O.default(t |> integral |> Continuous.lastY)
+  let integralEndY = (t: t) =>
+    t.integralSumCache |> E.O.defaultFn(() => t |> integral |> Continuous.lastY)
   let minX = shapeFn(XYShape.T.minX)
   let maxX = shapeFn(XYShape.T.maxX)
   let toDiscreteProbabilityMassFraction = _ => 1.0
