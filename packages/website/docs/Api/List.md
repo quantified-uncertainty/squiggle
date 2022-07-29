@@ -78,6 +78,7 @@ See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/b
 ```
 filter: (list<'a>, 'a => bool) => list<'a>
 ```
+
 See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/latest/api/belt/array#keep), which is functionally equivalent.
 
 ### reduce
