@@ -41,14 +41,14 @@ This interface should also be able to handle changing Squiggle values. This is b
 **Importance & quality scores**  
 Workflows/functionality to declare the importance and coveredness of each part of the paramater space. For example, some subsets of the paramater space of a function might be much more important to get right than others. Similarly, the analyst might be much more certain about some parts than others. Ideally. they could decline sections.
 
-**Static / Sensitivity Analysis**  
+**Static / sensitivity analysis**  
 Guesstimate has Sensitivity analysis that's pretty useful. This could be quite feasible to add, though it will likely require some thinking.
 
 **Annotation**  
 It might be useful to allow people to annotate functions and variables with longer descriptions, maybe Markdown. This could very much help interpretation/analysis of these items.
 
-**Randomness Seeds**  
+**Randomness seeds**  
 Right now, Monte Carlo simulations are totally random. It would be nicer to be able to enter a seed somehow in order to control the randomness. Or, with the same seed, the function should always return the same values. This would make debugging and similar easier.
 
-**Caching/Memoization**  
+**Caching/memoization**  
 There are many performance improvements that Squiggle could have. We'll get to some of them eventually.
