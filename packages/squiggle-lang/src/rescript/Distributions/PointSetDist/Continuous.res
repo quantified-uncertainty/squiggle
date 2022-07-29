@@ -250,7 +250,7 @@ module T = Dist({
 
   let downsample = (length, t): t =>
     t |> shapeMap(XYShape.XsConversion.proportionByProbabilityMass(length, integral(t).xyShape))
-  let integralEndY = (t: t) => t.integralSumCache |> E.O.default(t |> integral |> lastY)
+  let integralEndY = (t: t) => t.integralSumCache |> E.O.defaultFn(() => t |> integral |> lastY)
   let integralXtoY = (f, t: t) => t |> integral |> shapeFn(XYShape.XtoY.linear(f))
   let integralYtoX = (f, t: t) => t |> integral |> shapeFn(XYShape.YtoX.linear(f))
   let toContinuous = t => Some(t)
