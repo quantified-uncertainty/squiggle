@@ -73,7 +73,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     expY = false,
     diagramStart = 0,
     diagramStop = 10,
-    diagramCount = 100,
+    diagramCount = 20,
     tickFormat,
     minX,
     maxX,

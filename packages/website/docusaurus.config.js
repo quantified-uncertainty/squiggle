@@ -57,18 +57,18 @@ const config = {
         hideOnScroll: true,
         logo: {
           alt: "Squiggle Logo",
-          src: "img/quri-logo.png",
+          src: "img/squiggle-logo.png",
         },
         items: [
           {
             type: "doc",
-            docId: "Introduction",
+            docId: "Overview",
             position: "left",
             label: "Documentation",
           },
           {
             type: "doc",
-            docId: "Api/DistGeneric",
+            docId: "Api/Dist",
             position: "left",
             label: "API",
           },
@@ -82,6 +82,11 @@ const config = {
           {
             href: "https://github.com/quantified-uncertainty/squiggle",
             label: "GitHub",
+            position: "right",
+          },
+          {
+            href: "https://quantifieduncertainty.org/",
+            label: "QURI",
             position: "right",
           },
         ],

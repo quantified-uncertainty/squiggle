@@ -60,7 +60,7 @@ html[data-theme="dark"] .docusaurus-highlight-code-line {
 }
 
 .hero__subtitle2 {
-  color: #ba3e3e;
+  color: #777;
   font-size: 1.5em;
   font-family: "Lora";
   font-weight: 500;
@@ -86,6 +86,10 @@ h2 {
 
 .navbar__item {
   font-weight: 700;
+}
+
+.navbar__logo {
+  height: 1.5rem;
 }
 
 :root {
