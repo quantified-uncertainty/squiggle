@@ -277,8 +277,12 @@ arrayConstructor 'array'
     { return [head, ...tail]; }
 
 recordConstructor  'record'
-  = '{' _nl args:array_recordArguments _nl '}' 
+  = '{' _nl args:array_recordArguments _nl end_of_record
   { return h.constructRecord(args); }
+
+  end_of_record 
+    = '}'
+    / ',' _nl '}'
 
   array_recordArguments 
     = head:keyValuePair tail:(_ ',' _nl @keyValuePair)* 
