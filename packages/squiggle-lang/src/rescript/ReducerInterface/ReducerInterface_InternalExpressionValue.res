@@ -37,6 +37,29 @@ type internalExpressionValue = t
 
 type functionCall = (string, array<t>)
 
+module Internal = {
+  module NameSpace = {
+    external castNameSpaceToHidden: nameSpace => ExternalExpressionValue.hiddenNameSpace =
+      "%identity"
+    external castHiddenToNameSpace: ExternalExpressionValue.hiddenNameSpace => nameSpace =
+      "%identity"
+  }
+  module Lambda = {
+    let toInternal = (v: ExternalExpressionValue.lambdaValue): lambdaValue => {
+      let p = v.parameters
+      let c = v.context->NameSpace.castHiddenToNameSpace
+      let b = v.body
+      {parameters: p, context: c, body: b}
+    }
+    and toExternal = (v: lambdaValue): ExternalExpressionValue.lambdaValue => {
+      let p = v.parameters
+      let c = v.context->NameSpace.castNameSpaceToHidden
+      let b = v.body
+      {parameters: p, context: c, body: b}
+    }
+  }
+}
+
 let rec toString = aValue =>
   switch aValue {
   | IEvArray(anArray) => {
@@ -244,12 +267,7 @@ let rec toExternal = (iev: t): ExternalExpressionValue.t => {
 }
 and mapToExternal = v =>
   v->Belt.Map.String.map(e => toExternal(e))->Belt.Map.String.toArray->Js.Dict.fromArray
-and lambdaValueToExternal = v => {
-  let p = v.parameters
-  let c = v.context->nameSpaceToTypeScriptBindings
-  let b = v.body
-  {parameters: p, context: c, body: b}
-}
+and lambdaValueToExternal = Internal.Lambda.toExternal
 and nameSpaceToTypeScriptBindings = (
   nameSpace: nameSpace,
 ): ReducerInterface_ExternalExpressionValue.externalBindings => {
@@ -284,12 +302,7 @@ let rec toInternal = (ev: ExternalExpressionValue.t): t => {
 }
 and recordToInternal = v =>
   v->Js.Dict.entries->Belt.Map.String.fromArray->Belt.Map.String.map(e => toInternal(e))
-and lambdaValueToInternal = v => {
-  let p = v.parameters
-  let c = v.context->nameSpaceFromTypeScriptBindings
-  let b = v.body
-  {parameters: p, context: c, body: b}
-}
+and lambdaValueToInternal = Internal.Lambda.toInternal
 and nameSpaceFromTypeScriptBindings = (
   r: ReducerInterface_ExternalExpressionValue.externalBindings,
 ): nameSpace =>
