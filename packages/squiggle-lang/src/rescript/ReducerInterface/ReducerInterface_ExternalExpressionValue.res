@@ -7,6 +7,9 @@ module ErrorValue = Reducer_ErrorValue
 @genType.opaque
 type internalCode = Object
 
+@genType.opaque
+type hiddenNameSpace = Object
+
 @genType
 type rec externalExpressionValue =
   | EvArray(array<externalExpressionValue>)
@@ -30,7 +33,7 @@ and record = Js.Dict.t<externalExpressionValue>
 and externalBindings = record
 and lambdaValue = {
   parameters: array<string>,
-  context: externalBindings,
+  context: hiddenNameSpace,
   body: internalCode,
 }
 and lambdaDeclaration = Declaration.declaration<lambdaValue>
