@@ -30,13 +30,15 @@ type rec externalExpressionValue =
   | EvType(record)
   | EvVoid
 and record = Js.Dict.t<externalExpressionValue>
-and externalBindings = record
 and lambdaValue = {
   parameters: array<string>,
   context: hiddenNameSpace,
   body: internalCode,
 }
 and lambdaDeclaration = Declaration.declaration<lambdaValue>
+
+@genType
+type externalBindings = record
 
 @genType
 type t = externalExpressionValue
