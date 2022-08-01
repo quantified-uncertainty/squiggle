@@ -57,19 +57,19 @@ jobs:
           path: packages/squiggle-lang
           bump-patch-for-minor-pre-major: true
           skip-github-release: true
-#      - name: Publish: Checkout source
-#        uses: actions/checkout@v2
-#        # these if statements ensure that a publication only occurs when
-#        # a new release is created:
-#        if: ${{ steps.release.outputs.release_created }}
-#      - name: Publish: Install dependencies
-#        run: yarn
-#        if: ${{ steps.release.outputs.release_created }}
-#      - name: Publish
-#        run: cd packages/squiggle-lang && yarn publish
-#        env:
-#          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-#        if: ${{ steps.release.outputs.release_created }}
+  #      - name: Publish: Checkout source
+  #        uses: actions/checkout@v2
+  #        # these if statements ensure that a publication only occurs when
+  #        # a new release is created:
+  #        if: ${{ steps.release.outputs.release_created }}
+  #      - name: Publish: Install dependencies
+  #        run: yarn
+  #        if: ${{ steps.release.outputs.release_created }}
+  #      - name: Publish
+  #        run: cd packages/squiggle-lang && yarn publish
+  #        env:
+  #          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+  #        if: ${{ steps.release.outputs.release_created }}
   relplz-components:
     name: for components
     runs-on: ubuntu-latest
@@ -84,18 +84,18 @@ jobs:
           path: packages/components
           bump-patch-for-minor-pre-major: true
           skip-github-release: true
-#      - name: Publish: Checkout source
-#        uses: actions/checkout@v2
-#        # these if statements ensure that a publication only occurs when
-#        # a new release is created:
-#        if: ${{ steps.release.outputs.release_created }}
-#      - name: Publish: Install dependencies
-#        run: yarn
-#        if: ${{ steps.release.outputs.release_created }}
-#      - name: Publish
-#        run: cd packages/components && yarn publish
-#        env:
-#          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+  #      - name: Publish: Checkout source
+  #        uses: actions/checkout@v2
+  #        # these if statements ensure that a publication only occurs when
+  #        # a new release is created:
+  #        if: ${{ steps.release.outputs.release_created }}
+  #      - name: Publish: Install dependencies
+  #        run: yarn
+  #        if: ${{ steps.release.outputs.release_created }}
+  #      - name: Publish
+  #        run: cd packages/components && yarn publish
+  #        env:
+  #          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
   relplz-website:
     name: for website
     runs-on: ubuntu-latest
