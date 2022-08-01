@@ -5,7 +5,8 @@ const katex = require("rehype-katex");
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
-const packageJson = require("./package.json");
+const langPackageJson = require("../squiggle-lang/package.json");
+const componentsPackageJson = require("../components/package.json");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -115,7 +116,7 @@ const config = {
           width: 150,
           height: 150,
         },
-        copyright: `v${packageJson.version}`,
+        copyright: `Rescript language package v${langPackageJson.version} | React components package v${componentsPackageJson.version}`,
       },
       prism: {
         theme: lightCodeTheme,
