@@ -9276,10 +9276,10 @@ fast-check@^2.17.0:
   dependencies:
     pure-rand "^5.0.1"
 
-fast-check@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.1.0.tgz#0c958b6592f45fb66ea291a0bd1be2e7045f7e57"
-  integrity sha512-LHM6ZiznfQ5ZxReDUZnlKzSI/nlwCdfwaQ6qrCYBIkuWT6PfI3GOK/O2Xj50DF9oC0HIP22vbbHA8v4itAiyGA==
+fast-check@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.1.1.tgz#72c5ae7022a4e86504762e773adfb8a5b0b01252"
+  integrity sha512-3vtXinVyuUKCKFKYcwXhGE6NtGWkqF8Yh3rvMZNzmwz8EPrgoc/v4pDdLHyLnCyCI5MZpZZkDEwFyXyEONOxpA==
   dependencies:
     pure-rand "^5.0.1"
 
