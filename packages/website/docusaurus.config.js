@@ -7,6 +7,7 @@ const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const langPackageJson = require("../squiggle-lang/package.json");
 const componentsPackageJson = require("../components/package.json");
+const date = require("./date");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -116,7 +117,7 @@ const config = {
           width: 150,
           height: 150,
         },
-        copyright: `Rescript language package v${langPackageJson.version} | React components package v${componentsPackageJson.version}`,
+        copyright: `Rescript language package v${langPackageJson.version} | React components package v${componentsPackageJson.version} | Built at ${date}`,
       },
       prism: {
         theme: lightCodeTheme,
