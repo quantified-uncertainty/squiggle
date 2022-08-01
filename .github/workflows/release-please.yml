@@ -48,57 +48,62 @@ jobs:
     needs: pre_check
     if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
     steps:
-      - name: Action (squiggle-lang)
+      - name: Release please (squiggle-lang)
         uses: google-github-actions/release-please-action@v2
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/squiggle-lang
+          bump-patch-for-minor-pre-major: true
   relplz-components:
     name: for components
     runs-on: ubuntu-latest
     needs: pre_check
     if: ${{ needs.pre_check.outputs.should_skip_components != 'true' }}
     steps:
-      - name: Action (components)
+      - name: Release please (components)
         uses: google-github-actions/release-please-action@v2
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/components
+          bump-patch-for-minor-pre-major: true
   relplz-website:
     name: for website
     runs-on: ubuntu-latest
     needs: pre_check
     if: ${{ needs.pre_check.outputs.should_skip_website != 'true' }}
     steps:
-      - name: Action (website)
+      - name: Release please (website)
         uses: google-github-actions/release-please-action@v2
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/website
+          bump-patch-for-minor-pre-major: true
   relplz-vscodeext:
     name: for vscode-ext
     runs-on: ubuntu-latest
     needs: pre_check
     if: ${{ needs.pre_check.outputs.should_skip_vscodeext != 'true' }}
     steps:
-      - name: Action (vscode-ext)
+      - name: Release please (vscode-ext)
         uses: google-github-actions/release-please-action@v2
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/vscode-ext
+          bump-patch-for-minor-pre-major: true
   relplz-cl:
     name: for cli
     runs-on: ubuntu-latest
     needs: pre_check
     if: ${{ needs.pre_check.outputs.should_skip_cli != 'true' }}
     steps:
-      - name: Action (cli)
+      - name: Release please (cli)
         uses: google-github-actions/release-please-action@v2
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/cli
+          bump-patch-for-minor-pre-major: true
