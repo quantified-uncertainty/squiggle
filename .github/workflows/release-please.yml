@@ -6,11 +6,99 @@ on:
       - develop
 
 jobs:
-  release-please:
+  pre_check:
+    name: Precheck for skipping redundant jobs
     runs-on: ubuntu-latest
+    outputs:
+      should_skip_lang: ${{ steps.skip_lang_check.outputs.should_skip }}
+      should_skip_components: ${{ steps.skip_components_check.outputs.should_skip }}
+      should_skip_website: ${{ steps.skip_website_check.outputs.should_skip }}
+      should_skip_vscodeext: ${{ steps.skip_vscodeext_check.outputs.should_skip }}
+      should_skip_cli: ${{ steps.skip_cli_check.outputs.should_skip }}
     steps:
-      - uses: google-github-actions/release-please-action@v2
-        id: release
+      - id: skip_lang_check
+        name: Check if the changes are about squiggle-lang src files
+        uses: fkirc/skip-duplicate-actions@v3.4.1
+        with:
+          paths: '["packages/squiggle-lang/**"]'
+      - id: skip_components_check
+        name: Check if the changes are about components src files
+        uses: fkirc/skip-duplicate-actions@v3.4.1
+        with:
+          paths: '["packages/components/**"]'
+      - id: skip_website_check
+        name: Check if the changes are about website src files
+        uses: fkirc/skip-duplicate-actions@v3.4.1
+        with:
+          paths: '["packages/website/**"]'
+      - id: skip_vscodeext_check
+        name: Check if the changes are about vscode extension src files
+        uses: fkirc/skip-duplicate-actions@v3.4.1
+        with:
+          paths: '["packages/vscode-ext/**"]'
+      - id: skip_cli_check
+        name: Check if the changes are about cli src files
+        uses: fkirc/skip-duplicate-actions@v3.4.1
+        with:
+          paths: '["packages/cli/**"]'
+
+  relplz-lang:
+    name: for squiggle-lang
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
+    steps:
+      - name: Action (squiggle-lang)
+        uses: google-github-actions/release-please-action@v2
         with:
           token: ${{secrets.GITHUB_TOKEN}}
-          command: manifest
+          command: manifest-pr
+          path: packages/squiggle-lang
+  relplz-components:
+    name: for components
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_components != 'true' }}
+    steps:
+      - name: Action (components)
+        uses: google-github-actions/release-please-action@v2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          command: manifest-pr
+          path: packages/components
+  relplz-website:
+    name: for website
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_website != 'true' }}
+    steps:
+      - name: Action (website)
+        uses: google-github-actions/release-please-action@v2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          command: manifest-pr
+          path: packages/website
+  relplz-vscodeext:
+    name: for vscode-ext
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_vscodeext != 'true' }}
+    steps:
+      - name: Action (vscode-ext)
+        uses: google-github-actions/release-please-action@v2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          command: manifest-pr
+          path: packages/vscode-ext
+  relplz-cl:
+    name: for cli
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_cli != 'true' }}
+    steps:
+      - name: Action (cli)
+        uses: google-github-actions/release-please-action@v2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          command: manifest-pr
+          path: packages/cli
