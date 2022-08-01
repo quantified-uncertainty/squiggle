@@ -112,7 +112,7 @@ const config = {
         logo: {
           alt: "QURI logo",
           src: "img/quri-logo-with-QURI-written-underneath.png",
-          href: "https://quantified-uncertainty.org",
+          href: "https://quantifieduncertainty.org",
           width: 150,
           height: 150,
         },
