@@ -32,3 +32,7 @@ This extention allows you to run and visualize Squiggle code.
 ## [Observable Library](https://observablehq.com/@hazelfire/squiggle)
 
 An exportable [Observable Notebook](https://observablehq.com/@hazelfire/squiggle) of the key components that you can directly import and use in Observable notebooks.
+
+## [NextJS starter](https://github.com/quantified-uncertainty/next-app-with-squiggle)
+
+A template for presenting estimates on a nextjs site.
