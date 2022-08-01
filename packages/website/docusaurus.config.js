@@ -5,7 +5,7 @@ const katex = require("rehype-katex");
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
-const path = require("path");
+const packageJson = require("./package.json")
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -108,7 +108,15 @@ const config = {
             ],
           },
         ],
-        copyright: `CC0. Built with Docusaurus.`,
+        logo: {
+          alt: "QURI logo",
+          src: "img/quri-logo-with-QURI-written-underneath.png",
+          href: "https://quantified-uncertainty.org",
+          width: 150,
+          height: 150
+
+        },
+        copyright: `v${packageJson.version}`,
       },
       prism: {
         theme: lightCodeTheme,
