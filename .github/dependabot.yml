@@ -11,3 +11,5 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "⬆️"
+    open-pull-requests-limit: 100
+
