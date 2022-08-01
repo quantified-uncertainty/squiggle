@@ -1,0 +1,15 @@
+{
+  "bootstrap-sha": "6a2584d800a4274da4ef3d792067e9cb83ea775b",
+  "bump-patch-for-minor-pre-major": true,
+  "release-type": "node",
+  "packages": {
+    "packages/squiggle-lang": {},
+    "packages/components": {},
+    "packages/website": {},
+    "packages/vscode-ext": {},
+    "packages/cli": {}
+  },
+  "skip-github-release": true,
+  "commit-search-depth": 50,
+  "plugins": ["node-workspace"]
+}

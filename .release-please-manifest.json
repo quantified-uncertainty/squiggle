@@ -1,0 +1,29 @@
+{
+  "extra-files": [
+    {
+      "type": "json",
+      "path": "packages/squiggle-lang/package.json",
+      "jsonpath": "$.json.version"
+    },
+    {
+      "type": "json",
+      "path":  "packages/components/package.json",
+      "jsonpath": "$.json.version"
+    },
+    {
+      "type": "json",
+      "path":  "packages/vscode-ext/package.json",
+      "jsonpath": "$.json.version"
+    },
+    {
+      "type": "json",
+      "path":  "packages/website/package.json",
+      "jsonpath": "$.json.version"
+    },
+    {
+      "type": "json",
+      "path":  "packages/cli/package.json",
+      "jsonpath": "$.json.version"
+    }
+  ]
+}
