@@ -12,8 +12,8 @@ _An estimation language_.
 
 - [Gallery](https://www.squiggle-language.com/docs/Discussions/Gallery)
 - [Squiggle playground](https://squiggle-language.com/playground)
-- [Language basics](https://www.squiggle-language.com/docs/Features/Language)
-- [Squiggle functions source of truth](https://www.squiggle-language.com/docs/Features/Functions)
+- [Language basics](https://www.squiggle-language.com/docs/Guides/Language)
+- [Squiggle functions source of truth](https://www.squiggle-language.com/docs/Guides/Functions)
 - [Known bugs](https://www.squiggle-language.com/docs/Discussions/Bugs)
 - [Original lesswrong sequence](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3)
 - [Author your squiggle models as Observable notebooks](https://observablehq.com/@hazelfire/squiggle)
