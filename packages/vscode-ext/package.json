@@ -128,7 +128,7 @@
   "devDependencies": {
     "@types/glob": "^7.2.0",
     "@types/node": "18.x",
-    "@types/vscode": "^1.69.0",
+    "@types/vscode": "^1.70.0",
     "@typescript-eslint/eslint-plugin": "^5.32.0",
     "@typescript-eslint/parser": "^5.32.0",
     "eslint": "^8.21.0",
