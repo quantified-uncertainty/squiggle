@@ -2188,10 +2188,22 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
+"@floating-ui/core@^0.7.3":
+  version "0.7.3"
+  resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-0.7.3.tgz#d274116678ffae87f6b60e90f88cc4083eefab86"
+  integrity sha512-buc8BXHmG9l82+OQXOFU3Kr2XQx9ys01U/Q9HMIrZ300iLc8HLMgh7dcCqgYzAzf4BkoQvDcXf5Y+CuEZ5JBYg==
+
 "@floating-ui/core@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.0.0.tgz#ec1d31f54c72dd0460276e2149e59bd13c0f01f6"
   integrity sha512-sm3nW0hHAxTv3gRDdCH8rNVQxijF+qPFo5gAeXCErRjKC7Qc28lIQ3R9Vd7Gw+KgwfA7RhRydDFuGeI0peGq7A==
+
+"@floating-ui/dom@^0.5.3":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@floating-ui/dom/-/dom-0.5.4.tgz#4eae73f78bcd4bd553ae2ade30e6f1f9c73fe3f1"
+  integrity sha512-419BMceRLq0RrmTSDxn8hf9R3VCJv2K9PUfugh5JyEFmdjzDo+e8U5EdR8nzKq8Yj1htzLm3b6eQEEam3/rrtg==
+  dependencies:
+    "@floating-ui/core" "^0.7.3"
 
 "@floating-ui/dom@^1.0.0":
   version "1.0.0"
@@ -2200,6 +2212,15 @@
   dependencies:
     "@floating-ui/core" "^1.0.0"
 
+"@floating-ui/react-dom-interactions@^0.6.6":
+  version "0.6.6"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom-interactions/-/react-dom-interactions-0.6.6.tgz#8542e8c4bcbee2cd0d512de676c6a493e0a2d168"
+  integrity sha512-qnao6UPjSZNHnXrF+u4/n92qVroQkx0Umlhy3Avk1oIebm/5ee6yvDm4xbHob0OjY7ya8WmUnV3rQlPwX3Atwg==
+  dependencies:
+    "@floating-ui/react-dom" "^0.7.2"
+    aria-hidden "^1.1.3"
+    use-isomorphic-layout-effect "^1.1.1"
+
 "@floating-ui/react-dom-interactions@^0.9.1":
   version "0.9.1"
   resolved "https://registry.yarnpkg.com/@floating-ui/react-dom-interactions/-/react-dom-interactions-0.9.1.tgz#93f17ed89b664795251ce5a2f228c50fc8ada059"
@@ -2207,6 +2228,14 @@
   dependencies:
     "@floating-ui/react-dom" "^1.0.0"
     aria-hidden "^1.1.3"
+
+"@floating-ui/react-dom@^0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-0.7.2.tgz#0bf4ceccb777a140fc535c87eb5d6241c8e89864"
+  integrity sha512-1T0sJcpHgX/u4I1OzIEhlcrvkUN8ln39nz7fMoE/2HDHrPiMFoOGR7++GYyfUmIQHkkrTinaeQsO3XWubjSvGg==
+  dependencies:
+    "@floating-ui/dom" "^0.5.3"
+    use-isomorphic-layout-effect "^1.1.1"
 
 "@floating-ui/react-dom@^1.0.0":
   version "1.0.0"
@@ -2250,7 +2279,7 @@
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-1.0.6.tgz#35dd26987228b39ef2316db3b1245c42eb19e324"
   integrity sha512-JJCXydOFWMDpCP4q13iEplA503MQO3xLoZiKum+955ZCtHINWnx26CUxVxxFQu/uLb4LW3ge15ZpzIkXKkJ8oQ==
 
-"@hookform/resolvers@^2.9.7":
+"@hookform/resolvers@^2.9.6", "@hookform/resolvers@^2.9.7":
   version "2.9.7"
   resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-2.9.7.tgz#8b257ae67234ce0270e6b044c1a61fb98ec02b4b"
   integrity sha512-BloehX3MOLwuFEwT4yZnmolPjVmqyn8VsSuodLfazbCIqxBHsQ4qUZsi+bvNNCduRli1AGWFrkDLGD5QoNzsoA==
@@ -2654,7 +2683,7 @@
   resolved "https://registry.yarnpkg.com/@mdx-js/util/-/util-1.6.22.tgz#219dfd89ae5b97a8801f015323ffa4b62f45718b"
   integrity sha512-H1rQc1ZOHANWBvPcW+JpGwr+juXSxM8Q8YCkm3GhZd8REu1fHR3z99CErO1p9pkcfcxZnMdIZdIsXkOHY0NilA==
 
-"@motionone/animation@^10.13.1":
+"@motionone/animation@^10.12.0", "@motionone/animation@^10.13.1":
   version "10.13.2"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.13.2.tgz#174a55a3bac1b6fb314cc1c3627093dc790ae081"
   integrity sha512-YGWss58IR2X4lOjW89rv1Q+/Nq/QhfltaggI7i8sZTpKC1yUvM+XYDdvlRpWc6dk8LviMBrddBJAlLdbaqeRmw==
@@ -2662,6 +2691,18 @@
     "@motionone/easing" "^10.13.2"
     "@motionone/types" "^10.13.2"
     "@motionone/utils" "^10.13.2"
+    tslib "^2.3.1"
+
+"@motionone/dom@10.12.0":
+  version "10.12.0"
+  resolved "https://registry.yarnpkg.com/@motionone/dom/-/dom-10.12.0.tgz#ae30827fd53219efca4e1150a5ff2165c28351ed"
+  integrity sha512-UdPTtLMAktHiqV0atOczNYyDd/d8Cf5fFsd1tua03PqTwwCe/6lwhLSQ8a7TbnQ5SN0gm44N1slBfj+ORIhrqw==
+  dependencies:
+    "@motionone/animation" "^10.12.0"
+    "@motionone/generators" "^10.12.0"
+    "@motionone/types" "^10.12.0"
+    "@motionone/utils" "^10.12.0"
+    hey-listen "^1.0.8"
     tslib "^2.3.1"
 
 "@motionone/dom@10.13.1":
@@ -2684,7 +2725,7 @@
     "@motionone/utils" "^10.13.2"
     tslib "^2.3.1"
 
-"@motionone/generators@^10.13.1":
+"@motionone/generators@^10.12.0", "@motionone/generators@^10.13.1":
   version "10.13.2"
   resolved "https://registry.yarnpkg.com/@motionone/generators/-/generators-10.13.2.tgz#dd972195b899e7a556d65bd27fae2fd423055e10"
   integrity sha512-QMoXV1MXEEhR6D3dct/RMMS1FwJlAsW+kMPbFGzBA4NbweblgeYQCft9DcDAVpV9wIwD6qvlBG9u99sOXLfHiA==
@@ -2693,12 +2734,12 @@
     "@motionone/utils" "^10.13.2"
     tslib "^2.3.1"
 
-"@motionone/types@^10.13.0", "@motionone/types@^10.13.2":
+"@motionone/types@^10.12.0", "@motionone/types@^10.13.0", "@motionone/types@^10.13.2":
   version "10.13.2"
   resolved "https://registry.yarnpkg.com/@motionone/types/-/types-10.13.2.tgz#c560090d81bd0149e7451aae23ab7af458570363"
   integrity sha512-yYV4q5v5F0iADhab4wHfqaRJnM/eVtQLjUPhyEcS72aUz/xyOzi09GzD/Gu+K506BDfqn5eULIilUI77QNaqhw==
 
-"@motionone/utils@^10.13.1", "@motionone/utils@^10.13.2":
+"@motionone/utils@^10.12.0", "@motionone/utils@^10.13.1", "@motionone/utils@^10.13.2":
   version "10.13.2"
   resolved "https://registry.yarnpkg.com/@motionone/utils/-/utils-10.13.2.tgz#ce79bfe1d133493c217cdc0584960434e065648d"
   integrity sha512-6Lw5bDA/w7lrPmT/jYWQ76lkHlHs9fl2NZpJ22cVy1kKDdEH+Cl1U6hMTpdphO6VQktQ6v2APngag91WBKLqlA==
@@ -2776,6 +2817,44 @@
   version "1.0.0-next.21"
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
+
+"@quri/squiggle-components@^0.2.23":
+  version "0.2.24"
+  resolved "https://registry.yarnpkg.com/@quri/squiggle-components/-/squiggle-components-0.2.24.tgz#16a2d72fb16f46a0bf71388c85d1238927676923"
+  integrity sha512-slBGryELfCsM6WX+AwQcqiPPoImLRHNyXZDueL7a+OKEAx09w3pKOqVzLWNGL7+dJe3dF8as9X/Gv1JbbIj5yw==
+  dependencies:
+    "@floating-ui/react-dom" "^0.7.2"
+    "@floating-ui/react-dom-interactions" "^0.6.6"
+    "@headlessui/react" "^1.6.6"
+    "@heroicons/react" "^1.0.6"
+    "@hookform/resolvers" "^2.9.6"
+    "@quri/squiggle-lang" "^0.2.8"
+    "@react-hook/size" "^2.1.2"
+    clsx "^1.2.1"
+    framer-motion "^6.5.1"
+    lodash "^4.17.21"
+    react "^18.1.0"
+    react-ace "^10.1.0"
+    react-hook-form "^7.33.1"
+    react-use "^17.4.0"
+    react-vega "^7.6.0"
+    vega "^5.22.1"
+    vega-embed "^6.21.0"
+    vega-lite "^5.3.0"
+    vscode-uri "^3.0.3"
+    yup "^0.32.11"
+
+"@quri/squiggle-lang@^0.2.11", "@quri/squiggle-lang@^0.2.8":
+  version "0.2.12"
+  resolved "https://registry.yarnpkg.com/@quri/squiggle-lang/-/squiggle-lang-0.2.12.tgz#e8fdb22a84aa75df71c071d1ed4ae5c55f15d447"
+  integrity sha512-fgv9DLvPlX/TqPSacKSW3GZ5S9H/YwqaMoRdFrn5SJjHnnMh/xJW/9iyzzgOxPCXov9xFeDvL159tkbStMm7vw==
+  dependencies:
+    "@rescript/std" "^9.1.4"
+    "@stdlib/stats" "^0.0.13"
+    jstat "^1.9.5"
+    lodash "^4.17.21"
+    mathjs "^11.0.1"
+    pdfast "^0.2.0"
 
 "@react-hook/latest@^1.0.2":
   version "1.0.3"
@@ -9608,6 +9687,20 @@ fragment-cache@^0.2.1:
   dependencies:
     map-cache "^0.2.2"
 
+framer-motion@^6.5.1:
+  version "6.5.1"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-6.5.1.tgz#802448a16a6eb764124bf36d8cbdfa6dd6b931a7"
+  integrity sha512-o1BGqqposwi7cgDrtg0dNONhkmPsUFDaLcKXigzuTFC5x58mE8iyTazxSudFzmT6MEyJKfjjU8ItoMe3W+3fiw==
+  dependencies:
+    "@motionone/dom" "10.12.0"
+    framesync "6.0.1"
+    hey-listen "^1.0.8"
+    popmotion "11.0.3"
+    style-value-types "5.0.0"
+    tslib "^2.1.0"
+  optionalDependencies:
+    "@emotion/is-prop-valid" "^0.8.2"
+
 framer-motion@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-7.0.0.tgz#5fb580d0fe5a2a3ec055d2b7b5b57313a96683b7"
@@ -15021,7 +15114,7 @@ react-helmet-async@*, react-helmet-async@^1.3.0:
     react-fast-compare "^3.2.0"
     shallowequal "^1.1.0"
 
-react-hook-form@^7.34.0:
+react-hook-form@^7.33.1, react-hook-form@^7.34.0:
   version "7.34.0"
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.34.0.tgz#22883b5e014e5c5e35f3061d0e3862153b0df2ec"
   integrity sha512-s0/TJ09NVlEk2JPp3yit1WnMuPNBXFmUKEQPulgDi9pYBw/ZmmAFHe6AXWq73Y+kp8ye4OcMf0Jv+i/qLPektg==
@@ -18092,7 +18185,7 @@ vega-label@~1.2.0:
     vega-scenegraph "^4.9.2"
     vega-util "^1.15.2"
 
-vega-lite@^5.4.0:
+vega-lite@^5.3.0, vega-lite@^5.4.0:
   version "5.4.0"
   resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-5.4.0.tgz#d09331e2a1c87843d5865de0fa7704919796ab56"
   integrity sha512-e/P5iOtBE62WEWZhKP7sLcBd92YS9prfUQafelxoOeloooSSrkUwM/ZDmN5Q5ffByEZTiKfODtnwD6/xKDYUmw==
