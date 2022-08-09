@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.2.24",
+  "version": "0.3.0",
   "license": "MIT",
   "dependencies": {
     "@floating-ui/react-dom": "^1.0.0",
