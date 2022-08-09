@@ -1,7 +1,7 @@
 {
   "packages/cli": "0.0.3",
-  "packages/components": "0.2.24",
-  "packages/squiggle-lang": "0.2.11",
+  "packages/components": "0.3.1",
+  "packages/squiggle-lang": "0.3.0",
   "packages/vscode-ext": "0.3.1",
-  "packages/website": "0.2.1"
+  "packages/website": "0.3.0"
 }
