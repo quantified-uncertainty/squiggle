@@ -59,6 +59,13 @@ export const ExpressionViewer: React.FC<Props> = ({
   expression,
   width,
 }) => {
+  if (typeof expression !== "object") {
+    return (
+      <VariableList path={path} heading="Error">
+        {() => `Unknown expression: ${expression}`}
+      </VariableList>
+    );
+  }
   switch (expression.tag) {
     case "number":
       return (
@@ -281,10 +288,16 @@ export const ExpressionViewer: React.FC<Props> = ({
       );
     default: {
       return (
-        <div>
-          <span>No display for type: </span>{" "}
-          <span className="font-semibold text-slate-600">{expression.tag}</span>
-        </div>
+        <VariableList path={path} heading="Error">
+          {() => (
+            <div>
+              <span>No display for type: </span>{" "}
+              <span className="font-semibold text-slate-600">
+                {expression.tag}
+              </span>
+            </div>
+          )}
+        </VariableList>
       );
     }
   }

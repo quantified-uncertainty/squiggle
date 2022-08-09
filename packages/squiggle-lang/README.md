@@ -20,7 +20,7 @@ environment created from the squiggle code.
 ```js
 import { run } from "@quri/squiggle-lang";
 run(
-  "normal(0, 1) * fromSamples([-3,-2,-1,1,2,3,3,3,4,9]"
+  "normal(0, 1) * SampleSet.fromList([-3, 2,-1,1,2,3,3,3,4,9])"
 ).value.value.toSparkline().value;
 ```
 
