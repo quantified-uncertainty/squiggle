@@ -174,6 +174,3 @@ describe("project with include", () => {
   })
 })
 
-// test bindings
-//TODO: test continues
-//TODO: test include
