@@ -20,7 +20,7 @@ describe("Peggy parse type", () => {
       "{(::$_typeOf_$ :f (::$_typeFunction_$ (::$_constructArray_$ (#number #number #number))))}",
     )
   })
-  describe("high priority modifier", () => {
+  describe("high priority contract", () => {
     testParse(
       "answer: number<-min<-max(100)|string",
       "{(::$_typeOf_$ :answer (::$_typeOr_$ (::$_constructArray_$ ((::$_typeModifier_max_$ (::$_typeModifier_min_$ #number) 100) #string))))}",
@@ -30,7 +30,7 @@ describe("Peggy parse type", () => {
       "{(::$_typeOf_$ :answer (::$_typeModifier_memberOf_$ #number (::$_constructArray_$ (1 3 5))))}",
     )
   })
-  describe("low priority modifier", () => {
+  describe("low priority contract", () => {
     testParse(
       "answer: number | string $ opaque",
       "{(::$_typeOf_$ :answer (::$_typeModifier_opaque_$ (::$_typeOr_$ (::$_constructArray_$ (#number #string)))))}",
@@ -63,14 +63,14 @@ describe("Peggy parse type", () => {
       "{(::$_typeOf_$ :weekend (::$_typeOr_$ (::$_constructArray_$ ((::$_typeConstructor_$ #Saturday (::$_constructArray_$ ())) (::$_typeConstructor_$ #Sunday (::$_constructArray_$ ()))))))}",
     )
   })
-  describe("type paranthesis", () => {
-    //$ is introduced to avoid paranthesis
+  describe("type parenthesis", () => {
+    //$ is introduced to avoid parenthesis
     testParse(
       "answer: (number|string)<-opaque",
       "{(::$_typeOf_$ :answer (::$_typeModifier_opaque_$ (::$_typeOr_$ (::$_constructArray_$ (#number #string)))))}",
     )
   })
-  describe("squiggle expressions in type modifiers", () => {
+  describe("squiggle expressions in type contracts", () => {
     testParse(
       "odds1 = [1,3,5]; odds2 = [7, 9]; type odds = number<-memberOf(concat(odds1, odds2))",
       "{:odds1 = {(::$_constructArray_$ (1 3 5))}; :odds2 = {(::$_constructArray_$ (7 9))}; (::$_typeAlias_$ #odds (::$_typeModifier_memberOf_$ #number (::concat :odds1 :odds2)))}",

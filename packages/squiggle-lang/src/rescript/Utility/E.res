@@ -631,6 +631,19 @@ module A = {
     )
   let filter = Js.Array.filter
   let joinWith = Js.Array.joinWith
+  let transpose = (xs: array<array<'a>>): array<array<'a>> => {
+    let arr: array<array<'a>> = []
+    for i in 0 to length(xs) - 1 {
+      for j in 0 to length(xs[i]) - 1 {
+        if Js.Array.length(arr) <= j {
+          ignore(Js.Array.push([xs[i][j]], arr))
+        } else {
+          ignore(Js.Array.push(xs[i][j], arr[j]))
+        }
+      }
+    }
+    arr
+  }
 
   let all = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) == length(xs)
   let any = (p: 'a => bool, xs: array<'a>): bool => length(filter(p, xs)) > 0
@@ -752,7 +765,7 @@ module A = {
     let diff = (t: t): array<float> =>
       Belt.Array.zipBy(t, Belt.Array.sliceToEnd(t, 1), (left, right) => right -. left)
 
-    let cumsum = (t: t): array<float> => accumulate((a, b) => a +. b, t)
+    let cumSum = (t: t): array<float> => accumulate((a, b) => a +. b, t)
     let cumProd = (t: t): array<float> => accumulate((a, b) => a *. b, t)
 
     exception RangeError(string)

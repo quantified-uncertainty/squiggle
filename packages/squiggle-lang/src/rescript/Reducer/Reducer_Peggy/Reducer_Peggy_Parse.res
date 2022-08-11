@@ -91,7 +91,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
     args->Js.Array2.map(arg => PgNodeIdentifier(arg)->pgToString)->Js.Array2.toString
 
   let nodesToStringUsingSeparator = (nodes: array<node>, separator: string): string =>
-    nodes->Js.Array2.map(toString)->Extra.Array.interperse(separator)->Js.String.concatMany("")
+    nodes->Js.Array2.map(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
   switch peggyNode {
   | PgNodeBlock(node) => "{" ++ node["statements"]->nodesToStringUsingSeparator("; ") ++ "}"
