@@ -82,6 +82,11 @@ module O = {
     | None => d
     | Some(a) => a
     }
+  let defaultFn = (d, o) =>
+    switch o {
+    | None => d()
+    | Some(a) => a
+    }
   let isSome = o =>
     switch o {
     | Some(_) => true
@@ -158,6 +163,7 @@ module O = {
 
 module O2 = {
   let default = (a, b) => O.default(b, a)
+  let defaultFn = (a, b) => O.defaultFn(b, a)
   let toExn = (a, b) => O.toExn(b, a)
   let fmap = (a, b) => O.fmap(b, a)
   let toResult = (a, b) => O.toResult(b, a)
@@ -546,6 +552,7 @@ module A = {
   let slice = Belt.Array.slice
   let init = Array.init
   let reduce = Belt.Array.reduce
+  let reduceReverse = Belt.Array.reduceReverse
   let reducei = Belt.Array.reduceWithIndex
   let some = Belt.Array.some
   let isEmpty = r => length(r) < 1

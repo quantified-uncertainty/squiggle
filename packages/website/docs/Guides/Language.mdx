@@ -5,50 +5,103 @@ title: Language Basics
 
 import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 
-## Expressions
+Squiggle supports some simple types and language features.
 
-### Distributions
-
-<SquiggleEditor defaultCode={`mixture(1 to 2, 3, [0.3, 0.7])`} />
-
-### Numbers
+## Numbers
 
 <SquiggleEditor defaultCode="4.32" />
 
-### Arrays
+## Distributions
+
+There are several ways of easily entering distributions. See the [documentation](/docs/Api/Dist/) on distributions for a complete API.
 
 <SquiggleEditor
-  defaultCode={`[beta(1,10), 4, isNormalized(toSampleSet(1 to 2))]`}
+  defaultCode={`a = normal(4,2)
+b = 30 to 50
+c = lognormal({mean:90, stdev: 7})
+d = mixture(a,b,c, [.3, .3, .4])
+d`}
 />
 
-### Records
+## Lists
+
+Squiggle lists can accept items of any type, similar to those in Python. [API](/docs/Api/List).
+
+<SquiggleEditor
+  defaultCode={`[beta(1,10), 4, isNormalized(SampleSet.fromDist(1 to 2))]`}
+/>
+
+## Dictionaries
+
+Squiggle dictionaries work similarly to Python dictionaries. [API](/docs/Api/Dictionary).
 
 <SquiggleEditor
   defaultCode={`d = {dist: triangular(0, 1, 2), weight: 0.25}
 d.dist`}
 />
 
-## Statements
-
-A statement assigns expressions to names. It looks like `<symbol> = <expression>`
+## Functions
 
 <SquiggleEditor
-  defaultCode={`value_of_work = 10 to 70
-5 + value_of_work / 75`}
+  defaultCode={`f(t) = normal(t^2, t^1.2+.01)
+f`}
 />
 
-### Functions
+## Anonymous Functions
 
-We can define functions
+<SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
+
+## Comments
 
 <SquiggleEditor
-  defaultCode={`ozzie_estimate(t) = lognormal(t^(1.1), 0.5)
-nuno_estimate(t, m) = mixture(normal(-5, 1), lognormal(m, t / 1.25))
-ozzie_estimate(1) * nuno_estimate(1, 1)`}
+  defaultCode={`// This is a single-line comment\n
+/*
+This is a multiple
+-line comment.
+*/
+""
+`}
 />
 
-## See more
+## Pipes
 
-- [Distribution creation](./DistributionCreation)
-- [Functions reference](./Functions)
-- [Gallery](../Discussions/Gallery)
+Squiggle features [data-first](https://www.javierchavarri.com/data-first-and-data-last-a-comparison/) pipes. Functions in the standard library are organized to make this convenient.
+
+<SquiggleEditor
+  defaultCode={`normal(5,2) |> truncateLeft(3) |> SampleSet.fromDist |> SampleSet.map({|r| r + 10})`}
+/>
+
+## Standard Library
+
+Squiggle features a simple [standard libary](/docs/Api/Dist).
+
+Most functions are namespaced under their respective types to keep functionality distinct. Certain popular functions are usable without their namespaces.
+
+For example,
+
+<SquiggleEditor
+  defaultCode={`a = List.upTo(0, 5000) |> SampleSet.fromList // namespaces required
+b = normal(5,2) // namespace not required
+c = 5 to 10 // namespace not required
+""`}
+/>
+
+## Number Prefixes
+
+Numbers support a few scientific notation prefixes.
+
+| prefix | multiplier |
+| ------ | ---------- |
+| n      | 10^-9      |
+| m      | 10^-3      |
+| k      | 10^3       |
+| M      | 10^6       |
+| B,G    | 10^9       |
+| T      | 10^12      |
+| P      | 10^15      |
+
+<SquiggleEditor
+  defaultCode={`simpleNumber = 4.32k
+distribution = 40M to 50M
+distribution`}
+/>

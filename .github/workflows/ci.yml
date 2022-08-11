@@ -24,27 +24,27 @@ jobs:
     steps:
       - id: skip_lang_check
         name: Check if the changes are about squiggle-lang src files
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v4.0.0
         with:
           paths: '["packages/squiggle-lang/**"]'
       - id: skip_components_check
         name: Check if the changes are about components src files
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v4.0.0
         with:
           paths: '["packages/components/**"]'
       - id: skip_website_check
         name: Check if the changes are about website src files
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v4.0.0
         with:
           paths: '["packages/website/**"]'
       - id: skip_vscodeext_check
         name: Check if the changes are about vscode extension src files
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v4.0.0
         with:
           paths: '["packages/vscode-ext/**"]'
       - id: skip_cli_check
         name: Check if the changes are about cli src files
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v4.0.0
         with:
           paths: '["packages/cli/**"]'
 
@@ -58,7 +58,7 @@ jobs:
         shell: bash
         working-directory: packages/squiggle-lang
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Dependencies
         run: cd ../../ && yarn
       - name: Check rescript lint
@@ -79,7 +79,7 @@ jobs:
         shell: bash
         working-directory: packages/squiggle-lang
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 2
       - name: Install dependencies from monorepo level
@@ -107,7 +107,7 @@ jobs:
         shell: bash
         working-directory: packages/components
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check javascript, typescript, and markdown lint
         uses: creyD/prettier_action@v4.2
         with:
@@ -124,7 +124,7 @@ jobs:
         shell: bash
         working-directory: packages/components
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies from monorepo level
         run: cd ../../ && yarn
       - name: Build rescript codebase in squiggle-lang
@@ -144,7 +144,7 @@ jobs:
         shell: bash
         working-directory: packages/website
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check javascript, typescript, and markdown lint
         uses: creyD/prettier_action@v4.2
         with:
@@ -161,7 +161,7 @@ jobs:
         shell: bash
         working-directory: packages/website
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies from monorepo level
         run: cd ../../ && yarn
       - name: Build rescript in squiggle-lang
@@ -181,7 +181,7 @@ jobs:
         shell: bash
         working-directory: packages/vscode-ext
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies from monorepo level
         run: cd ../../ && yarn
       - name: Lint the VSCode Extension source code
@@ -197,7 +197,7 @@ jobs:
         shell: bash
         working-directory: packages/vscode-ext
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies from monorepo level
         run: cd ../../ && yarn
       - name: Build
@@ -213,7 +213,7 @@ jobs:
         shell: bash
         working-directory: packages/cli
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check javascript, typescript, and markdown lint
         uses: creyD/prettier_action@v4.2
         with:

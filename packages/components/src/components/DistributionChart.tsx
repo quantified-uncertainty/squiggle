@@ -10,7 +10,6 @@ import {
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
 import { useSize } from "react-use";
-import clsx from "clsx";
 
 import {
   buildVegaSpec,
@@ -19,19 +18,18 @@ import {
 import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult, all } from "../lib/utility";
+import { hasMassBelowZero } from "../lib/distributionUtils";
 
 export type DistributionPlottingSettings = {
   /** Whether to show a summary of means, stdev, percentiles etc */
   showSummary: boolean;
-  /** Whether to show the user graph controls (scale etc) */
-  showControls: boolean;
+  actions?: boolean;
 } & DistributionChartSpecOptions;
 
 export type DistributionChartProps = {
   plot: Plot;
   width?: number;
   height: number;
-  actions?: boolean;
 } & DistributionPlottingSettings;
 
 export function defaultPlot(distribution: Distribution): Plot {
@@ -53,17 +51,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     height,
     showSummary,
     width,
-    showControls,
     logX,
-    expY,
     actions = false,
   } = props;
-  const [isLogX, setLogX] = React.useState(logX);
-  const [isExpY, setExpY] = React.useState(expY);
-
-  React.useEffect(() => setLogX(logX), [logX]);
-  React.useEffect(() => setExpY(expY), [expY]);
-
+  const shape = distribution.pointSet();
   const [sized] = useSize((size) => {
     let shapes = flattenResult(
       plot.distributions.map((x) =>
@@ -82,13 +73,6 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
     }
 
-    const massBelow0 = all(
-      shapes.value.map(
-        (shape) =>
-          shape.continuous.some((x) => x.x <= 0) ||
-          shape.discrete.some((x) => x.x <= 0)
-      )
-    );
     const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
@@ -104,7 +88,11 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
 
     return (
       <div style={{ width: widthProp }}>
-        {!(isLogX && massBelow0) ? (
+        {logX && hasMassBelowZero(shape.value) ? (
+          <ErrorAlert heading="Log Domain Error">
+            Cannot graph distribution with negative values on logarithmic scale.
+          </ErrorAlert>
+        ) : (
           <Vega
             spec={spec}
             data={{ data: shapes.value, domain }}
@@ -112,67 +100,16 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             height={height}
             actions={actions}
           />
-        ) : (
-          <ErrorAlert heading="Log Domain Error">
-            Cannot graph distribution with negative values on logarithmic scale.
-          </ErrorAlert>
         )}
         <div className="flex justify-center">
           {showSummary && plot.distributions.length == 1 && (
             <SummaryTable distribution={plot.distributions[0].distribution} />
           )}
         </div>
-        {showControls && (
-          <div>
-            <CheckBox
-              label="Log X scale"
-              value={isLogX}
-              onChange={setLogX}
-              // Check whether we should disable the checkbox
-              {...(massBelow0
-                ? {
-                    disabled: true,
-                    tooltip:
-                      "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
-                  }
-                : {})}
-            />
-            <CheckBox label="Exp Y scale" value={isExpY} onChange={setExpY} />
-          </div>
-        )}
       </div>
     );
   });
   return sized;
-};
-
-interface CheckBoxProps {
-  label: string;
-  onChange: (x: boolean) => void;
-  value: boolean;
-  disabled?: boolean;
-  tooltip?: string;
-}
-
-export const CheckBox: React.FC<CheckBoxProps> = ({
-  label,
-  onChange,
-  value,
-  disabled = false,
-  tooltip,
-}) => {
-  return (
-    <span title={tooltip}>
-      <input
-        type="checkbox"
-        checked={value}
-        onChange={() => onChange(!value)}
-        disabled={disabled}
-        className="form-checkbox"
-      />
-      <label className={clsx(disabled && "text-slate-400")}> {label}</label>
-    </span>
-  );
 };
 
 const TableHeadCell: React.FC<{ children: React.ReactNode }> = ({

@@ -23,13 +23,13 @@ const sidebars = {
   tutorialSidebar: [
     {
       type: "doc",
-      id: "Introduction",
-      label: "Introduction",
+      id: "Overview",
+      label: "Overview",
     },
     {
       type: "doc",
-      id: "Node-Packages",
-      label: "Node Packages",
+      id: "Integrations",
+      label: "Integrations",
     },
     {
       type: "category",

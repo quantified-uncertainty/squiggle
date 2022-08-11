@@ -16,6 +16,13 @@ describe("FunctionRegistry Library", () => {
     testEvalToBe("List.first([3,5,8])", "Ok(3)")
     testEvalToBe("List.last([3,5,8])", "Ok(8)")
     testEvalToBe("List.reverse([3,5,8])", "Ok([8,5,3])")
+    testEvalToBe("double(x)=2*x; arr=[1,2,3]; List.map(arr, double)", "Ok([2,4,6])")
+    testEvalToBe("double(x)=2*x; arr=[1,2,3]; map(arr, double)", "Ok([2,4,6])")
+    testEvalToBe("myadd(acc,x)=acc+x; arr=[1,2,3]; List.reduce(arr, 0, myadd)", "Ok(6)")
+    testEvalToBe("change(acc,x)=acc*x+x; arr=[1,2,3]; List.reduce(arr, 0, change)", "Ok(15)")
+    testEvalToBe("change(acc,x)=acc*x+x; arr=[1,2,3]; List.reduceReverse(arr, 0, change)", "Ok(9)")
+    testEvalToBe("check(x)=(x==2);arr=[1,2,3]; List.filter(arr,check)", "Ok([2])")
+    testEvalToBe("arr=[1,2,3]; List.reverse(arr)", "Ok([3,2,1])")
     testEvalToBe("Dist.normal(5,2)", "Ok(Normal(5,2))")
     testEvalToBe("normal(5,2)", "Ok(Normal(5,2))")
     testEvalToBe("normal({mean:5,stdev:2})", "Ok(Normal(5,2))")
@@ -53,6 +60,17 @@ describe("FunctionRegistry Library", () => {
     )
     testEvalToBe("Dist.logScore({estimate: normal(5,2), answer: 4.5})", "Ok(1.6433360626394853)")
     testEvalToBe("Dist.klDivergence(normal(5,2), normal(5,1.5))", "Ok(0.06874342818671068)")
+    testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
+    testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
+    testEvalToBe("SampleSet.fromFn({|| sample(normal(5,2))})", "Ok(Sample Set Distribution)")
+    testEvalToBe(
+      "addOne(t)=t+1; SampleSet.toList(SampleSet.map(SampleSet.fromList([1,2,3,4,5,6]), addOne))",
+      "Ok([2,3,4,5,6,7])",
+    )
+    testEvalToBe(
+      "SampleSet.toList(SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
+      "Ok([6,5,4,4,5,6])",
+    )
   })
 
   describe("Fn auto-testing", () => {

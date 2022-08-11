@@ -18,6 +18,7 @@ import { tagged, tag } from "./types";
 
 // Raw rescript types.
 export type rescriptExport =
+  | 0 // EvVoid
   | {
       TAG: 0; // EvArray
       _0: rescriptExport[];
@@ -131,7 +132,8 @@ export type squiggleExpression =
   | tagged<"record", { [key: string]: squiggleExpression }>
   | tagged<"type", { [key: string]: squiggleExpression }>
   | tagged<"typeIdentifier", string>
-  | tagged<"module", { [key: string]: squiggleExpression }>;
+  | tagged<"module", { [key: string]: squiggleExpression }>
+  | tagged<"void", string>;
 
 export { lambdaValue };
 
@@ -139,6 +141,10 @@ export function convertRawToTypescript(
   result: rescriptExport,
   environment: environment
 ): squiggleExpression {
+  if (typeof result === "number") {
+    // EvVoid
+    return tag("void", "");
+  }
   switch (result.TAG) {
     case 0: // EvArray
       return tag(

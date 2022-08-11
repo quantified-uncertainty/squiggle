@@ -44,12 +44,12 @@ export default function PlaygroundPage() {
   const playgroundProps = {
     defaultCode: "normal(0,1)",
     height: 700,
-    showTypes: true,
+    showShareButton: true,
     ...hashData,
     onCodeChange: (code) => setHashData({ initialSquiggleString: code }),
     onSettingsChange: (settings) => {
-      const { showTypes, showControls, showSummary, showEditor } = settings;
-      setHashData({ showTypes, showControls, showSummary, showEditor });
+      const { showSummary, showEditor } = settings;
+      setHashData({ showSummary, showEditor });
     },
   };
   return (
@@ -57,6 +57,7 @@ export default function PlaygroundPage() {
       <div
         style={{
           maxWidth: 2000,
+          padding: 8,
         }}
       >
         <SquigglePlayground {...playgroundProps} />

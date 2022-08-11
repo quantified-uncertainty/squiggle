@@ -1,5 +1,5 @@
+import { RefreshIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
-import { motion } from "framer-motion";
 import React from "react";
 
 type IconType = (props: React.ComponentProps<"svg">) => JSX.Element;
@@ -9,19 +9,19 @@ type Props = {
   onChange: (status: boolean) => void;
   texts: [string, string];
   icons: [IconType, IconType];
+  spinIcon?: boolean;
 };
 
 export const Toggle: React.FC<Props> = ({
-  texts: [onText, offText],
-  icons: [OnIcon, OffIcon],
   status,
   onChange,
+  texts: [onText, offText],
+  icons: [OnIcon, OffIcon],
+  spinIcon,
 }) => {
   const CurrentIcon = status ? OnIcon : OffIcon;
   return (
-    <motion.button
-      layout
-      transition={{ duration: 0.2 }}
+    <button
       className={clsx(
         "rounded-md py-0.5 bg-slate-500 text-white text-xs font-semibold flex items-center space-x-1",
         status ? "bg-slate-500" : "bg-gray-400",
@@ -30,12 +30,18 @@ export const Toggle: React.FC<Props> = ({
       )}
       onClick={() => onChange(!status)}
     >
-      <motion.div layout transition={{ duration: 0.2 }}>
-        <CurrentIcon className="w-6 h-6" />
-      </motion.div>
-      <motion.span layout transition={{ duration: 0.2 }}>
-        {status ? onText : offText}
-      </motion.span>
-    </motion.button>
+      <div className="relative w-6 h-6" key={String(spinIcon)}>
+        <CurrentIcon
+          className={clsx(
+            "w-6 h-6 absolute opacity-100",
+            spinIcon && "animate-hide"
+          )}
+        />
+        {spinIcon && (
+          <RefreshIcon className="w-6 h-6 absolute opacity-0 animate-appear-and-spin" />
+        )}
+      </div>
+      <span>{status ? onText : offText}</span>
+    </button>
   );
 };

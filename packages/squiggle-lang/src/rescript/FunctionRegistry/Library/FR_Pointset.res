@@ -1,7 +1,7 @@
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
 
-let nameSpace = "Pointset"
+let nameSpace = "PointSet"
 let requiresNamespace = true
 
 let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
@@ -25,11 +25,40 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
 
 let library = [
   Function.make(
+    ~name="fromDist",
+    ~nameSpace,
+    ~requiresNamespace=true,
+    ~examples=[`PointSet.fromDist(normal(5,2))`],
+    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~definitions=[
+      FnDefinition.make(
+        ~name="fromDist",
+        ~inputs=[FRTypeDist],
+        ~run=(_, inputs, env, _) =>
+          switch inputs {
+          | [FRValueDist(dist)] =>
+            GenericDist.toPointSet(
+              dist,
+              ~xyPointLength=env.xyPointLength,
+              ~sampleCount=env.sampleCount,
+              (),
+            )
+            ->E.R2.fmap(Wrappers.pointSet)
+            ->E.R2.fmap(Wrappers.evDistribution)
+            ->E.R2.errMap(_ => "")
+          | _ => Error(impossibleError)
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
     ~name="makeContinuous",
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Pointset.makeContinuous([
+      `PointSet.makeContinuous([
         {x: 0, y: 0.2},
         {x: 1, y: 0.7},
         {x: 2, y: 0.8},
@@ -41,7 +70,7 @@ let library = [
       FnDefinition.make(
         ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        ~run=(_, inputs, _, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
         (),
       ),
     ],
@@ -52,7 +81,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[
-      `Pointset.makeDiscrete([
+      `PointSet.makeDiscrete([
         {x: 0, y: 0.2},
         {x: 1, y: 0.7},
         {x: 2, y: 0.8},
@@ -64,7 +93,7 @@ let library = [
       FnDefinition.make(
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+        ~run=(_, inputs, _, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
         (),
       ),
     ],
