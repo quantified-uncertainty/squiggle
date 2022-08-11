@@ -46,14 +46,7 @@ export function makePlot(record: {
 }
 
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const {
-    plot,
-    height,
-    showSummary,
-    width,
-    logX,
-    actions = false,
-  } = props;
+  const { plot, height, showSummary, width, logX, actions = false } = props;
   const shape = distribution.pointSet();
   const [sized] = useSize((size) => {
     let shapes = flattenResult(
