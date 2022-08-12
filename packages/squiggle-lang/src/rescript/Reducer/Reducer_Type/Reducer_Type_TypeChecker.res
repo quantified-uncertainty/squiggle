@@ -7,10 +7,15 @@ open InternalExpressionValue
 let rec isITypeOf = (anIType: T.iType, aValue): result<bool, T.typeErrorValue> => {
   let caseTypeIdentifier = (anUpperTypeName, aValue) => {
     let aTypeName = anUpperTypeName->Js.String2.toLowerCase
-    let valueTypeName = aValue->valueToValueType->valueTypeToString->Js.String2.toLowerCase
-    switch aTypeName == valueTypeName {
-    | true => Ok(true)
-    | false => T.TypeMismatch(anIType, aValue)->Error
+    switch aTypeName {
+    | "any" => Ok(true)
+    | _ => {
+        let valueTypeName = aValue->valueToValueType->valueTypeToString->Js.String2.toLowerCase
+        switch aTypeName == valueTypeName {
+        | true => Ok(true)
+        | false => T.TypeMismatch(anIType, aValue)->Error
+        }
+      }
     }
   }
 
@@ -146,6 +151,13 @@ let checkITypeArguments = (anIType: T.iType, args: array<InternalExpressionValue
   switch anIType {
   | T.ItTypeFunction({inputs}) => isITypeOf(T.ItTypeTuple({elements: inputs}), args->IEvArray)
   | _ => T.TypeMismatch(anIType, args->IEvArray)->Error
+  }
+}
+
+let checkITypeArgumentsBool = (anIType: T.iType, args: array<InternalExpressionValue.t>): bool => {
+  switch checkITypeArguments(anIType, args) {
+  | Ok(_) => true
+  | _ => false
   }
 }
 
