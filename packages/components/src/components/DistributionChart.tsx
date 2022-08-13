@@ -80,7 +80,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
 
     return (
       <div style={{ width: widthProp }}>
-        {logX && hasMassBelowZero(shape.value) ? (
+        {logX && shapes.value.some(hasMassBelowZero) ? (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>

@@ -31,3 +31,7 @@ export function resultBind<a, b, c>(
 export function all(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x && y, true);
 }
+
+export function some(arr: boolean[]): boolean {
+  return arr.reduce((x, y) => x || y, false);
+}
