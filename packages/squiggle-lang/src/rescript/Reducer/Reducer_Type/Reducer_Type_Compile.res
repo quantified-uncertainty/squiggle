@@ -38,3 +38,12 @@ let fromTypeExpression = (
     (reducerFn: ExpressionT.reducerFn),
   )->Belt.Result.map(T.fromIEvValue)
 }
+
+let fromTypeExpressionExn = (
+  typeExpressionSourceCode: string,
+  reducerFn: ExpressionT.reducerFn,
+): T.t =>
+  switch fromTypeExpression(typeExpressionSourceCode, reducerFn) {
+  | Ok(value) => value
+  | _ => `Cannot compile ${typeExpressionSourceCode}`->Reducer_Exception.ImpossibleException->raise
+  }
