@@ -10,5 +10,5 @@ describe("Evaluate ternary operator", () => {
   testEvalToBe("false ? 'YES' : 'NO'", "Ok('NO')")
   testEvalToBe("2 > 1 ? 'YES' : 'NO'", "Ok('YES')")
   testEvalToBe("2 <= 1 ? 'YES' : 'NO'", "Ok('NO')")
-  testEvalToBe("1+1 ? 'YES' : 'NO'", "Error(Expected type: Boolean)")
+  testEvalToBe("1+1 ? 'YES' : 'NO'", "Error(Expected type: Boolean but got: )")
 })

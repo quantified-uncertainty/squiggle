@@ -5,17 +5,17 @@ author: Ozzie Gooen
 date: 02-19-2022
 ---
 
-Probability distributions have several subtle possible formats. Three important ones that we deal with in Squiggle are symbolic, sample set, and graph formats.
+Probability distributions have several subtle possible formats. Three important ones that we deal with in Squiggle are symbolic, sample set, and point set formats.
 
 _Symbolic_ formats are just the math equations. `normal(5,3)` is the symbolic representation of a normal distribution.
 
 When you sample distributions (usually starting with symbolic formats), you get lists of samples. Monte Carlo techniques return lists of samples. Let’s call this the “_Sample Set_” format.
 
-Lastly is what I’ll refer to as the _Graph_ format. It describes the coordinates, or the shape, of the distribution. You can save these formats in JSON, for instance, like, `{xs: [1, 2, 3, 4, …], ys: [.0001, .0003, .002, …]}`.
+Lastly is what I’ll refer to as the _Point Set_ format. It describes the coordinates, or the shape, of the distribution. You can save these formats in JSON, for instance, like, `{xs: [1, 2, 3, 4, …], ys: [.0001, .0003, .002, …]}`.
 
-Symbolic, Sample Set, and Graph formats all have very different advantages and disadvantages.
+Symbolic, Sample Set, and Point Set formats all have very different advantages and disadvantages.
 
-Note that the name "Symbolic" is fairly standard, but I haven't found common names for what I'm referring to as "Sample Set" and "Graph" formats. The formats aren't often specifically referred to for these purposes, from what I can tell.
+Note that the name "Symbolic" is fairly standard, but I haven't found common names for what I'm referring to as "Sample Set" and "Point Set" formats. The formats aren't often specifically referred to for these purposes, from what I can tell.
 
 ## Symbolic Formats
 
@@ -40,7 +40,7 @@ To perform calculations of symbolic systems, you need to find analytical solutio
 - It’s often either impossible or computationally infeasible to find analytical solutions to most symbolic equations.
 - Solving symbolic equations requires very specialized tooling that’s very rare. There are a few small symbolic solver libraries out there, but not many. Wolfram Research is the main group that seems very strong here, and their work is mostly closed source + expensive.
 
-**Converting to Graph Formats**
+**Converting to Point Set Formats**
 
 - Very easy. Choose X points such that you capture most of the distribution (you can set a threshold, like 99.9%). For each X point, calculate the pdf, and save as the Y points.
 
@@ -49,23 +49,23 @@ To perform calculations of symbolic systems, you need to find analytical solutio
 - Very easy. Just sample a bunch of times. The regular way is to randomly sample (This is trivial to do for all distributions with inverse-cdf functions.) If you want to get more fancy, you could provide extra samples from the tails, that would be weighted lower. Or, you could take samples in equal distances (of probability mass) along the entire distribution, then optionally shuffle it. (In the latter case, these would not be random samples, but sometimes that’s fine.)
 
 **How to Visualize**  
-Convert to graph, then display that. (Optionally, you can also convert to samples, then display those using a histogram, but this is often worse you have both options.)
+Convert to point set, then display that. (Optionally, you can also convert to samples, then display those using a histogram, but this is often worse you have both options.)
 
 **Bonus: The Metalog Distribution**
 
 The Metalog distribution seems like it can represent almost any reasonable distribution. It’s symbolic. This is great for storage, but it’s not clear if it helps with calculation. My impression is that we don’t have symbolic ways of doing most functions (addition, multiplication, etc) on metalog distributions. Also, note that it can take a fair bit of computation to fit a shape to the Metalog distribution.
 
-## Graph Formats
+## Point Set Formats
 
 **TL;DR**  
-Lists of the x-y coordinates of the shape of a distribution. (Usually the pdf, which is more compressed than the cdf). Some key functions (like pdf, cdf) and manipulations can work on almost any graphically-described distribution.
+Lists of the x-y coordinates of the shape of a distribution. (Usually the pdf, which is more compressed than the cdf). Some key functions (like pdf, cdf) and manipulations can work on almost any point set distribution.
 
 **Alternative Names:**  
 Grid, Mesh, Graph, Vector, Pdf, PdfCoords/PdfPoints, Discretised, Bezier, Curve  
 See [this facebook thread](https://www.facebook.com/ozzie.gooen/posts/10165936265785363?notif_id=1644937423623638&notif_t=feedback_reaction_generic&ref=notif).
 
 **How to Do Computation**  
-Use graph techniques. These can be fairly computationally-intensive (particularly finding integrals, which take a whole lot of adding). In the case that you want to multiply independent distributions, you can try convolution, but it’s pretty expensive.
+Use point set techniques. These can be fairly computationally-intensive (particularly finding integrals, which take a whole lot of adding). In the case that you want to multiply independent distributions, you can try convolution, but it’s pretty expensive.
 
 **Examples**  
 `{xs: [1, 2, 3, 4…], ys: [.0001, .0003, .002, .04, ...]} `  
@@ -74,18 +74,18 @@ Use graph techniques. These can be fairly computationally-intensive (particularl
 **Advantages**
 
 - Much more compressed than Sample List formats, but much less compressed than Symbolic formats.
-- Many functions (pdf, cdf, percentiles, mean, integration, etc) and manipulations (truncation, scaling horizontally or vertically), are possible on essentially all graph distributions.
+- Many functions (pdf, cdf, percentiles, mean, integration, etc) and manipulations (truncation, scaling horizontally or vertically), are possible on essentially all point set distributions.
 
 **Disadvantages**
 
-- Most calculations are infeasible/impossible to perform graphically. In these cases, you need to use sampling.
+- Most calculations are infeasible/impossible to perform using point sets formats. In these cases, you need to use sampling.
 - Not as accurate or fast as symbolic methods, where the symbolic methods are applicable.
-- The tails get cut off, which is subideal. It’s assumed that the value of the pdf outside of the bounded range is exactly 0, which is not correct. (Note: If you have ideas on how to store graph formats that don’t cut off tails, let me know)
+- The tails get cut off, which is subideal. It’s assumed that the value of the pdf outside of the bounded range is exactly 0, which is not correct. (Note: If you have ideas on how to store point set formats that don’t cut off tails, let me know)
 
 **Converting to Symbolic Formats**
 
 - Okay, if you are okay with a Metalog approximation or similar. Metaculus uses an additive combination of up to [Logistic distributions](https://www.metaculus.com/help/faq/); you could also fit this. Fitting takes a little time (it requires several attempts and some optimization), can be arbitrarily accurate.
-- If you want to be very fancy, you could try to fit graph distributions into normal / lognormal / etc. but this seems like a lot of work for little gain.
+- If you want to be very fancy, you could try to fit point set distributions into normal / lognormal / etc. but this seems like a lot of work for little gain.
 
 **Converting to Sample List Formats**
 

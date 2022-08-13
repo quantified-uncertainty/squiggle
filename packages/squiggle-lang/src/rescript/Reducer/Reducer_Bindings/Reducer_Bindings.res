@@ -1,3 +1,6 @@
+// Only Bindings as the global module is supported
+// Other module operations such as import export will be prepreocessed jobs
+
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue

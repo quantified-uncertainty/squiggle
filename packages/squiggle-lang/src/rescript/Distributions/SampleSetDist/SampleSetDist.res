@@ -117,6 +117,11 @@ let map3 = (
 ): result<t, sampleSetError> =>
   E.A.zip3(get(t1), get(t2), get(t3))->E.A2.fmap(E.Tuple3.toFnCall(fn))->_fromSampleResultArray
 
+let mapN = (~fn: array<float> => result<float, Operation.Error.t>, ~t1: array<t>): result<
+  t,
+  sampleSetError,
+> => E.A.transpose(E.A.fmap(get, t1))->E.A2.fmap(fn)->_fromSampleResultArray
+
 let mean = t => T.get(t)->E.A.Floats.mean
 let geomean = t => T.get(t)->E.A.Floats.geomean
 let mode = t => T.get(t)->E.A.Floats.mode

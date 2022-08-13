@@ -82,3 +82,5 @@ let eIdentifier = (name: string): expression =>
 
 let eTypeIdentifier = (name: string): expression =>
   name->BInternalExpressionValue.IEvTypeIdentifier->BExpressionT.EValue
+
+let eVoid: expression = BInternalExpressionValue.IEvVoid->BExpressionT.EValue

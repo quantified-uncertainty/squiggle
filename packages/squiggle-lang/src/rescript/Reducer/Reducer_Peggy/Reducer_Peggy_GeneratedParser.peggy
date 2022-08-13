@@ -5,13 +5,12 @@
 }}
 
 start
-  // = _nl start:typeExpression _nl finalComment?  {return start}
   = _nl start:outerBlock _nl finalComment?  {return start}
 
 zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
 
 outerBlock 
-	= statements:array_statements  finalExpression: (statementSeparator @expression)?
+  = statements:array_statements  finalExpression: (statementSeparator @expression)?
     { if (finalExpression != null) { statements.push(finalExpression) }
         return h.nodeBlock(statements) }
   / finalExpression: expression
@@ -24,28 +23,34 @@ innerBlockOrExpression
 
 quotedInnerBlock  
   = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
-	  { statements.push(finalExpression) 
-    	return h.nodeBlock(statements) }
+      { statements.push(finalExpression) 
+        return h.nodeBlock(statements) }
   / '{' _nl finalExpression: expression  _nl '}'
-	  { return h.nodeBlock([finalExpression]) }
+      { return h.nodeBlock([finalExpression]) }
 
 array_statements
   = head:statement tail:(statementSeparator @array_statements )
     { return [head, ...tail] }
   / head:statement
-  	{ return [head] }
+      { return [head] }
 
 statement 
   = letStatement
   / defunStatement
   / typeStatement
+  / voidStatement
+
+voidStatement 
+  = "call" _nl value:zeroOMoreArgumentsBlockOrExpression
+    { var variable = h.nodeIdentifier("_", location());
+      return h.nodeLetStatement(variable, value); }
 
 letStatement 
-  = variable:identifier _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
-  { return h.nodeLetStatement(variable, value) }
+  = variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
+    { return h.nodeLetStatement(variable, value) }
 
 defunStatement
-  = variable:identifier '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = variable:variable '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     { var value = h.nodeLambda(args, body)
       return h.nodeLetStatement(variable, value) }
 
@@ -53,13 +58,15 @@ defunStatement
 
 array_parameters 
   = head:dollarIdentifier tail:(_ ',' _nl @dollarIdentifier)* 
-  { return [head, ...tail]; }
+    { return [head, ...tail]; }
+  / ""
+    { return [h.nodeIdentifier("_", location())]; }
 
 expression = ifthenelse / ternary / logicalAdditive
 
 ifthenelse 
   = 'if' __nl condition:logicalAdditive 
-  	__nl 'then' __nl trueExpression:innerBlockOrExpression 
+      __nl 'then' __nl trueExpression:innerBlockOrExpression 
     __nl 'else' __nl falseExpression:(ifthenelse/innerBlockOrExpression)
     { return h.nodeTernary(condition, trueExpression, falseExpression) }
   
@@ -88,8 +95,8 @@ equality
   = left:relational _ operator:equalityOp _nl right:relational 
   { return h.makeFunctionCall(h.toFunction[operator], [left, right])}
   / relational  
- 
- equalityOp "operator" = '=='/'!='
+  
+  equalityOp "operator" = '=='/'!='
 
 relational
   = left:additive _ operator:relationalOp _nl right:additive 
@@ -137,11 +144,11 @@ chainFunctionCall
     }, head)}
 
   chainedFunction
-    = fn:dollarIdentifier '(' _nl args:array_functionArguments _nl ')' 
+    = fn:variable '(' _nl args:array_functionArguments _nl ')' 
       { return {fnName: fn.value, args: args}}
-      / fn:dollarIdentifier '(' _nl ')' 
+      / fn:variable '(' _nl ')' 
       { return {fnName: fn.value, args: []}}
-      / fn:dollarIdentifier
+      / fn:variable
       { return {fnName: fn.value, args: []}}
 
 // end of binary operators
@@ -172,19 +179,26 @@ collectionElement
     array_functionArguments 
       = head:expression tail:(_ ',' _nl @expression)* 
       { return [head, ...tail]; }
+  / ""
+      {return [h.nodeVoid()];}
 
 atom
   = '(' _nl expression:expression _nl ')' {return expression}
   / basicValue
 
 basicValue = valueConstructor / basicLiteral
- 
+
 basicLiteral
   = string
   / number
   / boolean
-  / dollarIdentifierWithModule
-  / dollarIdentifier
+  / variable
+  / voidLiteral
+
+voidLiteral 'void'
+  = "()" {return h.nodeVoid();}
+
+variable = dollarIdentifierWithModule / dollarIdentifier
 
 dollarIdentifierWithModule 'identifier'
   = head:$moduleIdentifier 
@@ -195,7 +209,7 @@ dollarIdentifierWithModule 'identifier'
     modifiers.unshift(head)
     modifiers.push(final)
     let modifiedIdentifier = modifiers.join('.')
-    return h.nodeIdentifier(modifiedIdentifier)
+    return h.nodeIdentifier(modifiedIdentifier, location())
   }
 
 identifier 'identifier'
@@ -232,8 +246,8 @@ float 'float'
   = $(((d+ "\." d*) / ("\." d+)) floatExponent? / d+ floatExponent)
   { return h.nodeFloat(parseFloat(text()))} 
 
-	floatExponent = [e]i '-'? d+
-	d = [0-9]
+    floatExponent = [e]i '-'? d+
+    d = [0-9]
     
 boolean 'boolean'
   = ('true'/'false') 
@@ -247,10 +261,10 @@ valueConstructor
 
 lambda  
   = '{' _nl '|' _nl args:array_parameters _nl '|' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
-	  { statements.push(finalExpression) 
-    	return h.nodeLambda(args, h.nodeBlock(statements)) }
+      { statements.push(finalExpression) 
+        return h.nodeLambda(args, h.nodeBlock(statements)) }
   / '{' _nl '|' _nl args:array_parameters _nl '|' _nl finalExpression: expression  _nl '}'
-	  { return h.nodeLambda(args, h.nodeBlock([finalExpression])) }
+      { return h.nodeLambda(args, h.nodeBlock([finalExpression])) }
 
 arrayConstructor 'array'
   = '[' _nl ']'
@@ -263,8 +277,12 @@ arrayConstructor 'array'
     { return [head, ...tail]; }
 
 recordConstructor  'record'
-  = '{' _nl args:array_recordArguments _nl '}' 
+  = '{' _nl args:array_recordArguments _nl end_of_record
   { return h.constructRecord(args); }
+
+  end_of_record 
+    = '}'
+    / ',' _nl '}'
 
   array_recordArguments 
     = head:keyValuePair tail:(_ ',' _nl @keyValuePair)* 
@@ -289,7 +307,7 @@ __nl 'whitespace or newline'
   = (whiteSpaceCharactersOrComment / commentOrNewLine )+
 
 statementSeparator 'statement separator'
-	= _ (';'/ commentOrNewLine)+ _nl
+    = _ (';'/ commentOrNewLine)+ _nl
 
   commentOrNewLine = finalComment? newLine 
 

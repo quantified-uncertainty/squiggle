@@ -1,5 +1,5 @@
 ---
-title: "Distribution Creation"
+title: "Distributions: Creation"
 sidebar_position: 2
 ---
 
@@ -17,7 +17,7 @@ The `to` function is an easy way to generate simple distributions using predicte
 
 If both values are above zero, a `lognormal` distribution is used. If not, a `normal` distribution is used.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="5 to 10" default>
     When <code>5 to 10</code> is entered, both numbers are positive, so it
     generates a lognormal distribution with 5th and 95th percentiles at 5 and
@@ -35,8 +35,9 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
     <SquiggleEditor defaultCode="-5 to -3" />
   </TabItem>
   <TabItem value="ex4" label="1 to 10000">
-    It's very easy to generate distributions with very long tails. If this
-    happens, you can click the "log x scale" box to view this using a log scale.
+    It's very easy to generate distributions with very long tails. These can be
+    impossible to see without changing view settings. (These settings are
+    available in the Playground, but not this smaller editor component)
     <SquiggleEditor defaultCode="1 to 10000" />
   </TabItem>
 </Tabs>
@@ -67,14 +68,14 @@ If both values are above zero, a `lognormal` distribution is used. If not, a `no
 
 ## Mixture
 
-`mixture(...distributions: Distribution[], weights?: number[])`
-`mx(...distributions: Distribution[], weights?: number[])`
-`mixture(distributions: Distributions[], weights?: number[])`
+`mixture(...distributions: Distribution[], weights?: number[])`  
+`mx(...distributions: Distribution[], weights?: number[])`  
+`mixture(distributions: Distributions[], weights?: number[])`  
 `mx(distributions: Distributions[], weights?: number[])`
 
 The `mixture` mixes combines multiple distributions to create a mixture. You can optionally pass in a list of proportional weights.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="Simple" default>
     <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10)" />
   </TabItem>
@@ -110,6 +111,11 @@ The `mixture` mixes combines multiple distributions to create a mixture. You can
   <p>
     In this case, I have a 20% chance of spending 0 time with it. I might estimate my hours with,
   </p>
+  <Admonition type="caution" title="Caution">
+    <p>
+      There's a temporary bug where the below render is compressed. If you toggle the code it will fix render correctly.
+    </p>
+  </Admonition>
   <SquiggleEditor
     defaultCode={`hours_the_project_will_take = 5 to 20
 chance_of_doing_anything = 0.8
@@ -139,12 +145,12 @@ mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_co
 
 Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="normal(5,1)" default>
     <SquiggleEditor defaultCode="normal(5, 1)" />
   </TabItem>
-  <TabItem value="ex2" label="normal(100000000000, 100000000000)">
-    <SquiggleEditor defaultCode="normal(100000000000, 100000000000)" />
+  <TabItem value="ex2" label="normal(1G, 1G)">
+    <SquiggleEditor defaultCode="normal(1G, 1G)" />
   </TabItem>
 </Tabs>
 
@@ -234,7 +240,7 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
 
 `pointMass()` distributions are currently the only discrete distributions accessible in Squiggle.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="pointMass(3)" default>
     <SquiggleEditor defaultCode="pointMass(3)" />
   </TabItem>
@@ -263,7 +269,7 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
 
 Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) with the given `alpha` and `beta` values. For a good summary of the beta distribution, see [this explanation](https://stats.stackexchange.com/a/47782) on Stack Overflow.
 
-<Tabs>
+<Tabs lazy>
   <TabItem value="ex1" label="beta(10, 20)" default>
     <SquiggleEditor defaultCode="beta(10,20)" />
   </TabItem>
@@ -279,11 +285,8 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   <TabItem value="ex5" label="beta(0.8, 0.8)">
     <SquiggleEditor defaultCode="beta(0.8, 0.8)" />
   </TabItem>
-  <TabItem
-    value="from mean and standard deviation"
-    label="beta({mean: 0.39, stdev: 0.1})"
-  >
-    <SquiggleEditor initialSquiggleString="beta({mean: 0.39, stdev: 0.1})" />
+  <TabItem value="ex6" label="beta({mean: 0.39, stdev: 0.1})">
+    <SquiggleEditor defaultCode="beta({mean: 0.39, stdev: 0.1})" />
   </TabItem>
 </Tabs>
 
@@ -300,7 +303,7 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   </p>
   <details>
     <summary>Examples</summary>
-    <Tabs>
+    <Tabs lazy>
       <TabItem value="ex1" label="beta(0.3, 0.3)" default>
         <SquiggleEditor defaultCode="beta(0.3, 0.3)" />
       </TabItem>
@@ -343,13 +346,13 @@ Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_dis
 
 <SquiggleEditor defaultCode="triangular(1, 2, 4)" />
 
-## FromSamples
+## SampleSet.fromList
 
-`fromSamples(samples:number[])`
+`SampleSet.fromList(samples:number[])`
 
 Creates a sample set distribution using an array of samples.
 
-<SquiggleEditor defaultCode="fromSamples([1,2,3,4,6,5,5,5])" />
+<SquiggleEditor defaultCode="SampleSet.fromList([1,2,3,4,6,5,5,5])" />
 
 ### Arguments
 
@@ -367,3 +370,41 @@ Creates a sample set distribution using an array of samples.
     specificity.
   </p>
 </Admonition>
+
+## PointSet.makeContinuous
+
+`PointSet.makeContinuous(points:{x: number, y: number})`
+
+Creates a continuous point set distribution using a list of points.
+
+<SquiggleEditor
+  defaultCode={`PointSet.makeContinuous([
+  { x: 0, y: 0.1 },
+  { x: 1, y: 0.2 },
+  { x: 2, y: 0.15 },
+  { x: 3, y: 0.1 }
+])`}
+/>
+
+### Arguments
+
+- `points`: An array of at least 3 coordinates.
+
+## PointSet.makeDiscrete
+
+`PointSet.makeDiscrete(points:{x: number, y: number})`
+
+Creates a discrete point set distribution using a list of points.
+
+<SquiggleEditor
+  defaultCode={`PointSet.makeDiscrete([
+  { x: 0, y: 0.1 },
+  { x: 1, y: 0.2 },
+  { x: 2, y: 0.15 },
+  { x: 3, y: 0.1 }
+])`}
+/>
+
+### Arguments
+
+- `points`: An array of at least 1 coordinate.

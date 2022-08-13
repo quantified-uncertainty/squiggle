@@ -7,7 +7,7 @@ type errorValue =
   | REArrayIndexNotFound(string, int)
   | REAssignmentExpected
   | REDistributionError(DistributionTypes.error)
-  | REExpectedType(string)
+  | REExpectedType(string, string)
   | REExpressionExpected
   | REFunctionExpected(string)
   | REFunctionNotFound(string)
@@ -55,6 +55,6 @@ let errorToString = err =>
   | RESymbolNotFound(symbolName) => `${symbolName} is not defined`
   | RESyntaxError(desc, _) => `Syntax Error: ${desc}`
   | RETodo(msg) => `TODO: ${msg}`
-  | REExpectedType(typeName) => `Expected type: ${typeName}`
+  | REExpectedType(typeName, valueString) => `Expected type: ${typeName} but got: ${valueString}`
   | REUnitNotFound(unitName) => `Unit not found: ${unitName}`
   }

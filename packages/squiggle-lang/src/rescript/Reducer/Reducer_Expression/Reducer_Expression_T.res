@@ -30,12 +30,12 @@ let rec toString = expression =>
   switch expression {
   | EList(list{EValue(IEvCall("$$_block_$$")), ...statements}) =>
     `{${Belt.List.map(statements, aValue => toString(aValue))
-      ->Extra.List.interperse("; ")
+      ->Extra.List.intersperse("; ")
       ->Belt.List.toArray
       ->Js.String.concatMany("")}}`
   | EList(aList) =>
     `(${Belt.List.map(aList, aValue => toString(aValue))
-      ->Extra.List.interperse(" ")
+      ->Extra.List.intersperse(" ")
       ->Belt.List.toArray
       ->Js.String.concatMany("")})`
   | EValue(aValue) => InternalExpressionValue.toString(aValue)

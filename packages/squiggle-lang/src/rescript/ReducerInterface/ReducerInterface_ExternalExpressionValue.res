@@ -7,6 +7,9 @@ module ErrorValue = Reducer_ErrorValue
 @genType.opaque
 type internalCode = Object
 
+@genType.opaque
+type hiddenNameSpace = Object
+
 @genType
 type rec externalExpressionValue =
   | EvArray(array<externalExpressionValue>)
@@ -25,14 +28,17 @@ type rec externalExpressionValue =
   | EvTypeIdentifier(string)
   | EvModule(record)
   | EvType(record)
+  | EvVoid
 and record = Js.Dict.t<externalExpressionValue>
-and externalBindings = record
 and lambdaValue = {
   parameters: array<string>,
-  context: externalBindings,
+  context: hiddenNameSpace,
   body: internalCode,
 }
 and lambdaDeclaration = Declaration.declaration<lambdaValue>
+
+@genType
+type externalBindings = record
 
 @genType
 type t = externalExpressionValue
@@ -63,6 +69,7 @@ let rec toString = aValue =>
   | EvTimeDuration(t) => DateTime.Duration.toString(t)
   | EvType(t) => `type${t->toStringRecord}`
   | EvTypeIdentifier(id) => `#${id}`
+  | EvVoid => `()`
   }
 and toStringRecord = aRecord => {
   let pairs =

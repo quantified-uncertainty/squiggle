@@ -233,19 +233,6 @@ let dispatchToGenericOutput = (call: IEV.functionCall, env: GenericDist.env): op
   | ("inv", [IEvDistribution(dist), IEvNumber(float)]) => Helpers.toFloatFn(#Inv(float), dist, ~env)
   | ("quantile", [IEvDistribution(dist), IEvNumber(float)]) =>
     Helpers.toFloatFn(#Inv(float), dist, ~env)
-  | ("toSampleSet", [IEvDistribution(dist), IEvNumber(float)]) =>
-    Helpers.toDistFn(ToSampleSet(Belt.Int.fromFloat(float)), dist, ~env)
-  | ("toSampleSet", [IEvDistribution(dist)]) =>
-    Helpers.toDistFn(ToSampleSet(env.sampleCount), dist, ~env)
-  | ("toList", [IEvDistribution(SampleSet(dist))]) => Some(FloatArray(SampleSetDist.T.get(dist)))
-  | ("fromSamples", [IEvArray(inputArray)]) => {
-      let _wrapInputErrors = x => SampleSetDist.NonNumericInput(x)
-      let parsedArray = Helpers.parseNumberArray(inputArray)->E.R2.errMap(_wrapInputErrors)
-      switch parsedArray {
-      | Ok(array) => DistributionOperation.run(FromSamples(array), ~env)
-      | Error(e) => GenDistError(SampleSetError(e))
-      }->Some
-    }
   | ("inspect", [IEvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist, ~env)
   | ("truncateLeft", [IEvDistribution(dist), IEvNumber(float)]) =>
     Helpers.toDistFn(Truncate(Some(float), None), dist, ~env)

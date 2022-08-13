@@ -1,0 +1,4 @@
+x = 1 to 2
+y = {a: x, b: 1e1}
+f(t) = normal(t, 1.1)
+z = y.b * y.a

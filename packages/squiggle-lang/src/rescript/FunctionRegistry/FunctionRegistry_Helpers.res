@@ -4,6 +4,8 @@ let impossibleError = "Wrong inputs / Logically impossible"
 
 module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)
+  let pointSet = r => DistributionTypes.PointSet(r)
+  let sampleSet = r => DistributionTypes.SampleSet(r)
   let evDistribution = r => ReducerInterface_InternalExpressionValue.IEvDistribution(r)
   let evNumber = r => ReducerInterface_InternalExpressionValue.IEvNumber(r)
   let evArray = r => ReducerInterface_InternalExpressionValue.IEvArray(r)
@@ -214,71 +216,27 @@ module Process = {
   }
 }
 
-module TwoArgDist = {
-  let process = (~fn, ~env, r) =>
-    r
-    ->E.R.bind(Process.DistOrNumberToDist.twoValuesUsingSymbolicDist(~fn, ~values=_, ~env))
-    ->E.R2.fmap(Wrappers.evDistribution)
-
-  let make = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber], ~run=(inputs, env) =>
-      inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env)
-    )
-  }
-
-  let makeRecordP5P95 = (name, fn) => {
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
-      ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
-    )
-  }
-
-  let makeRecordMeanStdev = (name, fn) => {
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
-      ~run=(inputs, env) => inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
-    )
-  }
-}
-
-module OneArgDist = {
-  let process = (~fn, ~env, r) =>
-    r
-    ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
-    ->E.R2.fmap(Wrappers.evDistribution)
-
-  let make = (name, fn) =>
-    FnDefinition.make(~name, ~inputs=[FRTypeDistOrNumber], ~run=(inputs, env) =>
-      inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env)
-    )
-}
-
 module ArrayNumberDist = {
   let make = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeNumber)], ~run=(inputs, _) =>
-      Prepare.ToTypedArray.numbers(inputs)
-      ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-      ->E.R.bind(fn)
+    FnDefinition.make(
+      ~name,
+      ~inputs=[FRTypeArray(FRTypeNumber)],
+      ~run=(_, inputs, _, _) =>
+        Prepare.ToTypedArray.numbers(inputs)
+        ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
+        ->E.R.bind(fn),
+      (),
     )
   }
   let make2 = (name, fn) => {
-    FnDefinition.make(~name, ~inputs=[FRTypeArray(FRTypeAny)], ~run=(inputs, _) =>
-      Prepare.ToTypedArray.numbers(inputs)
-      ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-      ->E.R.bind(fn)
+    FnDefinition.make(
+      ~name,
+      ~inputs=[FRTypeArray(FRTypeAny)],
+      ~run=(_, inputs, _, _) =>
+        Prepare.ToTypedArray.numbers(inputs)
+        ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
+        ->E.R.bind(fn),
+      (),
     )
   }
-}
-
-module NumberToNumber = {
-  let make = (name, fn) =>
-    FnDefinition.make(~name, ~inputs=[FRTypeNumber], ~run=(inputs, _) => {
-      inputs
-      ->getOrError(0)
-      ->E.R.bind(Prepare.oneNumber)
-      ->E.R2.fmap(fn)
-      ->E.R2.fmap(Wrappers.evNumber)
-    })
 }

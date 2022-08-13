@@ -3,11 +3,10 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
 open Jest
 open Reducer_Peggy_TestHelpers
-open Expect
 
 describe("Peggy to Expression", () => {
   describe("literals operators parenthesis", () => {
-    // Note that there is always an outer block. Otherwise, external bindings are ignrored at the first statement
+    // Note that there is always an outer block. Otherwise, external bindings are ignored at the first statement
     testToExpression("1", "{1}", ~v="1", ())
     testToExpression("'hello'", "{'hello'}", ~v="'hello'", ())
     testToExpression("true", "{true}", ~v="true", ())
