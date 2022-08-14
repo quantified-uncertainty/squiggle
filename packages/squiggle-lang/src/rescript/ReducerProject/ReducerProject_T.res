@@ -22,4 +22,9 @@ module Private = {
 
   external castFromInternalProject: t => project = "%identity"
   external castToInternalProject: project => t = "%identity"
+
+  let getSourceIds = (this: t): array<string> => Belt.Map.String.keysToArray(this["items"])
+
+  let getItem = (this: t, sourceId: string) =>
+    Belt.Map.String.getWithDefault(this["items"], sourceId, ProjectItem.emptyItem)
 }

@@ -173,4 +173,3 @@ describe("project with include", () => {
     runFetchBindings(project, "main")->expect->toBe("@{common: 0,x: 1,y: 2}")
   })
 })
-

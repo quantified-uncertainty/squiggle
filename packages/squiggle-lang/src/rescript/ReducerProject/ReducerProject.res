@@ -9,6 +9,7 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 module ProjectItem = ReducerProject_ProjectItem
 module T = ReducerProject_T
+module Topology = ReducerProject_Topology
 
 @genType.opaque
 type project = T.t
@@ -18,59 +19,12 @@ module Private = {
   type internalProject = T.Private.t
   type t = T.Private.t
 
-  let getSourceIds = (this: t): array<string> => Belt.Map.String.keysToArray(this["items"])
-
-  let getItem = (this: t, sourceId: string) =>
-    Belt.Map.String.getWithDefault(this["items"], sourceId, ProjectItem.emptyItem)
-
-  let getImmediateDependencies = (this: t, sourceId: string): ProjectItem.T.includesType =>
-    getItem(this, sourceId)->ProjectItem.getImmediateDependencies
-
-  type topologicalSortState = (Belt.Map.String.t<bool>, list<string>)
-  let rec topologicalSortUtil = (
-    this: t,
-    sourceId: string,
-    state: topologicalSortState,
-  ): topologicalSortState => {
-    let dependencies = getImmediateDependencies(this, sourceId)->Belt.Result.getWithDefault([])
-    let (visited, stack) = state
-    let myVisited = Belt.Map.String.set(visited, sourceId, true)
-    let (newVisited, newStack) = dependencies->Belt.Array.reduce((myVisited, stack), (
-      (currVisited, currStack),
-      dependency,
-    ) => {
-      if !Belt.Map.String.getWithDefault(currVisited, dependency, false) {
-        topologicalSortUtil(this, dependency, (currVisited, currStack))
-      } else {
-        (currVisited, currStack)
-      }
-    })
-    (newVisited, list{sourceId, ...newStack})
-  }
-
-  let getTopologicalSort = (this: t): array<string> => {
-    let (_visited, stack) = getSourceIds(this)->Belt.Array.reduce((Belt.Map.String.empty, list{}), (
-      (currVisited, currStack),
-      currId,
-    ) =>
-      if !Belt.Map.String.getWithDefault(currVisited, currId, false) {
-        topologicalSortUtil(this, currId, (currVisited, currStack))
-      } else {
-        (currVisited, currStack)
-      }
-    )
-    Belt.List.reverse(stack)->Belt.List.toArray
-  }
-
-  let getTopologicalSortFor = (this: t, sourceId) => {
-    let runOrder = getTopologicalSort(this)
-    let index = runOrder->Js.Array2.indexOf(sourceId)
-    let after = Belt.Array.sliceToEnd(runOrder, index + 1)
-    let before = Js.Array2.slice(runOrder, ~start=0, ~end_=index + 1)
-    (before, after)
-  }
-
-  let getRunOrder = getTopologicalSort
+  let getSourceIds = T.Private.getSourceIds
+  let getItem = T.Private.getItem
+  let getDependents = Topology.getDependents
+  let getDependencies = Topology.getDependencies
+  let getRunOrder = Topology.getRunOrder
+  let getRunOrderFor = Topology.getRunOrderFor
 
   let createProject = () => {
     let this: t = {
@@ -79,23 +33,6 @@ module Private = {
       "environment": InternalExpressionValue.defaultEnvironment,
     }
     this
-  }
-
-  let getRunOrderFor = (this: t, sourceId: string) => {
-    let (runOrder, _) = getTopologicalSortFor(this, sourceId)
-    runOrder
-  }
-
-  let getDependencies = (this: t, sourceId: string): array<string> => {
-    let runOrder = getRunOrderFor(this, sourceId)
-
-    let _ = Js.Array2.pop(runOrder)
-    runOrder
-  }
-
-  let getDependents = (this: t, sourceId: string): array<string> => {
-    let (_, dependents) = getTopologicalSortFor(this, sourceId)
-    dependents
   }
 
   let rec touchSource = (this: t, sourceId: string): unit => {
@@ -245,7 +182,7 @@ module Private = {
   }
 
   let runAll = (this: t): unit => {
-    let runOrder = getTopologicalSort(this)
+    let runOrder = Topology.getRunOrder(this)
     let initialState = (Ok(InternalExpressionValue.IEvVoid), getStdLib(this))
     let _finalState = Belt.Array.reduce(runOrder, initialState, (currState, currId) =>
       tryRunWithContinuation(this, currId, currState)
@@ -253,7 +190,7 @@ module Private = {
   }
 
   let run = (this: t, sourceId: string): unit => {
-    let runOrder = getRunOrderFor(this, sourceId)
+    let runOrder = Topology.getRunOrderFor(this, sourceId)
     let initialState = (Ok(InternalExpressionValue.IEvVoid), getStdLib(this))
     let _finalState = Belt.Array.reduce(runOrder, initialState, (currState, currId) =>
       tryRunWithContinuation(this, currId, currState)
