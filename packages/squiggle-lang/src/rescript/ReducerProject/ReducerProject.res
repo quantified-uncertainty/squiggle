@@ -1,4 +1,3 @@
-// TODO: Restore run FFI?
 // TODO: Auto clean project based on topology
 
 module Bindings = Reducer_Bindings
@@ -212,102 +211,167 @@ module Private = {
   PUBLIC FUNCTIONS
 */
 
-// Create a new this to hold the sources, executables, bindings and other data.
-// The this is a mutable object for use in TypeScript.
+/*
+Creates a new project to hold the sources, executables, bindings, and other data. 
+The new project runs the sources according to their topological sorting because of the includes and continues.
+
+Any source can include or continue other sources. "Therefore, the project is a graph data structure."
+The difference between including and continuing is that includes are stated inside the source code while continues are stated in the project.
+
+To run a group of source codes and get results/bindings, the necessary methods are
+- setSource
+- setContinues
+- parseIncludes
+- run or runAll
+- getExternalBindings
+- getExternalResult
+*/
 let createProject = (): t => Private.createProject()->T.Private.castFromInternalProject
 
-// Answers the array of existing source ids to enumerate over.
+/*
+Answer all the source ids of all the sources in the project.
+*/
 let getSourceIds = (this: t): array<string> =>
   this->T.Private.castToInternalProject->Private.getSourceIds
 
-// Sets the source for a given source id.
+/*
+Sets the source for a given source Id.
+*/
 let setSource = (this: t, sourceId: string, value: string): unit =>
   this->T.Private.castToInternalProject->Private.setSource(sourceId, value)
 
-// Gets the source for a given source id.
+/*
+Gets the source for a given source id.
+*/
 let getSource = (this: t, sourceId: string): option<string> =>
   this->T.Private.castToInternalProject->Private.getSource(sourceId)
 
-// Touches the source for a given source id. This forces the dependency graph to be re-evaluated.
-// Touching source code clears the includes so that they can be reevaluated.
+/*
+Touches the source for a given source id. This and dependent, sources are set to be re-evaluated.
+*/
 let touchSource = (this: t, sourceId: string): unit =>
   this->T.Private.castToInternalProject->Private.touchSource(sourceId)
 
-// Cleans the compilation artifacts for a given source id. The results stay untouched.
+/*
+Cleans the compilation artifacts for a given source ID. The results stay untouched, so compilation won't be run again.
+
+Normally, you would never need the compilation artifacts again as the results with the same sources would never change. However, they are needed in case of any debugging reruns
+*/
 let clean = (this: t, sourceId: string): unit =>
   this->T.Private.castToInternalProject->Private.clean(sourceId)
 
-// Cleans all compilation artifacts for all the this. The results stay untouched.
+/*
+Cleans all the compilation artifacts in all of the project
+*/
 let cleanAll = (this: t): unit => this->T.Private.castToInternalProject->Private.cleanAll
 
-// Cleans results. Compilation stays untouched to rerun the source.
+/*
+Cleans results. Compilation stays untouched to be able to re-run the source.
+You would not do this if you were not trying to debug the source code.
+*/
 let cleanResults = (this: t, sourceId: string): unit =>
   this->T.Private.castToInternalProject->Private.cleanResults(sourceId)
 
-// Cleans all results. Compilations stays untouched to rerun the source.
+/*
+Cleans all results. Compilations remains untouched to rerun the source.
+*/
 let cleanAllResults = (this: t): unit =>
   this->T.Private.castToInternalProject->Private.cleanAllResults
 
+/*
+To set the includes one first has to call "parseIncludes". The parsed includes or the parser error is returned.
+*/
 let getIncludes = (this: t, sourceId: string): ProjectItem.T.includesType =>
   this->T.Private.castToInternalProject->Private.getIncludes(sourceId)
 
+/*
+Answers the source codes after which this source code is continuing
+*/
 let getContinues = (this: t, sourceId: string): array<string> =>
   this->T.Private.castToInternalProject->Private.getContinues(sourceId)
 
-// setContinues acts like an include hidden in the source. It is used to define a continuation.
+/*
+ "continues" acts like hidden includes in the source. 
+ It is used to define a continuation that is not visible in the source code. 
+ You can chain source codes on the web interface for example
+*/
 let setContinues = (this: t, sourceId: string, continues: array<string>): unit =>
   this->T.Private.castToInternalProject->Private.setContinues(sourceId, continues)
 
-// This source is not continuing any other source. It is a standalone source.
-// Touches this source also.
+/*
+Break the continuation chain. This source will become a standalone source.
+*/
 let removeContinues = (this: t, sourceId: string): unit =>
   this->T.Private.castToInternalProject->Private.removeContinues(sourceId)
 
-// Gets includes and continues for a given source id. SourceId is depending on them
+/*
+This source depends on the array of sources returned.
+*/
 let getDependencies = (this: t, sourceId: string): array<string> =>
   this->T.Private.castToInternalProject->Private.getDependencies(sourceId)
 
-// Get source ids depending on a given source id.
+/*
+The sources returned are dependent on this
+*/
 let getDependents = (this: t, sourceId: string): array<string> =>
   this->T.Private.castToInternalProject->Private.getDependents(sourceId)
 
-// Get run order for all sources. It is a topological sort of the dependency graph.
+/*
+Get the run order for the sources in the project.
+*/
 let getRunOrder = (this: t) => this->T.Private.castToInternalProject->Private.getRunOrder
 
-// Get run order for a given source id. It is a topological sort of the dependency graph.
+/*
+Get the run order to get the results of this specific source
+*/
 let getRunOrderFor = (this: t, sourceId: string) =>
   this->T.Private.castToInternalProject->Private.getRunOrderFor(sourceId)
 
-// Parse includes so that you can load them before running. Use getIncludes to get the includes.
-// It is your responsibility to load the includes before running.
+/*
+Parse includes so that you can load them before running. 
+Load includes by calling getIncludes which returns the includes that have been parsed. 
+It is your responsibility to load the includes before running.
+*/
 let parseIncludes = (this: t, sourceId: string): unit =>
   this->T.Private.castToInternalProject->Private.parseIncludes(sourceId)
 
-// Parse the source code if it is not done already. Use getRawParse to get the parse tree
+/*
+Parse the source code if it is not done already. 
+Use getRawParse to get the parse tree. 
+You would need this function if you want to see the parse tree without running the source code.
+*/
 let rawParse = (this: t, sourceId: string): unit =>
   this->T.Private.castToInternalProject->Private.rawParse(sourceId)
 
-// Runs the source code.
-// The code is parsed if it is not already done.
-// If it continues/includes another source then it will run that source also if is not already done.
+/*
+Runs a specific source code if it is not done already. The code is parsed if it is not already done. It runs the dependencies if it is not already done.
+*/
 let run = (this: t, sourceId: string): unit =>
   this->T.Private.castToInternalProject->Private.run(sourceId)
 
-// Runs all the sources.
+/*
+Runs all of the sources in a project. Their results and bindings will be available
+*/
 let runAll = (this: t): unit => this->T.Private.castToInternalProject->Private.runAll
 
-// WARNING" getExternalBindings will be deprecated. Cyclic directed graph problems
-// Get the bindings after running the source code.
+/*
+Get the bindings after running this source file or the project
+*/
 let getExternalBindings = (this: t, sourceId: string): ExternalExpressionValue.record =>
   this->T.Private.castToInternalProject->Private.getExternalBindings(sourceId)
 
-//WARNING: externalResult will be deprecated. Cyclic directed graph problems
+/*
+Get the result after running this source file or the project
+*/
 let getExternalResult = (this: t, sourceId: string): option<
   result<ExternalExpressionValue.t, Reducer_ErrorValue.errorValue>,
 > => this->T.Private.castToInternalProject->Private.getExternalResult(sourceId)
 
-// This is a convenience function to get the result of a single source.
-// You cannot use includes
+/*
+This is a convenience function to get the result of a single source without creating a project. 
+However, without a project, you cannot handle include directives.
+The source has to be include free
+*/
 let evaluate = (sourceCode: string): ('r, 'b) => {
   let (result, continuation) = Private.evaluate(sourceCode)
   (
