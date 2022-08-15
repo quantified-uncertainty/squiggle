@@ -2,11 +2,12 @@ module ProjectItem = ReducerProject_ProjectItem
 module ExpressionT = Reducer_Expression_T
 module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 
-type project = Object
+type project = {"tag": string}
 type t = project
 
 module Private = {
   type internalProject = {
+    "tag": string,
     "items": Belt.Map.String.t<ProjectItem.t>,
     "stdLib": Reducer_Bindings.t,
     "environment": ExpressionT.environment,
