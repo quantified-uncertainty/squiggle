@@ -1,0 +1,68 @@
+{
+  "nodes": {
+    "gentype": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1660002716,
+        "narHash": "sha256-Ig7Dt7d33nNCNlqRGc45uEJTXLRmpCeHrYNOd1AdObc=",
+        "owner": "quinn-dougherty",
+        "repo": "genType",
+        "rev": "c7291db6465ac62800a49bacbe94ce4eb4abcbe0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "quinn-dougherty",
+        "repo": "genType",
+        "type": "github"
+      }
+    },
+    "hercules-ci-effects": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1655158531,
+        "narHash": "sha256-5LeaONqA6pgSNeA39gzu5XUipw3mXNZ04LUiy2TVImU=",
+        "owner": "hercules-ci",
+        "repo": "hercules-ci-effects",
+        "rev": "bda248e06dc44cbba9f4db350abbb10c3fe3b6fd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "hercules-ci-effects",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1660485612,
+        "narHash": "sha256-sSLW1KaB1adKTJn9+Ja3h3AaS7QCZyhUKiSUStcLg80=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6512b21eabb4d52e87ea2edcf31a288e67b2e4f8",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "ref": "nixos-unstable",
+        "type": "indirect"
+      }
+    },
+    "root": {
+      "inputs": {
+        "gentype": "gentype",
+        "hercules-ci-effects": "hercules-ci-effects",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
