@@ -38,7 +38,7 @@ let fromTypeExpression = (typeExpressionSourceCode: string, reducerFn: ProjectRe
 
 let fromTypeExpressionExn = (
   typeExpressionSourceCode: string,
-  reducerFn: ExpressionT.reducerFn,
+  reducerFn: ProjectReducerFnT.t,
 ): T.t =>
   switch fromTypeExpression(typeExpressionSourceCode, reducerFn) {
   | Ok(value) => value
