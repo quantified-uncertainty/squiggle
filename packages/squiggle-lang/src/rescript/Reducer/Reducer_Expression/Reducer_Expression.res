@@ -107,8 +107,9 @@ let reduceReturningBindings = (
   continuation: T.bindings,
   accessors: ProjectAccessorsT.t,
 ): (result<InternalExpressionValue.t, 'e>, T.bindings) => {
+  let states = accessors.states
   let result = reduceExpressionInProject(expression, continuation, accessors)
-  (result, accessors.continuation)
+  (result, states.continuation)
 }
 
 module BackCompatible = {

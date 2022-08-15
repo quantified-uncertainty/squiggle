@@ -3,22 +3,38 @@ module Bindings = Reducer_Bindings
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
+type states = {mutable continuation: ProjectItemT.continuationArgumentType}
+
 type projectAccessors = {
   stdLib: Reducer_Bindings.t,
   environment: ExpressionT.environment,
-  mutable continuation: ProjectItemT.continuationArgumentType,
+  states: states,
 }
 
 type t = projectAccessors
 
 let identityAccessors: t = {
-  continuation: Bindings.emptyBindings,
+  // We need the states at the end of the runtime.
+  // Accessors can be modified but states will stay as the same pointer
+  states: {
+    continuation: Bindings.emptyBindings,
+  },
   stdLib: ReducerInterface_StdLib.internalStdLib,
   environment: InternalExpressionValue.defaultEnvironment,
 }
 
 let identityAccessorsWithEnvironment = (environment): t => {
-  continuation: Bindings.emptyBindings,
+  states: {
+    continuation: Bindings.emptyBindings,
+  },
   stdLib: ReducerInterface_StdLib.internalStdLib,
   environment: environment,
+}
+
+// to support change of environment in runtime
+let setEnvironment = (this: t, environment: ExpressionT.environment): t => {
+  {
+    ...this,
+    environment: environment,
+  }
 }

@@ -16,7 +16,7 @@ let ievFromTypeExpression = (
   Reducer_Expression.BackCompatible.parse(sourceCode)->Belt.Result.flatMap(expr => {
     let accessors = ProjectAccessorsT.identityAccessors
     let result = reducerFn(expr, Bindings.emptyBindings, accessors)
-    let nameSpace = accessors.continuation
+    let nameSpace = accessors.states.continuation
 
     switch result {
     | Ok(_) =>

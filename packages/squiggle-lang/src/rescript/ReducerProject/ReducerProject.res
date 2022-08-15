@@ -138,7 +138,7 @@ module Private = {
   }
 
   let buildProjectAccessors = (this: t): ProjectAccessorsT.t => {
-    continuation: Bindings.emptyBindings,
+    states: {continuation: Bindings.emptyBindings},
     stdLib: getStdLib(this),
     environment: getEnvironment(this),
   }
@@ -149,9 +149,10 @@ module Private = {
     continuation: ProjectItem.T.continuation,
   ): unit => {
     let accessors = buildProjectAccessors(this)
+    let states = accessors.states
     let newItem = this->getItem(sourceId)->ProjectItem.run(continuation, accessors)
     Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
-    setContinuation(this, sourceId, accessors.continuation)
+    setContinuation(this, sourceId, states.continuation)
   }
 
   type runState = (ProjectItem.T.resultArgumentType, ProjectItem.T.continuation)
