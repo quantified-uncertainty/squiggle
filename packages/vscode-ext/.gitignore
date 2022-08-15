@@ -1,0 +1,5 @@
+/media/vendor
+/client/out
+/server/out
+/*.vsix
+/syntaxes/*.json

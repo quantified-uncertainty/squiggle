@@ -11,7 +11,7 @@ describe("mixture", () => {
       let (mean1, mean2) = tup
       let meanValue = {
         run(Mixture([(mkNormal(mean1, 9e-1), 0.5), (mkNormal(mean2, 9e-1), 0.5)]))->outputMap(
-          FromDist(ToFloat(#Mean)),
+          FromDist(#ToFloat(#Mean)),
         )
       }
       meanValue->unpackFloat->expect->toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1)
@@ -28,7 +28,7 @@ describe("mixture", () => {
       let meanValue = {
         run(
           Mixture([(mkBeta(alpha, beta), betaWeight), (mkExponential(rate), exponentialWeight)]),
-        )->outputMap(FromDist(ToFloat(#Mean)))
+        )->outputMap(FromDist(#ToFloat(#Mean)))
       }
       let betaMean = 1.0 /. (1.0 +. beta /. alpha)
       let exponentialMean = 1.0 /. rate
@@ -52,7 +52,7 @@ describe("mixture", () => {
             (mkUniform(low, high), uniformWeight),
             (mkLognormal(mu, sigma), lognormalWeight),
           ]),
-        )->outputMap(FromDist(ToFloat(#Mean)))
+        )->outputMap(FromDist(#ToFloat(#Mean)))
       }
       let uniformMean = (low +. high) /. 2.0
       let lognormalMean = mu +. sigma ** 2.0 /. 2.0

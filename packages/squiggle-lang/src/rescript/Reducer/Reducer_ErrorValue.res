@@ -1,19 +1,25 @@
+@gentype.import("peggy") @genType.as("LocationRange")
+type location
+
 @genType
 type errorValue =
   | REArityError(option<string>, int, int) //TODO: Binding a lambda to a variable should record the variable name in lambda for error reporting
   | REArrayIndexNotFound(string, int)
   | REAssignmentExpected
   | REDistributionError(DistributionTypes.error)
+  | REExpectedType(string, string)
   | REExpressionExpected
   | REFunctionExpected(string)
+  | REFunctionNotFound(string)
   | REJavaScriptExn(option<string>, option<string>) // Javascript Exception
   | REMacroNotFound(string)
   | RENotAFunction(string)
+  | REOperationError(Operation.operationError)
   | RERecordPropertyNotFound(string, string)
   | RESymbolNotFound(string)
-  | RESyntaxError(string)
+  | RESyntaxError(string, option<location>)
   | RETodo(string) // To do
-  | REExpectedType(string)
+  | REUnitNotFound(string)
 
 type t = errorValue
 
@@ -28,7 +34,9 @@ let errorToString = err =>
   | REAssignmentExpected => "Assignment expected"
   | REExpressionExpected => "Expression expected"
   | REFunctionExpected(msg) => `Function expected: ${msg}`
+  | REFunctionNotFound(msg) => `Function not found: ${msg}`
   | REDistributionError(err) => `Distribution Math Error: ${DistributionTypes.Error.toString(err)}`
+  | REOperationError(err) => `Math Error: ${Operation.Error.toString(err)}`
   | REJavaScriptExn(omsg, oname) => {
       let answer = "JS Exception:"
       let answer = switch oname {
@@ -45,7 +53,8 @@ let errorToString = err =>
   | RENotAFunction(valueString) => `${valueString} is not a function`
   | RERecordPropertyNotFound(msg, index) => `${msg}: ${index}`
   | RESymbolNotFound(symbolName) => `${symbolName} is not defined`
-  | RESyntaxError(desc) => `Syntax Error: ${desc}`
+  | RESyntaxError(desc, _) => `Syntax Error: ${desc}`
   | RETodo(msg) => `TODO: ${msg}`
-  | REExpectedType(typeName) => `Expected type: ${typeName}`
+  | REExpectedType(typeName, valueString) => `Expected type: ${typeName} but got: ${valueString}`
+  | REUnitNotFound(unitName) => `Unit not found: ${unitName}`
   }

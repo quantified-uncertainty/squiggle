@@ -86,6 +86,7 @@ let stepwiseToLinear = (t: t): t =>
 
 // Note: This results in a distribution with as many points as the sum of those in t1 and t2.
 let combinePointwise = (
+  ~combiner=XYShape.PointwiseCombination.combine,
   ~integralSumCachesFn=(_, _) => None,
   ~distributionType: PointSetTypes.distributionType=#PDF,
   fn: (float, float) => result<float, Operation.Error.t>,
@@ -119,7 +120,7 @@ let combinePointwise = (
 
   let interpolator = XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation)
 
-  XYShape.PointwiseCombination.combine(fn, interpolator, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
+  combiner(interpolator, fn, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
     make(~integralSumCache=combinedIntegralSum, x)
   )
 }
@@ -249,7 +250,7 @@ module T = Dist({
 
   let downsample = (length, t): t =>
     t |> shapeMap(XYShape.XsConversion.proportionByProbabilityMass(length, integral(t).xyShape))
-  let integralEndY = (t: t) => t.integralSumCache |> E.O.default(t |> integral |> lastY)
+  let integralEndY = (t: t) => t.integralSumCache |> E.O.defaultFn(() => t |> integral |> lastY)
   let integralXtoY = (f, t: t) => t |> integral |> shapeFn(XYShape.XtoY.linear(f))
   let integralYtoX = (f, t: t) => t |> integral |> shapeFn(XYShape.YtoX.linear(f))
   let toContinuous = t => Some(t)
@@ -273,7 +274,8 @@ module T = Dist({
 
 let isNormalized = (t: t): bool => {
   let areaUnderIntegral = t |> updateIntegralCache(Some(T.integral(t))) |> T.integralEndY
-  areaUnderIntegral < 1. +. 1e-7 && areaUnderIntegral > 1. -. 1e-7
+  areaUnderIntegral < 1. +. MagicNumbers.Epsilon.seven &&
+    areaUnderIntegral > 1. -. MagicNumbers.Epsilon.seven
 }
 
 let downsampleEquallyOverX = (length, t): t =>

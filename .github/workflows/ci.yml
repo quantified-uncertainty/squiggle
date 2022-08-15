@@ -19,22 +19,34 @@ jobs:
       should_skip_lang: ${{ steps.skip_lang_check.outputs.should_skip }}
       should_skip_components: ${{ steps.skip_components_check.outputs.should_skip }}
       should_skip_website: ${{ steps.skip_website_check.outputs.should_skip }}
+      should_skip_vscodeext: ${{ steps.skip_vscodeext_check.outputs.should_skip }}
+      should_skip_cli: ${{ steps.skip_cli_check.outputs.should_skip }}
     steps:
       - id: skip_lang_check
         name: Check if the changes are about squiggle-lang src files
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v4.0.0
         with:
           paths: '["packages/squiggle-lang/**"]'
       - id: skip_components_check
         name: Check if the changes are about components src files
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v4.0.0
         with:
           paths: '["packages/components/**"]'
       - id: skip_website_check
         name: Check if the changes are about website src files
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v4.0.0
         with:
           paths: '["packages/website/**"]'
+      - id: skip_vscodeext_check
+        name: Check if the changes are about vscode extension src files
+        uses: fkirc/skip-duplicate-actions@v4.0.0
+        with:
+          paths: '["packages/vscode-ext/**"]'
+      - id: skip_cli_check
+        name: Check if the changes are about cli src files
+        uses: fkirc/skip-duplicate-actions@v4.0.0
+        with:
+          paths: '["packages/cli/**"]'
 
   lang-lint:
     name: Language lint
@@ -46,7 +58,7 @@ jobs:
         shell: bash
         working-directory: packages/squiggle-lang
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Dependencies
         run: cd ../../ && yarn
       - name: Check rescript lint
@@ -67,7 +79,9 @@ jobs:
         shell: bash
         working-directory: packages/squiggle-lang
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
       - name: Install dependencies from monorepo level
         run: cd ../../ && yarn
       - name: Build rescript codebase
@@ -93,12 +107,12 @@ jobs:
         shell: bash
         working-directory: packages/components
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check javascript, typescript, and markdown lint
         uses: creyD/prettier_action@v4.2
         with:
           dry: true
-          prettier_options: --check packages/components
+          prettier_options: --check packages/components --ignore-path packages/components/.prettierignore
 
   components-bundle-build:
     name: Components bundle and build
@@ -110,7 +124,7 @@ jobs:
         shell: bash
         working-directory: packages/components
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies from monorepo level
         run: cd ../../ && yarn
       - name: Build rescript codebase in squiggle-lang
@@ -130,7 +144,7 @@ jobs:
         shell: bash
         working-directory: packages/website
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check javascript, typescript, and markdown lint
         uses: creyD/prettier_action@v4.2
         with:
@@ -147,10 +161,61 @@ jobs:
         shell: bash
         working-directory: packages/website
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies from monorepo level
         run: cd ../../ && yarn
       - name: Build rescript in squiggle-lang
         run: cd ../squiggle-lang && yarn build
+      - name: Build components
+        run: cd ../components && yarn build
       - name: Build website assets
         run: yarn build
+
+  vscode-ext-lint:
+    name: VS Code extension lint
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_vscodeext != 'true' }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/vscode-ext
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies from monorepo level
+        run: cd ../../ && yarn
+      - name: Lint the VSCode Extension source code
+        run: yarn lint
+
+  vscode-ext-build:
+    name: VS Code extension build
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ (needs.pre_check.outputs.should_skip_components != 'true') || (needs.pre_check.outputs.should_skip_lang != 'true') }} || (needs.pre_check.outputs.should_skip_vscodeext != 'true') }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/vscode-ext
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies from monorepo level
+        run: cd ../../ && yarn
+      - name: Build
+        run: yarn compile
+
+  cli-lint:
+    name: CLI lint
+    runs-on: ubuntu-latest
+    needs: pre_check
+    if: ${{ needs.pre_check.outputs.should_skip_cli != 'true' }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/cli
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check javascript, typescript, and markdown lint
+        uses: creyD/prettier_action@v4.2
+        with:
+          dry: true
+          prettier_options: --check packages/cli

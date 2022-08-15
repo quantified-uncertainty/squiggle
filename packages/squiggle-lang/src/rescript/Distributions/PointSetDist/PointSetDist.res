@@ -66,6 +66,7 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
   }
 
 let combinePointwise = (
+  ~combiner=XYShape.PointwiseCombination.combine,
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
   ~integralCachesFn: (
     PointSetTypes.continuousShape,
@@ -78,6 +79,7 @@ let combinePointwise = (
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combinePointwise(
+      ~combiner,
       ~integralSumCachesFn,
       fn,
       m1,
@@ -85,8 +87,9 @@ let combinePointwise = (
     )->E.R2.fmap(x => PointSetTypes.Continuous(x))
   | (Discrete(m1), Discrete(m2)) =>
     Discrete.combinePointwise(
+      ~combiner,
       ~integralSumCachesFn,
-      fn,
+      ~fn,
       m1,
       m2,
     )->E.R2.fmap(x => PointSetTypes.Discrete(x))
@@ -197,6 +200,14 @@ module T = Dist({
     }
 })
 
+let logScore = (args: PointSetDist_Scoring.scoreArgs): result<float, Operation.Error.t> =>
+  PointSetDist_Scoring.logScore(
+    args,
+    ~combineFn=combinePointwise,
+    ~integrateFn=T.Integral.sum,
+    ~toMixedFn=toMixed,
+  )
+
 let pdf = (f: float, t: t) => {
   let mixedPoint: PointSetTypes.mixedPoint = T.xToY(f, t)
   mixedPoint.continuous +. mixedPoint.discrete
@@ -214,9 +225,8 @@ let doN = (n, fn) => {
 }
 
 let sample = (t: t): float => {
-  let randomItem = Random.float(1.)
-  let bar = t |> T.Integral.yToX(randomItem)
-  bar
+  let randomItem = Random.float(1.0)
+  t |> T.Integral.yToX(randomItem)
 }
 
 let isFloat = (t: t) =>
@@ -238,6 +248,8 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Inv(f) => inv(f, s)
   | #Sample => sample(s)
   | #Mean => T.mean(s)
+  | #Min => T.minX(s)
+  | #Max => T.maxX(s)
   }
 
 let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineError> =>

@@ -124,6 +124,26 @@ module Beta = {
   let sample = (t: t) => Jstat.Beta.sample(t.alpha, t.beta)
   let mean = (t: t) => Ok(Jstat.Beta.mean(t.alpha, t.beta))
   let toString = ({alpha, beta}: t) => j`Beta($alpha,$beta)`
+
+  let fromMeanAndSampleSize = (mean, sampleSize) => {
+    // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_sample_size
+    let alpha = mean *. sampleSize
+    let beta = (1.0 -. mean) *. sampleSize
+    make(alpha, beta)
+  }
+
+  let fromMeanAndStdev = (mean, stdev) => {
+    // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
+    if !(0.0 < stdev && stdev <= 0.5) {
+      Error("Stdev must be in in between 0 and 0.5.")
+    } else if !(0.0 <= mean && mean <= 1.0) {
+      Error("Mean must be in between 0 and 1.0.")
+    } else {
+      let var = stdev *. stdev
+      let sampleSize = mean *. (1.0 -. mean) /. var -. 1.0
+      fromMeanAndSampleSize(mean, sampleSize)
+    }
+  }
 }
 
 module Lognormal = {
@@ -216,6 +236,50 @@ module Uniform = {
   }
 }
 
+module Logistic = {
+  type t = logistic
+  let make = (location, scale) =>
+    scale > 0.0
+      ? Ok(#Logistic({location: location, scale: scale}))
+      : Error("Scale must be positive")
+
+  let pdf = (x, t: t) => Stdlib.Logistic.pdf(x, t.location, t.scale)
+  let cdf = (x, t: t) => Stdlib.Logistic.cdf(x, t.location, t.scale)
+  let inv = (p, t: t) => Stdlib.Logistic.quantile(p, t.location, t.scale)
+  let sample = (t: t) => {
+    let s = Uniform.sample({low: 0.0, high: 1.0})
+    inv(s, t)
+  }
+  let mean = (t: t) => Ok(Stdlib.Logistic.mean(t.location, t.scale))
+  let toString = ({location, scale}: t) => j`Logistic($location,$scale)`
+}
+
+module Bernoulli = {
+  type t = bernoulli
+  let make = p =>
+    p >= 0.0 && p <= 1.0
+      ? Ok(#Bernoulli({p: p}))
+      : Error("Bernoulli parameter must be between 0 and 1")
+  let pmf = (x, t: t) => Stdlib.Bernoulli.pmf(x, t.p)
+
+  //Bernoulli is a discrete distribution, so it doesn't really have a pdf().
+  //We fake this for now with the pmf function, but this should be fixed at some point.
+  let pdf = (x, t: t) => Stdlib.Bernoulli.pmf(x, t.p)
+  let cdf = (x, t: t) => Stdlib.Bernoulli.cdf(x, t.p)
+  let inv = (p, t: t) => Stdlib.Bernoulli.quantile(p, t.p)
+  let mean = (t: t) => Ok(Stdlib.Bernoulli.mean(t.p))
+  let min = (t: t) => t.p == 1.0 ? 1.0 : 0.0
+  let max = (t: t) => t.p == 0.0 ? 0.0 : 1.0
+  let sample = (t: t) => {
+    let s = Uniform.sample({low: 0.0, high: 1.0})
+    inv(s, t)
+  }
+  let toString = ({p}: t) => j`Bernoulli($p)`
+  let toPointSetDist = ({p}: t): PointSetTypes.pointSetDist => Discrete(
+    Discrete.make(~integralSumCache=Some(1.0), {xs: [0.0, 1.0], ys: [1.0 -. p, p]}),
+  )
+}
+
 module Gamma = {
   type t = gamma
   let make = (shape: float, scale: float) => {
@@ -251,7 +315,10 @@ module Float = {
   let inv = (p, t: t) => p < t ? 0.0 : 1.0
   let mean = (t: t) => Ok(t)
   let sample = (t: t) => t
-  let toString = (t: t) => j`Delta($t)`
+  let toString = (t: t) => j`PointMass($t)`
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Discrete(
+    Discrete.make(~integralSumCache=Some(1.0), {xs: [t], ys: [1.0]}),
+  )
 }
 
 module From90thPercentile = {
@@ -275,9 +342,11 @@ module T = {
     | #Cauchy(n) => Cauchy.pdf(x, n)
     | #Gamma(n) => Gamma.pdf(x, n)
     | #Lognormal(n) => Lognormal.pdf(x, n)
+    | #Logistic(n) => Logistic.pdf(x, n)
     | #Uniform(n) => Uniform.pdf(x, n)
     | #Beta(n) => Beta.pdf(x, n)
     | #Float(n) => Float.pdf(x, n)
+    | #Bernoulli(n) => Bernoulli.pdf(x, n)
     }
 
   let cdf = (x, dist) =>
@@ -287,10 +356,12 @@ module T = {
     | #Exponential(n) => Exponential.cdf(x, n)
     | #Cauchy(n) => Cauchy.cdf(x, n)
     | #Gamma(n) => Gamma.cdf(x, n)
+    | #Logistic(n) => Logistic.cdf(x, n)
     | #Lognormal(n) => Lognormal.cdf(x, n)
     | #Uniform(n) => Uniform.cdf(x, n)
     | #Beta(n) => Beta.cdf(x, n)
     | #Float(n) => Float.cdf(x, n)
+    | #Bernoulli(n) => Bernoulli.cdf(x, n)
     }
 
   let inv = (x, dist) =>
@@ -300,10 +371,12 @@ module T = {
     | #Exponential(n) => Exponential.inv(x, n)
     | #Cauchy(n) => Cauchy.inv(x, n)
     | #Gamma(n) => Gamma.inv(x, n)
+    | #Logistic(n) => Logistic.inv(x, n)
     | #Lognormal(n) => Lognormal.inv(x, n)
     | #Uniform(n) => Uniform.inv(x, n)
     | #Beta(n) => Beta.inv(x, n)
     | #Float(n) => Float.inv(x, n)
+    | #Bernoulli(n) => Bernoulli.inv(x, n)
     }
 
   let sample: symbolicDist => float = x =>
@@ -313,10 +386,12 @@ module T = {
     | #Exponential(n) => Exponential.sample(n)
     | #Cauchy(n) => Cauchy.sample(n)
     | #Gamma(n) => Gamma.sample(n)
+    | #Logistic(n) => Logistic.sample(n)
     | #Lognormal(n) => Lognormal.sample(n)
     | #Uniform(n) => Uniform.sample(n)
     | #Beta(n) => Beta.sample(n)
     | #Float(n) => Float.sample(n)
+    | #Bernoulli(n) => Bernoulli.sample(n)
     }
 
   let doN = (n, fn) => {
@@ -336,10 +411,12 @@ module T = {
     | #Cauchy(n) => Cauchy.toString(n)
     | #Normal(n) => Normal.toString(n)
     | #Gamma(n) => Gamma.toString(n)
+    | #Logistic(n) => Logistic.toString(n)
     | #Lognormal(n) => Lognormal.toString(n)
     | #Uniform(n) => Uniform.toString(n)
     | #Beta(n) => Beta.toString(n)
     | #Float(n) => Float.toString(n)
+    | #Bernoulli(n) => Bernoulli.toString(n)
     }
 
   let min: symbolicDist => float = x =>
@@ -349,8 +426,10 @@ module T = {
     | #Cauchy(n) => Cauchy.inv(minCdfValue, n)
     | #Normal(n) => Normal.inv(minCdfValue, n)
     | #Lognormal(n) => Lognormal.inv(minCdfValue, n)
+    | #Logistic(n) => Logistic.inv(minCdfValue, n)
     | #Gamma(n) => Gamma.inv(minCdfValue, n)
     | #Uniform({low}) => low
+    | #Bernoulli(n) => Bernoulli.min(n)
     | #Beta(n) => Beta.inv(minCdfValue, n)
     | #Float(n) => n
     }
@@ -363,7 +442,9 @@ module T = {
     | #Normal(n) => Normal.inv(maxCdfValue, n)
     | #Gamma(n) => Gamma.inv(maxCdfValue, n)
     | #Lognormal(n) => Lognormal.inv(maxCdfValue, n)
+    | #Logistic(n) => Logistic.inv(maxCdfValue, n)
     | #Beta(n) => Beta.inv(maxCdfValue, n)
+    | #Bernoulli(n) => Bernoulli.max(n)
     | #Uniform({high}) => high
     | #Float(n) => n
     }
@@ -376,8 +457,10 @@ module T = {
     | #Normal(n) => Normal.mean(n)
     | #Lognormal(n) => Lognormal.mean(n)
     | #Beta(n) => Beta.mean(n)
+    | #Logistic(n) => Logistic.mean(n)
     | #Uniform(n) => Uniform.mean(n)
     | #Gamma(n) => Gamma.mean(n)
+    | #Bernoulli(n) => Bernoulli.mean(n)
     | #Float(n) => Float.mean(n)
     }
 
@@ -386,6 +469,8 @@ module T = {
     | #Cdf(f) => Ok(cdf(f, s))
     | #Pdf(f) => Ok(pdf(f, s))
     | #Inv(f) => Ok(inv(f, s))
+    | #Min => Ok(min(s))
+    | #Max => Ok(max(s))
     | #Sample => Ok(sample(s))
     | #Mean => mean(s)
     }
@@ -396,8 +481,9 @@ module T = {
     | (#ByWeight, #Uniform(n)) =>
       // In `ByWeight mode, uniform distributions get special treatment because we need two x's
       // on either side for proper rendering (just left and right of the discontinuities).
-      let dx = 0.00001 *. (n.high -. n.low)
-      [n.low -. dx, n.low +. dx, n.high -. dx, n.high +. dx]
+      let distance = n.high -. n.low
+      let dx = MagicNumbers.Epsilon.ten *. distance
+      [n.low -. dx, n.low, n.low +. dx, n.high -. dx, n.high, n.high +. dx]
     | (#ByWeight, _) =>
       let ys = E.A.Floats.range(minCdfValue, maxCdfValue, n)
       ys |> E.A.fmap(y => inv(y, dist))
@@ -452,7 +538,8 @@ module T = {
     d: symbolicDist,
   ): PointSetTypes.pointSetDist =>
     switch d {
-    | #Float(v) => Discrete(Discrete.make(~integralSumCache=Some(1.0), {xs: [v], ys: [1.0]}))
+    | #Float(v) => Float.toPointSetDist(v)
+    | #Bernoulli(v) => Bernoulli.toPointSetDist(v)
     | _ =>
       let xs = interpolateXs(~xSelection, d, sampleCount)
       let ys = xs |> E.A.fmap(x => pdf(x, d))

@@ -1,16 +1,16 @@
-module Bindings = Reducer_Expression_Bindings
+module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module ErrorValue = Reducer_ErrorValue
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface.ExpressionValue
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Result = Belt.Result
+module Bindings = Reducer_Bindings
 
 type bindings = ExpressionT.bindings
 type context = bindings
-type environment = ExpressionValue.environment
+type environment = InternalExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression
-type expressionValue = ExpressionValue.expressionValue
-type externalBindings = ReducerInterface_ExpressionValue.externalBindings
+type internalExpressionValue = InternalExpressionValue.t
 type reducerFn = ExpressionT.reducerFn
 
 type expressionWithContext =
@@ -22,11 +22,16 @@ let callReducer = (
   bindings: bindings,
   environment: environment,
   reducer: reducerFn,
-): result<expressionValue, errorValue> =>
+): result<internalExpressionValue, errorValue> => {
   switch expressionWithContext {
-  | ExpressionNoContext(expr) => reducer(expr, bindings, environment)
-  | ExpressionWithContext(expr, context) => reducer(expr, context, environment)
+  | ExpressionNoContext(expr) =>
+    // Js.log(`callReducer: bindings ${Bindings.toString(bindings)} expr ${ExpressionT.toString(expr)}`)
+    reducer(expr, bindings, environment)
+  | ExpressionWithContext(expr, context) =>
+    // Js.log(`callReducer: context ${Bindings.toString(context)} expr ${ExpressionT.toString(expr)}`)
+    reducer(expr, context, environment)
   }
+}
 
 let withContext = (expression, context) => ExpressionWithContext(expression, context)
 let noContext = expression => ExpressionNoContext(expression)
@@ -35,7 +40,9 @@ let toString = expressionWithContext =>
   switch expressionWithContext {
   | ExpressionNoContext(expr) => ExpressionT.toString(expr)
   | ExpressionWithContext(expr, context) =>
-    `${ExpressionT.toString(expr)} context: ${Bindings.toString(context)}`
+    `${ExpressionT.toString(expr)} context: ${context
+      ->Bindings.toExpressionValue
+      ->InternalExpressionValue.toString}`
   }
 
 let toStringResult = rExpressionWithContext =>

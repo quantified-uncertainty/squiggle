@@ -1,36 +1,33 @@
-module Bindings = Reducer_Expression_Bindings
+module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module BuiltIn = Reducer_Dispatch_BuiltIn
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
-module ExpressionValue = ReducerInterface.ExpressionValue
 module Extra = Reducer_Extra
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 module Macro = Reducer_Expression_Macro
 module MathJs = Reducer_MathJs
+module Bindings = Reducer_Bindings
 module Result = Belt.Result
 module T = Reducer_Expression_T
 
-type environment = ReducerInterface_ExpressionValue.environment
+type environment = InternalExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = T.expression
-type expressionValue = ReducerInterface_ExpressionValue.expressionValue
-type externalBindings = ReducerInterface_ExpressionValue.externalBindings
-type internalCode = ReducerInterface_ExpressionValue.internalCode
+type internalExpressionValue = InternalExpressionValue.t
+type externalExpressionValue = ReducerInterface_ExternalExpressionValue.t
 type t = expression
 
 /*
-  Converts a MathJs code to expression
+  Converts a Squigle code to expression
 */
-let parse_ = (expr: string, parser, converter): result<t, errorValue> =>
-  expr->parser->Result.flatMap(node => converter(node))
-
-let parse = (mathJsCode: string): result<t, errorValue> =>
-  mathJsCode->parse_(MathJs.Parse.parse, MathJs.ToExpression.fromNode)
+let parse = (peggyCode: string): result<t, errorValue> =>
+  peggyCode->Reducer_Peggy_Parse.parse->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
 /*
   Recursively evaluate/reduce the expression (Lisp AST)
 */
 let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<
-  expressionValue,
+  internalExpressionValue,
   'e,
 > => {
   // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
@@ -38,7 +35,7 @@ let rec reduceExpression = (expression: t, bindings: T.bindings, environment: en
   | T.EValue(value) => value->Ok
   | T.EList(list) =>
     switch list {
-    | list{EValue(EvCall(fName)), ..._args} =>
+    | list{EValue(IEvCall(fName)), ..._args} =>
       switch Macro.isMacroName(fName) {
       // A macro expands then reduces itself
       | true => Macro.doMacroCall(expression, bindings, environment, reduceExpression)
@@ -53,11 +50,11 @@ and reduceExpressionList = (
   expressions: list<t>,
   bindings: T.bindings,
   environment: environment,
-): result<expressionValue, 'e> => {
-  let racc: result<list<expressionValue>, 'e> = expressions->Belt.List.reduceReverse(Ok(list{}), (
-    racc,
-    each: expression,
-  ) =>
+): result<internalExpressionValue, 'e> => {
+  let racc: result<
+    list<internalExpressionValue>,
+    'e,
+  > = expressions->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
     racc->Result.flatMap(acc => {
       each
       ->reduceExpression(bindings, environment)
@@ -72,70 +69,90 @@ and reduceExpressionList = (
 /*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
-and reduceValueList = (valueList: list<expressionValue>, environment): result<
-  expressionValue,
+and reduceValueList = (valueList: list<internalExpressionValue>, environment): result<
+  internalExpressionValue,
   'e,
 > =>
   switch valueList {
-  | list{EvCall(fName), ...args} =>
-    (fName, args->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
+  | list{IEvCall(fName), ...args} => {
+      let rCheckedArgs = switch fName {
+      | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args->Ok
+      | _ => args->Lambda.checkIfReduced
+      }
 
-  | list{EvLambda(lamdaCall), ...args} =>
-    Lambda.doLambdaCall(lamdaCall, args, environment, reduceExpression)
+      rCheckedArgs->Result.flatMap(checkedArgs =>
+        (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
+      )
+    }
+  | list{IEvLambda(_)} =>
+    // TODO: remove on solving issue#558
+    valueList
+    ->Lambda.checkIfReduced
+    ->Result.flatMap(reducedValueList =>
+      reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
+    )
+  | list{IEvLambda(lamdaCall), ...args} =>
+    args
+    ->Lambda.checkIfReduced
+    ->Result.flatMap(checkedArgs =>
+      Lambda.doLambdaCall(lamdaCall, checkedArgs, environment, reduceExpression)
+    )
+
   | _ =>
     valueList
     ->Lambda.checkIfReduced
     ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->ExpressionValue.EvArray->Ok
+      reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
     )
   }
 
 let evalUsingBindingsExpression_ = (aExpression, bindings, environment): result<
-  expressionValue,
+  internalExpressionValue,
   'e,
 > => reduceExpression(aExpression, bindings, environment)
 
 let evaluateUsingOptions = (
-  ~environment: option<ReducerInterface_ExpressionValue.environment>,
-  ~externalBindings: option<ReducerInterface_ExpressionValue.externalBindings>,
+  ~environment: option<ReducerInterface_ExternalExpressionValue.environment>,
+  ~externalBindings: option<ReducerInterface_ExternalExpressionValue.externalBindings>,
   code: string,
-): result<expressionValue, errorValue> => {
-  let anEnvironment = switch environment {
-  | Some(env) => env
-  | None => ReducerInterface_ExpressionValue.defaultEnvironment
-  }
+): result<externalExpressionValue, errorValue> => {
+  let anEnvironment = Belt.Option.getWithDefault(
+    environment,
+    ReducerInterface_ExternalExpressionValue.defaultEnvironment,
+  )
 
-  let anExternalBindings = switch externalBindings {
-  | Some(bindings) => bindings
-  | None => ReducerInterface_ExpressionValue.defaultExternalBindings
-  }
+  let mergedBindings: InternalExpressionValue.nameSpace = Bindings.merge(
+    ReducerInterface_StdLib.internalStdLib,
+    Belt.Option.map(externalBindings, Bindings.fromTypeScriptBindings)->Belt.Option.getWithDefault(
+      Bindings.emptyModule,
+    ),
+  )
 
-  let bindings = anExternalBindings->Bindings.fromExternalBindings
-
-  parse(code)->Result.flatMap(expr => evalUsingBindingsExpression_(expr, bindings, anEnvironment))
+  parse(code)
+  ->Result.flatMap(expr => evalUsingBindingsExpression_(expr, mergedBindings, anEnvironment))
+  ->Result.map(ReducerInterface_InternalExpressionValue.toExternal)
 }
 
 /*
-  Evaluates MathJs code and bindings via Reducer and answers the result
+  IEvaluates Squiggle code and bindings via Reducer and answers the result
 */
-let evaluate = (code: string): result<expressionValue, errorValue> => {
+let evaluate = (code: string): result<externalExpressionValue, errorValue> => {
   evaluateUsingOptions(~environment=None, ~externalBindings=None, code)
 }
-let eval = evaluate
 let evaluatePartialUsingExternalBindings = (
   code: string,
-  externalBindings: ReducerInterface_ExpressionValue.externalBindings,
-  environment: ReducerInterface_ExpressionValue.environment,
-): result<externalBindings, errorValue> => {
+  externalBindings: ReducerInterface_ExternalExpressionValue.externalBindings,
+  environment: ReducerInterface_ExternalExpressionValue.environment,
+): result<ReducerInterface_ExternalExpressionValue.externalBindings, errorValue> => {
   let rAnswer = evaluateUsingOptions(
     ~environment=Some(environment),
     ~externalBindings=Some(externalBindings),
     code,
   )
   switch rAnswer {
-  | Ok(EvRecord(externalBindings)) => Ok(externalBindings)
+  | Ok(EvModule(externalBindings)) => Ok(externalBindings)
   | Ok(_) =>
-    Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`))
+    Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`, None))
   | Error(err) => err->Error
   }
 }

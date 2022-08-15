@@ -1,5 +1,4 @@
-let defaultEnv: DistributionOperation.env
 let dispatch: (
-  ReducerInterface_ExpressionValue.functionCall,
-  ReducerInterface_ExpressionValue.environment,
-) => option<result<ReducerInterface_ExpressionValue.expressionValue, Reducer_ErrorValue.errorValue>>
+  ReducerInterface_InternalExpressionValue.functionCall,
+  ReducerInterface_ExternalExpressionValue.environment,
+) => option<result<ReducerInterface_InternalExpressionValue.t, Reducer_ErrorValue.errorValue>>

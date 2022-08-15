@@ -96,7 +96,21 @@ module T = {
   let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> Belt.Array.unzip |> fromArray
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
-
+  let filterYValues = (fn, t: t): t => t |> zip |> E.A.filter(((_, y)) => fn(y)) |> fromZippedArray
+  let filterOkYs = (xs: array<float>, ys: array<result<float, 'b>>): t => {
+    let n = E.A.length(xs) // Assume length(xs) == length(ys)
+    let newXs = []
+    let newYs = []
+    for i in 0 to n - 1 {
+      switch ys[i] {
+      | Ok(y) =>
+        let _ = Js.Array.push(xs[i], newXs)
+        let _ = Js.Array.push(y, newYs)
+      | Error(_) => ()
+      }
+    }
+    {xs: newXs, ys: newYs}
+  }
   module Validator = {
     let fnName = "XYShape validate"
     let notSortedError = (p: string): error => NotSorted(p)
@@ -133,6 +147,11 @@ module T = {
     | Some(error) => Error(error)
     | None => Ok(attempt)
     }
+  }
+
+  let makeFromZipped = (values: array<(float, float)>) => {
+    let (xs, ys) = E.A.unzip(values)
+    make(~xs, ~ys)
   }
 }
 
@@ -308,8 +327,8 @@ module Zipped = {
 module PointwiseCombination = {
   // t1Interpolator and t2Interpolator are functions from XYShape.XtoY, e.g. linearBetweenPointsExtrapolateFlat.
   let combine: (
-    (float, float) => result<float, Operation.Error.t>,
     interpolator,
+    (float, float) => result<float, Operation.Error.t>,
     T.t,
     T.t,
   ) => result<T.t, Operation.Error.t> = %raw(`
@@ -318,7 +337,7 @@ module PointwiseCombination = {
       // and interpolates the value on the other side, thus accumulating xs and ys.
       // This is written in raw JS because this can still be a bottleneck, and using refs for the i and j indices is quite painful.
 
-      function(fn, interpolator, t1, t2) {
+      function(interpolator, fn, t1, t2) {
         let t1n = t1.xs.length;
         let t2n = t2.xs.length;
         let outX = [];
@@ -376,8 +395,110 @@ module PointwiseCombination = {
       }
     `)
 
+  /*
+    This is from an approach to kl divergence that was ultimately rejected. Leaving it in for now because it may help us factor `combine` out of raw javascript soon.
+ */
+  let combineAlongSupportOfSecondArgument0: (
+    interpolator,
+    (float, float) => result<float, Operation.Error.t>,
+    T.t,
+    T.t,
+  ) => result<T.t, Operation.Error.t> = (interpolator, fn, t1, t2) => {
+    let newYs = []
+    let newXs = []
+    let (l1, l2) = (E.A.length(t1.xs), E.A.length(t2.xs))
+    let (i, j) = (ref(0), ref(0))
+    let minX = t2.xs[0]
+    let maxX = t2.xs[l2 - 1]
+    while j.contents < l2 - 1 && i.contents < l1 - 1 {
+      let someTuple = {
+        let x1 = t1.xs[i.contents + 1]
+        let x2 = t2.xs[j.contents + 1]
+        if (
+          /* if t1 has to catch up to t2 */
+          i.contents < l1 - 1 && j.contents < l2 && x1 < x2 && minX <= x1 && x2 <= maxX
+        ) {
+          i := i.contents + 1
+          let x = x1
+          let y1 = t1.ys[i.contents]
+          let y2 = interpolator(t2, j.contents, x)
+          Some((x, y1, y2))
+        } else if (
+          /* if t2 has to catch up to t1 */
+          i.contents < l1 && j.contents < l2 - 1 && x1 > x2 && x2 >= minX && maxX >= x1
+        ) {
+          j := j.contents + 1
+          let x = x2
+          let y1 = interpolator(t1, i.contents, x)
+          let y2 = t2.ys[j.contents]
+          Some((x, y1, y2))
+        } else if (
+          /* move both ahead if they are equal */
+          i.contents < l1 - 1 && j.contents < l2 - 1 && x1 == x2 && x1 >= minX && maxX >= x2
+        ) {
+          i := i.contents + 1
+          j := j.contents + 1
+          let x = x1
+          let y1 = t1.ys[i.contents]
+          let y2 = t2.ys[j.contents]
+          Some((x, y1, y2))
+        } else {
+          i := i.contents + 1
+          None
+        }
+      }
+      switch someTuple {
+      | Some((x, y1, y2)) => {
+          let _ = Js.Array.push(fn(y1, y2), newYs)
+          let _ = Js.Array.push(x, newXs)
+        }
+      | None => ()
+      }
+    }
+    T.filterOkYs(newXs, newYs)->Ok
+  }
+
+  /* *Dead code*: Nuño wrote this function to try to increase precision, but it didn't work.
+     If another traveler comes through with a similar idea, we hope this implementation will help them.
+     By "enrich" we mean to increase granularity.
+ */
+  let enrichXyShape = (t: T.t): T.t => {
+    let defaultEnrichmentFactor = 10
+    let length = E.A.length(t.xs)
+    let points =
+      length < MagicNumbers.Environment.defaultXYPointLength
+        ? defaultEnrichmentFactor * MagicNumbers.Environment.defaultXYPointLength / length
+        : defaultEnrichmentFactor
+
+    let getInBetween = (x1: float, x2: float): array<float> => {
+      if abs_float(x1 -. x2) < 2.0 *. MagicNumbers.Epsilon.seven {
+        [x1]
+      } else {
+        let newPointsArray = Belt.Array.makeBy(points - 1, i => i)
+        // don't repeat the x2 point, it will be gotten in the next iteration.
+        let result = Js.Array.mapi((pos, i) =>
+          if i == 0 {
+            x1
+          } else {
+            let points' = Belt.Float.fromInt(points)
+            let pos' = Belt.Float.fromInt(pos)
+            x1 *. (points' -. pos') /. points' +. x2 *. pos' /. points'
+          }
+        , newPointsArray)
+        result
+      }
+    }
+    let newXsUnflattened = Js.Array.mapi(
+      (x, i) => i < length - 2 ? getInBetween(x, t.xs[i + 1]) : [x],
+      t.xs,
+    )
+    let newXs = Belt.Array.concatMany(newXsUnflattened)
+    let newYs = E.A.fmap(x => XtoY.linear(x, t), newXs)
+    {xs: newXs, ys: newYs}
+  }
+
   let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
-    combine((a, b) => Ok(a +. b), interpolator, t1, t2)->E.R.toExn(
+    combine(interpolator, (a, b) => Ok(a +. b), t1, t2)->E.R.toExn(
       "Add operation should never fail",
       _,
     )
@@ -467,7 +588,7 @@ module Range = {
   // TODO: I think this isn't needed by any functions anymore.
   let stepsToContinuous = t => {
     // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
-    let diff = T.xTotalRange(t) |> (r => r *. 0.00001)
+    let diff = T.xTotalRange(t) |> (r => r *. MagicNumbers.Epsilon.five)
     let items = switch E.A.toRanges(Belt.Array.zip(t.xs, t.ys)) {
     | Ok(items) =>
       Some(
@@ -488,25 +609,6 @@ module Range = {
     }
   }
 }
-
-let pointLogScore = (prediction, answer) =>
-  switch answer {
-  | 0. => 0.0
-  | answer => answer *. Js.Math.log2(Js.Math.abs_float(prediction /. answer))
-  }
-
-let logScorePoint = (sampleCount, t1, t2) =>
-  PointwiseCombination.combineEvenXs(
-    ~fn=pointLogScore,
-    ~xToYSelection=XtoY.linear,
-    sampleCount,
-    t1,
-    t2,
-  )
-  |> Range.integrateWithTriangles
-  |> E.O.fmap(T.accumulateYs(\"+."))
-  |> E.O.fmap(Pairs.last)
-  |> E.O.fmap(Pairs.y)
 
 module Analysis = {
   let getVarianceDangerously = (t: 't, mean: 't => float, getMeanOfSquares: 't => float): float => {

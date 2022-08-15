@@ -8,7 +8,7 @@ The below few seem to work fine. In the future there's definitely more work to d
 */
 
 @genType
-type samplingParams = DistributionOperation.env
+type samplingParams = GenericDist.env
 
 @genType
 type genericDist = DistributionTypes.genericDist
@@ -41,16 +41,19 @@ let evaluate = Reducer.evaluate
 let evaluateUsingOptions = Reducer.evaluateUsingOptions
 
 @genType
+let parse = Reducer_Peggy_Parse.parse
+
+@genType
 let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
 
 @genType
 type externalBindings = Reducer.externalBindings
 
 @genType
-type expressionValue = ReducerInterface_ExpressionValue.expressionValue
+type expressionValue = ReducerInterface_ExternalExpressionValue.t
 
 @genType
-type recordEV = ReducerInterface_ExpressionValue.record
+type recordEV = ReducerInterface_ExternalExpressionValue.record
 
 @genType
 type errorValue = Reducer_ErrorValue.errorValue
@@ -74,13 +77,25 @@ let errorValueToString = Reducer_ErrorValue.errorToString
 let distributionErrorToString = DistributionTypes.Error.toString
 
 @genType
-type lambdaValue = ReducerInterface_ExpressionValue.lambdaValue
+type lambdaValue = ReducerInterface_ExternalExpressionValue.lambdaValue
 
 @genType
-let defaultSamplingEnv = ReducerInterface_GenericDistribution.defaultEnv
+type lambdaDeclaration = ReducerInterface_ExternalExpressionValue.lambdaDeclaration
 
 @genType
-type environment = ReducerInterface_ExpressionValue.environment
+let defaultSamplingEnv = DistributionOperation.defaultEnv
 
 @genType
-let defaultEnvironment = ReducerInterface_ExpressionValue.defaultEnvironment
+type environment = ReducerInterface_ExternalExpressionValue.environment
+
+@genType
+let defaultEnvironment = ReducerInterface_ExternalExpressionValue.defaultEnvironment
+
+@genType
+let foreignFunctionInterface = Reducer.foreignFunctionInterface
+
+@genType
+type declarationArg = Declaration.arg
+
+@genType
+type declaration<'a> = Declaration.declaration<'a>

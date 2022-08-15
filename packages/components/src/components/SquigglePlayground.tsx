@@ -1,129 +1,418 @@
-import _ from "lodash";
-import React, { FC, ReactElement, useState } from "react";
-import ReactDOM from "react-dom";
-import { SquiggleChart } from "./SquiggleChart";
-import CodeEditor from "./CodeEditor";
-import styled from "styled-components";
+import React, {
+  FC,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
+import { useForm, UseFormRegister, useWatch } from "react-hook-form";
+import * as yup from "yup";
+import { useMaybeControlledValue, useRunnerState } from "../lib/hooks";
+import { yupResolver } from "@hookform/resolvers/yup";
+import {
+  ChartSquareBarIcon,
+  CheckCircleIcon,
+  ClipboardCopyIcon,
+  CodeIcon,
+  CogIcon,
+  CurrencyDollarIcon,
+  EyeIcon,
+  PauseIcon,
+  PlayIcon,
+  RefreshIcon,
+} from "@heroicons/react/solid";
+import clsx from "clsx";
 
-interface FieldFloatProps {
-  label: string;
-  className?: string;
-  value: number;
-  onChange: (value: number) => void;
-}
+import { defaultBindings, environment } from "@quri/squiggle-lang";
 
-const Input = styled.input``;
+import { SquiggleChart, SquiggleChartProps } from "./SquiggleChart";
+import { CodeEditor } from "./CodeEditor";
+import { JsonEditor } from "./JsonEditor";
+import { ErrorAlert, SuccessAlert } from "./Alert";
+import { SquiggleContainer } from "./SquiggleContainer";
+import { Toggle } from "./ui/Toggle";
+import { StyledTab } from "./ui/StyledTab";
+import { InputItem } from "./ui/InputItem";
+import { Text } from "./ui/Text";
+import { ViewSettings, viewSettingsSchema } from "./ViewSettings";
+import { HeadedSection } from "./ui/HeadedSection";
+import {
+  defaultColor,
+  defaultTickFormat,
+} from "../lib/distributionSpecBuilder";
+import { Button } from "./ui/Button";
 
-const FormItem = (props: { label: string; children: ReactElement }) => (
-  <div>
-    <label>{props.label}</label>
-    {props.children}
+type PlaygroundProps = SquiggleChartProps & {
+  /** The initial squiggle string to put in the playground */
+  defaultCode?: string;
+  onCodeChange?(expr: string): void;
+  /* When settings change */
+  onSettingsChange?(settings: any): void;
+  /** Should we show the editor? */
+  showEditor?: boolean;
+  /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
+  showShareButton?: boolean;
+};
+
+const schema = yup
+  .object({})
+  .shape({
+    sampleCount: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(1000000),
+    xyPointLength: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(1000)
+      .min(10)
+      .max(10000),
+  })
+  .concat(viewSettingsSchema);
+
+type FormFields = yup.InferType<typeof schema>;
+
+const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
+  register,
+}) => (
+  <div className="space-y-6 p-3 max-w-xl">
+    <div>
+      <InputItem
+        name="sampleCount"
+        type="number"
+        label="Sample Count"
+        register={register}
+      />
+      <div className="mt-2">
+        <Text>
+          How many samples to use for Monte Carlo simulations. This can
+          occasionally be overridden by specific Squiggle programs.
+        </Text>
+      </div>
+    </div>
+    <div>
+      <InputItem
+        name="xyPointLength"
+        type="number"
+        register={register}
+        label="Coordinate Count (For PointSet Shapes)"
+      />
+      <div className="mt-2">
+        <Text>
+          When distributions are converted into PointSet shapes, we need to know
+          how many coordinates to use.
+        </Text>
+      </div>
+    </div>
   </div>
 );
 
-function FieldFloat(Props: FieldFloatProps) {
-  let [contents, setContents] = useState(Props.value + "");
-  return (
-    <FormItem label={Props.label}>
-      <Input
-        value={contents}
-        className={Props.className ? Props.className : ""}
-        onChange={(e) => {
-          setContents(e.target.value);
-          let result = parseFloat(contents);
-          if (_.isFinite(result)) {
-            Props.onChange(result);
-          }
-        }}
-      />
-    </FormItem>
+const InputVariablesSettings: React.FC<{
+  initialImports: any; // TODO - any json type
+  setImports: (imports: any) => void;
+}> = ({ initialImports, setImports }) => {
+  const [importString, setImportString] = useState(() =>
+    JSON.stringify(initialImports)
   );
-}
+  const [importsAreValid, setImportsAreValid] = useState(true);
 
-interface Props {
-  initialSquiggleString?: string;
-  height?: number;
-  showTypes?: boolean;
-  showControls?: boolean;
-}
+  const onChange = (value: string) => {
+    setImportString(value);
+    let imports = {} as any;
+    try {
+      imports = JSON.parse(value);
+      setImportsAreValid(true);
+    } catch (e) {
+      setImportsAreValid(false);
+    }
+    setImports(imports);
+  };
 
-interface Props2 {
-  height: number;
-}
-
-const ShowBox = styled.div<Props2>`
-  border: 1px solid #eee;
-  border-radius: 2px;
-  height: ${(props) => props.height};
-`;
-
-interface TitleProps {
-  readonly maxHeight: number;
-}
-
-const Display = styled.div<TitleProps>`
-  background: #f6f6f6;
-  border-left: 1px solid #eee;
-  height: 100vh;
-  padding: 3px;
-  overflow-y: auto;
-  max-height: ${(props) => props.maxHeight}px;
-`;
-
-const Row = styled.div`
-  display: grid;
-  grid-template-columns: 50% 50%;
-`;
-const Col = styled.div``;
-
-let SquigglePlayground: FC<Props> = ({
-  initialSquiggleString = "",
-  height = 300,
-  showTypes = false,
-  showControls = false,
-}: Props) => {
-  let [squiggleString, setSquiggleString] = useState(initialSquiggleString);
-  let [sampleCount, setSampleCount] = useState(1000);
-  let [outputXYPoints, setOutputXYPoints] = useState(1000);
-  let [pointDistLength, setPointDistLength] = useState(1000);
-  let [diagramStart, setDiagramStart] = useState(0);
-  let [diagramStop, setDiagramStop] = useState(10);
-  let [diagramCount, setDiagramCount] = useState(20);
   return (
-    <ShowBox height={height}>
-      <Row>
-        <Col>
-          <CodeEditor
-            value={squiggleString}
-            onChange={setSquiggleString}
-            oneLine={false}
-            showGutter={true}
-            height={height - 3}
-          />
-        </Col>
-        <Col>
-          <Display maxHeight={height - 3}>
-            <SquiggleChart
-              squiggleString={squiggleString}
-              sampleCount={sampleCount}
-              outputXYPoints={outputXYPoints}
-              diagramStart={diagramStart}
-              diagramStop={diagramStop}
-              diagramCount={diagramCount}
-              pointDistLength={pointDistLength}
+    <div className="p-3 max-w-3xl">
+      <HeadedSection title="Import Variables from JSON">
+        <div className="space-y-6">
+          <Text>
+            You can import variables from JSON into your Squiggle code.
+            Variables are accessed with dollar signs. For example, "timeNow"
+            would be accessed as "$timeNow".
+          </Text>
+          <div className="border border-slate-200 mt-6 mb-2">
+            <JsonEditor
+              value={importString}
+              onChange={onChange}
+              oneLine={false}
+              showGutter={true}
               height={150}
-              showTypes={showTypes}
-              showControls={showControls}
             />
-          </Display>
-        </Col>
-      </Row>
-    </ShowBox>
+          </div>
+          <div className="p-1 pt-2">
+            {importsAreValid ? (
+              <SuccessAlert heading="Valid JSON" />
+            ) : (
+              <ErrorAlert heading="Invalid JSON">
+                You must use valid JSON in this editor.
+              </ErrorAlert>
+            )}
+          </div>
+        </div>
+      </HeadedSection>
+    </div>
   );
 };
-export default SquigglePlayground;
-export function renderSquigglePlaygroundToDom(props: Props) {
-  let parent = document.createElement("div");
-  ReactDOM.render(<SquigglePlayground {...props} />, parent);
-  return parent;
-}
+
+const RunControls: React.FC<{
+  autorunMode: boolean;
+  isRunning: boolean;
+  isStale: boolean;
+  onAutorunModeChange: (value: boolean) => void;
+  run: () => void;
+}> = ({ autorunMode, isRunning, isStale, onAutorunModeChange, run }) => {
+  const CurrentPlayIcon = isRunning ? RefreshIcon : PlayIcon;
+
+  return (
+    <div className="flex space-x-1 items-center">
+      {autorunMode ? null : (
+        <button onClick={run}>
+          <CurrentPlayIcon
+            className={clsx(
+              "w-8 h-8",
+              isRunning && "animate-spin",
+              isStale ? "text-indigo-500" : "text-gray-400"
+            )}
+          />
+        </button>
+      )}
+      <Toggle
+        texts={["Autorun", "Paused"]}
+        icons={[CheckCircleIcon, PauseIcon]}
+        status={autorunMode}
+        onChange={onAutorunModeChange}
+        spinIcon={autorunMode && isRunning}
+      />
+    </div>
+  );
+};
+
+const ShareButton: React.FC = () => {
+  const [isCopied, setIsCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText((window.top || window).location.href);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 1000);
+  };
+  return (
+    <div className="w-36">
+      <Button onClick={copy} wide>
+        {isCopied ? (
+          "Copied to clipboard!"
+        ) : (
+          <div className="flex items-center space-x-1">
+            <ClipboardCopyIcon className="w-4 h-4" />
+            <span>Copy share link</span>
+          </div>
+        )}
+      </Button>
+    </div>
+  );
+};
+
+type PlaygroundContextShape = {
+  getLeftPanelElement: () => HTMLDivElement | undefined;
+};
+export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
+  getLeftPanelElement: () => undefined,
+});
+
+export const SquigglePlayground: FC<PlaygroundProps> = ({
+  defaultCode = "",
+  height = 500,
+  showSummary = false,
+  logX = false,
+  expY = false,
+  title,
+  minX,
+  maxX,
+  color = defaultColor,
+  tickFormat = defaultTickFormat,
+  distributionChartActions,
+  code: controlledCode,
+  onCodeChange,
+  onSettingsChange,
+  showEditor = true,
+  showShareButton = false,
+}) => {
+  const [code, setCode] = useMaybeControlledValue({
+    value: controlledCode,
+    defaultValue: defaultCode,
+    onChange: onCodeChange,
+  });
+
+  const [imports, setImports] = useState({});
+
+  const { register, control } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      sampleCount: 1000,
+      xyPointLength: 1000,
+      chartHeight: 150,
+      logX,
+      expY,
+      title,
+      minX,
+      maxX,
+      color,
+      tickFormat,
+      distributionChartActions,
+      showSummary,
+      showEditor,
+      diagramStart: 0,
+      diagramStop: 10,
+      diagramCount: 20,
+    },
+  });
+  const vars = useWatch({
+    control,
+  });
+
+  useEffect(() => {
+    onSettingsChange?.(vars);
+  }, [vars, onSettingsChange]);
+
+  const env: environment = useMemo(
+    () => ({
+      sampleCount: Number(vars.sampleCount),
+      xyPointLength: Number(vars.xyPointLength),
+    }),
+    [vars.sampleCount, vars.xyPointLength]
+  );
+
+  const {
+    run,
+    autorunMode,
+    setAutorunMode,
+    isRunning,
+    renderedCode,
+    executionId,
+  } = useRunnerState(code);
+
+  const squiggleChart =
+    renderedCode === "" ? null : (
+      <div className="relative">
+        {isRunning ? (
+          <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
+        ) : null}
+        <SquiggleChart
+          code={renderedCode}
+          executionId={executionId}
+          environment={env}
+          {...vars}
+          bindings={defaultBindings}
+          jsImports={imports}
+          enableLocalSettings={true}
+        />
+      </div>
+    );
+
+  const firstTab = vars.showEditor ? (
+    <div className="border border-slate-200">
+      <CodeEditor
+        value={code}
+        onChange={setCode}
+        onSubmit={run}
+        oneLine={false}
+        showGutter={true}
+        height={height - 1}
+      />
+    </div>
+  ) : (
+    squiggleChart
+  );
+
+  const tabs = (
+    <StyledTab.Panels>
+      <StyledTab.Panel>{firstTab}</StyledTab.Panel>
+      <StyledTab.Panel>
+        <SamplingSettings register={register} />
+      </StyledTab.Panel>
+      <StyledTab.Panel>
+        <ViewSettings
+          register={
+            // This is dangerous, but doesn't cause any problems.
+            // I tried to make `ViewSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
+            register as unknown as UseFormRegister<
+              yup.InferType<typeof viewSettingsSchema>
+            >
+          }
+        />
+      </StyledTab.Panel>
+      <StyledTab.Panel>
+        <InputVariablesSettings
+          initialImports={imports}
+          setImports={setImports}
+        />
+      </StyledTab.Panel>
+    </StyledTab.Panels>
+  );
+
+  const leftPanelRef = useRef<HTMLDivElement | null>(null);
+
+  const withEditor = (
+    <div className="flex mt-2">
+      <div
+        className="w-1/2 relative"
+        style={{ minHeight: height }}
+        ref={leftPanelRef}
+      >
+        {tabs}
+      </div>
+      <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
+    </div>
+  );
+
+  const withoutEditor = <div className="mt-3">{tabs}</div>;
+
+  const getLeftPanelElement = useCallback(() => {
+    return leftPanelRef.current ?? undefined;
+  }, []);
+
+  return (
+    <SquiggleContainer>
+      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+        <StyledTab.Group>
+          <div className="pb-4">
+            <div className="flex justify-between items-center">
+              <StyledTab.List>
+                <StyledTab
+                  name={vars.showEditor ? "Code" : "Display"}
+                  icon={vars.showEditor ? CodeIcon : EyeIcon}
+                />
+                <StyledTab name="Sampling Settings" icon={CogIcon} />
+                <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+              </StyledTab.List>
+              <div className="flex space-x-2 items-center">
+                <RunControls
+                  autorunMode={autorunMode}
+                  isStale={renderedCode !== code}
+                  run={run}
+                  isRunning={isRunning}
+                  onAutorunModeChange={setAutorunMode}
+                />
+                {showShareButton && <ShareButton />}
+              </div>
+            </div>
+            {vars.showEditor ? withEditor : withoutEditor}
+          </div>
+        </StyledTab.Group>
+      </PlaygroundContext.Provider>
+    </SquiggleContainer>
+  );
+};

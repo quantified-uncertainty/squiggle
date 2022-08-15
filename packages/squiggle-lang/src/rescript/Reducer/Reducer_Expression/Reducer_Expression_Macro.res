@@ -1,11 +1,11 @@
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface.ExpressionValue
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
 module Result = Belt.Result
 
-type environment = ExpressionValue.environment
+type environment = InternalExpressionValue.environment
 type expression = ExpressionT.expression
-type expressionValue = ExpressionValue.expressionValue
+type internalExpressionValue = InternalExpressionValue.t
 type expressionWithContext = ExpressionWithContext.expressionWithContext
 
 let expandMacroCall = (
@@ -26,7 +26,7 @@ let doMacroCall = (
   bindings: ExpressionT.bindings,
   environment: environment,
   reduceExpression: ExpressionT.reducerFn,
-): result<expressionValue, 'e> =>
+): result<internalExpressionValue, 'e> =>
   expandMacroCall(
     macroExpression,
     bindings,

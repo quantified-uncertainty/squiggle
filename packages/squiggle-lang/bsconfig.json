@@ -20,7 +20,8 @@
   ],
   "suffix": ".bs.js",
   "namespace": true,
-  "bs-dependencies": ["@glennsl/rescript-jest", "bisect_ppx"],
+  "bs-dependencies": ["bisect_ppx"],
+  "bs-dev-dependencies": ["@glennsl/rescript-jest", "rescript-fast-check"],
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",
@@ -30,6 +31,7 @@
       "basic": false
     }
   },
+  "external-stdlib": "@rescript/std",
   "refmt": 3,
   "warnings": {
     "number": "+A-42-48-9-30-4"

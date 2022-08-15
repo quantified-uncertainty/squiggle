@@ -12,11 +12,12 @@ _An estimation language_.
 
 - [Gallery](https://www.squiggle-language.com/docs/Discussions/Gallery)
 - [Squiggle playground](https://squiggle-language.com/playground)
-- [Language basics](https://www.squiggle-language.com/docs/Features/Language)
-- [Squiggle functions source of truth](https://www.squiggle-language.com/docs/Features/Functions)
+- [Language basics](https://www.squiggle-language.com/docs/Guides/Language)
+- [Squiggle functions source of truth](https://www.squiggle-language.com/docs/Guides/Functions)
 - [Known bugs](https://www.squiggle-language.com/docs/Discussions/Bugs)
 - [Original lesswrong sequence](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3)
 - [Author your squiggle models as Observable notebooks](https://observablehq.com/@hazelfire/squiggle)
+- [Use squiggle in VS Code](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
 
 ## Our deployments
 
@@ -39,8 +40,8 @@ the packages can be found in `packages`.
   of the calculation.
 - `packages/website` is the main descriptive website for squiggle,
   it is hosted at `squiggle-language.com`.
-
-The playground depends on the components library which then depends on the language. This means that if you wish to work on the components library, you will need to build (no need to bundle) the language, and as of this writing playground doesn't really work.
+- `packages/vscode-ext` is the VS Code extension for writing estimation functions.
+- `packages/cli` is an experimental way of using imports in squiggle, which is also on [npm](https://www.npmjs.com/package/squiggle-cli-experimental).
 
 # Develop
 

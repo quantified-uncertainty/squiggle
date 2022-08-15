@@ -15,7 +15,7 @@ instead returns bindings that can be used by further Squiggle Editors.
   <Story
     name="Standalone"
     args={{
-      initialSquiggleString: "x = normal(5,2)",
+      defaultCode: "x = normal(5,2)",
     }}
   >
     {Template.bind({})}
@@ -36,12 +36,12 @@ instead returns bindings that can be used by further Squiggle Editors.
         <>
           <SquigglePartial
             {...props}
-            initialSquiggleString={props.initialPartialString}
+            defaultCode={props.initialPartialString}
             onChange={setBindings}
           />
           <SquiggleEditor
             {...props}
-            initialSquiggleString={props.initialEditorString}
+            defaultCode={props.initialEditorString}
             bindings={bindings}
           />
         </>

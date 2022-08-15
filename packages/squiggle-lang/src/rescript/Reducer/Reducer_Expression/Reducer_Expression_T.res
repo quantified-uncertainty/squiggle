@@ -7,38 +7,49 @@
   The act of defining the semantics of a functional language is to write it in terms of Lisp AST.
 */
 module Extra = Reducer_Extra
-module ExpressionValue = ReducerInterface.ExpressionValue
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
-type expressionValue = ExpressionValue.expressionValue
-type environment = ExpressionValue.environment
+type internalExpressionValue = InternalExpressionValue.t
+type environment = ReducerInterface_InternalExpressionValue.environment
 
 type rec expression =
   | EList(list<expression>) // A list to map-reduce
-  | EValue(expressionValue) // Irreducible built-in value. Reducer should not know the internals. External libraries are responsible
-and bindings = Belt.Map.String.t<expressionValue>
+  | EValue(internalExpressionValue) // Irreducible built-in value. Reducer should not know the internals. External libraries are responsible
+and bindings = InternalExpressionValue.nameSpace
 
 type reducerFn = (
   expression,
   bindings,
   environment,
-) => result<expressionValue, Reducer_ErrorValue.errorValue>
+) => result<internalExpressionValue, Reducer_ErrorValue.errorValue>
 
 /*
   Converts the expression to String
 */
 let rec toString = expression =>
   switch expression {
+  | EList(list{EValue(IEvCall("$$_block_$$")), ...statements}) =>
+    `{${Belt.List.map(statements, aValue => toString(aValue))
+      ->Extra.List.intersperse("; ")
+      ->Belt.List.toArray
+      ->Js.String.concatMany("")}}`
   | EList(aList) =>
     `(${Belt.List.map(aList, aValue => toString(aValue))
-      ->Extra.List.interperse(" ")
+      ->Extra.List.intersperse(" ")
       ->Belt.List.toArray
       ->Js.String.concatMany("")})`
-  | EValue(aValue) => ExpressionValue.toString(aValue)
+  | EValue(aValue) => InternalExpressionValue.toString(aValue)
   }
 
 let toStringResult = codeResult =>
   switch codeResult {
   | Ok(a) => `Ok(${toString(a)})`
+  | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
+  }
+
+let toStringResultOkless = codeResult =>
+  switch codeResult {
+  | Ok(a) => toString(a)
   | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
   }
 
@@ -54,3 +65,18 @@ let inspectResult = (r: result<expression, Reducer_ErrorValue.errorValue>): resu
   Js.log(toStringResult(r))
   r
 }
+
+type ffiFn = (
+  array<internalExpressionValue>,
+  environment,
+) => result<internalExpressionValue, Reducer_ErrorValue.errorValue>
+
+type optionFfiFn = (array<internalExpressionValue>, environment) => option<internalExpressionValue>
+type optionFfiFnReturningResult = (
+  array<internalExpressionValue>,
+  environment,
+) => option<result<internalExpressionValue, Reducer_ErrorValue.errorValue>>
+
+type expressionOrFFI =
+  | NotFFI(expression)
+  | FFI(ffiFn)

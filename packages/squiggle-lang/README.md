@@ -13,14 +13,28 @@ For instance, in a javascript project, you can
 yarn add @quri/squiggle-lang
 ```
 
+The `@quri/squiggle-lang` package exports a single function, `run`, which given
+a string of Squiggle code, will execute the code and return any exports and the
+environment created from the squiggle code.
+
 ```js
 import { run } from "@quri/squiggle-lang";
 run(
-  "normal(0, 1) * fromSamples([-3,-2,-1,1,2,3,3,3,4,9]"
+  "normal(0, 1) * SampleSet.fromList([-3, 2,-1,1,2,3,3,3,4,9])"
 ).value.value.toSparkline().value;
 ```
 
 **However, for most use cases you'll prefer to use our [library of react components](https://www.npmjs.com/package/@quri/squiggle-components)**, and let your app transitively depend on `@quri/squiggle-lang`.
+
+`run` has two optional arguments. The first optional argument allows you to set
+sampling settings for Squiggle when representing distributions. The second optional
+argument allows you to pass an environment previously created by another `run`
+call. Passing this environment will mean that all previously declared variables
+in the previous environment will be made available.
+
+The return type of `run` is a bit complicated, and comes from auto generated `js`
+code that comes from rescript. We highly recommend using typescript when using
+this library to help navigate the return type.
 
 # Build for development
 

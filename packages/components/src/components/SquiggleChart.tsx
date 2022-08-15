@@ -1,201 +1,33 @@
 import * as React from "react";
-import _ from "lodash";
-import styled from "styled-components";
 import {
-  run,
-  errorValueToString,
   squiggleExpression,
   bindings,
-  samplingParams,
+  environment,
   jsImports,
   defaultImports,
   defaultBindings,
+  defaultEnvironment,
 } from "@quri/squiggle-lang";
-import { NumberShower } from "./NumberShower";
-import { DistributionChart } from "./DistributionChart";
-import { ErrorBox } from "./ErrorBox";
-
-const variableBox = {
-  Component: styled.div`
-    background: white;
-    border: 1px solid #eee;
-    border-radius: 2px;
-    margin-bottom: 0.4em;
-  `,
-  Heading: styled.div`
-    border-bottom: 1px solid #eee;
-    padding-left: 0.8em;
-    padding-right: 0.8em;
-    padding-top: 0.1em;
-  `,
-  Body: styled.div`
-    padding: 0.4em 0.8em;
-  `,
-};
-
-interface VariableBoxProps {
-  heading: string;
-  children: React.ReactNode;
-  showTypes?: boolean;
-}
-
-export const VariableBox: React.FC<VariableBoxProps> = ({
-  heading = "Error",
-  children,
-  showTypes = false,
-}: VariableBoxProps) => {
-  if (showTypes) {
-    return (
-      <variableBox.Component>
-        <variableBox.Heading>
-          <h3>{heading}</h3>
-        </variableBox.Heading>
-        <variableBox.Body>{children}</variableBox.Body>
-      </variableBox.Component>
-    );
-  } else {
-    return <>{children}</>;
-  }
-};
-
-let RecordKeyHeader = styled.h3``;
-
-export interface SquiggleItemProps {
-  /** The input string for squiggle */
-  expression: squiggleExpression;
-  width?: number;
-  height: number;
-  /** Whether to show type information */
-  showTypes?: boolean;
-  /** Whether to show users graph controls (scale etc) */
-  showControls?: boolean;
-}
-
-const SquiggleItem: React.FC<SquiggleItemProps> = ({
-  expression,
-  width,
-  height,
-  showTypes = false,
-  showControls = false,
-}: SquiggleItemProps) => {
-  switch (expression.tag) {
-    case "number":
-      return (
-        <VariableBox heading="Number" showTypes={showTypes}>
-          <NumberShower precision={3} number={expression.value} />
-        </VariableBox>
-      );
-    case "distribution": {
-      let distType = expression.value.type();
-      return (
-        <VariableBox
-          heading={`Distribution (${distType})`}
-          showTypes={showTypes}
-        >
-          {distType === "Symbolic" && showTypes ? (
-            <>
-              <div>{expression.value.toString()}</div>
-            </>
-          ) : (
-            <></>
-          )}
-          <DistributionChart
-            distribution={expression.value}
-            height={height}
-            width={width}
-            showControls={showControls}
-          />
-        </VariableBox>
-      );
-    }
-    case "string":
-      return (
-        <VariableBox
-          heading="String"
-          showTypes={showTypes}
-        >{`"${expression.value}"`}</VariableBox>
-      );
-    case "boolean":
-      return (
-        <VariableBox heading="Boolean" showTypes={showTypes}>
-          {expression.value.toString()}
-        </VariableBox>
-      );
-    case "symbol":
-      return (
-        <VariableBox heading="Symbol" showTypes={showTypes}>
-          {expression.value}
-        </VariableBox>
-      );
-    case "call":
-      return (
-        <VariableBox heading="Call" showTypes={showTypes}>
-          {expression.value}
-        </VariableBox>
-      );
-    case "array":
-      return (
-        <VariableBox heading="Array" showTypes={showTypes}>
-          {expression.value.map((r) => (
-            <SquiggleItem
-              expression={r}
-              width={width !== undefined ? width - 20 : width}
-              height={50}
-              showTypes={showTypes}
-              showControls={showControls}
-            />
-          ))}
-        </VariableBox>
-      );
-    case "record":
-      return (
-        <VariableBox heading="Record" showTypes={showTypes}>
-          {Object.entries(expression.value).map(([key, r]) => (
-            <>
-              <RecordKeyHeader>{key}</RecordKeyHeader>
-              <SquiggleItem
-                expression={r}
-                width={width !== undefined ? width - 20 : width}
-                height={50}
-                showTypes={showTypes}
-                showControls={showControls}
-              />
-            </>
-          ))}
-        </VariableBox>
-      );
-    case "arraystring":
-      return (
-        <VariableBox heading="Array String" showTypes={showTypes}>
-          {expression.value.map((r) => `"${r}"`)}
-        </VariableBox>
-      );
-    case "lambda":
-      return (
-        <ErrorBox heading="No Viewer">
-          There is no viewer currently available for function types.
-        </ErrorBox>
-      );
-  }
-};
+import { useSquiggle } from "../lib/hooks";
+import { SquiggleViewer } from "./SquiggleViewer";
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
-  squiggleString?: string;
+  code?: string;
+  /** Allows to re-run the code if code hasn't changed */
+  executionId?: number;
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
   /** The amount of points returned to draw the distribution */
-  outputXYPoints?: number;
-  kernelWidth?: number;
-  pointDistLength?: number;
-  /** If the result is a function, where the function starts */
+  environment?: environment;
+  /** If the result is a function, where the function domain starts */
   diagramStart?: number;
-  /** If the result is a function, where the function ends */
+  /** If the result is a function, where the function domain ends */
   diagramStop?: number;
-  /** If the result is a function, how many points along the function it samples */
+  /** If the result is a function, the amount of stops sampled */
   diagramCount?: number;
-  /** When the environment changes */
-  onChange?(expr: squiggleExpression): void;
+  /** When the squiggle code gets reevaluated */
+  onChange?(expr: squiggleExpression | undefined): void;
   /** CSS width of the element */
   width?: number;
   height?: number;
@@ -203,59 +35,90 @@ export interface SquiggleChartProps {
   bindings?: bindings;
   /** JS imported parameters */
   jsImports?: jsImports;
-  /** Whether to show type information about returns, default false */
-  showTypes?: boolean;
-  /** Whether to show graph controls (scale etc)*/
-  showControls?: boolean;
+  /** Whether to show a summary of the distribution */
+  showSummary?: boolean;
+  /** Set the x scale to be logarithmic by deault */
+  logX?: boolean;
+  /** Set the y scale to be exponential by deault */
+  expY?: boolean;
+  /** How to format numbers on the x axis */
+  tickFormat?: string;
+  /** Title of the graphed distribution */
+  title?: string;
+  /** Color of the graphed distribution */
+  color?: string;
+  /** Specify the lower bound of the x scale */
+  minX?: number;
+  /** Specify the upper bound of the x scale */
+  maxX?: number;
+  /** Whether to show vega actions to the user, so they can copy the chart spec */
+  distributionChartActions?: boolean;
+  enableLocalSettings?: boolean;
 }
 
-const ChartWrapper = styled.div`
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-`;
+const defaultOnChange = () => {};
 
-export const SquiggleChart: React.FC<SquiggleChartProps> = ({
-  squiggleString = "",
-  sampleCount = 1000,
-  outputXYPoints = 1000,
-  onChange = () => {},
-  height = 60,
-  bindings = defaultBindings,
-  jsImports = defaultImports,
-  width,
-  showTypes = false,
-  showControls = false,
-}: SquiggleChartProps) => {
-  let samplingInputs: samplingParams = {
-    sampleCount: sampleCount,
-    xyPointLength: outputXYPoints,
-  };
-  let expressionResult = run(
-    squiggleString,
-    bindings,
-    samplingInputs,
-    jsImports
-  );
-  let internal: JSX.Element;
-  if (expressionResult.tag === "Ok") {
-    let expression = expressionResult.value;
-    onChange(expression);
-    internal = (
-      <SquiggleItem
-        expression={expression}
+export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
+  ({
+    code = "",
+    executionId = 0,
+    environment,
+    onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
+    height = 200,
+    bindings = defaultBindings,
+    jsImports = defaultImports,
+    showSummary = false,
+    width,
+    logX = false,
+    expY = false,
+    diagramStart = 0,
+    diagramStop = 10,
+    diagramCount = 20,
+    tickFormat,
+    minX,
+    maxX,
+    color,
+    title,
+    distributionChartActions,
+    enableLocalSettings = false,
+  }) => {
+    const result = useSquiggle({
+      code,
+      bindings,
+      environment,
+      jsImports,
+      onChange,
+      executionId,
+    });
+
+    const distributionPlotSettings = {
+      showSummary,
+      logX,
+      expY,
+      format: tickFormat,
+      minX,
+      maxX,
+      color,
+      title,
+      actions: distributionChartActions,
+    };
+
+    const chartSettings = {
+      start: diagramStart,
+      stop: diagramStop,
+      count: diagramCount,
+    };
+
+    return (
+      <SquiggleViewer
+        result={result}
         width={width}
         height={height}
-        showTypes={showTypes}
-        showControls={showControls}
+        distributionPlotSettings={distributionPlotSettings}
+        chartSettings={chartSettings}
+        environment={environment ?? defaultEnvironment}
+        enableLocalSettings={enableLocalSettings}
       />
     );
-  } else {
-    internal = (
-      <ErrorBox heading={"Parse Error"}>
-        {errorValueToString(expressionResult.value)}
-      </ErrorBox>
-    );
   }
-  return <ChartWrapper>{internal}</ChartWrapper>;
-};
+);

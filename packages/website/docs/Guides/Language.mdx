@@ -1,0 +1,107 @@
+---
+sidebar_position: 1
+title: Language Basics
+---
+
+import { SquiggleEditor } from "../../src/components/SquiggleEditor";
+
+Squiggle supports some simple types and language features.
+
+## Numbers
+
+<SquiggleEditor defaultCode="4.32" />
+
+## Distributions
+
+There are several ways of easily entering distributions. See the [documentation](/docs/Api/Dist/) on distributions for a complete API.
+
+<SquiggleEditor
+  defaultCode={`a = normal(4,2)
+b = 30 to 50
+c = lognormal({mean:90, stdev: 7})
+d = mixture(a,b,c, [.3, .3, .4])
+d`}
+/>
+
+## Lists
+
+Squiggle lists can accept items of any type, similar to those in Python. [API](/docs/Api/List).
+
+<SquiggleEditor
+  defaultCode={`[beta(1,10), 4, isNormalized(SampleSet.fromDist(1 to 2))]`}
+/>
+
+## Dictionaries
+
+Squiggle dictionaries work similarly to Python dictionaries. [API](/docs/Api/Dictionary).
+
+<SquiggleEditor
+  defaultCode={`d = {dist: triangular(0, 1, 2), weight: 0.25}
+d.dist`}
+/>
+
+## Functions
+
+<SquiggleEditor
+  defaultCode={`f(t) = normal(t^2, t^1.2+.01)
+f`}
+/>
+
+## Anonymous Functions
+
+<SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
+
+## Comments
+
+<SquiggleEditor
+  defaultCode={`// This is a single-line comment\n
+/*
+This is a multiple
+-line comment.
+*/
+""
+`}
+/>
+
+## Pipes
+
+Squiggle features [data-first](https://www.javierchavarri.com/data-first-and-data-last-a-comparison/) pipes. Functions in the standard library are organized to make this convenient.
+
+<SquiggleEditor
+  defaultCode={`normal(5,2) |> truncateLeft(3) |> SampleSet.fromDist |> SampleSet.map({|r| r + 10})`}
+/>
+
+## Standard Library
+
+Squiggle features a simple [standard libary](/docs/Api/Dist).
+
+Most functions are namespaced under their respective types to keep functionality distinct. Certain popular functions are usable without their namespaces.
+
+For example,
+
+<SquiggleEditor
+  defaultCode={`a = List.upTo(0, 5000) |> SampleSet.fromList // namespaces required
+b = normal(5,2) // namespace not required
+c = 5 to 10 // namespace not required
+""`}
+/>
+
+## Number Prefixes
+
+Numbers support a few scientific notation prefixes.
+
+| prefix | multiplier |
+| ------ | ---------- |
+| n      | 10^-9      |
+| m      | 10^-3      |
+| k      | 10^3       |
+| M      | 10^6       |
+| B,G    | 10^9       |
+| T      | 10^12      |
+| P      | 10^15      |
+
+<SquiggleEditor
+  defaultCode={`simpleNumber = 4.32k
+distribution = 40M to 50M
+distribution`}
+/>

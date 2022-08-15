@@ -1,4 +1,4 @@
-module ExpressionValue = ReducerInterface.ExpressionValue
+module ExpressionValue = ReducerInterface.ExternalExpressionValue
 
 open Jest
 open Expect
@@ -22,6 +22,16 @@ describe("builtin", () => {
 describe("builtin exception", () => {
   //It's a pity that MathJs does not return error position
   test("MathJs Exception", () =>
-    expectEvalToBe("testZadanga()", "Error(JS Exception: Error: Undefined function testZadanga)")
+    expectEvalToBe("testZadanga(1)", "Error(JS Exception: Error: Undefined function testZadanga)")
   )
+})
+
+describe("error reporting from collection functions", () => {
+  testEval("arr=[1,2,3]; map(arr, {|x| x*2})", "Ok([2,4,6])")
+  testEval(
+    "arr = [normal(3,2)]; map(arr, zarathsuzaWasHere)",
+    "Error(zarathsuzaWasHere is not defined)",
+  )
+  // FIXME: returns "Error(Function not found: map(Array,Symbol))"
+  // Actually this error is correct but not informative
 })

@@ -2,7 +2,7 @@ open Jest
 open Reducer_TestHelpers
 
 describe("Parse ternary operator", () => {
-  testParseToBe("true ? 'YES' : 'NO'", "Ok((:$$block (:$$ternary true 'YES' 'NO')))")
+  testParseToBe("true ? 'YES' : 'NO'", "Ok({(:$$_ternary_$$ true 'YES' 'NO')})")
 })
 
 describe("Evaluate ternary operator", () => {
@@ -10,5 +10,5 @@ describe("Evaluate ternary operator", () => {
   testEvalToBe("false ? 'YES' : 'NO'", "Ok('NO')")
   testEvalToBe("2 > 1 ? 'YES' : 'NO'", "Ok('YES')")
   testEvalToBe("2 <= 1 ? 'YES' : 'NO'", "Ok('NO')")
-  testEvalToBe("1+1 ? 'YES' : 'NO'", "Error(Expected type: Boolean)")
+  testEvalToBe("1+1 ? 'YES' : 'NO'", "Error(Expected type: Boolean but got: )")
 })

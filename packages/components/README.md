@@ -5,6 +5,8 @@
 
 This package contains the react components for squiggle. These can be used either as a library or hosted as a [storybook](https://storybook.js.org/).
 
+The `@quri/squiggle-components` package offers several components and utilities for people who want to embed Squiggle components into websites.
+
 # Usage in a `react` project
 
 For example, in a fresh `create-react-app` project
@@ -18,9 +20,45 @@ Add to `App.js`:
 ```jsx
 import { SquiggleEditor } from "@quri/squiggle-components";
 <SquiggleEditor
-  initialSquiggleString="x = beta($alpha, 10); x + $shift"
+  defaultCode="x = beta($alpha, 10); x + $shift"
   jsImports={{ alpha: 3, shift: 20 }}
 />;
+```
+
+# Usage in a Nextjs project
+
+For now, `squiggle-components` requires the `window` property, so using the package in nextjs requires dynamic loading:
+
+```
+
+import React from "react";
+import { SquiggleChart } from "@quri/squiggle-components";
+
+import dynamic from "next/dynamic";
+
+const SquiggleChart = dynamic(
+  () => import("@quri/squiggle-components").then((mod) => mod.SquiggleChart),
+  {
+    loading: () => <p>Loading...</p>,
+    ssr: false,
+  }
+);
+
+export function DynamicSquiggleChart({ squiggleString }) {
+  if (squiggleString == "") {
+    return null;
+  } else {
+    return (
+        <SquiggleChart
+          defaultCode={squiggleString}
+          width={445}
+          height={200}
+          showSummary={true}
+        />
+    );
+  }
+}
+
 ```
 
 # Build storybook for development

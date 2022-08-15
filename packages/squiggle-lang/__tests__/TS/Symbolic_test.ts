@@ -1,11 +1,10 @@
-import { errorValueToString } from "../../src/js/index";
 import { testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 
 describe("Symbolic mean", () => {
   test("mean(triangular(x,y,z))", () => {
     fc.assert(
-      fc.property(fc.float(), fc.float(), fc.float(), (x, y, z) => {
+      fc.property(fc.integer(), fc.integer(), fc.integer(), (x, y, z) => {
         if (!(x < y && y < z)) {
           try {
             let squiggleResult = testRun(`mean(triangular(${x},${y},${z}))`);

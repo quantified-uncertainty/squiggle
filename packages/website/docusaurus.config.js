@@ -9,8 +9,9 @@ const path = require("path");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "Squiggle (alpha)",
-  tagline: "Estimation language for forecasters",
+  title: "Squiggle",
+  tagline:
+    "A simple programming language for intuitive probabilistic estimation",
   url: "https://squiggle-language.com",
   baseUrl: "/",
   onBrokenLinks: "throw",
@@ -18,28 +19,7 @@ const config = {
   favicon: "img/favicon.ico",
   organizationName: "quantified-uncertainty", // Usually your GitHub org/user name.
   projectName: "squiggle", // Usually your repo name.
-
-  plugins: [
-    () => ({
-      configureWebpack(config, isServer, utils, content) {
-        return {
-          resolve: {
-            alias: {
-              "@quri/squiggle-components": path.resolve(
-                __dirname,
-                "../components/src"
-              ),
-              "@quri/squiggle-lang": path.resolve(
-                __dirname,
-                "../squiggle-lang/src/js"
-              ),
-            },
-          },
-        };
-      },
-    }),
-  ],
-
+  plugins: [],
   presets: [
     [
       "classic",
@@ -60,7 +40,10 @@ const config = {
             "https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/website/",
         },
         theme: {
-          customCss: require.resolve("./src/css/custom.css"),
+          customCss: [
+            require.resolve("./src/css/custom.css"),
+            require.resolve("@quri/squiggle-components/dist/main.css"),
+          ],
         },
       }),
     ],
@@ -71,22 +54,39 @@ const config = {
     ({
       navbar: {
         title: "Squiggle",
+        hideOnScroll: true,
         logo: {
           alt: "Squiggle Logo",
-          src: "img/quri-logo.png",
+          src: "img/squiggle-logo.png",
         },
         items: [
           {
             type: "doc",
-            docId: "Introduction",
+            docId: "Overview",
             position: "left",
             label: "Documentation",
+          },
+          {
+            type: "doc",
+            docId: "Api/Dist",
+            position: "left",
+            label: "API",
           },
           { to: "/blog", label: "Blog", position: "left" },
           { to: "/playground", label: "Playground", position: "left" },
           {
+            href: "https://github.com/quantified-uncertainty/squiggle/discussions",
+            label: "Issues & Discussion",
+            position: "right",
+          },
+          {
             href: "https://github.com/quantified-uncertainty/squiggle",
             label: "GitHub",
+            position: "right",
+          },
+          {
+            href: "https://quantifieduncertainty.org/",
+            label: "QURI",
             position: "right",
           },
         ],

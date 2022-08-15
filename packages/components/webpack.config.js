@@ -10,12 +10,8 @@ module.exports = {
       {
         test: /\.tsx?$/,
         loader: "ts-loader",
-        options: { projectReferences: true, transpileOnly: true },
+        options: { projectReferences: true },
         exclude: /node_modules/,
-      },
-      {
-        test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
       },
     ],
   },
@@ -39,5 +35,19 @@ module.exports = {
     },
     compress: true,
     port: 9000,
+  },
+  externals: {
+    react: {
+      commonjs: "react",
+      commonjs2: "react",
+      amd: "react",
+      root: "React",
+    },
+    "react-dom": {
+      commonjs: "react-dom",
+      commonjs2: "react-dom",
+      amd: "react-dom",
+      root: "ReactDOM",
+    },
   },
 };
