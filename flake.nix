@@ -53,7 +53,7 @@
           };
           # building
           packages = flake-utils.lib.flattenTree {
-            default = website.website;
+            default = website.docusaurus;
             lang-bundle = lang.bundle;
             components = components.package-build;
             storybook = components.site-build;
