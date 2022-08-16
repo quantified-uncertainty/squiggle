@@ -70,9 +70,6 @@
         effects = hercules-ci-effects.lib.withPkgs hciPkgs;
         local = localFlake {
           pkgs = hciPkgs;
-          lang = langFn { pkgs = hciPkgs; };
-          components = componentsFn { pkgs = hciPkgs; };
-          website = websiteFn { pkgs = hciPkgs; };
         };
       in {
         # herc
