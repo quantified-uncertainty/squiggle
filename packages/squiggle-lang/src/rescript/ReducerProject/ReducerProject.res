@@ -275,7 +275,8 @@ let clean = (this: reducerProject, sourceId: string): unit =>
 Cleans all the compilation artifacts in all of the project
 */
 @genType
-let cleanAll = (this: reducerProject): unit => this->T.Private.castToInternalProject->Private.cleanAll
+let cleanAll = (this: reducerProject): unit =>
+  this->T.Private.castToInternalProject->Private.cleanAll
 
 /*
 Cleans results. Compilation stays untouched to be able to re-run the source.
@@ -380,7 +381,10 @@ let runAll = (this: reducerProject): unit => this->T.Private.castToInternalProje
 Get the bindings after running this source file or the project
 */
 @genType
-let getExternalBindings = (this: reducerProject, sourceId: string): ExternalExpressionValue.record =>
+let getExternalBindings = (
+  this: reducerProject,
+  sourceId: string,
+): ExternalExpressionValue.record =>
   this->T.Private.castToInternalProject->Private.getExternalBindings(sourceId)
 
 /*
