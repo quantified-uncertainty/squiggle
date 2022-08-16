@@ -41,8 +41,7 @@ rec {
   };
   lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-lint";
-    src = yarn-source
-      + "/libexec/@quri/squiggle-lang/deps/@quri/squiggle-lang";
+    src = yarn-source + "/libexec/@quri/squiggle-lang/deps/@quri/squiggle-lang";
     buildInputs = common.buildInputs ++ common.prettier;
     buildPhase = ''
       yarn lint:prettier

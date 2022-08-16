@@ -12,29 +12,26 @@ rec {
     };
     packageJsonString = builtins.toJSON modified;
   in pkgs.writeText "packages/website/patched-package.json" packageJsonString;
-  website-yarnPackage = pkgs.mkYarnPackage {
+  yarn-source = pkgs.mkYarnPackage {
     name = "squiggle-website_source";
     src = ../packages/website;
     packageJSON = websitePackageJson;
     yarnLock = ../yarn.lock;
-    packageResolutions."@quri/squiggle-lang" = lang.lang-build;
-    packageResolutions."@quri/squiggle-components" =
-      components.components-package-build;
-    workspaceDependencies =
-      [ lang.lang-yarnPackage components.components-yarnPackage ];
+    packageResolutions."@quri/squiggle-lang" = lang.build;
+    packageResolutions."@quri/squiggle-components" = components.package-build;
+    workspaceDependencies = [ lang.yarn-source components.yarn-source ];
   };
-  website-lint = pkgs.stdenv.mkDerivation {
+  lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-website-lint";
     buildInputs = common.buildInputs ++ common.prettier;
-    src = website-yarnPackage
-      + "/libexec/squiggle-website/deps/squiggle-website";
+    src = yarn-source + "/libexec/squiggle-website/deps/squiggle-website";
     buildPhase = "yarn --offline lint";
     installPhase = "mkdir -p $out";
   };
-  website = pkgs.stdenv.mkDerivation {
+  docusaurus = pkgs.stdenv.mkDerivation {
     name = "squiggle-website";
     buildInputs = common.buildInputs;
-    src = website-yarnPackage + "/libexec/squiggle-website";
+    src = yarn-source + "/libexec/squiggle-website";
     buildPhase = ''
       pushd deps/squiggle-website
       yarn --offline build

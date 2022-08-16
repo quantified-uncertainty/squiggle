@@ -48,16 +48,16 @@
           checks = flake-utils.lib.flattenTree {
             lang-lint = lang.lint;
             lang-test = lang.test;
-            components-lint = components.components-lint;
-            docusaurus-lint = website.website-lint;
+            components-lint = components.lint;
+            docusaurus-lint = website.lint;
           };
           # building
           packages = flake-utils.lib.flattenTree {
             default = website.website;
             lang-bundle = lang.bundle;
-            components = components.components-package-build;
-            storybook = components.components-site-build;
-            docs-site = website.website;
+            components = components.package-build;
+            storybook = components.site-build;
+            docs-site = website.docusaurus;
           };
 
           # developing
@@ -85,13 +85,13 @@
               squiggle-lang-bundle = lang.bundle;
             };
             components.outputs = {
-              squiggle-components = components.components-package-build;
-              squiggle-components-lint = components.components-lint;
-              squiggle-components-storybook = components.components-site-build;
+              squiggle-components = components.package-build;
+              squiggle-components-lint = components.lint;
+              squiggle-components-storybook = components.site-build;
             };
             docs-site.outputs = {
-              squiggle-website = website.website;
-              docusaurus-lint = website.website-lint;
+              squiggle-website = website.docusaurus;
+              docusaurus-lint = website.lint;
             };
           };
         };

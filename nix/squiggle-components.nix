@@ -10,25 +10,25 @@ rec {
     packageJsonString = builtins.toJSON modified;
   in pkgs.writeText "packages/components/patched-package.json"
   packageJsonString;
-  components-yarnPackage = pkgs.mkYarnPackage {
+  yarn-source = pkgs.mkYarnPackage {
     name = "squiggle-components_source";
     buildInputs = common.buildInputs;
     src = ../packages/components;
     packageJSON = componentsPackageJson;
     yarnLock = ../yarn.lock;
-    packageResolutions."@quri/squiggle-lang" = lang.lang-build;
+    packageResolutions."@quri/squiggle-lang" = lang.build;
   };
-  components-lint = pkgs.stdenv.mkDerivation {
+  lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-components-lint";
-    src = components-yarnPackage
+    src = yarn-source
       + "/libexec/@quri/squiggle-components/deps/@quri/squiggle-components";
     buildInputs = common.buildInputs ++ common.prettier;
     buildPhase = "yarn lint";
     installPhase = "mkdir -p $out";
   };
-  components-package-build = pkgs.stdenv.mkDerivation {
+  package-build = pkgs.stdenv.mkDerivation {
     name = "squiggle-components-package-build";
-    src = components-yarnPackage + "/libexec/@quri/squiggle-components";
+    src = yarn-source + "/libexec/@quri/squiggle-components";
     buildInputs = common.buildInputs;
     buildPhase = ''
       cp -r node_modules/@quri/squiggle-lang deps/@quri
@@ -50,9 +50,9 @@ rec {
       cp -r deps/@quri/squiggle-components/. $out
     '';
   };
-  components-site-build = pkgs.stdenv.mkDerivation {
+  site-build = pkgs.stdenv.mkDerivation {
     name = "squiggle-components-storybook";
-    src = components-package-build;
+    src = package-build;
     buildInputs = common.buildInputs;
     buildPhase = "yarn build:storybook";
     installPhase = ''
