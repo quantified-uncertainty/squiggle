@@ -1,6 +1,5 @@
 {
   description = "Squiggle CI";
-  # Derived from https://gitlab.com/Silvers_Gw2/Stats_Frontend/-/blob/cc5d783abd54e95363410592c390ca6925462262/flake.nix
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
@@ -19,7 +18,7 @@
   };
 
   outputs = { self, nixpkgs, gentype, hercules-ci-effects, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         # globals
         hciSystem = "x86_64-linux";
@@ -219,7 +218,7 @@
             mkdir -p $out
 
             # patching .gitignore so flake keeps build artefacts
-            sed -i /\build/d .gitignore
+            sed -i /build/d .gitignore
             sed -i /storybook-static/d .gitignore
           '';
         };
@@ -282,7 +281,7 @@
         };
 
         # herc
-        herculesCI = {
+        herculesCI = flake-utils.lib.flattenTree {
           ciSystems = [ hciSystem ];
           onPush = {
             lang.outputs = {
@@ -315,6 +314,7 @@
               rustup
               pkg-config
               openssl
+              nixfmt
             ];
           };
         };
