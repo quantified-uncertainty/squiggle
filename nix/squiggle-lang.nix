@@ -1,12 +1,13 @@
-{ system, pkgs, common, gentype }:
+{ pkgs, commonFn, gentype }:
 
 rec {
+  common = commonFn pkgs;
   # packages in subrepos
   lang-yarnPackage = pkgs.mkYarnPackage {
     name = "squiggle-lang_source";
-    src = ./packages/squiggle-lang;
-    packageJSON = ./packages/squiggle-lang/package.json;
-    yarnLock = ./yarn.lock;
+    src = ../packages/squiggle-lang;
+    packageJSON = ../packages/squiggle-lang/package.json;
+    yarnLock = ../yarn.lock;
     # extraBuildInputs = prettierCommon;
     pkgConfig = {
       rescript = {
@@ -36,7 +37,7 @@ rec {
         postInstall = ''
           mv gentype.exe ELFLESS-gentype.exe
           cp ${
-            gentype.outputs.defaultPackage."${system}"
+            gentype.outputs.defaultPackage."${pkgs.system}"
           }/GenType.exe gentype.exe
         '';
       };

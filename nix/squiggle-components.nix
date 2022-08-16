@@ -1,8 +1,10 @@
-{ pkgs, common, lang }:
+{ pkgs, commonFn, langFn }:
 
 rec {
+  common = commonFn pkgs;
+  lang = langFn pkgs;
   componentsPackageJson = let
-    raw = pkgs.lib.importJSON ./packages/components/package.json;
+    raw = pkgs.lib.importJSON ../packages/components/package.json;
     modified =
       pkgs.lib.recursiveUpdate raw { dependencies.react-dom = "^18.2.0"; };
     packageJsonString = builtins.toJSON modified;
@@ -11,9 +13,9 @@ rec {
   components-yarnPackage = pkgs.mkYarnPackage {
     name = "squiggle-components_source";
     buildInputs = common.buildInputs;
-    src = ./packages/components;
+    src = ../packages/components;
     packageJSON = componentsPackageJson;
-    yarnLock = ./yarn.lock;
+    yarnLock = ../yarn.lock;
     packageResolutions."@quri/squiggle-lang" = lang.lang-build;
   };
   components-lint = pkgs.stdenv.mkDerivation {

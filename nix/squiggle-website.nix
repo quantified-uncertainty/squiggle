@@ -1,8 +1,11 @@
-{ pkgs, common, lang, components }:
+{ pkgs, commonFn, langFn, componentsFn }:
 
 rec {
+  common = commonFn pkgs;
+  lang = langFn pkgs;
+  components = componentsFn pkgs;
   websitePackageJson = let
-    raw = pkgs.lib.importJSON ./packages/website/package.json;
+    raw = pkgs.lib.importJSON ../packages/website/package.json;
     modified = pkgs.lib.recursiveUpdate raw {
       dependencies.postcss-import = "^14.1.0";
       dependencies.tailwindcss = "^3.1.8";
@@ -11,9 +14,9 @@ rec {
   in pkgs.writeText "packages/website/patched-package.json" packageJsonString;
   website-yarnPackage = pkgs.mkYarnPackage {
     name = "squiggle-website_source";
-    src = ./packages/website;
+    src = ../packages/website;
     packageJSON = websitePackageJson;
-    yarnLock = ./yarn.lock;
+    yarnLock = ../yarn.lock;
     packageResolutions."@quri/squiggle-lang" = lang.lang-build;
     packageResolutions."@quri/squiggle-components" =
       components.components-package-build;

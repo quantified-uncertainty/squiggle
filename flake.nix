@@ -18,10 +18,91 @@
   };
 
   outputs = { self, nixpkgs, gentype, hercules-ci-effects, flake-utils, ... }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
+    let
+      commonFn = pkgs: {
+        buildInputs = with pkgs; [ nodejs yarn ];
+        prettier = with pkgs.nodePackages; [ prettier ];
+        which = [ pkgs.which ];
+      };
+      langFn = { pkgs, ... }:
+        import ./nix/squiggle-lang.nix { inherit pkgs commonFn gentype; };
+      componentsFn = { pkgs, ... }:
+        import ./nix/squiggle-components.nix { inherit pkgs commonFn langFn; };
+      websiteFn = { pkgs, ... }:
+        import ./nix/squiggle-website.nix {
+          inherit pkgs commonFn langFn componentsFn;
+        };
+
+      # local machines
+      localFlake = { pkgs }:
+        let
+          lang = langFn pkgs;
+          components = componentsFn pkgs;
+          website = websiteFn pkgs;
+        in {
+          # validating
+          checks = flake-utils.lib.flattenTree {
+            lang-lint = lang.lang-lint;
+            lang-test = lang.lang-test;
+            components-lint = components.components-lint;
+            docusaurus-lint = website.website-lint;
+          };
+          # building
+          packages = flake-utils.lib.flattenTree {
+            default = website.website;
+            lang-build = lang.lang-build;
+            lang-bundle = lang.lang-bundle;
+            components = components.components-package-build;
+            storybook = components.components-site-build;
+            docs-site = website.website;
+          };
+
+          # developing
+          devShells = flake-utils.lib.flattenTree {
+            default = (import ./nix/shell.nix { inherit pkgs; }).shell;
+          };
+        };
+
+      # ci
+      herc = let
+        hciSystem = "x86_64-linux";
+        hciPkgs = import nixpkgs { system = hciSystem; };
+        effects = hercules-ci-effects.lib.withPkgs hciPkgs;
+        local = localFlake {
+          pkgs = hciPkgs;
+          lang = langFn { pkgs = hciPkgs; };
+          components = componentsFn { pkgs = hciPkgs; };
+          website = websiteFn { pkgs = hciPkgs; };
+        };
+      in {
+        # herc
+        herculesCI = {
+          ciSystems = [ hciSystem ];
+          onPush = {
+            lang.outputs = {
+              squiggle-lang-lint = local.checks.${hciSystem}.lang-lint;
+              squiggle-lang-test = local.checks.${hciSystem}.lang-test;
+              # squiggle-lang-build = lang.lang-build;
+              squiggle-lang-bundle = local.packages.${hciSystem}.lang-bundle;
+            };
+            components.outputs = {
+              squiggle-components = local.packages.${hciSystem}.components;
+              squiggle-components-lint =
+                local.checks.${hciSystem}.components-lint;
+              squiggle-components-storybook =
+                local.packages.${hciSystem}.storybook;
+            };
+            docs-site.outputs = {
+              squiggle-website = local.packages.${hciSystem}.docs-site;
+              docusaurus-lint = local.checks.${hciSystem}.docusaurus-lint;
+            };
+          };
+        };
+
+      };
+    in flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         # globals
-        hciSystem = "x86_64-linux";
         pkgs = import nixpkgs {
           system = system;
           overlays = [
@@ -32,65 +113,6 @@
             })
           ];
         };
-        hciPkgs = import nixpkgs { system = hciSystem; };
-        effects = hercules-ci-effects.lib.withPkgs hciPkgs;
 
-        common = {
-          buildInputs = with pkgs; [ nodejs yarn ];
-          prettier = with pkgs.nodePackages; [ prettier ];
-          which = [ pkgs.which ];
-        };
-        lang = import ./nix/squiggle-lang.nix {
-          inherit system pkgs common gentype;
-        };
-        components =
-          import ./nix/squiggle-components.nix { inherit pkgs common lang; };
-        website = import ./nix/squiggle-website.nix {
-          inherit pkgs common lang components;
-        };
-
-      in rec {
-
-        checks = flake-utils.lib.flattenTree {
-          lang-lint = lang.lang-lint;
-          lang-test = lang.lang-test;
-          components-lint = components.components-lint;
-          docusaurus-lint = website.website-lint;
-        };
-        packages = flake-utils.lib.flattenTree {
-          default = website.website;
-          lang-bundle = lang.lang-bundle;
-          components = components.components-package-build;
-          storybook = components.components-site-build;
-          docs-site = website.website;
-        };
-
-        # nix develop
-        devShells = flake-utils.lib.flattenTree {
-          default = (import ./nix/shell.nix { inherit pkgs; }).shell;
-        };
-
-        # herc
-        herculesCI = flake-utils.lib.flattenTree {
-          ciSystems = [ hciSystem ];
-          onPush = {
-            lang.outputs = {
-              squiggle-lang-lint = checks.${hciSystem}.lang-lint;
-              squiggle-lang-test = checks.${hciSystem}.lang-test;
-              squiggle-lang-build = lang.lang-build;
-              squiggle-lang-bundle = packages.${hciSystem}.lang-bundle;
-            };
-            components.outputs = {
-              squiggle-components = packages.${hciSystem}.components;
-              squiggle-components-lint = checks.${hciSystem}.components-lint;
-              squiggle-components-storybook = packages.${hciSystem}.storybook;
-            };
-            docs-site.outputs = {
-              squiggle-website = packages.${hciSystem}.docs-site;
-              docusaurus-lint = checks.${hciSystem}.docusaurus-lint;
-            };
-          };
-        };
-
-      });
+      in (localFlake { inherit pkgs; } )) // herc;
 }

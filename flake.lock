@@ -15,18 +15,34 @@
         "type": "github"
       }
     },
+    "flake-utils_2": {
+      "locked": {
+        "lastModified": 1659877975,
+        "narHash": "sha256-zllb8aq3YO3h8B/U0/J1WBgAL8EX5yWf5pMj3G0NAmc=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "c0e246b9b83f637f4681389ecabcb2681b4f3af0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "gentype": {
       "inputs": {
+        "flake-utils": "flake-utils_2",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1660002716,
-        "narHash": "sha256-Ig7Dt7d33nNCNlqRGc45uEJTXLRmpCeHrYNOd1AdObc=",
+        "lastModified": 1660628617,
+        "narHash": "sha256-swFuey10pJV/TFcPv9pMf9xuXf/BDuJ1xzZ57jpfkrA=",
         "owner": "quinn-dougherty",
         "repo": "genType",
-        "rev": "c7291db6465ac62800a49bacbe94ce4eb4abcbe0",
+        "rev": "e4374399178976de0c4fc41f64dde913c3bed5dd",
         "type": "github"
       },
       "original": {
