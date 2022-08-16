@@ -287,34 +287,37 @@
         };
 
         # herc
-        herculesCI.onPush = {
-          lang.outputs = {
-            squiggle-lang-lint = checks.${hciSystem}.lang-lint;
-            squiggle-lang-test = checks.${hciSystem}.lang-test;
-            squiggle-lang-build = lang-build;
-            squiggle-lang-bundle = packages.${hciSystem}.lang-bundle;
+        herculesCI = {
+          ciSystems = [ hciSystem ];
+          onPush = {
+            lang.outputs = {
+              squiggle-lang-lint = checks.${hciSystem}.lang-lint;
+              squiggle-lang-test = checks.${hciSystem}.lang-test;
+              squiggle-lang-build = lang-build;
+              squiggle-lang-bundle = packages.${hciSystem}.lang-bundle;
+            };
+            components.outputs = {
+              squiggle-components = packages.${hciSystem}.components;
+              squiggle-components-lint = checks.${hciSystem}.components-lint;
+              squiggle-components-storybook = packages.${hciSystem}.storybook;
+            };
+            docs-site.outputs = {
+              squiggle-website = packages.${hciSystem}.docs-site;
+              docusaurus-lint = checks.${hciSystem}.docusaurus-lint;
+            };
           };
-          components.outputs = {
-            squiggle-components = packages.${hciSystem}.components;
-            squiggle-components-lint = checks.${hciSystem}.components-lint;
-            squiggle-components-storybook = packages.${hciSystem}.storybook;
+          devShells.${system}.default = pkgs.mkShell {
+            name = "squiggle-wasm-development-shell";
+            buildInputs = with pkgs; [
+              wasm-pack
+              cargo
+              cargo-generate
+              yarn
+              rustup
+              pkg-config
+              openssl
+            ];
           };
-          docs-site.outputs = {
-            squiggle-website = packages.${hciSystem}.docs-site;
-            docusaurus-lint = checks.${hciSystem}.docusaurus-lint;
-          };
-        };
-        devShells.${system}.default = pkgs.mkShell {
-          name = "squiggle-wasm-development-shell";
-          buildInputs = with pkgs; [
-            wasm-pack
-            cargo
-            cargo-generate
-            yarn
-            rustup
-            pkg-config
-            openssl
-          ];
         };
       });
 }
