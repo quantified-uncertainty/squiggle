@@ -279,11 +279,6 @@
           components = components-package-build;
           storybook = components-site-build;
           docs-site = website;
-          # tmp = {
-          #   lang-build = lang-build;
-          #   components-yarnPkg = components-yarnPackage;
-          #   components-lint = components-lint;
-          # };
         };
 
         # herc
@@ -306,7 +301,11 @@
               docusaurus-lint = checks.${hciSystem}.docusaurus-lint;
             };
           };
-          devShells.${system}.default = pkgs.mkShell {
+        };
+
+        # nix develop
+        devShells = flake-utils.lib.flattenTree {
+          default = pkgs.mkShell {
             name = "squiggle-wasm-development-shell";
             buildInputs = with pkgs; [
               wasm-pack
