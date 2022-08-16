@@ -9,7 +9,7 @@ open Expect.Operators
 
 describe("ReducerProject Tutorial", () => {
   describe("Single source", () => {
-    /*
+/*
 Case "Running a single source". 
 */
     test("run", () => {
@@ -94,3 +94,16 @@ Case "Running a single source".
     })
   })
 })
+
+//TODO multiple sources
+//TODO multiple sources with includes. Introduction to includes
+//TODO multiple sources with multi level includes. Cycle detection
+//TODO 
+//TODO: Implement a runOrder consideration - clean results based on run order.
+//TODO: runOrder vs setSource/touchSource
+//TODO: Advanced details: (below)
+//TODO  runOrder. includes vs continues. Run order based reexecution
+//TODO: dependents and reexecution
+//TODO: dependencies and reexecution
+//TODO: cleanAllResults clean
+//TODO: cleanAll clean 
