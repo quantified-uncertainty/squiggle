@@ -50,7 +50,6 @@
           # building
           packages = flake-utils.lib.flattenTree {
             default = website.website;
-            lang-build = lang.lang-build;
             lang-bundle = lang.lang-bundle;
             components = components.components-package-build;
             storybook = components.components-site-build;
@@ -68,30 +67,30 @@
         hciSystem = "x86_64-linux";
         hciPkgs = import nixpkgs { system = hciSystem; };
         effects = hercules-ci-effects.lib.withPkgs hciPkgs;
-        local = localFlake {
-          pkgs = hciPkgs;
-        };
+        lang = langFn hciPkgs;
+        components = componentsFn hciPkgs;
+        website = websiteFn hciPkgs;
       in {
         # herc
         herculesCI = {
           ciSystems = [ hciSystem ];
           onPush = {
             lang.outputs = {
-              squiggle-lang-lint = local.checks.${hciSystem}.lang-lint;
-              squiggle-lang-test = local.checks.${hciSystem}.lang-test;
-              # squiggle-lang-build = lang.lang-build;
-              squiggle-lang-bundle = local.packages.${hciSystem}.lang-bundle;
+              squiggle-lang-lint = lang.lang-lint;
+              squiggle-lang-build = lang.lang-build;
+              squiggle-lang-test = lang.lang-test;
+              squiggle-lang-bundle = lang.lang-bundle;
             };
             components.outputs = {
-              squiggle-components = local.packages.${hciSystem}.components;
+              squiggle-components = components.components-package-build;
               squiggle-components-lint =
-                local.checks.${hciSystem}.components-lint;
+                components.components-lint;
               squiggle-components-storybook =
-                local.packages.${hciSystem}.storybook;
+                components.storybook;
             };
             docs-site.outputs = {
-              squiggle-website = local.packages.${hciSystem}.docs-site;
-              docusaurus-lint = local.checks.${hciSystem}.docusaurus-lint;
+              squiggle-website = website.website;
+              docusaurus-lint = website.docusaurus-lint;
             };
           };
         };
