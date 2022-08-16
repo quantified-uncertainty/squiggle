@@ -1,10 +1,9 @@
 module ErrorValue = Reducer_ErrorValue
-module ExternalExpressionValue = ReducerInterface_ExternalExpressionValue
 module Extra_Array = Reducer_Extra_Array
-type internalCode = ExternalExpressionValue.internalCode
-type environment = ExternalExpressionValue.environment
+type internalCode = ReducerInterface_ExternalExpressionValue.internalCode
+type environment = ReducerInterface_ExternalExpressionValue.environment
 
-let defaultEnvironment = ExternalExpressionValue.defaultEnvironment
+let defaultEnvironment = ReducerInterface_ExternalExpressionValue.defaultEnvironment
 
 type rec t =
   | IEvArray(array<t>) // FIXME: Convert to MapInt
@@ -39,19 +38,19 @@ type functionCall = (string, array<t>)
 
 module Internal = {
   module NameSpace = {
-    external castNameSpaceToHidden: nameSpace => ExternalExpressionValue.hiddenNameSpace =
+    external castNameSpaceToHidden: nameSpace => ReducerInterface_ExternalExpressionValue.hiddenNameSpace =
       "%identity"
-    external castHiddenToNameSpace: ExternalExpressionValue.hiddenNameSpace => nameSpace =
+    external castHiddenToNameSpace: ReducerInterface_ExternalExpressionValue.hiddenNameSpace => nameSpace =
       "%identity"
   }
   module Lambda = {
-    let toInternal = (v: ExternalExpressionValue.lambdaValue): lambdaValue => {
+    let toInternal = (v: ReducerInterface_ExternalExpressionValue.lambdaValue): lambdaValue => {
       let p = v.parameters
       let c = v.context->NameSpace.castHiddenToNameSpace
       let b = v.body
       {parameters: p, context: c, body: b}
     }
-    and toExternal = (v: lambdaValue): ExternalExpressionValue.lambdaValue => {
+    and toExternal = (v: lambdaValue): ReducerInterface_ExternalExpressionValue.lambdaValue => {
       let p = v.parameters
       let c = v.context->NameSpace.castNameSpaceToHidden
       let b = v.body
@@ -146,7 +145,7 @@ let toStringResultOkless = (codeResult: result<t, ErrorValue.errorValue>): strin
 
 let toStringResultRecord = x =>
   switch x {
-  | Ok(a) => `Ok(${ExternalExpressionValue.toStringRecord(a)})`
+  | Ok(a) => `Ok(${ReducerInterface_ExternalExpressionValue.toStringRecord(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
@@ -194,7 +193,7 @@ let valueToValueType = value =>
   | IEvVoid => EvtVoid
   }
 
-let externalValueToValueType = (value: ExternalExpressionValue.t) =>
+let externalValueToValueType = (value: ReducerInterface_ExternalExpressionValue.t) =>
   switch value {
   | EvArray(_) => EvtArray
   | EvArrayString(_) => EvtArrayString
@@ -246,7 +245,7 @@ let functionCallSignatureToString = (functionCallSignature: functionCallSignatur
   `${fn}(${args->Js.Array2.map(valueTypeToString)->Js.Array2.toString})`
 }
 
-let rec toExternal = (iev: t): ExternalExpressionValue.t => {
+let rec toExternal = (iev: t): ReducerInterface_ExternalExpressionValue.t => {
   switch iev {
   | IEvArray(v) => v->Belt.Array.map(e => toExternal(e))->EvArray
   | IEvArrayString(v) => EvArrayString(v)
@@ -281,7 +280,7 @@ and nameSpaceToTypeScriptBindings = (
   Belt.Map.String.map(container, e => toExternal(e))->Belt.Map.String.toArray->Js.Dict.fromArray
 }
 
-let rec toInternal = (ev: ExternalExpressionValue.t): t => {
+let rec toInternal = (ev: ReducerInterface_ExternalExpressionValue.t): t => {
   switch ev {
   | EvArray(v) => v->Belt.Array.map(e => toInternal(e))->IEvArray
   | EvArrayString(v) => IEvArrayString(v)

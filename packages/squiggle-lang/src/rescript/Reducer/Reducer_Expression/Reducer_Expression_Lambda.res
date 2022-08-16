@@ -95,7 +95,7 @@ let foreignFunctionInterface = (
   argArray: array<internalExpressionValue>,
   accessors: ProjectAccessorsT.t,
   reducer: ProjectReducerFnT.t,
-): result<internalExpressionValue, 'e> => {
+): result<internalExpressionValue, Reducer_ErrorValue.errorValue> => {
   let args = argArray->Belt.List.fromArray
   applyParametersToLambda(lambdaValue, args, accessors, reducer)
 }

@@ -232,7 +232,7 @@ A project has a public field tag with a constant value "reducerProject"
 project = {tag: "reducerProject"}
 */
 @genType
-let createProject = (): t => Private.createProject()->T.Private.castFromInternalProject
+let createProject = (): reducerProject => Private.createProject()->T.Private.castFromInternalProject
 
 /*
 Answer all the source ids of all the sources in the project.
