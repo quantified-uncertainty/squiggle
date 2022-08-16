@@ -26,175 +26,175 @@ module Private = {
   let getRunOrderFor = Topology.getRunOrderFor
 
   let createProject = () => {
-    let this: t = {
+    let project: t = {
       "tag": "reducerProject",
       "items": Belt.Map.String.empty,
       "stdLib": ReducerInterface_StdLib.internalStdLib,
       "environment": InternalExpressionValue.defaultEnvironment,
     }
-    this
+    project
   }
 
-  let rec touchSource = (this: t, sourceId: string): unit => {
-    let item = this->getItem(sourceId)
+  let rec touchSource = (project: t, sourceId: string): unit => {
+    let item = project->getItem(sourceId)
     let newItem = ProjectItem.touchSource(item)
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
-    touchDependents(this, sourceId)
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
+    touchDependents(project, sourceId)
   }
-  and touchDependents = (this: t, sourceId: string): unit => {
-    let _ = getDependents(this, sourceId)->Belt.Array.forEach(_, touchSource(this, _))
-  }
-
-  let getSource = (this: t, sourceId: string): option<string> =>
-    Belt.Map.String.get(this["items"], sourceId)->Belt.Option.map(ProjectItem.getSource)
-
-  let setSource = (this: t, sourceId: string, value: string): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.setSource(value)
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
-    touchDependents(this, sourceId)
+  and touchDependents = (project: t, sourceId: string): unit => {
+    let _ = getDependents(project, sourceId)->Belt.Array.forEach(_, touchSource(project, _))
   }
 
-  let clean = (this: t, sourceId: string): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.clean
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
+  let getSource = (project: t, sourceId: string): option<string> =>
+    Belt.Map.String.get(project["items"], sourceId)->Belt.Option.map(ProjectItem.getSource)
+
+  let setSource = (project: t, sourceId: string, value: string): unit => {
+    let newItem = project->getItem(sourceId)->ProjectItem.setSource(value)
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
+    touchDependents(project, sourceId)
   }
 
-  let cleanAll = (this: t): unit =>
-    getSourceIds(this)->Belt.Array.forEach(sourceId => clean(this, sourceId))
-
-  let cleanResults = (this: t, sourceId: string): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.cleanResults
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
+  let clean = (project: t, sourceId: string): unit => {
+    let newItem = project->getItem(sourceId)->ProjectItem.clean
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
   }
 
-  let cleanAllResults = (this: t): unit =>
-    getSourceIds(this)->Belt.Array.forEach(sourceId => cleanResults(this, sourceId))
+  let cleanAll = (project: t): unit =>
+    getSourceIds(project)->Belt.Array.forEach(sourceId => clean(project, sourceId))
 
-  let getIncludes = (this: t, sourceId: string): ProjectItem.T.includesType =>
-    this->getItem(sourceId)->ProjectItem.getIncludes
-
-  let setContinues = (this: t, sourceId: string, continues: array<string>): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.setContinues(continues)
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
-    touchSource(this, sourceId)
-  }
-  let getContinues = (this: t, sourceId: string): array<string> =>
-    ProjectItem.getContinues(this->getItem(sourceId))
-
-  let removeContinues = (this: t, sourceId: string): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.removeContinues
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
-    touchSource(this, sourceId)
+  let cleanResults = (project: t, sourceId: string): unit => {
+    let newItem = project->getItem(sourceId)->ProjectItem.cleanResults
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
   }
 
-  let getContinuation = (this: t, sourceId: string): ProjectItem.T.continuationArgumentType =>
-    this->getItem(sourceId)->ProjectItem.getContinuation
+  let cleanAllResults = (project: t): unit =>
+    getSourceIds(project)->Belt.Array.forEach(sourceId => cleanResults(project, sourceId))
+
+  let getIncludes = (project: t, sourceId: string): ProjectItem.T.includesType =>
+    project->getItem(sourceId)->ProjectItem.getIncludes
+
+  let setContinues = (project: t, sourceId: string, continues: array<string>): unit => {
+    let newItem = project->getItem(sourceId)->ProjectItem.setContinues(continues)
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
+    touchSource(project, sourceId)
+  }
+  let getContinues = (project: t, sourceId: string): array<string> =>
+    ProjectItem.getContinues(project->getItem(sourceId))
+
+  let removeContinues = (project: t, sourceId: string): unit => {
+    let newItem = project->getItem(sourceId)->ProjectItem.removeContinues
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
+    touchSource(project, sourceId)
+  }
+
+  let getContinuation = (project: t, sourceId: string): ProjectItem.T.continuationArgumentType =>
+    project->getItem(sourceId)->ProjectItem.getContinuation
 
   let setContinuation = (
-    this: t,
+    project: t,
     sourceId: string,
     continuation: ProjectItem.T.continuationArgumentType,
   ): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.setContinuation(continuation)
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
+    let newItem = project->getItem(sourceId)->ProjectItem.setContinuation(continuation)
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
   }
 
-  let getResult = (this: t, sourceId: string): ProjectItem.T.resultType =>
-    this->getItem(sourceId)->ProjectItem.getResult
+  let getResult = (project: t, sourceId: string): ProjectItem.T.resultType =>
+    project->getItem(sourceId)->ProjectItem.getResult
 
-  let setResult = (this: t, sourceId: string, value: ProjectItem.T.resultArgumentType): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.setResult(value)
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
+  let setResult = (project: t, sourceId: string, value: ProjectItem.T.resultArgumentType): unit => {
+    let newItem = project->getItem(sourceId)->ProjectItem.setResult(value)
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
   }
 
-  let getExternalResult = (this: t, sourceId: string): ProjectItem.T.externalResultType =>
-    this->getItem(sourceId)->ProjectItem.getExternalResult
+  let getExternalResult = (project: t, sourceId: string): ProjectItem.T.externalResultType =>
+    project->getItem(sourceId)->ProjectItem.getExternalResult
 
-  let parseIncludes = (this: t, sourceId: string): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.parseIncludes
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
+  let parseIncludes = (project: t, sourceId: string): unit => {
+    let newItem = project->getItem(sourceId)->ProjectItem.parseIncludes
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
   }
 
-  let rawParse = (this: t, sourceId): unit => {
-    let newItem = this->getItem(sourceId)->ProjectItem.rawParse
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
+  let rawParse = (project: t, sourceId): unit => {
+    let newItem = project->getItem(sourceId)->ProjectItem.rawParse
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
   }
 
-  let getStdLib = (this: t): Reducer_Bindings.t => this["stdLib"]
-  let setStdLib = (this: t, value: Reducer_Bindings.t): unit =>
-    T.Private.setFieldStdLib(this, value)
+  let getStdLib = (project: t): Reducer_Bindings.t => project["stdLib"]
+  let setStdLib = (project: t, value: Reducer_Bindings.t): unit =>
+    T.Private.setFieldStdLib(project, value)
 
-  let getEnvironment = (this: t): InternalExpressionValue.environment => this["environment"]
-  let setEnvironment = (this: t, value: InternalExpressionValue.environment): unit =>
-    T.Private.setFieldEnvironment(this, value)
+  let getEnvironment = (project: t): InternalExpressionValue.environment => project["environment"]
+  let setEnvironment = (project: t, value: InternalExpressionValue.environment): unit =>
+    T.Private.setFieldEnvironment(project, value)
 
   let getExternalBindings = (
-    this: t,
+    project: t,
     sourceId: string,
   ): ProjectItem.T.externalBindingsArgumentType => {
-    let those = this->getContinuation(sourceId)
-    let these = this->getStdLib
+    let those = project->getContinuation(sourceId)
+    let these = project->getStdLib
     let ofUser = Continuation.minus(those, these)
     ofUser->InternalExpressionValue.nameSpaceToTypeScriptBindings
   }
 
-  let buildProjectAccessors = (this: t): ProjectAccessorsT.t => {
+  let buildProjectAccessors = (project: t): ProjectAccessorsT.t => {
     states: {continuation: Bindings.emptyBindings},
-    stdLib: getStdLib(this),
-    environment: getEnvironment(this),
+    stdLib: getStdLib(project),
+    environment: getEnvironment(project),
   }
 
   let doRunWithContinuation = (
-    this: t,
+    project: t,
     sourceId: string,
     continuation: ProjectItem.T.continuation,
   ): unit => {
-    let accessors = buildProjectAccessors(this)
+    let accessors = buildProjectAccessors(project)
     let states = accessors.states
-    let newItem = this->getItem(sourceId)->ProjectItem.run(continuation, accessors)
-    Belt.Map.String.set(this["items"], sourceId, newItem)->T.Private.setFieldItems(this, _)
-    setContinuation(this, sourceId, states.continuation)
+    let newItem = project->getItem(sourceId)->ProjectItem.run(continuation, accessors)
+    Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
+    setContinuation(project, sourceId, states.continuation)
   }
 
   type runState = (ProjectItem.T.resultArgumentType, ProjectItem.T.continuation)
 
   let tryRunWithContinuation = (
-    this: t,
+    project: t,
     sourceId: string,
     (rPrevResult: ProjectItem.T.resultArgumentType, continuation: ProjectItem.T.continuation),
   ): (ProjectItem.T.resultArgumentType, ProjectItem.T.continuation) => {
-    switch getResult(this, sourceId) {
-    | Some(result) => (result, getContinuation(this, sourceId)) // already ran
+    switch getResult(project, sourceId) {
+    | Some(result) => (result, getContinuation(project, sourceId)) // already ran
     | None =>
       switch rPrevResult {
       | Error(error) => {
-          setResult(this, sourceId, Error(error))
+          setResult(project, sourceId, Error(error))
           (Error(error), continuation)
         }
       | Ok(_prevResult) => {
-          doRunWithContinuation(this, sourceId, continuation)
+          doRunWithContinuation(project, sourceId, continuation)
           (
-            getResult(this, sourceId)->Belt.Option.getWithDefault(rPrevResult),
-            getContinuation(this, sourceId),
+            getResult(project, sourceId)->Belt.Option.getWithDefault(rPrevResult),
+            getContinuation(project, sourceId),
           )
         }
       }
     }
   }
 
-  let runAll = (this: t): unit => {
-    let runOrder = Topology.getRunOrder(this)
-    let initialState = (Ok(InternalExpressionValue.IEvVoid), getStdLib(this))
+  let runAll = (project: t): unit => {
+    let runOrder = Topology.getRunOrder(project)
+    let initialState = (Ok(InternalExpressionValue.IEvVoid), getStdLib(project))
     let _finalState = Belt.Array.reduce(runOrder, initialState, (currState, currId) =>
-      tryRunWithContinuation(this, currId, currState)
+      tryRunWithContinuation(project, currId, currState)
     )
   }
 
-  let run = (this: t, sourceId: string): unit => {
-    let runOrder = Topology.getRunOrderFor(this, sourceId)
-    let initialState = (Ok(InternalExpressionValue.IEvVoid), getStdLib(this))
+  let run = (project: t, sourceId: string): unit => {
+    let runOrder = Topology.getRunOrderFor(project, sourceId)
+    let initialState = (Ok(InternalExpressionValue.IEvVoid), getStdLib(project))
     let _finalState = Belt.Array.reduce(runOrder, initialState, (currState, currId) =>
-      tryRunWithContinuation(this, currId, currState)
+      tryRunWithContinuation(project, currId, currState)
     )
   }
 
@@ -239,29 +239,29 @@ let createProject = (): reducerProject => Private.createProject()->T.Private.cas
 Answer all the source ids of all the sources in the project.
 */
 @genType
-let getSourceIds = (this: reducerProject): array<string> =>
-  this->T.Private.castToInternalProject->Private.getSourceIds
+let getSourceIds = (project: reducerProject): array<string> =>
+  project->T.Private.castToInternalProject->Private.getSourceIds
 
 /*
 Sets the source for a given source Id.
 */
 @genType
-let setSource = (this: reducerProject, sourceId: string, value: string): unit =>
-  this->T.Private.castToInternalProject->Private.setSource(sourceId, value)
+let setSource = (project: reducerProject, sourceId: string, value: string): unit =>
+  project->T.Private.castToInternalProject->Private.setSource(sourceId, value)
 
 /*
 Gets the source for a given source id.
 */
 @genType
-let getSource = (this: reducerProject, sourceId: string): option<string> =>
-  this->T.Private.castToInternalProject->Private.getSource(sourceId)
+let getSource = (project: reducerProject, sourceId: string): option<string> =>
+  project->T.Private.castToInternalProject->Private.getSource(sourceId)
 
 /*
 Touches the source for a given source id. This and dependent, sources are set to be re-evaluated.
 */
 @genType
-let touchSource = (this: reducerProject, sourceId: string): unit =>
-  this->T.Private.castToInternalProject->Private.touchSource(sourceId)
+let touchSource = (project: reducerProject, sourceId: string): unit =>
+  project->T.Private.castToInternalProject->Private.touchSource(sourceId)
 
 /*
 Cleans the compilation artifacts for a given source ID. The results stay untouched, so compilation won't be run again.
@@ -269,46 +269,46 @@ Cleans the compilation artifacts for a given source ID. The results stay untouch
 Normally, you would never need the compilation artifacts again as the results with the same sources would never change. However, they are needed in case of any debugging reruns
 */
 @genType
-let clean = (this: reducerProject, sourceId: string): unit =>
-  this->T.Private.castToInternalProject->Private.clean(sourceId)
+let clean = (project: reducerProject, sourceId: string): unit =>
+  project->T.Private.castToInternalProject->Private.clean(sourceId)
 
 /*
 Cleans all the compilation artifacts in all of the project
 */
 @genType
-let cleanAll = (this: reducerProject): unit =>
-  this->T.Private.castToInternalProject->Private.cleanAll
+let cleanAll = (project: reducerProject): unit =>
+  project->T.Private.castToInternalProject->Private.cleanAll
 
 /*
 Cleans results. Compilation stays untouched to be able to re-run the source.
 You would not do this if you were not trying to debug the source code.
 */
 @genType
-let cleanResults = (this: reducerProject, sourceId: string): unit =>
-  this->T.Private.castToInternalProject->Private.cleanResults(sourceId)
+let cleanResults = (project: reducerProject, sourceId: string): unit =>
+  project->T.Private.castToInternalProject->Private.cleanResults(sourceId)
 
 /*
 Cleans all results. Compilations remains untouched to rerun the source.
 */
 @genType
-let cleanAllResults = (this: reducerProject): unit =>
-  this->T.Private.castToInternalProject->Private.cleanAllResults
+let cleanAllResults = (project: reducerProject): unit =>
+  project->T.Private.castToInternalProject->Private.cleanAllResults
 
 /*
 To set the includes one first has to call "parseIncludes". The parsed includes or the parser error is returned.
 */
 @genType
-let getIncludes = (this: reducerProject, sourceId: string): result<
+let getIncludes = (project: reducerProject, sourceId: string): result<
   array<string>,
   Reducer_ErrorValue.errorValue,
-> => this->T.Private.castToInternalProject->Private.getIncludes(sourceId)
+> => project->T.Private.castToInternalProject->Private.getIncludes(sourceId)
 
 /*
 Answers the source codes after which this source code is continuing
 */
 @genType
-let getContinues = (this: reducerProject, sourceId: string): array<string> =>
-  this->T.Private.castToInternalProject->Private.getContinues(sourceId)
+let getContinues = (project: reducerProject, sourceId: string): array<string> =>
+  project->T.Private.castToInternalProject->Private.getContinues(sourceId)
 
 /*
  "continues" acts like hidden includes in the source. 
@@ -316,36 +316,36 @@ let getContinues = (this: reducerProject, sourceId: string): array<string> =>
  You can chain source codes on the web interface for example
 */
 @genType
-let setContinues = (this: reducerProject, sourceId: string, continues: array<string>): unit =>
-  this->T.Private.castToInternalProject->Private.setContinues(sourceId, continues)
+let setContinues = (project: reducerProject, sourceId: string, continues: array<string>): unit =>
+  project->T.Private.castToInternalProject->Private.setContinues(sourceId, continues)
 
 /*
 This source depends on the array of sources returned.
 */
 @genType
-let getDependencies = (this: reducerProject, sourceId: string): array<string> =>
-  this->T.Private.castToInternalProject->Private.getDependencies(sourceId)
+let getDependencies = (project: reducerProject, sourceId: string): array<string> =>
+  project->T.Private.castToInternalProject->Private.getDependencies(sourceId)
 
 /*
 The sources returned are dependent on this
 */
 @genType
-let getDependents = (this: reducerProject, sourceId: string): array<string> =>
-  this->T.Private.castToInternalProject->Private.getDependents(sourceId)
+let getDependents = (project: reducerProject, sourceId: string): array<string> =>
+  project->T.Private.castToInternalProject->Private.getDependents(sourceId)
 
 /*
 Get the run order for the sources in the project.
 */
 @genType
-let getRunOrder = (this: reducerProject): array<string> =>
-  this->T.Private.castToInternalProject->Private.getRunOrder
+let getRunOrder = (project: reducerProject): array<string> =>
+  project->T.Private.castToInternalProject->Private.getRunOrder
 
 /*
 Get the run order to get the results of this specific source
 */
 @genType
-let getRunOrderFor = (this: reducerProject, sourceId: string) =>
-  this->T.Private.castToInternalProject->Private.getRunOrderFor(sourceId)
+let getRunOrderFor = (project: reducerProject, sourceId: string) =>
+  project->T.Private.castToInternalProject->Private.getRunOrderFor(sourceId)
 
 /*
 Parse includes so that you can load them before running. 
@@ -353,8 +353,8 @@ Load includes by calling getIncludes which returns the includes that have been p
 It is your responsibility to load the includes before running.
 */
 @genType
-let parseIncludes = (this: reducerProject, sourceId: string): unit =>
-  this->T.Private.castToInternalProject->Private.parseIncludes(sourceId)
+let parseIncludes = (project: reducerProject, sourceId: string): unit =>
+  project->T.Private.castToInternalProject->Private.parseIncludes(sourceId)
 
 /*
 Parse the source code if it is not done already. 
@@ -362,39 +362,40 @@ Use getRawParse to get the parse tree.
 You would need this function if you want to see the parse tree without running the source code.
 */
 @genType
-let rawParse = (this: reducerProject, sourceId: string): unit =>
-  this->T.Private.castToInternalProject->Private.rawParse(sourceId)
+let rawParse = (project: reducerProject, sourceId: string): unit =>
+  project->T.Private.castToInternalProject->Private.rawParse(sourceId)
 
 /*
 Runs a specific source code if it is not done already. The code is parsed if it is not already done. It runs the dependencies if it is not already done.
 */
 @genType
-let run = (this: reducerProject, sourceId: string): unit =>
-  this->T.Private.castToInternalProject->Private.run(sourceId)
+let run = (project: reducerProject, sourceId: string): unit =>
+  project->T.Private.castToInternalProject->Private.run(sourceId)
 
 /*
 Runs all of the sources in a project. Their results and bindings will be available
 */
 @genType
-let runAll = (this: reducerProject): unit => this->T.Private.castToInternalProject->Private.runAll
+let runAll = (project: reducerProject): unit =>
+  project->T.Private.castToInternalProject->Private.runAll
 
 /*
 Get the bindings after running this source file or the project
 */
 @genType
 let getExternalBindings = (
-  this: reducerProject,
+  project: reducerProject,
   sourceId: string,
 ): ExternalExpressionValue.record =>
-  this->T.Private.castToInternalProject->Private.getExternalBindings(sourceId)
+  project->T.Private.castToInternalProject->Private.getExternalBindings(sourceId)
 
 /*
 Get the result after running this source file or the project
 */
 @genType
-let getExternalResult = (this: reducerProject, sourceId: string): option<
+let getExternalResult = (project: reducerProject, sourceId: string): option<
   result<ExternalExpressionValue.externalExpressionValue, Reducer_ErrorValue.errorValue>,
-> => this->T.Private.castToInternalProject->Private.getExternalResult(sourceId)
+> => project->T.Private.castToInternalProject->Private.getExternalResult(sourceId)
 
 /*
 This is a convenience function to get the result of a single source without creating a project. 
@@ -412,9 +413,9 @@ let evaluate = (sourceCode: string): ('r, 'b) => {
 
 @genType
 let setEnvironment = (
-  this: reducerProject,
+  project: reducerProject,
   environment: ExternalExpressionValue.environment,
-): unit => this->T.Private.castToInternalProject->Private.setEnvironment(environment)
+): unit => project->T.Private.castToInternalProject->Private.setEnvironment(environment)
 
 @genType
 let foreignFunctionInterface = (
