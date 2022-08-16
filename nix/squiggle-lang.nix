@@ -2,7 +2,7 @@
 
 rec {
   common = commonFn pkgs;
-  lang-yarnPackage = pkgs.mkYarnPackage {
+  yarn-source = pkgs.mkYarnPackage {
     name = "squiggle-lang_source";
     src = ../packages/squiggle-lang;
     packageJSON = ../packages/squiggle-lang/package.json;
@@ -39,9 +39,9 @@ rec {
       };
     };
   };
-  lang-lint = pkgs.stdenv.mkDerivation {
+  lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-lint";
-    src = lang-yarnPackage
+    src = yarn-source
       + "/libexec/@quri/squiggle-lang/deps/@quri/squiggle-lang";
     buildInputs = common.buildInputs ++ common.prettier;
     buildPhase = ''
@@ -50,10 +50,10 @@ rec {
     '';
     installPhase = "mkdir -p $out";
   };
-  lang-build = pkgs.stdenv.mkDerivation {
+  build = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-build";
     # `peggy` is in the `node_modules` that's adjacent to `deps`.
-    src = lang-yarnPackage + "/libexec/@quri/squiggle-lang";
+    src = yarn-source + "/libexec/@quri/squiggle-lang";
     buildInputs = common.buildInputs;
     buildPhase = ''
       # so that the path to ppx doesn't need to be patched.
@@ -88,9 +88,9 @@ rec {
       cp -r deps/@quri/squiggle-lang/. $out
     '';
   };
-  lang-test = pkgs.stdenv.mkDerivation {
+  test = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-test";
-    src = lang-build;
+    src = build;
     buildInputs = common.buildInputs;
     buildPhase = ''
       yarn --offline test
@@ -100,9 +100,9 @@ rec {
       cp -r . $out
     '';
   };
-  lang-bundle = pkgs.stdenv.mkDerivation {
+  bundle = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-bundle";
-    src = lang-test;
+    src = test;
     buildInputs = common.buildInputs;
     buildPhase = ''
       yarn --offline bundle

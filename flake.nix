@@ -46,15 +46,15 @@
         in {
           # validating
           checks = flake-utils.lib.flattenTree {
-            lang-lint = lang.lang-lint;
-            lang-test = lang.lang-test;
+            lang-lint = lang.lint;
+            lang-test = lang.test;
             components-lint = components.components-lint;
             docusaurus-lint = website.website-lint;
           };
           # building
           packages = flake-utils.lib.flattenTree {
             default = website.website;
-            lang-bundle = lang.lang-bundle;
+            lang-bundle = lang.bundle;
             components = components.components-package-build;
             storybook = components.components-site-build;
             docs-site = website.website;
@@ -79,10 +79,10 @@
           ciSystems = [ hciSystem ];
           onPush = {
             lang.outputs = {
-              squiggle-lang-lint = lang.lang-lint;
-              squiggle-lang-build = lang.lang-build;
-              squiggle-lang-test = lang.lang-test;
-              squiggle-lang-bundle = lang.lang-bundle;
+              squiggle-lang-lint = lang.lint;
+              squiggle-lang-build = lang.build;
+              squiggle-lang-test = lang.test;
+              squiggle-lang-bundle = lang.bundle;
             };
             components.outputs = {
               squiggle-components = components.components-package-build;
