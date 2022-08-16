@@ -2,7 +2,6 @@
 module ExternalExpressionValue = ReducerInterface_ExternalExpressionValue
 module Project = ReducerProject
 module Bindings = Reducer_Bindings
-module Continuation = ReducerInterface_Value_Continuation
 
 open Jest
 open Expect

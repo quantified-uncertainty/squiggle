@@ -202,10 +202,11 @@ module Private = {
     let project = createProject()
     setSource(project, "main", sourceCode)
     runAll(project)
-    (
-      getResult(project, "main")->Belt.Option.getWithDefault(IEvVoid->Ok),
-      getContinuation(project, "main"),
-    )
+    let those = project->getContinuation("main")
+    let these = project->getStdLib
+    let ofUser = Continuation.minus(those, these)
+
+    (getResult(project, "main")->Belt.Option.getWithDefault(IEvVoid->Ok), ofUser)
   }
 }
 
@@ -408,6 +409,12 @@ let evaluate = (sourceCode: string): ('r, 'b) => {
     continuation->InternalExpressionValue.nameSpaceToTypeScriptBindings,
   )
 }
+
+@genType
+let setEnvironment = (
+  this: reducerProject,
+  environment: ExternalExpressionValue.environment,
+): unit => this->T.Private.castToInternalProject->Private.setEnvironment(environment)
 
 @genType
 let foreignFunctionInterface = (
