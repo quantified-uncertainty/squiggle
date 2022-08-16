@@ -34,9 +34,7 @@ rec {
       gentype = {
         postInstall = ''
           mv gentype.exe ELFLESS-gentype.exe
-          cp ${
-            gentypeOutputFn pkgs
-          }/src/GenType.exe gentype.exe
+          cp ${gentypeOutputFn pkgs}/src/GenType.exe gentype.exe
         '';
       };
     };
@@ -58,7 +56,9 @@ rec {
     src = lang-yarnPackage + "/libexec/@quri/squiggle-lang";
     buildInputs = common.buildInputs;
     buildPhase = ''
+      # so that the path to ppx doesn't need to be patched.
       mv node_modules deps
+
       pushd deps/@quri/squiggle-lang
       yarn --offline build:peggy
       yarn --offline build:rescript

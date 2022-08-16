@@ -2,7 +2,7 @@
   description = "Squiggle CI";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-22.05";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
     gentype = {
       url = "github:quinn-dougherty/genType";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -27,7 +27,9 @@
       };
       gentypeOutputFn = pkgs: gentype.outputs.packages.${pkgs.system}.default;
       langFn = { pkgs, ... }:
-        import ./nix/squiggle-lang.nix { inherit pkgs commonFn gentypeOutputFn; };
+        import ./nix/squiggle-lang.nix {
+          inherit pkgs commonFn gentypeOutputFn;
+        };
       componentsFn = { pkgs, ... }:
         import ./nix/squiggle-components.nix { inherit pkgs commonFn langFn; };
       websiteFn = { pkgs, ... }:
@@ -85,10 +87,8 @@
             };
             components.outputs = {
               squiggle-components = components.components-package-build;
-              squiggle-components-lint =
-                components.components-lint;
-              squiggle-components-storybook =
-                components.components-site-build;
+              squiggle-components-lint = components.components-lint;
+              squiggle-components-storybook = components.components-site-build;
             };
             docs-site.outputs = {
               squiggle-website = website.website;
@@ -98,7 +98,7 @@
         };
 
       };
-      in flake-utils.lib.eachDefaultSystem (system:
+    in flake-utils.lib.eachDefaultSystem (system:
       let
         # globals
         pkgs = import nixpkgs {

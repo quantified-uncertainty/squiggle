@@ -1,6 +1,5 @@
 { pkgs }:
-with pkgs;
-{
+with pkgs; {
   shell = mkShell {
     name = "SQUIGGLE_yarn-wasm-devshell";
     buildInputs =
