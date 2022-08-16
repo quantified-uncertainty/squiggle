@@ -2,7 +2,7 @@
   description = "Squiggle CI";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-unstable";
+    nixpkgs.url = "nixpkgs/nixos-22.05";
     gentype = {
       url = "github:quinn-dougherty/genType";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -75,7 +75,6 @@
         components = componentsFn hciPkgs;
         website = websiteFn hciPkgs;
       in {
-        # herc
         herculesCI = {
           ciSystems = [ hciSystem ];
           onPush = {
@@ -92,11 +91,10 @@
             };
             docs-site.outputs = {
               squiggle-website = website.website;
-              docusaurus-lint = website.docusaurus-lint;
+              docusaurus-lint = website.website-lint;
             };
           };
         };
-
       };
     in flake-utils.lib.eachDefaultSystem (system:
       let
