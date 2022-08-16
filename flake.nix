@@ -19,13 +19,15 @@
 
   outputs = { self, nixpkgs, gentype, hercules-ci-effects, flake-utils, ... }:
     let
+      version = builtins.substring 0 8 self.lastModifiedDate;
       commonFn = pkgs: {
         buildInputs = with pkgs; [ nodejs yarn ];
         prettier = with pkgs.nodePackages; [ prettier ];
         which = [ pkgs.which ];
       };
+      gentypeOutputFn = pkgs: gentype.outputs.packages.${pkgs.system}.default;
       langFn = { pkgs, ... }:
-        import ./nix/squiggle-lang.nix { inherit pkgs commonFn gentype; };
+        import ./nix/squiggle-lang.nix { inherit pkgs commonFn gentypeOutputFn; };
       componentsFn = { pkgs, ... }:
         import ./nix/squiggle-components.nix { inherit pkgs commonFn langFn; };
       websiteFn = { pkgs, ... }:
@@ -34,7 +36,7 @@
         };
 
       # local machines
-      localFlake = { pkgs }:
+      localFlake = { pkgs, ... }:
         let
           lang = langFn pkgs;
           components = componentsFn pkgs;
@@ -86,7 +88,7 @@
               squiggle-components-lint =
                 components.components-lint;
               squiggle-components-storybook =
-                components.storybook;
+                components.components-site-build;
             };
             docs-site.outputs = {
               squiggle-website = website.website;
@@ -96,19 +98,19 @@
         };
 
       };
-    in flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
+      in flake-utils.lib.eachDefaultSystem (system:
       let
         # globals
         pkgs = import nixpkgs {
-          system = system;
+          inherit system;
           overlays = [
             (final: prev: {
               # set the node version here
-              nodejs = prev.nodejs-16_x;
+              nodejs = prev.nodejs-18_x;
               # The override is the only way to get it into mkYarnModules
             })
           ];
         };
 
-      in (localFlake { inherit pkgs; } )) // herc;
+      in localFlake pkgs) // herc;
 }

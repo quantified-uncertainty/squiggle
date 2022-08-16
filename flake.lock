@@ -38,11 +38,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1660628617,
-        "narHash": "sha256-swFuey10pJV/TFcPv9pMf9xuXf/BDuJ1xzZ57jpfkrA=",
+        "lastModified": 1660630689,
+        "narHash": "sha256-oM21qcr+VtI69GIm56UDy6oGiupq2GkZDIaKXWWnM8k=",
         "owner": "quinn-dougherty",
         "repo": "genType",
-        "rev": "e4374399178976de0c4fc41f64dde913c3bed5dd",
+        "rev": "c2a022cfec32b5a61d575205daa93416a9a9309c",
         "type": "github"
       },
       "original": {
