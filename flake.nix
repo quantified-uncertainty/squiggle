@@ -131,7 +131,7 @@
             wasm.outputs = {
               squiggle-wasm-lint = mc.rust-lint;
               squiggle-wasm-pkg = mc.webpack-build-pkg;
-              squiggle-wasm-test-ff = mc.rust-firefox-test;
+              squiggle-wasm-test-ff = mc.firefox-test;
             };
             lang.outputs = {
               squiggle-lang-lint = lang.lint;
