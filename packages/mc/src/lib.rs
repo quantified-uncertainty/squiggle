@@ -11,20 +11,11 @@ use distribution::{monte_carlo, bandwidth};
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-// This is like the `main` function, except for JavaScript.
-#[wasm_bindgen(start)]
-pub fn main_js() -> Result<(), JsValue> {
-    // This provides better error messages in debug mode.
-    // It's disabled in release mode so it doesn't bloat up the file size.
+#[wasm_bindgen]
+pub fn sample_n(samples: Box<[f32]>, num_samples: i32) -> Vec<f32> {
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
+    let samples_vec = Vec::from(samples);
 
-    console::log_1(&JsValue::from_str(&format!(
-        "nrd(1,2,5): {}",
-        bandwidth::nrd([1.0, 2.0, 5.0].to_vec())
-    )));
-    // Your code goes here!
-    console::log_1(&JsValue::from_str(&monte_carlo::my_string()));
-
-    Ok(())
+    monte_carlo::sampleN(samples_vec, num_samples)
 }

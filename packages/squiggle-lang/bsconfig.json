@@ -37,6 +37,6 @@
     "number": "+A-42-48-9-30-4"
   },
   "ppx-flags": [
-    ["../../node_modules/bisect_ppx/bin/linux/ppx", "--exclude-files", ".*_test\\.res$$"]
+    ["../../node_modules/bisect_ppx/ppx", "--exclude-files", ".*_test\\.res$$"]
   ]
 }

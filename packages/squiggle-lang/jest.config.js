@@ -11,4 +11,7 @@ module.exports = {
     ".*Helpers.bs.js",
     ".*Helpers.ts",
   ],
+  moduleNameMapper: {
+    "@quri/squiggle-mc": "<rootDir>/../mc/pkg",
+  },
 };

@@ -6,6 +6,8 @@ Please run `yarn` at the monorepo level.
 
 In this subrepo, please run `./cargo-refresh-nix.sh` every time `Cargo.toml`/`Cargo.lock` is modified, it requires nix with flakes. 
 
+Please view `/.github/workflows/ci.yml` for the most accurate story about how to build in concert with the rest of the packages in the monorepo. 
+
 ## How to run in debug mode
 
 ```sh

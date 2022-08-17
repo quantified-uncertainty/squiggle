@@ -5,9 +5,9 @@
   "license": "MIT",
   "scripts": {
     "peggy": "peggy --cache",
-    "build:mc-cached": "cd ../squiggle-mc-cached && yarn build and cd ../squiggle-lang",
+    "build:mc": "cd ../mc && yarn build and cd ../squiggle-lang",
     "rescript": "rescript",
-    "build": "yarn build:mc-cached && yarn build:peggy && yarn build:rescript && yarn build:typescript",
+    "build": "yarn build:peggy && yarn build:rescript && yarn build:typescript",
     "build:peggy:helpers": "tsc --module commonjs --outDir src/rescript/Reducer/Reducer_Peggy/ src/rescript/Reducer/Reducer_Peggy/helpers.ts",
     "build:peggy": "yarn build:peggy:helpers && find . -type f -name *.peggy -exec yarn peggy {} \\;",
     "build:rescript": "rescript build -with-deps",

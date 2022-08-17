@@ -1,9 +1,10 @@
 /**  The math here was taken from https://github.com/jasondavies/science.js/blob/master/src/stats/SampleSetDist_Bandwidth.js
 */
 use statistics::variance;
-// mod magic_numbers;
+// use kernel_density::ecdf::percentile;
 use crate::distribution::BandwidthParameters;
-use crate::distribution::e::a::floats::{lenf, min, percentile};
+mod e;
+use e::a::floats::{lenf, min, percentile};
 
 fn iqr_percentile() -> f64 {
     return BandwidthParameters::default().iqr_percentile;

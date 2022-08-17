@@ -87,13 +87,15 @@ The former helps in cases where multiple distributions are correlated.
 However, if n > length(t), then there's no clear right answer, so we just randomly
 sample everything.
 */
-let sampleN = (t: t, n) => {
+let sampleN' = (t: t, n) => {
   if n <= E.A.length(get(t)) {
     E.A.slice(get(t), ~offset=0, ~len=n)
   } else {
     Belt.Array.makeBy(n, _ => sample(t))
   }
 }
+
+let sampleN = WasmInterface.sampleN
 
 let _fromSampleResultArray = (samples: array<result<float, QuriSquiggleLang.Operation.Error.t>>) =>
   E.A.R.firstErrorOrOpen(samples)->E.R2.errMap(Error.fromOperationError) |> E.R2.bind(make)

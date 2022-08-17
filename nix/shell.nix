@@ -7,12 +7,15 @@ with pkgs; {
       cargo
       yarn
       nodejs
+      nodePackages.ts-node
       rustup
       pkg-config
       libressl
       nixfmt
       rustfmt
       cargo2nix.outputs.packages.${pkgs.system}.default
+      wasmtime
+      binaryen
     ];
   };
 }

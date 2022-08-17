@@ -449,7 +449,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "quri-squiggle-mc"
+name = "quri_squiggle_mc"
 version = "0.0.1"
 dependencies = [
  "cached",

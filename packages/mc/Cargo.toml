@@ -1,6 +1,6 @@
 # You must change these to your own details.
 [package]
-name = "quri-squiggle-mc"
+name = "quri_squiggle_mc"
 description = "Cached and parallel Monte Carlo simulations in WebAssembly"
 version = "0.0.1"
 authors = ["Quinn <quinn@quantifieduncertainty.org>"]
@@ -11,11 +11,11 @@ readme = "README.md"
 edition = "2018"
 
 [package.metadata.wasm-pack.profile.dev]
-wasm-opt = false
+wasm-opt = true
 [package.metadata.wasm-pack.profile.profiling]
-wasm-opt = false
+wasm-opt = true
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = false
+wasm-opt = true
 
 [lib]
 crate-type = ["cdylib"]
@@ -33,7 +33,7 @@ default = ["wee_alloc"]
 [dependencies]
 # The `wasm-bindgen` crate provides the bare minimum functionality needed
 # to interact with JavaScript.
-wasm-bindgen = "0.2.45"
+wasm-bindgen = "0.2.82"
 
 # The `web-sys` crate allows you to interact with the various browser APIs,
 # like the DOM.

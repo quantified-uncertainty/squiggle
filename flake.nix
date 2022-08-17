@@ -38,7 +38,7 @@
         cargo2nix.overlays.default
         (final: prev: {
           # set the node version here
-          nodejs = prev.nodejs-18_x;
+          nodejs = prev.nodejs-16_x;
           # The override is the only way to get it into mkYarnModules
         })
       ];

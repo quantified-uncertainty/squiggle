@@ -29,6 +29,7 @@ rec {
           THE_LD=$(patchelf --print-interpreter $(which mkdir))
           patchelf --set-interpreter $THE_LD bin/linux/ppx
           patchelf --set-interpreter $THE_LD bin/linux/bisect-ppx-report
+          cp bin/linux/ppx ppx
         '';
       };
       gentype = {
