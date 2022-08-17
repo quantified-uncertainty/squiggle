@@ -9,7 +9,7 @@ with pkgs; {
       nodejs
       rustup
       pkg-config
-      openssl
+      libressl
       nixfmt
       rustfmt
       cargo2nix.outputs.packages.${pkgs.system}.default

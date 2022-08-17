@@ -10,6 +10,13 @@ categories = ["wasm", "Monte Carlo"]
 readme = "README.md"
 edition = "2018"
 
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = false
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = false
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
 [lib]
 crate-type = ["cdylib"]
 
@@ -21,6 +28,7 @@ lto = true
 [features]
 # If you uncomment this line, it will enable `wee_alloc`:
 default = ["wee_alloc"]
+# wasm-bindgen = [ "instant/wasm-bindgen" ]
 
 [dependencies]
 # The `wasm-bindgen` crate provides the bare minimum functionality needed
