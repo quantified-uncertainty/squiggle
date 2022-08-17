@@ -1,4 +1,5 @@
 open ForTS_Types
 
 @genType
-let getResult = (_p: myProject): option<result_internalValue> => My_ErrorValue.EError->Error->Some
+let getResult = (_p: myProject): option<result_<internalValue, errorValue>> =>
+  My_ErrorValue.EError->Error->Some

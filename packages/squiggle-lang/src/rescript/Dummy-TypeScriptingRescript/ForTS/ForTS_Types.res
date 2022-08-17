@@ -6,7 +6,7 @@
 @genType.opaque type recordLike = MyInterface_InternalValue_RecordLike.t
 @genType.opaque type internalVoid = int
 @genType.opaque type errorValue = My_ErrorValue.t
-@genType.opaque type result_internalValue = result<internalValue, errorValue> // There has to be a type for each result permutation
+@genType.opaque type result_<'a, 'e> = result<'a, 'e> // There has to be a type for each result permutation
 @genType.opaque type myProject = {name: string}
 
 //There is no need to map option<> as it becomes nullable
