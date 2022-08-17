@@ -5,8 +5,9 @@
   "license": "MIT",
   "scripts": {
     "peggy": "peggy --cache",
+    "build:mc-cached": "cd ../squiggle-mc-cached && yarn build and cd ../squiggle-lang",
     "rescript": "rescript",
-    "build": "yarn build:peggy && yarn build:rescript && yarn build:typescript",
+    "build": "yarn build:mc-cached && yarn build:peggy && yarn build:rescript && yarn build:typescript",
     "build:peggy:helpers": "tsc --module commonjs --outDir src/rescript/Reducer/Reducer_Peggy/ src/rescript/Reducer/Reducer_Peggy/helpers.ts",
     "build:peggy": "yarn build:peggy:helpers && find . -type f -name *.peggy -exec yarn peggy {} \\;",
     "build:rescript": "rescript build -with-deps",
@@ -40,6 +41,7 @@
   ],
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
+    "@quri/par-cached-monte-carlo": "file:../squiggle-mc-cached/pkg",
     "@rescript/std": "^9.1.4",
     "@stdlib/stats": "^0.0.13",
     "jstat": "^1.9.5",

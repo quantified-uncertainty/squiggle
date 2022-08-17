@@ -1,7 +1,7 @@
 {
-  "author": "You <you@example.com>",
-  "name": "rust-webpack-template",
-  "version": "0.1.0",
+  "author": "Quinn Dougherty <quinnd@riseup.net>",
+  "name": "@quri/par-cached-monte-carlo",
+  "version": "0.0.1",
   "scripts": {
     "build": "rimraf dist pkg && webpack",
     "start": "rimraf dist pkg && webpack-dev-server --open -d",

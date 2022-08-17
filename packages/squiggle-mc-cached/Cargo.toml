@@ -1,10 +1,12 @@
 # You must change these to your own details.
 [package]
 name = "squiggle-mc-cached-wasm"
-description = "Caching for Monte Carlo simulations in WebAssembly"
+description = "Cached and parallel Monte Carlo simulations in WebAssembly"
 version = "0.0.1"
 authors = ["Quinn <quinn@quantifieduncertainty.org>"]
-categories = ["wasm"]
+repository = "github.com/quantified-uncertainty/squiggle"
+license = "MIT"
+categories = ["wasm", "Monte Carlo"]
 readme = "README.md"
 edition = "2018"
 
@@ -31,8 +33,12 @@ wasm-bindgen = "0.2.45"
 wee_alloc = { version = "0.4.2", optional = true }
 
 # Numerical things
+rand = "0.8.5"
 getrandom = { version = "0.2", features = ["js"] }
 rand_distr = "0.4.3"
+statistics = "0.4.1"
+kernel_density = "0.0.1"
+cached = { version = "0.38.0", features = ["wasm"] }
 
 # The `web-sys` crate allows you to interact with the various browser APIs,
 # like the DOM.
@@ -53,3 +59,5 @@ wasm-bindgen-test = "0.2.45"
 futures = "0.1.27"
 js-sys = "0.3.22"
 wasm-bindgen-futures = "0.3.22"
+quickcheck = "1"
+quickcheck_macros = "1"
