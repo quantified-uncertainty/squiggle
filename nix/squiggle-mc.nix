@@ -57,7 +57,8 @@ rec {
   firefox-test = pkgs.stdenv.mkDerivation {
     name = "squiggle-mc-test";
     src = yarn-source + "/libexec/@quri/squiggle-mc/deps/@quri/squiggle-mc";
-    buildInputs = common.buildInputs ++ (with pkgs; [ geckodriver cargo wasm-pack ]);
+    buildInputs = common.buildInputs
+      ++ (with pkgs; [ geckodriver cargo wasm-pack ]);
     buildPhase = "yarn --offline test -- --firefox";
     installPhase = "mkdir -p $out";
   };

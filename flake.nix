@@ -34,24 +34,30 @@
         system = "wasm32-wasi";
         useLLVM = true;
       };
-      overlays =  [
-            cargo2nix.overlays.default
-            (final: prev: {
-              # set the node version here
-              nodejs = prev.nodejs-18_x;
-              # The override is the only way to get it into mkYarnModules
-            })
-          ];
+      overlays = [
+        cargo2nix.overlays.default
+        (final: prev: {
+          # set the node version here
+          nodejs = prev.nodejs-18_x;
+          # The override is the only way to get it into mkYarnModules
+        })
+      ];
 
       commonFn = pkgs: {
         buildInputs = with pkgs; [ nodejs yarn ];
         prettier = with pkgs.nodePackages; [ prettier ];
         which = [ pkgs.which ];
       };
-      naerskFn = { pkgs, rust, ... }: pkgs.callPackage naersk { cargo = rust; rustc = rust; };
+      naerskFn = { pkgs, rust, ... }:
+        pkgs.callPackage naersk {
+          cargo = rust;
+          rustc = rust;
+        };
       gentypeOutputFn = pkgs: gentype.outputs.packages.${pkgs.system}.default;
       mcFn = { pkgs, wasmPkgs, ... }:
-        import ./nix/squiggle-mc.nix { inherit pkgs wasmPkgs commonFn naerskFn; };
+        import ./nix/squiggle-mc.nix {
+          inherit pkgs wasmPkgs commonFn naerskFn;
+        };
       langFn = { pkgs, ... }:
         import ./nix/squiggle-lang.nix {
           inherit pkgs commonFn mcFn gentypeOutputFn;
@@ -105,9 +111,16 @@
       herc = let
         hciSystem = "x86_64-linux";
         hciPkgs = import nixpkgs { system = hciSystem; };
-        hciPkgsWasm = import nixpkgs { system = hciSystem; crossSystem = crossSystemForWasmPkgs; overlays = overlays; };
+        hciPkgsWasm = import nixpkgs {
+          system = hciSystem;
+          crossSystem = crossSystemForWasmPkgs;
+          overlays = overlays;
+        };
         effects = hercules-ci-effects.lib.withPkgs hciPkgs;
-        mc = mcFn hciPkgs hciPkgsWasm;
+        mc = mcFn {
+          pkgs = hciPkgs;
+          wasmPkgs = hciPkgsWasm;
+        };
         lang = langFn hciPkgs;
         components = componentsFn hciPkgs;
         website = websiteFn hciPkgs;
@@ -151,5 +164,8 @@
           crossSystem = crossSystemForWasmPkgs;
         };
 
-      in localFlake { pkgs = pkgs; wasmPkgs = pkgsWasm; }) // herc;
+      in localFlake {
+        pkgs = pkgs;
+        wasmPkgs = pkgsWasm;
+      }) // herc;
 }
