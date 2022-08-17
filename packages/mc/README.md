@@ -1,8 +1,10 @@
-# `@quri/par-cached-monte-carlo` - parallel Monte Carlo with memoization
+# `@quri/squiggle-mc` - parallel Monte Carlo with memoization for the `@quri/squiggle-lang` javascript interface
 
 ## How to install
 
-Please run `yarn` at hte monorepo level
+Please run `yarn` at the monorepo level. 
+
+In this subrepo, please run `./cargo-refresh-nix.sh` every time `Cargo.toml`/`Cargo.lock` is modified, it requires nix with flakes. 
 
 ## How to run in debug mode
 
@@ -19,6 +21,8 @@ yarn build
 ```
 
 ## How to run unit tests
+
+These are the headless browser tests, which will attempt to download and install drivers, and may fail. 
 
 ```sh
 # Runs tests in Firefox

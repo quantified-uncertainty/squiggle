@@ -449,6 +449,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "quri-squiggle-mc"
+version = "0.0.1"
+dependencies = [
+ "cached",
+ "console_error_panic_hook",
+ "futures 0.1.31",
+ "getrandom",
+ "js-sys",
+ "kernel_density",
+ "quickcheck",
+ "quickcheck_macros",
+ "rand 0.8.5",
+ "rand_distr",
+ "statistics",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "rand"
 version = "0.3.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -557,28 +579,6 @@ name = "scoped-tls"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
-
-[[package]]
-name = "squiggle-mc-cached-wasm"
-version = "0.0.1"
-dependencies = [
- "cached",
- "console_error_panic_hook",
- "futures 0.1.31",
- "getrandom",
- "js-sys",
- "kernel_density",
- "quickcheck",
- "quickcheck_macros",
- "rand 0.8.5",
- "rand_distr",
- "statistics",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-bindgen-test",
- "web-sys",
- "wee_alloc",
-]
 
 [[package]]
 name = "statistics"

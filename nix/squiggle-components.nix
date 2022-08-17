@@ -1,8 +1,8 @@
-{ pkgs, commonFn, mcCacheFn, langFn }:
+{ pkgs, commonFn, mcFn, langFn }:
 
 rec {
   common = commonFn pkgs;
-  mcCache = mcCacheFn pkgs;
+  mc = mcFn pkgs;
   lang = langFn pkgs;
   componentsPackageJson = let
     raw = pkgs.lib.importJSON ../packages/components/package.json;
@@ -12,11 +12,12 @@ rec {
   in pkgs.writeText "packages/components/patched-package.json"
   packageJsonString;
   yarn-source = pkgs.mkYarnPackage {
-    name = "squiggle-components_source";
+    name = "squiggle-components_yarnsource";
     buildInputs = common.buildInputs;
     src = ../packages/components;
     packageJSON = componentsPackageJson;
     yarnLock = ../yarn.lock;
+    packageResolutions."@quri/squiggle-mc" = mc.webpack-build-pkg;
     packageResolutions."@quri/squiggle-lang" = lang.build;
   };
   lint = pkgs.stdenv.mkDerivation {

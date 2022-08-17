@@ -21,7 +21,8 @@
     };
   };
 
-  outputs = { self, nixpkgs, gentype, hercules-ci-effects, cargo2nix, flake-utils, ... }:
+  outputs = { self, nixpkgs, gentype, hercules-ci-effects, cargo2nix
+    , flake-utils, ... }:
     let
       version = builtins.substring 0 8 self.lastModifiedDate;
       commonFn = pkgs: {
@@ -30,29 +31,33 @@
         which = [ pkgs.which ];
       };
       gentypeOutputFn = pkgs: gentype.outputs.packages.${pkgs.system}.default;
-      mcCacheFn = { pkgs, ... }:
-        import ./nix/squiggle-mcCache.nix { inherit pkgs; };
+      mcFn = { pkgs, ... }:
+        import ./nix/squiggle-mc.nix { inherit pkgs commonFn; };
       langFn = { pkgs, ... }:
         import ./nix/squiggle-lang.nix {
-          inherit pkgs commonFn mcCacheFn gentypeOutputFn;
+          inherit pkgs commonFn mcFn gentypeOutputFn;
         };
       componentsFn = { pkgs, ... }:
-        import ./nix/squiggle-components.nix { inherit pkgs commonFn mcCacheFn langFn; };
+        import ./nix/squiggle-components.nix {
+          inherit pkgs commonFn mcFn langFn;
+        };
       websiteFn = { pkgs, ... }:
         import ./nix/squiggle-website.nix {
-          inherit pkgs commonFn mcCacheFn langFn componentsFn;
+          inherit pkgs commonFn mcFn langFn componentsFn;
         };
 
       # local machines
       localFlake = { pkgs, ... }:
         let
-          mcCache = mcCacheFn pkgs;
+          mc = mcFn pkgs;
           lang = langFn pkgs;
           components = componentsFn pkgs;
           website = websiteFn pkgs;
         in {
           # validating
           checks = flake-utils.lib.flattenTree {
+            wasm-lint = mc.rust-lint;
+            wasm-headless-test = mc.firefox-test;
             lang-lint = lang.lint;
             lang-test = lang.test;
             components-lint = components.lint;
@@ -61,7 +66,8 @@
           # building
           packages = flake-utils.lib.flattenTree {
             default = website.docusaurus;
-            mc-wasm = mcCache.mc-cached;
+            mc-wasm = mc.lib;
+            mc-wasm-pkg = mc.webpack-build-pkg;
             lang-bundle = lang.bundle;
             components = components.package-build;
             storybook = components.site-build;
@@ -70,7 +76,8 @@
 
           # developing
           devShells = flake-utils.lib.flattenTree {
-            default = (import ./nix/shell.nix { inherit pkgs cargo2nix; }).shell;
+            default =
+              (import ./nix/shell.nix { inherit pkgs cargo2nix; }).shell;
           };
         };
 
@@ -79,6 +86,7 @@
         hciSystem = "x86_64-linux";
         hciPkgs = import nixpkgs { system = hciSystem; };
         effects = hercules-ci-effects.lib.withPkgs hciPkgs;
+        mc = mcFn hciPkgs;
         lang = langFn hciPkgs;
         components = componentsFn hciPkgs;
         website = websiteFn hciPkgs;
@@ -86,6 +94,11 @@
         herculesCI = {
           ciSystems = [ hciSystem ];
           onPush = {
+            wasm.outputs = {
+              squiggle-wasm-lint = mc.rust-lint;
+              squiggle-wasm-pkg = mc.webpack-build-pkg;
+              squiggle-wasm-test-ff = mc.rust-firefox-test;
+            };
             lang.outputs = {
               squiggle-lang-lint = lang.lint;
               squiggle-lang-build = lang.build;

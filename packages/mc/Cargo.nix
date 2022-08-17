@@ -4,7 +4,7 @@
 args@{
   release ? true,
   rootFeatures ? [
-    "squiggle-mc-cached-wasm/default"
+    "quri-squiggle-mc/default"
   ],
   rustPackages,
   buildRustPackages,
@@ -38,7 +38,7 @@ in
 {
   cargo2nixVersion = "0.11.0";
   workspace = {
-    squiggle-mc-cached-wasm = rustPackages.unknown.squiggle-mc-cached-wasm."0.0.1";
+    quri-squiggle-mc = rustPackages.unknown.quri-squiggle-mc."0.0.1";
   };
   "registry+https://github.com/rust-lang/crates.io-index".aho-corasick."0.7.18" = overridableMkRustCrate (profileName: rec {
     name = "aho-corasick";
@@ -659,6 +659,37 @@ in
     };
   });
   
+  "unknown".quri-squiggle-mc."0.0.1" = overridableMkRustCrate (profileName: rec {
+    name = "quri-squiggle-mc";
+    version = "0.0.1";
+    registry = "unknown";
+    src = fetchCrateLocal workspaceSrc;
+    features = builtins.concatLists [
+      (lib.optional (rootFeatures' ? "quri-squiggle-mc/default") "default")
+      (lib.optional (rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc") "wee_alloc")
+    ];
+    dependencies = {
+      cached = rustPackages."registry+https://github.com/rust-lang/crates.io-index".cached."0.38.0" { inherit profileName; };
+      ${ if false then "console_error_panic_hook" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".console_error_panic_hook."0.1.7" { inherit profileName; };
+      getrandom = rustPackages."registry+https://github.com/rust-lang/crates.io-index".getrandom."0.2.7" { inherit profileName; };
+      kernel_density = rustPackages."registry+https://github.com/rust-lang/crates.io-index".kernel_density."0.0.1" { inherit profileName; };
+      rand = rustPackages."registry+https://github.com/rust-lang/crates.io-index".rand."0.8.5" { inherit profileName; };
+      rand_distr = rustPackages."registry+https://github.com/rust-lang/crates.io-index".rand_distr."0.4.3" { inherit profileName; };
+      statistics = rustPackages."registry+https://github.com/rust-lang/crates.io-index".statistics."0.4.1" { inherit profileName; };
+      wasm_bindgen = rustPackages."registry+https://github.com/rust-lang/crates.io-index".wasm-bindgen."0.2.82" { inherit profileName; };
+      web_sys = rustPackages."registry+https://github.com/rust-lang/crates.io-index".web-sys."0.3.59" { inherit profileName; };
+      ${ if rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc" then "wee_alloc" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".wee_alloc."0.4.5" { inherit profileName; };
+    };
+    devDependencies = {
+      futures = rustPackages."registry+https://github.com/rust-lang/crates.io-index".futures."0.1.31" { inherit profileName; };
+      js_sys = rustPackages."registry+https://github.com/rust-lang/crates.io-index".js-sys."0.3.59" { inherit profileName; };
+      quickcheck = rustPackages."registry+https://github.com/rust-lang/crates.io-index".quickcheck."1.0.3" { inherit profileName; };
+      quickcheck_macros = buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".quickcheck_macros."1.0.0" { profileName = "__noProfile"; };
+      wasm_bindgen_futures = rustPackages."registry+https://github.com/rust-lang/crates.io-index".wasm-bindgen-futures."0.3.27" { inherit profileName; };
+      wasm_bindgen_test = rustPackages."registry+https://github.com/rust-lang/crates.io-index".wasm-bindgen-test."0.2.50" { inherit profileName; };
+    };
+  });
+  
   "registry+https://github.com/rust-lang/crates.io-index".rand."0.3.23" = overridableMkRustCrate (profileName: rec {
     name = "rand";
     version = "0.3.23";
@@ -821,36 +852,6 @@ in
     version = "1.0.0";
     registry = "registry+https://github.com/rust-lang/crates.io-index";
     src = fetchCratesIo { inherit name version; sha256 = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"; };
-  });
-  
-  "unknown".squiggle-mc-cached-wasm."0.0.1" = overridableMkRustCrate (profileName: rec {
-    name = "squiggle-mc-cached-wasm";
-    version = "0.0.1";
-    registry = "unknown";
-    src = fetchCrateLocal workspaceSrc;
-    features = builtins.concatLists [
-      (lib.optional (rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc") "wee_alloc")
-    ];
-    dependencies = {
-      cached = rustPackages."registry+https://github.com/rust-lang/crates.io-index".cached."0.38.0" { inherit profileName; };
-      ${ if false then "console_error_panic_hook" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".console_error_panic_hook."0.1.7" { inherit profileName; };
-      getrandom = rustPackages."registry+https://github.com/rust-lang/crates.io-index".getrandom."0.2.7" { inherit profileName; };
-      kernel_density = rustPackages."registry+https://github.com/rust-lang/crates.io-index".kernel_density."0.0.1" { inherit profileName; };
-      rand = rustPackages."registry+https://github.com/rust-lang/crates.io-index".rand."0.8.5" { inherit profileName; };
-      rand_distr = rustPackages."registry+https://github.com/rust-lang/crates.io-index".rand_distr."0.4.3" { inherit profileName; };
-      statistics = rustPackages."registry+https://github.com/rust-lang/crates.io-index".statistics."0.4.1" { inherit profileName; };
-      wasm_bindgen = rustPackages."registry+https://github.com/rust-lang/crates.io-index".wasm-bindgen."0.2.82" { inherit profileName; };
-      web_sys = rustPackages."registry+https://github.com/rust-lang/crates.io-index".web-sys."0.3.59" { inherit profileName; };
-      ${ if rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc" then "wee_alloc" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".wee_alloc."0.4.5" { inherit profileName; };
-    };
-    devDependencies = {
-      futures = rustPackages."registry+https://github.com/rust-lang/crates.io-index".futures."0.1.31" { inherit profileName; };
-      js_sys = rustPackages."registry+https://github.com/rust-lang/crates.io-index".js-sys."0.3.59" { inherit profileName; };
-      quickcheck = rustPackages."registry+https://github.com/rust-lang/crates.io-index".quickcheck."1.0.3" { inherit profileName; };
-      quickcheck_macros = buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".quickcheck_macros."1.0.0" { profileName = "__noProfile"; };
-      wasm_bindgen_futures = rustPackages."registry+https://github.com/rust-lang/crates.io-index".wasm-bindgen-futures."0.3.27" { inherit profileName; };
-      wasm_bindgen_test = rustPackages."registry+https://github.com/rust-lang/crates.io-index".wasm-bindgen-test."0.2.50" { inherit profileName; };
-    };
   });
   
   "registry+https://github.com/rust-lang/crates.io-index".statistics."0.4.1" = overridableMkRustCrate (profileName: rec {
@@ -1139,14 +1140,14 @@ in
     registry = "registry+https://github.com/rust-lang/crates.io-index";
     src = fetchCratesIo { inherit name version; sha256 = "dbb3b5a6b2bb17cb6ad44a2e68a43e8d2722c997da10e928665c72ec6c0a0b8e"; };
     features = builtins.concatLists [
-      (lib.optional (rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc") "default")
-      (lib.optional (rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc") "size_classes")
+      (lib.optional (rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc") "default")
+      (lib.optional (rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc") "size_classes")
     ];
     dependencies = {
-      ${ if rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc" then "cfg_if" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".cfg-if."0.1.10" { inherit profileName; };
-      ${ if rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc" && hostPlatform.isUnix && !(hostPlatform.parsed.cpu.name == "wasm32") then "libc" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".libc."0.2.132" { inherit profileName; };
-      ${ if rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc" then "memory_units" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".memory_units."0.4.0" { inherit profileName; };
-      ${ if rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc" && hostPlatform.parsed.kernel.name == "windows" then "winapi" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".winapi."0.3.9" { inherit profileName; };
+      ${ if rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc" then "cfg_if" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".cfg-if."0.1.10" { inherit profileName; };
+      ${ if (rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc") && hostPlatform.isUnix && !(hostPlatform.parsed.cpu.name == "wasm32") then "libc" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".libc."0.2.132" { inherit profileName; };
+      ${ if rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc" then "memory_units" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".memory_units."0.4.0" { inherit profileName; };
+      ${ if (rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc") && hostPlatform.parsed.kernel.name == "windows" then "winapi" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".winapi."0.3.9" { inherit profileName; };
     };
   });
   
@@ -1156,12 +1157,12 @@ in
     registry = "registry+https://github.com/rust-lang/crates.io-index";
     src = fetchCratesIo { inherit name version; sha256 = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419"; };
     features = builtins.concatLists [
-      (lib.optional (rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc") "memoryapi")
+      (lib.optional (rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc") "memoryapi")
       [ "minwindef" ]
       [ "ntsecapi" ]
       [ "profileapi" ]
-      (lib.optional (rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc") "synchapi")
-      (lib.optional (rootFeatures' ? "squiggle-mc-cached-wasm/wee_alloc") "winbase")
+      (lib.optional (rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc") "synchapi")
+      (lib.optional (rootFeatures' ? "quri-squiggle-mc/default" || rootFeatures' ? "quri-squiggle-mc/wee_alloc") "winbase")
       [ "winnt" ]
     ];
     dependencies = {

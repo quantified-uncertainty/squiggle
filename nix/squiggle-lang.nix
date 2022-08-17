@@ -1,10 +1,10 @@
-{ pkgs, commonFn, mcCacheFn, gentypeOutputFn }:
+{ pkgs, commonFn, mcFn, gentypeOutputFn }:
 
 rec {
   common = commonFn pkgs;
-  mcCache = mcCacheFn pkgs;
+  mc = mcFn pkgs;
   yarn-source = pkgs.mkYarnPackage {
-    name = "squiggle-lang_source";
+    name = "squiggle-lang_yarnsource";
     src = ../packages/squiggle-lang;
     packageJSON = ../packages/squiggle-lang/package.json;
     yarnLock = ../yarn.lock;
@@ -23,8 +23,7 @@ rec {
         '';
       };
       bisect_ppx = {
-        buildInputs =
-          common.which; # ++ (with pkgs; [ ocaml nodePackages.esy ocamlPackages.bisect_ppx ]);
+        buildInputs = common.which;
         postInstall = ''
           echo "PATCHELF'ING BISECT_PPX EXECUTABLE"
           THE_LD=$(patchelf --print-interpreter $(which mkdir))
@@ -39,7 +38,7 @@ rec {
         '';
       };
     };
-    packageResolutions."@quri/par-cached-monte-carlo" = mcCache.mc-cached;
+    packageResolutions."@quri/squiggle-mc" = mc.webpack-build-pkg;
   };
   lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-lint";

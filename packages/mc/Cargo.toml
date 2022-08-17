@@ -1,6 +1,6 @@
 # You must change these to your own details.
 [package]
-name = "squiggle-mc-cached-wasm"
+name = "quri-squiggle-mc"
 description = "Cached and parallel Monte Carlo simulations in WebAssembly"
 version = "0.0.1"
 authors = ["Quinn <quinn@quantifieduncertainty.org>"]
@@ -20,12 +20,16 @@ lto = true
 
 [features]
 # If you uncomment this line, it will enable `wee_alloc`:
-#default = ["wee_alloc"]
+default = ["wee_alloc"]
 
 [dependencies]
 # The `wasm-bindgen` crate provides the bare minimum functionality needed
 # to interact with JavaScript.
 wasm-bindgen = "0.2.45"
+
+# The `web-sys` crate allows you to interact with the various browser APIs,
+# like the DOM.
+web-sys = { version = "0.3.59", features = ["console"] }
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. However, it is slower than the default
@@ -39,12 +43,6 @@ rand_distr = "0.4.3"
 statistics = "0.4.1"
 kernel_density = "0.0.1"
 cached = { version = "0.38.0", features = ["wasm"] }
-
-# The `web-sys` crate allows you to interact with the various browser APIs,
-# like the DOM.
-[dependencies.web-sys]
-version = "0.3.22"
-features = ["console"]
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

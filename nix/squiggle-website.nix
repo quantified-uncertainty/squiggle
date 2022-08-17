@@ -1,8 +1,8 @@
-{ pkgs, commonFn, mcCacheFn, langFn, componentsFn }:
+{ pkgs, commonFn, mcFn, langFn, componentsFn }:
 
 rec {
   common = commonFn pkgs;
-  mcCache = mcCacheFn pkgs;
+  mc = mcFn pkgs;
   lang = langFn pkgs;
   components = componentsFn pkgs;
   websitePackageJson = let
@@ -14,13 +14,13 @@ rec {
     packageJsonString = builtins.toJSON modified;
   in pkgs.writeText "packages/website/patched-package.json" packageJsonString;
   yarn-source = pkgs.mkYarnPackage {
-    name = "squiggle-website_source";
+    name = "squiggle-website_yarnsource";
     src = ../packages/website;
     packageJSON = websitePackageJson;
     yarnLock = ../yarn.lock;
+    packageResolutions."@quri/squiggle-mc" = mc.webpack-build-pkg + "/pkg";
     packageResolutions."@quri/squiggle-lang" = lang.build;
     packageResolutions."@quri/squiggle-components" = components.package-build;
-    workspaceDependencies = [ lang.yarn-source components.yarn-source ];
   };
   lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-website-lint";

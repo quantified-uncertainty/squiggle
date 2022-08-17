@@ -1,6 +1,6 @@
 {
   "author": "Quinn Dougherty <quinnd@riseup.net>",
-  "name": "@quri/par-cached-monte-carlo",
+  "name": "@quri/squiggle-mc",
   "version": "0.0.1",
   "scripts": {
     "build": "rimraf dist pkg && webpack",

@@ -41,7 +41,7 @@
   ],
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
-    "@quri/par-cached-monte-carlo": "file:../squiggle-mc-cached/pkg",
+    "@quri/squiggle-mc": "^0.0.1",
     "@rescript/std": "^9.1.4",
     "@stdlib/stats": "^0.0.13",
     "jstat": "^1.9.5",
