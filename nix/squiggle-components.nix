@@ -1,7 +1,8 @@
-{ pkgs, commonFn, langFn }:
+{ pkgs, commonFn, mcCacheFn, langFn }:
 
 rec {
   common = commonFn pkgs;
+  mcCache = mcCacheFn pkgs;
   lang = langFn pkgs;
   componentsPackageJson = let
     raw = pkgs.lib.importJSON ../packages/components/package.json;

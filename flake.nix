@@ -3,6 +3,10 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
+    cargo2nix = {
+      url = "github:cargo2nix/cargo2nix/release-0.11.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     gentype = {
       url = "github:quinn-dougherty/genType";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,7 +21,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, gentype, hercules-ci-effects, flake-utils, ... }:
+  outputs = { self, nixpkgs, gentype, hercules-ci-effects, cargo2nix, flake-utils, ... }:
     let
       version = builtins.substring 0 8 self.lastModifiedDate;
       commonFn = pkgs: {
@@ -26,20 +30,23 @@
         which = [ pkgs.which ];
       };
       gentypeOutputFn = pkgs: gentype.outputs.packages.${pkgs.system}.default;
+      mcCacheFn = { pkgs, ... }:
+        import ./nix/squiggle-mcCache.nix { inherit pkgs; };
       langFn = { pkgs, ... }:
         import ./nix/squiggle-lang.nix {
-          inherit pkgs commonFn gentypeOutputFn;
+          inherit pkgs commonFn mcCacheFn gentypeOutputFn;
         };
       componentsFn = { pkgs, ... }:
-        import ./nix/squiggle-components.nix { inherit pkgs commonFn langFn; };
+        import ./nix/squiggle-components.nix { inherit pkgs commonFn mcCacheFn langFn; };
       websiteFn = { pkgs, ... }:
         import ./nix/squiggle-website.nix {
-          inherit pkgs commonFn langFn componentsFn;
+          inherit pkgs commonFn mcCacheFn langFn componentsFn;
         };
 
       # local machines
       localFlake = { pkgs, ... }:
         let
+          mcCache = mcCacheFn pkgs;
           lang = langFn pkgs;
           components = componentsFn pkgs;
           website = websiteFn pkgs;
@@ -54,6 +61,7 @@
           # building
           packages = flake-utils.lib.flattenTree {
             default = website.docusaurus;
+            mc-wasm = mcCache.mc-cached;
             lang-bundle = lang.bundle;
             components = components.package-build;
             storybook = components.site-build;
@@ -62,7 +70,7 @@
 
           # developing
           devShells = flake-utils.lib.flattenTree {
-            default = (import ./nix/shell.nix { inherit pkgs; }).shell;
+            default = (import ./nix/shell.nix { inherit pkgs cargo2nix; }).shell;
           };
         };
 
@@ -102,6 +110,7 @@
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
+            cargo2nix.overlays.default
             (final: prev: {
               # set the node version here
               nodejs = prev.nodejs-18_x;

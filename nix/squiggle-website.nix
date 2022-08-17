@@ -1,7 +1,8 @@
-{ pkgs, commonFn, langFn, componentsFn }:
+{ pkgs, commonFn, mcCacheFn, langFn, componentsFn }:
 
 rec {
   common = commonFn pkgs;
+  mcCache = mcCacheFn pkgs;
   lang = langFn pkgs;
   components = componentsFn pkgs;
   websitePackageJson = let

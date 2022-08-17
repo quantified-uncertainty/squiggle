@@ -1,7 +1,8 @@
-{ pkgs, commonFn, gentypeOutputFn }:
+{ pkgs, commonFn, mcCacheFn, gentypeOutputFn }:
 
 rec {
   common = commonFn pkgs;
+  mcCache = mcCacheFn pkgs;
   yarn-source = pkgs.mkYarnPackage {
     name = "squiggle-lang_source";
     src = ../packages/squiggle-lang;
@@ -38,6 +39,7 @@ rec {
         '';
       };
     };
+    packageResolutions."@quri/par-cached-monte-carlo" = mcCache.mc-cached;
   };
   lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-lint";
