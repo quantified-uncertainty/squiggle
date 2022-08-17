@@ -34,7 +34,7 @@ pub fn iqr(x: &Vec<f64>) -> f64 {
 
 /** Silverman, B. W. (1986) Density Estimation. London: Chapman and Hall.
 */
-pub fn nrd0(x: Vec<f64>) -> f64 {
+pub fn nrd0(x: &Vec<f64>) -> f64 {
     let _hi = variance(&x).sqrt();
     let _lo = min([_hi, iqr(&x) / nrd0_lo_denominator()].to_vec());
     let _e = x[1].abs();
@@ -52,7 +52,7 @@ pub fn nrd0(x: Vec<f64>) -> f64 {
 }
 
 /** Scott, D. W. (1992) Multivariate Density Estimation: Theory, Practice, and Visualization. Wiley. */
-pub fn nrd(x: Vec<f64>) -> f64 {
+pub fn nrd(x: &Vec<f64>) -> f64 {
     let h = iqr(&x) / nrd0_lo_denominator();
     return nrd_coef() * min([variance(&x).sqrt(), h].to_vec()) * lenf(&x).powf(nrd_fractional_power());
 }

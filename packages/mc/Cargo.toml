@@ -33,7 +33,8 @@ default = ["wee_alloc"]
 [dependencies]
 # The `wasm-bindgen` crate provides the bare minimum functionality needed
 # to interact with JavaScript.
-wasm-bindgen = "0.2.82"
+wasm-bindgen = { version = "0.2.82", features = ["serde-serialize"] }
+serde = { version = "1", features = ["derive"] }
 
 # The `web-sys` crate allows you to interact with the various browser APIs,
 # like the DOM.
@@ -49,7 +50,7 @@ rand = "0.8.5"
 getrandom = { version = "0.2", features = ["js"] }
 rand_distr = "0.4.3"
 statistics = "0.4.1"
-kernel_density = "0.0.1"
+kernel_density = { git = "https://github.com/daithiocrualaoich/kernel_density" }
 cached = { version = "0.38.0", features = ["wasm"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
