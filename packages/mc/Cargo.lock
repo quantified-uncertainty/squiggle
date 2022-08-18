@@ -286,11 +286,10 @@ dependencies = [
 
 [[package]]
 name = "kernel_density"
-version = "0.0.2"
-source = "git+https://github.com/daithiocrualaoich/kernel_density#98c5fb6f9989d9bb6db19adc134cdbd32512d41e"
+version = "0.0.3"
+source = "git+https://github.com/quinn-dougherty/kernel_density#c044758c96ae0c4666523a38449f3dbd0d4695cd"
 dependencies = [
- "rand 0.3.23",
- "special-fun",
+ "rand 0.4.6",
 ]
 
 [[package]]
@@ -443,16 +442,6 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.3.23"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64ac302d8f83c0c1974bf758f6b041c6c8ada916fbb44a609158ca8b064cc76c"
-dependencies = [
- "libc",
- "rand 0.4.6",
-]
-
-[[package]]
-name = "rand"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "552840b97013b1a26992c11eac34bdd778e464601a4c2054b5f0bff7c6761293"
@@ -588,12 +577,6 @@ dependencies = [
  "ryu",
  "serde",
 ]
-
-[[package]]
-name = "special-fun"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cde43d93062bf8040a0d30f83a8b40b2756af55ba048e007ee7c81e02276b81"
 
 [[package]]
 name = "statistics"

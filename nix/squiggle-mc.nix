@@ -11,13 +11,10 @@ rec {
 
     buildPhase = ''
       cargo build --lib --release --target=wasm32-unknown-unknown
-
       mkdir -p $out/pkg
-
       wasm-bindgen --target nodejs --out-dir $out/pkg target/wasm32-unknown-unknown/release/quri_squiggle_mc.wasm
     '';
     installPhase = "echo 'skipping installPhase'";
-
     cargoLock = {
       lockFile = ../packages/mc/Cargo.lock;
       outputHashes = {
@@ -29,7 +26,7 @@ rec {
     name = "squiggle-mc-lint";
     src = ../packages/mc;
     buildInputs = with pkgs; [ rustfmt ];
-    buildPhase = "rustfmt --check src";
+    buildPhase = "rustfmt --check src/**";
     installPhase = "mkdir -p $out";
   };
 

@@ -52,7 +52,7 @@ rand = "0.8.5"
 getrandom = { version = "0.2.7", features = ["js"] }
 # rand_distr = "0.4.3"
 statistics = "0.4.1"
-kernel_density = { git = "https://github.com/daithiocrualaoich/kernel_density" }
+kernel_density = { git = "https://github.com/quinn-dougherty/kernel_density", version = "0.0.3" }
 cached = { version = "0.38.0", features = ["wasm"] }
 # instant = { git = "https://github.com/sebcrozet/instant", features = ["wasm-bindgen"] }
 # The `console_error_panic_hook` crate provides better debugging of panics by
