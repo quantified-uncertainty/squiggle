@@ -92,7 +92,7 @@
       # ci
       herc = let
         hciSystem = "x86_64-linux";
-        hciPkgs = import nixpkgs { system = hciSystem; };
+        hciPkgs = import nixpkgs { system = hciSystem; overlays = overlays; };
         effects = hercules-ci-effects.lib.withPkgs hciPkgs;
         mc = mcFn hciPkgs;
         lang = langFn hciPkgs;

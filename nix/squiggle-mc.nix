@@ -1,8 +1,8 @@
 { pkgs }:
 
-with pkgs.rustPlatform; rec {
+rec {
   rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-  pkg = buildRustPackage {
+  pkg = pkgs.rustPlatform.buildRustPackage {
     pname = "quri_squiggle_mc";
     version = "0.0.1";
     src = ../packages/mc;
@@ -35,7 +35,7 @@ with pkgs.rustPlatform; rec {
 
   test = pkgs.stdenv.mkDerivation {
     name = "squiggle-mc-test";
-    src = mc-pkg + "/pkg";
+    src = pkg + "/pkg";
     buildInputs = with pkgs; [ cargo ];
     buildPhase = "cargo test";
     installPhase = "mkdir -p $out";
