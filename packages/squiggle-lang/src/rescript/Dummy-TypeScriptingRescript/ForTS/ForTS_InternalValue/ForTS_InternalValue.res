@@ -1,4 +1,4 @@
-open ForTS_Types
+open ForTS_Types_
 
 @module("ForTS_InternalValue_tag") @scope("InternalValueTag")
 external ivtVoid_: int = "IvtVoid"

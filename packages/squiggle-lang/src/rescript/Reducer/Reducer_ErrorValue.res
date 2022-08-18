@@ -1,7 +1,7 @@
+//FIXME: Move this under ForTS
 @gentype.import("peggy") @genType.as("LocationRange")
 type location
 
-@genType
 type errorValue =
   | REArityError(option<string>, int, int)
   | REArrayIndexNotFound(string, int)
@@ -23,7 +23,6 @@ type errorValue =
 
 type t = errorValue
 
-@genType
 let errorToString = err =>
   switch err {
   | REArityError(_oFnName, arity, usedArity) =>

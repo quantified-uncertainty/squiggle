@@ -34,30 +34,6 @@ type resultString = result<string, distributionError>
 @genType
 let makeSampleSetDist = SampleSetDist.make
 
-// @genType
-// let evaluate = Reducer.evaluate
-
-// @genType
-// let evaluateUsingOptions = Reducer.evaluateUsingOptions
-
-@genType
-let parse = Reducer_Peggy_Parse.parse
-
-// @genType
-// let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
-
-@genType
-type externalBindings = Reducer.externalBindings
-
-@genType
-type expressionValue = ReducerInterface_ExternalExpressionValue.t
-
-@genType
-type recordEV = ReducerInterface_ExternalExpressionValue.record
-
-@genType
-type errorValue = Reducer_ErrorValue.errorValue
-
 @genType
 let toPointSet = GenericDist.toPointSet
 
@@ -71,28 +47,10 @@ type discreteShape = PointSetTypes.discreteShape
 type continuousShape = PointSetTypes.continuousShape
 
 @genType
-let errorValueToString = Reducer_ErrorValue.errorToString
-
-@genType
 let distributionErrorToString = DistributionTypes.Error.toString
 
 @genType
-type lambdaValue = ReducerInterface_ExternalExpressionValue.lambdaValue
-
-@genType
-type lambdaDeclaration = ReducerInterface_ExternalExpressionValue.lambdaDeclaration
-
-@genType
 let defaultSamplingEnv = DistributionOperation.defaultEnv
-
-@genType
-type environment = ReducerInterface_ExternalExpressionValue.environment
-
-@genType
-let defaultEnvironment = ReducerInterface_ExternalExpressionValue.defaultEnvironment
-
-// @genType
-// let foreignFunctionInterface = Reducer.foreignFunctionInterface
 
 @genType
 type declarationArg = Declaration.arg

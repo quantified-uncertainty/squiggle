@@ -1,4 +1,4 @@
-open ForTS_Types
+open ForTS__Types
 
 @genType let isError = (r: result_<'a, 'e>): bool => Belt.Result.isError(r)
 @genType let isOk = (r: result_<'a, 'e>): bool => Belt.Result.isOk(r)
