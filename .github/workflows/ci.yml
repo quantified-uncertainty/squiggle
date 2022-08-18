@@ -64,8 +64,7 @@ jobs:
         shell: bash
         working-directory: packages/mc
     steps:
-      - name: Run yarn at monorepo level
-        run: cd ../../ && yarn
+      - uses: actions/checkout@v3
       - name: Download wasm-bindgen
         uses: jetli/wasm-bindgen-action@v0.1.0
         with:
