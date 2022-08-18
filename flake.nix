@@ -116,10 +116,8 @@
             components.outputs = {
               squiggle-components = components.package-build;
               squiggle-components-lint = components.lint;
-              squiggle-components-storybook = components.site-build;
             };
             docs-site.outputs = {
-              squiggle-website = website.docusaurus;
               docusaurus-lint = website.lint;
             };
           };
