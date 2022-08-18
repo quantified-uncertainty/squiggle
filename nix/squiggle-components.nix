@@ -17,7 +17,7 @@ rec {
     src = ../packages/components;
     packageJSON = componentsPackageJson;
     yarnLock = ../yarn.lock;
-    packageResolutions."@quri/squiggle-mc" = mc.webpack-build-pkg;
+    packageResolutions."@quri/squiggle-mc" = mc.pkg;
     packageResolutions."@quri/squiggle-lang" = lang.build;
   };
   lint = pkgs.stdenv.mkDerivation {
@@ -50,19 +50,6 @@ rec {
       # patching .gitignore so flake keeps build artefacts
       sed -i /dist/d deps/@quri/squiggle-components/.gitignore
       cp -r deps/@quri/squiggle-components/. $out
-    '';
-  };
-  site-build = pkgs.stdenv.mkDerivation {
-    name = "squiggle-components-storybook";
-    src = package-build;
-    buildInputs = common.buildInputs;
-    buildPhase = "yarn build:storybook";
-    installPhase = ''
-      mkdir -p $out
-
-      # patching .gitignore so flake keeps build artefacts
-      sed -i /build/d .gitignore
-      sed -i /storybook-static/d .gitignore
     '';
   };
 }

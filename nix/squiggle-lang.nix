@@ -10,7 +10,7 @@ rec {
     yarnLock = ../yarn.lock;
     pkgConfig = {
       rescript = {
-        buildInputs = common.which ++ [ pkgs.gcc_multi ];
+        buildInputs = common.which ++ (if pkgs.system != "i686-linux" then [ pkgs.gcc_multi ] else []);
         postInstall = ''
           echo "PATCHELF'ING RESCRIPT EXECUTABLES (INCL NINJA)"
           # Patching interpreter for linux/*.exe's
@@ -39,7 +39,7 @@ rec {
         '';
       };
     };
-    packageResolutions."@quri/squiggle-mc" = mc.webpack-build-pkg;
+    packageResolutions."@quri/squiggle-mc" = mc.pkg;
   };
   lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-lint";

@@ -1,4 +1,4 @@
-{ pkgs, cargo2nix }:
+{ pkgs }:
 with pkgs; {
   shell = mkShell {
     name = "SQUIGGLE_yarn-wasm-devshell";
@@ -13,9 +13,9 @@ with pkgs; {
       libressl
       nixfmt
       rustfmt
-      cargo2nix.outputs.packages.${pkgs.system}.default
       wasmtime
       binaryen
+      wasm-bindgen-cli
     ];
   };
 }

@@ -18,7 +18,7 @@ rec {
     src = ../packages/website;
     packageJSON = websitePackageJson;
     yarnLock = ../yarn.lock;
-    packageResolutions."@quri/squiggle-mc" = mc.webpack-build-pkg + "/pkg";
+    packageResolutions."@quri/squiggle-mc" = mc.pkg;
     packageResolutions."@quri/squiggle-lang" = lang.build;
     packageResolutions."@quri/squiggle-components" = components.package-build;
   };
@@ -28,19 +28,5 @@ rec {
     src = yarn-source + "/libexec/squiggle-website/deps/squiggle-website";
     buildPhase = "yarn --offline lint";
     installPhase = "mkdir -p $out";
-  };
-  docusaurus = pkgs.stdenv.mkDerivation {
-    name = "squiggle-website";
-    buildInputs = common.buildInputs;
-    src = yarn-source + "/libexec/squiggle-website";
-    buildPhase = ''
-      pushd deps/squiggle-website
-      yarn --offline build
-      popd
-    '';
-    installPhase = ''
-      mkdir -p $out
-      cp -r $src/build $out
-    '';
   };
 }

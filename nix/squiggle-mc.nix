@@ -1,65 +1,43 @@
-{ pkgs, wasmPkgs, commonFn, naerskFn }:
+{ pkgs }:
 
-rec {
-  common = commonFn pkgs;
-
-  rustVersion = "1.61.0";
-  wasmTarget = "wasm32-unknown-unknown";
-  rust = pkgs.rust-bin.stable.${rustVersion}.default.override {
-    targets = [ wasmTarget ];
-  };
-  naersk = naerskFn { inherit pkgs rust; };
-  mc-pkg = naersk.buildPackage {
+with pkgs.rustPlatform; rec {
+  rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+  pkg = buildRustPackage {
+    pname = "quri_squiggle_mc";
+    version = "0.0.1";
     src = ../packages/mc;
-    copyLibs = true;
-    copyBins = true;
-    CARGO_BUILD_TARGET = wasmTarget;
-    nativeBuildInputs = common.buildInputs;
-  };
-  lib2 = mc-pkg;
 
-  rustPkgsWasm = wasmPkgs.rustBuilder.makePackageSet {
-    rustVersion = rustVersion;
-    packageFun = import ../packages/mc/Cargo.nix;
-    target = wasmTarget;
-  };
-  lib = (rustPkgsWasm.workspace.quri-squiggle-mc { }).out;
+    nativeBuildInputs = [ rust pkgs.wasm-bindgen-cli ];
 
-  yarn-source = pkgs.mkYarnPackage {
-    name = "squiggle-mc_yarnsource";
-    buildInputs = common.buildInputs;
-    src = ../packages/mc;
-    packageJSON = ../packages/mc/package.json;
-    yarnLock = ../yarn.lock;
+    buildPhase = ''
+      cargo build --lib --release --target=wasm32-unknown-unknown
+
+      mkdir -p $out/pkg
+
+      wasm-bindgen --target nodejs --out-dir $out/pkg target/wasm32-unknown-unknown/release/quri_squiggle_mc.wasm
+    '';
+    installPhase = "echo 'skipping installPhase'";
+
+    cargoLock = {
+      lockFile = ../packages/mc/Cargo.lock;
+      outputHashes = {
+        "kernel_density-0.0.2" = "sha256-pHh5p/AS+uopmPSaXK9rKHlmqS26qggXvf1TeitS430=";
+      };
+    };
   };
-  rust-lint = pkgs.stdenv.mkDerivation {
+  lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-mc-lint";
-    src = yarn-source + "/libexec/@quri/squiggle-mc/deps/@quri/squiggle-mc";
+    src = ../packages/mc;
     buildInputs = with pkgs; [ rustfmt ];
     buildPhase = "rustfmt --check src";
     installPhase = "mkdir -p $out";
   };
-  webpack-build-pkg = pkgs.stdenv.mkDerivation {
-    name = "squiggle-mc-build";
-    src = yarn-source + "/libexec/@quri/squiggle-mc";
-    buildInputs = common.buildInputs ++ (with pkgs; [ wasm-pack ]);
-    buildPhase = ''
-      pushd deps/@quri/squiggle-mc
-      sed -i /pkg/d .gitignore
-      yarn --offline build
-      popd
-    '';
-    installPhase = ''
-      mkdir -p $out
-      cp -r deps/@quri/squiggle-mc/. $out
-    '';
-  };
-  firefox-test = pkgs.stdenv.mkDerivation {
+
+  test = pkgs.stdenv.mkDerivation {
     name = "squiggle-mc-test";
-    src = yarn-source + "/libexec/@quri/squiggle-mc/deps/@quri/squiggle-mc";
-    buildInputs = common.buildInputs
-      ++ (with pkgs; [ geckodriver cargo wasm-pack ]);
-    buildPhase = "yarn --offline test -- --firefox";
+    src = mc-pkg + "/pkg";
+    buildInputs = with pkgs; [ cargo ];
+    buildPhase = "cargo test";
     installPhase = "mkdir -p $out";
   };
 }

@@ -3,12 +3,8 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
-    naersk = {
-      url = "github:nix-community/naersk";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    cargo2nix = {
-      url = "github:cargo2nix/cargo2nix/release-0.11.0";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     gentype = {
@@ -25,20 +21,14 @@
     };
   };
 
-  outputs = { self, nixpkgs, gentype, hercules-ci-effects, naersk, cargo2nix
-    , flake-utils, ... }:
+  outputs = { self, nixpkgs, rust-overlay, gentype, hercules-ci-effects, flake-utils, ... }:
     let
       version = builtins.substring 0 8 self.lastModifiedDate;
-      crossSystemForWasmPkgs = {
-        config = "wasm32-unknown-wasi-unknown";
-        system = "wasm32-wasi";
-        useLLVM = true;
-      };
       overlays = [
-        cargo2nix.overlays.default
+        rust-overlay.overlays.default
         (final: prev: {
           # set the node version here
-          nodejs = prev.nodejs-16_x;
+          nodejs = prev.nodejs-18_x;
           # The override is the only way to get it into mkYarnModules
         })
       ];
@@ -48,17 +38,13 @@
         prettier = with pkgs.nodePackages; [ prettier ];
         which = [ pkgs.which ];
       };
-      naerskFn = { pkgs, rust, ... }:
-        pkgs.callPackage naersk {
-          cargo = rust;
-          rustc = rust;
-        };
       gentypeOutputFn = pkgs: gentype.outputs.packages.${pkgs.system}.default;
-      mcFn = { pkgs, wasmPkgs, ... }:
+      mcFn = { pkgs, ... }:
         import ./nix/squiggle-mc.nix {
-          inherit pkgs wasmPkgs commonFn naerskFn;
+          inherit pkgs;
         };
       langFn = { pkgs, ... }:
+        # Probably doesn't work on i686-linux
         import ./nix/squiggle-lang.nix {
           inherit pkgs commonFn mcFn gentypeOutputFn;
         };
@@ -72,17 +58,17 @@
         };
 
       # local machines
-      localFlake = { pkgs, wasmPkgs, ... }:
+      localFlake = { pkgs, ... }:
         let
-          mc = mcFn { inherit pkgs wasmPkgs; };
+          mc = mcFn pkgs;
           lang = langFn pkgs;
           components = componentsFn pkgs;
           website = websiteFn pkgs;
         in {
           # validating
           checks = flake-utils.lib.flattenTree {
-            wasm-lint = mc.rust-lint;
-            wasm-headless-test = mc.firefox-test;
+            wasm-lint = mc.lint;
+            wasm-test = mc.test;
             lang-lint = lang.lint;
             lang-test = lang.test;
             components-lint = components.lint;
@@ -90,20 +76,16 @@
           };
           # building
           packages = flake-utils.lib.flattenTree {
-            default = website.docusaurus;
-            mc-wasm = mc.lib;
-            mc-wasm2 = mc.lib2;
-            mc-wasm-pkg = mc.webpack-build-pkg;
+            default = components.package-build;
+            mc-wasm = mc.pkg;
             lang-bundle = lang.bundle;
             components = components.package-build;
-            storybook = components.site-build;
-            docs-site = website.docusaurus;
           };
 
           # developing
           devShells = flake-utils.lib.flattenTree {
             default =
-              (import ./nix/shell.nix { inherit pkgs cargo2nix; }).shell;
+              (import ./nix/shell.nix { inherit pkgs; }).shell;
           };
         };
 
@@ -111,16 +93,8 @@
       herc = let
         hciSystem = "x86_64-linux";
         hciPkgs = import nixpkgs { system = hciSystem; };
-        hciPkgsWasm = import nixpkgs {
-          system = hciSystem;
-          crossSystem = crossSystemForWasmPkgs;
-          overlays = overlays;
-        };
         effects = hercules-ci-effects.lib.withPkgs hciPkgs;
-        mc = mcFn {
-          pkgs = hciPkgs;
-          wasmPkgs = hciPkgsWasm;
-        };
+        mc = mcFn hciPkgs;
         lang = langFn hciPkgs;
         components = componentsFn hciPkgs;
         website = websiteFn hciPkgs;
@@ -129,9 +103,9 @@
           ciSystems = [ hciSystem ];
           onPush = {
             wasm.outputs = {
-              squiggle-wasm-lint = mc.rust-lint;
-              squiggle-wasm-pkg = mc.webpack-build-pkg;
-              squiggle-wasm-test-ff = mc.firefox-test;
+              squiggle-wasm-lint = mc.lint;
+              squiggle-wasm-pkg = mc.pkg;
+              squiggle-wasm-test = mc.test;
             };
             lang.outputs = {
               squiggle-lang-lint = lang.lint;
@@ -158,14 +132,6 @@
           inherit system;
           overlays = overlays;
         };
-        pkgsWasm = import nixpkgs {
-          inherit system;
-          overlays = overlays;
-          crossSystem = crossSystemForWasmPkgs;
-        };
 
-      in localFlake {
-        pkgs = pkgs;
-        wasmPkgs = pkgsWasm;
-      }) // herc;
+      in localFlake pkgs) // herc;
 }
