@@ -221,7 +221,7 @@ jobs:
         with:
           version: "latest"
       - name: Build squiggle-mc
-        run: cd ../mc wasm-pack build --target nodejs
+        run: cd ../mc && wasm-pack build --target nodejs
       - name: Build rescript and typescript in squiggle-lang
         run: cd ../squiggle-lang && yarn build
       - name: Build components
