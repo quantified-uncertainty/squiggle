@@ -28,8 +28,8 @@ rec {
     buildPhase = "yarn lint";
     installPhase = "mkdir -p $out";
   };
-  package-build = pkgs.stdenv.mkDerivation {
-    name = "squiggle-components-package-build";
+  build = pkgs.stdenv.mkDerivation {
+    name = "squiggle-components-build";
     src = yarn-source + "/libexec/@quri/squiggle-components";
     buildInputs = common.buildInputs;
     buildPhase = ''
@@ -38,6 +38,29 @@ rec {
 
       yarn --offline build:cjs
       yarn --offline build:css
+      popd
+    '';
+    installPhase = ''
+      mkdir -p $out
+
+      # annoying hack because permissions on transitive dependencies later on
+      mv deps/@quri/squiggle-components/node_modules deps/@quri/squiggle-components/NODE_MODULES
+      mv node_modules deps/@quri/squiggle-components
+
+      # patching .gitignore so flake keeps build artefacts
+      sed -i /dist/d deps/@quri/squiggle-components/.gitignore
+      cp -r deps/@quri/squiggle-components/. $out
+    '';
+  };
+  bundle = pkgs.stdenv.mkDerivation {
+    name = "squiggle-components-bundle";
+    src = yarn-source + "/libexec/@quri/squiggle-components";
+    buildInputs = common.buildInputs;
+    buildPhase = ''
+      cp -r node_modules/@quri/squiggle-lang deps/@quri
+      pushd deps/@quri/squiggle-components
+
+      yarn --offline bundle
       popd
     '';
     installPhase = ''

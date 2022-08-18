@@ -76,10 +76,11 @@
           };
           # building
           packages = flake-utils.lib.flattenTree {
-            default = components.package-build;
+            default = components.build;
             mc-wasm = mc.pkg;
             lang-bundle = lang.bundle;
-            components = components.package-build;
+            components = components.build;
+            components-bundle = components.bundle;
           };
 
           # developing
@@ -114,8 +115,9 @@
               squiggle-lang-bundle = lang.bundle;
             };
             components.outputs = {
-              squiggle-components = components.package-build;
               squiggle-components-lint = components.lint;
+              squiggle-components = components.build;
+              squiggle-components-bundle = components.bundle;
             };
             docs-site.outputs = {
               docusaurus-lint = website.lint;
