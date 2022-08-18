@@ -20,7 +20,7 @@ rec {
     yarnLock = ../yarn.lock;
     packageResolutions."@quri/squiggle-mc" = mc.pkg;
     packageResolutions."@quri/squiggle-lang" = lang.build;
-    packageResolutions."@quri/squiggle-components" = components.package-build;
+    packageResolutions."@quri/squiggle-components" = components.build;
   };
   lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-website-lint";
