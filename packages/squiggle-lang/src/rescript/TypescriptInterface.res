@@ -9,7 +9,7 @@ The below few seem to work fine. In the future there's definitely more work to d
 */
 
 @genType
-type samplingParams = GenericDist.env
+type samplingParams = environment
 
 @genType
 type genericDist = squiggleValue_Distribution
