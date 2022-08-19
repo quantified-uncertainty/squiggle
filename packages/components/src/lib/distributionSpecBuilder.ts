@@ -83,7 +83,7 @@ export function buildVegaSpec(
 
   let spec: VisualizationSpec = {
     $schema: "https://vega.github.io/schema/vega/v5.json",
-    description: "A basic area chart example",
+    description: "Squiggle plot chart",
     width: 500,
     height: 100,
     padding: 5,

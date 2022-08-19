@@ -40,7 +40,7 @@ export function makePlot(record: {
   [key: string]: squiggleExpression;
 }): Plot | void {
   const plotResult = parsePlot(record);
-  if (plotResult.tag == "Ok") {
+  if (plotResult.tag === "Ok") {
     return plotResult.value;
   }
 }
