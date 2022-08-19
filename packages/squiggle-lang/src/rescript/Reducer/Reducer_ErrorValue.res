@@ -1,6 +1,6 @@
-//FIXME: Move this under ForTS
+//TODO: Do not export here but in ForTS__Types
 @gentype.import("peggy") @genType.as("LocationRange")
-type location
+type syntaxErrorLocation
 
 type errorValue =
   | REArityError(option<string>, int, int)
@@ -17,7 +17,7 @@ type errorValue =
   | REOperationError(Operation.operationError)
   | RERecordPropertyNotFound(string, string)
   | RESymbolNotFound(string)
-  | RESyntaxError(string, option<location>)
+  | RESyntaxError(string, option<syntaxErrorLocation>)
   | RETodo(string) // To do
   | REUnitNotFound(string)
 

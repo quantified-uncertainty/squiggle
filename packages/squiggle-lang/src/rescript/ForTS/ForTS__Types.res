@@ -1,4 +1,6 @@
 @genType.opaque type result_<'a, 'e> = result<'a, 'e>
+@genType.opaque type reducerErrorValue = Reducer_ErrorValue.errorValue
+@genType type syntaxErrorLocation = Reducer_ErrorValue.syntaxErrorLocation
 
 /*
 The reason this is not ExpressionValue is that ExpressionValue is becoming a parametric type
@@ -13,7 +15,6 @@ type squiggleValue_Declaration = ReducerInterface_InternalExpressionValue.lambda
 @genType.opaque type squiggleValue_Lambda = ReducerInterface_InternalExpressionValue.lambdaValue
 @genType.opaque type squiggleValue_Record = ReducerInterface_InternalExpressionValue.map
 @genType.opaque type squiggleValue_Type = ReducerInterface_InternalExpressionValue.map
-@genType.opaque type reducerErrorValue = Reducer_ErrorValue.errorValue
 
 @genType.opaque type reducerProject = ReducerProject_T.t
 

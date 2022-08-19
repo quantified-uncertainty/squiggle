@@ -5,10 +5,10 @@ type node = {"type": string}
 
 @module("./Reducer_Peggy_GeneratedParser.js") external parse__: string => node = "parse"
 
-type withLocation = {"location": Reducer_ErrorValue.location}
+type withLocation = {"location": Reducer_ErrorValue.syntaxErrorLocation}
 external castWithLocation: Js.Exn.t => withLocation = "%identity"
 
-let syntaxErrorToLocation = (error: Js.Exn.t): Reducer_ErrorValue.location =>
+let syntaxErrorToLocation = (error: Js.Exn.t): Reducer_ErrorValue.syntaxErrorLocation =>
   castWithLocation(error)["location"]
 
 let parse = (expr: string): result<node, errorValue> =>
