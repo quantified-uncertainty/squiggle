@@ -135,7 +135,7 @@ let toStringResult = x =>
 
 let toStringOptionResult = x =>
   switch x {
-  | Some(a) => `${toStringResult(a)})`
+  | Some(a) => toStringResult(a)
   | None => "None"
   }
 
