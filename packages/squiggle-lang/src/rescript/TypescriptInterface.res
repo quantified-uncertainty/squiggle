@@ -1,3 +1,4 @@
+open ForTS__Types
 /*
 This is meant as a file to contain @genType declarations as needed for Typescript.
 I would ultimately want to have all @genType declarations here, vs. other files, but
@@ -23,13 +24,13 @@ type symbolicDist = SymbolicDistTypes.symbolicDist
 type distributionError = DistributionTypes.error
 
 @genType
-type resultDist = result<genericDist, distributionError>
+type resultDist = result_<genericDist, distributionError>
 
 @genType
-type resultFloat = result<float, distributionError>
+type resultFloat = result_<float, distributionError>
 
 @genType
-type resultString = result<string, distributionError>
+type resultString = result_<string, distributionError>
 
 @genType
 let makeSampleSetDist = SampleSetDist.make
