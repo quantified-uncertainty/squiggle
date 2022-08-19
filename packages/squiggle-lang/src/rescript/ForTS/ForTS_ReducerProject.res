@@ -177,16 +177,23 @@ let evaluate = (sourceCode: string): ('r, 'b) => Private.evaluate(sourceCode)
 let setEnvironment = (project: reducerProject, environment: environment): unit =>
   project->T.Private.castToInternalProject->Private.setEnvironment(environment)
 
-let foreignFunctionInterface = (
-  lambdaValue: squiggleValue_Lambda,
-  argArray: array<squiggleValue>,
-  environment: environment,
-): result_<squiggleValue, reducerErrorValue> => {
-  let accessors = ReducerProject_ProjectAccessors_T.identityAccessorsWithEnvironment(environment)
-  Reducer_Expression_Lambda.foreignFunctionInterface(
-    lambdaValue,
-    argArray,
-    accessors,
-    Reducer_Expression.reduceExpressionInProject,
-  )
-}
+/*
+Foreign function interface is intentionally demolished.
+There is another way to do that: Umur.
+Also there is no more conversion from javascript to squiggle values currently.
+If the conversion to the new project is too difficult, I can add it later.
+*/
+
+// let foreignFunctionInterface = (
+//   lambdaValue: squiggleValue_Lambda,
+//   argArray: array<squiggleValue>,
+//   environment: environment,
+// ): result_<squiggleValue, reducerErrorValue> => {
+//   let accessors = ReducerProject_ProjectAccessors_T.identityAccessorsWithEnvironment(environment)
+//   Reducer_Expression_Lambda.foreignFunctionInterface(
+//     lambdaValue,
+//     argArray,
+//     accessors,
+//     Reducer_Expression.reduceExpressionInProject,
+//   )
+// }
