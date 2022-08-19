@@ -94,7 +94,7 @@ To set the includes one first has to call "parseIncludes". The parsed includes o
 @genType
 let getIncludes = (project: reducerProject, sourceId: string): result_<
   array<string>,
-  Reducer_ErrorValue.errorValue,
+  reducerErrorValue,
 > => project->T.Private.castToInternalProject->Private.getIncludes(sourceId)
 
 /*
