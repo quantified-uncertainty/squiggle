@@ -37,10 +37,7 @@ import { InputItem } from "./ui/InputItem";
 import { Text } from "./ui/Text";
 import { ViewSettings, viewSettingsSchema } from "./ViewSettings";
 import { HeadedSection } from "./ui/HeadedSection";
-import {
-  defaultColor,
-  defaultTickFormat,
-} from "../lib/distributionSpecBuilder";
+import { defaultTickFormat } from "../lib/distributionSpecBuilder";
 import { Button } from "./ui/Button";
 
 type PlaygroundProps = SquiggleChartProps & {
@@ -240,7 +237,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   title,
   minX,
   maxX,
-  color = defaultColor,
   tickFormat = defaultTickFormat,
   distributionChartActions,
   code: controlledCode,
@@ -268,7 +264,6 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       title,
       minX,
       maxX,
-      color,
       tickFormat,
       distributionChartActions,
       showSummary,
