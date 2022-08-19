@@ -32,11 +32,22 @@ type resultFloat = result_<float, distributionError>
 @genType
 type resultString = result_<string, distributionError>
 
+//TODO: ForTS Interface module candid
 @genType
-let makeSampleSetDist = SampleSetDist.make
+let makeSampleSetDist: array<float> => result_<
+  sampleSetDist,
+  SampleSetDist.sampleSetError,
+> = SampleSetDist.make
 
+//TODO: ForTS Interface module candid
 @genType
-let toPointSet = GenericDist.toPointSet
+let toPointSet: (
+  squiggleValue_Distribution,
+  ~xyPointLength: int,
+  ~sampleCount: int,
+  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=?,
+  unit,
+) => result_<PointSetTypes.pointSetDist, distributionError> = GenericDist.toPointSet
 
 @genType
 type mixedShape = PointSetTypes.mixedShape
