@@ -1,5 +1,5 @@
 module MathJs = Reducer_MathJs
-module ErrorValue = Reducer.ErrorValue
+module ErrorValue = Reducer_ErrorValue
 
 open Jest
 open ExpectJs

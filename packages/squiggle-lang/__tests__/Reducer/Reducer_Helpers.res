@@ -1,6 +1,5 @@
 // Reducer_Helpers
 module ErrorValue = Reducer_ErrorValue
-module ExternalExpressionValue = ReducerInterface.ExternalExpressionValue
 module InternalExpressionValue = ReducerInterface.InternalExpressionValue
 module Bindings = Reducer_Bindings
 

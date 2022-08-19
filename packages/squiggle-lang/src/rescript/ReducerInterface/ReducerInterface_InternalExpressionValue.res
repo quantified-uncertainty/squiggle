@@ -172,27 +172,6 @@ let valueToValueType = value =>
   | IEvVoid => EvtVoid
   }
 
-let externalValueToValueType = (value: ReducerInterface_ExternalExpressionValue.t) =>
-  switch value {
-  | EvArray(_) => EvtArray
-  | EvArrayString(_) => EvtArrayString
-  | EvBool(_) => EvtBool
-  | EvCall(_) => EvtCall
-  | EvDate(_) => EvtDate
-  | EvDeclaration(_) => EvtDeclaration
-  | EvDistribution(_) => EvtDistribution
-  | EvLambda(_) => EvtLambda
-  | EvModule(_) => EvtModule
-  | EvNumber(_) => EvtNumber
-  | EvRecord(_) => EvtRecord
-  | EvString(_) => EvtString
-  | EvSymbol(_) => EvtSymbol
-  | EvTimeDuration(_) => EvtTimeDuration
-  | EvType(_) => EvtType
-  | EvTypeIdentifier(_) => EvtTypeIdentifier
-  | EvVoid => EvtVoid
-  }
-
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
   let (fn, args) = functionCall
   CallSignature(fn, args->Js.Array2.map(valueToValueType))

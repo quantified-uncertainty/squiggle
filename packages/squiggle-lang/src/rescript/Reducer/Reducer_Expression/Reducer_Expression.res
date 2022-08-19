@@ -2,7 +2,6 @@ module Bindings = Reducer_Bindings
 module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module BuiltIn = Reducer_Dispatch_BuiltIn
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
-module ExternalExpressionValue = ReducerInterface_ExternalExpressionValue
 module Extra = Reducer_Extra
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
@@ -13,7 +12,6 @@ module Result = Belt.Result
 module T = Reducer_Expression_T
 
 type errorValue = Reducer_ErrorValue.errorValue
-type externalExpressionValue = ReducerInterface_ExternalExpressionValue.t
 type t = T.t
 
 /*

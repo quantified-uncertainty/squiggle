@@ -1,7 +1,6 @@
 module Parse = Reducer_Peggy_Parse
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module ExternalExpressionValue = ReducerInterface_ExternalExpressionValue
 open Reducer_ErrorValue
 
 type sourceArgumentType = string
