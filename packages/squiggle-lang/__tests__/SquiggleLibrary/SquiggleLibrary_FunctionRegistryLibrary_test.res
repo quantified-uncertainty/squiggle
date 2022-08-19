@@ -3,8 +3,8 @@ open Expect
 open Reducer_TestHelpers
 
 let expectEvalToBeOk = (code: string) =>
-  Reducer_Expression.BackCompatible.evaluateStringAsExternal(code)
-  ->Reducer_Helpers.rRemoveDefaultsExternal
+  Reducer_Expression.BackCompatible.evaluateString(code)
+  ->Reducer_Helpers.rRemoveDefaultsInternal
   ->E.R.isOk
   ->expect
   ->toBe(true)
@@ -92,8 +92,8 @@ describe("FunctionRegistry Library", () => {
       ((fn, example)) => {
         let responseType =
           example
-          ->Reducer_Expression.BackCompatible.evaluateStringAsExternal
-          ->E.R2.fmap(ReducerInterface_InternalExpressionValue.externalValueToValueType)
+          ->Reducer_Expression.BackCompatible.evaluateString
+          ->E.R2.fmap(ReducerInterface_InternalExpressionValue.valueToValueType)
         let expectedOutputType = fn.output |> E.O.toExn("")
         expect(responseType)->toEqual(Ok(expectedOutputType))
       },

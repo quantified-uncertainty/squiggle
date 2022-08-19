@@ -125,15 +125,4 @@ module BackCompatible = {
 
   let evaluateString = (peggyCode: string): result<InternalExpressionValue.t, errorValue> =>
     parse(peggyCode)->Result.flatMap(evaluate)
-
-  let evaluateAsExternal = (expression: t): result<ExternalExpressionValue.t, errorValue> =>
-    {
-      let accessors = ProjectAccessorsT.identityAccessors
-      expression->reduceExpressionInProject(accessors.stdLib, accessors)
-    }->Result.map(InternalExpressionValue.toExternal)
-
-  let evaluateStringAsExternal = (peggyCode: string): result<
-    ExternalExpressionValue.t,
-    errorValue,
-  > => parse(peggyCode)->Result.flatMap(evaluateAsExternal)
 }

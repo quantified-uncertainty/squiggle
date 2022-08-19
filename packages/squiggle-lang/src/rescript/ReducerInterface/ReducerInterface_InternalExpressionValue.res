@@ -1,9 +1,9 @@
 module ErrorValue = Reducer_ErrorValue
 module Extra_Array = Reducer_Extra_Array
-type internalCode = ReducerInterface_ExternalExpressionValue.internalCode
-type environment = ReducerInterface_ExternalExpressionValue.environment
+type internalCode = Object
+type environment = GenericDist.env
 
-let defaultEnvironment = ReducerInterface_ExternalExpressionValue.defaultEnvironment
+let defaultEnvironment: environment = DistributionOperation.defaultEnv
 
 type rec t =
   | IEvArray(array<t>) // FIXME: Convert to MapInt
@@ -37,29 +37,6 @@ type squiggleMap = map
 type internalExpressionValue = t
 
 type functionCall = (string, array<t>)
-
-module Internal = {
-  module NameSpace = {
-    external castNameSpaceToHidden: nameSpace => ReducerInterface_ExternalExpressionValue.hiddenNameSpace =
-      "%identity"
-    external castHiddenToNameSpace: ReducerInterface_ExternalExpressionValue.hiddenNameSpace => nameSpace =
-      "%identity"
-  }
-  module Lambda = {
-    let toInternal = (v: ReducerInterface_ExternalExpressionValue.lambdaValue): lambdaValue => {
-      let p = v.parameters
-      let c = v.context->NameSpace.castHiddenToNameSpace
-      let b = v.body
-      {parameters: p, context: c, body: b}
-    }
-    and toExternal = (v: lambdaValue): ReducerInterface_ExternalExpressionValue.lambdaValue => {
-      let p = v.parameters
-      let c = v.context->NameSpace.castNameSpaceToHidden
-      let b = v.body
-      {parameters: p, context: c, body: b}
-    }
-  }
-}
 
 let rec toString = aValue =>
   switch aValue {
@@ -147,7 +124,7 @@ let toStringResultOkless = (codeResult: result<t, ErrorValue.errorValue>): strin
 
 let toStringResultRecord = x =>
   switch x {
-  | Ok(a) => `Ok(${ReducerInterface_ExternalExpressionValue.toStringRecord(a)})`
+  | Ok(a) => `Ok(${toStringMap(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
@@ -247,79 +224,18 @@ let functionCallSignatureToString = (functionCallSignature: functionCallSignatur
   `${fn}(${args->Js.Array2.map(valueTypeToString)->Js.Array2.toString})`
 }
 
-let rec toExternal = (iev: t): ReducerInterface_ExternalExpressionValue.t => {
-  switch iev {
-  | IEvArray(v) => v->Belt.Array.map(e => toExternal(e))->EvArray
-  | IEvArrayString(v) => EvArrayString(v)
-  | IEvBool(v) => EvBool(v)
-  | IEvCall(v) => EvCall(v)
-  | IEvDeclaration(v) => {
-      let fn = lambdaValueToExternal(v.fn)
-      let args = v.args
-      EvDeclaration({fn: fn, args: args})
-    }
-  | IEvDistribution(v) => EvDistribution(v)
-  | IEvLambda(v) => EvLambda(lambdaValueToExternal(v))
-  | IEvNumber(v) => EvNumber(v)
-  | IEvRecord(v) => v->mapToExternal->EvRecord
-  | IEvString(v) => EvString(v)
-  | IEvSymbol(v) => EvSymbol(v)
-  | IEvDate(v) => EvDate(v)
-  | IEvTimeDuration(v) => EvTimeDuration(v)
-  | IEvType(v) => v->mapToExternal->EvType
-  | IEvTypeIdentifier(v) => EvTypeIdentifier(v)
-  | IEvBindings(v) => v->nameSpaceToTypeScriptBindings->EvModule
-  | IEvVoid => EvVoid
-  }
-}
-and mapToExternal = v =>
-  v->Belt.Map.String.map(e => toExternal(e))->Belt.Map.String.toArray->Js.Dict.fromArray
-and lambdaValueToExternal = Internal.Lambda.toExternal
-and nameSpaceToTypeScriptBindings = (
-  nameSpace: nameSpace,
-): ReducerInterface_ExternalExpressionValue.externalBindings => {
-  let NameSpace(container) = nameSpace
-  Belt.Map.String.map(container, e => toExternal(e))->Belt.Map.String.toArray->Js.Dict.fromArray
-}
-
-let rec toInternal = (ev: ReducerInterface_ExternalExpressionValue.t): t => {
-  switch ev {
-  | EvArray(v) => v->Belt.Array.map(e => toInternal(e))->IEvArray
-  | EvArrayString(v) => IEvArrayString(v)
-  | EvBool(v) => IEvBool(v)
-  | EvCall(v) => IEvCall(v)
-  | EvDate(v) => IEvDate(v)
-  | EvDeclaration(v) => {
-      let fn = lambdaValueToInternal(v.fn)
-      let args = v.args
-      IEvDeclaration({fn: fn, args: args})
-    }
-  | EvDistribution(v) => IEvDistribution(v)
-  | EvLambda(v) => IEvLambda(lambdaValueToInternal(v))
-  | EvModule(v) => v->nameSpaceFromTypeScriptBindings->IEvBindings
-  | EvNumber(v) => IEvNumber(v)
-  | EvRecord(v) => v->recordToInternal->IEvRecord
-  | EvString(v) => IEvString(v)
-  | EvSymbol(v) => IEvSymbol(v)
-  | EvTimeDuration(v) => IEvTimeDuration(v)
-  | EvType(v) => v->recordToInternal->IEvType
-  | EvTypeIdentifier(v) => IEvTypeIdentifier(v)
-  | EvVoid => IEvVoid
-  }
-}
-and recordToInternal = v =>
-  v->Js.Dict.entries->Belt.Map.String.fromArray->Belt.Map.String.map(e => toInternal(e))
-and lambdaValueToInternal = Internal.Lambda.toInternal
-and nameSpaceFromTypeScriptBindings = (
-  r: ReducerInterface_ExternalExpressionValue.externalBindings,
-): nameSpace =>
-  r->Js.Dict.entries->Belt.Map.String.fromArray->Belt.Map.String.map(e => toInternal(e))->NameSpace
-
-let nameSpaceToKeyValueArray = (nameSpace: nameSpace): array<(string, t)> => {
-  let NameSpace(container) = nameSpace
-  container->Belt.Map.String.toArray
-}
-
 let arrayToValueArray = (arr: array<t>): array<t> => arr
 
 let recordToKeyValuePairs = (record: map): array<(string, t)> => record->Belt.Map.String.toArray
+
+// let nameSpaceToTypeScriptBindings = (
+//   nameSpace: nameSpace,
+// ) => {
+//   let NameSpace(container) = nameSpace
+//   Belt.Map.String.map(container, e => e->Belt.Map.String.toArray->Js.Dict.fromArray)
+// }
+
+let nameSpaceToKeyValuePairs = (nameSpace: nameSpace): array<(string, t)> => {
+  let NameSpace(container) = nameSpace
+  container->Belt.Map.String.toArray
+}
