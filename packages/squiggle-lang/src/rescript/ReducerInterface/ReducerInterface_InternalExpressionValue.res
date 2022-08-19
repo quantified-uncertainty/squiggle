@@ -23,6 +23,7 @@ type rec t =
   | IEvType(map)
   | IEvTypeIdentifier(string)
   | IEvVoid
+and squiggleArray = array<t>
 and map = Belt.Map.String.t<t>
 and nameSpace = NameSpace(Belt.Map.String.t<t>)
 and lambdaValue = {
@@ -32,6 +33,7 @@ and lambdaValue = {
 }
 and lambdaDeclaration = Declaration.declaration<lambdaValue>
 
+type squiggleMap = map
 type internalExpressionValue = t
 
 type functionCall = (string, array<t>)
@@ -312,3 +314,12 @@ and nameSpaceFromTypeScriptBindings = (
   r: ReducerInterface_ExternalExpressionValue.externalBindings,
 ): nameSpace =>
   r->Js.Dict.entries->Belt.Map.String.fromArray->Belt.Map.String.map(e => toInternal(e))->NameSpace
+
+let nameSpaceToKeyValueArray = (nameSpace: nameSpace): array<(string, t)> => {
+  let NameSpace(container) = nameSpace
+  container->Belt.Map.String.toArray
+}
+
+let arrayToValueArray = (arr: array<t>): array<t> => arr
+
+let recordToKeyValuePairs = (record: map): array<(string, t)> => record->Belt.Map.String.toArray

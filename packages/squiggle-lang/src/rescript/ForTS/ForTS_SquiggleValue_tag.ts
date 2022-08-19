@@ -5,7 +5,7 @@ enum SquiggleValueTag {
     SvtCall,
     SvtDate,
     SvtDeclaration,
-    SvtDistribution
+    SvtDistribution,
     SvtLambda,
     SvtModule,
     SvtNumber,

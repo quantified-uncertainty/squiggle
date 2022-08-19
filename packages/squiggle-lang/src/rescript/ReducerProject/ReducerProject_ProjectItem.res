@@ -20,19 +20,13 @@ let emptyItem = T.ProjectItem({
   continues: [],
   includes: []->Ok,
 })
-// source -> rawParse -> includes -> expression -> continuation -> externalBindings -> result -> externalResult
+// source -> rawParse -> includes -> expression -> continuation -> result
 
 let getSource = (T.ProjectItem(r)): T.sourceType => r.source
 let getRawParse = (T.ProjectItem(r)): T.rawParseType => r.rawParse
 let getExpression = (T.ProjectItem(r)): T.expressionType => r.expression
 let getContinuation = (T.ProjectItem(r)): T.continuationArgumentType => r.continuation
-let toExternalBindings = continuation =>
-  continuation->InternalExpressionValue.nameSpaceToTypeScriptBindings
 let getResult = (T.ProjectItem(r)): T.resultType => r.result
-let getExternalResult = (T.ProjectItem(r)): T.externalResultType =>
-  r.result->Belt.Option.map(opt =>
-    opt->Belt.Result.map(value => value->InternalExpressionValue.toExternal)
-  )
 
 let getContinues = (T.ProjectItem(r)): T.continuesType => r.continues
 let getIncludes = (T.ProjectItem(r)): T.includesType => r.includes

@@ -1,6 +1,6 @@
 @@warning("-44")
-module ExternalExpressionValue = ReducerInterface_ExternalExpressionValue
-module Project = ReducerProject
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
+module Project = ForTS_ReducerProject
 module Bindings = Reducer_Bindings
 
 open Jest
@@ -45,13 +45,13 @@ Case "Running a single source".
        Note that getResult returns None if the source has not been run.
        Getting None means you have forgotten to run the source.
  */
-      let result = project->Project.getExternalResult("main")
-      let bindings = project->Project.getExternalBindings("main")
+      let result = project->Project.getResult("main")
+      let bindings = project->Project.getBindings("main")
 
       /* Let's display the result and bindings */
       (
-        result->ExternalExpressionValue.toStringOptionResult,
-        bindings->ExternalExpressionValue.EvModule->ExternalExpressionValue.toString,
+        result->InternalExpressionValue.toStringOptionResult,
+        bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
       )->expect == ("Ok(3)", "@{}")
       /* You've got 3 with empty bindings. */
     })
@@ -60,12 +60,12 @@ Case "Running a single source".
       let project = Project.createProject()
       Project.setSource(project, "main", "1 + 2")
       Project.runAll(project)
-      let result = Project.getExternalResult(project, "main")
-      let bindings = Project.getExternalBindings(project, "main")
+      let result = Project.getResult(project, "main")
+      let bindings = Project.getBindings(project, "main")
       /* Now you have external bindings and external result. */
       (
-        result->ExternalExpressionValue.toStringOptionResult,
-        bindings->ExternalExpressionValue.EvModule->ExternalExpressionValue.toString,
+        result->InternalExpressionValue.toStringOptionResult,
+        bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
       )->expect == ("Ok(3)", "@{}")
     })
 
@@ -74,13 +74,13 @@ Case "Running a single source".
       let project = Project.createProject()
 
       /* Optional. Set your custom environment anytime before running */
-      Project.setEnvironment(project, ExternalExpressionValue.defaultEnvironment)
+      Project.setEnvironment(project, InternalExpressionValue.defaultEnvironment)
 
       Project.setSource(project, "main", "1 + 2")
       Project.runAll(project)
-      let result = Project.getExternalResult(project, "main")
-      let _bindings = Project.getExternalBindings(project, "main")
-      result->ExternalExpressionValue.toStringOptionResult->expect == "Ok(3)"
+      let result = Project.getResult(project, "main")
+      let _bindings = Project.getBindings(project, "main")
+      result->InternalExpressionValue.toStringOptionResult->expect == "Ok(3)"
     })
 
     test("shortcut", () => {
@@ -88,8 +88,8 @@ Case "Running a single source".
       /* Examples above was to prepare you for the multi source tutorial. */
       let (result, bindings) = Project.evaluate("1+2")
       (
-        result->ExternalExpressionValue.toStringResult,
-        bindings->ExternalExpressionValue.EvModule->ExternalExpressionValue.toString,
+        result->InternalExpressionValue.toStringResult,
+        bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
       )->expect == ("Ok(3)", "@{}")
     })
   })

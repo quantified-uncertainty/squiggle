@@ -16,18 +16,18 @@ type rec externalExpressionValue =
   | EvArrayString(array<string>)
   | EvBool(bool)
   | EvCall(string) // External function call
+  | EvDate(Js.Date.t)
+  | EvDeclaration(lambdaDeclaration)
   | EvDistribution(DistributionTypes.genericDist)
   | EvLambda(lambdaValue)
+  | EvModule(record)
   | EvNumber(float)
   | EvRecord(record)
   | EvString(string)
   | EvSymbol(string)
-  | EvDate(Js.Date.t)
   | EvTimeDuration(float)
-  | EvDeclaration(lambdaDeclaration)
-  | EvTypeIdentifier(string)
-  | EvModule(record)
   | EvType(record)
+  | EvTypeIdentifier(string)
   | EvVoid
 and record = Js.Dict.t<externalExpressionValue>
 and lambdaValue = {

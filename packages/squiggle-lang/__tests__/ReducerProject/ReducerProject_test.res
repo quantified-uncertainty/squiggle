@@ -1,6 +1,6 @@
 @@warning("-44")
-module ExternalExpressionValue = ReducerInterface_ExternalExpressionValue
-module Project = ReducerProject
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
+module Project = ForTS_ReducerProject
 module Bindings = Reducer_Bindings
 
 open Jest
@@ -11,14 +11,14 @@ open Expect.Operators
 
 let runFetchResult = (project, sourceId) => {
   Project.run(project, sourceId)
-  Project.getExternalResult(project, sourceId)->ExternalExpressionValue.toStringOptionResult
+  Project.getResult(project, sourceId)->InternalExpressionValue.toStringOptionResult
 }
 
 let runFetchBindings = (project, sourceId) => {
   Project.run(project, sourceId)
-  Project.getExternalBindings(project, sourceId)
-  ->ExternalExpressionValue.EvModule
-  ->ExternalExpressionValue.toString
+  Project.getBindings(project, sourceId)
+  ->InternalExpressionValue.IEvBindings
+  ->InternalExpressionValue.toString
 }
 
 test("setting continuation", () => {

@@ -1,20 +1,25 @@
-/* 
+/*
 The reason this is not ExpressionValue is that ExpressionValue is becoming a parametric type
 to allow expressions for different domains.
 So we rename it right away not cause a compatibility problem
 */
 @genType.opaque type result_<'a, 'e> = result<'a, 'e>
 
-@genType.opaque type squiggleValue
-@genType.opaque type squiggleValue_Array
-@genType.opaque type squiggleValue_ArrayString
-@genType.opaque type squiggleValue_Date
-@genType.opaque type squiggleValue_Declaration
-@genType.opaque type squiggleValue_Distribution 
-@genType.opaque type squiggleValue_Lambda 
-@genType.opaque type squiggleValue_Record
-@genType.opaque type squiggleValue_TimeDuration
-@genType.opaque type squiggleValue_Type
-@genType.opaque type squiggleValue_Void
-@genType.opaque type reducer_errorValue
+@genType.opaque type squiggleValue = ReducerInterface_InternalExpressionValue.t
+@genType.opaque type squiggleValue_Array = ReducerInterface_InternalExpressionValue.squiggleArray
+@genType.opaque
+type squiggleValue_Declaration = ReducerInterface_InternalExpressionValue.lambdaDeclaration
+@genType.opaque type squiggleValue_Module = ReducerInterface_InternalExpressionValue.nameSpace
+@genType.opaque type squiggleValue_Lambda = ReducerInterface_InternalExpressionValue.lambdaValue
+@genType.opaque type squiggleValue_Record = ReducerInterface_InternalExpressionValue.map
+@genType.opaque type squiggleValue_Type = ReducerInterface_InternalExpressionValue.map
+@genType.opaque type reducerErrorValue = Reducer_ErrorValue.errorValue
 
+@genType.opaque type reducerProject = ReducerProject_T.t
+
+// From now on one should introduce any new types as opaque types
+// Already existing open types we cannot dive in now
+@genType type environment = GenericDist.env
+@genType type squiggleValue_Distribution = DistributionTypes.genericDist
+
+//TODO: index.ts should use types from here or vice versa
