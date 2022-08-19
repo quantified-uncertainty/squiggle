@@ -26,29 +26,34 @@ To run a group of source codes and get results/bindings, the necessary methods a
 A project has a public field tag with a constant value "reducerProject"
 project = {tag: "reducerProject"}
 */
+@genType
 let createProject = (): reducerProject => Private.createProject()->T.Private.castFromInternalProject
 
 /*
 Answer all the source ids of all the sources in the project.
 */
+@genType
 let getSourceIds = (project: reducerProject): array<string> =>
   project->T.Private.castToInternalProject->Private.getSourceIds
 
 /*
 Sets the source for a given source Id.
 */
+@genType
 let setSource = (project: reducerProject, sourceId: string, value: string): unit =>
   project->T.Private.castToInternalProject->Private.setSource(sourceId, value)
 
 /*
 Gets the source for a given source id.
 */
+@genType
 let getSource = (project: reducerProject, sourceId: string): option<string> =>
   project->T.Private.castToInternalProject->Private.getSource(sourceId)
 
 /*
 Touches the source for a given source id. This and dependent, sources are set to be re-evaluated.
 */
+@genType
 let touchSource = (project: reducerProject, sourceId: string): unit =>
   project->T.Private.castToInternalProject->Private.touchSource(sourceId)
 
@@ -57,12 +62,14 @@ Cleans the compilation artifacts for a given source ID. The results stay untouch
 
 Normally, you would never need the compilation artifacts again as the results with the same sources would never change. However, they are needed in case of any debugging reruns
 */
+@genType
 let clean = (project: reducerProject, sourceId: string): unit =>
   project->T.Private.castToInternalProject->Private.clean(sourceId)
 
 /*
 Cleans all the compilation artifacts in all of the project
 */
+@genType
 let cleanAll = (project: reducerProject): unit =>
   project->T.Private.castToInternalProject->Private.cleanAll
 
@@ -70,18 +77,21 @@ let cleanAll = (project: reducerProject): unit =>
 Cleans results. Compilation stays untouched to be able to re-run the source.
 You would not do this if you were not trying to debug the source code.
 */
+@genType
 let cleanResults = (project: reducerProject, sourceId: string): unit =>
   project->T.Private.castToInternalProject->Private.cleanResults(sourceId)
 
 /*
 Cleans all results. Compilations remains untouched to rerun the source.
 */
+@genType
 let cleanAllResults = (project: reducerProject): unit =>
   project->T.Private.castToInternalProject->Private.cleanAllResults
 
 /*
 To set the includes one first has to call "parseIncludes". The parsed includes or the parser error is returned.
 */
+@genType
 let getIncludes = (project: reducerProject, sourceId: string): result<
   array<string>,
   Reducer_ErrorValue.errorValue,
@@ -90,6 +100,7 @@ let getIncludes = (project: reducerProject, sourceId: string): result<
 /*
 Answers the source codes after which this source code is continuing
 */
+@genType
 let getContinues = (project: reducerProject, sourceId: string): array<string> =>
   project->T.Private.castToInternalProject->Private.getContinues(sourceId)
 
@@ -98,30 +109,35 @@ let getContinues = (project: reducerProject, sourceId: string): array<string> =>
  It is used to define a continuation that is not visible in the source code. 
  You can chain source codes on the web interface for example
 */
+@genType
 let setContinues = (project: reducerProject, sourceId: string, continues: array<string>): unit =>
   project->T.Private.castToInternalProject->Private.setContinues(sourceId, continues)
 
 /*
 This source depends on the array of sources returned.
 */
+@genType
 let getDependencies = (project: reducerProject, sourceId: string): array<string> =>
   project->T.Private.castToInternalProject->Private.getDependencies(sourceId)
 
 /*
 The sources returned are dependent on this
 */
+@genType
 let getDependents = (project: reducerProject, sourceId: string): array<string> =>
   project->T.Private.castToInternalProject->Private.getDependents(sourceId)
 
 /*
 Get the run order for the sources in the project.
 */
+@genType
 let getRunOrder = (project: reducerProject): array<string> =>
   project->T.Private.castToInternalProject->Private.getRunOrder
 
 /*
 Get the run order to get the results of this specific source
 */
+@genType
 let getRunOrderFor = (project: reducerProject, sourceId: string) =>
   project->T.Private.castToInternalProject->Private.getRunOrderFor(sourceId)
 
@@ -131,6 +147,7 @@ Load includes by calling getIncludes which returns the includes that have been p
 It is your responsibility to load the includes before running.
 */ module Topology = ReducerProject_Topology
 
+@genType
 let parseIncludes = (project: reducerProject, sourceId: string): unit =>
   project->T.Private.castToInternalProject->Private.parseIncludes(sourceId)
 
@@ -139,30 +156,35 @@ Parse the source code if it is not done already.
 Use getRawParse to get the parse tree. 
 You would need this function if you want to see the parse tree without running the source code.
 */
+@genType
 let rawParse = (project: reducerProject, sourceId: string): unit =>
   project->T.Private.castToInternalProject->Private.rawParse(sourceId)
 
 /*
 Runs a specific source code if it is not done already. The code is parsed if it is not already done. It runs the dependencies if it is not already done.
 */
+@genType
 let run = (project: reducerProject, sourceId: string): unit =>
   project->T.Private.castToInternalProject->Private.run(sourceId)
 
 /*
 Runs all of the sources in a project. Their results and bindings will be available
 */
+@genType
 let runAll = (project: reducerProject): unit =>
   project->T.Private.castToInternalProject->Private.runAll
 
 /*
 Get the bindings after running this source file or the project
 */
+@genType
 let getBindings = (project: reducerProject, sourceId: string): squiggleValue_Module =>
   project->T.Private.castToInternalProject->Private.getBindings(sourceId)
 
 /*
 Get the result after running this source file or the project
 */
+@genType
 let getResult = (project: reducerProject, sourceId: string): option<
   result_<squiggleValue, reducerErrorValue>,
 > => project->T.Private.castToInternalProject->Private.getResult(sourceId)
@@ -172,8 +194,9 @@ This is a convenience function to get the result of a single source without crea
 However, without a project, you cannot handle include directives.
 The source has to be include free
 */
-let evaluate = (sourceCode: string): ('r, 'b) => Private.evaluate(sourceCode)
+@genType let evaluate = (sourceCode: string): ('r, 'b) => Private.evaluate(sourceCode)
 
+@genType
 let setEnvironment = (project: reducerProject, environment: environment): unit =>
   project->T.Private.castToInternalProject->Private.setEnvironment(environment)
 
