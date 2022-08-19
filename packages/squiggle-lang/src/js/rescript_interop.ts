@@ -137,7 +137,7 @@ type rescriptPointSetDist =
 //   | tagged<"module", { [key: string]: squiggleExpression }>
 //   | tagged<"void", string>;
 
-export { lambdaValue };
+// export { lambdaValue };
 
 // Umur: Opaque type no conversion!
 // export function convertRawToTypescript(
