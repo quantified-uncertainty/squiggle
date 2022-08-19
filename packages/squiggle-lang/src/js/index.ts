@@ -1,14 +1,32 @@
+/* Some of the types have moved to ForTS__Types.
+Needs to be reimported here if necessary and distribution related 
+
+We only need distribution related extras for back compatibility. Umur
+
+Instead of a global function namespace we should use modules under ForTS directly maybe renaming them for ease.
+
+.e.g. Project.run(project)
+.e.g. Distribution.makeSampleSetDist
+
+*/
+
+
 import * as _ from "lodash";
 import type {
   environment,
+  expressionValue,
   externalBindings,
   errorValue,
 } from "../rescript/TypescriptInterface.gen";
 import {
   defaultEnvironment,
+  evaluatePartialUsingExternalBindings,
+  evaluateUsingOptions,
+  foreignFunctionInterface,
 } from "../rescript/TypescriptInterface.gen";
 export {
   makeSampleSetDist,
+  errorValueToString,
   distributionErrorToString,
 } from "../rescript/TypescriptInterface.gen";
 export type {
@@ -18,7 +36,12 @@ export type {
 } from "../rescript/TypescriptInterface.gen";
 export type { errorValue, externalBindings as bindings, jsImports };
 import {
+  jsValueToBinding,
+  jsValueToExpressionValue,
+  jsValue,
+  rescriptExport,
   squiggleExpression,
+  convertRawToTypescript,
   lambdaValue,
 } from "./rescript_interop";
 import { result, resultMap, tag, tagged } from "./types";
@@ -35,9 +58,8 @@ export let defaultSamplingInputs: environment = {
 };
 
 
-/*
-  All those functions below are invalid since the introduction of ReducerProject
-*/
+/* Umur: All the functions below are invalid. ForTS_Reducer project is the new way to do this. */
+
 // export function run(
 //   squiggleString: string,
 //   bindings?: externalBindings,
@@ -72,7 +94,6 @@ export let defaultSamplingInputs: environment = {
 //   );
 // }
 
-// jsValueToExpressionValue is invalid
 // export function runForeign(
 //   fn: lambdaValue,
 //   args: jsValue[],
