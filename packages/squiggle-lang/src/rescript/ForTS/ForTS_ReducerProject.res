@@ -129,7 +129,7 @@ let getRunOrderFor = (project: reducerProject, sourceId: string) =>
 Parse includes so that you can load them before running. 
 Load includes by calling getIncludes which returns the includes that have been parsed. 
 It is your responsibility to load the includes before running.
-*/module Topology = ReducerProject_Topology
+*/ module Topology = ReducerProject_Topology
 
 let parseIncludes = (project: reducerProject, sourceId: string): unit =>
   project->T.Private.castToInternalProject->Private.parseIncludes(sourceId)
