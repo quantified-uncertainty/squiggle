@@ -4,6 +4,8 @@ import {
   result,
   distributionError,
   distributionErrorToString,
+  squiggleExpression,
+  resultMap,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -14,6 +16,8 @@ import {
   DistributionChartSpecOptions,
 } from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
+import { Plot, parsePlot } from "../lib/plotParser";
+import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 
 export type DistributionPlottingSettings = {
@@ -23,26 +27,41 @@ export type DistributionPlottingSettings = {
 } & DistributionChartSpecOptions;
 
 export type DistributionChartProps = {
-  distribution: Distribution;
+  plot: Plot;
   width?: number;
   height: number;
 } & DistributionPlottingSettings;
 
+export function defaultPlot(distribution: Distribution): Plot {
+  return { distributions: [{ name: "default", distribution }] };
+}
+
+export function makePlot(record: {
+  [key: string]: squiggleExpression;
+}): Plot | void {
+  const plotResult = parsePlot(record);
+  if (plotResult.tag === "Ok") {
+    return plotResult.value;
+  }
+}
+
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const {
-    distribution,
-    height,
-    showSummary,
-    width,
-    logX,
-    actions = false,
-  } = props;
-  const shape = distribution.pointSet();
+  const { plot, height, showSummary, width, logX, actions = false } = props;
   const [sized] = useSize((size) => {
-    if (shape.tag === "Error") {
+    let shapes = flattenResult(
+      plot.distributions.map((x) =>
+        resultMap(x.distribution.pointSet(), (shape) => ({
+          name: x.name,
+          // color: x.color, // not supported yet
+          continuous: shape.continuous,
+          discrete: shape.discrete,
+        }))
+      )
+    );
+    if (shapes.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(shape.value)}
+          {distributionErrorToString(shapes.value)}
         </ErrorAlert>
       );
     }
@@ -56,24 +75,29 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
       widthProp = 20;
     }
+    const domain = shapes.value.flatMap((shape) =>
+      shape.discrete.concat(shape.continuous)
+    );
 
     return (
       <div style={{ width: widthProp }}>
-        {logX && hasMassBelowZero(shape.value) ? (
+        {logX && shapes.value.some(hasMassBelowZero) ? (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
         ) : (
           <Vega
             spec={spec}
-            data={{ con: shape.value.continuous, dis: shape.value.discrete }}
+            data={{ data: shapes.value, domain }}
             width={widthProp - 10}
             height={height}
             actions={actions}
           />
         )}
         <div className="flex justify-center">
-          {showSummary && <SummaryTable distribution={distribution} />}
+          {showSummary && plot.distributions.length === 1 && (
+            <SummaryTable distribution={plot.distributions[0].distribution} />
+          )}
         </div>
       </div>
     );

@@ -5,10 +5,7 @@ import { InputItem } from "./ui/InputItem";
 import { Checkbox } from "./ui/Checkbox";
 import { HeadedSection } from "./ui/HeadedSection";
 import { Text } from "./ui/Text";
-import {
-  defaultColor,
-  defaultTickFormat,
-} from "../lib/distributionSpecBuilder";
+import { defaultTickFormat } from "../lib/distributionSpecBuilder";
 
 export const viewSettingsSchema = yup.object({}).shape({
   chartHeight: yup.number().required().positive().integer().default(350),
@@ -18,7 +15,6 @@ export const viewSettingsSchema = yup.object({}).shape({
   expY: yup.boolean().required(),
   tickFormat: yup.string().default(defaultTickFormat),
   title: yup.string(),
-  color: yup.string().default(defaultColor).required(),
   minX: yup.number(),
   maxX: yup.number(),
   distributionChartActions: yup.boolean(),
@@ -113,12 +109,6 @@ export const ViewSettings: React.FC<{
               type="text"
               register={register}
               label="Tick Format"
-            />
-            <InputItem
-              name="color"
-              type="color"
-              register={register}
-              label="Color"
             />
           </div>
         </HeadedSection>
