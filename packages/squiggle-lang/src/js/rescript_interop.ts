@@ -100,22 +100,22 @@ type rescriptPointSetDist =
       _0: continuousShape;
     };
 
-type rescriptLambdaDeclaration = {
-  readonly fn: lambdaValue;
-  readonly args: rescriptDeclarationArg[];
-};
+// type rescriptLambdaDeclaration = {
+//   readonly fn: lambdaValue;
+//   readonly args: rescriptDeclarationArg[];
+// };
 
-type rescriptDeclarationArg =
-  | {
-      TAG: 0; // Float
-      min: number;
-      max: number;
-    }
-  | {
-      TAG: 1; // Date
-      min: Date;
-      max: Date;
-    };
+// type rescriptDeclarationArg =
+//   | {
+//       TAG: 0; // Float
+//       min: number;
+//       max: number;
+//     }
+//   | {
+//       TAG: 1; // Date
+//       min: Date;
+//       max: Date;
+//     };
 
 // Umur: Squiggle expressions are opaque!
 // export type squiggleExpression =
@@ -200,16 +200,16 @@ export { lambdaValue };
 //   }
 // }
 
-function convertDeclaration(
-  declarationArg: rescriptDeclarationArg
-): declarationArg {
-  switch (declarationArg.TAG) {
-    case 0: // Float
-      return tag("Float", { min: declarationArg.min, max: declarationArg.max });
-    case 1: // Date
-      return tag("Date", { min: declarationArg.min, max: declarationArg.max });
-  }
-}
+// function convertDeclaration(
+//   declarationArg: rescriptDeclarationArg
+// ): declarationArg {
+//   switch (declarationArg.TAG) {
+//     case 0: // Float
+//       return tag("Float", { min: declarationArg.min, max: declarationArg.max });
+//     case 1: // Date
+//       return tag("Date", { min: declarationArg.min, max: declarationArg.max });
+//   }
+// }
 
 function convertRawDistributionToGenericDist(
   result: rescriptDist
@@ -238,35 +238,35 @@ export type jsValue =
   | { [key: string]: jsValue }
   | boolean;
 
-export function jsValueToBinding(value: jsValue): rescriptExport {
-  if (typeof value === "boolean") {
-    return { TAG: 2, _0: value as boolean };
-  } else if (typeof value === "string") {
-    return { TAG: 8, _0: value as string };
-  } else if (typeof value === "number") {
-    return { TAG: 6, _0: value as number };
-  } else if (Array.isArray(value)) {
-    return { TAG: 0, _0: value.map(jsValueToBinding) };
-  } else {
-    // Record
-    return { TAG: 7, _0: _.mapValues(value, jsValueToBinding) };
-  }
-}
+// export function jsValueToBinding(value: jsValue): rescriptExport {
+//   if (typeof value === "boolean") {
+//     return { TAG: 2, _0: value as boolean };
+//   } else if (typeof value === "string") {
+//     return { TAG: 8, _0: value as string };
+//   } else if (typeof value === "number") {
+//     return { TAG: 6, _0: value as number };
+//   } else if (Array.isArray(value)) {
+//     return { TAG: 0, _0: value.map(jsValueToBinding) };
+//   } else {
+//     // Record
+//     return { TAG: 7, _0: _.mapValues(value, jsValueToBinding) };
+//   }
+// }
 
-export function jsValueToExpressionValue(value: jsValue): expressionValue {
-  if (typeof value === "boolean") {
-    return { tag: "EvBool", value: value as boolean };
-  } else if (typeof value === "string") {
-    return { tag: "EvString", value: value as string };
-  } else if (typeof value === "number") {
-    return { tag: "EvNumber", value: value as number };
-  } else if (Array.isArray(value)) {
-    return { tag: "EvArray", value: value.map(jsValueToExpressionValue) };
-  } else {
-    // Record
-    return {
-      tag: "EvRecord",
-      value: _.mapValues(value, jsValueToExpressionValue),
-    };
-  }
-}
+// export function jsValueToExpressionValue(value: jsValue): expressionValue {
+//   if (typeof value === "boolean") {
+//     return { tag: "EvBool", value: value as boolean };
+//   } else if (typeof value === "string") {
+//     return { tag: "EvString", value: value as string };
+//   } else if (typeof value === "number") {
+//     return { tag: "EvNumber", value: value as number };
+//   } else if (Array.isArray(value)) {
+//     return { tag: "EvArray", value: value.map(jsValueToExpressionValue) };
+//   } else {
+//     // Record
+//     return {
+//       tag: "EvRecord",
+//       value: _.mapValues(value, jsValueToExpressionValue),
+//     };
+//   }
+// }
