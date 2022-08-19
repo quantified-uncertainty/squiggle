@@ -17,7 +17,7 @@ import {
 } from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
-import { flattenResult, all } from "../lib/utility";
+import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 
 export type DistributionPlottingSettings = {
@@ -52,6 +52,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       plot.distributions.map((x) =>
         resultMap(x.distribution.pointSet(), (shape) => ({
           name: x.name,
+          // color: x.color, // not supported yet
           continuous: shape.continuous,
           discrete: shape.discrete,
         }))
@@ -94,7 +95,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
           />
         )}
         <div className="flex justify-center">
-          {showSummary && plot.distributions.length == 1 && (
+          {showSummary && plot.distributions.length === 1 && (
             <SummaryTable distribution={plot.distributions[0].distribution} />
           )}
         </div>

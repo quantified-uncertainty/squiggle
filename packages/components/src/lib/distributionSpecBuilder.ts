@@ -10,8 +10,6 @@ export type DistributionChartSpecOptions = {
   minX?: number;
   /** The maximum x coordinate shown on the chart */
   maxX?: number;
-  /** The color of the chart */
-  color?: string;
   /** The title of the chart */
   title?: string;
   /** The formatting of the ticks */
@@ -57,14 +55,12 @@ export let expYScale: PowScale = {
 };
 
 export const defaultTickFormat = ".9~s";
-export const defaultColor = "#739ECC";
 
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
   const {
     format = defaultTickFormat,
-    color = defaultColor,
     title,
     minX,
     maxX,
@@ -106,7 +102,7 @@ export function buildVegaSpec(
           data: "data",
           field: "name",
         },
-        range: { scheme: "category10" },
+        range: { scheme: "blues" },
       },
     ],
     axes: [
@@ -120,6 +116,7 @@ export function buildVegaSpec(
         domainOpacity: 0.0,
         format: format,
         tickCount: 10,
+        labelOverlap: "greedy",
       },
     ],
     marks: [
@@ -259,15 +256,38 @@ export function buildVegaSpec(
         ],
       },
     ],
-  };
-  if (title) {
-    spec = {
-      ...spec,
+    legends: [
+      {
+        fill: "color",
+        orient: "top",
+        labelFontSize: 12,
+        encode: {
+          symbols: {
+            update: {
+              fill: [
+                { test: "length(domain('color')) == 1", value: "transparent" },
+                { scale: "color", field: "value" },
+              ],
+            },
+          },
+          labels: {
+            interactive: true,
+            update: {
+              fill: [
+                { test: "length(domain('color')) == 1", value: "transparent" },
+                { value: "black" },
+              ],
+            },
+          },
+        },
+      },
+    ],
+    ...(title && {
       title: {
         text: title,
       },
-    };
-  }
+    }),
+  };
 
   return spec;
 }

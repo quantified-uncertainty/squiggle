@@ -1,7 +1,11 @@
 import * as yup from "yup";
 import { Distribution, result, squiggleExpression } from "@quri/squiggle-lang";
 
-export type LabeledDistribution = { name: string; distribution: Distribution };
+export type LabeledDistribution = {
+  name: string;
+  distribution: Distribution;
+  color?: string;
+};
 
 export type Plot = {
   distributions: LabeledDistribution[];
@@ -27,12 +31,18 @@ const schema = yup
         .of(
           yup.object().shape({
             tag: yup.mixed().oneOf(["record"]),
-            value: yup.object().shape({
+            value: yup.object({
               name: yup.object().shape({
                 tag: yup.mixed().oneOf(["string"]),
                 value: yup.string().required(),
               }),
-              distribution: yup.object().shape({
+              // color: yup
+              //   .object({
+              //     tag: yup.mixed().oneOf(["string"]),
+              //     value: yup.string().required(),
+              //   })
+              //   .default(undefined),
+              distribution: yup.object({
                 tag: yup.mixed().oneOf(["distribution"]),
                 value: yup.mixed(),
               }),
@@ -51,6 +61,7 @@ export function parsePlot(record: {
     return ok({
       distributions: plotRecord.distributions.value.map((x) => ({
         name: x.value.name.value,
+        // color: x.value.color?.value, // not supported yet
         distribution: x.value.distribution.value,
       })),
     });
