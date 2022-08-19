@@ -16,3 +16,16 @@ let getValue = (r: result_<'a, 'e>): option<'a> =>
   | Ok(v) => Some(v)
   | Error(_) => None
   }
+
+@module("ForTS_Result_tag") @scope("ResultTag")
+external rtOk_: int = "RtOk"
+
+@module("ForTS_Result_tag") @scope("ResultTag")
+external rtError_: int = "RtError"
+
+@genType
+let getTag = (r: result_<'a, 'e>): int =>
+  switch r {
+  | Ok(_) => rtOk_
+  | Error(_) => rtError_
+  }

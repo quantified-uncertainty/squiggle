@@ -1,0 +1,4 @@
+enum ResultTag {
+    Ok,
+    Error,
+}
