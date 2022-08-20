@@ -43,8 +43,7 @@ module Internal = {
 
   let mapY = (pointSetDist: t, aLambdaValue, env, reducer) => {
     let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, env, reducer)
-    let foo = PointSetDist.T.mapYResult(~fn, pointSetDist)
-    foo->toType
+    PointSetDist.T.mapYResult(~fn, pointSetDist)->toType
   }
 }
 
@@ -90,7 +89,8 @@ let library = [
         ~inputs=[FRTypeDist, FRTypeLambda],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
-          | [IEvDistribution(PointSet(dist)), IEvLambda(lambda)] => Internal.mapY(dist, lambda, env, reducer)->E.R2.errMap(_ => "")
+          | [IEvDistribution(PointSet(dist)), IEvLambda(lambda)] =>
+            Internal.mapY(dist, lambda, env, reducer)->E.R2.errMap(Reducer_ErrorValue.errorToString)
           | _ => Error(impossibleError)
           },
         (),
