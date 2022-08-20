@@ -29,3 +29,10 @@ let getTag = (r: result_<'a, 'e>): int =>
   | Ok(_) => rtOk_
   | Error(_) => rtError_
   }
+
+@genType
+let fmap = (r: result_<'a, 'e>, f: 'a => 'b): result_<'b, 'e> =>
+  switch r {
+  | Ok(v) => Ok(f(v))
+  | Error(e) => Error(e)
+  }
