@@ -207,7 +207,9 @@ let library = [
               IEvDistribution(SampleSet(dist2)),
               IEvLambda(lambda),
             ] =>
-            Internal.map2(dist1, dist2, lambda, env, reducer)->E.R2.errMap(Reducer_ErrorValue.errorToString)
+            Internal.map2(dist1, dist2, lambda, env, reducer)->E.R2.errMap(
+              Reducer_ErrorValue.errorToString,
+            )
           | _ => Error(impossibleError)
           }
         },
@@ -236,7 +238,9 @@ let library = [
               IEvDistribution(SampleSet(dist3)),
               IEvLambda(lambda),
             ] =>
-            Internal.map3(dist1, dist2, dist3, lambda, env, reducer)->E.R2.errMap(Reducer_ErrorValue.errorToString)
+            Internal.map3(dist1, dist2, dist3, lambda, env, reducer)->E.R2.errMap(
+              Reducer_ErrorValue.errorToString,
+            )
           | _ => Error(impossibleError)
           },
         (),
@@ -259,7 +263,9 @@ let library = [
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(dists), IEvLambda(lambda)] =>
-            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(Reducer_ErrorValue.errorToString)
+            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(
+              Reducer_ErrorValue.errorToString,
+            )
           | _ => Error(impossibleError)
           },
         (),
