@@ -18,10 +18,14 @@ type squiggleValue_Declaration = ReducerInterface_InternalExpressionValue.lambda
 
 @genType.opaque type reducerProject = ReducerProject_T.t
 
+/* Distribution related */
+@genType type environment = GenericDist.env
+@genType.opaque
+type distributionError = DistributionTypes.error
+
 // From now on one should introduce any new types as opaque types.
 // Exception: The intended type is really a JavaScript type or record. Not by coincidence
 // Already existing open types we cannot dive in now
-@genType type environment = GenericDist.env
 @genType type squiggleValue_Distribution = DistributionTypes.genericDist
 
 //TODO: index.ts should use types from here or vice versa

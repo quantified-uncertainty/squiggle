@@ -21,9 +21,6 @@ type sampleSetDist = SampleSetDist.t
 type symbolicDist = SymbolicDistTypes.symbolicDist
 
 @genType
-type distributionError = DistributionTypes.error
-
-@genType
 type resultDist = result_<genericDist, distributionError>
 
 @genType
@@ -58,8 +55,9 @@ type discreteShape = PointSetTypes.discreteShape
 @genType
 type continuousShape = PointSetTypes.continuousShape
 
-@genType
-let distributionErrorToString = DistributionTypes.Error.toString
+// ForTS_Distributions_Error.toString
+// @genType
+// let distributionErrorToString = DistributionTypes.Error.toString
 
 @genType
 let defaultSamplingEnv = DistributionOperation.defaultEnv
