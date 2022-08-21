@@ -131,3 +131,15 @@ let max = t => T.get(t)->E.A.Floats.max
 let stdev = t => T.get(t)->E.A.Floats.stdev
 let variance = t => T.get(t)->E.A.Floats.variance
 let percentile = (t, f) => T.get(t)->E.A.Floats.percentile(f)
+
+let mixture = (values: array<(t, float)>, intendedLength: int) => {
+  let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
+  values
+  ->E.A2.fmap(((dist, weight)) => {
+    let adjustedWeight = weight /. totalWeight
+    let samplesToGet = adjustedWeight *. E.I.toFloat(intendedLength) |> E.Float.toInt
+    sampleN(dist, samplesToGet)
+  })
+  ->E.A.concatMany
+  ->T.make
+}
