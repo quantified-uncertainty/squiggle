@@ -239,6 +239,7 @@ export function buildVegaSpec(
                     x: {
                       scale: "xscale",
                       field: "x",
+                      offset: 0.5,
                     },
                     y: {
                       scale: "yscale",

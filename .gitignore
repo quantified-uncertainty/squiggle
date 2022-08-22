@@ -7,3 +7,6 @@ yarn-error.log
 **/.sync.ffs_db
 .direnv
 .log
+
+.vscode
+todo.txt
