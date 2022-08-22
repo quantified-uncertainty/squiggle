@@ -7,7 +7,7 @@
   "publisher": "QURI",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/quantified-uncertainty/squiggle.git"
+    "url": "https://github.com/quantified-uncertainty/squiggle.git"
   },
   "icon": "media/vendor/icon.png",
   "engines": {
