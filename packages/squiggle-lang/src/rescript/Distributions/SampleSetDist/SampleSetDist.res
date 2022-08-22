@@ -134,12 +134,19 @@ let percentile = (t, f) => T.get(t)->E.A.Floats.percentile(f)
 
 let mixture = (values: array<(t, float)>, intendedLength: int) => {
   let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
-  values
-  ->E.A2.fmap(((dist, weight)) => {
-    let adjustedWeight = weight /. totalWeight
-    let samplesToGet = adjustedWeight *. E.I.toFloat(intendedLength) |> E.Float.toInt
-    sampleN(dist, samplesToGet)
-  })
-  ->E.A.concatMany
-  ->T.make
+  let discreteSamples =
+    values
+    ->Belt.Array.mapWithIndex((i, (_, weight)) => (E.I.toFloat(i), weight /. totalWeight))
+    ->XYShape.T.fromZippedArray
+    ->Discrete.make
+    ->Discrete.sampleN(intendedLength)
+  let dists = values->E.A2.fmap(E.Tuple2.first)->E.A2.fmap(T.get)
+  let samples =
+    discreteSamples
+    ->Belt.Array.mapWithIndex((index, distIndexToChoose) => {
+      let chosenDist = E.A.get(dists, E.Float.toInt(distIndexToChoose))
+      chosenDist |> E.O2.bind(E.A.get(_, index))
+    })
+    ->E.A.O.openIfAllSome
+  (samples |> E.O.toExn("Mixture unreachable error"))->T.make
 }
