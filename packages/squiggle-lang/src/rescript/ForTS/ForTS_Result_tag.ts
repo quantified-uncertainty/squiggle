@@ -1,4 +1,4 @@
 export enum resultTag {
-  Ok,
-  Error,
+  RtOk,
+  RtError,
 }

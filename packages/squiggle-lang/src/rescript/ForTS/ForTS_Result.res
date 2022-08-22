@@ -18,10 +18,10 @@ let getValue = (r: result<'a, 'e>): option<'a> =>
   | Error(_) => None
   }
 
-@module("ForTS_Result_tag") @scope("resultTag")
+@module("./ForTS_Result_tag") @scope("resultTag")
 external rtOk_: int = "RtOk"
 
-@module("ForTS_Result_tag") @scope("resultTag")
+@module("./ForTS_Result_tag") @scope("resultTag")
 external rtError_: int = "RtError"
 
 @genType.import("./ForTS_Result_tag")
