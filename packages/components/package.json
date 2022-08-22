@@ -38,7 +38,7 @@
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/jest": "^27.5.0",
-    "@types/lodash": "^4.14.182",
+    "@types/lodash": "^4.14.184",
     "@types/node": "^18.7.4",
     "@types/react": "^18.0.9",
     "@types/styled-components": "^5.1.26",
