@@ -1,6 +1,13 @@
-open ForTS__Types
-// If a module is built for TypeScript then it can only refer to ForTS__Types for other types and modules
-// The exception is its implementation and private modules
+@genType type reducerProject = ReducerProject_T.t //re-export
+
+type result<'a, 'e> = ForTS_Result.result<'a, 'e> // Use opaque result type
+type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
+
+type squiggleValue = ForTS_SquiggleValue.squiggleValue //use
+type squiggleValue_Module = ForTS_SquiggleValue_Module.squiggleValue_Module //use
+
+type environment = ForTS_Distribution_Environment.environment //use
+
 module T = ReducerProject_T
 module Private = ReducerProject.Private
 
@@ -9,6 +16,8 @@ module Private = ReducerProject.Private
 */
 
 /*
+A project links and runs sources that continue or include each other.
+
 Creates a new project to hold the sources, executables, bindings, and other data. 
 The new project runs the sources according to their topological sorting because of the includes and continues.
 
@@ -92,7 +101,7 @@ let cleanAllResults = (project: reducerProject): unit =>
 To set the includes one first has to call "parseIncludes". The parsed includes or the parser error is returned.
 */
 @genType
-let getIncludes = (project: reducerProject, sourceId: string): result_<
+let getIncludes = (project: reducerProject, sourceId: string): result<
   array<string>,
   reducerErrorValue,
 > => project->T.Private.castToInternalProject->Private.getIncludes(sourceId)
@@ -145,7 +154,7 @@ let getRunOrderFor = (project: reducerProject, sourceId: string) =>
 Parse includes so that you can load them before running. 
 Load includes by calling getIncludes which returns the includes that have been parsed. 
 It is your responsibility to load the includes before running.
-*/ module Topology = ReducerProject_Topology
+*/
 
 @genType
 let parseIncludes = (project: reducerProject, sourceId: string): unit =>
@@ -186,7 +195,7 @@ Get the result after running this source file or the project
 */
 @genType
 let getResult = (project: reducerProject, sourceId: string): option<
-  result_<squiggleValue, reducerErrorValue>,
+  result<squiggleValue, reducerErrorValue>,
 > => project->T.Private.castToInternalProject->Private.getResult(sourceId)
 
 /*
@@ -194,7 +203,11 @@ This is a convenience function to get the result of a single source without crea
 However, without a project, you cannot handle include directives.
 The source has to be include free
 */
-@genType let evaluate = (sourceCode: string): ('r, 'b) => Private.evaluate(sourceCode)
+@genType
+let evaluate = (sourceCode: string): (
+  result<squiggleValue, reducerErrorValue>,
+  squiggleValue_Module,
+) => Private.evaluate(sourceCode)
 
 @genType
 let setEnvironment = (project: reducerProject, environment: environment): unit =>
@@ -211,7 +224,7 @@ If the conversion to the new project is too difficult, I can add it later.
 //   lambdaValue: squiggleValue_Lambda,
 //   argArray: array<squiggleValue>,
 //   environment: environment,
-// ): result_<squiggleValue, reducerErrorValue> => {
+// ): result<squiggleValue, reducerErrorValue> => {
 //   let accessors = ReducerProject_ProjectAccessors_T.identityAccessorsWithEnvironment(environment)
 //   Reducer_Expression_Lambda.foreignFunctionInterface(
 //     lambdaValue,

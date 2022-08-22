@@ -1,78 +1,93 @@
-open ForTS__Types
+@genType type squiggleValue = ReducerInterface_InternalExpressionValue.t //re-export
+type result_<'a, 'e> = ForTS_Result.result_<'a, 'e> //use
+type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
 
-// Return values as they are if they are JavaScript types.
+@genType type squiggleValue_Array = ReducerInterface_InternalExpressionValue.squiggleArray //re-export recursive type
+@genType type squiggleValue_Module = ReducerInterface_InternalExpressionValue.nameSpace //re-export recursive type
+@genType type squiggleValue_Record = ReducerInterface_InternalExpressionValue.map //re-export recursive type
+@genType type squiggleValue_Type = ReducerInterface_InternalExpressionValue.map //re-export recursive type
+type squiggleValue_Declaration = ForTS_SquiggleValue_Declaration.squiggleValue_Declaration //use
+type squiggleValue_Distribution = ForTS_SquiggleValue_Distribution.squiggleValue_Distribution //use
+type squiggleValue_Lambda = ForTS_SquiggleValue_Lambda.squiggleValue_Lambda //use
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+// Return values are kept as they are if they are JavaScript types.
+
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtArray_: int = "SvtArray"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtArrayString_: int = "SvtArrayString"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtBool_: int = "SvtBool"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtCall_: int = "SvtCall"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtDate_: int = "SvtDate"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtDeclaration_: int = "SvtDeclaration"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtDistribution_: int = "SvtDistribution"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtLambda_: int = "SvtLambda"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtModule_: int = "SvtModule"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtNumber_: int = "SvtNumber"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtRecord_: int = "SvtRecord"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtString_: int = "SvtString"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtSymbol_: int = "SvtSymbol"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtTimeDuration_: int = "SvtTimeDuration"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtType_: int = "SvtType"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtTypeIdentifier_: int = "SvtUndefined"
 
-@module("ForTS_SquiggleValue_tag") @scope("SquiggleValueTag")
+@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtVoid_: int = "SvtVoid"
 
+@genType.import("./ForTS_SquiggleValue_tag")
+type squiggleValueTag
+
+external castEnum: int => squiggleValueTag = "%identity"
+
 @genType
-let getTag = (variant: squiggleValue) =>
+let getTag = (variant: squiggleValue): squiggleValueTag =>
   switch variant {
-  | IEvArray(_) => svtArray_
-  | IEvArrayString(_) => svtArrayString_
-  | IEvBool(_) => svtBool_
-  | IEvCall(_) => svtCall_ //Impossible
-  | IEvDate(_) => svtDate_
-  | IEvDeclaration(_) => svtDeclaration_
-  | IEvDistribution(_) => svtDistribution_
-  | IEvLambda(_) => svtLambda_
-  | IEvBindings(_) => svtModule_ //Impossible
-  | IEvNumber(_) => svtNumber_
-  | IEvRecord(_) => svtRecord_
-  | IEvString(_) => svtString_
-  | IEvSymbol(_) => svtSymbol_
-  | IEvTimeDuration(_) => svtTimeDuration_
-  | IEvType(_) => svtType_
-  | IEvTypeIdentifier(_) => svtTypeIdentifier_
-  | IEvVoid => svtVoid_
+  | IEvArray(_) => svtArray_->castEnum
+  | IEvArrayString(_) => svtArrayString_->castEnum
+  | IEvBool(_) => svtBool_->castEnum
+  | IEvCall(_) => svtCall_->castEnum //Impossible
+  | IEvDate(_) => svtDate_->castEnum
+  | IEvDeclaration(_) => svtDeclaration_->castEnum
+  | IEvDistribution(_) => svtDistribution_->castEnum
+  | IEvLambda(_) => svtLambda_->castEnum
+  | IEvBindings(_) => svtModule_->castEnum //Impossible
+  | IEvNumber(_) => svtNumber_->castEnum
+  | IEvRecord(_) => svtRecord_->castEnum
+  | IEvString(_) => svtString_->castEnum
+  | IEvSymbol(_) => svtSymbol_->castEnum
+  | IEvTimeDuration(_) => svtTimeDuration_->castEnum
+  | IEvType(_) => svtType_->castEnum
+  | IEvTypeIdentifier(_) => svtTypeIdentifier_->castEnum
+  | IEvVoid => svtVoid_->castEnum
   }
 
 @genType

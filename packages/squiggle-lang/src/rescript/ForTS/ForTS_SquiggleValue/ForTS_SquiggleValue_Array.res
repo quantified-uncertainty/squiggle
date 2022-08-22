@@ -1,6 +1,5 @@
-open ForTS__Types
-// Note: Internal representation will not be an array in the future.
-// Thus we still to have a conversion
+type squiggleValue = ForTS_SquiggleValue.squiggleValue
+@genType type squiggleValue_Array = ForTS_SquiggleValue.squiggleValue_Array //re-export recursive type
 
 @genType
 let getValues = (v: squiggleValue_Array): array<squiggleValue> =>

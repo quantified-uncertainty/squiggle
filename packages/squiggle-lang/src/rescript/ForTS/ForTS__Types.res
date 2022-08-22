@@ -1,31 +1,24 @@
-@genType.opaque type result_<'a, 'e> = result<'a, 'e>
-@genType.opaque type reducerErrorValue = Reducer_ErrorValue.errorValue
-@genType type syntaxErrorLocation = Reducer_ErrorValue.syntaxErrorLocation
+@genType type result_<'a, 'e> = ForTS_Result.result_<'a, 'e> //re-export
+@genType type result<'a, 'e> = ForTS_Result.result<'a, 'e> //re-export
+@genType type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //re-export
+@genType type syntaxErrorLocation = ForTS_Reducer_ErrorValue.syntaxErrorLocation //re-export
 
-/*
-The reason this is not ExpressionValue is that ExpressionValue is becoming a parametric type
-to allow expressions for different domains.
-So we rename it right away not cause a compatibility problem
-*/
-@genType.opaque type squiggleValue = ReducerInterface_InternalExpressionValue.t
-@genType.opaque type squiggleValue_Array = ReducerInterface_InternalExpressionValue.squiggleArray
-@genType.opaque
-type squiggleValue_Declaration = ReducerInterface_InternalExpressionValue.lambdaDeclaration
-@genType.opaque type squiggleValue_Module = ReducerInterface_InternalExpressionValue.nameSpace
-@genType.opaque type squiggleValue_Lambda = ReducerInterface_InternalExpressionValue.lambdaValue
-@genType.opaque type squiggleValue_Record = ReducerInterface_InternalExpressionValue.map
-@genType.opaque type squiggleValue_Type = ReducerInterface_InternalExpressionValue.map
-
-@genType.opaque type reducerProject = ReducerProject_T.t
+@genType type reducerProject = ForTS_ReducerProject.reducerProject //re-export
+@genType type squiggleValue = ForTS_SquiggleValue.squiggleValue //re-export
+@genType type squiggleValue_Array = ForTS_SquiggleValue_Array.squiggleValue_Array //re-export
+@genType type squiggleValue_Declaration = ForTS_SquiggleValue_Declaration.squiggleValue_Declaration //re-export
+@genType type squiggleValue_Lambda = ForTS_SquiggleValue_Lambda.squiggleValue_Lambda //re-export
+@genType type squiggleValue_Module = ForTS_SquiggleValue_Module.squiggleValue_Module //re-export
+@genType type squiggleValue_Record = ForTS_SquiggleValue_Record.squiggleValue_Record //re-export
+@genType type squiggleValue_Type = ForTS_SquiggleValue_Type.squiggleValue_Type //re-export
 
 /* Distribution related */
-@genType type environment = GenericDist.env
-@genType.opaque
-type distributionError = DistributionTypes.error
+@genType type squiggleValue_Distribution = ForTS_Distribution.distribution //re-export
+@genType type distribution = squiggleValue_Distribution //candid
+@genType type distributionError = ForTS_Distribution_Error.distributionError //re-export
+@genType type environment = ForTS_Distribution_Environment.environment //re-export
 
-// From now on one should introduce any new types as opaque types.
-// Exception: The intended type is really a JavaScript type or record. Not by coincidence
-// Already existing open types we cannot dive in now
-@genType type squiggleValue_Distribution = DistributionTypes.genericDist
+@genType type pointSetDistribution = ForTS_Distribution_PointSetDistribution.pointSetDistribution //re-export
+@genType type sampleSetDistribution = ForTS_Distribution_SampleSetDistribution.sampleSetDistribution //re-export
+@genType type symbolicDistribution = ForTS_Distribution_SymbolicDistribution.symbolicDistribution //re-export
 
-//TODO: index.ts should use types from here or vice versa

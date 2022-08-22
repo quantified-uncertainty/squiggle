@@ -1,4 +1,4 @@
-enum ResultTag {
-    Ok,
-    Error,
+export enum resultTag {
+  Ok,
+  Error,
 }

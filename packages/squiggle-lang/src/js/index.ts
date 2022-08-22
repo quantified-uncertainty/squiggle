@@ -10,7 +10,6 @@ Instead of a global function namespace we should use modules under ForTS directl
 
 */
 
-
 import * as _ from "lodash";
 import type {
   environment,
@@ -56,7 +55,6 @@ export let defaultSamplingInputs: environment = {
   sampleCount: 10000,
   xyPointLength: 10000,
 };
-
 
 /* Umur: All the functions below are invalid. ForTS_Reducer project is the new way to do this. */
 

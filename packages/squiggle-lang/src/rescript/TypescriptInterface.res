@@ -8,28 +8,17 @@ would be preferable.
 The below few seem to work fine. In the future there's definitely more work to do here.
 */
 
-@genType
-type samplingParams = environment
+// For backwards compatibility:
+//Alternatives if one wants to keep the old habits
+@genType type samplingParams = environment
+@genType type squiggleValue_Dist = squiggleValue_Distribution //alternative
+@genType type genericDist = squiggleValue_Distribution //alternative
+@genType type sampleSetDist = sampleSetDistribution //alternative
+@genType type symbolicDist = symbolicDistribution //alternative
+@genType type resultDist = result_<distribution, distributionError> //alternative
+@genType type resultFloat = result_<float, distributionError> //alternative
+@genType type resultString = result_<string, distributionError> //alternative
 
-@genType
-type genericDist = squiggleValue_Distribution
-
-@genType
-type sampleSetDist = SampleSetDist.t
-
-@genType
-type symbolicDist = SymbolicDistTypes.symbolicDist
-
-@genType
-type resultDist = result_<genericDist, distributionError>
-
-@genType
-type resultFloat = result_<float, distributionError>
-
-@genType
-type resultString = result_<string, distributionError>
-
-//TODO: ForTS Interface module candid
 @genType
 let makeSampleSetDist: array<float> => result_<
   sampleSetDist,
@@ -55,15 +44,15 @@ type discreteShape = PointSetTypes.discreteShape
 @genType
 type continuousShape = PointSetTypes.continuousShape
 
-// ForTS_Distributions_Error.toString
+@genType
+let distributionErrorToString = ForTS_Distribution_Error.toString
+
+@genType
+let defaultSamplingEnv = ForTS_Distribution.defaultEnvironment
+
+// Umur: opaqe types
 // @genType
-// let distributionErrorToString = DistributionTypes.Error.toString
+// type declarationArg = Declaration.arg
 
-@genType
-let defaultSamplingEnv = DistributionOperation.defaultEnv
-
-@genType
-type declarationArg = Declaration.arg
-
-@genType
-type declaration<'a> = Declaration.declaration<'a>
+// @genType
+// type declaration<'a> = Declaration.declaration<'a>

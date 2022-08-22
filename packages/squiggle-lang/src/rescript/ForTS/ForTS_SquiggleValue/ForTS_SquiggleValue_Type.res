@@ -1,4 +1,5 @@
-open ForTS__Types
+type squiggleValue = ForTS_SquiggleValue.squiggleValue //use
+@genType type squiggleValue_Type = ForTS_SquiggleValue.squiggleValue_Type //re-export recursive type
 
 @genType
 let getKeyValuePairs = (value: squiggleValue_Type): array<(string, squiggleValue)> =>

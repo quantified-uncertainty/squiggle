@@ -5,6 +5,7 @@ type environment = GenericDist.env
 
 let defaultEnvironment: environment = DistributionOperation.defaultEnv
 
+@genType.opaque
 type rec t =
   | IEvArray(array<t>) // FIXME: Convert to MapInt
   | IEvArrayString(array<string>)
@@ -23,17 +24,17 @@ type rec t =
   | IEvType(map)
   | IEvTypeIdentifier(string)
   | IEvVoid
-and squiggleArray = array<t>
-and map = Belt.Map.String.t<t>
-and nameSpace = NameSpace(Belt.Map.String.t<t>)
+@genType.opaque and squiggleArray = array<t>
+@genType.opaque and map = Belt.Map.String.t<t>
+@genType.opaque and nameSpace = NameSpace(Belt.Map.String.t<t>)
+@genType.opaque
 and lambdaValue = {
   parameters: array<string>,
   context: nameSpace,
   body: internalCode,
 }
-and lambdaDeclaration = Declaration.declaration<lambdaValue>
+@genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>
 
-type squiggleMap = map
 type internalExpressionValue = t
 
 type functionCall = (string, array<t>)

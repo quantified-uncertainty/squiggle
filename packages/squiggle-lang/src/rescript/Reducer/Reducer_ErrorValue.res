@@ -2,6 +2,7 @@
 @gentype.import("peggy") @genType.as("LocationRange")
 type syntaxErrorLocation
 
+@genType.opaque
 type errorValue =
   | REArityError(option<string>, int, int)
   | REArrayIndexNotFound(string, int)

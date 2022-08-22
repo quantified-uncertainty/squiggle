@@ -1,19 +1,23 @@
-import * as _ from "lodash";
-import type {
-  expressionValue,
-  mixedShape,
-  sampleSetDist,
-  genericDist,
-  environment,
-  symbolicDist,
-  discreteShape,
-  continuousShape,
-  lambdaValue,
-  lambdaDeclaration,
-  declarationArg,
-} from "../rescript/TypescriptInterface.gen";
-import { Distribution } from "./distribution";
-import { tagged, tag } from "./types";
+/** 
+ Umur: Delete this file! There is nothing left to see here.
+**/
+
+// import * as _ from "lodash";
+// import type {
+//   // expressionValue,
+//   mixedShape,
+//   sampleSetDist,
+//   genericDist,
+//   // environment,
+//   symbolicDist,
+//   discreteShape,
+//   continuousShape,
+//   // lambdaValue,
+//   // lambdaDeclaration,
+//   // declarationArg,
+// } from "../rescript/TypescriptInterface.gen";
+// import { Distribution } from "./distribution";
+// import { tagged, tag } from "./types";
 // This file is here to compensate for genType not fully recursively converting types
 
 // Raw rescript types.
@@ -81,24 +85,26 @@ import { tagged, tag } from "./types";
 //       _0: { [key: string]: rescriptExport };
 //     };
 
-type rescriptDist =
-  | { TAG: 0; _0: rescriptPointSetDist }
-  | { TAG: 1; _0: sampleSetDist }
-  | { TAG: 2; _0: symbolicDist };
+// Umur: opaque type
+// type rescriptDist =
+//   | { TAG: 0; _0: rescriptPointSetDist }
+//   | { TAG: 1; _0: sampleSetDist }
+//   | { TAG: 2; _0: symbolicDist };
 
-type rescriptPointSetDist =
-  | {
-      TAG: 0; // Mixed
-      _0: mixedShape;
-    }
-  | {
-      TAG: 1; // Discrete
-      _0: discreteShape;
-    }
-  | {
-      TAG: 2; // ContinuousShape
-      _0: continuousShape;
-    };
+// Umur: opaque type, no conversion
+// type rescriptPointSetDist =
+//   | {
+//       TAG: 0; // Mixed
+//       _0: mixedShape;
+//     }
+//   | {
+//       TAG: 1; // Discrete
+//       _0: discreteShape;
+//     }
+//   | {
+//       TAG: 2; // ContinuousShape
+//       _0: continuousShape;
+//     };
 
 // type rescriptLambdaDeclaration = {
 //   readonly fn: lambdaValue;
@@ -211,32 +217,33 @@ type rescriptPointSetDist =
 //   }
 // }
 
-function convertRawDistributionToGenericDist(
-  result: rescriptDist
-): genericDist {
-  switch (result.TAG) {
-    case 0: // Point Set Dist
-      switch (result._0.TAG) {
-        case 0: // Mixed
-          return tag("PointSet", tag("Mixed", result._0._0));
-        case 1: // Discrete
-          return tag("PointSet", tag("Discrete", result._0._0));
-        case 2: // Continuous
-          return tag("PointSet", tag("Continuous", result._0._0));
-      }
-    case 1: // Sample Set Dist
-      return tag("SampleSet", result._0);
-    case 2: // Symbolic Dist
-      return tag("Symbolic", result._0);
-  }
-}
+// Umur: opaque type no conversion!
+// function convertRawDistributionToGenericDist(
+//   result: rescriptDist
+// ): genericDist {
+//   switch (result.TAG) {
+//     case 0: // Point Set Dist
+//       switch (result._0.TAG) {
+//         case 0: // Mixed
+//           return tag("PointSet", tag("Mixed", result._0._0));
+//         case 1: // Discrete
+//           return tag("PointSet", tag("Discrete", result._0._0));
+//         case 2: // Continuous
+//           return tag("PointSet", tag("Continuous", result._0._0));
+//       }
+//     case 1: // Sample Set Dist
+//       return tag("SampleSet", result._0);
+//     case 2: // Symbolic Dist
+//       return tag("Symbolic", result._0);
+//   }
+// }
 
-export type jsValue =
-  | string
-  | number
-  | jsValue[]
-  | { [key: string]: jsValue }
-  | boolean;
+// export type jsValue =
+//   | string
+//   | number
+//   | jsValue[]
+//   | { [key: string]: jsValue }
+//   | boolean;
 
 // export function jsValueToBinding(value: jsValue): rescriptExport {
 //   if (typeof value === "boolean") {

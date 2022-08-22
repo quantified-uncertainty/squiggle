@@ -2,7 +2,10 @@ module ProjectItem = ReducerProject_ProjectItem
 module ExpressionT = Reducer_Expression_T
 module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 
+@genType.opaque
 type project = {"tag": string}
+//re-export
+@genType
 type t = project
 
 module Private = {

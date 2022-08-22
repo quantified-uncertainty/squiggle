@@ -1,3 +1,4 @@
+type result<'a, 'e> = ForTS_Result.result<'a, 'e> // Use opaque result type
 type functionCallInfo = DistributionTypes.DistributionOperation.genericFunctionCallInfo
 type genericDist = DistributionTypes.genericDist
 type error = DistributionTypes.error
