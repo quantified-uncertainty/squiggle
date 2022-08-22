@@ -30,6 +30,9 @@
   "references": [
     {
       "path": "../squiggle-lang"
+    },
+    {
+      "path": "../mc"
     }
   ]
 }

@@ -32,8 +32,10 @@ module Internals = {
   }
 
   module KDE = {
-    let normalSampling = (samples, outputXYPoints, kernelWidth) =>
+    let normalSampling' = (samples, outputXYPoints, kernelWidth) =>
       samples |> JS.samplesToContinuousPdf(_, outputXYPoints, kernelWidth) |> JS.jsToDist
+    let normalSampling = (samples, outputXYPoints, kernelWidth) =>
+      WasmInterface.samplesToContinuousPdf(samples, kernelWidth)
   }
 
   module T = {
