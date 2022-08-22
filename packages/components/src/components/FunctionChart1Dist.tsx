@@ -16,6 +16,7 @@ import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import {
   DistributionChart,
   DistributionPlottingSettings,
+  defaultPlot,
 } from "./DistributionChart";
 import { NumberShower } from "./NumberShower";
 import { ErrorAlert } from "./Alert";
@@ -179,7 +180,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   let showChart =
     mouseItem.tag === "Ok" && mouseItem.value.tag === "distribution" ? (
       <DistributionChart
-        distribution={mouseItem.value.value}
+        plot={defaultPlot(mouseItem.value.value)}
         width={400}
         height={50}
         {...distributionPlotSettings}

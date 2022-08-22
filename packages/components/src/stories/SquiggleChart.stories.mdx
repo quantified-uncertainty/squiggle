@@ -93,6 +93,33 @@ could be continuous, discrete or mixed.
   </Story>
 </Canvas>
 
+## Multiple plots
+
+<Canvas>
+  <Story
+    name="Multiple plots"
+    args={{
+      code: `
+{
+  distributions: [
+    {
+      name: "one",
+      distribution: mx(0.5, normal(0,1))
+    },
+    {
+      name: "two",
+      distribution: mx(2, normal(5, 2)),
+    }
+  ]
+}
+`,
+      width,
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
 ## Constants
 
 A constant is a simple number as a result. This has special formatting rules
