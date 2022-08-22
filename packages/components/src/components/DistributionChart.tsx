@@ -47,6 +47,8 @@ export function makePlot(record: {
 
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const { plot, height, showSummary, width, logX, actions = false } = props;
+  // const [xAxis, setXAxis] = React.useState<"dateAndTime" | "numbers">("dateAndTime")
+  
   const [sized] = useSize((size) => {
     let shapes = flattenResult(
       plot.distributions.map((x) =>

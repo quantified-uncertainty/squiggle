@@ -91,7 +91,21 @@ export function buildVegaSpec(
         name: "domain",
       },
     ],
-    signals: [],
+    signals: [
+      {
+        "name": "hover",
+        "value": null,
+        "on": [
+          {"events": "symbol:mouseover", "update": "datum"},
+          {"events": "symbol:mouseout", "update": "null"}
+        ]
+      },
+      {
+        "name": "announcer",
+        "value": "",
+        "update": "hover ? 'Probability: ' + hover.y + ', Value: ' + hover.x : ''"
+      }
+    ],
     scales: [
       xScale,
       expY ? expYScale : linearYScale,
@@ -239,7 +253,7 @@ export function buildVegaSpec(
                     x: {
                       scale: "xscale",
                       field: "x",
-                      offset: 0.5,
+                      offset: 0.5, // if this is not included, the circles are slightly left of center. 
                     },
                     y: {
                       scale: "yscale",
@@ -256,6 +270,22 @@ export function buildVegaSpec(
           },
         ],
       },
+      {
+        "type": "text",
+        "interactive": false,
+        "encode": {
+          "enter": {
+            "x": {"signal": "width", "offset": 1},
+            "y": {"value": 0},
+            "fill": {"value": "black"},
+            "fontSize": {"value": 20},
+            "align": {"value": "right"}
+          },
+          "update": {
+            "text": {"signal": "announcer"}
+          }
+        }
+      }
     ],
     legends: [
       {
