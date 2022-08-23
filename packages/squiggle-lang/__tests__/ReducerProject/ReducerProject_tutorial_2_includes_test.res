@@ -91,7 +91,7 @@ Here we will finally proceed to a real life scenario. */
 
           | Ok(includes) =>
             Belt.Array.forEach(includes, newIncludeName => {
-              /* We have got one of the new incldues.
+              /* We have got one of the new includes.
                Let's load it and add it to the project */
               let newSource = loadSource(newIncludeName)
               Project.setSource(project, newIncludeName, newSource)
