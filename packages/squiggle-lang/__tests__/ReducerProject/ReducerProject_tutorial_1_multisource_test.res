@@ -10,8 +10,7 @@ open Expect.Operators
 describe("ReducerProject Tutorial", () => {
   describe("Multi source", () => {
     /*
-Case "Running multiple sources"
-*/
+     Case "Running multiple sources" */
     test("Chaining", () => {
       let project = Project.createProject()
       /* This time let's add 3 sources and chain them together */
@@ -67,8 +66,7 @@ Case "Running multiple sources"
     test("Intro to including", () => {
       /* Though it would not be practical for a storybook, 
         let's write the same project above with includes.
-        You will see that parsing includes is setting the dependencies the same way as before.
- */
+        You will see that parsing includes is setting the dependencies the same way as before. */
       let project = Project.createProject()
 
       /* This time source1 and source2 are not depending on anything */
@@ -99,18 +97,16 @@ Case "Running multiple sources"
         result3->InternalExpressionValue.toStringOptionResult,
         bindings3->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
       )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
-      /* 
+      /*
       Doing it like this is too verbose for a storybook 
-      But I hope you have seen the relation of setContinues and parseIncludes 
-      */
-      /* 
+      But I hope you have seen the relation of setContinues and parseIncludes */
+      /*
          Dealing with includes needs more. 
          - There are parse errors
          - There are cyclic includes
          - And the depended source1 and source2 is not already there in the project
          - If you knew the includes before hand there would not be point of the include directive.
-         More on those on the next section.
-      */
+         More on those on the next section. */
     })
   })
 })
