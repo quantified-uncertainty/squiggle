@@ -102,7 +102,7 @@ let library = [
             GenericDist.toSampleSetDist(dist, accessors.environment.sampleCount)
             ->E.R2.fmap(Wrappers.sampleSet)
             ->E.R2.fmap(Wrappers.evDistribution)
-            ->E.R2.errMap(_ => "")
+            ->E.R2.errMap(DistributionTypes.Error.toString)
           | _ => Error(impossibleError)
           },
         (),
@@ -168,7 +168,7 @@ let library = [
           | [IEvLambda(lambda)] =>
             switch Internal.fromFn(lambda, accessors, reducer) {
             | Ok(r) => Ok(r->Wrappers.sampleSet->Wrappers.evDistribution)
-            | Error(_) => Error("issue")
+            | Error(e) => Error(Operation.Error.toString(e))
             }
           | _ => Error(impossibleError)
           },
