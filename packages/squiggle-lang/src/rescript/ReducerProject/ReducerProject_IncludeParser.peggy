@@ -3,9 +3,8 @@
 // #include "string"
 // #include "string2"
 
-
 start
-  = @includes newLine* ignore
+  = (newLine/_/comment/delimitedComment)* @includes newLine* ignore
 
 includes
  = head:includeStatement tail:(newLine+ @includeStatement)* 
@@ -14,7 +13,7 @@ includes
  {return [];}
 
 includeStatement
-  = '#include' _* @string _* 
+  = _* '#include' _* @string _* 
   / comment
   / delimitedComment
 

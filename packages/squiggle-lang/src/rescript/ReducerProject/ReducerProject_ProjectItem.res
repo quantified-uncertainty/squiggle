@@ -106,7 +106,7 @@ let setIncludes = (T.ProjectItem(r): t, includes: T.includesType): t => T.Projec
 
 //TODO: forward parse errors to the user
 let parseIncludes = (this: t): t =>
-  setIncludes(this, getSource(this)->ReducerProject_ParseIncludes.parseIncludes->Ok)
+  setIncludes(this, getSource(this)->ReducerProject_ParseIncludes.parseIncludes)
 
 let doRawParse = (this: t): T.rawParseArgumentType => this->getSource->Reducer_Peggy_Parse.parse
 
