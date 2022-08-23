@@ -54,7 +54,103 @@ Here we will finally proceed to a real life scenario. */
       /* Nothing is depending on or including main */
     })
 
-    /* Let's look at recursive and possibly cyclic includes */
-    /* ... */
+    describe("Real Like", () => {
+      /* Now let's look at recursive and possibly cyclic includes */
+      /* There is no function provided to load the include files.
+    Because we have no idea if will it be an ordinary function or will it use promises.
+    Therefore one has to write a function to load sources recursively and and setSources
+    while checking for dependencies */
+
+      /* Let's make a dummy loader */
+      let loadSource = (sourceName: string) =>
+        switch sourceName {
+        | "source1" => "x=1"
+        | "source2" => `
+            #include "source1"
+            y=2`
+        | "source3" => `
+            #include "source2"
+            z=3`
+        | _ => `source ${sourceName} not found`->Js.Exn.raiseError
+        }
+
+      /* let's recursively load the sources */
+      let rec loadIncludesRecursively = (project, sourceName, visited) => {
+        if Js.Array2.includes(visited, sourceName) {
+          /* Oh we have already visited this source. There is an include cycle */
+          "Cyclic include ${sourceName}"->Js.Exn.raiseError
+        } else {
+          let newVisited = Js.Array2.copy(visited)
+          let _ = Js.Array2.push(newVisited, sourceName)
+          /* Let's parse the includes and dive into them */
+          Project.parseIncludes(project, sourceName)
+          let rIncludes = Project.getIncludes(project, sourceName)
+          switch rIncludes {
+          /* Maybe there is an include syntax error */
+          | Error(err) => err->Reducer_ErrorValue.errorToString->Js.Exn.raiseError
+
+          | Ok(includes) =>
+            Belt.Array.forEach(includes, newIncludeName => {
+              /* We have got one of the new incldues.
+               Let's load it and add it to the project */
+              let newSource = loadSource(newIncludeName)
+              Project.setSource(project, newIncludeName, newSource)
+              /* The new source is loaded and added to the project. */
+              /* Of course the new source might have includes too. */
+              /* Let's recursively load them */
+              loadIncludesRecursively(project, newIncludeName, newVisited)
+            })
+          }
+        }
+      }
+      /* As we have a fake source loader and a recursive include handler,
+       We can not set up a real project */
+
+      /* * Here starts our real life project! * */
+
+      let project = Project.createProject()
+
+      /* main includes source3 which includes source2 which includes source1 */
+      Project.setSource(
+        project,
+        "main",
+        `
+        #include "source3"
+        x+y+z
+        `,
+      )
+      /* Setting source requires parsing and loading the includes recursively */
+      loadIncludesRecursively(project, "main", []) //No visited yet
+
+      /* Let's salt it more. Let's have another source in the project which also has includes */
+      /* doubleX includes source1 which is eventually included by main as well */
+      Project.setSource(
+        project,
+        "doubleX",
+        `
+        #include "source1"
+        doubleX = x * 2
+        `,
+      )
+      loadIncludesRecursively(project, "doubleX", [])
+      /* Remember, any time you set a source, you need to load includes recursively */
+
+      /* As doubleX is not included by main, it is not loaded recursively.
+       So we link it to the project as a dependency */
+      Project.setContinues(project, "main", ["doubleX"])
+
+      /* Let's run the project */
+      Project.runAll(project)
+      let result = Project.getResult(project, "main")
+      let bindings = Project.getBindings(project, "main")
+      /* And see the result and bindings.. */
+      test("recursive includes", () => {
+        (
+          result->InternalExpressionValue.toStringOptionResult,
+          bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
+        )->expect == ("Ok(6)", "@{doubleX: 2,x: 1,y: 2,z: 3}")
+        /* Everything as expected */
+      })
+    })
   })
 })
