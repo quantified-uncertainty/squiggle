@@ -16,7 +16,7 @@ export type DistributionChartSpecOptions = {
   format?: string;
 };
 
-export let linearXScale: LinearScale = {
+export const linearXScale: LinearScale = {
   name: "xscale",
   clamp: true,
   type: "linear",
@@ -25,7 +25,7 @@ export let linearXScale: LinearScale = {
   nice: false,
   domain: { data: "domain", field: "x" },
 };
-export let linearYScale: LinearScale = {
+export const linearYScale: LinearScale = {
   name: "yscale",
   type: "linear",
   range: "height",
@@ -33,7 +33,7 @@ export let linearYScale: LinearScale = {
   domain: { data: "domain", field: "y" },
 };
 
-export let logXScale: LogScale = {
+export const logXScale: LogScale = {
   name: "xscale",
   type: "log",
   range: "width",
@@ -44,7 +44,7 @@ export let logXScale: LogScale = {
   domain: { data: "domain", field: "x" },
 };
 
-export let expYScale: PowScale = {
+export const expYScale: PowScale = {
   name: "yscale",
   type: "pow",
   exponent: 0.1,
@@ -77,7 +77,7 @@ export function buildVegaSpec(
     xScale = { ...xScale, domainMax: maxX };
   }
 
-  let spec: VisualizationSpec = {
+  const spec: VisualizationSpec = {
     $schema: "https://vega.github.io/schema/vega/v5.json",
     description: "Squiggle plot chart",
     width: 500,
@@ -100,16 +100,20 @@ export function buildVegaSpec(
         "name": "position",
         "value": "[0, 0]",
         "on": [
-          { "events": "mousemove", "update": "hover ? xy() : null"},
+          { "events": "mousemove", "update": "xy() "},
           { "events": "mouseout", "update": "null"},
         ]
       },
- 
-      // {
-      //   "name": "announcer",
-      //   "value": "",
-      //   "update": "hover ?  'Value: ' + hover.x : ''"
-      // },
+      {
+        "name": "position_scaled",
+        "value": 0,
+        "update": "position ? invert('xscale', position[0]) : null"
+      },
+      {
+        "name": "announcer",
+        "value": "",
+        "update": "hover ?  'Value: ' + hover.x : ''"
+      },
       
     
     ],
@@ -302,38 +306,37 @@ export function buildVegaSpec(
         "encode": {
           "enter": {
             "x": {"signal": "width", "offset": 1},
-            "y": {"value": 0},
             "fill": {"value": "black"},
             "fontSize": {"value": 20},
             "align": {"value": "right"}
           },
           "update": {
-            "text": {"signal": "position ? position[0]/width  : ''"}
+            "text": {"signal": "position_scaled ? position_scaled  : ''", }
           }
         }
       },
-      // {
-      //   "type": "rule",
-      //   "encode": {
-      //     "enter": {
-      //       x: {value: 0},
-      //       "y": {"scale": "yscale", "value":0},
+      {
+        "type": "rule",
+        "encode": {
+          "enter": {
+            x: {value: 0},
+            "y": {"scale": "yscale", "value":0},
 
-      //       y2: {
-      //        signal: "height",
-      //        offset: 2
-      //       },
-      //       "strokeDash": {"value": [5, 5]}, 
-      //      },
+            y2: {
+             signal: "height",
+             offset: 2
+            },
+            "strokeDash": {"value": [5, 5]}, 
+           },
            
-      //      "update": {
-      //       "x": {"signal": "position[0] < 0 ? null : position[0] > width ? null : position[0]"},
+           "update": {
+            "x": {"signal": "position ? position[0] < 0 ? null : position[0] > width ? null : position[0]: null"},
 
-      //       "opacity": {"signal": "position ? 1 : 0"}
-      //     },
-      //   }
+            "opacity": {"signal": "position ? 1 : 0"}
+          },
+        }
         
-      // }
+      }
     ],
     legends: [
       {
