@@ -21,4 +21,3 @@
 @genType type pointSetDistribution = ForTS_Distribution_PointSetDistribution.pointSetDistribution //re-export
 @genType type sampleSetDistribution = ForTS_Distribution_SampleSetDistribution.sampleSetDistribution //re-export
 @genType type symbolicDistribution = ForTS_Distribution_SymbolicDistribution.symbolicDistribution //re-export
-
