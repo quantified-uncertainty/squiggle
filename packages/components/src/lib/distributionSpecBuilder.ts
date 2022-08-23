@@ -84,27 +84,34 @@ export function buildVegaSpec(
     height: 100,
     padding: 5,
     data: [
-      {
-        name: "data",
-      },
-      {
-        name: "domain",
-      },
+      {name: "data",},
+      { name: "domain",},
     ],
     signals: [
       {
         "name": "hover",
         "value": null,
         "on": [
-          {"events": "symbol:mouseover", "update": "datum"},
-          {"events": "symbol:mouseout", "update": "null"}
+          {"events": "mouseover", "update": "datum"},
+          {"events": "mouseout", "update": "null"}
         ]
       },
       {
-        "name": "announcer",
-        "value": "",
-        "update": "hover ? 'Probability: ' + hover.y + ', Value: ' + hover.x : ''"
-      }
+        "name": "position",
+        "value": "[0, 0]",
+        "on": [
+          { "events": "mousemove", "update": "hover ? xy() : null"},
+          { "events": "mouseout", "update": "null"},
+        ]
+      },
+ 
+      // {
+      //   "name": "announcer",
+      //   "value": "",
+      //   "update": "hover ?  'Value: ' + hover.x : ''"
+      // },
+      
+    
     ],
     scales: [
       xScale,
@@ -134,6 +141,7 @@ export function buildVegaSpec(
       },
     ],
     marks: [
+     
       {
         name: "all_distributions",
         type: "group",
@@ -145,6 +153,7 @@ export function buildVegaSpec(
           },
         },
         marks: [
+         
           {
             name: "continuous_distribution",
             type: "group",
@@ -204,6 +213,22 @@ export function buildVegaSpec(
             },
             marks: [
               {
+                "name": "samples",
+                "type": "rect",
+                "from": {"data": "discrete_facet"},
+                "encode": {
+                  "enter": {
+                    "x": {"scale": "xscale", "field":"x"},
+                    "width": {"value": 1},
+        
+                    "y": {"value": 25, "offset": {"signal": "height"}},
+                    "height": {"value": 5},
+                    "fill": {"value": "steelblue"},
+                    "fillOpacity": {"value": 0.8}
+                  }
+                }
+              },
+              {
                 type: "rect",
                 from: {
                   data: "discrete_facet",
@@ -241,6 +266,7 @@ export function buildVegaSpec(
                 },
                 encode: {
                   enter: {
+
                     shape: {
                       value: "circle",
                     },
@@ -282,10 +308,32 @@ export function buildVegaSpec(
             "align": {"value": "right"}
           },
           "update": {
-            "text": {"signal": "announcer"}
+            "text": {"signal": "position ? position[0]/width  : ''"}
           }
         }
-      }
+      },
+      // {
+      //   "type": "rule",
+      //   "encode": {
+      //     "enter": {
+      //       x: {value: 0},
+      //       "y": {"scale": "yscale", "value":0},
+
+      //       y2: {
+      //        signal: "height",
+      //        offset: 2
+      //       },
+      //       "strokeDash": {"value": [5, 5]}, 
+      //      },
+           
+      //      "update": {
+      //       "x": {"signal": "position[0] < 0 ? null : position[0] > width ? null : position[0]"},
+
+      //       "opacity": {"signal": "position ? 1 : 0"}
+      //     },
+      //   }
+        
+      // }
     ],
     legends: [
       {
