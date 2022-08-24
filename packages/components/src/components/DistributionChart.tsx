@@ -15,6 +15,7 @@ import {
   buildVegaSpec,
   DistributionChartSpecOptions,
 } from "../lib/distributionSpecBuilder";
+import { buildDateVegaSpec } from "../lib/dateDistributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult } from "../lib/utility";
@@ -30,6 +31,7 @@ export type DistributionChartProps = {
   plot: Plot;
   width?: number;
   height: number;
+  xAxis?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
 export function defaultPlot(distribution: Distribution): Plot {
@@ -45,8 +47,102 @@ export function makePlot(record: {
   }
 }
 
+const DateDistributionChart: React.FC<DistributionChartProps> = (props) => {
+  const {
+    plot,
+    height,
+    showSummary,
+    width,
+    logX,
+    actions = false,
+    xAxis = "dateTime",
+  } = props;
+  // const [xAxis, setXAxis] = React.useState<"dateAndTime" | "numbers">("dateAndTime")
+  const [sized] = useSize((size) => {
+    const shapes = flattenResult(
+      plot.distributions.map((x) =>
+        resultMap(x.distribution.pointSet(), (shape) => ({
+          name: x.name,
+          // color: x.color, // not supported yet
+          continuous: shape.continuous,
+          discrete: shape.discrete,
+        }))
+      )
+    );
+
+    if (shapes.tag === "Error") {
+      return (
+        <ErrorAlert heading="Distribution Error">
+          {distributionErrorToString(shapes.value)}
+        </ErrorAlert>
+      );
+    }
+
+    const spec = buildDateVegaSpec(props);
+
+    let widthProp = width ? width : size.width;
+    if (widthProp < 20) {
+      console.warn(
+        `Width of Distribution is set to ${widthProp}, which is too small`
+      );
+      widthProp = 20;
+    }
+    const domain = shapes.value.flatMap((shape) =>
+      shape.discrete.concat(shape.continuous)
+    );
+
+    const dateData = {
+      name: "default",
+      continuous: [],
+      discrete: [
+        { dateTime: new Date().getTime() - 1000000, y: 0.3 },
+        { dateTime: new Date().getTime(), y: 0.5 },
+        { dateTime: new Date().getTime() + 1000000, y: 0.7 },
+      ],
+    };
+
+    const dateDomain = [
+      { dateTime: new Date().getTime() - 1000000, y: 0.2 },
+      { dateTime: new Date().getTime(), y: 0.5 },
+      { dateTime: new Date().getTime() + 1000000, y: 0.7 },
+    ];
+
+    return (
+      <div style={{ width: widthProp }}>
+        {logX && shapes.value.some(hasMassBelowZero) ? (
+          <ErrorAlert heading="Log Domain Error">
+            Cannot graph distribution with negative values on logarithmic scale.
+          </ErrorAlert>
+        ) : (
+          <Vega
+            spec={spec}
+            data={{ data: dateData, domain: dateDomain }}
+            width={widthProp - 10}
+            height={height}
+            actions={actions}
+          />
+        )}
+        <div className="flex justify-center">
+          {showSummary && plot.distributions.length === 1 && (
+            <SummaryTable distribution={plot.distributions[0].distribution} />
+          )}
+        </div>
+      </div>
+    );
+  });
+  return sized;
+};
+
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const { plot, height, showSummary, width, logX, actions = false } = props;
+  const {
+    plot,
+    height,
+    showSummary,
+    width,
+    logX,
+    actions = false,
+    xAxis = "number",
+  } = props;
   // const [xAxis, setXAxis] = React.useState<"dateAndTime" | "numbers">("dateAndTime")
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
@@ -81,7 +177,6 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       shape.discrete.concat(shape.continuous)
     );
 
-    console.log({domain, data: shapes.value})
     return (
       <div style={{ width: widthProp }}>
         {logX && shapes.value.some(hasMassBelowZero) ? (
@@ -89,13 +184,26 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
         ) : (
-          <Vega
-            spec={spec}
-            data={{ data: shapes.value, domain }}
-            width={widthProp - 10}
-            height={height}
-            actions={actions}
-          />
+          <>
+            <Vega
+              spec={spec}
+              data={{ data: shapes.value, domain }}
+              width={widthProp - 10}
+              height={height}
+              actions={actions}
+            />
+            <div id="CONORDELETETHIS">
+              <DateDistributionChart
+                plot={plot}
+                height={height}
+                showSummary={showSummary}
+                width={width}
+                logX={logX}
+                actions={actions}
+                expY={props.expY}
+              />
+            </div>
+          </>
         )}
         <div className="flex justify-center">
           {showSummary && plot.distributions.length === 1 && (
