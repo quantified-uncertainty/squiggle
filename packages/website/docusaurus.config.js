@@ -54,10 +54,10 @@ const config = {
     ({
       algolia: {
         // The application ID provided by Algolia
-        appId: "NEUN2KAR5K",
+        appId: "KBED3M1CMD",
 
         // Public API key: it is safe to commit it
-        apiKey: "1f5c74a2d72799add24eb7682531a1b0",
+        apiKey: "c61bc7603893cf287ed6971983af8bad",
 
         indexName: "squiggle_docs",
 
