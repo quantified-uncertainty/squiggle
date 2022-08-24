@@ -48,9 +48,8 @@ export function makePlot(record: {
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const { plot, height, showSummary, width, logX, actions = false } = props;
   // const [xAxis, setXAxis] = React.useState<"dateAndTime" | "numbers">("dateAndTime")
-  
   const [sized] = useSize((size) => {
-    let shapes = flattenResult(
+    const shapes = flattenResult(
       plot.distributions.map((x) =>
         resultMap(x.distribution.pointSet(), (shape) => ({
           name: x.name,
@@ -60,6 +59,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         }))
       )
     );
+
     if (shapes.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
@@ -81,6 +81,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       shape.discrete.concat(shape.continuous)
     );
 
+    console.log({domain, data: shapes.value})
     return (
       <div style={{ width: widthProp }}>
         {logX && shapes.value.some(hasMassBelowZero) ? (
