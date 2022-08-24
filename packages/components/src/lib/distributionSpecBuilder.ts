@@ -311,7 +311,7 @@ export function buildVegaSpec(
             "align": {"value": "right"}
           },
           "update": {
-            "text": {"signal": "position_scaled ? position_scaled  : ''", }
+            "text": {"signal": "position_scaled ? format(position_scaled, ',.4r')  : ''", }
           }
         }
       },
