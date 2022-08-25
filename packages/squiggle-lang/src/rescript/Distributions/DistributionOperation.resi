@@ -1,4 +1,3 @@
-type result<'a, 'e> = ForTS_Result.result<'a, 'e> // Use opaque result type
 @genType
 let defaultEnv: GenericDist.env
 

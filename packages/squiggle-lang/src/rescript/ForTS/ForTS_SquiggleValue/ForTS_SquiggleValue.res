@@ -1,5 +1,4 @@
 @genType type squiggleValue = ReducerInterface_InternalExpressionValue.t //re-export
-type result_<'a, 'e> = ForTS_Result.result_<'a, 'e> //use
 type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
 
 @genType type squiggleValue_Array = ReducerInterface_InternalExpressionValue.squiggleArray //re-export recursive type
@@ -97,7 +96,7 @@ let toString = (variant: squiggleValue) =>
 // This is a useful method for unit tests.
 // Convert the result along with the error message to a string.
 @genType
-let toStringResult = (variantResult: result_<squiggleValue, reducerErrorValue>) =>
+let toStringResult = (variantResult: result<squiggleValue, reducerErrorValue>) =>
   ReducerInterface_InternalExpressionValue.toStringResult(variantResult)
 
 @genType

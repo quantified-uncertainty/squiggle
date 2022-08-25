@@ -1,6 +1,5 @@
 @genType type reducerProject = ReducerProject_T.t //re-export
 
-type result<'a, 'e> = ForTS_Result.result<'a, 'e> // Use opaque result type
 type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
 
 type squiggleValue = ForTS_SquiggleValue.squiggleValue //use

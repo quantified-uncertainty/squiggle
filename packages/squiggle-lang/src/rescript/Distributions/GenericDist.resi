@@ -1,5 +1,3 @@
-type result<'a, 'e> = ForTS_Result.result<'a, 'e> // Use opaque result type
-
 type t = DistributionTypes.genericDist
 type error = DistributionTypes.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>

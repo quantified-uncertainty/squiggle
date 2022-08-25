@@ -1,5 +1,3 @@
-@genType type result_<'a, 'e> = ForTS_Result.result_<'a, 'e> //re-export
-@genType type result<'a, 'e> = ForTS_Result.result<'a, 'e> //re-export
 @genType type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //re-export
 @genType type syntaxErrorLocation = ForTS_Reducer_ErrorValue.syntaxErrorLocation //re-export
 

@@ -15,12 +15,12 @@ The below few seem to work fine. In the future there's definitely more work to d
 @genType type genericDist = squiggleValue_Distribution //alternative
 @genType type sampleSetDist = sampleSetDistribution //alternative
 @genType type symbolicDist = symbolicDistribution //alternative
-@genType type resultDist = result_<distribution, distributionError> //alternative
-@genType type resultFloat = result_<float, distributionError> //alternative
-@genType type resultString = result_<string, distributionError> //alternative
+@genType type resultDist = result<distribution, distributionError> //alternative
+@genType type resultFloat = result<float, distributionError> //alternative
+@genType type resultString = result<string, distributionError> //alternative
 
 @genType
-let makeSampleSetDist: array<float> => result_<
+let makeSampleSetDist: array<float> => result<
   sampleSetDist,
   SampleSetDist.sampleSetError,
 > = SampleSetDist.make
@@ -33,7 +33,7 @@ let toPointSet: (
   ~sampleCount: int,
   ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=?,
   unit,
-) => result_<PointSetTypes.pointSetDist, distributionError> = GenericDist.toPointSet
+) => result<PointSetTypes.pointSetDist, distributionError> = GenericDist.toPointSet
 
 @genType
 type mixedShape = PointSetTypes.mixedShape
