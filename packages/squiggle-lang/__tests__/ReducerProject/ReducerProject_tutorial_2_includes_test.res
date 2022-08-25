@@ -13,7 +13,7 @@ In the previous tutorial we have set the similarity between setContinues and par
 Here we will finally proceed to a real life scenario. */
 
   describe("parseIncludes", () => {
-    /* Here we investigate the details about parseIncludes, before setting up a real life senario in the next section. */
+    /* Here we investigate the details about parseIncludes, before setting up a real life scenario in the next section. */
     /* Everything happens inside a project, so let's have a project */
     let project = Project.createProject()
     Project.setSource(

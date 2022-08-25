@@ -50,7 +50,7 @@ let distributionErrorToString = ForTS_Distribution_Error.toString
 @genType
 let defaultSamplingEnv = ForTS_Distribution.defaultEnvironment
 
-// Umur: opaqe types
+// Umur: opaque types
 // @genType
 // type declarationArg = Declaration.arg
 
