@@ -47,92 +47,6 @@ export function makePlot(record: {
   }
 }
 
-const DateDistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const {
-    plot,
-    height,
-    showSummary,
-    width,
-    logX,
-    actions = false,
-    xAxis = "dateTime",
-  } = props;
-  // const [xAxis, setXAxis] = React.useState<"dateAndTime" | "numbers">("dateAndTime")
-  const [sized] = useSize((size) => {
-    const shapes = flattenResult(
-      plot.distributions.map((x) =>
-        resultMap(x.distribution.pointSet(), (shape) => ({
-          name: x.name,
-          // color: x.color, // not supported yet
-          continuous: shape.continuous,
-          discrete: shape.discrete,
-        }))
-      )
-    );
-
-    if (shapes.tag === "Error") {
-      return (
-        <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(shapes.value)}
-        </ErrorAlert>
-      );
-    }
-
-    const spec = buildDateVegaSpec(props);
-
-    let widthProp = width ? width : size.width;
-    if (widthProp < 20) {
-      console.warn(
-        `Width of Distribution is set to ${widthProp}, which is too small`
-      );
-      widthProp = 20;
-    }
-    const domain = shapes.value.flatMap((shape) =>
-      shape.discrete.concat(shape.continuous)
-    );
-
-    const dateData = {
-      name: "default",
-      continuous: [],
-      discrete: [
-        { dateTime: new Date().getTime() - 1000000, y: 0.2 },
-        { dateTime: new Date().getTime(), y: 0.5 },
-        { dateTime: new Date().getTime() + 1000000, y: 0.7 },
-      ],
-    };
-
-    const dateDomain = [
-      { dateTime: new Date().getTime() - 1000000, y: 0.2 },
-      { dateTime: new Date().getTime(), y: 0.5 },
-      { dateTime: new Date().getTime() + 1000000, y: 0.7 },
-    ];
-
-    return (
-      <div style={{ width: widthProp }}>
-        {logX && shapes.value.some(hasMassBelowZero) ? (
-          <ErrorAlert heading="Log Domain Error">
-            Cannot graph distribution with negative values on logarithmic scale.
-          </ErrorAlert>
-        ) : (
-          <Vega
-            spec={spec}
-            data={{ data: dateData, domain: dateDomain }}
-            width={widthProp - 10}
-            height={height}
-            actions={actions}
-          />
-        )}
-        <div className="flex justify-center">
-          {showSummary && plot.distributions.length === 1 && (
-            <SummaryTable distribution={plot.distributions[0].distribution} />
-          )}
-        </div>
-      </div>
-    );
-  });
-  return sized;
-};
-
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const {
     plot,
@@ -143,7 +57,6 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     actions = false,
     xAxis = "number",
   } = props;
-  // const [xAxis, setXAxis] = React.useState<"dateAndTime" | "numbers">("dateAndTime")
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
       plot.distributions.map((x) =>
@@ -164,7 +77,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
     }
 
-    const spec = buildVegaSpec(props);
+    const spec =
+      xAxis === "dateTime" ? buildDateVegaSpec(props) : buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
     if (widthProp < 20) {
@@ -173,9 +87,31 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
       widthProp = 20;
     }
-    const domain = shapes.value.flatMap((shape) =>
+    const predomain = shapes.value.flatMap((shape) =>
       shape.discrete.concat(shape.continuous)
     );
+
+    const domain =
+      xAxis === "dateTime"
+        ? predomain.map((p) => {
+            return { dateTime: p.x, y: p.y };
+          })
+        : predomain;
+
+    const data =
+      xAxis === "dateTime"
+        ? shapes.value.map((val) => {
+            return {
+              ...val,
+              continuous: val.continuous.map((p) => {
+                return { dateTime: p.x, y: p.y };
+              }),
+              discrete: val.discrete.map((p) => {
+                return { dateTime: p.x, y: p.y };
+              }),
+            };
+          })
+        : shapes.value;
 
     return (
       <div style={{ width: widthProp }}>
@@ -184,26 +120,13 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
         ) : (
-          <>
-            <Vega
-              spec={spec}
-              data={{ data: shapes.value, domain }}
-              width={widthProp - 10}
-              height={height}
-              actions={actions}
-            />
-            <div id="CONORDELETETHIS">
-              <DateDistributionChart
-                plot={plot}
-                height={height}
-                showSummary={showSummary}
-                width={width}
-                logX={logX}
-                actions={actions}
-                expY={props.expY}
-              />
-            </div>
-          </>
+          <Vega
+            spec={spec}
+            data={{ data, domain }}
+            width={widthProp - 10}
+            height={height}
+            actions={actions}
+          />
         )}
         <div className="flex justify-center">
           {showSummary && plot.distributions.length === 1 && (
