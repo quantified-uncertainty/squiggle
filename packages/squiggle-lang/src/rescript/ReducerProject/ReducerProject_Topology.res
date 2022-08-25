@@ -81,16 +81,25 @@ let runOrderDiff = (current: array<string>, previous0: array<string>): array<str
   Belt.Array.forEach(filler, _ => {
     let _ = Js.Array2.push(previous, "")
   })
-  let zipped = Belt.Array.zip(current, previous)
+  let zipped: array<(string, string)> = Belt.Array.zip(current, previous)
+
+  // zipped
+  // ->Belt.Array.map(((curr, prev)) => {
+  //   let result = `(${curr}, ${prev})`
+  //   result
+  // })
+  // ->Js.Array2.joinWith(", ")
+  // ->Js.log
+
   let (_, affected) = Belt.Array.reduce(zipped, (true, []), ((wasEqual, acc), (curr, prev)) => {
     switch wasEqual {
     | true =>
       if curr == prev {
-        (true, Belt.Array.concat(acc, [curr]))
+        (true, acc)
       } else {
-        (false, acc)
+        (false, Belt.Array.concat(acc, [curr]))
       }
-    | false => (false, acc)
+    | false => (false, Belt.Array.concat(acc, [curr]))
     }
   })
   affected
