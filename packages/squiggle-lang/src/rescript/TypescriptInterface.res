@@ -1,3 +1,4 @@
+open ForTS__Types
 /*
 This is meant as a file to contain @genType declarations as needed for Typescript.
 I would ultimately want to have all @genType declarations here, vs. other files, but
@@ -7,59 +8,32 @@ would be preferable.
 The below few seem to work fine. In the future there's definitely more work to do here.
 */
 
-@genType
-type samplingParams = GenericDist.env
+// For backwards compatibility:
+//Alternatives if one wants to keep the old habits
+@genType type samplingParams = environment
+@genType type squiggleValue_Dist = squiggleValue_Distribution //alternative
+@genType type genericDist = squiggleValue_Distribution //alternative
+@genType type sampleSetDist = sampleSetDistribution //alternative
+@genType type symbolicDist = symbolicDistribution //alternative
+@genType type resultDist = result<distribution, distributionError> //alternative
+@genType type resultFloat = result<float, distributionError> //alternative
+@genType type resultString = result<string, distributionError> //alternative
 
 @genType
-type genericDist = DistributionTypes.genericDist
+let makeSampleSetDist: array<float> => result<
+  sampleSetDist,
+  SampleSetDist.sampleSetError,
+> = SampleSetDist.make
 
+//TODO: ForTS Interface module candid
 @genType
-type sampleSetDist = SampleSetDist.t
-
-@genType
-type symbolicDist = SymbolicDistTypes.symbolicDist
-
-@genType
-type distributionError = DistributionTypes.error
-
-@genType
-type resultDist = result<genericDist, distributionError>
-
-@genType
-type resultFloat = result<float, distributionError>
-
-@genType
-type resultString = result<string, distributionError>
-
-@genType
-let makeSampleSetDist = SampleSetDist.make
-
-@genType
-let evaluate = Reducer.evaluate
-
-@genType
-let evaluateUsingOptions = Reducer.evaluateUsingOptions
-
-@genType
-let parse = Reducer_Peggy_Parse.parse
-
-@genType
-let evaluatePartialUsingExternalBindings = Reducer.evaluatePartialUsingExternalBindings
-
-@genType
-type externalBindings = Reducer.externalBindings
-
-@genType
-type expressionValue = ReducerInterface_ExternalExpressionValue.t
-
-@genType
-type recordEV = ReducerInterface_ExternalExpressionValue.record
-
-@genType
-type errorValue = Reducer_ErrorValue.errorValue
-
-@genType
-let toPointSet = GenericDist.toPointSet
+let toPointSet: (
+  squiggleValue_Distribution,
+  ~xyPointLength: int,
+  ~sampleCount: int,
+  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=?,
+  unit,
+) => result<PointSetTypes.pointSetDist, distributionError> = GenericDist.toPointSet
 
 @genType
 type mixedShape = PointSetTypes.mixedShape
@@ -71,31 +45,14 @@ type discreteShape = PointSetTypes.discreteShape
 type continuousShape = PointSetTypes.continuousShape
 
 @genType
-let errorValueToString = Reducer_ErrorValue.errorToString
+let distributionErrorToString = ForTS_Distribution_Error.toString
 
 @genType
-let distributionErrorToString = DistributionTypes.Error.toString
+let defaultSamplingEnv = ForTS_Distribution.defaultEnvironment
 
-@genType
-type lambdaValue = ReducerInterface_ExternalExpressionValue.lambdaValue
+// Umur: opaqe types
+// @genType
+// type declarationArg = Declaration.arg
 
-@genType
-type lambdaDeclaration = ReducerInterface_ExternalExpressionValue.lambdaDeclaration
-
-@genType
-let defaultSamplingEnv = DistributionOperation.defaultEnv
-
-@genType
-type environment = ReducerInterface_ExternalExpressionValue.environment
-
-@genType
-let defaultEnvironment = ReducerInterface_ExternalExpressionValue.defaultEnvironment
-
-@genType
-let foreignFunctionInterface = Reducer.foreignFunctionInterface
-
-@genType
-type declarationArg = Declaration.arg
-
-@genType
-type declaration<'a> = Declaration.declaration<'a>
+// @genType
+// type declaration<'a> = Declaration.declaration<'a>

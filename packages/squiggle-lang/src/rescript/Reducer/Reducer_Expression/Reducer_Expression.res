@@ -1,3 +1,4 @@
+module Bindings = Reducer_Bindings
 module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module BuiltIn = Reducer_Dispatch_BuiltIn
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
@@ -6,30 +7,21 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 module Macro = Reducer_Expression_Macro
 module MathJs = Reducer_MathJs
-module Bindings = Reducer_Bindings
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 module Result = Belt.Result
 module T = Reducer_Expression_T
 
-type environment = InternalExpressionValue.environment
 type errorValue = Reducer_ErrorValue.errorValue
-type expression = T.expression
-type internalExpressionValue = InternalExpressionValue.t
-type externalExpressionValue = ReducerInterface_ExternalExpressionValue.t
-type t = expression
+type t = T.t
 
 /*
-  Converts a Squigle code to expression
+  Recursively evaluate/reduce the expression (Lisp AST/Lambda calculus)
 */
-let parse = (peggyCode: string): result<t, errorValue> =>
-  peggyCode->Reducer_Peggy_Parse.parse->Result.map(Reducer_Peggy_ToExpression.fromNode)
-
-/*
-  Recursively evaluate/reduce the expression (Lisp AST)
-*/
-let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<
-  internalExpressionValue,
-  'e,
-> => {
+let rec reduceExpressionInProject = (
+  expression: t,
+  continuation: T.bindings,
+  accessors: ProjectAccessorsT.t,
+): result<InternalExpressionValue.t, 'e> => {
   // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
   switch expression {
   | T.EValue(value) => value->Ok
@@ -38,41 +30,40 @@ let rec reduceExpression = (expression: t, bindings: T.bindings, environment: en
     | list{EValue(IEvCall(fName)), ..._args} =>
       switch Macro.isMacroName(fName) {
       // A macro expands then reduces itself
-      | true => Macro.doMacroCall(expression, bindings, environment, reduceExpression)
-      | false => reduceExpressionList(list, bindings, environment)
+      | true => Macro.doMacroCall(expression, continuation, accessors, reduceExpressionInProject)
+      | false => reduceExpressionList(list, continuation, accessors)
       }
-    | _ => reduceExpressionList(list, bindings, environment)
+    | _ => reduceExpressionList(list, continuation, accessors)
     }
   }
 }
-
 and reduceExpressionList = (
   expressions: list<t>,
-  bindings: T.bindings,
-  environment: environment,
-): result<internalExpressionValue, 'e> => {
+  continuation: T.bindings,
+  accessors: ProjectAccessorsT.t,
+): result<InternalExpressionValue.t, 'e> => {
   let racc: result<
-    list<internalExpressionValue>,
+    list<InternalExpressionValue.t>,
     'e,
-  > = expressions->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
+  > = expressions->Belt.List.reduceReverse(Ok(list{}), (racc, each: t) =>
     racc->Result.flatMap(acc => {
       each
-      ->reduceExpression(bindings, environment)
+      ->reduceExpressionInProject(continuation, accessors)
       ->Result.map(newNode => {
         acc->Belt.List.add(newNode)
       })
     })
   )
-  racc->Result.flatMap(acc => acc->reduceValueList(environment))
+  racc->Result.flatMap(acc => acc->reduceValueList(accessors))
 }
 
 /*
     After reducing each level of expression(Lisp AST), we have a value list to evaluate
  */
-and reduceValueList = (valueList: list<internalExpressionValue>, environment): result<
-  internalExpressionValue,
-  'e,
-> =>
+and reduceValueList = (
+  valueList: list<InternalExpressionValue.t>,
+  accessors: ProjectAccessorsT.t,
+): result<InternalExpressionValue.t, 'e> =>
   switch valueList {
   | list{IEvCall(fName), ...args} => {
       let rCheckedArgs = switch fName {
@@ -81,7 +72,10 @@ and reduceValueList = (valueList: list<internalExpressionValue>, environment): r
       }
 
       rCheckedArgs->Result.flatMap(checkedArgs =>
-        (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
+        (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(
+          accessors,
+          reduceExpressionInProject,
+        )
       )
     }
   | list{IEvLambda(_)} =>
@@ -91,11 +85,11 @@ and reduceValueList = (valueList: list<internalExpressionValue>, environment): r
     ->Result.flatMap(reducedValueList =>
       reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
     )
-  | list{IEvLambda(lamdaCall), ...args} =>
+  | list{IEvLambda(lambdaCall), ...args} =>
     args
     ->Lambda.checkIfReduced
     ->Result.flatMap(checkedArgs =>
-      Lambda.doLambdaCall(lamdaCall, checkedArgs, environment, reduceExpression)
+      Lambda.doLambdaCall(lambdaCall, checkedArgs, accessors, reduceExpressionInProject)
     )
 
   | _ =>
@@ -106,53 +100,27 @@ and reduceValueList = (valueList: list<internalExpressionValue>, environment): r
     )
   }
 
-let evalUsingBindingsExpression_ = (aExpression, bindings, environment): result<
-  internalExpressionValue,
-  'e,
-> => reduceExpression(aExpression, bindings, environment)
-
-let evaluateUsingOptions = (
-  ~environment: option<ReducerInterface_ExternalExpressionValue.environment>,
-  ~externalBindings: option<ReducerInterface_ExternalExpressionValue.externalBindings>,
-  code: string,
-): result<externalExpressionValue, errorValue> => {
-  let anEnvironment = Belt.Option.getWithDefault(
-    environment,
-    ReducerInterface_ExternalExpressionValue.defaultEnvironment,
-  )
-
-  let mergedBindings: InternalExpressionValue.nameSpace = Bindings.merge(
-    ReducerInterface_StdLib.internalStdLib,
-    Belt.Option.map(externalBindings, Bindings.fromTypeScriptBindings)->Belt.Option.getWithDefault(
-      Bindings.emptyModule,
-    ),
-  )
-
-  parse(code)
-  ->Result.flatMap(expr => evalUsingBindingsExpression_(expr, mergedBindings, anEnvironment))
-  ->Result.map(ReducerInterface_InternalExpressionValue.toExternal)
+let reduceReturningBindings = (
+  expression: t,
+  continuation: T.bindings,
+  accessors: ProjectAccessorsT.t,
+): (result<InternalExpressionValue.t, 'e>, T.bindings) => {
+  let states = accessors.states
+  let result = reduceExpressionInProject(expression, continuation, accessors)
+  (result, states.continuation)
 }
 
-/*
-  IEvaluates Squiggle code and bindings via Reducer and answers the result
-*/
-let evaluate = (code: string): result<externalExpressionValue, errorValue> => {
-  evaluateUsingOptions(~environment=None, ~externalBindings=None, code)
-}
-let evaluatePartialUsingExternalBindings = (
-  code: string,
-  externalBindings: ReducerInterface_ExternalExpressionValue.externalBindings,
-  environment: ReducerInterface_ExternalExpressionValue.environment,
-): result<ReducerInterface_ExternalExpressionValue.externalBindings, errorValue> => {
-  let rAnswer = evaluateUsingOptions(
-    ~environment=Some(environment),
-    ~externalBindings=Some(externalBindings),
-    code,
-  )
-  switch rAnswer {
-  | Ok(EvModule(externalBindings)) => Ok(externalBindings)
-  | Ok(_) =>
-    Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`, None))
-  | Error(err) => err->Error
+module BackCompatible = {
+  // Those methods are used to support the existing tests
+  // If they are used outside limited testing context, error location reporting will fail
+  let parse = (peggyCode: string): result<t, errorValue> =>
+    peggyCode->Reducer_Peggy_Parse.parse->Result.map(Reducer_Peggy_ToExpression.fromNode)
+
+  let evaluate = (expression: t): result<InternalExpressionValue.t, errorValue> => {
+    let accessors = ProjectAccessorsT.identityAccessors
+    expression->reduceExpressionInProject(accessors.stdLib, accessors)
   }
+
+  let evaluateString = (peggyCode: string): result<InternalExpressionValue.t, errorValue> =>
+    parse(peggyCode)->Result.flatMap(evaluate)
 }

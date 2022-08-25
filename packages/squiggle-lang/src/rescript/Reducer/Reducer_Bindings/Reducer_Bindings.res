@@ -74,9 +74,10 @@ let set = (nameSpace: t, id: string, value): t => {
 
 let emptyModule: t = NameSpace(emptyMap)
 let emptyBindings = emptyModule
+let emptyNameSpace = emptyModule
 
-let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
-let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
+// let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
+// let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
 
 let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvBindings(nameSpace)
 let fromExpressionValue = (aValue: internalExpressionValue): t =>

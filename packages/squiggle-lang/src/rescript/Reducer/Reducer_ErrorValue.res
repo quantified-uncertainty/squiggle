@@ -1,9 +1,10 @@
+//TODO: Do not export here but in ForTS__Types
 @gentype.import("peggy") @genType.as("LocationRange")
-type location
+type syntaxErrorLocation
 
-@genType
+@genType.opaque
 type errorValue =
-  | REArityError(option<string>, int, int) //TODO: Binding a lambda to a variable should record the variable name in lambda for error reporting
+  | REArityError(option<string>, int, int)
   | REArrayIndexNotFound(string, int)
   | REAssignmentExpected
   | REDistributionError(DistributionTypes.error)
@@ -17,13 +18,13 @@ type errorValue =
   | REOperationError(Operation.operationError)
   | RERecordPropertyNotFound(string, string)
   | RESymbolNotFound(string)
-  | RESyntaxError(string, option<location>)
+  | RESyntaxError(string, option<syntaxErrorLocation>)
   | RETodo(string) // To do
   | REUnitNotFound(string)
+  | RENeedToRun
 
 type t = errorValue
 
-@genType
 let errorToString = err =>
   switch err {
   | REArityError(_oFnName, arity, usedArity) =>
@@ -57,4 +58,5 @@ let errorToString = err =>
   | RETodo(msg) => `TODO: ${msg}`
   | REExpectedType(typeName, valueString) => `Expected type: ${typeName} but got: ${valueString}`
   | REUnitNotFound(unitName) => `Unit not found: ${unitName}`
+  | RENeedToRun => "Need to run"
   }

@@ -7,7 +7,6 @@ module Bindings = Reducer_Bindings
 type errorValue = Reducer_ErrorValue.errorValue
 type expression = ExpressionT.expression
 type internalExpressionValue = InternalExpressionValue.t
-type externalBindings = ReducerInterface_ExternalExpressionValue.externalBindings
 
 let isMacroName = (fName: string): bool => fName->Js.String2.startsWith("$$")
 

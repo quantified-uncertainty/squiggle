@@ -2,8 +2,12 @@ open Jest
 open Expect
 open Reducer_TestHelpers
 
-let expectEvalToBeOk = (expr: string) =>
-  Reducer.evaluate(expr)->Reducer_Helpers.rRemoveDefaultsExternal->E.R.isOk->expect->toBe(true)
+let expectEvalToBeOk = (code: string) =>
+  Reducer_Expression.BackCompatible.evaluateString(code)
+  ->Reducer_Helpers.rRemoveDefaultsInternal
+  ->E.R.isOk
+  ->expect
+  ->toBe(true)
 
 let registry = FunctionRegistry_Library.registry
 let examples = E.A.to_list(FunctionRegistry_Core.Registry.allExamples(registry))
@@ -88,8 +92,8 @@ describe("FunctionRegistry Library", () => {
       ((fn, example)) => {
         let responseType =
           example
-          ->Reducer.evaluate
-          ->E.R2.fmap(ReducerInterface_InternalExpressionValue.externalValueToValueType)
+          ->Reducer_Expression.BackCompatible.evaluateString
+          ->E.R2.fmap(ReducerInterface_InternalExpressionValue.valueToValueType)
         let expectedOutputType = fn.output |> E.O.toExn("")
         expect(responseType)->toEqual(Ok(expectedOutputType))
       },
