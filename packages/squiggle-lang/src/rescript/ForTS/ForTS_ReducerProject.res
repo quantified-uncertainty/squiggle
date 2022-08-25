@@ -194,8 +194,9 @@ let getBindings = (project: reducerProject, sourceId: string): squiggleValue_Mod
 Get the result after running this source file or the project
 */
 @genType
-let getResult = (project: reducerProject, sourceId: string): option<
-  result<squiggleValue, reducerErrorValue>,
+let getResult = (project: reducerProject, sourceId: string): result<
+  squiggleValue,
+  reducerErrorValue,
 > => project->T.Private.castToInternalProject->Private.getResult(sourceId)
 
 /*

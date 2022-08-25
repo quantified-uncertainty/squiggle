@@ -50,7 +50,7 @@ Case "Running a single source".
 
       /* Let's display the result and bindings */
       (
-        result->InternalExpressionValue.toStringOptionResult,
+        result->InternalExpressionValue.toStringResult,
         bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
       )->expect == ("Ok(3)", "@{}")
       /* You've got 3 with empty bindings. */
@@ -64,7 +64,7 @@ Case "Running a single source".
       let bindings = Project.getBindings(project, "main")
       /* Now you have external bindings and external result. */
       (
-        result->InternalExpressionValue.toStringOptionResult,
+        result->InternalExpressionValue.toStringResult,
         bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
       )->expect == ("Ok(3)", "@{}")
     })
@@ -80,7 +80,7 @@ Case "Running a single source".
       Project.runAll(project)
       let result = Project.getResult(project, "main")
       let _bindings = Project.getBindings(project, "main")
-      result->InternalExpressionValue.toStringOptionResult->expect == "Ok(3)"
+      result->InternalExpressionValue.toStringResult->expect == "Ok(3)"
     })
 
     test("shortcut", () => {

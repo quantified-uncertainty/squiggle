@@ -96,8 +96,14 @@ module Private = {
     Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
   }
 
-  let getResult = (project: t, sourceId: string): ProjectItem.T.resultType =>
+  let getResultOption = (project: t, sourceId: string): ProjectItem.T.resultType =>
     project->getItem(sourceId)->ProjectItem.getResult
+
+  let getResult = (project: t, sourceId: string): ProjectItem.T.resultArgumentType =>
+    switch getResultOption(project, sourceId) {
+    | None => RENeedToRun->Error
+    | Some(result) => result
+    }
 
   let setResult = (project: t, sourceId: string, value: ProjectItem.T.resultArgumentType): unit => {
     let newItem = project->getItem(sourceId)->ProjectItem.setResult(value)
@@ -154,7 +160,7 @@ module Private = {
     sourceId: string,
     (rPrevResult: ProjectItem.T.resultArgumentType, continuation: ProjectItem.T.continuation),
   ): (ProjectItem.T.resultArgumentType, ProjectItem.T.continuation) => {
-    switch getResult(project, sourceId) {
+    switch getResultOption(project, sourceId) {
     | Some(result) => (result, getContinuation(project, sourceId)) // already ran
     | None =>
       switch rPrevResult {
@@ -165,7 +171,7 @@ module Private = {
       | Ok(_prevResult) => {
           doRunWithContinuation(project, sourceId, continuation)
           (
-            getResult(project, sourceId)->Belt.Option.getWithDefault(rPrevResult),
+            getResultOption(project, sourceId)->Belt.Option.getWithDefault(rPrevResult),
             getContinuation(project, sourceId),
           )
         }
@@ -197,6 +203,6 @@ module Private = {
     let these = project->getStdLib
     let ofUser = Continuation.minus(those, these)
 
-    (getResult(project, "main")->Belt.Option.getWithDefault(IEvVoid->Ok), ofUser)
+    (getResultOption(project, "main")->Belt.Option.getWithDefault(IEvVoid->Ok), ofUser)
   }
 }

@@ -21,6 +21,7 @@ type errorValue =
   | RESyntaxError(string, option<syntaxErrorLocation>)
   | RETodo(string) // To do
   | REUnitNotFound(string)
+  | RENeedToRun
 
 type t = errorValue
 
@@ -57,4 +58,5 @@ let errorToString = err =>
   | RETodo(msg) => `TODO: ${msg}`
   | REExpectedType(typeName, valueString) => `Expected type: ${typeName} but got: ${valueString}`
   | REUnitNotFound(unitName) => `Unit not found: ${unitName}`
+  | RENeedToRun => "Need to run"
   }

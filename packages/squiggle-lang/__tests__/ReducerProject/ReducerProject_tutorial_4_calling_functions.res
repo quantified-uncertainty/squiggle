@@ -32,7 +32,7 @@ describe("ReducerProject Tutorial", () => {
 
   test("userResults", () => {
     let userResultsAsString = Belt.Array.map(userResults, aResult =>
-      aResult->InternalExpressionValue.toStringOptionResult
+      aResult->InternalExpressionValue.toStringResult
     )
     userResultsAsString->expect == ["Ok(2)", "Ok(4)", "Ok(6)", "Ok(8)", "Ok(10)"]
   })
