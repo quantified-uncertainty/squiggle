@@ -25,6 +25,7 @@ export const linearXScale: LinearScale = {
   nice: false,
   domain: { data: "domain", field: "x" },
 };
+
 export const linearYScale: LinearScale = {
   name: "yscale",
   type: "linear",

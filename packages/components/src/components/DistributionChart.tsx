@@ -95,7 +95,7 @@ const DateDistributionChart: React.FC<DistributionChartProps> = (props) => {
       name: "default",
       continuous: [],
       discrete: [
-        { dateTime: new Date().getTime() - 1000000, y: 0.3 },
+        { dateTime: new Date().getTime() - 1000000, y: 0.2 },
         { dateTime: new Date().getTime(), y: 0.5 },
         { dateTime: new Date().getTime() + 1000000, y: 0.7 },
       ],

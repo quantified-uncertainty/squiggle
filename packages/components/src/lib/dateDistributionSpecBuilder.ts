@@ -24,10 +24,33 @@ export const timeXScale: TimeScale = {
   nice: false,
   domain: { data: "domain", field: "dateTime" },
 };
-export const timeYScale: TimeScale = {
+
+export const linearYScale: LinearScale = {
   name: "yscale",
-  type: "time",
+  type: "linear",
   range: "height",
+  zero: true,
+  domain: { data: "domain", field: "y" },
+};
+
+export const logXScale: LogScale = {
+  name: "xscale",
+  type: "log",
+  range: "width",
+  zero: false,
+  base: 10,
+  nice: false,
+  clamp: true,
+  domain: { data: "domain", field: "x" },
+};
+
+export const expYScale: PowScale = {
+  name: "yscale",
+  type: "pow",
+  exponent: 0.1,
+  range: "height",
+  zero: true,
+  nice: false,
   domain: { data: "domain", field: "y" },
 };
 
@@ -86,7 +109,7 @@ export function buildDateVegaSpec(
     ],
     scales: [
       xScale,
-      timeYScale,
+      expY ? expYScale : linearYScale,
       {
         name: "color",
         type: "ordinal",
