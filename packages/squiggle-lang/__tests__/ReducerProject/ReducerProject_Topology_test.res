@@ -5,7 +5,7 @@ open Jest
 open Expect
 open Expect.Operators
 
-describe("Topology", () => {
+describe("Topology Diff", () => {
   test("when equal 1x", () => {
     Topology.runOrderDiff(["a"], ["a"])->expect == []
   })
@@ -20,5 +20,17 @@ describe("Topology", () => {
 
   test("more dependents", () => {
     Topology.runOrderDiff(["a", "b", "c", "d"], ["a", "b"])->expect == ["c", "d"]
+  })
+
+  test("change midway", () => {
+    Topology.runOrderDiff(["a", "b", "bb", "c", "d"], ["a", "b", "c", "d"])->expect == [
+        "bb",
+        "c",
+        "d",
+      ]
+  })
+
+  test("swap", () => {
+    Topology.runOrderDiff(["a", "b", "c", "d"], ["a", "c", "b", "d"])->expect == ["b", "c", "d"]
   })
 })
