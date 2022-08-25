@@ -12,61 +12,61 @@ type squiggleValue_Lambda = ForTS_SquiggleValue_Lambda.squiggleValue_Lambda //us
 
 // Return values are kept as they are if they are JavaScript types.
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtArray_: int = "SvtArray"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtArray_: string = "SvtArray"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtArrayString_: int = "SvtArrayString"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtArrayString_: string = "SvtArrayString"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtBool_: int = "SvtBool"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtBool_: string = "SvtBool"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtCall_: int = "SvtCall"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtCall_: string = "SvtCall"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtDate_: int = "SvtDate"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtDate_: string = "SvtDate"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtDeclaration_: int = "SvtDeclaration"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtDeclaration_: string = "SvtDeclaration"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtDistribution_: int = "SvtDistribution"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtDistribution_: string = "SvtDistribution"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtLambda_: int = "SvtLambda"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtLambda_: string = "SvtLambda"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtModule_: int = "SvtModule"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtModule_: string = "SvtModule"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtNumber_: int = "SvtNumber"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtNumber_: string = "SvtNumber"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtRecord_: int = "SvtRecord"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtRecord_: string = "SvtRecord"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtString_: int = "SvtString"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtString_: string = "SvtString"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtSymbol_: int = "SvtSymbol"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtSymbol_: string = "SvtSymbol"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtTimeDuration_: int = "SvtTimeDuration"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtTimeDuration_: string = "SvtTimeDuration"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtType_: int = "SvtType"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtType_: string = "SvtType"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtTypeIdentifier_: int = "SvtUndefined"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtTypeIdentifier_: string = "SvtUndefined"
 
-@module("ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtVoid_: int = "SvtVoid"
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtVoid_: string = "SvtVoid"
 
 @genType.import("./ForTS_SquiggleValue_tag")
 type squiggleValueTag
 
-external castEnum: int => squiggleValueTag = "%identity"
+external castEnum: string => squiggleValueTag = "%identity"
 
 @genType
 let getTag = (variant: squiggleValue): squiggleValueTag =>
