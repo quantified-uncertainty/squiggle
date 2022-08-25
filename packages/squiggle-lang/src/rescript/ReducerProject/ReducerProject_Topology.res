@@ -70,3 +70,28 @@ let getDependents = (this: t, sourceId: string): array<string> => {
   let (_, dependents) = getTopologicalSortFor(this, sourceId)
   dependents
 }
+
+let runOrderDiff = (current: array<string>, previous0: array<string>): array<string> => {
+  let extraLength =
+    Belt.Array.length(current) > Belt.Array.length(previous0)
+      ? Belt.Array.length(current) - Belt.Array.length(previous0)
+      : 0
+  let previous = Belt.Array.copy(previous0)
+  let filler = Belt.Array.make(extraLength, "")
+  Belt.Array.forEach(filler, _ => {
+    let _ = Js.Array2.push(previous, "")
+  })
+  let zipped = Belt.Array.zip(current, previous)
+  let (_, affected) = Belt.Array.reduce(zipped, (true, []), ((wasEqual, acc), (curr, prev)) => {
+    switch wasEqual {
+    | true =>
+      if curr == prev {
+        (true, Belt.Array.concat(acc, [curr]))
+      } else {
+        (false, acc)
+      }
+    | false => (false, acc)
+    }
+  })
+  affected
+}
