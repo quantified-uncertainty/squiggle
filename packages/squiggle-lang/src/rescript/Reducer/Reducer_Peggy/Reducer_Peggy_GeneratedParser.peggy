@@ -263,8 +263,8 @@ float 'float'
     d = [0-9]
     
 boolean 'boolean'
-  = ('true'/'false') 
-  { return h.nodeBoolean(text() === 'true')}   
+  = ('true'/'false')  ! [a-z]i ! [_$]
+  { return h.nodeBoolean(text() === 'true')}
 
 valueConstructor
   = recordConstructor
