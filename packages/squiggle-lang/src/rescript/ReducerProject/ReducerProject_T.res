@@ -3,17 +3,18 @@ module ExpressionT = Reducer_Expression_T
 module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 
 @genType.opaque
-type project = {"tag": string}
+type project = {"iAmProject": bool}
 //re-export
 @genType
 type t = project
 
 module Private = {
   type internalProject = {
-    "tag": string,
+    "iAmProject": bool,
     "items": Belt.Map.String.t<ProjectItem.t>,
     "stdLib": Reducer_Bindings.t,
     "environment": ExpressionT.environment,
+    "previousRunOrder": array<string>,
   }
   type t = internalProject
 
@@ -22,7 +23,9 @@ module Private = {
   @set
   external setFieldStdLib: (t, Reducer_Bindings.t) => unit = "stdLib"
   @set
-  external setFieldEnvironment: (t, ExpressionT.environment) => unit = "stdLib"
+  external setFieldEnvironment: (t, ExpressionT.environment) => unit = "environment"
+  @set
+  external setFieldPreviousRunOrder: (t, array<string>) => unit = "previousRunOrder"
 
   external castFromInternalProject: t => project = "%identity"
   external castToInternalProject: project => t = "%identity"

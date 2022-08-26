@@ -24,22 +24,35 @@ module Private = {
 
   let createProject = () => {
     let project: t = {
-      "tag": "reducerProject",
+      "iAmProject": true,
       "items": Belt.Map.String.empty,
       "stdLib": ReducerInterface_StdLib.internalStdLib,
       "environment": InternalExpressionValue.defaultEnvironment,
+      "previousRunOrder": [],
     }
     project
   }
 
-  let rec touchSource = (project: t, sourceId: string): unit => {
+  let rec touchSource_ = (project: t, sourceId: string): unit => {
     let item = project->getItem(sourceId)
     let newItem = ProjectItem.touchSource(item)
     Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
-    touchDependents(project, sourceId)
   }
   and touchDependents = (project: t, sourceId: string): unit => {
-    let _ = getDependents(project, sourceId)->Belt.Array.forEach(_, touchSource(project, _))
+    let _ = getDependents(project, sourceId)->Belt.Array.forEach(_, touchSource_(project, _))
+  }
+
+  let touchSource = (project: t, sourceId: string): unit => {
+    touchSource_(project, sourceId)
+    touchDependents(project, sourceId)
+  }
+
+  let handleNewTopology = (project: t): unit => {
+    let previousRunOrder = project["previousRunOrder"]
+    let currentRunOrder = Topology.getRunOrder(project)
+    let diff = Topology.runOrderDiff(currentRunOrder, previousRunOrder)
+    Belt.Array.forEach(diff, touchSource(project, _))
+    T.Private.setFieldPreviousRunOrder(project, currentRunOrder)
   }
 
   let getSource = (project: t, sourceId: string): option<string> =>
@@ -73,7 +86,7 @@ module Private = {
   let setContinues = (project: t, sourceId: string, continues: array<string>): unit => {
     let newItem = project->getItem(sourceId)->ProjectItem.setContinues(continues)
     Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
-    touchSource(project, sourceId)
+    handleNewTopology(project)
   }
   let getContinues = (project: t, sourceId: string): array<string> =>
     ProjectItem.getContinues(project->getItem(sourceId))
@@ -81,7 +94,7 @@ module Private = {
   let removeContinues = (project: t, sourceId: string): unit => {
     let newItem = project->getItem(sourceId)->ProjectItem.removeContinues
     Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
-    touchSource(project, sourceId)
+    handleNewTopology(project)
   }
 
   let getContinuation = (project: t, sourceId: string): ProjectItem.T.continuationArgumentType =>
@@ -113,6 +126,7 @@ module Private = {
   let parseIncludes = (project: t, sourceId: string): unit => {
     let newItem = project->getItem(sourceId)->ProjectItem.parseIncludes
     Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
+    handleNewTopology(project)
   }
 
   let rawParse = (project: t, sourceId): unit => {
