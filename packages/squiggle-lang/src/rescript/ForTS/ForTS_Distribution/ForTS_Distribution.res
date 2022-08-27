@@ -56,7 +56,7 @@ let getSymbolic = (variant: distribution): option<symbolicDistribution> =>
   | _ => None
   }
 
-@genType 
+@genType
 let mean = DistributionOperation.Constructors.mean
 
 @genType
