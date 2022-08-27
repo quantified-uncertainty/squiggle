@@ -1,5 +1,5 @@
 import * as yup from "yup";
-import { Distribution, result, squiggleExpression } from "@quri/squiggle-lang";
+import { Distribution, result, SquiggleRecord } from "@quri/squiggle-lang";
 
 export type LabeledDistribution = {
   name: string;
@@ -53,9 +53,7 @@ const schema = yup
     }),
   });
 
-export function parsePlot(record: {
-  [key: string]: squiggleExpression;
-}): result<Plot, string> {
+export function parsePlot(record: SquiggleRecord): result<Plot, string> {
   try {
     const plotRecord = schema.validateSync(record);
     return ok({

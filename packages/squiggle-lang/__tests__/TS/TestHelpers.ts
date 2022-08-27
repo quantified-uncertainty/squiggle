@@ -1,60 +1,21 @@
-import {
-  run,
-  runPartial,
-  bindings,
-  squiggleExpression,
-  errorValueToString,
-  defaultImports,
-  defaultBindings,
-  jsImports,
-} from "../../src/js/index";
+import { run, SquiggleValue } from "../../src/js/index";
 
-export function testRun(
-  x: string,
-  bindings: bindings = defaultBindings,
-  imports: jsImports = defaultImports
-): squiggleExpression {
-  let squiggleResult = run(
-    x,
-    bindings,
-    {
-      sampleCount: 1000,
-      xyPointLength: 100,
-    },
-    imports
-  );
-  if (squiggleResult.tag === "Ok") {
-    return squiggleResult.value;
+export function testRun(x: string) {
+  const { result, bindings } = run(x); // FIXME - set environment
+  //   x,
+  //   bindings,
+  //   {
+  //     sampleCount: 1000,
+  //     xyPointLength: 100,
+  //   },
+  //   imports
+  // );
+
+  if (result.tag === "Ok") {
+    return result.value;
   } else {
     throw new Error(
-      `Expected squiggle expression to evaluate but got error: ${errorValueToString(
-        squiggleResult.value
-      )}`
-    );
-  }
-}
-
-export function testRunPartial(
-  x: string,
-  bindings: bindings = defaultBindings,
-  imports: jsImports = defaultImports
-): bindings {
-  let squiggleResult = runPartial(
-    x,
-    bindings,
-    {
-      sampleCount: 1000,
-      xyPointLength: 100,
-    },
-    imports
-  );
-  if (squiggleResult.tag === "Ok") {
-    return squiggleResult.value;
-  } else {
-    throw new Error(
-      `Expected squiggle expression to evaluate but got error: ${errorValueToString(
-        squiggleResult.value
-      )}`
+      `Expected squiggle expression to evaluate but got error: ${result.value}`
     );
   }
 }

@@ -1,4 +1,7 @@
 @genType type pointSetDistribution = PointSetTypes.pointSetDist
+@genType type continuousShape = PointSetTypes.continuousShape
+@genType type discreteShape = PointSetTypes.discreteShape
+@genType type mixedShape = PointSetTypes.mixedShape
 
 @module("ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
 external pstMixed_: int = "PstMixed"

@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  lambdaValue,
-  environment,
-  runForeign,
-  errorValueToString,
-} from "@quri/squiggle-lang";
+import { LambdaValue, environment, runForeign } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
 import { DistributionPlottingSettings } from "./DistributionChart";
@@ -17,7 +12,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChartProps {
-  fn: lambdaValue;
+  fn: LambdaValue;
   chartSettings: FunctionChartSettings;
   distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;

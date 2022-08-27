@@ -1,11 +1,7 @@
 import * as React from "react";
 import {
-  squiggleExpression,
-  bindings,
+  SquiggleValue,
   environment,
-  jsImports,
-  defaultImports,
-  defaultBindings,
   defaultEnvironment,
 } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
@@ -27,14 +23,12 @@ export interface SquiggleChartProps {
   /** If the result is a function, the amount of stops sampled */
   diagramCount?: number;
   /** When the squiggle code gets reevaluated */
-  onChange?(expr: squiggleExpression | undefined): void;
+  onChange?(expr: SquiggleValue | undefined): void;
   /** CSS width of the element */
   width?: number;
   height?: number;
-  /** Bindings of previous variables declared */
-  bindings?: bindings;
   /** JS imported parameters */
-  jsImports?: jsImports;
+  // jsImports?: jsImports;
   /** Whether to show a summary of the distribution */
   showSummary?: boolean;
   /** Set the x scale to be logarithmic by deault */
@@ -65,8 +59,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     environment,
     onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
     height = 200,
-    bindings = defaultBindings,
-    jsImports = defaultImports,
+    // jsImports = defaultImports,
     showSummary = false,
     width,
     logX = false,
@@ -84,9 +77,8 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
   }) => {
     const result = useSquiggle({
       code,
-      bindings,
       environment,
-      jsImports,
+      // jsImports,
       onChange,
       executionId,
     });

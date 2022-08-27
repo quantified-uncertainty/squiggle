@@ -10,53 +10,86 @@ Instead of a global function namespace we should use modules under ForTS directl
 
 */
 
-import * as _ from "lodash";
-import type {
-  environment,
-  expressionValue,
-  externalBindings,
-  errorValue,
-} from "../rescript/TypescriptInterface.gen";
-import {
-  defaultEnvironment,
-  evaluatePartialUsingExternalBindings,
-  evaluateUsingOptions,
-  foreignFunctionInterface,
-} from "../rescript/TypescriptInterface.gen";
+import { environment } from "../rescript/ForTS/ForTS_ReducerProject.gen";
+import { Project } from "./Project";
+import { SquiggleValue, Tag as SquiggleValueTag } from "./SquiggleValue";
+export { result } from "../rescript/ForTS/ForTS_Result_tag";
+export { Project, SquiggleValue };
+export { Distribution, Tag as DistributionTag } from "./Distribution";
+export { DistributionError } from "./DistributionError";
+export { Record as SquiggleRecord } from "./Record";
+export { SquiggleValueTag };
 export {
-  makeSampleSetDist,
-  errorValueToString,
-  distributionErrorToString,
-} from "../rescript/TypescriptInterface.gen";
-export type {
-  distributionError,
-  declarationArg,
-  declaration,
-} from "../rescript/TypescriptInterface.gen";
-export type { errorValue, externalBindings as bindings, jsImports };
-import {
-  jsValueToBinding,
-  jsValueToExpressionValue,
-  jsValue,
-  rescriptExport,
-  squiggleExpression,
-  convertRawToTypescript,
-  lambdaValue,
-} from "./rescript_interop";
-import { result, resultMap, tag, tagged } from "./types";
-import { Distribution, shape } from "./distribution";
+  environment,
+  defaultEnvironment,
+} from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
+export { ErrorValue } from "./ErrorValue";
+export { resultMap } from "./types";
 
-export { Distribution, resultMap, defaultEnvironment };
-export type { result, shape, environment, lambdaValue, squiggleExpression };
+// import * as _ from "lodash";
+// import type {
+//   environment,
+//   expressionValue,
+//   externalBindings,
+//   errorValue,
+// } from "../rescript/TypescriptInterface.gen";
+// import {
+//   defaultEnvironment,
+//   evaluatePartialUsingExternalBindings,
+//   evaluateUsingOptions,
+//   foreignFunctionInterface,
+// } from "../rescript/TypescriptInterface.gen";
+// export {
+//   makeSampleSetDist,
+//   errorValueToString,
+//   distributionErrorToString,
+// } from "../rescript/TypescriptInterface.gen";
+// export type {
+//   distributionError,
+//   declarationArg,
+//   declaration,
+// } from "../rescript/TypescriptInterface.gen";
+// export type { errorValue, externalBindings as bindings, jsImports };
+// import {
+//   jsValueToBinding,
+//   jsValueToExpressionValue,
+//   jsValue,
+//   rescriptExport,
+//   squiggleExpression,
+//   convertRawToTypescript,
+//   lambdaValue,
+// } from "./rescript_interop";
+// import { result, resultMap, tag, tagged } from "./types";
+// import { Distribution, shape } from "./distribution";
 
-export { parse } from "./parse";
+// export { Distribution, resultMap, defaultEnvironment };
+// export type { result, shape, environment, lambdaValue, squiggleExpression };
 
-export let defaultSamplingInputs: environment = {
-  sampleCount: 10000,
-  xyPointLength: 10000,
-};
+// export { parse } from "./parse";
+
+// export let defaultSamplingInputs: environment = {
+//   sampleCount: 10000,
+//   xyPointLength: 10000,
+// };
 
 /* Umur: All the functions below are invalid. ForTS_Reducer project is the new way to do this. */
+
+export const run = (
+  code: string,
+  options?: {
+    environment?: environment;
+  }
+) => {
+  const project = Project.create();
+  project.setSource("main", code);
+  if (options?.environment) {
+    project.setEnvironment(options.environment);
+  }
+  project.run("main");
+  const result = project.getResult("main");
+  const bindings = project.getBindings("main");
+  return { result, bindings };
+};
 
 // export function run(
 //   squiggleString: string,

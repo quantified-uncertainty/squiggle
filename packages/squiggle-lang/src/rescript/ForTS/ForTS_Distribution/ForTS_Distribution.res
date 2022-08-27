@@ -1,5 +1,6 @@
 // Genetic Distribution happens to be abstract distribution
 @genType type distribution = DistributionTypes.genericDist
+@genType type distributionError = DistributionTypes.error
 @genType type pointSetDistribution = ForTS_Distribution_PointSetDistribution.pointSetDistribution
 @genType type sampleSetDistribution = ForTS_Distribution_SampleSetDistribution.sampleSetDistribution
 @genType type symbolicDistribution = ForTS_Distribution_SymbolicDistribution.symbolicDistribution
@@ -73,3 +74,11 @@ let inv = DistributionOperation.Constructors.inv
 let pdf = DistributionOperation.Constructors.pdf
 @genType
 let normalize = DistributionOperation.Constructors.normalize
+
+@genType
+let toPointSet = (variant: distribution, env: environment) =>
+  GenericDist.toPointSet(variant, ~sampleCount=env.sampleCount, ~xyPointLength=env.xyPointLength, ())
+
+@genType
+let toString = (variant: distribution) =>
+  GenericDist.toString(variant)

@@ -2,10 +2,10 @@ import * as React from "react";
 import {
   Distribution,
   result,
-  distributionError,
-  distributionErrorToString,
-  squiggleExpression,
+  DistributionError,
+  SquiggleValue,
   resultMap,
+  SquiggleRecord,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -36,9 +36,7 @@ export function defaultPlot(distribution: Distribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
 }
 
-export function makePlot(record: {
-  [key: string]: squiggleExpression;
-}): Plot | void {
+export function makePlot(record: SquiggleRecord): Plot | void {
   const plotResult = parsePlot(record);
   if (plotResult.tag === "Ok") {
     return plotResult.value;
@@ -50,18 +48,17 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const [sized] = useSize((size) => {
     let shapes = flattenResult(
       plot.distributions.map((x) =>
-        resultMap(x.distribution.pointSet(), (shape) => ({
+        resultMap(x.distribution.pointSet(), (pointSet) => ({
+          ...pointSet.asShape(),
           name: x.name,
           // color: x.color, // not supported yet
-          continuous: shape.continuous,
-          discrete: shape.discrete,
         }))
       )
     );
     if (shapes.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(shapes.value)}
+          {shapes.value.toString()}
         </ErrorAlert>
       );
     }
@@ -134,18 +131,18 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
   const p90 = distribution.inv(0.9);
   const p95 = distribution.inv(0.95);
 
-  const hasResult = (x: result<number, distributionError>): boolean =>
+  const hasResult = (x: result<number, DistributionError>): boolean =>
     x.tag === "Ok";
 
   const unwrapResult = (
-    x: result<number, distributionError>
+    x: result<number, DistributionError>
   ): React.ReactNode => {
     if (x.tag === "Ok") {
       return <NumberShower number={x.value} />;
     } else {
       return (
         <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(x.value)}
+          {x.value.toString()}
         </ErrorAlert>
       );
     }
