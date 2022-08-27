@@ -55,3 +55,21 @@ let getSymbolic = (variant: distribution): option<symbolicDistribution> =>
   | Symbolic(dist) => dist->Some
   | _ => None
   }
+
+@genType 
+let mean = DistributionOperation.Constructors.mean
+
+@genType
+let stdev = DistributionOperation.Constructors.stdev
+@genType
+let variance = DistributionOperation.Constructors.variance
+@genType
+let sample = DistributionOperation.Constructors.sample
+@genType
+let cdf = DistributionOperation.Constructors.cdf
+@genType
+let inv = DistributionOperation.Constructors.inv
+@genType
+let pdf = DistributionOperation.Constructors.pdf
+@genType
+let normalize = DistributionOperation.Constructors.normalize
