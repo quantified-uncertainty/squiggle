@@ -2818,6 +2818,11 @@
     "@react-hook/passive-layout-effect" "^1.2.0"
     "@react-hook/resize-observer" "^1.2.1"
 
+"@rescript/std@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@rescript/std/-/std-10.0.0.tgz#11996296739d7f0d2949283c93b4d14e9ed4589d"
+  integrity sha512-DFwX5vWASZtvjFdqar2VIadvmy2ZBPTnPI2A9EKEkvNR93OUoZygOfvhRaueIQtlS4f9X50E3v2awI9JJG+JsQ==
+
 "@rescript/std@^9.1.4":
   version "9.1.4"
   resolved "https://registry.yarnpkg.com/@rescript/std/-/std-9.1.4.tgz#94971cb504b10d36d470618fa1c6f0a2d03a6b9b"
@@ -15662,10 +15667,10 @@ rescript-fast-check@^1.1.1:
   dependencies:
     fast-check "^2.17.0"
 
-rescript@^9.1.4:
-  version "9.1.4"
-  resolved "https://registry.yarnpkg.com/rescript/-/rescript-9.1.4.tgz#1eb126f98d6c16942c0bf0df67c050198e580515"
-  integrity sha512-aXANK4IqecJzdnDpJUsU6pxMViCR5ogAxzuqS0mOr8TloMnzAjJFu63fjD6LCkWrKAhlMkFFzQvVQYaAaVkFXw==
+rescript@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/rescript/-/rescript-10.0.0.tgz#8460bc6f7d94bc580eac02d7c7efdf0a470916b8"
+  integrity sha512-LhNg/4+0j8NvoFeslgAeYLlzUwkq6kR6l6v8BnZ61VDTxopK2l96uT1lq5lv1aMxzMDynvE2qnX0zalre+6XxA==
 
 resize-observer-polyfill@^1.5.1:
   version "1.5.1"
