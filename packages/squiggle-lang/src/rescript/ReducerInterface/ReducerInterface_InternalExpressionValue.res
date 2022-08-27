@@ -72,6 +72,7 @@ and toStringDate = (date) => DateTime.Date.toString(date)
 and toStringDeclaration = (d) => Declaration.toString(d, r => toString(IEvLambda(r)))
 and toStringDistribution = (dist) => GenericDist.toString(dist)
 and toStringLambda = (lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
+and toStringFunction = (lambdaValue) => `function(${Js.Array2.toString(lambdaValue.parameters)})`
 and toStringNumber = (aNumber) => Js.String.make(aNumber)
 and toStringRecord = (aMap) => aMap->toStringMap
 and toStringString = (aString) => `'${aString}'`
