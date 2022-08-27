@@ -3,3 +3,8 @@
 @genType
 let toString = (v: squiggleValue_Lambda): string =>
   ReducerInterface_InternalExpressionValue.toStringLambda(v)
+
+@genType
+let parameters = (v: squiggleValue_Lambda): array<string> => {
+  v.parameters
+}
