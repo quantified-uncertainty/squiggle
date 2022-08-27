@@ -8,4 +8,8 @@ export class Lambda {
   constructor(_value: T) {
     this._value = _value;
   }
+
+  parameters() {
+    return RSLambda.parameters(this._value);
+  }
 }

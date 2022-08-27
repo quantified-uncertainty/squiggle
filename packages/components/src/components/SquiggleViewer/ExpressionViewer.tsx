@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   DistributionTag,
   SquiggleValue,
@@ -12,6 +12,7 @@ import { VariableBox } from "./VariableBox";
 import { ItemSettingsMenu } from "./ItemSettingsMenu";
 import { hasMassBelowZero } from "../../lib/distributionUtils";
 import { MergedItemSettings } from "./utils";
+import { ViewerContext } from "./ViewerContext";
 
 /*
 // DISABLED FOR 0.4 branch, for now
@@ -66,6 +67,8 @@ export const ExpressionViewer: React.FC<Props> = ({
   expression,
   width,
 }) => {
+  const { getMergedSettings } = useContext(ViewerContext);
+
   if (typeof expression !== "object") {
     return (
       <VariableList path={path} heading="Error">
@@ -95,13 +98,15 @@ export const ExpressionViewer: React.FC<Props> = ({
               : ""
           }`}
           renderSettingsMenu={({ onChange }) => {
-            const shape = expression.value.pointSet();
+            const shape = expression.value.pointSet(
+              getMergedSettings(path).environment
+            );
             return (
               <ItemSettingsMenu
                 path={path}
                 onChange={onChange}
                 disableLogX={
-                  shape.tag === "Ok" && hasMassBelowZero(shape.value)
+                  shape.tag === "Ok" && hasMassBelowZero(shape.value.asShape())
                 }
                 withFunctionSettings={false}
               />
@@ -112,6 +117,7 @@ export const ExpressionViewer: React.FC<Props> = ({
             return (
               <DistributionChart
                 plot={defaultPlot(expression.value)}
+                environment={settings.environment}
                 {...settings.distributionPlotSettings}
                 height={settings.height}
                 width={width}
@@ -200,9 +206,9 @@ export const ExpressionViewer: React.FC<Props> = ({
         >
           {(settings) => (
             <>
-              <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${expression.value.parameters.join(
-                ","
-              )})`}</div>
+              <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${expression.value
+                .parameters()
+                .join(",")})`}</div>
               <FunctionChart
                 fn={expression.value}
                 chartSettings={settings.chartSettings}
@@ -272,12 +278,15 @@ export const ExpressionViewer: React.FC<Props> = ({
         return (
           <VariableBox
             path={path}
-            heading={"Plot"}
+            heading="Plot"
             renderSettingsMenu={({ onChange }) => {
               let disableLogX = plot.distributions.some((x) => {
-                let pointSet = x.distribution.pointSet();
+                let pointSet = x.distribution.pointSet(
+                  getMergedSettings(path).environment
+                );
                 return (
-                  pointSet.tag === "Ok" && hasMassBelowZero(pointSet.value)
+                  pointSet.tag === "Ok" &&
+                  hasMassBelowZero(pointSet.value.asShape())
                 );
               });
               return (
@@ -294,6 +303,7 @@ export const ExpressionViewer: React.FC<Props> = ({
               return (
                 <DistributionChart
                   plot={plot}
+                  environment={settings.environment}
                   {...settings.distributionPlotSettings}
                   height={settings.height}
                   width={width}
@@ -306,14 +316,16 @@ export const ExpressionViewer: React.FC<Props> = ({
         return (
           <VariableList path={path} heading="Record">
             {(_) =>
-              Object.entries(expression.value).map(([key, r]) => (
-                <ExpressionViewer
-                  key={key}
-                  path={[...path, key]}
-                  expression={r}
-                  width={width !== undefined ? width - 20 : width}
-                />
-              ))
+              expression.value
+                .entries()
+                .map(([key, r]) => (
+                  <ExpressionViewer
+                    key={key}
+                    path={[...path, key]}
+                    expression={r}
+                    width={width !== undefined ? width - 20 : width}
+                  />
+                ))
             }
           </VariableList>
         );

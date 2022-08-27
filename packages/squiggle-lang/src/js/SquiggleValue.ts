@@ -1,6 +1,6 @@
 import * as RSSquiggleValue from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue.gen";
 import { squiggleValueTag as Tag } from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_tag";
-import { Distribution, wrapDistribution } from "./Distribution";
+import { wrapDistribution } from "./Distribution";
 import { Lambda } from "./Lambda";
 import { LambdaDeclaration } from "./LambdaDeclaration";
 import { NameSpace } from "./NameSpace";

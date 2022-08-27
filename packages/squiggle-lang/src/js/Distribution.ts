@@ -1,5 +1,6 @@
 import * as RSDistribution from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 import { distributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_tag";
+import { environment } from "../rescript/ForTS/ForTS__Types.gen";
 import { DistributionError } from "./DistributionError";
 import { wrapPointSetDist } from "./PointSetDist";
 import { resultMap2 } from "./types";
@@ -21,8 +22,7 @@ abstract class AbstractDistribution {
     this._value = value;
   }
 
-  pointSet() {
-    const env: any = "TODO";
+  pointSet(env: environment) {
     const innerResult = RSDistribution.toPointSet(this._value, env);
     return resultMap2(
       innerResult,
@@ -35,16 +35,28 @@ abstract class AbstractDistribution {
     RSDistribution.toString(this._value);
   }
 
-  mean() {
-    return RSDistribution.mean(this._value);
+  mean(env: environment) {
+    return resultMap2(
+      RSDistribution.mean({ env }, this._value),
+      (v: number) => v,
+      (e: RSDistribution.distributionError) => new DistributionError(e)
+    );
   }
 
-  inv(n: number) {
-    return RSDistribution.inv(this._value, n);
+  inv(env: environment, n: number) {
+    return resultMap2(
+      RSDistribution.inv({ env }, this._value, n),
+      (v: number) => v,
+      (e: RSDistribution.distributionError) => new DistributionError(e)
+    );
   }
 
-  stdev() {
-    return RSDistribution.stdev(this._value);
+  stdev(env: environment) {
+    return resultMap2(
+      RSDistribution.stdev({ env }, this._value),
+      (v: number) => v,
+      (e: RSDistribution.distributionError) => new DistributionError(e)
+    );
   }
 }
 

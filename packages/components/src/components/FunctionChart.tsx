@@ -1,5 +1,5 @@
 import * as React from "react";
-import { LambdaValue, environment, runForeign } from "@quri/squiggle-lang";
+import { Lambda, environment } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
 import { DistributionPlottingSettings } from "./DistributionChart";
@@ -12,7 +12,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChartProps {
-  fn: LambdaValue;
+  fn: Lambda;
   chartSettings: FunctionChartSettings;
   distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;
@@ -33,6 +33,8 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
+  return <div>NOT IMPLEMENTED IN 0.4 YET</div>;
+  /*
   const result1 = runForeign(fn, [chartSettings.start], environment);
   const result2 = runForeign(fn, [chartSettings.stop], environment);
   const getValidResult = () => {
@@ -48,9 +50,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
 
   if (validResult.tag === "Error") {
     return (
-      <ErrorAlert heading="Error">
-        {errorValueToString(validResult.value)}
-      </ErrorAlert>
+      <ErrorAlert heading="Error">{validResult.value.toString()}</ErrorAlert>
     );
   }
 
@@ -82,4 +82,5 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
         </MessageAlert>
       );
   }
+  */
 };

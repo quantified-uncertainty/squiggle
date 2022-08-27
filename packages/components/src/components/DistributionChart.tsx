@@ -3,9 +3,9 @@ import {
   Distribution,
   result,
   DistributionError,
-  SquiggleValue,
   resultMap,
   SquiggleRecord,
+  environment,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -28,6 +28,7 @@ export type DistributionPlottingSettings = {
 
 export type DistributionChartProps = {
   plot: Plot;
+  environment: environment;
   width?: number;
   height: number;
 } & DistributionPlottingSettings;
@@ -44,16 +45,24 @@ export function makePlot(record: SquiggleRecord): Plot | void {
 }
 
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const { plot, height, showSummary, width, logX, actions = false } = props;
+  const {
+    plot,
+    environment,
+    height,
+    showSummary,
+    width,
+    logX,
+    actions = false,
+  } = props;
   const [sized] = useSize((size) => {
-    let shapes = flattenResult(
-      plot.distributions.map((x) =>
-        resultMap(x.distribution.pointSet(), (pointSet) => ({
+    const shapes = flattenResult(
+      plot.distributions.map((x) => {
+        return resultMap(x.distribution.pointSet(environment), (pointSet) => ({
           ...pointSet.asShape(),
           name: x.name,
           // color: x.color, // not supported yet
-        }))
-      )
+        }));
+      })
     );
     if (shapes.tag === "Error") {
       return (
@@ -93,7 +102,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         )}
         <div className="flex justify-center">
           {showSummary && plot.distributions.length === 1 && (
-            <SummaryTable distribution={plot.distributions[0].distribution} />
+            <SummaryTable
+              distribution={plot.distributions[0].distribution}
+              environment={environment}
+            />
           )}
         </div>
       </div>
@@ -118,18 +130,22 @@ const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 type SummaryTableProps = {
   distribution: Distribution;
+  environment: environment;
 };
 
-const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
-  const mean = distribution.mean();
-  const stdev = distribution.stdev();
-  const p5 = distribution.inv(0.05);
-  const p10 = distribution.inv(0.1);
-  const p25 = distribution.inv(0.25);
-  const p50 = distribution.inv(0.5);
-  const p75 = distribution.inv(0.75);
-  const p90 = distribution.inv(0.9);
-  const p95 = distribution.inv(0.95);
+const SummaryTable: React.FC<SummaryTableProps> = ({
+  distribution,
+  environment,
+}) => {
+  const mean = distribution.mean(environment);
+  const stdev = distribution.stdev(environment);
+  const p5 = distribution.inv(environment, 0.05);
+  const p10 = distribution.inv(environment, 0.1);
+  const p25 = distribution.inv(environment, 0.25);
+  const p50 = distribution.inv(environment, 0.5);
+  const p75 = distribution.inv(environment, 0.75);
+  const p90 = distribution.inv(environment, 0.9);
+  const p95 = distribution.inv(environment, 0.95);
 
   const hasResult = (x: result<number, DistributionError>): boolean =>
     x.tag === "Ok";

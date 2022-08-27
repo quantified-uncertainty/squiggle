@@ -3,13 +3,13 @@
 @genType type discreteShape = PointSetTypes.discreteShape
 @genType type mixedShape = PointSetTypes.mixedShape
 
-@module("ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
+@module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
 external pstMixed_: int = "PstMixed"
 
-@module("ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
+@module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
 external pstDiscrete_: int = "PstDiscrete"
 
-@module("ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
+@module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
 external pstContinuous_: int = "PstContinuous"
 
 @genType.import("./ForTS_Distribution_PointSetDistribution_tag")

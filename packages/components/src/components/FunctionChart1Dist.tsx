@@ -1,16 +1,7 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import {
-  Distribution,
-  result,
-  lambdaValue,
-  environment,
-  runForeign,
-  squiggleExpression,
-  errorValue,
-  errorValueToString,
-} from "@quri/squiggle-lang";
+import { Distribution, result, Lambda, environment } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import {
@@ -46,7 +37,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChart1DistProps {
-  fn: lambdaValue;
+  fn: Lambda;
   chartSettings: FunctionChartSettings;
   distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;
@@ -80,6 +71,8 @@ type errors = _.Dictionary<
 type point = { x: number; value: result<Distribution, string> };
 
 let getPercentiles = ({ chartSettings, fn, environment }) => {
+  throw new Error("NOT IMPLEMENTED IN 0.4 YET");
+  /*
   let chartPointsToRender = _rangeByCount(
     chartSettings.start,
     chartSettings.stop,
@@ -104,7 +97,7 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
     } else {
       return {
         x,
-        value: { tag: "Error", value: errorValueToString(result.value) },
+        value: { tag: "Error", value: result.value.toString() },
       };
     }
   });
@@ -149,6 +142,7 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
   });
 
   return { percentiles, errors: groupedErrors };
+  */
 };
 
 export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
@@ -167,6 +161,9 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   }
   const signalListeners = { mousemove: handleHover, mouseout: handleOut };
 
+  return <div>NOT IMPLEMENTED IN 0.4 YET</div>;
+
+  /*
   //TODO: This custom error handling is a bit hacky and should be improved.
   let mouseItem: result<squiggleExpression, errorValue> = !!mouseOverlay
     ? runForeign(fn, [mouseOverlay], environment)
@@ -217,4 +214,5 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
       )}
     </>
   );
+  */
 };

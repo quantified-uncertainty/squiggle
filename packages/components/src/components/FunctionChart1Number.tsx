@@ -1,13 +1,7 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import {
-  result,
-  lambdaValue,
-  environment,
-  runForeign,
-  errorValueToString,
-} from "@quri/squiggle-lang";
+import { result, Lambda, environment } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as lineChartSpec from "../vega-specs/spec-line-chart.json";
 import { ErrorAlert } from "./Alert";
@@ -30,7 +24,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChart1NumberProps {
-  fn: lambdaValue;
+  fn: Lambda;
   chartSettings: FunctionChartSettings;
   environment: environment;
   height: number;
@@ -39,6 +33,8 @@ interface FunctionChart1NumberProps {
 type point = { x: number; value: result<number, string> };
 
 let getFunctionImage = ({ chartSettings, fn, environment }) => {
+  throw new Error("NOT IMPLEMENTED IN 0.4 YET");
+  /*
   let chartPointsToRender = _rangeByCount(
     chartSettings.start,
     chartSettings.stop,
@@ -62,7 +58,7 @@ let getFunctionImage = ({ chartSettings, fn, environment }) => {
     } else {
       return {
         x,
-        value: { tag: "Error", value: errorValueToString(result.value) },
+        value: { tag: "Error", value: result.value.toString() },
       };
     }
   });
@@ -82,6 +78,7 @@ let getFunctionImage = ({ chartSettings, fn, environment }) => {
   }, initialPartition);
 
   return { errors, functionImage };
+  */
 };
 
 export const FunctionChart1Number: React.FC<FunctionChart1NumberProps> = ({
@@ -90,6 +87,8 @@ export const FunctionChart1Number: React.FC<FunctionChart1NumberProps> = ({
   environment,
   height,
 }: FunctionChart1NumberProps) => {
+  return <div>NOT IMPLEMENTED IN 0.4 YET</div>;
+  /*
   let getFunctionImageMemoized = React.useMemo(
     () => getFunctionImage({ chartSettings, fn, environment }),
     [environment, fn]
@@ -113,4 +112,5 @@ export const FunctionChart1Number: React.FC<FunctionChart1NumberProps> = ({
       ))}
     </>
   );
+  */
 };

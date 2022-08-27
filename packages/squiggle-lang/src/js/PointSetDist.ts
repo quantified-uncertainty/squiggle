@@ -5,7 +5,7 @@ import { pointSetDistributionTag as Tag } from "../rescript/ForTS/ForTS_Distribu
 type T = RSPointSetDist.pointSetDistribution;
 
 export type point = { x: number; y: number };
-type shape = {
+export type shape = {
   continuous: point[];
   discrete: point[];
 };

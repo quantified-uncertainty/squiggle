@@ -15,9 +15,13 @@ import { Project } from "./Project";
 import { SquiggleValue, Tag as SquiggleValueTag } from "./SquiggleValue";
 export { result } from "../rescript/ForTS/ForTS_Result_tag";
 export { Project, SquiggleValue };
-export { Distribution, Tag as DistributionTag } from "./Distribution";
+export {
+  Distribution as Distribution,
+  Tag as DistributionTag,
+} from "./Distribution";
 export { DistributionError } from "./DistributionError";
 export { Record as SquiggleRecord } from "./Record";
+export { Lambda } from "./Lambda";
 export { SquiggleValueTag };
 export {
   environment,
@@ -25,6 +29,7 @@ export {
 } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 export { ErrorValue } from "./ErrorValue";
 export { resultMap } from "./types";
+export { shape } from "./PointSetDist";
 
 // import * as _ from "lodash";
 // import type {

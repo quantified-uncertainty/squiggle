@@ -10,13 +10,13 @@ type environment = ForTS_Distribution_Environment.environment //use
 @genType
 let defaultEnvironment: environment = DistributionOperation.defaultEnv
 
-@module("ForTS_Distribution_tag") @scope("distributionTag")
+@module("./ForTS_Distribution_tag") @scope("distributionTag")
 external dtPointSet_: int = "DtPointSet"
 
-@module("ForTS_Distribution_tag") @scope("distributionTag")
+@module("./ForTS_Distribution_tag") @scope("distributionTag")
 external dtSampleSet_: int = "DtSampleSet"
 
-@module("ForTS_Distribution_tag") @scope("distributionTag")
+@module("./ForTS_Distribution_tag") @scope("distributionTag")
 external dtSymbolic_: int = "DtSymbolic"
 
 @genType.import("./ForTS_Distribution_tag")
