@@ -4,3 +4,7 @@ type squiggleValue = ForTS_SquiggleValue.squiggleValue
 @genType
 let getValues = (v: squiggleValue_Array): array<squiggleValue> =>
   ReducerInterface_InternalExpressionValue.arrayToValueArray(v)
+
+@genType
+let toString = (v: squiggleValue_Array): string =>
+  ReducerInterface_InternalExpressionValue.toStringArray(v)
