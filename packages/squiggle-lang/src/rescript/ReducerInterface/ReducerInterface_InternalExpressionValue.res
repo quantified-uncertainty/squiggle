@@ -41,30 +41,46 @@ type functionCall = (string, array<t>)
 
 let rec toString = aValue =>
   switch aValue {
-  | IEvArray(anArray) => {
-      let args = anArray->Js.Array2.map(each => toString(each))->Js.Array2.toString
-      `[${args}]`
-    }
-  | IEvArrayString(anArray) => {
+  | IEvArray(anArray) =>toStringArray(anArray)
+  | IEvArrayString(anArray) => toStringArrayString(anArray)
+  | IEvBindings(m) => toStringBindings(m)
+  | IEvBool(aBool) => toStringBool(aBool)
+  | IEvCall(fName) => toStringCall(fName)
+  | IEvDate(date) => toStringDate(date)
+  | IEvDeclaration(d) => toStringDeclaration(d)
+  | IEvDistribution(dist) => toStringDistribution(dist)
+  | IEvLambda(lambdaValue) => toStringLambda(lambdaValue)
+  | IEvNumber(aNumber) => toStringNumber(aNumber)
+  | IEvRecord(aMap) => aMap->toStringRecord
+  | IEvString(aString) => toStringString(aString)
+  | IEvSymbol(aString) => toStringSymbol(aString)
+  | IEvTimeDuration(t) => toStringTimeDuration(t)
+  | IEvType(aMap) => toStringType(aMap)
+  | IEvTypeIdentifier(id) => toStringTypeIdentifier(id)
+  | IEvVoid => toStringVoid
+  }
+and toStringArray = (anArray) => {let args = anArray->Js.Array2.map(each => toString(each))->Js.Array2.toString
+      `[${args}]`}
+and toStringArrayString = (anArray) =>  {
       let args = anArray->Js.Array2.toString
       `[${args}]`
     }
-  | IEvBool(aBool) => Js.String.make(aBool)
-  | IEvCall(fName) => `:${fName}`
-  | IEvDate(date) => DateTime.Date.toString(date)
-  | IEvDeclaration(d) => Declaration.toString(d, r => toString(IEvLambda(r)))
-  | IEvDistribution(dist) => GenericDist.toString(dist)
-  | IEvLambda(lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
-  | IEvBindings(m) => `@${m->toStringNameSpace}`
-  | IEvNumber(aNumber) => Js.String.make(aNumber)
-  | IEvRecord(aMap) => aMap->toStringMap
-  | IEvString(aString) => `'${aString}'`
-  | IEvSymbol(aString) => `:${aString}`
-  | IEvType(aMap) => aMap->toStringMap
-  | IEvTimeDuration(t) => DateTime.Duration.toString(t)
-  | IEvTypeIdentifier(id) => `#${id}`
-  | IEvVoid => `()`
-  }
+and toStringBindings = (m) => `@${m->toStringNameSpace}`
+and toStringBool = (aBool) => Js.String.make(aBool)
+and toStringCall = (fName) => `:${fName}` 
+and toStringDate = (date) => DateTime.Date.toString(date)
+and toStringDeclaration = (d) => Declaration.toString(d, r => toString(IEvLambda(r)))
+and toStringDistribution = (dist) => GenericDist.toString(dist)
+and toStringLambda = (lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
+and toStringNumber = (aNumber) => Js.String.make(aNumber)
+and toStringRecord = (aMap) => aMap->toStringMap
+and toStringString = (aString) => `'${aString}'`
+and toStringSymbol = (aString) => `:${aString}`
+and toStringTimeDuration = (t) => DateTime.Duration.toString(t)
+and toStringType = (aMap) => aMap->toStringMap
+and toStringTypeIdentifier = (id) => `#${id}`
+and toStringVoid = `()`
+
 and toStringMap = aMap => {
   let pairs =
     aMap
