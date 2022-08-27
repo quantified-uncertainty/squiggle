@@ -8,3 +8,6 @@ let toString = (v: squiggleValue_Lambda): string =>
 let parameters = (v: squiggleValue_Lambda): array<string> => {
   v.parameters
 }
+
+@genType
+let getParameters = parameters
