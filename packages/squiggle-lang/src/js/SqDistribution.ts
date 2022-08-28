@@ -1,20 +1,20 @@
 import * as RSDistribution from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 import { distributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_tag";
 import { environment } from "../rescript/ForTS/ForTS__Types.gen";
-import { DistributionError } from "./DistributionError";
-import { wrapPointSetDist } from "./PointSetDist";
+import { SqDistributionError } from "./SqDistributionError";
+import { wrapPointSetDist } from "./SqPointSetDist";
 import { resultMap2 } from "./types";
 
 type T = RSDistribution.distribution;
-export { Tag };
+export { Tag as SqDistributionTag };
 
-export const wrapDistribution = (value: T): Distribution => {
+export const wrapDistribution = (value: T): SqDistribution => {
   const tag = RSDistribution.getTag(value);
 
   return new tagToClass[tag](value);
 };
 
-abstract class AbstractDistribution {
+abstract class SqAbstractDistribution {
   abstract tag: Tag;
   _value: T;
 
@@ -27,7 +27,7 @@ abstract class AbstractDistribution {
     return resultMap2(
       innerResult,
       wrapPointSetDist,
-      (v: RSDistribution.distributionError) => new DistributionError(v)
+      (v: RSDistribution.distributionError) => new SqDistributionError(v)
     );
   }
 
@@ -39,7 +39,7 @@ abstract class AbstractDistribution {
     return resultMap2(
       RSDistribution.mean({ env }, this._value),
       (v: number) => v,
-      (e: RSDistribution.distributionError) => new DistributionError(e)
+      (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );
   }
 
@@ -47,7 +47,7 @@ abstract class AbstractDistribution {
     return resultMap2(
       RSDistribution.inv({ env }, this._value, n),
       (v: number) => v,
-      (e: RSDistribution.distributionError) => new DistributionError(e)
+      (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );
   }
 
@@ -55,13 +55,13 @@ abstract class AbstractDistribution {
     return resultMap2(
       RSDistribution.stdev({ env }, this._value),
       (v: number) => v,
-      (e: RSDistribution.distributionError) => new DistributionError(e)
+      (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );
   }
 }
 
 const valueMethod = <IR>(
-  _this: AbstractDistribution,
+  _this: SqAbstractDistribution,
   rsMethod: (v: T) => IR | null | undefined
 ) => {
   const value = rsMethod(_this._value);
@@ -69,7 +69,7 @@ const valueMethod = <IR>(
   return value;
 };
 
-export class PointSetDistribution extends AbstractDistribution {
+export class SqPointSetDistribution extends SqAbstractDistribution {
   tag = Tag.DtPointSet;
 
   value() {
@@ -77,7 +77,7 @@ export class PointSetDistribution extends AbstractDistribution {
   }
 }
 
-export class SampleSetDistribution extends AbstractDistribution {
+export class SqSampleSetDistribution extends SqAbstractDistribution {
   tag = Tag.DtSampleSet;
 
   value() {
@@ -85,7 +85,7 @@ export class SampleSetDistribution extends AbstractDistribution {
   }
 }
 
-export class SymbolicDistribution extends AbstractDistribution {
+export class SqSymbolicDistribution extends SqAbstractDistribution {
   tag = Tag.DtSymbolic;
 
   value() {
@@ -94,12 +94,12 @@ export class SymbolicDistribution extends AbstractDistribution {
 }
 
 const tagToClass = {
-  [Tag.DtPointSet]: PointSetDistribution,
-  [Tag.DtSampleSet]: SampleSetDistribution,
-  [Tag.DtSymbolic]: SymbolicDistribution,
+  [Tag.DtPointSet]: SqPointSetDistribution,
+  [Tag.DtSampleSet]: SqSampleSetDistribution,
+  [Tag.DtSymbolic]: SqSymbolicDistribution,
 } as const;
 
-export type Distribution =
-  | PointSetDistribution
-  | SampleSetDistribution
-  | SymbolicDistribution;
+export type SqDistribution =
+  | SqPointSetDistribution
+  | SqSampleSetDistribution
+  | SqSymbolicDistribution;

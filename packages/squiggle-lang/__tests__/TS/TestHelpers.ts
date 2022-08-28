@@ -1,4 +1,4 @@
-import { run, SquiggleValue } from "../../src/js/index";
+import { run, SqValue } from "../../src/js";
 
 export function testRun(x: string) {
   const { result, bindings } = run(x); // FIXME - set environment

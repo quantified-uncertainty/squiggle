@@ -1,83 +1,21 @@
-/* Some of the types have moved to ForTS__Types.
-Needs to be reimported here if necessary and distribution related 
-
-We only need distribution related extras for back compatibility. Umur
-
-Instead of a global function namespace we should use modules under ForTS directly maybe renaming them for ease.
-
-.e.g. Project.run(project)
-.e.g. Distribution.makeSampleSetDist
-
-*/
-
 import { environment } from "../rescript/ForTS/ForTS_ReducerProject.gen";
-import { Project } from "./Project";
-import { SquiggleValue, Tag as SquiggleValueTag } from "./SquiggleValue";
+import { SqProject } from "./SqProject";
+import { SqValue, SqValueTag } from "./SqValue";
 export { result } from "../rescript/ForTS/ForTS_Result_tag";
-export { Project, SquiggleValue };
-export {
-  Distribution as Distribution,
-  Tag as DistributionTag,
-} from "./Distribution";
-export { DistributionError } from "./DistributionError";
-export { Record as SquiggleRecord } from "./Record";
-export { Lambda } from "./Lambda";
-export { SquiggleValueTag };
+export { SqDistribution, SqDistributionTag } from "./SqDistribution";
+export { SqDistributionError } from "./SqDistributionError";
+export { SqRecord } from "./SqRecord";
+export { SqLambda } from "./SqLambda";
+export { SqProject };
+export { SqValue, SqValueTag };
 export {
   environment,
   defaultEnvironment,
 } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
-export { ErrorValue } from "./ErrorValue";
+export { SqError } from "./SqError";
+export { SqShape } from "./SqPointSetDist";
+
 export { resultMap } from "./types";
-export { shape } from "./PointSetDist";
-
-// import * as _ from "lodash";
-// import type {
-//   environment,
-//   expressionValue,
-//   externalBindings,
-//   errorValue,
-// } from "../rescript/TypescriptInterface.gen";
-// import {
-//   defaultEnvironment,
-//   evaluatePartialUsingExternalBindings,
-//   evaluateUsingOptions,
-//   foreignFunctionInterface,
-// } from "../rescript/TypescriptInterface.gen";
-// export {
-//   makeSampleSetDist,
-//   errorValueToString,
-//   distributionErrorToString,
-// } from "../rescript/TypescriptInterface.gen";
-// export type {
-//   distributionError,
-//   declarationArg,
-//   declaration,
-// } from "../rescript/TypescriptInterface.gen";
-// export type { errorValue, externalBindings as bindings, jsImports };
-// import {
-//   jsValueToBinding,
-//   jsValueToExpressionValue,
-//   jsValue,
-//   rescriptExport,
-//   squiggleExpression,
-//   convertRawToTypescript,
-//   lambdaValue,
-// } from "./rescript_interop";
-// import { result, resultMap, tag, tagged } from "./types";
-// import { Distribution, shape } from "./distribution";
-
-// export { Distribution, resultMap, defaultEnvironment };
-// export type { result, shape, environment, lambdaValue, squiggleExpression };
-
-// export { parse } from "./parse";
-
-// export let defaultSamplingInputs: environment = {
-//   sampleCount: 10000,
-//   xyPointLength: 10000,
-// };
-
-/* Umur: All the functions below are invalid. ForTS_Reducer project is the new way to do this. */
 
 export const run = (
   code: string,
@@ -85,7 +23,7 @@ export const run = (
     environment?: environment;
   }
 ) => {
-  const project = Project.create();
+  const project = SqProject.create();
   project.setSource("main", code);
   if (options?.environment) {
     project.setEnvironment(options.environment);
@@ -96,39 +34,15 @@ export const run = (
   return { result, bindings };
 };
 
-// export function run(
-//   squiggleString: string,
-//   bindings?: externalBindings,
-//   environment?: environment,
-//   imports?: jsImports
-// ): result<squiggleExpression, errorValue> {
-//   let b = bindings ? bindings : defaultBindings;
-//   let i = imports ? imports : defaultImports;
-//   let e = environment ? environment : defaultEnvironment;
-//   let res: result<expressionValue, errorValue> = evaluateUsingOptions(
-//     { externalBindings: mergeImportsWithBindings(b, i), environment: e },
-//     squiggleString
-//   );
-//   return resultMap(res, (x) => createTsExport(x, e));
-// }
-
-// // Run Partial. A partial is a block of code that doesn't return a value
-// export function runPartial(
-//   squiggleString: string,
-//   bindings?: externalBindings,
-//   environment?: environment,
-//   imports?: jsImports
-// ): result<externalBindings, errorValue> {
-//   let b = bindings ? bindings : defaultBindings;
-//   let i = imports ? imports : defaultImports;
-//   let e = environment ? environment : defaultEnvironment;
-
-//   return evaluatePartialUsingExternalBindings(
-//     squiggleString,
-//     mergeImportsWithBindings(b, i),
-//     e
-//   );
-// }
+// import {
+//   jsValueToBinding,
+//   jsValueToExpressionValue,
+//   jsValue,
+//   rescriptExport,
+//   squiggleExpression,
+//   convertRawToTypescript,
+//   lambdaValue,
+// } from "./rescript_interop";
 
 // export function runForeign(
 //   fn: lambdaValue,

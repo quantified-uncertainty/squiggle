@@ -4,15 +4,15 @@ import { pointSetDistributionTag as Tag } from "../rescript/ForTS/ForTS_Distribu
 
 type T = RSPointSetDist.pointSetDistribution;
 
-export type point = { x: number; y: number };
-export type shape = {
-  continuous: point[];
-  discrete: point[];
+export type SqPoint = { x: number; y: number };
+export type SqShape = {
+  continuous: SqPoint[];
+  discrete: SqPoint[];
 };
 
 const shapePoints = (
   x: RSPointSetDist.continuousShape | RSPointSetDist.discreteShape
-): point[] => {
+): SqPoint[] => {
   let xs = x.xyShape.xs;
   let ys = x.xyShape.ys;
   return _.zipWith(xs, ys, (x, y) => ({ x, y }));
@@ -24,18 +24,18 @@ export const wrapPointSetDist = (value: T) => {
   return new tagToClass[tag](value);
 };
 
-abstract class AbstractPointSetDist {
+abstract class SqAbstractPointSetDist {
   _value: T;
 
   constructor(_value: T) {
     this._value = _value;
   }
 
-  abstract asShape(): shape;
+  abstract asShape(): SqShape;
 }
 
 const valueMethod = <IR>(
-  _this: AbstractPointSetDist,
+  _this: SqAbstractPointSetDist,
   rsMethod: (v: T) => IR | null | undefined
 ) => {
   const value = rsMethod(_this._value);
@@ -43,7 +43,7 @@ const valueMethod = <IR>(
   return value;
 };
 
-export class MixedPointSetDist extends AbstractPointSetDist {
+export class SqMixedPointSetDist extends SqAbstractPointSetDist {
   tag = Tag.PstMixed as const;
 
   get value(): RSPointSetDist.mixedShape {
@@ -59,7 +59,7 @@ export class MixedPointSetDist extends AbstractPointSetDist {
   }
 }
 
-export class DiscretePointSetDist extends AbstractPointSetDist {
+export class SqDiscretePointSetDist extends SqAbstractPointSetDist {
   tag = Tag.PstDiscrete as const;
 
   get value(): RSPointSetDist.discreteShape {
@@ -75,7 +75,7 @@ export class DiscretePointSetDist extends AbstractPointSetDist {
   }
 }
 
-export class ContinuousPointSetDist extends AbstractPointSetDist {
+export class SqContinuousPointSetDist extends SqAbstractPointSetDist {
   tag = Tag.PstContinuous as const;
 
   get value(): RSPointSetDist.continuousShape {
@@ -92,12 +92,12 @@ export class ContinuousPointSetDist extends AbstractPointSetDist {
 }
 
 const tagToClass = {
-  [Tag.PstMixed]: MixedPointSetDist,
-  [Tag.PstDiscrete]: DiscretePointSetDist,
-  [Tag.PstContinuous]: ContinuousPointSetDist,
+  [Tag.PstMixed]: SqMixedPointSetDist,
+  [Tag.PstDiscrete]: SqDiscretePointSetDist,
+  [Tag.PstContinuous]: SqContinuousPointSetDist,
 } as const;
 
-export type PointSetDist =
-  | MixedPointSetDist
-  | DiscretePointSetDist
-  | ContinuousPointSetDist;
+export type SqPointSetDist =
+  | SqMixedPointSetDist
+  | SqDiscretePointSetDist
+  | SqContinuousPointSetDist;

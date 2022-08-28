@@ -1,5 +1,5 @@
-import { Project, SquiggleValue } from "../../src/js";
-import { NumberValue } from "../../src/js/SquiggleValue";
+import { SqProject, SqValue } from "../../src/js";
+import { SqNumberValue } from "../../src/js/SqValue";
 import { failDefault, testRun } from "./TestHelpers";
 
 function Ok<b>(x: b) {
@@ -12,7 +12,7 @@ describe("Simple calculations and results", () => {
     expect(result.tag).toEqual("Number");
     switch (result.tag) {
       case "Number":
-        expect(result.value()).toEqual(5);
+        expect(result.value).toEqual(5);
         break;
       default:
         fail();
@@ -22,11 +22,11 @@ describe("Simple calculations and results", () => {
     // });
   });
   test("10+10", () => {
-    let result = testRun("10 + 10") as NumberValue;
+    let result = testRun("10 + 10") as SqNumberValue;
     expect(result.tag).toEqual("Number");
     switch (result.tag) {
       case "Number":
-        expect(result.value()).toEqual(20);
+        expect(result.value).toEqual(20);
         break;
       default:
         fail();

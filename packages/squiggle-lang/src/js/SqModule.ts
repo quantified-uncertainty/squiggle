@@ -1,6 +1,6 @@
 import * as RSModuleValue from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_Module.gen";
 
-export class NameSpace {
+export class SqModule {
   _value: RSModuleValue.squiggleValue_Module;
 
   constructor(_value: RSModuleValue.squiggleValue_Module) {

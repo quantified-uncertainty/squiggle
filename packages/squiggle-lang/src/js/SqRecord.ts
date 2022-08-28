@@ -1,9 +1,9 @@
 import * as RSRecord from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_Record.gen";
-import { AbstractSquiggleValue, wrapSquiggleValue } from "./SquiggleValue";
+import { wrapValue } from "./SqValue";
 
 type T = RSRecord.squiggleValue_Record;
 
-export class Record {
+export class SqRecord {
   _value: T;
 
   constructor(_value: T) {
@@ -12,7 +12,7 @@ export class Record {
 
   entries() {
     return RSRecord.getKeyValuePairs(this._value).map(
-      ([k, v]) => [k, wrapSquiggleValue(v)] as const
+      ([k, v]) => [k, wrapValue(v)] as const
     );
   }
 }

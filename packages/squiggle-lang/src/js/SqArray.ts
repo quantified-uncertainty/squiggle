@@ -1,9 +1,9 @@
 import * as RSArray from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_Array.gen";
-import { AbstractSquiggleValue, wrapSquiggleValue } from "./SquiggleValue";
+import { wrapValue } from "./SqValue";
 
 type T = RSArray.squiggleValue_Array;
 
-export class SquiggleArray {
+export class SqArray {
   _value: T;
 
   constructor(_value: T) {
@@ -11,6 +11,6 @@ export class SquiggleArray {
   }
 
   getValues() {
-    return RSArray.getValues(this._value).map(wrapSquiggleValue);
+    return RSArray.getValues(this._value).map(wrapValue);
   }
 }

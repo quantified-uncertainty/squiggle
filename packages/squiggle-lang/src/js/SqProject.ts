@@ -1,12 +1,12 @@
 import * as RSProject from "../rescript/ForTS/ForTS_ReducerProject.gen";
 import { reducerErrorValue } from "../rescript/ForTS/ForTS_Reducer_ErrorValue.gen";
 import { environment } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_Environment.gen";
-import { ErrorValue } from "./ErrorValue";
-import { NameSpace as NameSpace } from "./NameSpace";
-import { wrapSquiggleValue } from "./SquiggleValue";
+import { SqError } from "./SqError";
+import { SqModule } from "./SqModule";
+import { wrapValue } from "./SqValue";
 import { resultMap2 } from "./types";
 
-export class Project {
+export class SqProject {
   _value: RSProject.reducerProject;
 
   constructor(_value: RSProject.reducerProject) {
@@ -14,7 +14,7 @@ export class Project {
   }
 
   static create() {
-    return new Project(RSProject.createProject());
+    return new SqProject(RSProject.createProject());
   }
 
   getSourceIds() {
@@ -53,7 +53,7 @@ export class Project {
     return resultMap2(
       RSProject.getIncludes(this._value, sourceId),
       (a) => a,
-      (v: reducerErrorValue) => new ErrorValue(v)
+      (v: reducerErrorValue) => new SqError(v)
     );
   }
 
@@ -94,15 +94,15 @@ export class Project {
   }
 
   getBindings(sourceId: string) {
-    return new NameSpace(RSProject.getBindings(this._value, sourceId));
+    return new SqModule(RSProject.getBindings(this._value, sourceId));
   }
 
   getResult(sourceId: string) {
     const innerResult = RSProject.getResult(this._value, sourceId);
     return resultMap2(
       innerResult,
-      wrapSquiggleValue,
-      (v: reducerErrorValue) => new ErrorValue(v)
+      wrapValue,
+      (v: reducerErrorValue) => new SqError(v)
     );
   }
 

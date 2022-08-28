@@ -2,7 +2,7 @@ import * as RSDistributionError from "../rescript/ForTS/ForTS_Distribution/ForTS
 
 type T = RSDistributionError.distributionError;
 
-export class DistributionError {
+export class SqDistributionError {
   _value: T;
 
   constructor(_value: T) {

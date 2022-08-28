@@ -2,7 +2,7 @@ import * as RSLambda from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleV
 
 type T = RSLambda.squiggleValue_Lambda;
 
-export class Lambda {
+export class SqLambda {
   _value: T;
 
   constructor(_value: T) {

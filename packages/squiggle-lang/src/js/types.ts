@@ -27,9 +27,3 @@ export function resultMap2<a, b, c, d>(
 export function Ok<a, b>(x: a): result<a, b> {
   return { tag: "Ok", value: x };
 }
-
-export type tagged<a, b> = { tag: a; value: b };
-
-export function tag<a, b>(x: a, y: b): tagged<a, b> {
-  return { tag: x, value: y };
-}
