@@ -1,4 +1,10 @@
-import { environment, run, SqValue } from "@quri/squiggle-lang";
+import {
+  environment,
+  resultMap,
+  run,
+  SqValue,
+  SqValueTag,
+} from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 
 type SquiggleArgs = {
@@ -12,8 +18,12 @@ type SquiggleArgs = {
 export const useSquiggle = (args: SquiggleArgs) => {
   const result = useMemo(
     () => {
-      const { result } = run(args.code, { environment: args.environment });
-      return result;
+      const { result, bindings } = run(args.code, {
+        environment: args.environment,
+      });
+      return resultMap(result, (v) =>
+        v.tag === SqValueTag.Void ? bindings.asValue() : v
+      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -29,6 +39,8 @@ export const useSquiggle = (args: SquiggleArgs) => {
   useEffect(() => {
     onChange?.(result.tag === "Ok" ? result.value : undefined);
   }, [result, onChange]);
+
+  console.log(result);
 
   return result;
 };

@@ -8,3 +8,7 @@ let getKeyValuePairs = (v: squiggleValue_Module): array<(string, squiggleValue)>
 @genType
 let toString = (v: squiggleValue_Module): string =>
   ReducerInterface_InternalExpressionValue.toStringNameSpace(v)
+
+@genType
+let toSquiggleValue = (v: squiggleValue_Module): squiggleValue =>
+  IEvBindings(v)
