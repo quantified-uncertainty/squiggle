@@ -70,7 +70,7 @@ const valueMethod = <IR>(
 };
 
 export class SqPointSetDistribution extends SqAbstractDistribution {
-  tag = Tag.DtPointSet;
+  tag = Tag.PointSet;
 
   value() {
     return valueMethod(this, RSDistribution.getPointSet);
@@ -78,7 +78,7 @@ export class SqPointSetDistribution extends SqAbstractDistribution {
 }
 
 export class SqSampleSetDistribution extends SqAbstractDistribution {
-  tag = Tag.DtSampleSet;
+  tag = Tag.SampleSet;
 
   value() {
     return valueMethod(this, RSDistribution.getSampleSet);
@@ -86,7 +86,7 @@ export class SqSampleSetDistribution extends SqAbstractDistribution {
 }
 
 export class SqSymbolicDistribution extends SqAbstractDistribution {
-  tag = Tag.DtSymbolic;
+  tag = Tag.Symbolic;
 
   value() {
     return valueMethod(this, RSDistribution.getSymbolic);
@@ -94,9 +94,9 @@ export class SqSymbolicDistribution extends SqAbstractDistribution {
 }
 
 const tagToClass = {
-  [Tag.DtPointSet]: SqPointSetDistribution,
-  [Tag.DtSampleSet]: SqSampleSetDistribution,
-  [Tag.DtSymbolic]: SqSymbolicDistribution,
+  [Tag.PointSet]: SqPointSetDistribution,
+  [Tag.SampleSet]: SqSampleSetDistribution,
+  [Tag.Symbolic]: SqSymbolicDistribution,
 } as const;
 
 export type SqDistribution =

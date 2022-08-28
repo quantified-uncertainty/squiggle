@@ -1,9 +1,9 @@
-import { ErrorValue } from "@quri/squiggle-lang";
+import { SqError } from "@quri/squiggle-lang";
 import React from "react";
 import { ErrorAlert } from "./Alert";
 
 type Props = {
-  error: ErrorValue;
+  error: SqError;
 };
 
 export const SquiggleErrorAlert: React.FC<Props> = ({ error }) => {

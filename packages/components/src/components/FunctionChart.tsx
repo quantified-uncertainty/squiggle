@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Lambda, environment } from "@quri/squiggle-lang";
+import { SqLambda, environment } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
 import { DistributionPlottingSettings } from "./DistributionChart";
@@ -12,7 +12,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChartProps {
-  fn: Lambda;
+  fn: SqLambda;
   chartSettings: FunctionChartSettings;
   distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;

@@ -1,9 +1,5 @@
 import React, { useContext } from "react";
-import {
-  DistributionTag,
-  SquiggleValue,
-  SquiggleValueTag,
-} from "@quri/squiggle-lang";
+import { SqDistributionTag, SqValue, SqValueTag } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
 import { DistributionChart, defaultPlot, makePlot } from "../DistributionChart";
 import { FunctionChart, FunctionChartSettings } from "../FunctionChart";
@@ -56,7 +52,7 @@ const VariableList: React.FC<{
 
 export interface Props {
   /** The output of squiggle's run */
-  expression: SquiggleValue;
+  expression: SqValue;
   /** Path to the current item, e.g. `['foo', 'bar', '3']` for `foo.bar[3]`; can be empty on the top-level item. */
   path: string[];
   width?: number;
@@ -77,7 +73,7 @@ export const ExpressionViewer: React.FC<Props> = ({
     );
   }
   switch (expression.tag) {
-    case SquiggleValueTag.SvtNumber:
+    case SqValueTag.Number:
       return (
         <VariableBox path={path} heading="Number">
           {() => (
@@ -87,13 +83,13 @@ export const ExpressionViewer: React.FC<Props> = ({
           )}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtDistribution: {
+    case SqValueTag.Distribution: {
       const distType = expression.value.tag;
       return (
         <VariableBox
           path={path}
           heading={`Distribution (${distType})\n${
-            distType === DistributionTag.DtSymbolic
+            distType === SqDistributionTag.Symbolic
               ? expression.value.toString()
               : ""
           }`}
@@ -127,7 +123,7 @@ export const ExpressionViewer: React.FC<Props> = ({
         </VariableBox>
       );
     }
-    case SquiggleValueTag.SvtString:
+    case SqValueTag.String:
       return (
         <VariableBox path={path} heading="String">
           {() => (
@@ -141,13 +137,13 @@ export const ExpressionViewer: React.FC<Props> = ({
           )}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtBool:
+    case SqValueTag.Bool:
       return (
         <VariableBox path={path} heading="Boolean">
           {() => expression.value.toString()}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtSymbol:
+    case SqValueTag.Symbol:
       return (
         <VariableBox path={path} heading="Symbol">
           {() => (
@@ -158,38 +154,38 @@ export const ExpressionViewer: React.FC<Props> = ({
           )}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtCall:
+    case SqValueTag.Call:
       return (
         <VariableBox path={path} heading="Call">
           {() => expression.value}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtArrayString:
+    case SqValueTag.ArrayString:
       return (
         <VariableBox path={path} heading="Array String">
           {() => expression.value.map((r) => `"${r}"`).join(", ")}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtDate:
+    case SqValueTag.Date:
       return (
         <VariableBox path={path} heading="Date">
           {() => expression.value.toDateString()}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtVoid:
+    case SqValueTag.Void:
       return (
         <VariableBox path={path} heading="Void">
           {() => "Void"}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtTimeDuration: {
+    case SqValueTag.TimeDuration: {
       return (
         <VariableBox path={path} heading="Time Duration">
           {() => <NumberShower precision={3} number={expression.value} />}
         </VariableBox>
       );
     }
-    case SquiggleValueTag.SvtLambda:
+    case SqValueTag.Lambda:
       return (
         <VariableBox
           path={path}
@@ -223,7 +219,7 @@ export const ExpressionViewer: React.FC<Props> = ({
           )}
         </VariableBox>
       );
-    case SquiggleValueTag.SvtDeclaration: {
+    case SqValueTag.Declaration: {
       return (
         <VariableBox
           path={path}
@@ -254,7 +250,7 @@ export const ExpressionViewer: React.FC<Props> = ({
         </VariableBox>
       );
     }
-    case SquiggleValueTag.SvtModule: {
+    case SqValueTag.Module: {
       return (
         <VariableList path={path} heading="Module">
           {(_) =>
@@ -272,7 +268,7 @@ export const ExpressionViewer: React.FC<Props> = ({
         </VariableList>
       );
     }
-    case SquiggleValueTag.SvtRecord:
+    case SqValueTag.Record:
       const plot = makePlot(expression.value);
       if (plot) {
         return (
@@ -330,7 +326,7 @@ export const ExpressionViewer: React.FC<Props> = ({
           </VariableList>
         );
       }
-    case SquiggleValueTag.SvtArray:
+    case SqValueTag.Array:
       return (
         <VariableList path={path} heading="Array">
           {(_) =>

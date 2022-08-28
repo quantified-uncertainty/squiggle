@@ -12,55 +12,55 @@ type squiggleValue_Lambda = ForTS_SquiggleValue_Lambda.squiggleValue_Lambda //us
 // Return values are kept as they are if they are JavaScript types.
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtArray_: string = "SvtArray"
+external svtArray_: string = "Array"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtArrayString_: string = "SvtArrayString"
+external svtArrayString_: string = "ArrayString"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtBool_: string = "SvtBool"
+external svtBool_: string = "Bool"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtCall_: string = "SvtCall"
+external svtCall_: string = "Call"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtDate_: string = "SvtDate"
+external svtDate_: string = "Date"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtDeclaration_: string = "SvtDeclaration"
+external svtDeclaration_: string = "Declaration"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtDistribution_: string = "SvtDistribution"
+external svtDistribution_: string = "Distribution"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtLambda_: string = "SvtLambda"
+external svtLambda_: string = "Lambda"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtModule_: string = "SvtModule"
+external svtModule_: string = "Module"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtNumber_: string = "SvtNumber"
+external svtNumber_: string = "Number"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtRecord_: string = "SvtRecord"
+external svtRecord_: string = "Record"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtString_: string = "SvtString"
+external svtString_: string = "String"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtSymbol_: string = "SvtSymbol"
+external svtSymbol_: string = "Symbol"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtTimeDuration_: string = "SvtTimeDuration"
+external svtTimeDuration_: string = "TimeDuration"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtType_: string = "SvtType"
+external svtType_: string = "Type"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtTypeIdentifier_: string = "SvtUndefined"
+external svtTypeIdentifier_: string = "TypeIdentifier"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtVoid_: string = "SvtVoid"
+external svtVoid_: string = "Void"
 
 @genType.import("./ForTS_SquiggleValue_tag")
 type squiggleValueTag

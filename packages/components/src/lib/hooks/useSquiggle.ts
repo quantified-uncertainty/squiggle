@@ -1,4 +1,4 @@
-import { environment, run, SquiggleValue } from "@quri/squiggle-lang";
+import { environment, run, SqValue } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 
 type SquiggleArgs = {
@@ -6,7 +6,7 @@ type SquiggleArgs = {
   executionId?: number;
   // jsImports?: jsImports;
   environment?: environment;
-  onChange?: (expr: SquiggleValue | undefined) => void;
+  onChange?: (expr: SqValue | undefined) => void;
 };
 
 export const useSquiggle = (args: SquiggleArgs) => {

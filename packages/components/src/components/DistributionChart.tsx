@@ -1,10 +1,10 @@
 import * as React from "react";
 import {
-  Distribution,
+  SqDistribution,
   result,
-  DistributionError,
+  SqDistributionError,
   resultMap,
-  SquiggleRecord,
+  SqRecord,
   environment,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
@@ -33,11 +33,11 @@ export type DistributionChartProps = {
   height: number;
 } & DistributionPlottingSettings;
 
-export function defaultPlot(distribution: Distribution): Plot {
+export function defaultPlot(distribution: SqDistribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
 }
 
-export function makePlot(record: SquiggleRecord): Plot | void {
+export function makePlot(record: SqRecord): Plot | void {
   const plotResult = parsePlot(record);
   if (plotResult.tag === "Ok") {
     return plotResult.value;
@@ -129,7 +129,7 @@ const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 type SummaryTableProps = {
-  distribution: Distribution;
+  distribution: SqDistribution;
   environment: environment;
 };
 
@@ -147,11 +147,11 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
   const p90 = distribution.inv(environment, 0.9);
   const p95 = distribution.inv(environment, 0.95);
 
-  const hasResult = (x: result<number, DistributionError>): boolean =>
+  const hasResult = (x: result<number, SqDistributionError>): boolean =>
     x.tag === "Ok";
 
   const unwrapResult = (
-    x: result<number, DistributionError>
+    x: result<number, SqDistributionError>
   ): React.ReactNode => {
     if (x.tag === "Ok") {
       return <NumberShower number={x.value} />;

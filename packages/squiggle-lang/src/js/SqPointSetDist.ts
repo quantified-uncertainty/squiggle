@@ -44,7 +44,7 @@ const valueMethod = <IR>(
 };
 
 export class SqMixedPointSetDist extends SqAbstractPointSetDist {
-  tag = Tag.PstMixed as const;
+  tag = Tag.Mixed as const;
 
   get value(): RSPointSetDist.mixedShape {
     return valueMethod(this, RSPointSetDist.getMixed);
@@ -60,7 +60,7 @@ export class SqMixedPointSetDist extends SqAbstractPointSetDist {
 }
 
 export class SqDiscretePointSetDist extends SqAbstractPointSetDist {
-  tag = Tag.PstDiscrete as const;
+  tag = Tag.Discrete as const;
 
   get value(): RSPointSetDist.discreteShape {
     return valueMethod(this, RSPointSetDist.getDiscrete);
@@ -76,7 +76,7 @@ export class SqDiscretePointSetDist extends SqAbstractPointSetDist {
 }
 
 export class SqContinuousPointSetDist extends SqAbstractPointSetDist {
-  tag = Tag.PstContinuous as const;
+  tag = Tag.Continuous as const;
 
   get value(): RSPointSetDist.continuousShape {
     return valueMethod(this, RSPointSetDist.getContinues);
@@ -92,9 +92,9 @@ export class SqContinuousPointSetDist extends SqAbstractPointSetDist {
 }
 
 const tagToClass = {
-  [Tag.PstMixed]: SqMixedPointSetDist,
-  [Tag.PstDiscrete]: SqDiscretePointSetDist,
-  [Tag.PstContinuous]: SqContinuousPointSetDist,
+  [Tag.Mixed]: SqMixedPointSetDist,
+  [Tag.Discrete]: SqDiscretePointSetDist,
+  [Tag.Continuous]: SqContinuousPointSetDist,
 } as const;
 
 export type SqPointSetDist =

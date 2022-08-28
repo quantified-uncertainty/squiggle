@@ -1,7 +1,12 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import { Distribution, result, Lambda, environment } from "@quri/squiggle-lang";
+import {
+  SqDistribution,
+  result,
+  SqLambda,
+  environment,
+} from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import {
@@ -37,7 +42,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChart1DistProps {
-  fn: Lambda;
+  fn: SqLambda;
   chartSettings: FunctionChartSettings;
   distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;
@@ -68,7 +73,7 @@ type errors = _.Dictionary<
   }[]
 >;
 
-type point = { x: number; value: result<Distribution, string> };
+type point = { x: number; value: result<SqDistribution, string> };
 
 let getPercentiles = ({ chartSettings, fn, environment }) => {
   throw new Error("NOT IMPLEMENTED IN 0.4 YET");

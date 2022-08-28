@@ -1,9 +1,5 @@
 import * as React from "react";
-import {
-  SquiggleValue,
-  environment,
-  defaultEnvironment,
-} from "@quri/squiggle-lang";
+import { SqValue, environment, defaultEnvironment } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
 import { SquiggleViewer } from "./SquiggleViewer";
 
@@ -23,7 +19,7 @@ export interface SquiggleChartProps {
   /** If the result is a function, the amount of stops sampled */
   diagramCount?: number;
   /** When the squiggle code gets reevaluated */
-  onChange?(expr: SquiggleValue | undefined): void;
+  onChange?(expr: SqValue | undefined): void;
   /** CSS width of the element */
   width?: number;
   height?: number;

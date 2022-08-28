@@ -37,7 +37,7 @@ const valueMethod = <IR>(
 };
 
 export class SqArrayValue extends SqAbstractValue {
-  tag = Tag.SvtArray as const;
+  tag = Tag.Array as const;
 
   get value() {
     return new SqArray(valueMethod(this, RSValue.getArray));
@@ -45,7 +45,7 @@ export class SqArrayValue extends SqAbstractValue {
 }
 
 export class SqArrayStringValue extends SqAbstractValue {
-  tag = Tag.SvtArrayString as const;
+  tag = Tag.ArrayString as const;
 
   get value() {
     return valueMethod(this, RSValue.getArrayString);
@@ -53,7 +53,7 @@ export class SqArrayStringValue extends SqAbstractValue {
 }
 
 export class SqBoolValue extends SqAbstractValue {
-  tag = Tag.SvtBool as const;
+  tag = Tag.Bool as const;
 
   get value() {
     return valueMethod(this, RSValue.getBool);
@@ -61,7 +61,7 @@ export class SqBoolValue extends SqAbstractValue {
 }
 
 export class SqCallValue extends SqAbstractValue {
-  tag = Tag.SvtCall as const;
+  tag = Tag.Call as const;
 
   get value() {
     return valueMethod(this, RSValue.getCall);
@@ -69,7 +69,7 @@ export class SqCallValue extends SqAbstractValue {
 }
 
 export class SqDateValue extends SqAbstractValue {
-  tag = Tag.SvtDate as const;
+  tag = Tag.Date as const;
 
   get value() {
     return valueMethod(this, RSValue.getDate);
@@ -77,7 +77,7 @@ export class SqDateValue extends SqAbstractValue {
 }
 
 export class SqDeclarationValue extends SqAbstractValue {
-  tag = Tag.SvtDeclaration as const;
+  tag = Tag.Declaration as const;
 
   get value() {
     return new SqLambdaDeclaration(valueMethod(this, RSValue.getDeclaration));
@@ -85,7 +85,7 @@ export class SqDeclarationValue extends SqAbstractValue {
 }
 
 export class SqDistributionValue extends SqAbstractValue {
-  tag = Tag.SvtDistribution as const;
+  tag = Tag.Distribution as const;
 
   get value() {
     return wrapDistribution(valueMethod(this, RSValue.getDistribution));
@@ -93,7 +93,7 @@ export class SqDistributionValue extends SqAbstractValue {
 }
 
 export class SqLambdaValue extends SqAbstractValue {
-  tag = Tag.SvtLambda as const;
+  tag = Tag.Lambda as const;
 
   get value() {
     return new SqLambda(valueMethod(this, RSValue.getLambda));
@@ -101,7 +101,7 @@ export class SqLambdaValue extends SqAbstractValue {
 }
 
 export class SqModuleValue extends SqAbstractValue {
-  tag = Tag.SvtModule as const;
+  tag = Tag.Module as const;
 
   get value() {
     return new SqModule(valueMethod(this, RSValue.getModule));
@@ -109,7 +109,7 @@ export class SqModuleValue extends SqAbstractValue {
 }
 
 export class SqNumberValue extends SqAbstractValue {
-  tag = Tag.SvtNumber as const;
+  tag = Tag.Number as const;
 
   get value() {
     return valueMethod(this, RSValue.getNumber);
@@ -117,7 +117,7 @@ export class SqNumberValue extends SqAbstractValue {
 }
 
 export class SqRecordValue extends SqAbstractValue {
-  tag = Tag.SvtRecord as const;
+  tag = Tag.Record as const;
 
   get value() {
     return new SqRecord(valueMethod(this, RSValue.getRecord));
@@ -125,7 +125,7 @@ export class SqRecordValue extends SqAbstractValue {
 }
 
 export class SqStringValue extends SqAbstractValue {
-  tag = Tag.SvtString as const;
+  tag = Tag.String as const;
 
   get value(): string {
     return valueMethod(this, RSValue.getString);
@@ -133,7 +133,7 @@ export class SqStringValue extends SqAbstractValue {
 }
 
 export class SqSymbolValue extends SqAbstractValue {
-  tag = Tag.SvtSymbol as const;
+  tag = Tag.Symbol as const;
 
   get value(): string {
     return valueMethod(this, RSValue.getSymbol);
@@ -141,7 +141,7 @@ export class SqSymbolValue extends SqAbstractValue {
 }
 
 export class SqTimeDurationValue extends SqAbstractValue {
-  tag = Tag.SvtTimeDuration as const;
+  tag = Tag.TimeDuration as const;
 
   get value() {
     return valueMethod(this, RSValue.getTimeDuration);
@@ -149,7 +149,7 @@ export class SqTimeDurationValue extends SqAbstractValue {
 }
 
 export class SqTypeValue extends SqAbstractValue {
-  tag = Tag.SvtType as const;
+  tag = Tag.Type as const;
 
   get value() {
     return new SqType(valueMethod(this, RSValue.getType));
@@ -157,7 +157,7 @@ export class SqTypeValue extends SqAbstractValue {
 }
 
 export class SqTypeIdentifierValue extends SqAbstractValue {
-  tag = Tag.SvtTypeIdentifier as const;
+  tag = Tag.TypeIdentifier as const;
 
   get value() {
     return valueMethod(this, RSValue.getTypeIdentifier);
@@ -165,27 +165,27 @@ export class SqTypeIdentifierValue extends SqAbstractValue {
 }
 
 export class SqVoidValue extends SqAbstractValue {
-  tag = Tag.SvtVoid as const;
+  tag = Tag.Void as const;
 }
 
 const tagToClass = {
-  [Tag.SvtArray]: SqArrayValue,
-  [Tag.SvtArrayString]: SqArrayStringValue,
-  [Tag.SvtBool]: SqBoolValue,
-  [Tag.SvtCall]: SqCallValue,
-  [Tag.SvtDate]: SqDateValue,
-  [Tag.SvtDeclaration]: SqDeclarationValue,
-  [Tag.SvtDistribution]: SqDistributionValue,
-  [Tag.SvtLambda]: SqLambdaValue,
-  [Tag.SvtModule]: SqModuleValue,
-  [Tag.SvtNumber]: SqNumberValue,
-  [Tag.SvtRecord]: SqRecordValue,
-  [Tag.SvtString]: SqStringValue,
-  [Tag.SvtSymbol]: SqSymbolValue,
-  [Tag.SvtTimeDuration]: SqTimeDurationValue,
-  [Tag.SvtType]: SqTypeValue,
-  [Tag.SvtTypeIdentifier]: SqTypeIdentifierValue,
-  [Tag.SvtVoid]: SqVoidValue,
+  [Tag.Array]: SqArrayValue,
+  [Tag.ArrayString]: SqArrayStringValue,
+  [Tag.Bool]: SqBoolValue,
+  [Tag.Call]: SqCallValue,
+  [Tag.Date]: SqDateValue,
+  [Tag.Declaration]: SqDeclarationValue,
+  [Tag.Distribution]: SqDistributionValue,
+  [Tag.Lambda]: SqLambdaValue,
+  [Tag.Module]: SqModuleValue,
+  [Tag.Number]: SqNumberValue,
+  [Tag.Record]: SqRecordValue,
+  [Tag.String]: SqStringValue,
+  [Tag.Symbol]: SqSymbolValue,
+  [Tag.TimeDuration]: SqTimeDurationValue,
+  [Tag.Type]: SqTypeValue,
+  [Tag.TypeIdentifier]: SqTypeIdentifierValue,
+  [Tag.Void]: SqVoidValue,
 } as const;
 
 // FIXME

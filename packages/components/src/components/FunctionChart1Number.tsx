@@ -1,7 +1,7 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import { result, Lambda, environment } from "@quri/squiggle-lang";
+import { result, SqLambda, environment } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as lineChartSpec from "../vega-specs/spec-line-chart.json";
 import { ErrorAlert } from "./Alert";
@@ -24,7 +24,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChart1NumberProps {
-  fn: Lambda;
+  fn: SqLambda;
   chartSettings: FunctionChartSettings;
   environment: environment;
   height: number;
