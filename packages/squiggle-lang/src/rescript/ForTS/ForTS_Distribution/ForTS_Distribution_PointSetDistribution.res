@@ -4,18 +4,18 @@
 @genType type mixedShape = PointSetTypes.mixedShape
 
 @module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
-external pstMixed_: int = "Mixed"
+external pstMixed_: string = "Mixed"
 
 @module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
-external pstDiscrete_: int = "Discrete"
+external pstDiscrete_: string = "Discrete"
 
 @module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
-external pstContinuous_: int = "Continuous"
+external pstContinuous_: string = "Continuous"
 
 @genType.import("./ForTS_Distribution_PointSetDistribution_tag")
 type pointSetDistributionTag
 
-external castEnum: int => pointSetDistributionTag = "%identity"
+external castEnum: string => pointSetDistributionTag = "%identity"
 
 @genType
 let getTag = (variant: pointSetDistribution): pointSetDistributionTag =>
