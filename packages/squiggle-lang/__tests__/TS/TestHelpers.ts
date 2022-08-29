@@ -1,4 +1,5 @@
-import { run, SqValue } from "../../src/js";
+import { run, SqValueTag } from "../../src/js";
+export { SqValueTag };
 
 export function testRun(x: string) {
   const { result, bindings } = run(x); // FIXME - set environment
@@ -18,10 +19,6 @@ export function testRun(x: string) {
       `Expected squiggle expression to evaluate but got error: ${result.value}`
     );
   }
-}
-
-export function failDefault() {
-  expect("be reached").toBe("codepath should never");
 }
 
 /**

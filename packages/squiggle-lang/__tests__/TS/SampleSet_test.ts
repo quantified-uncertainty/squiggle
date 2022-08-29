@@ -1,4 +1,4 @@
-import { expectErrorToBeBounded, failDefault, testRun } from "./TestHelpers";
+import { expectErrorToBeBounded, testRun, SqValueTag } from "./TestHelpers";
 import * as fc from "fast-check";
 
 // Beware: float64Array makes it appear in an infinite loop.
@@ -19,7 +19,7 @@ let arrayGen = () =>
 let makeSampleSet = (samples: number[]) => {
   let sampleList = samples.map((x) => x.toFixed(20)).join(",");
   let result = testRun(`SampleSet.fromList([${sampleList}])`);
-  if (result.tag === "Distribution") {
+  if (result.tag === SqValueTag.Distribution) {
     return result.value;
   } else {
     fail("Expected to be distribution");
@@ -104,7 +104,7 @@ describe("cumulative density function", () => {
         } else if (typeof cdfValue == "number") {
           expect(Math.round(1e5 * cdfValue) / 1e5).toBeLessThanOrEqual(1);
         } else {
-          failDefault();
+          fail();
         }
       })
     );
@@ -166,7 +166,7 @@ describe("mean is mean", () => {
               1
             );
           } else {
-            failDefault();
+            fail();
           }
         }
       )
@@ -191,7 +191,7 @@ describe("mean is mean", () => {
               1
             );
           } else {
-            failDefault();
+            fail();
           }
         }
       )

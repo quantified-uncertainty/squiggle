@@ -1,6 +1,6 @@
 import { SqProject, SqValue } from "../../src/js";
 import { SqNumberValue } from "../../src/js/SqValue";
-import { failDefault, testRun } from "./TestHelpers";
+import { testRun } from "./TestHelpers";
 
 function Ok<b>(x: b) {
   return { tag: "Ok", value: x };
@@ -9,28 +9,11 @@ function Ok<b>(x: b) {
 describe("Simple calculations and results", () => {
   test("mean(normal(5,2))", () => {
     const result = testRun("mean(normal(5,2))"); // FIXME
-    expect(result.tag).toEqual("Number");
-    switch (result.tag) {
-      case "Number":
-        expect(result.value).toEqual(5);
-        break;
-      default:
-        fail();
-    }
-    //   tag: "number",
-    //   value: 5,
-    // });
+    expect(result.value).toEqual(5);
   });
   test("10+10", () => {
     let result = testRun("10 + 10") as SqNumberValue;
-    expect(result.tag).toEqual("Number");
-    switch (result.tag) {
-      case "Number":
-        expect(result.value).toEqual(20);
-        break;
-      default:
-        fail();
-    }
+    expect(result.value).toEqual(20);
   });
 });
 // describe("Log function", () => {
