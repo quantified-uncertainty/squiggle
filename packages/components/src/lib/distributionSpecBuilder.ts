@@ -77,7 +77,6 @@ export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
   const {
-    format = defaultTickFormat,
     title,
     minX,
     maxX,
@@ -88,6 +87,13 @@ export function buildVegaSpec(
   } = specOptions;
 
   const dateTime = xAxis === "dateTime";
+
+  // some fallbacks
+  const format = specOptions?.format
+    ? specOptions.format
+    : dateTime
+    ? timeTickFormat
+    : defaultTickFormat;
 
   let xScale = dateTime ? timeXScale : logX ? logXScale : linearXScale;
 
@@ -125,8 +131,10 @@ export function buildVegaSpec(
       },
       {
         name: "position_scaled",
-        value: 0,
-        update: "position ? invert('xscale', position[0]) : null",
+        value: null,
+        update: "isArray(position) ? invert('xscale', position[0]) : ''",
+        // value: 0,
+        // update: "position ? invert('xscale', position[0]) : null",
       },
     ],
     scales: [
@@ -152,7 +160,7 @@ export function buildVegaSpec(
         domainColor: "#fff",
         domainOpacity: 0.0,
         format: format,
-        tickCount: 10,
+        tickCount: dateTime ? 3 : 10,
         labelOverlap: "greedy",
       },
     ],
@@ -308,7 +316,9 @@ export function buildVegaSpec(
           },
           update: {
             text: {
-              signal: "position_scaled ? format(position_scaled, ',.4r')  : ''",
+              signal: dateTime
+                ? "position_scaled ? utcyear(position_scaled) + '-' + utcmonth(position_scaled) + '-' + utcdate(position_scaled) + 'T' + utchours(position_scaled)+':' +utcminutes(position_scaled) : ''"
+                : "position_scaled ? format(position_scaled, ',.4r')  : ''",
             },
           },
         },

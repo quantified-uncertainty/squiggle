@@ -57,6 +57,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     actions = false,
     xAxis = "number",
   } = props;
+  console.log({ plot });
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
       plot.distributions.map((x) =>
