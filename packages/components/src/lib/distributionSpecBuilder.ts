@@ -72,6 +72,7 @@ export const expYScale: PowScale = {
 
 export const defaultTickFormat = ".9~s";
 export const timeTickFormat = "%b %d, %Y %H:%M";
+const width = 500;
 
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
@@ -108,7 +109,7 @@ export function buildVegaSpec(
   const spec: VisualizationSpec = {
     $schema: "https://vega.github.io/schema/vega/v5.json",
     description: "Squiggle plot chart",
-    width: 500,
+    width: width,
     height: 100,
     padding: 5,
     data: [{ name: "data" }, { name: "domain" }],
@@ -133,8 +134,6 @@ export function buildVegaSpec(
         name: "position_scaled",
         value: null,
         update: "isArray(position) ? invert('xscale', position[0]) : ''",
-        // value: 0,
-        // update: "position ? invert('xscale', position[0]) : null",
       },
     ],
     scales: [
@@ -309,7 +308,7 @@ export function buildVegaSpec(
         interactive: false,
         encode: {
           enter: {
-            x: { signal: "width", offset: 1 },
+            x: { signal: String(width), offset: 1 }, // vega would prefer its internal ` "width" ` variable, but that breaks the squiggle playground. Just setting it to the same var as used elsewhere in the spec achieves the same result.
             fill: { value: "black" },
             fontSize: { value: 20 },
             align: { value: "right" },
