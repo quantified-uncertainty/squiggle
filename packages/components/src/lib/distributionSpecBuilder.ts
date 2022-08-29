@@ -138,35 +138,7 @@ export function buildVegaSpec(
       },
     ],
     marks: [
-      {
-        name: "sample_distributions",
-        type: "group",
-        from: {
-          facet: {
-            name: "distribution_facet",
-            data: "domain",
-            groupby: ["name"],
-          },
-        },
-        marks: [
-          {
-            name: "samples",
-            type: "rect",
-            from: { data: "distribution_facet" },
-            encode: {
-              enter: {
-                x: { scale: "xscale", field: "x" },
-                width: { value: 0.5 },
 
-                y: { value: 25, offset: { signal: "height" } },
-                height: { value: 5 },
-                fill: { value: "steelblue" },
-                fillOpacity: { value: 0.8 },
-              },
-            },
-          },
-        ],
-      },
       {
         name: "all_distributions",
         type: "group",
@@ -323,6 +295,7 @@ export function buildVegaSpec(
       },
       {
         type: "rule",
+        interactive: false,
         encode: {
           enter: {
             x: { value: 0 },
