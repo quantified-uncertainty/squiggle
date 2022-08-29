@@ -15,7 +15,6 @@ import {
   buildVegaSpec,
   DistributionChartSpecOptions,
 } from "../lib/distributionSpecBuilder";
-import { buildDateVegaSpec } from "../lib/dateDistributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult } from "../lib/utility";
@@ -31,6 +30,7 @@ export type DistributionChartProps = {
   plot: Plot;
   width?: number;
   height: number;
+  sample: boolean;
   xAxis?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
@@ -77,8 +77,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
     }
 
-    const spec =
-      xAxis === "dateTime" ? buildDateVegaSpec(props) : buildVegaSpec(props);
+    const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
     if (widthProp < 20) {

@@ -1,5 +1,5 @@
 import { VisualizationSpec } from "react-vega";
-import type { LogScale, LinearScale, PowScale } from "vega";
+import type { LogScale, LinearScale, PowScale, TimeScale } from "vega";
 
 export type DistributionChartSpecOptions = {
   /** Set the x scale to be logarithmic by deault */
@@ -14,6 +14,12 @@ export type DistributionChartSpecOptions = {
   title?: string;
   /** The formatting of the ticks */
   format?: string;
+
+  /** Whether or not to show the band of sample data at the bottom */
+  sample?: boolean;
+
+  /** Whether the x-axis should be dates or numbers */
+  xAxis?: "number" | "dateTime";
 };
 
 export const linearXScale: LinearScale = {
@@ -24,14 +30,6 @@ export const linearXScale: LinearScale = {
   zero: false,
   nice: false,
   domain: { data: "domain", field: "x" },
-};
-
-export const linearYScale: LinearScale = {
-  name: "yscale",
-  type: "linear",
-  range: "height",
-  zero: true,
-  domain: { data: "domain", field: "y" },
 };
 
 export const logXScale: LogScale = {
@@ -45,6 +43,23 @@ export const logXScale: LogScale = {
   domain: { data: "domain", field: "x" },
 };
 
+export const timeXScale: TimeScale = {
+  name: "xscale",
+  clamp: true,
+  type: "time",
+  range: "width",
+  nice: false,
+  domain: { data: "domain", field: "dateTime" },
+};
+
+export const linearYScale: LinearScale = {
+  name: "yscale",
+  type: "linear",
+  range: "height",
+  zero: true,
+  domain: { data: "domain", field: "y" },
+};
+
 export const expYScale: PowScale = {
   name: "yscale",
   type: "pow",
@@ -56,6 +71,7 @@ export const expYScale: PowScale = {
 };
 
 export const defaultTickFormat = ".9~s";
+export const timeTickFormat = "%b %d, %Y %H:%M";
 
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
@@ -67,9 +83,14 @@ export function buildVegaSpec(
     maxX,
     logX,
     expY,
+    sample = false,
+    xAxis = "number",
   } = specOptions;
 
-  let xScale = logX ? logXScale : linearXScale;
+  const dateTime = xAxis === "dateTime";
+
+  let xScale = dateTime ? timeXScale : logX ? logXScale : linearXScale;
+
   if (minX !== undefined && Number.isFinite(minX)) {
     xScale = { ...xScale, domainMin: minX };
   }
@@ -105,9 +126,7 @@ export function buildVegaSpec(
       {
         name: "position_scaled",
         value: 0,
-        update: "position ? position[0] < 0 ? null : position[0] > width ? null : invert('xscale', position[0]) : null",
-        // "position ? position[0] < 0 ? 0 : position[0] > width ? 0 : 1 : 0",
-
+        update: "position ? invert('xscale', position[0]) : null",
       },
     ],
     scales: [
@@ -138,7 +157,6 @@ export function buildVegaSpec(
       },
     ],
     marks: [
-
       {
         name: "all_distributions",
         type: "group",
@@ -175,7 +193,7 @@ export function buildVegaSpec(
                     interpolate: { value: "linear" },
                     x: {
                       scale: "xscale",
-                      field: "x",
+                      field: dateTime ? "dateTime" : "x",
                     },
                     y: {
                       scale: "yscale",
@@ -222,7 +240,7 @@ export function buildVegaSpec(
                   update: {
                     x: {
                       scale: "xscale",
-                      field: "x",
+                      field: dateTime ? "dateTime" : "x",
                     },
                     y: {
                       scale: "yscale",
@@ -251,13 +269,15 @@ export function buildVegaSpec(
                     },
                     size: [{ value: 100 }],
                     tooltip: {
-                      signal: "{ probability: datum.y, value: datum.x }",
+                      signal: dateTime
+                        ? "{ probability: datum.y, value: datetime(datum.dateTime) }"
+                        : "{ probability: datum.y, value: datum.x }",
                     },
                   },
                   update: {
                     x: {
                       scale: "xscale",
-                      field: "x",
+                      field: dateTime ? "dateTime" : "x",
                       offset: 0.5, // if this is not included, the circles are slightly left of center.
                     },
                     y: {
@@ -356,5 +376,37 @@ export function buildVegaSpec(
     }),
   };
 
+  // include the band at the bottom if specified in the React component
+  if (sample) {
+    spec.marks?.push({
+      name: "sample_distributions",
+      type: "group",
+      from: {
+        facet: {
+          name: "distribution_facet",
+          data: "domain",
+          groupby: ["name"],
+        },
+      },
+      marks: [
+        {
+          name: "samples",
+          type: "rect",
+          from: { data: "distribution_facet" },
+          encode: {
+            enter: {
+              x: { scale: "xscale", field: dateTime ? "dateTime" : "x" },
+              width: { value: 0.5 },
+
+              y: { value: 25, offset: { signal: "height" } },
+              height: { value: 5 },
+              fill: { value: "steelblue" },
+              fillOpacity: { value: 0.8 },
+            },
+          },
+        },
+      ],
+    });
+  }
   return spec;
 }
