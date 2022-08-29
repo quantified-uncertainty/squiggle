@@ -16,11 +16,14 @@ export const wrapDistribution = (value: T): SqDistribution => {
 
 abstract class SqAbstractDistribution {
   abstract tag: Tag;
-  _value: T;
 
-  constructor(value: T) {
-    this._value = value;
-  }
+  constructor(private _value: T) {}
+
+  protected valueMethod = <IR>(rsMethod: (v: T) => IR | null | undefined) => {
+    const value = rsMethod(this._value);
+    if (!value) throw new Error("Internal casting error");
+    return value;
+  };
 
   pointSet(env: environment) {
     const innerResult = RSDistribution.toPointSet(this._value, env);
@@ -76,20 +79,11 @@ abstract class SqAbstractDistribution {
   }
 }
 
-const valueMethod = <IR>(
-  _this: SqAbstractDistribution,
-  rsMethod: (v: T) => IR | null | undefined
-) => {
-  const value = rsMethod(_this._value);
-  if (!value) throw new Error("Internal casting error");
-  return value;
-};
-
 export class SqPointSetDistribution extends SqAbstractDistribution {
   tag = Tag.PointSet;
 
   value() {
-    return valueMethod(this, RSDistribution.getPointSet);
+    return this.valueMethod(RSDistribution.getPointSet);
   }
 }
 
@@ -97,7 +91,7 @@ export class SqSampleSetDistribution extends SqAbstractDistribution {
   tag = Tag.SampleSet;
 
   value() {
-    return valueMethod(this, RSDistribution.getSampleSet);
+    return this.valueMethod(RSDistribution.getSampleSet);
   }
 }
 
@@ -105,7 +99,7 @@ export class SqSymbolicDistribution extends SqAbstractDistribution {
   tag = Tag.Symbolic;
 
   value() {
-    return valueMethod(this, RSDistribution.getSymbolic);
+    return this.valueMethod(RSDistribution.getSymbolic);
   }
 }
 

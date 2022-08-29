@@ -1,21 +1,20 @@
 import React, { useCallback, useRef } from "react";
-import { environment } from "@quri/squiggle-lang";
+import { environment, SqValueLocation } from "@quri/squiggle-lang";
 import { DistributionPlottingSettings } from "../DistributionChart";
 import { FunctionChartSettings } from "../FunctionChart";
 import { ExpressionViewer } from "./ExpressionViewer";
 import { ViewerContext } from "./ViewerContext";
 import {
   LocalItemSettings,
+  locationAsString,
   MergedItemSettings,
-  Path,
-  pathAsString,
 } from "./utils";
 import { useSquiggle } from "../../lib/hooks";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert";
 
 type Props = {
   /** The output of squiggle's run */
-  result: ReturnType<typeof useSquiggle>;
+  result: ReturnType<typeof useSquiggle>["result"];
   width?: number;
   height: number;
   distributionPlotSettings: DistributionPlottingSettings;
@@ -45,22 +44,22 @@ export const SquiggleViewer: React.FC<Props> = ({
   const settingsRef = useRef<Settings>({});
 
   const getSettings = useCallback(
-    (path: Path) => {
-      return settingsRef.current[pathAsString(path)] || defaultSettings;
+    (location: SqValueLocation) => {
+      return settingsRef.current[locationAsString(location)] || defaultSettings;
     },
     [settingsRef]
   );
 
   const setSettings = useCallback(
-    (path: Path, value: LocalItemSettings) => {
-      settingsRef.current[pathAsString(path)] = value;
+    (location: SqValueLocation, value: LocalItemSettings) => {
+      settingsRef.current[locationAsString(location)] = value;
     },
     [settingsRef]
   );
 
   const getMergedSettings = useCallback(
-    (path: Path) => {
-      const localSettings = getSettings(path);
+    (location: SqValueLocation) => {
+      const localSettings = getSettings(location);
       const result: MergedItemSettings = {
         distributionPlotSettings: {
           ...distributionPlotSettings,
@@ -91,7 +90,7 @@ export const SquiggleViewer: React.FC<Props> = ({
       }}
     >
       {result.tag === "Ok" ? (
-        <ExpressionViewer path={[]} expression={result.value} width={width} />
+        <ExpressionViewer value={result.value} width={width} />
       ) : (
         <SquiggleErrorAlert error={result.value} />
       )}

@@ -1,11 +1,7 @@
 import * as RSErrorValue from "../rescript/ForTS/ForTS_Reducer_ErrorValue.gen";
 
 export class SqError {
-  _value: RSErrorValue.reducerErrorValue;
-
-  constructor(_value: RSErrorValue.reducerErrorValue) {
-    this._value = _value;
-  }
+  constructor(private _value: RSErrorValue.reducerErrorValue) {}
 
   toString() {
     return RSErrorValue.toString(this._value);

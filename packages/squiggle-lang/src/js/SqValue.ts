@@ -7,42 +7,38 @@ import { SqModule } from "./SqModule";
 import { SqRecord } from "./SqRecord";
 import { SqArray } from "./SqArray";
 import { SqType } from "./SqType";
+import { SqProject } from "./SqProject";
+import { SqValueLocation } from "./SqValueLocation";
 
 export { Tag as SqValueTag };
 
 type T = RSValue.squiggleValue;
 
-export const wrapValue = (value: T): SqValue => {
+export const wrapValue = (value: T, location: SqValueLocation): SqValue => {
   const tag = RSValue.getTag(value);
 
-  return new tagToClass[tag](value);
+  return new tagToClass[tag](value, location);
 };
 
 export abstract class SqAbstractValue {
   abstract tag: Tag;
-  _value: T;
 
-  constructor(value: T) {
-    this._value = value;
-  }
+  constructor(private _value: T, public location: SqValueLocation) {}
+
+  protected valueMethod = <IR>(rsMethod: (v: T) => IR | null | undefined) => {
+    const value = rsMethod(this._value);
+    if (value === undefined || value === null) {
+      throw new Error("Internal casting error");
+    }
+    return value;
+  };
 }
-
-const valueMethod = <IR>(
-  _this: SqAbstractValue,
-  rsMethod: (v: T) => IR | null | undefined
-) => {
-  const value = rsMethod(_this._value);
-  if (value === undefined || value === null) {
-    throw new Error("Internal casting error");
-  }
-  return value;
-};
 
 export class SqArrayValue extends SqAbstractValue {
   tag = Tag.Array as const;
 
   get value() {
-    return new SqArray(valueMethod(this, RSValue.getArray));
+    return new SqArray(this.valueMethod(RSValue.getArray), this.location);
   }
 }
 
@@ -50,7 +46,7 @@ export class SqArrayStringValue extends SqAbstractValue {
   tag = Tag.ArrayString as const;
 
   get value() {
-    return valueMethod(this, RSValue.getArrayString);
+    return this.valueMethod(RSValue.getArrayString);
   }
 }
 
@@ -58,7 +54,7 @@ export class SqBoolValue extends SqAbstractValue {
   tag = Tag.Bool as const;
 
   get value() {
-    return valueMethod(this, RSValue.getBool);
+    return this.valueMethod(RSValue.getBool);
   }
 }
 
@@ -66,7 +62,7 @@ export class SqCallValue extends SqAbstractValue {
   tag = Tag.Call as const;
 
   get value() {
-    return valueMethod(this, RSValue.getCall);
+    return this.valueMethod(RSValue.getCall);
   }
 }
 
@@ -74,7 +70,7 @@ export class SqDateValue extends SqAbstractValue {
   tag = Tag.Date as const;
 
   get value() {
-    return valueMethod(this, RSValue.getDate);
+    return this.valueMethod(RSValue.getDate);
   }
 }
 
@@ -82,7 +78,7 @@ export class SqDeclarationValue extends SqAbstractValue {
   tag = Tag.Declaration as const;
 
   get value() {
-    return new SqLambdaDeclaration(valueMethod(this, RSValue.getDeclaration));
+    return new SqLambdaDeclaration(this.valueMethod(RSValue.getDeclaration));
   }
 }
 
@@ -90,7 +86,7 @@ export class SqDistributionValue extends SqAbstractValue {
   tag = Tag.Distribution as const;
 
   get value() {
-    return wrapDistribution(valueMethod(this, RSValue.getDistribution));
+    return wrapDistribution(this.valueMethod(RSValue.getDistribution));
   }
 }
 
@@ -98,7 +94,7 @@ export class SqLambdaValue extends SqAbstractValue {
   tag = Tag.Lambda as const;
 
   get value() {
-    return new SqLambda(valueMethod(this, RSValue.getLambda));
+    return new SqLambda(this.valueMethod(RSValue.getLambda), this.location);
   }
 }
 
@@ -106,7 +102,7 @@ export class SqModuleValue extends SqAbstractValue {
   tag = Tag.Module as const;
 
   get value() {
-    return new SqModule(valueMethod(this, RSValue.getModule));
+    return new SqModule(this.valueMethod(RSValue.getModule), this.location);
   }
 }
 
@@ -114,7 +110,7 @@ export class SqNumberValue extends SqAbstractValue {
   tag = Tag.Number as const;
 
   get value() {
-    return valueMethod(this, RSValue.getNumber);
+    return this.valueMethod(RSValue.getNumber);
   }
 }
 
@@ -122,7 +118,7 @@ export class SqRecordValue extends SqAbstractValue {
   tag = Tag.Record as const;
 
   get value() {
-    return new SqRecord(valueMethod(this, RSValue.getRecord));
+    return new SqRecord(this.valueMethod(RSValue.getRecord), this.location);
   }
 }
 
@@ -130,7 +126,7 @@ export class SqStringValue extends SqAbstractValue {
   tag = Tag.String as const;
 
   get value(): string {
-    return valueMethod(this, RSValue.getString);
+    return this.valueMethod(RSValue.getString);
   }
 }
 
@@ -138,7 +134,7 @@ export class SqSymbolValue extends SqAbstractValue {
   tag = Tag.Symbol as const;
 
   get value(): string {
-    return valueMethod(this, RSValue.getSymbol);
+    return this.valueMethod(RSValue.getSymbol);
   }
 }
 
@@ -146,7 +142,7 @@ export class SqTimeDurationValue extends SqAbstractValue {
   tag = Tag.TimeDuration as const;
 
   get value() {
-    return valueMethod(this, RSValue.getTimeDuration);
+    return this.valueMethod(RSValue.getTimeDuration);
   }
 }
 
@@ -154,7 +150,7 @@ export class SqTypeValue extends SqAbstractValue {
   tag = Tag.Type as const;
 
   get value() {
-    return new SqType(valueMethod(this, RSValue.getType));
+    return new SqType(this.valueMethod(RSValue.getType));
   }
 }
 
@@ -162,7 +158,7 @@ export class SqTypeIdentifierValue extends SqAbstractValue {
   tag = Tag.TypeIdentifier as const;
 
   get value() {
-    return valueMethod(this, RSValue.getTypeIdentifier);
+    return this.valueMethod(RSValue.getTypeIdentifier);
   }
 }
 

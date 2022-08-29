@@ -5,13 +5,10 @@ import { SqError } from "./SqError";
 import { SqModule } from "./SqModule";
 import { wrapValue } from "./SqValue";
 import { resultMap2 } from "./types";
+import { SqValueLocation } from "./SqValueLocation";
 
 export class SqProject {
-  _value: RSProject.reducerProject;
-
-  constructor(_value: RSProject.reducerProject) {
-    this._value = _value;
-  }
+  constructor(private _value: RSProject.reducerProject) {}
 
   static create() {
     return new SqProject(RSProject.createProject());
@@ -94,14 +91,27 @@ export class SqProject {
   }
 
   getBindings(sourceId: string) {
-    return new SqModule(RSProject.getBindings(this._value, sourceId));
+    return new SqModule(
+      RSProject.getBindings(this._value, sourceId),
+      new SqValueLocation(this, sourceId, {
+        root: "bindings",
+        items: [],
+      })
+    );
   }
 
   getResult(sourceId: string) {
     const innerResult = RSProject.getResult(this._value, sourceId);
     return resultMap2(
       innerResult,
-      wrapValue,
+      (v) =>
+        wrapValue(
+          v,
+          new SqValueLocation(this, sourceId, {
+            root: "result",
+            items: [],
+          })
+        ),
       (v: reducerErrorValue) => new SqError(v)
     );
   }

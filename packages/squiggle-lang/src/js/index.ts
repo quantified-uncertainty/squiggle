@@ -1,6 +1,7 @@
 import { environment } from "../rescript/ForTS/ForTS_ReducerProject.gen";
 import { SqProject } from "./SqProject";
 import { SqValue, SqValueTag } from "./SqValue";
+export { SqValueLocation } from "./SqValueLocation";
 export { result } from "../rescript/ForTS/ForTS_Result_tag";
 export { SqDistribution, SqDistributionTag } from "./SqDistribution";
 export { SqDistributionError } from "./SqDistributionError";

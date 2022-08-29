@@ -1,20 +1,23 @@
 import * as RSModuleValue from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_Module.gen";
 import { SqModuleValue, wrapValue } from "./SqValue";
+import { SqValueLocation } from "./SqValueLocation";
 
 export class SqModule {
-  _value: RSModuleValue.squiggleValue_Module;
-
-  constructor(_value: RSModuleValue.squiggleValue_Module) {
-    this._value = _value;
-  }
+  constructor(
+    private _value: RSModuleValue.squiggleValue_Module,
+    public location: SqValueLocation
+  ) {}
 
   entries() {
     return RSModuleValue.getKeyValuePairs(this._value).map(
-      ([k, v]) => [k, wrapValue(v)] as const
+      ([k, v]) => [k, wrapValue(v, this.location.extend(k))] as const
     );
   }
 
   asValue() {
-    return new SqModuleValue(RSModuleValue.toSquiggleValue(this._value));
+    return new SqModuleValue(
+      RSModuleValue.toSquiggleValue(this._value),
+      this.location
+    );
   }
 }

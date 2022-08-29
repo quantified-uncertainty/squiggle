@@ -71,7 +71,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     distributionChartActions,
     enableLocalSettings = false,
   }) => {
-    const result = useSquiggle({
+    const { result, bindings } = useSquiggle({
       code,
       environment,
       // jsImports,
@@ -98,15 +98,27 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     };
 
     return (
-      <SquiggleViewer
-        result={result}
-        width={width}
-        height={height}
-        distributionPlotSettings={distributionPlotSettings}
-        chartSettings={chartSettings}
-        environment={environment ?? defaultEnvironment}
-        enableLocalSettings={enableLocalSettings}
-      />
+      <div>
+        <SquiggleViewer
+          result={result}
+          width={width}
+          height={height}
+          distributionPlotSettings={distributionPlotSettings}
+          chartSettings={chartSettings}
+          environment={environment ?? defaultEnvironment}
+          enableLocalSettings={enableLocalSettings}
+        />
+        <hr className="my-4" />
+        <SquiggleViewer
+          result={{ tag: "Ok", value: bindings.asValue() }}
+          width={width}
+          height={height}
+          distributionPlotSettings={distributionPlotSettings}
+          chartSettings={chartSettings}
+          environment={environment ?? defaultEnvironment}
+          enableLocalSettings={enableLocalSettings}
+        />
+      </div>
     );
   }
 );

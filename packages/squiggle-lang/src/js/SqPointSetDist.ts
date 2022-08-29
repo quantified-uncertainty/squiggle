@@ -25,29 +25,22 @@ export const wrapPointSetDist = (value: T) => {
 };
 
 abstract class SqAbstractPointSetDist {
-  _value: T;
-
-  constructor(_value: T) {
-    this._value = _value;
-  }
+  constructor(private _value: T) {}
 
   abstract asShape(): SqShape;
-}
 
-const valueMethod = <IR>(
-  _this: SqAbstractPointSetDist,
-  rsMethod: (v: T) => IR | null | undefined
-) => {
-  const value = rsMethod(_this._value);
-  if (!value) throw new Error("Internal casting error");
-  return value;
-};
+  protected valueMethod = <IR>(rsMethod: (v: T) => IR | null | undefined) => {
+    const value = rsMethod(this._value);
+    if (!value) throw new Error("Internal casting error");
+    return value;
+  };
+}
 
 export class SqMixedPointSetDist extends SqAbstractPointSetDist {
   tag = Tag.Mixed as const;
 
   get value(): RSPointSetDist.mixedShape {
-    return valueMethod(this, RSPointSetDist.getMixed);
+    return this.valueMethod(RSPointSetDist.getMixed);
   }
 
   asShape() {
@@ -63,7 +56,7 @@ export class SqDiscretePointSetDist extends SqAbstractPointSetDist {
   tag = Tag.Discrete as const;
 
   get value(): RSPointSetDist.discreteShape {
-    return valueMethod(this, RSPointSetDist.getDiscrete);
+    return this.valueMethod(RSPointSetDist.getDiscrete);
   }
 
   asShape() {
@@ -79,7 +72,7 @@ export class SqContinuousPointSetDist extends SqAbstractPointSetDist {
   tag = Tag.Continuous as const;
 
   get value(): RSPointSetDist.continuousShape {
-    return valueMethod(this, RSPointSetDist.getContinues);
+    return this.valueMethod(RSPointSetDist.getContinues);
   }
 
   asShape() {

@@ -3,9 +3,5 @@ import * as RSType from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleVal
 type T = RSType.squiggleValue_Type;
 
 export class SqType {
-  _value: T;
-
-  constructor(_value: T) {
-    this._value = _value;
-  }
+  constructor(private _value: T) {}
 }

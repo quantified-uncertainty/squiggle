@@ -18,12 +18,10 @@ type SquiggleArgs = {
 export const useSquiggle = (args: SquiggleArgs) => {
   const result = useMemo(
     () => {
-      const { result, bindings } = run(args.code, {
+      const result = run(args.code, {
         environment: args.environment,
       });
-      return resultMap(result, (v) =>
-        v.tag === SqValueTag.Void ? bindings.asValue() : v
-      );
+      return result;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -37,10 +35,8 @@ export const useSquiggle = (args: SquiggleArgs) => {
   const { onChange } = args;
 
   useEffect(() => {
-    onChange?.(result.tag === "Ok" ? result.value : undefined);
+    onChange?.(result.result.tag === "Ok" ? result.result.value : undefined);
   }, [result, onChange]);
-
-  console.log(result);
 
   return result;
 };
