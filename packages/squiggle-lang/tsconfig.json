@@ -12,7 +12,7 @@
     "declarationDir": "./dist",
     "declaration": true,
     "composite": true,
-    "target": "ES6",
+    "target": "ES6"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts", "webpack.config.js"]

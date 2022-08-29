@@ -1,9 +1,3 @@
-import {
-  run,
-  squiggleExpression,
-  errorValue,
-  result,
-} from "../../src/js/index";
 import { testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 

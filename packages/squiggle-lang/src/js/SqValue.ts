@@ -32,7 +32,9 @@ const valueMethod = <IR>(
   rsMethod: (v: T) => IR | null | undefined
 ) => {
   const value = rsMethod(_this._value);
-  if (!value) throw new Error("Internal casting error");
+  if (value === undefined || value === null) {
+    throw new Error("Internal casting error");
+  }
   return value;
 };
 
@@ -166,6 +168,10 @@ export class SqTypeIdentifierValue extends SqAbstractValue {
 
 export class SqVoidValue extends SqAbstractValue {
   tag = Tag.Void as const;
+
+  get value() {
+    return null;
+  }
 }
 
 const tagToClass = {

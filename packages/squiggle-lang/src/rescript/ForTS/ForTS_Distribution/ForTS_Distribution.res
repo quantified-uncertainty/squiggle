@@ -77,8 +77,12 @@ let normalize = DistributionOperation.Constructors.normalize
 
 @genType
 let toPointSet = (variant: distribution, env: environment) =>
-  GenericDist.toPointSet(variant, ~sampleCount=env.sampleCount, ~xyPointLength=env.xyPointLength, ())
+  GenericDist.toPointSet(
+    variant,
+    ~sampleCount=env.sampleCount,
+    ~xyPointLength=env.xyPointLength,
+    (),
+  )
 
 @genType
-let toString = (variant: distribution) =>
-  GenericDist.toString(variant)
+let toString = (variant: distribution) => GenericDist.toString(variant)

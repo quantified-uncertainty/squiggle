@@ -43,6 +43,22 @@ abstract class SqAbstractDistribution {
     );
   }
 
+  pdf(env: environment, n: number) {
+    return resultMap2(
+      RSDistribution.pdf({ env }, this._value, n),
+      (v: number) => v,
+      (e: RSDistribution.distributionError) => new SqDistributionError(e)
+    );
+  }
+
+  cdf(env: environment, n: number) {
+    return resultMap2(
+      RSDistribution.cdf({ env }, this._value, n),
+      (v: number) => v,
+      (e: RSDistribution.distributionError) => new SqDistributionError(e)
+    );
+  }
+
   inv(env: environment, n: number) {
     return resultMap2(
       RSDistribution.inv({ env }, this._value, n),
