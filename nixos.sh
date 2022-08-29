@@ -13,6 +13,6 @@ theLd=$(patchelf --print-interpreter $(which mkdir))
 patchelf --set-interpreter $theLd ./node_modules/gentype/gentype.exe
 patchelf --set-interpreter $theLd ./node_modules/rescript/linux/*.exe
 patchelf --set-interpreter $theLd ./node_modules/bisect_ppx/ppx
-patchelf --set-interpreter $theLd ./node_moduels/bisect_ppx/bisect-ppx-report
-theSo=$(find /nix/store/*$fhsShellName*/lib64 -name libstdc++.so.6 | grep $fhsShellName | head -n 1)
+patchelf --set-interpreter $theLd ./node_modules/bisect_ppx/bisect-ppx-report
+theSo=$(find /nix/store/*$fhsShellName*/lib64 -name libstdc++.so.6 | head -n 1)
 patchelf --replace-needed libstdc++.so.6 $theSo ./node_modules/rescript/linux/ninja.exe

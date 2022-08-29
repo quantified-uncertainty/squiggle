@@ -1,0 +1,37 @@
+name: Builds, lints, tests in nix
+
+on: [push, pull_request]
+
+jobs:
+  flake:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Install nix
+      uses: cachix/install-nix-action@v17
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+    - name: Use cachix
+      uses: cachix/cachix-action@v10
+      with:
+        name: quantified-uncertainty
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    - name: Check that lang lints
+      run: nix build .#lang-lint
+    - name: Check that components lints
+      run: nix build .#components-lint
+    - name: Check that website lints
+      run: nix build .#docusaurus-lint
+    - name: Check that vscode extension lints
+      run: nix build .#vscode-lint
+
+    - name: Check that lang bundles
+      run: nix build .#lang-bundle
+    - name: Check all lang tests
+      run: nix build .#lang-test
+    - name: Check that components builds
+      run: nix build .#components
+    - name: Check that components bundles
+      run: nix build .#components-bundle
