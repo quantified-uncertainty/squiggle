@@ -46,3 +46,13 @@ PointSet.makeDiscrete([
   { x: 3, y: 0.1 },
 ]);
 ```
+
+### mapY
+
+```
+PointSet.mapY: (pointSetDist, (number => number)) => pointSetDist
+```
+
+```javascript
+normal(5,3) |> PointSet.fromDist |> PointSet.mapY({|x| x ^ 2}) |> normalize
+```
