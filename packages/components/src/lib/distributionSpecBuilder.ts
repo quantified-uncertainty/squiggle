@@ -105,7 +105,9 @@ export function buildVegaSpec(
       {
         name: "position_scaled",
         value: 0,
-        update: "position ? invert('xscale', position[0]) : null",
+        update: "position ? position[0] < 0 ? null : position[0] > width ? null : invert('xscale', position[0]) : null",
+        // "position ? position[0] < 0 ? 0 : position[0] > width ? 0 : 1 : 0",
+
       },
     ],
     scales: [
@@ -303,6 +305,7 @@ export function buildVegaSpec(
       },
       {
         type: "text",
+        name: "announcer",
         interactive: false,
         encode: {
           enter: {
@@ -338,7 +341,11 @@ export function buildVegaSpec(
                 "position ? position[0] < 0 ? null : position[0] > width ? null : position[0]: null",
             },
 
-            opacity: { signal: "position ? 1 : 0" },
+            opacity: {
+              signal:
+                "position ? position[0] < 0 ? 0 : position[0] > width ? 0 : 1 : 0",
+            },
+            // opacity: { signal: "position ? 1 : 0" },
           },
         },
       },
