@@ -67,6 +67,7 @@
           # building
           packages = flake-utils.lib.flattenTree {
             default = components.build;
+            lang = lang.build;
             lang-bundle = lang.bundle;
             lang-test = lang.test;
             components = components.build;
