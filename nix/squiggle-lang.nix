@@ -6,7 +6,7 @@ rec {
     raw = pkgs.lib.importJSON ../packages/squiggle-lang/package.json;
     modified = pkgs.lib.recursiveUpdate raw { devDependencies."@types/lodash" = "^4.14.182"; };
     packageJsonString = builtins.toJSON modified;
-    in pkgs.writeText "packages/squiggle-lang/patched-package.json";
+    in pkgs.writeText "packages/squiggle-lang/patched-package.json" packageJsonString;
   yarn-source = pkgs.mkYarnPackage {
     name = "squiggle-lang_yarnsource";
     src = ../packages/squiggle-lang;
