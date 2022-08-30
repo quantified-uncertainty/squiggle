@@ -2,10 +2,15 @@
 
 rec {
   common = commonFn pkgs;
+  langPackageJson = let
+    raw = pkgs.lib.importJSON ../packages/squiggle-lang/package.json;
+    modified = pkgs.lib.recursiveUpdate raw { devDependencies."@types/lodash" = "^4.14.182"; };
+    packageJsonString = builtins.toJSON modified;
+    in pkgs.writeText "packages/squiggle-lang/patched-package.json";
   yarn-source = pkgs.mkYarnPackage {
     name = "squiggle-lang_yarnsource";
     src = ../packages/squiggle-lang;
-    packageJSON = ../packages/squiggle-lang/package.json;
+    packageJSON = langPackageJson;
     yarnLock = ../yarn.lock;
     pkgConfig = {
       rescript = {

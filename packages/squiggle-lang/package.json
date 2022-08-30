@@ -51,7 +51,6 @@
     "@glennsl/rescript-jest": "^0.9.2",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@types/jest": "^27.5.0",
-    "@types/lodash": "^4.14.182",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "bisect_ppx": "^2.7.1",
     "chalk": "^5.0.1",
