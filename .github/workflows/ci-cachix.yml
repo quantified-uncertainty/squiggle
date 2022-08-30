@@ -14,6 +14,7 @@ on:
 
 jobs:
   flake-lints:
+    name: All lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -38,6 +39,7 @@ jobs:
         run: nix build .#vscode-lint
 
   flake-packages:
+    name: Builds, tests, and bundles
     runs-on: ubuntu-latest
     needs: flake-lints
     steps:
@@ -63,6 +65,7 @@ jobs:
         run: nix build .#components-bundle
 
   flake-devshells:
+    name: Development shell environment
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -76,5 +79,7 @@ jobs:
         with:
           name: quantified-uncertainty
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-      - name: Build devshell
-        run: nix develop -c echo "built devshell"
+      - name: Build js devshell
+        run: nix develop .#js -c echo "built js devshell"
+      - name: Build js & wasm devshell
+        run: nix develop -c echo "built js & wasm devshell"

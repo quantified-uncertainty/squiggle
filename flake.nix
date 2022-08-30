@@ -74,8 +74,10 @@
           };
 
           # developing
-          devShells = flake-utils.lib.flattenTree {
-            default = (import ./nix/shell.nix { inherit pkgs; }).shell;
+          devShells = let shellNix = import ./nix/shell.nix { inherit pkgs; };
+          in flake-utils.lib.flattenTree {
+            default = shellNix.all;
+            js = shellNix.just-js;
           };
         };
     in flake-utils.lib.eachDefaultSystem (system:
