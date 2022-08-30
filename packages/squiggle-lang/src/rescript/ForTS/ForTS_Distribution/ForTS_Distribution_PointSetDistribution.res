@@ -45,3 +45,6 @@ let getContinues = (variant: pointSetDistribution): 'd =>
   | Continuous(continuous) => continuous->Some
   | _ => None
   }
+
+@genType
+let toDistribution = (v: pointSetDistribution): DistributionTypes.genericDist => PointSet(v)

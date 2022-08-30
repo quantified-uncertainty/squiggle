@@ -6,4 +6,12 @@ export class SqError {
   toString() {
     return RSErrorValue.toString(this._value);
   }
+
+  static createTodoError(v: string) {
+    return new SqError(RSErrorValue.createTodoError(v));
+  }
+
+  static createOtherError(v: string) {
+    return new SqError(RSErrorValue.createOtherError(v));
+  }
 }

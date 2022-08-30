@@ -6,6 +6,9 @@ import {
   result,
   SqLambda,
   environment,
+  SqError,
+  SqValue,
+  SqValueTag,
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
@@ -75,9 +78,15 @@ type errors = _.Dictionary<
 
 type point = { x: number; value: result<SqDistribution, string> };
 
-let getPercentiles = ({ chartSettings, fn, environment }) => {
-  throw new Error("NOT IMPLEMENTED IN 0.4 YET");
-  /*
+let getPercentiles = ({
+  chartSettings,
+  fn,
+  environment,
+}: {
+  chartSettings: FunctionChartSettings;
+  fn: SqLambda;
+  environment: environment;
+}) => {
   let chartPointsToRender = _rangeByCount(
     chartSettings.start,
     chartSettings.stop,
@@ -85,9 +94,9 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
   );
 
   let chartPointsData: point[] = chartPointsToRender.map((x) => {
-    let result = runForeign(fn, [x], environment);
+    let result = fn.call([x]);
     if (result.tag === "Ok") {
-      if (result.value.tag === "distribution") {
+      if (result.value.tag === SqValueTag.Distribution) {
         return { x, value: { tag: "Ok", value: result.value.value } };
       } else {
         return {
@@ -108,7 +117,7 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
   });
 
   let initialPartition: [
-    { x: number; value: Distribution }[],
+    { x: number; value: SqDistribution }[],
     { x: number; value: string }[]
   ] = [[], []];
 
@@ -127,27 +136,26 @@ let getPercentiles = ({ chartSettings, fn, environment }) => {
     // We convert it to to a pointSet distribution first, so that in case its a sample set
     // distribution, it doesn't internally convert it to a pointSet distribution for every
     // single inv() call.
-    let toPointSet: Distribution = unwrap(value.toPointSet());
+    let toPointSet = unwrap(value.pointSet(environment)).asDistribution();
     return {
       x: x,
-      p1: unwrap(toPointSet.inv(0.01)),
-      p5: unwrap(toPointSet.inv(0.05)),
-      p10: unwrap(toPointSet.inv(0.1)),
-      p20: unwrap(toPointSet.inv(0.2)),
-      p30: unwrap(toPointSet.inv(0.3)),
-      p40: unwrap(toPointSet.inv(0.4)),
-      p50: unwrap(toPointSet.inv(0.5)),
-      p60: unwrap(toPointSet.inv(0.6)),
-      p70: unwrap(toPointSet.inv(0.7)),
-      p80: unwrap(toPointSet.inv(0.8)),
-      p90: unwrap(toPointSet.inv(0.9)),
-      p95: unwrap(toPointSet.inv(0.95)),
-      p99: unwrap(toPointSet.inv(0.99)),
+      p1: unwrap(toPointSet.inv(environment, 0.01)),
+      p5: unwrap(toPointSet.inv(environment, 0.05)),
+      p10: unwrap(toPointSet.inv(environment, 0.1)),
+      p20: unwrap(toPointSet.inv(environment, 0.2)),
+      p30: unwrap(toPointSet.inv(environment, 0.3)),
+      p40: unwrap(toPointSet.inv(environment, 0.4)),
+      p50: unwrap(toPointSet.inv(environment, 0.5)),
+      p60: unwrap(toPointSet.inv(environment, 0.6)),
+      p70: unwrap(toPointSet.inv(environment, 0.7)),
+      p80: unwrap(toPointSet.inv(environment, 0.8)),
+      p90: unwrap(toPointSet.inv(environment, 0.9)),
+      p95: unwrap(toPointSet.inv(environment, 0.95)),
+      p99: unwrap(toPointSet.inv(environment, 0.99)),
     };
   });
 
   return { percentiles, errors: groupedErrors };
-  */
 };
 
 export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
@@ -166,23 +174,21 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   }
   const signalListeners = { mousemove: handleHover, mouseout: handleOut };
 
-  return <div>NOT IMPLEMENTED IN 0.4 YET</div>;
-
-  /*
   //TODO: This custom error handling is a bit hacky and should be improved.
-  let mouseItem: result<squiggleExpression, errorValue> = !!mouseOverlay
-    ? runForeign(fn, [mouseOverlay], environment)
+  let mouseItem: result<SqValue, SqError> = !!mouseOverlay
+    ? fn.call([mouseOverlay])
     : {
         tag: "Error",
-        value: {
-          tag: "RETodo",
-          value: "Hover x-coordinate returned NaN. Expected a number.",
-        },
+        value: SqError.createOtherError(
+          "Hover x-coordinate returned NaN. Expected a number."
+        ),
       };
   let showChart =
-    mouseItem.tag === "Ok" && mouseItem.value.tag === "distribution" ? (
+    mouseItem.tag === "Ok" &&
+    mouseItem.value.tag === SqValueTag.Distribution ? (
       <DistributionChart
         plot={defaultPlot(mouseItem.value.value)}
+        environment={environment}
         width={400}
         height={50}
         {...distributionPlotSettings}
@@ -219,5 +225,4 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
       )}
     </>
   );
-  */
 };

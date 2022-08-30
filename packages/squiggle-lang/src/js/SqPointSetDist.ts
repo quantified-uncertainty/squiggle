@@ -1,4 +1,5 @@
 import * as _ from "lodash";
+import { wrapDistribution } from "./SqDistribution";
 import * as RSPointSetDist from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
 import { pointSetDistributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution_tag";
 
@@ -34,6 +35,10 @@ abstract class SqAbstractPointSetDist {
     if (!value) throw new Error("Internal casting error");
     return value;
   };
+
+  asDistribution() {
+    return wrapDistribution(RSPointSetDist.toDistribution(this._value));
+  }
 }
 
 export class SqMixedPointSetDist extends SqAbstractPointSetDist {

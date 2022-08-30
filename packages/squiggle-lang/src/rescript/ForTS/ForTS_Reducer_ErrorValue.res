@@ -10,3 +10,9 @@ let getLocation = (e: reducerErrorValue): option<syntaxErrorLocation> =>
   | RESyntaxError(_, optionalLocation) => optionalLocation
   | _ => None
   }
+
+@genType
+let createTodoError = (v: string) => Reducer_ErrorValue.RETodo(v)
+
+@genType
+let createOtherError = (v: string) => Reducer_ErrorValue.REOther(v)
