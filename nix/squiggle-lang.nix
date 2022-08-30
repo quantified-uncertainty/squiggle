@@ -5,7 +5,7 @@ rec {
   langPackageJson = let
     raw = pkgs.lib.importJSON ../packages/squiggle-lang/package.json;
     modified = pkgs.lib.recursiveUpdate raw {
-      devDependencies."@types/lodash" = "^4.14.182";
+      devDependencies."@types/lodash" = "^4.14.167";
     };
     packageJsonString = builtins.toJSON modified;
   in pkgs.writeText "packages/squiggle-lang/patched-package.json"
