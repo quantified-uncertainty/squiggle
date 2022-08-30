@@ -5,8 +5,8 @@
 # We need to patchelf rescript executables. https://github.com/NixOS/nixpkgs/issues/107375
 set -x
 
-fhsShellName="squiggle-development"
-fhsShellDotNix="{pkgs ? import <nixpkgs> {} }: (pkgs.buildFHSUserEnv { name = \"${fhsShellName}\"; targetPkgs = pkgs: [pkgs.yarn]; runScript = \"yarn\"; }).env"
+fhsShellName="squiggle-fhs-development"
+fhsShellDotNix="{pkgs ? import <nixpkgs> {} }: (pkgs.buildFHSUserEnv { name = \"${fhsShellName}\"; targetPkgs = pkgs: [pkgs.yarn pkgs.glibc]; runScript = \"yarn\"; }).env"
 nix-shell - <<<"$fhsShellDotNix"
 
 theLd=$(patchelf --print-interpreter $(which mkdir))
