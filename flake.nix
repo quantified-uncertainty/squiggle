@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
     gentype = {
-      url = "github:quinn-dougherty/genType";
+      url = "github:rescript-association/genType";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-utils.url = "github:numtide/flake-utils";
