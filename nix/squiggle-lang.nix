@@ -4,9 +4,12 @@ rec {
   common = commonFn pkgs;
   langPackageJson = let
     raw = pkgs.lib.importJSON ../packages/squiggle-lang/package.json;
-    modified = pkgs.lib.recursiveUpdate raw { devDependencies."@types/lodash" = "^4.14.182"; };
+    modified = pkgs.lib.recursiveUpdate raw {
+      devDependencies."@types/lodash" = "^4.14.182";
+    };
     packageJsonString = builtins.toJSON modified;
-    in pkgs.writeText "packages/squiggle-lang/patched-package.json" packageJsonString;
+  in pkgs.writeText "packages/squiggle-lang/patched-package.json"
+  packageJsonString;
   yarn-source = pkgs.mkYarnPackage {
     name = "squiggle-lang_yarnsource";
     src = ../packages/squiggle-lang;
@@ -14,7 +17,8 @@ rec {
     yarnLock = ../yarn.lock;
     pkgConfig = {
       rescript = {
-        buildInputs = common.which ++ (if pkgs.system != "i686-linux" then [ pkgs.gcc_multi ] else []);
+        buildInputs = common.which
+          ++ (if pkgs.system != "i686-linux" then [ pkgs.gcc_multi ] else [ ]);
         postInstall = ''
           echo "PATCHELF'ING RESCRIPT EXECUTABLES (INCL NINJA)"
           # Patching interpreter for linux/*.exe's

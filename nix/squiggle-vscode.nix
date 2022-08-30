@@ -16,7 +16,8 @@ rec {
   lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-vscode-lint";
     buildInputs = common.buildInputs ++ common.prettier;
-    src = ../packages/vscode-ext; # yarn-source + "/libexec/vscode-squiggle/deps/vscode-squiggle";
+    src =
+      ../packages/vscode-ext; # yarn-source + "/libexec/vscode-squiggle/deps/vscode-squiggle";
     buildPhase = "prettier --check .";
     installPhase = "mkdir -p $out";
   };

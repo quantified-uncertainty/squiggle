@@ -4,10 +4,10 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
     gentype = {
-      url = github:quinn-dougherty/genType;
+      url = "github:quinn-dougherty/genType";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    flake-utils.url = github:numtide/flake-utils;
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = { self, nixpkgs, gentype, flake-utils }:
@@ -33,9 +33,7 @@
           inherit pkgs commonFn gentypeOutputFn;
         };
       componentsFn = { pkgs, ... }:
-        import ./nix/squiggle-components.nix {
-          inherit pkgs commonFn langFn;
-        };
+        import ./nix/squiggle-components.nix { inherit pkgs commonFn langFn; };
       websiteFn = { pkgs, ... }:
         import ./nix/squiggle-website.nix {
           inherit pkgs commonFn langFn componentsFn;
@@ -77,8 +75,7 @@
 
           # developing
           devShells = flake-utils.lib.flattenTree {
-            default =
-              (import ./nix/shell.nix { inherit pkgs; }).shell;
+            default = (import ./nix/shell.nix { inherit pkgs; }).shell;
           };
         };
     in flake-utils.lib.eachDefaultSystem (system:
