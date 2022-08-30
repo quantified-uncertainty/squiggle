@@ -182,10 +182,11 @@ jobs:
         working-directory: packages/vscode-ext
     steps:
       - uses: actions/checkout@v3
-      - name: Install dependencies from monorepo level
-        run: cd ../../ && yarn
-      - name: Lint the VSCode Extension source code
-        run: yarn lint
+      - name: Check javascript, typescript, and markdown lint
+        uses: creyD/prettier_action@v4.2
+        with:
+          dry: true
+          prettier_options: --check packages/vscode-ext
 
   vscode-ext-build:
     name: VS Code extension build
