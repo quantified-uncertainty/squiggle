@@ -13,3 +13,4 @@ packages/squiggle-lang/src/rescript/Reducer/Reducer_Peggy/Reducer_Peggy_Generate
 packages/vscode-ext/media/vendor/
 packages/squiggle-lang/.nyc_output/
 packages/*/dist
+result
