@@ -13,9 +13,9 @@ on:
       - epic-reducer-project
 
 jobs:
-  flake-packages:
+  flake-lints:
     runs-on: ubuntu-latest
-
+    id: lints
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -37,6 +37,22 @@ jobs:
         run: nix build .#docusaurus-lint
       - name: Check that vscode extension lints
         run: nix build .#vscode-lint
+
+  flake-packages:
+    runs-on: ubuntu-latest
+    needs: lints
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install nix
+        uses: cachix/install-nix-action@v17
+        with:
+          nix_path: nixpkgs=channel:nixos-22.05
+      - name: Use cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: quantified-uncertainty
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
 
       - name: Check all lang tests
         run: nix build .#lang-test
