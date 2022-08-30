@@ -82,6 +82,6 @@ jobs:
           name: quantified-uncertainty
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Build js devshell
-        run: nix develop --profile just-js
+        run: nix develop .#js --profile just-js
       - name: Build js & wasm devshell
         run: nix develop --profile full-shell
