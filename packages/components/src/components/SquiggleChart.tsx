@@ -51,7 +51,9 @@ export interface SquiggleChartProps {
   minX?: number;
   /** Specify the upper bound of the x scale */
   maxX?: number;
-  // /** Whether the x-axis should be dates or numbers */
+  // /** Whether to include the sample band below the chart */
+  sample?: boolean;
+  /** Whether the x-axis should be dates or numbers */
   xAxis?: "number" | "dateTime";
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;
@@ -81,6 +83,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     maxX,
     color,
     title,
+    sample = false,
     xAxis = "number",
     distributionChartActions,
     enableLocalSettings = false,
@@ -93,7 +96,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       onChange,
       executionId,
     });
-
+    console.log({ result });
     const distributionPlotSettings = {
       showSummary,
       logX,
@@ -104,6 +107,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       color,
       title,
       xAxis,
+      sample,
       actions: distributionChartActions,
     };
 

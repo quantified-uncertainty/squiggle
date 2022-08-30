@@ -110,6 +110,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
           })
         : shapes.value;
 
+    console.log({ data });
+    
     return (
       <div style={{ width: widthProp }}>
         {logX && shapes.value.some(hasMassBelowZero) ? (

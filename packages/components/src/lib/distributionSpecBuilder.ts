@@ -218,6 +218,7 @@ export function buildVegaSpec(
                   },
                 },
               },
+             
             ],
           },
           {
