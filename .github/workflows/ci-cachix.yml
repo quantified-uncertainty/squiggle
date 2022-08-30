@@ -37,6 +37,8 @@ jobs:
         run: nix build .#docusaurus-lint
       - name: Check that vscode extension lints
         run: nix build .#vscode-lint
+      - name: Check that cli lints
+        run: nix build .#cli-lint
 
   flake-packages:
     name: Builds, tests, and bundles
@@ -80,6 +82,6 @@ jobs:
           name: quantified-uncertainty
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Build js devshell
-        run: nix develop .#js -c echo "built js devshell"
+        run: nix develop --profile just-js
       - name: Build js & wasm devshell
-        run: nix develop -c echo "built js & wasm devshell"
+        run: nix develop --profile full-shell

@@ -42,6 +42,10 @@
         import ./nix/squiggle-vscode.nix {
           inherit pkgs commonFn langFn componentsFn;
         };
+      cliFn = { pkgs, ... }:
+        import ./nix/squiggle-cli.nix {
+          inherit pkgs commonFn;
+        };
 
       # local machines
       localFlakeOutputs = { pkgs, ... }:
@@ -50,6 +54,7 @@
           components = componentsFn pkgs;
           website = websiteFn pkgs;
           vscodeext = vscodeextFn pkgs;
+          cli = cliFn pkgs;
         in {
           # validating
           checks = flake-utils.lib.flattenTree {
@@ -57,6 +62,7 @@
             lang-test = lang.test;
             components-lint = components.lint;
             docusaurus-lint = website.lint;
+            cli-lint = cli.lint;
           };
           # building
           packages = flake-utils.lib.flattenTree {
@@ -71,6 +77,7 @@
             components-lint = components.lint;
             docusaurus-lint = website.lint;
             vscode-lint = vscodeext.lint;
+            cli-lint = cli.lint;
           };
 
           # developing
