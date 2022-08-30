@@ -10,6 +10,7 @@ on:
       - master
       - develop
       - reducer-dev
+      - epic-reducer-project
 
 jobs:
   pre_check:
