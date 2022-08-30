@@ -40,8 +40,8 @@ export type { result, shape, environment, lambdaValue, squiggleExpression };
 export { parse } from "./parse";
 
 export let defaultSamplingInputs: environment = {
-  sampleCount: 10000,
-  xyPointLength: 10000,
+  sampleCount: 1000,
+  xyPointLength: 1000,
 };
 
 export function run(
