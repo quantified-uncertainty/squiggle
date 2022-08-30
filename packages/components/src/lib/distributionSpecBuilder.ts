@@ -14,10 +14,8 @@ export type DistributionChartSpecOptions = {
   title?: string;
   /** The formatting of the ticks */
   format?: string;
-
   /** Whether or not to show the band of sample data at the bottom */
   sample?: boolean;
-
   /** Whether the x-axis should be dates or numbers */
   xAxis?: "number" | "dateTime";
 };

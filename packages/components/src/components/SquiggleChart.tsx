@@ -51,7 +51,7 @@ export interface SquiggleChartProps {
   minX?: number;
   /** Specify the upper bound of the x scale */
   maxX?: number;
-  /** Whether the x-axis should be dates or numbers */
+  // /** Whether the x-axis should be dates or numbers */
   xAxis?: "number" | "dateTime";
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;

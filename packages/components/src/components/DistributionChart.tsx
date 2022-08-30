@@ -30,7 +30,7 @@ export type DistributionChartProps = {
   plot: Plot;
   width?: number;
   height: number;
-  sample: boolean;
+  sample?: boolean;
   xAxis?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
@@ -57,7 +57,6 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     actions = false,
     xAxis = "number",
   } = props;
-  console.log({ plot });
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
       plot.distributions.map((x) =>
@@ -93,9 +92,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
 
     const domain =
       xAxis === "dateTime"
-        ? predomain.map((p) => {
-            return { dateTime: p.x, y: p.y };
-          })
+        ? predomain.map((p) => ({ dateTime: p.x, y: p.y }))
         : predomain;
 
     const data =
