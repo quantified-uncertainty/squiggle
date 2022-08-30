@@ -1,5 +1,5 @@
 {
-  description = "Squiggle CI";
+  description = "Squiggle packages";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
@@ -7,10 +7,7 @@
       url = github:quinn-dougherty/genType;
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    flake-utils = {
-      url = github:numtide/flake-utils;
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    flake-utils.url = github:numtide/flake-utils;
   };
 
   outputs = { self, nixpkgs, gentype, flake-utils }:
