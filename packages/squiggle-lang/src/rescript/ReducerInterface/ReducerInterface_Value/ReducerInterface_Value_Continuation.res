@@ -21,8 +21,7 @@ let inspectOption = (oNameSpace, label: string) =>
   }
 
 let minus = (NameSpace(thisContainer): t, NameSpace(thatContainer): t) => {
-  Belt.Map.String.removeMany(
-    thisContainer,
-    Belt.Map.String.keysToArray(thatContainer),
-  )->InternalExpressionValue.NameSpace
+  InternalExpressionValue.NameSpace(
+    Belt.Map.String.removeMany(thisContainer, Belt.Map.String.keysToArray(thatContainer)),
+  )
 }

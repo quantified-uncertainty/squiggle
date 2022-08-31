@@ -105,6 +105,11 @@ let getIncludes = (project: reducerProject, sourceId: string): result<
   reducerErrorValue,
 > => project->T.Private.castToInternalProject->Private.getIncludes(sourceId)
 
+/* Other sources contributing to the global namespace of this source. */
+@genType
+let getPastChain = (project: reducerProject, sourceId: string): array<string> =>
+  project->T.Private.castToInternalProject->Private.getPastChain(sourceId)
+
 /*
 Answers the source codes after which this source code is continuing
 */
@@ -183,7 +188,7 @@ let runAll = (project: reducerProject): unit =>
   project->T.Private.castToInternalProject->Private.runAll
 
 /*
-Get the bindings after running this source file or the project
+Get the bindings after running this source fil. The bindings are local to the source
 */
 @genType
 let getBindings = (project: reducerProject, sourceId: string): squiggleValue_Module =>

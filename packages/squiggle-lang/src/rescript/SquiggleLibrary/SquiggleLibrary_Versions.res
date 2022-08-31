@@ -6,4 +6,4 @@ let bindings: Bindings.t =
   ]->Bindings.fromArray
 
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
-  previousBindings->Bindings.merge(bindings)
+  previousBindings->Bindings.mergeFrom(bindings)

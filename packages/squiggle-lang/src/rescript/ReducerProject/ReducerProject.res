@@ -83,6 +83,21 @@ module Private = {
   let getIncludes = (project: t, sourceId: string): ProjectItem.T.includesType =>
     project->getItem(sourceId)->ProjectItem.getIncludes
 
+  // let getDirectIncludes = (project: t, sourceId: string): array<string> =>
+  //   project->getItem(sourceId)->ProjectItem.getDirectIncludes
+
+  let getPastChain = (project: t, sourceId: string): array<string> =>
+    project->getItem(sourceId)->ProjectItem.getPastChain
+
+  let getIncludesAsVariables = (
+    project: t,
+    sourceId: string,
+  ): ProjectItem.T.importAsVariablesType =>
+    project->getItem(sourceId)->ProjectItem.getIncludesAsVariables
+
+  let getDirectIncludes = (project: t, sourceId: string): array<string> =>
+    project->getItem(sourceId)->ProjectItem.getDirectIncludes
+
   let setContinues = (project: t, sourceId: string, continues: array<string>): unit => {
     let newItem = project->getItem(sourceId)->ProjectItem.setContinues(continues)
     Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
@@ -155,39 +170,63 @@ module Private = {
     environment: getEnvironment(project),
   }
 
-  let doRunWithContinuation = (
-    project: t,
-    sourceId: string,
-    continuation: ProjectItem.T.continuation,
-  ): unit => {
+  let getContinuationsBefore = (project: t, sourceId: string): array<
+    ProjectItem.T.continuation,
+  > => {
+    let pastNameSpaces = project->getPastChain(sourceId)->Belt.Array.map(getBindings(project, _))
+    let theLength = Belt.Array.length(pastNameSpaces)
+    if theLength == 0 {
+      // `getContinuationBefore ${sourceId}: stdLib`->Js.log
+      [project->getStdLib]
+    } else {
+      // `getContinuationBefore ${sourceId}: ${lastOne} = ${InternalExpressionValue.toStringBindings(
+      //     project->getBindings(lastOne),
+      //   )}`->Js.log
+      pastNameSpaces
+    }
+  }
+
+  let linkDependencies = (project: t, sourceId: string): ProjectItem.T.continuation => {
+    module NameSpace = Reducer_Bindings
+    let continuationsBefore = project->getContinuationsBefore(sourceId)
+    let nameSpace = NameSpace.emptyNameSpace->NameSpace.chainTo(continuationsBefore)
+    let includesAsVariables = project->getIncludesAsVariables(sourceId)
+    Belt.Array.reduce(includesAsVariables, nameSpace, (currentNameSpace, (variable, includeFile)) =>
+      Bindings.set(
+        currentNameSpace,
+        variable,
+        getBindings(project, includeFile)->InternalExpressionValue.IEvBindings,
+      )
+    )
+  }
+
+  let doLinkAndRun = (project: t, sourceId: string): unit => {
     let accessors = buildProjectAccessors(project)
     let states = accessors.states
+    let continuation = linkDependencies(project, sourceId)
     let newItem = project->getItem(sourceId)->ProjectItem.run(continuation, accessors)
     Belt.Map.String.set(project["items"], sourceId, newItem)->T.Private.setFieldItems(project, _)
     setContinuation(project, sourceId, states.continuation)
   }
 
-  type runState = (ProjectItem.T.resultArgumentType, ProjectItem.T.continuation)
+  type runState = ProjectItem.T.resultArgumentType
 
-  let tryRunWithContinuation = (
+  let tryRunWithResult = (
     project: t,
     sourceId: string,
-    (rPrevResult: ProjectItem.T.resultArgumentType, continuation: ProjectItem.T.continuation),
-  ): (ProjectItem.T.resultArgumentType, ProjectItem.T.continuation) => {
+    rPrevResult: ProjectItem.T.resultArgumentType,
+  ): ProjectItem.T.resultArgumentType => {
     switch getResultOption(project, sourceId) {
-    | Some(result) => (result, getContinuation(project, sourceId)) // already ran
+    | Some(result) => result // already ran
     | None =>
       switch rPrevResult {
       | Error(error) => {
           setResult(project, sourceId, Error(error))
-          (Error(error), continuation)
+          Error(error)
         }
       | Ok(_prevResult) => {
-          doRunWithContinuation(project, sourceId, continuation)
-          (
-            getResultOption(project, sourceId)->Belt.Option.getWithDefault(rPrevResult),
-            getContinuation(project, sourceId),
-          )
+          doLinkAndRun(project, sourceId)
+          getResultOption(project, sourceId)->Belt.Option.getWithDefault(rPrevResult)
         }
       }
     }
@@ -195,17 +234,17 @@ module Private = {
 
   let runAll = (project: t): unit => {
     let runOrder = Topology.getRunOrder(project)
-    let initialState = (Ok(InternalExpressionValue.IEvVoid), getStdLib(project))
+    let initialState = Ok(InternalExpressionValue.IEvVoid)
     let _finalState = Belt.Array.reduce(runOrder, initialState, (currState, currId) =>
-      tryRunWithContinuation(project, currId, currState)
+      tryRunWithResult(project, currId, currState)
     )
   }
 
   let run = (project: t, sourceId: string): unit => {
     let runOrder = Topology.getRunOrderFor(project, sourceId)
-    let initialState = (Ok(InternalExpressionValue.IEvVoid), getStdLib(project))
+    let initialState = Ok(InternalExpressionValue.IEvVoid)
     let _finalState = Belt.Array.reduce(runOrder, initialState, (currState, currId) =>
-      tryRunWithContinuation(project, currId, currState)
+      tryRunWithResult(project, currId, currState)
     )
   }
 

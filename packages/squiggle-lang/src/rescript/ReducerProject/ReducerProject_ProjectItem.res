@@ -19,6 +19,8 @@ let emptyItem = T.ProjectItem({
   result: None,
   continues: [],
   includes: []->Ok,
+  directIncludes: [],
+  includeAsVariables: [],
 })
 // source -> rawParse -> includes -> expression -> continuation -> result
 
@@ -30,40 +32,59 @@ let getResult = (T.ProjectItem(r)): T.resultType => r.result
 
 let getContinues = (T.ProjectItem(r)): T.continuesType => r.continues
 let getIncludes = (T.ProjectItem(r)): T.includesType => r.includes
+let getDirectIncludes = (T.ProjectItem(r)): array<string> => r.directIncludes
+let getIncludesAsVariables = (T.ProjectItem(r)): T.importAsVariablesType => r.includeAsVariables
 
 let touchSource = (this: t): t => {
   let T.ProjectItem(r) = emptyItem
   T.ProjectItem({
     ...r,
-    includes: getIncludes(this),
-    continues: getContinues(this),
     source: getSource(this),
+    continues: getContinues(this),
+    includes: getIncludes(this),
+    includeAsVariables: getIncludesAsVariables(this),
+    directIncludes: getDirectIncludes(this),
   })
 }
+
 let touchRawParse = (this: t): t => {
   let T.ProjectItem(r) = emptyItem
   T.ProjectItem({
     ...r,
-    continues: getContinues(this),
     source: getSource(this),
-    rawParse: getRawParse(this),
+    continues: getContinues(this),
     includes: getIncludes(this),
+    includeAsVariables: getIncludesAsVariables(this),
+    directIncludes: getDirectIncludes(this),
+    rawParse: getRawParse(this),
   })
 }
+
 let touchExpression = (this: t): t => {
   let T.ProjectItem(r) = emptyItem
   T.ProjectItem({
     ...r,
-    continues: getContinues(this),
     source: getSource(this),
-    rawParse: getRawParse(this),
+    continues: getContinues(this),
     includes: getIncludes(this),
+    includeAsVariables: getIncludesAsVariables(this),
+    directIncludes: getDirectIncludes(this),
+    rawParse: getRawParse(this),
     expression: getExpression(this),
   })
 }
 
+let resetIncludes = (T.ProjectItem(r): t): t => {
+  T.ProjectItem({
+    ...r,
+    includes: []->Ok,
+    includeAsVariables: [],
+    directIncludes: [],
+  })
+}
+
 let setSource = (T.ProjectItem(r): t, source: T.sourceArgumentType): t =>
-  T.ProjectItem({...r, source: source})->touchSource
+  T.ProjectItem({...r, source: source})->resetIncludes->touchSource
 
 let setRawParse = (T.ProjectItem(r): t, rawParse: T.rawParseArgumentType): t =>
   T.ProjectItem({...r, rawParse: Some(rawParse)})->touchRawParse
@@ -95,6 +116,10 @@ let clean = (this: t): t => {
 let getImmediateDependencies = (this: t): T.includesType =>
   getIncludes(this)->Belt.Result.map(Js.Array2.concat(_, getContinues(this)))
 
+let getPastChain = (this: t): array<string> => {
+  Js.Array2.concat(getDirectIncludes(this), getContinues(this))
+}
+
 let setContinues = (T.ProjectItem(r): t, continues: array<string>): t =>
   T.ProjectItem({...r, continues: continues})->touchSource
 let removeContinues = (T.ProjectItem(r): t): t => T.ProjectItem({...r, continues: []})->touchSource
@@ -104,10 +129,38 @@ let setIncludes = (T.ProjectItem(r): t, includes: T.includesType): t => T.Projec
   includes: includes,
 })
 
-//TODO: forward parse errors to the user
-let parseIncludes = (this: t): t =>
-  setIncludes(this, getSource(this)->ReducerProject_ParseIncludes.parseIncludes)
+let setImportAsVariables = (
+  T.ProjectItem(r): t,
+  includeAsVariables: T.importAsVariablesType,
+): t => T.ProjectItem({...r, includeAsVariables: includeAsVariables})
 
+let setDirectImports = (T.ProjectItem(r): t, directIncludes: array<string>): t => T.ProjectItem({
+  ...r,
+  directIncludes: directIncludes,
+})
+
+let parseIncludes = (this: t): t => {
+  let T.ProjectItem(r) = this
+  let rRawImportAsVariables = getSource(this)->ReducerProject_ParseIncludes.parseIncludes
+  switch rRawImportAsVariables {
+  | Error(e) => resetIncludes(this)->setIncludes(Error(e))
+  | Ok(rawImportAsVariables) => {
+      let includes = rawImportAsVariables->Belt.Array.map(((_variable, file)) => file)->Ok
+      let includeAsVariables =
+        rawImportAsVariables->Belt.Array.keep(((variable, _file)) => variable != "")
+      let directIncludes =
+        rawImportAsVariables
+        ->Belt.Array.keep(((variable, _file)) => variable == "")
+        ->Belt.Array.map(((_variable, file)) => file)
+      T.ProjectItem({
+        ...r,
+        includes: includes,
+        includeAsVariables: includeAsVariables,
+        directIncludes: directIncludes,
+      })
+    }
+  }
+}
 let doRawParse = (this: t): T.rawParseArgumentType => this->getSource->Reducer_Peggy_Parse.parse
 
 let rawParse = (this: t): t =>

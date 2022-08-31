@@ -21,6 +21,7 @@ type continuesArgumentType = array<string>
 type continuesType = array<string>
 type includesArgumentType = string
 type includesType = result<array<string>, errorValue>
+type importAsVariablesType = array<(string, string)>
 
 type projectItem =
   | ProjectItem({
@@ -30,7 +31,9 @@ type projectItem =
       continuation: continuationArgumentType,
       result: resultType,
       continues: continuesType,
-      includes: includesType,
-    })
+      includes: includesType, //For  loader
+      includeAsVariables: importAsVariablesType, //For linker
+      directIncludes: array<string>,
+    }) //For linker
 
 type t = projectItem
