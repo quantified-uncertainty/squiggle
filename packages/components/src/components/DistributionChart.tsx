@@ -19,6 +19,7 @@ import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
+import { point } from "@quri/squiggle-lang/src/js/distribution";
 
 export type DistributionPlottingSettings = {
   /** Whether to show a summary of means, stdev, percentiles etc */
@@ -65,6 +66,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
           // color: x.color, // not supported yet
           continuous: shape.continuous,
           discrete: shape.discrete,
+          samples: [] as point[],
         }))
       )
     );
@@ -77,6 +79,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
     }
 
+    // if this is a sample set, include the samples
+    const t = plot?.distributions[0]?.distribution?.t;
+    if (t.tag === "SampleSet") {
+      shapes.value[0].samples = t.value.map((v) => ({ x: v, y: 0 }));
+    }
+    
     const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
@@ -106,12 +114,13 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
               discrete: val.discrete.map((p) => {
                 return { dateTime: p.x, y: p.y };
               }),
+              samples: val.samples.map((p) => {
+                return { dateTime: p, y: 0 };
+              }),
             };
           })
         : shapes.value;
 
-    console.log({ data });
-    
     return (
       <div style={{ width: widthProp }}>
         {logX && shapes.value.some(hasMassBelowZero) ? (

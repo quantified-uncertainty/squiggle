@@ -81,7 +81,6 @@ export function buildVegaSpec(
     maxX,
     logX,
     expY,
-    sample = false,
     xAxis = "number",
   } = specOptions;
 
@@ -110,7 +109,7 @@ export function buildVegaSpec(
     width: width,
     height: 100,
     padding: 5,
-    data: [{ name: "data" }, { name: "domain" }],
+    data: [{ name: "data" }, { name: "domain" }, { name: "samples" }],
     signals: [
       {
         name: "hover",
@@ -218,7 +217,6 @@ export function buildVegaSpec(
                   },
                 },
               },
-             
             ],
           },
           {
@@ -294,6 +292,35 @@ export function buildVegaSpec(
                       scale: "color",
                       field: { parent: "name" },
                     },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            name: "sample_distributions",
+            type: "group",
+            from: {
+              facet: {
+                name: "sample_facet",
+                data: "distribution_facet",
+                field: "samples",
+              },
+            },
+            marks: [
+              {
+                name: "samples",
+                type: "rect",
+                from: { data: "sample_facet" },
+                encode: {
+                  enter: {
+                    x: { scale: "xscale", field: dateTime ? "dateTime" : "x" },
+                    width: { value: 0.1 },
+
+                    y: { value: 25, offset: { signal: "height" } },
+                    height: { value: 5 },
+                    fill: { value: "steelblue" },
+                    fillOpacity: { value: 1 },
                   },
                 },
               },
@@ -384,37 +411,5 @@ export function buildVegaSpec(
     }),
   };
 
-  // include the band at the bottom if specified in the React component
-  if (sample) {
-    spec.marks?.push({
-      name: "sample_distributions",
-      type: "group",
-      from: {
-        facet: {
-          name: "distribution_facet",
-          data: "domain",
-          groupby: ["name"],
-        },
-      },
-      marks: [
-        {
-          name: "samples",
-          type: "rect",
-          from: { data: "distribution_facet" },
-          encode: {
-            enter: {
-              x: { scale: "xscale", field: dateTime ? "dateTime" : "x" },
-              width: { value: 0.5 },
-
-              y: { value: 25, offset: { signal: "height" } },
-              height: { value: 5 },
-              fill: { value: "steelblue" },
-              fillOpacity: { value: 0.8 },
-            },
-          },
-        },
-      ],
-    });
-  }
   return spec;
 }
