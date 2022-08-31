@@ -572,11 +572,21 @@ module A = {
       |> (x => Ok(x))
     }
 
-  let getByOpen = (a, op, bin) =>
-    switch getBy(a, r => bin(op(r))) {
-    | Some(r) => Some(op(r))
-    | None => None
+  let getByWithFn = (a, fn, boolCondition) => {
+    let i = ref(0);
+    let finalFunctionValue = ref(None);
+    let length = Belt.Array.length(a);
+
+    while (i.contents < length) && (finalFunctionValue.contents == None) {
+      let itemWithFnApplied = Belt.Array.getUnsafe(a, i.contents) |> fn
+      if boolCondition(itemWithFnApplied) {
+        finalFunctionValue := Some(itemWithFnApplied)
+      }
+      i := i.contents + 1
     }
+
+    finalFunctionValue.contents
+  }
 
   let tail = Belt.Array.sliceToEnd(_, 1)
 
@@ -680,7 +690,7 @@ module A = {
     let firstSome = x => Belt.Array.getBy(x, O.isSome)
 
     let firstSomeFn = (r: array<unit => option<'a>>): option<'a> =>
-      O.flatten(getByOpen(r, l => l(), O.isSome))
+      O.flatten(getByWithFn(r, l => l(), O.isSome))
 
     let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->O2.default(default)
 
