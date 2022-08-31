@@ -573,11 +573,11 @@ module A = {
     }
 
   let getByWithFn = (a, fn, boolCondition) => {
-    let i = ref(0);
-    let finalFunctionValue = ref(None);
-    let length = Belt.Array.length(a);
+    let i = ref(0)
+    let finalFunctionValue = ref(None)
+    let length = Belt.Array.length(a)
 
-    while (i.contents < length) && (finalFunctionValue.contents == None) {
+    while i.contents < length && finalFunctionValue.contents == None {
       let itemWithFnApplied = Belt.Array.getUnsafe(a, i.contents) |> fn
       if boolCondition(itemWithFnApplied) {
         finalFunctionValue := Some(itemWithFnApplied)
