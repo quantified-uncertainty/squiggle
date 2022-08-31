@@ -80,11 +80,19 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     }
 
     // if this is a sample set, include the samples
-    const t = plot?.distributions[0]?.distribution?.t;
-    if (t.tag === "SampleSet") {
-      shapes.value[0].samples = t.value.map((v) => ({ x: v, y: 0 }));
+    const sampleSets = plot?.distributions.filter(
+      (dist) => dist.distribution.t.tag === "SampleSet"
+    );
+    if (sampleSets.length) {
+      for (const set of sampleSets) {
+        if (set.distribution.t.tag === "SampleSet") { // this must be duplicated to please typescript, more elegant solution probably exists
+          shapes.value[0].samples.push(
+            ...set.distribution.t.value.map((v) => ({ x: v, y: 0 }))
+          );
+        }
+      }
     }
-    
+
     const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;

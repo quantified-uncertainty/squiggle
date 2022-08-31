@@ -75,14 +75,7 @@ const width = 500;
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
-  const {
-    title,
-    minX,
-    maxX,
-    logX,
-    expY,
-    xAxis = "number",
-  } = specOptions;
+  const { title, minX, maxX, logX, expY, xAxis = "number" } = specOptions;
 
   const dateTime = xAxis === "dateTime";
 
@@ -319,7 +312,10 @@ export function buildVegaSpec(
 
                     y: { value: 25, offset: { signal: "height" } },
                     height: { value: 5 },
-                    fill: { value: "steelblue" },
+                    fill: {
+                      scale: "color",
+                      field: { parent: "name" },
+                    },
                     fillOpacity: { value: 1 },
                   },
                 },
