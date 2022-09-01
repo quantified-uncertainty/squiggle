@@ -18,4 +18,4 @@ export type MergedItemSettings = {
 };
 
 export const locationAsString = (location: SqValueLocation) =>
-  location.path.root + "/" + location.path.items.join(".");
+  location.path.items.join(".");

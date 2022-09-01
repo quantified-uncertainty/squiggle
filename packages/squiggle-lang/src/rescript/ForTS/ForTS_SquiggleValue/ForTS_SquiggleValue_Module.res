@@ -11,3 +11,6 @@ let toString = (v: squiggleValue_Module): string =>
 
 @genType
 let toSquiggleValue = (v: squiggleValue_Module): squiggleValue => IEvBindings(v)
+
+@genType
+let get = ReducerInterface_InternalExpressionValue.nameSpaceGet

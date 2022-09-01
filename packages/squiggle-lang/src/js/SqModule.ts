@@ -20,4 +20,11 @@ export class SqModule {
       this.location
     );
   }
+
+  get(k: string) {
+    const v = RSModuleValue.get(this._value, k);
+    return v === undefined || v === null
+      ? undefined
+      : wrapValue(v, this.location.extend(k));
+  }
 }

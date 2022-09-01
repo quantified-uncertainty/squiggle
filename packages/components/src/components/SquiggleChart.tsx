@@ -1,5 +1,12 @@
 import * as React from "react";
-import { SqValue, environment, defaultEnvironment } from "@quri/squiggle-lang";
+import {
+  SqValue,
+  environment,
+  defaultEnvironment,
+  resultMap,
+  SqValueLocation,
+  SqValueTag,
+} from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
 import { SquiggleViewer } from "./SquiggleViewer";
 
@@ -97,28 +104,20 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       count: diagramCount,
     };
 
+    const resultToRender = resultMap(result, (value) =>
+      value.tag === SqValueTag.Void ? bindings.asValue() : value
+    );
+
     return (
-      <div>
-        <SquiggleViewer
-          result={result}
-          width={width}
-          height={height}
-          distributionPlotSettings={distributionPlotSettings}
-          chartSettings={chartSettings}
-          environment={environment ?? defaultEnvironment}
-          enableLocalSettings={enableLocalSettings}
-        />
-        <hr className="my-4" />
-        <SquiggleViewer
-          result={{ tag: "Ok", value: bindings.asValue() }}
-          width={width}
-          height={height}
-          distributionPlotSettings={distributionPlotSettings}
-          chartSettings={chartSettings}
-          environment={environment ?? defaultEnvironment}
-          enableLocalSettings={enableLocalSettings}
-        />
-      </div>
+      <SquiggleViewer
+        result={resultToRender}
+        width={width}
+        height={height}
+        distributionPlotSettings={distributionPlotSettings}
+        chartSettings={chartSettings}
+        environment={environment ?? defaultEnvironment}
+        enableLocalSettings={enableLocalSettings}
+      />
     );
   }
 );
