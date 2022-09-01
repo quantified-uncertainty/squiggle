@@ -104,7 +104,7 @@ let callInternal = (
 
   let doDumpBindings = (continuation: nameSpace, value: internalExpressionValue) => {
     // let _ = Continuation.inspect(continuation, "doDumpBindings")
-    accessors.states.continuation = continuation
+    accessors.states.continuation = continuation->Bindings.set("__result__", value)
     value->Ok
   }
 

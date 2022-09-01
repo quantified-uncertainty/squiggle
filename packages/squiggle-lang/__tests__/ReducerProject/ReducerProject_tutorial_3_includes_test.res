@@ -147,7 +147,7 @@ Here we will finally proceed to a real life scenario. */
       test("recursive includes", () => {
         (
           result->InternalExpressionValue.toStringResult,
-          bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
+          bindings->Bindings.removeResult->InternalExpressionValue.toStringBindings,
         )->expect == ("Ok(6)", "@{doubleX: 2,x: 1,y: 2,z: 3}")
         /* Everything as expected */
       })

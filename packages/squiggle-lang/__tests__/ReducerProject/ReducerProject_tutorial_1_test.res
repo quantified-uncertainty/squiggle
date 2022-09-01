@@ -46,12 +46,12 @@ Case "Running a single source".
        Getting None means you have forgotten to run the source.
  */
       let result = project->Project.getResult("main")
-      let bindings = project->Project.getBindings("main")
+      let bindings = project->Project.getBindings("main")->Bindings.removeResult
 
       /* Let's display the result and bindings */
       (
         result->InternalExpressionValue.toStringResult,
-        bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
+        bindings->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(3)", "@{}")
       /* You've got 3 with empty bindings. */
     })
@@ -61,7 +61,7 @@ Case "Running a single source".
       Project.setSource(project, "main", "1 + 2")
       Project.runAll(project)
       let result = Project.getResult(project, "main")
-      let bindings = Project.getBindings(project, "main")
+      let bindings = Project.getBindings(project, "main")->Bindings.removeResult
       /* Now you have external bindings and external result. */
       (
         result->InternalExpressionValue.toStringResult,
@@ -89,7 +89,7 @@ Case "Running a single source".
       let (result, bindings) = Project.evaluate("1+2")
       (
         result->InternalExpressionValue.toStringResult,
-        bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
+        bindings->Bindings.removeResult->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(3)", "@{}")
     })
   })

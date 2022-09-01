@@ -183,3 +183,7 @@ let chainTo = (nameSpace: t, previousNameSpaces: array<t>) => {
     mergeFrom(prevNameSpace, topNameSpace)
   )
 }
+
+let removeResult = (NameSpace(container): t): t => {
+  container->Belt.Map.String.remove("__result__")->NameSpace
+}

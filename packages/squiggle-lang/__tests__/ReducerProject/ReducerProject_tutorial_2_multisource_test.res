@@ -29,11 +29,11 @@ describe("ReducerProject Tutorial", () => {
 
       /* And let's check the result and bindings of source3 */
       let result3 = Project.getResult(project, "source3")
-      let bindings3 = Project.getBindings(project, "source3")
+      let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
 
       (
         result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
+        bindings3->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
     })
 
@@ -55,11 +55,11 @@ describe("ReducerProject Tutorial", () => {
 
       /* And let's check the result and bindings of source3 */
       let result3 = Project.getResult(project, "source3")
-      let bindings3 = Project.getBindings(project, "source3")
+      let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
 
       (
         result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
+        bindings3->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
     })
 
@@ -91,11 +91,11 @@ describe("ReducerProject Tutorial", () => {
       This time you are getting all the variables because we are including the other sources 
       Behind the scenes parseIncludes is setting the dependencies */
       let result3 = Project.getResult(project, "source3")
-      let bindings3 = Project.getBindings(project, "source3")
+      let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
 
       (
         result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
+        bindings3->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
       /*
       Doing it like this is too verbose for a storybook 
