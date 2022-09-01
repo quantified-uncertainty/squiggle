@@ -140,3 +140,9 @@ let truncate = (t, ~leftCutoff: option<float>, ~rightCutoff: option<float>) => {
   let withTruncatedRight = t => rightCutoff |> E.O.dimap(left => truncateRight(t, left), _ => Ok(t))
   t->withTruncatedLeft |> E.R2.bind(withTruncatedRight)
 }
+
+let minOfTwo = (t1: t, t2: t) => map2(~fn=(a, b) => Ok(Js.Math.min_float(a, b)), ~t1, ~t2)
+let maxOfTwo = (t1: t, t2: t) => map2(~fn=(a, b) => Ok(Js.Math.max_float(a, b)), ~t1, ~t2)
+
+let minOfFloat = (t: t, f: float) => samplesMap(~fn=a => Ok(Js.Math.min_float(a, f)), t)
+let maxOfFloat = (t: t, f: float) => samplesMap(~fn=a => Ok(Js.Math.max_float(a, f)), t)
