@@ -85,7 +85,7 @@ module Internal = {
   }
 }
 
-let library = [
+let libaryBase = [
   Function.make(
     ~name="fromDist",
     ~nameSpace,
@@ -280,3 +280,63 @@ let library = [
     (),
   ),
 ]
+
+module Comparison = {
+  let template = (name, inputs, run) => {
+    FnDefinition.make(
+      ~name,
+      ~inputs,
+      ~run=(inputs, _, _, _) => {
+        run(inputs)
+      },
+      (),
+    )
+  }
+
+  let wrapper = r =>
+    r
+    ->E.R2.fmap(r => r->Wrappers.sampleSet->Wrappers.evDistribution)
+    ->E.R2.errMap(SampleSetDist.Error.toString)
+
+  let mkBig = (name, withDist, withFloat) =>
+    Function.make(
+      ~name,
+      ~nameSpace,
+      ~requiresNamespace=false,
+      ~examples=[
+        `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(6,2)))`,
+        `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), 3.0)`,
+        `SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`,
+      ],
+      ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+      ~definitions=[
+        template(name, [FRTypeDist, FRTypeDist], inputs => {
+          switch inputs {
+          | [IEvDistribution(SampleSet(dist1)), IEvDistribution(SampleSet(dist2))] =>
+            withDist(dist1, dist2)->wrapper
+          | _ => Error(impossibleError)
+          }
+        }),
+        template(name, [FRTypeDist, FRTypeNumber], inputs => {
+          switch inputs {
+          | [IEvDistribution(SampleSet(dist)), IEvNumber(f)] => withFloat(dist, f)->wrapper
+          | _ => Error(impossibleError)
+          }
+        }),
+        template(name, [FRTypeNumber, FRTypeDist], inputs => {
+          switch inputs {
+          | [IEvNumber(f), IEvDistribution(SampleSet(dist))] => withFloat(dist, f)->wrapper
+          | _ => Error(impossibleError)
+          }
+        }),
+      ],
+      (),
+    )
+
+  let library = [
+    mkBig("min", SampleSetDist.minOfTwo, SampleSetDist.minOfFloat),
+    mkBig("max", SampleSetDist.maxOfTwo, SampleSetDist.maxOfFloat),
+  ]
+}
+
+let library = E.A.append(libaryBase, Comparison.library)

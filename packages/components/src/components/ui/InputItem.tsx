@@ -1,7 +1,7 @@
 import React from "react";
-import { Path, UseFormRegister } from "react-hook-form";
+import { Path, UseFormRegister, FieldValues } from "react-hook-form";
 
-export function InputItem<T>({
+export function InputItem<T extends FieldValues>({
   name,
   label,
   type,

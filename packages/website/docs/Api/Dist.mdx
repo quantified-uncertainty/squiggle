@@ -290,12 +290,29 @@ quantile: (distribution, number) => number
 quantile(normal(5, 2), 0.5);
 ```
 
-### truncateLeft
+### truncate
 
-Truncates the left side of a distribution. Returns either a pointSet distribution or a symbolic distribution.
+Truncates both the left side and the right side of a distribution.
 
 ```
-truncateLeft: (distribution, l => number) => distribution
+truncate: (distribution, left: number, right: number) => distribution
+```
+
+<Admonition type="note" title="Implementation Details">
+  <p>
+    Sample set distributions are truncated by filtering samples, but point set
+    distributions are truncated using direct geometric manipulation. Uniform
+    distributions are truncated symbolically. Symbolic but non-uniform
+    distributions get converted to Point Set distributions.
+  </p>
+</Admonition>
+
+### truncateLeft
+
+Truncates the left side of a distribution.
+
+```
+truncateLeft: (distribution, left: number) => distribution
 ```
 
 **Examples**
@@ -306,10 +323,10 @@ truncateLeft(normal(5, 2), 3);
 
 ### truncateRight
 
-Truncates the right side of a distribution. Returns either a pointSet distribution or a symbolic distribution.
+Truncates the right side of a distribution.
 
 ```
-truncateRight: (distribution, r => number) => distribution
+truncateRight: (distribution, right: number) => distribution
 ```
 
 **Examples**
@@ -388,7 +405,7 @@ The only functions that do not return normalized distributions are the pointwise
 
 ### normalize
 
-Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1. This only impacts Pointset distributions, because those are the only ones that can be non-normlized.
+Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1. This only impacts Point Set distributions, because those are the only ones that can be non-normlized.
 
 ```
 normalize: (distribution) => distribution

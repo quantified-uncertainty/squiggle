@@ -121,20 +121,17 @@
     "compile": "yarn run compile:vendor && yarn run compile:grammar && yarn run compile:tsc",
     "watch": "tsc -b -watch",
     "pretest": "yarn run compile && yarn run lint",
-    "lint": "eslint client/src server/src --ext ts",
-    "format": "eslint client/src server/src --ext ts --fix",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
     "package": "npx vsce package --yarn"
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
     "@types/node": "18.x",
     "@types/vscode": "^1.70.0",
-    "@typescript-eslint/eslint-plugin": "^5.33.1",
-    "@typescript-eslint/parser": "^5.33.1",
-    "eslint": "^8.22.0",
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
-    "typescript": "^4.7.4",
+    "typescript": "^4.8.2",
     "vsce-yarn-patch": "^1.66.2"
   },
   "dependencies": {

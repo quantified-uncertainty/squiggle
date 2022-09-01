@@ -67,6 +67,9 @@ describe("FunctionRegistry Library", () => {
     testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
     testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
     testEvalToBe("SampleSet.fromFn({|| sample(normal(5,2))})", "Ok(Sample Set Distribution)")
+    testEvalToBe("SampleSet.min(SampleSet.fromDist(normal(50,2)), 2)", "Ok(Sample Set Distribution)")
+    testEvalToBe("mean(SampleSet.min(SampleSet.fromDist(normal(50,2)), 2))", "Ok(2)")
+    testEvalToBe("SampleSet.max(SampleSet.fromDist(normal(50,2)), 10)", "Ok(Sample Set Distribution)")
     testEvalToBe(
       "addOne(t)=t+1; SampleSet.toList(SampleSet.map(SampleSet.fromList([1,2,3,4,5,6]), addOne))",
       "Ok([2,3,4,5,6,7])",
