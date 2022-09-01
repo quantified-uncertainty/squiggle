@@ -132,6 +132,25 @@ let stdev = t => T.get(t)->E.A.Floats.stdev
 let variance = t => T.get(t)->E.A.Floats.variance
 let percentile = (t, f) => T.get(t)->E.A.Floats.percentile(f)
 
+let mixture = (values: array<(t, float)>, intendedLength: int) => {
+  let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
+  let discreteSamples =
+    values
+    ->Belt.Array.mapWithIndex((i, (_, weight)) => (E.I.toFloat(i), weight /. totalWeight))
+    ->XYShape.T.fromZippedArray
+    ->Discrete.make
+    ->Discrete.sampleN(intendedLength)
+  let dists = values->E.A2.fmap(E.Tuple2.first)->E.A2.fmap(T.get)
+  let samples =
+    discreteSamples
+    ->Belt.Array.mapWithIndex((index, distIndexToChoose) => {
+      let chosenDist = E.A.get(dists, E.Float.toInt(distIndexToChoose))
+      chosenDist->E.O.bind(E.A.get(_, index))
+    })
+    ->E.A.O.openIfAllSome
+  samples->E.O2.toExn("Mixture unreachable error")->T.make
+}
+
 let truncateLeft = (t, f) => T.get(t)->E.A2.filter(x => x >= f)->T.make
 let truncateRight = (t, f) => T.get(t)->E.A2.filter(x => x <= f)->T.make
 

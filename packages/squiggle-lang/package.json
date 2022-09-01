@@ -18,6 +18,7 @@
     "benchmark": "ts-node benchmark/conversion_tests.ts",
     "test": "jest",
     "test:ts": "jest __tests__/TS/",
+    "test:stdlib": "jest __tests__/Stdlib_test.bs.js",
     "test:rescript": "jest --modulePathIgnorePatterns=__tests__/TS/*",
     "test:watch": "jest --watchAll",
     "test:fnRegistry": "jest __tests__/SquiggleLibrary/SquiggleLibrary_FunctionRegistryLibrary_test.bs.js",
