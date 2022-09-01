@@ -6,10 +6,7 @@ import { Modal } from "../ui/Modal";
 import { ViewSettings, viewSettingsSchema } from "../ViewSettings";
 import { Path, pathAsString } from "./utils";
 import { ViewerContext } from "./ViewerContext";
-import {
-  defaultColor,
-  defaultTickFormat,
-} from "../../lib/distributionSpecBuilder";
+import { defaultTickFormat } from "../../lib/distributionSpecBuilder";
 import { PlaygroundContext } from "../SquigglePlayground";
 
 type Props = {
@@ -46,7 +43,6 @@ const ItemSettingsModal: React.FC<
       tickFormat:
         mergedSettings.distributionPlotSettings.format || defaultTickFormat,
       title: mergedSettings.distributionPlotSettings.title,
-      color: mergedSettings.distributionPlotSettings.color || defaultColor,
       minX: mergedSettings.distributionPlotSettings.minX,
       maxX: mergedSettings.distributionPlotSettings.maxX,
       distributionChartActions: mergedSettings.distributionPlotSettings.actions,
@@ -66,7 +62,6 @@ const ItemSettingsModal: React.FC<
           expY: vars.expY,
           format: vars.tickFormat,
           title: vars.title,
-          color: vars.color,
           minX: vars.minX,
           maxX: vars.maxX,
           actions: vars.distributionChartActions,

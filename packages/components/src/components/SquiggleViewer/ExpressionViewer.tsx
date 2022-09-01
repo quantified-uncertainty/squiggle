@@ -1,7 +1,7 @@
 import React from "react";
 import { squiggleExpression, declaration } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
-import { DistributionChart } from "../DistributionChart";
+import { DistributionChart, defaultPlot, makePlot } from "../DistributionChart";
 import { FunctionChart, FunctionChartSettings } from "../FunctionChart";
 import clsx from "clsx";
 import { VariableBox } from "./VariableBox";
@@ -102,7 +102,7 @@ export const ExpressionViewer: React.FC<Props> = ({
           {(settings) => {
             return (
               <DistributionChart
-                distribution={expression.value}
+                plot={defaultPlot(expression.value)}
                 {...settings.distributionPlotSettings}
                 height={settings.height}
                 width={width}
@@ -241,9 +241,9 @@ export const ExpressionViewer: React.FC<Props> = ({
     case "module": {
       return (
         <VariableList path={path} heading="Module">
-          {(settings) =>
+          {(_) =>
             Object.entries(expression.value)
-              .filter(([key, r]) => !key.match(/^(Math|System)\./))
+              .filter(([key, _]) => !key.match(/^(Math|System)\./))
               .map(([key, r]) => (
                 <ExpressionViewer
                   key={key}
@@ -257,24 +257,61 @@ export const ExpressionViewer: React.FC<Props> = ({
       );
     }
     case "record":
-      return (
-        <VariableList path={path} heading="Record">
-          {(settings) =>
-            Object.entries(expression.value).map(([key, r]) => (
-              <ExpressionViewer
-                key={key}
-                path={[...path, key]}
-                expression={r}
-                width={width !== undefined ? width - 20 : width}
-              />
-            ))
-          }
-        </VariableList>
-      );
+      const plot = makePlot(expression.value);
+      if (plot) {
+        return (
+          <VariableBox
+            path={path}
+            heading={"Plot"}
+            renderSettingsMenu={({ onChange }) => {
+              let disableLogX = plot.distributions.some((x) => {
+                let pointSet = x.distribution.pointSet();
+                return (
+                  pointSet.tag === "Ok" && hasMassBelowZero(pointSet.value)
+                );
+              });
+              return (
+                <ItemSettingsMenu
+                  path={path}
+                  onChange={onChange}
+                  disableLogX={disableLogX}
+                  withFunctionSettings={false}
+                />
+              );
+            }}
+          >
+            {(settings) => {
+              return (
+                <DistributionChart
+                  plot={plot}
+                  {...settings.distributionPlotSettings}
+                  height={settings.height}
+                  width={width}
+                />
+              );
+            }}
+          </VariableBox>
+        );
+      } else {
+        return (
+          <VariableList path={path} heading="Record">
+            {(_) =>
+              Object.entries(expression.value).map(([key, r]) => (
+                <ExpressionViewer
+                  key={key}
+                  path={[...path, key]}
+                  expression={r}
+                  width={width !== undefined ? width - 20 : width}
+                />
+              ))
+            }
+          </VariableList>
+        );
+      }
     case "array":
       return (
         <VariableList path={path} heading="Array">
-          {(settings) =>
+          {(_) =>
             expression.value.map((r, i) => (
               <ExpressionViewer
                 key={i}

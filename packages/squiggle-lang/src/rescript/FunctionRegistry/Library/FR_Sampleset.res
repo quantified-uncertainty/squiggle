@@ -75,7 +75,7 @@ module Internal = {
   }
 }
 
-let library = [
+let libaryBase = [
   Function.make(
     ~name="fromDist",
     ~nameSpace,
@@ -92,7 +92,7 @@ let library = [
             GenericDist.toSampleSetDist(dist, env.sampleCount)
             ->E.R2.fmap(Wrappers.sampleSet)
             ->E.R2.fmap(Wrappers.evDistribution)
-            ->E.R2.errMap(_ => "")
+            ->E.R2.errMap(DistributionTypes.Error.toString)
           | _ => Error(impossibleError)
           },
         (),
@@ -158,7 +158,7 @@ let library = [
           | [IEvLambda(lambda)] =>
             switch Internal.fromFn(lambda, env, reducer) {
             | Ok(r) => Ok(r->Wrappers.sampleSet->Wrappers.evDistribution)
-            | Error(_) => Error("issue")
+            | Error(e) => Error(Operation.Error.toString(e))
             }
           | _ => Error(impossibleError)
           },
@@ -180,7 +180,7 @@ let library = [
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist)), IEvLambda(lambda)] =>
-            Internal.map1(dist, lambda, env, reducer)->E.R2.errMap(_ => "")
+            Internal.map1(dist, lambda, env, reducer)->E.R2.errMap(Reducer_ErrorValue.errorToString)
           | _ => Error(impossibleError)
           },
         (),
@@ -207,7 +207,9 @@ let library = [
               IEvDistribution(SampleSet(dist2)),
               IEvLambda(lambda),
             ] =>
-            Internal.map2(dist1, dist2, lambda, env, reducer)->E.R2.errMap(_ => "")
+            Internal.map2(dist1, dist2, lambda, env, reducer)->E.R2.errMap(
+              Reducer_ErrorValue.errorToString,
+            )
           | _ => Error(impossibleError)
           }
         },
@@ -236,7 +238,9 @@ let library = [
               IEvDistribution(SampleSet(dist3)),
               IEvLambda(lambda),
             ] =>
-            Internal.map3(dist1, dist2, dist3, lambda, env, reducer)->E.R2.errMap(_ => "")
+            Internal.map3(dist1, dist2, dist3, lambda, env, reducer)->E.R2.errMap(
+              Reducer_ErrorValue.errorToString,
+            )
           | _ => Error(impossibleError)
           },
         (),
@@ -259,9 +263,9 @@ let library = [
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(dists), IEvLambda(lambda)] =>
-            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(_e => {
-              "AHHH doesn't work"
-            })
+            Internal.mapN(dists, lambda, env, reducer)->E.R2.errMap(
+              Reducer_ErrorValue.errorToString,
+            )
           | _ => Error(impossibleError)
           },
         (),
@@ -270,3 +274,63 @@ let library = [
     (),
   ),
 ]
+
+module Comparison = {
+  let template = (name, inputs, run) => {
+    FnDefinition.make(
+      ~name,
+      ~inputs,
+      ~run=(inputs, _, _, _) => {
+        run(inputs)
+      },
+      (),
+    )
+  }
+
+  let wrapper = r =>
+    r
+    ->E.R2.fmap(r => r->Wrappers.sampleSet->Wrappers.evDistribution)
+    ->E.R2.errMap(SampleSetDist.Error.toString)
+
+  let mkBig = (name, withDist, withFloat) =>
+    Function.make(
+      ~name,
+      ~nameSpace,
+      ~requiresNamespace=false,
+      ~examples=[
+        `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(6,2)))`,
+        `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), 3.0)`,
+        `SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`,
+      ],
+      ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+      ~definitions=[
+        template(name, [FRTypeDist, FRTypeDist], inputs => {
+          switch inputs {
+          | [IEvDistribution(SampleSet(dist1)), IEvDistribution(SampleSet(dist2))] =>
+            withDist(dist1, dist2)->wrapper
+          | _ => Error(impossibleError)
+          }
+        }),
+        template(name, [FRTypeDist, FRTypeNumber], inputs => {
+          switch inputs {
+          | [IEvDistribution(SampleSet(dist)), IEvNumber(f)] => withFloat(dist, f)->wrapper
+          | _ => Error(impossibleError)
+          }
+        }),
+        template(name, [FRTypeNumber, FRTypeDist], inputs => {
+          switch inputs {
+          | [IEvNumber(f), IEvDistribution(SampleSet(dist))] => withFloat(dist, f)->wrapper
+          | _ => Error(impossibleError)
+          }
+        }),
+      ],
+      (),
+    )
+
+  let library = [
+    mkBig("min", SampleSetDist.minOfTwo, SampleSetDist.minOfFloat),
+    mkBig("max", SampleSetDist.maxOfTwo, SampleSetDist.maxOfFloat),
+  ]
+}
+
+let library = E.A.append(libaryBase, Comparison.library)

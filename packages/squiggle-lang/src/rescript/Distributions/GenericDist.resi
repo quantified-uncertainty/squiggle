@@ -81,6 +81,7 @@ let mixture: (
   array<(t, float)>,
   ~scaleMultiplyFn: scaleMultiplyFn,
   ~pointwiseAddFn: pointwiseAddFn,
+  ~env: env,
 ) => result<t, error>
 
 let isSymbolic: t => bool
