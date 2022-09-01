@@ -231,7 +231,7 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
 export const SquigglePlayground: FC<PlaygroundProps> = ({
   defaultCode = "",
   height = 500,
-  showSummary = false,
+  showSummary = true,
   logX = false,
   expY = false,
   title,
