@@ -248,7 +248,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           {(_) =>
             value.value
               .entries()
-              .filter(([key, _]) => !key.match(/^(Math|System)\./))
+              .filter(([key, _]) => !key.match(/^(__result__)$/))
               .map(([key, r]) => (
                 <ExpressionViewer
                   key={key}
