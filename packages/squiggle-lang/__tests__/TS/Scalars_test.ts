@@ -5,7 +5,7 @@ import * as fc from "fast-check";
 describe("Scalar manipulation is well-modeled by javascript math", () => {
   test("in the case of natural logarithms", () => {
     fc.assert(
-      fc.property(fc.integer(), (x) => {
+      fc.property(fc.nat(), (x) => {
         let squiggleString = `log(${x})`;
         let squiggleResult = testRun(squiggleString);
         if (x == 0) {

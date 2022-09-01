@@ -1,3 +1,4 @@
+import { SqValue, SqValueLocation } from "@quri/squiggle-lang";
 import React, { useContext, useReducer } from "react";
 import { Tooltip } from "../ui/Tooltip";
 import { LocalItemSettings, MergedItemSettings } from "./utils";
@@ -8,14 +9,14 @@ type SettingsMenuParams = {
 };
 
 type VariableBoxProps = {
-  path: string[];
+  value: SqValue;
   heading: string;
   renderSettingsMenu?: (params: SettingsMenuParams) => React.ReactNode;
   children: (settings: MergedItemSettings) => React.ReactNode;
 };
 
 export const VariableBox: React.FC<VariableBoxProps> = ({
-  path,
+  value: { location },
   heading = "Error",
   renderSettingsMenu,
   children,
@@ -27,10 +28,10 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
   // So we use `forceUpdate` to force rerendering.
   const [_, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  const settings = getSettings(path);
+  const settings = getSettings(location);
 
   const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {
-    setSettings(path, newSettings);
+    setSettings(location, newSettings);
     forceUpdate();
   };
 
@@ -38,8 +39,10 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
     setSettingsAndUpdate({ ...settings, collapsed: !settings.collapsed });
   };
 
-  const isTopLevel = path.length === 0;
-  const name = isTopLevel ? "Result" : path[path.length - 1];
+  const isTopLevel = location.path.items.length === 0;
+  const name = isTopLevel
+    ? { result: "Result", bindings: "Bindings" }[location.path.root]
+    : location.path.items[location.path.items.length - 1];
 
   return (
     <div>
@@ -65,13 +68,13 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
       </header>
       {settings.collapsed ? null : (
         <div className="flex w-full">
-          {path.length ? (
+          {location.path.items.length ? (
             <div
               className="border-l-2 border-slate-200 hover:border-indigo-600 w-4 cursor-pointer"
               onClick={toggleCollapsed}
             ></div>
           ) : null}
-          <div className="grow">{children(getMergedSettings(path))}</div>
+          <div className="grow">{children(getMergedSettings(location))}</div>
         </div>
       )}
     </div>

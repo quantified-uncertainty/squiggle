@@ -1,5 +1,5 @@
 export enum distributionTag {
-  DtPointSet,
-  DtSampleSet,
-  DtSymbolic,
+  PointSet = "PointSet",
+  SampleSet = "SampleSet",
+  Symbolic = "Symbolic",
 }

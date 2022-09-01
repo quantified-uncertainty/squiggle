@@ -239,3 +239,9 @@ let nameSpaceToKeyValuePairs = (nameSpace: nameSpace): array<(string, t)> => {
   let NameSpace(container) = nameSpace
   container->Belt.Map.String.toArray
 }
+
+let nameSpaceGet = (nameSpace: nameSpace, key: string): option<t> => {
+  let NameSpace(container) = nameSpace
+  container->Belt.Map.String.get(key)
+
+}

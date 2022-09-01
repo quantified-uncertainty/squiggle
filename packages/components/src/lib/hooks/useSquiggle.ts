@@ -1,34 +1,27 @@
-import {
-  bindings,
-  environment,
-  jsImports,
-  run,
-  runPartial,
-} from "@quri/squiggle-lang";
+import { environment, run, SqValue } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 
-type SquiggleArgs<T extends ReturnType<typeof run | typeof runPartial>> = {
+type SquiggleArgs = {
   code: string;
   executionId?: number;
-  bindings?: bindings;
-  jsImports?: jsImports;
+  // jsImports?: jsImports;
   environment?: environment;
-  onChange?: (expr: Extract<T, { tag: "Ok" }>["value"] | undefined) => void;
+  onChange?: (expr: SqValue | undefined) => void;
 };
 
-const useSquiggleAny = <T extends ReturnType<typeof run | typeof runPartial>>(
-  args: SquiggleArgs<T>,
-  f: (...args: Parameters<typeof run>) => T
-) => {
-  const result: T = useMemo<T>(
-    () => f(args.code, args.bindings, args.environment, args.jsImports),
+export const useSquiggle = (args: SquiggleArgs) => {
+  const result = useMemo(
+    () => {
+      const result = run(args.code, {
+        environment: args.environment,
+      });
+      return result;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      f,
       args.code,
-      args.bindings,
       args.environment,
-      args.jsImports,
+      // args.jsImports,
       args.executionId,
     ]
   );
@@ -36,18 +29,8 @@ const useSquiggleAny = <T extends ReturnType<typeof run | typeof runPartial>>(
   const { onChange } = args;
 
   useEffect(() => {
-    onChange?.(result.tag === "Ok" ? result.value : undefined);
+    onChange?.(result.result.tag === "Ok" ? result.result.value : undefined);
   }, [result, onChange]);
 
   return result;
-};
-
-export const useSquigglePartial = (
-  args: SquiggleArgs<ReturnType<typeof runPartial>>
-) => {
-  return useSquiggleAny(args, runPartial);
-};
-
-export const useSquiggle = (args: SquiggleArgs<ReturnType<typeof run>>) => {
-  return useSquiggleAny(args, run);
 };
