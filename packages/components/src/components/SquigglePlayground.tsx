@@ -39,6 +39,7 @@ import { ViewSettings, viewSettingsSchema } from "./ViewSettings";
 import { HeadedSection } from "./ui/HeadedSection";
 import { defaultTickFormat } from "../lib/distributionSpecBuilder";
 import { Button } from "./ui/Button";
+import { JsImports } from "../lib/jsImports";
 
 type PlaygroundProps = SquiggleChartProps & {
   /** The initial squiggle string to put in the playground */
@@ -112,8 +113,8 @@ const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
 );
 
 const InputVariablesSettings: React.FC<{
-  initialImports: any; // TODO - any json type
-  setImports: (imports: any) => void;
+  initialImports: JsImports;
+  setImports: (imports: JsImports) => void;
 }> = ({ initialImports, setImports }) => {
   const [importString, setImportString] = useState(() =>
     JSON.stringify(initialImports)
@@ -122,7 +123,7 @@ const InputVariablesSettings: React.FC<{
 
   const onChange = (value: string) => {
     setImportString(value);
-    let imports = {} as any;
+    let imports = {};
     try {
       imports = JSON.parse(value);
       setImportsAreValid(true);
@@ -251,7 +252,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     onChange: onCodeChange,
   });
 
-  const [imports, setImports] = useState({});
+  const [imports, setImports] = useState<JsImports>({});
 
   const { register, control } = useForm({
     resolver: yupResolver(schema),
@@ -309,7 +310,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
           executionId={executionId}
           environment={env}
           {...vars}
-          // jsImports={imports}
+          jsImports={imports}
           enableLocalSettings={true}
         />
       </div>

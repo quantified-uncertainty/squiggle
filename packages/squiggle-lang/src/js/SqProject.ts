@@ -62,14 +62,6 @@ export class SqProject {
     return RSProject.setContinues(this._value, sourceId, continues);
   }
 
-  getDependencies(sourceId: string) {
-    return RSProject.getDependencies(this._value, sourceId);
-  }
-
-  getDependents(sourceId: string) {
-    return RSProject.getDependents(this._value, sourceId);
-  }
-
   getRunOrder() {
     return RSProject.getRunOrder(this._value);
   }
