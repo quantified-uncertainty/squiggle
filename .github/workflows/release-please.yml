@@ -55,7 +55,7 @@ jobs:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/squiggle-lang
-          bump-patch-for-minor-pre-major: true
+          # bump-patch-for-minor-pre-major: true
           skip-github-release: true
       - name: Publish- Checkout source
         uses: actions/checkout@v3
@@ -83,7 +83,7 @@ jobs:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/components
-          bump-patch-for-minor-pre-major: true
+          # bump-patch-for-minor-pre-major: true
           skip-github-release: true
       - name: Publish- Checkout source
         uses: actions/checkout@v3
@@ -109,7 +109,7 @@ jobs:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/website
-          bump-patch-for-minor-pre-major: true
+          # bump-patch-for-minor-pre-major: true
           skip-github-release: true
   relplz-vscodeext:
     name: for vscode-ext
@@ -123,7 +123,7 @@ jobs:
           token: ${{secrets.GITHUB_TOKEN}}
           command: manifest-pr
           path: packages/vscode-ext
-          bump-patch-for-minor-pre-major: true
+          # bump-patch-for-minor-pre-major: true
           skip-github-release: true
   relplz-cl:
     name: for cli
