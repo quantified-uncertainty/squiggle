@@ -145,10 +145,10 @@ let mixture = (values: array<(t, float)>, intendedLength: int) => {
     discreteSamples
     ->Belt.Array.mapWithIndex((index, distIndexToChoose) => {
       let chosenDist = E.A.get(dists, E.Float.toInt(distIndexToChoose))
-      chosenDist |> E.O2.bind(E.A.get(_, index))
+      chosenDist -> E.O.bind(E.A.get(_, index))
     })
     ->E.A.O.openIfAllSome
-  (samples |> E.O.toExn("Mixture unreachable error"))->T.make
+  (samples -> E.O2.toExn("Mixture unreachable error"))->T.make
 }
 
 let truncateLeft = (t, f) => T.get(t)->E.A2.filter(x => x >= f)->T.make
