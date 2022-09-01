@@ -1,10 +1,4 @@
-import {
-  environment,
-  resultMap,
-  run,
-  SqValue,
-  SqValueTag,
-} from "@quri/squiggle-lang";
+import { environment, run, SqValue } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 
 type SquiggleArgs = {
@@ -26,7 +20,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       args.code,
-      // args.environment,
+      args.environment,
       // args.jsImports,
       args.executionId,
     ]
