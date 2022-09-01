@@ -1,18 +1,11 @@
 import { environment, SqProject, SqValue } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
-
-export type jsImports =
-  | number
-  | string
-  | jsImports[]
-  | {
-      [k: string]: jsImports;
-    };
+import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
 
 type SquiggleArgs = {
   code: string;
   executionId?: number;
-  jsImports?: jsImports;
+  jsImports?: JsImports;
   environment?: environment;
   onChange?: (expr: SqValue | undefined) => void;
 };
@@ -25,12 +18,10 @@ export const useSquiggle = (args: SquiggleArgs) => {
       if (args.environment) {
         project.setEnvironment(args.environment);
       }
-      if (args.jsImports) {
-        console.log(JSON.stringify(args.jsImports));
-        project.setSource(
-          "zzz", // due to bug in topology implementation, can be renamed later
-          "imports = " + JSON.stringify(args.jsImports)
-        );
+      if (args.jsImports && Object.keys(args.jsImports).length) {
+        const importsSource = jsImportsToSquiggleCode(args.jsImports);
+        project.setSource("imports", importsSource);
+        project.setContinues("main", ["imports"]);
       }
       project.run("main");
       const result = project.getResult("main");
@@ -38,12 +29,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
       return { result, bindings };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      args.code,
-      args.environment,
-      // args.jsImports,
-      args.executionId,
-    ]
+    [args.code, args.environment, args.jsImports, args.executionId]
   );
 
   const { onChange } = args;
