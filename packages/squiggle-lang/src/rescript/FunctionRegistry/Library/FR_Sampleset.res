@@ -75,7 +75,7 @@ module Internal = {
   }
 }
 
-let library1 = [
+let libaryBase = [
   Function.make(
     ~name="fromDist",
     ~nameSpace,
@@ -333,4 +333,4 @@ module Comparison = {
   ]
 }
 
-let library = E.A.append(library1, Comparison.library)
+let library = E.A.append(libaryBase, Comparison.library)
