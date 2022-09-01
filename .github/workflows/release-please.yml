@@ -62,7 +62,7 @@ jobs:
         # these if statements ensure that a publication only occurs when
         # a new release is created:
         if: ${{ steps.release.outputs.release_created }}
-      - name: Publish: Install dependencies
+      - name: Publish- Install dependencies
         run: yarn
         if: ${{ steps.release.outputs.release_created }}
       - name: Publish
@@ -85,8 +85,8 @@ jobs:
           path: packages/components
           bump-patch-for-minor-pre-major: true
           skip-github-release: true
-      - name: Publish: Checkout source
-        uses: actions/checkout@v2
+      - name: Publish- Checkout source
+        uses: actions/checkout@v3
         # these if statements ensure that a publication only occurs when
         # a new release is created:
         if: ${{ steps.release.outputs.release_created }}
