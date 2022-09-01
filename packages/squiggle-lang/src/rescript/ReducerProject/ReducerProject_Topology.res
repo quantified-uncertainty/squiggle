@@ -44,31 +44,23 @@ let getTopologicalSort = (this: t): array<string> => {
   Belt.List.reverse(stack)->Belt.List.toArray
 }
 
-let getTopologicalSortFor = (this: t, sourceId) => {
-  let runOrder = getTopologicalSort(this)
-  let index = runOrder->Js.Array2.indexOf(sourceId)
-  let after = Belt.Array.sliceToEnd(runOrder, index + 1)
-  let before = Js.Array2.slice(runOrder, ~start=0, ~end_=index + 1)
-  (before, after)
-}
-
 let getRunOrder = getTopologicalSort
 
-let getRunOrderFor = (this: t, sourceId: string) => {
-  let (runOrder, _) = getTopologicalSortFor(this, sourceId)
-  runOrder
+let getRunOrderFor = (this: t, sourceId) => {
+  let (_visited, stack) = topologicalSortUtil(this, sourceId, (Belt.Map.String.empty, list{}))
+  Belt.List.reverse(stack)->Belt.List.toArray
 }
 
 let getDependencies = (this: t, sourceId: string): array<string> => {
-  let runOrder = getRunOrderFor(this, sourceId)
-
-  let _ = Js.Array2.pop(runOrder)
-  runOrder
+  let runOrder = getTopologicalSort(this)
+  let index = runOrder->Js.Array2.indexOf(sourceId)
+  Js.Array2.slice(runOrder, ~start=0, ~end_=index)
 }
 
 let getDependents = (this: t, sourceId: string): array<string> => {
-  let (_, dependents) = getTopologicalSortFor(this, sourceId)
-  dependents
+  let runOrder = getTopologicalSort(this)
+  let index = runOrder->Js.Array2.indexOf(sourceId)
+  Belt.Array.sliceToEnd(runOrder, index + 1)
 }
 
 let runOrderDiff = (current: array<string>, previous0: array<string>): array<string> => {
