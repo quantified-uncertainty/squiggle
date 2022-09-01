@@ -181,3 +181,15 @@ describe("project with include", () => {
     runFetchFlatBindings(project, "main")->expect->toBe("@{common: 0,x: 1,y: 2}")
   })
 })
+
+describe("project with independent sources", () => {
+  let project = Project.createProject()
+  Project.setSource(project, "first", "1")
+  Project.setSource(project, "second", "2")
+  test("first run order", () => {
+    expect(Project.getRunOrderFor(project, "first")) == ["first"]
+  })
+  test("first run order", () => {
+    expect(Project.getRunOrderFor(project, "second")) == ["second"]
+  })
+})
