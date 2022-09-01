@@ -45,4 +45,5 @@ module Random = {
     size: int,
   }
   @module external sample: (array<float>, sampleArgs) => array<float> = "@stdlib/random/sample"
+  let sample = sample
 }

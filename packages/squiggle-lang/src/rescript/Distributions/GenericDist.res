@@ -516,7 +516,7 @@ let mixture = (
       switch value {
       | SampleSet(sampleSet) => Ok((sampleSet, weight))
       | _ => Error("Unreachable")
-      } |> E.R.toExn("Mixture coding error: SampleSet expected. This should be inaccessible.")
+      }->E.R2.toExn("Mixture coding error: SampleSet expected. This should be inaccessible.")
     )
     let sampleSetMixture = SampleSetDist.mixture(withSampleSetValues, env.sampleCount)
     switch sampleSetMixture {
