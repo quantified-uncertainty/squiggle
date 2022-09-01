@@ -24,7 +24,7 @@ const jsImportsValueToSquiggleCode = (v: JsImportsValue): string => {
       return (
         "{" +
         Object.entries(v)
-          .map(([k, v]) => `${k}:${jsImportsValueToSquiggleCode(v)},`)
+          .map(([k, v]) => `${quote(k)}:${jsImportsValueToSquiggleCode(v)},`)
           .join("") +
         "}"
       );
@@ -35,7 +35,17 @@ const jsImportsValueToSquiggleCode = (v: JsImportsValue): string => {
 };
 
 export const jsImportsToSquiggleCode = (v: JsImports) => {
-  return Object.entries(v)
-    .map(([k, v]) => `$${k} = ${jsImportsValueToSquiggleCode(v)}\n`)
+  const validId = new RegExp("[a-zA-Z][[a-zA-Z0-9]*");
+  let result = Object.entries(v)
+    .map(([k, v]) => {
+      if (!k.match(validId)) {
+        return ""; // skipping without warnings; can be improved
+      }
+      return `$${k} = ${jsImportsValueToSquiggleCode(v)}\n`;
+    })
     .join("");
+  if (!result) {
+    result = "$__no_valid_imports__ = 1"; // without this generated squiggle code can be invalid
+  }
+  return result;
 };
