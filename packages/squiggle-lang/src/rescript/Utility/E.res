@@ -572,7 +572,7 @@ module A = {
       |> (x => Ok(x))
     }
 
-  let getByWithFn = (a, fn, boolCondition) => {
+  let getByFmap = (a, fn, boolCondition) => {
     let i = ref(0)
     let finalFunctionValue = ref(None)
     let length = Belt.Array.length(a)
@@ -690,7 +690,7 @@ module A = {
     let firstSome = x => Belt.Array.getBy(x, O.isSome)
 
     let firstSomeFn = (r: array<unit => option<'a>>): option<'a> =>
-      O.flatten(getByWithFn(r, l => l(), O.isSome))
+      O.flatten(getByFmap(r, l => l(), O.isSome))
 
     let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->O2.default(default)
 
