@@ -1,18 +1,21 @@
 @genType type pointSetDistribution = PointSetTypes.pointSetDist
+@genType type continuousShape = PointSetTypes.continuousShape
+@genType type discreteShape = PointSetTypes.discreteShape
+@genType type mixedShape = PointSetTypes.mixedShape
 
-@module("ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
-external pstMixed_: int = "PstMixed"
+@module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
+external pstMixed_: string = "Mixed"
 
-@module("ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
-external pstDiscrete_: int = "PstDiscrete"
+@module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
+external pstDiscrete_: string = "Discrete"
 
-@module("ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
-external pstContinuous_: int = "PstContinuous"
+@module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
+external pstContinuous_: string = "Continuous"
 
 @genType.import("./ForTS_Distribution_PointSetDistribution_tag")
 type pointSetDistributionTag
 
-external castEnum: int => pointSetDistributionTag = "%identity"
+external castEnum: string => pointSetDistributionTag = "%identity"
 
 @genType
 let getTag = (variant: pointSetDistribution): pointSetDistributionTag =>
@@ -42,3 +45,6 @@ let getContinues = (variant: pointSetDistribution): 'd =>
   | Continuous(continuous) => continuous->Some
   | _ => None
   }
+
+@genType
+let toDistribution = (v: pointSetDistribution): DistributionTypes.genericDist => PointSet(v)

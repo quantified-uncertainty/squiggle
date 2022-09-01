@@ -1,5 +1,6 @@
 // Genetic Distribution happens to be abstract distribution
 @genType type distribution = DistributionTypes.genericDist
+@genType type distributionError = DistributionTypes.error
 @genType type pointSetDistribution = ForTS_Distribution_PointSetDistribution.pointSetDistribution
 @genType type sampleSetDistribution = ForTS_Distribution_SampleSetDistribution.sampleSetDistribution
 @genType type symbolicDistribution = ForTS_Distribution_SymbolicDistribution.symbolicDistribution
@@ -9,19 +10,19 @@ type environment = ForTS_Distribution_Environment.environment //use
 @genType
 let defaultEnvironment: environment = DistributionOperation.defaultEnv
 
-@module("ForTS_Distribution_tag") @scope("distributionTag")
-external dtPointSet_: int = "DtPointSet"
+@module("./ForTS_Distribution_tag") @scope("distributionTag")
+external dtPointSet_: string = "PointSet"
 
-@module("ForTS_Distribution_tag") @scope("distributionTag")
-external dtSampleSet_: int = "DtSampleSet"
+@module("./ForTS_Distribution_tag") @scope("distributionTag")
+external dtSampleSet_: string = "SampleSet"
 
-@module("ForTS_Distribution_tag") @scope("distributionTag")
-external dtSymbolic_: int = "DtSymbolic"
+@module("./ForTS_Distribution_tag") @scope("distributionTag")
+external dtSymbolic_: string = "Symbolic"
 
 @genType.import("./ForTS_Distribution_tag")
 type distributionTag
 
-external castEnum: int => distributionTag = "%identity"
+external castEnum: string => distributionTag = "%identity"
 
 // type genericDist =
 //   | PointSet(PointSetTypes.pointSetDist)
@@ -73,3 +74,15 @@ let inv = DistributionOperation.Constructors.inv
 let pdf = DistributionOperation.Constructors.pdf
 @genType
 let normalize = DistributionOperation.Constructors.normalize
+
+@genType
+let toPointSet = (variant: distribution, env: environment) =>
+  GenericDist.toPointSet(
+    variant,
+    ~sampleCount=env.sampleCount,
+    ~xyPointLength=env.xyPointLength,
+    (),
+  )
+
+@genType
+let toString = (variant: distribution) => GenericDist.toString(variant)

@@ -1,5 +1,5 @@
 export enum pointSetDistributionTag {
-  PstMixed,
-  PstDiscrete,
-  PstContinuous,
+  Mixed = "Mixed",
+  Discrete = "Discrete",
+  Continuous = "Continuous",
 }

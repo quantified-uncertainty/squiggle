@@ -24,7 +24,7 @@ import {
 } from "@heroicons/react/solid";
 import clsx from "clsx";
 
-import { defaultBindings, environment } from "@quri/squiggle-lang";
+import { environment } from "@quri/squiggle-lang";
 
 import { SquiggleChart, SquiggleChartProps } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
@@ -309,8 +309,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
           executionId={executionId}
           environment={env}
           {...vars}
-          bindings={defaultBindings}
-          jsImports={imports}
+          // jsImports={imports}
           enableLocalSettings={true}
         />
       </div>
