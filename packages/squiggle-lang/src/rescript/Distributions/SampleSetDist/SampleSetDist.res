@@ -150,3 +150,12 @@ let mixture = (values: array<(t, float)>, intendedLength: int) => {
     ->E.A.O.openIfAllSome
   (samples |> E.O.toExn("Mixture unreachable error"))->T.make
 }
+
+let truncateLeft = (t, f) => T.get(t)->E.A2.filter(x => x >= f)->T.make
+let truncateRight = (t, f) => T.get(t)->E.A2.filter(x => x <= f)->T.make
+
+let truncate = (t, ~leftCutoff: option<float>, ~rightCutoff: option<float>) => {
+  let withTruncatedLeft = t => leftCutoff |> E.O.dimap(left => truncateLeft(t, left), _ => Ok(t))
+  let withTruncatedRight = t => rightCutoff |> E.O.dimap(left => truncateRight(t, left), _ => Ok(t))
+  t->withTruncatedLeft |> E.R2.bind(withTruncatedRight)
+}

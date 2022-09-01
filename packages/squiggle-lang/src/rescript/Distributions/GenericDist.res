@@ -242,11 +242,19 @@ module Truncate = {
       switch trySymbolicSimplification(leftCutoff, rightCutoff, t) {
       | Some(r) => Ok(r)
       | None =>
-        toPointSetFn(t)->E.R2.fmap(t => {
-          DistributionTypes.PointSet(
-            PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize,
-          )
-        })
+        switch t {
+        | SampleSet(t) =>
+          switch SampleSetDist.truncate(t, ~leftCutoff, ~rightCutoff) {
+          | Ok(r) => Ok(SampleSet(r))
+          | Error(err) => Error(DistributionTypes.SampleSetError(err))
+          }
+        | _ =>
+          toPointSetFn(t)->E.R2.fmap(t => {
+            DistributionTypes.PointSet(
+              PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize,
+            )
+          })
+        }
       }
     }
   }
