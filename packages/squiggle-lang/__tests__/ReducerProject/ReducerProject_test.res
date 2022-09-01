@@ -189,7 +189,7 @@ describe("project with independent sources", () => {
   test("first run order", () => {
     expect(Project.getRunOrderFor(project, "first")) == ["first"]
   })
-  test("first run order", () => {
+  test("second run order", () => {
     expect(Project.getRunOrderFor(project, "second")) == ["second"]
   })
 })
