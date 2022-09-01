@@ -226,6 +226,6 @@ module T = Dist({
 })
 
 let sampleN = (t: t, n): array<float> => {
-  let normalized = t |> T.normalize |> getShape
+  let normalized = t->T.normalize->getShape
   Stdlib.Random.sample(normalized.xs, {probs: normalized.ys, size: n})
 }
