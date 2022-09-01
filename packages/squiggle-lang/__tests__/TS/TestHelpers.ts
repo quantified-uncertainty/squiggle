@@ -1,16 +1,21 @@
 import { run, SqValueTag } from "../../src/js";
 export { SqValueTag };
 
+expect.extend({
+  toEqualSqValue(x, y) {
+    // hack via https://github.com/facebook/jest/issues/10329#issuecomment-820656061
+    const { getMatchers } = require("expect/build/jestMatchersObject");
+    return getMatchers().toEqual.call(this, x.toString(), y.toString());
+  },
+});
+
 export function testRun(x: string) {
-  const { result, bindings } = run(x); // FIXME - set environment
-  //   x,
-  //   bindings,
-  //   {
-  //     sampleCount: 1000,
-  //     xyPointLength: 100,
-  //   },
-  //   imports
-  // );
+  const { result, bindings } = run(x, {
+    environment: {
+      sampleCount: 1000,
+      xyPointLength: 100,
+    },
+  });
 
   if (result.tag === "Ok") {
     return result.value;

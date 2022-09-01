@@ -32,6 +32,10 @@ export abstract class SqAbstractValue {
     }
     return value;
   };
+
+  toString() {
+    return RSValue.toString(this._value);
+  }
 }
 
 export class SqArrayValue extends SqAbstractValue {

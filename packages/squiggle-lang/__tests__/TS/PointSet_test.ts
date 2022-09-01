@@ -1,4 +1,3 @@
-// import { errorValueToString } from "../../src/js/index";
 import { testRun, expectErrorToBeBounded, SqValueTag } from "./TestHelpers";
 import * as fc from "fast-check";
 
