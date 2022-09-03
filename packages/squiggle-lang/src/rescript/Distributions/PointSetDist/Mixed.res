@@ -270,9 +270,9 @@ module T = Dist({
     })
   }
 
-  let discreteIntegralSum =({discrete}: t): float => Discrete.T.Integral.sum(discrete)
-  let continuousIntegralSum =({continuous}: t): float => Continuous.T.Integral.sum(continuous)
-  let integralSum =(t:t): float => discreteIntegralSum(t) +. continuousIntegralSum(t)
+  let discreteIntegralSum = ({discrete}: t): float => Discrete.T.Integral.sum(discrete)
+  let continuousIntegralSum = ({continuous}: t): float => Continuous.T.Integral.sum(continuous)
+  let integralSum = (t: t): float => discreteIntegralSum(t) +. continuousIntegralSum(t)
 
   let mean = ({discrete, continuous} as t: t): float => {
     let discreteMean = Discrete.T.mean(discrete)
@@ -289,7 +289,7 @@ module T = Dist({
     let _integralSum = integralSum(t)
     let getMeanOfSquares = ({discrete, continuous}: t) => {
       let discreteMean = discrete |> Discrete.shapeMap(XYShape.T.square) |> Discrete.T.mean
-      let continuousMean = continuous -> Continuous.Analysis.getMeanOfSquares
+      let continuousMean = continuous->Continuous.Analysis.getMeanOfSquares
       (discreteMean *. discreteIntegralSum(t) +. continuousMean *. continuousIntegralSum(t)) /.
         integralSum(t)
     }
@@ -300,16 +300,18 @@ module T = Dist({
     | _ => XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
     }
   }
-  
-  let sampleN = (t: t, n:int): array<float> => {
-    let discreteIntegralSum = discreteIntegralSum(t);
-    let integralSum = integralSum(t);
-    let discreteSampleLength:int = (Js.Int.toFloat(n) *. discreteIntegralSum /. integralSum) -> E.Float.toInt
-    let continuousSampleLength = n - discreteSampleLength;
-    let continuousSamples = t.continuous ->Continuous.T.normalize-> Continuous.T.sampleN( continuousSampleLength)
-    let discreteSamples = t.discrete ->Discrete.T.normalize->Discrete.T.sampleN(discreteSampleLength)
-    Js.log3("Samples", continuousSamples, discreteSamples);
-    E.A.concat(discreteSamples, continuousSamples) -> E.A.shuffle
+
+  let sampleN = (t: t, n: int): array<float> => {
+    let discreteIntegralSum = discreteIntegralSum(t)
+    let integralSum = integralSum(t)
+    let discreteSampleLength: int =
+      (Js.Int.toFloat(n) *. discreteIntegralSum /. integralSum)->E.Float.toInt
+    let continuousSampleLength = n - discreteSampleLength
+    let continuousSamples =
+      t.continuous->Continuous.T.normalize->Continuous.T.sampleN(continuousSampleLength)
+    let discreteSamples = t.discrete->Discrete.T.normalize->Discrete.T.sampleN(discreteSampleLength)
+    Js.log3("Samples", continuousSamples, discreteSamples)
+    E.A.concat(discreteSamples, continuousSamples)->E.A.shuffle
   }
 })
 

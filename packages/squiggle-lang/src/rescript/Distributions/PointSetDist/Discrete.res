@@ -224,8 +224,8 @@ module T = Dist({
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
   }
 
-let sampleN = (t: t, n): array<float> => {
-  let normalized = t->normalize->getShape
-  Stdlib.Random.sample(normalized.xs, {probs: normalized.ys, size: n})
-}
+  let sampleN = (t: t, n): array<float> => {
+    let normalized = t->normalize->getShape
+    Stdlib.Random.sample(normalized.xs, {probs: normalized.ys, size: n})
+  }
 })

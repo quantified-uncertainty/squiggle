@@ -31,7 +31,7 @@ let isSymbolic = (t: t) =>
 
 let sampleN = (t: t, n) =>
   switch t {
-  | PointSet(r) => PointSetDist.T.sampleN(r,n)
+  | PointSet(r) => PointSetDist.T.sampleN(r, n)
   | SampleSet(r) => SampleSetDist.sampleN(r, n)
   | Symbolic(r) => SymbolicDist.T.sampleN(n, r)
   }

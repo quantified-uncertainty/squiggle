@@ -201,9 +201,9 @@ module T = Dist({
 
   let sampleN = (t: t, int): array<float> =>
     switch t {
-    | Mixed(m) => Mixed.T.sampleN(m,int)
-    | Discrete(m) => Discrete.T.sampleN(m,int)
-    | Continuous(m) => Continuous.T.sampleN(m,int)
+    | Mixed(m) => Mixed.T.sampleN(m, int)
+    | Discrete(m) => Discrete.T.sampleN(m, int)
+    | Continuous(m) => Continuous.T.sampleN(m, int)
     }
 })
 
