@@ -559,6 +559,7 @@ module A = {
   let isEmpty = r => length(r) < 1
   let stableSortBy = Belt.SortArray.stableSortBy
   let toNoneIfEmpty = r => isEmpty(r) ? None : Some(r)
+  let shuffle = Belt.Array.shuffle
   let toRanges = (a: array<'a>) =>
     switch a |> Belt.Array.length {
     | 0

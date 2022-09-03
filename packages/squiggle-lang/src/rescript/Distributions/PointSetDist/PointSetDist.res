@@ -198,6 +198,13 @@ module T = Dist({
     | Discrete(m) => Discrete.T.variance(m)
     | Continuous(m) => Continuous.T.variance(m)
     }
+
+  let sampleN = (t: t, int): array<float> =>
+    switch t {
+    | Mixed(m) => Mixed.T.sampleN(m,int)
+    | Discrete(m) => Discrete.T.sampleN(m,int)
+    | Continuous(m) => Continuous.T.sampleN(m,int)
+    }
 })
 
 let logScore = (args: PointSetDist_Scoring.scoreArgs): result<float, Operation.Error.t> =>
@@ -234,12 +241,6 @@ let isFloat = (t: t) =>
   | Discrete({xyShape: {xs: [_], ys: [1.0]}}) => true
   | _ => false
   }
-
-let sampleNRendered = (n, dist) => {
-  let integralCache = T.Integral.get(dist)
-  let distWithUpdatedIntegralCache = T.updateIntegralCache(Some(integralCache), dist)
-  doN(n, () => sample(distWithUpdatedIntegralCache))
-}
 
 let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   switch distToFloatOp {

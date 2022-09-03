@@ -31,9 +31,9 @@ let isSymbolic = (t: t) =>
 
 let sampleN = (t: t, n) =>
   switch t {
-  | PointSet(r) => PointSetDist.sampleNRendered(n, r)
-  | Symbolic(r) => SymbolicDist.T.sampleN(n, r)
+  | PointSet(r) => PointSetDist.T.sampleN(r,n)
   | SampleSet(r) => SampleSetDist.sampleN(r, n)
+  | Symbolic(r) => SymbolicDist.T.sampleN(n, r)
   }
 
 let sample = (t: t) => sampleN(t, 1)->E.A.first |> E.O.toExn("Should not have happened")

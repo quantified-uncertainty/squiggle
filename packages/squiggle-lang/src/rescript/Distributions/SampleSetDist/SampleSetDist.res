@@ -139,7 +139,7 @@ let mixture = (values: array<(t, float)>, intendedLength: int) => {
     ->Belt.Array.mapWithIndex((i, (_, weight)) => (E.I.toFloat(i), weight /. totalWeight))
     ->XYShape.T.fromZippedArray
     ->Discrete.make
-    ->Discrete.sampleN(intendedLength)
+    ->Discrete.T.sampleN(intendedLength)
   let dists = values->E.A2.fmap(E.Tuple2.first)->E.A2.fmap(T.get)
   let samples =
     discreteSamples

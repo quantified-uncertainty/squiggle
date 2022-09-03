@@ -33,6 +33,7 @@ module type dist = {
 
   let mean: t => float
   let variance: t => float
+  let sampleN: (t, int) => array<float>
 }
 
 module Dist = (T: dist) => {
@@ -64,6 +65,8 @@ module Dist = (T: dist) => {
     let yToX = T.integralYtoX
     let sum = T.integralEndY
   }
+
+  let sampleN = T.sampleN
 }
 
 module Common = {

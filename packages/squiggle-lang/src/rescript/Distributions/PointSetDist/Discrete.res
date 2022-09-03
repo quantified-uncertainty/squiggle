@@ -223,9 +223,9 @@ module T = Dist({
     let getMeanOfSquares = t => t |> shapeMap(XYShape.T.square) |> mean
     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
   }
-})
 
 let sampleN = (t: t, n): array<float> => {
-  let normalized = t->T.normalize->getShape
+  let normalized = t->normalize->getShape
   Stdlib.Random.sample(normalized.xs, {probs: normalized.ys, size: n})
 }
+})

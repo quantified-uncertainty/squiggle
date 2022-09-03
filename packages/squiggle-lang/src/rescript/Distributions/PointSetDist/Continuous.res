@@ -270,6 +270,25 @@ module T = Dist({
   }
   let variance = (t: t): float =>
     XYShape.Analysis.getVarianceDangerously(t, mean, Analysis.getMeanOfSquares)
+
+let doN = (n, fn) => {
+  let items = Belt.Array.make(n, 0.0)
+  for x in 0 to n - 1 {
+    let _ = Belt.Array.set(items, x, fn())
+  }
+  items
+}
+
+let sample = (t: t): float => {
+  let randomItem = Random.float(1.0)
+  t |> integralYtoX(randomItem)
+}
+
+let sampleN = (dist, n) => {
+  let integralCache = integral(dist)
+  let distWithUpdatedIntegralCache = updateIntegralCache(Some(integralCache), dist)
+  doN(n, () => sample(distWithUpdatedIntegralCache))
+}
 })
 
 let isNormalized = (t: t): bool => {
