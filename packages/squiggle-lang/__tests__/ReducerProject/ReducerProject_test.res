@@ -186,10 +186,10 @@ describe("project with independent sources", () => {
   let project = Project.createProject()
   Project.setSource(project, "first", "1")
   Project.setSource(project, "second", "2")
-  test("first run order", () => {
+  test("run order of first", () => {
     expect(Project.getRunOrderFor(project, "first")) == ["first"]
   })
-  test("second run order", () => {
+  test("run order of second", () => {
     expect(Project.getRunOrderFor(project, "second")) == ["second"]
   })
 })
