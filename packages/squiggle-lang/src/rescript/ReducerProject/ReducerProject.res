@@ -256,6 +256,11 @@ module Private = {
     let these = project->getStdLib
     let ofUser = Continuation.minus(those, these)
 
-    (getResultOption(project, "main")->Belt.Option.getWithDefault(InternalExpressionValue.IEvVoid->Ok), ofUser)
+    (
+      getResultOption(project, "main")->Belt.Option.getWithDefault(
+        InternalExpressionValue.IEvVoid->Ok,
+      ),
+      ofUser,
+    )
   }
 }
