@@ -44,11 +44,52 @@ module ThreeNumbersToNumber = {
     )
 }
 
+module FunctionToNumberZero = {
+  let make = (name, fn) =>
+    FnDefinition.make(
+      ~name,
+      ~inputs=[FRTypeLambda],
+      ~run=(_, inputs, _, _) => {
+        Ok(0.0)->E.R2.fmap(Wrappers.evNumber)
+      },
+      (),
+    )
+}
+
 module Internals = {
   let factorial = Stdlib.Math.factorial
   let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
   let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
+  let applyFun = (element, lambda, environment, reducer) => {
+    let rNewElem = Reducer_Expression_Lambda.doLambdaCall(
+          lambda,
+          element,
+          environment,
+          reducer,
+        )
+  }
+  let map = (array: array<internalExpressionValue>, environment, eLambdaValue, reducer): result<
+    ReducerInterface_InternalExpressionValue.t,
+    Reducer_ErrorValue.errorValue,
+  > => {
+    let x = array[0]
+    let wrappedY = {
+        let result2 = Reducer_Expression_Lambda.doLambdaCall(
+            eLambdaValue,
+            list{x},
+            environment,
+            reducer,
+          )
+        let result3 = switch(result2){
+          | Ok(a) => Ok(list{a})
+          | Error(b) => Error(b)
+        }
+        result3
+      }
+    wrappedY->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)
+  }
+
 }
 
 let library = [
@@ -90,6 +131,36 @@ let library = [
     ~output=EvtNumber,
     ~examples=[`Danger.binomial(1, 20, 0.5)`],
     ~definitions=[ThreeNumbersToNumber.make("binomial", Internals.binomial)],
+    (),
+  ),
+  Function.make(
+    ~name="functionToZero",
+    ~nameSpace,
+    ~requiresNamespace,
+    ~output=EvtNumber,
+    ~examples=[`Danger.functionToZero({|x| x})`],
+    ~definitions=[FunctionToNumberZero.make("functionToZero", x => x)],
+    (),
+  ),
+  Function.make(
+    ~name="map",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[`List.map([1,4,5], {|x| x+1})`],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="map",
+        ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [IEvArray(array), IEvLambda(lambda)] =>
+            Internals.map(array, env, lambda, reducer)->E.R2.errMap(_ => "Error!")
+          | _ => Error(impossibleError)
+          },
+        (),
+      ),
+    ],
     (),
   ),
 ]
