@@ -20,18 +20,6 @@ module NumberToNumber = {
     )
 }
 
-module TwoNumbersToNumber = {
-  let make = (name, fn) =>
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeNumber, FRTypeNumber],
-      ~run=(_, inputs, _, _) => {
-        inputs->Prepare.ToValueTuple.twoNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
-      },
-      (),
-    )
-}
-
 module ArrayNumberDist = {
   let make = (name, fn) => {
     FnDefinition.make(
