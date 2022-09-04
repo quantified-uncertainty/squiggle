@@ -61,19 +61,11 @@ module Internals = {
   let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
   let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
-  let applyFun = (element, lambda, environment, reducer) => {
-    let rNewElem = Reducer_Expression_Lambda.doLambdaCall(
-          lambda,
-          element,
-          environment,
-          reducer,
-        )
-  }
-  let map = (array: array<internalExpressionValue>, environment, eLambdaValue, reducer): result<
+  let map = (num: internalExpressionValue, environment, eLambdaValue, reducer): result<
     ReducerInterface_InternalExpressionValue.t,
     Reducer_ErrorValue.errorValue,
   > => {
-    let x = array[0]
+    let x = num
     let wrappedY = {
         let result2 = Reducer_Expression_Lambda.doLambdaCall(
             eLambdaValue,
@@ -151,11 +143,11 @@ let library = [
     ~definitions=[
       FnDefinition.make(
         ~name="map",
-        ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
+        ~inputs=[FRTypeNumber, FRTypeLambda],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
-          | [IEvArray(array), IEvLambda(lambda)] =>
-            Internals.map(array, env, lambda, reducer)->E.R2.errMap(_ => "Error!")
+          | [num, IEvLambda(lambda)] =>
+            Internals.map(num, env, lambda, reducer)->E.R2.errMap(_ => "Error!")
           | _ => Error(impossibleError)
           },
         (),
