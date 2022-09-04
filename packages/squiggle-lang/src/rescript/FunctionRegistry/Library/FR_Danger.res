@@ -74,13 +74,51 @@ module Internals = {
   let internalZero = ReducerInterface_InternalExpressionValue.IEvNumber(0.0)
   let applyFunctionAtZero = (aLambda, environment, reducer) =>
     applyFunctionAtPoint(aLambda, internalZero, environment, reducer)
+  @dead
   let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
     applyFunctionAtPoint(aLambda, ReducerInterface_InternalExpressionValue.IEvNumber(point))
-  let integrateFunction = (aLambda, min: float, max: float, increment, environment, reducer) => {
+
+  let integrateFunctionBetweenWithIncrement = (
+    aLambda,
+    min: float,
+    max: float,
+    increment: float,
+    environment,
+    reducer,
+  ) => {
     // Should be easy, but tired today.
-    0.0
+    let applyFunctionAtFloatToFloatOption = (point: float) => {
+      let pointAsInternalExpression = ReducerInterface_InternalExpressionValue.IEvNumber(point)
+      let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+        aLambda,
+        list{pointAsInternalExpression},
+        environment,
+        reducer,
+      )
+      let result = switch resultAsInternalExpression {
+      | Ok(IEvNumber(x)) => Ok(x)
+      | Error(_) => Error("Integration error in Danger.integrate")
+      | _ => Error("Integration error in Danger.integrate")
+      }
+      result
+    }
+    let xsLength = Js.Math.ceil((max -. min) /. increment)
+    let xs = Belt.Array.makeBy(xsLength, i => min +. Belt_Float.fromInt(i) *. increment)
+    let ysOptions = Belt.Array.map(xs, x => applyFunctionAtFloatToFloatOption(x))
+    let okYs = E.A.R.filterOk(ysOptions)
+    let result = switch E.A.length(ysOptions) == E.A.length(okYs) {
+    | true => {
+        let numericIntermediate = okYs->E.A.reduce(0.0, (a, b) => a +. b)
+        let numericIntermediate2 = numericIntermediate *. increment
+        let resultWrapped =
+          numericIntermediate2->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
+        resultWrapped
+      }
+    | false => Error("Integration error in Danger.integrate")
+    }
+    result
   }
-  let getDiminishingMarginalReturnsEquilibrium = "To do"
+  @dead let getDiminishingMarginalReturnsEquilibrium = "To do"
 }
 
 let library = [
@@ -143,12 +181,14 @@ let library = [
       FnDefinition.make(
         ~name="applyFunctionAtZero",
         ~inputs=[FRTypeLambda],
-        ~run=(inputs, _, env, reducer) =>
-          switch inputs {
+        ~run=(inputs, _, env, reducer) => {
+          let result = switch inputs {
           | [IEvLambda(aLambda)] =>
             Internals.applyFunctionAtZero(aLambda, env, reducer)->E.R2.errMap(_ => "Error!")
           | _ => Error(impossibleError)
-          },
+          }
+          result
+        },
         (),
       ),
     ],
@@ -170,6 +210,43 @@ let library = [
             Internals.applyFunctionAtPoint(aLambda, point, env, reducer)->E.R2.errMap(_ => "Error!")
           | _ => Error(impossibleError)
           },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="integrateFunctionBetweenWithIncrement",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`], // should be [x^2 + x]1_10 = (10^2 + 10) - (1 + 1) = 110 - 2 = 118
+    ~definitions=[
+      FnDefinition.make(
+        ~name="integrateFunctionBetweenWithIncrement",
+        ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
+        ~run=(inputs, _, env, reducer) => {
+          let result = switch inputs {
+          | [_, _, _, IEvNumber(0.0)] =>
+            Error("Integration error in Danger.integrate: Increment can't be 0.")
+          | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(increment)] =>
+            Internals.integrateFunctionBetweenWithIncrement(
+              aLambda,
+              min,
+              max,
+              increment,
+              env,
+              reducer,
+            )->E.R2.errMap(_ =>
+              "Integration error in Danger.integrate. Something went wrong along the way"
+            )
+          | _ =>
+            Error(
+              "Integration error in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
+            )
+          }
+          result
+        },
         (),
       ),
     ],
