@@ -61,23 +61,22 @@ module Internals = {
   let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
   let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
-  let applyFunctionAtPoint = (aLambda, internalNumber: internalExpressionValue, environment, reducer): result<
-    ReducerInterface_InternalExpressionValue.t,
-    Reducer_ErrorValue.errorValue,
-  > => {
+  let applyFunctionAtPoint = (
+    aLambda,
+    internalNumber: internalExpressionValue,
+    environment,
+    reducer,
+  ): result<ReducerInterface_InternalExpressionValue.t, Reducer_ErrorValue.errorValue> => {
     let x = internalNumber
-    let result =  Reducer_Expression_Lambda.doLambdaCall(
-      aLambda,
-      list{x},
-      environment,
-      reducer,
-    )
+    let result = Reducer_Expression_Lambda.doLambdaCall(aLambda, list{x}, environment, reducer)
     result
   }
   let internalZero = ReducerInterface_InternalExpressionValue.IEvNumber(0.0)
-  let applyFunctionAtZero = (aLambda,environment , reducer) => applyFunctionAtPoint(aLambda, internalZero, environment, reducer)
-  let applyFunctionAtFloat = (aLambda, point, environment, reducer) => applyFunctionAtPoint(aLambda, ReducerInterface_InternalExpressionValue.IEvNumber(point))
-  let integrateFunction = (aLambda, min:float, max:float, increment, environment, reducer) => {
+  let applyFunctionAtZero = (aLambda, environment, reducer) =>
+    applyFunctionAtPoint(aLambda, internalZero, environment, reducer)
+  let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
+    applyFunctionAtPoint(aLambda, ReducerInterface_InternalExpressionValue.IEvNumber(point))
+  let integrateFunction = (aLambda, min: float, max: float, increment, environment, reducer) => {
     // Should be easy, but tired today.
     0.0
   }
