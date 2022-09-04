@@ -220,7 +220,8 @@ let library = [
     ~nameSpace,
     ~output=EvtArray,
     ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`], // should be [x^2 + x]1_10 = (10^2 + 10) - (1 + 1) = 110 - 2 = 118
+    ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`], // should be [x^2/2 + x]1_10 = (50 + 10) - (1 + 1) = 60 - 2 = 58
+    // Some testing needed to see where the small deviation comes from.
     ~definitions=[
       FnDefinition.make(
         ~name="integrateFunctionBetweenWithIncrement",
