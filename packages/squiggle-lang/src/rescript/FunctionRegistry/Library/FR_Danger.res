@@ -74,6 +74,8 @@ module Internals = {
     )
     result
   }
+  let internalZero = ReducerInterface_InternalExpressionValue.IEvNumber(0.0)
+  let applyFunctionAtZero = (aLambda) => applyFunctionAtPoint(aLambda, internalZero)
 
 }
 
@@ -125,6 +127,27 @@ let library = [
     ~output=EvtNumber,
     ~examples=[`Danger.functionToZero({|x| x})`],
     ~definitions=[FunctionToNumberZero.make("functionToZero", x => x)],
+    (),
+  ),
+  Function.make(
+    ~name="applyFunctionAtZero",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[`Danger.applyFunctionAtZero({|x| x+1})`],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="applyFunctionAtPoint",
+        ~inputs=[FRTypeLambda],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [IEvLambda(aLambda)] =>
+            Internals.applyFunctionAtZero(aLambda, env, reducer)->E.R2.errMap(_ => "Error!")
+          | _ => Error(impossibleError)
+          },
+        (),
+      ),
+    ],
     (),
   ),
   Function.make(
