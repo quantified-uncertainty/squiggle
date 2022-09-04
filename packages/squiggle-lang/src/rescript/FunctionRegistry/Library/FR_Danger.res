@@ -61,25 +61,18 @@ module Internals = {
   let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
   let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
-  let map = (array: array<internalExpressionValue>, environment, eLambdaValue, reducer): result<
+  let applyFunctionAtPoint = (aLambda, internalNumber: internalExpressionValue, environment , reducer): result<
     ReducerInterface_InternalExpressionValue.t,
     Reducer_ErrorValue.errorValue,
   > => {
-    let x = array[0]
-    let wrappedY = {
-        let result2 = Reducer_Expression_Lambda.doLambdaCall(
-            eLambdaValue,
-            list{x},
-            environment,
-            reducer,
-          )
-        let result3 = switch(result2){
-          | Ok(a) => Ok(list{a})
-          | Error(b) => Error(b)
-        }
-        result3
-      }
-    wrappedY->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)
+    let x = internalNumber
+    let result =  Reducer_Expression_Lambda.doLambdaCall(
+      aLambda,
+      list{x},
+      environment,
+      reducer,
+    )
+    result
   }
 
 }
@@ -135,19 +128,19 @@ let library = [
     (),
   ),
   Function.make(
-    ~name="map",
+    ~name="applyFunctionAtPoint",
     ~nameSpace,
     ~output=EvtArray,
     ~requiresNamespace=false,
-    ~examples=[`List.map([1,4,5], {|x| x+1})`],
+    ~examples=[`Danger.applyFunctionAtPoint({|x| x+1}, 1)`],
     ~definitions=[
       FnDefinition.make(
-        ~name="map",
-        ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
+        ~name="applyFunctionAtPoint",
+        ~inputs=[FRTypeLambda, FRTypeNumber],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
-          | [IEvArray(array), IEvLambda(lambda)] =>
-            Internals.map(array, env, lambda, reducer)->E.R2.errMap(_ => "Error!")
+          | [IEvLambda(aLambda), point] =>
+            Internals.applyFunctionAtPoint(aLambda, point, env, reducer)->E.R2.errMap(_ => "Error!")
           | _ => Error(impossibleError)
           },
         (),
