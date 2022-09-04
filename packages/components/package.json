@@ -66,7 +66,7 @@
   },
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
-    "build:cjs": "tsc -b",
+    "build:cjs": "rm -rf dist/src && tsc -b",
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
     "build:storybook": "build-storybook -s public",
     "build": "yarn run build:cjs && yarn run build:css && yarn run build:storybook",
@@ -74,7 +74,7 @@
     "all": "yarn bundle && yarn build",
     "lint": "prettier --check .",
     "format": "prettier --write .",
-    "prepack": "yarn bundle && tsc -b"
+    "prepack": "yarn run build:cjs && yarn run bundle"
   },
   "eslintConfig": {
     "extends": [
