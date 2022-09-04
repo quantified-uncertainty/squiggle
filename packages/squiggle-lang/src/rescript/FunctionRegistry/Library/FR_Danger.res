@@ -61,7 +61,7 @@ module Internals = {
   let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
   let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
-  let applyFunctionAtPoint = (aLambda, internalNumber: internalExpressionValue, environment , reducer): result<
+  let applyFunctionAtPoint = (aLambda, internalNumber: internalExpressionValue, environment, reducer): result<
     ReducerInterface_InternalExpressionValue.t,
     Reducer_ErrorValue.errorValue,
   > => {
@@ -75,8 +75,13 @@ module Internals = {
     result
   }
   let internalZero = ReducerInterface_InternalExpressionValue.IEvNumber(0.0)
-  let applyFunctionAtZero = (aLambda) => applyFunctionAtPoint(aLambda, internalZero)
-
+  let applyFunctionAtZero = (aLambda,environment , reducer) => applyFunctionAtPoint(aLambda, internalZero, environment, reducer)
+  let applyFunctionAtFloat = (aLambda, point, environment, reducer) => applyFunctionAtPoint(aLambda, ReducerInterface_InternalExpressionValue.IEvNumber(point))
+  let integrateFunction = (aLambda, min:float, max:float, increment, environment, reducer) => {
+    // Should be easy, but tired today.
+    0.0
+  }
+  let getDiminishingMarginalReturnsEquilibrium = "To do"
 }
 
 let library = [
@@ -137,7 +142,7 @@ let library = [
     ~examples=[`Danger.applyFunctionAtZero({|x| x+1})`],
     ~definitions=[
       FnDefinition.make(
-        ~name="applyFunctionAtPoint",
+        ~name="applyFunctionAtZero",
         ~inputs=[FRTypeLambda],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
