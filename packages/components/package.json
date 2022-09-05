@@ -39,7 +39,7 @@
     "@testing-library/user-event": "^14.4.3",
     "@types/jest": "^27.5.0",
     "@types/lodash": "^4.14.184",
-    "@types/node": "^18.7.13",
+    "@types/node": "^18.7.15",
     "@types/react": "^18.0.18",
     "@types/styled-components": "^5.1.26",
     "@types/webpack": "^5.28.0",
