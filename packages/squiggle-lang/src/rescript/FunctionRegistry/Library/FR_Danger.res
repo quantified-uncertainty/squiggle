@@ -95,9 +95,9 @@ module Internals = {
       | Ok(IEvNumber(x)) => Ok(x)
       | Error(_) =>
         Error(
-          "Integration error in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+          "Integration error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
         )
-      | _ => Error("Integration error in Danger.integrate")
+      | _ => Error("Integration error 2 in Danger.integrate")
       }
       result
     }
@@ -161,7 +161,7 @@ module Internals = {
         }
         resultWithOuterPoints
       }
-    | false => Error("Integration error in Danger.integrate")
+    | false => Error("Integration error 3 in Danger.integrate")
     }
     result
   }
@@ -277,7 +277,7 @@ let library = [
         ~run=(inputs, _, env, reducer) => {
           let result = switch inputs {
           | [_, _, _, IEvNumber(0.0)] =>
-            Error("Integration error in Danger.integrate: Increment can't be 0.")
+            Error("Integration error 4 in Danger.integrate: Increment can't be 0.")
           | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(numIntegrationPoints)] =>
             Internals.integrateFunctionBetweenWithNumIntegrationPoints(
               aLambda,
@@ -287,11 +287,11 @@ let library = [
               env,
               reducer,
             )->E.R2.errMap(_ =>
-              "Integration error in Danger.integrate. Something went wrong along the way"
+              "Integration error 5 in Danger.integrate. Something went wrong along the way"
             )
           | _ =>
             Error(
-              "Integration error in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
+              "Integration error 6 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
             )
           }
           result
@@ -328,11 +328,11 @@ let library = [
               env,
               reducer,
             )->E.R2.errMap(_ =>
-              "Integration error in Danger.integrate. Something went wrong along the way"
+              "Integration error 7 in Danger.integrate. Something went wrong along the way"
             )
           | _ =>
             Error(
-              "Integration error in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
+              "Integration error 8 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
             )
           }
           result
