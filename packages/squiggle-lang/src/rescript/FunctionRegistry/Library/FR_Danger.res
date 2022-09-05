@@ -173,7 +173,7 @@ module Internals = {
   }
   type diminishingReturnsAccumulatorInner = {
     optimalAllocations: array<float>,
-    currentMarginalReturns: array<result<float, string>>,
+    currentMarginalReturns: result<array<float>, string>,
   }
   type diminishingReturnsAccumulator = result<diminishingReturnsAccumulatorInner, string>
   let diminishingMarginalReturnsSkeleton = (
@@ -214,18 +214,55 @@ module Internals = {
     let increment = funds /. numDivisions
     let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
 
+    let findBiggestMarginalReturnsIndex = (_) => 0
     let initAccumulator: diminishingReturnsAccumulator = Ok({
       optimalAllocations: [0.0, 0.0],
-      currentMarginalReturns: [
+      currentMarginalReturns: E.A.R.firstErrorOrOpen([
         applyFunctionAtFloatToFloatOption(lambda1, 0.0),
         applyFunctionAtFloatToFloatOption(lambda2, 0.0),
-      ],
+      ]),
     })
     let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
       acc,
-      new,
+      newIncrement,
     ) => {
+      switch(acc){
+        | Ok(accInner) => {
+          let currentMarginalReturnsWrapped = accInner.currentMarginalReturns
+          let newAccWrapped = switch(currentMarginalReturnsWrapped){
+            | Ok(currentMarginalReturns) => {
+              let biggestMarginalReturnsIndex = findBiggestMarginalReturnsIndex(currentMarginalReturns)
+              let newOptimalAllocations  = Belt.Array.copy(accInner.optimalAllocations)
+              let newOptimalAllocationsi = 
+                newOptimalAllocations[biggestMarginalReturnsIndex] +. newIncrement
+              newOptimalAllocations[biggestMarginalReturnsIndex] = newOptimalAllocationsi
+              let lambdai = biggestMarginalReturnsIndex == 0 ? lambda1: lambda2 // to do: generalize
+              let newMarginalResultsLambdai = applyFunctionAtFloatToFloatOption(lambdai, newOptimalAllocationsi)
+              let newCurrentMarginalReturns = switch(newMarginalResultsLambdai){
+                | Ok(value) => {
+                    let result = Belt.Array.copy(currentMarginalReturns)
+                    result[biggestMarginalReturnsIndex] = value
+                    Ok(result)
+                }
+                | Error(b) => Error(b)
+              }
+               
+              let newAcc: diminishingReturnsAccumulatorInner = {
+                optimalAllocations: newOptimalAllocations,
+                currentMarginalReturns: newCurrentMarginalReturns
+              }
+              Ok(newAcc)
+            }
+            | Error(b) => Error(b)
+          }
+          newAccWrapped
+        }
+        | Error(b) => Error(b)
+      }
+      /*let findSmaller = (_) => 0
+      let smallerDMR = 
       acc
+      */
     })
     let optimalAllocationResult = switch optimalAllocationEndAccumulator {
     | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
