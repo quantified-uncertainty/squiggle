@@ -55,7 +55,6 @@ module Internals = {
 
   // Integral helper functions
 
-
   let castFloatToInternalNumber = x => ReducerInterface_InternalExpressionValue.IEvNumber(x)
   let castArrayOfFloatsToInternalArrayOfInternals = xs => ReducerInterface_InternalExpressionValue.IEvArray(
     Belt.Array.map(xs, x => castFloatToInternalNumber(x)),
@@ -79,7 +78,7 @@ module Internals = {
     // reason for existence: might be an useful template to have for calculating diminishing marginal returns later on
     applyFunctionAtPoint(aLambda, castFloatToInternalNumber(point), environment, reducer)
   // integrate function itself
-  */
+ */
   let integrateFunctionBetweenWithNumIntegrationPoints = (
     aLambda,
     min: float,
@@ -323,7 +322,7 @@ module Internals = {
     let increment = funds /. numDivisions
     let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
     let numLambdas = E.A.length(lambdas)
-    
+
     let initAccumulator: diminishingReturnsAccumulator = Ok({
       optimalAllocations: Belt.Array.makeBy(numLambdas, _ => 0.0),
       currentMarginalReturns: E.A.fmap(
@@ -331,7 +330,7 @@ module Internals = {
         lambdas,
       )->E.A.R.firstErrorOrOpen,
     })
-    
+
     let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
       acc,
       newIncrement,
@@ -377,7 +376,7 @@ module Internals = {
     | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
     | Error(b) => Error(b)
     }
-    
+
     optimalAllocationResult
     // let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
     // result
@@ -477,7 +476,7 @@ let library = [
     ],
     (),
   ),
-  */
+ */
   // Integral in terms of function, min, max, num points
   // Note that execution time will be more predictable, because it
   // will only depend on num points and the complexity of the function
