@@ -126,7 +126,7 @@
     "package": "npx vsce package --yarn"
   },
   "devDependencies": {
-    "@types/glob": "^7.2.0",
+    "@types/glob": "^8.0.0",
     "@types/node": "18.x",
     "@types/vscode": "^1.70.0",
     "glob": "^8.0.3",
