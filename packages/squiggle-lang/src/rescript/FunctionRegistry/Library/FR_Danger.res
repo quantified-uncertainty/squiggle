@@ -76,8 +76,14 @@ module Internals = {
   let internalZero = ReducerInterface_InternalExpressionValue.IEvNumber(0.0)
   let applyFunctionAtZero = (aLambda, environment, reducer) =>
     applyFunctionAtPoint(aLambda, internalZero, environment, reducer)
-  @dead let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
-    applyFunctionAtPoint(aLambda, ReducerInterface_InternalExpressionValue.IEvNumber(point), environment, reducer)
+  @dead
+  let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
+    applyFunctionAtPoint(
+      aLambda,
+      ReducerInterface_InternalExpressionValue.IEvNumber(point),
+      environment,
+      reducer,
+    )
   // simplest integral function
   let integrateFunctionBetweenWithIncrement = (
     aLambda,
@@ -146,7 +152,7 @@ module Internals = {
     let xsLengthCandidate = Belt.Float.toInt(Js.Math.round(numIntervals))
     let xsLength = xsLengthCandidate > 0 ? xsLengthCandidate : 1
     let increment = (max -. min) /. Belt.Int.toFloat(xsLength)
-    let xs = Belt.Array.makeBy(xsLength +1, i => min +. Belt_Float.fromInt(i) *. increment)
+    let xs = Belt.Array.makeBy(xsLength + 1, i => min +. Belt_Float.fromInt(i) *. increment)
     // makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
     let ysOptions = Belt.Array.map(xs, x => applyFunctionAtFloatToFloatOption(x))
     let okYs = E.A.R.filterOk(ysOptions)
@@ -266,7 +272,7 @@ let library = [
     ~nameSpace,
     ~output=EvtNumber,
     ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`], 
+    ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`],
     // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
     // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
     ~definitions=[
@@ -301,12 +307,12 @@ let library = [
     (),
   ),
   // Integral which is a bit more thoughtful
-    Function.make(
+  Function.make(
     ~name="integrateFunctionBetweenWithNumIntervals",
     ~nameSpace,
     ~output=EvtNumber,
     ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithNumIntervals({|x| x+1}, 1, 10, 10)`], 
+    ~examples=[`Danger.integrateFunctionBetweenWithNumIntervals({|x| x+1}, 1, 10, 10)`],
     // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
     // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
     ~definitions=[
@@ -323,7 +329,7 @@ let library = [
               min,
               max,
               numIntervals,
-              env,  
+              env,
               reducer,
             )->E.R2.errMap(_ =>
               "Integration error in Danger.integrate. Something went wrong along the way"
