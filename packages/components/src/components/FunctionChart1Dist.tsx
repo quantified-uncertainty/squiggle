@@ -133,26 +133,23 @@ let getPercentiles = ({
   let groupedErrors: errors = _.groupBy(errors, (x) => x.value);
 
   let percentiles: percentiles = functionImage.map(({ x, value }) => {
-    // We convert it to to a pointSet distribution first, so that in case its a sample set
-    // distribution, it doesn't internally convert it to a pointSet distribution for every
-    // single inv() call.
-    let toPointSet = unwrap(value.pointSet(environment)).asDistribution();
-    return {
+    const res = {
       x: x,
-      p1: unwrap(toPointSet.inv(environment, 0.01)),
-      p5: unwrap(toPointSet.inv(environment, 0.05)),
-      p10: unwrap(toPointSet.inv(environment, 0.1)),
-      p20: unwrap(toPointSet.inv(environment, 0.2)),
-      p30: unwrap(toPointSet.inv(environment, 0.3)),
-      p40: unwrap(toPointSet.inv(environment, 0.4)),
-      p50: unwrap(toPointSet.inv(environment, 0.5)),
-      p60: unwrap(toPointSet.inv(environment, 0.6)),
-      p70: unwrap(toPointSet.inv(environment, 0.7)),
-      p80: unwrap(toPointSet.inv(environment, 0.8)),
-      p90: unwrap(toPointSet.inv(environment, 0.9)),
-      p95: unwrap(toPointSet.inv(environment, 0.95)),
-      p99: unwrap(toPointSet.inv(environment, 0.99)),
+      p1: unwrap(value.inv(environment, 0.01)),
+      p5: unwrap(value.inv(environment, 0.05)),
+      p10: unwrap(value.inv(environment, 0.1)),
+      p20: unwrap(value.inv(environment, 0.2)),
+      p30: unwrap(value.inv(environment, 0.3)),
+      p40: unwrap(value.inv(environment, 0.4)),
+      p50: unwrap(value.inv(environment, 0.5)),
+      p60: unwrap(value.inv(environment, 0.6)),
+      p70: unwrap(value.inv(environment, 0.7)),
+      p80: unwrap(value.inv(environment, 0.8)),
+      p90: unwrap(value.inv(environment, 0.9)),
+      p95: unwrap(value.inv(environment, 0.95)),
+      p99: unwrap(value.inv(environment, 0.99)),
     };
+    return res;
   });
 
   return { percentiles, errors: groupedErrors };
