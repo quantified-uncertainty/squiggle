@@ -161,7 +161,10 @@ module Internals = {
         }
         resultWithOuterPoints
       }
-    | false => Error("Integration error 3 in Danger.integrate")
+    | false =>
+      Error(
+        "Integration error 3 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+      )
     }
     result
   }
@@ -286,12 +289,10 @@ let library = [
               numIntegrationPoints,
               env,
               reducer,
-            )->E.R2.errMap(_ =>
-              "Integration error 5 in Danger.integrate. Something went wrong along the way"
             )
           | _ =>
             Error(
-              "Integration error 6 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
+              "Integration error 5 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
             )
           }
           result
