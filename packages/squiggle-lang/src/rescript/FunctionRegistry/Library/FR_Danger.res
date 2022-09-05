@@ -69,8 +69,11 @@ module Internals = {
     result
   }
   let castFloatToInternalNumber = x => ReducerInterface_InternalExpressionValue.IEvNumber(x)
-  let castArrayOfFloatsToInternalArrayOfInternals = xs => ReducerInterface_InternalExpressionValue.IEvArray(Belt.Array.map(xs, x => castFloatToInternalNumber(x)))
-  @dead let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
+  let castArrayOfFloatsToInternalArrayOfInternals = xs => ReducerInterface_InternalExpressionValue.IEvArray(
+    Belt.Array.map(xs, x => castFloatToInternalNumber(x)),
+  )
+  @dead
+  let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
     // reason for existence: might be an useful template to have for calculating diminishing marginal returns later on
     applyFunctionAtPoint(aLambda, castFloatToInternalNumber(point), environment, reducer)
   // integrate function itself
@@ -84,7 +87,7 @@ module Internals = {
   ) => {
     let applyFunctionAtFloatToFloatOption = (point: float) => {
       // Defined here so that it has access to environment, reducer
-      let pointAsInternalExpression = ReducerInterface_InternalExpressionValue.IEvNumber(point)
+      let pointAsInternalExpression = castFloatToInternalNumber(point)
       let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
         aLambda,
         list{pointAsInternalExpression},
@@ -168,15 +171,67 @@ module Internals = {
     }
     result
   }
+  type diminishingReturnsAccumulatorInner = {
+    optimalAllocations: array<float>,
+    currentMarginalReturns: array<result<float, string>>,
+  }
+  type diminishingReturnsAccumulator = result<diminishingReturnsAccumulatorInner, string>
   let diminishingMarginalReturnsSkeleton = (
     lambda1,
     lambda2,
-    funds, 
-    increment,
+    funds,
+    approximateIncrement,
     environment,
     reducer,
   ) => {
-    Ok(castArrayOfFloatsToInternalArrayOfInternals([0.0, 1.0]))
+    /*
+    Two possible algorithms (n=funds/increment, m=num lambdas)
+    1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent
+    2. O(n*m): Iterate through all possible spending combinations. Fun is, it doesn't assume that the returns of marginal spending are diminishing.
+ */
+    let applyFunctionAtFloatToFloatOption = (lambda, point: float) => {
+      // Defined here so that it has access to environment, reducer
+      let pointAsInternalExpression = castFloatToInternalNumber(point)
+      let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+        lambda,
+        list{pointAsInternalExpression},
+        environment,
+        reducer,
+      )
+      let result = switch resultAsInternalExpression {
+      | Ok(IEvNumber(x)) => Ok(x)
+      | Error(_) =>
+        Error(
+          "Integration error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+        )
+      | _ => Error("Integration error 2 in Danger.integrate")
+      }
+      result
+    }
+
+    let numDivisions = Js.Math.round(funds /. approximateIncrement)
+    let numDivisionsInt = Belt.Float.toInt(numDivisions)
+    let increment = funds /. numDivisions
+    let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
+
+    let initAccumulator: diminishingReturnsAccumulator = Ok({
+      optimalAllocations: [0.0, 0.0],
+      currentMarginalReturns: [
+        applyFunctionAtFloatToFloatOption(lambda1, 0.0),
+        applyFunctionAtFloatToFloatOption(lambda2, 0.0),
+      ],
+    })
+    let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
+      acc,
+      new,
+    ) => {
+      acc
+    })
+    let optimalAllocationResult = switch optimalAllocationEndAccumulator {
+    | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
+    | Error(b) => Error(b)
+    }
+    optimalAllocationResult
   }
 }
 
@@ -352,7 +407,7 @@ let library = [
     ],
     (),
   ),
-    Function.make(
+  Function.make(
     ~name="diminishingMarginalReturnsSkeleton",
     ~nameSpace,
     ~output=EvtArray,
@@ -364,8 +419,20 @@ let library = [
         ~inputs=[FRTypeLambda, FRTypeLambda, FRTypeNumber, FRTypeNumber],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
-          | [IEvLambda(lambda1), IEvLambda(lambda2), IEvNumber(funds), IEvNumber(increment)] =>
-            Internals.diminishingMarginalReturnsSkeleton(lambda1, lambda2, funds, increment, env, reducer)
+          | [
+              IEvLambda(lambda1),
+              IEvLambda(lambda2),
+              IEvNumber(funds),
+              IEvNumber(approximateIncrement),
+            ] =>
+            Internals.diminishingMarginalReturnsSkeleton(
+              lambda1,
+              lambda2,
+              funds,
+              approximateIncrement,
+              env,
+              reducer,
+            )
           | _ => Error("Error in Danger.diminishingMarginalReturnsSkeleton")
           },
         (),

@@ -75,7 +75,8 @@ module Internals = {
         })
       })
     )
-    let result = rMappedList->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)
+    let result =
+      rMappedList->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)
     result
   }
 }
@@ -190,15 +191,14 @@ let library = [
       FnDefinition.make(
         ~name="map",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
-        ~run=(inputs, _, env, reducer) =>
-          {
-            let result = switch inputs {
-            | [IEvArray(array), IEvLambda(lambda)] =>
-              Internals.map(array, env, lambda, reducer)->E.R2.errMap(_ => "Error!")
-            | _ => Error(impossibleError)
-            }
-            result
-          },
+        ~run=(inputs, _, env, reducer) => {
+          let result = switch inputs {
+          | [IEvArray(array), IEvLambda(lambda)] =>
+            Internals.map(array, env, lambda, reducer)->E.R2.errMap(_ => "Error!")
+          | _ => Error(impossibleError)
+          }
+          result
+        },
         (),
       ),
     ],
