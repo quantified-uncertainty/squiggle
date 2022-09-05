@@ -176,7 +176,7 @@ module Internals = {
     currentMarginalReturns: result<array<float>, string>,
   }
   type diminishingReturnsAccumulator = result<diminishingReturnsAccumulatorInner, string>
-  let diminishingMarginalReturnsSkeleton = (
+  let diminishingMarginalReturnsForTwoFunctions = (
     lambda1,
     lambda2,
     funds,
@@ -453,14 +453,14 @@ let library = [
     (),
   ),
   Function.make(
-    ~name="diminishingMarginalReturnsSkeleton",
+    ~name="diminishingMarginalReturnsForTwoFunctions",
     ~nameSpace,
     ~output=EvtArray,
     ~requiresNamespace=false,
-    ~examples=[`Danger.diminishingMarginalReturnsSkeleton({|x| x+1}, {|y| 10}, 100, 1)`],
+    ~examples=[`Danger.diminishingMarginalReturnsForTwoFunctions({|x| x+1}, {|y| 10}, 100, 1)`],
     ~definitions=[
       FnDefinition.make(
-        ~name="diminishingMarginalReturnsSkeleton",
+        ~name="diminishingMarginalReturnsForTwoFunctions",
         ~inputs=[FRTypeLambda, FRTypeLambda, FRTypeNumber, FRTypeNumber],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
@@ -470,7 +470,7 @@ let library = [
               IEvNumber(funds),
               IEvNumber(approximateIncrement),
             ] =>
-            Internals.diminishingMarginalReturnsSkeleton(
+            Internals.diminishingMarginalReturnsForTwoFunctions(
               lambda1,
               lambda2,
               funds,
@@ -478,7 +478,7 @@ let library = [
               env,
               reducer,
             )
-          | _ => Error("Error in Danger.diminishingMarginalReturnsSkeleton")
+          | _ => Error("Error in Danger.diminishingMarginalReturnsForTwoFunctions")
           },
         (),
       ),
