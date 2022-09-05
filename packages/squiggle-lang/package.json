@@ -64,7 +64,7 @@
     "peggy": "^2.0.1",
     "prettier": "^2.7.1",
     "reanalyze": "^2.23.0",
-    "rescript": "^9.1.4",
+    "rescript": "^10.0.1",
     "rescript-fast-check": "^1.1.1",
     "ts-jest": "^27.1.4",
     "ts-loader": "^9.3.0",
