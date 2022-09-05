@@ -311,7 +311,7 @@ let library = [
     ~nameSpace,
     ~output=EvtNumber,
     ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 1)`],
+    ~examples=[`Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`],
     ~definitions=[
       FnDefinition.make(
         ~name="integrateFunctionBetweenWithEpsilon",
