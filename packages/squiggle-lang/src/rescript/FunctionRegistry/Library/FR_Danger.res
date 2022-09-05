@@ -214,7 +214,12 @@ module Internals = {
     let increment = funds /. numDivisions
     let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
 
-    let findBiggestMarginalReturnsIndex = (_) => 0
+    let findBiggestElementIndex = (xs) => E.A.reducei(xs, 0, (acc, newElement, index) => {
+      switch(newElement > xs[acc]){
+        | true => index
+        | false => acc
+      }
+    })
     let initAccumulator: diminishingReturnsAccumulator = Ok({
       optimalAllocations: [0.0, 0.0],
       currentMarginalReturns: E.A.R.firstErrorOrOpen([
@@ -228,20 +233,20 @@ module Internals = {
     ) => {
       switch(acc){
         | Ok(accInner) => {
-          let currentMarginalReturnsWrapped = accInner.currentMarginalReturns
-          let newAccWrapped = switch(currentMarginalReturnsWrapped){
-            | Ok(currentMarginalReturns) => {
-              let biggestMarginalReturnsIndex = findBiggestMarginalReturnsIndex(currentMarginalReturns)
+          let oldMarginalReturnsWrapped = accInner.currentMarginalReturns
+          let newAccWrapped = switch(oldMarginalReturnsWrapped){
+            | Ok(oldMarginalReturns) => {
+              let indexOfBiggestDMR = findBiggestElementIndex(oldMarginalReturns)
               let newOptimalAllocations  = Belt.Array.copy(accInner.optimalAllocations)
               let newOptimalAllocationsi = 
-                newOptimalAllocations[biggestMarginalReturnsIndex] +. newIncrement
-              newOptimalAllocations[biggestMarginalReturnsIndex] = newOptimalAllocationsi
-              let lambdai = biggestMarginalReturnsIndex == 0 ? lambda1: lambda2 // to do: generalize
+                newOptimalAllocations[indexOfBiggestDMR] +. newIncrement
+              newOptimalAllocations[indexOfBiggestDMR] = newOptimalAllocationsi
+              let lambdai = indexOfBiggestDMR == 0 ? lambda1: lambda2 // to do: generalize
               let newMarginalResultsLambdai = applyFunctionAtFloatToFloatOption(lambdai, newOptimalAllocationsi)
               let newCurrentMarginalReturns = switch(newMarginalResultsLambdai){
                 | Ok(value) => {
-                    let result = Belt.Array.copy(currentMarginalReturns)
-                    result[biggestMarginalReturnsIndex] = value
+                    let result = Belt.Array.copy(oldMarginalReturns)
+                    result[indexOfBiggestDMR] = value
                     Ok(result)
                 }
                 | Error(b) => Error(b)
