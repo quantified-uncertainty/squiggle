@@ -278,6 +278,7 @@ module Internals = {
     }
     optimalAllocationResult
   }
+  /*
   let diminishingMarginalReturnsForManyFunctionsSkeleton = (
     lambdas,
     funds,
@@ -285,10 +286,39 @@ module Internals = {
     environment,
     reducer,
   ) => {
-    let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
+    let applyFunctionAtFloatToFloatOption = (lambda, point: float) => {
+      // Defined here so that it has access to environment, reducer
+      let pointAsInternalExpression = castFloatToInternalNumber(point)
+      let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+        lambda,
+        list{pointAsInternalExpression},
+        environment,
+        reducer,
+      )
+      let result = switch resultAsInternalExpression {
+      | Ok(IEvNumber(x)) => Ok(x)
+      | Error(_) =>
+        Error(
+          "Error 1 in Danger.diminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+        )
+      | _ => Error("Error 2 in Danger.diminishingMarginalReturnsForManyFunctions")
+      }
+      result
+    }
+    let answer =
+      E.A.fmap(
+        lambda => applyFunctionAtFloatToFloatOption(lambda, 0.0),
+        lambdas,
+      )->E.A.R.firstErrorOrOpen
+    let result = switch answer {
+    | Ok(xs) => xs->castArrayOfFloatsToInternalArrayOfInternals->Ok
+    | Error(b) => Error(b)
+    }
+
+    // let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
     result
-  }
-  /*
+  }*/
+
   let diminishingMarginalReturnsForManyFunctions = (
     lambdas,
     funds,
@@ -320,67 +350,66 @@ module Internals = {
       }
       result
     }
-        let numDivisions = Js.Math.round(funds /. approximateIncrement)
-        let numDivisionsInt = Belt.Float.toInt(numDivisions)
-        let increment = funds /. numDivisions
-        let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
-        let numLambdas = E.A.length(lambdas)
-        let initAccumulator: diminishingReturnsAccumulator = Ok({
-          optimalAllocations: Belt.Array.makeBy(numLambdas, _ => 0.0),
-          currentMarginalReturns: E.A.fmap(
-            lambda => applyFunctionAtFloatToFloatOption(lambda, 0.0),
-            lambdas,
-          )->E.A.R.firstErrorOrOpen,
-        })
-        let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
-          acc,
-          newIncrement,
-        ) => {
-          switch acc {
-          | Ok(accInner) => {
-              let oldMarginalReturnsWrapped = accInner.currentMarginalReturns
-              let newAccWrapped = switch oldMarginalReturnsWrapped {
-              | Ok(oldMarginalReturns) => {
-                  let indexOfBiggestDMR = findBiggestElementIndex(oldMarginalReturns)
-                  let newOptimalAllocations = Belt.Array.copy(accInner.optimalAllocations)
-                  let newOptimalAllocationsi =
-                    newOptimalAllocations[indexOfBiggestDMR] +. newIncrement
-                  newOptimalAllocations[indexOfBiggestDMR] = newOptimalAllocationsi
-                  let lambdai = lambdas[indexOfBiggestDMR]
-                  let newMarginalResultsLambdai = applyFunctionAtFloatToFloatOption(
-                    lambdai,
-                    newOptimalAllocationsi,
-                  )
-                  let newCurrentMarginalReturns = switch newMarginalResultsLambdai {
-                  | Ok(value) => {
-                      let result = Belt.Array.copy(oldMarginalReturns)
-                      result[indexOfBiggestDMR] = value
-                      Ok(result)
-                    }
-                  | Error(b) => Error(b)
-                  }
-
-                  let newAcc: diminishingReturnsAccumulatorInner = {
-                    optimalAllocations: newOptimalAllocations,
-                    currentMarginalReturns: newCurrentMarginalReturns,
-                  }
-                  Ok(newAcc)
+    let numDivisions = Js.Math.round(funds /. approximateIncrement)
+    let numDivisionsInt = Belt.Float.toInt(numDivisions)
+    let increment = funds /. numDivisions
+    let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
+    let numLambdas = E.A.length(lambdas)
+    let initAccumulator: diminishingReturnsAccumulator = Ok({
+      optimalAllocations: Belt.Array.makeBy(numLambdas, _ => 0.0),
+      currentMarginalReturns: E.A.fmap(
+        lambda => applyFunctionAtFloatToFloatOption(lambda, 0.0),
+        lambdas,
+      )->E.A.R.firstErrorOrOpen,
+    })
+    let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
+      acc,
+      newIncrement,
+    ) => {
+      switch acc {
+      | Ok(accInner) => {
+          let oldMarginalReturnsWrapped = accInner.currentMarginalReturns
+          let newAccWrapped = switch oldMarginalReturnsWrapped {
+          | Ok(oldMarginalReturns) => {
+              let indexOfBiggestDMR = findBiggestElementIndex(oldMarginalReturns)
+              let newOptimalAllocations = Belt.Array.copy(accInner.optimalAllocations)
+              let newOptimalAllocationsi = newOptimalAllocations[indexOfBiggestDMR] +. newIncrement
+              newOptimalAllocations[indexOfBiggestDMR] = newOptimalAllocationsi
+              let lambdai = lambdas[indexOfBiggestDMR]
+              let newMarginalResultsLambdai = applyFunctionAtFloatToFloatOption(
+                lambdai,
+                newOptimalAllocationsi,
+              )
+              let newCurrentMarginalReturns = switch newMarginalResultsLambdai {
+              | Ok(value) => {
+                  let result = Belt.Array.copy(oldMarginalReturns)
+                  result[indexOfBiggestDMR] = value
+                  Ok(result)
                 }
               | Error(b) => Error(b)
               }
-              newAccWrapped
+
+              let newAcc: diminishingReturnsAccumulatorInner = {
+                optimalAllocations: newOptimalAllocations,
+                currentMarginalReturns: newCurrentMarginalReturns,
+              }
+              Ok(newAcc)
             }
           | Error(b) => Error(b)
           }
-        })
-        let optimalAllocationResult = switch optimalAllocationEndAccumulator {
-        | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
-        | Error(b) => Error(b)
+          newAccWrapped
         }
-        optimalAllocationResult
+      | Error(b) => Error(b)
+      }
+    })
+    let optimalAllocationResult = switch optimalAllocationEndAccumulator {
+    | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
+    | Error(b) => Error(b)
+    }
+    optimalAllocationResult
     //let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
     // result
-  }*/
+  }
 }
 
 let library = [
@@ -556,14 +585,14 @@ let library = [
     (),
   ),
   Function.make(
-    ~name="diminishingMarginalReturnsForTwoFunctions",
+    ~name="diminishingMarginalReturnsForFunctions2",
     ~nameSpace,
     ~output=EvtArray,
     ~requiresNamespace=false,
-    ~examples=[`Danger.diminishingMarginalReturnsForTwoFunctions({|x| x+1}, {|y| 10}, 100, 0.01)`],
+    ~examples=[`Danger.diminishingMarginalReturnsForFunctions2({|x| x+1}, {|y| 10}, 100, 0.01)`],
     ~definitions=[
       FnDefinition.make(
-        ~name="diminishingMarginalReturnsForTwoFunctions",
+        ~name="diminishingMarginalReturnsForFunctions2",
         ~inputs=[FRTypeLambda, FRTypeLambda, FRTypeNumber, FRTypeNumber],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
@@ -573,15 +602,14 @@ let library = [
               IEvNumber(funds),
               IEvNumber(approximateIncrement),
             ] =>
-            Internals.diminishingMarginalReturnsForTwoFunctions(
-              lambda1,
-              lambda2,
+            Internals.diminishingMarginalReturnsForManyFunctions(
+              [lambda1, lambda2],
               funds,
               approximateIncrement,
               env,
               reducer,
             )
-          | _ => Error("Error in Danger.diminishingMarginalReturnsForTwoFunctions")
+          | _ => Error("Error in Danger.diminishingMarginalReturnsForFunctions2")
           },
         (),
       ),
@@ -594,7 +622,7 @@ let library = [
     ~output=EvtArray,
     ~requiresNamespace=false,
     ~examples=[
-      `Danger.diminishingMarginalReturnsForFunctions3({|x| x+1}, {|y| 10}, {|z| 20-2x}, 100, 0.01)`,
+      `Danger.diminishingMarginalReturnsForFunctions3({|x| x+1}, {|y| 10}, {|z| 20-2*z}, 100, 0.01)`,
     ],
     ~definitions=[
       FnDefinition.make(
@@ -609,7 +637,7 @@ let library = [
               IEvNumber(funds),
               IEvNumber(approximateIncrement),
             ] =>
-            Internals.diminishingMarginalReturnsForManyFunctionsSkeleton(
+            Internals.diminishingMarginalReturnsForManyFunctions(
               [lambda1, lambda2, lambda3],
               funds,
               approximateIncrement,
@@ -623,7 +651,192 @@ let library = [
     ],
     (),
   ),
-  /* The following will compile, but not work, because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/558> Instead, I am creating different functions for different numbers of inputs
+  Function.make(
+    ~name="diminishingMarginalReturnsForFunctions4",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[
+      `Danger.diminishingMarginalReturnsForFunctions4({|x| x+1}, {|y| 10}, {|z| 20-2*z}, {|a| 15-a}, 100, 0.01)`,
+    ],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="diminishingMarginalReturnsForFunctions4",
+        ~inputs=[
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeNumber,
+          FRTypeNumber,
+        ],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [
+              IEvLambda(lambda1),
+              IEvLambda(lambda2),
+              IEvLambda(lambda3),
+              IEvLambda(lambda4),
+              IEvNumber(funds),
+              IEvNumber(approximateIncrement),
+            ] =>
+            Internals.diminishingMarginalReturnsForManyFunctions(
+              [lambda1, lambda2, lambda3, lambda4],
+              funds,
+              approximateIncrement,
+              env,
+              reducer,
+            )
+          | _ => Error("Error in Danger.diminishingMarginalReturnsForFunctions4")
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="diminishingMarginalReturnsForFunctions5",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[
+      `Danger.diminishingMarginalReturnsForFunctions5({|x| x+1}, {|y| 10}, {|z| 20-2*z}, {|a| 15-a}, {|b| 17-b}, 100, 0.01)`,
+    ],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="diminishingMarginalReturnsForFunctions5",
+        ~inputs=[
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeNumber,
+          FRTypeNumber,
+        ],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [
+              IEvLambda(lambda1),
+              IEvLambda(lambda2),
+              IEvLambda(lambda3),
+              IEvLambda(lambda4),
+              IEvLambda(lambda5),
+              IEvNumber(funds),
+              IEvNumber(approximateIncrement),
+            ] =>
+            Internals.diminishingMarginalReturnsForManyFunctions(
+              [lambda1, lambda2, lambda3, lambda4, lambda5],
+              funds,
+              approximateIncrement,
+              env,
+              reducer,
+            )
+          | _ => Error("Error in Danger.diminishingMarginalReturnsForFunctions5")
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="diminishingMarginalReturnsForFunctions6",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[
+      `Danger.diminishingMarginalReturnsForFunctions6({|x| x+1}, {|y| 10}, {|z| 20-2*z}, {|a| 15-a}, {|b| 17-b}, {|c| 19-c}, 100, 0.01)`,
+    ],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="diminishingMarginalReturnsForFunctions6",
+        ~inputs=[
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeNumber,
+          FRTypeNumber,
+        ],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [
+              IEvLambda(lambda1),
+              IEvLambda(lambda2),
+              IEvLambda(lambda3),
+              IEvLambda(lambda4),
+              IEvLambda(lambda5),
+              IEvLambda(lambda6),
+              IEvNumber(funds),
+              IEvNumber(approximateIncrement),
+            ] =>
+            Internals.diminishingMarginalReturnsForManyFunctions(
+              [lambda1, lambda2, lambda3, lambda4, lambda5, lambda6],
+              funds,
+              approximateIncrement,
+              env,
+              reducer,
+            )
+          | _ => Error("Error in Danger.diminishingMarginalReturnsForFunctions6")
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="diminishingMarginalReturnsForFunctions7",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[
+      `Danger.diminishingMarginalReturnsForFunctions7({|x| x+1}, {|y| 10}, {|z| 20-2*z}, {|a| 15-a}, {|b| 17-b}, {|c| 19-c}, {|d| 20-d/2}, 100, 0.01)`,
+    ],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="diminishingMarginalReturnsForFunctions7",
+        ~inputs=[
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeLambda,
+          FRTypeNumber,
+          FRTypeNumber,
+        ],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [
+              IEvLambda(lambda1),
+              IEvLambda(lambda2),
+              IEvLambda(lambda3),
+              IEvLambda(lambda4),
+              IEvLambda(lambda5),
+              IEvLambda(lambda6),
+              IEvLambda(lambda7),
+              IEvNumber(funds),
+              IEvNumber(approximateIncrement),
+            ] =>
+            Internals.diminishingMarginalReturnsForManyFunctions(
+              [lambda1, lambda2, lambda3, lambda4, lambda5, lambda6, lambda7],
+              funds,
+              approximateIncrement,
+              env,
+              reducer,
+            )
+          | _ => Error("Error in Danger.diminishingMarginalReturnsForFunctions4")
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  // The following will compile, but not work, because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/558> Instead, I am creating different functions for different numbers of inputs
+  /*
   Function.make(
     ~name="diminishingMarginalReturnsForManyFunctions",
     ~nameSpace,
