@@ -220,8 +220,9 @@ let library = [
     ~nameSpace,
     ~output=EvtArray,
     ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`], // should be [x^2/2 + x]1_10 = (50 + 10) - (1 + 1) = 60 - 2 = 58
-    // Some testing needed to see where the small deviation comes from.
+    ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`], 
+    // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
+    // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
     ~definitions=[
       FnDefinition.make(
         ~name="integrateFunctionBetweenWithIncrement",
