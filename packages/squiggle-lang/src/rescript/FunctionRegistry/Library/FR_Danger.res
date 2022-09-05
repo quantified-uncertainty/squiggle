@@ -54,7 +54,14 @@ module Internals = {
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
 
   // Integral helper functions
-  let applyFunctionAtPoint = (
+
+
+  let castFloatToInternalNumber = x => ReducerInterface_InternalExpressionValue.IEvNumber(x)
+  let castArrayOfFloatsToInternalArrayOfInternals = xs => ReducerInterface_InternalExpressionValue.IEvArray(
+    Belt.Array.map(xs, x => castFloatToInternalNumber(x)),
+  )
+  /* Helper functions. May be useful in 3 months when coming back to this code.
+  @dead let applyFunctionAtPoint = (
     aLambda,
     internalNumber: internalExpressionValue,
     environment,
@@ -68,15 +75,11 @@ module Internals = {
     )
     result
   }
-  let castFloatToInternalNumber = x => ReducerInterface_InternalExpressionValue.IEvNumber(x)
-  let castArrayOfFloatsToInternalArrayOfInternals = xs => ReducerInterface_InternalExpressionValue.IEvArray(
-    Belt.Array.map(xs, x => castFloatToInternalNumber(x)),
-  )
-  @dead
-  let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
+  @dead let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
     // reason for existence: might be an useful template to have for calculating diminishing marginal returns later on
     applyFunctionAtPoint(aLambda, castFloatToInternalNumber(point), environment, reducer)
   // integrate function itself
+  */
   let integrateFunctionBetweenWithNumIntegrationPoints = (
     aLambda,
     min: float,
@@ -171,6 +174,9 @@ module Internals = {
     }
     result
   }
+
+  // Diminishing returns
+  // Helpers
   type diminishingReturnsAccumulatorInner = {
     optimalAllocations: array<float>,
     currentMarginalReturns: result<array<float>, string>,
@@ -183,7 +189,9 @@ module Internals = {
       }
     })
   type diminishingReturnsAccumulator = result<diminishingReturnsAccumulatorInner, string>
-  let diminishingMarginalReturnsForTwoFunctions = (
+  /* Simple function. May be useful for remembering how this works when I come back to this code weeks or months from now.
+  @dead let diminishingMarginalReturnsForTwoFunctions = (
+    // left alive for now because I know it works.
     lambda1,
     lambda2,
     funds,
@@ -277,48 +285,7 @@ module Internals = {
     | Error(b) => Error(b)
     }
     optimalAllocationResult
-  }
-  /*
-  let diminishingMarginalReturnsForManyFunctionsSkeleton = (
-    lambdas,
-    funds,
-    approximateIncrement,
-    environment,
-    reducer,
-  ) => {
-    let applyFunctionAtFloatToFloatOption = (lambda, point: float) => {
-      // Defined here so that it has access to environment, reducer
-      let pointAsInternalExpression = castFloatToInternalNumber(point)
-      let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
-        lambda,
-        list{pointAsInternalExpression},
-        environment,
-        reducer,
-      )
-      let result = switch resultAsInternalExpression {
-      | Ok(IEvNumber(x)) => Ok(x)
-      | Error(_) =>
-        Error(
-          "Error 1 in Danger.diminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
-        )
-      | _ => Error("Error 2 in Danger.diminishingMarginalReturnsForManyFunctions")
-      }
-      result
-    }
-    let answer =
-      E.A.fmap(
-        lambda => applyFunctionAtFloatToFloatOption(lambda, 0.0),
-        lambdas,
-      )->E.A.R.firstErrorOrOpen
-    let result = switch answer {
-    | Ok(xs) => xs->castArrayOfFloatsToInternalArrayOfInternals->Ok
-    | Error(b) => Error(b)
-    }
-
-    // let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
-    result
   }*/
-
   let diminishingMarginalReturnsForManyFunctions = (
     lambdas,
     funds,
@@ -350,11 +317,13 @@ module Internals = {
       }
       result
     }
+
     let numDivisions = Js.Math.round(funds /. approximateIncrement)
     let numDivisionsInt = Belt.Float.toInt(numDivisions)
     let increment = funds /. numDivisions
     let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
     let numLambdas = E.A.length(lambdas)
+    
     let initAccumulator: diminishingReturnsAccumulator = Ok({
       optimalAllocations: Belt.Array.makeBy(numLambdas, _ => 0.0),
       currentMarginalReturns: E.A.fmap(
@@ -362,6 +331,7 @@ module Internals = {
         lambdas,
       )->E.A.R.firstErrorOrOpen,
     })
+    
     let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
       acc,
       newIncrement,
@@ -402,13 +372,16 @@ module Internals = {
       | Error(b) => Error(b)
       }
     })
+
     let optimalAllocationResult = switch optimalAllocationEndAccumulator {
     | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
     | Error(b) => Error(b)
     }
+    
     optimalAllocationResult
-    //let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
+    // let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
     // result
+    // ^ useful for debugging.
   }
 }
 
@@ -454,6 +427,7 @@ let library = [
     (),
   ),
   // Helper functions building up to the integral
+  /* Initial functions that helped me build understanding, may help when coming back to the code weeks or months from now.
   Function.make(
     ~name="applyFunctionAtZero",
     ~nameSpace,
@@ -503,6 +477,7 @@ let library = [
     ],
     (),
   ),
+  */
   // Integral in terms of function, min, max, num points
   // Note that execution time will be more predictable, because it
   // will only depend on num points and the complexity of the function
@@ -584,6 +559,10 @@ let library = [
     ],
     (),
   ),
+  // Diminishing marginal return functions
+  // There are functions diminishingMarginalReturnsForFunctions2 through diminishingMarginalReturnsForFunctions7
+  // Because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/1090>
+  // As soon as that is fixed, I will destroy this monstrosity.
   Function.make(
     ~name="diminishingMarginalReturnsForFunctions2",
     ~nameSpace,
@@ -835,7 +814,7 @@ let library = [
     ],
     (),
   ),
-  // The following will compile, but not work, because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/558> Instead, I am creating different functions for different numbers of inputs
+  // The following will compile, but not work, because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/558> Instead, I am creating different functions for different numbers of inputs above.
   /*
   Function.make(
     ~name="diminishingMarginalReturnsForManyFunctions",
