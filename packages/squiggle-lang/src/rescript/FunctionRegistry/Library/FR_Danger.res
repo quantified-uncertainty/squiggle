@@ -151,13 +151,15 @@ module Internals = {
     }
     // worked example in comments below, assuming min=0, max = 10
     let numTotalPoints = Belt.Float.toInt(numIntervals)
-    let numInnerPoints = numTotalPoints - 2 
-    let numOuterPoints = 2 
-    let totalWeight = (max -. min)
-    let weightForAnInnerPoint = totalWeight/.E.I.toFloat(numTotalPoints-1)
-    let weightForAnOuterPoint = totalWeight/.E.I.toFloat(numTotalPoints-1)/. 2.0
-    let innerPointIncrement = (max -. min) /. E.I.toFloat(numTotalPoints -1)
-    let innerXs = Belt.Array.makeBy(numInnerPoints, i => min +. Belt_Float.fromInt(i + 1) *. innerPointIncrement)
+    let numInnerPoints = numTotalPoints - 2
+    let numOuterPoints = 2
+    let totalWeight = max -. min
+    let weightForAnInnerPoint = totalWeight /. E.I.toFloat(numTotalPoints - 1)
+    let weightForAnOuterPoint = totalWeight /. E.I.toFloat(numTotalPoints - 1) /. 2.0
+    let innerPointIncrement = (max -. min) /. E.I.toFloat(numTotalPoints - 1)
+    let innerXs = Belt.Array.makeBy(numInnerPoints, i =>
+      min +. Belt_Float.fromInt(i + 1) *. innerPointIncrement
+    )
     // Note that makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
     let ysOptions = Belt.Array.map(innerXs, x => applyFunctionAtFloatToFloatOption(x))
     let okYs = E.A.R.filterOk(ysOptions)
@@ -167,11 +169,19 @@ module Internals = {
     Js.Console.log2("numTotalPoints", numTotalPoints) // 5
     Js.Console.log2("numInnerPoints", numInnerPoints) // 3
     Js.Console.log2("numOuterPoints", numOuterPoints) // always 2
-    Js.Console.log2("totalWeight", totalWeight)  // 10 - 0 = 10
+    Js.Console.log2("totalWeight", totalWeight) // 10 - 0 = 10
     Js.Console.log2("weightForAnInnerPoint", weightForAnInnerPoint) // 10/4 = 2.5
     Js.Console.log2("weightForAnOuterPoint", weightForAnOuterPoint) // 10/4/2 = 1.25
-    Js.Console.log2("weightForAnInnerPoint * numInnerPoints + weightForAnOuterPoint * numOuterPoints", weightForAnInnerPoint *. E.I.toFloat(numInnerPoints) +. weightForAnOuterPoint *. E.I.toFloat(numOuterPoints)) // should be 10
-    Js.Console.log2("sum of weights == totalWeight", (weightForAnInnerPoint *. E.I.toFloat(numInnerPoints) +. weightForAnOuterPoint *. E.I.toFloat(numOuterPoints)) == totalWeight ) // true
+    Js.Console.log2(
+      "weightForAnInnerPoint * numInnerPoints + weightForAnOuterPoint * numOuterPoints",
+      weightForAnInnerPoint *. E.I.toFloat(numInnerPoints) +.
+        weightForAnOuterPoint *. E.I.toFloat(numOuterPoints),
+    ) // should be 10
+    Js.Console.log2(
+      "sum of weights == totalWeight",
+      weightForAnInnerPoint *. E.I.toFloat(numInnerPoints) +.
+        weightForAnOuterPoint *. E.I.toFloat(numOuterPoints) == totalWeight,
+    ) // true
     Js.Console.log2("innerPointIncrement", innerPointIncrement) // (10-0)/4 = 2.5
     Js.Console.log2("innerXs", innerXs) // 2.5, 5, 7.5
     Js.Console.log2("ysOptions", ysOptions)
@@ -180,17 +190,21 @@ module Internals = {
     let result = switch E.A.length(ysOptions) == E.A.length(okYs) {
     | true => {
         let innerPointsSum = okYs->E.A.reduce(0.0, (a, b) => a +. b)
-        let resultWithOuterPoints = switch(applyFunctionAtFloatToFloatOption(min), applyFunctionAtFloatToFloatOption(max)){
-          | (Ok(yMin), Ok(yMax)) => {
-              let result = ((yMin +. yMax)*.weightForAnOuterPoint +. innerPointsSum*.weightForAnInnerPoint)
-              let wrappedResult = result -> ReducerInterface_InternalExpressionValue.IEvNumber -> Ok
-              wrappedResult
-            }
-          | (Error(b), _) => Error(b)
-          | (_, Error(b)) => Error(b)
+        let resultWithOuterPoints = switch (
+          applyFunctionAtFloatToFloatOption(min),
+          applyFunctionAtFloatToFloatOption(max),
+        ) {
+        | (Ok(yMin), Ok(yMax)) => {
+            let result =
+              (yMin +. yMax) *. weightForAnOuterPoint +. innerPointsSum *. weightForAnInnerPoint
+            let wrappedResult = result->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
+            wrappedResult
+          }
+        | (Error(b), _) => Error(b)
+        | (_, Error(b)) => Error(b)
+        }
+        resultWithOuterPoints
       }
-      resultWithOuterPoints
-    }
     | false => Error("Integration error in Danger.integrate")
     }
     result
