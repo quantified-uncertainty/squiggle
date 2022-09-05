@@ -4,56 +4,46 @@ open FunctionRegistry_Helpers
 let nameSpace = "Danger"
 let requiresNamespace = true
 
-module NumberToNumber = {
-  let make = (name, fn) =>
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeNumber],
-      ~run=(_, inputs, _, _) => {
-        inputs
-        ->getOrError(0)
-        ->E.R.bind(Prepare.oneNumber)
-        ->E.R2.fmap(fn)
-        ->E.R2.fmap(Wrappers.evNumber)
-      },
-      (),
-    )
-}
+module NNumbersToNumber = {
+  module One = {
+    let make = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs
+          ->getOrError(0)
+          ->E.R.bind(Prepare.oneNumber)
+          ->E.R2.fmap(fn)
+          ->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+  }
 
-module TwoNumbersToNumber = {
-  let make = (name, fn) =>
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeNumber, FRTypeNumber],
-      ~run=(_, inputs, _, _) => {
-        inputs->Prepare.ToValueTuple.twoNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
-      },
-      (),
-    )
-}
+  module Two = {
+    let make = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber, FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs->Prepare.ToValueTuple.twoNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+  }
 
-module ThreeNumbersToNumber = {
-  let make = (name, fn) =>
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
-      ~run=(_, inputs, _, _) => {
-        inputs->Prepare.ToValueTuple.threeNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
-      },
-      (),
-    )
-}
-
-module FunctionToNumberZero = {
-  let make = (name, _) =>
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeLambda],
-      ~run=(_, _, _, _) => {
-        Ok(0.0)->E.R2.fmap(Wrappers.evNumber)
-      },
-      (),
-    )
+  module Three = {
+    let make = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs->Prepare.ToValueTuple.threeNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+  }
 }
 
 module Internals = {
@@ -62,6 +52,7 @@ module Internals = {
   let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
   let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
+
   // Integral helper functions
   let applyFunctionAtPoint = (
     aLambda,
@@ -69,72 +60,30 @@ module Internals = {
     environment,
     reducer,
   ): result<ReducerInterface_InternalExpressionValue.t, Reducer_ErrorValue.errorValue> => {
-    let x = internalNumber
-    let result = Reducer_Expression_Lambda.doLambdaCall(aLambda, list{x}, environment, reducer)
-    result
-  }
-  let internalZero = ReducerInterface_InternalExpressionValue.IEvNumber(0.0)
-  let applyFunctionAtZero = (aLambda, environment, reducer) =>
-    applyFunctionAtPoint(aLambda, internalZero, environment, reducer)
-  @dead
-  let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
-    applyFunctionAtPoint(
+    let result = Reducer_Expression_Lambda.doLambdaCall(
       aLambda,
-      ReducerInterface_InternalExpressionValue.IEvNumber(point),
+      list{internalNumber},
       environment,
       reducer,
     )
-  // simplest integral function
-  let integrateFunctionBetweenWithIncrement = (
-    aLambda,
-    min: float,
-    max: float,
-    increment: float,
-    environment,
-    reducer,
-  ) => {
-    let applyFunctionAtFloatToFloatOption = (point: float) => {
-      let pointAsInternalExpression = ReducerInterface_InternalExpressionValue.IEvNumber(point)
-      let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
-        aLambda,
-        list{pointAsInternalExpression},
-        environment,
-        reducer,
-      )
-      let result = switch resultAsInternalExpression {
-      | Ok(IEvNumber(x)) => Ok(x)
-      | Error(_) => Error("Integration error in Danger.integrate")
-      | _ => Error("Integration error in Danger.integrate")
-      }
-      result
-    }
-    let xsLength = Js.Math.floor((max -. min) /. increment) // Note that we are loosing a bit of the tail
-    let xs = Belt.Array.makeBy(xsLength, i => min +. (Belt_Float.fromInt(i) +. 0.5) *. increment)
-    // makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
-    let ysOptions = Belt.Array.map(xs, x => applyFunctionAtFloatToFloatOption(x))
-    let okYs = E.A.R.filterOk(ysOptions)
-    let result = switch E.A.length(ysOptions) == E.A.length(okYs) {
-    | true => {
-        let numericIntermediate = okYs->E.A.reduce(0.0, (a, b) => a +. b)
-        let numericIntermediate2 = numericIntermediate *. increment
-        let resultWrapped =
-          numericIntermediate2->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
-        resultWrapped
-      }
-    | false => Error("Integration error in Danger.integrate")
-    }
     result
   }
-  // slightly better integrate function
-  let integrateFunctionBetweenWithNumIntervals = (
+  let castFloatToInternalNumber = x => ReducerInterface_InternalExpressionValue.IEvNumber(x)
+  @dead
+  let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
+    // reason for existence: might be an useful template to have for calculating diminishing marginal returns later on
+    applyFunctionAtPoint(aLambda, castFloatToInternalNumber(point), environment, reducer)
+  // integrate function itself
+  let integrateFunctionBetweenWithNumIntegrationPoints = (
     aLambda,
     min: float,
     max: float,
-    numIntervals: float, // cast as int?
+    numIntegrationPoints: float, // cast as int?
     environment,
     reducer,
   ) => {
     let applyFunctionAtFloatToFloatOption = (point: float) => {
+      // Defined here so that it has access to environment, reducer
       let pointAsInternalExpression = ReducerInterface_InternalExpressionValue.IEvNumber(point)
       let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
         aLambda,
@@ -144,13 +93,16 @@ module Internals = {
       )
       let result = switch resultAsInternalExpression {
       | Ok(IEvNumber(x)) => Ok(x)
-      | Error(_) => Error("Integration error in Danger.integrate")
+      | Error(_) =>
+        Error(
+          "Integration error in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+        )
       | _ => Error("Integration error in Danger.integrate")
       }
       result
     }
     // worked example in comments below, assuming min=0, max = 10
-    let numTotalPoints = Belt.Float.toInt(numIntervals)
+    let numTotalPoints = Belt.Float.toInt(numIntegrationPoints) // superflous declaration, but useful to keep track that we are interpreting "numIntegrationPoints" as the total number on which we evaluate the function, not e.g., as the inner integration points.
     let numInnerPoints = numTotalPoints - 2
     let numOuterPoints = 2
     let totalWeight = max -. min
@@ -160,32 +112,36 @@ module Internals = {
     let innerXs = Belt.Array.makeBy(numInnerPoints, i =>
       min +. Belt_Float.fromInt(i + 1) *. innerPointIncrement
     )
-    // Note that makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
+    // Gotcha: makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
     let ysOptions = Belt.Array.map(innerXs, x => applyFunctionAtFloatToFloatOption(x))
     let okYs = E.A.R.filterOk(ysOptions)
 
-    // Logging
-    // assuming min = 0, max = 10, results below:
-    Js.Console.log2("numTotalPoints", numTotalPoints) // 5
-    Js.Console.log2("numInnerPoints", numInnerPoints) // 3
-    Js.Console.log2("numOuterPoints", numOuterPoints) // always 2
-    Js.Console.log2("totalWeight", totalWeight) // 10 - 0 = 10
-    Js.Console.log2("weightForAnInnerPoint", weightForAnInnerPoint) // 10/4 = 2.5
-    Js.Console.log2("weightForAnOuterPoint", weightForAnOuterPoint) // 10/4/2 = 1.25
-    Js.Console.log2(
-      "weightForAnInnerPoint * numInnerPoints + weightForAnOuterPoint * numOuterPoints",
-      weightForAnInnerPoint *. E.I.toFloat(numInnerPoints) +.
-        weightForAnOuterPoint *. E.I.toFloat(numOuterPoints),
-    ) // should be 10
-    Js.Console.log2(
-      "sum of weights == totalWeight",
-      weightForAnInnerPoint *. E.I.toFloat(numInnerPoints) +.
-        weightForAnOuterPoint *. E.I.toFloat(numOuterPoints) == totalWeight,
-    ) // true
-    Js.Console.log2("innerPointIncrement", innerPointIncrement) // (10-0)/4 = 2.5
-    Js.Console.log2("innerXs", innerXs) // 2.5, 5, 7.5
-    Js.Console.log2("ysOptions", ysOptions)
-    Js.Console.log2("okYs", okYs)
+    /* Logging, with a worked example. */
+    // Useful for understanding what is happening.
+    // assuming min = 0, max = 10, numTotalPoints=10, results below:
+    let verbose = false
+    if verbose {
+      Js.Console.log2("numTotalPoints", numTotalPoints) // 5
+      Js.Console.log2("numInnerPoints", numInnerPoints) // 3
+      Js.Console.log2("numOuterPoints", numOuterPoints) // always 2
+      Js.Console.log2("totalWeight", totalWeight) // 10 - 0 = 10
+      Js.Console.log2("weightForAnInnerPoint", weightForAnInnerPoint) // 10/4 = 2.5
+      Js.Console.log2("weightForAnOuterPoint", weightForAnOuterPoint) // 10/4/2 = 1.25
+      Js.Console.log2(
+        "weightForAnInnerPoint * numInnerPoints + weightForAnOuterPoint * numOuterPoints",
+        weightForAnInnerPoint *. E.I.toFloat(numInnerPoints) +.
+          weightForAnOuterPoint *. E.I.toFloat(numOuterPoints),
+      ) // should be 10
+      Js.Console.log2(
+        "sum of weights == totalWeight",
+        weightForAnInnerPoint *. E.I.toFloat(numInnerPoints) +.
+          weightForAnOuterPoint *. E.I.toFloat(numOuterPoints) == totalWeight,
+      ) // true
+      Js.Console.log2("innerPointIncrement", innerPointIncrement) // (10-0)/4 = 2.5
+      Js.Console.log2("innerXs", innerXs) // 2.5, 5, 7.5
+      Js.Console.log2("ysOptions", ysOptions)
+      Js.Console.log2("okYs", okYs)
+    }
 
     let result = switch E.A.length(ysOptions) == E.A.length(okYs) {
     | true => {
@@ -220,7 +176,7 @@ let library = [
     ~output=EvtNumber,
     ~examples=[`Danger.laplace(1, 20)`],
     ~definitions=[
-      TwoNumbersToNumber.make("laplace", ((successes, trials)) =>
+      NNumbersToNumber.Two.make("laplace", ((successes, trials)) =>
         (successes +. 1.0) /. (trials +. 2.0)
       ),
     ],
@@ -232,7 +188,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`Danger.factorial(20)`],
-    ~definitions=[NumberToNumber.make("factorial", Internals.factorial)],
+    ~definitions=[NNumbersToNumber.One.make("factorial", Internals.factorial)],
     (),
   ),
   Function.make(
@@ -241,7 +197,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`Danger.choose(1, 20)`],
-    ~definitions=[TwoNumbersToNumber.make("choose", Internals.choose)],
+    ~definitions=[NNumbersToNumber.Two.make("choose", Internals.choose)],
     (),
   ),
   Function.make(
@@ -250,19 +206,10 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`Danger.binomial(1, 20, 0.5)`],
-    ~definitions=[ThreeNumbersToNumber.make("binomial", Internals.binomial)],
+    ~definitions=[NNumbersToNumber.Three.make("binomial", Internals.binomial)],
     (),
   ),
   // Helper functions building up to the integral
-  Function.make(
-    ~name="functionToZero",
-    ~nameSpace,
-    ~requiresNamespace,
-    ~output=EvtNumber,
-    ~examples=[`Danger.functionToZero({|x| x})`],
-    ~definitions=[FunctionToNumberZero.make("functionToZero", x => x)],
-    (),
-  ),
   Function.make(
     ~name="applyFunctionAtZero",
     ~nameSpace,
@@ -273,10 +220,15 @@ let library = [
       FnDefinition.make(
         ~name="applyFunctionAtZero",
         ~inputs=[FRTypeLambda],
-        ~run=(inputs, _, env, reducer) => {
+        ~run=(inputs, _, environment, reducer) => {
           let result = switch inputs {
           | [IEvLambda(aLambda)] =>
-            Internals.applyFunctionAtZero(aLambda, env, reducer)->E.R2.errMap(_ => "Error!")
+            Internals.applyFunctionAtPoint(
+              aLambda,
+              Internals.castFloatToInternalNumber(0.0),
+              environment,
+              reducer,
+            )->E.R2.errMap(_ => "Error!")
           | _ => Error(impossibleError)
           }
           result
@@ -307,29 +259,31 @@ let library = [
     ],
     (),
   ),
-  // simplest integral
+  // Integral in terms of function, min, max, num points
+  // Note that execution time will be more predictable, because it
+  // will only depend on num points and the complexity of the function
   Function.make(
-    ~name="integrateFunctionBetweenWithIncrement",
+    ~name="integrateFunctionBetweenWithNumIntegrationPoints",
     ~nameSpace,
     ~output=EvtNumber,
     ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`],
+    ~examples=[`Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`],
     // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
     // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
     ~definitions=[
       FnDefinition.make(
-        ~name="integrateFunctionBetweenWithIncrement",
+        ~name="integrateFunctionBetweenWithNumIntegrationPoints",
         ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
         ~run=(inputs, _, env, reducer) => {
           let result = switch inputs {
           | [_, _, _, IEvNumber(0.0)] =>
             Error("Integration error in Danger.integrate: Increment can't be 0.")
-          | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(increment)] =>
-            Internals.integrateFunctionBetweenWithIncrement(
+          | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(numIntegrationPoints)] =>
+            Internals.integrateFunctionBetweenWithNumIntegrationPoints(
               aLambda,
               min,
               max,
-              increment,
+              numIntegrationPoints,
               env,
               reducer,
             )->E.R2.errMap(_ =>
@@ -347,29 +301,30 @@ let library = [
     ],
     (),
   ),
-  // Integral which is a bit more thoughtful
+  // Integral in terms of function, min, max, epsilon (distance between points)
+  // Note that execution time will be less predictable, because it
+  // will depend on min, max and epsilon together,
+  // as well and the complexity of the function
   Function.make(
-    ~name="integrateFunctionBetweenWithNumIntervals",
+    ~name="integrateFunctionBetweenWithEpsilon",
     ~nameSpace,
     ~output=EvtNumber,
     ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithNumIntervals({|x| x+1}, 1, 10, 10)`],
-    // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
-    // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
+    ~examples=[`Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 1)`],
     ~definitions=[
       FnDefinition.make(
-        ~name="integrateFunctionBetweenWithNumIntervals",
+        ~name="integrateFunctionBetweenWithEpsilon",
         ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
         ~run=(inputs, _, env, reducer) => {
           let result = switch inputs {
           | [_, _, _, IEvNumber(0.0)] =>
             Error("Integration error in Danger.integrate: Increment can't be 0.")
-          | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(numIntervals)] =>
-            Internals.integrateFunctionBetweenWithNumIntervals(
+          | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(epsilon)] =>
+            Internals.integrateFunctionBetweenWithNumIntegrationPoints(
               aLambda,
               min,
               max,
-              numIntervals,
+              (max -. min) /. epsilon,
               env,
               reducer,
             )->E.R2.errMap(_ =>
