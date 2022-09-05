@@ -567,7 +567,7 @@ let library = [
     ~nameSpace,
     ~output=EvtArray,
     ~requiresNamespace=false,
-    ~examples=[`Danger.diminishingMarginalReturnsForFunctions2({|x| x+1}, {|y| 10}, 100, 0.01)`],
+    ~examples=[`Danger.diminishingMarginalReturnsForFunctions2({|x| 20-x}, {|y| 10}, 100, 0.01)`],
     ~definitions=[
       FnDefinition.make(
         ~name="diminishingMarginalReturnsForFunctions2",
