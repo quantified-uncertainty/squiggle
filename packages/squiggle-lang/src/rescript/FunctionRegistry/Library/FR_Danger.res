@@ -168,7 +168,16 @@ module Internals = {
     }
     result
   }
-  @dead let getDiminishingMarginalReturnsEquilibrium = "To do"
+  let diminishingMarginalReturnsSkeleton = (
+    lambda1,
+    lambda2,
+    funds, 
+    increment,
+    environment,
+    reducer,
+  ) => {
+    Ok(castFloatToInternalNumber(0.0))
+  }
 }
 
 let library = [
@@ -338,6 +347,27 @@ let library = [
           }
           result
         },
+        (),
+      ),
+    ],
+    (),
+  ),
+    Function.make(
+    ~name="diminishingMarginalReturnsSkeleton",
+    ~nameSpace,
+    ~output=EvtNumber,
+    ~requiresNamespace=false,
+    ~examples=[`Danger.diminishingMarginalReturnsSkeleton({|x| x+1}, {|y| 10}, 100, 1)`],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="diminishingMarginalReturnsSkeleton",
+        ~inputs=[FRTypeLambda, FRTypeLambda, FRTypeNumber, FRTypeNumber],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [IEvLambda(lambda1), IEvLambda(lambda2), IEvNumber(funds), IEvNumber(increment)] =>
+            Internals.diminishingMarginalReturnsSkeleton(lambda1, lambda2, funds, increment, env, reducer)
+          | _ => Error("Error in Danger.diminishingMarginalReturnsSkeleton")
+          },
         (),
       ),
     ],
