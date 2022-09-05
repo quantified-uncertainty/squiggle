@@ -45,11 +45,11 @@ module ThreeNumbersToNumber = {
 }
 
 module FunctionToNumberZero = {
-  let make = (name, fn) =>
+  let make = (name, _) =>
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeLambda],
-      ~run=(_, inputs, _, _) => {
+      ~run=(_, _, _, _) => {
         Ok(0.0)->E.R2.fmap(Wrappers.evNumber)
       },
       (),
@@ -77,7 +77,7 @@ module Internals = {
   let applyFunctionAtZero = (aLambda, environment, reducer) =>
     applyFunctionAtPoint(aLambda, internalZero, environment, reducer)
   @dead let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
-    applyFunctionAtPoint(aLambda, ReducerInterface_InternalExpressionValue.IEvNumber(point))
+    applyFunctionAtPoint(aLambda, ReducerInterface_InternalExpressionValue.IEvNumber(point), environment, reducer)
   // simplest integral function
   let integrateFunctionBetweenWithIncrement = (
     aLambda,
@@ -103,7 +103,8 @@ module Internals = {
       result
     }
     let xsLength = Js.Math.ceil((max -. min) /. increment)
-    let xs = Belt.Array.makeBy(xsLength, i => min +. Belt_Float.fromInt(i) *. increment)
+    let xs = Belt.Array.makeBy(xsLength + 1, i => min +. Belt_Float.fromInt(i) *. increment)
+    // makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
     let ysOptions = Belt.Array.map(xs, x => applyFunctionAtFloatToFloatOption(x))
     let okYs = E.A.R.filterOk(ysOptions)
     let result = switch E.A.length(ysOptions) == E.A.length(okYs) {
@@ -145,7 +146,8 @@ module Internals = {
     let xsLengthCandidate = Belt.Float.toInt(Js.Math.round(numIntervals))
     let xsLength = xsLengthCandidate > 0 ? xsLengthCandidate : 1
     let increment = (max -. min) /. Belt.Int.toFloat(xsLength)
-    let xs = Belt.Array.makeBy(xsLength, i => min +. Belt_Float.fromInt(i) *. increment)
+    let xs = Belt.Array.makeBy(xsLength +1, i => min +. Belt_Float.fromInt(i) *. increment)
+    // makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
     let ysOptions = Belt.Array.map(xs, x => applyFunctionAtFloatToFloatOption(x))
     let okYs = E.A.R.filterOk(ysOptions)
     let result = switch E.A.length(ysOptions) == E.A.length(okYs) {
