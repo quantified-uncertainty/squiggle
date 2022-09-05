@@ -98,9 +98,9 @@ module Internals = {
       | Ok(IEvNumber(x)) => Ok(x)
       | Error(_) =>
         Error(
-          "Integration error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+          "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
         )
-      | _ => Error("Integration error 2 in Danger.integrate")
+      | _ => Error("Error 2 in Danger.integrate")
       }
       result
     }
@@ -209,9 +209,9 @@ module Internals = {
       | Ok(IEvNumber(x)) => Ok(x)
       | Error(_) =>
         Error(
-          "Integration error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+          "Integration error 1 in Danger.diminishingMarginalReturnsForTwoFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
         )
-      | _ => Error("Integration error 2 in Danger.integrate")
+      | _ => Error("Integration error 2 in Danger.diminishingMarginalReturnsForTwoFunctions")
       }
       result
     }
@@ -278,6 +278,17 @@ module Internals = {
     }
     optimalAllocationResult
   }
+  let diminishingMarginalReturnsForManyFunctionsSkeleton = (
+    lambdas,
+    funds,
+    approximateIncrement,
+    environment,
+    reducer,
+  ) => {
+    let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
+    result
+  }
+  /*
   let diminishingMarginalReturnsForManyFunctions = (
     lambdas,
     funds,
@@ -290,27 +301,25 @@ module Internals = {
     1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent
     2. O(n*m): Iterate through all possible spending combinations. Fun is, it doesn't assume that the returns of marginal spending are diminishing.
  */
- let applyFunctionAtFloatToFloatOption = (lambda, point: float) => {
-          // Defined here so that it has access to environment, reducer
-          let pointAsInternalExpression = castFloatToInternalNumber(point)
-          let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
-            lambda,
-            list{pointAsInternalExpression},
-            environment,
-            reducer,
-          )
-          let result = switch resultAsInternalExpression {
-          | Ok(IEvNumber(x)) => Ok(x)
-          | Error(_) =>
-            Error(
-              "Integration error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
-            )
-          | _ => Error("Integration error 2 in Danger.integrate")
-          }
-          result
-        }
-    /*
-        
+    let applyFunctionAtFloatToFloatOption = (lambda, point: float) => {
+      // Defined here so that it has access to environment, reducer
+      let pointAsInternalExpression = castFloatToInternalNumber(point)
+      let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+        lambda,
+        list{pointAsInternalExpression},
+        environment,
+        reducer,
+      )
+      let result = switch resultAsInternalExpression {
+      | Ok(IEvNumber(x)) => Ok(x)
+      | Error(_) =>
+        Error(
+          "Error 1 in Danger.diminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+        )
+      | _ => Error("Error 2 in Danger.diminishingMarginalReturnsForManyFunctions")
+      }
+      result
+    }
         let numDivisions = Js.Math.round(funds /. approximateIncrement)
         let numDivisionsInt = Belt.Float.toInt(numDivisions)
         let increment = funds /. numDivisions
@@ -368,11 +377,10 @@ module Internals = {
         | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
         | Error(b) => Error(b)
         }
-        // optimalAllocationResult
- */
-    let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
-    result
-  }
+        optimalAllocationResult
+    //let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
+    // result
+  }*/
 }
 
 let library = [
@@ -581,6 +589,42 @@ let library = [
     (),
   ),
   Function.make(
+    ~name="diminishingMarginalReturnsForFunctions3",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[
+      `Danger.diminishingMarginalReturnsForFunctions3({|x| x+1}, {|y| 10}, {|z| 20-2x}, 100, 0.01)`,
+    ],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="diminishingMarginalReturnsForFunctions3",
+        ~inputs=[FRTypeLambda, FRTypeLambda, FRTypeLambda, FRTypeNumber, FRTypeNumber],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [
+              IEvLambda(lambda1),
+              IEvLambda(lambda2),
+              IEvLambda(lambda3),
+              IEvNumber(funds),
+              IEvNumber(approximateIncrement),
+            ] =>
+            Internals.diminishingMarginalReturnsForManyFunctionsSkeleton(
+              [lambda1, lambda2, lambda3],
+              funds,
+              approximateIncrement,
+              env,
+              reducer,
+            )
+          | _ => Error("Error in Danger.diminishingMarginalReturnsForFunctions3")
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  /* The following will compile, but not work, because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/558> Instead, I am creating different functions for different numbers of inputs
+  Function.make(
     ~name="diminishingMarginalReturnsForManyFunctions",
     ~nameSpace,
     ~output=EvtArray,
@@ -595,7 +639,7 @@ let library = [
         ~run=(inputs, _, environment, reducer) =>
           switch inputs {
           | [IEvArray(innerlambdas), IEvNumber(funds), IEvNumber(approximateIncrement)] => {
-              /*let individuallyWrappedLambdas = E.A.fmap(innerLambda => {
+              let individuallyWrappedLambdas = E.A.fmap(innerLambda => {
                 switch innerLambda {
                 | ReducerInterface_InternalExpressionValue.IEvLambda(lambda) => Ok(lambda)
                 | _ =>
@@ -618,9 +662,7 @@ let library = [
                 }
               | Error(b) => Error(b)
               }
-              result
-              */
-              Error("wtf man")
+              result //Error("wtf man")
             }
           | _ => Error("Error in Danger.diminishingMarginalReturnsForTwoFunctions")
           },
@@ -629,39 +671,5 @@ let library = [
     ],
     (),
   ),
-  /*
-  Function.make(
-    ~name="diminishingMarginalReturnsForManyFunctions",
-    ~nameSpace,
-    ~output=EvtArray,
-    ~requiresNamespace=false,
-    ~examples=[
-      `Danger.diminishingMarginalReturnsForManyFunctions([{|x| x+1}, {|y| 10}, {|z| 20 - 2*z}], 100, 0.01)`,
-    ],
-    ~definitions=[
-      FnDefinition.make(
-        ~name="diminishingMarginalReturnsForManyFunctions",
-        ~inputs=[FRTypeArray(FRTypeLambda), FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _, env, reducer) =>
-          switch inputs {
-          | [IEvArray(innerlambdas), IEvNumber(funds), IEvNumber(approximateIncrement)] => {
-              let result = [0.0, 0.0]->Internals.castArrayOfFloatsToInternalArrayOfInternals->Ok
-              result
-            }
-            /*
-            Internals.diminishingMarginalReturnsForManyFunctions(
-              innerlambdas,
-              funds,
-              approximateIncrement,
-              env,
-              reducer,
-            )*/
-
-          | _ => Error("Error in Danger.diminishingMarginalReturnsForManyFunctions")
-          },
-        (),
-      ),
-    ],
-    (),
-  ),*/
+ */
 ]
