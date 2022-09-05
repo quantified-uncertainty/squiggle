@@ -217,7 +217,7 @@ let library = [
   Function.make(
     ~name="applyFunctionAtZero",
     ~nameSpace,
-    ~output=EvtArray,
+    ~output=EvtNumber,
     ~requiresNamespace=false,
     ~examples=[`Danger.applyFunctionAtZero({|x| x+1})`],
     ~definitions=[
@@ -240,7 +240,7 @@ let library = [
   Function.make(
     ~name="applyFunctionAtPoint",
     ~nameSpace,
-    ~output=EvtArray,
+    ~output=EvtNumber,
     ~requiresNamespace=false,
     ~examples=[`Danger.applyFunctionAtPoint({|x| x+1}, 1)`],
     ~definitions=[
@@ -262,7 +262,7 @@ let library = [
   Function.make(
     ~name="integrateFunctionBetweenWithIncrement",
     ~nameSpace,
-    ~output=EvtArray,
+    ~output=EvtNumber,
     ~requiresNamespace=false,
     ~examples=[`Danger.integrateFunctionBetweenWithIncrement({|x| x+1}, 1, 10, 1)`], 
     // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
@@ -302,7 +302,7 @@ let library = [
     Function.make(
     ~name="integrateFunctionBetweenWithNumIntervals",
     ~nameSpace,
-    ~output=EvtArray,
+    ~output=EvtNumber,
     ~requiresNamespace=false,
     ~examples=[`Danger.integrateFunctionBetweenWithNumIntervals({|x| x+1}, 1, 10, 10)`], 
     // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
