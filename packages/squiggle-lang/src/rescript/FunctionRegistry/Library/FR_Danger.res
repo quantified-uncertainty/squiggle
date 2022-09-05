@@ -69,8 +69,8 @@ module Internals = {
     result
   }
   let castFloatToInternalNumber = x => ReducerInterface_InternalExpressionValue.IEvNumber(x)
-  @dead
-  let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
+  let castArrayOfFloatsToInternalArrayOfInternals = xs => ReducerInterface_InternalExpressionValue.IEvArray(Belt.Array.map(xs, x => castFloatToInternalNumber(x)))
+  @dead let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
     // reason for existence: might be an useful template to have for calculating diminishing marginal returns later on
     applyFunctionAtPoint(aLambda, castFloatToInternalNumber(point), environment, reducer)
   // integrate function itself
@@ -176,7 +176,7 @@ module Internals = {
     environment,
     reducer,
   ) => {
-    Ok(castFloatToInternalNumber(0.0))
+    Ok(castArrayOfFloatsToInternalArrayOfInternals([0.0, 1.0]))
   }
 }
 
@@ -355,7 +355,7 @@ let library = [
     Function.make(
     ~name="diminishingMarginalReturnsSkeleton",
     ~nameSpace,
-    ~output=EvtNumber,
+    ~output=EvtArray,
     ~requiresNamespace=false,
     ~examples=[`Danger.diminishingMarginalReturnsSkeleton({|x| x+1}, {|y| 10}, 100, 1)`],
     ~definitions=[
