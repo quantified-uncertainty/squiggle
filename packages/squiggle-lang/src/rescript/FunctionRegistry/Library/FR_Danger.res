@@ -57,10 +57,12 @@ module FunctionToNumberZero = {
 }
 
 module Internals = {
+  // Probability functions
   let factorial = Stdlib.Math.factorial
   let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
   let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
+  // Integral helper functions
   let applyFunctionAtPoint = (
     aLambda,
     internalNumber: internalExpressionValue,
@@ -74,10 +76,9 @@ module Internals = {
   let internalZero = ReducerInterface_InternalExpressionValue.IEvNumber(0.0)
   let applyFunctionAtZero = (aLambda, environment, reducer) =>
     applyFunctionAtPoint(aLambda, internalZero, environment, reducer)
-  @dead
-  let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
+  @dead let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
     applyFunctionAtPoint(aLambda, ReducerInterface_InternalExpressionValue.IEvNumber(point))
-
+  // simplest integral function
   let integrateFunctionBetweenWithIncrement = (
     aLambda,
     min: float,
@@ -86,7 +87,6 @@ module Internals = {
     environment,
     reducer,
   ) => {
-    // Should be easy, but tired today.
     let applyFunctionAtFloatToFloatOption = (point: float) => {
       let pointAsInternalExpression = ReducerInterface_InternalExpressionValue.IEvNumber(point)
       let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
@@ -103,6 +103,48 @@ module Internals = {
       result
     }
     let xsLength = Js.Math.ceil((max -. min) /. increment)
+    let xs = Belt.Array.makeBy(xsLength, i => min +. Belt_Float.fromInt(i) *. increment)
+    let ysOptions = Belt.Array.map(xs, x => applyFunctionAtFloatToFloatOption(x))
+    let okYs = E.A.R.filterOk(ysOptions)
+    let result = switch E.A.length(ysOptions) == E.A.length(okYs) {
+    | true => {
+        let numericIntermediate = okYs->E.A.reduce(0.0, (a, b) => a +. b)
+        let numericIntermediate2 = numericIntermediate *. increment
+        let resultWrapped =
+          numericIntermediate2->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
+        resultWrapped
+      }
+    | false => Error("Integration error in Danger.integrate")
+    }
+    result
+  }
+  // slightly better integrate function
+  let integrateFunctionBetweenWithNumIntervals = (
+    aLambda,
+    min: float,
+    max: float,
+    numIntervals: float, // cast as int?
+    environment,
+    reducer,
+  ) => {
+    let applyFunctionAtFloatToFloatOption = (point: float) => {
+      let pointAsInternalExpression = ReducerInterface_InternalExpressionValue.IEvNumber(point)
+      let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+        aLambda,
+        list{pointAsInternalExpression},
+        environment,
+        reducer,
+      )
+      let result = switch resultAsInternalExpression {
+      | Ok(IEvNumber(x)) => Ok(x)
+      | Error(_) => Error("Integration error in Danger.integrate")
+      | _ => Error("Integration error in Danger.integrate")
+      }
+      result
+    }
+    let xsLengthCandidate = Belt.Float.toInt(Js.Math.round(numIntervals))
+    let xsLength = xsLengthCandidate > 0 ? xsLengthCandidate : 1
+    let increment = (max -. min) /. Belt.Int.toFloat(xsLength)
     let xs = Belt.Array.makeBy(xsLength, i => min +. Belt_Float.fromInt(i) *. increment)
     let ysOptions = Belt.Array.map(xs, x => applyFunctionAtFloatToFloatOption(x))
     let okYs = E.A.R.filterOk(ysOptions)
@@ -162,6 +204,7 @@ let library = [
     ~definitions=[ThreeNumbersToNumber.make("binomial", Internals.binomial)],
     (),
   ),
+  // Helper functions building up to the integral
   Function.make(
     ~name="functionToZero",
     ~nameSpace,
@@ -215,6 +258,7 @@ let library = [
     ],
     (),
   ),
+  // simplest integral
   Function.make(
     ~name="integrateFunctionBetweenWithIncrement",
     ~nameSpace,
@@ -238,6 +282,46 @@ let library = [
               max,
               increment,
               env,
+              reducer,
+            )->E.R2.errMap(_ =>
+              "Integration error in Danger.integrate. Something went wrong along the way"
+            )
+          | _ =>
+            Error(
+              "Integration error in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
+            )
+          }
+          result
+        },
+        (),
+      ),
+    ],
+    (),
+  ),
+  // Integral which is a bit more thoughtful
+    Function.make(
+    ~name="integrateFunctionBetweenWithNumIntervals",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[`Danger.integrateFunctionBetweenWithNumIntervals({|x| x+1}, 1, 10, 10)`], 
+    // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
+    // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
+    ~definitions=[
+      FnDefinition.make(
+        ~name="integrateFunctionBetweenWithNumIntervals",
+        ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
+        ~run=(inputs, _, env, reducer) => {
+          let result = switch inputs {
+          | [_, _, _, IEvNumber(0.0)] =>
+            Error("Integration error in Danger.integrate: Increment can't be 0.")
+          | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(numIntervals)] =>
+            Internals.integrateFunctionBetweenWithNumIntervals(
+              aLambda,
+              min,
+              max,
+              numIntervals,
+              env,  
               reducer,
             )->E.R2.errMap(_ =>
               "Integration error in Danger.integrate. Something went wrong along the way"
