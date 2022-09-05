@@ -175,6 +175,13 @@ module Internals = {
     optimalAllocations: array<float>,
     currentMarginalReturns: result<array<float>, string>,
   }
+  let findBiggestElementIndex = xs =>
+    E.A.reducei(xs, 0, (acc, newElement, index) => {
+      switch newElement > xs[acc] {
+      | true => index
+      | false => acc
+      }
+    })
   type diminishingReturnsAccumulator = result<diminishingReturnsAccumulatorInner, string>
   let diminishingMarginalReturnsForTwoFunctions = (
     lambda1,
@@ -214,13 +221,6 @@ module Internals = {
     let increment = funds /. numDivisions
     let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
 
-    let findBiggestElementIndex = xs =>
-      E.A.reducei(xs, 0, (acc, newElement, index) => {
-        switch newElement > xs[acc] {
-        | true => index
-        | false => acc
-        }
-      })
     let initAccumulator: diminishingReturnsAccumulator = Ok({
       optimalAllocations: [0.0, 0.0],
       currentMarginalReturns: E.A.R.firstErrorOrOpen([
@@ -277,6 +277,115 @@ module Internals = {
     | Error(b) => Error(b)
     }
     optimalAllocationResult
+  }
+  let diminishingMarginalReturnsForManyFunctions = (
+    innerLambdas,
+    funds,
+    approximateIncrement,
+    environment,
+    reducer,
+  ) => {
+    /*
+    Two possible algorithms (n=funds/increment, m=num lambdas)
+    1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent
+    2. O(n*m): Iterate through all possible spending combinations. Fun is, it doesn't assume that the returns of marginal spending are diminishing.
+ */
+    let individuallyWrappedLambdas = E.A.fmap(possibleLambda =>
+      switch possibleLambda {
+      | ReducerInterface_InternalExpressionValue.IEvLambda(lambda) => Ok(lambda)
+      | _ =>
+        Error(
+          "Error in diminishingMarginalReturnsForManyFunctions: One of the elements in the function array is not a function",
+        )
+      }
+    , innerLambdas)
+    let collectivelyWrappedLambdas = E.A.R.firstErrorOrOpen(individuallyWrappedLambdas)
+    let result = switch collectivelyWrappedLambdas {
+    | Ok(lambdas) => {
+        let applyFunctionAtFloatToFloatOption = (lambda, point: float) => {
+          // Defined here so that it has access to environment, reducer
+          let pointAsInternalExpression = castFloatToInternalNumber(point)
+          let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+            lambda,
+            list{pointAsInternalExpression},
+            environment,
+            reducer,
+          )
+          let result = switch resultAsInternalExpression {
+          | Ok(IEvNumber(x)) => Ok(x)
+          | Error(_) =>
+            Error(
+              "Integration error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+            )
+          | _ => Error("Integration error 2 in Danger.integrate")
+          }
+          result
+        }
+        let numDivisions = Js.Math.round(funds /. approximateIncrement)
+        let numDivisionsInt = Belt.Float.toInt(numDivisions)
+        let increment = funds /. numDivisions
+        let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
+        let numLambdas = E.A.length(lambdas)
+        let initAccumulator: diminishingReturnsAccumulator = Ok({
+          optimalAllocations: Belt.Array.makeBy(numLambdas, _ => 0.0),
+          currentMarginalReturns: E.A.fmap(
+            lambda => applyFunctionAtFloatToFloatOption(lambda, 0.0),
+            lambdas,
+          )->E.A.R.firstErrorOrOpen,
+        })
+        let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
+          acc,
+          newIncrement,
+        ) => {
+          switch acc {
+          | Ok(accInner) => {
+              let oldMarginalReturnsWrapped = accInner.currentMarginalReturns
+              let newAccWrapped = switch oldMarginalReturnsWrapped {
+              | Ok(oldMarginalReturns) => {
+                  let indexOfBiggestDMR = findBiggestElementIndex(oldMarginalReturns)
+                  let newOptimalAllocations = Belt.Array.copy(accInner.optimalAllocations)
+                  let newOptimalAllocationsi =
+                    newOptimalAllocations[indexOfBiggestDMR] +. newIncrement
+                  newOptimalAllocations[indexOfBiggestDMR] = newOptimalAllocationsi
+                  let lambdai = lambdas[indexOfBiggestDMR]
+                  let newMarginalResultsLambdai = applyFunctionAtFloatToFloatOption(
+                    lambdai,
+                    newOptimalAllocationsi,
+                  )
+                  let newCurrentMarginalReturns = switch newMarginalResultsLambdai {
+                  | Ok(value) => {
+                      let result = Belt.Array.copy(oldMarginalReturns)
+                      result[indexOfBiggestDMR] = value
+                      Ok(result)
+                    }
+                  | Error(b) => Error(b)
+                  }
+
+                  let newAcc: diminishingReturnsAccumulatorInner = {
+                    optimalAllocations: newOptimalAllocations,
+                    currentMarginalReturns: newCurrentMarginalReturns,
+                  }
+                  Ok(newAcc)
+                }
+              | Error(b) => Error(b)
+              }
+              newAccWrapped
+            }
+          | Error(b) => Error(b)
+          }
+        })
+        let optimalAllocationResult = switch optimalAllocationEndAccumulator {
+        | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
+        | Error(b) => Error(b)
+        }
+        optimalAllocationResult
+        /*let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
+        result*/
+      }
+
+    | Error(b) => Error(b)
+    }
+    result
   }
 }
 
@@ -457,7 +566,7 @@ let library = [
     ~nameSpace,
     ~output=EvtArray,
     ~requiresNamespace=false,
-    ~examples=[`Danger.diminishingMarginalReturnsForTwoFunctions({|x| x+1}, {|y| 10}, 100, 1)`],
+    ~examples=[`Danger.diminishingMarginalReturnsForTwoFunctions({|x| x+1}, {|y| 10}, 100, 0.01)`],
     ~definitions=[
       FnDefinition.make(
         ~name="diminishingMarginalReturnsForTwoFunctions",
@@ -473,6 +582,35 @@ let library = [
             Internals.diminishingMarginalReturnsForTwoFunctions(
               lambda1,
               lambda2,
+              funds,
+              approximateIncrement,
+              env,
+              reducer,
+            )
+          | _ => Error("Error in Danger.diminishingMarginalReturnsForTwoFunctions")
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="diminishingMarginalReturnsForManyFunctions",
+    ~nameSpace,
+    ~output=EvtArray,
+    ~requiresNamespace=false,
+    ~examples=[
+      `Danger.diminishingMarginalReturnsForManyFunctions([{|x| x+1}, {|y| 10} , {|z| 20 - 2*z}], 100, 0.01)`,
+    ],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="diminishingMarginalReturnsForManyFunctions",
+        ~inputs=[FRTypeArray(FRTypeLambda), FRTypeNumber, FRTypeNumber],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [IEvArray(innerlambdas), IEvNumber(funds), IEvNumber(approximateIncrement)] =>
+            Internals.diminishingMarginalReturnsForManyFunctions(
+              innerlambdas,
               funds,
               approximateIncrement,
               env,
