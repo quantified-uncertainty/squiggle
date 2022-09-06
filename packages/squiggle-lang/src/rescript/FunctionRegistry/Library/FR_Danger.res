@@ -1,3 +1,5 @@
+/* Notes: See commit 5ce0a6979d9f95d77e4ddbdffc40009de73821e3 for last commit which has helper functions. These might be useful when coming back to this code after a long time. */
+
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
 
@@ -16,26 +18,6 @@ module Internals = {
     ->Belt.Array.map(FunctionRegistry_Helpers.Wrappers.evNumber)
     ->FunctionRegistry_Helpers.Wrappers.evArray
 
-  /* Helper functions. May be useful in 3 months when coming back to this code.
-  @dead let applyFunctionAtPoint = (
-    aLambda,
-    internalNumber: internalExpressionValue,
-    environment,
-    reducer,
-  ): result<ReducerInterface_InternalExpressionValue.t, Reducer_ErrorValue.errorValue> => {
-    let result = Reducer_Expression_Lambda.doLambdaCall(
-      aLambda,
-      list{internalNumber},
-      environment,
-      reducer,
-    )
-    result
-  }
-  @dead let applyFunctionAtFloat = (aLambda, point, environment, reducer) =>
-    // reason for existence: might be an useful template to have for calculating diminishing marginal returns later on
-    applyFunctionAtPoint(aLambda, castFloatToInternalNumber(point), environment, reducer)
-  // integrate function itself
- */
   let integrateFunctionBetweenWithNumIntegrationPoints = (
     aLambda,
     min: float,
@@ -137,7 +119,9 @@ module Internals = {
     currentMarginalReturns: result<array<float>, string>,
   }
 
-  //Also can be done by Js.Math.max_int
+  // Cannot be be done by Js.Math.max_int or maxMany_int
+  // because that function returns the value of the element
+  // not of the index.
   let findBiggestElementIndex = xs =>
     E.A.reducei(xs, 0, (acc, newElement, index) => {
       switch newElement > xs[acc] {
@@ -146,103 +130,6 @@ module Internals = {
       }
     })
   type diminishingReturnsAccumulator = result<diminishingReturnsAccumulatorInner, string>
-  /* Simple function. May be useful for remembering how this works when I come back to this code weeks or months from now.
-  @dead let diminishingMarginalReturnsForTwoFunctions = (
-    // left alive for now because I know it works.
-    lambda1,
-    lambda2,
-    funds,
-    approximateIncrement,
-    environment,
-    reducer,
-  ) => {
-    /*
-    Two possible algorithms (n=funds/increment, m=num lambdas)
-    1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent
-    2. O(n*m): Iterate through all possible spending combinations. Fun is, it doesn't assume that the returns of marginal spending are diminishing.
- */
-    let applyFunctionAtFloatToFloatOption = (lambda, point: float) => {
-      // Defined here so that it has access to environment, reducer
-      let pointAsInternalExpression = castFloatToInternalNumber(point)
-      let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
-        lambda,
-        list{pointAsInternalExpression},
-        environment,
-        reducer,
-      )
-      let result = switch resultAsInternalExpression {
-      | Ok(IEvNumber(x)) => Ok(x)
-      | Error(_) =>
-        Error(
-          "Integration error 1 in Danger.diminishingMarginalReturnsForTwoFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
-        )
-      | _ => Error("Integration error 2 in Danger.diminishingMarginalReturnsForTwoFunctions")
-      }
-      result
-    }
-
-    let numDivisions = Js.Math.round(funds /. approximateIncrement)
-    let numDivisionsInt = Belt.Float.toInt(numDivisions)
-    let increment = funds /. numDivisions
-    let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
-
-    let initAccumulator: diminishingReturnsAccumulator = Ok({
-      optimalAllocations: [0.0, 0.0],
-      currentMarginalReturns: E.A.R.firstErrorOrOpen([
-        applyFunctionAtFloatToFloatOption(lambda1, 0.0),
-        applyFunctionAtFloatToFloatOption(lambda2, 0.0),
-      ]),
-    })
-    let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
-      acc,
-      newIncrement,
-    ) => {
-      switch acc {
-      | Ok(accInner) => {
-          let oldMarginalReturnsWrapped = accInner.currentMarginalReturns
-          let newAccWrapped = switch oldMarginalReturnsWrapped {
-          | Ok(oldMarginalReturns) => {
-              let indexOfBiggestDMR = findBiggestElementIndex(oldMarginalReturns)
-              let newOptimalAllocations = Belt.Array.copy(accInner.optimalAllocations)
-              let newOptimalAllocationsi = newOptimalAllocations[indexOfBiggestDMR] +. newIncrement
-              newOptimalAllocations[indexOfBiggestDMR] = newOptimalAllocationsi
-              let lambdai = indexOfBiggestDMR == 0 ? lambda1 : lambda2 // to do: generalize
-              let newMarginalResultsLambdai = applyFunctionAtFloatToFloatOption(
-                lambdai,
-                newOptimalAllocationsi,
-              )
-              let newCurrentMarginalReturns = switch newMarginalResultsLambdai {
-              | Ok(value) => {
-                  let result = Belt.Array.copy(oldMarginalReturns)
-                  result[indexOfBiggestDMR] = value
-                  Ok(result)
-                }
-              | Error(b) => Error(b)
-              }
-
-              let newAcc: diminishingReturnsAccumulatorInner = {
-                optimalAllocations: newOptimalAllocations,
-                currentMarginalReturns: newCurrentMarginalReturns,
-              }
-              Ok(newAcc)
-            }
-          | Error(b) => Error(b)
-          }
-          newAccWrapped
-        }
-      | Error(b) => Error(b)
-      }
-      /* let findSmaller = (_) => 0
-      let smallerDMR = 
-      acc
- */
-    })
-    let optimalAllocationResult = switch optimalAllocationEndAccumulator {
-    | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
-    | Error(b) => Error(b)
-    }
-    optimalAllocationResult
-  }*/
   //TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/environment.
   let diminishingMarginalReturnsForManyFunctions = (
     lambdas,
@@ -333,7 +220,7 @@ module Internals = {
     optimalAllocationResult
     // let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
     // result
-    // ^ useful for debugging.
+    // ^ helper with the same type as what the result should be. Useful for debugging.
   }
 }
 
@@ -378,58 +265,6 @@ let library = [
     ~definitions=[DefineFn.Numbers.threeToOne("binomial", Internals.binomial)],
     (),
   ),
-  // Helper functions building up to the integral
-  /* Initial functions that helped me build understanding, may help when coming back to the code weeks or months from now.
-  Function.make(
-    ~name="applyFunctionAtZero",
-    ~nameSpace,
-    ~output=EvtNumber,
-    ~requiresNamespace=false,
-    ~examples=[`Danger.applyFunctionAtZero({|x| x+1})`],
-    ~definitions=[
-      FnDefinition.make(
-        ~name="applyFunctionAtZero",
-        ~inputs=[FRTypeLambda],
-        ~run=(inputs, _, environment, reducer) => {
-          let result = switch inputs {
-          | [IEvLambda(aLambda)] =>
-            Internals.applyFunctionAtPoint(
-              aLambda,
-              Internals.castFloatToInternalNumber(0.0),
-              environment,
-              reducer,
-            )->E.R2.errMap(_ => "Error!")
-          | _ => Error(impossibleError)
-          }
-          result
-        },
-        (),
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="applyFunctionAtPoint",
-    ~nameSpace,
-    ~output=EvtNumber,
-    ~requiresNamespace=false,
-    ~examples=[`Danger.applyFunctionAtPoint({|x| x+1}, 1)`],
-    ~definitions=[
-      FnDefinition.make(
-        ~name="applyFunctionAtPoint",
-        ~inputs=[FRTypeLambda, FRTypeNumber],
-        ~run=(inputs, _, env, reducer) =>
-          switch inputs {
-          | [IEvLambda(aLambda), point] =>
-            Internals.applyFunctionAtPoint(aLambda, point, env, reducer)->E.R2.errMap(_ => "Error!")
-          | _ => Error(impossibleError)
-          },
-        (),
-      ),
-    ],
-    (),
-  ),
- */
   // Integral in terms of function, min, max, num points
   // Note that execution time will be more predictable, because it
   // will only depend on num points and the complexity of the function
@@ -471,7 +306,7 @@ let library = [
     (),
   ),
   // Integral in terms of function, min, max, epsilon (distance between points)
-  // Note that execution time will be less predictable, because it
+  // Execution time will be less predictable, because it
   // will depend on min, max and epsilon together,
   // as well and the complexity of the function
   Function.make(
@@ -514,7 +349,7 @@ let library = [
   // Diminishing marginal return functions
   // There are functions diminishingMarginalReturnsForFunctions2 through diminishingMarginalReturnsForFunctions7
   // Because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/1090>
-  // As soon as that is fixed, I will destroy this monstrosity.
+  // As soon as that is fixed, I will simplify this monstrosity.
   Function.make(
     ~name="diminishingMarginalReturnsForFunctions2",
     ~nameSpace,
