@@ -272,92 +272,114 @@ module DiminishingReturns = {
       1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent
       2. O(n*m): Iterate through all possible spending combinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
  */
-      let applyFunctionAtPoint = (lambda, point: float) => {
-        // Defined here so that it has access to environment, reducer
-        let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
-        let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
-          lambda,
-          list{pointAsInternalExpression},
-          environment,
-          reducer,
+      switch (
+        E.A.length(lambdas) > 1,
+        funds > 0.0,
+        approximateIncrement > 0.0,
+        funds > approximateIncrement,
+      ) {
+      | (false, _, _, _) =>
+        Error(
+          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1.",
         )
-        switch resultAsInternalExpression {
-        | Ok(IEvNumber(x)) => Ok(x)
-        | Error(_) =>
-          Error(
-            "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
-          )
-        | _ =>
-          Error(
-            "Error 2 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
-          )
-        }
-      }
+      | (_, false, _, _) =>
+        Error(
+          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0.",
+        )
+      | (_, _, false, _) =>
+        Error(
+          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0.",
+        )
+      | (_, _, _, false) =>
+        Error(
+          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount.",
+        )
+      | (true, true, true, true) => {
+          let applyFunctionAtPoint = (lambda, point: float) => {
+            // Defined here so that it has access to environment, reducer
+            let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
+            let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+              lambda,
+              list{pointAsInternalExpression},
+              environment,
+              reducer,
+            )
+            switch resultAsInternalExpression {
+            | Ok(IEvNumber(x)) => Ok(x)
+            | Error(_) =>
+              Error(
+                "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+              )
+            | _ =>
+              Error(
+                "Error 2 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
+              )
+            }
+          }
 
-      let numDivisions = Js.Math.round(funds /. approximateIncrement)
-      let increment = funds /. numDivisions
-      let arrayOfIncrements = Belt.Array.make(Belt.Float.toInt(numDivisions), increment)
+          let numDivisions = Js.Math.round(funds /. approximateIncrement)
+          let increment = funds /. numDivisions
+          let arrayOfIncrements = Belt.Array.make(Belt.Float.toInt(numDivisions), increment)
 
-      let initAccumulator: diminishingReturnsAccumulator = Ok({
-        optimalAllocations: Belt.Array.make(E.A.length(lambdas), 0.0),
-        currentMarginalReturns: E.A.fmap(
-          lambda => applyFunctionAtPoint(lambda, 0.0),
-          lambdas,
-        )->E.A.R.firstErrorOrOpen,
-      })
+          let initAccumulator: diminishingReturnsAccumulator = Ok({
+            optimalAllocations: Belt.Array.make(E.A.length(lambdas), 0.0),
+            currentMarginalReturns: E.A.fmap(
+              lambda => applyFunctionAtPoint(lambda, 0.0),
+              lambdas,
+            )->E.A.R.firstErrorOrOpen,
+          })
 
-      let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
-        acc,
-        newIncrement,
-      ) => {
-        switch acc {
-        | Ok(accInner) => {
-            let oldMarginalReturnsWrapped = accInner.currentMarginalReturns
-            let newAccWrapped = switch oldMarginalReturnsWrapped {
-            | Ok(oldMarginalReturns) => {
-                let indexOfBiggestDMR = findBiggestElementIndex(oldMarginalReturns)
-                let newOptimalAllocations = Belt.Array.copy(accInner.optimalAllocations)
-                let newOptimalAllocationsi =
-                  newOptimalAllocations[indexOfBiggestDMR] +. newIncrement
-                newOptimalAllocations[indexOfBiggestDMR] = newOptimalAllocationsi
-                let lambdai = lambdas[indexOfBiggestDMR]
-                let newMarginalResultsLambdai = applyFunctionAtPoint(
-                  lambdai,
-                  newOptimalAllocationsi,
-                )
-                let newCurrentMarginalReturns = switch newMarginalResultsLambdai {
-                | Ok(value) => {
-                    let result = Belt.Array.copy(oldMarginalReturns)
-                    result[indexOfBiggestDMR] = value
-                    Ok(result)
+          let optimalAllocationEndAccumulator = E.A.reduce(arrayOfIncrements, initAccumulator, (
+            acc,
+            newIncrement,
+          ) => {
+            switch acc {
+            | Ok(accInner) => {
+                let oldMarginalReturnsWrapped = accInner.currentMarginalReturns
+                let newAccWrapped = switch oldMarginalReturnsWrapped {
+                | Ok(oldMarginalReturns) => {
+                    let indexOfBiggestDMR = findBiggestElementIndex(oldMarginalReturns)
+                    let newOptimalAllocations = Belt.Array.copy(accInner.optimalAllocations)
+                    let newOptimalAllocationsi =
+                      newOptimalAllocations[indexOfBiggestDMR] +. newIncrement
+                    newOptimalAllocations[indexOfBiggestDMR] = newOptimalAllocationsi
+                    let lambdai = lambdas[indexOfBiggestDMR]
+                    let newMarginalResultsLambdai = applyFunctionAtPoint(
+                      lambdai,
+                      newOptimalAllocationsi,
+                    )
+                    let newCurrentMarginalReturns = switch newMarginalResultsLambdai {
+                    | Ok(value) => {
+                        let result = Belt.Array.copy(oldMarginalReturns)
+                        result[indexOfBiggestDMR] = value
+                        Ok(result)
+                      }
+                    | Error(b) => Error(b)
+                    }
+
+                    let newAcc: diminishingReturnsAccumulatorInner = {
+                      optimalAllocations: newOptimalAllocations,
+                      currentMarginalReturns: newCurrentMarginalReturns,
+                    }
+                    Ok(newAcc)
                   }
                 | Error(b) => Error(b)
                 }
-
-                let newAcc: diminishingReturnsAccumulatorInner = {
-                  optimalAllocations: newOptimalAllocations,
-                  currentMarginalReturns: newCurrentMarginalReturns,
-                }
-                Ok(newAcc)
+                newAccWrapped
               }
             | Error(b) => Error(b)
             }
-            newAccWrapped
+          })
+
+          let optimalAllocationResult = switch optimalAllocationEndAccumulator {
+          | Ok(inner) =>
+            Ok(FunctionRegistry_Helpers.Wrappers.evArrayOfEvNumber(inner.optimalAllocations))
+          | Error(b) => Error(b)
           }
-        | Error(b) => Error(b)
+
+          optimalAllocationResult
         }
-      })
-
-      let optimalAllocationResult = switch optimalAllocationEndAccumulator {
-      | Ok(inner) =>
-        Ok(FunctionRegistry_Helpers.Wrappers.evArrayOfEvNumber(inner.optimalAllocations))
-      | Error(b) => Error(b)
       }
-
-      optimalAllocationResult
-      // let result = [0.0, 0.0]->FunctionRegistry_Helpers.Wrappers.evArrayOfEvNumber->Ok
-      // result
-      // ^ helper with the same type as what the result should be. Useful for debugging.
     }
   }
   module Lib = {
