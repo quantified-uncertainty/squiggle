@@ -54,22 +54,22 @@ describe("Peggy to Expression", () => {
   })
 
   describe("arrays", () => {
-    testToExpression("[]", "{(:$_endOfOuterBlock_$ () (:$_constructArray_$ ()))}", ~v="[]", ())
+    testToExpression("[]", "{(:$_endOfOuterBlock_$ () (:$_constructArray_$))}", ~v="[]", ())
     testToExpression(
       "[0, 1, 2]",
-      "{(:$_endOfOuterBlock_$ () (:$_constructArray_$ (0 1 2)))}",
+      "{(:$_endOfOuterBlock_$ () (:$_constructArray_$ 0 1 2))}",
       ~v="[0,1,2]",
       (),
     )
     testToExpression(
       "['hello', 'world']",
-      "{(:$_endOfOuterBlock_$ () (:$_constructArray_$ ('hello' 'world')))}",
+      "{(:$_endOfOuterBlock_$ () (:$_constructArray_$ 'hello' 'world'))}",
       ~v="['hello','world']",
       (),
     )
     testToExpression(
       "([0,1,2])[1]",
-      "{(:$_endOfOuterBlock_$ () (:$_atIndex_$ (:$_constructArray_$ (0 1 2)) 1))}",
+      "{(:$_endOfOuterBlock_$ () (:$_atIndex_$ (:$_constructArray_$ 0 1 2) 1))}",
       ~v="1",
       (),
     )

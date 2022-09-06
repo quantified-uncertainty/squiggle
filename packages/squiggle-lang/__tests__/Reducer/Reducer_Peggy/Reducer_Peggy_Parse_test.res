@@ -110,15 +110,15 @@ describe("Peggy parse", () => {
   })
 
   describe("arrays", () => {
-    testParse("[]", "{(::$_endOfOuterBlock_$ () (::$_constructArray_$ ()))}")
-    testParse("[0, 1, 2]", "{(::$_endOfOuterBlock_$ () (::$_constructArray_$ (0 1 2)))}")
+    testParse("[]", "{(::$_endOfOuterBlock_$ () (::$_constructArray_$))}")
+    testParse("[0, 1, 2]", "{(::$_endOfOuterBlock_$ () (::$_constructArray_$ 0 1 2))}")
     testParse(
       "['hello', 'world']",
-      "{(::$_endOfOuterBlock_$ () (::$_constructArray_$ ('hello' 'world')))}",
+      "{(::$_endOfOuterBlock_$ () (::$_constructArray_$ 'hello' 'world'))}",
     )
     testParse(
       "([0,1,2])[1]",
-      "{(::$_endOfOuterBlock_$ () (::$_atIndex_$ (::$_constructArray_$ (0 1 2)) 1))}",
+      "{(::$_endOfOuterBlock_$ () (::$_atIndex_$ (::$_constructArray_$ 0 1 2) 1))}",
     )
   })
 
@@ -315,7 +315,7 @@ describe("Peggy parse", () => {
     )
     testParse(
       "myadd(x,y)=x+y; z=[myadd]; z",
-      "{:myadd = {|:x,:y| {(::add :x :y)}}; :z = {(::$_constructArray_$ (:myadd))}; (::$_endOfOuterBlock_$ () :z)}",
+      "{:myadd = {|:x,:y| {(::add :x :y)}}; :z = {(::$_constructArray_$ :myadd)}; (::$_endOfOuterBlock_$ () :z)}",
     )
     testParse(
       "myaddd(x,y)=x+y; z={x: myaddd}; z",
@@ -328,11 +328,11 @@ describe("Peggy parse", () => {
     )
     testParse(
       "map([1,2,3], {|x| x+1})",
-      "{(::$_endOfOuterBlock_$ () (::map (::$_constructArray_$ (1 2 3)) {|:x| {(::add :x 1)}}))}",
+      "{(::$_endOfOuterBlock_$ () (::map (::$_constructArray_$ 1 2 3) {|:x| {(::add :x 1)}}))}",
     )
     testParse(
       "[1,2,3]->map({|x| x+1})",
-      "{(::$_endOfOuterBlock_$ () (::map (::$_constructArray_$ (1 2 3)) {|:x| {(::add :x 1)}}))}",
+      "{(::$_endOfOuterBlock_$ () (::map (::$_constructArray_$ 1 2 3) {|:x| {(::add :x 1)}}))}",
     )
   })
   describe("unit", () => {
