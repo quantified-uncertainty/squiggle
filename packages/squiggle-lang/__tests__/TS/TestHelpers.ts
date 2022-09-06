@@ -1,66 +1,29 @@
-import {
-  run,
-  runPartial,
-  bindings,
-  squiggleExpression,
-  errorValueToString,
-  defaultImports,
-  defaultBindings,
-  jsImports,
-} from "../../src/js/index";
+import { run, SqValueTag } from "../../src/js";
+export { SqValueTag };
 
-export function testRun(
-  x: string,
-  bindings: bindings = defaultBindings,
-  imports: jsImports = defaultImports
-): squiggleExpression {
-  let squiggleResult = run(
-    x,
-    bindings,
-    {
+expect.extend({
+  toEqualSqValue(x, y) {
+    // hack via https://github.com/facebook/jest/issues/10329#issuecomment-820656061
+    const { getMatchers } = require("expect/build/jestMatchersObject");
+    return getMatchers().toEqual.call(this, x.toString(), y.toString());
+  },
+});
+
+export function testRun(x: string) {
+  const { result, bindings } = run(x, {
+    environment: {
       sampleCount: 1000,
       xyPointLength: 100,
     },
-    imports
-  );
-  if (squiggleResult.tag === "Ok") {
-    return squiggleResult.value;
+  });
+
+  if (result.tag === "Ok") {
+    return result.value;
   } else {
     throw new Error(
-      `Expected squiggle expression to evaluate but got error: ${errorValueToString(
-        squiggleResult.value
-      )}`
+      `Expected squiggle expression to evaluate but got error: ${result.value}`
     );
   }
-}
-
-export function testRunPartial(
-  x: string,
-  bindings: bindings = defaultBindings,
-  imports: jsImports = defaultImports
-): bindings {
-  let squiggleResult = runPartial(
-    x,
-    bindings,
-    {
-      sampleCount: 1000,
-      xyPointLength: 100,
-    },
-    imports
-  );
-  if (squiggleResult.tag === "Ok") {
-    return squiggleResult.value;
-  } else {
-    throw new Error(
-      `Expected squiggle expression to evaluate but got error: ${errorValueToString(
-        squiggleResult.value
-      )}`
-    );
-  }
-}
-
-export function failDefault() {
-  expect("be reached").toBe("codepath should never");
 }
 
 /**

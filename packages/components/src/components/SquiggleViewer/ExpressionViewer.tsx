@@ -1,5 +1,5 @@
-import React from "react";
-import { squiggleExpression, declaration } from "@quri/squiggle-lang";
+import React, { useContext } from "react";
+import { SqDistributionTag, SqValue, SqValueTag } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
 import { DistributionChart, defaultPlot, makePlot } from "../DistributionChart";
 import { FunctionChart, FunctionChartSettings } from "../FunctionChart";
@@ -8,7 +8,10 @@ import { VariableBox } from "./VariableBox";
 import { ItemSettingsMenu } from "./ItemSettingsMenu";
 import { hasMassBelowZero } from "../../lib/distributionUtils";
 import { MergedItemSettings } from "./utils";
+import { ViewerContext } from "./ViewerContext";
 
+/*
+// DISABLED FOR 0.4 branch, for now
 function getRange<a>(x: declaration<a>) {
   const first = x.args[0];
   switch (first.tag) {
@@ -31,15 +34,21 @@ function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
     count: 20,
   };
 }
+*/
 
 const VariableList: React.FC<{
-  path: string[];
+  value: SqValue;
   heading: string;
   children: (settings: MergedItemSettings) => React.ReactNode;
-}> = ({ path, heading, children }) => (
-  <VariableBox path={path} heading={heading}>
+}> = ({ value, heading, children }) => (
+  <VariableBox value={value} heading={heading}>
     {(settings) => (
-      <div className={clsx("space-y-3", path.length ? "pt-1 mt-1" : null)}>
+      <div
+        className={clsx(
+          "space-y-3",
+          value.location.path.items.length ? "pt-1 mt-1" : null
+        )}
+      >
         {children(settings)}
       </div>
     )}
@@ -48,51 +57,44 @@ const VariableList: React.FC<{
 
 export interface Props {
   /** The output of squiggle's run */
-  expression: squiggleExpression;
-  /** Path to the current item, e.g. `['foo', 'bar', '3']` for `foo.bar[3]`; can be empty on the top-level item. */
-  path: string[];
+  value: SqValue;
   width?: number;
 }
 
-export const ExpressionViewer: React.FC<Props> = ({
-  path,
-  expression,
-  width,
-}) => {
-  if (typeof expression !== "object") {
-    return (
-      <VariableList path={path} heading="Error">
-        {() => `Unknown expression: ${expression}`}
-      </VariableList>
-    );
-  }
-  switch (expression.tag) {
-    case "number":
+export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
+  const { getMergedSettings } = useContext(ViewerContext);
+
+  switch (value.tag) {
+    case SqValueTag.Number:
       return (
-        <VariableBox path={path} heading="Number">
+        <VariableBox value={value} heading="Number">
           {() => (
             <div className="font-semibold text-slate-600">
-              <NumberShower precision={3} number={expression.value} />
+              <NumberShower precision={3} number={value.value} />
             </div>
           )}
         </VariableBox>
       );
-    case "distribution": {
-      const distType = expression.value.type();
+    case SqValueTag.Distribution: {
+      const distType = value.value.tag;
       return (
         <VariableBox
-          path={path}
+          value={value}
           heading={`Distribution (${distType})\n${
-            distType === "Symbolic" ? expression.value.toString() : ""
+            distType === SqDistributionTag.Symbolic
+              ? value.value.toString()
+              : ""
           }`}
           renderSettingsMenu={({ onChange }) => {
-            const shape = expression.value.pointSet();
+            const shape = value.value.pointSet(
+              getMergedSettings(value.location).environment
+            );
             return (
               <ItemSettingsMenu
-                path={path}
+                value={value}
                 onChange={onChange}
                 disableLogX={
-                  shape.tag === "Ok" && hasMassBelowZero(shape.value)
+                  shape.tag === "Ok" && hasMassBelowZero(shape.value.asShape())
                 }
                 withFunctionSettings={false}
               />
@@ -102,7 +104,8 @@ export const ExpressionViewer: React.FC<Props> = ({
           {(settings) => {
             return (
               <DistributionChart
-                plot={defaultPlot(expression.value)}
+                plot={defaultPlot(value.value)}
+                environment={settings.environment}
                 {...settings.distributionPlotSettings}
                 height={settings.height}
                 width={width}
@@ -112,77 +115,77 @@ export const ExpressionViewer: React.FC<Props> = ({
         </VariableBox>
       );
     }
-    case "string":
+    case SqValueTag.String:
       return (
-        <VariableBox path={path} heading="String">
+        <VariableBox value={value} heading="String">
           {() => (
             <>
               <span className="text-slate-400">"</span>
               <span className="text-slate-600 font-semibold font-mono">
-                {expression.value}
+                {value.value}
               </span>
               <span className="text-slate-400">"</span>
             </>
           )}
         </VariableBox>
       );
-    case "boolean":
+    case SqValueTag.Bool:
       return (
-        <VariableBox path={path} heading="Boolean">
-          {() => expression.value.toString()}
+        <VariableBox value={value} heading="Boolean">
+          {() => value.value.toString()}
         </VariableBox>
       );
-    case "symbol":
+    case SqValueTag.Symbol:
       return (
-        <VariableBox path={path} heading="Symbol">
+        <VariableBox value={value} heading="Symbol">
           {() => (
             <>
               <span className="text-slate-500 mr-2">Undefined Symbol:</span>
-              <span className="text-slate-600">{expression.value}</span>
+              <span className="text-slate-600">{value.value}</span>
             </>
           )}
         </VariableBox>
       );
-    case "call":
+    case SqValueTag.Call:
       return (
-        <VariableBox path={path} heading="Call">
-          {() => expression.value}
+        <VariableBox value={value} heading="Call">
+          {() => value.value}
         </VariableBox>
       );
-    case "arraystring":
+    case SqValueTag.ArrayString:
       return (
-        <VariableBox path={path} heading="Array String">
-          {() => expression.value.map((r) => `"${r}"`).join(", ")}
+        <VariableBox value={value} heading="Array String">
+          {() => value.value.map((r) => `"${r}"`).join(", ")}
         </VariableBox>
       );
-    case "date":
+    case SqValueTag.Date:
       return (
-        <VariableBox path={path} heading="Date">
-          {() => expression.value.toDateString()}
+        <VariableBox value={value} heading="Date">
+          {() => value.value.toDateString()}
         </VariableBox>
       );
-    case "void":
+    case SqValueTag.Void:
       return (
-        <VariableBox path={path} heading="Void">
+        <VariableBox value={value} heading="Void">
           {() => "Void"}
         </VariableBox>
       );
-    case "timeDuration": {
+    case SqValueTag.TimeDuration: {
       return (
-        <VariableBox path={path} heading="Time Duration">
-          {() => <NumberShower precision={3} number={expression.value} />}
+        <VariableBox value={value} heading="Time Duration">
+          {() => <NumberShower precision={3} number={value.value} />}
         </VariableBox>
       );
     }
-    case "lambda":
+    case SqValueTag.Lambda:
       return (
         <VariableBox
-          path={path}
+          value={value}
           heading="Function"
           renderSettingsMenu={({ onChange }) => {
             return (
               <ItemSettingsMenu
-                path={path}
+                value={value}
                 onChange={onChange}
                 withFunctionSettings={true}
               />
@@ -191,11 +194,11 @@ export const ExpressionViewer: React.FC<Props> = ({
         >
           {(settings) => (
             <>
-              <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${expression.value.parameters.join(
-                ","
-              )})`}</div>
+              <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${value.value
+                .parameters()
+                .join(",")})`}</div>
               <FunctionChart
-                fn={expression.value}
+                fn={value.value}
                 chartSettings={settings.chartSettings}
                 distributionPlotSettings={settings.distributionPlotSettings}
                 height={settings.height}
@@ -208,47 +211,48 @@ export const ExpressionViewer: React.FC<Props> = ({
           )}
         </VariableBox>
       );
-    case "lambdaDeclaration": {
+    case SqValueTag.Declaration: {
       return (
         <VariableBox
-          path={path}
+          value={value}
           heading="Function Declaration"
           renderSettingsMenu={({ onChange }) => {
             return (
               <ItemSettingsMenu
                 onChange={onChange}
-                path={path}
+                value={value}
                 withFunctionSettings={true}
               />
             );
           }}
         >
           {(settings) => (
-            <FunctionChart
-              fn={expression.value.fn}
-              chartSettings={getChartSettings(expression.value)}
-              distributionPlotSettings={settings.distributionPlotSettings}
-              height={settings.height}
-              environment={{
-                sampleCount: settings.environment.sampleCount / 10,
-                xyPointLength: settings.environment.xyPointLength / 10,
-              }}
-            />
+            <div>NOT IMPLEMENTED IN 0.4 YET</div>
+            // <FunctionChart
+            //   fn={expression.value.fn}
+            //   chartSettings={getChartSettings(expression.value)}
+            //   distributionPlotSettings={settings.distributionPlotSettings}
+            //   height={settings.height}
+            //   environment={{
+            //     sampleCount: settings.environment.sampleCount / 10,
+            //     xyPointLength: settings.environment.xyPointLength / 10,
+            //   }}
+            // />
           )}
         </VariableBox>
       );
     }
-    case "module": {
+    case SqValueTag.Module: {
       return (
-        <VariableList path={path} heading="Module">
+        <VariableList value={value} heading="Module">
           {(_) =>
-            Object.entries(expression.value)
-              .filter(([key, _]) => !key.match(/^(Math|System)\./))
+            value.value
+              .entries()
+              .filter(([key, _]) => !key.match(/^(__result__)$/))
               .map(([key, r]) => (
                 <ExpressionViewer
                   key={key}
-                  path={[...path, key]}
-                  expression={r}
+                  value={r}
                   width={width !== undefined ? width - 20 : width}
                 />
               ))
@@ -256,23 +260,26 @@ export const ExpressionViewer: React.FC<Props> = ({
         </VariableList>
       );
     }
-    case "record":
-      const plot = makePlot(expression.value);
+    case SqValueTag.Record:
+      const plot = makePlot(value.value);
       if (plot) {
         return (
           <VariableBox
-            path={path}
-            heading={"Plot"}
+            value={value}
+            heading="Plot"
             renderSettingsMenu={({ onChange }) => {
               let disableLogX = plot.distributions.some((x) => {
-                let pointSet = x.distribution.pointSet();
+                let pointSet = x.distribution.pointSet(
+                  getMergedSettings(value.location).environment
+                );
                 return (
-                  pointSet.tag === "Ok" && hasMassBelowZero(pointSet.value)
+                  pointSet.tag === "Ok" &&
+                  hasMassBelowZero(pointSet.value.asShape())
                 );
               });
               return (
                 <ItemSettingsMenu
-                  path={path}
+                  value={value}
                   onChange={onChange}
                   disableLogX={disableLogX}
                   withFunctionSettings={false}
@@ -284,6 +291,7 @@ export const ExpressionViewer: React.FC<Props> = ({
               return (
                 <DistributionChart
                   plot={plot}
+                  environment={settings.environment}
                   {...settings.distributionPlotSettings}
                   height={settings.height}
                   width={width}
@@ -294,44 +302,44 @@ export const ExpressionViewer: React.FC<Props> = ({
         );
       } else {
         return (
-          <VariableList path={path} heading="Record">
+          <VariableList value={value} heading="Record">
             {(_) =>
-              Object.entries(expression.value).map(([key, r]) => (
-                <ExpressionViewer
-                  key={key}
-                  path={[...path, key]}
-                  expression={r}
-                  width={width !== undefined ? width - 20 : width}
-                />
-              ))
+              value.value
+                .entries()
+                .map(([key, r]) => (
+                  <ExpressionViewer
+                    key={key}
+                    value={r}
+                    width={width !== undefined ? width - 20 : width}
+                  />
+                ))
             }
           </VariableList>
         );
       }
-    case "array":
+    case SqValueTag.Array:
       return (
-        <VariableList path={path} heading="Array">
+        <VariableList value={value} heading="Array">
           {(_) =>
-            expression.value.map((r, i) => (
-              <ExpressionViewer
-                key={i}
-                path={[...path, String(i)]}
-                expression={r}
-                width={width !== undefined ? width - 20 : width}
-              />
-            ))
+            value.value
+              .getValues()
+              .map((r, i) => (
+                <ExpressionViewer
+                  key={i}
+                  value={r}
+                  width={width !== undefined ? width - 20 : width}
+                />
+              ))
           }
         </VariableList>
       );
     default: {
       return (
-        <VariableList path={path} heading="Error">
+        <VariableList value={value} heading="Error">
           {() => (
             <div>
               <span>No display for type: </span>{" "}
-              <span className="font-semibold text-slate-600">
-                {expression.tag}
-              </span>
+              <span className="font-semibold text-slate-600">{value.tag}</span>
             </div>
           )}
         </VariableList>
