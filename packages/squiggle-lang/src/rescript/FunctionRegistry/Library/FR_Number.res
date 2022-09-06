@@ -4,22 +4,6 @@ open FunctionRegistry_Helpers
 let nameSpace = "Number"
 let requiresNamespace = false
 
-module NumberToNumber = {
-  let make = (name, fn) =>
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeNumber],
-      ~run=(_, inputs, _, _) => {
-        inputs
-        ->getOrError(0)
-        ->E.R.bind(Prepare.oneNumber)
-        ->E.R2.fmap(fn)
-        ->E.R2.fmap(Wrappers.evNumber)
-      },
-      (),
-    )
-}
-
 module ArrayNumberDist = {
   let make = (name, fn) => {
     FnDefinition.make(
@@ -52,7 +36,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`floor(3.5)`],
-    ~definitions=[NumberToNumber.make("floor", Js.Math.floor_float)],
+    ~definitions=[DefineFn.Numbers.oneToOne("floor", Js.Math.floor_float)],
     (),
   ),
   Function.make(
@@ -61,7 +45,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`ceil(3.5)`],
-    ~definitions=[NumberToNumber.make("ceil", Js.Math.ceil_float)],
+    ~definitions=[DefineFn.Numbers.oneToOne("ceil", Js.Math.ceil_float)],
     (),
   ),
   Function.make(
@@ -70,7 +54,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`abs(3.5)`],
-    ~definitions=[NumberToNumber.make("abs", Js.Math.abs_float)],
+    ~definitions=[DefineFn.Numbers.oneToOne("abs", Js.Math.abs_float)],
     (),
   ),
   Function.make(
@@ -79,7 +63,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`exp(3.5)`],
-    ~definitions=[NumberToNumber.make("exp", Js.Math.exp)],
+    ~definitions=[DefineFn.Numbers.oneToOne("exp", Js.Math.exp)],
     (),
   ),
   Function.make(
@@ -88,7 +72,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`log(3.5)`],
-    ~definitions=[NumberToNumber.make("log", Js.Math.log)],
+    ~definitions=[DefineFn.Numbers.oneToOne("log", Js.Math.log)],
     (),
   ),
   Function.make(
@@ -97,7 +81,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`log10(3.5)`],
-    ~definitions=[NumberToNumber.make("log10", Js.Math.log10)],
+    ~definitions=[DefineFn.Numbers.oneToOne("log10", Js.Math.log10)],
     (),
   ),
   Function.make(
@@ -106,7 +90,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`log2(3.5)`],
-    ~definitions=[NumberToNumber.make("log2", Js.Math.log2)],
+    ~definitions=[DefineFn.Numbers.oneToOne("log2", Js.Math.log2)],
     (),
   ),
   Function.make(
@@ -115,7 +99,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`round(3.5)`],
-    ~definitions=[NumberToNumber.make("round", Js.Math.round)],
+    ~definitions=[DefineFn.Numbers.oneToOne("round", Js.Math.round)],
     (),
   ),
   Function.make(

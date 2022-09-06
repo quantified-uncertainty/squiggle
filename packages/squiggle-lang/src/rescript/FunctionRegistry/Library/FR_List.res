@@ -97,7 +97,9 @@ module Internals = {
         })
       })
     )
-    rMappedList->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)
+    let result =
+      rMappedList->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)
+    result
   }
 }
 
