@@ -85,7 +85,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     );
     if (sampleSets.length) {
       for (const set of sampleSets) {
-        if (set.distribution.t.tag === "SampleSet") { // this must be duplicated to please typescript, more elegant solution probably exists
+        if (set.distribution.t.tag === "SampleSet") {
+          // this must be duplicated to please typescript, more elegant solution probably exists
           shapes.value[0].samples.push(
             ...set.distribution.t.value.map((v) => ({ x: v, y: 0 }))
           );
@@ -102,32 +103,9 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       );
       widthProp = 20;
     }
-    const predomain = shapes.value.flatMap((shape) =>
+    const domain = shapes.value.flatMap((shape) =>
       shape.discrete.concat(shape.continuous)
     );
-
-    const domain =
-      xAxis === "dateTime"
-        ? predomain.map((p) => ({ dateTime: p.x, y: p.y }))
-        : predomain;
-
-    const data =
-      xAxis === "dateTime"
-        ? shapes.value.map((val) => {
-            return {
-              ...val,
-              continuous: val.continuous.map((p) => {
-                return { dateTime: p.x, y: p.y };
-              }),
-              discrete: val.discrete.map((p) => {
-                return { dateTime: p.x, y: p.y };
-              }),
-              samples: val.samples.map((p) => {
-                return { dateTime: p, y: 0 };
-              }),
-            };
-          })
-        : shapes.value;
 
     return (
       <div style={{ width: widthProp }}>
@@ -138,7 +116,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         ) : (
           <Vega
             spec={spec}
-            data={{ data, domain }}
+            data={{ data: shapes.value, domain }}
             width={widthProp - 10}
             height={height}
             actions={actions}
