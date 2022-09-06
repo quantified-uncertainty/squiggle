@@ -390,8 +390,6 @@ module DiminishingReturns = {
     }
   }
   module Lib = {
-    // many nigh-identical functions because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/1090>
-    // discussed further below
     let optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions = Function.make(
       ~name="optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
       ~nameSpace,
