@@ -215,3 +215,39 @@ module Process = {
       twoValues(~fn=Helpers.wrapSymbolic(fn), ~values)
   }
 }
+
+module DefineFn = {
+  module Numbers = {
+    let oneToOne = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs
+          ->getOrError(0)
+          ->E.R.bind(Prepare.oneNumber)
+          ->E.R2.fmap(fn)
+          ->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+    let twoToOne = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber, FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs->Prepare.ToValueTuple.twoNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+    let threeToOne = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs->Prepare.ToValueTuple.threeNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+  }
+}
