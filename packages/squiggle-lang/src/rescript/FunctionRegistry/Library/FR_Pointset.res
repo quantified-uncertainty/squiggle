@@ -23,6 +23,30 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
   expressionValue
 }
 
+module Internal = {
+  type t = PointSetDist.t
+
+  let toType = (r): result<
+    ReducerInterface_InternalExpressionValue.t,
+    Reducer_ErrorValue.errorValue,
+  > =>
+    switch r {
+    | Ok(r) => Ok(Wrappers.evDistribution(PointSet(r)))
+    | Error(err) => Error(REOperationError(err))
+    }
+
+  let doLambdaCall = (aLambdaValue, list, environment, reducer) =>
+    switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, environment, reducer) {
+    | Ok(IEvNumber(f)) => Ok(f)
+    | _ => Error(Operation.SampleMapNeedsNtoNFunction)
+    }
+
+  let mapY = (pointSetDist: t, aLambdaValue, env, reducer) => {
+    let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, env, reducer)
+    PointSetDist.T.mapYResult(~fn, pointSetDist)->toType
+  }
+}
+
 let library = [
   Function.make(
     ~name="fromDist",
@@ -34,18 +58,39 @@ let library = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(_, inputs, env, _) =>
+        ~run=(_, inputs, accessors, _) =>
           switch inputs {
           | [FRValueDist(dist)] =>
             GenericDist.toPointSet(
               dist,
-              ~xyPointLength=env.xyPointLength,
-              ~sampleCount=env.sampleCount,
+              ~xyPointLength=accessors.environment.xyPointLength,
+              ~sampleCount=accessors.environment.sampleCount,
               (),
             )
             ->E.R2.fmap(Wrappers.pointSet)
             ->E.R2.fmap(Wrappers.evDistribution)
             ->E.R2.errMap(_ => "")
+          | _ => Error(impossibleError)
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="mapY",
+    ~nameSpace,
+    ~requiresNamespace=true,
+    ~examples=[`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
+    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~definitions=[
+      FnDefinition.make(
+        ~name="mapY",
+        ~inputs=[FRTypeDist, FRTypeLambda],
+        ~run=(inputs, _, env, reducer) =>
+          switch inputs {
+          | [IEvDistribution(PointSet(dist)), IEvLambda(lambda)] =>
+            Internal.mapY(dist, lambda, env, reducer)->E.R2.errMap(Reducer_ErrorValue.errorToString)
           | _ => Error(impossibleError)
           },
         (),

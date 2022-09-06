@@ -19,4 +19,4 @@ let mathBindings: Bindings.t =
   ->Bindings.fromArray
 
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
-  previousBindings->Bindings.merge(mathBindings)
+  previousBindings->Bindings.mergeFrom(mathBindings)

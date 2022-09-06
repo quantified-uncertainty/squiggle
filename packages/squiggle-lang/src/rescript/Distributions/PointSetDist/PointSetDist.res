@@ -257,3 +257,7 @@ let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineErr
   ->E.O2.fmap(Continuous.downsampleEquallyOverX(bucketCount))
   ->E.O2.toResult(PointSetTypes.CannotSparklineDiscrete)
   ->E.R2.fmap(r => Continuous.getShape(r).ys->Sparklines.create())
+
+let makeDiscrete = (d): t => Discrete(d)
+let makeContinuous = (d): t => Continuous(d)
+let makeMixed = (d): t => Mixed(d)

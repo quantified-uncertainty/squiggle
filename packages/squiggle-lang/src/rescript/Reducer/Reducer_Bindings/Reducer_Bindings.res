@@ -1,5 +1,5 @@
 // Only Bindings as the global module is supported
-// Other module operations such as import export will be prepreocessed jobs
+// Other module operations such as import export will be preprocessed jobs
 
 module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
@@ -13,8 +13,7 @@ type t = ReducerInterface_InternalExpressionValue.nameSpace
 let typeAliasesKey = "_typeAliases_"
 let typeReferencesKey = "_typeReferences_"
 
-let getType = (nameSpace: t, id: string) => {
-  let NameSpace(container) = nameSpace
+let getType = (NameSpace(container): t, id: string) => {
   Belt.Map.String.get(container, typeAliasesKey)->Belt.Option.flatMap(aliases =>
     switch aliases {
     | IEvRecord(r) => Belt.Map.String.get(r, id)
@@ -23,8 +22,7 @@ let getType = (nameSpace: t, id: string) => {
   )
 }
 
-let getTypeOf = (nameSpace: t, id: string) => {
-  let NameSpace(container) = nameSpace
+let getTypeOf = (NameSpace(container): t, id: string) => {
   Belt.Map.String.get(container, typeReferencesKey)->Belt.Option.flatMap(defs =>
     switch defs {
     | IEvRecord(r) => Belt.Map.String.get(r, id)
@@ -33,50 +31,46 @@ let getTypeOf = (nameSpace: t, id: string) => {
   )
 }
 
-let getWithDefault = (nameSpace: t, id: string, default) => {
-  let NameSpace(container) = nameSpace
-  Belt.Map.String.getWithDefault(container, id, default)
-}
+let getWithDefault = (NameSpace(container): t, id: string, default) =>
+  switch Belt.Map.String.get(container, id) {
+  | Some(v) => v
+  | None => default
+  }
 
-let get = (nameSpace: t, id: string) => {
-  let NameSpace(container) = nameSpace
-  Belt.Map.String.get(container, id)
-}
+let get = (NameSpace(container): t, id: string) => Belt.Map.String.get(container, id)
 
 let emptyMap: map = Belt.Map.String.empty
 
-let setTypeAlias = (nameSpace: t, id: string, value): t => {
-  let NameSpace(container) = nameSpace
+let setTypeAlias = (NameSpace(container): t, id: string, value): t => {
   let rValue = Belt.Map.String.getWithDefault(container, typeAliasesKey, IEvRecord(emptyMap))
   let r = switch rValue {
   | IEvRecord(r) => r
   | _ => emptyMap
   }
   let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
-  Belt.Map.String.set(container, typeAliasesKey, r2)->NameSpace
+  NameSpace(Belt.Map.String.set(container, typeAliasesKey, r2))
 }
 
-let setTypeOf = (nameSpace: t, id: string, value): t => {
-  let NameSpace(container) = nameSpace
+let setTypeOf = (NameSpace(container): t, id: string, value): t => {
   let rValue = Belt.Map.String.getWithDefault(container, typeReferencesKey, IEvRecord(emptyMap))
   let r = switch rValue {
   | IEvRecord(r) => r
   | _ => emptyMap
   }
   let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
-  Belt.Map.String.set(container, typeReferencesKey, r2)->NameSpace
+  NameSpace(Belt.Map.String.set(container, typeReferencesKey, r2))
 }
 
-let set = (nameSpace: t, id: string, value): t => {
-  let NameSpace(container) = nameSpace
-  Belt.Map.String.set(container, id, value)->NameSpace
-}
+let set = (NameSpace(container): t, id: string, value): t => NameSpace(
+  Belt.Map.String.set(container, id, value),
+)
 
 let emptyModule: t = NameSpace(emptyMap)
 let emptyBindings = emptyModule
+let emptyNameSpace = emptyModule
 
-let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
-let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
+// let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
+// let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
 
 let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvBindings(nameSpace)
 let fromExpressionValue = (aValue: internalExpressionValue): t =>
@@ -85,29 +79,28 @@ let fromExpressionValue = (aValue: internalExpressionValue): t =>
   | _ => emptyModule
   }
 
-let fromArray = a => Belt.Map.String.fromArray(a)->NameSpace
+let fromArray = a => NameSpace(Belt.Map.String.fromArray(a))
 
-let merge = (nameSpace: t, other: t): t => {
-  let NameSpace(container) = nameSpace
-  let NameSpace(otherContainer) = other
-  otherContainer
-  ->Belt.Map.String.reduce(container, (container, key, value) =>
-    Belt.Map.String.set(container, key, value)
+let mergeFrom = (NameSpace(container): t, NameSpace(newContainer): t): t => {
+  NameSpace(
+    newContainer->Belt.Map.String.reduce(container, (container, key, value) =>
+      Belt.Map.String.set(container, key, value)
+    ),
   )
-  ->NameSpace
 }
 
-let removeOther = (nameSpace: t, other: t): t => {
-  let NameSpace(container) = nameSpace
-  let NameSpace(otherContainer) = other
+let removeOther = (NameSpace(container): t, NameSpace(otherContainer): t): t => {
   let keys = Belt.Map.String.keysToArray(otherContainer)
-  Belt.Map.String.keep(container, (key, _value) => {
-    let removeThis = Js.Array2.includes(keys, key)
-    !removeThis
-  })->NameSpace
+  NameSpace(
+    Belt.Map.String.keep(container, (key, _value) => {
+      let removeThis = Js.Array2.includes(keys, key)
+      !removeThis
+    }),
+  )
 }
 
 external castExpressionToInternalCode: ExpressionT.expressionOrFFI => internalCode = "%identity"
+
 let eLambdaFFIValue = (ffiFn: ExpressionT.ffiFn) => {
   IEvLambda({
     parameters: [],
@@ -152,9 +145,8 @@ let convertOptionToFfiFn = (
 }
 
 // -- Module definition
-let define = (nameSpace: t, identifier: string, ev: internalExpressionValue): t => {
-  let NameSpace(container) = nameSpace
-  Belt.Map.String.set(container, identifier, ev)->NameSpace
+let define = (NameSpace(container): t, identifier: string, ev: internalExpressionValue): t => {
+  NameSpace(Belt.Map.String.set(container, identifier, ev))
 }
 
 let defineNumber = (nameSpace: t, identifier: string, value: float): t =>
@@ -185,3 +177,13 @@ let defineFunctionReturningResult = (
 }
 
 let emptyStdLib: t = emptyModule->defineBool("_standardLibrary", true)
+
+let chainTo = (nameSpace: t, previousNameSpaces: array<t>) => {
+  previousNameSpaces->Belt.Array.reduce(nameSpace, (topNameSpace, prevNameSpace) =>
+    mergeFrom(prevNameSpace, topNameSpace)
+  )
+}
+
+let removeResult = (NameSpace(container): t): t => {
+  container->Belt.Map.String.remove("__result__")->NameSpace
+}

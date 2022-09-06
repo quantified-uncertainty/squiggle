@@ -1,11 +1,12 @@
 import * as React from "react";
 import {
-  Distribution,
+  SqDistribution,
   result,
-  distributionError,
-  distributionErrorToString,
-  squiggleExpression,
+  SqDistributionError,
   resultMap,
+  SqRecord,
+  environment,
+  SqDistributionTag,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -19,7 +20,6 @@ import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
-import { point } from "@quri/squiggle-lang/src/js/distribution";
 
 export type DistributionPlottingSettings = {
   /** Whether to show a summary of means, stdev, percentiles etc */
@@ -29,19 +29,18 @@ export type DistributionPlottingSettings = {
 
 export type DistributionChartProps = {
   plot: Plot;
+  environment: environment;
   width?: number;
   height: number;
   sample?: boolean;
   xAxisType?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
-export function defaultPlot(distribution: Distribution): Plot {
+export function defaultPlot(distribution: SqDistribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
 }
 
-export function makePlot(record: {
-  [key: string]: squiggleExpression;
-}): Plot | void {
+export function makePlot(record: SqRecord): Plot | void {
   const plotResult = parsePlot(record);
   if (plotResult.tag === "Ok") {
     return plotResult.value;
@@ -51,23 +50,21 @@ export function makePlot(record: {
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const {
     plot,
+    environment,
     height,
     showSummary,
     width,
     logX,
     actions = false,
-    xAxisType = "number",
   } = props;
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
       plot.distributions.map((x) =>
-        resultMap(x.distribution.pointSet(), (shape) => ({
+        resultMap(x.distribution.pointSet(environment), (pointSet) => ({
           name: x.name,
           // color: x.color, // not supported yet
-          continuous: shape.continuous,
-          discrete: shape.discrete,
+          ...pointSet.asShape(),
           samples: [] as number[],
-          // samples: [] as point[],
         }))
       )
     );
@@ -75,25 +72,24 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     if (shapes.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(shapes.value)}
+          {shapes.value.toString()}
         </ErrorAlert>
       );
     }
 
     // if this is a sample set, include the samples
     const sampleSets = plot?.distributions.filter(
-      (dist) => dist.distribution.t.tag === "SampleSet"
+      (dist) => dist.distribution.tag === SqDistributionTag.SampleSet
     );
     if (sampleSets.length) {
-      for (const set of sampleSets) {
-        if (set.distribution.t.tag === "SampleSet") {
+      for (const { distribution } of sampleSets) {
+        if (distribution.tag === SqDistributionTag.SampleSet) {
           // this conditional must be duplicated to please typescript, more elegant solution probably exists
-          shapes.value[0].samples.push(...set.distribution.t.value);
+          shapes.value[0].samples.push(...distribution.value());
         }
       }
     }
 
-    console.log(shapes.value);
     const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
@@ -124,7 +120,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         )}
         <div className="flex justify-center">
           {showSummary && plot.distributions.length === 1 && (
-            <SummaryTable distribution={plot.distributions[0].distribution} />
+            <SummaryTable
+              distribution={plot.distributions[0].distribution}
+              environment={environment}
+            />
           )}
         </div>
       </div>
@@ -148,32 +147,36 @@ const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 type SummaryTableProps = {
-  distribution: Distribution;
+  distribution: SqDistribution;
+  environment: environment;
 };
 
-const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
-  const mean = distribution.mean();
-  const stdev = distribution.stdev();
-  const p5 = distribution.inv(0.05);
-  const p10 = distribution.inv(0.1);
-  const p25 = distribution.inv(0.25);
-  const p50 = distribution.inv(0.5);
-  const p75 = distribution.inv(0.75);
-  const p90 = distribution.inv(0.9);
-  const p95 = distribution.inv(0.95);
+const SummaryTable: React.FC<SummaryTableProps> = ({
+  distribution,
+  environment,
+}) => {
+  const mean = distribution.mean(environment);
+  const stdev = distribution.stdev(environment);
+  const p5 = distribution.inv(environment, 0.05);
+  const p10 = distribution.inv(environment, 0.1);
+  const p25 = distribution.inv(environment, 0.25);
+  const p50 = distribution.inv(environment, 0.5);
+  const p75 = distribution.inv(environment, 0.75);
+  const p90 = distribution.inv(environment, 0.9);
+  const p95 = distribution.inv(environment, 0.95);
 
-  const hasResult = (x: result<number, distributionError>): boolean =>
+  const hasResult = (x: result<number, SqDistributionError>): boolean =>
     x.tag === "Ok";
 
   const unwrapResult = (
-    x: result<number, distributionError>
+    x: result<number, SqDistributionError>
   ): React.ReactNode => {
     if (x.tag === "Ok") {
       return <NumberShower number={x.value} />;
     } else {
       return (
         <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(x.value)}
+          {x.value.toString()}
         </ErrorAlert>
       );
     }

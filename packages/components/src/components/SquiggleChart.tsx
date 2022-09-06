@@ -1,15 +1,14 @@
 import * as React from "react";
 import {
-  squiggleExpression,
-  bindings,
+  SqValue,
   environment,
-  jsImports,
-  defaultImports,
-  defaultBindings,
   defaultEnvironment,
+  resultMap,
+  SqValueTag,
 } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
 import { SquiggleViewer } from "./SquiggleViewer";
+import { JsImports } from "../lib/jsImports";
 
 export interface SquiggleChartProps {
   /** The input string for squiggle */
@@ -27,14 +26,12 @@ export interface SquiggleChartProps {
   /** If the result is a function, the amount of stops sampled */
   diagramCount?: number;
   /** When the squiggle code gets reevaluated */
-  onChange?(expr: squiggleExpression | undefined): void;
+  onChange?(expr: SqValue | undefined): void;
   /** CSS width of the element */
   width?: number;
   height?: number;
-  /** Bindings of previous variables declared */
-  bindings?: bindings;
   /** JS imported parameters */
-  jsImports?: jsImports;
+  jsImports?: JsImports;
   /** Whether to show a summary of the distribution */
   showSummary?: boolean;
   /** Set the x scale to be logarithmic by deault */
@@ -59,6 +56,7 @@ export interface SquiggleChartProps {
 }
 
 const defaultOnChange = () => {};
+const defaultImports: JsImports = {};
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
   ({
@@ -67,7 +65,6 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     environment,
     onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
     height = 200,
-    bindings = defaultBindings,
     jsImports = defaultImports,
     showSummary = false,
     width,
@@ -85,9 +82,8 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     distributionChartActions,
     enableLocalSettings = false,
   }) => {
-    const result = useSquiggle({
+    const { result, bindings } = useSquiggle({
       code,
-      bindings,
       environment,
       jsImports,
       onChange,
@@ -113,9 +109,13 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       count: diagramCount,
     };
 
+    const resultToRender = resultMap(result, (value) =>
+      value.tag === SqValueTag.Void ? bindings.asValue() : value
+    );
+
     return (
       <SquiggleViewer
-        result={result}
+        result={resultToRender}
         width={width}
         height={height}
         distributionPlotSettings={distributionPlotSettings}

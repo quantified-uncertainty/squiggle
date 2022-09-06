@@ -1,11 +1,15 @@
+module Bindings = Reducer_Bindings
 module BindingsReplacer = Reducer_Expression_BindingsReplacer
+module Continuation = ReducerInterface_Value_Continuation
 module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
-module Bindings = Reducer_Bindings
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
+module ProjectReducerFnT = ReducerProject_ReducerFn_T
 module Result = Belt.Result
 module TypeBuilder = Reducer_Type_TypeBuilder
+
 open ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
@@ -19,10 +23,11 @@ open Reducer_ErrorValue
 
 exception TestRescriptException
 
-let callInternal = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
-  'b,
-  errorValue,
-> => {
+let callInternal = (
+  call: functionCall,
+  accessors: ProjectAccessorsT.t,
+  reducer: ProjectReducerFnT.t,
+): result<'b, errorValue> => {
   let callMathJs = (call: functionCall): result<'b, errorValue> =>
     switch call {
     | ("javascriptraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
@@ -95,9 +100,17 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 
   let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
 
+  let doIdentity = (value: internalExpressionValue) => value->Ok
+
+  let doDumpBindings = (continuation: nameSpace, value: internalExpressionValue) => {
+    // let _ = Continuation.inspect(continuation, "doDumpBindings")
+    accessors.states.continuation = continuation->Bindings.set("__result__", value)
+    value->Ok
+  }
+
   module SampleMap = {
     let doLambdaCall = (aLambdaValue, list) =>
-      switch Lambda.doLambdaCall(aLambdaValue, list, environment, reducer) {
+      switch Lambda.doLambdaCall(aLambdaValue, list, accessors, reducer) {
       | Ok(IEvNumber(f)) => Ok(f)
       | _ => Error(Operation.SampleMapNeedsNtoNFunction)
       }
@@ -134,15 +147,17 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
   | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
   | ("$_atIndex_$", [IEvBindings(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
   | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
-  | ("$_constructArray_$", [IEvArray(aValueArray)]) => IEvArray(aValueArray)->Ok
+  | ("$_constructArray_$", args) => IEvArray(args)->Ok
   | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
   | ("$_exportBindings_$", [IEvBindings(nameSpace)]) => doExportBindings(nameSpace)
+  | ("$_exportBindings_$", [evValue]) => doIdentity(evValue)
   | ("$_setBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
     doSetBindings(nameSpace, symbol, value)
   | ("$_setTypeAliasBindings_$", [IEvBindings(nameSpace), IEvTypeIdentifier(symbol), value]) =>
     doSetTypeAliasBindings(nameSpace, symbol, value)
   | ("$_setTypeOfBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
     doSetTypeOfBindings(nameSpace, symbol, value)
+  | ("$_dumpBindings_$", [IEvBindings(nameSpace), _, evValue]) => doDumpBindings(nameSpace, evValue)
   | ("$_typeModifier_memberOf_$", [IEvTypeIdentifier(typeIdentifier), IEvArray(arr)]) =>
     TypeBuilder.typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))
   | ("$_typeModifier_memberOf_$", [IEvType(typeRecord), IEvArray(arr)]) =>
@@ -182,15 +197,16 @@ let callInternal = (call: functionCall, environment, reducer: ExpressionT.reduce
 /*
   Reducer uses Result monad while reducing expressions
 */
-let dispatch = (call: functionCall, environment, reducer: ExpressionT.reducerFn): result<
-  internalExpressionValue,
-  errorValue,
-> =>
+let dispatch = (
+  call: functionCall,
+  accessors: ProjectAccessorsT.t,
+  reducer: ProjectReducerFnT.t,
+): result<internalExpressionValue, errorValue> =>
   try {
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), environment, reducer, callInternal)
+    ExternalLibrary.dispatch((Js.String.make(fn), args), accessors, reducer, callInternal)
   } catch {
   | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
   | _ => RETodo("unhandled rescript exception")->Error

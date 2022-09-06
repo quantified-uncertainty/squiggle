@@ -1,9 +1,3 @@
-import {
-  run,
-  squiggleExpression,
-  errorValue,
-  result,
-} from "../../src/js/index";
 import { testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 
@@ -42,9 +36,9 @@ describe("Squiggle's parser is whitespace insensitive", () => {
         whitespaceGen(),
         whitespaceGen(),
         (a, b, c, d, e, f, g, h) => {
-          expect(testRun(squiggleString(a, b, c, d, e, f, g, h))).toEqual(
-            squiggleOutput
-          );
+          expect(
+            testRun(squiggleString(a, b, c, d, e, f, g, h))
+          ).toEqualSqValue(squiggleOutput);
         }
       )
     );

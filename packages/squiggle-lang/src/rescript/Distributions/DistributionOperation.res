@@ -216,7 +216,7 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
   | FromFloat(subFnName, x) => reCall(~functionCallInfo=FromFloat(subFnName, x), ())
   | Mixture(dists) =>
     dists
-    ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd)
+    ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd, ~env)
     ->E.R2.fmap(r => Dist(r))
     ->OutputLocal.fromResult
   | FromSamples(xs) =>
