@@ -96,7 +96,6 @@ module Integration = {
       )
       // Gotcha: makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
       let ysOptions = Belt.Array.map(innerXs, x => applyFunctionAtFloatToFloatOption(x))
-      let okYs = E.A.R.filterOk(ysOptions)
 
       /* Logging, with a worked example. */
       // Useful for understanding what is happening.
@@ -122,29 +121,32 @@ module Integration = {
         Js.Console.log2("innerPointIncrement", innerPointIncrement) // (10-0)/4 = 2.5
         Js.Console.log2("innerXs", innerXs) // 2.5, 5, 7.5
         Js.Console.log2("ysOptions", ysOptions)
-        Js.Console.log2("okYs", okYs)
       }
 
       //This is pretty hacky. It should use a result type instead of checking that length matches.
-      let result = if E.A.length(ysOptions) == E.A.length(okYs) {
-        let innerPointsSum = okYs->E.A.reduce(0.0, (a, b) => a +. b)
-        let resultWithOuterPoints = switch (
-          applyFunctionAtFloatToFloatOption(min),
-          applyFunctionAtFloatToFloatOption(max),
-        ) {
-        | (Ok(yMin), Ok(yMax)) => {
-            let result =
-              (yMin +. yMax) *. weightForAnOuterPoint +. innerPointsSum *. weightForAnInnerPoint
-            let wrappedResult = result->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
-            wrappedResult
+      let result = switch E.A.R.firstErrorOrOpen(ysOptions) {
+      | Ok(ys) => {
+          let innerPointsSum = ys->E.A.reduce(0.0, (a, b) => a +. b)
+          let resultWithOuterPoints = switch (
+            applyFunctionAtFloatToFloatOption(min),
+            applyFunctionAtFloatToFloatOption(max),
+          ) {
+          | (Ok(yMin), Ok(yMax)) => {
+              let result =
+                (yMin +. yMax) *. weightForAnOuterPoint +. innerPointsSum *. weightForAnInnerPoint
+              let wrappedResult = result->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
+              wrappedResult
+            }
+          | (Error(b), _) => Error(b)
+          | (_, Error(b)) => Error(b)
           }
-        | (Error(b), _) => Error(b)
-        | (_, Error(b)) => Error(b)
+          resultWithOuterPoints
         }
-        resultWithOuterPoints
-      } else {
+      | Error(b) =>
         Error(
-          "Integration error 3 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
+          "Integration error 3 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead." ++
+          "Original error: " ++
+          b,
         )
       }
       result
