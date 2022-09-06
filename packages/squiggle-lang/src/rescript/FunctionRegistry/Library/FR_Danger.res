@@ -53,12 +53,11 @@ module Internals = {
   let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
   let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
 
-  // Integral helper functions
+  let castArrayOfFloatsToInternalArrayOfInternals = xs =>
+    xs
+    ->Belt.Array.map(FunctionRegistry_Helpers.Wrappers.evNumber)
+    ->FunctionRegistry_Helpers.Wrappers.evArray
 
-  let castFloatToInternalNumber = x => ReducerInterface_InternalExpressionValue.IEvNumber(x)
-  let castArrayOfFloatsToInternalArrayOfInternals = xs => ReducerInterface_InternalExpressionValue.IEvArray(
-    Belt.Array.map(xs, x => castFloatToInternalNumber(x)),
-  )
   /* Helper functions. May be useful in 3 months when coming back to this code.
   @dead let applyFunctionAtPoint = (
     aLambda,
@@ -89,7 +88,7 @@ module Internals = {
   ) => {
     let applyFunctionAtFloatToFloatOption = (point: float) => {
       // Defined here so that it has access to environment, reducer
-      let pointAsInternalExpression = castFloatToInternalNumber(point)
+      let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
       let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
         aLambda,
         list{pointAsInternalExpression},
@@ -148,25 +147,24 @@ module Internals = {
       Js.Console.log2("okYs", okYs)
     }
 
-    let result = switch E.A.length(ysOptions) == E.A.length(okYs) {
-    | true => {
-        let innerPointsSum = okYs->E.A.reduce(0.0, (a, b) => a +. b)
-        let resultWithOuterPoints = switch (
-          applyFunctionAtFloatToFloatOption(min),
-          applyFunctionAtFloatToFloatOption(max),
-        ) {
-        | (Ok(yMin), Ok(yMax)) => {
-            let result =
-              (yMin +. yMax) *. weightForAnOuterPoint +. innerPointsSum *. weightForAnInnerPoint
-            let wrappedResult = result->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
-            wrappedResult
-          }
-        | (Error(b), _) => Error(b)
-        | (_, Error(b)) => Error(b)
+    //This is pretty hacky. It should use a result type instead of checking that length matches.
+    let result = if E.A.length(ysOptions) == E.A.length(okYs) {
+      let innerPointsSum = okYs->E.A.reduce(0.0, (a, b) => a +. b)
+      let resultWithOuterPoints = switch (
+        applyFunctionAtFloatToFloatOption(min),
+        applyFunctionAtFloatToFloatOption(max),
+      ) {
+      | (Ok(yMin), Ok(yMax)) => {
+          let result =
+            (yMin +. yMax) *. weightForAnOuterPoint +. innerPointsSum *. weightForAnInnerPoint
+          let wrappedResult = result->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
+          wrappedResult
         }
-        resultWithOuterPoints
+      | (Error(b), _) => Error(b)
+      | (_, Error(b)) => Error(b)
       }
-    | false =>
+      resultWithOuterPoints
+    } else {
       Error(
         "Integration error 3 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
       )
@@ -180,6 +178,8 @@ module Internals = {
     optimalAllocations: array<float>,
     currentMarginalReturns: result<array<float>, string>,
   }
+
+  //Also can be done by Js.Math.max_int
   let findBiggestElementIndex = xs =>
     E.A.reducei(xs, 0, (acc, newElement, index) => {
       switch newElement > xs[acc] {
@@ -285,6 +285,7 @@ module Internals = {
     }
     optimalAllocationResult
   }*/
+  //TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/environment.
   let diminishingMarginalReturnsForManyFunctions = (
     lambdas,
     funds,
@@ -297,16 +298,16 @@ module Internals = {
     1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent
     2. O(n*m): Iterate through all possible spending combinations. Fun is, it doesn't assume that the returns of marginal spending are diminishing.
  */
-    let applyFunctionAtFloatToFloatOption = (lambda, point: float) => {
+    let applyFunctionAtPoint = (lambda, point: float) => {
       // Defined here so that it has access to environment, reducer
-      let pointAsInternalExpression = castFloatToInternalNumber(point)
+      let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
       let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
         lambda,
         list{pointAsInternalExpression},
         environment,
         reducer,
       )
-      let result = switch resultAsInternalExpression {
+      switch resultAsInternalExpression {
       | Ok(IEvNumber(x)) => Ok(x)
       | Error(_) =>
         Error(
@@ -314,19 +315,16 @@ module Internals = {
         )
       | _ => Error("Error 2 in Danger.diminishingMarginalReturnsForManyFunctions")
       }
-      result
     }
 
     let numDivisions = Js.Math.round(funds /. approximateIncrement)
-    let numDivisionsInt = Belt.Float.toInt(numDivisions)
     let increment = funds /. numDivisions
-    let arrayOfIncrements = Belt.Array.makeBy(numDivisionsInt, _ => increment)
-    let numLambdas = E.A.length(lambdas)
+    let arrayOfIncrements = Belt.Array.make(Belt.Float.toInt(numDivisions), increment)
 
     let initAccumulator: diminishingReturnsAccumulator = Ok({
-      optimalAllocations: Belt.Array.makeBy(numLambdas, _ => 0.0),
+      optimalAllocations: Belt.Array.make(E.A.length(lambdas), 0.0),
       currentMarginalReturns: E.A.fmap(
-        lambda => applyFunctionAtFloatToFloatOption(lambda, 0.0),
+        lambda => applyFunctionAtPoint(lambda, 0.0),
         lambdas,
       )->E.A.R.firstErrorOrOpen,
     })
@@ -345,10 +343,7 @@ module Internals = {
               let newOptimalAllocationsi = newOptimalAllocations[indexOfBiggestDMR] +. newIncrement
               newOptimalAllocations[indexOfBiggestDMR] = newOptimalAllocationsi
               let lambdai = lambdas[indexOfBiggestDMR]
-              let newMarginalResultsLambdai = applyFunctionAtFloatToFloatOption(
-                lambdai,
-                newOptimalAllocationsi,
-              )
+              let newMarginalResultsLambdai = applyFunctionAtPoint(lambdai, newOptimalAllocationsi)
               let newCurrentMarginalReturns = switch newMarginalResultsLambdai {
               | Ok(value) => {
                   let result = Belt.Array.copy(oldMarginalReturns)
