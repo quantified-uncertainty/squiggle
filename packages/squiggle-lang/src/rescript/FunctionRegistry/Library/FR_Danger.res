@@ -8,8 +8,7 @@ let requiresNamespace = true
 
 module Combinatorics = {
   module Helpers = {
-    let laplace = ((successes, trials)) =>
-        (successes +. 1.0) /. (trials +. 2.0)
+    let laplace = ((successes, trials)) => (successes +. 1.0) /. (trials +. 2.0)
     let factorial = Stdlib.Math.factorial
     let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
     let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
@@ -22,12 +21,10 @@ module Combinatorics = {
       ~requiresNamespace,
       ~output=EvtNumber,
       ~examples=[`Danger.laplace(1, 20)`],
-      ~definitions=[
-        DefineFn.Numbers.twoToOne("laplace", laplace),
-      ],
+      ~definitions=[DefineFn.Numbers.twoToOne("laplace", laplace)],
       (),
     )
-    let factorial =  Function.make(
+    let factorial = Function.make(
       ~name="factorial",
       ~nameSpace,
       ~requiresNamespace,
@@ -154,87 +151,92 @@ module Integration = {
     }
   }
   module Lib = {
-// Integral in terms of function, min, max, num points
-  // Note that execution time will be more predictable, because it
-  // will only depend on num points and the complexity of the function
-  let integrateFunctionBetweenWithNumIntegrationPoints = Function.make(
-    ~name="integrateFunctionBetweenWithNumIntegrationPoints",
-    ~nameSpace,
-    ~output=EvtNumber,
-    ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`],
-    // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
-    // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
-    ~definitions=[
-      FnDefinition.make(
-        ~name="integrateFunctionBetweenWithNumIntegrationPoints",
-        ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _, env, reducer) => {
-          let result = switch inputs {
-          | [_, _, _, IEvNumber(0.0)] =>
-            Error("Integration error 4 in Danger.integrate: Increment can't be 0.")
-          | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(numIntegrationPoints)] =>
-            Helpers.integrateFunctionBetweenWithNumIntegrationPoints(
-              aLambda,
-              min,
-              max,
-              numIntegrationPoints,
-              env,
-              reducer,
-            )
-          | _ =>
-            Error(
-              "Integration error 5 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
-            )
-          }
-          result
-        },
-        (),
-      ),
-    ],
-    (),
-  )
-  // Integral in terms of function, min, max, epsilon (distance between points)
-  // Execution time will be less predictable, because it
-  // will depend on min, max and epsilon together,
-  // as well and the complexity of the function
-  let integrateFunctionBetweenWithEpsilon = Function.make(
-    ~name="integrateFunctionBetweenWithEpsilon",
-    ~nameSpace,
-    ~output=EvtNumber,
-    ~requiresNamespace=false,
-    ~examples=[`Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`],
-    ~definitions=[
-      FnDefinition.make(
-        ~name="integrateFunctionBetweenWithEpsilon",
-        ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _, env, reducer) => {
-          let result = switch inputs {
-          | [_, _, _, IEvNumber(0.0)] =>
-            Error("Integration error in Danger.integrate: Increment can't be 0.")
-          | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(epsilon)] =>
-            Helpers.integrateFunctionBetweenWithNumIntegrationPoints(
-              aLambda,
-              min,
-              max,
-              (max -. min) /. epsilon,
-              env,
-              reducer,
-            )->E.R2.errMap(_ =>
-              "Integration error 7 in Danger.integrate. Something went wrong along the way"
-            )
-          | _ =>
-            Error(
-              "Integration error 8 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
-            )
-          }
-          result
-        },
-        (),
-      ),
-    ],
-    (),
-  )
+    // Integral in terms of function, min, max, num points
+    // Note that execution time will be more predictable, because it
+    // will only depend on num points and the complexity of the function
+    let integrateFunctionBetweenWithNumIntegrationPoints = Function.make(
+      ~name="integrateFunctionBetweenWithNumIntegrationPoints",
+      ~nameSpace,
+      ~output=EvtNumber,
+      ~requiresNamespace=false,
+      ~examples=[`Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`],
+      // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
+      // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
+      ~definitions=[
+        FnDefinition.make(
+          ~name="integrateFunctionBetweenWithNumIntegrationPoints",
+          ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
+          ~run=(inputs, _, env, reducer) => {
+            let result = switch inputs {
+            | [_, _, _, IEvNumber(0.0)] =>
+              Error("Integration error 4 in Danger.integrate: Increment can't be 0.")
+            | [
+                IEvLambda(aLambda),
+                IEvNumber(min),
+                IEvNumber(max),
+                IEvNumber(numIntegrationPoints),
+              ] =>
+              Helpers.integrateFunctionBetweenWithNumIntegrationPoints(
+                aLambda,
+                min,
+                max,
+                numIntegrationPoints,
+                env,
+                reducer,
+              )
+            | _ =>
+              Error(
+                "Integration error 5 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
+              )
+            }
+            result
+          },
+          (),
+        ),
+      ],
+      (),
+    )
+    // Integral in terms of function, min, max, epsilon (distance between points)
+    // Execution time will be less predictable, because it
+    // will depend on min, max and epsilon together,
+    // as well and the complexity of the function
+    let integrateFunctionBetweenWithEpsilon = Function.make(
+      ~name="integrateFunctionBetweenWithEpsilon",
+      ~nameSpace,
+      ~output=EvtNumber,
+      ~requiresNamespace=false,
+      ~examples=[`Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`],
+      ~definitions=[
+        FnDefinition.make(
+          ~name="integrateFunctionBetweenWithEpsilon",
+          ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
+          ~run=(inputs, _, env, reducer) => {
+            let result = switch inputs {
+            | [_, _, _, IEvNumber(0.0)] =>
+              Error("Integration error in Danger.integrate: Increment can't be 0.")
+            | [IEvLambda(aLambda), IEvNumber(min), IEvNumber(max), IEvNumber(epsilon)] =>
+              Helpers.integrateFunctionBetweenWithNumIntegrationPoints(
+                aLambda,
+                min,
+                max,
+                (max -. min) /. epsilon,
+                env,
+                reducer,
+              )->E.R2.errMap(_ =>
+                "Integration error 7 in Danger.integrate. Something went wrong along the way"
+              )
+            | _ =>
+              Error(
+                "Integration error 8 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
+              )
+            }
+            result
+          },
+          (),
+        ),
+      ],
+      (),
+    )
   }
 }
 
@@ -246,7 +248,6 @@ module Internals = {
     ->Belt.Array.map(FunctionRegistry_Helpers.Wrappers.evNumber)
     ->FunctionRegistry_Helpers.Wrappers.evArray
 
-  
   // Diminishing returns
   // Helpers
   type diminishingReturnsAccumulatorInner = {
@@ -359,14 +360,11 @@ module Internals = {
   }
 }
 
-
-
 let library = [
   Combinatorics.Lib.laplace,
   Combinatorics.Lib.factorial,
   Combinatorics.Lib.choose,
   Combinatorics.Lib.binomial,
-  
   // Diminishing marginal return functions
   // There are functions diminishingMarginalReturnsForFunctions2 through diminishingMarginalReturnsForFunctions7
   // Because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/1090>
