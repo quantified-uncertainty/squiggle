@@ -6,12 +6,59 @@ open FunctionRegistry_Helpers
 let nameSpace = "Danger"
 let requiresNamespace = true
 
+module Combinatorics = {
+  module Helpers = {
+    let laplace = ((successes, trials)) =>
+        (successes +. 1.0) /. (trials +. 2.0)
+    let factorial = Stdlib.Math.factorial
+    let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
+    let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
+    let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
+  }
+  module Lib = {
+    let laplace = Function.make(
+      ~name="laplace",
+      ~nameSpace,
+      ~requiresNamespace,
+      ~output=EvtNumber,
+      ~examples=[`Danger.laplace(1, 20)`],
+      ~definitions=[
+        DefineFn.Numbers.twoToOne("laplace", laplace),
+      ],
+      (),
+    )
+    let factorial =  Function.make(
+      ~name="factorial",
+      ~nameSpace,
+      ~requiresNamespace,
+      ~output=EvtNumber,
+      ~examples=[`Danger.factorial(20)`],
+      ~definitions=[DefineFn.Numbers.oneToOne("factorial", Combinatorics.factorial)],
+      (),
+    )
+    let choose = Function.make(
+      ~name="choose",
+      ~nameSpace,
+      ~requiresNamespace,
+      ~output=EvtNumber,
+      ~examples=[`Danger.choose(1, 20)`],
+      ~definitions=[DefineFn.Numbers.twoToOne("choose", Combinatorics.choose)],
+      (),
+    )
+    let binomial = Function.make(
+      ~name="binomial",
+      ~nameSpace,
+      ~requiresNamespace,
+      ~output=EvtNumber,
+      ~examples=[`Danger.binomial(1, 20, 0.5)`],
+      ~definitions=[DefineFn.Numbers.threeToOne("binomial", Combinatorics.binomial)],
+      (),
+    )
+  }
+}
+
 module Internals = {
   // Probability functions
-  let factorial = Stdlib.Math.factorial
-  let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
-  let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
-  let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
 
   let castArrayOfFloatsToInternalArrayOfInternals = xs =>
     xs
@@ -224,47 +271,12 @@ module Internals = {
   }
 }
 
+
 let library = [
-  Function.make(
-    ~name="laplace",
-    ~nameSpace,
-    ~requiresNamespace,
-    ~output=EvtNumber,
-    ~examples=[`Danger.laplace(1, 20)`],
-    ~definitions=[
-      DefineFn.Numbers.twoToOne("laplace", ((successes, trials)) =>
-        (successes +. 1.0) /. (trials +. 2.0)
-      ),
-    ],
-    (),
-  ),
-  Function.make(
-    ~name="factorial",
-    ~nameSpace,
-    ~requiresNamespace,
-    ~output=EvtNumber,
-    ~examples=[`Danger.factorial(20)`],
-    ~definitions=[DefineFn.Numbers.oneToOne("factorial", Internals.factorial)],
-    (),
-  ),
-  Function.make(
-    ~name="choose",
-    ~nameSpace,
-    ~requiresNamespace,
-    ~output=EvtNumber,
-    ~examples=[`Danger.choose(1, 20)`],
-    ~definitions=[DefineFn.Numbers.twoToOne("choose", Internals.choose)],
-    (),
-  ),
-  Function.make(
-    ~name="binomial",
-    ~nameSpace,
-    ~requiresNamespace,
-    ~output=EvtNumber,
-    ~examples=[`Danger.binomial(1, 20, 0.5)`],
-    ~definitions=[DefineFn.Numbers.threeToOne("binomial", Internals.binomial)],
-    (),
-  ),
+  Combinatorics.Lib.laplace,
+  Combinatorics.Lib.factorial,
+  Combinatorics.Lib.choose,
+  Combinatorics.Lib.binomial,
   // Integral in terms of function, min, max, num points
   // Note that execution time will be more predictable, because it
   // will only depend on num points and the complexity of the function
