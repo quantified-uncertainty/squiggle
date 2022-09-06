@@ -21,7 +21,7 @@ module Combinatorics = {
       ~requiresNamespace,
       ~output=EvtNumber,
       ~examples=[`Danger.laplace(1, 20)`],
-      ~definitions=[DefineFn.Numbers.twoToOne("laplace", laplace)],
+      ~definitions=[DefineFn.Numbers.twoToOne("laplace", Helpers.laplace)],
       (),
     )
     let factorial = Function.make(
@@ -30,7 +30,7 @@ module Combinatorics = {
       ~requiresNamespace,
       ~output=EvtNumber,
       ~examples=[`Danger.factorial(20)`],
-      ~definitions=[DefineFn.Numbers.oneToOne("factorial", Combinatorics.factorial)],
+      ~definitions=[DefineFn.Numbers.oneToOne("factorial", Helpers.factorial)],
       (),
     )
     let choose = Function.make(
@@ -39,7 +39,7 @@ module Combinatorics = {
       ~requiresNamespace,
       ~output=EvtNumber,
       ~examples=[`Danger.choose(1, 20)`],
-      ~definitions=[DefineFn.Numbers.twoToOne("choose", Combinatorics.choose)],
+      ~definitions=[DefineFn.Numbers.twoToOne("choose", Helpers.choose)],
       (),
     )
     let binomial = Function.make(
@@ -48,14 +48,14 @@ module Combinatorics = {
       ~requiresNamespace,
       ~output=EvtNumber,
       ~examples=[`Danger.binomial(1, 20, 0.5)`],
-      ~definitions=[DefineFn.Numbers.threeToOne("binomial", Combinatorics.binomial)],
+      ~definitions=[DefineFn.Numbers.threeToOne("binomial", Helpers.binomial)],
       (),
     )
   }
 }
 
 module Integration = {
-  let Helpers = {
+  module Helpers = {
     let integrateFunctionBetweenWithNumIntegrationPoints = (
       aLambda,
       min: float,
@@ -151,9 +151,6 @@ module Integration = {
     }
   }
   module Lib = {
-    // Integral in terms of function, min, max, num points
-    // Note that execution time will be more predictable, because it
-    // will only depend on num points and the complexity of the function
     let integrateFunctionBetweenWithNumIntegrationPoints = Function.make(
       ~name="integrateFunctionBetweenWithNumIntegrationPoints",
       ~nameSpace,
@@ -196,10 +193,6 @@ module Integration = {
       ],
       (),
     )
-    // Integral in terms of function, min, max, epsilon (distance between points)
-    // Execution time will be less predictable, because it
-    // will depend on min, max and epsilon together,
-    // as well and the complexity of the function
     let integrateFunctionBetweenWithEpsilon = Function.make(
       ~name="integrateFunctionBetweenWithEpsilon",
       ~nameSpace,
@@ -241,13 +234,6 @@ module Integration = {
 }
 
 module Internals = {
-  // Probability functions
-
-  let castArrayOfFloatsToInternalArrayOfInternals = xs =>
-    xs
-    ->Belt.Array.map(FunctionRegistry_Helpers.Wrappers.evNumber)
-    ->FunctionRegistry_Helpers.Wrappers.evArray
-
   // Diminishing returns
   // Helpers
   type diminishingReturnsAccumulatorInner = {
@@ -349,22 +335,34 @@ module Internals = {
     })
 
     let optimalAllocationResult = switch optimalAllocationEndAccumulator {
-    | Ok(inner) => Ok(castArrayOfFloatsToInternalArrayOfInternals(inner.optimalAllocations))
+    | Ok(inner) => Ok(FunctionRegistry_Helpers.Wrappers.evArrayOfEvNumber(inner.optimalAllocations))
     | Error(b) => Error(b)
     }
 
     optimalAllocationResult
-    // let result = [0.0, 0.0]->castArrayOfFloatsToInternalArrayOfInternals->Ok
+    // let result = [0.0, 0.0]->FunctionRegistry_Helpers.Wrappers.evArrayOfEvNumber->Ok
     // result
     // ^ helper with the same type as what the result should be. Useful for debugging.
   }
 }
 
 let library = [
+  // Combinatorics
   Combinatorics.Lib.laplace,
   Combinatorics.Lib.factorial,
   Combinatorics.Lib.choose,
   Combinatorics.Lib.binomial,
+  // Integration
+  Integration.Lib.integrateFunctionBetweenWithNumIntegrationPoints,
+  // ^ Integral in terms of function, min, max, epsilon (distance between points)
+  // Execution time will be less predictable, because it
+  // will depend on min, max and epsilon together,
+  // as well and the complexity of the function
+  Integration.Lib.integrateFunctionBetweenWithEpsilon,
+  // ^ Integral in terms of function, min, max, num points
+  // Note that execution time will be more predictable, because it
+  // will only depend on num points and the complexity of the function
+
   // Diminishing marginal return functions
   // There are functions diminishingMarginalReturnsForFunctions2 through diminishingMarginalReturnsForFunctions7
   // Because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/1090>

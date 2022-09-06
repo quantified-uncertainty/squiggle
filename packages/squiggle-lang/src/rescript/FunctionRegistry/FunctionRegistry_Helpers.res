@@ -12,6 +12,7 @@ module Wrappers = {
   let evRecord = r => ReducerInterface_InternalExpressionValue.IEvRecord(r)
   let evString = r => ReducerInterface_InternalExpressionValue.IEvString(r)
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
+  let evArrayOfEvNumber = xs => xs ->Belt.Array.map(evNumber) -> evArray
 }
 
 let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleError)
