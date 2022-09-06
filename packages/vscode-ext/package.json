@@ -3,7 +3,7 @@
   "displayName": "Squiggle",
   "description": "Squiggle language support",
   "license": "MIT",
-  "version": "0.3.1",
+  "version": "0.4.0-alpha.4",
   "publisher": "QURI",
   "repository": {
     "type": "git",
