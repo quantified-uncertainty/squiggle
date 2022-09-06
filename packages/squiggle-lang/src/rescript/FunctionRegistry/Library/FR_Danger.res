@@ -1,4 +1,4 @@
-/* Notes: See commit 5ce0a6979d9f95d77e4ddbdffc40009de73821e3 for last commit which has helper functions. These might be useful when coming back to this code after a long time. */
+/* Notes: See commit 5ce0a6979d9f95d77e4ddbdffc40009de73821e3 for last commit which has more detailed helper functions. These might be useful when coming back to this code after a long time. */
 
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
@@ -83,7 +83,7 @@ module Integration = {
         }
         result
       }
-      // worked example in comments below, assuming min=0, max = 10
+      // Variables are punctiliously defined because it's otherwise easy to make off-by one errors.
       let numTotalPoints = Belt.Float.toInt(numIntegrationPoints) // superflous declaration, but useful to keep track that we are interpreting "numIntegrationPoints" as the total number on which we evaluate the function, not e.g., as the inner integration points.
       let numInnerPoints = numTotalPoints - 2
       let numOuterPoints = 2
@@ -123,7 +123,6 @@ module Integration = {
         Js.Console.log2("ysOptions", ysOptions)
       }
 
-      //This is pretty hacky. It should use a result type instead of checking that length matches.
       let result = switch E.A.R.firstErrorOrOpen(ysOptions) {
       | Ok(ys) => {
           let innerPointsSum = ys->E.A.reduce(0.0, (a, b) => a +. b)
@@ -159,7 +158,9 @@ module Integration = {
       ~output=EvtNumber,
       ~requiresNamespace=false,
       ~examples=[`Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`],
-      // should be [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
+      // For the example of integrating x => x+1 between 1 and 10,
+      // result should be close to 58.5
+      // [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
       // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
       ~definitions=[
         FnDefinition.make(
@@ -217,8 +218,8 @@ module Integration = {
                 (max -. min) /. epsilon,
                 env,
                 reducer,
-              )->E.R2.errMap(_ =>
-                "Integration error 7 in Danger.integrate. Something went wrong along the way"
+              )->E.R2.errMap(b =>
+                "Integration error 7 in Danger.integrate. Something went wrong along the way: " ++ b
               )
             | _ =>
               Error(
@@ -249,7 +250,7 @@ module DiminishingReturns = {
         }
       })
     type diminishingReturnsAccumulator = result<diminishingReturnsAccumulatorInner, string>
-    //TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/environment.
+    // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/environment.
     /*
     The key idea for this function is that 
     1. we keep track of past spending and current marginal returns for each function
@@ -261,7 +262,13 @@ module DiminishingReturns = {
     This is currently being done with a reducer, that keeps track of:
       - Value of marginal spending for each function
       - How much has been assigned to each function.
- */
+    */
+
+    /*
+      Two possible algorithms (n=funds/increment, m=num lambdas)
+      1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent. (This is what we are doing.)
+      2. O(n*(m-1)): Iterate through all possible spending combinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
+    */
     let optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions = (
       lambdas,
       funds,
@@ -269,11 +276,7 @@ module DiminishingReturns = {
       environment,
       reducer,
     ) => {
-      /*
-      Two possible algorithms (n=funds/increment, m=num lambdas)
-      1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent
-      2. O(n*m): Iterate through all possible spending combinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
- */
+
       switch (
         E.A.length(lambdas) > 1,
         funds > 0.0,
@@ -322,6 +325,8 @@ module DiminishingReturns = {
           let numDivisions = Js.Math.round(funds /. approximateIncrement)
           let increment = funds /. numDivisions
           let arrayOfIncrements = Belt.Array.make(Belt.Float.toInt(numDivisions), increment)
+          // ^ make the increment cleanly divide the amount of funds
+          // nicely simplifies the calculations.
 
           let initAccumulator: diminishingReturnsAccumulator = Ok({
             optimalAllocations: Belt.Array.make(E.A.length(lambdas), 0.0),
@@ -385,6 +390,8 @@ module DiminishingReturns = {
     }
   }
   module Lib = {
+    // many nigh-identical functions because of this bug: <https://github.com/quantified-uncertainty/squiggle/issues/1090>
+    // discussed further below
     let optimalAllocationGivenDiminishingMarginalReturnsFunctions2 = Function.make(
       ~name="optimalAllocationGivenDiminishingMarginalReturnsFunctions2",
       ~nameSpace,
