@@ -41,7 +41,7 @@
   ],
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
-    "@rescript/std": "^9.1.4",
+    "@rescript/std": "^10.0.1",
     "@stdlib/stats": "^0.0.13",
     "jstat": "^1.9.5",
     "lodash": "^4.17.21",
