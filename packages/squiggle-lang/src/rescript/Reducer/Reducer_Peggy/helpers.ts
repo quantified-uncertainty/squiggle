@@ -137,7 +137,7 @@ export function apply(fn: string, arg: AnyPeggyNode) {
   return makeFunctionCall(fn, [arg]);
 }
 export function constructArray(elems: AnyPeggyNode[]) {
-  return apply("$_constructArray_$", nodeExpression(elems));
+  return makeFunctionCall("$_constructArray_$", elems);
 }
 export function constructRecord(elems: AnyPeggyNode[]) {
   return apply("$_constructRecord_$", nodeExpression(elems));
