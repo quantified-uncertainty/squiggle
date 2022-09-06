@@ -69,28 +69,18 @@ Danger.integrateFunctionBetweenWithEpsilon: (number => number, number, number, n
 
 Same caveats as `integrateFunctionBetweenWithNumIntegrationPoints` apply. 
 
-### optimalAllocationGivenDiminishingMarginalReturnsFunctions2
+### optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions
 
 ```js
-Danger.optimalAllocationGivenDiminishingMarginalReturnsFunctions2: (number => number, number => number, number, number) => number
+Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions: (array<number => number>, number, number) => number
 ```
 
-`Danger.optimalAllocationGivenDiminishingMarginalReturnsFunctions2(f1, f2, funds, approximateIncrement)` computes the optimal allocation of $`funds` between `f1` and `f2`. For the answer given to be correct, `f1` and `f2` will have to be decreasing, i.e., if `x > y`, then `f_i(x) < f_i(y)`
+`Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions([f1, f2], funds, approximateIncrement)` computes the optimal allocation of $`funds` between `f1` and `f2`. For the answer given to be correct, `f1` and `f2` will have to be decreasing, i.e., if `x > y`, then `f_i(x) < f_i(y)`.
 
 Example:
 
 ```js
-Danger.optimalAllocationGivenDiminishingMarginalReturnsFunctions2({|x| 20-x}, {|y| 10}, 100, 0.01)
+Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions({|x| 20-x}, {|y| 10}, 100, 0.01)
 ```
 
-### optimalAllocationGivenDiminishingMarginalReturnsFunctions3 to optimalAllocationGivenDiminishingMarginalReturnsFunctions7
-
-Equivalent to the above, but they take more functional arguments. Their type is given below:
-
-```js
-Danger.optimalAllocationGivenDiminishingMarginalReturnsFunctions3: (number => number, number => number, number => number, number, number) => number
-Danger.optimalAllocationGivenDiminishingMarginalReturnsFunctions5: (number => number, number => number, umber => number, number => number, number, number) => number
-Danger.optimalAllocationGivenDiminishingMarginalReturnsFunctions5: (number => number, number => number, umber => number, number => number, number => number, number, number) => number
-Danger.optimalAllocationGivenDiminishingMarginalReturnsFunctions6: (number => number, number => number, number => number, number => number, number => number, number => number, number, number) => number
-Danger.optimalAllocationGivenDiminishingMarginalReturnsFunctions7: (number => number, number => number, number => number, number => number, umber => number, number => number, number => number, number, number) => number
-```
+Note also that the array ought to have more than one function in it.
