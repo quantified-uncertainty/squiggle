@@ -52,7 +52,7 @@ export interface SquiggleChartProps {
   /** Specify the upper bound of the x scale */
   maxX?: number;
   /** Whether the x-axis should be dates or numbers */
-  xAxis?: "number" | "dateTime";
+  xAxisType?: "number" | "dateTime";
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;
   enableLocalSettings?: boolean;
@@ -81,7 +81,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     maxX,
     color,
     title,
-    xAxis = "number",
+    xAxisType = "number",
     distributionChartActions,
     enableLocalSettings = false,
   }) => {
@@ -103,7 +103,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       maxX,
       color,
       title,
-      xAxis,
+      xAxisType,
       actions: distributionChartActions,
     };
 

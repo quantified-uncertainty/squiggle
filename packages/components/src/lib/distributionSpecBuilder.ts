@@ -17,10 +17,10 @@ export type DistributionChartSpecOptions = {
   /** Whether or not to show the band of sample data at the bottom */
   sample?: boolean;
   /** Whether the x-axis should be dates or numbers */
-  xAxis?: "number" | "dateTime";
+  xAxisType?: "number" | "dateTime";
 };
 
-/** X Scales */ 
+/** X Scales */
 export const linearXScale: LinearScale = {
   name: "xscale",
   clamp: true,
@@ -51,7 +51,7 @@ export const timeXScale: TimeScale = {
   domain: { data: "domain", field: "x" },
 };
 
-/** Y Scales */ 
+/** Y Scales */
 export const linearYScale: LinearScale = {
   name: "yscale",
   type: "linear",
@@ -77,9 +77,16 @@ const width = 500;
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
-  const { title, minX, maxX, logX, expY, xAxis = "number" } = specOptions;
+  const {
+    title,
+    minX,
+    maxX,
+    logX,
+    expY,
+    xAxisType = "number",
+  } = specOptions;
 
-  const dateTime = xAxis === "dateTime";
+  const dateTime = xAxisType === "dateTime";
 
   // some fallbacks
   const format = specOptions?.format
@@ -270,13 +277,13 @@ export function buildVegaSpec(
                     tooltip: {
                       signal: dateTime
                         ? "{ probability: datum.y, value: datetime(datum.x) }"
-                        : "{ probability: datum.y, value: datum.x }", 
+                        : "{ probability: datum.y, value: datum.x }",
                     },
                   },
                   update: {
                     x: {
                       scale: "xscale",
-                      field:  "x",
+                      field: "x",
                       offset: 0.5, // if this is not included, the circles are slightly left of center.
                     },
                     y: {

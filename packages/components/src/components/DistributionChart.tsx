@@ -32,7 +32,7 @@ export type DistributionChartProps = {
   width?: number;
   height: number;
   sample?: boolean;
-  xAxis?: "number" | "dateTime";
+  xAxisType?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
 export function defaultPlot(distribution: Distribution): Plot {
@@ -56,7 +56,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     width,
     logX,
     actions = false,
-    xAxis = "number",
+    xAxisType = "number",
   } = props;
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
