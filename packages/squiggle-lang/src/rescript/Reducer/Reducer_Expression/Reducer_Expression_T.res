@@ -17,6 +17,8 @@ type rec expression =
   | EValue(internalExpressionValue) // Irreducible built-in value. Reducer should not know the internals. External libraries are responsible
 and bindings = InternalExpressionValue.nameSpace
 
+type t = expression
+
 type reducerFn = (
   expression,
   bindings,

@@ -1,4 +1,5 @@
-@genType
+//FIXME accessor methods or not opaque?
+@genType.opaque
 type genericDist =
   | PointSet(PointSetTypes.pointSetDist)
   | SampleSet(SampleSetDist.t)
@@ -6,7 +7,7 @@ type genericDist =
 
 type asAlgebraicCombinationStrategy = AsDefault | AsSymbolic | AsMonteCarlo | AsConvolution
 
-@genType
+@genType.opaque
 type error =
   | NotYetImplemented
   | Unreachable
@@ -27,7 +28,6 @@ module Error = {
 
   let fromString = (s: string): t => OtherError(s)
 
-  @genType
   let toString = (err: error): string =>
     switch err {
     | NotYetImplemented => "Function not yet implemented"

@@ -1,12 +1,13 @@
+module Bindings = Reducer_Bindings
 module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module ErrorValue = Reducer_ErrorValue
 module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module ExpressionValue = ReducerInterface_InternalExpressionValue
-module Bindings = Reducer_Bindings
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
+module ProjectReducerFnT = ReducerProject_ReducerFn_T
 module Result = Belt.Result
 
-type environment = ReducerInterface_InternalExpressionValue.environment
 type expression = ExpressionT.expression
 type expressionOrFFI = ExpressionT.expressionOrFFI
 type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
@@ -44,7 +45,13 @@ let checkIfReduced = (args: list<internalExpressionValue>) =>
     )
   )
 
-let caseNotFFI = (lambdaValue: ExpressionValue.lambdaValue, expr, args, environment, reducer) => {
+let caseNotFFI = (
+  lambdaValue: ExpressionValue.lambdaValue,
+  expr,
+  args,
+  accessors: ProjectAccessorsT.t,
+  reducer: ProjectReducerFnT.t,
+) => {
   let parameterList = lambdaValue.parameters->Belt.List.fromArray
   let zippedParameterList = parameterList->Belt.List.zip(args)
   let bindings = Belt.List.reduce(zippedParameterList, lambdaValue.context, (
@@ -52,39 +59,43 @@ let caseNotFFI = (lambdaValue: ExpressionValue.lambdaValue, expr, args, environm
     (variable, variableValue),
   ) => acc->Bindings.set(variable, variableValue))
   let newExpression = ExpressionBuilder.eBlock(list{expr})
-  reducer(newExpression, bindings, environment)
+  reducer(newExpression, bindings, accessors)
 }
 
-let caseFFI = (ffiFn: ExpressionT.ffiFn, args, environment) => {
-  ffiFn(args->Belt.List.toArray, environment)
+let caseFFI = (ffiFn: ExpressionT.ffiFn, args, accessors: ProjectAccessorsT.t) => {
+  ffiFn(args->Belt.List.toArray, accessors.environment)
 }
 
 let applyParametersToLambda = (
   lambdaValue: ExpressionValue.lambdaValue,
   args,
-  environment,
-  reducer: ExpressionT.reducerFn,
+  accessors: ProjectAccessorsT.t,
+  reducer: ProjectReducerFnT.t,
 ): result<internalExpressionValue, 'e> => {
   checkArity(lambdaValue, args)->Result.flatMap(args =>
     checkIfReduced(args)->Result.flatMap(args => {
       let exprOrFFI = castInternalCodeToExpression(lambdaValue.body)
       switch exprOrFFI {
-      | NotFFI(expr) => caseNotFFI(lambdaValue, expr, args, environment, reducer)
-      | FFI(ffiFn) => caseFFI(ffiFn, args, environment)
+      | NotFFI(expr) => caseNotFFI(lambdaValue, expr, args, accessors, reducer)
+      | FFI(ffiFn) => caseFFI(ffiFn, args, accessors)
       }
     })
   )
 }
 
-let doLambdaCall = (lambdaValue: ExpressionValue.lambdaValue, args, environment, reducer) =>
-  applyParametersToLambda(lambdaValue, args, environment, reducer)
+let doLambdaCall = (
+  lambdaValue: ExpressionValue.lambdaValue,
+  args,
+  accessors: ProjectAccessorsT.t,
+  reducer: ProjectReducerFnT.t,
+) => applyParametersToLambda(lambdaValue, args, accessors, reducer)
 
 let foreignFunctionInterface = (
   lambdaValue: ExpressionValue.lambdaValue,
   argArray: array<internalExpressionValue>,
-  environment: ExpressionValue.environment,
-  reducer: ExpressionT.reducerFn,
-): result<internalExpressionValue, 'e> => {
+  accessors: ProjectAccessorsT.t,
+  reducer: ProjectReducerFnT.t,
+): result<internalExpressionValue, Reducer_ErrorValue.errorValue> => {
   let args = argArray->Belt.List.fromArray
-  applyParametersToLambda(lambdaValue, args, environment, reducer)
+  applyParametersToLambda(lambdaValue, args, accessors, reducer)
 }

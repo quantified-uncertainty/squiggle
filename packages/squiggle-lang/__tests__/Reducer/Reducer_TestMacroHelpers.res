@@ -1,14 +1,14 @@
 open Jest
 open Expect
 
+module Bindings = Reducer_Bindings
 module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module Expression = Reducer_Expression
-// module ExpressionValue = ReducerInterface.ExpressionValue
-module InternalExpressionValue = ReducerInterface.InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
+module InternalExpressionValue = ReducerInterface.InternalExpressionValue
 module Macro = Reducer_Expression_Macro
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 module T = Reducer_Expression_T
-module Bindings = Reducer_Bindings
 
 let testMacro_ = (
   tester,
@@ -21,8 +21,8 @@ let testMacro_ = (
     expr
     ->Macro.expandMacroCall(
       bindings,
-      InternalExpressionValue.defaultEnvironment,
-      Expression.reduceExpression,
+      ProjectAccessorsT.identityAccessors,
+      Expression.reduceExpressionInProject,
     )
     ->ExpressionWithContext.toStringResult
     ->expect
@@ -41,8 +41,8 @@ let testMacroEval_ = (
     expr
     ->Macro.doMacroCall(
       bindings,
-      InternalExpressionValue.defaultEnvironment,
-      Expression.reduceExpression,
+      ProjectAccessorsT.identityAccessors,
+      Expression.reduceExpressionInProject,
     )
     ->InternalExpressionValue.toStringResult
     ->expect

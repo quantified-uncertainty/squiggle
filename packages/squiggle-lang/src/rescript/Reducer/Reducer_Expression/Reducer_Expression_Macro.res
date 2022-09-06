@@ -2,6 +2,8 @@ module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ExpressionWithContext = Reducer_ExpressionWithContext
 module Result = Belt.Result
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
+module ProjectReducerFnT = ReducerProject_ReducerFn_T
 
 type environment = InternalExpressionValue.environment
 type expression = ExpressionT.expression
@@ -11,34 +13,29 @@ type expressionWithContext = ExpressionWithContext.expressionWithContext
 let expandMacroCall = (
   macroExpression: expression,
   bindings: ExpressionT.bindings,
-  environment: environment,
-  reduceExpression: ExpressionT.reducerFn,
+  accessors: ProjectAccessorsT.t,
+  reduceExpression: ProjectReducerFnT.t,
 ): result<expressionWithContext, 'e> =>
   Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(
     macroExpression,
     bindings,
-    environment,
+    accessors,
     reduceExpression,
   )
 
 let doMacroCall = (
   macroExpression: expression,
   bindings: ExpressionT.bindings,
-  environment: environment,
-  reduceExpression: ExpressionT.reducerFn,
+  accessors: ProjectAccessorsT.t,
+  reduceExpression: ProjectReducerFnT.t,
 ): result<internalExpressionValue, 'e> =>
   expandMacroCall(
     macroExpression,
     bindings,
-    environment,
-    reduceExpression,
+    (accessors: ProjectAccessorsT.t),
+    (reduceExpression: ProjectReducerFnT.t),
   )->Result.flatMap(expressionWithContext =>
-    ExpressionWithContext.callReducer(
-      expressionWithContext,
-      bindings,
-      environment,
-      reduceExpression,
-    )
+    ExpressionWithContext.callReducer(expressionWithContext, bindings, accessors, reduceExpression)
   )
 
 let isMacroName = (fName: string): bool => fName->Js.String2.startsWith("$$")

@@ -1,3 +1,5 @@
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
+module ProjectReducerFnT = ReducerProject_ReducerFn_T
 type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
 type internalExpressionValueType = ReducerInterface_InternalExpressionValue.internalExpressionValueType
 
@@ -46,8 +48,8 @@ type fnDefinition = {
   run: (
     array<internalExpressionValue>,
     array<frValue>,
-    GenericDist.env,
-    Reducer_Expression_T.reducerFn,
+    ProjectAccessorsT.t,
+    ProjectReducerFnT.t,
   ) => result<internalExpressionValue, string>,
 }
 
@@ -382,12 +384,12 @@ module FnDefinition = {
   let run = (
     t: t,
     args: array<internalExpressionValue>,
-    env: GenericDist.env,
-    reducer: Reducer_Expression_T.reducerFn,
+    accessors: ProjectAccessorsT.t,
+    reducer: ProjectReducerFnT.t,
   ) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
-    | Some(values) => t.run(args, values, env, reducer)
+    | Some(values) => t.run(args, values, accessors, reducer)
     | None => Error("Incorrect Types")
     }
   }
@@ -493,8 +495,8 @@ module Registry = {
     ~registry: registry,
     ~fnName: string,
     ~args: array<internalExpressionValue>,
-    ~env: GenericDist.env,
-    ~reducer: Reducer_Expression_T.reducerFn,
+    ~accessors: ProjectAccessorsT.t,
+    ~reducer: ProjectReducerFnT.t,
   ) => {
     let relevantFunctions = Js.Dict.get(registry.fnNameDict, fnName) |> E.O.default([])
     let modified = {functions: relevantFunctions, fnNameDict: registry.fnNameDict}
@@ -512,7 +514,7 @@ module Registry = {
 
     switch Matcher.Registry.findMatches(modified, fnName, args) {
     | Matcher.Match.FullMatch(match) =>
-      match->matchToDef->E.O2.fmap(FnDefinition.run(_, args, env, reducer))
+      match->matchToDef->E.O2.fmap(FnDefinition.run(_, args, accessors, reducer))
     | SameNameDifferentArguments(m) => Some(Error(showNameMatchDefinitions(m)))
     | _ => None
     }
@@ -521,10 +523,10 @@ module Registry = {
   let dispatch = (
     registry,
     (fnName, args): ReducerInterface_InternalExpressionValue.functionCall,
-    env,
-    reducer: Reducer_Expression_T.reducerFn,
+    accessors: ProjectAccessorsT.t,
+    reducer: ProjectReducerFnT.t,
   ) => {
-    _matchAndRun(~registry, ~fnName, ~args, ~env, ~reducer)->E.O2.fmap(
+    _matchAndRun(~registry, ~fnName, ~args, ~accessors, ~reducer)->E.O2.fmap(
       E.R2.errMap(_, s => Reducer_ErrorValue.RETodo(s)),
     )
   }

@@ -1,6 +1,6 @@
 import { DistributionPlottingSettings } from "../DistributionChart";
 import { FunctionChartSettings } from "../FunctionChart";
-import { environment } from "@quri/squiggle-lang";
+import { environment, SqValueLocation } from "@quri/squiggle-lang";
 
 export type LocalItemSettings = {
   collapsed: boolean;
@@ -17,6 +17,5 @@ export type MergedItemSettings = {
   environment: environment;
 };
 
-export type Path = string[];
-
-export const pathAsString = (path: Path) => path.join(".");
+export const locationAsString = (location: SqValueLocation) =>
+  location.path.items.join(".");

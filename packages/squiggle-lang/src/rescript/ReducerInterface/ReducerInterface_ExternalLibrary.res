@@ -1,4 +1,6 @@
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
+module ProjectReducerFnT = ReducerProject_ReducerFn_T
 type internalExpressionValue = InternalExpressionValue.t
 
 /*
@@ -6,17 +8,17 @@ type internalExpressionValue = InternalExpressionValue.t
 */
 let dispatch = (
   call: InternalExpressionValue.functionCall,
-  environment,
-  reducer: Reducer_Expression_T.reducerFn,
+  accessors: ProjectAccessorsT.t,
+  reducer: ProjectReducerFnT.t,
   chain,
 ): result<internalExpressionValue, 'e> => {
   E.A.O.firstSomeFn([
-    () => ReducerInterface_GenericDistribution.dispatch(call, environment),
-    () => ReducerInterface_Date.dispatch(call, environment),
-    () => ReducerInterface_Duration.dispatch(call, environment),
-    () => ReducerInterface_Number.dispatch(call, environment),
-    () => FunctionRegistry_Library.dispatch(call, environment, reducer),
-  ])->E.O2.defaultFn(() => chain(call, environment, reducer))
+    () => ReducerInterface_GenericDistribution.dispatch(call, accessors.environment),
+    () => ReducerInterface_Date.dispatch(call, accessors.environment),
+    () => ReducerInterface_Duration.dispatch(call, accessors.environment),
+    () => ReducerInterface_Number.dispatch(call, accessors.environment),
+    () => FunctionRegistry_Library.dispatch(call, accessors, reducer),
+  ])->E.O2.defaultFn(() => chain(call, accessors, reducer))
 }
 
 /*

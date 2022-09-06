@@ -1,8 +1,9 @@
+module Bindings = Reducer_Bindings
+module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
 module ExpressionT = Reducer_Expression_T
-module ErrorValue = Reducer_ErrorValue
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module Bindings = Reducer_Bindings
+module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 module T = Reducer_Type_T
 module TypeChecker = Reducer_Type_TypeChecker
 
@@ -13,10 +14,10 @@ let checkArgumentsSourceCode = (aTypeSourceCode: string, sourceCode: string): re
   'v,
   ErrorValue.t,
 > => {
-  let reducerFn = Expression.reduceExpression
+  let reducerFn = Expression.reduceExpressionInProject
   let rResult =
-    Reducer.parse(sourceCode)->Belt.Result.flatMap(expr =>
-      reducerFn(expr, Bindings.emptyBindings, InternalExpressionValue.defaultEnvironment)
+    Expression.BackCompatible.parse(sourceCode)->Belt.Result.flatMap(expr =>
+      reducerFn(expr, Bindings.emptyBindings, ProjectAccessorsT.identityAccessors)
     )
   rResult->Belt.Result.flatMap(result =>
     switch result {

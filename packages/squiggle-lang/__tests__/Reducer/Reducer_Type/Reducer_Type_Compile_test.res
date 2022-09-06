@@ -8,7 +8,7 @@ open Jest
 open Expect
 
 let myIevEval = (aTypeSourceCode: string) =>
-  TypeCompile.ievFromTypeExpression(aTypeSourceCode, Expression.reduceExpression)
+  TypeCompile.ievFromTypeExpression(aTypeSourceCode, Expression.reduceExpressionInProject)
 let myIevEvalToString = (aTypeSourceCode: string) =>
   myIevEval(aTypeSourceCode)->InternalExpressionValue.toStringResult
 
@@ -19,7 +19,7 @@ let myIevTest = (test, aTypeSourceCode, answer) =>
   test(aTypeSourceCode, () => myIevExpectEqual(aTypeSourceCode, answer))
 
 let myTypeEval = (aTypeSourceCode: string) =>
-  TypeCompile.fromTypeExpression(aTypeSourceCode, Expression.reduceExpression)
+  TypeCompile.fromTypeExpression(aTypeSourceCode, Expression.reduceExpressionInProject)
 let myTypeEvalToString = (aTypeSourceCode: string) => myTypeEval(aTypeSourceCode)->T.toStringResult
 
 let myTypeExpectEqual = (aTypeSourceCode, answer) =>
