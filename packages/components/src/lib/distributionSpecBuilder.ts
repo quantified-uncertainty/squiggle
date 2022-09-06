@@ -316,7 +316,7 @@ export function buildVegaSpec(
                 from: { data: "sample_facet" },
                 encode: {
                   enter: {
-                    x: { scale: "xscale", field: "x" },
+                    x: { scale: "xscale", field: "data"},
                     width: { value: 0.1 },
 
                     y: { value: 25, offset: { signal: "height" } },

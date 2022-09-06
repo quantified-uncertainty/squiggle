@@ -66,7 +66,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
           // color: x.color, // not supported yet
           continuous: shape.continuous,
           discrete: shape.discrete,
-          samples: [] as point[],
+          samples: [] as number[],
+          // samples: [] as point[],
         }))
       )
     );
@@ -86,14 +87,13 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     if (sampleSets.length) {
       for (const set of sampleSets) {
         if (set.distribution.t.tag === "SampleSet") {
-          // this must be duplicated to please typescript, more elegant solution probably exists
-          shapes.value[0].samples.push(
-            ...set.distribution.t.value.map((v) => ({ x: v, y: 0 }))
-          );
+          // this conditional must be duplicated to please typescript, more elegant solution probably exists
+          shapes.value[0].samples.push(...set.distribution.t.value);
         }
       }
     }
 
+    console.log(shapes.value);
     const spec = buildVegaSpec(props);
 
     let widthProp = width ? width : size.width;
