@@ -1943,6 +1943,11 @@
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-1.0.6.tgz#35dd26987228b39ef2316db3b1245c42eb19e324"
   integrity sha512-JJCXydOFWMDpCP4q13iEplA503MQO3xLoZiKum+955ZCtHINWnx26CUxVxxFQu/uLb4LW3ge15ZpzIkXKkJ8oQ==
 
+"@heroicons/react@^2.0.10":
+  version "2.0.10"
+  resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-2.0.10.tgz#191a305aa2dc2271903f027c9f4700ca3dfa9e7b"
+  integrity sha512-Ufr+pgAElNiRCSklnHGOR10bXb02BLlosvbDK7sCRUMOcQ3R/HCXTfXs4BUkYZ4dKpx6l5dUD06VSW1dTpTEDw==
+
 "@hookform/resolvers@^2.9.7":
   version "2.9.7"
   resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-2.9.7.tgz#8b257ae67234ce0270e6b044c1a61fb98ec02b4b"
@@ -2487,6 +2492,32 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
+"@quri/squiggle-components@^0.3":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@quri/squiggle-components/-/squiggle-components-0.3.2.tgz#4fe9ffb02891704a7bc2ea2f87d5bd45714fcef1"
+  integrity sha512-Lp0cXrmt2FqVxNpv8Eq7V/femNZ0FeL4bbFo3/v/ApQM1T/OgRJUno7I4t7dPtd4lbuzBVpJpFtnKm7cmBHd5w==
+  dependencies:
+    "@floating-ui/react-dom" "^1.0.0"
+    "@floating-ui/react-dom-interactions" "^0.9.3"
+    "@headlessui/react" "^1.6.6"
+    "@heroicons/react" "^1.0.6"
+    "@hookform/resolvers" "^2.9.7"
+    "@quri/squiggle-lang" "^0.3.0"
+    "@react-hook/size" "^2.1.2"
+    clsx "^1.2.1"
+    framer-motion "^7.2.1"
+    lodash "^4.17.21"
+    react "^18.1.0"
+    react-ace "^10.1.0"
+    react-hook-form "^7.34.2"
+    react-use "^17.4.0"
+    react-vega "^7.6.0"
+    vega "^5.22.1"
+    vega-embed "^6.21.0"
+    vega-lite "^5.5.0"
+    vscode-uri "^3.0.3"
+    yup "^0.32.11"
+
 "@quri/squiggle-lang@^0.2.11":
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/@quri/squiggle-lang/-/squiggle-lang-0.2.12.tgz#e8fdb22a84aa75df71c071d1ed4ae5c55f15d447"
@@ -2497,6 +2528,18 @@
     jstat "^1.9.5"
     lodash "^4.17.21"
     mathjs "^11.0.1"
+    pdfast "^0.2.0"
+
+"@quri/squiggle-lang@^0.3.0":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@quri/squiggle-lang/-/squiggle-lang-0.3.1.tgz#b34f340a0adb13602d322869678413c84e20d2e4"
+  integrity sha512-JBuXkenhjdXI3xYfAimQz8kbVoUaqoEav0KlnOCCYIhZc4SHRc+/qKGu25IC6H87aSAkBUacRkrLnXLFDfayKw==
+  dependencies:
+    "@rescript/std" "^9.1.4"
+    "@stdlib/stats" "^0.0.13"
+    jstat "^1.9.5"
+    lodash "^4.17.21"
+    mathjs "^11.1.0"
     pdfast "^0.2.0"
 
 "@react-hook/latest@^1.0.2":
