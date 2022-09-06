@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.3.2",
+  "version": "0.4.0-alpha.1",
   "license": "MIT",
   "dependencies": {
     "@floating-ui/react-dom": "^1.0.0",
@@ -8,7 +8,7 @@
     "@headlessui/react": "^1.6.6",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^2.9.7",
-    "@quri/squiggle-lang": "^0.3.0",
+    "@quri/squiggle-lang": "^0.4.0-alpha.0",
     "@react-hook/size": "^2.1.2",
     "clsx": "^1.2.1",
     "framer-motion": "^7.2.1",
@@ -40,7 +40,7 @@
     "@types/jest": "^27.5.0",
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.7.13",
-    "@types/react": "^18.0.9",
+    "@types/react": "^18.0.18",
     "@types/styled-components": "^5.1.26",
     "@types/webpack": "^5.28.0",
     "cross-env": "^7.0.3",
@@ -66,7 +66,7 @@
   },
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
-    "build:cjs": "tsc -b",
+    "build:cjs": "rm -rf dist/src && tsc -b",
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
     "build:storybook": "build-storybook -s public",
     "build": "yarn run build:cjs && yarn run build:css && yarn run build:storybook",
@@ -74,7 +74,7 @@
     "all": "yarn bundle && yarn build",
     "lint": "prettier --check .",
     "format": "prettier --write .",
-    "prepack": "yarn bundle && tsc -b"
+    "prepack": "yarn run build:cjs && yarn run bundle"
   },
   "eslintConfig": {
     "extends": [

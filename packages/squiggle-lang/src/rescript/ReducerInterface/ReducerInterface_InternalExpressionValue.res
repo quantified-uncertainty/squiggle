@@ -1,11 +1,11 @@
 module ErrorValue = Reducer_ErrorValue
-module ExternalExpressionValue = ReducerInterface_ExternalExpressionValue
 module Extra_Array = Reducer_Extra_Array
-type internalCode = ExternalExpressionValue.internalCode
-type environment = ExternalExpressionValue.environment
+type internalCode = Object
+type environment = GenericDist.env
 
-let defaultEnvironment = ExternalExpressionValue.defaultEnvironment
+let defaultEnvironment: environment = DistributionOperation.defaultEnv
 
+@genType.opaque
 type rec t =
   | IEvArray(array<t>) // FIXME: Convert to MapInt
   | IEvArrayString(array<string>)
@@ -24,68 +24,67 @@ type rec t =
   | IEvType(map)
   | IEvTypeIdentifier(string)
   | IEvVoid
-and map = Belt.Map.String.t<t>
-and nameSpace = NameSpace(Belt.Map.String.t<t>)
+@genType.opaque and squiggleArray = array<t>
+@genType.opaque and map = Belt.Map.String.t<t>
+@genType.opaque and nameSpace = NameSpace(Belt.Map.String.t<t>)
+@genType.opaque
 and lambdaValue = {
   parameters: array<string>,
   context: nameSpace,
   body: internalCode,
 }
-and lambdaDeclaration = Declaration.declaration<lambdaValue>
+@genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>
 
 type internalExpressionValue = t
 
 type functionCall = (string, array<t>)
 
-module Internal = {
-  module NameSpace = {
-    external castNameSpaceToHidden: nameSpace => ExternalExpressionValue.hiddenNameSpace =
-      "%identity"
-    external castHiddenToNameSpace: ExternalExpressionValue.hiddenNameSpace => nameSpace =
-      "%identity"
-  }
-  module Lambda = {
-    let toInternal = (v: ExternalExpressionValue.lambdaValue): lambdaValue => {
-      let p = v.parameters
-      let c = v.context->NameSpace.castHiddenToNameSpace
-      let b = v.body
-      {parameters: p, context: c, body: b}
-    }
-    and toExternal = (v: lambdaValue): ExternalExpressionValue.lambdaValue => {
-      let p = v.parameters
-      let c = v.context->NameSpace.castNameSpaceToHidden
-      let b = v.body
-      {parameters: p, context: c, body: b}
-    }
-  }
-}
-
 let rec toString = aValue =>
   switch aValue {
-  | IEvArray(anArray) => {
-      let args = anArray->Js.Array2.map(each => toString(each))->Js.Array2.toString
-      `[${args}]`
-    }
-  | IEvArrayString(anArray) => {
-      let args = anArray->Js.Array2.toString
-      `[${args}]`
-    }
-  | IEvBool(aBool) => Js.String.make(aBool)
-  | IEvCall(fName) => `:${fName}`
-  | IEvDate(date) => DateTime.Date.toString(date)
-  | IEvDeclaration(d) => Declaration.toString(d, r => toString(IEvLambda(r)))
-  | IEvDistribution(dist) => GenericDist.toString(dist)
-  | IEvLambda(lambdaValue) => `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
-  | IEvBindings(m) => `@${m->toStringNameSpace}`
-  | IEvNumber(aNumber) => Js.String.make(aNumber)
-  | IEvRecord(aMap) => aMap->toStringMap
-  | IEvString(aString) => `'${aString}'`
-  | IEvSymbol(aString) => `:${aString}`
-  | IEvType(aMap) => aMap->toStringMap
-  | IEvTimeDuration(t) => DateTime.Duration.toString(t)
-  | IEvTypeIdentifier(id) => `#${id}`
-  | IEvVoid => `()`
+  | IEvArray(anArray) => toStringArray(anArray)
+  | IEvArrayString(anArray) => toStringArrayString(anArray)
+  | IEvBindings(m) => toStringBindings(m)
+  | IEvBool(aBool) => toStringBool(aBool)
+  | IEvCall(fName) => toStringCall(fName)
+  | IEvDate(date) => toStringDate(date)
+  | IEvDeclaration(d) => toStringDeclaration(d)
+  | IEvDistribution(dist) => toStringDistribution(dist)
+  | IEvLambda(lambdaValue) => toStringLambda(lambdaValue)
+  | IEvNumber(aNumber) => toStringNumber(aNumber)
+  | IEvRecord(aMap) => aMap->toStringRecord
+  | IEvString(aString) => toStringString(aString)
+  | IEvSymbol(aString) => toStringSymbol(aString)
+  | IEvTimeDuration(t) => toStringTimeDuration(t)
+  | IEvType(aMap) => toStringType(aMap)
+  | IEvTypeIdentifier(id) => toStringTypeIdentifier(id)
+  | IEvVoid => toStringVoid
   }
+and toStringArray = anArray => {
+  let args = anArray->Js.Array2.map(each => toString(each))->Js.Array2.toString
+  `[${args}]`
+}
+and toStringArrayString = anArray => {
+  let args = anArray->Js.Array2.toString
+  `[${args}]`
+}
+and toStringBindings = m => `@${m->toStringNameSpace}`
+and toStringBool = aBool => Js.String.make(aBool)
+and toStringCall = fName => `:${fName}`
+and toStringDate = date => DateTime.Date.toString(date)
+and toStringDeclaration = d => Declaration.toString(d, r => toString(IEvLambda(r)))
+and toStringDistribution = dist => GenericDist.toString(dist)
+and toStringLambda = lambdaValue =>
+  `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
+and toStringFunction = lambdaValue => `function(${Js.Array2.toString(lambdaValue.parameters)})`
+and toStringNumber = aNumber => Js.String.make(aNumber)
+and toStringRecord = aMap => aMap->toStringMap
+and toStringString = aString => `'${aString}'`
+and toStringSymbol = aString => `:${aString}`
+and toStringTimeDuration = t => DateTime.Duration.toString(t)
+and toStringType = aMap => aMap->toStringMap
+and toStringTypeIdentifier = id => `#${id}`
+and toStringVoid = `()`
+
 and toStringMap = aMap => {
   let pairs =
     aMap
@@ -132,6 +131,12 @@ let toStringResult = x =>
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
+let toStringOptionResult = x =>
+  switch x {
+  | Some(a) => toStringResult(a)
+  | None => "None"
+  }
+
 let toStringResultOkless = (codeResult: result<t, ErrorValue.errorValue>): string =>
   switch codeResult {
   | Ok(a) => toString(a)
@@ -140,7 +145,7 @@ let toStringResultOkless = (codeResult: result<t, ErrorValue.errorValue>): strin
 
 let toStringResultRecord = x =>
   switch x {
-  | Ok(a) => `Ok(${ExternalExpressionValue.toStringRecord(a)})`
+  | Ok(a) => `Ok(${toStringMap(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
@@ -188,27 +193,6 @@ let valueToValueType = value =>
   | IEvVoid => EvtVoid
   }
 
-let externalValueToValueType = (value: ExternalExpressionValue.t) =>
-  switch value {
-  | EvArray(_) => EvtArray
-  | EvArrayString(_) => EvtArrayString
-  | EvBool(_) => EvtBool
-  | EvCall(_) => EvtCall
-  | EvDate(_) => EvtDate
-  | EvDeclaration(_) => EvtDeclaration
-  | EvDistribution(_) => EvtDistribution
-  | EvLambda(_) => EvtLambda
-  | EvModule(_) => EvtModule
-  | EvNumber(_) => EvtNumber
-  | EvRecord(_) => EvtRecord
-  | EvString(_) => EvtString
-  | EvSymbol(_) => EvtSymbol
-  | EvTimeDuration(_) => EvtTimeDuration
-  | EvType(_) => EvtType
-  | EvTypeIdentifier(_) => EvtTypeIdentifier
-  | EvVoid => EvtVoid
-  }
-
 let functionCallToCallSignature = (functionCall: functionCall): functionCallSignature => {
   let (fn, args) = functionCall
   CallSignature(fn, args->Js.Array2.map(valueToValueType))
@@ -240,70 +224,23 @@ let functionCallSignatureToString = (functionCallSignature: functionCallSignatur
   `${fn}(${args->Js.Array2.map(valueTypeToString)->Js.Array2.toString})`
 }
 
-let rec toExternal = (iev: t): ExternalExpressionValue.t => {
-  switch iev {
-  | IEvArray(v) => v->Belt.Array.map(e => toExternal(e))->EvArray
-  | IEvArrayString(v) => EvArrayString(v)
-  | IEvBool(v) => EvBool(v)
-  | IEvCall(v) => EvCall(v)
-  | IEvDeclaration(v) => {
-      let fn = lambdaValueToExternal(v.fn)
-      let args = v.args
-      EvDeclaration({fn: fn, args: args})
-    }
-  | IEvDistribution(v) => EvDistribution(v)
-  | IEvLambda(v) => EvLambda(lambdaValueToExternal(v))
-  | IEvNumber(v) => EvNumber(v)
-  | IEvRecord(v) => v->mapToExternal->EvRecord
-  | IEvString(v) => EvString(v)
-  | IEvSymbol(v) => EvSymbol(v)
-  | IEvDate(v) => EvDate(v)
-  | IEvTimeDuration(v) => EvTimeDuration(v)
-  | IEvType(v) => v->mapToExternal->EvType
-  | IEvTypeIdentifier(v) => EvTypeIdentifier(v)
-  | IEvBindings(v) => v->nameSpaceToTypeScriptBindings->EvModule
-  | IEvVoid => EvVoid
-  }
-}
-and mapToExternal = v =>
-  v->Belt.Map.String.map(e => toExternal(e))->Belt.Map.String.toArray->Js.Dict.fromArray
-and lambdaValueToExternal = Internal.Lambda.toExternal
-and nameSpaceToTypeScriptBindings = (
-  nameSpace: nameSpace,
-): ReducerInterface_ExternalExpressionValue.externalBindings => {
+let arrayToValueArray = (arr: array<t>): array<t> => arr
+
+let recordToKeyValuePairs = (record: map): array<(string, t)> => record->Belt.Map.String.toArray
+
+// let nameSpaceToTypeScriptBindings = (
+//   nameSpace: nameSpace,
+// ) => {
+//   let NameSpace(container) = nameSpace
+//   Belt.Map.String.map(container, e => e->Belt.Map.String.toArray->Js.Dict.fromArray)
+// }
+
+let nameSpaceToKeyValuePairs = (nameSpace: nameSpace): array<(string, t)> => {
   let NameSpace(container) = nameSpace
-  Belt.Map.String.map(container, e => toExternal(e))->Belt.Map.String.toArray->Js.Dict.fromArray
+  container->Belt.Map.String.toArray
 }
 
-let rec toInternal = (ev: ExternalExpressionValue.t): t => {
-  switch ev {
-  | EvArray(v) => v->Belt.Array.map(e => toInternal(e))->IEvArray
-  | EvArrayString(v) => IEvArrayString(v)
-  | EvBool(v) => IEvBool(v)
-  | EvCall(v) => IEvCall(v)
-  | EvDate(v) => IEvDate(v)
-  | EvDeclaration(v) => {
-      let fn = lambdaValueToInternal(v.fn)
-      let args = v.args
-      IEvDeclaration({fn: fn, args: args})
-    }
-  | EvDistribution(v) => IEvDistribution(v)
-  | EvLambda(v) => IEvLambda(lambdaValueToInternal(v))
-  | EvModule(v) => v->nameSpaceFromTypeScriptBindings->IEvBindings
-  | EvNumber(v) => IEvNumber(v)
-  | EvRecord(v) => v->recordToInternal->IEvRecord
-  | EvString(v) => IEvString(v)
-  | EvSymbol(v) => IEvSymbol(v)
-  | EvTimeDuration(v) => IEvTimeDuration(v)
-  | EvType(v) => v->recordToInternal->IEvType
-  | EvTypeIdentifier(v) => IEvTypeIdentifier(v)
-  | EvVoid => IEvVoid
-  }
+let nameSpaceGet = (nameSpace: nameSpace, key: string): option<t> => {
+  let NameSpace(container) = nameSpace
+  container->Belt.Map.String.get(key)
 }
-and recordToInternal = v =>
-  v->Js.Dict.entries->Belt.Map.String.fromArray->Belt.Map.String.map(e => toInternal(e))
-and lambdaValueToInternal = Internal.Lambda.toInternal
-and nameSpaceFromTypeScriptBindings = (
-  r: ReducerInterface_ExternalExpressionValue.externalBindings,
-): nameSpace =>
-  r->Js.Dict.entries->Belt.Map.String.fromArray->Belt.Map.String.map(e => toInternal(e))->NameSpace

@@ -1,16 +1,11 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import {
-  result,
-  lambdaValue,
-  environment,
-  runForeign,
-  errorValueToString,
-} from "@quri/squiggle-lang";
+import { result, SqLambda, environment, SqValueTag } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as lineChartSpec from "../vega-specs/spec-line-chart.json";
 import { ErrorAlert } from "./Alert";
+import { squiggleValueTag } from "@quri/squiggle-lang/src/rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_tag";
 
 let SquiggleLineChart = createClassFromSpec({
   spec: lineChartSpec as Spec,
@@ -30,7 +25,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChart1NumberProps {
-  fn: lambdaValue;
+  fn: SqLambda;
   chartSettings: FunctionChartSettings;
   environment: environment;
   height: number;
@@ -38,7 +33,15 @@ interface FunctionChart1NumberProps {
 
 type point = { x: number; value: result<number, string> };
 
-let getFunctionImage = ({ chartSettings, fn, environment }) => {
+let getFunctionImage = ({
+  chartSettings,
+  fn,
+  environment,
+}: {
+  chartSettings: FunctionChartSettings;
+  fn: SqLambda;
+  environment: environment;
+}) => {
   let chartPointsToRender = _rangeByCount(
     chartSettings.start,
     chartSettings.stop,
@@ -46,9 +49,9 @@ let getFunctionImage = ({ chartSettings, fn, environment }) => {
   );
 
   let chartPointsData: point[] = chartPointsToRender.map((x) => {
-    let result = runForeign(fn, [x], environment);
+    let result = fn.call([x]);
     if (result.tag === "Ok") {
-      if (result.value.tag == "number") {
+      if (result.value.tag === SqValueTag.Number) {
         return { x, value: { tag: "Ok", value: result.value.value } };
       } else {
         return {
@@ -62,7 +65,7 @@ let getFunctionImage = ({ chartSettings, fn, environment }) => {
     } else {
       return {
         x,
-        value: { tag: "Error", value: errorValueToString(result.value) },
+        value: { tag: "Error", value: result.value.toString() },
       };
     }
   });

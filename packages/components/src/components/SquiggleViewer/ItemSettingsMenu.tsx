@@ -4,13 +4,14 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Modal } from "../ui/Modal";
 import { ViewSettings, viewSettingsSchema } from "../ViewSettings";
-import { Path, pathAsString } from "./utils";
 import { ViewerContext } from "./ViewerContext";
 import { defaultTickFormat } from "../../lib/distributionSpecBuilder";
 import { PlaygroundContext } from "../SquigglePlayground";
+import { SqValue } from "@quri/squiggle-lang";
+import { locationAsString } from "./utils";
 
 type Props = {
-  path: Path;
+  value: SqValue;
   onChange: () => void;
   disableLogX?: boolean;
   withFunctionSettings: boolean;
@@ -19,7 +20,7 @@ type Props = {
 const ItemSettingsModal: React.FC<
   Props & { close: () => void; resetScroll: () => void }
 > = ({
-  path,
+  value,
   onChange,
   disableLogX,
   withFunctionSettings,
@@ -29,7 +30,7 @@ const ItemSettingsModal: React.FC<
   const { setSettings, getSettings, getMergedSettings } =
     useContext(ViewerContext);
 
-  const mergedSettings = getMergedSettings(path);
+  const mergedSettings = getMergedSettings(value.location);
 
   const { register, watch } = useForm({
     resolver: yupResolver(viewSettingsSchema),
@@ -53,8 +54,8 @@ const ItemSettingsModal: React.FC<
   });
   useEffect(() => {
     const subscription = watch((vars) => {
-      const settings = getSettings(path); // get the latest version
-      setSettings(path, {
+      const settings = getSettings(value.location); // get the latest version
+      setSettings(value.location, {
         ...settings,
         distributionPlotSettings: {
           showSummary: vars.showSummary,
@@ -75,7 +76,7 @@ const ItemSettingsModal: React.FC<
       onChange();
     });
     return () => subscription.unsubscribe();
-  }, [getSettings, setSettings, onChange, path, watch]);
+  }, [getSettings, setSettings, onChange, value.location, watch]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
@@ -83,7 +84,7 @@ const ItemSettingsModal: React.FC<
     <Modal container={getLeftPanelElement()} close={close}>
       <Modal.Header>
         Chart settings
-        {path.length ? (
+        {value.location.path.items.length ? (
           <>
             {" for "}
             <span
@@ -91,7 +92,7 @@ const ItemSettingsModal: React.FC<
               className="cursor-pointer"
               onClick={resetScroll}
             >
-              {pathAsString(path)}
+              {locationAsString(value.location)}
             </span>{" "}
           </>
         ) : (
@@ -120,7 +121,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   if (!enableLocalSettings) {
     return null;
   }
-  const settings = getSettings(props.path);
+  const settings = getSettings(props.value.location);
 
   const resetScroll = () => {
     if (!ref.current) return;
@@ -139,7 +140,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
       {settings.distributionPlotSettings || settings.chartSettings ? (
         <button
           onClick={() => {
-            setSettings(props.path, {
+            setSettings(props.value.location, {
               ...settings,
               distributionPlotSettings: undefined,
               chartSettings: undefined,

@@ -47,7 +47,7 @@ type pointSetDistMonad<'a, 'b, 'c> =
   | Discrete('b)
   | Continuous('c)
 
-@genType
+@genType.opaque
 type pointSetDist = pointSetDistMonad<mixedShape, discreteShape, continuousShape>
 
 module ShapeMonad = {

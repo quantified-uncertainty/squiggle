@@ -23,13 +23,7 @@ let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
   } else {
     let a2 =
       rExpr
-      ->Result.flatMap(expr =>
-        Expression.reduceExpression(
-          expr,
-          ReducerInterface_StdLib.internalStdLib,
-          ExpressionValue.defaultEnvironment,
-        )
-      )
+      ->Result.flatMap(expr => Expression.BackCompatible.evaluate(expr))
       ->Reducer_Helpers.rRemoveDefaultsInternal
       ->ExpressionValue.toStringResultOkless
     (a1, a2)->expect->toEqual((answer, v))
