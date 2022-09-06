@@ -4,48 +4,6 @@ open FunctionRegistry_Helpers
 let nameSpace = "Danger"
 let requiresNamespace = true
 
-module NNumbersToNumber = {
-  module One = {
-    let make = (name, fn) =>
-      FnDefinition.make(
-        ~name,
-        ~inputs=[FRTypeNumber],
-        ~run=(_, inputs, _, _) => {
-          inputs
-          ->getOrError(0)
-          ->E.R.bind(Prepare.oneNumber)
-          ->E.R2.fmap(fn)
-          ->E.R2.fmap(Wrappers.evNumber)
-        },
-        (),
-      )
-  }
-
-  module Two = {
-    let make = (name, fn) =>
-      FnDefinition.make(
-        ~name,
-        ~inputs=[FRTypeNumber, FRTypeNumber],
-        ~run=(_, inputs, _, _) => {
-          inputs->Prepare.ToValueTuple.twoNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
-        },
-        (),
-      )
-  }
-
-  module Three = {
-    let make = (name, fn) =>
-      FnDefinition.make(
-        ~name,
-        ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
-        ~run=(_, inputs, _, _) => {
-          inputs->Prepare.ToValueTuple.threeNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
-        },
-        (),
-      )
-  }
-}
-
 module Internals = {
   // Probability functions
   let factorial = Stdlib.Math.factorial
@@ -387,7 +345,7 @@ let library = [
     ~output=EvtNumber,
     ~examples=[`Danger.laplace(1, 20)`],
     ~definitions=[
-      NNumbersToNumber.Two.make("laplace", ((successes, trials)) =>
+      DefineFn.Numbers.twoToOne("laplace", ((successes, trials)) =>
         (successes +. 1.0) /. (trials +. 2.0)
       ),
     ],
@@ -399,7 +357,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`Danger.factorial(20)`],
-    ~definitions=[NNumbersToNumber.One.make("factorial", Internals.factorial)],
+    ~definitions=[DefineFn.Numbers.oneToOne("factorial", Internals.factorial)],
     (),
   ),
   Function.make(
@@ -408,7 +366,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`Danger.choose(1, 20)`],
-    ~definitions=[NNumbersToNumber.Two.make("choose", Internals.choose)],
+    ~definitions=[DefineFn.Numbers.twoToOne("choose", Internals.choose)],
     (),
   ),
   Function.make(
@@ -417,7 +375,7 @@ let library = [
     ~requiresNamespace,
     ~output=EvtNumber,
     ~examples=[`Danger.binomial(1, 20, 0.5)`],
-    ~definitions=[NNumbersToNumber.Three.make("binomial", Internals.binomial)],
+    ~definitions=[DefineFn.Numbers.threeToOne("binomial", Internals.binomial)],
     (),
   ),
   // Helper functions building up to the integral
