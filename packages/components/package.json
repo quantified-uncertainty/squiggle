@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.4.0-alpha.4",
+  "version": "0.4.1",
   "license": "MIT",
   "dependencies": {
     "@floating-ui/react-dom": "^1.0.0",
@@ -8,7 +8,7 @@
     "@headlessui/react": "^1.6.6",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^2.9.7",
-    "@quri/squiggle-lang": "^0.4.0-alpha.0",
+    "@quri/squiggle-lang": "^0.4.1",
     "@react-hook/size": "^2.1.2",
     "clsx": "^1.2.1",
     "framer-motion": "^7.2.1",
