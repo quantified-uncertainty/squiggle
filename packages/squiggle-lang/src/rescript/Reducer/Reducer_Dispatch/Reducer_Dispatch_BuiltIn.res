@@ -13,6 +13,7 @@ module TypeBuilder = Reducer_Type_TypeBuilder
 open ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
+
 /*
   MathJs provides default implementations for built-ins
   This is where all the expected built-ins like + = * / sin cos log ln etc are handled
@@ -111,7 +112,7 @@ let callInternal = (
   module SampleMap = {
     let doLambdaCall = (aLambdaValue, list) =>
       switch Lambda.doLambdaCall(aLambdaValue, list, accessors, reducer) {
-      | Ok(IEvNumber(f)) => Ok(f)
+      | IEvNumber(f) => Ok(f)
       | _ => Error(Operation.SampleMapNeedsNtoNFunction)
       }
 
@@ -201,13 +202,17 @@ let dispatch = (
   call: functionCall,
   accessors: ProjectAccessorsT.t,
   reducer: ProjectReducerFnT.t,
-): result<internalExpressionValue, errorValue> =>
+): internalExpressionValue =>
   try {
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), accessors, reducer, callInternal)
+    switch ExternalLibrary.dispatch((Js.String.make(fn), args), accessors, reducer, callInternal) {
+    | Ok(v) => v
+    | Error(e) => raise(ErrorException(e))
+    }
   } catch {
-  | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
-  | _ => RETodo("unhandled rescript exception")->Error
+  | ErrorException(e) => raise(ErrorException(e))
+  | Js.Exn.Error(obj) => raise(ErrorException(REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))))
+  | _ => raise(ErrorException(RETodo("unhandled rescript exception")))
   }

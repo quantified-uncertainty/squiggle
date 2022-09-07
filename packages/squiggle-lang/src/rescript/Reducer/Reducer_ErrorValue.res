@@ -26,6 +26,8 @@ type errorValue =
 
 type t = errorValue
 
+exception ErrorException(errorValue)
+
 let errorToString = err =>
   switch err {
   | REArityError(_oFnName, arity, usedArity) =>

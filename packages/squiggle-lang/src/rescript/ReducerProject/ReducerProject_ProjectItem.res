@@ -183,16 +183,16 @@ let buildExpression = (this: t): t => {
   }
 }
 
-let wrappedReducer = (
-  rExpression: T.expressionArgumentType,
-  aContinuation: T.continuation,
-  accessors: ProjectAccessorsT.t,
-): T.resultArgumentType => {
-  Belt.Result.flatMap(
-    rExpression,
-    Reducer_Expression.reduceExpressionInProject(_, aContinuation, accessors),
-  )
-}
+// let wrappedReducer = (
+//   rExpression: T.expressionArgumentType,
+//   aContinuation: T.continuation,
+//   accessors: ProjectAccessorsT.t,
+// ): T.resultArgumentType => {
+//   Belt.Result.flatMap(
+//     rExpression,
+//     Reducer_Expression.reduceExpressionInProject(_, aContinuation, accessors),
+//   )
+// }
 
 let doBuildResult = (
   this: t,
@@ -204,7 +204,13 @@ let doBuildResult = (
   ->Belt.Option.map(
     Belt.Result.flatMap(
       _,
-      Reducer_Expression.reduceExpressionInProject(_, aContinuation, accessors),
+      expression =>
+      try {
+        Reducer_Expression.reduceExpressionInProject(expression, aContinuation, accessors)->Ok
+      } catch {
+      | Reducer_ErrorValue.ErrorException(e) => e->Error
+      | _ => RETodo("unhandled rescript exception")->Error
+      }
     ),
   )
 

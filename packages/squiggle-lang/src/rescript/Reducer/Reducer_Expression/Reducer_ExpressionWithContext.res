@@ -23,7 +23,7 @@ let callReducer = (
   bindings: bindings,
   accessors: ProjectAccessorsT.t,
   reducer: ProjectReducerFnT.t,
-): result<internalExpressionValue, errorValue> => {
+): internalExpressionValue => {
   switch expressionWithContext {
   | ExpressionNoContext(expr) =>
     // Js.log(`callReducer: bindings ${Bindings.toString(bindings)} expr ${ExpressionT.toString(expr)}`)

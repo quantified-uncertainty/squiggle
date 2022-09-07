@@ -74,12 +74,11 @@ module Integration = {
           reducer,
         )
         let result = switch resultAsInternalExpression {
-        | Ok(IEvNumber(x)) => Ok(x)
-        | Error(_) =>
+        | IEvNumber(x) => Ok(x)
+        | _ =>
           Error(
             "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
           )
-        | _ => Error("Error 2 in Danger.integrate")
         }
         result
       }
@@ -143,7 +142,7 @@ module Integration = {
         }
       | Error(b) =>
         Error(
-          "Integration error 3 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead." ++
+          "Integration error 2 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead." ++
           "Original error: " ++
           b,
         )
@@ -310,14 +309,9 @@ module DiminishingReturns = {
               reducer,
             )
             switch resultAsInternalExpression {
-            | Ok(IEvNumber(x)) => Ok(x)
-            | Error(_) =>
-              Error(
+            | IEvNumber(x) => Ok(x)
+            | _ => Error(
                 "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
-              )
-            | _ =>
-              Error(
-                "Error 2 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
               )
             }
           }

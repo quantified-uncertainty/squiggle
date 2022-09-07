@@ -23,26 +23,24 @@ let checkArity = (
     let argsLength = Belt.List.length(args)
     let parametersLength = Js.Array2.length(lambdaValue.parameters)
     if argsLength !== parametersLength {
-      ErrorValue.REArityError(None, parametersLength, argsLength)->Error
+      raise(ErrorValue.ErrorException(ErrorValue.REArityError(None, parametersLength, argsLength)))
     } else {
-      args->Ok
+      args
     }
   }
   let exprOrFFI = castInternalCodeToExpression(lambdaValue.body)
   switch exprOrFFI {
   | NotFFI(_) => reallyCheck
-  | FFI(_) => args->Ok
+  | FFI(_) => args
   }
 }
 
 let checkIfReduced = (args: list<internalExpressionValue>) =>
-  args->Belt.List.reduceReverse(Ok(list{}), (rAcc, arg) =>
-    rAcc->Result.flatMap(acc =>
+  args->Belt.List.reduceReverse(list{}, (acc, arg) =>
       switch arg {
-      | IEvSymbol(symbol) => ErrorValue.RESymbolNotFound(symbol)->Error
-      | _ => list{arg, ...acc}->Ok
+      | IEvSymbol(symbol) => raise(ErrorValue.ErrorException(ErrorValue.RESymbolNotFound(symbol)))
+      | _ => list{arg, ...acc}
       }
-    )
   )
 
 let caseNotFFI = (
@@ -63,7 +61,10 @@ let caseNotFFI = (
 }
 
 let caseFFI = (ffiFn: ExpressionT.ffiFn, args, accessors: ProjectAccessorsT.t) => {
-  ffiFn(args->Belt.List.toArray, accessors.environment)
+  switch ffiFn(args->Belt.List.toArray, accessors.environment) {
+    | Ok(value) => value
+    | Error(value) => raise(ErrorValue.ErrorException(value))
+  }
 }
 
 let applyParametersToLambda = (
@@ -71,16 +72,13 @@ let applyParametersToLambda = (
   args,
   accessors: ProjectAccessorsT.t,
   reducer: ProjectReducerFnT.t,
-): result<internalExpressionValue, 'e> => {
-  checkArity(lambdaValue, args)->Result.flatMap(args =>
-    checkIfReduced(args)->Result.flatMap(args => {
-      let exprOrFFI = castInternalCodeToExpression(lambdaValue.body)
-      switch exprOrFFI {
-      | NotFFI(expr) => caseNotFFI(lambdaValue, expr, args, accessors, reducer)
-      | FFI(ffiFn) => caseFFI(ffiFn, args, accessors)
-      }
-    })
-  )
+): internalExpressionValue => {
+  let args = checkArity(lambdaValue, args)->checkIfReduced
+  let exprOrFFI = castInternalCodeToExpression(lambdaValue.body)
+  switch exprOrFFI {
+  | NotFFI(expr) => caseNotFFI(lambdaValue, expr, args, accessors, reducer)
+  | FFI(ffiFn) => caseFFI(ffiFn, args, accessors)
+  }
 }
 
 let doLambdaCall = (
@@ -95,7 +93,7 @@ let foreignFunctionInterface = (
   argArray: array<internalExpressionValue>,
   accessors: ProjectAccessorsT.t,
   reducer: ProjectReducerFnT.t,
-): result<internalExpressionValue, Reducer_ErrorValue.errorValue> => {
+): internalExpressionValue => {
   let args = argArray->Belt.List.fromArray
   applyParametersToLambda(lambdaValue, args, accessors, reducer)
 }

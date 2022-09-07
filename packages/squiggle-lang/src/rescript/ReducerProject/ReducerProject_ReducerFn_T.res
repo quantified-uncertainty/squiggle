@@ -6,4 +6,4 @@ type t = (
   ExpressionT.t,
   ExpressionT.bindings,
   ProjectAccessorsT.t,
-) => result<InternalExpressionValue.t, Reducer_ErrorValue.errorValue>
+) => InternalExpressionValue.t
