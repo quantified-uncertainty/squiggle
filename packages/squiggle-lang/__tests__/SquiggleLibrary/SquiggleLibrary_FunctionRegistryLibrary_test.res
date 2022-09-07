@@ -2,8 +2,12 @@ open Jest
 open Expect
 open Reducer_TestHelpers
 
-let expectEvalToBeOk = (expr: string) =>
-  Reducer.evaluate(expr)->Reducer_Helpers.rRemoveDefaultsExternal->E.R.isOk->expect->toBe(true)
+let expectEvalToBeOk = (code: string) =>
+  Reducer_Expression.BackCompatible.evaluateString(code)
+  ->Reducer_Helpers.rRemoveDefaultsInternal
+  ->E.R.isOk
+  ->expect
+  ->toBe(true)
 
 let registry = FunctionRegistry_Library.registry
 let examples = E.A.to_list(FunctionRegistry_Core.Registry.allExamples(registry))
@@ -63,9 +67,15 @@ describe("FunctionRegistry Library", () => {
     testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
     testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
     testEvalToBe("SampleSet.fromFn({|| sample(normal(5,2))})", "Ok(Sample Set Distribution)")
-    testEvalToBe("SampleSet.min(SampleSet.fromDist(normal(50,2)), 2)", "Ok(Sample Set Distribution)")
+    testEvalToBe(
+      "SampleSet.min(SampleSet.fromDist(normal(50,2)), 2)",
+      "Ok(Sample Set Distribution)",
+    )
     testEvalToBe("mean(SampleSet.min(SampleSet.fromDist(normal(50,2)), 2))", "Ok(2)")
-    testEvalToBe("SampleSet.max(SampleSet.fromDist(normal(50,2)), 10)", "Ok(Sample Set Distribution)")
+    testEvalToBe(
+      "SampleSet.max(SampleSet.fromDist(normal(50,2)), 10)",
+      "Ok(Sample Set Distribution)",
+    )
     testEvalToBe(
       "addOne(t)=t+1; SampleSet.toList(SampleSet.map(SampleSet.fromList([1,2,3,4,5,6]), addOne))",
       "Ok([2,3,4,5,6,7])",
@@ -91,8 +101,8 @@ describe("FunctionRegistry Library", () => {
       ((fn, example)) => {
         let responseType =
           example
-          ->Reducer.evaluate
-          ->E.R2.fmap(ReducerInterface_InternalExpressionValue.externalValueToValueType)
+          ->Reducer_Expression.BackCompatible.evaluateString
+          ->E.R2.fmap(ReducerInterface_InternalExpressionValue.valueToValueType)
         let expectedOutputType = fn.output |> E.O.toExn("")
         expect(responseType)->toEqual(Ok(expectedOutputType))
       },

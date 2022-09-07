@@ -47,3 +47,7 @@ module Random = {
   @module external sample: (array<float>, sampleArgs) => array<float> = "@stdlib/random/sample"
   let sample = sample
 }
+
+module Math = {
+  @module external factorial: float => float = "@stdlib/math/base/special/factorial"
+}

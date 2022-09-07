@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  lambdaValue,
-  environment,
-  runForeign,
-  errorValueToString,
-} from "@quri/squiggle-lang";
+import { SqLambda, environment, SqValueTag } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
 import { DistributionPlottingSettings } from "./DistributionChart";
@@ -17,7 +12,7 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChartProps {
-  fn: lambdaValue;
+  fn: SqLambda;
   chartSettings: FunctionChartSettings;
   distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;
@@ -38,8 +33,8 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
-  const result1 = runForeign(fn, [chartSettings.start], environment);
-  const result2 = runForeign(fn, [chartSettings.stop], environment);
+  const result1 = fn.call([chartSettings.start]);
+  const result2 = fn.call([chartSettings.stop]);
   const getValidResult = () => {
     if (result1.tag === "Ok") {
       return result1;
@@ -53,14 +48,12 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
 
   if (validResult.tag === "Error") {
     return (
-      <ErrorAlert heading="Error">
-        {errorValueToString(validResult.value)}
-      </ErrorAlert>
+      <ErrorAlert heading="Error">{validResult.value.toString()}</ErrorAlert>
     );
   }
 
   switch (validResult.value.tag) {
-    case "distribution":
+    case SqValueTag.Distribution:
       return (
         <FunctionChart1Dist
           fn={fn}
@@ -70,7 +63,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
           distributionPlotSettings={distributionPlotSettings}
         />
       );
-    case "number":
+    case SqValueTag.Number:
       return (
         <FunctionChart1Number
           fn={fn}

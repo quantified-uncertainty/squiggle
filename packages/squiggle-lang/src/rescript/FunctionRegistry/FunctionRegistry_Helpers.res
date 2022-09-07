@@ -12,6 +12,7 @@ module Wrappers = {
   let evRecord = r => ReducerInterface_InternalExpressionValue.IEvRecord(r)
   let evString = r => ReducerInterface_InternalExpressionValue.IEvString(r)
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
+  let evArrayOfEvNumber = xs => xs->Belt.Array.map(evNumber)->evArray
 }
 
 let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleError)
@@ -213,5 +214,41 @@ module Process = {
 
     let twoValuesUsingSymbolicDist = (~fn, ~values) =>
       twoValues(~fn=Helpers.wrapSymbolic(fn), ~values)
+  }
+}
+
+module DefineFn = {
+  module Numbers = {
+    let oneToOne = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs
+          ->getOrError(0)
+          ->E.R.bind(Prepare.oneNumber)
+          ->E.R2.fmap(fn)
+          ->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+    let twoToOne = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber, FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs->Prepare.ToValueTuple.twoNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
+    let threeToOne = (name, fn) =>
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
+        ~run=(_, inputs, _, _) => {
+          inputs->Prepare.ToValueTuple.threeNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+        },
+        (),
+      )
   }
 }
