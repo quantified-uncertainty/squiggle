@@ -32,7 +32,6 @@ export type DistributionChartProps = {
   environment: environment;
   width?: number;
   height: number;
-  sample?: boolean;
   xAxisType?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
@@ -64,7 +63,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
           name: x.name,
           // color: x.color, // not supported yet
           ...pointSet.asShape(),
-          samples: [] as number[],
+          // samples: [] as number[],
         }))
       )
     );
@@ -78,6 +77,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     }
 
     // if this is a sample set, include the samples
+    const samples: number[] = [];
     const sampleSets = plot?.distributions.filter(
       (dist) => dist.distribution.tag === SqDistributionTag.SampleSet
     );
@@ -85,7 +85,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       for (const { distribution } of sampleSets) {
         if (distribution.tag === SqDistributionTag.SampleSet) {
           // this conditional must be duplicated to please typescript, more elegant solution probably exists
-          shapes.value[0].samples.push(...distribution.value());
+          samples.push(...distribution.value());
+          // shapes.value[0].samples.push(...distribution.value());
         }
       }
     }
@@ -112,7 +113,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         ) : (
           <Vega
             spec={spec}
-            data={{ data: shapes.value, domain }}
+            data={{ data: shapes.value, domain, samples }}
             width={widthProp - 10}
             height={height}
             actions={actions}

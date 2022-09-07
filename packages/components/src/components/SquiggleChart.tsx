@@ -89,7 +89,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       onChange,
       executionId,
     });
-    
+
     const distributionPlotSettings = {
       showSummary,
       logX,

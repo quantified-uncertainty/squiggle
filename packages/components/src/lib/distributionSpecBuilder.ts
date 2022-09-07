@@ -14,8 +14,6 @@ export type DistributionChartSpecOptions = {
   title?: string;
   /** The formatting of the ticks */
   format?: string;
-  /** Whether or not to show the band of sample data at the bottom */
-  sample?: boolean;
   /** Whether the x-axis should be dates or numbers */
   xAxisType?: "number" | "dateTime";
 };
@@ -77,14 +75,7 @@ const width = 500;
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
-  const {
-    title,
-    minX,
-    maxX,
-    logX,
-    expY,
-    xAxisType = "number",
-  } = specOptions;
+  const { title, minX, maxX, logX, expY, xAxisType = "number" } = specOptions;
 
   const dateTime = xAxisType === "dateTime";
 
@@ -299,39 +290,22 @@ export function buildVegaSpec(
               },
             ],
           },
-          {
-            name: "sample_distributions",
-            type: "group",
-            from: {
-              facet: {
-                name: "sample_facet",
-                data: "distribution_facet",
-                field: "samples",
-              },
-            },
-            marks: [
-              {
-                name: "samples",
-                type: "rect",
-                from: { data: "sample_facet" },
-                encode: {
-                  enter: {
-                    x: { scale: "xscale", field: "data"},
-                    width: { value: 0.1 },
-
-                    y: { value: 25, offset: { signal: "height" } },
-                    height: { value: 5 },
-                    fill: {
-                      scale: "color",
-                      field: { parent: "name" },
-                    },
-                    fillOpacity: { value: 1 },
-                  },
-                },
-              },
-            ],
-          },
         ],
+      },
+
+      {
+        name: "sampleset",
+        type: "rect",
+        from: { data: "samples" },
+        encode: {
+          enter: {
+            x: { scale: "xscale", field: "data" },
+            width: { value: 0.1 },
+
+            y: { value: 25, offset: { signal: "height" } },
+            height: { value: 5 },
+          },
+        },
       },
       {
         type: "text",
