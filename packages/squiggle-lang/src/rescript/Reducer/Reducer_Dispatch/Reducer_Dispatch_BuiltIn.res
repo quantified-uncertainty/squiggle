@@ -13,7 +13,6 @@ module TypeBuilder = Reducer_Type_TypeBuilder
 open ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
-
 /*
   MathJs provides default implementations for built-ins
   This is where all the expected built-ins like + = * / sin cos log ln etc are handled
@@ -213,6 +212,7 @@ let dispatch = (
     }
   } catch {
   | ErrorException(e) => raise(ErrorException(e))
-  | Js.Exn.Error(obj) => raise(ErrorException(REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))))
+  | Js.Exn.Error(obj) =>
+    raise(ErrorException(REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))))
   | _ => raise(ErrorException(RETodo("unhandled rescript exception")))
   }

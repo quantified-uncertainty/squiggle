@@ -32,10 +32,7 @@ let dispatchMacroCall = (
 
     let boundStatement = BindingsReplacer.replaceSymbols(newBindings, statement)
 
-    ExpressionWithContext.withContext(
-      newCode(newBindings->eModule, boundStatement),
-      newBindings,
-    )
+    ExpressionWithContext.withContext(newCode(newBindings->eModule, boundStatement), newBindings)
   }
 
   let correspondingSetBindingsFn = (fnName: string): string =>
@@ -65,7 +62,11 @@ let dispatchMacroCall = (
     }
   }
 
-  let doBindExpression = (bindingExpr: expression, statement: expression, accessors): expressionWithContext => {
+  let doBindExpression = (
+    bindingExpr: expression,
+    statement: expression,
+    accessors,
+  ): expressionWithContext => {
     let defaultStatement = () =>
       useExpressionToSetBindings(bindingExpr, accessors, statement, (
         _newBindingsExpr,
@@ -93,7 +94,11 @@ let dispatchMacroCall = (
     }
   }
 
-  let doBlock = (exprs: list<expression>, _bindings: ExpressionT.bindings, _accessors): expressionWithContext => {
+  let doBlock = (
+    exprs: list<expression>,
+    _bindings: ExpressionT.bindings,
+    _accessors,
+  ): expressionWithContext => {
     let exprsArray = Belt.List.toArray(exprs)
     let maxIndex = Js.Array2.length(exprsArray) - 1
     let newStatement = exprsArray->Js.Array2.reducei((acc, statement, index) =>
@@ -141,8 +146,11 @@ let dispatchMacroCall = (
     }
   }
 
-  let expandExpressionList = (aList, bindings: ExpressionT.bindings, accessors): expressionWithContext
-   =>
+  let expandExpressionList = (
+    aList,
+    bindings: ExpressionT.bindings,
+    accessors,
+  ): expressionWithContext =>
     switch aList {
     | list{
         ExpressionT.EValue(IEvCall("$$_bindStatement_$$")),

@@ -261,13 +261,13 @@ module DiminishingReturns = {
     This is currently being done with a reducer, that keeps track of:
       - Value of marginal spending for each function
       - How much has been assigned to each function.
-    */
+ */
 
     /*
       Two possible algorithms (n=funds/increment, m=num lambdas)
       1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent. (This is what we are doing.)
       2. O(n*(m-1)): Iterate through all possible spending combinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
-    */
+ */
     let optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions = (
       lambdas,
       funds,
@@ -275,7 +275,6 @@ module DiminishingReturns = {
       environment,
       reducer,
     ) => {
-
       switch (
         E.A.length(lambdas) > 1,
         funds > 0.0,
@@ -310,7 +309,8 @@ module DiminishingReturns = {
             )
             switch resultAsInternalExpression {
             | IEvNumber(x) => Ok(x)
-            | _ => Error(
+            | _ =>
+              Error(
                 "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
               )
             }
@@ -452,5 +452,5 @@ let library = [
   // will only depend on num points and the complexity of the function
 
   // Diminishing marginal return functions
-  DiminishingReturns.Lib.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions
+  DiminishingReturns.Lib.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions,
 ]

@@ -191,9 +191,7 @@ let doBuildResult = (
   this
   ->getExpression
   ->Belt.Option.map(
-    Belt.Result.flatMap(
-      _,
-      expression =>
+    Belt.Result.flatMap(_, expression =>
       try {
         Reducer_Expression.reduceExpressionInProject(expression, aContinuation, accessors)->Ok
       } catch {

@@ -11,8 +11,7 @@ let isMacroName = (fName: string): bool => fName->Js.String2.startsWith("$$")
 
 let rec replaceSymbols = (bindings: ExpressionT.bindings, expression: expression): expression =>
   switch expression {
-  | ExpressionT.EValue(value) =>
-    replaceSymbolOnValue(bindings, value)->ExpressionT.EValue
+  | ExpressionT.EValue(value) => replaceSymbolOnValue(bindings, value)->ExpressionT.EValue
   | ExpressionT.EList(list) =>
     switch list {
     | list{EValue(IEvCall(fName)), ..._args} =>
@@ -26,9 +25,10 @@ let rec replaceSymbols = (bindings: ExpressionT.bindings, expression: expression
   }
 
 and replaceSymbolsOnExpressionList = (bindings, list) => {
-  let racc = list->Belt.List.reduceReverse(list{}, (acc, each: expression) =>
-    replaceSymbols(bindings, each)->Belt.List.add(acc, _)
-  )
+  let racc =
+    list->Belt.List.reduceReverse(list{}, (acc, each: expression) =>
+      replaceSymbols(bindings, each)->Belt.List.add(acc, _)
+    )
   ExpressionT.EList(racc)
 }
 and replaceSymbolOnValue = (bindings, evValue: internalExpressionValue) =>
@@ -40,5 +40,10 @@ and replaceSymbolOnValue = (bindings, evValue: internalExpressionValue) =>
 and checkIfCallable = (evValue: internalExpressionValue) =>
   switch evValue {
   | IEvCall(_) | IEvLambda(_) => evValue
-  | _ => raise(ErrorValue.ErrorException(ErrorValue.RENotAFunction(InternalExpressionValue.toString(evValue))))
+  | _ =>
+    raise(
+      ErrorValue.ErrorException(
+        ErrorValue.RENotAFunction(InternalExpressionValue.toString(evValue)),
+      ),
+    )
   }

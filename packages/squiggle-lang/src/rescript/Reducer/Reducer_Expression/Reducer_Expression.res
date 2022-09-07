@@ -44,11 +44,10 @@ and reduceExpressionList = (
   continuation: T.bindings,
   accessors: ProjectAccessorsT.t,
 ): InternalExpressionValue.t => {
-  let acc: list<InternalExpressionValue.t> = expressions->Belt.List.reduceReverse(list{}, (acc, each: t) =>
-    acc->Belt.List.add(
-      each->reduceExpressionInProject(continuation, accessors)
+  let acc: list<InternalExpressionValue.t> =
+    expressions->Belt.List.reduceReverse(list{}, (acc, each: t) =>
+      acc->Belt.List.add(each->reduceExpressionInProject(continuation, accessors))
     )
-  )
   acc->reduceValueList(accessors)
 }
 
@@ -73,17 +72,12 @@ and reduceValueList = (
     }
   | list{IEvLambda(_)} =>
     // TODO: remove on solving issue#558
-    valueList
-    ->Lambda.checkIfReduced
-    ->Belt.List.toArray->InternalExpressionValue.IEvArray
+    valueList->Lambda.checkIfReduced->Belt.List.toArray->InternalExpressionValue.IEvArray
   | list{IEvLambda(lambdaCall), ...args} =>
     args
     ->Lambda.checkIfReduced
     ->Lambda.doLambdaCall(lambdaCall, _, accessors, reduceExpressionInProject)
-  | _ =>
-    valueList
-    ->Lambda.checkIfReduced
-    ->Belt.List.toArray->InternalExpressionValue.IEvArray
+  | _ => valueList->Lambda.checkIfReduced->Belt.List.toArray->InternalExpressionValue.IEvArray
   }
 
 let reduceReturningBindings = (

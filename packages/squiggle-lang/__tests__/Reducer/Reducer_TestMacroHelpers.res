@@ -18,20 +18,16 @@ let testMacro_ = (
 ) => {
   let bindings = Bindings.fromArray(bindArray)
   tester(expr->T.toString, () => {
-    let result = switch expr
-    ->Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(
+    let result = switch expr->Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(
       bindings,
       ProjectAccessorsT.identityAccessors,
       Expression.reduceExpressionInProject,
     ) {
-      | v => Ok(v)
-      | exception Reducer_ErrorValue.ErrorException(e) => Error(e)
+    | v => Ok(v)
+    | exception Reducer_ErrorValue.ErrorException(e) => Error(e)
     }
 
-    result
-    ->ExpressionWithContext.toStringResult
-    ->expect
-    ->toEqual(expectedCode)
+    result->ExpressionWithContext.toStringResult->expect->toEqual(expectedCode)
   })
 }
 

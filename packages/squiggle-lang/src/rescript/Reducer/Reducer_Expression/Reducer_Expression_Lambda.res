@@ -37,10 +37,10 @@ let checkArity = (
 
 let checkIfReduced = (args: list<internalExpressionValue>) =>
   args->Belt.List.reduceReverse(list{}, (acc, arg) =>
-      switch arg {
-      | IEvSymbol(symbol) => raise(ErrorValue.ErrorException(ErrorValue.RESymbolNotFound(symbol)))
-      | _ => list{arg, ...acc}
-      }
+    switch arg {
+    | IEvSymbol(symbol) => raise(ErrorValue.ErrorException(ErrorValue.RESymbolNotFound(symbol)))
+    | _ => list{arg, ...acc}
+    }
   )
 
 let caseNotFFI = (
@@ -62,8 +62,8 @@ let caseNotFFI = (
 
 let caseFFI = (ffiFn: ExpressionT.ffiFn, args, accessors: ProjectAccessorsT.t) => {
   switch ffiFn(args->Belt.List.toArray, accessors.environment) {
-    | Ok(value) => value
-    | Error(value) => raise(ErrorValue.ErrorException(value))
+  | Ok(value) => value
+  | Error(value) => raise(ErrorValue.ErrorException(value))
   }
 }
 

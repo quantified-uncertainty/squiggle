@@ -41,7 +41,7 @@ module Internals = {
         (reducer: ProjectReducerFnT.t),
       )
       list{newElem, ...acc}
-  })
+    })
     mappedList->Belt.List.toArray->Wrappers.evArray
   }
 
@@ -83,8 +83,8 @@ module Internals = {
         reducer,
       )
       switch newElem {
-        | IEvBool(true) => list{elem, ...acc}
-        | _ => acc
+      | IEvBool(true) => list{elem, ...acc}
+      | _ => acc
       }
     })
     mappedList->Belt.List.toArray->Wrappers.evArray
@@ -244,13 +244,7 @@ let library = [
         ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer: ProjectReducerFnT.t) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
-            Ok(Internals.reduceReverse(
-              array,
-              initialValue,
-              lambda,
-              accessors,
-              reducer,
-            ))
+            Ok(Internals.reduceReverse(array, initialValue, lambda, accessors, reducer))
           | _ => Error(impossibleError)
           },
         (),
