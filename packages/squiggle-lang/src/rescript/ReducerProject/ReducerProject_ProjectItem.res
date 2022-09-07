@@ -183,17 +183,6 @@ let buildExpression = (this: t): t => {
   }
 }
 
-// let wrappedReducer = (
-//   rExpression: T.expressionArgumentType,
-//   aContinuation: T.continuation,
-//   accessors: ProjectAccessorsT.t,
-// ): T.resultArgumentType => {
-//   Belt.Result.flatMap(
-//     rExpression,
-//     Reducer_Expression.reduceExpressionInProject(_, aContinuation, accessors),
-//   )
-// }
-
 let doBuildResult = (
   this: t,
   aContinuation: T.continuation,
