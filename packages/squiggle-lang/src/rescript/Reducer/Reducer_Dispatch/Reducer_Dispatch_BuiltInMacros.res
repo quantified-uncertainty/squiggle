@@ -15,7 +15,6 @@ module ProjectReducerFnT = ReducerProject_ReducerFn_T
 
 open Reducer_Expression_ExpressionBuilder
 
-exception ErrorException = ErrorValue.ErrorException
 type expression = ExpressionT.expression
 type expressionWithContext = ExpressionWithContext.expressionWithContext
 
@@ -45,7 +44,7 @@ let dispatchMacroCall = (
     }
 
   let doBindStatement = (bindingExpr: expression, statement: expression, accessors) => {
-    let defaultStatement = ErrorValue.REAssignmentExpected->ErrorException
+    let defaultStatement = ErrorValue.REAssignmentExpected
     switch statement {
     | ExpressionT.EList(list{ExpressionT.EValue(IEvCall(callName)), symbolExpr, statement}) => {
         let setBindingsFn = correspondingSetBindingsFn(callName)
@@ -55,10 +54,10 @@ let dispatchMacroCall = (
             boundStatement,
           ) => eFunction(setBindingsFn, list{newBindingsExpr, symbolExpr, boundStatement}))
         } else {
-          raise(defaultStatement)
+          defaultStatement->Reducer_ErrorValue.toException
         }
       }
-    | _ => raise(defaultStatement)
+    | _ => defaultStatement->Reducer_ErrorValue.toException
     }
   }
 
@@ -142,7 +141,7 @@ let dispatchMacroCall = (
         let ifTrueBlock = eBlock(list{ifTrue})
         ExpressionWithContext.withContext(ifTrueBlock, bindings)
       }
-    | _ => raise(ErrorException(REExpectedType("Boolean", "")))
+    | _ => REExpectedType("Boolean", "")->Reducer_ErrorValue.toException
     }
   }
 

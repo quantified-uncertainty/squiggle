@@ -41,9 +41,5 @@ and checkIfCallable = (evValue: internalExpressionValue) =>
   switch evValue {
   | IEvCall(_) | IEvLambda(_) => evValue
   | _ =>
-    raise(
-      ErrorValue.ErrorException(
-        ErrorValue.RENotAFunction(InternalExpressionValue.toString(evValue)),
-      ),
-    )
+    ErrorValue.RENotAFunction(InternalExpressionValue.toString(evValue))->ErrorValue.toException
   }

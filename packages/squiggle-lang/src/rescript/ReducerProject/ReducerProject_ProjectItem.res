@@ -195,8 +195,7 @@ let doBuildResult = (
       try {
         Reducer_Expression.reduceExpressionInProject(expression, aContinuation, accessors)->Ok
       } catch {
-      | Reducer_ErrorValue.ErrorException(e) => e->Error
-      | _ => RETodo("unhandled rescript exception")->Error
+      | exn => Reducer_ErrorValue.fromException(exn)->Error
       }
     ),
   )

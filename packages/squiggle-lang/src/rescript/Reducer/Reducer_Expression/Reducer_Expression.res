@@ -101,8 +101,7 @@ module BackCompatible = {
     try {
       expression->reduceExpressionInProject(accessors.stdLib, accessors)->Ok
     } catch {
-    | ErrorException(e) => Error(e)
-    | _ => raise(ErrorException(RETodo("internal exception")))
+    | exn => Reducer_ErrorValue.fromException(exn)->Error
     }
   }
 

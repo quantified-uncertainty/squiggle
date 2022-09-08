@@ -10,6 +10,23 @@ type expression = ExpressionT.expression
 type internalExpressionValue = InternalExpressionValue.t
 type expressionWithContext = ExpressionWithContext.expressionWithContext
 
+let expandMacroCallRs = (
+  macroExpression: expression,
+  bindings: ExpressionT.bindings,
+  accessors: ProjectAccessorsT.t,
+  reduceExpression: ProjectReducerFnT.t,
+): result<expressionWithContext, 'e> =>
+  try {
+    Reducer_Dispatch_BuiltInMacros.dispatchMacroCall(
+      macroExpression,
+      bindings,
+      accessors,
+      reduceExpression,
+    )->Ok
+  } catch {
+  | exn => Reducer_ErrorValue.fromException(exn)->Error
+  }
+
 let doMacroCall = (
   macroExpression: expression,
   bindings: ExpressionT.bindings,

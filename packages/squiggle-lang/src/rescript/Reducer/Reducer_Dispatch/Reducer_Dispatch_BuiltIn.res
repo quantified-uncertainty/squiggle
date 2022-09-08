@@ -3,6 +3,7 @@ module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module Continuation = ReducerInterface_Value_Continuation
 module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
 module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
@@ -206,13 +207,12 @@ let dispatch = (
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    switch ExternalLibrary.dispatch((Js.String.make(fn), args), accessors, reducer, callInternal) {
-    | Ok(v) => v
-    | Error(e) => raise(ErrorException(e))
-    }
+    ExternalLibrary.dispatch(
+      (Js.String.make(fn), args),
+      accessors,
+      reducer,
+      callInternal,
+    )->InternalExpressionValue.resultToValue
   } catch {
-  | ErrorException(e) => raise(ErrorException(e))
-  | Js.Exn.Error(obj) =>
-    raise(ErrorException(REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))))
-  | _ => raise(ErrorException(RETodo("unhandled rescript exception")))
+  | exn => Reducer_ErrorValue.fromException(exn)->Reducer_ErrorValue.toException
   }
