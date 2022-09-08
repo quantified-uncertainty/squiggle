@@ -14,8 +14,6 @@ module T = Reducer_Expression_T
 type errorValue = Reducer_ErrorValue.errorValue
 type t = T.t
 
-exception ErrorException = Reducer_ErrorValue.ErrorException
-
 /*
   Recursively evaluate/reduce the expression (Lisp AST/Lambda calculus)
 */
