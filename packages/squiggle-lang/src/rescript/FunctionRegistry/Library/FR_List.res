@@ -33,16 +33,14 @@ module Internals = {
     eLambdaValue,
     reducer: ProjectReducerFnT.t,
   ): ReducerInterface_InternalExpressionValue.t => {
-    let mappedList = array->E.A.reduceReverse(list{}, (acc, elem) => {
-      let newElem = Reducer_Expression_Lambda.doLambdaCall(
+    Belt.Array.map(array, elem =>
+      Reducer_Expression_Lambda.doLambdaCall(
         eLambdaValue,
         list{elem},
         (accessors: ProjectAccessorsT.t),
         (reducer: ProjectReducerFnT.t),
       )
-      list{newElem, ...acc}
-    })
-    mappedList->Belt.List.toArray->Wrappers.evArray
+    )->Wrappers.evArray
   }
 
   let reduce = (
