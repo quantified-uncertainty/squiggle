@@ -89,14 +89,14 @@ let callInternal = (
     Bindings.set(bindings, symbol, value)->IEvBindings->Ok
   }
 
-  let doSetTypeAliasBindings = (
-    bindings: nameSpace,
-    symbol: string,
-    value: internalExpressionValue,
-  ) => Bindings.setTypeAlias(bindings, symbol, value)->IEvBindings->Ok
+  // let doSetTypeAliasBindings = (
+  //   bindings: nameSpace,
+  //   symbol: string,
+  //   value: internalExpressionValue,
+  // ) => Bindings.setTypeAlias(bindings, symbol, value)->IEvBindings->Ok
 
-  let doSetTypeOfBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) =>
-    Bindings.setTypeOf(bindings, symbol, value)->IEvBindings->Ok
+  // let doSetTypeOfBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) =>
+  //   Bindings.setTypeOf(bindings, symbol, value)->IEvBindings->Ok
 
   let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
 
@@ -153,30 +153,30 @@ let callInternal = (
   | ("$_exportBindings_$", [evValue]) => doIdentity(evValue)
   | ("$_setBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
     doSetBindings(nameSpace, symbol, value)
-  | ("$_setTypeAliasBindings_$", [IEvBindings(nameSpace), IEvTypeIdentifier(symbol), value]) =>
-    doSetTypeAliasBindings(nameSpace, symbol, value)
-  | ("$_setTypeOfBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
-    doSetTypeOfBindings(nameSpace, symbol, value)
+  // | ("$_setTypeAliasBindings_$", [IEvBindings(nameSpace), IEvTypeIdentifier(symbol), value]) =>
+  //   doSetTypeAliasBindings(nameSpace, symbol, value)
+  // | ("$_setTypeOfBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
+  //   doSetTypeOfBindings(nameSpace, symbol, value)
   | ("$_dumpBindings_$", [IEvBindings(nameSpace), _, evValue]) => doDumpBindings(nameSpace, evValue)
-  | ("$_typeModifier_memberOf_$", [IEvTypeIdentifier(typeIdentifier), IEvArray(arr)]) =>
-    TypeBuilder.typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))
-  | ("$_typeModifier_memberOf_$", [IEvType(typeRecord), IEvArray(arr)]) =>
-    TypeBuilder.typeModifier_memberOf_update(typeRecord, IEvArray(arr))
-  | ("$_typeModifier_min_$", [IEvTypeIdentifier(typeIdentifier), value]) =>
-    TypeBuilder.typeModifier_min(IEvTypeIdentifier(typeIdentifier), value)
-  | ("$_typeModifier_min_$", [IEvType(typeRecord), value]) =>
-    TypeBuilder.typeModifier_min_update(typeRecord, value)
-  | ("$_typeModifier_max_$", [IEvTypeIdentifier(typeIdentifier), value]) =>
-    TypeBuilder.typeModifier_max(IEvTypeIdentifier(typeIdentifier), value)
-  | ("$_typeModifier_max_$", [IEvType(typeRecord), value]) =>
-    TypeBuilder.typeModifier_max_update(typeRecord, value)
-  | ("$_typeModifier_opaque_$", [IEvType(typeRecord)]) =>
-    TypeBuilder.typeModifier_opaque_update(typeRecord)
-  | ("$_typeOr_$", [IEvArray(arr)]) => TypeBuilder.typeOr(IEvArray(arr))
-  | ("$_typeFunction_$", [IEvArray(arr)]) => TypeBuilder.typeFunction(arr)
-  | ("$_typeTuple_$", [IEvArray(elems)]) => TypeBuilder.typeTuple(elems)
-  | ("$_typeArray_$", [elem]) => TypeBuilder.typeArray(elem)
-  | ("$_typeRecord_$", [IEvRecord(propertyMap)]) => TypeBuilder.typeRecord(propertyMap)
+  // | ("$_typeModifier_memberOf_$", [IEvTypeIdentifier(typeIdentifier), IEvArray(arr)]) =>
+  //   TypeBuilder.typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))
+  // | ("$_typeModifier_memberOf_$", [IEvType(typeRecord), IEvArray(arr)]) =>
+  //   TypeBuilder.typeModifier_memberOf_update(typeRecord, IEvArray(arr))
+  // | ("$_typeModifier_min_$", [IEvTypeIdentifier(typeIdentifier), value]) =>
+  //   TypeBuilder.typeModifier_min(IEvTypeIdentifier(typeIdentifier), value)
+  // | ("$_typeModifier_min_$", [IEvType(typeRecord), value]) =>
+  //   TypeBuilder.typeModifier_min_update(typeRecord, value)
+  // | ("$_typeModifier_max_$", [IEvTypeIdentifier(typeIdentifier), value]) =>
+  //   TypeBuilder.typeModifier_max(IEvTypeIdentifier(typeIdentifier), value)
+  // | ("$_typeModifier_max_$", [IEvType(typeRecord), value]) =>
+  //   TypeBuilder.typeModifier_max_update(typeRecord, value)
+  // | ("$_typeModifier_opaque_$", [IEvType(typeRecord)]) =>
+  //   TypeBuilder.typeModifier_opaque_update(typeRecord)
+  // | ("$_typeOr_$", [IEvArray(arr)]) => TypeBuilder.typeOr(IEvArray(arr))
+  // | ("$_typeFunction_$", [IEvArray(arr)]) => TypeBuilder.typeFunction(arr)
+  // | ("$_typeTuple_$", [IEvArray(elems)]) => TypeBuilder.typeTuple(elems)
+  // | ("$_typeArray_$", [elem]) => TypeBuilder.typeArray(elem)
+  // | ("$_typeRecord_$", [IEvRecord(propertyMap)]) => TypeBuilder.typeRecord(propertyMap)
   | ("concat", [IEvArray(aValueArray), IEvArray(bValueArray)]) =>
     doAddArray(aValueArray, bValueArray)
   | ("concat", [IEvString(aValueString), IEvString(bValueString)]) =>
@@ -204,11 +204,18 @@ let dispatch = (
 ): internalExpressionValue =>
   try {
     let (fn, args) = call
-    // There is a bug that prevents string match in patterns
-    // So we have to recreate a copy of the string
+    if fn->Js.String2.startsWith("$") {
+      switch callInternal((fn, args), accessors, reducer) {
+      | Ok(v) => v
+      | Error(e) => raise(ErrorException(e))
+      }
+    } else {
+      // There is a bug that prevents string match in patterns
+      // So we have to recreate a copy of the string
     switch ExternalLibrary.dispatch((Js.String.make(fn), args), accessors, reducer, callInternal) {
     | Ok(v) => v
     | Error(e) => raise(ErrorException(e))
+    }
     }
   } catch {
   | ErrorException(e) => raise(ErrorException(e))

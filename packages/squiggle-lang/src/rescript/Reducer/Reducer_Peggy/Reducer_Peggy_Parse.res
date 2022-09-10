@@ -21,8 +21,7 @@ let parse = (expr: string): result<node, errorValue> =>
 
 type nodeBlock = {...node, "statements": array<node>}
 type nodeBoolean = {...node, "value": bool}
-type nodeCallIdentifier = {...node, "value": string}
-type nodeExpression = {...node, "nodes": array<node>}
+type nodeCall = {...node, "fn": node, "args": array<node>}
 type nodeFloat = {...node, "value": float}
 type nodeIdentifier = {...node, "value": string}
 type nodeInteger = {...node, "value": int}
@@ -38,9 +37,8 @@ type nodeVoid = node
 type peggyNode =
   | PgNodeBlock(nodeBlock)
   | PgNodeBoolean(nodeBoolean)
-  | PgNodeCallIdentifier(nodeCallIdentifier)
-  | PgNodeExpression(nodeExpression)
   | PgNodeFloat(nodeFloat)
+  | PgNodeCall(nodeCall)
   | PgNodeIdentifier(nodeIdentifier)
   | PgNodeInteger(nodeInteger)
   | PgNodeKeyValue(nodeKeyValue)
@@ -54,8 +52,7 @@ type peggyNode =
 
 external castNodeBlock: node => nodeBlock = "%identity"
 external castNodeBoolean: node => nodeBoolean = "%identity"
-external castNodeCallIdentifier: node => nodeCallIdentifier = "%identity"
-external castNodeExpression: node => nodeExpression = "%identity"
+external castNodeCall: node => nodeCall = "%identity"
 external castNodeFloat: node => nodeFloat = "%identity"
 external castNodeIdentifier: node => nodeIdentifier = "%identity"
 external castNodeInteger: node => nodeInteger = "%identity"
@@ -73,8 +70,7 @@ let castNodeType = (node: node) =>
   switch node["type"] {
   | "Block" => node->castNodeBlock->PgNodeBlock
   | "Boolean" => node->castNodeBoolean->PgNodeBoolean
-  | "CallIdentifier" => node->castNodeCallIdentifier->PgNodeCallIdentifier
-  | "Expression" => node->castNodeExpression->PgNodeExpression
+  | "Call" => node->castNodeCall->PgNodeCall
   | "Float" => node->castNodeFloat->PgNodeFloat
   | "Identifier" => node->castNodeIdentifier->PgNodeIdentifier
   | "Integer" => node->castNodeInteger->PgNodeInteger
@@ -99,8 +95,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
   switch peggyNode {
   | PgNodeBlock(node) => "{" ++ node["statements"]->nodesToStringUsingSeparator("; ") ++ "}"
   | PgNodeBoolean(node) => node["value"]->Js.String.make
-  | PgNodeCallIdentifier(node) => `::${Js.String.make(node["value"])}` // This is an identifier also but for function names
-  | PgNodeExpression(node) => "(" ++ node["nodes"]->nodesToStringUsingSeparator(" ") ++ ")"
+  | PgNodeCall(node) => "(" ++ node["fn"]->toString ++ " " ++ node["args"]->nodesToStringUsingSeparator(" ") ++ ")"
   | PgNodeFloat(node) => node["value"]->Js.String.make
   | PgNodeIdentifier(node) => `:${node["value"]}`
   | PgNodeInteger(node) => node["value"]->Js.String.make

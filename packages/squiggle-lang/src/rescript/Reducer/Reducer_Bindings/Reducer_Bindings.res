@@ -13,23 +13,23 @@ type t = ReducerInterface_InternalExpressionValue.nameSpace
 let typeAliasesKey = "_typeAliases_"
 let typeReferencesKey = "_typeReferences_"
 
-let getType = (NameSpace(container): t, id: string) => {
-  Belt.Map.String.get(container, typeAliasesKey)->Belt.Option.flatMap(aliases =>
-    switch aliases {
-    | IEvRecord(r) => Belt.Map.String.get(r, id)
-    | _ => None
-    }
-  )
-}
+// let getType = (NameSpace(container): t, id: string) => {
+//   Belt.Map.String.get(container, typeAliasesKey)->Belt.Option.flatMap(aliases =>
+//     switch aliases {
+//     | IEvRecord(r) => Belt.Map.String.get(r, id)
+//     | _ => None
+//     }
+//   )
+// }
 
-let getTypeOf = (NameSpace(container): t, id: string) => {
-  Belt.Map.String.get(container, typeReferencesKey)->Belt.Option.flatMap(defs =>
-    switch defs {
-    | IEvRecord(r) => Belt.Map.String.get(r, id)
-    | _ => None
-    }
-  )
-}
+// let getTypeOf = (NameSpace(container): t, id: string) => {
+//   Belt.Map.String.get(container, typeReferencesKey)->Belt.Option.flatMap(defs =>
+//     switch defs {
+//     | IEvRecord(r) => Belt.Map.String.get(r, id)
+//     | _ => None
+//     }
+//   )
+// }
 
 let getWithDefault = (NameSpace(container): t, id: string, default) =>
   switch Belt.Map.String.get(container, id) {
@@ -37,29 +37,40 @@ let getWithDefault = (NameSpace(container): t, id: string, default) =>
   | None => default
   }
 
-let get = (NameSpace(container): t, id: string) => Belt.Map.String.get(container, id)
+let get = (nameSpace: t, id: string) => {
+  let NameSpace(container, parent) = nameSpace
+
+  switch container->Belt.MutableMap.String.get(key) {
+    | Some(v) => Some(v)
+    | None => switch parent {
+      | Some(p) => nameSpaceGet(p, key)
+      | None => None
+    }
+  }
+}
+
 
 let emptyMap: map = Belt.Map.String.empty
 
-let setTypeAlias = (NameSpace(container): t, id: string, value): t => {
-  let rValue = Belt.Map.String.getWithDefault(container, typeAliasesKey, IEvRecord(emptyMap))
-  let r = switch rValue {
-  | IEvRecord(r) => r
-  | _ => emptyMap
-  }
-  let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
-  NameSpace(Belt.Map.String.set(container, typeAliasesKey, r2))
-}
+// let setTypeAlias = (NameSpace(container): t, id: string, value): t => {
+//   let rValue = Belt.Map.String.getWithDefault(container, typeAliasesKey, IEvRecord(emptyMap))
+//   let r = switch rValue {
+//   | IEvRecord(r) => r
+//   | _ => emptyMap
+//   }
+//   let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
+//   NameSpace(Belt.Map.String.set(container, typeAliasesKey, r2))
+// }
 
-let setTypeOf = (NameSpace(container): t, id: string, value): t => {
-  let rValue = Belt.Map.String.getWithDefault(container, typeReferencesKey, IEvRecord(emptyMap))
-  let r = switch rValue {
-  | IEvRecord(r) => r
-  | _ => emptyMap
-  }
-  let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
-  NameSpace(Belt.Map.String.set(container, typeReferencesKey, r2))
-}
+// let setTypeOf = (NameSpace(container): t, id: string, value): t => {
+//   let rValue = Belt.Map.String.getWithDefault(container, typeReferencesKey, IEvRecord(emptyMap))
+//   let r = switch rValue {
+//   | IEvRecord(r) => r
+//   | _ => emptyMap
+//   }
+//   let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
+//   NameSpace(Belt.Map.String.set(container, typeReferencesKey, r2))
+// }
 
 let set = (NameSpace(container): t, id: string, value): t => NameSpace(
   Belt.Map.String.set(container, id, value),
@@ -68,9 +79,6 @@ let set = (NameSpace(container): t, id: string, value): t => NameSpace(
 let emptyModule: t = NameSpace(emptyMap)
 let emptyBindings = emptyModule
 let emptyNameSpace = emptyModule
-
-// let fromTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceFromTypeScriptBindings
-// let toTypeScriptBindings = ReducerInterface_InternalExpressionValue.nameSpaceToTypeScriptBindings
 
 let toExpressionValue = (nameSpace: t): internalExpressionValue => IEvBindings(nameSpace)
 let fromExpressionValue = (aValue: internalExpressionValue): t =>

@@ -13,8 +13,13 @@ type internalExpressionValue = InternalExpressionValue.t
 type environment = ReducerInterface_InternalExpressionValue.environment
 
 type rec expression =
-  | EList(list<expression>) // A list to map-reduce
-  | EValue(internalExpressionValue) // Irreducible built-in value. Reducer should not know the internals. External libraries are responsible
+  | EBlock(array<expression>)
+  | ESymbol(string)
+  | ETernary(expression, expression, expression)
+  | EAssign(string, expression)
+  | ECall(expression, array<expression>)
+  | ELambda(array<string>, expression)
+  | EValue(internalExpressionValue)
 and bindings = InternalExpressionValue.nameSpace
 
 type t = expression
@@ -28,20 +33,20 @@ type reducerFn = (
 /*
   Converts the expression to String
 */
-let rec toString = expression =>
-  switch expression {
-  | EList(list{EValue(IEvCall("$$_block_$$")), ...statements}) =>
-    `{${Belt.List.map(statements, aValue => toString(aValue))
-      ->Extra.List.intersperse("; ")
-      ->Belt.List.toArray
-      ->Js.String.concatMany("")}}`
-  | EList(aList) =>
-    `(${Belt.List.map(aList, aValue => toString(aValue))
-      ->Extra.List.intersperse(" ")
-      ->Belt.List.toArray
-      ->Js.String.concatMany("")})`
-  | EValue(aValue) => InternalExpressionValue.toString(aValue)
-  }
+let rec toString = expression => "TODO"
+  // switch expression {
+  // | EList(list{EValue(IEvCall("$$_block_$$")), ...statements}) =>
+  //   `{${Belt.List.map(statements, aValue => toString(aValue))
+  //     ->Extra.List.intersperse("; ")
+  //     ->Belt.List.toArray
+  //     ->Js.String.concatMany("")}}`
+  // | EList(aList) =>
+  //   `(${Belt.List.map(aList, aValue => toString(aValue))
+  //     ->Extra.List.intersperse(" ")
+  //     ->Belt.List.toArray
+  //     ->Js.String.concatMany("")})`
+  // | EValue(aValue) => InternalExpressionValue.toString(aValue)
+  // }
 
 let toStringResult = codeResult =>
   switch codeResult {

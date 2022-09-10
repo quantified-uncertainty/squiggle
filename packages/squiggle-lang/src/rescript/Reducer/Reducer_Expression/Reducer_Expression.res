@@ -19,36 +19,42 @@ exception ErrorException = Reducer_ErrorValue.ErrorException
 /*
   Recursively evaluate/reduce the expression (Lisp AST/Lambda calculus)
 */
-let rec reduceExpressionInProject = (
+let rec evaluate = (
   expression: t,
-  continuation: T.bindings,
+  bindings: T.bindings,
   accessors: ProjectAccessorsT.t,
 ): InternalExpressionValue.t => {
   // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
+  // Js.log(`reduce: ${T.toString(expression)}`)
   switch expression {
-  | T.EValue(value) => value
-  | T.EList(list) =>
-    switch list {
-    | list{EValue(IEvCall(fName)), ..._args} =>
-      switch Macro.isMacroName(fName) {
-      // A macro expands then reduces itself
-      | true => Macro.doMacroCall(expression, continuation, accessors, reduceExpressionInProject)
-      | false => reduceExpressionList(list, continuation, accessors)
+    | T.Eblock(statements) => {
+      statements->Js.Array2.reduce(statement => evaluate(statement, bindings, accessors))
+    }
+    | T.ESymbol(name) => bindings->nameSpaceGet(name)
+    | T.EValue(value) => value
+    | T.ETernary(predicate, trueCase, falseCase) => {
+      let predicateResult = evaluate(predicate, bindings, accessors)
+      switch predicateResult {
+      | InternalExpressionValue.IEvBool(false) =>
+        evaluate(false, bindings, accessors)
+      | InternalExpressionValue.IEvBool(true) =>
+        evaluate(trueCase, bindings, accessors)
+      | _ => REExpectedType("Boolean", "")->ErrorException->raise
       }
-    | _ => reduceExpressionList(list, continuation, accessors)
+    }
+    | T.ELambda(parameteres, expr) => {
+      BInternalExpressionValue.IEvLambda({
+        parameters: parameters,
+        context: context,
+        body: NotFFI(expr)->BBindings.castExpressionToInternalCode,
+      })->T.EValue
+    }
+    | T.ECall(fn, args) => {
+      let func = evaluate(fn, bindings, accessors)
+      "TODO"
+      // Lambda.doLambdaCall(), etc.
     }
   }
-}
-and reduceExpressionList = (
-  expressions: list<t>,
-  continuation: T.bindings,
-  accessors: ProjectAccessorsT.t,
-): InternalExpressionValue.t => {
-  let acc: list<InternalExpressionValue.t> =
-    expressions->Belt.List.reduceReverse(list{}, (acc, each: t) =>
-      acc->Belt.List.add(each->reduceExpressionInProject(continuation, accessors))
-    )
-  acc->reduceValueList(accessors)
 }
 
 /*
@@ -79,6 +85,8 @@ and reduceValueList = (
     ->Lambda.doLambdaCall(lambdaCall, _, accessors, reduceExpressionInProject)
   | _ => valueList->Lambda.checkIfReduced->Belt.List.toArray->InternalExpressionValue.IEvArray
   }
+
+let reduceExpressionInProject = evaluate
 
 let reduceReturningBindings = (
   expression: t,

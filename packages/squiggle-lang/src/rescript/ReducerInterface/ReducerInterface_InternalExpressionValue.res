@@ -26,7 +26,7 @@ type rec t =
   | IEvVoid
 @genType.opaque and squiggleArray = array<t>
 @genType.opaque and map = Belt.Map.String.t<t>
-@genType.opaque and nameSpace = NameSpace(Belt.Map.String.t<t>)
+@genType.opaque and nameSpace = NameSpace(Belt.MutableMap.String.t<t>, option<nameSpace>)
 @genType.opaque
 and lambdaValue = {
   parameters: array<string>,
@@ -94,7 +94,8 @@ and toStringMap = aMap => {
   `{${pairs}}`
 }
 and toStringNameSpace = nameSpace => {
-  let NameSpace(container) = nameSpace
+  let NameSpace(container, parent) = nameSpace
+  FIXME_CALL_PARENTS
   container->toStringMap
 }
 
@@ -228,19 +229,8 @@ let arrayToValueArray = (arr: array<t>): array<t> => arr
 
 let recordToKeyValuePairs = (record: map): array<(string, t)> => record->Belt.Map.String.toArray
 
-// let nameSpaceToTypeScriptBindings = (
-//   nameSpace: nameSpace,
-// ) => {
-//   let NameSpace(container) = nameSpace
-//   Belt.Map.String.map(container, e => e->Belt.Map.String.toArray->Js.Dict.fromArray)
-// }
-
 let nameSpaceToKeyValuePairs = (nameSpace: nameSpace): array<(string, t)> => {
-  let NameSpace(container) = nameSpace
-  container->Belt.Map.String.toArray
-}
-
-let nameSpaceGet = (nameSpace: nameSpace, key: string): option<t> => {
-  let NameSpace(container) = nameSpace
-  container->Belt.Map.String.get(key)
+  let NameSpace(container, parent) = nameSpace
+  FIXME_CALL_PARENTS
+  container->Belt.MutableMap.String.toArray
 }

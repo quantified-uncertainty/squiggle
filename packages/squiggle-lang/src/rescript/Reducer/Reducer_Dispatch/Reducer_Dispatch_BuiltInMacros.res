@@ -47,13 +47,13 @@ let dispatchMacroCall = (
   let doBindStatement = (bindingExpr: expression, statement: expression, accessors) => {
     let defaultStatement = ErrorValue.REAssignmentExpected->ErrorException
     switch statement {
-    | ExpressionT.EList(list{ExpressionT.EValue(IEvCall(callName)), symbolExpr, statement}) => {
+    | ExpressionT.EList(list{ExpressionT.EValue(IEvCall(callName)), ExpressionT.EValue(IEvSymbol(symbolExpr)), statement}) => {
         let setBindingsFn = correspondingSetBindingsFn(callName)
         if setBindingsFn !== "" {
           useExpressionToSetBindings(bindingExpr, accessors, statement, (
             newBindingsExpr,
             boundStatement,
-          ) => eFunction(setBindingsFn, list{newBindingsExpr, symbolExpr, boundStatement}))
+          ) => eFunction(setBindingsFn, list{newBindingsExpr, symbolExpr->IEvSymbol->ExpressionT.EValue, boundStatement}))
         } else {
           raise(defaultStatement)
         }

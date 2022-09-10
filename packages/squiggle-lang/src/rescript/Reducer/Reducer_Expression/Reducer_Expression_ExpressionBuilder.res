@@ -1,86 +1,63 @@
 module BBindingsReplacer = Reducer_Expression_BindingsReplacer
 module BErrorValue = Reducer_ErrorValue
-module BExpressionT = Reducer_Expression_T
+module T = Reducer_Expression_T
 module BInternalExpressionValue = ReducerInterface_InternalExpressionValue
 module BBindings = Reducer_Bindings
 
 type errorValue = BErrorValue.errorValue
-type expression = BExpressionT.expression
-type expressionOrFFI = BExpressionT.expressionOrFFI
-type ffiFn = BExpressionT.ffiFn
+type expression = T.expression
+type expressionOrFFI = T.expressionOrFFI
+type ffiFn = T.ffiFn
 type internalCode = ReducerInterface_InternalExpressionValue.internalCode
 
-let eArray = anArray => anArray->BInternalExpressionValue.IEvArray->BExpressionT.EValue
+let eArray = anArray => anArray->BInternalExpressionValue.IEvArray->T.EValue
 
-let eArrayString = anArray => anArray->BInternalExpressionValue.IEvArrayString->BExpressionT.EValue
+let eArrayString = anArray => anArray->BInternalExpressionValue.IEvArrayString->T.EValue
 
 let eBindings = (anArray: array<(string, BInternalExpressionValue.t)>) =>
-  anArray->BBindings.fromArray->BBindings.toExpressionValue->BExpressionT.EValue
+  anArray->BBindings.fromArray->BBindings.toExpressionValue->T.EValue
 
-let eBool = aBool => aBool->BInternalExpressionValue.IEvBool->BExpressionT.EValue
+let eBool = aBool => aBool->BInternalExpressionValue.IEvBool->T.EValue
 
 let eCall = (name: string): expression =>
-  name->BInternalExpressionValue.IEvCall->BExpressionT.EValue
+  name->BInternalExpressionValue.IEvCall->T.EValue
 
 let eFunction = (fName: string, lispArgs: list<expression>): expression => {
   let fn = fName->eCall
-  list{fn, ...lispArgs}->BExpressionT.EList
+  list{fn, ...lispArgs}->T.EList
 }
 
 let eLambda = (
   parameters: array<string>,
-  context: BInternalExpressionValue.nameSpace,
   expr: expression,
 ) => {
-  BInternalExpressionValue.IEvLambda({
-    parameters: parameters,
-    context: context,
-    body: NotFFI(expr)->BBindings.castExpressionToInternalCode,
-  })->BExpressionT.EValue
-}
+  T.ELambda(parameters, expr)
 
-let eLambdaFFI = (ffiFn: ffiFn) => {
-  ffiFn->BBindings.eLambdaFFIValue->BExpressionT.EValue
-}
+let eNumber = aNumber => aNumber->BInternalExpressionValue.IEvNumber->T.EValue
 
-let eNumber = aNumber => aNumber->BInternalExpressionValue.IEvNumber->BExpressionT.EValue
+let eRecord = aMap => aMap->BInternalExpressionValue.IEvRecord->T.EValue
 
-let eRecord = aMap => aMap->BInternalExpressionValue.IEvRecord->BExpressionT.EValue
-
-let eString = aString => aString->BInternalExpressionValue.IEvString->BExpressionT.EValue
+let eString = aString => aString->BInternalExpressionValue.IEvString->T.EValue
 
 let eSymbol = (name: string): expression =>
-  name->BInternalExpressionValue.IEvSymbol->BExpressionT.EValue
+  T.ESymbol(name)
 
-let eList = (list: list<expression>): expression => list->BExpressionT.EList
-
-let eBlock = (exprs: list<expression>): expression => eFunction("$$_block_$$", exprs)
+let eBlock = (exprs: array<expression>): expression =>
+  T.EBlock(exprs)
 
 let eModule = (nameSpace: BInternalExpressionValue.nameSpace): expression =>
-  nameSpace->BInternalExpressionValue.IEvBindings->BExpressionT.EValue
+  nameSpace->BInternalExpressionValue.IEvBindings->T.EValue
 
 let eLetStatement = (symbol: string, valueExpression: expression): expression =>
-  eFunction("$_let_$", list{eSymbol(symbol), valueExpression})
+  T.EAssign(symbol, valueExpression)
 
-let eBindStatement = (bindingExpr: expression, letStatement: expression): expression =>
-  eFunction("$$_bindStatement_$$", list{bindingExpr, letStatement})
-
-let eBindStatementDefault = (letStatement: expression): expression =>
-  eFunction("$$_bindStatement_$$", list{letStatement})
-
-let eBindExpression = (bindingExpr: expression, expression: expression): expression =>
-  eFunction("$$_bindExpression_$$", list{bindingExpr, expression})
-
-let eBindExpressionDefault = (expression: expression): expression =>
-  eFunction("$$_bindExpression_$$", list{expression})
-
-let eTernary = (truth: expression, trueCase: expression, falseCase: expression): expression =>
-  eFunction("$$_ternary_$$", list{truth, trueCase, falseCase})
+let eTernary = (predicate: expression, trueCase: expression, falseCase: expression): expression =>
+  T.ETernary(predicate, trueCase, falseCase)
 
 let eIdentifier = (name: string): expression =>
-  name->BInternalExpressionValue.IEvSymbol->BExpressionT.EValue
+  name->BInternalExpressionValue.IEvSymbol->T.EValue
 
 let eTypeIdentifier = (name: string): expression =>
-  name->BInternalExpressionValue.IEvTypeIdentifier->BExpressionT.EValue
+  name->BInternalExpressionValue.IEvTypeIdentifier->T.EValue
 
-let eVoid: expression = BInternalExpressionValue.IEvVoid->BExpressionT.EValue
+let eVoid: expression = BInternalExpressionValue.IEvVoid->T.EValue

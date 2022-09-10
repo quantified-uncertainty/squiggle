@@ -168,7 +168,7 @@ chainFunctionCall
 
 unary
   = unaryOperator:unaryOperator _nl right:(unary/postOperator)
-  { return h.apply(h.unaryToFunction[unaryOperator], right)}
+  { return h.makeFunctionCall(h.unaryToFunction[unaryOperator], [right])}
   / postOperator
   
   unaryOperator "unary operator"
@@ -247,7 +247,7 @@ number = number:(float / integer) unit:unitIdentifier?
     if (unit === null)
       { return number }
     else
-      { return h.apply('fromUnit_'+unit.value, number) 
+      { return h.makeFunctionCall('fromUnit_'+unit.value, [number]) 
       }
   }
 
@@ -357,10 +357,10 @@ typePostModifierExpression = head:typeOr tail:(_ '$' _nl @typeModifier)*
   }
 
 typeOr = head:typeFunction tail:(_ '|' _nl @typeFunction)*
-  { return tail.length === 0 ? head : h.apply('$_typeOr_$', h.constructArray([head, ...tail])); }
+  { return tail.length === 0 ? head : h.makeFunctionCall('$_typeOr_$', [h.constructArray([head, ...tail])]); }
 
 typeFunction = head:typeModifierExpression tail:(_ '=>' _nl @typeModifierExpression)*    
-  { return tail.length === 0 ? head : h.apply( '$_typeFunction_$', h.constructArray([head, ...tail])); }
+  { return tail.length === 0 ? head : h.makeFunctionCall( '$_typeFunction_$', [h.constructArray([head, ...tail])]); }
 
 typeModifierExpression = head:basicType tail:(_ '<-' _nl @typeModifier)* 
   { 
@@ -378,17 +378,17 @@ typeModifierExpression = head:basicType tail:(_ '<-' _nl @typeModifier)*
 basicType = typeConstructor / typeArray / typeTuple / typeRecord / typeInParanthesis / typeIdentifier
 
 typeArray = '[' _nl elem:typeExpression _nl ']' 
-  {return h.apply('$_typeArray_$', elem)}
+  {return h.makeFunctionCall('$_typeArray_$', [elem])}
 
 typeTuple = '[' _nl elems:array_typeTupleArguments _nl ']' 
-  { return h.apply('$_typeTuple_$', h.constructArray(elems))}
+  { return h.makeFunctionCall('$_typeTuple_$', [h.constructArray(elems)])}
 
   array_typeTupleArguments
     = head:typeExpression tail:(_ ',' _nl @typeExpression)* 
     { return [head, ...tail]; }
 
 typeRecord = '{' _nl elems:array_typeRecordArguments _nl '}' 
-  { return h.apply('$_typeRecord_$', h.constructRecord(elems)); }  
+  { return h.makeFunctionCall('$_typeRecord_$', [h.constructRecord(elems)]); }  
 
   array_typeRecordArguments 
     = head:typeKeyValuePair tail:(_ ',' _nl @typeKeyValuePair)* 
