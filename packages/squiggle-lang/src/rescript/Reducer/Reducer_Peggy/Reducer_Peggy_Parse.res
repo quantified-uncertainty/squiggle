@@ -29,7 +29,7 @@ type nodeIdentifier = {...node, "value": string}
 type nodeInteger = {...node, "value": int}
 type nodeKeyValue = {...node, "key": node, "value": node}
 type nodeRecord = {...node, "elements": array<nodeKeyValue>}
-type nodeLambda = {...node, "args": array<nodeIdentifier>, "body": nodeBlock}
+type nodeLambda = {...node, "args": array<nodeIdentifier>, "body": node}
 type nodeLetStatement = {...node, "variable": nodeIdentifier, "value": node}
 type nodeModuleIdentifier = {...node, "value": string}
 type nodeString = {...node, "value": string}
@@ -122,7 +122,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
   | PgNodeInteger(node) => node["value"]->Js.String.make
   | PgNodeKeyValue(node) => toString(node["key"]) ++ ": " ++ toString(node["value"])
   | PgNodeLambda(node) =>
-    "{|" ++ node["args"]->argsToString ++ "| " ++ pgToString(PgNodeBlock(node["body"])) ++ "}"
+    "{|" ++ node["args"]->argsToString ++ "| " ++ node["body"]->toString ++ "}"
   | PgNodeLetStatement(node) =>
     pgToString(PgNodeIdentifier(node["variable"])) ++ " = " ++ toString(node["value"])
   | PgNodeModuleIdentifier(node) => `@${node["value"]}`

@@ -12,4 +12,4 @@ let fnList = Belt.Array.concatMany([
 ])
 
 let registry = FunctionRegistry_Core.Registry.make(fnList)
-let dispatch = FunctionRegistry_Core.Registry.dispatch(registry)
+let call = FunctionRegistry_Core.Registry.call(registry)

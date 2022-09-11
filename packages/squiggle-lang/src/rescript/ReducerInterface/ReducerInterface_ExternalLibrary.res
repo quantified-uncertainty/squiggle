@@ -14,7 +14,7 @@ let dispatch = (
     () => ReducerInterface_Date.dispatch(call, environment),
     () => ReducerInterface_Duration.dispatch(call, environment),
     () => ReducerInterface_Number.dispatch(call, environment),
-    () => FunctionRegistry_Library.dispatch(call, environment, reducer),
+    // () => FunctionRegistry_Library.dispatch(call, environment, reducer),
   ])->E.O2.defaultFn(() => chain(call, environment, reducer))
 }
 

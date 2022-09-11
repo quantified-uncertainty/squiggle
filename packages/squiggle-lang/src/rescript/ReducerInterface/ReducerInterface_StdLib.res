@@ -63,14 +63,9 @@ let internalStdLib: Reducer_Bindings.t = {
     (name) => {
       let _ = res->Reducer_Bindings.set(name, Reducer_Expression_Lambda.makeFFILambda(
         (arguments, environment, reducer) => {
-          switch FunctionRegistry_Library.dispatch((name, arguments), environment, reducer) {
-            | Some(result) => {
-              switch result {
-                | Ok(value) => value
-                | Error(error) => error->Reducer_ErrorValue.ErrorException->raise
-              }
-            }
-            | None => Reducer_ErrorValue.RESymbolNotFound("Not found in registry")->Reducer_ErrorValue.ErrorException->raise
+          switch FunctionRegistry_Library.call(name, arguments, environment, reducer) {
+            | Ok(value) => value
+            | Error(error) => error->Reducer_ErrorValue.ErrorException->raise
           }
         }
       )->Reducer_T.IEvLambda)

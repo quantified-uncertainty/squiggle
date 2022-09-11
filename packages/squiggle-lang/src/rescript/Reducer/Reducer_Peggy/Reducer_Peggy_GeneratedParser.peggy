@@ -264,7 +264,7 @@ lambda
       { statements.push(finalExpression) 
         return h.nodeLambda(args, h.nodeBlock(statements)) }
   / '{' _nl '|' _nl args:array_parameters _nl '|' _nl finalExpression: expression  _nl '}'
-      { return h.nodeLambda(args, h.nodeBlock([finalExpression])) }
+      { return h.nodeLambda(args, finalExpression) }
 
 arrayConstructor 'array'
   = '[' _nl ']'

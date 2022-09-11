@@ -45,6 +45,28 @@ let library = [
         },
         ()
       ),
+      FnDefinition.make(
+        ~name="add",
+        ~inputs=[FRTypeNumber, FRTypeNumber],
+        ~run=(inputs, _, _, _) => {
+          switch inputs {
+          | [IEvNumber(x), IEvNumber(y)] => IEvNumber(x+.y)->Ok
+          | _ => Error(impossibleError)
+          }
+        },
+        ()
+      ),
+      FnDefinition.make(
+        ~name="add",
+        ~inputs=[FRTypeNumber, FRTypeNumber],
+        ~run=(inputs, _, _, _) => {
+          switch inputs {
+          | [IEvNumber(x), IEvNumber(y)] => IEvNumber(x+.y)->Ok
+          | _ => Error(impossibleError)
+          }
+        },
+        ()
+      ),
     ],
     (),
   ),
