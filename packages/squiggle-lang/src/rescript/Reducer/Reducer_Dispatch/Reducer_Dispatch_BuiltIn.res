@@ -45,11 +45,11 @@ let callInternal = (
     ->Ok
   }
 
-  let arrayAtIndex = (aValueArray: array<Reducer_T.value>, fIndex: float) =>
-    switch Belt.Array.get(aValueArray, Belt.Int.fromFloat(fIndex)) {
-    | Some(value) => value->Ok
-    | None => REArrayIndexNotFound("Array index not found", Belt.Int.fromFloat(fIndex))->Error
-    }
+  // let arrayAtIndex = (aValueArray: array<Reducer_T.value>, fIndex: float) =>
+  //   switch Belt.Array.get(aValueArray, Belt.Int.fromFloat(fIndex)) {
+  //   | Some(value) => value->Ok
+  //   | None => REArrayIndexNotFound("Array index not found", Belt.Int.fromFloat(fIndex))->Error
+  //   }
 
   let moduleAtIndex = (nameSpace: Reducer_T.nameSpace, sIndex) =>
     switch Bindings.get(nameSpace, sIndex) {
@@ -57,11 +57,11 @@ let callInternal = (
     | None => RERecordPropertyNotFound("Bindings property not found", sIndex)->Error
     }
 
-  let recordAtIndex = (dict: Belt.Map.String.t<Reducer_T.value>, sIndex) =>
-    switch Belt.Map.String.get(dict, sIndex) {
-    | Some(value) => value->Ok
-    | None => RERecordPropertyNotFound("Record property not found", sIndex)->Error
-    }
+  // let recordAtIndex = (dict: Belt.Map.String.t<Reducer_T.value>, sIndex) =>
+  //   switch Belt.Map.String.get(dict, sIndex) {
+  //   | Some(value) => value->Ok
+  //   | None => RERecordPropertyNotFound("Record property not found", sIndex)->Error
+  //   }
 
   let doAddArray = (originalA, b) => {
     let a = originalA->Js.Array2.copy
@@ -107,10 +107,10 @@ let callInternal = (
   // }
 
   switch call {
-  | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
+  // | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
   | ("$_atIndex_$", [IEvBindings(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
-  | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
-  | ("$_constructArray_$", args) => IEvArray(args)->Ok
+  // | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
+  // | ("$_constructArray_$", args) => IEvArray(args)->Ok
   | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
   // | ("$_exportBindings_$", [IEvBindings(nameSpace)]) => doExportBindings(nameSpace)
   // | ("$_exportBindings_$", [evValue]) => doIdentity(evValue)
@@ -167,18 +167,12 @@ let dispatch = (
 ): Reducer_T.value =>
   try {
     let (fn, args) = call
-    if fn->Js.String2.startsWith("$") {
-      switch callInternal((fn, args), env, reducer) {
-      | Ok(v) => v
-      | Error(e) => raise(ErrorException(e))
-      }
-    } else {
-      // There is a bug that prevents string match in patterns
-      // So we have to recreate a copy of the string
-      switch ExternalLibrary.dispatch((Js.String.make(fn), args), env, reducer, callInternal) {
-      | Ok(v) => v
-      | Error(e) => raise(ErrorException(e))
-      }
+
+    // There is a bug that prevents string match in patterns
+    // So we have to recreate a copy of the string
+    switch ExternalLibrary.dispatch((Js.String.make(fn), args), env, reducer, callInternal) {
+    | Ok(v) => v
+    | Error(e) => raise(ErrorException(e))
     }
   } catch {
   | ErrorException(e) => raise(ErrorException(e))

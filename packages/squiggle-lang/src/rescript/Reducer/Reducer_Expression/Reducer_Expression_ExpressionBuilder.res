@@ -24,7 +24,7 @@ let eLambda = (
 
 let eNumber = aNumber => aNumber->T.IEvNumber->T.EValue
 
-let eRecord = aMap => aMap->T.IEvRecord->T.EValue
+let eRecord = (aMap: array<(T.expression, T.expression)>) => aMap->T.ERecord
 
 let eString = aString => aString->T.IEvString->T.EValue
 

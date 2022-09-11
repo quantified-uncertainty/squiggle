@@ -19,7 +19,7 @@ let rec evaluate: T.reducerFn = (
     | T.EBlock(statements) => {
       let innerContext = {...context, bindings: context.bindings->Bindings.extend}
       statements->Js.Array2.reduce(
-        (acc, statement) => statement->evaluate(innerContext),
+        (_, statement) => statement->evaluate(innerContext),
         T.IEvVoid
       )
     }
@@ -27,7 +27,7 @@ let rec evaluate: T.reducerFn = (
     | T.EProgram(statements) => {
       // Js.log(`bindings: ${context.bindings->Reducer_Bindings.toString}`)
       let res = statements->Js.Array2.reduce(
-        (acc, statement) => statement->evaluate(context),
+        (_, statement) => statement->evaluate(context),
         T.IEvVoid
       )
       // Js.log(`bindings after: ${context.bindings->Reducer_Bindings.toString}`)
@@ -37,8 +37,16 @@ let rec evaluate: T.reducerFn = (
     | T.EArray(elements) =>
       elements->Js.Array2.map(element => evaluate(element, context))->T.IEvArray
 
-    | T.ERecord(map) =>
-      RETodo("TODO")->ErrorException->raise
+    | T.ERecord(pairs) =>
+      pairs->Js.Array2.map(((eKey, eValue)) => {
+        let key = eKey->evaluate(context)
+        let keyString = switch key {
+          | IEvString(s) => s
+          | _ => REOther("Record keys must be strings")->ErrorException->raise
+        }
+        let value = eValue->evaluate(context)
+        (keyString, value)
+      })->Belt.Map.String.fromArray->IEvRecord
 
     | T.EAssign(left, right) => {
       let result = right->evaluate(context)

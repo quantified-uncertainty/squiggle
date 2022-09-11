@@ -18,11 +18,22 @@ let rec fromNode = (node: Parse.node): expression => {
     let body = nodeLambda["body"]->caseBlock
 
     ExpressionBuilder.eLambda(args, body)
+
+  }
+
+  let caseRecord = (nodeRecord): expression => {
+    nodeRecord["elements"]
+    ->Js.Array2.map(
+      keyValueNode => (keyValueNode["key"]->fromNode, keyValueNode["value"]->fromNode)
+    )
+    ->ExpressionBuilder.eRecord
   }
 
   switch Parse.castNodeType(node) {
   | PgNodeBlock(nodeBlock) => caseBlock(nodeBlock)
   | PgNodeProgram(nodeProgram) => caseProgram(nodeProgram)
+  | PgNodeArray(nodeArray) => ExpressionBuilder.eArray(nodeArray["elements"]->Js.Array2.map(fromNode))
+  | PgNodeRecord(nodeRecord) => caseRecord(nodeRecord)
   | PgNodeBoolean(nodeBoolean) => ExpressionBuilder.eBool(nodeBoolean["value"])
   | PgNodeCall(nodeCall) => ExpressionBuilder.eCall(fromNode(nodeCall["fn"]), nodeCall["args"]->Js.Array2.map(fromNode))
   | PgNodeFloat(nodeFloat) => ExpressionBuilder.eNumber(nodeFloat["value"])

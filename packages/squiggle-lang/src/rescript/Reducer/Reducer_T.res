@@ -34,7 +34,7 @@ and expression =
   | EBlock(array<expression>)
   | EProgram(array<expression>) // programs are similar to blocks, but don't create an inner scope. there can be only one program at the top level of the expression.
   | EArray(array<expression>)
-  | ERecord(Belt.Map.String.t<expression>)
+  | ERecord(array<(expression, expression)>)
   | ESymbol(string)
   | ETernary(expression, expression, expression)
   | EAssign(string, expression)

@@ -1,4 +1,5 @@
 let fnList = Belt.Array.concatMany([
+  FR_Builtin.library,
   FR_Dict.library,
   FR_Dist.library,
   FR_Danger.library,
