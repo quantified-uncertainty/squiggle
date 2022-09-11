@@ -14,8 +14,6 @@ module T = Reducer_Expression_T
 type errorValue = Reducer_ErrorValue.errorValue
 type t = T.t
 
-exception ErrorException = Reducer_ErrorValue.ErrorException
-
 /*
   Recursively evaluate/reduce the expression (Lisp AST/Lambda calculus)
 */
@@ -101,8 +99,7 @@ module BackCompatible = {
     try {
       expression->reduceExpressionInProject(accessors.stdLib, accessors)->Ok
     } catch {
-    | ErrorException(e) => Error(e)
-    | _ => raise(ErrorException(RETodo("internal exception")))
+    | exn => Reducer_ErrorValue.fromException(exn)->Error
     }
   }
 

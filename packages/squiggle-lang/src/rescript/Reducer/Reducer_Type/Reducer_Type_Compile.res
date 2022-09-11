@@ -15,7 +15,7 @@ let ievFromTypeExpression = (
   let sourceCode = `type ${sIndex}=${typeExpressionSourceCode}`
   Reducer_Expression.BackCompatible.parse(sourceCode)->Belt.Result.flatMap(expr => {
     let accessors = ProjectAccessorsT.identityAccessors
-    let result = reducerFn(expr, Bindings.emptyBindings, accessors)
+    let _result = reducerFn(expr, Bindings.emptyBindings, accessors)
     let nameSpace = accessors.states.continuation
 
     switch Bindings.getType(nameSpace, sIndex) {

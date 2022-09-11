@@ -64,3 +64,20 @@ let errorToString = err =>
   | RENeedToRun => "Need to run"
   | REOther(msg) => `Error: ${msg}`
   }
+
+let fromException = exn =>
+  switch exn {
+  | ErrorException(e) => e
+  | Js.Exn.Error(e) =>
+    switch Js.Exn.message(e) {
+    | Some(message) => REOther(message)
+    | None =>
+      switch Js.Exn.name(e) {
+      | Some(name) => REOther(name)
+      | None => REOther("Unknown error")
+      }
+    }
+  | _e => REOther("Unknown error")
+  }
+
+let toException = (errorValue: t) => raise(ErrorException(errorValue))

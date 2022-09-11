@@ -23,7 +23,7 @@ let checkArity = (
     let argsLength = Belt.List.length(args)
     let parametersLength = Js.Array2.length(lambdaValue.parameters)
     if argsLength !== parametersLength {
-      raise(ErrorValue.ErrorException(ErrorValue.REArityError(None, parametersLength, argsLength)))
+      ErrorValue.REArityError(None, parametersLength, argsLength)->ErrorValue.toException
     } else {
       args
     }
@@ -38,7 +38,7 @@ let checkArity = (
 let checkIfReduced = (args: list<internalExpressionValue>) =>
   args->Belt.List.reduceReverse(list{}, (acc, arg) =>
     switch arg {
-    | IEvSymbol(symbol) => raise(ErrorValue.ErrorException(ErrorValue.RESymbolNotFound(symbol)))
+    | IEvSymbol(symbol) => ErrorValue.RESymbolNotFound(symbol)->ErrorValue.toException
     | _ => list{arg, ...acc}
     }
   )
@@ -63,7 +63,7 @@ let caseNotFFI = (
 let caseFFI = (ffiFn: ExpressionT.ffiFn, args, accessors: ProjectAccessorsT.t) => {
   switch ffiFn(args->Belt.List.toArray, accessors.environment) {
   | Ok(value) => value
-  | Error(value) => raise(ErrorValue.ErrorException(value))
+  | Error(value) => value->ErrorValue.toException
   }
 }
 
