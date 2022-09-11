@@ -16,7 +16,7 @@ module Internal = {
     reducer: ProjectReducerFnT.t,
   ) =>
     switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, accessors, reducer) {
-    | Ok(IEvNumber(f)) => Ok(f)
+    | IEvNumber(f) => Ok(f)
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
 
