@@ -22,7 +22,7 @@ let rec fromNode = (node: Parse.node): expression => {
     let callIdentifier = nodeCallIdentifier["value"]
     // `callIdentifier ${callIdentifier}`->Js.log
     let callValue = switch callIdentifier {
-    | "withEnvironmentSampleCount" => "$$_withEnvironmentSampleCount_$$"
+    | "Environment.withSampleCount" => "$$_withEnvironmentSampleCount_$$"
     | callName => callName
     }
     ExpressionBuilder.eCall(callValue)
@@ -33,7 +33,7 @@ let rec fromNode = (node: Parse.node): expression => {
     let identifier = nodeIdentifier["value"]
     // `caseIdentifier ${identifier}`->Js.log
     switch identifier {
-    | "environment" => "$$_environment_$$"->ExpressionBuilder.eFunction(list{})
+    | "System.environment" => "$$_environment_$$"->ExpressionBuilder.eFunction(list{})
     | symbol => symbol->ExpressionBuilder.eSymbol
     }
   }
