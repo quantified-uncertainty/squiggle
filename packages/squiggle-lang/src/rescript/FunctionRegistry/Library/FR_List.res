@@ -33,16 +33,14 @@ module Internals = {
     eLambdaValue,
     reducer: ProjectReducerFnT.t,
   ): ReducerInterface_InternalExpressionValue.t => {
-    let mappedList = array->E.A.reduceReverse(list{}, (acc, elem) => {
-      let newElem = Reducer_Expression_Lambda.doLambdaCall(
+    Belt.Array.map(array, elem =>
+      Reducer_Expression_Lambda.doLambdaCall(
         eLambdaValue,
         list{elem},
         (accessors: ProjectAccessorsT.t),
         (reducer: ProjectReducerFnT.t),
       )
-      list{newElem, ...acc}
-    })
-    mappedList->Belt.List.toArray->Wrappers.evArray
+    )->Wrappers.evArray
   }
 
   let reduce = (
@@ -75,19 +73,18 @@ module Internals = {
     accessors: ProjectAccessorsT.t,
     reducer: ProjectReducerFnT.t,
   ) => {
-    let mappedList = aValueArray->Belt.Array.reduceReverse(list{}, (acc, elem) => {
-      let newElem = Reducer_Expression_Lambda.doLambdaCall(
+    Js.Array2.filter(aValueArray, elem => {
+      let result = Reducer_Expression_Lambda.doLambdaCall(
         aLambdaValue,
         list{elem},
         accessors,
         reducer,
       )
-      switch newElem {
-      | IEvBool(true) => list{elem, ...acc}
-      | _ => acc
+      switch result {
+      | IEvBool(true) => true
+      | _ => false
       }
-    })
-    mappedList->Belt.List.toArray->Wrappers.evArray
+    })->Wrappers.evArray
   }
 }
 
