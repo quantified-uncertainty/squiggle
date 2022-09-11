@@ -169,13 +169,15 @@ let dispatchMacroCall = (
     | InternalExpressionValue.IEvNumber(sampleCount) => {
         let newEnvironment = {...accessors.environment, sampleCount: Js.Math.floor(sampleCount)}
         let newAccessors = {...accessors, environment: newEnvironment}
-        reduceExpression(expr, bindings, newAccessors)
+        let exprBlock = eBlock(list{expr})
+        reduceExpression(exprBlock, bindings, newAccessors)
         ->ExpressionT.EValue
         ->ExpressionWithContext.noContext
       }
     | _ => REExpectedType("Number", "")->Reducer_ErrorValue.toException
     }
   }
+
   let expandExpressionList = (
     aList,
     bindings: ExpressionT.bindings,
@@ -213,8 +215,8 @@ let dispatchMacroCall = (
     | list{ExpressionT.EValue(IEvCall("$$_environment_$$"))} => doEnvironment(accessors)
     | list{
         ExpressionT.EValue(IEvCall("$$_withEnvironmentSampleCount_$$")),
-        expr,
         sampleCountExpr,
+        expr,
       } =>
       doWithEnvironmentSampleCount(sampleCountExpr, expr, bindings, accessors)
     | _ => ExpressionWithContext.noContext(ExpressionT.EList(aList))

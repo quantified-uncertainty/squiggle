@@ -33,7 +33,11 @@ let rec fromNode = (node: Parse.node): expression => {
     let identifier = nodeIdentifier["value"]
     // `caseIdentifier ${identifier}`->Js.log
     switch identifier {
-    | "System.environment" => "$$_environment_$$"->ExpressionBuilder.eFunction(list{})
+    | "Environment.sampleCount" =>
+      "$_atIndex_$"->ExpressionBuilder.eFunction(list{
+        "$$_environment_$$"->ExpressionBuilder.eFunction(list{}),
+        ExpressionBuilder.eString("sampleCount"),
+      })
     | symbol => symbol->ExpressionBuilder.eSymbol
     }
   }
