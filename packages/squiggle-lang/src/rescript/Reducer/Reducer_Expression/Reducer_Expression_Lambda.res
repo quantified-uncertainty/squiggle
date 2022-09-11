@@ -43,11 +43,14 @@ let makeLambda = (
     reducer(body, { bindings: localBindings, environment })
   }
 
-  LNoFFI({
-    context: bindings,
+  {
+    // context: bindings,
     body: lambda,
     parameters,
-  })
+  }
 }
 
-let makeFFILambda = () => raise(Not_found)
+let makeFFILambda = (body: Reducer_T.lambdaBody): Reducer_T.lambdaValue => {
+  body,
+  parameters: ["..."]
+}

@@ -22,16 +22,13 @@ type rec value =
 @genType.opaque and arrayValue = array<value>
 @genType.opaque and map = Belt.Map.String.t<value>
 @genType.opaque and nameSpace = NameSpace(Belt.MutableMap.String.t<value>, option<nameSpace>)
+and lambdaBody = (array<value>, environment, reducerFn) => value
 @genType.opaque
-and lambdaValue =
-  | LNoFFI({
+and lambdaValue = {
     parameters: array<string>,
-    context: nameSpace,
+    // context: nameSpace,
     body: (array<value>, environment, reducerFn) => value,
-  })
-  | LFFI({
-    body: (array<value>, environment, reducerFn) => value,
-  })
+  }
 @genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>
 and expression =
   | EBlock(array<expression>)

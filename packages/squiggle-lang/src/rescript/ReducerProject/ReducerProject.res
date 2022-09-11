@@ -193,7 +193,7 @@ let doLinkAndRun = (project: t, sourceId: string): unit => {
   // FIXME: fill context with dependencies
   // let continuation = linkDependencies(project, sourceId)
   let newItem = project->getItem(sourceId)->ProjectItem.run(context)
-  Js.log("after run " ++ newItem.continuation->Reducer_Bindings.toString)
+  // Js.log("after run " ++ newItem.continuation->Reducer_Bindings.toString)
   project->setItem(sourceId, newItem)
 }
 

@@ -11,25 +11,10 @@ zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
 
 outerBlock 
   = statements:array_statements  finalExpression: (statementSeparator @expression)?
-      { if (finalExpression) statements.push(finalExpression) 
-        return h.nodeProgram(statements) }
-  // / '{' _nl finalExpression: expression  _nl '}'
-  //     { return h.nodeBlock([finalExpression]) }
-  //   { if (finalExpression != null) 
-  //       { 
-  //         var newFinalExpression = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), finalExpression]);
-  //         statements.push(newFinalExpression);
-  //       }
-  //     else 
-  //       {
-  //         var newFinalStatement = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), h.nodeVoid()]);
-  //         statements.push(newFinalStatement);
-  //       }
-  //     return h.nodeBlock(statements) }
-  // / finalExpression: expression
-  //   { 
-  //     var newFinalExpression = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), finalExpression]);
-  //     return h.nodeBlock([newFinalExpression])}
+    { if (finalExpression) statements.push(finalExpression) 
+      return h.nodeProgram(statements) }
+  / finalExpression: expression
+    { return h.nodeProgram([finalExpression]) }
     
 innerBlockOrExpression  
   = quotedInnerBlock

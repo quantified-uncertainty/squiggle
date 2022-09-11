@@ -49,10 +49,7 @@ and toStringDate = date => DateTime.Date.toString(date)
 and toStringDeclaration = d => Declaration.toString(d, r => toString(IEvLambda(r)))
 and toStringDistribution = dist => GenericDist.toString(dist)
 and toStringLambda = (lambdaValue: T.lambdaValue) =>
-  switch lambdaValue {
-    | LNoFFI({ parameters }) => `lambda(${parameters->Js.Array2.toString}=>internal code)` // TODO - serialize code too?
-    | LFFI(_) => `standard function` // TODO - serialize name, etc?
-  }
+  `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
 and toStringFunction = (lambdaValue: T.lambdaValue) => `function(${Js.Array2.toString(lambdaValue.parameters)})`
 and toStringNumber = aNumber => Js.String.make(aNumber)
 and toStringRecord = aMap => aMap->toStringMap

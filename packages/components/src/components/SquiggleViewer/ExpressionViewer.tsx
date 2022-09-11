@@ -135,23 +135,23 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           {() => value.value.toString()}
         </VariableBox>
       );
-    case SqValueTag.Symbol:
-      return (
-        <VariableBox value={value} heading="Symbol">
-          {() => (
-            <>
-              <span className="text-slate-500 mr-2">Undefined Symbol:</span>
-              <span className="text-slate-600">{value.value}</span>
-            </>
-          )}
-        </VariableBox>
-      );
-    case SqValueTag.Call:
-      return (
-        <VariableBox value={value} heading="Call">
-          {() => value.value}
-        </VariableBox>
-      );
+    // case SqValueTag.Symbol:
+    //   return (
+    //     <VariableBox value={value} heading="Symbol">
+    //       {() => (
+    //         <>
+    //           <span className="text-slate-500 mr-2">Undefined Symbol:</span>
+    //           <span className="text-slate-600">{value.value}</span>
+    //         </>
+    //       )}
+    //     </VariableBox>
+    //   );
+    // case SqValueTag.Call:
+    //   return (
+    //     <VariableBox value={value} heading="Call">
+    //       {() => value.value}
+    //     </VariableBox>
+    //   );
     case SqValueTag.ArrayString:
       return (
         <VariableBox value={value} heading="Array String">

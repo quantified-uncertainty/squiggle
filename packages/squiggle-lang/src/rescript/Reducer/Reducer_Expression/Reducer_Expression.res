@@ -14,7 +14,7 @@ let rec evaluate: T.reducerFn = (
   expression,
   context
 ) => {
-  Js.log(`reduce: ${expression->Reducer_Expression_T.toString}`)
+  // Js.log(`reduce: ${expression->Reducer_Expression_T.toString}`)
   switch expression {
     | T.EBlock(statements) => {
       let innerContext = {...context, bindings: context.bindings->Bindings.extend}
@@ -25,12 +25,12 @@ let rec evaluate: T.reducerFn = (
     }
 
     | T.EProgram(statements) => {
-      Js.log(`bindings: ${context.bindings->Reducer_Bindings.toString}`)
+      // Js.log(`bindings: ${context.bindings->Reducer_Bindings.toString}`)
       let res = statements->Js.Array2.reduce(
         (acc, statement) => statement->evaluate(context),
         T.IEvVoid
       )
-      Js.log(`bindings after: ${context.bindings->Reducer_Bindings.toString}`)
+      // Js.log(`bindings after: ${context.bindings->Reducer_Bindings.toString}`)
       res
     }
 
