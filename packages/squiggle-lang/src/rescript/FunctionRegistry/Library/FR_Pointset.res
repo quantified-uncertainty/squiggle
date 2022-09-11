@@ -37,7 +37,7 @@ module Internal = {
 
   let doLambdaCall = (aLambdaValue, list, environment, reducer) =>
     switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, environment, reducer) {
-    | Ok(IEvNumber(f)) => Ok(f)
+    | IEvNumber(f) => Ok(f)
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
 

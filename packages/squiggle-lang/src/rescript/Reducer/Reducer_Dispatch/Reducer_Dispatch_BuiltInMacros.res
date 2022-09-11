@@ -12,11 +12,9 @@ module ExpressionWithContext = Reducer_ExpressionWithContext
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 module ProjectReducerFnT = ReducerProject_ReducerFn_T
-module Result = Belt.Result
 
 open Reducer_Expression_ExpressionBuilder
 
-type errorValue = ErrorValue.errorValue
 type expression = ExpressionT.expression
 type expressionWithContext = ExpressionWithContext.expressionWithContext
 
@@ -25,21 +23,15 @@ let dispatchMacroCall = (
   bindings: ExpressionT.bindings,
   accessors: ProjectAccessorsT.t,
   reduceExpression: ProjectReducerFnT.t,
-): result<expressionWithContext, errorValue> => {
+): expressionWithContext => {
   let useExpressionToSetBindings = (bindingExpr: expression, accessors, statement, newCode) => {
-    let rExternalBindingsValue = reduceExpression(bindingExpr, bindings, accessors)
+    let nameSpaceValue = reduceExpression(bindingExpr, bindings, accessors)
 
-    rExternalBindingsValue->Result.flatMap(nameSpaceValue => {
-      let newBindings = Bindings.fromExpressionValue(nameSpaceValue)
+    let newBindings = Bindings.fromExpressionValue(nameSpaceValue)
 
-      let rNewStatement = BindingsReplacer.replaceSymbols(newBindings, statement)
-      rNewStatement->Result.map(boundStatement =>
-        ExpressionWithContext.withContext(
-          newCode(newBindings->eModule, boundStatement),
-          newBindings,
-        )
-      )
-    })
+    let boundStatement = BindingsReplacer.replaceSymbols(newBindings, statement)
+
+    ExpressionWithContext.withContext(newCode(newBindings->eModule, boundStatement), newBindings)
   }
 
   let correspondingSetBindingsFn = (fnName: string): string =>
@@ -52,7 +44,7 @@ let dispatchMacroCall = (
     }
 
   let doBindStatement = (bindingExpr: expression, statement: expression, accessors) => {
-    let defaultStatement = ErrorValue.REAssignmentExpected->Error
+    let defaultStatement = ErrorValue.REAssignmentExpected
     switch statement {
     | ExpressionT.EList(list{ExpressionT.EValue(IEvCall(callName)), symbolExpr, statement}) => {
         let setBindingsFn = correspondingSetBindingsFn(callName)
@@ -62,17 +54,18 @@ let dispatchMacroCall = (
             boundStatement,
           ) => eFunction(setBindingsFn, list{newBindingsExpr, symbolExpr, boundStatement}))
         } else {
-          defaultStatement
+          defaultStatement->Reducer_ErrorValue.toException
         }
       }
-    | _ => defaultStatement
+    | _ => defaultStatement->Reducer_ErrorValue.toException
     }
   }
 
-  let doBindExpression = (bindingExpr: expression, statement: expression, accessors): result<
-    expressionWithContext,
-    errorValue,
-  > => {
+  let doBindExpression = (
+    bindingExpr: expression,
+    statement: expression,
+    accessors,
+  ): expressionWithContext => {
     let defaultStatement = () =>
       useExpressionToSetBindings(bindingExpr, accessors, statement, (
         _newBindingsExpr,
@@ -100,10 +93,11 @@ let dispatchMacroCall = (
     }
   }
 
-  let doBlock = (exprs: list<expression>, _bindings: ExpressionT.bindings, _accessors): result<
-    expressionWithContext,
-    errorValue,
-  > => {
+  let doBlock = (
+    exprs: list<expression>,
+    _bindings: ExpressionT.bindings,
+    _accessors,
+  ): expressionWithContext => {
     let exprsArray = Belt.List.toArray(exprs)
     let maxIndex = Js.Array2.length(exprsArray) - 1
     let newStatement = exprsArray->Js.Array2.reducei((acc, statement, index) =>
@@ -119,14 +113,14 @@ let dispatchMacroCall = (
         eBindStatement(acc, statement)
       }
     , eSymbol("undefined block"))
-    ExpressionWithContext.noContext(newStatement)->Ok
+    ExpressionWithContext.noContext(newStatement)
   }
 
   let doLambdaDefinition = (
     bindings: ExpressionT.bindings,
     parameters: array<string>,
     lambdaDefinition: ExpressionT.expression,
-  ) => ExpressionWithContext.noContext(eLambda(parameters, bindings, lambdaDefinition))->Ok
+  ) => ExpressionWithContext.noContext(eLambda(parameters, bindings, lambdaDefinition))
 
   let doTernary = (
     condition: expression,
@@ -134,25 +128,23 @@ let dispatchMacroCall = (
     ifFalse: expression,
     bindings: ExpressionT.bindings,
     accessors,
-  ): result<expressionWithContext, errorValue> => {
+  ): expressionWithContext => {
     let blockCondition = ExpressionBuilder.eBlock(list{condition})
-    let rCondition = reduceExpression(blockCondition, bindings, accessors)
-    rCondition->Result.flatMap(conditionValue =>
-      switch conditionValue {
-      | InternalExpressionValue.IEvBool(false) => {
-          let ifFalseBlock = eBlock(list{ifFalse})
-          ExpressionWithContext.withContext(ifFalseBlock, bindings)->Ok
-        }
-      | InternalExpressionValue.IEvBool(true) => {
-          let ifTrueBlock = eBlock(list{ifTrue})
-          ExpressionWithContext.withContext(ifTrueBlock, bindings)->Ok
-        }
-      | _ => REExpectedType("Boolean", "")->Error
+    let conditionValue = reduceExpression(blockCondition, bindings, accessors)
+    switch conditionValue {
+    | InternalExpressionValue.IEvBool(false) => {
+        let ifFalseBlock = eBlock(list{ifFalse})
+        ExpressionWithContext.withContext(ifFalseBlock, bindings)
       }
-    )
+    | InternalExpressionValue.IEvBool(true) => {
+        let ifTrueBlock = eBlock(list{ifTrue})
+        ExpressionWithContext.withContext(ifTrueBlock, bindings)
+      }
+    | _ => REExpectedType("Boolean", "")->Reducer_ErrorValue.toException
+    }
   }
 
-  let doEnvironment = (accessors: ProjectAccessorsT.t) => {
+  let doEnvironment = (accessors: ProjectAccessorsT.t): expressionWithContext => {
     let environment = accessors.environment
     let environmentPairs = [
       ("sampleCount", environment.sampleCount->Js.Int.toFloat->InternalExpressionValue.IEvNumber),
@@ -162,7 +154,7 @@ let dispatchMacroCall = (
       ),
     ]
     let environmentMap = Belt.Map.String.fromArray(environmentPairs)
-    ExpressionWithContext.noContext(ExpressionBuilder.eRecord(environmentMap))->Ok
+    ExpressionWithContext.noContext(ExpressionBuilder.eRecord(environmentMap))
   }
 
   let doWithEnvironmentSampleCount = (
@@ -170,27 +162,25 @@ let dispatchMacroCall = (
     expr: expression,
     bindings: ExpressionT.bindings,
     accessors: ProjectAccessorsT.t,
-  ) => {
+  ): expressionWithContext => {
     let blockSampleCount = ExpressionBuilder.eBlock(list{sampleCountExpr})
-    let rSampleCount = reduceExpression(blockSampleCount, bindings, accessors)
-    rSampleCount->Result.flatMap(sampleCountValue =>
-      switch sampleCountValue {
-      | InternalExpressionValue.IEvNumber(sampleCount) => {
-          let newEnvironment = {...accessors.environment, sampleCount: Js.Math.floor(sampleCount)}
-          let newAccessors = {...accessors, environment: newEnvironment}
-          reduceExpression(expr, bindings, newAccessors)->Belt.Result.map(value =>
-            value->ExpressionT.EValue->ExpressionWithContext.noContext
-          )
-        }
-      | _ => REExpectedType("Number", "")->Error
+    let sampleCount = reduceExpression(blockSampleCount, bindings, accessors)
+    switch sampleCount {
+    | InternalExpressionValue.IEvNumber(sampleCount) => {
+        let newEnvironment = {...accessors.environment, sampleCount: Js.Math.floor(sampleCount)}
+        let newAccessors = {...accessors, environment: newEnvironment}
+        reduceExpression(expr, bindings, newAccessors)
+        ->ExpressionT.EValue
+        ->ExpressionWithContext.noContext
       }
-    )
+    | _ => REExpectedType("Number", "")->Reducer_ErrorValue.toException
+    }
   }
-
-  let expandExpressionList = (aList, bindings: ExpressionT.bindings, accessors): result<
-    expressionWithContext,
-    errorValue,
-  > =>
+  let expandExpressionList = (
+    aList,
+    bindings: ExpressionT.bindings,
+    accessors,
+  ): expressionWithContext =>
     switch aList {
     | list{
         ExpressionT.EValue(IEvCall("$$_bindStatement_$$")),
@@ -227,11 +217,11 @@ let dispatchMacroCall = (
         sampleCountExpr,
       } =>
       doWithEnvironmentSampleCount(sampleCountExpr, expr, bindings, accessors)
-    | _ => ExpressionWithContext.noContext(ExpressionT.EList(aList))->Ok
+    | _ => ExpressionWithContext.noContext(ExpressionT.EList(aList))
     }
 
   switch macroExpression {
   | EList(aList) => expandExpressionList(aList, bindings, accessors)
-  | _ => ExpressionWithContext.noContext(macroExpression)->Ok
+  | _ => ExpressionWithContext.noContext(macroExpression)
   }
 }

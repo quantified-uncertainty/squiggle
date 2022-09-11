@@ -21,10 +21,10 @@ let rec reduceExpressionInProject = (
   expression: t,
   continuation: T.bindings,
   accessors: ProjectAccessorsT.t,
-): result<InternalExpressionValue.t, 'e> => {
-  // `reduce: ${T.toString(expression)}`->Js.log
+): InternalExpressionValue.t => {
+  // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
   switch expression {
-  | T.EValue(value) => value->Ok
+  | T.EValue(value) => value
   | T.EList(list) =>
     switch list {
     | list{EValue(IEvCall(fName)), ..._args} =>
@@ -41,20 +41,12 @@ and reduceExpressionList = (
   expressions: list<t>,
   continuation: T.bindings,
   accessors: ProjectAccessorsT.t,
-): result<InternalExpressionValue.t, 'e> => {
-  let racc: result<
-    list<InternalExpressionValue.t>,
-    'e,
-  > = expressions->Belt.List.reduceReverse(Ok(list{}), (racc, each: t) =>
-    racc->Result.flatMap(acc => {
-      each
-      ->reduceExpressionInProject(continuation, accessors)
-      ->Result.map(newNode => {
-        acc->Belt.List.add(newNode)
-      })
-    })
-  )
-  racc->Result.flatMap(acc => acc->reduceValueList(accessors))
+): InternalExpressionValue.t => {
+  let acc: list<InternalExpressionValue.t> =
+    expressions->Belt.List.reduceReverse(list{}, (acc, each: t) =>
+      acc->Belt.List.add(each->reduceExpressionInProject(continuation, accessors))
+    )
+  acc->reduceValueList(accessors)
 }
 
 /*
@@ -63,48 +55,34 @@ and reduceExpressionList = (
 and reduceValueList = (
   valueList: list<InternalExpressionValue.t>,
   accessors: ProjectAccessorsT.t,
-): result<InternalExpressionValue.t, 'e> =>
+): InternalExpressionValue.t =>
   switch valueList {
   | list{IEvCall(fName), ...args} => {
-      let rCheckedArgs = switch fName {
-      | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args->Ok
+      let checkedArgs = switch fName {
+      | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args
       | _ => args->Lambda.checkIfReduced
       }
 
-      rCheckedArgs->Result.flatMap(checkedArgs =>
-        (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(
-          accessors,
-          reduceExpressionInProject,
-        )
+      (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(
+        accessors,
+        reduceExpressionInProject,
       )
     }
   | list{IEvLambda(_)} =>
     // TODO: remove on solving issue#558
-    valueList
-    ->Lambda.checkIfReduced
-    ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
-    )
+    valueList->Lambda.checkIfReduced->Belt.List.toArray->InternalExpressionValue.IEvArray
   | list{IEvLambda(lambdaCall), ...args} =>
     args
     ->Lambda.checkIfReduced
-    ->Result.flatMap(checkedArgs =>
-      Lambda.doLambdaCall(lambdaCall, checkedArgs, accessors, reduceExpressionInProject)
-    )
-
-  | _ =>
-    valueList
-    ->Lambda.checkIfReduced
-    ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
-    )
+    ->Lambda.doLambdaCall(lambdaCall, _, accessors, reduceExpressionInProject)
+  | _ => valueList->Lambda.checkIfReduced->Belt.List.toArray->InternalExpressionValue.IEvArray
   }
 
 let reduceReturningBindings = (
   expression: t,
   continuation: T.bindings,
   accessors: ProjectAccessorsT.t,
-): (result<InternalExpressionValue.t, 'e>, T.bindings) => {
+): (InternalExpressionValue.t, T.bindings) => {
   let states = accessors.states
   let result = reduceExpressionInProject(expression, continuation, accessors)
   (result, states.continuation)
@@ -118,7 +96,11 @@ module BackCompatible = {
 
   let evaluate = (expression: t): result<InternalExpressionValue.t, errorValue> => {
     let accessors = ProjectAccessorsT.identityAccessors
-    expression->reduceExpressionInProject(accessors.stdLib, accessors)
+    try {
+      expression->reduceExpressionInProject(accessors.stdLib, accessors)->Ok
+    } catch {
+    | exn => Reducer_ErrorValue.fromException(exn)->Error
+    }
   }
 
   let evaluateString = (peggyCode: string): result<InternalExpressionValue.t, errorValue> =>
