@@ -80,27 +80,28 @@ abstract class SqAbstractDistribution {
 }
 
 export class SqPointSetDistribution extends SqAbstractDistribution {
-  tag = Tag.PointSet;
+  tag = Tag.PointSet as const;
 
   value() {
-    return this.valueMethod(RSDistribution.getPointSet);
+    return wrapPointSetDist(this.valueMethod(RSDistribution.getPointSet));
   }
 }
 
 export class SqSampleSetDistribution extends SqAbstractDistribution {
-  tag = Tag.SampleSet;
+  tag = Tag.SampleSet as const;
 
-  value() {
+  value(): number[] {
     return this.valueMethod(RSDistribution.getSampleSet);
   }
 }
 
 export class SqSymbolicDistribution extends SqAbstractDistribution {
-  tag = Tag.Symbolic;
+  tag = Tag.Symbolic as const;
 
-  value() {
-    return this.valueMethod(RSDistribution.getSymbolic);
-  }
+  // not wrapped for TypeScript yet
+  // value() {
+  //   return this.valueMethod(RSDistribution.getSymbolic);
+  // }
 }
 
 const tagToClass = {

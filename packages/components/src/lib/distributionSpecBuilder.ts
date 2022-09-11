@@ -1,5 +1,5 @@
 import { VisualizationSpec } from "react-vega";
-import type { LogScale, LinearScale, PowScale } from "vega";
+import type { LogScale, LinearScale, PowScale, TimeScale } from "vega";
 
 export type DistributionChartSpecOptions = {
   /** Set the x scale to be logarithmic by deault */
@@ -14,9 +14,12 @@ export type DistributionChartSpecOptions = {
   title?: string;
   /** The formatting of the ticks */
   format?: string;
+  /** Whether the x-axis should be dates or numbers */
+  xAxisType?: "number" | "dateTime";
 };
 
-export let linearXScale: LinearScale = {
+/** X Scales */
+export const linearXScale: LinearScale = {
   name: "xscale",
   clamp: true,
   type: "linear",
@@ -25,15 +28,8 @@ export let linearXScale: LinearScale = {
   nice: false,
   domain: { data: "domain", field: "x" },
 };
-export let linearYScale: LinearScale = {
-  name: "yscale",
-  type: "linear",
-  range: "height",
-  zero: true,
-  domain: { data: "domain", field: "y" },
-};
 
-export let logXScale: LogScale = {
+export const logXScale: LogScale = {
   name: "xscale",
   type: "log",
   range: "width",
@@ -44,7 +40,25 @@ export let logXScale: LogScale = {
   domain: { data: "domain", field: "x" },
 };
 
-export let expYScale: PowScale = {
+export const timeXScale: TimeScale = {
+  name: "xscale",
+  clamp: true,
+  type: "time",
+  range: "width",
+  nice: false,
+  domain: { data: "domain", field: "x" },
+};
+
+/** Y Scales */
+export const linearYScale: LinearScale = {
+  name: "yscale",
+  type: "linear",
+  range: "height",
+  zero: true,
+  domain: { data: "domain", field: "y" },
+};
+
+export const expYScale: PowScale = {
   name: "yscale",
   type: "pow",
   exponent: 0.1,
@@ -55,20 +69,25 @@ export let expYScale: PowScale = {
 };
 
 export const defaultTickFormat = ".9~s";
+export const timeTickFormat = "%b %d, %Y %H:%M";
+const width = 500;
 
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions
 ): VisualizationSpec {
-  const {
-    format = defaultTickFormat,
-    title,
-    minX,
-    maxX,
-    logX,
-    expY,
-  } = specOptions;
+  const { title, minX, maxX, logX, expY, xAxisType = "number" } = specOptions;
 
-  let xScale = logX ? logXScale : linearXScale;
+  const dateTime = xAxisType === "dateTime";
+
+  // some fallbacks
+  const format = specOptions?.format
+    ? specOptions.format
+    : dateTime
+    ? timeTickFormat
+    : defaultTickFormat;
+
+  let xScale = dateTime ? timeXScale : logX ? logXScale : linearXScale;
+
   if (minX !== undefined && Number.isFinite(minX)) {
     xScale = { ...xScale, domainMin: minX };
   }
@@ -77,21 +96,36 @@ export function buildVegaSpec(
     xScale = { ...xScale, domainMax: maxX };
   }
 
-  let spec: VisualizationSpec = {
+  const spec: VisualizationSpec = {
     $schema: "https://vega.github.io/schema/vega/v5.json",
     description: "Squiggle plot chart",
-    width: 500,
+    width: width,
     height: 100,
     padding: 5,
-    data: [
+    data: [{ name: "data" }, { name: "domain" }, { name: "samples" }],
+    signals: [
       {
-        name: "data",
+        name: "hover",
+        value: null,
+        on: [
+          { events: "mouseover", update: "datum" },
+          { events: "mouseout", update: "null" },
+        ],
       },
       {
-        name: "domain",
+        name: "position",
+        value: "[0, 0]",
+        on: [
+          { events: "mousemove", update: "xy() " },
+          { events: "mouseout", update: "null" },
+        ],
+      },
+      {
+        name: "position_scaled",
+        value: null,
+        update: "isArray(position) ? invert('xscale', position[0]) : ''",
       },
     ],
-    signals: [],
     scales: [
       xScale,
       expY ? expYScale : linearYScale,
@@ -115,7 +149,7 @@ export function buildVegaSpec(
         domainColor: "#fff",
         domainOpacity: 0.0,
         format: format,
-        tickCount: 10,
+        tickCount: dateTime ? 3 : 10,
         labelOverlap: "greedy",
       },
     ],
@@ -232,13 +266,16 @@ export function buildVegaSpec(
                     },
                     size: [{ value: 100 }],
                     tooltip: {
-                      signal: "{ probability: datum.y, value: datum.x }",
+                      signal: dateTime
+                        ? "{ probability: datum.y, value: datetime(datum.x) }"
+                        : "{ probability: datum.y, value: datum.x }",
                     },
                   },
                   update: {
                     x: {
                       scale: "xscale",
                       field: "x",
+                      offset: 0.5, // if this is not included, the circles are slightly left of center.
                     },
                     y: {
                       scale: "yscale",
@@ -254,6 +291,69 @@ export function buildVegaSpec(
             ],
           },
         ],
+      },
+
+      {
+        name: "sampleset",
+        type: "rect",
+        from: { data: "samples" },
+        encode: {
+          enter: {
+            x: { scale: "xscale", field: "data" },
+            width: { value: 0.1 },
+
+            y: { value: 25, offset: { signal: "height" } },
+            height: { value: 5 },
+          },
+        },
+      },
+      {
+        type: "text",
+        name: "announcer",
+        interactive: false,
+        encode: {
+          enter: {
+            x: { signal: String(width), offset: 1 }, // vega would prefer its internal ` "width" ` variable, but that breaks the squiggle playground. Just setting it to the same var as used elsewhere in the spec achieves the same result.
+            fill: { value: "black" },
+            fontSize: { value: 20 },
+            align: { value: "right" },
+          },
+          update: {
+            text: {
+              signal: dateTime
+                ? "position_scaled ? utcyear(position_scaled) + '-' + utcmonth(position_scaled) + '-' + utcdate(position_scaled) + 'T' + utchours(position_scaled)+':' +utcminutes(position_scaled) : ''"
+                : "position_scaled ? format(position_scaled, ',.4r')  : ''",
+            },
+          },
+        },
+      },
+      {
+        type: "rule",
+        interactive: false,
+        encode: {
+          enter: {
+            x: { value: 0 },
+            y: { scale: "yscale", value: 0 },
+
+            y2: {
+              signal: "height",
+              offset: 2,
+            },
+            strokeDash: { value: [5, 5] },
+          },
+
+          update: {
+            x: {
+              signal:
+                "position ? position[0] < 0 ? null : position[0] > width ? null : position[0]: null",
+            },
+
+            opacity: {
+              signal:
+                "position ? position[0] < 0 ? 0 : position[0] > width ? 0 : 1 : 0",
+            },
+          },
+        },
       },
     ],
     legends: [
