@@ -1,43 +1,32 @@
 module BBindingsReplacer = Reducer_Expression_BindingsReplacer
 module BErrorValue = Reducer_ErrorValue
-module T = Reducer_Expression_T
-module BInternalExpressionValue = ReducerInterface_InternalExpressionValue
-module BBindings = Reducer_Bindings
+module T = Reducer_T
 
 type errorValue = BErrorValue.errorValue
-type expression = T.expression
-type expressionOrFFI = T.expressionOrFFI
-type ffiFn = T.ffiFn
-type internalCode = ReducerInterface_InternalExpressionValue.internalCode
+type expression = Reducer_T.expression
 
-let eArray = anArray => anArray->BInternalExpressionValue.IEvArray->T.EValue
+let eArray = (anArray: array<T.expression>) => anArray->T.EArray
 
-let eArrayString = anArray => anArray->BInternalExpressionValue.IEvArrayString->T.EValue
+let eArrayString = anArray => anArray->T.IEvArrayString->T.EValue
 
-let eBindings = (anArray: array<(string, BInternalExpressionValue.t)>) =>
-  anArray->BBindings.fromArray->BBindings.toExpressionValue->T.EValue
+let eBindings = (anArray: array<(string, T.value)>) =>
+  anArray->Reducer_Bindings.fromArray->Reducer_Bindings.toExpressionValue->T.EValue
 
-let eBool = aBool => aBool->BInternalExpressionValue.IEvBool->T.EValue
+let eBool = aBool => aBool->T.IEvBool->T.EValue
 
-let eCall = (name: string): expression =>
-  name->BInternalExpressionValue.IEvCall->T.EValue
-
-let eFunction = (fName: string, lispArgs: list<expression>): expression => {
-  let fn = fName->eCall
-  list{fn, ...lispArgs}->T.EList
-}
+let eCall = (fn: expression, args: array<expression>): expression =>
+  T.ECall(fn, args)
 
 let eLambda = (
   parameters: array<string>,
   expr: expression,
-) => {
-  T.ELambda(parameters, expr)
+) => T.ELambda(parameters, expr)
 
-let eNumber = aNumber => aNumber->BInternalExpressionValue.IEvNumber->T.EValue
+let eNumber = aNumber => aNumber->T.IEvNumber->T.EValue
 
-let eRecord = aMap => aMap->BInternalExpressionValue.IEvRecord->T.EValue
+let eRecord = aMap => aMap->T.IEvRecord->T.EValue
 
-let eString = aString => aString->BInternalExpressionValue.IEvString->T.EValue
+let eString = aString => aString->T.IEvString->T.EValue
 
 let eSymbol = (name: string): expression =>
   T.ESymbol(name)
@@ -45,8 +34,11 @@ let eSymbol = (name: string): expression =>
 let eBlock = (exprs: array<expression>): expression =>
   T.EBlock(exprs)
 
-let eModule = (nameSpace: BInternalExpressionValue.nameSpace): expression =>
-  nameSpace->BInternalExpressionValue.IEvBindings->T.EValue
+let eProgram = (exprs: array<expression>): expression =>
+  T.EProgram(exprs)
+
+let eModule = (nameSpace: T.nameSpace): expression =>
+  nameSpace->T.IEvBindings->T.EValue
 
 let eLetStatement = (symbol: string, valueExpression: expression): expression =>
   T.EAssign(symbol, valueExpression)
@@ -55,9 +47,9 @@ let eTernary = (predicate: expression, trueCase: expression, falseCase: expressi
   T.ETernary(predicate, trueCase, falseCase)
 
 let eIdentifier = (name: string): expression =>
-  name->BInternalExpressionValue.IEvSymbol->T.EValue
+  name->T.ESymbol
 
-let eTypeIdentifier = (name: string): expression =>
-  name->BInternalExpressionValue.IEvTypeIdentifier->T.EValue
+// let eTypeIdentifier = (name: string): expression =>
+//   name->T.IEvTypeIdentifier->T.EValue
 
-let eVoid: expression = BInternalExpressionValue.IEvVoid->T.EValue
+let eVoid: expression = T.IEvVoid->T.EValue

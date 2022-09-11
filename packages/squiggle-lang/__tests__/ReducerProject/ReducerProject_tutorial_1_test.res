@@ -65,7 +65,7 @@ Case "Running a single source".
       /* Now you have external bindings and external result. */
       (
         result->InternalExpressionValue.toStringResult,
-        bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
+        bindings->Reducer_T.IEvBindings->InternalExpressionValue.toString,
       )->expect == ("Ok(3)", "@{}")
     })
 

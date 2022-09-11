@@ -1,24 +1,21 @@
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
-module ProjectReducerFnT = ReducerProject_ReducerFn_T
-type internalExpressionValue = InternalExpressionValue.t
 
 /*
   Map external calls of Reducer
 */
 let dispatch = (
   call: InternalExpressionValue.functionCall,
-  accessors: ProjectAccessorsT.t,
-  reducer: ProjectReducerFnT.t,
+  environment: Reducer_T.environment,
+  reducer: Reducer_T.reducerFn,
   chain,
-): result<internalExpressionValue, 'e> => {
+): result<Reducer_T.value, 'e> => {
   E.A.O.firstSomeFn([
-    () => ReducerInterface_GenericDistribution.dispatch(call, accessors.environment),
-    () => ReducerInterface_Date.dispatch(call, accessors.environment),
-    () => ReducerInterface_Duration.dispatch(call, accessors.environment),
-    () => ReducerInterface_Number.dispatch(call, accessors.environment),
-    () => FunctionRegistry_Library.dispatch(call, accessors, reducer),
-  ])->E.O2.defaultFn(() => chain(call, accessors, reducer))
+    () => ReducerInterface_GenericDistribution.dispatch(call, environment),
+    () => ReducerInterface_Date.dispatch(call, environment),
+    () => ReducerInterface_Duration.dispatch(call, environment),
+    () => ReducerInterface_Number.dispatch(call, environment),
+    () => FunctionRegistry_Library.dispatch(call, environment, reducer),
+  ])->E.O2.defaultFn(() => chain(call, environment, reducer))
 }
 
 /*
@@ -26,7 +23,7 @@ If your dispatch is too big you can divide it into smaller dispatches and pass t
 
 The final chain(call) invokes the builtin default functions of the interpreter.
 
-Via chain(call), all MathJs operators and functions are available for string, number , boolean, array and record
+Via chain(call), all MathJs operators and functions are available for string, number, boolean, array and record
  .e.g + - / * > >= < <= == /= not and or sin cos log ln concat, etc.
 
 // See https://mathjs.org/docs/expressions/syntax.html

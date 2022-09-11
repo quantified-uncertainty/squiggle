@@ -1,4 +1,4 @@
-@genType type squiggleValue_Declaration = ReducerInterface_InternalExpressionValue.lambdaDeclaration //re-export
+@genType type squiggleValue_Declaration = Reducer_T.lambdaDeclaration //re-export
 
 @genType
 let toString = (v: squiggleValue_Declaration): string =>

@@ -9,7 +9,7 @@ open Expect
 let unwrapRecord = rValue =>
   rValue->Belt.Result.flatMap(value =>
     switch value {
-    | InternalExpressionValue.IEvRecord(aRecord) => Ok(aRecord)
+    | Reducer_T.IEvRecord(aRecord) => Ok(aRecord)
     | _ => ErrorValue.RETodo("TODO: Internal bindings must be returned")->Error
     }
   )

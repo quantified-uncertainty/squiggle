@@ -40,6 +40,11 @@ type NodeBlock = {
   statements: AnyPeggyNode[];
 };
 
+type NodeProgram = {
+  type: "Program";
+  statements: AnyPeggyNode[];
+};
+
 type NodeCall = {
   type: "Call";
   fn: AnyPeggyNode;
@@ -99,6 +104,7 @@ type NodeBoolean = {
 
 export type AnyPeggyNode =
   | NodeBlock
+  | NodeProgram
   | NodeCall
   | NodeFloat
   | NodeInteger
@@ -111,7 +117,11 @@ export type AnyPeggyNode =
   | NodeBoolean;
 
 export function makeFunctionCall(fn: string, args: AnyPeggyNode[]) {
-  return nodeCall(nodeIdentifier(fn), args);
+  if (fn === "$$_applyAll_$$") {
+    return nodeCall(args[0], args.splice(1));
+  } else {
+    return nodeCall(nodeIdentifier(fn), args);
+  }
 }
 
 export function constructArray(elems: AnyPeggyNode[]) {
@@ -123,6 +133,9 @@ export function constructRecord(elems: AnyPeggyNode[]) {
 
 export function nodeBlock(statements: AnyPeggyNode[]): NodeBlock {
   return { type: "Block", statements };
+}
+export function nodeProgram(statements: AnyPeggyNode[]): NodeProgram {
+  return { type: "Program", statements };
 }
 export function nodeBoolean(value: boolean): NodeBoolean {
   return { type: "Boolean", value };

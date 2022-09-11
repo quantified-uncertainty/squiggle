@@ -30,16 +30,16 @@ let library = [
             ("prior", FRTypeDist),
           ]),
         ],
-        ~run=(_, inputs, accessors, _) => {
+        ~run=(_, inputs, environment, _) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(inputs) {
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d)), FRValueDist(prior)]) =>
-            runScoring(estimate, Score_Dist(d), Some(prior), accessors.environment)
+            runScoring(estimate, Score_Dist(d), Some(prior), environment)
           | Ok([
               FRValueDist(estimate),
               FRValueDistOrNumber(FRValueNumber(d)),
               FRValueDist(prior),
             ]) =>
-            runScoring(estimate, Score_Scalar(d), Some(prior), accessors.environment)
+            runScoring(estimate, Score_Scalar(d), Some(prior), environment)
           | Error(e) => Error(e)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
@@ -49,12 +49,12 @@ let library = [
       FnDefinition.make(
         ~name="logScore",
         ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
-        ~run=(_, inputs, accessors, _) => {
+        ~run=(_, inputs, environment, _) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(inputs) {
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueDist(d))]) =>
-            runScoring(estimate, Score_Dist(d), None, accessors.environment)
+            runScoring(estimate, Score_Dist(d), None, environment)
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueNumber(d))]) =>
-            runScoring(estimate, Score_Scalar(d), None, accessors.environment)
+            runScoring(estimate, Score_Scalar(d), None, environment)
           | Error(e) => Error(e)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
@@ -74,10 +74,10 @@ let library = [
       FnDefinition.make(
         ~name="klDivergence",
         ~inputs=[FRTypeDist, FRTypeDist],
-        ~run=(_, inputs, accessors, _) => {
+        ~run=(_, inputs, environment, _) => {
           switch inputs {
           | [FRValueDist(estimate), FRValueDist(d)] =>
-            runScoring(estimate, Score_Dist(d), None, accessors.environment)
+            runScoring(estimate, Score_Dist(d), None, environment)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
         },

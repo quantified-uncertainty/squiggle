@@ -4,7 +4,7 @@ open FunctionRegistry_Helpers
 let nameSpace = "Dict"
 
 module Internals = {
-  type t = ReducerInterface_InternalExpressionValue.map
+  type t = Reducer_T.map
 
   let keys = (a: t): internalExpressionValue => IEvArray(
     Belt.Map.String.keysToArray(a)->E.A2.fmap(Wrappers.evString),

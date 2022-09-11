@@ -9,25 +9,27 @@ start
 
 zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
 
-//   { return h.makeFunctionCall('$_typeOf_$', [identifier, typeExpression])}
-// {return [h.nodeVoid()];}
 outerBlock 
   = statements:array_statements  finalExpression: (statementSeparator @expression)?
-    { if (finalExpression != null) 
-        { 
-          var newFinalExpression = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), finalExpression]);
-          statements.push(newFinalExpression);
-        }
-      else 
-        {
-          var newFinalStatement = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), h.nodeVoid()]);
-          statements.push(newFinalStatement);
-        }
-      return h.nodeBlock(statements) }
-  / finalExpression: expression
-    { 
-      var newFinalExpression = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), finalExpression]);
-      return h.nodeBlock([newFinalExpression])}
+      { if (finalExpression) statements.push(finalExpression) 
+        return h.nodeProgram(statements) }
+  // / '{' _nl finalExpression: expression  _nl '}'
+  //     { return h.nodeBlock([finalExpression]) }
+  //   { if (finalExpression != null) 
+  //       { 
+  //         var newFinalExpression = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), finalExpression]);
+  //         statements.push(newFinalExpression);
+  //       }
+  //     else 
+  //       {
+  //         var newFinalStatement = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), h.nodeVoid()]);
+  //         statements.push(newFinalStatement);
+  //       }
+  //     return h.nodeBlock(statements) }
+  // / finalExpression: expression
+  //   { 
+  //     var newFinalExpression = h.makeFunctionCall('$_endOfOuterBlock_$', [h.nodeVoid(), finalExpression]);
+  //     return h.nodeBlock([newFinalExpression])}
     
 innerBlockOrExpression  
   = quotedInnerBlock
@@ -36,7 +38,7 @@ innerBlockOrExpression
 
 quotedInnerBlock  
   = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
-      { statements.push(finalExpression) 
+      { if (finalExpression) statements.push(finalExpression) 
         return h.nodeBlock(statements) }
   / '{' _nl finalExpression: expression  _nl '}'
       { return h.nodeBlock([finalExpression]) }
@@ -50,7 +52,7 @@ array_statements
 statement 
   = letStatement
   / defunStatement
-  / typeStatement
+  // / typeStatement
   / voidStatement
 
 voidStatement 
@@ -337,80 +339,80 @@ statementSeparator 'statement separator'
     newLine "newline"
       = [\n\r]
 
-// Types
+// // Types
 
-noArguments = ('(' _nl ')' )?
+// noArguments = ('(' _nl ')' )?
 
-typeIdentifier 'type identifier'
-  = ([a-z]+[_a-z0-9]i*) {return h.nodeTypeIdentifier(text())} 
+// typeIdentifier 'type identifier'
+//   = ([a-z]+[_a-z0-9]i*) {return h.nodeTypeIdentifier(text())} 
 
-typeConstructorIdentifier 'type constructor identifier'
-  = ([A-Z]+[_a-z0-9]i*) {return h.nodeTypeIdentifier(text())} 
+// typeConstructorIdentifier 'type constructor identifier'
+//   = ([A-Z]+[_a-z0-9]i*) {return h.nodeTypeIdentifier(text())} 
 
-typeExpression = typePostModifierExpression
+// typeExpression = typePostModifierExpression
 
-typePostModifierExpression = head:typeOr tail:(_ '$' _nl @typeModifier)*
-  { 
-    return tail.reduce((result, element) => {
-      return h.makeFunctionCall('$_typeModifier_'+element.modifier.value+'_$', [result, ...element.args])
-    }, head)
-  }
+// typePostModifierExpression = head:typeOr tail:(_ '$' _nl @typeModifier)*
+//   { 
+//     return tail.reduce((result, element) => {
+//       return h.makeFunctionCall('$_typeModifier_'+element.modifier.value+'_$', [result, ...element.args])
+//     }, head)
+//   }
 
-typeOr = head:typeFunction tail:(_ '|' _nl @typeFunction)*
-  { return tail.length === 0 ? head : h.makeFunctionCall('$_typeOr_$', [h.constructArray([head, ...tail])]); }
+// typeOr = head:typeFunction tail:(_ '|' _nl @typeFunction)*
+//   { return tail.length === 0 ? head : h.makeFunctionCall('$_typeOr_$', [h.constructArray([head, ...tail])]); }
 
-typeFunction = head:typeModifierExpression tail:(_ '=>' _nl @typeModifierExpression)*    
-  { return tail.length === 0 ? head : h.makeFunctionCall( '$_typeFunction_$', [h.constructArray([head, ...tail])]); }
+// typeFunction = head:typeModifierExpression tail:(_ '=>' _nl @typeModifierExpression)*    
+//   { return tail.length === 0 ? head : h.makeFunctionCall( '$_typeFunction_$', [h.constructArray([head, ...tail])]); }
 
-typeModifierExpression = head:basicType tail:(_ '<-' _nl @typeModifier)* 
-  { 
-    return tail.reduce((result, element) => {
-      return h.makeFunctionCall('$_typeModifier_'+element.modifier.value+'_$', [result, ...element.args])
-    }, head)
-  }
+// typeModifierExpression = head:basicType tail:(_ '<-' _nl @typeModifier)* 
+//   { 
+//     return tail.reduce((result, element) => {
+//       return h.makeFunctionCall('$_typeModifier_'+element.modifier.value+'_$', [result, ...element.args])
+//     }, head)
+//   }
 
-  typeModifier 
-    = modifier:identifier _ '(' _nl args:array_elements _nl ')' 
-      { return {modifier: modifier, args: args}; }
-    / modifier:identifier _ noArguments
-      { return {modifier: modifier, args: []}; }
+//   typeModifier 
+//     = modifier:identifier _ '(' _nl args:array_elements _nl ')' 
+//       { return {modifier: modifier, args: args}; }
+//     / modifier:identifier _ noArguments
+//       { return {modifier: modifier, args: []}; }
   
-basicType = typeConstructor / typeArray / typeTuple / typeRecord / typeInParanthesis / typeIdentifier
+// basicType = typeConstructor / typeArray / typeTuple / typeRecord / typeInParanthesis / typeIdentifier
 
-typeArray = '[' _nl elem:typeExpression _nl ']' 
-  {return h.makeFunctionCall('$_typeArray_$', [elem])}
+// typeArray = '[' _nl elem:typeExpression _nl ']' 
+//   {return h.makeFunctionCall('$_typeArray_$', [elem])}
 
-typeTuple = '[' _nl elems:array_typeTupleArguments _nl ']' 
-  { return h.makeFunctionCall('$_typeTuple_$', [h.constructArray(elems)])}
+// typeTuple = '[' _nl elems:array_typeTupleArguments _nl ']' 
+//   { return h.makeFunctionCall('$_typeTuple_$', [h.constructArray(elems)])}
 
-  array_typeTupleArguments
-    = head:typeExpression tail:(_ ',' _nl @typeExpression)* 
-    { return [head, ...tail]; }
+//   array_typeTupleArguments
+//     = head:typeExpression tail:(_ ',' _nl @typeExpression)* 
+//     { return [head, ...tail]; }
 
-typeRecord = '{' _nl elems:array_typeRecordArguments _nl '}' 
-  { return h.makeFunctionCall('$_typeRecord_$', [h.constructRecord(elems)]); }  
+// typeRecord = '{' _nl elems:array_typeRecordArguments _nl '}' 
+//   { return h.makeFunctionCall('$_typeRecord_$', [h.constructRecord(elems)]); }  
 
-  array_typeRecordArguments 
-    = head:typeKeyValuePair tail:(_ ',' _nl @typeKeyValuePair)* 
-    { return [head, ...tail]; }
+//   array_typeRecordArguments 
+//     = head:typeKeyValuePair tail:(_ ',' _nl @typeKeyValuePair)* 
+//     { return [head, ...tail]; }
 
-  typeKeyValuePair 
-    = key:identifier _ ':' _nl value:typeExpression 
-    { return h.nodeKeyValue(key, value)}
+//   typeKeyValuePair 
+//     = key:identifier _ ':' _nl value:typeExpression 
+//     { return h.nodeKeyValue(key, value)}
 
-typeConstructor 
-  = constructor:typeConstructorIdentifier _ '(' _nl args:array_types _nl ')' 
-    { return h.makeFunctionCall('$_typeConstructor_$', [constructor, h.constructArray(args)]); }
-  / constructor:typeConstructorIdentifier _ noArguments
-    { return h.makeFunctionCall('$_typeConstructor_$', [constructor, h.constructArray([])]); }
+// typeConstructor 
+//   = constructor:typeConstructorIdentifier _ '(' _nl args:array_types _nl ')' 
+//     { return h.makeFunctionCall('$_typeConstructor_$', [constructor, h.constructArray(args)]); }
+//   / constructor:typeConstructorIdentifier _ noArguments
+//     { return h.makeFunctionCall('$_typeConstructor_$', [constructor, h.constructArray([])]); }
 
-  array_types = head:typeExpression tail:(_ ',' _nl @typeExpression)* 
-    { return [head, ...tail]; }
+//   array_types = head:typeExpression tail:(_ ',' _nl @typeExpression)* 
+//     { return [head, ...tail]; }
 
-typeStatement = typeAliasStatement / typeOfStatement
-typeAliasStatement = 'type' __nl typeIdentifier:typeIdentifier _nl '=' _nl typeExpression:typeExpression 
-  { return h.makeFunctionCall('$_typeAlias_$', [typeIdentifier, typeExpression])}
-typeOfStatement = identifier:identifier _ ':' _nl typeExpression:typeExpression
-  { return h.makeFunctionCall('$_typeOf_$', [identifier, typeExpression])}
+// typeStatement = typeAliasStatement / typeOfStatement
+// typeAliasStatement = 'type' __nl typeIdentifier:typeIdentifier _nl '=' _nl typeExpression:typeExpression 
+//   { return h.makeFunctionCall('$_typeAlias_$', [typeIdentifier, typeExpression])}
+// typeOfStatement = identifier:identifier _ ':' _nl typeExpression:typeExpression
+//   { return h.makeFunctionCall('$_typeOf_$', [identifier, typeExpression])}
 
-typeInParanthesis = '(' _nl typeExpression:typeExpression _nl ')' {return typeExpression}
+// typeInParanthesis = '(' _nl typeExpression:typeExpression _nl ')' {return typeExpression}

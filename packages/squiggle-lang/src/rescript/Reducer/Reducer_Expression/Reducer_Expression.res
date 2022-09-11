@@ -1,119 +1,100 @@
 module Bindings = Reducer_Bindings
-module BindingsReplacer = Reducer_Expression_BindingsReplacer
-module BuiltIn = Reducer_Dispatch_BuiltIn
-module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
-module Extra = Reducer_Extra
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
-module Macro = Reducer_Expression_Macro
-module MathJs = Reducer_MathJs
-module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 module Result = Belt.Result
-module T = Reducer_Expression_T
+module T = Reducer_T
 
 type errorValue = Reducer_ErrorValue.errorValue
-type t = T.t
 
 exception ErrorException = Reducer_ErrorValue.ErrorException
 
 /*
-  Recursively evaluate/reduce the expression (Lisp AST/Lambda calculus)
+  Recursively evaluate the expression
 */
-let rec evaluate = (
-  expression: t,
-  bindings: T.bindings,
-  accessors: ProjectAccessorsT.t,
-): InternalExpressionValue.t => {
-  // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
-  // Js.log(`reduce: ${T.toString(expression)}`)
+let rec evaluate: T.reducerFn = (
+  expression,
+  context
+) => {
+  Js.log(`reduce: ${expression->Reducer_Expression_T.toString}`)
   switch expression {
-    | T.Eblock(statements) => {
-      statements->Js.Array2.reduce(statement => evaluate(statement, bindings, accessors))
+    | T.EBlock(statements) => {
+      let innerContext = {...context, bindings: context.bindings->Bindings.extend}
+      statements->Js.Array2.reduce(
+        (acc, statement) => statement->evaluate(innerContext),
+        T.IEvVoid
+      )
     }
-    | T.ESymbol(name) => bindings->nameSpaceGet(name)
-    | T.EValue(value) => value
+
+    | T.EProgram(statements) => {
+      Js.log(`bindings: ${context.bindings->Reducer_Bindings.toString}`)
+      let res = statements->Js.Array2.reduce(
+        (acc, statement) => statement->evaluate(context),
+        T.IEvVoid
+      )
+      Js.log(`bindings after: ${context.bindings->Reducer_Bindings.toString}`)
+      res
+    }
+
+    | T.EArray(elements) =>
+      elements->Js.Array2.map(element => evaluate(element, context))->T.IEvArray
+
+    | T.ERecord(map) =>
+      RETodo("TODO")->ErrorException->raise
+
+    | T.EAssign(left, right) => {
+      let result = right->evaluate(context)
+      let _ = context.bindings->Bindings.set(left, result)
+      T.IEvVoid
+    }
+
+    | T.ESymbol(name) =>
+      switch context.bindings->Bindings.get(name) {
+      | Some(v) => v
+      | None => Reducer_ErrorValue.RESymbolNotFound(name)->ErrorException->raise
+      }
+
+    | T.EValue(value) =>
+      value
+
     | T.ETernary(predicate, trueCase, falseCase) => {
-      let predicateResult = evaluate(predicate, bindings, accessors)
+      let predicateResult = predicate->evaluate(context)
       switch predicateResult {
-      | InternalExpressionValue.IEvBool(false) =>
-        evaluate(false, bindings, accessors)
-      | InternalExpressionValue.IEvBool(true) =>
-        evaluate(trueCase, bindings, accessors)
+      | T.IEvBool(value) =>
+        (value ? trueCase : falseCase)->evaluate(context)
       | _ => REExpectedType("Boolean", "")->ErrorException->raise
       }
     }
-    | T.ELambda(parameteres, expr) => {
-      BInternalExpressionValue.IEvLambda({
-        parameters: parameters,
-        context: context,
-        body: NotFFI(expr)->BBindings.castExpressionToInternalCode,
-      })->T.EValue
-    }
+
+    | T.ELambda(parameters, body) =>
+      Lambda.makeLambda(parameters, context.bindings, body)->T.IEvLambda
+
     | T.ECall(fn, args) => {
-      let func = evaluate(fn, bindings, accessors)
-      "TODO"
-      // Lambda.doLambdaCall(), etc.
-    }
-  }
-}
-
-/*
-    After reducing each level of expression(Lisp AST), we have a value list to evaluate
- */
-and reduceValueList = (
-  valueList: list<InternalExpressionValue.t>,
-  accessors: ProjectAccessorsT.t,
-): InternalExpressionValue.t =>
-  switch valueList {
-  | list{IEvCall(fName), ...args} => {
-      let checkedArgs = switch fName {
-      | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args
-      | _ => args->Lambda.checkIfReduced
+      let lambda = fn->evaluate(context)
+      let argValues = Js.Array2.map(args, arg => arg->evaluate(context))
+      switch lambda {
+        | T.IEvLambda(lambda) => 
+          Lambda.doLambdaCall(lambda, argValues, context.environment, evaluate)
+        | _ => REExpectedType("Lambda", "")->ErrorException->raise
       }
-
-      (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(
-        accessors,
-        reduceExpressionInProject,
-      )
     }
-  | list{IEvLambda(_)} =>
-    // TODO: remove on solving issue#558
-    valueList->Lambda.checkIfReduced->Belt.List.toArray->InternalExpressionValue.IEvArray
-  | list{IEvLambda(lambdaCall), ...args} =>
-    args
-    ->Lambda.checkIfReduced
-    ->Lambda.doLambdaCall(lambdaCall, _, accessors, reduceExpressionInProject)
-  | _ => valueList->Lambda.checkIfReduced->Belt.List.toArray->InternalExpressionValue.IEvArray
   }
-
-let reduceExpressionInProject = evaluate
-
-let reduceReturningBindings = (
-  expression: t,
-  continuation: T.bindings,
-  accessors: ProjectAccessorsT.t,
-): (InternalExpressionValue.t, T.bindings) => {
-  let states = accessors.states
-  let result = reduceExpressionInProject(expression, continuation, accessors)
-  (result, states.continuation)
 }
 
 module BackCompatible = {
   // Those methods are used to support the existing tests
   // If they are used outside limited testing context, error location reporting will fail
-  let parse = (peggyCode: string): result<t, errorValue> =>
+  let parse = (peggyCode: string): result<Reducer_T.expression, errorValue> =>
     peggyCode->Reducer_Peggy_Parse.parse->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
-  let evaluate = (expression: t): result<InternalExpressionValue.t, errorValue> => {
-    let accessors = ProjectAccessorsT.identityAccessors
+  let evaluate = (expression: Reducer_T.expression): result<Reducer_T.value, errorValue> => {
+    let context = Reducer_Context.createDefaultContext()
     try {
-      expression->reduceExpressionInProject(accessors.stdLib, accessors)->Ok
+      expression->evaluate(context)->Ok
     } catch {
     | ErrorException(e) => Error(e)
     | _ => raise(ErrorException(RETodo("internal exception")))
     }
   }
 
-  let evaluateString = (peggyCode: string): result<InternalExpressionValue.t, errorValue> =>
+  let evaluateString = (peggyCode: string): result<Reducer_T.value, errorValue> =>
     parse(peggyCode)->Result.flatMap(evaluate)
 }

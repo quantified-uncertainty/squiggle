@@ -69,12 +69,12 @@ module Integration = {
         let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
         let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
           aLambda,
-          list{pointAsInternalExpression},
+          [pointAsInternalExpression],
           environment,
-          reducer,
+          reducer
         )
         let result = switch resultAsInternalExpression {
-        | IEvNumber(x) => Ok(x)
+        | Reducer_T.IEvNumber(x) => Ok(x)
         | _ =>
           Error(
             "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
@@ -132,7 +132,7 @@ module Integration = {
           | (Ok(yMin), Ok(yMax)) => {
               let result =
                 (yMin +. yMax) *. weightForAnOuterPoint +. innerPointsSum *. weightForAnInnerPoint
-              let wrappedResult = result->ReducerInterface_InternalExpressionValue.IEvNumber->Ok
+              let wrappedResult = result->Reducer_T.IEvNumber->Ok
               wrappedResult
             }
           | (Error(b), _) => Error(b)
@@ -273,7 +273,7 @@ module DiminishingReturns = {
       funds,
       approximateIncrement,
       environment,
-      reducer,
+      reducer
     ) => {
       switch (
         E.A.length(lambdas) > 1,
@@ -303,12 +303,12 @@ module DiminishingReturns = {
             let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
             let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
               lambda,
-              list{pointAsInternalExpression},
+              [pointAsInternalExpression],
               environment,
-              reducer,
+              reducer
             )
             switch resultAsInternalExpression {
-            | IEvNumber(x) => Ok(x)
+            | Reducer_T.IEvNumber(x) => Ok(x)
             | _ =>
               Error(
                 "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead",
@@ -401,7 +401,7 @@ module DiminishingReturns = {
             | [IEvArray(innerlambdas), IEvNumber(funds), IEvNumber(approximateIncrement)] => {
                 let individuallyWrappedLambdas = E.A.fmap(innerLambda => {
                   switch innerLambda {
-                  | ReducerInterface_InternalExpressionValue.IEvLambda(lambda) => Ok(lambda)
+                  | Reducer_T.IEvLambda(lambda) => Ok(lambda)
                   | _ =>
                     Error(
                       "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. A member of the array wasn't a function",

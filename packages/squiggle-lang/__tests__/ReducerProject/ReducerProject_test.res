@@ -23,10 +23,9 @@ let runFetchFlatBindings = (project, sourceId) => {
 
 test("setting continuation", () => {
   let project = Project.createProject()
-  let privateProject = project->Project.T.Private.castToInternalProject
-  let sampleBindings = Bindings.emptyBindings->Bindings.set("test", IEvVoid)
-  Project.Private.setContinuation(privateProject, "main", sampleBindings)
-  let answer = Project.Private.getContinuation(privateProject, "main")
+  let sampleBindings = Bindings.makeEmptyBindings()->Bindings.set("test", IEvVoid)
+  ReducerProject.setContinuation(project, "main", sampleBindings)
+  let answer = ReducerProject.getContinuation(project, "main")
   expect(answer)->toBe(sampleBindings)
 })
 
@@ -59,7 +58,6 @@ describe("project1", () => {
   Project.setSource(project, "first", "x=1")
   Project.setSource(project, "main", "x")
   Project.setContinues(project, "main", ["first"])
-  let internalProject = project->Project.T.Private.castToInternalProject
 
   test("runOrder", () => {
     expect(Project.getRunOrder(project)) == ["first", "main"]
@@ -78,10 +76,10 @@ describe("project1", () => {
   })
 
   test("past chain first", () => {
-    expect(Project.Private.getPastChain(internalProject, "first")) == []
+    expect(ReducerProject.getPastChain(project, "first")) == []
   })
   test("past chain main", () => {
-    expect(Project.Private.getPastChain(internalProject, "main")) == ["first"]
+    expect(ReducerProject.getPastChain(project, "main")) == ["first"]
   })
 
   test("test result", () => {

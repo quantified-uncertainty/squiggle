@@ -1,16 +1,14 @@
 module Bindings = Reducer_Bindings
-module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module Continuation = ReducerInterface_Value_Continuation
 module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
-module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
-module ProjectReducerFnT = ReducerProject_ReducerFn_T
 module Result = Belt.Result
 module TypeBuilder = Reducer_Type_TypeBuilder
 
-open ReducerInterface_InternalExpressionValue
+module IEV = ReducerInterface_InternalExpressionValue
+
 open Reducer_ErrorValue
 
 /*
@@ -24,42 +22,42 @@ open Reducer_ErrorValue
 exception TestRescriptException
 
 let callInternal = (
-  call: functionCall,
-  accessors: ProjectAccessorsT.t,
-  reducer: ProjectReducerFnT.t,
+  call: IEV.functionCall,
+  _: Reducer_T.environment,
+  _: Reducer_T.reducerFn,
 ): result<'b, errorValue> => {
-  let callMathJs = (call: functionCall): result<'b, errorValue> =>
+  let callMathJs = (call: IEV.functionCall): result<'b, errorValue> =>
     switch call {
-    | ("javascriptraise", [msg]) => Js.Exn.raiseError(toString(msg)) // For Tests
+    | ("javascriptraise", [msg]) => Js.Exn.raiseError(IEV.toString(msg)) // For Tests
     | ("rescriptraise", _) => raise(TestRescriptException) // For Tests
-    | call => call->toStringFunctionCall->MathJs.Eval.eval
+    | call => call->IEV.toStringFunctionCall->MathJs.Eval.eval
     }
 
   let constructRecord = arrayOfPairs => {
     Belt.Array.map(arrayOfPairs, pairValue =>
       switch pairValue {
-      | IEvArray([IEvString(key), valueValue]) => (key, valueValue)
-      | _ => ("wrong key type", pairValue->toStringWithType->IEvString)
+      | Reducer_T.IEvArray([IEvString(key), valueValue]) => (key, valueValue)
+      | _ => ("wrong key type", pairValue->IEV.toStringWithType->IEvString)
       }
     )
     ->Belt.Map.String.fromArray
-    ->IEvRecord
+    ->Reducer_T.IEvRecord
     ->Ok
   }
 
-  let arrayAtIndex = (aValueArray: array<internalExpressionValue>, fIndex: float) =>
+  let arrayAtIndex = (aValueArray: array<Reducer_T.value>, fIndex: float) =>
     switch Belt.Array.get(aValueArray, Belt.Int.fromFloat(fIndex)) {
     | Some(value) => value->Ok
     | None => REArrayIndexNotFound("Array index not found", Belt.Int.fromFloat(fIndex))->Error
     }
 
-  let moduleAtIndex = (nameSpace: nameSpace, sIndex) =>
+  let moduleAtIndex = (nameSpace: Reducer_T.nameSpace, sIndex) =>
     switch Bindings.get(nameSpace, sIndex) {
     | Some(value) => value->Ok
     | None => RERecordPropertyNotFound("Bindings property not found", sIndex)->Error
     }
 
-  let recordAtIndex = (dict: Belt.Map.String.t<internalExpressionValue>, sIndex) =>
+  let recordAtIndex = (dict: Belt.Map.String.t<Reducer_T.value>, sIndex) =>
     switch Belt.Map.String.get(dict, sIndex) {
     | Some(value) => value->Ok
     | None => RERecordPropertyNotFound("Record property not found", sIndex)->Error
@@ -68,26 +66,26 @@ let callInternal = (
   let doAddArray = (originalA, b) => {
     let a = originalA->Js.Array2.copy
     let _ = Js.Array2.pushMany(a, b)
-    a->IEvArray->Ok
+    a->Reducer_T.IEvArray->Ok
   }
   let doAddString = (a, b) => {
     let answer = Js.String2.concat(a, b)
-    answer->IEvString->Ok
+    answer->Reducer_T.IEvString->Ok
   }
 
-  let inspect = (value: internalExpressionValue) => {
-    Js.log(value->toString)
+  let inspect = (value: Reducer_T.value) => {
+    Js.log(value->IEV.toString)
     value->Ok
   }
 
-  let inspectLabel = (value: internalExpressionValue, label: string) => {
-    Js.log(`${label}: ${value->toString}`)
+  let inspectLabel = (value: Reducer_T.value, label: string) => {
+    Js.log(`${label}: ${value->IEV.toString}`)
     value->Ok
   }
 
-  let doSetBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) => {
-    Bindings.set(bindings, symbol, value)->IEvBindings->Ok
-  }
+  // let doSetBindings = (bindings: Reducer_T.nameSpace, symbol: string, value: Reducer_T.value) => {
+  //   Bindings.set(bindings, symbol, value)->IEvBindings->Ok
+  // }
 
   // let doSetTypeAliasBindings = (
   //   bindings: nameSpace,
@@ -98,50 +96,15 @@ let callInternal = (
   // let doSetTypeOfBindings = (bindings: nameSpace, symbol: string, value: internalExpressionValue) =>
   //   Bindings.setTypeOf(bindings, symbol, value)->IEvBindings->Ok
 
-  let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
+  // let doExportBindings = (bindings: nameSpace) => bindings->Bindings.toExpressionValue->Ok
 
-  let doIdentity = (value: internalExpressionValue) => value->Ok
+  // let doIdentity = (value: Reducer_T.value) => value->Ok
 
-  let doDumpBindings = (continuation: nameSpace, value: internalExpressionValue) => {
-    // let _ = Continuation.inspect(continuation, "doDumpBindings")
-    accessors.states.continuation = continuation->Bindings.set("__result__", value)
-    value->Ok
-  }
-
-  module SampleMap = {
-    let doLambdaCall = (aLambdaValue, list) =>
-      switch Lambda.doLambdaCall(aLambdaValue, list, accessors, reducer) {
-      | IEvNumber(f) => Ok(f)
-      | _ => Error(Operation.SampleMapNeedsNtoNFunction)
-      }
-
-    let toType = r =>
-      switch r {
-      | Ok(r) => Ok(IEvDistribution(SampleSet(r)))
-      | Error(r) => Error(REDistributionError(SampleSetError(r)))
-      }
-
-    let parseSampleSetArray = (arr: array<internalExpressionValue>): option<
-      array<SampleSetDist.t>,
-    > => {
-      let parseSampleSet = (value: internalExpressionValue): option<SampleSetDist.t> =>
-        switch value {
-        | IEvDistribution(SampleSet(dist)) => Some(dist)
-        | _ => None
-        }
-      E.A.O.openIfAllSome(E.A.fmap(parseSampleSet, arr))
-    }
-
-    let _mapN = (aValueArray: array<internalExpressionValue>, aLambdaValue) => {
-      switch parseSampleSetArray(aValueArray) {
-      | Some(t1) =>
-        let fn = a => doLambdaCall(aLambdaValue, list{IEvArray(E.A.fmap(x => IEvNumber(x), a))})
-        SampleSetDist.mapN(~fn, ~t1)->toType
-      | None =>
-        Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString))
-      }
-    }
-  }
+  // let doDumpBindings = (continuation: Reducer_T.nameSpace, value: Reducer_T.value) => {
+  //   // let _ = Continuation.inspect(continuation, "doDumpBindings")
+  //   accessors.states.continuation = continuation->Bindings.set("__result__", value)
+  //   value->Ok
+  // }
 
   switch call {
   | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
@@ -149,15 +112,15 @@ let callInternal = (
   | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
   | ("$_constructArray_$", args) => IEvArray(args)->Ok
   | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
-  | ("$_exportBindings_$", [IEvBindings(nameSpace)]) => doExportBindings(nameSpace)
-  | ("$_exportBindings_$", [evValue]) => doIdentity(evValue)
-  | ("$_setBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
-    doSetBindings(nameSpace, symbol, value)
+  // | ("$_exportBindings_$", [IEvBindings(nameSpace)]) => doExportBindings(nameSpace)
+  // | ("$_exportBindings_$", [evValue]) => doIdentity(evValue)
+  // | ("$_setBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
+  //   doSetBindings(nameSpace, symbol, value)
   // | ("$_setTypeAliasBindings_$", [IEvBindings(nameSpace), IEvTypeIdentifier(symbol), value]) =>
   //   doSetTypeAliasBindings(nameSpace, symbol, value)
   // | ("$_setTypeOfBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
   //   doSetTypeOfBindings(nameSpace, symbol, value)
-  | ("$_dumpBindings_$", [IEvBindings(nameSpace), _, evValue]) => doDumpBindings(nameSpace, evValue)
+  // | ("$_dumpBindings_$", [IEvBindings(nameSpace), _, evValue]) => doDumpBindings(nameSpace, evValue)
   // | ("$_typeModifier_memberOf_$", [IEvTypeIdentifier(typeIdentifier), IEvArray(arr)]) =>
   //   TypeBuilder.typeModifier_memberOf(IEvTypeIdentifier(typeIdentifier), IEvArray(arr))
   // | ("$_typeModifier_memberOf_$", [IEvType(typeRecord), IEvArray(arr)]) =>
@@ -191,31 +154,31 @@ let callInternal = (
   | (_, [IEvString(_), IEvString(_)]) =>
     callMathJs(call)
   | call =>
-    Error(REFunctionNotFound(call->functionCallToCallSignature->functionCallSignatureToString)) // Report full type signature as error
+    Error(REFunctionNotFound(call->IEV.functionCallToCallSignature->IEV.functionCallSignatureToString)) // Report full type signature as error
   }
 }
 /*
   Reducer uses Result monad while reducing expressions
 */
 let dispatch = (
-  call: functionCall,
-  accessors: ProjectAccessorsT.t,
-  reducer: ProjectReducerFnT.t,
-): internalExpressionValue =>
+  call: IEV.functionCall,
+  env: Reducer_T.environment,
+  reducer: Reducer_T.reducerFn
+): Reducer_T.value =>
   try {
     let (fn, args) = call
     if fn->Js.String2.startsWith("$") {
-      switch callInternal((fn, args), accessors, reducer) {
+      switch callInternal((fn, args), env, reducer) {
       | Ok(v) => v
       | Error(e) => raise(ErrorException(e))
       }
     } else {
       // There is a bug that prevents string match in patterns
       // So we have to recreate a copy of the string
-    switch ExternalLibrary.dispatch((Js.String.make(fn), args), accessors, reducer, callInternal) {
-    | Ok(v) => v
-    | Error(e) => raise(ErrorException(e))
-    }
+      switch ExternalLibrary.dispatch((Js.String.make(fn), args), env, reducer, callInternal) {
+      | Ok(v) => v
+      | Error(e) => raise(ErrorException(e))
+      }
     }
   } catch {
   | ErrorException(e) => raise(ErrorException(e))

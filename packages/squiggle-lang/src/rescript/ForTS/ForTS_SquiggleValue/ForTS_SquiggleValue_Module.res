@@ -3,7 +3,7 @@ type squiggleValue = ForTS_SquiggleValue.squiggleValue //use
 
 @genType
 let getKeyValuePairs = (v: squiggleValue_Module): array<(string, squiggleValue)> =>
-  ReducerInterface_InternalExpressionValue.nameSpaceToKeyValuePairs(v)
+  v->Reducer_Bindings.toKeyValuePairs
 
 @genType
 let toString = (v: squiggleValue_Module): string =>
@@ -13,4 +13,4 @@ let toString = (v: squiggleValue_Module): string =>
 let toSquiggleValue = (v: squiggleValue_Module): squiggleValue => IEvBindings(v)
 
 @genType
-let get = Reducer_Bindings.get
+let get = (v: squiggleValue_Module, k: string): option<squiggleValue> => Reducer_Bindings.get(v, k)

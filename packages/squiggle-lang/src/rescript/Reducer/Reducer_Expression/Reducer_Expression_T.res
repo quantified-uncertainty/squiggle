@@ -9,44 +9,38 @@
 module Extra = Reducer_Extra
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
-type internalExpressionValue = InternalExpressionValue.t
-type environment = ReducerInterface_InternalExpressionValue.environment
+type internalExpressionValue = Reducer_T.value
+type environment = Reducer_T.environment
 
-type rec expression =
-  | EBlock(array<expression>)
-  | ESymbol(string)
-  | ETernary(expression, expression, expression)
-  | EAssign(string, expression)
-  | ECall(expression, array<expression>)
-  | ELambda(array<string>, expression)
-  | EValue(internalExpressionValue)
-and bindings = InternalExpressionValue.nameSpace
+type expression = Reducer_T.expression
 
 type t = expression
 
-type reducerFn = (
-  expression,
-  bindings,
-  environment,
-) => result<internalExpressionValue, Reducer_ErrorValue.errorValue>
+type context = Reducer_T.context
+
+type reducerFn = Reducer_T.reducerFn
+
+let commaJoin = values => values->Reducer_Extra_Array.intersperse(", ")->Js.String.concatMany("")
 
 /*
   Converts the expression to String
 */
-let rec toString = expression => "TODO"
-  // switch expression {
-  // | EList(list{EValue(IEvCall("$$_block_$$")), ...statements}) =>
-  //   `{${Belt.List.map(statements, aValue => toString(aValue))
-  //     ->Extra.List.intersperse("; ")
-  //     ->Belt.List.toArray
-  //     ->Js.String.concatMany("")}}`
-  // | EList(aList) =>
-  //   `(${Belt.List.map(aList, aValue => toString(aValue))
-  //     ->Extra.List.intersperse(" ")
-  //     ->Belt.List.toArray
-  //     ->Js.String.concatMany("")})`
-  // | EValue(aValue) => InternalExpressionValue.toString(aValue)
-  // }
+let rec toString = (expression: expression) =>
+  switch expression {
+  | EBlock(statements) =>
+    `{${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}}`
+  | EProgram(statements) =>
+    `<${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}>`
+  | EArray(aList) =>
+    `[${Js.Array2.map(aList, aValue => toString(aValue))->commaJoin}]`
+  | ERecord(map) => "TODO"
+  | ESymbol(name) => name
+  | ETernary(predicate, trueCase, falseCase) => `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`
+  | EAssign(name, value) => `${name} = ${value->toString}`
+  | ECall(fn, args) => `(${fn->toString})(${args->Js.Array2.map(toString)->commaJoin})`
+  | ELambda(parameters, body) => `{|${parameters->commaJoin}| ${body->toString}}`
+  | EValue(aValue) => InternalExpressionValue.toString(aValue)
+  }
 
 let toStringResult = codeResult =>
   switch codeResult {

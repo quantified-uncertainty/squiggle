@@ -297,12 +297,12 @@ let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
   Reducer_ErrorValue.errorValue,
 > =>
   switch o {
-  | Dist(d) => Ok(ReducerInterface_InternalExpressionValue.IEvDistribution(d))
+  | Dist(d) => Ok(Reducer_T.IEvDistribution(d))
   | Float(d) => Ok(IEvNumber(d))
   | String(d) => Ok(IEvString(d))
   | Bool(d) => Ok(IEvBool(d))
   | FloatArray(d) =>
-    Ok(IEvArray(d |> E.A.fmap(r => ReducerInterface_InternalExpressionValue.IEvNumber(r))))
+    Ok(IEvArray(d |> E.A.fmap(r => Reducer_T.IEvNumber(r))))
   | GenDistError(err) => Error(REDistributionError(err))
   }
 

@@ -18,7 +18,7 @@ module Declaration = {
         inputs
         ->E.A2.fmap(getMinMax)
         ->E.A.R.firstErrorOrOpen
-        ->E.R2.fmap(args => ReducerInterface_InternalExpressionValue.IEvDeclaration(
+        ->E.R2.fmap(args => Reducer_T.IEvDeclaration(
           Declaration.make(lambda, args),
         ))
       }

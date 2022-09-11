@@ -1,51 +1,26 @@
+// deprecated, use Reducer_T instead
+// (value methods should be moved to Reducer_Value.res)
+
 module ErrorValue = Reducer_ErrorValue
 module Extra_Array = Reducer_Extra_Array
-type internalCode = Object
 type environment = GenericDist.env
+module T = Reducer_T
 
 let defaultEnvironment: environment = DistributionOperation.defaultEnv
 
-@genType.opaque
-type rec t =
-  | IEvArray(array<t>) // FIXME: Convert to MapInt
-  | IEvArrayString(array<string>)
-  | IEvBool(bool)
-  | IEvCall(string) // External function call
-  | IEvDate(Js.Date.t)
-  | IEvDeclaration(lambdaDeclaration)
-  | IEvDistribution(DistributionTypes.genericDist)
-  | IEvLambda(lambdaValue)
-  | IEvBindings(nameSpace)
-  | IEvNumber(float)
-  | IEvRecord(map)
-  | IEvString(string)
-  | IEvSymbol(string)
-  | IEvTimeDuration(float)
-  | IEvType(map)
-  | IEvTypeIdentifier(string)
-  | IEvVoid
-@genType.opaque and squiggleArray = array<t>
-@genType.opaque and map = Belt.Map.String.t<t>
-@genType.opaque and nameSpace = NameSpace(Belt.MutableMap.String.t<t>, option<nameSpace>)
-@genType.opaque
-and lambdaValue = {
-  parameters: array<string>,
-  context: nameSpace,
-  body: internalCode,
-}
-@genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>
+type t = Reducer_T.value
 
 type internalExpressionValue = t
 
 type functionCall = (string, array<t>)
 
-let rec toString = aValue =>
+let rec toString = (aValue: T.value) =>
   switch aValue {
   | IEvArray(anArray) => toStringArray(anArray)
   | IEvArrayString(anArray) => toStringArrayString(anArray)
   | IEvBindings(m) => toStringBindings(m)
   | IEvBool(aBool) => toStringBool(aBool)
-  | IEvCall(fName) => toStringCall(fName)
+  // | IEvCall(fName) => toStringCall(fName)
   | IEvDate(date) => toStringDate(date)
   | IEvDeclaration(d) => toStringDeclaration(d)
   | IEvDistribution(dist) => toStringDistribution(dist)
@@ -53,7 +28,7 @@ let rec toString = aValue =>
   | IEvNumber(aNumber) => toStringNumber(aNumber)
   | IEvRecord(aMap) => aMap->toStringRecord
   | IEvString(aString) => toStringString(aString)
-  | IEvSymbol(aString) => toStringSymbol(aString)
+  // | IEvSymbol(aString) => toStringSymbol(aString)
   | IEvTimeDuration(t) => toStringTimeDuration(t)
   | IEvType(aMap) => toStringType(aMap)
   | IEvTypeIdentifier(id) => toStringTypeIdentifier(id)
@@ -73,9 +48,12 @@ and toStringCall = fName => `:${fName}`
 and toStringDate = date => DateTime.Date.toString(date)
 and toStringDeclaration = d => Declaration.toString(d, r => toString(IEvLambda(r)))
 and toStringDistribution = dist => GenericDist.toString(dist)
-and toStringLambda = lambdaValue =>
-  `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
-and toStringFunction = lambdaValue => `function(${Js.Array2.toString(lambdaValue.parameters)})`
+and toStringLambda = (lambdaValue: T.lambdaValue) =>
+  switch lambdaValue {
+    | LNoFFI({ parameters }) => `lambda(${parameters->Js.Array2.toString}=>internal code)` // TODO - serialize code too?
+    | LFFI(_) => `standard function` // TODO - serialize name, etc?
+  }
+and toStringFunction = (lambdaValue: T.lambdaValue) => `function(${Js.Array2.toString(lambdaValue.parameters)})`
 and toStringNumber = aNumber => Js.String.make(aNumber)
 and toStringRecord = aMap => aMap->toStringMap
 and toStringString = aString => `'${aString}'`
@@ -94,17 +72,25 @@ and toStringMap = aMap => {
   `{${pairs}}`
 }
 and toStringNameSpace = nameSpace => {
-  let NameSpace(container, parent) = nameSpace
-  FIXME_CALL_PARENTS
-  container->toStringMap
+  let T.NameSpace(container, parent) = nameSpace
+  let pairs =
+    container
+    ->Belt.MutableMap.String.toArray
+    ->Js.Array2.map(((eachKey, eachValue)) => `${eachKey}: ${toString(eachValue)}`)
+    ->Js.Array2.toString
+  
+  switch parent {
+    | Some(p) => `{${pairs}} / ${toStringNameSpace(p)}`
+    | None => `{${pairs}}`
+  }
 }
 
-let toStringWithType = aValue =>
+let toStringWithType = (aValue: T.value) =>
   switch aValue {
   | IEvArray(_) => `Array::${toString(aValue)}`
   | IEvArrayString(_) => `ArrayString::${toString(aValue)}`
   | IEvBool(_) => `Bool::${toString(aValue)}`
-  | IEvCall(_) => `Call::${toString(aValue)}`
+  // | IEvCall(_) => `Call::${toString(aValue)}`
   | IEvDate(_) => `Date::${toString(aValue)}`
   | IEvDeclaration(_) => `Declaration::${toString(aValue)}`
   | IEvDistribution(_) => `Distribution::${toString(aValue)}`
@@ -113,7 +99,7 @@ let toStringWithType = aValue =>
   | IEvNumber(_) => `Number::${toString(aValue)}`
   | IEvRecord(_) => `Record::${toString(aValue)}`
   | IEvString(_) => `String::${toString(aValue)}`
-  | IEvSymbol(_) => `Symbol::${toString(aValue)}`
+  // | IEvSymbol(_) => `Symbol::${toString(aValue)}`
   | IEvTimeDuration(_) => `Date::${toString(aValue)}`
   | IEvType(_) => `Type::${toString(aValue)}`
   | IEvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
@@ -154,7 +140,7 @@ type internalExpressionValueType =
   | EvtArray
   | EvtArrayString
   | EvtBool
-  | EvtCall
+  // | EvtCall
   | EvtDate
   | EvtDeclaration
   | EvtDistribution
@@ -163,7 +149,7 @@ type internalExpressionValueType =
   | EvtNumber
   | EvtRecord
   | EvtString
-  | EvtSymbol
+  // | EvtSymbol
   | EvtTimeDuration
   | EvtType
   | EvtTypeIdentifier
@@ -173,12 +159,12 @@ type functionCallSignature = CallSignature(string, array<internalExpressionValue
 type functionDefinitionSignature =
   FunctionDefinitionSignature(functionCallSignature, internalExpressionValueType)
 
-let valueToValueType = value =>
+let valueToValueType = (value: T.value) =>
   switch value {
   | IEvArray(_) => EvtArray
   | IEvArrayString(_) => EvtArrayString
   | IEvBool(_) => EvtBool
-  | IEvCall(_) => EvtCall
+  // | IEvCall(_) => EvtCall
   | IEvDate(_) => EvtDate
   | IEvDeclaration(_) => EvtDeclaration
   | IEvDistribution(_) => EvtDistribution
@@ -187,7 +173,7 @@ let valueToValueType = value =>
   | IEvNumber(_) => EvtNumber
   | IEvRecord(_) => EvtRecord
   | IEvString(_) => EvtString
-  | IEvSymbol(_) => EvtSymbol
+  // | IEvSymbol(_) => EvtSymbol
   | IEvTimeDuration(_) => EvtTimeDuration
   | IEvType(_) => EvtType
   | IEvTypeIdentifier(_) => EvtTypeIdentifier
@@ -204,7 +190,7 @@ let valueTypeToString = (valueType: internalExpressionValueType): string =>
   | EvtArray => `Array`
   | EvtArrayString => `ArrayString`
   | EvtBool => `Bool`
-  | EvtCall => `Call`
+  // | EvtCall => `Call`
   | EvtDate => `Date`
   | EvtDeclaration => `Declaration`
   | EvtDistribution => `Distribution`
@@ -213,7 +199,7 @@ let valueTypeToString = (valueType: internalExpressionValueType): string =>
   | EvtNumber => `Number`
   | EvtRecord => `Record`
   | EvtString => `String`
-  | EvtSymbol => `Symbol`
+  // | EvtSymbol => `Symbol`
   | EvtTimeDuration => `Duration`
   | EvtType => `Type`
   | EvtTypeIdentifier => `TypeIdentifier`
@@ -227,10 +213,4 @@ let functionCallSignatureToString = (functionCallSignature: functionCallSignatur
 
 let arrayToValueArray = (arr: array<t>): array<t> => arr
 
-let recordToKeyValuePairs = (record: map): array<(string, t)> => record->Belt.Map.String.toArray
-
-let nameSpaceToKeyValuePairs = (nameSpace: nameSpace): array<(string, t)> => {
-  let NameSpace(container, parent) = nameSpace
-  FIXME_CALL_PARENTS
-  container->Belt.MutableMap.String.toArray
-}
+let recordToKeyValuePairs = (record: T.map): array<(string, t)> => record->Belt.Map.String.toArray

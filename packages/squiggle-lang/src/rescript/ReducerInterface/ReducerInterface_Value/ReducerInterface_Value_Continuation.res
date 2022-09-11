@@ -1,8 +1,8 @@
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
-type t = InternalExpressionValue.nameSpace
+type t = Reducer_T.nameSpace
 
-let toValue = nameSpace => InternalExpressionValue.IEvBindings(nameSpace)
+let toValue = nameSpace => Reducer_T.IEvBindings(nameSpace)
 let toString = nameSpace => InternalExpressionValue.toString(toValue(nameSpace))
 let toStringResult = rNameSpace =>
   Belt.Result.map(rNameSpace, toValue(_))->InternalExpressionValue.toStringResult
@@ -19,9 +19,3 @@ let inspectOption = (oNameSpace, label: string) =>
   | Some(nameSpace) => inspect(nameSpace, label)
   | None => Js.log(`${label}: None`)
   }
-
-let minus = (NameSpace(thisContainer): t, NameSpace(thatContainer): t) => {
-  InternalExpressionValue.NameSpace(
-    Belt.Map.String.removeMany(thisContainer, Belt.Map.String.keysToArray(thatContainer)),
-  )
-}

@@ -1,6 +1,3 @@
-// module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
-// module ProjectReducerFnT = ReducerProject_ReducerFn_T
-
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
 
@@ -29,16 +26,16 @@ module Internals = {
 
   let map = (
     array: array<internalExpressionValue>,
-    accessors: ProjectAccessorsT.t,
     eLambdaValue,
-    reducer: ProjectReducerFnT.t,
-  ): ReducerInterface_InternalExpressionValue.t => {
+    env: Reducer_T.environment,
+    reducer: Reducer_T.reducerFn
+  ): internalExpressionValue => {
     let mappedList = array->E.A.reduceReverse(list{}, (acc, elem) => {
       let newElem = Reducer_Expression_Lambda.doLambdaCall(
         eLambdaValue,
-        list{elem},
-        (accessors: ProjectAccessorsT.t),
-        (reducer: ProjectReducerFnT.t),
+        [elem],
+        env,
+        reducer
       )
       list{newElem, ...acc}
     })
@@ -49,11 +46,11 @@ module Internals = {
     aValueArray,
     initialValue,
     aLambdaValue,
-    accessors: ProjectAccessorsT.t,
-    reducer: ProjectReducerFnT.t,
+    env: Reducer_T.environment,
+    reducer: Reducer_T.reducerFn
   ) => {
     aValueArray->E.A.reduce(initialValue, (acc, elem) =>
-      Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, accessors, reducer)
+      Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, [acc, elem], env, reducer)
     )
   }
 
@@ -61,26 +58,26 @@ module Internals = {
     aValueArray,
     initialValue,
     aLambdaValue,
-    accessors: ProjectAccessorsT.t,
-    reducer: ProjectReducerFnT.t,
+    env: Reducer_T.environment,
+    reducer: Reducer_T.reducerFn
   ) => {
     aValueArray->Belt.Array.reduceReverse(initialValue, (acc, elem) =>
-      Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, accessors, reducer)
+      Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, [acc, elem], env, reducer)
     )
   }
 
   let filter = (
     aValueArray,
     aLambdaValue,
-    accessors: ProjectAccessorsT.t,
-    reducer: ProjectReducerFnT.t,
+    env: Reducer_T.environment,
+    reducer: Reducer_T.reducerFn
   ) => {
     let mappedList = aValueArray->Belt.Array.reduceReverse(list{}, (acc, elem) => {
       let newElem = Reducer_Expression_Lambda.doLambdaCall(
         aLambdaValue,
-        list{elem},
-        accessors,
-        reducer,
+        [elem],
+        env,
+        reducer
       )
       switch newElem {
       | IEvBool(true) => list{elem, ...acc}
@@ -201,10 +198,10 @@ let library = [
       FnDefinition.make(
         ~name="map",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer) =>
+        ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(array), IEvLambda(lambda)] =>
-            Ok(Internals.map(array, accessors, lambda, reducer))
+            Ok(Internals.map(array, lambda, env, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -221,10 +218,10 @@ let library = [
       FnDefinition.make(
         ~name="reduce",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeAny, FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer) =>
+        ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
-            Ok(Internals.reduce(array, initialValue, lambda, accessors, reducer))
+            Ok(Internals.reduce(array, initialValue, lambda, env, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -241,10 +238,10 @@ let library = [
       FnDefinition.make(
         ~name="reduceReverse",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeAny, FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer: ProjectReducerFnT.t) =>
+        ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
-            Ok(Internals.reduceReverse(array, initialValue, lambda, accessors, reducer))
+            Ok(Internals.reduceReverse(array, initialValue, lambda, env, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -261,10 +258,10 @@ let library = [
       FnDefinition.make(
         ~name="filter",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer: ProjectReducerFnT.t) =>
+        ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvArray(array), IEvLambda(lambda)] =>
-            Ok(Internals.filter(array, lambda, accessors, reducer))
+            Ok(Internals.filter(array, lambda, env, reducer))
           | _ => Error(impossibleError)
           },
         (),

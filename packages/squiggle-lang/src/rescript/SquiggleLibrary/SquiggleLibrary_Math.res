@@ -15,7 +15,7 @@ let availableNumbers: array<(string, float)> = [
 
 let mathBindings: Bindings.t =
   availableNumbers
-  ->E.A2.fmap(((name, v)) => (name, ReducerInterface_InternalExpressionValue.IEvNumber(v)))
+  ->E.A2.fmap(((name, v)) => (name, Reducer_T.IEvNumber(v)))
   ->Bindings.fromArray
 
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>

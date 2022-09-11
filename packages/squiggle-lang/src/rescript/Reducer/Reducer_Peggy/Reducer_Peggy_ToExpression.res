@@ -2,11 +2,14 @@ module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
 module ExpressionT = Reducer_Expression_T
 module Parse = Reducer_Peggy_Parse
 
-type expression = ExpressionT.expression
+type expression = Reducer_T.expression
 
 let rec fromNode = (node: Parse.node): expression => {
   let caseBlock = nodeBlock =>
     ExpressionBuilder.eBlock(nodeBlock["statements"]->Js.Array2.map(fromNode))
+
+  let caseProgram = nodeProgram =>
+    ExpressionBuilder.eProgram(nodeProgram["statements"]->Js.Array2.map(fromNode))
 
   let caseLambda = (nodeLambda: Parse.nodeLambda): expression => {
     let args =
@@ -19,14 +22,14 @@ let rec fromNode = (node: Parse.node): expression => {
 
   switch Parse.castNodeType(node) {
   | PgNodeBlock(nodeBlock) => caseBlock(nodeBlock)
+  | PgNodeProgram(nodeProgram) => caseProgram(nodeProgram)
   | PgNodeBoolean(nodeBoolean) => ExpressionBuilder.eBool(nodeBoolean["value"])
-  | PgNodeExpression(nodeExpression) =>
-    ExpressionT.EList(nodeExpression["nodes"]->Js.Array2.map(fromNode))
+  | PgNodeCall(nodeCall) => ExpressionBuilder.eCall(fromNode(nodeCall["fn"]), nodeCall["args"]->Js.Array2.map(fromNode))
   | PgNodeFloat(nodeFloat) => ExpressionBuilder.eNumber(nodeFloat["value"])
   | PgNodeIdentifier(nodeIdentifier) => ExpressionBuilder.eSymbol(nodeIdentifier["value"])
   | PgNodeInteger(nodeInteger) => ExpressionBuilder.eNumber(Belt.Int.toFloat(nodeInteger["value"]))
   | PgNodeKeyValue(nodeKeyValue) =>
-    ExpressionT.EList(list{fromNode(nodeKeyValue["key"]), fromNode(nodeKeyValue["value"])})
+    ExpressionBuilder.eArray([fromNode(nodeKeyValue["key"]), fromNode(nodeKeyValue["value"])])
   | PgNodeLambda(nodeLambda) => caseLambda(nodeLambda)
   | PgNodeLetStatement(nodeLetStatement) =>
     ExpressionBuilder.eLetStatement(
@@ -42,8 +45,8 @@ let rec fromNode = (node: Parse.node): expression => {
       fromNode(nodeTernary["trueExpression"]),
       fromNode(nodeTernary["falseExpression"])
     )
-  | PgNodeTypeIdentifier(nodeTypeIdentifier) =>
-    ExpressionBuilder.eTypeIdentifier(nodeTypeIdentifier["value"])
+  // | PgNodeTypeIdentifier(nodeTypeIdentifier) =>
+  //   ExpressionBuilder.eTypeIdentifier(nodeTypeIdentifier["value"])
   | PgNodeVoid(_) => ExpressionBuilder.eVoid
   }
 }

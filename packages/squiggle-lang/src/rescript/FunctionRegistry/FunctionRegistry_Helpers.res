@@ -6,11 +6,11 @@ module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)
   let pointSet = r => DistributionTypes.PointSet(r)
   let sampleSet = r => DistributionTypes.SampleSet(r)
-  let evDistribution = r => ReducerInterface_InternalExpressionValue.IEvDistribution(r)
-  let evNumber = r => ReducerInterface_InternalExpressionValue.IEvNumber(r)
-  let evArray = r => ReducerInterface_InternalExpressionValue.IEvArray(r)
-  let evRecord = r => ReducerInterface_InternalExpressionValue.IEvRecord(r)
-  let evString = r => ReducerInterface_InternalExpressionValue.IEvString(r)
+  let evDistribution = r => Reducer_T.IEvDistribution(r)
+  let evNumber = r => Reducer_T.IEvNumber(r)
+  let evArray = r => Reducer_T.IEvArray(r)
+  let evRecord = r => Reducer_T.IEvRecord(r)
+  let evString = r => Reducer_T.IEvString(r)
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
   let evArrayOfEvNumber = xs => xs->Belt.Array.map(evNumber)->evArray
 }

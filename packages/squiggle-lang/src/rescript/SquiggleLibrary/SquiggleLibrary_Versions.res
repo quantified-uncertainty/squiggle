@@ -1,9 +1,9 @@
 module Bindings = Reducer_Bindings
 
-let bindings: Bindings.t =
+let bindings: Reducer_T.nameSpace =
   [
-    ("System.version", ReducerInterface_InternalExpressionValue.IEvString("0.4.0-dev")),
+    ("System.version", Reducer_T.IEvString("0.4.0-dev")),
   ]->Bindings.fromArray
 
-let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
+let makeBindings = (previousBindings: Reducer_T.nameSpace): Reducer_T.nameSpace =>
   previousBindings->Bindings.mergeFrom(bindings)

@@ -1,5 +1,3 @@
-// module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
-// module ProjectReducerFnT = ReducerProject_ReducerFn_T
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
 
@@ -12,16 +10,16 @@ module Internal = {
   let doLambdaCall = (
     aLambdaValue,
     list,
-    accessors: ProjectAccessorsT.t,
-    reducer: ProjectReducerFnT.t,
+    env: Reducer_T.environment,
+    reducer: Reducer_T.reducerFn,
   ) =>
-    switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, accessors, reducer) {
+    switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, env, reducer) {
     | IEvNumber(f) => Ok(f)
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
 
   let toType = (r): result<
-    ReducerInterface_InternalExpressionValue.t,
+    Reducer_T.value,
     Reducer_ErrorValue.errorValue,
   > =>
     switch r {
@@ -30,26 +28,26 @@ module Internal = {
     }
 
   //TODO: I don't know why this seems to need at least one input
-  let fromFn = (aLambdaValue, accessors: ProjectAccessorsT.t, reducer: ProjectReducerFnT.t) => {
-    let sampleCount = accessors.environment.sampleCount
-    let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, accessors, reducer)
+  let fromFn = (aLambdaValue, environment: Reducer_T.environment, reducer: Reducer_T.reducerFn) => {
+    let sampleCount = environment.sampleCount
+    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], environment, reducer)
     Belt_Array.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
   }
 
-  let map1 = (sampleSetDist: t, aLambdaValue, accessors: ProjectAccessorsT.t, reducer) => {
-    let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, accessors, reducer)
+  let map1 = (sampleSetDist: t, aLambdaValue, environment: Reducer_T.environment, reducer) => {
+    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], environment, reducer)
     SampleSetDist.samplesMap(~fn, sampleSetDist)->toType
   }
 
-  let map2 = (t1: t, t2: t, aLambdaValue, accessors: ProjectAccessorsT.t, reducer) => {
+  let map2 = (t1: t, t2: t, aLambdaValue, environment: Reducer_T.environment, reducer) => {
     let fn = (a, b) =>
-      doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b)}, accessors, reducer)
+      doLambdaCall(aLambdaValue, [IEvNumber(a), IEvNumber(b)], environment, reducer)
     SampleSetDist.map2(~fn, ~t1, ~t2)->toType
   }
 
-  let map3 = (t1: t, t2: t, t3: t, aLambdaValue, accessors: ProjectAccessorsT.t, reducer) => {
+  let map3 = (t1: t, t2: t, t3: t, aLambdaValue, environment: Reducer_T.environment, reducer) => {
     let fn = (a, b, c) =>
-      doLambdaCall(aLambdaValue, list{IEvNumber(a), IEvNumber(b), IEvNumber(c)}, accessors, reducer)
+      doLambdaCall(aLambdaValue, [IEvNumber(a), IEvNumber(b), IEvNumber(c)], environment, reducer)
     SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
   }
 
@@ -67,7 +65,7 @@ module Internal = {
   let mapN = (
     aValueArray: array<internalExpressionValue>,
     aLambdaValue,
-    accessors: ProjectAccessorsT.t,
+    environment: Reducer_T.environment,
     reducer,
   ) => {
     switch parseSampleSetArray(aValueArray) {
@@ -75,8 +73,8 @@ module Internal = {
       let fn = a =>
         doLambdaCall(
           aLambdaValue,
-          list{IEvArray(E.A.fmap(x => Wrappers.evNumber(x), a))},
-          accessors,
+          [IEvArray(E.A.fmap(x => Wrappers.evNumber(x), a))],
+          environment,
           reducer,
         )
       SampleSetDist.mapN(~fn, ~t1)->toType
@@ -96,10 +94,10 @@ let libaryBase = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(_, inputs, accessors: ProjectAccessorsT.t, _) =>
+        ~run=(_, inputs, environment, _) =>
           switch inputs {
           | [FRValueDist(dist)] =>
-            GenericDist.toSampleSetDist(dist, accessors.environment.sampleCount)
+            GenericDist.toSampleSetDist(dist, environment.sampleCount)
             ->E.R2.fmap(Wrappers.sampleSet)
             ->E.R2.fmap(Wrappers.evDistribution)
             ->E.R2.errMap(DistributionTypes.Error.toString)
@@ -163,10 +161,10 @@ let libaryBase = [
       FnDefinition.make(
         ~name="fromFn",
         ~inputs=[FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer: ProjectReducerFnT.t) =>
+        ~run=(inputs, _, environment, reducer) =>
           switch inputs {
           | [IEvLambda(lambda)] =>
-            switch Internal.fromFn(lambda, accessors, reducer) {
+            switch Internal.fromFn(lambda, environment, reducer) {
             | Ok(r) => Ok(r->Wrappers.sampleSet->Wrappers.evDistribution)
             | Error(e) => Error(Operation.Error.toString(e))
             }
@@ -187,10 +185,10 @@ let libaryBase = [
       FnDefinition.make(
         ~name="map",
         ~inputs=[FRTypeDist, FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer) =>
+        ~run=(inputs, _, environment, reducer) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist)), IEvLambda(lambda)] =>
-            Internal.map1(dist, lambda, accessors, reducer)->E.R2.errMap(_ => "")
+            Internal.map1(dist, lambda, environment, reducer)->E.R2.errMap(_ => "")
           | _ => Error(impossibleError)
           },
         (),
@@ -210,14 +208,14 @@ let libaryBase = [
       FnDefinition.make(
         ~name="map2",
         ~inputs=[FRTypeDist, FRTypeDist, FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer) => {
+        ~run=(inputs, _, environment, reducer) => {
           switch inputs {
           | [
               IEvDistribution(SampleSet(dist1)),
               IEvDistribution(SampleSet(dist2)),
               IEvLambda(lambda),
             ] =>
-            Internal.map2(dist1, dist2, lambda, accessors, reducer)->E.R2.errMap(_ => "")
+            Internal.map2(dist1, dist2, lambda, environment, reducer)->E.R2.errMap(_ => "")
           | _ => Error(impossibleError)
           }
         },
@@ -238,7 +236,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="map3",
         ~inputs=[FRTypeDist, FRTypeDist, FRTypeDist, FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer) =>
+        ~run=(inputs, _, environment, reducer) =>
           switch inputs {
           | [
               IEvDistribution(SampleSet(dist1)),
@@ -246,7 +244,7 @@ let libaryBase = [
               IEvDistribution(SampleSet(dist3)),
               IEvLambda(lambda),
             ] =>
-            Internal.map3(dist1, dist2, dist3, lambda, accessors, reducer)->E.R2.errMap(_ => "")
+            Internal.map3(dist1, dist2, dist3, lambda, environment, reducer)->E.R2.errMap(_ => "")
           | _ => Error(impossibleError)
           },
         (),
@@ -266,10 +264,10 @@ let libaryBase = [
       FnDefinition.make(
         ~name="mapN",
         ~inputs=[FRTypeArray(FRTypeDist), FRTypeLambda],
-        ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer) =>
+        ~run=(inputs, _, environment, reducer) =>
           switch inputs {
           | [IEvArray(dists), IEvLambda(lambda)] =>
-            Internal.mapN(dists, lambda, accessors, reducer)->E.R2.errMap(_e => {
+            Internal.mapN(dists, lambda, environment, reducer)->E.R2.errMap(_e => {
               "AHHH doesn't work"
             })
           | _ => Error(impossibleError)

@@ -62,13 +62,13 @@ export class SqBoolValue extends SqAbstractValue {
   }
 }
 
-export class SqCallValue extends SqAbstractValue {
-  tag = Tag.Call as const;
+// export class SqCallValue extends SqAbstractValue {
+//   tag = Tag.Call as const;
 
-  get value() {
-    return this.valueMethod(RSValue.getCall);
-  }
-}
+//   get value() {
+//     return this.valueMethod(RSValue.getCall);
+//   }
+// }
 
 export class SqDateValue extends SqAbstractValue {
   tag = Tag.Date as const;
@@ -134,13 +134,13 @@ export class SqStringValue extends SqAbstractValue {
   }
 }
 
-export class SqSymbolValue extends SqAbstractValue {
-  tag = Tag.Symbol as const;
+// export class SqSymbolValue extends SqAbstractValue {
+//   tag = Tag.Symbol as const;
 
-  get value(): string {
-    return this.valueMethod(RSValue.getSymbol);
-  }
-}
+//   get value(): string {
+//     return this.valueMethod(RSValue.getSymbol);
+//   }
+// }
 
 export class SqTimeDurationValue extends SqAbstractValue {
   tag = Tag.TimeDuration as const;
@@ -178,7 +178,7 @@ const tagToClass = {
   [Tag.Array]: SqArrayValue,
   [Tag.ArrayString]: SqArrayStringValue,
   [Tag.Bool]: SqBoolValue,
-  [Tag.Call]: SqCallValue,
+  // [Tag.Call]: SqCallValue,
   [Tag.Date]: SqDateValue,
   [Tag.Declaration]: SqDeclarationValue,
   [Tag.Distribution]: SqDistributionValue,
@@ -187,7 +187,7 @@ const tagToClass = {
   [Tag.Number]: SqNumberValue,
   [Tag.Record]: SqRecordValue,
   [Tag.String]: SqStringValue,
-  [Tag.Symbol]: SqSymbolValue,
+  // [Tag.Symbol]: SqSymbolValue,
   [Tag.TimeDuration]: SqTimeDurationValue,
   [Tag.Type]: SqTypeValue,
   [Tag.TypeIdentifier]: SqTypeIdentifierValue,
@@ -200,7 +200,7 @@ export type SqValue =
   | SqArrayValue
   | SqArrayStringValue
   | SqBoolValue
-  | SqCallValue
+  // | SqCallValue
   | SqDateValue
   | SqDeclarationValue
   | SqDistributionValue
@@ -209,7 +209,7 @@ export type SqValue =
   | SqNumberValue
   | SqRecordValue
   | SqStringValue
-  | SqSymbolValue
+  // | SqSymbolValue
   | SqTimeDurationValue
   | SqTypeValue
   | SqTypeIdentifierValue

@@ -17,7 +17,7 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
   let expressionValue =
     xyCoords
     ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-    ->E.R2.fmap(r => ReducerInterface_InternalExpressionValue.IEvDistribution(
+    ->E.R2.fmap(r => Reducer_T.IEvDistribution(
       PointSet(makeDist(r)),
     ))
   expressionValue
@@ -27,7 +27,7 @@ module Internal = {
   type t = PointSetDist.t
 
   let toType = (r): result<
-    ReducerInterface_InternalExpressionValue.t,
+    Reducer_T.value,
     Reducer_ErrorValue.errorValue,
   > =>
     switch r {
@@ -35,14 +35,14 @@ module Internal = {
     | Error(err) => Error(REOperationError(err))
     }
 
-  let doLambdaCall = (aLambdaValue, list, environment, reducer) =>
-    switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, environment, reducer) {
-    | IEvNumber(f) => Ok(f)
+  let doLambdaCall = (aLambdaValue, list, env, reducer) =>
+    switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, env, reducer) {
+    | Reducer_T.IEvNumber(f) => Ok(f)
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
 
   let mapY = (pointSetDist: t, aLambdaValue, env, reducer) => {
-    let fn = r => doLambdaCall(aLambdaValue, list{IEvNumber(r)}, env, reducer)
+    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], env, reducer)
     PointSetDist.T.mapYResult(~fn, pointSetDist)->toType
   }
 }
@@ -58,13 +58,13 @@ let library = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(_, inputs, accessors, _) =>
+        ~run=(_, inputs, env, _) =>
           switch inputs {
           | [FRValueDist(dist)] =>
             GenericDist.toPointSet(
               dist,
-              ~xyPointLength=accessors.environment.xyPointLength,
-              ~sampleCount=accessors.environment.sampleCount,
+              ~xyPointLength=env.xyPointLength,
+              ~sampleCount=env.sampleCount,
               (),
             )
             ->E.R2.fmap(Wrappers.pointSet)
