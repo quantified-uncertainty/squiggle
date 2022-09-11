@@ -22,7 +22,7 @@ let rec reduceExpressionInProject = (
   continuation: T.bindings,
   accessors: ProjectAccessorsT.t,
 ): result<InternalExpressionValue.t, 'e> => {
-  // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
+  // `reduce: ${T.toString(expression)}`->Js.log
   switch expression {
   | T.EValue(value) => value->Ok
   | T.EList(list) =>

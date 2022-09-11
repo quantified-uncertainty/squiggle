@@ -152,6 +152,41 @@ let dispatchMacroCall = (
     )
   }
 
+  let doEnvironment = (accessors: ProjectAccessorsT.t) => {
+    let environment = accessors.environment
+    let environmentPairs = [
+      ("sampleCount", environment.sampleCount->Js.Int.toFloat->InternalExpressionValue.IEvNumber),
+      (
+        "xyPointLength",
+        environment.xyPointLength->Js.Int.toFloat->InternalExpressionValue.IEvNumber,
+      ),
+    ]
+    let environmentMap = Belt.Map.String.fromArray(environmentPairs)
+    ExpressionWithContext.noContext(ExpressionBuilder.eRecord(environmentMap))->Ok
+  }
+
+  let doWithEnvironmentSampleCount = (
+    sampleCountExpr: expression,
+    expr: expression,
+    bindings: ExpressionT.bindings,
+    accessors: ProjectAccessorsT.t,
+  ) => {
+    let blockSampleCount = ExpressionBuilder.eBlock(list{sampleCountExpr})
+    let rSampleCount = reduceExpression(blockSampleCount, bindings, accessors)
+    rSampleCount->Result.flatMap(sampleCountValue =>
+      switch sampleCountValue {
+      | InternalExpressionValue.IEvNumber(sampleCount) => {
+          let newEnvironment = {...accessors.environment, sampleCount: Js.Math.floor(sampleCount)}
+          let newAccessors = {...accessors, environment: newEnvironment}
+          reduceExpression(expr, bindings, newAccessors)->Belt.Result.map(value =>
+            value->ExpressionT.EValue->ExpressionWithContext.noContext
+          )
+        }
+      | _ => REExpectedType("Number", "")->Error
+      }
+    )
+  }
+
   let expandExpressionList = (aList, bindings: ExpressionT.bindings, accessors): result<
     expressionWithContext,
     errorValue,
@@ -185,6 +220,13 @@ let dispatchMacroCall = (
       doLambdaDefinition(bindings, parameters, lambdaDefinition)
     | list{ExpressionT.EValue(IEvCall("$$_ternary_$$")), condition, ifTrue, ifFalse} =>
       doTernary(condition, ifTrue, ifFalse, bindings, accessors)
+    | list{ExpressionT.EValue(IEvCall("$$_environment_$$"))} => doEnvironment(accessors)
+    | list{
+        ExpressionT.EValue(IEvCall("$$_withEnvironmentSampleCount_$$")),
+        expr,
+        sampleCountExpr,
+      } =>
+      doWithEnvironmentSampleCount(sampleCountExpr, expr, bindings, accessors)
     | _ => ExpressionWithContext.noContext(ExpressionT.EList(aList))->Ok
     }
 
