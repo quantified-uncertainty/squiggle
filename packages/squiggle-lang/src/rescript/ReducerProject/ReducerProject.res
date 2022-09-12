@@ -187,8 +187,12 @@ let linkDependencies = (project: t, sourceId: string): ProjectItem.T.continuatio
 let doLinkAndRun = (project: t, sourceId: string): unit => {
   let context = Reducer_Context.createContext(project->getStdLib, project->getEnvironment)
   // FIXME: fill context with dependencies
-  // let continuation = linkDependencies(project, sourceId)
-  let newItem = project->getItem(sourceId)->ProjectItem.run(context)
+  let continuation = linkDependencies(project, sourceId)
+  let contextWithContinuation = {
+    ...context,
+    bindings: continuation->Reducer_Bindings.extend,
+  }
+  let newItem = project->getItem(sourceId)->ProjectItem.run(contextWithContinuation)
   // Js.log("after run " ++ newItem.continuation->Reducer_Bindings.toString)
   project->setItem(sourceId, newItem)
 }
