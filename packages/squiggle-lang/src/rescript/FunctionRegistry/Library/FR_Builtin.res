@@ -38,10 +38,39 @@ let makeBinaryFn = (name: string, fn: (float, float) => float) => {
   )
 }
 
+let makeBinaryCmpFn = (name: string, fn: (float, float) => bool) => {
+  makeFn(
+    name,
+    [FRTypeNumber, FRTypeNumber],
+    inputs => {
+      switch inputs {
+      | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvBool->Ok
+      | _ => Error(impossibleError)
+      }
+    }
+  )
+}
+
 let library = [
   // TODO - other MathJS
   makeBinaryFn("add", (x, y) => x +. y),
   makeBinaryFn("subtract", (x, y) => x -. y),
   makeBinaryFn("multiply", (x, y) => x *. y),
   makeBinaryFn("divide", (x, y) => x /. y),
+  makeBinaryFn("pow", (x, y) => Js.Math.pow_float(~base=x, ~exp=y)),
+  makeBinaryCmpFn("equal", (x, y) => x == y),
+  makeBinaryCmpFn("smaller", (x, y) => x < y),
+  makeBinaryCmpFn("smallerEq", (x, y) => x <= y),
+  makeBinaryCmpFn("larger", (x, y) => x > y),
+  makeBinaryCmpFn("largerEq", (x, y) => x >= y),
+  makeFn(
+    "unaryMinus",
+    [FRTypeNumber],
+    inputs => {
+      switch inputs {
+      | [IEvNumber(x)] => IEvNumber(-.x)->Ok
+      | _ => Error(impossibleError)
+      }
+    }
+  )
 ]
