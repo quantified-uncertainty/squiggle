@@ -75,6 +75,7 @@ rec {
       # custom gitignore so that the flake keeps build artefacts
       mv .gitignore GITIGNORE
       sed -i /Reducer_Peggy_GeneratedParser.js/d GITIGNORE
+      sed -i /ReducerProject_IncludeParser.js/d GITIGNORE
       sed -i /\*.bs.js/d GITIGNORE
       sed -i /\*.gen.ts/d GITIGNORE
       sed -i /\*.gen.tsx/d GITIGNORE
