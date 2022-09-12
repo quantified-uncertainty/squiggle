@@ -7,7 +7,7 @@ let doLambdaCall = (
   lambdaValue: Reducer_T.lambdaValue,
   args,
   environment: Reducer_T.environment,
-  reducer: Reducer_T.reducerFn
+  reducer: Reducer_T.reducerFn,
 ): Reducer_T.value => {
   lambdaValue.body(args, environment, reducer)
 }
@@ -25,7 +25,7 @@ let makeLambda = (
   let lambda = (
     arguments: array<Reducer_T.value>,
     environment: Reducer_T.environment,
-    reducer: Reducer_T.reducerFn
+    reducer: Reducer_T.reducerFn,
   ) => {
     let argsLength = arguments->Js.Array2.length
     let parametersLength = parameters->Js.Array2.length
@@ -34,23 +34,21 @@ let makeLambda = (
     }
 
     let localBindings = bindings->Reducer_Bindings.extend
-    parameters->Js.Array2.forEachi(
-      (parameter, index) => {
-        let _ = localBindings->Reducer_Bindings.set(parameter, arguments[index])
-      }
-    )
+    parameters->Js.Array2.forEachi((parameter, index) => {
+      let _ = localBindings->Reducer_Bindings.set(parameter, arguments[index])
+    })
 
-    reducer(body, { bindings: localBindings, environment })
+    reducer(body, {bindings: localBindings, environment: environment})
   }
 
   {
     // context: bindings,
     body: lambda,
-    parameters,
+    parameters: parameters,
   }
 }
 
 let makeFFILambda = (body: Reducer_T.lambdaBody): Reducer_T.lambdaValue => {
-  body,
-  parameters: ["..."]
+  body: body,
+  parameters: ["..."],
 }

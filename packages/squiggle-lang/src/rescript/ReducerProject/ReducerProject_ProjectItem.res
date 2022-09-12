@@ -81,8 +81,10 @@ let setRawParse = (r: t, rawParse: T.rawParseArgumentType): t =>
 let setExpression = (r: t, expression: T.expressionArgumentType): t =>
   {...r, expression: Some(expression)}->touchExpression
 
-let setContinuation = (r: t, continuation: T.continuationArgumentType): t =>
-  {...r, continuation: continuation}
+let setContinuation = (r: t, continuation: T.continuationArgumentType): t => {
+  ...r,
+  continuation: continuation,
+}
 
 let setResult = (r: t, result: T.resultArgumentType): t => {
   ...r,
@@ -115,10 +117,10 @@ let setIncludes = (this: t, includes: T.includesType): t => {
   includes: includes,
 }
 
-let setImportAsVariables = (
-  this: t,
-  includeAsVariables: T.importAsVariablesType,
-): t => {...this, includeAsVariables: includeAsVariables}
+let setImportAsVariables = (this: t, includeAsVariables: T.importAsVariablesType): t => {
+  ...this,
+  includeAsVariables: includeAsVariables,
+}
 
 let setDirectImports = (this: t, directIncludes: array<string>): t => {
   ...this,
@@ -161,38 +163,26 @@ let buildExpression = (this: t): t => {
   switch this->getExpression {
   | Some(_) => this // cached
   | None =>
-    this
-    ->doBuildExpression
-    ->Belt.Option.map(setExpression(this, _))
-    ->E.O2.defaultFn(() => this)
+    this->doBuildExpression->Belt.Option.map(setExpression(this, _))->E.O2.defaultFn(() => this)
   }
 }
 
-let failRun = (
-  this: t,
-  e: Reducer_ErrorValue.errorValue
-): t => this->setResult(e->Error)->setContinuation(Reducer_Bindings.makeEmptyBindings())
+let failRun = (this: t, e: Reducer_ErrorValue.errorValue): t =>
+  this->setResult(e->Error)->setContinuation(Reducer_Bindings.makeEmptyBindings())
 
-let doRun = (
-  this: t,
-  context: Reducer_T.context
-): t =>
+let doRun = (this: t, context: Reducer_T.context): t =>
   switch this->getExpression {
-    | Some(expressionResult) => {
-        switch expressionResult {
-        | Ok(expression) => {
-          try {
-            let result = Reducer_Expression.evaluate(expression, context)
-            this->setResult(result->Ok)->setContinuation(context.bindings)
-          } catch {
-          | Reducer_ErrorValue.ErrorException(e) => this->failRun(e)
-          | _ => this->failRun(RETodo("unhandled rescript exception"))
-          }
-        }
-        | Error(e) => this->failRun(e)
+  | Some(expressionResult) => switch expressionResult {
+    | Ok(expression) => try {
+        let result = Reducer_Expression.evaluate(expression, context)
+        this->setResult(result->Ok)->setContinuation(context.bindings)
+      } catch {
+      | Reducer_ErrorValue.ErrorException(e) => this->failRun(e)
+      | _ => this->failRun(RETodo("unhandled rescript exception"))
       }
+    | Error(e) => this->failRun(e)
     }
-    | None => this->failRun(RETodo("attempt to run without expression"))
+  | None => this->failRun(RETodo("attempt to run without expression"))
   }
 
 let run = (this: t, context: Reducer_T.context): t => {

@@ -1,4 +1,3 @@
-module BBindingsReplacer = Reducer_Expression_BindingsReplacer
 module BErrorValue = Reducer_ErrorValue
 module T = Reducer_T
 
@@ -14,13 +13,9 @@ let eBindings = (anArray: array<(string, T.value)>) =>
 
 let eBool = aBool => aBool->T.IEvBool->T.EValue
 
-let eCall = (fn: expression, args: array<expression>): expression =>
-  T.ECall(fn, args)
+let eCall = (fn: expression, args: array<expression>): expression => T.ECall(fn, args)
 
-let eLambda = (
-  parameters: array<string>,
-  expr: expression,
-) => T.ELambda(parameters, expr)
+let eLambda = (parameters: array<string>, expr: expression) => T.ELambda(parameters, expr)
 
 let eNumber = aNumber => aNumber->T.IEvNumber->T.EValue
 
@@ -28,26 +23,26 @@ let eRecord = (aMap: array<(T.expression, T.expression)>) => aMap->T.ERecord
 
 let eString = aString => aString->T.IEvString->T.EValue
 
-let eSymbol = (name: string): expression =>
-  T.ESymbol(name)
+let eSymbol = (name: string): expression => T.ESymbol(name)
 
-let eBlock = (exprs: array<expression>): expression =>
-  T.EBlock(exprs)
+let eBlock = (exprs: array<expression>): expression => T.EBlock(exprs)
 
-let eProgram = (exprs: array<expression>): expression =>
-  T.EProgram(exprs)
+let eProgram = (exprs: array<expression>): expression => T.EProgram(exprs)
 
-let eModule = (nameSpace: T.nameSpace): expression =>
-  nameSpace->T.IEvBindings->T.EValue
+let eModule = (nameSpace: T.nameSpace): expression => nameSpace->T.IEvBindings->T.EValue
 
-let eLetStatement = (symbol: string, valueExpression: expression): expression =>
-  T.EAssign(symbol, valueExpression)
+let eLetStatement = (symbol: string, valueExpression: expression): expression => T.EAssign(
+  symbol,
+  valueExpression,
+)
 
-let eTernary = (predicate: expression, trueCase: expression, falseCase: expression): expression =>
-  T.ETernary(predicate, trueCase, falseCase)
+let eTernary = (
+  predicate: expression,
+  trueCase: expression,
+  falseCase: expression,
+): expression => T.ETernary(predicate, trueCase, falseCase)
 
-let eIdentifier = (name: string): expression =>
-  name->T.ESymbol
+let eIdentifier = (name: string): expression => name->T.ESymbol
 
 // let eTypeIdentifier = (name: string): expression =>
 //   name->T.IEvTypeIdentifier->T.EValue

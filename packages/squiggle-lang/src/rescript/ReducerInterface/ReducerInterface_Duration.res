@@ -3,7 +3,7 @@ module T = Reducer_T
 type internalExpressionValue = IEV.t
 
 let dispatch = (call: IEV.functionCall, _: T.environment): option<
-  result<Reducer_T.value, Reducer_ErrorValue.errorValue>
+  result<Reducer_T.value, Reducer_ErrorValue.errorValue>,
 > => {
   switch call {
   | ("toString", [IEvTimeDuration(t)]) => T.IEvString(DateTime.Duration.toString(t))->Ok->Some
@@ -14,8 +14,7 @@ let dispatch = (call: IEV.functionCall, _: T.environment): option<
   | ("fromUnit_hours", [IEvNumber(f)]) =>
     T.IEvTimeDuration(DateTime.Duration.fromHours(f))->Ok->Some
   | ("days", [IEvNumber(f)]) => T.IEvTimeDuration(DateTime.Duration.fromDays(f))->Ok->Some
-  | ("fromUnit_days", [IEvNumber(f)]) =>
-    T.IEvTimeDuration(DateTime.Duration.fromDays(f))->Ok->Some
+  | ("fromUnit_days", [IEvNumber(f)]) => T.IEvTimeDuration(DateTime.Duration.fromDays(f))->Ok->Some
   | ("years", [IEvNumber(f)]) => T.IEvTimeDuration(DateTime.Duration.fromYears(f))->Ok->Some
   | ("fromUnit_years", [IEvNumber(f)]) =>
     T.IEvTimeDuration(DateTime.Duration.fromYears(f))->Ok->Some

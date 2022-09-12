@@ -28,15 +28,10 @@ module Internals = {
     array: array<internalExpressionValue>,
     eLambdaValue,
     env: Reducer_T.environment,
-    reducer: Reducer_T.reducerFn
+    reducer: Reducer_T.reducerFn,
   ): internalExpressionValue => {
     let mappedList = array->E.A.reduceReverse(list{}, (acc, elem) => {
-      let newElem = Reducer_Expression_Lambda.doLambdaCall(
-        eLambdaValue,
-        [elem],
-        env,
-        reducer
-      )
+      let newElem = Reducer_Expression_Lambda.doLambdaCall(eLambdaValue, [elem], env, reducer)
       list{newElem, ...acc}
     })
     mappedList->Belt.List.toArray->Wrappers.evArray
@@ -47,7 +42,7 @@ module Internals = {
     initialValue,
     aLambdaValue,
     env: Reducer_T.environment,
-    reducer: Reducer_T.reducerFn
+    reducer: Reducer_T.reducerFn,
   ) => {
     aValueArray->E.A.reduce(initialValue, (acc, elem) =>
       Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, [acc, elem], env, reducer)
@@ -59,7 +54,7 @@ module Internals = {
     initialValue,
     aLambdaValue,
     env: Reducer_T.environment,
-    reducer: Reducer_T.reducerFn
+    reducer: Reducer_T.reducerFn,
   ) => {
     aValueArray->Belt.Array.reduceReverse(initialValue, (acc, elem) =>
       Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, [acc, elem], env, reducer)
@@ -70,15 +65,10 @@ module Internals = {
     aValueArray,
     aLambdaValue,
     env: Reducer_T.environment,
-    reducer: Reducer_T.reducerFn
+    reducer: Reducer_T.reducerFn,
   ) => {
     let mappedList = aValueArray->Belt.Array.reduceReverse(list{}, (acc, elem) => {
-      let newElem = Reducer_Expression_Lambda.doLambdaCall(
-        aLambdaValue,
-        [elem],
-        env,
-        reducer
-      )
+      let newElem = Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, [elem], env, reducer)
       switch newElem {
       | IEvBool(true) => list{elem, ...acc}
       | _ => acc
@@ -124,7 +114,8 @@ let library = [
         ~run=(_, inputs, _, _) =>
           inputs
           ->Prepare.ToValueTuple.twoNumbers
-          ->E.R2.fmap(((low, high)) => Internals.upTo(low, high)),
+          ->E.R2.fmap(((low, high)) => Internals.upTo(low, high))
+          ->E.R2.errMap(wrapError),
         (),
       ),
     ],
@@ -141,7 +132,7 @@ let library = [
         ~inputs=[FRTypeArray(FRTypeAny)],
         ~run=(inputs, _, _, _) =>
           switch inputs {
-          | [IEvArray(array)] => Internals.first(array)
+          | [IEvArray(array)] => Internals.first(array)->E.R2.errMap(wrapError)
           | _ => Error(impossibleError)
           },
         (),
@@ -160,7 +151,7 @@ let library = [
         ~inputs=[FRTypeArray(FRTypeAny)],
         ~run=(inputs, _, _, _) =>
           switch inputs {
-          | [IEvArray(array)] => Internals.last(array)
+          | [IEvArray(array)] => Internals.last(array)->E.R2.errMap(wrapError)
           | _ => Error(impossibleError)
           },
         (),
@@ -200,8 +191,7 @@ let library = [
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
-          | [IEvArray(array), IEvLambda(lambda)] =>
-            Ok(Internals.map(array, lambda, env, reducer))
+          | [IEvArray(array), IEvLambda(lambda)] => Ok(Internals.map(array, lambda, env, reducer))
           | _ => Error(impossibleError)
           },
         (),

@@ -18,12 +18,10 @@ module Declaration = {
         inputs
         ->E.A2.fmap(getMinMax)
         ->E.A.R.firstErrorOrOpen
-        ->E.R2.fmap(args => Reducer_T.IEvDeclaration(
-          Declaration.make(lambda, args),
-        ))
+        ->E.R2.fmap(args => Reducer_T.IEvDeclaration(Declaration.make(lambda, args)))
       }
     | Error(r) => Error(r)
-    | Ok(_) => Error(FunctionRegistry_Helpers.impossibleError)
+    | Ok(_) => Error(impossibleErrorString)
     }
   }
 }
@@ -52,7 +50,7 @@ let library = [
         ~name="declare",
         ~inputs=[Declaration.frType],
         ~run=(_, inputs, _, _) => {
-          inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)
+          inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)->E.R2.errMap(wrapError)
         },
         (),
       ),

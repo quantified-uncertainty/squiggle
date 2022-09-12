@@ -50,7 +50,8 @@ and toStringDeclaration = d => Declaration.toString(d, r => toString(IEvLambda(r
 and toStringDistribution = dist => GenericDist.toString(dist)
 and toStringLambda = (lambdaValue: T.lambdaValue) =>
   `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
-and toStringFunction = (lambdaValue: T.lambdaValue) => `function(${Js.Array2.toString(lambdaValue.parameters)})`
+and toStringFunction = (lambdaValue: T.lambdaValue) =>
+  `function(${Js.Array2.toString(lambdaValue.parameters)})`
 and toStringNumber = aNumber => Js.String.make(aNumber)
 and toStringRecord = aMap => aMap->toStringMap
 and toStringString = aString => `'${aString}'`
@@ -75,10 +76,10 @@ and toStringNameSpace = nameSpace => {
     ->Belt.MutableMap.String.toArray
     ->Js.Array2.map(((eachKey, eachValue)) => `${eachKey}: ${toString(eachValue)}`)
     ->Js.Array2.toString
-  
+
   switch parent {
-    | Some(p) => `{${pairs}} / ${toStringNameSpace(p)}`
-    | None => `{${pairs}}`
+  | Some(p) => `{${pairs}} / ${toStringNameSpace(p)}`
+  | None => `{${pairs}}`
   }
 }
 

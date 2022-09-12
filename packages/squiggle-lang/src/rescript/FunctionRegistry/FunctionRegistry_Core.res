@@ -1,5 +1,6 @@
 type internalExpressionValue = Reducer_T.value
 type internalExpressionValueType = ReducerInterface_InternalExpressionValue.internalExpressionValueType
+type errorValue = Reducer_ErrorValue.errorValue
 
 /*
   Function Registry "Type". A type, without any other information.
@@ -48,7 +49,7 @@ type fnDefinition = {
     array<frValue>,
     Reducer_T.environment,
     Reducer_T.reducerFn,
-  ) => result<internalExpressionValue, string>,
+  ) => result<internalExpressionValue, errorValue>,
 }
 
 type function = {
@@ -206,7 +207,7 @@ module FnDefinition = {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
     | Some(values) => t.run(args, values, env, reducer)
-    | None => Error("Incorrect Types")
+    | None => REOther("Incorrect Types")->Error
     }
   }
 
@@ -267,17 +268,20 @@ module Registry = {
   let _buildFnNameDict = (r: array<function>): fnNameDict => {
     // Sorry for the imperative style of this. But it's much easier/less buggy than the previous version.
     let res: fnNameDict = Js.Dict.empty()
-    r->Js.Array2.forEach(fn => 
+    r->Js.Array2.forEach(fn =>
       fn.definitions->Js.Array2.forEach(def => {
-        let nameWithNamespace = `${fn.nameSpace}.${def.name}`
-        let nameWithoutNamespace = def.name
-        let names = fn.requiresNamespace ? [nameWithNamespace] : [nameWithNamespace, nameWithoutNamespace]
+        let names =
+          [
+            fn.nameSpace == "" ? [] : [`${fn.nameSpace}.${def.name}`],
+            fn.requiresNamespace ? [] : [def.name],
+          ]->E.A.concatMany
+
         names->Js.Array2.forEach(name => {
           switch res->Js.Dict.get(name) {
-            | Some(fns) => {
+          | Some(fns) => {
               let _ = fns->Js.Array2.push(def)
             }
-            | None => res->Js.Dict.set(name, [def])
+          | None => res->Js.Dict.set(name, [def])
           }
         })
       })
@@ -296,9 +300,9 @@ module Registry = {
     args: array<internalExpressionValue>,
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
-  ): result<internalExpressionValue, Reducer_ErrorValue.errorValue> => {
+  ): result<internalExpressionValue, errorValue> => {
     switch Js.Dict.get(registry.fnNameDict, fnName) {
-      | Some(definitions) => {
+    | Some(definitions) => {
         let showNameMatchDefinitions = () => {
           let defsString =
             definitions
@@ -310,13 +314,12 @@ module Registry = {
 
         let match = definitions->Js.Array2.find(def => def->FnDefinition.isMatch(args))
         switch match {
-          | Some(def) => def->FnDefinition.run(args, env, reducer)->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
-          | None => {
-            Reducer_ErrorValue.REOther(showNameMatchDefinitions())->Error
-          }
+        | Some(def) =>
+          def->FnDefinition.run(args, env, reducer)
+        | None => REOther(showNameMatchDefinitions())->Error
         }
       }
-      | None => Reducer_ErrorValue.RESymbolNotFound(fnName)->Error
+    | None => RESymbolNotFound(fnName)->Error
     }
   }
 }

@@ -27,15 +27,13 @@ let commaJoin = values => values->Reducer_Extra_Array.intersperse(", ")->Js.Stri
 */
 let rec toString = (expression: expression) =>
   switch expression {
-  | EBlock(statements) =>
-    `{${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}}`
-  | EProgram(statements) =>
-    `<${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}>`
-  | EArray(aList) =>
-    `[${Js.Array2.map(aList, aValue => toString(aValue))->commaJoin}]`
+  | EBlock(statements) => `{${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}}`
+  | EProgram(statements) => `<${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}>`
+  | EArray(aList) => `[${Js.Array2.map(aList, aValue => toString(aValue))->commaJoin}]`
   | ERecord(map) => "TODO"
   | ESymbol(name) => name
-  | ETernary(predicate, trueCase, falseCase) => `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`
+  | ETernary(predicate, trueCase, falseCase) =>
+    `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`
   | EAssign(name, value) => `${name} = ${value->toString}`
   | ECall(fn, args) => `(${fn->toString})(${args->Js.Array2.map(toString)->commaJoin})`
   | ELambda(parameters, body) => `{|${parameters->commaJoin}| ${body->toString}}`
@@ -77,7 +75,3 @@ type optionFfiFnReturningResult = (
   array<internalExpressionValue>,
   environment,
 ) => option<result<internalExpressionValue, Reducer_ErrorValue.errorValue>>
-
-type expressionOrFFI =
-  | NotFFI(expression)
-  | FFI(ffiFn)

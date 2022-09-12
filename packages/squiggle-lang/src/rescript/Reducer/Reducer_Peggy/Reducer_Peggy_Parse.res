@@ -109,14 +109,17 @@ let rec pgToString = (peggyNode: peggyNode): string => {
 
   switch peggyNode {
   | PgNodeBlock(node)
-  | PgNodeProgram(node)
-  => "{" ++ node["statements"]->nodesToStringUsingSeparator("; ") ++ "}"
-  | PgNodeArray(node)
-  => "[" ++ node["elements"]->nodesToStringUsingSeparator("; ") ++ "]"
-  | PgNodeRecord(node)
-  => "{" ++ node["elements"]->Js.Array2.map(element => PgNodeKeyValue(element))->pgNodesToStringUsingSeparator(", ") ++ "}"
+  | PgNodeProgram(node) =>
+    "{" ++ node["statements"]->nodesToStringUsingSeparator("; ") ++ "}"
+  | PgNodeArray(node) => "[" ++ node["elements"]->nodesToStringUsingSeparator("; ") ++ "]"
+  | PgNodeRecord(node) =>
+    "{" ++
+    node["elements"]
+    ->Js.Array2.map(element => PgNodeKeyValue(element))
+    ->pgNodesToStringUsingSeparator(", ") ++ "}"
   | PgNodeBoolean(node) => node["value"]->Js.String.make
-  | PgNodeCall(node) => "(" ++ node["fn"]->toString ++ " " ++ node["args"]->nodesToStringUsingSeparator(" ") ++ ")"
+  | PgNodeCall(node) =>
+    "(" ++ node["fn"]->toString ++ " " ++ node["args"]->nodesToStringUsingSeparator(" ") ++ ")"
   | PgNodeFloat(node) => node["value"]->Js.String.make
   | PgNodeIdentifier(node) => `:${node["value"]}`
   | PgNodeInteger(node) => node["value"]->Js.String.make

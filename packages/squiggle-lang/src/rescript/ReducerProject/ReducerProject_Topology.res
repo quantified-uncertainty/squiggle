@@ -31,16 +31,16 @@ let rec topologicalSortUtil = (
 }
 
 let getTopologicalSort = (this: t): array<string> => {
-  let (_visited, stack) = this->getSourceIds->Belt.Array.reduce((Belt.Map.String.empty, list{}), (
-    (currVisited, currStack),
-    currId,
-  ) =>
-    if !Belt.Map.String.getWithDefault(currVisited, currId, false) {
-      topologicalSortUtil(this, currId, (currVisited, currStack))
-    } else {
-      (currVisited, currStack)
-    }
-  )
+  let (_visited, stack) =
+    this
+    ->getSourceIds
+    ->Belt.Array.reduce((Belt.Map.String.empty, list{}), ((currVisited, currStack), currId) =>
+      if !Belt.Map.String.getWithDefault(currVisited, currId, false) {
+        topologicalSortUtil(this, currId, (currVisited, currStack))
+      } else {
+        (currVisited, currStack)
+      }
+    )
   Belt.List.reverse(stack)->Belt.List.toArray
 }
 

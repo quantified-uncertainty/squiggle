@@ -17,19 +17,14 @@ let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
   let expressionValue =
     xyCoords
     ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-    ->E.R2.fmap(r => Reducer_T.IEvDistribution(
-      PointSet(makeDist(r)),
-    ))
+    ->E.R2.fmap(r => Reducer_T.IEvDistribution(PointSet(makeDist(r))))
   expressionValue
 }
 
 module Internal = {
   type t = PointSetDist.t
 
-  let toType = (r): result<
-    Reducer_T.value,
-    Reducer_ErrorValue.errorValue,
-  > =>
+  let toType = (r): result<Reducer_T.value, Reducer_ErrorValue.errorValue> =>
     switch r {
     | Ok(r) => Ok(Wrappers.evDistribution(PointSet(r)))
     | Error(err) => Error(REOperationError(err))
@@ -69,7 +64,7 @@ let library = [
             )
             ->E.R2.fmap(Wrappers.pointSet)
             ->E.R2.fmap(Wrappers.evDistribution)
-            ->E.R2.errMap(_ => "")
+            ->E.R2.errMap(e => Reducer_ErrorValue.REDistributionError(e))
           | _ => Error(impossibleError)
           },
         (),
@@ -90,7 +85,7 @@ let library = [
         ~run=(inputs, _, env, reducer) =>
           switch inputs {
           | [IEvDistribution(PointSet(dist)), IEvLambda(lambda)] =>
-            Internal.mapY(dist, lambda, env, reducer)->E.R2.errMap(Reducer_ErrorValue.errorToString)
+            Internal.mapY(dist, lambda, env, reducer)
           | _ => Error(impossibleError)
           },
         (),
@@ -115,7 +110,9 @@ let library = [
       FnDefinition.make(
         ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _, _) => inputsTodist(inputs, r => Continuous(Continuous.make(r))),
+        ~run=(_, inputs, _, _) =>
+          inputsTodist(inputs, r => Continuous(Continuous.make(r)))
+          ->E.R2.errMap(wrapError),
         (),
       ),
     ],
@@ -138,7 +135,9 @@ let library = [
       FnDefinition.make(
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _, _) => inputsTodist(inputs, r => Discrete(Discrete.make(r))),
+        ~run=(_, inputs, _, _) =>
+          inputsTodist(inputs, r => Discrete(Discrete.make(r)))
+          ->E.R2.errMap(wrapError),
         (),
       ),
     ],

@@ -33,17 +33,17 @@ let callInternal = (
     | call => call->IEV.toStringFunctionCall->MathJs.Eval.eval
     }
 
-  let constructRecord = arrayOfPairs => {
-    Belt.Array.map(arrayOfPairs, pairValue =>
-      switch pairValue {
-      | Reducer_T.IEvArray([IEvString(key), valueValue]) => (key, valueValue)
-      | _ => ("wrong key type", pairValue->IEV.toStringWithType->IEvString)
-      }
-    )
-    ->Belt.Map.String.fromArray
-    ->Reducer_T.IEvRecord
-    ->Ok
-  }
+  // let constructRecord = arrayOfPairs => {
+  //   Belt.Array.map(arrayOfPairs, pairValue =>
+  //     switch pairValue {
+  //     | Reducer_T.IEvArray([IEvString(key), valueValue]) => (key, valueValue)
+  //     | _ => ("wrong key type", pairValue->IEV.toStringWithType->IEvString)
+  //     }
+  //   )
+  //   ->Belt.Map.String.fromArray
+  //   ->Reducer_T.IEvRecord
+  //   ->Ok
+  // }
 
   // let arrayAtIndex = (aValueArray: array<Reducer_T.value>, fIndex: float) =>
   //   switch Belt.Array.get(aValueArray, Belt.Int.fromFloat(fIndex)) {
@@ -111,7 +111,7 @@ let callInternal = (
   | ("$_atIndex_$", [IEvBindings(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
   // | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
   // | ("$_constructArray_$", args) => IEvArray(args)->Ok
-  | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
+  // | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)
   // | ("$_exportBindings_$", [IEvBindings(nameSpace)]) => doExportBindings(nameSpace)
   // | ("$_exportBindings_$", [evValue]) => doIdentity(evValue)
   // | ("$_setBindings_$", [IEvBindings(nameSpace), IEvSymbol(symbol), value]) =>
@@ -154,7 +154,9 @@ let callInternal = (
   | (_, [IEvString(_), IEvString(_)]) =>
     callMathJs(call)
   | call =>
-    Error(REFunctionNotFound(call->IEV.functionCallToCallSignature->IEV.functionCallSignatureToString)) // Report full type signature as error
+    Error(
+      REFunctionNotFound(call->IEV.functionCallToCallSignature->IEV.functionCallSignatureToString),
+    ) // Report full type signature as error
   }
 }
 /*
@@ -163,7 +165,7 @@ let callInternal = (
 let dispatch = (
   call: IEV.functionCall,
   env: Reducer_T.environment,
-  reducer: Reducer_T.reducerFn
+  reducer: Reducer_T.reducerFn,
 ): Reducer_T.value =>
   try {
     let (fn, args) = call

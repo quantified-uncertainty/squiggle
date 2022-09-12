@@ -17,7 +17,7 @@ module Internals = {
     ->E.A2.fmap(((key, value)) => Wrappers.evArray([IEvString(key), value]))
     ->Wrappers.evArray
 
-  let fromList = (items: array<internalExpressionValue>): result<internalExpressionValue, string> =>
+  let fromList = (items: array<internalExpressionValue>): result<internalExpressionValue, errorValue> =>
     items
     ->E.A2.fmap(item => {
       switch (item: internalExpressionValue) {
@@ -80,7 +80,8 @@ let library = [
           ->E.R2.fmap(E.Dict.concatMany)
           ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
           ->E.R2.fmap(r => r->Js.Dict.entries->Belt.Map.String.fromArray)
-          ->E.R2.fmap(Wrappers.evRecord),
+          ->E.R2.fmap(Wrappers.evRecord)
+          ->E.R2.errMap(e => e->Reducer_ErrorValue.REOther),
         (),
       ),
     ],

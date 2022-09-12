@@ -11,10 +11,11 @@ let rec get = (nameSpace: t, id: string) => {
   let T.NameSpace(container, parent) = nameSpace
 
   switch container->Belt.MutableMap.String.get(id) {
-    | Some(v) => Some(v)
-    | None => switch parent {
-      | Some(p) => get(p, id)
-      | None => None
+  | Some(v) => Some(v)
+  | None =>
+    switch parent {
+    | Some(p) => get(p, id)
+    | None => None
     }
   }
 }
@@ -35,15 +36,11 @@ let set = (nameSpace: t, id: string, value): t => {
   nameSpace
 }
 
-let extend = (nameSpace: t) => T.NameSpace(
-  makeEmptyMap(),
-  nameSpace->Some
-)
+let extend = (nameSpace: t) => T.NameSpace(makeEmptyMap(), nameSpace->Some)
 
 let toKeyValuePairs = (T.NameSpace(container, _): t): array<(string, internalExpressionValue)> => {
   container->Belt.MutableMap.String.toArray
 }
-
 
 let makeEmptyBindings = (): t => T.NameSpace(makeEmptyMap(), None)
 
@@ -64,7 +61,7 @@ let mergeFrom = (T.NameSpace(container, _): t, T.NameSpace(newContainer, parent)
       }
       container
     }),
-    parent
+    parent,
   )
 }
 
@@ -79,6 +76,8 @@ let removeResult = (nameSpace: t): t => {
   container->Belt.MutableMap.String.remove("__result__")
   nameSpace
 }
+
+let locals = (T.NameSpace(container, _): t) => T.NameSpace(container, None)
 
 // let typeAliasesKey = "_typeAliases_"
 // let typeReferencesKey = "_typeReferences_"
@@ -129,16 +128,6 @@ let removeResult = (nameSpace: t): t => {
 //       !removeThis
 //     }),
 //   )
-// }
-
-// external castExpressionToInternalCode: ExpressionT.expressionOrFFI => internalCode = "%identity"
-
-// let eLambdaFFIValue = (ffiFn: ExpressionT.ffiFn) => {
-//   IEvLambda({
-//     parameters: [],
-//     context: emptyModule,
-//     body: FFI(ffiFn)->castExpressionToInternalCode,
-//   })
 // }
 
 // let functionNotFoundError = (call: functionCall) =>

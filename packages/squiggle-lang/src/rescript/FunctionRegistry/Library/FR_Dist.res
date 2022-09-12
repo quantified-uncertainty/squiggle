@@ -16,13 +16,14 @@ module DistributionCreation = {
       r
       ->E.R.bind(Process.DistOrNumberToDist.twoValuesUsingSymbolicDist(~fn, ~values=_, ~env))
       ->E.R2.fmap(Wrappers.evDistribution)
+      ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
 
     let make = (name, fn) => {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber],
         ~run=(_, inputs, env, _) =>
-          inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env=env),
+          inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env),
         (),
       )
     }
@@ -32,9 +33,7 @@ module DistributionCreation = {
         ~name,
         ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
         ~run=(_, inputs, env, _) =>
-          inputs
-          ->Prepare.ToValueTuple.Record.twoDistOrNumber
-          ->process(~fn, ~env=env),
+          inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
         (),
       )
     }
@@ -44,9 +43,7 @@ module DistributionCreation = {
         ~name,
         ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
         ~run=(_, inputs, env, _) =>
-          inputs
-          ->Prepare.ToValueTuple.Record.twoDistOrNumber
-          ->process(~fn, ~env=env),
+          inputs->Prepare.ToValueTuple.Record.twoDistOrNumber->process(~fn, ~env),
         (),
       )
     }
@@ -57,13 +54,14 @@ module DistributionCreation = {
       r
       ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
       ->E.R2.fmap(Wrappers.evDistribution)
+      ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
 
     let make = (name, fn) =>
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeDistOrNumber],
         ~run=(_, inputs, env, _) =>
-          inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env=env),
+          inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env),
         (),
       )
   }

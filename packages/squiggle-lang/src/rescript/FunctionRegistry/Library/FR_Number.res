@@ -12,7 +12,8 @@ module ArrayNumberDist = {
       ~run=(_, inputs, _, _) =>
         Prepare.ToTypedArray.numbers(inputs)
         ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-        ->E.R.bind(fn),
+        ->E.R.bind(fn)
+        ->E.R2.errMap(wrapError),
       (),
     )
   }
@@ -23,7 +24,8 @@ module ArrayNumberDist = {
       ~run=(_, inputs, _, _) =>
         Prepare.ToTypedArray.numbers(inputs)
         ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-        ->E.R.bind(fn),
+        ->E.R.bind(fn)
+        ->E.R2.errMap(wrapError),
       (),
     )
   }

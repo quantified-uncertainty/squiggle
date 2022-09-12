@@ -85,10 +85,7 @@ let getIncludes = (project: t, sourceId: string): ProjectItem.T.includesType =>
 let getPastChain = (project: t, sourceId: string): array<string> =>
   project->getItem(sourceId)->ProjectItem.getPastChain
 
-let getIncludesAsVariables = (
-  project: t,
-  sourceId: string,
-): ProjectItem.T.importAsVariablesType =>
+let getIncludesAsVariables = (project: t, sourceId: string): ProjectItem.T.importAsVariablesType =>
   project->getItem(sourceId)->ProjectItem.getIncludesAsVariables
 
 let getDirectIncludes = (project: t, sourceId: string): array<string> =>
@@ -156,12 +153,10 @@ let setEnvironment = (project: t, value: InternalExpressionValue.environment): u
 }
 
 let getBindings = (project: t, sourceId: string): ProjectItem.T.bindingsArgumentType => {
-  project->getContinuation(sourceId) // TODO - locals method for cleaning parent?
+  project->getContinuation(sourceId)->Reducer_Bindings.locals
 }
 
-let getContinuationsBefore = (project: t, sourceId: string): array<
-  ProjectItem.T.continuation,
-> => {
+let getContinuationsBefore = (project: t, sourceId: string): array<ProjectItem.T.continuation> => {
   let pastNameSpaces = project->getPastChain(sourceId)->Js.Array2.map(getBindings(project, _))
   let theLength = pastNameSpaces->Js.Array2.length
   if theLength == 0 {
@@ -177,7 +172,8 @@ let getContinuationsBefore = (project: t, sourceId: string): array<
 
 let linkDependencies = (project: t, sourceId: string): ProjectItem.T.continuation => {
   let continuationsBefore = project->getContinuationsBefore(sourceId)
-  let nameSpace = Reducer_Bindings.makeEmptyBindings()->Reducer_Bindings.chainTo(continuationsBefore)
+  let nameSpace =
+    Reducer_Bindings.makeEmptyBindings()->Reducer_Bindings.chainTo(continuationsBefore)
   let includesAsVariables = project->getIncludesAsVariables(sourceId)
   Belt.Array.reduce(includesAsVariables, nameSpace, (currentNameSpace, (variable, includeFile)) =>
     Bindings.set(
@@ -242,9 +238,7 @@ let evaluate = (sourceCode: string) => {
   runAll(project)
 
   (
-    getResultOption(project, "main")->Belt.Option.getWithDefault(
-      Reducer_T.IEvVoid->Ok,
-    ),
-    project->getBindings("main")
+    getResultOption(project, "main")->Belt.Option.getWithDefault(Reducer_T.IEvVoid->Ok),
+    project->getBindings("main"),
   )
 }

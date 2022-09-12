@@ -41,8 +41,7 @@ let createProject = (): reducerProject => Private.createProject()
 Answer all the source ids of all the sources in the project.
 */
 @genType
-let getSourceIds = (project: reducerProject): array<string> =>
-  project->Private.getSourceIds
+let getSourceIds = (project: reducerProject): array<string> => project->Private.getSourceIds
 
 /*
 Sets the source for a given source Id.
@@ -71,15 +70,13 @@ Cleans the compilation artifacts for a given source ID. The results stay untouch
 Normally, you would never need the compilation artifacts again as the results with the same sources would never change. However, they are needed in case of any debugging reruns
 */
 @genType
-let clean = (project: reducerProject, sourceId: string): unit =>
-  project->Private.clean(sourceId)
+let clean = (project: reducerProject, sourceId: string): unit => project->Private.clean(sourceId)
 
 /*
 Cleans all the compilation artifacts in all of the project
 */
 @genType
-let cleanAll = (project: reducerProject): unit =>
-  project->Private.cleanAll
+let cleanAll = (project: reducerProject): unit => project->Private.cleanAll
 
 /*
 Cleans results. Compilation stays untouched to be able to re-run the source.
@@ -93,8 +90,7 @@ let cleanResults = (project: reducerProject, sourceId: string): unit =>
 Cleans all results. Compilations remains untouched to rerun the source.
 */
 @genType
-let cleanAllResults = (project: reducerProject): unit =>
-  project->Private.cleanAllResults
+let cleanAllResults = (project: reducerProject): unit => project->Private.cleanAllResults
 
 /*
 To set the includes one first has to call "parseIncludes". The parsed includes or the parser error is returned.
@@ -144,8 +140,7 @@ let getDependents = (project: reducerProject, sourceId: string): array<string> =
 Get the run order for the sources in the project.
 */
 @genType
-let getRunOrder = (project: reducerProject): array<string> =>
-  project->Private.getRunOrder
+let getRunOrder = (project: reducerProject): array<string> => project->Private.getRunOrder
 
 /*
 Get the run order to get the results of this specific source
@@ -177,15 +172,13 @@ let rawParse = (project: reducerProject, sourceId: string): unit =>
 Runs a specific source code if it is not done already. The code is parsed if it is not already done. It runs the dependencies if it is not already done.
 */
 @genType
-let run = (project: reducerProject, sourceId: string): unit =>
-  project->Private.run(sourceId)
+let run = (project: reducerProject, sourceId: string): unit => project->Private.run(sourceId)
 
 /*
 Runs all of the sources in a project. Their results and bindings will be available
 */
 @genType
-let runAll = (project: reducerProject): unit =>
-  project->Private.runAll
+let runAll = (project: reducerProject): unit => project->Private.runAll
 
 /*
 Get the bindings after running this source fil. The bindings are local to the source

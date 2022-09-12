@@ -14,9 +14,7 @@ let availableNumbers: array<(string, float)> = [
 ]
 
 let mathBindings: Bindings.t =
-  availableNumbers
-  ->E.A2.fmap(((name, v)) => (name, Reducer_T.IEvNumber(v)))
-  ->Bindings.fromArray
+  availableNumbers->E.A2.fmap(((name, v)) => (name, Reducer_T.IEvNumber(v)))->Bindings.fromArray
 
 let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
   previousBindings->Bindings.mergeFrom(mathBindings)

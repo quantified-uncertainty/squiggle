@@ -1,6 +1,8 @@
 open FunctionRegistry_Core
 
-let impossibleError = "Wrong inputs / Logically impossible"
+let impossibleErrorString = "Wrong inputs / Logically impossible"
+let impossibleError: errorValue = impossibleErrorString->REOther
+let wrapError = e => Reducer_ErrorValue.REOther(e)
 
 module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)
@@ -15,7 +17,7 @@ module Wrappers = {
   let evArrayOfEvNumber = xs => xs->Belt.Array.map(evNumber)->evArray
 }
 
-let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleError)
+let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleErrorString)
 
 module Prepare = {
   type t = frValue
@@ -27,19 +29,19 @@ module Prepare = {
       let twoArgs = (inputs: ts): result<ts, err> =>
         switch inputs {
         | [FRValueRecord([(_, n1), (_, n2)])] => Ok([n1, n2])
-        | _ => Error(impossibleError)
+        | _ => Error(impossibleErrorString)
         }
 
       let threeArgs = (inputs: ts): result<ts, err> =>
         switch inputs {
         | [FRValueRecord([(_, n1), (_, n2), (_, n3)])] => Ok([n1, n2, n3])
-        | _ => Error(impossibleError)
+        | _ => Error(impossibleErrorString)
         }
 
       let toArgs = (inputs: ts): result<ts, err> =>
         switch inputs {
         | [FRValueRecord(args)] => args->E.A2.fmap(((_, b)) => b)->Ok
-        | _ => Error(impossibleError)
+        | _ => Error(impossibleErrorString)
         }
     }
 
@@ -47,13 +49,13 @@ module Prepare = {
       let openA = (inputs: t): result<ts, err> =>
         switch inputs {
         | FRValueArray(n) => Ok(n)
-        | _ => Error(impossibleError)
+        | _ => Error(impossibleErrorString)
         }
 
       let arrayOfArrays = (inputs: t): result<array<ts>, err> =>
         switch inputs {
         | FRValueArray(n) => n->E.A2.fmap(openA)->E.A.R.firstErrorOrOpen
-        | _ => Error(impossibleError)
+        | _ => Error(impossibleErrorString)
         }
     }
   }
@@ -62,7 +64,7 @@ module Prepare = {
     let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> => {
       switch values {
       | [FRValueDistOrNumber(a1), FRValueDistOrNumber(a2)] => Ok(a1, a2)
-      | _ => Error(impossibleError)
+      | _ => Error(impossibleErrorString)
       }
     }
 
@@ -72,28 +74,28 @@ module Prepare = {
     > => {
       switch values {
       | [FRValueDist(a1), FRValueDist(a2)] => Ok(a1, a2)
-      | _ => Error(impossibleError)
+      | _ => Error(impossibleErrorString)
       }
     }
 
     let twoNumbers = (values: ts): result<(float, float), err> => {
       switch values {
       | [FRValueNumber(a1), FRValueNumber(a2)] => Ok(a1, a2)
-      | _ => Error(impossibleError)
+      | _ => Error(impossibleErrorString)
       }
     }
 
     let threeNumbers = (values: ts): result<(float, float, float), err> => {
       switch values {
       | [FRValueNumber(a1), FRValueNumber(a2), FRValueNumber(a3)] => Ok(a1, a2, a3)
-      | _ => Error(impossibleError)
+      | _ => Error(impossibleErrorString)
       }
     }
 
     let oneDistOrNumber = (values: ts): result<frValueDistOrNumber, err> => {
       switch values {
       | [FRValueDistOrNumber(a1)] => Ok(a1)
-      | _ => Error(impossibleError)
+      | _ => Error(impossibleErrorString)
       }
     }
 
@@ -124,14 +126,14 @@ module Prepare = {
   let oneNumber = (values: t): result<float, err> => {
     switch values {
     | FRValueNumber(a1) => Ok(a1)
-    | _ => Error(impossibleError)
+    | _ => Error(impossibleErrorString)
     }
   }
 
   let oneDict = (values: t): result<Js.Dict.t<frValue>, err> => {
     switch values {
     | FRValueDict(a1) => Ok(a1)
-    | _ => Error(impossibleError)
+    | _ => Error(impossibleErrorString)
     }
   }
 
@@ -229,6 +231,7 @@ module DefineFn = {
           ->E.R.bind(Prepare.oneNumber)
           ->E.R2.fmap(fn)
           ->E.R2.fmap(Wrappers.evNumber)
+          ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
         },
         (),
       )
@@ -237,7 +240,11 @@ module DefineFn = {
         ~name,
         ~inputs=[FRTypeNumber, FRTypeNumber],
         ~run=(_, inputs, _, _) => {
-          inputs->Prepare.ToValueTuple.twoNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+          inputs
+          ->Prepare.ToValueTuple.twoNumbers
+          ->E.R2.fmap(fn)
+          ->E.R2.fmap(Wrappers.evNumber)
+          ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
         },
         (),
       )
@@ -246,7 +253,11 @@ module DefineFn = {
         ~name,
         ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
         ~run=(_, inputs, _, _) => {
-          inputs->Prepare.ToValueTuple.threeNumbers->E.R2.fmap(fn)->E.R2.fmap(Wrappers.evNumber)
+          inputs
+          ->Prepare.ToValueTuple.threeNumbers
+          ->E.R2.fmap(fn)
+          ->E.R2.fmap(Wrappers.evNumber)
+          ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
         },
         (),
       )

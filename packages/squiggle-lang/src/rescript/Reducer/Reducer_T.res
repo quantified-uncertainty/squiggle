@@ -25,10 +25,10 @@ type rec value =
 and lambdaBody = (array<value>, environment, reducerFn) => value
 @genType.opaque
 and lambdaValue = {
-    parameters: array<string>,
-    // context: nameSpace,
-    body: (array<value>, environment, reducerFn) => value,
-  }
+  parameters: array<string>,
+  // context: nameSpace,
+  body: (array<value>, environment, reducerFn) => value,
+}
 @genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>
 and expression =
   | EBlock(array<expression>)

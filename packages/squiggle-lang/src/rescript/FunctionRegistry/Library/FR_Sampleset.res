@@ -18,10 +18,7 @@ module Internal = {
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
 
-  let toType = (r): result<
-    Reducer_T.value,
-    Reducer_ErrorValue.errorValue,
-  > =>
+  let toType = (r): result<Reducer_T.value, Reducer_ErrorValue.errorValue> =>
     switch r {
     | Ok(r) => Ok(Wrappers.evDistribution(SampleSet(r)))
     | Error(r) => Error(REDistributionError(SampleSetError(r)))
@@ -100,7 +97,7 @@ let libaryBase = [
             GenericDist.toSampleSetDist(dist, environment.sampleCount)
             ->E.R2.fmap(Wrappers.sampleSet)
             ->E.R2.fmap(Wrappers.evDistribution)
-            ->E.R2.errMap(DistributionTypes.Error.toString)
+            ->E.R2.errMap(e => Reducer_ErrorValue.REDistributionError(e))
           | _ => Error(impossibleError)
           },
         (),
@@ -123,7 +120,9 @@ let libaryBase = [
             Prepare.ToTypedArray.numbers(inputs) |> E.R2.bind(r =>
               SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??")
             )
-          sampleSet->E.R2.fmap(Wrappers.sampleSet)->E.R2.fmap(Wrappers.evDistribution)
+          sampleSet->E.R2.fmap(Wrappers.sampleSet)
+          ->E.R2.fmap(Wrappers.evDistribution)
+          ->E.R2.errMap(wrapError)
         },
         (),
       ),
@@ -166,7 +165,7 @@ let libaryBase = [
           | [IEvLambda(lambda)] =>
             switch Internal.fromFn(lambda, environment, reducer) {
             | Ok(r) => Ok(r->Wrappers.sampleSet->Wrappers.evDistribution)
-            | Error(e) => Error(Operation.Error.toString(e))
+            | Error(e) => e->Reducer_ErrorValue.REOperationError->Error
             }
           | _ => Error(impossibleError)
           },
@@ -188,7 +187,7 @@ let libaryBase = [
         ~run=(inputs, _, environment, reducer) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist)), IEvLambda(lambda)] =>
-            Internal.map1(dist, lambda, environment, reducer)->E.R2.errMap(_ => "")
+            Internal.map1(dist, lambda, environment, reducer)
           | _ => Error(impossibleError)
           },
         (),
@@ -215,7 +214,7 @@ let libaryBase = [
               IEvDistribution(SampleSet(dist2)),
               IEvLambda(lambda),
             ] =>
-            Internal.map2(dist1, dist2, lambda, environment, reducer)->E.R2.errMap(_ => "")
+            Internal.map2(dist1, dist2, lambda, environment, reducer)
           | _ => Error(impossibleError)
           }
         },
@@ -244,7 +243,7 @@ let libaryBase = [
               IEvDistribution(SampleSet(dist3)),
               IEvLambda(lambda),
             ] =>
-            Internal.map3(dist1, dist2, dist3, lambda, environment, reducer)->E.R2.errMap(_ => "")
+            Internal.map3(dist1, dist2, dist3, lambda, environment, reducer)
           | _ => Error(impossibleError)
           },
         (),
@@ -267,9 +266,7 @@ let libaryBase = [
         ~run=(inputs, _, environment, reducer) =>
           switch inputs {
           | [IEvArray(dists), IEvLambda(lambda)] =>
-            Internal.mapN(dists, lambda, environment, reducer)->E.R2.errMap(_e => {
-              "AHHH doesn't work"
-            })
+            Internal.mapN(dists, lambda, environment, reducer)
           | _ => Error(impossibleError)
           },
         (),
@@ -294,7 +291,7 @@ module Comparison = {
   let wrapper = r =>
     r
     ->E.R2.fmap(r => r->Wrappers.sampleSet->Wrappers.evDistribution)
-    ->E.R2.errMap(SampleSetDist.Error.toString)
+    ->E.R2.errMap(e => e->DistributionTypes.Error.sampleErrorToDistErr->Reducer_ErrorValue.REDistributionError)
 
   let mkBig = (name, withDist, withFloat) =>
     Function.make(

@@ -13,29 +13,30 @@ let rec fromNode = (node: Parse.node): expression => {
 
   let caseLambda = (nodeLambda: Parse.nodeLambda): expression => {
     let args =
-      nodeLambda["args"]
-      ->Js.Array2.map((argNode: Parse.nodeIdentifier) => argNode["value"])
+      nodeLambda["args"]->Js.Array2.map((argNode: Parse.nodeIdentifier) => argNode["value"])
     let body = nodeLambda["body"]->fromNode
 
     ExpressionBuilder.eLambda(args, body)
-
   }
 
   let caseRecord = (nodeRecord): expression => {
     nodeRecord["elements"]
-    ->Js.Array2.map(
-      keyValueNode => (keyValueNode["key"]->fromNode, keyValueNode["value"]->fromNode)
-    )
+    ->Js.Array2.map(keyValueNode => (
+      keyValueNode["key"]->fromNode,
+      keyValueNode["value"]->fromNode,
+    ))
     ->ExpressionBuilder.eRecord
   }
 
   switch Parse.castNodeType(node) {
   | PgNodeBlock(nodeBlock) => caseBlock(nodeBlock)
   | PgNodeProgram(nodeProgram) => caseProgram(nodeProgram)
-  | PgNodeArray(nodeArray) => ExpressionBuilder.eArray(nodeArray["elements"]->Js.Array2.map(fromNode))
+  | PgNodeArray(nodeArray) =>
+    ExpressionBuilder.eArray(nodeArray["elements"]->Js.Array2.map(fromNode))
   | PgNodeRecord(nodeRecord) => caseRecord(nodeRecord)
   | PgNodeBoolean(nodeBoolean) => ExpressionBuilder.eBool(nodeBoolean["value"])
-  | PgNodeCall(nodeCall) => ExpressionBuilder.eCall(fromNode(nodeCall["fn"]), nodeCall["args"]->Js.Array2.map(fromNode))
+  | PgNodeCall(nodeCall) =>
+    ExpressionBuilder.eCall(fromNode(nodeCall["fn"]), nodeCall["args"]->Js.Array2.map(fromNode))
   | PgNodeFloat(nodeFloat) => ExpressionBuilder.eNumber(nodeFloat["value"])
   | PgNodeIdentifier(nodeIdentifier) => ExpressionBuilder.eSymbol(nodeIdentifier["value"])
   | PgNodeInteger(nodeInteger) => ExpressionBuilder.eNumber(Belt.Int.toFloat(nodeInteger["value"]))
@@ -54,7 +55,7 @@ let rec fromNode = (node: Parse.node): expression => {
     ExpressionBuilder.eTernary(
       fromNode(nodeTernary["condition"]),
       fromNode(nodeTernary["trueExpression"]),
-      fromNode(nodeTernary["falseExpression"])
+      fromNode(nodeTernary["falseExpression"]),
     )
   // | PgNodeTypeIdentifier(nodeTypeIdentifier) =>
   //   ExpressionBuilder.eTypeIdentifier(nodeTypeIdentifier["value"])

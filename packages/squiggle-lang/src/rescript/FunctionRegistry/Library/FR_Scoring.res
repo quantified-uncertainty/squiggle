@@ -6,7 +6,7 @@ let requiresNamespace = true
 let runScoring = (estimate, answer, prior, env) => {
   GenericDist.Score.logScore(~estimate, ~answer, ~prior, ~env)
   ->E.R2.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
-  ->E.R2.errMap(DistributionTypes.Error.toString)
+  ->E.R2.errMap(e => Reducer_ErrorValue.REDistributionError(e))
 }
 
 let library = [
@@ -40,7 +40,7 @@ let library = [
               FRValueDist(prior),
             ]) =>
             runScoring(estimate, Score_Scalar(d), Some(prior), environment)
-          | Error(e) => Error(e)
+          | Error(e) => Error(e->FunctionRegistry_Helpers.wrapError)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
         },
@@ -55,7 +55,7 @@ let library = [
             runScoring(estimate, Score_Dist(d), None, environment)
           | Ok([FRValueDist(estimate), FRValueDistOrNumber(FRValueNumber(d))]) =>
             runScoring(estimate, Score_Scalar(d), None, environment)
-          | Error(e) => Error(e)
+          | Error(e) => Error(e->FunctionRegistry_Helpers.wrapError)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
         },

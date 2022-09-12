@@ -1,8 +1,9 @@
 module T = Reducer_T
 
-let dispatch = (call: ReducerInterface_InternalExpressionValue.functionCall, _: GenericDist.env): option<
-  result<T.value, Reducer_ErrorValue.errorValue>,
-> => {
+let dispatch = (
+  call: ReducerInterface_InternalExpressionValue.functionCall,
+  _: GenericDist.env,
+): option<result<T.value, Reducer_ErrorValue.errorValue>> => {
   switch call {
   | ("toString", [IEvDate(t)]) => T.IEvString(DateTime.Date.toString(t))->Ok->Some
   | ("makeDateFromYear", [IEvNumber(year)]) =>
