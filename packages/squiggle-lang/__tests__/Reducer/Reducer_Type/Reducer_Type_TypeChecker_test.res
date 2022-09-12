@@ -19,7 +19,7 @@ let isTypeOfSourceCode = (aTypeSourceCode: string, sourceCode: string): result<
 > => {
   let reducerFn = Expression.reduceExpressionInProject
   let rResult =
-    Expression.BackCompatible.parse(sourceCode)->Belt.Result.flatMap(expr =>
+    Expression.BackCompatible.parse(sourceCode)->Belt.Result.map(expr =>
       reducerFn(expr, Bindings.emptyBindings, ProjectAccessorsT.identityAccessors)
     )
   rResult->Belt.Result.flatMap(result => TypeChecker.isTypeOf(aTypeSourceCode, result, reducerFn))

@@ -3,6 +3,7 @@ module BindingsReplacer = Reducer_Expression_BindingsReplacer
 module Continuation = ReducerInterface_Value_Continuation
 module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
 module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
@@ -111,7 +112,7 @@ let callInternal = (
   module SampleMap = {
     let doLambdaCall = (aLambdaValue, list) =>
       switch Lambda.doLambdaCall(aLambdaValue, list, accessors, reducer) {
-      | Ok(IEvNumber(f)) => Ok(f)
+      | IEvNumber(f) => Ok(f)
       | _ => Error(Operation.SampleMapNeedsNtoNFunction)
       }
 
@@ -201,13 +202,17 @@ let dispatch = (
   call: functionCall,
   accessors: ProjectAccessorsT.t,
   reducer: ProjectReducerFnT.t,
-): result<internalExpressionValue, errorValue> =>
+): internalExpressionValue =>
   try {
     let (fn, args) = call
     // There is a bug that prevents string match in patterns
     // So we have to recreate a copy of the string
-    ExternalLibrary.dispatch((Js.String.make(fn), args), accessors, reducer, callInternal)
+    ExternalLibrary.dispatch(
+      (Js.String.make(fn), args),
+      accessors,
+      reducer,
+      callInternal,
+    )->InternalExpressionValue.resultToValue
   } catch {
-  | Js.Exn.Error(obj) => REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))->Error
-  | _ => RETodo("unhandled rescript exception")->Error
+  | exn => Reducer_ErrorValue.fromException(exn)->Reducer_ErrorValue.toException
   }

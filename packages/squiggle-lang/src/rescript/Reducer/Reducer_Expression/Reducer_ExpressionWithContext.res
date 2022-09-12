@@ -18,12 +18,14 @@ type expressionWithContext =
   | ExpressionWithContext(expression, context)
   | ExpressionNoContext(expression)
 
+type t = expressionWithContext
+
 let callReducer = (
   expressionWithContext: expressionWithContext,
   bindings: bindings,
   accessors: ProjectAccessorsT.t,
   reducer: ProjectReducerFnT.t,
-): result<internalExpressionValue, errorValue> => {
+): internalExpressionValue => {
   switch expressionWithContext {
   | ExpressionNoContext(expr) =>
     // Js.log(`callReducer: bindings ${Bindings.toString(bindings)} expr ${ExpressionT.toString(expr)}`)
@@ -51,3 +53,10 @@ let toStringResult = rExpressionWithContext =>
   | Ok(expressionWithContext) => `Ok(${toString(expressionWithContext)})`
   | Error(errorValue) => ErrorValue.errorToString(errorValue)
   }
+
+let resultToValue = (rExpressionWithContext: result<t, errorValue>): t => {
+  switch rExpressionWithContext {
+  | Ok(expressionWithContext) => expressionWithContext
+  | Error(errorValue) => ErrorValue.toException(errorValue)
+  }
+}

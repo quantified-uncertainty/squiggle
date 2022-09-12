@@ -82,3 +82,9 @@ type optionFfiFnReturningResult = (
 type expressionOrFFI =
   | NotFFI(expression)
   | FFI(ffiFn)
+
+let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
+  switch rExpression {
+  | Ok(expression) => expression
+  | Error(errorValue) => Reducer_ErrorValue.toException(errorValue)
+  }

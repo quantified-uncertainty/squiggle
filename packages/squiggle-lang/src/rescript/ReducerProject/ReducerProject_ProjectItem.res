@@ -183,17 +183,6 @@ let buildExpression = (this: t): t => {
   }
 }
 
-let wrappedReducer = (
-  rExpression: T.expressionArgumentType,
-  aContinuation: T.continuation,
-  accessors: ProjectAccessorsT.t,
-): T.resultArgumentType => {
-  Belt.Result.flatMap(
-    rExpression,
-    Reducer_Expression.reduceExpressionInProject(_, aContinuation, accessors),
-  )
-}
-
 let doBuildResult = (
   this: t,
   aContinuation: T.continuation,
@@ -202,9 +191,12 @@ let doBuildResult = (
   this
   ->getExpression
   ->Belt.Option.map(
-    Belt.Result.flatMap(
-      _,
-      Reducer_Expression.reduceExpressionInProject(_, aContinuation, accessors),
+    Belt.Result.flatMap(_, expression =>
+      try {
+        Reducer_Expression.reduceExpressionInProject(expression, aContinuation, accessors)->Ok
+      } catch {
+      | exn => Reducer_ErrorValue.fromException(exn)->Error
+      }
     ),
   )
 

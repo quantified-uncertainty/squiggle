@@ -16,7 +16,7 @@ let checkArgumentsSourceCode = (aTypeSourceCode: string, sourceCode: string): re
 > => {
   let reducerFn = Expression.reduceExpressionInProject
   let rResult =
-    Expression.BackCompatible.parse(sourceCode)->Belt.Result.flatMap(expr =>
+    Expression.BackCompatible.parse(sourceCode)->Belt.Result.map(expr =>
       reducerFn(expr, Bindings.emptyBindings, ProjectAccessorsT.identityAccessors)
     )
   rResult->Belt.Result.flatMap(result =>

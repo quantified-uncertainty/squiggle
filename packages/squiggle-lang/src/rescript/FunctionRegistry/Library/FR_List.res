@@ -32,19 +32,15 @@ module Internals = {
     accessors: ProjectAccessorsT.t,
     eLambdaValue,
     reducer: ProjectReducerFnT.t,
-  ): result<ReducerInterface_InternalExpressionValue.t, Reducer_ErrorValue.errorValue> => {
-    let rMappedList = array->E.A.reduceReverse(Ok(list{}), (rAcc, elem) =>
-      rAcc->E.R.bind(_, acc => {
-        let rNewElem = Reducer_Expression_Lambda.doLambdaCall(
-          eLambdaValue,
-          list{elem},
-          (accessors: ProjectAccessorsT.t),
-          (reducer: ProjectReducerFnT.t),
-        )
-        rNewElem->E.R2.fmap(newElem => list{newElem, ...acc})
-      })
-    )
-    rMappedList->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)
+  ): ReducerInterface_InternalExpressionValue.t => {
+    Belt.Array.map(array, elem =>
+      Reducer_Expression_Lambda.doLambdaCall(
+        eLambdaValue,
+        list{elem},
+        (accessors: ProjectAccessorsT.t),
+        (reducer: ProjectReducerFnT.t),
+      )
+    )->Wrappers.evArray
   }
 
   let reduce = (
@@ -54,10 +50,8 @@ module Internals = {
     accessors: ProjectAccessorsT.t,
     reducer: ProjectReducerFnT.t,
   ) => {
-    aValueArray->E.A.reduce(Ok(initialValue), (rAcc, elem) =>
-      rAcc->E.R.bind(_, acc =>
-        Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, accessors, reducer)
-      )
+    aValueArray->E.A.reduce(initialValue, (acc, elem) =>
+      Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, accessors, reducer)
     )
   }
 
@@ -68,10 +62,8 @@ module Internals = {
     accessors: ProjectAccessorsT.t,
     reducer: ProjectReducerFnT.t,
   ) => {
-    aValueArray->Belt.Array.reduceReverse(Ok(initialValue), (rAcc, elem) =>
-      rAcc->Belt.Result.flatMap(acc =>
-        Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, accessors, reducer)
-      )
+    aValueArray->Belt.Array.reduceReverse(initialValue, (acc, elem) =>
+      Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list{acc, elem}, accessors, reducer)
     )
   }
 
@@ -81,25 +73,18 @@ module Internals = {
     accessors: ProjectAccessorsT.t,
     reducer: ProjectReducerFnT.t,
   ) => {
-    let rMappedList = aValueArray->Belt.Array.reduceReverse(Ok(list{}), (rAcc, elem) =>
-      rAcc->E.R.bind(_, acc => {
-        let rNewElem = Reducer_Expression_Lambda.doLambdaCall(
-          aLambdaValue,
-          list{elem},
-          accessors,
-          reducer,
-        )
-        rNewElem->E.R2.fmap(newElem => {
-          switch newElem {
-          | IEvBool(true) => list{elem, ...acc}
-          | _ => acc
-          }
-        })
-      })
-    )
-    let result =
-      rMappedList->E.R2.fmap(mappedList => mappedList->Belt.List.toArray->Wrappers.evArray)
-    result
+    Js.Array2.filter(aValueArray, elem => {
+      let result = Reducer_Expression_Lambda.doLambdaCall(
+        aLambdaValue,
+        list{elem},
+        accessors,
+        reducer,
+      )
+      switch result {
+      | IEvBool(true) => true
+      | _ => false
+      }
+    })->Wrappers.evArray
   }
 }
 
@@ -216,7 +201,7 @@ let library = [
         ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer) =>
           switch inputs {
           | [IEvArray(array), IEvLambda(lambda)] =>
-            Internals.map(array, accessors, lambda, reducer)->E.R2.errMap(_ => "Error!")
+            Ok(Internals.map(array, accessors, lambda, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -236,9 +221,7 @@ let library = [
         ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
-            Internals.reduce(array, initialValue, lambda, accessors, reducer)->E.R2.errMap(_ =>
-              "Error!"
-            )
+            Ok(Internals.reduce(array, initialValue, lambda, accessors, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -258,13 +241,7 @@ let library = [
         ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer: ProjectReducerFnT.t) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
-            Internals.reduceReverse(
-              array,
-              initialValue,
-              lambda,
-              accessors,
-              reducer,
-            )->E.R2.errMap(_ => "Error!")
+            Ok(Internals.reduceReverse(array, initialValue, lambda, accessors, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -284,7 +261,7 @@ let library = [
         ~run=(inputs, _, accessors: ProjectAccessorsT.t, reducer: ProjectReducerFnT.t) =>
           switch inputs {
           | [IEvArray(array), IEvLambda(lambda)] =>
-            Internals.filter(array, lambda, accessors, reducer)->E.R2.errMap(_ => "Error!")
+            Ok(Internals.filter(array, lambda, accessors, reducer))
           | _ => Error(impossibleError)
           },
         (),
