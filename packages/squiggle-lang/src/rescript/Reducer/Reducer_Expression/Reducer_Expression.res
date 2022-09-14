@@ -5,8 +5,6 @@ module T = Reducer_T
 
 type errorValue = Reducer_ErrorValue.errorValue
 
-exception ErrorException = Reducer_ErrorValue.ErrorException
-
 /*
   Recursively evaluate the expression
 */
@@ -35,7 +33,7 @@ let rec evaluate: T.reducerFn = (expression, context) => {
       let key = eKey->evaluate(context)
       let keyString = switch key {
       | IEvString(s) => s
-      | _ => REOther("Record keys must be strings")->ErrorException->raise
+      | _ => REOther("Record keys must be strings")->Reducer_ErrorValue.ErrorException->raise
       }
       let value = eValue->evaluate(context)
       (keyString, value)
@@ -52,7 +50,7 @@ let rec evaluate: T.reducerFn = (expression, context) => {
   | T.ESymbol(name) =>
     switch context.bindings->Bindings.get(name) {
     | Some(v) => v
-    | None => Reducer_ErrorValue.RESymbolNotFound(name)->ErrorException->raise
+    | None => Reducer_ErrorValue.RESymbolNotFound(name)->Reducer_ErrorValue.ErrorException->raise
     }
 
   | T.EValue(value) => value
@@ -61,7 +59,7 @@ let rec evaluate: T.reducerFn = (expression, context) => {
       let predicateResult = predicate->evaluate(context)
       switch predicateResult {
       | T.IEvBool(value) => (value ? trueCase : falseCase)->evaluate(context)
-      | _ => REExpectedType("Boolean", "")->ErrorException->raise
+      | _ => REExpectedType("Boolean", "")->Reducer_ErrorValue.ErrorException->raise
       }
     }
 
@@ -73,7 +71,7 @@ let rec evaluate: T.reducerFn = (expression, context) => {
       let argValues = Js.Array2.map(args, arg => arg->evaluate(context))
       switch lambda {
       | T.IEvLambda(lambda) => Lambda.doLambdaCall(lambda, argValues, context.environment, evaluate)
-      | _ => REExpectedType("Lambda", "")->ErrorException->raise
+      | _ => REExpectedType("Lambda", "")->Reducer_ErrorValue.ErrorException->raise
       }
     }
   }
@@ -90,8 +88,7 @@ module BackCompatible = {
     try {
       expression->evaluate(context)->Ok
     } catch {
-    | ErrorException(e) => Error(e)
-    | _ => raise(ErrorException(RETodo("internal exception")))
+    | exn => Reducer_ErrorValue.fromException(exn)->Error
     }
   }
 

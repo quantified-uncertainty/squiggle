@@ -211,4 +211,10 @@ let functionCallSignatureToString = (functionCallSignature: functionCallSignatur
 
 let arrayToValueArray = (arr: array<t>): array<t> => arr
 
+let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
+  switch rExpression {
+  | Ok(expression) => expression
+  | Error(errorValue) => Reducer_ErrorValue.toException(errorValue)
+  }
+
 let recordToKeyValuePairs = (record: T.map): array<(string, t)> => record->Belt.Map.String.toArray

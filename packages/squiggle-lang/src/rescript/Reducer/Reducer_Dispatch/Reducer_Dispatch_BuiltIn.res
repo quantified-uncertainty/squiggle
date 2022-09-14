@@ -2,6 +2,7 @@ module Bindings = Reducer_Bindings
 module Continuation = ReducerInterface_Value_Continuation
 module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
+module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Lambda = Reducer_Expression_Lambda
 module MathJs = Reducer_MathJs
 module Result = Belt.Result
@@ -177,8 +178,5 @@ let dispatch = (
     | Error(e) => raise(ErrorException(e))
     }
   } catch {
-  | ErrorException(e) => raise(ErrorException(e))
-  | Js.Exn.Error(obj) =>
-    raise(ErrorException(REJavaScriptExn(Js.Exn.message(obj), Js.Exn.name(obj))))
-  | _ => raise(ErrorException(RETodo("unhandled rescript exception")))
+  | exn => Reducer_ErrorValue.fromException(exn)->Reducer_ErrorValue.toException
   }

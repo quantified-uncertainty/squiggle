@@ -6,6 +6,7 @@ import {
   resultMap,
   SqRecord,
   environment,
+  SqDistributionTag,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -31,6 +32,7 @@ export type DistributionChartProps = {
   environment: environment;
   width?: number;
   height: number;
+  xAxisType?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
 export function defaultPlot(distribution: SqDistribution): Plot {
@@ -56,20 +58,29 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   } = props;
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
-      plot.distributions.map((x) => {
-        return resultMap(x.distribution.pointSet(environment), (pointSet) => ({
-          ...pointSet.asShape(),
+      plot.distributions.map((x) =>
+        resultMap(x.distribution.pointSet(environment), (pointSet) => ({
           name: x.name,
           // color: x.color, // not supported yet
-        }));
-      })
+          ...pointSet.asShape(),
+        }))
+      )
     );
+
     if (shapes.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
           {shapes.value.toString()}
         </ErrorAlert>
       );
+    }
+
+    // if this is a sample set, include the samples
+    const samples: number[] = [];
+    for (const { distribution } of plot?.distributions) {
+      if (distribution.tag === SqDistributionTag.SampleSet) {
+        samples.push(...distribution.value());
+      }
     }
 
     const spec = buildVegaSpec(props);
@@ -94,7 +105,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         ) : (
           <Vega
             spec={spec}
-            data={{ data: shapes.value, domain }}
+            data={{ data: shapes.value, domain, samples }}
             width={widthProp - 10}
             height={height}
             actions={actions}

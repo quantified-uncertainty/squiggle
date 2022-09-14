@@ -14,9 +14,9 @@ Danger.laplace: (number, number) => number
 Calculates the probability implied by [Laplace's rule of succession](https://en.wikipedia.org/wiki/Rule_of_succession)
 
 ```js
-trials = 10
-successes = 1
-Danger.laplace(trials, successes) //  (successes + 1) / (trials + 2)  = 2 / 12 = 0.1666
+trials = 10;
+successes = 1;
+Danger.laplace(trials, successes); //  (successes + 1) / (trials + 2)  = 2 / 12 = 0.1666
 ```
 
 ### factorial
@@ -49,7 +49,7 @@ Danger.binomial: (number, number, number) => number
 Danger.integrateFunctionBetweenWithNumIntegrationPoints: (number => number, number, number, number) => number
 ```
 
-`Danger.integrateFunctionBetweenWithNumIntegrationPoints(f, min, max, numIntegrationPoints)` integrates the function `f` between `min` and `max`, and computes `numIntegrationPoints` in between to do so. 
+`Danger.integrateFunctionBetweenWithNumIntegrationPoints(f, min, max, numIntegrationPoints)` integrates the function `f` between `min` and `max`, and computes `numIntegrationPoints` in between to do so.
 
 Note that the function `f` has to take in and return numbers. To integrate a function which returns distributios, use:
 
@@ -67,7 +67,7 @@ Danger.integrateFunctionBetweenWithEpsilon: (number => number, number, number, n
 
 `Danger.integrateFunctionBetweenWithEpsilon(f, min, max, epsilon)` integrates the function `f` between `min` and `max`, and uses an interval of `epsilon` between integration points when doing so. This makes its runtime less predictable than `integrateFunctionBetweenWithNumIntegrationPoints`, because runtime will not only depend on `epsilon`, but also on `min` and `max`.
 
-Same caveats as `integrateFunctionBetweenWithNumIntegrationPoints` apply. 
+Same caveats as `integrateFunctionBetweenWithNumIntegrationPoints` apply.
 
 ### optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions
 

@@ -75,3 +75,9 @@ type optionFfiFnReturningResult = (
   array<internalExpressionValue>,
   environment,
 ) => option<result<internalExpressionValue, Reducer_ErrorValue.errorValue>>
+
+let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
+  switch rExpression {
+  | Ok(expression) => expression
+  | Error(errorValue) => Reducer_ErrorValue.toException(errorValue)
+  }

@@ -30,11 +30,9 @@ module Internals = {
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
   ): internalExpressionValue => {
-    let mappedList = array->E.A.reduceReverse(list{}, (acc, elem) => {
-      let newElem = Reducer_Expression_Lambda.doLambdaCall(eLambdaValue, [elem], env, reducer)
-      list{newElem, ...acc}
-    })
-    mappedList->Belt.List.toArray->Wrappers.evArray
+    Belt.Array.map(array, elem =>
+      Reducer_Expression_Lambda.doLambdaCall(eLambdaValue, [elem], env, reducer)
+    )->Wrappers.evArray
   }
 
   let reduce = (
@@ -67,14 +65,18 @@ module Internals = {
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
   ) => {
-    let mappedList = aValueArray->Belt.Array.reduceReverse(list{}, (acc, elem) => {
-      let newElem = Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, [elem], env, reducer)
-      switch newElem {
-      | IEvBool(true) => list{elem, ...acc}
-      | _ => acc
+    Js.Array2.filter(aValueArray, elem => {
+      let result = Reducer_Expression_Lambda.doLambdaCall(
+        aLambdaValue,
+        [elem],
+        env,
+        reducer,
+      )
+      switch result {
+      | IEvBool(true) => true
+      | _ => false
       }
-    })
-    mappedList->Belt.List.toArray->Wrappers.evArray
+    })->Wrappers.evArray
   }
 }
 
