@@ -20,7 +20,7 @@
 *.js @Hazelfire @berekuk @OAGr
 
 # Any opsy files
-.github/** @quinn-doughert @berekuky @OAGr
+.github/** @quinn-dougherty @berekuk @OAGr
 *.json @quinn-dougherty @Hazelfire @berekuk @OAGr
 *.y*ml @quinn-dougherty @berekuk @OAGr
 *.config.js @Hazelfire @berekuk @OAGr
