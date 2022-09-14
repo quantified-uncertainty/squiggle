@@ -80,7 +80,7 @@ Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions: (array<
 Example:
 
 ```js
-Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions({|x| 20-x}, {|y| 10}, 100, 0.01)
+Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions([{|x| 20-x}, {|y| 10}], 100, 0.01)
 ```
 
 Note also that the array ought to have more than one function in it.
