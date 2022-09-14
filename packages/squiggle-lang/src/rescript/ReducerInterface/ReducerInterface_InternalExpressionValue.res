@@ -244,3 +244,9 @@ let nameSpaceGet = (nameSpace: nameSpace, key: string): option<t> => {
   let NameSpace(container) = nameSpace
   container->Belt.Map.String.get(key)
 }
+
+let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
+  switch rExpression {
+  | Ok(expression) => expression
+  | Error(errorValue) => Reducer_ErrorValue.toException(errorValue)
+  }
