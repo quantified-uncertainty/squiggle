@@ -393,8 +393,6 @@ let library = E.A.concatMany([
     makeProxyFn("truncateLeft", [FRTypeDist, FRTypeNumber]),
     makeProxyFn("truncateRight", [FRTypeDist, FRTypeNumber]),
     makeProxyFn("truncate", [FRTypeDist, FRTypeNumber, FRTypeNumber]),
-    // // FIXME - impossible to implement with FR!!!
-    // | ("mx" | "mixture", args) => Helpers.mixture(args, ~env)->Some
     makeProxyFn("log", [FRTypeDist]),
     makeProxyFn("log10", [FRTypeDist]),
     makeProxyFn("unaryMinus", [FRTypeDist]),

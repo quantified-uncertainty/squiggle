@@ -5,7 +5,6 @@ type rec value =
   | IEvArray(arrayValue)
   | IEvArrayString(array<string>)
   | IEvBool(bool)
-  // | IEvCall(string) // External function call
   | IEvDate(Js.Date.t)
   | IEvDeclaration(lambdaDeclaration)
   | IEvDistribution(DistributionTypes.genericDist)
@@ -14,7 +13,6 @@ type rec value =
   | IEvNumber(float)
   | IEvRecord(map)
   | IEvString(string)
-  // | IEvSymbol(string)
   | IEvTimeDuration(float)
   | IEvType(map)
   | IEvTypeIdentifier(string)
@@ -26,7 +24,6 @@ and lambdaBody = (array<value>, environment, reducerFn) => value
 @genType.opaque
 and lambdaValue = {
   parameters: array<string>,
-  // context: nameSpace,
   body: (array<value>, environment, reducerFn) => value,
 }
 @genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>

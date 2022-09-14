@@ -212,9 +212,9 @@ module FnDefinition = {
   }
 
   let make = (~name, ~inputs, ~run, ()): t => {
-    name: name,
-    inputs: inputs,
-    run: run,
+    name,
+    inputs,
+    run,
   }
 }
 
@@ -240,14 +240,14 @@ module Function = {
     ~isExperimental=false,
     (),
   ): t => {
-    name: name,
-    nameSpace: nameSpace,
-    definitions: definitions,
-    output: output,
+    name,
+    nameSpace,
+    definitions,
+    output,
     examples: examples |> E.O.default([]),
-    isExperimental: isExperimental,
-    requiresNamespace: requiresNamespace,
-    description: description,
+    isExperimental,
+    requiresNamespace,
+    description,
   }
 
   let toJson = (t: t): functionJson => {
