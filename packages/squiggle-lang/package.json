@@ -66,6 +66,7 @@
     "reanalyze": "^2.23.0",
     "rescript": "^9.1.4",
     "rescript-fast-check": "^1.1.1",
+    "rescript-js-map": "^1.1.0",
     "ts-jest": "^27.1.4",
     "ts-loader": "^9.3.0",
     "ts-node": "^10.9.1",

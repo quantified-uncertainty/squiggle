@@ -1,0 +1,13 @@
+integrate(fun, min, max) = {
+    // assume that min and max are integers.
+    epsilon = 1
+    l = max - min
+    meanF(t) = fun(t)
+    intervals = map(List.upTo(0, (l/epsilon)), ({|n| min + n*epsilon}))
+    values = map(intervals, ({ |x | meanF(x)}))
+    result = reduce(values, 0, ({|acc, x| acc + x})) * epsilon
+    result
+}
+
+f(x) = x
+integrate(f, 1, 100k)
