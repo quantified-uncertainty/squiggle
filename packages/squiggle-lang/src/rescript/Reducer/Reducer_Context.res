@@ -1,8 +1,8 @@
 type t = Reducer_T.context
 
-let createContext = (stdLib: Reducer_T.nameSpace, environment: Reducer_T.environment): t => {
+let createContext = (stdLib: Reducer_Namespace.t, environment: Reducer_T.environment): t => {
   {
-    bindings: stdLib->Reducer_Bindings.extend,
+    bindings: stdLib->Reducer_Bindings.fromNamespace,
     environment: environment,
   }
 }

@@ -1,5 +1,5 @@
 module Bindings = Reducer_Bindings
-module Continuation = ReducerInterface_Value_Continuation
+// module Continuation = ReducerInterface_Value_Continuation
 module ExpressionT = Reducer_Expression_T
 module ExternalLibrary = ReducerInterface.ExternalLibrary
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
@@ -52,11 +52,11 @@ let callInternal = (
   //   | None => REArrayIndexNotFound("Array index not found", Belt.Int.fromFloat(fIndex))->Error
   //   }
 
-  let moduleAtIndex = (nameSpace: Reducer_T.nameSpace, sIndex) =>
-    switch Bindings.get(nameSpace, sIndex) {
-    | Some(value) => value->Ok
-    | None => RERecordPropertyNotFound("Bindings property not found", sIndex)->Error
-    }
+  // let moduleAtIndex = (nameSpace: Reducer_T.nameSpace, sIndex) =>
+  //   switch Bindings.get(nameSpace, sIndex) {
+  //   | Some(value) => value->Ok
+  //   | None => RERecordPropertyNotFound("Bindings property not found", sIndex)->Error
+  //   }
 
   // let recordAtIndex = (dict: Belt.Map.String.t<Reducer_T.value>, sIndex) =>
   //   switch Belt.Map.String.get(dict, sIndex) {
@@ -109,7 +109,7 @@ let callInternal = (
 
   switch call {
   // | ("$_atIndex_$", [IEvArray(aValueArray), IEvNumber(fIndex)]) => arrayAtIndex(aValueArray, fIndex)
-  | ("$_atIndex_$", [IEvBindings(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
+  // | ("$_atIndex_$", [IEvBindings(dict), IEvString(sIndex)]) => moduleAtIndex(dict, sIndex)
   // | ("$_atIndex_$", [IEvRecord(dict), IEvString(sIndex)]) => recordAtIndex(dict, sIndex)
   // | ("$_constructArray_$", args) => IEvArray(args)->Ok
   // | ("$_constructRecord_$", [IEvArray(arrayOfPairs)]) => constructRecord(arrayOfPairs)

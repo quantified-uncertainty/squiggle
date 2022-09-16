@@ -4,13 +4,11 @@
 module ExpressionT = Reducer_Expression_T
 module T = Reducer_T
 
-type t = Reducer_T.nameSpace
+type t = Reducer_T.bindings
 type internalExpressionValue = Reducer_T.value
 
-let rec get = (nameSpace: t, id: string) => {
-  let T.NameSpace(container, parent) = nameSpace
-
-  switch container->Belt.MutableMap.String.get(id) {
+let rec get = ({ namespace, parent }: t, id: string) => {
+  switch namespace->Reducer_Namespace.get(id) {
   | Some(v) => Some(v)
   | None =>
     switch parent {
@@ -20,64 +18,38 @@ let rec get = (nameSpace: t, id: string) => {
   }
 }
 
-let getWithDefault = (nameSpace: t, id: string, default) =>
-  switch get(nameSpace, id) {
+let getWithDefault = (namespace: t, id: string, default) =>
+  switch namespace->get(id) {
   | Some(v) => Some(v)
   | None => default
   }
 
-let toString = ReducerInterface_InternalExpressionValue.toStringNameSpace
-
-let makeEmptyMap = () => Belt.MutableMap.String.make()
-
-let set = (nameSpace: t, id: string, value): t => {
-  let T.NameSpace(container, _) = nameSpace
-  Belt.MutableMap.String.set(container, id, value)
-  nameSpace
+let set = ({ namespace } as bindings: t, id: string, value): t => {
+  let _ = namespace->Reducer_Namespace.set(id, value)
+  bindings
 }
 
-let extend = (nameSpace: t) => T.NameSpace(makeEmptyMap(), nameSpace->Some)
+let rec toString = ({ namespace, parent }: t) => {
+  let pairs = namespace->Reducer_Namespace.toString
 
-let toKeyValuePairs = (T.NameSpace(container, _): t): array<(string, internalExpressionValue)> => {
-  container->Belt.MutableMap.String.toArray
-}
-
-let makeEmptyBindings = (): t => T.NameSpace(makeEmptyMap(), None)
-
-let toExpressionValue = (nameSpace: t): internalExpressionValue => T.IEvBindings(nameSpace)
-let fromExpressionValue = (aValue: internalExpressionValue): t =>
-  switch aValue {
-  | IEvBindings(nameSpace) => nameSpace
-  | _ => makeEmptyBindings()
+  switch parent {
+  | Some(p) => `{${pairs}} / ${toString(p)}`
+  | None => `{${pairs}}`
   }
-
-let fromArray = a => T.NameSpace(Belt.MutableMap.String.fromArray(a), None)
-
-let mergeFrom = (T.NameSpace(container, _): t, T.NameSpace(newContainer, parent): t): t => {
-  NameSpace(
-    newContainer->Belt.MutableMap.String.reduce(container, (container, key, value) => {
-      if key != "__result__" {
-        Belt.MutableMap.String.set(container, key, value)
-      }
-      container
-    }),
-    parent,
-  )
 }
 
-let chainTo = (nameSpace: t, previousNameSpaces: array<t>) => {
-  previousNameSpaces->Belt.Array.reduce(nameSpace, (topNameSpace, prevNameSpace) =>
-    mergeFrom(prevNameSpace, topNameSpace)
-  )
+let extend = (bindings: t): t => { namespace: Reducer_Namespace.make(), parent: bindings->Some }
+
+let make = (): t => { namespace: Reducer_Namespace.make(), parent: None }
+
+let removeResult = ({ namespace } as bindings: t): t => {
+  namespace->Belt.MutableMap.String.remove("__result__")
+  bindings
 }
 
-let removeResult = (nameSpace: t): t => {
-  let T.NameSpace(container, _) = nameSpace
-  container->Belt.MutableMap.String.remove("__result__")
-  nameSpace
-}
+let locals = ({ namespace }: t): Reducer_T.namespace => namespace
 
-let locals = (T.NameSpace(container, _): t) => T.NameSpace(container, None)
+let fromNamespace = (namespace: Reducer_Namespace.t): t => { namespace, parent: None }
 
 // let typeAliasesKey = "_typeAliases_"
 // let typeReferencesKey = "_typeReferences_"

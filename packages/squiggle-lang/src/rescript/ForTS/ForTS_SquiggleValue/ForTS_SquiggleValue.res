@@ -2,7 +2,6 @@
 type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
 
 @genType type squiggleValue_Array = Reducer_T.arrayValue //re-export recursive type
-@genType type squiggleValue_Module = Reducer_T.nameSpace //re-export recursive type
 @genType type squiggleValue_Record = Reducer_T.map //re-export recursive type
 @genType type squiggleValue_Type = Reducer_T.map //re-export recursive type
 type squiggleValue_Declaration = ForTS_SquiggleValue_Declaration.squiggleValue_Declaration //use
@@ -20,9 +19,6 @@ external svtArrayString_: string = "ArrayString"
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtBool_: string = "Bool"
 
-// @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-// external svtCall_: string = "Call"
-
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtDate_: string = "Date"
 
@@ -36,9 +32,6 @@ external svtDistribution_: string = "Distribution"
 external svtLambda_: string = "Lambda"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtModule_: string = "Module"
-
-@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtNumber_: string = "Number"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
@@ -46,9 +39,6 @@ external svtRecord_: string = "Record"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtString_: string = "String"
-
-// @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-// external svtSymbol_: string = "Symbol"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtTimeDuration_: string = "TimeDuration"
@@ -73,16 +63,13 @@ let getTag = (variant: squiggleValue): squiggleValueTag =>
   | IEvArray(_) => svtArray_->castEnum
   | IEvArrayString(_) => svtArrayString_->castEnum
   | IEvBool(_) => svtBool_->castEnum
-  // | IEvCall(_) => svtCall_->castEnum //Impossible
   | IEvDate(_) => svtDate_->castEnum
   | IEvDeclaration(_) => svtDeclaration_->castEnum
   | IEvDistribution(_) => svtDistribution_->castEnum
   | IEvLambda(_) => svtLambda_->castEnum
-  | IEvBindings(_) => svtModule_->castEnum //Impossible
   | IEvNumber(_) => svtNumber_->castEnum
   | IEvRecord(_) => svtRecord_->castEnum
   | IEvString(_) => svtString_->castEnum
-  // | IEvSymbol(_) => svtSymbol_->castEnum
   | IEvTimeDuration(_) => svtTimeDuration_->castEnum
   | IEvType(_) => svtType_->castEnum
   | IEvTypeIdentifier(_) => svtTypeIdentifier_->castEnum
@@ -121,13 +108,6 @@ let getBool = (variant: squiggleValue): option<bool> =>
   | _ => None
   }
 
-// @genType
-// let getCall = (variant: squiggleValue): option<string> =>
-//   switch variant {
-//   | IEvCall(value) => value->Some
-//   | _ => None
-//   }
-
 @genType
 let getDate = (variant: squiggleValue): option<Js.Date.t> =>
   switch variant {
@@ -157,13 +137,6 @@ let getLambda = (variant: squiggleValue): option<squiggleValue_Lambda> =>
   }
 
 @genType
-let getModule = (variant: squiggleValue): option<squiggleValue_Module> =>
-  switch variant {
-  | IEvBindings(value) => value->Some
-  | _ => None
-  }
-
-@genType
 let getNumber = (variant: squiggleValue): option<float> =>
   switch variant {
   | IEvNumber(value) => value->Some
@@ -183,13 +156,6 @@ let getString = (variant: squiggleValue): option<string> =>
   | IEvString(value) => value->Some
   | _ => None
   }
-
-// @genType
-// let getSymbol = (variant: squiggleValue): option<string> =>
-//   switch variant {
-//   | IEvSymbol(value) => value->Some
-//   | _ => None
-//   }
 
 @genType
 let getTimeDuration = (variant: squiggleValue): option<float> =>

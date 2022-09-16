@@ -5,11 +5,11 @@
       "dir": "src/rescript",
       "subdirs": true
     },
-    {
-      "dir": "__tests__",
-      "type": "dev",
-      "subdirs": true
-    },
+    // {
+    //   "dir": "__tests__",
+    //   "type": "dev",
+    //   "subdirs": true
+    // },
     {
       "dir": "benchmark",
       "type": "dev",

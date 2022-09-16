@@ -3,7 +3,7 @@
 type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
 
 type squiggleValue = ForTS_SquiggleValue.squiggleValue //use
-type squiggleValue_Module = ForTS_SquiggleValue_Module.squiggleValue_Module //use
+type squiggleValue_Record = ForTS_SquiggleValue.squiggleValue_Record //use
 
 type environment = ForTS_Distribution_Environment.environment //use
 
@@ -184,8 +184,8 @@ let runAll = (project: reducerProject): unit => project->Private.runAll
 Get the bindings after running this source fil. The bindings are local to the source
 */
 @genType
-let getBindings = (project: reducerProject, sourceId: string): squiggleValue_Module =>
-  project->Private.getBindings(sourceId)
+let getBindings = (project: reducerProject, sourceId: string): squiggleValue_Record =>
+  project->Private.getBindings(sourceId)->Reducer_Namespace.toMap
 
 /*
 Get the result after running this source file or the project
@@ -204,7 +204,7 @@ The source has to be include free
 @genType
 let evaluate = (sourceCode: string): (
   result<squiggleValue, reducerErrorValue>,
-  squiggleValue_Module,
+  squiggleValue_Record,
 ) => Private.evaluate(sourceCode)
 
 @genType

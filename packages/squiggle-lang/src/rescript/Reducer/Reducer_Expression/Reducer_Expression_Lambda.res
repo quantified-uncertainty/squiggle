@@ -14,7 +14,7 @@ let doLambdaCall = (
 
 let makeLambda = (
   parameters: array<string>,
-  bindings: Reducer_T.nameSpace,
+  bindings: Reducer_T.bindings,
   body: Reducer_T.expression,
 ): Reducer_T.lambdaValue => {
   // TODO - clone bindings to avoid later redefinitions affecting lambdas?

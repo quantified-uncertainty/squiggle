@@ -1,12 +1,12 @@
 exception ErrorException = Reducer_ErrorValue.ErrorException
 
-let internalStdLib: Reducer_Bindings.t = {
+let internalStdLib: Reducer_T.namespace = {
   let res =
-    Reducer_Bindings.makeEmptyBindings()
-    ->SquiggleLibrary_Math.makeBindings
-    ->SquiggleLibrary_Versions.makeBindings
+    Reducer_Namespace.make()
+    ->Reducer_Namespace.mergeFrom(SquiggleLibrary_Math.make())
+    ->Reducer_Namespace.mergeFrom(SquiggleLibrary_Versions.make())
 
-  let _ = res->Reducer_Bindings.set(
+  let _ = res->Reducer_Namespace.set(
     "$_atIndex_$",
     Reducer_Expression_Lambda.makeFFILambda((inputs, _, _) => {
       switch inputs {
@@ -31,7 +31,7 @@ let internalStdLib: Reducer_Bindings.t = {
 
   FunctionRegistry_Library.nonRegistryLambdas->Js.Array2.forEach(
     ((name, lambda)) => {
-      let _ = res->Reducer_Bindings.set(name, lambda->Reducer_T.IEvLambda)
+      let _ = res->Reducer_Namespace.set(name, lambda->Reducer_T.IEvLambda)
     }
   )
 
@@ -62,7 +62,7 @@ let internalStdLib: Reducer_Bindings.t = {
   FunctionRegistry_Library.registry.fnNameDict
   ->Js.Dict.keys
   ->Js.Array2.forEach(name => {
-    let _ = res->Reducer_Bindings.set(
+    let _ = res->Reducer_Namespace.set(
       name,
       Reducer_Expression_Lambda.makeFFILambda((arguments, environment, reducer) => {
         switch FunctionRegistry_Library.call(name, arguments, environment, reducer) {

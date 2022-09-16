@@ -8,7 +8,7 @@ let emptyItem: projectItem = {
   source: "",
   rawParse: None,
   expression: None,
-  continuation: Reducer_Bindings.makeEmptyBindings(),
+  continuation: Reducer_Namespace.make(),
   result: None,
   continues: [],
   includes: []->Ok,
@@ -168,14 +168,14 @@ let buildExpression = (this: t): t => {
 }
 
 let failRun = (this: t, e: Reducer_ErrorValue.errorValue): t =>
-  this->setResult(e->Error)->setContinuation(Reducer_Bindings.makeEmptyBindings())
+  this->setResult(e->Error)->setContinuation(Reducer_Namespace.make())
 
 let doRun = (this: t, context: Reducer_T.context): t =>
   switch this->getExpression {
   | Some(expressionResult) => switch expressionResult {
     | Ok(expression) => try {
         let result = Reducer_Expression.evaluate(expression, context)
-        this->setResult(result->Ok)->setContinuation(context.bindings)
+        this->setResult(result->Ok)->setContinuation(context.bindings->Reducer_Bindings.locals)
       } catch {
       | Reducer_ErrorValue.ErrorException(e) => this->failRun(e)
       | _ => this->failRun(RETodo("unhandled rescript exception"))

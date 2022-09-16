@@ -18,9 +18,7 @@ let rec toString = (aValue: T.value) =>
   switch aValue {
   | IEvArray(anArray) => toStringArray(anArray)
   | IEvArrayString(anArray) => toStringArrayString(anArray)
-  | IEvBindings(m) => toStringBindings(m)
   | IEvBool(aBool) => toStringBool(aBool)
-  // | IEvCall(fName) => toStringCall(fName)
   | IEvDate(date) => toStringDate(date)
   | IEvDeclaration(d) => toStringDeclaration(d)
   | IEvDistribution(dist) => toStringDistribution(dist)
@@ -28,7 +26,6 @@ let rec toString = (aValue: T.value) =>
   | IEvNumber(aNumber) => toStringNumber(aNumber)
   | IEvRecord(aMap) => aMap->toStringRecord
   | IEvString(aString) => toStringString(aString)
-  // | IEvSymbol(aString) => toStringSymbol(aString)
   | IEvTimeDuration(t) => toStringTimeDuration(t)
   | IEvType(aMap) => toStringType(aMap)
   | IEvTypeIdentifier(id) => toStringTypeIdentifier(id)
@@ -42,7 +39,6 @@ and toStringArrayString = anArray => {
   let args = anArray->Js.Array2.toString
   `[${args}]`
 }
-and toStringBindings = m => `@${m->toStringNameSpace}`
 and toStringBool = aBool => Js.String.make(aBool)
 and toStringCall = fName => `:${fName}`
 and toStringDate = date => DateTime.Date.toString(date)
@@ -69,35 +65,19 @@ and toStringMap = aMap => {
     ->Js.Array2.toString
   `{${pairs}}`
 }
-and toStringNameSpace = nameSpace => {
-  let T.NameSpace(container, parent) = nameSpace
-  let pairs =
-    container
-    ->Belt.MutableMap.String.toArray
-    ->Js.Array2.map(((eachKey, eachValue)) => `${eachKey}: ${toString(eachValue)}`)
-    ->Js.Array2.toString
-
-  switch parent {
-  | Some(p) => `{${pairs}} / ${toStringNameSpace(p)}`
-  | None => `{${pairs}}`
-  }
-}
 
 let toStringWithType = (aValue: T.value) =>
   switch aValue {
   | IEvArray(_) => `Array::${toString(aValue)}`
   | IEvArrayString(_) => `ArrayString::${toString(aValue)}`
   | IEvBool(_) => `Bool::${toString(aValue)}`
-  // | IEvCall(_) => `Call::${toString(aValue)}`
   | IEvDate(_) => `Date::${toString(aValue)}`
   | IEvDeclaration(_) => `Declaration::${toString(aValue)}`
   | IEvDistribution(_) => `Distribution::${toString(aValue)}`
   | IEvLambda(_) => `Lambda::${toString(aValue)}`
-  | IEvBindings(_) => `Bindings::${toString(aValue)}`
   | IEvNumber(_) => `Number::${toString(aValue)}`
   | IEvRecord(_) => `Record::${toString(aValue)}`
   | IEvString(_) => `String::${toString(aValue)}`
-  // | IEvSymbol(_) => `Symbol::${toString(aValue)}`
   | IEvTimeDuration(_) => `Date::${toString(aValue)}`
   | IEvType(_) => `Type::${toString(aValue)}`
   | IEvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
@@ -138,16 +118,13 @@ type internalExpressionValueType =
   | EvtArray
   | EvtArrayString
   | EvtBool
-  // | EvtCall
   | EvtDate
   | EvtDeclaration
   | EvtDistribution
   | EvtLambda
-  | EvtModule
   | EvtNumber
   | EvtRecord
   | EvtString
-  // | EvtSymbol
   | EvtTimeDuration
   | EvtType
   | EvtTypeIdentifier
@@ -162,16 +139,13 @@ let valueToValueType = (value: T.value) =>
   | IEvArray(_) => EvtArray
   | IEvArrayString(_) => EvtArrayString
   | IEvBool(_) => EvtBool
-  // | IEvCall(_) => EvtCall
   | IEvDate(_) => EvtDate
   | IEvDeclaration(_) => EvtDeclaration
   | IEvDistribution(_) => EvtDistribution
   | IEvLambda(_) => EvtLambda
-  | IEvBindings(_) => EvtModule
   | IEvNumber(_) => EvtNumber
   | IEvRecord(_) => EvtRecord
   | IEvString(_) => EvtString
-  // | IEvSymbol(_) => EvtSymbol
   | IEvTimeDuration(_) => EvtTimeDuration
   | IEvType(_) => EvtType
   | IEvTypeIdentifier(_) => EvtTypeIdentifier
@@ -193,7 +167,6 @@ let valueTypeToString = (valueType: internalExpressionValueType): string =>
   | EvtDeclaration => `Declaration`
   | EvtDistribution => `Distribution`
   | EvtLambda => `Lambda`
-  | EvtModule => `Module`
   | EvtNumber => `Number`
   | EvtRecord => `Record`
   | EvtString => `String`

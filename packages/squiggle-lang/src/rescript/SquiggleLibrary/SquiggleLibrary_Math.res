@@ -1,5 +1,3 @@
-module Bindings = Reducer_Bindings
-
 let availableNumbers: array<(string, float)> = [
   ("Math.pi", Js.Math._PI),
   ("Math.e", Js.Math._E),
@@ -13,8 +11,5 @@ let availableNumbers: array<(string, float)> = [
   ("Math.tau", 6.283185307179586),
 ]
 
-let mathBindings: Bindings.t =
-  availableNumbers->E.A2.fmap(((name, v)) => (name, Reducer_T.IEvNumber(v)))->Bindings.fromArray
-
-let makeBindings = (previousBindings: Bindings.t): Bindings.t =>
-  previousBindings->Bindings.mergeFrom(mathBindings)
+let make = (): Reducer_Namespace.t =>
+  availableNumbers->E.A2.fmap(((name, v)) => (name, Reducer_T.IEvNumber(v)))->Reducer_Namespace.fromArray

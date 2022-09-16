@@ -1,7 +1,6 @@
 // TODO: Auto clean project based on topology
 
 module Bindings = Reducer_Bindings
-module Continuation = ReducerInterface_Value_Continuation
 module ErrorValue = Reducer_ErrorValue
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ProjectItem = ReducerProject_ProjectItem
@@ -97,16 +96,13 @@ let setContinues = (project: t, sourceId: string, continues: array<string>): uni
   handleNewTopology(project)
 }
 let getContinues = (project: t, sourceId: string): array<string> =>
-  ProjectItem.getContinues(project->getItem(sourceId))
+  project->getItem(sourceId)->ProjectItem.getContinues
 
 let removeContinues = (project: t, sourceId: string): unit => {
   let newItem = project->getItem(sourceId)->ProjectItem.removeContinues
   project->setItem(sourceId, newItem)
   handleNewTopology(project)
 }
-
-let getContinuation = (project: t, sourceId: string): ProjectItem.T.continuationArgumentType =>
-  project->getItem(sourceId)->ProjectItem.getContinuation
 
 let setContinuation = (
   project: t,
@@ -142,8 +138,8 @@ let rawParse = (project: t, sourceId): unit => {
   project->setItem(sourceId, newItem)
 }
 
-let getStdLib = (project: t): Reducer_Bindings.t => project.stdLib
-let setStdLib = (project: t, value: Reducer_Bindings.t): unit => {
+let getStdLib = (project: t): Reducer_T.namespace => project.stdLib
+let setStdLib = (project: t, value: Reducer_T.namespace): unit => {
   project.stdLib = value
 }
 
@@ -152,47 +148,41 @@ let setEnvironment = (project: t, value: InternalExpressionValue.environment): u
   project.environment = value
 }
 
-let getBindings = (project: t, sourceId: string): ProjectItem.T.bindingsArgumentType => {
-  project->getContinuation(sourceId)->Reducer_Bindings.locals
+let getBindings = (project: t, sourceId: string): Reducer_T.namespace => {
+  project->getItem(sourceId)->ProjectItem.getContinuation
 }
 
-let getContinuationsBefore = (project: t, sourceId: string): array<ProjectItem.T.continuation> => {
-  let pastNameSpaces = project->getPastChain(sourceId)->Js.Array2.map(getBindings(project, _))
-  let theLength = pastNameSpaces->Js.Array2.length
-  if theLength == 0 {
-    // `getContinuationBefore ${sourceId}: stdLib`->Js.log
-    [project->getStdLib]
-  } else {
-    // `getContinuationBefore ${sourceId}: ${lastOne} = ${InternalExpressionValue.toStringBindings(
-    //     project->getBindings(lastOne),
-    //   )}`->Js.log
-    pastNameSpaces
-  }
+let getBindingsAsRecord = (project: t, sourceId: string): Reducer_T.value => {
+  project->getBindings(sourceId)->Reducer_Namespace.toRecord
 }
 
-let linkDependencies = (project: t, sourceId: string): ProjectItem.T.continuation => {
-  let continuationsBefore = project->getContinuationsBefore(sourceId)
-  let nameSpace =
-    Reducer_Bindings.makeEmptyBindings()->Reducer_Bindings.chainTo(continuationsBefore)
+let getContinuationsBefore = (project: t, sourceId: string): array<Reducer_T.namespace> => {
+  project->getPastChain(sourceId)->Belt.Array.map(project->getBindings)
+}
+
+let linkDependencies = (project: t, sourceId: string): Reducer_T.namespace => {
+  let nameSpace = Reducer_Namespace.mergeMany(
+    Belt.Array.concat(
+      [project->getStdLib],
+      project->getContinuationsBefore(sourceId)
+    )
+  )
+
   let includesAsVariables = project->getIncludesAsVariables(sourceId)
-  Belt.Array.reduce(includesAsVariables, nameSpace, (currentNameSpace, (variable, includeFile)) =>
-    Bindings.set(
-      currentNameSpace,
+  Belt.Array.reduce(includesAsVariables, nameSpace, (acc, (variable, includeFile)) =>
+    acc->Reducer_Namespace.set(
       variable,
-      getBindings(project, includeFile)->Reducer_T.IEvBindings,
+      project->getBindings(includeFile)->Reducer_Namespace.toRecord
     )
   )
 }
 
 let doLinkAndRun = (project: t, sourceId: string): unit => {
-  let context = Reducer_Context.createContext(project->getStdLib, project->getEnvironment)
-  // FIXME: fill context with dependencies
-  let continuation = linkDependencies(project, sourceId)
-  let contextWithContinuation = {
-    ...context,
-    bindings: continuation->Reducer_Bindings.extend,
-  }
-  let newItem = project->getItem(sourceId)->ProjectItem.run(contextWithContinuation)
+  let context = Reducer_Context.createContext(
+    project->linkDependencies(sourceId),
+    project->getEnvironment
+  )
+  let newItem = project->getItem(sourceId)->ProjectItem.run(context)
   // Js.log("after run " ++ newItem.continuation->Reducer_Bindings.toString)
   project->setItem(sourceId, newItem)
 }
@@ -243,6 +233,6 @@ let evaluate = (sourceCode: string) => {
 
   (
     getResultOption(project, "main")->Belt.Option.getWithDefault(Reducer_T.IEvVoid->Ok),
-    project->getBindings("main"),
+    project->getBindings("main")->Reducer_Namespace.toMap,
   )
 }

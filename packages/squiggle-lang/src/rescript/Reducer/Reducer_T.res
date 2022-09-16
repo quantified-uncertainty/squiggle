@@ -9,7 +9,6 @@ type rec value =
   | IEvDeclaration(lambdaDeclaration)
   | IEvDistribution(DistributionTypes.genericDist)
   | IEvLambda(lambdaValue)
-  | IEvBindings(nameSpace)
   | IEvNumber(float)
   | IEvRecord(map)
   | IEvString(string)
@@ -19,17 +18,17 @@ type rec value =
   | IEvVoid
 @genType.opaque and arrayValue = array<value>
 @genType.opaque and map = Belt.Map.String.t<value>
-@genType.opaque and nameSpace = NameSpace(Belt.MutableMap.String.t<value>, option<nameSpace>)
 and lambdaBody = (array<value>, environment, reducerFn) => value
 @genType.opaque
 and lambdaValue = {
   parameters: array<string>,
-  body: (array<value>, environment, reducerFn) => value,
+  body: lambdaBody,
 }
 @genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>
 and expression =
   | EBlock(array<expression>)
-  | EProgram(array<expression>) // programs are similar to blocks, but don't create an inner scope. there can be only one program at the top level of the expression.
+  // programs are similar to blocks, but don't create an inner scope. there can be only one program at the top level of the expression.
+  | EProgram(array<expression>)
   | EArray(array<expression>)
   | ERecord(array<(expression, expression)>)
   | ESymbol(string)
@@ -39,8 +38,14 @@ and expression =
   | ELambda(array<string>, expression)
   | EValue(value)
 
+and namespace = Belt.MutableMap.String.t<value>
+and bindings = {
+  namespace: namespace,
+  parent: option<bindings>,
+}
+
 and context = {
-  bindings: nameSpace,
+  bindings: bindings,
   environment: environment,
 }
 

@@ -15,4 +15,4 @@ const result = p.getResult("a");
 console.log(result.tag, result.value.toString());
 
 const bindings = p.getBindings("a");
-console.log(bindings.asValue().toString());
+console.log(bindings.toString());

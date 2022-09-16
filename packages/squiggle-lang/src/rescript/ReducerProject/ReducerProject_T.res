@@ -4,7 +4,7 @@ module ExpressionT = Reducer_Expression_T
 @genType.opaque
 type project = {
   items: Belt.MutableMap.String.t<ProjectItem.t>,
-  mutable stdLib: Reducer_Bindings.t,
+  mutable stdLib: Reducer_Namespace.t,
   mutable environment: ExpressionT.environment,
   mutable previousRunOrder: array<string>,
 }
