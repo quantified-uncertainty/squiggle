@@ -30,7 +30,7 @@ let rec toString = (expression: expression) =>
   | EBlock(statements) => `{${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}}`
   | EProgram(statements) => `<${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}>`
   | EArray(aList) => `[${Js.Array2.map(aList, aValue => toString(aValue))->commaJoin}]`
-  | ERecord(map) => "TODO"
+  | ERecord(map) => `{${map->Belt.Array.map(((key, value)) => `${key->toString}: ${value->toString}`)->Js.Array2.toString}}`
   | ESymbol(name) => name
   | ETernary(predicate, trueCase, falseCase) =>
     `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`

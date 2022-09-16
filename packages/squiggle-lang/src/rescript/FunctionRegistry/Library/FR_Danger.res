@@ -245,7 +245,7 @@ module DiminishingReturns = {
       optimalAllocations: array<float>,
       currentMarginalReturns: result<array<float>, errorValue>,
     }
-    let findBiggestElementIndex = xs =>
+    let findBiggestElementIndex = (xs: array<float>) =>
       E.A.reducei(xs, 0, (acc, newElement, index) => {
         switch newElement > xs[acc] {
         | true => index
