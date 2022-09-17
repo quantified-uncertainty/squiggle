@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "license": "MIT",
   "dependencies": {
     "@floating-ui/react-dom": "^1.0.0",
@@ -67,7 +67,7 @@
   },
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
-    "build:cjs": "rm -rf dist/src && tsc -b",
+    "build:cjs": "rm -rf dist/src && rm -f dist/tsconfig.tsbuildinfo && tsc -b",
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
     "build:storybook": "build-storybook -s public",
     "build": "yarn run build:cjs && yarn run build:css && yarn run build:storybook",
