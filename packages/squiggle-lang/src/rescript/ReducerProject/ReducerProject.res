@@ -194,17 +194,17 @@ let tryRunWithResult = (
   sourceId: string,
   rPrevResult: ProjectItem.T.resultArgumentType,
 ): ProjectItem.T.resultArgumentType => {
-  switch getResultOption(project, sourceId) {
+  switch project->getResultOption(sourceId) {
   | Some(result) => result // already ran
   | None =>
     switch rPrevResult {
     | Error(error) => {
-        setResult(project, sourceId, Error(error))
+        project->setResult(sourceId, Error(error))
         Error(error)
       }
     | Ok(_prevResult) => {
-        doLinkAndRun(project, sourceId)
-        getResultOption(project, sourceId)->Belt.Option.getWithDefault(rPrevResult)
+        project->doLinkAndRun(sourceId)
+        project->getResultOption(sourceId)->Belt.Option.getWithDefault(rPrevResult)
       }
     }
   }
@@ -214,7 +214,7 @@ let runAll = (project: t): unit => {
   let runOrder = Topology.getRunOrder(project)
   let initialState = Ok(Reducer_T.IEvVoid)
   let _finalState = Belt.Array.reduce(runOrder, initialState, (currState, currId) =>
-    tryRunWithResult(project, currId, currState)
+    project->tryRunWithResult(currId, currState)
   )
 }
 
@@ -222,17 +222,17 @@ let run = (project: t, sourceId: string): unit => {
   let runOrder = Topology.getRunOrderFor(project, sourceId)
   let initialState = Ok(Reducer_T.IEvVoid)
   let _finalState = Belt.Array.reduce(runOrder, initialState, (currState, currId) =>
-    tryRunWithResult(project, currId, currState)
+    project->tryRunWithResult(currId, currState)
   )
 }
 
 let evaluate = (sourceCode: string) => {
   let project = createProject()
-  setSource(project, "main", sourceCode)
-  runAll(project)
+  project->setSource("main", sourceCode)
+  project->runAll
 
   (
-    getResultOption(project, "main")->Belt.Option.getWithDefault(Reducer_T.IEvVoid->Ok),
+    project->getResultOption("main")->Belt.Option.getWithDefault(Reducer_T.IEvVoid->Ok),
     project->getBindings("main")->Reducer_Namespace.toMap,
   )
 }

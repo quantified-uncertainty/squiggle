@@ -2,7 +2,7 @@ type t = Reducer_T.context
 
 let createContext = (stdLib: Reducer_Namespace.t, environment: Reducer_T.environment): t => {
   {
-    bindings: stdLib->Reducer_Bindings.fromNamespace,
+    bindings: stdLib->Reducer_Bindings.fromNamespace->Reducer_Bindings.extend,
     environment: environment,
   }
 }

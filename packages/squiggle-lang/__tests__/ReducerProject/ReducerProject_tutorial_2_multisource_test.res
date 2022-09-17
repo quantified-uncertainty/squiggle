@@ -14,27 +14,27 @@ describe("ReducerProject Tutorial", () => {
     test("Chaining", () => {
       let project = Project.createProject()
       /* This time let's add 3 sources and chain them together */
-      Project.setSource(project, "source1", "x=1")
+      project->Project.setSource("source1", "x=1")
 
-      Project.setSource(project, "source2", "y=2")
+      project->Project.setSource("source2", "y=x+1")
       /* To run, source2 depends on source1 */
-      Project.setContinues(project, "source2", ["source1"])
+      project->Project.setContinues("source2", ["source1"])
 
-      Project.setSource(project, "source3", "z=3")
+      project->Project.setSource("source3", "z=y+1")
       /* To run, source3 depends on source2 */
-      Project.setContinues(project, "source3", ["source2"])
+      project->Project.setContinues("source3", ["source2"])
 
       /* Now we can run the project */
-      Project.runAll(project)
+      project->Project.runAll
 
       /* And let's check the result and bindings of source3 */
-      let result3 = Project.getResult(project, "source3")
-      let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
+      let result3 = project->Project.getResult("source3")
+      let bindings3 = project->Project.getBindings("source3")
 
       (
         result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.toStringBindings,
-      )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
+        bindings3->InternalExpressionValue.toStringRecord,
+      )->expect == ("Ok(())", "{z: 3}")
     })
 
     test("Depending", () => {
@@ -43,24 +43,24 @@ describe("ReducerProject Tutorial", () => {
       let project = Project.createProject()
 
       /* This time source1 and source2 are not depending on anything */
-      Project.setSource(project, "source1", "x=1")
-      Project.setSource(project, "source2", "y=2")
+      project->Project.setSource("source1", "x=1")
+      project->Project.setSource("source2", "y=2")
 
-      Project.setSource(project, "source3", "z=3")
+      project->Project.setSource("source3", "z=x+y")
       /* To run, source3 depends on source1 and source3 together */
-      Project.setContinues(project, "source3", ["source1", "source2"])
+      project->Project.setContinues("source3", ["source1", "source2"])
 
       /* Now we can run the project */
-      Project.runAll(project)
+      project->Project.runAll
 
       /* And let's check the result and bindings of source3 */
-      let result3 = Project.getResult(project, "source3")
-      let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
+      let result3 = project->Project.getResult("source3")
+      let bindings3 = project->Project.getBindings("source3")
 
       (
         result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.toStringBindings,
-      )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
+        bindings3->InternalExpressionValue.toStringRecord,
+      )->expect == ("Ok(())", "{z: 3}")
     })
 
     test("Intro to including", () => {
@@ -70,33 +70,32 @@ describe("ReducerProject Tutorial", () => {
       let project = Project.createProject()
 
       /* This time source1 and source2 are not depending on anything */
-      Project.setSource(project, "source1", "x=1")
-      Project.setSource(project, "source2", "y=2")
+      project->Project.setSource("source1", "x=1")
+      project->Project.setSource("source2", "y=2")
 
-      Project.setSource(
-        project,
+      project->Project.setSource(
         "source3",
         `
       #include "source1"
       #include "source2"
-      z=3`,
+      z=x+y`,
       )
       /* We need to parse the includes to set the dependencies */
-      Project.parseIncludes(project, "source3")
+      project->Project.parseIncludes("source3")
 
       /* Now we can run the project */
-      Project.runAll(project)
+      project->Project.runAll
 
       /* And let's check the result and bindings of source3 
       This time you are getting all the variables because we are including the other sources 
       Behind the scenes parseIncludes is setting the dependencies */
-      let result3 = Project.getResult(project, "source3")
-      let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
+      let result3 = project->Project.getResult("source3")
+      let bindings3 = project->Project.getBindings("source3")
 
       (
         result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.toStringBindings,
-      )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
+        bindings3->InternalExpressionValue.toStringRecord,
+      )->expect == ("Ok(())", "{z: 3}")
       /*
       Doing it like this is too verbose for a storybook 
       But I hope you have seen the relation of setContinues and parseIncludes */

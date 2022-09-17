@@ -35,4 +35,4 @@ const result = project.getResult("a");
 console.log("Result:", result.tag, result.value.toString());
 
 const bindings = project.getBindings("a");
-console.log("Bindings:", bindings.asValue().toString());
+console.log("Bindings:", bindings.toString());

@@ -72,5 +72,25 @@ let library = [
       | _ => Error(impossibleError)
       }
     }
-  )
+  ),
+  makeFn(
+    "not",
+    [FRTypeNumber],
+    inputs => {
+      switch inputs {
+      | [IEvNumber(x)] => IEvBool(x != 0.)->Ok
+      | _ => Error(impossibleError)
+      }
+    }
+  ),
+  makeFn(
+    "not",
+    [FRTypeBool],
+    inputs => {
+      switch inputs {
+      | [IEvBool(x)] => IEvBool(!x)->Ok
+      | _ => Error(impossibleError)
+      }
+    }
+  ),
 ]

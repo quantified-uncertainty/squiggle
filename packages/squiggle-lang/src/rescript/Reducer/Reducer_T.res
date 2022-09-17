@@ -38,7 +38,7 @@ and expression =
   | ELambda(array<string>, expression)
   | EValue(value)
 
-and namespace = Belt.MutableMap.String.t<value>
+and namespace = Belt.Map.String.t<value>
 and bindings = {
   namespace: namespace,
   parent: option<bindings>,
@@ -49,4 +49,4 @@ and context = {
   environment: environment,
 }
 
-and reducerFn = (expression, context) => value
+and reducerFn = (expression, context) => (value, context)

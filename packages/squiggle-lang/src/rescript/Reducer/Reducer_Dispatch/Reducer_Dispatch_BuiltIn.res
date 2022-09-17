@@ -34,36 +34,6 @@ let callInternal = (
     | call => call->IEV.toStringFunctionCall->MathJs.Eval.eval
     }
 
-  // let constructRecord = arrayOfPairs => {
-  //   Belt.Array.map(arrayOfPairs, pairValue =>
-  //     switch pairValue {
-  //     | Reducer_T.IEvArray([IEvString(key), valueValue]) => (key, valueValue)
-  //     | _ => ("wrong key type", pairValue->IEV.toStringWithType->IEvString)
-  //     }
-  //   )
-  //   ->Belt.Map.String.fromArray
-  //   ->Reducer_T.IEvRecord
-  //   ->Ok
-  // }
-
-  // let arrayAtIndex = (aValueArray: array<Reducer_T.value>, fIndex: float) =>
-  //   switch Belt.Array.get(aValueArray, Belt.Int.fromFloat(fIndex)) {
-  //   | Some(value) => value->Ok
-  //   | None => REArrayIndexNotFound("Array index not found", Belt.Int.fromFloat(fIndex))->Error
-  //   }
-
-  // let moduleAtIndex = (nameSpace: Reducer_T.nameSpace, sIndex) =>
-  //   switch Bindings.get(nameSpace, sIndex) {
-  //   | Some(value) => value->Ok
-  //   | None => RERecordPropertyNotFound("Bindings property not found", sIndex)->Error
-  //   }
-
-  // let recordAtIndex = (dict: Belt.Map.String.t<Reducer_T.value>, sIndex) =>
-  //   switch Belt.Map.String.get(dict, sIndex) {
-  //   | Some(value) => value->Ok
-  //   | None => RERecordPropertyNotFound("Record property not found", sIndex)->Error
-  //   }
-
   let doAddArray = (originalA, b) => {
     let a = originalA->Js.Array2.copy
     let _ = Js.Array2.pushMany(a, b)
@@ -83,10 +53,6 @@ let callInternal = (
     Js.log(`${label}: ${value->IEV.toString}`)
     value->Ok
   }
-
-  // let doSetBindings = (bindings: Reducer_T.nameSpace, symbol: string, value: Reducer_T.value) => {
-  //   Bindings.set(bindings, symbol, value)->IEvBindings->Ok
-  // }
 
   // let doSetTypeAliasBindings = (
   //   bindings: nameSpace,

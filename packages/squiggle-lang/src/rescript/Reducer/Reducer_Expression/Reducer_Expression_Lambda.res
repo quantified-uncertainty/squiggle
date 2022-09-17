@@ -34,11 +34,14 @@ let makeLambda = (
     }
 
     let localBindings = bindings->Reducer_Bindings.extend
-    parameters->Js.Array2.forEachi((parameter, index) => {
-      let _ = localBindings->Reducer_Bindings.set(parameter, arguments[index])
+    let localBindingsWithParameters = parameters->Belt.Array.reduceWithIndex(
+      localBindings,
+      (currentBindings, parameter, index) => {
+      currentBindings->Reducer_Bindings.set(parameter, arguments[index])
     })
 
-    reducer(body, {bindings: localBindings, environment: environment})
+    let (value, _) = reducer(body, {bindings: localBindingsWithParameters, environment: environment})
+    value
   }
 
   {

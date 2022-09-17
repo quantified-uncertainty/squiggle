@@ -16,8 +16,7 @@ Here we will finally proceed to a real life scenario. */
     /* Here we investigate the details about parseIncludes, before setting up a real life scenario in the next section. */
     /* Everything happens inside a project, so let's have a project */
     let project = Project.createProject()
-    Project.setSource(
-      project,
+    project->Project.setSource(
       "main",
       `
     #include "common"
@@ -25,10 +24,10 @@ Here we will finally proceed to a real life scenario. */
     `,
     )
     /* We need to parse includes after changing the source */
-    Project.parseIncludes(project, "main")
+    project->Project.parseIncludes("main")
     test("getDependencies", () => {
       /* Parse includes has set the dependencies */
-      Project.getDependencies(project, "main")->expect == ["common"]
+      project->Project.getDependencies("main")->expect == ["common"]
       /* If there were no includes than there would be no dependencies */
       /* However if there was a syntax error at includes then would be no dependencies also */
       /* Therefore looking at dependencies is not the right way to load includes */
@@ -36,7 +35,7 @@ Here we will finally proceed to a real life scenario. */
     })
     test("getIncludes", () => {
       /* Parse includes has set the includes */
-      switch Project.getIncludes(project, "main") {
+      switch project->Project.getIncludes("main") {
       | Ok(includes) => includes->expect == ["common"]
       | Error(err) => err->Reducer_ErrorValue.errorToString->fail
       }
@@ -50,7 +49,7 @@ Here we will finally proceed to a real life scenario. */
         include or depend on the current source.
         But you don't need to use this to execute the projects.
         It is provided for completeness of information. */
-      Project.getDependents(project, "main")->expect == []
+      project->Project.getDependents("main")->expect == []
       /* Nothing is depending on or including main */
     })
 
@@ -76,29 +75,29 @@ Here we will finally proceed to a real life scenario. */
 
       /* let's recursively load the sources */
       let rec loadIncludesRecursively = (project, sourceName, visited) => {
-        if Js.Array2.includes(visited, sourceName) {
+        if visited->Js.Array2.includes(sourceName) {
           /* Oh we have already visited this source. There is an include cycle */
           "Cyclic include ${sourceName}"->Js.Exn.raiseError
         } else {
           let newVisited = Js.Array2.copy(visited)
-          let _ = Js.Array2.push(newVisited, sourceName)
+          let _ = newVisited->Js.Array2.push(sourceName)
           /* Let's parse the includes and dive into them */
           Project.parseIncludes(project, sourceName)
-          let rIncludes = Project.getIncludes(project, sourceName)
+          let rIncludes = project->Project.getIncludes(sourceName)
           switch rIncludes {
           /* Maybe there is an include syntax error */
           | Error(err) => err->Reducer_ErrorValue.errorToString->Js.Exn.raiseError
 
           | Ok(includes) =>
-            Belt.Array.forEach(includes, newIncludeName => {
+            includes->Belt.Array.forEach(newIncludeName => {
               /* We have got one of the new includes.
                Let's load it and add it to the project */
               let newSource = loadSource(newIncludeName)
-              Project.setSource(project, newIncludeName, newSource)
+              project->Project.setSource(newIncludeName, newSource)
               /* The new source is loaded and added to the project. */
               /* Of course the new source might have includes too. */
               /* Let's recursively load them */
-              loadIncludesRecursively(project, newIncludeName, newVisited)
+              project->loadIncludesRecursively(newIncludeName, newVisited)
             })
           }
         }
@@ -110,45 +109,46 @@ Here we will finally proceed to a real life scenario. */
 
       let project = Project.createProject()
 
-      /* main includes source3 which includes source2 which includes source1 */
-      Project.setSource(
-        project,
+      project->Project.setSource(
         "main",
         `
+        #include "source1"
+        #include "source2"
         #include "source3"
-        x+y+z
+        a = x+y+z
+        b = doubleX
+        a
         `,
       )
       /* Setting source requires parsing and loading the includes recursively */
-      loadIncludesRecursively(project, "main", []) //No visited yet
+      project->loadIncludesRecursively("main", []) // Not visited yet
 
       /* Let's salt it more. Let's have another source in the project which also has includes */
       /* doubleX includes source1 which is eventually included by main as well */
-      Project.setSource(
-        project,
+      project->Project.setSource(
         "doubleX",
         `
         #include "source1"
         doubleX = x * 2
         `,
       )
-      loadIncludesRecursively(project, "doubleX", [])
+      project->loadIncludesRecursively("doubleX", [])
       /* Remember, any time you set a source, you need to load includes recursively */
 
       /* As doubleX is not included by main, it is not loaded recursively.
        So we link it to the project as a dependency */
-      Project.setContinues(project, "main", ["doubleX"])
+      project->Project.setContinues("main", ["doubleX"])
 
       /* Let's run the project */
-      Project.runAll(project)
-      let result = Project.getResult(project, "main")
-      let bindings = Project.getBindings(project, "main")
+      project->Project.runAll
+      let result = project->Project.getResult("main")
+      let bindings = project->Project.getBindings("main")
       /* And see the result and bindings.. */
       test("recursive includes", () => {
         (
           result->InternalExpressionValue.toStringResult,
-          bindings->Bindings.removeResult->InternalExpressionValue.toStringBindings,
-        )->expect == ("Ok(6)", "@{doubleX: 2,x: 1,y: 2,z: 3}")
+          bindings->InternalExpressionValue.toStringRecord,
+        )->expect == ("Ok(6)", "{a: 6,b: 2}")
         /* Everything as expected */
       })
     })

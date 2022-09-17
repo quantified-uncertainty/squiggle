@@ -4,7 +4,7 @@ open Reducer_TestHelpers
 describe("Parse ternary operator", () => {
   testParseToBe(
     "true ? 'YES' : 'NO'",
-    "Ok({(:$_endOfOuterBlock_$ () (:$$_ternary_$$ true 'YES' 'NO'))})",
+    "Ok({(:$$_ternary_$$ true 'YES' 'NO')})",
   )
 })
 

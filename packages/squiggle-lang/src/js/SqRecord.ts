@@ -12,4 +12,8 @@ export class SqRecord {
       ([k, v]) => [k, wrapValue(v, this.location.extend(k))] as const
     );
   }
+
+  toString() {
+    return RSRecord.toString(this._value);
+  }
 }

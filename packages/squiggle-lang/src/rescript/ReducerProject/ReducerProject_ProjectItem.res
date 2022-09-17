@@ -174,8 +174,8 @@ let doRun = (this: t, context: Reducer_T.context): t =>
   switch this->getExpression {
   | Some(expressionResult) => switch expressionResult {
     | Ok(expression) => try {
-        let result = Reducer_Expression.evaluate(expression, context)
-        this->setResult(result->Ok)->setContinuation(context.bindings->Reducer_Bindings.locals)
+        let (result, contextAfterEvaluation) = Reducer_Expression.evaluate(expression, context)
+        this->setResult(result->Ok)->setContinuation(contextAfterEvaluation.bindings->Reducer_Bindings.locals)
       } catch {
       | Reducer_ErrorValue.ErrorException(e) => this->failRun(e)
       | _ => this->failRun(RETodo("unhandled rescript exception"))

@@ -1,11 +1,10 @@
 module ProjectItem = ReducerProject_ProjectItem
-module ExpressionT = Reducer_Expression_T
 
 @genType.opaque
 type project = {
   items: Belt.MutableMap.String.t<ProjectItem.t>,
   mutable stdLib: Reducer_Namespace.t,
-  mutable environment: ExpressionT.environment,
+  mutable environment: Reducer_T.environment,
   mutable previousRunOrder: array<string>,
 }
 type t = project

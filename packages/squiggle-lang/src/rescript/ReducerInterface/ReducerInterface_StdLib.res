@@ -6,7 +6,7 @@ let internalStdLib: Reducer_T.namespace = {
     ->Reducer_Namespace.mergeFrom(SquiggleLibrary_Math.make())
     ->Reducer_Namespace.mergeFrom(SquiggleLibrary_Versions.make())
 
-  let _ = res->Reducer_Namespace.set(
+  let res = res->Reducer_Namespace.set(
     "$_atIndex_$",
     Reducer_Expression_Lambda.makeFFILambda((inputs, _, _) => {
       switch inputs {
@@ -29,9 +29,10 @@ let internalStdLib: Reducer_T.namespace = {
     })->Reducer_T.IEvLambda,
   )
 
-  FunctionRegistry_Library.nonRegistryLambdas->Js.Array2.forEach(
-    ((name, lambda)) => {
-      let _ = res->Reducer_Namespace.set(name, lambda->Reducer_T.IEvLambda)
+  let res = FunctionRegistry_Library.nonRegistryLambdas->Belt.Array.reduce(
+    res,
+    (cur, (name, lambda)) => {
+      cur->Reducer_Namespace.set(name, lambda->Reducer_T.IEvLambda)
     }
   )
 
@@ -59,10 +60,10 @@ let internalStdLib: Reducer_T.namespace = {
   // [ ] | (_, [IEvNumber(_), IEvNumber(_)])
   // [ ] | (_, [IEvString(_), IEvString(_)]) => callMathJs(call)
 
-  FunctionRegistry_Library.registry.fnNameDict
+  let res = FunctionRegistry_Library.registry.fnNameDict
   ->Js.Dict.keys
-  ->Js.Array2.forEach(name => {
-    let _ = res->Reducer_Namespace.set(
+  ->Belt.Array.reduce(res, (cur, name) => {
+    cur->Reducer_Namespace.set(
       name,
       Reducer_Expression_Lambda.makeFFILambda((arguments, environment, reducer) => {
         switch FunctionRegistry_Library.call(name, arguments, environment, reducer) {

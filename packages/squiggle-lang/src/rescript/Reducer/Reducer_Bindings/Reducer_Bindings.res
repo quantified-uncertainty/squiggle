@@ -18,15 +18,11 @@ let rec get = ({ namespace, parent }: t, id: string) => {
   }
 }
 
-let getWithDefault = (namespace: t, id: string, default) =>
-  switch namespace->get(id) {
-  | Some(v) => Some(v)
-  | None => default
-  }
-
 let set = ({ namespace } as bindings: t, id: string, value): t => {
-  let _ = namespace->Reducer_Namespace.set(id, value)
-  bindings
+  {
+    ...bindings,
+    namespace: namespace->Reducer_Namespace.set(id, value),
+  }
 }
 
 let rec toString = ({ namespace, parent }: t) => {
@@ -43,8 +39,8 @@ let extend = (bindings: t): t => { namespace: Reducer_Namespace.make(), parent: 
 let make = (): t => { namespace: Reducer_Namespace.make(), parent: None }
 
 let removeResult = ({ namespace } as bindings: t): t => {
-  namespace->Belt.MutableMap.String.remove("__result__")
-  bindings
+  ...bindings,
+  namespace: namespace->Belt.Map.String.remove("__result__"),
 }
 
 let locals = ({ namespace }: t): Reducer_T.namespace => namespace
@@ -90,16 +86,6 @@ let fromNamespace = (namespace: Reducer_Namespace.t): t => { namespace, parent: 
 //   }
 //   let r2 = Belt.Map.String.set(r, id, value)->IEvRecord
 //   NameSpace(Belt.Map.String.set(container, typeReferencesKey, r2))
-// }
-
-// let removeOther = (NameSpace(container): t, NameSpace(otherContainer): t): t => {
-//   let keys = Belt.Map.String.keysToArray(otherContainer)
-//   NameSpace(
-//     Belt.Map.String.keep(container, (key, _value) => {
-//       let removeThis = Js.Array2.includes(keys, key)
-//       !removeThis
-//     }),
-//   )
 // }
 
 // let functionNotFoundError = (call: functionCall) =>

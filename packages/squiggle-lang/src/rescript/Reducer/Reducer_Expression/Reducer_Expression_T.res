@@ -1,36 +1,23 @@
 /*
-  An expression is a Lisp AST. An expression is either a primitive value or a list of expressions.
-  In the case of a list of expressions (e1, e2, e3, ...eN), the semantic is
-     apply e1, e2 -> apply e3 -> ... -> apply eN
-  This is Lisp semantics. It holds true in both eager and lazy evaluations.
-  A Lisp AST contains only expressions/primitive values to apply to their left.
-  The act of defining the semantics of a functional language is to write it in terms of Lisp AST.
+  An expression is an intermediate representation of a Squiggle code.
+  Expressions are evaluated by `Reducer_Expression.evaluate` function.
 */
-module Extra = Reducer_Extra
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 
-type internalExpressionValue = Reducer_T.value
-type environment = Reducer_T.environment
-
-type expression = Reducer_T.expression
-
-type t = expression
-
-type context = Reducer_T.context
-
-type reducerFn = Reducer_T.reducerFn
+type t = Reducer_T.expression
 
 let commaJoin = values => values->Reducer_Extra_Array.intersperse(", ")->Js.String.concatMany("")
+let semicolonJoin = values => values->Reducer_Extra_Array.intersperse("; ")->Js.String.concatMany("")
 
 /*
   Converts the expression to String
 */
-let rec toString = (expression: expression) =>
+let rec toString = (expression: t) =>
   switch expression {
-  | EBlock(statements) => `{${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}}`
-  | EProgram(statements) => `<${Js.Array2.map(statements, aValue => toString(aValue))->commaJoin}>`
+  | EBlock(statements) => `{${Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin}}`
+  | EProgram(statements) => Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin
   | EArray(aList) => `[${Js.Array2.map(aList, aValue => toString(aValue))->commaJoin}]`
-  | ERecord(map) => `{${map->Belt.Array.map(((key, value)) => `${key->toString}: ${value->toString}`)->Js.Array2.toString}}`
+  | ERecord(map) => `{${map->Belt.Array.map(((key, value)) => `${key->toString}: ${value->toString}`)->commaJoin}}`
   | ESymbol(name) => name
   | ETernary(predicate, trueCase, falseCase) =>
     `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`
@@ -52,29 +39,18 @@ let toStringResultOkless = codeResult =>
   | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
   }
 
-let inspect = (expr: expression): expression => {
+let inspect = (expr: t): t => {
   Js.log(toString(expr))
   expr
 }
 
-let inspectResult = (r: result<expression, Reducer_ErrorValue.errorValue>): result<
-  expression,
+let inspectResult = (r: result<t, Reducer_ErrorValue.errorValue>): result<
+  t,
   Reducer_ErrorValue.errorValue,
 > => {
   Js.log(toStringResult(r))
   r
 }
-
-type ffiFn = (
-  array<internalExpressionValue>,
-  environment,
-) => result<internalExpressionValue, Reducer_ErrorValue.errorValue>
-
-type optionFfiFn = (array<internalExpressionValue>, environment) => option<internalExpressionValue>
-type optionFfiFnReturningResult = (
-  array<internalExpressionValue>,
-  environment,
-) => option<result<internalExpressionValue, Reducer_ErrorValue.errorValue>>
 
 let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
   switch rExpression {

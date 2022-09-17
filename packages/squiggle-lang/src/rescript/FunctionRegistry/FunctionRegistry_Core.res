@@ -8,6 +8,7 @@ type errorValue = Reducer_ErrorValue.errorValue
 */
 type rec frType =
   | FRTypeNumber
+  | FRTypeBool
   | FRTypeNumeric
   | FRTypeDistOrNumber
   | FRTypeDist
@@ -27,6 +28,7 @@ and frTypeRecordParam = (string, frType)
 */
 type rec frValue =
   | FRValueNumber(float)
+  | FRValueBool(bool)
   | FRValueDist(DistributionTypes.genericDist)
   | FRValueArray(array<frValue>)
   | FRValueDistOrNumber(frValueDistOrNumber)
@@ -71,6 +73,7 @@ module FRType = {
   let rec toString = (t: t) =>
     switch t {
     | FRTypeNumber => "number"
+    | FRTypeBool => "bool"
     | FRTypeNumeric => "numeric"
     | FRTypeDist => "distribution"
     | FRTypeDistOrNumber => "distribution|number"
@@ -107,6 +110,7 @@ module FRType = {
     | (FRTypeAny, f) => toFrValue(f)
     | (FRTypeString, IEvString(f)) => Some(FRValueString(f))
     | (FRTypeNumber, IEvNumber(f)) => Some(FRValueNumber(f))
+    | (FRTypeBool, IEvBool(f)) => Some(FRValueBool(f))
     | (FRTypeDistOrNumber, IEvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
     | (FRTypeDistOrNumber, IEvDistribution(Symbolic(#Float(f)))) =>
       Some(FRValueDistOrNumber(FRValueNumber(f)))
@@ -142,6 +146,7 @@ module FRType = {
   let rec matchReverse = (e: frValue): internalExpressionValue =>
     switch e {
     | FRValueNumber(f) => IEvNumber(f)
+    | FRValueBool(f) => IEvBool(f)
     | FRValueDistOrNumber(FRValueNumber(n)) => IEvNumber(n)
     | FRValueDistOrNumber(FRValueDist(n)) => IEvDistribution(n)
     | FRValueDist(dist) => IEvDistribution(dist)
