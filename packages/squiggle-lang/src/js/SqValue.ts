@@ -44,14 +44,6 @@ export class SqArrayValue extends SqAbstractValue {
   }
 }
 
-export class SqArrayStringValue extends SqAbstractValue {
-  tag = Tag.ArrayString as const;
-
-  get value() {
-    return this.valueMethod(RSValue.getArrayString);
-  }
-}
-
 export class SqBoolValue extends SqAbstractValue {
   tag = Tag.Bool as const;
 
@@ -150,7 +142,6 @@ export class SqVoidValue extends SqAbstractValue {
 
 const tagToClass = {
   [Tag.Array]: SqArrayValue,
-  [Tag.ArrayString]: SqArrayStringValue,
   [Tag.Bool]: SqBoolValue,
   [Tag.Date]: SqDateValue,
   [Tag.Declaration]: SqDeclarationValue,
@@ -169,7 +160,6 @@ const tagToClass = {
 // type SqValue = typeof tagToClass[keyof typeof tagToClass];
 export type SqValue =
   | SqArrayValue
-  | SqArrayStringValue
   | SqBoolValue
   | SqDateValue
   | SqDeclarationValue

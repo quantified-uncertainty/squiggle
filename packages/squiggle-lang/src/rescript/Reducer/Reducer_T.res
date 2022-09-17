@@ -3,7 +3,6 @@ type environment = GenericDist.env
 @genType.opaque
 type rec value =
   | IEvArray(arrayValue)
-  | IEvArrayString(array<string>)
   | IEvBool(bool)
   | IEvDate(Js.Date.t)
   | IEvDeclaration(lambdaDeclaration)

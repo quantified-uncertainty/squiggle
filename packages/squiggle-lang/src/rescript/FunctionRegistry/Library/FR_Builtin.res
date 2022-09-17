@@ -93,4 +93,57 @@ let library = [
       }
     }
   ),
+  makeFn(
+    "concat",
+    [FRTypeString, FRTypeString],
+    inputs => {
+      switch inputs {
+      | [IEvString(a), IEvString(b)] => {
+        let answer = Js.String2.concat(a, b)
+        answer->Reducer_T.IEvString->Ok
+      }
+      | _ => Error(impossibleError)
+      }
+    }
+  ),
+  makeFn(
+    "concat",
+    [FRTypeArray(FRTypeAny), FRTypeArray(FRTypeAny)],
+    inputs => {
+      switch inputs {
+      | [IEvArray(originalA), IEvArray(b)] => {
+        let a = originalA->Js.Array2.copy
+        let _ = Js.Array2.pushMany(a, b)
+        a->Reducer_T.IEvArray->Ok
+      }
+      | _ => Error(impossibleError)
+      }
+    }
+  ),
+  makeFn(
+    "inspect",
+    [FRTypeAny],
+    inputs => {
+      switch inputs {
+      | [value] => {
+        Js.log(value->ReducerInterface_InternalExpressionValue.toString)
+        value->Ok
+      }
+      | _ => Error(impossibleError)
+      }
+    }
+  ),
+  makeFn(
+    "inspect",
+    [FRTypeAny, FRTypeString],
+    inputs => {
+      switch inputs {
+      | [value, IEvString(label)] => {
+        Js.log(`${label}: ${value->ReducerInterface_InternalExpressionValue.toString}`)
+        value->Ok
+      }
+      | _ => Error(impossibleError)
+      }
+    }
+  ),
 ]

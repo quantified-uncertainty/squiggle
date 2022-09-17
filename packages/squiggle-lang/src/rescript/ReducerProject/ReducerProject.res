@@ -161,15 +161,25 @@ let getContinuationsBefore = (project: t, sourceId: string): array<Reducer_T.nam
 }
 
 let linkDependencies = (project: t, sourceId: string): Reducer_T.namespace => {
-  let nameSpace = Reducer_Namespace.mergeMany(
-    Belt.Array.concat(
+  let pastChain = project->getPastChain(sourceId)
+  let namespace = Reducer_Namespace.mergeMany(
+    Belt.Array.concatMany([
       [project->getStdLib],
-      project->getContinuationsBefore(sourceId)
-    )
+      pastChain->Belt.Array.map(project->getBindings),
+      pastChain->Belt.Array.map(
+        id => Reducer_Namespace.fromArray([
+          ("__result__",
+          switch project->getResult(id) {
+            | Ok(result) => result
+            | Error(error) => error->Reducer_ErrorValue.ErrorException->raise
+          })
+        ])
+      ),
+    ])
   )
 
   let includesAsVariables = project->getIncludesAsVariables(sourceId)
-  Belt.Array.reduce(includesAsVariables, nameSpace, (acc, (variable, includeFile)) =>
+  Belt.Array.reduce(includesAsVariables, namespace, (acc, (variable, includeFile)) =>
     acc->Reducer_Namespace.set(
       variable,
       project->getBindings(includeFile)->Reducer_Namespace.toRecord

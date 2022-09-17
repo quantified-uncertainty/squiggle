@@ -11,11 +11,7 @@ let set = (namespace: t, id: string, value): t => {
 
 let mergeFrom = (from: t, to: t): t => {
   to->Belt.Map.String.reduce(from, (namespace, key, value) => {
-    if key != "__result__" {
-      namespace->set(key, value)
-    } else {
-      namespace
-    }
+    namespace->set(key, value)
   })
 }
 

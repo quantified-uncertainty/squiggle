@@ -6,8 +6,6 @@ type expression = Reducer_T.expression
 
 let eArray = (anArray: array<T.expression>) => anArray->T.EArray
 
-let eArrayString = anArray => anArray->T.IEvArrayString->T.EValue
-
 let eBool = aBool => aBool->T.IEvBool->T.EValue
 
 let eCall = (fn: expression, args: array<expression>): expression => T.ECall(fn, args)

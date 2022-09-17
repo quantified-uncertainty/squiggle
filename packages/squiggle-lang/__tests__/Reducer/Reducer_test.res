@@ -11,6 +11,7 @@ describe("eval", () => {
     testEvalToBe("(1+2)*3", "Ok(9)")
     testEvalToBe("2>1", "Ok(true)")
     testEvalToBe("concat('a ', 'b')", "Ok('a b')")
+    testEvalToBe("concat([3,4], [5,6,7])", "Ok([3,4,5,6,7])")
     testEvalToBe("log(10)", "Ok(2.302585092994046)")
     testEvalToBe("cos(10)", "Ok(-0.8390715290764524)")
     // TODO more built ins

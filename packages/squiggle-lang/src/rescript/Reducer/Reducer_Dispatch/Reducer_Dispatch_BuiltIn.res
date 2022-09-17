@@ -34,15 +34,15 @@ let callInternal = (
     | call => call->IEV.toStringFunctionCall->MathJs.Eval.eval
     }
 
-  let doAddArray = (originalA, b) => {
-    let a = originalA->Js.Array2.copy
-    let _ = Js.Array2.pushMany(a, b)
-    a->Reducer_T.IEvArray->Ok
-  }
-  let doAddString = (a, b) => {
-    let answer = Js.String2.concat(a, b)
-    answer->Reducer_T.IEvString->Ok
-  }
+  // let doAddArray = (originalA, b) => {
+  //   let a = originalA->Js.Array2.copy
+  //   let _ = Js.Array2.pushMany(a, b)
+  //   a->Reducer_T.IEvArray->Ok
+  // }
+  // let doAddString = (a, b) => {
+  //   let answer = Js.String2.concat(a, b)
+  //   answer->Reducer_T.IEvString->Ok
+  // }
 
   let inspect = (value: Reducer_T.value) => {
     Js.log(value->IEV.toString)
@@ -107,10 +107,10 @@ let callInternal = (
   // | ("$_typeTuple_$", [IEvArray(elems)]) => TypeBuilder.typeTuple(elems)
   // | ("$_typeArray_$", [elem]) => TypeBuilder.typeArray(elem)
   // | ("$_typeRecord_$", [IEvRecord(propertyMap)]) => TypeBuilder.typeRecord(propertyMap)
-  | ("concat", [IEvArray(aValueArray), IEvArray(bValueArray)]) =>
-    doAddArray(aValueArray, bValueArray)
-  | ("concat", [IEvString(aValueString), IEvString(bValueString)]) =>
-    doAddString(aValueString, bValueString)
+  // | ("concat", [IEvArray(aValueArray), IEvArray(bValueArray)]) =>
+  //   doAddArray(aValueArray, bValueArray)
+  // | ("concat", [IEvString(aValueString), IEvString(bValueString)]) =>
+  //   doAddString(aValueString, bValueString)
   | ("inspect", [value, IEvString(label)]) => inspectLabel(value, label)
   | ("inspect", [value]) => inspect(value)
   | (_, [IEvBool(_)])

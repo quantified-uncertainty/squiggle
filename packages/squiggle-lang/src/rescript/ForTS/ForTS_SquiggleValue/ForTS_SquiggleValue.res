@@ -14,9 +14,6 @@ type squiggleValue_Lambda = ForTS_SquiggleValue_Lambda.squiggleValue_Lambda //us
 external svtArray_: string = "Array"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtArrayString_: string = "ArrayString"
-
-@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtBool_: string = "Bool"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
@@ -61,7 +58,6 @@ external castEnum: string => squiggleValueTag = "%identity"
 let getTag = (variant: squiggleValue): squiggleValueTag =>
   switch variant {
   | IEvArray(_) => svtArray_->castEnum
-  | IEvArrayString(_) => svtArrayString_->castEnum
   | IEvBool(_) => svtBool_->castEnum
   | IEvDate(_) => svtDate_->castEnum
   | IEvDeclaration(_) => svtDeclaration_->castEnum
@@ -91,13 +87,6 @@ let getArray = (variant: squiggleValue): option<squiggleValue_Array> =>
   //FIXME: Convert
   switch variant {
   | IEvArray(arrayLike) => arrayLike->Some
-  | _ => None
-  }
-
-@genType
-let getArrayString = (variant: squiggleValue): option<array<string>> =>
-  switch variant {
-  | IEvArrayString(value) => value->Some
   | _ => None
   }
 

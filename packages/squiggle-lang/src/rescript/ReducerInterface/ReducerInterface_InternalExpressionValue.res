@@ -17,7 +17,6 @@ type functionCall = (string, array<t>)
 let rec toString = (aValue: T.value) =>
   switch aValue {
   | IEvArray(anArray) => toStringArray(anArray)
-  | IEvArrayString(anArray) => toStringArrayString(anArray)
   | IEvBool(aBool) => toStringBool(aBool)
   | IEvDate(date) => toStringDate(date)
   | IEvDeclaration(d) => toStringDeclaration(d)
@@ -33,10 +32,6 @@ let rec toString = (aValue: T.value) =>
   }
 and toStringArray = anArray => {
   let args = anArray->Js.Array2.map(each => toString(each))->Js.Array2.toString
-  `[${args}]`
-}
-and toStringArrayString = anArray => {
-  let args = anArray->Js.Array2.toString
   `[${args}]`
 }
 and toStringBool = aBool => Js.String.make(aBool)
@@ -69,7 +64,6 @@ and toStringMap = aMap => {
 let toStringWithType = (aValue: T.value) =>
   switch aValue {
   | IEvArray(_) => `Array::${toString(aValue)}`
-  | IEvArrayString(_) => `ArrayString::${toString(aValue)}`
   | IEvBool(_) => `Bool::${toString(aValue)}`
   | IEvDate(_) => `Date::${toString(aValue)}`
   | IEvDeclaration(_) => `Declaration::${toString(aValue)}`
@@ -116,7 +110,6 @@ let toStringResultRecord = x =>
 
 type internalExpressionValueType =
   | EvtArray
-  | EvtArrayString
   | EvtBool
   | EvtDate
   | EvtDeclaration
@@ -137,7 +130,6 @@ type functionDefinitionSignature =
 let valueToValueType = (value: T.value) =>
   switch value {
   | IEvArray(_) => EvtArray
-  | IEvArrayString(_) => EvtArrayString
   | IEvBool(_) => EvtBool
   | IEvDate(_) => EvtDate
   | IEvDeclaration(_) => EvtDeclaration
@@ -160,7 +152,6 @@ let functionCallToCallSignature = (functionCall: functionCall): functionCallSign
 let valueTypeToString = (valueType: internalExpressionValueType): string =>
   switch valueType {
   | EvtArray => `Array`
-  | EvtArrayString => `ArrayString`
   | EvtBool => `Bool`
   // | EvtCall => `Call`
   | EvtDate => `Date`

@@ -22,7 +22,7 @@ let internalStdLib: Reducer_T.namespace = {
         }
       | [IEvRecord(dict), IEvString(sIndex)] => switch Belt.Map.String.get(dict, sIndex) {
         | Some(value) => value
-        | None => RERecordPropertyNotFound("Record index not found", sIndex)->ErrorException->raise
+        | None => RERecordPropertyNotFound("Record property not found", sIndex)->ErrorException->raise
         }
       | _ => REOther("Trying to access key on wrong value")->ErrorException->raise
       }

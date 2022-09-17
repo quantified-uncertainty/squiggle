@@ -1,6 +1,5 @@
 export enum squiggleValueTag {
   Array = "Array",
-  ArrayString = "ArrayString",
   Bool = "Bool",
   Date = "Date",
   Declaration = "Declaration",

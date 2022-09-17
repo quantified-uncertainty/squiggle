@@ -7,3 +7,6 @@ let getKeyValuePairs = (value: squiggleValue_Record): array<(string, squiggleVal
 
 @genType
 let toString = (v: squiggleValue_Record) => ReducerInterface_InternalExpressionValue.toStringMap(v)
+
+@genType
+let toSquiggleValue = (v: squiggleValue_Record): squiggleValue => IEvRecord(v)

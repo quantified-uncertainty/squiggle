@@ -1,5 +1,5 @@
 import * as RSRecord from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_Record.gen";
-import { wrapValue } from "./SqValue";
+import { SqRecordValue, wrapValue } from "./SqValue";
 import { SqValueLocation } from "./SqValueLocation";
 
 type T = RSRecord.squiggleValue_Record;
@@ -15,5 +15,12 @@ export class SqRecord {
 
   toString() {
     return RSRecord.toString(this._value);
+  }
+
+  asValue() {
+    return new SqRecordValue(
+      RSRecord.toSquiggleValue(this._value),
+      this.location
+    );
   }
 }
