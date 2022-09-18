@@ -310,8 +310,6 @@ module Old = {
     | String(d) => Ok(IEvString(d))
     | Bool(d) => Ok(IEvBool(d))
     | FloatArray(d) => Ok(IEvArray(d |> E.A.fmap(r => Reducer_T.IEvNumber(r))))
-    // // FIXME - can't propagate error objects through FunctionRegistry
-    // | GenDistError(err) => Error(REDistributionError(err))
     | GenDistError(err) => Error(REDistributionError(err))
     }
 
@@ -370,8 +368,7 @@ let library = E.A.concatMany([
     makeProxyFn("max", [FRTypeDist]),
     makeProxyFn("mode", [FRTypeDist]),
     makeProxyFn("integralSum", [FRTypeDist]),
-    // // FIXME: doesn't work with Js.Dict in FunctionRegistry_Core
-    // makeProxyFn("toString", [FRTypeDist]),
+    makeProxyFn("toString", [FRTypeDist]),
     makeProxyFn("sparkline", [FRTypeDist]),
     makeProxyFn("sparkline", [FRTypeDist, FRTypeNumber]),
     makeProxyFn("exp", [FRTypeDist]),

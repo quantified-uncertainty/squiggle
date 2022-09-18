@@ -51,8 +51,20 @@ let makeBinaryCmpFn = (name: string, fn: (float, float) => bool) => {
   )
 }
 
+let makeBinaryBooleanFn = (name: string, fn: (bool, bool) => bool) => {
+  makeFn(
+    name,
+    [FRTypeBool, FRTypeBool],
+    inputs => {
+      switch inputs {
+      | [IEvBool(x), IEvBool(y)] => fn(x, y)->IEvBool->Ok
+      | _ => Error(impossibleError)
+      }
+    }
+  )
+}
+
 let library = [
-  // TODO - other MathJS
   makeBinaryFn("add", (x, y) => x +. y),
   makeBinaryFn("subtract", (x, y) => x -. y),
   makeBinaryFn("multiply", (x, y) => x *. y),
@@ -63,6 +75,8 @@ let library = [
   makeBinaryCmpFn("smallerEq", (x, y) => x <= y),
   makeBinaryCmpFn("larger", (x, y) => x > y),
   makeBinaryCmpFn("largerEq", (x, y) => x >= y),
+  makeBinaryBooleanFn("or", (x, y) => x || y),
+  makeBinaryBooleanFn("and", (x, y) => x && y),
   makeFn(
     "unaryMinus",
     [FRTypeNumber],

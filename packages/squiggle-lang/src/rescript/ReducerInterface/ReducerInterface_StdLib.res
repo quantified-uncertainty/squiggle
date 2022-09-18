@@ -60,8 +60,8 @@ let internalStdLib: Reducer_T.namespace = {
   // [ ] | (_, [IEvNumber(_), IEvNumber(_)])
   // [ ] | (_, [IEvString(_), IEvString(_)]) => callMathJs(call)
 
-  let res = FunctionRegistry_Library.registry.fnNameDict
-  ->Js.Dict.keys
+  let res = FunctionRegistry_Library.registry
+  ->FunctionRegistry_Core.Registry.allNames
   ->Belt.Array.reduce(res, (cur, name) => {
     cur->Reducer_Namespace.set(
       name,

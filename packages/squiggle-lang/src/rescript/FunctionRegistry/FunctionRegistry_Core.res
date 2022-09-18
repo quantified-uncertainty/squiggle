@@ -10,6 +10,8 @@ type rec frType =
   | FRTypeNumber
   | FRTypeBool
   | FRTypeNumeric
+  | FRTypeDate
+  | FRTypeTimeDuration
   | FRTypeDistOrNumber
   | FRTypeDist
   | FRTypeLambda
@@ -29,6 +31,8 @@ and frTypeRecordParam = (string, frType)
 type rec frValue =
   | FRValueNumber(float)
   | FRValueBool(bool)
+  | FRValueDate(Js.Date.t)
+  | FRValueTimeDuration(float)
   | FRValueDist(DistributionTypes.genericDist)
   | FRValueArray(array<frValue>)
   | FRValueDistOrNumber(frValueDistOrNumber)
@@ -65,15 +69,14 @@ type function = {
   isExperimental: bool,
 }
 
-type fnNameDict = Js.Dict.t<array<fnDefinition>>
-type registry = {functions: array<function>, fnNameDict: fnNameDict}
-
 module FRType = {
   type t = frType
   let rec toString = (t: t) =>
     switch t {
     | FRTypeNumber => "number"
     | FRTypeBool => "bool"
+    | FRTypeDate => "date"
+    | FRTypeTimeDuration => "duration"
     | FRTypeNumeric => "numeric"
     | FRTypeDist => "distribution"
     | FRTypeDistOrNumber => "distribution|number"
@@ -90,6 +93,7 @@ module FRType = {
     }
 
   let rec toFrValue = (r: internalExpressionValue): option<frValue> =>
+    // not all value variants are supported, but it's not important (we'll probably deprecate frValues soon anyway)
     switch r {
     | IEvNumber(f) => Some(FRValueNumber(f))
     | IEvString(f) => Some(FRValueString(f))
@@ -111,6 +115,8 @@ module FRType = {
     | (FRTypeString, IEvString(f)) => Some(FRValueString(f))
     | (FRTypeNumber, IEvNumber(f)) => Some(FRValueNumber(f))
     | (FRTypeBool, IEvBool(f)) => Some(FRValueBool(f))
+    | (FRTypeDate, IEvDate(f)) => Some(FRValueDate(f))
+    | (FRTypeTimeDuration, IEvTimeDuration(f)) => Some(FRValueTimeDuration(f))
     | (FRTypeDistOrNumber, IEvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
     | (FRTypeDistOrNumber, IEvDistribution(Symbolic(#Float(f)))) =>
       Some(FRValueDistOrNumber(FRValueNumber(f)))
@@ -147,6 +153,8 @@ module FRType = {
     switch e {
     | FRValueNumber(f) => IEvNumber(f)
     | FRValueBool(f) => IEvBool(f)
+    | FRValueDate(f) => IEvDate(f)
+    | FRValueTimeDuration(f) => IEvTimeDuration(f)
     | FRValueDistOrNumber(FRValueNumber(n)) => IEvNumber(n)
     | FRValueDistOrNumber(FRValueDist(n)) => IEvDistribution(n)
     | FRValueDist(dist) => IEvDistribution(dist)
@@ -265,33 +273,44 @@ module Function = {
 }
 
 module Registry = {
+  type fnNameDict = Belt.Map.String.t<array<fnDefinition>>
+  type registry = {functions: array<function>, fnNameDict: fnNameDict}
+
   let toJson = (r: registry) => r.functions->E.A2.fmap(Function.toJson)
   let allExamples = (r: registry) => r.functions->E.A2.fmap(r => r.examples)->E.A.concatMany
   let allExamplesWithFns = (r: registry) =>
     r.functions->E.A2.fmap(fn => fn.examples->E.A2.fmap(example => (fn, example)))->E.A.concatMany
 
+  let allNames = (r: registry) => r.fnNameDict->Belt.Map.String.keysToArray
+
   let _buildFnNameDict = (r: array<function>): fnNameDict => {
-    // Sorry for the imperative style of this. But it's much easier/less buggy than the previous version.
-    let res: fnNameDict = Js.Dict.empty()
-    r->Js.Array2.forEach(fn =>
-      fn.definitions->Js.Array2.forEach(def => {
+    // Three layers of reduce:
+    // 1. functions
+    // 2. definitions of each function
+    // 3. name variations of each definition
+    r->Belt.Array.reduce(
+      Belt.Map.String.empty,
+      (acc, fn) =>
+      fn.definitions->Belt.Array.reduce(
+        acc,
+        (acc, def) => {
         let names =
           [
             fn.nameSpace == "" ? [] : [`${fn.nameSpace}.${def.name}`],
             fn.requiresNamespace ? [] : [def.name],
           ]->E.A.concatMany
 
-        names->Js.Array2.forEach(name => {
-          switch res->Js.Dict.get(name) {
+        names->Belt.Array.reduce(acc, (acc, name) => {
+          switch acc->Belt.Map.String.get(name) {
           | Some(fns) => {
-              let _ = fns->Js.Array2.push(def)
+              let _ = fns->Js.Array2.push(def) // mutates the array, no need to update acc
+              acc
             }
-          | None => res->Js.Dict.set(name, [def])
+          | None => acc->Belt.Map.String.set(name, [def])
           }
         })
       })
     )
-    res
   }
 
   let make = (fns: array<function>): registry => {
@@ -306,7 +325,7 @@ module Registry = {
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
   ): result<internalExpressionValue, errorValue> => {
-    switch Js.Dict.get(registry.fnNameDict, fnName) {
+    switch Belt.Map.String.get(registry.fnNameDict, fnName) {
     | Some(definitions) => {
         let showNameMatchDefinitions = () => {
           let defsString =

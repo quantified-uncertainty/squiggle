@@ -93,7 +93,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
       })
       switch lambda {
       | T.IEvLambda(lambda) => (Lambda.doLambdaCall(lambda, argValues, context.environment, evaluate), context)
-      | _ => REExpectedType("Lambda", "")->Reducer_ErrorValue.ErrorException->raise
+      | _ =>  RENotAFunction(lambda->ReducerInterface_InternalExpressionValue.toString)->Reducer_ErrorValue.ErrorException->raise
       }
     }
   }

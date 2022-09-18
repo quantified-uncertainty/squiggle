@@ -111,4 +111,8 @@ export class SqProject {
   setEnvironment(environment: environment) {
     RSProject.setEnvironment(this._value, environment);
   }
+
+  getEnvironment(): environment {
+    return RSProject.getEnvironment(this._value);
+  }
 }

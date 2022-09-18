@@ -211,6 +211,10 @@ let evaluate = (sourceCode: string): (
 let setEnvironment = (project: reducerProject, environment: environment): unit =>
   project->Private.setEnvironment(environment)
 
+@genType
+let getEnvironment = (project: reducerProject): environment =>
+  project->Private.getEnvironment
+
 /*
 Foreign function interface is intentionally demolished.
 There is another way to do that: Umur.
