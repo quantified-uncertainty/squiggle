@@ -14,8 +14,8 @@ const measure = (cb, times = 1) => {
   return (t2 - t1) / 1000;
 };
 
-const red = (s) => `\x1b[31m${s}\x1b[0m`;
-const green = (s) => `\x1b[32m${s}\x1b[0m`;
+const red = (str) => `\x1b[31m${str}\x1b[0m`;
+const green = (str) => `\x1b[32m${str}\x1b[0m`;
 
 const program = new Command();
 
@@ -39,7 +39,7 @@ if (!src) {
 }
 
 project.setSource("main", src);
-const t = measure(() => project.run("main"));
+const time = measure(() => project.run("main"));
 
 const bindings = project.getBindings("main");
 const result = project.getResult("main");
@@ -51,7 +51,7 @@ if (options.output) {
 
 console.log(
   "Time:",
-  String(t),
+  String(time),
   result.tag === "Error" ? red(result.tag) : green(result.tag),
   result.tag === "Error" ? result.value.toString() : ""
 );
