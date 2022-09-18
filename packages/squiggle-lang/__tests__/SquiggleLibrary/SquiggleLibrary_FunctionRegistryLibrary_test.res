@@ -15,7 +15,7 @@ let examples = E.A.to_list(FunctionRegistry_Core.Registry.allExamples(registry))
 describe("FunctionRegistry Library", () => {
   describe("Regular tests", () => {
     testEvalToBe("List.make(3, 'HI')", "Ok(['HI','HI','HI'])")
-    testEvalToBe("make(3, 'HI')", "Error(Function not found: make(Number,String))")
+    testEvalToBe("make(3, 'HI')", "Error(make is not defined)")
     testEvalToBe("List.upTo(1,3)", "Ok([1,2,3])")
     testEvalToBe("List.first([3,5,8])", "Ok(3)")
     testEvalToBe("List.last([3,5,8])", "Ok(8)")

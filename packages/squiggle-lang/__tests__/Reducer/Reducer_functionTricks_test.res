@@ -34,7 +34,7 @@ describe("symbol not defined", () => {
   testEvalToBe("f(x)=x(y); f(f)", "Error(y is not defined)")
   testEvalToBe("f(x)=x; f(f)", "Ok(lambda(x=>internal code))")
   testEvalToBe("f(x)=x(y); f(z)", "Error(z is not defined)")
-  testEvalToBe("f(x)=x(y); f(2)", "Error(2 is not a function)")
+  testEvalToBe("f(x)=x(y); f(2)", "Error(y is not defined)")
   testEvalToBe("f(x)=x(1); f(2)", "Error(2 is not a function)")
 })
 
@@ -48,7 +48,7 @@ describe("call and bindings", () => {
   testEvalToBe("f(x)=x+1; g(x)=f(x)+1; g(0)", "Ok(2)")
   testParseToBe(
     "f=99; g(x)=f; g(2)",
-    "Ok({(:$_let_$ :f {99}); (:$_let_$ :g (:$$_lambda_$$ [x] {:f})); (:$_endOfOuterBlock_$ () (:g 2))})",
+    "Ok(f = {99}; g = {|x| {f}}; (g)(2))",
   )
   testEvalToBe("f=99; g(x)=f; g(2)", "Ok(99)")
   testEvalToBe("f(x)=x; g(x)=f(x); g(2)", "Ok(2)")
