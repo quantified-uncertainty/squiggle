@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const s = require("@quri/squiggle-lang");
+import { SqProject } from "@quri/squiggle-lang";
 
 const measure = (cb, times = 1) => {
   const t1 = new Date();
@@ -15,7 +15,7 @@ const maxP = 5;
 
 for (let p = 0; p <= maxP; p++) {
   const size = Math.pow(10, p);
-  const prj = s.SqProject.create();
+  const prj = SqProject.create();
   prj.setSource(
     "main",
     `List.upTo(1, ${size}) |> map({|x| List.upTo(1, 100) |> reduce(0, {|a,b|a+b})})`

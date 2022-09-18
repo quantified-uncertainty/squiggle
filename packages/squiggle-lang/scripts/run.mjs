@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-const s = require("@quri/squiggle-lang");
+import { SqProject } from "@quri/squiggle-lang";
 
-const p = s.SqProject.create();
+const p = SqProject.create();
 
 const src = process.argv[2];
 if (!src) {
