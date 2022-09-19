@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+import { SqProject } from "@quri/squiggle-lang";
+import { measure } from "./lib.mjs";
+
+const maxP = 7;
+
+for (let p = 0; p <= maxP; p++) {
+  const size = Math.pow(10, p);
+  const project = SqProject.create();
+  project.setSource(
+    "main",
+    `
+    List.upTo(1, ${size}) -> map({|x|
+        normal(x,2) -> SampleSet.fromDist -> PointSet.fromDist
+    })->List.last
+    `
+  );
+  const time = measure(() => {
+    project.run("main");
+  });
+  console.log(`1e${p}`, "\t", time);
+}

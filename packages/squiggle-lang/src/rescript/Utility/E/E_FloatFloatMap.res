@@ -16,6 +16,14 @@ let increment = (el, t: t) =>
     }
   )
 
+let add = (el, amount: float, t: t) =>
+  Belt.MutableMap.update(t, el, x =>
+    switch x {
+    | Some(n) => Some(n +. amount)
+    | None => Some(amount)
+    }
+  )
+
 let get = (el, t: t) => Belt.MutableMap.get(t, el)
 let fmap = (fn, t: t) => Belt.MutableMap.map(t, fn)
 let partition = (fn, t: t) => {
