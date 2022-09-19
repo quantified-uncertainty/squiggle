@@ -9,12 +9,11 @@ let dispatch = (
   reducer: Reducer_T.reducerFn,
   chain,
 ): result<Reducer_T.value, 'e> => {
-  E.A.O.firstSomeFn([
-    // () => ReducerInterface_GenericDistribution.dispatch(call, environment),
-    // () => ReducerInterface_Date.dispatch(call, environment),
-    // () => ReducerInterface_Duration.dispatch(call, environment),
-    // () => ReducerInterface_Number.dispatch(call, environment),
-    // () => FunctionRegistry_Library.dispatch(call, environment, reducer),
+  E.A.O.firstSomeFn([// () => ReducerInterface_GenericDistribution.dispatch(call, environment),
+  // () => ReducerInterface_Date.dispatch(call, environment),
+  // () => ReducerInterface_Duration.dispatch(call, environment),
+  // () => ReducerInterface_Number.dispatch(call, environment),
+  // () => FunctionRegistry_Library.dispatch(call, environment, reducer),
   ])->E.O2.defaultFn(() => chain(call, environment, reducer))
 }
 

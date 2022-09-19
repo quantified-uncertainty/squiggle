@@ -225,9 +225,9 @@ module FnDefinition = {
   }
 
   let make = (~name, ~inputs, ~run, ()): t => {
-    name,
-    inputs,
-    run,
+    name: name,
+    inputs: inputs,
+    run: run,
   }
 }
 
@@ -253,14 +253,14 @@ module Function = {
     ~isExperimental=false,
     (),
   ): t => {
-    name,
-    nameSpace,
-    definitions,
-    output,
+    name: name,
+    nameSpace: nameSpace,
+    definitions: definitions,
+    output: output,
     examples: examples |> E.O.default([]),
-    isExperimental,
-    requiresNamespace,
-    description,
+    isExperimental: isExperimental,
+    requiresNamespace: requiresNamespace,
+    description: description,
   }
 
   let toJson = (t: t): functionJson => {
@@ -288,12 +288,8 @@ module Registry = {
     // 1. functions
     // 2. definitions of each function
     // 3. name variations of each definition
-    r->Belt.Array.reduce(
-      Belt.Map.String.empty,
-      (acc, fn) =>
-      fn.definitions->Belt.Array.reduce(
-        acc,
-        (acc, def) => {
+    r->Belt.Array.reduce(Belt.Map.String.empty, (acc, fn) =>
+      fn.definitions->Belt.Array.reduce(acc, (acc, def) => {
         let names =
           [
             fn.nameSpace == "" ? [] : [`${fn.nameSpace}.${def.name}`],
@@ -338,8 +334,7 @@ module Registry = {
 
         let match = definitions->Js.Array2.find(def => def->FnDefinition.isMatch(args))
         switch match {
-        | Some(def) =>
-          def->FnDefinition.run(args, env, reducer)
+        | Some(def) => def->FnDefinition.run(args, env, reducer)
         | None => REOther(showNameMatchDefinitions())->Error
         }
       }

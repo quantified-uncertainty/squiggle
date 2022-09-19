@@ -315,10 +315,11 @@ module Old = {
 
   let dispatch = (call: ReducerInterface_InternalExpressionValue.functionCall, environment) =>
     switch dispatchToGenericOutput(call, environment) {
-        | Some(o) => genericOutputToReducerValue(o)
-        | None => Reducer_ErrorValue.REOther("Internal error in FR_GenericDist implementation")
-          ->Reducer_ErrorValue.ErrorException
-          ->raise
+    | Some(o) => genericOutputToReducerValue(o)
+    | None =>
+      Reducer_ErrorValue.REOther("Internal error in FR_GenericDist implementation")
+      ->Reducer_ErrorValue.ErrorException
+      ->raise
     }
 }
 
@@ -340,24 +341,32 @@ let makeProxyFn = (name: string, inputs: array<frType>) => {
 }
 
 let makeOperationFns = (): array<function> => {
-    let ops = ["add", "multiply", "subtract", "divide", "pow", "log", "dotAdd", "dotMultiply", "dotSubtract", "dotDivide", "dotPow"]
-    let twoArgTypes = [
-        // can't use numeric+numeric, since number+number should be delegated to builtin arithmetics
-        [FRTypeDist, FRTypeNumber],
-        [FRTypeNumber, FRTypeDist],
-        [FRTypeDist, FRTypeDist],
-    ]
+  let ops = [
+    "add",
+    "multiply",
+    "subtract",
+    "divide",
+    "pow",
+    "log",
+    "dotAdd",
+    "dotMultiply",
+    "dotSubtract",
+    "dotDivide",
+    "dotPow",
+  ]
+  let twoArgTypes = [
+    // can't use numeric+numeric, since number+number should be delegated to builtin arithmetics
+    [FRTypeDist, FRTypeNumber],
+    [FRTypeNumber, FRTypeDist],
+    [FRTypeDist, FRTypeDist],
+  ]
 
-    ops->E.A2.fmap(
-        op => twoArgTypes->E.A2.fmap(
-            types => makeProxyFn(op, types)
-        )
-    )->E.A.concatMany
+  ops->E.A2.fmap(op => twoArgTypes->E.A2.fmap(types => makeProxyFn(op, types)))->E.A.concatMany
 }
 
 // TODO - duplicates the switch above, should rewrite with standard FR APIs
 let library = E.A.concatMany([
-    [
+  [
     makeProxyFn("triangular", [FRTypeNumber, FRTypeNumber, FRTypeNumber]),
     makeProxyFn("sample", [FRTypeDist]),
     makeProxyFn("sampleN", [FRTypeDist, FRTypeNumber]),
@@ -394,14 +403,14 @@ let library = E.A.concatMany([
     makeProxyFn("log10", [FRTypeDist]),
     makeProxyFn("unaryMinus", [FRTypeDist]),
     makeProxyFn("dotExp", [FRTypeDist]),
-    ],
-    makeOperationFns()
+  ],
+  makeOperationFns(),
 ])
 
 // FIXME - impossible to implement with FR due to arbitrary parameters length;
 let mxLambda = Reducer_Expression_Lambda.makeFFILambda((inputs, env, _) => {
-    switch Old.dispatch(("mx", inputs), env) {
-    | Ok(value) => value
-    | Error(e) => e->Reducer_ErrorValue.ErrorException->raise
-    }
+  switch Old.dispatch(("mx", inputs), env) {
+  | Ok(value) => value
+  | Error(e) => e->Reducer_ErrorValue.ErrorException->raise
+  }
 })

@@ -1,8 +1,8 @@
 import { LocationRange } from "peggy";
 
 export const toFunction = {
+  "+": "add",
   "-": "subtract",
-  "->": "pipe",
   "!=": "unequal",
   ".-": "dotSubtract",
   ".*": "dotMultiply",
@@ -13,7 +13,6 @@ export const toFunction = {
   "/": "divide",
   "&&": "and",
   "^": "pow", // or xor
-  "+": "add",
   "<": "smaller",
   "<=": "smallerEq",
   "==": "equal",

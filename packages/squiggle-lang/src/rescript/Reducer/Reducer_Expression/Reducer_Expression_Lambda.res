@@ -34,13 +34,18 @@ let makeLambda = (
     }
 
     let localBindings = bindings->Reducer_Bindings.extend
-    let localBindingsWithParameters = parameters->Belt.Array.reduceWithIndex(
-      localBindings,
-      (currentBindings, parameter, index) => {
+    let localBindingsWithParameters = parameters->Belt.Array.reduceWithIndex(localBindings, (
+      currentBindings,
+      parameter,
+      index,
+    ) => {
       currentBindings->Reducer_Bindings.set(parameter, arguments[index])
     })
 
-    let (value, _) = reducer(body, {bindings: localBindingsWithParameters, environment: environment})
+    let (value, _) = reducer(
+      body,
+      {bindings: localBindingsWithParameters, environment: environment},
+    )
     value
   }
 

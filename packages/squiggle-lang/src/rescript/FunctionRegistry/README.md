@@ -42,5 +42,7 @@ Key types, internal functionality, and a `Registry` module with a `matchAndRun` 
 **FunctionRegistry_Library**
 A list of all the Functions defined in the Function Registry.
 
+The definition arrays are stored in `FR_*` modules, by convention.
+
 **FunctionRegistry_Helpers**
 A list of helper functions for the FunctionRegistry_Library.

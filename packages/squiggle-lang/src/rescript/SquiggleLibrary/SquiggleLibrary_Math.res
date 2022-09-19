@@ -12,4 +12,6 @@ let availableNumbers: array<(string, float)> = [
 ]
 
 let make = (): Reducer_Namespace.t =>
-  availableNumbers->E.A2.fmap(((name, v)) => (name, Reducer_T.IEvNumber(v)))->Reducer_Namespace.fromArray
+  availableNumbers
+  ->E.A2.fmap(((name, v)) => (name, Reducer_T.IEvNumber(v)))
+  ->Reducer_Namespace.fromArray

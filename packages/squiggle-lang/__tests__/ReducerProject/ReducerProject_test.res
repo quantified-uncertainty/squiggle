@@ -14,8 +14,7 @@ let runFetchResult = (project, sourceId) => {
 
 let runFetchFlatBindings = (project, sourceId) => {
   Project.run(project, sourceId)
-  Project.getBindings(project, sourceId)
-  ->InternalExpressionValue.toStringRecord
+  Project.getBindings(project, sourceId)->InternalExpressionValue.toStringRecord
 }
 
 test("test result true", () => {

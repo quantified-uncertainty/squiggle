@@ -17,7 +17,10 @@ module Internals = {
     ->E.A2.fmap(((key, value)) => Wrappers.evArray([IEvString(key), value]))
     ->Wrappers.evArray
 
-  let fromList = (items: array<internalExpressionValue>): result<internalExpressionValue, errorValue> =>
+  let fromList = (items: array<internalExpressionValue>): result<
+    internalExpressionValue,
+    errorValue,
+  > =>
     items
     ->E.A2.fmap(item => {
       switch (item: internalExpressionValue) {

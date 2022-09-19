@@ -35,13 +35,9 @@ describe("Namespace", () => {
     let x2 = makeValue(20.)
     let x3 = makeValue(30.)
     let x4 = makeValue(40.)
-    let ns1 = Namespace.make()
-        ->Namespace.set("x1", x1)
-        ->Namespace.set("x2", x2)
-    let ns2 = Namespace.make()
-        ->Namespace.set("x3", x3)
-        ->Namespace.set("x4", x4)
-    
+    let ns1 = Namespace.make()->Namespace.set("x1", x1)->Namespace.set("x2", x2)
+    let ns2 = Namespace.make()->Namespace.set("x3", x3)->Namespace.set("x4", x4)
+
     let nsMerged = Namespace.mergeMany([ns, ns1, ns2])
 
     test("merge many 1", () => {

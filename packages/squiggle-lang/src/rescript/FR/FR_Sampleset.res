@@ -120,7 +120,8 @@ let libaryBase = [
             Prepare.ToTypedArray.numbers(inputs) |> E.R2.bind(r =>
               SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??")
             )
-          sampleSet->E.R2.fmap(Wrappers.sampleSet)
+          sampleSet
+          ->E.R2.fmap(Wrappers.sampleSet)
           ->E.R2.fmap(Wrappers.evDistribution)
           ->E.R2.errMap(wrapError)
         },
@@ -291,7 +292,9 @@ module Comparison = {
   let wrapper = r =>
     r
     ->E.R2.fmap(r => r->Wrappers.sampleSet->Wrappers.evDistribution)
-    ->E.R2.errMap(e => e->DistributionTypes.Error.sampleErrorToDistErr->Reducer_ErrorValue.REDistributionError)
+    ->E.R2.errMap(e =>
+      e->DistributionTypes.Error.sampleErrorToDistErr->Reducer_ErrorValue.REDistributionError
+    )
 
   let mkBig = (name, withDist, withFloat) =>
     Function.make(

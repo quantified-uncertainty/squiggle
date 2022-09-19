@@ -2,7 +2,6 @@
 // (value methods should be moved to Reducer_Value.res)
 
 module ErrorValue = Reducer_ErrorValue
-module Extra_Array = Reducer_Extra_Array
 type environment = GenericDist.env
 module T = Reducer_T
 

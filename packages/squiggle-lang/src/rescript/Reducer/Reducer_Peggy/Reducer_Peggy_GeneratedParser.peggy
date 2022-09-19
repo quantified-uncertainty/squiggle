@@ -11,7 +11,7 @@ zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
 
 outerBlock 
   = statements:array_statements  finalExpression: (statementSeparator @expression)?
-    { if (finalExpression) statements.push(finalExpression) 
+    { if (finalExpression) statements.push(finalExpression)
       return h.nodeProgram(statements) }
   / finalExpression: expression
     { return h.nodeProgram([finalExpression]) }
@@ -23,7 +23,7 @@ innerBlockOrExpression
 
 quotedInnerBlock  
   = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
-      { if (finalExpression) statements.push(finalExpression) 
+      { if (finalExpression) statements.push(finalExpression)
         return h.nodeBlock(statements) }
   / '{' _nl finalExpression: expression  _nl '}'
       { return h.nodeBlock([finalExpression]) }

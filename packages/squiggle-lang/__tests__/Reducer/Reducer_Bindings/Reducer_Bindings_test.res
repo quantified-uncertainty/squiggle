@@ -31,9 +31,7 @@ describe("Bindings", () => {
 
   describe("extend", () => {
     let value2 = Reducer_T.IEvNumber(5.)
-    let extendedBindings = bindings
-      ->Bindings.extend
-      ->Bindings.set("value", value2)
+    let extendedBindings = bindings->Bindings.extend->Bindings.set("value", value2)
 
     test("get on extended", () => {
       expect(extendedBindings->Bindings.get("value")) == Some(value2)

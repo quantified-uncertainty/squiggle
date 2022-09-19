@@ -119,10 +119,7 @@ describe("eval on distribution functions", () => {
 
 describe("parse on distribution functions", () => {
   describe("power", () => {
-    testParse(
-      "normal(5,2) ^ normal(5,1)",
-      "Ok((pow)((normal)(5, 2), (normal)(5, 1)))",
-    )
+    testParse("normal(5,2) ^ normal(5,1)", "Ok((pow)((normal)(5, 2), (normal)(5, 1)))")
     testParse("3 ^ normal(5,1)", "Ok((pow)(3, (normal)(5, 1)))")
     testParse("normal(5,2) ^ 3", "Ok((pow)((normal)(5, 2), 3))")
   })
@@ -138,18 +135,9 @@ describe("parse on distribution functions", () => {
       "Ok((:$$_block_$$ (:dotSubtract (:normal 5 2) (:normal 5 1))))",
       // TODO: !!! returns "Ok({(:dotPow (:normal 5 2) (:normal 5 1))})"
     )
-    testParse(
-      "normal(5,2) .* normal(5,1)",
-      "Ok((dotMultiply)((normal)(5, 2), (normal)(5, 1)))",
-    )
-    testParse(
-      "normal(5,2) ./ normal(5,1)",
-      "Ok((dotDivide)((normal)(5, 2), (normal)(5, 1)))",
-    )
-    testParse(
-      "normal(5,2) .^ normal(5,1)",
-      "Ok((dotPow)((normal)(5, 2), (normal)(5, 1)))",
-    )
+    testParse("normal(5,2) .* normal(5,1)", "Ok((dotMultiply)((normal)(5, 2), (normal)(5, 1)))")
+    testParse("normal(5,2) ./ normal(5,1)", "Ok((dotDivide)((normal)(5, 2), (normal)(5, 1)))")
+    testParse("normal(5,2) .^ normal(5,1)", "Ok((dotPow)((normal)(5, 2), (normal)(5, 1)))")
   })
   describe("equality", () => {
     testParse("5 == normal(5,2)", "Ok((equal)(5, (normal)(5, 2)))")

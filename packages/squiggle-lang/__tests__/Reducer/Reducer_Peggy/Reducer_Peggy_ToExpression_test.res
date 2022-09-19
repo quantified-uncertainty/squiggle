@@ -25,11 +25,7 @@ describe("Peggy to Expression", () => {
 
   describe("multi-line", () => {
     testToExpression("x=1; 2", "x = {1}; 2", ~v="2", ())
-    testToExpression(
-      "x=1; y=2",
-      "x = {1}; y = {2}",
-      (),
-    )
+    testToExpression("x=1; y=2", "x = {1}; y = {2}", ())
   })
 
   describe("variables", () => {
@@ -39,11 +35,7 @@ describe("Peggy to Expression", () => {
   })
 
   describe("functions", () => {
-    testToExpression(
-      "identity(x) = x",
-      "identity = {|x| {x}}",
-      (),
-    ) // Function definitions become lambda assignments
+    testToExpression("identity(x) = x", "identity = {|x| {x}}", ()) // Function definitions become lambda assignments
     testToExpression("identity(x)", "(identity)(x)", ()) // Note value returns error properly
     testToExpression(
       "f(x) = x> 2 ? 0 : 1; f(3)",
@@ -55,43 +47,15 @@ describe("Peggy to Expression", () => {
 
   describe("arrays", () => {
     testToExpression("[]", "[]", ~v="[]", ())
-    testToExpression(
-      "[0, 1, 2]",
-      "[0, 1, 2]",
-      ~v="[0,1,2]",
-      (),
-    )
-    testToExpression(
-      "['hello', 'world']",
-      "['hello', 'world']",
-      ~v="['hello','world']",
-      (),
-    )
-    testToExpression(
-      "([0,1,2])[1]",
-      "($_atIndex_$)([0, 1, 2], 1)",
-      ~v="1",
-      (),
-    )
+    testToExpression("[0, 1, 2]", "[0, 1, 2]", ~v="[0,1,2]", ())
+    testToExpression("['hello', 'world']", "['hello', 'world']", ~v="['hello','world']", ())
+    testToExpression("([0,1,2])[1]", "($_atIndex_$)([0, 1, 2], 1)", ~v="1", ())
   })
 
   describe("records", () => {
-    testToExpression(
-      "{a: 1, b: 2}",
-      "{'a': 1, 'b': 2}",
-      ~v="{a: 1,b: 2}",
-      (),
-    )
-    testToExpression(
-      "{1+0: 1, 2+0: 2}",
-      "{(add)(1, 0): 1, (add)(2, 0): 2}",
-      (),
-    ) // key can be any expression
-    testToExpression(
-      "record.property",
-      "($_atIndex_$)(record, 'property')",
-      (),
-    )
+    testToExpression("{a: 1, b: 2}", "{'a': 1, 'b': 2}", ~v="{a: 1,b: 2}", ())
+    testToExpression("{1+0: 1, 2+0: 2}", "{(add)(1, 0): 1, (add)(2, 0): 2}", ()) // key can be any expression
+    testToExpression("record.property", "($_atIndex_$)(record, 'property')", ())
     testToExpression(
       "record={property: 1}; record.property",
       "record = {{'property': 1}}; ($_atIndex_$)(record, 'property')",
@@ -103,45 +67,15 @@ describe("Peggy to Expression", () => {
   describe("comments", () => {
     testToExpression("1 # This is a line comment", "1", ~v="1", ())
     testToExpression("1 // This is a line comment", "1", ~v="1", ())
-    testToExpression(
-      "1 /* This is a multi line comment */",
-      "1",
-      ~v="1",
-      (),
-    )
-    testToExpression(
-      "/* This is a multi line comment */ 1",
-      "1",
-      ~v="1",
-      (),
-    )
+    testToExpression("1 /* This is a multi line comment */", "1", ~v="1", ())
+    testToExpression("/* This is a multi line comment */ 1", "1", ~v="1", ())
   })
 
   describe("ternary operator", () => {
-    testToExpression(
-      "true ? 1 : 0",
-      "true ? (1) : (0)",
-      ~v="1",
-      (),
-    )
-    testToExpression(
-      "false ? 1 : 0",
-      "false ? (1) : (0)",
-      ~v="0",
-      (),
-    )
-    testToExpression(
-      "true ? 1 : false ? 2 : 0",
-      "true ? (1) : (false ? (2) : (0))",
-      ~v="1",
-      (),
-    ) // nested ternary
-    testToExpression(
-      "false ? 1 : false ? 2 : 0",
-      "false ? (1) : (false ? (2) : (0))",
-      ~v="0",
-      (),
-    ) // nested ternary
+    testToExpression("true ? 1 : 0", "true ? (1) : (0)", ~v="1", ())
+    testToExpression("false ? 1 : 0", "false ? (1) : (0)", ~v="0", ())
+    testToExpression("true ? 1 : false ? 2 : 0", "true ? (1) : (false ? (2) : (0))", ~v="1", ()) // nested ternary
+    testToExpression("false ? 1 : false ? 2 : 0", "false ? (1) : (false ? (2) : (0))", ~v="0", ()) // nested ternary
     describe("ternary bindings", () => {
       testToExpression(
         // expression binding
@@ -168,16 +102,8 @@ describe("Peggy to Expression", () => {
   })
 
   describe("if then else", () => {
-    testToExpression(
-      "if true then 2 else 3",
-      "true ? ({2}) : ({3})",
-      (),
-    )
-    testToExpression(
-      "if true then {2} else {3}",
-      "true ? ({2}) : ({3})",
-      (),
-    )
+    testToExpression("if true then 2 else 3", "true ? ({2}) : ({3})", ())
+    testToExpression("if true then {2} else {3}", "true ? ({2}) : ({3})", ())
     testToExpression(
       "if false then {2} else if false then {4} else {5}",
       "false ? ({2}) : (false ? ({4}) : ({5}))",
@@ -187,18 +113,8 @@ describe("Peggy to Expression", () => {
 
   describe("pipe", () => {
     testToExpression("1 -> add(2)", "(add)(1, 2)", ~v="3", ())
-    testToExpression(
-      "-1 -> add(2)",
-      "(add)((unaryMinus)(1), 2)",
-      ~v="1",
-      (),
-    ) // note that unary has higher priority naturally
-    testToExpression(
-      "1 -> add(2) * 3",
-      "(multiply)((add)(1, 2), 3)",
-      ~v="9",
-      (),
-    )
+    testToExpression("-1 -> add(2)", "(add)((unaryMinus)(1), 2)", ~v="1", ()) // note that unary has higher priority naturally
+    testToExpression("1 -> add(2) * 3", "(multiply)((add)(1, 2), 3)", ~v="9", ())
   })
 
   describe("elixir pipe", () => {
@@ -219,27 +135,10 @@ describe("Peggy to Expression", () => {
   })
 
   describe("lambda", () => {
-    testToExpression(
-      "{|x| x}",
-      "{|x| x}",
-      ~v="lambda(x=>internal code)",
-      (),
-    )
-    testToExpression(
-      "f={|x| x}",
-      "f = {{|x| x}}",
-      (),
-    )
-    testToExpression(
-      "f(x)=x",
-      "f = {|x| {x}}",
-      (),
-    ) // Function definitions are lambda assignments
-    testToExpression(
-      "f(x)=x ? 1 : 0",
-      "f = {|x| {x ? (1) : (0)}}",
-      (),
-    )
+    testToExpression("{|x| x}", "{|x| x}", ~v="lambda(x=>internal code)", ())
+    testToExpression("f={|x| x}", "f = {{|x| x}}", ())
+    testToExpression("f(x)=x", "f = {|x| {x}}", ()) // Function definitions are lambda assignments
+    testToExpression("f(x)=x ? 1 : 0", "f = {|x| {x ? (1) : (0)}}", ())
   })
 
   describe("module", () => {

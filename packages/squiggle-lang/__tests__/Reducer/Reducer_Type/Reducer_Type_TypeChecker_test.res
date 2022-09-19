@@ -71,3 +71,4 @@
 // myTypeCheckTest(test, "number<-min(10)", "0", "Expected type: number<-min(10) but got: 0")
 // myTypeCheckTest(test, "any", "0", "Ok")
 // myTypeCheckTest(test, "any", "'a'", "Ok")
+

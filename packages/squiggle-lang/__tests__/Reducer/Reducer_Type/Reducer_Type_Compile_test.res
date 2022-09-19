@@ -50,3 +50,4 @@
 //   "Ok({properties: {age: #number,name: #string},typeTag: 'typeRecord'})",
 // )
 // myTypeTest(test, "{age: number, name: string}", "{age: number, name: string}")
+

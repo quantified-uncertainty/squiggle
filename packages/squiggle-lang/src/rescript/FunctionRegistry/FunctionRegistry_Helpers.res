@@ -225,13 +225,11 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber],
-        ~run=(_, inputs, _, _) => {
-          inputs
-          ->getOrError(0)
-          ->E.R.bind(Prepare.oneNumber)
-          ->E.R2.fmap(fn)
-          ->E.R2.fmap(Wrappers.evNumber)
-          ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
+        ~run=(inputs, _, _, _) => {
+          switch inputs {
+          | [IEvNumber(x)] => fn(x)->IEvNumber->Ok
+          | _ => Error(impossibleError)
+          }
         },
         (),
       )
@@ -239,12 +237,11 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber, FRTypeNumber],
-        ~run=(_, inputs, _, _) => {
-          inputs
-          ->Prepare.ToValueTuple.twoNumbers
-          ->E.R2.fmap(fn)
-          ->E.R2.fmap(Wrappers.evNumber)
-          ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
+        ~run=(inputs, _, _, _) => {
+          switch inputs {
+          | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvNumber->Ok
+          | _ => Error(impossibleError)
+          }
         },
         (),
       )
@@ -252,12 +249,11 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
-        ~run=(_, inputs, _, _) => {
-          inputs
-          ->Prepare.ToValueTuple.threeNumbers
-          ->E.R2.fmap(fn)
-          ->E.R2.fmap(Wrappers.evNumber)
-          ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
+        ~run=(inputs, _, _, _) => {
+          switch inputs {
+          | [IEvNumber(x), IEvNumber(y), IEvNumber(z)] => fn(x, y, z)->IEvNumber->Ok
+          | _ => Error(impossibleError)
+          }
         },
         (),
       )

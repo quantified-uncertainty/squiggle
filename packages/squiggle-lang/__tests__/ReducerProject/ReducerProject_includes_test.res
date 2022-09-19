@@ -75,9 +75,7 @@ x=1`,
   })
 
   test("include as variables", () => {
-    expect(project->Project.Private.getIncludesAsVariables("main")) == [
-        ("myVariable", "myModule"),
-      ]
+    expect(project->Project.Private.getIncludesAsVariables("main")) == [("myVariable", "myModule")]
   })
 })
 
@@ -110,8 +108,6 @@ x=1`,
     expect(Project.getPastChain(project, "main")) == ["common", "common2"]
   })
   test("include as variables", () => {
-    expect(project->Project.Private.getIncludesAsVariables("main")) == [
-        ("myVariable", "myModule"),
-      ]
+    expect(project->Project.Private.getIncludesAsVariables("main")) == [("myVariable", "myModule")]
   })
 })

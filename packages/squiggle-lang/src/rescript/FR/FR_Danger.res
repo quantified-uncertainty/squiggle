@@ -8,11 +8,11 @@ let requiresNamespace = true
 
 module Combinatorics = {
   module Helpers = {
-    let laplace = ((successes, trials)) => (successes +. 1.0) /. (trials +. 2.0)
+    let laplace = (successes, trials) => (successes +. 1.0) /. (trials +. 2.0)
     let factorial = Stdlib.Math.factorial
-    let choose = ((n, k)) => factorial(n) /. (factorial(n -. k) *. factorial(k))
+    let choose = (n, k) => factorial(n) /. (factorial(n -. k) *. factorial(k))
     let pow = (base, exp) => Js.Math.pow_float(~base, ~exp)
-    let binomial = ((n, k, p)) => choose((n, k)) *. pow(p, k) *. pow(1.0 -. p, n -. k)
+    let binomial = (n, k, p) => choose(n, k) *. pow(p, k) *. pow(1.0 -. p, n -. k)
   }
   module Lib = {
     let laplace = Function.make(
@@ -77,8 +77,7 @@ module Integration = {
         | Reducer_T.IEvNumber(x) => Ok(x)
         | _ =>
           Error(
-            "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
-            ->Reducer_ErrorValue.REOther
+            "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"->Reducer_ErrorValue.REOther,
           )
         }
         result
@@ -142,11 +141,11 @@ module Integration = {
           resultWithOuterPoints
         }
       | Error(b) =>
-        (
-          "Integration error 2 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead." ++
-          "Original error: " ++
-          b->Reducer_ErrorValue.errorToString
-        )->Reducer_ErrorValue.REOther->Error
+        ("Integration error 2 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead." ++
+        "Original error: " ++
+        b->Reducer_ErrorValue.errorToString)
+        ->Reducer_ErrorValue.REOther
+        ->Error
       }
       result
     }
@@ -169,7 +168,9 @@ module Integration = {
           ~run=(inputs, _, env, reducer) => {
             let result = switch inputs {
             | [_, _, _, IEvNumber(0.0)] =>
-              "Integration error 4 in Danger.integrate: Increment can't be 0."->Reducer_ErrorValue.REOther->Error
+              "Integration error 4 in Danger.integrate: Increment can't be 0."
+              ->Reducer_ErrorValue.REOther
+              ->Error
             | [
                 IEvLambda(aLambda),
                 IEvNumber(min),
@@ -186,7 +187,9 @@ module Integration = {
               )
             | _ =>
               Error(
-                Reducer_ErrorValue.REOther("Integration error 5 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))")
+                Reducer_ErrorValue.REOther(
+                  "Integration error 5 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))",
+                ),
               )
             }
             result
@@ -221,8 +224,8 @@ module Integration = {
                 env,
                 reducer,
               )->E.R2.errMap(b =>
-                ("Integration error 7 in Danger.integrate. Something went wrong along the way: " ++ b->Reducer_ErrorValue.errorToString)
-                ->Reducer_ErrorValue.REOther
+                ("Integration error 7 in Danger.integrate. Something went wrong along the way: " ++
+                b->Reducer_ErrorValue.errorToString)->Reducer_ErrorValue.REOther
               )
             | _ =>
               "Integration error 8 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))"
@@ -287,23 +290,19 @@ module DiminishingReturns = {
       ) {
       | (false, _, _, _) =>
         Error(
-          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1."
-          ->Reducer_ErrorValue.REOther
+          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1."->Reducer_ErrorValue.REOther,
         )
       | (_, false, _, _) =>
         Error(
-          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0."
-          ->Reducer_ErrorValue.REOther
+          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0."->Reducer_ErrorValue.REOther,
         )
       | (_, _, false, _) =>
         Error(
-          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0."
-          ->Reducer_ErrorValue.REOther
+          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0."->Reducer_ErrorValue.REOther,
         )
       | (_, _, _, false) =>
         Error(
-          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount."
-          ->Reducer_ErrorValue.REOther
+          "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount."->Reducer_ErrorValue.REOther,
         )
       | (true, true, true, true) => {
           let applyFunctionAtPoint = (lambda, point: float) => {
@@ -319,8 +318,7 @@ module DiminishingReturns = {
             | Reducer_T.IEvNumber(x) => Ok(x)
             | _ =>
               Error(
-                "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
-                ->Reducer_ErrorValue.REOther
+                "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"->Reducer_ErrorValue.REOther,
               )
             }
           }
@@ -433,7 +431,10 @@ module DiminishingReturns = {
                 }
                 result
               }
-            | _ => "Error in Danger.diminishingMarginalReturnsForTwoFunctions"->Reducer_ErrorValue.REOther->Error
+            | _ =>
+              "Error in Danger.diminishingMarginalReturnsForTwoFunctions"
+              ->Reducer_ErrorValue.REOther
+              ->Error
             },
           (),
         ),

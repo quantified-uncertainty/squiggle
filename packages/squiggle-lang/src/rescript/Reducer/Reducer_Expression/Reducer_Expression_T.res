@@ -7,17 +7,20 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 type t = Reducer_T.expression
 
 let commaJoin = values => values->Reducer_Extra_Array.intersperse(", ")->Js.String.concatMany("")
-let semicolonJoin = values => values->Reducer_Extra_Array.intersperse("; ")->Js.String.concatMany("")
+let semicolonJoin = values =>
+  values->Reducer_Extra_Array.intersperse("; ")->Js.String.concatMany("")
 
 /*
   Converts the expression to String
 */
 let rec toString = (expression: t) =>
   switch expression {
-  | EBlock(statements) => `{${Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin}}`
+  | EBlock(statements) =>
+    `{${Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin}}`
   | EProgram(statements) => Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin
   | EArray(aList) => `[${Js.Array2.map(aList, aValue => toString(aValue))->commaJoin}]`
-  | ERecord(map) => `{${map->Belt.Array.map(((key, value)) => `${key->toString}: ${value->toString}`)->commaJoin}}`
+  | ERecord(map) =>
+    `{${map->Belt.Array.map(((key, value)) => `${key->toString}: ${value->toString}`)->commaJoin}}`
   | ESymbol(name) => name
   | ETernary(predicate, trueCase, falseCase) =>
     `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`

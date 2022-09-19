@@ -46,10 +46,7 @@ describe("call and bindings", () => {
   testEvalToBe("f(x)=x+1; y=f(1); f(1)", "Ok(2)")
   testEvalToBe("f(x)=x+1; y=f(1); z=f(1); z", "Ok(2)")
   testEvalToBe("f(x)=x+1; g(x)=f(x)+1; g(0)", "Ok(2)")
-  testParseToBe(
-    "f=99; g(x)=f; g(2)",
-    "Ok(f = {99}; g = {|x| {f}}; (g)(2))",
-  )
+  testParseToBe("f=99; g(x)=f; g(2)", "Ok(f = {99}; g = {|x| {f}}; (g)(2))")
   testEvalToBe("f=99; g(x)=f; g(2)", "Ok(99)")
   testEvalToBe("f(x)=x; g(x)=f(x); g(2)", "Ok(2)")
   testEvalToBe("f(x)=x+1; g(x)=f(x)+1; y=g(2); y", "Ok(4)")

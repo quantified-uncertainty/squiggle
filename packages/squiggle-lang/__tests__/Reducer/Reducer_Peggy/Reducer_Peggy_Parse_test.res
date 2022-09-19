@@ -38,58 +38,22 @@ describe("Peggy parse", () => {
     testParse("1 * 2 / 3", "{(:divide (:multiply 1 2) 3)}")
     testParse("1 / 2 * 3", "{(:multiply (:divide 1 2) 3)}")
     testParse("1 / 2 / 3", "{(:divide (:divide 1 2) 3)}")
-    testParse(
-      "1 * 2 + 3 * 4",
-      "{(:add (:multiply 1 2) (:multiply 3 4))}",
-    )
-    testParse(
-      "1 * 2 - 3 * 4",
-      "{(:subtract (:multiply 1 2) (:multiply 3 4))}",
-    )
-    testParse(
-      "1 * 2 .+ 3 * 4",
-      "{(:dotAdd (:multiply 1 2) (:multiply 3 4))}",
-    )
-    testParse(
-      "1 * 2 .- 3 * 4",
-      "{(:dotSubtract (:multiply 1 2) (:multiply 3 4))}",
-    )
-    testParse(
-      "1 * 2 + 3 .* 4",
-      "{(:add (:multiply 1 2) (:dotMultiply 3 4))}",
-    )
-    testParse(
-      "1 * 2 + 3 / 4",
-      "{(:add (:multiply 1 2) (:divide 3 4))}",
-    )
-    testParse(
-      "1 * 2 + 3 ./ 4",
-      "{(:add (:multiply 1 2) (:dotDivide 3 4))}",
-    )
-    testParse(
-      "1 * 2 - 3 .* 4",
-      "{(:subtract (:multiply 1 2) (:dotMultiply 3 4))}",
-    )
-    testParse(
-      "1 * 2 - 3 / 4",
-      "{(:subtract (:multiply 1 2) (:divide 3 4))}",
-    )
-    testParse(
-      "1 * 2 - 3 ./ 4",
-      "{(:subtract (:multiply 1 2) (:dotDivide 3 4))}",
-    )
-    testParse(
-      "1 * 2 - 3 * 4^5",
-      "{(:subtract (:multiply 1 2) (:multiply 3 (:pow 4 5)))}",
-    )
+    testParse("1 * 2 + 3 * 4", "{(:add (:multiply 1 2) (:multiply 3 4))}")
+    testParse("1 * 2 - 3 * 4", "{(:subtract (:multiply 1 2) (:multiply 3 4))}")
+    testParse("1 * 2 .+ 3 * 4", "{(:dotAdd (:multiply 1 2) (:multiply 3 4))}")
+    testParse("1 * 2 .- 3 * 4", "{(:dotSubtract (:multiply 1 2) (:multiply 3 4))}")
+    testParse("1 * 2 + 3 .* 4", "{(:add (:multiply 1 2) (:dotMultiply 3 4))}")
+    testParse("1 * 2 + 3 / 4", "{(:add (:multiply 1 2) (:divide 3 4))}")
+    testParse("1 * 2 + 3 ./ 4", "{(:add (:multiply 1 2) (:dotDivide 3 4))}")
+    testParse("1 * 2 - 3 .* 4", "{(:subtract (:multiply 1 2) (:dotMultiply 3 4))}")
+    testParse("1 * 2 - 3 / 4", "{(:subtract (:multiply 1 2) (:divide 3 4))}")
+    testParse("1 * 2 - 3 ./ 4", "{(:subtract (:multiply 1 2) (:dotDivide 3 4))}")
+    testParse("1 * 2 - 3 * 4^5", "{(:subtract (:multiply 1 2) (:multiply 3 (:pow 4 5)))}")
     testParse(
       "1 * 2 - 3 * 4^5^6",
       "{(:subtract (:multiply 1 2) (:multiply 3 (:pow (:pow 4 5) 6)))}",
     )
-    testParse(
-      "1 * -a[-2]",
-      "{(:multiply 1 (:unaryMinus (:$_atIndex_$ :a (:unaryMinus 2))))}",
-    )
+    testParse("1 * -a[-2]", "{(:multiply 1 (:unaryMinus (:$_atIndex_$ :a (:unaryMinus 2))))}")
   })
 
   describe("multi-line", () => {
@@ -111,25 +75,13 @@ describe("Peggy parse", () => {
   describe("arrays", () => {
     testParse("[]", "{[]}")
     testParse("[0, 1, 2]", "{[0; 1; 2]}")
-    testParse(
-      "['hello', 'world']",
-      "{['hello'; 'world']}",
-    )
-    testParse(
-      "([0,1,2])[1]",
-      "{(:$_atIndex_$ [0; 1; 2] 1)}",
-    )
+    testParse("['hello', 'world']", "{['hello'; 'world']}")
+    testParse("([0,1,2])[1]", "{(:$_atIndex_$ [0; 1; 2] 1)}")
   })
 
   describe("records", () => {
-    testParse(
-      "{a: 1, b: 2}",
-      "{{'a': 1, 'b': 2}}",
-    )
-    testParse(
-      "{1+0: 1, 2+0: 2}",
-      "{{(:add 1 0): 1, (:add 2 0): 2}}",
-    ) // key can be any expression
+    testParse("{a: 1, b: 2}", "{{'a': 1, 'b': 2}}")
+    testParse("{1+0: 1, 2+0: 2}", "{{(:add 1 0): 1, (:add 2 0): 2}}") // key can be any expression
     testParse("record.property", "{(:$_atIndex_$ :record 'property')}")
   })
 
@@ -137,10 +89,7 @@ describe("Peggy parse", () => {
     //function call, array and record access are post operators with higher priority than unary operators
     testParse("a==!b(1)", "{(:equal :a (:not (:b 1)))}")
     testParse("a==!b[1]", "{(:equal :a (:not (:$_atIndex_$ :b 1)))}")
-    testParse(
-      "a==!b.one",
-      "{(:equal :a (:not (:$_atIndex_$ :b 'one')))}",
-    )
+    testParse("a==!b.one", "{(:equal :a (:not (:$_atIndex_$ :b 'one')))}")
   })
 
   describe("comments", () => {
@@ -167,14 +116,8 @@ describe("Peggy parse", () => {
   })
 
   describe("if then else", () => {
-    testParse(
-      "if true then 2 else 3",
-      "{(::$$_ternary_$$ true {2} {3})}",
-    )
-    testParse(
-      "if false then {2} else {3}",
-      "{(::$$_ternary_$$ false {2} {3})}",
-    )
+    testParse("if true then 2 else 3", "{(::$$_ternary_$$ true {2} {3})}")
+    testParse("if false then {2} else {3}", "{(::$$_ternary_$$ false {2} {3})}")
     testParse(
       "if false then {2} else if false then {4} else {5}",
       "{(::$$_ternary_$$ false {2} (::$$_ternary_$$ false {4} {5}))}",
@@ -189,51 +132,18 @@ describe("Peggy parse", () => {
     testParse("a && b || c && d", "{(:or (:and :a :b) (:and :c :d))}")
     testParse("a && !b || c", "{(:or (:and :a (:not :b)) :c)}")
     testParse("a && b==c || d", "{(:or (:and :a (:equal :b :c)) :d)}")
-    testParse(
-      "a && b!=c || d",
-      "{(:or (:and :a (:unequal :b :c)) :d)}",
-    )
-    testParse(
-      "a && !(b==c) || d",
-      "{(:or (:and :a (:not (:equal :b :c))) :d)}",
-    )
-    testParse(
-      "a && b>=c || d",
-      "{(:or (:and :a (:largerEq :b :c)) :d)}",
-    )
-    testParse(
-      "a && !(b>=c) || d",
-      "{(:or (:and :a (:not (:largerEq :b :c))) :d)}",
-    )
-    testParse(
-      "a && b<=c || d",
-      "{(:or (:and :a (:smallerEq :b :c)) :d)}",
-    )
+    testParse("a && b!=c || d", "{(:or (:and :a (:unequal :b :c)) :d)}")
+    testParse("a && !(b==c) || d", "{(:or (:and :a (:not (:equal :b :c))) :d)}")
+    testParse("a && b>=c || d", "{(:or (:and :a (:largerEq :b :c)) :d)}")
+    testParse("a && !(b>=c) || d", "{(:or (:and :a (:not (:largerEq :b :c))) :d)}")
+    testParse("a && b<=c || d", "{(:or (:and :a (:smallerEq :b :c)) :d)}")
     testParse("a && b>c || d", "{(:or (:and :a (:larger :b :c)) :d)}")
-    testParse(
-      "a && b<c || d",
-      "{(:or (:and :a (:smaller :b :c)) :d)}",
-    )
-    testParse(
-      "a && b<c[i] || d",
-      "{(:or (:and :a (:smaller :b (:$_atIndex_$ :c :i))) :d)}",
-    )
-    testParse(
-      "a && b<c.i || d",
-      "{(:or (:and :a (:smaller :b (:$_atIndex_$ :c 'i'))) :d)}",
-    )
-    testParse(
-      "a && b<c(i) || d",
-      "{(:or (:and :a (:smaller :b (:c :i))) :d)}",
-    )
-    testParse(
-      "a && b<1+2 || d",
-      "{(:or (:and :a (:smaller :b (:add 1 2))) :d)}",
-    )
-    testParse(
-      "a && b<1+2*3 || d",
-      "{(:or (:and :a (:smaller :b (:add 1 (:multiply 2 3)))) :d)}",
-    )
+    testParse("a && b<c || d", "{(:or (:and :a (:smaller :b :c)) :d)}")
+    testParse("a && b<c[i] || d", "{(:or (:and :a (:smaller :b (:$_atIndex_$ :c :i))) :d)}")
+    testParse("a && b<c.i || d", "{(:or (:and :a (:smaller :b (:$_atIndex_$ :c 'i'))) :d)}")
+    testParse("a && b<c(i) || d", "{(:or (:and :a (:smaller :b (:c :i))) :d)}")
+    testParse("a && b<1+2 || d", "{(:or (:and :a (:smaller :b (:add 1 2))) :d)}")
+    testParse("a && b<1+2*3 || d", "{(:or (:and :a (:smaller :b (:add 1 (:multiply 2 3)))) :d)}")
     testParse(
       "a && b<1+2*-3+4 || d",
       "{(:or (:and :a (:smaller :b (:add (:add 1 (:multiply 2 (:unaryMinus 3))) 4))) :d)}",
@@ -247,19 +157,13 @@ describe("Peggy parse", () => {
   describe("pipe", () => {
     testParse("1 -> add(2)", "{(:add 1 2)}")
     testParse("-1 -> add(2)", "{(:add (:unaryMinus 1) 2)}")
-    testParse(
-      "-a[1] -> add(2)",
-      "{(:add (:unaryMinus (:$_atIndex_$ :a 1)) 2)}",
-    )
+    testParse("-a[1] -> add(2)", "{(:add (:unaryMinus (:$_atIndex_$ :a 1)) 2)}")
     testParse("-f(1) -> add(2)", "{(:add (:unaryMinus (:f 1)) 2)}")
     testParse("1 + 2 -> add(3)", "{(:add 1 (:add 2 3))}")
     testParse("1 -> add(2) * 3", "{(:multiply (:add 1 2) 3)}")
     testParse("1 -> subtract(2)", "{(:subtract 1 2)}")
     testParse("-1 -> subtract(2)", "{(:subtract (:unaryMinus 1) 2)}")
-    testParse(
-      "1 -> subtract(2) * 3",
-      "{(:multiply (:subtract 1 2) 3)}",
-    )
+    testParse("1 -> subtract(2) * 3", "{(:multiply (:subtract 1 2) 3)}")
   })
 
   describe("elixir pipe", () => {
@@ -269,10 +173,7 @@ describe("Peggy parse", () => {
 
   describe("to", () => {
     testParse("1 to 2", "{(:credibleIntervalToDistribution 1 2)}")
-    testParse(
-      "-1 to -2",
-      "{(:credibleIntervalToDistribution (:unaryMinus 1) (:unaryMinus 2))}",
-    ) // lower than unary
+    testParse("-1 to -2", "{(:credibleIntervalToDistribution (:unaryMinus 1) (:unaryMinus 2))}") // lower than unary
     testParse(
       "a[1] to a[2]",
       "{(:credibleIntervalToDistribution (:$_atIndex_$ :a 1) (:$_atIndex_$ :a 2))}",
@@ -281,10 +182,7 @@ describe("Peggy parse", () => {
       "a.p1 to a.p2",
       "{(:credibleIntervalToDistribution (:$_atIndex_$ :a 'p1') (:$_atIndex_$ :a 'p2'))}",
     ) // lower than post
-    testParse(
-      "1 to 2 + 3",
-      "{(:add (:credibleIntervalToDistribution 1 2) 3)}",
-    ) // higher than binary operators
+    testParse("1 to 2 + 3", "{(:add (:credibleIntervalToDistribution 1 2) 3)}") // higher than binary operators
     testParse(
       "1->add(2) to 3->add(4) -> add(4)",
       "{(:credibleIntervalToDistribution (:add 1 2) (:add (:add 3 4) 4))}",
@@ -301,10 +199,7 @@ describe("Peggy parse", () => {
     testParse("{|x| x}", "{{|:x| :x}}")
     testParse("f={|x| x}", "{:f = {{|:x| :x}}}")
     testParse("f(x)=x", "{:f = {|:x| {:x}}}") // Function definitions are lambda assignments
-    testParse(
-      "f(x)=x ? 1 : 0",
-      "{:f = {|:x| {(::$$_ternary_$$ :x 1 0)}}}",
-    ) // Function definitions are lambda assignments
+    testParse("f(x)=x ? 1 : 0", "{:f = {|:x| {(::$$_ternary_$$ :x 1 0)}}}") // Function definitions are lambda assignments
   })
 
   describe("Using lambda as value", () => {
@@ -321,18 +216,9 @@ describe("Peggy parse", () => {
       "{:myaddd = {|:x,:y| {(:add :x :y)}}; :z = {{'x': :myaddd}}; :z}",
     )
     testParse("f({|x| x+1})", "{(:f {|:x| (:add :x 1)})}")
-    testParse(
-      "map(arr, {|x| x+1})",
-      "{(:map :arr {|:x| (:add :x 1)})}",
-    )
-    testParse(
-      "map([1,2,3], {|x| x+1})",
-      "{(:map [1; 2; 3] {|:x| (:add :x 1)})}",
-    )
-    testParse(
-      "[1,2,3]->map({|x| x+1})",
-      "{(:map [1; 2; 3] {|:x| (:add :x 1)})}",
-    )
+    testParse("map(arr, {|x| x+1})", "{(:map :arr {|:x| (:add :x 1)})}")
+    testParse("map([1,2,3], {|x| x+1})", "{(:map [1; 2; 3] {|:x| (:add :x 1)})}")
+    testParse("[1,2,3]->map({|x| x+1})", "{(:map [1; 2; 3] {|:x| (:add :x 1)})}")
   })
   describe("unit", () => {
     testParse("1m", "{(:fromUnit_m 1)}")
@@ -419,7 +305,7 @@ describe("parsing new line", () => {
  g=f+4
  g
  `,
-    "{:f = {:x = {1}; :y = {2}; :z = {3}; (:add (:add :x :y) :z)}; :g = {(:add :f 4)}; :g}"
+    "{:f = {:x = {1}; :y = {2}; :z = {3}; (:add (:add :x :y) :z)}; :g = {(:add :f 4)}; :g}",
   )
   testParse(
     `
@@ -441,7 +327,7 @@ describe("parsing new line", () => {
   p ->
   q 
  `,
-    "{:f = {:x = {1}; :y = {2}; :z = {3}; (:add (:add :x :y) :z)}; :g = {(:add :f 4)}; (:q (:p (:h :g)))}"
+    "{:f = {:x = {1}; :y = {2}; :z = {3}; (:add (:add :x :y) :z)}; :g = {(:add :f 4)}; (:q (:p (:h :g)))}",
   )
   testParse(
     `
@@ -460,6 +346,6 @@ describe("parsing new line", () => {
   d +
   e
  `,
-    "{(:add (:d (:c (:b :a))) :e)}"
+    "{(:add (:d (:c (:b :a))) :e)}",
   )
 })

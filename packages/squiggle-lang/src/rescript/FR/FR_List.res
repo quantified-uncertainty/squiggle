@@ -66,12 +66,7 @@ module Internals = {
     reducer: Reducer_T.reducerFn,
   ) => {
     Js.Array2.filter(aValueArray, elem => {
-      let result = Reducer_Expression_Lambda.doLambdaCall(
-        aLambdaValue,
-        [elem],
-        env,
-        reducer,
-      )
+      let result = Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, [elem], env, reducer)
       switch result {
       | IEvBool(true) => true
       | _ => false

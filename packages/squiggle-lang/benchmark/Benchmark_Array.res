@@ -24,7 +24,9 @@ module Map: Benchmark_Helpers.BenchmarkTopic = {
   }
 
   let runAll = () => {
-    Js.log(`Mapping identity function over arrays of size ${arraySize->Js.Int.toString} (${iterations->Js.Int.toString} iterations)`)
+    Js.log(
+      `Mapping identity function over arrays of size ${arraySize->Js.Int.toString} (${iterations->Js.Int.toString} iterations)`,
+    )
     Benchmark_Helpers.measure("Belt.Array.map", beltArray)
     Benchmark_Helpers.measure("Js.Array2.map", jsArray2)
     Benchmark_Helpers.measure("Array.map", ocamlArray)
@@ -65,7 +67,9 @@ module Sort: Benchmark_Helpers.BenchmarkTopic = {
   }
 
   let runAll = () => {
-    Js.log(`Sorting arrays of size ${arraySize->Js.Int.toString} (${iterations->Js.Int.toString} iterations)`)
+    Js.log(
+      `Sorting arrays of size ${arraySize->Js.Int.toString} (${iterations->Js.Int.toString} iterations)`,
+    )
     Benchmark_Helpers.measure("Js.Array2.sort", jsArray2)
     Benchmark_Helpers.measure("Js.Array2.sort with Ocaml compare", jsArray2withOcamlCompare)
     Benchmark_Helpers.measure("Array.fast_sort", ocamlArray)

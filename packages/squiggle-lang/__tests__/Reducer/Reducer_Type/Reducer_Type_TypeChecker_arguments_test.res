@@ -40,3 +40,4 @@
 //   test(aTypeSourceCode, () => myCheckArgumentsExpectEqual(aTypeSourceCode, sourceCode, answer))
 
 // myCheckArgumentsTest(test, "number=>number=>number", "[1,2]", "Ok")
+

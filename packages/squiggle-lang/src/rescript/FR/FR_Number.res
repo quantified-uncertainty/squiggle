@@ -17,18 +17,6 @@ module ArrayNumberDist = {
       (),
     )
   }
-  let make2 = (name, fn) => {
-    FnDefinition.make(
-      ~name,
-      ~inputs=[FRTypeArray(FRTypeAny)],
-      ~run=(_, inputs, _, _) =>
-        Prepare.ToTypedArray.numbers(inputs)
-        ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
-        ->E.R.bind(fn)
-        ->E.R2.errMap(wrapError),
-      (),
-    )
-  }
 }
 
 let library = [

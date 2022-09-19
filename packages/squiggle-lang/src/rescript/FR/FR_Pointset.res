@@ -111,8 +111,7 @@ let library = [
         ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(_, inputs, _, _) =>
-          inputsTodist(inputs, r => Continuous(Continuous.make(r)))
-          ->E.R2.errMap(wrapError),
+          inputsTodist(inputs, r => Continuous(Continuous.make(r)))->E.R2.errMap(wrapError),
         (),
       ),
     ],
@@ -136,8 +135,7 @@ let library = [
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(_, inputs, _, _) =>
-          inputsTodist(inputs, r => Discrete(Discrete.make(r)))
-          ->E.R2.errMap(wrapError),
+          inputsTodist(inputs, r => Discrete(Discrete.make(r)))->E.R2.errMap(wrapError),
         (),
       ),
     ],
