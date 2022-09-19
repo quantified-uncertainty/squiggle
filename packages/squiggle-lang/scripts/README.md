@@ -1,8 +1,5 @@
 Various scripts used for development, benchmarking and testing.
 
-<<<<<<< HEAD
-None of these are bundled in NPM package yet.
-=======
 None of these are bundled in the NPM package yet.
 
 # run.mjs
@@ -26,4 +23,3 @@ Time: 3.18 Ok
 ```
 
 To see the result and bindings, add the `-o` or `--output` flag.
->>>>>>> develop
