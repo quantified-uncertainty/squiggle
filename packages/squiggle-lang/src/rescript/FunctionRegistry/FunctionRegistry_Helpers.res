@@ -1,7 +1,8 @@
 open FunctionRegistry_Core
+open Reducer_T
 
 let impossibleErrorString = "Wrong inputs / Logically impossible"
-let impossibleError: errorValue = impossibleErrorString->REOther
+let impossibleError: errorValue = impossibleErrorString->Reducer_ErrorValue.REOther
 let wrapError = e => Reducer_ErrorValue.REOther(e)
 
 module Wrappers = {
