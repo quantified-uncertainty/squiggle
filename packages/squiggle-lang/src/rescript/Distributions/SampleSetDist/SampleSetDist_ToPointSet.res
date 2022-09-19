@@ -33,19 +33,19 @@ module Internals = {
 
   module KDE = {
     let normalSampling = (samples, outputXYPoints, kernelWidth) =>
-      samples -> JS.samplesToContinuousPdf(outputXYPoints, kernelWidth) -> JS.jsToDist
+      samples->JS.samplesToContinuousPdf(outputXYPoints, kernelWidth)->JS.jsToDist
   }
 
   module T = {
     type t = array<float>
 
     let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
-      let xyPointRange = E.A.Sorted.range(samples) -> E.O2.default(0.0)
+      let xyPointRange = E.A.Sorted.range(samples)->E.O2.default(0.0)
       let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints)
       xWidth /. xyPointWidth
     }
 
-    let formatUnitWidth = w => Jstat.max([w, 1.0]) -> int_of_float
+    let formatUnitWidth = w => Jstat.max([w, 1.0])->int_of_float
 
     let suggestedUnitWidth = (samples, outputXYPoints) => {
       let suggestedXWidth = SampleSetDist_Bandwidth.nrd0(samples)
@@ -87,7 +87,7 @@ let toPointSetDist = (
             continuousPart,
             samplingInputs.outputXYPoints,
           )
-          let usedWidth = samplingInputs.kernelWidth -> E.O2.default(_suggestedXWidth)
+          let usedWidth = samplingInputs.kernelWidth->E.O2.default(_suggestedXWidth)
           let usedUnitWidth = Internals.T.xWidthToUnitWidth(
             samples,
             samplingInputs.outputXYPoints,
@@ -126,7 +126,7 @@ let toPointSetDist = (
   let normalizedPointSet = pointSetDist->E.O2.fmap(PointSetDist.T.normalize)
 
   let samplesParse: Internals.Types.outputs = {
-    continuousParseParams: pdf -> E.O2.fmap(snd),
+    continuousParseParams: pdf->E.O2.fmap(snd),
     pointSetDist: normalizedPointSet,
   }
 

@@ -340,7 +340,7 @@ module Floats = {
               flush(cnt, prev)
               (1, element)
             }
-          }
+          },
         )
 
         // flush final values
