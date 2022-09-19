@@ -17,9 +17,9 @@ export const useSquiggle = (args: SquiggleArgs) => {
   const result = useMemo(
     () => {
       const project = args.project;
-      let code = project.getSource(args.sourceName)
-      if(args.code) {
-        code = args.code
+      let code = project.getSource(args.sourceName);
+      if (args.code) {
+        code = args.code;
       }
       project.setSource(args.sourceName, code ?? "");
       let includes = args.includes;
@@ -29,7 +29,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
       if (args.jsImports && Object.keys(args.jsImports).length) {
         const importsSource = jsImportsToSquiggleCode(args.jsImports);
         project.setSource("imports", importsSource);
-        includes.push("imports")
+        includes.push("imports");
       }
       project.setContinues(args.sourceName, includes);
       project.run(args.sourceName);
