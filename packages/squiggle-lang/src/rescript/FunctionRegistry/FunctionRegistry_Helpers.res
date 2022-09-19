@@ -259,3 +259,143 @@ module DefineFn = {
       )
   }
 }
+
+module Make = {
+  /*
+  Opinionated explanations for API choices here:
+
+  Q: Why such short names?
+  A: Because we have to type them a lot in definitions.
+
+  Q: Why not DefineFn.Numbers.oneToOne / DefineFn.Numbers.twoToOne / ...?
+  A: Because return values matter too, and we have many possible combinations: numbers to numbers, pairs of numbers to numbers, pair of numbers to bools.
+
+  Q: Does this approach scale?
+  A: It's good enough for most cases, and we can fall back on raw `Function.make` if necessary. We should figure out the better API powered by parameterized types, but it's hard (and might require PPX).
+
+  Q: What about `frValue` types?
+  A: I hope we'll get rid of them soon.
+
+  Q: What about polymorphic functions with multiple definitions? Why ~fn is not an array?
+  A: We often define the same function in multiple `FR_*` files, so that doesn't work well anyway. In 90%+ cases there's a single definition. And having to write `name` twice is annoying.
+  */
+  let f2f = (
+    ~name: string,
+    ~fn: (float) => float,
+    ~nameSpace="",
+    ~requiresNamespace=false,
+    ~examples=?,
+    (),
+  ) => {
+    Function.make(
+      ~name,
+      ~nameSpace,
+      ~requiresNamespace=requiresNamespace,
+      ~examples=examples->E.O.default([], _),
+      ~output=EvtNumber,
+      ~definitions=[
+        FnDefinition.make(
+          ~name,
+          ~inputs=[FRTypeNumber],
+          ~run=((inputs, _, _, _) =>
+            switch inputs {
+            | [IEvNumber(x)] => fn(x)->IEvNumber->Ok
+            | _ => Error(impossibleError)
+            }),
+          ()
+        )
+      ],
+      ()
+    )
+  }
+
+  let ff2f = (
+    ~name: string,
+    ~fn: (float, float) => float,
+    ~nameSpace="",
+    ~requiresNamespace=false,
+    ~examples=?,
+    (),
+  ) => {
+    Function.make(
+      ~name,
+      ~nameSpace,
+      ~requiresNamespace=requiresNamespace,
+      ~examples=examples->E.O.default([], _),
+      ~output=EvtNumber,
+      ~definitions=[
+        FnDefinition.make(
+          ~name,
+          ~inputs=[FRTypeNumber, FRTypeNumber],
+          ~run=((inputs, _, _, _) =>
+            switch inputs {
+            | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvNumber->Ok
+            | _ => Error(impossibleError)
+            }),
+          ()
+        )
+      ],
+      ()
+    )
+  }
+
+  let ff2b = (
+    ~name: string,
+    ~fn: (float, float) => bool,
+    ~nameSpace="",
+    ~requiresNamespace=false,
+    ~examples=?,
+    (),
+  ) => {
+    Function.make(
+      ~name,
+      ~nameSpace,
+      ~requiresNamespace=requiresNamespace,
+      ~examples=examples->E.O.default([], _),
+      ~output=EvtBool,
+      ~definitions=[
+        FnDefinition.make(
+          ~name,
+          ~inputs=[FRTypeNumber, FRTypeNumber],
+          ~run=((inputs, _, _, _) =>
+            switch inputs {
+            | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvBool->Ok
+            | _ => Error(impossibleError)
+            }),
+          ()
+        )
+      ],
+      ()
+    )
+  }
+
+  let bb2b = (
+    ~name: string,
+    ~fn: (bool, bool) => bool,
+    ~nameSpace="",
+    ~requiresNamespace=false,
+    ~examples=?,
+    (),
+  ) => {
+    Function.make(
+      ~name,
+      ~nameSpace,
+      ~requiresNamespace=requiresNamespace,
+      ~examples=examples->E.O.default([], _),
+      ~output=EvtBool,
+      ~definitions=[
+        FnDefinition.make(
+          ~name,
+          ~inputs=[FRTypeBool, FRTypeBool],
+          ~run=((inputs, _, _, _) =>
+            switch inputs {
+            | [IEvBool(x), IEvBool(y)] => fn(x, y)->IEvBool->Ok
+            | _ => Error(impossibleError)
+            }),
+          ()
+        )
+      ],
+      ()
+    )
+  }
+}

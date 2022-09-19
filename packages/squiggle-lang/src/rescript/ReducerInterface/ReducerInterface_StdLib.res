@@ -1,11 +1,13 @@
 exception ErrorException = Reducer_ErrorValue.ErrorException
 
 let internalStdLib: Reducer_T.namespace = {
+  // constants
   let res =
     Reducer_Namespace.make()
     ->Reducer_Namespace.mergeFrom(SquiggleLibrary_Math.make())
     ->Reducer_Namespace.mergeFrom(SquiggleLibrary_Versions.make())
 
+  // array and record lookups
   let res = res->Reducer_Namespace.set(
     "$_atIndex_$",
     Reducer_Expression_Lambda.makeFFILambda((inputs, _, _) => {
@@ -32,6 +34,7 @@ let internalStdLib: Reducer_T.namespace = {
     })->Reducer_T.IEvLambda,
   )
 
+  // some lambdas can't be expressed in function registry (e.g. `mx` with its variadic number of parameters)
   let res = FunctionRegistry_Library.nonRegistryLambdas->Belt.Array.reduce(res, (
     cur,
     (name, lambda),
@@ -39,15 +42,7 @@ let internalStdLib: Reducer_T.namespace = {
     cur->Reducer_Namespace.set(name, lambda->Reducer_T.IEvLambda)
   })
 
-  // Reducer_Dispatch_BuiltIn:
-
-  // [ ] | (_, [IEvBool(_)])
-  // [ ] | (_, [IEvNumber(_)])
-  // [ ] | (_, [IEvString(_)])
-  // [ ] | (_, [IEvBool(_), IEvBool(_)])
-  // [ ] | (_, [IEvNumber(_), IEvNumber(_)])
-  // [ ] | (_, [IEvString(_), IEvString(_)]) => callMathJs(call)
-
+  // bind the entire FunctionRegistry
   let res =
     FunctionRegistry_Library.registry
     ->FunctionRegistry_Core.Registry.allNames

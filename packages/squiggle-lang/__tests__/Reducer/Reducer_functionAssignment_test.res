@@ -10,3 +10,7 @@ describe("Parse function assignment", () => {
 describe("Evaluate function assignment", () => {
   testEvalToBe("f(x)=x; f(1)", "Ok(1)")
 })
+
+describe("Shadowing", () => {
+  testEvalToBe("x = 5; f(y) = x*y; x = 6; f(2)", "Ok(10)")
+})

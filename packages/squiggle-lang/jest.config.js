@@ -10,5 +10,7 @@ module.exports = {
     "/node_modules/",
     ".*Helpers.bs.js",
     ".*Helpers.ts",
+    ".*Reducer_Type.*",
+    ".*_type_test.bs.js",
   ],
 };

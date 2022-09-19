@@ -20,13 +20,12 @@ module ArrayNumberDist = {
 }
 
 let library = [
-  Function.make(
+  Make.f2f(
     ~name="floor",
     ~nameSpace,
     ~requiresNamespace,
-    ~output=EvtNumber,
     ~examples=[`floor(3.5)`],
-    ~definitions=[DefineFn.Numbers.oneToOne("floor", Js.Math.floor_float)],
+    ~fn=Js.Math.floor_float,
     (),
   ),
   Function.make(

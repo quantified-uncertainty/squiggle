@@ -25,52 +25,87 @@ let makeFn = (
   fn: array<internalExpressionValue> => result<internalExpressionValue, errorValue>,
 ) => makeFnMany(name, [{inputs: inputs, fn: fn}])
 
-let makeFF2F = (name: string, fn: (float, float) => float) => {
-  makeFn(name, [FRTypeNumber, FRTypeNumber], inputs => {
-    switch inputs {
-    | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvNumber->Ok
-    | _ => Error(impossibleError)
-    }
-  })
-}
-
-let makeFF2B = (name: string, fn: (float, float) => bool) => {
-  makeFn(name, [FRTypeNumber, FRTypeNumber], inputs => {
-    switch inputs {
-    | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvBool->Ok
-    | _ => Error(impossibleError)
-    }
-  })
-}
-
-let makeBB2B = (name: string, fn: (bool, bool) => bool) => {
-  makeFn(name, [FRTypeBool, FRTypeBool], inputs => {
-    switch inputs {
-    | [IEvBool(x), IEvBool(y)] => fn(x, y)->IEvBool->Ok
-    | _ => Error(impossibleError)
-    }
-  })
-}
-
 let library = [
-  makeFF2F("add", (x, y) => x +. y), // infix + (see Reducer/Reducer_Peggy/helpers.ts)
-  makeFF2F("subtract", (x, y) => x -. y), // infix -
-  makeFF2F("multiply", (x, y) => x *. y), // infix *
-  makeFF2F("divide", (x, y) => x /. y), // infix /
-  makeFF2F("pow", (x, y) => Js.Math.pow_float(~base=x, ~exp=y)), // infix ^
-  makeFF2B("equal", (x, y) => x == y), // infix ==
-  makeFF2B("smaller", (x, y) => x < y), // infix <
-  makeFF2B("smallerEq", (x, y) => x <= y), // infix <=
-  makeFF2B("larger", (x, y) => x > y), // infix >
-  makeFF2B("largerEq", (x, y) => x >= y), // infix >=
-  makeBB2B("or", (x, y) => x || y), // infix ||
-  makeBB2B("and", (x, y) => x && y), // infix &&
-  makeFn("unaryMinus", [FRTypeNumber], inputs => { // unary prefix -
-    switch inputs {
-    | [IEvNumber(x)] => IEvNumber(-.x)->Ok
-    | _ => Error(impossibleError)
-    }
-  }),
+  Make.ff2f(
+    ~name="add", // infix + (see Reducer/Reducer_Peggy/helpers.ts)
+    ~fn=(x, y) => x +. y,
+    ()
+  ),
+  Make.ff2f(
+    ~name="subtract", // infix -
+    ~fn=(x, y) => x -. y,
+    ()
+  ),
+  Make.ff2f(
+    ~name="multiply", // infix *
+    ~fn=(x, y) => x *. y,
+    ()
+  ),
+  Make.ff2f(
+    ~name="divide", // infix /
+    ~fn=(x, y) => x /. y,
+    ()
+  ),
+  Make.ff2f(
+    ~name="pow", // infix ^
+    ~fn=(x, y) => Js.Math.pow_float(~base=x, ~exp=y),
+    ()
+  ),
+  Make.ff2b(
+    ~name="equal", // infix == on numbers
+    ~fn=(x, y) => x == y,
+    ()
+  ),
+  Make.bb2b(
+    ~name="equal", // infix == on booleans
+    ~fn=(x, y) => x == y,
+    ()
+  ),
+  Make.ff2b(
+    ~name="unequal", // infix != on numbers
+    ~fn=(x, y) => x != y,
+    ()
+  ),
+  Make.ff2b(
+    ~name="unequal", // infix != on booleans
+    ~fn=(x, y) => x != y,
+    ()
+  ),
+  Make.ff2b(
+    ~name="smaller", // infix <
+    ~fn=(x, y) => x < y,
+    ()
+  ),
+  Make.ff2b(
+    ~name="smallerEq", // infix <=
+    ~fn=(x, y) => x <= y,
+    ()
+  ),
+  Make.ff2b(
+    ~name="larger", // infix >
+    ~fn=(x, y) => x > y,
+    ()
+  ),
+  Make.ff2b(
+    ~name="largerEq", // infix >=
+    ~fn=(x, y) => x >= y,
+    ()
+  ),
+  Make.bb2b(
+    ~name="or", // infix ||
+    ~fn=(x, y) => x || y,
+    ()
+  ),
+  Make.bb2b(
+    ~name="and", // infix &&
+    ~fn=(x, y) => x && y,
+    ()
+  ),
+  Make.f2f(
+    ~name="unaryMinus", // unary prefix -
+    ~fn=x => -.x,
+    ()
+  ),
   makeFn("not", [FRTypeNumber], inputs => { // unary prefix !
     switch inputs {
     | [IEvNumber(x)] => IEvBool(x != 0.)->Ok
@@ -116,6 +151,14 @@ let library = [
     | [value, IEvString(label)] => {
         Js.log(`${label}: ${value->ReducerInterface_InternalExpressionValue.toString}`)
         value->Ok
+      }
+    | _ => Error(impossibleError)
+    }
+  }),
+  makeFn("javascriptraise", [FRTypeAny], inputs => {
+    switch inputs {
+    | [msg] => {
+        Js.Exn.raiseError(msg->ReducerInterface_InternalExpressionValue.toString)
       }
     | _ => Error(impossibleError)
     }
