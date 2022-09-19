@@ -1,7 +1,6 @@
 module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
 module ExpressionT = Reducer_Expression_T
-module InternalExpressionValue = ReducerInterface.InternalExpressionValue
 
 open Jest
 open Expect
@@ -19,14 +18,13 @@ let expectParseToBe = (code: string, answer: string) =>
 
 let expectEvalToBe = (code: string, answer: string) =>
   Expression.BackCompatible.evaluateString(code)
-  ->Reducer_Helpers.rRemoveDefaultsInternal
-  ->InternalExpressionValue.toStringResult
+  ->Reducer_Value.toStringResult
   ->expect
   ->toBe(answer)
 
 let expectEvalError = (code: string) =>
   Expression.BackCompatible.evaluateString(code)
-  ->InternalExpressionValue.toStringResult
+  ->Reducer_Value.toStringResult
   ->expect
   ->toMatch("Error\(")
 

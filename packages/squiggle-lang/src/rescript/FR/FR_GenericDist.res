@@ -18,7 +18,7 @@ module Old = {
       | _ => #Multiply
       }
 
-    let catchAndConvertTwoArgsToDists = (args: array<internalExpressionValue>): option<(
+    let catchAndConvertTwoArgsToDists = (args: array<Reducer_T.value>): option<(
       DistributionTypes.genericDist,
       DistributionTypes.genericDist,
     )> =>
@@ -68,18 +68,18 @@ module Old = {
       )->DistributionOperation.run(~env)
     }
 
-    let parseNumber = (args: internalExpressionValue): Belt.Result.t<float, string> =>
+    let parseNumber = (args: Reducer_T.value): Belt.Result.t<float, string> =>
       switch args {
       | IEvNumber(x) => Ok(x)
       | _ => Error("Not a number")
       }
 
-    let parseNumberArray = (ags: array<internalExpressionValue>): Belt.Result.t<
+    let parseNumberArray = (ags: array<Reducer_T.value>): Belt.Result.t<
       array<float>,
       string,
     > => E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
 
-    let parseDist = (args: internalExpressionValue): Belt.Result.t<
+    let parseDist = (args: Reducer_T.value): Belt.Result.t<
       DistributionTypes.genericDist,
       string,
     > =>
@@ -89,7 +89,7 @@ module Old = {
       | _ => Error("Not a distribution")
       }
 
-    let parseDistributionArray = (ags: array<internalExpressionValue>): Belt.Result.t<
+    let parseDistributionArray = (ags: array<Reducer_T.value>): Belt.Result.t<
       array<DistributionTypes.genericDist>,
       string,
     > => E.A.fmap(parseDist, ags) |> E.A.R.firstErrorOrOpen
@@ -115,7 +115,7 @@ module Old = {
     }
 
     let mixture = (
-      args: array<internalExpressionValue>,
+      args: array<Reducer_T.value>,
       ~env: GenericDist.env,
     ): DistributionOperation.outputType => {
       let error = (err: string): DistributionOperation.outputType =>
@@ -174,7 +174,7 @@ module Old = {
   }
 
   let dispatchToGenericOutput = (
-    call: ReducerInterface_InternalExpressionValue.functionCall,
+    call: Reducer_Value.functionCall,
     env: GenericDist.env,
   ): option<DistributionOperation.outputType> => {
     let (fnName, args) = call
@@ -301,7 +301,7 @@ module Old = {
   }
 
   let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
-    internalExpressionValue,
+    Reducer_T.value,
     Reducer_ErrorValue.errorValue,
   > =>
     switch o {
@@ -313,7 +313,7 @@ module Old = {
     | GenDistError(err) => Error(REDistributionError(err))
     }
 
-  let dispatch = (call: ReducerInterface_InternalExpressionValue.functionCall, environment) =>
+  let dispatch = (call: Reducer_Value.functionCall, environment) =>
     switch dispatchToGenericOutput(call, environment) {
     | Some(o) => genericOutputToReducerValue(o)
     | None =>

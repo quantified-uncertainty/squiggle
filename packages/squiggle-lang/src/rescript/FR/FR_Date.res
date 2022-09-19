@@ -4,7 +4,7 @@ open FunctionRegistry_Helpers
 let makeFn = (
   name: string,
   inputs: array<frType>,
-  fn: array<internalExpressionValue> => result<internalExpressionValue, errorValue>,
+  fn: array<Reducer_T.value> => result<Reducer_T.value, errorValue>,
 ) =>
   Function.make(
     ~name,

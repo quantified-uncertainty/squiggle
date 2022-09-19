@@ -1,5 +1,4 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
 module Bindings = Reducer_Bindings
 
@@ -146,8 +145,8 @@ Here we will finally proceed to a real life scenario. */
       /* And see the result and bindings.. */
       test("recursive includes", () => {
         (
-          result->InternalExpressionValue.toStringResult,
-          bindings->InternalExpressionValue.toStringRecord,
+          result->Reducer_Value.toStringResult,
+          bindings->Reducer_Value.toStringRecord,
         )->expect == ("Ok(6)", "{a: 6,b: 2}")
         /* Everything as expected */
       })

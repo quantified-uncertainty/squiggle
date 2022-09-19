@@ -1,15 +1,12 @@
 // module Bindings = Reducer_Bindings
 // module ErrorValue = Reducer_ErrorValue
-// module Expression = Reducer_Expression
-// module ExpressionT = Reducer_Expression_T
-// module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 // module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 // module T = Reducer_Type_T
 
 // let ievFromTypeExpression = (
 //   typeExpressionSourceCode: string,
 //   reducerFn: ProjectReducerFnT.t,
-// ): result<InternalExpressionValue.t, ErrorValue.t> => {
+// ): result<Reducer_Value.t, ErrorValue.t> => {
 //   let sIndex = "compiled"
 //   let sourceCode = `type ${sIndex}=${typeExpressionSourceCode}`
 //   Reducer_Expression.BackCompatible.parse(sourceCode)->Belt.Result.flatMap(expr => {

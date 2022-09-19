@@ -8,15 +8,13 @@
 // module TypeChecker = Reducer_Type_TypeChecker
 // module TypeCompile = Reducer_Type_Compile
 
-// open ReducerInterface_InternalExpressionValue
-
 // type errorValue = Reducer_ErrorValue.errorValue
 
 // // Let's build a function to replace switch statements
 // // In dispatchChainPiece, we execute an return the result of execution if there is a type match.
 // // Otherwise we return None so that the call chain can continue.
 // // So we want to build a function like
-// // dispatchChainPiece = (call: functionCall, accessors): option<result<internalExpressionValue, errorValue>>
+// // dispatchChainPiece = (call: functionCall, accessors): option<result<Reducer_T.value, errorValue>>
 // // Use accessors.environment to get the environment finally.
 
 // // Now lets make the dispatchChainPiece itself.
@@ -28,9 +26,9 @@
 //   module Implementation = {
 //     let stringConcat = (a: string, b: string): string => Js.String2.concat(a, b)
 //     let arrayConcat = (
-//       a: Js.Array2.t<internalExpressionValue>,
-//       b: Js.Array2.t<internalExpressionValue>,
-//     ): Js.Array2.t<internalExpressionValue> => Js.Array2.concat(a, b)
+//       a: Js.Array2.t<Reducer_T.value>,
+//       b: Js.Array2.t<Reducer_T.value>,
+//     ): Js.Array2.t<Reducer_T.value> => Js.Array2.concat(a, b)
 //     let plot = _r => "yey, plotted"
 //   }
 
@@ -104,7 +102,7 @@
 //   accessors: ProjectAccessorsT.t,
 //   reducer: Reducer_T.reducerFn,
 //   chain,
-// ): result<internalExpressionValue, 'e> => {
+// ): result<Reducer_T.value, 'e> => {
 //   let dispatchChainPiece = makeMyDispatchChainPiece(reducer)
 //   dispatchChainPiece(call, accessors)->E.O2.defaultFn(() => chain(call, accessors, reducer))
 // }

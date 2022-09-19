@@ -5,7 +5,7 @@ let nameSpace = "" // no namespaced versions
 
 type simpleDefinition = {
   inputs: array<frType>,
-  fn: array<internalExpressionValue> => result<internalExpressionValue, errorValue>,
+  fn: array<Reducer_T.value> => result<Reducer_T.value, errorValue>,
 }
 
 let makeFnMany = (name: string, definitions: array<simpleDefinition>) =>
@@ -22,7 +22,7 @@ let makeFnMany = (name: string, definitions: array<simpleDefinition>) =>
 let makeFn = (
   name: string,
   inputs: array<frType>,
-  fn: array<internalExpressionValue> => result<internalExpressionValue, errorValue>,
+  fn: array<Reducer_T.value> => result<Reducer_T.value, errorValue>,
 ) => makeFnMany(name, [{inputs: inputs, fn: fn}])
 
 let library = [
@@ -140,7 +140,7 @@ let library = [
   makeFn("inspect", [FRTypeAny], inputs => {
     switch inputs {
     | [value] => {
-        Js.log(value->ReducerInterface_InternalExpressionValue.toString)
+        Js.log(value->Reducer_Value.toString)
         value->Ok
       }
     | _ => Error(impossibleError)
@@ -149,7 +149,7 @@ let library = [
   makeFn("inspect", [FRTypeAny, FRTypeString], inputs => {
     switch inputs {
     | [value, IEvString(label)] => {
-        Js.log(`${label}: ${value->ReducerInterface_InternalExpressionValue.toString}`)
+        Js.log(`${label}: ${value->Reducer_Value.toString}`)
         value->Ok
       }
     | _ => Error(impossibleError)
@@ -158,7 +158,7 @@ let library = [
   makeFn("javascriptraise", [FRTypeAny], inputs => {
     switch inputs {
     | [msg] => {
-        Js.Exn.raiseError(msg->ReducerInterface_InternalExpressionValue.toString)
+        Js.Exn.raiseError(msg->Reducer_Value.toString)
       }
     | _ => Error(impossibleError)
     }

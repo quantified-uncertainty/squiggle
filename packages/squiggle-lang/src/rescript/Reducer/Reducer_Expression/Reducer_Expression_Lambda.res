@@ -1,7 +1,4 @@
-module Bindings = Reducer_Bindings
 module ErrorValue = Reducer_ErrorValue
-
-type internalExpressionValue = ReducerInterface_InternalExpressionValue.t
 
 let doLambdaCall = (
   lambdaValue: Reducer_T.lambdaValue,
@@ -21,6 +18,7 @@ let makeLambda = (
 
   // Note: with this implementation, FFI lambdas (created by other methods than calling `makeLambda`) are allowed to violate the rules, pollute the bindings, etc.
   // Not sure yet if that's a bug or a feature.
+  // FunctionRegistry functions are unaffected by this, their API is too limited.
 
   let lambda = (
     arguments: array<Reducer_T.value>,

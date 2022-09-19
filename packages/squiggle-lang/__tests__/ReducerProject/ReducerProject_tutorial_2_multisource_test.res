@@ -1,5 +1,4 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
 module Bindings = Reducer_Bindings
 
@@ -32,8 +31,8 @@ describe("ReducerProject Tutorial", () => {
       let bindings3 = project->Project.getBindings("source3")
 
       (
-        result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.toStringRecord,
+        result3->Reducer_Value.toStringResult,
+        bindings3->Reducer_Value.toStringRecord,
       )->expect == ("Ok(())", "{z: 3}")
     })
 
@@ -58,8 +57,8 @@ describe("ReducerProject Tutorial", () => {
       let bindings3 = project->Project.getBindings("source3")
 
       (
-        result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.toStringRecord,
+        result3->Reducer_Value.toStringResult,
+        bindings3->Reducer_Value.toStringRecord,
       )->expect == ("Ok(())", "{z: 3}")
     })
 
@@ -93,8 +92,8 @@ describe("ReducerProject Tutorial", () => {
       let bindings3 = project->Project.getBindings("source3")
 
       (
-        result3->InternalExpressionValue.toStringResult,
-        bindings3->InternalExpressionValue.toStringRecord,
+        result3->Reducer_Value.toStringResult,
+        bindings3->Reducer_Value.toStringRecord,
       )->expect == ("Ok(())", "{z: 3}")
       /*
       Doing it like this is too verbose for a storybook 

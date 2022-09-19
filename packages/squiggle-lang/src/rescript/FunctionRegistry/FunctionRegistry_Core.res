@@ -1,5 +1,4 @@
-type internalExpressionValue = Reducer_T.value
-type internalExpressionValueType = ReducerInterface_InternalExpressionValue.internalExpressionValueType
+type internalExpressionValueType = Reducer_Value.internalExpressionValueType
 type errorValue = Reducer_ErrorValue.errorValue
 
 /*
@@ -51,11 +50,11 @@ type fnDefinition = {
   name: string,
   inputs: array<frType>,
   run: (
-    array<internalExpressionValue>,
+    array<Reducer_T.value>,
     array<frValue>,
     Reducer_T.environment,
     Reducer_T.reducerFn,
-  ) => result<internalExpressionValue, errorValue>,
+  ) => result<Reducer_T.value, errorValue>,
 }
 
 type function = {
@@ -92,7 +91,7 @@ module FRType = {
     | FRTypeAny => `any`
     }
 
-  let rec toFrValue = (r: internalExpressionValue): option<frValue> =>
+  let rec toFrValue = (r: Reducer_T.value): option<frValue> =>
     // not all value variants are supported, but it's not important (we'll probably deprecate frValues soon anyway)
     switch r {
     | IEvNumber(f) => Some(FRValueNumber(f))
@@ -109,7 +108,7 @@ module FRType = {
     | _ => None
     }
 
-  let rec matchWithExpressionValue = (t: t, r: internalExpressionValue): option<frValue> =>
+  let rec matchWithExpressionValue = (t: t, r: Reducer_T.value): option<frValue> =>
     switch (t, r) {
     | (FRTypeAny, f) => toFrValue(f)
     | (FRTypeString, IEvString(f)) => Some(FRValueString(f))
@@ -149,7 +148,7 @@ module FRType = {
     | _ => None
     }
 
-  let rec matchReverse = (e: frValue): internalExpressionValue =>
+  let rec matchReverse = (e: frValue): Reducer_T.value =>
     switch e {
     | FRValueNumber(f) => IEvNumber(f)
     | FRValueBool(f) => IEvBool(f)
@@ -182,7 +181,7 @@ module FRType = {
 
   let matchWithExpressionValueArray = (
     inputs: array<t>,
-    args: array<internalExpressionValue>,
+    args: array<Reducer_T.value>,
   ): option<array<frValue>> => {
     let isSameLength = E.A.length(inputs) == E.A.length(args)
     if !isSameLength {
@@ -203,7 +202,7 @@ module FnDefinition = {
     t.name ++ `(${inputs})`
   }
 
-  let isMatch = (t: t, args: array<internalExpressionValue>) => {
+  let isMatch = (t: t, args: array<Reducer_T.value>) => {
     let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
     switch argValues {
     | Some(_) => true
@@ -213,7 +212,7 @@ module FnDefinition = {
 
   let run = (
     t: t,
-    args: array<internalExpressionValue>,
+    args: array<Reducer_T.value>,
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
   ) => {
@@ -317,10 +316,10 @@ module Registry = {
   let call = (
     registry,
     fnName: string,
-    args: array<internalExpressionValue>,
+    args: array<Reducer_T.value>,
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
-  ): result<internalExpressionValue, errorValue> => {
+  ): result<Reducer_T.value, errorValue> => {
     switch Belt.Map.String.get(registry.fnNameDict, fnName) {
     | Some(definitions) => {
         let showNameMatchDefinitions = () => {

@@ -1,7 +1,6 @@
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module T = Reducer_Type_T
 
-let isMin = (modifierArg: InternalExpressionValue.t, aValue: InternalExpressionValue.t): bool => {
+let isMin = (modifierArg: Reducer_Value.t, aValue: Reducer_Value.t): bool => {
   let pair = (modifierArg, aValue)
   switch pair {
   | (IEvNumber(a), IEvNumber(b)) => a <= b
@@ -9,7 +8,7 @@ let isMin = (modifierArg: InternalExpressionValue.t, aValue: InternalExpressionV
   }
 }
 
-let isMax = (modifierArg: InternalExpressionValue.t, aValue: InternalExpressionValue.t): bool => {
+let isMax = (modifierArg: Reducer_Value.t, aValue: Reducer_Value.t): bool => {
   let pair = (modifierArg, aValue)
   switch pair {
   | (IEvNumber(a), IEvNumber(b)) => a >= b
@@ -18,8 +17,8 @@ let isMax = (modifierArg: InternalExpressionValue.t, aValue: InternalExpressionV
 }
 
 let isMemberOf = (
-  modifierArg: InternalExpressionValue.t,
-  aValue: InternalExpressionValue.t,
+  modifierArg: Reducer_Value.t,
+  aValue: Reducer_Value.t,
 ): bool => {
   let pair = (modifierArg, aValue)
   switch pair {
@@ -30,8 +29,8 @@ let isMemberOf = (
 
 let checkModifier = (
   key: string,
-  modifierArg: InternalExpressionValue.t,
-  aValue: InternalExpressionValue.t,
+  modifierArg: Reducer_Value.t,
+  aValue: Reducer_Value.t,
 ): bool =>
   switch key {
   | "min" => isMin(modifierArg, aValue)
@@ -41,8 +40,8 @@ let checkModifier = (
   }
 
 let checkModifiers = (
-  contracts: Belt.Map.String.t<InternalExpressionValue.t>,
-  aValue: InternalExpressionValue.t,
+  contracts: Belt.Map.String.t<Reducer_Value.t>,
+  aValue: Reducer_Value.t,
 ): bool => {
   contracts->Belt.Map.String.reduce(true, (acc, key, modifierArg) =>
     switch acc {

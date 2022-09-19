@@ -6,24 +6,24 @@ let nameSpace = "Dict"
 module Internals = {
   type t = Reducer_T.map
 
-  let keys = (a: t): internalExpressionValue => IEvArray(
+  let keys = (a: t): Reducer_T.value => IEvArray(
     Belt.Map.String.keysToArray(a)->E.A2.fmap(Wrappers.evString),
   )
 
-  let values = (a: t): internalExpressionValue => IEvArray(Belt.Map.String.valuesToArray(a))
+  let values = (a: t): Reducer_T.value => IEvArray(Belt.Map.String.valuesToArray(a))
 
-  let toList = (a: t): internalExpressionValue =>
+  let toList = (a: t): Reducer_T.value =>
     Belt.Map.String.toArray(a)
     ->E.A2.fmap(((key, value)) => Wrappers.evArray([IEvString(key), value]))
     ->Wrappers.evArray
 
-  let fromList = (items: array<internalExpressionValue>): result<
-    internalExpressionValue,
+  let fromList = (items: array<Reducer_T.value>): result<
+    Reducer_T.value,
     errorValue,
   > =>
     items
     ->E.A2.fmap(item => {
-      switch (item: internalExpressionValue) {
+      switch (item: Reducer_T.value) {
       | IEvArray([IEvString(string), value]) => (string, value)->Ok
       | _ => Error(impossibleError)
       }
@@ -32,12 +32,12 @@ module Internals = {
     ->E.R2.fmap(Belt.Map.String.fromArray)
     ->E.R2.fmap(Wrappers.evRecord)
 
-  let merge = (a: t, b: t): internalExpressionValue => IEvRecord(
+  let merge = (a: t, b: t): Reducer_T.value => IEvRecord(
     Belt.Map.String.merge(a, b, (_, _, c) => c),
   )
 
   //Belt.Map.String has a function for mergeMany, but I couldn't understand how to use it yet.
-  let mergeMany = (a: array<t>): internalExpressionValue => {
+  let mergeMany = (a: array<t>): Reducer_T.value => {
     let mergedValues =
       a->E.A2.fmap(Belt.Map.String.toArray)->Belt.Array.concatMany->Belt.Map.String.fromArray
     IEvRecord(mergedValues)

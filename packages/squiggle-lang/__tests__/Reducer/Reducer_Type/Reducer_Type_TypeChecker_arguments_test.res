@@ -1,8 +1,6 @@
 // module Bindings = Reducer_Bindings
 // module ErrorValue = Reducer_ErrorValue
 // module Expression = Reducer_Expression
-// module ExpressionT = Reducer_Expression_T
-// module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 // module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 // module T = Reducer_Type_T
 // module TypeChecker = Reducer_Type_TypeChecker

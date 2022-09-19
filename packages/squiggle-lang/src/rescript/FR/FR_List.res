@@ -7,29 +7,29 @@ let requiresNamespace = true
 module Internals = {
   let makeFromNumber = (
     n: float,
-    value: internalExpressionValue,
-  ): internalExpressionValue => IEvArray(Belt.Array.make(E.Float.toInt(n), value))
+    value: Reducer_T.value,
+  ): Reducer_T.value => IEvArray(Belt.Array.make(E.Float.toInt(n), value))
 
-  let upTo = (low: float, high: float): internalExpressionValue => IEvArray(
+  let upTo = (low: float, high: float): Reducer_T.value => IEvArray(
     E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)->E.A2.fmap(Wrappers.evNumber),
   )
 
-  let first = (v: array<internalExpressionValue>): result<internalExpressionValue, string> =>
+  let first = (v: array<Reducer_T.value>): result<Reducer_T.value, string> =>
     v->E.A.first |> E.O.toResult("No first element")
 
-  let last = (v: array<internalExpressionValue>): result<internalExpressionValue, string> =>
+  let last = (v: array<Reducer_T.value>): result<Reducer_T.value, string> =>
     v->E.A.last |> E.O.toResult("No last element")
 
-  let reverse = (array: array<internalExpressionValue>): internalExpressionValue => IEvArray(
+  let reverse = (array: array<Reducer_T.value>): Reducer_T.value => IEvArray(
     Belt.Array.reverse(array),
   )
 
   let map = (
-    array: array<internalExpressionValue>,
+    array: array<Reducer_T.value>,
     eLambdaValue,
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
-  ): internalExpressionValue => {
+  ): Reducer_T.value => {
     Belt.Array.map(array, elem =>
       Reducer_Expression_Lambda.doLambdaCall(eLambdaValue, [elem], env, reducer)
     )->Wrappers.evArray

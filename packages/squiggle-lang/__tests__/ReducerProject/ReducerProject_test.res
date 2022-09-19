@@ -1,5 +1,4 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
 module Bindings = Reducer_Bindings
 
@@ -9,12 +8,12 @@ open Expect.Operators
 
 let runFetchResult = (project, sourceId) => {
   Project.run(project, sourceId)
-  Project.getResult(project, sourceId)->InternalExpressionValue.toStringResult
+  Project.getResult(project, sourceId)->Reducer_Value.toStringResult
 }
 
 let runFetchFlatBindings = (project, sourceId) => {
   Project.run(project, sourceId)
-  Project.getBindings(project, sourceId)->InternalExpressionValue.toStringRecord
+  Project.getBindings(project, sourceId)->Reducer_Value.toStringRecord
 }
 
 test("test result true", () => {

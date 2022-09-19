@@ -1,7 +1,7 @@
 // module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 // module T = Reducer_Dispatch_T
 // module TypeChecker = Reducer_Type_TypeChecker
-// open ReducerInterface_InternalExpressionValue
+// open Reducer_Value
 
 // type errorValue = Reducer_ErrorValue.errorValue
 

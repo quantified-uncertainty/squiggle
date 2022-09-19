@@ -1,7 +1,6 @@
 // module Expression = Reducer_Expression
 // module ExpressionT = Reducer_Expression_T
 // module ErrorValue = Reducer_ErrorValue
-// module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 // module Bindings = Reducer_Bindings
 // module T = Reducer_Type_T
 // module TypeChecker = Reducer_Type_TypeChecker

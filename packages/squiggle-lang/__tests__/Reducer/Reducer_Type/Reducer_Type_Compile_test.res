@@ -1,5 +1,4 @@
 // module Expression = Reducer_Expression
-// module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 // module Bindings = Reducer_Bindings
 // module T = Reducer_Type_T
 // module TypeCompile = Reducer_Type_Compile
@@ -10,7 +9,7 @@
 // let myIevEval = (aTypeSourceCode: string) =>
 //   TypeCompile.ievFromTypeExpression(aTypeSourceCode, Expression.reduceExpressionInProject)
 // let myIevEvalToString = (aTypeSourceCode: string) =>
-//   myIevEval(aTypeSourceCode)->InternalExpressionValue.toStringResult
+//   myIevEval(aTypeSourceCode)->Reducer_Value.toStringResult
 
 // let myIevExpectEqual = (aTypeSourceCode, answer) =>
 //   expect(myIevEvalToString(aTypeSourceCode))->toEqual(answer)

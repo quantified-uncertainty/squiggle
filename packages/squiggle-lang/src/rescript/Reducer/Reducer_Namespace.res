@@ -25,7 +25,7 @@ let toString = (namespace: t) =>
   namespace
   ->Belt.Map.String.toArray
   ->Belt.Array.map(((eachKey, eachValue)) =>
-    `${eachKey}: ${eachValue->ReducerInterface_InternalExpressionValue.toString}`
+    `${eachKey}: ${eachValue->Reducer_Value.toString}`
   )
   ->Js.Array2.toString
 

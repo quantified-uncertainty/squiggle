@@ -1,6 +1,6 @@
 exception ErrorException = Reducer_ErrorValue.ErrorException
 
-let internalStdLib: Reducer_T.namespace = {
+let stdLib: Reducer_T.namespace = {
   // constants
   let res =
     Reducer_Namespace.make()

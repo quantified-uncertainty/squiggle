@@ -2,7 +2,7 @@
 
 @genType
 let toString = (v: squiggleValue_Lambda): string =>
-  ReducerInterface_InternalExpressionValue.toStringFunction(v)
+  Reducer_Value.toStringFunction(v)
 
 @genType
 let parameters = (v: squiggleValue_Lambda): array<string> => {

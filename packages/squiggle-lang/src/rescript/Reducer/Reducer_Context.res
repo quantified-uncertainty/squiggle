@@ -1,5 +1,7 @@
 type t = Reducer_T.context
 
+let defaultEnvironment: Reducer_T.environment = DistributionOperation.defaultEnv
+
 let createContext = (stdLib: Reducer_Namespace.t, environment: Reducer_T.environment): t => {
   {
     bindings: stdLib->Reducer_Bindings.fromNamespace->Reducer_Bindings.extend,
@@ -8,7 +10,4 @@ let createContext = (stdLib: Reducer_Namespace.t, environment: Reducer_T.environ
 }
 
 let createDefaultContext = (): t =>
-  createContext(
-    ReducerInterface_StdLib.internalStdLib,
-    ReducerInterface_InternalExpressionValue.defaultEnvironment,
-  )
+  createContext(SquiggleLibrary_StdLib.stdLib, defaultEnvironment)

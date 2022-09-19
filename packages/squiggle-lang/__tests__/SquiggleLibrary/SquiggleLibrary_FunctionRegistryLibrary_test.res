@@ -4,7 +4,6 @@ open Reducer_TestHelpers
 
 let expectEvalToBeOk = (code: string) =>
   Reducer_Expression.BackCompatible.evaluateString(code)
-  ->Reducer_Helpers.rRemoveDefaultsInternal
   ->E.R.isOk
   ->expect
   ->toBe(true)
@@ -102,7 +101,7 @@ describe("FunctionRegistry Library", () => {
         let responseType =
           example
           ->Reducer_Expression.BackCompatible.evaluateString
-          ->E.R2.fmap(ReducerInterface_InternalExpressionValue.valueToValueType)
+          ->E.R2.fmap(Reducer_Value.valueToValueType)
         let expectedOutputType = fn.output |> E.O.toExn("")
         expect(responseType)->toEqual(Ok(expectedOutputType))
       },

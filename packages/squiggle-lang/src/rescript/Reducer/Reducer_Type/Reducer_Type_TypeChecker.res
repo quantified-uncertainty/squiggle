@@ -1,9 +1,8 @@
 // module ExpressionT = Reducer_Expression_T
-// module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 // module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 // module T = Reducer_Type_T
 // module TypeContracts = Reducer_Type_Contracts
-// open InternalExpressionValue
+// open Reducer_Value
 
 // let rec isITypeOf = (anIType: T.iType, aValue): result<bool, T.typeErrorValue> => {
 //   let caseTypeIdentifier = (anUpperTypeName, aValue) => {
@@ -98,8 +97,8 @@
 //   let caseModifiedType = (
 //     anIType: T.iType,
 //     modifiedType: T.iType,
-//     contracts: Belt.Map.String.t<InternalExpressionValue.t>,
-//     aValue: InternalExpressionValue.t,
+//     contracts: Belt.Map.String.t<Reducer_Value.t>,
+//     aValue: Reducer_Value.t,
 //   ) => {
 //     isITypeOf(modifiedType, aValue)->Belt.Result.flatMap(_result => {
 //       if TypeContracts.checkModifiers(contracts, aValue) {
@@ -113,7 +112,7 @@
 //   switch anIType {
 //   | ItTypeIdentifier(name) => caseTypeIdentifier(name, aValue)
 //   | ItModifiedType({modifiedType, contracts}) =>
-//     caseModifiedType(anIType, modifiedType, contracts, aValue) //{modifiedType: iType, contracts: Belt.Map.String.t<InternalExpressionValue.t>}
+//     caseModifiedType(anIType, modifiedType, contracts, aValue) //{modifiedType: iType, contracts: Belt.Map.String.t<Reducer_Value.t>}
 //   | ItTypeOr({typeOr}) => caseOr(anIType, typeOr, aValue)
 //   | ItTypeFunction(_) =>
 //     raise(
@@ -129,23 +128,23 @@
 
 // let isTypeOf = (
 //   typeExpressionSourceCode: string,
-//   aValue: InternalExpressionValue.t,
+//   aValue: Reducer_Value.t,
 //   reducerFn: Reducer_T.reducerFn,
-// ): result<InternalExpressionValue.t, ErrorValue.t> => {
+// ): result<Reducer_Value.t, ErrorValue.t> => {
 //   switch typeExpressionSourceCode->Reducer_Type_Compile.fromTypeExpression(reducerFn) {
 //   | Ok(anIType) =>
 //     switch isITypeOf(anIType, aValue) {
 //     | Ok(_) => Ok(aValue)
 //     | Error(T.TypeMismatch(anIType, evValue)) =>
 //       Error(
-//         ErrorValue.REExpectedType(anIType->T.toString, evValue->InternalExpressionValue.toString),
+//         ErrorValue.REExpectedType(anIType->T.toString, evValue->Reducer_Value.toString),
 //       )
 //     }
 //   | Error(error) => Error(error) // Directly propagating - err => err - causes type mismatch
 //   }
 // }
 
-// let checkITypeArguments = (anIType: T.iType, args: array<InternalExpressionValue.t>): result<
+// let checkITypeArguments = (anIType: T.iType, args: array<Reducer_Value.t>): result<
 //   bool,
 //   T.typeErrorValue,
 // > => {
@@ -155,7 +154,7 @@
 //   }
 // }
 
-// let checkITypeArgumentsBool = (anIType: T.iType, args: array<InternalExpressionValue.t>): bool => {
+// let checkITypeArgumentsBool = (anIType: T.iType, args: array<Reducer_Value.t>): bool => {
 //   switch checkITypeArguments(anIType, args) {
 //   | Ok(_) => true
 //   | _ => false
@@ -164,16 +163,16 @@
 
 // let checkArguments = (
 //   typeExpressionSourceCode: string,
-//   args: array<InternalExpressionValue.t>,
+//   args: array<Reducer_Value.t>,
 //   reducerFn: ReducerT.reducerFn,
-// ): result<InternalExpressionValue.t, ErrorValue.t> => {
+// ): result<Reducer_Value.t, ErrorValue.t> => {
 //   switch typeExpressionSourceCode->Reducer_Type_Compile.fromTypeExpression(reducerFn) {
 //   | Ok(anIType) =>
 //     switch checkITypeArguments(anIType, args) {
 //     | Ok(_) => Ok(args->IEvArray)
 //     | Error(T.TypeMismatch(anIType, evValue)) =>
 //       Error(
-//         ErrorValue.REExpectedType(anIType->T.toString, evValue->InternalExpressionValue.toString),
+//         ErrorValue.REExpectedType(anIType->T.toString, evValue->Reducer_Value.toString),
 //       )
 //     }
 //   | Error(error) => Error(error) // Directly propagating - err => err - causes type mismatch

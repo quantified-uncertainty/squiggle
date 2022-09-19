@@ -5,7 +5,6 @@
 */
 
 type t = Reducer_T.bindings
-type internalExpressionValue = Reducer_T.value
 
 let rec get = ({namespace, parent}: t, id: string) => {
   switch namespace->Reducer_Namespace.get(id) {

@@ -48,10 +48,10 @@ module Internal = {
     SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
   }
 
-  let parseSampleSetArray = (arr: array<internalExpressionValue>): option<
+  let parseSampleSetArray = (arr: array<Reducer_T.value>): option<
     array<SampleSetDist.t>,
   > => {
-    let parseSampleSet = (value: internalExpressionValue): option<SampleSetDist.t> =>
+    let parseSampleSet = (value: Reducer_T.value): option<SampleSetDist.t> =>
       switch value {
       | IEvDistribution(SampleSet(dist)) => Some(dist)
       | _ => None
@@ -60,7 +60,7 @@ module Internal = {
   }
 
   let mapN = (
-    aValueArray: array<internalExpressionValue>,
+    aValueArray: array<Reducer_T.value>,
     aLambdaValue,
     environment: Reducer_T.environment,
     reducer,
@@ -86,7 +86,7 @@ let libaryBase = [
     ~nameSpace,
     ~requiresNamespace=true,
     ~examples=[`SampleSet.fromDist(normal(5,2))`],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="fromDist",
@@ -110,7 +110,7 @@ let libaryBase = [
     ~nameSpace,
     ~requiresNamespace=true,
     ~examples=[`SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="fromList",
@@ -135,7 +135,7 @@ let libaryBase = [
     ~nameSpace,
     ~requiresNamespace=true,
     ~examples=[`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
-    ~output=ReducerInterface_InternalExpressionValue.EvtArray,
+    ~output=Reducer_Value.EvtArray,
     ~definitions=[
       FnDefinition.make(
         ~name="toList",
@@ -156,7 +156,7 @@ let libaryBase = [
     ~nameSpace,
     ~requiresNamespace=true,
     ~examples=[`SampleSet.fromFn({|| sample(normal(5,2))})`],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="fromFn",
@@ -180,7 +180,7 @@ let libaryBase = [
     ~nameSpace,
     ~requiresNamespace,
     ~examples=[`SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="map",
@@ -203,7 +203,7 @@ let libaryBase = [
     ~examples=[
       `SampleSet.map2(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), {|x, y| x + y})`,
     ],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="map2",
@@ -231,7 +231,7 @@ let libaryBase = [
     ~examples=[
       `SampleSet.map3(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), {|x, y, z| max([x,y,z])})`,
     ],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="map3",
@@ -259,7 +259,7 @@ let libaryBase = [
     ~examples=[
       `SampleSet.mapN([SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2))], {|x| max(x)})`,
     ],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="mapN",
@@ -306,7 +306,7 @@ module Comparison = {
         `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), 3.0)`,
         `SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`,
       ],
-      ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+      ~output=Reducer_Value.EvtDistribution,
       ~definitions=[
         template(name, [FRTypeDist, FRTypeDist], inputs => {
           switch inputs {

@@ -2,4 +2,4 @@
 
 @genType
 let toString = (v: squiggleValue_Declaration): string =>
-  ReducerInterface_InternalExpressionValue.toStringDeclaration(v)
+  Reducer_Value.toStringDeclaration(v)

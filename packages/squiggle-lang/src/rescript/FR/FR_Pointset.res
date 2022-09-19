@@ -48,7 +48,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace=true,
     ~examples=[`PointSet.fromDist(normal(5,2))`],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="fromDist",
@@ -77,7 +77,7 @@ let library = [
     ~nameSpace,
     ~requiresNamespace=true,
     ~examples=[`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="mapY",
@@ -105,7 +105,7 @@ let library = [
         {x: 3, y: 0.2}
       ])`,
     ],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="makeContinuous",
@@ -129,7 +129,7 @@ let library = [
         {x: 3, y: 0.2}
       ])`,
     ],
-    ~output=ReducerInterface_InternalExpressionValue.EvtDistribution,
+    ~output=Reducer_Value.EvtDistribution,
     ~definitions=[
       FnDefinition.make(
         ~name="makeDiscrete",

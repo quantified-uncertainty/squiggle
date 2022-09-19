@@ -1,6 +1,3 @@
-module Bindings = Reducer_Bindings
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-
 open Jest
 open Reducer_Peggy_TestHelpers
 

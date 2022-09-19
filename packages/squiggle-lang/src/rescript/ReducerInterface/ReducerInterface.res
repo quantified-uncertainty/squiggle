@@ -1,2 +1,0 @@
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module StdLib = ReducerInterface_StdLib

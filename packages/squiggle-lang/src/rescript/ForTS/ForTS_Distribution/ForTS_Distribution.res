@@ -8,7 +8,7 @@
 type environment = ForTS_Distribution_Environment.environment //use
 
 @genType
-let defaultEnvironment: environment = DistributionOperation.defaultEnv
+let defaultEnvironment: environment = Reducer_Context.defaultEnvironment
 
 @module("./ForTS_Distribution_tag") @scope("distributionTag")
 external dtPointSet_: string = "PointSet"

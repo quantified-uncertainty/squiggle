@@ -4,7 +4,7 @@ let twoArgs = E.Tuple2.toFnCall
 
 module DistributionCreation = {
   let nameSpace = "Dist"
-  let output = ReducerInterface_InternalExpressionValue.EvtDistribution
+  let output = Reducer_Value.EvtDistribution
   let requiresNamespace = false
 
   let fnMake = (~name, ~examples, ~definitions) => {

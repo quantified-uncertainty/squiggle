@@ -2,7 +2,6 @@
 
 module Bindings = Reducer_Bindings
 module ErrorValue = Reducer_ErrorValue
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ProjectItem = ReducerProject_ProjectItem
 module T = ReducerProject_T
 module Topology = ReducerProject_Topology
@@ -19,8 +18,8 @@ let getRunOrderFor = Topology.getRunOrderFor
 let createProject = () => {
   let project: t = {
     items: Belt.MutableMap.String.make(),
-    stdLib: ReducerInterface_StdLib.internalStdLib,
-    environment: InternalExpressionValue.defaultEnvironment,
+    stdLib: SquiggleLibrary_StdLib.stdLib,
+    environment: Reducer_Context.defaultEnvironment,
     previousRunOrder: [],
   }
   project
@@ -143,8 +142,8 @@ let setStdLib = (project: t, value: Reducer_T.namespace): unit => {
   project.stdLib = value
 }
 
-let getEnvironment = (project: t): InternalExpressionValue.environment => project.environment
-let setEnvironment = (project: t, value: InternalExpressionValue.environment): unit => {
+let getEnvironment = (project: t): Reducer_T.environment => project.environment
+let setEnvironment = (project: t, value: Reducer_T.environment): unit => {
   project.environment = value
 }
 

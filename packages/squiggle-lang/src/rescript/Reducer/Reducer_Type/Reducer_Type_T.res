@@ -1,9 +1,6 @@
-// module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-// open InternalExpressionValue
-
 // type rec iType =
 //   | ItTypeIdentifier(string)
-//   | ItModifiedType({modifiedType: iType, contracts: Belt.Map.String.t<InternalExpressionValue.t>})
+//   | ItModifiedType({modifiedType: iType, contracts: Belt.Map.String.t<Reducer_Value.t>})
 //   | ItTypeOr({typeOr: array<iType>})
 //   | ItTypeFunction({inputs: array<iType>, output: iType})
 //   | ItTypeArray({element: iType})
@@ -11,14 +8,14 @@
 //   | ItTypeRecord({properties: Belt.Map.String.t<iType>})
 
 // type t = iType
-// type typeErrorValue = TypeMismatch(t, InternalExpressionValue.t)
+// type typeErrorValue = TypeMismatch(t, Reducer_Value.t)
 
 // let rec toString = (t: t): string => {
 //   switch t {
 //   | ItTypeIdentifier(s) => s
 //   | ItModifiedType({modifiedType, contracts}) =>
 //     `${toString(modifiedType)}${contracts->Belt.Map.String.reduce("", (acc, k, v) =>
-//         Js.String2.concatMany(acc, ["<-", k, "(", InternalExpressionValue.toString(v), ")"])
+//         Js.String2.concatMany(acc, ["<-", k, "(", Reducer_Value.toString(v), ")"])
 //       )}`
 //   | ItTypeOr({typeOr}) => `(${Js.Array2.map(typeOr, toString)->Js.Array2.joinWith(" | ")})`
 //   | ItTypeFunction({inputs, output}) =>
@@ -41,42 +38,42 @@
 
 // let rec fromTypeMap = typeMap => {
 //   let default = IEvString("")
-//   let evTypeTag: InternalExpressionValue.t = Belt.Map.String.getWithDefault(
+//   let evTypeTag: Reducer_Value.t = Belt.Map.String.getWithDefault(
 //     typeMap,
 //     "typeTag",
 //     default,
 //   )
-//   let evTypeIdentifier: InternalExpressionValue.t = Belt.Map.String.getWithDefault(
+//   let evTypeIdentifier: Reducer_Value.t = Belt.Map.String.getWithDefault(
 //     typeMap,
 //     "typeIdentifier",
 //     default,
 //   )
-//   let evTypeOr: InternalExpressionValue.t = Belt.Map.String.getWithDefault(
+//   let evTypeOr: Reducer_Value.t = Belt.Map.String.getWithDefault(
 //     typeMap,
 //     "typeOr",
 //     default,
 //   )
-//   let evInputs: InternalExpressionValue.t = Belt.Map.String.getWithDefault(
+//   let evInputs: Reducer_Value.t = Belt.Map.String.getWithDefault(
 //     typeMap,
 //     "inputs",
 //     default,
 //   )
-//   let evOutput: InternalExpressionValue.t = Belt.Map.String.getWithDefault(
+//   let evOutput: Reducer_Value.t = Belt.Map.String.getWithDefault(
 //     typeMap,
 //     "output",
 //     default,
 //   )
-//   let evElement: InternalExpressionValue.t = Belt.Map.String.getWithDefault(
+//   let evElement: Reducer_Value.t = Belt.Map.String.getWithDefault(
 //     typeMap,
 //     "element",
 //     default,
 //   )
-//   let evElements: InternalExpressionValue.t = Belt.Map.String.getWithDefault(
+//   let evElements: Reducer_Value.t = Belt.Map.String.getWithDefault(
 //     typeMap,
 //     "elements",
 //     default,
 //   )
-//   let evProperties: InternalExpressionValue.t = Belt.Map.String.getWithDefault(
+//   let evProperties: Reducer_Value.t = Belt.Map.String.getWithDefault(
 //     typeMap,
 //     "properties",
 //     default,
@@ -101,18 +98,18 @@
 //     : ItModifiedType({modifiedType: makeIt, contracts: contracts})
 // }
 
-// and fromIEvValue = (ievValue: InternalExpressionValue.t): iType =>
+// and fromIEvValue = (ievValue: Reducer_Value.t): iType =>
 //   switch ievValue {
 //   | IEvTypeIdentifier(typeIdentifier) => ItTypeIdentifier({typeIdentifier})
 //   | IEvType(typeMap) => fromTypeMap(typeMap)
 //   | _ => raise(Reducer_Exception.ImpossibleException("Reducer_Type_T-ievValue"))
 //   }
-// and fromIEvArray = (ievArray: InternalExpressionValue.t) =>
+// and fromIEvArray = (ievArray: Reducer_Value.t) =>
 //   switch ievArray {
 //   | IEvArray(array) => array->Belt.Array.map(fromIEvValue)
 //   | _ => raise(Reducer_Exception.ImpossibleException("Reducer_Type_T-ievArray"))
 //   }
-// and fromIEvRecord = (ievRecord: InternalExpressionValue.t) =>
+// and fromIEvRecord = (ievRecord: Reducer_Value.t) =>
 //   switch ievRecord {
 //   | IEvRecord(record) => record->Belt.Map.String.map(fromIEvValue)
 //   | _ => raise(Reducer_Exception.ImpossibleException("Reducer_Type_T-ievRecord"))

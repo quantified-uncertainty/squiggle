@@ -2,8 +2,6 @@
   An expression is an intermediate representation of a Squiggle code.
   Expressions are evaluated by `Reducer_Expression.evaluate` function.
 */
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-
 type t = Reducer_T.expression
 
 let commaJoin = values => values->Reducer_Extra_Array.intersperse(", ")->Js.String.concatMany("")
@@ -27,7 +25,7 @@ let rec toString = (expression: t) =>
   | EAssign(name, value) => `${name} = ${value->toString}`
   | ECall(fn, args) => `(${fn->toString})(${args->Js.Array2.map(toString)->commaJoin})`
   | ELambda(parameters, body) => `{|${parameters->commaJoin}| ${body->toString}}`
-  | EValue(aValue) => InternalExpressionValue.toString(aValue)
+  | EValue(aValue) => Reducer_Value.toString(aValue)
   }
 
 let toStringResult = codeResult =>

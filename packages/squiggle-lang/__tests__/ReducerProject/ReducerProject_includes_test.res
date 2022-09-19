@@ -1,7 +1,5 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
-module Bindings = Reducer_Bindings
 
 open Jest
 open Expect

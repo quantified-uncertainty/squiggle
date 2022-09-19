@@ -5,11 +5,7 @@ module ErrorValue = Reducer_ErrorValue
 type environment = GenericDist.env
 module T = Reducer_T
 
-let defaultEnvironment: environment = DistributionOperation.defaultEnv
-
 type t = Reducer_T.value
-
-type internalExpressionValue = t
 
 type functionCall = (string, array<t>)
 

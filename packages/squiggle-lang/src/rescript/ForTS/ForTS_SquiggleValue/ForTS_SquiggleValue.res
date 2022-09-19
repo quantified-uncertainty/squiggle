@@ -74,13 +74,13 @@ let getTag = (variant: squiggleValue): squiggleValueTag =>
 
 @genType
 let toString = (variant: squiggleValue) =>
-  ReducerInterface_InternalExpressionValue.toString(variant)
+  Reducer_Value.toString(variant)
 
 // This is a useful method for unit tests.
 // Convert the result along with the error message to a string.
 @genType
 let toStringResult = (variantResult: result<squiggleValue, reducerErrorValue>) =>
-  ReducerInterface_InternalExpressionValue.toStringResult(variantResult)
+  Reducer_Value.toStringResult(variantResult)
 
 @genType
 let getArray = (variant: squiggleValue): option<squiggleValue_Array> =>

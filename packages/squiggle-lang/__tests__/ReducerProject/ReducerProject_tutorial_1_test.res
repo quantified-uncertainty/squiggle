@@ -1,5 +1,4 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
 module Bindings = Reducer_Bindings
 
@@ -50,8 +49,8 @@ Case "Running a single source".
 
       /* Let's display the result and bindings */
       (
-        result->InternalExpressionValue.toStringResult,
-        bindings->InternalExpressionValue.toStringRecord,
+        result->Reducer_Value.toStringResult,
+        bindings->Reducer_Value.toStringRecord,
       )->expect == ("Ok(3)", "{}")
       /* You've got 3 with empty bindings. */
     })
@@ -64,8 +63,8 @@ Case "Running a single source".
       let bindings = project->Project.getBindings("main")
       /* Now you have external bindings and external result. */
       (
-        result->InternalExpressionValue.toStringResult,
-        bindings->Reducer_T.IEvRecord->InternalExpressionValue.toString,
+        result->Reducer_Value.toStringResult,
+        bindings->Reducer_T.IEvRecord->Reducer_Value.toString,
       )->expect == ("Ok(3)", "{}")
     })
 
@@ -74,13 +73,13 @@ Case "Running a single source".
       let project = Project.createProject()
 
       /* Optional. Set your custom environment anytime before running */
-      project->Project.setEnvironment(InternalExpressionValue.defaultEnvironment)
+      project->Project.setEnvironment(Reducer_Context.defaultEnvironment)
 
       project->Project.setSource("main", "1 + 2")
       project->Project.runAll
       let result = project->Project.getResult("main")
       let _bindings = project->Project.getBindings("main")
-      result->InternalExpressionValue.toStringResult->expect == "Ok(3)"
+      result->Reducer_Value.toStringResult->expect == "Ok(3)"
     })
 
     test("shortcut", () => {
@@ -88,8 +87,8 @@ Case "Running a single source".
       /* Examples above was to prepare you for the multi source tutorial. */
       let (result, bindings) = Project.evaluate("1+2")
       (
-        result->InternalExpressionValue.toStringResult,
-        bindings->InternalExpressionValue.toStringRecord,
+        result->Reducer_Value.toStringResult,
+        bindings->Reducer_Value.toStringRecord,
       )->expect == ("Ok(3)", "{}")
     })
   })
