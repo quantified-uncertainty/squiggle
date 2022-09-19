@@ -9,19 +9,19 @@ let prepareInputs = (ar, minWeight) =>
 describe("Continuous and discrete splits", () => {
   makeTest(
     "is empty, with no common elements",
-    prepareInputs([1.432, 1.33455, 2.0], 2),
+    prepareInputs([1.33455, 1.432, 2.0], 2),
     ([1.33455, 1.432, 2.0], []),
   )
 
   makeTest(
     "only stores 3.5 as discrete when minWeight is 3",
-    prepareInputs([1.432, 1.33455, 2.0, 2.0, 3.5, 3.5, 3.5], 3),
+    prepareInputs([1.33455, 1.432, 2.0, 2.0, 3.5, 3.5, 3.5], 3),
     ([1.33455, 1.432, 2.0, 2.0], [(3.5, 3.0)]),
   )
 
   makeTest(
     "doesn't store 3.5 as discrete when minWeight is 5",
-    prepareInputs([1.432, 1.33455, 2.0, 2.0, 3.5, 3.5, 3.5], 5),
+    prepareInputs([1.33455, 1.432, 2.0, 2.0, 3.5, 3.5, 3.5], 5),
     ([1.33455, 1.432, 2.0, 2.0, 3.5, 3.5, 3.5], []),
   )
 
