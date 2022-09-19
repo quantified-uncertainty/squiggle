@@ -5,6 +5,7 @@ import {
   defaultEnvironment,
   resultMap,
   SqValueTag,
+  SqProject,
 } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
 import { SquiggleViewer } from "./SquiggleViewer";
@@ -53,6 +54,12 @@ export interface SquiggleChartProps {
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;
   enableLocalSettings?: boolean;
+  /** The project that this execution is part of */
+  project?: SqProject;
+  /** The name of the squiggle execution source. Defaults to "main" */
+  sourceName?: string;
+  /** The sources that this execution continues */
+  includes?: string[];
 }
 
 const defaultOnChange = () => {};
@@ -60,7 +67,7 @@ const defaultImports: JsImports = {};
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
   ({
-    code = "",
+    code,
     executionId = 0,
     environment,
     onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
@@ -81,8 +88,14 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     xAxisType = "number",
     distributionChartActions,
     enableLocalSettings = false,
+    sourceName = "main",
+    includes = [],
+    project = SqProject.create(),
   }) => {
     const { result, bindings } = useSquiggle({
+      sourceName,
+      includes,
+      project,
       code,
       environment,
       jsImports,
