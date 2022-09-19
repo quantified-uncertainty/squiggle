@@ -90,10 +90,6 @@ Case "Running a single source".
   })
 })
 
-// s1:             { x = 1 } / { stdlib }
-// s2 (deps=[s1]): { y = 2 } / { { x = 1 } + stdlib }
-// s3 (deps=[s2]): { z = 3 } / { { y = 2 } + stdlib }
-
 //TODO multiple sources
 //TODO multiple sources with includes. Introduction to includes
 //TODO multiple sources with multi level includes. Cycle detection
