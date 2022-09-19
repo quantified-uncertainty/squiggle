@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import zipWith from "lodash/zipWith";
 import { wrapDistribution } from "./SqDistribution";
 import * as RSPointSetDist from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
 import { pointSetDistributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution_tag";
@@ -16,7 +16,7 @@ const shapePoints = (
 ): SqPoint[] => {
   let xs = x.xyShape.xs;
   let ys = x.xyShape.ys;
-  return _.zipWith(xs, ys, (x, y) => ({ x, y }));
+  return zipWith(xs, ys, (x, y) => ({ x, y }));
 };
 
 export const wrapPointSetDist = (value: T) => {
