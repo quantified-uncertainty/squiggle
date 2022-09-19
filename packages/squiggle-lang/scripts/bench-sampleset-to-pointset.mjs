@@ -2,7 +2,7 @@
 import { SqProject } from "@quri/squiggle-lang";
 import { measure } from "./lib.mjs";
 
-const maxP = 7;
+const maxP = 3;
 
 for (let p = 0; p <= maxP; p++) {
   const size = Math.pow(10, p);
