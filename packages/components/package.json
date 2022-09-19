@@ -21,7 +21,7 @@
     "vega": "^5.22.1",
     "vega-embed": "^6.21.0",
     "vega-lite": "^5.5.0",
-    "vscode-uri": "^3.0.3",
+    "vscode-uri": "^3.0.6",
     "yup": "^0.32.11"
   },
   "devDependencies": {
