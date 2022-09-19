@@ -5,10 +5,9 @@ let nameSpace = "List"
 let requiresNamespace = true
 
 module Internals = {
-  let makeFromNumber = (
-    n: float,
-    value: Reducer_T.value,
-  ): Reducer_T.value => IEvArray(Belt.Array.make(E.Float.toInt(n), value))
+  let makeFromNumber = (n: float, value: Reducer_T.value): Reducer_T.value => IEvArray(
+    Belt.Array.make(E.Float.toInt(n), value),
+  )
 
   let upTo = (low: float, high: float): Reducer_T.value => IEvArray(
     E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)->E.A2.fmap(Wrappers.evNumber),

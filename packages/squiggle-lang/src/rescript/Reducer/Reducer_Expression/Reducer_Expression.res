@@ -103,9 +103,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
           context,
         )
       | _ =>
-        RENotAFunction(lambda->Reducer_Value.toString)
-        ->Reducer_ErrorValue.ErrorException
-        ->raise
+        RENotAFunction(lambda->Reducer_Value.toString)->Reducer_ErrorValue.ErrorException->raise
       }
     }
   }

@@ -74,15 +74,10 @@ module Old = {
       | _ => Error("Not a number")
       }
 
-    let parseNumberArray = (ags: array<Reducer_T.value>): Belt.Result.t<
-      array<float>,
-      string,
-    > => E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
+    let parseNumberArray = (ags: array<Reducer_T.value>): Belt.Result.t<array<float>, string> =>
+      E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
 
-    let parseDist = (args: Reducer_T.value): Belt.Result.t<
-      DistributionTypes.genericDist,
-      string,
-    > =>
+    let parseDist = (args: Reducer_T.value): Belt.Result.t<DistributionTypes.genericDist, string> =>
       switch args {
       | IEvDistribution(x) => Ok(x)
       | IEvNumber(x) => Ok(GenericDist.fromFloat(x))
@@ -173,10 +168,9 @@ module Old = {
       }
   }
 
-  let dispatchToGenericOutput = (
-    call: Reducer_Value.functionCall,
-    env: GenericDist.env,
-  ): option<DistributionOperation.outputType> => {
+  let dispatchToGenericOutput = (call: Reducer_Value.functionCall, env: GenericDist.env): option<
+    DistributionOperation.outputType,
+  > => {
     let (fnName, args) = call
     switch (fnName, args) {
     | ("triangular" as fnName, [IEvNumber(f1), IEvNumber(f2), IEvNumber(f3)]) =>

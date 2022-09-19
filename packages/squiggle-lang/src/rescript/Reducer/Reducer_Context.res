@@ -9,5 +9,4 @@ let createContext = (stdLib: Reducer_Namespace.t, environment: Reducer_T.environ
   }
 }
 
-let createDefaultContext = (): t =>
-  createContext(SquiggleLibrary_StdLib.stdLib, defaultEnvironment)
+let createDefaultContext = (): t => createContext(SquiggleLibrary_StdLib.stdLib, defaultEnvironment)

@@ -6,5 +6,4 @@ let getKeyValuePairs = (value: squiggleValue_Type): array<(string, squiggleValue
   Reducer_Value.recordToKeyValuePairs(value)
 
 @genType
-let toString = (value: squiggleValue_Type): string =>
-  Reducer_Value.toStringType(value)
+let toString = (value: squiggleValue_Type): string => Reducer_Value.toStringType(value)

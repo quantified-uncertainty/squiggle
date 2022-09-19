@@ -24,9 +24,7 @@ let mergeMany = (namespaces: array<t>): t =>
 let toString = (namespace: t) =>
   namespace
   ->Belt.Map.String.toArray
-  ->Belt.Array.map(((eachKey, eachValue)) =>
-    `${eachKey}: ${eachValue->Reducer_Value.toString}`
-  )
+  ->Belt.Array.map(((eachKey, eachValue)) => `${eachKey}: ${eachValue->Reducer_Value.toString}`)
   ->Js.Array2.toString
 
 let fromArray = (a): t => Belt.Map.String.fromArray(a)

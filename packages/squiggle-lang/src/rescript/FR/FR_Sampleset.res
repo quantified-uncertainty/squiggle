@@ -48,9 +48,7 @@ module Internal = {
     SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
   }
 
-  let parseSampleSetArray = (arr: array<Reducer_T.value>): option<
-    array<SampleSetDist.t>,
-  > => {
+  let parseSampleSetArray = (arr: array<Reducer_T.value>): option<array<SampleSetDist.t>> => {
     let parseSampleSet = (value: Reducer_T.value): option<SampleSetDist.t> =>
       switch value {
       | IEvDistribution(SampleSet(dist)) => Some(dist)

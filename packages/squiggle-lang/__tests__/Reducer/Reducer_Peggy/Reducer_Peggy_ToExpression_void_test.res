@@ -10,12 +10,7 @@ describe("Peggy void", () => {
     // ~v="@{fn: lambda(_=>internal code)}",
     (),
   )
-  testToExpression(
-    "fn()=1; fn()",
-    "fn = {|_| {1}}; (fn)(())",
-    ~v="1",
-    (),
-  )
+  testToExpression("fn()=1; fn()", "fn = {|_| {1}}; (fn)(())", ~v="1", ())
   testToExpression(
     "fn(a)=(); call fn(1)",
     "fn = {|a| {()}}; _ = {(fn)(1)}",

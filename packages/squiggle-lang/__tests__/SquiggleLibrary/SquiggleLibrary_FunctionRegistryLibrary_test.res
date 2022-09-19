@@ -3,10 +3,7 @@ open Expect
 open Reducer_TestHelpers
 
 let expectEvalToBeOk = (code: string) =>
-  Reducer_Expression.BackCompatible.evaluateString(code)
-  ->E.R.isOk
-  ->expect
-  ->toBe(true)
+  Reducer_Expression.BackCompatible.evaluateString(code)->E.R.isOk->expect->toBe(true)
 
 let registry = FunctionRegistry_Library.registry
 let examples = E.A.to_list(FunctionRegistry_Core.Registry.allExamples(registry))

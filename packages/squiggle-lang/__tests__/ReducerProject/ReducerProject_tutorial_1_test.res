@@ -48,10 +48,8 @@ Case "Running a single source".
       let bindings = project->Project.getBindings("main")
 
       /* Let's display the result and bindings */
-      (
-        result->Reducer_Value.toStringResult,
-        bindings->Reducer_Value.toStringRecord,
-      )->expect == ("Ok(3)", "{}")
+      (result->Reducer_Value.toStringResult, bindings->Reducer_Value.toStringRecord)->expect ==
+        ("Ok(3)", "{}")
       /* You've got 3 with empty bindings. */
     })
 
@@ -86,10 +84,8 @@ Case "Running a single source".
       /* If you are running single source without includes and you don't need a custom environment, you can use the shortcut. */
       /* Examples above was to prepare you for the multi source tutorial. */
       let (result, bindings) = Project.evaluate("1+2")
-      (
-        result->Reducer_Value.toStringResult,
-        bindings->Reducer_Value.toStringRecord,
-      )->expect == ("Ok(3)", "{}")
+      (result->Reducer_Value.toStringResult, bindings->Reducer_Value.toStringRecord)->expect ==
+        ("Ok(3)", "{}")
     })
   })
 })

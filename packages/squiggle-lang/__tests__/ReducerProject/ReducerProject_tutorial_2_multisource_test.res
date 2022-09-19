@@ -30,10 +30,8 @@ describe("ReducerProject Tutorial", () => {
       let result3 = project->Project.getResult("source3")
       let bindings3 = project->Project.getBindings("source3")
 
-      (
-        result3->Reducer_Value.toStringResult,
-        bindings3->Reducer_Value.toStringRecord,
-      )->expect == ("Ok(())", "{z: 3}")
+      (result3->Reducer_Value.toStringResult, bindings3->Reducer_Value.toStringRecord)->expect ==
+        ("Ok(())", "{z: 3}")
     })
 
     test("Depending", () => {
@@ -56,10 +54,8 @@ describe("ReducerProject Tutorial", () => {
       let result3 = project->Project.getResult("source3")
       let bindings3 = project->Project.getBindings("source3")
 
-      (
-        result3->Reducer_Value.toStringResult,
-        bindings3->Reducer_Value.toStringRecord,
-      )->expect == ("Ok(())", "{z: 3}")
+      (result3->Reducer_Value.toStringResult, bindings3->Reducer_Value.toStringRecord)->expect ==
+        ("Ok(())", "{z: 3}")
     })
 
     test("Intro to including", () => {
@@ -91,10 +87,8 @@ describe("ReducerProject Tutorial", () => {
       let result3 = project->Project.getResult("source3")
       let bindings3 = project->Project.getBindings("source3")
 
-      (
-        result3->Reducer_Value.toStringResult,
-        bindings3->Reducer_Value.toStringRecord,
-      )->expect == ("Ok(())", "{z: 3}")
+      (result3->Reducer_Value.toStringResult, bindings3->Reducer_Value.toStringRecord)->expect ==
+        ("Ok(())", "{z: 3}")
       /*
       Doing it like this is too verbose for a storybook 
       But I hope you have seen the relation of setContinues and parseIncludes */

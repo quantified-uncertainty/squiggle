@@ -17,10 +17,7 @@ let expectParseToBe = (code: string, answer: string) =>
   Expression.BackCompatible.parse(code)->ExpressionT.toStringResult->expect->toBe(answer)
 
 let expectEvalToBe = (code: string, answer: string) =>
-  Expression.BackCompatible.evaluateString(code)
-  ->Reducer_Value.toStringResult
-  ->expect
-  ->toBe(answer)
+  Expression.BackCompatible.evaluateString(code)->Reducer_Value.toStringResult->expect->toBe(answer)
 
 let expectEvalError = (code: string) =>
   Expression.BackCompatible.evaluateString(code)

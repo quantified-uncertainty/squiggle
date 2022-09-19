@@ -17,10 +17,7 @@ module Internals = {
     ->E.A2.fmap(((key, value)) => Wrappers.evArray([IEvString(key), value]))
     ->Wrappers.evArray
 
-  let fromList = (items: array<Reducer_T.value>): result<
-    Reducer_T.value,
-    errorValue,
-  > =>
+  let fromList = (items: array<Reducer_T.value>): result<Reducer_T.value, errorValue> =>
     items
     ->E.A2.fmap(item => {
       switch (item: Reducer_T.value) {

@@ -16,10 +16,7 @@ let isMax = (modifierArg: Reducer_Value.t, aValue: Reducer_Value.t): bool => {
   }
 }
 
-let isMemberOf = (
-  modifierArg: Reducer_Value.t,
-  aValue: Reducer_Value.t,
-): bool => {
+let isMemberOf = (modifierArg: Reducer_Value.t, aValue: Reducer_Value.t): bool => {
   let pair = (modifierArg, aValue)
   switch pair {
   | (ievA, IEvArray(b)) => Js.Array2.includes(b, ievA)
@@ -27,11 +24,7 @@ let isMemberOf = (
   }
 }
 
-let checkModifier = (
-  key: string,
-  modifierArg: Reducer_Value.t,
-  aValue: Reducer_Value.t,
-): bool =>
+let checkModifier = (key: string, modifierArg: Reducer_Value.t, aValue: Reducer_Value.t): bool =>
   switch key {
   | "min" => isMin(modifierArg, aValue)
   | "max" => isMax(modifierArg, aValue)

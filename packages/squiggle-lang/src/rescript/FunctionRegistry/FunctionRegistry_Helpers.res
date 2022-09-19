@@ -278,10 +278,10 @@ module Make = {
 
   Q: What about polymorphic functions with multiple definitions? Why ~fn is not an array?
   A: We often define the same function in multiple `FR_*` files, so that doesn't work well anyway. In 90%+ cases there's a single definition. And having to write `name` twice is annoying.
-  */
+ */
   let f2f = (
     ~name: string,
-    ~fn: (float) => float,
+    ~fn: float => float,
     ~nameSpace="",
     ~requiresNamespace=false,
     ~examples=?,
@@ -290,22 +290,22 @@ module Make = {
     Function.make(
       ~name,
       ~nameSpace,
-      ~requiresNamespace=requiresNamespace,
+      ~requiresNamespace,
       ~examples=examples->E.O.default([], _),
       ~output=EvtNumber,
       ~definitions=[
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber],
-          ~run=((inputs, _, _, _) =>
+          ~run=(inputs, _, _, _) =>
             switch inputs {
             | [IEvNumber(x)] => fn(x)->IEvNumber->Ok
             | _ => Error(impossibleError)
-            }),
-          ()
-        )
+            },
+          (),
+        ),
       ],
-      ()
+      (),
     )
   }
 
@@ -320,22 +320,22 @@ module Make = {
     Function.make(
       ~name,
       ~nameSpace,
-      ~requiresNamespace=requiresNamespace,
+      ~requiresNamespace,
       ~examples=examples->E.O.default([], _),
       ~output=EvtNumber,
       ~definitions=[
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber, FRTypeNumber],
-          ~run=((inputs, _, _, _) =>
+          ~run=(inputs, _, _, _) =>
             switch inputs {
             | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvNumber->Ok
             | _ => Error(impossibleError)
-            }),
-          ()
-        )
+            },
+          (),
+        ),
       ],
-      ()
+      (),
     )
   }
 
@@ -350,22 +350,22 @@ module Make = {
     Function.make(
       ~name,
       ~nameSpace,
-      ~requiresNamespace=requiresNamespace,
+      ~requiresNamespace,
       ~examples=examples->E.O.default([], _),
       ~output=EvtBool,
       ~definitions=[
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber, FRTypeNumber],
-          ~run=((inputs, _, _, _) =>
+          ~run=(inputs, _, _, _) =>
             switch inputs {
             | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvBool->Ok
             | _ => Error(impossibleError)
-            }),
-          ()
-        )
+            },
+          (),
+        ),
       ],
-      ()
+      (),
     )
   }
 
@@ -380,22 +380,22 @@ module Make = {
     Function.make(
       ~name,
       ~nameSpace,
-      ~requiresNamespace=requiresNamespace,
+      ~requiresNamespace,
       ~examples=examples->E.O.default([], _),
       ~output=EvtBool,
       ~definitions=[
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeBool, FRTypeBool],
-          ~run=((inputs, _, _, _) =>
+          ~run=(inputs, _, _, _) =>
             switch inputs {
             | [IEvBool(x), IEvBool(y)] => fn(x, y)->IEvBool->Ok
             | _ => Error(impossibleError)
-            }),
-          ()
-        )
+            },
+          (),
+        ),
       ],
-      ()
+      (),
     )
   }
 }

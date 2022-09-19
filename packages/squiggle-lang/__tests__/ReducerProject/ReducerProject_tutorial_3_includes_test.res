@@ -144,10 +144,8 @@ Here we will finally proceed to a real life scenario. */
       let bindings = project->Project.getBindings("main")
       /* And see the result and bindings.. */
       test("recursive includes", () => {
-        (
-          result->Reducer_Value.toStringResult,
-          bindings->Reducer_Value.toStringRecord,
-        )->expect == ("Ok(6)", "{a: 6,b: 2}")
+        (result->Reducer_Value.toStringResult, bindings->Reducer_Value.toStringRecord)->expect ==
+          ("Ok(6)", "{a: 6,b: 2}")
         /* Everything as expected */
       })
     })

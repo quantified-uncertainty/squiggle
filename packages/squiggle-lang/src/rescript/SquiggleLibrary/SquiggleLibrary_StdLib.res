@@ -13,16 +13,13 @@ let stdLib: Reducer_T.namespace = {
     Reducer_Expression_Lambda.makeFFILambda((inputs, _, _) => {
       switch inputs {
       | [IEvArray(aValueArray), IEvNumber(fIndex)] => {
-        let index = Belt.Int.fromFloat(fIndex) // TODO - fail on non-integer indices?
+          let index = Belt.Int.fromFloat(fIndex) // TODO - fail on non-integer indices?
 
-        switch Belt.Array.get(aValueArray, index) {
-        | Some(value) => value
-        | None =>
-          REArrayIndexNotFound("Array index not found", index)
-          ->ErrorException
-          ->raise
+          switch Belt.Array.get(aValueArray, index) {
+          | Some(value) => value
+          | None => REArrayIndexNotFound("Array index not found", index)->ErrorException->raise
+          }
         }
-      }
       | [IEvRecord(dict), IEvString(sIndex)] =>
         switch Belt.Map.String.get(dict, sIndex) {
         | Some(value) => value

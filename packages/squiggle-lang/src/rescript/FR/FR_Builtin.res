@@ -26,93 +26,31 @@ let makeFn = (
 ) => makeFnMany(name, [{inputs: inputs, fn: fn}])
 
 let library = [
-  Make.ff2f(
-    ~name="add", // infix + (see Reducer/Reducer_Peggy/helpers.ts)
-    ~fn=(x, y) => x +. y,
-    ()
-  ),
-  Make.ff2f(
-    ~name="subtract", // infix -
-    ~fn=(x, y) => x -. y,
-    ()
-  ),
-  Make.ff2f(
-    ~name="multiply", // infix *
-    ~fn=(x, y) => x *. y,
-    ()
-  ),
-  Make.ff2f(
-    ~name="divide", // infix /
-    ~fn=(x, y) => x /. y,
-    ()
-  ),
-  Make.ff2f(
-    ~name="pow", // infix ^
-    ~fn=(x, y) => Js.Math.pow_float(~base=x, ~exp=y),
-    ()
-  ),
-  Make.ff2b(
-    ~name="equal", // infix == on numbers
-    ~fn=(x, y) => x == y,
-    ()
-  ),
-  Make.bb2b(
-    ~name="equal", // infix == on booleans
-    ~fn=(x, y) => x == y,
-    ()
-  ),
-  Make.ff2b(
-    ~name="unequal", // infix != on numbers
-    ~fn=(x, y) => x != y,
-    ()
-  ),
-  Make.ff2b(
-    ~name="unequal", // infix != on booleans
-    ~fn=(x, y) => x != y,
-    ()
-  ),
-  Make.ff2b(
-    ~name="smaller", // infix <
-    ~fn=(x, y) => x < y,
-    ()
-  ),
-  Make.ff2b(
-    ~name="smallerEq", // infix <=
-    ~fn=(x, y) => x <= y,
-    ()
-  ),
-  Make.ff2b(
-    ~name="larger", // infix >
-    ~fn=(x, y) => x > y,
-    ()
-  ),
-  Make.ff2b(
-    ~name="largerEq", // infix >=
-    ~fn=(x, y) => x >= y,
-    ()
-  ),
-  Make.bb2b(
-    ~name="or", // infix ||
-    ~fn=(x, y) => x || y,
-    ()
-  ),
-  Make.bb2b(
-    ~name="and", // infix &&
-    ~fn=(x, y) => x && y,
-    ()
-  ),
-  Make.f2f(
-    ~name="unaryMinus", // unary prefix -
-    ~fn=x => -.x,
-    ()
-  ),
-  makeFn("not", [FRTypeNumber], inputs => { // unary prefix !
+  Make.ff2f(~name="add", ~fn=(x, y) => x +. y, ()), // infix + (see Reducer/Reducer_Peggy/helpers.ts)
+  Make.ff2f(~name="subtract", ~fn=(x, y) => x -. y, ()), // infix -
+  Make.ff2f(~name="multiply", ~fn=(x, y) => x *. y, ()), // infix *
+  Make.ff2f(~name="divide", ~fn=(x, y) => x /. y, ()), // infix /
+  Make.ff2f(~name="pow", ~fn=(x, y) => Js.Math.pow_float(~base=x, ~exp=y), ()), // infix ^
+  Make.ff2b(~name="equal", ~fn=(x, y) => x == y, ()), // infix == on numbers
+  Make.bb2b(~name="equal", ~fn=(x, y) => x == y, ()), // infix == on booleans
+  Make.ff2b(~name="unequal", ~fn=(x, y) => x != y, ()), // infix != on numbers
+  Make.ff2b(~name="unequal", ~fn=(x, y) => x != y, ()), // infix != on booleans
+  Make.ff2b(~name="smaller", ~fn=(x, y) => x < y, ()), // infix <
+  Make.ff2b(~name="smallerEq", ~fn=(x, y) => x <= y, ()), // infix <=
+  Make.ff2b(~name="larger", ~fn=(x, y) => x > y, ()), // infix >
+  Make.ff2b(~name="largerEq", ~fn=(x, y) => x >= y, ()), // infix >=
+  Make.bb2b(~name="or", ~fn=(x, y) => x || y, ()), // infix ||
+  Make.bb2b(~name="and", ~fn=(x, y) => x && y, ()), // infix &&
+  Make.f2f(~name="unaryMinus", ~fn=x => -.x, ()), // unary prefix -
+  makeFn("not", [FRTypeNumber], inputs => {
+    // unary prefix !
     switch inputs {
     | [IEvNumber(x)] => IEvBool(x != 0.)->Ok
     | _ => Error(impossibleError)
     }
   }),
-  makeFn("not", [FRTypeBool], inputs => { // unary prefix !
+  makeFn("not", [FRTypeBool], inputs => {
+    // unary prefix !
     switch inputs {
     | [IEvBool(x)] => IEvBool(!x)->Ok
     | _ => Error(impossibleError)
@@ -157,9 +95,7 @@ let library = [
   }),
   makeFn("javascriptraise", [FRTypeAny], inputs => {
     switch inputs {
-    | [msg] => {
-        Js.Exn.raiseError(msg->Reducer_Value.toString)
-      }
+    | [msg] => Js.Exn.raiseError(msg->Reducer_Value.toString)
     | _ => Error(impossibleError)
     }
   }),

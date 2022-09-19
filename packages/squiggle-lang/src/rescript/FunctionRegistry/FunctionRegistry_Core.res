@@ -179,10 +179,9 @@ module FRType = {
     | FRValueAny(f) => matchReverse(f)
     }
 
-  let matchWithExpressionValueArray = (
-    inputs: array<t>,
-    args: array<Reducer_T.value>,
-  ): option<array<frValue>> => {
+  let matchWithExpressionValueArray = (inputs: array<t>, args: array<Reducer_T.value>): option<
+    array<frValue>,
+  > => {
     let isSameLength = E.A.length(inputs) == E.A.length(args)
     if !isSameLength {
       None
