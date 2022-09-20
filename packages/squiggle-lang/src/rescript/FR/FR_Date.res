@@ -10,7 +10,7 @@ let makeFn = (
     ~name,
     ~nameSpace="",
     ~requiresNamespace=false,
-    ~definitions=[FnDefinition.make(~name, ~inputs, ~run=(inputs, _, _, _) => fn(inputs), ())],
+    ~definitions=[FnDefinition.make(~name, ~inputs, ~run=(inputs, _, _) => fn(inputs), ())],
     (),
   )
 
@@ -23,7 +23,7 @@ let makeNumberToDurationFn = (name: string, fn: float => DateTime.Duration.t) =>
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvNumber(t)] => IEvTimeDuration(fn(t))->Ok
           | _ => Error(impossibleError)
@@ -43,7 +43,7 @@ let makeDurationToNumberFn = (name: string, fn: DateTime.Duration.t => float) =>
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeTimeDuration],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvTimeDuration(t)] => IEvNumber(fn(t))->Ok
           | _ => Error(impossibleError)

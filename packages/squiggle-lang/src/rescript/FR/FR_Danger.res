@@ -165,7 +165,7 @@ module Integration = {
         FnDefinition.make(
           ~name="integrateFunctionBetweenWithNumIntegrationPoints",
           ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, _, env, reducer) => {
+          ~run=(inputs, env, reducer) => {
             let result = switch inputs {
             | [_, _, _, IEvNumber(0.0)] =>
               "Integration error 4 in Danger.integrate: Increment can't be 0."
@@ -209,7 +209,7 @@ module Integration = {
         FnDefinition.make(
           ~name="integrateFunctionBetweenWithEpsilon",
           ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, _, env, reducer) => {
+          ~run=(inputs, env, reducer) => {
             let result = switch inputs {
             | [_, _, _, IEvNumber(0.0)] =>
               "Integration error in Danger.integrate: Increment can't be 0."
@@ -403,7 +403,7 @@ module DiminishingReturns = {
         FnDefinition.make(
           ~name="optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
           ~inputs=[FRTypeArray(FRTypeLambda), FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, _, environment, reducer) =>
+          ~run=(inputs, environment, reducer) =>
             switch inputs {
             | [IEvArray(innerlambdas), IEvNumber(funds), IEvNumber(approximateIncrement)] => {
                 let individuallyWrappedLambdas = E.A.fmap(innerLambda => {

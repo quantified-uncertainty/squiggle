@@ -29,10 +29,6 @@ module Internals = {
     ->E.R2.fmap(Belt.Map.String.fromArray)
     ->E.R2.fmap(Wrappers.evRecord)
 
-  let merge = (a: t, b: t): Reducer_T.value => IEvRecord(
-    Belt.Map.String.merge(a, b, (_, _, c) => c),
-  )
-
   //Belt.Map.String has a function for mergeMany, but I couldn't understand how to use it yet.
   let mergeMany = (a: array<t>): Reducer_T.value => {
     let mergedValues =
@@ -52,10 +48,10 @@ let library = [
       FnDefinition.make(
         ~name="merge",
         ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
-          | [IEvRecord(d1), IEvRecord(d2)] => Internals.merge(d1, d2)->Ok
-          | _ => Error(impossibleError)
+          | [IEvRecord(d1), IEvRecord(d2)] => Internals.mergeMany([d1, d2])->Ok
+          | _ => impossibleError->Error
           }
         },
         (),
@@ -63,7 +59,7 @@ let library = [
     ],
     (),
   ),
-  //TODO: Change to use new mergeMany() function.
+
   Function.make(
     ~name="mergeMany",
     ~nameSpace,
@@ -74,14 +70,17 @@ let library = [
       FnDefinition.make(
         ~name="mergeMany",
         ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
-        ~run=(_, inputs, _, _) =>
-          inputs
-          ->Prepare.ToTypedArray.dicts
-          ->E.R2.fmap(E.Dict.concatMany)
-          ->E.R2.fmap(Js.Dict.map((. r) => FunctionRegistry_Core.FRType.matchReverse(r)))
-          ->E.R2.fmap(r => r->Js.Dict.entries->Belt.Map.String.fromArray)
-          ->E.R2.fmap(Wrappers.evRecord)
-          ->E.R2.errMap(e => e->Reducer_ErrorValue.REOther),
+        ~run=(inputs, _, _) => {
+          switch inputs {
+            | [IEvArray(dicts)] => {
+              dicts->Belt.Array.map(dictValue => switch dictValue {
+                | IEvRecord(dict) => dict
+                | _ => impossibleError->Reducer_ErrorValue.toException
+              })->Internals.mergeMany->Ok
+            }
+            | _ => impossibleError->Error
+          }
+        },
         (),
       ),
     ],
@@ -97,7 +96,7 @@ let library = [
       FnDefinition.make(
         ~name="keys",
         ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvRecord(d1)] => Internals.keys(d1)->Ok
           | _ => Error(impossibleError)
@@ -117,7 +116,7 @@ let library = [
       FnDefinition.make(
         ~name="values",
         ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvRecord(d1)] => Internals.values(d1)->Ok
           | _ => Error(impossibleError)
@@ -137,7 +136,7 @@ let library = [
       FnDefinition.make(
         ~name="toList",
         ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvRecord(dict)] => dict->Internals.toList->Ok
           | _ => Error(impossibleError)
@@ -157,7 +156,7 @@ let library = [
       FnDefinition.make(
         ~name="fromList",
         ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvArray(items)] => Internals.fromList(items)
           | _ => Error(impossibleError)

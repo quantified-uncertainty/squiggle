@@ -4,21 +4,28 @@ open FunctionRegistry_Helpers
 let nameSpace = "PointSet"
 let requiresNamespace = true
 
-let inputsTodist = (inputs: array<FunctionRegistry_Core.frValue>, makeDist) => {
-  let array = inputs->getOrError(0)->E.R.bind(Prepare.ToValueArray.Array.openA)
-  let xyCoords =
-    array->E.R.bind(xyCoords =>
-      xyCoords
-      ->E.A2.fmap(xyCoord =>
-        [xyCoord]->Prepare.ToValueArray.Record.twoArgs->E.R.bind(Prepare.ToValueTuple.twoNumbers)
-      )
-      ->E.A.R.firstErrorOrOpen
-    )
-  let expressionValue =
-    xyCoords
-    ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-    ->E.R2.fmap(r => Reducer_T.IEvDistribution(PointSet(makeDist(r))))
-  expressionValue
+let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
+  // TODO - rewrite in more functional/functor-based style
+  switch inputs {
+    | [IEvArray(items)] => {
+      items->Belt.Array.map(
+        item =>
+        switch item {
+          | IEvRecord(map) => {
+            let xValue = map->Belt.Map.String.get("x")
+            let yValue = map->Belt.Map.String.get("y")
+            switch (xValue, yValue) {
+            | (Some(IEvNumber(x)), Some(IEvNumber(y))) => (x, y)
+            | _ => impossibleError->Reducer_ErrorValue.toException
+            }
+          }
+          | _ => impossibleError->Reducer_ErrorValue.toException
+        }
+      )->Ok->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
+       ->E.R2.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
+    }
+    | _ => impossibleError->Reducer_ErrorValue.toException
+  }
 }
 
 module Internal = {
@@ -53,9 +60,9 @@ let library = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(_, inputs, env, _) =>
+        ~run=(inputs, env, _) =>
           switch inputs {
-          | [FRValueDist(dist)] =>
+          | [IEvDistribution(dist)] =>
             GenericDist.toPointSet(
               dist,
               ~xyPointLength=env.xyPointLength,
@@ -82,7 +89,7 @@ let library = [
       FnDefinition.make(
         ~name="mapY",
         ~inputs=[FRTypeDist, FRTypeLambda],
-        ~run=(inputs, _, env, reducer) =>
+        ~run=(inputs, env, reducer) =>
           switch inputs {
           | [IEvDistribution(PointSet(dist)), IEvLambda(lambda)] =>
             Internal.mapY(dist, lambda, env, reducer)
@@ -110,8 +117,8 @@ let library = [
       FnDefinition.make(
         ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _, _) =>
-          inputsTodist(inputs, r => Continuous(Continuous.make(r)))->E.R2.errMap(wrapError),
+        ~run=(inputs, _, _) =>
+          inputsToDist(inputs, r => Continuous(Continuous.make(r)))->E.R2.errMap(wrapError),
         (),
       ),
     ],
@@ -134,8 +141,8 @@ let library = [
       FnDefinition.make(
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(_, inputs, _, _) =>
-          inputsTodist(inputs, r => Discrete(Discrete.make(r)))->E.R2.errMap(wrapError),
+        ~run=(inputs, _, _) =>
+          inputsToDist(inputs, r => Discrete(Discrete.make(r)))->E.R2.errMap(wrapError),
         (),
       ),
     ],

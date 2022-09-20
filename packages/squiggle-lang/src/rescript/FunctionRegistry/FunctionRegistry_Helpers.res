@@ -21,27 +21,30 @@ module Wrappers = {
 let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleErrorString)
 
 module Prepare = {
-  type t = frValue
-  type ts = array<frValue>
+  type t = value
+  type ts = array<value>
   type err = string
 
   module ToValueArray = {
     module Record = {
-      let twoArgs = (inputs: ts): result<ts, err> =>
+      let twoArgs = (inputs: ts, (arg1: string, arg2: string)): result<ts, err> =>
         switch inputs {
-        | [FRValueRecord([(_, n1), (_, n2)])] => Ok([n1, n2])
+        | [IEvRecord(map)] => {
+          let n1 = map->Belt.Map.String.getExn(arg1)
+          let n2 = map->Belt.Map.String.getExn(arg2)
+          Ok([n1, n2])
+        }
         | _ => Error(impossibleErrorString)
         }
 
-      let threeArgs = (inputs: ts): result<ts, err> =>
+      let threeArgs = (inputs: ts, (arg1: string, arg2: string, arg3: string)): result<ts, err> =>
         switch inputs {
-        | [FRValueRecord([(_, n1), (_, n2), (_, n3)])] => Ok([n1, n2, n3])
-        | _ => Error(impossibleErrorString)
+        | [IEvRecord(map)] => {
+          let n1 = map->Belt.Map.String.getExn(arg1)
+          let n2 = map->Belt.Map.String.getExn(arg2)
+          let n3 = map->Belt.Map.String.getExn(arg3)
+          Ok([n1, n2, n3])
         }
-
-      let toArgs = (inputs: ts): result<ts, err> =>
-        switch inputs {
-        | [FRValueRecord(args)] => args->E.A2.fmap(((_, b)) => b)->Ok
         | _ => Error(impossibleErrorString)
         }
     }
@@ -49,13 +52,13 @@ module Prepare = {
     module Array = {
       let openA = (inputs: t): result<ts, err> =>
         switch inputs {
-        | FRValueArray(n) => Ok(n)
+        | IEvArray(n) => Ok(n)
         | _ => Error(impossibleErrorString)
         }
 
       let arrayOfArrays = (inputs: t): result<array<ts>, err> =>
         switch inputs {
-        | FRValueArray(n) => n->E.A2.fmap(openA)->E.A.R.firstErrorOrOpen
+        | IEvArray(n) => n->E.A2.fmap(openA)->E.A.R.firstErrorOrOpen
         | _ => Error(impossibleErrorString)
         }
     }
@@ -64,7 +67,10 @@ module Prepare = {
   module ToValueTuple = {
     let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> => {
       switch values {
-      | [FRValueDistOrNumber(a1), FRValueDistOrNumber(a2)] => Ok(a1, a2)
+      | [IEvDistribution(a1), IEvDistribution(a2)] => Ok(FRValueDist(a1), FRValueDist(a2))
+      | [IEvDistribution(a1), IEvNumber(a2)] => Ok(FRValueDist(a1), FRValueNumber(a2))
+      | [IEvNumber(a1), IEvDistribution(a2)] => Ok(FRValueNumber(a1), FRValueDist(a2))
+      | [IEvNumber(a1), IEvNumber(a2)] => Ok(FRValueNumber(a1), FRValueNumber(a2))
       | _ => Error(impossibleErrorString)
       }
     }
@@ -74,66 +80,54 @@ module Prepare = {
       err,
     > => {
       switch values {
-      | [FRValueDist(a1), FRValueDist(a2)] => Ok(a1, a2)
+      | [IEvDistribution(a1), IEvDistribution(a2)] => Ok(a1, a2)
       | _ => Error(impossibleErrorString)
       }
     }
 
     let twoNumbers = (values: ts): result<(float, float), err> => {
       switch values {
-      | [FRValueNumber(a1), FRValueNumber(a2)] => Ok(a1, a2)
+      | [IEvNumber(a1), IEvNumber(a2)] => Ok(a1, a2)
       | _ => Error(impossibleErrorString)
       }
     }
 
     let threeNumbers = (values: ts): result<(float, float, float), err> => {
       switch values {
-      | [FRValueNumber(a1), FRValueNumber(a2), FRValueNumber(a3)] => Ok(a1, a2, a3)
+      | [IEvNumber(a1), IEvNumber(a2), IEvNumber(a3)] => Ok(a1, a2, a3)
       | _ => Error(impossibleErrorString)
       }
     }
 
     let oneDistOrNumber = (values: ts): result<frValueDistOrNumber, err> => {
       switch values {
-      | [FRValueDistOrNumber(a1)] => Ok(a1)
+      | [IEvNumber(a1)] => FRValueNumber(a1)->Ok
+      | [IEvDistribution(a2)] => FRValueDist(a2)->Ok
       | _ => Error(impossibleErrorString)
       }
     }
 
     module Record = {
-      let twoDistOrNumber = (values: ts): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
-        values->ToValueArray.Record.twoArgs->E.R.bind(twoDistOrNumber)
+      let twoDistOrNumber = (values: ts, labels: (string, string)): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
+        values->ToValueArray.Record.twoArgs(labels)->E.R.bind(twoDistOrNumber)
 
-      let twoDist = (values: ts): result<
+      let twoDist = (values: ts, labels: (string, string)): result<
         (DistributionTypes.genericDist, DistributionTypes.genericDist),
         err,
-      > => values->ToValueArray.Record.twoArgs->E.R.bind(twoDist)
+      > => values->ToValueArray.Record.twoArgs(labels)->E.R.bind(twoDist)
     }
   }
 
-  module ToArrayRecordPairs = {
-    let twoArgs = (input: t): result<array<ts>, err> => {
-      let array = input->ToValueArray.Array.openA
-      let pairs =
-        array->E.R.bind(pairs =>
-          pairs
-          ->E.A2.fmap(xyCoord => [xyCoord]->ToValueArray.Record.twoArgs)
-          ->E.A.R.firstErrorOrOpen
-        )
-      pairs
-    }
-  }
-
-  let oneNumber = (values: t): result<float, err> => {
-    switch values {
-    | FRValueNumber(a1) => Ok(a1)
+  let oneNumber = (value: t): result<float, err> => {
+    switch value {
+    | IEvNumber(a1) => Ok(a1)
     | _ => Error(impossibleErrorString)
     }
   }
 
-  let oneDict = (values: t): result<Js.Dict.t<frValue>, err> => {
-    switch values {
-    | FRValueDict(a1) => Ok(a1)
+  let oneDict = (value: t): result<Reducer_T.map, err> => {
+    switch value {
+    | IEvRecord(a1) => Ok(a1)
     | _ => Error(impossibleErrorString)
     }
   }
@@ -145,7 +139,7 @@ module Prepare = {
       inputs->getOrError(0)->E.R.bind(ToValueArray.Array.openA)->E.R.bind(openNumbers)
     }
 
-    let dicts = (inputs: ts): Belt.Result.t<array<Js.Dict.t<frValue>>, err> => {
+    let dicts = (inputs: ts): Belt.Result.t<array<Reducer_T.map>, err> => {
       let openDicts = (elements: array<t>) => elements->E.A2.fmap(oneDict)->E.A.R.firstErrorOrOpen
       inputs->getOrError(0)->E.R.bind(ToValueArray.Array.openA)->E.R.bind(openDicts)
     }
@@ -226,7 +220,7 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvNumber(x)] => fn(x)->IEvNumber->Ok
           | _ => Error(impossibleError)
@@ -238,7 +232,7 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvNumber->Ok
           | _ => Error(impossibleError)
@@ -250,7 +244,7 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvNumber(x), IEvNumber(y), IEvNumber(z)] => fn(x, y, z)->IEvNumber->Ok
           | _ => Error(impossibleError)
@@ -298,7 +292,7 @@ module Make = {
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber],
-          ~run=(inputs, _, _, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvNumber(x)] => fn(x)->IEvNumber->Ok
             | _ => Error(impossibleError)
@@ -328,7 +322,7 @@ module Make = {
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, _, _, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvNumber->Ok
             | _ => Error(impossibleError)
@@ -358,7 +352,7 @@ module Make = {
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, _, _, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvBool->Ok
             | _ => Error(impossibleError)
@@ -388,7 +382,7 @@ module Make = {
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeBool, FRTypeBool],
-          ~run=(inputs, _, _, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvBool(x), IEvBool(y)] => fn(x, y)->IEvBool->Ok
             | _ => Error(impossibleError)
