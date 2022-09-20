@@ -39,13 +39,6 @@ module Internals = {
   module T = {
     type t = array<float>
 
-    let fastSort = (samples: t): t => {
-      let typedSamples = samples->Js.TypedArray2.Float64Array.make->Js.TypedArray2.Float64Array.sortInPlace
-      // why is there no standard function in Resctipt for this?
-      let typedToArray: Js.TypedArray2.Float64Array.t => t = %raw(`a => Array.from(a)`)
-      typedToArray(typedSamples)
-    }
-
     let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
       let xyPointRange = E.A.Sorted.range(samples)->E.O2.default(0.0)
       let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints)
@@ -69,7 +62,7 @@ let toPointSetDist = (
   ~samplingInputs: SamplingInputs.samplingInputs,
   (),
 ): Internals.Types.outputs => {
-  let samples = samples->Internals.T.fastSort
+  let samples = samples->E.A.Floats.sort
 
   let minDiscreteToKeep = MagicNumbers.ToPointSet.minDiscreteToKeep(samples)
   let (continuousPart, discretePart) = E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(

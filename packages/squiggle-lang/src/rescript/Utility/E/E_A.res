@@ -229,9 +229,10 @@ module Floats = {
 
   let floatCompare: (float, float) => int = compare
   let sort = t => {
-    let r = t
-    r |> Array.fast_sort(floatCompare)
-    r
+    let typed = t->Js.TypedArray2.Float64Array.make->Js.TypedArray2.Float64Array.sortInPlace
+    // why is there no standard function in Resctipt for this?
+    let typedToArray: Js.TypedArray2.Float64Array.t => t = %raw(`a => Array.from(a)`)
+    typedToArray(typed)
   }
 
   let getNonFinite = (t: t) => Belt.Array.getBy(t, r => !Js.Float.isFinite(r))
