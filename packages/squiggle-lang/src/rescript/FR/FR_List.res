@@ -86,7 +86,7 @@ let library = [
       FnDefinition.make(
         ~name="make",
         ~inputs=[FRTypeNumber, FRTypeAny],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvNumber(number), value] => Internals.makeFromNumber(number, value)->Ok
           | _ => Error(impossibleError)
@@ -107,7 +107,7 @@ let library = [
       FnDefinition.make(
         ~name="upTo",
         ~inputs=[FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
             | [IEvNumber(low), IEvNumber(high)] => Internals.upTo(low, high)->Ok
             | _ => impossibleError->Error
@@ -126,7 +126,7 @@ let library = [
       FnDefinition.make(
         ~name="first",
         ~inputs=[FRTypeArray(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvArray(array)] => Internals.first(array)->E.R2.errMap(wrapError)
           | _ => Error(impossibleError)
@@ -145,7 +145,7 @@ let library = [
       FnDefinition.make(
         ~name="last",
         ~inputs=[FRTypeArray(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvArray(array)] => Internals.last(array)->E.R2.errMap(wrapError)
           | _ => Error(impossibleError)
@@ -165,7 +165,7 @@ let library = [
       FnDefinition.make(
         ~name="reverse",
         ~inputs=[FRTypeArray(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvArray(array)] => Internals.reverse(array)->Ok
           | _ => Error(impossibleError)
@@ -185,7 +185,7 @@ let library = [
       FnDefinition.make(
         ~name="map",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
-        ~run=(inputs, _, env, reducer) =>
+        ~run=(inputs, env, reducer) =>
           switch inputs {
           | [IEvArray(array), IEvLambda(lambda)] => Ok(Internals.map(array, lambda, env, reducer))
           | _ => Error(impossibleError)
@@ -204,7 +204,7 @@ let library = [
       FnDefinition.make(
         ~name="reduce",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeAny, FRTypeLambda],
-        ~run=(inputs, _, env, reducer) =>
+        ~run=(inputs, env, reducer) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
             Ok(Internals.reduce(array, initialValue, lambda, env, reducer))
@@ -224,7 +224,7 @@ let library = [
       FnDefinition.make(
         ~name="reduceReverse",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeAny, FRTypeLambda],
-        ~run=(inputs, _, env, reducer) =>
+        ~run=(inputs, env, reducer) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
             Ok(Internals.reduceReverse(array, initialValue, lambda, env, reducer))
@@ -244,7 +244,7 @@ let library = [
       FnDefinition.make(
         ~name="filter",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
-        ~run=(inputs, _, env, reducer) =>
+        ~run=(inputs, env, reducer) =>
           switch inputs {
           | [IEvArray(array), IEvLambda(lambda)] =>
             Ok(Internals.filter(array, lambda, env, reducer))

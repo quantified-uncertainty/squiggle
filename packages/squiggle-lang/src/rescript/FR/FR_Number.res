@@ -9,7 +9,7 @@ module ArrayNumberDist = {
     FnDefinition.make(
       ~name,
       ~inputs=[FRTypeArray(FRTypeNumber)],
-      ~run=(inputs, _, _, _) =>
+      ~run=(inputs, _, _) =>
         inputs
         ->Prepare.ToTypedArray.numbers
         ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))

@@ -14,7 +14,7 @@ let makeFnMany = (name: string, definitions: array<simpleDefinition>) =>
     ~nameSpace,
     ~requiresNamespace=false,
     ~definitions=definitions->Js.Array2.map(({inputs, fn}) =>
-      FnDefinition.make(~name, ~inputs, ~run=(inputs, _, _, _) => fn(inputs), ())
+      FnDefinition.make(~name, ~inputs, ~run=(inputs, _, _) => fn(inputs), ())
     ),
     (),
   )

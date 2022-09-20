@@ -326,7 +326,7 @@ let makeProxyFn = (name: string, inputs: array<frType>) => {
       FnDefinition.make(
         ~name,
         ~inputs,
-        ~run=(inputs, _, env, _) => Old.dispatch((name, inputs), env),
+        ~run=(inputs, env, _) => Old.dispatch((name, inputs), env),
         (),
       ),
     ],

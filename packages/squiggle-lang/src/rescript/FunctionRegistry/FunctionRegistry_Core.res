@@ -30,7 +30,6 @@ type fnDefinition = {
   inputs: array<frType>,
   run: (
     array<Reducer_T.value>,
-    unit,
     Reducer_T.environment,
     Reducer_T.reducerFn,
   ) => result<Reducer_T.value, errorValue>,
@@ -130,7 +129,7 @@ module FnDefinition = {
     reducer: Reducer_T.reducerFn,
   ) => {
     switch t->isMatch(args) {
-    | true => t.run(args, (), env, reducer)
+    | true => t.run(args, env, reducer)
     | false => REOther("Incorrect Types")->Error
     }
   }

@@ -9,7 +9,7 @@ let makeUnitFn = (name: string, multiplier: float) => {
       FnDefinition.make(
         ~name="fromUnit_" ++ name,
         ~inputs=[FRTypeNumber],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvNumber(f)] => IEvNumber(f *. multiplier)->Ok
           | _ => FunctionRegistry_Helpers.impossibleError->Error

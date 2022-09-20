@@ -22,7 +22,7 @@ module DistributionCreation = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber],
-        ~run=(inputs, _, env, _) =>
+        ~run=(inputs, env, _) =>
           inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env),
         (),
       )
@@ -32,7 +32,7 @@ module DistributionCreation = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
-        ~run=(inputs, _, env, _) =>
+        ~run=(inputs, env, _) =>
           inputs->Prepare.ToValueTuple.Record.twoDistOrNumber(("p5", "p95"))->process(~fn, ~env),
         (),
       )
@@ -42,7 +42,7 @@ module DistributionCreation = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
-        ~run=(inputs, _, env, _) =>
+        ~run=(inputs, env, _) =>
           inputs->Prepare.ToValueTuple.Record.twoDistOrNumber(("mean", "stdev"))->process(~fn, ~env),
         (),
       )
@@ -60,7 +60,7 @@ module DistributionCreation = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeDistOrNumber],
-        ~run=(inputs, _, env, _) =>
+        ~run=(inputs, env, _) =>
           inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env),
         (),
       )

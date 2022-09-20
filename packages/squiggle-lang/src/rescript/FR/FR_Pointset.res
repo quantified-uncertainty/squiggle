@@ -60,7 +60,7 @@ let library = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(inputs, _, env, _) =>
+        ~run=(inputs, env, _) =>
           switch inputs {
           | [IEvDistribution(dist)] =>
             GenericDist.toPointSet(
@@ -89,7 +89,7 @@ let library = [
       FnDefinition.make(
         ~name="mapY",
         ~inputs=[FRTypeDist, FRTypeLambda],
-        ~run=(inputs, _, env, reducer) =>
+        ~run=(inputs, env, reducer) =>
           switch inputs {
           | [IEvDistribution(PointSet(dist)), IEvLambda(lambda)] =>
             Internal.mapY(dist, lambda, env, reducer)
@@ -117,7 +117,7 @@ let library = [
       FnDefinition.make(
         ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           inputsToDist(inputs, r => Continuous(Continuous.make(r)))->E.R2.errMap(wrapError),
         (),
       ),
@@ -141,7 +141,7 @@ let library = [
       FnDefinition.make(
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           inputsToDist(inputs, r => Discrete(Discrete.make(r)))->E.R2.errMap(wrapError),
         (),
       ),

@@ -48,7 +48,7 @@ let library = [
       FnDefinition.make(
         ~name="merge",
         ~inputs=[FRTypeDict(FRTypeAny), FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvRecord(d1), IEvRecord(d2)] => Internals.mergeMany([d1, d2])->Ok
           | _ => impossibleError->Error
@@ -70,7 +70,7 @@ let library = [
       FnDefinition.make(
         ~name="mergeMany",
         ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
             | [IEvArray(dicts)] => {
               dicts->Belt.Array.map(dictValue => switch dictValue {
@@ -96,7 +96,7 @@ let library = [
       FnDefinition.make(
         ~name="keys",
         ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvRecord(d1)] => Internals.keys(d1)->Ok
           | _ => Error(impossibleError)
@@ -116,7 +116,7 @@ let library = [
       FnDefinition.make(
         ~name="values",
         ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvRecord(d1)] => Internals.values(d1)->Ok
           | _ => Error(impossibleError)
@@ -136,7 +136,7 @@ let library = [
       FnDefinition.make(
         ~name="toList",
         ~inputs=[FRTypeDict(FRTypeAny)],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvRecord(dict)] => dict->Internals.toList->Ok
           | _ => Error(impossibleError)
@@ -156,7 +156,7 @@ let library = [
       FnDefinition.make(
         ~name="fromList",
         ~inputs=[FRTypeArray(FRTypeArray(FRTypeAny))],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvArray(items)] => Internals.fromList(items)
           | _ => Error(impossibleError)

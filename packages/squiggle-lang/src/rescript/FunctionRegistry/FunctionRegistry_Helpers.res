@@ -220,7 +220,7 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvNumber(x)] => fn(x)->IEvNumber->Ok
           | _ => Error(impossibleError)
@@ -232,7 +232,7 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvNumber->Ok
           | _ => Error(impossibleError)
@@ -244,7 +244,7 @@ module DefineFn = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeNumber, FRTypeNumber, FRTypeNumber],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           switch inputs {
           | [IEvNumber(x), IEvNumber(y), IEvNumber(z)] => fn(x, y, z)->IEvNumber->Ok
           | _ => Error(impossibleError)
@@ -292,7 +292,7 @@ module Make = {
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber],
-          ~run=(inputs, _, _, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvNumber(x)] => fn(x)->IEvNumber->Ok
             | _ => Error(impossibleError)
@@ -322,7 +322,7 @@ module Make = {
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, _, _, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvNumber->Ok
             | _ => Error(impossibleError)
@@ -352,7 +352,7 @@ module Make = {
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, _, _, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvNumber(x), IEvNumber(y)] => fn(x, y)->IEvBool->Ok
             | _ => Error(impossibleError)
@@ -382,7 +382,7 @@ module Make = {
         FnDefinition.make(
           ~name,
           ~inputs=[FRTypeBool, FRTypeBool],
-          ~run=(inputs, _, _, _) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvBool(x), IEvBool(y)] => fn(x, y)->IEvBool->Ok
             | _ => Error(impossibleError)

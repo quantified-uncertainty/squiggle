@@ -89,7 +89,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(inputs, _, environment, _) =>
+        ~run=(inputs, environment, _) =>
           switch inputs {
           | [IEvDistribution(dist)] =>
             GenericDist.toSampleSetDist(dist, environment.sampleCount)
@@ -113,7 +113,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="fromList",
         ~inputs=[FRTypeArray(FRTypeNumber)],
-        ~run=(inputs, _, _, _) => {
+        ~run=(inputs, _, _) => {
           let sampleSet =
             inputs->Prepare.ToTypedArray.numbers |> E.R2.bind(r =>
               SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??")
@@ -138,7 +138,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="toList",
         ~inputs=[FRTypeDist],
-        ~run=(inputs, _, _, _) =>
+        ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist))] =>
             dist->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
@@ -159,7 +159,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="fromFn",
         ~inputs=[FRTypeLambda],
-        ~run=(inputs, _, environment, reducer) =>
+        ~run=(inputs, environment, reducer) =>
           switch inputs {
           | [IEvLambda(lambda)] =>
             switch Internal.fromFn(lambda, environment, reducer) {
@@ -183,7 +183,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="map",
         ~inputs=[FRTypeDist, FRTypeLambda],
-        ~run=(inputs, _, environment, reducer) =>
+        ~run=(inputs, environment, reducer) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist)), IEvLambda(lambda)] =>
             Internal.map1(dist, lambda, environment, reducer)
@@ -206,7 +206,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="map2",
         ~inputs=[FRTypeDist, FRTypeDist, FRTypeLambda],
-        ~run=(inputs, _, environment, reducer) => {
+        ~run=(inputs, environment, reducer) => {
           switch inputs {
           | [
               IEvDistribution(SampleSet(dist1)),
@@ -234,7 +234,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="map3",
         ~inputs=[FRTypeDist, FRTypeDist, FRTypeDist, FRTypeLambda],
-        ~run=(inputs, _, environment, reducer) =>
+        ~run=(inputs, environment, reducer) =>
           switch inputs {
           | [
               IEvDistribution(SampleSet(dist1)),
@@ -262,7 +262,7 @@ let libaryBase = [
       FnDefinition.make(
         ~name="mapN",
         ~inputs=[FRTypeArray(FRTypeDist), FRTypeLambda],
-        ~run=(inputs, _, environment, reducer) =>
+        ~run=(inputs, environment, reducer) =>
           switch inputs {
           | [IEvArray(dists), IEvLambda(lambda)] =>
             Internal.mapN(dists, lambda, environment, reducer)
@@ -280,7 +280,7 @@ module Comparison = {
     FnDefinition.make(
       ~name,
       ~inputs,
-      ~run=(inputs, _, _, _) => {
+      ~run=(inputs, _, _) => {
         run(inputs)
       },
       (),
