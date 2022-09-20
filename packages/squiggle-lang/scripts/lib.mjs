@@ -13,7 +13,7 @@ export const measure = (cb, times = 1) => {
 export const red = (str) => `\x1b[31m${str}\x1b[0m`;
 export const green = (str) => `\x1b[32m${str}\x1b[0m`;
 
-export const run = (src, { output, sampleCount }) => {
+export const run = (src, { output, sampleCount } = {}) => {
   const project = SqProject.create();
   if (sampleCount) {
     project.setEnvironment({
