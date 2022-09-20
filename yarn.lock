@@ -2153,10 +2153,10 @@
   dependencies:
     "@floating-ui/core" "^1.0.1"
 
-"@floating-ui/react-dom-interactions@^0.9.3":
-  version "0.9.3"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom-interactions/-/react-dom-interactions-0.9.3.tgz#4d4d81664066ac36980e50691aa90b1d40667949"
-  integrity sha512-oHwFLxySRtmhgwg7ZdWswvDDi+ld4mEtxu6ngOd7mRC5L1Rk6adjSfOBOHDxea+ItAWmds8m6A725sn1HQtUyQ==
+"@floating-ui/react-dom-interactions@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom-interactions/-/react-dom-interactions-0.10.1.tgz#45fc7c3d9a2ae58f0ef39078660e97594f484af8"
+  integrity sha512-mb9Sn/cnPjVlEucSZTSt4Iu7NAvqnXTvmzeE5EtfdRhVQO6L94dqqT+DPTmJmbiw4XqzoyGP+Q6J+I5iK2p6bw==
   dependencies:
     "@floating-ui/react-dom" "^1.0.0"
     aria-hidden "^1.1.3"
