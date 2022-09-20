@@ -107,11 +107,11 @@ let library = [
       FnDefinition.make(
         ~name="upTo",
         ~inputs=[FRTypeNumber, FRTypeNumber],
-        ~run=(_, inputs, _, _) =>
-          inputs
-          ->Prepare.ToValueTuple.twoNumbers
-          ->E.R2.fmap(((low, high)) => Internals.upTo(low, high))
-          ->E.R2.errMap(wrapError),
+        ~run=(inputs, _, _, _) =>
+          switch inputs {
+            | [IEvNumber(low), IEvNumber(high)] => Internals.upTo(low, high)->Ok
+            | _ => impossibleError->Error
+          },
         (),
       ),
     ],

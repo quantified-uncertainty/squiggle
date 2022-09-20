@@ -7,12 +7,12 @@ module Declaration = {
     ("inputs", FRTypeArray(FRTypeRecord([("min", FRTypeNumber), ("max", FRTypeNumber)]))),
   ])
 
-  let fromExpressionValue = (e: frValue): result<Reducer_T.value, string> => {
-    switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs([e]) {
-    | Ok([FRValueLambda(lambda), FRValueArray(inputs)]) => {
+  let fromExpressionValue = (e: Reducer_T.value): result<Reducer_T.value, string> => {
+    switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs([e], ("fn", "inputs")) {
+    | Ok([IEvLambda(lambda), IEvArray(inputs)]) => {
         open FunctionRegistry_Helpers.Prepare
         let getMinMax = arg =>
-          ToValueArray.Record.toArgs([arg])
+          ToValueArray.Record.twoArgs([arg], ("min", "max"))
           ->E.R.bind(ToValueTuple.twoNumbers)
           ->E.R2.fmap(((min, max)) => Declaration.ContinuousFloatArg.make(min, max))
         inputs
@@ -49,7 +49,7 @@ let library = [
       FnDefinition.make(
         ~name="declare",
         ~inputs=[Declaration.frType],
-        ~run=(_, inputs, _, _) => {
+        ~run=(inputs, _, _, _) => {
           inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)->E.R2.errMap(wrapError)
         },
         (),

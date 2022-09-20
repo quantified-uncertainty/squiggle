@@ -23,35 +23,14 @@ type rec frType =
 and frTypeRecord = array<frTypeRecordParam>
 and frTypeRecordParam = (string, frType)
 
-/*
-  Function Registry "Value". A type, with the information of that type.
-  Like, #Float(40.0)
-*/
-type rec frValue =
-  | FRValueNumber(float)
-  | FRValueBool(bool)
-  | FRValueDate(Js.Date.t)
-  | FRValueTimeDuration(float)
-  | FRValueDist(DistributionTypes.genericDist)
-  | FRValueArray(array<frValue>)
-  | FRValueDistOrNumber(frValueDistOrNumber)
-  | FRValueRecord(frValueRecord)
-  | FRValueLambda(Reducer_T.lambdaValue)
-  | FRValueString(string)
-  | FRValueVariant(string)
-  | FRValueAny(frValue)
-  | FRValueDict(Js.Dict.t<frValue>)
-and frValueRecord = array<frValueRecordParam>
-and frValueRecordParam = (string, frValue)
-and frValueDictParam = (string, frValue)
-and frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.genericDist)
+type frValueDistOrNumber = FRValueNumber(float) | FRValueDist(DistributionTypes.genericDist)
 
 type fnDefinition = {
   name: string,
   inputs: array<frType>,
   run: (
     array<Reducer_T.value>,
-    array<frValue>,
+    unit,
     Reducer_T.environment,
     Reducer_T.reducerFn,
   ) => result<Reducer_T.value, errorValue>,
@@ -91,104 +70,43 @@ module FRType = {
     | FRTypeAny => `any`
     }
 
-  let rec toFrValue = (r: Reducer_T.value): option<frValue> =>
-    // not all value variants are supported, but it's not important (we'll probably deprecate frValues soon anyway)
-    switch r {
-    | IEvNumber(f) => Some(FRValueNumber(f))
-    | IEvString(f) => Some(FRValueString(f))
-    | IEvDistribution(f) => Some(FRValueDistOrNumber(FRValueDist(f)))
-    | IEvLambda(f) => Some(FRValueLambda(f))
-    | IEvArray(elements) =>
-      elements->E.A2.fmap(toFrValue)->E.A.O.openIfAllSome->E.O2.fmap(r => FRValueArray(r))
-    | IEvRecord(map) =>
-      Belt.Map.String.toArray(map)
-      ->E.A2.fmap(((key, item)) => item->toFrValue->E.O2.fmap(o => (key, o)))
-      ->E.A.O.openIfAllSome
-      ->E.O2.fmap(r => FRValueRecord(r))
-    | _ => None
-    }
-
-  let rec matchWithExpressionValue = (t: t, r: Reducer_T.value): option<frValue> =>
+  let rec matchWithValue = (t: t, r: Reducer_T.value): bool =>
     switch (t, r) {
-    | (FRTypeAny, f) => toFrValue(f)
-    | (FRTypeString, IEvString(f)) => Some(FRValueString(f))
-    | (FRTypeNumber, IEvNumber(f)) => Some(FRValueNumber(f))
-    | (FRTypeBool, IEvBool(f)) => Some(FRValueBool(f))
-    | (FRTypeDate, IEvDate(f)) => Some(FRValueDate(f))
-    | (FRTypeTimeDuration, IEvTimeDuration(f)) => Some(FRValueTimeDuration(f))
-    | (FRTypeDistOrNumber, IEvNumber(f)) => Some(FRValueDistOrNumber(FRValueNumber(f)))
-    | (FRTypeDistOrNumber, IEvDistribution(Symbolic(#Float(f)))) =>
-      Some(FRValueDistOrNumber(FRValueNumber(f)))
-    | (FRTypeDistOrNumber, IEvDistribution(f)) => Some(FRValueDistOrNumber(FRValueDist(f)))
-    | (FRTypeDist, IEvDistribution(f)) => Some(FRValueDist(f))
-    | (FRTypeNumeric, IEvNumber(f)) => Some(FRValueNumber(f))
-    | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(f)))) => Some(FRValueNumber(f))
-    | (FRTypeLambda, IEvLambda(f)) => Some(FRValueLambda(f))
+    | (FRTypeAny, _) => true
+    | (FRTypeString, IEvString(_)) => true
+    | (FRTypeNumber, IEvNumber(_)) => true
+    | (FRTypeBool, IEvBool(_)) => true
+    | (FRTypeDate, IEvDate(_)) => true
+    | (FRTypeTimeDuration, IEvTimeDuration(_)) => true
+    | (FRTypeDistOrNumber, IEvNumber(_)) => true
+    | (FRTypeDistOrNumber, IEvDistribution(_)) => true
+    | (FRTypeDist, IEvDistribution(_)) => true
+    | (FRTypeNumeric, IEvNumber(_)) => true
+    | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(_)))) => true
+    | (FRTypeLambda, IEvLambda(_)) => true
     | (FRTypeArray(intendedType), IEvArray(elements)) => {
-        let el = elements->E.A2.fmap(matchWithExpressionValue(intendedType))
-        E.A.O.openIfAllSome(el)->E.O2.fmap(r => FRValueArray(r))
+        elements->Belt.Array.every(v => matchWithValue(intendedType, v))
       }
     | (FRTypeDict(r), IEvRecord(map)) =>
-      map
-      ->Belt.Map.String.toArray
-      ->E.A2.fmap(((key, item)) => matchWithExpressionValue(r, item)->E.O2.fmap(o => (key, o)))
-      ->E.A.O.openIfAllSome
-      ->E.O2.fmap(r => FRValueDict(Js.Dict.fromArray(r)))
+      map->Belt.Map.String.valuesToArray->Belt.Array.every(v => matchWithValue(r, v))
     | (FRTypeRecord(recordParams), IEvRecord(map)) => {
-        let getAndMatch = (name, input) =>
-          Belt.Map.String.get(map, name)->E.O.bind(matchWithExpressionValue(input))
-        //All names in the type must be present. If any are missing, the corresponding
-        //value will be None, and this function would return None.
-        let namesAndValues: array<option<(Js.Dict.key, frValue)>> =
-          recordParams->E.A2.fmap(((name, input)) =>
-            getAndMatch(name, input)->E.O2.fmap(match => (name, match))
-          )
-        namesAndValues->E.A.O.openIfAllSome->E.O2.fmap(r => FRValueRecord(r))
-      }
-    | _ => None
+      recordParams->Belt.Array.every(((name, input)) => {
+        switch map->Belt.Map.String.get(name) {
+          | Some(v) => matchWithValue(input, v)
+          | None => false
+        }
+      })
+    }
+    | _ => false
     }
 
-  let rec matchReverse = (e: frValue): Reducer_T.value =>
-    switch e {
-    | FRValueNumber(f) => IEvNumber(f)
-    | FRValueBool(f) => IEvBool(f)
-    | FRValueDate(f) => IEvDate(f)
-    | FRValueTimeDuration(f) => IEvTimeDuration(f)
-    | FRValueDistOrNumber(FRValueNumber(n)) => IEvNumber(n)
-    | FRValueDistOrNumber(FRValueDist(n)) => IEvDistribution(n)
-    | FRValueDist(dist) => IEvDistribution(dist)
-    | FRValueArray(elements) => IEvArray(elements->E.A2.fmap(matchReverse))
-    | FRValueRecord(frValueRecord) => {
-        let map =
-          frValueRecord
-          ->E.A2.fmap(((name, value)) => (name, matchReverse(value)))
-          ->Belt.Map.String.fromArray
-        IEvRecord(map)
-      }
-    | FRValueDict(frValueRecord) => {
-        let map =
-          frValueRecord
-          ->Js.Dict.entries
-          ->E.A2.fmap(((name, value)) => (name, matchReverse(value)))
-          ->Belt.Map.String.fromArray
-        IEvRecord(map)
-      }
-    | FRValueLambda(l) => IEvLambda(l)
-    | FRValueString(string) => IEvString(string)
-    | FRValueVariant(string) => IEvString(string)
-    | FRValueAny(f) => matchReverse(f)
-    }
-
-  let matchWithExpressionValueArray = (inputs: array<t>, args: array<Reducer_T.value>): option<
-    array<frValue>,
-  > => {
+  let matchWithValueArray = (inputs: array<t>, args: array<Reducer_T.value>): bool => {
     let isSameLength = E.A.length(inputs) == E.A.length(args)
     if !isSameLength {
-      None
+      false
     } else {
       E.A.zip(inputs, args)
-      ->E.A2.fmap(((input, arg)) => matchWithExpressionValue(input, arg))
-      ->E.A.O.openIfAllSome
+      ->Belt.Array.every(((input, arg)) => matchWithValue(input, arg))
     }
   }
 }
@@ -202,11 +120,7 @@ module FnDefinition = {
   }
 
   let isMatch = (t: t, args: array<Reducer_T.value>) => {
-    let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
-    switch argValues {
-    | Some(_) => true
-    | None => false
-    }
+    FRType.matchWithValueArray(t.inputs, args)
   }
 
   let run = (
@@ -215,10 +129,9 @@ module FnDefinition = {
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
   ) => {
-    let argValues = FRType.matchWithExpressionValueArray(t.inputs, args)
-    switch argValues {
-    | Some(values) => t.run(args, values, env, reducer)
-    | None => REOther("Incorrect Types")->Error
+    switch t->isMatch(args) {
+    | true => t.run(args, (), env, reducer)
+    | false => REOther("Incorrect Types")->Error
     }
   }
 

@@ -89,9 +89,9 @@ let libaryBase = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(_, inputs, environment, _) =>
+        ~run=(inputs, _, environment, _) =>
           switch inputs {
-          | [FRValueDist(dist)] =>
+          | [IEvDistribution(dist)] =>
             GenericDist.toSampleSetDist(dist, environment.sampleCount)
             ->E.R2.fmap(Wrappers.sampleSet)
             ->E.R2.fmap(Wrappers.evDistribution)
@@ -113,9 +113,9 @@ let libaryBase = [
       FnDefinition.make(
         ~name="fromList",
         ~inputs=[FRTypeArray(FRTypeNumber)],
-        ~run=(_, inputs, _, _) => {
+        ~run=(inputs, _, _, _) => {
           let sampleSet =
-            Prepare.ToTypedArray.numbers(inputs) |> E.R2.bind(r =>
+            inputs->Prepare.ToTypedArray.numbers |> E.R2.bind(r =>
               SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??")
             )
           sampleSet
