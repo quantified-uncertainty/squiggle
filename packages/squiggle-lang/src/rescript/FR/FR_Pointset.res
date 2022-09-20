@@ -5,17 +5,17 @@ let nameSpace = "PointSet"
 let requiresNamespace = true
 
 let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
-  // TODO - rewritein more functional/functor-based style
+  // TODO - rewrite in more functional/functor-based style
   switch inputs {
     | [IEvArray(items)] => {
       items->Belt.Array.map(
         item =>
         switch item {
           | IEvRecord(map) => {
-            let xValue = map->Belt.Map.String.getExn("x")
-            let yValue = map->Belt.Map.String.getExn("y")
+            let xValue = map->Belt.Map.String.get("x")
+            let yValue = map->Belt.Map.String.get("y")
             switch (xValue, yValue) {
-            | (IEvNumber(x), IEvNumber(y)) => (x, y)
+            | (Some(IEvNumber(x)), Some(IEvNumber(y))) => (x, y)
             | _ => impossibleError->Reducer_ErrorValue.toException
             }
           }
