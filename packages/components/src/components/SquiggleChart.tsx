@@ -27,7 +27,7 @@ export interface SquiggleChartProps {
   /** If the result is a function, the amount of stops sampled */
   diagramCount?: number;
   /** When the squiggle code gets reevaluated */
-  onChange?(expr: SqValue | undefined): void;
+  onChange?(expr: SqValue | undefined, sourceName: string): void;
   /** CSS width of the element */
   width?: number;
   height?: number;
@@ -88,7 +88,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
     xAxisType = "number",
     distributionChartActions,
     enableLocalSettings = false,
-    sourceName = "main",
+    sourceName,
     includes = [],
     project = SqProject.create(),
   }) => {
