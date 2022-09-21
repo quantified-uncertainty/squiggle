@@ -27,6 +27,7 @@ function ok<a, b>(x: a): result<a, b> {
 
 const schema = yup
   .object()
+  .noUnknown()
   .strict()
   .shape({
     distributions: yup
