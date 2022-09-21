@@ -1,5 +1,11 @@
 import * as yup from "yup";
-import { SqDistribution, result, SqRecord } from "@quri/squiggle-lang";
+import {
+  SqValue,
+  SqValueTag,
+  SqDistribution,
+  result,
+  SqRecord,
+} from "@quri/squiggle-lang";
 
 export type LabeledDistribution = {
   name: string;
@@ -21,48 +27,55 @@ function ok<a, b>(x: a): result<a, b> {
 
 const schema = yup
   .object()
-  .strict()
   .noUnknown()
+  .strict()
   .shape({
-    distributions: yup.object().shape({
-      tag: yup.mixed().oneOf(["array"]),
-      value: yup
-        .array()
-        .of(
-          yup.object().shape({
-            tag: yup.mixed().oneOf(["record"]),
-            value: yup.object({
-              name: yup.object().shape({
-                tag: yup.mixed().oneOf(["string"]),
-                value: yup.string().required(),
-              }),
-              // color: yup
-              //   .object({
-              //     tag: yup.mixed().oneOf(["string"]),
-              //     value: yup.string().required(),
-              //   })
-              //   .default(undefined),
-              distribution: yup.object({
-                tag: yup.mixed().oneOf(["distribution"]),
-                value: yup.mixed(),
-              }),
-            }),
-          })
-        )
-        .required(),
-    }),
+    distributions: yup
+      .array()
+      .required()
+      .of(
+        yup.object().required().shape({
+          name: yup.string().required(),
+          distribution: yup.mixed().required(),
+        })
+      ),
   });
+
+type JsonObject =
+  | string
+  | { [key: string]: JsonObject }
+  | JsonObject[]
+  | SqDistribution;
+
+function toJson(val: SqValue): JsonObject {
+  if (val.tag === SqValueTag.String) {
+    return val.value;
+  } else if (val.tag === SqValueTag.Record) {
+    return toJsonRecord(val.value);
+  } else if (val.tag === SqValueTag.Array) {
+    return val.value.getValues().map(toJson);
+  } else if (val.tag === SqValueTag.Distribution) {
+    return val.value;
+  } else {
+    throw new Error("Could not parse object of type " + val.tag);
+  }
+}
+
+function toJsonRecord(val: SqRecord): JsonObject {
+  let recordObject: JsonObject = {};
+  val.entries().forEach(([key, value]) => (recordObject[key] = toJson(value)));
+  return recordObject;
+}
 
 export function parsePlot(record: SqRecord): result<Plot, string> {
   try {
-    const plotRecord = schema.validateSync(record);
-    return ok({
-      distributions: plotRecord.distributions.value.map((x) => ({
-        name: x.value.name.value,
-        // color: x.value.color?.value, // not supported yet
-        distribution: x.value.distribution.value,
-      })),
-    });
+    const plotRecord = schema.validateSync(toJsonRecord(record));
+    if (plotRecord.distributions) {
+      return ok({ distributions: plotRecord.distributions.map((x) => x) });
+    } else {
+      // I have no idea why yup's typings thinks this is possible
+      return error("no distributions field. Should never get here");
+    }
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return error(message);
