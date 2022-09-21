@@ -36,7 +36,7 @@ const schema = yup
       .of(
         yup.object().required().shape({
           name: yup.string().required(),
-          distribution: yup.mixed(),
+          distribution: yup.mixed().required(),
         })
       ),
   });
