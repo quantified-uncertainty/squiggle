@@ -14,6 +14,8 @@ type SquiggleArgs = {
   onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 };
 
+const importSourceName = (sourceName: string) => "imports-" + sourceName;
+
 export const useSquiggle = (args: SquiggleArgs) => {
   const autogenName = useMemo(() => uuidv4(), []);
 
@@ -43,8 +45,8 @@ export const useSquiggle = (args: SquiggleArgs) => {
       }
       if (args.jsImports && Object.keys(args.jsImports).length) {
         const importsSource = jsImportsToSquiggleCode(args.jsImports);
-        project.setSource("imports", importsSource);
-        includes.push("imports");
+        project.setSource(importSourceName(sourceName), importsSource);
+        includes.push(importSourceName(sourceName));
       }
       project.setContinues(sourceName, includes);
       project.run(sourceName);
@@ -68,6 +70,8 @@ export const useSquiggle = (args: SquiggleArgs) => {
   useEffect(() => {
     return () => {
       if (!args.sourceName) args.project.clean(result.sourceName);
+      if (args.project.getSource(importSourceName(result.sourceName)))
+        args.project.clean(result.sourceName);
     };
   });
 
