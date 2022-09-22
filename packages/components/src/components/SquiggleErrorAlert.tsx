@@ -7,5 +7,5 @@ type Props = {
 };
 
 export const SquiggleErrorAlert: React.FC<Props> = ({ error }) => {
-  return <ErrorAlert heading="Error">{error.toString()}</ErrorAlert>;
+  return <ErrorAlert heading="Error">{error.toString()} (Source: {error.getSource()})</ErrorAlert>;
 };
