@@ -51,6 +51,14 @@ let setSource = (project: reducerProject, sourceId: string, value: string): unit
   project->Private.setSource(sourceId, value)
 
 /*
+Removes the source for a given source Id. Only works on sources without dependents.
+Returns true for success
+*/
+@genType
+let removeSource = (project: reducerProject, sourceId: string): unit =>
+  project->Private.removeSource(sourceId)
+
+/*
 Gets the source for a given source id.
 */
 @genType

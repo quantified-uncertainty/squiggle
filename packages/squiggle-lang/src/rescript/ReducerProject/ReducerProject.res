@@ -61,6 +61,10 @@ let setSource = (project: t, sourceId: string, value: string): unit => {
   touchDependents(project, sourceId)
 }
 
+let removeSource = (project: t, sourceId: string): unit => {
+  Belt.MutableMap.String.remove(project.items, sourceId)
+}
+
 let clean = (project: t, sourceId: string): unit => {
   let newItem = project->getItem(sourceId)->ProjectItem.clean
   project->setItem(sourceId, newItem)
@@ -184,6 +188,7 @@ let linkDependencies = (project: t, sourceId: string): Reducer_T.namespace => {
     acc->Reducer_Namespace.set(
       variable,
       project->getBindings(includeFile)->Reducer_Namespace.toRecord,
+
     )
   )
 }
