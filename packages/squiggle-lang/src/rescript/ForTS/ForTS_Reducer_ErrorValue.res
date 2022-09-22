@@ -19,4 +19,4 @@ let createTodoError = (v: string) => Reducer_ErrorValue.RETodo(v)
 let createOtherError = (v: string) => Reducer_ErrorValue.REOther(v)
 
 @genType
-let getErrorSource = (err: reducerErrorValueWithSource) => err.sourceId
+let getSource = (err: reducerErrorValueWithSource) => err.sourceId

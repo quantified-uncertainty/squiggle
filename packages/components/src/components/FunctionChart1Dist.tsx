@@ -172,25 +172,22 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   const signalListeners = { mousemove: handleHover, mouseout: handleOut };
 
   //TODO: This custom error handling is a bit hacky and should be improved.
-  let mouseItem: result<SqValue, SqError> = !!mouseOverlay
-    ? fn.call([mouseOverlay])
-    : {
-        tag: "Error",
-        value: SqError.createOtherError(
-          "Hover x-coordinate returned NaN. Expected a number."
-        ),
-      };
-  let showChart =
-    mouseItem.tag === "Ok" &&
-    mouseItem.value.tag === SqValueTag.Distribution ? (
-      <DistributionChart
-        plot={defaultPlot(mouseItem.value.value)}
-        environment={environment}
-        width={400}
-        height={50}
-        {...distributionPlotSettings}
-      />
-    ) : null;
+  let showChart: JSX.Element | null = null;
+  if (!isNaN(mouseOverlay)) {
+    let mouseItem = fn.call([mouseOverlay]);
+
+    showChart =
+      mouseItem.tag === "Ok" &&
+      mouseItem.value.tag === SqValueTag.Distribution ? (
+        <DistributionChart
+          plot={defaultPlot(mouseItem.value.value)}
+          environment={environment}
+          width={400}
+          height={50}
+          {...distributionPlotSettings}
+        />
+      ) : null;
+  }
 
   let getPercentilesMemoized = React.useMemo(
     () => getPercentiles({ chartSettings, fn, environment }),
