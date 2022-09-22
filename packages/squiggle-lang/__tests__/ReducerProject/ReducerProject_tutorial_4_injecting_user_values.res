@@ -30,7 +30,7 @@ describe("ReducerProject Tutorial", () => {
     /* We can now run the project */
     Project.runAll(project)
     let result = Project.getResult(project, "main")
-    result->InternalExpressionValue.toStringResult->expect == "Ok(6)"
+    result->InternalExpressionValue.toStringWithSourceResult->expect == "Ok(6)"
   })
 })
 

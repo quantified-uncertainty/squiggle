@@ -50,7 +50,7 @@ Case "Running a single source".
 
       /* Let's display the result and bindings */
       (
-        result->InternalExpressionValue.toStringResult,
+        result->InternalExpressionValue.toStringWithSourceResult,
         bindings->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(3)", "@{}")
       /* You've got 3 with empty bindings. */
@@ -64,7 +64,7 @@ Case "Running a single source".
       let bindings = Project.getBindings(project, "main")->Bindings.removeResult
       /* Now you have external bindings and external result. */
       (
-        result->InternalExpressionValue.toStringResult,
+        result->InternalExpressionValue.toStringWithSourceResult,
         bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
       )->expect == ("Ok(3)", "@{}")
     })
@@ -80,7 +80,7 @@ Case "Running a single source".
       Project.runAll(project)
       let result = Project.getResult(project, "main")
       let _bindings = Project.getBindings(project, "main")
-      result->InternalExpressionValue.toStringResult->expect == "Ok(3)"
+      result->InternalExpressionValue.toStringWithSourceResult->expect == "Ok(3)"
     })
 
     test("shortcut", () => {
@@ -88,7 +88,7 @@ Case "Running a single source".
       /* Examples above was to prepare you for the multi source tutorial. */
       let (result, bindings) = Project.evaluate("1+2")
       (
-        result->InternalExpressionValue.toStringResult,
+        result->InternalExpressionValue.toStringWithSourceResult,
         bindings->Bindings.removeResult->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(3)", "@{}")
     })

@@ -81,3 +81,11 @@ let fromException = exn =>
   }
 
 let toException = (errorValue: t) => raise(ErrorException(errorValue))
+
+@genType.opaque
+type errorValueWithSource = {error: errorValue, sourceId: string}
+
+let errorAddSource = (r: result<'a, errorValue>, sourceId: string): result<
+  'a,
+  errorValueWithSource,
+> => r->E.R2.errMap(err => {error: err, sourceId: sourceId})

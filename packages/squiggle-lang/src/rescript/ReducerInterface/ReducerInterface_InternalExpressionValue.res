@@ -131,6 +131,12 @@ let toStringResult = x =>
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
+let toStringWithSourceResult = (x: result<t, ErrorValue.errorValueWithSource>) =>
+  switch x {
+  | Ok(a) => `Ok(${toString(a)})`
+  | Error(m) => `Error(${ErrorValue.errorToString(m.error)})`
+  }
+
 let toStringOptionResult = x =>
   switch x {
   | Some(a) => toStringResult(a)

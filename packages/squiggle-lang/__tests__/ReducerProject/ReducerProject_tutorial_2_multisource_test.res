@@ -32,7 +32,7 @@ describe("ReducerProject Tutorial", () => {
       let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
 
       (
-        result3->InternalExpressionValue.toStringResult,
+        result3->InternalExpressionValue.toStringWithSourceResult,
         bindings3->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
     })
@@ -58,7 +58,7 @@ describe("ReducerProject Tutorial", () => {
       let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
 
       (
-        result3->InternalExpressionValue.toStringResult,
+        result3->InternalExpressionValue.toStringWithSourceResult,
         bindings3->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
     })
@@ -94,7 +94,7 @@ describe("ReducerProject Tutorial", () => {
       let bindings3 = Project.getBindings(project, "source3")->Bindings.removeResult
 
       (
-        result3->InternalExpressionValue.toStringResult,
+        result3->InternalExpressionValue.toStringWithSourceResult,
         bindings3->InternalExpressionValue.toStringBindings,
       )->expect == ("Ok(())", "@{x: 1,y: 2,z: 3}")
       /*

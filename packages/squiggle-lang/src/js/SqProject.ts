@@ -1,5 +1,5 @@
 import * as RSProject from "../rescript/ForTS/ForTS_ReducerProject.gen";
-import { reducerErrorValue } from "../rescript/ForTS/ForTS_Reducer_ErrorValue.gen";
+import { reducerErrorValueWithSource } from "../rescript/ForTS/ForTS_Reducer_ErrorValue.gen";
 import { environment } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_Environment.gen";
 import { SqError } from "./SqError";
 import { SqModule } from "./SqModule";
@@ -50,7 +50,7 @@ export class SqProject {
     return resultMap2(
       RSProject.getIncludes(this._value, sourceId),
       (a) => a,
-      (v: reducerErrorValue) => new SqError(v)
+      (v: reducerErrorValueWithSource) => new SqError(v)
     );
   }
 
@@ -104,7 +104,7 @@ export class SqProject {
             items: [],
           })
         ),
-      (v: reducerErrorValue) => new SqError(v)
+      (v: reducerErrorValueWithSource) => new SqError(v)
     );
   }
 

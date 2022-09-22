@@ -27,7 +27,7 @@ x=1`,
     let mainIncludes = Project.getIncludes(project, "main")
     switch mainIncludes {
     | Ok(includes) => expect(includes) == ["common"]
-    | Error(error) => fail(error->Reducer_ErrorValue.errorToString)
+    | Error(error) => fail(error.error->Reducer_ErrorValue.errorToString)
     }
   })
   let internalProject = project->Project.T.Private.castToInternalProject
@@ -63,7 +63,7 @@ x=1`,
     let mainIncludes = Project.getIncludes(project, "main")
     switch mainIncludes {
     | Ok(includes) => expect(includes) == ["common", "myModule"]
-    | Error(error) => fail(error->Reducer_ErrorValue.errorToString)
+    | Error(error) => fail(error.error->Reducer_ErrorValue.errorToString)
     }
   })
 
@@ -106,7 +106,7 @@ x=1`,
     let mainIncludes = Project.getIncludes(project, "main")
     switch mainIncludes {
     | Ok(includes) => expect(includes) == ["common", "common2", "myModule"]
-    | Error(error) => fail(error->Reducer_ErrorValue.errorToString)
+    | Error(error) => fail(error.error->Reducer_ErrorValue.errorToString)
     }
   })
   let internalProject = project->Project.T.Private.castToInternalProject

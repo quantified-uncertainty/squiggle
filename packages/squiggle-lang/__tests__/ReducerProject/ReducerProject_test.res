@@ -11,7 +11,7 @@ open Expect.Operators
 
 let runFetchResult = (project, sourceId) => {
   Project.run(project, sourceId)
-  Project.getResult(project, sourceId)->InternalExpressionValue.toStringResult
+  Project.getResult(project, sourceId)->InternalExpressionValue.toStringWithSourceResult
 }
 
 let runFetchFlatBindings = (project, sourceId) => {

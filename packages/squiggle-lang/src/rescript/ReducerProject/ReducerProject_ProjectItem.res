@@ -6,12 +6,14 @@ module ExpressionT = Reducer_Expression_T
 module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
 module ReducerFnT = ReducerProject_ReducerFn_T
+module ErrorValue = Reducer_ErrorValue
 module T = ReducerProject_ProjectItem_T
 
 type projectItem = T.projectItem
 type t = T.t
 
-let emptyItem = T.ProjectItem({
+let emptyItem = (id: string) => T.ProjectItem({
+  id: id,
   source: "",
   rawParse: None,
   expression: None,
@@ -25,6 +27,7 @@ let emptyItem = T.ProjectItem({
 // source -> rawParse -> includes -> expression -> continuation -> result
 
 let getSource = (T.ProjectItem(r)): T.sourceType => r.source
+let getId = (T.ProjectItem(r)): T.sourceType => r.id
 let getRawParse = (T.ProjectItem(r)): T.rawParseType => r.rawParse
 let getExpression = (T.ProjectItem(r)): T.expressionType => r.expression
 let getContinuation = (T.ProjectItem(r)): T.continuationArgumentType => r.continuation
@@ -36,7 +39,7 @@ let getDirectIncludes = (T.ProjectItem(r)): array<string> => r.directIncludes
 let getIncludesAsVariables = (T.ProjectItem(r)): T.importAsVariablesType => r.includeAsVariables
 
 let touchSource = (this: t): t => {
-  let T.ProjectItem(r) = emptyItem
+  let T.ProjectItem(r) = emptyItem(getId(this))
   T.ProjectItem({
     ...r,
     source: getSource(this),
@@ -48,7 +51,7 @@ let touchSource = (this: t): t => {
 }
 
 let touchRawParse = (this: t): t => {
-  let T.ProjectItem(r) = emptyItem
+  let T.ProjectItem(r) = emptyItem(getId(this))
   T.ProjectItem({
     ...r,
     source: getSource(this),
@@ -61,7 +64,7 @@ let touchRawParse = (this: t): t => {
 }
 
 let touchExpression = (this: t): t => {
-  let T.ProjectItem(r) = emptyItem
+  let T.ProjectItem(r) = emptyItem(getId(this))
   T.ProjectItem({
     ...r,
     source: getSource(this),
@@ -104,7 +107,7 @@ let setResult = (T.ProjectItem(r): t, result: T.resultArgumentType): t => T.Proj
 let cleanResults = touchExpression
 
 let clean = (this: t): t => {
-  let T.ProjectItem(r) = emptyItem
+  let T.ProjectItem(r) = emptyItem(getId(this))
   T.ProjectItem({
     ...r,
     source: getSource(this),
@@ -143,7 +146,7 @@ let parseIncludes = (this: t): t => {
   let T.ProjectItem(r) = this
   let rRawImportAsVariables = getSource(this)->ReducerProject_ParseIncludes.parseIncludes
   switch rRawImportAsVariables {
-  | Error(e) => resetIncludes(this)->setIncludes(Error(e))
+  | Error(e) => resetIncludes(this)->setIncludes(Error(e)->ErrorValue.errorAddSource(getId(this)))
   | Ok(rawImportAsVariables) => {
       let includes = rawImportAsVariables->Belt.Array.map(((_variable, file)) => file)->Ok
       let includeAsVariables =
@@ -190,14 +193,16 @@ let doBuildResult = (
 ): T.resultType =>
   this
   ->getExpression
-  ->Belt.Option.map(
-    Belt.Result.flatMap(_, expression =>
+  ->Belt.Option.map(expressionResult =>
+    expressionResult
+    ->Belt.Result.flatMap(_, expression =>
       try {
         Reducer_Expression.reduceExpressionInProject(expression, aContinuation, accessors)->Ok
       } catch {
       | exn => Reducer_ErrorValue.fromException(exn)->Error
       }
-    ),
+    )
+    ->ErrorValue.errorAddSource(getId(this))
   )
 
 let buildResult = (this: t, aContinuation: T.continuation, accessors: ProjectAccessorsT.t): t => {

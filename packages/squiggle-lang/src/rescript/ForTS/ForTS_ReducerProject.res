@@ -1,6 +1,7 @@
 @genType type reducerProject = ReducerProject_T.t //re-export
 
 type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
+type reducerErrorValueWithSource = ForTS_Reducer_ErrorValue.reducerErrorValueWithSource //use
 
 type squiggleValue = ForTS_SquiggleValue.squiggleValue //use
 type squiggleValue_Module = ForTS_SquiggleValue_Module.squiggleValue_Module //use
@@ -102,7 +103,7 @@ To set the includes one first has to call "parseIncludes". The parsed includes o
 @genType
 let getIncludes = (project: reducerProject, sourceId: string): result<
   array<string>,
-  reducerErrorValue,
+  reducerErrorValueWithSource,
 > => project->T.Private.castToInternalProject->Private.getIncludes(sourceId)
 
 /* Other sources contributing to the global namespace of this source. */
@@ -200,7 +201,7 @@ Get the result after running this source file or the project
 @genType
 let getResult = (project: reducerProject, sourceId: string): result<
   squiggleValue,
-  reducerErrorValue,
+  reducerErrorValueWithSource,
 > => project->T.Private.castToInternalProject->Private.getResult(sourceId)
 
 /*
@@ -210,7 +211,7 @@ The source has to be include free
 */
 @genType
 let evaluate = (sourceCode: string): (
-  result<squiggleValue, reducerErrorValue>,
+  result<squiggleValue, reducerErrorValueWithSource>,
   squiggleValue_Module,
 ) => Private.evaluate(sourceCode)
 

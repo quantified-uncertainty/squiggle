@@ -38,7 +38,7 @@ Here we will finally proceed to a real life scenario. */
       /* Parse includes has set the includes */
       switch Project.getIncludes(project, "main") {
       | Ok(includes) => includes->expect == ["common"]
-      | Error(err) => err->Reducer_ErrorValue.errorToString->fail
+      | Error(err) => err.error->Reducer_ErrorValue.errorToString->fail
       }
       /* If the includes cannot be parsed then you get a syntax error.
       Otherwise you get the includes.
@@ -87,7 +87,7 @@ Here we will finally proceed to a real life scenario. */
           let rIncludes = Project.getIncludes(project, sourceName)
           switch rIncludes {
           /* Maybe there is an include syntax error */
-          | Error(err) => err->Reducer_ErrorValue.errorToString->Js.Exn.raiseError
+          | Error(err) => err.error->Reducer_ErrorValue.errorToString->Js.Exn.raiseError
 
           | Ok(includes) =>
             Belt.Array.forEach(includes, newIncludeName => {
@@ -146,7 +146,7 @@ Here we will finally proceed to a real life scenario. */
       /* And see the result and bindings.. */
       test("recursive includes", () => {
         (
-          result->InternalExpressionValue.toStringResult,
+          result->InternalExpressionValue.toStringWithSourceResult,
           bindings->Bindings.removeResult->InternalExpressionValue.toStringBindings,
         )->expect == ("Ok(6)", "@{doubleX: 2,x: 1,y: 2,z: 3}")
         /* Everything as expected */
@@ -172,7 +172,7 @@ Here we will finally proceed to a real life scenario. */
     test("getIncludes", () => {
       switch Project.getIncludes(project, "main") {
       | Ok(includes) => includes->expect == ["common"]
-      | Error(err) => err->Reducer_ErrorValue.errorToString->fail
+      | Error(err) => err.error->Reducer_ErrorValue.errorToString->fail
       }
     })
   })

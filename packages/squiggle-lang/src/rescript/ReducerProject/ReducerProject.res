@@ -129,7 +129,7 @@ module Private = {
 
   let getResult = (project: t, sourceId: string): ProjectItem.T.resultArgumentType =>
     switch getResultOption(project, sourceId) {
-    | None => RENeedToRun->Error
+    | None => RENeedToRun->Error->ErrorValue.errorAddSource(sourceId)
     | Some(result) => result
     }
 

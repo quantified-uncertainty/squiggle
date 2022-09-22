@@ -4,6 +4,7 @@ module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 open Reducer_ErrorValue
 
 type sourceArgumentType = string
+type idArgumentType = string
 type sourceType = string
 type rawParseArgumentType = result<Parse.node, errorValue>
 type rawParseType = option<rawParseArgumentType>
@@ -15,16 +16,17 @@ type continuationType = option<continuationArgumentType>
 type continuationResultType = option<result<continuationArgumentType, errorValue>>
 type bindingsArgumentType = InternalExpressionValue.nameSpace
 type bindingsType = option<bindingsArgumentType>
-type resultArgumentType = result<InternalExpressionValue.t, errorValue>
+type resultArgumentType = result<InternalExpressionValue.t, errorValueWithSource>
 type resultType = option<resultArgumentType>
 type continuesArgumentType = array<string>
 type continuesType = array<string>
 type includesArgumentType = string
-type includesType = result<array<string>, errorValue>
+type includesType = result<array<string>, errorValueWithSource>
 type importAsVariablesType = array<(string, string)>
 
 type projectItem =
   | ProjectItem({
+      id: string,
       source: sourceType,
       rawParse: rawParseType,
       expression: expressionType,
