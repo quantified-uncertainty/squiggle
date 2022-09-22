@@ -56,7 +56,7 @@ export interface SquiggleChartProps {
   enableLocalSettings?: boolean;
   /** The project that this execution is part of */
   project?: SqProject;
-  /** The name of the squiggle execution source. Defaults to "main" */
+  /** The name of the squiggle execution source. Generates a UUID if not given */
   sourceName?: string;
   /** The sources that this execution continues */
   includes?: string[];

@@ -69,11 +69,13 @@ export const useSquiggle = (args: SquiggleArgs) => {
 
   useEffect(() => {
     return () => {
-      if (!args.sourceName) args.project.clean(result.sourceName);
+      if (result.needsClean) args.project.clean(result.sourceName);
       if (args.project.getSource(importSourceName(result.sourceName)))
         args.project.clean(result.sourceName);
     };
-  });
+  }, 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  []);
 
   return result;
 };
