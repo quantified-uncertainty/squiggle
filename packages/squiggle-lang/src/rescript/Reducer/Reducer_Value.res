@@ -21,8 +21,6 @@ let rec toString = (aValue: T.value) =>
   | IEvRecord(aMap) => aMap->toStringRecord
   | IEvString(aString) => toStringString(aString)
   | IEvTimeDuration(t) => toStringTimeDuration(t)
-  | IEvType(aMap) => toStringType(aMap)
-  | IEvTypeIdentifier(id) => toStringTypeIdentifier(id)
   | IEvVoid => toStringVoid
   }
 and toStringArray = anArray => {
@@ -43,8 +41,6 @@ and toStringRecord = aMap => aMap->toStringMap
 and toStringString = aString => `'${aString}'`
 and toStringSymbol = aString => `:${aString}`
 and toStringTimeDuration = t => DateTime.Duration.toString(t)
-and toStringType = aMap => aMap->toStringMap
-and toStringTypeIdentifier = id => `#${id}`
 and toStringVoid = `()`
 
 and toStringMap = aMap => {
@@ -68,8 +64,6 @@ let toStringWithType = (aValue: T.value) =>
   | IEvRecord(_) => `Record::${toString(aValue)}`
   | IEvString(_) => `String::${toString(aValue)}`
   | IEvTimeDuration(_) => `Date::${toString(aValue)}`
-  | IEvType(_) => `Type::${toString(aValue)}`
-  | IEvTypeIdentifier(_) => `TypeIdentifier::${toString(aValue)}`
   | IEvVoid => `Void`
   }
 
@@ -114,8 +108,6 @@ type internalExpressionValueType =
   | EvtRecord
   | EvtString
   | EvtTimeDuration
-  | EvtType
-  | EvtTypeIdentifier
   | EvtVoid
 
 type functionCallSignature = CallSignature(string, array<internalExpressionValueType>)
@@ -134,8 +126,6 @@ let valueToValueType = (value: T.value) =>
   | IEvRecord(_) => EvtRecord
   | IEvString(_) => EvtString
   | IEvTimeDuration(_) => EvtTimeDuration
-  | IEvType(_) => EvtType
-  | IEvTypeIdentifier(_) => EvtTypeIdentifier
   | IEvVoid => EvtVoid
   }
 
@@ -148,7 +138,6 @@ let valueTypeToString = (valueType: internalExpressionValueType): string =>
   switch valueType {
   | EvtArray => `Array`
   | EvtBool => `Bool`
-  // | EvtCall => `Call`
   | EvtDate => `Date`
   | EvtDeclaration => `Declaration`
   | EvtDistribution => `Distribution`
@@ -156,10 +145,7 @@ let valueTypeToString = (valueType: internalExpressionValueType): string =>
   | EvtNumber => `Number`
   | EvtRecord => `Record`
   | EvtString => `String`
-  // | EvtSymbol => `Symbol`
   | EvtTimeDuration => `Duration`
-  | EvtType => `Type`
-  | EvtTypeIdentifier => `TypeIdentifier`
   | EvtVoid => `Void`
   }
 

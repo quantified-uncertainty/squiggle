@@ -3,7 +3,6 @@ type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
 
 @genType type squiggleValue_Array = Reducer_T.arrayValue //re-export recursive type
 @genType type squiggleValue_Record = Reducer_T.map //re-export recursive type
-@genType type squiggleValue_Type = Reducer_T.map //re-export recursive type
 type squiggleValue_Declaration = ForTS_SquiggleValue_Declaration.squiggleValue_Declaration //use
 type squiggleValue_Distribution = ForTS_SquiggleValue_Distribution.squiggleValue_Distribution //use
 type squiggleValue_Lambda = ForTS_SquiggleValue_Lambda.squiggleValue_Lambda //use
@@ -41,12 +40,6 @@ external svtString_: string = "String"
 external svtTimeDuration_: string = "TimeDuration"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtType_: string = "Type"
-
-@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
-external svtTypeIdentifier_: string = "TypeIdentifier"
-
-@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtVoid_: string = "Void"
 
 @genType.import("./ForTS_SquiggleValue_tag")
@@ -67,8 +60,6 @@ let getTag = (variant: squiggleValue): squiggleValueTag =>
   | IEvRecord(_) => svtRecord_->castEnum
   | IEvString(_) => svtString_->castEnum
   | IEvTimeDuration(_) => svtTimeDuration_->castEnum
-  | IEvType(_) => svtType_->castEnum
-  | IEvTypeIdentifier(_) => svtTypeIdentifier_->castEnum
   | IEvVoid => svtVoid_->castEnum
   }
 
@@ -149,19 +140,5 @@ let getString = (variant: squiggleValue): option<string> =>
 let getTimeDuration = (variant: squiggleValue): option<float> =>
   switch variant {
   | IEvTimeDuration(value) => value->Some
-  | _ => None
-  }
-
-@genType
-let getType = (variant: squiggleValue): option<squiggleValue_Type> =>
-  switch variant {
-  | IEvType(value) => value->Some
-  | _ => None
-  }
-
-@genType
-let getTypeIdentifier = (variant: squiggleValue): option<string> =>
-  switch variant {
-  | IEvTypeIdentifier(value) => value->Some
   | _ => None
   }

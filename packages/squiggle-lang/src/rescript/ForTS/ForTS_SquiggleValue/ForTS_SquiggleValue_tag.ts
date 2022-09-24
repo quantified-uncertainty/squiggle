@@ -9,7 +9,5 @@ export enum squiggleValueTag {
   Record = "Record",
   String = "String",
   TimeDuration = "TimeDuration",
-  Type = "Type",
-  TypeIdentifier = "TypeIdentifier",
   Void = "Void",
 }

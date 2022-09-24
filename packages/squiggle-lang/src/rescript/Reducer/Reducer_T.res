@@ -12,8 +12,6 @@ type rec value =
   | IEvRecord(map)
   | IEvString(string)
   | IEvTimeDuration(float)
-  | IEvType(map)
-  | IEvTypeIdentifier(string)
   | IEvVoid
 @genType.opaque and arrayValue = array<value>
 @genType.opaque and map = Belt.Map.String.t<value>

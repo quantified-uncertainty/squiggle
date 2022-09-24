@@ -7,7 +7,6 @@
 @genType type squiggleValue_Declaration = ForTS_SquiggleValue_Declaration.squiggleValue_Declaration //re-export
 @genType type squiggleValue_Lambda = ForTS_SquiggleValue_Lambda.squiggleValue_Lambda //re-export
 @genType type squiggleValue_Record = ForTS_SquiggleValue_Record.squiggleValue_Record //re-export
-@genType type squiggleValue_Type = ForTS_SquiggleValue_Type.squiggleValue_Type //re-export
 
 /* Distribution related */
 @genType type squiggleValue_Distribution = ForTS_Distribution.distribution //re-export

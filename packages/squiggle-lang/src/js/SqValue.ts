@@ -5,7 +5,6 @@ import { SqLambda } from "./SqLambda";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
 import { SqRecord } from "./SqRecord";
 import { SqArray } from "./SqArray";
-import { SqType } from "./SqType";
 import { SqValueLocation } from "./SqValueLocation";
 
 export { Tag as SqValueTag };
@@ -116,22 +115,6 @@ export class SqTimeDurationValue extends SqAbstractValue {
   }
 }
 
-export class SqTypeValue extends SqAbstractValue {
-  tag = Tag.Type as const;
-
-  get value() {
-    return new SqType(this.valueMethod(RSValue.getType));
-  }
-}
-
-export class SqTypeIdentifierValue extends SqAbstractValue {
-  tag = Tag.TypeIdentifier as const;
-
-  get value() {
-    return this.valueMethod(RSValue.getTypeIdentifier);
-  }
-}
-
 export class SqVoidValue extends SqAbstractValue {
   tag = Tag.Void as const;
 
@@ -151,8 +134,6 @@ const tagToClass = {
   [Tag.Record]: SqRecordValue,
   [Tag.String]: SqStringValue,
   [Tag.TimeDuration]: SqTimeDurationValue,
-  [Tag.Type]: SqTypeValue,
-  [Tag.TypeIdentifier]: SqTypeIdentifierValue,
   [Tag.Void]: SqVoidValue,
 } as const;
 
@@ -169,6 +150,4 @@ export type SqValue =
   | SqRecordValue
   | SqStringValue
   | SqTimeDurationValue
-  | SqTypeValue
-  | SqTypeIdentifierValue
   | SqVoidValue;
