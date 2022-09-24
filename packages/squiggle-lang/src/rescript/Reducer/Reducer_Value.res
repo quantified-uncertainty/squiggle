@@ -79,21 +79,9 @@ let toStringResult = x =>
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 
-let toStringOptionResult = x =>
-  switch x {
-  | Some(a) => toStringResult(a)
-  | None => "None"
-  }
-
-let toStringResultOkless = (codeResult: result<t, ErrorValue.errorValue>): string =>
+let toStringResultOkless = (codeResult: result<t, ErrorValue.error>): string =>
   switch codeResult {
   | Ok(a) => toString(a)
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
-  }
-
-let toStringResultRecord = x =>
-  switch x {
-  | Ok(a) => `Ok(${toStringMap(a)})`
   | Error(m) => `Error(${ErrorValue.errorToString(m)})`
   }
 

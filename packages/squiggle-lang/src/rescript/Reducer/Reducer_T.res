@@ -22,7 +22,7 @@ and lambdaValue = {
   body: lambdaBody,
 }
 @genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>
-and expression =
+and expressionContent =
   | EBlock(array<expression>)
   // programs are similar to blocks, but don't create an inner scope. there can be only one program at the top level of the expression.
   | EProgram(array<expression>)
@@ -34,6 +34,11 @@ and expression =
   | ECall(expression, array<expression>)
   | ELambda(array<string>, expression)
   | EValue(value)
+
+and expression = {
+  ast: Reducer_Peggy_Parse.ast,
+  content: expressionContent,
+}
 
 and namespace = Belt.Map.String.t<value>
 and bindings = {

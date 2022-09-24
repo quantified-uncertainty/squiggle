@@ -9,12 +9,12 @@ open Jest
 open Expect
 
 let expectParseToBe = (expr, answer) =>
-  Parse.parse(expr)->Parse.toStringResult->expect->toBe(answer)
+  Parse.parse(expr, "test")->Parse.toStringResult->expect->toBe(answer)
 
 let testParse = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
 
 let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
-  let rExpr = Parse.parse(expr)->Result.map(ToExpression.fromNode)
+  let rExpr = Parse.parse(expr, "test")->Result.map(ToExpression.fromNode)
   let a1 = rExpr->ExpressionT.toStringResultOkless
 
   if v == "_" {
@@ -22,6 +22,7 @@ let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
   } else {
     let a2 =
       rExpr
+      ->E.R2.errMap(e => e->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue)
       ->Result.flatMap(expr => Expression.BackCompatible.evaluate(expr))
       ->Reducer_Value.toStringResultOkless
     (a1, a2)->expect->toEqual((answer, v))

@@ -13,4 +13,4 @@ type t = project
 let getSourceIds = (project: t): array<string> => Belt.MutableMap.String.keysToArray(project.items)
 
 let getItem = (project: t, sourceId: string) =>
-  Belt.MutableMap.String.getWithDefault(project.items, sourceId, ProjectItem.emptyItem)
+  Belt.MutableMap.String.getWithDefault(project.items, sourceId, ProjectItem.emptyItem(sourceId))

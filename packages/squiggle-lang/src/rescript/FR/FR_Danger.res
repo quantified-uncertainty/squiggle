@@ -143,7 +143,7 @@ module Integration = {
       | Error(b) =>
         ("Integration error 2 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead." ++
         "Original error: " ++
-        b->Reducer_ErrorValue.errorToString)
+        b->Reducer_ErrorValue.errorValueToString)
         ->Reducer_ErrorValue.REOther
         ->Error
       }
@@ -225,7 +225,7 @@ module Integration = {
                 reducer,
               )->E.R2.errMap(b =>
                 ("Integration error 7 in Danger.integrate. Something went wrong along the way: " ++
-                b->Reducer_ErrorValue.errorToString)->Reducer_ErrorValue.REOther
+                b->Reducer_ErrorValue.errorValueToString)->Reducer_ErrorValue.REOther
               )
             | _ =>
               "Integration error 8 in Danger.integrate. Remember that inputs are (function, number (min), number (max), number(increment))"

@@ -117,7 +117,7 @@ let getResultOption = (project: t, sourceId: string): ProjectItem.T.resultType =
 
 let getResult = (project: t, sourceId: string): ProjectItem.T.resultArgumentType =>
   switch getResultOption(project, sourceId) {
-  | None => RENeedToRun->Error
+  | None => RENeedToRun->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue->Error
   | Some(result) => result
   }
 
@@ -171,7 +171,7 @@ let linkDependencies = (project: t, sourceId: string): Reducer_T.namespace => {
             "__result__",
             switch project->getResult(id) {
             | Ok(result) => result
-            | Error(error) => error->Reducer_ErrorValue.ErrorException->raise
+            | Error(error) => error->Reducer_ErrorValue.ExceptionWithStackTrace->raise
             },
           ),
         ])

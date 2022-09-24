@@ -1,18 +1,21 @@
+@genType type reducerError = Reducer_ErrorValue.error //alias
 @genType type reducerErrorValue = Reducer_ErrorValue.errorValue //alias
-@genType type syntaxErrorLocation = Reducer_ErrorValue.syntaxErrorLocation //alias
+@genType type location = Reducer_ErrorValue.location //alias
 
 @genType
-let toString = (e: reducerErrorValue): string => Reducer_ErrorValue.errorToString(e)
+let toString = (e: reducerError): string => Reducer_ErrorValue.errorToString(e)
 
 @genType
-let getLocation = (e: reducerErrorValue): option<syntaxErrorLocation> =>
-  switch e {
-  | RESyntaxError(_, optionalLocation) => optionalLocation
-  | _ => None
+let getLocation = (e: reducerError): option<location> =>
+  switch e.stackTrace {
+  | Some(stack) => Some(stack.location)
+  | None => None
   }
 
 @genType
-let createTodoError = (v: string) => Reducer_ErrorValue.RETodo(v)
+let createOtherError = (v: string): reducerError =>
+  Reducer_ErrorValue.REOther(v)->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue
 
 @genType
-let createOtherError = (v: string) => Reducer_ErrorValue.REOther(v)
+let attachEmptyStackTraceToErrorValue = (v: reducerErrorValue): reducerError =>
+  Reducer_ErrorValue.attachEmptyStackTraceToErrorValue(v)

@@ -1,19 +1,20 @@
 module Extra = Reducer_Extra
 open Reducer_ErrorValue
 
-type node = {"type": string}
+type node = {"type": string, "location": Reducer_ErrorValue.location}
 
-@module("./Reducer_Peggy_GeneratedParser.js") external parse__: string => node = "parse"
+@module("./Reducer_Peggy_GeneratedParser.js")
+external parse__: (string, {"grammarSource": string}) => node = "parse"
 
-type withLocation = {"location": Reducer_ErrorValue.syntaxErrorLocation}
+type withLocation = {"location": Reducer_ErrorValue.location}
 external castWithLocation: Js.Exn.t => withLocation = "%identity"
 
-let syntaxErrorToLocation = (error: Js.Exn.t): Reducer_ErrorValue.syntaxErrorLocation =>
+let syntaxErrorToLocation = (error: Js.Exn.t): Reducer_ErrorValue.location =>
   castWithLocation(error)["location"]
 
-let parse = (expr: string): result<node, errorValue> =>
+let parse = (expr: string, source: string): result<node, errorValue> =>
   try {
-    Ok(parse__(expr))
+    Ok(parse__(expr, {"grammarSource": source}))
   } catch {
   | Js.Exn.Error(obj) =>
     RESyntaxError(Belt.Option.getExn(Js.Exn.message(obj)), syntaxErrorToLocation(obj)->Some)->Error
@@ -34,27 +35,30 @@ type nodeLetStatement = {...node, "variable": nodeIdentifier, "value": node}
 type nodeModuleIdentifier = {...node, "value": string}
 type nodeString = {...node, "value": string}
 type nodeTernary = {...node, "condition": node, "trueExpression": node, "falseExpression": node}
-// type nodeTypeIdentifier = {...node, "value": string}
 type nodeVoid = node
 
-type peggyNode =
-  | PgNodeBlock(nodeBlock)
-  | PgNodeProgram(nodeProgram)
-  | PgNodeArray(nodeArray)
-  | PgNodeRecord(nodeRecord)
-  | PgNodeBoolean(nodeBoolean)
-  | PgNodeFloat(nodeFloat)
-  | PgNodeCall(nodeCall)
-  | PgNodeIdentifier(nodeIdentifier)
-  | PgNodeInteger(nodeInteger)
-  | PgNodeKeyValue(nodeKeyValue)
-  | PgNodeLambda(nodeLambda)
-  | PgNodeLetStatement(nodeLetStatement)
-  | PgNodeModuleIdentifier(nodeModuleIdentifier)
-  | PgNodeString(nodeString)
-  | PgNodeTernary(nodeTernary)
-  // | PgNodeTypeIdentifier(nodeTypeIdentifier)
-  | PgNodeVoid(nodeVoid)
+type astContent =
+  | ASTBlock(nodeBlock)
+  | ASTProgram(nodeProgram)
+  | ASTArray(nodeArray)
+  | ASTRecord(nodeRecord)
+  | ASTBoolean(nodeBoolean)
+  | ASTFloat(nodeFloat)
+  | ASTCall(nodeCall)
+  | ASTIdentifier(nodeIdentifier)
+  | ASTInteger(nodeInteger)
+  | ASTKeyValue(nodeKeyValue)
+  | ASTLambda(nodeLambda)
+  | ASTLetStatement(nodeLetStatement)
+  | ASTModuleIdentifier(nodeModuleIdentifier)
+  | ASTString(nodeString)
+  | ASTTernary(nodeTernary)
+  | ASTVoid(nodeVoid)
+
+type ast = {
+  location: location,
+  content: astContent,
+}
 
 external castNodeBlock: node => nodeBlock = "%identity"
 external castNodeProgram: node => nodeProgram = "%identity"
@@ -71,80 +75,87 @@ external castNodeLetStatement: node => nodeLetStatement = "%identity"
 external castNodeModuleIdentifier: node => nodeModuleIdentifier = "%identity"
 external castNodeString: node => nodeString = "%identity"
 external castNodeTernary: node => nodeTernary = "%identity"
-// external castNodeTypeIdentifier: node => nodeTypeIdentifier = "%identity"
 external castNodeVoid: node => nodeVoid = "%identity"
 
 exception UnsupportedPeggyNodeType(string) // This should never happen; programming error
-let castNodeType = (node: node) =>
-  switch node["type"] {
-  | "Block" => node->castNodeBlock->PgNodeBlock
-  | "Program" => node->castNodeBlock->PgNodeProgram
-  | "Array" => node->castNodeArray->PgNodeArray
-  | "Record" => node->castNodeRecord->PgNodeRecord
-  | "Boolean" => node->castNodeBoolean->PgNodeBoolean
-  | "Call" => node->castNodeCall->PgNodeCall
-  | "Float" => node->castNodeFloat->PgNodeFloat
-  | "Identifier" => node->castNodeIdentifier->PgNodeIdentifier
-  | "Integer" => node->castNodeInteger->PgNodeInteger
-  | "KeyValue" => node->castNodeKeyValue->PgNodeKeyValue
-  | "Lambda" => node->castNodeLambda->PgNodeLambda
-  | "LetStatement" => node->castNodeLetStatement->PgNodeLetStatement
-  | "ModuleIdentifier" => node->castNodeModuleIdentifier->PgNodeModuleIdentifier
-  | "String" => node->castNodeString->PgNodeString
-  | "Ternary" => node->castNodeTernary->PgNodeTernary
-  // | "TypeIdentifier" => node->castNodeTypeIdentifier->PgNodeTypeIdentifier
-  | "Void" => node->castNodeVoid->PgNodeVoid
+let nodeToAST = (node: node) => {
+  let content = switch node["type"] {
+  | "Block" => node->castNodeBlock->ASTBlock
+  | "Program" => node->castNodeBlock->ASTProgram
+  | "Array" => node->castNodeArray->ASTArray
+  | "Record" => node->castNodeRecord->ASTRecord
+  | "Boolean" => node->castNodeBoolean->ASTBoolean
+  | "Call" => node->castNodeCall->ASTCall
+  | "Float" => node->castNodeFloat->ASTFloat
+  | "Identifier" => node->castNodeIdentifier->ASTIdentifier
+  | "Integer" => node->castNodeInteger->ASTInteger
+  | "KeyValue" => node->castNodeKeyValue->ASTKeyValue
+  | "Lambda" => node->castNodeLambda->ASTLambda
+  | "LetStatement" => node->castNodeLetStatement->ASTLetStatement
+  | "ModuleIdentifier" => node->castNodeModuleIdentifier->ASTModuleIdentifier
+  | "String" => node->castNodeString->ASTString
+  | "Ternary" => node->castNodeTernary->ASTTernary
+  | "Void" => node->castNodeVoid->ASTVoid
   | _ => raise(UnsupportedPeggyNodeType(node["type"]))
   }
 
-let rec pgToString = (peggyNode: peggyNode): string => {
+  {location: node["location"], content: content}
+}
+
+let nodeIdentifierToAST = (node: nodeIdentifier) => {
+  {location: node["location"], content: node->ASTIdentifier}
+}
+
+let nodeKeyValueToAST = (node: nodeKeyValue) => {
+  {location: node["location"], content: node->ASTKeyValue}
+}
+
+let rec pgToString = (ast: ast): string => {
   let argsToString = (args: array<nodeIdentifier>): string =>
-    args->Js.Array2.map(arg => PgNodeIdentifier(arg)->pgToString)->Js.Array2.toString
+    args->Belt.Array.map(arg => arg->nodeIdentifierToAST->pgToString)->Js.Array2.toString
 
   let nodesToStringUsingSeparator = (nodes: array<node>, separator: string): string =>
-    nodes->Js.Array2.map(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
+    nodes->Belt.Array.map(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
-  let pgNodesToStringUsingSeparator = (nodes: array<peggyNode>, separator: string): string =>
-    nodes->Js.Array2.map(pgToString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
+  let pgNodesToStringUsingSeparator = (nodes: array<ast>, separator: string): string =>
+    nodes->Belt.Array.map(pgToString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
-  switch peggyNode {
-  | PgNodeBlock(node)
-  | PgNodeProgram(node) =>
+  switch ast.content {
+  | ASTBlock(node)
+  | ASTProgram(node) =>
     "{" ++ node["statements"]->nodesToStringUsingSeparator("; ") ++ "}"
-  | PgNodeArray(node) => "[" ++ node["elements"]->nodesToStringUsingSeparator("; ") ++ "]"
-  | PgNodeRecord(node) =>
+  | ASTArray(node) => "[" ++ node["elements"]->nodesToStringUsingSeparator("; ") ++ "]"
+  | ASTRecord(node) =>
     "{" ++
     node["elements"]
-    ->Js.Array2.map(element => PgNodeKeyValue(element))
+    ->Belt.Array.map(element => element->nodeKeyValueToAST)
     ->pgNodesToStringUsingSeparator(", ") ++ "}"
-  | PgNodeBoolean(node) => node["value"]->Js.String.make
-  | PgNodeCall(node) =>
+  | ASTBoolean(node) => node["value"]->Js.String.make
+  | ASTCall(node) =>
     "(" ++ node["fn"]->toString ++ " " ++ node["args"]->nodesToStringUsingSeparator(" ") ++ ")"
-  | PgNodeFloat(node) => node["value"]->Js.String.make
-  | PgNodeIdentifier(node) => `:${node["value"]}`
-  | PgNodeInteger(node) => node["value"]->Js.String.make
-  | PgNodeKeyValue(node) => toString(node["key"]) ++ ": " ++ toString(node["value"])
-  | PgNodeLambda(node) =>
-    "{|" ++ node["args"]->argsToString ++ "| " ++ node["body"]->toString ++ "}"
-  | PgNodeLetStatement(node) =>
-    pgToString(PgNodeIdentifier(node["variable"])) ++ " = " ++ toString(node["value"])
-  | PgNodeModuleIdentifier(node) => `@${node["value"]}`
-  | PgNodeString(node) => `'${node["value"]->Js.String.make}'`
-  | PgNodeTernary(node) =>
+  | ASTFloat(node) => node["value"]->Js.String.make
+  | ASTIdentifier(node) => `:${node["value"]}`
+  | ASTInteger(node) => node["value"]->Js.String.make
+  | ASTKeyValue(node) => toString(node["key"]) ++ ": " ++ toString(node["value"])
+  | ASTLambda(node) => "{|" ++ node["args"]->argsToString ++ "| " ++ node["body"]->toString ++ "}"
+  | ASTLetStatement(node) =>
+    pgToString(node["variable"]->nodeIdentifierToAST) ++ " = " ++ toString(node["value"])
+  | ASTModuleIdentifier(node) => `@${node["value"]}`
+  | ASTString(node) => `'${node["value"]->Js.String.make}'`
+  | ASTTernary(node) =>
     "(::$$_ternary_$$ " ++
     toString(node["condition"]) ++
     " " ++
     toString(node["trueExpression"]) ++
     " " ++
     toString(node["falseExpression"]) ++ ")"
-  // | PgNodeTypeIdentifier(node) => `#${node["value"]}`
-  | PgNodeVoid(_node) => "()"
+  | ASTVoid(_node) => "()"
   }
 }
-and toString = (node: node): string => node->castNodeType->pgToString
+and toString = (node: node): string => node->nodeToAST->pgToString
 
 let toStringResult = (rNode: result<node, errorValue>): string =>
   switch rNode {
   | Ok(node) => toString(node)
-  | Error(error) => `Error(${errorToString(error)})`
+  | Error(error) => `Error(${errorValueToString(error)})`
   }

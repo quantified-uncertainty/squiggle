@@ -11,7 +11,7 @@ type expressionType = option<expressionArgumentType>
 type continuationArgumentType = Reducer_T.namespace
 type continuationType = option<continuationArgumentType>
 type continuationResultType = option<result<continuationArgumentType, errorValue>>
-type resultArgumentType = result<Reducer_T.value, errorValue>
+type resultArgumentType = result<Reducer_T.value, error>
 type resultType = option<resultArgumentType>
 type continuesArgumentType = array<string>
 type continuesType = array<string>
@@ -21,6 +21,7 @@ type importAsVariablesType = array<(string, string)>
 
 type projectItem = {
   source: sourceType,
+  sourceId: string,
   rawParse: rawParseType,
   expression: expressionType,
   continuation: continuationArgumentType,

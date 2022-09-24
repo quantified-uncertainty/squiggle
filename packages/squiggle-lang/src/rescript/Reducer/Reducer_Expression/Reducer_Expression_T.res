@@ -12,7 +12,7 @@ let semicolonJoin = values =>
   Converts the expression to String
 */
 let rec toString = (expression: t) =>
-  switch expression {
+  switch expression.content {
   | EBlock(statements) =>
     `{${Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin}}`
   | EProgram(statements) => Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin
@@ -31,13 +31,13 @@ let rec toString = (expression: t) =>
 let toStringResult = codeResult =>
   switch codeResult {
   | Ok(a) => `Ok(${toString(a)})`
-  | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${Reducer_ErrorValue.errorValueToString(m)})`
   }
 
 let toStringResultOkless = codeResult =>
   switch codeResult {
   | Ok(a) => toString(a)
-  | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${Reducer_ErrorValue.errorValueToString(m)})`
   }
 
 let inspect = (expr: t): t => {
