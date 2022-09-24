@@ -25,6 +25,12 @@ describe("Continuous and discrete splits", () => {
     ([1.33455, 1.432, 2.0, 2.0, 3.5, 3.5, 3.5], []),
   )
 
+  makeTest(
+    "more general test",
+    prepareInputs([10., 10., 11., 11., 11., 12., 13., 13., 13., 13., 13., 14.], 3),
+    ([10., 10., 12., 14.], [(11., 3.), (13., 5.)]),
+  )
+
   let makeDuplicatedArray = count => {
     let arr = Belt.Array.range(1, count) |> E.A.fmap(float_of_int)
     let sorted = arr |> Belt.SortArray.stableSortBy(_, compare)
