@@ -1,6 +1,6 @@
 @genType type reducerError = Reducer_ErrorValue.error //alias
 @genType type reducerErrorValue = Reducer_ErrorValue.errorValue //alias
-@genType type location = Reducer_ErrorValue.location //alias
+@genType type location = Reducer_Peggy_Parse.location //alias
 
 @genType
 let toString = (e: reducerError): string => Reducer_ErrorValue.errorToString(e)

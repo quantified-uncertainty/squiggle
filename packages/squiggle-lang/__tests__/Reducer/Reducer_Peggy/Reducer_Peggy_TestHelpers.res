@@ -13,7 +13,7 @@ let expectParseToBe = (expr, answer) =>
 
 let testParse = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
 
-let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
+let expectExpressionToBe = (expr, answer, ~v="_", ()) => {
   let rExpr = Parse.parse(expr, "test")->Result.map(ToExpression.fromNode)
   let a1 = rExpr->ExpressionT.toStringResultOkless
 
@@ -22,7 +22,9 @@ let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
   } else {
     let a2 =
       rExpr
-      ->E.R2.errMap(e => e->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue)
+      ->E.R2.errMap(e =>
+        e->Reducer_ErrorValue.fromParseError->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue
+      )
       ->Result.flatMap(expr => Expression.BackCompatible.evaluate(expr))
       ->Reducer_Value.toStringResultOkless
     (a1, a2)->expect->toEqual((answer, v))
@@ -30,16 +32,16 @@ let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
 }
 
 let testToExpression = (expr, answer, ~v="_", ()) =>
-  test(expr, () => expectToExpressionToBe(expr, answer, ~v, ()))
+  test(expr, () => expectExpressionToBe(expr, answer, ~v, ()))
 
 module MyOnly = {
   let testParse = (expr, answer) => Only.test(expr, () => expectParseToBe(expr, answer))
   let testToExpression = (expr, answer, ~v="_", ()) =>
-    Only.test(expr, () => expectToExpressionToBe(expr, answer, ~v, ()))
+    Only.test(expr, () => expectExpressionToBe(expr, answer, ~v, ()))
 }
 
 module MySkip = {
   let testParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
   let testToExpression = (expr, answer, ~v="_", ()) =>
-    Skip.test(expr, () => expectToExpressionToBe(expr, answer, ~v, ()))
+    Skip.test(expr, () => expectExpressionToBe(expr, answer, ~v, ()))
 }

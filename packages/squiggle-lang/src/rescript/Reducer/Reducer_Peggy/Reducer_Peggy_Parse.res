@@ -1,23 +1,39 @@
 module Extra = Reducer_Extra
-open Reducer_ErrorValue
 
-type node = {"type": string, "location": Reducer_ErrorValue.location}
+// Do not gentype this, use LocationRange from peggy types instead
+// TODO - rename locationPoint -> location, location -> locationRange to match peggy
+@genType
+type locationPoint = {
+  line: int,
+  column: int,
+}
+@genType
+type location = {
+  source: string,
+  start: locationPoint,
+  end: locationPoint,
+}
+
+type node = {"type": string, "location": location}
+
+type parseError = SyntaxError(string, location)
+
+type parseResult = result<node, parseError>
 
 @module("./Reducer_Peggy_GeneratedParser.js")
 external parse__: (string, {"grammarSource": string}) => node = "parse"
 
-type withLocation = {"location": Reducer_ErrorValue.location}
+type withLocation = {"location": location}
 external castWithLocation: Js.Exn.t => withLocation = "%identity"
 
-let syntaxErrorToLocation = (error: Js.Exn.t): Reducer_ErrorValue.location =>
-  castWithLocation(error)["location"]
+let syntaxErrorToLocation = (error: Js.Exn.t): location => castWithLocation(error)["location"]
 
-let parse = (expr: string, source: string): result<node, errorValue> =>
+let parse = (expr: string, source: string): parseResult =>
   try {
     Ok(parse__(expr, {"grammarSource": source}))
   } catch {
   | Js.Exn.Error(obj) =>
-    RESyntaxError(Belt.Option.getExn(Js.Exn.message(obj)), syntaxErrorToLocation(obj)->Some)->Error
+    SyntaxError(Belt.Option.getExn(Js.Exn.message(obj)), syntaxErrorToLocation(obj))->Error
   }
 
 type nodeBlock = {...node, "statements": array<node>}
@@ -154,8 +170,13 @@ let rec pgToString = (ast: ast): string => {
 }
 and toString = (node: node): string => node->nodeToAST->pgToString
 
-let toStringResult = (rNode: result<node, errorValue>): string =>
+let toStringError = (error: parseError): string => {
+  let SyntaxError(message, _) = error
+  `Syntax Error: ${message}}`
+}
+
+let toStringResult = (rNode: parseResult): string =>
   switch rNode {
-  | Ok(node) => toString(node)
-  | Error(error) => `Error(${errorValueToString(error)})`
+  | Ok(node) => node->toString
+  | Error(error) => `Error(${error->toStringError})`
   }

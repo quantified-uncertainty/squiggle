@@ -31,30 +31,16 @@ let rec toString = (expression: t) =>
 let toStringResult = codeResult =>
   switch codeResult {
   | Ok(a) => `Ok(${toString(a)})`
-  | Error(m) => `Error(${Reducer_ErrorValue.errorValueToString(m)})`
+  | Error(m) => `Error(${Reducer_Peggy_Parse.toStringError(m)})`
   }
 
 let toStringResultOkless = codeResult =>
   switch codeResult {
   | Ok(a) => toString(a)
-  | Error(m) => `Error(${Reducer_ErrorValue.errorValueToString(m)})`
+  | Error(m) => `Error(${Reducer_Peggy_Parse.toStringError(m)})`
   }
 
 let inspect = (expr: t): t => {
   Js.log(toString(expr))
   expr
 }
-
-let inspectResult = (r: result<t, Reducer_ErrorValue.errorValue>): result<
-  t,
-  Reducer_ErrorValue.errorValue,
-> => {
-  Js.log(toStringResult(r))
-  r
-}
-
-let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
-  switch rExpression {
-  | Ok(expression) => expression
-  | Error(errorValue) => Reducer_ErrorValue.toException(errorValue)
-  }

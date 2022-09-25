@@ -1,16 +1,4 @@
-// Do not gentype this, use LocationRange from peggy types instead
-// TODO - rename locationPoint -> location, location -> locationRange to match peggy
-@genType
-type locationPoint = {
-  line: int,
-  column: int,
-}
-@genType
-type location = {
-  source: string,
-  start: locationPoint,
-  end: locationPoint,
-}
+type location = Reducer_Peggy_Parse.location
 
 @genType.opaque
 type errorValue =
@@ -50,6 +38,10 @@ type error = {
 }
 
 exception ExceptionWithStackTrace(error)
+
+let fromParseError = (
+  SyntaxError(message, location): Reducer_Peggy_Parse.parseError,
+) => RESyntaxError(message, location->Some)
 
 let errorValueToString = (err: errorValue) =>
   switch err {

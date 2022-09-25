@@ -125,7 +125,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
 module BackCompatible = {
   // Those methods are used to support the existing tests
   // If they are used outside limited testing context, error location reporting will fail
-  let parse = (peggyCode: string): result<T.expression, errorValue> =>
+  let parse = (peggyCode: string): result<T.expression, Reducer_Peggy_Parse.parseError> =>
     peggyCode->Reducer_Peggy_Parse.parse("main")->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
   let evaluate = (expression: T.expression): result<T.value, Reducer_ErrorValue.error> => {
@@ -144,6 +144,8 @@ module BackCompatible = {
 
   let evaluateString = (peggyCode: string): result<T.value, Reducer_ErrorValue.error> =>
     parse(peggyCode)
-    ->E.R2.errMap(e => e->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue)
+    ->E.R2.errMap(e =>
+      e->Reducer_ErrorValue.fromParseError->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue
+    )
     ->Result.flatMap(evaluate)
 }
