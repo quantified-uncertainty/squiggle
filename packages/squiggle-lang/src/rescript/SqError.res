@@ -86,6 +86,7 @@ module Message = {
 }
 
 module StackTrace = {
+  @genType.opaque
   type rec t = {
     location: location,
     parent: option<t>,
@@ -98,48 +99,68 @@ module StackTrace = {
     | None => ""
     }
   }
-}
 
-module Error = {
-  @genType.opaque
-  type t = {
-    message: Message.t,
-    stackTrace: option<StackTrace.t>,
-  }
-
-  exception SqException(t)
-
-  let toString = (err: t) => err.message->Message.toString
-
-  let toStringWithStackTrace = (err: t) =>
-    switch err.stackTrace {
-    | Some(stack) => "Traceback:\n" ++ stack->StackTrace.toString
-    | None => ""
-    } ++
-    err->toString
-
-  let fromMessage = (errorMessage: Message.t) => {
-    message: errorMessage,
-    stackTrace: None,
-  }
-
-  let fromMessageWithLocation = (errorMessage: Message.t, location: location): t => {
-    message: errorMessage,
-    stackTrace: Some({location: location, parent: None}),
-  }
-
-  let extend = ({message, stackTrace}: t, location: location) => {
-    message: message,
-    stackTrace: Some({location: location, parent: stackTrace}),
-  }
-
-  let throw = (t: t) => t->SqException->raise
-
-  let fromException = exn =>
-    switch exn {
-    | SqException(e) => e
-    | Message.MessageException(e) => e->fromMessage
-    | Js.Exn.Error(obj) => REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->fromMessage
-    | _ => REOther("Unknown exception")->fromMessage
+  let rec toLocationList = (t: t): list<location> => {
+    switch t.parent {
+    | Some(parent) => Belt.List.add(toLocationList(parent), t.location)
+    | None => list{t.location}
     }
+  }
+
+  @genType
+  let toLocationArray = (t: t): array<location> => t->toLocationList->Belt.List.toArray
 }
+
+@genType.opaque
+type t = {
+  message: Message.t,
+  stackTrace: option<StackTrace.t>,
+}
+
+exception SqException(t)
+
+@genType
+let fromMessage = (errorMessage: Message.t): t => {
+  message: errorMessage,
+  stackTrace: None,
+}
+
+let fromMessageWithLocation = (errorMessage: Message.t, location: location): t => {
+  message: errorMessage,
+  stackTrace: Some({location: location, parent: None}),
+}
+
+let extend = ({message, stackTrace}: t, location: location) => {
+  message: message,
+  stackTrace: Some({location: location, parent: stackTrace}),
+}
+
+@genType
+let getLocation = (t: t): option<location> => t.stackTrace->E.O2.fmap(stack => stack.location)
+
+@genType
+let getStackTrace = (t: t): option<StackTrace.t> => t.stackTrace
+
+@genType
+let toString = (t: t): string => t.message->Message.toString
+
+@genType
+let createOtherError = (v: string): t => Message.REOther(v)->fromMessage
+
+@genType
+let toStringWithStackTrace = (t: t) =>
+  switch t.stackTrace {
+  | Some(stack) => "Traceback:\n" ++ stack->StackTrace.toString
+  | None => ""
+  } ++
+  t->toString
+
+let throw = (t: t) => t->SqException->raise
+
+let fromException = exn =>
+  switch exn {
+  | SqException(e) => e
+  | Message.MessageException(e) => e->fromMessage
+  | Js.Exn.Error(obj) => REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->fromMessage
+  | _ => REOther("Unknown exception")->fromMessage
+  }

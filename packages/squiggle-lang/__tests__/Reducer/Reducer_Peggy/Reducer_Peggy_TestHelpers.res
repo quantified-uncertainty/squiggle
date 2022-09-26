@@ -22,7 +22,7 @@ let expectExpressionToBe = (expr, answer, ~v="_", ()) => {
   } else {
     let a2 =
       rExpr
-      ->E.R2.errMap(e => e->SqError.Message.fromParseError->SqError.Error.fromMessage)
+      ->E.R2.errMap(e => e->SqError.Message.fromParseError->SqError.fromMessage)
       ->Result.flatMap(expr => Expression.BackCompatible.evaluate(expr))
       ->Reducer_Value.toStringResultOkless
     (a1, a2)->expect->toEqual((answer, v))

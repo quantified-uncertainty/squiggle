@@ -1,7 +1,7 @@
 @genType type reducerProject = ReducerProject_T.project //re-export
 
-type error = ForTS_SqError.error //use
-type errorMessage = ForTS_SqError.errorMessage //use
+type error = SqError.t //use
+type errorMessage = SqError.Message.t //use
 
 type squiggleValue = ForTS_SquiggleValue.squiggleValue //use
 type squiggleValue_Record = ForTS_SquiggleValue.squiggleValue_Record //use

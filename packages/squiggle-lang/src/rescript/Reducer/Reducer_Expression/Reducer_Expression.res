@@ -8,7 +8,7 @@ let toLocation = (expression: T.expression): SqError.location => {
 }
 
 let throwFrom = (error: SqError.Message.t, expression: T.expression) =>
-  error->SqError.Error.fromMessageWithLocation(expression->toLocation)->SqError.Error.throw
+  error->SqError.fromMessageWithLocation(expression->toLocation)->SqError.throw
 
 /*
   Recursively evaluate the expression
@@ -108,11 +108,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
           let result = Lambda.doLambdaCall(lambda, argValues, context.environment, evaluate)
           (result, context)
         } catch {
-        | exn =>
-          exn
-          ->SqError.Error.fromException
-          ->SqError.Error.extend(expression->toLocation)
-          ->SqError.Error.throw
+        | exn => exn->SqError.fromException->SqError.extend(expression->toLocation)->SqError.throw
         }
       | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(expression)
       }
@@ -126,18 +122,18 @@ module BackCompatible = {
   let parse = (peggyCode: string): result<T.expression, Reducer_Peggy_Parse.parseError> =>
     peggyCode->Reducer_Peggy_Parse.parse("main")->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
-  let evaluate = (expression: T.expression): result<T.value, SqError.Error.t> => {
+  let evaluate = (expression: T.expression): result<T.value, SqError.t> => {
     let context = Reducer_Context.createDefaultContext()
     try {
       let (value, _) = expression->evaluate(context)
       value->Ok
     } catch {
-    | exn => exn->SqError.Error.fromException->Error
+    | exn => exn->SqError.fromException->Error
     }
   }
 
-  let evaluateString = (peggyCode: string): result<T.value, SqError.Error.t> =>
+  let evaluateString = (peggyCode: string): result<T.value, SqError.t> =>
     parse(peggyCode)
-    ->E.R2.errMap(e => e->SqError.Message.fromParseError->SqError.Error.fromMessage)
+    ->E.R2.errMap(e => e->SqError.Message.fromParseError->SqError.fromMessage)
     ->Result.flatMap(evaluate)
 }

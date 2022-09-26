@@ -174,7 +174,7 @@ let buildExpression = (this: t): t => {
   }
 }
 
-let failRun = (this: t, e: SqError.Error.t): t =>
+let failRun = (this: t, e: SqError.t): t =>
   this->setResult(e->Error)->setContinuation(Reducer_Namespace.make())
 
 let doRun = (this: t, context: Reducer_T.context): t =>
@@ -188,11 +188,11 @@ let doRun = (this: t, context: Reducer_T.context): t =>
         ->setResult(result->Ok)
         ->setContinuation(contextAfterEvaluation.bindings->Reducer_Bindings.locals)
       } catch {
-      | e => this->failRun(e->SqError.Error.fromException)
+      | e => this->failRun(e->SqError.fromException)
       }
-    | Error(e) => this->failRun(e->SqError.Error.fromMessage)
+    | Error(e) => this->failRun(e->SqError.fromMessage)
     }
-  | None => this->failRun(RETodo("attempt to run without expression")->SqError.Error.fromMessage)
+  | None => this->failRun(RETodo("attempt to run without expression")->SqError.fromMessage)
   }
 
 let run = (this: t, context: Reducer_T.context): t => {

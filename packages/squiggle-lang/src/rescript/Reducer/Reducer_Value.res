@@ -72,13 +72,13 @@ let toStringFunctionCall = ((fn, args)): string => `${fn}(${argsToString(args)})
 let toStringResult = x =>
   switch x {
   | Ok(a) => `Ok(${toString(a)})`
-  | Error(m) => `Error(${SqError.Error.toString(m)})`
+  | Error(m) => `Error(${SqError.toString(m)})`
   }
 
-let toStringResultOkless = (codeResult: result<t, SqError.Error.t>): string =>
+let toStringResultOkless = (codeResult: result<t, SqError.t>): string =>
   switch codeResult {
   | Ok(a) => toString(a)
-  | Error(m) => `Error(${SqError.Error.toString(m)})`
+  | Error(m) => `Error(${SqError.toString(m)})`
   }
 
 type internalExpressionValueType =

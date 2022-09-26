@@ -116,7 +116,7 @@ let getResultOption = (project: t, sourceId: string): ProjectItem.T.resultType =
 
 let getResult = (project: t, sourceId: string): ProjectItem.T.resultArgumentType =>
   switch getResultOption(project, sourceId) {
-  | None => RENeedToRun->SqError.Error.fromMessage->Error
+  | None => RENeedToRun->SqError.fromMessage->Error
   | Some(result) => result
   }
 
@@ -170,7 +170,7 @@ let linkDependencies = (project: t, sourceId: string): Reducer_T.namespace => {
             "__result__",
             switch project->getResult(id) {
             | Ok(result) => result
-            | Error(error) => error->SqError.Error.throw
+            | Error(error) => error->SqError.throw
             },
           ),
         ])

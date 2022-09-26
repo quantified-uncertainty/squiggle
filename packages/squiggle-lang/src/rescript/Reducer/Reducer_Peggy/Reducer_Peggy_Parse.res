@@ -1,7 +1,5 @@
 module Extra = Reducer_Extra
 
-// Do not gentype this, use LocationRange from peggy types instead
-// TODO - rename locationPoint -> location, location -> locationRange to match peggy
 @genType
 type locationPoint = {
   line: int,

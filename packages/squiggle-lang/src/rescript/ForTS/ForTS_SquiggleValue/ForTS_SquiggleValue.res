@@ -1,5 +1,5 @@
 @genType type squiggleValue = Reducer_T.value //re-export
-type error = ForTS_SqError.error //use
+type error = SqError.t //use
 
 @genType type squiggleValue_Array = Reducer_T.arrayValue //re-export recursive type
 @genType type squiggleValue_Record = Reducer_T.map //re-export recursive type
