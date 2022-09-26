@@ -109,8 +109,8 @@ let library = [
         ~inputs=[FRTypeNumber, FRTypeNumber],
         ~run=(inputs, _, _) =>
           switch inputs {
-            | [IEvNumber(low), IEvNumber(high)] => Internals.upTo(low, high)->Ok
-            | _ => impossibleError->Error
+          | [IEvNumber(low), IEvNumber(high)] => Internals.upTo(low, high)->Ok
+          | _ => impossibleError->Error
           },
         (),
       ),

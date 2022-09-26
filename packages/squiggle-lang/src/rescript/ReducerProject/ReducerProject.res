@@ -188,7 +188,6 @@ let linkDependencies = (project: t, sourceId: string): Reducer_T.namespace => {
     acc->Reducer_Namespace.set(
       variable,
       project->getBindings(includeFile)->Reducer_Namespace.toRecord,
-
     )
   )
 }
