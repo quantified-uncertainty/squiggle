@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { SqDistributionTag, SqValue, SqValueTag } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
 import { DistributionChart, defaultPlot, makePlot } from "../DistributionChart";
-import { FunctionChart, FunctionChartSettings } from "../FunctionChart";
+import { FunctionChart } from "../FunctionChart";
 import clsx from "clsx";
 import { VariableBox } from "./VariableBox";
 import { ItemSettingsMenu } from "./ItemSettingsMenu";
@@ -298,7 +298,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           {() => (
             <div>
               <span>No display for type: </span>{" "}
-              <span className="font-semibold text-slate-600">{value.tag}</span>
+              <span className="font-semibold text-slate-600">{(value as {tag: string}).tag}</span>
             </div>
           )}
         </VariableList>
