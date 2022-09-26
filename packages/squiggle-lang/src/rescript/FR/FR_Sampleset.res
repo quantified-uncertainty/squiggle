@@ -18,7 +18,7 @@ module Internal = {
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
 
-  let toType = (r): result<Reducer_T.value, Reducer_ErrorValue.errorValue> =>
+  let toType = (r): result<Reducer_T.value, SqError.Message.t> =>
     switch r {
     | Ok(r) => Ok(Wrappers.evDistribution(SampleSet(r)))
     | Error(r) => Error(REDistributionError(SampleSetError(r)))
@@ -95,7 +95,7 @@ let libaryBase = [
             GenericDist.toSampleSetDist(dist, environment.sampleCount)
             ->E.R2.fmap(Wrappers.sampleSet)
             ->E.R2.fmap(Wrappers.evDistribution)
-            ->E.R2.errMap(e => Reducer_ErrorValue.REDistributionError(e))
+            ->E.R2.errMap(e => SqError.Message.REDistributionError(e))
           | _ => Error(impossibleError)
           },
         (),
@@ -115,9 +115,8 @@ let libaryBase = [
         ~inputs=[FRTypeArray(FRTypeNumber)],
         ~run=(inputs, _, _) => {
           let sampleSet =
-            inputs->Prepare.ToTypedArray.numbers |> E.R2.bind(r =>
-              SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??")
-            )
+            inputs->Prepare.ToTypedArray.numbers
+              |> E.R2.bind(r => SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??"))
           sampleSet
           ->E.R2.fmap(Wrappers.sampleSet)
           ->E.R2.fmap(Wrappers.evDistribution)
@@ -164,7 +163,7 @@ let libaryBase = [
           | [IEvLambda(lambda)] =>
             switch Internal.fromFn(lambda, environment, reducer) {
             | Ok(r) => Ok(r->Wrappers.sampleSet->Wrappers.evDistribution)
-            | Error(e) => e->Reducer_ErrorValue.REOperationError->Error
+            | Error(e) => e->SqError.Message.REOperationError->Error
             }
           | _ => Error(impossibleError)
           },
@@ -291,7 +290,7 @@ module Comparison = {
     r
     ->E.R2.fmap(r => r->Wrappers.sampleSet->Wrappers.evDistribution)
     ->E.R2.errMap(e =>
-      e->DistributionTypes.Error.sampleErrorToDistErr->Reducer_ErrorValue.REDistributionError
+      e->DistributionTypes.Error.sampleErrorToDistErr->SqError.Message.REDistributionError
     )
 
   let mkBig = (name, withDist, withFloat) =>

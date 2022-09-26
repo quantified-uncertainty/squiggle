@@ -6,7 +6,7 @@ let requiresNamespace = true
 let runScoring = (estimate, answer, prior, env) => {
   GenericDist.Score.logScore(~estimate, ~answer, ~prior, ~env)
   ->E.R2.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
-  ->E.R2.errMap(e => Reducer_ErrorValue.REDistributionError(e))
+  ->E.R2.errMap(e => SqError.Message.REDistributionError(e))
 }
 
 let library = [
@@ -31,14 +31,13 @@ let library = [
           ]),
         ],
         ~run=(inputs, environment, _) => {
-          switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(inputs, ("estimate", "answer", "prior")) {
+          switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(
+            inputs,
+            ("estimate", "answer", "prior"),
+          ) {
           | Ok([IEvDistribution(estimate), IEvDistribution(d), IEvDistribution(prior)]) =>
             runScoring(estimate, Score_Dist(d), Some(prior), environment)
-          | Ok([
-              IEvDistribution(estimate),
-              IEvNumber(d),
-              IEvDistribution(prior),
-            ]) =>
+          | Ok([IEvDistribution(estimate), IEvNumber(d), IEvDistribution(prior)]) =>
             runScoring(estimate, Score_Scalar(d), Some(prior), environment)
           | Error(e) => Error(e->FunctionRegistry_Helpers.wrapError)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
@@ -50,7 +49,10 @@ let library = [
         ~name="logScore",
         ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
         ~run=(inputs, environment, _) => {
-          switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(inputs, ("estimate", "answer")) {
+          switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(
+            inputs,
+            ("estimate", "answer"),
+          ) {
           | Ok([IEvDistribution(estimate), IEvDistribution(d)]) =>
             runScoring(estimate, Score_Dist(d), None, environment)
           | Ok([IEvDistribution(estimate), IEvNumber(d)]) =>

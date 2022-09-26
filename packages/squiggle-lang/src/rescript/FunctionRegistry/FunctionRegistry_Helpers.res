@@ -2,8 +2,8 @@ open FunctionRegistry_Core
 open Reducer_T
 
 let impossibleErrorString = "Wrong inputs / Logically impossible"
-let impossibleError: errorValue = impossibleErrorString->Reducer_ErrorValue.REOther
-let wrapError = e => Reducer_ErrorValue.REOther(e)
+let impossibleError: errorMessage = impossibleErrorString->SqError.Message.REOther
+let wrapError = e => SqError.Message.REOther(e)
 
 module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)
@@ -30,21 +30,21 @@ module Prepare = {
       let twoArgs = (inputs: ts, (arg1: string, arg2: string)): result<ts, err> =>
         switch inputs {
         | [IEvRecord(map)] => {
-          let n1 = map->Belt.Map.String.getExn(arg1)
-          let n2 = map->Belt.Map.String.getExn(arg2)
-          Ok([n1, n2])
-        }
+            let n1 = map->Belt.Map.String.getExn(arg1)
+            let n2 = map->Belt.Map.String.getExn(arg2)
+            Ok([n1, n2])
+          }
         | _ => Error(impossibleErrorString)
         }
 
       let threeArgs = (inputs: ts, (arg1: string, arg2: string, arg3: string)): result<ts, err> =>
         switch inputs {
         | [IEvRecord(map)] => {
-          let n1 = map->Belt.Map.String.getExn(arg1)
-          let n2 = map->Belt.Map.String.getExn(arg2)
-          let n3 = map->Belt.Map.String.getExn(arg3)
-          Ok([n1, n2, n3])
-        }
+            let n1 = map->Belt.Map.String.getExn(arg1)
+            let n2 = map->Belt.Map.String.getExn(arg2)
+            let n3 = map->Belt.Map.String.getExn(arg3)
+            Ok([n1, n2, n3])
+          }
         | _ => Error(impossibleErrorString)
         }
     }
@@ -108,8 +108,10 @@ module Prepare = {
     }
 
     module Record = {
-      let twoDistOrNumber = (values: ts, labels: (string, string)): result<(frValueDistOrNumber, frValueDistOrNumber), err> =>
-        values->ToValueArray.Record.twoArgs(labels)->E.R.bind(twoDistOrNumber)
+      let twoDistOrNumber = (values: ts, labels: (string, string)): result<
+        (frValueDistOrNumber, frValueDistOrNumber),
+        err,
+      > => values->ToValueArray.Record.twoArgs(labels)->E.R.bind(twoDistOrNumber)
 
       let twoDist = (values: ts, labels: (string, string)): result<
         (DistributionTypes.genericDist, DistributionTypes.genericDist),

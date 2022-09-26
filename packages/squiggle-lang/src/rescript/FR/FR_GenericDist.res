@@ -296,7 +296,7 @@ module Old = {
 
   let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
     Reducer_T.value,
-    Reducer_ErrorValue.errorValue,
+    SqError.Message.t,
   > =>
     switch o {
     | Dist(d) => Ok(Reducer_T.IEvDistribution(d))
@@ -311,9 +311,9 @@ module Old = {
     switch dispatchToGenericOutput(call, environment) {
     | Some(o) => genericOutputToReducerValue(o)
     | None =>
-      Reducer_ErrorValue.REOther("Internal error in FR_GenericDist implementation")
-      ->Reducer_ErrorValue.ErrorException
-      ->raise
+      SqError.Message.REOther(
+        "Internal error in FR_GenericDist implementation",
+      )->SqError.Message.toException
     }
 }
 
@@ -405,6 +405,6 @@ let library = E.A.concatMany([
 let mxLambda = Reducer_Expression_Lambda.makeFFILambda((inputs, env, _) => {
   switch Old.dispatch(("mx", inputs), env) {
   | Ok(value) => value
-  | Error(e) => e->Reducer_ErrorValue.ErrorException->raise
+  | Error(e) => e->SqError.Message.toException
   }
 })

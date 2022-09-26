@@ -70,7 +70,7 @@ describe("test exceptions", () => {
   testDescriptionEvalToBe(
     "javascript exception",
     "javascriptraise('div by 0')",
-    "Error(Error: 'div by 0')",
+    "Error(JS Exception: Error: 'div by 0')",
   )
   // testDescriptionEvalToBe(
   //   "rescript exception",

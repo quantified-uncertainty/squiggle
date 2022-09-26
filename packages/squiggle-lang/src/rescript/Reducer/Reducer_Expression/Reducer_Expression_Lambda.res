@@ -1,5 +1,3 @@
-module ErrorValue = Reducer_ErrorValue
-
 let doLambdaCall = (
   lambdaValue: Reducer_T.lambdaValue,
   args,
@@ -28,7 +26,7 @@ let makeLambda = (
     let argsLength = arguments->Js.Array2.length
     let parametersLength = parameters->Js.Array2.length
     if argsLength !== parametersLength {
-      ErrorValue.REArityError(None, parametersLength, argsLength)->ErrorValue.ErrorException->raise
+      SqError.Message.REArityError(None, parametersLength, argsLength)->SqError.Message.toException
     }
 
     let localBindings = bindings->Reducer_Bindings.extend

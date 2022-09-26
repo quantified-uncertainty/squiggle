@@ -1,7 +1,5 @@
-module BErrorValue = Reducer_ErrorValue
 module T = Reducer_T
 
-type errorValue = BErrorValue.errorValue
 type expression = Reducer_T.expression
 type expressionContent = Reducer_T.expressionContent
 

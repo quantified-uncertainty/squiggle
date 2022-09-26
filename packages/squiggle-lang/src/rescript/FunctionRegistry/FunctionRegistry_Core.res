@@ -1,5 +1,5 @@
 type internalExpressionValueType = Reducer_Value.internalExpressionValueType
-type errorValue = Reducer_ErrorValue.errorValue
+type errorMessage = SqError.Message.t
 
 /*
   Function Registry "Type". A type, without any other information.
@@ -32,7 +32,7 @@ type fnDefinition = {
     array<Reducer_T.value>,
     Reducer_T.environment,
     Reducer_T.reducerFn,
-  ) => result<Reducer_T.value, errorValue>,
+  ) => result<Reducer_T.value, errorMessage>,
 }
 
 type function = {
@@ -83,19 +83,17 @@ module FRType = {
     | (FRTypeNumeric, IEvNumber(_)) => true
     | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(_)))) => true
     | (FRTypeLambda, IEvLambda(_)) => true
-    | (FRTypeArray(intendedType), IEvArray(elements)) => {
-        elements->Belt.Array.every(v => matchWithValue(intendedType, v))
-      }
+    | (FRTypeArray(intendedType), IEvArray(elements)) =>
+      elements->Belt.Array.every(v => matchWithValue(intendedType, v))
     | (FRTypeDict(r), IEvRecord(map)) =>
       map->Belt.Map.String.valuesToArray->Belt.Array.every(v => matchWithValue(r, v))
-    | (FRTypeRecord(recordParams), IEvRecord(map)) => {
+    | (FRTypeRecord(recordParams), IEvRecord(map)) =>
       recordParams->Belt.Array.every(((name, input)) => {
         switch map->Belt.Map.String.get(name) {
-          | Some(v) => matchWithValue(input, v)
-          | None => false
+        | Some(v) => matchWithValue(input, v)
+        | None => false
         }
       })
-    }
     | _ => false
     }
 
@@ -104,8 +102,7 @@ module FRType = {
     if !isSameLength {
       false
     } else {
-      E.A.zip(inputs, args)
-      ->Belt.Array.every(((input, arg)) => matchWithValue(input, arg))
+      E.A.zip(inputs, args)->Belt.Array.every(((input, arg)) => matchWithValue(input, arg))
     }
   }
 }
@@ -230,7 +227,7 @@ module Registry = {
     args: array<Reducer_T.value>,
     env: Reducer_T.environment,
     reducer: Reducer_T.reducerFn,
-  ): result<Reducer_T.value, errorValue> => {
+  ): result<Reducer_T.value, errorMessage> => {
     switch Belt.Map.String.get(registry.fnNameDict, fnName) {
     | Some(definitions) => {
         let showNameMatchDefinitions = () => {

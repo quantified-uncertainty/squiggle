@@ -1,7 +1,7 @@
 @genType type reducerProject = ReducerProject_T.project //re-export
 
-type reducerError = ForTS_Reducer_ErrorValue.reducerError //use
-type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
+type error = ForTS_SqError.error //use
+type errorMessage = ForTS_SqError.errorMessage //use
 
 type squiggleValue = ForTS_SquiggleValue.squiggleValue //use
 type squiggleValue_Record = ForTS_SquiggleValue.squiggleValue_Record //use
@@ -99,7 +99,7 @@ To set the includes one first has to call "parseIncludes". The parsed includes o
 @genType
 let getIncludes = (project: reducerProject, sourceId: string): result<
   array<string>,
-  reducerErrorValue,
+  errorMessage,
 > => project->Private.getIncludes(sourceId)
 
 /* Other sources contributing to the global namespace of this source. */
@@ -192,7 +192,7 @@ let getBindings = (project: reducerProject, sourceId: string): squiggleValue_Rec
 Get the result after running this source file or the project
 */
 @genType
-let getResult = (project: reducerProject, sourceId: string): result<squiggleValue, reducerError> =>
+let getResult = (project: reducerProject, sourceId: string): result<squiggleValue, error> =>
   project->Private.getResult(sourceId)
 
 /*
@@ -201,7 +201,7 @@ However, without a project, you cannot handle include directives.
 The source has to be include free
 */
 @genType
-let evaluate = (sourceCode: string): (result<squiggleValue, reducerError>, squiggleValue_Record) =>
+let evaluate = (sourceCode: string): (result<squiggleValue, error>, squiggleValue_Record) =>
   Private.evaluate(sourceCode)
 
 @genType

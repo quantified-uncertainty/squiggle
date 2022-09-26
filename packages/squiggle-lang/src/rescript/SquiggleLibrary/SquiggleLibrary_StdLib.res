@@ -1,4 +1,4 @@
-exception ErrorException = Reducer_ErrorValue.ErrorException
+let throwMessage = SqError.Message.toException
 
 let stdLib: Reducer_T.namespace = {
   // constants
@@ -17,16 +17,15 @@ let stdLib: Reducer_T.namespace = {
 
           switch Belt.Array.get(aValueArray, index) {
           | Some(value) => value
-          | None => REArrayIndexNotFound("Array index not found", index)->ErrorException->raise
+          | None => REArrayIndexNotFound("Array index not found", index)->throwMessage
           }
         }
       | [IEvRecord(dict), IEvString(sIndex)] =>
         switch Belt.Map.String.get(dict, sIndex) {
         | Some(value) => value
-        | None =>
-          RERecordPropertyNotFound("Record property not found", sIndex)->ErrorException->raise
+        | None => RERecordPropertyNotFound("Record property not found", sIndex)->throwMessage
         }
-      | _ => REOther("Trying to access key on wrong value")->ErrorException->raise
+      | _ => REOther("Trying to access key on wrong value")->throwMessage
       }
     })->Reducer_T.IEvLambda,
   )
@@ -49,7 +48,7 @@ let stdLib: Reducer_T.namespace = {
         Reducer_Expression_Lambda.makeFFILambda((arguments, environment, reducer) => {
           switch FunctionRegistry_Library.call(name, arguments, environment, reducer) {
           | Ok(value) => value
-          | Error(error) => error->Reducer_ErrorValue.ErrorException->raise
+          | Error(error) => error->SqError.Message.toException
           }
         })->Reducer_T.IEvLambda,
       )

@@ -1,22 +1,21 @@
 module Parse = Reducer_Peggy_Parse
 module ExpressionT = Reducer_Expression_T
-open Reducer_ErrorValue
 
 type sourceArgumentType = string
 type sourceType = string
-type rawParseArgumentType = result<Parse.node, errorValue>
+type rawParseArgumentType = result<Parse.node, SqError.Message.t>
 type rawParseType = option<rawParseArgumentType>
-type expressionArgumentType = result<ExpressionT.t, errorValue>
+type expressionArgumentType = result<ExpressionT.t, SqError.Message.t>
 type expressionType = option<expressionArgumentType>
 type continuationArgumentType = Reducer_T.namespace
 type continuationType = option<continuationArgumentType>
-type continuationResultType = option<result<continuationArgumentType, errorValue>>
-type resultArgumentType = result<Reducer_T.value, error>
+type continuationResultType = option<result<continuationArgumentType, SqError.Message.t>>
+type resultArgumentType = result<Reducer_T.value, SqError.Error.t>
 type resultType = option<resultArgumentType>
 type continuesArgumentType = array<string>
 type continuesType = array<string>
 type includesArgumentType = string
-type includesType = result<array<string>, errorValue>
+type includesType = result<array<string>, SqError.Message.t>
 type importAsVariablesType = array<(string, string)>
 
 type projectItem = {

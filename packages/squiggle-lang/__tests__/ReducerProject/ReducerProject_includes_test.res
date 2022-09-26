@@ -25,7 +25,7 @@ x=1`,
     let mainIncludes = Project.getIncludes(project, "main")
     switch mainIncludes {
     | Ok(includes) => expect(includes) == ["common"]
-    | Error(error) => fail(error->Reducer_ErrorValue.errorValueToString)
+    | Error(error) => fail(error->SqError.Message.toString)
     }
   })
   test("past chain", () => {
@@ -60,7 +60,7 @@ x=1`,
     let mainIncludes = Project.getIncludes(project, "main")
     switch mainIncludes {
     | Ok(includes) => expect(includes) == ["common", "myModule"]
-    | Error(error) => fail(error->Reducer_ErrorValue.errorValueToString)
+    | Error(error) => fail(error->SqError.Message.toString)
     }
   })
 
@@ -99,7 +99,7 @@ x=1`,
     let mainIncludes = Project.getIncludes(project, "main")
     switch mainIncludes {
     | Ok(includes) => expect(includes) == ["common", "common2", "myModule"]
-    | Error(error) => fail(error->Reducer_ErrorValue.errorValueToString)
+    | Error(error) => fail(error->SqError.Message.toString)
     }
   })
   test("direct past chain", () => {

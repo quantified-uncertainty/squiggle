@@ -3,14 +3,12 @@ module Lambda = Reducer_Expression_Lambda
 module Result = Belt.Result
 module T = Reducer_T
 
-type errorValue = Reducer_ErrorValue.errorValue
-
-let toLocation = (expression: T.expression): Reducer_ErrorValue.location => {
+let toLocation = (expression: T.expression): SqError.location => {
   expression.ast.location
 }
 
-let throwFrom = (error: errorValue, expression: T.expression) =>
-  error->Reducer_ErrorValue.raiseNewExceptionWithStackTrace(expression->toLocation)
+let throwFrom = (error: SqError.Message.t, expression: T.expression) =>
+  error->SqError.Error.fromMessageWithLocation(expression->toLocation)->SqError.Error.throw
 
 /*
   Recursively evaluate the expression
@@ -110,11 +108,11 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
           let result = Lambda.doLambdaCall(lambda, argValues, context.environment, evaluate)
           (result, context)
         } catch {
-        | Reducer_ErrorValue.ErrorException(e) => e->throwFrom(expression) // function implementation returned an error without location
-        | Reducer_ErrorValue.ExceptionWithStackTrace(e) =>
-          Reducer_ErrorValue.raiseExtendedExceptionWithStackTrace(e, expression->toLocation) // function implementation probably called a lambda that threw an exception
-        | Js.Exn.Error(obj) =>
-          REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->throwFrom(expression)
+        | exn =>
+          exn
+          ->SqError.Error.fromException
+          ->SqError.Error.extend(expression->toLocation)
+          ->SqError.Error.throw
         }
       | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(expression)
       }
@@ -128,24 +126,18 @@ module BackCompatible = {
   let parse = (peggyCode: string): result<T.expression, Reducer_Peggy_Parse.parseError> =>
     peggyCode->Reducer_Peggy_Parse.parse("main")->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
-  let evaluate = (expression: T.expression): result<T.value, Reducer_ErrorValue.error> => {
+  let evaluate = (expression: T.expression): result<T.value, SqError.Error.t> => {
     let context = Reducer_Context.createDefaultContext()
     try {
       let (value, _) = expression->evaluate(context)
       value->Ok
     } catch {
-    | exn =>
-      exn
-      ->Reducer_ErrorValue.fromException
-      ->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue
-      ->Error // TODO - this could be done better (see ReducerProject)
+    | exn => exn->SqError.Error.fromException->Error
     }
   }
 
-  let evaluateString = (peggyCode: string): result<T.value, Reducer_ErrorValue.error> =>
+  let evaluateString = (peggyCode: string): result<T.value, SqError.Error.t> =>
     parse(peggyCode)
-    ->E.R2.errMap(e =>
-      e->Reducer_ErrorValue.fromParseError->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue
-    )
+    ->E.R2.errMap(e => e->SqError.Message.fromParseError->SqError.Error.fromMessage)
     ->Result.flatMap(evaluate)
 }

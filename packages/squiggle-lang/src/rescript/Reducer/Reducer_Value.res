@@ -1,7 +1,3 @@
-// deprecated, use Reducer_T instead
-// (value methods should be moved to Reducer_Value.res)
-
-module ErrorValue = Reducer_ErrorValue
 type environment = GenericDist.env
 module T = Reducer_T
 
@@ -76,13 +72,13 @@ let toStringFunctionCall = ((fn, args)): string => `${fn}(${argsToString(args)})
 let toStringResult = x =>
   switch x {
   | Ok(a) => `Ok(${toString(a)})`
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${SqError.Error.toString(m)})`
   }
 
-let toStringResultOkless = (codeResult: result<t, ErrorValue.error>): string =>
+let toStringResultOkless = (codeResult: result<t, SqError.Error.t>): string =>
   switch codeResult {
   | Ok(a) => toString(a)
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${SqError.Error.toString(m)})`
   }
 
 type internalExpressionValueType =
@@ -144,10 +140,10 @@ let functionCallSignatureToString = (functionCallSignature: functionCallSignatur
 
 let arrayToValueArray = (arr: array<t>): array<t> => arr
 
-let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
+let resultToValue = (rExpression: result<t, SqError.Message.t>): t =>
   switch rExpression {
   | Ok(expression) => expression
-  | Error(errorValue) => Reducer_ErrorValue.toException(errorValue)
+  | Error(errorValue) => SqError.Message.toException(errorValue)
   }
 
 let recordToKeyValuePairs = (record: T.map): array<(string, t)> => record->Belt.Map.String.toArray

@@ -1,10 +1,7 @@
 @module("./ReducerProject_IncludeParser.js")
 external parse__: string => array<array<string>> = "parse"
 
-let parseIncludes = (expr: string): result<
-  array<(string, string)>,
-  Reducer_ErrorValue.errorValue,
-> =>
+let parseIncludes = (expr: string): result<array<(string, string)>, SqError.Message.t> =>
   try {
     let answer = parse__(expr)
     // let logEntry = answer->Js.Array2.joinWith(",")

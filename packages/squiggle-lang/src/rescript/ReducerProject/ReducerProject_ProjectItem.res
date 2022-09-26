@@ -155,7 +155,7 @@ let doRawParse = (this: t): T.rawParseArgumentType =>
   this
   ->getSource
   ->Reducer_Peggy_Parse.parse(this.sourceId)
-  ->E.R2.errMap(Reducer_ErrorValue.fromParseError)
+  ->E.R2.errMap(SqError.Message.fromParseError)
 
 let rawParse = (this: t): t =>
   this->getRawParse->E.O2.defaultFn(() => doRawParse(this))->setRawParse(this, _)
@@ -174,7 +174,7 @@ let buildExpression = (this: t): t => {
   }
 }
 
-let failRun = (this: t, e: Reducer_ErrorValue.error): t =>
+let failRun = (this: t, e: SqError.Error.t): t =>
   this->setResult(e->Error)->setContinuation(Reducer_Namespace.make())
 
 let doRun = (this: t, context: Reducer_T.context): t =>
@@ -188,24 +188,11 @@ let doRun = (this: t, context: Reducer_T.context): t =>
         ->setResult(result->Ok)
         ->setContinuation(contextAfterEvaluation.bindings->Reducer_Bindings.locals)
       } catch {
-      | Reducer_ErrorValue.ErrorException(e) =>
-        this->failRun(e->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue)
-      | Reducer_ErrorValue.ExceptionWithStackTrace(e) => this->failRun(e)
-      | _ =>
-        this->failRun(
-          RETodo(
-            "unhandled rescript exception",
-          )->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue,
-        )
+      | e => this->failRun(e->SqError.Error.fromException)
       }
-    | Error(e) => this->failRun(e->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue)
+    | Error(e) => this->failRun(e->SqError.Error.fromMessage)
     }
-  | None =>
-    this->failRun(
-      RETodo(
-        "attempt to run without expression",
-      )->Reducer_ErrorValue.attachEmptyStackTraceToErrorValue,
-    )
+  | None => this->failRun(RETodo("attempt to run without expression")->SqError.Error.fromMessage)
   }
 
 let run = (this: t, context: Reducer_T.context): t => {
