@@ -98,7 +98,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
 
   | T.ECall(fn, args) => {
       let (lambda, _) = fn->evaluate(context)
-      let argValues = Js.Array2.map(args, arg => {
+      let argValues = Belt.Array.map(args, arg => {
         let (argValue, _) = arg->evaluate(context)
         argValue
       })

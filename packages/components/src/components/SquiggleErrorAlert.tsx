@@ -17,21 +17,24 @@ const StackTraceLocation: React.FC<{ location: SqLocation }> = ({
 };
 
 const StackTrace: React.FC<Props> = ({ error }) => {
-  return (
+  const locations = error.toLocationArray();
+  return locations.length ? (
     <div>
-      {error.toLocationArray().map((location, i) => (
-        <StackTraceLocation location={location} key={i} />
-      ))}
+      <div>Traceback:</div>
+      <div className="ml-4">
+        {locations.map((location, i) => (
+          <StackTraceLocation location={location} key={i} />
+        ))}
+      </div>
     </div>
-  );
+  ) : null;
 };
 
 export const SquiggleErrorAlert: React.FC<Props> = ({ error }) => {
   return (
     <ErrorAlert heading="Error">
-      <div>{error.toString()}</div>
-      <div className="mt-4">Traceback:</div>
-      <div className="ml-4">
+      <div className="space-y-4">
+        <div>{error.toString()}</div>
         <StackTrace error={error} />
       </div>
     </ErrorAlert>

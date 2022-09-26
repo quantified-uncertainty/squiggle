@@ -1,13 +1,21 @@
 import React from "react";
 import { CodeEditor } from "./CodeEditor";
 import { SquiggleContainer } from "./SquiggleContainer";
-import { SquiggleChart, SquiggleChartProps } from "./SquiggleChart";
-import { useMaybeControlledValue } from "../lib/hooks";
+import {
+  splitSquiggleChartSettings,
+  SquiggleChartProps,
+} from "./SquiggleChart";
+import { useMaybeControlledValue, useSquiggle } from "../lib/hooks";
+import { JsImports } from "../lib/jsImports";
+import { defaultEnvironment, SqLocation } from "@quri/squiggle-lang";
+import { SquiggleViewer } from "./SquiggleViewer";
+import { getErrorLocations, getValueToRender } from "../lib/utility";
 
 const WrappedCodeEditor: React.FC<{
   code: string;
   setCode: (code: string) => void;
-}> = ({ code, setCode }) => (
+  errorLocations?: SqLocation[];
+}> = ({ code, setCode, errorLocations }) => (
   <div className="border border-grey-200 p-2 m-4">
     <CodeEditor
       value={code}
@@ -15,6 +23,7 @@ const WrappedCodeEditor: React.FC<{
       oneLine={true}
       showGutter={false}
       height={20}
+      errorLocations={errorLocations}
     />
   </div>
 );
@@ -24,6 +33,9 @@ export type SquiggleEditorProps = SquiggleChartProps & {
   onCodeChange?: (code: string) => void;
 };
 
+const defaultOnChange = () => {};
+const defaultImports: JsImports = {};
+
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   const [code, setCode] = useMaybeControlledValue({
     value: props.code,
@@ -31,11 +43,46 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     onChange: props.onCodeChange,
   });
 
-  let chartProps = { ...props, code };
+  const { distributionPlotSettings, chartSettings } =
+    splitSquiggleChartSettings(props);
+
+  const {
+    environment,
+    jsImports = defaultImports,
+    onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
+    executionId = 0,
+    width,
+    height = 200,
+    enableLocalSettings = false,
+  } = props;
+
+  const resultAndBindings = useSquiggle({
+    code,
+    environment,
+    jsImports,
+    onChange,
+    executionId,
+  });
+
+  const valueToRender = getValueToRender(resultAndBindings);
+  const errorLocations = getErrorLocations(resultAndBindings.result);
+
   return (
     <SquiggleContainer>
-      <WrappedCodeEditor code={code} setCode={setCode} />
-      <SquiggleChart {...chartProps} />
+      <WrappedCodeEditor
+        code={code}
+        setCode={setCode}
+        errorLocations={errorLocations}
+      />
+      <SquiggleViewer
+        result={valueToRender}
+        width={width}
+        height={height}
+        distributionPlotSettings={distributionPlotSettings}
+        chartSettings={chartSettings}
+        environment={environment ?? defaultEnvironment}
+        enableLocalSettings={enableLocalSettings}
+      />
     </SquiggleContainer>
   );
 };

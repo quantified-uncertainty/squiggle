@@ -8,7 +8,11 @@ import React, {
 } from "react";
 import { useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
-import { useMaybeControlledValue, useRunnerState } from "../lib/hooks";
+import {
+  useMaybeControlledValue,
+  useRunnerState,
+  useSquiggle,
+} from "../lib/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   ChartSquareBarIcon,
@@ -26,7 +30,7 @@ import clsx from "clsx";
 
 import { environment } from "@quri/squiggle-lang";
 
-import { SquiggleChart, SquiggleChartProps } from "./SquiggleChart";
+import { SquiggleChartProps } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
 import { JsonEditor } from "./JsonEditor";
 import { ErrorAlert, SuccessAlert } from "./Alert";
@@ -40,6 +44,8 @@ import { HeadedSection } from "./ui/HeadedSection";
 import { defaultTickFormat } from "../lib/distributionSpecBuilder";
 import { Button } from "./ui/Button";
 import { JsImports } from "../lib/jsImports";
+import { getErrorLocations, getValueToRender } from "../lib/utility";
+import { SquiggleViewer } from "./SquiggleViewer";
 
 type PlaygroundProps = SquiggleChartProps & {
   /** The initial squiggle string to put in the playground */
@@ -282,7 +288,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     onSettingsChange?.(vars);
   }, [vars, onSettingsChange]);
 
-  const env: environment = useMemo(
+  const environment: environment = useMemo(
     () => ({
       sampleCount: Number(vars.sampleCount),
       xyPointLength: Number(vars.xyPointLength),
@@ -299,26 +305,51 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     executionId,
   } = useRunnerState(code);
 
+  const resultAndBindings = useSquiggle({
+    code,
+    environment,
+    jsImports: imports,
+    executionId,
+  });
+
+  const valueToRender = getValueToRender(resultAndBindings);
+
   const squiggleChart =
     renderedCode === "" ? null : (
       <div className="relative">
         {isRunning ? (
           <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
         ) : null}
-        <SquiggleChart
-          code={renderedCode}
-          executionId={executionId}
-          environment={env}
-          {...vars}
-          jsImports={imports}
+        <SquiggleViewer
+          result={valueToRender}
+          environment={environment}
+          height={vars.chartHeight || 150}
+          distributionPlotSettings={{
+            showSummary: vars.showSummary ?? false,
+            logX: vars.logX ?? false,
+            expY: vars.expY ?? false,
+            format: vars.tickFormat,
+            minX: vars.minX,
+            maxX: vars.maxX,
+            title: vars.title,
+            actions: vars.distributionChartActions,
+          }}
+          chartSettings={{
+            start: vars.diagramStart ?? 0,
+            stop: vars.diagramStop ?? 10,
+            count: vars.diagramCount ?? 20,
+          }}
           enableLocalSettings={true}
         />
       </div>
     );
 
+  const errorLocations = getErrorLocations(resultAndBindings.result);
+
   const firstTab = vars.showEditor ? (
     <div className="border border-slate-200">
       <CodeEditor
+        errorLocations={errorLocations}
         value={code}
         onChange={setCode}
         onSubmit={run}

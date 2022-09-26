@@ -22,4 +22,8 @@ export class SqError {
 
     return stackTrace ? RSError.StackTrace.toLocationArray(stackTrace) : [];
   }
+
+  toLocation() {
+    return RSError.getLocation(this._value);
+  }
 }

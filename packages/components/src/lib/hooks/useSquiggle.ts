@@ -1,4 +1,11 @@
-import { environment, SqProject, SqValue } from "@quri/squiggle-lang";
+import {
+  environment,
+  result,
+  SqError,
+  SqProject,
+  SqRecord,
+  SqValue,
+} from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
 
@@ -10,7 +17,12 @@ type SquiggleArgs = {
   onChange?: (expr: SqValue | undefined) => void;
 };
 
-export const useSquiggle = (args: SquiggleArgs) => {
+export type ResultAndBindings = {
+  result: result<SqValue, SqError>;
+  bindings: SqRecord;
+};
+
+export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
   const result = useMemo(
     () => {
       const project = SqProject.create();
