@@ -86,6 +86,7 @@ let toFloatOperation = (
       | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
       | (SampleSet(sampleSet), #Min) => SampleSetDist.min(sampleSet)->Some
       | (SampleSet(sampleSet), #Max) => SampleSetDist.max(sampleSet)->Some
+      | (SampleSet(sampleSet), #Cdf(r)) => SampleSetDist.cdf(sampleSet, r)->Some
       | _ => None
       }
 
@@ -277,22 +278,14 @@ module AlgebraicCombination = {
      Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
  */
     let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
-      let firstOperandIsGreaterThanZero =
+      let isDistGreaterThanZero = t =>
         toFloatOperation(
-          t1,
+          t,
           ~toPointSetFn,
           ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
-        ) |> E.R.fmap(r => r > 0.)
-      let secondOperandIsGreaterThanZero =
-        toFloatOperation(
-          t2,
-          ~toPointSetFn,
-          ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
-        ) |> E.R.fmap(r => r > 0.)
-      let items = E.A.R.firstErrorOrOpen([
-        firstOperandIsGreaterThanZero,
-        secondOperandIsGreaterThanZero,
-      ])
+        )->E.R2.fmap(r => r > 0.)
+
+      let items = E.A.R.firstErrorOrOpen([isDistGreaterThanZero(t1), isDistGreaterThanZero(t2)])
       switch items {
       | Error(r) => Some(r)
       | Ok([true, _]) =>
