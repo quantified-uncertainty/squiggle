@@ -1,6 +1,5 @@
 module Expression = Reducer_Expression
 module ExpressionT = Reducer_Expression_T
-module ExpressionValue = ReducerInterface.InternalExpressionValue
 module Parse = Reducer_Peggy_Parse
 module Result = Belt.Result
 module ToExpression = Reducer_Peggy_ToExpression
@@ -24,8 +23,7 @@ let expectToExpressionToBe = (expr, answer, ~v="_", ()) => {
     let a2 =
       rExpr
       ->Result.flatMap(expr => Expression.BackCompatible.evaluate(expr))
-      ->Reducer_Helpers.rRemoveDefaultsInternal
-      ->ExpressionValue.toStringResultOkless
+      ->Reducer_Value.toStringResultOkless
     (a1, a2)->expect->toEqual((answer, v))
   }
 }

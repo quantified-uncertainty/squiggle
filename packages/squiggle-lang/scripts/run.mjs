@@ -7,4 +7,6 @@ if (!src) {
 }
 console.log(`Running ${src}`);
 
-run(src);
+const sampleCount = process.env.SAMPLE_COUNT;
+
+run(src, { output: true, sampleCount });

@@ -1,5 +1,4 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
 module Bindings = Reducer_Bindings
 
@@ -16,13 +15,13 @@ Case "Running a single source".
       /* Let's start with running a single source and getting Result as well as the Bindings 
        First you need to create a project. A project is a collection of sources. 
        Project takes care of the dependencies between the sources, correct compilation and run order. 
-       You can run any source in the project. It will be compiled and run if it is not already done else already existing results will be presented.
+       You can run any source in the project. It will be compiled and run if it hasn't happened already; otherwise already existing results will be presented.
        The dependencies will be automatically compiled and run. So you don't need to worry about that in a multi source project.
        In summary you issue a run command on the whole project or on a specific source to ensure that there is a result for that source.
  */
       let project = Project.createProject()
       /* Every source has a name. This is used for debugging, dependencies and error messages. */
-      Project.setSource(project, "main", "1 + 2")
+      project->Project.setSource("main", "1 + 2")
       /* Let's run "main" source. */
       project->Project.run("main")
       /* Now you have a result for "main" source. 
@@ -46,27 +45,25 @@ Case "Running a single source".
        Getting None means you have forgotten to run the source.
  */
       let result = project->Project.getResult("main")
-      let bindings = project->Project.getBindings("main")->Bindings.removeResult
+      let bindings = project->Project.getBindings("main")
 
       /* Let's display the result and bindings */
-      (
-        result->InternalExpressionValue.toStringResult,
-        bindings->InternalExpressionValue.toStringBindings,
-      )->expect == ("Ok(3)", "@{}")
+      (result->Reducer_Value.toStringResult, bindings->Reducer_Value.toStringRecord)->expect ==
+        ("Ok(3)", "{}")
       /* You've got 3 with empty bindings. */
     })
 
     test("run summary", () => {
       let project = Project.createProject()
-      Project.setSource(project, "main", "1 + 2")
-      Project.runAll(project)
-      let result = Project.getResult(project, "main")
-      let bindings = Project.getBindings(project, "main")->Bindings.removeResult
+      project->Project.setSource("main", "1 + 2")
+      project->Project.runAll
+      let result = project->Project.getResult("main")
+      let bindings = project->Project.getBindings("main")
       /* Now you have external bindings and external result. */
       (
-        result->InternalExpressionValue.toStringResult,
-        bindings->InternalExpressionValue.IEvBindings->InternalExpressionValue.toString,
-      )->expect == ("Ok(3)", "@{}")
+        result->Reducer_Value.toStringResult,
+        bindings->Reducer_T.IEvRecord->Reducer_Value.toString,
+      )->expect == ("Ok(3)", "{}")
     })
 
     test("run with an environment", () => {
@@ -74,23 +71,21 @@ Case "Running a single source".
       let project = Project.createProject()
 
       /* Optional. Set your custom environment anytime before running */
-      Project.setEnvironment(project, InternalExpressionValue.defaultEnvironment)
+      project->Project.setEnvironment(Reducer_Context.defaultEnvironment)
 
-      Project.setSource(project, "main", "1 + 2")
-      Project.runAll(project)
-      let result = Project.getResult(project, "main")
-      let _bindings = Project.getBindings(project, "main")
-      result->InternalExpressionValue.toStringResult->expect == "Ok(3)"
+      project->Project.setSource("main", "1 + 2")
+      project->Project.runAll
+      let result = project->Project.getResult("main")
+      let _bindings = project->Project.getBindings("main")
+      result->Reducer_Value.toStringResult->expect == "Ok(3)"
     })
 
     test("shortcut", () => {
       /* If you are running single source without includes and you don't need a custom environment, you can use the shortcut. */
       /* Examples above was to prepare you for the multi source tutorial. */
       let (result, bindings) = Project.evaluate("1+2")
-      (
-        result->InternalExpressionValue.toStringResult,
-        bindings->Bindings.removeResult->InternalExpressionValue.toStringBindings,
-      )->expect == ("Ok(3)", "@{}")
+      (result->Reducer_Value.toStringResult, bindings->Reducer_Value.toStringRecord)->expect ==
+        ("Ok(3)", "{}")
     })
   })
 })
