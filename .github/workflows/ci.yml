@@ -11,6 +11,7 @@ on:
       - develop
       - reducer-dev
       - epic-reducer-project
+      - epic-0.5.0
 
 jobs:
   pre_check:
