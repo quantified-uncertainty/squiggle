@@ -115,4 +115,14 @@ export class SqProject {
   getEnvironment(): environment {
     return RSProject.getEnvironment(this._value);
   }
+
+  toJSON(): RSProject.reducerProjectJson {
+    return RSProject.toJson(this._value);
+  }
+
+  static fromJson(
+    projectJson: RSProject.reducerProjectJson
+  ): RSProject.reducerProject {
+    return RSProject.fromJson(projectJson);
+  }
 }

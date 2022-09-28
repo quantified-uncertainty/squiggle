@@ -180,3 +180,42 @@ describe("project with independent sources", () => {
     expect(Project.getRunOrderFor(project, "second")) == ["second"]
   })
 })
+
+describe("project serialization", () => {
+  let project = Project.createProject()
+  Project.setSource(project, "first", "x = 1")
+  Project.setSource(project, "second", "y = 1")
+  Project.setSource(project, "main", "x + y")
+  Project.setContinues(project, "main", ["first", "second"])
+  let expectedJson: Project.reducerProjectJson = {
+    environment: {
+      sampleCount: 10000,
+      xyPointLength: 1000,
+    },
+    items: [
+      {
+        continues: [],
+        id: "first",
+        source: "x = 1",
+      },
+      {
+        continues: ["first", "second"],
+        id: "main",
+        source: "x + y",
+      },
+      {
+        continues: [],
+        id: "second",
+        source: "y = 1",
+      },
+    ],
+  }
+
+  test("serializes correctly", () => {
+    expect(Project.toJson(project)) == expectedJson
+  })
+
+  test("serializes reflexive", () => {
+    expect(Project.toJson(Project.fromJson(Project.toJson(project)))) == Project.toJson(project)
+  })
+})

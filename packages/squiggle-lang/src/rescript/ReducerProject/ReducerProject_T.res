@@ -9,6 +9,17 @@ type project = {
 }
 type t = project
 
+type projectItemJson = {
+  id: string,
+  source: string,
+  continues: array<string>,
+}
+
+type projectJson = {
+  items: array<projectItemJson>,
+  environment: Reducer_T.environment,
+}
+
 // these functions are used in ReducerProject_Topology, so they are defined here to avoid circular dependencies
 let getSourceIds = (project: t): array<string> => Belt.MutableMap.String.keysToArray(project.items)
 

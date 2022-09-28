@@ -182,7 +182,6 @@ let doRun = (this: t, context: Reducer_T.context): t =>
         ->setContinuation(contextAfterEvaluation.bindings->Reducer_Bindings.locals)
       } catch {
       | Reducer_ErrorValue.ErrorException(e) => this->failRun(e)
-      | _ => this->failRun(RETodo("unhandled rescript exception"))
       }
     | Error(e) => this->failRun(e)
     }

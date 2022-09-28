@@ -1,4 +1,5 @@
 @genType type reducerProject = ReducerProject_T.project //re-export
+@genType type reducerProjectJson = ReducerProject_T.projectJson //re-export
 
 type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
 
@@ -213,6 +214,12 @@ let setEnvironment = (project: reducerProject, environment: environment): unit =
 
 @genType
 let getEnvironment = (project: reducerProject): environment => project->Private.getEnvironment
+
+@genType
+let toJson = (project: reducerProject): reducerProjectJson => project->Private.toJson
+
+@genType
+let fromJson = (project: reducerProjectJson): reducerProject => project->Private.fromJson
 
 /*
 Foreign function interface is intentionally demolished.

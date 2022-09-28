@@ -59,7 +59,6 @@ let library = [
     ],
     (),
   ),
-
   Function.make(
     ~name="mergeMany",
     ~nameSpace,
@@ -72,13 +71,16 @@ let library = [
         ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
         ~run=(inputs, _, _) => {
           switch inputs {
-            | [IEvArray(dicts)] => {
-              dicts->Belt.Array.map(dictValue => switch dictValue {
-                | IEvRecord(dict) => dict
-                | _ => impossibleError->Reducer_ErrorValue.toException
-              })->Internals.mergeMany->Ok
-            }
-            | _ => impossibleError->Error
+          | [IEvArray(dicts)] => dicts
+            ->Belt.Array.map(dictValue =>
+              switch dictValue {
+              | IEvRecord(dict) => dict
+              | _ => impossibleError->Reducer_ErrorValue.toException
+              }
+            )
+            ->Internals.mergeMany
+            ->Ok
+          | _ => impossibleError->Error
           }
         },
         (),

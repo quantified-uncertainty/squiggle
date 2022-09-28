@@ -147,6 +147,28 @@ let setEnvironment = (project: t, value: Reducer_T.environment): unit => {
   project.environment = value
 }
 
+let toJson = (project: t): T.projectJson => {
+  items: Belt.Array.map(Belt.MutableMap.String.toArray(project.items), ((id, projectItem)) => {
+    let projectItem: T.projectItemJson = {
+      id: id,
+      source: ProjectItem.getSource(projectItem),
+      continues: ProjectItem.getContinues(projectItem),
+    }
+    projectItem
+  }),
+  environment: getEnvironment(project),
+}
+
+let fromJson = (json: T.projectJson): t => {
+  let project = createProject()
+  setEnvironment(project, json.environment)
+  Belt.Array.forEach(json.items, item => {
+    setSource(project, item.id, item.source)
+    setContinues(project, item.id, item.continues)
+  })
+  project
+}
+
 let getBindings = (project: t, sourceId: string): Reducer_T.namespace => {
   project->getItem(sourceId)->ProjectItem.getContinuation
 }

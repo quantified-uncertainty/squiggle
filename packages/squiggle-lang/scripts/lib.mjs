@@ -39,3 +39,26 @@ export const run = (src, { output, sampleCount } = {}) => {
     result.tag === "Error" ? result.value.toString() : ""
   );
 };
+
+export const runProject = (project, output) => {
+  const time = measure(() => project.runAll());
+  console.log("Time: ", time);
+
+  const ids = project.getSourceIds();
+
+  ids.forEach((id) => {
+    const result = project.getResult(id);
+    const bindings = project.getBindings("main");
+
+    console.log(id + ":");
+    if (output) {
+      console.log("Result:", result.tag, result.value.toString());
+      console.log("Bindings:", bindings.toString());
+    }
+
+    console.log(
+      result.tag === "Error" ? red(result.tag) : green(result.tag),
+      result.tag === "Error" ? result.value.toString() : ""
+    );
+  });
+};
