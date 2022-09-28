@@ -7,24 +7,24 @@ let requiresNamespace = true
 let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
   // TODO - rewrite in more functional/functor-based style
   switch inputs {
-    | [IEvArray(items)] => {
-      items->Belt.Array.map(
-        item =>
-        switch item {
-          | IEvRecord(map) => {
-            let xValue = map->Belt.Map.String.get("x")
-            let yValue = map->Belt.Map.String.get("y")
-            switch (xValue, yValue) {
-            | (Some(IEvNumber(x)), Some(IEvNumber(y))) => (x, y)
-            | _ => impossibleError->Reducer_ErrorValue.toException
-            }
-          }
+  | [IEvArray(items)] => items
+    ->Belt.Array.map(item =>
+      switch item {
+      | IEvRecord(map) => {
+          let xValue = map->Belt.Map.String.get("x")
+          let yValue = map->Belt.Map.String.get("y")
+          switch (xValue, yValue) {
+          | (Some(IEvNumber(x)), Some(IEvNumber(y))) => (x, y)
           | _ => impossibleError->Reducer_ErrorValue.toException
+          }
         }
-      )->Ok->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-       ->E.R2.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
-    }
-    | _ => impossibleError->Reducer_ErrorValue.toException
+      | _ => impossibleError->Reducer_ErrorValue.toException
+      }
+    )
+    ->Ok
+    ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
+    ->E.R2.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
+  | _ => impossibleError->Reducer_ErrorValue.toException
   }
 }
 
