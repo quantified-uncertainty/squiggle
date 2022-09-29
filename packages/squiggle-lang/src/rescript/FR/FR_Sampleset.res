@@ -10,10 +10,10 @@ module Internal = {
   let doLambdaCall = (
     aLambdaValue,
     list,
-    env: Reducer_T.environment,
+    context: Reducer_T.context,
     reducer: Reducer_T.reducerFn,
   ) =>
-    switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, env, reducer) {
+    switch Reducer_Lambda.doLambdaCall(aLambdaValue, list, context, reducer) {
     | IEvNumber(f) => Ok(f)
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
@@ -25,26 +25,25 @@ module Internal = {
     }
 
   //TODO: I don't know why this seems to need at least one input
-  let fromFn = (aLambdaValue, environment: Reducer_T.environment, reducer: Reducer_T.reducerFn) => {
-    let sampleCount = environment.sampleCount
-    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], environment, reducer)
+  let fromFn = (aLambdaValue, context: Reducer_T.context, reducer: Reducer_T.reducerFn) => {
+    let sampleCount = context.environment.sampleCount
+    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], context, reducer)
     Belt_Array.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
   }
 
-  let map1 = (sampleSetDist: t, aLambdaValue, environment: Reducer_T.environment, reducer) => {
-    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], environment, reducer)
+  let map1 = (sampleSetDist: t, aLambdaValue, context: Reducer_T.context, reducer) => {
+    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], context, reducer)
     SampleSetDist.samplesMap(~fn, sampleSetDist)->toType
   }
 
-  let map2 = (t1: t, t2: t, aLambdaValue, environment: Reducer_T.environment, reducer) => {
-    let fn = (a, b) =>
-      doLambdaCall(aLambdaValue, [IEvNumber(a), IEvNumber(b)], environment, reducer)
+  let map2 = (t1: t, t2: t, aLambdaValue, context: Reducer_T.context, reducer) => {
+    let fn = (a, b) => doLambdaCall(aLambdaValue, [IEvNumber(a), IEvNumber(b)], context, reducer)
     SampleSetDist.map2(~fn, ~t1, ~t2)->toType
   }
 
-  let map3 = (t1: t, t2: t, t3: t, aLambdaValue, environment: Reducer_T.environment, reducer) => {
+  let map3 = (t1: t, t2: t, t3: t, aLambdaValue, context: Reducer_T.context, reducer) => {
     let fn = (a, b, c) =>
-      doLambdaCall(aLambdaValue, [IEvNumber(a), IEvNumber(b), IEvNumber(c)], environment, reducer)
+      doLambdaCall(aLambdaValue, [IEvNumber(a), IEvNumber(b), IEvNumber(c)], context, reducer)
     SampleSetDist.map3(~fn, ~t1, ~t2, ~t3)->toType
   }
 
@@ -60,7 +59,7 @@ module Internal = {
   let mapN = (
     aValueArray: array<Reducer_T.value>,
     aLambdaValue,
-    environment: Reducer_T.environment,
+    context: Reducer_T.context,
     reducer,
   ) => {
     switch parseSampleSetArray(aValueArray) {
@@ -69,7 +68,7 @@ module Internal = {
         doLambdaCall(
           aLambdaValue,
           [IEvArray(E.A.fmap(x => Wrappers.evNumber(x), a))],
-          environment,
+          context,
           reducer,
         )
       SampleSetDist.mapN(~fn, ~t1)->toType
@@ -89,10 +88,10 @@ let libaryBase = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(inputs, environment, _) =>
+        ~run=(inputs, context, _) =>
           switch inputs {
           | [IEvDistribution(dist)] =>
-            GenericDist.toSampleSetDist(dist, environment.sampleCount)
+            GenericDist.toSampleSetDist(dist, context.environment.sampleCount)
             ->E.R2.fmap(Wrappers.sampleSet)
             ->E.R2.fmap(Wrappers.evDistribution)
             ->E.R2.errMap(e => SqError.Message.REDistributionError(e))

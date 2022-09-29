@@ -1,5 +1,4 @@
 module Bindings = Reducer_Bindings
-module Lambda = Reducer_Expression_Lambda
 module Result = Belt.Result
 module T = Reducer_T
 
@@ -7,8 +6,8 @@ let toLocation = (expression: T.expression): SqError.location => {
   expression.ast.location
 }
 
-let throwFrom = (error: SqError.Message.t, expression: T.expression) =>
-  error->SqError.fromMessageWithLocation(expression->toLocation)->SqError.throw
+let throwFrom = (error: SqError.Message.t, context: T.context) =>
+  error->SqError.throwMessage(context)
 
 /*
   Recursively evaluate the expression
@@ -54,7 +53,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
           let (key, _) = eKey->evaluate(context)
           let keyString = switch key {
           | IEvString(s) => s
-          | _ => REOther("Record keys must be strings")->throwFrom(expression)
+          | _ => REOther("Record keys must be strings")->throwFrom(context)
           }
           let (value, _) = eValue->evaluate(context)
           (keyString, value)
@@ -78,7 +77,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   | T.ESymbol(name) =>
     switch context.bindings->Bindings.get(name) {
     | Some(v) => (v, context)
-    | None => RESymbolNotFound(name)->throwFrom(expression)
+    | None => RESymbolNotFound(name)->throwFrom(context)
     }
 
   | T.EValue(value) => (value, context)
@@ -87,12 +86,18 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
       let (predicateResult, _) = predicate->evaluate(context)
       switch predicateResult {
       | T.IEvBool(value) => (value ? trueCase : falseCase)->evaluate(context)
-      | _ => REExpectedType("Boolean", "")->throwFrom(expression)
+      | _ => REExpectedType("Boolean", "")->throwFrom(context)
       }
     }
 
   | T.ELambda(parameters, body) => (
-      Lambda.makeLambda(parameters, context.bindings, body)->T.IEvLambda,
+      Reducer_Lambda.makeLambda(
+        None, // TODO - pass function name from parser
+        parameters,
+        context.bindings,
+        body,
+        expression->toLocation,
+      )->T.IEvLambda,
       context,
     )
 
@@ -103,14 +108,11 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
         argValue
       })
       switch lambda {
-      | T.IEvLambda(lambda) =>
-        try {
-          let result = Lambda.doLambdaCall(lambda, argValues, context.environment, evaluate)
+      | T.IEvLambda(lambda) => {
+          let result = Reducer_Lambda.doLambdaCall(lambda, argValues, context, evaluate)
           (result, context)
-        } catch {
-        | exn => exn->SqError.fromException->SqError.extend(expression->toLocation)->SqError.throw
         }
-      | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(expression)
+      | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(context)
       }
     }
   }
@@ -122,8 +124,11 @@ module BackCompatible = {
   let parse = (peggyCode: string): result<T.expression, Reducer_Peggy_Parse.parseError> =>
     peggyCode->Reducer_Peggy_Parse.parse("main")->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
+  let createDefaultContext = () =>
+    Reducer_Context.createContext(SquiggleLibrary_StdLib.stdLib, Reducer_Context.defaultEnvironment)
+
   let evaluate = (expression: T.expression): result<T.value, SqError.t> => {
-    let context = Reducer_Context.createDefaultContext()
+    let context = createDefaultContext()
     try {
       let (value, _) = expression->evaluate(context)
       value->Ok

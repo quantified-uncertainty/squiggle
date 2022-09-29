@@ -13,7 +13,7 @@ export {
   environment,
   defaultEnvironment,
 } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
-export { SqError, SqLocation } from "./SqError";
+export { SqError } from "./SqError";
 export { SqShape } from "./SqPointSetDist";
 
 export { resultMap } from "./types";

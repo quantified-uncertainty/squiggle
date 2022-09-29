@@ -16,16 +16,16 @@ let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
           let yValue = map->Belt.Map.String.get("y")
           switch (xValue, yValue) {
           | (Some(IEvNumber(x)), Some(IEvNumber(y))) => (x, y)
-          | _ => impossibleError->SqError.Message.toException
+          | _ => impossibleError->SqError.Message.throw
           }
         }
-      | _ => impossibleError->SqError.Message.toException
+      | _ => impossibleError->SqError.Message.throw
       }
     )
     ->Ok
     ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
     ->E.R2.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
-  | _ => impossibleError->SqError.Message.toException
+  | _ => impossibleError->SqError.Message.throw
   }
 }
 
@@ -39,7 +39,7 @@ module Internal = {
     }
 
   let doLambdaCall = (aLambdaValue, list, env, reducer) =>
-    switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, env, reducer) {
+    switch Reducer_Lambda.doLambdaCall(aLambdaValue, list, env, reducer) {
     | Reducer_T.IEvNumber(f) => Ok(f)
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
@@ -61,13 +61,13 @@ let library = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(inputs, env, _) =>
+        ~run=(inputs, context, _) =>
           switch inputs {
           | [IEvDistribution(dist)] =>
             GenericDist.toPointSet(
               dist,
-              ~xyPointLength=env.xyPointLength,
-              ~sampleCount=env.sampleCount,
+              ~xyPointLength=context.environment.xyPointLength,
+              ~sampleCount=context.environment.sampleCount,
               (),
             )
             ->E.R2.fmap(Wrappers.pointSet)

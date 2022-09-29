@@ -313,7 +313,7 @@ module Old = {
     | None =>
       SqError.Message.REOther(
         "Internal error in FR_GenericDist implementation",
-      )->SqError.Message.toException
+      )->SqError.Message.throw
     }
 }
 
@@ -326,7 +326,7 @@ let makeProxyFn = (name: string, inputs: array<frType>) => {
       FnDefinition.make(
         ~name,
         ~inputs,
-        ~run=(inputs, env, _) => Old.dispatch((name, inputs), env),
+        ~run=(inputs, context, _) => Old.dispatch((name, inputs), context.environment),
         (),
       ),
     ],
@@ -402,9 +402,9 @@ let library = E.A.concatMany([
 ])
 
 // FIXME - impossible to implement with FR due to arbitrary parameters length;
-let mxLambda = Reducer_Expression_Lambda.makeFFILambda((inputs, env, _) => {
-  switch Old.dispatch(("mx", inputs), env) {
+let mxLambda = Reducer_Lambda.makeFFILambda("mx", (inputs, context, _) => {
+  switch Old.dispatch(("mx", inputs), context.environment) {
   | Ok(value) => value
-  | Error(e) => e->SqError.Message.toException
+  | Error(e) => e->SqError.Message.throw
   }
 })

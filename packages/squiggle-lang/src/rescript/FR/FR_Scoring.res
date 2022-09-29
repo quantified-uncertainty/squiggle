@@ -30,15 +30,15 @@ let library = [
             ("prior", FRTypeDist),
           ]),
         ],
-        ~run=(inputs, environment, _) => {
+        ~run=(inputs, context, _) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.threeArgs(
             inputs,
             ("estimate", "answer", "prior"),
           ) {
           | Ok([IEvDistribution(estimate), IEvDistribution(d), IEvDistribution(prior)]) =>
-            runScoring(estimate, Score_Dist(d), Some(prior), environment)
+            runScoring(estimate, Score_Dist(d), Some(prior), context.environment)
           | Ok([IEvDistribution(estimate), IEvNumber(d), IEvDistribution(prior)]) =>
-            runScoring(estimate, Score_Scalar(d), Some(prior), environment)
+            runScoring(estimate, Score_Scalar(d), Some(prior), context.environment)
           | Error(e) => Error(e->FunctionRegistry_Helpers.wrapError)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
@@ -48,15 +48,15 @@ let library = [
       FnDefinition.make(
         ~name="logScore",
         ~inputs=[FRTypeRecord([("estimate", FRTypeDist), ("answer", FRTypeDistOrNumber)])],
-        ~run=(inputs, environment, _) => {
+        ~run=(inputs, context, _) => {
           switch FunctionRegistry_Helpers.Prepare.ToValueArray.Record.twoArgs(
             inputs,
             ("estimate", "answer"),
           ) {
           | Ok([IEvDistribution(estimate), IEvDistribution(d)]) =>
-            runScoring(estimate, Score_Dist(d), None, environment)
+            runScoring(estimate, Score_Dist(d), None, context.environment)
           | Ok([IEvDistribution(estimate), IEvNumber(d)]) =>
-            runScoring(estimate, Score_Scalar(d), None, environment)
+            runScoring(estimate, Score_Scalar(d), None, context.environment)
           | Error(e) => Error(e->FunctionRegistry_Helpers.wrapError)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
@@ -76,10 +76,10 @@ let library = [
       FnDefinition.make(
         ~name="klDivergence",
         ~inputs=[FRTypeDist, FRTypeDist],
-        ~run=(inputs, environment, _) => {
+        ~run=(inputs, context, _) => {
           switch inputs {
           | [IEvDistribution(estimate), IEvDistribution(d)] =>
-            runScoring(estimate, Score_Dist(d), None, environment)
+            runScoring(estimate, Score_Dist(d), None, context.environment)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
         },

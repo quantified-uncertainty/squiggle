@@ -1,6 +1,8 @@
 import * as RSError from "../rescript/SqError.gen";
 
-export type SqLocation = RSError.location;
+import * as RSCallStack from "../rescript/Reducer/Reducer_CallStack.gen";
+
+export type SqFrame = RSCallStack.frame;
 
 export class SqError {
   constructor(private _value: RSError.t) {}
@@ -17,13 +19,17 @@ export class SqError {
     return new SqError(RSError.createOtherError(v));
   }
 
-  toLocationArray() {
-    const stackTrace = RSError.getStackTrace(this._value);
-
-    return stackTrace ? RSError.StackTrace.toLocationArray(stackTrace) : [];
+  getTopFrame(): SqCallFrame | undefined {
+    const frame = RSCallStack.getTopFrame(RSError.getStackTrace(this._value));
+    return frame ? new SqCallFrame(frame) : undefined;
   }
 
-  toLocation() {
-    return RSError.getLocation(this._value);
+  getFrameArray(): SqCallFrame[] {
+    const frames = RSError.getFrameArray(this._value);
+    return frames.map((frame) => new SqCallFrame(frame));
   }
+}
+
+export class SqCallFrame {
+  constructor(private _value: SqFrame) {}
 }

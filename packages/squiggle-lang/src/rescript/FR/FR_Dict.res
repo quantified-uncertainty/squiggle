@@ -76,7 +76,7 @@ let library = [
             ->Belt.Array.map(dictValue =>
               switch dictValue {
               | IEvRecord(dict) => dict
-              | _ => impossibleError->SqError.Message.toException
+              | _ => impossibleError->SqError.Message.throw
               }
             )
             ->Internals.mergeMany

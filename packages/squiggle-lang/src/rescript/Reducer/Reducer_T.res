@@ -15,12 +15,16 @@ type rec value =
   | IEvVoid
 @genType.opaque and arrayValue = array<value>
 @genType.opaque and map = Belt.Map.String.t<value>
-and lambdaBody = (array<value>, environment, reducerFn) => value
+and lambdaBody = (array<value>, context, reducerFn) => value
 @genType.opaque
-and lambdaValue = {
-  parameters: array<string>,
-  body: lambdaBody,
-}
+and lambdaValue =
+  | FnLambda({
+      parameters: array<string>,
+      body: lambdaBody,
+      location: Reducer_Peggy_Parse.location,
+      name: option<string>,
+    })
+  | FnBuiltin({body: lambdaBody, name: string})
 @genType.opaque and lambdaDeclaration = Declaration.declaration<lambdaValue>
 and expressionContent =
   | EBlock(array<expression>)
@@ -49,6 +53,7 @@ and bindings = {
 and context = {
   bindings: bindings,
   environment: environment,
+  callStack: Reducer_CallStack.t,
 }
 
 and reducerFn = (expression, context) => (value, context)

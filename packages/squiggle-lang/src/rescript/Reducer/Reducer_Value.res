@@ -28,10 +28,12 @@ and toStringCall = fName => `:${fName}`
 and toStringDate = date => DateTime.Date.toString(date)
 and toStringDeclaration = d => Declaration.toString(d, r => toString(IEvLambda(r)))
 and toStringDistribution = dist => GenericDist.toString(dist)
-and toStringLambda = (lambdaValue: T.lambdaValue) =>
-  `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
-and toStringFunction = (lambdaValue: T.lambdaValue) =>
-  `function(${Js.Array2.toString(lambdaValue.parameters)})`
+and toStringLambda = (lambdaValue: T.lambdaValue) => {
+  switch lambdaValue {
+  | FnLambda({parameters}) => `lambda(${Js.Array2.toString(parameters)}=>internal code)`
+  | FnBuiltin(_) => "Builtin function"
+  }
+}
 and toStringNumber = aNumber => Js.String.make(aNumber)
 and toStringRecord = aMap => aMap->toStringMap
 and toStringString = aString => `'${aString}'`
@@ -143,7 +145,7 @@ let arrayToValueArray = (arr: array<t>): array<t> => arr
 let resultToValue = (rExpression: result<t, SqError.Message.t>): t =>
   switch rExpression {
   | Ok(expression) => expression
-  | Error(errorValue) => SqError.Message.toException(errorValue)
+  | Error(errorValue) => SqError.Message.throw(errorValue)
   }
 
 let recordToKeyValuePairs = (record: T.map): array<(string, t)> => record->Belt.Map.String.toArray

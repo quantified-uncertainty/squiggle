@@ -67,7 +67,7 @@ module Integration = {
       let applyFunctionAtFloatToFloatOption = (point: float) => {
         // Defined here so that it has access to environment, reducer
         let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
-        let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+        let resultAsInternalExpression = Reducer_Lambda.doLambdaCall(
           aLambda,
           [pointAsInternalExpression],
           environment,
@@ -308,7 +308,7 @@ module DiminishingReturns = {
           let applyFunctionAtPoint = (lambda, point: float) => {
             // Defined here so that it has access to environment, reducer
             let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
-            let resultAsInternalExpression = Reducer_Expression_Lambda.doLambdaCall(
+            let resultAsInternalExpression = Reducer_Lambda.doLambdaCall(
               lambda,
               [pointAsInternalExpression],
               environment,

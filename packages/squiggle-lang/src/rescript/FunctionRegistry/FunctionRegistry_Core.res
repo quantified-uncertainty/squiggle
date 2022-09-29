@@ -30,7 +30,7 @@ type fnDefinition = {
   inputs: array<frType>,
   run: (
     array<Reducer_T.value>,
-    Reducer_T.environment,
+    Reducer_T.context,
     Reducer_T.reducerFn,
   ) => result<Reducer_T.value, errorMessage>,
 }
@@ -122,11 +122,11 @@ module FnDefinition = {
   let run = (
     t: t,
     args: array<Reducer_T.value>,
-    env: Reducer_T.environment,
+    context: Reducer_T.context,
     reducer: Reducer_T.reducerFn,
   ) => {
     switch t->isMatch(args) {
-    | true => t.run(args, env, reducer)
+    | true => t.run(args, context, reducer)
     | false => REOther("Incorrect Types")->Error
     }
   }
@@ -164,7 +164,7 @@ module Function = {
     nameSpace: nameSpace,
     definitions: definitions,
     output: output,
-    examples: examples |> E.O.default([]),
+    examples: examples->E.O2.default([]),
     isExperimental: isExperimental,
     requiresNamespace: requiresNamespace,
     description: description,
@@ -225,7 +225,7 @@ module Registry = {
     registry,
     fnName: string,
     args: array<Reducer_T.value>,
-    env: Reducer_T.environment,
+    context: Reducer_T.context,
     reducer: Reducer_T.reducerFn,
   ): result<Reducer_T.value, errorMessage> => {
     switch Belt.Map.String.get(registry.fnNameDict, fnName) {
@@ -241,7 +241,7 @@ module Registry = {
 
         let match = definitions->Js.Array2.find(def => def->FnDefinition.isMatch(args))
         switch match {
-        | Some(def) => def->FnDefinition.run(args, env, reducer)
+        | Some(def) => def->FnDefinition.run(args, context, reducer)
         | None => REOther(showNameMatchDefinitions())->Error
         }
       }
