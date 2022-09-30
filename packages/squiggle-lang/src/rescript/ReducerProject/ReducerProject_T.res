@@ -7,14 +7,18 @@ type project = {
   mutable environment: Reducer_T.environment,
   mutable previousRunOrder: array<string>,
 }
+
+@genType
 type t = project
 
+@genType
 type projectItemJson = {
   id: string,
   source: string,
   continues: array<string>,
 }
 
+@genType
 type projectJson = {
   items: array<projectItemJson>,
   environment: Reducer_T.environment,

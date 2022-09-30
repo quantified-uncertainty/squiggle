@@ -1,3 +1,4 @@
+@genType
 type environment = GenericDist.env
 
 @genType.opaque
