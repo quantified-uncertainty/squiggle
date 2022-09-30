@@ -81,7 +81,8 @@
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "prepack": "yarn run build:cjs && yarn run bundle",
-    "test": "jest"
+    "test": "jest",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "eslintConfig": {
     "extends": [

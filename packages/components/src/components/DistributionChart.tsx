@@ -83,22 +83,26 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       }
     }
 
-    const spec = buildVegaSpec(props);
+    const domain = shapes.value.flatMap((shape) =>
+      shape.discrete.concat(shape.continuous)
+    );
 
-    let widthProp = width ? width : (isFinite(size.width) ? size.width : 400);
+    const spec = buildVegaSpec({
+      ...props,
+      minX: props.minX ?? Math.min(...domain.map((x) => x.x)),
+      maxX: props.minX ?? Math.max(...domain.map((x) => x.x)),
+      maxY: Math.max(...domain.map((x) => x.y)),
+    });
+
+    let widthProp = width ? width : isFinite(size.width) ? size.width : 400;
     if (widthProp < 20) {
       console.warn(
         `Width of Distribution is set to ${widthProp}, which is too small`
       );
       widthProp = 20;
     }
-    const domain = shapes.value.flatMap((shape) =>
-      shape.discrete.concat(shape.continuous)
-    );
-    
-    const vegaData = {data: shapes.value, domain, samples}
 
-    console.log(vegaData)
+    const vegaData = { data: shapes.value, samples };
 
     return (
       <div style={{ width: widthProp }}>
