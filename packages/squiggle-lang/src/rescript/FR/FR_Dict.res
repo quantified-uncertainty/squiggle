@@ -71,7 +71,8 @@ let library = [
         ~inputs=[FRTypeArray(FRTypeDict(FRTypeAny))],
         ~run=(inputs, _, _) => {
           switch inputs {
-          | [IEvArray(dicts)] => dicts
+          | [IEvArray(dicts)] =>
+            dicts
             ->Belt.Array.map(dictValue =>
               switch dictValue {
               | IEvRecord(dict) => dict
