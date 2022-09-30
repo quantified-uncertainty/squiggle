@@ -7,7 +7,8 @@ let requiresNamespace = true
 let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
   // TODO - rewrite in more functional/functor-based style
   switch inputs {
-  | [IEvArray(items)] => items
+  | [IEvArray(items)] =>
+    items
     ->Belt.Array.map(item =>
       switch item {
       | IEvRecord(map) => {
