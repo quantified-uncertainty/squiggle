@@ -11,11 +11,11 @@
     "@quri/squiggle-lang": "^0.5.0-alpha.2",
     "@react-hook/size": "^2.1.2",
     "clsx": "^1.2.1",
-    "framer-motion": "^7.3.5",
+    "framer-motion": "^7.4.0",
     "lodash": "^4.17.21",
     "react": "^18.1.0",
     "react-ace": "^10.1.0",
-    "react-hook-form": "^7.35.0",
+    "react-hook-form": "^7.36.1",
     "react-use": "^17.4.0",
     "react-vega": "^7.6.0",
     "vega": "^5.22.1",
@@ -39,8 +39,8 @@
     "@testing-library/user-event": "^14.4.3",
     "@types/jest": "^27.5.0",
     "@types/lodash": "^4.14.185",
-    "@types/node": "^18.7.18",
-    "@types/react": "^18.0.18",
+    "@types/node": "^18.7.22",
+    "@types/react": "^18.0.21",
     "@types/styled-components": "^5.1.26",
     "@types/webpack": "^5.28.0",
     "cross-env": "^7.0.3",
@@ -59,7 +59,7 @@
     "web-vitals": "^3.0.2",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.11.0"
+    "webpack-dev-server": "^4.11.1"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17 || ^18",

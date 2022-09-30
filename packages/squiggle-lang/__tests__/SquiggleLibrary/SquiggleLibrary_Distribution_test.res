@@ -98,6 +98,7 @@ describe("eval on distribution functions", () => {
       "log(normal(5,2), normal(10,1))",
       "Error(Distribution Math Error: Logarithm of input error: First input must be completely greater than 0)",
     )
+    testEval("log(2, SampleSet.fromDist(0.0001 to 5))", "Ok(Sample Set Distribution)") // log with low values, see https://github.com/quantified-uncertainty/squiggle/issues/1098
     testEval("log(uniform(5,8))", "Ok(Sample Set Distribution)")
     testEval("log10(uniform(5,8))", "Ok(Sample Set Distribution)")
   })
