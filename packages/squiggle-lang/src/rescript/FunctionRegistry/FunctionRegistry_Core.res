@@ -83,15 +83,12 @@ module FRType = {
     | (FRTypeNumeric, IEvNumber(_)) => true
     | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(_)))) => true
     | (FRTypeLambda, IEvLambda(_)) => true
-    | (FRTypeArray(intendedType), IEvArray(elements)) => elements->Belt.Array.every(v =>
-        matchWithValue(intendedType, v)
-      )
+    | (FRTypeArray(intendedType), IEvArray(elements)) =>
+      elements->Belt.Array.every(v => matchWithValue(intendedType, v))
     | (FRTypeDict(r), IEvRecord(map)) =>
       map->Belt.Map.String.valuesToArray->Belt.Array.every(v => matchWithValue(r, v))
-    | (FRTypeRecord(recordParams), IEvRecord(map)) => recordParams->Belt.Array.every(((
-        name,
-        input,
-      )) => {
+    | (FRTypeRecord(recordParams), IEvRecord(map)) =>
+      recordParams->Belt.Array.every(((name, input)) => {
         switch map->Belt.Map.String.get(name) {
         | Some(v) => matchWithValue(input, v)
         | None => false
