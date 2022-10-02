@@ -57,14 +57,6 @@ let makeFFILambda = (name: string, body: Reducer_T.lambdaBody): t => FnBuiltin({
   name: name,
 })
 
-let extendCallStack = (t: t, callStack: Reducer_CallStack.t): Reducer_CallStack.t => {
-  switch t {
-  | FnLambda({location}) =>
-    callStack->Reducer_CallStack.extend(InLambda({location: location, name: "TODO"})) // FIXME
-  | FnBuiltin({name}) => callStack->Reducer_CallStack.extend(InFFI({name: name}))
-  }
-}
-
 // this function doesn't scale to FunctionRegistry's polymorphic functions
 let parameters = (t: t): array<string> => {
   switch t {
@@ -76,13 +68,13 @@ let parameters = (t: t): array<string> => {
 let doLambdaCall = (t: t, args, context: Reducer_Context.t, reducer) => {
   let newContext = {
     ...context,
-    callStack: t->extendCallStack(context.callStack),
+    callStack: t->Reducer_CallStack.extend(t),
   }
 
-  SqError.contextualizeAndRethrow(() => {
+  SqError.rethrowWithStacktrace(() => {
     switch t {
     | FnLambda({body}) => body(args, newContext, reducer)
     | FnBuiltin({body}) => body(args, newContext, reducer)
     }
-  }, newContext)
+  }, newContext.callStack)
 }

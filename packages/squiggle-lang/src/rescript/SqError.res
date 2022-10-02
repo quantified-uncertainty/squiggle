@@ -90,91 +90,68 @@ module Message = {
 @genType.opaque
 type t = {
   message: Message.t,
-  /*
-  Errors raised from internal functions can have empty location.
-
-  Also, location is not the same as the top of the stackTrace.
-  Consider this:
-  ```
-  f() = {
-    x = 5
-    y = z // no such var
-    x + y
-  }
-  ```
-  This code should report the location of assignment issue, but there's no function call there.
- */
-  location: option<location>,
-  stackTrace: Reducer_CallStack.t,
+  frameStack: Reducer_FrameStack.t,
 }
 
 exception SqException(t)
 
 // `context` should be specified for runtime errors, but can be left empty for errors from Reducer_Project and so on.
 // `location` can be empty for errors raised from FunctionRegistry.
-let fromMessage = (
-  message: Message.t,
-  context: option<Reducer_T.context>,
-  location: option<location>,
-): t => {
+let fromMessage = (message: Message.t, frameStack: Reducer_FrameStack.t): t => {
   message: message,
-  location: location,
-  stackTrace: switch context {
-  | Some(context) => context.callStack
-  | None => Reducer_CallStack.make()
-  },
+  stackTrace: stackTrace,
 }
+
+let fromMessageWithoutFrameStack = (message: Message.t) =>
+  fromMessage(message, Reducer_FrameStack.make())
 
 @genType
 let getTopFrame = (t: t): option<Reducer_CallStack.frame> =>
-  t.stackTrace->Reducer_CallStack.getTopFrame
+  t.stackTrace->Reducer_FrameStack.getTopFrame
 
 @genType
-let getStackTrace = (t: t): Reducer_CallStack.t => t.stackTrace
+let getFrameStack = (t: t): Reducer_FrameStack.t => t.frameStack
 
 @genType
 let toString = (t: t): string => t.message->Message.toString
 
 @genType
-let createOtherError = (v: string): t => Message.REOther(v)->fromMessage()
+let createOtherError = (v: string): t => Message.REOther(v)->fromMessageWithoutFrameStack
 
 @genType
 let getFrameArray = (t: t): array<Reducer_CallStack.frame> =>
   t.stackTrace->Reducer_CallStack.toFrameArray
 
 @genType
-let toStringWithStackTrace = (t: t) =>
-  if t.stackTrace->Reducer_CallStack.isEmpty {
-    "Traceback:\n" ++ t.stackTrace->Reducer_CallStack.toString
-  } else {
-    ""
-  } ++
-  t->toString
-
+let toStringWithStacktrace = (t: t) =>
+  t->toString ++ if t.frameStack->Reducer_FrameStack.isEmpty {
+      "Traceback:\n" ++ t.frameStack->Reducer_FrameStack.toString
+    }
 let throw = (t: t) => t->SqException->raise
 
-let throwMessage = (message: Message.t, context: Reducer_T.context, location: location) =>
-  fromMessage(message, context, location)->throw
+let throwMessage = (message: Message.t, frameStack: Reducer_FrameStack.t) =>
+  fromMessage(message, frameStack)->throw
 
 // this shouldn't be used for most runtime errors - the resulting error would have an empty stacktrace
 let fromException = exn =>
   switch exn {
   | SqException(e) => e
-  | Message.MessageException(e) => e->fromMessage
-  | Js.Exn.Error(obj) => REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->fromMessage
-  | _ => REOther("Unknown exception")->fromMessage
+  | Message.MessageException(e) => e->fromMessage(Reducer_CallStack.make())
+  | Js.Exn.Error(obj) =>
+    REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->fromMessageWithoutStacktrace
+  | _ => REOther("Unknown exception")->fromMessageWithoutStacktrace
   }
 
 // converts raw exceptions into exceptions with stacktrace attached
 // already converted exceptions won't be affected
-let contextualizeAndRethrow = (fn: unit => 'a, context: Reducer_T.context) => {
+let rethrowWithStacktrace = (fn: unit => 'a, stackTrace: Reducer_CallStack.t) => {
   try {
     fn()
   } catch {
-  | SqException(e) => e->throw
-  | Message.MessageException(e) => e->throwMessage(context)
+  | SqException(e) => e->throw // exception already has a stacktrace
+  | Message.MessageException(e) => e->throwMessage(stackTrace) // probably comes from FunctionRegistry, adding stacktrace
   | Js.Exn.Error(obj) =>
-    REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->throwMessage(context)
-  | _ => REOther("Unknown exception")->throwMessage(context)
+    REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->throwMessage(stackTrace)
+  | _ => REOther("Unknown exception")->throwMessage(stackTrace)
   }
 }

@@ -50,10 +50,18 @@ and bindings = {
   parent: option<bindings>,
 }
 
+and frame = {
+  name: string,
+  location: option<Reducer_Peggy_Parse.location>, // can be empty for calls from builtin functions
+}
+
+and frameStack = list<frame>
+
 and context = {
   bindings: bindings,
   environment: environment,
-  callStack: Reducer_CallStack.t,
+  inFunction: option<string>, // used to build the next frame in frameStack
+  callStack: frameStack,
 }
 
 and reducerFn = (expression, context) => (value, context)

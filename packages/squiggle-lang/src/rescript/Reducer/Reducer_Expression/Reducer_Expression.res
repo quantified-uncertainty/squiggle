@@ -6,8 +6,11 @@ let toLocation = (expression: T.expression): SqError.location => {
   expression.ast.location
 }
 
-let throwFrom = (error: SqError.Message.t, context: T.context) =>
-  error->SqError.throwMessage(context)
+let throwFrom = (error: SqError.Message.t, expression: T.expression, context: T.context) =>
+  error->SqError.throwMessage(
+    context.callStack,
+    location: Some(expression->toLocation)
+  )
 
 /*
   Recursively evaluate the expression
@@ -53,7 +56,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
           let (key, _) = eKey->evaluate(context)
           let keyString = switch key {
           | IEvString(s) => s
-          | _ => REOther("Record keys must be strings")->throwFrom(context)
+          | _ => REOther("Record keys must be strings")->throwFrom(expression, context)
           }
           let (value, _) = eValue->evaluate(context)
           (keyString, value)
@@ -77,7 +80,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   | T.ESymbol(name) =>
     switch context.bindings->Bindings.get(name) {
     | Some(v) => (v, context)
-    | None => RESymbolNotFound(name)->throwFrom(context)
+    | None => RESymbolNotFound(name)->throwFrom(expression, context)
     }
 
   | T.EValue(value) => (value, context)
@@ -86,7 +89,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
       let (predicateResult, _) = predicate->evaluate(context)
       switch predicateResult {
       | T.IEvBool(value) => (value ? trueCase : falseCase)->evaluate(context)
-      | _ => REExpectedType("Boolean", "")->throwFrom(context)
+      | _ => REExpectedType("Boolean", "")->throwFrom(expression, context)
       }
     }
 
@@ -112,7 +115,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
           let result = Reducer_Lambda.doLambdaCall(lambda, argValues, context, evaluate)
           (result, context)
         }
-      | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(context)
+      | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(expression, context)
       }
     }
   }
