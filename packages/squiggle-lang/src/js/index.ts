@@ -1,4 +1,4 @@
-import { environment } from "../rescript/ForTS/ForTS_ReducerProject.gen";
+import { environment } from "../rescript/ForTS/ForTS__Types.gen";
 import { SqProject } from "./SqProject";
 import { SqValue, SqValueTag } from "./SqValue";
 export { SqValueLocation } from "./SqValueLocation";

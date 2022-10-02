@@ -1,7 +1,5 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
-module Bindings = Reducer_Bindings
 
 open Jest
 open Expect
@@ -30,12 +28,11 @@ x=1`,
     | Error(error) => fail(error->Reducer_ErrorValue.errorToString)
     }
   })
-  let internalProject = project->Project.T.Private.castToInternalProject
   test("past chain", () => {
-    expect(Project.Private.getPastChain(internalProject, "main")) == ["common"]
+    expect(project->Project.getPastChain("main")) == ["common"]
   })
   test("import as variables", () => {
-    expect(Project.Private.getIncludesAsVariables(internalProject, "main")) == []
+    expect(project->Project.Private.getIncludesAsVariables("main")) == []
   })
 })
 
@@ -67,20 +64,16 @@ x=1`,
     }
   })
 
-  let internalProject = project->Project.T.Private.castToInternalProject
-
   test("direct past chain", () => {
-    expect(Project.Private.getPastChain(internalProject, "main")) == ["common"]
+    expect(project->Project.Private.getPastChain("main")) == ["common"]
   })
 
   test("direct includes", () => {
-    expect(Project.Private.getDirectIncludes(internalProject, "main")) == ["common"]
+    expect(project->Project.Private.getDirectIncludes("main")) == ["common"]
   })
 
   test("include as variables", () => {
-    expect(Project.Private.getIncludesAsVariables(internalProject, "main")) == [
-        ("myVariable", "myModule"),
-      ]
+    expect(project->Project.Private.getIncludesAsVariables("main")) == [("myVariable", "myModule")]
   })
 })
 
@@ -109,13 +102,10 @@ x=1`,
     | Error(error) => fail(error->Reducer_ErrorValue.errorToString)
     }
   })
-  let internalProject = project->Project.T.Private.castToInternalProject
   test("direct past chain", () => {
     expect(Project.getPastChain(project, "main")) == ["common", "common2"]
   })
   test("include as variables", () => {
-    expect(Project.Private.getIncludesAsVariables(internalProject, "main")) == [
-        ("myVariable", "myModule"),
-      ]
+    expect(project->Project.Private.getIncludesAsVariables("main")) == [("myVariable", "myModule")]
   })
 })

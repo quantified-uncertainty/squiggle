@@ -9,6 +9,11 @@
       "dir": "__tests__",
       "type": "dev",
       "subdirs": true
+    },
+    {
+      "dir": "benchmark",
+      "type": "dev",
+      "subdirs": true
     }
   ],
   "bsc-flags": ["-bs-super-errors", "-bs-no-version-header", "-bs-g"],
@@ -21,7 +26,12 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": ["bisect_ppx"],
-  "bs-dev-dependencies": ["@glennsl/rescript-jest", "rescript-fast-check"],
+  "bs-dev-dependencies": [
+    "@glennsl/rescript-jest",
+    "rescript-fast-check",
+    "rescript-js-map",
+    "rescript-js-iterator"
+  ],
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",

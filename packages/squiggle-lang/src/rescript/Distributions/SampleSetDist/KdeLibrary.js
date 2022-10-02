@@ -1,5 +1,6 @@
 const pdfast = require("pdfast");
-const _ = require("lodash");
+const filter = require("lodash/filter");
+const isFinite = require("lodash/isFinite");
 
 const samplesToContinuousPdf = (
   samples,
@@ -8,12 +9,12 @@ const samplesToContinuousPdf = (
   min = false,
   max = false
 ) => {
-  let _samples = _.filter(samples, _.isFinite);
-  if (_.isFinite(min)) {
-    _samples = _.filter(_samples, (r) => r > min);
+  let _samples = filter(samples, isFinite);
+  if (isFinite(min)) {
+    _samples = filter(_samples, (r) => r > min);
   }
-  if (_.isFinite(max)) {
-    _samples = _.filter(_samples, (r) => r < max);
+  if (isFinite(max)) {
+    _samples = filter(_samples, (r) => r < max);
   }
 
   // The pdf that's created from this function is not a pdf but a pmf. y values

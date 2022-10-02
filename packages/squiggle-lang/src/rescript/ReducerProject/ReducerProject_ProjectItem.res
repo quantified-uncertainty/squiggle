@@ -1,69 +1,60 @@
-// TODO: Use actual types instead of aliases in public functions
 // TODO: Use topological sorting to prevent unnecessary runs
-module Bindings = Reducer_Bindings
-module Continuation = ReducerInterface_Value_Continuation
-module ExpressionT = Reducer_Expression_T
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module ProjectAccessorsT = ReducerProject_ProjectAccessors_T
-module ReducerFnT = ReducerProject_ReducerFn_T
 module T = ReducerProject_ProjectItem_T
 
 type projectItem = T.projectItem
 type t = T.t
 
-let emptyItem = T.ProjectItem({
+let emptyItem: projectItem = {
   source: "",
   rawParse: None,
   expression: None,
-  continuation: Bindings.emptyBindings,
+  continuation: Reducer_Namespace.make(),
   result: None,
   continues: [],
   includes: []->Ok,
   directIncludes: [],
   includeAsVariables: [],
-})
+}
 // source -> rawParse -> includes -> expression -> continuation -> result
 
-let getSource = (T.ProjectItem(r)): T.sourceType => r.source
-let getRawParse = (T.ProjectItem(r)): T.rawParseType => r.rawParse
-let getExpression = (T.ProjectItem(r)): T.expressionType => r.expression
-let getContinuation = (T.ProjectItem(r)): T.continuationArgumentType => r.continuation
-let getResult = (T.ProjectItem(r)): T.resultType => r.result
+let getSource = (r: t): T.sourceType => r.source
+let getRawParse = (r: t): T.rawParseType => r.rawParse
+let getExpression = (r: t): T.expressionType => r.expression
+let getContinuation = (r: t): T.continuationArgumentType => r.continuation
+let getResult = (r: t): T.resultType => r.result
 
-let getContinues = (T.ProjectItem(r)): T.continuesType => r.continues
-let getIncludes = (T.ProjectItem(r)): T.includesType => r.includes
-let getDirectIncludes = (T.ProjectItem(r)): array<string> => r.directIncludes
-let getIncludesAsVariables = (T.ProjectItem(r)): T.importAsVariablesType => r.includeAsVariables
+let getContinues = (r: t): T.continuesType => r.continues
+let getIncludes = (r: t): T.includesType => r.includes
+let getDirectIncludes = (r: t): array<string> => r.directIncludes
+let getIncludesAsVariables = (r: t): T.importAsVariablesType => r.includeAsVariables
 
 let touchSource = (this: t): t => {
-  let T.ProjectItem(r) = emptyItem
-  T.ProjectItem({
+  let r = emptyItem
+  {
     ...r,
     source: getSource(this),
     continues: getContinues(this),
     includes: getIncludes(this),
     includeAsVariables: getIncludesAsVariables(this),
     directIncludes: getDirectIncludes(this),
-  })
+  }
 }
 
 let touchRawParse = (this: t): t => {
-  let T.ProjectItem(r) = emptyItem
-  T.ProjectItem({
-    ...r,
+  {
+    ...emptyItem,
     source: getSource(this),
     continues: getContinues(this),
     includes: getIncludes(this),
     includeAsVariables: getIncludesAsVariables(this),
     directIncludes: getDirectIncludes(this),
     rawParse: getRawParse(this),
-  })
+  }
 }
 
 let touchExpression = (this: t): t => {
-  let T.ProjectItem(r) = emptyItem
-  T.ProjectItem({
-    ...r,
+  {
+    ...this,
     source: getSource(this),
     continues: getContinues(this),
     includes: getIncludes(this),
@@ -71,46 +62,42 @@ let touchExpression = (this: t): t => {
     directIncludes: getDirectIncludes(this),
     rawParse: getRawParse(this),
     expression: getExpression(this),
-  })
+  }
 }
 
-let resetIncludes = (T.ProjectItem(r): t): t => {
-  T.ProjectItem({
-    ...r,
-    includes: []->Ok,
-    includeAsVariables: [],
-    directIncludes: [],
-  })
+let resetIncludes = (r: t): t => {
+  ...r,
+  includes: []->Ok,
+  includeAsVariables: [],
+  directIncludes: [],
 }
 
-let setSource = (T.ProjectItem(r): t, source: T.sourceArgumentType): t =>
-  T.ProjectItem({...r, source: source})->resetIncludes->touchSource
+let setSource = (r: t, source: T.sourceArgumentType): t =>
+  {...r, source: source}->resetIncludes->touchSource
 
-let setRawParse = (T.ProjectItem(r): t, rawParse: T.rawParseArgumentType): t =>
-  T.ProjectItem({...r, rawParse: Some(rawParse)})->touchRawParse
+let setRawParse = (r: t, rawParse: T.rawParseArgumentType): t =>
+  {...r, rawParse: Some(rawParse)}->touchRawParse
 
-let setExpression = (T.ProjectItem(r): t, expression: T.expressionArgumentType): t =>
-  T.ProjectItem({...r, expression: Some(expression)})->touchExpression
+let setExpression = (r: t, expression: T.expressionArgumentType): t =>
+  {...r, expression: Some(expression)}->touchExpression
 
-let setContinuation = (T.ProjectItem(r): t, continuation: T.continuationArgumentType): t => {
-  T.ProjectItem({...r, continuation: continuation})
+let setContinuation = (r: t, continuation: T.continuationArgumentType): t => {
+  ...r,
+  continuation: continuation,
 }
 
-let setResult = (T.ProjectItem(r): t, result: T.resultArgumentType): t => T.ProjectItem({
+let setResult = (r: t, result: T.resultArgumentType): t => {
   ...r,
   result: Some(result),
-})
+}
 
 let cleanResults = touchExpression
 
 let clean = (this: t): t => {
-  let T.ProjectItem(r) = emptyItem
-  T.ProjectItem({
-    ...r,
-    source: getSource(this),
-    continuation: getContinuation(this),
-    result: getResult(this),
-  })
+  ...this,
+  source: getSource(this),
+  continuation: getContinuation(this),
+  result: getResult(this),
 }
 
 let getImmediateDependencies = (this: t): T.includesType =>
@@ -120,27 +107,27 @@ let getPastChain = (this: t): array<string> => {
   Js.Array2.concat(getDirectIncludes(this), getContinues(this))
 }
 
-let setContinues = (T.ProjectItem(r): t, continues: array<string>): t =>
-  T.ProjectItem({...r, continues: continues})->touchSource
-let removeContinues = (T.ProjectItem(r): t): t => T.ProjectItem({...r, continues: []})->touchSource
+let setContinues = (this: t, continues: array<string>): t =>
+  {...this, continues: continues}->touchSource
 
-let setIncludes = (T.ProjectItem(r): t, includes: T.includesType): t => T.ProjectItem({
-  ...r,
+let removeContinues = (this: t): t => {...this, continues: []}->touchSource
+
+let setIncludes = (this: t, includes: T.includesType): t => {
+  ...this,
   includes: includes,
-})
+}
 
-let setImportAsVariables = (
-  T.ProjectItem(r): t,
-  includeAsVariables: T.importAsVariablesType,
-): t => T.ProjectItem({...r, includeAsVariables: includeAsVariables})
+let setImportAsVariables = (this: t, includeAsVariables: T.importAsVariablesType): t => {
+  ...this,
+  includeAsVariables: includeAsVariables,
+}
 
-let setDirectImports = (T.ProjectItem(r): t, directIncludes: array<string>): t => T.ProjectItem({
-  ...r,
+let setDirectImports = (this: t, directIncludes: array<string>): t => {
+  ...this,
   directIncludes: directIncludes,
-})
+}
 
 let parseIncludes = (this: t): t => {
-  let T.ProjectItem(r) = this
   let rRawImportAsVariables = getSource(this)->ReducerProject_ParseIncludes.parseIncludes
   switch rRawImportAsVariables {
   | Error(e) => resetIncludes(this)->setIncludes(Error(e))
@@ -152,12 +139,12 @@ let parseIncludes = (this: t): t => {
         rawImportAsVariables
         ->Belt.Array.keep(((variable, _file)) => variable == "")
         ->Belt.Array.map(((_variable, file)) => file)
-      T.ProjectItem({
-        ...r,
+      {
+        ...this,
         includes: includes,
         includeAsVariables: includeAsVariables,
         directIncludes: directIncludes,
-      })
+      }
     }
   }
 }
@@ -172,44 +159,40 @@ let doBuildExpression = (this: t): T.expressionType =>
   ->Belt.Option.map(o => o->Belt.Result.map(r => r->Reducer_Peggy_ToExpression.fromNode))
 
 let buildExpression = (this: t): t => {
-  let withRawParse: t = this->rawParse
-  switch withRawParse->getExpression {
-  | Some(_) => withRawParse
+  let this = this->rawParse
+  switch this->getExpression {
+  | Some(_) => this // cached
   | None =>
-    withRawParse
-    ->doBuildExpression
-    ->Belt.Option.map(setExpression(withRawParse, _))
-    ->E.O2.defaultFn(() => withRawParse)
+    this->doBuildExpression->Belt.Option.map(setExpression(this, _))->E.O2.defaultFn(() => this)
   }
 }
 
-let doBuildResult = (
-  this: t,
-  aContinuation: T.continuation,
-  accessors: ProjectAccessorsT.t,
-): T.resultType =>
-  this
-  ->getExpression
-  ->Belt.Option.map(
-    Belt.Result.flatMap(_, expression =>
+let failRun = (this: t, e: Reducer_ErrorValue.errorValue): t =>
+  this->setResult(e->Error)->setContinuation(Reducer_Namespace.make())
+
+let doRun = (this: t, context: Reducer_T.context): t =>
+  switch this->getExpression {
+  | Some(expressionResult) =>
+    switch expressionResult {
+    | Ok(expression) =>
       try {
-        Reducer_Expression.reduceExpressionInProject(expression, aContinuation, accessors)->Ok
+        let (result, contextAfterEvaluation) = Reducer_Expression.evaluate(expression, context)
+        this
+        ->setResult(result->Ok)
+        ->setContinuation(contextAfterEvaluation.bindings->Reducer_Bindings.locals)
       } catch {
-      | exn => Reducer_ErrorValue.fromException(exn)->Error
+      | Reducer_ErrorValue.ErrorException(e) => this->failRun(e)
+      | _ => this->failRun(RETodo("unhandled rescript exception"))
       }
-    ),
-  )
+    | Error(e) => this->failRun(e)
+    }
+  | None => this->failRun(RETodo("attempt to run without expression"))
+  }
 
-let buildResult = (this: t, aContinuation: T.continuation, accessors: ProjectAccessorsT.t): t => {
-  let withExpression: t = this->buildExpression
-  switch withExpression->getResult {
-  | Some(_) => withExpression
-  | None =>
-    withExpression
-    ->doBuildResult(aContinuation, accessors)
-    ->Belt.Option.map(setResult(withExpression, _))
-    ->E.O2.defaultFn(() => withExpression)
+let run = (this: t, context: Reducer_T.context): t => {
+  let this = this->buildExpression
+  switch this->getResult {
+  | Some(_) => this
+  | None => this->doRun(context)
   }
 }
-
-let run = buildResult

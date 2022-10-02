@@ -20,27 +20,31 @@ let parse = (expr: string): result<node, errorValue> =>
   }
 
 type nodeBlock = {...node, "statements": array<node>}
+type nodeProgram = {...node, "statements": array<node>}
+type nodeArray = {...node, "elements": array<node>}
 type nodeBoolean = {...node, "value": bool}
-type nodeCallIdentifier = {...node, "value": string}
-type nodeExpression = {...node, "nodes": array<node>}
+type nodeCall = {...node, "fn": node, "args": array<node>}
 type nodeFloat = {...node, "value": float}
 type nodeIdentifier = {...node, "value": string}
 type nodeInteger = {...node, "value": int}
 type nodeKeyValue = {...node, "key": node, "value": node}
-type nodeLambda = {...node, "args": array<nodeIdentifier>, "body": nodeBlock}
+type nodeRecord = {...node, "elements": array<nodeKeyValue>}
+type nodeLambda = {...node, "args": array<nodeIdentifier>, "body": node}
 type nodeLetStatement = {...node, "variable": nodeIdentifier, "value": node}
 type nodeModuleIdentifier = {...node, "value": string}
 type nodeString = {...node, "value": string}
 type nodeTernary = {...node, "condition": node, "trueExpression": node, "falseExpression": node}
-type nodeTypeIdentifier = {...node, "value": string}
+// type nodeTypeIdentifier = {...node, "value": string}
 type nodeVoid = node
 
 type peggyNode =
   | PgNodeBlock(nodeBlock)
+  | PgNodeProgram(nodeProgram)
+  | PgNodeArray(nodeArray)
+  | PgNodeRecord(nodeRecord)
   | PgNodeBoolean(nodeBoolean)
-  | PgNodeCallIdentifier(nodeCallIdentifier)
-  | PgNodeExpression(nodeExpression)
   | PgNodeFloat(nodeFloat)
+  | PgNodeCall(nodeCall)
   | PgNodeIdentifier(nodeIdentifier)
   | PgNodeInteger(nodeInteger)
   | PgNodeKeyValue(nodeKeyValue)
@@ -49,13 +53,15 @@ type peggyNode =
   | PgNodeModuleIdentifier(nodeModuleIdentifier)
   | PgNodeString(nodeString)
   | PgNodeTernary(nodeTernary)
-  | PgNodeTypeIdentifier(nodeTypeIdentifier)
+  // | PgNodeTypeIdentifier(nodeTypeIdentifier)
   | PgNodeVoid(nodeVoid)
 
 external castNodeBlock: node => nodeBlock = "%identity"
+external castNodeProgram: node => nodeProgram = "%identity"
+external castNodeArray: node => nodeArray = "%identity"
+external castNodeRecord: node => nodeRecord = "%identity"
 external castNodeBoolean: node => nodeBoolean = "%identity"
-external castNodeCallIdentifier: node => nodeCallIdentifier = "%identity"
-external castNodeExpression: node => nodeExpression = "%identity"
+external castNodeCall: node => nodeCall = "%identity"
 external castNodeFloat: node => nodeFloat = "%identity"
 external castNodeIdentifier: node => nodeIdentifier = "%identity"
 external castNodeInteger: node => nodeInteger = "%identity"
@@ -65,16 +71,18 @@ external castNodeLetStatement: node => nodeLetStatement = "%identity"
 external castNodeModuleIdentifier: node => nodeModuleIdentifier = "%identity"
 external castNodeString: node => nodeString = "%identity"
 external castNodeTernary: node => nodeTernary = "%identity"
-external castNodeTypeIdentifier: node => nodeTypeIdentifier = "%identity"
+// external castNodeTypeIdentifier: node => nodeTypeIdentifier = "%identity"
 external castNodeVoid: node => nodeVoid = "%identity"
 
 exception UnsupportedPeggyNodeType(string) // This should never happen; programming error
 let castNodeType = (node: node) =>
   switch node["type"] {
   | "Block" => node->castNodeBlock->PgNodeBlock
+  | "Program" => node->castNodeBlock->PgNodeProgram
+  | "Array" => node->castNodeArray->PgNodeArray
+  | "Record" => node->castNodeRecord->PgNodeRecord
   | "Boolean" => node->castNodeBoolean->PgNodeBoolean
-  | "CallIdentifier" => node->castNodeCallIdentifier->PgNodeCallIdentifier
-  | "Expression" => node->castNodeExpression->PgNodeExpression
+  | "Call" => node->castNodeCall->PgNodeCall
   | "Float" => node->castNodeFloat->PgNodeFloat
   | "Identifier" => node->castNodeIdentifier->PgNodeIdentifier
   | "Integer" => node->castNodeInteger->PgNodeInteger
@@ -84,7 +92,7 @@ let castNodeType = (node: node) =>
   | "ModuleIdentifier" => node->castNodeModuleIdentifier->PgNodeModuleIdentifier
   | "String" => node->castNodeString->PgNodeString
   | "Ternary" => node->castNodeTernary->PgNodeTernary
-  | "TypeIdentifier" => node->castNodeTypeIdentifier->PgNodeTypeIdentifier
+  // | "TypeIdentifier" => node->castNodeTypeIdentifier->PgNodeTypeIdentifier
   | "Void" => node->castNodeVoid->PgNodeVoid
   | _ => raise(UnsupportedPeggyNodeType(node["type"]))
   }
@@ -96,17 +104,28 @@ let rec pgToString = (peggyNode: peggyNode): string => {
   let nodesToStringUsingSeparator = (nodes: array<node>, separator: string): string =>
     nodes->Js.Array2.map(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
+  let pgNodesToStringUsingSeparator = (nodes: array<peggyNode>, separator: string): string =>
+    nodes->Js.Array2.map(pgToString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
+
   switch peggyNode {
-  | PgNodeBlock(node) => "{" ++ node["statements"]->nodesToStringUsingSeparator("; ") ++ "}"
+  | PgNodeBlock(node)
+  | PgNodeProgram(node) =>
+    "{" ++ node["statements"]->nodesToStringUsingSeparator("; ") ++ "}"
+  | PgNodeArray(node) => "[" ++ node["elements"]->nodesToStringUsingSeparator("; ") ++ "]"
+  | PgNodeRecord(node) =>
+    "{" ++
+    node["elements"]
+    ->Js.Array2.map(element => PgNodeKeyValue(element))
+    ->pgNodesToStringUsingSeparator(", ") ++ "}"
   | PgNodeBoolean(node) => node["value"]->Js.String.make
-  | PgNodeCallIdentifier(node) => `::${Js.String.make(node["value"])}` // This is an identifier also but for function names
-  | PgNodeExpression(node) => "(" ++ node["nodes"]->nodesToStringUsingSeparator(" ") ++ ")"
+  | PgNodeCall(node) =>
+    "(" ++ node["fn"]->toString ++ " " ++ node["args"]->nodesToStringUsingSeparator(" ") ++ ")"
   | PgNodeFloat(node) => node["value"]->Js.String.make
   | PgNodeIdentifier(node) => `:${node["value"]}`
   | PgNodeInteger(node) => node["value"]->Js.String.make
   | PgNodeKeyValue(node) => toString(node["key"]) ++ ": " ++ toString(node["value"])
   | PgNodeLambda(node) =>
-    "{|" ++ node["args"]->argsToString ++ "| " ++ pgToString(PgNodeBlock(node["body"])) ++ "}"
+    "{|" ++ node["args"]->argsToString ++ "| " ++ node["body"]->toString ++ "}"
   | PgNodeLetStatement(node) =>
     pgToString(PgNodeIdentifier(node["variable"])) ++ " = " ++ toString(node["value"])
   | PgNodeModuleIdentifier(node) => `@${node["value"]}`
@@ -118,7 +137,7 @@ let rec pgToString = (peggyNode: peggyNode): string => {
     toString(node["trueExpression"]) ++
     " " ++
     toString(node["falseExpression"]) ++ ")"
-  | PgNodeTypeIdentifier(node) => `#${node["value"]}`
+  // | PgNodeTypeIdentifier(node) => `#${node["value"]}`
   | PgNodeVoid(_node) => "()"
   }
 }

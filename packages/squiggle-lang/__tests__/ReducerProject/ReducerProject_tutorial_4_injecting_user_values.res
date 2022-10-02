@@ -1,7 +1,5 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
-module Bindings = Reducer_Bindings
 
 open Jest
 open Expect
@@ -30,7 +28,7 @@ describe("ReducerProject Tutorial", () => {
     /* We can now run the project */
     Project.runAll(project)
     let result = Project.getResult(project, "main")
-    result->InternalExpressionValue.toStringResult->expect == "Ok(6)"
+    result->Reducer_Value.toStringResult->expect == "Ok(6)"
   })
 })
 

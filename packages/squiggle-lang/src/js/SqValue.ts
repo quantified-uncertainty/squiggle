@@ -3,11 +3,8 @@ import { squiggleValueTag as Tag } from "../rescript/ForTS/ForTS_SquiggleValue/F
 import { wrapDistribution } from "./SqDistribution";
 import { SqLambda } from "./SqLambda";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
-import { SqModule } from "./SqModule";
 import { SqRecord } from "./SqRecord";
 import { SqArray } from "./SqArray";
-import { SqType } from "./SqType";
-import { SqProject } from "./SqProject";
 import { SqValueLocation } from "./SqValueLocation";
 
 export { Tag as SqValueTag };
@@ -46,27 +43,11 @@ export class SqArrayValue extends SqAbstractValue {
   }
 }
 
-export class SqArrayStringValue extends SqAbstractValue {
-  tag = Tag.ArrayString as const;
-
-  get value() {
-    return this.valueMethod(RSValue.getArrayString);
-  }
-}
-
 export class SqBoolValue extends SqAbstractValue {
   tag = Tag.Bool as const;
 
   get value() {
     return this.valueMethod(RSValue.getBool);
-  }
-}
-
-export class SqCallValue extends SqAbstractValue {
-  tag = Tag.Call as const;
-
-  get value() {
-    return this.valueMethod(RSValue.getCall);
   }
 }
 
@@ -102,14 +83,6 @@ export class SqLambdaValue extends SqAbstractValue {
   }
 }
 
-export class SqModuleValue extends SqAbstractValue {
-  tag = Tag.Module as const;
-
-  get value() {
-    return new SqModule(this.valueMethod(RSValue.getModule), this.location);
-  }
-}
-
 export class SqNumberValue extends SqAbstractValue {
   tag = Tag.Number as const;
 
@@ -134,35 +107,11 @@ export class SqStringValue extends SqAbstractValue {
   }
 }
 
-export class SqSymbolValue extends SqAbstractValue {
-  tag = Tag.Symbol as const;
-
-  get value(): string {
-    return this.valueMethod(RSValue.getSymbol);
-  }
-}
-
 export class SqTimeDurationValue extends SqAbstractValue {
   tag = Tag.TimeDuration as const;
 
   get value() {
     return this.valueMethod(RSValue.getTimeDuration);
-  }
-}
-
-export class SqTypeValue extends SqAbstractValue {
-  tag = Tag.Type as const;
-
-  get value() {
-    return new SqType(this.valueMethod(RSValue.getType));
-  }
-}
-
-export class SqTypeIdentifierValue extends SqAbstractValue {
-  tag = Tag.TypeIdentifier as const;
-
-  get value() {
-    return this.valueMethod(RSValue.getTypeIdentifier);
   }
 }
 
@@ -176,21 +125,15 @@ export class SqVoidValue extends SqAbstractValue {
 
 const tagToClass = {
   [Tag.Array]: SqArrayValue,
-  [Tag.ArrayString]: SqArrayStringValue,
   [Tag.Bool]: SqBoolValue,
-  [Tag.Call]: SqCallValue,
   [Tag.Date]: SqDateValue,
   [Tag.Declaration]: SqDeclarationValue,
   [Tag.Distribution]: SqDistributionValue,
   [Tag.Lambda]: SqLambdaValue,
-  [Tag.Module]: SqModuleValue,
   [Tag.Number]: SqNumberValue,
   [Tag.Record]: SqRecordValue,
   [Tag.String]: SqStringValue,
-  [Tag.Symbol]: SqSymbolValue,
   [Tag.TimeDuration]: SqTimeDurationValue,
-  [Tag.Type]: SqTypeValue,
-  [Tag.TypeIdentifier]: SqTypeIdentifierValue,
   [Tag.Void]: SqVoidValue,
 } as const;
 
@@ -198,19 +141,13 @@ const tagToClass = {
 // type SqValue = typeof tagToClass[keyof typeof tagToClass];
 export type SqValue =
   | SqArrayValue
-  | SqArrayStringValue
   | SqBoolValue
-  | SqCallValue
   | SqDateValue
   | SqDeclarationValue
   | SqDistributionValue
   | SqLambdaValue
-  | SqModuleValue
   | SqNumberValue
   | SqRecordValue
   | SqStringValue
-  | SqSymbolValue
   | SqTimeDurationValue
-  | SqTypeValue
-  | SqTypeIdentifierValue
   | SqVoidValue;
