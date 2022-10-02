@@ -2,7 +2,7 @@ import * as RSProject from "../rescript/ForTS/ForTS_ReducerProject.gen";
 import { reducerErrorValue } from "../rescript/ForTS/ForTS_Reducer_ErrorValue.gen";
 import { environment } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_Environment.gen";
 import { SqError } from "./SqError";
-import { SqModule } from "./SqModule";
+import { SqRecord } from "./SqRecord";
 import { wrapValue } from "./SqValue";
 import { resultMap2 } from "./types";
 import { SqValueLocation } from "./SqValueLocation";
@@ -83,7 +83,7 @@ export class SqProject {
   }
 
   getBindings(sourceId: string) {
-    return new SqModule(
+    return new SqRecord(
       RSProject.getBindings(this._value, sourceId),
       new SqValueLocation(this, sourceId, {
         root: "bindings",
@@ -110,5 +110,9 @@ export class SqProject {
 
   setEnvironment(environment: environment) {
     RSProject.setEnvironment(this._value, environment);
+  }
+
+  getEnvironment(): environment {
+    return RSProject.getEnvironment(this._value);
   }
 }

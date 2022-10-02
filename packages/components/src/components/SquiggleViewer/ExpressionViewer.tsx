@@ -135,29 +135,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           {() => value.value.toString()}
         </VariableBox>
       );
-    case SqValueTag.Symbol:
-      return (
-        <VariableBox value={value} heading="Symbol">
-          {() => (
-            <>
-              <span className="text-slate-500 mr-2">Undefined Symbol:</span>
-              <span className="text-slate-600">{value.value}</span>
-            </>
-          )}
-        </VariableBox>
-      );
-    case SqValueTag.Call:
-      return (
-        <VariableBox value={value} heading="Call">
-          {() => value.value}
-        </VariableBox>
-      );
-    case SqValueTag.ArrayString:
-      return (
-        <VariableBox value={value} heading="Array String">
-          {() => value.value.map((r) => `"${r}"`).join(", ")}
-        </VariableBox>
-      );
     case SqValueTag.Date:
       return (
         <VariableBox value={value} heading="Date">
@@ -242,24 +219,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
         </VariableBox>
       );
     }
-    case SqValueTag.Module: {
-      return (
-        <VariableList value={value} heading="Module">
-          {(_) =>
-            value.value
-              .entries()
-              .filter(([key, _]) => !key.match(/^(__result__)$/))
-              .map(([key, r]) => (
-                <ExpressionViewer
-                  key={key}
-                  value={r}
-                  width={width !== undefined ? width - 20 : width}
-                />
-              ))
-          }
-        </VariableList>
-      );
-    }
     case SqValueTag.Record:
       const plot = makePlot(value.value);
       if (plot) {
@@ -339,7 +298,9 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           {() => (
             <div>
               <span>No display for type: </span>{" "}
-              <span className="font-semibold text-slate-600">{value.tag}</span>
+              <span className="font-semibold text-slate-600">
+                {(value as { tag: string }).tag}
+              </span>
             </div>
           )}
         </VariableList>

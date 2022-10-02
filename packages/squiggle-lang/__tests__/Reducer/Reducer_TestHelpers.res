@@ -1,7 +1,6 @@
 module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
 module ExpressionT = Reducer_Expression_T
-module InternalExpressionValue = ReducerInterface.InternalExpressionValue
 
 open Jest
 open Expect
@@ -9,7 +8,7 @@ open Expect
 let unwrapRecord = rValue =>
   rValue->Belt.Result.flatMap(value =>
     switch value {
-    | InternalExpressionValue.IEvRecord(aRecord) => Ok(aRecord)
+    | Reducer_T.IEvRecord(aRecord) => Ok(aRecord)
     | _ => ErrorValue.RETodo("TODO: Internal bindings must be returned")->Error
     }
   )
@@ -18,15 +17,11 @@ let expectParseToBe = (code: string, answer: string) =>
   Expression.BackCompatible.parse(code)->ExpressionT.toStringResult->expect->toBe(answer)
 
 let expectEvalToBe = (code: string, answer: string) =>
-  Expression.BackCompatible.evaluateString(code)
-  ->Reducer_Helpers.rRemoveDefaultsInternal
-  ->InternalExpressionValue.toStringResult
-  ->expect
-  ->toBe(answer)
+  Expression.BackCompatible.evaluateString(code)->Reducer_Value.toStringResult->expect->toBe(answer)
 
 let expectEvalError = (code: string) =>
   Expression.BackCompatible.evaluateString(code)
-  ->InternalExpressionValue.toStringResult
+  ->Reducer_Value.toStringResult
   ->expect
   ->toMatch("Error\(")
 

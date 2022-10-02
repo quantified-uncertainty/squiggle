@@ -15557,6 +15557,18 @@ rescript-fast-check@^1.1.1:
   dependencies:
     fast-check "^2.17.0"
 
+rescript-js-iterator@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/rescript-js-iterator/-/rescript-js-iterator-1.1.0.tgz#7fc1e6097cec5f3b847189e112deed0bca331f4d"
+  integrity sha512-9VSGfAUXdmOl0OoersJZknpGjCi4gsIuejcHQwIYKwoPPlfswFvrKjwOLTy4SoqM2037RxiwxsMPRlWgfDY22A==
+
+rescript-js-map@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/rescript-js-map/-/rescript-js-map-1.1.0.tgz#5e4e57d9147733bd2d14307d65f0f8febb5850fc"
+  integrity sha512-kJB43pIRv/Cd9OY17Fpof+xq6WTCqagdW+zrmBxFIj8SpK48rG4nF8jXSsYK3ksdwIJwh7J3sx3pwA27YkeM+A==
+  dependencies:
+    rescript-js-iterator "^1.1.0"
+
 rescript@^9.1.4:
   version "9.1.4"
   resolved "https://registry.yarnpkg.com/rescript/-/rescript-9.1.4.tgz#1eb126f98d6c16942c0bf0df67c050198e580515"

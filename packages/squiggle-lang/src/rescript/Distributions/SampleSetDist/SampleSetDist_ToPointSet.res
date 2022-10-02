@@ -62,7 +62,7 @@ let toPointSetDist = (
   ~samplingInputs: SamplingInputs.samplingInputs,
   (),
 ): Internals.Types.outputs => {
-  let samples = samples->Js.Array2.copy->Js.Array2.sortInPlaceWith(compare)
+  let samples = samples->E.A.Floats.sort
 
   let minDiscreteToKeep = MagicNumbers.ToPointSet.minDiscreteToKeep(samples)
   let (continuousPart, discretePart) = E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(

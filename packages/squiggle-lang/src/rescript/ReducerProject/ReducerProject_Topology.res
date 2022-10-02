@@ -1,12 +1,12 @@
 module ProjectItem = ReducerProject_ProjectItem
 module T = ReducerProject_T
-type t = T.Private.t
+type t = T.t
 
-let getSourceIds = T.Private.getSourceIds
-let getItem = T.Private.getItem
+let getSourceIds = T.getSourceIds
+let getItem = T.getItem
 
 let getImmediateDependencies = (this: t, sourceId: string): ProjectItem.T.includesType =>
-  getItem(this, sourceId)->ProjectItem.getImmediateDependencies
+  this->getItem(sourceId)->ProjectItem.getImmediateDependencies
 
 type topologicalSortState = (Belt.Map.String.t<bool>, list<string>)
 let rec topologicalSortUtil = (
@@ -31,16 +31,16 @@ let rec topologicalSortUtil = (
 }
 
 let getTopologicalSort = (this: t): array<string> => {
-  let (_visited, stack) = getSourceIds(this)->Belt.Array.reduce((Belt.Map.String.empty, list{}), (
-    (currVisited, currStack),
-    currId,
-  ) =>
-    if !Belt.Map.String.getWithDefault(currVisited, currId, false) {
-      topologicalSortUtil(this, currId, (currVisited, currStack))
-    } else {
-      (currVisited, currStack)
-    }
-  )
+  let (_visited, stack) =
+    this
+    ->getSourceIds
+    ->Belt.Array.reduce((Belt.Map.String.empty, list{}), ((currVisited, currStack), currId) =>
+      if !Belt.Map.String.getWithDefault(currVisited, currId, false) {
+        topologicalSortUtil(this, currId, (currVisited, currStack))
+      } else {
+        (currVisited, currStack)
+      }
+    )
   Belt.List.reverse(stack)->Belt.List.toArray
 }
 

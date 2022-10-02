@@ -1,5 +1,4 @@
 @@warning("-44")
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
 module Project = ForTS_ReducerProject
 module Bindings = Reducer_Bindings
 
@@ -32,7 +31,7 @@ describe("ReducerProject Tutorial", () => {
 
   test("userResults", () => {
     let userResultsAsString = Belt.Array.map(userResults, aResult =>
-      aResult->InternalExpressionValue.toStringResult
+      aResult->Reducer_Value.toStringResult
     )
     userResultsAsString->expect == ["Ok(2)", "Ok(4)", "Ok(6)", "Ok(8)", "Ok(10)"]
   })

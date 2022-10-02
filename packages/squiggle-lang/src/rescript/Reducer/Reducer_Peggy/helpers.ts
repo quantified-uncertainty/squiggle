@@ -1,8 +1,8 @@
 import { LocationRange } from "peggy";
 
 export const toFunction = {
+  "+": "add",
   "-": "subtract",
-  "->": "pipe",
   "!=": "unequal",
   ".-": "dotSubtract",
   ".*": "dotMultiply",
@@ -13,7 +13,6 @@ export const toFunction = {
   "/": "divide",
   "&&": "and",
   "^": "pow", // or xor
-  "+": "add",
   "<": "smaller",
   "<=": "smallerEq",
   "==": "equal",
@@ -40,9 +39,25 @@ type NodeBlock = {
   statements: AnyPeggyNode[];
 };
 
-type NodeExpression = {
-  type: "Expression";
-  nodes: AnyPeggyNode[];
+type NodeProgram = {
+  type: "Program";
+  statements: AnyPeggyNode[];
+};
+
+type NodeArray = {
+  type: "Array";
+  elements: AnyPeggyNode[];
+};
+
+type NodeRecord = {
+  type: "Record";
+  elements: NodeKeyValue[];
+};
+
+type NodeCall = {
+  type: "Call";
+  fn: AnyPeggyNode;
+  args: AnyPeggyNode[];
 };
 
 type NodeFloat = {
@@ -57,12 +72,6 @@ type NodeInteger = {
 
 type NodeIdentifier = {
   type: "Identifier";
-  value: string;
-  location: LocationRange;
-};
-
-type NodeCallIdentifier = {
-  type: "CallIdentifier";
   value: string;
 };
 
@@ -103,12 +112,14 @@ type NodeBoolean = {
 };
 
 export type AnyPeggyNode =
+  | NodeArray
+  | NodeRecord
   | NodeBlock
-  | NodeExpression
+  | NodeProgram
+  | NodeCall
   | NodeFloat
   | NodeInteger
   | NodeIdentifier
-  | NodeCallIdentifier
   | NodeLetStatement
   | NodeLambda
   | NodeTernary
@@ -118,51 +129,36 @@ export type AnyPeggyNode =
 
 export function makeFunctionCall(fn: string, args: AnyPeggyNode[]) {
   if (fn === "$$_applyAll_$$") {
-    // Any list of values is applied from left to right anyway.
-    // Like in Haskell and Lisp.
-    // So we remove the redundant $$_applyAll_$$.
-    if (args[0].type === "Identifier") {
-      args[0] = {
-        ...args[0],
-        type: "CallIdentifier",
-      };
-    }
-    return nodeExpression(args);
+    return nodeCall(args[0], args.splice(1));
   } else {
-    return nodeExpression([nodeCallIndentifier(fn), ...args]);
+    return nodeCall(nodeIdentifier(fn), args);
   }
 }
 
-export function apply(fn: string, arg: AnyPeggyNode) {
-  return makeFunctionCall(fn, [arg]);
+export function constructArray(elements: AnyPeggyNode[]) {
+  return { type: "Array", elements };
 }
-export function constructArray(elems: AnyPeggyNode[]) {
-  return makeFunctionCall("$_constructArray_$", elems);
-}
-export function constructRecord(elems: AnyPeggyNode[]) {
-  return apply("$_constructRecord_$", nodeExpression(elems));
+export function constructRecord(elements: AnyPeggyNode[]) {
+  return { type: "Record", elements };
 }
 
 export function nodeBlock(statements: AnyPeggyNode[]): NodeBlock {
   return { type: "Block", statements };
 }
+export function nodeProgram(statements: AnyPeggyNode[]): NodeProgram {
+  return { type: "Program", statements };
+}
 export function nodeBoolean(value: boolean): NodeBoolean {
   return { type: "Boolean", value };
 }
-export function nodeCallIndentifier(value: string): NodeCallIdentifier {
-  return { type: "CallIdentifier", value };
-}
-export function nodeExpression(args: AnyPeggyNode[]): NodeExpression {
-  return { type: "Expression", nodes: args };
+export function nodeCall(fn: AnyPeggyNode, args: AnyPeggyNode[]): NodeCall {
+  return { type: "Call", fn, args };
 }
 export function nodeFloat(value: number): NodeFloat {
   return { type: "Float", value };
 }
-export function nodeIdentifier(
-  value: string,
-  location: LocationRange
-): NodeIdentifier {
-  return { type: "Identifier", value, location };
+export function nodeIdentifier(value: string): NodeIdentifier {
+  return { type: "Identifier", value };
 }
 export function nodeInteger(value: number): NodeInteger {
   return { type: "Integer", value };
