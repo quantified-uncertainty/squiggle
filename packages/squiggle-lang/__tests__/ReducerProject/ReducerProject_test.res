@@ -122,12 +122,12 @@ describe("removing sources", () => {
 
   Project.removeSource(project, "main")
 
-  test("can delete sources without dependents", () => {
-    expect(Project.getDependents(project, "second")) == []
-  })
-
   test("project doesn't have source", () => {
     expect(Project.getSource(project, "main")) == None
+  })
+
+  test("dependents get updated", () => {
+    expect(Project.getDependents(project, "second")) == []
   })
 })
 
