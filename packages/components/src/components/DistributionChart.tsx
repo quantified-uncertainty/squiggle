@@ -94,7 +94,9 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       maxY: Math.max(...domain.map((x) => x.y)),
     });
 
-    let widthProp = width ? width : isFinite(size.width) ? size.width : 400;
+    // I think size.width is sometimes not finite due to the component not being in a visible context
+    // This occurs during testing
+    let widthProp = width ? width : Number.isFinite(size.width) ? size.width : 400;
     if (widthProp < 20) {
       console.warn(
         `Width of Distribution is set to ${widthProp}, which is too small`
