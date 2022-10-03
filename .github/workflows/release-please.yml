@@ -18,27 +18,27 @@ jobs:
     steps:
       - id: skip_lang_check
         name: Check if the changes are about squiggle-lang src files
-        uses: fkirc/skip-duplicate-actions@v5.1.0
+        uses: fkirc/skip-duplicate-actions@v5.2.0
         with:
           paths: '["packages/squiggle-lang/**"]'
       - id: skip_components_check
         name: Check if the changes are about components src files
-        uses: fkirc/skip-duplicate-actions@v5.1.0
+        uses: fkirc/skip-duplicate-actions@v5.2.0
         with:
           paths: '["packages/components/**"]'
       - id: skip_website_check
         name: Check if the changes are about website src files
-        uses: fkirc/skip-duplicate-actions@v5.1.0
+        uses: fkirc/skip-duplicate-actions@v5.2.0
         with:
           paths: '["packages/website/**"]'
       - id: skip_vscodeext_check
         name: Check if the changes are about vscode extension src files
-        uses: fkirc/skip-duplicate-actions@v5.1.0
+        uses: fkirc/skip-duplicate-actions@v5.2.0
         with:
           paths: '["packages/vscode-ext/**"]'
       - id: skip_cli_check
         name: Check if the changes are about cli src files
-        uses: fkirc/skip-duplicate-actions@v5.1.0
+        uses: fkirc/skip-duplicate-actions@v5.2.0
         with:
           paths: '["packages/cli/**"]'
 
