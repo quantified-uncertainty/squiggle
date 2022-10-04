@@ -182,7 +182,7 @@ describe("Peggy parse", () => {
       "a.p1 to a.p2",
       "{(:credibleIntervalToDistribution (:$_atIndex_$ :a 'p1') (:$_atIndex_$ :a 'p2'))}",
     ) // lower than post
-    testParse("1 to 2 + 3", "{(:add (:credibleIntervalToDistribution 1 2) 3)}") // higher than binary operators
+    testParse("1 to 2 + 3", "{(:credibleIntervalToDistribution 1 (:add 2 3))}") 
     testParse(
       "1->add(2) to 3->add(4) -> add(4)",
       "{(:credibleIntervalToDistribution (:add 1 2) (:add (:add 3 4) 4))}",
