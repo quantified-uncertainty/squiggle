@@ -83,18 +83,32 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       }
     }
 
-    const spec = buildVegaSpec(props);
+    const domain = shapes.value.flatMap((shape) =>
+      shape.discrete.concat(shape.continuous)
+    );
 
-    let widthProp = width ? width : size.width;
+    const spec = buildVegaSpec({
+      ...props,
+      minX: props.minX ?? Math.min(...domain.map((x) => x.x)),
+      maxX: props.minX ?? Math.max(...domain.map((x) => x.x)),
+      maxY: Math.max(...domain.map((x) => x.y)),
+    });
+
+    // I think size.width is sometimes not finite due to the component not being in a visible context
+    // This occurs during testing
+    let widthProp = width
+      ? width
+      : Number.isFinite(size.width)
+      ? size.width
+      : 400;
     if (widthProp < 20) {
       console.warn(
         `Width of Distribution is set to ${widthProp}, which is too small`
       );
       widthProp = 20;
     }
-    const domain = shapes.value.flatMap((shape) =>
-      shape.discrete.concat(shape.continuous)
-    );
+
+    const vegaData = { data: shapes.value, samples };
 
     return (
       <div style={{ width: widthProp }}>
@@ -105,7 +119,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         ) : (
           <Vega
             spec={spec}
-            data={{ data: shapes.value, domain, samples }}
+            data={vegaData}
             width={widthProp - 10}
             height={height}
             actions={actions}
