@@ -1,7 +1,7 @@
 import { environment, SqProject, SqValue } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
-import * as uuid from 'uuid';
+import * as uuid from "uuid";
 
 type SquiggleArgs = {
   code?: string;
