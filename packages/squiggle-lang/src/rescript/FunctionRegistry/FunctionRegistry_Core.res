@@ -83,19 +83,17 @@ module FRType = {
     | (FRTypeNumeric, IEvNumber(_)) => true
     | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(_)))) => true
     | (FRTypeLambda, IEvLambda(_)) => true
-    | (FRTypeArray(intendedType), IEvArray(elements)) => {
-        elements->Belt.Array.every(v => matchWithValue(intendedType, v))
-      }
+    | (FRTypeArray(intendedType), IEvArray(elements)) =>
+      elements->Belt.Array.every(v => matchWithValue(intendedType, v))
     | (FRTypeDict(r), IEvRecord(map)) =>
       map->Belt.Map.String.valuesToArray->Belt.Array.every(v => matchWithValue(r, v))
-    | (FRTypeRecord(recordParams), IEvRecord(map)) => {
+    | (FRTypeRecord(recordParams), IEvRecord(map)) =>
       recordParams->Belt.Array.every(((name, input)) => {
         switch map->Belt.Map.String.get(name) {
-          | Some(v) => matchWithValue(input, v)
-          | None => false
+        | Some(v) => matchWithValue(input, v)
+        | None => false
         }
       })
-    }
     | _ => false
     }
 
@@ -104,8 +102,7 @@ module FRType = {
     if !isSameLength {
       false
     } else {
-      E.A.zip(inputs, args)
-      ->Belt.Array.every(((input, arg)) => matchWithValue(input, arg))
+      E.A.zip(inputs, args)->Belt.Array.every(((input, arg)) => matchWithValue(input, arg))
     }
   }
 }
