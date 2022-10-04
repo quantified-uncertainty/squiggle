@@ -44,6 +44,7 @@
     "@types/node": "^18.8.0",
     "@types/react": "^18.0.21",
     "@types/styled-components": "^5.1.26",
+    "@types/uuid": "^8.3.4",
     "@types/webpack": "^5.28.0",
     "canvas": "^2.10.1",
     "cross-env": "^7.0.3",
@@ -84,7 +85,8 @@
     "format": "prettier --write .",
     "prepack": "yarn run build:cjs && yarn run bundle",
     "test": "jest",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:profile": "node --cpu-prof node_modules/.bin/jest --runInBand"
   },
   "eslintConfig": {
     "extends": [

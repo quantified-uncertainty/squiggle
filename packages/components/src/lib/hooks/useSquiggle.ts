@@ -1,7 +1,7 @@
 import { environment, SqProject, SqValue } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
-import { v4 as uuidv4 } from "uuid";
+import * as uuid from 'uuid';
 
 type SquiggleArgs = {
   code?: string;
@@ -17,7 +17,7 @@ type SquiggleArgs = {
 const importSourceName = (sourceName: string) => "imports-" + sourceName;
 
 export const useSquiggle = (args: SquiggleArgs) => {
-  const autogenName = useMemo(() => uuidv4(), []);
+  const autogenName = useMemo(() => uuid.v4(), []);
 
   const result = useMemo(
     () => {
@@ -70,9 +70,9 @@ export const useSquiggle = (args: SquiggleArgs) => {
   useEffect(
     () => {
       return () => {
-        if (result.needsClean) args.project.clean(result.sourceName);
+        if (result.needsClean) args.project.removeSource(result.sourceName);
         if (args.project.getSource(importSourceName(result.sourceName)))
-          args.project.clean(result.sourceName);
+          args.project.removeSource(result.sourceName);
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
