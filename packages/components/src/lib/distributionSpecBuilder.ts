@@ -26,7 +26,6 @@ export const linearXScale: LinearScale = {
   range: "width",
   zero: false,
   nice: false,
-  domain: { data: "domain", field: "x" },
 };
 
 export const logXScale: LogScale = {
@@ -37,7 +36,6 @@ export const logXScale: LogScale = {
   base: 10,
   nice: false,
   clamp: true,
-  domain: { data: "domain", field: "x" },
 };
 
 export const timeXScale: TimeScale = {
@@ -46,7 +44,6 @@ export const timeXScale: TimeScale = {
   type: "time",
   range: "width",
   nice: false,
-  domain: { data: "domain", field: "x" },
 };
 
 /** Y Scales */
@@ -55,7 +52,6 @@ export const linearYScale: LinearScale = {
   type: "linear",
   range: "height",
   zero: true,
-  domain: { data: "domain", field: "y" },
 };
 
 export const expYScale: PowScale = {
@@ -65,7 +61,6 @@ export const expYScale: PowScale = {
   range: "height",
   zero: true,
   nice: false,
-  domain: { data: "domain", field: "y" },
 };
 
 export const defaultTickFormat = ".9~s";
@@ -73,9 +68,17 @@ export const timeTickFormat = "%b %d, %Y %H:%M";
 const width = 500;
 
 export function buildVegaSpec(
-  specOptions: DistributionChartSpecOptions
+  specOptions: DistributionChartSpecOptions & { maxY: number }
 ): VisualizationSpec {
-  const { title, minX, maxX, logX, expY, xAxisType = "number" } = specOptions;
+  const {
+    title,
+    minX,
+    maxX,
+    logX,
+    expY,
+    xAxisType = "number",
+    maxY,
+  } = specOptions;
 
   const dateTime = xAxisType === "dateTime";
 
@@ -88,13 +91,15 @@ export function buildVegaSpec(
 
   let xScale = dateTime ? timeXScale : logX ? logXScale : linearXScale;
 
-  if (minX !== undefined && Number.isFinite(minX)) {
-    xScale = { ...xScale, domainMin: minX };
-  }
+  xScale = {
+    ...xScale,
+    domain: [minX ?? 0, maxX ?? 1],
+    domainMin: minX,
+    domainMax: maxX,
+  };
 
-  if (maxX !== undefined && Number.isFinite(maxX)) {
-    xScale = { ...xScale, domainMax: maxX };
-  }
+  let yScale = expY ? expYScale : linearYScale;
+  yScale = { ...yScale, domain: [0, maxY ?? 1], domainMin: 0, domainMax: maxY };
 
   const spec: VisualizationSpec = {
     $schema: "https://vega.github.io/schema/vega/v5.json",
@@ -128,7 +133,7 @@ export function buildVegaSpec(
     ],
     scales: [
       xScale,
-      expY ? expYScale : linearYScale,
+      yScale,
       {
         name: "color",
         type: "ordinal",
