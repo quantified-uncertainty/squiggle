@@ -82,7 +82,7 @@ let doLambdaCallFrom = (
     inFunction: Some(t),
   }
 
-  SqError.rethrowWithStacktrace(() => {
+  SqError.rethrowWithFrameStack(() => {
     switch t {
     | FnLambda({body}) => body(args, newContext, reducer)
     | FnBuiltin({body}) => body(args, newContext, reducer)

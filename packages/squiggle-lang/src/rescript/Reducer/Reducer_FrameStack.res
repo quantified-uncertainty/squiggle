@@ -1,3 +1,6 @@
+// This is called "frameStack" and not "callStack", because the last frame in errors is often not a function call.
+// A "frame" is a pair of a scope (function or top-level scope, currently stored as a string) and a location inside it.
+// See this comment to deconfuse about what a frame is: https://github.com/quantified-uncertainty/squiggle/pull/1172#issuecomment-1264115038
 type t = Reducer_T.frameStack
 
 module Frame = {
@@ -17,9 +20,6 @@ module Frame = {
 }
 
 let make = (): t => list{}
-
-@genType
-let getTopFrame = (t: t): option<Reducer_T.frame> => Belt.List.head(t)
 
 let extend = (t: t, name: string, location: option<Reducer_Peggy_Parse.location>) =>
   t->Belt.List.add({

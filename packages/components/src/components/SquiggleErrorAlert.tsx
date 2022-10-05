@@ -22,7 +22,7 @@ const StackTrace: React.FC<Props> = ({ error }) => {
   const frames = error.getFrameArray();
   return frames.length ? (
     <div>
-      <div>Traceback:</div>
+      <div className="font-medium">Stack trace:</div>
       <div className="ml-4">
         {frames.map((frame, i) => (
           <StackTraceFrame frame={frame} key={i} />

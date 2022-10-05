@@ -1,7 +1,8 @@
 type location = Reducer_Peggy_Parse.location
 
 // Messages don't contain any stack trace information.
-// FunctionRegistry functions are allowed to throw MessageExceptions, though, because they will be caught and rewrapped by Reducer_Lambda code
+// FunctionRegistry functions are allowed to throw MessageExceptions, though,
+// because they will be caught and rewrapped by Reducer_Lambda code.
 module Message = {
   @genType.opaque
   type t =
@@ -125,16 +126,16 @@ let getFrameArray = (t: t): array<Reducer_T.frame> => t.frameStack->Reducer_Fram
 @genType
 let toStringWithStackTrace = (t: t) =>
   t->toString ++ if t.frameStack->Reducer_FrameStack.isEmpty {
-      "\nTraceback:\n" ++ t.frameStack->Reducer_FrameStack.toString
+      "\nStack trace:\n" ++ t.frameStack->Reducer_FrameStack.toString
     } else {
       ""
     }
 let throw = (t: t) => t->SqException->raise
 
 let throwMessageWithFrameStack = (message: Message.t, frameStack: Reducer_FrameStack.t) =>
-  fromMessageWithFrameStack(message, frameStack)->throw
+  message->fromMessageWithFrameStack(frameStack)->throw
 
-// this shouldn't be used for most runtime errors - the resulting error would have an empty stacktrace
+// this shouldn't be used for most runtime errors - the resulting error would have an empty framestack
 let fromException = exn =>
   switch exn {
   | SqException(e) => e
@@ -143,14 +144,14 @@ let fromException = exn =>
   | _ => REOther("Unknown exception")->fromMessage
   }
 
-// converts raw exceptions into exceptions with stacktrace attached
+// converts raw exceptions into exceptions with framestack attached
 // already converted exceptions won't be affected
-let rethrowWithStacktrace = (fn: unit => 'a, frameStack: Reducer_FrameStack.t) => {
+let rethrowWithFrameStack = (fn: unit => 'a, frameStack: Reducer_FrameStack.t) => {
   try {
     fn()
   } catch {
-  | SqException(e) => e->throw // exception already has a stacktrace
-  | Message.MessageException(e) => e->throwMessageWithFrameStack(frameStack) // probably comes from FunctionRegistry, adding stacktrace
+  | SqException(e) => e->throw // exception already has a framestack
+  | Message.MessageException(e) => e->throwMessageWithFrameStack(frameStack) // probably comes from FunctionRegistry, adding framestack
   | Js.Exn.Error(obj) =>
     REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->throwMessageWithFrameStack(frameStack)
   | _ => REOther("Unknown exception")->throwMessageWithFrameStack(frameStack)
