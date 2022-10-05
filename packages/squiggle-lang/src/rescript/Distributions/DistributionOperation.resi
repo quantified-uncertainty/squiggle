@@ -98,7 +98,7 @@ module Constructors: {
   @genType
   let toSampleSet: (~env: GenericDist.env, genericDist, int) => result<genericDist, error>
   @genType
-  let fromSamples: (~env: GenericDist.env, SampleSetDist.t) => result<genericDist, error>
+  let fromSamples: (~env: GenericDist.env, array<float>) => result<genericDist, error>
   @genType
   let truncate: (
     ~env: GenericDist.env,

@@ -2,14 +2,10 @@
 module Error = {
   @genType
   type sampleSetError =
-    TooFewSamples | NonNumericInput(string) | OperationError(Operation.operationError)
-
-  let sampleSetErrorToString = (err: sampleSetError): string =>
-    switch err {
-    | TooFewSamples => "Too few samples when constructing sample set"
-    | NonNumericInput(err) => `Found a non-number in input: ${err}`
-    | OperationError(err) => Operation.Error.toString(err)
-    }
+    | TooFewSamples
+    | NonNumericInput(string)
+    | OperationError(Operation.operationError)
+    | UnequalSizes
 
   @genType
   type pointsetConversionError = TooFewSamplesForConversionToPointSet
@@ -26,6 +22,7 @@ module Error = {
     | TooFewSamples => "Too few samples when constructing sample set"
     | NonNumericInput(err) => `Found a non-number in input: ${err}`
     | OperationError(err) => Operation.Error.toString(err)
+    | UnequalSizes => "Expected sample sets of equal size"
     }
   }
 }
@@ -38,26 +35,29 @@ this constructor.
 https://stackoverflow.com/questions/66909578/how-to-make-a-type-constructor-private-in-rescript-except-in-current-module
 */
 module T: {
-  //This really should be hidden (remove the array<float>). The reason it isn't is to act as an escape hatch in JS__Test.ts.
-  //When we get a good functional library in TS, we could refactor that out.
-  @genType
-  type t = array<float>
-  let make: array<float> => result<t, sampleSetError>
-  let get: t => array<float>
+  @genType.opaque
+  type t
+  let makeFromTypedArray: E.FloatArray.t => result<t, sampleSetError>
+  let makeFromJsArray: array<float> => result<t, sampleSetError>
+  let toJsArray: t => array<float>
+  let get: t => E.FloatArray.t
 } = {
-  type t = array<float>
-  let make = (a: array<float>) =>
-    if E.A.length(a) > 5 {
+  type t = E.FloatArray.t
+  let makeFromTypedArray = (a: E.FloatArray.t): result<t, sampleSetError> =>
+    if E.FloatArray.length(a) > 5 {
       Ok(a)
     } else {
       Error(TooFewSamples)
     }
-  let get = (a: t) => a
+  let makeFromJsArray = (a: array<float>): result<t, sampleSetError> =>
+    E.FloatArray.make(a)->makeFromTypedArray
+  let toJsArray = (t: t) => t->E.FloatArray.toArray
+  let get = (t: t) => t
 }
 
 include T
 
-let length = (t: t) => get(t)->E.A.length
+let length = (t: T.t) => T.get(t)->E.FloatArray.length
 
 /*
 TODO: Refactor to get a more precise estimate. Also, this code is just fairly messy, could use 
@@ -68,15 +68,15 @@ let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInput
   pointsetConversionError,
 > =>
   SampleSetDist_ToPointSet.toPointSetDist(
-    ~samples=get(samples),
+    ~samples=T.get(samples),
     ~samplingInputs,
     (),
   ).pointSetDist->E.O2.toResult(TooFewSamplesForConversionToPointSet)
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
-  let i = E.Int.random(~min=0, ~max=E.A.length(get(t)) - 1)
-  E.A.unsafe_get(get(t), i)
+  let i = E.Int.random(~min=0, ~max=E.FloatArray.length(get(t)) - 1)
+  E.FloatArray.unsafe_get(get(t), i)
 }
 
 /*
@@ -87,52 +87,144 @@ The former helps in cases where multiple distributions are correlated.
 However, if n > length(t), then there's no clear right answer, so we just randomly
 sample everything.
 */
-let sampleN = (t: t, n) => {
-  if n <= E.A.length(get(t)) {
-    E.A.slice(get(t), ~offset=0, ~len=n)
+let sampleN = (t: t, n): array<float> => {
+  if n <= length(t) {
+    E.FloatArray.slice(~start=0, ~end_=n, get(t))->E.FloatArray.toArray
   } else {
     Belt.Array.makeBy(n, _ => sample(t))
   }
 }
 
-let _fromSampleResultArray = (samples: array<result<float, QuriSquiggleLang.Operation.Error.t>>) =>
-  E.A.R.firstErrorOrOpen(samples)->E.R2.errMap(Error.fromOperationError) |> E.R2.bind(make)
-
 let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): result<
   t,
   sampleSetError,
-> => T.get(t)->E.A2.fmap(fn)->_fromSampleResultArray
+> => {
+  try {
+    T.get(t)
+    ->E.FloatArray.map((. v) => {
+      switch fn(v) {
+      | Ok(res) => res
+      | Error(err) => err->Operation.Error.OperationException->raise
+      }
+    })
+    ->T.makeFromTypedArray
+  } catch {
+  | Operation.Error.OperationException(err) => Error.fromOperationError(err)->Error
+  }
+}
 
-//TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
 let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2: t): result<
   t,
   sampleSetError,
-> => E.A.zip(get(t1), get(t2))->E.A2.fmap(E.Tuple2.toFnCall(fn))->_fromSampleResultArray
+> => {
+  let length1 = t1->length
+  let length2 = t2->length
+  if length1 == length2 {
+    try {
+      let res = E.FloatArray.fromLength(length1)
+      for i in 0 to length1 - 1 {
+        let v = switch fn(
+          get(t1)->E.FloatArray.unsafe_get(i),
+          get(t2)->E.FloatArray.unsafe_get(i),
+        ) {
+        | Ok(fnResult) => fnResult
+        | Error(err) => err->Operation.Error.OperationException->raise
+        }
+        res->E.FloatArray.set(i, v)
+      }
+      res->T.makeFromTypedArray
+    } catch {
+    | Operation.Error.OperationException(err) => Error.fromOperationError(err)->Error
+    }
+  } else {
+    Error.UnequalSizes->Error
+  }
+}
 
 let map3 = (
   ~fn: (float, float, float) => result<float, Operation.Error.t>,
   ~t1: t,
   ~t2: t,
   ~t3: t,
-): result<t, sampleSetError> =>
-  E.A.zip3(get(t1), get(t2), get(t3))->E.A2.fmap(E.Tuple3.toFnCall(fn))->_fromSampleResultArray
+): result<t, sampleSetError> => {
+  let length1 = t1->length
+  let length2 = t2->length
+  let length3 = t3->length
+  if length1 == length2 && length2 == length3 {
+    try {
+      let res = E.FloatArray.fromLength(length1)
+      for i in 0 to length1 - 1 {
+        let v = switch fn(
+          get(t1)->E.FloatArray.unsafe_get(i),
+          get(t2)->E.FloatArray.unsafe_get(i),
+          get(t3)->E.FloatArray.unsafe_get(i),
+        ) {
+        | Ok(fnResult) => fnResult
+        | Error(err) => err->Operation.Error.OperationException->raise
+        }
+        res->E.FloatArray.set(i, v)
+      }
+      res->T.makeFromTypedArray
+    } catch {
+    | Operation.Error.OperationException(err) => Error.fromOperationError(err)->Error
+    }
+  } else {
+    Error.UnequalSizes->Error
+  }
+}
 
 let mapN = (~fn: array<float> => result<float, Operation.Error.t>, ~t1: array<t>): result<
   t,
   sampleSetError,
-> => E.A.transpose(E.A.fmap(get, t1))->E.A2.fmap(fn)->_fromSampleResultArray
+> => {
+  let lengths = t1->E.A2.fmap(t => t->length)
+  let l0 = lengths[0]
+  if lengths->E.A.all(l => l == l0, _) {
+    try {
+      let res = E.FloatArray.fromLength(l0)
+      for i in 0 to l0 - 1 {
+        let v = switch fn(t1->E.A2.fmap(t => get(t)->E.FloatArray.unsafe_get(i))) {
+        | Ok(fnResult) => fnResult
+        | Error(err) => err->Operation.Error.OperationException->raise
+        }
+        res->E.FloatArray.set(i, v)
+      }
+      res->T.makeFromTypedArray
+    } catch {
+    | Operation.Error.OperationException(err) => Error.fromOperationError(err)->Error
+    }
+  } else {
+    Error.UnequalSizes->Error
+  }
+}
 
-let mean = t => T.get(t)->E.A.Floats.mean
-let geomean = t => T.get(t)->E.A.Floats.geomean
-let mode = t => T.get(t)->E.A.Floats.mode
-let sum = t => T.get(t)->E.A.Floats.sum
-let min = t => T.get(t)->E.A.Floats.min
-let max = t => T.get(t)->E.A.Floats.max
-let stdev = t => T.get(t)->E.A.Floats.stdev
-let variance = t => T.get(t)->E.A.Floats.variance
-let percentile = (t, f) => T.get(t)->E.A.Floats.percentile(f)
+let makeBy = (n: int, fn: int => result<float, Operation.Error.t>): result<t, sampleSetError> => {
+  let res = E.FloatArray.fromLength(n)
+  try {
+    for i in 0 to n - 1 {
+      let fnResult = fn(i)
+      switch fnResult {
+      | Ok(v) => res->E.FloatArray.set(i, v)
+      | Error(err) => err->Operation.Error.OperationException->raise
+      }
+    }
+    res->T.makeFromTypedArray
+  } catch {
+  | Operation.Error.OperationException(err) => Error.fromOperationError(err)->Error
+  }
+}
+
+let mean = t => T.get(t)->E.FloatArray.mean
+let geomean = t => T.get(t)->E.FloatArray.geomean
+let mode = t => T.get(t)->E.FloatArray.mode
+let sum = t => T.get(t)->E.FloatArray.sum
+let min = t => T.get(t)->E.FloatArray.min
+let max = t => T.get(t)->E.FloatArray.max
+let stdev = t => T.get(t)->E.FloatArray.stdev
+let variance = t => T.get(t)->E.FloatArray.variance
+let percentile = (t, f) => T.get(t)->E.FloatArray.percentile(f)
 let cdf = (t: t, f: float) => {
-  let countBelowF = t->E.A.reduce(0, (acc, x) => acc + (x <= f ? 1 : 0))
+  let countBelowF = T.get(t)->E.FloatArray.reduce((. acc, x) => acc + (x <= f ? 1 : 0), 0)
   countBelowF->Js.Int.toFloat /. t->length->Js.Int.toFloat
 }
 
@@ -149,14 +241,14 @@ let mixture = (values: array<(t, float)>, intendedLength: int) => {
     discreteSamples
     ->Belt.Array.mapWithIndex((index, distIndexToChoose) => {
       let chosenDist = E.A.get(dists, E.Float.toInt(distIndexToChoose))
-      chosenDist->E.O.bind(E.A.get(_, index))
+      chosenDist->E.O.bind(E.FloatArray.get(_, index))
     })
     ->E.A.O.openIfAllSome
-  samples->E.O2.toExn("Mixture unreachable error")->T.make
+  samples->E.O2.toExn("Mixture unreachable error")->T.makeFromJsArray
 }
 
-let truncateLeft = (t, f) => T.get(t)->E.A2.filter(x => x >= f)->T.make
-let truncateRight = (t, f) => T.get(t)->E.A2.filter(x => x <= f)->T.make
+let truncateLeft = (t, f) => T.get(t)->E.FloatArray.filter((. x) => x >= f)->T.makeFromTypedArray
+let truncateRight = (t, f) => T.get(t)->E.FloatArray.filter((. x) => x <= f)->T.makeFromTypedArray
 
 let truncate = (t, ~leftCutoff: option<float>, ~rightCutoff: option<float>) => {
   let withTruncatedLeft = t => leftCutoff |> E.O.dimap(left => truncateLeft(t, left), _ => Ok(t))

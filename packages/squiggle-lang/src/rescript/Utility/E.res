@@ -11,6 +11,7 @@ module B = E_B
 module Dict = E_Dict
 module F = E_F
 module Float = E_Float
+module FloatArray = E_FloatArray
 module FloatFloatMap = E_FloatFloatMap
 module I = E_I
 module Int = E_Int

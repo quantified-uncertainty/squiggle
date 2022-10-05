@@ -78,6 +78,8 @@ module Error = {
     | NotYetImplemented => "This pathway is not yet implemented"
     | Other(t) => t
     }
+
+  exception OperationException(t)
 }
 
 let power = (a: float, b: float): result<float, Error.t> =>

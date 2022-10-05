@@ -28,7 +28,7 @@ module Internal = {
   let fromFn = (aLambdaValue, environment: Reducer_T.environment, reducer: Reducer_T.reducerFn) => {
     let sampleCount = environment.sampleCount
     let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], environment, reducer)
-    Belt_Array.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
+    SampleSetDist.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))
   }
 
   let map1 = (sampleSetDist: t, aLambdaValue, environment: Reducer_T.environment, reducer) => {
@@ -116,7 +116,9 @@ let libaryBase = [
         ~run=(inputs, _, _) => {
           let sampleSet =
             inputs->Prepare.ToTypedArray.numbers
-              |> E.R2.bind(r => SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??"))
+              |> E.R2.bind(r =>
+                SampleSetDist.makeFromJsArray(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??")
+              )
           sampleSet
           ->E.R2.fmap(Wrappers.sampleSet)
           ->E.R2.fmap(Wrappers.evDistribution)
@@ -140,7 +142,7 @@ let libaryBase = [
         ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist))] =>
-            dist->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+            dist->SampleSetDist.toJsArray->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
           | _ => Error(impossibleError)
           },
         (),
@@ -163,7 +165,7 @@ let libaryBase = [
           | [IEvLambda(lambda)] =>
             switch Internal.fromFn(lambda, environment, reducer) {
             | Ok(r) => Ok(r->Wrappers.sampleSet->Wrappers.evDistribution)
-            | Error(e) => e->Reducer_ErrorValue.REOperationError->Error
+            | Error(e) => e->SampleSetError->Reducer_ErrorValue.REDistributionError->Error
             }
           | _ => Error(impossibleError)
           },

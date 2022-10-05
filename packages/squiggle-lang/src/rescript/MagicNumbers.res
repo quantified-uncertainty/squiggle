@@ -35,7 +35,7 @@ module ToPointSet = {
   it would strike a reasonable trade-off, but I’m really unsure what’s 
   best right now.
  */
-  let minDiscreteToKeep = samples => max(20, E.A.length(samples) / 50)
+  let minDiscreteToKeep = samples => max(20, E.FloatArray.length(samples) / 50)
 }
 
 module SampleSetBandwidth = {

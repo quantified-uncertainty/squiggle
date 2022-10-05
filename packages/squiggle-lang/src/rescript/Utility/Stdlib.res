@@ -51,3 +51,11 @@ module Random = {
 module Math = {
   @module external factorial: float => float = "@stdlib/math/base/special/factorial"
 }
+
+module Base = {
+  @module
+  external variance: (int, int, Js.TypedArray2.Float64Array.t, int) => float =
+    "@stdlib/stats/base/variance"
+  let variance = (t: Js.TypedArray2.Float64Array.t) =>
+    variance(t->Js.TypedArray2.Float64Array.length, 0, t, 1)
+}

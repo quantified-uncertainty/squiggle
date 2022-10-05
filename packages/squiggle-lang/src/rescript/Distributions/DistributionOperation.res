@@ -221,7 +221,7 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
     ->OutputLocal.fromResult
   | FromSamples(xs) =>
     xs
-    ->SampleSetDist.make
+    ->SampleSetDist.makeFromJsArray
     ->E.R2.errMap(x => DistributionTypes.SampleSetError(x))
     ->E.R2.fmap(x => x->DistributionTypes.SampleSet->Dist)
     ->OutputLocal.fromResult

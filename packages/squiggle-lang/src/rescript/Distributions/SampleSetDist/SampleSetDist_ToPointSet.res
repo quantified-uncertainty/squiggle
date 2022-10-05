@@ -37,40 +37,40 @@ module Internals = {
   }
 
   module T = {
-    type t = array<float>
+    type t = E.FloatArray.t
 
-    let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
-      let xyPointRange = E.A.Sorted.range(samples)->E.O2.default(0.0)
+    let xWidthToUnitWidth = (samples: t, outputXYPoints, xWidth) => {
+      let xyPointRange = E.FloatArray.Sorted.range(samples)->E.O2.default(0.0)
       let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints)
       xWidth /. xyPointWidth
     }
 
     let formatUnitWidth = w => Jstat.max([w, 1.0])->int_of_float
 
-    let suggestedUnitWidth = (samples, outputXYPoints) => {
+    let suggestedUnitWidth = (samples: t, outputXYPoints) => {
       let suggestedXWidth = SampleSetDist_Bandwidth.nrd0(samples)
       xWidthToUnitWidth(samples, outputXYPoints, suggestedXWidth)
     }
 
-    let kde = (~samples, ~outputXYPoints, width) =>
-      KDE.normalSampling(samples, outputXYPoints, width)
+    let kde = (~samples: t, ~outputXYPoints, width) =>
+      KDE.normalSampling(samples->E.FloatArray.toArray, outputXYPoints, width)
   }
 }
 
 let toPointSetDist = (
-  ~samples: Internals.T.t,
+  ~samples: E.FloatArray.t,
   ~samplingInputs: SamplingInputs.samplingInputs,
   (),
 ): Internals.Types.outputs => {
-  let samples = samples->E.A.Floats.sort
+  let samples = samples->E.FloatArray.sort
 
   let minDiscreteToKeep = MagicNumbers.ToPointSet.minDiscreteToKeep(samples)
-  let (continuousPart, discretePart) = E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(
+  let (continuousPart, discretePart) = E.FloatArray.Sorted.splitContinuousAndDiscreteForMinWeight(
     samples,
     ~minDiscreteWeight=minDiscreteToKeep,
   )
 
-  let length = samples->E.A.length->float_of_int
+  let length = samples->E.FloatArray.length->float_of_int
   let discrete: PointSetTypes.discreteShape =
     discretePart
     ->E.FloatFloatMap.fmap(r => r /. length, _)
@@ -79,7 +79,7 @@ let toPointSetDist = (
     ->Discrete.make
 
   let pdf =
-    continuousPart->E.A.length > 5
+    continuousPart->E.FloatArray.length > 5
       ? {
           let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
           // todo: This does some recalculating from the last step.

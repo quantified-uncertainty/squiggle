@@ -90,9 +90,9 @@ export class SqPointSetDistribution extends SqAbstractDistribution {
 export class SqSampleSetDistribution extends SqAbstractDistribution {
   tag = Tag.SampleSet as const;
 
-  value(): number[] {
-    return this.valueMethod(RSDistribution.getSampleSet);
-  }
+  // value(): number[] {
+  //   return this.valueMethod(RSDistribution.getSampleSet);
+  // }
 }
 
 export class SqSymbolicDistribution extends SqAbstractDistribution {
