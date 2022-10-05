@@ -24,7 +24,7 @@ let rec toString = (expression: t) =>
     `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`
   | EAssign(name, value) => `${name} = ${value->toString}`
   | ECall(fn, args) => `(${fn->toString})(${args->Js.Array2.map(toString)->commaJoin})`
-  | ELambda(parameters, body) => `{|${parameters->commaJoin}| ${body->toString}}`
+  | ELambda(parameters, body, _) => `{|${parameters->commaJoin}| ${body->toString}}`
   | EValue(aValue) => Reducer_Value.toString(aValue)
   }
 

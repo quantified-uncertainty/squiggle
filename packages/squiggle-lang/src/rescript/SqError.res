@@ -95,19 +95,19 @@ type t = {
 
 exception SqException(t)
 
-// `context` should be specified for runtime errors, but can be left empty for errors from Reducer_Project and so on.
-// `location` can be empty for errors raised from FunctionRegistry.
-let fromMessage = (message: Message.t, frameStack: Reducer_FrameStack.t): t => {
+let fromMessageWithFrameStack = (message: Message.t, frameStack: Reducer_FrameStack.t): t => {
   message: message,
-  stackTrace: stackTrace,
+  frameStack: frameStack,
 }
 
-let fromMessageWithoutFrameStack = (message: Message.t) =>
-  fromMessage(message, Reducer_FrameStack.make())
+// this shouldn't be used much, since frame stack will be empty
+// but it's useful for global errors, e.g. in ReducerProject or somethere in the frontend
+@genType
+let fromMessage = (message: Message.t) =>
+  fromMessageWithFrameStack(message, Reducer_FrameStack.make())
 
 @genType
-let getTopFrame = (t: t): option<Reducer_CallStack.frame> =>
-  t.stackTrace->Reducer_FrameStack.getTopFrame
+let getTopFrame = (t: t): option<Reducer_T.frame> => t.frameStack->Reducer_FrameStack.getTopFrame
 
 @genType
 let getFrameStack = (t: t): Reducer_FrameStack.t => t.frameStack
@@ -116,42 +116,42 @@ let getFrameStack = (t: t): Reducer_FrameStack.t => t.frameStack
 let toString = (t: t): string => t.message->Message.toString
 
 @genType
-let createOtherError = (v: string): t => Message.REOther(v)->fromMessageWithoutFrameStack
+let createOtherError = (v: string): t => Message.REOther(v)->fromMessage
 
 @genType
-let getFrameArray = (t: t): array<Reducer_CallStack.frame> =>
-  t.stackTrace->Reducer_CallStack.toFrameArray
+let getFrameArray = (t: t): array<Reducer_T.frame> => t.frameStack->Reducer_FrameStack.toFrameArray
 
 @genType
-let toStringWithStacktrace = (t: t) =>
+let toStringWithStackTrace = (t: t) =>
   t->toString ++ if t.frameStack->Reducer_FrameStack.isEmpty {
-      "Traceback:\n" ++ t.frameStack->Reducer_FrameStack.toString
+      "\nTraceback:\n" ++ t.frameStack->Reducer_FrameStack.toString
+    } else {
+      ""
     }
 let throw = (t: t) => t->SqException->raise
 
-let throwMessage = (message: Message.t, frameStack: Reducer_FrameStack.t) =>
-  fromMessage(message, frameStack)->throw
+let throwMessageWithFrameStack = (message: Message.t, frameStack: Reducer_FrameStack.t) =>
+  fromMessageWithFrameStack(message, frameStack)->throw
 
 // this shouldn't be used for most runtime errors - the resulting error would have an empty stacktrace
 let fromException = exn =>
   switch exn {
   | SqException(e) => e
-  | Message.MessageException(e) => e->fromMessage(Reducer_CallStack.make())
-  | Js.Exn.Error(obj) =>
-    REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->fromMessageWithoutStacktrace
-  | _ => REOther("Unknown exception")->fromMessageWithoutStacktrace
+  | Message.MessageException(e) => e->fromMessage
+  | Js.Exn.Error(obj) => REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->fromMessage
+  | _ => REOther("Unknown exception")->fromMessage
   }
 
 // converts raw exceptions into exceptions with stacktrace attached
 // already converted exceptions won't be affected
-let rethrowWithStacktrace = (fn: unit => 'a, stackTrace: Reducer_CallStack.t) => {
+let rethrowWithStacktrace = (fn: unit => 'a, frameStack: Reducer_FrameStack.t) => {
   try {
     fn()
   } catch {
   | SqException(e) => e->throw // exception already has a stacktrace
-  | Message.MessageException(e) => e->throwMessage(stackTrace) // probably comes from FunctionRegistry, adding stacktrace
+  | Message.MessageException(e) => e->throwMessageWithFrameStack(frameStack) // probably comes from FunctionRegistry, adding stacktrace
   | Js.Exn.Error(obj) =>
-    REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->throwMessage(stackTrace)
-  | _ => REOther("Unknown exception")->throwMessage(stackTrace)
+    REJavaScriptExn(obj->Js.Exn.message, obj->Js.Exn.name)->throwMessageWithFrameStack(frameStack)
+  | _ => REOther("Unknown exception")->throwMessageWithFrameStack(frameStack)
   }
 }

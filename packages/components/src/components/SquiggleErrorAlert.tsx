@@ -1,4 +1,4 @@
-import { SqError, SqLocation } from "@quri/squiggle-lang";
+import { SqError, SqFrame } from "@quri/squiggle-lang";
 import React from "react";
 import { ErrorAlert } from "./Alert";
 
@@ -6,24 +6,26 @@ type Props = {
   error: SqError;
 };
 
-const StackTraceLocation: React.FC<{ location: SqLocation }> = ({
-  location,
-}) => {
+const StackTraceFrame: React.FC<{ frame: SqFrame }> = ({ frame }) => {
+  const location = frame.location();
   return (
     <div>
-      Line {location.start.line}, column {location.start.column}
+      {frame.name()}
+      {location
+        ? ` at line ${location.start.line}, column ${location.start.column}`
+        : ""}
     </div>
   );
 };
 
 const StackTrace: React.FC<Props> = ({ error }) => {
-  const locations = error.toLocationArray();
-  return locations.length ? (
+  const frames = error.getFrameArray();
+  return frames.length ? (
     <div>
       <div>Traceback:</div>
       <div className="ml-4">
-        {locations.map((location, i) => (
-          <StackTraceLocation location={location} key={i} />
+        {frames.map((frame, i) => (
+          <StackTraceFrame frame={frame} key={i} />
         ))}
       </div>
     </div>

@@ -33,7 +33,8 @@ let makeLambda = (
     let lambdaContext: Reducer_T.context = {
       bindings: localBindingsWithParameters, // based on bindings at the moment of lambda creation
       environment: context.environment, // environment at the moment when lambda is called
-      callStack: context.callStack, // extended by main `evaluate` function
+      frameStack: context.frameStack, // already extended in `doLambdaCall`
+      inFunction: context.inFunction, // already updated in `doLambdaCall`
     }
 
     let (value, _) = reducer(body, lambdaContext)
@@ -49,7 +50,7 @@ let makeLambda = (
   })
 }
 
-// stdlib lambdas (everything in FunctionRegistry) is built by this method. Body is generated in SquiggleLibrary_StdLib.res
+// stdlib functions (everything in FunctionRegistry) are built by this method. Body is generated in SquiggleLibrary_StdLib.res
 let makeFFILambda = (name: string, body: Reducer_T.lambdaBody): t => FnBuiltin({
   // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
   // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
@@ -65,10 +66,20 @@ let parameters = (t: t): array<string> => {
   }
 }
 
-let doLambdaCall = (t: t, args, context: Reducer_Context.t, reducer) => {
+let doLambdaCallFrom = (
+  t: t,
+  args: array<Reducer_T.value>,
+  context: Reducer_T.context,
+  reducer,
+  location: option<Reducer_Peggy_Parse.location>,
+) => {
   let newContext = {
     ...context,
-    callStack: t->Reducer_CallStack.extend(t),
+    frameStack: context.frameStack->Reducer_FrameStack.extend(
+      context->Reducer_Context.currentFunctionName,
+      location,
+    ),
+    inFunction: Some(t),
   }
 
   SqError.rethrowWithStacktrace(() => {
@@ -76,5 +87,9 @@ let doLambdaCall = (t: t, args, context: Reducer_Context.t, reducer) => {
     | FnLambda({body}) => body(args, newContext, reducer)
     | FnBuiltin({body}) => body(args, newContext, reducer)
     }
-  }, newContext.callStack)
+  }, newContext.frameStack)
+}
+
+let doLambdaCall = (t: t, args, context, reducer) => {
+  doLambdaCallFrom(t, args, context, reducer, None)
 }

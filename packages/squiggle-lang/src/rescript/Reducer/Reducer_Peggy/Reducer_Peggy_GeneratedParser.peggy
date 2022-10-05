@@ -50,7 +50,7 @@ letStatement
 
 defunStatement
   = variable:variable '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
-    { var value = h.nodeLambda(args, body, location())
+    { var value = h.nodeLambda(args, body, location(), variable)
       return h.nodeLetStatement(variable, value, location()) }
 
   assignmentOp "assignment" = '='
@@ -261,9 +261,9 @@ valueConstructor
 lambda  
   = '{' _nl '|' _nl args:array_parameters _nl '|' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
       { statements.push(finalExpression) 
-        return h.nodeLambda(args, h.nodeBlock(statements, location()), location()) }
+        return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined) }
   / '{' _nl '|' _nl args:array_parameters _nl '|' _nl finalExpression: expression  _nl '}'
-      { return h.nodeLambda(args, finalExpression, location()) }
+      { return h.nodeLambda(args, finalExpression, location(), undefined) }
 
 arrayConstructor 'array'
   = '[' _nl ']'

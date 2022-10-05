@@ -89,6 +89,7 @@ type NodeLambda = Node & {
   type: "Lambda";
   args: AnyPeggyNode[];
   body: AnyPeggyNode;
+  name?: string;
 };
 
 type NodeTernary = Node & {
@@ -217,9 +218,10 @@ export function nodeKeyValue(
 export function nodeLambda(
   args: AnyPeggyNode[],
   body: AnyPeggyNode,
-  location: LocationRange
+  location: LocationRange,
+  name?: NodeIdentifier
 ): NodeLambda {
-  return { type: "Lambda", args, body, location };
+  return { type: "Lambda", args, body, location, name: name?.value };
 }
 export function nodeLetStatement(
   variable: NodeIdentifier,

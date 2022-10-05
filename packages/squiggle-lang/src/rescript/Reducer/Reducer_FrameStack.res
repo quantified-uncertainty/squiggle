@@ -1,37 +1,43 @@
 type t = Reducer_T.frameStack
 
 module Frame = {
-  let toString = ({lambda, location}: Reducer_T.frame) =>
-    `${fromFrame} at ${location.start.line->Js.Int.toString}, column ${location.start.column->Js.Int.toString}`
+  let toString = ({name, location}: Reducer_T.frame) =>
+    name ++
+    switch location {
+    | Some(location) =>
+      ` at line ${location.start.line->Js.Int.toString}, column ${location.start.column->Js.Int.toString}`
+    | None => ""
+    }
+
+  @genType
+  let toLocation = (t: Reducer_T.frame): option<Reducer_Peggy_Parse.location> => t.location
+
+  @genType
+  let toName = (t: Reducer_T.frame): string => t.name
 }
 
 let make = (): t => list{}
 
-let topFrameName = (t: t) =>
-  switch t->getTopFrame {
-  | Some({lambda}) =>
-    switch lambda {
-    | FnLambda({name}) => name
-    | FnBuiltin({name}) => name
-    }
-  | None => "<main>"
-  }
+@genType
+let getTopFrame = (t: t): option<Reducer_T.frame> => Belt.List.head(t)
 
-let extend = (t: t, lambda: Reducer_T.lambdaValue, location: option<location>) =>
+let extend = (t: t, name: string, location: option<Reducer_Peggy_Parse.location>) =>
   t->Belt.List.add({
-    lambda: lambda,
-    fromLocation: location,
-    fromFrame: t->topFrameName,
+    name: name,
+    location: location,
   })
 
 let toString = (t: t) =>
-  t->Belt.List.map(s => "  " ++ s->toStringFrame ++ "\n")->Belt.List.toArray->Js.Array2.joinWith("")
+  t
+  ->Belt.List.map(s => "  " ++ s->Frame.toString ++ "\n")
+  ->Belt.List.toArray
+  ->Js.Array2.joinWith("")
 
 @genType
-let toFrameArray = (t: t): array<frame> => t->Belt.List.toArray
+let toFrameArray = (t: t): array<Reducer_T.frame> => t->Belt.List.toArray
 
 @genType
-let getTopFrame = (t: t): option<frame> => t->Belt.List.head
+let getTopFrame = (t: t): option<Reducer_T.frame> => t->Belt.List.head
 
 let isEmpty = (t: t): bool =>
   switch t->Belt.List.head {

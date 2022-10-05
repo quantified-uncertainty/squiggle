@@ -20,7 +20,7 @@ let rec fromNode = (node: Parse.node): expression => {
         nodeLambda["args"]->Js.Array2.map((argNode: Parse.nodeIdentifier) => argNode["value"])
       let body = nodeLambda["body"]->fromNode
 
-      ExpressionBuilder.eLambda(args, body)
+      ExpressionBuilder.eLambda(args, body, nodeLambda["name"])
     }
 
     let caseRecord = (nodeRecord): expressionContent => {

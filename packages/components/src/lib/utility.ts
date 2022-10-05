@@ -45,7 +45,7 @@ export function getValueToRender({ result, bindings }: ResultAndBindings) {
 
 export function getErrorLocations(result: ResultAndBindings["result"]) {
   if (result.tag === "Error") {
-    const location = result.value.toLocation();
+    const location = result.value.location();
     return location ? [location] : [];
   } else {
     return [];

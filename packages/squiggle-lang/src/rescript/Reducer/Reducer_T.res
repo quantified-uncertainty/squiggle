@@ -36,7 +36,7 @@ and expressionContent =
   | ETernary(expression, expression, expression)
   | EAssign(string, expression)
   | ECall(expression, array<expression>)
-  | ELambda(array<string>, expression)
+  | ELambda(array<string>, expression, option<string>)
   | EValue(value)
 
 and expression = {
@@ -50,18 +50,18 @@ and bindings = {
   parent: option<bindings>,
 }
 
+@genType.opaque
 and frame = {
   name: string,
   location: option<Reducer_Peggy_Parse.location>, // can be empty for calls from builtin functions
 }
-
-and frameStack = list<frame>
+@genType.opaque and frameStack = list<frame>
 
 and context = {
   bindings: bindings,
   environment: environment,
-  inFunction: option<string>, // used to build the next frame in frameStack
-  callStack: frameStack,
+  frameStack: frameStack,
+  inFunction: option<lambdaValue>,
 }
 
 and reducerFn = (expression, context) => (value, context)

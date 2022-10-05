@@ -9,10 +9,11 @@ let eBool = aBool => aBool->T.IEvBool->T.EValue
 
 let eCall = (fn: expression, args: array<expression>): expressionContent => T.ECall(fn, args)
 
-let eLambda = (parameters: array<string>, expr: expression): expressionContent => T.ELambda(
-  parameters,
-  expr,
-)
+let eLambda = (
+  parameters: array<string>,
+  expr: expression,
+  name: option<string>,
+): expressionContent => T.ELambda(parameters, expr, name)
 
 let eNumber = aNumber => aNumber->T.IEvNumber->T.EValue
 

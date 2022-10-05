@@ -2,14 +2,16 @@ module Bindings = Reducer_Bindings
 module Result = Belt.Result
 module T = Reducer_T
 
-let toLocation = (expression: T.expression): SqError.location => {
+let toLocation = (expression: T.expression): Reducer_Peggy_Parse.location => {
   expression.ast.location
 }
 
 let throwFrom = (error: SqError.Message.t, expression: T.expression, context: T.context) =>
-  error->SqError.throwMessage(
-    context.callStack,
-    location: Some(expression->toLocation)
+  error->SqError.throwMessageWithFrameStack(
+    context.frameStack->Reducer_FrameStack.extend(
+      context->Reducer_Context.currentFunctionName,
+      Some(expression->toLocation),
+    ),
   )
 
 /*
@@ -93,9 +95,9 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
       }
     }
 
-  | T.ELambda(parameters, body) => (
+  | T.ELambda(parameters, body, name) => (
       Reducer_Lambda.makeLambda(
-        None, // TODO - pass function name from parser
+        name,
         parameters,
         context.bindings,
         body,
@@ -112,7 +114,13 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
       })
       switch lambda {
       | T.IEvLambda(lambda) => {
-          let result = Reducer_Lambda.doLambdaCall(lambda, argValues, context, evaluate)
+          let result = Reducer_Lambda.doLambdaCallFrom(
+            lambda,
+            argValues,
+            context,
+            evaluate,
+            Some(expression->toLocation), // we have to pass the location of a current expression here, to put it on frameStack
+          )
           (result, context)
         }
       | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(expression, context)
