@@ -152,10 +152,7 @@ let parseIncludes = (this: t): t => {
   }
 }
 let doRawParse = (this: t): T.rawParseArgumentType =>
-  this
-  ->getSource
-  ->Reducer_Peggy_Parse.parse(this.sourceId)
-  ->E.R2.errMap(SqError.Message.fromParseError)
+  this->getSource->Reducer_Peggy_Parse.parse(this.sourceId)->E.R2.errMap(SqError.fromParseError)
 
 let rawParse = (this: t): t =>
   this->getRawParse->E.O2.defaultFn(() => doRawParse(this))->setRawParse(this, _)
@@ -190,7 +187,7 @@ let doRun = (this: t, context: Reducer_T.context): t =>
       } catch {
       | e => this->failRun(e->SqError.fromException)
       }
-    | Error(e) => this->failRun(e->SqError.fromMessage)
+    | Error(e) => this->failRun(e)
     }
   | None => this->failRun(RETodo("attempt to run without expression")->SqError.fromMessage)
   }

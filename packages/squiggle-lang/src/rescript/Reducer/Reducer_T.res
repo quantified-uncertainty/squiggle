@@ -65,3 +65,5 @@ and context = {
 }
 
 and reducerFn = (expression, context) => (value, context)
+
+let topFrameName = "<top>"

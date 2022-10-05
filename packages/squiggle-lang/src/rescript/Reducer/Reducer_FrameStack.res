@@ -27,6 +27,9 @@ let extend = (t: t, name: string, location: option<Reducer_Peggy_Parse.location>
     location: location,
   })
 
+let makeSingleFrameStack = (location: Reducer_Peggy_Parse.location): t =>
+  make()->extend(Reducer_T.topFrameName, Some(location))
+
 let toString = (t: t) =>
   t
   ->Belt.List.map(s => "  " ++ s->Frame.toString ++ "\n")

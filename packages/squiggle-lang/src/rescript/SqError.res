@@ -19,17 +19,13 @@ module Message = {
     | REOperationError(Operation.operationError)
     | RERecordPropertyNotFound(string, string)
     | RESymbolNotFound(string)
-    | RESyntaxError(string, option<location>)
+    | RESyntaxError(string)
     | RETodo(string) // To do
     | REUnitNotFound(string)
     | RENeedToRun
     | REOther(string)
 
   exception MessageException(t)
-
-  let fromParseError = (
-    SyntaxError(message, location): Reducer_Peggy_Parse.parseError,
-  ) => RESyntaxError(message, location->Some)
 
   let toString = (err: t) =>
     switch err {
@@ -61,7 +57,7 @@ module Message = {
     | RENotAFunction(valueString) => `${valueString} is not a function`
     | RERecordPropertyNotFound(msg, index) => `${msg}: ${index}`
     | RESymbolNotFound(symbolName) => `${symbolName} is not defined`
-    | RESyntaxError(desc, _) => `Syntax Error: ${desc}`
+    | RESyntaxError(desc) => `Syntax Error: ${desc}`
     | RETodo(msg) => `TODO: ${msg}`
     | REExpectedType(typeName, valueString) => `Expected type: ${typeName} but got: ${valueString}`
     | REUnitNotFound(unitName) => `Unit not found: ${unitName}`
@@ -105,6 +101,11 @@ let fromMessageWithFrameStack = (message: Message.t, frameStack: Reducer_FrameSt
 @genType
 let fromMessage = (message: Message.t) =>
   fromMessageWithFrameStack(message, Reducer_FrameStack.make())
+
+let fromParseError = (SyntaxError(message, location): Reducer_Peggy_Parse.parseError) =>
+  RESyntaxError(message)->fromMessageWithFrameStack(
+    Reducer_FrameStack.makeSingleFrameStack(location),
+  )
 
 @genType
 let getTopFrame = (t: t): option<Reducer_T.frame> => t.frameStack->Reducer_FrameStack.getTopFrame

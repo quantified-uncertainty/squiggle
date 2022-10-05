@@ -12,5 +12,5 @@ let createContext = (stdLib: Reducer_Namespace.t, environment: Reducer_T.environ
 }
 
 let currentFunctionName = (t: t): string => {
-  t.inFunction->E.O2.fmap(Reducer_Lambda_T.name)->E.O2.default("<top>")
+  t.inFunction->E.O2.fmap(Reducer_Lambda_T.name)->E.O2.default(Reducer_T.topFrameName)
 }

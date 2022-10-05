@@ -3,9 +3,9 @@ module ExpressionT = Reducer_Expression_T
 
 type sourceArgumentType = string
 type sourceType = string
-type rawParseArgumentType = result<Parse.node, SqError.Message.t>
+type rawParseArgumentType = result<Parse.node, SqError.t>
 type rawParseType = option<rawParseArgumentType>
-type expressionArgumentType = result<ExpressionT.t, SqError.Message.t>
+type expressionArgumentType = result<ExpressionT.t, SqError.t>
 type expressionType = option<expressionArgumentType>
 type continuationArgumentType = Reducer_T.namespace
 type continuationType = option<continuationArgumentType>
@@ -15,7 +15,7 @@ type resultType = option<resultArgumentType>
 type continuesArgumentType = array<string>
 type continuesType = array<string>
 type includesArgumentType = string
-type includesType = result<array<string>, SqError.Message.t>
+type includesType = result<array<string>, SqError.t>
 type importAsVariablesType = array<(string, string)>
 
 type projectItem = {

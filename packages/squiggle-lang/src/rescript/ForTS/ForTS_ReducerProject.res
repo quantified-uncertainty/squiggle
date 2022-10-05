@@ -104,10 +104,8 @@ let cleanAllResults = (project: reducerProject): unit => project->Private.cleanA
 To set the includes one first has to call "parseIncludes". The parsed includes or the parser error is returned.
 */
 @genType
-let getIncludes = (project: reducerProject, sourceId: string): result<
-  array<string>,
-  errorMessage,
-> => project->Private.getIncludes(sourceId)
+let getIncludes = (project: reducerProject, sourceId: string): result<array<string>, error> =>
+  project->Private.getIncludes(sourceId)
 
 /* Other sources contributing to the global namespace of this source. */
 @genType
