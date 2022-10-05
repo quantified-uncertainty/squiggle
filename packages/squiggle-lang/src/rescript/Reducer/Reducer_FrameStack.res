@@ -8,7 +8,7 @@ module Frame = {
     name ++
     switch location {
     | Some(location) =>
-      ` at line ${location.start.line->Js.Int.toString}, column ${location.start.column->Js.Int.toString}`
+      ` at line ${location.start.line->Js.Int.toString}, column ${location.start.column->Js.Int.toString}` // TODO - source id?
     | None => ""
     }
 
@@ -27,9 +27,11 @@ let extend = (t: t, name: string, location: option<Reducer_Peggy_Parse.location>
     location: location,
   })
 
+// this is useful for SyntaxErrors
 let makeSingleFrameStack = (location: Reducer_Peggy_Parse.location): t =>
   make()->extend(Reducer_T.topFrameName, Some(location))
 
+// this includes the left offset because it's mostly used in SqError.toStringWithStackTrace
 let toString = (t: t) =>
   t
   ->Belt.List.map(s => "  " ++ s->Frame.toString ++ "\n")

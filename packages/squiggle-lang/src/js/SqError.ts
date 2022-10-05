@@ -43,8 +43,6 @@ export class SqFrame {
   }
 
   location() {
-    console.log(RSFrameStack);
-    console.log(RSFrameStack.Frame);
     return RSFrameStack.Frame.getLocation(this._value);
   }
 }
