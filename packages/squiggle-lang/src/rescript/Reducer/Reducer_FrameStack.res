@@ -13,10 +13,10 @@ module Frame = {
     }
 
   @genType
-  let toLocation = (t: Reducer_T.frame): option<Reducer_Peggy_Parse.location> => t.location
+  let getLocation = (t: Reducer_T.frame): option<Reducer_Peggy_Parse.location> => t.location
 
   @genType
-  let toName = (t: Reducer_T.frame): string => t.name
+  let getName = (t: Reducer_T.frame): string => t.name
 }
 
 let make = (): t => list{}

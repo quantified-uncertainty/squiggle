@@ -39,12 +39,12 @@ export class SqFrame {
   constructor(private _value: RSReducerT.frame) {}
 
   name(): string {
-    return RSFrameStack.Frame.toName(this._value);
+    return RSFrameStack.Frame.getName(this._value);
   }
 
   location() {
     console.log(RSFrameStack);
     console.log(RSFrameStack.Frame);
-    return RSFrameStack.Frame.toLocation(this._value);
+    return RSFrameStack.Frame.getLocation(this._value);
   }
 }
