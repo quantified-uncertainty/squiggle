@@ -54,7 +54,7 @@ export class SqProject {
     return resultMap2(
       RSProject.getIncludes(this._value, sourceId),
       (a) => a,
-      (v: RSError.Message_t) => new SqError(RSError.fromMessage(v))
+      (v: RSError.t) => new SqError(v)
     );
   }
 
