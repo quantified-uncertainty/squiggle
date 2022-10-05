@@ -7,7 +7,7 @@
 start
   = _nl start:outerBlock _nl finalComment?  {return start}
 
-zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
+zeroOMoreArgumentsBlockOrExpression = lambda / innerBlockOrExpression
 
 outerBlock 
   = statements:array_statements  finalExpression: (statementSeparator @expression)?

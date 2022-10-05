@@ -197,7 +197,7 @@ describe("Peggy parse", () => {
 
   describe("lambda", () => {
     testParse("{|x| x}", "{{|:x| :x}}")
-    testParse("f={|x| x}", "{:f = {{|:x| :x}}}")
+    testParse("f={|x| x}", "{:f = {|:x| :x}}")
     testParse("f(x)=x", "{:f = {|:x| {:x}}}") // Function definitions are lambda assignments
     testParse("f(x)=x ? 1 : 0", "{:f = {|:x| {(::$$_ternary_$$ :x 1 0)}}}") // Function definitions are lambda assignments
   })

@@ -228,7 +228,9 @@ export function nodeLetStatement(
   value: AnyPeggyNode,
   location: LocationRange
 ): NodeLetStatement {
-  return { type: "LetStatement", variable, value, location };
+  const patchedValue =
+    value.type === "Lambda" ? { ...value, name: variable.value } : value;
+  return { type: "LetStatement", variable, value: patchedValue, location };
 }
 export function nodeModuleIdentifier(value: string, location: LocationRange) {
   return { type: "ModuleIdentifier", value, location };

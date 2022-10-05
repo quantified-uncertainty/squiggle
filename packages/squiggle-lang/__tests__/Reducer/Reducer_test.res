@@ -102,7 +102,7 @@ describe("stacktraces", () => {
     )->toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]
 Stack trace:
   f at line 4, column 5
-  <anonymous> at line 6, column 12
+  g at line 6, column 12
   h at line 7, column 10
   <top> at line 8, column 3
 `)
