@@ -11,15 +11,13 @@ import { useSquiggle } from "../lib/hooks";
 import { SquiggleViewer } from "./SquiggleViewer";
 import { JsImports } from "../lib/jsImports";
 
-export interface SquiggleChartProps {
+export type SquiggleChartProps = {
   /** The input string for squiggle */
-  code?: string;
+  code: string;
   /** Allows to re-run the code if code hasn't changed */
   executionId?: number;
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
-  /** The amount of points returned to draw the distribution */
-  environment?: environment;
   /** If the result is a function, where the function domain starts */
   diagramStart?: number;
   /** If the result is a function, where the function domain ends */
@@ -54,50 +52,66 @@ export interface SquiggleChartProps {
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;
   enableLocalSettings?: boolean;
-  /** The project that this execution is part of */
-  project?: SqProject;
-  /** The name of the squiggle execution source. Generates a UUID if not given */
-  sourceName?: string;
-  /** The sources that this execution continues */
-  includes?: string[];
-}
+} & (StandaloneExecutionProps | ProjectExecutionProps);
 
+// Props needed for a standalone execution
+type StandaloneExecutionProps = {
+  /** Project must be undefined */
+  project?: undefined;
+  /** Includes must be undefined */
+  includes?: undefined;
+  /** The amount of points returned to draw the distribution, not needed if using a project */
+  environment?: environment;
+};
+
+// Props needed when executing inside a project.
+type ProjectExecutionProps = {
+  /** environment must be undefined (we don't set it here, users can set the environment outside the execution) */
+  environment?: undefined;
+  /** The project that this execution is part of */
+  project: SqProject;
+  /** What other squiggle sources from the project to include. Default none */
+  includes?: string[];
+};
 const defaultOnChange = () => {};
 const defaultImports: JsImports = {};
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
-  ({
-    code,
-    executionId = 0,
-    environment,
-    onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
-    height = 200,
-    jsImports = defaultImports,
-    showSummary = false,
-    width,
-    logX = false,
-    expY = false,
-    diagramStart = 0,
-    diagramStop = 10,
-    diagramCount = 20,
-    tickFormat,
-    minX,
-    maxX,
-    color,
-    title,
-    xAxisType = "number",
-    distributionChartActions,
-    enableLocalSettings = false,
-    sourceName,
-    includes = [],
-    project = SqProject.create(),
-  }) => {
-    const { result, bindings } = useSquiggle({
-      sourceName,
-      includes,
-      project,
+  (props: SquiggleChartProps) => {
+    const {
+      executionId = 0,
+      onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
+      height = 200,
+      jsImports = defaultImports,
+      showSummary = false,
+      width,
+      logX = false,
+      expY = false,
+      diagramStart = 0,
+      diagramStop = 10,
+      diagramCount = 20,
+      tickFormat,
+      minX,
+      maxX,
+      color,
+      title,
+      xAxisType = "number",
+      distributionChartActions,
+      enableLocalSettings = false,
+      project = SqProject.create(),
       code,
-      environment,
+      includes = [],
+    } = props;
+
+    const p = project ?? SqProject.create();
+    if (!project && props.environment) {
+      p.setEnvironment(props.environment);
+    }
+
+    const { result, bindings } = useSquiggle({
+      includes,
+      project: p,
+      code,
       jsImports,
       onChange,
       executionId,
@@ -133,7 +147,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
         height={height}
         distributionPlotSettings={distributionPlotSettings}
         chartSettings={chartSettings}
-        environment={environment ?? defaultEnvironment}
+        environment={p.getEnvironment()}
         enableLocalSettings={enableLocalSettings}
       />
     );
