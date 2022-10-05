@@ -20,7 +20,6 @@ export const useSquiggle = (args: SquiggleArgs) => {
   const result = useMemo(
     () => {
       const project = args.project;
-      let needsClean = true;
 
       project.setSource(sourceName, args.code ?? "");
       let includes = args.includes;
@@ -33,7 +32,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
       project.run(sourceName);
       const result = project.getResult(sourceName);
       const bindings = project.getBindings(sourceName);
-      return { result, bindings, sourceName, needsClean };
+      return { result, bindings, sourceName };
     },
     // This complains about executionId not being used inside the function body.
     // This is on purpose, as executionId simply allows you to run the squiggle
