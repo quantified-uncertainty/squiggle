@@ -30,7 +30,7 @@ export const Alert: React.FC<{
           className={clsx("h-5 w-5 flex-shrink-0", iconColor)}
           aria-hidden="true"
         />
-        <div className="ml-3">
+        <div className="ml-3 grow">
           <header className={clsx("text-sm font-medium", headingColor)}>
             {heading}
           </header>

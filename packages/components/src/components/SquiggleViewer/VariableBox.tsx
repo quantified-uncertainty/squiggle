@@ -1,4 +1,4 @@
-import { SqValue, SqValueLocation } from "@quri/squiggle-lang";
+import { SqValue } from "@quri/squiggle-lang";
 import React, { useContext, useReducer } from "react";
 import { Tooltip } from "../ui/Tooltip";
 import { LocalItemSettings, MergedItemSettings } from "./utils";
@@ -70,7 +70,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
         <div className="flex w-full">
           {location.path.items.length ? (
             <div
-              className="border-l-2 border-slate-200 hover:border-indigo-600 w-4 cursor-pointer"
+              className="shrink-0 border-l-2 border-slate-200 hover:border-indigo-600 w-4 cursor-pointer"
               onClick={toggleCollapsed}
             ></div>
           ) : null}
