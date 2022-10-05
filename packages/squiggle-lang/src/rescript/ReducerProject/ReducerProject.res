@@ -60,6 +60,10 @@ let setSource = (project: t, sourceId: string, value: string): unit => {
   touchDependents(project, sourceId)
 }
 
+let removeSource = (project: t, sourceId: string): unit => {
+  Belt.MutableMap.String.remove(project.items, sourceId)
+}
+
 let clean = (project: t, sourceId: string): unit => {
   let newItem = project->getItem(sourceId)->ProjectItem.clean
   project->setItem(sourceId, newItem)

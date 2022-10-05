@@ -82,7 +82,10 @@ describe("FunctionRegistry Library", () => {
     )
 
     testEvalToBe("Dict.merge({a: 1, b: 2}, {b: 3, c: 4, d: 5})", "Ok({a: 1,b: 3,c: 4,d: 5})")
-    testEvalToBe("Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}, {c: 5, e: 6}])", "Ok({a: 1,b: 2,c: 5,d: 4,e: 6})")
+    testEvalToBe(
+      "Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}, {c: 5, e: 6}])",
+      "Ok({a: 1,b: 2,c: 5,d: 4,e: 6})",
+    )
     testEvalToBe("Dict.keys({a: 1, b: 2})", "Ok(['a','b'])")
     testEvalToBe("Dict.values({a: 1, b: 2})", "Ok([1,2])")
     testEvalToBe("Dict.toList({a: 1, b: 2})", "Ok([['a',1],['b',2]])")

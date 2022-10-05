@@ -299,7 +299,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
             <div>
               <span>No display for type: </span>{" "}
               <span className="font-semibold text-slate-600">
-                {(value as any).tag}
+                {(value as { tag: string }).tag}
               </span>
             </div>
           )}
