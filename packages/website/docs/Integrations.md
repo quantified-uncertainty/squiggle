@@ -22,7 +22,7 @@ Types are available for both packages.
 
 This documentation uses `@quri/squiggle-components` frequently.
 
-We host [a storybook](https://squiggle-components.netlify.app/) with details
+We host [a storybook](https://components.squiggle-language.com) with details
 and usage of each of the components made available.
 
 ## [Visual Studio Code Extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle) ![npm version](https://vsmarketplacebadge.apphb.com/version/QURI.vscode-squiggle.svg)

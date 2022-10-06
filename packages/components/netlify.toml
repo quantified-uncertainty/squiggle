@@ -1,8 +1,0 @@
-[build]
-    base = "packages/components/"
-    command = "cd ../squiggle-lang && yarn build && cd ../components && yarn build"
-    publish = "storybook-static/"
-    ignore = "node -e 'process.exitCode = process.env.BRANCH.includes(\"dependabot\") ? 0 : 1' && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF . ../squiggle-lang"
-
-[build.environment]
-    NETLIFY_USE_YARN = "true"
