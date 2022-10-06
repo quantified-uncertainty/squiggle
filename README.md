@@ -21,10 +21,10 @@ _An estimation language_.
 
 ## Our deployments
 
-- **website/docs prod**: https://squiggle-language.com [![Netlify Status](https://api.netlify.com/api/v1/badges/2139af5c-671d-473d-a9f6-66c96077d8a1/deploy-status)](https://app.netlify.com/sites/squiggle-documentation/deploys)
-- **website/docs staging**: https://develop--squiggle-documentation.netlify.app/
-- **components storybook prod**: https://squiggle-components.netlify.app/ [![Netlify Status](https://api.netlify.com/api/v1/badges/b7f724aa-6b20-4d0e-bf86-3fcd1a3e9a70/deploy-status)](https://app.netlify.com/sites/squiggle-components/deploys)
-- **components storybook staging**: https://develop--squiggle-components.netlify.app/
+- **website/docs prod**: https://squiggle-language.com
+- **website/docs staging**: https://preview.squiggle-language.com
+- **components storybook prod**: https://components.squiggle-language.com
+- **components storybook staging**: https://preview-components.squiggle-language.com
 - **legacy (2020) playground**: https://playground.squiggle-language.com
 
 ## Packages
