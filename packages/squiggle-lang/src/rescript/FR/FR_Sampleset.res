@@ -116,7 +116,7 @@ let libaryBase = [
         ~run=(inputs, _, _) => {
           let sampleSet =
             inputs->Prepare.ToTypedArray.numbers
-              |> E.R2.bind(r => SampleSetDist.make(r)->E.R2.errMap(_ => "AM I HERE? WHYERE AMI??"))
+              |> E.R2.bind(r => SampleSetDist.make(r)->E.R2.errMap(SampleSetDist.Error.toString))
           sampleSet
           ->E.R2.fmap(Wrappers.sampleSet)
           ->E.R2.fmap(Wrappers.evDistribution)

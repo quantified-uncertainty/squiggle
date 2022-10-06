@@ -4,13 +4,6 @@ module Error = {
   type sampleSetError =
     TooFewSamples | NonNumericInput(string) | OperationError(Operation.operationError)
 
-  let sampleSetErrorToString = (err: sampleSetError): string =>
-    switch err {
-    | TooFewSamples => "Too few samples when constructing sample set"
-    | NonNumericInput(err) => `Found a non-number in input: ${err}`
-    | OperationError(err) => Operation.Error.toString(err)
-    }
-
   @genType
   type pointsetConversionError = TooFewSamplesForConversionToPointSet
 
