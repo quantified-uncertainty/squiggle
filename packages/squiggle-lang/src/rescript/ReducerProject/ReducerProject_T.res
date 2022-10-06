@@ -8,7 +8,6 @@ type project = {
   mutable previousRunOrder: array<string>,
 }
 
-@genType
 type t = project
 
 @genType
