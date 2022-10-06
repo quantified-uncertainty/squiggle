@@ -82,13 +82,10 @@ describe("FunctionRegistry Library", () => {
       "SampleSet.toList(SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
       "Ok([6,5,4,4,5,6])",
     )
-<<<<<<< Updated upstream
-=======
     testEvalToBe(
       "SampleSet.fromList([1, 2, 3])",
       "Error(Error: Too few samples when constructing sample set)",
     )
->>>>>>> Stashed changes
 
     testEvalToBe("Dict.merge({a: 1, b: 2}, {b: 3, c: 4, d: 5})", "Ok({a: 1,b: 3,c: 4,d: 5})")
     testEvalToBe(
