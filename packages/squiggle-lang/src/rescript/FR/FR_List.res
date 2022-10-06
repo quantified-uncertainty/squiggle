@@ -5,6 +5,10 @@ let nameSpace = "List"
 let requiresNamespace = true
 
 module Internals = {
+  let length = (v: array<Reducer_T.value>): Reducer_T.value => IEvNumber(
+    Belt.Int.toFloat(Array.length(v)),
+  )
+
   let makeFromNumber = (n: float, value: Reducer_T.value): Reducer_T.value => IEvArray(
     Belt.Array.make(E.Float.toInt(n), value),
   )
@@ -75,6 +79,26 @@ module Internals = {
 }
 
 let library = [
+  Function.make(
+    ~name="length",
+    ~nameSpace,
+    ~output=EvtNumber,
+    ~requiresNamespace=false,
+    ~examples=[`List.length([1,4,5])`],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="length",
+        ~inputs=[FRTypeArray(FRTypeAny)],
+        ~run=(inputs, _, _) =>
+          switch inputs {
+          | [IEvArray(array)] => Internals.length(array)->Ok
+          | _ => Error(impossibleError)
+          },
+        (),
+      ),
+    ],
+    (),
+  ),
   Function.make(
     ~name="make",
     ~nameSpace,
