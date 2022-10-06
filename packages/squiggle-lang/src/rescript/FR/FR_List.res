@@ -83,7 +83,7 @@ let library = [
     ~name="length",
     ~nameSpace,
     ~output=EvtNumber,
-    ~requiresNamespace=false,
+    ~requiresNamespace=true,
     ~examples=[`List.length([1,4,5])`],
     ~definitions=[
       FnDefinition.make(
