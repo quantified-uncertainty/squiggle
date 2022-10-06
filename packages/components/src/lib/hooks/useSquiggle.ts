@@ -53,7 +53,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
   useEffect(() => {
     onChange?.(
       result.result.tag === "Ok" ? result.result.value : undefined,
-      sourceName 
+      sourceName
     );
   }, [result, onChange, sourceName]);
 
