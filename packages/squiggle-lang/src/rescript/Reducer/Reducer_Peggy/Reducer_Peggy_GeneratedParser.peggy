@@ -98,12 +98,20 @@ equality
   equalityOp "operator" = '=='/'!='
 
 relational
-  = left:additive _ operator:relationalOp _nl right:additive 
+  = left:credibleInterval _ operator:relationalOp _nl right:credibleInterval 
   { return h.makeFunctionCall(h.toFunction[operator], [left, right])}
-  / additive
+  / credibleInterval
 
   relationalOp "operator" = '<='/'<'/'>='/'>'
 
+credibleInterval
+  = head:additive tail:(__ operator:credibleIntervalOp __nl arg:additive {return {operator: operator, right: arg}})* 
+  { return tail.reduce(function(result, element) {
+      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
+    }, head)}
+
+    credibleIntervalOp "operator" = 'to'
+  
 additive
   = head:multiplicative tail:(_ operator:additiveOp _nl arg:multiplicative {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
@@ -121,20 +129,12 @@ multiplicative
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
-  = head:credibleInterval tail:(_ operator:powerOp _nl arg:credibleInterval {return {operator: operator, right: arg}})* 
+  = head:chainFunctionCall tail:(_ operator:powerOp _nl arg:chainFunctionCall {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
       return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
     }, head)}
 
   powerOp "operator" = '^' / '.^'
-
-credibleInterval
-  = head:chainFunctionCall tail:(__ operator:credibleIntervalOp __nl arg:chainFunctionCall {return {operator: operator, right: arg}})* 
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
-    }, head)}
-
-    credibleIntervalOp "operator" = 'to'
 
 chainFunctionCall
   = head:unary tail:(_ ('->'/'|>') _nl chained:chainedFunction {return chained})* 
