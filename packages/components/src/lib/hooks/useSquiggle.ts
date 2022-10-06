@@ -1,10 +1,10 @@
-import { environment, SqProject, SqValue } from "@quri/squiggle-lang";
+import { SqProject, SqValue } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
 import * as uuid from "uuid";
 
 type SquiggleArgs = {
-  code?: string;
+  code: string;
   executionId?: number;
   jsImports?: JsImports;
   project: SqProject;
@@ -21,7 +21,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
     () => {
       const project = args.project;
 
-      project.setSource(sourceName, args.code ?? "");
+      project.setSource(sourceName, args.code);
       let includes = args.includes;
       if (args.jsImports && Object.keys(args.jsImports).length) {
         const importsSource = jsImportsToSquiggleCode(args.jsImports);
@@ -32,7 +32,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
       project.run(sourceName);
       const result = project.getResult(sourceName);
       const bindings = project.getBindings(sourceName);
-      return { result, bindings, sourceName };
+      return { result, bindings };
     },
     // This complains about executionId not being used inside the function body.
     // This is on purpose, as executionId simply allows you to run the squiggle
@@ -53,17 +53,17 @@ export const useSquiggle = (args: SquiggleArgs) => {
   useEffect(() => {
     onChange?.(
       result.result.tag === "Ok" ? result.result.value : undefined,
-      result.sourceName
+      sourceName 
     );
-  }, [result, onChange]);
+  }, [result, onChange, sourceName]);
 
   useEffect(() => {
     return () => {
-      args.project.removeSource(result.sourceName);
-      if (args.project.getSource(importSourceName(result.sourceName)))
-        args.project.removeSource(result.sourceName);
+      args.project.removeSource(sourceName);
+      if (args.project.getSource(importSourceName(sourceName)))
+        args.project.removeSource(sourceName);
     };
-  }, [args.project, result.sourceName]);
+  }, [args.project, sourceName]);
 
   return result;
 };
