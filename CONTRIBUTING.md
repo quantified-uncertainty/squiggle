@@ -16,7 +16,7 @@ Squiggle is currently pre-alpha.
 
 # Bug reports
 
-Anyone (with a github account) can file an issue at any time. Please allow Quinn, Sam, and Ozzie to triage, but otherwise just follow the suggestions in the issue templates.
+Anyone (with a github account) can file an issue at any time. Please allow Slava, Sam, and Ozzie to triage, but otherwise just follow the suggestions in the issue templates.
 
 # Project structure
 
@@ -28,7 +28,7 @@ Squiggle is a **monorepo** with three **packages**.
 
 # Deployment ops
 
-We use netlify, and it should only concern Quinn, Sam, and Ozzie.
+We use Vercel, and it should only concern Slava, Sam, and Ozzie.
 
 # Development environment, building, testing, dev server
 
@@ -56,9 +56,9 @@ If you absolutely must, please prefix your commit message with `hotfix: `.
 
 Please work against `develop` branch. **Do not** work against `master`.
 
-- For rescript code: Quinn and Ozzie are reviewers
+- For rescript code: Slava and Ozzie are reviewers
 - For js or typescript code: Sam and Ozzie are reviewers
-- For ops code (i.e. yaml, package.json): Quinn and Sam are reviewers
+- For ops code (i.e. yaml, package.json): Slava and Sam are reviewers
 
 Autopings are set up: if you are not autopinged, you are welcome to comment, but please do not use the formal review feature, send approvals, rejections, or merges.
 
