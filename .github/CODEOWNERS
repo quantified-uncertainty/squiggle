@@ -24,7 +24,7 @@
 *.json @quinn-dougherty @Hazelfire @berekuk @OAGr
 *.y*ml @quinn-dougherty @berekuk @OAGr
 *.config.js @Hazelfire @berekuk @OAGr
-netlify.toml @quinn-dougherty @OAGr @berekuk @Hazelfire 
+vercel.json @OAGr @berekuk @Hazelfire
 
 # Documentation
 *.md @quinn-dougherty @OAGr @Hazelfire

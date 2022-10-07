@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd ../squiggle-lang && yarn build && cd ../components && yarn build",
+  "outputDirectory": "storybook-static",
+  "installCommand": "cd ../../ && yarn"
+}
