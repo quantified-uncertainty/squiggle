@@ -323,32 +323,31 @@ module Floats = {
       let continuous: array<float> = []
       let discrete = FloatFloatMap.empty()
 
-      let addData = (count: int, value: float): unit => {
-        if count >= minDiscreteWeight {
-          FloatFloatMap.add(value, count->Belt.Int.toFloat, discrete)
+      // In a run of exactly minDiscreteWeigth, the first and last
+      // element indices differ by minDistance.
+      let minDistance = minDiscreteWeight - 1
+
+      let l = length(sortedArray)
+      let i = ref(0)
+      while i.contents < l - minDistance {
+        let value = sortedArray[i.contents]
+        if value != sortedArray[i.contents + minDistance] {
+          Js.Array2.push(continuous, value) |> ignore
+          i := i.contents + 1
         } else {
-          for _ in 1 to count {
-            continuous->Js.Array2.push(value)->ignore
+          // Move i forward to next unequal value
+          let i0 = i.contents
+          i := i.contents + minDistance + 1
+          while i.contents < l && sortedArray[i.contents] == value {
+            i := i.contents + 1
           }
+
+          let count = i.contents - i0
+          FloatFloatMap.add(value, count->Belt.Int.toFloat, discrete)
         }
       }
-
-      let (finalCount, finalValue) = sortedArray->Belt.Array.reduce(
-        // initial prev value doesn't matter; if it collides with the first element of the array, flush won't do anything
-        (0, 0.),
-        ((count, prev), element) => {
-          if element == prev {
-            (count + 1, prev)
-          } else {
-            // new value, process previous ones
-            addData(count, prev)
-            (1, element)
-          }
-        },
-      )
-
-      // flush final values
-      addData(finalCount, finalValue)
+      let tail = Js.Array2.sliceFrom(sortedArray, i.contents)
+      Js.Array2.pushMany(continuous, tail) |> ignore
 
       (continuous, discrete)
     }
