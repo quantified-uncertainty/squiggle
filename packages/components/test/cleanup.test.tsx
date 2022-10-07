@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 import { SquiggleChart } from "../src/index";
 import { SqProject } from "@quri/squiggle-lang";
 
-test("Creates and cleans up source with no name", async () => {
+test("Creates and cleans up source", async () => {
   const project = SqProject.create();
 
   const { unmount } = render(
@@ -19,4 +19,21 @@ test("Creates and cleans up source with no name", async () => {
   unmount();
   expect(project.getSourceIds().length).toBe(0);
   expect(project.getSource(sourceId)).toBe(undefined);
+});
+
+test("Creates and cleans up source and imports", async () => {
+  const project = SqProject.create();
+
+  const { unmount } = render(
+    <SquiggleChart
+      code={"normal($x, 1)"}
+      project={project}
+      jsImports={{ x: 3 }}
+    />
+  );
+
+  expect(project.getSourceIds().length).toBe(2);
+
+  unmount();
+  expect(project.getSourceIds()).toStrictEqual([]);
 });

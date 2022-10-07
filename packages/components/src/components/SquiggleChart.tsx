@@ -2,7 +2,6 @@ import * as React from "react";
 import {
   SqValue,
   environment,
-  defaultEnvironment,
   resultMap,
   SqValueTag,
   SqProject,
@@ -56,22 +55,19 @@ export type SquiggleChartProps = {
 
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
-  /** Project must be undefined */
   project?: undefined;
-  /** Includes must be undefined */
-  includes?: undefined;
+  continues?: undefined;
   /** The amount of points returned to draw the distribution, not needed if using a project */
   environment?: environment;
 };
 
 // Props needed when executing inside a project.
 type ProjectExecutionProps = {
-  /** environment must be undefined (we don't set it here, users can set the environment outside the execution) */
   environment?: undefined;
   /** The project that this execution is part of */
   project: SqProject;
-  /** What other squiggle sources from the project to include. Default none */
-  includes?: string[];
+  /** What other squiggle sources from the project to continue. Default [] */
+  continues?: string[];
 };
 const defaultOnChange = () => {};
 const defaultImports: JsImports = {};
@@ -98,18 +94,24 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       xAxisType = "number",
       distributionChartActions,
       enableLocalSettings = false,
-      project = SqProject.create(),
       code,
-      includes = [],
+      continues = [],
     } = props;
 
-    const p = project ?? SqProject.create();
-    if (!project && props.environment) {
-      p.setEnvironment(props.environment);
-    }
+    const p = React.useMemo(() => {
+      if (props.project) {
+        return props.project;
+      } else {
+        const p = SqProject.create();
+        if (props.environment) {
+          p.setEnvironment(props.environment);
+        }
+        return p;
+      }
+    }, [props.project, props.environment]);
 
     const { result, bindings } = useSquiggle({
-      includes,
+      continues,
       project: p,
       code,
       jsImports,

@@ -8,7 +8,7 @@ type SquiggleArgs = {
   executionId?: number;
   jsImports?: JsImports;
   project: SqProject;
-  includes: string[];
+  continues: string[];
   onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 };
 
@@ -17,18 +17,20 @@ const importSourceName = (sourceName: string) => "imports-" + sourceName;
 export const useSquiggle = (args: SquiggleArgs) => {
   const sourceName = useMemo(() => uuid.v4(), []);
 
+  const env = args.project.getEnvironment();
+
   const result = useMemo(
     () => {
       const project = args.project;
 
       project.setSource(sourceName, args.code);
-      let includes = args.includes;
+      let continues = args.continues;
       if (args.jsImports && Object.keys(args.jsImports).length) {
         const importsSource = jsImportsToSquiggleCode(args.jsImports);
         project.setSource(importSourceName(sourceName), importsSource);
-        includes.push(importSourceName(sourceName));
+        continues = args.continues.concat(importSourceName(sourceName));
       }
-      project.setContinues(sourceName, includes);
+      project.setContinues(sourceName, continues);
       project.run(sourceName);
       const result = project.getResult(sourceName);
       const bindings = project.getBindings(sourceName);
@@ -43,8 +45,9 @@ export const useSquiggle = (args: SquiggleArgs) => {
       args.jsImports,
       args.executionId,
       sourceName,
-      args.includes,
+      args.continues,
       args.project,
+      env,
     ]
   );
 
@@ -61,7 +64,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
     return () => {
       args.project.removeSource(sourceName);
       if (args.project.getSource(importSourceName(sourceName)))
-        args.project.removeSource(sourceName);
+        args.project.removeSource(importSourceName(sourceName));
     };
   }, [args.project, sourceName]);
 
