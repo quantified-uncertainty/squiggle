@@ -3007,18 +3007,6 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@quri/squiggle-lang@^0.2.11":
-  version "0.2.12"
-  resolved "https://registry.yarnpkg.com/@quri/squiggle-lang/-/squiggle-lang-0.2.12.tgz#e8fdb22a84aa75df71c071d1ed4ae5c55f15d447"
-  integrity sha512-fgv9DLvPlX/TqPSacKSW3GZ5S9H/YwqaMoRdFrn5SJjHnnMh/xJW/9iyzzgOxPCXov9xFeDvL159tkbStMm7vw==
-  dependencies:
-    "@rescript/std" "^9.1.4"
-    "@stdlib/stats" "^0.0.13"
-    jstat "^1.9.5"
-    lodash "^4.17.21"
-    mathjs "^11.0.1"
-    pdfast "^0.2.0"
-
 "@react-hook/latest@^1.0.2":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@react-hook/latest/-/latest-1.0.3.tgz#c2d1d0b0af8b69ec6e2b3a2412ba0768ac82db80"
@@ -13152,7 +13140,7 @@ markdown-it@^8.3.1:
     mdurl "^1.0.1"
     uc.micro "^1.0.5"
 
-mathjs@^11.0.1, mathjs@^11.2.1:
+mathjs@^11.2.1:
   version "11.2.1"
   resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-11.2.1.tgz#725d2e769eb036214530ff532cea4a464efdc75e"
   integrity sha512-V5lqIPExHtFi56LUf0Gyz0wyuJmSbXUM3liZcCDNpj4OKQaUlpQuAymC8x9mFNqajWOgxqS1HZ7Z5B76Hbwrtw==
