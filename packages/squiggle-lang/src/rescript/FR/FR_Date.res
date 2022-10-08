@@ -4,7 +4,7 @@ open FunctionRegistry_Helpers
 let makeFn = (
   name: string,
   inputs: array<frType>,
-  fn: array<Reducer_T.value> => result<Reducer_T.value, errorValue>,
+  fn: array<Reducer_T.value> => result<Reducer_T.value, errorMessage>,
 ) =>
   Function.make(
     ~name,
@@ -66,7 +66,7 @@ let library = [
     | [IEvNumber(year)] =>
       switch DateTime.Date.makeFromYear(year) {
       | Ok(t) => IEvDate(t)->Ok
-      | Error(e) => Reducer_ErrorValue.RETodo(e)->Error
+      | Error(e) => SqError.Message.RETodo(e)->Error
       }
     | _ => Error(impossibleError)
     }

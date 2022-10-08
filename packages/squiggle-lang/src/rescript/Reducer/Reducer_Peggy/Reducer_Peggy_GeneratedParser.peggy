@@ -7,26 +7,26 @@
 start
   = _nl start:outerBlock _nl finalComment?  {return start}
 
-zeroOMoreArgumentsBlockOrExpression = innerBlockOrExpression / lambda
+zeroOMoreArgumentsBlockOrExpression = lambda / innerBlockOrExpression
 
 outerBlock 
   = statements:array_statements  finalExpression: (statementSeparator @expression)?
     { if (finalExpression) statements.push(finalExpression)
-      return h.nodeProgram(statements) }
+      return h.nodeProgram(statements, location()) }
   / finalExpression: expression
-    { return h.nodeProgram([finalExpression]) }
+    { return h.nodeProgram([finalExpression], location()) }
     
 innerBlockOrExpression  
   = quotedInnerBlock
   / finalExpression: expression
-    { return h.nodeBlock([finalExpression])}
+    { return h.nodeBlock([finalExpression], location())}
 
 quotedInnerBlock  
   = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
       { if (finalExpression) statements.push(finalExpression)
-        return h.nodeBlock(statements) }
+        return h.nodeBlock(statements, location()) }
   / '{' _nl finalExpression: expression  _nl '}'
-      { return h.nodeBlock([finalExpression]) }
+      { return h.nodeBlock([finalExpression], location()) }
 
 array_statements
   = head:statement tail:(statementSeparator @array_statements )
@@ -42,16 +42,16 @@ statement
 voidStatement 
   = "call" _nl value:zeroOMoreArgumentsBlockOrExpression
     { var variable = h.nodeIdentifier("_", location());
-      return h.nodeLetStatement(variable, value); }
+      return h.nodeLetStatement(variable, value, location()); }
 
 letStatement 
   = variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
-    { return h.nodeLetStatement(variable, value) }
+    { return h.nodeLetStatement(variable, value, location()) }
 
 defunStatement
   = variable:variable '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
-    { var value = h.nodeLambda(args, body)
-      return h.nodeLetStatement(variable, value) }
+    { var value = h.nodeLambda(args, body, location(), variable)
+      return h.nodeLetStatement(variable, value, location()) }
 
   assignmentOp "assignment" = '='
 
@@ -67,16 +67,16 @@ ifthenelse
   = 'if' __nl condition:logicalAdditive 
       __nl 'then' __nl trueExpression:innerBlockOrExpression 
     __nl 'else' __nl falseExpression:(ifthenelse/innerBlockOrExpression)
-    { return h.nodeTernary(condition, trueExpression, falseExpression) }
+    { return h.nodeTernary(condition, trueExpression, falseExpression, location()) }
   
 ternary 
   = condition:logicalAdditive _ '?' _nl trueExpression:logicalAdditive _ ':' _nl falseExpression:(ternary/logicalAdditive)
-    { return h.nodeTernary(condition, trueExpression, falseExpression) }
+    { return h.nodeTernary(condition, trueExpression, falseExpression, location()) }
 
 logicalAdditive
   = head:logicalMultiplicative tail:(_ operator:logicalAdditiveOp _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
+      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
     }, head)}
 
   logicalAdditiveOp "operator" = '||'
@@ -85,21 +85,21 @@ logicalAdditive
 logicalMultiplicative
   = head:equality tail:(_ operator:logicalMultiplicativeOp _nl arg:equality {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
+      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
     }, head)}
 
   logicalMultiplicativeOp "operator" = '&&'
 
 equality
   = left:relational _ operator:equalityOp _nl right:relational 
-  { return h.makeFunctionCall(h.toFunction[operator], [left, right])}
+  { return h.makeFunctionCall(h.toFunction[operator], [left, right], location())}
   / relational  
   
   equalityOp "operator" = '=='/'!='
 
 relational
   = left:credibleInterval _ operator:relationalOp _nl right:credibleInterval 
-  { return h.makeFunctionCall(h.toFunction[operator], [left, right])}
+  { return h.makeFunctionCall(h.toFunction[operator], [left, right], location())}
   / credibleInterval
 
   relationalOp "operator" = '<='/'<'/'>='/'>'
@@ -107,7 +107,7 @@ relational
 credibleInterval
   = head:additive tail:(__ operator:credibleIntervalOp __nl arg:additive {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
+      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
     }, head)}
 
     credibleIntervalOp "operator" = 'to'
@@ -115,7 +115,7 @@ credibleInterval
 additive
   = head:multiplicative tail:(_ operator:additiveOp _nl arg:multiplicative {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
+      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
     }, head)}
 
   additiveOp "operator" = '+' / '-' / '.+' / '.-'
@@ -123,7 +123,7 @@ additive
 multiplicative
   = head:power tail:(_ operator:multiplicativeOp _nl arg:power {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
+      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
     }, head)}
 
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
@@ -131,7 +131,7 @@ multiplicative
 power
   = head:chainFunctionCall tail:(_ operator:powerOp _nl arg:chainFunctionCall {return {operator: operator, right: arg}})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right])
+      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
     }, head)}
 
   powerOp "operator" = '^' / '.^'
@@ -139,7 +139,7 @@ power
 chainFunctionCall
   = head:unary tail:(_ ('->'/'|>') _nl chained:chainedFunction {return chained})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(element.fnName, [result, ...element.args])
+      return h.makeFunctionCall(element.fnName, [result, ...element.args], location())
     }, head)}
 
   chainedFunction
@@ -154,7 +154,7 @@ chainFunctionCall
 
 unary
   = unaryOperator:unaryOperator _nl right:(unary/postOperator)
-  { return h.makeFunctionCall(h.unaryToFunction[unaryOperator], [right])}
+  { return h.makeFunctionCall(h.unaryToFunction[unaryOperator], [right], location())}
   / postOperator
   
   unaryOperator "unary operator"
@@ -169,17 +169,17 @@ collectionElement
     tail:(
       _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
     / _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: h.postOperatorToFunction['()'], args: args}}
-    / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg)]}}
+    / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
     )* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(element.fn, [result, ...element.args])
+      return h.makeFunctionCall(element.fn, [result, ...element.args], location())
     }, head)}
 
     array_functionArguments 
       = head:expression tail:(_ ',' _nl @expression)* 
       { return [head, ...tail]; }
   / ""
-      {return [h.nodeVoid()];}
+      {return [h.nodeVoid(location())];}
 
 atom
   = '(' _nl expression:expression _nl ')' {return expression}
@@ -195,7 +195,7 @@ basicLiteral
   / voidLiteral
 
 voidLiteral 'void'
-  = "()" {return h.nodeVoid();}
+  = "()" {return h.nodeVoid(location());}
 
 variable = dollarIdentifierWithModule / dollarIdentifier
 
@@ -221,36 +221,36 @@ dollarIdentifier '$identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) {return h.nodeIdentifier(text(), location())} 
 
 moduleIdentifier 'identifier'
-  = ([A-Z]+[_a-z0-9]i*) {return h.nodeModuleIdentifier(text())} 
+  = ([A-Z]+[_a-z0-9]i*) {return h.nodeModuleIdentifier(text(), location())} 
 
 
 string 'string'
-  = characters:("'" @([^'])* "'") {return h.nodeString(characters.join(''))} 
-  / characters:('"' @([^"])* '"') {return h.nodeString(characters.join(''))}
+  = characters:("'" @([^'])* "'") {return h.nodeString(characters.join(''), location())} 
+  / characters:('"' @([^"])* '"') {return h.nodeString(characters.join(''), location())}
 
 number = number:(float / integer) unit:unitIdentifier?
   { 
     if (unit === null)
       { return number }
     else
-      { return h.makeFunctionCall('fromUnit_'+unit.value, [number]) 
+      { return h.makeFunctionCall('fromUnit_'+unit.value, [number], location()) 
       }
   }
 
 integer 'integer'
   = d+ !"\." ![e]i
-  { return h.nodeInteger(parseInt(text()))} 
+  { return h.nodeInteger(parseInt(text()), location())} 
   
 float 'float'
   = $(((d+ "\." d*) / ("\." d+)) floatExponent? / d+ floatExponent)
-  { return h.nodeFloat(parseFloat(text()))} 
+  { return h.nodeFloat(parseFloat(text()), location())} 
 
     floatExponent = [e]i '-'? d+
     d = [0-9]
     
 boolean 'boolean'
   = ('true'/'false')  ! [a-z]i ! [_$]
-  { return h.nodeBoolean(text() === 'true')}
+  { return h.nodeBoolean(text() === 'true', location())}
 
 valueConstructor
   = recordConstructor
@@ -261,15 +261,15 @@ valueConstructor
 lambda  
   = '{' _nl '|' _nl args:array_parameters _nl '|' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
       { statements.push(finalExpression) 
-        return h.nodeLambda(args, h.nodeBlock(statements)) }
+        return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined) }
   / '{' _nl '|' _nl args:array_parameters _nl '|' _nl finalExpression: expression  _nl '}'
-      { return h.nodeLambda(args, finalExpression) }
+      { return h.nodeLambda(args, finalExpression, location(), undefined) }
 
 arrayConstructor 'array'
   = '[' _nl ']'
-    { return h.constructArray([]); }
+    { return h.constructArray([], location()); }
   / '[' _nl args:array_elements _nl ']' 
-    { return h.constructArray(args); }
+    { return h.constructArray(args, location()); }
 
   array_elements 
     = head:expression tail:(_ ',' _nl @expression)* 
@@ -277,7 +277,7 @@ arrayConstructor 'array'
 
 recordConstructor  'record'
   = '{' _nl args:array_recordArguments _nl end_of_record
-  { return h.constructRecord(args); }
+  { return h.constructRecord(args, location()); }
 
   end_of_record 
     = '}'
@@ -289,7 +289,7 @@ recordConstructor  'record'
 
   keyValuePair 
     = key:expression _ ':' _nl value:expression 
-    { return h.nodeKeyValue(key, value)}
+    { return h.nodeKeyValue(key, value, location())}
 
 // Separators
 

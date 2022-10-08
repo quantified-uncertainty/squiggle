@@ -1,7 +1,6 @@
 // TODO: Auto clean project based on topology
 
 module Bindings = Reducer_Bindings
-module ErrorValue = Reducer_ErrorValue
 module ProjectItem = ReducerProject_ProjectItem
 module T = ReducerProject_T
 module Topology = ReducerProject_Topology
@@ -121,7 +120,7 @@ let getResultOption = (project: t, sourceId: string): ProjectItem.T.resultType =
 
 let getResult = (project: t, sourceId: string): ProjectItem.T.resultArgumentType =>
   switch getResultOption(project, sourceId) {
-  | None => RENeedToRun->Error
+  | None => RENeedToRun->SqError.fromMessage->Error
   | Some(result) => result
   }
 
@@ -175,7 +174,7 @@ let linkDependencies = (project: t, sourceId: string): Reducer_T.namespace => {
             "__result__",
             switch project->getResult(id) {
             | Ok(result) => result
-            | Error(error) => error->Reducer_ErrorValue.ErrorException->raise
+            | Error(error) => error->SqError.throw
             },
           ),
         ])

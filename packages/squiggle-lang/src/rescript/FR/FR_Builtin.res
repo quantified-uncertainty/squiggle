@@ -5,7 +5,7 @@ let nameSpace = "" // no namespaced versions
 
 type simpleDefinition = {
   inputs: array<frType>,
-  fn: array<Reducer_T.value> => result<Reducer_T.value, errorValue>,
+  fn: array<Reducer_T.value> => result<Reducer_T.value, errorMessage>,
 }
 
 let makeFnMany = (name: string, definitions: array<simpleDefinition>) =>
@@ -22,7 +22,7 @@ let makeFnMany = (name: string, definitions: array<simpleDefinition>) =>
 let makeFn = (
   name: string,
   inputs: array<frType>,
-  fn: array<Reducer_T.value> => result<Reducer_T.value, errorValue>,
+  fn: array<Reducer_T.value> => result<Reducer_T.value, errorMessage>,
 ) => makeFnMany(name, [{inputs: inputs, fn: fn}])
 
 let library = [

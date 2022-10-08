@@ -1,6 +1,3 @@
-@genType type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //re-export
-@genType type syntaxErrorLocation = ForTS_Reducer_ErrorValue.syntaxErrorLocation //re-export
-
 @genType type reducerProject = ForTS_ReducerProject.reducerProject //re-export
 @genType type squiggleValue = ForTS_SquiggleValue.squiggleValue //re-export
 @genType type squiggleValue_Array = ForTS_SquiggleValue_Array.squiggleValue_Array //re-export

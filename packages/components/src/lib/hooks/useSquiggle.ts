@@ -1,4 +1,10 @@
-import { SqProject, SqValue } from "@quri/squiggle-lang";
+import {
+  result,
+  SqError,
+  SqProject,
+  SqRecord,
+  SqValue,
+} from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
 import * as uuid from "uuid";
@@ -8,29 +14,36 @@ type SquiggleArgs = {
   executionId?: number;
   jsImports?: JsImports;
   project: SqProject;
-  continues: string[];
+  continues?: string[];
   onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 };
 
-const importSourceName = (sourceName: string) => "imports-" + sourceName;
+export type ResultAndBindings = {
+  result: result<SqValue, SqError>;
+  bindings: SqRecord;
+};
 
-export const useSquiggle = (args: SquiggleArgs) => {
+const importSourceName = (sourceName: string) => "imports-" + sourceName;
+const defaultContinues = [];
+
+export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
   const sourceName = useMemo(() => uuid.v4(), []);
 
   const env = args.project.getEnvironment();
+  const continues = args.continues || defaultContinues;
 
   const result = useMemo(
     () => {
       const project = args.project;
 
       project.setSource(sourceName, args.code);
-      let continues = args.continues;
+      let fullContinues = continues;
       if (args.jsImports && Object.keys(args.jsImports).length) {
         const importsSource = jsImportsToSquiggleCode(args.jsImports);
         project.setSource(importSourceName(sourceName), importsSource);
-        continues = args.continues.concat(importSourceName(sourceName));
+        fullContinues = continues.concat(importSourceName(sourceName));
       }
-      project.setContinues(sourceName, continues);
+      project.setContinues(sourceName, fullContinues);
       project.run(sourceName);
       const result = project.getResult(sourceName);
       const bindings = project.getBindings(sourceName);
@@ -45,7 +58,7 @@ export const useSquiggle = (args: SquiggleArgs) => {
       args.jsImports,
       args.executionId,
       sourceName,
-      args.continues,
+      continues,
       args.project,
       env,
     ]

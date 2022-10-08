@@ -1,14 +1,9 @@
 import * as React from "react";
-import {
-  SqValue,
-  environment,
-  resultMap,
-  SqValueTag,
-  SqProject,
-} from "@quri/squiggle-lang";
+import { SqValue, environment, SqProject } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
 import { SquiggleViewer } from "./SquiggleViewer";
 import { JsImports } from "../lib/jsImports";
+import { getValueToRender } from "../lib/utility";
 
 export type SquiggleChartProps = {
   /** The input string for squiggle */
@@ -71,31 +66,61 @@ type ProjectExecutionProps = {
 };
 const defaultOnChange = () => {};
 const defaultImports: JsImports = {};
+const defaultContinues: string[] = [];
+
+export const splitSquiggleChartSettings = (props: SquiggleChartProps) => {
+  const {
+    showSummary = false,
+    logX = false,
+    expY = false,
+    diagramStart = 0,
+    diagramStop = 10,
+    diagramCount = 20,
+    tickFormat,
+    minX,
+    maxX,
+    color,
+    title,
+    xAxisType = "number",
+    distributionChartActions,
+  } = props;
+
+  const distributionPlotSettings = {
+    showSummary,
+    logX,
+    expY,
+    format: tickFormat,
+    minX,
+    maxX,
+    color,
+    title,
+    xAxisType,
+    actions: distributionChartActions,
+  };
+
+  const chartSettings = {
+    start: diagramStart,
+    stop: diagramStop,
+    count: diagramCount,
+  };
+
+  return { distributionPlotSettings, chartSettings };
+};
 
 export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
-  (props: SquiggleChartProps) => {
+  (props) => {
+    const { distributionPlotSettings, chartSettings } =
+      splitSquiggleChartSettings(props);
+
     const {
-      executionId = 0,
-      onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
-      height = 200,
-      jsImports = defaultImports,
-      showSummary = false,
-      width,
-      logX = false,
-      expY = false,
-      diagramStart = 0,
-      diagramStop = 10,
-      diagramCount = 20,
-      tickFormat,
-      minX,
-      maxX,
-      color,
-      title,
-      xAxisType = "number",
-      distributionChartActions,
-      enableLocalSettings = false,
       code,
-      continues = [],
+      jsImports = defaultImports,
+      onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
+      executionId = 0,
+      width,
+      height = 200,
+      enableLocalSettings = false,
+      continues = defaultContinues,
     } = props;
 
     const p = React.useMemo(() => {
@@ -110,7 +135,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       }
     }, [props.project, props.environment]);
 
-    const { result, bindings } = useSquiggle({
+    const resultAndBindings = useSquiggle({
       continues,
       project: p,
       code,
@@ -119,32 +144,11 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       executionId,
     });
 
-    const distributionPlotSettings = {
-      showSummary,
-      logX,
-      expY,
-      format: tickFormat,
-      minX,
-      maxX,
-      color,
-      title,
-      xAxisType,
-      actions: distributionChartActions,
-    };
-
-    const chartSettings = {
-      start: diagramStart,
-      stop: diagramStop,
-      count: diagramCount,
-    };
-
-    const resultToRender = resultMap(result, (value) =>
-      value.tag === SqValueTag.Void ? bindings.asValue() : value
-    );
+    const valueToRender = getValueToRender(resultAndBindings);
 
     return (
       <SquiggleViewer
-        result={resultToRender}
+        result={valueToRender}
         width={width}
         height={height}
         distributionPlotSettings={distributionPlotSettings}

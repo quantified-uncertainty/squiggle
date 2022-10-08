@@ -16,13 +16,14 @@ module DistributionCreation = {
       r
       ->E.R.bind(Process.DistOrNumberToDist.twoValuesUsingSymbolicDist(~fn, ~values=_, ~env))
       ->E.R2.fmap(Wrappers.evDistribution)
-      ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
+      ->E.R2.errMap(e => SqError.Message.REOther(e))
 
     let make = (name, fn) => {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeDistOrNumber, FRTypeDistOrNumber],
-        ~run=(inputs, env, _) => inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env),
+        ~run=(inputs, context, _) =>
+          inputs->Prepare.ToValueTuple.twoDistOrNumber->process(~fn, ~env=context.environment),
         (),
       )
     }
@@ -31,8 +32,10 @@ module DistributionCreation = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeRecord([("p5", FRTypeDistOrNumber), ("p95", FRTypeDistOrNumber)])],
-        ~run=(inputs, env, _) =>
-          inputs->Prepare.ToValueTuple.Record.twoDistOrNumber(("p5", "p95"))->process(~fn, ~env),
+        ~run=(inputs, context, _) =>
+          inputs
+          ->Prepare.ToValueTuple.Record.twoDistOrNumber(("p5", "p95"))
+          ->process(~fn, ~env=context.environment),
         (),
       )
     }
@@ -41,10 +44,10 @@ module DistributionCreation = {
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeRecord([("mean", FRTypeDistOrNumber), ("stdev", FRTypeDistOrNumber)])],
-        ~run=(inputs, env, _) =>
+        ~run=(inputs, context, _) =>
           inputs
           ->Prepare.ToValueTuple.Record.twoDistOrNumber(("mean", "stdev"))
-          ->process(~fn, ~env),
+          ->process(~fn, ~env=context.environment),
         (),
       )
     }
@@ -55,13 +58,14 @@ module DistributionCreation = {
       r
       ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
       ->E.R2.fmap(Wrappers.evDistribution)
-      ->E.R2.errMap(e => Reducer_ErrorValue.REOther(e))
+      ->E.R2.errMap(e => SqError.Message.REOther(e))
 
     let make = (name, fn) =>
       FnDefinition.make(
         ~name,
         ~inputs=[FRTypeDistOrNumber],
-        ~run=(inputs, env, _) => inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env),
+        ~run=(inputs, context, _) =>
+          inputs->Prepare.ToValueTuple.oneDistOrNumber->process(~fn, ~env=context.environment),
         (),
       )
   }

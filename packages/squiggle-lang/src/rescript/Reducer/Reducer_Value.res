@@ -1,7 +1,3 @@
-// deprecated, use Reducer_T instead
-// (value methods should be moved to Reducer_Value.res)
-
-module ErrorValue = Reducer_ErrorValue
 type environment = GenericDist.env
 module T = Reducer_T
 
@@ -32,10 +28,12 @@ and toStringCall = fName => `:${fName}`
 and toStringDate = date => DateTime.Date.toString(date)
 and toStringDeclaration = d => Declaration.toString(d, r => toString(IEvLambda(r)))
 and toStringDistribution = dist => GenericDist.toString(dist)
-and toStringLambda = (lambdaValue: T.lambdaValue) =>
-  `lambda(${Js.Array2.toString(lambdaValue.parameters)}=>internal code)`
-and toStringFunction = (lambdaValue: T.lambdaValue) =>
-  `function(${Js.Array2.toString(lambdaValue.parameters)})`
+and toStringLambda = (lambdaValue: T.lambdaValue) => {
+  switch lambdaValue {
+  | FnLambda({parameters}) => `lambda(${Js.Array2.toString(parameters)}=>internal code)`
+  | FnBuiltin(_) => "Builtin function"
+  }
+}
 and toStringNumber = aNumber => Js.String.make(aNumber)
 and toStringRecord = aMap => aMap->toStringMap
 and toStringString = aString => `'${aString}'`
@@ -76,25 +74,13 @@ let toStringFunctionCall = ((fn, args)): string => `${fn}(${argsToString(args)})
 let toStringResult = x =>
   switch x {
   | Ok(a) => `Ok(${toString(a)})`
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${SqError.toString(m)})`
   }
 
-let toStringOptionResult = x =>
-  switch x {
-  | Some(a) => toStringResult(a)
-  | None => "None"
-  }
-
-let toStringResultOkless = (codeResult: result<t, ErrorValue.errorValue>): string =>
+let toStringResultOkless = (codeResult: result<t, SqError.t>): string =>
   switch codeResult {
   | Ok(a) => toString(a)
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
-  }
-
-let toStringResultRecord = x =>
-  switch x {
-  | Ok(a) => `Ok(${toStringMap(a)})`
-  | Error(m) => `Error(${ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${SqError.toString(m)})`
   }
 
 type internalExpressionValueType =
@@ -156,10 +142,10 @@ let functionCallSignatureToString = (functionCallSignature: functionCallSignatur
 
 let arrayToValueArray = (arr: array<t>): array<t> => arr
 
-let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
+let resultToValue = (rExpression: result<t, SqError.Message.t>): t =>
   switch rExpression {
   | Ok(expression) => expression
-  | Error(errorValue) => Reducer_ErrorValue.toException(errorValue)
+  | Error(errorValue) => SqError.Message.throw(errorValue)
   }
 
 let recordToKeyValuePairs = (record: T.map): array<(string, t)> => record->Belt.Map.String.toArray

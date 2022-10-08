@@ -1,16 +1,25 @@
 module Bindings = Reducer_Bindings
-module Lambda = Reducer_Expression_Lambda
 module Result = Belt.Result
 module T = Reducer_T
 
-type errorValue = Reducer_ErrorValue.errorValue
+let toLocation = (expression: T.expression): Reducer_Peggy_Parse.location => {
+  expression.ast.location
+}
+
+let throwFrom = (error: SqError.Message.t, expression: T.expression, context: T.context) =>
+  error->SqError.throwMessageWithFrameStack(
+    context.frameStack->Reducer_FrameStack.extend(
+      context->Reducer_Context.currentFunctionName,
+      Some(expression->toLocation),
+    ),
+  )
 
 /*
   Recursively evaluate the expression
 */
 let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   // Js.log(`reduce: ${expression->Reducer_Expression_T.toString}`)
-  switch expression {
+  switch expression.content {
   | T.EBlock(statements) => {
       let innerContext = {...context, bindings: context.bindings->Bindings.extend}
       let (value, _) =
@@ -49,7 +58,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
           let (key, _) = eKey->evaluate(context)
           let keyString = switch key {
           | IEvString(s) => s
-          | _ => REOther("Record keys must be strings")->Reducer_ErrorValue.ErrorException->raise
+          | _ => REOther("Record keys must be strings")->throwFrom(expression, context)
           }
           let (value, _) = eValue->evaluate(context)
           (keyString, value)
@@ -73,7 +82,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   | T.ESymbol(name) =>
     switch context.bindings->Bindings.get(name) {
     | Some(v) => (v, context)
-    | None => Reducer_ErrorValue.RESymbolNotFound(name)->Reducer_ErrorValue.ErrorException->raise
+    | None => RESymbolNotFound(name)->throwFrom(expression, context)
     }
 
   | T.EValue(value) => (value, context)
@@ -82,28 +91,39 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
       let (predicateResult, _) = predicate->evaluate(context)
       switch predicateResult {
       | T.IEvBool(value) => (value ? trueCase : falseCase)->evaluate(context)
-      | _ => REExpectedType("Boolean", "")->Reducer_ErrorValue.ErrorException->raise
+      | _ => REExpectedType("Boolean", "")->throwFrom(expression, context)
       }
     }
 
-  | T.ELambda(parameters, body) => (
-      Lambda.makeLambda(parameters, context.bindings, body)->T.IEvLambda,
+  | T.ELambda(parameters, body, name) => (
+      Reducer_Lambda.makeLambda(
+        name,
+        parameters,
+        context.bindings,
+        body,
+        expression->toLocation,
+      )->T.IEvLambda,
       context,
     )
 
   | T.ECall(fn, args) => {
       let (lambda, _) = fn->evaluate(context)
-      let argValues = Js.Array2.map(args, arg => {
+      let argValues = Belt.Array.map(args, arg => {
         let (argValue, _) = arg->evaluate(context)
         argValue
       })
       switch lambda {
-      | T.IEvLambda(lambda) => (
-          Lambda.doLambdaCall(lambda, argValues, context.environment, evaluate),
-          context,
-        )
-      | _ =>
-        RENotAFunction(lambda->Reducer_Value.toString)->Reducer_ErrorValue.ErrorException->raise
+      | T.IEvLambda(lambda) => {
+          let result = Reducer_Lambda.doLambdaCallFrom(
+            lambda,
+            argValues,
+            context,
+            evaluate,
+            Some(expression->toLocation), // we have to pass the location of a current expression here, to put it on frameStack
+          )
+          (result, context)
+        }
+      | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(expression, context)
       }
     }
   }
@@ -112,19 +132,22 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
 module BackCompatible = {
   // Those methods are used to support the existing tests
   // If they are used outside limited testing context, error location reporting will fail
-  let parse = (peggyCode: string): result<T.expression, errorValue> =>
-    peggyCode->Reducer_Peggy_Parse.parse->Result.map(Reducer_Peggy_ToExpression.fromNode)
+  let parse = (peggyCode: string): result<T.expression, Reducer_Peggy_Parse.parseError> =>
+    peggyCode->Reducer_Peggy_Parse.parse("main")->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
-  let evaluate = (expression: T.expression): result<T.value, errorValue> => {
-    let context = Reducer_Context.createDefaultContext()
+  let createDefaultContext = () =>
+    Reducer_Context.createContext(SquiggleLibrary_StdLib.stdLib, Reducer_Context.defaultEnvironment)
+
+  let evaluate = (expression: T.expression): result<T.value, SqError.t> => {
+    let context = createDefaultContext()
     try {
       let (value, _) = expression->evaluate(context)
       value->Ok
     } catch {
-    | exn => Reducer_ErrorValue.fromException(exn)->Error
+    | exn => exn->SqError.fromException->Error
     }
   }
 
-  let evaluateString = (peggyCode: string): result<T.value, errorValue> =>
-    parse(peggyCode)->Result.flatMap(evaluate)
+  let evaluateString = (peggyCode: string): result<T.value, SqError.t> =>
+    parse(peggyCode)->E.R2.errMap(e => e->SqError.fromParseError)->Result.flatMap(evaluate)
 }

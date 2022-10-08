@@ -5,6 +5,8 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-golang";
 import "ace-builds/src-noconflict/theme-github";
 
+import { SqLocation } from "@quri/squiggle-lang";
+
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -13,15 +15,17 @@ interface CodeEditorProps {
   width?: number;
   height: number;
   showGutter?: boolean;
+  errorLocations?: SqLocation[];
 }
 
 export const CodeEditor: FC<CodeEditorProps> = ({
   value,
   onChange,
   onSubmit,
+  height,
   oneLine = false,
   showGutter = false,
-  height,
+  errorLocations = [],
 }) => {
   const lineCount = value.split("\n").length;
   const id = useMemo(() => _.uniqueId(), []);
@@ -30,8 +34,11 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   const onSubmitRef = useRef<typeof onSubmit | null>(null);
   onSubmitRef.current = onSubmit;
 
+  const editorEl = useRef<AceEditor | null>(null);
+
   return (
     <AceEditor
+      ref={editorEl}
       value={value}
       mode="golang"
       theme="github"
@@ -59,6 +66,14 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           exec: () => onSubmitRef.current?.(),
         },
       ]}
+      markers={errorLocations?.map((location) => ({
+        startRow: location.start.line - 1,
+        startCol: location.start.column - 1,
+        endRow: location.end.line - 1,
+        endCol: location.end.column - 1,
+        className: "ace-error-marker",
+        type: "text",
+      }))}
     />
   );
 };

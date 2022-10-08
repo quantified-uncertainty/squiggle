@@ -1,6 +1,7 @@
 @genType type reducerProject = ReducerProject_T.project //re-export
 
-type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
+type error = SqError.t //use
+type errorMessage = SqError.Message.t //use
 
 type squiggleValue = ForTS_SquiggleValue.squiggleValue //use
 type squiggleValue_Record = ForTS_SquiggleValue.squiggleValue_Record //use
@@ -103,10 +104,8 @@ let cleanAllResults = (project: reducerProject): unit => project->Private.cleanA
 To set the includes one first has to call "parseIncludes". The parsed includes or the parser error is returned.
 */
 @genType
-let getIncludes = (project: reducerProject, sourceId: string): result<
-  array<string>,
-  reducerErrorValue,
-> => project->Private.getIncludes(sourceId)
+let getIncludes = (project: reducerProject, sourceId: string): result<array<string>, error> =>
+  project->Private.getIncludes(sourceId)
 
 /* Other sources contributing to the global namespace of this source. */
 @genType
@@ -198,10 +197,8 @@ let getBindings = (project: reducerProject, sourceId: string): squiggleValue_Rec
 Get the result after running this source file or the project
 */
 @genType
-let getResult = (project: reducerProject, sourceId: string): result<
-  squiggleValue,
-  reducerErrorValue,
-> => project->Private.getResult(sourceId)
+let getResult = (project: reducerProject, sourceId: string): result<squiggleValue, error> =>
+  project->Private.getResult(sourceId)
 
 /*
 This is a convenience function to get the result of a single source without creating a project. 
@@ -209,10 +206,8 @@ However, without a project, you cannot handle include directives.
 The source has to be include free
 */
 @genType
-let evaluate = (sourceCode: string): (
-  result<squiggleValue, reducerErrorValue>,
-  squiggleValue_Record,
-) => Private.evaluate(sourceCode)
+let evaluate = (sourceCode: string): (result<squiggleValue, error>, squiggleValue_Record) =>
+  Private.evaluate(sourceCode)
 
 @genType
 let setEnvironment = (project: reducerProject, environment: environment): unit =>
@@ -220,24 +215,3 @@ let setEnvironment = (project: reducerProject, environment: environment): unit =
 
 @genType
 let getEnvironment = (project: reducerProject): environment => project->Private.getEnvironment
-
-/*
-Foreign function interface is intentionally demolished.
-There is another way to do that: Umur.
-Also there is no more conversion from javascript to squiggle values currently.
-If the conversion to the new project is too difficult, I can add it later.
-*/
-
-// let foreignFunctionInterface = (
-//   lambdaValue: squiggleValue_Lambda,
-//   argArray: array<squiggleValue>,
-//   environment: environment,
-// ): result<squiggleValue, reducerErrorValue> => {
-//   let accessors = ReducerProject_ProjectAccessors_T.identityAccessorsWithEnvironment(environment)
-//   Reducer_Expression_Lambda.foreignFunctionInterface(
-//     lambdaValue,
-//     argArray,
-//     accessors,
-//     Reducer_Expression.reduceExpressionInProject,
-//   )
-// }
