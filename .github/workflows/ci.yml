@@ -26,6 +26,6 @@ jobs:
           node-version: 16
           cache: 'yarn'
       - name: Turbo run
-        run: turbo run build test lint bundle
+        run: npx turbo run build test lint bundle
       - name: Coverage
-        run: turbo run coverage --no-cache # coverage builds for squiggle-lang can generate slower code that should never be cached
+        run: npx turbo run coverage --no-cache # coverage builds for squiggle-lang can generate slower code that should never be cached
