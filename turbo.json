@@ -9,7 +9,12 @@
     "vscode-squiggle#build": {
       "dependsOn": ["^build", "@quri/squiggle-components#bundle"]
     },
+    "@quri/squiggle-components#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "storybook-static/**"]
+    },
     "@quri/squiggle-lang#build": {
+      "dependsOn": ["^build"],
       "outputs": [
         "__tests__/**/*.bs.js",
         "benchmark/**/*.bs.js",
@@ -25,6 +30,8 @@
     "bundle": {
       "dependsOn": ["^build", "build"]
     },
-    "coverage": {}
+    "coverage": {
+      "cache": false
+    }
   }
 }

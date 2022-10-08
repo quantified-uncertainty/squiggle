@@ -43,4 +43,4 @@ jobs:
       - name: Install dependencies
         run: yarn
       - name: Coverage
-        run: npx turbo run coverage --no-cache # coverage builds for squiggle-lang can generate slower code that should never be cached
+        run: npx turbo run coverage
