@@ -35,6 +35,7 @@ export type SquiggleEditorProps = SquiggleChartProps & {
 
 const defaultOnChange = () => {};
 const defaultImports: JsImports = {};
+const defaultContinues: string[] = [];
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   const [code, setCode] = useMaybeControlledValue({
@@ -54,17 +55,13 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     width,
     height = 200,
     enableLocalSettings = false,
+    continues = defaultContinues,
+    project,
   } = props;
 
-  const project = React.useMemo(() => {
-    const p = SqProject.create();
-    if (environment) {
-      p.setEnvironment(environment);
-    }
-    return p;
-  }, [environment]);
-
   const resultAndBindings = useSquiggle({
+    environment,
+    continues,
     code,
     project,
     jsImports,
