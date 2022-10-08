@@ -25,7 +25,7 @@
     "coverage:rescript:local": "rm -f *.coverage && yarn clean && BISECT_ENABLE=yes yarn build && yarn test:rescript && bisect-ppx-report html",
     "coverage:ts:local": "yarn clean && yarn build && nyc --reporter=lcov yarn test:ts",
     "coverage:rescript": "yarn clean && BISECT_ENABLE=yes yarn build:rescript && yarn test:rescript && bisect-ppx-report send-to Codecov",
-    "coverage:ts": "yarn coverage:ts && codecov",
+    "coverage:ts": "yarn coverage:ts:local && codecov",
     "coverage": "yarn coverage:rescript && yarn coverage:ts",
     "coverage:local": "yarn coverage:rescript:local && yarn coverage:ts:local",
     "lint:rescript": "./lint.sh",

@@ -15,8 +15,8 @@ env:
   TURBO_TEAM: quantified-uncertainty
 
 jobs:
-  build-check-coverage:
-    name: Build, check, coverage
+  build-test-lint:
+    name: Build, test, lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -29,5 +29,18 @@ jobs:
         run: yarn
       - name: Turbo run
         run: npx turbo run build test lint bundle
+
+  coverage:
+    name: Build, check, coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn
       - name: Coverage
         run: npx turbo run coverage --no-cache # coverage builds for squiggle-lang can generate slower code that should never be cached
