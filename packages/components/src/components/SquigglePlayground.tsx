@@ -28,7 +28,7 @@ import {
 } from "@heroicons/react/solid";
 import clsx from "clsx";
 
-import { environment } from "@quri/squiggle-lang";
+import { environment, SqProject } from "@quri/squiggle-lang";
 
 import { SquiggleChartProps } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
@@ -305,9 +305,17 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     executionId,
   } = useRunnerState(code);
 
+  const project = React.useMemo(() => {
+    const p = SqProject.create();
+    if (environment) {
+      p.setEnvironment(environment);
+    }
+    return p;
+  }, [environment]);
+
   const resultAndBindings = useSquiggle({
     code,
-    environment,
+    project,
     jsImports: imports,
     executionId,
   });

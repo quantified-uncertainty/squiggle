@@ -7,7 +7,7 @@ import {
 } from "./SquiggleChart";
 import { useMaybeControlledValue, useSquiggle } from "../lib/hooks";
 import { JsImports } from "../lib/jsImports";
-import { defaultEnvironment, SqLocation } from "@quri/squiggle-lang";
+import { defaultEnvironment, SqLocation, SqProject } from "@quri/squiggle-lang";
 import { SquiggleViewer } from "./SquiggleViewer";
 import { getErrorLocations, getValueToRender } from "../lib/utility";
 
@@ -56,9 +56,17 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     enableLocalSettings = false,
   } = props;
 
+  const project = React.useMemo(() => {
+    const p = SqProject.create();
+    if (environment) {
+      p.setEnvironment(environment);
+    }
+    return p;
+  }, [environment]);
+
   const resultAndBindings = useSquiggle({
     code,
-    environment,
+    project,
     jsImports,
     onChange,
     executionId,

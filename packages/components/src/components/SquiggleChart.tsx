@@ -1,25 +1,17 @@
 import * as React from "react";
-import {
-  SqValue,
-  environment,
-  defaultEnvironment,
-  resultMap,
-  SqValueTag,
-} from "@quri/squiggle-lang";
+import { SqValue, environment, SqProject } from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
 import { SquiggleViewer } from "./SquiggleViewer";
 import { JsImports } from "../lib/jsImports";
 import { getValueToRender } from "../lib/utility";
 
-export interface SquiggleChartProps {
+export type SquiggleChartProps = {
   /** The input string for squiggle */
-  code?: string;
+  code: string;
   /** Allows to re-run the code if code hasn't changed */
   executionId?: number;
   /** If the output requires monte carlo sampling, the amount of samples */
   sampleCount?: number;
-  /** The amount of points returned to draw the distribution */
-  environment?: environment;
   /** If the result is a function, where the function domain starts */
   diagramStart?: number;
   /** If the result is a function, where the function domain ends */
@@ -27,7 +19,7 @@ export interface SquiggleChartProps {
   /** If the result is a function, the amount of stops sampled */
   diagramCount?: number;
   /** When the squiggle code gets reevaluated */
-  onChange?(expr: SqValue | undefined): void;
+  onChange?(expr: SqValue | undefined, sourceName: string): void;
   /** CSS width of the element */
   width?: number;
   height?: number;
@@ -54,10 +46,27 @@ export interface SquiggleChartProps {
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;
   enableLocalSettings?: boolean;
-}
+} & (StandaloneExecutionProps | ProjectExecutionProps);
 
+// Props needed for a standalone execution
+type StandaloneExecutionProps = {
+  project?: undefined;
+  continues?: undefined;
+  /** The amount of points returned to draw the distribution, not needed if using a project */
+  environment?: environment;
+};
+
+// Props needed when executing inside a project.
+type ProjectExecutionProps = {
+  environment?: undefined;
+  /** The project that this execution is part of */
+  project: SqProject;
+  /** What other squiggle sources from the project to continue. Default [] */
+  continues?: string[];
+};
 const defaultOnChange = () => {};
 const defaultImports: JsImports = {};
+const defaultContinues: string[] = [];
 
 export const splitSquiggleChartSettings = (props: SquiggleChartProps) => {
   const {
@@ -104,19 +113,32 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       splitSquiggleChartSettings(props);
 
     const {
-      code = "",
-      environment,
+      code,
       jsImports = defaultImports,
       onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
       executionId = 0,
       width,
       height = 200,
       enableLocalSettings = false,
+      continues = defaultContinues,
     } = props;
 
+    const p = React.useMemo(() => {
+      if (props.project) {
+        return props.project;
+      } else {
+        const p = SqProject.create();
+        if (props.environment) {
+          p.setEnvironment(props.environment);
+        }
+        return p;
+      }
+    }, [props.project, props.environment]);
+
     const resultAndBindings = useSquiggle({
+      continues,
+      project: p,
       code,
-      environment,
       jsImports,
       onChange,
       executionId,
@@ -131,7 +153,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
         height={height}
         distributionPlotSettings={distributionPlotSettings}
         chartSettings={chartSettings}
-        environment={environment ?? defaultEnvironment}
+        environment={p.getEnvironment()}
         enableLocalSettings={enableLocalSettings}
       />
     );
