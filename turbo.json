@@ -12,7 +12,7 @@
     "bundle": {
       "dependsOn": ["^build", "build"]
     },
-    "vscode-ext#build": {
+    "vscode-squiggle#build": {
       "dependsOn": ["^build", "@quri/squiggle-components#bundle"]
     },
     "coverage": {
