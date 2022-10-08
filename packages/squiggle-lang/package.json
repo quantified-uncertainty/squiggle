@@ -27,7 +27,7 @@
     "coverage:rescript": "yarn clean && BISECT_ENABLE=yes yarn build:rescript && yarn test:rescript && bisect-ppx-report send-to Codecov",
     "coverage:ts": "yarn coverage:ts:local && codecov",
     "coverage": "yarn coverage:ts && yarn coverage:rescript",
-    "coverage:local": "yarn coverage:rescript:local && yarn coverage:ts:local",
+    "coverage:local": "yarn coverage:ts:local && yarn coverage:rescript:local",
     "lint:rescript": "./lint.sh",
     "lint:prettier": "prettier --check .",
     "lint": "yarn lint:rescript && yarn lint:prettier",
