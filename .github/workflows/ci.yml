@@ -25,6 +25,8 @@ jobs:
         with:
           node-version: 16
           cache: 'yarn'
+      - name: Install dependencies
+        run: yarn
       - name: Turbo run
         run: npx turbo run build test lint bundle
       - name: Coverage
