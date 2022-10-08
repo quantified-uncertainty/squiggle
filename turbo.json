@@ -6,14 +6,24 @@
     "build": {
       "dependsOn": ["^build"]
     },
+    "vscode-squiggle#build": {
+      "dependsOn": ["^build", "@quri/squiggle-components#bundle"]
+    },
+    "@quri/squiggle-lang#build": {
+      "outputs": [
+        "__tests__/**/*.bs.js",
+        "benchmark/**/*.bs.js",
+        "src/rescript/**/*.js",
+        "src/rescript/**/*.gen.tsx",
+        "../../node_modules/bisect_ppx/**/*.bs.js",
+        "dist/**"
+      ]
+    },
     "test": {
       "dependsOn": ["build"]
     },
     "bundle": {
       "dependsOn": ["^build", "build"]
-    },
-    "vscode-squiggle#build": {
-      "dependsOn": ["^build", "@quri/squiggle-components#bundle"]
     },
     "coverage": {
       "dependsOn": ["build"]
