@@ -1,7 +1,10 @@
 .vscode/**
 .vscode-test/**
 src/**
+client
+server
 .gitignore
+node_modules
 .yarnrc
 vsc-extension-quickstart.md
 **/tsconfig.json
