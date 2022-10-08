@@ -22,6 +22,10 @@ export class SqProject {
     return RSProject.setSource(this._value, sourceId, value);
   }
 
+  removeSource(sourceId: string) {
+    RSProject.removeSource(this._value, sourceId);
+  }
+
   getSource(sourceId: string) {
     return RSProject.getSource(this._value, sourceId);
   }

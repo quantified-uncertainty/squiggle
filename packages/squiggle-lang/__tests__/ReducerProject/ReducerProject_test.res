@@ -112,6 +112,25 @@ describe("project2", () => {
   })
 })
 
+describe("removing sources", () => {
+  let project = Project.createProject()
+  Project.setContinues(project, "main", ["second"])
+  Project.setContinues(project, "second", ["first"])
+  Project.setSource(project, "first", "x=1")
+  Project.setSource(project, "second", "y=2")
+  Project.setSource(project, "main", "y")
+
+  Project.removeSource(project, "main")
+
+  test("project doesn't have source", () => {
+    expect(Project.getSource(project, "main")) == None
+  })
+
+  test("dependents get updated", () => {
+    expect(Project.getDependents(project, "second")) == []
+  })
+})
+
 describe("project with include", () => {
   let project = Project.createProject()
   Project.setContinues(project, "main", ["second"])
