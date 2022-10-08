@@ -120,9 +120,7 @@ export class SqProject {
     return RSProject.toJson(this._value);
   }
 
-  static fromJson(
-    projectJson: RSProject.reducerProjectJson
-  ): RSProject.reducerProject {
-    return RSProject.fromJson(projectJson);
+  static fromJson(projectJson: RSProject.reducerProjectJson): SqProject {
+    return new SqProject(RSProject.fromJson(projectJson));
   }
 }
