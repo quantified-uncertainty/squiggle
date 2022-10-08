@@ -76,6 +76,10 @@ const config = {
 
       //   //... other Algolia params
       // },
+      colorMode: {
+        // squiggle playground is not compatible with dark mode yet, see https://github.com/quantified-uncertainty/squiggle/issues/1192
+        disableSwitch: true,
+      },
       navbar: {
         title: "Squiggle",
         hideOnScroll: true,

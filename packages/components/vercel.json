@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd ../squiggle-lang && yarn build && cd ../components && yarn build",
+  "outputDirectory": "storybook-static",
+  "installCommand": "cd ../../ && yarn",
+  "ignoreCommand": "git diff --quiet $VERCEL_GIT_PREVIOUS_SHA $VERCEL_GIT_COMMIT_SHA . ../squiggle-lang"
+}
