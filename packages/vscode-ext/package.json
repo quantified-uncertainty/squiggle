@@ -114,13 +114,13 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
-    "compile:tsc": "tsc -b",
-    "compile:grammar": "js-yaml syntaxes/squiggle.tmLanguage.yaml >syntaxes/squiggle.tmLanguage.json",
-    "compile:vendor": "(cd ../squiggle-lang && yarn run build) && (cd ../components && yarn run bundle && yarn run build:css) && mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/squiggle-logo.png media/vendor/icon.png",
-    "compile": "yarn run compile:vendor && yarn run compile:grammar && yarn run compile:tsc",
+    "vscode:prepublish": "yarn run build",
+    "build:tsc": "tsc -b",
+    "build:grammar": "js-yaml syntaxes/squiggle.tmLanguage.yaml >syntaxes/squiggle.tmLanguage.json",
+    "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/squiggle-logo.png media/vendor/icon.png",
+    "build": "yarn run build:vendor && yarn run build:grammar && yarn run build:tsc",
     "watch": "tsc -b -watch",
-    "pretest": "yarn run compile && yarn run lint",
+    "pretest": "yarn run build && yarn run lint",
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "package": "npx vsce package --yarn"
@@ -138,6 +138,7 @@
     "vscode-languageclient": "^8.0.2",
     "vscode-languageserver": "^8.0.2",
     "vscode-languageserver-textdocument": "^1.0.7",
-    "@quri/squiggle-lang": "^0.2.11"
+    "@quri/squiggle-lang": "*",
+    "@quri/squiggle-components": "*"
   }
 }

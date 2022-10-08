@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "lint": {},
+    "build": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "vscode-ext#build": {
+      "dependsOn": ["^build", "@quri/squiggle-components#bundle"]
+    }
+  }
+}
