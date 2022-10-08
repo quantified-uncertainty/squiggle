@@ -10,10 +10,7 @@
     "rootDir": "src",
     "sourceMap": true
   },
-  "include": [
-    "src/server/server.ts",
-    "src/client/extension.ts"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "node_modules",
     ".vscode-test"
