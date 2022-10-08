@@ -1,6 +1,4 @@
 {
-  "buildCommand": "cd ../squiggle-lang && yarn build && cd ../components && yarn build && cd ../website && yarn build",
-  "framework": "docusaurus-2",
-  "installCommand": "cd ../../ && yarn",
-  "ignoreCommand": "git diff --quiet $VERCEL_GIT_PREVIOUS_SHA $VERCEL_GIT_COMMIT_SHA ../squiggle-lang ../components ."
+  "buildCommand": "cd ../.. && npx turbo run build --filter=squiggle-website",
+  "framework": "docusaurus-2"
 }
