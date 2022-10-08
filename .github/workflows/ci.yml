@@ -31,7 +31,7 @@ jobs:
         run: npx turbo run build test lint bundle
 
   coverage:
-    name: Build, check, coverage
+    name: Coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
