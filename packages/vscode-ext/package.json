@@ -22,7 +22,7 @@
     "onCustomEditor:squiggle.wysiwyg",
     "onCommand:squiggle.preview"
   ],
-  "main": "./client/out/extension.js",
+  "main": "./dist/src/client/extension.js",
   "contributes": {
     "languages": [
       {
@@ -114,25 +114,26 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run build",
-    "build:tsc": "tsc -b",
+    "vscode:prepublish": "yarn run lint && yarn run build",
     "build:grammar": "js-yaml syntaxes/squiggle.tmLanguage.yaml >syntaxes/squiggle.tmLanguage.json",
     "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/squiggle-logo.png media/vendor/icon.png",
-    "build": "yarn run build:vendor && yarn run build:grammar && yarn run build:tsc",
-    "watch": "tsc -b -watch",
+    "build:bundle": "esbuild ./src/client/extension.ts ./src/server/server.ts --format=cjs --platform=node --sourcemap --minify --bundle --external:vscode --outdir=./dist",
+    "build": "yarn run build:vendor && yarn run build:grammar && yarn run build:bundle",
+    "watch": "yarn run compile:bundle --watch",
     "pretest": "yarn run build && yarn run lint",
-    "lint": "prettier --check .",
+    "lint": "tsc -noEmit && prettier --check .",
     "format": "prettier --write .",
-    "package": "npx vsce package --yarn"
+    "package": "vsce package --yarn"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
     "@types/node": "18.x",
     "@types/vscode": "^1.70.0",
+    "esbuild": "^0.15.10",
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
     "typescript": "^4.8.4",
-    "vsce-yarn-patch": "^1.66.2"
+    "vsce": "^2.11.0"
   },
   "dependencies": {
     "vscode-languageclient": "^8.0.2",
