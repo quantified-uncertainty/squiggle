@@ -3,9 +3,11 @@ title: How to import squiggle files into `.mdx` documents
 sidebar_position: 5
 ---
 
-import { SquiggleEditorWithImportedBindings } from "../../src/components/SquiggleEditor";
+:::caution Proof of concept
 
-_Proof of concept_
+The following usage pattern is currently broken. We expect to bring it back in some form in 0.5.1 or 0.5.2 release.
+
+:::
 
 ## Consider the following squiggle file
 
@@ -30,10 +32,3 @@ import { SquiggleEditorWithImportedBindings } from "../../src/components/Squiggl
 ```
 
 Notice, you need to wrap the export of `@quri/squiggle-components` in custom code for dynamicism, please view `packages/website/src/components/` in github for details.
-
-Which would then look exactly like
-
-<SquiggleEditorWithImportedBindings
-  defaultCode={"f(z)"}
-  bindingsImportUrl={"/estimates/demo.squiggle"}
-/>
