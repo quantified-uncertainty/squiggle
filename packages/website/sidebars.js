@@ -61,6 +61,11 @@ const sidebars = {
         },
       ],
     },
+    {
+      type: "doc",
+      id: "Changelog",
+      label: "Changelog",
+    },
   ],
 
   // But you can create a sidebar manually
