@@ -71,7 +71,6 @@ type ProjectExecutionProps = {
 };
 const defaultOnChange = () => {};
 const defaultImports: JsImports = {};
-const defaultContinues: string[] = [];
 
 export const splitSquiggleChartSettings = (props: SquiggleChartProps) => {
   const {
@@ -125,7 +124,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       width,
       height = 200,
       enableLocalSettings = false,
-      continues = defaultContinues,
+      continues,
       project,
       environment,
     } = props;

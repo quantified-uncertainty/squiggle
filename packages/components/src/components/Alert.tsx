@@ -24,7 +24,7 @@ export const Alert: React.FC<{
   children,
 }) => {
   return (
-    <div className={clsx("rounded-md p-4", backgroundColor)}>
+    <div className={clsx("rounded-md p-4", backgroundColor)} role="status">
       <div className="flex">
         <Icon
           className={clsx("h-5 w-5 flex-shrink-0", iconColor)}

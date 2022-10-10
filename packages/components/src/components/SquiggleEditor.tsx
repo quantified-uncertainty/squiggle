@@ -35,7 +35,6 @@ export type SquiggleEditorProps = SquiggleChartProps & {
 
 const defaultOnChange = () => {};
 const defaultImports: JsImports = {};
-const defaultContinues: string[] = [];
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   const [code, setCode] = useMaybeControlledValue({
@@ -55,7 +54,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     width,
     height = 200,
     enableLocalSettings = false,
-    continues = defaultContinues,
+    continues,
     project,
   } = props;
 
