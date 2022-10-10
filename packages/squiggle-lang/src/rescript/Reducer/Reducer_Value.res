@@ -14,6 +14,7 @@ let rec toString = (aValue: T.value) =>
   | IEvDistribution(dist) => toStringDistribution(dist)
   | IEvLambda(lambdaValue) => toStringLambda(lambdaValue)
   | IEvNumber(aNumber) => toStringNumber(aNumber)
+  | IEvPlot(aPlot) => toStringPlot(aPlot)
   | IEvRecord(aMap) => aMap->toStringRecord
   | IEvString(aString) => toStringString(aString)
   | IEvTimeDuration(t) => toStringTimeDuration(t)
@@ -35,6 +36,10 @@ and toStringLambda = (lambdaValue: T.lambdaValue) => {
   }
 }
 and toStringNumber = aNumber => Js.String.make(aNumber)
+and toStringPlot = aPlot => {
+  let chartNames = E.A.fmap((x: Reducer_T.labeledDistribution) => x.name, aPlot.distributions)
+  `Plot showing ${Js.Array2.toString(chartNames)}`
+}
 and toStringRecord = aMap => aMap->toStringMap
 and toStringString = aString => `'${aString}'`
 and toStringSymbol = aString => `:${aString}`
@@ -59,6 +64,7 @@ let toStringWithType = (aValue: T.value) =>
   | IEvDistribution(_) => `Distribution::${toString(aValue)}`
   | IEvLambda(_) => `Lambda::${toString(aValue)}`
   | IEvNumber(_) => `Number::${toString(aValue)}`
+  | IEvPlot(_) => `Plot::${toString(aValue)}`
   | IEvRecord(_) => `Record::${toString(aValue)}`
   | IEvString(_) => `String::${toString(aValue)}`
   | IEvTimeDuration(_) => `Date::${toString(aValue)}`
@@ -91,6 +97,7 @@ type internalExpressionValueType =
   | EvtDistribution
   | EvtLambda
   | EvtNumber
+  | EvtPlot
   | EvtRecord
   | EvtString
   | EvtTimeDuration
@@ -109,6 +116,7 @@ let valueToValueType = (value: T.value) =>
   | IEvDistribution(_) => EvtDistribution
   | IEvLambda(_) => EvtLambda
   | IEvNumber(_) => EvtNumber
+  | IEvPlot(_) => EvtPlot
   | IEvRecord(_) => EvtRecord
   | IEvString(_) => EvtString
   | IEvTimeDuration(_) => EvtTimeDuration
@@ -129,6 +137,7 @@ let valueTypeToString = (valueType: internalExpressionValueType): string =>
   | EvtDistribution => `Distribution`
   | EvtLambda => `Lambda`
   | EvtNumber => `Number`
+  | EvtPlot => `Plot`
   | EvtRecord => `Record`
   | EvtString => `String`
   | EvtTimeDuration => `Duration`

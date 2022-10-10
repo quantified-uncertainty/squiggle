@@ -4,6 +4,7 @@ import { wrapDistribution } from "./SqDistribution";
 import { SqLambda } from "./SqLambda";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
 import { SqRecord } from "./SqRecord";
+import { SqPlot } from "./SqPlot";
 import { SqArray } from "./SqArray";
 import { SqValueLocation } from "./SqValueLocation";
 
@@ -91,6 +92,14 @@ export class SqNumberValue extends SqAbstractValue {
   }
 }
 
+export class SqPlotValue extends SqAbstractValue {
+  tag = Tag.Plot as const;
+
+  get value() {
+    return new SqPlot(this.valueMethod(RSValue.getPlot), this.location);
+  }
+}
+
 export class SqRecordValue extends SqAbstractValue {
   tag = Tag.Record as const;
 
@@ -131,6 +140,7 @@ const tagToClass = {
   [Tag.Distribution]: SqDistributionValue,
   [Tag.Lambda]: SqLambdaValue,
   [Tag.Number]: SqNumberValue,
+  [Tag.Plot]: SqPlotValue,
   [Tag.Record]: SqRecordValue,
   [Tag.String]: SqStringValue,
   [Tag.TimeDuration]: SqTimeDurationValue,
@@ -148,6 +158,7 @@ export type SqValue =
   | SqLambdaValue
   | SqNumberValue
   | SqRecordValue
+  | SqPlotValue
   | SqStringValue
   | SqTimeDurationValue
   | SqVoidValue;

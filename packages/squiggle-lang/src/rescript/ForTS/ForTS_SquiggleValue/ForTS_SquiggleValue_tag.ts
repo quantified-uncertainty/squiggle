@@ -6,6 +6,7 @@ export enum squiggleValueTag {
   Distribution = "Distribution",
   Lambda = "Lambda",
   Number = "Number",
+  Plot = "Plot",
   Record = "Record",
   String = "String",
   TimeDuration = "TimeDuration",

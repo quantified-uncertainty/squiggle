@@ -9,10 +9,12 @@ type rec value =
   | IEvDistribution(DistributionTypes.genericDist)
   | IEvLambda(lambdaValue)
   | IEvNumber(float)
+  | IEvPlot(plotValue)
   | IEvRecord(map)
   | IEvString(string)
   | IEvTimeDuration(float)
   | IEvVoid
+
 @genType.opaque and arrayValue = array<value>
 @genType.opaque and map = Belt.Map.String.t<value>
 and lambdaBody = (array<value>, context, reducerFn) => value
@@ -65,5 +67,13 @@ and context = {
 }
 
 and reducerFn = (expression, context) => (value, context)
+
+@genType and plotValue = {distributions: array<labeledDistribution>}
+
+@genType
+and labeledDistribution = {
+  name: string,
+  distribution: DistributionTypes.genericDist,
+}
 
 let topFrameName = "<top>"

@@ -6,6 +6,7 @@ export { result } from "../rescript/ForTS/ForTS_Result_tag";
 export { SqDistribution, SqDistributionTag } from "./SqDistribution";
 export { SqDistributionError } from "./SqDistributionError";
 export { SqRecord } from "./SqRecord";
+export { SqPlot, LabeledDistribution } from "./SqPlot";
 export { SqLambda } from "./SqLambda";
 export { SqProject };
 export { SqValue, SqValueTag };
@@ -14,7 +15,7 @@ export {
   defaultEnvironment,
 } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 export { SqError, SqFrame, SqLocation } from "./SqError";
-export { SqShape } from "./SqPointSetDist";
+export { SqShape, SqPoint } from "./SqPointSetDist";
 
 export { resultMap } from "./types";
 

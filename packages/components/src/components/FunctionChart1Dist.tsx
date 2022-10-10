@@ -15,7 +15,6 @@ import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import {
   DistributionChart,
   DistributionPlottingSettings,
-  defaultPlot,
 } from "./DistributionChart";
 import { NumberShower } from "./NumberShower";
 import { ErrorAlert } from "./Alert";
@@ -184,7 +183,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
     mouseItem.tag === "Ok" &&
     mouseItem.value.tag === SqValueTag.Distribution ? (
       <DistributionChart
-        plot={defaultPlot(mouseItem.value.value)}
+        distribution={mouseItem.value.value}
         environment={environment}
         width={400}
         height={50}
@@ -194,7 +193,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
 
   let getPercentilesMemoized = React.useMemo(
     () => getPercentiles({ chartSettings, fn, environment }),
-    [environment, fn]
+    [chartSettings, environment, fn]
   );
 
   return (

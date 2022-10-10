@@ -135,7 +135,7 @@ jobs:
         run: yarn bundle
       - name: Build storybook
         run: yarn build
-      - name: Test components 
+      - name: Test components
         run: yarn test
 
   website-lint:

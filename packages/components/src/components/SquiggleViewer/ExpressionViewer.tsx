@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { SqDistributionTag, SqValue, SqValueTag } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
-import { DistributionChart, defaultPlot, makePlot } from "../DistributionChart";
+import { DistributionChart } from "../DistributionChart";
 import { FunctionChart } from "../FunctionChart";
 import clsx from "clsx";
 import { VariableBox } from "./VariableBox";
@@ -104,7 +104,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           {(settings) => {
             return (
               <DistributionChart
-                plot={defaultPlot(value.value)}
+                distribution={value.value}
                 environment={settings.environment}
                 {...settings.distributionPlotSettings}
                 height={settings.height}
@@ -219,63 +219,61 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
         </VariableBox>
       );
     }
+    case SqValueTag.Plot:
+      const plot = value.value;
+      return (
+        <VariableBox
+          value={value}
+          heading="Plot"
+          renderSettingsMenu={({ onChange }) => {
+            let disableLogX = plot.getDistributions().some((x) => {
+              let pointSet = x.distribution.pointSet(
+                getMergedSettings(value.location).environment
+              );
+              return (
+                pointSet.tag === "Ok" &&
+                hasMassBelowZero(pointSet.value.asShape())
+              );
+            });
+            return (
+              <ItemSettingsMenu
+                value={value}
+                onChange={onChange}
+                disableLogX={disableLogX}
+                withFunctionSettings={false}
+              />
+            );
+          }}
+        >
+          {(settings) => {
+            return (
+              <DistributionChart
+                plot={plot}
+                environment={settings.environment}
+                {...settings.distributionPlotSettings}
+                height={settings.height}
+                width={width}
+              />
+            );
+          }}
+        </VariableBox>
+      );
     case SqValueTag.Record:
-      const plot = makePlot(value.value);
-      if (plot) {
-        return (
-          <VariableBox
-            value={value}
-            heading="Plot"
-            renderSettingsMenu={({ onChange }) => {
-              let disableLogX = plot.distributions.some((x) => {
-                let pointSet = x.distribution.pointSet(
-                  getMergedSettings(value.location).environment
-                );
-                return (
-                  pointSet.tag === "Ok" &&
-                  hasMassBelowZero(pointSet.value.asShape())
-                );
-              });
-              return (
-                <ItemSettingsMenu
-                  value={value}
-                  onChange={onChange}
-                  disableLogX={disableLogX}
-                  withFunctionSettings={false}
+      return (
+        <VariableList value={value} heading="Record">
+          {(_) =>
+            value.value
+              .entries()
+              .map(([key, r]) => (
+                <ExpressionViewer
+                  key={key}
+                  value={r}
+                  width={width !== undefined ? width - 20 : width}
                 />
-              );
-            }}
-          >
-            {(settings) => {
-              return (
-                <DistributionChart
-                  plot={plot}
-                  environment={settings.environment}
-                  {...settings.distributionPlotSettings}
-                  height={settings.height}
-                  width={width}
-                />
-              );
-            }}
-          </VariableBox>
-        );
-      } else {
-        return (
-          <VariableList value={value} heading="Record">
-            {(_) =>
-              value.value
-                .entries()
-                .map(([key, r]) => (
-                  <ExpressionViewer
-                    key={key}
-                    value={r}
-                    width={width !== undefined ? width - 20 : width}
-                  />
-                ))
-            }
-          </VariableList>
-        );
-      }
+              ))
+          }
+        </VariableList>
+      );
     case SqValueTag.Array:
       return (
         <VariableList value={value} heading="Array">

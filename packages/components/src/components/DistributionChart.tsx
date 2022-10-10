@@ -3,8 +3,9 @@ import {
   SqDistribution,
   result,
   SqDistributionError,
+  LabeledDistribution,
   resultMap,
-  SqRecord,
+  SqPlot,
   environment,
   SqDistributionTag,
 } from "@quri/squiggle-lang";
@@ -17,7 +18,6 @@ import {
   DistributionChartSpecOptions,
 } from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
-import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 
@@ -28,27 +28,15 @@ export type DistributionPlottingSettings = {
 } & DistributionChartSpecOptions;
 
 export type DistributionChartProps = {
-  plot: Plot;
   environment: environment;
   width?: number;
   height: number;
   xAxisType?: "number" | "dateTime";
-} & DistributionPlottingSettings;
-
-export function defaultPlot(distribution: SqDistribution): Plot {
-  return { distributions: [{ name: "default", distribution }] };
-}
-
-export function makePlot(record: SqRecord): Plot | void {
-  const plotResult = parsePlot(record);
-  if (plotResult.tag === "Ok") {
-    return plotResult.value;
-  }
-}
+} & DistributionPlottingSettings &
+  ({ plot: SqPlot } | { distribution: SqDistribution });
 
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const {
-    plot,
     environment,
     height,
     showSummary,
@@ -57,8 +45,14 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     actions = false,
   } = props;
   const [sized] = useSize((size) => {
-    const shapes = flattenResult(
-      plot.distributions.map((x) =>
+    let distributions: LabeledDistribution[];
+    if ("plot" in props) {
+      distributions = props.plot.getDistributions();
+    } else {
+      distributions = [{ name: "default", distribution: props.distribution }];
+    }
+    let shapes = flattenResult(
+      distributions.map((x) =>
         resultMap(x.distribution.pointSet(environment), (pointSet) => ({
           name: x.name,
           // color: x.color, // not supported yet
@@ -77,7 +71,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
 
     // if this is a sample set, include the samples
     const samples: number[] = [];
-    for (const { distribution } of plot?.distributions) {
+    for (const { distribution } of distributions) {
       if (distribution.tag === SqDistributionTag.SampleSet) {
         samples.push(...distribution.value());
       }
@@ -126,9 +120,9 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
           />
         )}
         <div className="flex justify-center">
-          {showSummary && plot.distributions.length === 1 && (
+          {showSummary && distributions.length === 1 && (
             <SummaryTable
-              distribution={plot.distributions[0].distribution}
+              distribution={distributions[0].distribution}
               environment={environment}
             />
           )}

@@ -6,6 +6,7 @@ type error = SqError.t //use
 type squiggleValue_Declaration = ForTS_SquiggleValue_Declaration.squiggleValue_Declaration //use
 type squiggleValue_Distribution = ForTS_SquiggleValue_Distribution.squiggleValue_Distribution //use
 type squiggleValue_Lambda = ForTS_SquiggleValue_Lambda.squiggleValue_Lambda //use
+@genType type squiggleValue_Plot = Reducer_T.plotValue //use
 
 // Return values are kept as they are if they are JavaScript types.
 
@@ -29,6 +30,9 @@ external svtLambda_: string = "Lambda"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtNumber_: string = "Number"
+
+@module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
+external svtPlot_: string = "Plot"
 
 @module("./ForTS_SquiggleValue_tag") @scope("squiggleValueTag")
 external svtRecord_: string = "Record"
@@ -57,6 +61,7 @@ let getTag = (variant: squiggleValue): squiggleValueTag =>
   | IEvDistribution(_) => svtDistribution_->castEnum
   | IEvLambda(_) => svtLambda_->castEnum
   | IEvNumber(_) => svtNumber_->castEnum
+  | IEvPlot(_) => svtPlot_->castEnum
   | IEvRecord(_) => svtRecord_->castEnum
   | IEvString(_) => svtString_->castEnum
   | IEvTimeDuration(_) => svtTimeDuration_->castEnum
@@ -119,6 +124,13 @@ let getLambda = (variant: squiggleValue): option<squiggleValue_Lambda> =>
 let getNumber = (variant: squiggleValue): option<float> =>
   switch variant {
   | IEvNumber(value) => value->Some
+  | _ => None
+  }
+
+@genType
+let getPlot = (variant: squiggleValue): option<squiggleValue_Plot> =>
+  switch variant {
+  | IEvPlot(value) => value->Some
   | _ => None
   }
 
