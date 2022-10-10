@@ -1,5 +1,4 @@
 {
-  "buildCommand": "cd ../squiggle-lang && yarn build && cd ../components && yarn build",
-  "outputDirectory": "storybook-static",
-  "installCommand": "cd ../../ && yarn"
+  "buildCommand": "cd ../.. && npx turbo run build --filter=@quri/squiggle-components",
+  "outputDirectory": "storybook-static"
 }
