@@ -36,7 +36,7 @@ export const run = (src, { output, sampleCount } = {}) => {
     "Time:",
     String(time),
     result.tag === "Error" ? red(result.tag) : green(result.tag),
-    result.tag === "Error" ? result.value.toString() : ""
+    result.tag === "Error" ? result.value.toStringWithFrameStack() : ""
   );
 };
 

@@ -70,11 +70,41 @@ describe("test exceptions", () => {
   testDescriptionEvalToBe(
     "javascript exception",
     "javascriptraise('div by 0')",
-    "Error(Error: 'div by 0')",
+    "Error(JS Exception: Error: 'div by 0')",
   )
   // testDescriptionEvalToBe(
   //   "rescript exception",
   //   "rescriptraise()",
   //   "Error(TODO: unhandled rescript exception)",
   // )
+})
+
+describe("stacktraces", () => {
+  test("nested calls", () => {
+    open Expect
+
+    let error =
+      Expression.BackCompatible.evaluateString(`
+  f(x) = {
+    y = "a"
+    x + y
+  }
+  g = {|x| f(x)}
+  h(x) = g(x)
+  h(5)
+`)
+      ->E.R.getError
+      ->E.O2.toExn("oops")
+      ->SqError.toStringWithStackTrace
+
+    expect(
+      error,
+    )->toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]
+Stack trace:
+  f at line 4, column 5
+  g at line 6, column 12
+  h at line 7, column 10
+  <top> at line 8, column 3
+`)
+  })
 })

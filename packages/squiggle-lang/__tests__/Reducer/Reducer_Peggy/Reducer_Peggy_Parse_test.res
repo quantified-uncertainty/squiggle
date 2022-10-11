@@ -182,7 +182,7 @@ describe("Peggy parse", () => {
       "a.p1 to a.p2",
       "{(:credibleIntervalToDistribution (:$_atIndex_$ :a 'p1') (:$_atIndex_$ :a 'p2'))}",
     ) // lower than post
-    testParse("1 to 2 + 3", "{(:add (:credibleIntervalToDistribution 1 2) 3)}") // higher than binary operators
+    testParse("1 to 2 + 3", "{(:credibleIntervalToDistribution 1 (:add 2 3))}")
     testParse(
       "1->add(2) to 3->add(4) -> add(4)",
       "{(:credibleIntervalToDistribution (:add 1 2) (:add (:add 3 4) 4))}",
@@ -197,7 +197,7 @@ describe("Peggy parse", () => {
 
   describe("lambda", () => {
     testParse("{|x| x}", "{{|:x| :x}}")
-    testParse("f={|x| x}", "{:f = {{|:x| :x}}}")
+    testParse("f={|x| x}", "{:f = {|:x| :x}}")
     testParse("f(x)=x", "{:f = {|:x| {:x}}}") // Function definitions are lambda assignments
     testParse("f(x)=x ? 1 : 0", "{:f = {|:x| {(::$$_ternary_$$ :x 1 0)}}}") // Function definitions are lambda assignments
   })

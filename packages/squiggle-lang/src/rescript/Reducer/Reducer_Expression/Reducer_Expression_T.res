@@ -12,7 +12,7 @@ let semicolonJoin = values =>
   Converts the expression to String
 */
 let rec toString = (expression: t) =>
-  switch expression {
+  switch expression.content {
   | EBlock(statements) =>
     `{${Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin}}`
   | EProgram(statements) => Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin
@@ -24,37 +24,23 @@ let rec toString = (expression: t) =>
     `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`
   | EAssign(name, value) => `${name} = ${value->toString}`
   | ECall(fn, args) => `(${fn->toString})(${args->Js.Array2.map(toString)->commaJoin})`
-  | ELambda(parameters, body) => `{|${parameters->commaJoin}| ${body->toString}}`
+  | ELambda(parameters, body, _) => `{|${parameters->commaJoin}| ${body->toString}}`
   | EValue(aValue) => Reducer_Value.toString(aValue)
   }
 
 let toStringResult = codeResult =>
   switch codeResult {
   | Ok(a) => `Ok(${toString(a)})`
-  | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${Reducer_Peggy_Parse.toStringError(m)})`
   }
 
 let toStringResultOkless = codeResult =>
   switch codeResult {
   | Ok(a) => toString(a)
-  | Error(m) => `Error(${Reducer_ErrorValue.errorToString(m)})`
+  | Error(m) => `Error(${Reducer_Peggy_Parse.toStringError(m)})`
   }
 
 let inspect = (expr: t): t => {
   Js.log(toString(expr))
   expr
 }
-
-let inspectResult = (r: result<t, Reducer_ErrorValue.errorValue>): result<
-  t,
-  Reducer_ErrorValue.errorValue,
-> => {
-  Js.log(toStringResult(r))
-  r
-}
-
-let resultToValue = (rExpression: result<t, Reducer_ErrorValue.t>): t =>
-  switch rExpression {
-  | Ok(expression) => expression
-  | Error(errorValue) => Reducer_ErrorValue.toException(errorValue)
-  }

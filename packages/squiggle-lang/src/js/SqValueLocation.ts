@@ -1,4 +1,3 @@
-import { isParenthesisNode } from "mathjs";
 import { SqProject } from "./SqProject";
 
 type PathItem = string | number;

@@ -1,42 +1,85 @@
-import { environment, SqProject, SqValue } from "@quri/squiggle-lang";
+import {
+  result,
+  SqError,
+  SqProject,
+  SqRecord,
+  SqValue,
+} from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
+import * as uuid from "uuid";
 
 type SquiggleArgs = {
   code: string;
   executionId?: number;
   jsImports?: JsImports;
-  environment?: environment;
-  onChange?: (expr: SqValue | undefined) => void;
+  project: SqProject;
+  continues?: string[];
+  onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 };
 
-export const useSquiggle = (args: SquiggleArgs) => {
+export type ResultAndBindings = {
+  result: result<SqValue, SqError>;
+  bindings: SqRecord;
+};
+
+const importSourceName = (sourceName: string) => "imports-" + sourceName;
+const defaultContinues = [];
+
+export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
+  const sourceName = useMemo(() => uuid.v4(), []);
+
+  const env = args.project.getEnvironment();
+  const continues = args.continues || defaultContinues;
+
   const result = useMemo(
     () => {
-      const project = SqProject.create();
-      project.setSource("main", args.code);
-      if (args.environment) {
-        project.setEnvironment(args.environment);
-      }
+      const project = args.project;
+
+      project.setSource(sourceName, args.code);
+      let fullContinues = continues;
       if (args.jsImports && Object.keys(args.jsImports).length) {
         const importsSource = jsImportsToSquiggleCode(args.jsImports);
-        project.setSource("imports", importsSource);
-        project.setContinues("main", ["imports"]);
+        project.setSource(importSourceName(sourceName), importsSource);
+        fullContinues = continues.concat(importSourceName(sourceName));
       }
-      project.run("main");
-      const result = project.getResult("main");
-      const bindings = project.getBindings("main");
+      project.setContinues(sourceName, fullContinues);
+      project.run(sourceName);
+      const result = project.getResult(sourceName);
+      const bindings = project.getBindings(sourceName);
       return { result, bindings };
     },
+    // This complains about executionId not being used inside the function body.
+    // This is on purpose, as executionId simply allows you to run the squiggle
+    // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [args.code, args.environment, args.jsImports, args.executionId]
+    [
+      args.code,
+      args.jsImports,
+      args.executionId,
+      sourceName,
+      continues,
+      args.project,
+      env,
+    ]
   );
 
   const { onChange } = args;
 
   useEffect(() => {
-    onChange?.(result.result.tag === "Ok" ? result.result.value : undefined);
-  }, [result, onChange]);
+    onChange?.(
+      result.result.tag === "Ok" ? result.result.value : undefined,
+      sourceName
+    );
+  }, [result, onChange, sourceName]);
+
+  useEffect(() => {
+    return () => {
+      args.project.removeSource(sourceName);
+      if (args.project.getSource(importSourceName(sourceName)))
+        args.project.removeSource(importSourceName(sourceName));
+    };
+  }, [args.project, sourceName]);
 
   return result;
 };

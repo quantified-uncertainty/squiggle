@@ -2,8 +2,8 @@ open FunctionRegistry_Core
 open Reducer_T
 
 let impossibleErrorString = "Wrong inputs / Logically impossible"
-let impossibleError: errorValue = impossibleErrorString->Reducer_ErrorValue.REOther
-let wrapError = e => Reducer_ErrorValue.REOther(e)
+let impossibleError: errorMessage = impossibleErrorString->SqError.Message.REOther
+let wrapError = e => SqError.Message.REOther(e)
 
 module Wrappers = {
   let symbolic = r => DistributionTypes.Symbolic(r)

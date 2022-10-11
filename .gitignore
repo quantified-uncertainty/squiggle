@@ -11,3 +11,5 @@ yarn-error.log
 .vscode
 todo.txt
 result
+shell.nix
+.turbo

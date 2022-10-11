@@ -3,7 +3,7 @@ This is the most basic file in our invariants family of tests.
 
 Validate that the addition of means equals the mean of the addition, similar for subtraction and multiplication. 
 
-Details in https://develop--squiggle-documentation.netlify.app/docs/internal/invariants/
+Details in https://squiggle-language.com/docs/internal/invariants/
 
 Note: epsilon of 1e3 means the invariants are, in general, not being satisfied. 
 */

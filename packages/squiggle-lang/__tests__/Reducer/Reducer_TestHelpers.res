@@ -1,4 +1,3 @@
-module ErrorValue = Reducer_ErrorValue
 module Expression = Reducer_Expression
 module ExpressionT = Reducer_Expression_T
 
@@ -9,7 +8,7 @@ let unwrapRecord = rValue =>
   rValue->Belt.Result.flatMap(value =>
     switch value {
     | Reducer_T.IEvRecord(aRecord) => Ok(aRecord)
-    | _ => ErrorValue.RETodo("TODO: Internal bindings must be returned")->Error
+    | _ => SqError.Message.RETodo("TODO: Internal bindings must be returned")->Error
     }
   )
 

@@ -1,9 +1,15 @@
 import * as React from "react";
-import { SqLambda, environment, SqValueTag } from "@quri/squiggle-lang";
+import {
+  SqLambda,
+  environment,
+  SqValueTag,
+  SqError,
+} from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
 import { DistributionPlottingSettings } from "./DistributionChart";
-import { ErrorAlert, MessageAlert } from "./Alert";
+import { MessageAlert } from "./Alert";
+import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
 
 export type FunctionChartSettings = {
   start: number;
@@ -19,6 +25,25 @@ interface FunctionChartProps {
   height: number;
 }
 
+const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
+  const [expanded, setExpanded] = React.useState(false);
+  if (expanded) {
+  }
+  return (
+    <MessageAlert heading="Function Display Failed">
+      <div className="space-y-2">
+        <span
+          className="underline decoration-dashed cursor-pointer"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? "Hide" : "Show"} error details
+        </span>
+        {expanded ? <SquiggleErrorAlert error={error} /> : null}
+      </div>
+    </MessageAlert>
+  );
+};
+
 export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
   chartSettings,
@@ -26,7 +51,8 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   distributionPlotSettings,
   height,
 }) => {
-  if (fn.parameters.length > 1) {
+  console.log(fn.parameters().length);
+  if (fn.parameters().length !== 1) {
     return (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.
@@ -47,9 +73,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   const validResult = getValidResult();
 
   if (validResult.tag === "Error") {
-    return (
-      <ErrorAlert heading="Error">{validResult.value.toString()}</ErrorAlert>
-    );
+    return <FunctionCallErrorAlert error={validResult.value} />;
   }
 
   switch (validResult.value.tag) {

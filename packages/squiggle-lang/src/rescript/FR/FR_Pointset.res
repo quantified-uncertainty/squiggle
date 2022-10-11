@@ -16,30 +16,30 @@ let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
           let yValue = map->Belt.Map.String.get("y")
           switch (xValue, yValue) {
           | (Some(IEvNumber(x)), Some(IEvNumber(y))) => (x, y)
-          | _ => impossibleError->Reducer_ErrorValue.toException
+          | _ => impossibleError->SqError.Message.throw
           }
         }
-      | _ => impossibleError->Reducer_ErrorValue.toException
+      | _ => impossibleError->SqError.Message.throw
       }
     )
     ->Ok
     ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
     ->E.R2.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
-  | _ => impossibleError->Reducer_ErrorValue.toException
+  | _ => impossibleError->SqError.Message.throw
   }
 }
 
 module Internal = {
   type t = PointSetDist.t
 
-  let toType = (r): result<Reducer_T.value, Reducer_ErrorValue.errorValue> =>
+  let toType = (r): result<Reducer_T.value, SqError.Message.t> =>
     switch r {
     | Ok(r) => Ok(Wrappers.evDistribution(PointSet(r)))
     | Error(err) => Error(REOperationError(err))
     }
 
   let doLambdaCall = (aLambdaValue, list, env, reducer) =>
-    switch Reducer_Expression_Lambda.doLambdaCall(aLambdaValue, list, env, reducer) {
+    switch Reducer_Lambda.doLambdaCall(aLambdaValue, list, env, reducer) {
     | Reducer_T.IEvNumber(f) => Ok(f)
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
@@ -61,18 +61,18 @@ let library = [
       FnDefinition.make(
         ~name="fromDist",
         ~inputs=[FRTypeDist],
-        ~run=(inputs, env, _) =>
+        ~run=(inputs, context, _) =>
           switch inputs {
           | [IEvDistribution(dist)] =>
             GenericDist.toPointSet(
               dist,
-              ~xyPointLength=env.xyPointLength,
-              ~sampleCount=env.sampleCount,
+              ~xyPointLength=context.environment.xyPointLength,
+              ~sampleCount=context.environment.sampleCount,
               (),
             )
             ->E.R2.fmap(Wrappers.pointSet)
             ->E.R2.fmap(Wrappers.evDistribution)
-            ->E.R2.errMap(e => Reducer_ErrorValue.REDistributionError(e))
+            ->E.R2.errMap(e => SqError.Message.REDistributionError(e))
           | _ => Error(impossibleError)
           },
         (),

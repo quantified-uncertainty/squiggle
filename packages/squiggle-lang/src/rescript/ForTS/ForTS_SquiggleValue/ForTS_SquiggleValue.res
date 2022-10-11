@@ -1,5 +1,5 @@
 @genType type squiggleValue = Reducer_T.value //re-export
-type reducerErrorValue = ForTS_Reducer_ErrorValue.reducerErrorValue //use
+type error = SqError.t //use
 
 @genType type squiggleValue_Array = Reducer_T.arrayValue //re-export recursive type
 @genType type squiggleValue_Record = Reducer_T.map //re-export recursive type
@@ -69,7 +69,7 @@ let toString = (variant: squiggleValue) => Reducer_Value.toString(variant)
 // This is a useful method for unit tests.
 // Convert the result along with the error message to a string.
 @genType
-let toStringResult = (variantResult: result<squiggleValue, reducerErrorValue>) =>
+let toStringResult = (variantResult: result<squiggleValue, error>) =>
   Reducer_Value.toStringResult(variantResult)
 
 @genType

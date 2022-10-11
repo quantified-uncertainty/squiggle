@@ -36,7 +36,7 @@ Here we will finally proceed to a real life scenario. */
       /* Parse includes has set the includes */
       switch project->Project.getIncludes("main") {
       | Ok(includes) => includes->expect == ["common"]
-      | Error(err) => err->Reducer_ErrorValue.errorToString->fail
+      | Error(err) => err->SqError.toString->fail
       }
       /* If the includes cannot be parsed then you get a syntax error.
       Otherwise you get the includes.
@@ -85,7 +85,7 @@ Here we will finally proceed to a real life scenario. */
           let rIncludes = project->Project.getIncludes(sourceName)
           switch rIncludes {
           /* Maybe there is an include syntax error */
-          | Error(err) => err->Reducer_ErrorValue.errorToString->Js.Exn.raiseError
+          | Error(err) => err->SqError.toString->Js.Exn.raiseError
 
           | Ok(includes) =>
             includes->Belt.Array.forEach(newIncludeName => {
@@ -169,7 +169,7 @@ Here we will finally proceed to a real life scenario. */
     test("getIncludes", () => {
       switch Project.getIncludes(project, "main") {
       | Ok(includes) => includes->expect == ["common"]
-      | Error(err) => err->Reducer_ErrorValue.errorToString->fail
+      | Error(err) => err->SqError.toString->fail
       }
     })
   })

@@ -3,3 +3,4 @@
 /server/out
 /*.vsix
 /syntaxes/*.json
+dist
