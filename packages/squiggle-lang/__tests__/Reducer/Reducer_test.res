@@ -99,7 +99,7 @@ describe("stacktraces", () => {
 
     expect(
       error,
-    )->toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]
+    )->toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(date, duration)]; [add(duration, duration)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]
 Stack trace:
   f at line 4, column 5
   g at line 6, column 12
