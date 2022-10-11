@@ -2,7 +2,8 @@ open Jest
 open Reducer_TestHelpers
 
 describe("Plot Library", () => {
-  testEvalToBe(`Plot.dist({
+  testEvalToBe(
+    `Plot.dist({
     show: [{
       name: "normal",
       value: normal(0, 1)
@@ -13,5 +14,7 @@ describe("Plot Library", () => {
       name: "constant", 
       value: 3
     }]
-})`, "Ok(Plot showing normal,lognormal,constant)")
+})`,
+    "Ok(Plot showing normal,lognormal,constant)",
+  )
 })

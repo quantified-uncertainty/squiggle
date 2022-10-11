@@ -1,4 +1,5 @@
 type internalExpressionValueType = Reducer_Value.internalExpressionValueType
+let valueTypeToString = Reducer_Value.valueTypeToString
 type errorMessage = SqError.Message.t
 
 /*
