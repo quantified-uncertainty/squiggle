@@ -25,7 +25,6 @@
   ],
   "suffix": ".bs.js",
   "namespace": true,
-  "bs-dependencies": ["bisect_ppx"],
   "bs-dev-dependencies": [
     "@glennsl/rescript-jest",
     "rescript-fast-check",
@@ -45,8 +44,5 @@
   "refmt": 3,
   "warnings": {
     "number": "+A-42-48-9-30-4"
-  },
-  "ppx-flags": [
-    ["../../node_modules/bisect_ppx/ppx", "--exclude-files", ".*_test\\.res$$"]
-  ]
+  }
 }

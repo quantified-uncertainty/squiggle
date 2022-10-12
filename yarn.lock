@@ -6640,11 +6640,6 @@ bindings@^1.5.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
-bisect_ppx@^2.7.1:
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/bisect_ppx/-/bisect_ppx-2.7.1.tgz#8fde3e6f767a1a4ca190a266d0bd38800b088f66"
-  integrity sha512-e8gRgfhmCptiyGGov+54Acah+rc+svm0yc/26mn+M6CCNDADufVLMgRaG1uw3LAHm/PFPy+zGFAKMwd6lD2O2g==
-
 bl@^4.0.3:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/bl/-/bl-4.1.0.tgz#451535264182bec2fbbc83a62ab98cf11d9f7b3a"
