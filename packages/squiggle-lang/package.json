@@ -22,7 +22,7 @@
     "test:rescript": "jest --modulePathIgnorePatterns=__tests__/TS/*",
     "test:watch": "jest --watchAll",
     "test:fnRegistry": "jest __tests__/SquiggleLibrary/SquiggleLibrary_FunctionRegistryLibrary_test.bs.js",
-    "coverage:local": "jest --coverage && open coverage/lcov-report/index.html",
+    "coverage:local": "jest --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",
     "coverage": "jest --coverage && codecov",
     "lint:rescript": "./lint.sh",
     "lint:prettier": "prettier --check .",
