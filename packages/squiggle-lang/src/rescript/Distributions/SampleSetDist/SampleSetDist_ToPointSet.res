@@ -33,19 +33,19 @@ module Internals = {
 
   module KDE = {
     let normalSampling = (samples, outputXYPoints, kernelWidth) =>
-      samples |> JS.samplesToContinuousPdf(_, outputXYPoints, kernelWidth) |> JS.jsToDist
+      samples->JS.samplesToContinuousPdf(outputXYPoints, kernelWidth)->JS.jsToDist
   }
 
   module T = {
     type t = array<float>
 
     let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
-      let xyPointRange = E.A.Sorted.range(samples) |> E.O.default(0.0)
+      let xyPointRange = E.A.Sorted.range(samples)->E.O2.default(0.0)
       let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints)
       xWidth /. xyPointWidth
     }
 
-    let formatUnitWidth = w => Jstat.max([w, 1.0]) |> int_of_float
+    let formatUnitWidth = w => Jstat.max([w, 1.0])->int_of_float
 
     let suggestedUnitWidth = (samples, outputXYPoints) => {
       let suggestedXWidth = SampleSetDist_Bandwidth.nrd0(samples)
@@ -62,22 +62,24 @@ let toPointSetDist = (
   ~samplingInputs: SamplingInputs.samplingInputs,
   (),
 ): Internals.Types.outputs => {
-  Array.fast_sort(compare, samples)
+  let samples = samples->E.A.Floats.sort
+
   let minDiscreteToKeep = MagicNumbers.ToPointSet.minDiscreteToKeep(samples)
   let (continuousPart, discretePart) = E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(
     samples,
     ~minDiscreteWeight=minDiscreteToKeep,
   )
-  let length = samples |> E.A.length |> float_of_int
+
+  let length = samples->E.A.length->float_of_int
   let discrete: PointSetTypes.discreteShape =
     discretePart
-    |> E.FloatFloatMap.fmap(r => r /. length)
-    |> E.FloatFloatMap.toArray
-    |> XYShape.T.fromZippedArray
-    |> Discrete.make
+    ->E.FloatFloatMap.fmap(r => r /. length, _)
+    ->E.FloatFloatMap.toArray
+    ->XYShape.T.fromZippedArray
+    ->Discrete.make
 
   let pdf =
-    continuousPart |> E.A.length > 5
+    continuousPart->E.A.length > 5
       ? {
           let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
           // todo: This does some recalculating from the last step.
@@ -85,7 +87,7 @@ let toPointSetDist = (
             continuousPart,
             samplingInputs.outputXYPoints,
           )
-          let usedWidth = samplingInputs.kernelWidth |> E.O.default(_suggestedXWidth)
+          let usedWidth = samplingInputs.kernelWidth->E.O2.default(_suggestedXWidth)
           let usedUnitWidth = Internals.T.xWidthToUnitWidth(
             samples,
             samplingInputs.outputXYPoints,
@@ -100,18 +102,18 @@ let toPointSetDist = (
             bandwidthUnitImplemented: usedUnitWidth,
           }
           continuousPart
-          |> Internals.T.kde(
+          ->Internals.T.kde(
             ~samples=_,
             ~outputXYPoints=samplingInputs.outputXYPoints,
             Internals.T.formatUnitWidth(usedUnitWidth),
           )
-          |> Continuous.make
-          |> (r => Some((r, samplingStats)))
+          ->Continuous.make
+          ->(r => Some((r, samplingStats)))
         }
       : None
 
   let pointSetDist = MixedShapeBuilder.buildSimple(
-    ~continuous=pdf |> E.O.fmap(fst),
+    ~continuous=pdf->E.O2.fmap(fst),
     ~discrete=Some(discrete),
   )
 
@@ -124,7 +126,7 @@ let toPointSetDist = (
   let normalizedPointSet = pointSetDist->E.O2.fmap(PointSetDist.T.normalize)
 
   let samplesParse: Internals.Types.outputs = {
-    continuousParseParams: pdf |> E.O.fmap(snd),
+    continuousParseParams: pdf->E.O2.fmap(snd),
     pointSetDist: normalizedPointSet,
   }
 

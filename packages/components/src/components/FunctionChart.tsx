@@ -1,14 +1,15 @@
 import * as React from "react";
 import {
-  lambdaValue,
+  SqLambda,
   environment,
-  runForeign,
-  errorValueToString,
+  SqValueTag,
+  SqError,
 } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
 import { DistributionPlottingSettings } from "./DistributionChart";
-import { ErrorAlert, MessageAlert } from "./Alert";
+import { MessageAlert } from "./Alert";
+import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
 
 export type FunctionChartSettings = {
   start: number;
@@ -17,12 +18,31 @@ export type FunctionChartSettings = {
 };
 
 interface FunctionChartProps {
-  fn: lambdaValue;
+  fn: SqLambda;
   chartSettings: FunctionChartSettings;
   distributionPlotSettings: DistributionPlottingSettings;
   environment: environment;
   height: number;
 }
+
+const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
+  const [expanded, setExpanded] = React.useState(false);
+  if (expanded) {
+  }
+  return (
+    <MessageAlert heading="Function Display Failed">
+      <div className="space-y-2">
+        <span
+          className="underline decoration-dashed cursor-pointer"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? "Hide" : "Show"} error details
+        </span>
+        {expanded ? <SquiggleErrorAlert error={error} /> : null}
+      </div>
+    </MessageAlert>
+  );
+};
 
 export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
@@ -31,15 +51,16 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   distributionPlotSettings,
   height,
 }) => {
-  if (fn.parameters.length > 1) {
+  console.log(fn.parameters().length);
+  if (fn.parameters().length !== 1) {
     return (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.
       </MessageAlert>
     );
   }
-  const result1 = runForeign(fn, [chartSettings.start], environment);
-  const result2 = runForeign(fn, [chartSettings.stop], environment);
+  const result1 = fn.call([chartSettings.start]);
+  const result2 = fn.call([chartSettings.stop]);
   const getValidResult = () => {
     if (result1.tag === "Ok") {
       return result1;
@@ -52,15 +73,11 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   const validResult = getValidResult();
 
   if (validResult.tag === "Error") {
-    return (
-      <ErrorAlert heading="Error">
-        {errorValueToString(validResult.value)}
-      </ErrorAlert>
-    );
+    return <FunctionCallErrorAlert error={validResult.value} />;
   }
 
   switch (validResult.value.tag) {
-    case "distribution":
+    case SqValueTag.Distribution:
       return (
         <FunctionChart1Dist
           fn={fn}
@@ -70,7 +87,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
           distributionPlotSettings={distributionPlotSettings}
         />
       );
-    case "number":
+    case SqValueTag.Number:
       return (
         <FunctionChart1Number
           fn={fn}

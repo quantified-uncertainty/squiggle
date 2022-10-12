@@ -52,28 +52,33 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      algolia: {
-        // The application ID provided by Algolia
-        appId: "KBED3M1CMD",
+      // TODO - disabled until we fix algolia search
+      // algolia: {
+      //   // The application ID provided by Algolia
+      //   appId: "KBED3M1CMD",
 
-        // Public API key: it is safe to commit it
-        apiKey: "c61bc7603893cf287ed6971983af8bad",
+      //   // Public API key: it is safe to commit it
+      //   apiKey: "c61bc7603893cf287ed6971983af8bad",
 
-        indexName: "squiggle_docs",
+      //   indexName: "squiggle_docs",
 
-        // Optional: see doc section below
-        contextualSearch: true,
+      //   // Optional: see doc section below
+      //   contextualSearch: true,
 
-        // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
-        // externalUrlRegex: 'external\\.com|domain\\.com',
+      //   // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
+      //   // externalUrlRegex: 'external\\.com|domain\\.com',
 
-        // Optional: Algolia search parameters
-        searchParameters: {},
+      //   // Optional: Algolia search parameters
+      //   searchParameters: {},
 
-        // Optional: path for search page that enabled by default (`false` to disable it)
-        searchPagePath: "search",
+      //   // Optional: path for search page that enabled by default (`false` to disable it)
+      //   searchPagePath: "search",
 
-        //... other Algolia params
+      //   //... other Algolia params
+      // },
+      colorMode: {
+        // squiggle playground is not compatible with dark mode yet, see https://github.com/quantified-uncertainty/squiggle/issues/1192
+        disableSwitch: true,
       },
       navbar: {
         title: "Squiggle",

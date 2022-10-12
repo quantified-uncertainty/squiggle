@@ -6,3 +6,5 @@ lib
 _coverage/
 .cache/
 Reducer_Peggy_GeneratedParser.js
+ReducerProject_IncludeParser.js
+src/rescript/Reducer/Reducer_Peggy/helpers.js

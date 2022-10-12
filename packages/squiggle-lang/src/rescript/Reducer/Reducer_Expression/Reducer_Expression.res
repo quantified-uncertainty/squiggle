@@ -1,158 +1,153 @@
-module BindingsReplacer = Reducer_Expression_BindingsReplacer
-module BuiltIn = Reducer_Dispatch_BuiltIn
-module ExpressionBuilder = Reducer_Expression_ExpressionBuilder
-module Extra = Reducer_Extra
-module InternalExpressionValue = ReducerInterface_InternalExpressionValue
-module Lambda = Reducer_Expression_Lambda
-module Macro = Reducer_Expression_Macro
-module MathJs = Reducer_MathJs
 module Bindings = Reducer_Bindings
 module Result = Belt.Result
-module T = Reducer_Expression_T
+module T = Reducer_T
 
-type environment = InternalExpressionValue.environment
-type errorValue = Reducer_ErrorValue.errorValue
-type expression = T.expression
-type internalExpressionValue = InternalExpressionValue.t
-type externalExpressionValue = ReducerInterface_ExternalExpressionValue.t
-type t = expression
-
-/*
-  Converts a Squigle code to expression
-*/
-let parse = (peggyCode: string): result<t, errorValue> =>
-  peggyCode->Reducer_Peggy_Parse.parse->Result.map(Reducer_Peggy_ToExpression.fromNode)
-
-/*
-  Recursively evaluate/reduce the expression (Lisp AST)
-*/
-let rec reduceExpression = (expression: t, bindings: T.bindings, environment: environment): result<
-  internalExpressionValue,
-  'e,
-> => {
-  // Js.log(`reduce: ${T.toString(expression)} bindings: ${bindings->Bindings.toString}`)
-  switch expression {
-  | T.EValue(value) => value->Ok
-  | T.EList(list) =>
-    switch list {
-    | list{EValue(IEvCall(fName)), ..._args} =>
-      switch Macro.isMacroName(fName) {
-      // A macro expands then reduces itself
-      | true => Macro.doMacroCall(expression, bindings, environment, reduceExpression)
-      | false => reduceExpressionList(list, bindings, environment)
-      }
-    | _ => reduceExpressionList(list, bindings, environment)
-    }
-  }
+let toLocation = (expression: T.expression): Reducer_Peggy_Parse.location => {
+  expression.ast.location
 }
 
-and reduceExpressionList = (
-  expressions: list<t>,
-  bindings: T.bindings,
-  environment: environment,
-): result<internalExpressionValue, 'e> => {
-  let racc: result<
-    list<internalExpressionValue>,
-    'e,
-  > = expressions->Belt.List.reduceReverse(Ok(list{}), (racc, each: expression) =>
-    racc->Result.flatMap(acc => {
-      each
-      ->reduceExpression(bindings, environment)
-      ->Result.map(newNode => {
-        acc->Belt.List.add(newNode)
-      })
-    })
-  )
-  racc->Result.flatMap(acc => acc->reduceValueList(environment))
-}
-
-/*
-    After reducing each level of expression(Lisp AST), we have a value list to evaluate
- */
-and reduceValueList = (valueList: list<internalExpressionValue>, environment): result<
-  internalExpressionValue,
-  'e,
-> =>
-  switch valueList {
-  | list{IEvCall(fName), ...args} => {
-      let rCheckedArgs = switch fName {
-      | "$_setBindings_$" | "$_setTypeOfBindings_$" | "$_setTypeAliasBindings_$" => args->Ok
-      | _ => args->Lambda.checkIfReduced
-      }
-
-      rCheckedArgs->Result.flatMap(checkedArgs =>
-        (fName, checkedArgs->Belt.List.toArray)->BuiltIn.dispatch(environment, reduceExpression)
-      )
-    }
-  | list{IEvLambda(_)} =>
-    // TODO: remove on solving issue#558
-    valueList
-    ->Lambda.checkIfReduced
-    ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
-    )
-  | list{IEvLambda(lamdaCall), ...args} =>
-    args
-    ->Lambda.checkIfReduced
-    ->Result.flatMap(checkedArgs =>
-      Lambda.doLambdaCall(lamdaCall, checkedArgs, environment, reduceExpression)
-    )
-
-  | _ =>
-    valueList
-    ->Lambda.checkIfReduced
-    ->Result.flatMap(reducedValueList =>
-      reducedValueList->Belt.List.toArray->InternalExpressionValue.IEvArray->Ok
-    )
-  }
-
-let evalUsingBindingsExpression_ = (aExpression, bindings, environment): result<
-  internalExpressionValue,
-  'e,
-> => reduceExpression(aExpression, bindings, environment)
-
-let evaluateUsingOptions = (
-  ~environment: option<ReducerInterface_ExternalExpressionValue.environment>,
-  ~externalBindings: option<ReducerInterface_ExternalExpressionValue.externalBindings>,
-  code: string,
-): result<externalExpressionValue, errorValue> => {
-  let anEnvironment = Belt.Option.getWithDefault(
-    environment,
-    ReducerInterface_ExternalExpressionValue.defaultEnvironment,
-  )
-
-  let mergedBindings: InternalExpressionValue.nameSpace = Bindings.merge(
-    ReducerInterface_StdLib.internalStdLib,
-    Belt.Option.map(externalBindings, Bindings.fromTypeScriptBindings)->Belt.Option.getWithDefault(
-      Bindings.emptyModule,
+let throwFrom = (error: SqError.Message.t, expression: T.expression, context: T.context) =>
+  error->SqError.throwMessageWithFrameStack(
+    context.frameStack->Reducer_FrameStack.extend(
+      context->Reducer_Context.currentFunctionName,
+      Some(expression->toLocation),
     ),
   )
 
-  parse(code)
-  ->Result.flatMap(expr => evalUsingBindingsExpression_(expr, mergedBindings, anEnvironment))
-  ->Result.map(ReducerInterface_InternalExpressionValue.toExternal)
+/*
+  Recursively evaluate the expression
+*/
+let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
+  // Js.log(`reduce: ${expression->Reducer_Expression_T.toString}`)
+  switch expression.content {
+  | T.EBlock(statements) => {
+      let innerContext = {...context, bindings: context.bindings->Bindings.extend}
+      let (value, _) =
+        statements->Belt.Array.reduce((T.IEvVoid, innerContext), ((_, currentContext), statement) =>
+          statement->evaluate(currentContext)
+        )
+      (value, context)
+    }
+
+  | T.EProgram(statements) => {
+      // Js.log(`bindings: ${context.bindings->Bindings.locals->Reducer_Namespace.toString}`)
+      let (value, finalContext) =
+        statements->Belt.Array.reduce((T.IEvVoid, context), ((_, currentContext), statement) =>
+          statement->evaluate(currentContext)
+        )
+
+      // Js.log(`bindings after: ${finalContext.bindings->Bindings.locals->Reducer_Namespace.toString}`)
+      (value, finalContext)
+    }
+
+  | T.EArray(elements) => {
+      let value =
+        elements
+        ->Belt.Array.map(element => {
+          let (value, _) = evaluate(element, context)
+          value
+        })
+        ->T.IEvArray
+      (value, context)
+    }
+
+  | T.ERecord(pairs) => {
+      let value =
+        pairs
+        ->Belt.Array.map(((eKey, eValue)) => {
+          let (key, _) = eKey->evaluate(context)
+          let keyString = switch key {
+          | IEvString(s) => s
+          | _ => REOther("Record keys must be strings")->throwFrom(expression, context)
+          }
+          let (value, _) = eValue->evaluate(context)
+          (keyString, value)
+        })
+        ->Belt.Map.String.fromArray
+        ->T.IEvRecord
+      (value, context)
+    }
+
+  | T.EAssign(left, right) => {
+      let (result, _) = right->evaluate(context)
+      (
+        T.IEvVoid,
+        {
+          ...context,
+          bindings: context.bindings->Bindings.set(left, result),
+        },
+      )
+    }
+
+  | T.ESymbol(name) =>
+    switch context.bindings->Bindings.get(name) {
+    | Some(v) => (v, context)
+    | None => RESymbolNotFound(name)->throwFrom(expression, context)
+    }
+
+  | T.EValue(value) => (value, context)
+
+  | T.ETernary(predicate, trueCase, falseCase) => {
+      let (predicateResult, _) = predicate->evaluate(context)
+      switch predicateResult {
+      | T.IEvBool(value) => (value ? trueCase : falseCase)->evaluate(context)
+      | _ => REExpectedType("Boolean", "")->throwFrom(expression, context)
+      }
+    }
+
+  | T.ELambda(parameters, body, name) => (
+      Reducer_Lambda.makeLambda(
+        name,
+        parameters,
+        context.bindings,
+        body,
+        expression->toLocation,
+      )->T.IEvLambda,
+      context,
+    )
+
+  | T.ECall(fn, args) => {
+      let (lambda, _) = fn->evaluate(context)
+      let argValues = Belt.Array.map(args, arg => {
+        let (argValue, _) = arg->evaluate(context)
+        argValue
+      })
+      switch lambda {
+      | T.IEvLambda(lambda) => {
+          let result = Reducer_Lambda.doLambdaCallFrom(
+            lambda,
+            argValues,
+            context,
+            evaluate,
+            Some(expression->toLocation), // we have to pass the location of a current expression here, to put it on frameStack
+          )
+          (result, context)
+        }
+      | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(expression, context)
+      }
+    }
+  }
 }
 
-/*
-  IEvaluates Squiggle code and bindings via Reducer and answers the result
-*/
-let evaluate = (code: string): result<externalExpressionValue, errorValue> => {
-  evaluateUsingOptions(~environment=None, ~externalBindings=None, code)
-}
-let evaluatePartialUsingExternalBindings = (
-  code: string,
-  externalBindings: ReducerInterface_ExternalExpressionValue.externalBindings,
-  environment: ReducerInterface_ExternalExpressionValue.environment,
-): result<ReducerInterface_ExternalExpressionValue.externalBindings, errorValue> => {
-  let rAnswer = evaluateUsingOptions(
-    ~environment=Some(environment),
-    ~externalBindings=Some(externalBindings),
-    code,
-  )
-  switch rAnswer {
-  | Ok(EvModule(externalBindings)) => Ok(externalBindings)
-  | Ok(_) =>
-    Error(Reducer_ErrorValue.RESyntaxError(`Partials must end with an assignment or record`, None))
-  | Error(err) => err->Error
+module BackCompatible = {
+  // Those methods are used to support the existing tests
+  // If they are used outside limited testing context, error location reporting will fail
+  let parse = (peggyCode: string): result<T.expression, Reducer_Peggy_Parse.parseError> =>
+    peggyCode->Reducer_Peggy_Parse.parse("main")->Result.map(Reducer_Peggy_ToExpression.fromNode)
+
+  let createDefaultContext = () =>
+    Reducer_Context.createContext(SquiggleLibrary_StdLib.stdLib, Reducer_Context.defaultEnvironment)
+
+  let evaluate = (expression: T.expression): result<T.value, SqError.t> => {
+    let context = createDefaultContext()
+    try {
+      let (value, _) = expression->evaluate(context)
+      value->Ok
+    } catch {
+    | exn => exn->SqError.fromException->Error
+    }
   }
+
+  let evaluateString = (peggyCode: string): result<T.value, SqError.t> =>
+    parse(peggyCode)->E.R2.errMap(e => e->SqError.fromParseError)->Result.flatMap(evaluate)
 }

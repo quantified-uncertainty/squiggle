@@ -154,9 +154,11 @@ or all values lower than x. It is the inverse of `quantile`.
 
 ### Quantile
 
-The `quantile(dist, prob)` gives the value x or which the probability for all values
+The `quantile(dist, prob)` gives the value x for which the sum of the probability for all values
 lower than x is equal to prob. It is the inverse of `cdf`. In the literature, it
-is also known as the quantiles function.
+is also known as the quantiles function. In the optional `summary stistics` panel which appears
+beneath distributions, the numbers beneath 5%, 10%, 25% etc are the quantiles of that distribution
+for those precentage values.
 
 <SquiggleEditor defaultCode="quantile(normal(0,1),0.5)" />
 
@@ -179,7 +181,7 @@ The `sample(distribution)` samples a given distribution.
 
 ## Converting between distribution formats
 
-Recall the [three formats of distributions](https://develop--squiggle-documentation.netlify.app/docs/Discussions/Three-Types-Of-Distributions). We can force any distribution into `SampleSet` format
+Recall the [three formats of distributions](/docs/Discussions/Three-Formats-Of-Distributions). We can force any distribution into `SampleSet` format
 
 <SquiggleEditor defaultCode="SampleSet.fromDist(normal(5, 10))" />
 

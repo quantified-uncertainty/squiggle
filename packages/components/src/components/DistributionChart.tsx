@@ -1,11 +1,12 @@
 import * as React from "react";
 import {
-  Distribution,
+  SqDistribution,
   result,
-  distributionError,
-  distributionErrorToString,
-  squiggleExpression,
+  SqDistributionError,
   resultMap,
+  SqRecord,
+  environment,
+  SqDistributionTag,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -28,17 +29,17 @@ export type DistributionPlottingSettings = {
 
 export type DistributionChartProps = {
   plot: Plot;
+  environment: environment;
   width?: number;
   height: number;
+  xAxisType?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
-export function defaultPlot(distribution: Distribution): Plot {
+export function defaultPlot(distribution: SqDistribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
 }
 
-export function makePlot(record: {
-  [key: string]: squiggleExpression;
-}): Plot | void {
+export function makePlot(record: SqRecord): Plot | void {
   const plotResult = parsePlot(record);
   if (plotResult.tag === "Ok") {
     return plotResult.value;
@@ -46,38 +47,68 @@ export function makePlot(record: {
 }
 
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const { plot, height, showSummary, width, logX, actions = false } = props;
+  const {
+    plot,
+    environment,
+    height,
+    showSummary,
+    width,
+    logX,
+    actions = false,
+  } = props;
   const [sized] = useSize((size) => {
-    let shapes = flattenResult(
+    const shapes = flattenResult(
       plot.distributions.map((x) =>
-        resultMap(x.distribution.pointSet(), (shape) => ({
+        resultMap(x.distribution.pointSet(environment), (pointSet) => ({
           name: x.name,
           // color: x.color, // not supported yet
-          continuous: shape.continuous,
-          discrete: shape.discrete,
+          ...pointSet.asShape(),
         }))
       )
     );
+
     if (shapes.tag === "Error") {
       return (
         <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(shapes.value)}
+          {shapes.value.toString()}
         </ErrorAlert>
       );
     }
 
-    const spec = buildVegaSpec(props);
+    // if this is a sample set, include the samples
+    const samples: number[] = [];
+    for (const { distribution } of plot?.distributions) {
+      if (distribution.tag === SqDistributionTag.SampleSet) {
+        samples.push(...distribution.value());
+      }
+    }
 
-    let widthProp = width ? width : size.width;
+    const domain = shapes.value.flatMap((shape) =>
+      shape.discrete.concat(shape.continuous)
+    );
+
+    const spec = buildVegaSpec({
+      ...props,
+      minX: props.minX ?? Math.min(...domain.map((x) => x.x)),
+      maxX: props.minX ?? Math.max(...domain.map((x) => x.x)),
+      maxY: Math.max(...domain.map((x) => x.y)),
+    });
+
+    // I think size.width is sometimes not finite due to the component not being in a visible context
+    // This occurs during testing
+    let widthProp = width
+      ? width
+      : Number.isFinite(size.width)
+      ? size.width
+      : 400;
     if (widthProp < 20) {
       console.warn(
         `Width of Distribution is set to ${widthProp}, which is too small`
       );
       widthProp = 20;
     }
-    const domain = shapes.value.flatMap((shape) =>
-      shape.discrete.concat(shape.continuous)
-    );
+
+    const vegaData = { data: shapes.value, samples };
 
     return (
       <div style={{ width: widthProp }}>
@@ -88,7 +119,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         ) : (
           <Vega
             spec={spec}
-            data={{ data: shapes.value, domain }}
+            data={vegaData}
             width={widthProp - 10}
             height={height}
             actions={actions}
@@ -96,7 +127,10 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         )}
         <div className="flex justify-center">
           {showSummary && plot.distributions.length === 1 && (
-            <SummaryTable distribution={plot.distributions[0].distribution} />
+            <SummaryTable
+              distribution={plot.distributions[0].distribution}
+              environment={environment}
+            />
           )}
         </div>
       </div>
@@ -120,32 +154,36 @@ const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 type SummaryTableProps = {
-  distribution: Distribution;
+  distribution: SqDistribution;
+  environment: environment;
 };
 
-const SummaryTable: React.FC<SummaryTableProps> = ({ distribution }) => {
-  const mean = distribution.mean();
-  const stdev = distribution.stdev();
-  const p5 = distribution.inv(0.05);
-  const p10 = distribution.inv(0.1);
-  const p25 = distribution.inv(0.25);
-  const p50 = distribution.inv(0.5);
-  const p75 = distribution.inv(0.75);
-  const p90 = distribution.inv(0.9);
-  const p95 = distribution.inv(0.95);
+const SummaryTable: React.FC<SummaryTableProps> = ({
+  distribution,
+  environment,
+}) => {
+  const mean = distribution.mean(environment);
+  const stdev = distribution.stdev(environment);
+  const p5 = distribution.inv(environment, 0.05);
+  const p10 = distribution.inv(environment, 0.1);
+  const p25 = distribution.inv(environment, 0.25);
+  const p50 = distribution.inv(environment, 0.5);
+  const p75 = distribution.inv(environment, 0.75);
+  const p90 = distribution.inv(environment, 0.9);
+  const p95 = distribution.inv(environment, 0.95);
 
-  const hasResult = (x: result<number, distributionError>): boolean =>
+  const hasResult = (x: result<number, SqDistributionError>): boolean =>
     x.tag === "Ok";
 
   const unwrapResult = (
-    x: result<number, distributionError>
+    x: result<number, SqDistributionError>
   ): React.ReactNode => {
     if (x.tag === "Ok") {
       return <NumberShower number={x.value} />;
     } else {
       return (
         <ErrorAlert heading="Distribution Error">
-          {distributionErrorToString(x.value)}
+          {x.value.toString()}
         </ErrorAlert>
       );
     }

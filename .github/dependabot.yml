@@ -12,9 +12,13 @@ updates:
     commit-message:
       prefix: "⬆️"
     open-pull-requests-limit: 100
+    labels:
+      - "dependencies"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     commit-message:
       prefix: "⬆️"
+    labels:
+      - "dependencies"

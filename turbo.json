@@ -1,0 +1,39 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "lint": {
+      "outputs": []
+    },
+    "format": {},
+    "build": {
+      "dependsOn": ["^build"]
+    },
+    "vscode-squiggle#build": {
+      "dependsOn": ["^build", "@quri/squiggle-components#bundle"]
+    },
+    "@quri/squiggle-components#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "storybook-static/**"]
+    },
+    "@quri/squiggle-lang#build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        "__tests__/**/*.bs.js",
+        "benchmark/**/*.bs.js",
+        "src/rescript/**/*.js",
+        "src/rescript/**/*.gen.tsx",
+        "dist/**"
+      ]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
+    "bundle": {
+      "dependsOn": ["build"]
+    },
+    "coverage": {
+      "dependsOn": ["build"]
+    }
+  }
+}

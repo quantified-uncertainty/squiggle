@@ -1,6 +1,5 @@
+module Expression = Reducer_Expression
 module ExpressionT = Reducer_Expression_T
-module ExternalExpressionValue = ReducerInterface.ExternalExpressionValue
-module ErrorValue = Reducer_ErrorValue
 
 open Jest
 open Expect
@@ -8,30 +7,22 @@ open Expect
 let unwrapRecord = rValue =>
   rValue->Belt.Result.flatMap(value =>
     switch value {
-    | ExternalExpressionValue.EvRecord(aRecord) => Ok(aRecord)
-    | _ => ErrorValue.RETodo("TODO: External bindings must be returned")->Error
+    | Reducer_T.IEvRecord(aRecord) => Ok(aRecord)
+    | _ => SqError.Message.RETodo("TODO: Internal bindings must be returned")->Error
     }
   )
 
-let expectParseToBe = (expr: string, answer: string) =>
-  Reducer.parse(expr)->ExpressionT.toStringResult->expect->toBe(answer)
+let expectParseToBe = (code: string, answer: string) =>
+  Expression.BackCompatible.parse(code)->ExpressionT.toStringResult->expect->toBe(answer)
 
-let expectEvalToBe = (expr: string, answer: string) =>
-  Reducer.evaluate(expr)
-  ->Reducer_Helpers.rRemoveDefaultsExternal
-  ->ExternalExpressionValue.toStringResult
+let expectEvalToBe = (code: string, answer: string) =>
+  Expression.BackCompatible.evaluateString(code)->Reducer_Value.toStringResult->expect->toBe(answer)
+
+let expectEvalError = (code: string) =>
+  Expression.BackCompatible.evaluateString(code)
+  ->Reducer_Value.toStringResult
   ->expect
-  ->toBe(answer)
-
-let expectEvalError = (expr: string) =>
-  Reducer.evaluate(expr)->ExternalExpressionValue.toStringResult->expect->toMatch("Error\(")
-
-let expectEvalBindingsToBe = (expr: string, bindings: Reducer.externalBindings, answer: string) =>
-  Reducer.evaluateUsingOptions(expr, ~externalBindings=Some(bindings), ~environment=None)
-  ->Reducer_Helpers.rRemoveDefaultsExternal
-  ->ExternalExpressionValue.toStringResult
-  ->expect
-  ->toBe(answer)
+  ->toMatch("Error\(")
 
 let testParseToBe = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
 let testDescriptionParseToBe = (desc, expr, answer) =>
@@ -40,18 +31,12 @@ let testDescriptionParseToBe = (desc, expr, answer) =>
 let testEvalError = expr => test(expr, () => expectEvalError(expr))
 let testEvalToBe = (expr, answer) => test(expr, () => expectEvalToBe(expr, answer))
 let testDescriptionEvalToBe = (desc, expr, answer) => test(desc, () => expectEvalToBe(expr, answer))
-let testEvalBindingsToBe = (expr, bindingsList, answer) =>
-  test(expr, () => expectEvalBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
 
 module MySkip = {
   let testParseToBe = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
   let testEvalToBe = (expr, answer) => Skip.test(expr, () => expectEvalToBe(expr, answer))
-  let testEvalBindingsToBe = (expr, bindingsList, answer) =>
-    Skip.test(expr, () => expectEvalBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
 }
 module MyOnly = {
   let testParseToBe = (expr, answer) => Only.test(expr, () => expectParseToBe(expr, answer))
   let testEvalToBe = (expr, answer) => Only.test(expr, () => expectEvalToBe(expr, answer))
-  let testEvalBindingsToBe = (expr, bindingsList, answer) =>
-    Only.test(expr, () => expectEvalBindingsToBe(expr, bindingsList->Js.Dict.fromList, answer))
 }

@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import React from "react";
-import { Path, UseFormRegister } from "react-hook-form";
+import { Path, UseFormRegister, FieldValues } from "react-hook-form";
 
-export function Checkbox<T>({
+export function Checkbox<T extends FieldValues>({
   name,
   label,
   register,

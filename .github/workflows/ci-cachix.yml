@@ -1,0 +1,87 @@
+name: Nix build
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+      - reducer-dev
+      - epic-reducer-project
+
+jobs:
+  flake-lints:
+    name: All lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install nix
+        uses: cachix/install-nix-action@v17
+        with:
+          nix_path: nixpkgs=channel:nixos-22.05
+      - name: Use cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: quantified-uncertainty
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+
+      - name: Check that lang lints
+        run: nix build .#lang-lint
+      - name: Check that components lints
+        run: nix build .#components-lint
+      - name: Check that website lints
+        run: nix build .#docusaurus-lint
+      - name: Check that vscode extension lints
+        run: nix build .#vscode-lint
+      - name: Check that cli lints
+        run: nix build .#cli-lint
+
+  flake-packages:
+    name: Builds, tests, and bundles
+    runs-on: ubuntu-latest
+    needs: flake-lints
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install nix
+        uses: cachix/install-nix-action@v17
+        with:
+          nix_path: nixpkgs=channel:nixos-22.05
+      - name: Use cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: quantified-uncertainty
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+
+      - name: Check all lang tests
+        run: nix build .#lang-test
+      - name: Check that lang bundles
+        run: nix build .#lang-bundle
+      - name: Check that components builds
+        run: nix build .#components
+      - name: Check that components bundles
+        run: nix build .#components-bundle
+
+  flake-devshells:
+    name: Development shell environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install nix
+        uses: cachix/install-nix-action@v17
+        with:
+          nix_path: nixpkgs=channel:nixos-22.05
+      - name: Use cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: quantified-uncertainty
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - name: Build js devshell
+        run: nix develop .#js --profile just-js
+      - name: Build js & wasm devshell
+        run: nix develop --profile full-shell

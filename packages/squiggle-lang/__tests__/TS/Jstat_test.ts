@@ -1,4 +1,3 @@
-// import { errorValueToString } from "../../src/js/index";
 import * as fc from "fast-check";
 import { testRun } from "./TestHelpers";
 

@@ -38,3 +38,16 @@ module Logistic = {
   @module external variance: (float, float) => float = "@stdlib/stats/base/dists/logistic/variance"
   let variance = variance
 }
+
+module Random = {
+  type sampleArgs = {
+    probs: array<float>,
+    size: int,
+  }
+  @module external sample: (array<float>, sampleArgs) => array<float> = "@stdlib/random/sample"
+  let sample = sample
+}
+
+module Math = {
+  @module external factorial: float => float = "@stdlib/math/base/special/factorial"
+}

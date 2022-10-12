@@ -1,6 +1,6 @@
 {
   "name": "squiggle-website",
-  "version": "0.3.0",
+  "version": "0.0.0",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -12,10 +12,10 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@docusaurus/core": "2.0.1",
-    "@docusaurus/preset-classic": "2.0.1",
+    "@docusaurus/core": "2.1.0",
+    "@docusaurus/preset-classic": "2.1.0",
     "@heroicons/react": "^1.0.6",
-    "@quri/squiggle-components": "^0.3",
+    "@quri/squiggle-components": "*",
     "base64-js": "^1.5.1",
     "clsx": "^1.2.1",
     "hast-util-is-element": "2.1.2",

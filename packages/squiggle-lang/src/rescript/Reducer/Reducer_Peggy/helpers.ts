@@ -1,8 +1,8 @@
 import { LocationRange } from "peggy";
 
 export const toFunction = {
+  "+": "add",
   "-": "subtract",
-  "->": "pipe",
   "!=": "unequal",
   ".-": "dotSubtract",
   ".*": "dotMultiply",
@@ -13,7 +13,6 @@ export const toFunction = {
   "/": "divide",
   "&&": "and",
   "^": "pow", // or xor
-  "+": "add",
   "<": "smaller",
   "<=": "smallerEq",
   "==": "equal",
@@ -35,128 +34,161 @@ export const postOperatorToFunction = {
   "[]": "$_atIndex_$",
 };
 
-type NodeBlock = {
+type Node = {
+  location: LocationRange;
+};
+
+type NodeBlock = Node & {
   type: "Block";
   statements: AnyPeggyNode[];
 };
 
-type NodeExpression = {
-  type: "Expression";
-  nodes: AnyPeggyNode[];
+type NodeProgram = Node & {
+  type: "Program";
+  statements: AnyPeggyNode[];
 };
 
-type NodeFloat = {
+type NodeArray = Node & {
+  type: "Array";
+  elements: AnyPeggyNode[];
+};
+
+type NodeRecord = Node & {
+  type: "Record";
+  elements: NodeKeyValue[];
+};
+
+type NodeCall = Node & {
+  type: "Call";
+  fn: AnyPeggyNode;
+  args: AnyPeggyNode[];
+};
+
+type NodeFloat = Node & {
   type: "Float";
   value: number;
 };
 
-type NodeInteger = {
+type NodeInteger = Node & {
   type: "Integer";
   value: number;
 };
 
-type NodeIdentifier = {
+type NodeIdentifier = Node & {
   type: "Identifier";
   value: string;
-  location: LocationRange;
 };
 
-type NodeCallIdentifier = {
-  type: "CallIdentifier";
-  value: string;
-};
-
-type NodeLetStatement = {
+type NodeLetStatement = Node & {
   type: "LetStatement";
   variable: NodeIdentifier;
   value: AnyPeggyNode;
 };
 
-type NodeLambda = {
+type NodeLambda = Node & {
   type: "Lambda";
   args: AnyPeggyNode[];
   body: AnyPeggyNode;
+  name?: string;
 };
 
-type NodeTernary = {
+type NodeTernary = Node & {
   type: "Ternary";
   condition: AnyPeggyNode;
   trueExpression: AnyPeggyNode;
   falseExpression: AnyPeggyNode;
 };
 
-type NodeKeyValue = {
+type NodeKeyValue = Node & {
   type: "KeyValue";
   key: AnyPeggyNode;
   value: AnyPeggyNode;
 };
 
-type NodeString = {
+type NodeString = Node & {
   type: "String";
   value: string;
   location?: LocationRange;
 };
 
-type NodeBoolean = {
+type NodeBoolean = Node & {
   type: "Boolean";
   value: boolean;
 };
 
+type NodeVoid = Node & {
+  type: "Void";
+};
+
 export type AnyPeggyNode =
+  | NodeArray
+  | NodeRecord
   | NodeBlock
-  | NodeExpression
+  | NodeProgram
+  | NodeCall
   | NodeFloat
   | NodeInteger
   | NodeIdentifier
-  | NodeCallIdentifier
   | NodeLetStatement
   | NodeLambda
   | NodeTernary
   | NodeKeyValue
   | NodeString
-  | NodeBoolean;
+  | NodeBoolean
+  | NodeVoid;
 
-export function makeFunctionCall(fn: string, args: AnyPeggyNode[]) {
+export function makeFunctionCall(
+  fn: string,
+  args: AnyPeggyNode[],
+  location: LocationRange
+) {
   if (fn === "$$_applyAll_$$") {
-    // Any list of values is applied from left to right anyway.
-    // Like in Haskell and Lisp.
-    // So we remove the redundant $$_applyAll_$$.
-    if (args[0].type === "Identifier") {
-      args[0] = {
-        ...args[0],
-        type: "CallIdentifier",
-      };
-    }
-    return nodeExpression(args);
+    return nodeCall(args[0], args.splice(1), location);
   } else {
-    return nodeExpression([nodeCallIndentifier(fn), ...args]);
+    return nodeCall(nodeIdentifier(fn, location), args, location);
   }
 }
 
-export function apply(fn: string, arg: AnyPeggyNode) {
-  return makeFunctionCall(fn, [arg]);
+export function constructArray(
+  elements: AnyPeggyNode[],
+  location: LocationRange
+): NodeArray {
+  return { type: "Array", elements, location };
 }
-export function constructArray(elems: AnyPeggyNode[]) {
-  return apply("$_constructArray_$", nodeExpression(elems));
-}
-export function constructRecord(elems: AnyPeggyNode[]) {
-  return apply("$_constructRecord_$", nodeExpression(elems));
+export function constructRecord(
+  elements: NodeKeyValue[],
+  location: LocationRange
+): NodeRecord {
+  return { type: "Record", elements, location };
 }
 
-export function nodeBlock(statements: AnyPeggyNode[]): NodeBlock {
-  return { type: "Block", statements };
+export function nodeBlock(
+  statements: AnyPeggyNode[],
+  location: LocationRange
+): NodeBlock {
+  return { type: "Block", statements, location };
 }
-export function nodeBoolean(value: boolean): NodeBoolean {
-  return { type: "Boolean", value };
+export function nodeProgram(
+  statements: AnyPeggyNode[],
+  location: LocationRange
+): NodeProgram {
+  return { type: "Program", statements, location };
 }
-export function nodeCallIndentifier(value: string): NodeCallIdentifier {
-  return { type: "CallIdentifier", value };
+export function nodeBoolean(
+  value: boolean,
+  location: LocationRange
+): NodeBoolean {
+  return { type: "Boolean", value, location };
 }
-export function nodeExpression(args: AnyPeggyNode[]): NodeExpression {
-  return { type: "Expression", nodes: args };
+export function nodeCall(
+  fn: AnyPeggyNode,
+  args: AnyPeggyNode[],
+  location: LocationRange
+): NodeCall {
+  return { type: "Call", fn, args, location };
 }
-export function nodeFloat(value: number): NodeFloat {
-  return { type: "Float", value };
+export function nodeFloat(value: number, location: LocationRange): NodeFloat {
+  return { type: "Float", value, location };
 }
 export function nodeIdentifier(
   value: string,
@@ -164,12 +196,16 @@ export function nodeIdentifier(
 ): NodeIdentifier {
   return { type: "Identifier", value, location };
 }
-export function nodeInteger(value: number): NodeInteger {
-  return { type: "Integer", value };
+export function nodeInteger(
+  value: number,
+  location: LocationRange
+): NodeInteger {
+  return { type: "Integer", value, location };
 }
 export function nodeKeyValue(
   key: AnyPeggyNode,
-  value: AnyPeggyNode
+  value: AnyPeggyNode,
+  location: LocationRange
 ): NodeKeyValue {
   if (key.type === "Identifier") {
     key = {
@@ -177,43 +213,46 @@ export function nodeKeyValue(
       type: "String",
     };
   }
-  return { type: "KeyValue", key, value };
+  return { type: "KeyValue", key, value, location };
 }
 export function nodeLambda(
   args: AnyPeggyNode[],
-  body: AnyPeggyNode
+  body: AnyPeggyNode,
+  location: LocationRange,
+  name?: NodeIdentifier
 ): NodeLambda {
-  return { type: "Lambda", args, body };
+  return { type: "Lambda", args, body, location, name: name?.value };
 }
 export function nodeLetStatement(
   variable: NodeIdentifier,
-  value: AnyPeggyNode
+  value: AnyPeggyNode,
+  location: LocationRange
 ): NodeLetStatement {
-  return { type: "LetStatement", variable, value };
+  const patchedValue =
+    value.type === "Lambda" ? { ...value, name: variable.value } : value;
+  return { type: "LetStatement", variable, value: patchedValue, location };
 }
-export function nodeModuleIdentifier(value: string) {
-  return { type: "ModuleIdentifier", value };
+export function nodeModuleIdentifier(value: string, location: LocationRange) {
+  return { type: "ModuleIdentifier", value, location };
 }
-export function nodeString(value: string): NodeString {
-  return { type: "String", value };
+export function nodeString(value: string, location: LocationRange): NodeString {
+  return { type: "String", value, location };
 }
 export function nodeTernary(
   condition: AnyPeggyNode,
   trueExpression: AnyPeggyNode,
-  falseExpression: AnyPeggyNode
+  falseExpression: AnyPeggyNode,
+  location: LocationRange
 ): NodeTernary {
   return {
     type: "Ternary",
     condition,
     trueExpression,
     falseExpression,
+    location,
   };
 }
 
-export function nodeTypeIdentifier(typeValue: string) {
-  return { type: "TypeIdentifier", value: typeValue };
-}
-
-export function nodeVoid() {
-  return { type: "Void" };
+export function nodeVoid(location: LocationRange): NodeVoid {
+  return { type: "Void", location };
 }

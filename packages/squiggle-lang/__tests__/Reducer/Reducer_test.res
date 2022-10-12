@@ -2,19 +2,29 @@ open Jest
 open Reducer_TestHelpers
 
 describe("eval", () => {
-  // All MathJs operators and functions are builtin for string, float and boolean
-  // .e.g + - / * > >= < <= == /= not and or
-  // See https://mathjs.org/docs/reference/functions.html
   describe("expressions", () => {
     testEvalToBe("1", "Ok(1)")
+    testEvalToBe("-1", "Ok(-1)")
+    testEvalToBe("1-1", "Ok(0)")
     testEvalToBe("1+2", "Ok(3)")
     testEvalToBe("(1+2)*3", "Ok(9)")
     testEvalToBe("2>1", "Ok(true)")
     testEvalToBe("concat('a ', 'b')", "Ok('a b')")
+    testEvalToBe("concat([3,4], [5,6,7])", "Ok([3,4,5,6,7])")
     testEvalToBe("log(10)", "Ok(2.302585092994046)")
-    testEvalToBe("cos(10)", "Ok(-0.8390715290764524)")
+    testEvalToBe("Math.cos(10)", "Ok(-0.8390715290764524)")
     // TODO more built ins
   })
+
+  describe("missing function", () => {
+    testEvalToBe("testZadanga(1)", "Error(testZadanga is not defined)")
+
+    testEvalToBe(
+      "arr = [normal(3,2)]; map(arr, zarathsuzaWasHere)",
+      "Error(zarathsuzaWasHere is not defined)",
+    )
+  })
+
   describe("arrays", () => {
     test("empty array", () => expectEvalToBe("[]", "Ok([])"))
     testEvalToBe("[1, 2, 3]", "Ok([1,2,3])")
@@ -48,7 +58,11 @@ describe("eval", () => {
     testEvalToBe("x=1; y=x+1; y+1", "Ok(3)")
     testEvalError("1; x=1")
     testEvalError("1; 1")
-    testEvalToBe("x=1; x=1", "Ok(@{x: 1})")
+    testEvalToBe("x=1; x=1; x", "Ok(1)")
+  })
+
+  describe("blocks", () => {
+    testEvalToBe("x = { y = { z = 5; z * 2 }; y + 3 }; x", "Ok(13)")
   })
 })
 
@@ -63,4 +77,34 @@ describe("test exceptions", () => {
   //   "rescriptraise()",
   //   "Error(TODO: unhandled rescript exception)",
   // )
+})
+
+describe("stacktraces", () => {
+  test("nested calls", () => {
+    open Expect
+
+    let error =
+      Expression.BackCompatible.evaluateString(`
+  f(x) = {
+    y = "a"
+    x + y
+  }
+  g = {|x| f(x)}
+  h(x) = g(x)
+  h(5)
+`)
+      ->E.R.getError
+      ->E.O2.toExn("oops")
+      ->SqError.toStringWithStackTrace
+
+    expect(
+      error,
+    )->toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]
+Stack trace:
+  f at line 4, column 5
+  g at line 6, column 12
+  h at line 7, column 10
+  <top> at line 8, column 3
+`)
+  })
 })

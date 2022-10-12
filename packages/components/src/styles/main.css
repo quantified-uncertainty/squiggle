@@ -22,3 +22,8 @@ but this line is still necessary for proper initialization of `--tw-*` variables
 .ace_cursor {
   border-left: 2px solid !important;
 }
+
+.ace-error-marker {
+  position: absolute;
+  border-bottom: 1px solid red;
+}

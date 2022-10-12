@@ -9,22 +9,22 @@
 # This also holds true for GitHub teams.
 
 # Rescript 
-*.res @OAGr
-*.resi @OAGr
+*.res @berekuk @OAGr
+*.resi @berekuk @OAGr
 
 # Typescript 
-*.tsx @Hazelfire @OAGr
-*.ts @Hazelfire @OAGr
+*.tsx @Hazelfire @berekuk @OAGr 
+*.ts @Hazelfire @berekuk @OAGr
 
 # Javascript
-*.js @Hazelfire @OAGr
+*.js @Hazelfire @berekuk @OAGr
 
 # Any opsy files
-.github/** @quinn-dougherty @OAGr
-*.json @quinn-dougherty @Hazelfire @OAGr
-*.y*ml @quinn-dougherty @OAGr
-*.config.js @Hazelfire @OAGr
-netlify.toml @quinn-dougherty @OAGr @Hazelfire 
+.github/** @quinn-dougherty @berekuk @OAGr
+*.json @quinn-dougherty @Hazelfire @berekuk @OAGr
+*.y*ml @quinn-dougherty @berekuk @OAGr
+*.config.js @Hazelfire @berekuk @OAGr
+vercel.json @OAGr @berekuk @Hazelfire
 
 # Documentation
 *.md @quinn-dougherty @OAGr @Hazelfire

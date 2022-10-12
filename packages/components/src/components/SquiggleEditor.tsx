@@ -1,23 +1,29 @@
 import React from "react";
 import { CodeEditor } from "./CodeEditor";
-import { environment, bindings, jsImports } from "@quri/squiggle-lang";
-import { defaultImports, defaultBindings } from "@quri/squiggle-lang";
 import { SquiggleContainer } from "./SquiggleContainer";
-import { SquiggleChart, SquiggleChartProps } from "./SquiggleChart";
-import { useSquigglePartial, useMaybeControlledValue } from "../lib/hooks";
-import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
+import {
+  splitSquiggleChartSettings,
+  SquiggleChartProps,
+} from "./SquiggleChart";
+import { useMaybeControlledValue, useSquiggle } from "../lib/hooks";
+import { JsImports } from "../lib/jsImports";
+import { defaultEnvironment, SqLocation, SqProject } from "@quri/squiggle-lang";
+import { SquiggleViewer } from "./SquiggleViewer";
+import { getErrorLocations, getValueToRender } from "../lib/utility";
 
 const WrappedCodeEditor: React.FC<{
   code: string;
   setCode: (code: string) => void;
-}> = ({ code, setCode }) => (
-  <div className="border border-grey-200 p-2 m-4">
+  errorLocations?: SqLocation[];
+}> = ({ code, setCode, errorLocations }) => (
+  <div className="border border-grey-200 p-2 m-4" data-testid="squiggle-editor">
     <CodeEditor
       value={code}
       onChange={setCode}
       oneLine={true}
       showGutter={false}
       height={20}
+      errorLocations={errorLocations}
     />
   </div>
 );
@@ -27,6 +33,9 @@ export type SquiggleEditorProps = SquiggleChartProps & {
   onCodeChange?: (code: string) => void;
 };
 
+const defaultOnChange = () => {};
+const defaultImports: JsImports = {};
+
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   const [code, setCode] = useMaybeControlledValue({
     value: props.code,
@@ -34,59 +43,54 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     onChange: props.onCodeChange,
   });
 
-  let chartProps = { ...props, code };
-  return (
-    <SquiggleContainer>
-      <WrappedCodeEditor code={code} setCode={setCode} />
-      <SquiggleChart {...chartProps} />
-    </SquiggleContainer>
-  );
-};
+  const { distributionPlotSettings, chartSettings } =
+    splitSquiggleChartSettings(props);
 
-export interface SquigglePartialProps {
-  /** The text inside the input (controlled) */
-  code?: string;
-  /** The default text inside the input (unControlled) */
-  defaultCode?: string;
-  /** when the environment changes. Used again for notebook magic*/
-  onChange?(expr: bindings | undefined): void;
-  /** When the code changes */
-  onCodeChange?(code: string): void;
-  /** Previously declared variables */
-  bindings?: bindings;
-  /** If the output requires monte carlo sampling, the amount of samples */
-  environment?: environment;
-  /** Variables imported from js */
-  jsImports?: jsImports;
-}
-
-export const SquigglePartial: React.FC<SquigglePartialProps> = ({
-  code: controlledCode,
-  defaultCode = "",
-  onChange,
-  onCodeChange,
-  bindings = defaultBindings,
-  environment,
-  jsImports = defaultImports,
-}: SquigglePartialProps) => {
-  const [code, setCode] = useMaybeControlledValue<string>({
-    value: controlledCode,
-    defaultValue: defaultCode,
-    onChange: onCodeChange,
-  });
-
-  const result = useSquigglePartial({
-    code,
-    bindings,
+  const {
     environment,
+    jsImports = defaultImports,
+    onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
+    executionId = 0,
+    width,
+    height = 200,
+    enableLocalSettings = false,
+  } = props;
+
+  const project = React.useMemo(() => {
+    const p = SqProject.create();
+    if (environment) {
+      p.setEnvironment(environment);
+    }
+    return p;
+  }, [environment]);
+
+  const resultAndBindings = useSquiggle({
+    code,
+    project,
     jsImports,
     onChange,
+    executionId,
   });
+
+  const valueToRender = getValueToRender(resultAndBindings);
+  const errorLocations = getErrorLocations(resultAndBindings.result);
 
   return (
     <SquiggleContainer>
-      <WrappedCodeEditor code={code} setCode={setCode} />
-      {result.tag !== "Ok" ? <SquiggleErrorAlert error={result.value} /> : null}
+      <WrappedCodeEditor
+        code={code}
+        setCode={setCode}
+        errorLocations={errorLocations}
+      />
+      <SquiggleViewer
+        result={valueToRender}
+        width={width}
+        height={height}
+        distributionPlotSettings={distributionPlotSettings}
+        chartSettings={chartSettings}
+        environment={environment ?? defaultEnvironment}
+        enableLocalSettings={enableLocalSettings}
+      />
     </SquiggleContainer>
   );
 };

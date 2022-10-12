@@ -2,16 +2,18 @@ open Jest
 open Expect
 open Reducer_TestHelpers
 
-let expectEvalToBeOk = (expr: string) =>
-  Reducer.evaluate(expr)->Reducer_Helpers.rRemoveDefaultsExternal->E.R.isOk->expect->toBe(true)
+let expectEvalToBeOk = (code: string) =>
+  Reducer_Expression.BackCompatible.evaluateString(code)->E.R.isOk->expect->toBe(true)
 
 let registry = FunctionRegistry_Library.registry
 let examples = E.A.to_list(FunctionRegistry_Core.Registry.allExamples(registry))
 
 describe("FunctionRegistry Library", () => {
   describe("Regular tests", () => {
+    testEvalToBe("List.length([3,5,8])", "Ok(3)")
+    testEvalToBe("List.length([])", "Ok(0)")
     testEvalToBe("List.make(3, 'HI')", "Ok(['HI','HI','HI'])")
-    testEvalToBe("make(3, 'HI')", "Error(Function not found: make(Number,String))")
+    testEvalToBe("make(3, 'HI')", "Error(make is not defined)")
     testEvalToBe("List.upTo(1,3)", "Ok([1,2,3])")
     testEvalToBe("List.first([3,5,8])", "Ok(3)")
     testEvalToBe("List.last([3,5,8])", "Ok(8)")
@@ -64,6 +66,15 @@ describe("FunctionRegistry Library", () => {
     testEvalToBe("SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])", "Ok(Sample Set Distribution)")
     testEvalToBe("SampleSet.fromFn({|| sample(normal(5,2))})", "Ok(Sample Set Distribution)")
     testEvalToBe(
+      "SampleSet.min(SampleSet.fromDist(normal(50,2)), 2)",
+      "Ok(Sample Set Distribution)",
+    )
+    testEvalToBe("mean(SampleSet.min(SampleSet.fromDist(normal(50,2)), 2))", "Ok(2)")
+    testEvalToBe(
+      "SampleSet.max(SampleSet.fromDist(normal(50,2)), 10)",
+      "Ok(Sample Set Distribution)",
+    )
+    testEvalToBe(
       "addOne(t)=t+1; SampleSet.toList(SampleSet.map(SampleSet.fromList([1,2,3,4,5,6]), addOne))",
       "Ok([2,3,4,5,6,7])",
     )
@@ -71,6 +82,20 @@ describe("FunctionRegistry Library", () => {
       "SampleSet.toList(SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
       "Ok([6,5,4,4,5,6])",
     )
+    testEvalToBe(
+      "SampleSet.fromList([1, 2, 3])",
+      "Error(Error: Too few samples when constructing sample set)",
+    )
+
+    testEvalToBe("Dict.merge({a: 1, b: 2}, {b: 3, c: 4, d: 5})", "Ok({a: 1,b: 3,c: 4,d: 5})")
+    testEvalToBe(
+      "Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}, {c: 5, e: 6}])",
+      "Ok({a: 1,b: 2,c: 5,d: 4,e: 6})",
+    )
+    testEvalToBe("Dict.keys({a: 1, b: 2})", "Ok(['a','b'])")
+    testEvalToBe("Dict.values({a: 1, b: 2})", "Ok([1,2])")
+    testEvalToBe("Dict.toList({a: 1, b: 2})", "Ok([['a',1],['b',2]])")
+    testEvalToBe("Dict.fromList([['a', 1], ['b', 2]])", "Ok({a: 1,b: 2})")
   })
 
   describe("Fn auto-testing", () => {
@@ -88,8 +113,8 @@ describe("FunctionRegistry Library", () => {
       ((fn, example)) => {
         let responseType =
           example
-          ->Reducer.evaluate
-          ->E.R2.fmap(ReducerInterface_InternalExpressionValue.externalValueToValueType)
+          ->Reducer_Expression.BackCompatible.evaluateString
+          ->E.R2.fmap(Reducer_Value.valueToValueType)
         let expectedOutputType = fn.output |> E.O.toExn("")
         expect(responseType)->toEqual(Ok(expectedOutputType))
       },

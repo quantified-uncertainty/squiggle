@@ -1,4 +1,5 @@
 //TODO: multimodal, add interface, test somehow, track performance, refactor sampleSet, refactor ASTEvaluator.res.
+
 type t = DistributionTypes.genericDist
 type error = DistributionTypes.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
@@ -85,6 +86,7 @@ let toFloatOperation = (
       | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
       | (SampleSet(sampleSet), #Min) => SampleSetDist.min(sampleSet)->Some
       | (SampleSet(sampleSet), #Max) => SampleSetDist.max(sampleSet)->Some
+      | (SampleSet(sampleSet), #Cdf(r)) => SampleSetDist.cdf(sampleSet, r)->Some
       | _ => None
       }
 
@@ -242,11 +244,19 @@ module Truncate = {
       switch trySymbolicSimplification(leftCutoff, rightCutoff, t) {
       | Some(r) => Ok(r)
       | None =>
-        toPointSetFn(t)->E.R2.fmap(t => {
-          DistributionTypes.PointSet(
-            PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize,
-          )
-        })
+        switch t {
+        | SampleSet(t) =>
+          switch SampleSetDist.truncate(t, ~leftCutoff, ~rightCutoff) {
+          | Ok(r) => Ok(SampleSet(r))
+          | Error(err) => Error(DistributionTypes.SampleSetError(err))
+          }
+        | _ =>
+          toPointSetFn(t)->E.R2.fmap(t => {
+            DistributionTypes.PointSet(
+              PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize,
+            )
+          })
+        }
       }
     }
   }
@@ -268,22 +278,14 @@ module AlgebraicCombination = {
      Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
  */
     let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
-      let firstOperandIsGreaterThanZero =
+      let isDistGreaterThanZero = t =>
         toFloatOperation(
-          t1,
+          t,
           ~toPointSetFn,
           ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
-        ) |> E.R.fmap(r => r > 0.)
-      let secondOperandIsGreaterThanZero =
-        toFloatOperation(
-          t2,
-          ~toPointSetFn,
-          ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
-        ) |> E.R.fmap(r => r > 0.)
-      let items = E.A.R.firstErrorOrOpen([
-        firstOperandIsGreaterThanZero,
-        secondOperandIsGreaterThanZero,
-      ])
+        )->E.R2.fmap(r => r > 0.)
+
+      let items = E.A.R.firstErrorOrOpen([isDistGreaterThanZero(t1), isDistGreaterThanZero(t2)])
       switch items {
       | Error(r) => Some(r)
       | Ok([true, _]) =>
@@ -491,15 +493,30 @@ let pointwiseCombinationFloat = (
   m->E.R2.fmap(r => DistributionTypes.PointSet(r))
 }
 
-//Note: The result should always cumulatively sum to 1. This would be good to test.
-//Note: If the inputs are not normalized, this will return poor results. The weights probably refer to the post-normalized forms. It would be good to apply a catch to this.
+//TODO: The result should always cumulatively sum to 1. This would be good to test.
+//TODO: If the inputs are not normalized, this will return poor results. The weights probably refer to the post-normalized forms. It would be good to apply a catch to this.
 let mixture = (
   values: array<(t, float)>,
   ~scaleMultiplyFn: scaleMultiplyFn,
   ~pointwiseAddFn: pointwiseAddFn,
+  ~env: env,
 ) => {
-  if E.A.length(values) == 0 {
+  let allValuesAreSampleSet = v => E.A.all(((t, _)) => isSampleSetSet(t), v)
+
+  if E.A.isEmpty(values) {
     Error(DistributionTypes.OtherError("Mixture error: mixture must have at least 1 element"))
+  } else if allValuesAreSampleSet(values) {
+    let withSampleSetValues = values->E.A2.fmap(((value, weight)) =>
+      switch value {
+      | SampleSet(sampleSet) => Ok((sampleSet, weight))
+      | _ => Error("Unreachable")
+      }->E.R2.toExn("Mixture coding error: SampleSet expected. This should be inaccessible.")
+    )
+    let sampleSetMixture = SampleSetDist.mixture(withSampleSetValues, env.sampleCount)
+    switch sampleSetMixture {
+    | Ok(sampleSet) => Ok(DistributionTypes.SampleSet(sampleSet))
+    | Error(err) => Error(DistributionTypes.Error.sampleErrorToDistErr(err))
+    }
   } else {
     let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =

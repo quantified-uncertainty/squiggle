@@ -1,4 +1,4 @@
-name: Squiggle packages check
+name: Squiggle packages checks
 
 on:
   push:
@@ -9,213 +9,40 @@ on:
     branches:
       - master
       - develop
-      - reducer-dev
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: quantified-uncertainty
 
 jobs:
-  pre_check:
-    name: Precheck for skipping redundant jobs
+  build-test-lint:
+    name: Build, test, lint
     runs-on: ubuntu-latest
-    outputs:
-      should_skip_lang: ${{ steps.skip_lang_check.outputs.should_skip }}
-      should_skip_components: ${{ steps.skip_components_check.outputs.should_skip }}
-      should_skip_website: ${{ steps.skip_website_check.outputs.should_skip }}
-      should_skip_vscodeext: ${{ steps.skip_vscodeext_check.outputs.should_skip }}
-      should_skip_cli: ${{ steps.skip_cli_check.outputs.should_skip }}
-    steps:
-      - id: skip_lang_check
-        name: Check if the changes are about squiggle-lang src files
-        uses: fkirc/skip-duplicate-actions@v4.0.0
-        with:
-          paths: '["packages/squiggle-lang/**"]'
-      - id: skip_components_check
-        name: Check if the changes are about components src files
-        uses: fkirc/skip-duplicate-actions@v4.0.0
-        with:
-          paths: '["packages/components/**"]'
-      - id: skip_website_check
-        name: Check if the changes are about website src files
-        uses: fkirc/skip-duplicate-actions@v4.0.0
-        with:
-          paths: '["packages/website/**"]'
-      - id: skip_vscodeext_check
-        name: Check if the changes are about vscode extension src files
-        uses: fkirc/skip-duplicate-actions@v4.0.0
-        with:
-          paths: '["packages/vscode-ext/**"]'
-      - id: skip_cli_check
-        name: Check if the changes are about cli src files
-        uses: fkirc/skip-duplicate-actions@v4.0.0
-        with:
-          paths: '["packages/cli/**"]'
-
-  lang-lint:
-    name: Language lint
-    runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/squiggle-lang
     steps:
       - uses: actions/checkout@v3
-      - name: Install Dependencies
-        run: cd ../../ && yarn
-      - name: Check rescript lint
-        run: yarn lint:rescript
-      - name: Check javascript, typescript, and markdown lint
-        uses: creyD/prettier_action@v4.2
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
         with:
-          dry: true
-          prettier_options: --check packages/squiggle-lang
+          node-version: 16
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+      - name: Turbo run
+        run: npx turbo run build test lint bundle
 
-  lang-build-test-bundle:
-    name: Language build, test, and bundle
+  coverage:
+    name: Coverage
     runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ needs.pre_check.outputs.should_skip_lang != 'true' }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/squiggle-lang
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
-      - name: Install dependencies from monorepo level
-        run: cd ../../ && yarn
-      - name: Build rescript codebase
-        run: yarn build
-      - name: Run rescript tests
-        run: yarn test:rescript
-      - name: Run typescript tests
-        run: yarn test:ts
-      - name: Run webpack
-        run: yarn bundle
-      - name: Upload rescript coverage report
-        run: yarn coverage:rescript:ci
-      - name: Upload typescript coverage report
-        run: yarn coverage:ts:ci
-
-  components-lint:
-    name: Components lint
-    runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ needs.pre_check.outputs.should_skip_components != 'true' }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/components
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check javascript, typescript, and markdown lint
-        uses: creyD/prettier_action@v4.2
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
         with:
-          dry: true
-          prettier_options: --check packages/components --ignore-path packages/components/.prettierignore
-
-  components-bundle-build:
-    name: Components bundle and build
-    runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ (needs.pre_check.outputs.should_skip_components != 'true') || (needs.pre_check.outputs.should_skip_lang != 'true') }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/components
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies from monorepo level
-        run: cd ../../ && yarn
-      - name: Build rescript codebase in squiggle-lang
-        run: cd ../squiggle-lang && yarn build
-      - name: Run webpack
-        run: yarn bundle
-      - name: Build storybook
-        run: yarn build
-
-  website-lint:
-    name: Website lint
-    runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ needs.pre_check.outputs.should_skip_website != 'true' }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/website
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check javascript, typescript, and markdown lint
-        uses: creyD/prettier_action@v4.2
-        with:
-          dry: true
-          prettier_options: --check packages/website
-
-  website-build:
-    name: Website build
-    runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ (needs.pre_check.outputs.should_skip_website != 'true') || (needs.pre_check.outputs.should_skip_lang != 'true')  || (needs.pre_check.outputs.should_skip_components != 'true') }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/website
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies from monorepo level
-        run: cd ../../ && yarn
-      - name: Build rescript in squiggle-lang
-        run: cd ../squiggle-lang && yarn build
-      - name: Build components
-        run: cd ../components && yarn build
-      - name: Build website assets
-        run: yarn build
-
-  vscode-ext-lint:
-    name: VS Code extension lint
-    runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ needs.pre_check.outputs.should_skip_vscodeext != 'true' }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/vscode-ext
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies from monorepo level
-        run: cd ../../ && yarn
-      - name: Lint the VSCode Extension source code
-        run: yarn lint
-
-  vscode-ext-build:
-    name: VS Code extension build
-    runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ (needs.pre_check.outputs.should_skip_components != 'true') || (needs.pre_check.outputs.should_skip_lang != 'true') }} || (needs.pre_check.outputs.should_skip_vscodeext != 'true') }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/vscode-ext
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies from monorepo level
-        run: cd ../../ && yarn
-      - name: Build
-        run: yarn compile
-
-  cli-lint:
-    name: CLI lint
-    runs-on: ubuntu-latest
-    needs: pre_check
-    if: ${{ needs.pre_check.outputs.should_skip_cli != 'true' }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: packages/cli
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check javascript, typescript, and markdown lint
-        uses: creyD/prettier_action@v4.2
-        with:
-          dry: true
-          prettier_options: --check packages/cli
+          node-version: 16
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn
+      - name: Coverage
+        run: npx turbo run coverage
