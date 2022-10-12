@@ -79,8 +79,8 @@ module MixedPoint = {
   type t = mixedPoint
   let toContinuousValue = (t: t) => t.continuous
   let toDiscreteValue = (t: t) => t.discrete
-  let makeContinuous = (continuous: float): t => {continuous: continuous, discrete: 0.0}
-  let makeDiscrete = (discrete: float): t => {continuous: 0.0, discrete: discrete}
+  let makeContinuous = (continuous: float): t => {continuous, discrete: 0.0}
+  let makeDiscrete = (discrete: float): t => {continuous: 0.0, discrete}
 
   let fmap = (fn: float => float, t: t) => {
     continuous: fn(t.continuous),

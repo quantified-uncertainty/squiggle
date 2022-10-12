@@ -34,6 +34,7 @@ module Prepare = {
             let n2 = map->Belt.Map.String.getExn(arg2)
             Ok([n1, n2])
           }
+
         | _ => Error(impossibleErrorString)
         }
 
@@ -45,6 +46,7 @@ module Prepare = {
             let n3 = map->Belt.Map.String.getExn(arg3)
             Ok([n1, n2, n3])
           }
+
         | _ => Error(impossibleErrorString)
         }
     }

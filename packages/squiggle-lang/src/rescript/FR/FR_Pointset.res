@@ -19,6 +19,7 @@ let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
           | _ => impossibleError->SqError.Message.throw
           }
         }
+
       | _ => impossibleError->SqError.Message.throw
       }
     )

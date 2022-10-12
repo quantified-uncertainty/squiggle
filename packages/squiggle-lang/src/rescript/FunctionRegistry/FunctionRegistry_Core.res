@@ -61,6 +61,7 @@ module FRType = {
         let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
         `{${r->E.A2.fmap(input)->E.A2.joinWith(", ")}}`
       }
+
     | FRTypeArray(r) => `list(${toString(r)})`
     | FRTypeLambda => `lambda`
     | FRTypeString => `string`
@@ -132,9 +133,9 @@ module FnDefinition = {
   }
 
   let make = (~name, ~inputs, ~run, ()): t => {
-    name: name,
-    inputs: inputs,
-    run: run,
+    name,
+    inputs,
+    run,
   }
 }
 
@@ -160,14 +161,14 @@ module Function = {
     ~isExperimental=false,
     (),
   ): t => {
-    name: name,
-    nameSpace: nameSpace,
-    definitions: definitions,
-    output: output,
+    name,
+    nameSpace,
+    definitions,
+    output,
     examples: examples->E.O2.default([]),
-    isExperimental: isExperimental,
-    requiresNamespace: requiresNamespace,
-    description: description,
+    isExperimental,
+    requiresNamespace,
+    description,
   }
 
   let toJson = (t: t): functionJson => {
@@ -203,15 +204,19 @@ module Registry = {
             fn.requiresNamespace ? [] : [def.name],
           ]->E.A.concatMany
 
-        names->Belt.Array.reduce(acc, (acc, name) => {
-          switch acc->Belt.Map.String.get(name) {
-          | Some(fns) => {
-              let _ = fns->Js.Array2.push(def) // mutates the array, no need to update acc
-              acc
+        names->Belt.Array.reduce(
+          acc,
+          (acc, name) => {
+            switch acc->Belt.Map.String.get(name) {
+            | Some(fns) => {
+                let _ = fns->Js.Array2.push(def) // mutates the array, no need to update acc
+                acc
+              }
+
+            | None => acc->Belt.Map.String.set(name, [def])
             }
-          | None => acc->Belt.Map.String.set(name, [def])
-          }
-        })
+          },
+        )
       })
     )
   }
@@ -245,6 +250,7 @@ module Registry = {
         | None => REOther(showNameMatchDefinitions())->Error
         }
       }
+
     | None => RESymbolNotFound(fnName)->Error
     }
   }

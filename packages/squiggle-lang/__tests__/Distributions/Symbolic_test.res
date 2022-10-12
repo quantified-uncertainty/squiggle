@@ -3,7 +3,7 @@ open Expect
 open TestHelpers
 
 // TODO: use Normal.make (but preferably after teh new validation dispatch is in)
-let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean: mean, stdev: stdev}))
+let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean, stdev}))
 
 describe("(Symbolic) normalize", () => {
   testAll("has no impact on normal distributions", list{-1e8, -1e-2, 0.0, 1e-4, 1e16}, mean => {
@@ -47,10 +47,7 @@ describe("(Symbolic) mean", () => {
     tup => {
       let (low, medium, high) = tup
       let meanValue = run(
-        FromDist(
-          #ToFloat(#Mean),
-          DistributionTypes.Symbolic(#Triangular({low: low, medium: medium, high: high})),
-        ),
+        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Triangular({low, medium, high}))),
       )
       meanValue->unpackFloat->expect->toBeCloseTo((low +. medium +. high) /. 3.0) // https://www.statology.org/triangular-distribution/
     },
@@ -63,7 +60,7 @@ describe("(Symbolic) mean", () => {
     tup => {
       let (alpha, beta) = tup
       let meanValue = run(
-        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Beta({alpha: alpha, beta: beta}))),
+        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Beta({alpha, beta}))),
       )
       meanValue->unpackFloat->expect->toBeCloseTo(1.0 /. (1.0 +. beta /. alpha)) // https://en.wikipedia.org/wiki/Beta_distribution#Mean
     },
@@ -84,8 +81,8 @@ describe("(Symbolic) mean", () => {
       let (mean, stdev) = tup
       let betaDistribution = SymbolicDist.Beta.fromMeanAndStdev(mean, stdev)
       let meanValue =
-        betaDistribution->E.R2.fmap(d =>
-          run(FromDist(#ToFloat(#Mean), d->DistributionTypes.Symbolic))
+        betaDistribution->E.R2.fmap(
+          d => run(FromDist(#ToFloat(#Mean), d->DistributionTypes.Symbolic)),
         )
       switch meanValue {
       | Ok(value) => value->unpackFloat->expect->toBeCloseTo(mean)
@@ -100,7 +97,7 @@ describe("(Symbolic) mean", () => {
     tup => {
       let (mu, sigma) = tup
       let meanValue = run(
-        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Lognormal({mu: mu, sigma: sigma}))),
+        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Lognormal({mu, sigma}))),
       )
       meanValue->unpackFloat->expect->toBeCloseTo(Js.Math.exp(mu +. sigma ** 2.0 /. 2.0)) // https://brilliant.org/wiki/log-normal-distribution/
     },
@@ -112,7 +109,7 @@ describe("(Symbolic) mean", () => {
     tup => {
       let (low, high) = tup
       let meanValue = run(
-        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Uniform({low: low, high: high}))),
+        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Uniform({low, high}))),
       )
       meanValue->unpackFloat->expect->toBeCloseTo((low +. high) /. 2.0) // https://en.wikipedia.org/wiki/Continuous_uniform_distribution#Moments
     },

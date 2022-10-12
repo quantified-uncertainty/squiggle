@@ -18,6 +18,7 @@ let stdLib: Reducer_T.namespace = {
           | None => REArrayIndexNotFound("Array index not found", index)->SqError.Message.throw
           }
         }
+
       | [IEvRecord(dict), IEvString(sIndex)] =>
         switch Belt.Map.String.get(dict, sIndex) {
         | Some(value) => value

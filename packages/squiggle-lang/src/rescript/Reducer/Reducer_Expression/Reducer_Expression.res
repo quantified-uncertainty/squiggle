@@ -123,6 +123,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
           )
           (result, context)
         }
+
       | _ => RENotAFunction(lambda->Reducer_Value.toString)->throwFrom(expression, context)
       }
     }

@@ -39,7 +39,7 @@
   ],
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
-    "@rescript/std": "^9.1.4",
+    "@rescript/std": "^10.0.0",
     "@stdlib/stats": "^0.0.13",
     "jstat": "^1.9.5",
     "lodash": "^4.17.21",
@@ -58,7 +58,7 @@
     "peggy": "^2.0.1",
     "prettier": "^2.7.1",
     "reanalyze": "^2.23.0",
-    "rescript": "^9.1.4",
+    "rescript": "^10.0.0",
     "rescript-fast-check": "^1.1.1",
     "rescript-js-map": "^1.1.0",
     "ts-jest": "^29.0.3",

@@ -6,7 +6,7 @@ type t = T.t
 
 let emptyItem = (sourceId: string): projectItem => {
   source: "",
-  sourceId: sourceId,
+  sourceId,
   rawParse: None,
   expression: None,
   continuation: Reducer_Namespace.make(),
@@ -76,7 +76,7 @@ let resetIncludes = (r: t): t => {
 }
 
 let setSource = (r: t, source: T.sourceArgumentType): t =>
-  {...r, source: source}->resetIncludes->touchSource
+  {...r, source}->resetIncludes->touchSource
 
 let setRawParse = (r: t, rawParse: T.rawParseArgumentType): t =>
   {...r, rawParse: Some(rawParse)}->touchRawParse
@@ -86,7 +86,7 @@ let setExpression = (r: t, expression: T.expressionArgumentType): t =>
 
 let setContinuation = (r: t, continuation: T.continuationArgumentType): t => {
   ...r,
-  continuation: continuation,
+  continuation,
 }
 
 let setResult = (r: t, result: T.resultArgumentType): t => {
@@ -110,24 +110,23 @@ let getPastChain = (this: t): array<string> => {
   Js.Array2.concat(getDirectIncludes(this), getContinues(this))
 }
 
-let setContinues = (this: t, continues: array<string>): t =>
-  {...this, continues: continues}->touchSource
+let setContinues = (this: t, continues: array<string>): t => {...this, continues}->touchSource
 
 let removeContinues = (this: t): t => {...this, continues: []}->touchSource
 
 let setIncludes = (this: t, includes: T.includesType): t => {
   ...this,
-  includes: includes,
+  includes,
 }
 
 let setImportAsVariables = (this: t, includeAsVariables: T.importAsVariablesType): t => {
   ...this,
-  includeAsVariables: includeAsVariables,
+  includeAsVariables,
 }
 
 let setDirectImports = (this: t, directIncludes: array<string>): t => {
   ...this,
-  directIncludes: directIncludes,
+  directIncludes,
 }
 
 let parseIncludes = (this: t): t => {
@@ -144,9 +143,9 @@ let parseIncludes = (this: t): t => {
         ->Belt.Array.map(((_variable, file)) => file)
       {
         ...this,
-        includes: includes,
-        includeAsVariables: includeAsVariables,
-        directIncludes: directIncludes,
+        includes,
+        includeAsVariables,
+        directIncludes,
       }
     }
   }

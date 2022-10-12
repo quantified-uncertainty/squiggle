@@ -216,6 +216,7 @@ let tryRunWithResult = (
         project->setResult(sourceId, Error(error))
         Error(error)
       }
+
     | Ok(_prevResult) => {
         project->doLinkAndRun(sourceId)
         project->getResultOption(sourceId)->Belt.Option.getWithDefault(rPrevResult)

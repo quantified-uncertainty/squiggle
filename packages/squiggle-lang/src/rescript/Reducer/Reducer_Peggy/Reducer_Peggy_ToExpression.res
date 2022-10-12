@@ -68,7 +68,7 @@ let rec fromNode = (node: Parse.node): expression => {
   }
 
   {
-    ast: ast,
-    content: content,
+    ast,
+    content,
   }
 }

@@ -20,6 +20,7 @@ module Declaration = {
         ->E.A.R.firstErrorOrOpen
         ->E.R2.fmap(args => Reducer_T.IEvDeclaration(Declaration.make(lambda, args)))
       }
+
     | Error(r) => Error(r)
     | Ok(_) => Error(impossibleErrorString)
     }
