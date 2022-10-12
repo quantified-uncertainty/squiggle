@@ -69,7 +69,7 @@ let toDiscretePointMassesFromTriangulars = (
       ()
     }
 
-    {n: n - 2, masses: masses, means: means, variances: variances}
+    {n: n - 2, masses, means, variances}
   } else {
     for i in 1 to n - 2 {
       // area of triangle = width * height / 2
@@ -91,7 +91,7 @@ let toDiscretePointMassesFromTriangulars = (
       ) |> ignore
       ()
     }
-    {n: n - 2, masses: masses, means: means, variances: variances}
+    {n: n - 2, masses, means, variances}
   }
 }
 
@@ -184,7 +184,7 @@ let toDiscretePointMassesFromDiscrete = (s: PointSetTypes.xyShape): pointMassesW
   let means: array<float> = Belt.Array.makeBy(n, i => xs[i])
   let variances: array<float> = Belt.Array.makeBy(n, _ => 0.0)
 
-  {n: n, masses: masses, means: means, variances: variances}
+  {n, masses, means, variances}
 }
 
 type argumentPosition = First | Second

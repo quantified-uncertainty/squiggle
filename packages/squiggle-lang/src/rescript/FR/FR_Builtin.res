@@ -23,7 +23,7 @@ let makeFn = (
   name: string,
   inputs: array<frType>,
   fn: array<Reducer_T.value> => result<Reducer_T.value, errorMessage>,
-) => makeFnMany(name, [{inputs: inputs, fn: fn}])
+) => makeFnMany(name, [{inputs, fn}])
 
 let library = [
   Make.ff2f(~name="add", ~fn=(x, y) => x +. y, ()), // infix + (see Reducer/Reducer_Peggy/helpers.ts)
@@ -62,6 +62,7 @@ let library = [
         let answer = Js.String2.concat(a, b)
         answer->Reducer_T.IEvString->Ok
       }
+
     | _ => Error(impossibleError)
     }
   }),
@@ -72,6 +73,7 @@ let library = [
         let _ = Js.Array2.pushMany(a, b)
         a->Reducer_T.IEvArray->Ok
       }
+
     | _ => Error(impossibleError)
     }
   }),
@@ -81,6 +83,7 @@ let library = [
         Js.log(value->Reducer_Value.toString)
         value->Ok
       }
+
     | _ => Error(impossibleError)
     }
   }),
@@ -90,6 +93,7 @@ let library = [
         Js.log(`${label}: ${value->Reducer_Value.toString}`)
         value->Ok
       }
+
     | _ => Error(impossibleError)
     }
   }),

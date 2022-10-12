@@ -54,6 +54,7 @@ module Message = {
         }
         answer
       }
+
     | REMacroNotFound(macro) => `Macro not found: ${macro}`
     | RENotAFunction(valueString) => `${valueString} is not a function`
     | RERecordPropertyNotFound(msg, index) => `${msg}: ${index}`
@@ -93,8 +94,8 @@ type t = {
 exception SqException(t)
 
 let fromMessageWithFrameStack = (message: Message.t, frameStack: Reducer_FrameStack.t): t => {
-  message: message,
-  frameStack: frameStack,
+  message,
+  frameStack,
 }
 
 // this shouldn't be used much, since frame stack will be empty

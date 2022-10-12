@@ -45,16 +45,16 @@ module Analysis = {
 let getShape = (t: t) => t.xyShape
 let interpolation = (t: t) => t.interpolation
 let make = (~interpolation=#Linear, ~integralSumCache=None, ~integralCache=None, xyShape): t => {
-  xyShape: xyShape,
-  interpolation: interpolation,
-  integralSumCache: integralSumCache,
-  integralCache: integralCache,
+  xyShape,
+  interpolation,
+  integralSumCache,
+  integralCache,
 }
 let shapeMap = (fn, {xyShape, interpolation, integralSumCache, integralCache}: t): t => {
   xyShape: fn(xyShape),
-  interpolation: interpolation,
-  integralSumCache: integralSumCache,
-  integralCache: integralCache,
+  interpolation,
+  integralSumCache,
+  integralCache,
 }
 let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
 let oShapeMap = (fn, {xyShape, interpolation, integralSumCache, integralCache}: t): option<
@@ -135,10 +135,10 @@ let shapeFn = (fn, t: t) => t |> getShape |> fn
 
 let updateIntegralSumCache = (integralSumCache, t: t): t => {
   ...t,
-  integralSumCache: integralSumCache,
+  integralSumCache,
 }
 
-let updateIntegralCache = (integralCache, t: t): t => {...t, integralCache: integralCache}
+let updateIntegralCache = (integralCache, t: t): t => {...t, integralCache}
 
 let sum = (
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,

@@ -23,8 +23,8 @@ let make = (): t => list{}
 
 let extend = (t: t, name: string, location: option<Reducer_Peggy_Parse.location>) =>
   t->Belt.List.add({
-    name: name,
-    location: location,
+    name,
+    location,
   })
 
 // this is useful for SyntaxErrors

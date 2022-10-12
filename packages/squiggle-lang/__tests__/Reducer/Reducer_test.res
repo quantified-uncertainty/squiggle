@@ -37,14 +37,16 @@ describe("eval", () => {
     test("index", () => expectEvalToBe("r = {a: 1}; r.a", "Ok(1)"))
     test("index", () => expectEvalToBe("r = {a: 1}; r.b", "Error(Record property not found: b)"))
     testEvalError("{a: 1}.b") // invalid syntax
-    test("always the same property ending", () =>
-      expectEvalToBe(
-        `{
+    test(
+      "always the same property ending",
+      () =>
+        expectEvalToBe(
+          `{
       a: 1, 
       b: 2,
     }`,
-        "Ok({a: 1,b: 2})",
-      )
+          "Ok({a: 1,b: 2})",
+        ),
     )
   })
 

@@ -6,7 +6,7 @@ let createContext = (stdLib: Reducer_Namespace.t, environment: Reducer_T.environ
   {
     frameStack: list{},
     bindings: stdLib->Reducer_Bindings.fromNamespace->Reducer_Bindings.extend,
-    environment: environment,
+    environment,
     inFunction: None,
   }
 }

@@ -85,8 +85,8 @@ module T = {
   }
   let square = mapX(x => x ** 2.0)
   let zip = ({xs, ys}: t) => Belt.Array.zip(xs, ys)
-  let fromArray = ((xs, ys)): t => {xs: xs, ys: ys}
-  let fromArrays = (xs, ys): t => {xs: xs, ys: ys}
+  let fromArray = ((xs, ys)): t => {xs, ys}
+  let fromArrays = (xs, ys): t => {xs, ys}
   let accumulateYs = (fn, p: t) => fromArray((p.xs, E.A.accumulate(fn, p.ys)))
   let concat = (t1: t, t2: t) => {
     let cxs = Array.concat(list{t1.xs, t2.xs})
@@ -142,7 +142,7 @@ module T = {
   }
 
   let make = (~xs: array<float>, ~ys: array<float>) => {
-    let attempt: t = {xs: xs, ys: ys}
+    let attempt: t = {xs, ys}
     switch Validator.validate(attempt) {
     | Some(error) => Error(error)
     | None => Ok(attempt)
@@ -452,6 +452,7 @@ module PointwiseCombination = {
           let _ = Js.Array.push(fn(y1, y2), newYs)
           let _ = Js.Array.push(x, newXs)
         }
+
       | None => ()
       }
     }
@@ -558,7 +559,7 @@ module Range = {
         (xs[x + 1] -. xs[x]) *. ((ys[x] +. ys[x + 1]) /. 2.) +. cumulativeY[x], // dx // (1/2) * (avgY)
       )
     }
-    Some({xs: xs, ys: cumulativeY})
+    Some({xs, ys: cumulativeY})
   }
 
   let derivative = mapYsBasedOnRanges(delta_y_over_delta_x)

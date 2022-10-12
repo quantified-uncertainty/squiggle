@@ -140,6 +140,7 @@ module Old = {
             | Error(err) => error(err)
             }
           }
+
         | Some(IEvNumber(_))
         | Some(IEvDistribution(_)) =>
           switch parseDistributionArray(args) {
@@ -192,6 +193,7 @@ module Old = {
         }
         Helpers.toFloatFn(fn, dist, ~env)
       }
+
     | ("integralSum", [IEvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
     | ("toString", [IEvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
     | ("sparkline", [IEvDistribution(dist)]) =>

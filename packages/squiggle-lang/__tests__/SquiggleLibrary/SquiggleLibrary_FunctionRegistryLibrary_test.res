@@ -99,15 +99,19 @@ describe("FunctionRegistry Library", () => {
   })
 
   describe("Fn auto-testing", () => {
-    testAll("tests of validity", examples, r => {
-      expectEvalToBeOk(r)
-    })
+    testAll(
+      "tests of validity",
+      examples,
+      r => {
+        expectEvalToBeOk(r)
+      },
+    )
 
     testAll(
       "tests of type",
       E.A.to_list(
-        FunctionRegistry_Core.Registry.allExamplesWithFns(registry)->E.A2.filter(((fn, _)) =>
-          E.O.isSome(fn.output)
+        FunctionRegistry_Core.Registry.allExamplesWithFns(registry)->E.A2.filter(
+          ((fn, _)) => E.O.isSome(fn.output),
         ),
       ),
       ((fn, example)) => {

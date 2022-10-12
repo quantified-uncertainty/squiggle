@@ -113,7 +113,7 @@ let nodeToAST = (node: node) => {
   | _ => raise(UnsupportedPeggyNodeType(node["type"]))
   }
 
-  {location: node["location"], content: content}
+  {location: node["location"], content}
 }
 
 let nodeIdentifierToAST = (node: nodeIdentifier) => {

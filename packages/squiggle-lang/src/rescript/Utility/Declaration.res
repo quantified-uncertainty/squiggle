@@ -9,13 +9,13 @@ type declaration<'a> = {
 
 module ContinuousFloatArg = {
   let make = (min: float, max: float): arg => {
-    Float({min: min, max: max})
+    Float({min, max})
   }
 }
 
 module ContinuousTimeArg = {
   let make = (min: Js.Date.t, max: Js.Date.t): arg => {
-    Date({min: min, max: max})
+    Date({min, max})
   }
 }
 
@@ -33,7 +33,7 @@ module Arg = {
 }
 
 let make = (fn: 'a, args: array<arg>): declaration<'a> => {
-  {fn: fn, args: args}
+  {fn, args}
 }
 
 let toString = (r: declaration<'a>, fnToString): string => {

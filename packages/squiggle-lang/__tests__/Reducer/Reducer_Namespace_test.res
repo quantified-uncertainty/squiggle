@@ -40,14 +40,23 @@ describe("Namespace", () => {
 
     let nsMerged = Namespace.mergeMany([ns, ns1, ns2])
 
-    test("merge many 1", () => {
-      expect(nsMerged->Namespace.get("x1")) == Some(x1)
-    })
-    test("merge many 2", () => {
-      expect(nsMerged->Namespace.get("x4")) == Some(x4)
-    })
-    test("merge many 3", () => {
-      expect(nsMerged->Namespace.get("value")) == Some(value)
-    })
+    test(
+      "merge many 1",
+      () => {
+        expect(nsMerged->Namespace.get("x1")) == Some(x1)
+      },
+    )
+    test(
+      "merge many 2",
+      () => {
+        expect(nsMerged->Namespace.get("x4")) == Some(x4)
+      },
+    )
+    test(
+      "merge many 3",
+      () => {
+        expect(nsMerged->Namespace.get("value")) == Some(value)
+      },
+    )
   })
 })

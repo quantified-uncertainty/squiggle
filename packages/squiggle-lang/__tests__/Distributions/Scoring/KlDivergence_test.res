@@ -17,10 +17,9 @@ describe("klDivergence: continuous -> continuous -> float", () => {
       let answer =
         uniformMakeR(lowAnswer, highAnswer)->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
       let prediction =
-        uniformMakeR(
-          lowPrediction,
-          highPrediction,
-        )->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
+        uniformMakeR(lowPrediction, highPrediction)->E.R2.errMap(
+          s => DistributionTypes.ArgumentError(s),
+        )
       // integral along the support of the answer of answer.pdf(x) times log of prediction.pdf(x) divided by answer.pdf(x) dx
       let analyticalKl = Js.Math.log((highPrediction -. lowPrediction) /. (highAnswer -. lowAnswer))
       let kl = E.R.liftJoin2(klDivergence, prediction, answer)
@@ -183,9 +182,9 @@ describe("combineAlongSupportOfSecondArgument0", () => {
     let answer =
       uniformMakeR(lowAnswer, highAnswer)->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
     let prediction =
-      uniformMakeR(lowPrediction, highPrediction)->E.R2.errMap(s => DistributionTypes.ArgumentError(
-        s,
-      ))
+      uniformMakeR(lowPrediction, highPrediction)->E.R2.errMap(
+        s => DistributionTypes.ArgumentError(s),
+      )
     let answerWrapped = E.R.fmap(a => run(FromDist(#ToDist(ToPointSet), a)), answer)
     let predictionWrapped = E.R.fmap(a => run(FromDist(#ToDist(ToPointSet), a)), prediction)
 

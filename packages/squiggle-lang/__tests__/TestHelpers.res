@@ -45,12 +45,12 @@ let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.generi
 let unpackFloat = x => x->toFloat->toExtFloat
 let unpackDist = y => y->toDist->toExtDist
 
-let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean: mean, stdev: stdev}))
-let mkBeta = (alpha, beta) => DistributionTypes.Symbolic(#Beta({alpha: alpha, beta: beta}))
+let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean, stdev}))
+let mkBeta = (alpha, beta) => DistributionTypes.Symbolic(#Beta({alpha, beta}))
 let mkExponential = rate => DistributionTypes.Symbolic(#Exponential({rate: rate}))
-let mkUniform = (low, high) => DistributionTypes.Symbolic(#Uniform({low: low, high: high}))
-let mkCauchy = (local, scale) => DistributionTypes.Symbolic(#Cauchy({local: local, scale: scale}))
-let mkLognormal = (mu, sigma) => DistributionTypes.Symbolic(#Lognormal({mu: mu, sigma: sigma}))
+let mkUniform = (low, high) => DistributionTypes.Symbolic(#Uniform({low, high}))
+let mkCauchy = (local, scale) => DistributionTypes.Symbolic(#Cauchy({local, scale}))
+let mkLognormal = (mu, sigma) => DistributionTypes.Symbolic(#Lognormal({mu, sigma}))
 let mkDelta = x => DistributionTypes.Symbolic(#Float(x))
 
 let normalMake = SymbolicDist.Normal.make
