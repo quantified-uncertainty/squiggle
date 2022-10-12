@@ -30,10 +30,10 @@
       "outputs": []
     },
     "bundle": {
-      "dependsOn": ["^build", "build"]
+      "dependsOn": ["build"]
     },
     "coverage": {
-      "cache": false
+      "dependsOn": ["build"]
     }
   }
 }
