@@ -21,6 +21,13 @@ export const viewSettingsSchema = yup.object({}).shape({
   diagramStart: yup.number().required().positive().integer().default(0).min(0),
   diagramStop: yup.number().required().positive().integer().default(10).min(0),
   diagramCount: yup.number().required().positive().integer().default(20).min(2),
+  numberPrecision: yup
+    .number()
+    .required()
+    .integer()
+    .positive()
+    .default(3)
+    .min(0),
 });
 
 type FormFields = yup.InferType<typeof viewSettingsSchema>;
@@ -57,6 +64,16 @@ export const ViewSettings: React.FC<{
         </div>
       </HeadedSection>
 
+      <div className="pt-8">
+        <HeadedSection title="Number Display Settings">
+          <InputItem
+            name="numberPrecision"
+            type="number"
+            register={register}
+            label="Chart Height (in pixels)"
+          />
+        </HeadedSection>
+      </div>
       <div className="pt-8">
         <HeadedSection title="Distribution Display Settings">
           <div className="space-y-2">

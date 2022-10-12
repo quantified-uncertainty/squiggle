@@ -278,6 +278,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
       diagramStart: 0,
       diagramStop: 10,
       diagramCount: 20,
+      numberPrecision: 3,
     },
   });
   const vars = useWatch({
@@ -332,6 +333,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
           result={valueToRender}
           environment={environment}
           height={vars.chartHeight || 150}
+          numberPrecision={vars.numberPrecision}
           distributionPlotSettings={{
             showSummary: vars.showSummary ?? false,
             logX: vars.logX ?? false,

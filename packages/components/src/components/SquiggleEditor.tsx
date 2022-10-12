@@ -53,6 +53,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     executionId = 0,
     width,
     height = 200,
+    numberPrecision,
     enableLocalSettings = false,
   } = props;
 
@@ -86,6 +87,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
         result={valueToRender}
         width={width}
         height={height}
+        numberPrecision={numberPrecision}
         distributionPlotSettings={distributionPlotSettings}
         chartSettings={chartSettings}
         environment={environment ?? defaultEnvironment}

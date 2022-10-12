@@ -38,6 +38,7 @@ const ItemSettingsModal: React.FC<
       // this is a mess and should be fixed
       showEditor: true, // doesn't matter
       chartHeight: mergedSettings.height,
+      numberPrecision: mergedSettings.numberPrecision,
       showSummary: mergedSettings.distributionPlotSettings.showSummary,
       logX: mergedSettings.distributionPlotSettings.logX,
       expY: mergedSettings.distributionPlotSettings.expY,
