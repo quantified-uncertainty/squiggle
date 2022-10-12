@@ -16,7 +16,7 @@ const WrappedCodeEditor: React.FC<{
   setCode: (code: string) => void;
   errorLocations?: SqLocation[];
 }> = ({ code, setCode, errorLocations }) => (
-  <div className="border border-grey-200 p-2 m-4">
+  <div className="border border-grey-200 p-2 m-4" data-testid="squiggle-editor">
     <CodeEditor
       value={code}
       onChange={setCode}
