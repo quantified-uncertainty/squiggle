@@ -68,9 +68,12 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
     case SqValueTag.Number:
       return (
         <VariableBox value={value} heading="Number">
-          {() => (
+          {(settings) => (
             <div className="font-semibold text-slate-600">
-              <NumberShower precision={3} number={value.value} />
+              <NumberShower
+                precision={settings.numberPrecision}
+                number={value.value}
+              />
             </div>
           )}
         </VariableBox>

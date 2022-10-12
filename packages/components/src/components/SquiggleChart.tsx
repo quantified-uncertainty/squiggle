@@ -46,6 +46,8 @@ export type SquiggleChartProps = {
   /** Whether to show vega actions to the user, so they can copy the chart spec */
   distributionChartActions?: boolean;
   enableLocalSettings?: boolean;
+  /** Precision to show numbers */
+  numberPrecision?: number;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
 // Props needed for a standalone execution
@@ -121,6 +123,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       height = 200,
       enableLocalSettings = false,
       continues = defaultContinues,
+      numberPrecision,
     } = props;
 
     const p = React.useMemo(() => {
@@ -151,6 +154,7 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
         result={valueToRender}
         width={width}
         height={height}
+        numberPrecision={numberPrecision}
         distributionPlotSettings={distributionPlotSettings}
         chartSettings={chartSettings}
         environment={p.getEnvironment()}

@@ -29,6 +29,7 @@ export const ViewerContext = React.createContext<ViewerContextShape>({
     },
     environment: defaultEnvironment,
     height: 150,
+    numberPrecision: 3,
   }),
   setSettings() {},
   enableLocalSettings: false,

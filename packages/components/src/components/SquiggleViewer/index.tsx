@@ -23,6 +23,7 @@ type Props = {
   /** Environment for further function executions */
   environment: environment;
   enableLocalSettings?: boolean;
+  numberPrecision?: number;
 };
 
 type Settings = {
@@ -38,6 +39,7 @@ export const SquiggleViewer: React.FC<Props> = ({
   distributionPlotSettings,
   chartSettings,
   environment,
+  numberPrecision = 3,
   enableLocalSettings = false,
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
@@ -74,10 +76,18 @@ export const SquiggleViewer: React.FC<Props> = ({
           ...(localSettings.environment || {}),
         },
         height: localSettings.height || height,
+        numberPrecision: localSettings.numberPrecision || numberPrecision,
       };
       return result;
     },
-    [distributionPlotSettings, chartSettings, environment, height, getSettings]
+    [
+      distributionPlotSettings,
+      chartSettings,
+      environment,
+      height,
+      getSettings,
+      numberPrecision,
+    ]
   );
 
   return (

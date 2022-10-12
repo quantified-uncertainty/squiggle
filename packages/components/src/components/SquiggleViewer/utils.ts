@@ -8,6 +8,7 @@ export type LocalItemSettings = {
   chartSettings?: Partial<FunctionChartSettings>;
   height?: number;
   environment?: Partial<environment>;
+  numberPrecision?: number;
 };
 
 export type MergedItemSettings = {
@@ -15,6 +16,7 @@ export type MergedItemSettings = {
   chartSettings: FunctionChartSettings;
   height: number;
   environment: environment;
+  numberPrecision: number;
 };
 
 export const locationAsString = (location: SqValueLocation) =>
