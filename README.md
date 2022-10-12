@@ -65,6 +65,12 @@ turbo run build --filter=@quri/squiggle-components
 
 You can also run specific npm scripts for the package you're working on. See `packages/*/README.md` for the details.
 
+# NixOS users
+
+This repository requires the use of bundled binaries from node_modules, which
+are not linked statically. The easiest way to get them working is to enable
+[nix-ld](https://github.com/Mic92/nix-ld).
+
 # Contributing
 
 See `CONTRIBUTING.md`.
