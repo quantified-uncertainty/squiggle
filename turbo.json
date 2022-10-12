@@ -22,7 +22,6 @@
         "benchmark/**/*.bs.js",
         "src/rescript/**/*.js",
         "src/rescript/**/*.gen.tsx",
-        "../../node_modules/bisect_ppx/**/*.bs.js",
         "dist/**"
       ]
     },
@@ -31,10 +30,10 @@
       "outputs": []
     },
     "bundle": {
-      "dependsOn": ["^build", "build"]
+      "dependsOn": ["build"]
     },
     "coverage": {
-      "cache": false
+      "dependsOn": ["build"]
     }
   }
 }

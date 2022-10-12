@@ -30,16 +30,6 @@ rec {
           patchelf --replace-needed libstdc++.so.6 $THE_SO linux/ninja.exe && echo "- replaced needed for linux/ninja.exe"
         '';
       };
-      bisect_ppx = {
-        buildInputs = common.which;
-        postInstall = ''
-          echo "PATCHELF'ING BISECT_PPX EXECUTABLE"
-          THE_LD=$(patchelf --print-interpreter $(which mkdir))
-          patchelf --set-interpreter $THE_LD bin/linux/ppx
-          patchelf --set-interpreter $THE_LD bin/linux/bisect-ppx-report
-          cp bin/linux/ppx ppx
-        '';
-      };
       gentype = {
         postInstall = ''
           mv gentype.exe ELFLESS-gentype.exe
