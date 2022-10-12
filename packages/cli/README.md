@@ -38,12 +38,12 @@ node node_modules/squiggle-cli-experimental/index.js compile
 
 or you can add a script to your `package.json`, like:
 
-````
+```
  ...
  scripts: {
   "compile": "squiggle-cli-experimental compile"
  }
  ...
-````
+```
 
 This can be run with `npm run compile`. `npm` knows how to reach into the node_modules directly, so it's not necessary to specify that.
