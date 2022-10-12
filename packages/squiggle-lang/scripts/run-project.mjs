@@ -13,7 +13,7 @@ program.arguments("<string>");
 
 const options = program.parse(process.argv);
 
-const sampleCount = process.env.SAMPLE_COUNT ?? 10000;
+const sampleCount = process.env.SAMPLE_COUNT;
 console.log(sampleCount);
 
 const src = fs.readFileSync(program.args[0], "utf-8");
@@ -25,4 +25,4 @@ const projectJson = JSON.parse(src);
 
 const project = SqProject.fromJson(projectJson);
 
-runProject(project, options.output);
+runProject(project, options);

@@ -22,25 +22,10 @@ export const run = (src, { output, sampleCount } = {}) => {
     });
   }
   project.setSource("main", src);
-  const time = measure(() => project.run("main"));
-
-  const bindings = project.getBindings("main");
-  const result = project.getResult("main");
-
-  if (output) {
-    console.log("Result:", result.tag, result.value.toString());
-    console.log("Bindings:", bindings.toString());
-  }
-
-  console.log(
-    "Time:",
-    String(time),
-    result.tag === "Error" ? red(result.tag) : green(result.tag),
-    result.tag === "Error" ? result.value.toStringWithFrameStack() : ""
-  );
+  runProject(project, output);
 };
 
-export const runProject = (project, output) => {
+export const runProject = (project, { output }) => {
   const time = measure(() => project.runAll());
   console.log("Time: ", time);
 
@@ -48,7 +33,7 @@ export const runProject = (project, output) => {
 
   ids.forEach((id) => {
     const result = project.getResult(id);
-    const bindings = project.getBindings("main");
+    const bindings = project.getBindings(id);
 
     console.log(id + ":");
     if (output) {
