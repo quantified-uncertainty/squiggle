@@ -49,7 +49,7 @@
   "devDependencies": {
     "@glennsl/rescript-jest": "^0.9.2",
     "@types/jest": "^27.5.0",
-    "chalk": "^5.0.1",
+    "chalk": "^5.1.0",
     "codecov": "^3.8.3",
     "fast-check": "^3.1.4",
     "gentype": "^4.5.0",
@@ -61,7 +61,7 @@
     "rescript": "^9.1.4",
     "rescript-fast-check": "^1.1.1",
     "rescript-js-map": "^1.1.0",
-    "ts-jest": "^27.1.4",
+    "ts-jest": "^29.0.3",
     "ts-loader": "^9.4.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.4",
