@@ -187,7 +187,7 @@ const RunControls: React.FC<{
   const CurrentPlayIcon = isRunning ? RefreshIcon : PlayIcon;
 
   return (
-    <div className="flex space-x-1 items-center">
+    <div className="flex space-x-1 items-center" data-testid="autorun-controls">
       {autorunMode ? null : (
         <button onClick={run}>
           <CurrentPlayIcon
@@ -313,7 +313,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
   const errorLocations = getErrorLocations(resultAndBindings.result);
 
   const firstTab = vars.showEditor ? (
-    <div className="border border-slate-200">
+    <div className="border border-slate-200" data-testid="squiggle-editor">
       <CodeEditor
         errorLocations={errorLocations}
         value={code}
@@ -365,7 +365,9 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
       >
         {tabs}
       </div>
-      <div className="w-1/2 p-2 pl-4">{squiggleChart}</div>
+      <div className="w-1/2 p-2 pl-4" data-testid="playground-result">
+        {squiggleChart}
+      </div>
     </div>
   );
 

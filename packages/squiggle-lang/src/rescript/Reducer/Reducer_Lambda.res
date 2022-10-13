@@ -43,10 +43,10 @@ let makeLambda = (
 
   FnLambda({
     // context: bindings,
-    name: name,
+    name,
     body: lambda,
-    parameters: parameters,
-    location: location,
+    parameters,
+    location,
   })
 }
 
@@ -54,8 +54,8 @@ let makeLambda = (
 let makeFFILambda = (name: string, body: Reducer_T.lambdaBody): t => FnBuiltin({
   // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
   // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
-  body: body,
-  name: name,
+  body,
+  name,
 })
 
 // this function doesn't scale to FunctionRegistry's polymorphic functions

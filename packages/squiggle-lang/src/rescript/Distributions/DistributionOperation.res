@@ -141,6 +141,7 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
         Js.log2("Console log requested: ", dist)
         Dist(dist)
       }
+
     | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
     | #ToScore(LogScore(answer, prior)) =>
       GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior, ~env)

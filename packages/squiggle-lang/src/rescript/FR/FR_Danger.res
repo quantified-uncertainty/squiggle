@@ -135,11 +135,13 @@ module Integration = {
               let wrappedResult = result->Reducer_T.IEvNumber->Ok
               wrappedResult
             }
+
           | (Error(b), _) => Error(b)
           | (_, Error(b)) => Error(b)
           }
           resultWithOuterPoints
         }
+
       | Error(b) =>
         ("Integration error 2 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead." ++
         "Original error: " ++
@@ -362,6 +364,7 @@ module DiminishingReturns = {
                         result[indexOfBiggestDMR] = value
                         Ok(result)
                       }
+
                     | Error(b) => Error(b)
                     }
 
@@ -371,10 +374,12 @@ module DiminishingReturns = {
                     }
                     Ok(newAcc)
                   }
+
                 | Error(b) => Error(b)
                 }
                 newAccWrapped
               }
+
             | Error(b) => Error(b)
             }
           })
@@ -427,10 +432,12 @@ module DiminishingReturns = {
                     )
                     result
                   }
+
                 | Error(b) => Error(b)
                 }
                 result
               }
+
             | _ =>
               "Error in Danger.diminishingMarginalReturnsForTwoFunctions"
               ->SqError.Message.REOther

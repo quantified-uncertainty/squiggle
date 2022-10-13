@@ -44,4 +44,4 @@ let removeResult = ({namespace} as bindings: t): t => {
 
 let locals = ({namespace}: t): Reducer_T.namespace => namespace
 
-let fromNamespace = (namespace: Reducer_Namespace.t): t => {namespace: namespace, parent: None}
+let fromNamespace = (namespace: Reducer_Namespace.t): t => {namespace, parent: None}

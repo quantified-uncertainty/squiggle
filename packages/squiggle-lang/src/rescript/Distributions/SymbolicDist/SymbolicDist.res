@@ -7,7 +7,7 @@ module Normal = {
   type t = normal
   let make = (mean: float, stdev: float): result<symbolicDist, string> =>
     stdev > 0.0
-      ? Ok(#Normal({mean: mean, stdev: stdev}))
+      ? Ok(#Normal({mean, stdev}))
       : Error("Standard deviation of normal distribution must be larger than 0")
   let pdf = (x, t: t) => Jstat.Normal.pdf(x, t.mean, t.stdev)
   let cdf = (x, t: t) => Jstat.Normal.cdf(x, t.mean, t.stdev)
@@ -15,7 +15,7 @@ module Normal = {
   let from90PercentCI = (low, high) => {
     let mean = E.A.Floats.mean([low, high])
     let stdev = (high -. low) /. (2. *. normal95confidencePoint)
-    #Normal({mean: mean, stdev: stdev})
+    #Normal({mean, stdev})
   }
   let inv = (p, t: t) => Jstat.Normal.inv(p, t.mean, t.stdev)
   let sample = (t: t) => Jstat.Normal.sample(t.mean, t.stdev)
@@ -25,12 +25,12 @@ module Normal = {
   let add = (n1: t, n2: t) => {
     let mean = n1.mean +. n2.mean
     let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
-    #Normal({mean: mean, stdev: stdev})
+    #Normal({mean, stdev})
   }
   let subtract = (n1: t, n2: t) => {
     let mean = n1.mean -. n2.mean
     let stdev = Js.Math.sqrt(n1.stdev ** 2. +. n2.stdev ** 2.)
-    #Normal({mean: mean, stdev: stdev})
+    #Normal({mean, stdev})
   }
 
   // TODO: is this useful here at all? would need the integral as well ...
@@ -38,7 +38,7 @@ module Normal = {
     let mean =
       (n1.mean *. n2.stdev ** 2. +. n2.mean *. n1.stdev ** 2.) /. (n1.stdev ** 2. +. n2.stdev ** 2.)
     let stdev = 1. /. (1. /. n1.stdev ** 2. +. 1. /. n2.stdev ** 2.)
-    #Normal({mean: mean, stdev: stdev})
+    #Normal({mean, stdev})
   }
 
   let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
@@ -88,7 +88,7 @@ module Cauchy = {
   type t = cauchy
   let make = (local, scale): result<symbolicDist, string> =>
     scale > 0.0
-      ? Ok(#Cauchy({local: local, scale: scale}))
+      ? Ok(#Cauchy({local, scale}))
       : Error("Cauchy distribution scale parameter must larger than 0.")
   let pdf = (x, t: t) => Jstat.Cauchy.pdf(x, t.local, t.scale)
   let cdf = (x, t: t) => Jstat.Cauchy.cdf(x, t.local, t.scale)
@@ -102,7 +102,7 @@ module Triangular = {
   type t = triangular
   let make = (low, medium, high): result<symbolicDist, string> =>
     low < medium && medium < high
-      ? Ok(#Triangular({low: low, medium: medium, high: high}))
+      ? Ok(#Triangular({low, medium, high}))
       : Error("Triangular values must be increasing order.")
   let pdf = (x, t: t) => Jstat.Triangular.pdf(x, t.low, t.high, t.medium) // not obvious in jstat docs that high comes before medium?
   let cdf = (x, t: t) => Jstat.Triangular.cdf(x, t.low, t.high, t.medium)
@@ -116,7 +116,7 @@ module Beta = {
   type t = beta
   let make = (alpha, beta) =>
     alpha > 0.0 && beta > 0.0
-      ? Ok(#Beta({alpha: alpha, beta: beta}))
+      ? Ok(#Beta({alpha, beta}))
       : Error("Beta distribution parameters must be positive")
   let pdf = (x, t: t) => Jstat.Beta.pdf(x, t.alpha, t.beta)
   let cdf = (x, t: t) => Jstat.Beta.cdf(x, t.alpha, t.beta)
@@ -150,7 +150,7 @@ module Lognormal = {
   type t = lognormal
   let make = (mu, sigma) =>
     sigma > 0.0
-      ? Ok(#Lognormal({mu: mu, sigma: sigma}))
+      ? Ok(#Lognormal({mu, sigma}))
       : Error("Lognormal standard deviation must be larger than 0")
   let pdf = (x, t: t) => Jstat.Lognormal.pdf(x, t.mu, t.sigma)
   let cdf = (x, t: t) => Jstat.Lognormal.cdf(x, t.mu, t.sigma)
@@ -164,7 +164,7 @@ module Lognormal = {
     let logHigh = Js.Math.log(high)
     let mu = E.A.Floats.mean([logLow, logHigh])
     let sigma = (logHigh -. logLow) /. (2.0 *. normal95confidencePoint)
-    #Lognormal({mu: mu, sigma: sigma})
+    #Lognormal({mu, sigma})
   }
   let fromMeanAndStdev = (mean, stdev) => {
     // https://math.stackexchange.com/questions/2501783/parameters-of-a-lognormal-distribution
@@ -174,7 +174,7 @@ module Lognormal = {
       let meanSquared = mean ** 2.
       let mu = 2. *. Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance +. meanSquared)
       let sigma = Js.Math.sqrt(Js.Math.log(variance /. meanSquared +. 1.))
-      Ok(#Lognormal({mu: mu, sigma: sigma}))
+      Ok(#Lognormal({mu, sigma}))
     } else {
       Error("Lognormal standard deviation must be larger than 0")
     }
@@ -184,14 +184,14 @@ module Lognormal = {
     // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Multiplication_and_division_of_independent,_log-normal_random_variables
     let mu = l1.mu +. l2.mu
     let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.)
-    #Lognormal({mu: mu, sigma: sigma})
+    #Lognormal({mu, sigma})
   }
   let divide = (l1, l2) => {
     let mu = l1.mu -. l2.mu
     // We believe the ratiands will have covariance zero.
     // See here https://stats.stackexchange.com/questions/21735/what-are-the-mean-and-variance-of-the-ratio-of-two-lognormal-variables for details
     let sigma = Js.Math.sqrt(l1.sigma ** 2. +. l2.sigma ** 2.)
-    #Lognormal({mu: mu, sigma: sigma})
+    #Lognormal({mu, sigma})
   }
   let operate = (operation: Operation.Algebraic.t, n1: t, n2: t) =>
     switch operation {
@@ -220,7 +220,7 @@ module Lognormal = {
 module Uniform = {
   type t = uniform
   let make = (low, high) =>
-    high > low ? Ok(#Uniform({low: low, high: high})) : Error("High must be larger than low")
+    high > low ? Ok(#Uniform({low, high})) : Error("High must be larger than low")
 
   let pdf = (x, t: t) => Jstat.Uniform.pdf(x, t.low, t.high)
   let cdf = (x, t: t) => Jstat.Uniform.cdf(x, t.low, t.high)
@@ -239,9 +239,7 @@ module Uniform = {
 module Logistic = {
   type t = logistic
   let make = (location, scale) =>
-    scale > 0.0
-      ? Ok(#Logistic({location: location, scale: scale}))
-      : Error("Scale must be positive")
+    scale > 0.0 ? Ok(#Logistic({location, scale})) : Error("Scale must be positive")
 
   let pdf = (x, t: t) => Stdlib.Logistic.pdf(x, t.location, t.scale)
   let cdf = (x, t: t) => Stdlib.Logistic.cdf(x, t.location, t.scale)
@@ -285,7 +283,7 @@ module Gamma = {
   let make = (shape: float, scale: float) => {
     if shape > 0. {
       if scale > 0. {
-        Ok(#Gamma({shape: shape, scale: scale}))
+        Ok(#Gamma({shape, scale}))
       } else {
         Error("scale must be larger than 0")
       }
@@ -543,6 +541,6 @@ module T = {
     | _ =>
       let xs = interpolateXs(~xSelection, d, sampleCount)
       let ys = xs |> E.A.fmap(x => pdf(x, d))
-      Continuous(Continuous.make(~integralSumCache=Some(1.0), {xs: xs, ys: ys}))
+      Continuous(Continuous.make(~integralSumCache=Some(1.0), {xs, ys}))
     }
 }

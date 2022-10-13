@@ -4,14 +4,14 @@ open Distributions
 type t = PointSetTypes.discreteShape
 
 let make = (~integralSumCache=None, ~integralCache=None, xyShape): t => {
-  xyShape: xyShape,
-  integralSumCache: integralSumCache,
-  integralCache: integralCache,
+  xyShape,
+  integralSumCache,
+  integralCache,
 }
 let shapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): t => {
   xyShape: fn(xyShape),
-  integralSumCache: integralSumCache,
-  integralCache: integralCache,
+  integralSumCache,
+  integralCache,
 }
 let getShape = (t: t) => t.xyShape
 let oShapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): option<t> =>
@@ -63,12 +63,12 @@ let reduce = (
 
 let updateIntegralSumCache = (integralSumCache, t: t): t => {
   ...t,
-  integralSumCache: integralSumCache,
+  integralSumCache,
 }
 
 let updateIntegralCache = (integralCache, t: t): t => {
   ...t,
-  integralCache: integralCache,
+  integralCache,
 }
 
 /* This multiples all of the data points together and creates a new discrete distribution from the results.

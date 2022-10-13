@@ -99,6 +99,7 @@ let toFloatOperation = (
         }
       }
     }
+
   | (#Stdev | #Variance | #Mode) as op =>
     switch t {
     | SampleSet(s) =>
@@ -129,7 +130,7 @@ let toPointSet = (
     SampleSetDist.toPointSetDist(
       ~samples=r,
       ~samplingInputs={
-        sampleCount: sampleCount,
+        sampleCount,
         outputXYPoints: xyPointLength,
         pointSetDistLength: xyPointLength,
         kernelWidth: None,
@@ -427,6 +428,7 @@ module AlgebraicCombination = {
           ~toSampleSetFn,
         )
       }
+
     | (None, AsMonteCarlo) =>
       StrategyCallOnValidatedInputs.monteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
     | (None, AsSymbolic) =>
@@ -443,6 +445,7 @@ module AlgebraicCombination = {
             )}`
           Error(RequestedStrategyInvalidError(errString))
         }
+
       | Some(convOp) => StrategyCallOnValidatedInputs.convolution(toPointSetFn, convOp, t1, t2)
       }
     }

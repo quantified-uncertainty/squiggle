@@ -22,7 +22,7 @@ let expectEvalError = (code: string) =>
   Expression.BackCompatible.evaluateString(code)
   ->Reducer_Value.toStringResult
   ->expect
-  ->toMatch("Error\(")
+  ->toMatch("Error\\(")
 
 let testParseToBe = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
 let testDescriptionParseToBe = (desc, expr, answer) =>

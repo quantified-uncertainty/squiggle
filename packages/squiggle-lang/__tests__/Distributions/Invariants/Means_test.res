@@ -87,14 +87,22 @@ describe("Means are invariant", () => {
     let testAddInvariant = (t1, t2) =>
       E.R.liftM2(testAdditionMean, t1, t2)->E.R.toExn("Means were not invariant", _)
 
-    testAll("with two of the same distribution", distributions, dist => {
-      testAddInvariant(dist, dist)
-    })
+    testAll(
+      "with two of the same distribution",
+      distributions,
+      dist => {
+        testAddInvariant(dist, dist)
+      },
+    )
 
-    testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
-      let (dist1, dist2) = dists
-      testAddInvariant(dist1, dist2)
-    })
+    testAll(
+      "with two different distributions",
+      pairsOfDifferentDistributions,
+      dists => {
+        let (dist1, dist2) = dists
+        testAddInvariant(dist1, dist2)
+      },
+    )
 
     testAll(
       "with two different distributions in swapped order",
@@ -116,14 +124,22 @@ describe("Means are invariant", () => {
     let testSubtractInvariant = (t1, t2) =>
       E.R.liftM2(testSubtractionMean, t1, t2)->E.R.toExn("Means were not invariant", _)
 
-    testAll("with two of the same distribution", distributions, dist => {
-      testSubtractInvariant(dist, dist)
-    })
+    testAll(
+      "with two of the same distribution",
+      distributions,
+      dist => {
+        testSubtractInvariant(dist, dist)
+      },
+    )
 
-    testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
-      let (dist1, dist2) = dists
-      testSubtractInvariant(dist1, dist2)
-    })
+    testAll(
+      "with two different distributions",
+      pairsOfDifferentDistributions,
+      dists => {
+        let (dist1, dist2) = dists
+        testSubtractInvariant(dist1, dist2)
+      },
+    )
 
     testAll(
       "with two different distributions in swapped order",
@@ -145,14 +161,22 @@ describe("Means are invariant", () => {
     let testMultiplicationInvariant = (t1, t2) =>
       E.R.liftM2(testMultiplicationMean, t1, t2)->E.R.toExn("Means were not invariant", _)
 
-    testAll("with two of the same distribution", distributions, dist => {
-      testMultiplicationInvariant(dist, dist)
-    })
+    testAll(
+      "with two of the same distribution",
+      distributions,
+      dist => {
+        testMultiplicationInvariant(dist, dist)
+      },
+    )
 
-    testAll("with two different distributions", pairsOfDifferentDistributions, dists => {
-      let (dist1, dist2) = dists
-      testMultiplicationInvariant(dist1, dist2)
-    })
+    testAll(
+      "with two different distributions",
+      pairsOfDifferentDistributions,
+      dists => {
+        let (dist1, dist2) = dists
+        testMultiplicationInvariant(dist1, dist2)
+      },
+    )
 
     testAll(
       "with two different distributions in swapped order",

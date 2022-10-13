@@ -4,10 +4,10 @@ open Distributions
 
 type t = PointSetTypes.mixedShape
 let make = (~integralSumCache=None, ~integralCache=None, ~continuous, ~discrete): t => {
-  continuous: continuous,
-  discrete: discrete,
-  integralSumCache: integralSumCache,
-  integralCache: integralCache,
+  continuous,
+  discrete,
+  integralSumCache,
+  integralCache,
 }
 
 let totalLength = (t: t): int => {
@@ -35,7 +35,7 @@ let toDiscrete = ({discrete}: t) => Some(discrete)
 
 let updateIntegralCache = (integralCache, t: t): t => {
   ...t,
-  integralCache: integralCache,
+  integralCache,
 }
 
 let combinePointwise = (
