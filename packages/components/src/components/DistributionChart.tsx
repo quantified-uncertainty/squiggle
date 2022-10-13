@@ -49,10 +49,10 @@ export function makePlot(record: SqRecord): Plot | void {
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const {
     plot,
-    environment,
     height,
     showSummary,
     width,
+    environment,
     logX,
     actions = false,
   } = props;
@@ -89,8 +89,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
 
     const spec = buildVegaSpec({
       ...props,
-      minX: props.minX ?? Math.min(...domain.map((x) => x.x)),
-      maxX: props.minX ?? Math.max(...domain.map((x) => x.x)),
+      minX: Number.isFinite(props.minX)
+        ? props.minX
+        : Math.min(...domain.map((x) => x.x)),
+      maxX: Number.isFinite(props.maxX)
+        ? props.maxX
+        : Math.max(...domain.map((x) => x.x)),
       maxY: Math.max(...domain.map((x) => x.y)),
     });
 

@@ -13,9 +13,9 @@ export type DistributionChartSpecOptions = {
   /** The title of the chart */
   title?: string;
   /** The formatting of the ticks */
-  format?: string;
+  format: string;
   /** Whether the x-axis should be dates or numbers */
-  xAxisType?: "number" | "dateTime";
+  xAxisType: "number" | "dateTime";
 };
 
 /** X Scales */
@@ -70,15 +70,7 @@ const width = 500;
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions & { maxY: number }
 ): VisualizationSpec {
-  const {
-    title,
-    minX,
-    maxX,
-    logX,
-    expY,
-    xAxisType = "number",
-    maxY,
-  } = specOptions;
+  const { title, minX, maxX, logX, expY, xAxisType, maxY } = specOptions;
 
   const dateTime = xAxisType === "dateTime";
 

@@ -1,14 +1,14 @@
 import React from "react";
 import { CodeEditor } from "./CodeEditor";
 import { SquiggleContainer } from "./SquiggleContainer";
+import { useMaybeControlledValue } from "../lib/hooks";
+import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle";
+import { SqLocation } from "@quri/squiggle-lang";
 import {
-  splitSquiggleChartSettings,
-  SquiggleChartProps,
-} from "./SquiggleChart";
-import { useMaybeControlledValue, useSquiggle } from "../lib/hooks";
-import { JsImports } from "../lib/jsImports";
-import { defaultEnvironment, SqLocation, SqProject } from "@quri/squiggle-lang";
-import { SquiggleViewer } from "./SquiggleViewer";
+  SquiggleViewer,
+  createViewSettings,
+  FlattenedViewSettings,
+} from "./SquiggleViewer";
 import { getErrorLocations, getValueToRender } from "../lib/utility";
 
 const WrappedCodeEditor: React.FC<{
@@ -28,13 +28,11 @@ const WrappedCodeEditor: React.FC<{
   </div>
 );
 
-export type SquiggleEditorProps = SquiggleChartProps & {
-  defaultCode?: string;
-  onCodeChange?: (code: string) => void;
-};
-
-const defaultOnChange = () => {};
-const defaultImports: JsImports = {};
+export type SquiggleEditorProps = SquiggleArgs &
+  FlattenedViewSettings & {
+    defaultCode?: string;
+    onCodeChange?: (code: string) => void;
+  };
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   const [code, setCode] = useMaybeControlledValue({
@@ -43,34 +41,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     onChange: props.onCodeChange,
   });
 
-  const { distributionPlotSettings, chartSettings } =
-    splitSquiggleChartSettings(props);
-
-  const {
-    environment,
-    jsImports = defaultImports,
-    onChange = defaultOnChange, // defaultOnChange must be constant, don't move its definition here
-    executionId = 0,
-    width,
-    height = 200,
-    enableLocalSettings = false,
-  } = props;
-
-  const project = React.useMemo(() => {
-    const p = SqProject.create();
-    if (environment) {
-      p.setEnvironment(environment);
-    }
-    return p;
-  }, [environment]);
-
-  const resultAndBindings = useSquiggle({
-    code,
-    project,
-    jsImports,
-    onChange,
-    executionId,
-  });
+  const resultAndBindings = useSquiggle({ ...props, code });
 
   const valueToRender = getValueToRender(resultAndBindings);
   const errorLocations = getErrorLocations(resultAndBindings.result);
@@ -82,15 +53,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
         setCode={setCode}
         errorLocations={errorLocations}
       />
-      <SquiggleViewer
-        result={valueToRender}
-        width={width}
-        height={height}
-        distributionPlotSettings={distributionPlotSettings}
-        chartSettings={chartSettings}
-        environment={environment ?? defaultEnvironment}
-        enableLocalSettings={enableLocalSettings}
-      />
+      <SquiggleViewer result={valueToRender} {...createViewSettings(props)} />
     </SquiggleContainer>
   );
 };

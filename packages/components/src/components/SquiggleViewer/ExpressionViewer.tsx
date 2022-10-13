@@ -105,9 +105,9 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
             return (
               <DistributionChart
                 plot={defaultPlot(value.value)}
-                environment={settings.environment}
                 {...settings.distributionPlotSettings}
-                height={settings.height}
+                height={settings.chartHeight}
+                environment={settings.environment}
                 width={width}
               />
             );
@@ -178,7 +178,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
                 fn={value.value}
                 chartSettings={settings.chartSettings}
                 distributionPlotSettings={settings.distributionPlotSettings}
-                height={settings.height}
+                height={settings.chartHeight}
                 environment={{
                   sampleCount: settings.environment.sampleCount / 10,
                   xyPointLength: settings.environment.xyPointLength / 10,
@@ -203,7 +203,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
             );
           }}
         >
-          {(settings) => (
+          {(_) => (
             <div>NOT IMPLEMENTED IN 0.4 YET</div>
             // <FunctionChart
             //   fn={expression.value.fn}
@@ -252,7 +252,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
                   plot={plot}
                   environment={settings.environment}
                   {...settings.distributionPlotSettings}
-                  height={settings.height}
+                  height={settings.chartHeight}
                   width={width}
                 />
               );

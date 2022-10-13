@@ -13,6 +13,7 @@ import {
   useRunnerState,
   useSquiggle,
 } from "../lib/hooks";
+import { SquiggleArgs } from "../lib/hooks/useSquiggle";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   ChartSquareBarIcon,
@@ -28,9 +29,8 @@ import {
 } from "@heroicons/react/solid";
 import clsx from "clsx";
 
-import { environment, SqProject } from "@quri/squiggle-lang";
+import { environment } from "@quri/squiggle-lang";
 
-import { SquiggleChartProps } from "./SquiggleChart";
 import { CodeEditor } from "./CodeEditor";
 import { JsonEditor } from "./JsonEditor";
 import { ErrorAlert, SuccessAlert } from "./Alert";
@@ -41,23 +41,27 @@ import { InputItem } from "./ui/InputItem";
 import { Text } from "./ui/Text";
 import { ViewSettings, viewSettingsSchema } from "./ViewSettings";
 import { HeadedSection } from "./ui/HeadedSection";
-import { defaultTickFormat } from "../lib/distributionSpecBuilder";
 import { Button } from "./ui/Button";
 import { JsImports } from "../lib/jsImports";
 import { getErrorLocations, getValueToRender } from "../lib/utility";
-import { SquiggleViewer } from "./SquiggleViewer";
+import {
+  SquiggleViewer,
+  FlattenedViewSettings,
+  createViewSettings,
+} from "./SquiggleViewer";
 
-type PlaygroundProps = SquiggleChartProps & {
-  /** The initial squiggle string to put in the playground */
-  defaultCode?: string;
-  onCodeChange?(expr: string): void;
-  /* When settings change */
-  onSettingsChange?(settings: any): void;
-  /** Should we show the editor? */
-  showEditor?: boolean;
-  /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
-  showShareButton?: boolean;
-};
+type PlaygroundProps = SquiggleArgs &
+  FlattenedViewSettings & {
+    /** The initial squiggle string to put in the playground */
+    defaultCode?: string;
+    onCodeChange?(expr: string): void;
+    /* When settings change */
+    onSettingsChange?(settings: any): void;
+    /** Should we show the editor? */
+    showEditor?: boolean;
+    /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
+    showShareButton?: boolean;
+  };
 
 const schema = yup
   .object({})
@@ -78,6 +82,7 @@ const schema = yup
       .default(1000)
       .min(10)
       .max(10000),
+    showEditor: yup.boolean().required().default(true),
   })
   .concat(viewSettingsSchema);
 
@@ -235,23 +240,14 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
   getLeftPanelElement: () => undefined,
 });
 
-export const SquigglePlayground: FC<PlaygroundProps> = ({
-  defaultCode = "",
-  height = 500,
-  showSummary = true,
-  logX = false,
-  expY = false,
-  title,
-  minX,
-  maxX,
-  tickFormat = defaultTickFormat,
-  distributionChartActions,
-  code: controlledCode,
-  onCodeChange,
-  onSettingsChange,
-  showEditor = true,
-  showShareButton = false,
-}) => {
+export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
+  const {
+    defaultCode = "",
+    code: controlledCode,
+    onCodeChange,
+    onSettingsChange,
+    showShareButton = false,
+  } = props;
   const [code, setCode] = useMaybeControlledValue({
     value: controlledCode,
     defaultValue: defaultCode,
@@ -260,29 +256,19 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
 
   const [imports, setImports] = useState<JsImports>({});
 
+  let defaultValues: FormFields = {
+    ...schema.getDefault(),
+    ...props,
+  };
+
   const { register, control } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: {
-      sampleCount: 1000,
-      xyPointLength: 1000,
-      chartHeight: 150,
-      logX,
-      expY,
-      title,
-      minX,
-      maxX,
-      tickFormat,
-      distributionChartActions,
-      showSummary,
-      showEditor,
-      diagramStart: 0,
-      diagramStop: 10,
-      diagramCount: 20,
-    },
+    defaultValues: defaultValues,
   });
-  const vars = useWatch({
+  const rawVars = useWatch({
     control,
   });
+  let vars = useMemo(() => ({ ...schema.getDefault(), ...rawVars }), [rawVars]);
 
   useEffect(() => {
     onSettingsChange?.(vars);
@@ -305,20 +291,12 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     executionId,
   } = useRunnerState(code);
 
-  const project = React.useMemo(() => {
-    const p = SqProject.create();
-    if (environment) {
-      p.setEnvironment(environment);
-    }
-    return p;
-  }, [environment]);
-
-  const resultAndBindings = useSquiggle({
-    code,
-    project,
-    jsImports: imports,
-    executionId,
-  });
+  let args: SquiggleArgs = props;
+  args = { ...args, code, jsImports: imports, executionId };
+  if (!args.project) {
+    args = { ...args, environment };
+  }
+  const resultAndBindings = useSquiggle(args);
 
   const valueToRender = getValueToRender(resultAndBindings);
 
@@ -328,27 +306,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
         {isRunning ? (
           <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
         ) : null}
-        <SquiggleViewer
-          result={valueToRender}
-          environment={environment}
-          height={vars.chartHeight || 150}
-          distributionPlotSettings={{
-            showSummary: vars.showSummary ?? false,
-            logX: vars.logX ?? false,
-            expY: vars.expY ?? false,
-            format: vars.tickFormat,
-            minX: vars.minX,
-            maxX: vars.maxX,
-            title: vars.title,
-            actions: vars.distributionChartActions,
-          }}
-          chartSettings={{
-            start: vars.diagramStart ?? 0,
-            stop: vars.diagramStop ?? 10,
-            count: vars.diagramCount ?? 20,
-          }}
-          enableLocalSettings={true}
-        />
+        <SquiggleViewer {...createViewSettings(vars)} result={valueToRender} />
       </div>
     );
 
@@ -363,7 +321,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
         onSubmit={run}
         oneLine={false}
         showGutter={true}
-        height={height - 1}
+        height={(props.chartHeight ?? 200) - 1}
       />
     </div>
   ) : (
@@ -402,7 +360,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     <div className="flex mt-2">
       <div
         className="w-1/2 relative"
-        style={{ minHeight: height }}
+        style={{ minHeight: props.chartHeight }}
         ref={leftPanelRef}
       >
         {tabs}

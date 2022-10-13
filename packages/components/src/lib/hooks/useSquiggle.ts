@@ -1,6 +1,7 @@
 import {
   result,
   SqError,
+  environment,
   SqProject,
   SqRecord,
   SqValue,
@@ -9,13 +10,31 @@ import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
 import * as uuid from "uuid";
 
-type SquiggleArgs = {
+export type SquiggleArgs = {
   code: string;
   executionId?: number;
   jsImports?: JsImports;
+  onChange?: (
+    expr: result<SqValue, SqError> | undefined,
+    sourceName: string
+  ) => void;
+} & (StandaloneExecutionProps | ProjectExecutionProps);
+
+// Props needed for a standalone execution
+type StandaloneExecutionProps = {
+  project?: undefined;
+  continues?: undefined;
+  /** The amount of points returned to draw the distribution, not needed if using a project */
+  environment?: environment;
+};
+
+// Props needed when executing inside a project.
+type ProjectExecutionProps = {
+  environment?: undefined;
+  /** The project that this execution is part of */
   project: SqProject;
+  /** What other squiggle sources from the project to continue. Default [] */
   continues?: string[];
-  onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 };
 
 export type ResultAndBindings = {
@@ -29,12 +48,24 @@ const defaultContinues = [];
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
   const sourceName = useMemo(() => uuid.v4(), []);
 
-  const env = args.project.getEnvironment();
+  const p = useMemo(() => {
+    if (args.project) {
+      return args.project;
+    } else {
+      const p = SqProject.create();
+      if (args.environment) {
+        p.setEnvironment(args.environment);
+      }
+      return p;
+    }
+  }, [args.project, args.environment]);
+
+  const env = p.getEnvironment();
   const continues = args.continues || defaultContinues;
 
   const result = useMemo(
     () => {
-      const project = args.project;
+      const project = p;
 
       project.setSource(sourceName, args.code);
       let fullContinues = continues;
@@ -61,25 +92,23 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
       continues,
       args.project,
       env,
+      p,
     ]
   );
 
   const { onChange } = args;
 
   useEffect(() => {
-    onChange?.(
-      result.result.tag === "Ok" ? result.result.value : undefined,
-      sourceName
-    );
+    onChange?.(result.result, sourceName);
   }, [result, onChange, sourceName]);
 
   useEffect(() => {
     return () => {
-      args.project.removeSource(sourceName);
-      if (args.project.getSource(importSourceName(sourceName)))
-        args.project.removeSource(importSourceName(sourceName));
+      p.removeSource(sourceName);
+      if (p.getSource(importSourceName(sourceName)))
+        p.removeSource(importSourceName(sourceName));
     };
-  }, [args.project, sourceName]);
+  }, [p, sourceName]);
 
   return result;
 };
