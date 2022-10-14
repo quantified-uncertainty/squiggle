@@ -4,16 +4,18 @@ import {
   SqProject,
   SqRecord,
   SqValue,
+  environment,
 } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
 import * as uuid from "uuid";
 
 type SquiggleArgs = {
+  environment?: environment;
   code: string;
   executionId?: number;
   jsImports?: JsImports;
-  project: SqProject;
+  project?: SqProject;
   continues?: string[];
   onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 };
@@ -27,15 +29,25 @@ const importSourceName = (sourceName: string) => "imports-" + sourceName;
 const defaultContinues = [];
 
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
+  const project = useMemo(() => {
+    if (args.project) {
+      return args.project;
+    } else {
+      const p = SqProject.create();
+      if (args.environment) {
+        p.setEnvironment(args.environment);
+      }
+      return p;
+    }
+  }, [args.project, args.environment]);
+
   const sourceName = useMemo(() => uuid.v4(), []);
 
-  const env = args.project.getEnvironment();
+  const env = project.getEnvironment();
   const continues = args.continues || defaultContinues;
 
   const result = useMemo(
     () => {
-      const project = args.project;
-
       project.setSource(sourceName, args.code);
       let fullContinues = continues;
       if (args.jsImports && Object.keys(args.jsImports).length) {
@@ -59,7 +71,7 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
       args.executionId,
       sourceName,
       continues,
-      args.project,
+      project,
       env,
     ]
   );
@@ -75,11 +87,11 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
 
   useEffect(() => {
     return () => {
-      args.project.removeSource(sourceName);
-      if (args.project.getSource(importSourceName(sourceName)))
-        args.project.removeSource(importSourceName(sourceName));
+      project.removeSource(sourceName);
+      if (project.getSource(importSourceName(sourceName)))
+        project.removeSource(importSourceName(sourceName));
     };
-  }, [args.project, sourceName]);
+  }, [project, sourceName]);
 
   return result;
 };

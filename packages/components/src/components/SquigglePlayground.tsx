@@ -251,6 +251,8 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
   onSettingsChange,
   showEditor = true,
   showShareButton = false,
+  continues,
+  project,
 }) => {
   const [code, setCode] = useMaybeControlledValue({
     value: controlledCode,
@@ -305,15 +307,9 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
     executionId,
   } = useRunnerState(code);
 
-  const project = React.useMemo(() => {
-    const p = SqProject.create();
-    if (environment) {
-      p.setEnvironment(environment);
-    }
-    return p;
-  }, [environment]);
-
   const resultAndBindings = useSquiggle({
+    environment,
+    continues,
     code: renderedCode,
     project,
     jsImports: imports,

@@ -1,5 +1,10 @@
 import * as React from "react";
-import { SqValue, environment, SqProject } from "@quri/squiggle-lang";
+import {
+  SqValue,
+  environment,
+  SqProject,
+  defaultEnvironment,
+} from "@quri/squiggle-lang";
 import { useSquiggle } from "../lib/hooks";
 import { SquiggleViewer } from "./SquiggleViewer";
 import { JsImports } from "../lib/jsImports";
@@ -66,7 +71,6 @@ type ProjectExecutionProps = {
 };
 const defaultOnChange = () => {};
 const defaultImports: JsImports = {};
-const defaultContinues: string[] = [];
 
 export const splitSquiggleChartSettings = (props: SquiggleChartProps) => {
   const {
@@ -120,24 +124,15 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
       width,
       height = 200,
       enableLocalSettings = false,
-      continues = defaultContinues,
+      continues,
+      project,
+      environment,
     } = props;
 
-    const p = React.useMemo(() => {
-      if (props.project) {
-        return props.project;
-      } else {
-        const p = SqProject.create();
-        if (props.environment) {
-          p.setEnvironment(props.environment);
-        }
-        return p;
-      }
-    }, [props.project, props.environment]);
-
     const resultAndBindings = useSquiggle({
+      environment,
       continues,
-      project: p,
+      project,
       code,
       jsImports,
       onChange,
@@ -153,7 +148,9 @@ export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
         height={height}
         distributionPlotSettings={distributionPlotSettings}
         chartSettings={chartSettings}
-        environment={p.getEnvironment()}
+        environment={
+          project ? project.getEnvironment() : environment ?? defaultEnvironment
+        }
         enableLocalSettings={enableLocalSettings}
       />
     );
