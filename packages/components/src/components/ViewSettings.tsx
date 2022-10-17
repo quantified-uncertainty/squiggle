@@ -6,125 +6,71 @@ import { Checkbox } from "./ui/Checkbox";
 import { HeadedSection } from "./ui/HeadedSection";
 import { Text } from "./ui/Text";
 import { MergedItemSettings, LocalItemSettings } from "./SquiggleViewer/utils";
-import { defaultTickFormat } from "../lib/distributionSpecBuilder";
+import { distributionSettingsSchema } from "./DistributionChart";
 
-export const viewSettingsSchema = yup.object({}).shape({
-  chartHeight: yup.number().required().positive().integer().default(350),
-  showSummary: yup.boolean().required().default(false),
-  logX: yup.boolean().required().default(false),
-  expY: yup.boolean().required().default(false),
-  tickFormat: yup.string().required().default(defaultTickFormat),
-  title: yup.string(),
-  minX: yup.number(),
-  maxX: yup.number(),
-  xAxisType: yup
-    .mixed<"number" | "dateTime">()
-    .oneOf(["number", "dateTime"])
-    .default("number"),
-  distributionChartActions: yup.boolean(),
-  diagramStart: yup.number().required().positive().integer().default(0).min(0),
-  diagramStop: yup.number().required().positive().integer().default(10).min(0),
-  diagramCount: yup.number().required().positive().integer().default(20).min(2),
-});
+export const viewSettingsSchema = yup
+  .object({})
+  .shape({
+    diagramStart: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(0)
+      .min(0),
+    diagramStop: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(10)
+      .min(0),
+    diagramCount: yup
+      .number()
+      .required()
+      .positive()
+      .integer()
+      .default(20)
+      .min(2),
+  })
+  .concat(distributionSettingsSchema);
 
 export type EditableViewSettings = yup.InferType<typeof viewSettingsSchema>;
 
+export const mergedToViewSettings = (
+  settings: MergedItemSettings
+): EditableViewSettings => ({
+  ...settings,
+  ...settings.distributionPlotSettings,
+  diagramStart: settings.chartSettings.start,
+  diagramStop: settings.chartSettings.stop,
+  diagramCount: settings.chartSettings.count,
+});
 export const viewSettingsToMerged = (
   settings: EditableViewSettings
-): Omit<MergedItemSettings, "environment"> => {
-  const {
-    showSummary,
-    logX,
-    expY,
-    diagramStart,
-    diagramStop,
-    diagramCount,
-    tickFormat,
-    minX,
-    maxX,
-    title,
-    xAxisType,
-    distributionChartActions,
-    chartHeight,
-  } = settings;
+): Omit<MergedItemSettings, "environment"> => ({
+  distributionPlotSettings: { ...settings },
+  chartSettings: {
+    start: settings.diagramStart,
+    stop: settings.diagramStop,
+    count: settings.diagramCount,
+  },
+  chartHeight: settings.chartHeight,
+});
 
-  const distributionPlotSettings = {
-    showSummary,
-    logX,
-    expY,
-    format: tickFormat,
-    minX,
-    maxX,
-    title,
-    xAxisType,
-    actions: distributionChartActions,
-  };
-
-  const chartSettings = {
-    start: diagramStart,
-    stop: diagramStop,
-    count: diagramCount,
-  };
-
-  return { distributionPlotSettings, chartSettings, chartHeight };
-};
-
+// Annoyingly, this has the exact same body as above, however I can't work
+// out how to convince typescript that it's a duplication. The only way I can think
+// of removing this is by making EditableViewSettings and Omit<MergedItemSettings, "environment> the same object and removing the need for both these functions
 export const viewSettingsToLocal = (
   settings: Partial<EditableViewSettings>
-): Omit<LocalItemSettings, "collapsed" | "environment"> => {
-  const {
-    showSummary,
-    logX,
-    expY,
-    diagramStart,
-    diagramStop,
-    diagramCount,
-    tickFormat,
-    minX,
-    maxX,
-    title,
-    xAxisType,
-    distributionChartActions,
-    chartHeight,
-  } = settings;
-
-  const distributionPlotSettings = {
-    showSummary,
-    logX,
-    expY,
-    format: tickFormat,
-    minX,
-    maxX,
-    title,
-    xAxisType,
-    actions: distributionChartActions,
-  };
-
-  const chartSettings = {
-    start: diagramStart,
-    stop: diagramStop,
-    count: diagramCount,
-  };
-
-  return { distributionPlotSettings, chartSettings, chartHeight };
-};
-
-export const mergedToViewSettings = (
-  mergedSettings: MergedItemSettings
-): EditableViewSettings => ({
-  chartHeight: mergedSettings.chartHeight,
-  showSummary: mergedSettings.distributionPlotSettings.showSummary,
-  logX: mergedSettings.distributionPlotSettings.logX,
-  expY: mergedSettings.distributionPlotSettings.expY,
-  tickFormat: mergedSettings.distributionPlotSettings.format,
-  title: mergedSettings.distributionPlotSettings.title,
-  minX: mergedSettings.distributionPlotSettings.minX,
-  maxX: mergedSettings.distributionPlotSettings.maxX,
-  distributionChartActions: mergedSettings.distributionPlotSettings.actions,
-  xAxisType: mergedSettings.distributionPlotSettings.xAxisType,
-  diagramStart: mergedSettings.chartSettings.start,
-  diagramStop: mergedSettings.chartSettings.stop,
-  diagramCount: mergedSettings.chartSettings.count,
+): Omit<LocalItemSettings, "collapsed" | "environment"> => ({
+  distributionPlotSettings: { ...settings },
+  chartSettings: {
+    start: settings.diagramStart,
+    stop: settings.diagramStop,
+    count: settings.diagramCount,
+  },
+  chartHeight: settings.chartHeight,
 });
 
 export const ViewSettings: React.FC<{
@@ -183,7 +129,7 @@ export const DistributionViewSettings: React.FC<{
           />
           <Checkbox
             register={register}
-            name="distributionChartActions"
+            name="vegaActions"
             label="Show vega chart controls"
           />
           <Checkbox

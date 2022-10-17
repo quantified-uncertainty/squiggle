@@ -22,15 +22,12 @@ export type SquiggleArgs = {
 
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
-  project?: undefined;
-  continues?: undefined;
   /** The amount of points returned to draw the distribution, not needed if using a project */
   environment?: environment;
 };
 
 // Props needed when executing inside a project.
 type ProjectExecutionProps = {
-  environment?: undefined;
   /** The project that this execution is part of */
   project: SqProject;
   /** What other squiggle sources from the project to continue. Default [] */
@@ -47,21 +44,22 @@ const defaultContinues = [];
 
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
   const sourceName = useMemo(() => uuid.v4(), []);
+  const project = "project" in args ? args.project : undefined;
+  const environment = "environment" in args ? args.environment : undefined;
+  const continues =
+    "continues" in args ? args.continues ?? [] : defaultContinues;
 
   const p = useMemo(() => {
-    if (args.project) {
-      return args.project;
+    if (project) {
+      return project;
     } else {
       const p = SqProject.create();
-      if (args.environment) {
-        p.setEnvironment(args.environment);
+      if (environment) {
+        p.setEnvironment(environment);
       }
       return p;
     }
-  }, [args.project, args.environment]);
-
-  const env = p.getEnvironment();
-  const continues = args.continues || defaultContinues;
+  }, [project, environment]);
 
   const result = useMemo(
     () => {
@@ -84,16 +82,7 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      args.code,
-      args.jsImports,
-      args.executionId,
-      sourceName,
-      continues,
-      args.project,
-      env,
-      p,
-    ]
+    [args.code, args.jsImports, args.executionId, sourceName, continues, p]
   );
 
   const { onChange } = args;

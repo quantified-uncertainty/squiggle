@@ -187,14 +187,14 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
         plot={defaultPlot(mouseItem.value.value)}
         environment={environment}
         width={400}
-        height={50}
         {...distributionPlotSettings}
+        chartHeight={50}
       />
     ) : null;
 
   let getPercentilesMemoized = React.useMemo(
     () => getPercentiles({ chartSettings, fn, environment }),
-    [environment, fn]
+    [environment, fn, chartSettings]
   );
 
   return (

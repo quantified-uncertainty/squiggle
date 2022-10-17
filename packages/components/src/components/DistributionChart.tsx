@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as yup from "yup";
 import {
   SqDistribution,
   result,
@@ -14,25 +15,30 @@ import { useSize } from "react-use";
 
 import {
   buildVegaSpec,
-  DistributionChartSpecOptions,
+  distributionChartSpecSchema,
 } from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 
-export type DistributionPlottingSettings = {
-  /** Whether to show a summary of means, stdev, percentiles etc */
-  showSummary: boolean;
-  actions?: boolean;
-} & DistributionChartSpecOptions;
+export const distributionSettingsSchema = yup
+  .object({})
+  .shape({
+    showSummary: yup.boolean().required().default(false),
+    chartHeight: yup.number().required().positive().integer().default(150),
+    vegaActions: yup.boolean().required().default(false),
+  })
+  .concat(distributionChartSpecSchema);
+
+export type DistributionPlottingSettings = yup.InferType<
+  typeof distributionSettingsSchema
+>;
 
 export type DistributionChartProps = {
   plot: Plot;
   environment: environment;
   width?: number;
-  height: number;
-  xAxisType?: "number" | "dateTime";
 } & DistributionPlottingSettings;
 
 export function defaultPlot(distribution: SqDistribution): Plot {
@@ -49,12 +55,12 @@ export function makePlot(record: SqRecord): Plot | void {
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const {
     plot,
-    height,
+    chartHeight,
     showSummary,
     width,
     environment,
     logX,
-    actions = false,
+    vegaActions,
   } = props;
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
@@ -125,8 +131,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             spec={spec}
             data={vegaData}
             width={widthProp - 10}
-            height={height}
-            actions={actions}
+            height={chartHeight}
+            actions={vegaActions}
           />
         )}
         <div className="flex justify-center">

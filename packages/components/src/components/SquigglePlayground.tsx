@@ -61,6 +61,8 @@ type PlaygroundProps = SquiggleArgs &
     showEditor?: boolean;
     /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
     showShareButton?: boolean;
+    /** Height of the editor */
+    height?: number;
   };
 
 const schema = yup
@@ -247,6 +249,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
     onCodeChange,
     onSettingsChange,
     showShareButton = false,
+    height = 500,
   } = props;
   const [code, setCode] = useMaybeControlledValue({
     value: controlledCode,
@@ -291,12 +294,13 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
     executionId,
   } = useRunnerState(code);
 
-  let args: SquiggleArgs = props;
-  args = { ...args, code, jsImports: imports, executionId };
-  if (!args.project) {
-    args = { ...args, environment };
-  }
-  const resultAndBindings = useSquiggle(args);
+  const resultAndBindings = useSquiggle({
+    ...props,
+    code,
+    jsImports: imports,
+    executionId,
+    environment,
+  });
 
   const valueToRender = getValueToRender(resultAndBindings);
 
@@ -321,7 +325,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
         onSubmit={run}
         oneLine={false}
         showGutter={true}
-        height={(props.chartHeight ?? 200) - 1}
+        height={height - 1}
       />
     </div>
   ) : (

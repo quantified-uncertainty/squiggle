@@ -7,6 +7,7 @@ import {
   ViewSettings,
   viewSettingsSchema,
   mergedToViewSettings,
+  EditableViewSettings,
   viewSettingsToLocal,
 } from "../ViewSettings";
 import { ViewerContext } from "./ViewerContext";
@@ -41,7 +42,7 @@ const ItemSettingsModal: React.FC<
     defaultValues: mergedToViewSettings(mergedSettings),
   });
   useEffect(() => {
-    const subscription = watch((vars) => {
+    const subscription = watch((vars: Partial<EditableViewSettings>) => {
       const settings = getSettings(value.location); // get the latest version
       setSettings(value.location, {
         ...settings,

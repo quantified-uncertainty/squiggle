@@ -7,7 +7,7 @@ export type LocalItemSettings = {
   distributionPlotSettings?: Partial<DistributionPlottingSettings>;
   chartSettings?: Partial<FunctionChartSettings>;
   chartHeight?: number;
-  environment?: environment;
+  environment?: Partial<environment>;
 };
 
 export type MergedItemSettings = {
