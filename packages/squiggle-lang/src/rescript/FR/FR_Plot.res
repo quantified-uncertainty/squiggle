@@ -113,7 +113,7 @@ module Internals = {
 
   let getLabeledDistribution: FnApp.fnApp<Reducer_T.labeledDistribution> = {
     makeLabeledDistribution
-    ->FnApp.Record.fmap(FnApp.Record.getField("name", FnApp.getString))
+    ->FnApp.Record.fmap(FnApp.Record.getField("title", FnApp.getString))
     ->FnApp.Record.app(FnApp.Record.getField("value", FnApp.getDistOrNumber))
     ->FnApp.getRecord
   }
@@ -124,22 +124,22 @@ module Internals = {
 
   let parsePlotValue: FnApp.fnApp<Reducer_T.plotValue> = {
     makePlot
-    ->FnApp.Record.fmap(FnApp.Record.getField("show", FnApp.getArray(getLabeledDistribution)))
+    ->FnApp.Record.fmap(FnApp.Record.getField("dists", FnApp.getArray(getLabeledDistribution)))
     ->FnApp.getRecord
   }
 }
 
 let library = [
   Function.make(
-    ~name="dist",
+    ~name="dists",
     ~nameSpace,
     ~requiresNamespace=true,
     ~output=EvtPlot,
     ~examples=[
-      `Plot.dist({show: [{name: "Control", value: 1 to 2}, {name: "Treatment", value: 1.5 to 2.5}]}) `,
+      `Plot.dist({dists: [{title: "Control", value: 1 to 2}, {title: "Treatment", value: 1.5 to 2.5}]}) `,
     ],
     ~definitions=[
-      FnApp.oneArgDef("dist", Internals.parsePlotValue, (a: Reducer_T.plotValue) => Ok(IEvPlot(a))),
+      FnApp.oneArgDef("dists", Internals.parsePlotValue, (a: Reducer_T.plotValue) => Ok(IEvPlot(a))),
     ],
     (),
   ),
