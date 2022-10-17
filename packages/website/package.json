@@ -14,7 +14,7 @@
   "dependencies": {
     "@docusaurus/core": "2.1.0",
     "@docusaurus/preset-classic": "2.1.0",
-    "@heroicons/react": "^1.0.6",
+    "@heroicons/react": "^2.0.12",
     "@quri/squiggle-components": "*",
     "base64-js": "^1.5.1",
     "clsx": "^1.2.1",
