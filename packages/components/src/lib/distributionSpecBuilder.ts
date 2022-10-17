@@ -141,7 +141,7 @@ export function buildVegaSpec(
           data: "data",
           field: "name",
         },
-        range: { scheme: "blues" },
+        range: { scheme: "category20c" },
       },
     ],
     axes: [
