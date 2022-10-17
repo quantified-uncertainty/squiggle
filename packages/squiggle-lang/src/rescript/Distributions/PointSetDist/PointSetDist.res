@@ -224,9 +224,13 @@ let doN = (n, fn) => {
   items
 }
 
-let sample = (t: t): float => {
-  let randomItem = Random.float(1.0)
-  t |> T.Integral.yToX(randomItem)
+let rec sampleN = (t: t, n: int): array<float> => {
+  switch t {
+  | Discrete(discrete) => Discrete.sampleN(discrete, n)
+  // TODO: Maybe sample a normal curve instead of giving a 50/50 split all the time?
+  | Mixed(mixed) => Array.append(sampleN(Continuous(mixed.continuous), n/2), sampleN(Discrete(mixed.discrete), n-(n/2)))
+  | _ => doN(n, () => T.Integral.yToX(Random.float(1.0), t))
+  }
 }
 
 let isFloat = (t: t) =>
@@ -238,7 +242,7 @@ let isFloat = (t: t) =>
 let sampleNRendered = (n, dist) => {
   let integralCache = T.Integral.get(dist)
   let distWithUpdatedIntegralCache = T.updateIntegralCache(Some(integralCache), dist)
-  doN(n, () => sample(distWithUpdatedIntegralCache))
+  sampleN(distWithUpdatedIntegralCache, n)
 }
 
 let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
@@ -246,7 +250,7 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
   | #Pdf(f) => pdf(f, s)
   | #Cdf(f) => cdf(f, s)
   | #Inv(f) => inv(f, s)
-  | #Sample => sample(s)
+  | #Sample => sampleN(s, 1)[0]
   | #Mean => T.mean(s)
   | #Min => T.minX(s)
   | #Max => T.maxX(s)
