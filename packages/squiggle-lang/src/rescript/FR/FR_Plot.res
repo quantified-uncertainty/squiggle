@@ -139,7 +139,9 @@ let library = [
       `Plot.dist({dists: [{title: "Control", value: 1 to 2}, {title: "Treatment", value: 1.5 to 2.5}]}) `,
     ],
     ~definitions=[
-      FnApp.oneArgDef("dists", Internals.parsePlotValue, (a: Reducer_T.plotValue) => Ok(IEvPlot(a))),
+      FnApp.oneArgDef("dists", Internals.parsePlotValue, (a: Reducer_T.plotValue) => Ok(
+        IEvPlot(a),
+      )),
     ],
     (),
   ),
