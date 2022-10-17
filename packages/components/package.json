@@ -7,7 +7,7 @@
     "@floating-ui/react-dom-interactions": "^0.10.1",
     "@headlessui/react": "^1.7.3",
     "@heroicons/react": "^1.0.6",
-    "@hookform/resolvers": "^2.9.8",
+    "@hookform/resolvers": "^2.9.9",
     "@quri/squiggle-lang": "^0.5.0",
     "@react-hook/size": "^2.1.2",
     "@types/uuid": "^8.3.4",
