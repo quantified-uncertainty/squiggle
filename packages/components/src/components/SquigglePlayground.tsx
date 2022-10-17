@@ -296,8 +296,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
 
   const resultAndBindings = useSquiggle({
     ...props,
-    code,
-    jsImports: imports,
+    code: renderedCode,
     executionId,
     environment,
   });

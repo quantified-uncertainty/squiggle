@@ -55,10 +55,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
       editorProps={{
         $blockScrolling: true,
       }}
-      setOptions={{
-        enableBasicAutocompletion: false,
-        enableLiveAutocompletion: false,
-      }}
+      setOptions={{}}
       commands={[
         {
           name: "submit",

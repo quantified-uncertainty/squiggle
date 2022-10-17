@@ -45,7 +45,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
     : location.path.items[location.path.items.length - 1];
 
   return (
-    <div>
+    <div role={isTopLevel ? "status" : undefined}>
       <header className="inline-flex space-x-1">
         <Tooltip text={heading}>
           <span

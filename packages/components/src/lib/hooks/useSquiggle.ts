@@ -1,10 +1,10 @@
 import {
   result,
   SqError,
-  environment,
   SqProject,
   SqRecord,
   SqValue,
+  environment,
 } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
