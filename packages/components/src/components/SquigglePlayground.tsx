@@ -298,6 +298,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
     ...props,
     code: renderedCode,
     executionId,
+    jsImports: imports,
     environment,
   });
 

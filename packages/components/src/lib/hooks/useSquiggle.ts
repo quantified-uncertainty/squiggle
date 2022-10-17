@@ -15,7 +15,7 @@ export type SquiggleArgs = {
   executionId?: number;
   jsImports?: JsImports;
   onChange?: (
-    expr: result<SqValue, SqError> | undefined,
+    expr: SqValue | undefined,
     sourceName: string
   ) => void;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
@@ -44,14 +44,14 @@ const defaultContinues = [];
 
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
   const sourceName = useMemo(() => uuid.v4(), []);
-  const project = "project" in args ? args.project : undefined;
+  const projectArg = "project" in args ? args.project : undefined;
   const environment = "environment" in args ? args.environment : undefined;
   const continues =
     "continues" in args ? args.continues ?? [] : defaultContinues;
 
-  const p = useMemo(() => {
-    if (project) {
-      return project;
+  const project = useMemo(() => {
+    if (projectArg) {
+      return projectArg;
     } else {
       const p = SqProject.create();
       if (environment) {
@@ -59,11 +59,10 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
       }
       return p;
     }
-  }, [project, environment]);
+  }, [projectArg, environment]);
 
   const result = useMemo(
     () => {
-      const project = p;
 
       project.setSource(sourceName, args.code);
       let fullContinues = continues;
@@ -82,22 +81,25 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [args.code, args.jsImports, args.executionId, sourceName, continues, p]
+    [args.code, args.jsImports, args.executionId, sourceName, continues, projectArg]
   );
 
   const { onChange } = args;
 
   useEffect(() => {
-    onChange?.(result.result, sourceName);
+     onChange?.(
+      result.result.tag === "Ok" ? result.result.value : undefined,
+      sourceName
+    );
   }, [result, onChange, sourceName]);
 
   useEffect(() => {
     return () => {
-      p.removeSource(sourceName);
-      if (p.getSource(importSourceName(sourceName)))
-        p.removeSource(importSourceName(sourceName));
+      project.removeSource(sourceName);
+      if (project.getSource(importSourceName(sourceName)))
+        project.removeSource(importSourceName(sourceName));
     };
-  }, [p, sourceName]);
+  }, [project, sourceName]);
 
   return result;
 };
