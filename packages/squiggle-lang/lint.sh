@@ -10,7 +10,7 @@ for file in $files
 do
   current=`cat $file`
   linted=`echo "${current}" | rescript format -stdin .res`
-  diff=`diff <(echo $current) <(echo $linted)`
+  diff=`diff <(echo "$current") <(echo "$linted")`
 
   if [ ${#diff} -gt 0 ]
   then
@@ -24,7 +24,7 @@ for file in $files
 do
   current=`cat $file`
   linted=`echo "${current}" | rescript format -stdin .resi`
-  diff=`diff <(echo $current) <(echo $linted)`
+  diff=`diff <(echo "$current") <(echo "$linted")`
   if [ ${#diff} -gt 0 ]
   then 
     echo "ERROR: $file doesn't pass lint"
