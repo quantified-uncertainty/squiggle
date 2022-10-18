@@ -13122,7 +13122,7 @@ markdown-it@^12.3.2:
     mdurl "^1.0.1"
     uc.micro "^1.0.5"
 
-mathjs@^11.0.1, mathjs@^11.3.0:
+mathjs@^11.0.1:
   version "11.3.0"
   resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-11.3.0.tgz#17d7504ab27445b3c7e847f6de4cef26e16381e6"
   integrity sha512-HAUFLxyH8WMSDisNljQFIKjp//d1iL0C36nhGEJFwzdMb46gACMG1E8Ze06sES4hJ5jHDv5ieq7r3mDDcU/d4g==
