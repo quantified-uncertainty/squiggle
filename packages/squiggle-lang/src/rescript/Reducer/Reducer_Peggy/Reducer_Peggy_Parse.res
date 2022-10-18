@@ -14,7 +14,18 @@ type location = {
 
 type node = {"type": string, "location": location}
 
-type parseError = SyntaxError(string, location)
+module ParseError = {
+  @genType.opaque
+  type t = SyntaxError(string, location)
+
+  @genType
+  let getMessage = (SyntaxError(message, _): t) => message
+
+  @genType
+  let getLocation = (SyntaxError(_, location): t) => location
+}
+
+type parseError = ParseError.t
 
 type parseResult = result<node, parseError>
 
@@ -26,6 +37,7 @@ external castWithLocation: Js.Exn.t => withLocation = "%identity"
 
 let syntaxErrorToLocation = (error: Js.Exn.t): location => castWithLocation(error)["location"]
 
+@genType
 let parse = (expr: string, source: string): parseResult =>
   try {
     Ok(parse__(expr, {"grammarSource": source}))
@@ -169,7 +181,7 @@ let rec pgToString = (ast: ast): string => {
 and toString = (node: node): string => node->nodeToAST->pgToString
 
 let toStringError = (error: parseError): string => {
-  let SyntaxError(message, _) = error
+  let ParseError.SyntaxError(message, _) = error
   `Syntax Error: ${message}}`
 }
 
