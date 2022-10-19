@@ -278,11 +278,11 @@ module DefineFn = {
                   let result = fn(numbers)
                   switch result {
                   | Ok(x) => Ok(Wrappers.evNumber(x))
-                  | Error(b) => Error(b)
+                  | Error(b) => b->SqError.Message.REOther->Error
                   }
                 }
 
-              | Error(b) => Error(b)
+              | Error(b) => b->Error
               }
               result
             }
