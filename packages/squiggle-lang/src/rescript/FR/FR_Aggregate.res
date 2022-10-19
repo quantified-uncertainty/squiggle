@@ -8,7 +8,8 @@ module AggregateFs = {
   module Helpers = {
     let geomMean = (xs: array<float>) => {
       let xsLogs = E.A.fmap(x => Js.Math.log2(x), xs)
-      let sumXsLogs = E.A.reduce(xsLogs, 0.0, (a, b) => a +. b)
+      let sumXsLogs =
+        E.A.reduce(xsLogs, 0.0, (a, b) => a +. b) /. Belt.Float.fromInt(E.A.length(xs))
       let answer = Js.Math.pow_float(~base=2.0, ~exp=sumXsLogs)
       answer
     }
@@ -18,11 +19,11 @@ module AggregateFs = {
       ~name="geomMean",
       ~nameSpace,
       ~output=EvtNumber,
-      ~requiresNamespace=false,
-      ~examples=[`Aggregate.id(1)`],
+      ~requiresNamespace=true,
+      ~examples=[`Aggregate.geomMean([1, 2, 4])`],
       ~definitions=[
         FnDefinition.make(
-          ~name="id",
+          ~name="geomMean",
           ~inputs=[FRTypeArray(FRTypeNumber)],
           ~run=(inputs, _, _) =>
             switch inputs {
