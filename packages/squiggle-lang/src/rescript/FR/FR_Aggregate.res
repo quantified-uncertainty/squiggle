@@ -1,12 +1,17 @@
 open FunctionRegistry_Core
-open FunctionRegistry_Helpers
+// open FunctionRegistry_Helpers
 
 let nameSpace = "Example"
 let requiresNamespace = true
 
 module AggregateFs = {
   module Helpers = {
-    let geomMean = (xs: array<float>) => 1.0
+    let geomMean = (xs: array<float>) => {
+      let xsLogs = E.A.fmap(x => Js.Math.log2(x), xs)
+      let sumXsLogs = E.A.reduce(xsLogs, 0.0, (a, b) => a +. b)
+      let answer = Js.Math.pow_float(~base=2.0, ~exp=sumXsLogs)
+      answer
+    }
   }
   module Lib = {
     let geomMean = Function.make(
@@ -19,7 +24,7 @@ module AggregateFs = {
         FnDefinition.make(
           ~name="id",
           ~inputs=[FRTypeArray(FRTypeNumber)],
-          ~run=(inputs, environment, reducer) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvArray(innerNumbers)] => {
                 let individuallyWrappedNumbers = E.A.fmap(innerNumber => {
