@@ -32,10 +32,14 @@ module AggregateFs = {
         }
       }
     }
+    let probabilityToOdds = p => p /. (1.0 -. p)
+    let oddsToProbability = o => o /. (1.0 +. o)
+    let sum = xs => E.A.reduce(xs, 0.0, (a, b) => a +. b)
+    let mean = xs => sum(xs) /. Belt.Float.fromInt(E.A.length(xs))
+
     let geomMean = (xs: array<float>) => {
       let xsLogs = E.A.fmap(x => Js.Math.log2(x), xs)
-      let sumXsLogs = E.A.reduce(xsLogs, 0.0, (a, b) => a +. b)
-      let meanXsLogs = sumXsLogs /. Belt.Float.fromInt(E.A.length(xs))
+      let meanXsLogs = mean(xsLogs)
       let answer = Js.Math.pow_float(~base=2.0, ~exp=meanXsLogs)
       answer
     }
@@ -43,6 +47,41 @@ module AggregateFs = {
       let sumXs = E.A.reduce(xs, 0.0, (a, b) => a +. b)
       let meanXs = sumXs /. Belt.Float.fromInt(E.A.length(xs))
       meanXs
+    }
+
+    let geomMeanOfOdds = xs => {
+      let arrayOfOdds = E.A.fmap(p => probabilityToOdds(p), xs)
+      let arrayOfLogsOfOdds = E.A.fmap(p => Js.Math.log2(p), arrayOfOdds)
+      let meanOfLogsOfodds = mean(arrayOfLogsOfOdds)
+      let geomMeanOfOdds = Js.Math.pow_float(~base=2.0, ~exp=meanOfLogsOfodds)
+      let result = oddsToProbability(geomMeanOfOdds)
+      result
+    }
+
+    let extremizedGeometricMeanOfOdds = (~xs, ~extremizationParameter=1.5, ()) => {
+      let arrayOfOdds = E.A.fmap(p => probabilityToOdds(p), xs)
+      let arrayOfLogsOfOdds = E.A.fmap(p => Js.Math.log2(p), arrayOfOdds)
+      let extremizedSumOfLogsOfOdds = extremizationParameter *. mean(arrayOfLogsOfOdds)
+      let extremizedGeomMeanOfOdds = Js.Math.pow_float(~base=2.0, ~exp=extremizedSumOfLogsOfOdds)
+      let result = oddsToProbability(extremizedGeomMeanOfOdds)
+      result
+    }
+
+    let neyman = xs => {
+      let n = Belt.Int.toFloat(E.A.length(xs))
+      let d =
+        n *.
+        (Js.Math.sqrt(3.0 *. Js.Math.pow_float(~base=n, ~exp=2.0) -. 3.0 *. n +. 1.0) -. 2.0) /.
+        (Js.Math.pow_float(~base=n, ~exp=2.0) -. n -. 1.0)
+      let result = extremizedGeometricMeanOfOdds(~xs, ~extremizationParameter=d, ())
+      result
+    }
+
+    let samotsvety = xs => {
+      let sortedXs = Belt.SortArray.stableSortBy(xs, (a, b) => a > b ? 1 : -1)
+      let middleXs = Belt.Array.slice(sortedXs, ~offset=1, ~len=E.A.length(xs) - 1)
+      let answer = geomMeanOfOdds(xs)
+      answer
     }
   }
   module Lib = {
@@ -72,14 +111,60 @@ module AggregateFs = {
       ],
       (),
     )
+    let geomMeanOfOdds = Function.make(
+      ~name="geomMeanOfOdds",
+      ~nameSpace,
+      ~output=EvtNumber,
+      ~requiresNamespace=true,
+      ~examples=[`Aggregate.geomMeanOfOdds([0.1, 0.2, 0.4])`],
+      ~definitions=[
+        DefineFn.Numbers.arrayToNum("geomMeanOfOdds", xs =>
+          Helpers.checker(xs => Ok(Helpers.geomMeanOfOdds(xs)), xs, 2)
+        ),
+      ],
+      (),
+    )
+
+    let neyman = Function.make(
+      ~name="neyman",
+      ~nameSpace,
+      ~output=EvtNumber,
+      ~requiresNamespace=true,
+      ~examples=[`Aggregate.neyman([0.1, 0.2, 0.4])`],
+      ~definitions=[
+        DefineFn.Numbers.arrayToNum("neyman", xs =>
+          Helpers.checker(xs => Ok(Helpers.neyman(xs)), xs, 2)
+        ),
+      ],
+      (),
+    )
+
+    let samotsvety = Function.make(
+      ~name="samotsvety",
+      ~nameSpace,
+      ~output=EvtNumber,
+      ~requiresNamespace=true,
+      ~examples=[`Aggregate.samotsvety([0.1, 0.2, 0.4])`],
+      ~definitions=[
+        DefineFn.Numbers.arrayToNum("neyman", xs =>
+          Helpers.checker(xs => Ok(Helpers.neyman(xs)), xs, 3)
+        ),
+      ],
+      (),
+    )
   }
 }
 
 let library = [
   // Combinatorics
   AggregateFs.Lib.geomMean,
+  AggregateFs.Lib.arithmeticMean,
+  AggregateFs.Lib.geomMeanOfOdds,
+  AggregateFs.Lib.neyman,
+  AggregateFs.Lib.samotsvety,
 ]
 
-// Then, to actually use,
-// add the new functions to
-// src/rescript/FunctionRegistry/FunctionRegistry_Library.res
+/* To do
+- [ ] Add remaining aggregation types
+- [ ] Add documentation
+*/
