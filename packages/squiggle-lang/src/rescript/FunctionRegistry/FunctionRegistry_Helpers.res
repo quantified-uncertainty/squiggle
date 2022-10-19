@@ -256,6 +256,42 @@ module DefineFn = {
         },
         (),
       )
+    let arrayToNum = (name, fn) => {
+      FnDefinition.make(
+        ~name,
+        ~inputs=[FRTypeArray(FRTypeNumber)],
+        ~run=(inputs, _, _) =>
+          switch inputs {
+          | [IEvArray(innerNumbers)] => {
+              let individuallyWrappedNumbers = E.A.fmap(innerNumber => {
+                switch innerNumber {
+                | Reducer_T.IEvNumber(x) => Ok(x)
+                | _ =>
+                  ("Error in function " ++ name ++ ". A member of the array wasn't a number")
+                  ->SqError.Message.REOther
+                  ->Error
+                }
+              }, innerNumbers)
+              let wrappedNumbers = E.A.R.firstErrorOrOpen(individuallyWrappedNumbers)
+              let result = switch wrappedNumbers {
+              | Ok(numbers) => {
+                  let result = fn(numbers)
+                  switch result {
+                  | Ok(x) => Ok(Wrappers.evNumber(x))
+                  | Error(b) => Error(b)
+                  }
+                }
+
+              | Error(b) => Error(b)
+              }
+              result
+            }
+
+          | _ => ("Error in function " ++ name)->SqError.Message.REOther->Error
+          },
+        (),
+      )
+    }
   }
 }
 

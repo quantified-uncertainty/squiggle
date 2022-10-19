@@ -1,5 +1,5 @@
 open FunctionRegistry_Core
-// open FunctionRegistry_Helpers
+open FunctionRegistry_Helpers
 
 let nameSpace = "Aggregate"
 let requiresNamespace = true
@@ -8,10 +8,15 @@ module AggregateFs = {
   module Helpers = {
     let geomMean = (xs: array<float>) => {
       let xsLogs = E.A.fmap(x => Js.Math.log2(x), xs)
-      let sumXsLogs =
-        E.A.reduce(xsLogs, 0.0, (a, b) => a +. b) /. Belt.Float.fromInt(E.A.length(xs))
-      let answer = Js.Math.pow_float(~base=2.0, ~exp=sumXsLogs)
+      let sumXsLogs = E.A.reduce(xsLogs, 0.0, (a, b) => a +. b)
+      let meanXsLogs = sumXsLogs /. Belt.Float.fromInt(E.A.length(xs))
+      let answer = Js.Math.pow_float(~base=2.0, ~exp=meanXsLogs)
       answer
+    }
+    let arithmeticMean = (xs: array<float>) => {
+      let sumXs = E.A.reduce(xs, 0.0, (a, b) => a +. b)
+      let meanXs = sumXs /. Belt.Float.fromInt(E.A.length(xs))
+      meanXs
     }
   }
   module Lib = {
@@ -21,39 +26,7 @@ module AggregateFs = {
       ~output=EvtNumber,
       ~requiresNamespace=true,
       ~examples=[`Aggregate.geomMean([1, 2, 4])`],
-      ~definitions=[
-        FnDefinition.make(
-          ~name="geomMean",
-          ~inputs=[FRTypeArray(FRTypeNumber)],
-          ~run=(inputs, _, _) =>
-            switch inputs {
-            | [IEvArray(innerNumbers)] => {
-                let individuallyWrappedNumbers = E.A.fmap(innerNumber => {
-                  switch innerNumber {
-                  | Reducer_T.IEvNumber(x) => Ok(x)
-                  | _ =>
-                    "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. A member of the array wasn't a function"
-                    ->SqError.Message.REOther
-                    ->Error
-                  }
-                }, innerNumbers)
-                let wrappedNumbers = E.A.R.firstErrorOrOpen(individuallyWrappedNumbers)
-                let result = switch wrappedNumbers {
-                | Ok(numbers) => {
-                    let result = Helpers.geomMean(numbers)
-                    Ok(FunctionRegistry_Helpers.Wrappers.evNumber(result))
-                  }
-
-                | Error(b) => Error(b)
-                }
-                result
-              }
-
-            | _ => "Error in Aggregate.id"->SqError.Message.REOther->Error
-            },
-          (),
-        ),
-      ],
+      ~definitions=[DefineFn.Numbers.arrayToNum("geomMean", xs => Ok(Helpers.geomMean(xs)))],
       (),
     )
   }
