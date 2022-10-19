@@ -1,7 +1,7 @@
 open FunctionRegistry_Core
 // open FunctionRegistry_Helpers
 
-let nameSpace = "Aggregate"
+let nameSpace = "Example"
 let requiresNamespace = true
 
 module Topic = {
@@ -14,7 +14,7 @@ module Topic = {
       ~nameSpace,
       ~output=EvtNumber,
       ~requiresNamespace=false,
-      ~examples=[`Agrgegate.id(1)`],
+      ~examples=[`Example.id(1)`],
       ~definitions=[
         FnDefinition.make(
           ~name="id",
@@ -27,7 +27,7 @@ module Topic = {
                 Ok(wrappedResult)
               }
 
-            | _ => "Error in Agrgegate.id"->SqError.Message.REOther->Error
+            | _ => "Error in Example.id"->SqError.Message.REOther->Error
             },
           (),
         ),
