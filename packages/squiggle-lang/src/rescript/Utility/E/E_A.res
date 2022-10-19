@@ -336,10 +336,24 @@ module Floats = {
           i := i.contents + 1
         } else {
           // Move i forward to next unequal value
+          // That is, find j so that equalAt(j-1) and !equalAt(j)
           let i0 = i.contents
-          i := i.contents + minDistance + 1
-          while i.contents < l && sortedArray[i.contents] == value {
-            i := i.contents + 1
+          // Find base so that j is in (i0+base, i0+2*base]
+          let base = ref(minDistance)
+          let equalAt = (ind: int) => ind < l && sortedArray[ind] == value
+          while equalAt(i0 + base.contents * 2) {
+            base := base.contents * 2
+          }
+          // Maintain j in (lo, i]. Once lo+1 == i, i is j.
+          let lo = ref(i0 + base.contents)
+          i := Js.Math.min_int(lo.contents + base.contents, l)
+          while lo.contents + 1 < i.contents {
+            let mid = lo.contents + (i.contents - lo.contents) / 2
+            if sortedArray[mid] == value {
+              lo := mid
+            } else {
+              i := mid
+            }
           }
 
           let count = i.contents - i0
