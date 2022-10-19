@@ -1,5 +1,5 @@
 open FunctionRegistry_Core
-open FunctionRegistry_Helpers
+// open FunctionRegistry_Helpers
 
 let nameSpace = "Aggregate"
 let requiresNamespace = true
@@ -19,7 +19,7 @@ module Topic = {
         FnDefinition.make(
           ~name="id",
           ~inputs=[FRTypeNumber],
-          ~run=(inputs, environment, reducer) =>
+          ~run=(inputs, _, _) =>
             switch inputs {
             | [IEvNumber(x)] => {
                 let unwrappedResult = Helpers.id(x)
