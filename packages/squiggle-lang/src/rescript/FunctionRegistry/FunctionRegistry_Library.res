@@ -13,6 +13,7 @@ let fnList = Belt.Array.concatMany([
   FR_Units.library,
   FR_Date.library,
   FR_Math.library,
+  FR_Aggregate.library,
   // FR_Example.library
 ])
 
