@@ -504,7 +504,7 @@ let mixture = (
   ~pointwiseAddFn: pointwiseAddFn,
   ~env: env,
 ) => {
-  let allValuesAreSampleSet = v => E.A.all(((t, _)) => isSampleSetSet(t), v)
+  let allValuesAreSampleSet = v => E.A.every(v, ((t, _)) => isSampleSetSet(t))
 
   if E.A.isEmpty(values) {
     Error(DistributionTypes.OtherError("Mixture error: mixture must have at least 1 element"))

@@ -603,7 +603,7 @@ module Range = {
     switch (items, first) {
     | (Some(items), Some((0.0, _))) => Some(items)
     | (Some(items), Some((firstX, _))) =>
-      let all = E.A.append([(firstX, 0.0)], items |> T.zip)
+      let all = E.A.concat([(firstX, 0.0)], items |> T.zip)
       all |> T.fromZippedArray |> E.O.some
     | _ => None
     }

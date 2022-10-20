@@ -333,4 +333,4 @@ module Comparison = {
   ]
 }
 
-let library = E.A.append(libaryBase, Comparison.library)
+let library = E.A.concat(libaryBase, Comparison.library)

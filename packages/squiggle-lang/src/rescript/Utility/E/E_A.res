@@ -6,32 +6,25 @@ let fmap = Belt.Array.map
 let fmapi = Belt.Array.mapWithIndex
 let forEach = Belt.Array.forEach
 let forEachI = Belt.Array.forEachWithIndex
-let to_list = Belt.List.fromArray
-let of_list = Belt.List.toArray
 let length = Belt.Array.length
-let append = Belt.Array.concat
 let unsafe_get = Belt.Array.getUnsafe
 let get = Belt.Array.get
 let getBy = Belt.Array.getBy
 let getIndexBy = Belt.Array.getIndexBy
 let last = a => get(a, length(a) - 1)
 let first = get(_, 0)
-let hasBy = (r, fn) => Belt.Array.getBy(r, fn)->E_O.isSome
 let concat = Belt.Array.concat
 let concatMany = Belt.Array.concatMany
-let keepMap = Belt.Array.keepMap
 let makeBy = Belt.Array.makeBy
 let slice = Belt.Array.slice
 let reduce = Belt.Array.reduce
 let reduceReverse = Belt.Array.reduceReverse
 let reducei = Belt.Array.reduceWithIndex
 let fold_left = reduce
-let fold_right = reduceReverse
 let some = Belt.Array.some
 let every = Belt.Array.every
 let isEmpty = r => length(r) < 1
 let stableSortBy = Belt.SortArray.stableSortBy
-let toNoneIfEmpty = r => isEmpty(r) ? None : Some(r)
 let toRanges = (a: array<'a>) =>
   switch a->length {
   | 0
@@ -59,18 +52,10 @@ let getByFmap = (a, fn, boolCondition) => {
 let zip = Belt.Array.zip
 let unzip = Belt.Array.unzip
 let zip3 = (a, b, c) => zip(a, b)->zip(c)->fmap((((v1, v2), v3)) => (v1, v2, v3))
-// This zips while taking the longest elements of each array.
-let zipMaxLength = (array1, array2) => {
-  let maxLength = Int.max(length(array1), length(array2))
-  let result = maxLength->Belt.Array.makeUninitializedUnsafe
-  for i in 0 to maxLength - 1 {
-    Belt.Array.set(result, i, (get(array1, i), get(array2, i)))->ignore
-  }
-  result
-}
 
+let to_list = Belt.List.fromArray
 /* TODO: Is there a better way of doing this? */
-let uniq = r => r->to_list->E_L.uniq->of_list
+let uniq = r => r->to_list->E_L.uniq->Belt.List.toArray
 
 //intersperse([1,2,3], [10,11,12]) => [1,10,2,11,3,12]
 let intersperse = (a: array<'a>, b: array<'a>) => {
@@ -78,8 +63,8 @@ let intersperse = (a: array<'a>, b: array<'a>) => {
 
   forEachI(a, (i, item) =>
     switch get(b, i) {
-    | Some(r) => items := append(items.contents, [item, r])
-    | None => items := append(items.contents, [item])
+    | Some(r) => items := concat(items.contents, [item, r])
+    | None => items := concat(items.contents, [item])
     }
   )
   items.contents
@@ -104,14 +89,6 @@ let accumulate = (fn: ('a, 'a) => 'a, items: array<'a>) => {
 let tail = Belt.Array.sliceToEnd(_, 1)
 let pairwise = (t, fn) => Belt.Array.zipBy(t, tail(t), fn)
 
-// @todo: Is -1 still the indicator that this is false (as is true with
-// @todo: js findIndex)? Wasn't sure.
-let findIndex = (e, i) => {
-  switch Js.Array.findIndex(e, i) {
-  | -1 => None
-  | r => Some(r)
-  }
-}
 let filter = Belt.Array.keep
 let joinWith = Js.Array2.joinWith
 let transpose = (xs: array<array<'a>>): array<array<'a>> => {
@@ -127,9 +104,6 @@ let transpose = (xs: array<array<'a>>): array<array<'a>> => {
   }
   arr
 }
-
-let all = (p, xs) => Belt.Array.every(xs, p)
-let any = (p, xs) => Belt.Array.some(xs, p)
 
 module O = {
   let concatSomes = (optionals: array<option<'a>>): array<'a> =>
@@ -159,7 +133,7 @@ module O = {
   let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->E_O2.default(default)
 
   let openIfAllSome = (optionals: array<option<'a>>): option<array<'a>> => {
-    if all(E_O.isSome, optionals) {
+    if every(optionals, E_O.isSome) {
       Some(optionals->fmap(E_O.toExn("Warning: This should not have happened")))
     } else {
       None
