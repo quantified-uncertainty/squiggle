@@ -323,16 +323,16 @@ module Floats = {
       let continuous: array<float> = []
       let discrete = FloatFloatMap.empty()
 
-      // In a run of exactly minDiscreteWeigth, the first and last
+      // In a run of exactly minDiscreteWeight, the first and last
       // element indices differ by minDistance.
       let minDistance = minDiscreteWeight - 1
 
-      let l = length(sortedArray)
+      let len = length(sortedArray)
       let i = ref(0)
-      while i.contents < l - minDistance {
+      while i.contents < len - minDistance {
         let value = sortedArray[i.contents]
         if value != sortedArray[i.contents + minDistance] {
-          Js.Array2.push(continuous, value) |> ignore
+          Js.Array2.push(continuous, value)->ignore
           i := i.contents + 1
         } else {
           // Move i forward to next unequal value
@@ -340,14 +340,14 @@ module Floats = {
           let i0 = i.contents
           // Find base so that j is in (i0+base, i0+2*base]
           let base = ref(minDistance)
-          let equalAt = (ind: int) => ind < l && sortedArray[ind] == value
+          let equalAt = (ind: int) => ind < len && sortedArray[ind] == value
           while equalAt(i0 + base.contents * 2) {
             base := base.contents * 2
           }
           // Maintain j in (lo, i]. Once lo+1 == i, i is j.
           let lo = ref(i0 + base.contents)
-          i := Js.Math.min_int(lo.contents + base.contents, l)
-          while lo.contents + 1 < i.contents {
+          i := Js.Math.min_int(lo.contents + base.contents, len)
+          while i.contents - lo.contents > 1 {
             let mid = lo.contents + (i.contents - lo.contents) / 2
             if sortedArray[mid] == value {
               lo := mid
@@ -360,8 +360,8 @@ module Floats = {
           FloatFloatMap.add(value, count->Belt.Int.toFloat, discrete)
         }
       }
-      let tail = Js.Array2.sliceFrom(sortedArray, i.contents)
-      Js.Array2.pushMany(continuous, tail) |> ignore
+      let tail = Belt.Array.sliceToEnd(sortedArray, i.contents)
+      Js.Array2.pushMany(continuous, tail)->ignore
 
       (continuous, discrete)
     }
