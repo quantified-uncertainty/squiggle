@@ -89,8 +89,8 @@ module T = {
   let fromArrays = (xs, ys): t => {xs, ys}
   let accumulateYs = (fn, p: t) => fromArray((p.xs, E.A.accumulate(fn, p.ys)))
   let concat = (t1: t, t2: t) => {
-    let cxs = Array.concat(list{t1.xs, t2.xs})
-    let cys = Array.concat(list{t1.ys, t2.ys})
+    let cxs = Belt.Array.concat(t1.xs, t2.xs)
+    let cys = Belt.Array.concat(t1.ys, t2.ys)
     {xs: cxs, ys: cys}
   }
   let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> Belt.Array.unzip |> fromArray
@@ -175,7 +175,7 @@ module Pairs = {
     let zipped = T.zip(t)
     let firstIndex = zipped |> Belt.Array.getIndexBy(_, ((x, _)) => x > xValue)
     let previousIndex = switch firstIndex {
-    | None => Some(Array.length(zipped) - 1)
+    | None => Some(E.A.length(zipped) - 1)
     | Some(0) => None
     | Some(n) => Some(n - 1)
     }

@@ -7,7 +7,7 @@ module Util = {
 }
 let fmap = List.map
 let get = Belt.List.get
-let toArray = Array.of_list
+let toArray = Belt.List.toArray
 let fmapi = List.mapi
 let concat = List.concat
 let concat' = (xs, ys) => List.append(ys, xs)
@@ -34,7 +34,7 @@ let takeLast = (i, xs) => List.rev(xs) |> take(i) |> List.rev
 let splitAt = (i, xs) => (take(i, xs), takeLast(List.length(xs) - i, xs))
 let remove = (i, n, xs) => {
   let (a, b) = splitAt(i, xs)
-  \"@"(a, drop(n, b))
+  Belt.List.concat(a, drop(n, b))
 }
 
 let find = List.find

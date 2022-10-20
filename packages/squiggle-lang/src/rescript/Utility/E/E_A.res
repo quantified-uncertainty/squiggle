@@ -1,30 +1,30 @@
 /* A for Array */
 // module O = E_O
+module A2 = E_A2
 module Int = E_Int
 module L = E_L
 module FloatFloatMap = E_FloatFloatMap
 
-let fmap = Array.map
-let fmapi = Array.mapi
-let to_list = Array.to_list
-let of_list = Array.of_list
-let length = Array.length
-let append = Array.append
+let fmap = (a, b) => A2.fmap(b, a)
+let fmapi = (a, b) => A2.fmapi(b, a)
+let to_list = Belt.List.fromArray
+let of_list = Belt.List.toArray
+let length = Belt.Array.length
+let append = Belt.Array.concat
 // let empty = [||];
-let unsafe_get = Array.unsafe_get
+let unsafe_get = Belt.Array.getUnsafe
 let get = Belt.Array.get
 let getBy = Belt.Array.getBy
 let getIndexBy = Belt.Array.getIndexBy
 let last = a => get(a, length(a) - 1)
 let first = get(_, 0)
 let hasBy = (r, fn) => Belt.Array.getBy(r, fn) |> E_O.isSome
-let fold_left = Array.fold_left
-let fold_right = Array.fold_right
+let fold_left = (fn, init, arr) => Belt.Array.reduce(arr, init, fn)
+let fold_right = (fn, init, arr) => Belt.Array.reduceReverse(arr, init, fn)
 let concat = Belt.Array.concat
 let concatMany = Belt.Array.concatMany
 let keepMap = Belt.Array.keepMap
 let slice = Belt.Array.slice
-let init = Array.init
 let reduce = Belt.Array.reduce
 let reduceReverse = Belt.Array.reduceReverse
 let reducei = Belt.Array.reduceWithIndex
@@ -120,13 +120,13 @@ let findIndex = (e, i) =>
       | r => Some(r)
       }
   )
-let filter = Js.Array.filter
+let filter = (a, b) => A2.filter(b, a)
 let joinWith = Js.Array.joinWith
 let transpose = (xs: array<array<'a>>): array<array<'a>> => {
   let arr: array<array<'a>> = []
   for i in 0 to length(xs) - 1 {
     for j in 0 to length(xs[i]) - 1 {
-      if Js.Array.length(arr) <= j {
+      if length(arr) <= j {
         ignore(Js.Array.push([xs[i][j]], arr))
       } else {
         ignore(Js.Array.push(xs[i][j], arr[j]))
@@ -240,7 +240,7 @@ module Floats = {
   let getBelowZero = (t: t) => Belt.Array.getBy(t, r => r < 0.0)
 
   let isSorted = (t: t): bool =>
-    if Array.length(t) < 1 {
+    if length(t) < 1 {
       true
     } else {
       reduce(zip(t, tail(t)), true, (acc, (first, second)) => acc && first < second)
@@ -299,10 +299,10 @@ module Floats = {
     let concatMany = (t1: array<array<'a>>) => Belt.Array.concatMany(t1)->sort
 
     let makeIncrementalUp = (a, b) =>
-      Array.make(b - a + 1, a) |> Array.mapi((i, c) => c + i) |> Belt.Array.map(_, float_of_int)
+      Belt.Array.make(b - a + 1, a) |> fmapi((i, c) => c + i) |> Belt.Array.map(_, float_of_int)
 
     let makeIncrementalDown = (a, b) =>
-      Array.make(a - b + 1, a) |> Array.mapi((i, c) => c - i) |> Belt.Array.map(_, float_of_int)
+      Belt.Array.make(a - b + 1, a) |> fmapi((i, c) => c - i) |> Belt.Array.map(_, float_of_int)
 
     /*
       This function goes through a sorted array and divides it into two different clusters:

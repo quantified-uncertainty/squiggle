@@ -1,5 +1,4 @@
-module A = E_A
-let fmap = (a, b) => A.fmap(b, a)
-let fmapi = (a, b) => A.fmapi(b, a)
-let joinWith = (a, b) => A.joinWith(b, a)
-let filter = (a, b) => A.filter(b, a)
+let fmap = Belt.Array.map
+let fmapi = Belt.Array.mapWithIndex
+let joinWith = (a, b) => Js.Array.joinWith(b, a)
+let filter = Belt.Array.keep

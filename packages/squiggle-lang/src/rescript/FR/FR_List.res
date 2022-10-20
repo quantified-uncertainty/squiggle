@@ -6,7 +6,7 @@ let requiresNamespace = true
 
 module Internals = {
   let length = (v: array<Reducer_T.value>): Reducer_T.value => IEvNumber(
-    Belt.Int.toFloat(Array.length(v)),
+    Belt.Int.toFloat(Belt.Array.length(v)),
   )
 
   let makeFromNumber = (n: float, value: Reducer_T.value): Reducer_T.value => IEvArray(
