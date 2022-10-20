@@ -3,7 +3,7 @@ import {
   XCircleIcon,
   InformationCircleIcon,
   CheckCircleIcon,
-} from "@heroicons/react/solid";
+} from "@heroicons/react/20/solid";
 import clsx from "clsx";
 
 export const Alert: React.FC<{

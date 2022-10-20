@@ -1,4 +1,4 @@
-import { CogIcon } from "@heroicons/react/solid";
+import { Cog8ToothIcon } from "@heroicons/react/20/solid";
 import React, { useContext, useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -133,7 +133,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
 
   return (
     <div className="flex gap-2" ref={ref}>
-      <CogIcon
+      <Cog8ToothIcon
         className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500"
         onClick={() => setIsOpen(!isOpen)}
       />

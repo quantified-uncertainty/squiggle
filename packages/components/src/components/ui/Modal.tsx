@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import * as ReactDOM from "react-dom";
-import { XIcon } from "@heroicons/react/solid";
+import { XMarkIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { useWindowScroll, useWindowSize } from "react-use";
 
@@ -36,7 +36,7 @@ const ModalHeader: React.FC<{
         type="button"
         onClick={close}
       >
-        <XIcon className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500" />
+        <XMarkIcon className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500" />
       </button>
     </header>
   );

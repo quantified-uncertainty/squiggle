@@ -15,17 +15,17 @@ import {
 } from "../lib/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
-  ChartSquareBarIcon,
+  ChartBarSquareIcon,
   CheckCircleIcon,
-  ClipboardCopyIcon,
-  CodeIcon,
-  CogIcon,
+  ClipboardDocumentIcon,
+  CodeBracketIcon,
+  Cog8ToothIcon,
   CurrencyDollarIcon,
   EyeIcon,
-  PauseIcon,
-  PlayIcon,
-  RefreshIcon,
-} from "@heroicons/react/solid";
+  PauseCircleIcon,
+  PlayCircleIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/20/solid";
 import clsx from "clsx";
 
 import { environment, SqProject } from "@quri/squiggle-lang";
@@ -179,7 +179,7 @@ const RunControls: React.FC<{
   onAutorunModeChange: (value: boolean) => void;
   run: () => void;
 }> = ({ autorunMode, isRunning, isStale, onAutorunModeChange, run }) => {
-  const CurrentPlayIcon = isRunning ? RefreshIcon : PlayIcon;
+  const CurrentPlayIcon = isRunning ? ArrowPathIcon : PlayCircleIcon;
 
   return (
     <div className="flex space-x-1 items-center" data-testid="autorun-controls">
@@ -196,7 +196,7 @@ const RunControls: React.FC<{
       )}
       <Toggle
         texts={["Autorun", "Paused"]}
-        icons={[CheckCircleIcon, PauseIcon]}
+        icons={[CheckCircleIcon, PauseCircleIcon]}
         status={autorunMode}
         onChange={onAutorunModeChange}
         spinIcon={autorunMode && isRunning}
@@ -219,7 +219,7 @@ const ShareButton: React.FC = () => {
           "Copied to clipboard!"
         ) : (
           <div className="flex items-center space-x-1">
-            <ClipboardCopyIcon className="w-4 h-4" />
+            <ClipboardDocumentIcon className="w-4 h-4" />
             <span>Copy share link</span>
           </div>
         )}
@@ -424,10 +424,10 @@ export const SquigglePlayground: FC<PlaygroundProps> = ({
               <StyledTab.List>
                 <StyledTab
                   name={vars.showEditor ? "Code" : "Display"}
-                  icon={vars.showEditor ? CodeIcon : EyeIcon}
+                  icon={vars.showEditor ? CodeBracketIcon : EyeIcon}
                 />
-                <StyledTab name="Sampling Settings" icon={CogIcon} />
-                <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                <StyledTab name="Sampling Settings" icon={Cog8ToothIcon} />
+                <StyledTab name="View Settings" icon={ChartBarSquareIcon} />
                 <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
               </StyledTab.List>
               <div className="flex space-x-2 items-center">

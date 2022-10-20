@@ -1,4 +1,4 @@
-import { RefreshIcon } from "@heroicons/react/solid";
+import { ArrowPathIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import React from "react";
 
@@ -38,7 +38,7 @@ export const Toggle: React.FC<Props> = ({
           )}
         />
         {spinIcon && (
-          <RefreshIcon className="w-6 h-6 absolute opacity-0 animate-appear-and-spin" />
+          <ArrowPathIcon className="w-6 h-6 absolute opacity-0 animate-appear-and-spin" />
         )}
       </div>
       <span>{status ? onText : offText}</span>
