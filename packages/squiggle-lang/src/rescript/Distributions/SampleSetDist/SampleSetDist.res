@@ -94,13 +94,13 @@ let _fromSampleResultArray = (samples: array<result<float, QuriSquiggleLang.Oper
 let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): result<
   t,
   sampleSetError,
-> => T.get(t)->E.A2.fmap(fn)->_fromSampleResultArray
+> => T.get(t)->E.A.fmap(fn)->_fromSampleResultArray
 
 //TODO: Figure out what to do if distributions are different lengths. ``zip`` is kind of inelegant for this.
 let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2: t): result<
   t,
   sampleSetError,
-> => E.A.zip(get(t1), get(t2))->E.A2.fmap(E.Tuple2.toFnCall(fn))->_fromSampleResultArray
+> => E.A.zip(get(t1), get(t2))->E.A.fmap(E.Tuple2.toFnCall(fn))->_fromSampleResultArray
 
 let map3 = (
   ~fn: (float, float, float) => result<float, Operation.Error.t>,
@@ -108,12 +108,12 @@ let map3 = (
   ~t2: t,
   ~t3: t,
 ): result<t, sampleSetError> =>
-  E.A.zip3(get(t1), get(t2), get(t3))->E.A2.fmap(E.Tuple3.toFnCall(fn))->_fromSampleResultArray
+  E.A.zip3(get(t1), get(t2), get(t3))->E.A.fmap(E.Tuple3.toFnCall(fn))->_fromSampleResultArray
 
 let mapN = (~fn: array<float> => result<float, Operation.Error.t>, ~t1: array<t>): result<
   t,
   sampleSetError,
-> => E.A.transpose(E.A.fmap(get, t1))->E.A2.fmap(fn)->_fromSampleResultArray
+> => E.A.transpose(E.A.fmap(t1, get))->E.A.fmap(fn)->_fromSampleResultArray
 
 let mean = t => T.get(t)->E.A.Floats.mean
 let geomean = t => T.get(t)->E.A.Floats.geomean
@@ -130,14 +130,14 @@ let cdf = (t: t, f: float) => {
 }
 
 let mixture = (values: array<(t, float)>, intendedLength: int) => {
-  let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
+  let totalWeight = values->E.A.fmap(E.Tuple2.second)->E.A.Floats.sum
   let discreteSamples =
     values
     ->Belt.Array.mapWithIndex((i, (_, weight)) => (E.I.toFloat(i), weight /. totalWeight))
     ->XYShape.T.fromZippedArray
     ->Discrete.make
     ->Discrete.sampleN(intendedLength)
-  let dists = values->E.A2.fmap(E.Tuple2.first)->E.A2.fmap(T.get)
+  let dists = values->E.A.fmap(E.Tuple2.first)->E.A.fmap(T.get)
   let samples =
     discreteSamples
     ->Belt.Array.mapWithIndex((index, distIndexToChoose) => {
@@ -148,8 +148,8 @@ let mixture = (values: array<(t, float)>, intendedLength: int) => {
   samples->E.O2.toExn("Mixture unreachable error")->T.make
 }
 
-let truncateLeft = (t, f) => T.get(t)->E.A2.filter(x => x >= f)->T.make
-let truncateRight = (t, f) => T.get(t)->E.A2.filter(x => x <= f)->T.make
+let truncateLeft = (t, f) => T.get(t)->E.A.filter(x => x >= f)->T.make
+let truncateRight = (t, f) => T.get(t)->E.A.filter(x => x <= f)->T.make
 
 let truncate = (t, ~leftCutoff: option<float>, ~rightCutoff: option<float>) => {
   let withTruncatedLeft = t => leftCutoff |> E.O.dimap(left => truncateLeft(t, left), _ => Ok(t))

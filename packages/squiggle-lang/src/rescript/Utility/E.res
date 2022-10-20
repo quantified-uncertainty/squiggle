@@ -6,7 +6,6 @@ running `rescript convert -all` on Rationale https://github.com/jonlaing/rationa
 let equals = (a, b) => a === b
 
 module A = E_A
-module A2 = E_A2
 module B = E_B
 module Dict = E_Dict
 module F = E_F

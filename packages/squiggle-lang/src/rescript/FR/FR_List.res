@@ -14,7 +14,7 @@ module Internals = {
   )
 
   let upTo = (low: float, high: float): Reducer_T.value => IEvArray(
-    E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)->E.A2.fmap(Wrappers.evNumber),
+    E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)->E.A.fmap(Wrappers.evNumber),
   )
 
   let first = (v: array<Reducer_T.value>): result<Reducer_T.value, string> =>

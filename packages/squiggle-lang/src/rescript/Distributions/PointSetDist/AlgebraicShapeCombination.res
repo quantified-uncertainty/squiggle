@@ -251,15 +251,13 @@ let combineShapesContinuousDiscrete = (
   }
 
   outXYShapes
-  |> E.A.fmap(XYShape.T.fromZippedArray)
-  |> E.A.fold_left(
-    (acc, x) =>
-      XYShape.PointwiseCombination.addCombine(
-        XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
-        acc,
-        x,
-      ),
-    XYShape.T.empty,
+  ->E.A.fmap(XYShape.T.fromZippedArray)
+  ->E.A.fold_left(XYShape.T.empty, (acc, x) =>
+    XYShape.PointwiseCombination.addCombine(
+      XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
+      acc,
+      x,
+    )
   )
 }
 

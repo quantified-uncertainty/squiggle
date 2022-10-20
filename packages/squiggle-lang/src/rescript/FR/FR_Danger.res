@@ -333,9 +333,8 @@ module DiminishingReturns = {
 
           let initAccumulator: diminishingReturnsAccumulator = Ok({
             optimalAllocations: Belt.Array.make(E.A.length(lambdas), 0.0),
-            currentMarginalReturns: E.A.fmap(
-              lambda => applyFunctionAtPoint(lambda, 0.0),
-              lambdas,
+            currentMarginalReturns: E.A.fmap(lambdas, lambda =>
+              applyFunctionAtPoint(lambda, 0.0)
             )->E.A.R.firstErrorOrOpen,
           })
 
@@ -411,7 +410,7 @@ module DiminishingReturns = {
           ~run=(inputs, environment, reducer) =>
             switch inputs {
             | [IEvArray(innerlambdas), IEvNumber(funds), IEvNumber(approximateIncrement)] => {
-                let individuallyWrappedLambdas = E.A.fmap(innerLambda => {
+                let individuallyWrappedLambdas = innerlambdas->E.A.fmap(innerLambda => {
                   switch innerLambda {
                   | Reducer_T.IEvLambda(lambda) => Ok(lambda)
                   | _ =>
@@ -419,7 +418,7 @@ module DiminishingReturns = {
                     ->SqError.Message.REOther
                     ->Error
                   }
-                }, innerlambdas)
+                })
                 let wrappedLambdas = E.A.R.firstErrorOrOpen(individuallyWrappedLambdas)
                 let result = switch wrappedLambdas {
                 | Ok(lambdas) => {

@@ -35,8 +35,7 @@ module Error = {
           p1Length,
         )} and ${p2Name} has length ${E.I.toString(p2Length)}`
     | MultipleErrors(errors) =>
-      `Multiple Errors: ${E.A2.fmap(errors, toString)->E.A2.fmap(r => `[${r}]`)
-          |> E.A.joinWith(", ")}`
+      `Multiple Errors: ${E.A.fmap(errors, toString)->E.A.fmap(r => `[${r}]`)->E.A.joinWith(", ")}`
     }
 }
 
@@ -77,10 +76,10 @@ module T = {
   let firstY = (t: t) => t |> ys |> E.A.first |> extImp
   let lastY = (t: t) => t |> ys |> E.A.last |> extImp
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
-  let mapX = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys}
-  let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(fn, t.ys)}
+  let mapX = (fn, t: t): t => {xs: E.A.fmap(t.xs, fn), ys: t.ys}
+  let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(t.ys, fn)}
   let mapYResult = (fn: float => result<float, 'e>, t: t): result<t, 'e> => {
-    let mappedYs = E.A.fmap(fn, t.ys)
+    let mappedYs = E.A.fmap(t.ys, fn)
     E.A.R.firstErrorOrOpen(mappedYs)->E.R2.fmap(y => {xs: t.xs, ys: y})
   }
   let square = mapX(x => x ** 2.0)
@@ -96,7 +95,7 @@ module T = {
   let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> Belt.Array.unzip |> fromArray
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
-  let filterYValues = (fn, t: t): t => t |> zip |> E.A.filter(((_, y)) => fn(y)) |> fromZippedArray
+  let filterYValues = (fn, t: t): t => t->zip->E.A.filter(((_, y)) => fn(y))->fromZippedArray
   let filterOkYs = (xs: array<float>, ys: array<result<float, 'b>>): t => {
     let n = E.A.length(xs) // Assume length(xs) == length(ys)
     let newXs = []
@@ -157,10 +156,10 @@ module T = {
 
 module Ts = {
   type t = T.ts
-  let minX = (t: t) => t |> E.A.fmap(T.minX) |> E.A.Floats.min
-  let maxX = (t: t) => t |> E.A.fmap(T.maxX) |> E.A.Floats.max
+  let minX = (t: t) => t->E.A.fmap(T.minX) |> E.A.Floats.min
+  let maxX = (t: t) => t->E.A.fmap(T.maxX) |> E.A.Floats.max
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
-  let allXs = (t: t) => t |> E.A.fmap(T.xs) |> E.A.Sorted.concatMany
+  let allXs = (t: t) => t->E.A.fmap(T.xs) |> E.A.Sorted.concatMany
 }
 
 module Pairs = {
@@ -306,7 +305,7 @@ module XsConversion = {
   }
 
   let equallyDivideXByMass = (newLength: int, integral: T.t) =>
-    E.A.Floats.range(0.0, 1.0, newLength) |> E.A.fmap(YtoX.linear(_, integral))
+    E.A.Floats.range(0.0, 1.0, newLength)->E.A.fmap(YtoX.linear(_, integral))
 
   let proportionEquallyOverX = (newLength: int, t: T.t): T.t =>
     T.equallyDividedXs(t, newLength) |> _replaceWithXs(_, t)
@@ -321,7 +320,7 @@ module Zipped = {
   let compareXs = ((x1, _): (float, float), (x2, _): (float, float)) => x1 > x2 ? 1 : 0
   let sortByY = (t: zipped) => t |> E.A.stableSortBy(_, compareYs)
   let sortByX = (t: zipped) => t |> E.A.stableSortBy(_, compareXs)
-  let filterByX = (testFn: float => bool, t: zipped) => t |> E.A.filter(((x, _)) => testFn(x))
+  let filterByX = (testFn: float => bool, t: zipped) => t->E.A.filter(((x, _)) => testFn(x))
 }
 
 module PointwiseCombination = {
@@ -494,7 +493,7 @@ module PointwiseCombination = {
       t.xs,
     )
     let newXs = Belt.Array.concatMany(newXsUnflattened)
-    let newYs = E.A.fmap(x => XtoY.linear(x, t), newXs)
+    let newYs = E.A.fmap(newXs, x => XtoY.linear(x, t))
     {xs: newXs, ys: newYs}
   }
 
@@ -512,7 +511,7 @@ module PointwiseCombination = {
     | (_, _) =>
       let allXs = Ts.equallyDividedXs([t1, t2], sampleCount)
 
-      let allYs = allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)))
+      let allYs = allXs->E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)))
 
       T.fromArrays(allXs, allYs)
     }

@@ -509,7 +509,7 @@ let mixture = (
   if E.A.isEmpty(values) {
     Error(DistributionTypes.OtherError("Mixture error: mixture must have at least 1 element"))
   } else if allValuesAreSampleSet(values) {
-    let withSampleSetValues = values->E.A2.fmap(((value, weight)) =>
+    let withSampleSetValues = values->E.A.fmap(((value, weight)) =>
       switch value {
       | SampleSet(sampleSet) => Ok((sampleSet, weight))
       | _ => Error("Unreachable")
@@ -521,17 +521,16 @@ let mixture = (
     | Error(err) => Error(DistributionTypes.Error.sampleErrorToDistErr(err))
     }
   } else {
-    let totalWeight = values->E.A2.fmap(E.Tuple2.second)->E.A.Floats.sum
+    let totalWeight = values->E.A.fmap(E.Tuple2.second)->E.A.Floats.sum
     let properlyWeightedValues =
       values
-      ->E.A2.fmap(((dist, weight)) => scaleMultiplyFn(dist, weight /. totalWeight))
+      ->E.A.fmap(((dist, weight)) => scaleMultiplyFn(dist, weight /. totalWeight))
       ->E.A.R.firstErrorOrOpen
     properlyWeightedValues->E.R.bind(values => {
       values
-      |> Js.Array.sliceFrom(1)
-      |> E.A.fold_left(
-        (acc, x) => E.R.bind(acc, acc => pointwiseAddFn(acc, x)),
-        Ok(E.A.unsafe_get(values, 0)),
+      ->Belt.Array.sliceToEnd(1)
+      ->E.A.fold_left(Ok(E.A.unsafe_get(values, 0)), (acc, x) =>
+        E.R.bind(acc, acc => pointwiseAddFn(acc, x))
       )
     })
   }

@@ -5,4 +5,4 @@ let getByNameResult = (t: t<'a>, name) =>
   getByName(t, name) |> E.O.toResult(name ++ " expected and not found")
 
 let getByNames = (hash: t<'a>, names: array<string>) =>
-  names |> E.A.fmap(name => (name, getByName(hash, name)))
+  names->E.A.fmap(name => (name, getByName(hash, name)))

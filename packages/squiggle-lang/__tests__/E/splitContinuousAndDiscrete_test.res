@@ -32,7 +32,7 @@ describe("Continuous and discrete splits", () => {
   )
 
   let makeDuplicatedArray = count => {
-    let arr = Belt.Array.range(1, count) |> E.A.fmap(float_of_int)
+    let arr = Belt.Array.range(1, count)->E.A.fmap(float_of_int)
     let sorted = arr |> Belt.SortArray.stableSortBy(_, compare)
     E.A.concatMany([sorted, sorted, sorted, sorted]) |> Belt.SortArray.stableSortBy(_, compare)
   }

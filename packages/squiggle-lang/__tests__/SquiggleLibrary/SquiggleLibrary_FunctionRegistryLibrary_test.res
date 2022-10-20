@@ -110,7 +110,7 @@ describe("FunctionRegistry Library", () => {
     testAll(
       "tests of type",
       E.A.to_list(
-        FunctionRegistry_Core.Registry.allExamplesWithFns(registry)->E.A2.filter(
+        FunctionRegistry_Core.Registry.allExamplesWithFns(registry)->E.A.filter(
           ((fn, _)) => E.O.isSome(fn.output),
         ),
       ),

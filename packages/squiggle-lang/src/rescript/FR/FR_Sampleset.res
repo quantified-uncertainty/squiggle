@@ -53,7 +53,7 @@ module Internal = {
       | IEvDistribution(SampleSet(dist)) => Some(dist)
       | _ => None
       }
-    E.A.O.openIfAllSome(E.A.fmap(parseSampleSet, arr))
+    E.A.O.openIfAllSome(E.A.fmap(arr, parseSampleSet))
   }
 
   let mapN = (
@@ -67,7 +67,7 @@ module Internal = {
       let fn = a =>
         doLambdaCall(
           aLambdaValue,
-          [IEvArray(E.A.fmap(x => Wrappers.evNumber(x), a))],
+          [IEvArray(E.A.fmap(a, x => Wrappers.evNumber(x)))],
           context,
           reducer,
         )
@@ -139,7 +139,7 @@ let libaryBase = [
         ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist))] =>
-            dist->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+            dist->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
           | _ => Error(impossibleError)
           },
         (),
