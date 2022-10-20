@@ -44,7 +44,6 @@ async function validateSquiggleDocument(
   const diagnostics: Diagnostic[] = [];
 
   const parseResult = parse(text);
-  console.log(parseResult);
   if (parseResult.tag === "Error") {
     const location = parseResult.value.getLocation();
     diagnostics.push({
