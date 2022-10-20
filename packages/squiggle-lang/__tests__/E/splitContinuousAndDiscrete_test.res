@@ -42,13 +42,13 @@ describe("Continuous and discrete splits", () => {
     ~minDiscreteWeight=2,
   )
   let toArr1 = discrete1 |> E.FloatFloatMap.toArray
-  makeTest("splitMedium at count=10", toArr1 |> Belt.Array.length, 10)
+  makeTest("splitMedium at count=10", toArr1 |> E.A.length, 10)
 
   let (_c, discrete2) = E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(
     makeDuplicatedArray(500),
     ~minDiscreteWeight=2,
   )
   let toArr2 = discrete2 |> E.FloatFloatMap.toArray
-  makeTest("splitMedium at count=500", toArr2 |> Belt.Array.length, 500)
-  // makeTest("foo", [] |> Belt.Array.length, 500)
+  makeTest("splitMedium at count=500", toArr2 |> E.A.length, 500)
+  // makeTest("foo", [] |> E.A.length, 500)
 })

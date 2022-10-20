@@ -4,6 +4,8 @@ module FloatFloatMap = E_FloatFloatMap
 
 let fmap = Belt.Array.map
 let fmapi = Belt.Array.mapWithIndex
+let forEach = Belt.Array.forEach
+let forEachI = Belt.Array.forEachWithIndex
 let to_list = Belt.List.fromArray
 let of_list = Belt.List.toArray
 let length = Belt.Array.length
@@ -26,6 +28,7 @@ let reducei = Belt.Array.reduceWithIndex
 let fold_left = reduce
 let fold_right = reduceReverse
 let some = Belt.Array.some
+let every = Belt.Array.every
 let isEmpty = r => length(r) < 1
 let stableSortBy = Belt.SortArray.stableSortBy
 let toNoneIfEmpty = r => isEmpty(r) ? None : Some(r)
@@ -73,7 +76,7 @@ let uniq = r => r->to_list->E_L.uniq->of_list
 let intersperse = (a: array<'a>, b: array<'a>) => {
   let items: ref<array<'a>> = ref([])
 
-  Belt.Array.forEachWithIndex(a, (i, item) =>
+  forEachI(a, (i, item) =>
     switch get(b, i) {
     | Some(r) => items := append(items.contents, [item, r])
     | None => items := append(items.contents, [item])
@@ -87,7 +90,7 @@ let intersperse = (a: array<'a>, b: array<'a>) => {
 let accumulate = (fn: ('a, 'a) => 'a, items: array<'a>) => {
   let length = items->length
   let empty = Belt.Array.make(length, items->unsafe_get(0))
-  Belt.Array.forEachWithIndex(items, (index, element) => {
+  forEachI(items, (index, element) => {
     let item = switch index {
     | 0 => element
     | index => fn(element, unsafe_get(empty, index - 1))

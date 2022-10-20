@@ -18,7 +18,7 @@ let rec toString = (expression: t) =>
   | EProgram(statements) => Js.Array2.map(statements, aValue => toString(aValue))->semicolonJoin
   | EArray(aList) => `[${Js.Array2.map(aList, aValue => toString(aValue))->commaJoin}]`
   | ERecord(map) =>
-    `{${map->Belt.Array.map(((key, value)) => `${key->toString}: ${value->toString}`)->commaJoin}}`
+    `{${map->E.A.fmap(((key, value)) => `${key->toString}: ${value->toString}`)->commaJoin}}`
   | ESymbol(name) => name
   | ETernary(predicate, trueCase, falseCase) =>
     `${predicate->toString} ? (${trueCase->toString}) : (${falseCase->toString})`

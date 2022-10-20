@@ -85,11 +85,11 @@ module FRType = {
     | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(_)))) => true
     | (FRTypeLambda, IEvLambda(_)) => true
     | (FRTypeArray(intendedType), IEvArray(elements)) =>
-      elements->Belt.Array.every(v => matchWithValue(intendedType, v))
+      elements->E.A.every(v => matchWithValue(intendedType, v))
     | (FRTypeDict(r), IEvRecord(map)) =>
-      map->Belt.Map.String.valuesToArray->Belt.Array.every(v => matchWithValue(r, v))
+      map->Belt.Map.String.valuesToArray->E.A.every(v => matchWithValue(r, v))
     | (FRTypeRecord(recordParams), IEvRecord(map)) =>
-      recordParams->Belt.Array.every(((name, input)) => {
+      recordParams->E.A.every(((name, input)) => {
         switch map->Belt.Map.String.get(name) {
         | Some(v) => matchWithValue(input, v)
         | None => false
@@ -103,7 +103,7 @@ module FRType = {
     if !isSameLength {
       false
     } else {
-      E.A.zip(inputs, args)->Belt.Array.every(((input, arg)) => matchWithValue(input, arg))
+      E.A.zip(inputs, args)->E.A.every(((input, arg)) => matchWithValue(input, arg))
     }
   }
 }
@@ -196,15 +196,15 @@ module Registry = {
     // 1. functions
     // 2. definitions of each function
     // 3. name variations of each definition
-    r->Belt.Array.reduce(Belt.Map.String.empty, (acc, fn) =>
-      fn.definitions->Belt.Array.reduce(acc, (acc, def) => {
+    r->E.A.reduce(Belt.Map.String.empty, (acc, fn) =>
+      fn.definitions->E.A.reduce(acc, (acc, def) => {
         let names =
           [
             fn.nameSpace == "" ? [] : [`${fn.nameSpace}.${def.name}`],
             fn.requiresNamespace ? [] : [def.name],
           ]->E.A.concatMany
 
-        names->Belt.Array.reduce(
+        names->E.A.reduce(
           acc,
           (acc, name) => {
             switch acc->Belt.Map.String.get(name) {

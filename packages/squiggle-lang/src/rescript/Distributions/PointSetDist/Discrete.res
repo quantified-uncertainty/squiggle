@@ -184,7 +184,7 @@ module T = Dist({
       |> XYShape.T.zip
       |> XYShape.Zipped.sortByY
       |> Belt.Array.reverse
-      |> Belt.Array.slice(_, ~offset=0, ~len=i)
+      |> E.A.slice(_, ~offset=0, ~len=i)
       |> XYShape.Zipped.sortByX
       |> XYShape.T.fromZippedArray
       |> make

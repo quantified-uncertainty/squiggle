@@ -32,7 +32,7 @@ module Internals = {
   //Belt.Map.String has a function for mergeMany, but I couldn't understand how to use it yet.
   let mergeMany = (a: array<t>): Reducer_T.value => {
     let mergedValues =
-      a->E.A.fmap(Belt.Map.String.toArray)->Belt.Array.concatMany->Belt.Map.String.fromArray
+      a->E.A.fmap(Belt.Map.String.toArray)->E.A.concatMany->Belt.Map.String.fromArray
     IEvRecord(mergedValues)
   }
 }
@@ -73,7 +73,7 @@ let library = [
           switch inputs {
           | [IEvArray(dicts)] =>
             dicts
-            ->Belt.Array.map(dictValue =>
+            ->E.A.fmap(dictValue =>
               switch dictValue {
               | IEvRecord(dict) => dict
               | _ => impossibleError->SqError.Message.throw

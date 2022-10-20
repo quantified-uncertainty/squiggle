@@ -84,7 +84,7 @@ let sampleN = (t: t, n) => {
   if n <= E.A.length(get(t)) {
     E.A.slice(get(t), ~offset=0, ~len=n)
   } else {
-    Belt.Array.makeBy(n, _ => sample(t))
+    E.A.makeBy(n, _ => sample(t))
   }
 }
 
@@ -133,14 +133,14 @@ let mixture = (values: array<(t, float)>, intendedLength: int) => {
   let totalWeight = values->E.A.fmap(E.Tuple2.second)->E.A.Floats.sum
   let discreteSamples =
     values
-    ->Belt.Array.mapWithIndex((i, (_, weight)) => (E.I.toFloat(i), weight /. totalWeight))
+    ->E.A.fmapi((i, (_, weight)) => (E.I.toFloat(i), weight /. totalWeight))
     ->XYShape.T.fromZippedArray
     ->Discrete.make
     ->Discrete.sampleN(intendedLength)
   let dists = values->E.A.fmap(E.Tuple2.first)->E.A.fmap(T.get)
   let samples =
     discreteSamples
-    ->Belt.Array.mapWithIndex((index, distIndexToChoose) => {
+    ->E.A.fmapi((index, distIndexToChoose) => {
       let chosenDist = E.A.get(dists, E.Float.toInt(distIndexToChoose))
       chosenDist->E.O.bind(E.A.get(_, index))
     })

@@ -99,7 +99,7 @@ Here we will finally proceed to a real life scenario. */
             | Error(err) => err->SqError.toString->Js.Exn.raiseError
 
             | Ok(includes) =>
-              includes->Belt.Array.forEach(
+              includes->E.A.forEach(
                 newIncludeName => {
                   /* We have got one of the new includes.
                    Let's load it and add it to the project */

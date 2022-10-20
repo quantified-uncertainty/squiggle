@@ -95,7 +95,7 @@ module Old = {
       ~env: GenericDist.env,
     ): DistributionOperation.outputType =>
       E.A.length(distributions) == E.A.length(weights)
-        ? Mixture(Belt.Array.zip(distributions, weights))->DistributionOperation.run(~env)
+        ? Mixture(E.A.zip(distributions, weights))->DistributionOperation.run(~env)
         : GenDistError(
             ArgumentError("Error, mixture call has different number of distributions and weights"),
           )
@@ -133,7 +133,7 @@ module Old = {
         | Some(IEvArray(b)) => {
             let weights = parseNumberArray(b)
             let distributions = parseDistributionArray(
-              Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
+              E.A.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
             )
             switch E.R.merge(distributions, weights) {
             | Ok(d, w) => mixtureWithGivenWeights(d, w, ~env)

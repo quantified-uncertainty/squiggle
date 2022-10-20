@@ -28,7 +28,7 @@ module Internal = {
   let fromFn = (aLambdaValue, context: Reducer_T.context, reducer: Reducer_T.reducerFn) => {
     let sampleCount = context.environment.sampleCount
     let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], context, reducer)
-    Belt_Array.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
+    E.A.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
   }
 
   let map1 = (sampleSetDist: t, aLambdaValue, context: Reducer_T.context, reducer) => {

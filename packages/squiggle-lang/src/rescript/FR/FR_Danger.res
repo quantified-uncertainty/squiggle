@@ -90,11 +90,11 @@ module Integration = {
       let weightForAnInnerPoint = totalWeight /. E.I.toFloat(numTotalPoints - 1)
       let weightForAnOuterPoint = totalWeight /. E.I.toFloat(numTotalPoints - 1) /. 2.0
       let innerPointIncrement = (max -. min) /. E.I.toFloat(numTotalPoints - 1)
-      let innerXs = Belt.Array.makeBy(numInnerPoints, i =>
+      let innerXs = E.A.makeBy(numInnerPoints, i =>
         min +. Belt_Float.fromInt(i + 1) *. innerPointIncrement
       )
       // Gotcha: makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
-      let ysOptions = Belt.Array.map(innerXs, x => applyFunctionAtFloatToFloatOption(x))
+      let ysOptions = E.A.fmap(innerXs, x => applyFunctionAtFloatToFloatOption(x))
 
       /* Logging, with a worked example. */
       // Useful for understanding what is happening.
