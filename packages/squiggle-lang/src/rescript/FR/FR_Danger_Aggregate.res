@@ -1,7 +1,7 @@
 open FunctionRegistry_Core
 open FunctionRegistry_Helpers
 
-let nameSpace = "Aggregate"
+let nameSpace = "Danger_Aggregate"
 let requiresNamespace = true
 
 module AggregateFs = {
@@ -11,7 +11,7 @@ module AggregateFs = {
       | true =>
         Error(
           "Aggregation method does not make sense with fewer than" ++
-          Belt.Int.toString(minLength) ++ "elements",
+          Belt.Int.toString(minLength) ++ " elements",
         )
       | false => {
           let checkedIndividualXs = E.A.fmap(x =>
@@ -80,7 +80,8 @@ module AggregateFs = {
     let samotsvety = xs => {
       let sortedXs = Belt.SortArray.stableSortBy(xs, (a, b) => a > b ? 1 : -1)
       let middleXs = Belt.Array.slice(sortedXs, ~offset=1, ~len=E.A.length(xs) - 1)
-      let answer = geomMeanOfOdds(xs)
+      Js.log2("MiddleXs: ", middleXs)
+      let answer = geomMeanOfOdds(middleXs)
       answer
     }
   }
@@ -90,7 +91,7 @@ module AggregateFs = {
       ~nameSpace,
       ~output=EvtNumber,
       ~requiresNamespace=true,
-      ~examples=[`Aggregate.geomMean([0.1, 0.2, 0.4])`],
+      ~examples=[`Danger_Aggregate.geomMean([0.1, 0.2, 0.4])`],
       ~definitions=[
         DefineFn.Numbers.arrayToNum("geomMean", xs =>
           Helpers.checker(xs => Ok(Helpers.geomMean(xs)), xs, 2)
@@ -103,9 +104,9 @@ module AggregateFs = {
       ~nameSpace,
       ~output=EvtNumber,
       ~requiresNamespace=true,
-      ~examples=[`Aggregate.arithmeticMean([0.1, 0.2, 0.4])`],
+      ~examples=[`Danger_Aggregate.arithmeticMean([0.1, 0.2, 0.4])`],
       ~definitions=[
-        DefineFn.Numbers.arrayToNum("geomMean", xs =>
+        DefineFn.Numbers.arrayToNum("arithmeticMean", xs =>
           Helpers.checker(xs => Ok(Helpers.arithmeticMean(xs)), xs, 2)
         ),
       ],
@@ -116,7 +117,7 @@ module AggregateFs = {
       ~nameSpace,
       ~output=EvtNumber,
       ~requiresNamespace=true,
-      ~examples=[`Aggregate.geomMeanOfOdds([0.1, 0.2, 0.4])`],
+      ~examples=[`Danger_Aggregate.geomMeanOfOdds([0.1, 0.2, 0.4])`],
       ~definitions=[
         DefineFn.Numbers.arrayToNum("geomMeanOfOdds", xs =>
           Helpers.checker(xs => Ok(Helpers.geomMeanOfOdds(xs)), xs, 2)
@@ -130,7 +131,7 @@ module AggregateFs = {
       ~nameSpace,
       ~output=EvtNumber,
       ~requiresNamespace=true,
-      ~examples=[`Aggregate.neyman([0.1, 0.2, 0.4])`],
+      ~examples=[`Danger_Aggregate.neyman([0.1, 0.2, 0.4])`],
       ~definitions=[
         DefineFn.Numbers.arrayToNum("neyman", xs =>
           Helpers.checker(xs => Ok(Helpers.neyman(xs)), xs, 2)
@@ -144,10 +145,10 @@ module AggregateFs = {
       ~nameSpace,
       ~output=EvtNumber,
       ~requiresNamespace=true,
-      ~examples=[`Aggregate.samotsvety([0.1, 0.2, 0.4])`],
+      ~examples=[`Danger_Aggregate.samotsvety([0.1, 0.2, 0.4])`],
       ~definitions=[
-        DefineFn.Numbers.arrayToNum("neyman", xs =>
-          Helpers.checker(xs => Ok(Helpers.neyman(xs)), xs, 3)
+        DefineFn.Numbers.arrayToNum("samotsvety", xs =>
+          Helpers.checker(xs => Ok(Helpers.samotsvety(xs)), xs, 3)
         ),
       ],
       (),
