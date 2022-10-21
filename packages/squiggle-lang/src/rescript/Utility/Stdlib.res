@@ -23,7 +23,8 @@ module Random = {
     probs: array<float>,
     size: int,
   }
-  @module("../../js/math") external sample: (array<float>, sampleArgs) => array<float> = "random_sample"
+  @module("../../js/math")
+  external sample: (array<float>, sampleArgs) => array<float> = "random_sample"
 }
 
 module Math = {
