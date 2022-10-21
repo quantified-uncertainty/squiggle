@@ -1,7 +1,6 @@
 /* R for Result */
 
 exception Assertion(string)
-module U = E_U
 
 open Belt.Result
 let result = (okF, errF, r) =>
@@ -9,7 +8,7 @@ let result = (okF, errF, r) =>
   | Ok(a) => okF(a)
   | Error(err) => errF(err)
   }
-let id = e => e |> result(U.id, U.id)
+let id = e => e |> result(e => e, e => e)
 let isOk = Belt.Result.isOk
 let getError = (r: result<'a, 'b>) =>
   switch r {
