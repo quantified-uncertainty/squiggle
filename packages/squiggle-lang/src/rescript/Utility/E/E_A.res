@@ -336,16 +336,17 @@ module Floats = {
           i := i.contents + 1
         } else {
           // Move i forward to next unequal value
-          // That is, find j so that equalAt(j-1) and !equalAt(j)
-          let i0 = i.contents
-          // Find base so that j is in (i0+base, i0+2*base]
+          // That is, find iNext so that isEqualAt(iNext-1) and !isEqualAt(iNext)
+          let iOrig = i.contents
+          // Find base so that iNext is in (iOrig+base, iOrig+2*base]
+          // This is where we start the binary search
           let base = ref(minDistance)
-          let equalAt = (ind: int) => ind < len && sortedArray[ind] == value
-          while equalAt(i0 + base.contents * 2) {
+          let isEqualAt = (ind: int) => ind < len && sortedArray[ind] == value
+          while isEqualAt(iOrig + base.contents * 2) {
             base := base.contents * 2
           }
-          // Maintain j in (lo, i]. Once lo+1 == i, i is j.
-          let lo = ref(i0 + base.contents)
+          // Maintain iNext in (lo, i]. Once lo+1 == i, i is iNext.
+          let lo = ref(iOrig + base.contents)
           i := Js.Math.min_int(lo.contents + base.contents, len)
           while i.contents - lo.contents > 1 {
             let mid = lo.contents + (i.contents - lo.contents) / 2
@@ -356,7 +357,7 @@ module Floats = {
             }
           }
 
-          let count = i.contents - i0
+          let count = i.contents - iOrig
           FloatFloatMap.add(value, count->Belt.Int.toFloat, discrete)
         }
       }
