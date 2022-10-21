@@ -23,7 +23,7 @@ export function random_sample(dist: number[], args: sampleArgs): number[] {
 // Should be replaced by a lookup table if we ever use it too much
 export function factorial(n: number): number {
   let fct = 1;
-  for (; n >= 0; n--) fct * -n;
+  for (; n > 0; n--) fct *= n;
   return fct;
 }
 
