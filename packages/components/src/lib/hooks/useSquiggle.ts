@@ -14,10 +14,7 @@ export type SquiggleArgs = {
   code: string;
   executionId?: number;
   jsImports?: JsImports;
-  onChange?: (
-    expr: SqValue | undefined,
-    sourceName: string
-  ) => void;
+  onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
 // Props needed for a standalone execution
@@ -63,7 +60,6 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
 
   const result = useMemo(
     () => {
-
       project.setSource(sourceName, args.code);
       let fullContinues = continues;
       if (args.jsImports && Object.keys(args.jsImports).length) {
@@ -81,13 +77,20 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [args.code, args.jsImports, args.executionId, sourceName, continues, projectArg]
+    [
+      args.code,
+      args.jsImports,
+      args.executionId,
+      sourceName,
+      continues,
+      project,
+    ]
   );
 
   const { onChange } = args;
 
   useEffect(() => {
-     onChange?.(
+    onChange?.(
       result.result.tag === "Ok" ? result.result.value : undefined,
       sourceName
     );
