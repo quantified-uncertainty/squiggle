@@ -94,7 +94,7 @@ let transpose = (xs: array<array<'a>>): array<array<'a>> => {
 
 module O = {
   let concatSomes = (optionals: array<option<'a>>): array<'a> =>
-    optionals->filter(E_O.isSome)->fmap(E_O.toExn("Warning: This should not have happened"))
+    optionals->filter(E_O.isSome)->fmap(E_O.toExn(_, "Warning: This should not have happened"))
   let defaultEmpty = (o: option<array<'a>>): array<'a> =>
     switch o {
     | Some(o) => o
@@ -117,11 +117,11 @@ module O = {
   let firstSomeFn = (r: array<unit => option<'a>>): option<'a> =>
     E_O.flatten(getByFmap(r, l => l(), E_O.isSome))
 
-  let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->E_O2.default(default)
+  let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->E_O.default(default)
 
   let openIfAllSome = (optionals: array<option<'a>>): option<array<'a>> => {
     if every(optionals, E_O.isSome) {
-      Some(optionals->fmap(E_O.toExn("Warning: This should not have happened")))
+      Some(optionals->fmap(E_O.toExn(_, "Warning: This should not have happened")))
     } else {
       None
     }

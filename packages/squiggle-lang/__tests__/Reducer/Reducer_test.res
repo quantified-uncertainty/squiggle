@@ -96,7 +96,7 @@ describe("stacktraces", () => {
   h(5)
 `)
       ->E.R.getError
-      ->E.O2.toExn("oops")
+      ->E.O.toExn("oops")
       ->SqError.toStringWithStackTrace
 
     expect(

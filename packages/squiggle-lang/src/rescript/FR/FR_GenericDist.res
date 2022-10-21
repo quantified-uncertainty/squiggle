@@ -270,7 +270,7 @@ module Old = {
         ("add" | "multiply" | "subtract" | "divide" | "pow" | "log") as arithmetic,
         [_, _] as args,
       ) =>
-      Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
+      Helpers.catchAndConvertTwoArgsToDists(args)->E.O.fmap(((fst, snd)) =>
         Helpers.twoDiststoDistFn(Algebraic(AsDefault), arithmetic, fst, snd, ~env)
       )
     | (
@@ -281,7 +281,7 @@ module Old = {
         | "dotPow") as arithmetic,
         [_, _] as args,
       ) =>
-      Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
+      Helpers.catchAndConvertTwoArgsToDists(args)->E.O.fmap(((fst, snd)) =>
         Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd, ~env)
       )
     | ("dotExp", [IEvDistribution(a)]) =>

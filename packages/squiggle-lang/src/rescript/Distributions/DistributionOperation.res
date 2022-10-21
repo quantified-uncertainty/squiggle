@@ -32,7 +32,7 @@ module OutputLocal = {
     | _ => None
     }
 
-  let toErrorOrUnreachable = (t: t): error => t->toError->E.O2.default((Unreachable: error))
+  let toErrorOrUnreachable = (t: t): error => t->toError->E.O.default((Unreachable: error))
 
   let toDistR = (t: t): result<genericDist, error> =>
     switch t {

@@ -39,7 +39,7 @@ module Internals = {
   let pairsOfDifferentDistributions = combinations2(distributions)
 
   let runMean: DistributionTypes.genericDist => float = dist => {
-    dist->mean->run->toFloat->E.O2.toExn("Shouldn't see this because we trust testcase input")
+    dist->mean->run->toFloat->E.O.toExn("Shouldn't see this because we trust testcase input")
   }
 
   let testOperationMean = (

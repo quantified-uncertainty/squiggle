@@ -8,7 +8,6 @@ module Float = E_Float
 module FloatFloatMap = E_FloatFloatMap
 module I = E_I
 module O = E_O
-module O2 = E_O2
 module R = E_R
 module R2 = E_R2
 module Tuple2 = E_Tuple2

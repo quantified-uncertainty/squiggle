@@ -288,7 +288,7 @@ module T = Dist({
     let totalIntegralSum = discreteIntegralSum +. continuousIntegralSum
 
     let getMeanOfSquares = ({discrete, continuous}: t) => {
-      let discreteMean = discrete |> Discrete.shapeMap(XYShape.T.square) |> Discrete.T.mean
+      let discreteMean = discrete->Discrete.shapeMap(XYShape.T.square)->Discrete.T.mean
       let continuousMean = continuous |> Continuous.Analysis.getMeanOfSquares
       (discreteMean *. discreteIntegralSum +. continuousMean *. continuousIntegralSum) /.
         totalIntegralSum

@@ -154,7 +154,7 @@ let doRawParse = (this: t): T.rawParseArgumentType =>
   this->getSource->Reducer_Peggy_Parse.parse(this.sourceId)->E.R2.errMap(SqError.fromParseError)
 
 let rawParse = (this: t): t =>
-  this->getRawParse->E.O2.defaultFn(() => doRawParse(this))->setRawParse(this, _)
+  this->getRawParse->E.O.defaultFn(() => doRawParse(this))->setRawParse(this, _)
 
 let doBuildExpression = (this: t): T.expressionType =>
   this
@@ -166,7 +166,7 @@ let buildExpression = (this: t): t => {
   switch this->getExpression {
   | Some(_) => this // cached
   | None =>
-    this->doBuildExpression->Belt.Option.map(setExpression(this, _))->E.O2.defaultFn(() => this)
+    this->doBuildExpression->Belt.Option.map(setExpression(this, _))->E.O.defaultFn(() => this)
   }
 }
 

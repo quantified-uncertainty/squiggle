@@ -254,8 +254,8 @@ let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
 
 let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineError> =>
   T.toContinuous(t)
-  ->E.O2.fmap(Continuous.downsampleEquallyOverX(bucketCount))
-  ->E.O2.toResult(PointSetTypes.CannotSparklineDiscrete)
+  ->E.O.fmap(Continuous.downsampleEquallyOverX(bucketCount))
+  ->E.O.toResult(PointSetTypes.CannotSparklineDiscrete)
   ->E.R2.fmap(r => Continuous.getShape(r).ys->Sparklines.create())
 
 let makeDiscrete = (d): t => Discrete(d)

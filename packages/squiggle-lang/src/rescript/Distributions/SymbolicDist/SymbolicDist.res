@@ -230,8 +230,8 @@ module Uniform = {
   let toString = ({low, high}: t) => j`Uniform($low,$high)`
   let truncate = (low, high, t: t): t => {
     //todo: add check
-    let newLow = max(E.O.default(neg_infinity, low), t.low)
-    let newHigh = min(E.O.default(infinity, high), t.high)
+    let newLow = max(E.O.default(low, neg_infinity), t.low)
+    let newHigh = min(E.O.default(high, infinity), t.high)
     {low: newLow, high: newHigh}
   }
 }
@@ -504,26 +504,26 @@ module T = {
       | Error(n) => #Error(n)
       }
     | (#Normal(v1), #Normal(v2)) =>
-      Normal.operate(op, v1, v2) |> E.O.dimap(r => #AnalyticalSolution(r), () => #NoSolution)
+      Normal.operate(op, v1, v2)->E.O.dimap(r => #AnalyticalSolution(r), () => #NoSolution)
     | (#Float(v1), #Normal(v2)) =>
-      Normal.operateFloatFirst(op, v1, v2) |> E.O.dimap(
+      Normal.operateFloatFirst(op, v1, v2)->E.O.dimap(
         r => #AnalyticalSolution(r),
         () => #NoSolution,
       )
     | (#Normal(v1), #Float(v2)) =>
-      Normal.operateFloatSecond(op, v1, v2) |> E.O.dimap(
+      Normal.operateFloatSecond(op, v1, v2)->E.O.dimap(
         r => #AnalyticalSolution(r),
         () => #NoSolution,
       )
     | (#Lognormal(v1), #Lognormal(v2)) =>
-      Lognormal.operate(op, v1, v2) |> E.O.dimap(r => #AnalyticalSolution(r), () => #NoSolution)
+      Lognormal.operate(op, v1, v2)->E.O.dimap(r => #AnalyticalSolution(r), () => #NoSolution)
     | (#Float(v1), #Lognormal(v2)) =>
-      Lognormal.operateFloatFirst(op, v1, v2) |> E.O.dimap(
+      Lognormal.operateFloatFirst(op, v1, v2)->E.O.dimap(
         r => #AnalyticalSolution(r),
         () => #NoSolution,
       )
     | (#Lognormal(v1), #Float(v2)) =>
-      Lognormal.operateFloatSecond(op, v1, v2) |> E.O.dimap(
+      Lognormal.operateFloatSecond(op, v1, v2)->E.O.dimap(
         r => #AnalyticalSolution(r),
         () => #NoSolution,
       )

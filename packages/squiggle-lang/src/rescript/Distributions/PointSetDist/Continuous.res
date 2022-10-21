@@ -50,16 +50,16 @@ let make = (~interpolation=#Linear, ~integralSumCache=None, ~integralCache=None,
   integralSumCache,
   integralCache,
 }
-let shapeMap = (fn, {xyShape, interpolation, integralSumCache, integralCache}: t): t => {
+let shapeMap = ({xyShape, interpolation, integralSumCache, integralCache}: t, fn): t => {
   xyShape: fn(xyShape),
   interpolation,
   integralSumCache,
   integralCache,
 }
-let lastY = (t: t) => t |> getShape |> XYShape.T.lastY
+let lastY = (t: t) => t->getShape->XYShape.T.lastY
 let oShapeMap = (fn, {xyShape, interpolation, integralSumCache, integralCache}: t): option<
   PointSetTypes.continuousShape,
-> => fn(xyShape) |> E.O.fmap(make(~interpolation, ~integralSumCache, ~integralCache))
+> => fn(xyShape)->E.O.fmap(make(~interpolation, ~integralSumCache, ~integralCache))
 
 let emptyIntegral: PointSetTypes.continuousShape = {
   xyShape: {
@@ -128,10 +128,10 @@ let combinePointwise = (
 let toLinear = (t: t): option<t> =>
   switch t {
   | {interpolation: #Stepwise, xyShape, integralSumCache, integralCache} =>
-    xyShape |> XYShape.Range.stepsToContinuous |> E.O.fmap(make(~integralSumCache, ~integralCache))
+    xyShape->XYShape.Range.stepsToContinuous->E.O.fmap(make(~integralSumCache, ~integralCache))
   | {interpolation: #Linear} => Some(t)
   }
-let shapeFn = (fn, t: t) => t |> getShape |> fn
+let shapeFn = (fn, t: t) => t->getShape->fn
 
 let updateIntegralSumCache = (integralSumCache, t: t): t => {
   ...t,
@@ -157,7 +157,7 @@ let reduce = (
   continuousShapes,
 ): result<t, 'e> => {
   let merge = combinePointwise(~integralSumCachesFn, fn)
-  continuousShapes |> E.A.R.foldM(merge, empty)
+  continuousShapes->E.A.R.foldM(merge, empty, _)
 }
 
 let mapYResult = (
@@ -169,8 +169,8 @@ let mapYResult = (
   XYShape.T.mapYResult(fn, getShape(t))->E.R2.fmap(x =>
     make(
       ~interpolation=t.interpolation,
-      ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
-      ~integralCache=t.integralCache |> E.O.bind(_, integralCacheFn),
+      ~integralSumCache=t.integralSumCache->E.O.bind(integralSumCacheFn),
+      ~integralCache=t.integralCache->E.O.bind(integralCacheFn),
       x,
     )
   )
@@ -183,9 +183,9 @@ let mapY = (
 ): t =>
   make(
     ~interpolation=t.interpolation,
-    ~integralSumCache=t.integralSumCache |> E.O.bind(_, integralSumCacheFn),
-    ~integralCache=t.integralCache |> E.O.bind(_, integralCacheFn),
-    t |> getShape |> XYShape.T.mapY(fn),
+    ~integralSumCache=t.integralSumCache->E.O.bind(integralSumCacheFn),
+    ~integralCache=t.integralCache->E.O.bind(integralCacheFn),
+    t->getShape->XYShape.T.mapY(fn, _),
   )
 
 let rec scaleBy = (~scale=1.0, t: t): t => {
@@ -193,9 +193,9 @@ let rec scaleBy = (~scale=1.0, t: t): t => {
   let scaledIntegralCache = E.O.bind(t.integralCache, v => Some(scaleBy(~scale, v)))
 
   t
-  |> mapY(~fn=(r: float) => r *. scale)
-  |> updateIntegralSumCache(scaledIntegralSumCache)
-  |> updateIntegralCache(scaledIntegralCache)
+  ->mapY(~fn=(r: float) => r *. scale, _)
+  ->updateIntegralSumCache(scaledIntegralSumCache, _)
+  ->updateIntegralCache(scaledIntegralCache, _)
 }
 
 module T = Dist({
@@ -210,18 +210,18 @@ module T = Dist({
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Continuous(t)
   let xToY = (f, {interpolation, xyShape}: t) =>
     switch interpolation {
-    | #Stepwise => xyShape |> XYShape.XtoY.stepwiseIncremental(f) |> E.O.default(0.0)
-    | #Linear => xyShape |> XYShape.XtoY.linear(f)
-    } |> PointSetTypes.MixedPoint.makeContinuous
+    | #Stepwise => xyShape->XYShape.XtoY.stepwiseIncremental(f, _)->E.O.default(0.0)
+    | #Linear => xyShape->XYShape.XtoY.linear(f, _)
+    }->PointSetTypes.MixedPoint.makeContinuous
 
   let truncate = (leftCutoff: option<float>, rightCutoff: option<float>, t: t) => {
-    let lc = E.O.default(neg_infinity, leftCutoff)
-    let rc = E.O.default(infinity, rightCutoff)
+    let lc = E.O.default(leftCutoff, neg_infinity)
+    let rc = E.O.default(rightCutoff, infinity)
     let truncatedZippedPairs =
-      t |> getShape |> XYShape.T.zip |> XYShape.Zipped.filterByX(x => x >= lc && x <= rc)
+      t->getShape->XYShape.T.zip->XYShape.Zipped.filterByX(x => x >= lc && x <= rc, _)
 
-    let leftNewPoint = leftCutoff |> E.O.dimap(lc => [(lc -. epsilon_float, 0.)], _ => [])
-    let rightNewPoint = rightCutoff |> E.O.dimap(rc => [(rc +. epsilon_float, 0.)], _ => [])
+    let leftNewPoint = leftCutoff->E.O.dimap(lc => [(lc -. epsilon_float, 0.)], _ => [])
+    let rightNewPoint = rightCutoff->E.O.dimap(rc => [(rc +. epsilon_float, 0.)], _ => [])
 
     let truncatedZippedPairsWithNewPoints = E.A.concatMany([
       leftNewPoint,
@@ -235,30 +235,30 @@ module T = Dist({
 
   // TODO: This should work with stepwise plots.
   let integral = t =>
-    switch (getShape(t) |> XYShape.T.isEmpty, t.integralCache) {
+    switch (getShape(t)->XYShape.T.isEmpty, t.integralCache) {
     | (true, _) => emptyIntegral
     | (false, Some(cache)) => cache
     | (false, None) =>
       t
-      |> getShape
-      |> XYShape.Range.integrateWithTriangles
-      |> E.O.toExt("This should not have happened")
-      |> make
+      ->getShape
+      ->XYShape.Range.integrateWithTriangles
+      ->E.O.toExt("This should not have happened")
+      ->make
     }
 
   let downsample = (length, t): t =>
-    t |> shapeMap(XYShape.XsConversion.proportionByProbabilityMass(length, integral(t).xyShape))
-  let integralEndY = (t: t) => t.integralSumCache |> E.O.defaultFn(() => t |> integral |> lastY)
-  let integralXtoY = (f, t: t) => t |> integral |> shapeFn(XYShape.XtoY.linear(f))
-  let integralYtoX = (f, t: t) => t |> integral |> shapeFn(XYShape.YtoX.linear(f))
+    t->shapeMap(XYShape.XsConversion.proportionByProbabilityMass(length, integral(t).xyShape))
+  let integralEndY = (t: t) => t.integralSumCache->E.O.defaultFn(() => t->integral->lastY)
+  let integralXtoY = (f, t: t) => t->integral->shapeFn(XYShape.XtoY.linear(f), _)
+  let integralYtoX = (f, t: t) => t->integral->shapeFn(XYShape.YtoX.linear(f), _)
   let toContinuous = t => Some(t)
   let toDiscrete = _ => None
 
   let normalize = (t: t): t =>
     t
-    |> updateIntegralCache(Some(integral(t)))
-    |> scaleBy(~scale=1. /. integralEndY(t))
-    |> updateIntegralSumCache(Some(1.0))
+    ->updateIntegralCache(Some(integral(t)), _)
+    ->scaleBy(~scale=1. /. integralEndY(t), _)
+    ->updateIntegralSumCache(Some(1.0), _)
 
   let mean = (t: t) => {
     let indefiniteIntegralStepwise = (p, h1) => h1 *. p ** 2.0 /. 2.0
@@ -271,13 +271,13 @@ module T = Dist({
 })
 
 let isNormalized = (t: t): bool => {
-  let areaUnderIntegral = t |> updateIntegralCache(Some(T.integral(t))) |> T.integralEndY
+  let areaUnderIntegral = t->updateIntegralCache(Some(T.integral(t)), _)->T.integralEndY
   areaUnderIntegral < 1. +. MagicNumbers.Epsilon.seven &&
     areaUnderIntegral > 1. -. MagicNumbers.Epsilon.seven
 }
 
 let downsampleEquallyOverX = (length, t): t =>
-  t |> shapeMap(XYShape.XsConversion.proportionEquallyOverX(length))
+  t->shapeMap(XYShape.XsConversion.proportionEquallyOverX(length))
 
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
@@ -287,7 +287,7 @@ let combineAlgebraicallyWithDiscrete = (
   t2: PointSetTypes.discreteShape,
   ~discretePosition: AlgebraicShapeCombination.argumentPosition,
 ) => {
-  let t1s = t1 |> getShape
+  let t1s = t1->getShape
   let t2s = t2.xyShape // TODO would like to use Discrete.getShape here, but current file structure doesn't allow for that
 
   if XYShape.T.isEmpty(t1s) || XYShape.T.isEmpty(t2s) {
@@ -300,7 +300,7 @@ let combineAlgebraicallyWithDiscrete = (
 
     let combinedShape = AlgebraicShapeCombination.combineShapesContinuousDiscrete(
       op,
-      continuousAsLinear |> getShape,
+      continuousAsLinear->getShape,
       t2s,
       ~discretePosition,
     )
@@ -317,10 +317,10 @@ let combineAlgebraicallyWithDiscrete = (
 }
 
 let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t) => {
-  let s1 = t1 |> getShape
-  let s2 = t2 |> getShape
-  let t1n = s1 |> XYShape.T.length
-  let t2n = s2 |> XYShape.T.length
+  let s1 = t1->getShape
+  let s2 = t2->getShape
+  let t1n = s1->XYShape.T.length
+  let t2n = s2->XYShape.T.length
   if t1n == 0 || t2n == 0 {
     empty
   } else {

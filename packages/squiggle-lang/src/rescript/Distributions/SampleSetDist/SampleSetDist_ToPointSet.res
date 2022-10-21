@@ -40,7 +40,7 @@ module Internals = {
     type t = array<float>
 
     let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
-      let xyPointRange = E.A.Sorted.range(samples)->E.O2.default(0.0)
+      let xyPointRange = E.A.Sorted.range(samples)->E.O.default(0.0)
       let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints)
       xWidth /. xyPointWidth
     }
@@ -87,7 +87,7 @@ let toPointSetDist = (
             continuousPart,
             samplingInputs.outputXYPoints,
           )
-          let usedWidth = samplingInputs.kernelWidth->E.O2.default(_suggestedXWidth)
+          let usedWidth = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
           let usedUnitWidth = Internals.T.xWidthToUnitWidth(
             samples,
             samplingInputs.outputXYPoints,
@@ -113,7 +113,7 @@ let toPointSetDist = (
       : None
 
   let pointSetDist = MixedShapeBuilder.buildSimple(
-    ~continuous=pdf->E.O2.fmap(fst),
+    ~continuous=pdf->E.O.fmap(fst),
     ~discrete=Some(discrete),
   )
 
@@ -123,10 +123,10 @@ let toPointSetDist = (
   check to see if we still need to do this.
  */
 
-  let normalizedPointSet = pointSetDist->E.O2.fmap(PointSetDist.T.normalize)
+  let normalizedPointSet = pointSetDist->E.O.fmap(PointSetDist.T.normalize)
 
   let samplesParse: Internals.Types.outputs = {
-    continuousParseParams: pdf->E.O2.fmap(snd),
+    continuousParseParams: pdf->E.O.fmap(snd),
     pointSetDist: normalizedPointSet,
   }
 

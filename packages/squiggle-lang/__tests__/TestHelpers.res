@@ -37,11 +37,12 @@ let env: GenericDist.env = {
 let run = DistributionOperation.run(~env)
 let outputMap = fmap(~env)
 let unreachableInTestFileMessage = "Should be impossible to reach (This error is in test file)"
-let toExtFloat: option<float> => float = E.O.toExt(unreachableInTestFileMessage)
+let toExtFloat: option<float> => float = E.O.toExt(_, unreachableInTestFileMessage)
 let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.genericDist = E.O.toExt(
+  _,
   unreachableInTestFileMessage,
 )
-// let toExt: option<'a> => 'a = E.O.toExt(unreachableInTestFileMessage)
+// let toExt: option<'a> => 'a = E.O.toExt(_, unreachableInTestFileMessage)
 let unpackFloat = x => x->toFloat->toExtFloat
 let unpackDist = y => y->toDist->toExtDist
 

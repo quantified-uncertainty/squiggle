@@ -18,7 +18,7 @@ module Wrappers = {
   let evArrayOfEvNumber = xs => xs->E.A.fmap(evNumber)->evArray
 }
 
-let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleErrorString)
+let getOrError = (a, g) => E.A.get(a, g)->E.O.toResult(impossibleErrorString)
 
 module Prepare = {
   type t = value
@@ -290,7 +290,7 @@ module Make = {
       ~name,
       ~nameSpace,
       ~requiresNamespace,
-      ~examples=examples->E.O.default([], _),
+      ~examples=examples->E.O.default([]),
       ~output=EvtNumber,
       ~definitions=[
         FnDefinition.make(
@@ -320,7 +320,7 @@ module Make = {
       ~name,
       ~nameSpace,
       ~requiresNamespace,
-      ~examples=examples->E.O.default([], _),
+      ~examples=examples->E.O.default([]),
       ~output=EvtNumber,
       ~definitions=[
         FnDefinition.make(
@@ -350,7 +350,7 @@ module Make = {
       ~name,
       ~nameSpace,
       ~requiresNamespace,
-      ~examples=examples->E.O.default([], _),
+      ~examples=examples->E.O.default([]),
       ~output=EvtBool,
       ~definitions=[
         FnDefinition.make(
@@ -380,7 +380,7 @@ module Make = {
       ~name,
       ~nameSpace,
       ~requiresNamespace,
-      ~examples=examples->E.O.default([], _),
+      ~examples=examples->E.O.default([]),
       ~output=EvtBool,
       ~definitions=[
         FnDefinition.make(

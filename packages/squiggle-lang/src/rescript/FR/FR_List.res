@@ -18,10 +18,10 @@ module Internals = {
   )
 
   let first = (v: array<Reducer_T.value>): result<Reducer_T.value, string> =>
-    v->E.A.first |> E.O.toResult("No first element")
+    v->E.A.first->E.O.toResult("No first element")
 
   let last = (v: array<Reducer_T.value>): result<Reducer_T.value, string> =>
-    v->E.A.last |> E.O.toResult("No last element")
+    v->E.A.last->E.O.toResult("No last element")
 
   let reverse = (array: array<Reducer_T.value>): Reducer_T.value => IEvArray(
     Belt.Array.reverse(array),

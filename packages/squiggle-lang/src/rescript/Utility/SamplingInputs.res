@@ -13,9 +13,9 @@ module SamplingInputs = {
     pointSetDistLength: option<int>,
   }
   let withDefaults = (t: t): samplingInputs => {
-    sampleCount: t.sampleCount |> E.O.default(10000),
-    outputXYPoints: t.outputXYPoints |> E.O.default(10000),
+    sampleCount: t.sampleCount->E.O.default(10000),
+    outputXYPoints: t.outputXYPoints->E.O.default(10000),
     kernelWidth: t.kernelWidth,
-    pointSetDistLength: t.pointSetDistLength |> E.O.default(10000),
+    pointSetDistLength: t.pointSetDistLength->E.O.default(10000),
   }
 }
