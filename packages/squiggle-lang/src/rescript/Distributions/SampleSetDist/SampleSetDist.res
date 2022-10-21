@@ -68,7 +68,7 @@ let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInput
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
-  let i = E.Int.random(~min=0, ~max=E.A.length(get(t)) - 1)
+  let i = Js.Math.random_int(0, E.A.length(get(t)) - 1)
   E.A.unsafe_get(get(t), i)
 }
 

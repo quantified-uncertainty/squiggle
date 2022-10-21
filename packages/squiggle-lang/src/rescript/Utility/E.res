@@ -4,12 +4,9 @@ running `rescript convert -all` on Rationale https://github.com/jonlaing/rationa
 */
 
 module A = E_A
-module F = E_F
 module Float = E_Float
 module FloatFloatMap = E_FloatFloatMap
 module I = E_I
-module Int = E_Int
-module JsDate = E_JsDate
 module O = E_O
 module O2 = E_O2
 module R = E_R

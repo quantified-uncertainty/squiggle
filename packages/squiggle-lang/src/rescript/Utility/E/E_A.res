@@ -1,5 +1,4 @@
 /* A for Array */
-module Int = E_Int
 module FloatFloatMap = E_FloatFloatMap
 
 let fmap = Belt.Array.map
