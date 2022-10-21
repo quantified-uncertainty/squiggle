@@ -92,9 +92,9 @@ let libaryBase = [
           switch inputs {
           | [IEvDistribution(dist)] =>
             GenericDist.toSampleSetDist(dist, context.environment.sampleCount)
-            ->E.R2.fmap(Wrappers.sampleSet)
-            ->E.R2.fmap(Wrappers.evDistribution)
-            ->E.R2.errMap(e => SqError.Message.REDistributionError(e))
+            ->E.R.fmap(Wrappers.sampleSet)
+            ->E.R.fmap(Wrappers.evDistribution)
+            ->E.R.errMap(e => SqError.Message.REDistributionError(e))
           | _ => Error(impossibleError)
           },
         (),
@@ -115,11 +115,11 @@ let libaryBase = [
         ~run=(inputs, _, _) => {
           let sampleSet =
             inputs->Prepare.ToTypedArray.numbers
-              |> E.R2.bind(r => SampleSetDist.make(r)->E.R2.errMap(SampleSetDist.Error.toString))
+              -> E.R.bind(r => SampleSetDist.make(r)->E.R.errMap(SampleSetDist.Error.toString))
           sampleSet
-          ->E.R2.fmap(Wrappers.sampleSet)
-          ->E.R2.fmap(Wrappers.evDistribution)
-          ->E.R2.errMap(wrapError)
+          ->E.R.fmap(Wrappers.sampleSet)
+          ->E.R.fmap(Wrappers.evDistribution)
+          ->E.R.errMap(wrapError)
         },
         (),
       ),
@@ -287,8 +287,8 @@ module Comparison = {
 
   let wrapper = r =>
     r
-    ->E.R2.fmap(r => r->Wrappers.sampleSet->Wrappers.evDistribution)
-    ->E.R2.errMap(e =>
+    ->E.R.fmap(r => r->Wrappers.sampleSet->Wrappers.evDistribution)
+    ->E.R.errMap(e =>
       e->DistributionTypes.Error.sampleErrorToDistErr->SqError.Message.REDistributionError
     )
 

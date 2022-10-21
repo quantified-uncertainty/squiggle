@@ -161,7 +161,7 @@ module Process = {
         | Error(r) => Error(Operation.Other(r))
         }
 
-      let wrapSymbolic = (fn, r) => r->fn->E.R2.fmap(Wrappers.symbolic)
+      let wrapSymbolic = (fn, r) => r->fn->E.R.fmap(Wrappers.symbolic)
 
       let singleVarSample = (dist, fn, env) => {
         switch toSampleSet(dist, env) {

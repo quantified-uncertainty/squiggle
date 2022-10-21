@@ -49,7 +49,7 @@ let combinePointwise = (
   // TODO: does it ever make sense to pointwise combine the integrals here?
   // It could be done for pointwise additions, but is that ever needed?
 
-  combiner(XYShape.XtoY.discreteInterpolator, fn, t1.xyShape, t2.xyShape)->E.R2.fmap(make)
+  combiner(XYShape.XtoY.discreteInterpolator, fn, t1.xyShape, t2.xyShape)->E.R.fmap(make)
 }
 
 let reduce = (
@@ -110,7 +110,7 @@ let mapYResult = (
   ~fn: float => result<float, 'e>,
   t: t,
 ): result<t, 'e> =>
-  XYShape.T.mapYResult(fn, getShape(t))->E.R2.fmap(x =>
+  XYShape.T.mapYResult(fn, getShape(t))->E.R.fmap(x =>
     make(
       ~integralSumCache=t.integralSumCache->E.O.bind(integralSumCacheFn),
       ~integralCache=t.integralCache->E.O.bind(integralCacheFn),

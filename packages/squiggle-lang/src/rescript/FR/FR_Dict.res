@@ -26,8 +26,8 @@ module Internals = {
       }
     })
     ->E.A.R.firstErrorOrOpen
-    ->E.R2.fmap(Belt.Map.String.fromArray)
-    ->E.R2.fmap(Wrappers.evRecord)
+    ->E.R.fmap(Belt.Map.String.fromArray)
+    ->E.R.fmap(Wrappers.evRecord)
 
   //Belt.Map.String has a function for mergeMany, but I couldn't understand how to use it yet.
   let mergeMany = (a: array<t>): Reducer_T.value => {

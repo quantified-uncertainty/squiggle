@@ -120,7 +120,7 @@ let combinePointwise = (
 
   let interpolator = XYShape.XtoY.continuousInterpolator(t1.interpolation, extrapolation)
 
-  combiner(interpolator, fn, t1.xyShape, t2.xyShape)->E.R2.fmap(x =>
+  combiner(interpolator, fn, t1.xyShape, t2.xyShape)->E.R.fmap(x =>
     make(~integralSumCache=combinedIntegralSum, x)
   )
 }
@@ -147,7 +147,6 @@ let sum = (
   continuousShapes->E.A.fold_left(empty, (x, y) =>
     combinePointwise(~integralSumCachesFn, (a, b) => Ok(a +. b), x, y)->E.R.toExn(
       "Addition should never fail",
-      _,
     )
   )
 
@@ -166,7 +165,7 @@ let mapYResult = (
   ~fn: float => result<float, 'e>,
   t: t,
 ): result<t, 'e> =>
-  XYShape.T.mapYResult(fn, getShape(t))->E.R2.fmap(x =>
+  XYShape.T.mapYResult(fn, getShape(t))->E.R.fmap(x =>
     make(
       ~interpolation=t.interpolation,
       ~integralSumCache=t.integralSumCache->E.O.bind(integralSumCacheFn),

@@ -24,8 +24,8 @@ let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
       }
     )
     ->Ok
-    ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R2.errMap(XYShape.Error.toString))
-    ->E.R2.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
+    ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R.errMap(XYShape.Error.toString))
+    ->E.R.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
   | _ => impossibleError->SqError.Message.throw
   }
 }
@@ -71,9 +71,9 @@ let library = [
               ~sampleCount=context.environment.sampleCount,
               (),
             )
-            ->E.R2.fmap(Wrappers.pointSet)
-            ->E.R2.fmap(Wrappers.evDistribution)
-            ->E.R2.errMap(e => SqError.Message.REDistributionError(e))
+            ->E.R.fmap(Wrappers.pointSet)
+            ->E.R.fmap(Wrappers.evDistribution)
+            ->E.R.errMap(e => SqError.Message.REDistributionError(e))
           | _ => Error(impossibleError)
           },
         (),
@@ -120,7 +120,7 @@ let library = [
         ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(inputs, _, _) =>
-          inputsToDist(inputs, r => Continuous(Continuous.make(r)))->E.R2.errMap(wrapError),
+          inputsToDist(inputs, r => Continuous(Continuous.make(r)))->E.R.errMap(wrapError),
         (),
       ),
     ],
@@ -144,7 +144,7 @@ let library = [
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(inputs, _, _) =>
-          inputsToDist(inputs, r => Discrete(Discrete.make(r)))->E.R2.errMap(wrapError),
+          inputsToDist(inputs, r => Discrete(Discrete.make(r)))->E.R.errMap(wrapError),
         (),
       ),
     ],

@@ -14,11 +14,11 @@ module Declaration = {
         let getMinMax = arg =>
           ToValueArray.Record.twoArgs([arg], ("min", "max"))
           ->E.R.bind(ToValueTuple.twoNumbers)
-          ->E.R2.fmap(((min, max)) => Declaration.ContinuousFloatArg.make(min, max))
+          ->E.R.fmap(((min, max)) => Declaration.ContinuousFloatArg.make(min, max))
         inputs
         ->E.A.fmap(getMinMax)
         ->E.A.R.firstErrorOrOpen
-        ->E.R2.fmap(args => Reducer_T.IEvDeclaration(Declaration.make(lambda, args)))
+        ->E.R.fmap(args => Reducer_T.IEvDeclaration(Declaration.make(lambda, args)))
       }
 
     | Error(r) => Error(r)
@@ -51,7 +51,7 @@ let library = [
         ~name="declare",
         ~inputs=[Declaration.frType],
         ~run=(inputs, _, _) => {
-          inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)->E.R2.errMap(wrapError)
+          inputs->getOrError(0)->E.R.bind(Declaration.fromExpressionValue)->E.R.errMap(wrapError)
         },
         (),
       ),

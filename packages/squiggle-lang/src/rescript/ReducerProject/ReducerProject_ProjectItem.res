@@ -151,7 +151,7 @@ let parseIncludes = (this: t): t => {
   }
 }
 let doRawParse = (this: t): T.rawParseArgumentType =>
-  this->getSource->Reducer_Peggy_Parse.parse(this.sourceId)->E.R2.errMap(SqError.fromParseError)
+  this->getSource->Reducer_Peggy_Parse.parse(this.sourceId)->E.R.errMap(SqError.fromParseError)
 
 let rawParse = (this: t): t =>
   this->getRawParse->E.O.defaultFn(() => doRawParse(this))->setRawParse(this, _)

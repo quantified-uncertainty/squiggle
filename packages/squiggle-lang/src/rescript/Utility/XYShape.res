@@ -80,7 +80,7 @@ module T = {
   let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(t.ys, fn)}
   let mapYResult = (fn: float => result<float, 'e>, t: t): result<t, 'e> => {
     let mappedYs = E.A.fmap(t.ys, fn)
-    E.A.R.firstErrorOrOpen(mappedYs)->E.R2.fmap(y => {xs: t.xs, ys: y})
+    E.A.R.firstErrorOrOpen(mappedYs)->E.R.fmap(y => {xs: t.xs, ys: y})
   }
   let square = mapX(x => x ** 2.0)
   let zip = ({xs, ys}: t) => E.A.zip(xs, ys)
@@ -500,7 +500,6 @@ module PointwiseCombination = {
   let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
     combine(interpolator, (a, b) => Ok(a +. b), t1, t2)->E.R.toExn(
       "Add operation should never fail",
-      _,
     )
 
   let combineEvenXs = (~fn, ~xToYSelection, sampleCount, t1: T.t, t2: T.t) =>

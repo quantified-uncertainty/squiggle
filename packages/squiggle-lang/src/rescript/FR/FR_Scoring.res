@@ -5,8 +5,8 @@ let requiresNamespace = true
 
 let runScoring = (estimate, answer, prior, env) => {
   GenericDist.Score.logScore(~estimate, ~answer, ~prior, ~env)
-  ->E.R2.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
-  ->E.R2.errMap(e => SqError.Message.REDistributionError(e))
+  ->E.R.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
+  ->E.R.errMap(e => SqError.Message.REDistributionError(e))
 }
 
 let library = [

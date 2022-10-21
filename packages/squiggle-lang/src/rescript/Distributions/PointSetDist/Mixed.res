@@ -46,15 +46,17 @@ let combinePointwise = (
   t2: t,
 ): result<t, 'e> => {
   let reducedDiscrete =
-    [t1, t2]->E.A.fmap(toDiscrete)
-    |> E.A.O.concatSomes
-    |> Discrete.reduce(~integralSumCachesFn, fn)
-    |> E.R.toExn("Theoretically unreachable state")
+    [t1, t2]
+    ->E.A.fmap(toDiscrete)
+    -> E.A.O.concatSomes
+    -> Discrete.reduce(~integralSumCachesFn, fn, _)
+    -> E.R.toExn("Theoretically unreachable state")
 
   let reducedContinuous =
-    [t1, t2]->E.A.fmap(toContinuous)
-    |> E.A.O.concatSomes
-    |> Continuous.reduce(~integralSumCachesFn, fn)
+    [t1, t2]
+    ->E.A.fmap(toContinuous)
+    -> E.A.O.concatSomes
+    -> Continuous.reduce(~integralSumCachesFn, fn, _)
 
   let combinedIntegralSum = Common.combineIntegralSums(
     integralSumCachesFn,
@@ -67,7 +69,7 @@ let combinePointwise = (
     t1.integralCache,
     t2.integralCache,
   )
-  reducedContinuous->E.R2.fmap(continuous =>
+  reducedContinuous->E.R.fmap(continuous =>
     make(
       ~integralSumCache=combinedIntegralSum,
       ~integralCache=combinedIntegral,
@@ -257,7 +259,7 @@ module T = Dist({
     E.R.merge(
       Discrete.T.mapYResult(~fn, t.discrete),
       Continuous.T.mapYResult(~fn, t.continuous),
-    )->E.R2.fmap(((discreteMapped, continuousMapped)) => {
+    )->E.R.fmap(((discreteMapped, continuousMapped)) => {
       createMixedFromContinuousDiscrete(
         ~integralCacheFn,
         ~integralSumCacheFn,
@@ -375,7 +377,7 @@ let combinePointwise = (
     t1.integralCache,
     t2.integralCache,
   )
-  E.R.merge(reducedContinuous, reducedDiscrete)->E.R2.fmap(((continuous, discrete)) =>
+  E.R.merge(reducedContinuous, reducedDiscrete)->E.R.fmap(((continuous, discrete)) =>
     make(
       ~integralSumCache=combinedIntegralSum,
       ~integralCache=combinedIntegral,

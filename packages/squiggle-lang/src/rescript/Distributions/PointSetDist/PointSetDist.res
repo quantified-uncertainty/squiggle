@@ -18,9 +18,9 @@ let fmap = ((fn1, fn2, fn3), t: t): t =>
 
 let fmapResult = ((fn1, fn2, fn3), t: t): result<t, 'e> =>
   switch t {
-  | Mixed(m) => fn1(m)->E.R2.fmap(x => PointSetTypes.Mixed(x))
-  | Discrete(m) => fn2(m)->E.R2.fmap(x => PointSetTypes.Discrete(x))
-  | Continuous(m) => fn3(m)->E.R2.fmap(x => PointSetTypes.Continuous(x))
+  | Mixed(m) => fn1(m)->E.R.fmap(x => PointSetTypes.Mixed(x))
+  | Discrete(m) => fn2(m)->E.R.fmap(x => PointSetTypes.Discrete(x))
+  | Continuous(m) => fn3(m)->E.R.fmap(x => PointSetTypes.Continuous(x))
   }
 
 let toMixed = mapToAll((
@@ -84,7 +84,7 @@ let combinePointwise = (
       fn,
       m1,
       m2,
-    )->E.R2.fmap(x => PointSetTypes.Continuous(x))
+    )->E.R.fmap(x => PointSetTypes.Continuous(x))
   | (Discrete(m1), Discrete(m2)) =>
     Discrete.combinePointwise(
       ~combiner,
@@ -92,7 +92,7 @@ let combinePointwise = (
       ~fn,
       m1,
       m2,
-    )->E.R2.fmap(x => PointSetTypes.Discrete(x))
+    )->E.R.fmap(x => PointSetTypes.Discrete(x))
   | (m1, m2) =>
     Mixed.combinePointwise(
       ~integralSumCachesFn,
@@ -100,7 +100,7 @@ let combinePointwise = (
       fn,
       toMixed(m1),
       toMixed(m2),
-    )->E.R2.fmap(x => PointSetTypes.Mixed(x))
+    )->E.R.fmap(x => PointSetTypes.Mixed(x))
   }
 
 module T = Dist({
@@ -256,7 +256,7 @@ let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineErr
   T.toContinuous(t)
   ->E.O.fmap(Continuous.downsampleEquallyOverX(bucketCount))
   ->E.O.toResult(PointSetTypes.CannotSparklineDiscrete)
-  ->E.R2.fmap(r => Continuous.getShape(r).ys->Sparklines.create())
+  ->E.R.fmap(r => Continuous.getShape(r).ys->Sparklines.create())
 
 let makeDiscrete = (d): t => Discrete(d)
 let makeContinuous = (d): t => Continuous(d)

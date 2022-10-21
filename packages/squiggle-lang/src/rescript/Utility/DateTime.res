@@ -71,7 +71,7 @@ module Date = {
   }
   let makeFromYear = (year: float): result<t, string> => {
     let floor = year->Js.Math.floor_float
-    makeWithYearInt(Belt.Float.toInt(floor))->E.R2.fmap(earlyDate => {
+    makeWithYearInt(Belt.Float.toInt(floor))->E.R.fmap(earlyDate => {
       let diff = year -. floor
       earlyDate->addDuration(diff *. Duration.year)
     })

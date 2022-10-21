@@ -150,5 +150,5 @@ module BackCompatible = {
   }
 
   let evaluateString = (peggyCode: string): result<T.value, SqError.t> =>
-    parse(peggyCode)->E.R2.errMap(e => e->SqError.fromParseError)->Result.flatMap(evaluate)
+    parse(peggyCode)->E.R.errMap(e => e->SqError.fromParseError)->Result.flatMap(evaluate)
 }

@@ -89,7 +89,7 @@ let sampleN = (t: t, n) => {
 }
 
 let _fromSampleResultArray = (samples: array<result<float, QuriSquiggleLang.Operation.Error.t>>) =>
-  E.A.R.firstErrorOrOpen(samples)->E.R2.errMap(Error.fromOperationError)->E.R.bind(make)
+  E.A.R.firstErrorOrOpen(samples)->E.R.errMap(Error.fromOperationError)->E.R.bind(make)
 
 let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): result<
   t,

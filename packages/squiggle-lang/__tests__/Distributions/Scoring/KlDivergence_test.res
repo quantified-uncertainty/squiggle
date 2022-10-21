@@ -15,9 +15,9 @@ describe("klDivergence: continuous -> continuous -> float", () => {
   let testUniform = (lowAnswer, highAnswer, lowPrediction, highPrediction) => {
     test("of two uniforms is equal to the analytic expression", () => {
       let answer =
-        uniformMakeR(lowAnswer, highAnswer)->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
+        uniformMakeR(lowAnswer, highAnswer)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
       let prediction =
-        uniformMakeR(lowPrediction, highPrediction)->E.R2.errMap(
+        uniformMakeR(lowPrediction, highPrediction)->E.R.errMap(
           s => DistributionTypes.ArgumentError(s),
         )
       // integral along the support of the answer of answer.pdf(x) times log of prediction.pdf(x) divided by answer.pdf(x) dx
@@ -47,8 +47,8 @@ describe("klDivergence: continuous -> continuous -> float", () => {
     let stdev2 = 1.0
 
     let prediction =
-      normalMakeR(mean1, stdev1)->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
-    let answer = normalMakeR(mean2, stdev2)->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
+      normalMakeR(mean1, stdev1)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
+    let answer = normalMakeR(mean2, stdev2)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
     // https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians
     let analyticalKl =
       Js.Math.log(stdev1 /. stdev2) +.
@@ -180,13 +180,13 @@ describe("combineAlongSupportOfSecondArgument0", () => {
     let highPrediction = 2.0
 
     let answer =
-      uniformMakeR(lowAnswer, highAnswer)->E.R2.errMap(s => DistributionTypes.ArgumentError(s))
+      uniformMakeR(lowAnswer, highAnswer)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
     let prediction =
-      uniformMakeR(lowPrediction, highPrediction)->E.R2.errMap(
+      uniformMakeR(lowPrediction, highPrediction)->E.R.errMap(
         s => DistributionTypes.ArgumentError(s),
       )
-    let answerWrapped = E.R.fmap(a => run(FromDist(#ToDist(ToPointSet), a)), answer)
-    let predictionWrapped = E.R.fmap(a => run(FromDist(#ToDist(ToPointSet), a)), prediction)
+    let answerWrapped = E.R.fmap(answer, a => run(FromDist(#ToDist(ToPointSet), a)))
+    let predictionWrapped = E.R.fmap(prediction, a => run(FromDist(#ToDist(ToPointSet), a)))
 
     let interpolator = XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero)
     let integrand = PointSetDist_Scoring.WithDistAnswer.integrand

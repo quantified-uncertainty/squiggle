@@ -118,7 +118,7 @@ describe("FunctionRegistry Library", () => {
         let responseType =
           example
           ->Reducer_Expression.BackCompatible.evaluateString
-          ->E.R2.fmap(Reducer_Value.valueToValueType)
+          ->E.R.fmap(Reducer_Value.valueToValueType)
         let expectedOutputType = fn.output->E.O.toExn("")
         expect(responseType)->toEqual(Ok(expectedOutputType))
       },

@@ -63,7 +63,7 @@ let lognormalMake = SymbolicDist.Lognormal.make
 let triangularMake = SymbolicDist.Triangular.make
 let floatMake = SymbolicDist.Float.make
 
-let fmapGenDist = symbdistres => E.R.fmap(s => DistributionTypes.Symbolic(s), symbdistres)
+let fmapGenDist = symbdistres => E.R.fmap(symbdistres, s => DistributionTypes.Symbolic(s))
 let normalMakeR = (mean, stdev) => fmapGenDist(SymbolicDist.Normal.make(mean, stdev))
 let betaMakeR = (alpha, beta) => fmapGenDist(SymbolicDist.Beta.make(alpha, beta))
 let exponentialMakeR = rate => fmapGenDist(SymbolicDist.Exponential.make(rate))

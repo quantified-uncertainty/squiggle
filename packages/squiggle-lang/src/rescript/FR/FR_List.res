@@ -152,7 +152,7 @@ let library = [
         ~inputs=[FRTypeArray(FRTypeAny)],
         ~run=(inputs, _, _) =>
           switch inputs {
-          | [IEvArray(array)] => Internals.first(array)->E.R2.errMap(wrapError)
+          | [IEvArray(array)] => Internals.first(array)->E.R.errMap(wrapError)
           | _ => Error(impossibleError)
           },
         (),
@@ -171,7 +171,7 @@ let library = [
         ~inputs=[FRTypeArray(FRTypeAny)],
         ~run=(inputs, _, _) =>
           switch inputs {
-          | [IEvArray(array)] => Internals.last(array)->E.R2.errMap(wrapError)
+          | [IEvArray(array)] => Internals.last(array)->E.R.errMap(wrapError)
           | _ => Error(impossibleError)
           },
         (),

@@ -15,8 +15,8 @@ module DistributionCreation = {
     let process = (~fn, ~env, r) =>
       r
       ->E.R.bind(Process.DistOrNumberToDist.twoValuesUsingSymbolicDist(~fn, ~values=_, ~env))
-      ->E.R2.fmap(Wrappers.evDistribution)
-      ->E.R2.errMap(e => SqError.Message.REOther(e))
+      ->E.R.fmap(Wrappers.evDistribution)
+      ->E.R.errMap(e => SqError.Message.REOther(e))
 
     let make = (name, fn) => {
       FnDefinition.make(
@@ -57,8 +57,8 @@ module DistributionCreation = {
     let process = (~fn, ~env, r) =>
       r
       ->E.R.bind(Process.DistOrNumberToDist.oneValueUsingSymbolicDist(~fn, ~value=_, ~env))
-      ->E.R2.fmap(Wrappers.evDistribution)
-      ->E.R2.errMap(e => SqError.Message.REOther(e))
+      ->E.R.fmap(Wrappers.evDistribution)
+      ->E.R.errMap(e => SqError.Message.REOther(e))
 
     let make = (name, fn) =>
       FnDefinition.make(
