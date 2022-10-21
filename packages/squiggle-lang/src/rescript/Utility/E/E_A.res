@@ -24,13 +24,6 @@ let some = Belt.Array.some
 let every = Belt.Array.every
 let isEmpty = r => length(r) < 1
 let stableSortBy = Belt.SortArray.stableSortBy
-let toRanges = (a: array<'a>) =>
-  switch a->length {
-  | 0
-  | 1 =>
-    Belt.Result.Error("Must be at least 2 elements")
-  | n => makeBy(n - 1, r => r)->fmap(index => (unsafe_get(a, index), unsafe_get(a, index + 1)))->Ok
-  }
 
 let getByFmap = (a, fn, boolCondition) => {
   let i = ref(0)
@@ -57,15 +50,9 @@ let uniq = reduce(_, [], (acc, v) => some(acc, \"=="(v)) ? acc : concat([v], acc
 
 //intersperse([1,2,3], [10,11,12]) => [1,10,2,11,3,12]
 let intersperse = (a: array<'a>, b: array<'a>) => {
-  let items: ref<array<'a>> = ref([])
-
-  forEachI(a, (i, item) =>
-    switch get(b, i) {
-    | Some(r) => items := concat(items.contents, [item, r])
-    | None => items := concat(items.contents, [item])
-    }
-  )
-  items.contents
+  let c = concatMany(Belt.Array.zipBy(a, b, (e, f) => [e, f]))
+  // Copying old implementation: add tail of a, but not b?
+  concat(c, Belt.Array.sliceToEnd(a, length(b)))
 }
 
 // This is like map, but
@@ -86,6 +73,8 @@ let accumulate = (fn: ('a, 'a) => 'a, items: array<'a>) => {
 // Sort of a complement to accumulate
 let tail = Belt.Array.sliceToEnd(_, 1)
 let pairwise = (t, fn) => Belt.Array.zipBy(t, tail(t), fn)
+let toRanges = a =>
+  length(a) > 1 ? Ok(zip(a, tail(a))) : Belt.Result.Error("Must be at least 2 elements")
 
 let filter = Belt.Array.keep
 let joinWith = Js.Array2.joinWith
