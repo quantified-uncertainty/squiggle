@@ -15,7 +15,6 @@ module I = E_I
 module Int = E_Int
 module J = E_J
 module JsDate = E_JsDate
-module L = E_L
 module O = E_O
 module O2 = E_O2
 module R = E_R

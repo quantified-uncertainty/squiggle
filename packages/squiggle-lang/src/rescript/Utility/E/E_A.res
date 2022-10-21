@@ -54,8 +54,7 @@ let unzip = Belt.Array.unzip
 let zip3 = (a, b, c) => zip(a, b)->zip(c)->fmap((((v1, v2), v3)) => (v1, v2, v3))
 
 let to_list = Belt.List.fromArray
-/* TODO: Is there a better way of doing this? */
-let uniq = r => r->to_list->E_L.uniq->Belt.List.toArray
+let uniq = reduce(_, [], (acc, v) => some(acc, \"=="(v)) ? acc : concat([v], acc))
 
 //intersperse([1,2,3], [10,11,12]) => [1,10,2,11,3,12]
 let intersperse = (a: array<'a>, b: array<'a>) => {
