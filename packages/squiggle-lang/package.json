@@ -40,7 +40,6 @@
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
     "@rescript/std": "^10.0.0",
-    "@stdlib/stats": "^0.0.13",
     "jstat": "^1.9.5",
     "lodash": "^4.17.21",
     "pdfast": "^0.2.0"
