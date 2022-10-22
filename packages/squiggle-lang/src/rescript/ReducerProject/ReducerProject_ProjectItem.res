@@ -134,13 +134,13 @@ let parseIncludes = (this: t): t => {
   switch rRawImportAsVariables {
   | Error(e) => resetIncludes(this)->setIncludes(Error(e))
   | Ok(rawImportAsVariables) => {
-      let includes = rawImportAsVariables->Belt.Array.map(((_variable, file)) => file)->Ok
+      let includes = rawImportAsVariables->E.A.fmap(((_variable, file)) => file)->Ok
       let includeAsVariables =
-        rawImportAsVariables->Belt.Array.keep(((variable, _file)) => variable != "")
+        rawImportAsVariables->E.A.filter(((variable, _file)) => variable != "")
       let directIncludes =
         rawImportAsVariables
-        ->Belt.Array.keep(((variable, _file)) => variable == "")
-        ->Belt.Array.map(((_variable, file)) => file)
+        ->E.A.filter(((variable, _file)) => variable == "")
+        ->E.A.fmap(((_variable, file)) => file)
       {
         ...this,
         includes,

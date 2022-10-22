@@ -180,9 +180,9 @@ let toDiscretePointMassesFromDiscrete = (s: PointSetTypes.xyShape): pointMassesW
   let {xs, ys}: XYShape.T.t = s
   let n = E.A.length(xs)
 
-  let masses: array<float> = Belt.Array.makeBy(n, i => ys[i])
-  let means: array<float> = Belt.Array.makeBy(n, i => xs[i])
-  let variances: array<float> = Belt.Array.makeBy(n, _ => 0.0)
+  let masses: array<float> = E.A.makeBy(n, i => ys[i])
+  let means: array<float> = E.A.makeBy(n, i => xs[i])
+  let variances: array<float> = E.A.makeBy(n, _ => 0.0)
 
   {n, masses, means, variances}
 }
@@ -251,15 +251,13 @@ let combineShapesContinuousDiscrete = (
   }
 
   outXYShapes
-  |> E.A.fmap(XYShape.T.fromZippedArray)
-  |> E.A.fold_left(
-    (acc, x) =>
-      XYShape.PointwiseCombination.addCombine(
-        XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
-        acc,
-        x,
-      ),
-    XYShape.T.empty,
+  ->E.A.fmap(XYShape.T.fromZippedArray)
+  ->E.A.fold_left(XYShape.T.empty, (acc, x) =>
+    XYShape.PointwiseCombination.addCombine(
+      XYShape.XtoY.continuousInterpolator(#Linear, #UseZero),
+      acc,
+      x,
+    )
   )
 }
 

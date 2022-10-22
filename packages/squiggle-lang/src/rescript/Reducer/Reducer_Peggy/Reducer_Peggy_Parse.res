@@ -138,13 +138,13 @@ let nodeKeyValueToAST = (node: nodeKeyValue) => {
 
 let rec pgToString = (ast: ast): string => {
   let argsToString = (args: array<nodeIdentifier>): string =>
-    args->Belt.Array.map(arg => arg->nodeIdentifierToAST->pgToString)->Js.Array2.toString
+    args->E.A.fmap(arg => arg->nodeIdentifierToAST->pgToString)->Js.Array2.toString
 
   let nodesToStringUsingSeparator = (nodes: array<node>, separator: string): string =>
-    nodes->Belt.Array.map(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
+    nodes->E.A.fmap(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
   let pgNodesToStringUsingSeparator = (nodes: array<ast>, separator: string): string =>
-    nodes->Belt.Array.map(pgToString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
+    nodes->E.A.fmap(pgToString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
   switch ast.content {
   | ASTBlock(node)
@@ -154,7 +154,7 @@ let rec pgToString = (ast: ast): string => {
   | ASTRecord(node) =>
     "{" ++
     node["elements"]
-    ->Belt.Array.map(element => element->nodeKeyValueToAST)
+    ->E.A.fmap(element => element->nodeKeyValueToAST)
     ->pgNodesToStringUsingSeparator(", ") ++ "}"
   | ASTBoolean(node) => node["value"]->Js.String.make
   | ASTCall(node) =>

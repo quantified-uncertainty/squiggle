@@ -75,7 +75,7 @@ module Old = {
       }
 
     let parseNumberArray = (ags: array<Reducer_T.value>): Belt.Result.t<array<float>, string> =>
-      E.A.fmap(parseNumber, ags) |> E.A.R.firstErrorOrOpen
+      E.A.fmap(ags, parseNumber) |> E.A.R.firstErrorOrOpen
 
     let parseDist = (args: Reducer_T.value): Belt.Result.t<DistributionTypes.genericDist, string> =>
       switch args {
@@ -87,7 +87,7 @@ module Old = {
     let parseDistributionArray = (ags: array<Reducer_T.value>): Belt.Result.t<
       array<DistributionTypes.genericDist>,
       string,
-    > => E.A.fmap(parseDist, ags) |> E.A.R.firstErrorOrOpen
+    > => E.A.fmap(ags, parseDist) |> E.A.R.firstErrorOrOpen
 
     let mixtureWithGivenWeights = (
       distributions: array<DistributionTypes.genericDist>,
@@ -95,7 +95,7 @@ module Old = {
       ~env: GenericDist.env,
     ): DistributionOperation.outputType =>
       E.A.length(distributions) == E.A.length(weights)
-        ? Mixture(Belt.Array.zip(distributions, weights))->DistributionOperation.run(~env)
+        ? Mixture(E.A.zip(distributions, weights))->DistributionOperation.run(~env)
         : GenDistError(
             ArgumentError("Error, mixture call has different number of distributions and weights"),
           )
@@ -133,7 +133,7 @@ module Old = {
         | Some(IEvArray(b)) => {
             let weights = parseNumberArray(b)
             let distributions = parseDistributionArray(
-              Belt.Array.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
+              E.A.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
             )
             switch E.R.merge(distributions, weights) {
             | Ok(d, w) => mixtureWithGivenWeights(d, w, ~env)
@@ -305,7 +305,7 @@ module Old = {
     | Float(d) => Ok(IEvNumber(d))
     | String(d) => Ok(IEvString(d))
     | Bool(d) => Ok(IEvBool(d))
-    | FloatArray(d) => Ok(IEvArray(d |> E.A.fmap(r => Reducer_T.IEvNumber(r))))
+    | FloatArray(d) => Ok(IEvArray(d->E.A.fmap(r => Reducer_T.IEvNumber(r))))
     | GenDistError(err) => Error(REDistributionError(err))
     }
 
@@ -357,7 +357,7 @@ let makeOperationFns = (): array<function> => {
     [FRTypeDist, FRTypeDist],
   ]
 
-  ops->E.A2.fmap(op => twoArgTypes->E.A2.fmap(types => makeProxyFn(op, types)))->E.A.concatMany
+  ops->E.A.fmap(op => twoArgTypes->E.A.fmap(types => makeProxyFn(op, types)))->E.A.concatMany
 }
 
 // TODO - duplicates the switch above, should rewrite with standard FR APIs
