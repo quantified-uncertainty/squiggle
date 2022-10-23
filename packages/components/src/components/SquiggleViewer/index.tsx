@@ -26,7 +26,7 @@ export type FlattenedViewSettings = Partial<
 type ViewSettings = {
   width?: number;
   enableLocalSettings?: boolean;
-} & Omit<MergedItemSettings, "environment">;
+} & MergedItemSettings;
 
 export const createViewSettings = (
   props: FlattenedViewSettings

@@ -104,7 +104,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
             return (
               <DistributionChart
                 plot={defaultPlot(value.value)}
-                {...settings.distributionChartSettings}
+                settings={settings.distributionChartSettings}
                 environment={environment}
                 width={width}
               />
@@ -174,7 +174,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
                 .join(",")})`}</div>
               <FunctionChart
                 fn={value.value}
-                chartSettings={settings.functionChartSettings}
+                settings={settings.functionChartSettings}
                 distributionChartSettings={settings.distributionChartSettings}
                 height={settings.chartHeight}
                 environment={{
@@ -247,7 +247,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
                 <DistributionChart
                   plot={plot}
                   environment={environment}
-                  {...settings.distributionChartSettings}
+                  settings={settings.distributionChartSettings}
                   width={width}
                 />
               );

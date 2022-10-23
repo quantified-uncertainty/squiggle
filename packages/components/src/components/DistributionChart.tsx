@@ -38,8 +38,9 @@ export type DistributionChartSettings = yup.InferType<
 export type DistributionChartProps = {
   plot: Plot;
   environment: environment;
-  width?: number;
-} & DistributionChartSettings;
+  width?: number; // TODO - move to settings?
+  settings: DistributionChartSettings;
+};
 
 export function defaultPlot(distribution: SqDistribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
@@ -53,15 +54,7 @@ export function makePlot(record: SqRecord): Plot | void {
 }
 
 export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const {
-    plot,
-    chartHeight,
-    showSummary,
-    width,
-    environment,
-    logX,
-    vegaActions,
-  } = props;
+  const { plot, settings, width, environment } = props;
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
       plot.distributions.map((x) =>
@@ -94,12 +87,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     );
 
     const spec = buildVegaSpec({
-      ...props,
-      minX: Number.isFinite(props.minX)
-        ? props.minX
+      ...settings,
+      minX: Number.isFinite(settings.minX)
+        ? settings.minX
         : Math.min(...domain.map((x) => x.x)),
-      maxX: Number.isFinite(props.maxX)
-        ? props.maxX
+      maxX: Number.isFinite(settings.maxX)
+        ? settings.maxX
         : Math.max(...domain.map((x) => x.x)),
       maxY: Math.max(...domain.map((x) => x.y)),
     });
@@ -122,7 +115,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
 
     return (
       <div style={{ width: widthProp }}>
-        {logX && shapes.value.some(hasMassBelowZero) ? (
+        {settings.logX && shapes.value.some(hasMassBelowZero) ? (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
@@ -131,12 +124,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             spec={spec}
             data={vegaData}
             width={widthProp - 10}
-            height={chartHeight}
-            actions={vegaActions}
+            height={settings.chartHeight}
+            actions={settings.vegaActions}
           />
         )}
         <div className="flex justify-center">
-          {showSummary && plot.distributions.length === 1 && (
+          {settings.showSummary && plot.distributions.length === 1 && (
             <SummaryTable
               distribution={plot.distributions[0].distribution}
               environment={environment}

@@ -17,13 +17,13 @@ export type FunctionChartSettings = {
   count: number;
 };
 
-interface FunctionChartProps {
+type FunctionChartProps = {
   fn: SqLambda;
-  chartSettings: FunctionChartSettings;
+  settings: FunctionChartSettings;
   distributionChartSettings: DistributionChartSettings;
   environment: environment;
   height: number;
-}
+};
 
 const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
   const [expanded, setExpanded] = React.useState(false);
@@ -46,7 +46,7 @@ const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
 
 export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
-  chartSettings,
+  settings,
   environment,
   distributionChartSettings,
   height,
@@ -59,8 +59,8 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
-  const result1 = fn.call([chartSettings.start]);
-  const result2 = fn.call([chartSettings.stop]);
+  const result1 = fn.call([settings.start]);
+  const result2 = fn.call([settings.stop]);
   const getValidResult = () => {
     if (result1.tag === "Ok") {
       return result1;
@@ -81,7 +81,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       return (
         <FunctionChart1Dist
           fn={fn}
-          chartSettings={chartSettings}
+          settings={settings}
           environment={environment}
           height={height}
           distributionChartSettings={distributionChartSettings}
@@ -89,12 +89,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       );
     case SqValueTag.Number:
       return (
-        <FunctionChart1Number
-          fn={fn}
-          chartSettings={chartSettings}
-          environment={environment}
-          height={height}
-        />
+        <FunctionChart1Number fn={fn} settings={settings} height={height} />
       );
     default:
       return (

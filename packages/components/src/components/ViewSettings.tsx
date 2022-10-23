@@ -48,7 +48,7 @@ export const mergedToViewSettings = (
 });
 export const viewSettingsToMerged = (
   settings: EditableViewSettings
-): Omit<MergedItemSettings, "environment"> => ({
+): MergedItemSettings => ({
   distributionChartSettings: { ...settings },
   functionChartSettings: {
     start: settings.diagramStart,
@@ -60,10 +60,10 @@ export const viewSettingsToMerged = (
 
 // Annoyingly, this has the exact same body as above, however I can't work
 // out how to convince typescript that it's a duplication. The only way I can think
-// of removing this is by making EditableViewSettings and Omit<MergedItemSettings, "environment> the same object and removing the need for both these functions
+// of removing this is by making EditableViewSettings and MergedItemSettings the same object and removing the need for both these functions
 export const viewSettingsToLocal = (
   settings: Partial<EditableViewSettings>
-): Omit<LocalItemSettings, "collapsed" | "environment"> => ({
+): Omit<LocalItemSettings, "collapsed"> => ({
   distributionChartSettings: { ...settings },
   functionChartSettings: {
     start: settings.diagramStart,
