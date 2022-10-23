@@ -10,13 +10,6 @@ import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
 import * as uuid from "uuid";
 
-export type SquiggleArgs = {
-  code: string;
-  executionId?: number;
-  jsImports?: JsImports;
-  onChange?: (expr: SqValue | undefined, sourceName: string) => void;
-} & (StandaloneExecutionProps | ProjectExecutionProps);
-
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
   /** The amount of points returned to draw the distribution, not needed if using a project */
@@ -30,6 +23,13 @@ type ProjectExecutionProps = {
   /** What other squiggle sources from the project to continue. Default [] */
   continues?: string[];
 };
+
+export type SquiggleArgs = {
+  code: string;
+  executionId?: number;
+  jsImports?: JsImports;
+  onChange?: (expr: SqValue | undefined, sourceName: string) => void;
+} & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export type ResultAndBindings = {
   result: result<SqValue, SqError>;

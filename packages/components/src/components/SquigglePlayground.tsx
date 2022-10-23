@@ -62,7 +62,7 @@ type PlaygroundProps = SquiggleArgs &
     /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
     showShareButton?: boolean;
     /** Height of the editor */
-    height?: number;
+    editorHeight?: number;
   };
 
 const schema = yup
@@ -249,7 +249,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
     onCodeChange,
     onSettingsChange,
     showShareButton = false,
-    height = 500,
+    editorHeight = 500,
   } = props;
   const [code, setCode] = useMaybeControlledValue({
     value: controlledCode,
@@ -259,19 +259,20 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
 
   const [imports, setImports] = useState<JsImports>({});
 
-  let defaultValues: FormFields = {
+  const defaultValues: FormFields = {
     ...schema.getDefault(),
-    ...props,
+    ...Object.fromEntries(
+      Object.entries(props).filter(([k, v]) => v !== undefined)
+    ),
   };
 
   const { register, control } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: defaultValues,
+    defaultValues,
   });
-  const rawVars = useWatch({
-    control,
-  });
-  let vars = useMemo(() => ({ ...schema.getDefault(), ...rawVars }), [rawVars]);
+
+  // react-hook-form types the result as Partial, but the result doesn't seem to be a Partial, so this should be ok
+  const vars = useWatch({ control }) as FormFields;
 
   useEffect(() => {
     onSettingsChange?.(vars);
@@ -310,7 +311,11 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
         {isRunning ? (
           <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
         ) : null}
-        <SquiggleViewer {...createViewSettings(vars)} result={valueToRender} />
+        <SquiggleViewer
+          {...createViewSettings(vars)}
+          enableLocalSettings={true}
+          result={valueToRender}
+        />
       </div>
     );
 
@@ -325,7 +330,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
         onSubmit={run}
         oneLine={false}
         showGutter={true}
-        height={height - 1}
+        height={editorHeight}
       />
     </div>
   ) : (

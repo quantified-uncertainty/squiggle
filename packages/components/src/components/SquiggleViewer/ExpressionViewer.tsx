@@ -260,7 +260,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
       } else {
         return (
           <VariableList value={value} heading="Record">
-            {(_) =>
+            {() =>
               value.value
                 .entries()
                 .map(([key, r]) => (
