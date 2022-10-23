@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { SqDistributionTag, SqValue, SqValueTag } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
 import { DistributionChart, defaultPlot, makePlot } from "../DistributionChart";
@@ -8,10 +8,9 @@ import { VariableBox } from "./VariableBox";
 import { ItemSettingsMenu } from "./ItemSettingsMenu";
 import { hasMassBelowZero } from "../../lib/distributionUtils";
 import { MergedItemSettings } from "./utils";
-import { ViewerContext } from "./ViewerContext";
 
 /*
-// DISABLED FOR 0.4 branch, for now
+// DISABLED FOR NOW
 function getRange<a>(x: declaration<a>) {
   const first = x.args[0];
   switch (first.tag) {
@@ -62,7 +61,7 @@ export interface Props {
 }
 
 export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
-  const { getMergedSettings } = useContext(ViewerContext);
+  const environment = value.location.project.getEnvironment();
 
   switch (value.tag) {
     case SqValueTag.Number:
@@ -87,7 +86,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           }`}
           renderSettingsMenu={({ onChange }) => {
             const shape = value.value.pointSet(
-              getMergedSettings(value.location).environment
+              value.location.project.getEnvironment()
             );
             return (
               <ItemSettingsMenu
@@ -105,8 +104,8 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
             return (
               <DistributionChart
                 plot={defaultPlot(value.value)}
-                {...settings.distributionPlotSettings}
-                environment={settings.environment}
+                {...settings.distributionChartSettings}
+                environment={environment}
                 width={width}
               />
             );
@@ -175,12 +174,12 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
                 .join(",")})`}</div>
               <FunctionChart
                 fn={value.value}
-                chartSettings={settings.chartSettings}
-                distributionPlotSettings={settings.distributionPlotSettings}
+                chartSettings={settings.functionChartSettings}
+                distributionChartSettings={settings.distributionChartSettings}
                 height={settings.chartHeight}
                 environment={{
-                  sampleCount: settings.environment.sampleCount / 10,
-                  xyPointLength: settings.environment.xyPointLength / 10,
+                  sampleCount: environment.sampleCount / 10,
+                  xyPointLength: environment.xyPointLength / 10,
                 }}
               />
             </>
@@ -203,15 +202,15 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           }}
         >
           {(_) => (
-            <div>NOT IMPLEMENTED IN 0.4 YET</div>
+            <div>NOT IMPLEMENTED YET</div>
             // <FunctionChart
             //   fn={expression.value.fn}
             //   chartSettings={getChartSettings(expression.value)}
-            //   distributionPlotSettings={settings.distributionPlotSettings}
+            //   distributionChartSettings={settings.distributionChartSettings}
             //   height={settings.height}
             //   environment={{
-            //     sampleCount: settings.environment.sampleCount / 10,
-            //     xyPointLength: settings.environment.xyPointLength / 10,
+            //     sampleCount: environment.sampleCount / 10,
+            //     xyPointLength: environment.xyPointLength / 10,
             //   }}
             // />
           )}
@@ -227,9 +226,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
             heading="Plot"
             renderSettingsMenu={({ onChange }) => {
               let disableLogX = plot.distributions.some((x) => {
-                let pointSet = x.distribution.pointSet(
-                  getMergedSettings(value.location).environment
-                );
+                let pointSet = x.distribution.pointSet(environment);
                 return (
                   pointSet.tag === "Ok" &&
                   hasMassBelowZero(pointSet.value.asShape())
@@ -249,8 +246,8 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
               return (
                 <DistributionChart
                   plot={plot}
-                  environment={settings.environment}
-                  {...settings.distributionPlotSettings}
+                  environment={environment}
+                  {...settings.distributionChartSettings}
                   width={width}
                 />
               );

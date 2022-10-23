@@ -53,8 +53,8 @@ export const SquiggleViewer: React.FC<Props> = ({
   result,
   width,
   chartHeight,
-  distributionPlotSettings,
-  chartSettings,
+  distributionChartSettings,
+  functionChartSettings: chartSettings,
   enableLocalSettings = false,
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
@@ -76,26 +76,21 @@ export const SquiggleViewer: React.FC<Props> = ({
 
   const getMergedSettings = useCallback(
     (location: SqValueLocation) => {
-      const env = location.project.getEnvironment();
       const localSettings = getSettings(location);
       const result: MergedItemSettings = {
-        distributionPlotSettings: {
-          ...distributionPlotSettings,
-          ...(localSettings.distributionPlotSettings || {}),
+        distributionChartSettings: {
+          ...distributionChartSettings,
+          ...(localSettings.distributionChartSettings || {}),
         },
-        chartSettings: {
+        functionChartSettings: {
           ...chartSettings,
-          ...(localSettings.chartSettings || {}),
-        },
-        environment: {
-          ...env,
-          ...localSettings.environment,
+          ...(localSettings.functionChartSettings || {}),
         },
         chartHeight: localSettings.chartHeight || chartHeight,
       };
       return result;
     },
-    [distributionPlotSettings, chartSettings, chartHeight, getSettings]
+    [distributionChartSettings, chartSettings, chartHeight, getSettings]
   );
 
   return (

@@ -14,7 +14,7 @@ import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import {
   DistributionChart,
-  DistributionPlottingSettings,
+  DistributionChartSettings,
   defaultPlot,
 } from "./DistributionChart";
 import { NumberShower } from "./NumberShower";
@@ -47,7 +47,7 @@ export type FunctionChartSettings = {
 interface FunctionChart1DistProps {
   fn: SqLambda;
   chartSettings: FunctionChartSettings;
-  distributionPlotSettings: DistributionPlottingSettings;
+  distributionChartSettings: DistributionChartSettings;
   environment: environment;
   height: number;
 }
@@ -159,7 +159,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   fn,
   chartSettings,
   environment,
-  distributionPlotSettings,
+  distributionChartSettings,
   height,
 }) => {
   let [mouseOverlay, setMouseOverlay] = React.useState(0);
@@ -187,7 +187,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
         plot={defaultPlot(mouseItem.value.value)}
         environment={environment}
         width={400}
-        {...distributionPlotSettings}
+        {...distributionChartSettings}
         chartHeight={50}
       />
     ) : null;

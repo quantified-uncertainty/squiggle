@@ -41,16 +41,16 @@ export const mergedToViewSettings = (
   settings: MergedItemSettings
 ): EditableViewSettings => ({
   ...settings,
-  ...settings.distributionPlotSettings,
-  diagramStart: settings.chartSettings.start,
-  diagramStop: settings.chartSettings.stop,
-  diagramCount: settings.chartSettings.count,
+  ...settings.distributionChartSettings,
+  diagramStart: settings.functionChartSettings.start,
+  diagramStop: settings.functionChartSettings.stop,
+  diagramCount: settings.functionChartSettings.count,
 });
 export const viewSettingsToMerged = (
   settings: EditableViewSettings
 ): Omit<MergedItemSettings, "environment"> => ({
-  distributionPlotSettings: { ...settings },
-  chartSettings: {
+  distributionChartSettings: { ...settings },
+  functionChartSettings: {
     start: settings.diagramStart,
     stop: settings.diagramStop,
     count: settings.diagramCount,
@@ -64,8 +64,8 @@ export const viewSettingsToMerged = (
 export const viewSettingsToLocal = (
   settings: Partial<EditableViewSettings>
 ): Omit<LocalItemSettings, "collapsed" | "environment"> => ({
-  distributionPlotSettings: { ...settings },
-  chartSettings: {
+  distributionChartSettings: { ...settings },
+  functionChartSettings: {
     start: settings.diagramStart,
     stop: settings.diagramStop,
     count: settings.diagramCount,

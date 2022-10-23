@@ -7,7 +7,7 @@ import {
 } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
-import { DistributionPlottingSettings } from "./DistributionChart";
+import { DistributionChartSettings } from "./DistributionChart";
 import { MessageAlert } from "./Alert";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
 
@@ -20,7 +20,7 @@ export type FunctionChartSettings = {
 interface FunctionChartProps {
   fn: SqLambda;
   chartSettings: FunctionChartSettings;
-  distributionPlotSettings: DistributionPlottingSettings;
+  distributionChartSettings: DistributionChartSettings;
   environment: environment;
   height: number;
 }
@@ -48,7 +48,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
   chartSettings,
   environment,
-  distributionPlotSettings,
+  distributionChartSettings,
   height,
 }) => {
   console.log(fn.parameters().length);
@@ -84,7 +84,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
           chartSettings={chartSettings}
           environment={environment}
           height={height}
-          distributionPlotSettings={distributionPlotSettings}
+          distributionChartSettings={distributionChartSettings}
         />
       );
     case SqValueTag.Number:

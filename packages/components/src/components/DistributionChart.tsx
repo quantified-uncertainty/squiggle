@@ -31,7 +31,7 @@ export const distributionSettingsSchema = yup
   })
   .concat(distributionChartSpecSchema);
 
-export type DistributionPlottingSettings = yup.InferType<
+export type DistributionChartSettings = yup.InferType<
   typeof distributionSettingsSchema
 >;
 
@@ -39,7 +39,7 @@ export type DistributionChartProps = {
   plot: Plot;
   environment: environment;
   width?: number;
-} & DistributionPlottingSettings;
+} & DistributionChartSettings;
 
 export function defaultPlot(distribution: SqDistribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
