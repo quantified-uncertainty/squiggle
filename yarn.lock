@@ -5064,9 +5064,9 @@
     "@types/react" "*"
 
 "@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
-  version "18.0.21"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.21.tgz#b8209e9626bb00a34c76f55482697edd2b43cc67"
-  integrity sha512-7QUCOxvFgnD5Jk8ZKlUAhVcRj7GuJRjnjjiY/IUBWKgOlnvDvTMLD4RTF7NPyVmbRhNrbomZiOepg7M/2Kj1mA==
+  version "18.0.22"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.22.tgz#97782d995d999617de116cf61f437f1351036fc7"
+  integrity sha512-4yWc5PyCkZN8ke8K9rQHkTXxHIWHxLzzW6RI1kXVoepkD3vULpKzC2sDtAMKn78h92BRYuzf+7b/ms7ajE6hFw==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -9510,10 +9510,10 @@ fast-check@^2.17.0:
   dependencies:
     pure-rand "^5.0.1"
 
-fast-check@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.2.0.tgz#a1f2848de45a4ea6b4606993022ffde7003aa296"
-  integrity sha512-RH1GMdVeN6Le0B4gI7fz5VZnCgrkREqt4SFMGyFe8v9n06ZuFdR2npxJDl8GUvZQZCq0/mo92JYUZInZnUm0nw==
+fast-check@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.3.0.tgz#002b7cc53166129545983ab4fe97a80fef6ac8b4"
+  integrity sha512-Zu6tZ4g0T4H9Tiz3tdNPEHrSbuICj7yhdOM9RCZKNMkpjZ9avDV3ORklXaEmh4zvkX24/bGZ9DxKKqWfXttUqw==
   dependencies:
     pure-rand "^5.0.2"
 
