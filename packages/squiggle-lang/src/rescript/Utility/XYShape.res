@@ -76,17 +76,17 @@ module T = {
   let firstY = (t: t) => t->ys->E.A.first->extImp
   let lastY = (t: t) => t->ys->E.A.last->extImp
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
-  let mapX = (fn, t: t): t => {xs: E.A.fmap(t.xs, fn), ys: t.ys}
-  let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(t.ys, fn)}
-  let mapYResult = (fn: float => result<float, 'e>, t: t): result<t, 'e> => {
+  let mapX = (t: t, fn): t => {xs: E.A.fmap(t.xs, fn), ys: t.ys}
+  let mapY = (t: t, fn): t => {xs: t.xs, ys: E.A.fmap(t.ys, fn)}
+  let mapYResult = (t: t, fn: float => result<float, 'e>): result<t, 'e> => {
     let mappedYs = E.A.fmap(t.ys, fn)
     E.A.R.firstErrorOrOpen(mappedYs)->E.R.fmap(y => {xs: t.xs, ys: y})
   }
-  let square = mapX(x => x ** 2.0)
+  let square = mapX(_, x => x ** 2.0)
   let zip = ({xs, ys}: t) => E.A.zip(xs, ys)
   let fromArray = ((xs, ys)): t => {xs, ys}
   let fromArrays = (xs, ys): t => {xs, ys}
-  let accumulateYs = (fn, p: t) => fromArray((p.xs, E.A.accumulate(fn, p.ys)))
+  let accumulateYs = (p: t, fn) => (p.xs, p.ys->E.A.accumulate(fn))->fromArray
   let concat = (t1: t, t2: t) => {
     let cxs = E.A.concat(t1.xs, t2.xs)
     let cys = E.A.concat(t1.ys, t2.ys)
@@ -95,7 +95,7 @@ module T = {
   let fromZippedArray = (pairs: array<(float, float)>): t => pairs->E.A.unzip->fromArray
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
-  let filterYValues = (fn, t: t): t => t->zip->E.A.filter(((_, y)) => fn(y))->fromZippedArray
+  let filterYValues = (t: t, fn): t => t->zip->E.A.filter(((_, y)) => fn(y))->fromZippedArray
   let filterOkYs = (xs: array<float>, ys: array<result<float, 'b>>): t => {
     let n = E.A.length(xs) // Assume length(xs) == length(ys)
     let newXs = []
@@ -170,7 +170,7 @@ module Pairs = {
 
   let getBy = (t: T.t, fn) => t->T.zip->E.A.getBy(fn)
 
-  let firstAtOrBeforeXValue = (xValue, t: T.t) => {
+  let firstAtOrBeforeXValue = (t: T.t, xValue) => {
     let zipped = T.zip(t)
     let firstIndex = zipped->E.A.getIndexBy(((x, _)) => x > xValue)
     let previousIndex = switch firstIndex {
@@ -183,7 +183,7 @@ module Pairs = {
 }
 
 module YtoX = {
-  let linear = (y: float, t: T.t): float => {
+  let linear = (t: T.t, y: float): float => {
     let firstHigherIndex = E.A.Sorted.binarySearchFirstElementGreaterIndex(T.ys(t), y)
     let foundX = switch firstHigherIndex {
     | #overMax => T.maxX(t)
@@ -209,12 +209,12 @@ module YtoX = {
 }
 
 module XtoY = {
-  let stepwiseIncremental = (f, t: T.t) => Pairs.firstAtOrBeforeXValue(f, t)->E.O.fmap(Pairs.y)
+  let stepwiseIncremental = (t: T.t, f) => Pairs.firstAtOrBeforeXValue(t, f)->E.O.fmap(Pairs.y)
 
-  let stepwiseIfAtX = (f: float, t: T.t) =>
+  let stepwiseIfAtX = (t: T.t, f: float) =>
     Pairs.getBy(t, ((x: float, _)) => x == f)->E.O.fmap(Pairs.y)
 
-  let linear = (x: float, t: T.t): float => {
+  let linear = (t: T.t, x: float): float => {
     let firstHigherIndex = E.A.Sorted.binarySearchFirstElementGreaterIndex(T.xs(t), x)
     let n = switch firstHigherIndex {
     | #overMax => T.lastY(t)
@@ -300,17 +300,17 @@ module XtoY = {
 
 module XsConversion = {
   let _replaceWithXs = (newXs: array<float>, t: T.t): T.t => {
-    let newYs = E.A.fmap(newXs, XtoY.linear(_, t))
+    let newYs = E.A.fmap(newXs, XtoY.linear(t))
     {xs: newXs, ys: newYs}
   }
 
   let equallyDivideXByMass = (integral: T.t, newLength: int) =>
-    E.A.Floats.range(0.0, 1.0, newLength)->E.A.fmap(YtoX.linear(_, integral))
+    E.A.Floats.range(0.0, 1.0, newLength)->E.A.fmap(YtoX.linear(integral))
 
-  let proportionEquallyOverX = (newLength: int, t: T.t): T.t =>
+  let proportionEquallyOverX = (t: T.t, newLength: int): T.t =>
     T.equallyDividedXs(t, newLength)->_replaceWithXs(t)
 
-  let proportionByProbabilityMass = (newLength: int, integral: T.t, t: T.t): T.t =>
+  let proportionByProbabilityMass = (t: T.t, newLength: int, integral: T.t): T.t =>
     integral->equallyDivideXByMass(newLength)->_replaceWithXs(t) // creates a new set of xs at evenly spaced percentiles // linearly interpolates new ys for the new xs
 }
 
@@ -320,7 +320,7 @@ module Zipped = {
   let compareXs = ((x1, _): (float, float), (x2, _): (float, float)) => x1 > x2 ? 1 : 0
   let sortByY = (t: zipped) => t->E.A.stableSortBy(compareYs)
   let sortByX = (t: zipped) => t->E.A.stableSortBy(compareXs)
-  let filterByX = (testFn: float => bool, t: zipped) => t->E.A.filter(((x, _)) => testFn(x))
+  let filterByX = (t: zipped, testFn: float => bool) => t->E.A.filter(((x, _)) => testFn(x))
 }
 
 module PointwiseCombination = {
@@ -493,7 +493,7 @@ module PointwiseCombination = {
       t.xs,
     )
     let newXs = E.A.concatMany(newXsUnflattened)
-    let newYs = E.A.fmap(newXs, x => XtoY.linear(x, t))
+    let newYs = E.A.fmap(newXs, x => XtoY.linear(t, x))
     {xs: newXs, ys: newYs}
   }
 
@@ -539,7 +539,7 @@ module Range = {
   let delta_y_over_delta_x = (((lastX, lastY), (nextX, nextY)): zippedRange) =>
     (nextY -. lastY) /. (nextX -. lastX)
 
-  let mapYsBasedOnRanges = (fn, t) =>
+  let mapYsBasedOnRanges = (t, fn) =>
     E.A.zip(t.xs, t.ys)
     ->E.A.toRanges
     ->E.R.toOption
@@ -560,7 +560,7 @@ module Range = {
     Some({xs, ys: cumulativeY})
   }
 
-  let derivative = mapYsBasedOnRanges(delta_y_over_delta_x)
+  let derivative = mapYsBasedOnRanges(_, delta_y_over_delta_x)
 
   let stepwiseToLinear = ({xs, ys}: T.t): T.t => {
     // adds points at the bottom of each step.
@@ -594,7 +594,7 @@ module Range = {
         items
         ->E.A.fmap(rangePointAssumingSteps)
         ->T.fromZippedArray
-        ->PointwiseCombination.intersperse(T.mapX(e => e +. diff, t), _),
+        ->PointwiseCombination.intersperse(t->T.mapX(e => e +. diff), _),
       )
     | _ => Some(t)
     }

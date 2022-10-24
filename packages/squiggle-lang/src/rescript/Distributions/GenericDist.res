@@ -483,8 +483,8 @@ let pointwiseCombinationFloat = (
       PointSetDist.T.mapYResult(
         ~integralSumCacheFn=integralSumCacheFn(f),
         ~integralCacheFn=integralCacheFn(f),
-        ~fn=fn(f),
         t,
+        fn(f),
       )->E.R.errMap(x => DistributionTypes.OperationError(x))
     })
   let m = switch algebraicCombination {

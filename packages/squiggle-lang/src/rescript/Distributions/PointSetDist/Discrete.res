@@ -29,7 +29,7 @@ let empty: PointSetTypes.discreteShape = {
   integralCache: Some(emptyIntegral),
 }
 
-let shapeFn = (fn, t: t) => t->getShape->fn
+let shapeFn = (t: t, fn) => t->getShape->fn
 
 let lastY = (t: t) => t->getShape->XYShape.T.lastY
 
@@ -53,20 +53,20 @@ let combinePointwise = (
 }
 
 let reduce = (
+  discreteShapes: array<PointSetTypes.discreteShape>,
   ~integralSumCachesFn=(_, _) => None,
   fn: (float, float) => result<float, 'e>,
-  discreteShapes: array<PointSetTypes.discreteShape>,
 ): result<t, 'e> => {
   let merge = combinePointwise(~integralSumCachesFn, ~fn)
   discreteShapes->E.A.R.foldM(merge, empty, _)
 }
 
-let updateIntegralSumCache = (integralSumCache, t: t): t => {
+let updateIntegralSumCache = (t: t, integralSumCache): t => {
   ...t,
   integralSumCache,
 }
 
-let updateIntegralCache = (integralCache, t: t): t => {
+let updateIntegralCache = (t: t, integralCache): t => {
   ...t,
   integralCache,
 }
@@ -107,10 +107,12 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
 let mapYResult = (
   ~integralSumCacheFn=_ => None,
   ~integralCacheFn=_ => None,
-  ~fn: float => result<float, 'e>,
   t: t,
+  fn: float => result<float, 'e>,
 ): result<t, 'e> =>
-  XYShape.T.mapYResult(fn, getShape(t))->E.R.fmap(x =>
+  getShape(t)
+  ->XYShape.T.mapYResult(fn)
+  ->E.R.fmap(x =>
     make(
       ~integralSumCache=t.integralSumCache->E.O.bind(integralSumCacheFn),
       ~integralCache=t.integralCache->E.O.bind(integralCacheFn),
@@ -121,23 +123,23 @@ let mapYResult = (
 let mapY = (
   ~integralSumCacheFn=_ => None,
   ~integralCacheFn=_ => None,
-  ~fn: float => float,
   t: t,
+  fn: float => float,
 ): t =>
   make(
     ~integralSumCache=t.integralSumCache->E.O.bind(integralSumCacheFn),
     ~integralCache=t.integralCache->E.O.bind(integralCacheFn),
-    t->getShape->XYShape.T.mapY(fn, _),
+    t->getShape->XYShape.T.mapY(fn),
   )
 
-let scaleBy = (~scale=1.0, t: t): t => {
+let scaleBy = (t: t, scale): t => {
   let scaledIntegralSumCache = t.integralSumCache->E.O.fmap(\"*."(scale))
-  let scaledIntegralCache = t.integralCache->E.O.fmap(Continuous.scaleBy(~scale))
+  let scaledIntegralCache = t.integralCache->E.O.fmap(Continuous.scaleBy(_, scale))
 
   t
-  ->mapY(~fn=(r: float) => r *. scale, _)
-  ->updateIntegralSumCache(scaledIntegralSumCache, _)
-  ->updateIntegralCache(scaledIntegralCache, _)
+  ->mapY((r: float) => r *. scale)
+  ->updateIntegralSumCache(scaledIntegralSumCache)
+  ->updateIntegralCache(scaledIntegralCache)
 }
 
 module T = Dist({
@@ -152,16 +154,15 @@ module T = Dist({
       // The first xy of this integral should always be the zero, to ensure nice plotting
       let firstX = ts->XYShape.T.minX
       let prependedZeroPoint: XYShape.T.t = {xs: [firstX -. epsilon_float], ys: [0.]}
-      let integralShape =
-        ts->XYShape.T.concat(prependedZeroPoint, _)->XYShape.T.accumulateYs(\"+.", _)
+      let integralShape = ts->XYShape.T.concat(prependedZeroPoint, _)->XYShape.T.accumulateYs(\"+.")
 
       Continuous.make(~interpolation=#Stepwise, integralShape)
     }
 
   let integralEndY = (t: t) =>
     t.integralSumCache->E.O.defaultFn(() => t->integral->Continuous.lastY)
-  let minX = shapeFn(XYShape.T.minX)
-  let maxX = shapeFn(XYShape.T.maxX)
+  let minX = shapeFn(_, XYShape.T.minX)
+  let maxX = shapeFn(_, XYShape.T.maxX)
   let toDiscreteProbabilityMassFraction = _ => 1.0
   let mapY = mapY
   let mapYResult = mapYResult
@@ -170,8 +171,7 @@ module T = Dist({
   let toContinuous = _ => None
   let toDiscrete = t => Some(t)
 
-  let normalize = (t: t): t =>
-    t->scaleBy(~scale=1. /. integralEndY(t), _)->updateIntegralSumCache(Some(1.0), _)
+  let normalize = (t: t): t => t->scaleBy(1. /. integralEndY(t))->updateIntegralSumCache(Some(1.0))
 
   let downsample = (i, t: t): t => {
     // It's not clear how to downsample a set of discrete points in a meaningful way.
@@ -197,9 +197,8 @@ module T = Dist({
     t
     ->getShape
     ->XYShape.T.zip
-    ->XYShape.Zipped.filterByX(
-      x => x >= E.O.default(leftCutoff, neg_infinity) && x <= E.O.default(rightCutoff, infinity),
-      _,
+    ->XYShape.Zipped.filterByX(x =>
+      x >= E.O.default(leftCutoff, neg_infinity) && x <= E.O.default(rightCutoff, infinity)
     )
     ->XYShape.T.fromZippedArray
     ->make
@@ -207,13 +206,12 @@ module T = Dist({
   let xToY = (f, t) =>
     t
     ->getShape
-    ->XYShape.XtoY.stepwiseIfAtX(f, _)
+    ->XYShape.XtoY.stepwiseIfAtX(f)
     ->E.O.default(0.0)
     ->PointSetTypes.MixedPoint.makeDiscrete
 
-  let integralXtoY = (f, t) => t->integral->Continuous.getShape->XYShape.XtoY.linear(f, _)
-
-  let integralYtoX = (f, t) => t->integral->Continuous.getShape->XYShape.YtoX.linear(f, _)
+  let integralXtoY = (f, t) => t->integral->Continuous.getShape->XYShape.XtoY.linear(f)
+  let integralYtoX = (f, t) => t->integral->Continuous.getShape->XYShape.YtoX.linear(f)
 
   let mean = (t: t): float => {
     let s = getShape(t)

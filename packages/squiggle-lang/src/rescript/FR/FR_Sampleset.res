@@ -114,8 +114,9 @@ let libaryBase = [
         ~inputs=[FRTypeArray(FRTypeNumber)],
         ~run=(inputs, _, _) => {
           let sampleSet =
-            inputs->Prepare.ToTypedArray.numbers
-              -> E.R.bind(r => SampleSetDist.make(r)->E.R.errMap(SampleSetDist.Error.toString))
+            inputs
+            ->Prepare.ToTypedArray.numbers
+            ->E.R.bind(r => SampleSetDist.make(r)->E.R.errMap(SampleSetDist.Error.toString))
           sampleSet
           ->E.R.fmap(Wrappers.sampleSet)
           ->E.R.fmap(Wrappers.evDistribution)

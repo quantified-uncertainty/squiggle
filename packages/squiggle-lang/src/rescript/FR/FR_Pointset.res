@@ -47,7 +47,7 @@ module Internal = {
 
   let mapY = (pointSetDist: t, aLambdaValue, env, reducer) => {
     let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], env, reducer)
-    PointSetDist.T.mapYResult(~fn, pointSetDist)->toType
+    pointSetDist->PointSetDist.T.mapYResult(fn)->toType
   }
 }
 

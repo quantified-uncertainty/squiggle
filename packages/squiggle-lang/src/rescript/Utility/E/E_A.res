@@ -56,8 +56,8 @@ let intersperse = (a: array<'a>, b: array<'a>) => {
 }
 
 // This is like map, but
-//accumulate((a,b) => a + b, [1,2,3]) => [1, 3, 6]
-let accumulate = (fn: ('a, 'a) => 'a, items: array<'a>) => {
+//[1,2,3]->accumulate((a,b) => a + b) => [1, 3, 6]
+let accumulate = (items: array<'a>, fn: ('a, 'a) => 'a) => {
   let length = items->length
   let empty = Belt.Array.make(length, items->unsafe_get(0))
   forEachI(items, (index, element) => {
@@ -204,8 +204,8 @@ module Floats = {
   // diff([1,5,3,7]) = [4,-2,4]
   let diff = (t: t): array<float> => t->pairwise((left, right) => right -. left)
 
-  let cumSum = (t: t): array<float> => accumulate((a, b) => a +. b, t)
-  let cumProd = (t: t): array<float> => accumulate((a, b) => a *. b, t)
+  let cumSum = (t: t): array<float> => t->accumulate((a, b) => a +. b)
+  let cumProd = (t: t): array<float> => t->accumulate((a, b) => a *. b)
 
   exception RangeError(string)
   let range = (min: float, max: float, n: int): array<float> =>

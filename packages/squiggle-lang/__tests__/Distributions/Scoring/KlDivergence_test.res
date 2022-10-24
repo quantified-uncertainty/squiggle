@@ -46,8 +46,7 @@ describe("klDivergence: continuous -> continuous -> float", () => {
     let stdev1 = 4.0
     let stdev2 = 1.0
 
-    let prediction =
-      normalMakeR(mean1, stdev1)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
+    let prediction = normalMakeR(mean1, stdev1)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
     let answer = normalMakeR(mean2, stdev2)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
     // https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians
     let analyticalKl =
