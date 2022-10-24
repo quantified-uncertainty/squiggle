@@ -60,7 +60,7 @@ let apply = (o, a) =>
   | Some(f) => bind(a, b => some(f(b)))
   | _ => None
   }
-let flatApply = (fn, b) => apply(fn, Some(b)) |> flatten
+let flatApply = (fn, b) => apply(fn, Some(b))->flatten
 
 let toBool = opt =>
   switch opt {

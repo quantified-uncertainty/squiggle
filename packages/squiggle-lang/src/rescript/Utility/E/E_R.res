@@ -8,7 +8,6 @@ let result = (okF, errF, r) =>
   | Ok(a) => okF(a)
   | Error(err) => errF(err)
   }
-let id = e => e |> result(e => e, e => e)
 let isOk = Belt.Result.isOk
 let getError = (r: result<'a, 'b>) =>
   switch r {

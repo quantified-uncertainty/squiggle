@@ -75,7 +75,7 @@ module Old = {
       }
 
     let parseNumberArray = (ags: array<Reducer_T.value>): Belt.Result.t<array<float>, string> =>
-      E.A.fmap(ags, parseNumber) |> E.A.R.firstErrorOrOpen
+      E.A.fmap(ags, parseNumber)->E.A.R.firstErrorOrOpen
 
     let parseDist = (args: Reducer_T.value): Belt.Result.t<DistributionTypes.genericDist, string> =>
       switch args {
@@ -87,7 +87,7 @@ module Old = {
     let parseDistributionArray = (ags: array<Reducer_T.value>): Belt.Result.t<
       array<DistributionTypes.genericDist>,
       string,
-    > => E.A.fmap(ags, parseDist) |> E.A.R.firstErrorOrOpen
+    > => E.A.fmap(ags, parseDist)->E.A.R.firstErrorOrOpen
 
     let mixtureWithGivenWeights = (
       distributions: array<DistributionTypes.genericDist>,

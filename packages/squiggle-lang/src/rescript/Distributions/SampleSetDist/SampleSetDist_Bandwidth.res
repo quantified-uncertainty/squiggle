@@ -2,7 +2,7 @@
 let {iqr_percentile, nrd0_lo_denominator, one, nrd0_coef, nrd_coef, nrd_fractionalPower} = module(
   MagicNumbers.SampleSetBandwidth
 )
-let len = x => E.A.length(x) |> float_of_int
+let len = x => E.A.length(x)->float_of_int
 
 let iqr = x =>
   Jstat.percentile(x, iqr_percentile, true) -. Jstat.percentile(x, 1.0 -. iqr_percentile, true)
