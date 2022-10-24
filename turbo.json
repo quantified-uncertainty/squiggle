@@ -1,10 +1,6 @@
 {
   "$schema": "https://turborepo.org/schema.json",
   "pipeline": {
-    "lint": {
-      "outputs": []
-    },
-    "format": {},
     "build": {
       "dependsOn": ["^build"]
     },
@@ -24,6 +20,11 @@
         "src/rescript/**/*.gen.tsx",
         "dist/**"
       ]
+    },
+    "format": {},
+    "lint": {
+      "dependsOn": ["^build"],
+      "outputs": []
     },
     "test": {
       "dependsOn": ["build"],
