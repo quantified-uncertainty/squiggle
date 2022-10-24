@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as yup from "yup";
 import {
   SqLambda,
   environment,
@@ -7,15 +8,19 @@ import {
 } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
-import { DistributionChartSettings } from "./DistributionChart";
 import { MessageAlert } from "./Alert";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
+import { DistributionChartSettings } from "./DistributionChart";
 
-export type FunctionChartSettings = {
-  start: number;
-  stop: number;
-  count: number;
-};
+export const functionSettingsSchema = yup.object({}).shape({
+  start: yup.number().required().positive().integer().default(0).min(0),
+  stop: yup.number().required().positive().integer().default(10).min(0),
+  count: yup.number().required().positive().integer().default(20).min(2),
+});
+
+export type FunctionChartSettings = yup.InferType<
+  typeof functionSettingsSchema
+>;
 
 type FunctionChartProps = {
   fn: SqLambda;
