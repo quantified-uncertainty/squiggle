@@ -318,13 +318,20 @@ module Floats = {
       For continuous distributions, this comparison is always false, keeping branch prediction costs low.
       If the comparison is true, it finds the complete run with recursive doubling then a binary search,
       which skips over many elements for long runs.
-    */
+ */
+    exception BadWeight(string)
     let splitContinuousAndDiscreteForMinWeight = (
       sortedArray: array<float>,
       ~minDiscreteWeight: int,
     ) => {
       let continuous: array<float> = []
       let discrete = FloatFloatMap.empty()
+
+      // Weight of 1 is pointless because it indicates only discrete values,
+      // and causes an infinite loop in the doubling search used here.
+      if minDiscreteWeight <= 1 {
+        raise(BadWeight("Minimum discrete weight must be at least 1"))
+      }
 
       // In a run of exactly minDiscreteWeight, the first and last
       // element indices differ by minDistance.
