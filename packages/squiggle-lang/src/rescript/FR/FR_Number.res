@@ -178,7 +178,7 @@ let library = [
     ~examples=[`sort([3,5,2,3,5])`],
     ~definitions=[
       ArrayNumberDist.make("sort", r =>
-        r->E.A.Floats.sort->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        r->E.A.Floats.sort->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
     (),
@@ -191,7 +191,7 @@ let library = [
     ~examples=[`cumsum([3,5,2,3,5])`],
     ~definitions=[
       ArrayNumberDist.make("cumsum", r =>
-        r->E.A.Floats.cumSum->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        r->E.A.Floats.cumSum->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
     (),
@@ -204,7 +204,7 @@ let library = [
     ~examples=[`cumprod([3,5,2,3,5])`],
     ~definitions=[
       ArrayNumberDist.make("cumprod", r =>
-        r->E.A.Floats.cumProd->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        r->E.A.Floats.cumProd->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
     (),
@@ -217,7 +217,7 @@ let library = [
     ~examples=[`diff([3,5,2,3,5])`],
     ~definitions=[
       ArrayNumberDist.make("diff", r =>
-        r->E.A.Floats.diff->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+        r->E.A.Floats.diff->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
       ),
     ],
     (),

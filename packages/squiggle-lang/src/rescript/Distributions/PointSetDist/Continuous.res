@@ -144,13 +144,11 @@ let sum = (
   ~integralSumCachesFn: (float, float) => option<float>=(_, _) => None,
   continuousShapes,
 ): t =>
-  continuousShapes |> E.A.fold_left(
-    (x, y) =>
-      combinePointwise(~integralSumCachesFn, (a, b) => Ok(a +. b), x, y)->E.R.toExn(
-        "Addition should never fail",
-        _,
-      ),
-    empty,
+  continuousShapes->E.A.fold_left(empty, (x, y) =>
+    combinePointwise(~integralSumCachesFn, (a, b) => Ok(a +. b), x, y)->E.R.toExn(
+      "Addition should never fail",
+      _,
+    )
   )
 
 let reduce = (

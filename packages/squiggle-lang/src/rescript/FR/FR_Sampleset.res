@@ -28,7 +28,7 @@ module Internal = {
   let fromFn = (aLambdaValue, context: Reducer_T.context, reducer: Reducer_T.reducerFn) => {
     let sampleCount = context.environment.sampleCount
     let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], context, reducer)
-    Belt_Array.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
+    E.A.makeBy(sampleCount, r => fn(r->Js.Int.toFloat))->E.A.R.firstErrorOrOpen
   }
 
   let map1 = (sampleSetDist: t, aLambdaValue, context: Reducer_T.context, reducer) => {
@@ -53,7 +53,7 @@ module Internal = {
       | IEvDistribution(SampleSet(dist)) => Some(dist)
       | _ => None
       }
-    E.A.O.openIfAllSome(E.A.fmap(parseSampleSet, arr))
+    E.A.O.openIfAllSome(E.A.fmap(arr, parseSampleSet))
   }
 
   let mapN = (
@@ -67,7 +67,7 @@ module Internal = {
       let fn = a =>
         doLambdaCall(
           aLambdaValue,
-          [IEvArray(E.A.fmap(x => Wrappers.evNumber(x), a))],
+          [IEvArray(E.A.fmap(a, x => Wrappers.evNumber(x)))],
           context,
           reducer,
         )
@@ -139,7 +139,7 @@ let libaryBase = [
         ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist))] =>
-            dist->E.A2.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+            dist->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
           | _ => Error(impossibleError)
           },
         (),
@@ -333,4 +333,4 @@ module Comparison = {
   ]
 }
 
-let library = E.A.append(libaryBase, Comparison.library)
+let library = E.A.concat(libaryBase, Comparison.library)

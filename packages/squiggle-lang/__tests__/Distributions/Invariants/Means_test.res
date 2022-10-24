@@ -30,7 +30,13 @@ module Internals = {
     triangularMake(1e0, 1e1, 5e1),
     Ok(floatMake(1e1)),
   }
-  let pairsOfDifferentDistributions = E.L.combinations2(distributions)
+  let rec combinations2 = xs => {
+    switch xs {
+    | list{h, ...t} => Belt.List.concat(Belt.List.map(t, e => (h, e)), combinations2(t))
+    | list{} => list{}
+    }
+  }
+  let pairsOfDifferentDistributions = combinations2(distributions)
 
   let runMean: DistributionTypes.genericDist => float = dist => {
     dist->mean->run->toFloat->E.O2.toExn("Shouldn't see this because we trust testcase input")

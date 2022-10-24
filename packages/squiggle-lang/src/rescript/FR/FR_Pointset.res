@@ -9,7 +9,7 @@ let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
   switch inputs {
   | [IEvArray(items)] =>
     items
-    ->Belt.Array.map(item =>
+    ->E.A.fmap(item =>
       switch item {
       | IEvRecord(map) => {
           let xValue = map->Belt.Map.String.get("x")

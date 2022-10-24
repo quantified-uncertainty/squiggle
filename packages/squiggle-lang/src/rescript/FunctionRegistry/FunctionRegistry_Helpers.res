@@ -15,7 +15,7 @@ module Wrappers = {
   let evRecord = r => Reducer_T.IEvRecord(r)
   let evString = r => Reducer_T.IEvString(r)
   let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
-  let evArrayOfEvNumber = xs => xs->Belt.Array.map(evNumber)->evArray
+  let evArrayOfEvNumber = xs => xs->E.A.fmap(evNumber)->evArray
 }
 
 let getOrError = (a, g) => E.A.get(a, g) |> E.O.toResult(impossibleErrorString)
@@ -60,7 +60,7 @@ module Prepare = {
 
       let arrayOfArrays = (inputs: t): result<array<ts>, err> =>
         switch inputs {
-        | IEvArray(n) => n->E.A2.fmap(openA)->E.A.R.firstErrorOrOpen
+        | IEvArray(n) => n->E.A.fmap(openA)->E.A.R.firstErrorOrOpen
         | _ => Error(impossibleErrorString)
         }
     }
@@ -139,12 +139,12 @@ module Prepare = {
   module ToTypedArray = {
     let numbers = (inputs: ts): result<array<float>, err> => {
       let openNumbers = (elements: array<t>) =>
-        elements->E.A2.fmap(oneNumber)->E.A.R.firstErrorOrOpen
+        elements->E.A.fmap(oneNumber)->E.A.R.firstErrorOrOpen
       inputs->getOrError(0)->E.R.bind(ToValueArray.Array.openA)->E.R.bind(openNumbers)
     }
 
     let dicts = (inputs: ts): Belt.Result.t<array<Reducer_T.map>, err> => {
-      let openDicts = (elements: array<t>) => elements->E.A2.fmap(oneDict)->E.A.R.firstErrorOrOpen
+      let openDicts = (elements: array<t>) => elements->E.A.fmap(oneDict)->E.A.R.firstErrorOrOpen
       inputs->getOrError(0)->E.R.bind(ToValueArray.Array.openA)->E.R.bind(openDicts)
     }
   }

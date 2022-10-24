@@ -19,8 +19,8 @@ let create = (relativeHeights: array<float>, ~maximum=?, ()) => {
     let maximum = maximum->E.O2.default(E.A.Floats.max(relativeHeights))
 
     relativeHeights
-    ->E.A2.fmap(_heightToTickIndex(maximum))
-    ->E.A2.fmap(r => E.A.get(ticks, r)->E.O2.toExn(""))
-    ->E.A2.joinWith("")
+    ->E.A.fmap(_heightToTickIndex(maximum))
+    ->E.A.fmap(r => E.A.get(ticks, r)->E.O2.toExn(""))
+    ->E.A.joinWith("")
   }
 }

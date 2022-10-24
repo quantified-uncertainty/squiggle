@@ -45,7 +45,7 @@ async function validateSquiggleDocument(
 
   const parseResult = parse(text);
   if (parseResult.tag === "Error") {
-    const location = parseResult.value.value[1];
+    const location = parseResult.value.getLocation();
     diagnostics.push({
       severity: DiagnosticSeverity.Error,
       range: {
@@ -58,7 +58,7 @@ async function validateSquiggleDocument(
           character: location.end.column - 1,
         },
       },
-      message: parseResult.value.value[0],
+      message: parseResult.value.getMessage(),
     });
   }
 

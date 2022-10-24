@@ -23,7 +23,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   | T.EBlock(statements) => {
       let innerContext = {...context, bindings: context.bindings->Bindings.extend}
       let (value, _) =
-        statements->Belt.Array.reduce((T.IEvVoid, innerContext), ((_, currentContext), statement) =>
+        statements->E.A.reduce((T.IEvVoid, innerContext), ((_, currentContext), statement) =>
           statement->evaluate(currentContext)
         )
       (value, context)
@@ -32,7 +32,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   | T.EProgram(statements) => {
       // Js.log(`bindings: ${context.bindings->Bindings.locals->Reducer_Namespace.toString}`)
       let (value, finalContext) =
-        statements->Belt.Array.reduce((T.IEvVoid, context), ((_, currentContext), statement) =>
+        statements->E.A.reduce((T.IEvVoid, context), ((_, currentContext), statement) =>
           statement->evaluate(currentContext)
         )
 
@@ -43,7 +43,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   | T.EArray(elements) => {
       let value =
         elements
-        ->Belt.Array.map(element => {
+        ->E.A.fmap(element => {
           let (value, _) = evaluate(element, context)
           value
         })
@@ -54,7 +54,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   | T.ERecord(pairs) => {
       let value =
         pairs
-        ->Belt.Array.map(((eKey, eValue)) => {
+        ->E.A.fmap(((eKey, eValue)) => {
           let (key, _) = eKey->evaluate(context)
           let keyString = switch key {
           | IEvString(s) => s
@@ -108,7 +108,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
 
   | T.ECall(fn, args) => {
       let (lambda, _) = fn->evaluate(context)
-      let argValues = Belt.Array.map(args, arg => {
+      let argValues = E.A.fmap(args, arg => {
         let (argValue, _) = arg->evaluate(context)
         argValue
       })

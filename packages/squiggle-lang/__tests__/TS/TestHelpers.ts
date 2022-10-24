@@ -3,9 +3,19 @@ export { SqValueTag };
 
 expect.extend({
   toEqualSqValue(x, y) {
-    // hack via https://github.com/facebook/jest/issues/10329#issuecomment-820656061
-    const { getMatchers } = require("expect/build/jestMatchersObject");
-    return getMatchers().toEqual.call(this, x.toString(), y.toString());
+    const xString = x.toString();
+    const yString = y.toString();
+    if (xString === yString) {
+      return {
+        pass: true,
+        message: () => "",
+      };
+    } else {
+      return {
+        pass: false,
+        message: () => `Expected: ${xString}\n` + `Received: ${yString}`,
+      };
+    }
   },
 });
 

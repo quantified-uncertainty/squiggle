@@ -22,7 +22,7 @@ let makeLambda = (
     // create new bindings scope - technically not necessary, since bindings are immutable, but might help with debugging/new features in the future
     let localBindings = bindings->Reducer_Bindings.extend
 
-    let localBindingsWithParameters = parameters->Belt.Array.reduceWithIndex(localBindings, (
+    let localBindingsWithParameters = parameters->E.A.reducei(localBindings, (
       currentBindings,
       parameter,
       index,
