@@ -58,7 +58,7 @@ let reduce = (
   fn: (float, float) => result<float, 'e>,
 ): result<t, 'e> => {
   let merge = combinePointwise(~integralSumCachesFn, ~fn)
-  discreteShapes->E.A.R.foldM(merge, empty, _)
+  discreteShapes->E.A.R.foldM(empty, merge)
 }
 
 let updateIntegralSumCache = (t: t, integralSumCache): t => {

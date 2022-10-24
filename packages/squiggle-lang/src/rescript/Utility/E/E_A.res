@@ -143,7 +143,7 @@ module R = {
   let forM = (x: array<'a>, fn: 'a => result<'b, 'c>): result<array<'b>, 'c> =>
     firstErrorOrOpen(fmap(x, fn))
 
-  let foldM = (fn: ('c, 'a) => result<'b, 'e>, init: 'c, x: array<'a>): result<'c, 'e> => {
+  let foldM = (x: array<'a>, init: 'c, fn: ('c, 'a) => result<'b, 'e>): result<'c, 'e> => {
     let acc = ref(init)
     let final = ref(Ok())
     let break = ref(false)
