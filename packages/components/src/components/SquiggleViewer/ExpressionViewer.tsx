@@ -262,17 +262,19 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
       } else {
         return (
           <VariableList value={value} heading="Record">
-            {(_) =>
-              value.value
-                .entries()
-                .map(([key, r]) => (
-                  <ExpressionViewer
-                    key={key}
-                    value={r}
-                    width={width !== undefined ? width - 20 : width}
-                  />
-                ))
-            }
+            {() => {
+              const entries = value.value.entries();
+              if (!entries.length) {
+                return <div className="text-slate-400">Empty record</div>;
+              }
+              return entries.map(([key, r]) => (
+                <ExpressionViewer
+                  key={key}
+                  value={r}
+                  width={width !== undefined ? width - 20 : width}
+                />
+              ));
+            }}
           </VariableList>
         );
       }
