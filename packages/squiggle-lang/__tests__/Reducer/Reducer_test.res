@@ -33,6 +33,7 @@ describe("eval", () => {
     testDescriptionEvalToBe("index not found", "([0,1,2])[10]", "Error(Array index not found: 10)")
   })
   describe("records", () => {
+    test("empty", () => expectEvalToBe("{}", "Ok({})"))
     test("define", () => expectEvalToBe("{a: 1, b: 2}", "Ok({a: 1,b: 2})"))
     test("index", () => expectEvalToBe("r = {a: 1}; r.a", "Ok(1)"))
     test("index", () => expectEvalToBe("r = {a: 1}; r.b", "Error(Record property not found: b)"))
