@@ -87,6 +87,8 @@ describe("FunctionRegistry Library", () => {
       "Error(Error: Too few samples when constructing sample set)",
     )
 
+    testEvalToBe("Dict.set({a: 1, b: 2}, 'c', 3)", "Ok({a: 1,b: 2,c: 3})")
+    testEvalToBe("d={a: 1, b: 2}; _=Dict.set(d, 'c', 3); d", "Ok({a: 1,b: 2})")
     testEvalToBe("Dict.merge({a: 1, b: 2}, {b: 3, c: 4, d: 5})", "Ok({a: 1,b: 3,c: 4,d: 5})")
     testEvalToBe(
       "Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}, {c: 5, e: 6}])",
@@ -96,6 +98,7 @@ describe("FunctionRegistry Library", () => {
     testEvalToBe("Dict.values({a: 1, b: 2})", "Ok([1,2])")
     testEvalToBe("Dict.toList({a: 1, b: 2})", "Ok([['a',1],['b',2]])")
     testEvalToBe("Dict.fromList([['a', 1], ['b', 2]])", "Ok({a: 1,b: 2})")
+    testEvalToBe("Dict.map({a: 1, b: 2}, {|x| x * 2})", "Ok({a: 2,b: 4})")
   })
 
   describe("Fn auto-testing", () => {
