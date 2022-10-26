@@ -11,7 +11,7 @@ import { functionSettingsSchema } from "./FunctionChart";
 export const viewSettingsSchema = yup.object({}).shape({
   distributionChartSettings: distributionSettingsSchema,
   functionChartSettings: functionSettingsSchema,
-  chartHeight: yup.number().required().positive().integer().default(150),
+  chartHeight: yup.number().required().positive().integer().default(200),
 });
 
 export type ViewSettings = yup.InferType<typeof viewSettingsSchema>;

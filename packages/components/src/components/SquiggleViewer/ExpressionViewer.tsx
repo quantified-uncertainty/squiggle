@@ -104,9 +104,10 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
             return (
               <DistributionChart
                 plot={defaultPlot(value.value)}
-                settings={settings.distributionChartSettings}
                 environment={environment}
                 width={width}
+                chartHeight={settings.chartHeight}
+                settings={settings.distributionChartSettings}
               />
             );
           }}
@@ -247,8 +248,9 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
                 <DistributionChart
                   plot={plot}
                   environment={environment}
-                  settings={settings.distributionChartSettings}
                   width={width}
+                  chartHeight={settings.chartHeight}
+                  settings={settings.distributionChartSettings}
                 />
               );
             }}

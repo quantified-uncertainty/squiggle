@@ -26,7 +26,6 @@ export const distributionSettingsSchema = yup
   .object({})
   .shape({
     showSummary: yup.boolean().required().default(false),
-    chartHeight: yup.number().required().positive().integer().default(150),
     vegaActions: yup.boolean().required().default(false),
   })
   .concat(distributionChartSpecSchema);
@@ -39,6 +38,7 @@ export type DistributionChartProps = {
   plot: Plot;
   environment: environment;
   width?: number;
+  chartHeight?: number;
   settings: DistributionChartSettings;
 };
 
@@ -53,8 +53,13 @@ export function makePlot(record: SqRecord): Plot | void {
   }
 }
 
-export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const { plot, settings, width, environment } = props;
+export const DistributionChart: React.FC<DistributionChartProps> = ({
+  plot,
+  environment,
+  width,
+  chartHeight,
+  settings,
+}) => {
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
       plot.distributions.map((x) =>
@@ -97,13 +102,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
       maxY: Math.max(...domain.map((x) => x.y)),
     });
 
-    // I think size.width is sometimes not finite due to the component not being in a visible context
-    // This occurs during testing
-    let widthProp = width
-      ? width
-      : Number.isFinite(size.width)
-      ? size.width
-      : 400;
+    let widthProp = width ? width : size.width;
     if (widthProp < 20) {
       console.warn(
         `Width of Distribution is set to ${widthProp}, which is too small`
@@ -124,7 +123,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             spec={spec}
             data={vegaData}
             width={widthProp - 10}
-            height={settings.chartHeight}
+            height={chartHeight}
             actions={settings.vegaActions}
           />
         )}
