@@ -139,16 +139,18 @@ power
 chainFunctionCall
   = head:unary tail:(_ ('->'/'|>') _nl chained:chainedFunction {return chained})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(element.fnName, [result, ...element.args], location())
+      return h.makeFunctionCall(h.postOperatorToFunction['()'], [element.callable, result, ...element.args], location())
     }, head)}
 
   chainedFunction
-    = fn:variable '(' _nl args:array_functionArguments _nl ')' 
-      { return {fnName: fn.value, args: args}}
-      / fn:variable '(' _nl ')' 
-      { return {fnName: fn.value, args: []}}
-      / fn:variable
-      { return {fnName: fn.value, args: []}}
+    = fn:callableBasicValue '(' _nl args:array_functionArguments _nl ')' 
+      { return {callable: fn, args: args}}
+    / fn:callableBasicValue '(' _nl ')' 
+      { return {callable: fn, args: []}}
+    / fn:callableBasicValue
+      { return {callable: fn, args: []}}
+      
+  callableBasicValue = valueConstructor / variable   
 
 // end of binary operators
 

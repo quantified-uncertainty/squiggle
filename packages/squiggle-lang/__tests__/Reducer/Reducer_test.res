@@ -67,6 +67,17 @@ describe("eval", () => {
   describe("blocks", () => {
     testEvalToBe("x = { y = { z = 5; z * 2 }; y + 3 }; x", "Ok(13)")
   })
+
+  describe("chain call", () => {
+   describe("to function", () => {
+    testEvalToBe("f(x)=x; 1->f", "Ok(1)")
+    testEvalToBe("f(x,y)=x+y; 1->f(2)", "Ok(3)")
+   })
+   describe("to block", () => {
+    testEvalToBe("1->{|x| x}", "Ok(1)")
+    testEvalToBe("1->{|x,y| x+y}(2)", "Ok(3)")
+   })
+  })
 })
 
 describe("test exceptions", () => {
