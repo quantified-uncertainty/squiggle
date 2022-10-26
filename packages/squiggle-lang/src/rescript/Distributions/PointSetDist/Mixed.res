@@ -11,16 +11,16 @@ let make = (~integralSumCache=None, ~integralCache=None, ~continuous, ~discrete)
 }
 
 let totalLength = (t: t): int => {
-  let continuousLength = t.continuous |> Continuous.getShape |> XYShape.T.length
-  let discreteLength = t.discrete |> Discrete.getShape |> XYShape.T.length
+  let continuousLength = t.continuous->Continuous.getShape->XYShape.T.length
+  let discreteLength = t.discrete->Discrete.getShape->XYShape.T.length
 
   continuousLength + discreteLength
 }
 
-let scaleBy = (~scale=1.0, t: t): t => {
-  let scaledDiscrete = Discrete.scaleBy(~scale, t.discrete)
-  let scaledContinuous = Continuous.scaleBy(~scale, t.continuous)
-  let scaledIntegralCache = E.O.bind(t.integralCache, v => Some(Continuous.scaleBy(~scale, v)))
+let scaleBy = (t: t, scale): t => {
+  let scaledDiscrete = Discrete.scaleBy(t.discrete, scale)
+  let scaledContinuous = Continuous.scaleBy(t.continuous, scale)
+  let scaledIntegralCache = E.O.bind(t.integralCache, v => Some(Continuous.scaleBy(v, scale)))
   let scaledIntegralSumCache = E.O.bind(t.integralSumCache, s => Some(s *. scale))
   make(
     ~discrete=scaledDiscrete,
@@ -33,7 +33,7 @@ let scaleBy = (~scale=1.0, t: t): t => {
 let toContinuous = ({continuous}: t) => Some(continuous)
 let toDiscrete = ({discrete}: t) => Some(discrete)
 
-let updateIntegralCache = (integralCache, t: t): t => {
+let updateIntegralCache = (t: t, integralCache): t => {
   ...t,
   integralCache,
 }
@@ -46,15 +46,14 @@ let combinePointwise = (
   t2: t,
 ): result<t, 'e> => {
   let reducedDiscrete =
-    [t1, t2]->E.A.fmap(toDiscrete)
-    |> E.A.O.concatSomes
-    |> Discrete.reduce(~integralSumCachesFn, fn)
-    |> E.R.toExn("Theoretically unreachable state")
+    [t1, t2]
+    ->E.A.fmap(toDiscrete)
+    ->E.A.O.concatSomes
+    ->Discrete.reduce(~integralSumCachesFn, fn)
+    ->E.R.toExn("Theoretically unreachable state")
 
   let reducedContinuous =
-    [t1, t2]->E.A.fmap(toContinuous)
-    |> E.A.O.concatSomes
-    |> Continuous.reduce(~integralSumCachesFn, fn)
+    [t1, t2]->E.A.fmap(toContinuous)->E.A.O.concatSomes->Continuous.reduce(~integralSumCachesFn, fn)
 
   let combinedIntegralSum = Common.combineIntegralSums(
     integralSumCachesFn,
@@ -67,7 +66,7 @@ let combinePointwise = (
     t1.integralCache,
     t2.integralCache,
   )
-  reducedContinuous->E.R2.fmap(continuous =>
+  reducedContinuous->E.R.fmap(continuous =>
     make(
       ~integralSumCache=combinedIntegralSum,
       ~integralCache=combinedIntegral,
@@ -111,8 +110,8 @@ module T = Dist({
     let continuousIntegral = Continuous.T.Integral.get(t.continuous)
     let discreteIntegral = Discrete.T.Integral.get(t.discrete)
 
-    let continuous = t.continuous |> Continuous.updateIntegralCache(Some(continuousIntegral))
-    let discrete = t.discrete |> Discrete.updateIntegralCache(Some(discreteIntegral))
+    let continuous = t.continuous->Continuous.updateIntegralCache(Some(continuousIntegral))
+    let discrete = t.discrete->Discrete.updateIntegralCache(Some(discreteIntegral))
 
     let continuousIntegralSum = Continuous.T.Integral.sum(continuous)
     let discreteIntegralSum = Discrete.T.Integral.sum(discrete)
@@ -123,12 +122,12 @@ module T = Dist({
 
     let normalizedContinuous =
       continuous
-      |> Continuous.scaleBy(~scale=newContinuousSum /. continuousIntegralSum)
-      |> Continuous.updateIntegralSumCache(Some(newContinuousSum))
+      ->Continuous.scaleBy(newContinuousSum /. continuousIntegralSum)
+      ->Continuous.updateIntegralSumCache(Some(newContinuousSum))
     let normalizedDiscrete =
       discrete
-      |> Discrete.scaleBy(~scale=newDiscreteSum /. discreteIntegralSum)
-      |> Discrete.updateIntegralSumCache(Some(newDiscreteSum))
+      ->Discrete.scaleBy(newDiscreteSum /. discreteIntegralSum)
+      ->Discrete.updateIntegralSumCache(Some(newDiscreteSum))
 
     make(
       ~integralSumCache=Some(1.0),
@@ -195,11 +194,10 @@ module T = Dist({
       )
     }
 
-  let integralEndY = (t: t) => t |> integral |> Continuous.lastY
+  let integralEndY = (t: t) => t->integral->Continuous.lastY
 
-  let integralXtoY = (f, t) => t |> integral |> Continuous.getShape |> XYShape.XtoY.linear(f)
-
-  let integralYtoX = (f, t) => t |> integral |> Continuous.getShape |> XYShape.YtoX.linear(f)
+  let integralXtoY = (f, t) => t->integral->Continuous.getShape->XYShape.XtoY.linear(f)
+  let integralYtoX = (f, t) => t->integral->Continuous.getShape->XYShape.YtoX.linear(f)
 
   let createMixedFromContinuousDiscrete = (
     ~integralSumCacheFn=_ => None,
@@ -210,15 +208,15 @@ module T = Dist({
   ): t => {
     let yMappedDiscrete: PointSetTypes.discreteShape =
       discrete
-      |> Discrete.updateIntegralSumCache(E.O.bind(t.discrete.integralSumCache, integralSumCacheFn))
-      |> Discrete.updateIntegralCache(E.O.bind(t.discrete.integralCache, integralCacheFn))
+      ->Discrete.updateIntegralSumCache(E.O.bind(t.discrete.integralSumCache, integralSumCacheFn))
+      ->Discrete.updateIntegralCache(E.O.bind(t.discrete.integralCache, integralCacheFn))
 
     let yMappedContinuous: PointSetTypes.continuousShape =
       continuous
-      |> Continuous.updateIntegralSumCache(
+      ->Continuous.updateIntegralSumCache(
         E.O.bind(t.continuous.integralSumCache, integralSumCacheFn),
       )
-      |> Continuous.updateIntegralCache(E.O.bind(t.continuous.integralCache, integralCacheFn))
+      ->Continuous.updateIntegralCache(E.O.bind(t.continuous.integralCache, integralCacheFn))
 
     {
       discrete: yMappedDiscrete,
@@ -234,11 +232,11 @@ module T = Dist({
   let mapY = (
     ~integralSumCacheFn=_ => None,
     ~integralCacheFn=_ => None,
-    ~fn: float => float,
     t: t,
+    fn: float => float,
   ): t => {
-    let discrete = t.discrete |> Discrete.T.mapY(~fn)
-    let continuous = t.continuous |> Continuous.T.mapY(~fn)
+    let discrete = t.discrete->Discrete.T.mapY(fn)
+    let continuous = t.continuous->Continuous.T.mapY(fn)
     createMixedFromContinuousDiscrete(
       ~integralCacheFn,
       ~integralSumCacheFn,
@@ -251,13 +249,13 @@ module T = Dist({
   let mapYResult = (
     ~integralSumCacheFn=_ => None,
     ~integralCacheFn=_ => None,
-    ~fn: float => result<float, 'e>,
     t: t,
+    fn: float => result<float, 'e>,
   ): result<t, 'e> => {
     E.R.merge(
-      Discrete.T.mapYResult(~fn, t.discrete),
-      Continuous.T.mapYResult(~fn, t.continuous),
-    )->E.R2.fmap(((discreteMapped, continuousMapped)) => {
+      Discrete.T.mapYResult(t.discrete, fn),
+      Continuous.T.mapYResult(t.continuous, fn),
+    )->E.R.fmap(((discreteMapped, continuousMapped)) => {
       createMixedFromContinuousDiscrete(
         ~integralCacheFn,
         ~integralSumCacheFn,
@@ -288,8 +286,8 @@ module T = Dist({
     let totalIntegralSum = discreteIntegralSum +. continuousIntegralSum
 
     let getMeanOfSquares = ({discrete, continuous}: t) => {
-      let discreteMean = discrete |> Discrete.shapeMap(XYShape.T.square) |> Discrete.T.mean
-      let continuousMean = continuous |> Continuous.Analysis.getMeanOfSquares
+      let discreteMean = discrete->Discrete.shapeMap(XYShape.T.square)->Discrete.T.mean
+      let continuousMean = continuous->Continuous.Analysis.getMeanOfSquares
       (discreteMean *. discreteIntegralSum +. continuousMean *. continuousIntegralSum) /.
         totalIntegralSum
     }
@@ -357,12 +355,10 @@ let combinePointwise = (
   t2: t,
 ): result<t, 'e> => {
   let reducedDiscrete =
-    [t1, t2]->E.A.fmap(toDiscrete) |> E.A.O.concatSomes |> Discrete.reduce(~integralSumCachesFn, fn)
+    [t1, t2]->E.A.fmap(toDiscrete)->E.A.O.concatSomes->Discrete.reduce(~integralSumCachesFn, fn)
 
   let reducedContinuous =
-    [t1, t2]->E.A.fmap(toContinuous)
-    |> E.A.O.concatSomes
-    |> Continuous.reduce(~integralSumCachesFn, fn)
+    [t1, t2]->E.A.fmap(toContinuous)->E.A.O.concatSomes->Continuous.reduce(~integralSumCachesFn, fn)
 
   let combinedIntegralSum = Common.combineIntegralSums(
     integralSumCachesFn,
@@ -375,7 +371,7 @@ let combinePointwise = (
     t1.integralCache,
     t2.integralCache,
   )
-  E.R.merge(reducedContinuous, reducedDiscrete)->E.R2.fmap(((continuous, discrete)) =>
+  E.R.merge(reducedContinuous, reducedDiscrete)->E.R.fmap(((continuous, discrete)) =>
     make(
       ~integralSumCache=combinedIntegralSum,
       ~integralCache=combinedIntegral,

@@ -6,14 +6,14 @@ module type dist = {
   let mapY: (
     ~integralSumCacheFn: float => option<float>=?,
     ~integralCacheFn: PointSetTypes.continuousShape => option<PointSetTypes.continuousShape>=?,
-    ~fn: float => float,
     t,
+    float => float,
   ) => t
   let mapYResult: (
     ~integralSumCacheFn: float => option<float>=?,
     ~integralCacheFn: PointSetTypes.continuousShape => option<PointSetTypes.continuousShape>=?,
-    ~fn: float => result<float, 'e>,
     t,
+    float => result<float, 'e>,
   ) => result<t, 'e>
   let xToY: (float, t) => PointSetTypes.mixedPoint
   let toPointSetDist: t => PointSetTypes.pointSetDist
@@ -24,7 +24,7 @@ module type dist = {
   let downsample: (int, t) => t
   let truncate: (option<float>, option<float>, t) => t
 
-  let updateIntegralCache: (option<PointSetTypes.continuousShape>, t) => t
+  let updateIntegralCache: (t, option<PointSetTypes.continuousShape>) => t
 
   let integral: t => integral
   let integralEndY: t => float

@@ -24,6 +24,7 @@ let {run} = module(DistributionOperation)
 let run = run(~env)
 let outputMap = fmap(~env)
 let toExt: option<'a> => 'a = E.O.toExt(
+  _,
   "Should be impossible to reach (This error is in test file)",
 )
 

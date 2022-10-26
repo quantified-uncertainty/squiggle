@@ -225,7 +225,7 @@ module Integration = {
                 (max -. min) /. epsilon,
                 env,
                 reducer,
-              )->E.R2.errMap(b =>
+              )->E.R.errMap(b =>
                 ("Integration error 7 in Danger.integrate. Something went wrong along the way: " ++
                 b->SqError.Message.toString)->SqError.Message.REOther
               )

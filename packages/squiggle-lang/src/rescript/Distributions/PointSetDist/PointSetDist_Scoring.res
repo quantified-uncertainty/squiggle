@@ -36,7 +36,7 @@ module WithDistAnswer = {
     ~toMixedFn,
   ): result<score, Operation.Error.t> => {
     let combineAndIntegrate = (estimate, answer) =>
-      combineFn(integrand, estimate, answer)->E.R2.fmap(integrateFn)
+      combineFn(integrand, estimate, answer)->E.R.fmap(integrateFn)
 
     let getMixedSums = (estimate: pointSetDist, answer: pointSetDist) => {
       let esti = estimate->toMixedFn
@@ -69,7 +69,7 @@ module WithDistAnswer = {
     | (Discrete(_), Discrete(_)) =>
       combineAndIntegrate(estimate, answer)
     | (_, _) =>
-      getMixedSums(estimate, answer)->E.R2.fmap(((discretePart, continuousPart)) =>
+      getMixedSums(estimate, answer)->E.R.fmap(((discretePart, continuousPart)) =>
         discretePart +. continuousPart
       )
     }
@@ -85,7 +85,7 @@ module WithDistAnswer = {
   ): result<score, Operation.Error.t> => {
     let kl1 = sum(~estimate, ~answer, ~combineFn, ~integrateFn, ~toMixedFn)
     let kl2 = sum(~estimate=prior, ~answer, ~combineFn, ~integrateFn, ~toMixedFn)
-    E.R.merge(kl1, kl2)->E.R2.fmap(((kl1', kl2')) => kl1' -. kl2')
+    E.R.merge(kl1, kl2)->E.R.fmap(((kl1', kl2')) => kl1' -. kl2')
   }
 }
 
@@ -123,7 +123,7 @@ module WithScalarAnswer = {
     score,
     Operation.Error.t,
   > => {
-    E.R.merge(score(~estimate, ~answer), score(~estimate=prior, ~answer))->E.R2.fmap(((s1, s2)) =>
+    E.R.merge(score(~estimate, ~answer), score(~estimate=prior, ~answer))->E.R.fmap(((s1, s2)) =>
       s1 -. s2
     )
   }

@@ -47,7 +47,7 @@ module Error = {
     }
 
   let resultStringToResultError: result<'a, string> => result<'a, error> = n =>
-    n->E.R2.errMap(r => r->fromString)
+    n->E.R.errMap(r => r->fromString)
 
   let sampleErrorToDistErr = (err: SampleSetDist.sampleSetError): error => SampleSetError(err)
 }

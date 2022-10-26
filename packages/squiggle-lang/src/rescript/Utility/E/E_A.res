@@ -56,8 +56,8 @@ let intersperse = (a: array<'a>, b: array<'a>) => {
 }
 
 // This is like map, but
-//accumulate((a,b) => a + b, [1,2,3]) => [1, 3, 6]
-let accumulate = (fn: ('a, 'a) => 'a, items: array<'a>) => {
+//[1,2,3]->accumulate((a,b) => a + b) => [1, 3, 6]
+let accumulate = (items: array<'a>, fn: ('a, 'a) => 'a) => {
   let length = items->length
   let empty = Belt.Array.make(length, items->unsafe_get(0))
   forEachI(items, (index, element) => {
@@ -94,7 +94,7 @@ let transpose = (xs: array<array<'a>>): array<array<'a>> => {
 
 module O = {
   let concatSomes = (optionals: array<option<'a>>): array<'a> =>
-    optionals->filter(E_O.isSome)->fmap(E_O.toExn("Warning: This should not have happened"))
+    optionals->filter(E_O.isSome)->fmap(E_O.toExn(_, "Warning: This should not have happened"))
   let defaultEmpty = (o: option<array<'a>>): array<'a> =>
     switch o {
     | Some(o) => o
@@ -117,11 +117,11 @@ module O = {
   let firstSomeFn = (r: array<unit => option<'a>>): option<'a> =>
     E_O.flatten(getByFmap(r, l => l(), E_O.isSome))
 
-  let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->E_O2.default(default)
+  let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->E_O.default(default)
 
   let openIfAllSome = (optionals: array<option<'a>>): option<array<'a>> => {
     if every(optionals, E_O.isSome) {
-      Some(optionals->fmap(E_O.toExn("Warning: This should not have happened")))
+      Some(optionals->fmap(E_O.toExn(_, "Warning: This should not have happened")))
     } else {
       None
     }
@@ -143,7 +143,7 @@ module R = {
   let forM = (x: array<'a>, fn: 'a => result<'b, 'c>): result<array<'b>, 'c> =>
     firstErrorOrOpen(fmap(x, fn))
 
-  let foldM = (fn: ('c, 'a) => result<'b, 'e>, init: 'c, x: array<'a>): result<'c, 'e> => {
+  let foldM = (x: array<'a>, init: 'c, fn: ('c, 'a) => result<'b, 'e>): result<'c, 'e> => {
     let acc = ref(init)
     let final = ref(Ok())
     let break = ref(false)
@@ -204,8 +204,8 @@ module Floats = {
   // diff([1,5,3,7]) = [4,-2,4]
   let diff = (t: t): array<float> => t->pairwise((left, right) => right -. left)
 
-  let cumSum = (t: t): array<float> => accumulate((a, b) => a +. b, t)
-  let cumProd = (t: t): array<float> => accumulate((a, b) => a *. b, t)
+  let cumSum = (t: t): array<float> => t->accumulate((a, b) => a +. b)
+  let cumProd = (t: t): array<float> => t->accumulate((a, b) => a *. b)
 
   exception RangeError(string)
   let range = (min: float, max: float, n: int): array<float> =>

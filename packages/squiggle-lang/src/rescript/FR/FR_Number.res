@@ -14,7 +14,7 @@ module ArrayNumberDist = {
         ->Prepare.ToTypedArray.numbers
         ->E.R.bind(r => E.A.length(r) === 0 ? Error("List is empty") : Ok(r))
         ->E.R.bind(fn)
-        ->E.R2.errMap(wrapError),
+        ->E.R.errMap(wrapError),
       (),
     )
   }

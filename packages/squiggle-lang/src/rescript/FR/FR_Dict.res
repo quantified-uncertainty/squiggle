@@ -26,8 +26,8 @@ module Internals = {
       }
     })
     ->E.A.R.firstErrorOrOpen
-    ->E.R2.fmap(Belt.Map.String.fromArray)
-    ->E.R2.fmap(Wrappers.evRecord)
+    ->E.R.fmap(Belt.Map.String.fromArray)
+    ->E.R.fmap(Wrappers.evRecord)
 
   let set = (a: t, key, value): Reducer_T.value => IEvRecord(Belt.Map.String.set(a, key, value))
 

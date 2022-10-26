@@ -60,7 +60,7 @@ let interpolate = (xMin: float, xMax: float, yMin: float, yMax: float, xIntended
 }
 
 // TODO: Make sure that shapes cannot be empty.
-let extImp = E.O.toExt("Tried to perform an operation on an empty XYShape.")
+let extImp = E.O.toExt(_, "Tried to perform an operation on an empty XYShape.")
 
 module T = {
   type t = xyShape
@@ -71,31 +71,31 @@ module T = {
   let length = (t: t) => E.A.length(t.xs)
   let empty = {xs: [], ys: []}
   let isEmpty = (t: t) => length(t) == 0
-  let minX = (t: t) => t |> xs |> E.A.Sorted.min |> extImp
-  let maxX = (t: t) => t |> xs |> E.A.Sorted.max |> extImp
-  let firstY = (t: t) => t |> ys |> E.A.first |> extImp
-  let lastY = (t: t) => t |> ys |> E.A.last |> extImp
+  let minX = (t: t) => t->xs->E.A.Sorted.min->extImp
+  let maxX = (t: t) => t->xs->E.A.Sorted.max->extImp
+  let firstY = (t: t) => t->ys->E.A.first->extImp
+  let lastY = (t: t) => t->ys->E.A.last->extImp
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
-  let mapX = (fn, t: t): t => {xs: E.A.fmap(t.xs, fn), ys: t.ys}
-  let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(t.ys, fn)}
-  let mapYResult = (fn: float => result<float, 'e>, t: t): result<t, 'e> => {
+  let mapX = (t: t, fn): t => {xs: E.A.fmap(t.xs, fn), ys: t.ys}
+  let mapY = (t: t, fn): t => {xs: t.xs, ys: E.A.fmap(t.ys, fn)}
+  let mapYResult = (t: t, fn: float => result<float, 'e>): result<t, 'e> => {
     let mappedYs = E.A.fmap(t.ys, fn)
-    E.A.R.firstErrorOrOpen(mappedYs)->E.R2.fmap(y => {xs: t.xs, ys: y})
+    E.A.R.firstErrorOrOpen(mappedYs)->E.R.fmap(y => {xs: t.xs, ys: y})
   }
-  let square = mapX(x => x ** 2.0)
+  let square = mapX(_, x => x ** 2.0)
   let zip = ({xs, ys}: t) => E.A.zip(xs, ys)
   let fromArray = ((xs, ys)): t => {xs, ys}
   let fromArrays = (xs, ys): t => {xs, ys}
-  let accumulateYs = (fn, p: t) => fromArray((p.xs, E.A.accumulate(fn, p.ys)))
+  let accumulateYs = (p: t, fn) => (p.xs, p.ys->E.A.accumulate(fn))->fromArray
   let concat = (t1: t, t2: t) => {
     let cxs = E.A.concat(t1.xs, t2.xs)
     let cys = E.A.concat(t1.ys, t2.ys)
     {xs: cxs, ys: cys}
   }
-  let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> E.A.unzip |> fromArray
+  let fromZippedArray = (pairs: array<(float, float)>): t => pairs->E.A.unzip->fromArray
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
-  let filterYValues = (fn, t: t): t => t->zip->E.A.filter(((_, y)) => fn(y))->fromZippedArray
+  let filterYValues = (t: t, fn): t => t->zip->E.A.filter(((_, y)) => fn(y))->fromZippedArray
   let filterOkYs = (xs: array<float>, ys: array<result<float, 'b>>): t => {
     let n = E.A.length(xs) // Assume length(xs) == length(ys)
     let newXs = []
@@ -132,8 +132,8 @@ module T = {
       let xsEmpty = areXsEmpty(t) ? Some(isEmptyError("Xs")) : None
       let differentLengths =
         E.A.length(xs(t)) !== E.A.length(ys(t)) ? Some(differentLengthsError(t)) : None
-      let xsNotFinite = getNonFiniteXs(t)->E.O2.fmap(notFiniteError("Xs"))
-      let ysNotFinite = getNonFiniteYs(t)->E.O2.fmap(notFiniteError("Ys"))
+      let xsNotFinite = getNonFiniteXs(t)->E.O.fmap(notFiniteError("Xs"))
+      let ysNotFinite = getNonFiniteYs(t)->E.O.fmap(notFiniteError("Ys"))
       [xsNotSorted, xsEmpty, differentLengths, xsNotFinite, ysNotFinite]
       ->E.A.O.concatSomes
       ->Error.mapErrorArrayToError
@@ -156,10 +156,10 @@ module T = {
 
 module Ts = {
   type t = T.ts
-  let minX = (t: t) => t->E.A.fmap(T.minX) |> E.A.Floats.min
-  let maxX = (t: t) => t->E.A.fmap(T.maxX) |> E.A.Floats.max
+  let minX = (t: t) => t->E.A.fmap(T.minX)->E.A.Floats.min
+  let maxX = (t: t) => t->E.A.fmap(T.maxX)->E.A.Floats.max
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
-  let allXs = (t: t) => t->E.A.fmap(T.xs) |> E.A.Sorted.concatMany
+  let allXs = (t: t) => t->E.A.fmap(T.xs)->E.A.Sorted.concatMany
 }
 
 module Pairs = {
@@ -168,22 +168,22 @@ module Pairs = {
   let first = (t: T.t) => (T.minX(t), T.firstY(t))
   let last = (t: T.t) => (T.maxX(t), T.lastY(t))
 
-  let getBy = (t: T.t, fn) => t |> T.zip |> E.A.getBy(_, fn)
+  let getBy = (t: T.t, fn) => t->T.zip->E.A.getBy(fn)
 
-  let firstAtOrBeforeXValue = (xValue, t: T.t) => {
+  let firstAtOrBeforeXValue = (t: T.t, xValue) => {
     let zipped = T.zip(t)
-    let firstIndex = zipped |> E.A.getIndexBy(_, ((x, _)) => x > xValue)
+    let firstIndex = zipped->E.A.getIndexBy(((x, _)) => x > xValue)
     let previousIndex = switch firstIndex {
     | None => Some(E.A.length(zipped) - 1)
     | Some(0) => None
     | Some(n) => Some(n - 1)
     }
-    previousIndex |> Belt.Option.flatMap(_, E.A.get(zipped))
+    previousIndex->Belt.Option.flatMap(E.A.get(zipped))
   }
 }
 
 module YtoX = {
-  let linear = (y: float, t: T.t): float => {
+  let linear = (t: T.t, y: float): float => {
     let firstHigherIndex = E.A.Sorted.binarySearchFirstElementGreaterIndex(T.ys(t), y)
     let foundX = switch firstHigherIndex {
     | #overMax => T.maxX(t)
@@ -209,12 +209,12 @@ module YtoX = {
 }
 
 module XtoY = {
-  let stepwiseIncremental = (f, t: T.t) => Pairs.firstAtOrBeforeXValue(f, t) |> E.O.fmap(Pairs.y)
+  let stepwiseIncremental = (t: T.t, f) => Pairs.firstAtOrBeforeXValue(t, f)->E.O.fmap(Pairs.y)
 
-  let stepwiseIfAtX = (f: float, t: T.t) =>
-    Pairs.getBy(t, ((x: float, _)) => x == f) |> E.O.fmap(Pairs.y)
+  let stepwiseIfAtX = (t: T.t, f: float) =>
+    Pairs.getBy(t, ((x: float, _)) => x == f)->E.O.fmap(Pairs.y)
 
-  let linear = (x: float, t: T.t): float => {
+  let linear = (t: T.t, x: float): float => {
     let firstHigherIndex = E.A.Sorted.binarySearchFirstElementGreaterIndex(T.xs(t), x)
     let n = switch firstHigherIndex {
     | #overMax => T.lastY(t)
@@ -300,27 +300,27 @@ module XtoY = {
 
 module XsConversion = {
   let _replaceWithXs = (newXs: array<float>, t: T.t): T.t => {
-    let newYs = E.A.fmap(newXs, XtoY.linear(_, t))
+    let newYs = E.A.fmap(newXs, XtoY.linear(t))
     {xs: newXs, ys: newYs}
   }
 
-  let equallyDivideXByMass = (newLength: int, integral: T.t) =>
-    E.A.Floats.range(0.0, 1.0, newLength)->E.A.fmap(YtoX.linear(_, integral))
+  let equallyDivideXByMass = (integral: T.t, newLength: int) =>
+    E.A.Floats.range(0.0, 1.0, newLength)->E.A.fmap(YtoX.linear(integral))
 
-  let proportionEquallyOverX = (newLength: int, t: T.t): T.t =>
-    T.equallyDividedXs(t, newLength) |> _replaceWithXs(_, t)
+  let proportionEquallyOverX = (t: T.t, newLength: int): T.t =>
+    T.equallyDividedXs(t, newLength)->_replaceWithXs(t)
 
-  let proportionByProbabilityMass = (newLength: int, integral: T.t, t: T.t): T.t =>
-    integral |> equallyDivideXByMass(newLength) |> _replaceWithXs(_, t) // creates a new set of xs at evenly spaced percentiles // linearly interpolates new ys for the new xs
+  let proportionByProbabilityMass = (t: T.t, newLength: int, integral: T.t): T.t =>
+    integral->equallyDivideXByMass(newLength)->_replaceWithXs(t) // creates a new set of xs at evenly spaced percentiles // linearly interpolates new ys for the new xs
 }
 
 module Zipped = {
   type zipped = array<(float, float)>
   let compareYs = ((_, y1): (float, float), (_, y2): (float, float)) => y1 > y2 ? 1 : 0
   let compareXs = ((x1, _): (float, float), (x2, _): (float, float)) => x1 > x2 ? 1 : 0
-  let sortByY = (t: zipped) => t |> E.A.stableSortBy(_, compareYs)
-  let sortByX = (t: zipped) => t |> E.A.stableSortBy(_, compareXs)
-  let filterByX = (testFn: float => bool, t: zipped) => t->E.A.filter(((x, _)) => testFn(x))
+  let sortByY = (t: zipped) => t->E.A.stableSortBy(compareYs)
+  let sortByX = (t: zipped) => t->E.A.stableSortBy(compareXs)
+  let filterByX = (t: zipped, testFn: float => bool) => t->E.A.filter(((x, _)) => testFn(x))
 }
 
 module PointwiseCombination = {
@@ -493,14 +493,13 @@ module PointwiseCombination = {
       t.xs,
     )
     let newXs = E.A.concatMany(newXsUnflattened)
-    let newYs = E.A.fmap(newXs, x => XtoY.linear(x, t))
+    let newYs = E.A.fmap(newXs, x => XtoY.linear(t, x))
     {xs: newXs, ys: newYs}
   }
 
   let addCombine = (interpolator: interpolator, t1: T.t, t2: T.t): T.t =>
     combine(interpolator, (a, b) => Ok(a +. b), t1, t2)->E.R.toExn(
       "Add operation should never fail",
-      _,
     )
 
   let combineEvenXs = (~fn, ~xToYSelection, sampleCount, t1: T.t, t2: T.t) =>
@@ -517,7 +516,7 @@ module PointwiseCombination = {
     }
 
   // TODO: I'd bet this is pretty slow. Maybe it would be faster to intersperse Xs and Ys separately.
-  let intersperse = (t1: T.t, t2: T.t) => E.A.intersperse(T.zip(t1), T.zip(t2)) |> T.fromZippedArray
+  let intersperse = (t1: T.t, t2: T.t) => E.A.intersperse(T.zip(t1), T.zip(t2))->T.fromZippedArray
 }
 
 // I'm really not sure this part is actually what we want at this point.
@@ -540,11 +539,11 @@ module Range = {
   let delta_y_over_delta_x = (((lastX, lastY), (nextX, nextY)): zippedRange) =>
     (nextY -. lastY) /. (nextX -. lastX)
 
-  let mapYsBasedOnRanges = (fn, t) =>
+  let mapYsBasedOnRanges = (t, fn) =>
     E.A.zip(t.xs, t.ys)
-    |> E.A.toRanges
-    |> E.R.toOption
-    |> E.O.fmap(r => r |> E.A.fmap(_, r => (nextX(r), fn(r))))
+    ->E.A.toRanges
+    ->E.R.toOption
+    ->E.O.fmap(r => r->E.A.fmap(r => (nextX(r), fn(r))))
 
   // This code is messy, in part because I'm trying to make things easy on garbage collection here.
   // It's using triangles instead of trapezoids right now.
@@ -561,7 +560,7 @@ module Range = {
     Some({xs, ys: cumulativeY})
   }
 
-  let derivative = mapYsBasedOnRanges(delta_y_over_delta_x)
+  let derivative = mapYsBasedOnRanges(_, delta_y_over_delta_x)
 
   let stepwiseToLinear = ({xs, ys}: T.t): T.t => {
     // adds points at the bottom of each step.
@@ -569,16 +568,16 @@ module Range = {
     let newXs: array<float> = Belt.Array.makeUninitializedUnsafe(2 * length)
     let newYs: array<float> = Belt.Array.makeUninitializedUnsafe(2 * length)
 
-    Belt.Array.set(newXs, 0, xs[0] -. epsilon_float) |> ignore
-    Belt.Array.set(newYs, 0, 0.) |> ignore
-    Belt.Array.set(newXs, 1, xs[0]) |> ignore
-    Belt.Array.set(newYs, 1, ys[0]) |> ignore
+    Belt.Array.set(newXs, 0, xs[0] -. epsilon_float)->ignore
+    Belt.Array.set(newYs, 0, 0.)->ignore
+    Belt.Array.set(newXs, 1, xs[0])->ignore
+    Belt.Array.set(newYs, 1, ys[0])->ignore
 
     for i in 1 to E.A.length(xs) - 1 {
-      Belt.Array.set(newXs, i * 2, xs[i] -. epsilon_float) |> ignore
-      Belt.Array.set(newYs, i * 2, ys[i - 1]) |> ignore
-      Belt.Array.set(newXs, i * 2 + 1, xs[i]) |> ignore
-      Belt.Array.set(newYs, i * 2 + 1, ys[i]) |> ignore
+      Belt.Array.set(newXs, i * 2, xs[i] -. epsilon_float)->ignore
+      Belt.Array.set(newYs, i * 2, ys[i - 1])->ignore
+      Belt.Array.set(newXs, i * 2 + 1, xs[i])->ignore
+      Belt.Array.set(newYs, i * 2 + 1, ys[i])->ignore
       ()
     }
 
@@ -588,23 +587,23 @@ module Range = {
   // TODO: I think this isn't needed by any functions anymore.
   let stepsToContinuous = t => {
     // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
-    let diff = T.xTotalRange(t) |> (r => r *. MagicNumbers.Epsilon.five)
+    let diff = T.xTotalRange(t)->(r => r *. MagicNumbers.Epsilon.five)
     let items = switch E.A.toRanges(E.A.zip(t.xs, t.ys)) {
     | Ok(items) =>
       Some(
         items
-        |> E.A.fmap(_, rangePointAssumingSteps)
-        |> T.fromZippedArray
-        |> PointwiseCombination.intersperse(t |> T.mapX(e => e +. diff)),
+        ->E.A.fmap(rangePointAssumingSteps)
+        ->T.fromZippedArray
+        ->PointwiseCombination.intersperse(t->T.mapX(e => e +. diff), _),
       )
     | _ => Some(t)
     }
-    let first = items |> E.O.fmap(T.zip) |> E.O.bind(_, E.A.get(_, 0))
+    let first = items->E.O.fmap(T.zip)->E.O.bind(E.A.get(_, 0))
     switch (items, first) {
     | (Some(items), Some((0.0, _))) => Some(items)
     | (Some(items), Some((firstX, _))) =>
-      let all = E.A.concat([(firstX, 0.0)], items |> T.zip)
-      all |> T.fromZippedArray |> E.O.some
+      let all = E.A.concat([(firstX, 0.0)], items->T.zip)
+      all->T.fromZippedArray->E.O.some
     | _ => None
     }
   }

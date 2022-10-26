@@ -8,14 +8,13 @@ let result = (okF, errF, r) =>
   | Ok(a) => okF(a)
   | Error(err) => errF(err)
   }
-let id = e => e |> result(e => e, e => e)
 let isOk = Belt.Result.isOk
 let getError = (r: result<'a, 'b>) =>
   switch r {
   | Ok(_) => None
   | Error(e) => Some(e)
   }
-let fmap = (f: 'a => 'b, r: result<'a, 'c>): result<'b, 'c> => {
+let fmap = (r: result<'a, 'c>, f: 'a => 'b): result<'b, 'c> => {
   switch r {
   | Ok(r') => Ok(f(r'))
   | Error(err) => Error(err)
@@ -26,7 +25,7 @@ let bind = (r, f) =>
   | Ok(a) => f(a)
   | Error(err) => Error(err)
   }
-let toExn = (msg: string, x: result<'a, 'b>): 'a =>
+let toExn = (x: result<'a, 'b>, msg: string): 'a =>
   switch x {
   | Ok(r) => r
   | Error(_) => raise(Assertion(msg))
@@ -63,12 +62,12 @@ let ap = (r, a) =>
   }
 let ap' = (r, a) =>
   switch r {
-  | Ok(f) => fmap(f, a)
+  | Ok(f) => fmap(a, f)
   | Error(err) => Error(err)
   }
 
 let liftM2: (('a, 'b) => 'c, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (op, xR, yR) => {
-  ap'(fmap(op, xR), yR)
+  ap'(fmap(xR, op), yR)
 }
 
 let liftJoin2: (('a, 'b) => result<'c, 'd>, result<'a, 'd>, result<'b, 'd>) => result<'c, 'd> = (
@@ -79,7 +78,7 @@ let liftJoin2: (('a, 'b) => result<'c, 'd>, result<'a, 'd>, result<'b, 'd>) => r
   bind(liftM2(op, xR, yR), x => x)
 }
 
-let fmap2 = (f, r) =>
+let fmap2 = (r, f) =>
   switch r {
   | Ok(r) => r->Ok
   | Error(x) => x->f->Error
@@ -90,4 +89,11 @@ let unify = (a: result<'a, 'b>, c: 'b => 'a): 'a =>
   switch a {
   | Ok(x) => x
   | Error(x) => c(x)
+  }
+
+//Converts result type to change error type only
+let errMap = (a: result<'a, 'b>, map: 'b => 'c): result<'a, 'c> =>
+  switch a {
+  | Ok(r) => Ok(r)
+  | Error(e) => Error(map(e))
   }

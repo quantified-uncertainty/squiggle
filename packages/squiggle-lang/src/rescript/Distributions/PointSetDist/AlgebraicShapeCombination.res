@@ -16,28 +16,28 @@ let toDiscretePointMassesFromTriangulars = (
   s: XYShape.T.t,
 ): pointMassesWithMoments => {
   // TODO: what if there is only one point in the distribution?
-  let n = s |> XYShape.T.length
+  let n = s->XYShape.T.length
   // first, double up the leftmost and rightmost points:
   let {xs, ys}: XYShape.T.t = s
-  Js.Array.unshift(xs[0], xs) |> ignore
-  Js.Array.unshift(ys[0], ys) |> ignore
-  Js.Array.push(xs[n - 1], xs) |> ignore
-  Js.Array.push(ys[n - 1], ys) |> ignore
+  Js.Array.unshift(xs[0], xs)->ignore
+  Js.Array.unshift(ys[0], ys)->ignore
+  Js.Array.push(xs[n - 1], xs)->ignore
+  Js.Array.push(ys[n - 1], ys)->ignore
   let n = E.A.length(xs)
   // squares and neighbourly products of the xs
   let xsSq: array<float> = Belt.Array.makeUninitializedUnsafe(n)
   let xsProdN1: array<float> = Belt.Array.makeUninitializedUnsafe(n - 1)
   let xsProdN2: array<float> = Belt.Array.makeUninitializedUnsafe(n - 2)
   for i in 0 to n - 1 {
-    Belt.Array.set(xsSq, i, xs[i] *. xs[i]) |> ignore
+    Belt.Array.set(xsSq, i, xs[i] *. xs[i])->ignore
     ()
   }
   for i in 0 to n - 2 {
-    Belt.Array.set(xsProdN1, i, xs[i] *. xs[i + 1]) |> ignore
+    Belt.Array.set(xsProdN1, i, xs[i] *. xs[i + 1])->ignore
     ()
   }
   for i in 0 to n - 3 {
-    Belt.Array.set(xsProdN2, i, xs[i] *. xs[i + 2]) |> ignore
+    Belt.Array.set(xsProdN2, i, xs[i] *. xs[i + 2])->ignore
     ()
   }
   // means and variances
@@ -47,7 +47,7 @@ let toDiscretePointMassesFromTriangulars = (
 
   if inverse {
     for i in 1 to n - 2 {
-      Belt.Array.set(masses, i - 1, (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.) |> ignore
+      Belt.Array.set(masses, i - 1, (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.)->ignore
 
       // this only works when the whole triange is either on the left or on the right of zero
       let a = xs[i - 1]
@@ -63,9 +63,9 @@ let toDiscretePointMassesFromTriangulars = (
         2. *. (log(c /. a) /. (a -. c) +. b *. log(b /. c) /. (b -. c)) /. (a -. b) -.
           inverseMean ** 2.
 
-      Belt.Array.set(means, i - 1, inverseMean) |> ignore
+      Belt.Array.set(means, i - 1, inverseMean)->ignore
 
-      Belt.Array.set(variances, i - 1, inverseVar) |> ignore
+      Belt.Array.set(variances, i - 1, inverseVar)->ignore
       ()
     }
 
@@ -73,10 +73,10 @@ let toDiscretePointMassesFromTriangulars = (
   } else {
     for i in 1 to n - 2 {
       // area of triangle = width * height / 2
-      Belt.Array.set(masses, i - 1, (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.) |> ignore
+      Belt.Array.set(masses, i - 1, (xs[i + 1] -. xs[i - 1]) *. ys[i] /. 2.)->ignore
 
       // means of triangle = (a + b + c) / 3
-      Belt.Array.set(means, i - 1, (xs[i - 1] +. xs[i] +. xs[i + 1]) /. 3.) |> ignore
+      Belt.Array.set(means, i - 1, (xs[i - 1] +. xs[i] +. xs[i + 1]) /. 3.)->ignore
 
       // variance of triangle = (a^2 + b^2 + c^2 - ab - ac - bc) / 18
       Belt.Array.set(
@@ -88,7 +88,7 @@ let toDiscretePointMassesFromTriangulars = (
         xsProdN1[i - 1] -.
         xsProdN1[i] -.
         xsProdN2[i - 1]) /. 18.,
-      ) |> ignore
+      )->ignore
       ()
     }
     {n: n - 2, masses, means, variances}
@@ -127,7 +127,7 @@ let combineShapesContinuousContinuous = (
   for i in 0 to t1m.n - 1 {
     for j in 0 to t2m.n - 1 {
       let k = i * t2m.n + j
-      Belt.Array.set(masses, k, t1m.masses[i] *. t2m.masses[j]) |> ignore
+      Belt.Array.set(masses, k, t1m.masses[i] *. t2m.masses[j])->ignore
 
       let mean = combineMeansFn(t1m.means[i], t2m.means[j])
       let variance = combineVariancesFn(
@@ -136,8 +136,8 @@ let combineShapesContinuousContinuous = (
         t1m.means[i],
         t2m.means[j],
       )
-      Belt.Array.set(means, k, mean) |> ignore
-      Belt.Array.set(variances, k, variance) |> ignore
+      Belt.Array.set(means, k, mean)->ignore
+      Belt.Array.set(variances, k, variance)->ignore
       // update bounds
       let minX = mean -. 2. *. sqrt(variance) *. 1.644854
       let maxX = mean +. 2. *. sqrt(variance) *. 1.644854
@@ -168,7 +168,7 @@ let combineShapesContinuousContinuous = (
           masses[j] *.
           exp(-.(dx ** 2.) /. (2. *. variances[j])) /.
           sqrt(2. *. 3.14159276 *. variances[j])
-        Belt.Array.set(outputYs, i, outputYs[i] +. contribution) |> ignore
+        Belt.Array.set(outputYs, i, outputYs[i] +. contribution)->ignore
       }
     }
   }
@@ -195,8 +195,8 @@ let combineShapesContinuousDiscrete = (
   discreteShape: PointSetTypes.xyShape,
   ~discretePosition: argumentPosition,
 ): PointSetTypes.xyShape => {
-  let t1n = continuousShape |> XYShape.T.length
-  let t2n = discreteShape |> XYShape.T.length
+  let t1n = continuousShape->XYShape.T.length
+  let t2n = discreteShape->XYShape.T.length
 
   // each x pair is added/subtracted
   let opFunc = Operation.Convolution.toFn(op)
@@ -222,9 +222,9 @@ let combineShapesContinuousDiscrete = (
             fn(continuousShape.xs[i], discreteShape.xs[j]),
             continuousShape.ys[i] *. discreteShape.ys[j],
           ),
-        ) |> ignore
+        )->ignore
       }
-      Belt.Array.set(outXYShapes, j, dxyShape) |> ignore
+      Belt.Array.set(outXYShapes, j, dxyShape)->ignore
       ()
     }
   | #Multiply =>
@@ -243,10 +243,10 @@ let combineShapesContinuousDiscrete = (
             fn(continuousShape.xs[i], discreteShape.xs[j]),
             continuousShape.ys[i] *. discreteShape.ys[j] /. Js.Math.abs_float(discreteShape.xs[j]),
           ),
-        ) |> ignore
+        )->ignore
         ()
       }
-      Belt.Array.set(outXYShapes, j, dxyShape) |> ignore
+      Belt.Array.set(outXYShapes, j, dxyShape)->ignore
     }
   }
 
