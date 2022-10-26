@@ -20,12 +20,12 @@
 *.js @Hazelfire @berekuk @OAGr
 
 # Any opsy files
-.github/** @quinn-dougherty @berekuk @OAGr
-*.json @quinn-dougherty @Hazelfire @berekuk @OAGr
-*.y*ml @quinn-dougherty @berekuk @OAGr
+.github/** @berekuk @OAGr
+*.json @Hazelfire @berekuk @OAGr
+*.y*ml @berekuk @OAGr
 *.config.js @Hazelfire @berekuk @OAGr
 vercel.json @OAGr @berekuk @Hazelfire
 
 # Documentation
-*.md @quinn-dougherty @OAGr @Hazelfire
-*.mdx @quinn-dougherty @OAGr @Hazelfire
+*.md @OAGr @Hazelfire
+*.mdx @OAGr @Hazelfire

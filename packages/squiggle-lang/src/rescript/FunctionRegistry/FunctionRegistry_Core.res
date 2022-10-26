@@ -59,7 +59,7 @@ module FRType = {
     | FRTypeDistOrNumber => "distribution|number"
     | FRTypeRecord(r) => {
         let input = ((name, frType): frTypeRecordParam) => `${name}: ${toString(frType)}`
-        `{${r->E.A2.fmap(input)->E.A2.joinWith(", ")}}`
+        `{${r->E.A.fmap(input)->E.A.joinWith(", ")}}`
       }
 
     | FRTypeArray(r) => `list(${toString(r)})`
@@ -85,11 +85,11 @@ module FRType = {
     | (FRTypeNumeric, IEvDistribution(Symbolic(#Float(_)))) => true
     | (FRTypeLambda, IEvLambda(_)) => true
     | (FRTypeArray(intendedType), IEvArray(elements)) =>
-      elements->Belt.Array.every(v => matchWithValue(intendedType, v))
+      elements->E.A.every(v => matchWithValue(intendedType, v))
     | (FRTypeDict(r), IEvRecord(map)) =>
-      map->Belt.Map.String.valuesToArray->Belt.Array.every(v => matchWithValue(r, v))
+      map->Belt.Map.String.valuesToArray->E.A.every(v => matchWithValue(r, v))
     | (FRTypeRecord(recordParams), IEvRecord(map)) =>
-      recordParams->Belt.Array.every(((name, input)) => {
+      recordParams->E.A.every(((name, input)) => {
         switch map->Belt.Map.String.get(name) {
         | Some(v) => matchWithValue(input, v)
         | None => false
@@ -103,7 +103,7 @@ module FRType = {
     if !isSameLength {
       false
     } else {
-      E.A.zip(inputs, args)->Belt.Array.every(((input, arg)) => matchWithValue(input, arg))
+      E.A.zip(inputs, args)->E.A.every(((input, arg)) => matchWithValue(input, arg))
     }
   }
 }
@@ -112,7 +112,7 @@ module FnDefinition = {
   type t = fnDefinition
 
   let toString = (t: t) => {
-    let inputs = t.inputs->E.A2.fmap(FRType.toString)->E.A2.joinWith(", ")
+    let inputs = t.inputs->E.A.fmap(FRType.toString)->E.A.joinWith(", ")
     t.name ++ `(${inputs})`
   }
 
@@ -173,7 +173,7 @@ module Function = {
 
   let toJson = (t: t): functionJson => {
     name: t.name,
-    definitions: t.definitions->E.A2.fmap(FnDefinition.toString),
+    definitions: t.definitions->E.A.fmap(FnDefinition.toString),
     examples: t.examples,
     description: t.description,
     isExperimental: t.isExperimental,
@@ -184,10 +184,10 @@ module Registry = {
   type fnNameDict = Belt.Map.String.t<array<fnDefinition>>
   type registry = {functions: array<function>, fnNameDict: fnNameDict}
 
-  let toJson = (r: registry) => r.functions->E.A2.fmap(Function.toJson)
-  let allExamples = (r: registry) => r.functions->E.A2.fmap(r => r.examples)->E.A.concatMany
+  let toJson = (r: registry) => r.functions->E.A.fmap(Function.toJson)
+  let allExamples = (r: registry) => r.functions->E.A.fmap(r => r.examples)->E.A.concatMany
   let allExamplesWithFns = (r: registry) =>
-    r.functions->E.A2.fmap(fn => fn.examples->E.A2.fmap(example => (fn, example)))->E.A.concatMany
+    r.functions->E.A.fmap(fn => fn.examples->E.A.fmap(example => (fn, example)))->E.A.concatMany
 
   let allNames = (r: registry) => r.fnNameDict->Belt.Map.String.keysToArray
 
@@ -196,15 +196,15 @@ module Registry = {
     // 1. functions
     // 2. definitions of each function
     // 3. name variations of each definition
-    r->Belt.Array.reduce(Belt.Map.String.empty, (acc, fn) =>
-      fn.definitions->Belt.Array.reduce(acc, (acc, def) => {
+    r->E.A.reduce(Belt.Map.String.empty, (acc, fn) =>
+      fn.definitions->E.A.reduce(acc, (acc, def) => {
         let names =
           [
             fn.nameSpace == "" ? [] : [`${fn.nameSpace}.${def.name}`],
             fn.requiresNamespace ? [] : [def.name],
           ]->E.A.concatMany
 
-        names->Belt.Array.reduce(
+        names->E.A.reduce(
           acc,
           (acc, name) => {
             switch acc->Belt.Map.String.get(name) {
@@ -238,9 +238,9 @@ module Registry = {
         let showNameMatchDefinitions = () => {
           let defsString =
             definitions
-            ->E.A2.fmap(FnDefinition.toString)
-            ->E.A2.fmap(r => `[${r}]`)
-            ->E.A2.joinWith("; ")
+            ->E.A.fmap(FnDefinition.toString)
+            ->E.A.fmap(r => `[${r}]`)
+            ->E.A.joinWith("; ")
           `There are function matches for ${fnName}(), but with different arguments: ${defsString}`
         }
 

@@ -21,8 +21,9 @@ const populateTokensBuilder = (
   // bindings: { [key: string]: boolean }
 ) => {
   switch (node.type) {
-    case "Expression":
-      for (const child of node.nodes) {
+    case "Call":
+      populateTokensBuilder(tokensBuilder, node.fn);
+      for (const child of node.args) {
         populateTokensBuilder(tokensBuilder, child);
       }
       break;

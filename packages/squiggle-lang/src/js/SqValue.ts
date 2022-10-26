@@ -22,11 +22,8 @@ export abstract class SqAbstractValue {
 
   constructor(private _value: T, public location: SqValueLocation) {}
 
-  protected valueMethod = <IR>(rsMethod: (v: T) => IR | null | undefined) => {
+  protected valueMethod = <IR>(rsMethod: (v: T) => IR) => {
     const value = rsMethod(this._value);
-    if (value === undefined || value === null) {
-      throw new Error("Internal casting error");
-    }
     return value;
   };
 

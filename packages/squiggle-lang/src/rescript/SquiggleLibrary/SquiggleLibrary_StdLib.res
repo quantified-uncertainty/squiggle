@@ -13,7 +13,7 @@ let stdLib: Reducer_T.namespace = {
       | [IEvArray(aValueArray), IEvNumber(fIndex)] => {
           let index = Belt.Int.fromFloat(fIndex) // TODO - fail on non-integer indices?
 
-          switch Belt.Array.get(aValueArray, index) {
+          switch E.A.get(aValueArray, index) {
           | Some(value) => value
           | None => REArrayIndexNotFound("Array index not found", index)->SqError.Message.throw
           }
@@ -31,10 +31,7 @@ let stdLib: Reducer_T.namespace = {
   )
 
   // some lambdas can't be expressed in function registry (e.g. `mx` with its variadic number of parameters)
-  let res = FunctionRegistry_Library.nonRegistryLambdas->Belt.Array.reduce(res, (
-    cur,
-    (name, lambda),
-  ) => {
+  let res = FunctionRegistry_Library.nonRegistryLambdas->E.A.reduce(res, (cur, (name, lambda)) => {
     cur->Reducer_Namespace.set(name, lambda->Reducer_T.IEvLambda)
   })
 
@@ -42,7 +39,7 @@ let stdLib: Reducer_T.namespace = {
   let res =
     FunctionRegistry_Library.registry
     ->FunctionRegistry_Core.Registry.allNames
-    ->Belt.Array.reduce(res, (cur, name) => {
+    ->E.A.reduce(res, (cur, name) => {
       cur->Reducer_Namespace.set(
         name,
         Reducer_Lambda.makeFFILambda(name, (arguments, context, reducer) => {

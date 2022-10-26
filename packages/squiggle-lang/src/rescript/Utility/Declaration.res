@@ -37,6 +37,6 @@ let make = (fn: 'a, args: array<arg>): declaration<'a> => {
 }
 
 let toString = (r: declaration<'a>, fnToString): string => {
-  let args = r.args->E.A2.fmap(Arg.toString) |> E.A.joinWith(", ")
+  let args = r.args->E.A.fmap(Arg.toString)->E.A.joinWith(", ")
   return`fn: ${fnToString(r.fn)}, args: [${args}]`
 }

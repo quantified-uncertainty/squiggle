@@ -16,7 +16,7 @@ module Declaration = {
           ->E.R.bind(ToValueTuple.twoNumbers)
           ->E.R2.fmap(((min, max)) => Declaration.ContinuousFloatArg.make(min, max))
         inputs
-        ->E.A2.fmap(getMinMax)
+        ->E.A.fmap(getMinMax)
         ->E.A.R.firstErrorOrOpen
         ->E.R2.fmap(args => Reducer_T.IEvDeclaration(Declaration.make(lambda, args)))
       }

@@ -276,8 +276,10 @@ arrayConstructor 'array'
     { return [head, ...tail]; }
 
 recordConstructor  'record'
-  = '{' _nl args:array_recordArguments _nl end_of_record
-  { return h.constructRecord(args, location()); }
+  = '{' _nl '}'
+    { return h.constructRecord([], location()); }
+  / '{' _nl args:array_recordArguments _nl end_of_record
+    { return h.constructRecord(args, location()); }
 
   end_of_record 
     = '}'

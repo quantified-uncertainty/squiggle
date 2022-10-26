@@ -6,7 +6,7 @@ let requiresNamespace = true
 
 module Internals = {
   let length = (v: array<Reducer_T.value>): Reducer_T.value => IEvNumber(
-    Belt.Int.toFloat(Array.length(v)),
+    Belt.Int.toFloat(E.A.length(v)),
   )
 
   let makeFromNumber = (n: float, value: Reducer_T.value): Reducer_T.value => IEvArray(
@@ -14,7 +14,7 @@ module Internals = {
   )
 
   let upTo = (low: float, high: float): Reducer_T.value => IEvArray(
-    E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)->E.A2.fmap(Wrappers.evNumber),
+    E.A.Floats.range(low, high, (high -. low +. 1.0)->E.Float.toInt)->E.A.fmap(Wrappers.evNumber),
   )
 
   let first = (v: array<Reducer_T.value>): result<Reducer_T.value, string> =>
@@ -33,7 +33,7 @@ module Internals = {
     context: Reducer_T.context,
     reducer: Reducer_T.reducerFn,
   ): Reducer_T.value => {
-    Belt.Array.map(array, elem =>
+    E.A.fmap(array, elem =>
       Reducer_Lambda.doLambdaCall(eLambdaValue, [elem], context, reducer)
     )->Wrappers.evArray
   }
@@ -57,7 +57,7 @@ module Internals = {
     context: Reducer_T.context,
     reducer: Reducer_T.reducerFn,
   ) => {
-    aValueArray->Belt.Array.reduceReverse(initialValue, (acc, elem) =>
+    aValueArray->E.A.reduceReverse(initialValue, (acc, elem) =>
       Reducer_Lambda.doLambdaCall(aLambdaValue, [acc, elem], context, reducer)
     )
   }

@@ -14,7 +14,18 @@ type location = {
 
 type node = {"type": string, "location": location}
 
-type parseError = SyntaxError(string, location)
+module ParseError = {
+  @genType.opaque
+  type t = SyntaxError(string, location)
+
+  @genType
+  let getMessage = (SyntaxError(message, _): t) => message
+
+  @genType
+  let getLocation = (SyntaxError(_, location): t) => location
+}
+
+type parseError = ParseError.t
 
 type parseResult = result<node, parseError>
 
@@ -26,6 +37,7 @@ external castWithLocation: Js.Exn.t => withLocation = "%identity"
 
 let syntaxErrorToLocation = (error: Js.Exn.t): location => castWithLocation(error)["location"]
 
+@genType
 let parse = (expr: string, source: string): parseResult =>
   try {
     Ok(parse__(expr, {"grammarSource": source}))
@@ -126,13 +138,13 @@ let nodeKeyValueToAST = (node: nodeKeyValue) => {
 
 let rec pgToString = (ast: ast): string => {
   let argsToString = (args: array<nodeIdentifier>): string =>
-    args->Belt.Array.map(arg => arg->nodeIdentifierToAST->pgToString)->Js.Array2.toString
+    args->E.A.fmap(arg => arg->nodeIdentifierToAST->pgToString)->Js.Array2.toString
 
   let nodesToStringUsingSeparator = (nodes: array<node>, separator: string): string =>
-    nodes->Belt.Array.map(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
+    nodes->E.A.fmap(toString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
   let pgNodesToStringUsingSeparator = (nodes: array<ast>, separator: string): string =>
-    nodes->Belt.Array.map(pgToString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
+    nodes->E.A.fmap(pgToString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
 
   switch ast.content {
   | ASTBlock(node)
@@ -142,7 +154,7 @@ let rec pgToString = (ast: ast): string => {
   | ASTRecord(node) =>
     "{" ++
     node["elements"]
-    ->Belt.Array.map(element => element->nodeKeyValueToAST)
+    ->E.A.fmap(element => element->nodeKeyValueToAST)
     ->pgNodesToStringUsingSeparator(", ") ++ "}"
   | ASTBoolean(node) => node["value"]->Js.String.make
   | ASTCall(node) =>
@@ -169,7 +181,7 @@ let rec pgToString = (ast: ast): string => {
 and toString = (node: node): string => node->nodeToAST->pgToString
 
 let toStringError = (error: parseError): string => {
-  let SyntaxError(message, _) = error
+  let ParseError.SyntaxError(message, _) = error
   `Syntax Error: ${message}}`
 }
 

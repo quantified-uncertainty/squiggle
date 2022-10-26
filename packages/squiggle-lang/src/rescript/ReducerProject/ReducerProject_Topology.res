@@ -17,7 +17,7 @@ let rec topologicalSortUtil = (
   let dependencies = getImmediateDependencies(this, sourceId)->Belt.Result.getWithDefault([])
   let (visited, stack) = state
   let myVisited = Belt.Map.String.set(visited, sourceId, true)
-  let (newVisited, newStack) = dependencies->Belt.Array.reduce((myVisited, stack), (
+  let (newVisited, newStack) = dependencies->E.A.reduce((myVisited, stack), (
     (currVisited, currStack),
     dependency,
   ) => {
@@ -34,7 +34,7 @@ let getTopologicalSort = (this: t): array<string> => {
   let (_visited, stack) =
     this
     ->getSourceIds
-    ->Belt.Array.reduce((Belt.Map.String.empty, list{}), ((currVisited, currStack), currId) =>
+    ->E.A.reduce((Belt.Map.String.empty, list{}), ((currVisited, currStack), currId) =>
       if !Belt.Map.String.getWithDefault(currVisited, currId, false) {
         topologicalSortUtil(this, currId, (currVisited, currStack))
       } else {
@@ -65,33 +65,31 @@ let getDependents = (this: t, sourceId: string): array<string> => {
 
 let runOrderDiff = (current: array<string>, previous0: array<string>): array<string> => {
   let extraLength =
-    Belt.Array.length(current) > Belt.Array.length(previous0)
-      ? Belt.Array.length(current) - Belt.Array.length(previous0)
-      : 0
+    E.A.length(current) > E.A.length(previous0) ? E.A.length(current) - E.A.length(previous0) : 0
   let previous = Belt.Array.copy(previous0)
   let filler = Belt.Array.make(extraLength, "")
-  Belt.Array.forEach(filler, _ => {
+  E.A.forEach(filler, _ => {
     let _ = Js.Array2.push(previous, "")
   })
-  let zipped: array<(string, string)> = Belt.Array.zip(current, previous)
+  let zipped: array<(string, string)> = E.A.zip(current, previous)
 
   // zipped
-  // ->Belt.Array.map(((curr, prev)) => {
+  // ->E.A.fmap(((curr, prev)) => {
   //   let result = `(${curr}, ${prev})`
   //   result
   // })
   // ->Js.Array2.joinWith(", ")
   // ->Js.log
 
-  let (_, affected) = Belt.Array.reduce(zipped, (true, []), ((wasEqual, acc), (curr, prev)) => {
+  let (_, affected) = E.A.reduce(zipped, (true, []), ((wasEqual, acc), (curr, prev)) => {
     switch wasEqual {
     | true =>
       if curr == prev {
         (true, acc)
       } else {
-        (false, Belt.Array.concat(acc, [curr]))
+        (false, E.A.concat(acc, [curr]))
       }
-    | false => (false, Belt.Array.concat(acc, [curr]))
+    | false => (false, E.A.concat(acc, [curr]))
     }
   })
   affected

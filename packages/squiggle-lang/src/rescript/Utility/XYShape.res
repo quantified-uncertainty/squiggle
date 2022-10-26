@@ -35,8 +35,7 @@ module Error = {
           p1Length,
         )} and ${p2Name} has length ${E.I.toString(p2Length)}`
     | MultipleErrors(errors) =>
-      `Multiple Errors: ${E.A2.fmap(errors, toString)->E.A2.fmap(r => `[${r}]`)
-          |> E.A.joinWith(", ")}`
+      `Multiple Errors: ${E.A.fmap(errors, toString)->E.A.fmap(r => `[${r}]`)->E.A.joinWith(", ")}`
     }
 }
 
@@ -77,26 +76,26 @@ module T = {
   let firstY = (t: t) => t |> ys |> E.A.first |> extImp
   let lastY = (t: t) => t |> ys |> E.A.last |> extImp
   let xTotalRange = (t: t) => maxX(t) -. minX(t)
-  let mapX = (fn, t: t): t => {xs: E.A.fmap(fn, t.xs), ys: t.ys}
-  let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(fn, t.ys)}
+  let mapX = (fn, t: t): t => {xs: E.A.fmap(t.xs, fn), ys: t.ys}
+  let mapY = (fn, t: t): t => {xs: t.xs, ys: E.A.fmap(t.ys, fn)}
   let mapYResult = (fn: float => result<float, 'e>, t: t): result<t, 'e> => {
-    let mappedYs = E.A.fmap(fn, t.ys)
+    let mappedYs = E.A.fmap(t.ys, fn)
     E.A.R.firstErrorOrOpen(mappedYs)->E.R2.fmap(y => {xs: t.xs, ys: y})
   }
   let square = mapX(x => x ** 2.0)
-  let zip = ({xs, ys}: t) => Belt.Array.zip(xs, ys)
+  let zip = ({xs, ys}: t) => E.A.zip(xs, ys)
   let fromArray = ((xs, ys)): t => {xs, ys}
   let fromArrays = (xs, ys): t => {xs, ys}
   let accumulateYs = (fn, p: t) => fromArray((p.xs, E.A.accumulate(fn, p.ys)))
   let concat = (t1: t, t2: t) => {
-    let cxs = Array.concat(list{t1.xs, t2.xs})
-    let cys = Array.concat(list{t1.ys, t2.ys})
+    let cxs = E.A.concat(t1.xs, t2.xs)
+    let cys = E.A.concat(t1.ys, t2.ys)
     {xs: cxs, ys: cys}
   }
-  let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> Belt.Array.unzip |> fromArray
+  let fromZippedArray = (pairs: array<(float, float)>): t => pairs |> E.A.unzip |> fromArray
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
   let toJs = (t: t) => {"xs": t.xs, "ys": t.ys}
-  let filterYValues = (fn, t: t): t => t |> zip |> E.A.filter(((_, y)) => fn(y)) |> fromZippedArray
+  let filterYValues = (fn, t: t): t => t->zip->E.A.filter(((_, y)) => fn(y))->fromZippedArray
   let filterOkYs = (xs: array<float>, ys: array<result<float, 'b>>): t => {
     let n = E.A.length(xs) // Assume length(xs) == length(ys)
     let newXs = []
@@ -157,10 +156,10 @@ module T = {
 
 module Ts = {
   type t = T.ts
-  let minX = (t: t) => t |> E.A.fmap(T.minX) |> E.A.Floats.min
-  let maxX = (t: t) => t |> E.A.fmap(T.maxX) |> E.A.Floats.max
+  let minX = (t: t) => t->E.A.fmap(T.minX) |> E.A.Floats.min
+  let maxX = (t: t) => t->E.A.fmap(T.maxX) |> E.A.Floats.max
   let equallyDividedXs = (t: t, newLength) => E.A.Floats.range(minX(t), maxX(t), newLength)
-  let allXs = (t: t) => t |> E.A.fmap(T.xs) |> E.A.Sorted.concatMany
+  let allXs = (t: t) => t->E.A.fmap(T.xs) |> E.A.Sorted.concatMany
 }
 
 module Pairs = {
@@ -173,13 +172,13 @@ module Pairs = {
 
   let firstAtOrBeforeXValue = (xValue, t: T.t) => {
     let zipped = T.zip(t)
-    let firstIndex = zipped |> Belt.Array.getIndexBy(_, ((x, _)) => x > xValue)
+    let firstIndex = zipped |> E.A.getIndexBy(_, ((x, _)) => x > xValue)
     let previousIndex = switch firstIndex {
-    | None => Some(Array.length(zipped) - 1)
+    | None => Some(E.A.length(zipped) - 1)
     | Some(0) => None
     | Some(n) => Some(n - 1)
     }
-    previousIndex |> Belt.Option.flatMap(_, Belt.Array.get(zipped))
+    previousIndex |> Belt.Option.flatMap(_, E.A.get(zipped))
   }
 }
 
@@ -301,12 +300,12 @@ module XtoY = {
 
 module XsConversion = {
   let _replaceWithXs = (newXs: array<float>, t: T.t): T.t => {
-    let newYs = Belt.Array.map(newXs, XtoY.linear(_, t))
+    let newYs = E.A.fmap(newXs, XtoY.linear(_, t))
     {xs: newXs, ys: newYs}
   }
 
   let equallyDivideXByMass = (newLength: int, integral: T.t) =>
-    E.A.Floats.range(0.0, 1.0, newLength) |> E.A.fmap(YtoX.linear(_, integral))
+    E.A.Floats.range(0.0, 1.0, newLength)->E.A.fmap(YtoX.linear(_, integral))
 
   let proportionEquallyOverX = (newLength: int, t: T.t): T.t =>
     T.equallyDividedXs(t, newLength) |> _replaceWithXs(_, t)
@@ -321,7 +320,7 @@ module Zipped = {
   let compareXs = ((x1, _): (float, float), (x2, _): (float, float)) => x1 > x2 ? 1 : 0
   let sortByY = (t: zipped) => t |> E.A.stableSortBy(_, compareYs)
   let sortByX = (t: zipped) => t |> E.A.stableSortBy(_, compareXs)
-  let filterByX = (testFn: float => bool, t: zipped) => t |> E.A.filter(((x, _)) => testFn(x))
+  let filterByX = (testFn: float => bool, t: zipped) => t->E.A.filter(((x, _)) => testFn(x))
 }
 
 module PointwiseCombination = {
@@ -475,7 +474,7 @@ module PointwiseCombination = {
       if abs_float(x1 -. x2) < 2.0 *. MagicNumbers.Epsilon.seven {
         [x1]
       } else {
-        let newPointsArray = Belt.Array.makeBy(points - 1, i => i)
+        let newPointsArray = E.A.makeBy(points - 1, i => i)
         // don't repeat the x2 point, it will be gotten in the next iteration.
         let result = Js.Array.mapi((pos, i) =>
           if i == 0 {
@@ -493,8 +492,8 @@ module PointwiseCombination = {
       (x, i) => i < length - 2 ? getInBetween(x, t.xs[i + 1]) : [x],
       t.xs,
     )
-    let newXs = Belt.Array.concatMany(newXsUnflattened)
-    let newYs = E.A.fmap(x => XtoY.linear(x, t), newXs)
+    let newXs = E.A.concatMany(newXsUnflattened)
+    let newYs = E.A.fmap(newXs, x => XtoY.linear(x, t))
     {xs: newXs, ys: newYs}
   }
 
@@ -512,7 +511,7 @@ module PointwiseCombination = {
     | (_, _) =>
       let allXs = Ts.equallyDividedXs([t1, t2], sampleCount)
 
-      let allYs = allXs |> E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)))
+      let allYs = allXs->E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)))
 
       T.fromArrays(allXs, allYs)
     }
@@ -542,10 +541,10 @@ module Range = {
     (nextY -. lastY) /. (nextX -. lastX)
 
   let mapYsBasedOnRanges = (fn, t) =>
-    Belt.Array.zip(t.xs, t.ys)
+    E.A.zip(t.xs, t.ys)
     |> E.A.toRanges
     |> E.R.toOption
-    |> E.O.fmap(r => r |> Belt.Array.map(_, r => (nextX(r), fn(r))))
+    |> E.O.fmap(r => r |> E.A.fmap(_, r => (nextX(r), fn(r))))
 
   // This code is messy, in part because I'm trying to make things easy on garbage collection here.
   // It's using triangles instead of trapezoids right now.
@@ -590,11 +589,11 @@ module Range = {
   let stepsToContinuous = t => {
     // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
     let diff = T.xTotalRange(t) |> (r => r *. MagicNumbers.Epsilon.five)
-    let items = switch E.A.toRanges(Belt.Array.zip(t.xs, t.ys)) {
+    let items = switch E.A.toRanges(E.A.zip(t.xs, t.ys)) {
     | Ok(items) =>
       Some(
         items
-        |> Belt.Array.map(_, rangePointAssumingSteps)
+        |> E.A.fmap(_, rangePointAssumingSteps)
         |> T.fromZippedArray
         |> PointwiseCombination.intersperse(t |> T.mapX(e => e +. diff)),
       )
@@ -604,7 +603,7 @@ module Range = {
     switch (items, first) {
     | (Some(items), Some((0.0, _))) => Some(items)
     | (Some(items), Some((firstX, _))) =>
-      let all = E.A.append([(firstX, 0.0)], items |> T.zip)
+      let all = E.A.concat([(firstX, 0.0)], items |> T.zip)
       all |> T.fromZippedArray |> E.O.some
     | _ => None
     }

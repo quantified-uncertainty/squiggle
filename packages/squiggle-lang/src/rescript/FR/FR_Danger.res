@@ -90,11 +90,11 @@ module Integration = {
       let weightForAnInnerPoint = totalWeight /. E.I.toFloat(numTotalPoints - 1)
       let weightForAnOuterPoint = totalWeight /. E.I.toFloat(numTotalPoints - 1) /. 2.0
       let innerPointIncrement = (max -. min) /. E.I.toFloat(numTotalPoints - 1)
-      let innerXs = Belt.Array.makeBy(numInnerPoints, i =>
+      let innerXs = E.A.makeBy(numInnerPoints, i =>
         min +. Belt_Float.fromInt(i + 1) *. innerPointIncrement
       )
       // Gotcha: makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
-      let ysOptions = Belt.Array.map(innerXs, x => applyFunctionAtFloatToFloatOption(x))
+      let ysOptions = E.A.fmap(innerXs, x => applyFunctionAtFloatToFloatOption(x))
 
       /* Logging, with a worked example. */
       // Useful for understanding what is happening.
@@ -333,9 +333,8 @@ module DiminishingReturns = {
 
           let initAccumulator: diminishingReturnsAccumulator = Ok({
             optimalAllocations: Belt.Array.make(E.A.length(lambdas), 0.0),
-            currentMarginalReturns: E.A.fmap(
-              lambda => applyFunctionAtPoint(lambda, 0.0),
-              lambdas,
+            currentMarginalReturns: E.A.fmap(lambdas, lambda =>
+              applyFunctionAtPoint(lambda, 0.0)
             )->E.A.R.firstErrorOrOpen,
           })
 
@@ -411,7 +410,7 @@ module DiminishingReturns = {
           ~run=(inputs, environment, reducer) =>
             switch inputs {
             | [IEvArray(innerlambdas), IEvNumber(funds), IEvNumber(approximateIncrement)] => {
-                let individuallyWrappedLambdas = E.A.fmap(innerLambda => {
+                let individuallyWrappedLambdas = innerlambdas->E.A.fmap(innerLambda => {
                   switch innerLambda {
                   | Reducer_T.IEvLambda(lambda) => Ok(lambda)
                   | _ =>
@@ -419,7 +418,7 @@ module DiminishingReturns = {
                     ->SqError.Message.REOther
                     ->Error
                   }
-                }, innerlambdas)
+                })
                 let wrappedLambdas = E.A.R.firstErrorOrOpen(individuallyWrappedLambdas)
                 let result = switch wrappedLambdas {
                 | Ok(lambdas) => {

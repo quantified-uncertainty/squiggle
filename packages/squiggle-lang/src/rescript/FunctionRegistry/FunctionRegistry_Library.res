@@ -1,4 +1,4 @@
-let fnList = Belt.Array.concatMany([
+let fnList = E.A.concatMany([
   FR_Builtin.library,
   FR_Dict.library,
   FR_Dist.library,

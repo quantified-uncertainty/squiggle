@@ -73,72 +73,72 @@ let toStringResult = (variantResult: result<squiggleValue, error>) =>
   Reducer_Value.toStringResult(variantResult)
 
 @genType
-let getArray = (variant: squiggleValue): option<squiggleValue_Array> =>
+let getArray = (variant: squiggleValue): squiggleValue_Array =>
   //FIXME: Convert
   switch variant {
-  | IEvArray(arrayLike) => arrayLike->Some
-  | _ => None
+  | IEvArray(arrayLike) => arrayLike
+  | _ => raise(Not_found)
   }
 
 @genType
-let getBool = (variant: squiggleValue): option<bool> =>
+let getBool = (variant: squiggleValue): bool =>
   switch variant {
-  | IEvBool(value) => value->Some
-  | _ => None
+  | IEvBool(value) => value
+  | _ => raise(Not_found)
   }
 
 @genType
-let getDate = (variant: squiggleValue): option<Js.Date.t> =>
+let getDate = (variant: squiggleValue): Js.Date.t =>
   switch variant {
-  | IEvDate(value) => value->Some
-  | _ => None
+  | IEvDate(value) => value
+  | _ => raise(Not_found)
   }
 
 @genType
-let getDeclaration = (variant: squiggleValue): option<squiggleValue_Declaration> =>
+let getDeclaration = (variant: squiggleValue): squiggleValue_Declaration =>
   switch variant {
-  | IEvDeclaration(value) => value->Some
-  | _ => None
+  | IEvDeclaration(value) => value
+  | _ => raise(Not_found)
   }
 
 @genType
-let getDistribution = (variant: squiggleValue): option<squiggleValue_Distribution> =>
+let getDistribution = (variant: squiggleValue): squiggleValue_Distribution =>
   switch variant {
-  | IEvDistribution(value) => value->Some
-  | _ => None
+  | IEvDistribution(value) => value
+  | _ => raise(Not_found)
   }
 
 @genType
-let getLambda = (variant: squiggleValue): option<squiggleValue_Lambda> =>
+let getLambda = (variant: squiggleValue): squiggleValue_Lambda =>
   switch variant {
-  | IEvLambda(value) => value->Some
-  | _ => None
+  | IEvLambda(value) => value
+  | _ => raise(Not_found)
   }
 
 @genType
-let getNumber = (variant: squiggleValue): option<float> =>
+let getNumber = (variant: squiggleValue): float =>
   switch variant {
-  | IEvNumber(value) => value->Some
-  | _ => None
+  | IEvNumber(value) => value
+  | _ => raise(Not_found)
   }
 
 @genType
-let getRecord = (variant: squiggleValue): option<squiggleValue_Record> =>
+let getRecord = (variant: squiggleValue): squiggleValue_Record =>
   switch variant {
-  | IEvRecord(value) => value->Some
-  | _ => None
+  | IEvRecord(value) => value
+  | _ => raise(Not_found)
   }
 
 @genType
-let getString = (variant: squiggleValue): option<string> =>
+let getString = (variant: squiggleValue): string =>
   switch variant {
-  | IEvString(value) => value->Some
-  | _ => None
+  | IEvString(value) => value
+  | _ => raise(Not_found)
   }
 
 @genType
-let getTimeDuration = (variant: squiggleValue): option<float> =>
+let getTimeDuration = (variant: squiggleValue): float =>
   switch variant {
-  | IEvTimeDuration(value) => value->Some
-  | _ => None
+  | IEvTimeDuration(value) => value
+  | _ => raise(Not_found)
   }

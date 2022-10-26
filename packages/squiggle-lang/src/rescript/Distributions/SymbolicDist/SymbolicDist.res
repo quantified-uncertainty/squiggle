@@ -484,7 +484,7 @@ module T = {
       [n.low -. dx, n.low, n.low +. dx, n.high -. dx, n.high, n.high +. dx]
     | (#ByWeight, _) =>
       let ys = E.A.Floats.range(minCdfValue, maxCdfValue, n)
-      ys |> E.A.fmap(y => inv(y, dist))
+      ys->E.A.fmap(y => inv(y, dist))
     }
 
   /* Calling e.g. "Normal.operate" returns an optional that wraps a result.
@@ -540,7 +540,7 @@ module T = {
     | #Bernoulli(v) => Bernoulli.toPointSetDist(v)
     | _ =>
       let xs = interpolateXs(~xSelection, d, sampleCount)
-      let ys = xs |> E.A.fmap(x => pdf(x, d))
+      let ys = xs->E.A.fmap(x => pdf(x, d))
       Continuous(Continuous.make(~integralSumCache=Some(1.0), {xs, ys}))
     }
 }
