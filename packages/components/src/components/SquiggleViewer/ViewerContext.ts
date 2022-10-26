@@ -1,7 +1,7 @@
-import { defaultEnvironment, SqValueLocation } from "@quri/squiggle-lang";
+import { SqValueLocation } from "@quri/squiggle-lang";
 import React from "react";
 import { LocalItemSettings, MergedItemSettings } from "./utils";
-import { viewSettingsSchema, viewSettingsToMerged } from "../ViewSettings";
+import { viewSettingsSchema } from "../ViewSettingsForm";
 
 type ViewerContextShape = {
   // Note that we don't store settings themselves in the context (that would cause rerenders of the entire tree on each settings update).
@@ -15,11 +15,7 @@ type ViewerContextShape = {
 
 export const ViewerContext = React.createContext<ViewerContextShape>({
   getSettings: () => ({ collapsed: false }),
-  getMergedSettings: () => ({
-    collapsed: false,
-    environment: defaultEnvironment,
-    ...viewSettingsToMerged(viewSettingsSchema.getDefault()),
-  }),
+  getMergedSettings: () => viewSettingsSchema.getDefault(),
   setSettings() {},
   enableLocalSettings: false,
 });

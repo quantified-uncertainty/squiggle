@@ -1,22 +1,16 @@
 import * as React from "react";
 import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle";
-import {
-  SquiggleViewer,
-  FlattenedViewSettings,
-  createViewSettings,
-} from "./SquiggleViewer";
+import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer";
 import { getValueToRender } from "../lib/utility";
 
-export type SquiggleChartProps = SquiggleArgs & FlattenedViewSettings;
+type Props = SquiggleArgs & Omit<SquiggleViewerProps, "result">;
 
-export const SquiggleChart: React.FC<SquiggleChartProps> = React.memo(
-  (props) => {
-    const resultAndBindings = useSquiggle(props);
+export const SquiggleChart: React.FC<Props> = React.memo((props) => {
+  // TODO - split props into useSquiggle args and SquiggleViewer args would be cleaner
+  // (but `useSquiggle` props are union-typed and are hard to extract for that reason)
+  const resultAndBindings = useSquiggle(props);
 
-    const valueToRender = getValueToRender(resultAndBindings);
+  const valueToRender = getValueToRender(resultAndBindings);
 
-    return (
-      <SquiggleViewer {...createViewSettings(props)} result={valueToRender} />
-    );
-  }
-);
+  return <SquiggleViewer {...props} result={valueToRender} />;
+});

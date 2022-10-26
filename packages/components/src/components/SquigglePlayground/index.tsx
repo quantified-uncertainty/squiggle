@@ -1,5 +1,4 @@
 import React, {
-  FC,
   useState,
   useEffect,
   useMemo,
@@ -12,13 +11,12 @@ import {
   useMaybeControlledValue,
   useRunnerState,
   useSquiggle,
-} from "../lib/hooks";
-import { SquiggleArgs } from "../lib/hooks/useSquiggle";
+} from "../../lib/hooks";
+import { SquiggleArgs } from "../../lib/hooks/useSquiggle";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   ChartSquareBarIcon,
   CheckCircleIcon,
-  ClipboardCopyIcon,
   CodeIcon,
   CogIcon,
   CurrencyDollarIcon,
@@ -31,27 +29,21 @@ import clsx from "clsx";
 
 import { environment } from "@quri/squiggle-lang";
 
-import { CodeEditor } from "./CodeEditor";
-import { JsonEditor } from "./JsonEditor";
-import { ErrorAlert, SuccessAlert } from "./Alert";
-import { SquiggleContainer } from "./SquiggleContainer";
-import { Toggle } from "./ui/Toggle";
-import { StyledTab } from "./ui/StyledTab";
-import { InputItem } from "./ui/InputItem";
-import { Text } from "./ui/Text";
-import { ViewSettings, viewSettingsSchema } from "./ViewSettings";
-import { HeadedSection } from "./ui/HeadedSection";
-import { Button } from "./ui/Button";
-import { JsImports } from "../lib/jsImports";
-import { getErrorLocations, getValueToRender } from "../lib/utility";
-import {
-  SquiggleViewer,
-  FlattenedViewSettings,
-  createViewSettings,
-} from "./SquiggleViewer";
+import { CodeEditor } from "../CodeEditor";
+import { SquiggleContainer } from "../SquiggleContainer";
+import { Toggle } from "../ui/Toggle";
+import { StyledTab } from "../ui/StyledTab";
+import { InputItem } from "../ui/InputItem";
+import { Text } from "../ui/Text";
+import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm";
+import { getErrorLocations, getValueToRender } from "../../lib/utility";
+import { SquiggleViewer, SquiggleViewerProps } from "../SquiggleViewer";
+import { ShareButton } from "./ShareButton";
+import { JsImports } from "../../lib/jsImports";
+import { ImportSettingsForm } from "./ImportSettingsForm";
 
 type PlaygroundProps = SquiggleArgs &
-  FlattenedViewSettings & {
+  Omit<SquiggleViewerProps, "result"> & {
     /** The initial squiggle string to put in the playground */
     defaultCode?: string;
     onCodeChange?(expr: string): void;
@@ -62,7 +54,7 @@ type PlaygroundProps = SquiggleArgs &
     /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
     showShareButton?: boolean;
     /** Height of the editor */
-    editorHeight?: number;
+    height?: number;
   };
 
 const schema = yup
@@ -84,15 +76,14 @@ const schema = yup
       .default(1000)
       .min(10)
       .max(10000),
-    showEditor: yup.boolean().required().default(true),
   })
   .concat(viewSettingsSchema);
 
 type FormFields = yup.InferType<typeof schema>;
 
-const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
-  register,
-}) => (
+const EnvironmentSettingsForm: React.FC<{
+  register: UseFormRegister<FormFields>;
+}> = ({ register }) => (
   <div className="space-y-6 p-3 max-w-xl">
     <div>
       <InputItem
@@ -124,60 +115,6 @@ const SamplingSettings: React.FC<{ register: UseFormRegister<FormFields> }> = ({
     </div>
   </div>
 );
-
-const InputVariablesSettings: React.FC<{
-  initialImports: JsImports;
-  setImports: (imports: JsImports) => void;
-}> = ({ initialImports, setImports }) => {
-  const [importString, setImportString] = useState(() =>
-    JSON.stringify(initialImports)
-  );
-  const [importsAreValid, setImportsAreValid] = useState(true);
-
-  const onChange = (value: string) => {
-    setImportString(value);
-    let imports = {};
-    try {
-      imports = JSON.parse(value);
-      setImportsAreValid(true);
-    } catch (e) {
-      setImportsAreValid(false);
-    }
-    setImports(imports);
-  };
-
-  return (
-    <div className="p-3 max-w-3xl">
-      <HeadedSection title="Import Variables from JSON">
-        <div className="space-y-6">
-          <Text>
-            You can import variables from JSON into your Squiggle code.
-            Variables are accessed with dollar signs. For example, "timeNow"
-            would be accessed as "$timeNow".
-          </Text>
-          <div className="border border-slate-200 mt-6 mb-2">
-            <JsonEditor
-              value={importString}
-              onChange={onChange}
-              oneLine={false}
-              showGutter={true}
-              height={150}
-            />
-          </div>
-          <div className="p-1 pt-2">
-            {importsAreValid ? (
-              <SuccessAlert heading="Valid JSON" />
-            ) : (
-              <ErrorAlert heading="Invalid JSON">
-                You must use valid JSON in this editor.
-              </ErrorAlert>
-            )}
-          </div>
-        </div>
-      </HeadedSection>
-    </div>
-  );
-};
 
 const RunControls: React.FC<{
   autorunMode: boolean;
@@ -212,29 +149,7 @@ const RunControls: React.FC<{
   );
 };
 
-const ShareButton: React.FC = () => {
-  const [isCopied, setIsCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText((window.top || window).location.href);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 1000);
-  };
-  return (
-    <div className="w-36">
-      <Button onClick={copy} wide>
-        {isCopied ? (
-          "Copied to clipboard!"
-        ) : (
-          <div className="flex items-center space-x-1">
-            <ClipboardCopyIcon className="w-4 h-4" />
-            <span>Copy share link</span>
-          </div>
-        )}
-      </Button>
-    </div>
-  );
-};
-
+// Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
   getLeftPanelElement: () => HTMLDivElement | undefined;
 };
@@ -242,14 +157,15 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
   getLeftPanelElement: () => undefined,
 });
 
-export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
+export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const {
     defaultCode = "",
     code: controlledCode,
     onCodeChange,
     onSettingsChange,
     showShareButton = false,
-    editorHeight = 500,
+    height = 500,
+    showEditor = true,
   } = props;
   const [code, setCode] = useMaybeControlledValue({
     value: controlledCode,
@@ -312,7 +228,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
           <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
         ) : null}
         <SquiggleViewer
-          {...createViewSettings(vars)}
+          {...vars}
           enableLocalSettings={true}
           result={valueToRender}
         />
@@ -321,7 +237,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
 
   const errorLocations = getErrorLocations(resultAndBindings.result);
 
-  const firstTab = vars.showEditor ? (
+  const firstTab = props.showEditor ? (
     <div className="border border-slate-200" data-testid="squiggle-editor">
       <CodeEditor
         errorLocations={errorLocations}
@@ -330,7 +246,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
         onSubmit={run}
         oneLine={false}
         showGutter={true}
-        height={editorHeight}
+        height={height}
       />
     </div>
   ) : (
@@ -341,10 +257,10 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
     <StyledTab.Panels>
       <StyledTab.Panel>{firstTab}</StyledTab.Panel>
       <StyledTab.Panel>
-        <SamplingSettings register={register} />
+        <EnvironmentSettingsForm register={register} />
       </StyledTab.Panel>
       <StyledTab.Panel>
-        <ViewSettings
+        <ViewSettingsForm
           register={
             // This is dangerous, but doesn't cause any problems.
             // I tried to make `ViewSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
@@ -355,10 +271,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
         />
       </StyledTab.Panel>
       <StyledTab.Panel>
-        <InputVariablesSettings
-          initialImports={imports}
-          setImports={setImports}
-        />
+        <ImportSettingsForm initialImports={imports} setImports={setImports} />
       </StyledTab.Panel>
     </StyledTab.Panels>
   );
@@ -390,12 +303,17 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
     <SquiggleContainer>
       <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
         <StyledTab.Group>
-          <div className="pb-4">
+          <div
+            className="pb-4"
+            style={{
+              minHeight: 200 /* important if editor is hidden */,
+            }}
+          >
             <div className="flex justify-between items-center">
               <StyledTab.List>
                 <StyledTab
-                  name={vars.showEditor ? "Code" : "Display"}
-                  icon={vars.showEditor ? CodeIcon : EyeIcon}
+                  name={showEditor ? "Code" : "Display"}
+                  icon={showEditor ? CodeIcon : EyeIcon}
                 />
                 <StyledTab name="Sampling Settings" icon={CogIcon} />
                 <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
@@ -412,7 +330,7 @@ export const SquigglePlayground: FC<PlaygroundProps> = (props) => {
                 {showShareButton && <ShareButton />}
               </div>
             </div>
-            {vars.showEditor ? withEditor : withoutEditor}
+            {showEditor ? withEditor : withoutEditor}
           </div>
         </StyledTab.Group>
       </PlaygroundContext.Provider>

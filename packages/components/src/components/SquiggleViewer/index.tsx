@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { SqValueLocation } from "@quri/squiggle-lang";
 import { ExpressionViewer } from "./ExpressionViewer";
 import { ViewerContext } from "./ViewerContext";
@@ -8,89 +8,63 @@ import {
   MergedItemSettings,
 } from "./utils";
 import { useSquiggle } from "../../lib/hooks";
-import {
-  EditableViewSettings,
-  viewSettingsSchema,
-  viewSettingsToMerged,
-} from "../ViewSettings";
+import { PartialViewSettings, viewSettingsSchema } from "../ViewSettingsForm";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert";
+import _ from "lodash";
 
-// Flattened view settings, gets turned into props for SquiggleChart and SquiggleEditor
-export type FlattenedViewSettings = Partial<
-  EditableViewSettings & {
-    width?: number;
-    enableLocalSettings?: boolean;
-  }
->;
-
-type ViewSettings = {
-  width?: number;
-  enableLocalSettings?: boolean;
-} & MergedItemSettings;
-
-export const createViewSettings = (
-  props: FlattenedViewSettings
-): ViewSettings => {
-  const propsWithDefaults = { ...viewSettingsSchema.getDefault(), ...props };
-  let merged = viewSettingsToMerged(propsWithDefaults);
-  const { width, enableLocalSettings } = propsWithDefaults;
-
-  return { ...merged, width, enableLocalSettings };
-};
-
-type Props = {
+export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   result: ReturnType<typeof useSquiggle>["result"];
-} & ViewSettings;
+  width?: number;
+  enableLocalSettings?: boolean;
+} & PartialViewSettings;
 
-type Settings = {
+type SettingsStore = {
   [k: string]: LocalItemSettings;
 };
 
 const defaultSettings: LocalItemSettings = { collapsed: false };
 
-export const SquiggleViewer: React.FC<Props> = ({
+export const SquiggleViewer: React.FC<SquiggleViewerProps> = ({
   result,
   width,
-  chartHeight,
-  distributionChartSettings,
-  functionChartSettings: chartSettings,
   enableLocalSettings = false,
+  ...partialViewSettings
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
-  const settingsRef = useRef<Settings>({});
+  const settingsStoreRef = useRef<SettingsStore>({});
+
+  const globalSettings = useMemo(() => {
+    return _.merge({}, viewSettingsSchema.getDefault(), partialViewSettings);
+  }, [partialViewSettings]);
 
   const getSettings = useCallback(
     (location: SqValueLocation) => {
-      return settingsRef.current[locationAsString(location)] || defaultSettings;
+      return (
+        settingsStoreRef.current[locationAsString(location)] || defaultSettings
+      );
     },
-    [settingsRef]
+    [settingsStoreRef]
   );
 
   const setSettings = useCallback(
     (location: SqValueLocation, value: LocalItemSettings) => {
-      settingsRef.current[locationAsString(location)] = value;
+      settingsStoreRef.current[locationAsString(location)] = value;
     },
-    [settingsRef]
+    [settingsStoreRef]
   );
 
   const getMergedSettings = useCallback(
     (location: SqValueLocation) => {
       const localSettings = getSettings(location);
-      const result: MergedItemSettings = {
-        distributionChartSettings: {
-          ...distributionChartSettings,
-          ...(localSettings.distributionChartSettings || {}),
-        },
-        functionChartSettings: {
-          ...chartSettings,
-          ...(localSettings.functionChartSettings || {}),
-        },
-        chartHeight: localSettings.chartHeight || chartHeight,
-      };
+      const result: MergedItemSettings = _.merge(
+        {},
+        globalSettings,
+        localSettings
+      );
       return result;
     },
-    [distributionChartSettings, chartSettings, chartHeight, getSettings]
+    [globalSettings, getSettings]
   );
 
   return (

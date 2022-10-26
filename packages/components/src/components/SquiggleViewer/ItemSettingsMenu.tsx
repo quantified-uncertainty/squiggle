@@ -3,17 +3,12 @@ import React, { useContext, useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Modal } from "../ui/Modal";
-import {
-  ViewSettings,
-  viewSettingsSchema,
-  mergedToViewSettings,
-  EditableViewSettings,
-  viewSettingsToLocal,
-} from "../ViewSettings";
+import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm";
 import { ViewerContext } from "./ViewerContext";
 import { PlaygroundContext } from "../SquigglePlayground";
 import { SqValue } from "@quri/squiggle-lang";
 import { locationAsString } from "./utils";
+import _ from "lodash";
 
 type Props = {
   value: SqValue;
@@ -39,15 +34,12 @@ const ItemSettingsModal: React.FC<
 
   const { register, watch } = useForm({
     resolver: yupResolver(viewSettingsSchema),
-    defaultValues: mergedToViewSettings(mergedSettings),
+    defaultValues: mergedSettings,
   });
   useEffect(() => {
-    const subscription = watch((vars: Partial<EditableViewSettings>) => {
+    const subscription = watch((vars) => {
       const settings = getSettings(value.location); // get the latest version
-      setSettings(value.location, {
-        ...settings,
-        ...viewSettingsToLocal(vars),
-      });
+      setSettings(value.location, _.merge({}, settings, vars));
       onChange();
     });
     return () => subscription.unsubscribe();
@@ -75,7 +67,7 @@ const ItemSettingsModal: React.FC<
         )}
       </Modal.Header>
       <Modal.Body>
-        <ViewSettings
+        <ViewSettingsForm
           register={register}
           withFunctionSettings={withFunctionSettings}
           disableLogXSetting={disableLogX}

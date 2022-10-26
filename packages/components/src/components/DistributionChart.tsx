@@ -38,7 +38,7 @@ export type DistributionChartSettings = yup.InferType<
 export type DistributionChartProps = {
   plot: Plot;
   environment: environment;
-  width?: number; // TODO - move to settings?
+  width?: number;
   settings: DistributionChartSettings;
 };
 

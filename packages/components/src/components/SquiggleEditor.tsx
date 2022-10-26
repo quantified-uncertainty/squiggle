@@ -4,11 +4,7 @@ import { SquiggleContainer } from "./SquiggleContainer";
 import { useMaybeControlledValue } from "../lib/hooks";
 import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle";
 import { SqLocation } from "@quri/squiggle-lang";
-import {
-  SquiggleViewer,
-  createViewSettings,
-  FlattenedViewSettings,
-} from "./SquiggleViewer";
+import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer";
 import { getErrorLocations, getValueToRender } from "../lib/utility";
 
 const WrappedCodeEditor: React.FC<{
@@ -28,11 +24,10 @@ const WrappedCodeEditor: React.FC<{
   </div>
 );
 
-export type SquiggleEditorProps = SquiggleArgs &
-  FlattenedViewSettings & {
-    defaultCode?: string;
-    onCodeChange?: (code: string) => void;
-  };
+export type SquiggleEditorProps = SquiggleArgs & {
+  defaultCode?: string;
+  onCodeChange?: (code: string) => void;
+} & Omit<SquiggleViewerProps, "result">;
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   const [code, setCode] = useMaybeControlledValue({
@@ -53,7 +48,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
         setCode={setCode}
         errorLocations={errorLocations}
       />
-      <SquiggleViewer result={valueToRender} {...createViewSettings(props)} />
+      <SquiggleViewer result={valueToRender} {...props} />
     </SquiggleContainer>
   );
 };

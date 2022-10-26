@@ -5,78 +5,29 @@ import { InputItem } from "./ui/InputItem";
 import { Checkbox } from "./ui/Checkbox";
 import { HeadedSection } from "./ui/HeadedSection";
 import { Text } from "./ui/Text";
-import { MergedItemSettings, LocalItemSettings } from "./SquiggleViewer/utils";
 import { distributionSettingsSchema } from "./DistributionChart";
+import { functionSettingsSchema } from "./FunctionChart";
 
-export const viewSettingsSchema = yup
-  .object({})
-  .shape({
-    diagramStart: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(0)
-      .min(0),
-    diagramStop: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(10)
-      .min(0),
-    diagramCount: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(20)
-      .min(2),
-  })
-  .concat(distributionSettingsSchema);
-
-export type EditableViewSettings = yup.InferType<typeof viewSettingsSchema>;
-
-export const mergedToViewSettings = (
-  settings: MergedItemSettings
-): EditableViewSettings => ({
-  ...settings,
-  ...settings.distributionChartSettings,
-  diagramStart: settings.functionChartSettings.start,
-  diagramStop: settings.functionChartSettings.stop,
-  diagramCount: settings.functionChartSettings.count,
-});
-export const viewSettingsToMerged = (
-  settings: EditableViewSettings
-): MergedItemSettings => ({
-  distributionChartSettings: { ...settings },
-  functionChartSettings: {
-    start: settings.diagramStart,
-    stop: settings.diagramStop,
-    count: settings.diagramCount,
-  },
-  chartHeight: settings.chartHeight,
+export const viewSettingsSchema = yup.object({}).shape({
+  distributionChartSettings: distributionSettingsSchema,
+  functionChartSettings: functionSettingsSchema,
+  chartHeight: yup.number().required().positive().integer().default(150),
 });
 
-// Annoyingly, this has the exact same body as above, however I can't work
-// out how to convince typescript that it's a duplication. The only way I can think
-// of removing this is by making EditableViewSettings and MergedItemSettings the same object and removing the need for both these functions
-export const viewSettingsToLocal = (
-  settings: Partial<EditableViewSettings>
-): Omit<LocalItemSettings, "collapsed"> => ({
-  distributionChartSettings: { ...settings },
-  functionChartSettings: {
-    start: settings.diagramStart,
-    stop: settings.diagramStop,
-    count: settings.diagramCount,
-  },
-  chartHeight: settings.chartHeight,
-});
+export type ViewSettings = yup.InferType<typeof viewSettingsSchema>;
 
-export const ViewSettings: React.FC<{
+type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+
+export type PartialViewSettings = DeepPartial<ViewSettings>;
+
+export const ViewSettingsForm: React.FC<{
   withFunctionSettings?: boolean;
   disableLogXSetting?: boolean;
-  register: UseFormRegister<EditableViewSettings>;
+  register: UseFormRegister<ViewSettings>;
 }> = ({ withFunctionSettings = true, disableLogXSetting, register }) => {
   return (
     <div className="space-y-6 p-3 divide-y divide-gray-200 max-w-xl">
@@ -91,21 +42,21 @@ export const ViewSettings: React.FC<{
         </div>
       </HeadedSection>
 
-      <DistributionViewSettings
+      <DistributionViewSettingsForm
         disableLogXSetting={disableLogXSetting}
         register={register}
       />
 
       {withFunctionSettings ? (
-        <FunctionViewSettings register={register} />
+        <FunctionViewSettingsForm register={register} />
       ) : null}
     </div>
   );
 };
 
-export const DistributionViewSettings: React.FC<{
+export const DistributionViewSettingsForm: React.FC<{
   disableLogXSetting?: boolean;
-  register: UseFormRegister<EditableViewSettings>;
+  register: UseFormRegister<ViewSettings>;
 }> = ({ disableLogXSetting, register }) => {
   return (
     <div className="pt-8">
@@ -113,7 +64,7 @@ export const DistributionViewSettings: React.FC<{
         <div className="space-y-2">
           <Checkbox
             register={register}
-            name="logX"
+            name="distributionChartSettings.logX"
             label="Show x scale logarithmically"
             disabled={disableLogXSetting}
             tooltip={
@@ -124,39 +75,39 @@ export const DistributionViewSettings: React.FC<{
           />
           <Checkbox
             register={register}
-            name="expY"
+            name="distributionChartSettings.expY"
             label="Show y scale exponentially"
           />
           <Checkbox
             register={register}
-            name="vegaActions"
+            name="distributionChartSettings.vegaActions"
             label="Show vega chart controls"
           />
           <Checkbox
             register={register}
-            name="showSummary"
+            name="distributionChartSettings.showSummary"
             label="Show summary statistics"
           />
           <InputItem
-            name="minX"
+            name="distributionChartSettings.minX"
             type="number"
             register={register}
             label="Min X Value"
           />
           <InputItem
-            name="maxX"
+            name="distributionChartSettings.maxX"
             type="number"
             register={register}
             label="Max X Value"
           />
           <InputItem
-            name="title"
+            name="distributionChartSettings.title"
             type="text"
             register={register}
             label="Title"
           />
           <InputItem
-            name="tickFormat"
+            name="distributionChartSettings.tickFormat"
             type="text"
             register={register}
             label="Tick Format"
@@ -167,8 +118,8 @@ export const DistributionViewSettings: React.FC<{
   );
 };
 
-export const FunctionViewSettings: React.FC<{
-  register: UseFormRegister<EditableViewSettings>;
+export const FunctionViewSettingsForm: React.FC<{
+  register: UseFormRegister<ViewSettings>;
 }> = ({ register }) => (
   <div className="pt-8">
     <HeadedSection title="Function Display Settings">
@@ -182,19 +133,19 @@ export const FunctionViewSettings: React.FC<{
         <div className="space-y-4">
           <InputItem
             type="number"
-            name="diagramStart"
+            name="functionChartSettings.start"
             register={register}
             label="Min X Value"
           />
           <InputItem
             type="number"
-            name="diagramStop"
+            name="functionChartSettings.stop"
             register={register}
             label="Max X Value"
           />
           <InputItem
             type="number"
-            name="diagramCount"
+            name="functionChartSettings.count"
             register={register}
             label="Points between X min and X max to sample"
           />
