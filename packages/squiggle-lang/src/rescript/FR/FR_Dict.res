@@ -214,9 +214,10 @@ let library = [
       FnDefinition.make(
         ~name="map",
         ~inputs=[FRTypeDict(FRTypeAny), FRTypeLambda],
-        ~run=(inputs, env, reducer) =>
+        ~run=(inputs, context, reducer) =>
           switch inputs {
-          | [IEvRecord(dict), IEvLambda(lambda)] => Ok(Internals.map(dict, lambda, env, reducer))
+          | [IEvRecord(dict), IEvLambda(lambda)] =>
+            Ok(Internals.map(dict, lambda, context, reducer))
           | _ => Error(impossibleError)
           },
         (),
