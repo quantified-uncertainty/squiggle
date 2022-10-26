@@ -5,15 +5,18 @@ import type { LogScale, LinearScale, PowScale, TimeScale } from "vega";
 export const defaultTickFormat = ".9~s";
 
 export const distributionChartSpecSchema = yup.object({}).shape({
+  /** Set the x scale to be logarithmic */
   logX: yup.boolean().required().default(false),
+  /** Set the y scale to be exponential */
   expY: yup.boolean().required().default(false),
   minX: yup.number(),
-  title: yup.string(),
   maxX: yup.number(),
+  title: yup.string(),
   xAxisType: yup
     .mixed<"number" | "dateTime">()
     .oneOf(["number", "dateTime"])
     .default("number"),
+  /** Documented here: https://github.com/d3/d3-format */
   tickFormat: yup.string().required().default(defaultTickFormat),
 });
 
