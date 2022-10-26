@@ -102,7 +102,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       maxY: Math.max(...domain.map((x) => x.y)),
     });
 
-    let widthProp = width ? width : size.width;
+    let widthProp = width
+      ? width
+      : Number.isFinite(size.width)
+      ? size.width
+      : 400;
+
     if (widthProp < 20) {
       console.warn(
         `Width of Distribution is set to ${widthProp}, which is too small`
@@ -113,7 +118,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
     const vegaData = { data: shapes.value, samples };
 
     return (
-      <div style={{ width: widthProp }}>
+      <div>
         {settings.logX && shapes.value.some(hasMassBelowZero) ? (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.

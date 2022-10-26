@@ -237,7 +237,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const errorLocations = getErrorLocations(resultAndBindings.result);
 
-  const firstTab = props.showEditor ? (
+  const firstTab = showEditor ? (
     <div className="border border-slate-200" data-testid="squiggle-editor">
       <CodeEditor
         errorLocations={errorLocations}
