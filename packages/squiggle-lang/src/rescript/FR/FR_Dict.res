@@ -29,15 +29,49 @@ module Internals = {
     ->E.R2.fmap(Belt.Map.String.fromArray)
     ->E.R2.fmap(Wrappers.evRecord)
 
+  let set = (a: t, key, value): Reducer_T.value => IEvRecord(Belt.Map.String.set(a, key, value))
+
   //Belt.Map.String has a function for mergeMany, but I couldn't understand how to use it yet.
   let mergeMany = (a: array<t>): Reducer_T.value => {
     let mergedValues =
       a->E.A.fmap(Belt.Map.String.toArray)->E.A.concatMany->Belt.Map.String.fromArray
     IEvRecord(mergedValues)
   }
+
+  let map = (
+    dict: t,
+    eLambdaValue,
+    context: Reducer_T.context,
+    reducer: Reducer_T.reducerFn,
+  ): Reducer_T.value => {
+    Belt.Map.String.map(dict, elem =>
+      Reducer_Lambda.doLambdaCall(eLambdaValue, [elem], context, reducer)
+    )->Wrappers.evRecord
+  }
 }
 
 let library = [
+  Function.make(
+    ~name="set",
+    ~nameSpace,
+    ~requiresNamespace=true,
+    ~output=EvtRecord,
+    ~examples=[`Dict.set({a: 1, b: 2}, "c", 3)`],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="set",
+        ~inputs=[FRTypeDict(FRTypeAny), FRTypeString, FRTypeAny],
+        ~run=(inputs, _, _) => {
+          switch inputs {
+          | [IEvRecord(dict), IEvString(key), value] => Internals.set(dict, key, value)->Ok
+          | _ => Error(impossibleError)
+          }
+        },
+        (),
+      ),
+    ],
+    (),
+  ),
   Function.make(
     ~name="merge",
     ~nameSpace,
@@ -165,6 +199,26 @@ let library = [
           | _ => Error(impossibleError)
           }
         },
+        (),
+      ),
+    ],
+    (),
+  ),
+  Function.make(
+    ~name="map",
+    ~nameSpace,
+    ~requiresNamespace=true,
+    ~output=EvtRecord,
+    ~examples=[`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
+    ~definitions=[
+      FnDefinition.make(
+        ~name="map",
+        ~inputs=[FRTypeDict(FRTypeAny), FRTypeLambda],
+        ~run=(inputs, env, reducer) =>
+          switch inputs {
+          | [IEvRecord(dict), IEvLambda(lambda)] => Ok(Internals.map(dict, lambda, env, reducer))
+          | _ => Error(impossibleError)
+          },
         (),
       ),
     ],
