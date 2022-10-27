@@ -88,7 +88,7 @@ describe("FunctionRegistry Library", () => {
     )
 
     testEvalToBe("Dict.set({a: 1, b: 2}, 'c', 3)", "Ok({a: 1,b: 2,c: 3})")
-    testEvalToBe("d={a: 1, b: 2}; _=Dict.set(d, 'c', 3); d", "Ok({a: 1,b: 2})")
+    testEvalToBe("d={a: 1, b: 2}; _=Dict.set(d, 'c', 3); d", "Ok({a: 1,b: 2})") // Immutable
     testEvalToBe("Dict.merge({a: 1, b: 2}, {b: 3, c: 4, d: 5})", "Ok({a: 1,b: 3,c: 4,d: 5})")
     testEvalToBe(
       "Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}, {c: 5, e: 6}])",

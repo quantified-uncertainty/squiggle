@@ -209,9 +209,10 @@ let library = [
       FnDefinition.make(
         ~name="map",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
-        ~run=(inputs, env, reducer) =>
+        ~run=(inputs, context, reducer) =>
           switch inputs {
-          | [IEvArray(array), IEvLambda(lambda)] => Ok(Internals.map(array, lambda, env, reducer))
+          | [IEvArray(array), IEvLambda(lambda)] =>
+            Ok(Internals.map(array, lambda, context, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -228,10 +229,10 @@ let library = [
       FnDefinition.make(
         ~name="reduce",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeAny, FRTypeLambda],
-        ~run=(inputs, env, reducer) =>
+        ~run=(inputs, context, reducer) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
-            Ok(Internals.reduce(array, initialValue, lambda, env, reducer))
+            Ok(Internals.reduce(array, initialValue, lambda, context, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -248,10 +249,10 @@ let library = [
       FnDefinition.make(
         ~name="reduceReverse",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeAny, FRTypeLambda],
-        ~run=(inputs, env, reducer) =>
+        ~run=(inputs, context, reducer) =>
           switch inputs {
           | [IEvArray(array), initialValue, IEvLambda(lambda)] =>
-            Ok(Internals.reduceReverse(array, initialValue, lambda, env, reducer))
+            Ok(Internals.reduceReverse(array, initialValue, lambda, context, reducer))
           | _ => Error(impossibleError)
           },
         (),
@@ -268,10 +269,10 @@ let library = [
       FnDefinition.make(
         ~name="filter",
         ~inputs=[FRTypeArray(FRTypeAny), FRTypeLambda],
-        ~run=(inputs, env, reducer) =>
+        ~run=(inputs, context, reducer) =>
           switch inputs {
           | [IEvArray(array), IEvLambda(lambda)] =>
-            Ok(Internals.filter(array, lambda, env, reducer))
+            Ok(Internals.filter(array, lambda, context, reducer))
           | _ => Error(impossibleError)
           },
         (),

@@ -39,14 +39,14 @@ module Internal = {
     | Error(err) => Error(REOperationError(err))
     }
 
-  let doLambdaCall = (aLambdaValue, list, env, reducer) =>
-    switch Reducer_Lambda.doLambdaCall(aLambdaValue, list, env, reducer) {
+  let doLambdaCall = (aLambdaValue, list, context, reducer) =>
+    switch Reducer_Lambda.doLambdaCall(aLambdaValue, list, context, reducer) {
     | Reducer_T.IEvNumber(f) => Ok(f)
     | _ => Error(Operation.SampleMapNeedsNtoNFunction)
     }
 
-  let mapY = (pointSetDist: t, aLambdaValue, env, reducer) => {
-    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], env, reducer)
+  let mapY = (pointSetDist: t, aLambdaValue, context, reducer) => {
+    let fn = r => doLambdaCall(aLambdaValue, [IEvNumber(r)], context, reducer)
     pointSetDist->PointSetDist.T.mapYResult(fn)->toType
   }
 }
@@ -91,10 +91,10 @@ let library = [
       FnDefinition.make(
         ~name="mapY",
         ~inputs=[FRTypeDist, FRTypeLambda],
-        ~run=(inputs, env, reducer) =>
+        ~run=(inputs, context, reducer) =>
           switch inputs {
           | [IEvDistribution(PointSet(dist)), IEvLambda(lambda)] =>
-            Internal.mapY(dist, lambda, env, reducer)
+            Internal.mapY(dist, lambda, context, reducer)
           | _ => Error(impossibleError)
           },
         (),
