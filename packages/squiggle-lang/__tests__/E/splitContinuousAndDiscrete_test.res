@@ -1,9 +1,12 @@
 open Jest
 open TestHelpers
+open FastCheck
+open Arbitrary
+open Property.Sync
 
 let prepareInputs = (ar, minWeight) =>
-  E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(ar, ~minDiscreteWeight=minWeight) |> (
-    ((c, disc)) => (c, disc |> E.FloatFloatMap.toArray)
+  E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(ar, ~minDiscreteWeight=minWeight)->(
+    ((c, disc)) => (c, disc->E.FloatFloatMap.toArray)
   )
 
 describe("Continuous and discrete splits", () => {
@@ -33,22 +36,52 @@ describe("Continuous and discrete splits", () => {
 
   let makeDuplicatedArray = count => {
     let arr = Belt.Array.range(1, count)->E.A.fmap(float_of_int)
-    let sorted = arr |> Belt.SortArray.stableSortBy(_, compare)
-    E.A.concatMany([sorted, sorted, sorted, sorted]) |> Belt.SortArray.stableSortBy(_, compare)
+    let sorted = arr->Belt.SortArray.stableSortBy(compare)
+    E.A.concatMany([sorted, sorted, sorted, sorted])->Belt.SortArray.stableSortBy(compare)
   }
 
   let (_, discrete1) = E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(
     makeDuplicatedArray(10),
     ~minDiscreteWeight=2,
   )
-  let toArr1 = discrete1 |> E.FloatFloatMap.toArray
-  makeTest("splitMedium at count=10", toArr1 |> E.A.length, 10)
+  let toArr1 = discrete1->E.FloatFloatMap.toArray
+  makeTest("splitMedium at count=10", toArr1->E.A.length, 10)
 
   let (_c, discrete2) = E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(
     makeDuplicatedArray(500),
     ~minDiscreteWeight=2,
   )
-  let toArr2 = discrete2 |> E.FloatFloatMap.toArray
-  makeTest("splitMedium at count=500", toArr2 |> E.A.length, 500)
-  // makeTest("foo", [] |> E.A.length, 500)
+  let toArr2 = discrete2->E.FloatFloatMap.toArray
+  makeTest("splitMedium at count=500", toArr2->E.A.length, 500)
+  // makeTest("foo", [] -> E.A.length, 500)
+
+  // Function for fast-check property testing
+  let testSegments = (counts, weight) => {
+    // Make random-length segments, join them, and split continuous/discrete
+    let random = _ => 0.01 +. Js.Math.random() // random() can produce 0
+    let values = counts->E.A.length->E.A.makeBy(random)->E.A.Floats.cumSum
+    let segments = Belt.Array.zipBy(counts, values, Belt.Array.make)
+    let result = prepareInputs(segments->E.A.concatMany, weight)
+
+    // Then split based on the segment length directly
+    let (contSegments, discSegments) = segments->Belt.Array.partition(s => E.A.length(s) < weight)
+    let expect = (
+      contSegments->E.A.concatMany,
+      discSegments->E.A.fmap(a => (E.A.unsafe_get(a, 0), E.A.length(a)->Belt.Int.toFloat)),
+    )
+
+    makeTest("fast-check testing", result, expect)
+    true
+  }
+
+  // rescript-fast-check's integerRange is broken, so we have to use nat plus a minimum
+  let testSegmentsCorrected = (counts, weight) =>
+    testSegments(counts->E.A.fmap(c => 1 + c), weight + 2)
+  assert_(
+    property2(
+      Combinators.arrayWithLength(nat(~max=30, ()), 0, 50),
+      nat(~max=20, ()),
+      testSegmentsCorrected,
+    ),
+  )
 })
