@@ -149,11 +149,9 @@ module Beta = {
 module Lognormal = {
   type t = lognormal
   let make = (mu, sigma) =>
-    mu <= 0.0
-      ? Error("Lognormal mean must be larger than 0")
-      : sigma <= 0.0
-      ? Error("Lognormal standard deviation must be larger than 0")
-      : Ok(#Lognormal({mu, sigma}))
+    sigma > 0.0
+      ? Ok(#Lognormal({mu, sigma}))
+      : Error("Lognormal standard deviation must be larger than 0")
   let pdf = (x, t: t) => Jstat.Lognormal.pdf(x, t.mu, t.sigma)
   let cdf = (x, t: t) => Jstat.Lognormal.cdf(x, t.mu, t.sigma)
   let inv = (p, t: t) => Jstat.Lognormal.inv(p, t.mu, t.sigma)
@@ -171,14 +169,16 @@ module Lognormal = {
   let fromMeanAndStdev = (mean, stdev) => {
     // https://math.stackexchange.com/questions/2501783/parameters-of-a-lognormal-distribution
     // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Generation_and_parameters
-    if stdev > 0.0 {
+    if mean <= 0.0 {
+      Error("Lognormal mean must be larger than 0")
+    } else if stdev <= 0.0 {
+      Error("Lognormal standard deviation must be larger than 0")
+    } else {
       let variance = stdev ** 2.
       let meanSquared = mean ** 2.
       let mu = 2. *. Js.Math.log(mean) -. 0.5 *. Js.Math.log(variance +. meanSquared)
       let sigma = Js.Math.sqrt(Js.Math.log(variance /. meanSquared +. 1.))
       Ok(#Lognormal({mu, sigma}))
-    } else {
-      Error("Lognormal standard deviation must be larger than 0")
     }
   }
 
