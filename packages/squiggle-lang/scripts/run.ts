@@ -1,11 +1,9 @@
 #!/usr/bin/env node
-import { run } from "./lib.mjs";
+import { run } from "./lib";
 
-import { Command } from "commander";
+import { Command } from "@commander-js/extra-typings";
 
-const program = new Command();
-
-program.arguments("<string>");
+const program = new Command().arguments("<string>");
 
 const options = program.parse(process.argv);
 

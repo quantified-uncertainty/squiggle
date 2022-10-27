@@ -1,21 +1,27 @@
-import { SqProject } from "@quri/squiggle-lang";
+import { SqProject } from "../src/js";
 
-export const measure = (cb, times = 1) => {
+export const measure = (cb: () => void, times = 1) => {
   const t1 = new Date();
 
   for (let i = 1; i <= times; i++) {
     cb();
   }
   const t2 = new Date();
-  return (t2 - t1) / 1000;
+  return (t2.getTime() - t1.getTime()) / 1000;
 };
 
-export const red = (str) => `\x1b[31m${str}\x1b[0m`;
-export const green = (str) => `\x1b[32m${str}\x1b[0m`;
+export const red = (str: string) => `\x1b[31m${str}\x1b[0m`;
+export const green = (str: string) => `\x1b[32m${str}\x1b[0m`;
 
-export const run = (src, { output, sampleCount } = {}) => {
+export const run = (
+  src: string,
+  {
+    output,
+    sampleCount,
+  }: { output?: boolean; sampleCount?: string | number } = {}
+) => {
   const project = SqProject.create();
-  if (sampleCount) {
+  if (sampleCount && Number(sampleCount) !== NaN) {
     project.setEnvironment({
       sampleCount: Number(sampleCount),
       xyPointLength: Number(sampleCount),
@@ -36,6 +42,6 @@ export const run = (src, { output, sampleCount } = {}) => {
     "Time:",
     String(time),
     result.tag === "Error" ? red(result.tag) : green(result.tag),
-    result.tag === "Error" ? result.value.toStringWithFrameStack() : ""
+    result.tag === "Error" ? result.value.toStringWithStackTrace() : ""
   );
 };

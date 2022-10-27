@@ -1,16 +1,14 @@
 #!/usr/bin/env node
 import fs from "fs";
 
-import { Command } from "commander";
+import { Command } from "@commander-js/extra-typings";
 
-import { run } from "./lib.mjs";
+import { run } from "./lib";
 
-const program = new Command();
+const program = new Command().arguments("<string>").option("-o, --output");
 
-program.option("-o, --output");
-program.arguments("<string>");
-
-const options = program.parse(process.argv);
+program.parse(process.argv);
+const options = program.opts();
 
 const sampleCount = process.env.SAMPLE_COUNT;
 
