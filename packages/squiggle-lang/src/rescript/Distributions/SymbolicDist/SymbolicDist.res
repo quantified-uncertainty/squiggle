@@ -149,9 +149,11 @@ module Beta = {
 module Lognormal = {
   type t = lognormal
   let make = (mu, sigma) =>
-    sigma > 0.0
-      ? Ok(#Lognormal({mu, sigma}))
-      : Error("Lognormal standard deviation must be larger than 0")
+    mu <= 0.0
+      ? Error("Lognormal mean must be larger than 0")
+      : sigma <= 0.0
+      ? Error("Lognormal standard deviation must be larger than 0")
+      : Ok(#Lognormal({mu, sigma}))
   let pdf = (x, t: t) => Jstat.Lognormal.pdf(x, t.mu, t.sigma)
   let cdf = (x, t: t) => Jstat.Lognormal.cdf(x, t.mu, t.sigma)
   let inv = (p, t: t) => Jstat.Lognormal.inv(p, t.mu, t.sigma)
