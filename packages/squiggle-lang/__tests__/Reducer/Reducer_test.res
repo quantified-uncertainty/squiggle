@@ -107,7 +107,6 @@ Stack trace:
   f at line 4, column 5
   g at line 6, column 12
   h at line 7, column 10
-  <top> at line 8, column 3
-`)
+  <top> at line 8, column 3`)
   })
 })
