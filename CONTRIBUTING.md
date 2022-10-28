@@ -38,16 +38,6 @@ Being a monorepo, where packages are connected by dependency, it's important to 
 
 We aspire for `ci.yaml` and `README.md`s to be in one-to-one correspondence.
 
-## If you're on NixOS
-
-You can't run `yarn` outside of a FHS shell. Additionally, you need to `patchelf` some things. A script does everything for you.
-
-```sh
-./nixos.sh
-```
-
-Reasons for this are comments in the script. Then, you should be able to do all the package-level `yarn run` commands/scripts.
-
 # Try not to push directly to develop
 
 If you absolutely must, please prefix your commit message with `hotfix: `.
