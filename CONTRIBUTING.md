@@ -47,6 +47,8 @@ If you absolutely must, please prefix your commit message with `hotfix: `.
 
 Please work against `develop` branch. **Do not** work against `master`.
 
+For PRs from the core contributor team, we usually wait for at least one review unless the PR is trivial or urgent.
+
 Autopings are set up: if you are not autopinged, you are welcome to comment, but please do not use the formal review feature, send approvals, rejections, or merges.
 
 # Code Quality
@@ -59,7 +61,6 @@ Autopings are set up: if you are not autopinged, you are welcome to comment, but
 # Rescript Style
 
 **Use `->` instead of `|>`**
-Note: Our codebase used to use `|>`, so there's a lot of that in the system. We'll gradually change it.
 
 **Use `x -> y -> z` instead of `let foo = y(x); let bar = z(foo)`**
 
@@ -87,9 +88,6 @@ Good:
   }
   foo -> addingFn
 ```
-
-**Write out types for everything, even if there's an interface file**
-We'll try this for one month (ending May 5, 2022), then revisit.
 
 **Use the Rescript optional default syntax**
 Rescript is clever about function inputs. There's custom syntax for default and optional arguments. In the cases where this applies, use it.
