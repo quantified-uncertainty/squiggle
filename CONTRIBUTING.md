@@ -1,10 +1,8 @@
-_The current document was written quickly and not exhaustively, yet, it's unfinished. [Template here](https://mozillascience.github.io/working-open-workshop/contributing/)_
-
 # Contributing to Squiggle
 
 We welcome contributions from developers, especially people in React/TypeScript, Rescript, and interpreters/parsers. We also are keen to hear issues filed by users!
 
-Squiggle is currently pre-alpha.
+Squiggle is currently in "Early Access" mode.
 
 # Quick links
 
