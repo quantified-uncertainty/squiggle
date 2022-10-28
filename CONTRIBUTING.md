@@ -147,6 +147,8 @@ It's almost always possible to type things properly with modern Typescript.
 Loose equality is [crazy](https://dorey.github.io/JavaScript-Equality-Table/unified/).
 
 **Don't use too many external libraries**
+This is especially important in `squiggle-lang` and less important in `website` or some other code that won't be used much as a library by many users.
+
 Heuristics for deciding whether pulling an external library is worth it:
 
 - is it maintained? is it going to stay maintained in the future?
