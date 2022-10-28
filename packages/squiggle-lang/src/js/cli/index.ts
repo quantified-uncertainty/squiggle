@@ -1,5 +1,5 @@
 import fs from "fs";
-import { run } from "./utils";
+import { OutputMode, run } from "./utils";
 
 import { program } from "@commander-js/extra-typings";
 import open from "open";
@@ -11,10 +11,22 @@ program
     "-e, --eval <code>",
     "run a given squiggle code string instead of a file"
   )
-  .option("-m --measure", "output the time it took to evaluate the code")
-  .option("-q, --quiet", "don't output the results and bindings")
+  .option("-t --time", "output the time it took to evaluate the code")
+  .option("-q, --quiet", "don't output the results and bindings") // useful for measuring the performance or checking that the code is valid
+  .option("-b, --show-bindings", "show bindings even if the result is present") // incompatible with --quiet
   .action((filename, options) => {
     let src = "";
+
+    let output: OutputMode = "RESULT_OR_BINDINGS";
+    if (options.quiet && options.showBindings) {
+      program.error(
+        "--quiet and --show-bindings can't be set at the same time."
+      );
+    } else if (options.quiet) {
+      output = "NONE";
+    } else if (options.showBindings) {
+      output = "RESULT_AND_BINDINGS";
+    }
 
     if (filename) {
       if (options.eval) {
@@ -31,7 +43,11 @@ program
 
     const sampleCount = process.env.SAMPLE_COUNT;
 
-    run(src, { output: !options.quiet, measure: options.measure, sampleCount });
+    run(src, {
+      output,
+      measure: options.time,
+      sampleCount,
+    });
   });
 
 program.command("playground").action(() => {
