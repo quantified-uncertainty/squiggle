@@ -71,12 +71,12 @@ Autopings are set up: if you are not autopinged, you are welcome to comment, but
 
 # Rescript Style
 
-**Use `->` instead of `|>`**  
+**Use `->` instead of `|>`**
 Note: Our codebase used to use `|>`, so there's a lot of that in the system. We'll gradually change it.
 
 **Use `x -> y -> z` instead of `let foo = y(x); let bar = z(foo)`**
 
-**Don't use anonymous functions with over three lines**  
+**Don't use anonymous functions with over three lines**
 Bad:
 
 ```rescript
@@ -101,10 +101,10 @@ Good:
   foo -> addingFn
 ```
 
-**Write out types for everything, even if there's an interface file**  
+**Write out types for everything, even if there's an interface file**
 We'll try this for one month (ending May 5, 2022), then revisit.
 
-**Use the Rescript optional default syntax**  
+**Use the Rescript optional default syntax**
 Rescript is clever about function inputs. There's custom syntax for default and optional arguments. In the cases where this applies, use it.
 
 From https://rescript-lang.org/docs/manual/latest/function:
@@ -120,13 +120,13 @@ let drawCircle = (~color, ~radius=?, ()) => {
 }
 ```
 
-**Use named arguments**  
+**Use named arguments**
 If a function is called externally (in a different file), and has either:
 
 1. Two arguments of the same type
 2. Three paramaters or more.
 
-**Module naming: Use x_y as module names**  
+**Module naming: Use x_y as module names**
 For example: `Myname_Myproject_Add.res`. Rescript/Ocaml both require files to have unique names, so long names are needed to keep different parts separate from each other.
 
 See [this page](https://dev.to/yawaramin/a-modular-ocaml-project-structure-1ikd) for more information. (Though note that they use two underscores, and we do one. We might refactor that later.
@@ -142,3 +142,59 @@ We have some of this in the Reducer code, but generally discourage it.
 - https://github.com/avohq/reasonml-code-style-guide
 - https://cs.brown.edu/courses/cs017/content/docs/reasonml-style.pdf
 - https://github.com/ostera/reason-design-patterns/
+
+# TypeScript style
+
+**Prefer `const` over `let`, never use `var`**
+`var` is deprecated in JS. `let` should only be used for mutable variables.
+
+**Use functional style, avoid classes**
+We use classes for outer-facing APIs, but most of the codebase should use plain immutable objects with functions act on those objects.
+
+**Use immutable types when it doesn't hurt the performance**
+Wrap object types in [Readonly](https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype) or mark individual fields as `readonly`.
+
+**Don't use namespaces**
+Use native ES modules instead, as [recommended by TypeScript documentation](https://www.typescriptlang.org/docs/handbook/namespaces-and-modules.html#using-modules).
+
+**Avoid `any` as much as possible**
+It's almost always possible to type things properly with modern Typescript.
+
+**Always use `===` instead of `==`**
+Loose equality is [crazy](https://dorey.github.io/JavaScript-Equality-Table/unified/).
+
+**Don't use too many external libraries**
+Heuristics for deciding whether pulling an external library is worth it:
+
+- is it maintained? is it going to stay maintained in the future?
+- how hard it would be to reimplement the functionality ourselves? if it's a few lines, it's better to control the implementation in our own codebase
+- what's the bundle size of the dependency and would it be effectively tree-shaked, if the dependency is big and we need only a small part of it?
+- would we want to fine-tune the implementation in the future, because of Squiggle's design needs or for the sake of performance?
+  - the closer to the "core" functionality of Squiggle the feature is (math, distributions-related code), the more it makes sense to keep control over the implementation details
+
+**Prefer named exports over default exports**
+It's easier to do refactorings with named exports.
+
+**Name files according to their main named exports; split code into many small files**
+This is expecially straightforward in the frontend code; try to put one component in a single file, `export const MyComponent: React.FC = ...` from `MyComponent.tsx`.
+
+In the squiggle-lang code, I'm not sure yet if this is viable.
+
+**Prefer `type` over `interface`**
+In the modern TypeScript there's no [big](https://stackoverflow.com/questions/37233735/interfaces-vs-types-in-typescript/52682220) [difference](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces) between types and interfaces. Errors in interfaces can be slightly nicer, but interfaces are open by default and we mostly don't want that.
+
+It's not worth fighting over, though, the difference is pretty small.
+
+**Prefer arrow functions over `function` keyword whenever possible**
+Arrow functions have less hidden features (`this`, `arguments`, function hoisting) and are more concise when writing in functional style.
+
+It's ok to use `function` when you need to define a complicated generic function, e.g. a generic functional React component.
+
+**Prefer `undefined` over `null`**
+
+**Use `UpperCamelCase` for type names, `camelCase` for variable names**
+
+**Use exceptions instead of Ok/Error pairs, wrap in try/catch on top level if necessary**
+
+**https://github.com/airbnb/javascript is mostly good**
+When it doesn't contradict the list above.
