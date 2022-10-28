@@ -2,29 +2,30 @@ _The current document was written quickly and not exhaustively, yet, it's unfini
 
 # Contributing to Squiggle
 
-We welcome contributions from developers, especially people in react/typescript, rescript, and interpreters/parsers. We also are keen to hear issues filed by users!
+We welcome contributions from developers, especially people in React/TypeScript, Rescript, and interpreters/parsers. We also are keen to hear issues filed by users!
 
 Squiggle is currently pre-alpha.
 
 # Quick links
 
 - [Roadmap to the alpha](https://github.com/orgs/quantified-uncertainty/projects/1)
-- The team presently communicates via the **EA Forecasting and Epistemics** slack (channels `#squiggle` and `#squiggle-ops`), you can track down an invite by reaching out to Ozzie Gooen
+- The team presently communicates via the **EA Forecasting and Epistemics** slack (channels `#squiggle-dev` and `#squiggle-ops`), you can track down an invite by reaching out to Ozzie Gooen
 - [Squiggle documentation](https://www.squiggle-language.com/docs/Language)
 - [Rescript documentation](https://rescript-lang.org/docs/manual/latest/introduction)
-- You can email `quinn@quantifieduncertainty.org` if you need assistance in onboarding or if you have questions
+- You can email `slava@quantifieduncertainty.org` if you need assistance in onboarding or if you have questions
 
 # Bug reports
 
-Anyone (with a github account) can file an issue at any time. Please allow Slava, Sam, and Ozzie to triage, but otherwise just follow the suggestions in the issue templates.
+Anyone (with a GitHub account) can file an issue at any time. Please allow [Slava](https://github.com/berekuk), [Sam](https://github.com/hazelfire), and [Ozzie](https://github.com/OAGr) to triage, but otherwise just follow the suggestions in the issue templates.
 
 # Project structure
 
-Squiggle is a **monorepo** with three **packages**.
+Squiggle is a **monorepo** with several **packages**.
 
 - **components** is where we improve reactive interfacing with Squiggle
 - **squiggle-lang** is where the magic happens: probability distributions, the interpreter, etc.
-- **website** is the site `squiggle-language.com`
+- **website** is the site [squiggle-language.com](https://www.squiggle-language.com)
+- **vscode-ext** is the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=qURI.vscode-squiggle)
 
 # Deployment ops
 
@@ -45,10 +46,6 @@ If you absolutely must, please prefix your commit message with `hotfix: `.
 # Pull request protocol
 
 Please work against `develop` branch. **Do not** work against `master`.
-
-- For rescript code: Slava and Ozzie are reviewers
-- For js or typescript code: Sam and Ozzie are reviewers
-- For ops code (i.e. yaml, package.json): Slava and Sam are reviewers
 
 Autopings are set up: if you are not autopinged, you are welcome to comment, but please do not use the formal review feature, send approvals, rejections, or merges.
 
