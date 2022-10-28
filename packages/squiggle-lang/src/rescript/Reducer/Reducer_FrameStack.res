@@ -8,7 +8,7 @@ module Frame = {
     name ++
     switch location {
     | Some(location) =>
-      ` at line ${location.start.line->Js.Int.toString}, column ${location.start.column->Js.Int.toString}` // TODO - source id?
+      ` at line ${location.start.line->Js.Int.toString}, column ${location.start.column->Js.Int.toString}, file ${location.source}`
     | None => ""
     }
 

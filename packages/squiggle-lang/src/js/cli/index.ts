@@ -1,3 +1,4 @@
+import path from "path";
 import fs from "fs";
 import { OutputMode, run } from "./utils";
 
@@ -38,7 +39,7 @@ export const makeProgram = () => {
         if (options.eval) {
           program.error("Only one of filename and eval string should be set.");
         }
-        src = fs.readFileSync(filename, "utf-8");
+        src = fs.readFileSync(path.resolve(filename), "utf-8");
       } else {
         if (options.eval) {
           src = options.eval;
@@ -49,7 +50,7 @@ export const makeProgram = () => {
 
       const sampleCount = process.env.SAMPLE_COUNT;
 
-      run({ src, output, measure: options.time, sampleCount });
+      run({ src, filename, output, measure: options.time, sampleCount });
     });
 
   program.command("playground").action(() => {

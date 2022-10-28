@@ -1,3 +1,4 @@
+import path from "path";
 import { CommanderError } from "@commander-js/extra-typings";
 import { makeProgram } from "../../src/js/cli";
 
@@ -91,4 +92,18 @@ it("Bindings", async () => {
   expect(result.exitCode).toBe(0);
   expect(result.stderr).toBe("");
   expect(stripAnsi(result.stdout)).toBe("Result:\n6\n\nBindings:\n{x: 5}\n");
+});
+
+it("Code with includes", async () => {
+  const filename = path.join(
+    __dirname,
+    "..",
+    "fixtures",
+    "includes",
+    "main.squiggle"
+  );
+  const result = await runCLI(["run", filename]);
+  expect(result.exitCode).toBe(0);
+  expect(result.stderr).toBe("");
+  expect(result.stdout).toBe("Normal(5, 2)");
 });
