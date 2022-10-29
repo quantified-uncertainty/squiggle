@@ -1,11 +1,11 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import { result, SqLambda, environment, SqValueTag } from "@quri/squiggle-lang";
+import { result, SqLambda, SqValueTag } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as lineChartSpec from "../vega-specs/spec-line-chart.json";
 import { ErrorAlert } from "./Alert";
-import { squiggleValueTag } from "@quri/squiggle-lang/src/rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_tag";
+import { FunctionChartSettings } from "./FunctionChart";
 
 let SquiggleLineChart = createClassFromSpec({
   spec: lineChartSpec as Spec,
@@ -18,34 +18,25 @@ const _rangeByCount = (start: number, stop: number, count: number) => {
   return result;
 };
 
-export type FunctionChartSettings = {
-  start: number;
-  stop: number;
-  count: number;
-};
-
-interface FunctionChart1NumberProps {
+type FunctionChart1NumberProps = {
   fn: SqLambda;
-  chartSettings: FunctionChartSettings;
-  environment: environment;
+  settings: FunctionChartSettings;
   height: number;
-}
+};
 
 type point = { x: number; value: result<number, string> };
 
 let getFunctionImage = ({
-  chartSettings,
+  settings,
   fn,
-  environment,
 }: {
-  chartSettings: FunctionChartSettings;
+  settings: FunctionChartSettings;
   fn: SqLambda;
-  environment: environment;
 }) => {
   let chartPointsToRender = _rangeByCount(
-    chartSettings.start,
-    chartSettings.stop,
-    chartSettings.count
+    settings.start,
+    settings.stop,
+    settings.count
   );
 
   let chartPointsData: point[] = chartPointsToRender.map((x) => {
@@ -89,13 +80,12 @@ let getFunctionImage = ({
 
 export const FunctionChart1Number: React.FC<FunctionChart1NumberProps> = ({
   fn,
-  chartSettings,
-  environment,
+  settings,
   height,
 }: FunctionChart1NumberProps) => {
   let getFunctionImageMemoized = React.useMemo(
-    () => getFunctionImage({ chartSettings, fn, environment }),
-    [environment, fn]
+    () => getFunctionImage({ settings: settings, fn }),
+    [settings, fn]
   );
 
   let data = getFunctionImageMemoized.functionImage.map(({ x, value }) => ({

@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as yup from "yup";
 import {
   SqDistribution,
   result,
@@ -14,26 +15,32 @@ import { useSize } from "react-use";
 
 import {
   buildVegaSpec,
-  DistributionChartSpecOptions,
+  distributionChartSpecSchema,
 } from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 
-export type DistributionPlottingSettings = {
-  /** Whether to show a summary of means, stdev, percentiles etc */
-  showSummary: boolean;
-  actions?: boolean;
-} & DistributionChartSpecOptions;
+export const distributionSettingsSchema = yup
+  .object({})
+  .shape({
+    showSummary: yup.boolean().required().default(false),
+    vegaActions: yup.boolean().required().default(false),
+  })
+  .concat(distributionChartSpecSchema);
+
+export type DistributionChartSettings = yup.InferType<
+  typeof distributionSettingsSchema
+>;
 
 export type DistributionChartProps = {
   plot: Plot;
   environment: environment;
   width?: number;
-  height: number;
-  xAxisType?: "number" | "dateTime";
-} & DistributionPlottingSettings;
+  chartHeight?: number;
+  settings: DistributionChartSettings;
+};
 
 export function defaultPlot(distribution: SqDistribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
@@ -46,16 +53,13 @@ export function makePlot(record: SqRecord): Plot | void {
   }
 }
 
-export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const {
-    plot,
-    environment,
-    height,
-    showSummary,
-    width,
-    logX,
-    actions = false,
-  } = props;
+export const DistributionChart: React.FC<DistributionChartProps> = ({
+  plot,
+  environment,
+  width,
+  chartHeight,
+  settings,
+}) => {
   const [sized] = useSize((size) => {
     const shapes = flattenResult(
       plot.distributions.map((x) =>
@@ -88,19 +92,22 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     );
 
     const spec = buildVegaSpec({
-      ...props,
-      minX: props.minX ?? Math.min(...domain.map((x) => x.x)),
-      maxX: props.minX ?? Math.max(...domain.map((x) => x.x)),
+      ...settings,
+      minX: Number.isFinite(settings.minX)
+        ? settings.minX
+        : Math.min(...domain.map((x) => x.x)),
+      maxX: Number.isFinite(settings.maxX)
+        ? settings.maxX
+        : Math.max(...domain.map((x) => x.x)),
       maxY: Math.max(...domain.map((x) => x.y)),
     });
 
-    // I think size.width is sometimes not finite due to the component not being in a visible context
-    // This occurs during testing
     let widthProp = width
       ? width
       : Number.isFinite(size.width)
       ? size.width
       : 400;
+
     if (widthProp < 20) {
       console.warn(
         `Width of Distribution is set to ${widthProp}, which is too small`
@@ -111,8 +118,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     const vegaData = { data: shapes.value, samples };
 
     return (
-      <div style={{ width: widthProp }}>
-        {logX && shapes.value.some(hasMassBelowZero) ? (
+      <div>
+        {settings.logX && shapes.value.some(hasMassBelowZero) ? (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
@@ -121,12 +128,12 @@ export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             spec={spec}
             data={vegaData}
             width={widthProp - 10}
-            height={height}
-            actions={actions}
+            height={chartHeight}
+            actions={settings.vegaActions}
           />
         )}
         <div className="flex justify-center">
-          {showSummary && plot.distributions.length === 1 && (
+          {settings.showSummary && plot.distributions.length === 1 && (
             <SummaryTable
               distribution={plot.distributions[0].distribution}
               environment={environment}
