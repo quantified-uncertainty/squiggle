@@ -12,7 +12,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@docusaurus/core": "2.1.0",
+    "@docusaurus/core": "2.2.0",
     "@docusaurus/preset-classic": "2.1.0",
     "@heroicons/react": "^1.0.6",
     "@quri/squiggle-components": "*",
