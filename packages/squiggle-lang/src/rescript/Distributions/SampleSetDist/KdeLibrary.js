@@ -6,7 +6,8 @@ const isFinite = require("lodash/isFinite");
 // samples: Must be sorted!
 // size:    Number of points in output, >= 3
 // xWidth:  Width of the kernel in x axis units
-const samplesToContinuousPdf = (samples, size, xWidth) => {
+// weight:  Probability mass for each point
+const samplesToContinuousPdf = (samples, size, xWidth, weight) => {
   samples = filter(samples, isFinite); // Not sure if this is needed?
   const len = samples.length;
   if (len === 0) return { xs: [], ys: [] };
@@ -28,17 +29,17 @@ const samplesToContinuousPdf = (samples, size, xWidth) => {
   // To give room for all the kernels, we'll have width steps
   // on either side as padding.
   // Subtract from the size - 1 total intervals.
-  const stepsInside = size - 1 - width * 2;
+  const stepsInside = size - 1 - 2 * width;
   const dx = srange / stepsInside;
+  xWidth = width * dx;
 
   // Output min and range
   // Total number of intervals is:
   // range / dx === (srange + 2 * margin) / dx
   //            === stepsInside + 2 * width
   //            === size - 1
-  const margin = width * dx;
-  const min = smin - margin;
-  const range = srange + 2 * margin;
+  const min = smin - xWidth;
+  const range = srange + 2 * xWidth;
 
   // On our discrete set of x values, each triangle is indistinguishable
   // from a sum of two triangles with peaks at the sample's two nearest
@@ -55,8 +56,9 @@ const samplesToContinuousPdf = (samples, size, xWidth) => {
     ysum[width + index + 2] += left;
   });
 
-  // Total sum will be width * width * len * dx but we want 1 / dx
-  const normalizer = 1 / (width * width * len * dx * dx);
+  // Sum for each sample will be width * width * dx
+  // but we want weight / dx
+  const normalizer = weight / (xWidth * xWidth);
 
   // A triangle at i causes the KDE to
   // - start increasing (+1) at i - width,

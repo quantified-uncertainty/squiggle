@@ -7,6 +7,7 @@ describe("Converting from a sample set distribution", () => {
       [1., 2., 3., 3., 4., 5., 5., 5., 6., 8., 9., 9.],
       50,
       0.35,
+      1. /. 12.,
     )
     let c: PointSetTypes.continuousShape = {
       xyShape: outputXYShape,

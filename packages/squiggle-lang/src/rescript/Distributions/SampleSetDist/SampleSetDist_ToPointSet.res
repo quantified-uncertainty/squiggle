@@ -26,19 +26,20 @@ module Internals = {
     }
 
     @module("./KdeLibrary.js")
-    external samplesToContinuousPdf: (array<float>, int, float) => distJs = "samplesToContinuousPdf"
+    external samplesToContinuousPdf: (array<float>, int, float, float) => distJs =
+      "samplesToContinuousPdf"
   }
 
   module KDE = {
-    let normalSampling = (samples, outputXYPoints, kernelWidth) =>
-      samples->JS.samplesToContinuousPdf(outputXYPoints, kernelWidth)->JS.jsToDist
+    let normalSampling = (samples, outputXYPoints, kernelWidth, totalWeight) =>
+      samples->JS.samplesToContinuousPdf(outputXYPoints, kernelWidth, totalWeight)->JS.jsToDist
   }
 
   module T = {
     type t = array<float>
 
-    let kde = (~samples, ~outputXYPoints, width) =>
-      KDE.normalSampling(samples, outputXYPoints, width)
+    let kde = (~samples, ~outputXYPoints, width, weight) =>
+      KDE.normalSampling(samples, outputXYPoints, width, weight)
   }
 }
 
@@ -56,7 +57,12 @@ let toPointSetDist = (
   )
 
   let contLength = continuousPart->E.A.length
+  let length = samples->E.A.length
+  let outLength = contLength <= 5 ? length - contLength : length
+  let pointWeight = 1. /. outLength->float_of_int
+
   let pdf = if contLength <= 5 {
+    // Drop these points; missing mass accounted for by outLength above
     None
   } else if E.A.unsafe_get(continuousPart, 0) == E.A.unsafe_get(continuousPart, contLength - 1) {
     // All the same value: treat as discrete
@@ -78,15 +84,19 @@ let toPointSetDist = (
       bandwidthXImplemented: usedWidth,
     }
     continuousPart
-    ->Internals.T.kde(~samples=_, ~outputXYPoints=samplingInputs.outputXYPoints, usedWidth)
+    ->Internals.T.kde(
+      ~samples=_,
+      ~outputXYPoints=samplingInputs.outputXYPoints,
+      usedWidth,
+      pointWeight,
+    )
     ->Continuous.make
     ->(r => Some((r, samplingStats)))
   }
 
-  let length = samples->E.A.length->float_of_int
   let discrete: PointSetTypes.discreteShape =
     discretePart
-    ->E.FloatFloatMap.fmap(r => r /. length, _)
+    ->E.FloatFloatMap.fmap(r => r *. pointWeight, _)
     ->E.FloatFloatMap.toArray
     ->XYShape.T.fromZippedArray
     ->Discrete.make
@@ -96,17 +106,9 @@ let toPointSetDist = (
     ~discrete=Some(discrete),
   )
 
-  /*
-   I'm surprised that this doesn't come out normalized. My guess is that the KDE library
-  we're using is standardizing on something else. If we ever change that library, we should
-  check to see if we still need to do this.
- */
-
-  let normalizedPointSet = pointSetDist->E.O.fmap(PointSetDist.T.normalize)
-
   let samplesParse: Internals.Types.outputs = {
     continuousParseParams: pdf->E.O.fmap(snd),
-    pointSetDist: normalizedPointSet,
+    pointSetDist,
   }
 
   samplesParse
