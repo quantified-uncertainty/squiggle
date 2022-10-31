@@ -59,11 +59,7 @@ let toPointSetDist = (
     None
   } else if E.A.unsafe_get(continuousPart, 0) == E.A.unsafe_get(continuousPart, contLength - 1) {
     // All the same value: treat as discrete
-    E.FloatFloatMap.add(
-      E.A.unsafe_get(continuousPart, 0),
-      contLength->Belt.Int.toFloat,
-      discretePart,
-    )->ignore
+    Js.Array2.push(discretePart, (E.A.unsafe_get(continuousPart, 0), contLength))->ignore
     None
   } else {
     // The only reason we compute _suggestedXWidth if
@@ -84,8 +80,7 @@ let toPointSetDist = (
 
   let discrete: PointSetTypes.discreteShape =
     discretePart
-    ->E.FloatFloatMap.fmap(r => r *. pointWeight, _)
-    ->E.FloatFloatMap.toArray
+    ->E.A.fmap(((x, count)) => (x, count->Belt.Int.toFloat *. pointWeight))
     ->XYShape.T.fromZippedArray
     ->Discrete.make
 

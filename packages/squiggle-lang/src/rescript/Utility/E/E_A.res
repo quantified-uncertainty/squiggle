@@ -1,6 +1,4 @@
 /* A for Array */
-module FloatFloatMap = E_FloatFloatMap
-
 let fmap = Belt.Array.map
 let fmapi = Belt.Array.mapWithIndex
 let forEach = Belt.Array.forEach
@@ -272,7 +270,7 @@ module Floats = {
       ~minDiscreteWeight: int,
     ) => {
       let continuous: array<float> = []
-      let discrete = FloatFloatMap.empty()
+      let discrete: array<(float, int)> = []
 
       // Weight of 1 is pointless because it indicates only discrete values,
       // and causes an infinite loop in the doubling search used here.
@@ -318,7 +316,7 @@ module Floats = {
           }
 
           let count = i.contents - iOrig
-          FloatFloatMap.add(value, count->Belt.Int.toFloat, discrete)
+          Js.Array2.push(discrete, (value, count))->ignore
         }
       }
       // Remaining values are continuous
