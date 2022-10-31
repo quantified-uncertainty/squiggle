@@ -67,6 +67,48 @@ let toPointSetDist = (
     ~minDiscreteWeight=minDiscreteToKeep,
   )
 
+  let contLength = continuousPart->E.A.length
+  let pdf = if contLength <= 5 {
+    None
+  } else if E.A.unsafe_get(continuousPart, 0) == E.A.unsafe_get(continuousPart, contLength - 1) {
+    // All the same value: treat as discrete
+    E.FloatFloatMap.add(
+      E.A.unsafe_get(continuousPart, 0),
+      contLength->Belt.Int.toFloat,
+      discretePart,
+    )->ignore
+    None
+  } else {
+    let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
+    let _suggestedUnitWidth = Internals.T.suggestedUnitWidth(
+      continuousPart,
+      samplingInputs.outputXYPoints,
+      _suggestedXWidth,
+    )
+    let usedWidth = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
+    let usedUnitWidth = Internals.T.xWidthToUnitWidth(
+      samples,
+      samplingInputs.outputXYPoints,
+      usedWidth,
+    )
+    let samplingStats: Internals.Types.samplingStats = {
+      sampleCount: samplingInputs.sampleCount,
+      outputXYPoints: samplingInputs.outputXYPoints,
+      bandwidthXSuggested: _suggestedXWidth,
+      bandwidthUnitSuggested: _suggestedUnitWidth,
+      bandwidthXImplemented: usedWidth,
+      bandwidthUnitImplemented: usedUnitWidth,
+    }
+    continuousPart
+    ->Internals.T.kde(
+      ~samples=_,
+      ~outputXYPoints=samplingInputs.outputXYPoints,
+      Internals.T.formatUnitWidth(usedUnitWidth),
+    )
+    ->Continuous.make
+    ->(r => Some((r, samplingStats)))
+  }
+
   let length = samples->E.A.length->float_of_int
   let discrete: PointSetTypes.discreteShape =
     discretePart
@@ -74,40 +116,6 @@ let toPointSetDist = (
     ->E.FloatFloatMap.toArray
     ->XYShape.T.fromZippedArray
     ->Discrete.make
-
-  let pdf =
-    continuousPart->E.A.length > 5
-      ? {
-          let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
-          let _suggestedUnitWidth = Internals.T.suggestedUnitWidth(
-            continuousPart,
-            samplingInputs.outputXYPoints,
-            _suggestedXWidth,
-          )
-          let usedWidth = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
-          let usedUnitWidth = Internals.T.xWidthToUnitWidth(
-            samples,
-            samplingInputs.outputXYPoints,
-            usedWidth,
-          )
-          let samplingStats: Internals.Types.samplingStats = {
-            sampleCount: samplingInputs.sampleCount,
-            outputXYPoints: samplingInputs.outputXYPoints,
-            bandwidthXSuggested: _suggestedXWidth,
-            bandwidthUnitSuggested: _suggestedUnitWidth,
-            bandwidthXImplemented: usedWidth,
-            bandwidthUnitImplemented: usedUnitWidth,
-          }
-          continuousPart
-          ->Internals.T.kde(
-            ~samples=_,
-            ~outputXYPoints=samplingInputs.outputXYPoints,
-            Internals.T.formatUnitWidth(usedUnitWidth),
-          )
-          ->Continuous.make
-          ->(r => Some((r, samplingStats)))
-        }
-      : None
 
   let pointSetDist = MixedShapeBuilder.buildSimple(
     ~continuous=pdf->E.O.fmap(fst),

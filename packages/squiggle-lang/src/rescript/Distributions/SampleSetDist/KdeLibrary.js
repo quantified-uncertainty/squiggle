@@ -32,9 +32,6 @@ const samplesToContinuousPdf = (samples, size, width) => {
   const min = smin - margin;
   const range = srange + 2 * margin;
 
-  // Should catch this case and treat as discrete earlier?
-  if (range === 0) return [{ xs: [min], ys: [1] }];
-
   // On our discrete set of x values, each triangle is indistinguishable
   // from a sum of two triangles with peaks at the sample's two nearest
   // neighbors. Here we sum up the peak values from all samples.
