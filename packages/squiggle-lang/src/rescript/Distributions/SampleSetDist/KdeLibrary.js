@@ -47,9 +47,10 @@ const samplesToContinuousPdf = (samples, size, xWidth, weight) => {
   // Only the indices width + 1 + [0, size) in ysum are ever nonzero
   // The extra zeros are to avoid out-of-bounds lookups for ddy below
   const ysum = Array(size + 2 * width).fill(0);
-  samples.forEach(function (x) {
+  const dxInv = 1 / dx;
+  samples.forEach((x) => {
     const off = x - min;
-    const index = Math.floor(off / dx);
+    const index = Math.floor(off * dxInv);
     const left = off - index * dx;
     const right = dx - left;
     ysum[width + index + 1] += right;
@@ -67,16 +68,17 @@ const samplesToContinuousPdf = (samples, size, xWidth, weight) => {
   // So the result is a double prefix sum.
   let dy = 0;
   let y = 0;
-  const ys = Array(size)
+  const xs = Array(size)
     .fill()
-    .map((_, i) => {
-      const ddy = ysum[i] - 2 * ysum[i + width] + ysum[i + 2 * width];
-      dy += ddy;
-      y += dy;
-      return normalizer * y;
-    });
+    .map((_, i) => min + i * dx);
+  const ys = xs.map((_, i) => {
+    const ddy = ysum[i] - 2 * ysum[i + width] + ysum[i + 2 * width];
+    dy += ddy;
+    y += dy;
+    return normalizer * y;
+  });
 
-  return { xs: ys.map((_, i) => min + i * dx), ys };
+  return { xs, ys };
 };
 
 module.exports = {

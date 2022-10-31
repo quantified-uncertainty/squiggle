@@ -34,17 +34,10 @@ module Internals = {
     let normalSampling = (samples, outputXYPoints, kernelWidth, totalWeight) =>
       samples->JS.samplesToContinuousPdf(outputXYPoints, kernelWidth, totalWeight)->JS.jsToDist
   }
-
-  module T = {
-    type t = array<float>
-
-    let kde = (~samples, ~outputXYPoints, width, weight) =>
-      KDE.normalSampling(samples, outputXYPoints, width, weight)
-  }
 }
 
 let toPointSetDist = (
-  ~samples: Internals.T.t,
+  ~samples: array<float>,
   ~samplingInputs: SamplingInputs.samplingInputs,
   (),
 ): Internals.Types.outputs => {
@@ -84,12 +77,7 @@ let toPointSetDist = (
       bandwidthXImplemented: usedWidth,
     }
     continuousPart
-    ->Internals.T.kde(
-      ~samples=_,
-      ~outputXYPoints=samplingInputs.outputXYPoints,
-      usedWidth,
-      pointWeight,
-    )
+    ->Internals.KDE.normalSampling(samplingInputs.outputXYPoints, usedWidth, pointWeight)
     ->Continuous.make
     ->(r => Some((r, samplingStats)))
   }
