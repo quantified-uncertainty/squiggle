@@ -47,10 +47,7 @@ module Internals = {
 
     let formatUnitWidth = w => Jstat.max([w, 1.0])->int_of_float
 
-    let suggestedUnitWidth = (samples, outputXYPoints) => {
-      let suggestedXWidth = SampleSetDist_Bandwidth.nrd0(samples)
-      xWidthToUnitWidth(samples, outputXYPoints, suggestedXWidth)
-    }
+    let suggestedUnitWidth = xWidthToUnitWidth
 
     let kde = (~samples, ~outputXYPoints, width) =>
       KDE.normalSampling(samples, outputXYPoints, width)
@@ -82,10 +79,10 @@ let toPointSetDist = (
     continuousPart->E.A.length > 5
       ? {
           let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
-          // todo: This does some recalculating from the last step.
           let _suggestedUnitWidth = Internals.T.suggestedUnitWidth(
             continuousPart,
             samplingInputs.outputXYPoints,
+            _suggestedXWidth,
           )
           let usedWidth = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
           let usedUnitWidth = Internals.T.xWidthToUnitWidth(
