@@ -4,23 +4,31 @@ const isFinite = require("lodash/isFinite");
 // Convert samples to x-y pairs for a PDF
 // Uses kernel density estimation (KDE) with a triangular kernel
 // samples: Must be sorted!
-// size:    Number of points in output
-// width:   Width of the kernel, as a whole number of x steps
-const samplesToContinuousPdf = (samples, size, width) => {
+// size:    Number of points in output, >= 3
+// xWidth:  Width of the kernel in x axis units
+const samplesToContinuousPdf = (samples, size, xWidth) => {
   samples = filter(samples, isFinite); // Not sure if this is needed?
   const len = samples.length;
   if (len === 0) return { xs: [], ys: [] };
+
+  // Sample min and range
+  const smin = samples[0];
+  const srange = samples[len - 1] - smin;
+
+  // width is in units of the step size dx and has to be a whole number
+  // If we set width = wantedWidth exactly then we have:
+  // width * dx === width * srange / (size - 1 - 2 * width)
+  //            === srange / ((size - 1) / width - 2)
+  //            === srange / ((srange + 2 * xWidth) / xWidth - 2)
+  //            === srange / (srange / xWidth + 2 - 2)
+  //            === xWidth
+  const wantedWidth = ((size - 1) * xWidth) / (srange + 2 * xWidth);
+  const width = Math.max(1, Math.floor(wantedWidth));
 
   // To give room for all the kernels, we'll have width steps
   // on either side as padding.
   // Subtract from the size - 1 total intervals.
   const stepsInside = size - 1 - width * 2;
-  if (stepsInside < 1)
-    throw Error("Number of steps isn't enough to contain all values");
-
-  // Sample min and range, and the size of an x interval dx
-  const smin = samples[0];
-  const srange = samples[len - 1] - smin;
   const dx = srange / stepsInside;
 
   // Output min and range

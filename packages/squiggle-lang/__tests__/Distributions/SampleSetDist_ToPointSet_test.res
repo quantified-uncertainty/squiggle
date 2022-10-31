@@ -6,7 +6,7 @@ describe("Converting from a sample set distribution", () => {
     let outputXYShape = SampleSetDist_ToPointSet.Internals.KDE.normalSampling(
       [1., 2., 3., 3., 4., 5., 5., 5., 6., 8., 9., 9.],
       50,
-      2,
+      0.35,
     )
     let c: PointSetTypes.continuousShape = {
       xyShape: outputXYShape,

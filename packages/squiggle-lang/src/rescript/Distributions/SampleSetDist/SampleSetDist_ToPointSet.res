@@ -4,9 +4,7 @@ module Internals = {
       sampleCount: int,
       outputXYPoints: int,
       bandwidthXSuggested: float,
-      bandwidthUnitSuggested: float,
       bandwidthXImplemented: float,
-      bandwidthUnitImplemented: float,
     }
 
     type outputs = {
@@ -28,7 +26,7 @@ module Internals = {
     }
 
     @module("./KdeLibrary.js")
-    external samplesToContinuousPdf: (array<float>, int, int) => distJs = "samplesToContinuousPdf"
+    external samplesToContinuousPdf: (array<float>, int, float) => distJs = "samplesToContinuousPdf"
   }
 
   module KDE = {
@@ -38,16 +36,6 @@ module Internals = {
 
   module T = {
     type t = array<float>
-
-    let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
-      let xyPointRange = E.A.Sorted.range(samples)->E.O.default(0.0)
-      let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints)
-      xWidth /. xyPointWidth
-    }
-
-    let formatUnitWidth = w => Jstat.max([w, 1.0])->int_of_float
-
-    let suggestedUnitWidth = xWidthToUnitWidth
 
     let kde = (~samples, ~outputXYPoints, width) =>
       KDE.normalSampling(samples, outputXYPoints, width)
@@ -79,32 +67,18 @@ let toPointSetDist = (
     )->ignore
     None
   } else {
+    // The only reason we compute _suggestedXWidth if
+    // samplingInputs.kernelWidth is given is to log it. Unnecessary?
     let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
-    let _suggestedUnitWidth = Internals.T.suggestedUnitWidth(
-      continuousPart,
-      samplingInputs.outputXYPoints,
-      _suggestedXWidth,
-    )
     let usedWidth = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
-    let usedUnitWidth = Internals.T.xWidthToUnitWidth(
-      samples,
-      samplingInputs.outputXYPoints,
-      usedWidth,
-    )
     let samplingStats: Internals.Types.samplingStats = {
       sampleCount: samplingInputs.sampleCount,
       outputXYPoints: samplingInputs.outputXYPoints,
       bandwidthXSuggested: _suggestedXWidth,
-      bandwidthUnitSuggested: _suggestedUnitWidth,
       bandwidthXImplemented: usedWidth,
-      bandwidthUnitImplemented: usedUnitWidth,
     }
     continuousPart
-    ->Internals.T.kde(
-      ~samples=_,
-      ~outputXYPoints=samplingInputs.outputXYPoints,
-      Internals.T.formatUnitWidth(usedUnitWidth),
-    )
+    ->Internals.T.kde(~samples=_, ~outputXYPoints=samplingInputs.outputXYPoints, usedWidth)
     ->Continuous.make
     ->(r => Some((r, samplingStats)))
   }
