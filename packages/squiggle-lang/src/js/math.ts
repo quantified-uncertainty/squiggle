@@ -1,13 +1,14 @@
-type sampleArgs = {
+type SampleArgs = {
   probs: number[];
   size: number;
 };
 
-export function random_sample(dist: number[], args: sampleArgs): number[] {
+export function randomSample(dist: number[], args: SampleArgs): number[] {
   const { probs, size } = args;
   const sum = probs.reduce((a, b) => a + b);
-
+  
   let sample: number[] = Array(size);
+
   for (let index = 0; index < size; index++) {
     // Instead of normalizing the whole probability array, we just multiply random by that value.
     // Might actually be more costly at large sample sizes?
@@ -23,51 +24,57 @@ export function random_sample(dist: number[], args: sampleArgs): number[] {
 // Should be replaced by a lookup table if we ever use it too much
 export function factorial(n: number): number {
   let fct = 1;
-  for (; n > 0; n--) fct *= n;
+  while (n > 0) {
+    fct *= n--
+  }
   return fct;
 }
 
 type Distribution<P> = {
-  cdf: (args: P, x: number) => number;
-  mean: (args: P) => number;
-  stdev: (args: P) => number;
-  variance: (args: P) => number;
-  quantile: (args: P, p: number) => number;
+  cdf(args: P, x: number): number;
+  mean(args: P): number;
+  stdev(args: P): number;
+  variance(args: P): number;
+  quantile(args: P, p: number): number;
 };
 
 type ContinuousProbabilityDistribution<P> = Distribution<P> & {
-  pdf: (args: P, x: number) => number;
+  pdf(args: P, x: number): number;
 };
 
 type DiscreteProbabilityDistribution<P> = Distribution<P> & {
-  pmf: (args: P, x: number) => number;
+  pmf(args: P, x: number): number;
 };
 
 let bernoulli: DiscreteProbabilityDistribution<number> = {
-  pmf: (p, x) => (x == 0 ? 1 - p : p),
+  pmf: (p, x) => (x === 0 ? 1 - p : p),
   cdf: (p, x) => (x < 0 ? 0 : x >= 1 ? 1 : 1 - p),
   mean: (p) => p,
-  stdev: (p) => p * (1 - p),
+  stdev: (p) => Math.sqrt(p * (1 - p)),
   quantile: (p, prob) => (prob <= 1 - p ? 0 : 1),
   variance: (p) => p * (1 - p),
 };
 
+function sq(n: number): number  { return n * n }
+
 let logistic: ContinuousProbabilityDistribution<{ mu: number; s: number }> = {
   pdf: ({ mu, s }, x) => {
-    if (s == 0) return mu == x ? +Infinity : 0;
-    let z = Math.abs((x - mu) / s);
-    let ez = Math.exp(-z);
-    return ez / (s * Math.pow(1 + ez, 2));
+    if (s === 0) return mu === x ? +Infinity : 0;
+    let exp_delta = Math.exp(-((x - mu) / s));
+    return exp_delta / (s * sq(1 + exp_delta));
   },
   cdf: ({ mu, s }, x) => {
-    if (s === 0) return x < mu ? 0 : 1;
-    let ez = Math.exp(-Math.abs((x - mu) / s));
-    return 1 / Math.pow(1 + ez, 2);
+    if (s === 0) return mu === x ? +Infinity : 0;
+    let exp_delta = Math.exp(-((x - mu) / s));
+    return 1 / (1 + exp_delta);
   },
   mean: ({ mu, s }) => mu,
-  stdev: ({ mu, s }) => NaN,
-  variance: ({ mu, s }) => (Math.pow(s, 2) * Math.pow(Math.PI, 2)) / 3,
-  quantile: ({ mu, s }, p) => mu + s * Math.log(p / (1 - p)),
+  stdev: ({ mu, s }) => Math.sqrt((sq(s) * sq(Math.PI)) / 3),
+  variance: ({ mu, s }) => (sq(s) * sq(Math.PI)) / 3,
+  quantile: ({ mu, s }, p) => {
+    if (p === 0) return (s === 0) ? mu : +Infinity
+    return mu + s * Math.log(p / (1 - p))
+  },
 };
 
 export let bernoulli_pmf = bernoulli.pmf;
