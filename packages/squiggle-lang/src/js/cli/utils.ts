@@ -1,3 +1,4 @@
+import isFinite from "lodash/isFinite";
 import { SqProject } from "../SqProject";
 import { SqValueTag } from "../SqValue";
 
@@ -25,7 +26,7 @@ export const run = (
   props: RunProps = { output: "RESULT_OR_BINDINGS" }
 ) => {
   const project = SqProject.create();
-  if (props.sampleCount && Number(props.sampleCount) !== NaN) {
+  if (props.sampleCount && isFinite(Number(props.sampleCount))) {
     project.setEnvironment({
       sampleCount: Number(props.sampleCount),
       xyPointLength: Number(props.sampleCount),
