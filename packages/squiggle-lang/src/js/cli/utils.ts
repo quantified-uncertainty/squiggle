@@ -38,26 +38,30 @@ export const run = (
   const bindings = project.getBindings("main");
   const result = project.getResult("main");
 
+  // Prints a section consisting of multiple lines; prints an extra "\n" if a section was printed before.
+  let isFirstSection = true;
+  const printLines = (...lines: string[]) => {
+    if (!isFirstSection) {
+      console.log();
+    }
+    isFirstSection = false;
+    lines.forEach((line) => console.log(line));
+  };
+
   if (result.tag === "Error") {
-    console.log(red("Error:"));
-    console.log(result.value.toStringWithStackTrace());
+    printLines(red("Error:"), result.value.toStringWithStackTrace());
   } else {
     switch (props.output) {
       case "RESULT_OR_BINDINGS":
         if (result.value.tag === SqValueTag.Void) {
-          console.log(bindings.toString());
+          printLines(bindings.toString());
         } else {
-          console.log(result.value.toString());
+          printLines(result.value.toString());
         }
-        if (props.measure) console.log();
         break;
       case "RESULT_AND_BINDINGS":
-        console.log(green("Result:"));
-        console.log(result.value.toString());
-        console.log();
-        console.log(green("Bindings:"));
-        console.log(bindings.toString());
-        if (props.measure) console.log();
+        printLines(green("Result:"), result.value.toString());
+        printLines(green("Bindings:"), bindings.toString());
         break;
       case "NONE":
       // do nothing
@@ -65,6 +69,6 @@ export const run = (
   }
 
   if (props.measure) {
-    console.log(green("Time:"), String(time) + "s");
+    printLines(`${green("Time:")} ${time}s`);
   }
 };
