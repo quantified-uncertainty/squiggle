@@ -1,36 +1,32 @@
-@@warning("-44")
-module Project = ForTS_ReducerProject
-
-open Jest
-open Expect
-open Expect.Operators
+import { SqProject } from "../../src/js";
+import { toStringResult } from "../../src/js/SqValue";
 
 describe("ReducerProject Tutorial", () => {
   /* Let's build a project that depends on values from the UI */
-  let project = Project.createProject()
-  Project.setSource(project, "main", "x+y+z")
+  const project = SqProject.create();
+  project.setSource("main", "x+y+z");
   /* x, y and z is not defined in the project but they has to come from the user */
   test("Injecting user values", () => {
     /* User has input the values */
-    let x = 1
-    let y = 2
-    let z = 3
+    const x = 1;
+    const y = 2;
+    const z = 3;
     /* Then we construct a source code to define those values */
     let userCode = `
-      x = ${x->Js.Int.toString}
-      y = ${y->Js.Int.toString}
-      z = ${z->Js.Int.toString}
-    `
+      x = ${x}
+      y = ${y}
+      z = ${z}
+    `;
     /* We inject the user code into the project */
-    Project.setSource(project, "userCode", userCode)
+    project.setSource("userCode", userCode);
     /* "main" is depending on the user code */
-    Project.setContinues(project, "main", ["userCode"])
+    project.setContinues("main", ["userCode"]);
     /* We can now run the project */
-    Project.runAll(project)
-    let result = Project.getResult(project, "main")
-    result->Reducer_Value.toStringResult->expect == "Ok(6)"
-  })
-})
+    project.runAll();
+    let result = project.getResult("main");
+    expect(toStringResult(result)).toBe("Ok(6)");
+  });
+});
 
 /* Note that this is not final version of the project */
 /* In the future, for safety, we will provide a way to inject values instead of a source code */

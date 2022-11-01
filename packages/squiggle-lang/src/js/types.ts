@@ -12,6 +12,17 @@ export function resultMap<a, b, c>(
   }
 }
 
+export function resultMapError<a, b, c>(
+  r: result<a, b>,
+  mapError: (y: b) => c
+): result<a, c> {
+  if (r.tag === "Ok") {
+    return { tag: "Ok", value: r.value };
+  } else {
+    return { tag: "Error", value: mapError(r.value) };
+  }
+}
+
 export function resultMap2<a, b, c, d>(
   r: result<a, b>,
   mapValue: (x: a) => c,
@@ -26,4 +37,9 @@ export function resultMap2<a, b, c, d>(
 
 export function Ok<a, b>(x: a): result<a, b> {
   return { tag: "Ok", value: x };
+}
+
+// Error is taken by JS's native exception type
+export function Error_<a, b>(x: b): result<a, b> {
+  return { tag: "Error", value: x };
 }

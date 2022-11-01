@@ -1,4 +1,5 @@
 import * as RSValue from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue.gen";
+import { result } from "./types";
 import { squiggleValueTag as Tag } from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_tag";
 import { wrapDistribution } from "./SqDistribution";
 import { SqLambda } from "./SqLambda";
@@ -6,6 +7,7 @@ import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
 import { SqRecord } from "./SqRecord";
 import { SqArray } from "./SqArray";
 import { SqValueLocation } from "./SqValueLocation";
+import { SqError } from "./SqError";
 
 export { Tag as SqValueTag };
 
@@ -148,3 +150,7 @@ export type SqValue =
   | SqStringValue
   | SqTimeDurationValue
   | SqVoidValue;
+
+export const toStringResult = (result: result<SqValue, SqError>) => {
+  return `${result.tag}(${result.value.toString()})`;
+};

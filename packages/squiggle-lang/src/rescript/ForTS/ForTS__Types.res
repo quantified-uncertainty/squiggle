@@ -1,4 +1,3 @@
-@genType type reducerProject = ForTS_ReducerProject.reducerProject //re-export
 @genType type squiggleValue = ForTS_SquiggleValue.squiggleValue //re-export
 @genType type squiggleValue_Array = ForTS_SquiggleValue_Array.squiggleValue_Array //re-export
 @genType type squiggleValue_Declaration = ForTS_SquiggleValue_Declaration.squiggleValue_Declaration //re-export

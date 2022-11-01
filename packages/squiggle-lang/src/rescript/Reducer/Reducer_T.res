@@ -39,12 +39,13 @@ and expressionContent =
   | ELambda(array<string>, expression, option<string>)
   | EValue(value)
 
+@genType.opaque
 and expression = {
   ast: Reducer_Peggy_Parse.ast,
   content: expressionContent,
 }
 
-and namespace = Belt.Map.String.t<value>
+@genType.opaque and namespace = Belt.Map.String.t<value>
 and bindings = {
   namespace: namespace,
   parent: option<bindings>,
@@ -57,6 +58,7 @@ and frame = {
 }
 @genType.opaque and frameStack = list<frame>
 
+@genType
 and context = {
   bindings: bindings,
   environment: environment,
@@ -64,6 +66,6 @@ and context = {
   inFunction: option<lambdaValue>,
 }
 
-and reducerFn = (expression, context) => (value, context)
+@genType and reducerFn = (expression, context) => (value, context)
 
 let topFrameName = "<top>"

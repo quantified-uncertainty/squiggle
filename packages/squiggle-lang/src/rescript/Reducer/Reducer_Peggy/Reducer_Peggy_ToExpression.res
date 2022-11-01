@@ -5,6 +5,7 @@ module Parse = Reducer_Peggy_Parse
 type expression = Reducer_T.expression
 type expressionContent = Reducer_T.expressionContent
 
+@genType
 let rec fromNode = (node: Parse.node): expression => {
   let ast = Parse.nodeToAST(node)
 
