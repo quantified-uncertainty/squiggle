@@ -1,13 +1,11 @@
 import { SqProject } from "../SqProject";
 import { SqValueTag } from "../SqValue";
 
-export const measure = (cb: () => void, times = 1) => {
+export const measure = (callback: () => void) => {
   const t1 = new Date();
-
-  for (let i = 1; i <= times; i++) {
-    cb();
-  }
+  callback();
   const t2 = new Date();
+
   return (t2.getTime() - t1.getTime()) / 1000;
 };
 
