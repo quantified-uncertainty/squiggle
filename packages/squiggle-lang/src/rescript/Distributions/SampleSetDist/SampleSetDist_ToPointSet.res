@@ -16,13 +16,19 @@ module Internals = {
   module JS = {
     @deriving(abstract)
     type distJs = {
+      usedWidth: float,
       xs: array<float>,
       ys: array<float>,
     }
 
-    let jsToDist = (d: distJs): PointSetTypes.xyShape => {
-      xs: xsGet(d),
-      ys: ysGet(d),
+    let jsToDist = (d: distJs): (float, PointSetTypes.xyShape) => {
+      (
+        usedWidthGet(d),
+        {
+          xs: xsGet(d),
+          ys: ysGet(d),
+        },
+      )
     }
 
     @module("./KdeLibrary.js")
@@ -65,17 +71,21 @@ let toPointSetDist = (
     // The only reason we compute _suggestedXWidth if
     // samplingInputs.kernelWidth is given is to log it. Unnecessary?
     let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
-    let usedWidth = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
+    let width = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
+    let (usedWidth, pdf) =
+      continuousPart->Internals.KDE.normalSampling(
+        samplingInputs.outputXYPoints,
+        width,
+        pointWeight,
+      )
     let samplingStats: Internals.Types.samplingStats = {
       sampleCount: samplingInputs.sampleCount,
       outputXYPoints: samplingInputs.outputXYPoints,
       bandwidthXSuggested: _suggestedXWidth,
       bandwidthXImplemented: usedWidth,
     }
-    continuousPart
-    ->Internals.KDE.normalSampling(samplingInputs.outputXYPoints, usedWidth, pointWeight)
-    ->Continuous.make
-    ->(r => Some((r, samplingStats)))
+
+    Some((pdf->Continuous.make, samplingStats))
   }
 
   let discrete: PointSetTypes.discreteShape =

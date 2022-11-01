@@ -78,7 +78,7 @@ const samplesToContinuousPdf = (samples, size, xWidth, weight) => {
     return normalizer * y;
   });
 
-  return { xs, ys };
+  return { usedWidth: xWidth, xs, ys };
 };
 
 module.exports = {
