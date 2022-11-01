@@ -3,19 +3,34 @@ type SampleArgs = {
   size: number;
 };
 
+/** Searches for a first element in `arr` greater than `value` */
+function binsearchFirstGreater(arr: number[], value: number): number {
+  let s = 0
+  let e = arr.length - 1;
+  while ((e - s) > 1) {
+    const i = Math.ceil((s + e) / 2)
+    if (arr[i] < value) {
+      s = i + 1
+    } else {
+      e = i
+    }
+  }
+  return value < arr[s] ? s : e
+}
+
 export function randomSample(dist: number[], args: SampleArgs): number[] {
   const { probs, size } = args;
-  const sum = probs.reduce((a, b) => a + b);
-  
   let sample: number[] = Array(size);
 
+  let accum = 0
+  let probPrefixSums = [];
+  for (const f of probs) {
+    probPrefixSums.push(accum += f)
+  }
+  let sum = probPrefixSums[probPrefixSums.length - 1]
+
   for (let index = 0; index < size; index++) {
-    // Instead of normalizing the whole probability array, we just multiply random by that value.
-    // Might actually be more costly at large sample sizes?
-    let acc = Math.random() * sum;
-    let selection = probs.findIndex((prob) => (acc -= prob) <= 0);
-    // May happen due to fp shenanigans
-    if (selection == -1) selection = size - 1;
+    let selection = binsearchFirstGreater(probPrefixSums, Math.random() * sum)
     sample[index] = dist[selection];
   }
   return sample;
@@ -55,7 +70,7 @@ let bernoulli: DiscreteProbabilityDistribution<number> = {
   variance: (p) => p * (1 - p),
 };
 
-function sq(n: number): number  { return n * n }
+function sq(n: number): number { return n * n }
 
 let logistic: ContinuousProbabilityDistribution<{ mu: number; s: number }> = {
   pdf: ({ mu, s }, x) => {
