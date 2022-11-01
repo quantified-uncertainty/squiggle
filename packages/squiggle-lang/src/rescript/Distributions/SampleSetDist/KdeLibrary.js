@@ -4,7 +4,7 @@ const isFinite = require("lodash/isFinite");
 // Convert samples to x-y pairs for a PDF
 // Uses kernel density estimation (KDE) with a triangular kernel
 // samples: Must be sorted!
-// size:    Number of points in output, >= 3
+// size:    Number of points in output, >= 4
 // xWidth:  Width of the kernel in x axis units
 // weight:  Probability mass for each point
 const samplesToContinuousPdf = (samples, size, xWidth, weight) => {
