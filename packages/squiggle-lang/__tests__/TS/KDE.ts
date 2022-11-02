@@ -1,5 +1,5 @@
 import * as fc from "fast-check";
-import { samplesToContinuousPdf } from "../../src/rescript/Distributions/SampleSetDist/KdeLibrary.js";
+import samplesToContinuousPdf from "../../src/rescript/Distributions/SampleSetDist/KdeLibrary";
 import range from "lodash/range";
 import sum from "lodash/sum";
 import sumBy from "lodash/sumBy";

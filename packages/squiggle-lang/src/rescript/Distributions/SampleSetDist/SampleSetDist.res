@@ -1,3 +1,24 @@
+module JS = {
+  @deriving(abstract)
+  type xyJs = {
+    xs: array<float>,
+    ys: array<float>,
+  }
+  @deriving(abstract)
+  type distJs = {
+    continuousDist: option<xyJs>,
+    discreteDist: xyJs,
+  }
+
+  let jsToDist = (d: xyJs): PointSetTypes.xyShape => {
+    xs: xsGet(d),
+    ys: ysGet(d),
+  }
+
+  @module("./SampleSetDist_ToPointSet.ts")
+  external toPointSetDist: (array<float>, int, option<float>) => distJs = "toPointSetDist"
+}
+
 @genType
 module Error = {
   @genType
@@ -59,12 +80,24 @@ some refactoring.
 let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs): result<
   PointSetTypes.pointSetDist,
   pointsetConversionError,
-> =>
-  SampleSetDist_ToPointSet.toPointSetDist(
-    ~samples=get(samples),
-    ~samplingInputs,
-    (),
-  ).pointSetDist->E.O.toResult(TooFewSamplesForConversionToPointSet)
+> => {
+  let dists = JS.toPointSetDist(
+    get(samples),
+    samplingInputs.outputXYPoints,
+    samplingInputs.kernelWidth,
+  )
+  let discretePart = JS.discreteDistGet(dists)
+  let continuousPart = JS.continuousDistGet(dists)
+
+  let discreteDist =
+    XYShape.T.fromArrays(JS.xsGet(discretePart), JS.ysGet(discretePart))->Discrete.make
+  let makeContinuous = c => c->JS.jsToDist->Continuous.make
+
+  MixedShapeBuilder.buildSimple(
+    ~continuous=continuousPart->E.O.fmap(makeContinuous),
+    ~discrete=Some(discreteDist),
+  )->E.O.toResult(TooFewSamplesForConversionToPointSet)
+}
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
