@@ -1,7 +1,7 @@
 open FunctionRegistry_Core
 // open FunctionRegistry_Helpers
 
-let nameSpace = "Example"
+let nameSpace = "Template"
 let requiresNamespace = true
 
 module Topic = {
@@ -14,7 +14,7 @@ module Topic = {
       ~nameSpace,
       ~output=EvtNumber,
       ~requiresNamespace=false,
-      ~examples=[`Example.id(1)`],
+      ~example=[`Template.id(1)`],
       ~definitions=[
         FnDefinition.make(
           ~name="id",
@@ -27,7 +27,7 @@ module Topic = {
                 Ok(wrappedResult)
               }
 
-            | _ => "Error in Example.id"->SqError.Message.REOther->Error
+            | _ => "Error in Template.id"->SqError.Message.REOther->Error
             },
           (),
         ),

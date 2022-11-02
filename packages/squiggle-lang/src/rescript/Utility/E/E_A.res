@@ -219,7 +219,14 @@ module R = {
 module Floats = {
   type t = array<float>
   let mean = Jstat.mean
-  let geomean = Jstat.geomean
+  let geomean = (xs: array<float>) => {
+    // Note: can't use jstat because they use a worse algorithm
+    // <https://github.com/jstat/jstat/pull/282>
+    let xsLogs = E.A.fmap(x => Js.Math.log2(x), xs)
+    let meanXsLogs = E.A.Floats.mean(xsLogs)
+    let answer = Js.Math.pow_float(~base=2.0, ~exp=meanXsLogs)
+    answer
+  } //Jstat.geomean
   let mode = Jstat.mode
   let variance = Jstat.variance
   let stdev = Jstat.stdev

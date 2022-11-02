@@ -60,26 +60,13 @@ module AggregateFs = {
 
     let probabilityToOdds = p => p /. (1.0 -. p)
     let oddsToProbability = o => o /. (1.0 +. o)
-    let sum = xs => E.A.reduce(xs, 0.0, (a, b) => a +. b)
-    let mean = xs => sum(xs) /. Belt.Float.fromInt(E.A.length(xs))
 
-    let geomMean = (xs: array<float>) => {
-      let xsLogs = E.A.fmap(x => Js.Math.log2(x), xs)
-      let meanXsLogs = mean(xsLogs)
-      let answer = Js.Math.pow_float(~base=2.0, ~exp=meanXsLogs)
-      answer
-    }
-    let arithmeticMean = (xs: array<float>) => {
-      let sumXs = E.A.reduce(xs, 0.0, (a, b) => a +. b)
-      let meanXs = sumXs /. Belt.Float.fromInt(E.A.length(xs))
-      meanXs
-    }
+    let geomMean = E.A.Floats.geomean
+    let arithmeticMean = E.A.Floats.mean
 
     let geomMeanOfOdds = xs => {
       let arrayOfOdds = E.A.fmap(p => probabilityToOdds(p), xs)
-      let arrayOfLogsOfOdds = E.A.fmap(p => Js.Math.log2(p), arrayOfOdds)
-      let meanOfLogsOfodds = mean(arrayOfLogsOfOdds)
-      let geomMeanOfOdds = Js.Math.pow_float(~base=2.0, ~exp=meanOfLogsOfodds)
+      let geomMeanOfOdds = geomMean(arrayOfOdds)
       let result = oddsToProbability(geomMeanOfOdds)
       result
     }
