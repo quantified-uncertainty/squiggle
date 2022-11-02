@@ -77,7 +77,8 @@ module AggregateFs = {
       extremizedGeom
     }
 
-    let extremizedGeometricMeanOfOdds = xs => { // a.k.a. neyman
+    let extremizedGeometricMeanOfOdds = xs => {
+      // a.k.a. neyman
       let n = Belt.Int.toFloat(E.A.length(xs))
       let d =
         n *.
@@ -87,7 +88,8 @@ module AggregateFs = {
       result
     }
 
-    let geomMeanOfOddsWithoutExtremes = xs => { // a.k.a. samotsvety
+    let geomMeanOfOddsWithoutExtremes = xs => {
+      // a.k.a. samotsvety
       let sortedXs = E.A.Floats.sort(xs)
       let middleXs = Belt.Array.slice(sortedXs, ~offset=1, ~len=E.A.length(xs) - 2)
       let answer = geomMeanOfOdds(middleXs)

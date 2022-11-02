@@ -226,7 +226,7 @@ module Floats = {
     let meanXsLogs = Jstat.mean(xsLogs)
     let answer = Js.Math.pow_float(~base=2.0, ~exp=meanXsLogs)
     answer
-  } 
+  }
   let geommean2 = Jstat.geomean
   let mode = Jstat.mode
   let variance = Jstat.variance
