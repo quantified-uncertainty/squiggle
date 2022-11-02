@@ -243,6 +243,7 @@ module Floats = {
     let typedArrayToArray: Js.TypedArray2.Float64Array.t => t = %raw(`a => Array.from(a)`)
     typedArrayToArray(typedArray)
   }
+  // Alternative: Belt.SortArray.stableSortBy(xs, (a, b) => a > b ? 1 : -1)
 
   let getNonFinite = (t: t) => Belt.Array.getBy(t, r => !Js.Float.isFinite(r))
   let getBelowZero = (t: t) => Belt.Array.getBy(t, r => r < 0.0)
