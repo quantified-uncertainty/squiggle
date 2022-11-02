@@ -14,7 +14,6 @@ let fnList = Belt.Array.concatMany([
   FR_Date.library,
   FR_Math.library,
   FR_Danger_Aggregate.library,
-  // FR_Template.library
 ])
 
 let registry = FunctionRegistry_Core.Registry.make(fnList)
