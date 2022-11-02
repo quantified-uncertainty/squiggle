@@ -37,19 +37,19 @@ module AggregateFs = {
         }
       }
       let notZeroCheck = {
-        f: x => x != 0.0,
+        f: x => x == 0.0,
         errorString: "0 is not a probability",
       }
       let higherThanZeroCheck = {
-        f: x => x > 0.0,
+        f: x => x < 0.0,
         errorString: "Probabilities can't be lower than 0",
       }
       let lowerThanOneCheck = {
-        f: x => x < 1.0,
+        f: x => x > 1.0,
         errorString: "Probabilities can't be higher than 1",
       }
       let notOneCheck = {
-        f: x => x != 1.0,
+        f: x => x == 1.0,
         errorString: "1 is not a probability",
       }
       let checks = [notZeroCheck, higherThanZeroCheck, lowerThanOneCheck, notOneCheck]
@@ -237,7 +237,7 @@ let library = [
   AggregateFs.Lib.geomMeanOfOdds,
   AggregateFs.Lib.extremizedGeometricMeanOfOdds,
   AggregateFs.Lib.neyman,
-  AggregateFs.Lib.geomMeanOfOddsWithoutExtremes,
+  AggregateFs.Lib.extremizedGeometricMeanOfOdds,
   AggregateFs.Lib.samotsvety,
 ]
 
