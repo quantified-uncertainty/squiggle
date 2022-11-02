@@ -1,12 +1,12 @@
 import * as fc from "fast-check";
 import { samplesToContinuousPdf } from "../../src/rescript/Distributions/SampleSetDist/KdeLibrary.js";
 import range from "lodash/range";
+import sumBy from "lodash/sumBy";
 
+// KDE by definition, with triangular kernel max(0, |1-x|)
 const evalKde = (samples: number[], width: number, weight: number, x: number) =>
   (weight / width) *
-  samples
-    .map((p) => Math.max(0, 1 - Math.abs((p - x) / width)))
-    .reduce((a, b) => a + b);
+  sumBy(samples, (p) => Math.max(0, 1 - Math.abs((x - p) / width)));
 
 describe("Kernel density estimation", () => {
   test("should approximately equal naive definition", () => {
