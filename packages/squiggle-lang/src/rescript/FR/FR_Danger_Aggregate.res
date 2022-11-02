@@ -3,35 +3,61 @@ open FunctionRegistry_Helpers
 
 let nameSpace = "Danger_Aggregate"
 let requiresNamespace = true
+type check = {
+  f: float => bool,
+  errorString: string,
+}
 
 module AggregateFs = {
   module Helpers = {
-    let checker = (fn, xs, minLength) => {
-      switch E.A.length(xs) < minLength {
-      | true =>
-        Error(
-          "Aggregation method does not make sense with fewer than" ++
-          Belt.Int.toString(minLength) ++ " elements",
-        )
-      | false => {
-          let checkedIndividualXs = E.A.fmap(x =>
-            switch (x, x > 1.0, x < 0.0) {
-            | (0.0, _, _) => Error("0 is not a probability")
-            | (1.0, _, _) => Error("1 is not a probability")
-            | (_, true, _) => Error("Probabilities can't be higher than 1")
-            | (_, _, true) => Error("Probabilities can't be lower than 0")
-            | (_, false, false) => Ok(x)
-            }
-          , xs)
-          let checkedCollectiveXs = E.A.R.firstErrorOrOpen(checkedIndividualXs)
-          let result = switch checkedCollectiveXs {
-          | Ok(xs) => fn(xs)
-          | Error(e) => Error(e)
-          }
-          result
-        }
+    let applyIfCheck = (fn, xs, check) => {
+      switch check(xs) {
+      | Error(msg) => Error(msg)
+      | Ok(_) => Ok(fn(xs))
       }
     }
+    let applyIfMinLengthAndCheck = (fn, xs, minLength, check) => {
+      switch E.A.length(xs) >= minLength {
+      | true => applyIfCheck(fn, xs, check)
+      | false =>
+        Error(
+          "Length of array is " ++
+          E.I.toString(E.A.length(xs)) ++
+          ", but it should be at least " ++
+          E.I.toString(minLength) ++ " for this aggregation method.",
+        )
+      }
+    }
+    let checkWellFormedProbabilities = xs => {
+      let applyCheck = (check: check) => {
+        let result = E.A.findIndex(check.f, xs)
+        switch result {
+        | None => Ok(true)
+        | Some(x) => Error(check.errorString ++ ", at index " ++ E.I.toString(x))
+        }
+      }
+      let notZeroCheck = {
+        f: x => x != 0.0,
+        errorString: "0 is not a probability",
+      }
+      let higherThanZeroCheck = {
+        f: x => x > 0.0,
+        errorString: "Probabilities can't be lower than 0",
+      }
+      let lowerThanOneCheck = {
+        f: x => x < 1.0,
+        errorString: "Probabilities can't be higher than 1",
+      }
+      let notOneCheck = {
+        f: x => x != 1.0,
+        errorString: "1 is not a probability",
+      }
+      let checks = [notZeroCheck, higherThanZeroCheck, lowerThanOneCheck, notOneCheck]
+      let results = E.A.fmap(applyCheck, checks)
+      let result = E.A.R.firstErrorOrOpen(results)
+      result
+    }
+
     let probabilityToOdds = p => p /. (1.0 -. p)
     let oddsToProbability = o => o /. (1.0 +. o)
     let sum = xs => E.A.reduce(xs, 0.0, (a, b) => a +. b)
@@ -94,8 +120,14 @@ module AggregateFs = {
       ~examples=[`Danger_Aggregate.geomMean([0.1, 0.2, 0.4])`],
       ~definitions=[
         DefineFn.Numbers.arrayToNum("geomMean", xs =>
-          Helpers.checker(xs => Ok(Helpers.geomMean(xs)), xs, 2)
+          Helpers.applyIfMinLengthAndCheck(
+            Helpers.geomMean,
+            xs,
+            2,
+            Helpers.checkWellFormedProbabilities,
+          )
         ),
+        //xs => Ok(Helpers.geomMean(xs)), xs, 2)
       ],
       (),
     )
@@ -107,7 +139,12 @@ module AggregateFs = {
       ~examples=[`Danger_Aggregate.arithmeticMean([0.1, 0.2, 0.4])`],
       ~definitions=[
         DefineFn.Numbers.arrayToNum("arithmeticMean", xs =>
-          Helpers.checker(xs => Ok(Helpers.arithmeticMean(xs)), xs, 2)
+          Helpers.applyIfMinLengthAndCheck(
+            Helpers.arithmeticMean,
+            xs,
+            2,
+            Helpers.checkWellFormedProbabilities,
+          )
         ),
       ],
       (),
@@ -120,7 +157,12 @@ module AggregateFs = {
       ~examples=[`Danger_Aggregate.geomMeanOfOdds([0.1, 0.2, 0.4])`],
       ~definitions=[
         DefineFn.Numbers.arrayToNum("geomMeanOfOdds", xs =>
-          Helpers.checker(xs => Ok(Helpers.geomMeanOfOdds(xs)), xs, 2)
+          Helpers.applyIfMinLengthAndCheck(
+            Helpers.geomMeanOfOdds,
+            xs,
+            2,
+            Helpers.checkWellFormedProbabilities,
+          )
         ),
       ],
       (),
@@ -134,7 +176,12 @@ module AggregateFs = {
       ~examples=[`Danger_Aggregate.neyman([0.1, 0.2, 0.4])`],
       ~definitions=[
         DefineFn.Numbers.arrayToNum("neyman", xs =>
-          Helpers.checker(xs => Ok(Helpers.neyman(xs)), xs, 2)
+          Helpers.applyIfMinLengthAndCheck(
+            Helpers.neyman,
+            xs,
+            2,
+            Helpers.checkWellFormedProbabilities,
+          )
         ),
       ],
       (),
@@ -148,7 +195,12 @@ module AggregateFs = {
       ~examples=[`Danger_Aggregate.samotsvety([0.1, 0.2, 0.4])`],
       ~definitions=[
         DefineFn.Numbers.arrayToNum("samotsvety", xs =>
-          Helpers.checker(xs => Ok(Helpers.samotsvety(xs)), xs, 3)
+          Helpers.applyIfMinLengthAndCheck(
+            Helpers.samotsvety,
+            xs,
+            3,
+            Helpers.checkWellFormedProbabilities,
+          )
         ),
       ],
       (),
