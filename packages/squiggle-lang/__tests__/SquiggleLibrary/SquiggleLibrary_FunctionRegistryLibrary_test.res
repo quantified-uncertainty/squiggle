@@ -45,7 +45,7 @@ describe("FunctionRegistry Library", () => {
     testEvalToBe("Number.min([2,5,3])", "Ok(2)")
     testEvalToBe("Number.max([2,5,3])", "Ok(5)")
     testEvalToBe("Number.mean([0,5,10])", "Ok(5)")
-    testEvalToBe("Number.geomean([1,5,18])", "Ok(4.481404746557164)")
+    testEvalToBe("Number.geomean([1,5,18])", "Ok(4.481404746557163)")
     testEvalToBe("Number.stdev([0,5,10,15])", "Ok(5.5901699437494745)")
     testEvalToBe("Number.variance([0,5,10,15])", "Ok(31.25)")
     testEvalToBe("Number.sort([10,0,15,5])", "Ok([0,5,10,15])")
