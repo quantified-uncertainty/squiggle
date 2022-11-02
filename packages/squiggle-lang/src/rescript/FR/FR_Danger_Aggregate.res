@@ -232,10 +232,12 @@ module AggregateFs = {
 
 let library = [
   // Combinatorics
-  AggregateFs.Lib.geomMean,
   AggregateFs.Lib.arithmeticMean,
+  AggregateFs.Lib.geomMean,
   AggregateFs.Lib.geomMeanOfOdds,
+  AggregateFs.Lib.extremizedGeometricMeanOfOdds,
   AggregateFs.Lib.neyman,
+  AggregateFs.Lib.geomMeanOfOddsWithoutExtremes,
   AggregateFs.Lib.samotsvety,
 ]
 
