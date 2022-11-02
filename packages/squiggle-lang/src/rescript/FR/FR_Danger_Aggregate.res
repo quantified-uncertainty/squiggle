@@ -71,27 +71,24 @@ module AggregateFs = {
       result
     }
 
-    let extremizedGeometricMeanOfOdds = (~xs, ~extremizationParameter=1.5, ()) => {
-      let arrayOfOdds = E.A.fmap(p => probabilityToOdds(p), xs)
-      let arrayOfLogsOfOdds = E.A.fmap(p => Js.Math.log2(p), arrayOfOdds)
-      let extremizedSumOfLogsOfOdds = extremizationParameter *. arithmeticMean(arrayOfLogsOfOdds)
-      let extremizedGeomMeanOfOdds = Js.Math.pow_float(~base=2.0, ~exp=extremizedSumOfLogsOfOdds)
-      let result = oddsToProbability(extremizedGeomMeanOfOdds)
-      result
+    let extremizedGeometricMeanOfOddsWithParameter = (~xs, ~extremizationParameter) => {
+      let geom = geomMeanOfOdds(xs)
+      let extremizedGeom = Js.Math.pow_float(~base=geom, ~exp=extremizationParameter)
+      extremizedGeom
     }
 
-    let neyman = xs => {
+    let extremizedGeometricMeanOfOdds = xs => { // a.k.a. neyman
       let n = Belt.Int.toFloat(E.A.length(xs))
       let d =
         n *.
         (Js.Math.sqrt(3.0 *. Js.Math.pow_float(~base=n, ~exp=2.0) -. 3.0 *. n +. 1.0) -. 2.0) /.
         (Js.Math.pow_float(~base=n, ~exp=2.0) -. n -. 1.0)
-      let result = extremizedGeometricMeanOfOdds(~xs, ~extremizationParameter=d, ())
+      let result = extremizedGeometricMeanOfOddsWithParameter(~xs, ~extremizationParameter=d)
       result
     }
 
-    let samotsvety = xs => {
-      let sortedXs = E.A.Floats.sort(xs) 
+    let geomMeanOfOddsWithoutExtremes = xs => { // a.k.a. samotsvety
+      let sortedXs = E.A.Floats.sort(xs)
       let middleXs = Belt.Array.slice(sortedXs, ~offset=1, ~len=E.A.length(xs) - 2)
       let answer = geomMeanOfOdds(middleXs)
       answer
@@ -154,6 +151,25 @@ module AggregateFs = {
       (),
     )
 
+    // extremizedGeometricMeanOfOdds
+    let extremizedGeometricMeanOfOdds = Function.make(
+      ~name="extremizedGeometricMeanOfOdds",
+      ~nameSpace,
+      ~output=EvtNumber,
+      ~requiresNamespace=true,
+      ~examples=[`Danger_Aggregate.extremizedGeometricMeanOfOdds([0.1, 0.2, 0.4])`],
+      ~definitions=[
+        DefineFn.Numbers.arrayToNum("extremizedGeometricMeanOfOdds", xs =>
+          Helpers.applyIfMinLengthAndCheck(
+            Helpers.extremizedGeometricMeanOfOdds,
+            xs,
+            2,
+            Helpers.checkWellFormedProbabilities,
+          )
+        ),
+      ],
+      (),
+    )
     let neyman = Function.make(
       ~name="neyman",
       ~nameSpace,
@@ -163,7 +179,7 @@ module AggregateFs = {
       ~definitions=[
         DefineFn.Numbers.arrayToNum("neyman", xs =>
           Helpers.applyIfMinLengthAndCheck(
-            Helpers.neyman,
+            Helpers.extremizedGeometricMeanOfOdds,
             xs,
             2,
             Helpers.checkWellFormedProbabilities,
@@ -173,7 +189,27 @@ module AggregateFs = {
       (),
     )
 
+    let geomMeanOfOddsWithoutExtremes = Function.make(
+      ~name="geomMeanOfOddsWithoutExtremes",
+      ~nameSpace,
+      ~output=EvtNumber,
+      ~requiresNamespace=true,
+      ~examples=[`Danger_Aggregate.geomMeanOfOddsWithoutExtremes([0.1, 0.2, 0.4])`],
+      ~definitions=[
+        DefineFn.Numbers.arrayToNum("geomMeanOfOddsWithoutExtremes", xs =>
+          Helpers.applyIfMinLengthAndCheck(
+            Helpers.geomMeanOfOddsWithoutExtremes,
+            xs,
+            3,
+            Helpers.checkWellFormedProbabilities,
+          )
+        ),
+      ],
+      (),
+    )
+
     let samotsvety = Function.make(
+      // Alias for geomMeanOfOddsWithoutExtremes
       ~name="samotsvety",
       ~nameSpace,
       ~output=EvtNumber,
@@ -182,7 +218,7 @@ module AggregateFs = {
       ~definitions=[
         DefineFn.Numbers.arrayToNum("samotsvety", xs =>
           Helpers.applyIfMinLengthAndCheck(
-            Helpers.samotsvety,
+            Helpers.geomMeanOfOddsWithoutExtremes,
             xs,
             3,
             Helpers.checkWellFormedProbabilities,
