@@ -1,21 +1,11 @@
-import { DistributionPlottingSettings } from "../DistributionChart";
-import { FunctionChartSettings } from "../FunctionChart";
-import { environment, SqValueLocation } from "@quri/squiggle-lang";
+import { SqValueLocation } from "@quri/squiggle-lang";
+import { PartialViewSettings, ViewSettings } from "../ViewSettingsForm";
 
 export type LocalItemSettings = {
   collapsed: boolean;
-  distributionPlotSettings?: Partial<DistributionPlottingSettings>;
-  chartSettings?: Partial<FunctionChartSettings>;
-  height?: number;
-  environment?: Partial<environment>;
-};
+} & PartialViewSettings;
 
-export type MergedItemSettings = {
-  distributionPlotSettings: DistributionPlottingSettings;
-  chartSettings: FunctionChartSettings;
-  height: number;
-  environment: environment;
-};
+export type MergedItemSettings = ViewSettings;
 
 export const locationAsString = (location: SqValueLocation) =>
   location.path.items.join(".");

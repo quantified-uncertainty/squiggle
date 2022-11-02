@@ -3,12 +3,12 @@ import React, { useContext, useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Modal } from "../ui/Modal";
-import { ViewSettings, viewSettingsSchema } from "../ViewSettings";
+import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm";
 import { ViewerContext } from "./ViewerContext";
-import { defaultTickFormat } from "../../lib/distributionSpecBuilder";
 import { PlaygroundContext } from "../SquigglePlayground";
 import { SqValue } from "@quri/squiggle-lang";
 import { locationAsString } from "./utils";
+import _ from "lodash";
 
 type Props = {
   value: SqValue;
@@ -34,45 +34,12 @@ const ItemSettingsModal: React.FC<
 
   const { register, watch } = useForm({
     resolver: yupResolver(viewSettingsSchema),
-    defaultValues: {
-      // this is a mess and should be fixed
-      showEditor: true, // doesn't matter
-      chartHeight: mergedSettings.height,
-      showSummary: mergedSettings.distributionPlotSettings.showSummary,
-      logX: mergedSettings.distributionPlotSettings.logX,
-      expY: mergedSettings.distributionPlotSettings.expY,
-      tickFormat:
-        mergedSettings.distributionPlotSettings.format || defaultTickFormat,
-      title: mergedSettings.distributionPlotSettings.title,
-      minX: mergedSettings.distributionPlotSettings.minX,
-      maxX: mergedSettings.distributionPlotSettings.maxX,
-      distributionChartActions: mergedSettings.distributionPlotSettings.actions,
-      diagramStart: mergedSettings.chartSettings.start,
-      diagramStop: mergedSettings.chartSettings.stop,
-      diagramCount: mergedSettings.chartSettings.count,
-    },
+    defaultValues: mergedSettings,
   });
   useEffect(() => {
     const subscription = watch((vars) => {
       const settings = getSettings(value.location); // get the latest version
-      setSettings(value.location, {
-        ...settings,
-        distributionPlotSettings: {
-          showSummary: vars.showSummary,
-          logX: vars.logX,
-          expY: vars.expY,
-          format: vars.tickFormat,
-          title: vars.title,
-          minX: vars.minX,
-          maxX: vars.maxX,
-          actions: vars.distributionChartActions,
-        },
-        chartSettings: {
-          start: vars.diagramStart,
-          stop: vars.diagramStop,
-          count: vars.diagramCount,
-        },
-      });
+      setSettings(value.location, _.merge({}, settings, vars));
       onChange();
     });
     return () => subscription.unsubscribe();
@@ -100,9 +67,8 @@ const ItemSettingsModal: React.FC<
         )}
       </Modal.Header>
       <Modal.Body>
-        <ViewSettings
+        <ViewSettingsForm
           register={register}
-          withShowEditorSetting={false}
           withFunctionSettings={withFunctionSettings}
           disableLogXSetting={disableLogX}
         />
@@ -137,13 +103,13 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
         className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500"
         onClick={() => setIsOpen(!isOpen)}
       />
-      {settings.distributionPlotSettings || settings.chartSettings ? (
+      {settings.distributionChartSettings || settings.functionChartSettings ? (
         <button
           onClick={() => {
             setSettings(props.value.location, {
               ...settings,
-              distributionPlotSettings: undefined,
-              chartSettings: undefined,
+              distributionChartSettings: undefined,
+              functionChartSettings: undefined,
             });
             props.onChange();
           }}
