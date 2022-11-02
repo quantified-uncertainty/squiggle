@@ -39,10 +39,13 @@
   ],
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
+    "@commander-js/extra-typings": "^0.3.0",
     "@rescript/std": "^10.0.0",
     "@stdlib/stats": "^0.0.13",
+    "commander": "^9.4.1",
     "jstat": "^1.9.5",
     "lodash": "^4.17.21",
+    "open": "^8.4.0",
     "pdfast": "^0.2.0"
   },
   "devDependencies": {
@@ -69,5 +72,8 @@
   },
   "source": "./src/js/index.ts",
   "main": "./dist/src/js/index.js",
-  "types": "./dist/src/js/index.d.ts"
+  "types": "./dist/src/js/index.d.ts",
+  "bin": {
+    "squiggle": "./dist/src/cli/index.js"
+  }
 }
