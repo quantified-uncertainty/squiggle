@@ -42,13 +42,17 @@ export default function PlaygroundPage() {
     delete hashData.initialSquiggleString;
   }
   const playgroundProps = {
-    defaultCode: "normal(0,1)",
+    defaultCode: hashData.defaultCode ?? "normal(0,1)",
+    distributionChartSettings: {
+      showSummary: hashData.showSummary ?? true,
+    },
     height: 700,
     showShareButton: true,
-    ...hashData,
-    onCodeChange: (code) => setHashData({ initialSquiggleString: code }),
+    showEditor: hashData.showEditor ?? true,
+    onCodeChange: (code) => setHashData({ defaultCode: code }),
     onSettingsChange: (settings) => {
-      const { showSummary, showEditor } = settings;
+      const { showEditor } = settings;
+      const showSummary = settings.distributionChartSettings?.showSummary;
       setHashData({ showSummary, showEditor });
     },
   };

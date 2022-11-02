@@ -1,22 +1,28 @@
 import { VisualizationSpec } from "react-vega";
+import * as yup from "yup";
 import type { LogScale, LinearScale, PowScale, TimeScale } from "vega";
 
-export type DistributionChartSpecOptions = {
-  /** Set the x scale to be logarithmic by deault */
-  logX: boolean;
-  /** Set the y scale to be exponential by deault */
-  expY: boolean;
-  /** The minimum x coordinate shown on the chart */
-  minX?: number;
-  /** The maximum x coordinate shown on the chart */
-  maxX?: number;
-  /** The title of the chart */
-  title?: string;
-  /** The formatting of the ticks */
-  format?: string;
-  /** Whether the x-axis should be dates or numbers */
-  xAxisType?: "number" | "dateTime";
-};
+export const defaultTickFormat = ".9~s";
+
+export const distributionChartSpecSchema = yup.object({}).shape({
+  /** Set the x scale to be logarithmic */
+  logX: yup.boolean().required().default(false),
+  /** Set the y scale to be exponential */
+  expY: yup.boolean().required().default(false),
+  minX: yup.number(),
+  maxX: yup.number(),
+  title: yup.string(),
+  xAxisType: yup
+    .mixed<"number" | "dateTime">()
+    .oneOf(["number", "dateTime"])
+    .default("number"),
+  /** Documented here: https://github.com/d3/d3-format */
+  tickFormat: yup.string().required().default(defaultTickFormat),
+});
+
+export type DistributionChartSpecOptions = yup.InferType<
+  typeof distributionChartSpecSchema
+>;
 
 /** X Scales */
 export const linearXScale: LinearScale = {
@@ -63,28 +69,19 @@ export const expYScale: PowScale = {
   nice: false,
 };
 
-export const defaultTickFormat = ".9~s";
 export const timeTickFormat = "%b %d, %Y %H:%M";
 const width = 500;
 
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions & { maxY: number }
 ): VisualizationSpec {
-  const {
-    title,
-    minX,
-    maxX,
-    logX,
-    expY,
-    xAxisType = "number",
-    maxY,
-  } = specOptions;
+  const { title, minX, maxX, logX, expY, xAxisType, maxY } = specOptions;
 
   const dateTime = xAxisType === "dateTime";
 
   // some fallbacks
-  const format = specOptions?.format
-    ? specOptions.format
+  const format = specOptions?.tickFormat
+    ? specOptions.tickFormat
     : dateTime
     ? timeTickFormat
     : defaultTickFormat;

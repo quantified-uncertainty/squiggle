@@ -1,25 +1,9 @@
-Various scripts used for development, benchmarking and testing.
+Various scripts used for development and benchmarking.
 
-None of these are bundled in the NPM package yet.
+None of these are bundled in the NPM package.
 
-# run.mjs
+# How to run these scripts
 
-`scripts/run.mjs` allows quick testing of Squiggle programs:
+Option 1. `ts-node ./scripts/run.ts`. Slow, but doesn't require rebuilds.
 
-```
-$ ./scripts/run.mjs '2+2'
-Running 2+2
-Ok 4
-@{__result__: 4}
-```
-
-# run-file.mjs
-
-`scripts/run-file.mjs` can be used to run and benchmark squiggle scripts stored in files:
-
-```
-$ ./scripts/run-file.mjs ./path/to/file.squiggle
-Time: 3.18 Ok
-```
-
-To see the result and bindings, add the `-o` or `--output` flag.
+Option 2. Run `yarn build` and then `node ./dist/scripts/run.js`.

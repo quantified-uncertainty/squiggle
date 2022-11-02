@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as yup from "yup";
 import {
   SqLambda,
   environment,
@@ -7,23 +8,27 @@ import {
 } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
-import { DistributionPlottingSettings } from "./DistributionChart";
 import { MessageAlert } from "./Alert";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
+import { DistributionChartSettings } from "./DistributionChart";
 
-export type FunctionChartSettings = {
-  start: number;
-  stop: number;
-  count: number;
-};
+export const functionSettingsSchema = yup.object({}).shape({
+  start: yup.number().required().positive().integer().default(0).min(0),
+  stop: yup.number().required().positive().integer().default(10).min(0),
+  count: yup.number().required().positive().integer().default(20).min(2),
+});
 
-interface FunctionChartProps {
+export type FunctionChartSettings = yup.InferType<
+  typeof functionSettingsSchema
+>;
+
+type FunctionChartProps = {
   fn: SqLambda;
-  chartSettings: FunctionChartSettings;
-  distributionPlotSettings: DistributionPlottingSettings;
+  settings: FunctionChartSettings;
+  distributionChartSettings: DistributionChartSettings;
   environment: environment;
   height: number;
-}
+};
 
 const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
   const [expanded, setExpanded] = React.useState(false);
@@ -46,9 +51,9 @@ const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
 
 export const FunctionChart: React.FC<FunctionChartProps> = ({
   fn,
-  chartSettings,
+  settings,
   environment,
-  distributionPlotSettings,
+  distributionChartSettings,
   height,
 }) => {
   console.log(fn.parameters().length);
@@ -59,8 +64,8 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
-  const result1 = fn.call([chartSettings.start]);
-  const result2 = fn.call([chartSettings.stop]);
+  const result1 = fn.call([settings.start]);
+  const result2 = fn.call([settings.stop]);
   const getValidResult = () => {
     if (result1.tag === "Ok") {
       return result1;
@@ -81,20 +86,15 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
       return (
         <FunctionChart1Dist
           fn={fn}
-          chartSettings={chartSettings}
+          settings={settings}
           environment={environment}
           height={height}
-          distributionPlotSettings={distributionPlotSettings}
+          distributionChartSettings={distributionChartSettings}
         />
       );
     case SqValueTag.Number:
       return (
-        <FunctionChart1Number
-          fn={fn}
-          chartSettings={chartSettings}
-          environment={environment}
-          height={height}
-        />
+        <FunctionChart1Number fn={fn} settings={settings} height={height} />
       );
     default:
       return (

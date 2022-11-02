@@ -35,7 +35,6 @@ describe("SqError", () => {
     )->toBe(`Error: test error
 Stack trace:
   frame2
-  frame1
-`)
+  frame1`)
   })
 })

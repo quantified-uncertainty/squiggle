@@ -10,15 +10,26 @@ import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
 import * as uuid from "uuid";
 
-type SquiggleArgs = {
+// Props needed for a standalone execution
+type StandaloneExecutionProps = {
+  /** The amount of points returned to draw the distribution, not needed if using a project */
   environment?: environment;
+};
+
+// Props needed when executing inside a project.
+type ProjectExecutionProps = {
+  /** The project that this execution is part of */
+  project: SqProject;
+  /** What other squiggle sources from the project to continue. Default [] */
+  continues?: string[];
+};
+
+export type SquiggleArgs = {
   code: string;
   executionId?: number;
   jsImports?: JsImports;
-  project?: SqProject;
-  continues?: string[];
   onChange?: (expr: SqValue | undefined, sourceName: string) => void;
-};
+} & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export type ResultAndBindings = {
   result: result<SqValue, SqError>;
@@ -29,22 +40,23 @@ const importSourceName = (sourceName: string) => "imports-" + sourceName;
 const defaultContinues = [];
 
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
+  const sourceName = useMemo(() => uuid.v4(), []);
+  const projectArg = "project" in args ? args.project : undefined;
+  const environment = "environment" in args ? args.environment : undefined;
+  const continues =
+    "continues" in args ? args.continues ?? [] : defaultContinues;
+
   const project = useMemo(() => {
-    if (args.project) {
-      return args.project;
+    if (projectArg) {
+      return projectArg;
     } else {
       const p = SqProject.create();
-      if (args.environment) {
-        p.setEnvironment(args.environment);
+      if (environment) {
+        p.setEnvironment(environment);
       }
       return p;
     }
-  }, [args.project, args.environment]);
-
-  const sourceName = useMemo(() => uuid.v4(), []);
-
-  const env = project.getEnvironment();
-  const continues = args.continues || defaultContinues;
+  }, [projectArg, environment]);
 
   const result = useMemo(
     () => {
@@ -72,7 +84,6 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
       sourceName,
       continues,
       project,
-      env,
     ]
   );
 
