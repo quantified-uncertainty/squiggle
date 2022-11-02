@@ -93,7 +93,6 @@ module AggregateFs = {
     let samotsvety = xs => {
       let sortedXs = Belt.SortArray.stableSortBy(xs, (a, b) => a > b ? 1 : -1)
       let middleXs = Belt.Array.slice(sortedXs, ~offset=1, ~len=E.A.length(xs) - 2)
-      Js.log2("MiddleXs: ", middleXs)
       let answer = geomMeanOfOdds(middleXs)
       answer
     }
