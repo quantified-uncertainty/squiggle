@@ -14,7 +14,7 @@ module Topic = {
       ~nameSpace,
       ~output=EvtNumber,
       ~requiresNamespace=false,
-      ~example=[`Template.id(1)`],
+      ~examples=[`Template.id(1)`],
       ~definitions=[
         FnDefinition.make(
           ~name="id",

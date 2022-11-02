@@ -74,7 +74,7 @@ module AggregateFs = {
     let extremizedGeometricMeanOfOdds = (~xs, ~extremizationParameter=1.5, ()) => {
       let arrayOfOdds = E.A.fmap(p => probabilityToOdds(p), xs)
       let arrayOfLogsOfOdds = E.A.fmap(p => Js.Math.log2(p), arrayOfOdds)
-      let extremizedSumOfLogsOfOdds = extremizationParameter *. mean(arrayOfLogsOfOdds)
+      let extremizedSumOfLogsOfOdds = extremizationParameter *. arithmeticMean(arrayOfLogsOfOdds)
       let extremizedGeomMeanOfOdds = Js.Math.pow_float(~base=2.0, ~exp=extremizedSumOfLogsOfOdds)
       let result = oddsToProbability(extremizedGeomMeanOfOdds)
       result
@@ -91,7 +91,7 @@ module AggregateFs = {
     }
 
     let samotsvety = xs => {
-      let sortedXs = Belt.SortArray.stableSortBy(xs, (a, b) => a > b ? 1 : -1)
+      let sortedXs = E.A.Floats.sort(xs)// Belt.SortArray.stableSortBy(xs, (a, b) => a > b ? 1 : -1)
       let middleXs = Belt.Array.slice(sortedXs, ~offset=1, ~len=E.A.length(xs) - 2)
       let answer = geomMeanOfOdds(middleXs)
       answer
