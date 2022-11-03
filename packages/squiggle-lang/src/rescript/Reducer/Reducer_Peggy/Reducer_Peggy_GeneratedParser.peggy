@@ -150,7 +150,10 @@ chainFunctionCall
     / fn:callableBasicValue
       { return {callable: fn, args: []}}
       
-  callableBasicValue = valueConstructor / variable   
+  callableBasicValue = staticCollectionElement / valueConstructor / variable   
+
+// type: 'Call', fn: { type: 'Lambda', ... }, args:
+// type: 'Call', fn: { type: 'Identifier', value:  }, args:
 
 // end of binary operators
 
@@ -166,11 +169,21 @@ postOperator
   = collectionElement
   / atom
 
+staticCollectionElement
+  = head:atom &('['/'.')
+    tail:(
+      _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
+    / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
+    )* 
+  { return tail.reduce(function(result, element) {
+      return h.makeFunctionCall(element.fn, [result, ...element.args], location())
+    }, head)}
+
 collectionElement
   = head:atom &('['/'('/'.')
     tail:(
-      _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
-    / _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: h.postOperatorToFunction['()'], args: args}}
+      _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: h.postOperatorToFunction['()'], args: args}}
+    / _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
     / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
     )* 
   { return tail.reduce(function(result, element) {

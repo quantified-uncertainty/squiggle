@@ -77,6 +77,10 @@ describe("eval", () => {
     testEvalToBe("1->{|x| x}", "Ok(1)")
     testEvalToBe("1->{|x,y| x+y}(2)", "Ok(3)")
    })
+   describe("to expression", () => {
+    testEvalToBe("1->{f:{|x|x+2}}.f", "Ok(3)")
+    testEvalToBe("1->{f:{|x|x+2}}['f']", "Ok(3)")
+   })
   })
 })
 
