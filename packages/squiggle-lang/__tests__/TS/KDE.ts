@@ -1,6 +1,7 @@
 import * as fc from "fast-check";
 import { samplesToContinuousPdf } from "../../src/rescript/Distributions/SampleSetDist/KdeLibrary.js";
 import range from "lodash/range";
+import sum from "lodash/sum";
 import sumBy from "lodash/sumBy";
 
 // KDE by definition, with triangular kernel max(0, |1-x|)
@@ -74,6 +75,11 @@ describe("Kernel density estimation", () => {
               evalKde(sortedSamples, width, weight, xs[i])
             )
           );
+        });
+
+        test("should sum to 1 / dx, with x step size dx", () => {
+          const dx = xs[1] - xs[0];
+          expect(sum(ys)).toBeCloseTo(1 / dx);
         });
       }
     )
