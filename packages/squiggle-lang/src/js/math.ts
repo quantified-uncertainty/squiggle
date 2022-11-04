@@ -3,19 +3,18 @@ type SampleArgs = {
   size: number;
 };
 
-/** Searches for a first element in `arr` greater than `value` */
+/**
+ * Searches for a first element in `arr` greater than `value` 
+ * For more info:
+ * https://github.com/quantified-uncertainty/squiggle/pull/1290#issuecomment-1302224197
+*/
 function binsearchFirstGreater(arr: number[], value: number): number {
-  let s = 0
-  let e = arr.length - 1;
-  while ((e - s) > 1) {
-    const i = Math.ceil((s + e) / 2)
-    if (arr[i] < value) {
-      s = i + 1
-    } else {
-      e = i
-    }
+  let s = -1;             // Largest index known <=value
+  let l = arr.length + 1; // Result is in (s,s+l]
+  for (let h; (h = l >> 1) > 0; l -= h) {
+    s += h * +(arr[s + h] <= value);
   }
-  return value < arr[s] ? s : e
+  return s + 1;
 }
 
 export function randomSample(dist: number[], args: SampleArgs): number[] {
@@ -23,9 +22,9 @@ export function randomSample(dist: number[], args: SampleArgs): number[] {
   let sample: number[] = Array(size);
 
   let accum = 0
-  let probPrefixSums = [];
-  for (const f of probs) {
-    probPrefixSums.push(accum += f)
+  let probPrefixSums = Array(probs.length);
+  for (let index = 0; index < probs.length; index++) {
+    probPrefixSums[index] = (accum += probs[index])
   }
   let sum = probPrefixSums[probPrefixSums.length - 1]
 
@@ -76,7 +75,7 @@ let logistic: ContinuousProbabilityDistribution<{ mu: number; s: number }> = {
   pdf: ({ mu, s }, x) => {
     if (s === 0) return mu === x ? +Infinity : 0;
     let exp_delta = Math.exp(-((x - mu) / s));
-    return exp_delta / (s * sq(1 + exp_delta));
+    return exp_delta / (s * square(1 + exp_delta));
   },
   cdf: ({ mu, s }, x) => {
     if (s === 0) return mu === x ? +Infinity : 0;
