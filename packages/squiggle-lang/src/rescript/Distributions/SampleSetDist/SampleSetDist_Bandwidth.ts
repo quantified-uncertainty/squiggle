@@ -10,7 +10,7 @@ const nrd_coef = 1.06;
 const nrd_fractionalPower = -0.2;
 
 // Stats utilities, valid on sorted arguments only!
-const percentile = (xs, k) => {
+const percentile = (xs: number[], k: number) => {
   const realIndex = k * (xs.length + 1);
   const index = Math.floor(realIndex);
   const frac = realIndex - index;
@@ -19,7 +19,7 @@ const percentile = (xs, k) => {
   return x0 + frac * (x1 - x0);
 };
 
-const variance = (xs) => {
+const variance = (xs: number[]) => {
   // Variance is shift-invariant; subtract the middle of the range for precision
   // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Computing_shifted_data
   const n = xs.length;
@@ -35,11 +35,11 @@ const variance = (xs) => {
   return sumsq / n - mean * mean;
 };
 
-const iqr = (x) =>
+const iqr = (x: number[]) =>
   percentile(x, iqr_percentile) - percentile(x, iqr_percentile_complement);
 
 // Silverman, B. W. (1986) Density Estimation. London: Chapman and Hall.
-const nrd0 = (x) => {
+export const nrd0 = (x: number[]) => {
   const hi = Math.sqrt(variance(x));
   const lo = Math.min(hi, iqr(x) / nrd0_lo_denominator);
   const e = Math.abs(x[1]);
@@ -48,16 +48,11 @@ const nrd0 = (x) => {
 };
 
 // Scott, D. W. (1992) Multivariate Density Estimation: Theory, Practice, and Visualization. Wiley.
-const nrd = (x) => {
+export const nrd = (x: number[]) => {
   const h = iqr(x) / nrd0_lo_denominator;
   return (
     nrd_coef *
     Math.min(Math.sqrt(variance(x)), h) *
     Math.pow(x.length, nrd_fractionalPower)
   );
-};
-
-module.exports = {
-  nrd0,
-  nrd,
 };

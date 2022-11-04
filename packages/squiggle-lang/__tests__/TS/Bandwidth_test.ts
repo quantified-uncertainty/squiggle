@@ -1,7 +1,7 @@
-const {
+import {
   nrd,
   nrd0,
-} = require("../../src/rescript/Distributions/SampleSetDist/SampleSetDist_Bandwidth.js");
+} from "../../src/rescript/Distributions/SampleSetDist/SampleSetDist_Bandwidth";
 
 describe("Bandwidth", () => {
   test("nrd0()", () => {

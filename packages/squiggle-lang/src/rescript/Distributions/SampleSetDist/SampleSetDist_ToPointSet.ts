@@ -1,5 +1,5 @@
 import samplesToContinuousPdf from "./KdeLibrary";
-const { nrd0 } = require("./SampleSetDist_Bandwidth.js");
+import { nrd0 } from "./SampleSetDist_Bandwidth";
 import splitContinuousAndDiscrete from "./SplitContinuousAndDiscrete";
 import zipWith from "lodash/zipWith";
 
