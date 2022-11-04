@@ -11,49 +11,53 @@ const evalKde = (samples: number[], width: number, weight: number, x: number) =>
   sumBy(samples, (p) => Math.max(0, 1 - Math.abs((x - p) / width)));
 
 describe("Kernel density estimation", () => {
-  test("should approximately equal naive definition", () => {
-    fc.assert(
-      fc.property(
-        fc.array(fc.double({ min: -10, max: 10, noNaN: true }), {
-          minLength: 6, // 5 samples or below filtered out in SampleSetDist.toPointSetDist
-        }),
-        fc.integer({ min: 4, max: 1e3 }), // 4 is the minimum allowed length
-        fc.double({ min: 0.1, max: 3, noNaN: true }),
-        (samples, outputLength, wantedWidth) => {
-          const len = samples.length;
-          const weight = 1 / len;
-          const sortedSamples = samples.sort((a, b) => a - b);
-          // The bandwidth recommendations always return a width less than the
-          // range, so it doesn't make sense to test very large widths.
-          // But fast-check might make the range of the samples arbitrarily
-          // small, so we test here.
-          if (sortedSamples[len - 1] - sortedSamples[0] < 2 * wantedWidth)
-            return true;
+  fc.assert(
+    fc.property(
+      fc.array(fc.double({ min: -10, max: 10, noNaN: true }), {
+        minLength: 6, // 5 samples or below filtered out in SampleSetDist.toPointSetDist
+      }),
+      fc.integer({ min: 4, max: 1e3 }), // 4 is the minimum allowed length
+      fc.double({ min: 0.1, max: 3, noNaN: true }),
+      (samples, outputLength, wantedWidth) => {
+        const len = samples.length;
+        const weight = 1 / len;
+        const sortedSamples = samples.sort((a, b) => a - b);
+        // The bandwidth recommendations always return a width less than the
+        // range, so it doesn't make sense to test very large widths.
+        // But fast-check might make the range of the samples arbitrarily
+        // small, so we test here.
+        if (sortedSamples[len - 1] - sortedSamples[0] < 2 * wantedWidth)
+          return true;
 
-          const {
-            xs,
-            ys,
-            usedWidth: width,
-          } = samplesToContinuousPdf(
-            sortedSamples,
-            outputLength,
-            wantedWidth,
-            weight
-          );
+        const {
+          xs,
+          ys,
+          usedWidth: width,
+        } = samplesToContinuousPdf(
+          sortedSamples,
+          outputLength,
+          wantedWidth,
+          weight
+        );
 
+        test("lengths of xs and ys should match outputLength", () => {
           expect(xs.length).toEqual(outputLength);
           expect(ys.length).toEqual(outputLength);
+        });
 
-          // Point range should be sample range plus width on either side
+        test("point range should be sample range plus width on either side", () => {
           expect(xs[0] + width).toBeCloseTo(sortedSamples[0]);
           expect(xs[outputLength - 1] - width).toBeCloseTo(
             sortedSamples[len - 1]
           );
+        });
 
-          // No tail
+        test("should have y value 0 on both sides to indicate no tails", () => {
           expect(ys[0]).toBeCloseTo(0);
           expect(ys[outputLength - 1]).toBeCloseTo(0);
+        });
 
+        test("should approximately equal naive definition", () => {
           // Checking cost for each point is proportional to len.
           // We don't want to spend len * outputLength to check one function:
           // instead len * numChecks <= 10 * len + 1e3
@@ -70,8 +74,8 @@ describe("Kernel density estimation", () => {
               evalKde(sortedSamples, width, weight, xs[i])
             )
           );
-        }
-      )
-    );
-  });
+        });
+      }
+    )
+  );
 });
