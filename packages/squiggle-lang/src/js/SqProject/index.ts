@@ -153,14 +153,14 @@ export class SqProject {
     return this.getItem(sourceId).directIncludes;
   }
 
+  getContinues(sourceId: string): string[] {
+    return this.getItem(sourceId).continues;
+  }
+
   setContinues(sourceId: string, continues: string[]): void {
     const newItem = ProjectItem.setContinues(this.getItem(sourceId), continues);
     this.setItem(sourceId, newItem);
     this.handleNewTopology();
-  }
-
-  getContinues(sourceId: string): string[] {
-    return this.getItem(sourceId).continues;
   }
 
   private getResultOption(sourceId: string) {

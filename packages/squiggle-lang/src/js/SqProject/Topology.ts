@@ -1,20 +1,40 @@
 import { SqProject } from "./index";
 
+// TODO - we should keep the persistent graph and reverse graph of dependencies for better performance.
+
+const dfs = ({
+  getEdges,
+  visited = new Set(),
+  from,
+  result,
+}: {
+  getEdges: (id: string) => string[];
+  visited?: Set<string>;
+  from: string;
+  result: string[]; // will be modified
+}) => {
+  const _dfs = (id: string) => {
+    if (visited.has(id)) return;
+    visited.add(id);
+    for (const dependencyId of getEdges(id)) {
+      if (visited.has(dependencyId)) continue;
+      _dfs(dependencyId);
+    }
+    result.push(id);
+  };
+  _dfs(from);
+};
+
 export const getRunOrder = (project: SqProject): string[] => {
   const visited = new Set<string>();
   const runOrder: string[] = [];
-  const dfs = (id: string) => {
-    if (visited.has(id)) return;
-    visited.add(id);
-    for (const dependencyId of project.getImmediateDependencies(id)) {
-      if (visited.has(dependencyId)) continue;
-      dfs(dependencyId);
-    }
-    runOrder.push(id);
-  };
-
   for (const sourceId of project.getSourceIds()) {
-    dfs(sourceId);
+    dfs({
+      getEdges: (id) => project.getImmediateDependencies(id),
+      visited,
+      from: sourceId,
+      result: runOrder,
+    });
   }
   return runOrder;
 };
@@ -23,38 +43,55 @@ export const getRunOrderFor = (
   project: SqProject,
   sourceId: string
 ): string[] => {
-  const visited = new Set<string>();
-  const runOrder: string[] = [];
-  const dfs = (id: string) => {
-    if (visited.has(id)) return;
-    visited.add(id);
-    for (const dependencyId of project.getImmediateDependencies(id)) {
-      if (visited.has(dependencyId)) continue;
-      dfs(dependencyId);
-    }
-    runOrder.push(id);
-  };
-  dfs(sourceId);
-
-  return runOrder;
+  const result: string[] = [];
+  dfs({
+    getEdges: (id) => project.getImmediateDependencies(id),
+    from: sourceId,
+    result,
+  });
+  return result;
 };
 
 export const getDependencies = (
   project: SqProject,
   sourceId: string
 ): string[] => {
-  const runOrder = getRunOrder(project);
-  const index = runOrder.indexOf(sourceId);
-  return runOrder.slice(0, index); // FIXME - this returns extra stuff
+  const runOrder = getRunOrderFor(project, sourceId);
+
+  // sourceId is the last item of runOrder, but I didn't want to add an assertion
+  return runOrder.filter((id) => id !== sourceId);
+};
+
+const getInverseGraph = (project: SqProject) => {
+  const graph = new Map<string, string[]>();
+  for (const id of project.getSourceIds()) {
+    const dependencies = project.getImmediateDependencies(id);
+    for (const dependencyId of dependencies) {
+      const edges = graph.get(dependencyId) ?? [];
+      edges.push(id);
+      graph.set(dependencyId, edges);
+    }
+  }
+  return graph;
 };
 
 export const getDependents = (
   project: SqProject,
   sourceId: string
 ): string[] => {
-  const runOrder = getRunOrder(project);
-  const index = runOrder.indexOf(sourceId);
-  return runOrder.slice(index + 1); // FIXME - this returns extra stuff
+  // We'll need the inverse graph for this.
+  const graph = getInverseGraph(project);
+  console.log(graph);
+
+  const result: string[] = [];
+  // TODO - it would be more appropriate to do bfs, but dfs+reverse allows to reuse the existing code
+  dfs({
+    getEdges: (id) => graph.get(id) ?? [],
+    from: sourceId,
+    result,
+  });
+
+  return result.filter((id) => id !== sourceId).reverse();
 };
 
 export const runOrderDiff = (
