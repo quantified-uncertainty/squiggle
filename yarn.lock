@@ -4865,9 +4865,9 @@
     "@types/react" "*"
 
 "@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
-  version "18.0.24"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.24.tgz#2f79ed5b27f08d05107aab45c17919754cc44c20"
-  integrity sha512-wRJWT6ouziGUy+9uX0aW4YOJxAY0bG6/AOk5AW5QSvZqI7dk6VBIbXvcVgIw/W5Jrl24f77df98GEKTJGOLx7Q==
+  version "18.0.25"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.25.tgz#8b1dcd7e56fe7315535a4af25435e0bb55c8ae44"
+  integrity sha512-xD6c0KDT4m7n9uD4ZHi02lzskaiqcBxf4zi+tXZY98a04wvc0hi/TcCPC2FOESZi51Nd7tlUeOJY8RofL799/g==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -18838,10 +18838,10 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
-vsce@^2.13.0:
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/vsce/-/vsce-2.13.0.tgz#832adc2926a4ca9facf898fea011dd33515f7ace"
-  integrity sha512-t1otQ2lqyi5Y/G6qUl9BEc561nEIYrZbLT8k+R1SoZaKNa6gaehaLGQG5zvB524YPGZOVvbOBzAXoO7Mor1J5g==
+vsce@^2.14.0:
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/vsce/-/vsce-2.14.0.tgz#f264c427f52cb6c1b1ba2e5f8a84063a034f2438"
+  integrity sha512-LH0j++sHjcFNT++SYcJ86Zyw49GvyoTRfzYJGmaCgfzTyL7MyMhZeVEnj9K9qKh/m1N3/sdWWNxP+PFS/AvWiA==
   dependencies:
     azure-devops-node-api "^11.0.1"
     chalk "^2.4.2"
