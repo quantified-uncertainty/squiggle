@@ -114,10 +114,7 @@ const setExpression = (
   return touchExpression({ ...t, expression: expression });
 };
 
-export const setContinuation = (
-  t: t,
-  continuation: RSReducerT.namespace
-): t => {
+const setContinuation = (t: t, continuation: RSReducerT.namespace): t => {
   return {
     ...t,
     continuation,
@@ -161,28 +158,12 @@ export const getPastChain = (t: t): string[] => [
 export const setContinues = (t: t, continues: string[]): t =>
   touchSource({ ...t, continues });
 
-export const removeContinues = (t: t): t =>
-  touchSource({ ...t, continues: [] });
-
 const setIncludes = (
   t: t,
   includes: NonNullable<ProjectItem["includes"]>
 ): t => ({
   ...t,
   includes,
-});
-
-const setImportAsVariables = (
-  t: t,
-  includeAsVariables: NonNullable<ProjectItem["includeAsVariables"]>
-): t => ({
-  ...t,
-  includeAsVariables,
-});
-
-const setDirectImports = (t: t, directIncludes: string[]): t => ({
-  ...t,
-  directIncludes,
 });
 
 export const parseIncludes = (t: t): t => {

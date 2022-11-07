@@ -1,10 +1,4 @@
-import zip from "lodash/zip";
 import { SqProject } from "./index";
-
-type State = {
-  visited: Set<string>;
-  stack: string[];
-};
 
 export const getRunOrder = (project: SqProject): string[] => {
   const visited = new Set<string>();

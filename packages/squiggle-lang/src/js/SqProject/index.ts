@@ -162,23 +162,6 @@ export class SqProject {
     return ProjectItem.getContinues(this.getItem(sourceId));
   }
 
-  removeContinues(sourceId: string): void {
-    const newItem = ProjectItem.removeContinues(this.getItem(sourceId));
-    this.setItem(sourceId, newItem);
-    this.handleNewTopology();
-  }
-
-  private setContinuation(
-    sourceId: string,
-    continuation: RSReducerT.namespace
-  ): void {
-    const newItem = ProjectItem.setContinuation(
-      this.getItem(sourceId),
-      continuation
-    );
-    this.setItem(sourceId, newItem);
-  }
-
   private getResultOption(sourceId: string) {
     return ProjectItem.getResult(this.getItem(sourceId));
   }
@@ -312,6 +295,7 @@ export class SqProject {
 
 // ------------------------------------------------------------------------------------
 
+// Shortcut for running a single piece of code without creating a project
 export const evaluate = (
   sourceCode: string
 ): [result<SqValue, SqError>, SqRecord] => {
