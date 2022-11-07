@@ -39,7 +39,7 @@
   ],
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
-    "@commander-js/extra-typings": "^0.3.0",
+    "@commander-js/extra-typings": "^9.4.1",
     "@rescript/std": "^10.0.0",
     "@stdlib/stats": "^0.0.13",
     "commander": "^9.4.1",

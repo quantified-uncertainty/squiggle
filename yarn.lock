@@ -1449,10 +1449,10 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@commander-js/extra-typings@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@commander-js/extra-typings/-/extra-typings-0.3.0.tgz#b8ce31dd446f7a898e4d7a889f8ac4a538f34192"
-  integrity sha512-DfCVFlVBGTU8FeMy1+gBoefXL/ity/DyOPYn4bGytmjhKdP7pY9i27m8Ugmlv8FTsLp5a+mQrbRbUk2W/3M5qA==
+"@commander-js/extra-typings@^9.4.1":
+  version "9.4.1"
+  resolved "https://registry.yarnpkg.com/@commander-js/extra-typings/-/extra-typings-9.4.1.tgz#acb75021594519799f509bde8f9210b114f1a0f1"
+  integrity sha512-v0BqORYamk1koxDon6femDGLWSL7P78vYTyOU5nFaALnmNALL+ktgdHvWbxzzBBJIKS7kv3XvM/DqNwiLcgFTA==
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
@@ -4865,9 +4865,9 @@
     "@types/react" "*"
 
 "@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
-  version "18.0.24"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.24.tgz#2f79ed5b27f08d05107aab45c17919754cc44c20"
-  integrity sha512-wRJWT6ouziGUy+9uX0aW4YOJxAY0bG6/AOk5AW5QSvZqI7dk6VBIbXvcVgIw/W5Jrl24f77df98GEKTJGOLx7Q==
+  version "18.0.25"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.25.tgz#8b1dcd7e56fe7315535a4af25435e0bb55c8ae44"
+  integrity sha512-xD6c0KDT4m7n9uD4ZHi02lzskaiqcBxf4zi+tXZY98a04wvc0hi/TcCPC2FOESZi51Nd7tlUeOJY8RofL799/g==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
