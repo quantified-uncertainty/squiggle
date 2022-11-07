@@ -1,6 +1,6 @@
 import * as path from "path";
 import { CommanderError } from "@commander-js/extra-typings";
-import { makeProgram } from "../../src/js/cli";
+import { makeProgram } from "../src/js/cli";
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -97,7 +97,6 @@ it("Bindings", async () => {
 it("Code with includes", async () => {
   const filename = path.join(
     __dirname,
-    "..",
     "fixtures",
     "includes",
     "main.squiggle"
@@ -111,7 +110,6 @@ it("Code with includes", async () => {
 it("Relative includes", async () => {
   const filename = path.join(
     __dirname,
-    "..",
     "fixtures",
     "relative-includes",
     "main.squiggle"

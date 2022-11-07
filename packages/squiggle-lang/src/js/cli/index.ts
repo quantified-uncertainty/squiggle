@@ -1,4 +1,3 @@
-import path from "path";
 import fs from "fs";
 import { OutputMode, run } from "./utils";
 
@@ -35,17 +34,14 @@ export const makeProgram = () => {
         output = "RESULT_AND_BINDINGS";
       }
 
-      if (filename) {
-        if (options.eval) {
-          program.error("Only one of filename and eval string should be set.");
-        }
-        src = fs.readFileSync(path.resolve(filename), "utf-8");
+      if (filename && options.eval) {
+        program.error("Only one of filename and eval string should be set.");
+      } else if (filename) {
+        src = fs.readFileSync(filename, "utf-8");
+      } else if (options.eval) {
+        src = options.eval;
       } else {
-        if (options.eval) {
-          src = options.eval;
-        } else {
-          program.error("One of filename and eval string should be set.");
-        }
+        program.error("One of filename and eval string should be set.");
       }
 
       const sampleCount = process.env.SAMPLE_COUNT;

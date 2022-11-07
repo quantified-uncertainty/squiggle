@@ -1,5 +1,7 @@
 import path from "path";
 import fs from "fs";
+import isFinite from "lodash/isFinite";
+
 import { environment } from "..";
 import { SqProject } from "../SqProject";
 import { SqValueTag } from "../SqValue";
@@ -7,13 +9,11 @@ import { SqValueTag } from "../SqValue";
 export const red = (str: string) => `\x1b[31;1m${str}\x1b[0m`;
 export const bold = (str: string) => `\x1b[1m${str}\x1b[0m`;
 
-export const measure = (cb: () => void, times = 1) => {
+export const measure = (callback: () => void) => {
   const t1 = new Date();
-
-  for (let i = 1; i <= times; i++) {
-    cb();
-  }
+  callback();
   const t2 = new Date();
+
   return (t2.getTime() - t1.getTime()) / 1000;
 };
 
@@ -67,7 +67,7 @@ const _run = (args: {
 
 export const run = (args: RunArgs) => {
   let environment: environment | undefined;
-  if (args.sampleCount && Number(args.sampleCount) !== NaN) {
+  if (args.sampleCount && isFinite(Number(args.sampleCount))) {
     environment = {
       sampleCount: Number(args.sampleCount),
       xyPointLength: Number(args.sampleCount),
@@ -80,26 +80,30 @@ export const run = (args: RunArgs) => {
     environment,
   });
 
+  // Prints a section consisting of multiple lines; prints an extra "\n" if a section was printed before.
+  let isFirstSection = true;
+  const printLines = (...lines: string[]) => {
+    if (!isFirstSection) {
+      console.log();
+    }
+    isFirstSection = false;
+    lines.forEach((line) => console.log(line));
+  };
+
   if (result.tag === "Error") {
-    console.log(red("Error:"));
-    console.log(result.value.toStringWithStackTrace());
+    printLines(red("Error:"), result.value.toStringWithStackTrace());
   } else {
     switch (args.output) {
       case "RESULT_OR_BINDINGS":
         if (result.value.tag === SqValueTag.Void) {
-          console.log(bindings.toString());
+          printLines(bindings.toString());
         } else {
-          console.log(result.value.toString());
+          printLines(result.value.toString());
         }
-        if (args.measure) console.log();
         break;
       case "RESULT_AND_BINDINGS":
-        console.log(bold("Result:"));
-        console.log(result.value.toString());
-        console.log();
-        console.log(bold("Bindings:"));
-        console.log(bindings.toString());
-        if (args.measure) console.log();
+        printLines(bold("Result:"), result.value.toString());
+        printLines(bold("Bindings:"), bindings.toString());
         break;
       case "NONE":
       // do nothing
@@ -107,6 +111,6 @@ export const run = (args: RunArgs) => {
   }
 
   if (args.measure) {
-    console.log(bold("Time:"), String(time) + "s");
+    printLines(`${bold("Time:")} ${time}s`);
   }
 };
