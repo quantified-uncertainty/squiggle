@@ -57,7 +57,7 @@ describe("ReducerProject Tutorial", () => {
       /* Though it would not be practical for a storybook, 
         let's write the same project above with includes.
         You will see that parsing includes is setting the dependencies the same way as before. */
-      let project = SqProject.create();
+      let project = SqProject.create({ resolver: (name) => name });
 
       /* This time source1 and source2 are not depending on anything */
       project.setSource("source1", "x=1");

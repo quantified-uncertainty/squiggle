@@ -128,7 +128,9 @@ describe("removing sources", () => {
 });
 
 describe("project with include", () => {
-  const project = SqProject.create();
+  const project = SqProject.create({
+    resolver: (name) => name,
+  });
   project.setContinues("main", ["second"]);
   project.setContinues("second", ["first"]);
 

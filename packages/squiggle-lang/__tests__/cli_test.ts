@@ -1,4 +1,4 @@
-import path from "path";
+import * as path from "path";
 import { CommanderError } from "@commander-js/extra-typings";
 import { makeProgram } from "../../src/js/cli";
 
@@ -105,5 +105,19 @@ it("Code with includes", async () => {
   const result = await runCLI(["run", filename]);
   expect(result.exitCode).toBe(0);
   expect(result.stderr).toBe("");
-  expect(result.stdout).toBe("Normal(5, 2)");
+  expect(result.stdout).toBe("Normal(5,2)\n");
+});
+
+it("Relative includes", async () => {
+  const filename = path.join(
+    __dirname,
+    "..",
+    "fixtures",
+    "relative-includes",
+    "main.squiggle"
+  );
+  const result = await runCLI(["run", filename]);
+  expect(result.exitCode).toBe(0);
+  expect(result.stderr).toBe("");
+  expect(result.stdout).toBe("113\n");
 });

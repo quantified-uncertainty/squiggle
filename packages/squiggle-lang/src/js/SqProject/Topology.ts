@@ -81,7 +81,6 @@ export const getDependents = (
 ): string[] => {
   // We'll need the inverse graph for this.
   const graph = getInverseGraph(project);
-  console.log(graph);
 
   const result: string[] = [];
   // TODO - it would be more appropriate to do bfs, but dfs+reverse allows to reuse the existing code

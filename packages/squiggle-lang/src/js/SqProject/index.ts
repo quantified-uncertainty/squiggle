@@ -12,6 +12,11 @@ import { Error_, result, resultMap } from "../types";
 import { SqValueLocation } from "../SqValueLocation";
 import * as ProjectItem from "./ProjectItem";
 import * as Topology from "./Topology";
+import { Resolver } from "./Resolver";
+
+type Options = {
+  resolver?: Resolver;
+};
 
 // TODO: Auto clean project based on topology
 export class SqProject {
@@ -19,16 +24,18 @@ export class SqProject {
   private stdLib: RSReducerT.namespace;
   private environment: environment;
   private previousRunOrder: string[];
+  private resolver?: Resolver; // if not present, includes are forbidden
 
-  constructor() {
+  constructor(options?: Options) {
     this.items = new Map();
     this.stdLib = RSSquiggleLibraryStdLib.stdLib;
     this.environment = defaultEnvironment;
     this.previousRunOrder = [];
+    this.resolver = options?.resolver;
   }
 
-  static create() {
-    return new SqProject();
+  static create(options?: { resolver: Resolver }) {
+    return new SqProject(options);
   }
 
   setEnvironment(environment: environment) {
@@ -196,7 +203,13 @@ export class SqProject {
   }
 
   parseIncludes(sourceId: string): void {
-    const newItem = ProjectItem.parseIncludes(this.getItem(sourceId));
+    if (!this.resolver) {
+      throw new Error("Includes are not supported when resolver is unset");
+    }
+    const newItem = ProjectItem.parseIncludes(
+      this.getItem(sourceId),
+      this.resolver
+    );
     this.setItem(sourceId, newItem);
     this.handleNewTopology();
   }

@@ -1,7 +1,7 @@
 import { SqProject } from "../../src/js/SqProject";
 
 describe("Parse includes", () => {
-  const project = SqProject.create();
+  const project = SqProject.create({ resolver: (name) => name });
   project.setSource(
     "main",
     `
@@ -32,7 +32,7 @@ x=1`
 });
 
 describe("Parse includes", () => {
-  const project = SqProject.create();
+  const project = SqProject.create({ resolver: (name) => name });
   project.setSource(
     "main",
     `
@@ -75,7 +75,7 @@ x=1`
 });
 
 describe("Parse multiple direct includes", () => {
-  let project = SqProject.create();
+  let project = SqProject.create({ resolver: (name) => name });
   project.setSource(
     "main",
     `

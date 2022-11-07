@@ -1,0 +1,3 @@
+#include "./common.squiggle" as localCommon
+#include "../common.squiggle" as common
+x = localCommon.x + common.x

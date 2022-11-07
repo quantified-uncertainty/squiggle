@@ -9,6 +9,7 @@ import * as RSReducerPeggyToExpression from "../../rescript/Reducer/Reducer_Pegg
 import { parseIncludes as parseIncludes_ } from "./parseIncludes";
 import { SqError } from "../SqError";
 import { Error_, Ok, result, resultMap, resultMapError } from "../types";
+import { Resolver } from "./Resolver";
 
 // source -> rawParse -> includes -> expression -> bindings & result
 
@@ -147,21 +148,22 @@ export const getPastChain = (t: t): string[] => [
 export const setContinues = (t: t, continues: string[]): t =>
   touchSource({ ...t, continues });
 
-const setIncludes = (
-  t: t,
-  includes: NonNullable<ProjectItem["includes"]>
-): t => ({
+const setIncludes = (t: t, includes: ProjectItem["includes"]): t => ({
   ...t,
   includes,
 });
 
-export const parseIncludes = (t: t): t => {
+export const parseIncludes = (t: t, resolver: Resolver): t => {
   const rRawImportAsVariables = parseIncludes_(t.source);
   if (rRawImportAsVariables.tag === "Error") {
     return setIncludes(resetIncludes(t), rRawImportAsVariables);
   } else {
-    const rawImportAsVariables = rRawImportAsVariables.value;
     // ok
+    const rawImportAsVariables = rRawImportAsVariables.value.map(
+      ([variable, file]) =>
+        [variable, resolver(file, t.sourceId)] as [string, string]
+    );
+
     const includes = rawImportAsVariables.map(([_variable, file]) => file);
     const includeAsVariables = rawImportAsVariables.filter(
       ([variable, _file]) => variable !== ""

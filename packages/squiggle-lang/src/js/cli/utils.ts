@@ -32,7 +32,14 @@ const _run = (args: {
   filename?: string;
   environment?: environment;
 }) => {
-  const project = SqProject.create();
+  const project = SqProject.create({
+    resolver: (name, fromId) => {
+      if (!name.startsWith("./") && !name.startsWith("../")) {
+        throw new Error("Only relative paths in includes are allowed");
+      }
+      return path.resolve(path.dirname(fromId), name);
+    },
+  });
   const filename = path.resolve(args.filename || "./__anonymous__");
 
   const loadIncludesRecursively = (sourceId: string) => {
@@ -41,8 +48,7 @@ const _run = (args: {
     if (includes.tag === "Error") {
       throw new Error(`Failed to parse includes from ${sourceId}`);
     }
-    includes.value.forEach((include) => {
-      const includeId = path.join(path.dirname(sourceId), include);
+    includes.value.forEach((includeId) => {
       const includeSrc = fs.readFileSync(includeId, "utf-8");
       project.setSource(includeId, includeSrc);
       loadIncludesRecursively(includeId);

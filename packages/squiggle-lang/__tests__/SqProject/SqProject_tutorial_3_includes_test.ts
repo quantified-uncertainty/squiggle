@@ -9,7 +9,9 @@ Here we will finally proceed to a real life scenario. */
   describe("parseIncludes", () => {
     /* Here we investigate the details about parseIncludes, before setting up a real life scenario in the next section. */
     /* Everything happens inside a project, so let's have a project */
-    const project = SqProject.create();
+    const project = SqProject.create({
+      resolver: (name) => name,
+    });
     project.setSource(
       "main",
       `
@@ -112,7 +114,7 @@ Here we will finally proceed to a real life scenario. */
 
       /* * Here starts our real life project! * */
 
-      const project = SqProject.create();
+      const project = SqProject.create({ resolver: (name) => name });
 
       project.setSource(
         "main",
@@ -161,7 +163,7 @@ Here we will finally proceed to a real life scenario. */
 
   describe("Includes myFile as myVariable", () => {
     /* Instead of including into global space you can also put a module into a record variable */
-    const project = SqProject.create();
+    const project = SqProject.create({ resolver: (name) => name });
     project.setSource(
       "main",
       `
