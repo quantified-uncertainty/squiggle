@@ -27,7 +27,9 @@ export const getRunOrderFor = (
   const runOrder: string[] = [];
   const dfs = (id: string) => {
     if (visited.has(id)) return;
+    visited.add(id);
     for (const dependencyId of project.getImmediateDependencies(id)) {
+      if (visited.has(dependencyId)) continue;
       dfs(dependencyId);
     }
     runOrder.push(id);

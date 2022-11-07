@@ -65,7 +65,7 @@ export class SqProject {
     this.setItem(sourceId, newItem);
   }
 
-  touchDependents(sourceId: string) {
+  private touchDependents(sourceId: string) {
     Topology.getDependents(this, sourceId).forEach((id) =>
       this.touchSource_(id)
     );
@@ -136,20 +136,21 @@ export class SqProject {
     this.getSourceIds().forEach((id) => this.cleanResults(id));
   }
 
-  getIncludes(sourceId: string) {
-    return ProjectItem.getIncludes(this.getItem(sourceId));
+  getIncludes(sourceId: string): result<string[], SqError> {
+    return this.getItem(sourceId).includes;
   }
 
+  // returns all "direct" includes: explicit continues and direct "include as *"
   getPastChain(sourceId: string): string[] {
     return ProjectItem.getPastChain(this.getItem(sourceId));
   }
 
-  getIncludesAsVariables(sourceId: string) {
-    return ProjectItem.getIncludesAsVariables(this.getItem(sourceId));
+  getIncludesAsVariables(sourceId: string): [string, string][] {
+    return this.getItem(sourceId).includeAsVariables;
   }
 
   getDirectIncludes(sourceId: string): string[] {
-    return ProjectItem.getDirectIncludes(this.getItem(sourceId));
+    return this.getItem(sourceId).directIncludes;
   }
 
   setContinues(sourceId: string, continues: string[]): void {
@@ -159,11 +160,11 @@ export class SqProject {
   }
 
   getContinues(sourceId: string): string[] {
-    return ProjectItem.getContinues(this.getItem(sourceId));
+    return this.getItem(sourceId).continues;
   }
 
   private getResultOption(sourceId: string) {
-    return ProjectItem.getResult(this.getItem(sourceId));
+    return this.getItem(sourceId).result;
   }
 
   private getRSResult(sourceId: string) {
@@ -205,13 +206,13 @@ export class SqProject {
     this.setItem(sourceId, newItem);
   }
 
-  private getContinuation(sourceId: string): RSReducerT.namespace {
-    return ProjectItem.getContinuation(this.getItem(sourceId));
+  private getRawBindings(sourceId: string): RSReducerT.namespace {
+    return this.getItem(sourceId).bindings;
   }
 
   getBindings(sourceId: string): SqRecord {
     return new SqRecord(
-      RSReducerNamespace.toMap(this.getContinuation(sourceId)),
+      RSReducerNamespace.toMap(this.getRawBindings(sourceId)),
       new SqValueLocation(this, sourceId, {
         root: "bindings",
         items: [],
@@ -219,15 +220,11 @@ export class SqProject {
     );
   }
 
-  getContinuationsBefore(sourceId: string): RSReducerT.namespace[] {
-    return this.getPastChain(sourceId).map((id) => this.getContinuation(id));
-  }
-
   private linkDependencies(sourceId: string): RSReducerT.namespace {
     const pastChain = this.getPastChain(sourceId);
     const namespace = RSReducerNamespace.mergeMany([
       this.getStdLib(),
-      ...pastChain.map((id) => this.getContinuation(id)),
+      ...pastChain.map((id) => this.getRawBindings(id)),
       ...pastChain.map((id) => {
         const result = this.getRSResult(id);
         if (result.tag === "Error") {
@@ -243,7 +240,7 @@ export class SqProject {
         RSReducerNamespace.set(
           acc,
           variable,
-          RSReducerNamespace.toRecord(this.getContinuation(includeFile))
+          RSReducerNamespace.toRecord(this.getRawBindings(includeFile))
         ),
       namespace
     );
@@ -255,7 +252,7 @@ export class SqProject {
       this.getEnvironment()
     );
     const newItem = ProjectItem.run(this.getItem(sourceId), context);
-    // console.log("after run " + newItem.continuation->Reducer_Bindings.toString)
+    // console.log("after run " + newItem.bindings->Reducer_Bindings.toString)
     this.setItem(sourceId, newItem);
   }
 

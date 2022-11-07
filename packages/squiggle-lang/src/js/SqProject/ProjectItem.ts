@@ -10,80 +10,69 @@ import { parseIncludes as parseIncludes_ } from "./parseIncludes";
 import { SqError } from "../SqError";
 import { Error_, Ok, result, resultMap, resultMapError } from "../types";
 
-export type ProjectItem = {
-  source: string;
+// source -> rawParse -> includes -> expression -> bindings & result
+
+export type ProjectItem = Readonly<{
   sourceId: string;
+  source: string;
   rawParse?: result<node, SqError>;
   expression?: result<RSReducerT.expression, SqError>;
-  continuation: RSReducerT.namespace;
+  bindings: RSReducerT.namespace;
   result?: result<RSReducerT.value, SqError>;
   continues: string[];
-  includes: result<string[], SqError>; //For loader
-  includeAsVariables: [string, string][]; //For linker
+  includes: result<string[], SqError>; // For loader
+  includeAsVariables: [string, string][]; // For linker
   directIncludes: string[];
-};
+}>;
 
 type t = ProjectItem;
 
 export const emptyItem = (sourceId: string): t => ({
-  source: "",
   sourceId,
-  continuation: RSReducerNamespace.make(),
+  source: "",
+  bindings: RSReducerNamespace.make(),
   continues: [],
   includes: Ok([]),
   directIncludes: [],
   includeAsVariables: [],
 });
 
-// source -> rawParse -> includes -> expression -> continuation -> result
-
-const getSource = (r: t) => r.source;
-const getSourceId = (r: t) => r.sourceId;
-const getRawParse = (r: t) => r.rawParse;
-const getExpression = (r: t) => r.expression;
-export const getContinuation = (r: t) => r.continuation;
-export const getResult = (r: t) => r.result;
-
-export const getContinues = (r: t) => r.continues;
-export const getIncludes = (r: t) => r.includes;
-export const getDirectIncludes = (r: t) => r.directIncludes;
-export const getIncludesAsVariables = (r: t) => r.includeAsVariables;
-
 export const touchSource = (t: t): t => {
-  const r = emptyItem(getSourceId(t));
+  const r = emptyItem(t.sourceId);
   return {
     ...r,
-    source: getSource(t),
-    continues: getContinues(t),
-    includes: getIncludes(t),
-    includeAsVariables: getIncludesAsVariables(t),
-    directIncludes: getDirectIncludes(t),
+    source: t.source,
+    continues: t.continues,
+    // why do we keep these?
+    includes: t.includes,
+    includeAsVariables: t.includeAsVariables,
+    directIncludes: t.directIncludes,
   };
 };
 
 const touchRawParse = (t: t): t => {
-  const r = emptyItem(getSourceId(t));
+  const r = emptyItem(t.sourceId);
   return {
     ...r,
-    source: getSource(t),
-    continues: getContinues(t),
-    includes: getIncludes(t),
-    includeAsVariables: getIncludesAsVariables(t),
-    directIncludes: getDirectIncludes(t),
-    rawParse: getRawParse(t),
+    source: t.source,
+    continues: t.continues,
+    includes: t.includes,
+    includeAsVariables: t.includeAsVariables,
+    directIncludes: t.directIncludes,
+    rawParse: t.rawParse,
   };
 };
 
 const touchExpression = (t: t): t => {
   return {
     ...t,
-    source: getSource(t),
-    continues: getContinues(t),
-    includes: getIncludes(t),
-    includeAsVariables: getIncludesAsVariables(t),
-    directIncludes: getDirectIncludes(t),
-    rawParse: getRawParse(t),
-    expression: getExpression(t),
+    source: t.source,
+    continues: t.continues,
+    includes: t.includes,
+    includeAsVariables: t.includeAsVariables,
+    directIncludes: t.directIncludes,
+    rawParse: t.rawParse,
+    expression: t.expression,
   };
 };
 
@@ -114,10 +103,10 @@ const setExpression = (
   return touchExpression({ ...t, expression: expression });
 };
 
-const setContinuation = (t: t, continuation: RSReducerT.namespace): t => {
+const setBindings = (t: t, bindings: RSReducerT.namespace): t => {
   return {
     ...t,
-    continuation,
+    bindings,
   };
 };
 
@@ -137,9 +126,9 @@ export const clean = (t: t): t => {
   // FIXME - this doesn't seem to be doing anything
   return {
     ...t,
-    source: getSource(t),
-    continuation: getContinuation(t),
-    result: getResult(t),
+    source: t.source,
+    bindings: t.bindings,
+    result: t.result,
   };
 };
 
@@ -147,12 +136,12 @@ export const getImmediateDependencies = (t: t): string[] => {
   if (t.includes.tag === "Error") {
     return [];
   }
-  return [...t.includes.value, ...getContinues(t)];
+  return [...t.includes.value, ...t.continues];
 };
 
 export const getPastChain = (t: t): string[] => [
-  ...getDirectIncludes(t),
-  ...getContinues(t),
+  ...t.directIncludes,
+  ...t.continues,
 ];
 
 export const setContinues = (t: t, continues: string[]): t =>
@@ -167,7 +156,7 @@ const setIncludes = (
 });
 
 export const parseIncludes = (t: t): t => {
-  const rRawImportAsVariables = parseIncludes_(getSource(t));
+  const rRawImportAsVariables = parseIncludes_(t.source);
   if (rRawImportAsVariables.tag === "Error") {
     return setIncludes(resetIncludes(t), rRawImportAsVariables);
   } else {
@@ -190,11 +179,11 @@ export const parseIncludes = (t: t): t => {
 };
 
 export const rawParse = (t: t): t => {
-  if (getRawParse(t)) {
+  if (t.rawParse) {
     return t;
   }
   const rawParse = resultMapError(
-    RSReducerPeggyParse.parse(getSource(t), t.sourceId),
+    RSReducerPeggyParse.parse(t.source, t.sourceId),
     (e: RSReducerPeggyParse.ParseError_t) =>
       new SqError(RSError.fromParseError(e))
   );
@@ -217,7 +206,7 @@ const buildExpression = (t: t): t => {
 };
 
 const failRun = (t: t, e: SqError): t =>
-  setContinuation(setResult(t, Error_(e)), RSReducerNamespace.make());
+  setBindings(setResult(t, Error_(e)), RSReducerNamespace.make());
 
 export const run = (t: t, context: RSReducerT.context): t => {
   t = buildExpression(t);
@@ -239,7 +228,7 @@ export const run = (t: t, context: RSReducerT.context): t => {
       t.expression.value,
       context
     );
-    return setContinuation(
+    return setBindings(
       setResult(t, Ok(result)),
       RSReducerBindings.locals(contextAfterEvaluation.bindings)
     );
