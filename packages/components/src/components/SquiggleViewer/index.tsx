@@ -15,7 +15,6 @@ import _ from "lodash";
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   result: ReturnType<typeof useSquiggle>["result"];
-  width?: number;
   enableLocalSettings?: boolean;
 } & PartialViewSettings;
 
@@ -27,7 +26,6 @@ const defaultSettings: LocalItemSettings = { collapsed: false };
 
 export const SquiggleViewer: React.FC<SquiggleViewerProps> = ({
   result,
-  width,
   enableLocalSettings = false,
   ...partialViewSettings
 }) => {
@@ -77,7 +75,7 @@ export const SquiggleViewer: React.FC<SquiggleViewerProps> = ({
       }}
     >
       {result.tag === "Ok" ? (
-        <ExpressionViewer value={result.value} width={width} />
+        <ExpressionViewer value={result.value} />
       ) : (
         <SquiggleErrorAlert error={result.value} />
       )}

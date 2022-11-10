@@ -315,10 +315,9 @@ export function buildVegaSpec(
         interactive: false,
         encode: {
           enter: {
-            x: { signal: String(width), offset: 1 }, // vega would prefer its internal ` "width" ` variable, but that breaks the squiggle playground. Just setting it to the same var as used elsewhere in the spec achieves the same result.
             fill: { value: "black" },
-            fontSize: { value: 20 },
-            align: { value: "right" },
+            fontSize: { value: 16 },
+            align: { value: "left" },
           },
           update: {
             text: {

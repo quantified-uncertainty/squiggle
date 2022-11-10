@@ -105,7 +105,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
               <DistributionChart
                 plot={defaultPlot(value.value)}
                 environment={environment}
-                width={width}
                 chartHeight={settings.chartHeight}
                 settings={settings.distributionChartSettings}
               />
@@ -248,7 +247,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
                 <DistributionChart
                   plot={plot}
                   environment={environment}
-                  width={width}
                   chartHeight={settings.chartHeight}
                   settings={settings.distributionChartSettings}
                 />
@@ -265,11 +263,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
                 return <div className="text-slate-400">Empty record</div>;
               }
               return entries.map(([key, r]) => (
-                <ExpressionViewer
-                  key={key}
-                  value={r}
-                  width={width !== undefined ? width - 20 : width}
-                />
+                <ExpressionViewer key={key} value={r} />
               ));
             }}
           </VariableList>
@@ -281,13 +275,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
           {(_) =>
             value.value
               .getValues()
-              .map((r, i) => (
-                <ExpressionViewer
-                  key={i}
-                  value={r}
-                  width={width !== undefined ? width - 20 : width}
-                />
-              ))
+              .map((r, i) => <ExpressionViewer key={i} value={r} />)
           }
         </VariableList>
       );

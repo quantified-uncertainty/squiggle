@@ -11,7 +11,7 @@ import {
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
-import { useSize } from "react-use";
+import { useMeasure } from "react-use";
 
 import {
   buildVegaSpec,
@@ -37,7 +37,6 @@ export type DistributionChartSettings = yup.InferType<
 export type DistributionChartProps = {
   plot: Plot;
   environment: environment;
-  width?: number;
   chartHeight?: number;
   settings: DistributionChartSettings;
 };
@@ -56,94 +55,80 @@ export function makePlot(record: SqRecord): Plot | void {
 export const DistributionChart: React.FC<DistributionChartProps> = ({
   plot,
   environment,
-  width,
   chartHeight,
   settings,
 }) => {
-  const [sized] = useSize((size) => {
-    const shapes = flattenResult(
-      plot.distributions.map((x) =>
-        resultMap(x.distribution.pointSet(environment), (pointSet) => ({
-          name: x.name,
-          // color: x.color, // not supported yet
-          ...pointSet.asShape(),
-        }))
-      )
-    );
+  const [containerRef, containerMeasure] = useMeasure<HTMLDivElement>();
+  const shapes = flattenResult(
+    plot.distributions.map((x) =>
+      resultMap(x.distribution.pointSet(environment), (pointSet) => ({
+        name: x.name,
+        // color: x.color, // not supported yet
+        ...pointSet.asShape(),
+      }))
+    )
+  );
 
-    if (shapes.tag === "Error") {
-      return (
-        <ErrorAlert heading="Distribution Error">
-          {shapes.value.toString()}
-        </ErrorAlert>
-      );
-    }
-
-    // if this is a sample set, include the samples
-    const samples: number[] = [];
-    for (const { distribution } of plot?.distributions) {
-      if (distribution.tag === SqDistributionTag.SampleSet) {
-        samples.push(...distribution.value());
-      }
-    }
-
-    const domain = shapes.value.flatMap((shape) =>
-      shape.discrete.concat(shape.continuous)
-    );
-
-    const spec = buildVegaSpec({
-      ...settings,
-      minX: Number.isFinite(settings.minX)
-        ? settings.minX
-        : Math.min(...domain.map((x) => x.x)),
-      maxX: Number.isFinite(settings.maxX)
-        ? settings.maxX
-        : Math.max(...domain.map((x) => x.x)),
-      maxY: Math.max(...domain.map((x) => x.y)),
-    });
-
-    let widthProp = width
-      ? width
-      : Number.isFinite(size.width)
-      ? size.width
-      : 400;
-
-    if (widthProp < 20) {
-      console.warn(
-        `Width of Distribution is set to ${widthProp}, which is too small`
-      );
-      widthProp = 20;
-    }
-
-    const vegaData = { data: shapes.value, samples };
-
+  if (shapes.tag === "Error") {
     return (
-      <div>
-        {settings.logX && shapes.value.some(hasMassBelowZero) ? (
+      <ErrorAlert heading="Distribution Error">
+        {shapes.value.toString()}
+      </ErrorAlert>
+    );
+  }
+
+  // if this is a sample set, include the samples
+  const samples: number[] = [];
+  for (const { distribution } of plot?.distributions) {
+    if (distribution.tag === SqDistributionTag.SampleSet) {
+      samples.push(...distribution.value());
+    }
+  }
+
+  const domain = shapes.value.flatMap((shape) =>
+    shape.discrete.concat(shape.continuous)
+  );
+
+  const spec = buildVegaSpec({
+    ...settings,
+    minX: Number.isFinite(settings.minX)
+      ? settings.minX
+      : Math.min(...domain.map((x) => x.x)),
+    maxX: Number.isFinite(settings.maxX)
+      ? settings.maxX
+      : Math.max(...domain.map((x) => x.x)),
+    maxY: Math.max(...domain.map((x) => x.y)),
+  });
+
+  const vegaData = { data: shapes.value, samples };
+
+  return (
+    <div ref={containerRef}>
+      {
+        settings.logX && shapes.value.some(hasMassBelowZero) ? (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
-        ) : (
+        ) : containerMeasure.width ? (
           <Vega
             spec={spec}
             data={vegaData}
-            width={widthProp - 10}
+            width={containerMeasure.width - 22}
             height={chartHeight}
             actions={settings.vegaActions}
           />
+        ) : null /* width can be 0 initially or when we're on the server side; that's fine, we don't want to pre-render charts with broken width */
+      }
+      <div className="flex justify-center">
+        {settings.showSummary && plot.distributions.length === 1 && (
+          <SummaryTable
+            distribution={plot.distributions[0].distribution}
+            environment={environment}
+          />
         )}
-        <div className="flex justify-center">
-          {settings.showSummary && plot.distributions.length === 1 && (
-            <SummaryTable
-              distribution={plot.distributions[0].distribution}
-              environment={environment}
-            />
-          )}
-        </div>
       </div>
-    );
-  });
-  return sized;
+    </div>
+  );
 };
 
 const TableHeadCell: React.FC<{ children: React.ReactNode }> = ({
