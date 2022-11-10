@@ -1,9 +1,7 @@
 import _ from "lodash";
 import React, { FC } from "react";
-import AceEditor from "react-ace";
 
-import "ace-builds/src-noconflict/mode-json";
-import "ace-builds/src-noconflict/theme-github";
+import { DynamicAceEditor } from "./DynamicAceEditor";
 
 interface CodeEditorProps {
   value: string;
@@ -24,7 +22,7 @@ export const JsonEditor: FC<CodeEditorProps> = ({
   const lineCount = value.split("\n").length;
   const id = _.uniqueId();
   return (
-    <AceEditor
+    <DynamicAceEditor
       value={value}
       mode="json"
       theme="github"

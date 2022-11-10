@@ -1,11 +1,8 @@
 import _ from "lodash";
 import React, { FC, useMemo, useRef } from "react";
-import AceEditor from "react-ace";
-
-import "ace-builds/src-noconflict/mode-golang";
-import "ace-builds/src-noconflict/theme-github";
 
 import { SqLocation } from "@quri/squiggle-lang";
+import { DynamicAceEditor } from "./DynamicAceEditor";
 
 interface CodeEditorProps {
   value: string;
@@ -37,7 +34,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   const editorEl = useRef<AceEditor | null>(null);
 
   return (
-    <AceEditor
+    <DynamicAceEditor
       ref={editorEl}
       value={value}
       mode="golang"
