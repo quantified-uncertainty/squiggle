@@ -31,11 +31,8 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   const onSubmitRef = useRef<typeof onSubmit | null>(null);
   onSubmitRef.current = onSubmit;
 
-  const editorEl = useRef<AceEditor | null>(null);
-
   return (
     <DynamicAceEditor
-      ref={editorEl}
       value={value}
       mode="golang"
       theme="github"
