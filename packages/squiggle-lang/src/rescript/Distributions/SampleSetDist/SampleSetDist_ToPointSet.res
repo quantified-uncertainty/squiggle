@@ -4,9 +4,7 @@ module Internals = {
       sampleCount: int,
       outputXYPoints: int,
       bandwidthXSuggested: float,
-      bandwidthUnitSuggested: float,
       bandwidthXImplemented: float,
-      bandwidthUnitImplemented: float,
     }
 
     type outputs = {
@@ -18,47 +16,34 @@ module Internals = {
   module JS = {
     @deriving(abstract)
     type distJs = {
+      usedWidth: float,
       xs: array<float>,
       ys: array<float>,
     }
 
-    let jsToDist = (d: distJs): PointSetTypes.xyShape => {
-      xs: xsGet(d),
-      ys: ysGet(d),
+    let jsToDist = (d: distJs): (float, PointSetTypes.xyShape) => {
+      (
+        usedWidthGet(d),
+        {
+          xs: xsGet(d),
+          ys: ysGet(d),
+        },
+      )
     }
 
     @module("./KdeLibrary.js")
-    external samplesToContinuousPdf: (array<float>, int, int) => distJs = "samplesToContinuousPdf"
+    external samplesToContinuousPdf: (array<float>, int, float, float) => distJs =
+      "samplesToContinuousPdf"
   }
 
   module KDE = {
-    let normalSampling = (samples, outputXYPoints, kernelWidth) =>
-      samples->JS.samplesToContinuousPdf(outputXYPoints, kernelWidth)->JS.jsToDist
-  }
-
-  module T = {
-    type t = array<float>
-
-    let xWidthToUnitWidth = (samples, outputXYPoints, xWidth) => {
-      let xyPointRange = E.A.Sorted.range(samples)->E.O.default(0.0)
-      let xyPointWidth = xyPointRange /. float_of_int(outputXYPoints)
-      xWidth /. xyPointWidth
-    }
-
-    let formatUnitWidth = w => Jstat.max([w, 1.0])->int_of_float
-
-    let suggestedUnitWidth = (samples, outputXYPoints) => {
-      let suggestedXWidth = SampleSetDist_Bandwidth.nrd0(samples)
-      xWidthToUnitWidth(samples, outputXYPoints, suggestedXWidth)
-    }
-
-    let kde = (~samples, ~outputXYPoints, width) =>
-      KDE.normalSampling(samples, outputXYPoints, width)
+    let normalSampling = (samples, outputXYPoints, kernelWidth, totalWeight) =>
+      samples->JS.samplesToContinuousPdf(outputXYPoints, kernelWidth, totalWeight)->JS.jsToDist
   }
 }
 
 let toPointSetDist = (
-  ~samples: Internals.T.t,
+  ~samples: array<float>,
   ~samplingInputs: SamplingInputs.samplingInputs,
   (),
 ): Internals.Types.outputs => {
@@ -70,64 +55,53 @@ let toPointSetDist = (
     ~minDiscreteWeight=minDiscreteToKeep,
   )
 
-  let length = samples->E.A.length->float_of_int
+  let contLength = continuousPart->E.A.length
+  let length = samples->E.A.length
+  let outLength = contLength <= 5 ? length - contLength : length
+  let pointWeight = 1. /. outLength->float_of_int
+
+  let pdf = if contLength <= 5 {
+    // Drop these points; missing mass accounted for by outLength above
+    None
+  } else if E.A.unsafe_get(continuousPart, 0) == E.A.unsafe_get(continuousPart, contLength - 1) {
+    // All the same value: treat as discrete
+    Js.Array2.push(discretePart, (E.A.unsafe_get(continuousPart, 0), contLength))->ignore
+    None
+  } else {
+    // The only reason we compute _suggestedXWidth if
+    // samplingInputs.kernelWidth is given is to log it. Unnecessary?
+    let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
+    let width = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
+    let (usedWidth, pdf) =
+      continuousPart->Internals.KDE.normalSampling(
+        samplingInputs.outputXYPoints,
+        width,
+        pointWeight,
+      )
+    let samplingStats: Internals.Types.samplingStats = {
+      sampleCount: samplingInputs.sampleCount,
+      outputXYPoints: samplingInputs.outputXYPoints,
+      bandwidthXSuggested: _suggestedXWidth,
+      bandwidthXImplemented: usedWidth,
+    }
+
+    Some((pdf->Continuous.make, samplingStats))
+  }
+
   let discrete: PointSetTypes.discreteShape =
     discretePart
-    ->E.FloatFloatMap.fmap(r => r /. length, _)
-    ->E.FloatFloatMap.toArray
+    ->E.A.fmap(((x, count)) => (x, count->Belt.Int.toFloat *. pointWeight))
     ->XYShape.T.fromZippedArray
     ->Discrete.make
-
-  let pdf =
-    continuousPart->E.A.length > 5
-      ? {
-          let _suggestedXWidth = SampleSetDist_Bandwidth.nrd0(continuousPart)
-          // todo: This does some recalculating from the last step.
-          let _suggestedUnitWidth = Internals.T.suggestedUnitWidth(
-            continuousPart,
-            samplingInputs.outputXYPoints,
-          )
-          let usedWidth = samplingInputs.kernelWidth->E.O.default(_suggestedXWidth)
-          let usedUnitWidth = Internals.T.xWidthToUnitWidth(
-            samples,
-            samplingInputs.outputXYPoints,
-            usedWidth,
-          )
-          let samplingStats: Internals.Types.samplingStats = {
-            sampleCount: samplingInputs.sampleCount,
-            outputXYPoints: samplingInputs.outputXYPoints,
-            bandwidthXSuggested: _suggestedXWidth,
-            bandwidthUnitSuggested: _suggestedUnitWidth,
-            bandwidthXImplemented: usedWidth,
-            bandwidthUnitImplemented: usedUnitWidth,
-          }
-          continuousPart
-          ->Internals.T.kde(
-            ~samples=_,
-            ~outputXYPoints=samplingInputs.outputXYPoints,
-            Internals.T.formatUnitWidth(usedUnitWidth),
-          )
-          ->Continuous.make
-          ->(r => Some((r, samplingStats)))
-        }
-      : None
 
   let pointSetDist = MixedShapeBuilder.buildSimple(
     ~continuous=pdf->E.O.fmap(fst),
     ~discrete=Some(discrete),
   )
 
-  /*
-   I'm surprised that this doesn't come out normalized. My guess is that the KDE library
-  we're using is standardizing on something else. If we ever change that library, we should
-  check to see if we still need to do this.
- */
-
-  let normalizedPointSet = pointSetDist->E.O.fmap(PointSetDist.T.normalize)
-
   let samplesParse: Internals.Types.outputs = {
     continuousParseParams: pdf->E.O.fmap(snd),
-    pointSetDist: normalizedPointSet,
+    pointSetDist,
   }
 
   samplesParse

@@ -5,9 +5,7 @@ open Arbitrary
 open Property.Sync
 
 let prepareInputs = (ar, minWeight) =>
-  E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(ar, ~minDiscreteWeight=minWeight)->(
-    ((c, disc)) => (c, disc->E.FloatFloatMap.toArray)
-  )
+  E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(ar, ~minDiscreteWeight=minWeight)
 
 describe("Continuous and discrete splits", () => {
   makeTest(
@@ -19,7 +17,7 @@ describe("Continuous and discrete splits", () => {
   makeTest(
     "only stores 3.5 as discrete when minWeight is 3",
     prepareInputs([1.33455, 1.432, 2.0, 2.0, 3.5, 3.5, 3.5], 3),
-    ([1.33455, 1.432, 2.0, 2.0], [(3.5, 3.0)]),
+    ([1.33455, 1.432, 2.0, 2.0], [(3.5, 3)]),
   )
 
   makeTest(
@@ -31,7 +29,7 @@ describe("Continuous and discrete splits", () => {
   makeTest(
     "more general test",
     prepareInputs([10., 10., 11., 11., 11., 12., 13., 13., 13., 13., 13., 14.], 3),
-    ([10., 10., 12., 14.], [(11., 3.), (13., 5.)]),
+    ([10., 10., 12., 14.], [(11., 3), (13., 5)]),
   )
 
   let makeDuplicatedArray = count => {
@@ -44,15 +42,13 @@ describe("Continuous and discrete splits", () => {
     makeDuplicatedArray(10),
     ~minDiscreteWeight=2,
   )
-  let toArr1 = discrete1->E.FloatFloatMap.toArray
-  makeTest("splitMedium at count=10", toArr1->E.A.length, 10)
+  makeTest("splitMedium at count=10", discrete1->E.A.length, 10)
 
   let (_c, discrete2) = E.A.Floats.Sorted.splitContinuousAndDiscreteForMinWeight(
     makeDuplicatedArray(500),
     ~minDiscreteWeight=2,
   )
-  let toArr2 = discrete2->E.FloatFloatMap.toArray
-  makeTest("splitMedium at count=500", toArr2->E.A.length, 500)
+  makeTest("splitMedium at count=500", discrete2->E.A.length, 500)
   // makeTest("foo", [] -> E.A.length, 500)
 
   // Function for fast-check property testing
@@ -67,7 +63,7 @@ describe("Continuous and discrete splits", () => {
     let (contSegments, discSegments) = segments->Belt.Array.partition(s => E.A.length(s) < weight)
     let expect = (
       contSegments->E.A.concatMany,
-      discSegments->E.A.fmap(a => (E.A.unsafe_get(a, 0), E.A.length(a)->Belt.Int.toFloat)),
+      discSegments->E.A.fmap(a => (E.A.unsafe_get(a, 0), E.A.length(a))),
     )
 
     makeTest("fast-check testing", result, expect)
