@@ -1,7 +1,6 @@
 import samplesToContinuousPdf from "./KdeLibrary";
 import { nrd0 } from "./SampleSetDist_Bandwidth";
-import splitContinuousAndDiscrete from "./SplitContinuousAndDiscrete";
-import zipWith from "lodash/zipWith";
+import { splitContinuousAndDiscrete } from "./SplitContinuousAndDiscrete";
 
 const minDiscreteToKeep = (samples: number[]) =>
   Math.max(20, samples.length / 50);
