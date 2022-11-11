@@ -15,7 +15,7 @@ module JS = {
     ys: ysGet(d),
   }
 
-  @module("./SampleSetDist_ToPointSet.ts")
+  @module("./SampleSetDist_ToPointSet")
   external toPointSetDist: (array<float>, int, option<float>) => distJs = "toPointSetDist"
 }
 
