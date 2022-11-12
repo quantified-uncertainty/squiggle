@@ -1,15 +1,16 @@
 import { kde } from "./KdeLibrary";
+import { JS_distJs } from "./SampleSetDist.gen";
 import { nrd0 } from "./SampleSetDist_Bandwidth";
 import { splitContinuousAndDiscrete } from "./SplitContinuousAndDiscrete";
 
 const minDiscreteToKeep = (samples: number[]) =>
   Math.max(20, samples.length / 50);
 
-const toPointSetDist = (
+export const toPointSetDist = (
   samples: number[],
   outputXYPoints: number,
-  kernelWidth: number | undefined
-) => {
+  kernelWidth?: number
+): JS_distJs => {
   samples = Array.from(new Float64Array(samples).sort());
 
   const { continuousPart, discretePart } = splitContinuousAndDiscrete(
@@ -54,8 +55,4 @@ const toPointSetDist = (
     continuousDist,
     discreteDist: discretePart,
   };
-};
-
-module.exports = {
-  toPointSetDist,
 };
