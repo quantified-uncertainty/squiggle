@@ -1,4 +1,4 @@
-import samplesToContinuousPdf from "./KdeLibrary";
+import { kde } from "./KdeLibrary";
 import { nrd0 } from "./SampleSetDist_Bandwidth";
 import { splitContinuousAndDiscrete } from "./SplitContinuousAndDiscrete";
 
@@ -39,12 +39,7 @@ const toPointSetDist = (
       usedWidth: bandwidthXImplemented,
       xs,
       ys,
-    } = samplesToContinuousPdf(
-      continuousPart,
-      outputXYPoints,
-      width,
-      pointWeight
-    );
+    } = kde(continuousPart, outputXYPoints, width, pointWeight);
     continuousDist = { xs, ys };
     samplingStats = {
       outputXYPoints,

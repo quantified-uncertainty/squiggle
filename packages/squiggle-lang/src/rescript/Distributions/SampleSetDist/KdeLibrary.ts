@@ -6,7 +6,7 @@ import filter from "lodash/filter";
 // outputLength: Number of points in output, >= 4
 // xWidth:       Width of the kernel in x axis units
 // weight:       Probability mass for each point
-export default (
+export const kde = (
   samples: number[],
   outputLength: number,
   xWidth: number,
