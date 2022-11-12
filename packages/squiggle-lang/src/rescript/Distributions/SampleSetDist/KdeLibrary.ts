@@ -1,5 +1,4 @@
-const filter = require("lodash/filter");
-const isFinite = require("lodash/isFinite");
+import filter from "lodash/filter";
 
 // Convert samples to x-y pairs for a PDF
 // Uses kernel density estimation (KDE) with a triangular kernel
@@ -7,10 +6,15 @@ const isFinite = require("lodash/isFinite");
 // outputLength: Number of points in output, >= 4
 // xWidth:       Width of the kernel in x axis units
 // weight:       Probability mass for each point
-const samplesToContinuousPdf = (samples, outputLength, xWidth, weight) => {
+export const kde = (
+  samples: number[],
+  outputLength: number,
+  xWidth: number,
+  weight: number
+) => {
   samples = filter(samples, isFinite); // Not sure if this is needed?
   const len = samples.length;
-  if (len === 0) return { xs: [], ys: [] };
+  if (len === 0) return { usedWidth: xWidth, xs: [], ys: [] };
 
   // Sample min and range
   const smin = samples[0];
@@ -65,7 +69,7 @@ const samplesToContinuousPdf = (samples, outputLength, xWidth, weight) => {
   const normalizer = weight / (xWidth * xWidth);
 
   const xs = Array(outputLength)
-    .fill()
+    .fill(0)
     .map((_, i) => min + i * dx);
 
   // A triangle at i causes the KDE to
@@ -86,8 +90,4 @@ const samplesToContinuousPdf = (samples, outputLength, xWidth, weight) => {
   });
 
   return { usedWidth: xWidth, xs, ys };
-};
-
-module.exports = {
-  samplesToContinuousPdf,
 };

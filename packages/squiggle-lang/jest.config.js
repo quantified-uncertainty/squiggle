@@ -9,5 +9,6 @@ module.exports = {
     ".*Helpers.ts",
     ".*Reducer_Type.*",
     ".*_type_test.bs.js",
+    "/dist",
   ],
 };

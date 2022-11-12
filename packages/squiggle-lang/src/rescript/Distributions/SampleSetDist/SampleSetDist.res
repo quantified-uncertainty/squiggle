@@ -1,3 +1,14 @@
+module JS = {
+  @genType
+  type distJs = {
+    continuousDist: option<PointSetTypes.xyShape>,
+    discreteDist: PointSetTypes.xyShape,
+  }
+
+  @module("./SampleSetDist_ToPointSet")
+  external toPointSetDist: (array<float>, int, option<float>) => distJs = "toPointSetDist"
+}
+
 @genType
 module Error = {
   @genType
@@ -59,12 +70,18 @@ some refactoring.
 let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs): result<
   PointSetTypes.pointSetDist,
   pointsetConversionError,
-> =>
-  SampleSetDist_ToPointSet.toPointSetDist(
-    ~samples=get(samples),
-    ~samplingInputs,
-    (),
-  ).pointSetDist->E.O.toResult(TooFewSamplesForConversionToPointSet)
+> => {
+  let dists = JS.toPointSetDist(
+    get(samples),
+    samplingInputs.outputXYPoints,
+    samplingInputs.kernelWidth,
+  )
+
+  MixedShapeBuilder.buildSimple(
+    ~continuous=dists.continuousDist->E.O.fmap(Continuous.make),
+    ~discrete=Some(dists.discreteDist->Discrete.make),
+  )->E.O.toResult(TooFewSamplesForConversionToPointSet)
+}
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
