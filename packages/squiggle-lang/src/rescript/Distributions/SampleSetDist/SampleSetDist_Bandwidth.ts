@@ -10,13 +10,18 @@ const nrd_coef = 1.06;
 const nrd_fractionalPower = -0.2;
 
 // Stats utilities, valid on sorted arguments only!
+// TODO - move `percentile` and `variance` to a common module
 const percentile = (xs: number[], k: number) => {
-  const realIndex = k * (xs.length + 1);
+  const realIndex = k * (xs.length - 1);
   const index = Math.floor(realIndex);
-  const frac = realIndex - index;
-  const x0 = xs[index - 1];
-  const x1 = xs[index];
-  return x0 + frac * (x1 - x0);
+  if (index + 1 < xs.length) {
+    const frac = realIndex - index;
+    const x0 = xs[index];
+    const x1 = xs[index + 1];
+    return x0 + frac * (x1 - x0);
+  } else {
+    return xs[index];
+  }
 };
 
 const variance = (xs: number[]) => {
