@@ -146,9 +146,9 @@ export function buildVegaSpec(
         orient: "bottom",
         scale: "xscale",
         labelColor: "#727d93",
-        tickColor: "#fff",
-        tickOpacity: 0.0,
-        domainColor: "#fff",
+        labelFlush: true,
+        tickSize: 2,
+        domainColor: "#727d93",
         domainOpacity: 0.0,
         format: format,
         tickCount: dateTime ? 3 : 10,
@@ -315,10 +315,9 @@ export function buildVegaSpec(
         interactive: false,
         encode: {
           enter: {
-            x: { signal: String(width), offset: 1 }, // vega would prefer its internal ` "width" ` variable, but that breaks the squiggle playground. Just setting it to the same var as used elsewhere in the spec achieves the same result.
             fill: { value: "black" },
-            fontSize: { value: 20 },
-            align: { value: "right" },
+            fontSize: { value: 16 },
+            align: { value: "left" },
           },
           update: {
             text: {

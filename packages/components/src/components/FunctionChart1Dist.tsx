@@ -181,7 +181,6 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
       <DistributionChart
         plot={defaultPlot(mouseItem.value.value)}
         environment={environment}
-        width={400}
         chartHeight={50}
         settings={distributionChartSettings}
       />
