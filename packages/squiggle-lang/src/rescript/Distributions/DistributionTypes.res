@@ -115,73 +115,13 @@ module DistributionOperation = {
     | #ToScore(toScore)
   ]
 
-  type singleParamaterFunction =
-    | FromDist(fromDist)
-    | FromFloat(fromFloat)
+  type singleParamaterFunction = FromDist(fromDist)
 
   type genericFunctionCallInfo =
     | FromDist(fromDist, genericDist)
-    | FromFloat(fromFloat, float)
-    | FromSamples(array<float>)
     | Mixture(array<(genericDist, float)>)
-
-  let floatCallToString = (floatFunction: fromFloat): string =>
-    switch floatFunction {
-    | #ToFloat(#Cdf(r)) => `cdf(${E.Float.toFixed(r)})`
-    | #ToFloat(#Inv(r)) => `inv(${E.Float.toFixed(r)})`
-    | #ToFloat(#Mean) => `mean`
-    | #ToFloat(#Min) => `min`
-    | #ToFloat(#Max) => `max`
-    | #ToFloat(#Stdev) => `stdev`
-    | #ToFloat(#Variance) => `variance`
-    | #ToFloat(#Mode) => `mode`
-    | #ToFloat(#Pdf(r)) => `pdf(${E.Float.toFixed(r)})`
-    | #ToFloat(#Sample) => `sample`
-    | #ToFloat(#IntegralSum) => `integralSum`
-    | #ToDist(Normalize) => `normalize`
-    | #ToDist(ToPointSet) => `toPointSet`
-    | #ToDist(ToSampleSet(r)) => `toSampleSet(${E.I.toString(r)})`
-    | #ToDist(Truncate(_, _)) => `truncate`
-    | #ToDist(Inspect) => `inspect`
-    | #ToDist(Scale(#Power, r)) => `scalePower(${E.Float.toFixed(r)})`
-    | #ToDist(Scale(#Multiply, r)) => `scaleMultiply(${E.Float.toFixed(r)})`
-    | #ToDist(Scale(#Logarithm, r)) => `scaleLog(${E.Float.toFixed(r)})`
-    | #ToDist(Scale(#LogarithmWithThreshold(eps), r)) =>
-      `scaleLogWithThreshold(${E.Float.toFixed(r)}, epsilon=${E.Float.toFixed(eps)})`
-    | #ToString(ToString) => `toString`
-    | #ToString(ToSparkline(n)) => `sparkline(${E.I.toString(n)})`
-    | #ToBool(IsNormalized) => `isNormalized`
-    | #ToDistCombination(Algebraic(_), _, _) => `algebraic`
-    | #ToDistCombination(Pointwise, _, _) => `pointwise`
-    }
-
-  let distCallToString = (
-    distFunction: [
-      | #ToFloat(toFloat)
-      | #ToDist(toDist)
-      | #ToDistCombination(direction, Operation.Algebraic.t, [#Dist(genericDist) | #Float(float)])
-      | #ToString(toString)
-      | #ToBool(toBool)
-      | #ToScore(toScore)
-    ],
-  ): string =>
-    switch distFunction {
-    | #ToScore(_) => `logScore`
-    | #ToFloat(x) => floatCallToString(#ToFloat(x))
-    | #ToDist(x) => floatCallToString(#ToDist(x))
-    | #ToString(x) => floatCallToString(#ToString(x))
-    | #ToBool(x) => floatCallToString(#ToBool(x))
-    | #ToDistCombination(x, y, z) => floatCallToString(#ToDistCombination(x, y, z))
-    }
-
-  let toString = (d: genericFunctionCallInfo): string =>
-    switch d {
-    | FromDist(f, _) => distCallToString(f)
-    | FromFloat(f, _) => floatCallToString(f)
-    | Mixture(_) => `mixture`
-    | FromSamples(_) => `fromSamples`
-    }
 }
+
 module Constructors = {
   type t = DistributionOperation.genericFunctionCallInfo
 
@@ -198,7 +138,6 @@ module Constructors = {
     let isNormalized = (dist): t => FromDist(#ToBool(IsNormalized), dist)
     let toPointSet = (dist): t => FromDist(#ToDist(ToPointSet), dist)
     let toSampleSet = (dist, r): t => FromDist(#ToDist(ToSampleSet(r)), dist)
-    let fromSamples = (xs): t => FromSamples(xs)
     let truncate = (dist, left, right): t => FromDist(#ToDist(Truncate(left, right)), dist)
     let inspect = (dist): t => FromDist(#ToDist(Inspect), dist)
     module LogScore = {

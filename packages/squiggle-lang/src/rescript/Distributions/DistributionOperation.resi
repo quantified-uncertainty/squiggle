@@ -17,16 +17,6 @@ let run: (
   ~env: GenericDist.env,
   DistributionTypes.DistributionOperation.genericFunctionCallInfo,
 ) => outputType
-let runFromDist: (
-  ~env: GenericDist.env,
-  ~functionCallInfo: DistributionTypes.DistributionOperation.fromDist,
-  genericDist,
-) => outputType
-let runFromFloat: (
-  ~env: GenericDist.env,
-  ~functionCallInfo: DistributionTypes.DistributionOperation.fromFloat,
-  float,
-) => outputType
 
 module Output: {
   type t = outputType
@@ -97,8 +87,6 @@ module Constructors: {
   let toPointSet: (~env: GenericDist.env, genericDist) => result<genericDist, error>
   @genType
   let toSampleSet: (~env: GenericDist.env, genericDist, int) => result<genericDist, error>
-  @genType
-  let fromSamples: (~env: GenericDist.env, SampleSetDist.t) => result<genericDist, error>
   @genType
   let truncate: (
     ~env: GenericDist.env,

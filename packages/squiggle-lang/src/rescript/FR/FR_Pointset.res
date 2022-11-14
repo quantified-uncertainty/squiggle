@@ -23,8 +23,8 @@ let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
       | _ => impossibleError->SqError.Message.throw
       }
     )
-    ->Ok
-    ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R.errMap(XYShape.Error.toString))
+    ->XYShape.T.makeFromZipped
+    ->E.R.errMap(XYShape.Error.toString)
     ->E.R.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
   | _ => impossibleError->SqError.Message.throw
   }

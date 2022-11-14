@@ -214,23 +214,13 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
 
   switch functionCallInfo {
   | FromDist(subFnName, dist) => fromDistFn(subFnName, dist)
-  | FromFloat(subFnName, x) => reCall(~functionCallInfo=FromFloat(subFnName, x), ())
   | Mixture(dists) =>
     dists
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd, ~env)
     ->E.R.fmap(r => Dist(r))
     ->OutputLocal.fromResult
-  | FromSamples(xs) =>
-    xs
-    ->SampleSetDist.make
-    ->E.R.errMap(x => DistributionTypes.SampleSetError(x))
-    ->E.R.fmap(x => x->DistributionTypes.SampleSet->Dist)
-    ->OutputLocal.fromResult
   }
 }
-
-let runFromDist = (~env, ~functionCallInfo, dist) => run(~env, FromDist(functionCallInfo, dist))
-let runFromFloat = (~env, ~functionCallInfo, float) => run(~env, FromFloat(functionCallInfo, float))
 
 module Output = {
   include OutputLocal
@@ -242,10 +232,8 @@ module Output = {
   ): outputType => {
     let newFnCall: result<functionCallInfo, error> = switch (functionCallInfo, input) {
     | (FromDist(fromDist), Dist(o)) => Ok(FromDist(fromDist, o))
-    | (FromFloat(fromDist), Float(o)) => Ok(FromFloat(fromDist, o))
     | (_, GenDistError(r)) => Error(r)
     | (FromDist(_), _) => Error(OtherError("Expected dist, got something else"))
-    | (FromFloat(_), _) => Error(OtherError("Expected float, got something else"))
     }
     newFnCall->E.R.fmap(run(~env))->OutputLocal.fromResult
   }
@@ -278,7 +266,6 @@ module Constructors = {
   }
   let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
   let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
-  let fromSamples = (~env, xs) => C.fromSamples(xs)->run(~env)->toDistR
   let truncate = (~env, dist, leftCutoff, rightCutoff) =>
     C.truncate(dist, leftCutoff, rightCutoff)->run(~env)->toDistR
   let inspect = (~env, dist) => C.inspect(dist)->run(~env)->toDistR
