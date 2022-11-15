@@ -4,6 +4,9 @@ open Expect
 let makeTest = (~only=false, str, item1, item2) =>
   (only ? Only.test : test)(str, () => expect(item1)->toEqual(item2))
 
+let makeTestApproxEq = (~only=false, ~digits=5, str, item1, item2) =>
+  (only ? Only.test : test)(str, () => expect(item1)->toBeSoCloseTo(~digits, item2))
+
 describe("Stdlib.Random", () => {
   makeTest(
     "Length of Random.sample",
@@ -22,6 +25,8 @@ describe("Stdlib.Logistic", () => {
   let s = 2.0
   let cdf = Stdlib.Logistic.cdf(mu, s)
   let pdf = Stdlib.Logistic.pdf(mu, s)
+  let stdev = Stdlib.Logistic.stdev(mu, s)
+  let variance = Stdlib.Logistic.variance(mu, s)
   // FIXME: this is ridiculous, fix the order in  the quantile function
   let quantile = p => Stdlib.Logistic.quantile(p, mu, s)
   let testRange = 10.0
@@ -34,6 +39,7 @@ describe("Stdlib.Logistic", () => {
     iter->Js.Array2.map(cdf)->(arr => E.A.pairwise(arr, (a, b) => a <= b))->E.A.every(a => a),
     true,
   )
+
   makeTest(
     "CDF conforms to PDF",
     iter
@@ -44,6 +50,7 @@ describe("Stdlib.Logistic", () => {
     ),
     true,
   )
+
   makeTest(
     "Quantile is inverse of CDF",
     iter
@@ -51,12 +58,16 @@ describe("Stdlib.Logistic", () => {
     ->E.A.every(((p, pp)) => Js.Math.abs_float(p -. pp) < 0.00001),
     true,
   )
+
+  makeTestApproxEq("stdev == sqrt(variance)", stdev, Js.Math.sqrt(variance))
 })
 
 describe("Stdlib.Bernoulli", () => {
   let p = 0.5
   let cdf = Stdlib.Bernoulli.cdf(p)
   let pmf = Stdlib.Bernoulli.pmf(p)
+  let stdev = Stdlib.Bernoulli.stdev(p)
+  let variance = Stdlib.Bernoulli.variance(p)
   // FIXME: this is ridiculous, fix the order in  the quantile function
   let quantile = prob => Stdlib.Bernoulli.quantile(prob, p)
   let iter = [0.0, 1.0]
@@ -85,4 +96,6 @@ describe("Stdlib.Bernoulli", () => {
     ->E.A.every(((p, pp)) => Js.Math.abs_float(p -. pp) < 0.00001),
     true,
   )
+
+  makeTestApproxEq("stdev == sqrt(variance)", stdev, Js.Math.sqrt(variance))
 })
