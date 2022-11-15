@@ -10,11 +10,8 @@ describe("mixture", () => {
       // should be property
       let (mean1, mean2) = tup
       let meanValue = {
-        DistributionOperation.mixture(
-          [(mkNormal(mean1, 9e-1), 0.5), (mkNormal(mean2, 9e-1), 0.5)],
-          env,
-        )
-        ->unpackDist
+        GenericDist.mixture([(mkNormal(mean1, 9e-1), 0.5), (mkNormal(mean2, 9e-1), 0.5)], ~env)
+        ->unpackResult
         ->GenericDist.mean(~env)
       }
       meanValue->unpackResult->expect->toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1)
@@ -29,11 +26,11 @@ describe("mixture", () => {
       let betaWeight = 0.25
       let exponentialWeight = 0.75
       let meanValue = {
-        DistributionOperation.mixture(
+        GenericDist.mixture(
           [(mkBeta(alpha, beta), betaWeight), (mkExponential(rate), exponentialWeight)],
-          env,
+          ~env,
         )
-        ->unpackDist
+        ->unpackResult
         ->GenericDist.mean(~env)
       }
       let betaMean = 1.0 /. (1.0 +. beta /. alpha)
@@ -53,11 +50,11 @@ describe("mixture", () => {
       let uniformWeight = 0.6
       let lognormalWeight = 0.4
       let meanValue = {
-        DistributionOperation.mixture(
+        GenericDist.mixture(
           [(mkUniform(low, high), uniformWeight), (mkLognormal(mu, sigma), lognormalWeight)],
-          env,
+          ~env,
         )
-        ->unpackDist
+        ->unpackResult
         ->GenericDist.mean(~env)
       }
       let uniformMean = (low +. high) /. 2.0

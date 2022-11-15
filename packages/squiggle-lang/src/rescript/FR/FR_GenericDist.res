@@ -55,90 +55,6 @@ module Old = {
         dist1,
       )
     }
-
-    let parseNumber = (args: Reducer_T.value): Belt.Result.t<float, string> =>
-      switch args {
-      | IEvNumber(x) => Ok(x)
-      | _ => Error("Not a number")
-      }
-
-    let parseNumberArray = (ags: array<Reducer_T.value>): Belt.Result.t<array<float>, string> =>
-      E.A.fmap(ags, parseNumber)->E.A.R.firstErrorOrOpen
-
-    let parseDist = (args: Reducer_T.value): Belt.Result.t<DistributionTypes.genericDist, string> =>
-      switch args {
-      | IEvDistribution(x) => Ok(x)
-      | IEvNumber(x) => Ok(GenericDist.fromFloat(x))
-      | _ => Error("Not a distribution")
-      }
-
-    let parseDistributionArray = (ags: array<Reducer_T.value>): Belt.Result.t<
-      array<DistributionTypes.genericDist>,
-      string,
-    > => E.A.fmap(ags, parseDist)->E.A.R.firstErrorOrOpen
-
-    let mixtureWithGivenWeights = (
-      distributions: array<DistributionTypes.genericDist>,
-      weights: array<float>,
-      ~env: GenericDist.env,
-    ): DistributionOperation.outputType =>
-      E.A.length(distributions) == E.A.length(weights)
-        ? DistributionOperation.mixture(E.A.zip(distributions, weights), env)
-        : GenDistError(
-            ArgumentError("Error, mixture call has different number of distributions and weights"),
-          )
-
-    let mixtureWithDefaultWeights = (
-      distributions: array<DistributionTypes.genericDist>,
-      ~env: GenericDist.env,
-    ): DistributionOperation.outputType => {
-      let length = E.A.length(distributions)
-      let weights = Belt.Array.make(length, 1.0 /. Belt.Int.toFloat(length))
-      mixtureWithGivenWeights(distributions, weights, ~env)
-    }
-
-    let mixture = (
-      args: array<Reducer_T.value>,
-      ~env: GenericDist.env,
-    ): DistributionOperation.outputType => {
-      let error = (err: string): DistributionOperation.outputType =>
-        err->DistributionTypes.ArgumentError->GenDistError
-      switch args {
-      | [IEvArray(distributions)] =>
-        switch parseDistributionArray(distributions) {
-        | Ok(distrs) => mixtureWithDefaultWeights(distrs, ~env)
-        | Error(err) => error(err)
-        }
-      | [IEvArray(distributions), IEvArray(weights)] =>
-        switch (parseDistributionArray(distributions), parseNumberArray(weights)) {
-        | (Ok(distrs), Ok(wghts)) => mixtureWithGivenWeights(distrs, wghts, ~env)
-        | (Error(err), Ok(_)) => error(err)
-        | (Ok(_), Error(err)) => error(err)
-        | (Error(err1), Error(err2)) => error(`${err1}|${err2}`)
-        }
-      | _ =>
-        switch E.A.last(args) {
-        | Some(IEvArray(b)) => {
-            let weights = parseNumberArray(b)
-            let distributions = parseDistributionArray(
-              E.A.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
-            )
-            switch E.R.merge(distributions, weights) {
-            | Ok(d, w) => mixtureWithGivenWeights(d, w, ~env)
-            | Error(err) => error(err)
-            }
-          }
-
-        | Some(IEvNumber(_))
-        | Some(IEvDistribution(_)) =>
-          switch parseDistributionArray(args) {
-          | Ok(distributions) => mixtureWithDefaultWeights(distributions, ~env)
-          | Error(err) => error(err)
-          }
-        | _ => error("Last argument of mx must be array or distribution")
-        }
-      }
-    }
   }
 
   module SymbolicConstructors = {
@@ -244,7 +160,6 @@ module Old = {
       Helpers.toDistFn(Truncate(None, Some(float)), dist, ~env)
     | ("truncate", [IEvDistribution(dist), IEvNumber(float1), IEvNumber(float2)]) =>
       Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist, ~env)
-    | ("mx" | "mixture", args) => Helpers.mixture(args, ~env)->Some
     | ("log", [IEvDistribution(a)]) =>
       Helpers.twoDiststoDistFn(
         Algebraic(AsDefault),
@@ -406,10 +321,82 @@ let library = E.A.concatMany([
   makeOperationFns(),
 ])
 
-// FIXME - impossible to implement with FR due to arbitrary parameters length;
+module Mixture = {
+  let raiseArgumentError = (message: string) =>
+    message->ArgumentError->REDistributionError->SqError.Message.throw
+
+  let parseNumber = (args: Reducer_T.value): float =>
+    switch args {
+    | IEvNumber(x) => x
+    | _ => raiseArgumentError("Not a number")
+    }
+
+  let parseNumberArray = (ags: array<Reducer_T.value>): array<float> => E.A.fmap(ags, parseNumber)
+
+  let parseDist = (args: Reducer_T.value): DistributionTypes.genericDist =>
+    switch args {
+    | IEvDistribution(x) => x
+    | IEvNumber(x) => GenericDist.fromFloat(x)
+    | _ => raiseArgumentError("Not a distribution")
+    }
+
+  let parseDistributionArray = (ags: array<Reducer_T.value>): array<
+    DistributionTypes.genericDist,
+  > => E.A.fmap(ags, parseDist)
+
+  let mixtureWithGivenWeights = (
+    distributions: array<DistributionTypes.genericDist>,
+    weights: array<float>,
+    ~env: GenericDist.env,
+  ): result<DistributionTypes.genericDist, DistributionTypes.error> =>
+    E.A.length(distributions) == E.A.length(weights)
+      ? GenericDist.mixture(E.A.zip(distributions, weights), ~env)
+      : Error(
+          ArgumentError("Error, mixture call has different number of distributions and weights"),
+        )
+
+  let mixtureWithDefaultWeights = (
+    distributions: array<DistributionTypes.genericDist>,
+    ~env: GenericDist.env,
+  ) => {
+    let length = E.A.length(distributions)
+    let weights = Belt.Array.make(length, 1.0 /. Belt.Int.toFloat(length))
+    mixtureWithGivenWeights(distributions, weights, ~env)
+  }
+
+  let mixture = (args: array<Reducer_T.value>, ~env: GenericDist.env) => {
+    switch args {
+    | [IEvArray(distributions)] =>
+      parseDistributionArray(distributions)->mixtureWithDefaultWeights(~env)
+    | [IEvArray(distributions), IEvArray(weights)] => {
+        let distrs = parseDistributionArray(distributions)
+        let wghts = parseNumberArray(weights)
+        mixtureWithGivenWeights(distrs, wghts, ~env)
+      }
+
+    | _ =>
+      switch E.A.last(args) {
+      | Some(IEvArray(b)) => {
+          let weights = parseNumberArray(b)
+          let distributions = parseDistributionArray(
+            E.A.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
+          )
+          mixtureWithGivenWeights(distributions, weights, ~env)
+        }
+
+      | Some(IEvNumber(_))
+      | Some(IEvDistribution(_)) =>
+        parseDistributionArray(args)->mixtureWithDefaultWeights(~env)
+      | _ => raiseArgumentError("Last argument of mx must be array or distribution")
+      }
+    }
+  }
+}
+
+// FIXME - impossible to implement with FR due to arbitrary parameters length
 let mxLambda = Reducer_Lambda.makeFFILambda("mx", (inputs, context, _) => {
-  switch Old.dispatch(("mx", inputs), context.environment) {
-  | Ok(value) => value
-  | Error(e) => e->SqError.Message.throw
+  switch Mixture.mixture(inputs, ~env=context.environment) {
+  | Ok(value) => IEvDistribution(value)
+  | Error(e) => e->REDistributionError->SqError.Message.throw
   }
 })

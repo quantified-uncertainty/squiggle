@@ -12,14 +12,9 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
 
   test("score: agrees with analytical answer when finite", () => {
     let prediction' =
-      [
-        (pointA, 0.25),
-        (pointB, 0.25),
-        (pointC, 0.25),
-        (pointD, 0.25),
-      ]->DistributionOperation.mixture(env)
+      [(pointA, 0.25), (pointB, 0.25), (pointC, 0.25), (pointD, 0.25)]->GenericDist.mixture(~env)
     let prediction = switch prediction' {
-    | Dist(PointSet(p)) => p
+    | Ok(PointSet(p)) => p
     | _ => raise(MixtureFailed)
     }
 
@@ -32,9 +27,9 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
   })
 
   test("score: agrees with analytical answer when finite", () => {
-    let prediction' = [(pointA, 0.75), (pointB, 0.25)]->DistributionOperation.mixture(env)
+    let prediction' = [(pointA, 0.75), (pointB, 0.25)]->GenericDist.mixture(~env)
     let prediction = switch prediction' {
-    | Dist(PointSet(p)) => p
+    | Ok(PointSet(p)) => p
     | _ => raise(MixtureFailed)
     }
     let answer = 3.0 // So this is: assigning 100% probability to 2.0
@@ -46,16 +41,16 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
   })
 
   test("scoreWithPrior: agrees with analytical answer when finite", () => {
-    let prior' = [(pointA, 0.5), (pointB, 0.5)]->DistributionOperation.mixture(env)
-    let prediction' = [(pointA, 0.75), (pointB, 0.25)]->DistributionOperation.mixture(env)
+    let prior' = [(pointA, 0.5), (pointB, 0.5)]->GenericDist.mixture(~env)
+    let prediction' = [(pointA, 0.75), (pointB, 0.25)]->GenericDist.mixture(~env)
 
     let prediction = switch prediction' {
-    | Dist(PointSet(p)) => p
+    | Ok(PointSet(p)) => p
     | _ => raise(MixtureFailed)
     }
 
     let prior = switch prior' {
-    | Dist(PointSet(p)) => p
+    | Ok(PointSet(p)) => p
     | _ => raise(MixtureFailed)
     }
 

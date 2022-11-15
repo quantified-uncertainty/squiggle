@@ -496,12 +496,15 @@ let pointwiseCombinationFloat = (
 
 //TODO: The result should always cumulatively sum to 1. This would be good to test.
 //TODO: If the inputs are not normalized, this will return poor results. The weights probably refer to the post-normalized forms. It would be good to apply a catch to this.
-let mixture = (
-  values: array<(t, float)>,
-  ~scaleMultiplyFn: scaleMultiplyFn,
-  ~pointwiseAddFn: pointwiseAddFn,
-  ~env: env,
-) => {
+let mixture = (values: array<(t, float)>, ~env: env) => {
+  let toPointSetFn = dist => dist->toPointSet(~env, ())
+
+  let scaleMultiplyFn = (dist, weight) =>
+    dist->pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Multiply, ~f=weight)
+
+  let pointwiseAddFn = (dist1, dist2) =>
+    dist1->pointwiseCombination(~toPointSetFn, ~algebraicCombination=#Add, ~t2=dist2)
+
   let allValuesAreSampleSet = v => E.A.every(v, ((t, _)) => isSampleSetSet(t))
 
   if E.A.isEmpty(values) {

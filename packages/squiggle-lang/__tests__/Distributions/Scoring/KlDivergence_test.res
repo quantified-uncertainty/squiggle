@@ -79,10 +79,10 @@ describe("klDivergence: continuous -> continuous -> float", () => {
 })
 
 describe("klDivergence: discrete -> discrete -> float", () => {
-  let a' = [(point1, 1e0), (point2, 1e0)]->DistributionOperation.mixture(env)
-  let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->DistributionOperation.mixture(env)
+  let a' = [(point1, 1e0), (point2, 1e0)]->GenericDist.mixture(~env)
+  let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->GenericDist.mixture(~env)
   let (a, b) = switch (a', b') {
-  | (Dist(a''), Dist(b'')) => (a'', b'')
+  | (Ok(a''), Ok(b'')) => (a'', b'')
   | _ => raise(MixtureFailed)
   }
   test("agrees with analytical answer when finite", () => {
@@ -113,9 +113,9 @@ describe("klDivergence: discrete -> discrete -> float", () => {
 
 describe("klDivergence: mixed -> mixed -> float", () => {
   let mixture = a => {
-    let dist' = a->DistributionOperation.mixture(env)
+    let dist' = a->GenericDist.mixture(~env)
     switch dist' {
-    | Dist(dist) => dist
+    | Ok(dist) => dist
     | _ => raise(MixtureFailed)
     }
   }

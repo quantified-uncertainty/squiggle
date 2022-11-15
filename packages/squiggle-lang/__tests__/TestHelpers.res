@@ -25,7 +25,7 @@ let makeTest = (~only=false, str, item1, item2) =>
     ? Only.test(str, () => expect(item1)->toEqual(item2))
     : test(str, () => expect(item1)->toEqual(item2))
 
-let {toDist, toString, toError, fmap} = module(DistributionOperation.Output)
+let {toDist, toError} = module(DistributionOperation.Output)
 
 let fnImage = (theFn, inps) => Js.Array.map(theFn, inps)
 
@@ -35,7 +35,6 @@ let env: GenericDist.env = {
 }
 
 let run = DistributionOperation.run(~env)
-let outputMap = fmap(~env)
 let unreachableInTestFileMessage = "Should be impossible to reach (This error is in test file)"
 let toExtFloat: option<float> => float = E.O.toExt(_, unreachableInTestFileMessage)
 let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.genericDist = E.O.toExt(

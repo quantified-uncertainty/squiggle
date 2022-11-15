@@ -51,18 +51,6 @@ module OutputLocal = {
     | e => Error(toErrorOrUnreachable(e))
     }
 
-  let toString = (t: t) =>
-    switch t {
-    | String(d) => Some(d)
-    | _ => None
-    }
-
-  let toStringR = (t: t): result<string, error> =>
-    switch t {
-    | String(r) => Ok(r)
-    | e => Error(toErrorOrUnreachable(e))
-    }
-
   let toBool = (t: t) =>
     switch t {
     | Bool(d) => Some(d)
@@ -148,25 +136,6 @@ let run = (
     ->E.R.fmap(r => Dist(r))
     ->OutputLocal.fromResult
   }
-}
-
-let mixture = (dists: array<(genericDist, float)>, env: env): outputType => {
-  let toPointSetFn = dist => dist->GenericDist.toPointSet(~env, ())
-
-  let scaleMultiply = (dist, weight) =>
-    dist->GenericDist.pointwiseCombinationFloat(
-      ~toPointSetFn,
-      ~algebraicCombination=#Multiply,
-      ~f=weight,
-    )
-
-  let pointwiseAdd = (dist1, dist2) =>
-    dist1->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination=#Add, ~t2=dist2)
-
-  dists
-  ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd, ~env)
-  ->E.R.fmap(r => Dist(r))
-  ->OutputLocal.fromResult
 }
 
 module Output = {

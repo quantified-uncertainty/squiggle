@@ -15,14 +15,10 @@ type outputType =
 @genType
 let run: (~env: GenericDist.env, DistributionOperation.t, genericDist) => outputType
 
-let mixture: (array<(genericDist, float)>, GenericDist.env) => outputType
-
 module Output: {
   type t = outputType
   let toDist: t => option<genericDist>
   let toDistR: t => result<genericDist, error>
-  let toString: t => option<string>
-  let toStringR: t => result<string, error>
   let toBool: t => option<bool>
   let toBoolR: t => result<bool, error>
   let toError: t => option<error>

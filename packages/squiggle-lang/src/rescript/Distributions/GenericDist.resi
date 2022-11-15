@@ -84,12 +84,7 @@ let pointwiseCombinationFloat: (
   ~f: float,
 ) => result<t, error>
 
-let mixture: (
-  array<(t, float)>,
-  ~scaleMultiplyFn: scaleMultiplyFn,
-  ~pointwiseAddFn: pointwiseAddFn,
-  ~env: env,
-) => result<t, error>
+let mixture: (array<(t, float)>, ~env: env) => result<t, error>
 
 let isSymbolic: t => bool
 let isPointSet: t => bool
