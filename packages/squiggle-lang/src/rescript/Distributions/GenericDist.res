@@ -65,9 +65,34 @@ let integralEndY = (t: t): float =>
 
 let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
+//Todo: If it's a pointSet, but the xyPointLength is different from what it has, it should change.
+// This is tricky because the case of discrete distributions.
+// Also, change the outputXYPoints/pointSetDistLength details
+let toPointSet = (
+  t,
+  ~env: env,
+  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=#ByWeight,
+  (),
+): result<PointSetTypes.pointSetDist, error> => {
+  switch (t: t) {
+  | PointSet(pointSet) => Ok(pointSet)
+  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, env.xyPointLength, r))
+  | SampleSet(r) =>
+    SampleSetDist.toPointSetDist(
+      ~samples=r,
+      ~samplingInputs={
+        sampleCount: env.sampleCount,
+        outputXYPoints: env.xyPointLength,
+        pointSetDistLength: env.xyPointLength,
+        kernelWidth: None,
+      },
+    )->E.R.errMap(x => DistributionTypes.PointSetConversionError(x))
+  }
+}
+
 let toFloatOperation = (
   t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
 ) => {
   switch distToFloatOperation {
@@ -93,7 +118,7 @@ let toFloatOperation = (
       | None =>
         switch trySampleSetSolution {
         | Some(r) => Ok(r)
-        | None => toPointSetFn(t)->E.R.fmap(PointSetDist.operate(op))
+        | None => toPointSet(t, ~env, ())->E.R.fmap(PointSetDist.operate(op))
         }
       }
     }
@@ -111,31 +136,12 @@ let toFloatOperation = (
   }
 }
 
-//Todo: If it's a pointSet, but the xyPointLength is different from what it has, it should change.
-// This is tricky because the case of discrete distributions.
-// Also, change the outputXYPoints/pointSetDistLength details
-let toPointSet = (
-  t,
-  ~xyPointLength,
-  ~sampleCount,
-  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=#ByWeight,
-  (),
-): result<PointSetTypes.pointSetDist, error> => {
-  switch (t: t) {
-  | PointSet(pointSet) => Ok(pointSet)
-  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, xyPointLength, r))
-  | SampleSet(r) =>
-    SampleSetDist.toPointSetDist(
-      ~samples=r,
-      ~samplingInputs={
-        sampleCount,
-        outputXYPoints: xyPointLength,
-        pointSetDistLength: xyPointLength,
-        kernelWidth: None,
-      },
-    )->E.R.errMap(x => DistributionTypes.PointSetConversionError(x))
-  }
-}
+let mean = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Mean)
+let stdev = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Stdev)
+let variance = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Variance)
+let cdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Cdf(x))
+let pdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Pdf(x))
+let inv = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Inv(x))
 
 module Score = {
   type genericDistOrScalar = DistributionTypes.DistributionOperation.genericDistOrScalar
@@ -144,14 +150,7 @@ module Score = {
     PointSetDist_Scoring.scoreArgs,
     error,
   > => {
-    let toPointSetFn = t =>
-      toPointSet(
-        t,
-        ~xyPointLength=env.xyPointLength,
-        ~sampleCount=env.sampleCount,
-        ~xSelection=#ByWeight,
-        (),
-      )
+    let toPointSetFn = t => toPointSet(t, ~env, ~xSelection=#ByWeight, ())
     let prior': option<result<PointSetTypes.pointSetDist, error>> = switch prior {
     | None => None
     | Some(d) => toPointSetFn(d)->Some
@@ -209,7 +208,7 @@ module Score = {
  */
 let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<string, error> =>
   t
-  ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
+  ->toPointSet(~xSelection=#Linear, ~env={xyPointLength: bucketCount * 3, sampleCount}, ())
   ->E.R.bind(r =>
     r->PointSetDist.toSparkline(bucketCount)->E.R.errMap(x => DistributionTypes.SparklineError(x))
   )
@@ -276,11 +275,11 @@ module AlgebraicCombination = {
      that both the probability mass and the probability density are greater than zero.
      Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
  */
-    let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
+    let getLogarithmInputError = (t1: t, t2: t, ~env: env): option<error> => {
       let isDistGreaterThanZero = t =>
         toFloatOperation(
           t,
-          ~toPointSetFn,
+          ~env,
           ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
         )->E.R.fmap(r => r > 0.)
 
@@ -296,9 +295,9 @@ module AlgebraicCombination = {
       }
     }
 
-    let run = (t1: t, t2: t, ~toPointSetFn: toPointSetFn, ~arithmeticOperation): option<error> => {
+    let run = (t1: t, t2: t, ~env: env, ~arithmeticOperation): option<error> => {
       if arithmeticOperation == #Logarithm {
-        getLogarithmInputError(t1, t2, ~toPointSetFn)
+        getLogarithmInputError(t1, t2, ~env)
       } else {
         None
       }
@@ -407,12 +406,13 @@ module AlgebraicCombination = {
   let run = (
     ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
     t1: t,
-    ~toPointSetFn: toPointSetFn,
+    ~env: env,
     ~toSampleSetFn: toSampleSetFn,
     ~arithmeticOperation: Operation.algebraicOperation,
     ~t2: t,
   ): result<t, error> => {
-    let invalidOperationError = InputValidator.run(t1, t2, ~arithmeticOperation, ~toPointSetFn)
+    let toPointSetFn = dist => toPointSet(dist, ~env, ())
+    let invalidOperationError = InputValidator.run(t1, t2, ~arithmeticOperation, ~env)
     switch (invalidOperationError, strategy) {
     | (Some(e), _) => Error(e)
     | (None, AsDefault) => {

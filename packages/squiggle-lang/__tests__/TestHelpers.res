@@ -25,7 +25,7 @@ let makeTest = (~only=false, str, item1, item2) =>
     ? Only.test(str, () => expect(item1)->toEqual(item2))
     : test(str, () => expect(item1)->toEqual(item2))
 
-let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Output)
+let {toDist, toString, toError, fmap} = module(DistributionOperation.Output)
 
 let fnImage = (theFn, inps) => Js.Array.map(theFn, inps)
 
@@ -43,7 +43,7 @@ let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.generi
   unreachableInTestFileMessage,
 )
 // let toExt: option<'a> => 'a = E.O.toExt(_, unreachableInTestFileMessage)
-let unpackFloat = x => x->toFloat->toExtFloat
+let unpackResult = x => x->E.R.toExn("failed")
 let unpackDist = y => y->toDist->toExtDist
 
 let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean, stdev}))

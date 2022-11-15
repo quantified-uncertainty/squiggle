@@ -92,8 +92,6 @@ module DistributionOperation = {
 
   type toFloatArray = Sample(int)
 
-  type toBool = IsNormalized
-
   type toString =
     | ToString
     | ToSparkline(int)
@@ -103,11 +101,9 @@ module DistributionOperation = {
   type toScore = LogScore(genericDistOrScalar, option<genericDist>)
 
   type t = [
-    | #ToFloat(toFloat)
     | #ToDist(toDist)
     | #ToDistCombination(direction, Operation.Algebraic.t, genericDist)
     | #ToString(toString)
-    | #ToBool(toBool)
     | #ToScore(toScore)
   ]
 }
@@ -117,15 +113,7 @@ module Constructors = {
 
   module UsingDists = {
     @genType
-    let mean: t = #ToFloat(#Mean)
-    let stdev: t = #ToFloat(#Stdev)
-    let variance: t = #ToFloat(#Variance)
-    let sample: t = #ToFloat(#Sample)
-    let cdf = (x): t => #ToFloat(#Cdf(x))
-    let inv = (x): t => #ToFloat(#Inv(x))
-    let pdf = (x): t => #ToFloat(#Pdf(x))
     let normalize: t = #ToDist(Normalize)
-    let isNormalized: t = #ToBool(IsNormalized)
     let toPointSet: t = #ToDist(ToPointSet)
     let toSampleSet = (r): t => #ToDist(ToSampleSet(r))
     let truncate = (left, right): t => #ToDist(Truncate(left, right))

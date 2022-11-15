@@ -21,8 +21,6 @@ module Output: {
   type t = outputType
   let toDist: t => option<genericDist>
   let toDistR: t => result<genericDist, error>
-  let toFloat: t => option<float>
-  let toFloatR: t => result<float, error>
   let toString: t => option<string>
   let toStringR: t => result<string, error>
   let toBool: t => option<bool>
@@ -34,23 +32,7 @@ module Output: {
 
 module Constructors: {
   @genType
-  let mean: (~env: GenericDist.env, genericDist) => result<float, error>
-  @genType
-  let stdev: (~env: GenericDist.env, genericDist) => result<float, error>
-  @genType
-  let variance: (~env: GenericDist.env, genericDist) => result<float, error>
-  @genType
-  let sample: (~env: GenericDist.env, genericDist) => result<float, error>
-  @genType
-  let cdf: (~env: GenericDist.env, genericDist, float) => result<float, error>
-  @genType
-  let inv: (~env: GenericDist.env, genericDist, float) => result<float, error>
-  @genType
-  let pdf: (~env: GenericDist.env, genericDist, float) => result<float, error>
-  @genType
   let normalize: (~env: GenericDist.env, genericDist) => result<genericDist, error>
-  @genType
-  let isNormalized: (~env: GenericDist.env, genericDist) => result<bool, error>
   module LogScore: {
     @genType
     let distEstimateDistAnswer: (

@@ -15,7 +15,7 @@ describe("dotSubtract", () => {
       mkNormal(mean, 1.0),
       mkExponential(rate),
     )
-    let meanResult = E.R.bind(dotDifference, DistributionOperation.Constructors.mean(~env))
+    let meanResult = dotDifference->E.R.bind(GenericDist.mean(~env))
     let meanAnalytical =
       mean -.
       SymbolicDist.Exponential.mean({rate: rate})->E.R.toExn(
@@ -42,7 +42,7 @@ describe("dotSubtract", () => {
             mkNormal(mean, 1.0),
             mkExponential(rate),
           )
-          let meanResult = E.R.bind(dotDifference, DistributionOperation.Constructors.mean(~env))
+          let meanResult = E.R.bind(dotDifference, GenericDist.mean(~env))
           // according to algebra or random variables,
           let meanAnalytical =
             mean -.

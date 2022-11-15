@@ -40,7 +40,7 @@ abstract class SqAbstractDistribution {
 
   mean(env: environment) {
     return resultMap2(
-      RSDistribution.mean({ env }, this._value),
+      RSDistribution.mean(this._value, { env }),
       (v: number) => v,
       (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );
@@ -48,7 +48,7 @@ abstract class SqAbstractDistribution {
 
   pdf(env: environment, n: number) {
     return resultMap2(
-      RSDistribution.pdf({ env }, this._value, n),
+      RSDistribution.pdf(this._value, n, { env }),
       (v: number) => v,
       (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );
@@ -56,7 +56,7 @@ abstract class SqAbstractDistribution {
 
   cdf(env: environment, n: number) {
     return resultMap2(
-      RSDistribution.cdf({ env }, this._value, n),
+      RSDistribution.cdf(this._value, n, { env }),
       (v: number) => v,
       (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );
@@ -64,7 +64,7 @@ abstract class SqAbstractDistribution {
 
   inv(env: environment, n: number) {
     return resultMap2(
-      RSDistribution.inv({ env }, this._value, n),
+      RSDistribution.inv(this._value, n, { env }),
       (v: number) => v,
       (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );
@@ -72,7 +72,7 @@ abstract class SqAbstractDistribution {
 
   stdev(env: environment) {
     return resultMap2(
-      RSDistribution.stdev({ env }, this._value),
+      RSDistribution.stdev(this._value, { env }),
       (v: number) => v,
       (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );

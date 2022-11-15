@@ -45,12 +45,6 @@ module OutputLocal = {
     | _ => None
     }
 
-  let toFloat = (t: t) =>
-    switch t {
-    | Float(d) => Some(d)
-    | _ => None
-    }
-
   let toFloatR = (t: t): result<float, error> =>
     switch t {
     | Float(r) => Ok(r)
@@ -94,17 +88,13 @@ let run = (
   operation: DistributionTypes.DistributionOperation.t,
   dist: genericDist,
 ): outputType => {
-  let {sampleCount, xyPointLength} = env
+  let {sampleCount} = env
 
-  let toPointSetFn = dist => dist->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
+  let toPointSetFn = dist => dist->GenericDist.toPointSet(~env, ())
 
   let toSampleSetFn = dist => dist->GenericDist.toSampleSetDist(sampleCount)
 
   switch operation {
-  | #ToFloat(distToFloatOperation) =>
-    GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
-    ->E.R.fmap(r => Float(r))
-    ->OutputLocal.fromResult
   | #ToString(ToString) => dist->GenericDist.toString->String
   | #ToString(ToSparkline(bucketCount)) =>
     GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
@@ -120,7 +110,6 @@ let run = (
     GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior, ~env)
     ->E.R.fmap(s => Float(s))
     ->OutputLocal.fromResult
-  | #ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
   | #ToDist(Truncate(leftCutoff, rightCutoff)) =>
     GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
     ->E.R.fmap(r => Dist(r))
@@ -128,10 +117,7 @@ let run = (
   | #ToDist(ToSampleSet(n)) =>
     dist->GenericDist.toSampleSetDist(n)->E.R.fmap(r => Dist(SampleSet(r)))->OutputLocal.fromResult
   | #ToDist(ToPointSet) =>
-    dist
-    ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
-    ->E.R.fmap(r => Dist(PointSet(r)))
-    ->OutputLocal.fromResult
+    dist->GenericDist.toPointSet(~env, ())->E.R.fmap(r => Dist(PointSet(r)))->OutputLocal.fromResult
   | #ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
     dist
     ->GenericDist.pointwiseCombinationFloat(
@@ -158,13 +144,7 @@ let run = (
     ->OutputLocal.fromResult
   | #ToDistCombination(Algebraic(strategy), arithmeticOperation, t2) =>
     dist
-    ->GenericDist.algebraicCombination(
-      ~strategy,
-      ~toPointSetFn,
-      ~toSampleSetFn,
-      ~arithmeticOperation,
-      ~t2,
-    )
+    ->GenericDist.algebraicCombination(~strategy, ~env, ~toSampleSetFn, ~arithmeticOperation, ~t2)
     ->E.R.fmap(r => Dist(r))
     ->OutputLocal.fromResult
   | #ToDistCombination(Pointwise, algebraicCombination, t2) =>
@@ -176,8 +156,7 @@ let run = (
 }
 
 let mixture = (dists: array<(genericDist, float)>, env: env): outputType => {
-  let toPointSetFn = dist =>
-    dist->GenericDist.toPointSet(~xyPointLength=env.xyPointLength, ~sampleCount=env.sampleCount, ())
+  let toPointSetFn = dist => dist->GenericDist.toPointSet(~env, ())
 
   let scaleMultiply = (dist, weight) =>
     dist->GenericDist.pointwiseCombinationFloat(
@@ -217,15 +196,7 @@ module Output = {
 module Constructors = {
   module C = DistributionTypes.Constructors.UsingDists
   open OutputLocal
-  let mean = (~env, dist) => run(~env, C.mean, dist)->toFloatR
-  let stdev = (~env, dist) => run(~env, C.stdev, dist)->toFloatR
-  let variance = (~env, dist) => run(~env, C.variance, dist)->toFloatR
-  let sample = (~env, dist) => run(~env, C.sample, dist)->toFloatR
-  let cdf = (~env, dist, f) => run(~env, C.cdf(f), dist)->toFloatR
-  let inv = (~env, dist, f) => run(~env, C.inv(f), dist)->toFloatR
-  let pdf = (~env, dist, f) => run(~env, C.pdf(f), dist)->toFloatR
   let normalize = (~env, dist) => run(~env, C.normalize, dist)->toDistR
-  let isNormalized = (~env, dist) => run(~env, C.isNormalized, dist)->toBoolR
   module LogScore = {
     let distEstimateDistAnswer = (~env, estimate, answer) =>
       run(~env, C.LogScore.distEstimateDistAnswer(answer), estimate)->toFloatR

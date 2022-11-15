@@ -21,11 +21,19 @@ let normalize: t => t
 
 let isNormalized: t => bool
 
+// Deprecated
 let toFloatOperation: (
   t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
 ) => result<float, error>
+
+let mean: (t, ~env: env) => result<float, error>
+let stdev: (t, ~env: env) => result<float, error>
+let variance: (t, ~env: env) => result<float, error>
+let cdf: (t, float, ~env: env) => result<float, error>
+let pdf: (t, float, ~env: env) => result<float, error>
+let inv: (t, float, ~env: env) => result<float, error>
 
 module Score: {
   let logScore: (
@@ -39,8 +47,7 @@ module Score: {
 @genType
 let toPointSet: (
   t,
-  ~xyPointLength: int,
-  ~sampleCount: int,
+  ~env: env,
   ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=?,
   unit,
 ) => result<PointSetTypes.pointSetDist, error>
@@ -57,7 +64,7 @@ let truncate: (
 let algebraicCombination: (
   ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
   t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~toSampleSetFn: toSampleSetFn,
   ~arithmeticOperation: Operation.algebraicOperation,
   ~t2: t,

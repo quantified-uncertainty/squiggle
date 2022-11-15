@@ -13,9 +13,11 @@ describe("mixture", () => {
         DistributionOperation.mixture(
           [(mkNormal(mean1, 9e-1), 0.5), (mkNormal(mean2, 9e-1), 0.5)],
           env,
-        )->outputMap(#ToFloat(#Mean))
+        )
+        ->unpackDist
+        ->GenericDist.mean(~env)
       }
-      meanValue->unpackFloat->expect->toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1)
+      meanValue->unpackResult->expect->toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1)
     },
   )
   testAll(
@@ -30,12 +32,14 @@ describe("mixture", () => {
         DistributionOperation.mixture(
           [(mkBeta(alpha, beta), betaWeight), (mkExponential(rate), exponentialWeight)],
           env,
-        )->outputMap(#ToFloat(#Mean))
+        )
+        ->unpackDist
+        ->GenericDist.mean(~env)
       }
       let betaMean = 1.0 /. (1.0 +. beta /. alpha)
       let exponentialMean = 1.0 /. rate
       meanValue
-      ->unpackFloat
+      ->unpackResult
       ->expect
       ->toBeSoCloseTo(betaWeight *. betaMean +. exponentialWeight *. exponentialMean, ~digits=-1)
     },
@@ -52,12 +56,14 @@ describe("mixture", () => {
         DistributionOperation.mixture(
           [(mkUniform(low, high), uniformWeight), (mkLognormal(mu, sigma), lognormalWeight)],
           env,
-        )->outputMap(#ToFloat(#Mean))
+        )
+        ->unpackDist
+        ->GenericDist.mean(~env)
       }
       let uniformMean = (low +. high) /. 2.0
       let lognormalMean = mu +. sigma ** 2.0 /. 2.0
       meanValue
-      ->unpackFloat
+      ->unpackResult
       ->expect
       ->toBeSoCloseTo(uniformWeight *. uniformMean +. lognormalWeight *. lognormalMean, ~digits=-1)
     },

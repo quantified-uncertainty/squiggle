@@ -33,8 +33,11 @@ module Old = {
       fnCall: DistributionTypes.DistributionOperation.toFloat,
       dist: DistributionTypes.genericDist,
       ~env: GenericDist.env,
-    ) => {
-      DistributionOperation.run(~env, #ToFloat(fnCall), dist)->Some
+    ): option<DistributionOperation.outputType> => {
+      switch GenericDist.toFloatOperation(dist, ~env, ~distToFloatOperation=fnCall) {
+      | Ok(f) => f->Float->Some
+      | Error(e) => e->GenDistError->Some
+      }
     }
 
     let toStringFn = (
@@ -43,14 +46,6 @@ module Old = {
       ~env: GenericDist.env,
     ) => {
       DistributionOperation.run(~env, #ToString(fnCall), dist)->Some
-    }
-
-    let toBoolFn = (
-      fnCall: DistributionTypes.DistributionOperation.toBool,
-      dist: DistributionTypes.genericDist,
-      ~env: GenericDist.env,
-    ) => {
-      DistributionOperation.run(~env, #ToBool(fnCall), dist)->Some
     }
 
     let toDistFn = (
@@ -211,7 +206,7 @@ module Old = {
         ~env,
       )->Some
     | ("normalize", [IEvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
-    | ("isNormalized", [IEvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
+    | ("isNormalized", [IEvDistribution(dist)]) => GenericDist.isNormalized(dist)->Bool->Some
     | ("toPointSet", [IEvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
     | ("scaleLog", [IEvDistribution(dist)]) =>
       Helpers.toDistFn(Scale(#Logarithm, MagicNumbers.Math.e), dist, ~env)

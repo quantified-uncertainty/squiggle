@@ -65,12 +65,7 @@ let library = [
         ~run=(inputs, context, _) =>
           switch inputs {
           | [IEvDistribution(dist)] =>
-            GenericDist.toPointSet(
-              dist,
-              ~xyPointLength=context.environment.xyPointLength,
-              ~sampleCount=context.environment.sampleCount,
-              (),
-            )
+            GenericDist.toPointSet(dist, ~env=context.environment, ())
             ->E.R.fmap(Wrappers.pointSet)
             ->E.R.fmap(Wrappers.evDistribution)
             ->E.R.errMap(e => SqError.Message.REDistributionError(e))

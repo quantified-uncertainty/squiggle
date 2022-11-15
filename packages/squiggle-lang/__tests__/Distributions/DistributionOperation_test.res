@@ -19,7 +19,7 @@ let {
   exponentialDist,
 } = module(GenericDist_Fixtures)
 
-let {toFloat, toDist, toString, toError, toBool, fmap} = module(DistributionOperation.Output)
+let {toDist, toString, toError, toBool, fmap} = module(DistributionOperation.Output)
 let {run} = module(DistributionOperation)
 let run = run(~env)
 let outputMap = fmap(~env)
@@ -77,27 +77,4 @@ describe("sparkline", () => {
     exponentialDist,
     String(`█▅▄▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁`),
   )
-})
-
-describe("toPointSet", () => {
-  test("on symbolic normal distribution", () => {
-    let result = run(#ToDist(ToPointSet), normalDist5)->outputMap(#ToFloat(#Mean))->toFloat->toExt
-    expect(result)->toBeSoCloseTo(5.0, ~digits=0)
-  })
-
-  let pointSet =
-    run(#ToDist(ToPointSet), normalDist5)
-    ->outputMap(#ToDist(ToSampleSet(1000)))
-    ->outputMap(#ToDist(ToPointSet))
-
-  test("mean from sample set", () => {
-    let mean = pointSet->outputMap(#ToFloat(#Mean))->toFloat->toExt
-
-    expect(mean)->toBeSoCloseTo(5.0, ~digits=-1)
-  })
-
-  test("isNormalized from sample set", () => {
-    let isNormalized = pointSet->outputMap(#ToBool(IsNormalized))->toBool->toExt
-    expect(isNormalized)->toBe(true)
-  })
 })
