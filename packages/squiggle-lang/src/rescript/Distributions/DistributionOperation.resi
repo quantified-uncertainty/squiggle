@@ -75,10 +75,6 @@ module Constructors: {
   @genType
   let inspect: (~env: GenericDist.env, genericDist) => result<genericDist, error>
   @genType
-  let toString: (~env: GenericDist.env, genericDist) => result<string, error>
-  @genType
-  let toSparkline: (~env: GenericDist.env, genericDist, int) => result<string, error>
-  @genType
   let algebraicAdd: (~env: GenericDist.env, genericDist, genericDist) => result<genericDist, error>
   @genType
   let algebraicMultiply: (

@@ -40,14 +40,6 @@ module Old = {
       }
     }
 
-    let toStringFn = (
-      fnCall: DistributionTypes.DistributionOperation.toString,
-      dist: DistributionTypes.genericDist,
-      ~env: GenericDist.env,
-    ) => {
-      DistributionOperation.run(~env, #ToString(fnCall), dist)->Some
-    }
-
     let toDistFn = (
       fnCall: DistributionTypes.DistributionOperation.toDist,
       dist,
@@ -191,11 +183,26 @@ module Old = {
       }
 
     | ("integralSum", [IEvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
-    | ("toString", [IEvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
+    | ("toString", [IEvDistribution(dist)]) => dist->GenericDist.toString->String->Some
     | ("sparkline", [IEvDistribution(dist)]) =>
-      Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
+      switch dist->GenericDist.toSparkline(
+        ~sampleCount=env.sampleCount,
+        ~bucketCount=MagicNumbers.Environment.sparklineLength,
+        (),
+      ) {
+      | Ok(s) => String(s)
+      | Error(e) => GenDistError(e)
+      }->Some
     | ("sparkline", [IEvDistribution(dist), IEvNumber(n)]) =>
-      Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
+      // FIXME - copy-paste
+      switch dist->GenericDist.toSparkline(
+        ~sampleCount=env.sampleCount,
+        ~bucketCount=Belt.Float.toInt(n),
+        (),
+      ) {
+      | Ok(s) => String(s)
+      | Error(e) => GenDistError(e)
+      }->Some
     | ("exp", [IEvDistribution(a)]) =>
       // https://mathjs.org/docs/reference/functions/exp.html
       Helpers.twoDiststoDistFn(

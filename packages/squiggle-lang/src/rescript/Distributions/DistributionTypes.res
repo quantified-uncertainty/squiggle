@@ -92,10 +92,6 @@ module DistributionOperation = {
 
   type toFloatArray = Sample(int)
 
-  type toString =
-    | ToString
-    | ToSparkline(int)
-
   type genericDistOrScalar = Score_Dist(genericDist) | Score_Scalar(float)
 
   type toScore = LogScore(genericDistOrScalar, option<genericDist>)
@@ -103,7 +99,6 @@ module DistributionOperation = {
   type t = [
     | #ToDist(toDist)
     | #ToDistCombination(direction, Operation.Algebraic.t, genericDist)
-    | #ToString(toString)
     | #ToScore(toScore)
   ]
 }
@@ -130,8 +125,6 @@ module Constructors = {
     let scalePower = (n): t => #ToDist(Scale(#Power, n))
     let scaleLogarithm = (n): t => #ToDist(Scale(#Logarithm, n))
     let scaleLogarithmWithThreshold = (n, eps): t => #ToDist(Scale(#LogarithmWithThreshold(eps), n))
-    let toString: t = #ToString(ToString)
-    let toSparkline = (n): t => #ToString(ToSparkline(n))
     let algebraicAdd = (dist2: genericDist): t =>
       #ToDistCombination(Algebraic(AsDefault), #Add, dist2)
     let algebraicMultiply = (dist2): t => #ToDistCombination(Algebraic(AsDefault), #Multiply, dist2)

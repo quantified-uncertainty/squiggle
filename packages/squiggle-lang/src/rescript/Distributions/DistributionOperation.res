@@ -95,11 +95,6 @@ let run = (
   let toSampleSetFn = dist => dist->GenericDist.toSampleSetDist(sampleCount)
 
   switch operation {
-  | #ToString(ToString) => dist->GenericDist.toString->String
-  | #ToString(ToSparkline(bucketCount)) =>
-    GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
-    ->E.R.fmap(r => String(r))
-    ->OutputLocal.fromResult
   | #ToDist(Inspect) => {
       Js.log2("Console log requested: ", dist)
       Dist(dist)
@@ -212,9 +207,6 @@ module Constructors = {
   let truncate = (~env, dist, leftCutoff, rightCutoff) =>
     run(~env, C.truncate(leftCutoff, rightCutoff), dist)->toDistR
   let inspect = (~env, dist) => run(~env, C.inspect, dist)->toDistR
-  let toString = (~env, dist) => run(~env, C.toString, dist)->toStringR
-  let toSparkline = (~env, dist, bucketCount) =>
-    run(~env, C.toSparkline(bucketCount), dist)->toStringR
   let algebraicAdd = (~env, dist1, dist2) => run(~env, C.algebraicAdd(dist2), dist1)->toDistR
   let algebraicMultiply = (~env, dist1, dist2) =>
     run(~env, C.algebraicMultiply(dist2), dist1)->toDistR
