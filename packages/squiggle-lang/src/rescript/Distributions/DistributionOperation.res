@@ -1,4 +1,3 @@
-type functionCallInfo = DistributionTypes.DistributionOperation.genericFunctionCallInfo
 type genericDist = DistributionTypes.genericDist
 type error = DistributionTypes.error
 
@@ -90,136 +89,110 @@ module OutputLocal = {
     }
 }
 
-let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
+let run = (
+  ~env: env,
+  operation: DistributionTypes.DistributionOperation.t,
+  dist: genericDist,
+): outputType => {
   let {sampleCount, xyPointLength} = env
 
-  let reCall = (~env=env, ~functionCallInfo=functionCallInfo, ()) => {
-    run(~env, functionCallInfo)
-  }
+  let toPointSetFn = dist => dist->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
 
-  let toPointSetFn = r => {
-    switch reCall(~functionCallInfo=FromDist(#ToDist(ToPointSet), r), ()) {
-    | Dist(PointSet(p)) => Ok(p)
-    | e => Error(OutputLocal.toErrorOrUnreachable(e))
+  let toSampleSetFn = dist => dist->GenericDist.toSampleSetDist(sampleCount)
+
+  switch operation {
+  | #ToFloat(distToFloatOperation) =>
+    GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
+    ->E.R.fmap(r => Float(r))
+    ->OutputLocal.fromResult
+  | #ToString(ToString) => dist->GenericDist.toString->String
+  | #ToString(ToSparkline(bucketCount)) =>
+    GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
+    ->E.R.fmap(r => String(r))
+    ->OutputLocal.fromResult
+  | #ToDist(Inspect) => {
+      Js.log2("Console log requested: ", dist)
+      Dist(dist)
     }
-  }
 
-  let toSampleSetFn = r => {
-    switch reCall(~functionCallInfo=FromDist(#ToDist(ToSampleSet(sampleCount)), r), ()) {
-    | Dist(SampleSet(p)) => Ok(p)
-    | e => Error(OutputLocal.toErrorOrUnreachable(e))
-    }
-  }
-
-  let scaleMultiply = (r, weight) =>
-    reCall(
-      ~functionCallInfo=FromDist(#ToDistCombination(Pointwise, #Multiply, #Float(weight)), r),
-      (),
-    )->OutputLocal.toDistR
-
-  let pointwiseAdd = (r1, r2) =>
-    reCall(
-      ~functionCallInfo=FromDist(#ToDistCombination(Pointwise, #Add, #Dist(r2)), r1),
-      (),
-    )->OutputLocal.toDistR
-
-  let fromDistFn = (
-    subFnName: DistributionTypes.DistributionOperation.fromDist,
-    dist: genericDist,
-  ): outputType => {
-    let response = switch subFnName {
-    | #ToFloat(distToFloatOperation) =>
-      GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
-      ->E.R.fmap(r => Float(r))
-      ->OutputLocal.fromResult
-    | #ToString(ToString) => dist->GenericDist.toString->String
-    | #ToString(ToSparkline(bucketCount)) =>
-      GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
-      ->E.R.fmap(r => String(r))
-      ->OutputLocal.fromResult
-    | #ToDist(Inspect) => {
-        Js.log2("Console log requested: ", dist)
-        Dist(dist)
-      }
-
-    | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
-    | #ToScore(LogScore(answer, prior)) =>
-      GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior, ~env)
-      ->E.R.fmap(s => Float(s))
-      ->OutputLocal.fromResult
-    | #ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
-    | #ToDist(Truncate(leftCutoff, rightCutoff)) =>
-      GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
-      ->E.R.fmap(r => Dist(r))
-      ->OutputLocal.fromResult
-    | #ToDist(ToSampleSet(n)) =>
-      dist
-      ->GenericDist.toSampleSetDist(n)
-      ->E.R.fmap(r => Dist(SampleSet(r)))
-      ->OutputLocal.fromResult
-    | #ToDist(ToPointSet) =>
-      dist
-      ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
-      ->E.R.fmap(r => Dist(PointSet(r)))
-      ->OutputLocal.fromResult
-    | #ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
-      dist
-      ->GenericDist.pointwiseCombinationFloat(
-        ~toPointSetFn,
-        ~algebraicCombination=#LogarithmWithThreshold(eps),
-        ~f,
-      )
-      ->E.R.fmap(r => Dist(r))
-      ->OutputLocal.fromResult
-    | #ToDist(Scale(#Multiply, f)) =>
-      dist
-      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Multiply, ~f)
-      ->E.R.fmap(r => Dist(r))
-      ->OutputLocal.fromResult
-    | #ToDist(Scale(#Logarithm, f)) =>
-      dist
-      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
-      ->E.R.fmap(r => Dist(r))
-      ->OutputLocal.fromResult
-    | #ToDist(Scale(#Power, f)) =>
-      dist
-      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Power, ~f)
-      ->E.R.fmap(r => Dist(r))
-      ->OutputLocal.fromResult
-    | #ToDistCombination(Algebraic(_), _, #Float(_)) => GenDistError(NotYetImplemented)
-    | #ToDistCombination(Algebraic(strategy), arithmeticOperation, #Dist(t2)) =>
-      dist
-      ->GenericDist.algebraicCombination(
-        ~strategy,
-        ~toPointSetFn,
-        ~toSampleSetFn,
-        ~arithmeticOperation,
-        ~t2,
-      )
-      ->E.R.fmap(r => Dist(r))
-      ->OutputLocal.fromResult
-    | #ToDistCombination(Pointwise, algebraicCombination, #Dist(t2)) =>
-      dist
-      ->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination, ~t2)
-      ->E.R.fmap(r => Dist(r))
-      ->OutputLocal.fromResult
-    | #ToDistCombination(Pointwise, algebraicCombination, #Float(f)) =>
-      dist
-      ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination, ~f)
-      ->E.R.fmap(r => Dist(r))
-      ->OutputLocal.fromResult
-    }
-    response
-  }
-
-  switch functionCallInfo {
-  | FromDist(subFnName, dist) => fromDistFn(subFnName, dist)
-  | Mixture(dists) =>
-    dists
-    ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd, ~env)
+  | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
+  | #ToScore(LogScore(answer, prior)) =>
+    GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior, ~env)
+    ->E.R.fmap(s => Float(s))
+    ->OutputLocal.fromResult
+  | #ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
+  | #ToDist(Truncate(leftCutoff, rightCutoff)) =>
+    GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
+    ->E.R.fmap(r => Dist(r))
+    ->OutputLocal.fromResult
+  | #ToDist(ToSampleSet(n)) =>
+    dist->GenericDist.toSampleSetDist(n)->E.R.fmap(r => Dist(SampleSet(r)))->OutputLocal.fromResult
+  | #ToDist(ToPointSet) =>
+    dist
+    ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
+    ->E.R.fmap(r => Dist(PointSet(r)))
+    ->OutputLocal.fromResult
+  | #ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
+    dist
+    ->GenericDist.pointwiseCombinationFloat(
+      ~toPointSetFn,
+      ~algebraicCombination=#LogarithmWithThreshold(eps),
+      ~f,
+    )
+    ->E.R.fmap(r => Dist(r))
+    ->OutputLocal.fromResult
+  | #ToDist(Scale(#Multiply, f)) =>
+    dist
+    ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Multiply, ~f)
+    ->E.R.fmap(r => Dist(r))
+    ->OutputLocal.fromResult
+  | #ToDist(Scale(#Logarithm, f)) =>
+    dist
+    ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
+    ->E.R.fmap(r => Dist(r))
+    ->OutputLocal.fromResult
+  | #ToDist(Scale(#Power, f)) =>
+    dist
+    ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Power, ~f)
+    ->E.R.fmap(r => Dist(r))
+    ->OutputLocal.fromResult
+  | #ToDistCombination(Algebraic(strategy), arithmeticOperation, t2) =>
+    dist
+    ->GenericDist.algebraicCombination(
+      ~strategy,
+      ~toPointSetFn,
+      ~toSampleSetFn,
+      ~arithmeticOperation,
+      ~t2,
+    )
+    ->E.R.fmap(r => Dist(r))
+    ->OutputLocal.fromResult
+  | #ToDistCombination(Pointwise, algebraicCombination, t2) =>
+    dist
+    ->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination, ~t2)
     ->E.R.fmap(r => Dist(r))
     ->OutputLocal.fromResult
   }
+}
+
+let mixture = (dists: array<(genericDist, float)>, env: env): outputType => {
+  let toPointSetFn = dist =>
+    dist->GenericDist.toPointSet(~xyPointLength=env.xyPointLength, ~sampleCount=env.sampleCount, ())
+
+  let scaleMultiply = (dist, weight) =>
+    dist->GenericDist.pointwiseCombinationFloat(
+      ~toPointSetFn,
+      ~algebraicCombination=#Multiply,
+      ~f=weight,
+    )
+
+  let pointwiseAdd = (dist1, dist2) =>
+    dist1->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination=#Add, ~t2=dist2)
+
+  dists
+  ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd, ~env)
+  ->E.R.fmap(r => Dist(r))
+  ->OutputLocal.fromResult
 }
 
 module Output = {
@@ -228,14 +201,13 @@ module Output = {
   let fmap = (
     ~env,
     input: outputType,
-    functionCallInfo: DistributionTypes.DistributionOperation.singleParamaterFunction,
+    operation: DistributionTypes.DistributionOperation.t,
   ): outputType => {
-    let newFnCall: result<functionCallInfo, error> = switch (functionCallInfo, input) {
-    | (FromDist(fromDist), Dist(o)) => Ok(FromDist(fromDist, o))
-    | (_, GenDistError(r)) => Error(r)
-    | (FromDist(_), _) => Error(OtherError("Expected dist, got something else"))
+    switch input {
+    | Dist(o) => run(~env, operation, o)
+    | GenDistError(r) => GenDistError(r)
+    | _ => GenDistError(OtherError("Expected dist, got something else"))
     }
-    newFnCall->E.R.fmap(run(~env))->OutputLocal.fromResult
   }
 }
 
@@ -245,52 +217,52 @@ module Output = {
 module Constructors = {
   module C = DistributionTypes.Constructors.UsingDists
   open OutputLocal
-  let mean = (~env, dist) => C.mean(dist)->run(~env)->toFloatR
-  let stdev = (~env, dist) => C.stdev(dist)->run(~env)->toFloatR
-  let variance = (~env, dist) => C.variance(dist)->run(~env)->toFloatR
-  let sample = (~env, dist) => C.sample(dist)->run(~env)->toFloatR
-  let cdf = (~env, dist, f) => C.cdf(dist, f)->run(~env)->toFloatR
-  let inv = (~env, dist, f) => C.inv(dist, f)->run(~env)->toFloatR
-  let pdf = (~env, dist, f) => C.pdf(dist, f)->run(~env)->toFloatR
-  let normalize = (~env, dist) => C.normalize(dist)->run(~env)->toDistR
-  let isNormalized = (~env, dist) => C.isNormalized(dist)->run(~env)->toBoolR
+  let mean = (~env, dist) => run(~env, C.mean, dist)->toFloatR
+  let stdev = (~env, dist) => run(~env, C.stdev, dist)->toFloatR
+  let variance = (~env, dist) => run(~env, C.variance, dist)->toFloatR
+  let sample = (~env, dist) => run(~env, C.sample, dist)->toFloatR
+  let cdf = (~env, dist, f) => run(~env, C.cdf(f), dist)->toFloatR
+  let inv = (~env, dist, f) => run(~env, C.inv(f), dist)->toFloatR
+  let pdf = (~env, dist, f) => run(~env, C.pdf(f), dist)->toFloatR
+  let normalize = (~env, dist) => run(~env, C.normalize, dist)->toDistR
+  let isNormalized = (~env, dist) => run(~env, C.isNormalized, dist)->toBoolR
   module LogScore = {
     let distEstimateDistAnswer = (~env, estimate, answer) =>
-      C.LogScore.distEstimateDistAnswer(estimate, answer)->run(~env)->toFloatR
+      run(~env, C.LogScore.distEstimateDistAnswer(answer), estimate)->toFloatR
     let distEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
-      C.LogScore.distEstimateDistAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+      run(~env, C.LogScore.distEstimateDistAnswerWithPrior(answer, prior), estimate)->toFloatR
     let distEstimateScalarAnswer = (~env, estimate, answer) =>
-      C.LogScore.distEstimateScalarAnswer(estimate, answer)->run(~env)->toFloatR
+      run(~env, C.LogScore.distEstimateScalarAnswer(answer), estimate)->toFloatR
     let distEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
-      C.LogScore.distEstimateScalarAnswerWithPrior(estimate, answer, prior)->run(~env)->toFloatR
+      run(~env, C.LogScore.distEstimateScalarAnswerWithPrior(answer, prior), estimate)->toFloatR
   }
-  let toPointSet = (~env, dist) => C.toPointSet(dist)->run(~env)->toDistR
-  let toSampleSet = (~env, dist, n) => C.toSampleSet(dist, n)->run(~env)->toDistR
+  let toPointSet = (~env, dist) => run(~env, C.toPointSet, dist)->toDistR
+  let toSampleSet = (~env, dist, n) => run(~env, C.toSampleSet(n), dist)->toDistR
   let truncate = (~env, dist, leftCutoff, rightCutoff) =>
-    C.truncate(dist, leftCutoff, rightCutoff)->run(~env)->toDistR
-  let inspect = (~env, dist) => C.inspect(dist)->run(~env)->toDistR
-  let toString = (~env, dist) => C.toString(dist)->run(~env)->toStringR
+    run(~env, C.truncate(leftCutoff, rightCutoff), dist)->toDistR
+  let inspect = (~env, dist) => run(~env, C.inspect, dist)->toDistR
+  let toString = (~env, dist) => run(~env, C.toString, dist)->toStringR
   let toSparkline = (~env, dist, bucketCount) =>
-    C.toSparkline(dist, bucketCount)->run(~env)->toStringR
-  let algebraicAdd = (~env, dist1, dist2) => C.algebraicAdd(dist1, dist2)->run(~env)->toDistR
+    run(~env, C.toSparkline(bucketCount), dist)->toStringR
+  let algebraicAdd = (~env, dist1, dist2) => run(~env, C.algebraicAdd(dist2), dist1)->toDistR
   let algebraicMultiply = (~env, dist1, dist2) =>
-    C.algebraicMultiply(dist1, dist2)->run(~env)->toDistR
-  let algebraicDivide = (~env, dist1, dist2) => C.algebraicDivide(dist1, dist2)->run(~env)->toDistR
+    run(~env, C.algebraicMultiply(dist2), dist1)->toDistR
+  let algebraicDivide = (~env, dist1, dist2) => run(~env, C.algebraicDivide(dist2), dist1)->toDistR
   let algebraicSubtract = (~env, dist1, dist2) =>
-    C.algebraicSubtract(dist1, dist2)->run(~env)->toDistR
+    run(~env, C.algebraicSubtract(dist2), dist1)->toDistR
   let algebraicLogarithm = (~env, dist1, dist2) =>
-    C.algebraicLogarithm(dist1, dist2)->run(~env)->toDistR
-  let algebraicPower = (~env, dist1, dist2) => C.algebraicPower(dist1, dist2)->run(~env)->toDistR
-  let scaleMultiply = (~env, dist, n) => C.scaleMultiply(dist, n)->run(~env)->toDistR
-  let scalePower = (~env, dist, n) => C.scalePower(dist, n)->run(~env)->toDistR
-  let scaleLogarithm = (~env, dist, n) => C.scaleLogarithm(dist, n)->run(~env)->toDistR
-  let pointwiseAdd = (~env, dist1, dist2) => C.pointwiseAdd(dist1, dist2)->run(~env)->toDistR
+    run(~env, C.algebraicLogarithm(dist2), dist1)->toDistR
+  let algebraicPower = (~env, dist1, dist2) => run(~env, C.algebraicPower(dist2), dist1)->toDistR
+  let scaleMultiply = (~env, dist, n) => run(~env, C.scaleMultiply(n), dist)->toDistR
+  let scalePower = (~env, dist, n) => run(~env, C.scalePower(n), dist)->toDistR
+  let scaleLogarithm = (~env, dist, n) => run(~env, C.scaleLogarithm(n), dist)->toDistR
+  let pointwiseAdd = (~env, dist1, dist2) => run(~env, C.pointwiseAdd(dist2), dist1)->toDistR
   let pointwiseMultiply = (~env, dist1, dist2) =>
-    C.pointwiseMultiply(dist1, dist2)->run(~env)->toDistR
-  let pointwiseDivide = (~env, dist1, dist2) => C.pointwiseDivide(dist1, dist2)->run(~env)->toDistR
+    run(~env, C.pointwiseMultiply(dist2), dist1)->toDistR
+  let pointwiseDivide = (~env, dist1, dist2) => run(~env, C.pointwiseDivide(dist2), dist1)->toDistR
   let pointwiseSubtract = (~env, dist1, dist2) =>
-    C.pointwiseSubtract(dist1, dist2)->run(~env)->toDistR
+    run(~env, C.pointwiseSubtract(dist2), dist1)->toDistR
   let pointwiseLogarithm = (~env, dist1, dist2) =>
-    C.pointwiseLogarithm(dist1, dist2)->run(~env)->toDistR
-  let pointwisePower = (~env, dist1, dist2) => C.pointwisePower(dist1, dist2)->run(~env)->toDistR
+    run(~env, C.pointwiseLogarithm(dist2), dist1)->toDistR
+  let pointwisePower = (~env, dist1, dist2) => run(~env, C.pointwisePower(dist2), dist1)->toDistR
 }

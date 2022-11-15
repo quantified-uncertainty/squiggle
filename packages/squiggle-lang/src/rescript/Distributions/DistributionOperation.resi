@@ -13,10 +13,9 @@ type outputType =
   | GenDistError(error)
 
 @genType
-let run: (
-  ~env: GenericDist.env,
-  DistributionTypes.DistributionOperation.genericFunctionCallInfo,
-) => outputType
+let run: (~env: GenericDist.env, DistributionOperation.t, genericDist) => outputType
+
+let mixture: (array<(genericDist, float)>, GenericDist.env) => outputType
 
 module Output: {
   type t = outputType
@@ -29,11 +28,8 @@ module Output: {
   let toBool: t => option<bool>
   let toBoolR: t => result<bool, error>
   let toError: t => option<error>
-  let fmap: (
-    ~env: GenericDist.env,
-    t,
-    DistributionTypes.DistributionOperation.singleParamaterFunction,
-  ) => t
+
+  let fmap: (~env: GenericDist.env, t, DistributionOperation.t) => t
 }
 
 module Constructors: {

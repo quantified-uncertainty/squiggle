@@ -79,9 +79,8 @@ describe("klDivergence: continuous -> continuous -> float", () => {
 })
 
 describe("klDivergence: discrete -> discrete -> float", () => {
-  let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
-  let a' = [(point1, 1e0), (point2, 1e0)]->mixture->run
-  let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
+  let a' = [(point1, 1e0), (point2, 1e0)]->DistributionOperation.mixture(env)
+  let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->DistributionOperation.mixture(env)
   let (a, b) = switch (a', b') {
   | (Dist(a''), Dist(b'')) => (a'', b'')
   | _ => raise(MixtureFailed)
@@ -113,9 +112,8 @@ describe("klDivergence: discrete -> discrete -> float", () => {
 })
 
 describe("klDivergence: mixed -> mixed -> float", () => {
-  let mixture' = a => DistributionTypes.DistributionOperation.Mixture(a)
   let mixture = a => {
-    let dist' = a->mixture'->run
+    let dist' = a->DistributionOperation.mixture(env)
     switch dist' {
     | Dist(dist) => dist
     | _ => raise(MixtureFailed)
@@ -184,8 +182,8 @@ describe("combineAlongSupportOfSecondArgument0", () => {
       uniformMakeR(lowPrediction, highPrediction)->E.R.errMap(
         s => DistributionTypes.ArgumentError(s),
       )
-    let answerWrapped = E.R.fmap(answer, a => run(FromDist(#ToDist(ToPointSet), a)))
-    let predictionWrapped = E.R.fmap(prediction, a => run(FromDist(#ToDist(ToPointSet), a)))
+    let answerWrapped = E.R.fmap(answer, a => run(#ToDist(ToPointSet), a))
+    let predictionWrapped = E.R.fmap(prediction, a => run(#ToDist(ToPointSet), a))
 
     let interpolator = XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero)
     let integrand = PointSetDist_Scoring.WithDistAnswer.integrand

@@ -45,12 +45,11 @@ describe("(Algebraic) addition of distributions", () => {
       () => {
         normalDist5
         ->algebraicAdd(normalDist20)
-        ->E.R.fmap(DistributionTypes.Constructors.UsingDists.mean)
-        ->E.R.fmap(run)
-        ->E.R.fmap(toFloat)
-        ->E.R.toExn("Expected float")
+        ->E.R.toExn("failed")
+        ->DistributionOperation.Constructors.mean(~env)
+        ->E.R.toExn("failed")
         ->expect
-        ->toBe(Some(2.5e1))
+        ->toBe(2.5e1)
       },
     )
 
@@ -62,16 +61,12 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           uniformDist
           ->algebraicAdd(betaDist)
-          ->E.R.fmap(DistributionTypes.Constructors.UsingDists.mean)
-          ->E.R.fmap(run)
-          ->E.R.fmap(toFloat)
-          ->E.R.toExn("Expected float")
-        switch received {
-        | None => "algebraicAdd has"->expect->toBe("failed")
+          ->E.R.toExn("failed")
+          ->DistributionOperation.Constructors.mean(~env)
+          ->E.R.toExn("failed")
         // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
         // sometimes it works with ~digits=2.
-        | Some(x) => x->expect->toBeSoCloseTo(9.786831807237022, ~digits=1) // (uniformMean +. betaMean)
-        }
+        received->expect->toBeSoCloseTo(9.786831807237022, ~digits=1) // (uniformMean +. betaMean)
       },
     )
     test(
@@ -82,16 +77,12 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           betaDist
           ->algebraicAdd(uniformDist)
-          ->E.R.fmap(DistributionTypes.Constructors.UsingDists.mean)
-          ->E.R.fmap(run)
-          ->E.R.fmap(toFloat)
+          ->E.R.toExn("failed")
+          ->DistributionOperation.Constructors.mean(~env)
           ->E.R.toExn("Expected float")
-        switch received {
-        | None => "algebraicAdd has"->expect->toBe("failed")
         // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
         // sometimes it works with ~digits=2.
-        | Some(x) => x->expect->toBeSoCloseTo(9.784290207736126, ~digits=1) // (uniformMean +. betaMean)
-        }
+        received->expect->toBeSoCloseTo(9.784290207736126, ~digits=1) // (uniformMean +. betaMean)
       },
     )
   })
@@ -104,16 +95,14 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           normalDist10 // this should be normal(10, sqrt(8))
           ->Ok
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, x))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.pdf(x), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
         let calculated =
           normalDist5
           ->algebraicAdd(normalDist5)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, x))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.pdf(x), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
@@ -137,16 +126,14 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           normalDist20
           ->Ok
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1.9e1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.pdf(1.9e1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
         let calculated =
           normalDist10
           ->algebraicAdd(normalDist10)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1.9e1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.pdf(1.9e1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
@@ -169,8 +156,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           uniformDist
           ->algebraicAdd(betaDist)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1e1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.pdf(1e1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toExn("Expected float")
         switch received {
@@ -188,8 +174,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           betaDist
           ->algebraicAdd(uniformDist)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.pdf(d, 1e1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.pdf(1e1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toExn("Expected float")
         switch received {
@@ -208,16 +193,14 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           normalDist10
           ->Ok
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, x))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.cdf(x), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
         let calculated =
           normalDist5
           ->algebraicAdd(normalDist5)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, x))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.cdf(x), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
@@ -241,16 +224,14 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           normalDist20
           ->Ok
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1.25e1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.cdf(1.25e1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
         let calculated =
           normalDist10
           ->algebraicAdd(normalDist10)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1.25e1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.cdf(1.25e1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
@@ -273,8 +254,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           uniformDist
           ->algebraicAdd(betaDist)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1e1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.cdf(1e1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toExn("Expected float")
         switch received {
@@ -291,8 +271,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           betaDist
           ->algebraicAdd(uniformDist)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.cdf(d, 1e1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.cdf(1e1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toExn("Expected float")
         switch received {
@@ -313,16 +292,14 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           normalDist10
           ->Ok
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, x))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.inv(x), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
         let calculated =
           normalDist5
           ->algebraicAdd(normalDist5)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, x))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.inv(x), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
@@ -346,16 +323,14 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           normalDist20
           ->Ok
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 1e-1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.inv(1e-1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
         let calculated =
           normalDist10
           ->algebraicAdd(normalDist10)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 1e-1))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.inv(1e-1), d))
           ->E.R.fmap(toFloat)
           ->E.R.toOption
           ->E.O.flatten
@@ -378,8 +353,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           uniformDist
           ->algebraicAdd(betaDist)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 2e-2))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.inv(2e-2), d))
           ->E.R.fmap(toFloat)
           ->E.R.toExn("Expected float")
         switch received {
@@ -396,8 +370,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           betaDist
           ->algebraicAdd(uniformDist)
-          ->E.R.fmap(d => DistributionTypes.Constructors.UsingDists.inv(d, 2e-2))
-          ->E.R.fmap(run)
+          ->E.R.fmap(d => run(DistributionTypes.Constructors.UsingDists.inv(2e-2), d))
           ->E.R.fmap(toFloat)
           ->E.R.toExn("Expected float")
         switch received {

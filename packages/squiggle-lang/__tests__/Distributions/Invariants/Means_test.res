@@ -39,7 +39,7 @@ module Internals = {
   let pairsOfDifferentDistributions = combinations2(distributions)
 
   let runMean: DistributionTypes.genericDist => float = dist => {
-    dist->mean->run->toFloat->E.O.toExn("Shouldn't see this because we trust testcase input")
+    run(mean, dist)->toFloat->E.O.toExn("Shouldn't see this because we trust testcase input")
   }
 
   let testOperationMean = (
@@ -57,8 +57,7 @@ module Internals = {
     let dist2 = dist2'->DistributionTypes.Symbolic
     let received =
       distOp(dist1, dist2)
-      ->E.R.fmap(mean)
-      ->E.R.fmap(run)
+      ->E.R.fmap(dist => run(mean, dist))
       ->E.R.fmap(toFloat)
       ->E.R.toExn("Expected float")
     let expected = floatOp(runMean(dist1), runMean(dist2))

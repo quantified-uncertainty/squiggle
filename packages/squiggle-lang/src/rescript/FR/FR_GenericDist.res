@@ -34,7 +34,7 @@ module Old = {
       dist: DistributionTypes.genericDist,
       ~env: GenericDist.env,
     ) => {
-      FromDist(#ToFloat(fnCall), dist)->DistributionOperation.run(~env)->Some
+      DistributionOperation.run(~env, #ToFloat(fnCall), dist)->Some
     }
 
     let toStringFn = (
@@ -42,7 +42,7 @@ module Old = {
       dist: DistributionTypes.genericDist,
       ~env: GenericDist.env,
     ) => {
-      FromDist(#ToString(fnCall), dist)->DistributionOperation.run(~env)->Some
+      DistributionOperation.run(~env, #ToString(fnCall), dist)->Some
     }
 
     let toBoolFn = (
@@ -50,7 +50,7 @@ module Old = {
       dist: DistributionTypes.genericDist,
       ~env: GenericDist.env,
     ) => {
-      FromDist(#ToBool(fnCall), dist)->DistributionOperation.run(~env)->Some
+      DistributionOperation.run(~env, #ToBool(fnCall), dist)->Some
     }
 
     let toDistFn = (
@@ -58,14 +58,15 @@ module Old = {
       dist,
       ~env: GenericDist.env,
     ) => {
-      FromDist(#ToDist(fnCall), dist)->DistributionOperation.run(~env)->Some
+      DistributionOperation.run(~env, #ToDist(fnCall), dist)->Some
     }
 
     let twoDiststoDistFn = (direction, arithmetic, dist1, dist2, ~env: GenericDist.env) => {
-      FromDist(
-        #ToDistCombination(direction, arithmeticMap(arithmetic), #Dist(dist2)),
+      DistributionOperation.run(
+        ~env,
+        #ToDistCombination(direction, arithmeticMap(arithmetic), dist2),
         dist1,
-      )->DistributionOperation.run(~env)
+      )
     }
 
     let parseNumber = (args: Reducer_T.value): Belt.Result.t<float, string> =>
@@ -95,7 +96,7 @@ module Old = {
       ~env: GenericDist.env,
     ): DistributionOperation.outputType =>
       E.A.length(distributions) == E.A.length(weights)
-        ? Mixture(E.A.zip(distributions, weights))->DistributionOperation.run(~env)
+        ? DistributionOperation.mixture(E.A.zip(distributions, weights), env)
         : GenDistError(
             ArgumentError("Error, mixture call has different number of distributions and weights"),
           )

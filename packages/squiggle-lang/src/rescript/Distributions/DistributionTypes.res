@@ -102,118 +102,61 @@ module DistributionOperation = {
 
   type toScore = LogScore(genericDistOrScalar, option<genericDist>)
 
-  type fromFloat = [
+  type t = [
     | #ToFloat(toFloat)
     | #ToDist(toDist)
-    | #ToDistCombination(direction, Operation.Algebraic.t, [#Dist(genericDist) | #Float(float)])
+    | #ToDistCombination(direction, Operation.Algebraic.t, genericDist)
     | #ToString(toString)
     | #ToBool(toBool)
-  ]
-
-  type fromDist = [
-    | fromFloat
     | #ToScore(toScore)
   ]
-
-  type singleParamaterFunction = FromDist(fromDist)
-
-  type genericFunctionCallInfo =
-    | FromDist(fromDist, genericDist)
-    | Mixture(array<(genericDist, float)>)
 }
 
 module Constructors = {
-  type t = DistributionOperation.genericFunctionCallInfo
+  type t = DistributionOperation.t
 
   module UsingDists = {
     @genType
-    let mean = (dist): t => FromDist(#ToFloat(#Mean), dist)
-    let stdev = (dist): t => FromDist(#ToFloat(#Stdev), dist)
-    let variance = (dist): t => FromDist(#ToFloat(#Variance), dist)
-    let sample = (dist): t => FromDist(#ToFloat(#Sample), dist)
-    let cdf = (dist, x): t => FromDist(#ToFloat(#Cdf(x)), dist)
-    let inv = (dist, x): t => FromDist(#ToFloat(#Inv(x)), dist)
-    let pdf = (dist, x): t => FromDist(#ToFloat(#Pdf(x)), dist)
-    let normalize = (dist): t => FromDist(#ToDist(Normalize), dist)
-    let isNormalized = (dist): t => FromDist(#ToBool(IsNormalized), dist)
-    let toPointSet = (dist): t => FromDist(#ToDist(ToPointSet), dist)
-    let toSampleSet = (dist, r): t => FromDist(#ToDist(ToSampleSet(r)), dist)
-    let truncate = (dist, left, right): t => FromDist(#ToDist(Truncate(left, right)), dist)
-    let inspect = (dist): t => FromDist(#ToDist(Inspect), dist)
+    let mean: t = #ToFloat(#Mean)
+    let stdev: t = #ToFloat(#Stdev)
+    let variance: t = #ToFloat(#Variance)
+    let sample: t = #ToFloat(#Sample)
+    let cdf = (x): t => #ToFloat(#Cdf(x))
+    let inv = (x): t => #ToFloat(#Inv(x))
+    let pdf = (x): t => #ToFloat(#Pdf(x))
+    let normalize: t = #ToDist(Normalize)
+    let isNormalized: t = #ToBool(IsNormalized)
+    let toPointSet: t = #ToDist(ToPointSet)
+    let toSampleSet = (r): t => #ToDist(ToSampleSet(r))
+    let truncate = (left, right): t => #ToDist(Truncate(left, right))
+    let inspect: t = #ToDist(Inspect)
     module LogScore = {
-      let distEstimateDistAnswer = (estimate, answer): t => FromDist(
-        #ToScore(LogScore(Score_Dist(answer), None)),
-        estimate,
-      )
-      let distEstimateDistAnswerWithPrior = (estimate, answer, prior): t => FromDist(
-        #ToScore(LogScore(Score_Dist(answer), Some(prior))),
-        estimate,
-      )
-      let distEstimateScalarAnswer = (estimate, answer): t => FromDist(
-        #ToScore(LogScore(Score_Scalar(answer), None)),
-        estimate,
-      )
-      let distEstimateScalarAnswerWithPrior = (estimate, answer, prior): t => FromDist(
-        #ToScore(LogScore(Score_Scalar(answer), Some(prior))),
-        estimate,
-      )
+      let distEstimateDistAnswer = (answer): t => #ToScore(LogScore(Score_Dist(answer), None))
+      let distEstimateDistAnswerWithPrior = (answer, prior): t =>
+        #ToScore(LogScore(Score_Dist(answer), Some(prior)))
+      let distEstimateScalarAnswer = (answer): t => #ToScore(LogScore(Score_Scalar(answer), None))
+      let distEstimateScalarAnswerWithPrior = (answer, prior): t =>
+        #ToScore(LogScore(Score_Scalar(answer), Some(prior)))
     }
-    let scaleMultiply = (dist, n): t => FromDist(#ToDist(Scale(#Multiply, n)), dist)
-    let scalePower = (dist, n): t => FromDist(#ToDist(Scale(#Power, n)), dist)
-    let scaleLogarithm = (dist, n): t => FromDist(#ToDist(Scale(#Logarithm, n)), dist)
-    let scaleLogarithmWithThreshold = (dist, n, eps): t => FromDist(
-      #ToDist(Scale(#LogarithmWithThreshold(eps), n)),
-      dist,
-    )
-    let toString = (dist): t => FromDist(#ToString(ToString), dist)
-    let toSparkline = (dist, n): t => FromDist(#ToString(ToSparkline(n)), dist)
-    let algebraicAdd = (dist1, dist2: genericDist): t => FromDist(
-      #ToDistCombination(Algebraic(AsDefault), #Add, #Dist(dist2)),
-      dist1,
-    )
-    let algebraicMultiply = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Algebraic(AsDefault), #Multiply, #Dist(dist2)),
-      dist1,
-    )
-    let algebraicDivide = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Algebraic(AsDefault), #Divide, #Dist(dist2)),
-      dist1,
-    )
-    let algebraicSubtract = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Algebraic(AsDefault), #Subtract, #Dist(dist2)),
-      dist1,
-    )
-    let algebraicLogarithm = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Algebraic(AsDefault), #Logarithm, #Dist(dist2)),
-      dist1,
-    )
-    let algebraicPower = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Algebraic(AsDefault), #Power, #Dist(dist2)),
-      dist1,
-    )
-    let pointwiseAdd = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Pointwise, #Add, #Dist(dist2)),
-      dist1,
-    )
-    let pointwiseMultiply = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Pointwise, #Multiply, #Dist(dist2)),
-      dist1,
-    )
-    let pointwiseDivide = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Pointwise, #Divide, #Dist(dist2)),
-      dist1,
-    )
-    let pointwiseSubtract = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Pointwise, #Subtract, #Dist(dist2)),
-      dist1,
-    )
-    let pointwiseLogarithm = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Pointwise, #Logarithm, #Dist(dist2)),
-      dist1,
-    )
-    let pointwisePower = (dist1, dist2): t => FromDist(
-      #ToDistCombination(Pointwise, #Power, #Dist(dist2)),
-      dist1,
-    )
+    let scaleMultiply = (n): t => #ToDist(Scale(#Multiply, n))
+    let scalePower = (n): t => #ToDist(Scale(#Power, n))
+    let scaleLogarithm = (n): t => #ToDist(Scale(#Logarithm, n))
+    let scaleLogarithmWithThreshold = (n, eps): t => #ToDist(Scale(#LogarithmWithThreshold(eps), n))
+    let toString: t = #ToString(ToString)
+    let toSparkline = (n): t => #ToString(ToSparkline(n))
+    let algebraicAdd = (dist2: genericDist): t =>
+      #ToDistCombination(Algebraic(AsDefault), #Add, dist2)
+    let algebraicMultiply = (dist2): t => #ToDistCombination(Algebraic(AsDefault), #Multiply, dist2)
+    let algebraicDivide = (dist2): t => #ToDistCombination(Algebraic(AsDefault), #Divide, dist2)
+    let algebraicSubtract = (dist2): t => #ToDistCombination(Algebraic(AsDefault), #Subtract, dist2)
+    let algebraicLogarithm = (dist2): t =>
+      #ToDistCombination(Algebraic(AsDefault), #Logarithm, dist2)
+    let algebraicPower = (dist2): t => #ToDistCombination(Algebraic(AsDefault), #Power, dist2)
+    let pointwiseAdd = (dist2): t => #ToDistCombination(Pointwise, #Add, dist2)
+    let pointwiseMultiply = (dist2): t => #ToDistCombination(Pointwise, #Multiply, dist2)
+    let pointwiseDivide = (dist2): t => #ToDistCombination(Pointwise, #Divide, dist2)
+    let pointwiseSubtract = (dist2): t => #ToDistCombination(Pointwise, #Subtract, dist2)
+    let pointwiseLogarithm = (dist2): t => #ToDistCombination(Pointwise, #Logarithm, dist2)
+    let pointwisePower = (dist2): t => #ToDistCombination(Pointwise, #Power, dist2)
   }
 }

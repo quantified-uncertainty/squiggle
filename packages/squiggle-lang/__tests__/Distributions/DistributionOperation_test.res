@@ -35,7 +35,7 @@ describe("sparkline", () => {
     expected: DistributionOperation.outputType,
   ) => {
     test(name, () => {
-      let result = DistributionOperation.run(~env, FromDist(#ToString(ToSparkline(20)), dist))
+      let result = DistributionOperation.run(~env, #ToString(ToSparkline(20)), dist)
       expect(result)->toEqual(expected)
     })
   }
@@ -81,27 +81,23 @@ describe("sparkline", () => {
 
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {
-    let result =
-      run(FromDist(#ToDist(ToPointSet), normalDist5))
-      ->outputMap(FromDist(#ToFloat(#Mean)))
-      ->toFloat
-      ->toExt
+    let result = run(#ToDist(ToPointSet), normalDist5)->outputMap(#ToFloat(#Mean))->toFloat->toExt
     expect(result)->toBeSoCloseTo(5.0, ~digits=0)
   })
 
   let pointSet =
-    run(FromDist(#ToDist(ToPointSet), normalDist5))
-    ->outputMap(FromDist(#ToDist(ToSampleSet(1000))))
-    ->outputMap(FromDist(#ToDist(ToPointSet)))
+    run(#ToDist(ToPointSet), normalDist5)
+    ->outputMap(#ToDist(ToSampleSet(1000)))
+    ->outputMap(#ToDist(ToPointSet))
 
   test("mean from sample set", () => {
-    let mean = pointSet->outputMap(FromDist(#ToFloat(#Mean)))->toFloat->toExt
+    let mean = pointSet->outputMap(#ToFloat(#Mean))->toFloat->toExt
 
     expect(mean)->toBeSoCloseTo(5.0, ~digits=-1)
   })
 
   test("isNormalized from sample set", () => {
-    let isNormalized = pointSet->outputMap(FromDist(#ToBool(IsNormalized)))->toBool->toExt
+    let isNormalized = pointSet->outputMap(#ToBool(IsNormalized))->toBool->toExt
     expect(isNormalized)->toBe(true)
   })
 })

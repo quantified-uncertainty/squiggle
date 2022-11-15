@@ -1,5 +1,3 @@
-//TODO: multimodal, add interface, test somehow, track performance, refactor sampleSet, refactor ASTEvaluator.res.
-
 type t = DistributionTypes.genericDist
 type error = DistributionTypes.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
