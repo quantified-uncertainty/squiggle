@@ -32,7 +32,7 @@ module OutputLocal = {
     | _ => None
     }
 
-  let toErrorOrUnreachable = (t: t): error => t->toError->E.O2.default((Unreachable: error))
+  let toErrorOrUnreachable = (t: t): error => t->toError->E.O.default((Unreachable: error))
 
   let toDistR = (t: t): result<genericDist, error> =>
     switch t {
@@ -130,12 +130,12 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
     let response = switch subFnName {
     | #ToFloat(distToFloatOperation) =>
       GenericDist.toFloatOperation(dist, ~toPointSetFn, ~distToFloatOperation)
-      ->E.R2.fmap(r => Float(r))
+      ->E.R.fmap(r => Float(r))
       ->OutputLocal.fromResult
     | #ToString(ToString) => dist->GenericDist.toString->String
     | #ToString(ToSparkline(bucketCount)) =>
       GenericDist.toSparkline(dist, ~sampleCount, ~bucketCount, ())
-      ->E.R2.fmap(r => String(r))
+      ->E.R.fmap(r => String(r))
       ->OutputLocal.fromResult
     | #ToDist(Inspect) => {
         Js.log2("Console log requested: ", dist)
@@ -145,22 +145,22 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
     | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
     | #ToScore(LogScore(answer, prior)) =>
       GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior, ~env)
-      ->E.R2.fmap(s => Float(s))
+      ->E.R.fmap(s => Float(s))
       ->OutputLocal.fromResult
     | #ToBool(IsNormalized) => dist->GenericDist.isNormalized->Bool
     | #ToDist(Truncate(leftCutoff, rightCutoff)) =>
       GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
-      ->E.R2.fmap(r => Dist(r))
+      ->E.R.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | #ToDist(ToSampleSet(n)) =>
       dist
       ->GenericDist.toSampleSetDist(n)
-      ->E.R2.fmap(r => Dist(SampleSet(r)))
+      ->E.R.fmap(r => Dist(SampleSet(r)))
       ->OutputLocal.fromResult
     | #ToDist(ToPointSet) =>
       dist
       ->GenericDist.toPointSet(~xyPointLength, ~sampleCount, ())
-      ->E.R2.fmap(r => Dist(PointSet(r)))
+      ->E.R.fmap(r => Dist(PointSet(r)))
       ->OutputLocal.fromResult
     | #ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
       dist
@@ -169,22 +169,22 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
         ~algebraicCombination=#LogarithmWithThreshold(eps),
         ~f,
       )
-      ->E.R2.fmap(r => Dist(r))
+      ->E.R.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | #ToDist(Scale(#Multiply, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Multiply, ~f)
-      ->E.R2.fmap(r => Dist(r))
+      ->E.R.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | #ToDist(Scale(#Logarithm, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
-      ->E.R2.fmap(r => Dist(r))
+      ->E.R.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | #ToDist(Scale(#Power, f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Power, ~f)
-      ->E.R2.fmap(r => Dist(r))
+      ->E.R.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | #ToDistCombination(Algebraic(_), _, #Float(_)) => GenDistError(NotYetImplemented)
     | #ToDistCombination(Algebraic(strategy), arithmeticOperation, #Dist(t2)) =>
@@ -196,17 +196,17 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
         ~arithmeticOperation,
         ~t2,
       )
-      ->E.R2.fmap(r => Dist(r))
+      ->E.R.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | #ToDistCombination(Pointwise, algebraicCombination, #Dist(t2)) =>
       dist
       ->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination, ~t2)
-      ->E.R2.fmap(r => Dist(r))
+      ->E.R.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     | #ToDistCombination(Pointwise, algebraicCombination, #Float(f)) =>
       dist
       ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination, ~f)
-      ->E.R2.fmap(r => Dist(r))
+      ->E.R.fmap(r => Dist(r))
       ->OutputLocal.fromResult
     }
     response
@@ -218,13 +218,13 @@ let rec run = (~env: env, functionCallInfo: functionCallInfo): outputType => {
   | Mixture(dists) =>
     dists
     ->GenericDist.mixture(~scaleMultiplyFn=scaleMultiply, ~pointwiseAddFn=pointwiseAdd, ~env)
-    ->E.R2.fmap(r => Dist(r))
+    ->E.R.fmap(r => Dist(r))
     ->OutputLocal.fromResult
   | FromSamples(xs) =>
     xs
     ->SampleSetDist.make
-    ->E.R2.errMap(x => DistributionTypes.SampleSetError(x))
-    ->E.R2.fmap(x => x->DistributionTypes.SampleSet->Dist)
+    ->E.R.errMap(x => DistributionTypes.SampleSetError(x))
+    ->E.R.fmap(x => x->DistributionTypes.SampleSet->Dist)
     ->OutputLocal.fromResult
   }
 }
@@ -247,7 +247,7 @@ module Output = {
     | (FromDist(_), _) => Error(OtherError("Expected dist, got something else"))
     | (FromFloat(_), _) => Error(OtherError("Expected float, got something else"))
     }
-    newFnCall->E.R2.fmap(run(~env))->OutputLocal.fromResult
+    newFnCall->E.R.fmap(run(~env))->OutputLocal.fromResult
   }
 }
 

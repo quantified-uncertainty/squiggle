@@ -1,10 +1,9 @@
-let dimap = (sFn, rFn, e) =>
+let dimap = (e, sFn, rFn) =>
   switch e {
   | Some(r) => sFn(r)
   | None => rFn()
   }
-()
-let fmap = (f: 'a => 'b, x: option<'a>): option<'b> => {
+let fmap = (x: option<'a>, f: 'a => 'b): option<'b> => {
   switch x {
   | None => None
   | Some(x') => Some(f(x'))
@@ -15,12 +14,12 @@ let bind = (o, f) =>
   | None => None
   | Some(a) => f(a)
   }
-let default = (d, o) =>
+let default = (o, d) =>
   switch o {
   | None => d
   | Some(a) => a
   }
-let defaultFn = (d, o) =>
+let defaultFn = (o, d) =>
   switch o {
   | None => d()
   | Some(a) => a
@@ -35,7 +34,7 @@ let isNone = o =>
   | None => true
   | _ => false
   }
-let toExn = (err, o) =>
+let toExn = (o, err) =>
   switch o {
   | None => raise(Failure(err))
   | Some(a) => a
@@ -61,7 +60,7 @@ let apply = (o, a) =>
   | Some(f) => bind(a, b => some(f(b)))
   | _ => None
   }
-let flatApply = (fn, b) => apply(fn, Some(b)) |> flatten
+let flatApply = (fn, b) => apply(fn, Some(b))->flatten
 
 let toBool = opt =>
   switch opt {
@@ -81,7 +80,7 @@ let toString = opt =>
   | _ => ""
   }
 
-let toResult = (error, e) =>
+let toResult = (e, error) =>
   switch e {
   | Some(r) => Belt.Result.Ok(r)
   | None => Error(error)

@@ -33,6 +33,7 @@ describe("eval", () => {
     testDescriptionEvalToBe("index not found", "([0,1,2])[10]", "Error(Array index not found: 10)")
   })
   describe("records", () => {
+    test("empty", () => expectEvalToBe("{}", "Ok({})"))
     test("define", () => expectEvalToBe("{a: 1, b: 2}", "Ok({a: 1,b: 2})"))
     test("index", () => expectEvalToBe("r = {a: 1}; r.a", "Ok(1)"))
     test("index", () => expectEvalToBe("r = {a: 1}; r.b", "Error(Record property not found: b)"))
@@ -66,6 +67,21 @@ describe("eval", () => {
   describe("blocks", () => {
     testEvalToBe("x = { y = { z = 5; z * 2 }; y + 3 }; x", "Ok(13)")
   })
+
+  describe("chain call", () => {
+   describe("to function", () => {
+    testEvalToBe("f(x)=x; 1->f", "Ok(1)")
+    testEvalToBe("f(x,y)=x+y; 1->f(2)", "Ok(3)")
+   })
+   describe("to block", () => {
+    testEvalToBe("1->{|x| x}", "Ok(1)")
+    testEvalToBe("6->{|x,y| x/y}(2)", "Ok(3)")
+   })
+   describe("to expression", () => {
+    testEvalToBe("1->{f:{|x|x+2}}.f", "Ok(3)")
+    testEvalToBe("1->{f:{|x|x+2}}['f']", "Ok(3)")
+   })
+  })
 })
 
 describe("test exceptions", () => {
@@ -96,7 +112,7 @@ describe("stacktraces", () => {
   h(5)
 `)
       ->E.R.getError
-      ->E.O2.toExn("oops")
+      ->E.O.toExn("oops")
       ->SqError.toStringWithStackTrace
 
     expect(
@@ -106,7 +122,6 @@ Stack trace:
   f at line 4, column 5
   g at line 6, column 12
   h at line 7, column 10
-  <top> at line 8, column 3
-`)
+  <top> at line 8, column 3`)
   })
 })

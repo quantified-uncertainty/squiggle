@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as yup from "yup";
 import {
   SqDistribution,
   result,
@@ -10,30 +11,35 @@ import {
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
-import { useSize } from "react-use";
+import { useMeasure } from "react-use";
 
 import {
   buildVegaSpec,
-  DistributionChartSpecOptions,
+  distributionChartSpecSchema,
 } from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot } from "../lib/plotParser";
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 
-export type DistributionPlottingSettings = {
-  /** Whether to show a summary of means, stdev, percentiles etc */
-  showSummary: boolean;
-  actions?: boolean;
-} & DistributionChartSpecOptions;
+export const distributionSettingsSchema = yup
+  .object({})
+  .shape({
+    showSummary: yup.boolean().required().default(false),
+    vegaActions: yup.boolean().required().default(false),
+  })
+  .concat(distributionChartSpecSchema);
+
+export type DistributionChartSettings = yup.InferType<
+  typeof distributionSettingsSchema
+>;
 
 export type DistributionChartProps = {
   plot: Plot;
   environment: environment;
-  width?: number;
-  height: number;
-  xAxisType?: "number" | "dateTime";
-} & DistributionPlottingSettings;
+  chartHeight?: number;
+  settings: DistributionChartSettings;
+};
 
 export function defaultPlot(distribution: SqDistribution): Plot {
   return { distributions: [{ name: "default", distribution }] };
@@ -46,97 +52,83 @@ export function makePlot(record: SqRecord): Plot | void {
   }
 }
 
-export const DistributionChart: React.FC<DistributionChartProps> = (props) => {
-  const {
-    plot,
-    environment,
-    height,
-    showSummary,
-    width,
-    logX,
-    actions = false,
-  } = props;
-  const [sized] = useSize((size) => {
-    const shapes = flattenResult(
-      plot.distributions.map((x) =>
-        resultMap(x.distribution.pointSet(environment), (pointSet) => ({
-          name: x.name,
-          // color: x.color, // not supported yet
-          ...pointSet.asShape(),
-        }))
-      )
-    );
+export const DistributionChart: React.FC<DistributionChartProps> = ({
+  plot,
+  environment,
+  chartHeight,
+  settings,
+}) => {
+  const [containerRef, containerMeasure] = useMeasure<HTMLDivElement>();
+  const shapes = flattenResult(
+    plot.distributions.map((x) =>
+      resultMap(x.distribution.pointSet(environment), (pointSet) => ({
+        name: x.name,
+        // color: x.color, // not supported yet
+        ...pointSet.asShape(),
+      }))
+    )
+  );
 
-    if (shapes.tag === "Error") {
-      return (
-        <ErrorAlert heading="Distribution Error">
-          {shapes.value.toString()}
-        </ErrorAlert>
-      );
-    }
-
-    // if this is a sample set, include the samples
-    const samples: number[] = [];
-    for (const { distribution } of plot?.distributions) {
-      if (distribution.tag === SqDistributionTag.SampleSet) {
-        samples.push(...distribution.value());
-      }
-    }
-
-    const domain = shapes.value.flatMap((shape) =>
-      shape.discrete.concat(shape.continuous)
-    );
-
-    const spec = buildVegaSpec({
-      ...props,
-      minX: props.minX ?? Math.min(...domain.map((x) => x.x)),
-      maxX: props.minX ?? Math.max(...domain.map((x) => x.x)),
-      maxY: Math.max(...domain.map((x) => x.y)),
-    });
-
-    // I think size.width is sometimes not finite due to the component not being in a visible context
-    // This occurs during testing
-    let widthProp = width
-      ? width
-      : Number.isFinite(size.width)
-      ? size.width
-      : 400;
-    if (widthProp < 20) {
-      console.warn(
-        `Width of Distribution is set to ${widthProp}, which is too small`
-      );
-      widthProp = 20;
-    }
-
-    const vegaData = { data: shapes.value, samples };
-
+  if (shapes.tag === "Error") {
     return (
-      <div style={{ width: widthProp }}>
-        {logX && shapes.value.some(hasMassBelowZero) ? (
+      <ErrorAlert heading="Distribution Error">
+        {shapes.value.toString()}
+      </ErrorAlert>
+    );
+  }
+
+  // if this is a sample set, include the samples
+  const samples: number[] = [];
+  for (const { distribution } of plot?.distributions) {
+    if (distribution.tag === SqDistributionTag.SampleSet) {
+      samples.push(...distribution.value());
+    }
+  }
+
+  const domain = shapes.value.flatMap((shape) =>
+    shape.discrete.concat(shape.continuous)
+  );
+
+  const spec = buildVegaSpec({
+    ...settings,
+    minX: Number.isFinite(settings.minX)
+      ? settings.minX
+      : Math.min(...domain.map((x) => x.x)),
+    maxX: Number.isFinite(settings.maxX)
+      ? settings.maxX
+      : Math.max(...domain.map((x) => x.x)),
+    maxY: Math.max(...domain.map((x) => x.y)),
+  });
+
+  const vegaData = { data: shapes.value, samples };
+
+  return (
+    <div ref={containerRef}>
+      {
+        settings.logX && shapes.value.some(hasMassBelowZero) ? (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
-        ) : (
+        ) : containerMeasure.width ? (
           <Vega
             spec={spec}
             data={vegaData}
-            width={widthProp - 10}
-            height={height}
-            actions={actions}
+            width={containerMeasure.width - 22}
+            height={chartHeight}
+            actions={settings.vegaActions}
+          />
+        ) : null /* width can be 0 initially or when we're on the server side; that's fine, we don't want to pre-render charts with broken width */
+      }
+      <div className="flex justify-center">
+        {settings.showSummary && plot.distributions.length === 1 && (
+          <SummaryTable
+            distribution={plot.distributions[0].distribution}
+            environment={environment}
           />
         )}
-        <div className="flex justify-center">
-          {showSummary && plot.distributions.length === 1 && (
-            <SummaryTable
-              distribution={plot.distributions[0].distribution}
-              environment={environment}
-            />
-          )}
-        </div>
       </div>
-    );
-  });
-  return sized;
+    </div>
+  );
 };
 
 const TableHeadCell: React.FC<{ children: React.ReactNode }> = ({

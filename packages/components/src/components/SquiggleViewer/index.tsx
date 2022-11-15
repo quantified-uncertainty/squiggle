@@ -1,7 +1,5 @@
-import React, { useCallback, useRef } from "react";
-import { environment, SqValueLocation } from "@quri/squiggle-lang";
-import { DistributionPlottingSettings } from "../DistributionChart";
-import { FunctionChartSettings } from "../FunctionChart";
+import React, { useCallback, useMemo, useRef } from "react";
+import { SqValueLocation } from "@quri/squiggle-lang";
 import { ExpressionViewer } from "./ExpressionViewer";
 import { ViewerContext } from "./ViewerContext";
 import {
@@ -10,74 +8,61 @@ import {
   MergedItemSettings,
 } from "./utils";
 import { useSquiggle } from "../../lib/hooks";
+import { PartialViewSettings, viewSettingsSchema } from "../ViewSettingsForm";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert";
+import _ from "lodash";
 
-type Props = {
+export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   result: ReturnType<typeof useSquiggle>["result"];
-  width?: number;
-  height: number;
-  distributionPlotSettings: DistributionPlottingSettings;
-  /** Settings for displaying functions */
-  chartSettings: FunctionChartSettings;
-  /** Environment for further function executions */
-  environment: environment;
   enableLocalSettings?: boolean;
-};
+} & PartialViewSettings;
 
-type Settings = {
+type SettingsStore = {
   [k: string]: LocalItemSettings;
 };
 
 const defaultSettings: LocalItemSettings = { collapsed: false };
 
-export const SquiggleViewer: React.FC<Props> = ({
+export const SquiggleViewer: React.FC<SquiggleViewerProps> = ({
   result,
-  width,
-  height,
-  distributionPlotSettings,
-  chartSettings,
-  environment,
   enableLocalSettings = false,
+  ...partialViewSettings
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
-  const settingsRef = useRef<Settings>({});
+  const settingsStoreRef = useRef<SettingsStore>({});
+
+  const globalSettings = useMemo(() => {
+    return _.merge({}, viewSettingsSchema.getDefault(), partialViewSettings);
+  }, [partialViewSettings]);
 
   const getSettings = useCallback(
     (location: SqValueLocation) => {
-      return settingsRef.current[locationAsString(location)] || defaultSettings;
+      return (
+        settingsStoreRef.current[locationAsString(location)] || defaultSettings
+      );
     },
-    [settingsRef]
+    [settingsStoreRef]
   );
 
   const setSettings = useCallback(
     (location: SqValueLocation, value: LocalItemSettings) => {
-      settingsRef.current[locationAsString(location)] = value;
+      settingsStoreRef.current[locationAsString(location)] = value;
     },
-    [settingsRef]
+    [settingsStoreRef]
   );
 
   const getMergedSettings = useCallback(
     (location: SqValueLocation) => {
       const localSettings = getSettings(location);
-      const result: MergedItemSettings = {
-        distributionPlotSettings: {
-          ...distributionPlotSettings,
-          ...(localSettings.distributionPlotSettings || {}),
-        },
-        chartSettings: {
-          ...chartSettings,
-          ...(localSettings.chartSettings || {}),
-        },
-        environment: {
-          ...environment,
-          ...(localSettings.environment || {}),
-        },
-        height: localSettings.height || height,
-      };
+      const result: MergedItemSettings = _.merge(
+        {},
+        globalSettings,
+        localSettings
+      );
       return result;
     },
-    [distributionPlotSettings, chartSettings, environment, height, getSettings]
+    [globalSettings, getSettings]
   );
 
   return (
@@ -90,7 +75,7 @@ export const SquiggleViewer: React.FC<Props> = ({
       }}
     >
       {result.tag === "Ok" ? (
-        <ExpressionViewer value={result.value} width={width} />
+        <ExpressionViewer value={result.value} />
       ) : (
         <SquiggleErrorAlert error={result.value} />
       )}

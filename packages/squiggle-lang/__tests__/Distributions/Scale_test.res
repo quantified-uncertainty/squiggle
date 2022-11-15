@@ -14,7 +14,7 @@ describe("Scale logarithm", () => {
       MagicNumbers.Math.e,
     )
 
-    let meanResult = E.R2.bind(DistributionOperation.Constructors.mean(~env), scalelog)
+    let meanResult = E.R.bind(scalelog, DistributionOperation.Constructors.mean(~env))
     // expected value of log of exponential distribution.
     let meanAnalytical = Js.Math.log(rate) +. 1.0
     switch meanResult {
@@ -28,7 +28,7 @@ describe("Scale logarithm", () => {
 
   test("mean of the base 2 scalar logarithm of a uniform(10, 100)", () => {
     //For uniform pdf `_ => 1 / (b - a)`, the expected value of log of uniform is `integral from a to b of x * log(1 / (b -a)) dx`
-    let meanResult = E.R2.bind(DistributionOperation.Constructors.mean(~env), scalelog)
+    let meanResult = E.R.bind(scalelog, DistributionOperation.Constructors.mean(~env))
     let meanAnalytical = -.Js.Math.log2(high -. low) /. 2.0 *. (high ** 2.0 -. low ** 2.0) // -. Js.Math.log2(high -. low)
     switch meanResult {
     | Ok(meanValue) => meanValue->expect->toBeCloseTo(meanAnalytical)

@@ -61,16 +61,16 @@ module Integration = {
       min: float,
       max: float,
       numIntegrationPoints: float, // cast as int?
-      environment,
+      context,
       reducer,
     ) => {
       let applyFunctionAtFloatToFloatOption = (point: float) => {
-        // Defined here so that it has access to environment, reducer
+        // Defined here so that it has access to context, reducer
         let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
         let resultAsInternalExpression = Reducer_Lambda.doLambdaCall(
           aLambda,
           [pointAsInternalExpression],
-          environment,
+          context,
           reducer,
         )
         let result = switch resultAsInternalExpression {
@@ -167,7 +167,7 @@ module Integration = {
         FnDefinition.make(
           ~name="integrateFunctionBetweenWithNumIntegrationPoints",
           ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, env, reducer) => {
+          ~run=(inputs, context, reducer) => {
             let result = switch inputs {
             | [_, _, _, IEvNumber(0.0)] =>
               "Integration error 4 in Danger.integrate: Increment can't be 0."
@@ -184,7 +184,7 @@ module Integration = {
                 min,
                 max,
                 numIntegrationPoints,
-                env,
+                context,
                 reducer,
               )
             | _ =>
@@ -211,7 +211,7 @@ module Integration = {
         FnDefinition.make(
           ~name="integrateFunctionBetweenWithEpsilon",
           ~inputs=[FRTypeLambda, FRTypeNumber, FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, env, reducer) => {
+          ~run=(inputs, context, reducer) => {
             let result = switch inputs {
             | [_, _, _, IEvNumber(0.0)] =>
               "Integration error in Danger.integrate: Increment can't be 0."
@@ -223,9 +223,9 @@ module Integration = {
                 min,
                 max,
                 (max -. min) /. epsilon,
-                env,
+                context,
                 reducer,
-              )->E.R2.errMap(b =>
+              )->E.R.errMap(b =>
                 ("Integration error 7 in Danger.integrate. Something went wrong along the way: " ++
                 b->SqError.Message.toString)->SqError.Message.REOther
               )
@@ -258,7 +258,7 @@ module DiminishingReturns = {
         }
       })
     type diminishingReturnsAccumulator = result<diminishingReturnsAccumulatorInner, errorMessage>
-    // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/environment.
+    // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
     /*
     The key idea for this function is that 
     1. we keep track of past spending and current marginal returns for each function
@@ -281,7 +281,7 @@ module DiminishingReturns = {
       lambdas,
       funds,
       approximateIncrement,
-      environment,
+      context,
       reducer,
     ) => {
       switch (
@@ -308,12 +308,12 @@ module DiminishingReturns = {
         )
       | (true, true, true, true) => {
           let applyFunctionAtPoint = (lambda, point: float) => {
-            // Defined here so that it has access to environment, reducer
+            // Defined here so that it has access to context, reducer
             let pointAsInternalExpression = FunctionRegistry_Helpers.Wrappers.evNumber(point)
             let resultAsInternalExpression = Reducer_Lambda.doLambdaCall(
               lambda,
               [pointAsInternalExpression],
-              environment,
+              context,
               reducer,
             )
             switch resultAsInternalExpression {
@@ -407,7 +407,7 @@ module DiminishingReturns = {
         FnDefinition.make(
           ~name="optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
           ~inputs=[FRTypeArray(FRTypeLambda), FRTypeNumber, FRTypeNumber],
-          ~run=(inputs, environment, reducer) =>
+          ~run=(inputs, context, reducer) =>
             switch inputs {
             | [IEvArray(innerlambdas), IEvNumber(funds), IEvNumber(approximateIncrement)] => {
                 let individuallyWrappedLambdas = innerlambdas->E.A.fmap(innerLambda => {
@@ -426,7 +426,7 @@ module DiminishingReturns = {
                       lambdas,
                       funds,
                       approximateIncrement,
-                      environment,
+                      context,
                       reducer,
                     )
                     result

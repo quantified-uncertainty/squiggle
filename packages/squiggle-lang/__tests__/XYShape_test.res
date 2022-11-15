@@ -19,7 +19,7 @@ let pointSetDist3: PointSetTypes.xyShape = {
 }
 
 let makeAndGetErrorString = (~xs, ~ys) =>
-  XYShape.T.make(~xs, ~ys)->E.R.getError->E.O2.fmap(XYShape.Error.toString)
+  XYShape.T.make(~xs, ~ys)->E.R.getError->E.O.fmap(XYShape.Error.toString)
 
 describe("XYShapes", () => {
   describe("Validator", () => {

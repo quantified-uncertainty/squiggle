@@ -81,7 +81,7 @@ describe("(Symbolic) mean", () => {
       let (mean, stdev) = tup
       let betaDistribution = SymbolicDist.Beta.fromMeanAndStdev(mean, stdev)
       let meanValue =
-        betaDistribution->E.R2.fmap(
+        betaDistribution->E.R.fmap(
           d => run(FromDist(#ToFloat(#Mean), d->DistributionTypes.Symbolic)),
         )
       switch meanValue {

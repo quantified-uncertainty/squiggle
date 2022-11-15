@@ -211,8 +211,8 @@ module Scale = {
 
 module Truncate = {
   let toString = (left: option<float>, right: option<float>, nodeToString) => {
-    let left = left |> E.O.dimap(Js.Float.toString, () => "-inf")
-    let right = right |> E.O.dimap(Js.Float.toString, () => "inf")
+    let left = left->E.O.dimap(Js.Float.toString, () => "-inf")
+    let right = right->E.O.dimap(Js.Float.toString, () => "inf")
     j`truncate($nodeToString, $left, $right)`
   }
 }

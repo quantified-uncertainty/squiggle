@@ -74,7 +74,9 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
               onClick={toggleCollapsed}
             ></div>
           ) : null}
-          <div className="grow">{children(getMergedSettings(location))}</div>
+          <div className="grow overflow-auto">
+            {children(getMergedSettings(location))}
+          </div>
         </div>
       )}
     </div>

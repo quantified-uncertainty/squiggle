@@ -37,16 +37,3 @@ module ToPointSet = {
  */
   let minDiscreteToKeep = samples => max(20, E.A.length(samples) / 50)
 }
-
-module SampleSetBandwidth = {
-  // Silverman, B. W. (1986) Density Estimation. London: Chapman and Hall.
-  // Scott, D. W. (1992) Multivariate Density Estimation: Theory, Practice, and Visualization. Wiley.
-  let iqr_percentile = 0.75
-  let iqr_percentile_complement = 1.0 -. iqr_percentile
-  let nrd0_lo_denominator = 1.34
-  let one = 1.0
-  let nrd0_coef = 0.9
-
-  let nrd_coef = 1.06
-  let nrd_fractionalPower = -0.2
-}

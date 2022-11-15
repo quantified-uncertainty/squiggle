@@ -1,3 +1,14 @@
+module JS = {
+  @genType
+  type distJs = {
+    continuousDist: option<PointSetTypes.xyShape>,
+    discreteDist: PointSetTypes.xyShape,
+  }
+
+  @module("./SampleSetDist_ToPointSet")
+  external toPointSetDist: (array<float>, int, option<float>) => distJs = "toPointSetDist"
+}
+
 @genType
 module Error = {
   @genType
@@ -59,12 +70,18 @@ some refactoring.
 let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs): result<
   PointSetTypes.pointSetDist,
   pointsetConversionError,
-> =>
-  SampleSetDist_ToPointSet.toPointSetDist(
-    ~samples=get(samples),
-    ~samplingInputs,
-    (),
-  ).pointSetDist->E.O2.toResult(TooFewSamplesForConversionToPointSet)
+> => {
+  let dists = JS.toPointSetDist(
+    get(samples),
+    samplingInputs.outputXYPoints,
+    samplingInputs.kernelWidth,
+  )
+
+  MixedShapeBuilder.buildSimple(
+    ~continuous=dists.continuousDist->E.O.fmap(Continuous.make),
+    ~discrete=Some(dists.discreteDist->Discrete.make),
+  )->E.O.toResult(TooFewSamplesForConversionToPointSet)
+}
 
 //Randomly get one sample from the distribution
 let sample = (t: t): float => {
@@ -89,7 +106,7 @@ let sampleN = (t: t, n) => {
 }
 
 let _fromSampleResultArray = (samples: array<result<float, QuriSquiggleLang.Operation.Error.t>>) =>
-  E.A.R.firstErrorOrOpen(samples)->E.R2.errMap(Error.fromOperationError) |> E.R2.bind(make)
+  E.A.R.firstErrorOrOpen(samples)->E.R.errMap(Error.fromOperationError)->E.R.bind(make)
 
 let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): result<
   t,
@@ -145,16 +162,16 @@ let mixture = (values: array<(t, float)>, intendedLength: int) => {
       chosenDist->E.O.bind(E.A.get(_, index))
     })
     ->E.A.O.openIfAllSome
-  samples->E.O2.toExn("Mixture unreachable error")->T.make
+  samples->E.O.toExn("Mixture unreachable error")->T.make
 }
 
 let truncateLeft = (t, f) => T.get(t)->E.A.filter(x => x >= f)->T.make
 let truncateRight = (t, f) => T.get(t)->E.A.filter(x => x <= f)->T.make
 
 let truncate = (t, ~leftCutoff: option<float>, ~rightCutoff: option<float>) => {
-  let withTruncatedLeft = t => leftCutoff |> E.O.dimap(left => truncateLeft(t, left), _ => Ok(t))
-  let withTruncatedRight = t => rightCutoff |> E.O.dimap(left => truncateRight(t, left), _ => Ok(t))
-  t->withTruncatedLeft |> E.R2.bind(withTruncatedRight)
+  let withTruncatedLeft = t => leftCutoff->E.O.dimap(left => truncateLeft(t, left), _ => Ok(t))
+  let withTruncatedRight = t => rightCutoff->E.O.dimap(left => truncateRight(t, left), _ => Ok(t))
+  t->withTruncatedLeft->E.R.bind(withTruncatedRight)
 }
 
 let minOfTwo = (t1: t, t2: t) => map2(~fn=(a, b) => Ok(Js.Math.min_float(a, b)), ~t1, ~t2)

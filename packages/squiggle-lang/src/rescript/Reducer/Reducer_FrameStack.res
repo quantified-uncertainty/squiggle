@@ -33,10 +33,7 @@ let makeSingleFrameStack = (location: Reducer_Peggy_Parse.location): t =>
 
 // this includes the left offset because it's mostly used in SqError.toStringWithStackTrace
 let toString = (t: t) =>
-  t
-  ->Belt.List.map(s => "  " ++ s->Frame.toString ++ "\n")
-  ->Belt.List.toArray
-  ->Js.Array2.joinWith("")
+  t->Belt.List.map(s => "  " ++ s->Frame.toString)->Belt.List.toArray->Js.Array2.joinWith("\n")
 
 @genType
 let toFrameArray = (t: t): array<Reducer_T.frame> => t->Belt.List.toArray

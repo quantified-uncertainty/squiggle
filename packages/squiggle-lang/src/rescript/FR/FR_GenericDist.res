@@ -75,7 +75,7 @@ module Old = {
       }
 
     let parseNumberArray = (ags: array<Reducer_T.value>): Belt.Result.t<array<float>, string> =>
-      E.A.fmap(ags, parseNumber) |> E.A.R.firstErrorOrOpen
+      E.A.fmap(ags, parseNumber)->E.A.R.firstErrorOrOpen
 
     let parseDist = (args: Reducer_T.value): Belt.Result.t<DistributionTypes.genericDist, string> =>
       switch args {
@@ -87,7 +87,7 @@ module Old = {
     let parseDistributionArray = (ags: array<Reducer_T.value>): Belt.Result.t<
       array<DistributionTypes.genericDist>,
       string,
-    > => E.A.fmap(ags, parseDist) |> E.A.R.firstErrorOrOpen
+    > => E.A.fmap(ags, parseDist)->E.A.R.firstErrorOrOpen
 
     let mixtureWithGivenWeights = (
       distributions: array<DistributionTypes.genericDist>,
@@ -270,7 +270,7 @@ module Old = {
         ("add" | "multiply" | "subtract" | "divide" | "pow" | "log") as arithmetic,
         [_, _] as args,
       ) =>
-      Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
+      Helpers.catchAndConvertTwoArgsToDists(args)->E.O.fmap(((fst, snd)) =>
         Helpers.twoDiststoDistFn(Algebraic(AsDefault), arithmetic, fst, snd, ~env)
       )
     | (
@@ -281,7 +281,7 @@ module Old = {
         | "dotPow") as arithmetic,
         [_, _] as args,
       ) =>
-      Helpers.catchAndConvertTwoArgsToDists(args)->E.O2.fmap(((fst, snd)) =>
+      Helpers.catchAndConvertTwoArgsToDists(args)->E.O.fmap(((fst, snd)) =>
         Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd, ~env)
       )
     | ("dotExp", [IEvDistribution(a)]) =>

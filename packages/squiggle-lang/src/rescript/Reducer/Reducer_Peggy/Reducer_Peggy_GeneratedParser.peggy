@@ -139,16 +139,21 @@ power
 chainFunctionCall
   = head:unary tail:(_ ('->'/'|>') _nl chained:chainedFunction {return chained})* 
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(element.fnName, [result, ...element.args], location())
+      return h.makeFunctionCall(h.postOperatorToFunction['()'], [element.callable, result, ...element.args], location())
     }, head)}
 
   chainedFunction
-    = fn:variable '(' _nl args:array_functionArguments _nl ')' 
-      { return {fnName: fn.value, args: args}}
-      / fn:variable '(' _nl ')' 
-      { return {fnName: fn.value, args: []}}
-      / fn:variable
-      { return {fnName: fn.value, args: []}}
+    = fn:callableBasicValue '(' _nl args:array_functionArguments _nl ')' 
+      { return {callable: fn, args: args}}
+    / fn:callableBasicValue '(' _nl ')' 
+      { return {callable: fn, args: []}}
+    / fn:callableBasicValue
+      { return {callable: fn, args: []}}
+      
+  callableBasicValue = staticCollectionElement / valueConstructor / variable   
+
+// type: 'Call', fn: { type: 'Lambda', ... }, args:
+// type: 'Call', fn: { type: 'Identifier', value:  }, args:
 
 // end of binary operators
 
@@ -164,11 +169,21 @@ postOperator
   = collectionElement
   / atom
 
+staticCollectionElement
+  = head:atom &('['/'.')
+    tail:(
+      _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
+    / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
+    )* 
+  { return tail.reduce(function(result, element) {
+      return h.makeFunctionCall(element.fn, [result, ...element.args], location())
+    }, head)}
+
 collectionElement
   = head:atom &('['/'('/'.')
     tail:(
-      _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
-    / _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: h.postOperatorToFunction['()'], args: args}}
+      _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: h.postOperatorToFunction['()'], args: args}}
+    / _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
     / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
     )* 
   { return tail.reduce(function(result, element) {
@@ -276,8 +291,10 @@ arrayConstructor 'array'
     { return [head, ...tail]; }
 
 recordConstructor  'record'
-  = '{' _nl args:array_recordArguments _nl end_of_record
-  { return h.constructRecord(args, location()); }
+  = '{' _nl '}'
+    { return h.constructRecord([], location()); }
+  / '{' _nl args:array_recordArguments _nl end_of_record
+    { return h.constructRecord(args, location()); }
 
   end_of_record 
     = '}'

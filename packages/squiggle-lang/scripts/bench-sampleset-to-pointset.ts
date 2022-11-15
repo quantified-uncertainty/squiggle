@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { SqProject } from "@quri/squiggle-lang";
-import { measure } from "./lib.mjs";
+import { SqProject } from "../src/js";
+import { measure } from "../src/js/cli/utils";
 
 const maxP = 3;
 

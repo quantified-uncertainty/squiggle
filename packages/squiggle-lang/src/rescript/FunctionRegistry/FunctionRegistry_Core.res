@@ -165,7 +165,7 @@ module Function = {
     nameSpace,
     definitions,
     output,
-    examples: examples->E.O2.default([]),
+    examples: examples->E.O.default([]),
     isExperimental,
     requiresNamespace,
     description,

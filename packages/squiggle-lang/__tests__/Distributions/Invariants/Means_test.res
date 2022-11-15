@@ -39,7 +39,7 @@ module Internals = {
   let pairsOfDifferentDistributions = combinations2(distributions)
 
   let runMean: DistributionTypes.genericDist => float = dist => {
-    dist->mean->run->toFloat->E.O2.toExn("Shouldn't see this because we trust testcase input")
+    dist->mean->run->toFloat->E.O.toExn("Shouldn't see this because we trust testcase input")
   }
 
   let testOperationMean = (
@@ -57,10 +57,10 @@ module Internals = {
     let dist2 = dist2'->DistributionTypes.Symbolic
     let received =
       distOp(dist1, dist2)
-      ->E.R2.fmap(mean)
-      ->E.R2.fmap(run)
-      ->E.R2.fmap(toFloat)
-      ->E.R.toExn("Expected float", _)
+      ->E.R.fmap(mean)
+      ->E.R.fmap(run)
+      ->E.R.fmap(toFloat)
+      ->E.R.toExn("Expected float")
     let expected = floatOp(runMean(dist1), runMean(dist2))
     switch received {
     | None => expectImpossiblePath(description)
@@ -91,7 +91,7 @@ describe("Means are invariant", () => {
   describe("for addition", () => {
     let testAdditionMean = testOperationMean(algebraicAdd, "algebraicAdd", \"+.", ~epsilon)
     let testAddInvariant = (t1, t2) =>
-      E.R.liftM2(testAdditionMean, t1, t2)->E.R.toExn("Means were not invariant", _)
+      E.R.liftM2(testAdditionMean, t1, t2)->E.R.toExn("Means were not invariant")
 
     testAll(
       "with two of the same distribution",
@@ -128,7 +128,7 @@ describe("Means are invariant", () => {
       ~epsilon,
     )
     let testSubtractInvariant = (t1, t2) =>
-      E.R.liftM2(testSubtractionMean, t1, t2)->E.R.toExn("Means were not invariant", _)
+      E.R.liftM2(testSubtractionMean, t1, t2)->E.R.toExn("Means were not invariant")
 
     testAll(
       "with two of the same distribution",
@@ -165,7 +165,7 @@ describe("Means are invariant", () => {
       ~epsilon,
     )
     let testMultiplicationInvariant = (t1, t2) =>
-      E.R.liftM2(testMultiplicationMean, t1, t2)->E.R.toExn("Means were not invariant", _)
+      E.R.liftM2(testMultiplicationMean, t1, t2)->E.R.toExn("Means were not invariant")
 
     testAll(
       "with two of the same distribution",

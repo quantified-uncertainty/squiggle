@@ -14,11 +14,12 @@ import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
 import {
   DistributionChart,
-  DistributionPlottingSettings,
+  DistributionChartSettings,
   defaultPlot,
 } from "./DistributionChart";
 import { NumberShower } from "./NumberShower";
 import { ErrorAlert } from "./Alert";
+import { FunctionChartSettings } from "./FunctionChart";
 
 let SquigglePercentilesChart = createClassFromSpec({
   spec: percentilesSpec as Spec,
@@ -38,19 +39,13 @@ function unwrap<a, b>(x: result<a, b>): a {
     throw Error("FAILURE TO UNWRAP");
   }
 }
-export type FunctionChartSettings = {
-  start: number;
-  stop: number;
-  count: number;
-};
-
-interface FunctionChart1DistProps {
+type FunctionChart1DistProps = {
   fn: SqLambda;
-  chartSettings: FunctionChartSettings;
-  distributionPlotSettings: DistributionPlottingSettings;
+  settings: FunctionChartSettings;
+  distributionChartSettings: DistributionChartSettings;
   environment: environment;
   height: number;
-}
+};
 
 type percentiles = {
   x: number;
@@ -79,18 +74,18 @@ type errors = _.Dictionary<
 type point = { x: number; value: result<SqDistribution, string> };
 
 let getPercentiles = ({
-  chartSettings,
+  settings,
   fn,
   environment,
 }: {
-  chartSettings: FunctionChartSettings;
+  settings: FunctionChartSettings;
   fn: SqLambda;
   environment: environment;
 }) => {
   let chartPointsToRender = _rangeByCount(
-    chartSettings.start,
-    chartSettings.stop,
-    chartSettings.count
+    settings.start,
+    settings.stop,
+    settings.count
   );
 
   let chartPointsData: point[] = chartPointsToRender.map((x) => {
@@ -157,9 +152,9 @@ let getPercentiles = ({
 
 export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   fn,
-  chartSettings,
+  settings,
   environment,
-  distributionPlotSettings,
+  distributionChartSettings,
   height,
 }) => {
   let [mouseOverlay, setMouseOverlay] = React.useState(0);
@@ -186,15 +181,14 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
       <DistributionChart
         plot={defaultPlot(mouseItem.value.value)}
         environment={environment}
-        width={400}
-        height={50}
-        {...distributionPlotSettings}
+        chartHeight={50}
+        settings={distributionChartSettings}
       />
     ) : null;
 
   let getPercentilesMemoized = React.useMemo(
-    () => getPercentiles({ chartSettings, fn, environment }),
-    [environment, fn]
+    () => getPercentiles({ settings, fn, environment }),
+    [environment, fn, settings]
   );
 
   return (

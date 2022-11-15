@@ -15,6 +15,6 @@
     "target": "ES6",
     "esModuleInterop": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts", "webpack.config.js"]
+  "include": ["src/**/*", "scripts/**/*", "__tests__/**/*"],
+  "exclude": ["**/*.spec.ts"]
 }

@@ -15,10 +15,10 @@ describe("dotSubtract", () => {
       mkNormal(mean, 1.0),
       mkExponential(rate),
     )
-    let meanResult = E.R2.bind(DistributionOperation.Constructors.mean(~env), dotDifference)
+    let meanResult = E.R.bind(dotDifference, DistributionOperation.Constructors.mean(~env))
     let meanAnalytical =
       mean -.
-      SymbolicDist.Exponential.mean({rate: rate})->E.R2.toExn(
+      SymbolicDist.Exponential.mean({rate: rate})->E.R.toExn(
         "On trusted input this should never happen",
       )
     switch meanResult {
@@ -42,11 +42,11 @@ describe("dotSubtract", () => {
             mkNormal(mean, 1.0),
             mkExponential(rate),
           )
-          let meanResult = E.R2.bind(DistributionOperation.Constructors.mean(~env), dotDifference)
+          let meanResult = E.R.bind(dotDifference, DistributionOperation.Constructors.mean(~env))
           // according to algebra or random variables,
           let meanAnalytical =
             mean -.
-            SymbolicDist.Exponential.mean({rate: rate})->E.R2.toExn(
+            SymbolicDist.Exponential.mean({rate: rate})->E.R.toExn(
               "On trusted input this should never happen",
             )
           switch meanResult {
