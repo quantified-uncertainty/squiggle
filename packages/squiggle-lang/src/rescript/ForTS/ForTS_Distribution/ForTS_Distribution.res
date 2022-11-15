@@ -73,7 +73,7 @@ let inv = GenericDist.inv
 let pdf = GenericDist.pdf
 
 @genType
-let normalize = DistributionOperation.Constructors.normalize
+let normalize = GenericDist.normalize
 
 @genType
 let toPointSet = (variant: distribution, env: environment) =>

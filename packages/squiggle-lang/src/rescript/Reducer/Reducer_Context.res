@@ -1,6 +1,6 @@
 type t = Reducer_T.context
 
-let defaultEnvironment: Reducer_T.environment = DistributionOperation.defaultEnv
+let defaultEnvironment: Reducer_T.environment = GenericDist.defaultEnv
 
 let createContext = (stdLib: Reducer_Namespace.t, environment: Reducer_T.environment): t => {
   {

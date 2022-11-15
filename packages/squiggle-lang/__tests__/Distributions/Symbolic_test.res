@@ -8,8 +8,8 @@ let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean, stdev}
 describe("(Symbolic) normalize", () => {
   testAll("has no impact on normal distributions", list{-1e8, -1e-2, 0.0, 1e-4, 1e16}, mean => {
     let normalValue = mkNormal(mean, 2.0)
-    let normalizedValue = run(#ToDist(Normalize), normalValue)
-    normalizedValue->unpackDist->expect->toEqual(normalValue)
+    let normalizedValue = normalValue->GenericDist.normalize
+    normalizedValue->expect->toEqual(normalValue)
   })
 })
 

@@ -2,11 +2,12 @@ type t = DistributionTypes.genericDist
 type error = DistributionTypes.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
-type scaleMultiplyFn = (t, float) => result<t, error>
-type pointwiseAddFn = (t, t) => result<t, error>
 
 @genType
 type env = {sampleCount: int, xyPointLength: int}
+
+@genType
+let defaultEnv: env
 
 let sampleN: (t, int) => array<float>
 let sample: t => float
@@ -31,6 +32,9 @@ let toFloatOperation: (
 let mean: (t, ~env: env) => result<float, error>
 let stdev: (t, ~env: env) => result<float, error>
 let variance: (t, ~env: env) => result<float, error>
+let min: (t, ~env: env) => result<float, error>
+let max: (t, ~env: env) => result<float, error>
+let mode: (t, ~env: env) => result<float, error>
 let cdf: (t, float, ~env: env) => result<float, error>
 let pdf: (t, float, ~env: env) => result<float, error>
 let inv: (t, float, ~env: env) => result<float, error>
@@ -57,7 +61,7 @@ let toSparkline: (t, ~sampleCount: int, ~bucketCount: int=?, unit) => result<str
 
 let truncate: (
   t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~leftCutoff: option<float>=?,
   ~rightCutoff: option<float>=?,
   unit,
@@ -67,26 +71,56 @@ let algebraicCombination: (
   ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
   t,
   ~env: env,
-  ~toSampleSetFn: toSampleSetFn,
   ~arithmeticOperation: Operation.algebraicOperation,
   ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombination: (
   t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~algebraicCombination: Operation.algebraicOperation,
   ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombinationFloat: (
   t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~algebraicCombination: Operation.algebraicOperation,
   ~f: float,
 ) => result<t, error>
+
+let scaleLog: (t, float, ~env: env) => result<t, error>
 
 let mixture: (array<(t, float)>, ~env: env) => result<t, error>
 
 let isSymbolic: t => bool
 let isPointSet: t => bool
+
+module Operations: {
+  type operationFn = (~env: env, t, t) => result<t, error>
+
+  @genType
+  let algebraicAdd: operationFn
+  @genType
+  let algebraicMultiply: operationFn
+  @genType
+  let algebraicDivide: operationFn
+  @genType
+  let algebraicSubtract: operationFn
+  @genType
+  let algebraicLogarithm: operationFn
+  @genType
+  let algebraicPower: operationFn
+  @genType
+  let pointwiseAdd: operationFn
+  @genType
+  let pointwiseMultiply: operationFn
+  @genType
+  let pointwiseDivide: operationFn
+  @genType
+  let pointwiseSubtract: operationFn
+  @genType
+  let pointwiseLogarithm: operationFn
+  @genType
+  let pointwisePower: operationFn
+}

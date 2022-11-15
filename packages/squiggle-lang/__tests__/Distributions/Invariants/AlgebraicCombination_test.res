@@ -29,7 +29,7 @@ let {
   algebraicSubtract,
   algebraicLogarithm,
   algebraicPower,
-} = module(DistributionOperation.Constructors)
+} = module(GenericDist.Operations)
 
 let algebraicAdd = algebraicAdd(~env)
 let algebraicMultiply = algebraicMultiply(~env)

@@ -19,6 +19,6 @@ let registry = FunctionRegistry_Core.Registry.make(fnList)
 let call = FunctionRegistry_Core.Registry.call(registry)
 
 let nonRegistryLambdas: array<(string, Reducer_T.lambdaValue)> = [
-  ("mx", FR_GenericDist.mxLambda),
-  ("mixture", FR_GenericDist.mxLambda),
+  ("mx", FR_Mixture.mxLambda),
+  ("mixture", FR_Mixture.mxLambda),
 ]

@@ -10,7 +10,7 @@ describe("dotSubtract", () => {
     let mean = 0.0
     let rate = 10.0
     exception MeanFailed
-    let dotDifference = DistributionOperation.Constructors.pointwiseSubtract(
+    let dotDifference = GenericDist.Operations.pointwiseSubtract(
       ~env,
       mkNormal(mean, 1.0),
       mkExponential(rate),
@@ -37,7 +37,7 @@ describe("dotSubtract", () => {
         floatRange(1e-5, 1e5),
         (mean, rate) => {
           // We limit ourselves to stdev=1 so that the integral is trivial
-          let dotDifference = DistributionOperation.Constructors.pointwiseSubtract(
+          let dotDifference = GenericDist.Operations.pointwiseSubtract(
             ~env,
             mkNormal(mean, 1.0),
             mkExponential(rate),
