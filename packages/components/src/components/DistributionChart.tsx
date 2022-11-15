@@ -5,7 +5,6 @@ import {
   result,
   SqDistributionError,
   resultMap,
-  SqRecord,
   environment,
   SqDistributionTag,
 } from "@quri/squiggle-lang";
@@ -18,8 +17,6 @@ import {
   distributionChartSpecSchema,
 } from "../lib/distributionSpecBuilder";
 import { NumberShower } from "./NumberShower";
-import { Plot, parsePlot } from "../lib/plotParser";
-import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 
 export const distributionSettingsSchema = yup
@@ -35,59 +32,38 @@ export type DistributionChartSettings = yup.InferType<
 >;
 
 export type DistributionChartProps = {
-  plot: Plot;
+  distribution: SqDistribution;
   environment: environment;
   chartHeight?: number;
   settings: DistributionChartSettings;
 };
 
-export function defaultPlot(distribution: SqDistribution): Plot {
-  return { distributions: [{ name: "default", distribution }] };
-}
-
-export function makePlot(record: SqRecord): Plot | void {
-  const plotResult = parsePlot(record);
-  if (plotResult.tag === "Ok") {
-    return plotResult.value;
-  }
-}
-
 export const DistributionChart: React.FC<DistributionChartProps> = ({
-  plot,
+  distribution,
   environment,
   chartHeight,
   settings,
 }) => {
   const [containerRef, containerMeasure] = useMeasure<HTMLDivElement>();
-  const shapes = flattenResult(
-    plot.distributions.map((x) =>
-      resultMap(x.distribution.pointSet(environment), (pointSet) => ({
-        name: x.name,
-        // color: x.color, // not supported yet
-        ...pointSet.asShape(),
-      }))
-    )
+  const shape = resultMap(distribution.pointSet(environment), (pointSet) =>
+    pointSet.asShape()
   );
 
-  if (shapes.tag === "Error") {
+  if (shape.tag === "Error") {
     return (
       <ErrorAlert heading="Distribution Error">
-        {shapes.value.toString()}
+        {shape.value.toString()}
       </ErrorAlert>
     );
   }
 
   // if this is a sample set, include the samples
   const samples: number[] = [];
-  for (const { distribution } of plot?.distributions) {
-    if (distribution.tag === SqDistributionTag.SampleSet) {
-      samples.push(...distribution.value());
-    }
+  if (distribution.tag === SqDistributionTag.SampleSet) {
+    samples.push(...distribution.value());
   }
 
-  const domain = shapes.value.flatMap((shape) =>
-    shape.discrete.concat(shape.continuous)
-  );
+  const domain = shape.value.discrete.concat(shape.value.continuous);
 
   const spec = buildVegaSpec({
     ...settings,
@@ -98,14 +74,15 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
       ? settings.maxX
       : Math.max(...domain.map((x) => x.x)),
     maxY: Math.max(...domain.map((x) => x.y)),
+    multiplot: false,
   });
 
-  const vegaData = { data: shapes.value, samples };
+  const vegaData = { data: [shape.value], samples };
 
   return (
     <div ref={containerRef}>
       {
-        settings.logX && shapes.value.some(hasMassBelowZero) ? (
+        settings.logX && hasMassBelowZero(shape.value) ? (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
@@ -120,11 +97,8 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
         ) : null /* width can be 0 initially or when we're on the server side; that's fine, we don't want to pre-render charts with broken width */
       }
       <div className="flex justify-center">
-        {settings.showSummary && plot.distributions.length === 1 && (
-          <SummaryTable
-            distribution={plot.distributions[0].distribution}
-            environment={environment}
-          />
+        {settings.showSummary && (
+          <SummaryTable distribution={distribution} environment={environment} />
         )}
       </div>
     </div>

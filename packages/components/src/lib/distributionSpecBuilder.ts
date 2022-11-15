@@ -73,9 +73,13 @@ export const timeTickFormat = "%b %d, %Y %H:%M";
 const width = 500;
 
 export function buildVegaSpec(
-  specOptions: DistributionChartSpecOptions & { maxY: number }
+  specOptions: DistributionChartSpecOptions & {
+    maxY: number;
+    multiplot: boolean;
+  }
 ): VisualizationSpec {
-  const { title, minX, maxX, logX, expY, xAxisType, maxY } = specOptions;
+  const { title, minX, maxX, logX, expY, xAxisType, maxY, multiplot } =
+    specOptions;
 
   const dateTime = xAxisType === "dateTime";
 
@@ -138,7 +142,7 @@ export function buildVegaSpec(
           data: "data",
           field: "name",
         },
-        range: { scheme: "blues" },
+        range: { scheme: multiplot ? "category10" : "blues" },
       },
     ],
     axes: [
@@ -198,6 +202,10 @@ export function buildVegaSpec(
                       scale: "yscale",
                       field: "y",
                     },
+                    stroke: {
+                      scale: "color",
+                      field: { parent: "name" },
+                    },
                     fill: {
                       scale: "color",
                       field: { parent: "name" },
@@ -207,7 +215,7 @@ export function buildVegaSpec(
                       value: 0,
                     },
                     fillOpacity: {
-                      value: 1,
+                      value: multiplot ? 0.5 : 1,
                     },
                   },
                 },
@@ -357,32 +365,28 @@ export function buildVegaSpec(
         },
       },
     ],
-    legends: [
-      {
-        fill: "color",
-        orient: "top",
-        labelFontSize: 12,
-        encode: {
-          symbols: {
-            update: {
-              fill: [
-                { test: "length(domain('color')) == 1", value: "transparent" },
-                { scale: "color", field: "value" },
-              ],
+    legends: multiplot
+      ? [
+          {
+            fill: "color",
+            orient: "top",
+            labelFontSize: 12,
+            encode: {
+              symbols: {
+                update: {
+                  fill: { scale: "color", field: "value" },
+                },
+              },
+              labels: {
+                interactive: true,
+                update: {
+                  fill: { value: "black" },
+                },
+              },
             },
           },
-          labels: {
-            interactive: true,
-            update: {
-              fill: [
-                { test: "length(domain('color')) == 1", value: "transparent" },
-                { value: "black" },
-              ],
-            },
-          },
-        },
-      },
-    ],
+        ]
+      : [],
     ...(title && {
       title: {
         text: title,
