@@ -36,9 +36,11 @@ let pdf: (t, float, ~env: env) => result<float, error>
 let inv: (t, float, ~env: env) => result<float, error>
 
 module Score: {
+  type genericDistOrScalar = Score_Dist(t) | Score_Scalar(float)
+
   let logScore: (
     ~estimate: t,
-    ~answer: DistributionTypes.DistributionOperation.genericDistOrScalar,
+    ~answer: genericDistOrScalar,
     ~prior: option<t>,
     ~env: env,
   ) => result<float, error>

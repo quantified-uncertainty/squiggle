@@ -18,11 +18,7 @@ type outputType =
   | Bool(bool)
   | GenDistError(error)
 
-/*
-We're going to add another function to this module later, so first define a
-local version, which is not exported.
-*/
-module OutputLocal = {
+module Output = {
   type t = outputType
 
   let toError = (t: outputType) =>
@@ -43,24 +39,6 @@ module OutputLocal = {
     switch t {
     | Dist(d) => Some(d)
     | _ => None
-    }
-
-  let toFloatR = (t: t): result<float, error> =>
-    switch t {
-    | Float(r) => Ok(r)
-    | e => Error(toErrorOrUnreachable(e))
-    }
-
-  let toBool = (t: t) =>
-    switch t {
-    | Bool(d) => Some(d)
-    | _ => None
-    }
-
-  let toBoolR = (t: t): result<bool, error> =>
-    switch t {
-    | Bool(r) => Ok(r)
-    | e => Error(toErrorOrUnreachable(e))
     }
 
   //This is used to catch errors in other switch statements.
@@ -89,18 +67,14 @@ let run = (
     }
 
   | #ToDist(Normalize) => dist->GenericDist.normalize->Dist
-  | #ToScore(LogScore(answer, prior)) =>
-    GenericDist.Score.logScore(~estimate=dist, ~answer, ~prior, ~env)
-    ->E.R.fmap(s => Float(s))
-    ->OutputLocal.fromResult
   | #ToDist(Truncate(leftCutoff, rightCutoff)) =>
     GenericDist.truncate(~toPointSetFn, ~leftCutoff, ~rightCutoff, dist, ())
     ->E.R.fmap(r => Dist(r))
-    ->OutputLocal.fromResult
+    ->Output.fromResult
   | #ToDist(ToSampleSet(n)) =>
-    dist->GenericDist.toSampleSetDist(n)->E.R.fmap(r => Dist(SampleSet(r)))->OutputLocal.fromResult
+    dist->GenericDist.toSampleSetDist(n)->E.R.fmap(r => Dist(SampleSet(r)))->Output.fromResult
   | #ToDist(ToPointSet) =>
-    dist->GenericDist.toPointSet(~env, ())->E.R.fmap(r => Dist(PointSet(r)))->OutputLocal.fromResult
+    dist->GenericDist.toPointSet(~env, ())->E.R.fmap(r => Dist(PointSet(r)))->Output.fromResult
   | #ToDist(Scale(#LogarithmWithThreshold(eps), f)) =>
     dist
     ->GenericDist.pointwiseCombinationFloat(
@@ -109,48 +83,32 @@ let run = (
       ~f,
     )
     ->E.R.fmap(r => Dist(r))
-    ->OutputLocal.fromResult
+    ->Output.fromResult
   | #ToDist(Scale(#Multiply, f)) =>
     dist
     ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Multiply, ~f)
     ->E.R.fmap(r => Dist(r))
-    ->OutputLocal.fromResult
+    ->Output.fromResult
   | #ToDist(Scale(#Logarithm, f)) =>
     dist
     ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Logarithm, ~f)
     ->E.R.fmap(r => Dist(r))
-    ->OutputLocal.fromResult
+    ->Output.fromResult
   | #ToDist(Scale(#Power, f)) =>
     dist
     ->GenericDist.pointwiseCombinationFloat(~toPointSetFn, ~algebraicCombination=#Power, ~f)
     ->E.R.fmap(r => Dist(r))
-    ->OutputLocal.fromResult
+    ->Output.fromResult
   | #ToDistCombination(Algebraic(strategy), arithmeticOperation, t2) =>
     dist
     ->GenericDist.algebraicCombination(~strategy, ~env, ~toSampleSetFn, ~arithmeticOperation, ~t2)
     ->E.R.fmap(r => Dist(r))
-    ->OutputLocal.fromResult
+    ->Output.fromResult
   | #ToDistCombination(Pointwise, algebraicCombination, t2) =>
     dist
     ->GenericDist.pointwiseCombination(~toPointSetFn, ~algebraicCombination, ~t2)
     ->E.R.fmap(r => Dist(r))
-    ->OutputLocal.fromResult
-  }
-}
-
-module Output = {
-  include OutputLocal
-
-  let fmap = (
-    ~env,
-    input: outputType,
-    operation: DistributionTypes.DistributionOperation.t,
-  ): outputType => {
-    switch input {
-    | Dist(o) => run(~env, operation, o)
-    | GenDistError(r) => GenDistError(r)
-    | _ => GenDistError(OtherError("Expected dist, got something else"))
-    }
+    ->Output.fromResult
   }
 }
 
@@ -159,18 +117,8 @@ module Output = {
 // DistributionTypes.Constructors. However, this broke GenType for me, so beware.
 module Constructors = {
   module C = DistributionTypes.Constructors.UsingDists
-  open OutputLocal
+  open Output
   let normalize = (~env, dist) => run(~env, C.normalize, dist)->toDistR
-  module LogScore = {
-    let distEstimateDistAnswer = (~env, estimate, answer) =>
-      run(~env, C.LogScore.distEstimateDistAnswer(answer), estimate)->toFloatR
-    let distEstimateDistAnswerWithPrior = (~env, estimate, answer, prior) =>
-      run(~env, C.LogScore.distEstimateDistAnswerWithPrior(answer, prior), estimate)->toFloatR
-    let distEstimateScalarAnswer = (~env, estimate, answer) =>
-      run(~env, C.LogScore.distEstimateScalarAnswer(answer), estimate)->toFloatR
-    let distEstimateScalarAnswerWithPrior = (~env, estimate, answer, prior) =>
-      run(~env, C.LogScore.distEstimateScalarAnswerWithPrior(answer, prior), estimate)->toFloatR
-  }
   let toPointSet = (~env, dist) => run(~env, C.toPointSet, dist)->toDistR
   let toSampleSet = (~env, dist, n) => run(~env, C.toSampleSet(n), dist)->toDistR
   let truncate = (~env, dist, leftCutoff, rightCutoff) =>

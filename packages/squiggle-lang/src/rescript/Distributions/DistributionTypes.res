@@ -90,16 +90,9 @@ module DistributionOperation = {
     | Truncate(option<float>, option<float>)
     | Inspect
 
-  type toFloatArray = Sample(int)
-
-  type genericDistOrScalar = Score_Dist(genericDist) | Score_Scalar(float)
-
-  type toScore = LogScore(genericDistOrScalar, option<genericDist>)
-
   type t = [
     | #ToDist(toDist)
     | #ToDistCombination(direction, Operation.Algebraic.t, genericDist)
-    | #ToScore(toScore)
   ]
 }
 
@@ -113,14 +106,6 @@ module Constructors = {
     let toSampleSet = (r): t => #ToDist(ToSampleSet(r))
     let truncate = (left, right): t => #ToDist(Truncate(left, right))
     let inspect: t = #ToDist(Inspect)
-    module LogScore = {
-      let distEstimateDistAnswer = (answer): t => #ToScore(LogScore(Score_Dist(answer), None))
-      let distEstimateDistAnswerWithPrior = (answer, prior): t =>
-        #ToScore(LogScore(Score_Dist(answer), Some(prior)))
-      let distEstimateScalarAnswer = (answer): t => #ToScore(LogScore(Score_Scalar(answer), None))
-      let distEstimateScalarAnswerWithPrior = (answer, prior): t =>
-        #ToScore(LogScore(Score_Scalar(answer), Some(prior)))
-    }
     let scaleMultiply = (n): t => #ToDist(Scale(#Multiply, n))
     let scalePower = (n): t => #ToDist(Scale(#Power, n))
     let scaleLogarithm = (n): t => #ToDist(Scale(#Logarithm, n))

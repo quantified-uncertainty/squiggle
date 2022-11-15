@@ -144,7 +144,7 @@ let pdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOper
 let inv = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Inv(x))
 
 module Score = {
-  type genericDistOrScalar = DistributionTypes.DistributionOperation.genericDistOrScalar
+  type genericDistOrScalar = Score_Dist(t) | Score_Scalar(float)
 
   let argsMake = (~esti: t, ~answ: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
     PointSetDist_Scoring.scoreArgs,

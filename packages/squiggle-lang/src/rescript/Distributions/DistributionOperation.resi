@@ -19,44 +19,12 @@ module Output: {
   type t = outputType
   let toDist: t => option<genericDist>
   let toDistR: t => result<genericDist, error>
-  let toBool: t => option<bool>
-  let toBoolR: t => result<bool, error>
   let toError: t => option<error>
-
-  let fmap: (~env: GenericDist.env, t, DistributionOperation.t) => t
 }
 
 module Constructors: {
   @genType
   let normalize: (~env: GenericDist.env, genericDist) => result<genericDist, error>
-  module LogScore: {
-    @genType
-    let distEstimateDistAnswer: (
-      ~env: GenericDist.env,
-      genericDist,
-      genericDist,
-    ) => result<float, error>
-    @genType
-    let distEstimateDistAnswerWithPrior: (
-      ~env: GenericDist.env,
-      genericDist,
-      genericDist,
-      genericDist,
-    ) => result<float, error>
-    @genType
-    let distEstimateScalarAnswer: (
-      ~env: GenericDist.env,
-      genericDist,
-      float,
-    ) => result<float, error>
-    @genType
-    let distEstimateScalarAnswerWithPrior: (
-      ~env: GenericDist.env,
-      genericDist,
-      float,
-      genericDist,
-    ) => result<float, error>
-  }
   @genType
   let toPointSet: (~env: GenericDist.env, genericDist) => result<genericDist, error>
   @genType
