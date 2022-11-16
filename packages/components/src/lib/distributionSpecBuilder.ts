@@ -215,7 +215,7 @@ export function buildVegaSpec(
                       value: 0,
                     },
                     fillOpacity: {
-                      value: multiplot ? 0.5 : 1,
+                      value: multiplot ? 0.3 : 1,
                     },
                   },
                 },

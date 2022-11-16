@@ -10,32 +10,6 @@ import { ItemSettingsMenu } from "./ItemSettingsMenu";
 import { hasMassBelowZero } from "../../lib/distributionUtils";
 import { MergedItemSettings } from "./utils";
 
-/*
-// DISABLED FOR NOW
-function getRange<a>(x: declaration<a>) {
-  const first = x.args[0];
-  switch (first.tag) {
-    case "Float": {
-      return { floats: { min: first.value.min, max: first.value.max } };
-    }
-    case "Date": {
-      return { time: { min: first.value.min, max: first.value.max } };
-    }
-  }
-}
-
-function getChartSettings<a>(x: declaration<a>): FunctionChartSettings {
-  const range = getRange(x);
-  const min = range.floats ? range.floats.min : 0;
-  const max = range.floats ? range.floats.max : 10;
-  return {
-    start: min,
-    stop: max,
-    count: 20,
-  };
-}
-*/
-
 const VariableList: React.FC<{
   value: SqValue;
   heading: string;
@@ -61,7 +35,7 @@ export interface Props {
   width?: number;
 }
 
-export const ExpressionViewer: React.FC<Props> = ({ value, width }) => {
+export const ExpressionViewer: React.FC<Props> = ({ value }) => {
   const environment = value.location.project.getEnvironment();
 
   switch (value.tag) {
