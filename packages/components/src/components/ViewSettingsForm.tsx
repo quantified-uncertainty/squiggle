@@ -5,7 +5,7 @@ import { InputItem } from "./ui/InputItem";
 import { Checkbox } from "./ui/Checkbox";
 import { HeadedSection } from "./ui/HeadedSection";
 import { Text } from "./ui/Text";
-import { distributionSettingsSchema } from "./DistributionChart";
+import { distributionSettingsSchema } from "./MultiDistributionChart";
 import { functionSettingsSchema } from "./FunctionChart";
 
 export const viewSettingsSchema = yup.object({}).shape({

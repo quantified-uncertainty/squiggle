@@ -75,11 +75,21 @@ const width = 500;
 export function buildVegaSpec(
   specOptions: DistributionChartSpecOptions & {
     maxY: number;
-    multiplot: boolean;
+    showLegend: boolean;
+    colorScheme: string;
   }
 ): VisualizationSpec {
-  const { title, minX, maxX, logX, expY, xAxisType, maxY, multiplot } =
-    specOptions;
+  const {
+    title,
+    minX,
+    maxX,
+    logX,
+    expY,
+    xAxisType,
+    maxY,
+    showLegend,
+    colorScheme,
+  } = specOptions;
 
   const dateTime = xAxisType === "dateTime";
 
@@ -142,7 +152,7 @@ export function buildVegaSpec(
           data: "data",
           field: "name",
         },
-        range: { scheme: multiplot ? "category10" : "blues" },
+        range: { scheme: colorScheme },
       },
     ],
     axes: [
@@ -215,7 +225,7 @@ export function buildVegaSpec(
                       value: 0,
                     },
                     fillOpacity: {
-                      value: multiplot ? 0.3 : 1,
+                      field: { parent: "opacity" },
                     },
                   },
                 },
@@ -365,7 +375,7 @@ export function buildVegaSpec(
         },
       },
     ],
-    legends: multiplot
+    legends: showLegend
       ? [
           {
             fill: "color",

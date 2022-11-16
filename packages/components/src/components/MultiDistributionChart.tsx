@@ -1,14 +1,33 @@
 import * as React from "react";
-import { resultMap, SqRecord, SqDistributionTag } from "@quri/squiggle-lang";
+import * as yup from "yup";
+import {
+  resultMap,
+  SqRecord,
+  SqDistributionTag,
+  environment,
+} from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
 import { useMeasure } from "react-use";
-
-import { buildVegaSpec } from "../lib/distributionSpecBuilder";
+import {
+  buildVegaSpec,
+  distributionChartSpecSchema,
+} from "../lib/distributionSpecBuilder";
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 import { Plot, parsePlot, LabeledDistribution } from "../lib/plotParser";
-import { DistributionChartProps } from "./DistributionChart";
+
+export const distributionSettingsSchema = yup
+  .object({})
+  .shape({
+    showSummary: yup.boolean().required().default(false),
+    vegaActions: yup.boolean().required().default(false),
+  })
+  .concat(distributionChartSpecSchema);
+
+export type DistributionChartSettings = yup.InferType<
+  typeof distributionSettingsSchema
+>;
 
 export function makePlot(record: SqRecord): Plot | void {
   const plotResult = parsePlot(record);
@@ -17,11 +36,11 @@ export function makePlot(record: SqRecord): Plot | void {
   }
 }
 
-export type MultiDistributionChartProps = Omit<
-  DistributionChartProps,
-  "distribution"
-> & {
+export type MultiDistributionChartProps = {
   plot: Plot;
+  environment: environment;
+  chartHeight?: number;
+  settings: DistributionChartSettings;
 };
 
 export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
@@ -38,7 +57,7 @@ export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
     distributions.map((x) =>
       resultMap(x.distribution.pointSet(environment), (pointSet) => ({
         name: x.name,
-        // color: x.color, // not supported yet
+        opacity: x.opacity,
         ...pointSet.asShape(),
       }))
     )
@@ -73,7 +92,8 @@ export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
       ? settings.maxX
       : Math.max(...domain.map((x) => x.x)),
     maxY: Math.max(...domain.map((x) => x.y)),
-    multiplot: true,
+    colorScheme: plot.colorScheme,
+    showLegend: plot.showLegend,
   });
 
   const vegaData = { data: shapes.value, samples };
