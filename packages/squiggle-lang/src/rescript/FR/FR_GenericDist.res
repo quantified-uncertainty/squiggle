@@ -157,8 +157,8 @@ let library = E.A.concatMany([
       | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
       }
     ),
-    Helpers.makeDistToFloatFn("sample", d =>
-      GenericDist.toFloatOperation(d, ~distToFloatOperation=#Sample)
+    Helpers.makeDistToFloatFn("sample", (d, ~env) =>
+      GenericDist.toFloatOperation(d, ~distToFloatOperation=#Sample, ~env)
     ),
     Helpers.makeFn("sampleN", [FRTypeDist, FRTypeNumber], (inputs, _) => {
       let (dist, n) = inputs->Helpers.unpackDistAndFloat
@@ -240,10 +240,6 @@ let library = E.A.concatMany([
     Helpers.makeDistAndFloatToFloatFn("pdf", GenericDist.pdf),
     Helpers.makeDistAndFloatToFloatFn("inv", GenericDist.inv),
     Helpers.makeDistAndFloatToFloatFn("quantile", GenericDist.inv),
-    Helpers.makeDistToDistFn("inspect", (dist, ~env as _) => {
-      Js.log2("Console log requested: ", dist)
-      dist->Ok
-    }),
     Helpers.makeDistAndFloatToDistFn("truncateLeft", (dist, x, ~env) =>
       dist->GenericDist.truncate(~env, ~leftCutoff=Some(x), ())
     ),

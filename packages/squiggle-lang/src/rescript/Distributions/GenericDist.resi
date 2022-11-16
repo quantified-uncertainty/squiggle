@@ -1,7 +1,5 @@
 type t = DistributionTypes.genericDist
 type error = DistributionTypes.error
-type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
-type toSampleSetFn = t => result<SampleSetDist.t, error>
 
 @genType
 type env = {sampleCount: int, xyPointLength: int}
