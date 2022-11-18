@@ -55,9 +55,11 @@ let getSource = (project: t, sourceId: string): option<string> =>
   Belt.MutableMap.String.get(project.items, sourceId)->Belt.Option.map(ProjectItem.getSource)
 
 let setSource = (project: t, sourceId: string, value: string): unit => {
-  let newItem = project->getItem(sourceId)->ProjectItem.setSource(value)
-  project->setItem(sourceId, newItem)
-  touchDependents(project, sourceId)
+  if getSource(project, sourceId) !== Some(value) {
+    let newItem = project->getItem(sourceId)->ProjectItem.setSource(value)
+    project->setItem(sourceId, newItem)
+    touchDependents(project, sourceId)
+  }
 }
 
 let removeSource = (project: t, sourceId: string): unit => {
@@ -92,13 +94,16 @@ let getIncludesAsVariables = (project: t, sourceId: string): ProjectItem.T.impor
 let getDirectIncludes = (project: t, sourceId: string): array<string> =>
   project->getItem(sourceId)->ProjectItem.getDirectIncludes
 
-let setContinues = (project: t, sourceId: string, continues: array<string>): unit => {
-  let newItem = project->getItem(sourceId)->ProjectItem.setContinues(continues)
-  project->setItem(sourceId, newItem)
-  handleNewTopology(project)
-}
 let getContinues = (project: t, sourceId: string): array<string> =>
   project->getItem(sourceId)->ProjectItem.getContinues
+
+let setContinues = (project: t, sourceId: string, continues: array<string>): unit => {
+  if getContinues(project, sourceId) !== continues {
+    let newItem = project->getItem(sourceId)->ProjectItem.setContinues(continues)
+    project->setItem(sourceId, newItem)
+    handleNewTopology(project)
+  }
+}
 
 let removeContinues = (project: t, sourceId: string): unit => {
   let newItem = project->getItem(sourceId)->ProjectItem.removeContinues

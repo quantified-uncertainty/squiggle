@@ -20,6 +20,7 @@ type StandaloneExecutionProps = {
 type ProjectExecutionProps = {
   /** The project that this execution is part of */
   project: SqProject;
+  sourceName?: string;
   /** What other squiggle sources from the project to continue. Default [] */
   continues?: string[];
 };
@@ -40,7 +41,11 @@ const importSourceName = (sourceName: string) => "imports-" + sourceName;
 const defaultContinues = [];
 
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
-  const sourceName = useMemo(() => uuid.v4(), []);
+  const givenSourceName = "sourceName" in args ? args.sourceName : undefined;
+  const sourceName = useMemo(
+    () => givenSourceName ?? uuid.v4(),
+    [givenSourceName]
+  );
   const projectArg = "project" in args ? args.project : undefined;
   const environment = "environment" in args ? args.environment : undefined;
   const continues =
