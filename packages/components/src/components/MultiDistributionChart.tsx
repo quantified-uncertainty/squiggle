@@ -201,8 +201,9 @@ const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
   const p90 = distribution.inv(environment, 0.9);
   const p95 = distribution.inv(environment, 0.95);
 
-  const hasResult = (x: result<number, SqDistributionError>): boolean =>
-    x.tag === "Ok";
+  const hasResult = (
+    x: result<number, SqDistributionError>
+  ): x is { tag: "Ok"; value: number } => x.tag === "Ok";
 
   const unwrapResult = (
     x: result<number, SqDistributionError>
@@ -221,7 +222,15 @@ const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
     <tr>
       {showName && <Cell>{name}</Cell>}
       <Cell>{unwrapResult(mean)}</Cell>
-      {hasResult(stdev) && <Cell>{unwrapResult(stdev)}</Cell>}
+      {
+        <Cell>
+          {hasResult(stdev) ? (
+            <NumberShower number={stdev.value} />
+          ) : (
+            stdev.value.toString()
+          )}
+        </Cell>
+      }
       <Cell>{unwrapResult(p5)}</Cell>
       <Cell>{unwrapResult(p10)}</Cell>
       <Cell>{unwrapResult(p25)}</Cell>

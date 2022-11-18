@@ -77,9 +77,7 @@ function toJsonRecord(val: SqRecord): JsonObject {
 export function parsePlot(record: SqRecord): result<Plot, string> {
   try {
     const r = toJsonRecord(record);
-    console.log(r);
     const plotRecord = schema.validateSync(r);
-    console.log(plotRecord);
     if (plotRecord.distributions) {
       return ok({
         distributions: plotRecord.distributions.map((x) => x),
