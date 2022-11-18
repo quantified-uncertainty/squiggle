@@ -102,7 +102,7 @@ export let bernoulli_mean = bernoulli.mean;
 export let bernoulli_stdev = bernoulli.stdev;
 export let bernoulli_variance = bernoulli.variance;
 export let bernoulli_quantile = (prob: number, p: number) =>
-  bernoulli.quantile(p, prob);
+  bernoulli.quantile(prob, p);
 
 export let logistic_pdf = (mu: number, s: number, x: number) =>
   logistic.pdf({ mu, s }, x);
