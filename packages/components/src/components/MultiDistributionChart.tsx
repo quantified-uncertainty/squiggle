@@ -154,6 +154,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ plot, environment }) => {
         <tr>
           {plot.showLegend && <TableHeadCell>Name</TableHeadCell>}
           <TableHeadCell>{"Mean"}</TableHeadCell>
+          <TableHeadCell>{"Stdev"}</TableHeadCell>
           <TableHeadCell>{"5%"}</TableHeadCell>
           <TableHeadCell>{"10%"}</TableHeadCell>
           <TableHeadCell>{"25%"}</TableHeadCell>
@@ -201,10 +202,6 @@ const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
   const p90 = distribution.inv(environment, 0.9);
   const p95 = distribution.inv(environment, 0.95);
 
-  const hasResult = (
-    x: result<number, SqDistributionError>
-  ): x is { tag: "Ok"; value: number } => x.tag === "Ok";
-
   const unwrapResult = (
     x: result<number, SqDistributionError>
   ): React.ReactNode => {
@@ -222,15 +219,7 @@ const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
     <tr>
       {showName && <Cell>{name}</Cell>}
       <Cell>{unwrapResult(mean)}</Cell>
-      {
-        <Cell>
-          {hasResult(stdev) ? (
-            <NumberShower number={stdev.value} />
-          ) : (
-            stdev.value.toString()
-          )}
-        </Cell>
-      }
+      <Cell>{unwrapResult(stdev)}</Cell>
       <Cell>{unwrapResult(p5)}</Cell>
       <Cell>{unwrapResult(p10)}</Cell>
       <Cell>{unwrapResult(p25)}</Cell>
