@@ -82,7 +82,7 @@
     "build": "yarn run build:cjs && yarn run build:css && yarn run build:storybook",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
-    "lint": "prettier --check .",
+    "lint": "prettier --check . && eslint --ignore-path .gitignore .",
     "format": "prettier --write .",
     "prepack": "yarn run build:cjs && yarn run bundle",
     "test": "jest",
