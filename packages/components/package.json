@@ -48,6 +48,7 @@
     "@types/webpack": "^5.28.0",
     "canvas": "^2.10.2",
     "cross-env": "^7.0.3",
+    "eslint": "^8.27.0",
     "jest": "^29.3.1",
     "jest-environment-jsdom": "^29.3.1",
     "jsdom": "^20.0.2",
@@ -81,7 +82,7 @@
     "build": "yarn run build:cjs && yarn run build:css && yarn run build:storybook",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
-    "lint": "prettier --check .",
+    "lint": "prettier --check . && eslint --ignore-path .gitignore .",
     "format": "prettier --write .",
     "prepack": "yarn run build:cjs && yarn run bundle",
     "test": "jest",
@@ -93,10 +94,14 @@
       "react-app",
       "react-app/jest"
     ],
+    "rules": {
+      "no-console": "error"
+    },
     "overrides": [
       {
         "files": [
-          "**/*.stories.*"
+          "**/*.stories.*",
+          "src/index.ts"
         ],
         "rules": {
           "import/no-anonymous-default-export": "off"
