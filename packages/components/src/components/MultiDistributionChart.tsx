@@ -20,6 +20,8 @@ import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 import { NumberShower } from "./NumberShower";
 import { Plot, parsePlot, LabeledDistribution } from "../lib/plotParser";
+import { XIcon } from "@heroicons/react/solid";
+import { Tooltip } from "./ui/Tooltip";
 
 export const distributionSettingsSchema = yup
   .object({})
@@ -209,9 +211,9 @@ const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
       return <NumberShower number={x.value} />;
     } else {
       return (
-        <ErrorAlert heading="Distribution Error">
-          {x.value.toString()}
-        </ErrorAlert>
+        <Tooltip text={x.value.toString()}>
+          <XIcon className="w-5 h-5 text-gray-500" />
+        </Tooltip>
       );
     }
   };
