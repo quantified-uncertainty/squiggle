@@ -10,11 +10,11 @@ describe("mixture", () => {
       // should be property
       let (mean1, mean2) = tup
       let meanValue = {
-        run(Mixture([(mkNormal(mean1, 9e-1), 0.5), (mkNormal(mean2, 9e-1), 0.5)]))->outputMap(
-          FromDist(#ToFloat(#Mean)),
-        )
+        GenericDist.mixture([(mkNormal(mean1, 9e-1), 0.5), (mkNormal(mean2, 9e-1), 0.5)], ~env)
+        ->unpackResult
+        ->GenericDist.mean(~env)
       }
-      meanValue->unpackFloat->expect->toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1)
+      meanValue->unpackResult->expect->toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1)
     },
   )
   testAll(
@@ -26,14 +26,17 @@ describe("mixture", () => {
       let betaWeight = 0.25
       let exponentialWeight = 0.75
       let meanValue = {
-        run(
-          Mixture([(mkBeta(alpha, beta), betaWeight), (mkExponential(rate), exponentialWeight)]),
-        )->outputMap(FromDist(#ToFloat(#Mean)))
+        GenericDist.mixture(
+          [(mkBeta(alpha, beta), betaWeight), (mkExponential(rate), exponentialWeight)],
+          ~env,
+        )
+        ->unpackResult
+        ->GenericDist.mean(~env)
       }
       let betaMean = 1.0 /. (1.0 +. beta /. alpha)
       let exponentialMean = 1.0 /. rate
       meanValue
-      ->unpackFloat
+      ->unpackResult
       ->expect
       ->toBeSoCloseTo(betaWeight *. betaMean +. exponentialWeight *. exponentialMean, ~digits=-1)
     },
@@ -47,17 +50,17 @@ describe("mixture", () => {
       let uniformWeight = 0.6
       let lognormalWeight = 0.4
       let meanValue = {
-        run(
-          Mixture([
-            (mkUniform(low, high), uniformWeight),
-            (mkLognormal(mu, sigma), lognormalWeight),
-          ]),
-        )->outputMap(FromDist(#ToFloat(#Mean)))
+        GenericDist.mixture(
+          [(mkUniform(low, high), uniformWeight), (mkLognormal(mu, sigma), lognormalWeight)],
+          ~env,
+        )
+        ->unpackResult
+        ->GenericDist.mean(~env)
       }
       let uniformMean = (low +. high) /. 2.0
       let lognormalMean = mu +. sigma ** 2.0 /. 2.0
       meanValue
-      ->unpackFloat
+      ->unpackResult
       ->expect
       ->toBeSoCloseTo(uniformWeight *. uniformMean +. lognormalWeight *. lognormalMean, ~digits=-1)
     },

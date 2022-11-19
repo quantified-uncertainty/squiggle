@@ -1,15 +1,16 @@
-//TODO: multimodal, add interface, test somehow, track performance, refactor sampleSet, refactor ASTEvaluator.res.
-
 type t = DistributionTypes.genericDist
 type error = DistributionTypes.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
-type scaleMultiplyFn = (t, float) => result<t, error>
-type pointwiseAddFn = (t, t) => result<t, error>
 
 type env = {
   sampleCount: int,
   xyPointLength: int,
+}
+
+let defaultEnv: env = {
+  sampleCount: MagicNumbers.Environment.defaultSampleCount,
+  xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
 
 let isPointSet = (t: t) =>
@@ -67,9 +68,34 @@ let integralEndY = (t: t): float =>
 
 let isNormalized = (t: t): bool => Js.Math.abs_float(integralEndY(t) -. 1.0) < 1e-7
 
+//Todo: If it's a pointSet, but the xyPointLength is different from what it has, it should change.
+// This is tricky because the case of discrete distributions.
+// Also, change the outputXYPoints/pointSetDistLength details
+let toPointSet = (
+  t,
+  ~env: env,
+  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=#ByWeight,
+  (),
+): result<PointSetTypes.pointSetDist, error> => {
+  switch (t: t) {
+  | PointSet(pointSet) => Ok(pointSet)
+  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, env.xyPointLength, r))
+  | SampleSet(r) =>
+    SampleSetDist.toPointSetDist(
+      ~samples=r,
+      ~samplingInputs={
+        sampleCount: env.sampleCount,
+        outputXYPoints: env.xyPointLength,
+        pointSetDistLength: env.xyPointLength,
+        kernelWidth: None,
+      },
+    )->E.R.errMap(x => DistributionTypes.PointSetConversionError(x))
+  }
+}
+
 let toFloatOperation = (
   t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
 ) => {
   switch distToFloatOperation {
@@ -95,7 +121,7 @@ let toFloatOperation = (
       | None =>
         switch trySampleSetSolution {
         | Some(r) => Ok(r)
-        | None => toPointSetFn(t)->E.R.fmap(PointSetDist.operate(op))
+        | None => toPointSet(t, ~env, ())->E.R.fmap(PointSetDist.operate(op))
         }
       }
     }
@@ -113,47 +139,24 @@ let toFloatOperation = (
   }
 }
 
-//Todo: If it's a pointSet, but the xyPointLength is different from what it has, it should change.
-// This is tricky because the case of discrete distributions.
-// Also, change the outputXYPoints/pointSetDistLength details
-let toPointSet = (
-  t,
-  ~xyPointLength,
-  ~sampleCount,
-  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=#ByWeight,
-  (),
-): result<PointSetTypes.pointSetDist, error> => {
-  switch (t: t) {
-  | PointSet(pointSet) => Ok(pointSet)
-  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, xyPointLength, r))
-  | SampleSet(r) =>
-    SampleSetDist.toPointSetDist(
-      ~samples=r,
-      ~samplingInputs={
-        sampleCount,
-        outputXYPoints: xyPointLength,
-        pointSetDistLength: xyPointLength,
-        kernelWidth: None,
-      },
-    )->E.R.errMap(x => DistributionTypes.PointSetConversionError(x))
-  }
-}
+let mean = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Mean)
+let stdev = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Stdev)
+let variance = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Variance)
+let min = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Min)
+let max = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Max)
+let mode = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Mode)
+let cdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Cdf(x))
+let pdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Pdf(x))
+let inv = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Inv(x))
 
 module Score = {
-  type genericDistOrScalar = DistributionTypes.DistributionOperation.genericDistOrScalar
+  type genericDistOrScalar = Score_Dist(t) | Score_Scalar(float)
 
   let argsMake = (~esti: t, ~answ: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
     PointSetDist_Scoring.scoreArgs,
     error,
   > => {
-    let toPointSetFn = t =>
-      toPointSet(
-        t,
-        ~xyPointLength=env.xyPointLength,
-        ~sampleCount=env.sampleCount,
-        ~xSelection=#ByWeight,
-        (),
-      )
+    let toPointSetFn = t => toPointSet(t, ~env, ~xSelection=#ByWeight, ())
     let prior': option<result<PointSetTypes.pointSetDist, error>> = switch prior {
     | None => None
     | Some(d) => toPointSetFn(d)->Some
@@ -211,7 +214,7 @@ module Score = {
  */
 let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<string, error> =>
   t
-  ->toPointSet(~xSelection=#Linear, ~xyPointLength=bucketCount * 3, ~sampleCount, ())
+  ->toPointSet(~xSelection=#Linear, ~env={xyPointLength: bucketCount * 3, sampleCount}, ())
   ->E.R.bind(r =>
     r->PointSetDist.toSparkline(bucketCount)->E.R.errMap(x => DistributionTypes.SparklineError(x))
   )
@@ -233,7 +236,7 @@ module Truncate = {
 
   let run = (
     t: t,
-    ~toPointSetFn: toPointSetFn,
+    ~env: env,
     ~leftCutoff=None: option<float>,
     ~rightCutoff=None: option<float>,
     (),
@@ -252,7 +255,9 @@ module Truncate = {
           | Error(err) => Error(DistributionTypes.SampleSetError(err))
           }
         | _ =>
-          toPointSetFn(t)->E.R.fmap(t => {
+          t
+          ->toPointSet(~env, ())
+          ->E.R.fmap(t => {
             DistributionTypes.PointSet(
               PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize,
             )
@@ -278,11 +283,11 @@ module AlgebraicCombination = {
      that both the probability mass and the probability density are greater than zero.
      Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
  */
-    let getLogarithmInputError = (t1: t, t2: t, ~toPointSetFn: toPointSetFn): option<error> => {
+    let getLogarithmInputError = (t1: t, t2: t, ~env: env): option<error> => {
       let isDistGreaterThanZero = t =>
         toFloatOperation(
           t,
-          ~toPointSetFn,
+          ~env,
           ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
         )->E.R.fmap(r => r > 0.)
 
@@ -298,9 +303,9 @@ module AlgebraicCombination = {
       }
     }
 
-    let run = (t1: t, t2: t, ~toPointSetFn: toPointSetFn, ~arithmeticOperation): option<error> => {
+    let run = (t1: t, t2: t, ~env: env, ~arithmeticOperation): option<error> => {
       if arithmeticOperation == #Logarithm {
-        getLogarithmInputError(t1, t2, ~toPointSetFn)
+        getLogarithmInputError(t1, t2, ~env)
       } else {
         None
       }
@@ -409,12 +414,14 @@ module AlgebraicCombination = {
   let run = (
     ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
     t1: t,
-    ~toPointSetFn: toPointSetFn,
-    ~toSampleSetFn: toSampleSetFn,
+    ~env: env,
     ~arithmeticOperation: Operation.algebraicOperation,
     ~t2: t,
   ): result<t, error> => {
-    let invalidOperationError = InputValidator.run(t1, t2, ~arithmeticOperation, ~toPointSetFn)
+    let toSampleSetFn = dist => dist->toSampleSetDist(env.sampleCount)
+    let toPointSetFn = dist => toPointSet(dist, ~env, ())
+
+    let invalidOperationError = InputValidator.run(t1, t2, ~arithmeticOperation, ~env)
     switch (invalidOperationError, strategy) {
     | (Some(e), _) => Error(e)
     | (None, AsDefault) => {
@@ -457,10 +464,12 @@ let algebraicCombination = AlgebraicCombination.run
 //TODO: Add faster pointwiseCombine fn
 let pointwiseCombination = (
   t1: t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~algebraicCombination: Operation.algebraicOperation,
   ~t2: t,
 ): result<t, error> => {
+  let toPointSetFn = dist => toPointSet(dist, ~env, ())
+
   E.R.merge(toPointSetFn(t1), toPointSetFn(t2))->E.R.bind(((t1, t2)) =>
     PointSetDist.combinePointwise(Operation.Algebraic.toFn(algebraicCombination), t1, t2)
     ->E.R.fmap(r => DistributionTypes.PointSet(r))
@@ -470,12 +479,14 @@ let pointwiseCombination = (
 
 let pointwiseCombinationFloat = (
   t: t,
-  ~toPointSetFn: toPointSetFn,
+  ~env: env,
   ~algebraicCombination: Operation.algebraicOperation,
   ~f: float,
 ): result<t, error> => {
   let executeCombination = arithOp =>
-    toPointSetFn(t)->E.R.bind(t => {
+    t
+    ->toPointSet(~env, ())
+    ->E.R.bind(t => {
       //TODO: Move to PointSet codebase
       let fn = (secondary, main) => Operation.Scale.toFn(arithOp, main, secondary)
       let integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(arithOp)
@@ -496,14 +507,18 @@ let pointwiseCombinationFloat = (
   m->E.R.fmap(r => DistributionTypes.PointSet(r))
 }
 
+let scaleLog = (t: t, f: float, ~env: env) =>
+  t->pointwiseCombinationFloat(~env, ~algebraicCombination=#Logarithm, ~f)
+
 //TODO: The result should always cumulatively sum to 1. This would be good to test.
 //TODO: If the inputs are not normalized, this will return poor results. The weights probably refer to the post-normalized forms. It would be good to apply a catch to this.
-let mixture = (
-  values: array<(t, float)>,
-  ~scaleMultiplyFn: scaleMultiplyFn,
-  ~pointwiseAddFn: pointwiseAddFn,
-  ~env: env,
-) => {
+let mixture = (values: array<(t, float)>, ~env: env) => {
+  let scaleMultiplyFn = (dist, weight) =>
+    dist->pointwiseCombinationFloat(~env, ~algebraicCombination=#Multiply, ~f=weight)
+
+  let pointwiseAddFn = (dist1, dist2) =>
+    dist1->pointwiseCombination(~env, ~algebraicCombination=#Add, ~t2=dist2)
+
   let allValuesAreSampleSet = v => E.A.every(v, ((t, _)) => isSampleSetSet(t))
 
   if E.A.isEmpty(values) {
@@ -534,4 +549,35 @@ let mixture = (
       )
     })
   }
+}
+
+module Operations = {
+  // common type for all functions below (checked in .resi)
+  type operationFn = (~env: env, t, t) => result<t, error>
+
+  // private helpers
+  let algebraic = (dist1, dist2, env, operation) =>
+    algebraicCombination(
+      dist1,
+      ~strategy=AsDefault,
+      ~arithmeticOperation=operation,
+      ~env,
+      ~t2=dist2,
+    )
+  let pointwise = (dist1, dist2, env, operation) =>
+    pointwiseCombination(dist1, ~env, ~algebraicCombination=operation, ~t2=dist2)
+
+  let algebraicAdd = (~env, dist1, dist2) => algebraic(dist1, dist2, env, #Add)
+  let algebraicMultiply = (~env, dist1, dist2) => algebraic(dist1, dist2, env, #Multiply)
+  let algebraicDivide = (~env, dist1, dist2) => algebraic(dist1, dist2, env, #Divide)
+  let algebraicSubtract = (~env, dist1, dist2) => algebraic(dist1, dist2, env, #Subtract)
+  let algebraicLogarithm = (~env, dist1, dist2) => algebraic(dist1, dist2, env, #Logarithm)
+  let algebraicPower = (~env, dist1, dist2) => algebraic(dist1, dist2, env, #Power)
+
+  let pointwiseAdd = (~env, dist1, dist2) => pointwise(dist1, dist2, env, #Add)
+  let pointwiseMultiply = (~env, dist1, dist2) => pointwise(dist1, dist2, env, #Multiply)
+  let pointwiseDivide = (~env, dist1, dist2) => pointwise(dist1, dist2, env, #Divide)
+  let pointwiseSubtract = (~env, dist1, dist2) => pointwise(dist1, dist2, env, #Subtract)
+  let pointwiseLogarithm = (~env, dist1, dist2) => pointwise(dist1, dist2, env, #Logarithm)
+  let pointwisePower = (~env, dist1, dist2) => pointwise(dist1, dist2, env, #Power)
 }

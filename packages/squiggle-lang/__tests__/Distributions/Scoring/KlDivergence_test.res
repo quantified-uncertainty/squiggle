@@ -3,7 +3,9 @@ open Expect
 open TestHelpers
 open GenericDist_Fixtures
 
-let klDivergence = DistributionOperation.Constructors.LogScore.distEstimateDistAnswer(~env)
+let klDivergence = (prediction, answer) =>
+  GenericDist.Score.logScore(~env, ~estimate=prediction, ~answer=Score_Dist(answer), ~prior=None)
+
 // integral from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx
 let klNormalUniform = (mean, stdev, low, high): float =>
   -.Js.Math.log((high -. low) /. Js.Math.sqrt(2.0 *. MagicNumbers.Math.pi *. stdev ** 2.0)) +.
@@ -11,18 +13,17 @@ let klNormalUniform = (mean, stdev, low, high): float =>
   stdev ** 2.0 *.
   (mean ** 2.0 -. (high +. low) *. mean +. (low ** 2.0 +. high *. low +. high ** 2.0) /. 3.0)
 
+let unwrapResultWithStringError = r => E.R.toExnFnString(e => e, r)
+
 describe("klDivergence: continuous -> continuous -> float", () => {
   let testUniform = (lowAnswer, highAnswer, lowPrediction, highPrediction) => {
     test("of two uniforms is equal to the analytic expression", () => {
-      let answer =
-        uniformMakeR(lowAnswer, highAnswer)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
-      let prediction =
-        uniformMakeR(lowPrediction, highPrediction)->E.R.errMap(
-          s => DistributionTypes.ArgumentError(s),
-        )
+      let answer = uniformMakeR(lowAnswer, highAnswer)->unwrapResultWithStringError
+      let prediction = uniformMakeR(lowPrediction, highPrediction)->unwrapResultWithStringError
+
       // integral along the support of the answer of answer.pdf(x) times log of prediction.pdf(x) divided by answer.pdf(x) dx
       let analyticalKl = Js.Math.log((highPrediction -. lowPrediction) /. (highAnswer -. lowAnswer))
-      let kl = E.R.liftJoin2(klDivergence, prediction, answer)
+      let kl = klDivergence(prediction, answer)
       switch kl {
       | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=7)
       | Error(err) => {
@@ -46,13 +47,13 @@ describe("klDivergence: continuous -> continuous -> float", () => {
     let stdev1 = 4.0
     let stdev2 = 1.0
 
-    let prediction = normalMakeR(mean1, stdev1)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
-    let answer = normalMakeR(mean2, stdev2)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
+    let prediction = normalMakeR(mean1, stdev1)->unwrapResultWithStringError
+    let answer = normalMakeR(mean2, stdev2)->unwrapResultWithStringError
     // https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians
     let analyticalKl =
       Js.Math.log(stdev1 /. stdev2) +.
       (stdev2 ** 2.0 +. (mean2 -. mean1) ** 2.0) /. (2.0 *. stdev1 ** 2.0) -. 0.5
-    let kl = E.R.liftJoin2(klDivergence, prediction, answer)
+    let kl = klDivergence(prediction, answer)
 
     switch kl {
     | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=2)
@@ -79,11 +80,10 @@ describe("klDivergence: continuous -> continuous -> float", () => {
 })
 
 describe("klDivergence: discrete -> discrete -> float", () => {
-  let mixture = a => DistributionTypes.DistributionOperation.Mixture(a)
-  let a' = [(point1, 1e0), (point2, 1e0)]->mixture->run
-  let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->mixture->run
+  let a' = [(point1, 1e0), (point2, 1e0)]->GenericDist.mixture(~env)
+  let b' = [(point1, 1e0), (point2, 1e0), (point3, 1e0)]->GenericDist.mixture(~env)
   let (a, b) = switch (a', b') {
-  | (Dist(a''), Dist(b'')) => (a'', b'')
+  | (Ok(a''), Ok(b'')) => (a'', b'')
   | _ => raise(MixtureFailed)
   }
   test("agrees with analytical answer when finite", () => {
@@ -113,11 +113,10 @@ describe("klDivergence: discrete -> discrete -> float", () => {
 })
 
 describe("klDivergence: mixed -> mixed -> float", () => {
-  let mixture' = a => DistributionTypes.DistributionOperation.Mixture(a)
   let mixture = a => {
-    let dist' = a->mixture'->run
+    let dist' = a->GenericDist.mixture(~env)
     switch dist' {
-    | Dist(dist) => dist
+    | Ok(dist) => dist
     | _ => raise(MixtureFailed)
     }
   }
@@ -184,14 +183,14 @@ describe("combineAlongSupportOfSecondArgument0", () => {
       uniformMakeR(lowPrediction, highPrediction)->E.R.errMap(
         s => DistributionTypes.ArgumentError(s),
       )
-    let answerWrapped = E.R.fmap(answer, a => run(FromDist(#ToDist(ToPointSet), a)))
-    let predictionWrapped = E.R.fmap(prediction, a => run(FromDist(#ToDist(ToPointSet), a)))
+    let answerWrapped = E.R.bind(answer, a => GenericDist.toPointSet(a, ~env, ()))
+    let predictionWrapped = E.R.bind(prediction, a => GenericDist.toPointSet(a, ~env, ()))
 
     let interpolator = XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero)
     let integrand = PointSetDist_Scoring.WithDistAnswer.integrand
 
     let result = switch (answerWrapped, predictionWrapped) {
-    | (Ok(Dist(PointSet(Continuous(a)))), Ok(Dist(PointSet(Continuous(b))))) =>
+    | (Ok(Continuous(a)), Ok(Continuous(b))) =>
       Some(combineAlongSupportOfSecondArgument(interpolator, integrand, a.xyShape, b.xyShape))
     | _ => None
     }

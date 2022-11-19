@@ -8,36 +8,33 @@ let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean, stdev}
 describe("(Symbolic) normalize", () => {
   testAll("has no impact on normal distributions", list{-1e8, -1e-2, 0.0, 1e-4, 1e16}, mean => {
     let normalValue = mkNormal(mean, 2.0)
-    let normalizedValue = run(FromDist(#ToDist(Normalize), normalValue))
-    normalizedValue->unpackDist->expect->toEqual(normalValue)
+    let normalizedValue = normalValue->GenericDist.normalize
+    normalizedValue->expect->toEqual(normalValue)
   })
 })
 
 describe("(Symbolic) mean", () => {
   testAll("of normal distributions", list{-1e8, -16.0, -1e-2, 0.0, 1e-4, 32.0, 1e16}, mean => {
-    run(FromDist(#ToFloat(#Mean), mkNormal(mean, 4.0)))->unpackFloat->expect->toBeCloseTo(mean)
+    mkNormal(mean, 4.0)->GenericDist.mean(~env)->unpackResult->expect->toBeCloseTo(mean)
   })
 
   Skip.test("of normal(0, -1) (it NaNs out)", () => {
-    run(FromDist(#ToFloat(#Mean), mkNormal(1e1, -1e0)))->unpackFloat->expect->ExpectJs.toBeFalsy
+    mkNormal(1e1, -1e0)->GenericDist.mean(~env)->unpackResult->expect->ExpectJs.toBeFalsy
   })
 
   test("of normal(0, 1e-8) (it doesn't freak out at tiny stdev)", () => {
-    run(FromDist(#ToFloat(#Mean), mkNormal(0.0, 1e-8)))->unpackFloat->expect->toBeCloseTo(0.0)
+    mkNormal(0.0, 1e-8)->GenericDist.mean(~env)->unpackResult->expect->toBeCloseTo(0.0)
   })
 
   testAll("of exponential distributions", list{1e-7, 2.0, 10.0, 100.0}, rate => {
-    let meanValue = run(
-      FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Exponential({rate: rate}))),
-    )
-    meanValue->unpackFloat->expect->toBeCloseTo(1.0 /. rate) // https://en.wikipedia.org/wiki/Exponential_distribution#Mean,_variance,_moments,_and_median
+    let meanValue = DistributionTypes.Symbolic(#Exponential({rate: rate}))->GenericDist.mean(~env)
+    meanValue->unpackResult->expect->toBeCloseTo(1.0 /. rate) // https://en.wikipedia.org/wiki/Exponential_distribution#Mean,_variance,_moments,_and_median
   })
 
   test("of a cauchy distribution", () => {
-    let meanValue = run(
-      FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Cauchy({local: 1.0, scale: 1.0}))),
-    )
-    meanValue->unpackFloat->expect->toBeSoCloseTo(1.0098094001641797, ~digits=5)
+    let meanValue =
+      DistributionTypes.Symbolic(#Cauchy({local: 1.0, scale: 1.0}))->GenericDist.mean(~env)
+    meanValue->unpackResult->expect->toBeSoCloseTo(1.0098094001641797, ~digits=5)
     //-> toBe(GenDistError(Other("Cauchy distributions may have no mean value.")))
   })
 
@@ -46,10 +43,9 @@ describe("(Symbolic) mean", () => {
     list{(1.0, 2.0, 3.0), (-1e7, -1e-7, 1e-7), (-1e-7, 1e0, 1e7), (-1e-16, 0.0, 1e-16)},
     tup => {
       let (low, medium, high) = tup
-      let meanValue = run(
-        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Triangular({low, medium, high}))),
-      )
-      meanValue->unpackFloat->expect->toBeCloseTo((low +. medium +. high) /. 3.0) // https://www.statology.org/triangular-distribution/
+      let meanValue =
+        DistributionTypes.Symbolic(#Triangular({low, medium, high}))->GenericDist.mean(~env)
+      meanValue->unpackResult->expect->toBeCloseTo((low +. medium +. high) /. 3.0) // https://www.statology.org/triangular-distribution/
     },
   )
 
@@ -59,19 +55,16 @@ describe("(Symbolic) mean", () => {
     list{(1e-4, 6.4e1), (1.28e2, 1e0), (1e-16, 1e-16), (1e16, 1e16), (-1e4, 1e1), (1e1, -1e4)},
     tup => {
       let (alpha, beta) = tup
-      let meanValue = run(
-        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Beta({alpha, beta}))),
-      )
-      meanValue->unpackFloat->expect->toBeCloseTo(1.0 /. (1.0 +. beta /. alpha)) // https://en.wikipedia.org/wiki/Beta_distribution#Mean
+      let meanValue = DistributionTypes.Symbolic(#Beta({alpha, beta}))->GenericDist.mean(~env)
+      meanValue->unpackResult->expect->toBeCloseTo(1.0 /. (1.0 +. beta /. alpha)) // https://en.wikipedia.org/wiki/Beta_distribution#Mean
     },
   )
 
   // TODO: When we have our theory of validators we won't want this to be NaN but to be an error.
   test("of beta(0, 0)", () => {
-    let meanValue = run(
-      FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Beta({alpha: 0.0, beta: 0.0}))),
-    )
-    meanValue->unpackFloat->expect->ExpectJs.toBeFalsy
+    let meanValue =
+      DistributionTypes.Symbolic(#Beta({alpha: 0.0, beta: 0.0}))->GenericDist.mean(~env)
+    meanValue->unpackResult->expect->ExpectJs.toBeFalsy
   })
 
   testAll(
@@ -81,11 +74,9 @@ describe("(Symbolic) mean", () => {
       let (mean, stdev) = tup
       let betaDistribution = SymbolicDist.Beta.fromMeanAndStdev(mean, stdev)
       let meanValue =
-        betaDistribution->E.R.fmap(
-          d => run(FromDist(#ToFloat(#Mean), d->DistributionTypes.Symbolic)),
-        )
+        betaDistribution->E.R.fmap(d => d->DistributionTypes.Symbolic->GenericDist.mean(~env))
       switch meanValue {
-      | Ok(value) => value->unpackFloat->expect->toBeCloseTo(mean)
+      | Ok(value) => value->unpackResult->expect->toBeCloseTo(mean)
       | Error(err) => err->expect->toBe("shouldn't happen")
       }
     },
@@ -96,10 +87,8 @@ describe("(Symbolic) mean", () => {
     list{(2.0, 4.0), (1e-7, 1e-2), (-1e6, 10.0), (1e3, -1e2), (-1e8, -1e4), (1e2, 1e-5)},
     tup => {
       let (mu, sigma) = tup
-      let meanValue = run(
-        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Lognormal({mu, sigma}))),
-      )
-      meanValue->unpackFloat->expect->toBeCloseTo(Js.Math.exp(mu +. sigma ** 2.0 /. 2.0)) // https://brilliant.org/wiki/log-normal-distribution/
+      let meanValue = DistributionTypes.Symbolic(#Lognormal({mu, sigma}))->GenericDist.mean(~env)
+      meanValue->unpackResult->expect->toBeCloseTo(Js.Math.exp(mu +. sigma ** 2.0 /. 2.0)) // https://brilliant.org/wiki/log-normal-distribution/
     },
   )
 
@@ -108,16 +97,14 @@ describe("(Symbolic) mean", () => {
     list{(1e-5, 12.345), (-1e4, 1e4), (-1e16, -1e2), (5.3e3, 9e9)},
     tup => {
       let (low, high) = tup
-      let meanValue = run(
-        FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Uniform({low, high}))),
-      )
-      meanValue->unpackFloat->expect->toBeCloseTo((low +. high) /. 2.0) // https://en.wikipedia.org/wiki/Continuous_uniform_distribution#Moments
+      let meanValue = DistributionTypes.Symbolic(#Uniform({low, high}))->GenericDist.mean(~env)
+      meanValue->unpackResult->expect->toBeCloseTo((low +. high) /. 2.0) // https://en.wikipedia.org/wiki/Continuous_uniform_distribution#Moments
     },
   )
 
   test("of a float", () => {
-    let meanValue = run(FromDist(#ToFloat(#Mean), DistributionTypes.Symbolic(#Float(7.7))))
-    meanValue->unpackFloat->expect->toBeCloseTo(7.7)
+    let meanValue = DistributionTypes.Symbolic(#Float(7.7))->GenericDist.mean(~env)
+    meanValue->unpackResult->expect->toBeCloseTo(7.7)
   })
 })
 

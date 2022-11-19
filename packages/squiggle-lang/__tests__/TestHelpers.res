@@ -25,8 +25,6 @@ let makeTest = (~only=false, str, item1, item2) =>
     ? Only.test(str, () => expect(item1)->toEqual(item2))
     : test(str, () => expect(item1)->toEqual(item2))
 
-let {toFloat, toDist, toString, toError, fmap} = module(DistributionOperation.Output)
-
 let fnImage = (theFn, inps) => Js.Array.map(theFn, inps)
 
 let env: GenericDist.env = {
@@ -34,8 +32,6 @@ let env: GenericDist.env = {
   xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
 
-let run = DistributionOperation.run(~env)
-let outputMap = fmap(~env)
 let unreachableInTestFileMessage = "Should be impossible to reach (This error is in test file)"
 let toExtFloat: option<float> => float = E.O.toExt(_, unreachableInTestFileMessage)
 let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.genericDist = E.O.toExt(
@@ -43,8 +39,7 @@ let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.generi
   unreachableInTestFileMessage,
 )
 // let toExt: option<'a> => 'a = E.O.toExt(_, unreachableInTestFileMessage)
-let unpackFloat = x => x->toFloat->toExtFloat
-let unpackDist = y => y->toDist->toExtDist
+let unpackResult = x => x->E.R.toExn("failed")
 
 let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean, stdev}))
 let mkBeta = (alpha, beta) => DistributionTypes.Symbolic(#Beta({alpha, beta}))

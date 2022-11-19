@@ -1,412 +1,276 @@
 open FunctionRegistry_Core
 
-module Old = {
-  module Helpers = {
-    let arithmeticMap = r =>
-      switch r {
-      | "add" => #Add
-      | "dotAdd" => #Add
-      | "subtract" => #Subtract
-      | "dotSubtract" => #Subtract
-      | "divide" => #Divide
-      | "log" => #Logarithm
-      | "dotDivide" => #Divide
-      | "pow" => #Power
-      | "dotPow" => #Power
-      | "multiply" => #Multiply
-      | "dotMultiply" => #Multiply
-      | _ => #Multiply
-      }
+module Helpers = {
+  let makeFn = (
+    name: string,
+    inputs: array<frType>,
+    fn: (array<Reducer_T.value>, GenericDist.env) => result<Reducer_T.value, errorMessage>,
+  ) => {
+    Function.make(
+      ~name,
+      ~nameSpace="",
+      ~requiresNamespace=false,
+      ~definitions=[
+        FnDefinition.make(
+          ~name,
+          ~inputs,
+          ~run=(inputs, context, _) => fn(inputs, context.environment),
+          (),
+        ),
+      ],
+      (),
+    )
+  }
 
-    let catchAndConvertTwoArgsToDists = (args: array<Reducer_T.value>): option<(
-      DistributionTypes.genericDist,
-      DistributionTypes.genericDist,
-    )> =>
-      switch args {
-      | [IEvDistribution(a), IEvDistribution(b)] => Some((a, b))
-      | [IEvNumber(a), IEvDistribution(b)] => Some((GenericDist.fromFloat(a), b))
-      | [IEvDistribution(a), IEvNumber(b)] => Some((a, GenericDist.fromFloat(b)))
-      | _ => None
-      }
-
-    let toFloatFn = (
-      fnCall: DistributionTypes.DistributionOperation.toFloat,
-      dist: DistributionTypes.genericDist,
-      ~env: GenericDist.env,
-    ) => {
-      FromDist(#ToFloat(fnCall), dist)->DistributionOperation.run(~env)->Some
-    }
-
-    let toStringFn = (
-      fnCall: DistributionTypes.DistributionOperation.toString,
-      dist: DistributionTypes.genericDist,
-      ~env: GenericDist.env,
-    ) => {
-      FromDist(#ToString(fnCall), dist)->DistributionOperation.run(~env)->Some
-    }
-
-    let toBoolFn = (
-      fnCall: DistributionTypes.DistributionOperation.toBool,
-      dist: DistributionTypes.genericDist,
-      ~env: GenericDist.env,
-    ) => {
-      FromDist(#ToBool(fnCall), dist)->DistributionOperation.run(~env)->Some
-    }
-
-    let toDistFn = (
-      fnCall: DistributionTypes.DistributionOperation.toDist,
-      dist,
-      ~env: GenericDist.env,
-    ) => {
-      FromDist(#ToDist(fnCall), dist)->DistributionOperation.run(~env)->Some
-    }
-
-    let twoDiststoDistFn = (direction, arithmetic, dist1, dist2, ~env: GenericDist.env) => {
-      FromDist(
-        #ToDistCombination(direction, arithmeticMap(arithmetic), #Dist(dist2)),
-        dist1,
-      )->DistributionOperation.run(~env)
-    }
-
-    let parseNumber = (args: Reducer_T.value): Belt.Result.t<float, string> =>
-      switch args {
-      | IEvNumber(x) => Ok(x)
-      | _ => Error("Not a number")
-      }
-
-    let parseNumberArray = (ags: array<Reducer_T.value>): Belt.Result.t<array<float>, string> =>
-      E.A.fmap(ags, parseNumber)->E.A.R.firstErrorOrOpen
-
-    let parseDist = (args: Reducer_T.value): Belt.Result.t<DistributionTypes.genericDist, string> =>
-      switch args {
-      | IEvDistribution(x) => Ok(x)
-      | IEvNumber(x) => Ok(GenericDist.fromFloat(x))
-      | _ => Error("Not a distribution")
-      }
-
-    let parseDistributionArray = (ags: array<Reducer_T.value>): Belt.Result.t<
-      array<DistributionTypes.genericDist>,
-      string,
-    > => E.A.fmap(ags, parseDist)->E.A.R.firstErrorOrOpen
-
-    let mixtureWithGivenWeights = (
-      distributions: array<DistributionTypes.genericDist>,
-      weights: array<float>,
-      ~env: GenericDist.env,
-    ): DistributionOperation.outputType =>
-      E.A.length(distributions) == E.A.length(weights)
-        ? Mixture(E.A.zip(distributions, weights))->DistributionOperation.run(~env)
-        : GenDistError(
-            ArgumentError("Error, mixture call has different number of distributions and weights"),
-          )
-
-    let mixtureWithDefaultWeights = (
-      distributions: array<DistributionTypes.genericDist>,
-      ~env: GenericDist.env,
-    ): DistributionOperation.outputType => {
-      let length = E.A.length(distributions)
-      let weights = Belt.Array.make(length, 1.0 /. Belt.Int.toFloat(length))
-      mixtureWithGivenWeights(distributions, weights, ~env)
-    }
-
-    let mixture = (
-      args: array<Reducer_T.value>,
-      ~env: GenericDist.env,
-    ): DistributionOperation.outputType => {
-      let error = (err: string): DistributionOperation.outputType =>
-        err->DistributionTypes.ArgumentError->GenDistError
-      switch args {
-      | [IEvArray(distributions)] =>
-        switch parseDistributionArray(distributions) {
-        | Ok(distrs) => mixtureWithDefaultWeights(distrs, ~env)
-        | Error(err) => error(err)
-        }
-      | [IEvArray(distributions), IEvArray(weights)] =>
-        switch (parseDistributionArray(distributions), parseNumberArray(weights)) {
-        | (Ok(distrs), Ok(wghts)) => mixtureWithGivenWeights(distrs, wghts, ~env)
-        | (Error(err), Ok(_)) => error(err)
-        | (Ok(_), Error(err)) => error(err)
-        | (Error(err1), Error(err2)) => error(`${err1}|${err2}`)
-        }
-      | _ =>
-        switch E.A.last(args) {
-        | Some(IEvArray(b)) => {
-            let weights = parseNumberArray(b)
-            let distributions = parseDistributionArray(
-              E.A.slice(args, ~offset=0, ~len=E.A.length(args) - 1),
-            )
-            switch E.R.merge(distributions, weights) {
-            | Ok(d, w) => mixtureWithGivenWeights(d, w, ~env)
-            | Error(err) => error(err)
-            }
-          }
-
-        | Some(IEvNumber(_))
-        | Some(IEvDistribution(_)) =>
-          switch parseDistributionArray(args) {
-          | Ok(distributions) => mixtureWithDefaultWeights(distributions, ~env)
-          | Error(err) => error(err)
-          }
-        | _ => error("Last argument of mx must be array or distribution")
-        }
-      }
+  let unpackDist = (args: array<Reducer_T.value>) => {
+    switch args {
+    | [IEvDistribution(d)] => d
+    | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
     }
   }
 
-  module SymbolicConstructors = {
-    let threeFloat = name =>
-      switch name {
-      | "triangular" => Ok(SymbolicDist.Triangular.make)
-      | _ => Error("Unreachable state")
-      }
-
-    let symbolicResultToOutput = (
-      symbolicResult: result<SymbolicDistTypes.symbolicDist, string>,
-    ): option<DistributionOperation.outputType> =>
-      switch symbolicResult {
-      | Ok(r) => Some(Dist(Symbolic(r)))
-      | Error(r) => Some(GenDistError(OtherError(r)))
-      }
-  }
-
-  let dispatchToGenericOutput = (call: Reducer_Value.functionCall, env: GenericDist.env): option<
-    DistributionOperation.outputType,
-  > => {
-    let (fnName, args) = call
-    switch (fnName, args) {
-    | ("triangular" as fnName, [IEvNumber(f1), IEvNumber(f2), IEvNumber(f3)]) =>
-      SymbolicConstructors.threeFloat(fnName)
-      ->E.R.bind(r => r(f1, f2, f3))
-      ->SymbolicConstructors.symbolicResultToOutput
-    | ("sample", [IEvDistribution(dist)]) => Helpers.toFloatFn(#Sample, dist, ~env)
-    | ("sampleN", [IEvDistribution(dist), IEvNumber(n)]) =>
-      Some(FloatArray(GenericDist.sampleN(dist, Belt.Int.fromFloat(n))))
-    | (("mean" | "stdev" | "variance" | "min" | "max" | "mode") as op, [IEvDistribution(dist)]) => {
-        let fn = switch op {
-        | "mean" => #Mean
-        | "stdev" => #Stdev
-        | "variance" => #Variance
-        | "min" => #Min
-        | "max" => #Max
-        | "mode" => #Mode
-        | _ => #Mean
-        }
-        Helpers.toFloatFn(fn, dist, ~env)
-      }
-
-    | ("integralSum", [IEvDistribution(dist)]) => Helpers.toFloatFn(#IntegralSum, dist, ~env)
-    | ("toString", [IEvDistribution(dist)]) => Helpers.toStringFn(ToString, dist, ~env)
-    | ("sparkline", [IEvDistribution(dist)]) =>
-      Helpers.toStringFn(ToSparkline(MagicNumbers.Environment.sparklineLength), dist, ~env)
-    | ("sparkline", [IEvDistribution(dist), IEvNumber(n)]) =>
-      Helpers.toStringFn(ToSparkline(Belt.Float.toInt(n)), dist, ~env)
-    | ("exp", [IEvDistribution(a)]) =>
-      // https://mathjs.org/docs/reference/functions/exp.html
-      Helpers.twoDiststoDistFn(
-        Algebraic(AsDefault),
-        "pow",
-        GenericDist.fromFloat(MagicNumbers.Math.e),
-        a,
-        ~env,
-      )->Some
-    | ("normalize", [IEvDistribution(dist)]) => Helpers.toDistFn(Normalize, dist, ~env)
-    | ("isNormalized", [IEvDistribution(dist)]) => Helpers.toBoolFn(IsNormalized, dist, ~env)
-    | ("toPointSet", [IEvDistribution(dist)]) => Helpers.toDistFn(ToPointSet, dist, ~env)
-    | ("scaleLog", [IEvDistribution(dist)]) =>
-      Helpers.toDistFn(Scale(#Logarithm, MagicNumbers.Math.e), dist, ~env)
-    | ("scaleLog10", [IEvDistribution(dist)]) =>
-      Helpers.toDistFn(Scale(#Logarithm, 10.0), dist, ~env)
-    | ("scaleLog", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toDistFn(Scale(#Logarithm, float), dist, ~env)
-    | ("scaleLogWithThreshold", [IEvDistribution(dist), IEvNumber(base), IEvNumber(eps)]) =>
-      Helpers.toDistFn(Scale(#LogarithmWithThreshold(eps), base), dist, ~env)
-    | ("scaleMultiply", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toDistFn(Scale(#Multiply, float), dist, ~env)
-    | ("scalePow", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toDistFn(Scale(#Power, float), dist, ~env)
-    | ("scaleExp", [IEvDistribution(dist)]) =>
-      Helpers.toDistFn(Scale(#Power, MagicNumbers.Math.e), dist, ~env)
-    | ("cdf", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toFloatFn(#Cdf(float), dist, ~env)
-    | ("pdf", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toFloatFn(#Pdf(float), dist, ~env)
-    | ("inv", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toFloatFn(#Inv(float), dist, ~env)
-    | ("quantile", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toFloatFn(#Inv(float), dist, ~env)
-    | ("inspect", [IEvDistribution(dist)]) => Helpers.toDistFn(Inspect, dist, ~env)
-    | ("truncateLeft", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toDistFn(Truncate(Some(float), None), dist, ~env)
-    | ("truncateRight", [IEvDistribution(dist), IEvNumber(float)]) =>
-      Helpers.toDistFn(Truncate(None, Some(float)), dist, ~env)
-    | ("truncate", [IEvDistribution(dist), IEvNumber(float1), IEvNumber(float2)]) =>
-      Helpers.toDistFn(Truncate(Some(float1), Some(float2)), dist, ~env)
-    | ("mx" | "mixture", args) => Helpers.mixture(args, ~env)->Some
-    | ("log", [IEvDistribution(a)]) =>
-      Helpers.twoDiststoDistFn(
-        Algebraic(AsDefault),
-        "log",
-        a,
-        GenericDist.fromFloat(MagicNumbers.Math.e),
-        ~env,
-      )->Some
-    | ("log10", [IEvDistribution(a)]) =>
-      Helpers.twoDiststoDistFn(
-        Algebraic(AsDefault),
-        "log",
-        a,
-        GenericDist.fromFloat(10.0),
-        ~env,
-      )->Some
-    | ("unaryMinus", [IEvDistribution(a)]) =>
-      Helpers.twoDiststoDistFn(
-        Algebraic(AsDefault),
-        "multiply",
-        a,
-        GenericDist.fromFloat(-1.0),
-        ~env,
-      )->Some
-    | (
-        ("add" | "multiply" | "subtract" | "divide" | "pow" | "log") as arithmetic,
-        [_, _] as args,
-      ) =>
-      Helpers.catchAndConvertTwoArgsToDists(args)->E.O.fmap(((fst, snd)) =>
-        Helpers.twoDiststoDistFn(Algebraic(AsDefault), arithmetic, fst, snd, ~env)
-      )
-    | (
-        ("dotAdd"
-        | "dotMultiply"
-        | "dotSubtract"
-        | "dotDivide"
-        | "dotPow") as arithmetic,
-        [_, _] as args,
-      ) =>
-      Helpers.catchAndConvertTwoArgsToDists(args)->E.O.fmap(((fst, snd)) =>
-        Helpers.twoDiststoDistFn(Pointwise, arithmetic, fst, snd, ~env)
-      )
-    | ("dotExp", [IEvDistribution(a)]) =>
-      Helpers.twoDiststoDistFn(
-        Pointwise,
-        "dotPow",
-        GenericDist.fromFloat(MagicNumbers.Math.e),
-        a,
-        ~env,
-      )->Some
-    | _ => None
+  let unpackDistAndFloat = (args: array<Reducer_T.value>) => {
+    switch args {
+    | [IEvDistribution(dist), IEvNumber(float)] => (dist, float)
+    | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
     }
   }
 
-  let genericOutputToReducerValue = (o: DistributionOperation.outputType): result<
+  let packAny = (constructor: 'a => Reducer_T.value, r: result<'a, GenericDist.error>): result<
     Reducer_T.value,
-    SqError.Message.t,
-  > =>
-    switch o {
-    | Dist(d) => Ok(Reducer_T.IEvDistribution(d))
-    | Float(d) => Ok(IEvNumber(d))
-    | String(d) => Ok(IEvString(d))
-    | Bool(d) => Ok(IEvBool(d))
-    | FloatArray(d) => Ok(IEvArray(d->E.A.fmap(r => Reducer_T.IEvNumber(r))))
-    | GenDistError(err) => Error(REDistributionError(err))
+    errorMessage,
+  > => {
+    switch r {
+    | Ok(f) => f->constructor->Ok
+    | Error(e) => e->REDistributionError->Error
     }
+  }
 
-  let dispatch = (call: Reducer_Value.functionCall, environment) =>
-    switch dispatchToGenericOutput(call, environment) {
-    | Some(o) => genericOutputToReducerValue(o)
-    | None =>
-      SqError.Message.REOther(
-        "Internal error in FR_GenericDist implementation",
-      )->SqError.Message.throw
-    }
+  let packFloat = packAny(v => IEvNumber(v))
+  let packDist = packAny(v => IEvDistribution(v))
+  let packBool = packAny(v => IEvBool(v))
+  let packString = packAny(v => IEvString(v))
+
+  let makeDistToFloatFn = (name, fn) =>
+    makeFn(name, [FRTypeDist], (inputs, env) => inputs->unpackDist->fn(~env)->packFloat)
+
+  let makeDistToDistFn = (
+    name,
+    fn: (GenericDist.t, ~env: GenericDist.env) => result<GenericDist.t, GenericDist.error>,
+  ) => makeFn(name, [FRTypeDist], (inputs, env) => inputs->unpackDist->fn(~env)->packDist)
+
+  let makeDistToBoolFn = (name, fn) =>
+    makeFn(name, [FRTypeDist], (inputs, env) => inputs->unpackDist->fn(~env)->packBool)
+
+  let makeDistToStringFn = (name, fn) =>
+    makeFn(name, [FRTypeDist], (inputs, env) => inputs->unpackDist->fn(~env)->packString)
+
+  let makeDistAndFloatToStringFn = (name, fn) =>
+    makeFn(name, [FRTypeDist, FRTypeNumber], (inputs, env) => {
+      let (dist, x) = unpackDistAndFloat(inputs)
+      fn(dist, x, ~env)->packString
+    })
+
+  let makeDistAndFloatToFloatFn = (name, fn) =>
+    makeFn(name, [FRTypeDist, FRTypeNumber], (inputs, env) => {
+      let (dist, x) = unpackDistAndFloat(inputs)
+      fn(dist, x, ~env)->packFloat
+    })
+
+  let makeDistAndFloatToDistFn = (name, fn) =>
+    makeFn(name, [FRTypeDist, FRTypeNumber], (inputs, env) => {
+      let (dist, x) = unpackDistAndFloat(inputs)
+      fn(dist, x, ~env)->packDist
+    })
 }
 
-let makeProxyFn = (name: string, inputs: array<frType>) => {
-  Function.make(
-    ~name,
-    ~nameSpace="",
-    ~requiresNamespace=false,
-    ~definitions=[
-      FnDefinition.make(
-        ~name,
-        ~inputs,
-        ~run=(inputs, context, _) => Old.dispatch((name, inputs), context.environment),
-        (),
-      ),
-    ],
-    (),
-  )
-}
-
-let makeOperationFns = (): array<function> => {
-  let ops = [
-    "add",
-    "multiply",
-    "subtract",
-    "divide",
-    "pow",
-    "log",
-    "dotAdd",
-    "dotMultiply",
-    "dotSubtract",
-    "dotDivide",
-    "dotPow",
+module OperationFns = {
+  module Operations = GenericDist.Operations
+  type opPair = (string, Operations.operationFn)
+  let algebraicOps: array<opPair> = [
+    ("add", Operations.algebraicAdd),
+    ("multiply", Operations.algebraicMultiply),
+    ("subtract", Operations.algebraicSubtract),
+    ("divide", Operations.algebraicDivide),
+    ("pow", Operations.algebraicPower),
+    ("log", Operations.algebraicLogarithm),
   ]
-  let twoArgTypes = [
-    // can't use numeric+numeric, since number+number should be delegated to builtin arithmetics
-    [FRTypeDist, FRTypeNumber],
-    [FRTypeNumber, FRTypeDist],
-    [FRTypeDist, FRTypeDist],
+  let pointwiseOps: array<opPair> = [
+    ("dotAdd", Operations.pointwiseAdd),
+    ("dotMultiply", Operations.pointwiseMultiply),
+    ("dotSubtract", Operations.pointwiseSubtract),
+    ("dotDivide", Operations.pointwiseDivide),
+    ("dotPow", Operations.pointwisePower),
   ]
 
-  ops->E.A.fmap(op => twoArgTypes->E.A.fmap(types => makeProxyFn(op, types)))->E.A.concatMany
+  let make = (): array<function> => {
+    let twoArgTypes = [
+      // can't use numeric+numeric, since number+number should be delegated to builtin arithmetics
+      [FRTypeDist, FRTypeNumber],
+      [FRTypeNumber, FRTypeDist],
+      [FRTypeDist, FRTypeDist],
+    ]
+
+    let unpackTwoDists = (args: array<Reducer_T.value>): (
+      DistributionTypes.genericDist,
+      DistributionTypes.genericDist,
+    ) =>
+      switch args {
+      | [IEvDistribution(a), IEvDistribution(b)] => (a, b)
+      | [IEvNumber(a), IEvDistribution(b)] => (GenericDist.fromFloat(a), b)
+      | [IEvDistribution(a), IEvNumber(b)] => (a, GenericDist.fromFloat(b))
+      | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
+      }
+
+    let makeAlgebraicOpFn = ((name, operation): opPair, inputs: array<frType>) =>
+      Helpers.makeFn(name, inputs, (args, env) => {
+        let (dist1, dist2) = unpackTwoDists(args)
+        operation(dist1, dist2, ~env)->Helpers.packDist
+      })
+
+    let makePointwiseFn = ((name, operation): opPair, inputs: array<frType>) =>
+      Helpers.makeFn(name, inputs, (args, env) => {
+        let (dist1, dist2) = unpackTwoDists(args)
+        operation(dist1, dist2, ~env)->Helpers.packDist
+      })
+
+    E.A.concat(
+      algebraicOps
+      ->E.A.fmap(op => twoArgTypes->E.A.fmap(types => makeAlgebraicOpFn(op, types)))
+      ->E.A.concatMany,
+      pointwiseOps
+      ->E.A.fmap(op => twoArgTypes->E.A.fmap(types => makePointwiseFn(op, types)))
+      ->E.A.concatMany,
+    )
+  }
 }
 
-// TODO - duplicates the switch above, should rewrite with standard FR APIs
 let library = E.A.concatMany([
   [
-    makeProxyFn("triangular", [FRTypeNumber, FRTypeNumber, FRTypeNumber]),
-    makeProxyFn("sample", [FRTypeDist]),
-    makeProxyFn("sampleN", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("mean", [FRTypeDist]),
-    makeProxyFn("stdev", [FRTypeDist]),
-    makeProxyFn("variance", [FRTypeDist]),
-    makeProxyFn("min", [FRTypeDist]),
-    makeProxyFn("max", [FRTypeDist]),
-    makeProxyFn("mode", [FRTypeDist]),
-    makeProxyFn("integralSum", [FRTypeDist]),
-    makeProxyFn("toString", [FRTypeDist]),
-    makeProxyFn("sparkline", [FRTypeDist]),
-    makeProxyFn("sparkline", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("exp", [FRTypeDist]),
-    makeProxyFn("normalize", [FRTypeDist]),
-    makeProxyFn("isNormalized", [FRTypeDist]),
-    makeProxyFn("toPointSet", [FRTypeDist]),
-    makeProxyFn("scaleLog", [FRTypeDist]),
-    makeProxyFn("scaleLog10", [FRTypeDist]),
-    makeProxyFn("scaleLog", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("scaleLogWithThreshold", [FRTypeDist, FRTypeNumber, FRTypeNumber]),
-    makeProxyFn("scaleMultiply", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("scalePow", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("scaleExp", [FRTypeDist]),
-    makeProxyFn("cdf", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("pdf", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("inv", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("quantile", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("inspect", [FRTypeDist]),
-    makeProxyFn("truncateLeft", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("truncateRight", [FRTypeDist, FRTypeNumber]),
-    makeProxyFn("truncate", [FRTypeDist, FRTypeNumber, FRTypeNumber]),
-    makeProxyFn("log", [FRTypeDist]),
-    makeProxyFn("log10", [FRTypeDist]),
-    makeProxyFn("unaryMinus", [FRTypeDist]),
-    makeProxyFn("dotExp", [FRTypeDist]),
+    Helpers.makeFn("triangular", [FRTypeNumber, FRTypeNumber, FRTypeNumber], (inputs, _) =>
+      switch inputs {
+      | [IEvNumber(f1), IEvNumber(f2), IEvNumber(f3)] =>
+        switch SymbolicDist.Triangular.make(f1, f2, f3) {
+        | Ok(d) => d->Symbolic->IEvDistribution->Ok
+        | Error(e) => e->OtherError->REDistributionError->Error
+        }
+      | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
+      }
+    ),
+    Helpers.makeDistToFloatFn("sample", (d, ~env) =>
+      GenericDist.toFloatOperation(d, ~distToFloatOperation=#Sample, ~env)
+    ),
+    Helpers.makeFn("sampleN", [FRTypeDist, FRTypeNumber], (inputs, _) => {
+      let (dist, n) = inputs->Helpers.unpackDistAndFloat
+      dist
+      ->GenericDist.sampleN(Belt.Int.fromFloat(n))
+      ->E.A.fmap(r => Reducer_T.IEvNumber(r))
+      ->IEvArray
+      ->Ok
+    }),
+    Helpers.makeDistToFloatFn("mean", GenericDist.mean),
+    Helpers.makeDistToFloatFn("stdev", GenericDist.stdev),
+    Helpers.makeDistToFloatFn("variance", GenericDist.variance),
+    Helpers.makeDistToFloatFn("min", GenericDist.min),
+    Helpers.makeDistToFloatFn("max", GenericDist.max),
+    Helpers.makeDistToFloatFn("mode", GenericDist.mode),
+    Helpers.makeDistToFloatFn("integralSum", d =>
+      GenericDist.toFloatOperation(d, ~distToFloatOperation=#IntegralSum)
+    ),
+    Helpers.makeDistToStringFn("toString", (d, ~env as _) => GenericDist.toString(d)->Ok),
+    Helpers.makeDistToStringFn("sparkline", (dist, ~env) => {
+      dist->GenericDist.toSparkline(
+        ~sampleCount=env.sampleCount,
+        ~bucketCount=MagicNumbers.Environment.sparklineLength,
+        (),
+      )
+    }),
+    Helpers.makeDistAndFloatToStringFn("sparkline", (dist, n, ~env) => {
+      dist->GenericDist.toSparkline(
+        ~sampleCount=env.sampleCount,
+        ~bucketCount=Belt.Float.toInt(n),
+        (),
+      )
+    }),
+    Helpers.makeDistToDistFn("exp", (dist, ~env) => {
+      GenericDist.Operations.algebraicPower(GenericDist.fromFloat(MagicNumbers.Math.e), dist, ~env)
+    }),
+    Helpers.makeDistToDistFn("normalize", (dist, ~env as _) => dist->GenericDist.normalize->Ok),
+    Helpers.makeDistToBoolFn("isNormalized", (d, ~env as _) => GenericDist.isNormalized(d)->Ok),
+    Helpers.makeDistToDistFn("toPointSet", (dist, ~env) =>
+      dist->GenericDist.toPointSet(~env, ())->E.R.fmap(d => DistributionTypes.PointSet(d))
+    ),
+    Helpers.makeDistToDistFn("scaleLog", (dist, ~env) =>
+      dist->GenericDist.scaleLog(MagicNumbers.Math.e, ~env)
+    ),
+    Helpers.makeDistToDistFn("scaleLog10", (dist, ~env) => dist->GenericDist.scaleLog(10.0, ~env)),
+    Helpers.makeDistAndFloatToDistFn("scaleLog", (dist, x, ~env) =>
+      dist->GenericDist.scaleLog(x, ~env)
+    ),
+    Helpers.makeFn("scaleLogWithThreshold", [FRTypeDist, FRTypeNumber, FRTypeNumber], (
+      inputs,
+      env,
+    ) => {
+      switch inputs {
+      | [IEvDistribution(dist), IEvNumber(base), IEvNumber(eps)] =>
+        dist
+        ->GenericDist.pointwiseCombinationFloat(
+          ~env,
+          ~algebraicCombination=#LogarithmWithThreshold(eps),
+          ~f=base,
+        )
+        ->Helpers.packDist
+      | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
+      }
+    }),
+    Helpers.makeDistAndFloatToDistFn("scaleMultiply", (dist, f, ~env) =>
+      dist->GenericDist.pointwiseCombinationFloat(~env, ~algebraicCombination=#Multiply, ~f)
+    ),
+    Helpers.makeDistAndFloatToDistFn("scalePow", (dist, f, ~env) =>
+      dist->GenericDist.pointwiseCombinationFloat(~env, ~algebraicCombination=#Power, ~f)
+    ),
+    Helpers.makeDistToDistFn("scaleExp", (dist, ~env) =>
+      dist->GenericDist.pointwiseCombinationFloat(
+        ~env,
+        ~algebraicCombination=#Power,
+        ~f=MagicNumbers.Math.e,
+      )
+    ),
+    Helpers.makeDistAndFloatToFloatFn("cdf", GenericDist.cdf),
+    Helpers.makeDistAndFloatToFloatFn("pdf", GenericDist.pdf),
+    Helpers.makeDistAndFloatToFloatFn("inv", GenericDist.inv),
+    Helpers.makeDistAndFloatToFloatFn("quantile", GenericDist.inv),
+    Helpers.makeDistAndFloatToDistFn("truncateLeft", (dist, x, ~env) =>
+      dist->GenericDist.truncate(~env, ~leftCutoff=Some(x), ())
+    ),
+    Helpers.makeDistAndFloatToDistFn("truncateRight", (dist, x, ~env) =>
+      dist->GenericDist.truncate(~env, ~rightCutoff=Some(x), ())
+    ),
+    Helpers.makeFn("truncate", [FRTypeDist, FRTypeNumber, FRTypeNumber], (inputs, env) => {
+      switch inputs {
+      | [IEvDistribution(dist), IEvNumber(left), IEvNumber(right)] =>
+        dist
+        ->GenericDist.truncate(~env, ~leftCutoff=Some(left), ~rightCutoff=Some(right), ())
+        ->Helpers.packDist
+      | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
+      }
+    }),
+    Helpers.makeDistToDistFn("log", (dist, ~env) => {
+      GenericDist.Operations.algebraicLogarithm(
+        dist,
+        GenericDist.fromFloat(MagicNumbers.Math.e),
+        ~env,
+      )
+    }),
+    Helpers.makeDistToDistFn("log10", (dist, ~env) => {
+      GenericDist.Operations.algebraicLogarithm(dist, GenericDist.fromFloat(10.0), ~env)
+    }),
+    Helpers.makeDistToDistFn("unaryMinus", (dist, ~env) => {
+      GenericDist.Operations.algebraicMultiply(dist, GenericDist.fromFloat(-1.0), ~env)
+    }),
+    Helpers.makeDistToDistFn("dotExp", (dist, ~env) => {
+      GenericDist.Operations.pointwisePower(GenericDist.fromFloat(MagicNumbers.Math.e), dist, ~env)
+    }),
   ],
-  makeOperationFns(),
+  OperationFns.make(),
 ])
-
-// FIXME - impossible to implement with FR due to arbitrary parameters length;
-let mxLambda = Reducer_Lambda.makeFFILambda("mx", (inputs, context, _) => {
-  switch Old.dispatch(("mx", inputs), context.environment) {
-  | Ok(value) => value
-  | Error(e) => e->SqError.Message.throw
-  }
-})
