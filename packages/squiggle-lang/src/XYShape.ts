@@ -2,22 +2,7 @@ import sortBy from "lodash/sortBy";
 import * as E_A from "./utility/E_A";
 import * as E_A_Floats from "./utility/E_A_Floats";
 import * as E_A_Sorted from "./utility/E_A_Sorted";
-
-type rsResult<V, E> =
-  | {
-      TAG: 0;
-      _0: V;
-    }
-  | { TAG: 1; _0: E };
-
-const RSResult = {
-  Ok<T, E>(value: T): rsResult<T, E> {
-    return { TAG: 0, _0: value };
-  },
-  Error<T, E>(value: E): rsResult<T, E> {
-    return { TAG: 1, _0: value };
-  },
-};
+import * as RSResult from "./rsResult";
 
 type XYShape = {
   xs: number[];
@@ -139,8 +124,8 @@ export const T = {
   },
   mapYResult<E>(
     t: XYShape,
-    fn: (y: number) => rsResult<number, E>
-  ): rsResult<XYShape, E> {
+    fn: (y: number) => RSResult.t<number, E>
+  ): RSResult.t<XYShape, E> {
     const mappedYs: number[] = [];
     for (const y of t.ys) {
       const mappedY = fn(y);
@@ -187,7 +172,7 @@ export const T = {
   filterYValues(t: XYShape, fn: (y: number) => number): XYShape {
     return T.fromZippedArray(T.zip(t).filter(([, y]) => fn(y)));
   },
-  filterOkYs<B>(xs: number[], ys: rsResult<number, B>[]): XYShape {
+  filterOkYs<B>(xs: number[], ys: RSResult.t<number, B>[]): XYShape {
     const n = xs.length; // Assume length(xs) == length(ys)
     const newXs: number[] = [];
     const newYs: number[] = [];
@@ -264,7 +249,7 @@ export const T = {
     },
   },
 
-  make(xs: number[], ys: number[]): rsResult<XYShape, XYShapeError> {
+  make(xs: number[], ys: number[]): RSResult.t<XYShape, XYShapeError> {
     const attempt: XYShape = { xs, ys };
     const maybeError = T.Validator.validate(attempt);
     if (maybeError) {
@@ -496,10 +481,10 @@ export const PointwiseCombination = {
   // t1 and t2 are interpolator functions from XYShape.XtoY.
   combine(
     interpolator: Interpolator,
-    fn: (a: number, b: number) => rsResult<number, string>,
+    fn: (a: number, b: number) => RSResult.t<number, string>,
     t1: XYShape,
     t2: XYShape
-  ): rsResult<XYShape, string> {
+  ): RSResult.t<XYShape, string> {
     // This function combines two xyShapes by looping through both of them simultaneously.
     // It always moves on to the next smallest x, whether that's in the first or second input's xs,
     // and interpolates the value on the other side, thus accumulating xs and ys.
