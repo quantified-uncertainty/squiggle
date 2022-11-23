@@ -11,7 +11,7 @@ let make = (~integralSumCache=None, ~integralCache=None, ~continuous, ~discrete)
 
 let totalLength = (t: t): int => {
   let continuousLength = t.continuous.xyShape->XYShape.T.length
-  let discreteLength = t.discrete->Discrete.getShape->XYShape.T.length
+  let discreteLength = t.discrete.xyShape->XYShape.T.length
 
   continuousLength + discreteLength
 }

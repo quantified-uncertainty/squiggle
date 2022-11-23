@@ -225,7 +225,7 @@ export const reduce = <E>(
   return RSResult.Ok(acc);
 };
 
-const scaleBy = (t: ContinuousShape, scale: number): ContinuousShape => {
+export const scaleBy = (t: ContinuousShape, scale: number): ContinuousShape => {
   return T.mapY(
     t,
     (r) => r * scale,
@@ -316,7 +316,7 @@ export const T: PointSet<ContinuousShape> = {
   },
 
   // TODO: This should work with stepwise plots.
-  integral(t: ContinuousShape) {
+  integral(t) {
     if (XYShape.T.isEmpty(t.xyShape)) {
       return emptyIntegral;
     }

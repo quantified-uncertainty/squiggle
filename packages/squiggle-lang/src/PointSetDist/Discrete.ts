@@ -1,237 +1,301 @@
+import * as Continuous from "./Continuous";
+import * as RSResult from "../rsResult";
+import * as MixedPoint from "./MixedPoint";
+import * as Common from "./Common";
 import { ContinuousShape } from "./Continuous";
 import * as XYShape from "../XYShape";
+import {
+  ConvolutionOperation,
+  convolutionOperationToFn,
+  PointSet,
+} from "./types";
+import { epsilon_float } from "../magicNumbers";
 
-// type t = PointSetTypes.discreteShape
 export type DiscreteShape = {
   xyShape: XYShape.XYShape;
   integralSumCache?: number;
-  integralCache?: ContinuousShape;
+  integralCache?: Continuous.ContinuousShape;
 };
 
-// let make = (~integralSumCache=None, ~integralCache=None, xyShape): t => {
-//   xyShape,
-//   integralSumCache,
-//   integralCache,
-// }
-// let shapeMap = ({xyShape, integralSumCache, integralCache}: t, fn): t => {
-//   xyShape: fn(xyShape),
-//   integralSumCache,
-//   integralCache,
-// }
+export const make = (
+  xyShape: XYShape.XYShape,
+  integralSumCache: number | undefined = undefined,
+  integralCache: ContinuousShape | undefined = undefined
+): DiscreteShape => ({
+  xyShape,
+  integralSumCache,
+  integralCache,
+});
+
+export const shapeMap = (
+  t: DiscreteShape,
+  fn: (shape: XYShape.XYShape) => XYShape.XYShape
+): DiscreteShape => ({
+  xyShape: fn(t.xyShape),
+  integralSumCache: t.integralSumCache,
+  integralCache: t.integralCache,
+});
+
 // let getShape = (t: t) => t.xyShape
 // let oShapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): option<t> =>
 //   fn(xyShape)->E.O.fmap(make(~integralSumCache, ~integralCache))
 
-// let emptyIntegral: PointSetTypes.continuousShape = {
-//   xyShape: {xs: [neg_infinity], ys: [0.0]},
-//   interpolation: #Stepwise,
-//   integralSumCache: Some(0.0),
-//   integralCache: None,
-// }
-// let empty: PointSetTypes.discreteShape = {
-//   xyShape: XYShape.T.empty,
-//   integralSumCache: Some(0.0),
-//   integralCache: Some(emptyIntegral),
-// }
+const emptyIntegral: ContinuousShape = {
+  xyShape: { xs: [-Infinity], ys: [0] },
+  interpolation: "Stepwise",
+  integralSumCache: 0,
+  integralCache: undefined,
+};
+
+const empty: DiscreteShape = {
+  xyShape: XYShape.T.empty,
+  integralSumCache: 0,
+  integralCache: emptyIntegral,
+};
 
 // let shapeFn = (t: t, fn) => t->getShape->fn
 
 // let lastY = (t: t) => t->getShape->XYShape.T.lastY
 
-// let combinePointwise = (
-//   ~combiner=XYShape.PointwiseCombination.combine,
-//   ~integralSumCachesFn=(_, _) => None,
-//   ~fn=(a, b) => Ok(a +. b),
-//   t1: PointSetTypes.discreteShape,
-//   t2: PointSetTypes.discreteShape,
-// ): result<PointSetTypes.discreteShape, 'e> => {
-//   //  let combinedIntegralSum = Common.combineIntegralSums(
-//   //    integralSumCachesFn,
-//   //    t1.integralSumCache,
-//   //    t2.integralSumCache,
-//   //  )
+const combinePointwise = <E>(
+  t1: DiscreteShape,
+  t2: DiscreteShape,
+  fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
+  integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
+    undefined
+): RSResult.rsResult<DiscreteShape, E> => {
+  const combiner = XYShape.PointwiseCombination.combine;
 
-//   // TODO: does it ever make sense to pointwise combine the integrals here?
-//   // It could be done for pointwise additions, but is that ever needed?
+  // const combinedIntegralSum = Common.combineIntegralSums(
+  //   integralSumCachesFn,
+  //   t1.integralSumCache,
+  //   t2.integralSumCache
+  // );
 
-//   combiner(XYShape.XtoY.discreteInterpolator, fn, t1.xyShape, t2.xyShape)->E.R.fmap(make)
-// }
+  // TODO: does it ever make sense to pointwise combine the integrals here?
+  // It could be done for pointwise additions, but is that ever needed?
 
-// let reduce = (
-//   discreteShapes: array<PointSetTypes.discreteShape>,
-//   ~integralSumCachesFn=(_, _) => None,
-//   fn: (float, float) => result<float, 'e>,
-// ): result<t, 'e> => {
-//   let merge = combinePointwise(~integralSumCachesFn, ~fn)
-//   discreteShapes->E.A.R.foldM(empty, merge)
-// }
+  return RSResult.fmap(
+    combiner(XYShape.XtoY.discreteInterpolator, fn, t1.xyShape, t2.xyShape),
+    (x) => make(x)
+  );
+};
 
-// let updateIntegralSumCache = (t: t, integralSumCache): t => {
-//   ...t,
-//   integralSumCache,
-// }
+export const reduce = <E>(
+  shapes: DiscreteShape[],
+  fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
+  integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
+    undefined
+): RSResult.rsResult<DiscreteShape, E> => {
+  let acc = empty;
+  for (const shape of shapes) {
+    const result = combinePointwise(acc, shape, fn, integralSumCachesFn);
+    if (result.TAG === RSResult.E.Error) {
+      return result;
+    }
+    acc = result._0;
+  }
+  return RSResult.Ok(acc);
+};
 
-// let updateIntegralCache = (t: t, integralCache): t => {
-//   ...t,
-//   integralCache,
-// }
+export const updateIntegralSumCache = (
+  t: DiscreteShape,
+  integralSumCache: number | undefined
+): DiscreteShape => {
+  return {
+    ...t,
+    integralSumCache,
+  };
+};
 
-// /* This multiples all of the data points together and creates a new discrete distribution from the results.
-//  Data points at the same xs get added together. It may be a good idea to downsample t1 and t2 before and/or the result after. */
-// let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
-//   let t1s = t1->getShape
-//   let t2s = t2->getShape
-//   let t1n = t1s->XYShape.T.length
-//   let t2n = t2s->XYShape.T.length
+export const updateIntegralCache = (
+  t: DiscreteShape,
+  integralCache: ContinuousShape | undefined
+): DiscreteShape => {
+  return {
+    ...t,
+    integralCache,
+  };
+};
 
-//   let combinedIntegralSum = Common.combineIntegralSums(
-//     (s1, s2) => Some(s1 *. s2),
-//     t1.integralSumCache,
-//     t2.integralSumCache,
-//   )
+/* This multiples all of the data points together and creates a new discrete distribution from the results.
+ Data points at the same xs get added together. It may be a good idea to downsample t1 and t2 before and/or the result after. */
+export const combineAlgebraically = (
+  op: ConvolutionOperation,
+  t1: DiscreteShape,
+  t2: DiscreteShape
+): DiscreteShape => {
+  let t1s = t1.xyShape;
+  let t2s = t2.xyShape;
+  let t1n = XYShape.T.length(t1s);
+  let t2n = XYShape.T.length(t2s);
 
-//   let fn = Operation.Convolution.toFn(op)
-//   let xToYMap = E.FloatFloatMap.empty()
+  const combinedIntegralSum = Common.combineIntegralSums(
+    (s1, s2) => s1 * s2,
+    t1.integralSumCache,
+    t2.integralSumCache
+  );
 
-//   for i in 0 to t1n - 1 {
-//     for j in 0 to t2n - 1 {
-//       let x = fn(t1s.xs[i], t2s.xs[j])
-//       let cv = xToYMap->E.FloatFloatMap.get(x, _)->E.O.default(0.)
-//       let my = t1s.ys[i] *. t2s.ys[j]
-//       let _ = Belt.MutableMap.set(xToYMap, x, cv +. my)
-//     }
-//   }
+  const fn = convolutionOperationToFn(op);
+  const xToYMap = new Map<number, number>();
 
-//   let rxys = xToYMap->E.FloatFloatMap.toArray->XYShape.Zipped.sortByX
+  for (let i = 0; i <= t1n - 1; i++) {
+    for (let j = 0; j <= t2n - 1; j++) {
+      const x = fn(t1s.xs[i], t2s.xs[j]);
+      const cv = xToYMap.get(x) ?? 0;
+      const my = t1s.ys[i] * t2s.ys[j];
+      xToYMap.set(x, cv + my);
+    }
+  }
 
-//   let combinedShape = XYShape.T.fromZippedArray(rxys)
+  const rxys = XYShape.Zipped.sortByX([...xToYMap.entries()]);
 
-//   make(~integralSumCache=combinedIntegralSum, combinedShape)
-// }
+  const combinedShape = XYShape.T.fromZippedArray(rxys);
 
-// let mapYResult = (
-//   t: t,
-//   fn: float => result<float, 'e>,
-//   ~integralSumCacheFn=_ => None,
-//   ~integralCacheFn=_ => None,
-//   (),
-// ): result<t, 'e> =>
-//   getShape(t)
-//   ->XYShape.T.mapYResult(fn)
-//   ->E.R.fmap(x =>
-//     make(
-//       ~integralSumCache=t.integralSumCache->E.O.bind(integralSumCacheFn),
-//       ~integralCache=t.integralCache->E.O.bind(integralCacheFn),
-//       x,
-//     )
-//   )
+  return make(combinedShape, combinedIntegralSum);
+};
 
-// let mapY = (
-//   t: t,
-//   fn: float => float,
-//   ~integralSumCacheFn=_ => None,
-//   ~integralCacheFn=_ => None,
-//   (),
-// ): t =>
-//   make(
-//     ~integralSumCache=t.integralSumCache->E.O.bind(integralSumCacheFn),
-//     ~integralCache=t.integralCache->E.O.bind(integralCacheFn),
-//     t->getShape->XYShape.T.mapY(fn),
-//   )
+export const scaleBy = (t: DiscreteShape, scale: number): DiscreteShape => {
+  return T.mapY(
+    t,
+    (r) => r * scale,
+    (sum) => sum * scale,
+    (cache) => Continuous.scaleBy(cache, scale)
+  );
+};
 
-// let scaleBy = (t: t, scale): t => {
-//   let scaledIntegralSumCache = t.integralSumCache->E.O.fmap(\"*."(scale))
-//   let scaledIntegralCache = t.integralCache->E.O.fmap(Continuous.scaleBy(_, scale))
+export const T: PointSet<DiscreteShape> = {
+  integral(t) {
+    if (XYShape.T.isEmpty(t.xyShape)) {
+      return emptyIntegral;
+    }
+    if (t.integralCache) {
+      return t.integralCache;
+    }
 
-//   t
-//   ->mapY((r: float) => r *. scale, ())
-//   ->updateIntegralSumCache(scaledIntegralSumCache)
-//   ->updateIntegralCache(scaledIntegralCache)
-// }
+    const ts = t.xyShape;
+    // The first xy of this integral should always be the zero, to ensure nice plotting
+    const firstX = XYShape.T.minX(ts);
+    const prependedZeroPoint: XYShape.XYShape = {
+      xs: [firstX - epsilon_float],
+      ys: [0],
+    };
+    const integralShape = XYShape.T.accumulateYs(
+      XYShape.T.concat(prependedZeroPoint, ts),
+      (a, b) => a + b
+    );
 
-// module T = Dist({
-//   type t = PointSetTypes.discreteShape
-//   type integral = PointSetTypes.continuousShape
-//   let integral = t =>
-//     switch (getShape(t)->XYShape.T.isEmpty, t.integralCache) {
-//     | (true, _) => emptyIntegral
-//     | (false, Some(c)) => c
-//     | (false, None) =>
-//       let ts = getShape(t)
-//       // The first xy of this integral should always be the zero, to ensure nice plotting
-//       let firstX = ts->XYShape.T.minX
-//       let prependedZeroPoint: XYShape.T.t = {xs: [firstX -. epsilon_float], ys: [0.]}
-//       let integralShape = ts->XYShape.T.concat(prependedZeroPoint, _)->XYShape.T.accumulateYs(\"+.")
+    return Continuous.make(integralShape, "Stepwise");
+  },
+  integralEndY(t) {
+    return t.integralSumCache ?? Continuous.lastY(T.integral(t));
+  },
+  minX(t) {
+    return XYShape.T.minX(t.xyShape);
+  },
+  maxX(t) {
+    return XYShape.T.maxX(t.xyShape);
+  },
+  toDiscreteProbabilityMassFraction() {
+    return 1;
+  },
+  mapY(t, fn, integralSumCacheFn, integralCacheFn) {
+    return make(
+      XYShape.T.mapY(t.xyShape, fn),
+      t.integralSumCache === undefined
+        ? undefined
+        : integralSumCacheFn(t.integralSumCache),
+      t.integralCache === undefined
+        ? undefined
+        : integralCacheFn(t.integralCache)
+    );
+  },
 
-//       Continuous.make(integralShape, ~interpolation=#Stepwise, ())
-//     }
+  mapYResult(t, fn, integralSumCacheFn, integralCacheFn) {
+    const result = XYShape.T.mapYResult(t.xyShape, fn);
+    if (result.TAG === RSResult.E.Ok) {
+      return RSResult.Ok(
+        make(
+          result._0,
+          t.integralSumCache === undefined
+            ? undefined
+            : integralSumCacheFn(t.integralSumCache),
+          t.integralCache === undefined
+            ? undefined
+            : integralCacheFn(t.integralCache)
+        )
+      );
+    } else {
+      return result;
+    }
+  },
 
-//   let integralEndY = (t: t) =>
-//     t.integralSumCache->E.O.defaultFn(() => t->integral->Continuous.lastY)
-//   let minX = shapeFn(_, XYShape.T.minX)
-//   let maxX = shapeFn(_, XYShape.T.maxX)
-//   let toDiscreteProbabilityMassFraction = _ => 1.0
-//   let mapY = mapY
-//   let mapYResult = mapYResult
-//   let updateIntegralCache = updateIntegralCache
-//   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Discrete(t)
-//   let toContinuous = _ => None
-//   let toDiscrete = t => Some(t)
+  updateIntegralCache,
 
-//   let normalize = (t: t): t => t->scaleBy(1. /. integralEndY(t))->updateIntegralSumCache(Some(1.0))
+  toContinuous() {
+    return undefined;
+  },
+  toDiscrete(t) {
+    return t;
+  },
 
-//   let downsample = (i, t: t): t => {
-//     // It's not clear how to downsample a set of discrete points in a meaningful way.
-//     // The best we can do is to clip off the smallest values.
-//     let currentLength = t->getShape->XYShape.T.length
+  normalize(t) {
+    return updateIntegralSumCache(scaleBy(t, 1 / T.integralEndY(t)), 1);
+  },
 
-//     if i < currentLength && (i >= 1 && currentLength > 1) {
-//       t
-//       ->getShape
-//       ->XYShape.T.zip
-//       ->XYShape.Zipped.sortByY
-//       ->Belt.Array.reverse
-//       ->E.A.slice(~offset=0, ~len=i)
-//       ->XYShape.Zipped.sortByX
-//       ->XYShape.T.fromZippedArray
-//       ->make
-//     } else {
-//       t
-//     }
-//   }
+  downsample(i, t) {
+    // It's not clear how to downsample a set of discrete points in a meaningful way.
+    // The best we can do is to clip off the smallest values.
+    const currentLength = XYShape.T.length(t.xyShape);
 
-//   let truncate = (leftCutoff: option<float>, rightCutoff: option<float>, t: t): t =>
-//     t
-//     ->getShape
-//     ->XYShape.T.zip
-//     ->XYShape.Zipped.filterByX(x =>
-//       x >= E.O.default(leftCutoff, neg_infinity) && x <= E.O.default(rightCutoff, infinity)
-//     )
-//     ->XYShape.T.fromZippedArray
-//     ->make
+    if (i < currentLength && i >= 1 && currentLength > 1) {
+      const sortedByY = XYShape.Zipped.sortByY(XYShape.T.zip(t.xyShape));
+      const picked = [...sortedByY].reverse().slice(0, i);
+      return make(XYShape.T.fromZippedArray(XYShape.Zipped.sortByX(picked)));
+    } else {
+      return t;
+    }
+  },
 
-//   let xToY = (f, t) =>
-//     t
-//     ->getShape
-//     ->XYShape.XtoY.stepwiseIfAtX(f)
-//     ->E.O.default(0.0)
-//     ->PointSetTypes.MixedPoint.makeDiscrete
+  truncate(leftCutoff, rightCutoff, t) {
+    return make(
+      XYShape.T.fromZippedArray(
+        XYShape.Zipped.filterByX(
+          XYShape.T.zip(t.xyShape),
+          (x) =>
+            x >= (leftCutoff ?? -Infinity) && x <= (rightCutoff ?? Infinity)
+        )
+      )
+    );
+  },
 
-//   let integralXtoY = (f, t) => (t->integral).xyShape->XYShape.XtoY.linear(f)
-//   let integralYtoX = (f, t) => (t->integral).xyShape->XYShape.YtoX.linear(f)
+  xToY(f, t) {
+    return MixedPoint.makeDiscrete(
+      XYShape.XtoY.stepwiseIfAtX(t.xyShape, f) ?? 0
+    );
+  },
 
-//   let mean = (t: t): float => {
-//     let s = getShape(t)
-//     E.A.reducei(s.xs, 0.0, (acc, x, i) => acc +. x *. s.ys[i])
-//   }
+  integralXtoY(f, t) {
+    return XYShape.XtoY.linear(T.integral(t).xyShape, f);
+  },
+  integralYtoX(f, t) {
+    return XYShape.YtoX.linear(T.integral(t).xyShape, f);
+  },
 
-//   let variance = (t: t): float => {
-//     let getMeanOfSquares = t => t->shapeMap(XYShape.T.square)->mean
-//     XYShape.Analysis.getVarianceDangerously(t, mean, getMeanOfSquares)
-//   }
-// })
+  mean(t: DiscreteShape): number {
+    const s = t.xyShape;
+    return s.xs.reduce((acc, x, i) => acc + x * s.ys[i], 0);
+  },
 
-// let sampleN = (t: t, n): array<float> => {
-//   let normalized = t->T.normalize->getShape
-//   Stdlib.Random.sample(normalized.xs, {probs: normalized.ys, size: n})
-// }
+  variance(t: DiscreteShape): number {
+    const getMeanOfSquares = (t: DiscreteShape) =>
+      T.mean(shapeMap(t, XYShape.T.square));
+
+    return XYShape.Analysis.getVarianceDangerously(t, T.mean, getMeanOfSquares);
+  },
+};
+
+export const sampleN = (t: DiscreteShape, n: number): number[] => {
+  const normalized = T.normalize(t).xyShape;
+  Stdlib.Random.sample(normalized.xs, { probs: normalized.ys, size: n });
+};

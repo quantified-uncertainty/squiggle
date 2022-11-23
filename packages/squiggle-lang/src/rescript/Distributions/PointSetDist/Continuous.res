@@ -1,3 +1,4 @@
+@@warning("-27") //TODO: Remove and fix the warning
 %%raw(`const Continuous = require('../../../PointSetDist/Continuous')`)
 
 type t = PointSetTypes.continuousShape
@@ -27,9 +28,9 @@ let combinePointwise = (
   ~integralSumCachesFn=(_, _) => None,
   ~distributionType: PointSetTypes.distributionType=#PDF,
   fn: (float, float) => result<float, Operation.Error.t>,
-  t1: PointSetTypes.continuousShape,
-  t2: PointSetTypes.continuousShape,
-): result<PointSetTypes.continuousShape, 'e> => {
+  t1: t,
+  t2: t,
+): result<t, 'e> => {
   %raw(`Continuous.combinePointwise(t1, t2, fn, distributionTypeOpt, integralSumCachesFnOpt)`)
 }
 
@@ -81,6 +82,7 @@ module T = Dist({
   let integralEndY = %raw(`Continuous.T.integralEndY`)
   let integralXtoY = %raw(`Continuous.T.integralXtoY`)
   let integralYtoX = %raw(`Continuous.T.integralYtoX`)
+
   let toContinuous = %raw(`Continuous.T.toContinuous`)
   let toDiscrete = %raw(`Continuous.T.toDiscrete`)
 
