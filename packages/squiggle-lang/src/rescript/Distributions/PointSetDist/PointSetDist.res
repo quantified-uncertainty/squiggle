@@ -217,7 +217,7 @@ let sample = (t: t): float => {
 
 let isFloat = (t: t) =>
   switch t {
-  | Discrete({xyShape: {xs: [_], ys: [1.0]}}) => true
+  | Discrete(d) => Discrete.isFloat(d)
   | _ => false
   }
 
@@ -242,7 +242,7 @@ let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineErr
   T.toContinuous(t)
   ->E.O.fmap(Continuous.downsampleEquallyOverX(bucketCount))
   ->E.O.toResult(PointSetTypes.CannotSparklineDiscrete)
-  ->E.R.fmap(r => r.xyShape.ys->Sparklines.create())
+  ->E.R.fmap(r => (r->Continuous.getShape).ys->Sparklines.create())
 
 let makeDiscrete = (d): t => Discrete(d)
 let makeContinuous = (d): t => Continuous(d)

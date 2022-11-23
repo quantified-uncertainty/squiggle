@@ -6,8 +6,8 @@ let buildSimple = (
     continuous->E.O.defaultFn(() => Continuous.make(~integralSumCache=Some(0.0), {xs: [], ys: []}))
   let discrete =
     discrete->E.O.defaultFn(() => Discrete.make(~integralSumCache=Some(0.0), {xs: [], ys: []}))
-  let cLength = continuous.xyShape->XYShape.T.xs->E.A.length
-  let dLength = discrete.xyShape->XYShape.T.xs->E.A.length
+  let cLength = continuous->Continuous.getShape->XYShape.T.xs->E.A.length
+  let dLength = discrete->Discrete.getShape->XYShape.T.xs->E.A.length
   switch (cLength, dLength) {
   | (0 | 1, 0) => None
   | (0 | 1, _) => Some(Discrete(discrete))

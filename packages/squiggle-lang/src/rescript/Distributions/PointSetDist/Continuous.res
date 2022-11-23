@@ -20,6 +20,8 @@ let make = (
 let lastY: t => float = %raw(`Continuous.lastY`)
 let empty: t = %raw(`Continuous.empty`)
 
+let getShape: t => XYShape.T.t = %raw(`Continuous.getShape`)
+
 let stepwiseToLinear: t => t = %raw(`Continuous.stepwiseToLinear`)
 
 let combinePointwise = (

@@ -2,6 +2,8 @@ import zipWith from "lodash/zipWith";
 import { wrapDistribution } from "./SqDistribution";
 import * as RSPointSetDist from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
 import { pointSetDistributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution_tag";
+import { ContinuousShape } from "../PointSetDist/Continuous";
+import { DiscreteShape } from "../PointSetDist/Discrete";
 
 type T = RSPointSetDist.pointSetDistribution;
 
@@ -11,9 +13,7 @@ export type SqShape = {
   discrete: SqPoint[];
 };
 
-const shapePoints = (
-  x: RSPointSetDist.continuousShape | RSPointSetDist.discreteShape
-): SqPoint[] => {
+const shapePoints = (x: ContinuousShape | DiscreteShape): SqPoint[] => {
   let xs = x.xyShape.xs;
   let ys = x.xyShape.ys;
   return zipWith(xs, ys, (x, y) => ({ x, y }));
@@ -60,7 +60,7 @@ export class SqMixedPointSetDist extends SqAbstractPointSetDist {
 export class SqDiscretePointSetDist extends SqAbstractPointSetDist {
   tag = Tag.Discrete as const;
 
-  get value(): RSPointSetDist.discreteShape {
+  get value(): DiscreteShape {
     return this.valueMethod(RSPointSetDist.getDiscrete);
   }
 
@@ -76,7 +76,7 @@ export class SqDiscretePointSetDist extends SqAbstractPointSetDist {
 export class SqContinuousPointSetDist extends SqAbstractPointSetDist {
   tag = Tag.Continuous as const;
 
-  get value(): RSPointSetDist.continuousShape {
+  get value(): ContinuousShape {
     return this.valueMethod(RSPointSetDist.getContinues);
   }
 

@@ -166,13 +166,7 @@ export const combinePointwise = <E>(
   );
 };
 
-// // let toLinear = (t: t): option<t> =>
-// //   switch t {
-// //   | {interpolation: #Stepwise, xyShape, integralSumCache, integralCache} =>
-// //     xyShape->XYShape.Range.stepsToContinuous->E.O.fmap(make(~integralSumCache, ~integralCache))
-// //   | {interpolation: #Linear} => Some(t)
-// //   }
-// let shapeFn = (t: t, fn) => t->getShape->fn
+export const getShape = (t: ContinuousShape) => t.xyShape;
 
 export const updateIntegralSumCache = (
   t: ContinuousShape,
@@ -354,12 +348,7 @@ export const T: PointSet<ContinuousShape> = {
     return undefined;
   },
   toMixed(t) {
-    return Mixed.make(
-      t,
-      Discrete.empty,
-      t.integralSumCache,
-      t.integralCache,
-    ),
+    return Mixed.make(t, Discrete.empty, t.integralSumCache, t.integralCache);
   },
 
   normalize(t) {

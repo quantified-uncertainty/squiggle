@@ -358,7 +358,7 @@ module AlgebraicCombination = {
       switch x {
       | Symbolic(#Float(_)) => MagicNumbers.OpCost.floatCost
       | Symbolic(_) => MagicNumbers.OpCost.symbolicCost
-      | PointSet(Discrete(m)) => m.xyShape->XYShape.T.length
+      | PointSet(Discrete(m)) => m->Discrete.getShape->XYShape.T.length
       | PointSet(Mixed(_)) => MagicNumbers.OpCost.mixedCost
       | PointSet(Continuous(_)) => MagicNumbers.OpCost.continuousCost
       | _ => MagicNumbers.OpCost.wildcardCost

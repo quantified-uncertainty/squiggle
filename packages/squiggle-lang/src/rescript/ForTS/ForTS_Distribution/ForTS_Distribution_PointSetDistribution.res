@@ -1,7 +1,27 @@
 @genType type pointSetDistribution = PointSetTypes.pointSetDist
-@genType type continuousShape = PointSetTypes.continuousShape
-@genType type discreteShape = PointSetTypes.discreteShape
-@genType type mixedShape = PointSetTypes.mixedShape
+// temporary copy-paste
+@genType
+type rec continuousShape = {
+  xyShape: XYShape.xyShape,
+  interpolation: XYShape.interpolationStrategy,
+  integralSumCache: option<float>,
+  integralCache: option<continuousShape>,
+}
+
+@genType
+type discreteShape = {
+  xyShape: XYShape.xyShape,
+  integralSumCache: option<float>,
+  integralCache: option<continuousShape>,
+}
+
+@genType
+type mixedShape = {
+  continuous: continuousShape,
+  discrete: discreteShape,
+  integralSumCache: option<float>,
+  integralCache: option<continuousShape>,
+}
 
 @module("./ForTS_Distribution_PointSetDistribution_tag") @scope("pointSetDistributionTag")
 external pstMixed_: string = "Mixed"
@@ -17,6 +37,10 @@ type pointSetDistributionTag
 
 external castEnum: string => pointSetDistributionTag = "%identity"
 
+external castContinuousShape: 'd => continuousShape = "%identity"
+external castDiscreteShape: 'd => discreteShape = "%identity"
+external castMixedShape: 'd => mixedShape = "%identity"
+
 @genType
 let getTag = (variant: pointSetDistribution): pointSetDistributionTag =>
   switch variant {
@@ -28,21 +52,21 @@ let getTag = (variant: pointSetDistribution): pointSetDistributionTag =>
 @genType
 let getMixed = (variant: pointSetDistribution): 'd =>
   switch variant {
-  | Mixed(mixed) => mixed->Some
+  | Mixed(mixed) => mixed->castMixedShape->Some
   | _ => None
   }
 
 @genType
 let getDiscrete = (variant: pointSetDistribution): 'd =>
   switch variant {
-  | Discrete(discrete) => discrete->Some
+  | Discrete(discrete) => discrete->castDiscreteShape->Some
   | _ => None
   }
 
 @genType
 let getContinues = (variant: pointSetDistribution): 'd =>
   switch variant {
-  | Continuous(continuous) => continuous->Some
+  | Continuous(continuous) => continuous->castContinuousShape->Some
   | _ => None
   }
 

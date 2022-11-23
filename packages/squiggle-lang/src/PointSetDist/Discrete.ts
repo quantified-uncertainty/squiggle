@@ -55,9 +55,14 @@ export const empty: DiscreteShape = {
   integralCache: emptyIntegral,
 };
 
-// let shapeFn = (t: t, fn) => t->getShape->fn
+export const isFloat = (t: DiscreteShape): boolean => {
+  if (t.xyShape.ys.length === 1 && t.xyShape.ys[0] === 1) {
+    return true;
+  }
+  return false;
+};
 
-// let lastY = (t: t) => t->getShape->XYShape.T.lastY
+export const getShape = (t: DiscreteShape) => t.xyShape;
 
 export const combinePointwise = <E>(
   t1: DiscreteShape,
@@ -241,12 +246,7 @@ export const T: PointSet<DiscreteShape> = {
     return t;
   },
   toMixed(t) {
-    return Mixed.make(
-      Continuous.empty,
-      t,
-      t.integralSumCache,
-      t.integralCache,
-    ),
+    return Mixed.make(Continuous.empty, t, t.integralSumCache, t.integralCache);
   },
 
   normalize(t) {

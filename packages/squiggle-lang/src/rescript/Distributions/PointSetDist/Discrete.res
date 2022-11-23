@@ -18,6 +18,12 @@ let shapeMap = (t: t, fn: XYShape.T.t => XYShape.T.t): t => {
 }
 let empty: t = %raw(`Discrete.empty`)
 
+let getShape: t => XYShape.T.t = %raw(`Discrete.getShape`)
+
+let isFloat = (t: t): bool => {
+  %raw(`Discrete.isFloat(t)`)
+}
+
 let combinePointwise = (
   ~combiner=XYShape.PointwiseCombination.combine,
   ~integralSumCachesFn=(_, _) => None,

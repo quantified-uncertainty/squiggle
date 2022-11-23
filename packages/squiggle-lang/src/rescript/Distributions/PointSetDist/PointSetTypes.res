@@ -3,32 +3,14 @@ type distributionType = [
   | #CDF
 ]
 
+@genType
 type xyShape = XYShape.xyShape
 type interpolationStrategy = XYShape.interpolationStrategy
 
-// matches PointSetDist/Continuous.ts
-@genType
-type rec continuousShape = {
-  xyShape: xyShape,
-  interpolation: interpolationStrategy,
-  integralSumCache: option<float>,
-  integralCache: option<continuousShape>,
-}
-
-@genType
-type discreteShape = {
-  xyShape: xyShape,
-  integralSumCache: option<float>,
-  integralCache: option<continuousShape>,
-}
-
-@genType
-type mixedShape = {
-  continuous: continuousShape,
-  discrete: discreteShape,
-  integralSumCache: option<float>,
-  integralCache: option<continuousShape>,
-}
+// opaque
+type continuousShape
+type discreteShape
+type mixedShape
 
 @genType.opaque
 type pointSetDist =
