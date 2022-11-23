@@ -1,42 +1,21 @@
 module Bernoulli = {
-  @module external cdf: (float, float) => float = "@stdlib/stats/base/dists/bernoulli/cdf"
-  let cdf = cdf
-
-  @module external pmf: (float, float) => float = "@stdlib/stats/base/dists/bernoulli/pmf"
-  let pmf = pmf
-
-  @module external quantile: (float, float) => float = "@stdlib/stats/base/dists/bernoulli/quantile"
-  let quantile = quantile
-
-  @module external mean: float => float = "@stdlib/stats/base/dists/bernoulli/mean"
-  let mean = mean
-
-  @module external stdev: float => float = "@stdlib/stats/base/dists/bernoulli/stdev"
-  let stdev = stdev
-
-  @module external variance: float => float = "@stdlib/stats/base/dists/bernoulli/variance"
-  let variance = variance
+  @module("../../js/math") external cdf: (float, float) => float = "bernoulli_cdf"
+  @module("../../js/math") external pmf: (float, float) => float = "bernoulli_pmf"
+  @module("../../js/math") external quantile: (float, float) => float = "bernoulli_quantile"
+  @module("../../js/math") external mean: float => float = "bernoulli_mean"
+  @module("../../js/math") external stdev: float => float = "bernoulli_stdev"
+  @module("../../js/math") external variance: float => float = "bernoulli_variance"
 }
 
+// @module external logistic: (float, float, float) => float = ""
+
 module Logistic = {
-  @module external cdf: (float, float, float) => float = "@stdlib/stats/base/dists/logistic/cdf"
-  let cdf = cdf
-
-  @module external pdf: (float, float, float) => float = "@stdlib/stats/base/dists/logistic/pdf"
-  let pdf = pdf
-
-  @module
-  external quantile: (float, float, float) => float = "@stdlib/stats/base/dists/logistic/quantile"
-  let quantile = quantile
-
-  @module external mean: (float, float) => float = "@stdlib/stats/base/dists/logistic/mean"
-  let mean = mean
-
-  @module external stdev: (float, float) => float = "@stdlib/stats/base/dists/logistic/stdev"
-  let stdev = stdev
-
-  @module external variance: (float, float) => float = "@stdlib/stats/base/dists/logistic/variance"
-  let variance = variance
+  @module("../../js/math") external cdf: (float, float, float) => float = "logistic_cdf"
+  @module("../../js/math") external pdf: (float, float, float) => float = "logistic_pdf"
+  @module("../../js/math") external quantile: (float, float, float) => float = "logistic_quantile"
+  @module("../../js/math") external mean: (float, float) => float = "logistic_mean"
+  @module("../../js/math") external stdev: (float, float) => float = "logistic_stdev"
+  @module("../../js/math") external variance: (float, float) => float = "logistic_variance"
 }
 
 module Random = {
@@ -44,10 +23,10 @@ module Random = {
     probs: array<float>,
     size: int,
   }
-  @module external sample: (array<float>, sampleArgs) => array<float> = "@stdlib/random/sample"
-  let sample = sample
+  @module("../../js/math")
+  external sample: (array<float>, sampleArgs) => array<float> = "random_sample"
 }
 
 module Math = {
-  @module external factorial: float => float = "@stdlib/math/base/special/factorial"
+  @module("../../js/math") external factorial: float => float = "factorial"
 }

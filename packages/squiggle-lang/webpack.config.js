@@ -14,7 +14,6 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
-    fallback: { buffer: ["@stdlib/buffer"] },
   },
   output: {
     filename: "bundle.js",
