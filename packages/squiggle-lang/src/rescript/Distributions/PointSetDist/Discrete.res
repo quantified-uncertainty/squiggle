@@ -1,4 +1,5 @@
 @@warning("-27") //TODO: Remove and fix the warning
+%%raw(`const Discrete = require('../../../PointSetDist/Discrete')`)
 
 type t = PointSetTypes.discreteShape
 
@@ -15,21 +16,7 @@ let make = (
 let shapeMap = (t: t, fn: XYShape.T.t => XYShape.T.t): t => {
   %raw(`Discrete.shapeMap(t, fn)`)
 }
-// let getShape = (t: t) => t.xyShape
-// let oShapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): option<t> =>
-//   fn(xyShape)->E.O.fmap(make(~integralSumCache, ~integralCache))
-
-// let emptyIntegral: PointSetTypes.continuousShape = {
-//   xyShape: {xs: [neg_infinity], ys: [0.0]},
-//   interpolation: #Stepwise,
-//   integralSumCache: Some(0.0),
-//   integralCache: None,
-// }
 let empty: t = %raw(`Discrete.empty`)
-
-// let shapeFn = (t: t, fn) => t->getShape->fn
-
-// let lastY = (t: t) => t->getShape->XYShape.T.lastY
 
 let combinePointwise = (
   ~combiner=XYShape.PointwiseCombination.combine,
@@ -92,9 +79,6 @@ module T = Dist({
   let updateIntegralCache = %raw(`Discrete.T.updateIntegralCache`)
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Discrete(t)
 
-  //   let toContinuous = _ => None
-  //   let toDiscrete = t => Some(t)
-
   let normalize = %raw(`Discrete.T.normalize`)
 
   let downsample = %raw(`Discrete.T.downsample`)
@@ -114,7 +98,6 @@ module T = Dist({
   let variance = %raw(`Discrete.T.variance`)
 })
 
-// let sampleN = (t: t, n): array<float> => {
-//   let normalized = t->T.normalize->getShape
-//   Stdlib.Random.sample(normalized.xs, {probs: normalized.ys, size: n})
-// }
+let sampleN = (t: t, n: int): array<float> => {
+  %raw(`Discrete.sampleN(t, n)`)
+}

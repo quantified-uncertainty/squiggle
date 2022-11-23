@@ -10,6 +10,7 @@ import {
   PointSet,
 } from "./types";
 import { epsilon_float } from "../magicNumbers";
+import { random_sample } from "../js/math";
 
 export type DiscreteShape = {
   xyShape: XYShape.XYShape;
@@ -47,7 +48,7 @@ const emptyIntegral: ContinuousShape = {
   integralCache: undefined,
 };
 
-const empty: DiscreteShape = {
+export const empty: DiscreteShape = {
   xyShape: XYShape.T.empty,
   integralSumCache: 0,
   integralCache: emptyIntegral,
@@ -57,7 +58,7 @@ const empty: DiscreteShape = {
 
 // let lastY = (t: t) => t->getShape->XYShape.T.lastY
 
-const combinePointwise = <E>(
+export const combinePointwise = <E>(
   t1: DiscreteShape,
   t2: DiscreteShape,
   fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
@@ -297,5 +298,5 @@ export const T: PointSet<DiscreteShape> = {
 
 export const sampleN = (t: DiscreteShape, n: number): number[] => {
   const normalized = T.normalize(t).xyShape;
-  Stdlib.Random.sample(normalized.xs, { probs: normalized.ys, size: n });
+  return random_sample(normalized.xs, { probs: normalized.ys, size: n });
 };
