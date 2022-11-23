@@ -96,7 +96,7 @@ let combineAlgebraicallyWithDiscrete = (
   op: Operation.convolutionOperation,
   t1: t,
   t2: PointSetTypes.discreteShape,
-  ~discretePosition: AlgebraicShapeCombination.argumentPosition,
+  ~discretePosition: [#First | #Second],
 ): t => {
   %raw(`Continuous.combineAlgebraicallyWithDiscrete(op, t1, t2, discretePosition)`)
 }
