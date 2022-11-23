@@ -33,3 +33,16 @@ export function fmap<T, T2, E>(
     return r;
   }
 }
+
+export function merge<T1, T2, E>(
+  a: rsResult<T1, E>,
+  b: rsResult<T2, E>
+): rsResult<[T1, T2], E> {
+  if (a.TAG === E.Error) {
+    return a;
+  }
+  if (b.TAG === E.Error) {
+    return b;
+  }
+  return Ok([a._0, b._0]);
+}

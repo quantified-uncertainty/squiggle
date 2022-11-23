@@ -2,7 +2,6 @@
 %%raw(`const Continuous = require('../../../PointSetDist/Continuous')`)
 
 type t = PointSetTypes.continuousShape
-
 open Distributions
 
 module Analysis = {

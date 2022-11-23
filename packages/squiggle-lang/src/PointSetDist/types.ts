@@ -23,8 +23,8 @@ export type PointSet<T> = {
   mapY: (
     t: T,
     fn: (y: number) => number,
-    integralSumCacheFn: (sum: number) => number | undefined,
-    integralCacheFn: (cache: ContinuousShape) => ContinuousShape | undefined
+    integralSumCacheFn?: (sum: number) => number | undefined,
+    integralCacheFn?: (cache: ContinuousShape) => ContinuousShape | undefined
   ) => T;
   mapYResult: <E>(
     t: T,

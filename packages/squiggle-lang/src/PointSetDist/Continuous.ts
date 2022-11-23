@@ -172,7 +172,7 @@ export const combinePointwise = <E>(
 // //   }
 // let shapeFn = (t: t, fn) => t->getShape->fn
 
-const updateIntegralSumCache = (
+export const updateIntegralSumCache = (
   t: ContinuousShape,
   integralSumCache: number | undefined
 ): ContinuousShape => {
@@ -247,10 +247,10 @@ export const T: PointSet<ContinuousShape> = {
       t.interpolation,
       t.integralSumCache === undefined
         ? undefined
-        : integralSumCacheFn(t.integralSumCache),
+        : integralSumCacheFn?.(t.integralSumCache),
       t.integralCache === undefined
         ? undefined
-        : integralCacheFn(t.integralCache)
+        : integralCacheFn?.(t.integralCache)
     );
   },
   mapYResult(t, fn, integralSumCacheFn, integralCacheFn) {

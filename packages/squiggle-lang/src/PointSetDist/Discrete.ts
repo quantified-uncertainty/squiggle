@@ -205,10 +205,10 @@ export const T: PointSet<DiscreteShape> = {
       XYShape.T.mapY(t.xyShape, fn),
       t.integralSumCache === undefined
         ? undefined
-        : integralSumCacheFn(t.integralSumCache),
+        : integralSumCacheFn?.(t.integralSumCache),
       t.integralCache === undefined
         ? undefined
-        : integralCacheFn(t.integralCache)
+        : integralCacheFn?.(t.integralCache)
     );
   },
 
