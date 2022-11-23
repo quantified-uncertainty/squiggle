@@ -51,14 +51,14 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
       op,
       m2,
       m1,
-      ~discretePosition=First,
+      ~discretePosition=#First,
     )->Continuous.T.toPointSetDist
   | (Continuous(m1), Discrete(m2)) =>
     Continuous.combineAlgebraicallyWithDiscrete(
       op,
       m1,
       m2,
-      ~discretePosition=Second,
+      ~discretePosition=#Second,
     )->Continuous.T.toPointSetDist
   | (Discrete(m1), Discrete(m2)) =>
     Discrete.combineAlgebraically(op, m1, m2)->Discrete.T.toPointSetDist
@@ -79,7 +79,6 @@ let combinePointwise = (
   switch (t1, t2) {
   | (Continuous(m1), Continuous(m2)) =>
     Continuous.combinePointwise(
-      ~combiner,
       ~integralSumCachesFn,
       fn,
       m1,
@@ -254,7 +253,7 @@ let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineErr
   T.toContinuous(t)
   ->E.O.fmap(Continuous.downsampleEquallyOverX(bucketCount))
   ->E.O.toResult(PointSetTypes.CannotSparklineDiscrete)
-  ->E.R.fmap(r => Continuous.getShape(r).ys->Sparklines.create())
+  ->E.R.fmap(r => r.xyShape.ys->Sparklines.create())
 
 let makeDiscrete = (d): t => Discrete(d)
 let makeContinuous = (d): t => Continuous(d)

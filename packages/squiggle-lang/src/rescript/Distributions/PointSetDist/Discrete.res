@@ -176,11 +176,10 @@ module T = Dist({
   let downsample = (i, t: t): t => {
     // It's not clear how to downsample a set of discrete points in a meaningful way.
     // The best we can do is to clip off the smallest values.
-    let currentLength = t->getShape->XYShape.T.length
+    let currentLength = t.xyShape->XYShape.T.length
 
     if i < currentLength && (i >= 1 && currentLength > 1) {
-      t
-      ->getShape
+      t.xyShape
       ->XYShape.T.zip
       ->XYShape.Zipped.sortByY
       ->Belt.Array.reverse
@@ -210,8 +209,8 @@ module T = Dist({
     ->E.O.default(0.0)
     ->PointSetTypes.MixedPoint.makeDiscrete
 
-  let integralXtoY = (f, t) => t->integral->Continuous.getShape->XYShape.XtoY.linear(f)
-  let integralYtoX = (f, t) => t->integral->Continuous.getShape->XYShape.YtoX.linear(f)
+  let integralXtoY = (f, t) => integral(t).xyShape->XYShape.XtoY.linear(f)
+  let integralYtoX = (f, t) => integral(t).xyShape->XYShape.YtoX.linear(f)
 
   let mean = (t: t): float => {
     let s = getShape(t)

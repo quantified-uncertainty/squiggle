@@ -10,7 +10,7 @@ let make = (~integralSumCache=None, ~integralCache=None, ~continuous, ~discrete)
 }
 
 let totalLength = (t: t): int => {
-  let continuousLength = t.continuous->Continuous.getShape->XYShape.T.length
+  let continuousLength = t.continuous.xyShape->XYShape.T.length
   let discreteLength = t.discrete->Discrete.getShape->XYShape.T.length
 
   continuousLength + discreteLength
@@ -149,16 +149,16 @@ module T = Dist({
       Continuous.make(
         XYShape.PointwiseCombination.addCombine(
           XYShape.XtoY.continuousInterpolator(#Linear, #UseOutermostPoints),
-          Continuous.getShape(continuousIntegral),
-          Continuous.getShape(discreteIntegral),
+          continuousIntegral.xyShape,
+          discreteIntegral.xyShape,
         ),
       )
     }
 
   let integralEndY = (t: t) => t->integral->Continuous.lastY
 
-  let integralXtoY = (f, t) => t->integral->Continuous.getShape->XYShape.XtoY.linear(f)
-  let integralYtoX = (f, t) => t->integral->Continuous.getShape->XYShape.YtoX.linear(f)
+  let integralXtoY = (f, t) => integral(t).xyShape->XYShape.XtoY.linear(f)
+  let integralYtoX = (f, t) => integral(t).xyShape->XYShape.YtoX.linear(f)
 
   let createMixedFromContinuousDiscrete = (
     ~integralSumCacheFn=_ => None,
@@ -281,13 +281,13 @@ let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t
     op,
     t2.continuous,
     t1.discrete,
-    ~discretePosition=First,
+    ~discretePosition=#First,
   )
   let cdConvResult = Continuous.combineAlgebraicallyWithDiscrete(
     op,
     t1.continuous,
     t2.discrete,
-    ~discretePosition=Second,
+    ~discretePosition=#Second,
   )
   let continuousConvResult = Continuous.sum([ccConvResult, dcConvResult, cdConvResult])
 

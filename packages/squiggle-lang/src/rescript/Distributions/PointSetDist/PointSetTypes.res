@@ -6,6 +6,7 @@ type distributionType = [
 type xyShape = XYShape.xyShape
 type interpolationStrategy = XYShape.interpolationStrategy
 
+// matches PointSetDist/Continuous.ts
 @genType
 type rec continuousShape = {
   xyShape: xyShape,

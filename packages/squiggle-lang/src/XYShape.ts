@@ -3,8 +3,9 @@ import * as E_A from "./utility/E_A";
 import * as E_A_Floats from "./utility/E_A_Floats";
 import * as E_A_Sorted from "./utility/E_A_Sorted";
 import * as RSResult from "./rsResult";
+import { epsilon_float } from "./magicNumbers";
 
-type XYShape = {
+export type XYShape = {
   xs: number[];
   ys: number[];
 };
@@ -68,7 +69,7 @@ export const XYShapeError = {
 };
 
 // can be changed to enum after Typescript conversion is done
-type InterpolationStrategy = "Stepwise" | "Linear";
+export type InterpolationStrategy = "Stepwise" | "Linear";
 type ExtrapolationStrategy = "UseZero" | "UseOutermostPoints";
 
 type Interpolator = (shape: XYShape, leftIndex: number, x: number) => number;
@@ -479,12 +480,12 @@ export const Zipped = {
 
 export const PointwiseCombination = {
   // t1 and t2 are interpolator functions from XYShape.XtoY.
-  combine(
+  combine<E>(
     interpolator: Interpolator,
-    fn: (a: number, b: number) => RSResult.t<number, string>,
+    fn: (a: number, b: number) => RSResult.t<number, E>,
     t1: XYShape,
     t2: XYShape
-  ): RSResult.t<XYShape, string> {
+  ): RSResult.t<XYShape, E> {
     // This function combines two xyShapes by looping through both of them simultaneously.
     // It always moves on to the next smallest x, whether that's in the first or second input's xs,
     // and interpolates the value on the other side, thus accumulating xs and ys.
@@ -722,7 +723,7 @@ export const Range = {
 
   integrateWithTriangles({ xs, ys }: XYShape) {
     const length = xs.length;
-    const cumulativeY = new Array(length).fill(0);
+    const cumulativeY: number[] = new Array(length).fill(0);
     for (let x = 0; x <= length - 2; x++) {
       cumulativeY[x + 1] =
         (xs[x + 1] - xs[x]) * ((ys[x] + ys[x + 1]) / 2) + cumulativeY[x]; // dx // (1/2) * (avgY)
@@ -739,8 +740,6 @@ export const Range = {
     const length = xs.length;
     const newXs: number[] = new Array(2 * length);
     const newYs: number[] = new Array(2 * length);
-
-    const epsilon_float = 2.22044604925031308e-16; // via pervasives.js
 
     newXs[0] = xs[0] - epsilon_float;
     newYs[0] = 0;

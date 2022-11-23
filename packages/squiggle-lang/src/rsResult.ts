@@ -22,3 +22,14 @@ export function Ok<T, E>(value: T): rsResult<T, E> {
 export function Error<T, E>(value: E): rsResult<T, E> {
   return { TAG: E.Error, _0: value };
 }
+
+export function fmap<T, T2, E>(
+  r: rsResult<T, E>,
+  fn: (v: T) => T2
+): rsResult<T2, E> {
+  if (r.TAG === E.Ok) {
+    return Ok(fn(r._0));
+  } else {
+    return r;
+  }
+}
