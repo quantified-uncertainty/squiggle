@@ -13,8 +13,8 @@ module type dist = {
     ~integralSumCacheFn: float => option<float>=?,
     ~integralCacheFn: PointSetTypes.continuousShape => option<PointSetTypes.continuousShape>=?,
     t,
-    float => result<float, 'e>,
-  ) => result<t, 'e>
+    float => result<float, Operation.Error.t>,
+  ) => result<t, Operation.Error.t>
   let xToY: (float, t) => PointSetTypes.mixedPoint
   let toPointSetDist: t => PointSetTypes.pointSetDist
   let toContinuous: t => option<PointSetTypes.continuousShape>

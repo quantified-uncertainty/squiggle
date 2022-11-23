@@ -168,55 +168,55 @@ describe("klDivergence: mixed -> mixed -> float", () => {
   })
 })
 
-describe("combineAlongSupportOfSecondArgument0", () => {
-  // This tests the version of the function that we're NOT using. Haven't deleted the test in case we use the code later.
-  test("test on two uniforms", _ => {
-    let combineAlongSupportOfSecondArgument = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0
-    let lowAnswer = 0.0
-    let highAnswer = 1.0
-    let lowPrediction = 0.0
-    let highPrediction = 2.0
+// describe("combineAlongSupportOfSecondArgument0", () => {
+//   // This tests the version of the function that we're NOT using. Haven't deleted the test in case we use the code later.
+//   test("test on two uniforms", _ => {
+//     let combineAlongSupportOfSecondArgument = XYShape.PointwiseCombination.combineAlongSupportOfSecondArgument0
+//     let lowAnswer = 0.0
+//     let highAnswer = 1.0
+//     let lowPrediction = 0.0
+//     let highPrediction = 2.0
 
-    let answer =
-      uniformMakeR(lowAnswer, highAnswer)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
-    let prediction =
-      uniformMakeR(lowPrediction, highPrediction)->E.R.errMap(
-        s => DistributionTypes.ArgumentError(s),
-      )
-    let answerWrapped = E.R.bind(answer, a => GenericDist.toPointSet(a, ~env, ()))
-    let predictionWrapped = E.R.bind(prediction, a => GenericDist.toPointSet(a, ~env, ()))
+//     let answer =
+//       uniformMakeR(lowAnswer, highAnswer)->E.R.errMap(s => DistributionTypes.ArgumentError(s))
+//     let prediction =
+//       uniformMakeR(lowPrediction, highPrediction)->E.R.errMap(
+//         s => DistributionTypes.ArgumentError(s),
+//       )
+//     let answerWrapped = E.R.bind(answer, a => GenericDist.toPointSet(a, ~env, ()))
+//     let predictionWrapped = E.R.bind(prediction, a => GenericDist.toPointSet(a, ~env, ()))
 
-    let interpolator = XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero)
-    let integrand = PointSetDist_Scoring.WithDistAnswer.integrand
+//     let interpolator = XYShape.XtoY.continuousInterpolator(#Stepwise, #UseZero)
+//     let integrand = PointSetDist_Scoring.WithDistAnswer.integrand
 
-    let result = switch (answerWrapped, predictionWrapped) {
-    | (Ok(Continuous(a)), Ok(Continuous(b))) =>
-      Some(combineAlongSupportOfSecondArgument(interpolator, integrand, a.xyShape, b.xyShape))
-    | _ => None
-    }
-    result
-    ->expect
-    ->toEqual(
-      Some(
-        Ok({
-          xs: [
-            0.0,
-            MagicNumbers.Epsilon.ten,
-            2.0 *. MagicNumbers.Epsilon.ten,
-            1.0 -. MagicNumbers.Epsilon.ten,
-            1.0,
-            1.0 +. MagicNumbers.Epsilon.ten,
-          ],
-          ys: [
-            -0.34657359027997264,
-            -0.34657359027997264,
-            -0.34657359027997264,
-            -0.34657359027997264,
-            -0.34657359027997264,
-            infinity,
-          ],
-        }),
-      ),
-    )
-  })
-})
+//     let result = switch (answerWrapped, predictionWrapped) {
+//     | (Ok(Continuous(a)), Ok(Continuous(b))) =>
+//       Some(combineAlongSupportOfSecondArgument(interpolator, integrand, a.xyShape, b.xyShape))
+//     | _ => None
+//     }
+//     result
+//     ->expect
+//     ->toEqual(
+//       Some(
+//         Ok({
+//           xs: [
+//             0.0,
+//             MagicNumbers.Epsilon.ten,
+//             2.0 *. MagicNumbers.Epsilon.ten,
+//             1.0 -. MagicNumbers.Epsilon.ten,
+//             1.0,
+//             1.0 +. MagicNumbers.Epsilon.ten,
+//           ],
+//           ys: [
+//             -0.34657359027997264,
+//             -0.34657359027997264,
+//             -0.34657359027997264,
+//             -0.34657359027997264,
+//             -0.34657359027997264,
+//             infinity,
+//           ],
+//         }),
+//       ),
+//     )
+//   })
+// })

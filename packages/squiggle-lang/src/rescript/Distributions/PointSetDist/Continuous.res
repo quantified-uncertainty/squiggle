@@ -125,12 +125,12 @@ let combinePointwise = (
   )
 }
 
-let toLinear = (t: t): option<t> =>
-  switch t {
-  | {interpolation: #Stepwise, xyShape, integralSumCache, integralCache} =>
-    xyShape->XYShape.Range.stepsToContinuous->E.O.fmap(make(~integralSumCache, ~integralCache))
-  | {interpolation: #Linear} => Some(t)
-  }
+// let toLinear = (t: t): option<t> =>
+//   switch t {
+//   | {interpolation: #Stepwise, xyShape, integralSumCache, integralCache} =>
+//     xyShape->XYShape.Range.stepsToContinuous->E.O.fmap(make(~integralSumCache, ~integralCache))
+//   | {interpolation: #Linear} => Some(t)
+//   }
 let shapeFn = (t: t, fn) => t->getShape->fn
 
 let updateIntegralSumCache = (t: t, integralSumCache): t => {
