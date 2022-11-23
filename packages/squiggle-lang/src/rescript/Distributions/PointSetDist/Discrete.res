@@ -93,6 +93,7 @@ module T = Dist({
 
   let toContinuous = %raw(`Discrete.T.toContinuous`)
   let toDiscrete = %raw(`Discrete.T.toDiscrete`)
+  let toMixed = %raw(`Discrete.T.toMixed`)
 
   let mean = %raw(`Discrete.T.mean`)
   let variance = %raw(`Discrete.T.variance`)

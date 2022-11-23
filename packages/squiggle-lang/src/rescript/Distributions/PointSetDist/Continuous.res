@@ -84,6 +84,7 @@ module T = Dist({
 
   let toContinuous = %raw(`Continuous.T.toContinuous`)
   let toDiscrete = %raw(`Continuous.T.toDiscrete`)
+  let toMixed = %raw(`Continuous.T.toMixed`)
 
   let normalize = %raw(`Continuous.T.normalize`)
 

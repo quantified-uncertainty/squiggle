@@ -24,21 +24,9 @@ let fmapResult = (t: t, (fn1, fn2, fn3)): result<t, 'e> =>
   }
 
 let toMixed = mapToAll((
-  m => m,
-  d =>
-    Mixed.make(
-      ~integralSumCache=d.integralSumCache,
-      ~integralCache=d.integralCache,
-      ~discrete=d,
-      ~continuous=Continuous.empty,
-    ),
-  c =>
-    Mixed.make(
-      ~integralSumCache=c.integralSumCache,
-      ~integralCache=c.integralCache,
-      ~discrete=Discrete.empty,
-      ~continuous=c,
-    ),
+  m => Mixed.T.toMixed(m),
+  d => Discrete.T.toMixed(d),
+  c => Continuous.T.toMixed(c),
 ))
 
 //TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
@@ -135,6 +123,7 @@ module T = Dist({
     Continuous.T.toContinuous,
   ))
   let toDiscrete = mapToAll((Mixed.T.toDiscrete, Discrete.T.toDiscrete, Continuous.T.toDiscrete))
+  let toMixed = mapToAll((Mixed.T.toMixed, Discrete.T.toMixed, Continuous.T.toMixed))
 
   let toDiscreteProbabilityMassFraction = mapToAll((
     Mixed.T.toDiscreteProbabilityMassFraction,

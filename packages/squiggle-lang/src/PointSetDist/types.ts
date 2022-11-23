@@ -1,6 +1,7 @@
 import { rsResult } from "../rsResult";
 import { ContinuousShape } from "./Continuous";
 import { DiscreteShape } from "./Discrete";
+import { MixedShape } from "./Mixed";
 import { MixedPoint } from "./MixedPoint";
 
 export type ConvolutionOperation = "Add" | "Multiply" | "Subtract";
@@ -36,6 +37,7 @@ export type PointSet<T> = {
   // toPointSetDist: (t: T) => PointSetTypes.pointSetDist;
   toContinuous: (t: T) => ContinuousShape | undefined;
   toDiscrete: (t: T) => DiscreteShape | undefined;
+  toMixed: (t: T) => MixedShape;
   normalize: (t: T) => T;
   toDiscreteProbabilityMassFraction: (t: T) => number;
   downsample: (length: number, t: T) => T;

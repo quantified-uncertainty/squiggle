@@ -19,6 +19,7 @@ module type dist = {
   let toPointSetDist: t => PointSetTypes.pointSetDist
   let toContinuous: t => option<PointSetTypes.continuousShape>
   let toDiscrete: t => option<PointSetTypes.discreteShape>
+  let toMixed: t => PointSetTypes.mixedShape
   let normalize: t => t
   let toDiscreteProbabilityMassFraction: t => float
   let downsample: (int, t) => t
@@ -50,6 +51,7 @@ module Dist = (T: dist) => {
   let toDiscreteProbabilityMassFraction = T.toDiscreteProbabilityMassFraction
   let toContinuous = T.toContinuous
   let toDiscrete = T.toDiscrete
+  let toMixed = T.toMixed
   let normalize = T.normalize
   let truncate = T.truncate
   let mean = T.mean

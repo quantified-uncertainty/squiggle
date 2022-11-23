@@ -2,9 +2,11 @@ import { epsilon_float } from "../magicNumbers";
 import * as XYShape from "../XYShape";
 import * as MixedPoint from "./MixedPoint";
 import * as RSResult from "../rsResult";
+import * as Mixed from "./Mixed";
 import * as AlgebraicShapeCombination from "./AlgebraicShapeCombination";
 import * as Common from "./Common";
 import { ConvolutionOperation, DistributionType, PointSet } from "./types";
+import * as Discrete from "./Discrete";
 import { DiscreteShape } from "./Discrete";
 
 export type ContinuousShape = {
@@ -103,7 +105,7 @@ const emptyIntegral: ContinuousShape = {
   integralSumCache: 0,
   integralCache: undefined,
 };
-const empty: ContinuousShape = {
+export const empty: ContinuousShape = {
   xyShape: XYShape.T.empty,
   interpolation: "Linear",
   integralSumCache: 0,
@@ -350,6 +352,14 @@ export const T: PointSet<ContinuousShape> = {
   },
   toDiscrete() {
     return undefined;
+  },
+  toMixed(t) {
+    return Mixed.make(
+      t,
+      Discrete.empty,
+      t.integralSumCache,
+      t.integralCache,
+    ),
   },
 
   normalize(t) {

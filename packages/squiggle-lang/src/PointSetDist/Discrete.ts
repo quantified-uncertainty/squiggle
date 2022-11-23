@@ -2,6 +2,7 @@ import * as Continuous from "./Continuous";
 import * as RSResult from "../rsResult";
 import * as MixedPoint from "./MixedPoint";
 import * as Common from "./Common";
+import * as Mixed from "./Mixed";
 import { ContinuousShape } from "./Continuous";
 import * as XYShape from "../XYShape";
 import {
@@ -238,6 +239,14 @@ export const T: PointSet<DiscreteShape> = {
   },
   toDiscrete(t) {
     return t;
+  },
+  toMixed(t) {
+    return Mixed.make(
+      Continuous.empty,
+      t,
+      t.integralSumCache,
+      t.integralCache,
+    ),
   },
 
   normalize(t) {

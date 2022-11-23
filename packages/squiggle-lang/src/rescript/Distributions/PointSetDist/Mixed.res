@@ -24,6 +24,7 @@ module T = Dist({
 
   let toContinuous = %raw(`Mixed.T.toContinuous`)
   let toDiscrete = %raw(`Mixed.T.toDiscrete`)
+  let toMixed = %raw(`Mixed.T.toMixed`)
 
   let truncate = %raw(`Mixed.T.truncate`)
 

@@ -77,6 +77,9 @@ export const T: PointSet<MixedShape> = {
   toDiscrete(t) {
     return t.discrete;
   },
+  toMixed(t) {
+    return t;
+  },
 
   updateIntegralCache,
   truncate(leftCutoff, rightCutoff, { discrete, continuous }) {
