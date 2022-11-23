@@ -5,7 +5,6 @@ running `rescript convert -all` on Rationale https://github.com/jonlaing/rationa
 
 module A = E_A
 module Float = E_Float
-module FloatFloatMap = E_FloatFloatMap
 module I = E_I
 module O = E_O
 module R = E_R
