@@ -2,7 +2,6 @@ import * as Continuous from "./Continuous";
 import * as RSResult from "../rsResult";
 import * as MixedPoint from "./MixedPoint";
 import * as Common from "./Common";
-import * as Mixed from "./Mixed";
 import { ContinuousShape } from "./Continuous";
 import * as XYShape from "../XYShape";
 import {
@@ -12,48 +11,235 @@ import {
 } from "./types";
 import { epsilon_float } from "../magicNumbers";
 import { random_sample } from "../js/math";
+import { MixedShape } from "./Mixed";
 
-export type DiscreteShape = {
-  xyShape: XYShape.XYShape;
-  integralSumCache?: number;
-  integralCache?: Continuous.ContinuousShape;
-};
+export class DiscreteShape extends PointSet<DiscreteShape> {
+  readonly xyShape: XYShape.XYShape;
+  readonly integralSumCache?: number;
+  readonly integralCache?: Continuous.ContinuousShape;
 
-export const make = (
-  xyShape: XYShape.XYShape,
-  integralSumCache: number | undefined = undefined,
-  integralCache: ContinuousShape | undefined = undefined
-): DiscreteShape => ({
-  xyShape,
-  integralSumCache,
-  integralCache,
-});
+  constructor(args: {
+    xyShape: XYShape.XYShape;
+    integralSumCache?: number;
+    integralCache?: ContinuousShape;
+  }) {
+    super();
+    this.xyShape = args.xyShape;
+    this.integralSumCache = args.integralSumCache;
+    this.integralCache = args.integralCache;
+  }
 
-export const shapeMap = (
-  t: DiscreteShape,
-  fn: (shape: XYShape.XYShape) => XYShape.XYShape
-): DiscreteShape => ({
-  xyShape: fn(t.xyShape),
-  integralSumCache: t.integralSumCache,
-  integralCache: t.integralCache,
-});
+  shapeMap(fn: (shape: XYShape.XYShape) => XYShape.XYShape): DiscreteShape {
+    return new DiscreteShape({
+      xyShape: fn(this.xyShape),
+      integralSumCache: this.integralSumCache,
+      integralCache: this.integralCache,
+    });
+  }
 
-// let getShape = (t: t) => t.xyShape
-// let oShapeMap = (fn, {xyShape, integralSumCache, integralCache}: t): option<t> =>
-//   fn(xyShape)->E.O.fmap(make(~integralSumCache, ~integralCache))
+  integral() {
+    if (XYShape.T.isEmpty(this.xyShape)) {
+      return emptyIntegral();
+    }
+    if (this.integralCache) {
+      return this.integralCache;
+    }
 
-const emptyIntegral: ContinuousShape = {
-  xyShape: { xs: [-Infinity], ys: [0] },
-  interpolation: "Stepwise",
-  integralSumCache: 0,
-  integralCache: undefined,
-};
+    const ts = this.xyShape;
+    // The first xy of this integral should always be the zero, to ensure nice plotting
+    const firstX = XYShape.T.minX(ts);
+    const prependedZeroPoint: XYShape.XYShape = {
+      xs: [firstX - epsilon_float],
+      ys: [0],
+    };
+    const integralShape = XYShape.T.accumulateYs(
+      XYShape.T.concat(prependedZeroPoint, ts),
+      (a, b) => a + b
+    );
 
-export const empty: DiscreteShape = {
-  xyShape: XYShape.T.empty,
-  integralSumCache: 0,
-  integralCache: emptyIntegral,
-};
+    return new ContinuousShape({
+      xyShape: integralShape,
+      interpolation: "Stepwise",
+    });
+  }
+
+  integralEndY() {
+    return this.integralSumCache ?? this.integral().lastY();
+  }
+
+  minX() {
+    return XYShape.T.minX(this.xyShape);
+  }
+  maxX() {
+    return XYShape.T.maxX(this.xyShape);
+  }
+  toDiscreteProbabilityMassFraction() {
+    return 1;
+  }
+
+  mapY(
+    fn: (y: number) => number,
+    integralSumCacheFn?: ((sum: number) => number | undefined) | undefined,
+    integralCacheFn?:
+      | ((
+          cache: Continuous.ContinuousShape
+        ) => Continuous.ContinuousShape | undefined)
+      | undefined
+  ) {
+    return new DiscreteShape({
+      xyShape: XYShape.T.mapY(this.xyShape, fn),
+      integralSumCache:
+        this.integralSumCache === undefined
+          ? undefined
+          : integralSumCacheFn?.(this.integralSumCache),
+      integralCache:
+        this.integralCache === undefined
+          ? undefined
+          : integralCacheFn?.(this.integralCache),
+    });
+  }
+
+  mapYResult<E>(
+    fn: (y: number) => RSResult.rsResult<number, E>,
+    integralSumCacheFn: ((sum: number) => number | undefined) | undefined,
+    integralCacheFn:
+      | ((cache: ContinuousShape) => ContinuousShape | undefined)
+      | undefined
+  ): RSResult.rsResult<DiscreteShape, E> {
+    const result = XYShape.T.mapYResult(this.xyShape, fn);
+    if (result.TAG === RSResult.E.Ok) {
+      return RSResult.Ok(
+        new DiscreteShape({
+          xyShape: result._0,
+          integralSumCache:
+            this.integralSumCache === undefined
+              ? undefined
+              : integralSumCacheFn?.(this.integralSumCache),
+          integralCache:
+            this.integralCache === undefined
+              ? undefined
+              : integralCacheFn?.(this.integralCache),
+        })
+      );
+    } else {
+      return result;
+    }
+  }
+
+  updateIntegralCache(
+    integralCache: Continuous.ContinuousShape | undefined
+  ): DiscreteShape {
+    return new DiscreteShape({
+      xyShape: this.xyShape,
+      integralSumCache: this.integralSumCache,
+      integralCache,
+    });
+  }
+
+  updateIntegralSumCache(integralSumCache: number | undefined): DiscreteShape {
+    return new DiscreteShape({
+      xyShape: this.xyShape,
+      integralSumCache,
+      integralCache: this.integralCache,
+    });
+  }
+
+  toContinuous() {
+    return undefined;
+  }
+  toDiscrete() {
+    return this;
+  }
+  toMixed() {
+    return new MixedShape({
+      continuous: Continuous.empty(),
+      discrete: this,
+      integralSumCache: this.integralSumCache,
+      integralCache: this.integralCache,
+    });
+  }
+
+  scaleBy(scale: number): DiscreteShape {
+    return this.mapY(
+      (r) => r * scale,
+      (sum) => sum * scale,
+      (cache) => cache.scaleBy(scale)
+    );
+  }
+
+  normalize() {
+    return this.scaleBy(1 / this.integralEndY()).updateIntegralSumCache(1);
+  }
+
+  downsample(i: number) {
+    // It's not clear how to downsample a set of discrete points in a meaningful way.
+    // The best we can do is to clip off the smallest values.
+    const currentLength = XYShape.T.length(this.xyShape);
+
+    if (i < currentLength && i >= 1 && currentLength > 1) {
+      const sortedByY = XYShape.Zipped.sortByY(XYShape.T.zip(this.xyShape));
+      const picked = [...sortedByY].reverse().slice(0, i);
+      return new DiscreteShape({
+        xyShape: XYShape.T.fromZippedArray(XYShape.Zipped.sortByX(picked)),
+      });
+    } else {
+      return this;
+    }
+  }
+
+  truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
+    return new DiscreteShape({
+      xyShape: XYShape.T.fromZippedArray(
+        XYShape.Zipped.filterByX(
+          XYShape.T.zip(this.xyShape),
+          (x) =>
+            x >= (leftCutoff ?? -Infinity) && x <= (rightCutoff ?? Infinity)
+        )
+      ),
+    });
+  }
+
+  xToY(f: number) {
+    return MixedPoint.makeDiscrete(
+      XYShape.XtoY.stepwiseIfAtX(this.xyShape, f) ?? 0
+    );
+  }
+
+  integralXtoY(f: number) {
+    return XYShape.XtoY.linear(this.integral().xyShape, f);
+  }
+  integralYtoX(f: number) {
+    return XYShape.YtoX.linear(this.integral().xyShape, f);
+  }
+
+  mean() {
+    const s = this.xyShape;
+    return s.xs.reduce((acc, x, i) => acc + x * s.ys[i], 0);
+  }
+
+  variance() {
+    return XYShape.Analysis.getVarianceDangerously(
+      this,
+      (t) => t.mean(),
+      (t) => t.shapeMap(XYShape.T.square).mean()
+    );
+  }
+}
+
+const emptyIntegral = () =>
+  new ContinuousShape({
+    xyShape: { xs: [-Infinity], ys: [0] },
+    interpolation: "Stepwise",
+    integralSumCache: 0,
+    integralCache: undefined,
+  });
+
+export const empty = () =>
+  new DiscreteShape({
+    xyShape: XYShape.T.empty,
+    integralSumCache: 0,
+    integralCache: emptyIntegral(),
+  });
 
 export const isFloat = (t: DiscreteShape): boolean => {
   if (t.xyShape.ys.length === 1 && t.xyShape.ys[0] === 1) {
@@ -84,7 +270,7 @@ export const combinePointwise = <E>(
 
   return RSResult.fmap(
     combiner(XYShape.XtoY.discreteInterpolator, fn, t1.xyShape, t2.xyShape),
-    (x) => make(x)
+    (x) => new DiscreteShape({ xyShape: x })
   );
 };
 
@@ -94,7 +280,7 @@ export const reduce = <E>(
   integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
     undefined
 ): RSResult.rsResult<DiscreteShape, E> => {
-  let acc = empty;
+  let acc = empty();
   for (const shape of shapes) {
     const result = combinePointwise(acc, shape, fn, integralSumCachesFn);
     if (result.TAG === RSResult.E.Error) {
@@ -103,26 +289,6 @@ export const reduce = <E>(
     acc = result._0;
   }
   return RSResult.Ok(acc);
-};
-
-export const updateIntegralSumCache = (
-  t: DiscreteShape,
-  integralSumCache: number | undefined
-): DiscreteShape => {
-  return {
-    ...t,
-    integralSumCache,
-  };
-};
-
-export const updateIntegralCache = (
-  t: DiscreteShape,
-  integralCache: ContinuousShape | undefined
-): DiscreteShape => {
-  return {
-    ...t,
-    integralCache,
-  };
 };
 
 /* This multiples all of the data points together and creates a new discrete distribution from the results.
@@ -159,153 +325,13 @@ export const combineAlgebraically = (
 
   const combinedShape = XYShape.T.fromZippedArray(rxys);
 
-  return make(combinedShape, combinedIntegralSum);
-};
-
-export const scaleBy = (t: DiscreteShape, scale: number): DiscreteShape => {
-  return T.mapY(
-    t,
-    (r) => r * scale,
-    (sum) => sum * scale,
-    (cache) => Continuous.scaleBy(cache, scale)
-  );
-};
-
-export const T: PointSet<DiscreteShape> = {
-  integral(t) {
-    if (XYShape.T.isEmpty(t.xyShape)) {
-      return emptyIntegral;
-    }
-    if (t.integralCache) {
-      return t.integralCache;
-    }
-
-    const ts = t.xyShape;
-    // The first xy of this integral should always be the zero, to ensure nice plotting
-    const firstX = XYShape.T.minX(ts);
-    const prependedZeroPoint: XYShape.XYShape = {
-      xs: [firstX - epsilon_float],
-      ys: [0],
-    };
-    const integralShape = XYShape.T.accumulateYs(
-      XYShape.T.concat(prependedZeroPoint, ts),
-      (a, b) => a + b
-    );
-
-    return Continuous.make(integralShape, "Stepwise");
-  },
-  integralEndY(t) {
-    return t.integralSumCache ?? Continuous.lastY(T.integral(t));
-  },
-  minX(t) {
-    return XYShape.T.minX(t.xyShape);
-  },
-  maxX(t) {
-    return XYShape.T.maxX(t.xyShape);
-  },
-  toDiscreteProbabilityMassFraction() {
-    return 1;
-  },
-  mapY(t, fn, integralSumCacheFn, integralCacheFn) {
-    return make(
-      XYShape.T.mapY(t.xyShape, fn),
-      t.integralSumCache === undefined
-        ? undefined
-        : integralSumCacheFn?.(t.integralSumCache),
-      t.integralCache === undefined
-        ? undefined
-        : integralCacheFn?.(t.integralCache)
-    );
-  },
-
-  mapYResult(t, fn, integralSumCacheFn, integralCacheFn) {
-    const result = XYShape.T.mapYResult(t.xyShape, fn);
-    if (result.TAG === RSResult.E.Ok) {
-      return RSResult.Ok(
-        make(
-          result._0,
-          t.integralSumCache === undefined
-            ? undefined
-            : integralSumCacheFn(t.integralSumCache),
-          t.integralCache === undefined
-            ? undefined
-            : integralCacheFn(t.integralCache)
-        )
-      );
-    } else {
-      return result;
-    }
-  },
-
-  updateIntegralCache,
-
-  toContinuous() {
-    return undefined;
-  },
-  toDiscrete(t) {
-    return t;
-  },
-  toMixed(t) {
-    return Mixed.make(Continuous.empty, t, t.integralSumCache, t.integralCache);
-  },
-
-  normalize(t) {
-    return updateIntegralSumCache(scaleBy(t, 1 / T.integralEndY(t)), 1);
-  },
-
-  downsample(i, t) {
-    // It's not clear how to downsample a set of discrete points in a meaningful way.
-    // The best we can do is to clip off the smallest values.
-    const currentLength = XYShape.T.length(t.xyShape);
-
-    if (i < currentLength && i >= 1 && currentLength > 1) {
-      const sortedByY = XYShape.Zipped.sortByY(XYShape.T.zip(t.xyShape));
-      const picked = [...sortedByY].reverse().slice(0, i);
-      return make(XYShape.T.fromZippedArray(XYShape.Zipped.sortByX(picked)));
-    } else {
-      return t;
-    }
-  },
-
-  truncate(leftCutoff, rightCutoff, t) {
-    return make(
-      XYShape.T.fromZippedArray(
-        XYShape.Zipped.filterByX(
-          XYShape.T.zip(t.xyShape),
-          (x) =>
-            x >= (leftCutoff ?? -Infinity) && x <= (rightCutoff ?? Infinity)
-        )
-      )
-    );
-  },
-
-  xToY(f, t) {
-    return MixedPoint.makeDiscrete(
-      XYShape.XtoY.stepwiseIfAtX(t.xyShape, f) ?? 0
-    );
-  },
-
-  integralXtoY(f, t) {
-    return XYShape.XtoY.linear(T.integral(t).xyShape, f);
-  },
-  integralYtoX(f, t) {
-    return XYShape.YtoX.linear(T.integral(t).xyShape, f);
-  },
-
-  mean(t: DiscreteShape): number {
-    const s = t.xyShape;
-    return s.xs.reduce((acc, x, i) => acc + x * s.ys[i], 0);
-  },
-
-  variance(t: DiscreteShape): number {
-    const getMeanOfSquares = (t: DiscreteShape) =>
-      T.mean(shapeMap(t, XYShape.T.square));
-
-    return XYShape.Analysis.getVarianceDangerously(t, T.mean, getMeanOfSquares);
-  },
+  return new DiscreteShape({
+    xyShape: combinedShape,
+    integralSumCache: combinedIntegralSum,
+  });
 };
 
 export const sampleN = (t: DiscreteShape, n: number): number[] => {
-  const normalized = T.normalize(t).xyShape;
+  const normalized = t.normalize().xyShape;
   return random_sample(normalized.xs, { probs: normalized.ys, size: n });
 };

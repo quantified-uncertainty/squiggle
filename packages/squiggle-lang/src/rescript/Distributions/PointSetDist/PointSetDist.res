@@ -1,5 +1,4 @@
 @@warning("-27") //TODO: Remove and fix the warning
-open Distributions
 %%raw(`const PointSetDist = require('../../../PointSetDist/PointSetDist')`)
 
 type t = PointSetTypes.pointSetDist
@@ -22,54 +21,36 @@ let combinePointwise = (
   %raw(`PointSetDist.combinePointwise(t1, t2, fn, integralSumCachesFnOpt, integralCachesFnOpt)`)
 }
 
-module T = Dist({
+module T = {
   type t = PointSetTypes.pointSetDist
   type integral = PointSetTypes.continuousShape
 
-  let minX = %raw(`PointSetDist.T.minX`)
-  let maxX = %raw(`PointSetDist.T.maxX`)
-  let xToY = %raw(`PointSetDist.T.xToY`)
+  let minX = (t: t): float => %raw(`t.minX()`)
+  let maxX = (t: t): float => %raw(`t.maxX()`)
 
-  let toPointSetDist = (t: t) => t
+  let truncate = (left: option<float>, right: option<float>, t: t): t =>
+    %raw(`t.truncate(left, right)`)
 
-  let downsample = %raw(`PointSetDist.T.downsample`)
+  let normalize = (t: t): t => %raw(`t.normalize()`)
 
-  let updateIntegralCache = %raw(`PointSetDist.T.updateIntegralCache`)
-  let truncate = %raw(`PointSetDist.T.truncate`)
-  let normalize = %raw(`PointSetDist.T.normalize`)
+  let integral = (t: t): integral => %raw(`t.integral()`)
 
-  let toContinuous = %raw(`PointSetDist.T.toContinuous`)
-  let toDiscrete = %raw(`PointSetDist.T.toDiscrete`)
-  let toMixed = %raw(`PointSetDist.T.toMixed`)
+  let integralEndY = (t: t): float => %raw(`t.integralEndY()`)
+  let integralXtoY = (x: float, t: t): float => %raw(`t.integralXtoY(x)`)
+  let integralYtoX = (y: float, t: t): float => %raw(`t.integralYtoX(y)`)
 
-  let toDiscreteProbabilityMassFraction = %raw(`PointSetDist.T.toDiscreteProbabilityMassFraction`)
-
-  let integral = %raw(`PointSetDist.T.integral`)
-
-  let integralEndY = %raw(`PointSetDist.T.integralEndY`)
-  let integralXtoY = %raw(`PointSetDist.T.integralXtoY`)
-  let integralYtoX = %raw(`PointSetDist.T.integralYtoX`)
-
-  let mapY = (
-    ~integralSumCacheFn=_ => None,
-    ~integralCacheFn=_ => None,
-    t: t,
-    fn: float => float,
-  ): t => {
-    %raw(`PointSetDist.T.mapY(t, fn, integralSumCacheFnOpt, integralCacheFnOpt)`)
-  }
   let mapYResult = (
-    ~integralSumCacheFn=_ => None,
-    ~integralCacheFn=_ => None,
+    ~integralSumCacheFn: float => option<float>=_ => None,
+    ~integralCacheFn: PointSetTypes.continuousShape => option<PointSetTypes.continuousShape>=_ =>
+      None,
     t: t,
-    fn: float => result<float, 'e>,
-  ): result<t, 'e> => {
-    %raw(`PointSetDist.T.mapYResult(t, fn, integralSumCacheFnOpt, integralCacheFnOpt)`)
+    fn: float => result<float, Operation.Error.t>,
+  ): result<t, Operation.Error.t> => {
+    %raw(`t.mapYResult(fn, integralSumCacheFnOpt, integralCacheFnOpt)`)
   }
 
-  let mean = %raw(`PointSetDist.T.mean`)
-  let variance = %raw(`PointSetDist.T.variance`)
-})
+  let mean = (t: t): float => %raw(`t.mean()`)
+}
 
 let logScoreDistAnswer = (~estimate: t, ~answer: t, ~prior: option<t>): result<
   float,

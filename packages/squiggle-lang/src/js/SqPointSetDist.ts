@@ -8,8 +8,9 @@ import {
   toDistribution,
   pointSetDistribution,
 } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
+import { PointSet } from "../PointSetDist/types";
 
-type T = PointSetDist.PointSetDist;
+type T = PointSet;
 
 enum Tag {
   Mixed = "Mixed",
@@ -30,17 +31,15 @@ const shapePoints = (x: ContinuousShape | DiscreteShape): SqPoint[] => {
 };
 
 export const wrapPointSetDist = (value: pointSetDistribution) => {
-  const tsValue = value as unknown as PointSetDist.PointSetDist;
-  switch (tsValue.type) {
-    case "Continuous":
-      return new SqContinuousPointSetDist(tsValue.value);
-    case "Mixed":
-      return new SqMixedPointSetDist(tsValue.value);
-    case "Discrete":
-      return new SqDiscretePointSetDist(tsValue.value);
-    default:
-      throw new Error("Internal error");
+  const tsValue = value as unknown as PointSet;
+  if (tsValue instanceof ContinuousShape) {
+    return new SqContinuousPointSetDist(tsValue);
+  } else if (tsValue instanceof DiscreteShape) {
+    return new SqDiscretePointSetDist(tsValue);
+  } else if (tsValue instanceof MixedShape) {
+    return new SqMixedPointSetDist(tsValue);
   }
+  throw new Error(`Unknown PointSet shape ${tsValue}`);
 };
 
 abstract class SqAbstractPointSetDist<S> {
