@@ -218,10 +218,10 @@ export const mode = (t: SampleSetDist): number => {
 };
 // let sum = t => T.get(t)->E.A.Floats.sum
 export const min = (t: SampleSetDist): number => {
-  return t[0];
+  return Math.min(...t);
 };
 export const max = (t: SampleSetDist): number => {
-  return t[t.length - 1];
+  return Math.max(...t);
 };
 export const stdev = (t: SampleSetDist): number => {
   return E_A_Floats.stdev(t);

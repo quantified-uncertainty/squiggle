@@ -1,12 +1,3 @@
-type distributionType = [
-  | #PDF
-  | #CDF
-]
-
-@genType
-type xyShape = XYShape.xyShape
-type interpolationStrategy = XYShape.interpolationStrategy
-
 // double opaque
 @genType.opaque
 type continuousShape
@@ -16,5 +7,3 @@ type discreteShape
 type mixedShape
 @genType.opaque
 type pointSetDist
-
-type mixedPoint

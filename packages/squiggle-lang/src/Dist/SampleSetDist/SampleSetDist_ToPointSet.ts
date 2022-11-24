@@ -1,4 +1,4 @@
-import { kde } from "../../rescript/Distributions/SampleSetDist/KdeLibrary";
+import { kde } from "./KdeLibrary";
 import { XYShape } from "../../XYShape";
 import { nrd0 } from "./SampleSetDist_Bandwidth";
 import { splitContinuousAndDiscrete } from "./SplitContinuousAndDiscrete";

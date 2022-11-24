@@ -12,10 +12,10 @@ type error =
   | NotYetImplemented
   | Unreachable
   | DistributionVerticalShiftIsInvalid
-  | SampleSetError(SampleSetDist.sampleSetError)
+  | SampleSetError(SampleSetDist.Error.sampleSetError)
   | ArgumentError(string)
   | OperationError(Operation.Error.t)
-  | PointSetConversionError(SampleSetDist.pointsetConversionError)
+  | PointSetConversionError(SampleSetDist.Error.pointsetConversionError)
   | SparklineError(string)
   | RequestedStrategyInvalidError(string)
   | LogarithmOfDistributionError(string)
@@ -37,7 +37,7 @@ module Error = {
     | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
     | SampleSetError(err) => SampleSetDist.Error.toString(err)
     | OperationError(err) => Operation.Error.toString(err)
-    | PointSetConversionError(err) => SampleSetDist.pointsetConversionErrorToString(err)
+    | PointSetConversionError(err) => SampleSetDist.Error.pointsetConversionErrorToString(err)
     | SparklineError(err) => err
     | RequestedStrategyInvalidError(err) => `Requested strategy invalid: ${err}`
     | XYShapeError(err) => `XY Shape Error: ${XYShape.Error.toString(err)}`
@@ -47,7 +47,7 @@ module Error = {
   let resultStringToResultError: result<'a, string> => result<'a, error> = n =>
     n->E.R.errMap(r => r->fromString)
 
-  let sampleErrorToDistErr = (err: SampleSetDist.sampleSetError): error => SampleSetError(err)
+  let sampleErrorToDistErr = (err: SampleSetDist.Error.sampleSetError): error => SampleSetError(err)
 }
 
 @genType
