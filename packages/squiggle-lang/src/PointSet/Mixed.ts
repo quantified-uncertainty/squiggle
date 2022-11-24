@@ -6,9 +6,9 @@ import * as RSResult from "../rsResult";
 import * as Common from "./Common";
 import { ContinuousShape } from "./Continuous";
 import { DiscreteShape } from "./Discrete";
-import { ConvolutionOperation, PointSet } from "./types";
+import { ConvolutionOperation, PointSet } from "./PointSet";
 
-export class MixedShape extends PointSet<MixedShape> {
+export class MixedShape implements PointSet<MixedShape> {
   readonly continuous: ContinuousShape;
   readonly discrete: DiscreteShape;
   readonly integralSumCache?: number;
@@ -20,7 +20,6 @@ export class MixedShape extends PointSet<MixedShape> {
     integralSumCache?: number;
     integralCache?: ContinuousShape;
   }) {
-    super();
     this.continuous = args.continuous;
     this.discrete = args.discrete;
     this.integralSumCache = args.integralSumCache;
@@ -184,8 +183,10 @@ export class MixedShape extends PointSet<MixedShape> {
 
   mapYResult<E>(
     fn: (y: number) => RSResult.rsResult<number, E>,
-    integralSumCacheFn: (sum: number) => number | undefined,
-    integralCacheFn: (cache: ContinuousShape) => ContinuousShape | undefined
+    integralSumCacheFn: undefined | ((sum: number) => number | undefined),
+    integralCacheFn:
+      | undefined
+      | ((cache: ContinuousShape) => ContinuousShape | undefined)
   ): RSResult.rsResult<MixedShape, E> {
     const discreteResult = this.discrete.mapYResult(
       fn,

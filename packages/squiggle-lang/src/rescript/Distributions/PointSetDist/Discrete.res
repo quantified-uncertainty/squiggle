@@ -1,6 +1,6 @@
 @@warning("-27") //TODO: Remove and fix the warning
 %%raw(`const Discrete = require('../../../PointSet/Discrete')`)
-%%raw(`const PointSetDist = require('../../../Dist/PointSetDist')`)
+%%raw(`const { PointSetDist } = require('../../../Dist/PointSetDist')`)
 
 type t = PointSetTypes.discreteShape
 
@@ -15,7 +15,7 @@ let make = (
 let getShape: t => XYShape.T.t = %raw(`Discrete.getShape`)
 
 module T = {
-  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => %raw(`t`)
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => %raw(`new PointSetDist(t)`)
 }
 
 let sampleN = (t: t, n: int): array<float> => {

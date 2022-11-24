@@ -6,8 +6,12 @@ import {
 } from "../OperationError";
 import * as RSResult from "../rsResult";
 import { MixedPoint } from "./MixedPoint";
-import * as PointSetDist from "../Dist/PointSetDist";
-import { PointSet } from "./types";
+import {
+  AnyPointSet,
+  combinePointwise,
+  isContinuous,
+  isDiscrete,
+} from "./PointSet";
 
 const logFn = Math.log; // base e
 const minusScaledLogOfQuotient = ({
@@ -46,22 +50,18 @@ export const WithDistAnswer = {
     estimate,
     answer,
   }: {
-    estimate: PointSet;
-    answer: PointSet;
+    estimate: AnyPointSet;
+    answer: AnyPointSet;
   }): RSResult.rsResult<number, OperationError> {
-    const combineAndIntegrate = (estimate: PointSet, answer: PointSet) =>
+    const combineAndIntegrate = (estimate: AnyPointSet, answer: AnyPointSet) =>
       RSResult.fmap(
-        PointSetDist.combinePointwise(
-          estimate,
-          answer,
-          WithDistAnswer.integrand
-        ),
+        combinePointwise(estimate, answer, WithDistAnswer.integrand),
         (t) => t.integralEndY()
       );
 
     const getMixedSums = (
-      estimate: PointSet,
-      answer: PointSet
+      estimate: AnyPointSet,
+      answer: AnyPointSet
     ): RSResult.rsResult<[number, number], OperationError> => {
       const esti = estimate.toMixed();
       const answ = answer.toMixed();
@@ -85,9 +85,8 @@ export const WithDistAnswer = {
     };
 
     if (
-      (PointSetDist.isContinuous(estimate) &&
-        PointSetDist.isContinuous(answer)) ||
-      (PointSetDist.isDiscrete(estimate) && PointSetDist.isDiscrete(answer))
+      (isContinuous(estimate) && isContinuous(answer)) ||
+      (isDiscrete(estimate) && isDiscrete(answer))
     ) {
       return combineAndIntegrate(estimate, answer);
     } else {
@@ -103,9 +102,9 @@ export const WithDistAnswer = {
     answer,
     prior,
   }: {
-    estimate: PointSet;
-    answer: PointSet;
-    prior: PointSet;
+    estimate: AnyPointSet;
+    answer: AnyPointSet;
+    prior: AnyPointSet;
   }): RSResult.rsResult<number, OperationError> {
     let kl1 = WithDistAnswer.sum({
       estimate,
@@ -127,7 +126,7 @@ export const WithScalarAnswer = {
     estimate,
     answer,
   }: {
-    estimate: PointSet;
+    estimate: AnyPointSet;
     answer: number;
   }): RSResult.rsResult<number, OperationError> {
     const _score = (
@@ -148,10 +147,7 @@ export const WithScalarAnswer = {
       }
     };
     const estimatePdf = (x: number) => {
-      if (
-        PointSetDist.isContinuous(estimate) ||
-        PointSetDist.isDiscrete(estimate)
-      ) {
+      if (isContinuous(estimate) || isDiscrete(estimate)) {
         return WithScalarAnswer.sum(estimate.xToY(x));
       } else {
         return undefined;
@@ -164,9 +160,9 @@ export const WithScalarAnswer = {
     answer,
     prior,
   }: {
-    estimate: PointSet;
+    estimate: AnyPointSet;
     answer: number;
-    prior: PointSet;
+    prior: AnyPointSet;
   }): RSResult.rsResult<number, OperationError> {
     return RSResult.fmap(
       RSResult.merge(

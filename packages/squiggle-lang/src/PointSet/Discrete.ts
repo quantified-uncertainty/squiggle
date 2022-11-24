@@ -8,12 +8,12 @@ import {
   ConvolutionOperation,
   convolutionOperationToFn,
   PointSet,
-} from "./types";
+} from "./PointSet";
 import { epsilon_float } from "../magicNumbers";
 import { random_sample } from "../js/math";
 import { MixedShape } from "./Mixed";
 
-export class DiscreteShape extends PointSet<DiscreteShape> {
+export class DiscreteShape implements PointSet<DiscreteShape> {
   readonly xyShape: XYShape.XYShape;
   readonly integralSumCache?: number;
   readonly integralCache?: Continuous.ContinuousShape;
@@ -23,7 +23,6 @@ export class DiscreteShape extends PointSet<DiscreteShape> {
     integralSumCache?: number;
     integralCache?: ContinuousShape;
   }) {
-    super();
     this.xyShape = args.xyShape;
     this.integralSumCache = args.integralSumCache;
     this.integralCache = args.integralCache;

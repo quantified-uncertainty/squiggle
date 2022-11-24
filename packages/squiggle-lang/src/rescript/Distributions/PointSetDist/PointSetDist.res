@@ -25,19 +25,16 @@ module T = {
   type t = PointSetTypes.pointSetDist
   type integral = PointSetTypes.continuousShape
 
-  let minX = (t: t): float => %raw(`t.minX()`)
-  let maxX = (t: t): float => %raw(`t.maxX()`)
+  let minX = (t: t): float => %raw(`t.min()`)
+  let maxX = (t: t): float => %raw(`t.max()`)
+  let mean = (t: t): float => %raw(`t.mean()`)
 
   let truncate = (left: option<float>, right: option<float>, t: t): t =>
     %raw(`t.truncate(left, right)`)
 
   let normalize = (t: t): t => %raw(`t.normalize()`)
 
-  let integral = (t: t): integral => %raw(`t.integral()`)
-
   let integralEndY = (t: t): float => %raw(`t.integralEndY()`)
-  let integralXtoY = (x: float, t: t): float => %raw(`t.integralXtoY(x)`)
-  let integralYtoX = (y: float, t: t): float => %raw(`t.integralYtoX(y)`)
 
   let mapYResult = (
     ~integralSumCacheFn: float => option<float>=_ => None,
@@ -48,8 +45,6 @@ module T = {
   ): result<t, Operation.Error.t> => {
     %raw(`t.mapYResult(fn, integralSumCacheFnOpt, integralCacheFnOpt)`)
   }
-
-  let mean = (t: t): float => %raw(`t.mean()`)
 }
 
 let logScoreDistAnswer = (~estimate: t, ~answer: t, ~prior: option<t>): result<
@@ -72,11 +67,11 @@ let logScoreScalarAnswer = (~estimate: t, ~answer: float, ~prior: option<t>): re
   }
 }
 
-let pdf = (f: float, t: t) => %raw(`PointSetDist.pdf(f, t)`)
-let inv = (f: float, t: t) => %raw(`PointSetDist.inv(f, t)`)
-let cdf = (f: float, t: t) => %raw(`PointSetDist.cdf(f, t)`)
+let pdf = (f: float, t: t): float => %raw(`t.pdf(f)`)
+let inv = (f: float, t: t): float => %raw(`t.inv(f)`)
+let cdf = (f: float, t: t): float => %raw(`t.cdf(f)`)
 
-let sample = (t: t): float => %raw(`PointSetDist.sample(t)`)
+let sample = (t: t): float => %raw(`t.sample()`)
 
 // let isFloat = (t: t) =>
 //   switch t {
@@ -84,15 +79,12 @@ let sample = (t: t): float => %raw(`PointSetDist.sample(t)`)
 //   | _ => false
 //   }
 
-let sampleNRendered = (n: int, dist: t): array<float> => {
-  %raw(`PointSetDist.sampleNRendered(dist, n)`)
+let sampleNRendered = (n: int, t: t): array<float> => {
+  %raw(`t.sampleN(n)`)
 }
 
 let toSparkline = (t: t, bucketCount): result<string, string> => {
-  %raw(`PointSetDist.toSparkline(t, bucketCount)`)
+  %raw(`t.toSparkline(bucketCount)`)
 }
-
-let isContinuous: t => bool = %raw(`PointSetDist.isContinuous`)
-let isDiscrete: t => bool = %raw(`PointSetDist.isDiscrete`)
 
 let expectedConvolutionCost: t => int = %raw(`PointSetDist.expectedConvolutionCost`)

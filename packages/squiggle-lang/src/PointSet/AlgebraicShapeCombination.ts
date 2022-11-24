@@ -1,5 +1,5 @@
 import * as XYShape from "../XYShape";
-import { ConvolutionOperation, convolutionOperationToFn } from "./types";
+import { ConvolutionOperation, convolutionOperationToFn } from "./PointSet";
 import * as E_A_Floats from "../utility/E_A_Floats";
 
 type PointMassesWithMoments = {

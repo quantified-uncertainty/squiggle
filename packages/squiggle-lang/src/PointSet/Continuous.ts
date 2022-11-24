@@ -5,11 +5,11 @@ import * as RSResult from "../rsResult";
 import { MixedShape } from "./Mixed";
 import * as AlgebraicShapeCombination from "./AlgebraicShapeCombination";
 import * as Common from "./Common";
-import { ConvolutionOperation, DistributionType, PointSet } from "./types";
+import { ConvolutionOperation, DistributionType, PointSet } from "./PointSet";
 import * as Discrete from "./Discrete";
 import { DiscreteShape } from "./Discrete";
 
-export class ContinuousShape extends PointSet {
+export class ContinuousShape implements PointSet<ContinuousShape> {
   readonly xyShape: XYShape.XYShape;
   readonly interpolation: XYShape.InterpolationStrategy;
   readonly integralSumCache?: number;
@@ -21,7 +21,6 @@ export class ContinuousShape extends PointSet {
     integralSumCache?: number;
     integralCache?: ContinuousShape;
   }) {
-    super();
     this.xyShape = args.xyShape;
     this.interpolation = args.interpolation ?? "Linear";
     this.integralSumCache = args.integralSumCache;

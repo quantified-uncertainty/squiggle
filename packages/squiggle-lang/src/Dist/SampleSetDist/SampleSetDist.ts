@@ -7,9 +7,9 @@ import * as Discrete from "../../PointSet/Discrete";
 import * as XYShape from "../../XYShape";
 
 import { OperationError, operationErrorToString } from "../../OperationError";
-import { PointSet } from "../../PointSet/types";
 import { ContinuousShape } from "../../PointSet/Continuous";
 import { DiscreteShape } from "../../PointSet/Discrete";
+import { PointSetDist } from "../PointSetDist";
 
 export type SampleSetDist = readonly number[];
 
@@ -76,7 +76,7 @@ export const toPointSetDist = ({
 }: {
   samples: SampleSetDist;
   samplingInputs: SamplingInputs;
-}): RSResult.rsResult<PointSet, PointsetConversionError> => {
+}): RSResult.rsResult<PointSetDist, PointsetConversionError> => {
   const dists = SampleSetDist_ToPointSet.toPointSetDist(
     samples,
     samplingInputs.outputXYPoints,
@@ -92,7 +92,7 @@ export const toPointSetDist = ({
   if (!result) {
     return RSResult.Error("TooFewSamplesForConversionToPointSet");
   }
-  return RSResult.Ok(result);
+  return RSResult.Ok(new PointSetDist(result));
 };
 
 export const make = (

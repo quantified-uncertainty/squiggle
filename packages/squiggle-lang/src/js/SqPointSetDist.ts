@@ -7,7 +7,7 @@ import {
   toDistribution,
   pointSetDistribution,
 } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
-import { PointSet } from "../PointSet/types";
+import { AnyPointSet } from "../PointSet/PointSet";
 
 enum Tag {
   Mixed = "Mixed",
@@ -28,7 +28,7 @@ const shapePoints = (x: ContinuousShape | DiscreteShape): SqPoint[] => {
 };
 
 export const wrapPointSetDist = (value: pointSetDistribution) => {
-  const tsValue = value as unknown as PointSet;
+  const tsValue = value as unknown as AnyPointSet;
   if (tsValue instanceof ContinuousShape) {
     return new SqContinuousPointSetDist(tsValue);
   } else if (tsValue instanceof DiscreteShape) {

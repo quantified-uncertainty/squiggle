@@ -1,7 +1,7 @@
 import { ContinuousShape } from "./Continuous";
 import { DiscreteShape } from "./Discrete";
 import { MixedShape } from "./Mixed";
-import { PointSet } from "./types";
+import { AnyPointSet } from "./PointSet";
 
 export const buildSimple = ({
   continuous,
@@ -9,7 +9,7 @@ export const buildSimple = ({
 }: {
   continuous?: ContinuousShape;
   discrete?: DiscreteShape;
-}): PointSet | undefined => {
+}): AnyPointSet | undefined => {
   continuous ??= new ContinuousShape({
     integralSumCache: 0,
     xyShape: { xs: [], ys: [] },

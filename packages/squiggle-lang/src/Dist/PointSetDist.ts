@@ -1,40 +1,122 @@
 import * as Continuous from "../PointSet/Continuous";
 import { ContinuousShape } from "../PointSet/Continuous";
 
-import * as Discrete from "../PointSet/Discrete";
-import { DiscreteShape } from "../PointSet/Discrete";
-
-import * as Mixed from "../PointSet/Mixed";
 import { MixedShape } from "../PointSet/Mixed";
 
 import * as magicNumbers from "../magicNumbers";
 import * as RSResult from "../rsResult";
 import * as Sparklines from "../Sparklines";
 
-import { ConvolutionOperation, PointSet } from "../PointSet/types";
+import * as PointSet from "../PointSet/PointSet";
+
+import { BaseDist } from "./Base";
+import { AnyPointSet } from "../PointSet/PointSet";
+
+export class PointSetDist<
+  T extends AnyPointSet = AnyPointSet
+> extends BaseDist {
+  pointSet: T;
+
+  constructor(pointSet: T) {
+    super();
+    this.pointSet = pointSet;
+  }
+
+  max() {
+    return this.pointSet.maxX();
+  }
+  min() {
+    return this.pointSet.minX();
+  }
+  mean() {
+    return this.pointSet.mean();
+  }
+
+  private samplePointSet(pointSet: AnyPointSet) {
+    const randomItem = Math.random();
+    return pointSet.integralYtoX(randomItem);
+  }
+  sample() {
+    return this.samplePointSet(this.pointSet);
+  }
+  sampleN(n: number) {
+    const integralCache = this.pointSet.integral();
+    const distWithUpdatedIntegralCache =
+      this.pointSet.updateIntegralCache(integralCache);
+    const items: number[] = new Array(n).fill(0);
+    for (let i = 0; i <= n - 1; i++) {
+      items[i] = this.samplePointSet(distWithUpdatedIntegralCache);
+    }
+    return items;
+  }
+
+  truncate(left: number, right: number) {
+    return new PointSetDist(this.pointSet.truncate(left, right));
+  }
+
+  normalize() {
+    return new PointSetDist(this.pointSet.normalize());
+  }
+
+  integralEndY() {
+    return this.pointSet.integralEndY();
+  }
+
+  pdf(f: number) {
+    const mixedPoint = this.pointSet.xToY(f);
+    return mixedPoint.continuous + mixedPoint.discrete;
+  }
+  inv(f: number) {
+    return this.pointSet.integralYtoX(f);
+  }
+  cdf(f: number) {
+    return this.pointSet.integralXtoY(f);
+  }
+
+  // PointSet-only methods
+  toSparkline(bucketCount: number): RSResult.rsResult<string, string> {
+    const continuous = this.pointSet.toContinuous();
+    if (!continuous) {
+      return RSResult.Error(
+        "Cannot find the sparkline of a discrete distribution"
+      );
+    }
+    const downsampled = continuous.downsampleEquallyOverX(bucketCount);
+    return RSResult.Ok(Sparklines.create(Continuous.getShape(downsampled).ys));
+  }
+
+  mapYResult<E>(
+    fn: (y: number) => RSResult.rsResult<number, E>,
+    integralSumCacheFn: undefined | ((sum: number) => number | undefined),
+    integralCacheFn:
+      | undefined
+      | ((cache: ContinuousShape) => ContinuousShape | undefined)
+  ): RSResult.rsResult<PointSetDist, E> {
+    return RSResult.fmap(
+      this.pointSet.mapYResult(
+        fn,
+        integralSumCacheFn,
+        integralCacheFn
+      ) as RSResult.rsResult<AnyPointSet, E>,
+      (pointSet) => new PointSetDist(pointSet)
+    );
+  }
+}
 
 //TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
 export const combineAlgebraically = (
-  op: ConvolutionOperation,
-  t1: PointSet,
-  t2: PointSet<any>
-): PointSet => {
-  if (t1 instanceof ContinuousShape && t2 instanceof ContinuousShape) {
-    return Continuous.combineAlgebraically(op, t1, t2);
-  } else if (t1 instanceof DiscreteShape && t2 instanceof ContinuousShape) {
-    return Continuous.combineAlgebraicallyWithDiscrete(op, t2, t1, "First");
-  } else if (t1 instanceof ContinuousShape && t2 instanceof DiscreteShape) {
-    return Continuous.combineAlgebraicallyWithDiscrete(op, t1, t2, "Second");
-  } else if (t1 instanceof DiscreteShape && t2 instanceof DiscreteShape) {
-    return Discrete.combineAlgebraically(op, t1, t2);
-  } else {
-    return Mixed.combineAlgebraically(op, t1.toMixed(), t2.toMixed());
-  }
+  op: PointSet.ConvolutionOperation,
+  t1: PointSetDist,
+  t2: PointSetDist
+): PointSetDist => {
+  return new PointSetDist(
+    PointSet.combineAlgebraically(op, t1.pointSet, t2.pointSet)
+  );
 };
 
 export const combinePointwise = <E>(
-  t1: PointSet,
-  t2: PointSet,
+  t1: PointSetDist,
+  t2: PointSetDist,
   fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
   integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
     undefined,
@@ -42,39 +124,17 @@ export const combinePointwise = <E>(
     s1: ContinuousShape,
     s2: ContinuousShape
   ) => ContinuousShape | undefined = () => undefined
-): RSResult.rsResult<PointSet, E> => {
-  if (t1 instanceof ContinuousShape && t2 instanceof ContinuousShape) {
-    return Continuous.combinePointwise(
-      t1,
-      t2,
-      fn,
-      undefined,
-      integralSumCachesFn
-    );
-  } else if (t1 instanceof DiscreteShape && t2 instanceof DiscreteShape) {
-    return Discrete.combinePointwise(t1, t2, fn, integralSumCachesFn);
-  } else {
-    return Mixed.combinePointwise(
-      t1.toMixed(),
-      t2.toMixed(),
+): RSResult.rsResult<PointSetDist, E> => {
+  return RSResult.fmap(
+    PointSet.combinePointwise(
+      t1.pointSet,
+      t2.pointSet,
       fn,
       integralSumCachesFn,
       integralCachesFn
-    );
-  }
-};
-
-export const pdf = (f: number, t: PointSet) => {
-  const mixedPoint = t.xToY(f);
-  return mixedPoint.continuous + mixedPoint.discrete;
-};
-
-export const inv = (f: number, t: PointSet) => t.integralYtoX(f);
-export const cdf = (f: number, t: PointSet) => t.integralXtoY(f);
-
-export const sample = (t: PointSet): number => {
-  let randomItem = Math.random();
-  return t.integralYtoX(randomItem);
+    ),
+    (pointSet) => new PointSetDist(pointSet)
+  );
 };
 
 // let isFloat = (t: t) =>
@@ -83,41 +143,12 @@ export const sample = (t: PointSet): number => {
 //   | _ => false
 //   }
 
-export const sampleNRendered = (dist: PointSet, n: number): number[] => {
-  const integralCache = dist.integral();
-  const distWithUpdatedIntegralCache = dist.updateIntegralCache(integralCache);
-  const items: number[] = new Array(n).fill(0);
-  for (let i = 0; i <= n - 1; i++) {
-    items[i] = sample(distWithUpdatedIntegralCache);
-  }
-  return items;
-};
-
-export const toSparkline = (
-  t: PointSet,
-  bucketCount: number
-): RSResult.rsResult<string, string> => {
-  const continuous = t.toContinuous();
-  if (!continuous) {
-    return RSResult.Error(
-      "Cannot find the sparkline of a discrete distribution"
-    );
-  }
-  const downsampled = continuous.downsampleEquallyOverX(bucketCount);
-  return RSResult.Ok(Sparklines.create(Continuous.getShape(downsampled).ys));
-};
-
-export const isContinuous = (d: PointSet): d is ContinuousShape =>
-  d instanceof ContinuousShape;
-export const isDiscrete = (d: PointSet): d is DiscreteShape =>
-  d instanceof DiscreteShape;
-
-export const expectedConvolutionCost = (d: PointSet): number => {
-  if (isContinuous(d)) {
+export const expectedConvolutionCost = (d: PointSetDist): number => {
+  if (PointSet.isContinuous(d.pointSet)) {
     return magicNumbers.OpCost.continuousCost;
-  } else if (isDiscrete(d)) {
-    return d.xyShape.xs.length;
-  } else if (d instanceof MixedShape) {
+  } else if (PointSet.isDiscrete(d.pointSet)) {
+    return d.pointSet.xyShape.xs.length;
+  } else if (d.pointSet instanceof MixedShape) {
     return magicNumbers.OpCost.mixedCost;
   }
   throw new Error(`Unknown PointSet ${d}`);
