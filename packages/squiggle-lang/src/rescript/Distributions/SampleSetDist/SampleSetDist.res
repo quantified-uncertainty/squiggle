@@ -9,13 +9,12 @@ module JS = {
   external toPointSetDist: (array<float>, int, option<float>) => distJs = "toPointSetDist"
 }
 
-@genType
+@genType.opaque
 module Error = {
-  @genType
-  type sampleSetError =
-    TooFewSamples | NonNumericInput(string) | OperationError(Operation.operationError)
+  @genType.opaque
+  type sampleSetError = TooFewSamples | NonNumericInput(string) | OperationError(Operation.Error.t)
 
-  @genType
+  @genType.opaque
   type pointsetConversionError = TooFewSamplesForConversionToPointSet
 
   let pointsetConversionErrorToString = (err: pointsetConversionError) =>

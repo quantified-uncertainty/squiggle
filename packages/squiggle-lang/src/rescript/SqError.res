@@ -17,7 +17,7 @@ module Message = {
     | REJavaScriptExn(option<string>, option<string>) // Javascript Exception
     | REMacroNotFound(string)
     | RENotAFunction(string)
-    | REOperationError(Operation.operationError)
+    | REOperationError(Operation.Error.t)
     | RERecordPropertyNotFound(string, string)
     | RESymbolNotFound(string)
     | RESyntaxError(string)

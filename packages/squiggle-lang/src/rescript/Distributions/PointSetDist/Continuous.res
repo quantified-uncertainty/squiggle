@@ -1,5 +1,6 @@
 @@warning("-27") //TODO: Remove and fix the warning
 %%raw(`const Continuous = require('../../../PointSetDist/Continuous')`)
+%%raw(`const PointSetDist = require('../../../PointSetDist/PointSetDist')`)
 
 type t = PointSetTypes.continuousShape
 open Distributions
@@ -72,7 +73,7 @@ module T = Dist({
   }
   let updateIntegralCache = %raw(`Continuous.T.updateIntegralCache`)
   let toDiscreteProbabilityMassFraction = %raw(`Continuous.T.toDiscreteProbabilityMassFraction`)
-  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Continuous(t)
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => %raw(`PointSetDist.makeContinuous(t)`)
   let xToY = %raw(`Continuous.T.xToY`)
 
   let truncate = %raw(`Continuous.T.truncate`)

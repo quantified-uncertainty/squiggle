@@ -121,7 +121,20 @@ let toFloatOperation = (
       | None =>
         switch trySampleSetSolution {
         | Some(r) => Ok(r)
-        | None => toPointSet(t, ~env, ())->E.R.fmap(PointSetDist.operate(op))
+        | None => {
+            let pointSetR = toPointSet(t, ~env, ())
+            pointSetR->E.R.fmap(s =>
+              switch op {
+              | #Pdf(f) => PointSetDist.pdf(f, s)
+              | #Cdf(f) => PointSetDist.cdf(f, s)
+              | #Inv(f) => PointSetDist.inv(f, s)
+              | #Sample => PointSetDist.sample(s)
+              | #Mean => PointSetDist.T.mean(s)
+              | #Min => PointSetDist.T.minX(s)
+              | #Max => PointSetDist.T.maxX(s)
+              }
+            )
+          }
         }
       }
     }
@@ -152,59 +165,73 @@ let inv = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOper
 module Score = {
   type genericDistOrScalar = Score_Dist(t) | Score_Scalar(float)
 
-  let argsMake = (~esti: t, ~answ: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
-    PointSetDist_Scoring.scoreArgs,
+  let logScoreDistAnswer = (~estimate: t, ~answer: t, ~prior: option<t>, ~env: env): result<
+    float,
     error,
   > => {
-    let toPointSetFn = t => toPointSet(t, ~env, ~xSelection=#ByWeight, ())
-    let prior': option<result<PointSetTypes.pointSetDist, error>> = switch prior {
-    | None => None
-    | Some(d) => toPointSetFn(d)->Some
-    }
-    let twoDists = (~toPointSetFn, esti': t, answ': t): result<
-      (PointSetTypes.pointSetDist, PointSetTypes.pointSetDist),
-      error,
-    > => E.R.merge(toPointSetFn(esti'), toPointSetFn(answ'))
-    switch (esti, answ, prior') {
-    | (esti', Score_Dist(answ'), None) =>
-      twoDists(~toPointSetFn, esti', answ')->E.R.fmap(((esti'', answ'')) =>
-        {estimate: esti'', answer: answ'', prior: None}->PointSetDist_Scoring.DistAnswer
-      )
-    | (esti', Score_Dist(answ'), Some(Ok(prior''))) =>
-      twoDists(~toPointSetFn, esti', answ')->E.R.fmap(((esti'', answ'')) =>
-        {
-          estimate: esti'',
-          answer: answ'',
-          prior: Some(prior''),
-        }->PointSetDist_Scoring.DistAnswer
-      )
-    | (esti', Score_Scalar(answ'), None) =>
-      toPointSetFn(esti')->E.R.fmap(esti'' =>
-        {
-          estimate: esti'',
-          answer: answ',
-          prior: None,
-        }->PointSetDist_Scoring.ScalarAnswer
-      )
-    | (esti', Score_Scalar(answ'), Some(Ok(prior''))) =>
-      toPointSetFn(esti')->E.R.fmap(esti'' =>
-        {
-          estimate: esti'',
-          answer: answ',
-          prior: Some(prior''),
-        }->PointSetDist_Scoring.ScalarAnswer
-      )
-    | (_, _, Some(Error(err))) => err->Error
-    }
+    let toPointSetFn = t => toPointSet(t, ~env, ())
+    estimate
+    ->toPointSetFn
+    ->E.R.bind(estimate' => {
+      answer
+      ->toPointSetFn
+      ->E.R.bind(answer' => {
+        let prior' = prior->E_O.fmap(toPointSetFn)
+        switch prior' {
+        | Some(Error(e)) => Error(e)
+        | None =>
+          PointSetDist.logScoreDistAnswer(
+            ~estimate=estimate',
+            ~answer=answer',
+            ~prior=None,
+          )->E.R.errMap(y => DistributionTypes.OperationError(y))
+        | Some(Ok(prior'')) =>
+          PointSetDist.logScoreDistAnswer(
+            ~estimate=estimate',
+            ~answer=answer',
+            ~prior=Some(prior''),
+          )->E.R.errMap(y => DistributionTypes.OperationError(y))
+        }
+      })
+    })
+  }
+
+  let logScoreScalarAnswer = (~estimate: t, ~answer: float, ~prior: option<t>, ~env: env): result<
+    float,
+    error,
+  > => {
+    let toPointSetFn = t => toPointSet(t, ~env, ())
+    estimate
+    ->toPointSetFn
+    ->E.R.bind(estimate' => {
+      let prior' = prior->E_O.fmap(toPointSetFn)
+      switch prior' {
+      | Some(Error(e)) => Error(e)
+      | None =>
+        PointSetDist.logScoreScalarAnswer(
+          ~estimate=estimate',
+          ~answer,
+          ~prior=None,
+        )->E.R.errMap(y => DistributionTypes.OperationError(y))
+      | Some(Ok(prior'')) =>
+        PointSetDist.logScoreScalarAnswer(
+          ~estimate=estimate',
+          ~answer,
+          ~prior=Some(prior''),
+        )->E.R.errMap(y => DistributionTypes.OperationError(y))
+      }
+    })
   }
 
   let logScore = (~estimate: t, ~answer: genericDistOrScalar, ~prior: option<t>, ~env: env): result<
     float,
     error,
-  > =>
-    argsMake(~esti=estimate, ~answ=answer, ~prior, ~env)->E.R.bind(x =>
-      x->PointSetDist.logScore->E.R.errMap(y => DistributionTypes.OperationError(y))
-    )
+  > => {
+    switch answer {
+    | Score_Dist(t) => logScoreDistAnswer(~estimate, ~answer=t, ~prior, ~env)
+    | Score_Scalar(t) => logScoreScalarAnswer(~estimate, ~answer=t, ~prior, ~env)
+    }
+  }
 }
 /*
   PointSetDist.toSparkline calls "downsampleEquallyOverX", which downsamples it to n=bucketCount.
@@ -358,9 +385,7 @@ module AlgebraicCombination = {
       switch x {
       | Symbolic(#Float(_)) => MagicNumbers.OpCost.floatCost
       | Symbolic(_) => MagicNumbers.OpCost.symbolicCost
-      | PointSet(Discrete(m)) => m->Discrete.getShape->XYShape.T.length
-      | PointSet(Mixed(_)) => MagicNumbers.OpCost.mixedCost
-      | PointSet(Continuous(_)) => MagicNumbers.OpCost.continuousCost
+      | PointSet(d) => PointSetDist.expectedConvolutionCost(d)
       | _ => MagicNumbers.OpCost.wildcardCost
       }
 

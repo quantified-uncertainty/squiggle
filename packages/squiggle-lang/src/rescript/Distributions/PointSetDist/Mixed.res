@@ -1,5 +1,6 @@
 @@warning("-27") //TODO: Remove and fix the warning
 %%raw(`const Mixed = require('../../../PointSetDist/Mixed')`)
+%%raw(`const PointSetDist = require('../../../PointSetDist/PointSetDist')`)
 
 type t = PointSetTypes.mixedShape
 open Distributions
@@ -18,7 +19,7 @@ module T = Dist({
   type integral = PointSetTypes.continuousShape
   let minX = %raw(`Mixed.T.minX`)
   let maxX = %raw(`Mixed.T.maxX`)
-  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Mixed(t)
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => %raw(`PointSetDist.makeMixed(t)`)
 
   let updateIntegralCache = %raw(`Mixed.T.updateIntegralCache`)
 

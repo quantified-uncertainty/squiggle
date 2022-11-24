@@ -1,57 +1,12 @@
+@@warning("-27") //TODO: Remove and fix the warning
 open Distributions
+%%raw(`const PointSetDist = require('../../../PointSetDist/PointSetDist')`)
 
 type t = PointSetTypes.pointSetDist
 
-let mapToAll = ((fn1, fn2, fn3), t: t) =>
-  switch t {
-  | Mixed(m) => fn1(m)
-  | Discrete(m) => fn2(m)
-  | Continuous(m) => fn3(m)
-  }
-
-let fmap = (t: t, (fn1, fn2, fn3)): t =>
-  switch t {
-  | Mixed(m) => Mixed(fn1(m))
-  | Discrete(m) => Discrete(fn2(m))
-  | Continuous(m) => Continuous(fn3(m))
-  }
-
-let fmapResult = (t: t, (fn1, fn2, fn3)): result<t, 'e> =>
-  switch t {
-  | Mixed(m) => fn1(m)->E.R.fmap(x => PointSetTypes.Mixed(x))
-  | Discrete(m) => fn2(m)->E.R.fmap(x => PointSetTypes.Discrete(x))
-  | Continuous(m) => fn3(m)->E.R.fmap(x => PointSetTypes.Continuous(x))
-  }
-
-let toMixed = mapToAll((
-  m => Mixed.T.toMixed(m),
-  d => Discrete.T.toMixed(d),
-  c => Continuous.T.toMixed(c),
-))
-
-//TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
-let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t =>
-  switch (t1, t2) {
-  | (Continuous(m1), Continuous(m2)) =>
-    Continuous.combineAlgebraically(op, m1, m2)->Continuous.T.toPointSetDist
-  | (Discrete(m1), Continuous(m2)) =>
-    Continuous.combineAlgebraicallyWithDiscrete(
-      op,
-      m2,
-      m1,
-      ~discretePosition=#First,
-    )->Continuous.T.toPointSetDist
-  | (Continuous(m1), Discrete(m2)) =>
-    Continuous.combineAlgebraicallyWithDiscrete(
-      op,
-      m1,
-      m2,
-      ~discretePosition=#Second,
-    )->Continuous.T.toPointSetDist
-  | (Discrete(m1), Discrete(m2)) =>
-    Discrete.combineAlgebraically(op, m1, m2)->Discrete.T.toPointSetDist
-  | (m1, m2) => Mixed.combineAlgebraically(op, toMixed(m1), toMixed(m2))->Mixed.T.toPointSetDist
-  }
+let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
+  %raw(`PointSetDist.combineAlgebraically(op, t1, t2)`)
+}
 
 let combinePointwise = (
   ~combiner=XYShape.PointwiseCombination.combine,
@@ -63,187 +18,100 @@ let combinePointwise = (
   fn: (float, float) => result<float, Operation.Error.t>,
   t1: t,
   t2: t,
-): result<PointSetTypes.pointSetDist, Operation.Error.t> =>
-  switch (t1, t2) {
-  | (Continuous(m1), Continuous(m2)) =>
-    Continuous.combinePointwise(
-      ~integralSumCachesFn,
-      fn,
-      m1,
-      m2,
-    )->E.R.fmap(x => PointSetTypes.Continuous(x))
-  | (Discrete(m1), Discrete(m2)) =>
-    Discrete.combinePointwise(
-      ~combiner,
-      ~integralSumCachesFn,
-      ~fn,
-      m1,
-      m2,
-    )->E.R.fmap(x => PointSetTypes.Discrete(x))
-  | (m1, m2) =>
-    Mixed.combinePointwise(
-      ~integralSumCachesFn,
-      ~integralCachesFn,
-      fn,
-      toMixed(m1),
-      toMixed(m2),
-    )->E.R.fmap(x => PointSetTypes.Mixed(x))
-  }
+): result<PointSetTypes.pointSetDist, Operation.Error.t> => {
+  %raw(`PointSetDist.combinePointwise(t1, t2, fn, integralSumCachesFnOpt, integralCachesFnOpt)`)
+}
 
 module T = Dist({
   type t = PointSetTypes.pointSetDist
   type integral = PointSetTypes.continuousShape
 
-  let xToY = (f: float) => mapToAll((Mixed.T.xToY(f), Discrete.T.xToY(f), Continuous.T.xToY(f)))
+  let minX = %raw(`PointSetDist.T.minX`)
+  let maxX = %raw(`PointSetDist.T.maxX`)
+  let xToY = %raw(`PointSetDist.T.xToY`)
 
   let toPointSetDist = (t: t) => t
 
-  let downsample = (i, t) =>
-    t->fmap((Mixed.T.downsample(i), Discrete.T.downsample(i), Continuous.T.downsample(i)))
+  let downsample = %raw(`PointSetDist.T.downsample`)
 
-  let truncate = (leftCutoff, rightCutoff, t): t =>
-    t->fmap((
-      Mixed.T.truncate(leftCutoff, rightCutoff),
-      Discrete.T.truncate(leftCutoff, rightCutoff),
-      Continuous.T.truncate(leftCutoff, rightCutoff),
-    ))
+  let updateIntegralCache = %raw(`PointSetDist.T.updateIntegralCache`)
+  let truncate = %raw(`PointSetDist.T.truncate`)
+  let normalize = %raw(`PointSetDist.T.normalize`)
 
-  let normalize = fmap(_, (Mixed.T.normalize, Discrete.T.normalize, Continuous.T.normalize))
+  let toContinuous = %raw(`PointSetDist.T.toContinuous`)
+  let toDiscrete = %raw(`PointSetDist.T.toDiscrete`)
+  let toMixed = %raw(`PointSetDist.T.toMixed`)
 
-  let updateIntegralCache = (t: t, integralCache): t =>
-    t->fmap((
-      Mixed.T.updateIntegralCache(_, integralCache),
-      Discrete.T.updateIntegralCache(_, integralCache),
-      Continuous.T.updateIntegralCache(_, integralCache),
-    ))
+  let toDiscreteProbabilityMassFraction = %raw(`PointSetDist.T.toDiscreteProbabilityMassFraction`)
 
-  let toContinuous = mapToAll((
-    Mixed.T.toContinuous,
-    Discrete.T.toContinuous,
-    Continuous.T.toContinuous,
-  ))
-  let toDiscrete = mapToAll((Mixed.T.toDiscrete, Discrete.T.toDiscrete, Continuous.T.toDiscrete))
-  let toMixed = mapToAll((Mixed.T.toMixed, Discrete.T.toMixed, Continuous.T.toMixed))
+  let integral = %raw(`PointSetDist.T.integral`)
 
-  let toDiscreteProbabilityMassFraction = mapToAll((
-    Mixed.T.toDiscreteProbabilityMassFraction,
-    Discrete.T.toDiscreteProbabilityMassFraction,
-    Continuous.T.toDiscreteProbabilityMassFraction,
-  ))
+  let integralEndY = %raw(`PointSetDist.T.integralEndY`)
+  let integralXtoY = %raw(`PointSetDist.T.integralXtoY`)
+  let integralYtoX = %raw(`PointSetDist.T.integralYtoX`)
 
-  let minX = mapToAll((Mixed.T.minX, Discrete.T.minX, Continuous.T.minX))
-  let integral = mapToAll((
-    Mixed.T.Integral.get,
-    Discrete.T.Integral.get,
-    Continuous.T.Integral.get,
-  ))
-  let integralEndY = mapToAll((
-    Mixed.T.Integral.sum,
-    Discrete.T.Integral.sum,
-    Continuous.T.Integral.sum,
-  ))
-  let integralXtoY = f =>
-    mapToAll((Mixed.T.Integral.xToY(f), Discrete.T.Integral.xToY(f), Continuous.T.Integral.xToY(f)))
-  let integralYtoX = f =>
-    mapToAll((Mixed.T.Integral.yToX(f), Discrete.T.Integral.yToX(f), Continuous.T.Integral.yToX(f)))
-  let maxX = mapToAll((Mixed.T.maxX, Discrete.T.maxX, Continuous.T.maxX))
   let mapY = (
     ~integralSumCacheFn=_ => None,
     ~integralCacheFn=_ => None,
     t: t,
     fn: float => float,
-  ): t =>
-    t->fmap((
-      Mixed.T.mapY(~integralSumCacheFn, ~integralCacheFn, _, fn),
-      Discrete.T.mapY(~integralSumCacheFn, ~integralCacheFn, _, fn),
-      Continuous.T.mapY(~integralSumCacheFn, ~integralCacheFn, _, fn),
-    ))
-
+  ): t => {
+    %raw(`PointSetDist.T.mapY(t, fn, integralSumCacheFnOpt, integralCacheFnOpt)`)
+  }
   let mapYResult = (
     ~integralSumCacheFn=_ => None,
     ~integralCacheFn=_ => None,
     t: t,
     fn: float => result<float, 'e>,
-  ): result<t, 'e> =>
-    t->fmapResult((
-      Mixed.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, _, fn),
-      Discrete.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, _, fn),
-      Continuous.T.mapYResult(~integralSumCacheFn, ~integralCacheFn, _, fn),
-    ))
+  ): result<t, 'e> => {
+    %raw(`PointSetDist.T.mapYResult(t, fn, integralSumCacheFnOpt, integralCacheFnOpt)`)
+  }
 
-  let mean = (t: t): float =>
-    switch t {
-    | Mixed(m) => Mixed.T.mean(m)
-    | Discrete(m) => Discrete.T.mean(m)
-    | Continuous(m) => Continuous.T.mean(m)
-    }
-
-  let variance = (t: t): float =>
-    switch t {
-    | Mixed(m) => Mixed.T.variance(m)
-    | Discrete(m) => Discrete.T.variance(m)
-    | Continuous(m) => Continuous.T.variance(m)
-    }
+  let mean = %raw(`PointSetDist.T.mean`)
+  let variance = %raw(`PointSetDist.T.variance`)
 })
 
-let logScore = (args: PointSetDist_Scoring.scoreArgs): result<float, Operation.Error.t> =>
-  PointSetDist_Scoring.logScore(
-    args,
-    ~combineFn=combinePointwise,
-    ~integrateFn=T.Integral.sum,
-    ~toMixedFn=toMixed,
-  )
-
-let pdf = (f: float, t: t) => {
-  let mixedPoint: PointSetTypes.mixedPoint = T.xToY(f, t)
-  mixedPoint.continuous +. mixedPoint.discrete
-}
-
-let inv = T.Integral.yToX
-let cdf = T.Integral.xToY
-
-let doN = (n, fn) => {
-  let items = Belt.Array.make(n, 0.0)
-  for x in 0 to n - 1 {
-    let _ = Belt.Array.set(items, x, fn())
+let logScoreDistAnswer = (~estimate: t, ~answer: t, ~prior: option<t>): result<
+  float,
+  Operation.Error.t,
+> => {
+  switch prior {
+  | None => PointSetDist_Scoring.WithDistAnswer.sum(~estimate, ~answer)
+  | Some(prior) => PointSetDist_Scoring.WithDistAnswer.sumWithPrior(~estimate, ~answer, ~prior)
   }
-  items
 }
 
-let sample = (t: t): float => {
-  let randomItem = Random.float(1.0)
-  t->T.Integral.yToX(randomItem, _)
-}
-
-let isFloat = (t: t) =>
-  switch t {
-  | Discrete(d) => Discrete.isFloat(d)
-  | _ => false
+let logScoreScalarAnswer = (~estimate: t, ~answer: float, ~prior: option<t>): result<
+  float,
+  Operation.Error.t,
+> => {
+  switch prior {
+  | None => PointSetDist_Scoring.WithScalarAnswer.score(~estimate, ~answer)
+  | Some(prior) => PointSetDist_Scoring.WithScalarAnswer.scoreWithPrior(~estimate, ~answer, ~prior)
   }
-
-let sampleNRendered = (n, dist) => {
-  let integralCache = T.Integral.get(dist)
-  let distWithUpdatedIntegralCache = T.updateIntegralCache(dist, Some(integralCache))
-  doN(n, () => sample(distWithUpdatedIntegralCache))
 }
 
-let operate = (distToFloatOp: Operation.distToFloatOperation, s): float =>
-  switch distToFloatOp {
-  | #Pdf(f) => pdf(f, s)
-  | #Cdf(f) => cdf(f, s)
-  | #Inv(f) => inv(f, s)
-  | #Sample => sample(s)
-  | #Mean => T.mean(s)
-  | #Min => T.minX(s)
-  | #Max => T.maxX(s)
-  }
+let pdf = (f: float, t: t) => %raw(`PointSetDist.pdf(f, t)`)
+let inv = (f: float, t: t) => %raw(`PointSetDist.inv(f, t)`)
+let cdf = (f: float, t: t) => %raw(`PointSetDist.cdf(f, t)`)
 
-let toSparkline = (t: t, bucketCount): result<string, PointSetTypes.sparklineError> =>
-  T.toContinuous(t)
-  ->E.O.fmap(Continuous.downsampleEquallyOverX(bucketCount))
-  ->E.O.toResult(PointSetTypes.CannotSparklineDiscrete)
-  ->E.R.fmap(r => (r->Continuous.getShape).ys->Sparklines.create())
+let sample = (t: t): float => %raw(`PointSetDist.sample(t)`)
 
-let makeDiscrete = (d): t => Discrete(d)
-let makeContinuous = (d): t => Continuous(d)
-let makeMixed = (d): t => Mixed(d)
+// let isFloat = (t: t) =>
+//   switch t {
+//   | Discrete(d) => Discrete.isFloat(d)
+//   | _ => false
+//   }
+
+let sampleNRendered = (n: int, dist: t): array<float> => {
+  %raw(`PointSetDist.sampleNRendered(dist, n)`)
+}
+
+let toSparkline = (t: t, bucketCount): result<string, string> => {
+  %raw(`PointSetDist.toSparkline(t, bucketCount)`)
+}
+
+let isContinuous: t => bool = %raw(`PointSetDist.isContinuous`)
+let isDiscrete: t => bool = %raw(`PointSetDist.isDiscrete`)
+
+let expectedConvolutionCost: t => int = %raw(`PointSetDist.expectedConvolutionCost`)

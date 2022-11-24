@@ -1,4 +1,5 @@
 // This file has no dependencies. It's used outside of the interpreter, but the interpreter depends on it.
+%%raw(`const OperationError = require('../../OperationError')`)
 
 @genType
 type algebraicOperation = [
@@ -52,59 +53,43 @@ module Convolution = {
     }
 }
 
-type operationError =
-  | DivisionByZeroError
-  | ComplexNumberError
-  | InfinityError
-  | NegativeInfinityError
-  | SampleMapNeedsNtoNFunction
-  | PdfInvalidError
-  | NotYetImplemented // should be removed when `klDivergence` for mixed and discrete is implemented.
-  | Other(string)
-
-@genType
 module Error = {
-  @genType
-  type t = operationError
+  type t
 
-  let toString = (err: t): string =>
-    switch err {
-    | DivisionByZeroError => "Cannot divide by zero"
-    | ComplexNumberError => "Operation returned complex result"
-    | InfinityError => "Operation returned positive infinity"
-    | NegativeInfinityError => "Operation returned negative infinity"
-    | SampleMapNeedsNtoNFunction => "SampleMap needs a function that converts a number to a number"
-    | PdfInvalidError => "This Pdf is invalid"
-    | NotYetImplemented => "This pathway is not yet implemented"
-    | Other(t) => t
-    }
+  let toString = (err: t): string => %raw(`OperationError.operationErrorToString`)
+
+  let complexNumberError = %raw(`OperationError.ComplexNumberError`)
+  let divisionByZeroError = %raw(`OperationError.DivisionByZeroError`)
+  let negativeInfinityError = %raw(`OperationError.NegativeInfinityError`)
+  let sampleMapNeedsNtoNFunction = %raw(`OperationError.SampleMapNeedsNtoNFunction`)
+  let makeOtherError: string => t = %raw(`OperationError.makeOtherError`)
 }
 
 let power = (a: float, b: float): result<float, Error.t> =>
   if a >= 0.0 {
     Ok(a ** b)
   } else {
-    Error(ComplexNumberError)
+    Error(Error.complexNumberError)
   }
 
 let divide = (a: float, b: float): result<float, Error.t> =>
   if b != 0.0 {
     Ok(a /. b)
   } else {
-    Error(DivisionByZeroError)
+    Error(Error.divisionByZeroError)
   }
 
 let logarithm = (a: float, b: float): result<float, Error.t> =>
   if b == 1. {
-    Error(DivisionByZeroError)
+    Error(Error.divisionByZeroError)
   } else if b == 0. {
     Ok(0.)
   } else if a > 0.0 && b > 0.0 {
     Ok(log(a) /. log(b))
   } else if a == 0.0 {
-    Error(NegativeInfinityError)
+    Error(Error.negativeInfinityError)
   } else {
-    Error(ComplexNumberError)
+    Error(Error.complexNumberError)
   }
 
 @genType
@@ -153,19 +138,6 @@ module Pointwise = {
   let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
 }
 
-module DistToFloat = {
-  type t = distToFloatOperation
-
-  let format = (operation, value) =>
-    switch operation {
-    | #Cdf(f) => j`cdf(x=$f,$value)`
-    | #Pdf(f) => j`pdf(x=$f,$value)`
-    | #Inv(f) => j`inv(x=$f,$value)`
-    | #Sample => "sample($value)"
-    | #Mean => "mean($value)"
-    }
-}
-
 // Note that different logarithms don't really do anything.
 module Scale = {
   type t = scaleOperation
@@ -207,12 +179,4 @@ module Scale = {
     | #Logarithm => (_, _) => None
     | #LogarithmWithThreshold(_) => (_, _) => None
     }
-}
-
-module Truncate = {
-  let toString = (left: option<float>, right: option<float>, nodeToString) => {
-    let left = left->E.O.dimap(Js.Float.toString, () => "-inf")
-    let right = right->E.O.dimap(Js.Float.toString, () => "inf")
-    j`truncate($nodeToString, $left, $right)`
-  }
 }

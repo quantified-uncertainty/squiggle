@@ -42,7 +42,7 @@ module Internal = {
   let doLambdaCall = (aLambdaValue, list, context, reducer) =>
     switch Reducer_Lambda.doLambdaCall(aLambdaValue, list, context, reducer) {
     | Reducer_T.IEvNumber(f) => Ok(f)
-    | _ => Error(Operation.SampleMapNeedsNtoNFunction)
+    | _ => Error(Operation.Error.sampleMapNeedsNtoNFunction)
     }
 
   let mapY = (pointSetDist: t, aLambdaValue, context, reducer) => {
@@ -115,7 +115,9 @@ let library = [
         ~name="makeContinuous",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(inputs, _, _) =>
-          inputsToDist(inputs, r => Continuous(Continuous.make(r)))->E.R.errMap(wrapError),
+          inputsToDist(inputs, r => Continuous.T.toPointSetDist(Continuous.make(r)))->E.R.errMap(
+            wrapError,
+          ),
         (),
       ),
     ],
@@ -139,7 +141,9 @@ let library = [
         ~name="makeDiscrete",
         ~inputs=[FRTypeArray(FRTypeRecord([("x", FRTypeNumeric), ("y", FRTypeNumeric)]))],
         ~run=(inputs, _, _) =>
-          inputsToDist(inputs, r => Discrete(Discrete.make(r)))->E.R.errMap(wrapError),
+          inputsToDist(inputs, r => Discrete.T.toPointSetDist(Discrete.make(r)))->E.R.errMap(
+            wrapError,
+          ),
         (),
       ),
     ],

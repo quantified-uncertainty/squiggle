@@ -15,7 +15,7 @@ module Internal = {
   ) =>
     switch Reducer_Lambda.doLambdaCall(aLambdaValue, list, context, reducer) {
     | IEvNumber(f) => Ok(f)
-    | _ => Error(Operation.SampleMapNeedsNtoNFunction)
+    | _ => Error(Operation.Error.sampleMapNeedsNtoNFunction)
     }
 
   let toType = (r): result<Reducer_T.value, SqError.Message.t> =>

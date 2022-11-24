@@ -158,7 +158,7 @@ module Process = {
       let mapFnResult = r =>
         switch r {
         | Ok(r) => Ok(GenericDist.sample(r))
-        | Error(r) => Error(Operation.Other(r))
+        | Error(r) => Error(Operation.Error.makeOtherError(r))
         }
 
       let wrapSymbolic = (fn, r) => r->fn->E.R.fmap(Wrappers.symbolic)

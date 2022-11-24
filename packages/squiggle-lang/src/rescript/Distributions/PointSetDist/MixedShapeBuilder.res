@@ -10,10 +10,10 @@ let buildSimple = (
   let dLength = discrete->Discrete.getShape->XYShape.T.xs->E.A.length
   switch (cLength, dLength) {
   | (0 | 1, 0) => None
-  | (0 | 1, _) => Some(Discrete(discrete))
-  | (_, 0) => Some(Continuous(continuous))
+  | (0 | 1, _) => Some(discrete->Discrete.T.toPointSetDist)
+  | (_, 0) => Some(continuous->Continuous.T.toPointSetDist)
   | (_, _) =>
     let mixedDist = Mixed.make(~integralSumCache=None, ~integralCache=None, ~continuous, ~discrete)
-    Some(Mixed(mixedDist))
+    Some(mixedDist->Mixed.T.toPointSetDist)
   }
 }

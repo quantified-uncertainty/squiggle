@@ -1,11 +1,21 @@
 import zipWith from "lodash/zipWith";
-import { wrapDistribution } from "./SqDistribution";
-import * as RSPointSetDist from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
-import { pointSetDistributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution_tag";
+import { SqPointSetDistribution } from "./SqDistribution";
 import { ContinuousShape } from "../PointSetDist/Continuous";
 import { DiscreteShape } from "../PointSetDist/Discrete";
+import { MixedShape } from "../PointSetDist/Mixed";
+import * as PointSetDist from "../PointSetDist/PointSetDist";
+import {
+  toDistribution,
+  pointSetDistribution,
+} from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
 
-type T = RSPointSetDist.pointSetDistribution;
+type T = PointSetDist.PointSetDist;
+
+enum Tag {
+  Mixed = "Mixed",
+  Discrete = "Discrete",
+  Continuous = "Continuous",
+}
 
 export type SqPoint = { x: number; y: number };
 export type SqShape = {
@@ -19,33 +29,35 @@ const shapePoints = (x: ContinuousShape | DiscreteShape): SqPoint[] => {
   return zipWith(xs, ys, (x, y) => ({ x, y }));
 };
 
-export const wrapPointSetDist = (value: T) => {
-  const tag = RSPointSetDist.getTag(value);
-
-  return new tagToClass[tag](value);
+export const wrapPointSetDist = (value: pointSetDistribution) => {
+  const tsValue = value as unknown as PointSetDist.PointSetDist;
+  switch (tsValue.type) {
+    case "Continuous":
+      return new SqContinuousPointSetDist(tsValue.value);
+    case "Mixed":
+      return new SqMixedPointSetDist(tsValue.value);
+    case "Discrete":
+      return new SqDiscretePointSetDist(tsValue.value);
+    default:
+      throw new Error("Internal error");
+  }
 };
 
-abstract class SqAbstractPointSetDist {
-  constructor(private _value: T) {}
+abstract class SqAbstractPointSetDist<S> {
+  constructor(_value: S) {}
 
+  abstract get value(): S;
   abstract asShape(): SqShape;
 
-  protected valueMethod = <IR>(rsMethod: (v: T) => IR | null | undefined) => {
-    const value = rsMethod(this._value);
-    if (!value) throw new Error("Internal casting error");
-    return value;
-  };
-
-  asDistribution() {
-    return wrapDistribution(RSPointSetDist.toDistribution(this._value));
-  }
+  abstract asDistribution(): SqPointSetDistribution;
 }
 
-export class SqMixedPointSetDist extends SqAbstractPointSetDist {
+export class SqMixedPointSetDist implements SqAbstractPointSetDist<MixedShape> {
   tag = Tag.Mixed as const;
+  constructor(private _value: MixedShape) {}
 
-  get value(): RSPointSetDist.mixedShape {
-    return this.valueMethod(RSPointSetDist.getMixed);
+  get value(): MixedShape {
+    return this._value;
   }
 
   asShape() {
@@ -55,13 +67,24 @@ export class SqMixedPointSetDist extends SqAbstractPointSetDist {
       continuous: shapePoints(v.continuous),
     };
   }
+
+  asDistribution(): SqPointSetDistribution {
+    return new SqPointSetDistribution(
+      toDistribution(
+        PointSetDist.makeMixed(this._value) as unknown as pointSetDistribution
+      )
+    );
+  }
 }
 
-export class SqDiscretePointSetDist extends SqAbstractPointSetDist {
+export class SqDiscretePointSetDist
+  implements SqAbstractPointSetDist<DiscreteShape>
+{
   tag = Tag.Discrete as const;
+  constructor(private _value: DiscreteShape) {}
 
   get value(): DiscreteShape {
-    return this.valueMethod(RSPointSetDist.getDiscrete);
+    return this._value;
   }
 
   asShape() {
@@ -71,13 +94,26 @@ export class SqDiscretePointSetDist extends SqAbstractPointSetDist {
       continuous: [],
     };
   }
+
+  asDistribution(): SqPointSetDistribution {
+    return new SqPointSetDistribution(
+      toDistribution(
+        PointSetDist.makeDiscrete(
+          this._value
+        ) as unknown as pointSetDistribution
+      )
+    );
+  }
 }
 
-export class SqContinuousPointSetDist extends SqAbstractPointSetDist {
+export class SqContinuousPointSetDist
+  implements SqAbstractPointSetDist<ContinuousShape>
+{
   tag = Tag.Continuous as const;
+  constructor(private _value: ContinuousShape) {}
 
   get value(): ContinuousShape {
-    return this.valueMethod(RSPointSetDist.getContinues);
+    return this._value;
   }
 
   asShape() {
@@ -87,13 +123,17 @@ export class SqContinuousPointSetDist extends SqAbstractPointSetDist {
       continuous: shapePoints(v),
     };
   }
-}
 
-const tagToClass = {
-  [Tag.Mixed]: SqMixedPointSetDist,
-  [Tag.Discrete]: SqDiscretePointSetDist,
-  [Tag.Continuous]: SqContinuousPointSetDist,
-} as const;
+  asDistribution(): SqPointSetDistribution {
+    return new SqPointSetDistribution(
+      toDistribution(
+        PointSetDist.makeContinuous(
+          this._value
+        ) as unknown as pointSetDistribution
+      )
+    );
+  }
+}
 
 export type SqPointSetDist =
   | SqMixedPointSetDist

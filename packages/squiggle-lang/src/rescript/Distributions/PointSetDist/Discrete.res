@@ -1,5 +1,6 @@
 @@warning("-27") //TODO: Remove and fix the warning
 %%raw(`const Discrete = require('../../../PointSetDist/Discrete')`)
+%%raw(`const PointSetDist = require('../../../PointSetDist/PointSetDist')`)
 
 type t = PointSetTypes.discreteShape
 
@@ -83,7 +84,7 @@ module T = Dist({
     %raw(`Discrete.T.mapYResult(t, fn, integralSumCacheFnOpt, integralCacheFnOpt)`)
   }
   let updateIntegralCache = %raw(`Discrete.T.updateIntegralCache`)
-  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Discrete(t)
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => %raw(`PointSetDist.makeDiscrete(t)`)
 
   let normalize = %raw(`Discrete.T.normalize`)
 

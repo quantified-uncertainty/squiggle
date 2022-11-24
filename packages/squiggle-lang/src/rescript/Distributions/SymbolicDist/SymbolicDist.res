@@ -275,9 +275,11 @@ module Bernoulli = {
     inv(s, t)
   }
   let toString = ({p}: t) => j`Bernoulli($p)`
-  let toPointSetDist = ({p}: t): PointSetTypes.pointSetDist => Discrete(
-    Discrete.make(~integralSumCache=Some(1.0), {xs: [0.0, 1.0], ys: [1.0 -. p, p]}),
-  )
+  let toPointSetDist = ({p}: t): PointSetTypes.pointSetDist =>
+    Discrete.make(
+      ~integralSumCache=Some(1.0),
+      {xs: [0.0, 1.0], ys: [1.0 -. p, p]},
+    )->Discrete.T.toPointSetDist
 }
 
 module Gamma = {
@@ -316,9 +318,8 @@ module Float = {
   let mean = (t: t) => Ok(t)
   let sample = (t: t) => t
   let toString = (t: t) => j`PointMass($t)`
-  let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Discrete(
-    Discrete.make(~integralSumCache=Some(1.0), {xs: [t], ys: [1.0]}),
-  )
+  let toPointSetDist = (t: t): PointSetTypes.pointSetDist =>
+    Discrete.make(~integralSumCache=Some(1.0), {xs: [t], ys: [1.0]})->Discrete.T.toPointSetDist
 }
 
 module From90thPercentile = {
@@ -543,6 +544,6 @@ module T = {
     | _ =>
       let xs = interpolateXs(~xSelection, d, sampleCount)
       let ys = xs->E.A.fmap(x => pdf(x, d))
-      Continuous(Continuous.make(~integralSumCache=Some(1.0), {xs, ys}))
+      Continuous.make(~integralSumCache=Some(1.0), {xs, ys})->Continuous.T.toPointSetDist
     }
 }
