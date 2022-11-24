@@ -62,17 +62,3 @@ module T = Dist({
   let mean = %raw(`Mixed.T.mean`)
   let variance = %raw(`Mixed.T.variance`)
 })
-
-let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
-  %raw(`Mixed.combineAlgebraically(op, t1, t2)`)
-}
-
-let combinePointwise = (
-  ~integralSumCachesFn=(_, _) => None,
-  ~integralCachesFn=(_, _) => None,
-  fn: (float, float) => result<float, 'e>,
-  t1: t,
-  t2: t,
-): result<t, 'e> => {
-  %raw(`Mixed.combinePointwise(t1, t2, fn, integralSumCachesFnOpt, integralCachesFnOpt)`)
-}

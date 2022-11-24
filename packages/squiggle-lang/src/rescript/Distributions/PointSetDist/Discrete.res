@@ -14,49 +14,9 @@ let make = (
   %raw(`Discrete.make(xyShape, integralSumCacheOpt, integralCacheOpt)`)
 }
 
-let shapeMap = (t: t, fn: XYShape.T.t => XYShape.T.t): t => {
-  %raw(`Discrete.shapeMap(t, fn)`)
-}
 let empty: t = %raw(`Discrete.empty`)
 
 let getShape: t => XYShape.T.t = %raw(`Discrete.getShape`)
-
-let isFloat = (t: t): bool => {
-  %raw(`Discrete.isFloat(t)`)
-}
-
-let combinePointwise = (
-  ~combiner=XYShape.PointwiseCombination.combine,
-  ~integralSumCachesFn=(_, _) => None,
-  ~fn: (float, float) => result<float, Operation.Error.t>,
-  t1: t,
-  t2: t,
-): result<t, 'e> => {
-  %raw(`Discrete.combinePointwise(t1, t2, fn, integralSumCachesFnOpt)`)
-}
-
-let reduce = (
-  shapes: array<t>,
-  ~integralSumCachesFn: (float, float) => option<float>,
-  fn: (float, float) => result<float, Operation.Error.t>,
-): result<t, Operation.Error.t> => {
-  %raw(`Discrete.reduce(shapes, fn, integralSumCachesFn)`)
-}
-
-let updateIntegralCache: (
-  t,
-  option<PointSetTypes.continuousShape>,
-) => t = %raw(`Discrete.updateIntegralCache`)
-
-let updateIntegralSumCache: (t, option<float>) => t = %raw(`Discrete.updateIntegralSumCache`)
-
-let combineAlgebraically: (
-  Operation.convolutionOperation,
-  t,
-  t,
-) => t = %raw(`Discrete.combineAlgebraically`)
-
-let scaleBy: (t, float) => t = %raw(`Discrete.scaleBy`)
 
 module T = Dist({
   type t = PointSetTypes.discreteShape

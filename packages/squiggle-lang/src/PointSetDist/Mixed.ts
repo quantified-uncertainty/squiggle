@@ -47,9 +47,6 @@ export const make = (
 //   )
 // }
 
-// let toContinuous = ({continuous}: t) => Some(continuous)
-// let toDiscrete = ({discrete}: t) => Some(discrete)
-
 const updateIntegralCache = (
   t: MixedShape,
   integralCache: ContinuousShape | undefined
@@ -61,16 +58,13 @@ const updateIntegralCache = (
 };
 
 export const T: PointSet<MixedShape> = {
-  //   type t = PointSetTypes.mixedShape
-  //   type integral = PointSetTypes.continuousShape
   minX({ continuous, discrete }) {
     return Math.min(Continuous.T.minX(continuous), Discrete.T.minX(discrete));
   },
   maxX({ continuous, discrete }) {
     return Math.max(Continuous.T.maxX(continuous), Discrete.T.maxX(discrete));
   },
-  //   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => Mixed(t)
-  //   let updateIntegralCache = updateIntegralCache
+
   toContinuous(t) {
     return t.continuous;
   },

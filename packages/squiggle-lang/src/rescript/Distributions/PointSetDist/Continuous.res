@@ -5,10 +5,6 @@
 type t = PointSetTypes.continuousShape
 open Distributions
 
-module Analysis = {
-  let getMeanOfSquares: t => float = %raw(`Continuous.Analysis.getMeanOfSquares`)
-}
-
 let make = (
   ~interpolation: XYShape.interpolationStrategy=#Linear,
   ~integralSumCache: option<float>=None,
@@ -18,37 +14,7 @@ let make = (
   %raw(`Continuous.make(xyShape, interpolationOpt, integralSumCacheOpt, integralCacheOpt)`)
 }
 
-let lastY: t => float = %raw(`Continuous.lastY`)
-let empty: t = %raw(`Continuous.empty`)
-
 let getShape: t => XYShape.T.t = %raw(`Continuous.getShape`)
-
-let stepwiseToLinear: t => t = %raw(`Continuous.stepwiseToLinear`)
-
-let combinePointwise = (
-  ~combiner=XYShape.PointwiseCombination.combine,
-  ~integralSumCachesFn=(_, _) => None,
-  ~distributionType: PointSetTypes.distributionType=#PDF,
-  fn: (float, float) => result<float, Operation.Error.t>,
-  t1: t,
-  t2: t,
-): result<t, 'e> => {
-  %raw(`Continuous.combinePointwise(t1, t2, fn, distributionTypeOpt, integralSumCachesFnOpt)`)
-}
-
-let updateIntegralSumCache: (t, option<float>) => t = %raw(`Continuous.updateIntegralSumCache`)
-let updateIntegralCache: (t, option<t>) => t = %raw(`Continuous.updateIntegralCache`)
-
-let sum: array<t> => t = %raw(`Continuous.sum`)
-let reduce = (
-  shapes: array<t>,
-  fn: (float, float) => result<float, Operation.Error.t>,
-  ~integralSumCachesFn: (float, float) => option<float>,
-): result<t, Operation.Error.t> => {
-  %raw(`Continuous.reduce(shapes, fn, integralSumCachesFn)`)
-}
-
-let scaleBy: (t, float) => t = %raw(`Continuous.scaleBy`)
 
 module T = Dist({
   type t = PointSetTypes.continuousShape
@@ -94,20 +60,3 @@ module T = Dist({
   let mean = %raw(`Continuous.T.mean`)
   let variance = %raw(`Continuous.T.variance`)
 })
-
-let downsampleEquallyOverX: (int, t) => t = %raw(`Continuous.downsampleEquallyOverX`)
-
-let combineAlgebraicallyWithDiscrete = (
-  op: Operation.convolutionOperation,
-  t1: t,
-  t2: PointSetTypes.discreteShape,
-  ~discretePosition: [#First | #Second],
-): t => {
-  %raw(`Continuous.combineAlgebraicallyWithDiscrete(op, t1, t2, discretePosition)`)
-}
-
-let combineAlgebraically: (
-  Operation.convolutionOperation,
-  t,
-  t,
-) => t = %raw(`Continuous.combineAlgebraically`)
