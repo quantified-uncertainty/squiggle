@@ -16,7 +16,7 @@ yarn-error.log
 *.gen.ts
 *.gen.tsx
 *.gen.js
-dist
+/dist
 *.coverage
 _coverage
 coverage

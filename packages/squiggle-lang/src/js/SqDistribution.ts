@@ -1,5 +1,4 @@
 import { SampleSetDist } from "../Dist/SampleSetDist/SampleSetDist";
-import { PointSet } from "../PointSet/types";
 import * as RSDistribution from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 import { distributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_tag";
 import { environment } from "../rescript/ForTS/ForTS__Types.gen";
