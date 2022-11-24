@@ -235,8 +235,8 @@ module Score = {
 }
 /*
   PointSetDist.toSparkline calls "downsampleEquallyOverX", which downsamples it to n=bucketCount.
-  It first needs a pointSetDist, so we convert to a pointSetDist. In this process we want the 
-  xyPointLength to be a bit longer than the eventual toSparkline downsampling. I chose 3 
+  It first needs a pointSetDist, so we convert to a pointSetDist. In this process we want the
+  xyPointLength to be a bit longer than the eventual toSparkline downsampling. I chose 3
   fairly arbitrarily.
  */
 let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<string, error> =>
@@ -306,7 +306,7 @@ module AlgebraicCombination = {
   module InputValidator = {
     /*
      It would be good to also do a check to make sure that probability mass for the second
-     operand, at value 1.0, is 0 (or approximately 0). However, we'd ideally want to check 
+     operand, at value 1.0, is 0 (or approximately 0). However, we'd ideally want to check
      that both the probability mass and the probability density are greater than zero.
      Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
  */

@@ -2,7 +2,6 @@
 @genType type distribution = DistributionTypes.genericDist
 @genType type distributionError = DistributionTypes.error
 @genType type pointSetDistribution = ForTS_Distribution_PointSetDistribution.pointSetDistribution
-@genType type sampleSetDistribution = ForTS_Distribution_SampleSetDistribution.sampleSetDistribution
 @genType type symbolicDistribution = ForTS_Distribution_SymbolicDistribution.symbolicDistribution
 
 type environment = ForTS_Distribution_Environment.environment //use
@@ -34,20 +33,6 @@ let getTag = (variant: distribution): distributionTag =>
   | PointSet(_) => dtPointSet_->castEnum
   | SampleSet(_) => dtSampleSet_->castEnum
   | Symbolic(_) => dtSymbolic_->castEnum
-  }
-
-@genType
-let getPointSet = (variant: distribution): option<pointSetDistribution> =>
-  switch variant {
-  | PointSet(dist) => dist->Some
-  | _ => None
-  }
-
-@genType
-let getSampleSet = (variant: distribution): option<sampleSetDistribution> =>
-  switch variant {
-  | SampleSet(dist) => dist->Some
-  | _ => None
   }
 
 @genType

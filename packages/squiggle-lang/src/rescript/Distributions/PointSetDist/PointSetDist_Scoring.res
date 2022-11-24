@@ -1,5 +1,5 @@
 @@warning("-27")
-%%raw(`const PointSetDist_Scoring = require('../../../PointSetDist/PointSetDist_Scoring')`)
+%%raw(`const PointSetDist_Scoring = require('../../../PointSet/PointSetDist_Scoring')`)
 type pointSetDist = PointSetTypes.pointSetDist
 
 module WithDistAnswer = {

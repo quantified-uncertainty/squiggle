@@ -1,7 +1,7 @@
 import {
   nrd,
   nrd0,
-} from "../../src/rescript/Distributions/SampleSetDist/SampleSetDist_Bandwidth";
+} from "../../src/Dist/SampleSetDist/SampleSetDist_Bandwidth";
 
 describe("Bandwidth", () => {
   test("nrd0()", () => {

@@ -1,3 +1,4 @@
+// matches SamplingInputs from SampleSetDist.ts
 type samplingInputs = {
   sampleCount: int,
   outputXYPoints: int,

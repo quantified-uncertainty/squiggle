@@ -15,3 +15,17 @@ export const firstGreaterIndex = (xs: readonly number[], x: number): number => {
   }
   return a;
 };
+
+// based on Jstat.percentile in inclusive mode
+export const percentile = (xs: number[], k: number) => {
+  const realIndex = k * (xs.length - 1);
+  const index = Math.floor(realIndex);
+  if (index + 1 < xs.length) {
+    const frac = realIndex - index;
+    const x0 = xs[index];
+    const x1 = xs[index + 1];
+    return x0 + frac * (x1 - x0);
+  } else {
+    return xs[index];
+  }
+};

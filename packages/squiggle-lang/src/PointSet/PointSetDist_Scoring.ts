@@ -5,9 +5,8 @@ import {
   PdfInvalidError,
 } from "../OperationError";
 import * as RSResult from "../rsResult";
-import * as Mixed from "./Mixed";
 import { MixedPoint } from "./MixedPoint";
-import * as PointSetDist from "./PointSetDist";
+import * as PointSetDist from "../Dist/PointSetDist";
 import { PointSet } from "./types";
 
 const logFn = Math.log; // base e
@@ -77,14 +76,8 @@ export const WithDistAnswer = {
         answDiscretePart
       ) {
         return RSResult.merge(
-          combineAndIntegrate(
-            PointSetDist.makeDiscrete(estiDiscretePart),
-            PointSetDist.makeDiscrete(answDiscretePart)
-          ),
-          combineAndIntegrate(
-            PointSetDist.makeContinuous(estiContinuousPart),
-            PointSetDist.makeContinuous(answContinuousPart)
-          )
+          combineAndIntegrate(estiDiscretePart, answDiscretePart),
+          combineAndIntegrate(estiContinuousPart, answContinuousPart)
         );
       } else {
         return RSResult.Error(makeOtherError("unreachable state"));

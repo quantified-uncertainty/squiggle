@@ -1,5 +1,5 @@
 @@warning("-27") //TODO: Remove and fix the warning
-%%raw(`const { MixedShape } = require('../../../PointSetDist/Mixed')`)
+%%raw(`const { MixedShape } = require('../../../PointSet/Mixed')`)
 
 type t = PointSetTypes.mixedShape
 

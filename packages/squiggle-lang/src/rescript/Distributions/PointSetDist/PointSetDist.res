@@ -1,5 +1,5 @@
 @@warning("-27") //TODO: Remove and fix the warning
-%%raw(`const PointSetDist = require('../../../PointSetDist/PointSetDist')`)
+%%raw(`const PointSetDist = require('../../../Dist/PointSetDist')`)
 
 type t = PointSetTypes.pointSetDist
 

@@ -1,6 +1,6 @@
 @@warning("-27") //TODO: Remove and fix the warning
-%%raw(`const Discrete = require('../../../PointSetDist/Discrete')`)
-%%raw(`const PointSetDist = require('../../../PointSetDist/PointSetDist')`)
+%%raw(`const Discrete = require('../../../PointSet/Discrete')`)
+%%raw(`const PointSetDist = require('../../../Dist/PointSetDist')`)
 
 type t = PointSetTypes.discreteShape
 

@@ -1,5 +1,5 @@
 @@warning("-27") //TODO: Remove and fix the warning
-%%raw(`const Continuous = require('../../../PointSetDist/Continuous')`)
+%%raw(`const Continuous = require('../../../PointSet/Continuous')`)
 
 type t = PointSetTypes.continuousShape
 

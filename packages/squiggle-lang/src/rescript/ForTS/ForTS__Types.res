@@ -11,6 +11,4 @@
 @genType type distributionError = ForTS_Distribution_Error.distributionError //re-export
 @genType type environment = ForTS_Distribution_Environment.environment //re-export
 
-@genType type pointSetDistribution = ForTS_Distribution_PointSetDistribution.pointSetDistribution //re-export
-@genType type sampleSetDistribution = ForTS_Distribution_SampleSetDistribution.sampleSetDistribution //re-export
 @genType type symbolicDistribution = ForTS_Distribution_SymbolicDistribution.symbolicDistribution //re-export

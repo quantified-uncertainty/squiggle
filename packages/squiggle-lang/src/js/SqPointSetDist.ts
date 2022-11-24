@@ -1,16 +1,13 @@
 import zipWith from "lodash/zipWith";
 import { SqPointSetDistribution } from "./SqDistribution";
-import { ContinuousShape } from "../PointSetDist/Continuous";
-import { DiscreteShape } from "../PointSetDist/Discrete";
-import { MixedShape } from "../PointSetDist/Mixed";
-import * as PointSetDist from "../PointSetDist/PointSetDist";
+import { ContinuousShape } from "../PointSet/Continuous";
+import { DiscreteShape } from "../PointSet/Discrete";
+import { MixedShape } from "../PointSet/Mixed";
 import {
   toDistribution,
   pointSetDistribution,
 } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
-import { PointSet } from "../PointSetDist/types";
-
-type T = PointSet;
+import { PointSet } from "../PointSet/types";
 
 enum Tag {
   Mixed = "Mixed",
@@ -69,9 +66,7 @@ export class SqMixedPointSetDist implements SqAbstractPointSetDist<MixedShape> {
 
   asDistribution(): SqPointSetDistribution {
     return new SqPointSetDistribution(
-      toDistribution(
-        PointSetDist.makeMixed(this._value) as unknown as pointSetDistribution
-      )
+      toDistribution(this._value as unknown as pointSetDistribution)
     );
   }
 }
@@ -96,11 +91,7 @@ export class SqDiscretePointSetDist
 
   asDistribution(): SqPointSetDistribution {
     return new SqPointSetDistribution(
-      toDistribution(
-        PointSetDist.makeDiscrete(
-          this._value
-        ) as unknown as pointSetDistribution
-      )
+      toDistribution(this._value as unknown as pointSetDistribution)
     );
   }
 }
@@ -125,11 +116,7 @@ export class SqContinuousPointSetDist
 
   asDistribution(): SqPointSetDistribution {
     return new SqPointSetDistribution(
-      toDistribution(
-        PointSetDist.makeContinuous(
-          this._value
-        ) as unknown as pointSetDistribution
-      )
+      toDistribution(this._value as unknown as pointSetDistribution)
     );
   }
 }

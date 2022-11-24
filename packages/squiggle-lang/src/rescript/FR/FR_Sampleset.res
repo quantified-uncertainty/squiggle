@@ -140,7 +140,7 @@ let libaryBase = [
         ~run=(inputs, _, _) =>
           switch inputs {
           | [IEvDistribution(SampleSet(dist))] =>
-            dist->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+            dist->SampleSetDist.getSamples->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
           | _ => Error(impossibleError)
           },
         (),
@@ -162,7 +162,14 @@ let libaryBase = [
           switch inputs {
           | [IEvLambda(lambda)] =>
             switch Internal.fromFn(lambda, context, reducer) {
-            | Ok(r) => Ok(r->Wrappers.sampleSet->Wrappers.evDistribution)
+            | Ok(r) =>
+              Ok(
+                r
+                ->SampleSetDist.make
+                ->E_R.toExn("Didn't expect to fail, sampleCount too low?")
+                ->Wrappers.sampleSet
+                ->Wrappers.evDistribution,
+              )
             | Error(e) => e->SqError.Message.REOperationError->Error
             }
           | _ => Error(impossibleError)

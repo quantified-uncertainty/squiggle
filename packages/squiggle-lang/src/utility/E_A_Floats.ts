@@ -41,3 +41,41 @@ export const isSorted = (t: number[]): boolean => {
   }
   return true;
 };
+
+export const sum = (t: readonly number[]): number => {
+  let sum = 0;
+  for (let v of t) {
+    sum += v;
+  }
+  return sum;
+};
+
+export const mean = (t: readonly number[]): number => {
+  return sum(t) / t.length; // TODO - handle empty arrays?
+};
+
+export const percentile = (t: readonly number[]): number => {
+  return sum(t) / t.length; // TODO - handle empty arrays?
+};
+
+export const sorted = (t: readonly number[]): number[] => {
+  return [...t].sort((a, b) => a - b);
+};
+
+export const variance = (xs: readonly number[]) => {
+  // Variance is shift-invariant; subtract the middle of the range for precision
+  // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Computing_shifted_data
+  const n = xs.length;
+  const offset = (xs[0] + xs[n - 1]) / 2;
+  let sum = 0;
+  let sumsq = 0;
+  xs.forEach((x) => {
+    let xOffset = x - offset;
+    sum += xOffset;
+    sumsq += xOffset * xOffset;
+  });
+  const mean = sum / n;
+  return sumsq / n - mean * mean;
+};
+
+export const stdev = (t: readonly number[]) => Math.sqrt(variance(t));

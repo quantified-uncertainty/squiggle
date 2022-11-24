@@ -1,3 +1,5 @@
+import { SampleSetDist } from "../Dist/SampleSetDist/SampleSetDist";
+import { PointSet } from "../PointSet/types";
 import * as RSDistribution from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 import { distributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_tag";
 import { environment } from "../rescript/ForTS/ForTS__Types.gen";
@@ -17,7 +19,7 @@ export const wrapDistribution = (value: T): SqDistribution => {
 abstract class SqAbstractDistribution {
   abstract tag: Tag;
 
-  constructor(private _value: T) {}
+  constructor(protected _value: T) {}
 
   protected valueMethod = <IR>(rsMethod: (v: T) => IR | null | undefined) => {
     const value = rsMethod(this._value);
@@ -83,15 +85,15 @@ export class SqPointSetDistribution extends SqAbstractDistribution {
   tag = Tag.PointSet as const;
 
   value() {
-    return wrapPointSetDist(this.valueMethod(RSDistribution.getPointSet));
+    return wrapPointSetDist((this._value as any)._0);
   }
 }
 
 export class SqSampleSetDistribution extends SqAbstractDistribution {
   tag = Tag.SampleSet as const;
 
-  value(): number[] {
-    return this.valueMethod(RSDistribution.getSampleSet);
+  value(): SampleSetDist {
+    return (this._value as any)._0;
   }
 }
 
