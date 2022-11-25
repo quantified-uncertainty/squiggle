@@ -116,7 +116,7 @@ let libaryBase = [
           let sampleSet =
             inputs
             ->Prepare.ToTypedArray.numbers
-            ->E.R.bind(r => SampleSetDist.make(r)->E.R.errMap(DistributionTypes.Error.toString))
+            ->E.R.bind(r => SampleSetDist.make(r)->E.R.errMap(DistError.toString))
           sampleSet
           ->E.R.fmap(Wrappers.sampleSet)
           ->E.R.fmap(Wrappers.evDistribution)

@@ -27,7 +27,7 @@ describe("klDivergence: continuous -> continuous -> float", () => {
       switch kl {
       | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=7)
       | Error(err) => {
-          Js.Console.log(DistributionTypes.Error.toString(err))
+          Js.Console.log(DistError.toString(err))
           raise(KlFailed)
         }
       }
@@ -58,7 +58,7 @@ describe("klDivergence: continuous -> continuous -> float", () => {
     switch kl {
     | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=2)
     | Error(err) => {
-        Js.Console.log(DistributionTypes.Error.toString(err))
+        Js.Console.log(DistError.toString(err))
         raise(KlFailed)
       }
     }
@@ -72,7 +72,7 @@ describe("klDivergence: continuous -> continuous -> float", () => {
     switch kl {
     | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=1)
     | Error(err) => {
-        Js.Console.log(DistributionTypes.Error.toString(err))
+        Js.Console.log(DistError.toString(err))
         raise(KlFailed)
       }
     }
@@ -95,7 +95,7 @@ describe("klDivergence: discrete -> discrete -> float", () => {
     switch kl {
     | Ok(kl') => kl'->expect->toBeSoCloseTo(analyticalKl, ~digits=7)
     | Error(err) =>
-      Js.Console.log(DistributionTypes.Error.toString(err))
+      Js.Console.log(DistError.toString(err))
       raise(KlFailed)
     }
   })
@@ -106,7 +106,7 @@ describe("klDivergence: discrete -> discrete -> float", () => {
     switch kl {
     | Ok(kl') => kl'->expect->toEqual(infinity)
     | Error(err) =>
-      Js.Console.log(DistributionTypes.Error.toString(err))
+      Js.Console.log(DistError.toString(err))
       raise(KlFailed)
     }
   })
@@ -137,7 +137,7 @@ describe("klDivergence: mixed -> mixed -> float", () => {
     | Ok(kl') =>
       kl'->expect->toBeSoCloseTo(analyticalKlContinuousPart +. analyticalKlDiscretePart, ~digits=1)
     | Error(err) =>
-      Js.Console.log(DistributionTypes.Error.toString(err))
+      Js.Console.log(DistError.toString(err))
       raise(KlFailed)
     }
   })
@@ -148,7 +148,7 @@ describe("klDivergence: mixed -> mixed -> float", () => {
     switch kl {
     | Ok(kl') => kl'->expect->toEqual(infinity)
     | Error(err) =>
-      Js.Console.log(DistributionTypes.Error.toString(err))
+      Js.Console.log(DistError.toString(err))
       raise(KlFailed)
     }
   })
@@ -162,7 +162,7 @@ describe("klDivergence: mixed -> mixed -> float", () => {
     | Ok(kl') =>
       kl'->expect->toBeSoCloseTo(analyticalKlContinuousPart +. analyticalKlDiscretePart, ~digits=1)
     | Error(err) =>
-      Js.Console.log(DistributionTypes.Error.toString(err))
+      Js.Console.log(DistError.toString(err))
       raise(KlFailed)
     }
   })

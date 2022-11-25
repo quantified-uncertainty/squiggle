@@ -1,5 +1,5 @@
 type t = DistributionTypes.genericDist
-type error = DistributionTypes.error
+type error = DistError.t
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
 
@@ -16,7 +16,7 @@ let isPointSet = (t: t) =>
   | _ => false
   }
 
-let isSampleSetSet = (t: t) =>
+let isSampleSet = (t: t) =>
   switch t {
   | SampleSet(_) => true
   | _ => false
@@ -30,12 +30,18 @@ let isSymbolic = (t: t) =>
 
 let sampleN = (t: t, n) =>
   switch t {
-  | PointSet(r) => PointSetDist.sampleNRendered(n, r)
+  | PointSet(r) => PointSetDist.sampleN(n, r)
   | Symbolic(r) => SymbolicDist.T.sampleN(n, r)
   | SampleSet(r) => SampleSetDist.sampleN(r, n)
   }
 
-let sample = (t: t) => sampleN(t, 1)->E.A.first->E.O.toExn("Should not have happened")
+let sample = (t: t) => {
+  switch t {
+  | PointSet(r) => PointSetDist.sample(r)
+  | Symbolic(r) => SymbolicDist.T.sample(r)
+  | SampleSet(r) => SampleSetDist.sample(r)
+  }
+}
 
 let toSampleSetDist = (t: t, n) => SampleSetDist.make(sampleN(t, n))
 
@@ -85,19 +91,18 @@ let toPointSet = (
 let toFloatOperation = (
   t,
   ~env: env,
-  ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
+  ~operation: DistributionTypes.DistributionOperation.toFloat,
 ) => {
-  switch distToFloatOperation {
+  switch operation {
   | #IntegralSum => Ok(integralEndY(t))
-  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Sample | #Min | #Max) as op => {
+  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Min | #Max) as op => {
       let trySymbolicSolution = switch (t: t) {
       | Symbolic(r) => SymbolicDist.T.operate(op, r)->E.R.toOption
       | _ => None
       }
 
-      let trySampleSetSolution = switch ((t: t), distToFloatOperation) {
+      let trySampleSetSolution = switch ((t: t), operation) {
       | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
-      | (SampleSet(sampleSet), #Sample) => SampleSetDist.sample(sampleSet)->Some
       | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
       | (SampleSet(sampleSet), #Min) => SampleSetDist.min(sampleSet)->Some
       | (SampleSet(sampleSet), #Max) => SampleSetDist.max(sampleSet)->Some
@@ -117,7 +122,6 @@ let toFloatOperation = (
               | #Pdf(f) => PointSetDist.pdf(f, s)->E.R.toExn("PointSetDist.pdf shouldn't fail")
               | #Cdf(f) => PointSetDist.cdf(f, s)
               | #Inv(f) => PointSetDist.inv(f, s)
-              | #Sample => PointSetDist.sample(s)
               | #Mean => PointSetDist.T.mean(s)
               | #Min => PointSetDist.T.minX(s)
               | #Max => PointSetDist.T.maxX(s)
@@ -141,15 +145,15 @@ let toFloatOperation = (
   }
 }
 
-let mean = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Mean)
-let stdev = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Stdev)
-let variance = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Variance)
-let min = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Min)
-let max = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Max)
-let mode = (t, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Mode)
-let cdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Cdf(x))
-let pdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Pdf(x))
-let inv = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~distToFloatOperation=#Inv(x))
+let mean = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Mean)
+let stdev = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Stdev)
+let variance = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Variance)
+let min = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Min)
+let max = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Max)
+let mode = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Mode)
+let cdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~operation=#Cdf(x))
+let pdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~operation=#Pdf(x))
+let inv = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~operation=#Inv(x))
 
 module Score = {
   type genericDistOrScalar = Score_Dist(t) | Score_Scalar(float)
@@ -282,11 +286,7 @@ module AlgebraicCombination = {
  */
     let getLogarithmInputError = (t1: t, t2: t, ~env: env): option<error> => {
       let isDistGreaterThanZero = t =>
-        toFloatOperation(
-          t,
-          ~env,
-          ~distToFloatOperation=#Cdf(MagicNumbers.Epsilon.ten),
-        )->E.R.fmap(r => r > 0.)
+        toFloatOperation(t, ~env, ~operation=#Cdf(MagicNumbers.Epsilon.ten))->E.R.fmap(r => r > 0.)
 
       let items = E.A.R.firstErrorOrOpen([isDistGreaterThanZero(t1), isDistGreaterThanZero(t2)])
       switch items {
@@ -362,7 +362,7 @@ module AlgebraicCombination = {
       | _ => MagicNumbers.OpCost.wildcardCost
       }
 
-    let hasSampleSetDist = (t1: t, t2: t): bool => isSampleSetSet(t1) || isSampleSetSet(t2)
+    let hasSampleSetDist = (t1: t, t2: t): bool => isSampleSet(t1) || isSampleSet(t2)
 
     let convolutionIsFasterThanMonteCarlo = (t1: t, t2: t): bool =>
       expectedConvolutionCost(t1) * expectedConvolutionCost(t2) < MagicNumbers.OpCost.monteCarloCost
@@ -515,7 +515,7 @@ let mixture = (values: array<(t, float)>, ~env: env) => {
   let pointwiseAddFn = (dist1, dist2) =>
     dist1->pointwiseCombination(~env, ~algebraicCombination=#Add, ~t2=dist2)
 
-  let allValuesAreSampleSet = v => E.A.every(v, ((t, _)) => isSampleSetSet(t))
+  let allValuesAreSampleSet = v => E.A.every(v, ((t, _)) => isSampleSet(t))
 
   if E.A.isEmpty(values) {
     Error(DistError.fromString("Mixture error: mixture must have at least 1 element"))

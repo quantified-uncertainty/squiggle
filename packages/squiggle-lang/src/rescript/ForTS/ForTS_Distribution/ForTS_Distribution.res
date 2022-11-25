@@ -1,6 +1,6 @@
 // Genetic Distribution happens to be abstract distribution
 @genType type distribution = DistributionTypes.genericDist
-@genType type distributionError = DistributionTypes.error
+@genType type distributionError = DistError.t
 @genType type pointSetDistribution = ForTS_Distribution_PointSetDistribution.pointSetDistribution
 @genType type symbolicDistribution = ForTS_Distribution_SymbolicDistribution.symbolicDistribution
 

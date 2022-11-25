@@ -1,11 +1,15 @@
 type t = DistributionTypes.genericDist
-type error = DistributionTypes.error
+type error = DistError.t
 
 @genType
 type env = Env.env
 
 @genType
 let defaultEnv: env
+
+let isPointSet: t => bool
+let isSampleSet: t => bool
+let isSymbolic: t => bool
 
 let sampleN: (t, int) => array<float>
 let sample: t => float
@@ -19,13 +23,6 @@ let toString: t => string
 let normalize: t => t
 
 let isNormalized: t => bool
-
-// Deprecated
-let toFloatOperation: (
-  t,
-  ~env: env,
-  ~distToFloatOperation: DistributionTypes.DistributionOperation.toFloat,
-) => result<float, error>
 
 let mean: (t, ~env: env) => result<float, error>
 let stdev: (t, ~env: env) => result<float, error>
@@ -90,9 +87,6 @@ let pointwiseCombinationFloat: (
 let scaleLog: (t, float, ~env: env) => result<t, error>
 
 let mixture: (array<(t, float)>, ~env: env) => result<t, error>
-
-let isSymbolic: t => bool
-let isPointSet: t => bool
 
 module Operations: {
   type operationFn = (~env: env, t, t) => result<t, error>

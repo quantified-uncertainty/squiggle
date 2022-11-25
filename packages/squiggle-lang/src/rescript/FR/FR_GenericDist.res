@@ -157,9 +157,7 @@ let library = E.A.concatMany([
       | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
       }
     ),
-    Helpers.makeDistToFloatFn("sample", (d, ~env) =>
-      GenericDist.toFloatOperation(d, ~distToFloatOperation=#Sample, ~env)
-    ),
+    Helpers.makeDistToFloatFn("sample", (d, ~env as _) => GenericDist.sample(d)->Ok),
     Helpers.makeFn("sampleN", [FRTypeDist, FRTypeNumber], (inputs, _) => {
       let (dist, n) = inputs->Helpers.unpackDistAndFloat
       dist
@@ -174,9 +172,7 @@ let library = E.A.concatMany([
     Helpers.makeDistToFloatFn("min", GenericDist.min),
     Helpers.makeDistToFloatFn("max", GenericDist.max),
     Helpers.makeDistToFloatFn("mode", GenericDist.mode),
-    Helpers.makeDistToFloatFn("integralSum", d =>
-      GenericDist.toFloatOperation(d, ~distToFloatOperation=#IntegralSum)
-    ),
+    Helpers.makeDistToFloatFn("integralSum", (d, ~env as _) => GenericDist.sample(d)->Ok),
     Helpers.makeDistToStringFn("toString", (d, ~env as _) => GenericDist.toString(d)->Ok),
     Helpers.makeDistToStringFn("sparkline", (dist, ~env) => {
       dist->GenericDist.toSparkline(

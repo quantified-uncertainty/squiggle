@@ -1,6 +1,7 @@
 @@warning("-27")
 %%raw(`const DistError = require('../../Dist/DistError')`)
 
+@genType
 type t
 
 let fromString = (s: string): t => %raw(`DistError.otherError(s)`)

@@ -25,7 +25,7 @@ module Mixture = {
     distributions: array<DistributionTypes.genericDist>,
     weights: array<float>,
     ~env: GenericDist.env,
-  ): result<DistributionTypes.genericDist, DistributionTypes.error> =>
+  ): result<DistributionTypes.genericDist, DistError.t> =>
     E.A.length(distributions) == E.A.length(weights)
       ? GenericDist.mixture(E.A.zip(distributions, weights), ~env)
       : Error(

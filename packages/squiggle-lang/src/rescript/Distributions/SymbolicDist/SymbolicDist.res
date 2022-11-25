@@ -83,6 +83,7 @@ module T = {
   let cdf = (x: float, t: symbolicDist): float => %raw(`t.cdf(x)`)
 
   let sampleN = (n: int, t: symbolicDist) => %raw(`t.sampleN(n)`)
+  let sample = (t: symbolicDist) => %raw(`t.sample()`)
 
   let toString = (t: symbolicDist): string => %raw(`t.toString()`)
   let expectedConvolutionCost = (t: symbolicDist): int => %raw(`t.expectedConvolutionCost()`)

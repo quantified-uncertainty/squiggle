@@ -9,7 +9,7 @@ module Message = {
     | REArityError(option<string>, int, int)
     | REArrayIndexNotFound(string, int)
     | REAssignmentExpected
-    | REDistributionError(DistributionTypes.error)
+    | REDistributionError(DistError.t)
     | REExpectedType(string, string)
     | REExpressionExpected
     | REFunctionExpected(string)
@@ -39,8 +39,7 @@ module Message = {
     | REExpressionExpected => "Expression expected"
     | REFunctionExpected(msg) => `Function expected: ${msg}`
     | REFunctionNotFound(msg) => `Function not found: ${msg}`
-    | REDistributionError(err) =>
-      `Distribution Math Error: ${DistributionTypes.Error.toString(err)}`
+    | REDistributionError(err) => `Distribution Math Error: ${DistError.toString(err)}`
     | REOperationError(err) => `Math Error: ${Operation.Error.toString(err)}`
     | REJavaScriptExn(omsg, oname) => {
         let answer = "JS Exception:"

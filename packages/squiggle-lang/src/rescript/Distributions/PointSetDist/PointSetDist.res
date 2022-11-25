@@ -73,7 +73,7 @@ let cdf = (f: float, t: t): float => %raw(`t.cdf(f)`)
 
 let sample = (t: t): float => %raw(`t.sample()`)
 
-let sampleNRendered = (n: int, t: t): array<float> => {
+let sampleN = (n: int, t: t): array<float> => {
   %raw(`t.sampleN(n)`)
 }
 

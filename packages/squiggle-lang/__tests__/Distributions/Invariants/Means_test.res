@@ -44,7 +44,7 @@ module Internals = {
     distOp: (
       DistributionTypes.genericDist,
       DistributionTypes.genericDist,
-    ) => result<DistributionTypes.genericDist, DistributionTypes.error>,
+    ) => result<DistributionTypes.genericDist, DistError.t>,
     description: string,
     floatOp: (float, float) => float,
     dist1': SymbolicDistTypes.symbolicDist,
