@@ -9,12 +9,9 @@ import * as Sparklines from "../Sparklines";
 
 import * as PointSet from "../PointSet/PointSet";
 
-import { BaseDist } from "./Base";
+import { BaseDist, Env } from "./Base";
 import { AnyPointSet } from "../PointSet/PointSet";
-import {
-  PointsetConversionError,
-  SampleSetError,
-} from "./SampleSetDist/SampleSetDist";
+import { DistError } from "./DistError";
 
 export class PointSetDist<
   T extends AnyPointSet = AnyPointSet
@@ -57,7 +54,7 @@ export class PointSetDist<
   truncate(
     left: number,
     right: number
-  ): RSResult.rsResult<PointSetDist, SampleSetError /* never happens */> {
+  ): RSResult.rsResult<PointSetDist, DistError> {
     return RSResult.Ok(new PointSetDist(this.pointSet.truncate(left, right)));
   }
 
@@ -69,7 +66,7 @@ export class PointSetDist<
     return this.pointSet.integralEndY();
   }
 
-  pdf(f: number): RSResult.rsResult<number, PointsetConversionError> {
+  pdf(f: number): RSResult.rsResult<number, DistError> {
     const mixedPoint = this.pointSet.xToY(f);
     return RSResult.Ok(mixedPoint.continuous + mixedPoint.discrete);
   }
@@ -78,6 +75,10 @@ export class PointSetDist<
   }
   cdf(f: number) {
     return this.pointSet.integralXtoY(f);
+  }
+
+  toPointSetDist(): RSResult.rsResult<PointSetDist, DistError> {
+    return RSResult.Ok(this);
   }
 
   // PointSet-only methods

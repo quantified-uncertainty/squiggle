@@ -3,30 +3,15 @@
 
 type t
 
-module Error = {
-  type sampleSetError
+type distError = DistError.t
 
-  type pointsetConversionError
-
-  let pointsetConversionErrorToString = (err: pointsetConversionError) =>
-    %raw(`SampleSEtDist.Error.pointsetConversionErrorToString(err)`)
-
-  //   let fromOperationError = e => OperationError(e)
-
-  let toString = (err: sampleSetError) => {
-    %raw(`SampleSetDist.Error.toString(err)`)
-  }
-}
-
-type r = result<t, Error.sampleSetError>
-
-// include Error
+type r = result<t, distError>
 
 // let length = (t: t) => get(t)->E.A.length
 
 let toPointSetDist = (~samples: t, ~env: Env.env): result<
   PointSetTypes.pointSetDist,
-  Error.pointsetConversionError,
+  distError,
 > => {
   %raw(`samples.toPointSetDist(env)`)
 }

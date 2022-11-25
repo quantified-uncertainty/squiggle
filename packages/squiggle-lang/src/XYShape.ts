@@ -10,7 +10,7 @@ export type XYShape = {
   ys: number[];
 };
 
-type XYShapeError =
+export type XYShapeError =
   | {
       tag: "NotSorted";
       property: string;

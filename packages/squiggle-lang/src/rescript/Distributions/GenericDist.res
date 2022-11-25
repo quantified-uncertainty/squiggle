@@ -37,8 +37,7 @@ let sampleN = (t: t, n) =>
 
 let sample = (t: t) => sampleN(t, 1)->E.A.first->E.O.toExn("Should not have happened")
 
-let toSampleSetDist = (t: t, n) =>
-  SampleSetDist.make(sampleN(t, n))->E.R.errMap(DistributionTypes.Error.sampleErrorToDistErr)
+let toSampleSetDist = (t: t, n) => SampleSetDist.make(sampleN(t, n))
 
 let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
 
@@ -77,11 +76,7 @@ let toPointSet = (
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
   | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, env.xyPointLength, r))
-  | SampleSet(r) =>
-    SampleSetDist.toPointSetDist(
-      ~samples=r,
-      ~env,
-    )->E.R.errMap(x => DistributionTypes.PointSetConversionError(x))
+  | SampleSet(r) => SampleSetDist.toPointSetDist(~samples=r, ~env)
   }
 }
 
@@ -139,7 +134,7 @@ let toFloatOperation = (
       | #Variance => SampleSetDist.variance(s)->Ok
       | #Mode => SampleSetDist.mode(s)->Ok
       }
-    | _ => Error(DistributionTypes.NotYetImplemented)
+    | _ => Error(DistError.notYetImplemented())
     }
   }
 }
@@ -176,13 +171,13 @@ module Score = {
             ~estimate=estimate',
             ~answer=answer',
             ~prior=None,
-          )->E.R.errMap(y => DistributionTypes.OperationError(y))
+          )->E.R.errMap(y => DistError.operationError(y))
         | Some(Ok(prior'')) =>
           PointSetDist.logScoreDistAnswer(
             ~estimate=estimate',
             ~answer=answer',
             ~prior=Some(prior''),
-          )->E.R.errMap(y => DistributionTypes.OperationError(y))
+          )->E.R.errMap(y => DistError.operationError(y))
         }
       })
     })
@@ -204,13 +199,13 @@ module Score = {
           ~estimate=estimate',
           ~answer,
           ~prior=None,
-        )->E.R.errMap(y => DistributionTypes.OperationError(y))
+        )->E.R.errMap(y => DistError.operationError(y))
       | Some(Ok(prior'')) =>
         PointSetDist.logScoreScalarAnswer(
           ~estimate=estimate',
           ~answer,
           ~prior=Some(prior''),
-        )->E.R.errMap(y => DistributionTypes.OperationError(y))
+        )->E.R.errMap(y => DistError.operationError(y))
       }
     })
   }
@@ -235,7 +230,7 @@ let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<st
   t
   ->toPointSet(~xSelection=#Linear, ~env={xyPointLength: bucketCount * 3, sampleCount}, ())
   ->E.R.bind(r =>
-    r->PointSetDist.toSparkline(bucketCount)->E.R.errMap(x => DistributionTypes.SparklineError(x))
+    r->PointSetDist.toSparkline(bucketCount)->E.R.errMap(x => DistError.sparklineError(x))
   )
 
 module Truncate = {
@@ -271,7 +266,7 @@ module Truncate = {
         | SampleSet(t) =>
           switch SampleSetDist.truncate(t, ~leftCutoff, ~rightCutoff) {
           | Ok(r) => Ok(SampleSet(r))
-          | Error(err) => Error(DistributionTypes.SampleSetError(err))
+          | Error(err) => Error(err)
           }
         | _ =>
           t
@@ -316,11 +311,15 @@ module AlgebraicCombination = {
       switch items {
       | Error(r) => Some(r)
       | Ok([true, _]) =>
-        Some(LogarithmOfDistributionError("First input must be completely greater than 0"))
+        Some(
+          DistError.logarithmOfDistributionError("First input must be completely greater than 0"),
+        )
       | Ok([false, true]) =>
-        Some(LogarithmOfDistributionError("Second input must be completely greater than 0"))
+        Some(
+          DistError.logarithmOfDistributionError("Second input must be completely greater than 0"),
+        )
       | Ok([false, false]) => None
-      | Ok(_) => Some(Unreachable)
+      | Ok(_) => Some(DistError.unreachableError())
       }
     }
 
@@ -353,7 +352,7 @@ module AlgebraicCombination = {
       let fn = Operation.Algebraic.toFn(arithmeticOperation)
       E.R.merge(toSampleSet(t1), toSampleSet(t2))
       ->E.R.bind(((t1, t2)) => {
-        SampleSetDist.map2(~fn, ~t1, ~t2)->E.R.errMap(x => DistributionTypes.SampleSetError(x))
+        SampleSetDist.map2(~fn, ~t1, ~t2)
       })
       ->E.R.fmap(r => DistributionTypes.SampleSet(r))
     }
@@ -419,13 +418,13 @@ module AlgebraicCombination = {
     | #AsSymbolic =>
       switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
       | #AnalyticalSolution(symbolicDist) => Ok(Symbolic(symbolicDist))
-      | #Error(e) => Error(OperationError(e))
-      | #NoSolution => Error(Unreachable)
+      | #Error(e) => Error(DistError.operationError(e))
+      | #NoSolution => Error(DistError.unreachableError())
       }
     | #AsConvolution =>
       switch Operation.Convolution.fromAlgebraicOperation(arithmeticOperation) {
       | Some(convOp) => StrategyCallOnValidatedInputs.convolution(toPointSetFn, convOp, t1, t2)
-      | None => Error(Unreachable)
+      | None => Error(DistError.unreachableError())
       }
     }
   }
@@ -460,8 +459,9 @@ module AlgebraicCombination = {
     | (None, AsSymbolic) =>
       switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
       | #AnalyticalSolution(symbolicDist) => Ok(Symbolic(symbolicDist))
-      | #NoSolution => Error(RequestedStrategyInvalidError(`No analytic solution for inputs`))
-      | #Error(err) => Error(OperationError(err))
+      | #NoSolution =>
+        Error(DistError.requestedStrategyInvalidError(`No analytic solution for inputs`))
+      | #Error(err) => Error(DistError.operationError(err))
       }
     | (None, AsConvolution) =>
       switch Operation.Convolution.fromAlgebraicOperation(arithmeticOperation) {
@@ -469,7 +469,7 @@ module AlgebraicCombination = {
           let errString = `Convolution not supported for ${Operation.Algebraic.toString(
               arithmeticOperation,
             )}`
-          Error(RequestedStrategyInvalidError(errString))
+          Error(DistError.requestedStrategyInvalidError(errString))
         }
 
       | Some(convOp) => StrategyCallOnValidatedInputs.convolution(toPointSetFn, convOp, t1, t2)
@@ -492,7 +492,7 @@ let pointwiseCombination = (
   E.R.merge(toPointSetFn(t1), toPointSetFn(t2))->E.R.bind(((t1, t2)) =>
     PointSetDist.combinePointwise(Operation.Algebraic.toFn(algebraicCombination), t1, t2)
     ->E.R.fmap(r => DistributionTypes.PointSet(r))
-    ->E.R.errMap(err => DistributionTypes.OperationError(err))
+    ->E.R.errMap(err => DistError.operationError(err))
   )
 }
 
@@ -515,10 +515,10 @@ let pointwiseCombinationFloat = (
         ~integralCacheFn=integralCacheFn(f),
         t,
         fn(f),
-      )->E.R.errMap(x => DistributionTypes.OperationError(x))
+      )->E.R.errMap(x => DistError.operationError(x))
     })
   let m = switch algebraicCombination {
-  | #Add | #Subtract => Error(DistributionTypes.DistributionVerticalShiftIsInvalid)
+  | #Add | #Subtract => Error(DistError.distributionVerticalShiftIsInvalid())
   | (#Multiply | #Divide | #Power | #Logarithm) as arithmeticOperation =>
     executeCombination(arithmeticOperation)
   | #LogarithmWithThreshold(eps) => executeCombination(#LogarithmWithThreshold(eps))
@@ -541,7 +541,7 @@ let mixture = (values: array<(t, float)>, ~env: env) => {
   let allValuesAreSampleSet = v => E.A.every(v, ((t, _)) => isSampleSetSet(t))
 
   if E.A.isEmpty(values) {
-    Error(DistributionTypes.OtherError("Mixture error: mixture must have at least 1 element"))
+    Error(DistError.fromString("Mixture error: mixture must have at least 1 element"))
   } else if allValuesAreSampleSet(values) {
     let withSampleSetValues = values->E.A.fmap(((value, weight)) =>
       switch value {
@@ -552,7 +552,7 @@ let mixture = (values: array<(t, float)>, ~env: env) => {
     let sampleSetMixture = SampleSetDist.mixture(withSampleSetValues, env.sampleCount)
     switch sampleSetMixture {
     | Ok(sampleSet) => Ok(DistributionTypes.SampleSet(sampleSet))
-    | Error(err) => Error(DistributionTypes.Error.sampleErrorToDistErr(err))
+    | Error(err) => Error(err)
     }
   } else {
     let totalWeight = values->E.A.fmap(E.Tuple2.second)->E.A.Floats.sum

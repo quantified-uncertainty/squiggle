@@ -152,7 +152,7 @@ let library = E.A.concatMany([
       | [IEvNumber(f1), IEvNumber(f2), IEvNumber(f3)] =>
         switch SymbolicDist.Triangular.make(f1, f2, f3) {
         | Ok(d) => d->Symbolic->IEvDistribution->Ok
-        | Error(e) => e->OtherError->REDistributionError->Error
+        | Error(e) => e->DistError.fromString->REDistributionError->Error
         }
       | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
       }

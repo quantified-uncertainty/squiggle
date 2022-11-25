@@ -15,8 +15,7 @@ describe("Scale logarithm", () => {
     let meanAnalytical = Js.Math.log(rate) +. 1.0
     switch meanResult {
     | Ok(meanValue) => meanValue->expect->toBeCloseTo(meanAnalytical)
-    | Error(err) =>
-      err->expect->toBe(DistributionTypes.OperationError(Operation.Error.divisionByZeroError))
+    | Error(err) => err->expect->toBe(DistError.operationError(Operation.Error.divisionByZeroError))
     }
   })
   let low = 10.0
@@ -30,7 +29,7 @@ describe("Scale logarithm", () => {
     switch meanResult {
     | Ok(meanValue) => meanValue->expect->toBeCloseTo(meanAnalytical)
     | Error(err) =>
-      err->expect->toEqual(DistributionTypes.OperationError(Operation.Error.negativeInfinityError))
+      err->expect->toEqual(DistError.operationError(Operation.Error.negativeInfinityError))
     }
   })
 })

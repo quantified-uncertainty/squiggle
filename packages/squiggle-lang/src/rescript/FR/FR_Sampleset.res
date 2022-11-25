@@ -21,7 +21,7 @@ module Internal = {
   let toType = (r): result<Reducer_T.value, SqError.Message.t> =>
     switch r {
     | Ok(r) => Ok(Wrappers.evDistribution(SampleSet(r)))
-    | Error(r) => Error(REDistributionError(SampleSetError(r)))
+    | Error(r) => Error(REDistributionError(r))
     }
 
   //TODO: I don't know why this seems to need at least one input
@@ -116,7 +116,7 @@ let libaryBase = [
           let sampleSet =
             inputs
             ->Prepare.ToTypedArray.numbers
-            ->E.R.bind(r => SampleSetDist.make(r)->E.R.errMap(SampleSetDist.Error.toString))
+            ->E.R.bind(r => SampleSetDist.make(r)->E.R.errMap(DistributionTypes.Error.toString))
           sampleSet
           ->E.R.fmap(Wrappers.sampleSet)
           ->E.R.fmap(Wrappers.evDistribution)
@@ -295,9 +295,7 @@ module Comparison = {
   let wrapper = r =>
     r
     ->E.R.fmap(r => r->Wrappers.sampleSet->Wrappers.evDistribution)
-    ->E.R.errMap(e =>
-      e->DistributionTypes.Error.sampleErrorToDistErr->SqError.Message.REDistributionError
-    )
+    ->E.R.errMap(e => e->SqError.Message.REDistributionError)
 
   let mkBig = (name, withDist, withFloat) =>
     Function.make(

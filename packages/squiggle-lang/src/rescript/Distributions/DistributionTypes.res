@@ -8,46 +8,18 @@ type genericDist =
 type asAlgebraicCombinationStrategy = AsDefault | AsSymbolic | AsMonteCarlo | AsConvolution
 
 @genType.opaque
-type error =
-  | NotYetImplemented
-  | Unreachable
-  | DistributionVerticalShiftIsInvalid
-  | SampleSetError(SampleSetDist.Error.sampleSetError)
-  | ArgumentError(string)
-  | OperationError(Operation.Error.t)
-  | PointSetConversionError(SampleSetDist.Error.pointsetConversionError)
-  | SparklineError(string)
-  | RequestedStrategyInvalidError(string)
-  | LogarithmOfDistributionError(string)
-  | OtherError(string)
-  | XYShapeError(XYShape.error)
+type error = DistError.t
 
 @genType
 module Error = {
   type t = error
 
-  let fromString = (s: string): t => OtherError(s)
+  let fromString = DistError.fromString
 
-  let toString = (err: error): string =>
-    switch err {
-    | NotYetImplemented => "Function not yet implemented"
-    | Unreachable => "Unreachable"
-    | DistributionVerticalShiftIsInvalid => "Distribution vertical shift is invalid"
-    | ArgumentError(s) => `Argument Error ${s}`
-    | LogarithmOfDistributionError(s) => `Logarithm of input error: ${s}`
-    | SampleSetError(err) => SampleSetDist.Error.toString(err)
-    | OperationError(err) => Operation.Error.toString(err)
-    | PointSetConversionError(err) => SampleSetDist.Error.pointsetConversionErrorToString(err)
-    | SparklineError(err) => err
-    | RequestedStrategyInvalidError(err) => `Requested strategy invalid: ${err}`
-    | XYShapeError(err) => `XY Shape Error: ${XYShape.Error.toString(err)}`
-    | OtherError(s) => s
-    }
+  let toString = DistError.toString
 
   let resultStringToResultError: result<'a, string> => result<'a, error> = n =>
     n->E.R.errMap(r => r->fromString)
-
-  let sampleErrorToDistErr = (err: SampleSetDist.Error.sampleSetError): error => SampleSetError(err)
 }
 
 @genType

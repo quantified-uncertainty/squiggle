@@ -1,6 +1,6 @@
 module Mixture = {
   let raiseArgumentError = (message: string) =>
-    message->ArgumentError->REDistributionError->SqError.Message.throw
+    message->DistError.argumentError->REDistributionError->SqError.Message.throw
 
   let parseNumber = (args: Reducer_T.value): float =>
     switch args {
@@ -29,7 +29,9 @@ module Mixture = {
     E.A.length(distributions) == E.A.length(weights)
       ? GenericDist.mixture(E.A.zip(distributions, weights), ~env)
       : Error(
-          ArgumentError("Error, mixture call has different number of distributions and weights"),
+          DistError.argumentError(
+            "Error, mixture call has different number of distributions and weights",
+          ),
         )
 
   let mixtureWithDefaultWeights = (

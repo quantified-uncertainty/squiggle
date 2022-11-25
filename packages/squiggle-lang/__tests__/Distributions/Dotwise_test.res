@@ -51,8 +51,7 @@ describe("dotSubtract", () => {
             )
           switch meanResult {
           | Ok(meanValue) => abs_float(meanValue -. meanAnalytical) /. abs_float(meanValue) < 1e-2 // 1% relative error
-          | Error(err) =>
-            err === DistributionTypes.OperationError(Operation.Error.divisionByZeroError)
+          | Error(err) => err === DistError.operationError(Operation.Error.divisionByZeroError)
           }
         },
       ),

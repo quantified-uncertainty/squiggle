@@ -29,10 +29,8 @@ module T = {
   let maxX = (t: t): float => %raw(`t.max()`)
   let mean = (t: t): float => %raw(`t.mean()`)
 
-  let truncate = (left: option<float>, right: option<float>, t: t): result<
-    t,
-    SampleSetDist.Error.sampleSetError,
-  > => %raw(`t.truncate(left, right)`)
+  let truncate = (left: option<float>, right: option<float>, t: t): result<t, DistError.t> =>
+    %raw(`t.truncate(left, right)`)
 
   let normalize = (t: t): t => %raw(`t.normalize()`)
 

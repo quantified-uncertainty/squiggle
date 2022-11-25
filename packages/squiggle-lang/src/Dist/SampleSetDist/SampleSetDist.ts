@@ -11,6 +11,11 @@ import { ContinuousShape } from "../../PointSet/Continuous";
 import { DiscreteShape } from "../../PointSet/Discrete";
 import { PointSetDist } from "../PointSetDist";
 import { BaseDist, Env } from "../Base";
+import {
+  DistError,
+  DistOperationError,
+  TooFewSamplesForConversionToPointSet,
+} from "../DistError";
 
 export class SampleSetDist extends BaseDist<SampleSetDist> {
   samples: readonly number[];
@@ -21,7 +26,7 @@ export class SampleSetDist extends BaseDist<SampleSetDist> {
 
   static make(
     a: readonly number[]
-  ): RSResult.rsResult<SampleSetDist, SampleSetError> {
+  ): RSResult.rsResult<SampleSetDist, DistError> {
     if (a.length > 5) {
       return RSResult.Ok(new SampleSetDist(a));
     } else {
@@ -118,9 +123,7 @@ sample everything.
     );
   }
 
-  toPointSetDist(
-    env: Env
-  ): RSResult.rsResult<PointSetDist, PointsetConversionError> {
+  toPointSetDist(env: Env): RSResult.rsResult<PointSetDist, DistError> {
     const dists = SampleSetDist_ToPointSet.toPointSetDist(
       this.samples,
       env.xyPointLength,
@@ -134,14 +137,14 @@ sample everything.
       discrete: new DiscreteShape({ xyShape: dists.discreteDist }),
     });
     if (!result) {
-      return RSResult.Error("TooFewSamplesForConversionToPointSet");
+      return RSResult.Error(TooFewSamplesForConversionToPointSet());
     }
     return RSResult.Ok(new PointSetDist(result));
   }
 
   samplesMap(
     fn: (x: number) => RSResult.rsResult<number, OperationError>
-  ): RSResult.rsResult<SampleSetDist, SampleSetError> {
+  ): RSResult.rsResult<SampleSetDist, DistError> {
     return buildSampleSetFromFn(this.samples.length, (i) =>
       fn(this.samples[i])
     );
@@ -170,10 +173,6 @@ export const Error = {
     } else {
       throw new global.Error("Internal error");
     }
-  },
-
-  operationError(err: OperationError): SampleSetError {
-    return { type: "OperationError", value: err };
   },
 
   toString(err: SampleSetError) {
@@ -207,12 +206,12 @@ type SamplingInputs = {
 const buildSampleSetFromFn = (
   n: number,
   fn: (i: number) => RSResult.rsResult<number, OperationError>
-): RSResult.rsResult<SampleSetDist, SampleSetError> => {
+): RSResult.rsResult<SampleSetDist, DistError> => {
   const samples: number[] = [];
   for (let i = 0; i < n; i++) {
     const result = fn(i);
     if (result.TAG === RSResult.E.Error) {
-      return RSResult.Error(Error.operationError(result._0));
+      return RSResult.Error(DistOperationError(result._0));
     }
     samples.push(result._0);
   }
@@ -229,7 +228,7 @@ export const map2 = ({
   fn: (v1: number, v2: number) => RSResult.rsResult<number, OperationError>;
   t1: SampleSetDist;
   t2: SampleSetDist;
-}): RSResult.rsResult<SampleSetDist, SampleSetError> => {
+}): RSResult.rsResult<SampleSetDist, DistError> => {
   const length = Math.min(t1.samples.length, t2.samples.length);
   return buildSampleSetFromFn(length, (i) => fn(t1.samples[i], t2.samples[i]));
 };
@@ -248,7 +247,7 @@ export const map3 = ({
   t1: SampleSetDist;
   t2: SampleSetDist;
   t3: SampleSetDist;
-}): RSResult.rsResult<SampleSetDist, SampleSetError> => {
+}): RSResult.rsResult<SampleSetDist, DistError> => {
   const length = Math.min(
     t1.samples.length,
     t2.samples.length,
@@ -265,7 +264,7 @@ export const mapN = ({
 }: {
   fn: (v: number[]) => RSResult.rsResult<number, OperationError>;
   t1: SampleSetDist[];
-}): RSResult.rsResult<SampleSetDist, SampleSetError> => {
+}): RSResult.rsResult<SampleSetDist, DistError> => {
   const length = Math.max(...t1.map((t) => t.samples.length));
   return buildSampleSetFromFn(length, (i) =>
     fn(
@@ -279,7 +278,7 @@ export const mapN = ({
 export const mixture = (
   values: [SampleSetDist, number][],
   intendedLength: number
-): RSResult.rsResult<SampleSetDist, SampleSetError> => {
+): RSResult.rsResult<SampleSetDist, DistError> => {
   const dists = values.map((pair) => pair[0]);
   const totalWeight = values.reduce((acc, v) => acc + v[1], 0);
 
