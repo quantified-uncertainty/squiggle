@@ -4,13 +4,8 @@
 
 type t = PointSetTypes.continuousShape
 
-let make = (
-  ~interpolation: XYShape.interpolationStrategy=#Linear,
-  ~integralSumCache: option<float>=None,
-  ~integralCache: option<t>=None,
-  xyShape: XYShape.T.t,
-): t => {
-  %raw(`new Continuous.ContinuousShape({ xyShape, interpolation: interpolationOpt, integralSumCache: integralSumCacheOpt, integralCache: integralCacheOpt })`)
+let make = (xyShape: XYShape.T.t): t => {
+  %raw(`new Continuous.ContinuousShape({ xyShape })`)
 }
 
 let getShape: t => XYShape.T.t = %raw(`Continuous.getShape`)
