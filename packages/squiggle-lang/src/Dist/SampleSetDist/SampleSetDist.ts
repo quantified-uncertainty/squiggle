@@ -17,7 +17,7 @@ import {
   TooFewSamplesForConversionToPointSet,
 } from "../DistError";
 
-export class SampleSetDist extends BaseDist<SampleSetDist> {
+export class SampleSetDist extends BaseDist {
   samples: readonly number[];
   private constructor(samples: readonly number[]) {
     super();

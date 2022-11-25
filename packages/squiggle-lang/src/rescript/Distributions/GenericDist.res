@@ -39,7 +39,9 @@ let sample = (t: t) => sampleN(t, 1)->E.A.first->E.O.toExn("Should not have happ
 
 let toSampleSetDist = (t: t, n) => SampleSetDist.make(sampleN(t, n))
 
-let fromFloat = (f: float): t => Symbolic(SymbolicDist.Float.make(f))
+let fromFloat = (f: float): t => Symbolic(
+  SymbolicDist.Float.make(f)->E.R.toExn("failed to make float"),
+)
 
 let toString = (t: t) =>
   switch t {
@@ -75,7 +77,7 @@ let toPointSet = (
 ): result<PointSetTypes.pointSetDist, error> => {
   switch (t: t) {
   | PointSet(pointSet) => Ok(pointSet)
-  | Symbolic(r) => Ok(SymbolicDist.T.toPointSetDist(~xSelection, env.xyPointLength, r))
+  | Symbolic(r) => SymbolicDist.T.toPointSetDist(~xSelection, ~env, r)
   | SampleSet(r) => SampleSetDist.toPointSetDist(~samples=r, ~env)
   }
 }
@@ -234,20 +236,6 @@ let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<st
   )
 
 module Truncate = {
-  let trySymbolicSimplification = (
-    leftCutoff: option<float>,
-    rightCutoff: option<float>,
-    t: t,
-  ): option<t> =>
-    switch (leftCutoff, rightCutoff, t) {
-    | (None, None, _) => None
-    | (Some(lc), Some(rc), Symbolic(#Uniform(u))) if lc < rc =>
-      Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(Some(lc), Some(rc), u))))
-    | (lc, rc, Symbolic(#Uniform(u))) =>
-      Some(Symbolic(#Uniform(SymbolicDist.Uniform.truncate(lc, rc, u))))
-    | _ => None
-    }
-
   let run = (
     t: t,
     ~env: env,
@@ -259,26 +247,24 @@ module Truncate = {
     if doesNotNeedCutoff {
       Ok(t)
     } else {
-      switch trySymbolicSimplification(leftCutoff, rightCutoff, t) {
-      | Some(r) => Ok(r)
-      | None =>
-        switch t {
-        | SampleSet(t) =>
-          switch SampleSetDist.truncate(t, ~leftCutoff, ~rightCutoff) {
-          | Ok(r) => Ok(SampleSet(r))
-          | Error(err) => Error(err)
-          }
-        | _ =>
-          t
-          ->toPointSet(~env, ())
-          ->E.R.fmap(t => {
-            DistributionTypes.PointSet(
-              PointSetDist.T.truncate(leftCutoff, rightCutoff, t)
-              ->E.R.toExn("PointSetDist.truncate shouldn't fail")
-              ->PointSetDist.T.normalize,
-            )
-          })
+      switch t {
+      | Symbolic(t) =>
+        SymbolicDist.T.truncate(leftCutoff, rightCutoff, t, ~env)->E.R.fmap(normalize)
+      | SampleSet(t) =>
+        switch SampleSetDist.truncate(t, ~leftCutoff, ~rightCutoff) {
+        | Ok(r) => Ok(SampleSet(r))
+        | Error(err) => Error(err)
         }
+      | _ =>
+        t
+        ->toPointSet(~env, ())
+        ->E.R.fmap(t => {
+          DistributionTypes.PointSet(
+            PointSetDist.T.truncate(leftCutoff, rightCutoff, t)
+            ->E.R.toExn("PointSetDist.truncate shouldn't fail")
+            ->PointSetDist.T.normalize,
+          )
+        })
       }
     }
   }
@@ -365,7 +351,7 @@ module AlgebraicCombination = {
       switch (t1, t2) {
       | (DistributionTypes.Symbolic(d1), DistributionTypes.Symbolic(d2)) =>
         SymbolicDist.T.tryAnalyticalSimplification(d1, d2, arithmeticOperation)
-      | _ => #NoSolution
+      | _ => None
       }
     }
   }
@@ -376,8 +362,7 @@ module AlgebraicCombination = {
     //I'm (Ozzie) really just guessing here, very little idea what's best
     let expectedConvolutionCost: t => int = x =>
       switch x {
-      | Symbolic(#Float(_)) => MagicNumbers.OpCost.floatCost
-      | Symbolic(_) => MagicNumbers.OpCost.symbolicCost
+      | Symbolic(d) => SymbolicDist.T.expectedConvolutionCost(d)
       | PointSet(d) => PointSetDist.expectedConvolutionCost(d)
       | _ => MagicNumbers.OpCost.wildcardCost
       }
@@ -395,10 +380,8 @@ module AlgebraicCombination = {
 
     let run = (~t1: t, ~t2: t, ~arithmeticOperation): specificStrategy => {
       switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
-      | #AnalyticalSolution(_)
-      | #Error(_) =>
-        #AsSymbolic
-      | #NoSolution =>
+      | Some(_) => #AsSymbolic
+      | None =>
         preferConvolutionToMonteCarlo(t1, t2, arithmeticOperation) ? #AsConvolution : #AsMonteCarlo
       }
     }
@@ -417,9 +400,9 @@ module AlgebraicCombination = {
       StrategyCallOnValidatedInputs.monteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
     | #AsSymbolic =>
       switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
-      | #AnalyticalSolution(symbolicDist) => Ok(Symbolic(symbolicDist))
-      | #Error(e) => Error(DistError.operationError(e))
-      | #NoSolution => Error(DistError.unreachableError())
+      | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
+      | Some(Error(e)) => Error(DistError.operationError(e))
+      | None => Error(DistError.unreachableError())
       }
     | #AsConvolution =>
       switch Operation.Convolution.fromAlgebraicOperation(arithmeticOperation) {
@@ -458,10 +441,9 @@ module AlgebraicCombination = {
       StrategyCallOnValidatedInputs.monteCarlo(toSampleSetFn, arithmeticOperation, t1, t2)
     | (None, AsSymbolic) =>
       switch StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) {
-      | #AnalyticalSolution(symbolicDist) => Ok(Symbolic(symbolicDist))
-      | #NoSolution =>
-        Error(DistError.requestedStrategyInvalidError(`No analytic solution for inputs`))
-      | #Error(err) => Error(DistError.operationError(err))
+      | Some(Ok(symbolicDist)) => Ok(Symbolic(symbolicDist))
+      | None => Error(DistError.requestedStrategyInvalidError(`No analytic solution for inputs`))
+      | Some(Error(err)) => Error(DistError.operationError(err))
       }
     | (None, AsConvolution) =>
       switch Operation.Convolution.fromAlgebraicOperation(arithmeticOperation) {

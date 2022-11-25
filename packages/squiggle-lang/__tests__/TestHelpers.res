@@ -41,13 +41,27 @@ let toExtDist: option<DistributionTypes.genericDist> => DistributionTypes.generi
 // let toExt: option<'a> => 'a = E.O.toExt(_, unreachableInTestFileMessage)
 let unpackResult = x => x->E.R.toExn("failed")
 
-let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean, stdev}))
-let mkBeta = (alpha, beta) => DistributionTypes.Symbolic(#Beta({alpha, beta}))
-let mkExponential = rate => DistributionTypes.Symbolic(#Exponential({rate: rate}))
-let mkUniform = (low, high) => DistributionTypes.Symbolic(#Uniform({low, high}))
-let mkCauchy = (local, scale) => DistributionTypes.Symbolic(#Cauchy({local, scale}))
-let mkLognormal = (mu, sigma) => DistributionTypes.Symbolic(#Lognormal({mu, sigma}))
-let mkDelta = x => DistributionTypes.Symbolic(#Float(x))
+let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(
+  SymbolicDist.Normal.make(mean, stdev)->unpackResult,
+)
+let mkBeta = (alpha, beta) => DistributionTypes.Symbolic(
+  SymbolicDist.Beta.make(alpha, beta)->unpackResult,
+)
+let mkExponential = rate => DistributionTypes.Symbolic(
+  SymbolicDist.Exponential.make(rate)->unpackResult,
+)
+let mkUniform = (low, high) => DistributionTypes.Symbolic(
+  SymbolicDist.Uniform.make(low, high)->unpackResult,
+)
+let mkCauchy = (local, scale) => DistributionTypes.Symbolic(
+  SymbolicDist.Uniform.make(local, scale)->unpackResult,
+)
+let mkLognormal = (mu, sigma) => DistributionTypes.Symbolic(
+  SymbolicDist.Lognormal.make(mu, sigma)->unpackResult,
+)
+let mkDelta = x => DistributionTypes.Symbolic(
+  SymbolicDist.Float.make(x)->E.R.toExn("failed to make Float"),
+)
 
 let normalMake = SymbolicDist.Normal.make
 let betaMake = SymbolicDist.Beta.make

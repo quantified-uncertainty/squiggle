@@ -26,7 +26,7 @@ module Internals = {
     // cauchyMake(1e0, 1e0),
     lognormalMake(2e0, 1e0),
     triangularMake(1e0, 1e1, 5e1),
-    Ok(floatMake(1e1)),
+    floatMake(1e1),
   }
   let rec combinations2 = xs => {
     switch xs {

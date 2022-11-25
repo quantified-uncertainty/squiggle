@@ -18,7 +18,7 @@ describe("dotSubtract", () => {
     let meanResult = dotDifference->E.R.bind(GenericDist.mean(~env))
     let meanAnalytical =
       mean -.
-      SymbolicDist.Exponential.mean({rate: rate})->E.R.toExn(
+      SymbolicDist.Exponential.mean(SymbolicDist.Exponential.make(rate)->unpackResult)->E.R.toExn(
         "On trusted input this should never happen",
       )
     switch meanResult {
@@ -46,9 +46,9 @@ describe("dotSubtract", () => {
           // according to algebra or random variables,
           let meanAnalytical =
             mean -.
-            SymbolicDist.Exponential.mean({rate: rate})->E.R.toExn(
-              "On trusted input this should never happen",
-            )
+            SymbolicDist.Exponential.mean(
+              SymbolicDist.Exponential.make(rate)->unpackResult,
+            )->E.R.toExn("On trusted input this should never happen")
           switch meanResult {
           | Ok(meanValue) => abs_float(meanValue -. meanAnalytical) /. abs_float(meanValue) < 1e-2 // 1% relative error
           | Error(err) => err === DistError.operationError(Operation.Error.divisionByZeroError)

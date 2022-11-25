@@ -9,13 +9,13 @@ import * as Sparklines from "../Sparklines";
 
 import * as PointSet from "../PointSet/PointSet";
 
-import { BaseDist, Env } from "./Base";
+import { BaseDist } from "./Base";
 import { AnyPointSet } from "../PointSet/PointSet";
 import { DistError } from "./DistError";
 
 export class PointSetDist<
   T extends AnyPointSet = AnyPointSet
-> extends BaseDist<PointSetDist> {
+> extends BaseDist {
   pointSet: T;
 
   constructor(pointSet: T) {
@@ -52,8 +52,8 @@ export class PointSetDist<
   }
 
   truncate(
-    left: number,
-    right: number
+    left: number | undefined,
+    right: number | undefined
   ): RSResult.rsResult<PointSetDist, DistError> {
     return RSResult.Ok(new PointSetDist(this.pointSet.truncate(left, right)));
   }

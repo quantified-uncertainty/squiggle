@@ -152,7 +152,7 @@ module DistributionCreation = {
     fnMake(
       ~name="pointMass",
       ~examples=[`pointMass(0.5)`],
-      ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.makeSafe)],
+      ~definitions=[OneArgDist.make("pointMass", SymbolicDist.Float.make)],
     ),
   ]
 }

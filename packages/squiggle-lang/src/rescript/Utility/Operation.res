@@ -1,3 +1,4 @@
+@@warning("-27")
 // This file has no dependencies. It's used outside of the interpreter, but the interpreter depends on it.
 %%raw(`const OperationError = require('../../OperationError')`)
 

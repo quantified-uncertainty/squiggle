@@ -3,7 +3,9 @@ open Expect
 open TestHelpers
 
 // TODO: use Normal.make (but preferably after teh new validation dispatch is in)
-let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(#Normal({mean, stdev}))
+let mkNormal = (mean, stdev) => DistributionTypes.Symbolic(
+  SymbolicDist.Normal.make(mean, stdev)->unpackResult,
+)
 
 describe("(Symbolic) normalize", () => {
   testAll("has no impact on normal distributions", list{-1e8, -1e-2, 0.0, 1e-4, 1e16}, mean => {
@@ -27,13 +29,18 @@ describe("(Symbolic) mean", () => {
   })
 
   testAll("of exponential distributions", list{1e-7, 2.0, 10.0, 100.0}, rate => {
-    let meanValue = DistributionTypes.Symbolic(#Exponential({rate: rate}))->GenericDist.mean(~env)
+    let meanValue =
+      DistributionTypes.Symbolic(
+        SymbolicDist.Exponential.make(rate)->unpackResult,
+      )->GenericDist.mean(~env)
     meanValue->unpackResult->expect->toBeCloseTo(1.0 /. rate) // https://en.wikipedia.org/wiki/Exponential_distribution#Mean,_variance,_moments,_and_median
   })
 
   test("of a cauchy distribution", () => {
     let meanValue =
-      DistributionTypes.Symbolic(#Cauchy({local: 1.0, scale: 1.0}))->GenericDist.mean(~env)
+      DistributionTypes.Symbolic(
+        SymbolicDist.Cauchy.make(1.0, 1.0)->unpackResult,
+      )->GenericDist.mean(~env)
     meanValue->unpackResult->expect->toBeSoCloseTo(1.0098094001641797, ~digits=5)
     //-> toBe(GenDistError(Other("Cauchy distributions may have no mean value.")))
   })
@@ -44,27 +51,31 @@ describe("(Symbolic) mean", () => {
     tup => {
       let (low, medium, high) = tup
       let meanValue =
-        DistributionTypes.Symbolic(#Triangular({low, medium, high}))->GenericDist.mean(~env)
+        DistributionTypes.Symbolic(
+          SymbolicDist.Triangular.make(low, medium, high)->unpackResult,
+        )->GenericDist.mean(~env)
       meanValue->unpackResult->expect->toBeCloseTo((low +. medium +. high) /. 3.0) // https://www.statology.org/triangular-distribution/
     },
   )
 
-  // TODO: nonpositive inputs are SUPPOSED to crash.
   testAll(
     "of beta distributions",
-    list{(1e-4, 6.4e1), (1.28e2, 1e0), (1e-16, 1e-16), (1e16, 1e16), (-1e4, 1e1), (1e1, -1e4)},
+    list{(1e-4, 6.4e1), (1.28e2, 1e0), (1e-16, 1e-16), (1e16, 1e16)},
     tup => {
       let (alpha, beta) = tup
-      let meanValue = DistributionTypes.Symbolic(#Beta({alpha, beta}))->GenericDist.mean(~env)
+      let meanValue =
+        DistributionTypes.Symbolic(
+          SymbolicDist.Beta.make(alpha, beta)->E.R.toExnFnString(s => s, _),
+        )->GenericDist.mean(~env)
       meanValue->unpackResult->expect->toBeCloseTo(1.0 /. (1.0 +. beta /. alpha)) // https://en.wikipedia.org/wiki/Beta_distribution#Mean
     },
   )
 
-  // TODO: When we have our theory of validators we won't want this to be NaN but to be an error.
-  test("of beta(0, 0)", () => {
-    let meanValue =
-      DistributionTypes.Symbolic(#Beta({alpha: 0.0, beta: 0.0}))->GenericDist.mean(~env)
-    meanValue->unpackResult->expect->ExpectJs.toBeFalsy
+  // TODO: this is not a means() test
+  testAll("bad beta distributions", list{(-1e4, 1e1), (1e1, -1e4), (0., 0.)}, tup => {
+    let (alpha, beta) = tup
+    let r = SymbolicDist.Beta.make(alpha, beta)
+    expect(r->E.R.getError)->toBe(Some("Beta distribution parameters must be positive"))
   })
 
   testAll(
@@ -84,45 +95,59 @@ describe("(Symbolic) mean", () => {
 
   testAll(
     "of lognormal distributions",
-    list{(2.0, 4.0), (1e-7, 1e-2), (-1e6, 10.0), (1e3, -1e2), (-1e8, -1e4), (1e2, 1e-5)},
+    list{(2.0, 4.0), (1e-7, 1e-2), (-1e6, 10.0), (1e2, 1e-5)},
     tup => {
       let (mu, sigma) = tup
-      let meanValue = DistributionTypes.Symbolic(#Lognormal({mu, sigma}))->GenericDist.mean(~env)
+      let meanValue =
+        DistributionTypes.Symbolic(
+          SymbolicDist.Lognormal.make(mu, sigma)->unpackResult,
+        )->GenericDist.mean(~env)
       meanValue->unpackResult->expect->toBeCloseTo(Js.Math.exp(mu +. sigma ** 2.0 /. 2.0)) // https://brilliant.org/wiki/log-normal-distribution/
     },
   )
+
+  // TODO: this is not a means() test
+  testAll("bad lognormal distributions", list{(1e3, -1e2), (-1e8, -1e4)}, tup => {
+    let (mu, sigma) = tup
+    let r = SymbolicDist.Lognormal.make(mu, sigma)
+    expect(r->E.R.getError)->toBe(Some("Lognormal standard deviation must be larger than 0"))
+  })
 
   testAll(
     "of uniform distributions",
     list{(1e-5, 12.345), (-1e4, 1e4), (-1e16, -1e2), (5.3e3, 9e9)},
     tup => {
       let (low, high) = tup
-      let meanValue = DistributionTypes.Symbolic(#Uniform({low, high}))->GenericDist.mean(~env)
+      let meanValue =
+        DistributionTypes.Symbolic(
+          SymbolicDist.Uniform.make(low, high)->unpackResult,
+        )->GenericDist.mean(~env)
       meanValue->unpackResult->expect->toBeCloseTo((low +. high) /. 2.0) // https://en.wikipedia.org/wiki/Continuous_uniform_distribution#Moments
     },
   )
 
   test("of a float", () => {
-    let meanValue = DistributionTypes.Symbolic(#Float(7.7))->GenericDist.mean(~env)
+    let meanValue =
+      DistributionTypes.Symbolic(SymbolicDist.Float.make(7.7)->unpackResult)->GenericDist.mean(~env)
     meanValue->unpackResult->expect->toBeCloseTo(7.7)
   })
 })
 
 describe("Normal distribution with sparklines", () => {
-  let parameterWiseAdditionPdf = (n1: SymbolicDistTypes.normal, n2: SymbolicDistTypes.normal) => {
-    let normalDistAtSumMeanConstr = SymbolicDist.Normal.add(n1, n2)
-    let normalDistAtSumMean: SymbolicDistTypes.normal = switch normalDistAtSumMeanConstr {
-    | #Normal(params) => params
-    }
-    x => SymbolicDist.Normal.pdf(x, normalDistAtSumMean)
+  let parameterWiseAdditionPdf = (
+    n1: SymbolicDistTypes.symbolicDist,
+    n2: SymbolicDistTypes.symbolicDist,
+  ) => {
+    let normalDistAtSumMean = SymbolicDist.Normal.add(n1, n2)
+    x => SymbolicDist.T.pdf(x, normalDistAtSumMean)->unpackResult
   }
 
-  let normalDistAtMean5: SymbolicDistTypes.normal = {mean: 5.0, stdev: 2.0}
-  let normalDistAtMean10: SymbolicDistTypes.normal = {mean: 10.0, stdev: 2.0}
+  let normalDistAtMean5 = SymbolicDist.Normal.make(5.0, 2.0)->unpackResult
+  let normalDistAtMean10 = SymbolicDist.Normal.make(10.0, 2.0)->unpackResult
   let range20Float = E.A.Floats.range(0.0, 20.0, 20) // [0.0,1.0,2.0,3.0,4.0,...19.0,]
 
   test("mean=5 pdf", () => {
-    let pdfNormalDistAtMean5 = x => SymbolicDist.Normal.pdf(x, normalDistAtMean5)
+    let pdfNormalDistAtMean5 = x => SymbolicDist.T.pdf(x, normalDistAtMean5)->unpackResult
     let sparklineMean5 = fnImage(pdfNormalDistAtMean5, range20Float)
     Sparklines.create(sparklineMean5, ())
     ->expect
@@ -138,7 +163,7 @@ describe("Normal distribution with sparklines", () => {
   })
 
   test("mean=10 cdf", () => {
-    let cdfNormalDistAtMean10 = x => SymbolicDist.Normal.cdf(x, normalDistAtMean10)
+    let cdfNormalDistAtMean10 = x => SymbolicDist.T.cdf(x, normalDistAtMean10)
     let sparklineMean10 = fnImage(cdfNormalDistAtMean10, range20Float)
     Sparklines.create(sparklineMean10, ())
     ->expect

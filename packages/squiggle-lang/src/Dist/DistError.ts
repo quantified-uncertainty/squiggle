@@ -141,3 +141,8 @@ export const argumentError = (e: string): DistError => ({
   type: "ArgumentError",
   message: e,
 });
+
+export const xyShapeDistError = (e: XYShapeError): DistError => ({
+  type: "XYShapeError",
+  value: e,
+});

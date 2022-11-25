@@ -1,3 +1,4 @@
+@@warning("-27")
 %%raw(`const DistError = require('../../Dist/DistError')`)
 
 type t

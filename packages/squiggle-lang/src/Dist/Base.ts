@@ -11,7 +11,7 @@ export type Env = {
   xyPointLength: number; // int
 };
 
-export abstract class BaseDist<Self> {
+export abstract class BaseDist {
   abstract min(): number;
   abstract max(): number;
   abstract mean(): number;
@@ -19,13 +19,13 @@ export abstract class BaseDist<Self> {
   abstract sample(): number;
   abstract sampleN(n: number): number[];
 
-  abstract normalize(): Self;
+  abstract normalize(): BaseDist;
 
   abstract truncate(
     left: number | undefined,
     right: number | undefined,
     opts?: { env: Env } // needed for SymbolicDists
-  ): rsResult<Self, DistError>;
+  ): rsResult<BaseDist, DistError>;
 
   abstract integralEndY(): number;
 
