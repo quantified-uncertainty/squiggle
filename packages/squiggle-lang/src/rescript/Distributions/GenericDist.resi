@@ -2,7 +2,7 @@ type t = DistributionTypes.genericDist
 type error = DistributionTypes.error
 
 @genType
-type env = {sampleCount: int, xyPointLength: int}
+type env = Env.env
 
 @genType
 let defaultEnv: env

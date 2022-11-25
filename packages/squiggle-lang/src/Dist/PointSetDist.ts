@@ -11,10 +11,14 @@ import * as PointSet from "../PointSet/PointSet";
 
 import { BaseDist } from "./Base";
 import { AnyPointSet } from "../PointSet/PointSet";
+import {
+  PointsetConversionError,
+  SampleSetError,
+} from "./SampleSetDist/SampleSetDist";
 
 export class PointSetDist<
   T extends AnyPointSet = AnyPointSet
-> extends BaseDist {
+> extends BaseDist<PointSetDist> {
   pointSet: T;
 
   constructor(pointSet: T) {
@@ -50,8 +54,11 @@ export class PointSetDist<
     return items;
   }
 
-  truncate(left: number, right: number) {
-    return new PointSetDist(this.pointSet.truncate(left, right));
+  truncate(
+    left: number,
+    right: number
+  ): RSResult.rsResult<PointSetDist, SampleSetError /* never happens */> {
+    return RSResult.Ok(new PointSetDist(this.pointSet.truncate(left, right)));
   }
 
   normalize() {
@@ -62,9 +69,9 @@ export class PointSetDist<
     return this.pointSet.integralEndY();
   }
 
-  pdf(f: number) {
+  pdf(f: number): RSResult.rsResult<number, PointsetConversionError> {
     const mixedPoint = this.pointSet.xToY(f);
-    return mixedPoint.continuous + mixedPoint.discrete;
+    return RSResult.Ok(mixedPoint.continuous + mixedPoint.discrete);
   }
   inv(f: number) {
     return this.pointSet.integralYtoX(f);

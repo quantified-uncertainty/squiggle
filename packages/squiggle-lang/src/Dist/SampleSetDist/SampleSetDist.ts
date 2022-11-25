@@ -10,10 +10,145 @@ import { OperationError, operationErrorToString } from "../../OperationError";
 import { ContinuousShape } from "../../PointSet/Continuous";
 import { DiscreteShape } from "../../PointSet/Discrete";
 import { PointSetDist } from "../PointSetDist";
+import { BaseDist, Env } from "../Base";
 
-export type SampleSetDist = readonly number[];
+export class SampleSetDist extends BaseDist<SampleSetDist> {
+  samples: readonly number[];
+  private constructor(samples: readonly number[]) {
+    super();
+    this.samples = samples;
+  }
 
-type SampleSetError =
+  static make(
+    a: readonly number[]
+  ): RSResult.rsResult<SampleSetDist, SampleSetError> {
+    if (a.length > 5) {
+      return RSResult.Ok(new SampleSetDist(a));
+    } else {
+      return RSResult.Error({ type: "TooFewSamples" });
+    }
+  }
+
+  integralEndY() {
+    // sampleset is always normalized
+    return 1;
+  }
+  normalize() {
+    return this;
+  }
+
+  min() {
+    return Math.min(...this.samples);
+  }
+  max() {
+    return Math.max(...this.samples);
+  }
+  mean() {
+    return E_A_Floats.mean(this.samples);
+  }
+
+  truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
+    let truncated = this.samples;
+    if (leftCutoff !== undefined) {
+      truncated = truncated.filter((x) => x >= leftCutoff);
+    }
+    if (rightCutoff !== undefined) {
+      truncated = truncated.filter((x) => x <= rightCutoff);
+    }
+    return SampleSetDist.make(truncated);
+  }
+
+  // Randomly get one sample from the distribution
+  sample() {
+    const index = Math.floor(Math.random() * this.samples.length);
+    return this.samples[index];
+  }
+
+  /*
+If asked for a length of samples shorter or equal the length of the distribution,
+return this first n samples of this distribution.
+Else, return n random samples of the distribution.
+The former helps in cases where multiple distributions are correlated.
+However, if n > length(t), then there's no clear right answer, so we just randomly
+sample everything.
+*/
+  sampleN(n: number): number[] {
+    if (n <= this.samples.length) {
+      return this.samples.slice(0, n);
+    } else {
+      const result: number[] = [];
+      for (let i = 1; i <= n; i++) {
+        result.push(this.sample());
+      }
+      return result;
+    }
+  }
+
+  cdf(f: number): number {
+    const countBelowF = this.samples.reduce(
+      (acc, x) => acc + (x <= f ? 1 : 0),
+      0
+    );
+    return countBelowF / this.samples.length;
+  }
+
+  inv(f: number): number {
+    const sorted = E_A_Floats.sorted(this.samples);
+    return E_A_Sorted.percentile(sorted, f);
+  }
+
+  pdf(f: number, opts: { env: Env }) {
+    const pointSetDistR = this.toPointSetDist(opts.env);
+    if (pointSetDistR.TAG === RSResult.E.Error) {
+      return pointSetDistR;
+    }
+    return pointSetDistR._0.pdf(f);
+  }
+
+  stdev() {
+    return E_A_Floats.stdev(this.samples);
+  }
+  variance() {
+    return E_A_Floats.variance(this.samples);
+  }
+
+  mode(): number {
+    throw new global.Error(
+      "https://github.com/quantified-uncertainty/squiggle/issues/1392"
+    );
+  }
+
+  toPointSetDist(
+    env: Env
+  ): RSResult.rsResult<PointSetDist, PointsetConversionError> {
+    const dists = SampleSetDist_ToPointSet.toPointSetDist(
+      this.samples,
+      env.xyPointLength,
+      undefined
+    );
+
+    const result = MixedShapeBuilder.buildSimple({
+      continuous: dists.continuousDist
+        ? new ContinuousShape({ xyShape: dists.continuousDist })
+        : undefined,
+      discrete: new DiscreteShape({ xyShape: dists.discreteDist }),
+    });
+    if (!result) {
+      return RSResult.Error("TooFewSamplesForConversionToPointSet");
+    }
+    return RSResult.Ok(new PointSetDist(result));
+  }
+
+  samplesMap(
+    fn: (x: number) => RSResult.rsResult<number, OperationError>
+  ): RSResult.rsResult<SampleSetDist, SampleSetError> {
+    return buildSampleSetFromFn(this.samples.length, (i) =>
+      fn(this.samples[i])
+    );
+  }
+}
+
+export type SampleSetError =
   | {
       type: "TooFewSamples";
     }
@@ -26,7 +161,7 @@ type SampleSetError =
       value: OperationError;
     };
 
-type PointsetConversionError = "TooFewSamplesForConversionToPointSet";
+export type PointsetConversionError = "TooFewSamplesForConversionToPointSet";
 
 export const Error = {
   pointsetConversionErrorToString(err: PointsetConversionError) {
@@ -66,71 +201,6 @@ type SamplingInputs = {
   pointSetDistLength: number; // int
 };
 
-/*
-TODO: Refactor to get a more precise estimate. Also, this code is just fairly messy, could use
-some refactoring.
-*/
-export const toPointSetDist = ({
-  samples,
-  samplingInputs,
-}: {
-  samples: SampleSetDist;
-  samplingInputs: SamplingInputs;
-}): RSResult.rsResult<PointSetDist, PointsetConversionError> => {
-  const dists = SampleSetDist_ToPointSet.toPointSetDist(
-    samples,
-    samplingInputs.outputXYPoints,
-    samplingInputs.kernelWidth
-  );
-
-  const result = MixedShapeBuilder.buildSimple({
-    continuous: dists.continuousDist
-      ? new ContinuousShape({ xyShape: dists.continuousDist })
-      : undefined,
-    discrete: new DiscreteShape({ xyShape: dists.discreteDist }),
-  });
-  if (!result) {
-    return RSResult.Error("TooFewSamplesForConversionToPointSet");
-  }
-  return RSResult.Ok(new PointSetDist(result));
-};
-
-export const make = (
-  a: readonly number[]
-): RSResult.rsResult<SampleSetDist, SampleSetError> => {
-  if (a.length > 5) {
-    return RSResult.Ok(a);
-  } else {
-    return RSResult.Error({ type: "TooFewSamples" });
-  }
-};
-
-// Randomly get one sample from the distribution
-export const sample = (t: SampleSetDist): number => {
-  const index = Math.floor(Math.random() * t.length);
-  return t[index];
-};
-
-/*
-If asked for a length of samples shorter or equal the length of the distribution,
-return this first n samples of this distribution.
-Else, return n random samples of the distribution.
-The former helps in cases where multiple distributions are correlated.
-However, if n > length(t), then there's no clear right answer, so we just randomly
-sample everything.
-*/
-export const sampleN = (t: SampleSetDist, n: number): number[] => {
-  if (n <= t.length) {
-    return t.slice(0, n);
-  } else {
-    const result: number[] = [];
-    for (let i = 1; i <= n; i++) {
-      result.push(sample(t));
-    }
-    return result;
-  }
-};
-
 // let _fromSampleResultArray = (samples: array<result<float, QuriSquiggleLang.Operation.Error.t>>) =>
 //   E.A.R.firstErrorOrOpen(samples)->E.R.errMap(Error.fromOperationError)->E.R.bind(make)
 
@@ -146,14 +216,7 @@ const buildSampleSetFromFn = (
     }
     samples.push(result._0);
   }
-  return make(samples);
-};
-
-export const samplesMap = (
-  t: SampleSetDist,
-  fn: (x: number) => RSResult.rsResult<number, OperationError>
-): RSResult.rsResult<SampleSetDist, SampleSetError> => {
-  return buildSampleSetFromFn(t.length, (i) => fn(t[i]));
+  return SampleSetDist.make(samples);
 };
 
 // TODO: Figure out what to do if distributions are different lengths.
@@ -167,8 +230,8 @@ export const map2 = ({
   t1: SampleSetDist;
   t2: SampleSetDist;
 }): RSResult.rsResult<SampleSetDist, SampleSetError> => {
-  const length = Math.min(t1.length, t2.length);
-  return buildSampleSetFromFn(length, (i) => fn(t1[i], t2[i]));
+  const length = Math.min(t1.samples.length, t2.samples.length);
+  return buildSampleSetFromFn(length, (i) => fn(t1.samples[i], t2.samples[i]));
 };
 
 export const map3 = ({
@@ -186,8 +249,14 @@ export const map3 = ({
   t2: SampleSetDist;
   t3: SampleSetDist;
 }): RSResult.rsResult<SampleSetDist, SampleSetError> => {
-  const length = Math.min(t1.length, t2.length, t3.length);
-  return buildSampleSetFromFn(length, (i) => fn(t1[i], t2[i], t3[i]));
+  const length = Math.min(
+    t1.samples.length,
+    t2.samples.length,
+    t3.samples.length
+  );
+  return buildSampleSetFromFn(length, (i) =>
+    fn(t1.samples[i], t2.samples[i], t3.samples[i])
+  );
 };
 
 export const mapN = ({
@@ -197,45 +266,14 @@ export const mapN = ({
   fn: (v: number[]) => RSResult.rsResult<number, OperationError>;
   t1: SampleSetDist[];
 }): RSResult.rsResult<SampleSetDist, SampleSetError> => {
-  const length = Math.max(...t1.map((t) => t.length));
+  const length = Math.max(...t1.map((t) => t.samples.length));
   return buildSampleSetFromFn(length, (i) =>
     fn(
       t1
-        .map((t) => (i < t.length ? t[i] : undefined))
+        .map((t) => (i < t.samples.length ? t.samples[i] : undefined))
         .filter((v): v is number => v !== undefined)
     )
   );
-};
-
-export const mean = (t: SampleSetDist): number => E_A_Floats.mean(t);
-
-// let geomean = t => T.get(t)->E.A.Floats.geomean
-export const mode = (t: SampleSetDist): number => {
-  // this was calling Jstat.mode but needs to be reimplemented
-  throw new global.Error(
-    "https://github.com/quantified-uncertainty/squiggle/issues/1392"
-  );
-};
-// let sum = t => T.get(t)->E.A.Floats.sum
-export const min = (t: SampleSetDist): number => {
-  return Math.min(...t);
-};
-export const max = (t: SampleSetDist): number => {
-  return Math.max(...t);
-};
-export const stdev = (t: SampleSetDist): number => {
-  return E_A_Floats.stdev(t);
-};
-export const variance = (t: SampleSetDist): number => {
-  return E_A_Floats.variance(t);
-};
-export const percentile = (t: SampleSetDist, f: number): number => {
-  const sorted = E_A_Floats.sorted(t);
-  return E_A_Sorted.percentile(sorted, f);
-};
-export const cdf = (t: SampleSetDist, f: number): number => {
-  const countBelowF = t.reduce((acc, x) => acc + (x <= f ? 1 : 0), 0);
-  return countBelowF / t.length;
 };
 
 export const mixture = (
@@ -256,27 +294,12 @@ export const mixture = (
 
   const samples = discreteSamples.map((distIndexToChoose, index) => {
     const chosenDist = dists[distIndexToChoose];
-    if (chosenDist.length < index) {
+    if (chosenDist.samples.length < index) {
       throw new global.Error("Mixture unreachable error"); // https://github.com/quantified-uncertainty/squiggle/issues/1405
     }
-    return chosenDist[index];
+    return chosenDist.samples[index];
   });
-  return make(samples);
-};
-
-export const truncate = (
-  t: SampleSetDist,
-  leftCutoff: number | undefined,
-  rightCutoff: number | undefined
-) => {
-  let truncated = t;
-  if (leftCutoff !== undefined) {
-    truncated = truncated.filter((x) => x >= leftCutoff);
-  }
-  if (rightCutoff !== undefined) {
-    truncated = truncated.filter((x) => x <= rightCutoff);
-  }
-  return make(truncated);
+  return SampleSetDist.make(samples);
 };
 
 export const minOfTwo = (t1: SampleSetDist, t2: SampleSetDist) => {
@@ -287,8 +310,8 @@ export const maxOfTwo = (t1: SampleSetDist, t2: SampleSetDist) => {
 };
 
 export const minOfFloat = (t: SampleSetDist, f: number) => {
-  return samplesMap(t, (a) => RSResult.Ok(Math.min(a, f)));
+  return t.samplesMap((a) => RSResult.Ok(Math.min(a, f)));
 };
 export const maxOfFloat = (t: SampleSetDist, f: number) => {
-  return samplesMap(t, (a) => RSResult.Ok(Math.max(a, f)));
+  return t.samplesMap((a) => RSResult.Ok(Math.max(a, f)));
 };

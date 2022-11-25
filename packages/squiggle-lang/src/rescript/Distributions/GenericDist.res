@@ -3,12 +3,9 @@ type error = DistributionTypes.error
 type toPointSetFn = t => result<PointSetTypes.pointSetDist, error>
 type toSampleSetFn = t => result<SampleSetDist.t, error>
 
-type env = {
-  sampleCount: int,
-  xyPointLength: int,
-}
+type env = Env.env
 
-let defaultEnv: env = {
+let defaultEnv: Env.env = {
   sampleCount: MagicNumbers.Environment.defaultSampleCount,
   xyPointLength: MagicNumbers.Environment.defaultXYPointLength,
 }
@@ -83,12 +80,7 @@ let toPointSet = (
   | SampleSet(r) =>
     SampleSetDist.toPointSetDist(
       ~samples=r,
-      ~samplingInputs={
-        sampleCount: env.sampleCount,
-        outputXYPoints: env.xyPointLength,
-        pointSetDistLength: env.xyPointLength,
-        kernelWidth: None,
-      },
+      ~env,
     )->E.R.errMap(x => DistributionTypes.PointSetConversionError(x))
   }
 }
@@ -125,7 +117,7 @@ let toFloatOperation = (
             let pointSetR = toPointSet(t, ~env, ())
             pointSetR->E.R.fmap(s =>
               switch op {
-              | #Pdf(f) => PointSetDist.pdf(f, s)
+              | #Pdf(f) => PointSetDist.pdf(f, s)->E.R.toExn("PointSetDist.pdf shouldn't fail")
               | #Cdf(f) => PointSetDist.cdf(f, s)
               | #Inv(f) => PointSetDist.inv(f, s)
               | #Sample => PointSetDist.sample(s)
@@ -286,7 +278,9 @@ module Truncate = {
           ->toPointSet(~env, ())
           ->E.R.fmap(t => {
             DistributionTypes.PointSet(
-              PointSetDist.T.truncate(leftCutoff, rightCutoff, t)->PointSetDist.T.normalize,
+              PointSetDist.T.truncate(leftCutoff, rightCutoff, t)
+              ->E.R.toExn("PointSetDist.truncate shouldn't fail")
+              ->PointSetDist.T.normalize,
             )
           })
         }

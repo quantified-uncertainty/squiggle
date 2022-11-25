@@ -24,24 +24,22 @@ type r = result<t, Error.sampleSetError>
 
 // let length = (t: t) => get(t)->E.A.length
 
-let toPointSetDist = (~samples: t, ~samplingInputs: SamplingInputs.samplingInputs): result<
+let toPointSetDist = (~samples: t, ~env: Env.env): result<
   PointSetTypes.pointSetDist,
   Error.pointsetConversionError,
 > => {
-  %raw(`SampleSetDist.toPointSetDist({ samples, samplingInputs })`)
+  %raw(`samples.toPointSetDist(env)`)
 }
 
-let make = (a: array<float>): r => %raw(`SampleSetDist.make(a)`)
+let make = (a: array<float>): r => %raw(`SampleSetDist.SampleSetDist.make(a)`)
 
-let sample = (t: t): float => %raw(`SampleSetDist.sample(t)`)
-let sampleN = (t: t, n: int): array<float> => %raw(`SampleSetDist.sampleN(t, n)`)
+let sample = (t: t): float => %raw(`t.sample()`)
+let sampleN = (t: t, n: int): array<float> => %raw(`t.sampleN(n)`)
 
-let getSamples = (t: t): array<float> => %raw(`t`)
+let getSamples = (t: t): array<float> => %raw(`t.samples`)
 
-let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): result<
-  t,
-  Error.sampleSetError,
-> => %raw(`SampleSetDist.samplesMap(t, fn)`)
+let samplesMap = (~fn: float => result<float, Operation.Error.t>, t: t): r =>
+  %raw(`t.samplesMap(fn)`)
 
 let map2 = (~fn: (float, float) => result<float, Operation.Error.t>, ~t1: t, ~t2: t): r =>
   %raw(`SampleSetDist.map2({ fn, t1, t2 })`)
@@ -56,23 +54,23 @@ let map3 = (
 let mapN = (~fn: array<float> => result<float, Operation.Error.t>, ~t1: array<t>): r =>
   %raw(`SampleSetDist.mapN({ fn, t1 })`)
 
-let mean = (t: t): float => %raw(`SampleSetDist.mean(t)`)
-let min = (t: t): float => %raw(`SampleSetDist.min(t)`)
-let max = (t: t): float => %raw(`SampleSetDist.max(t)`)
-let mode = (t: t): float => %raw(`SampleSetDist.mode(t)`)
+let mean = (t: t): float => %raw(`t.mean()`)
+let min = (t: t): float => %raw(`t.min()`)
+let max = (t: t): float => %raw(`t.max()`)
+let mode = (t: t): float => %raw(`t.mode()`)
 // let geomean = t => T.get(t)->E.A.Floats.geomean
 // let sum = t => T.get(t)->E.A.Floats.sum
-let stdev = (t: t): float => %raw(`SampleSetDist.stdev(t)`)
-let variance = (t: t): float => %raw(`SampleSetDist.variance(t)`)
-let percentile = (t: t, f: float): float => %raw(`SampleSetDist.percentile(t, f)`)
-let cdf = (t: t, f: float): float => %raw(`SampleSetDist.cdf(t, f)`)
+let stdev = (t: t): float => %raw(`t.stdev()`)
+let variance = (t: t): float => %raw(`t.variance()`)
+let percentile = (t: t, f: float): float => %raw(`t.inv(f)`)
+let cdf = (t: t, f: float): float => %raw(`t.cdf(f)`)
 
 let mixture = (values: array<(t, float)>, intendedLength: int): r => {
   %raw(`SampleSetDist.mixture(values, intendedLength)`)
 }
 
 let truncate = (t, ~leftCutoff: option<float>, ~rightCutoff: option<float>): r => {
-  %raw(`SampleSetDist.truncate(t, leftCutoff, rightCutoff)`)
+  %raw(`t.truncate(leftCutoff, rightCutoff)`)
 }
 
 let minOfTwo = (t1: t, t2: t): r => %raw(`SampleSetDist.minOfTwo(t1, t2)`)
