@@ -81,6 +81,7 @@ module From90thPercentile = {
 module T = {
   let pdf = (x: float, t: symbolicDist): result<float, DistError.t> => %raw(`t.pdf(x)`)
   let cdf = (x: float, t: symbolicDist): float => %raw(`t.cdf(x)`)
+  let inv = (x: float, t: symbolicDist): float => %raw(`t.inv(x)`)
 
   let sampleN = (n: int, t: symbolicDist) => %raw(`t.sampleN(n)`)
   let sample = (t: symbolicDist) => %raw(`t.sample()`)
@@ -91,25 +92,13 @@ module T = {
   let isFloat = (t: symbolicDist): bool => %raw(`t.isFloat()`)
 
   let mean = (t: symbolicDist): float => %raw(`t.mean()`)
+  let min = (t: symbolicDist): float => %raw(`t.min()`)
+  let max = (t: symbolicDist): float => %raw(`t.max()`)
 
   let operate = (distToFloatOp: Operation.distToFloatOperation, s: symbolicDist) =>
     switch distToFloatOp {
     | #Cdf(f) => Ok(%raw(`s.cdf(distToFloatOp.VAL)`))
-    | #Pdf(f) => %raw(`s.pdf(distToFloatOp.VAL)`)
     | #Inv(f) => Ok(%raw(`s.inv(distToFloatOp.VAL)`))
-    | #Min => Ok(%raw(`s.min()`))
-    | #Max => Ok(%raw(`s.max()`))
-    | #Sample => Ok(%raw(`s.sample()`))
-    | #Mean =>
-      %raw(`(() => {
-
-        try {
-          return { TAG: 0, _0: s.mean() };
-        } catch {
-          return { TAG: 1, _0: "ERROR" }; // hack, will be ignored by GenericDist
-        }
-      })()
-      `)
     }
 
   let truncate = (low: option<float>, high: option<float>, t: symbolicDist, ~env: Env.env): result<

@@ -13,15 +13,8 @@ module DistributionOperation = {
   type pointsetXSelection = [#Linear | #ByWeight]
 
   type toFloat = [
-    | #Cdf(float)
-    | #Inv(float)
-    | #Pdf(float)
-    | #Mean
-    | #IntegralSum
     | #Mode
     | #Stdev
-    | #Min
-    | #Max
     | #Variance
   ]
 }

@@ -28,6 +28,8 @@ module T = {
   let minX = (t: t): float => %raw(`t.min()`)
   let maxX = (t: t): float => %raw(`t.max()`)
   let mean = (t: t): float => %raw(`t.mean()`)
+  let min = (t: t): float => %raw(`t.min()`)
+  let max = (t: t): float => %raw(`t.max()`)
 
   let truncate = (left: option<float>, right: option<float>, t: t): result<t, DistError.t> =>
     %raw(`t.truncate(left, right)`)
@@ -67,7 +69,7 @@ let logScoreScalarAnswer = (~estimate: t, ~answer: float, ~prior: option<t>): re
   }
 }
 
-let pdf = (f: float, t: t): result<float, 'e> => %raw(`t.pdf(f)`)
+let pdf = (f: float, t: t): result<float, DistError.t> => %raw(`t.pdf(f)`)
 let inv = (f: float, t: t): float => %raw(`t.inv(f)`)
 let cdf = (f: float, t: t): float => %raw(`t.cdf(f)`)
 

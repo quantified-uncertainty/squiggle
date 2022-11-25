@@ -12,7 +12,7 @@ describe("mixture", () => {
       let meanValue = {
         GenericDist.mixture([(mkNormal(mean1, 9e-1), 0.5), (mkNormal(mean2, 9e-1), 0.5)], ~env)
         ->unpackResult
-        ->GenericDist.mean(~env)
+        ->GenericDist.mean
       }
       meanValue->unpackResult->expect->toBeSoCloseTo((mean1 +. mean2) /. 2.0, ~digits=-1)
     },
@@ -31,7 +31,7 @@ describe("mixture", () => {
           ~env,
         )
         ->unpackResult
-        ->GenericDist.mean(~env)
+        ->GenericDist.mean
       }
       let betaMean = 1.0 /. (1.0 +. beta /. alpha)
       let exponentialMean = 1.0 /. rate
@@ -55,7 +55,7 @@ describe("mixture", () => {
           ~env,
         )
         ->unpackResult
-        ->GenericDist.mean(~env)
+        ->GenericDist.mean
       }
       let uniformMean = (low +. high) /. 2.0
       let lognormalMean = mu +. sigma ** 2.0 /. 2.0

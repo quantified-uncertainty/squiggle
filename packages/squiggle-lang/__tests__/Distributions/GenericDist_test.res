@@ -26,7 +26,7 @@ describe("toPointSet", () => {
     let result =
       normalDist5
       ->GenericDist.toPointSet(~env, ())
-      ->E.R.bind(pointSet => pointSet->PointSet->GenericDist.mean(~env))
+      ->E.R.bind(pointSet => pointSet->PointSet->GenericDist.mean)
       ->unpackResult
 
     expect(result)->toBeSoCloseTo(5.0, ~digits=0)
@@ -40,7 +40,7 @@ describe("toPointSet", () => {
     ->unpackResult
 
   test("mean from sample set", () => {
-    let mean = PointSet(pointSet)->GenericDist.mean(~env)->unpackResult
+    let mean = PointSet(pointSet)->GenericDist.mean->unpackResult
 
     expect(mean)->toBeSoCloseTo(5.0, ~digits=-1)
   })

@@ -45,6 +45,7 @@ let stdev = (t: t): float => %raw(`t.stdev()`)
 let variance = (t: t): float => %raw(`t.variance()`)
 let percentile = (t: t, f: float): float => %raw(`t.inv(f)`)
 let cdf = (t: t, f: float): float => %raw(`t.cdf(f)`)
+let pdf = (t: t, f: float, ~env: Env.env): result<float, DistError.t> => %raw(`t.pdf(f, { env })`)
 
 let mixture = (values: array<(t, float)>, intendedLength: int): r => {
   %raw(`SampleSetDist.mixture(values, intendedLength)`)

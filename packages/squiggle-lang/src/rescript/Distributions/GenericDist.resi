@@ -24,15 +24,15 @@ let normalize: t => t
 
 let isNormalized: t => bool
 
-let mean: (t, ~env: env) => result<float, error>
+let mean: t => result<float, error>
 let stdev: (t, ~env: env) => result<float, error>
 let variance: (t, ~env: env) => result<float, error>
-let min: (t, ~env: env) => result<float, error>
-let max: (t, ~env: env) => result<float, error>
+let min: t => result<float, error>
+let max: t => result<float, error>
 let mode: (t, ~env: env) => result<float, error>
-let cdf: (t, float, ~env: env) => result<float, error>
+let cdf: (t, float) => float
 let pdf: (t, float, ~env: env) => result<float, error>
-let inv: (t, float, ~env: env) => result<float, error>
+let inv: (t, float) => float
 
 module Score: {
   type genericDistOrScalar = Score_Dist(t) | Score_Scalar(float)

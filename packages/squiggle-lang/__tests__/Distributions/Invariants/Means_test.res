@@ -37,7 +37,7 @@ module Internals = {
   let pairsOfDifferentDistributions = combinations2(distributions)
 
   let runMean: DistributionTypes.genericDist => float = dist => {
-    dist->GenericDist.mean(~env)->unpackResult
+    dist->GenericDist.mean->unpackResult
   }
 
   let testOperationMean = (

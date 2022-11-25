@@ -45,7 +45,7 @@ describe("(Algebraic) addition of distributions", () => {
       () => {
         normalDist5
         ->algebraicAdd(normalDist20)
-        ->E.R.bind(d => d->GenericDist.mean(~env))
+        ->E.R.bind(d => d->GenericDist.mean)
         ->unpackResult
         ->expect
         ->toBe(2.5e1)
@@ -58,10 +58,7 @@ describe("(Algebraic) addition of distributions", () => {
         // let uniformMean = (9.0 +. 10.0) /. 2.0
         // let betaMean = 1.0 /. (1.0 +. 5.0 /. 2.0)
         let received =
-          uniformDist
-          ->algebraicAdd(betaDist)
-          ->E.R.bind(d => d->GenericDist.mean(~env))
-          ->unpackResult
+          uniformDist->algebraicAdd(betaDist)->E.R.bind(d => d->GenericDist.mean)->unpackResult
         // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
         // sometimes it works with ~digits=2.
         received->expect->toBeSoCloseTo(9.786831807237022, ~digits=1) // (uniformMean +. betaMean)
@@ -75,7 +72,7 @@ describe("(Algebraic) addition of distributions", () => {
         let received =
           betaDist
           ->algebraicAdd(uniformDist)
-          ->E.R.bind(d => d->GenericDist.mean(~env))
+          ->E.R.bind(d => d->GenericDist.mean)
           ->E.R.toExn("Expected float")
         // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
         // sometimes it works with ~digits=2.
@@ -145,12 +142,8 @@ describe("(Algebraic) addition of distributions", () => {
       "(normal(mean=5) + normal(mean=5)).cdf (imprecise)",
       list{6e0, 8e0, 1e1, 1.2e1},
       x => {
-        let received = normalDist10->GenericDist.cdf(x, ~env)->unpackResult
-        let calculated =
-          normalDist5
-          ->algebraicAdd(normalDist5)
-          ->E.R.bind(d => d->GenericDist.cdf(x, ~env))
-          ->unpackResult
+        let received = normalDist10->GenericDist.cdf(x)
+        let calculated = normalDist5->algebraicAdd(normalDist5)->unpackResult->GenericDist.cdf(x)
 
         received->expect->toBeSoCloseTo(calculated, ~digits=0)
       },
@@ -158,13 +151,10 @@ describe("(Algebraic) addition of distributions", () => {
     test(
       "(normal(mean=10) + normal(mean=10)).cdf(1.25e1)",
       () => {
-        let received = normalDist20->GenericDist.cdf(1.25e1, ~env)->unpackResult
+        let received = normalDist20->GenericDist.cdf(1.25e1)
 
         let calculated =
-          normalDist10
-          ->algebraicAdd(normalDist10)
-          ->E.R.bind(d => d->GenericDist.cdf(1.25e1, ~env))
-          ->unpackResult
+          normalDist10->algebraicAdd(normalDist10)->unpackResult->GenericDist.cdf(1.25e1)
 
         received->expect->toBeSoCloseTo(calculated, ~digits=2)
       },
@@ -172,11 +162,7 @@ describe("(Algebraic) addition of distributions", () => {
     test(
       "(uniform(low=9, high=10) + beta(alpha=2, beta=5)).cdf(10)",
       () => {
-        let received =
-          uniformDist
-          ->algebraicAdd(betaDist)
-          ->E.R.bind(d => d->GenericDist.cdf(1e1, ~env))
-          ->unpackResult
+        let received = uniformDist->algebraicAdd(betaDist)->unpackResult->GenericDist.cdf(1e1)
 
         // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
         // The value was calculated externally using a python script
@@ -186,11 +172,7 @@ describe("(Algebraic) addition of distributions", () => {
     test(
       "(beta(alpha=2, beta=5) + uniform(low=9, high=10)).cdf(10)",
       () => {
-        let received =
-          betaDist
-          ->algebraicAdd(uniformDist)
-          ->E.R.bind(d => d->GenericDist.cdf(1e1, ~env))
-          ->unpackResult
+        let received = betaDist->algebraicAdd(uniformDist)->unpackResult->GenericDist.cdf(1e1)
 
         // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
         // The value was calculated externally using a python script
@@ -204,13 +186,9 @@ describe("(Algebraic) addition of distributions", () => {
       "(normal(mean=5) + normal(mean=5)).inv (imprecise)",
       list{5e-2, 4.2e-3, 9e-3},
       x => {
-        let received = normalDist10->GenericDist.inv(x, ~env)->unpackResult
+        let received = normalDist10->GenericDist.inv(x)
 
-        let calculated =
-          normalDist5
-          ->algebraicAdd(normalDist5)
-          ->E.R.bind(d => d->GenericDist.inv(x, ~env))
-          ->unpackResult
+        let calculated = normalDist5->algebraicAdd(normalDist5)->unpackResult->GenericDist.inv(x)
 
         received->expect->toBeSoCloseTo(calculated, ~digits=-1)
       },
@@ -218,13 +196,10 @@ describe("(Algebraic) addition of distributions", () => {
     test(
       "(normal(mean=10) + normal(mean=10)).inv(1e-1)",
       () => {
-        let received = normalDist20->GenericDist.inv(1e-1, ~env)->unpackResult
+        let received = normalDist20->GenericDist.inv(1e-1)
 
         let calculated =
-          normalDist10
-          ->algebraicAdd(normalDist10)
-          ->E.R.bind(d => d->GenericDist.inv(1e-1, ~env))
-          ->unpackResult
+          normalDist10->algebraicAdd(normalDist10)->unpackResult->GenericDist.inv(1e-1)
 
         received->expect->toBeSoCloseTo(calculated, ~digits=-1)
       },
@@ -232,11 +207,7 @@ describe("(Algebraic) addition of distributions", () => {
     test(
       "(uniform(low=9, high=10) + beta(alpha=2, beta=5)).inv(2e-2)",
       () => {
-        let received =
-          uniformDist
-          ->algebraicAdd(betaDist)
-          ->E.R.bind(d => d->GenericDist.inv(2e-2, ~env))
-          ->unpackResult
+        let received = uniformDist->algebraicAdd(betaDist)->unpackResult->GenericDist.inv(2e-2)
 
         // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
         // sometimes it works with ~digits=2.
@@ -246,11 +217,7 @@ describe("(Algebraic) addition of distributions", () => {
     test(
       "(beta(alpha=2, beta=5) + uniform(low=9, high=10)).inv(2e-2)",
       () => {
-        let received =
-          betaDist
-          ->algebraicAdd(uniformDist)
-          ->E.R.bind(d => d->GenericDist.inv(2e-2, ~env))
-          ->unpackResult
+        let received = betaDist->algebraicAdd(uniformDist)->unpackResult->GenericDist.inv(2e-2)
 
         // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
         // sometimes it works with ~digits=2.

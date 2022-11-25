@@ -4,7 +4,7 @@ import { distributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/For
 import { environment } from "../rescript/ForTS/ForTS__Types.gen";
 import { SqDistributionError } from "./SqDistributionError";
 import { wrapPointSetDist } from "./SqPointSetDist";
-import { resultMap2 } from "./types";
+import { Ok, resultMap2 } from "./types";
 
 type T = RSDistribution.distribution;
 export { Tag as SqDistributionTag };
@@ -41,7 +41,7 @@ abstract class SqAbstractDistribution {
 
   mean(env: environment) {
     return resultMap2(
-      RSDistribution.mean(this._value, { env }),
+      RSDistribution.mean(this._value),
       (v: number) => v,
       (e: RSDistribution.distributionError) => new SqDistributionError(e)
     );
@@ -56,19 +56,11 @@ abstract class SqAbstractDistribution {
   }
 
   cdf(env: environment, n: number) {
-    return resultMap2(
-      RSDistribution.cdf(this._value, n, { env }),
-      (v: number) => v,
-      (e: RSDistribution.distributionError) => new SqDistributionError(e)
-    );
+    return Ok(RSDistribution.cdf(this._value, n));
   }
 
   inv(env: environment, n: number) {
-    return resultMap2(
-      RSDistribution.inv(this._value, n, { env }),
-      (v: number) => v,
-      (e: RSDistribution.distributionError) => new SqDistributionError(e)
-    );
+    return Ok(RSDistribution.inv(this._value, n));
   }
 
   stdev(env: environment) {

@@ -166,11 +166,11 @@ let library = E.A.concatMany([
       ->IEvArray
       ->Ok
     }),
-    Helpers.makeDistToFloatFn("mean", GenericDist.mean),
+    Helpers.makeDistToFloatFn("mean", (d, ~env as _) => GenericDist.mean(d)),
     Helpers.makeDistToFloatFn("stdev", GenericDist.stdev),
     Helpers.makeDistToFloatFn("variance", GenericDist.variance),
-    Helpers.makeDistToFloatFn("min", GenericDist.min),
-    Helpers.makeDistToFloatFn("max", GenericDist.max),
+    Helpers.makeDistToFloatFn("min", (d, ~env as _) => GenericDist.min(d)),
+    Helpers.makeDistToFloatFn("max", (d, ~env as _) => GenericDist.max(d)),
     Helpers.makeDistToFloatFn("mode", GenericDist.mode),
     Helpers.makeDistToFloatFn("integralSum", (d, ~env as _) => GenericDist.sample(d)->Ok),
     Helpers.makeDistToStringFn("toString", (d, ~env as _) => GenericDist.toString(d)->Ok),
@@ -232,10 +232,10 @@ let library = E.A.concatMany([
         ~f=MagicNumbers.Math.e,
       )
     ),
-    Helpers.makeDistAndFloatToFloatFn("cdf", GenericDist.cdf),
+    Helpers.makeDistAndFloatToFloatFn("cdf", (d, x, ~env as _) => GenericDist.cdf(d, x)->Ok),
     Helpers.makeDistAndFloatToFloatFn("pdf", GenericDist.pdf),
-    Helpers.makeDistAndFloatToFloatFn("inv", GenericDist.inv),
-    Helpers.makeDistAndFloatToFloatFn("quantile", GenericDist.inv),
+    Helpers.makeDistAndFloatToFloatFn("inv", (d, x, ~env as _) => GenericDist.inv(d, x)->Ok),
+    Helpers.makeDistAndFloatToFloatFn("quantile", (d, x, ~env as _) => GenericDist.inv(d, x)->Ok),
     Helpers.makeDistAndFloatToDistFn("truncateLeft", (dist, x, ~env) =>
       dist->GenericDist.truncate(~env, ~leftCutoff=Some(x), ())
     ),

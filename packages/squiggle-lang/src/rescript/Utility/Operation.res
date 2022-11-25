@@ -23,13 +23,8 @@ type convolutionOperation = [
 type pointwiseOperation = [#Add | #Multiply | #Power]
 type scaleOperation = [#Multiply | #Power | #Logarithm | #LogarithmWithThreshold(float) | #Divide]
 type distToFloatOperation = [
-  | #Pdf(float)
   | #Cdf(float)
   | #Inv(float)
-  | #Mean
-  | #Sample
-  | #Min
-  | #Max
 ]
 
 module Convolution = {

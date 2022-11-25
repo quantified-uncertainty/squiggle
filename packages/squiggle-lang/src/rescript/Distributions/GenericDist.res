@@ -88,72 +88,61 @@ let toPointSet = (
   }
 }
 
-let toFloatOperation = (
-  t,
-  ~env: env,
-  ~operation: DistributionTypes.DistributionOperation.toFloat,
-) => {
-  switch operation {
-  | #IntegralSum => Ok(integralEndY(t))
-  | (#Pdf(_) | #Cdf(_) | #Inv(_) | #Mean | #Min | #Max) as op => {
-      let trySymbolicSolution = switch (t: t) {
-      | Symbolic(r) => SymbolicDist.T.operate(op, r)->E.R.toOption
-      | _ => None
-      }
-
-      let trySampleSetSolution = switch ((t: t), operation) {
-      | (SampleSet(sampleSet), #Mean) => SampleSetDist.mean(sampleSet)->Some
-      | (SampleSet(sampleSet), #Inv(r)) => SampleSetDist.percentile(sampleSet, r)->Some
-      | (SampleSet(sampleSet), #Min) => SampleSetDist.min(sampleSet)->Some
-      | (SampleSet(sampleSet), #Max) => SampleSetDist.max(sampleSet)->Some
-      | (SampleSet(sampleSet), #Cdf(r)) => SampleSetDist.cdf(sampleSet, r)->Some
-      | _ => None
-      }
-
-      switch trySymbolicSolution {
-      | Some(r) => Ok(r)
-      | None =>
-        switch trySampleSetSolution {
-        | Some(r) => Ok(r)
-        | None => {
-            let pointSetR = toPointSet(t, ~env, ())
-            pointSetR->E.R.fmap(s =>
-              switch op {
-              | #Pdf(f) => PointSetDist.pdf(f, s)->E.R.toExn("PointSetDist.pdf shouldn't fail")
-              | #Cdf(f) => PointSetDist.cdf(f, s)
-              | #Inv(f) => PointSetDist.inv(f, s)
-              | #Mean => PointSetDist.T.mean(s)
-              | #Min => PointSetDist.T.minX(s)
-              | #Max => PointSetDist.T.maxX(s)
-              }
-            )
-          }
-        }
-      }
-    }
-
-  | (#Stdev | #Variance | #Mode) as op =>
-    switch t {
-    | SampleSet(s) =>
-      switch op {
-      | #Stdev => SampleSetDist.stdev(s)->Ok
-      | #Variance => SampleSetDist.variance(s)->Ok
-      | #Mode => SampleSetDist.mode(s)->Ok
-      }
-    | _ => Error(DistError.notYetImplemented())
-    }
+let mean = (t: t) =>
+  switch t {
+  | PointSet(r) => PointSetDist.T.mean(r)->Ok
+  | Symbolic(r) => SymbolicDist.T.mean(r)->Ok
+  | SampleSet(r) => SampleSetDist.mean(r)->Ok
   }
-}
+let min = (t: t) =>
+  switch t {
+  | PointSet(r) => PointSetDist.T.min(r)->Ok
+  | Symbolic(r) => SymbolicDist.T.min(r)->Ok
+  | SampleSet(r) => SampleSetDist.min(r)->Ok
+  }
+let max = (t: t) =>
+  switch t {
+  | PointSet(r) => PointSetDist.T.max(r)->Ok
+  | Symbolic(r) => SymbolicDist.T.max(r)->Ok
+  | SampleSet(r) => SampleSetDist.max(r)->Ok
+  }
 
-let mean = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Mean)
-let stdev = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Stdev)
-let variance = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Variance)
-let min = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Min)
-let max = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Max)
-let mode = (t, ~env: env) => toFloatOperation(t, ~env, ~operation=#Mode)
-let cdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~operation=#Cdf(x))
-let pdf = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~operation=#Pdf(x))
-let inv = (t, x: float, ~env: env) => toFloatOperation(t, ~env, ~operation=#Inv(x))
+let pdf = (t: t, x: float, ~env: env) =>
+  switch t {
+  | PointSet(r) => PointSetDist.pdf(x, r)
+  | Symbolic(r) => SymbolicDist.T.pdf(x, r)
+  | SampleSet(r) => SampleSetDist.pdf(r, x, ~env)
+  }
+
+let cdf = (t: t, x: float) =>
+  switch t {
+  | PointSet(r) => PointSetDist.cdf(x, r)
+  | Symbolic(r) => SymbolicDist.T.cdf(x, r)
+  | SampleSet(r) => SampleSetDist.cdf(r, x)
+  }
+
+let inv = (t: t, x: float) =>
+  switch t {
+  | PointSet(r) => PointSetDist.inv(x, r)
+  | Symbolic(r) => SymbolicDist.T.inv(x, r)
+  | SampleSet(r) => SampleSetDist.percentile(r, x)
+  }
+
+let stdev = (t: t, ~env as _: env) =>
+  switch t {
+  | SampleSet(s) => SampleSetDist.stdev(s)->Ok
+  | _ => Error(DistError.notYetImplemented())
+  }
+let variance = (t: t, ~env as _: env) =>
+  switch t {
+  | SampleSet(s) => SampleSetDist.variance(s)->Ok
+  | _ => Error(DistError.notYetImplemented())
+  }
+let mode = (t: t, ~env as _: env) =>
+  switch t {
+  | SampleSet(s) => SampleSetDist.mode(s)->Ok
+  | _ => Error(DistError.notYetImplemented())
+  }
 
 module Score = {
   type genericDistOrScalar = Score_Dist(t) | Score_Scalar(float)
@@ -253,20 +242,15 @@ let truncate = (
     switch t {
     | Symbolic(t) => SymbolicDist.T.truncate(leftCutoff, rightCutoff, t, ~env)->E.R.fmap(normalize)
     | SampleSet(t) =>
-      switch SampleSetDist.truncate(t, ~leftCutoff, ~rightCutoff) {
-      | Ok(r) => Ok(SampleSet(r))
-      | Error(err) => Error(err)
-      }
-    | _ =>
-      t
-      ->toPointSet(~env, ())
-      ->E.R.fmap(t => {
-        DistributionTypes.PointSet(
-          PointSetDist.T.truncate(leftCutoff, rightCutoff, t)
-          ->E.R.toExn("PointSetDist.truncate shouldn't fail")
-          ->PointSetDist.T.normalize,
-        )
-      })
+      SampleSetDist.truncate(
+        t,
+        ~leftCutoff,
+        ~rightCutoff,
+      )->E.R.fmap(d => DistributionTypes.SampleSet(d))
+    | PointSet(t) =>
+      PointSetDist.T.truncate(leftCutoff, rightCutoff, t)
+      ->E.R.fmap(PointSetDist.T.normalize)
+      ->E.R.fmap(d => DistributionTypes.PointSet(d))
     }
   }
 }
@@ -284,29 +268,26 @@ module AlgebraicCombination = {
      that both the probability mass and the probability density are greater than zero.
      Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
  */
-    let getLogarithmInputError = (t1: t, t2: t, ~env: env): option<error> => {
-      let isDistGreaterThanZero = t =>
-        toFloatOperation(t, ~env, ~operation=#Cdf(MagicNumbers.Epsilon.ten))->E.R.fmap(r => r > 0.)
+    let getLogarithmInputError = (t1: t, t2: t): option<error> => {
+      let isDistGreaterThanZero = t => cdf(t, MagicNumbers.Epsilon.ten) > 0.
 
-      let items = E.A.R.firstErrorOrOpen([isDistGreaterThanZero(t1), isDistGreaterThanZero(t2)])
-      switch items {
-      | Error(r) => Some(r)
-      | Ok([true, _]) =>
+      switch [isDistGreaterThanZero(t1), isDistGreaterThanZero(t2)] {
+      | [true, _] =>
         Some(
           DistError.logarithmOfDistributionError("First input must be completely greater than 0"),
         )
-      | Ok([false, true]) =>
+      | [false, true] =>
         Some(
           DistError.logarithmOfDistributionError("Second input must be completely greater than 0"),
         )
-      | Ok([false, false]) => None
-      | Ok(_) => Some(DistError.unreachableError())
+      | [false, false] => None
+      | _ => Some(DistError.unreachableError())
       }
     }
 
-    let run = (t1: t, t2: t, ~env: env, ~arithmeticOperation): option<error> => {
+    let run = (t1: t, t2: t, ~arithmeticOperation): option<error> => {
       if arithmeticOperation == #Logarithm {
-        getLogarithmInputError(t1, t2, ~env)
+        getLogarithmInputError(t1, t2)
       } else {
         None
       }
@@ -417,7 +398,7 @@ module AlgebraicCombination = {
     let toSampleSetFn = dist => dist->toSampleSetDist(env.sampleCount)
     let toPointSetFn = dist => toPointSet(dist, ~env, ())
 
-    let invalidOperationError = InputValidator.run(t1, t2, ~arithmeticOperation, ~env)
+    let invalidOperationError = InputValidator.run(t1, t2, ~arithmeticOperation)
     switch (invalidOperationError, strategy) {
     | (Some(e), _) => Error(e)
     | (None, AsDefault) => {
