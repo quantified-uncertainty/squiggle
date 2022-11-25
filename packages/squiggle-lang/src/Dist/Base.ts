@@ -1,10 +1,6 @@
 import { rsResult } from "../rsResult";
 import { DistError } from "./DistError";
 import { PointSetDist } from "./PointSetDist";
-import {
-  PointsetConversionError,
-  SampleSetError,
-} from "./SampleSetDist/SampleSetDist";
 
 export type Env = {
   sampleCount: number; // int

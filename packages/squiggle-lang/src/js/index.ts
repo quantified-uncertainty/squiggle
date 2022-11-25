@@ -1,21 +1,20 @@
-import { environment } from "../rescript/ForTS/ForTS__Types.gen";
+import { Env as environment } from "../Dist/Base";
 import { SqProject } from "./SqProject";
 import { SqValue, SqValueTag } from "./SqValue";
+
 export { SqValueLocation } from "./SqValueLocation";
 export { result } from "../rescript/ForTS/ForTS_Result_tag";
 export { SqDistribution, SqDistributionTag } from "./SqDistribution";
 export { SqDistributionError } from "./SqDistributionError";
 export { SqRecord } from "./SqRecord";
 export { SqLambda } from "./SqLambda";
-export { SqProject };
-export { SqValue, SqValueTag };
-export {
-  environment,
-  defaultEnvironment,
-} from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
+export { defaultEnvironment } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 export { SqError, SqFrame, SqLocation } from "./SqError";
 export { SqShape } from "./SqPointSetDist";
 export { parse } from "./parse";
+
+export { SqProject, SqValue, SqValueTag };
+export { environment };
 
 export { resultMap } from "./types";
 
