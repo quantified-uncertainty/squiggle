@@ -7,8 +7,6 @@ type distError = DistError.t
 
 type r = result<t, distError>
 
-// let length = (t: t) => get(t)->E.A.length
-
 let toPointSetDist = (~samples: t, ~env: Env.env): result<
   PointSetTypes.pointSetDist,
   distError,
@@ -43,8 +41,6 @@ let mean = (t: t): float => %raw(`t.mean()`)
 let min = (t: t): float => %raw(`t.min()`)
 let max = (t: t): float => %raw(`t.max()`)
 let mode = (t: t): float => %raw(`t.mode()`)
-// let geomean = t => T.get(t)->E.A.Floats.geomean
-// let sum = t => T.get(t)->E.A.Floats.sum
 let stdev = (t: t): float => %raw(`t.stdev()`)
 let variance = (t: t): float => %raw(`t.variance()`)
 let percentile = (t: t, f: float): float => %raw(`t.inv(f)`)

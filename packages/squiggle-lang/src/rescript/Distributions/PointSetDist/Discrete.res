@@ -12,12 +12,6 @@ let make = (
   %raw(`new Discrete.DiscreteShape({ xyShape, integralSumCache: integralSumCacheOpt, integralCache: integralCacheOpt })`)
 }
 
-let getShape: t => XYShape.T.t = %raw(`Discrete.getShape`)
-
 module T = {
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => %raw(`new PointSetDist(t)`)
-}
-
-let sampleN = (t: t, n: int): array<float> => {
-  %raw(`Discrete.sampleN(t, n)`)
 }

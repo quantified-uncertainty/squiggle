@@ -17,7 +17,6 @@ let slice = Belt.Array.slice
 let reduce = Belt.Array.reduce
 let reduceReverse = Belt.Array.reduceReverse
 let reducei = Belt.Array.reduceWithIndex
-let fold_left = reduce
 let some = Belt.Array.some
 let every = Belt.Array.every
 let isEmpty = r => length(r) < 1
@@ -168,13 +167,11 @@ module Floats = {
   type t = array<float>
   let mean = Jstat.mean
   let geomean = Jstat.geomean
-  let mode = Jstat.mode
   let variance = Jstat.variance
   let stdev = Jstat.stdev
   let sum = Jstat.sum
   let product = Jstat.product
-  let random = Js.Math.random_int
-
+  //
   let floatCompare: (float, float) => int = compare
   let sort = t => {
     let typedArray = t->Js.TypedArray2.Float64Array.make
@@ -193,10 +190,6 @@ module Floats = {
     } else {
       t->pairwise((first, second) => first < second)->Belt.Array.every(t => t)
     }
-
-  //Passing true for the exclusive parameter excludes both endpoints of the range.
-  //https://jstat.github.io/all.html
-  let percentile = (a, b) => Jstat.percentile(a, b, false)
 
   // Gives an array with all the differences between values
   // diff([1,5,3,7]) = [4,-2,4]

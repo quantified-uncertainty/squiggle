@@ -4,15 +4,6 @@
 
 type t = PointSetTypes.mixedShape
 
-let make = (
-  ~integralSumCache: option<float>=None,
-  ~integralCache: option<PointSetTypes.continuousShape>=None,
-  ~continuous: PointSetTypes.continuousShape,
-  ~discrete: PointSetTypes.discreteShape,
-): t => {
-  %raw(`new MixedShape({ continuous, discrete, integralSumCache: integralSumCacheOpt, integralCache: integralCacheOpt })`)
-}
-
 module T = {
   let toPointSetDist = (t: t): PointSetTypes.pointSetDist => %raw(`new PointSetDist(t)`)
 }

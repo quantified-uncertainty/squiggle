@@ -73,12 +73,6 @@ let cdf = (f: float, t: t): float => %raw(`t.cdf(f)`)
 
 let sample = (t: t): float => %raw(`t.sample()`)
 
-// let isFloat = (t: t) =>
-//   switch t {
-//   | Discrete(d) => Discrete.isFloat(d)
-//   | _ => false
-//   }
-
 let sampleNRendered = (n: int, t: t): array<float> => {
   %raw(`t.sampleN(n)`)
 }

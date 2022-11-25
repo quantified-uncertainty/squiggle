@@ -235,42 +235,37 @@ let toSparkline = (t: t, ~sampleCount: int, ~bucketCount: int=20, ()): result<st
     r->PointSetDist.toSparkline(bucketCount)->E.R.errMap(x => DistError.sparklineError(x))
   )
 
-module Truncate = {
-  let run = (
-    t: t,
-    ~env: env,
-    ~leftCutoff=None: option<float>,
-    ~rightCutoff=None: option<float>,
-    (),
-  ): result<t, error> => {
-    let doesNotNeedCutoff = E.O.isNone(leftCutoff) && E.O.isNone(rightCutoff)
-    if doesNotNeedCutoff {
-      Ok(t)
-    } else {
-      switch t {
-      | Symbolic(t) =>
-        SymbolicDist.T.truncate(leftCutoff, rightCutoff, t, ~env)->E.R.fmap(normalize)
-      | SampleSet(t) =>
-        switch SampleSetDist.truncate(t, ~leftCutoff, ~rightCutoff) {
-        | Ok(r) => Ok(SampleSet(r))
-        | Error(err) => Error(err)
-        }
-      | _ =>
-        t
-        ->toPointSet(~env, ())
-        ->E.R.fmap(t => {
-          DistributionTypes.PointSet(
-            PointSetDist.T.truncate(leftCutoff, rightCutoff, t)
-            ->E.R.toExn("PointSetDist.truncate shouldn't fail")
-            ->PointSetDist.T.normalize,
-          )
-        })
+let truncate = (
+  t: t,
+  ~env: env,
+  ~leftCutoff=None: option<float>,
+  ~rightCutoff=None: option<float>,
+  (),
+): result<t, error> => {
+  let doesNotNeedCutoff = E.O.isNone(leftCutoff) && E.O.isNone(rightCutoff)
+  if doesNotNeedCutoff {
+    Ok(t)
+  } else {
+    switch t {
+    | Symbolic(t) => SymbolicDist.T.truncate(leftCutoff, rightCutoff, t, ~env)->E.R.fmap(normalize)
+    | SampleSet(t) =>
+      switch SampleSetDist.truncate(t, ~leftCutoff, ~rightCutoff) {
+      | Ok(r) => Ok(SampleSet(r))
+      | Error(err) => Error(err)
       }
+    | _ =>
+      t
+      ->toPointSet(~env, ())
+      ->E.R.fmap(t => {
+        DistributionTypes.PointSet(
+          PointSetDist.T.truncate(leftCutoff, rightCutoff, t)
+          ->E.R.toExn("PointSetDist.truncate shouldn't fail")
+          ->PointSetDist.T.normalize,
+        )
+      })
     }
   }
 }
-
-let truncate = Truncate.run
 
 /* Given two random variables A and B, this returns the distribution
    of a new variable that is the result of the operation on A and B.
@@ -545,7 +540,7 @@ let mixture = (values: array<(t, float)>, ~env: env) => {
     properlyWeightedValues->E.R.bind(values => {
       values
       ->Belt.Array.sliceToEnd(1)
-      ->E.A.fold_left(Ok(E.A.unsafe_get(values, 0)), (acc, x) =>
+      ->E.A.reduce(Ok(E.A.unsafe_get(values, 0)), (acc, x) =>
         E.R.bind(acc, acc => pointwiseAddFn(acc, x))
       )
     })
