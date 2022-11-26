@@ -91,7 +91,7 @@ export let logistic: ContinuousProbabilityDistribution<{
   stdev: ({ mu, s }) => Math.sqrt((square(s) * square(Math.PI)) / 3),
   variance: ({ mu, s }) => (square(s) * square(Math.PI)) / 3,
   quantile: ({ mu, s }, p) => {
-    if (p === 0) return s === 0 ? mu : +Infinity;
+    if (p === 1) return s === 0 ? mu : +Infinity;
     return mu + s * Math.log(p / (1 - p));
   },
 };
