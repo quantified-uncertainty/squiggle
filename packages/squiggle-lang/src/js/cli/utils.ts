@@ -40,6 +40,9 @@ const _run = (args: {
       return path.resolve(path.dirname(fromId), name);
     },
   });
+  if (args.environment) {
+    project.setEnvironment(args.environment);
+  }
   const filename = path.resolve(args.filename || "./__anonymous__");
 
   const loadIncludesRecursively = (sourceId: string) => {
