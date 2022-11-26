@@ -10,7 +10,7 @@ import {
   PointSet,
 } from "./PointSet";
 import { epsilon_float } from "../magicNumbers";
-import { random_sample } from "../js/math";
+import { random_sample } from "../utility/math";
 import { MixedShape } from "./Mixed";
 
 export class DiscreteShape implements PointSet<DiscreteShape> {

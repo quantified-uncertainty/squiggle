@@ -61,8 +61,12 @@ export const mkCauchy = (local: number, scale: number) =>
   unpackResult(SymbolicDist.Cauchy.make({ local, scale }));
 export const mkLognormal = (mu: number, sigma: number) =>
   unpackResult(SymbolicDist.Lognormal.make({ mu, sigma }));
+export const mkLogistic = (location: number, scale: number) =>
+  unpackResult(SymbolicDist.Logistic.make({ location, scale }));
 export const mkTriangular = (low: number, medium: number, high: number) =>
   unpackResult(SymbolicDist.Triangular.make({ low, medium, high }));
+export const mkBernoulli = (p: number) =>
+  unpackResult(SymbolicDist.Bernoulli.make(p));
 export const mkDelta = (x: number) => unpackResult(SymbolicDist.Float.make(x));
 
 export const normalMake = SymbolicDist.Normal.make;

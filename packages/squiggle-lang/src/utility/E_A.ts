@@ -52,3 +52,11 @@ export const toRanges = <T>(items: T[]): result<[T, T][], string> => {
     return Ok(zip(items, items.slice(1)));
   }
 };
+
+export const pairwise = <T, R>(items: T[], fn: (v1: T, v2: T) => R): R[] => {
+  const result: R[] = [];
+  for (let i = 1; i < items.length; i++) {
+    result.push(fn(items[i - 1], items[i]));
+  }
+  return result;
+};

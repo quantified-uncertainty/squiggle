@@ -9,4 +9,3 @@ module I = E_I
 module O = E_O
 module R = E_R
 module Tuple2 = E_Tuple2
-module Tuple3 = E_Tuple3

@@ -1,7 +1,9 @@
 import {
+  mkBernoulli,
   mkBeta,
   mkCauchy,
   mkExponential,
+  mkLogistic,
   mkLognormal,
   mkNormal,
   mkTriangular,
@@ -10,6 +12,7 @@ import {
 import * as SymbolicDist from "../../src/Dist/SymbolicDist";
 import * as RSResult from "../../src/rsResult";
 import * as E_A_Floats from "../../src/utility/E_A_Floats";
+import * as E_A from "../../src/utility/E_A";
 import * as Sparklines from "../../src/Sparklines";
 
 describe("(Symbolic) normalize", () => {
@@ -167,5 +170,85 @@ describe("Normal distribution with sparklines", () => {
     const cdfNormalDistAtMean10 = (x: number) => normalDistAtMean10.cdf(x);
     const sparklineMean10 = range20Float.map(cdfNormalDistAtMean10);
     expect(Sparklines.create(sparklineMean10)).toEqual(`▁▁▁▁▁▁▁▁▂▄▅▇████████`);
+  });
+});
+
+describe("Logistic", () => {
+  const dist = mkLogistic(0, 2);
+  const testRange = 10;
+  const testSteps = 1000;
+  const step = (testRange * 2) / testSteps;
+  const iter = E_A_Floats.range(-testRange, testRange, testSteps);
+
+  test("CDF only grows", () => {
+    const cdfValues = iter.map((v) => dist.cdf(v));
+    expect(E_A.pairwise(cdfValues, (a, b) => a <= b).every((v) => v)).toBe(
+      true
+    );
+  });
+
+  test("CDF conforms to PDF", () => {
+    expect(
+      E_A.pairwise(
+        iter.map((a) => [dist.cdf(a), unpackResult(dist.pdf(a))]),
+        (a, b) => [a, b]
+      ).every(
+        ([[cdf, pdf], [cdf2]]) => Math.abs(cdf2 - cdf - pdf * step) < 0.0001
+      )
+    ).toBe(true);
+  });
+
+  test("Quantile is inverse of CDF", () => {
+    expect(
+      iter
+        .map((p) => [p, dist.inv(dist.cdf(p))])
+        .every(([p, pp]) => Math.abs(p - pp) < 0.00001)
+    ).toBe(true);
+  });
+
+  test("stdev == sqrt(variance)", () => {
+    expect(unpackResult(dist.stdev())).toBeCloseTo(
+      Math.sqrt(unpackResult(dist.variance())),
+      5
+    );
+  });
+});
+
+describe("Bernoulli", () => {
+  const dist = mkBernoulli(0.5);
+  const iter = [0.0, 1.0];
+  const step = 1.0;
+
+  test("CDF only grows", () => {
+    const cdfValues = iter.map((v) => dist.cdf(v));
+    expect(E_A.pairwise(cdfValues, (a, b) => a <= b).every((v) => v)).toBe(
+      true
+    );
+  });
+
+  test("CDF conforms to PDF", () => {
+    expect(
+      E_A.pairwise(
+        iter.map((a) => [dist.cdf(a), unpackResult(dist.pdf(a))]),
+        (a, b) => [a, b]
+      ).every(
+        ([[cdf, pdf], [cdf2]]) => Math.abs(cdf2 - cdf - pdf * step) < 0.0001
+      )
+    ).toBe(true);
+  });
+
+  test("Quantile is inverse of CDF", () => {
+    expect(
+      iter
+        .map((p) => [p, dist.inv(dist.cdf(p))])
+        .every(([p, pp]) => Math.abs(p - pp) < 0.00001)
+    ).toBe(true);
+  });
+
+  test("stdev == sqrt(variance)", () => {
+    expect(unpackResult(dist.stdev())).toBeCloseTo(
+      Math.sqrt(unpackResult(dist.variance())),
+      5
+    );
   });
 });
