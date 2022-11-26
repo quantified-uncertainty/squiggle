@@ -1,6 +1,5 @@
 module Math = {
   let e = Js.Math._E
-  let pi = Js.Math._PI
 }
 
 module Epsilon = {
@@ -12,9 +11,4 @@ module Environment = {
   let defaultXYPointLength = 1000
   let defaultSampleCount = 10000
   let sparklineLength = 20
-}
-
-module OpCost = {
-  let wildcardCost = 1000
-  let monteCarloCost = Environment.defaultSampleCount
 }

@@ -79,38 +79,6 @@ module From90thPercentile = {
 }
 
 module T = {
-  let pdf = (x: float, t: symbolicDist): result<float, DistError.t> => %raw(`t.pdf(x)`)
-  let cdf = (x: float, t: symbolicDist): float => %raw(`t.cdf(x)`)
-  let inv = (x: float, t: symbolicDist): float => %raw(`t.inv(x)`)
-
-  let sampleN = (n: int, t: symbolicDist) => %raw(`t.sampleN(n)`)
-  let sample = (t: symbolicDist) => %raw(`t.sample()`)
-
-  let toString = (t: symbolicDist): string => %raw(`t.toString()`)
-  let expectedConvolutionCost = (t: symbolicDist): int => %raw(`t.expectedConvolutionCost()`)
-
   let isFloat = (t: symbolicDist): bool =>
     %raw(`(t instanceof SymbolicDist.SymbolicDist && t.isFloat())`)
-
-  let mean = (t: symbolicDist): float => %raw(`t.mean()`)
-  let min = (t: symbolicDist): float => %raw(`t.min()`)
-  let max = (t: symbolicDist): float => %raw(`t.max()`)
-
-  let operate = (distToFloatOp: Operation.distToFloatOperation, s: symbolicDist) =>
-    switch distToFloatOp {
-    | #Cdf(f) => Ok(%raw(`s.cdf(distToFloatOp.VAL)`))
-    | #Inv(f) => Ok(%raw(`s.inv(distToFloatOp.VAL)`))
-    }
-
-  let tryAnalyticalSimplification = (
-    d1: symbolicDist,
-    d2: symbolicDist,
-    op: Operation.algebraicOperation,
-  ): SymbolicDistTypes.analyticalSimplificationResult =>
-    %raw(`SymbolicDist.tryAnalyticalSimplification(d1, d2, op)`)
-
-  let toPointSetDist = (~xSelection=#ByWeight, ~env: Env.env, d: symbolicDist): result<
-    PointSetTypes.pointSetDist,
-    DistError.t,
-  > => %raw(`d.toPointSetDist(env, xSelectionOpt)`)
 }
