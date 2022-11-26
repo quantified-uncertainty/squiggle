@@ -1,5 +1,7 @@
 // Temporary; to be removed after Rescript conversion is done.
 
+import { A } from "./rescript/Utility/E.bs";
+
 export enum E {
   Ok = 0,
   Error = 1,
@@ -34,6 +36,28 @@ export function fmap<T, T2, E>(
   }
 }
 
+export function errMap<T, E, E2>(
+  r: rsResult<T, E>,
+  fn: (v: E) => E2
+): rsResult<T, E2> {
+  if (r.TAG === E.Ok) {
+    return r;
+  } else {
+    return Error(fn(r._0));
+  }
+}
+
+export function bind<T, T2, E>(
+  r: rsResult<T, E>,
+  fn: (v: T) => rsResult<T2, E>
+): rsResult<T2, E> {
+  if (r.TAG === E.Ok) {
+    return fn(r._0);
+  } else {
+    return r;
+  }
+}
+
 export function merge<T1, T2, E>(
   a: rsResult<T1, E>,
   b: rsResult<T2, E>
@@ -45,4 +69,12 @@ export function merge<T1, T2, E>(
     return b;
   }
   return Ok([a._0, b._0]);
+}
+
+export function getError<T, E>(r: rsResult<T, E>): E | undefined {
+  if (r.TAG === E.Error) {
+    return r._0;
+  } else {
+    return undefined;
+  }
 }

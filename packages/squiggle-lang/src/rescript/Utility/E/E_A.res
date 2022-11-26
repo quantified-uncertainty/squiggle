@@ -22,22 +22,6 @@ let every = Belt.Array.every
 let isEmpty = r => length(r) < 1
 let stableSortBy = Belt.SortArray.stableSortBy
 
-let getByFmap = (a, fn, boolCondition) => {
-  let i = ref(0)
-  let finalFunctionValue = ref(None)
-  let length = length(a)
-
-  while i.contents < length && finalFunctionValue.contents == None {
-    let itemWithFnApplied = unsafe_get(a, i.contents)->fn
-    if boolCondition(itemWithFnApplied) {
-      finalFunctionValue := Some(itemWithFnApplied)
-    }
-    i := i.contents + 1
-  }
-
-  finalFunctionValue.contents
-}
-
 let zip = Belt.Array.zip
 let unzip = Belt.Array.unzip
 let zip3 = (a, b, c) => zip(a, b)->zip(c)->fmap((((v1, v2), v3)) => (v1, v2, v3))
@@ -110,11 +94,6 @@ module O = {
     }
   }
   let firstSome = x => getBy(x, E_O.isSome)
-
-  let firstSomeFn = (r: array<unit => option<'a>>): option<'a> =>
-    E_O.flatten(getByFmap(r, l => l(), E_O.isSome))
-
-  let firstSomeFnWithDefault = (r, default) => firstSomeFn(r)->E_O.default(default)
 
   let openIfAllSome = (optionals: array<option<'a>>): option<array<'a>> => {
     if every(optionals, E_O.isSome) {

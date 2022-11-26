@@ -4,17 +4,14 @@ type error = DistError.t
 @genType
 type env = Env.env
 
-@genType
-let defaultEnv: env
-
-let isPointSet: t => bool
 let isSampleSet: t => bool
+let isPointSet: t => bool
 let isSymbolic: t => bool
 
 let sampleN: (t, int) => array<float>
 let sample: t => float
 
-let toSampleSetDist: (t, int) => Belt.Result.t<QuriSquiggleLang.SampleSetDist.t, error>
+let toSampleSetDist: (t, int) => Belt.Result.t<t, error>
 
 let fromFloat: float => t
 
@@ -34,25 +31,23 @@ let cdf: (t, float) => float
 let pdf: (t, float, ~env: env) => result<float, error>
 let inv: (t, float) => float
 
-module Score: {
-  type genericDistOrScalar = Score_Dist(t) | Score_Scalar(float)
+let logScoreDistAnswer: (
+  ~estimate: t,
+  ~answer: t,
+  ~prior: option<t>,
+  ~env: env,
+) => result<float, error>
 
-  let logScore: (
-    ~estimate: t,
-    ~answer: genericDistOrScalar,
-    ~prior: option<t>,
-    ~env: env,
-  ) => result<float, error>
-}
+let logScoreScalarAnswer: (
+  ~estimate: t,
+  ~answer: float,
+  ~prior: option<t>,
+  ~env: env,
+) => result<float, error>
 
 @genType
-let toPointSet: (
-  t,
-  ~env: env,
-  ~xSelection: DistributionTypes.DistributionOperation.pointsetXSelection=?,
-  unit,
-) => result<PointSetTypes.pointSetDist, error>
-let toSparkline: (t, ~sampleCount: int, ~bucketCount: int=?, unit) => result<string, error>
+let toPointSet: (t, ~env: env, unit) => result<PointSetTypes.pointSetDist, error>
+let toSparkline: (t, ~bucketCount: int=?, ~env: env, unit) => result<string, error>
 
 let truncate: (
   t,
@@ -60,21 +55,6 @@ let truncate: (
   ~leftCutoff: option<float>=?,
   ~rightCutoff: option<float>=?,
   unit,
-) => result<t, error>
-
-let algebraicCombination: (
-  ~strategy: DistributionTypes.asAlgebraicCombinationStrategy,
-  t,
-  ~env: env,
-  ~arithmeticOperation: Operation.algebraicOperation,
-  ~t2: t,
-) => result<t, error>
-
-let pointwiseCombination: (
-  t,
-  ~env: env,
-  ~algebraicCombination: Operation.algebraicOperation,
-  ~t2: t,
 ) => result<t, error>
 
 let pointwiseCombinationFloat: (

@@ -4,7 +4,7 @@ module Helpers = {
   let makeFn = (
     name: string,
     inputs: array<frType>,
-    fn: (array<Reducer_T.value>, GenericDist.env) => result<Reducer_T.value, errorMessage>,
+    fn: (array<Reducer_T.value>, Env.env) => result<Reducer_T.value, errorMessage>,
   ) => {
     Function.make(
       ~name,
@@ -56,7 +56,7 @@ module Helpers = {
 
   let makeDistToDistFn = (
     name,
-    fn: (GenericDist.t, ~env: GenericDist.env) => result<GenericDist.t, GenericDist.error>,
+    fn: (GenericDist.t, ~env: Env.env) => result<GenericDist.t, GenericDist.error>,
   ) => makeFn(name, [FRTypeDist], (inputs, env) => inputs->unpackDist->fn(~env)->packDist)
 
   let makeDistToBoolFn = (name, fn) =>
@@ -151,7 +151,7 @@ let library = E.A.concatMany([
       switch inputs {
       | [IEvNumber(f1), IEvNumber(f2), IEvNumber(f3)] =>
         switch SymbolicDist.Triangular.make(f1, f2, f3) {
-        | Ok(d) => d->Symbolic->IEvDistribution->Ok
+        | Ok(d) => d->IEvDistribution->Ok
         | Error(e) => e->DistError.fromString->REDistributionError->Error
         }
       | _ => FunctionRegistry_Helpers.impossibleError->SqError.Message.throw
@@ -175,27 +175,17 @@ let library = E.A.concatMany([
     Helpers.makeDistToFloatFn("integralSum", (d, ~env as _) => GenericDist.sample(d)->Ok),
     Helpers.makeDistToStringFn("toString", (d, ~env as _) => GenericDist.toString(d)->Ok),
     Helpers.makeDistToStringFn("sparkline", (dist, ~env) => {
-      dist->GenericDist.toSparkline(
-        ~sampleCount=env.sampleCount,
-        ~bucketCount=MagicNumbers.Environment.sparklineLength,
-        (),
-      )
+      dist->GenericDist.toSparkline(~env, ~bucketCount=MagicNumbers.Environment.sparklineLength, ())
     }),
     Helpers.makeDistAndFloatToStringFn("sparkline", (dist, n, ~env) => {
-      dist->GenericDist.toSparkline(
-        ~sampleCount=env.sampleCount,
-        ~bucketCount=Belt.Float.toInt(n),
-        (),
-      )
+      dist->GenericDist.toSparkline(~env, ~bucketCount=Belt.Float.toInt(n), ())
     }),
     Helpers.makeDistToDistFn("exp", (dist, ~env) => {
       GenericDist.Operations.algebraicPower(GenericDist.fromFloat(MagicNumbers.Math.e), dist, ~env)
     }),
     Helpers.makeDistToDistFn("normalize", (dist, ~env as _) => dist->GenericDist.normalize->Ok),
     Helpers.makeDistToBoolFn("isNormalized", (d, ~env as _) => GenericDist.isNormalized(d)->Ok),
-    Helpers.makeDistToDistFn("toPointSet", (dist, ~env) =>
-      dist->GenericDist.toPointSet(~env, ())->E.R.fmap(d => DistributionTypes.PointSet(d))
-    ),
+    Helpers.makeDistToDistFn("toPointSet", (dist, ~env) => dist->GenericDist.toPointSet(~env, ())),
     Helpers.makeDistToDistFn("scaleLog", (dist, ~env) =>
       dist->GenericDist.scaleLog(MagicNumbers.Math.e, ~env)
     ),

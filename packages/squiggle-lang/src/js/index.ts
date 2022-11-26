@@ -1,4 +1,4 @@
-import { Env as environment } from "../Dist/Base";
+import { Env } from "../Dist/env";
 import { SqProject } from "./SqProject";
 import { SqValue, SqValueTag } from "./SqValue";
 
@@ -8,20 +8,20 @@ export { SqDistribution, SqDistributionTag } from "./SqDistribution";
 export { SqDistributionError } from "./SqDistributionError";
 export { SqRecord } from "./SqRecord";
 export { SqLambda } from "./SqLambda";
-export { defaultEnvironment } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 export { SqError, SqFrame, SqLocation } from "./SqError";
-export { SqShape } from "./SqPointSetDist";
+export { SqShape } from "./SqPointSet";
 export { parse } from "./parse";
 
+export { defaultEnv as defaultEnvironment } from "../Dist/env";
 export { SqProject, SqValue, SqValueTag };
-export { environment };
+export { Env };
 
 export { resultMap } from "./types";
 
 export const run = (
   code: string,
   options?: {
-    environment?: environment;
+    environment?: Env;
   }
 ) => {
   const project = SqProject.create();

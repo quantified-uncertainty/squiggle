@@ -6,15 +6,15 @@ let impossibleError: errorMessage = impossibleErrorString->SqError.Message.REOth
 let wrapError = e => SqError.Message.REOther(e)
 
 module Wrappers = {
-  let symbolic = r => DistributionTypes.Symbolic(r)
-  let pointSet = r => DistributionTypes.PointSet(r)
-  let sampleSet = r => DistributionTypes.SampleSet(r)
+  let symbolic = r => r
+  let pointSet = r => r
+  let sampleSet = r => r
   let evDistribution = r => Reducer_T.IEvDistribution(r)
   let evNumber = r => Reducer_T.IEvNumber(r)
   let evArray = r => Reducer_T.IEvArray(r)
   let evRecord = r => Reducer_T.IEvRecord(r)
   let evString = r => Reducer_T.IEvString(r)
-  let symbolicEvDistribution = r => r->DistributionTypes.Symbolic->evDistribution
+  let symbolicEvDistribution = r => r->evDistribution
   let evArrayOfEvNumber = xs => xs->E.A.fmap(evNumber)->evArray
 }
 
@@ -153,7 +153,7 @@ module Prepare = {
 module Process = {
   module DistOrNumberToDist = {
     module Helpers = {
-      let toSampleSet = (r, env: GenericDist.env) => GenericDist.toSampleSetDist(r, env.sampleCount)
+      let toSampleSet = (r, env: Env.env) => GenericDist.toSampleSetDist(r, env.sampleCount)
 
       let mapFnResult = r =>
         switch r {
@@ -167,7 +167,7 @@ module Process = {
         switch toSampleSet(dist, env) {
         | Ok(dist) =>
           switch SampleSetDist.samplesMap(~fn=f => fn(f)->mapFnResult, dist) {
-          | Ok(r) => Ok(DistributionTypes.SampleSet(r))
+          | Ok(r) => Ok(r)
           | Error(r) => Error(DistError.toString(r))
           }
         | Error(r) => Error(DistError.toString(r))
@@ -179,7 +179,7 @@ module Process = {
         switch E.R.merge(toSampleSet(dist1, env), toSampleSet(dist2, env)) {
         | Ok((t1, t2)) =>
           switch SampleSetDist.map2(~fn=altFn, ~t1, ~t2) {
-          | Ok(r) => Ok(DistributionTypes.SampleSet(r))
+          | Ok(r) => Ok(r)
           | Error(r) => Error(DistError.toString(r))
           }
         | Error(r) => Error(DistError.toString(r))
@@ -190,7 +190,7 @@ module Process = {
     let oneValue = (
       ~fn: float => result<DistributionTypes.genericDist, string>,
       ~value: frValueDistOrNumber,
-      ~env: GenericDist.env,
+      ~env: Env.env,
     ): result<DistributionTypes.genericDist, string> => {
       switch value {
       | FRValueNumber(a1) => fn(a1)
@@ -203,7 +203,7 @@ module Process = {
     let twoValues = (
       ~fn: ((float, float)) => result<DistributionTypes.genericDist, string>,
       ~values: (frValueDistOrNumber, frValueDistOrNumber),
-      ~env: GenericDist.env,
+      ~env: Env.env,
     ): result<DistributionTypes.genericDist, string> => {
       switch values {
       | (FRValueNumber(a1), FRValueNumber(a2)) => fn((a1, a2))

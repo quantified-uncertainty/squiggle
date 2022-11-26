@@ -1,7 +1,7 @@
 @@warning("-27") //TODO: Remove and fix the warning
 %%raw(`const SampleSetDist = require('../../../Dist/SampleSetDist/SampleSetDist')`)
 
-type t
+type t = DistributionTypes.genericDist
 
 type distError = DistError.t
 

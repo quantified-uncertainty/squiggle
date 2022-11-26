@@ -1,11 +1,9 @@
-import * as RSDistributionError from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_Error.gen";
-
-type T = RSDistributionError.distributionError;
+import { DistError, distErrorToString } from "../Dist/DistError";
 
 export class SqDistributionError {
-  constructor(private _value: T) {}
+  constructor(private _value: DistError) {}
 
   toString() {
-    return RSDistributionError.toString(this._value);
+    return distErrorToString(this._value);
   }
 }

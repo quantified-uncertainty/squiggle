@@ -6,4 +6,4 @@ type discreteShape
 @genType.opaque
 type mixedShape
 @genType.opaque
-type pointSetDist
+type pointSetDist = DistributionTypes.genericDist

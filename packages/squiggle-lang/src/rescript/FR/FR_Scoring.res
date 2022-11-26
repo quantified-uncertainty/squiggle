@@ -3,8 +3,14 @@ open FunctionRegistry_Core
 let nameSpace = "Dist"
 let requiresNamespace = true
 
-let runScoring = (estimate, answer, prior, env) => {
-  GenericDist.Score.logScore(~estimate, ~answer, ~prior, ~env)
+let runScoringScalarAnswer = (estimate, answer, prior, env) => {
+  GenericDist.logScoreScalarAnswer(~estimate, ~answer, ~prior, ~env)
+  ->E.R.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
+  ->E.R.errMap(e => SqError.Message.REDistributionError(e))
+}
+
+let runScoringDistAnswer = (estimate, answer, prior, env) => {
+  GenericDist.logScoreDistAnswer(~estimate, ~answer, ~prior, ~env)
   ->E.R.fmap(FunctionRegistry_Helpers.Wrappers.evNumber)
   ->E.R.errMap(e => SqError.Message.REDistributionError(e))
 }
@@ -36,9 +42,9 @@ let library = [
             ("estimate", "answer", "prior"),
           ) {
           | Ok([IEvDistribution(estimate), IEvDistribution(d), IEvDistribution(prior)]) =>
-            runScoring(estimate, Score_Dist(d), Some(prior), context.environment)
+            runScoringDistAnswer(estimate, d, Some(prior), context.environment)
           | Ok([IEvDistribution(estimate), IEvNumber(d), IEvDistribution(prior)]) =>
-            runScoring(estimate, Score_Scalar(d), Some(prior), context.environment)
+            runScoringScalarAnswer(estimate, d, Some(prior), context.environment)
           | Error(e) => Error(e->FunctionRegistry_Helpers.wrapError)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
@@ -54,9 +60,9 @@ let library = [
             ("estimate", "answer"),
           ) {
           | Ok([IEvDistribution(estimate), IEvDistribution(d)]) =>
-            runScoring(estimate, Score_Dist(d), None, context.environment)
+            runScoringDistAnswer(estimate, d, None, context.environment)
           | Ok([IEvDistribution(estimate), IEvNumber(d)]) =>
-            runScoring(estimate, Score_Scalar(d), None, context.environment)
+            runScoringScalarAnswer(estimate, d, None, context.environment)
           | Error(e) => Error(e->FunctionRegistry_Helpers.wrapError)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
@@ -79,7 +85,7 @@ let library = [
         ~run=(inputs, context, _) => {
           switch inputs {
           | [IEvDistribution(estimate), IEvDistribution(d)] =>
-            runScoring(estimate, Score_Dist(d), None, context.environment)
+            runScoringDistAnswer(estimate, d, None, context.environment)
           | _ => Error(FunctionRegistry_Helpers.impossibleError)
           }
         },

@@ -1,7 +1,7 @@
 @@warning("-27") //TODO: Remove and fix the warning
 %%raw(`const PointSetDist = require('../../../Dist/PointSetDist')`)
 
-type t = PointSetTypes.pointSetDist
+type t = DistributionTypes.genericDist
 
 let combineAlgebraically = (op: Operation.convolutionOperation, t1: t, t2: t): t => {
   %raw(`PointSetDist.combineAlgebraically(op, t1, t2)`)
@@ -22,7 +22,6 @@ let combinePointwise = (
 }
 
 module T = {
-  type t = PointSetTypes.pointSetDist
   type integral = PointSetTypes.continuousShape
 
   let minX = (t: t): float => %raw(`t.min()`)
@@ -46,26 +45,6 @@ module T = {
     fn: float => result<float, Operation.Error.t>,
   ): result<t, Operation.Error.t> => {
     %raw(`t.mapYResult(fn, integralSumCacheFnOpt, integralCacheFnOpt)`)
-  }
-}
-
-let logScoreDistAnswer = (~estimate: t, ~answer: t, ~prior: option<t>): result<
-  float,
-  Operation.Error.t,
-> => {
-  switch prior {
-  | None => PointSetDist_Scoring.WithDistAnswer.sum(~estimate, ~answer)
-  | Some(prior) => PointSetDist_Scoring.WithDistAnswer.sumWithPrior(~estimate, ~answer, ~prior)
-  }
-}
-
-let logScoreScalarAnswer = (~estimate: t, ~answer: float, ~prior: option<t>): result<
-  float,
-  Operation.Error.t,
-> => {
-  switch prior {
-  | None => PointSetDist_Scoring.WithScalarAnswer.score(~estimate, ~answer)
-  | Some(prior) => PointSetDist_Scoring.WithScalarAnswer.scoreWithPrior(~estimate, ~answer, ~prior)
   }
 }
 

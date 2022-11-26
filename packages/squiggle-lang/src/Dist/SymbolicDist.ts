@@ -1,4 +1,4 @@
-import { BaseDist, Env } from "./Base";
+import { BaseDist } from "./BaseDist";
 import * as RSResult from "../rsResult";
 import jstat from "jstat";
 import * as E_A_Floats from "../utility/E_A_Floats";
@@ -8,9 +8,10 @@ import * as Operation from "../operation";
 import { PointSetDist } from "./PointSetDist";
 import { Ok, rsResult } from "../rsResult";
 import { ContinuousShape } from "../PointSet/Continuous";
-import { DistError, xyShapeDistError } from "./DistError";
+import { DistError, notYetImplemented, xyShapeDistError } from "./DistError";
 import { OperationError } from "../OperationError";
 import { DiscreteShape } from "../PointSet/Discrete";
+import { Env } from "./env";
 
 const normal95confidencePoint = 1.6448536269514722;
 // explained in website/docs/internal/ProcessingConfidenceIntervals
@@ -25,6 +26,27 @@ export abstract class SymbolicDist extends BaseDist {
   private static minCdfValue = 0.0001;
   private static maxCdfValue = 0.9999;
 
+  // all symbolic dists must override this
+  abstract toString(): string;
+
+  // FIXME - copy-pasted from SampleSetDist
+  toSparkline(
+    bucketCount: number,
+    env: Env
+  ): RSResult.rsResult<string, DistError> {
+    return RSResult.bind(
+      this.toPointSetDist(
+        {
+          // In this process we want the xyPointLength to be a bit longer than the eventual toSparkline downsampling. 3 is fairly arbitrarily.
+          xyPointLength: bucketCount * 3,
+          sampleCount: env.sampleCount,
+        },
+        "Linear" // this makes this method slightly different from SampleSetDist version
+      ),
+      (r) => r.toSparkline(bucketCount)
+    );
+  }
+
   // symbolic dists are always normalized
   normalize() {
     return this;
@@ -32,8 +54,6 @@ export abstract class SymbolicDist extends BaseDist {
   integralEndY() {
     return 1;
   }
-
-  abstract toString(): string;
 
   // without result wrapper, guaranteed to work on symbolic dists
   protected abstract simplePdf(f: number): number;
@@ -66,7 +86,7 @@ export abstract class SymbolicDist extends BaseDist {
 
   toPointSetDist(
     env: Env,
-    xSelection = "ByWeight" as const
+    xSelection: PointsetXSelection = "ByWeight"
   ): rsResult<PointSetDist, DistError> {
     const xs = this.interpolateXs({
       xSelection,
@@ -97,6 +117,10 @@ export abstract class SymbolicDist extends BaseDist {
     if (!opts) {
       throw new Error("env is necessary for truncating a symbolic dist");
     }
+    if (left === undefined && right === undefined) {
+      return RSResult.Ok(this);
+    }
+
     const pointSetDistR = this.toPointSetDist(opts.env);
     if (pointSetDistR.TAG === RSResult.E.Error) {
       return pointSetDistR;
@@ -762,12 +786,12 @@ export class Logistic extends SymbolicDist {
     return this.location;
   }
 
-  stdev() {
-    return Math.sqrt((square(this.scale) * square(Math.PI)) / 3);
+  stdev(): RSResult.rsResult<number, DistError> {
+    return RSResult.Ok(Math.sqrt((square(this.scale) * square(Math.PI)) / 3));
   }
 
-  variance() {
-    return (square(this.scale) * square(Math.PI)) / 3;
+  variance(): RSResult.rsResult<number, DistError> {
+    return RSResult.Ok((square(this.scale) * square(Math.PI)) / 3);
   }
 }
 
@@ -819,11 +843,11 @@ export class Bernoulli extends SymbolicDist {
     return this.p === 0 ? 0 : 1;
   }
 
-  stdev() {
-    return Math.sqrt(this.p * (1 - this.p));
+  stdev(): RSResult.rsResult<number, DistError> {
+    return Ok(Math.sqrt(this.p * (1 - this.p)));
   }
-  variance() {
-    return this.p * (1 - this.p);
+  variance(): RSResult.rsResult<number, DistError> {
+    return Ok(this.p * (1 - this.p));
   }
 
   toPointSetDist(): rsResult<PointSetDist, DistError> {

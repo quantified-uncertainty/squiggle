@@ -8,6 +8,7 @@ import { SqRecord } from "./SqRecord";
 import { SqArray } from "./SqArray";
 import { SqValueLocation } from "./SqValueLocation";
 import { SqError } from "./SqError";
+import { BaseDist } from "../Dist/BaseDist";
 
 export { Tag as SqValueTag };
 
@@ -70,7 +71,9 @@ export class SqDistributionValue extends SqAbstractValue {
   tag = Tag.Distribution as const;
 
   get value() {
-    return wrapDistribution(this.valueMethod(RSValue.getDistribution));
+    return wrapDistribution(
+      this.valueMethod(RSValue.getDistribution) as unknown as BaseDist
+    );
   }
 }
 

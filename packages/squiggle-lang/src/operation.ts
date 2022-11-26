@@ -20,31 +20,35 @@ export type AlgebraicOperation =
       VAL: number;
     };
 
-// type ConvolutionOperation = "Add" | "Multiply" | "Subtract";
+export type ConvolutionOperation = "Add" | "Multiply" | "Subtract";
 // type PointwiseOperation = "Add" | "Multiply" | "Power";
-// type ScaleOperation = "Multiply" | "Power" | "Logarithm" | { NAME: "LogarithmWithThreshold", VAL: number } | "Divide";
 
-// module Convolution = {
-//   type t = convolutionOperation
-//   //Only a selection of operations are supported by convolution.
-//   let fromAlgebraicOperation = (op: AlgebraicOperation): option<convolutionOperation> =>
-//     switch op {
-//     | #Add => Some(#Add)
-//     | #Subtract => Some(#Subtract)
-//     | #Multiply => Some(#Multiply)
-//     | #Divide | #Power | #Logarithm | #LogarithmWithThreshold(_) => None
-//     }
-
-//   let canDoAlgebraicOperation = (op: AlgebraicOperation): bool =>
-//     fromAlgebraicOperation(op)->E.O.isSome
-
-//   let toFn: (t, float, float) => float = x =>
-//     switch x {
-//     | #Add => \"+."
-//     | #Subtract => \"-."
-//     | #Multiply => \"*."
-//     }
-// }
+export const Convolution = {
+  //Only a selection of operations are supported by convolution.
+  fromAlgebraicOperation(
+    op: AlgebraicOperation
+  ): ConvolutionOperation | undefined {
+    if (op === "Add" || op === "Subtract" || op === "Multiply") {
+      return op;
+    }
+    return undefined;
+  },
+  canDoAlgebraicOperation(op: AlgebraicOperation): boolean {
+    return Convolution.fromAlgebraicOperation(op) !== undefined;
+  },
+  toFn(t: ConvolutionOperation): (a: number, b: number) => number {
+    switch (t) {
+      case "Add":
+        return (a, b) => a + b;
+      case "Subtract":
+        return (a, b) => a - b;
+      case "Multiply":
+        return (a, b) => a * b;
+      default:
+        throw new Error("This should never happen");
+    }
+  },
+};
 
 export const power = (
   a: number,
@@ -114,16 +118,26 @@ export const Algebraic = {
     }
   },
 
-  // let toString = x =>
-  //   switch x {
-  //   | #Add => "+"
-  //   | #Subtract => "-"
-  //   | #Multiply => "*"
-  //   | #Power => "**"
-  //   | #Divide => "/"
-  //   | #Logarithm => "log"
-  //   | #LogarithmWithThreshold(_) => "log"
-  //   }
+  toString(x: AlgebraicOperation) {
+    if (x === "Add") {
+      return "+";
+    } else if (x === "Subtract") {
+      return "-";
+    } else if (x === "Multiply") {
+      return "*";
+    } else if (x === "Power") {
+      return "**";
+    } else if (x === "Divide") {
+      return "/";
+    } else if (x === "Logarithm") {
+      return "log";
+    } else if (x.NAME === "LogarithmWithThreshold") {
+      return "log";
+    } else {
+      // never
+      throw new Error(`Unknown operation ${x}`);
+    }
+  },
 
   // let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
 };
@@ -140,45 +154,61 @@ export const Algebraic = {
 //   let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
 // }
 
+export type ScaleOperation =
+  | "Multiply"
+  | "Power"
+  | "Logarithm"
+  | { NAME: "LogarithmWithThreshold"; VAL: number }
+  | "Divide";
+
 // // Note that different logarithms don't really do anything.
-// module Scale = {
-//   type t = scaleOperation
-//   let toFn = (x: t, a: float, b: float): result<float, Error.t> =>
-//     switch x {
-//     | #Multiply => Ok(a *. b)
-//     | #Divide => divide(a, b)
-//     | #Power => power(a, b)
-//     | #Logarithm => logarithm(a, b)
-//     | #LogarithmWithThreshold(eps) =>
-//       if a < eps {
-//         Ok(0.0)
-//       } else {
-//         logarithm(a, b)
-//       }
-//     }
+export const Scale = {
+  //   type t = scaleOperation
+  toFn(
+    x: ScaleOperation,
+    a: number,
+    b: number
+  ): rsResult<number, OperationError> {
+    if (x === "Multiply") {
+      return Ok(a * b);
+    } else if (x === "Divide") {
+      return divide(a, b);
+    } else if (x === "Power") {
+      return power(a, b);
+    } else if (x === "Logarithm") {
+      return logarithm(a, b);
+    } else if (x.NAME === "LogarithmWithThreshold") {
+      if (a < x.VAL) {
+        return Ok(0);
+      } else {
+        return logarithm(a, b);
+      }
+    } else {
+      throw new Error(`Unknown scale operation ${x}`);
+    }
+  },
+  //   let format = (operation: t, value, scaleBy) =>
+  //     switch operation {
+  //     | #Multiply => j`verticalMultiply($value, $scaleBy) `
+  //     | #Divide => j`verticalDivide($value, $scaleBy) `
+  //     | #Power => j`verticalPower($value, $scaleBy) `
+  //     | #Logarithm => j`verticalLog($value, $scaleBy) `
+  //     | #LogarithmWithThreshold(eps) => j`verticalLog($value, $scaleBy, epsilon=$eps) `
+  //     }
+  toIntegralSumCacheFn(
+    x: ScaleOperation
+  ): ((a: number, b: number) => number) | undefined {
+    if (x === "Multiply") {
+      return (a: number, b: number) => a * b;
+    } else if (x === "Divide") {
+      return (a: number, b: number) => a / b;
+    } else {
+      return undefined;
+    }
+  },
 
-//   let format = (operation: t, value, scaleBy) =>
-//     switch operation {
-//     | #Multiply => j`verticalMultiply($value, $scaleBy) `
-//     | #Divide => j`verticalDivide($value, $scaleBy) `
-//     | #Power => j`verticalPower($value, $scaleBy) `
-//     | #Logarithm => j`verticalLog($value, $scaleBy) `
-//     | #LogarithmWithThreshold(eps) => j`verticalLog($value, $scaleBy, epsilon=$eps) `
-//     }
-
-//   let toIntegralSumCacheFn = x =>
-//     switch x {
-//     | #Multiply => (a, b) => Some(a *. b)
-//     | #Divide => (a, b) => Some(a /. b)
-//     | #Power | #Logarithm | #LogarithmWithThreshold(_) => (_, _) => None
-//     }
-
-//   let toIntegralCacheFn = x =>
-//     switch x {
-//     | #Multiply => (_, _) => None // TODO: this could probably just be multiplied out (using Continuous.scaleBy)
-//     | #Divide => (_, _) => None
-//     | #Power => (_, _) => None
-//     | #Logarithm => (_, _) => None
-//     | #LogarithmWithThreshold(_) => (_, _) => None
-//     }
-// }
+  toIntegralCacheFn(x: ScaleOperation): undefined {
+    // TODO: in case of "Multiply" this could probably just be multiplied out (using Continuous.scaleBy)
+    return undefined;
+  },
+};

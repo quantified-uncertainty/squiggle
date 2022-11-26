@@ -25,7 +25,7 @@ let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
     )
     ->XYShape.T.makeFromZipped
     ->E.R.errMap(XYShape.Error.toString)
-    ->E.R.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
+    ->E.R.fmap(r => Reducer_T.IEvDistribution(r->xyShapeToPointSetDist))
   | _ => impossibleError->SqError.Message.throw
   }
 }
@@ -35,7 +35,7 @@ module Internal = {
 
   let toType = (r): result<Reducer_T.value, SqError.Message.t> =>
     switch r {
-    | Ok(r) => Ok(Wrappers.evDistribution(PointSet(r)))
+    | Ok(r) => Ok(Wrappers.evDistribution(r))
     | Error(err) => Error(REOperationError(err))
     }
 
@@ -88,8 +88,13 @@ let library = [
         ~inputs=[FRTypeDist, FRTypeLambda],
         ~run=(inputs, context, reducer) =>
           switch inputs {
-          | [IEvDistribution(PointSet(dist)), IEvLambda(lambda)] =>
-            Internal.mapY(dist, lambda, context, reducer)
+          | [IEvDistribution(dist), IEvLambda(lambda)] =>
+            if GenericDist.isPointSet(dist) {
+              Internal.mapY(dist, lambda, context, reducer)
+            } else {
+              Error(impossibleError)
+            }
+
           | _ => Error(impossibleError)
           },
         (),

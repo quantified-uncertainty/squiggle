@@ -89,7 +89,7 @@ describe("Distribution", () => {
   const dist2 = buildDist([20, 22, 24, 29, 30, 35, 38, 44, 52]);
 
   test("mean", () => {
-    expect(dist.mean(env).value).toBeCloseTo(9.5555555);
+    expect(dist.mean(env)).toBeCloseTo(9.5555555);
   });
   test("pdf", () => {
     expect(dist.pdf(env, 5.0).value).toBeCloseTo(0.10499097598222966, 1);

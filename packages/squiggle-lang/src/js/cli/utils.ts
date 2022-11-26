@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import isFinite from "lodash/isFinite";
 
-import { environment } from "..";
+import { Env } from "..";
 import { SqProject } from "../SqProject";
 import { SqValueTag } from "../SqValue";
 
@@ -27,11 +27,7 @@ export type RunArgs = {
   sampleCount?: string | number;
 };
 
-const _run = (args: {
-  src: string;
-  filename?: string;
-  environment?: environment;
-}) => {
+const _run = (args: { src: string; filename?: string; environment?: Env }) => {
   const project = SqProject.create({
     resolver: (name, fromId) => {
       if (!name.startsWith("./") && !name.startsWith("../")) {
@@ -69,7 +65,7 @@ const _run = (args: {
 };
 
 export const run = (args: RunArgs) => {
-  let environment: environment | undefined;
+  let environment: Env | undefined;
   if (args.sampleCount && isFinite(Number(args.sampleCount))) {
     environment = {
       sampleCount: Number(args.sampleCount),

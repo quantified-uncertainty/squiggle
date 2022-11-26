@@ -24,7 +24,7 @@ module Mixture = {
   let mixtureWithGivenWeights = (
     distributions: array<DistributionTypes.genericDist>,
     weights: array<float>,
-    ~env: GenericDist.env,
+    ~env: Env.env,
   ): result<DistributionTypes.genericDist, DistError.t> =>
     E.A.length(distributions) == E.A.length(weights)
       ? GenericDist.mixture(E.A.zip(distributions, weights), ~env)
@@ -36,14 +36,14 @@ module Mixture = {
 
   let mixtureWithDefaultWeights = (
     distributions: array<DistributionTypes.genericDist>,
-    ~env: GenericDist.env,
+    ~env: Env.env,
   ) => {
     let length = E.A.length(distributions)
     let weights = Belt.Array.make(length, 1.0 /. Belt.Int.toFloat(length))
     mixtureWithGivenWeights(distributions, weights, ~env)
   }
 
-  let mixture = (args: array<Reducer_T.value>, ~env: GenericDist.env) => {
+  let mixture = (args: array<Reducer_T.value>, ~env: Env.env) => {
     switch args {
     | [IEvArray(distributions)] =>
       parseDistributionArray(distributions)->mixtureWithDefaultWeights(~env)

@@ -1,4 +1,4 @@
-type environment = GenericDist.env
+type environment = Env.env
 module T = Reducer_T
 
 type t = Reducer_T.value

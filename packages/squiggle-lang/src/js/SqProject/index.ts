@@ -3,8 +3,6 @@ import * as RSReducerT from "../../rescript/Reducer/Reducer_T.gen";
 import * as RSReducerNamespace from "../../rescript/Reducer/Reducer_Namespace.gen";
 import * as RSReducerContext from "../../rescript/Reducer/Reducer_Context.gen";
 import * as RSSquiggleLibraryStdLib from "../../rescript/SquiggleLibrary/SquiggleLibrary_StdLib.gen";
-import { environment } from "../../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_Environment.gen";
-import { defaultEnvironment } from "../../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
 import { SqError } from "../SqError";
 import { SqRecord } from "../SqRecord";
 import { SqValue, wrapValue } from "../SqValue";
@@ -13,6 +11,7 @@ import { SqValueLocation } from "../SqValueLocation";
 import * as ProjectItem from "./ProjectItem";
 import * as Topology from "./Topology";
 import { Resolver } from "./Resolver";
+import { defaultEnv, Env } from "../../Dist/env";
 
 type Options = {
   resolver?: Resolver;
@@ -22,14 +21,14 @@ type Options = {
 export class SqProject {
   private readonly items: Map<string, ProjectItem.ProjectItem>;
   private stdLib: RSReducerT.namespace;
-  private environment: environment;
+  private environment: Env;
   private previousRunOrder: string[];
   private resolver?: Resolver; // if not present, includes are forbidden
 
   constructor(options?: Options) {
     this.items = new Map();
     this.stdLib = RSSquiggleLibraryStdLib.stdLib;
-    this.environment = defaultEnvironment;
+    this.environment = defaultEnv;
     this.previousRunOrder = [];
     this.resolver = options?.resolver;
   }
@@ -38,11 +37,11 @@ export class SqProject {
     return new SqProject(options);
   }
 
-  setEnvironment(environment: environment) {
+  setEnvironment(environment: Env) {
     this.environment = environment;
   }
 
-  getEnvironment(): environment {
+  getEnvironment(): Env {
     return this.environment;
   }
 

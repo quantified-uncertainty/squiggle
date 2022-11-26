@@ -9,9 +9,9 @@ import * as Sparklines from "../Sparklines";
 
 import * as PointSet from "../PointSet/PointSet";
 
-import { BaseDist } from "./Base";
+import { BaseDist } from "./BaseDist";
 import { AnyPointSet } from "../PointSet/PointSet";
-import { DistError } from "./DistError";
+import { DistError, sparklineError } from "./DistError";
 
 export class PointSetDist<
   T extends AnyPointSet = AnyPointSet
@@ -21,6 +21,10 @@ export class PointSetDist<
   constructor(pointSet: T) {
     super();
     this.pointSet = pointSet;
+  }
+
+  toString() {
+    return "Point Set Distribution";
   }
 
   max() {
@@ -55,7 +59,13 @@ export class PointSetDist<
     left: number | undefined,
     right: number | undefined
   ): RSResult.rsResult<PointSetDist, DistError> {
-    return RSResult.Ok(new PointSetDist(this.pointSet.truncate(left, right)));
+    if (left === undefined && right === undefined) {
+      return RSResult.Ok(this);
+    }
+
+    return RSResult.Ok(
+      new PointSetDist(this.pointSet.truncate(left, right).normalize())
+    );
   }
 
   normalize() {
@@ -78,20 +88,22 @@ export class PointSetDist<
   }
 
   toPointSetDist(): RSResult.rsResult<PointSetDist, DistError> {
+    // TODO: If env.xyPointLength is different from what it has, it should change.
     return RSResult.Ok(this);
   }
 
-  // PointSet-only methods
-  toSparkline(bucketCount: number): RSResult.rsResult<string, string> {
+  toSparkline(bucketCount: number): RSResult.rsResult<string, DistError> {
     const continuous = this.pointSet.toContinuous();
     if (!continuous) {
       return RSResult.Error(
-        "Cannot find the sparkline of a discrete distribution"
+        sparklineError("Cannot find the sparkline of a discrete distribution")
       );
     }
     const downsampled = continuous.downsampleEquallyOverX(bucketCount);
     return RSResult.Ok(Sparklines.create(Continuous.getShape(downsampled).ys));
   }
+
+  // PointSet-only methods
 
   mapYResult<E>(
     fn: (y: number) => RSResult.rsResult<number, E>,

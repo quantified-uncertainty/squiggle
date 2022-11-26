@@ -10,12 +10,15 @@ import { OperationError, operationErrorToString } from "../../OperationError";
 import { ContinuousShape } from "../../PointSet/Continuous";
 import { DiscreteShape } from "../../PointSet/Discrete";
 import { PointSetDist } from "../PointSetDist";
-import { BaseDist, Env } from "../Base";
+import { BaseDist } from "../BaseDist";
 import {
   DistError,
   DistOperationError,
+  notYetImplemented,
+  otherError,
   TooFewSamplesForConversionToPointSet,
 } from "../DistError";
+import { Env } from "../env";
 
 export class SampleSetDist extends BaseDist {
   samples: readonly number[];
@@ -32,6 +35,31 @@ export class SampleSetDist extends BaseDist {
     } else {
       return RSResult.Error({ type: "TooFewSamples" });
     }
+  }
+
+  toString() {
+    return "Sample Set Distribution";
+  }
+
+  toSparkline(
+    bucketCount: number,
+    env: Env
+  ): RSResult.rsResult<string, DistError> {
+    return RSResult.bind(
+      this.toPointSetDist({
+        // In this process we want the xyPointLength to be a bit longer than the eventual toSparkline downsampling. 3 is fairly arbitrarily.
+        xyPointLength: bucketCount * 3,
+        sampleCount: env.sampleCount,
+      }),
+      (r) => r.toSparkline(bucketCount)
+    );
+  }
+
+  static fromDist(
+    d: BaseDist,
+    env: Env
+  ): RSResult.rsResult<SampleSetDist, DistError> {
+    return SampleSetDist.make(d.sampleN(env.sampleCount));
   }
 
   integralEndY() {
@@ -110,16 +138,17 @@ sample everything.
     return pointSetDistR._0.pdf(f);
   }
 
-  stdev() {
-    return E_A_Floats.stdev(this.samples);
+  stdev(): RSResult.rsResult<number, DistError> {
+    return RSResult.Ok(E_A_Floats.stdev(this.samples));
   }
-  variance() {
-    return E_A_Floats.variance(this.samples);
+  variance(): RSResult.rsResult<number, DistError> {
+    return RSResult.Ok(E_A_Floats.variance(this.samples));
   }
-
-  mode(): number {
-    throw new global.Error(
-      "https://github.com/quantified-uncertainty/squiggle/issues/1392"
+  mode(): RSResult.rsResult<number, DistError> {
+    return RSResult.Error(
+      otherError(
+        "Not implemented, https://github.com/quantified-uncertainty/squiggle/issues/1392"
+      )
     );
   }
 

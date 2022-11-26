@@ -20,7 +20,7 @@ module Internal = {
 
   let toType = (r): result<Reducer_T.value, SqError.Message.t> =>
     switch r {
-    | Ok(r) => Ok(Wrappers.evDistribution(SampleSet(r)))
+    | Ok(r) => Ok(Wrappers.evDistribution(r))
     | Error(r) => Error(REDistributionError(r))
     }
 
@@ -50,7 +50,13 @@ module Internal = {
   let parseSampleSetArray = (arr: array<Reducer_T.value>): option<array<SampleSetDist.t>> => {
     let parseSampleSet = (value: Reducer_T.value): option<SampleSetDist.t> =>
       switch value {
-      | IEvDistribution(SampleSet(dist)) => Some(dist)
+      | IEvDistribution(dist) =>
+        if dist->GenericDist.isSampleSet {
+          Some(dist)
+        } else {
+          None
+        }
+
       | _ => None
       }
     E.A.O.openIfAllSome(E.A.fmap(arr, parseSampleSet))
@@ -139,8 +145,12 @@ let libaryBase = [
         ~inputs=[FRTypeDist],
         ~run=(inputs, _, _) =>
           switch inputs {
-          | [IEvDistribution(SampleSet(dist))] =>
-            dist->SampleSetDist.getSamples->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+          | [IEvDistribution(dist)] =>
+            if dist->GenericDist.isSampleSet {
+              dist->SampleSetDist.getSamples->E.A.fmap(Wrappers.evNumber)->Wrappers.evArray->Ok
+            } else {
+              Error(impossibleError)
+            }
           | _ => Error(impossibleError)
           },
         (),
@@ -191,8 +201,12 @@ let libaryBase = [
         ~inputs=[FRTypeDist, FRTypeLambda],
         ~run=(inputs, context, reducer) =>
           switch inputs {
-          | [IEvDistribution(SampleSet(dist)), IEvLambda(lambda)] =>
-            Internal.map1(dist, lambda, context, reducer)
+          | [IEvDistribution(dist), IEvLambda(lambda)] =>
+            if dist->GenericDist.isSampleSet {
+              Internal.map1(dist, lambda, context, reducer)
+            } else {
+              Error(impossibleError)
+            }
           | _ => Error(impossibleError)
           },
         (),
@@ -214,12 +228,13 @@ let libaryBase = [
         ~inputs=[FRTypeDist, FRTypeDist, FRTypeLambda],
         ~run=(inputs, context, reducer) => {
           switch inputs {
-          | [
-              IEvDistribution(SampleSet(dist1)),
-              IEvDistribution(SampleSet(dist2)),
-              IEvLambda(lambda),
-            ] =>
-            Internal.map2(dist1, dist2, lambda, context, reducer)
+          | [IEvDistribution(dist1), IEvDistribution(dist2), IEvLambda(lambda)] =>
+            if dist1->GenericDist.isSampleSet && dist2->GenericDist.isSampleSet {
+              Internal.map2(dist1, dist2, lambda, context, reducer)
+            } else {
+              Error(impossibleError)
+            }
+
           | _ => Error(impossibleError)
           }
         },
@@ -243,12 +258,20 @@ let libaryBase = [
         ~run=(inputs, context, reducer) =>
           switch inputs {
           | [
-              IEvDistribution(SampleSet(dist1)),
-              IEvDistribution(SampleSet(dist2)),
-              IEvDistribution(SampleSet(dist3)),
+              IEvDistribution(dist1),
+              IEvDistribution(dist2),
+              IEvDistribution(dist3),
               IEvLambda(lambda),
             ] =>
-            Internal.map3(dist1, dist2, dist3, lambda, context, reducer)
+            if (
+              dist1->GenericDist.isSampleSet &&
+              dist2->GenericDist.isSampleSet &&
+              dist3->GenericDist.isSampleSet
+            ) {
+              Internal.map3(dist1, dist2, dist3, lambda, context, reducer)
+            } else {
+              Error(impossibleError)
+            }
           | _ => Error(impossibleError)
           },
         (),
@@ -311,20 +334,34 @@ module Comparison = {
       ~definitions=[
         template(name, [FRTypeDist, FRTypeDist], inputs => {
           switch inputs {
-          | [IEvDistribution(SampleSet(dist1)), IEvDistribution(SampleSet(dist2))] =>
-            withDist(dist1, dist2)->wrapper
+          | [IEvDistribution(dist1), IEvDistribution(dist2)] =>
+            if GenericDist.isSampleSet(dist1) && GenericDist.isSampleSet(dist2) {
+              withDist(dist1, dist2)->wrapper
+            } else {
+              Error(impossibleError)
+            }
           | _ => Error(impossibleError)
           }
         }),
         template(name, [FRTypeDist, FRTypeNumber], inputs => {
           switch inputs {
-          | [IEvDistribution(SampleSet(dist)), IEvNumber(f)] => withFloat(dist, f)->wrapper
+          | [IEvDistribution(dist), IEvNumber(f)] =>
+            if GenericDist.isSampleSet(dist) {
+              withFloat(dist, f)->wrapper
+            } else {
+              Error(impossibleError)
+            }
           | _ => Error(impossibleError)
           }
         }),
         template(name, [FRTypeNumber, FRTypeDist], inputs => {
           switch inputs {
-          | [IEvNumber(f), IEvDistribution(SampleSet(dist))] => withFloat(dist, f)->wrapper
+          | [IEvNumber(f), IEvDistribution(dist)] =>
+            if GenericDist.isSampleSet(dist) {
+              withFloat(dist, f)->wrapper
+            } else {
+              Error(impossibleError)
+            }
           | _ => Error(impossibleError)
           }
         }),

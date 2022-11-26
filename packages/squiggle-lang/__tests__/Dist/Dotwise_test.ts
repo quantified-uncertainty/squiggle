@@ -1,0 +1,61 @@
+import * as fc from "fast-check";
+
+import * as RSResult from "../../src/rsResult";
+import { BinaryOperations } from "../../src/Dist/DistOperations";
+import { env, mkExponential, mkNormal, unpackResult } from "../TestHelpers";
+import { SimpleOperationError } from "../../src/OperationError";
+
+describe("dotSubtract", () => {
+  test("mean of normal minus exponential (unit)", () => {
+    const mean = 0;
+    const rate = 10;
+    const dotDifference = unpackResult(
+      BinaryOperations.pointwiseSubtract(
+        mkNormal(mean, 1.0),
+        mkExponential(rate),
+        { env }
+      )
+    );
+    const meanValue = dotDifference.mean();
+    const meanAnalytical = mean - mkExponential(rate).mean();
+    expect(meanValue).toBeCloseTo(meanAnalytical);
+  });
+  /*
+    It seems like this test should work, and it's plausible that
+    there's some bug in `pointwiseSubtract`
+ */
+  test.skip("mean of normal minus exponential (property)", () => {
+    fc.assert(
+      fc.property(
+        fc.float(),
+        fc.float({ min: new Float32Array([1e-5])[0], max: 1e5 }),
+        (mean, rate) => {
+          // We limit ourselves to stdev=1 so that the integral is trivial
+          const dotDifferenceR = BinaryOperations.pointwiseSubtract(
+            mkNormal(mean, 1.0),
+            mkExponential(rate),
+            { env }
+          );
+          if (dotDifferenceR.TAG === RSResult.E.Error) {
+            const err = dotDifferenceR._0;
+            return (
+              err.type === "OperationError" &&
+              err.value.type === "enum" &&
+              err.value.value === SimpleOperationError.DivisionByZeroError
+            );
+          }
+
+          const dotDifference = dotDifferenceR._0;
+
+          const meanValue = dotDifference.mean();
+          // according to algebra or random variables,
+          const meanAnalytical = mean - mkExponential(rate).mean();
+          console.log(meanValue, meanAnalytical);
+          return (
+            Math.abs(meanValue - meanAnalytical) / Math.abs(meanValue) < 1e-2
+          ); // 1% relative error
+        }
+      )
+    );
+  });
+});

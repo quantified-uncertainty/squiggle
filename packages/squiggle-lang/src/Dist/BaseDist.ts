@@ -1,11 +1,9 @@
 import { rsResult } from "../rsResult";
-import { DistError } from "./DistError";
+import * as RSResult from "../rsResult";
+import { DistError, notYetImplemented } from "./DistError";
 import { PointSetDist } from "./PointSetDist";
-
-export type Env = {
-  sampleCount: number; // int
-  xyPointLength: number; // int
-};
+import * as magicNumbers from "../magicNumbers";
+import { Env } from "./env";
 
 export abstract class BaseDist {
   abstract min(): number;
@@ -16,6 +14,9 @@ export abstract class BaseDist {
   abstract sampleN(n: number): number[];
 
   abstract normalize(): BaseDist;
+  isNormalized(): boolean {
+    return Math.abs(this.integralEndY() - 1) < 1e-7;
+  }
 
   abstract truncate(
     left: number | undefined,
@@ -29,5 +30,23 @@ export abstract class BaseDist {
   abstract cdf(x: number): number;
   abstract inv(x: number): number;
 
+  stdev(): rsResult<number, DistError> {
+    return RSResult.Error(notYetImplemented());
+  }
+  variance(): rsResult<number, DistError> {
+    return RSResult.Error(notYetImplemented());
+  }
+  mode(): rsResult<number, DistError> {
+    return RSResult.Error(notYetImplemented());
+  }
+
   abstract toPointSetDist(env: Env): rsResult<PointSetDist, DistError>;
+  abstract toSparkline(
+    bucketCount: number,
+    env: Env
+  ): rsResult<string, DistError>;
+
+  expectedConvolutionCost() {
+    return magicNumbers.OpCost.wildcardCost;
+  }
 }

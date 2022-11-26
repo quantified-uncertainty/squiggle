@@ -2,7 +2,7 @@
 %%raw(`const SymbolicDist = require('../../../Dist/SymbolicDist')`)
 %%raw(`const PointSetDist = require('../../../Dist/PointSetDist')`)
 
-type symbolicDist = SymbolicDistTypes.symbolicDist
+type symbolicDist = DistributionTypes.genericDist
 
 module Normal = {
   let make = (mean: float, stdev: float): result<symbolicDist, string> =>
@@ -89,7 +89,8 @@ module T = {
   let toString = (t: symbolicDist): string => %raw(`t.toString()`)
   let expectedConvolutionCost = (t: symbolicDist): int => %raw(`t.expectedConvolutionCost()`)
 
-  let isFloat = (t: symbolicDist): bool => %raw(`t.isFloat()`)
+  let isFloat = (t: symbolicDist): bool =>
+    %raw(`(t instanceof SymbolicDist.SymbolicDist && t.isFloat())`)
 
   let mean = (t: symbolicDist): float => %raw(`t.mean()`)
   let min = (t: symbolicDist): float => %raw(`t.min()`)
@@ -100,43 +101,6 @@ module T = {
     | #Cdf(f) => Ok(%raw(`s.cdf(distToFloatOp.VAL)`))
     | #Inv(f) => Ok(%raw(`s.inv(distToFloatOp.VAL)`))
     }
-
-  let truncate = (low: option<float>, high: option<float>, t: symbolicDist, ~env: Env.env): result<
-    DistributionTypes.genericDist,
-    DistError.t,
-  > => {
-    %raw(`
-    (() => {
-
-      const result = t.truncate(low, high, { env });
-      if (result.TAG === 1) {
-        return result; // error
-      }
-      const dist = result._0; // either Uniform or PointSetDist, need to be rewrapped to genericDist
-      if (dist instanceof SymbolicDist.SymbolicDist) {
-        return {
-          TAG: 0,
-          _0: {
-            TAG: 2,
-            _0: dist,
-            [Symbol.for("name")]: "Symbolic"
-          },
-        };
-      } else if (dist instanceof PointSetDist.PointSetDist) {
-        return {
-          TAG: 0,
-          _0: {
-            TAG: 0,
-            _0: dist,
-            [Symbol.for("name")]: "PointSet"
-          },
-        };
-      } else {
-        throw new Error("Hacky Rescript casting failed")
-      }
-    })()
-    `)
-  }
 
   let tryAnalyticalSimplification = (
     d1: symbolicDist,

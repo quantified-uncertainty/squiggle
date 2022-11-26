@@ -1,107 +1,101 @@
 import { SampleSetDist } from "../Dist/SampleSetDist/SampleSetDist";
-import * as RSDistribution from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution.gen";
-import { distributionTag as Tag } from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_tag";
-import { environment } from "../rescript/ForTS/ForTS__Types.gen";
+import { Env } from "../Dist/env";
 import { SqDistributionError } from "./SqDistributionError";
-import { wrapPointSetDist } from "./SqPointSetDist";
-import { Ok, resultMap2 } from "./types";
+import { wrapPointSet } from "./SqPointSet";
+import { fromRSResult, Ok, result, resultMap2 } from "./types";
+import { BaseDist } from "../Dist/BaseDist";
+import { DistError } from "../Dist/DistError";
+import { SymbolicDist } from "../Dist/SymbolicDist";
+import { PointSetDist } from "../Dist/PointSetDist";
 
-type T = RSDistribution.distribution;
-export { Tag as SqDistributionTag };
+export enum SqDistributionTag {
+  PointSet = "PointSet",
+  SampleSet = "SampleSet",
+  Symbolic = "Symbolic",
+}
 
-export const wrapDistribution = (value: T): SqDistribution => {
-  const tag = RSDistribution.getTag(value);
-
-  return new tagToClass[tag](value);
+export const wrapDistribution = (value: BaseDist): SqDistribution => {
+  if (value instanceof SymbolicDist) {
+    return new SqSymbolicDistribution(value);
+  } else if (value instanceof SampleSetDist) {
+    return new SqSampleSetDistribution(value);
+  } else if (value instanceof PointSetDist) {
+    return new SqPointSetDistribution(value);
+  }
+  throw new Error(`Unknown value ${value}`);
 };
 
-abstract class SqAbstractDistribution {
-  abstract tag: Tag;
+abstract class SqAbstractDistribution<T extends BaseDist> {
+  abstract tag: SqDistributionTag;
 
   constructor(protected _value: T) {}
 
-  protected valueMethod = <IR>(rsMethod: (v: T) => IR | null | undefined) => {
-    const value = rsMethod(this._value);
-    if (!value) throw new Error("Internal casting error");
-    return value;
-  };
-
-  pointSet(env: environment) {
-    const innerResult = RSDistribution.toPointSet(this._value, env);
+  pointSet(env: Env) {
+    const innerResult = fromRSResult(this._value.toPointSetDist(env));
     return resultMap2(
       innerResult,
-      wrapPointSetDist,
-      (v: RSDistribution.distributionError) => new SqDistributionError(v)
+      (dist) => wrapPointSet(dist.pointSet),
+      (e: DistError) => new SqDistributionError(e)
     );
   }
 
   toString() {
-    RSDistribution.toString(this._value);
+    return this._value.toString();
   }
 
-  mean(env: environment) {
+  mean(env: Env): number {
+    return this._value.mean();
+  }
+
+  pdf(env: Env, n: number) {
     return resultMap2(
-      RSDistribution.mean(this._value),
+      fromRSResult(this._value.pdf(n, { env })),
       (v: number) => v,
-      (e: RSDistribution.distributionError) => new SqDistributionError(e)
+      (e: DistError) => new SqDistributionError(e)
     );
   }
 
-  pdf(env: environment, n: number) {
+  cdf(env: Env, n: number): result<number, SqDistributionError> {
+    return Ok(this._value.cdf(n));
+  }
+
+  inv(env: Env, n: number) {
+    return Ok(this._value.inv(n));
+  }
+
+  stdev(env: Env) {
     return resultMap2(
-      RSDistribution.pdf(this._value, n, { env }),
+      fromRSResult(this._value.stdev()),
       (v: number) => v,
-      (e: RSDistribution.distributionError) => new SqDistributionError(e)
-    );
-  }
-
-  cdf(env: environment, n: number) {
-    return Ok(RSDistribution.cdf(this._value, n));
-  }
-
-  inv(env: environment, n: number) {
-    return Ok(RSDistribution.inv(this._value, n));
-  }
-
-  stdev(env: environment) {
-    return resultMap2(
-      RSDistribution.stdev(this._value, { env }),
-      (v: number) => v,
-      (e: RSDistribution.distributionError) => new SqDistributionError(e)
+      (e: DistError) => new SqDistributionError(e)
     );
   }
 }
 
-export class SqPointSetDistribution extends SqAbstractDistribution {
-  tag = Tag.PointSet as const;
+export class SqPointSetDistribution extends SqAbstractDistribution<PointSetDist> {
+  tag = SqDistributionTag.PointSet as const;
 
   value() {
-    return wrapPointSetDist((this._value as any)._0);
+    return wrapPointSet(this._value.pointSet);
   }
 }
 
-export class SqSampleSetDistribution extends SqAbstractDistribution {
-  tag = Tag.SampleSet as const;
+export class SqSampleSetDistribution extends SqAbstractDistribution<SampleSetDist> {
+  tag = SqDistributionTag.SampleSet as const;
 
   value(): SampleSetDist {
     return (this._value as any)._0;
   }
 }
 
-export class SqSymbolicDistribution extends SqAbstractDistribution {
-  tag = Tag.Symbolic as const;
+export class SqSymbolicDistribution extends SqAbstractDistribution<SymbolicDist> {
+  tag = SqDistributionTag.Symbolic as const;
 
   // not wrapped for TypeScript yet
   // value() {
   //   return this.valueMethod(RSDistribution.getSymbolic);
   // }
 }
-
-const tagToClass = {
-  [Tag.PointSet]: SqPointSetDistribution,
-  [Tag.SampleSet]: SqSampleSetDistribution,
-  [Tag.Symbolic]: SqSymbolicDistribution,
-} as const;
 
 export type SqDistribution =
   | SqPointSetDistribution

@@ -1,4 +1,4 @@
-type environment = GenericDist.env
+type environment = Env.env
 
 @genType.opaque
 type rec value =

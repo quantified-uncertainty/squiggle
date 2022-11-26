@@ -1,4 +1,5 @@
 import { result } from "../rescript/ForTS/ForTS_Result_tag";
+import { rsResult } from "../rsResult";
 export { result };
 
 export function resultMap<a, b, c>(
@@ -10,6 +11,18 @@ export function resultMap<a, b, c>(
   } else {
     return { tag: "Error", value: r.value };
   }
+}
+
+export function fromRSResult<A, B>(r: rsResult<A, B>): result<A, B> {
+  return r.TAG === 0
+    ? {
+        tag: "Ok",
+        value: r._0,
+      }
+    : {
+        tag: "Error",
+        value: r._0,
+      };
 }
 
 export function resultMapError<a, b, c>(

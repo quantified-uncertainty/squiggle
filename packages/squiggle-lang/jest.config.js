@@ -3,6 +3,7 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   testPathIgnorePatterns: [
+    "fixtures.ts",
     ".*Fixtures.bs.js",
     "/node_modules/",
     ".*Helpers.bs.js",

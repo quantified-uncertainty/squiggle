@@ -3,11 +3,8 @@ import { SqPointSetDistribution } from "./SqDistribution";
 import { ContinuousShape } from "../PointSet/Continuous";
 import { DiscreteShape } from "../PointSet/Discrete";
 import { MixedShape } from "../PointSet/Mixed";
-import {
-  toDistribution,
-  pointSetDistribution,
-} from "../rescript/ForTS/ForTS_Distribution/ForTS_Distribution_PointSetDistribution.gen";
 import { AnyPointSet } from "../PointSet/PointSet";
+import { PointSetDist } from "../Dist/PointSetDist";
 
 enum Tag {
   Mixed = "Mixed",
@@ -27,19 +24,18 @@ const shapePoints = (x: ContinuousShape | DiscreteShape): SqPoint[] => {
   return zipWith(xs, ys, (x, y) => ({ x, y }));
 };
 
-export const wrapPointSetDist = (value: pointSetDistribution) => {
-  const tsValue = value as unknown as AnyPointSet;
-  if (tsValue instanceof ContinuousShape) {
-    return new SqContinuousPointSetDist(tsValue);
-  } else if (tsValue instanceof DiscreteShape) {
-    return new SqDiscretePointSetDist(tsValue);
-  } else if (tsValue instanceof MixedShape) {
-    return new SqMixedPointSetDist(tsValue);
+export const wrapPointSet = (value: AnyPointSet) => {
+  if (value instanceof ContinuousShape) {
+    return new SqContinuousPointSet(value);
+  } else if (value instanceof DiscreteShape) {
+    return new SqDiscretePointSet(value);
+  } else if (value instanceof MixedShape) {
+    return new SqMixedPointSet(value);
   }
-  throw new Error(`Unknown PointSet shape ${tsValue}`);
+  throw new Error(`Unknown PointSet shape ${value}`);
 };
 
-abstract class SqAbstractPointSetDist<S> {
+abstract class SqAbstractPointSet<S extends AnyPointSet> {
   constructor(_value: S) {}
 
   abstract get value(): S;
@@ -48,7 +44,7 @@ abstract class SqAbstractPointSetDist<S> {
   abstract asDistribution(): SqPointSetDistribution;
 }
 
-export class SqMixedPointSetDist implements SqAbstractPointSetDist<MixedShape> {
+export class SqMixedPointSet implements SqAbstractPointSet<MixedShape> {
   tag = Tag.Mixed as const;
   constructor(private _value: MixedShape) {}
 
@@ -65,15 +61,11 @@ export class SqMixedPointSetDist implements SqAbstractPointSetDist<MixedShape> {
   }
 
   asDistribution(): SqPointSetDistribution {
-    return new SqPointSetDistribution(
-      toDistribution(this._value as unknown as pointSetDistribution)
-    );
+    return new SqPointSetDistribution(new PointSetDist(this.value));
   }
 }
 
-export class SqDiscretePointSetDist
-  implements SqAbstractPointSetDist<DiscreteShape>
-{
+export class SqDiscretePointSet implements SqAbstractPointSet<DiscreteShape> {
   tag = Tag.Discrete as const;
   constructor(private _value: DiscreteShape) {}
 
@@ -90,14 +82,12 @@ export class SqDiscretePointSetDist
   }
 
   asDistribution(): SqPointSetDistribution {
-    return new SqPointSetDistribution(
-      toDistribution(this._value as unknown as pointSetDistribution)
-    );
+    return new SqPointSetDistribution(new PointSetDist(this.value));
   }
 }
 
-export class SqContinuousPointSetDist
-  implements SqAbstractPointSetDist<ContinuousShape>
+export class SqContinuousPointSet
+  implements SqAbstractPointSet<ContinuousShape>
 {
   tag = Tag.Continuous as const;
   constructor(private _value: ContinuousShape) {}
@@ -115,13 +105,11 @@ export class SqContinuousPointSetDist
   }
 
   asDistribution(): SqPointSetDistribution {
-    return new SqPointSetDistribution(
-      toDistribution(this._value as unknown as pointSetDistribution)
-    );
+    return new SqPointSetDistribution(new PointSetDist(this.value));
   }
 }
 
-export type SqPointSetDist =
-  | SqMixedPointSetDist
-  | SqDiscretePointSetDist
-  | SqContinuousPointSetDist;
+export type SqPointSet =
+  | SqMixedPointSet
+  | SqDiscretePointSet
+  | SqContinuousPointSet;
