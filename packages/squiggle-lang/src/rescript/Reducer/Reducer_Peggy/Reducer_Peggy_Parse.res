@@ -23,11 +23,12 @@ module ParseError = {
 
   @genType
   let getLocation = (SyntaxError(_, location): t) => location
+
+  @genType
+  let make = (message: string, location: location) => SyntaxError(message, location)
 }
 
-type parseError = ParseError.t
-
-type parseResult = result<node, parseError>
+type parseResult = result<node, ParseError.t>
 
 @module("./Reducer_Peggy_GeneratedParser.js")
 external parse__: (string, {"grammarSource": string}) => node = "parse"
@@ -180,7 +181,7 @@ let rec pgToString = (ast: ast): string => {
 }
 and toString = (node: node): string => node->nodeToAST->pgToString
 
-let toStringError = (error: parseError): string => {
+let toStringError = (error: ParseError.t): string => {
   let ParseError.SyntaxError(message, _) = error
   `Syntax Error: ${message}}`
 }

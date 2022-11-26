@@ -1,58 +1,66 @@
 import fs from "fs";
 import { OutputMode, run } from "./utils";
 
-import { program } from "@commander-js/extra-typings";
+import { Command } from "@commander-js/extra-typings";
 import open from "open";
 
-program
-  .command("run")
-  .arguments("[filename]")
-  .option(
-    "-e, --eval <code>",
-    "run a given squiggle code string instead of a file"
-  )
-  .option("-t --time", "output the time it took to evaluate the code")
-  .option("-q, --quiet", "don't output the results and bindings") // useful for measuring the performance or checking that the code is valid
-  .option("-b, --show-bindings", "show bindings even if the result is present") // incompatible with --quiet
-  .action((filename, options) => {
-    let src = "";
+export const makeProgram = () => {
+  const program = new Command();
 
-    let output: OutputMode = "RESULT_OR_BINDINGS";
-    if (options.quiet && options.showBindings) {
-      program.error(
-        "--quiet and --show-bindings can't be set at the same time."
-      );
-    } else if (options.quiet) {
-      output = "NONE";
-    } else if (options.showBindings) {
-      output = "RESULT_AND_BINDINGS";
-    }
+  program
+    .command("run")
+    .arguments("[filename]")
+    .option(
+      "-e, --eval <code>",
+      "run a given squiggle code string instead of a file"
+    )
+    .option("-t --time", "output the time it took to evaluate the code")
+    .option("-q, --quiet", "don't output the results and bindings") // useful for measuring the performance or checking that the code is valid
+    .option(
+      "-b, --show-bindings",
+      "show bindings even if the result is present"
+    ) // incompatible with --quiet
+    .action((filename, options) => {
+      let src = "";
 
-    if (filename && options.eval) {
-      program.error("Only one of filename and eval string should be set.");
-    } else if (filename) {
-      src = fs.readFileSync(filename, "utf-8");
-    } else if (options.eval) {
-      src = options.eval;
-    } else {
-      program.error("One of filename and eval string should be set.");
-    }
+      let output: OutputMode = "RESULT_OR_BINDINGS";
+      if (options.quiet && options.showBindings) {
+        program.error(
+          "--quiet and --show-bindings can't be set at the same time."
+        );
+      } else if (options.quiet) {
+        output = "NONE";
+      } else if (options.showBindings) {
+        output = "RESULT_AND_BINDINGS";
+      }
 
-    const sampleCount = process.env.SAMPLE_COUNT;
+      if (filename && options.eval) {
+        program.error("Only one of filename and eval string should be set.");
+      } else if (filename) {
+        src = fs.readFileSync(filename, "utf-8");
+      } else if (options.eval) {
+        src = options.eval;
+      } else {
+        program.error("One of filename and eval string should be set.");
+      }
 
-    run(src, {
-      output,
-      measure: options.time,
-      sampleCount,
+      const sampleCount = process.env.SAMPLE_COUNT;
+
+      run({ src, filename, output, measure: options.time, sampleCount });
     });
+
+  program.command("playground").action(() => {
+    open("https://www.squiggle-language.com/playground");
   });
 
-program.command("playground").action(() => {
-  open("https://www.squiggle-language.com/playground");
-});
-
-const main = async () => {
-  await program.parseAsync();
+  return program;
 };
 
-main();
+const main = async () => {
+  await makeProgram().parseAsync();
+};
+
+if (require.main === module) {
+  // running as script, https://stackoverflow.com/a/6398335
+  main();
+}

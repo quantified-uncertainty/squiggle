@@ -42,6 +42,7 @@ let removeResult = ({namespace} as bindings: t): t => {
   namespace: namespace->Belt.Map.String.remove("__result__"),
 }
 
+@genType
 let locals = ({namespace}: t): Reducer_T.namespace => namespace
 
 let fromNamespace = (namespace: Reducer_Namespace.t): t => {namespace, parent: None}

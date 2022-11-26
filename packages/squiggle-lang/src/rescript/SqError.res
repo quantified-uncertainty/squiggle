@@ -66,6 +66,9 @@ module Message = {
     | REOther(msg) => `Error: ${msg}`
     }
 
+  @genType
+  let needToRun = RENeedToRun
+
   let fromException = exn =>
     switch exn {
     | MessageException(e) => e
@@ -103,7 +106,8 @@ let fromMessageWithFrameStack = (message: Message.t, frameStack: Reducer_FrameSt
 let fromMessage = (message: Message.t) =>
   fromMessageWithFrameStack(message, Reducer_FrameStack.make())
 
-let fromParseError = (SyntaxError(message, location): Reducer_Peggy_Parse.parseError) =>
+@genType
+let fromParseError = (SyntaxError(message, location): Reducer_Peggy_Parse.ParseError.t) =>
   RESyntaxError(message)->fromMessageWithFrameStack(
     Reducer_FrameStack.makeSingleFrameStack(location),
   )

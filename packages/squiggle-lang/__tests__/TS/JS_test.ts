@@ -1,4 +1,4 @@
-import { run, SqProject, SqValue, SqValueTag } from "../../src/js";
+import { run, SqProject, SqValueTag } from "../../src/js";
 import { testRun } from "./TestHelpers";
 
 function Ok<b>(x: b) {

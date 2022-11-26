@@ -17,6 +17,7 @@ let throwFrom = (error: SqError.Message.t, expression: T.expression, context: T.
 /*
   Recursively evaluate the expression
 */
+@genType
 let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
   // Js.log(`reduce: ${expression->Reducer_Expression_T.toString}`)
   switch expression.content {
@@ -133,7 +134,7 @@ let rec evaluate: T.reducerFn = (expression, context): (T.value, T.context) => {
 module BackCompatible = {
   // Those methods are used to support the existing tests
   // If they are used outside limited testing context, error location reporting will fail
-  let parse = (peggyCode: string): result<T.expression, Reducer_Peggy_Parse.parseError> =>
+  let parse = (peggyCode: string): result<T.expression, Reducer_Peggy_Parse.ParseError.t> =>
     peggyCode->Reducer_Peggy_Parse.parse("main")->Result.map(Reducer_Peggy_ToExpression.fromNode)
 
   let createDefaultContext = () =>
