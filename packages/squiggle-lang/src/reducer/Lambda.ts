@@ -2,6 +2,7 @@ import { LocationRange } from "peggy";
 import { Expression } from "../expression";
 import { ReducerFn, Value } from "../value";
 import * as Bindings from "./bindings";
+import * as Namespace from "./Namespace";
 import * as Context from "./Context";
 import { ReducerContext } from "./Context";
 import * as FrameStack from "./FrameStack";
@@ -53,17 +54,16 @@ export const makeLambda = (
       );
     }
 
-    // create new bindings scope - technically not necessary, since bindings are immutable, but might help with debugging/new features in the future
-    const localBindings = Bindings.extend(bindings);
-
-    const localBindingsWithParameters = parameters.reduce(
-      (currentBindings, parameter, index) =>
-        Bindings.set(currentBindings, parameter, args[index]),
-      localBindings
+    // create new bindings scope
+    const localBindings = Bindings.extendWith(
+      bindings,
+      Namespace.fromArray(
+        parameters.map((parameter, i) => [parameter, args[i]])
+      )
     );
 
     const lambdaContext: ReducerContext = {
-      bindings: localBindingsWithParameters, // based on bindings at the moment of lambda creation
+      bindings: localBindings, // based on bindings at the moment of lambda creation
       environment: context.environment, // environment at the moment when lambda is called
       frameStack: context.frameStack, // already extended in `doLambdaCall`
       inFunction: context.inFunction, // already updated in `doLambdaCall`

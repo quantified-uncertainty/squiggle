@@ -38,6 +38,11 @@ export const extend = (t: Bindings): Bindings => ({
   parent: t,
 });
 
+export const extendWith = (t: Bindings, ns: Namespace.Namespace): Bindings => ({
+  namespace: ns,
+  parent: t,
+});
+
 export const make = (): Bindings => ({
   namespace: Namespace.make(),
   parent: undefined,
