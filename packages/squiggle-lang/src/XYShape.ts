@@ -2,7 +2,7 @@ import sortBy from "lodash/sortBy";
 import * as E_A from "./utility/E_A";
 import * as E_A_Floats from "./utility/E_A_Floats";
 import * as E_A_Sorted from "./utility/E_A_Sorted";
-import * as RSResult from "./rsResult";
+import * as Result from "./utility/result";
 import { epsilon_float } from "./magicNumbers";
 
 export type XYShape = {
@@ -125,18 +125,17 @@ export const T = {
   },
   mapYResult<E>(
     t: XYShape,
-    fn: (y: number) => RSResult.t<number, E>
-  ): RSResult.t<XYShape, E> {
+    fn: (y: number) => Result.t<number, E>
+  ): Result.t<XYShape, E> {
     const mappedYs: number[] = [];
     for (const y of t.ys) {
       const mappedY = fn(y);
-      if (mappedY.TAG === 0) {
-        mappedYs.push(mappedY._0);
-      } else {
+      if (!mappedY.ok) {
         return mappedY;
       }
+      mappedYs.push(mappedY.value);
     }
-    return RSResult.Ok({
+    return Result.Ok({
       xs: t.xs,
       ys: mappedYs,
     });
@@ -173,15 +172,15 @@ export const T = {
   filterYValues(t: XYShape, fn: (y: number) => number): XYShape {
     return T.fromZippedArray(T.zip(t).filter(([, y]) => fn(y)));
   },
-  filterOkYs<B>(xs: number[], ys: RSResult.t<number, B>[]): XYShape {
+  filterOkYs<B>(xs: number[], ys: Result.t<number, B>[]): XYShape {
     const n = xs.length; // Assume length(xs) == length(ys)
     const newXs: number[] = [];
     const newYs: number[] = [];
     for (let i = 0; i <= n - 1; i++) {
       const y = ys[i];
-      if (y.TAG === 0) {
+      if (y.ok) {
         newXs.push(xs[i]);
-        newYs.push(y._0);
+        newYs.push(y.value);
       }
     }
     return { xs: newXs, ys: newYs };
@@ -250,13 +249,13 @@ export const T = {
     },
   },
 
-  make(xs: number[], ys: number[]): RSResult.t<XYShape, XYShapeError> {
+  make(xs: number[], ys: number[]): Result.t<XYShape, XYShapeError> {
     const attempt: XYShape = { xs, ys };
     const maybeError = T.Validator.validate(attempt);
     if (maybeError) {
-      return RSResult.Error(maybeError);
+      return Result.Error(maybeError);
     } else {
-      return RSResult.Ok(attempt);
+      return Result.Ok(attempt);
     }
   },
 
@@ -479,10 +478,10 @@ export const PointwiseCombination = {
   // t1 and t2 are interpolator functions from XYShape.XtoY.
   combine<E>(
     interpolator: Interpolator,
-    fn: (a: number, b: number) => RSResult.t<number, E>,
+    fn: (a: number, b: number) => Result.t<number, E>,
     t1: XYShape,
     t2: XYShape
-  ): RSResult.t<XYShape, E> {
+  ): Result.t<XYShape, E> {
     // This function combines two xyShapes by looping through both of them simultaneously.
     // It always moves on to the next smallest x, whether that's in the first or second input's xs,
     // and interpolates the value on the other side, thus accumulating xs and ys.
@@ -536,14 +535,13 @@ export const PointwiseCombination = {
       // Here I check whether the operation was a success. If it was
       // keep going. Otherwise, stop and throw the error back to user
       const newY = fn(ya, yb);
-      if (newY.TAG === 0) {
-        outY.push(newY._0);
-      } else {
+      if (!newY.ok) {
         return newY;
       }
+      outY.push(newY.value);
     }
 
-    return RSResult.Ok({ xs: outX, ys: outY });
+    return Result.Ok({ xs: outX, ys: outY });
   },
 
   //   /*
@@ -652,14 +650,14 @@ export const PointwiseCombination = {
   addCombine(interpolator: Interpolator, t1: XYShape, t2: XYShape): XYShape {
     const result = PointwiseCombination.combine(
       interpolator,
-      (a, b) => RSResult.Ok(a + b),
+      (a, b) => Result.Ok(a + b),
       t1,
       t2
     );
-    if (result.TAG === 1) {
+    if (!result.ok) {
       throw new Error("Add operation should never fail");
     }
-    return result._0;
+    return result.value;
   },
 
   // let combineEvenXs = (~fn, ~xToYSelection, sampleCount, t1: T.t, t2: T.t) =>
@@ -712,7 +710,7 @@ export const Range = {
     fn: (r: ZippedRange) => number
   ): [number, number][] | undefined {
     const ranges = E_A.toRanges(E_A.zip(t.xs, t.ys));
-    if (ranges.tag === "Error") {
+    if (!ranges.ok) {
       return undefined; // probably length=1
     }
     return ranges.value.map((r) => [Range.nextX(r), fn(r)]);

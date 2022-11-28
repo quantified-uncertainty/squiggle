@@ -2,8 +2,8 @@ import * as Continuous from "../PointSet/Continuous";
 import * as Discrete from "../PointSet/Discrete";
 import * as Mixed from "../PointSet/Mixed";
 
-import * as RSResult from "../rsResult";
-import { rsResult } from "../rsResult";
+import * as Result from "../utility/result";
+import { result } from "../utility/result";
 import { ContinuousShape } from "./Continuous";
 import { DiscreteShape } from "./Discrete";
 import { MixedShape } from "./Mixed";
@@ -33,12 +33,12 @@ export interface PointSet<T> {
     integralCacheFn?: (cache: ContinuousShape) => ContinuousShape | undefined
   ): T;
   mapYResult<E>(
-    fn: (y: number) => rsResult<number, E>,
+    fn: (y: number) => result<number, E>,
     integralSumCacheFn: undefined | ((sum: number) => number | undefined),
     integralCacheFn:
       | undefined
       | ((cache: ContinuousShape) => ContinuousShape | undefined)
-  ): rsResult<T, E>;
+  ): result<T, E>;
   xToY(x: number): MixedPoint;
   toContinuous(): ContinuousShape | undefined;
   toDiscrete(): DiscreteShape | undefined;
@@ -81,14 +81,14 @@ export const combineAlgebraically = (
 export const combinePointwise = <E>(
   t1: AnyPointSet,
   t2: AnyPointSet,
-  fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
+  fn: (v1: number, v2: number) => Result.result<number, E>,
   integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
     undefined,
   integralCachesFn: (
     s1: ContinuousShape,
     s2: ContinuousShape
   ) => ContinuousShape | undefined = () => undefined
-): rsResult<AnyPointSet, E> => {
+): result<AnyPointSet, E> => {
   if (t1 instanceof ContinuousShape && t2 instanceof ContinuousShape) {
     return Continuous.combinePointwise(
       t1,

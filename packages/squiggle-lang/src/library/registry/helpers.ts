@@ -1,12 +1,12 @@
 import { BaseDist } from "../../Dist/BaseDist";
 import { Env } from "../../Dist/env";
-import { Ok } from "../../rsResult";
+import { Ok } from "../../utility/result";
 import * as Lambda from "../../reducer/Lambda";
 import { ReducerFn, Value, vBool, vDist, vNumber, vString } from "../../value";
 import { FRFunction } from "./core";
 import { FnDefinition, makeDefinition } from "./fnDefinition";
 import { frBool, frDist, frNumber } from "./frTypes";
-import * as RSResult from "../../rsResult";
+import * as Result from "../../utility/result";
 import * as IError from "../../reducer/IError";
 import { DistError } from "../../Dist/DistError";
 import { ReducerContext } from "../../reducer/Context";
@@ -231,18 +231,16 @@ export class FnFactory {
   }
 }
 
-export const unpackDistResult = <T>(
-  result: RSResult.rsResult<T, DistError>
-): T => {
-  if (result.TAG === RSResult.E.Error) {
-    return IError.Message.throw(IError.REDistributionError(result._0));
+export const unpackDistResult = <T>(result: Result.result<T, DistError>): T => {
+  if (!result.ok) {
+    return IError.Message.throw(IError.REDistributionError(result.value));
   }
-  return result._0;
+  return result.value;
 };
 
 export const repackDistResult = (
-  result: RSResult.rsResult<BaseDist, DistError>
-): RSResult.rsResult<Value, IError.Message> => {
+  result: Result.result<BaseDist, DistError>
+): Result.result<Value, IError.Message> => {
   const dist = unpackDistResult(result);
   return Ok(vDist(dist));
 };

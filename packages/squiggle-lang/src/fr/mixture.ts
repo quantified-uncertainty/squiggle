@@ -3,7 +3,7 @@ import { Env } from "../Dist/env";
 import * as SymbolicDist from "../Dist/SymbolicDist";
 import * as Lambda from "../reducer/Lambda";
 import * as IError from "../reducer/IError";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import * as E_A from "../utility/E_A";
 import * as DistOperations from "../Dist/DistOperations";
 import { Value, vDist } from "../value";
@@ -39,7 +39,7 @@ let mixtureWithGivenWeights = (
   distributions: BaseDist[],
   weights: number[],
   env: Env
-): RSResult.rsResult<BaseDist, DistError> => {
+): Result.result<BaseDist, DistError> => {
   if (distributions.length === weights.length) {
     return DistOperations.mixture(E_A.zip(distributions, weights), { env });
   } else {

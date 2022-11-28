@@ -1,5 +1,5 @@
-import { Ok, rsResult } from "./rsResult";
-import * as RSResult from "./rsResult";
+import { Ok, result } from "./utility/result";
+import * as Result from "./utility/result";
 import {
   ComplexNumberError,
   DivisionByZeroError,
@@ -50,42 +50,39 @@ export const Convolution = {
   },
 };
 
-export const power = (
-  a: number,
-  b: number
-): rsResult<number, OperationError> => {
+export const power = (a: number, b: number): result<number, OperationError> => {
   if (a >= 0) {
     return Ok(a ** b);
   } else {
-    return RSResult.Error(ComplexNumberError);
+    return Result.Error(ComplexNumberError);
   }
 };
 
 export const divide = (
   a: number,
   b: number
-): rsResult<number, OperationError> => {
+): result<number, OperationError> => {
   if (b !== 0) {
     return Ok(a / b);
   } else {
-    return RSResult.Error(DivisionByZeroError);
+    return Result.Error(DivisionByZeroError);
   }
 };
 
 export const logarithm = (
   a: number,
   b: number
-): rsResult<number, OperationError> => {
+): result<number, OperationError> => {
   if (b === 1) {
-    return RSResult.Error(DivisionByZeroError);
+    return Result.Error(DivisionByZeroError);
   } else if (b === 0) {
     return Ok(0);
   } else if (a > 0 && b > 0) {
     return Ok(Math.log(a) / Math.log(b));
   } else if (a === 0) {
-    return RSResult.Error(NegativeInfinityError);
+    return Result.Error(NegativeInfinityError);
   } else {
-    return RSResult.Error(ComplexNumberError);
+    return Result.Error(ComplexNumberError);
   }
 };
 
@@ -94,7 +91,7 @@ export const Algebraic = {
     x: AlgebraicOperation,
     a: number,
     b: number
-  ): rsResult<number, OperationError> {
+  ): result<number, OperationError> {
     if (x === "Add") {
       return Ok(a + b);
     } else if (x === "Subtract") {
@@ -168,7 +165,7 @@ export const Scale = {
     x: ScaleOperation,
     a: number,
     b: number
-  ): rsResult<number, OperationError> {
+  ): result<number, OperationError> {
     if (x === "Multiply") {
       return Ok(a * b);
     } else if (x === "Divide") {

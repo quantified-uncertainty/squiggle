@@ -1,4 +1,4 @@
-import { Ok, result } from "../js/types";
+import { Ok, result } from "./result";
 
 export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
   // based on Belt.Array.zip
@@ -46,7 +46,7 @@ export const unzip = <A, B>(
 export const toRanges = <T>(items: T[]): result<[T, T][], string> => {
   if (items.length < 2) {
     return {
-      tag: "Error",
+      ok: false,
       value: "Must be at least 2 elements",
     };
   } else {

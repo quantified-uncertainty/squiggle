@@ -2,7 +2,7 @@ import * as XYShape from "../XYShape";
 import * as Continuous from "./Continuous";
 import * as Discrete from "./Discrete";
 import * as MixedPoint from "./MixedPoint";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import * as Common from "./Common";
 import { ContinuousShape } from "./Continuous";
 import { DiscreteShape } from "./Discrete";
@@ -182,12 +182,12 @@ export class MixedShape implements PointSet<MixedShape> {
   }
 
   mapYResult<E>(
-    fn: (y: number) => RSResult.rsResult<number, E>,
+    fn: (y: number) => Result.result<number, E>,
     integralSumCacheFn: undefined | ((sum: number) => number | undefined),
     integralCacheFn:
       | undefined
       | ((cache: ContinuousShape) => ContinuousShape | undefined)
-  ): RSResult.rsResult<MixedShape, E> {
+  ): Result.result<MixedShape, E> {
     const discreteResult = this.discrete.mapYResult(
       fn,
       integralSumCacheFn,
@@ -198,15 +198,15 @@ export class MixedShape implements PointSet<MixedShape> {
       integralSumCacheFn,
       integralCacheFn
     );
-    if (continuousResult.TAG === RSResult.E.Error) {
+    if (!continuousResult.ok) {
       return continuousResult;
     }
-    if (discreteResult.TAG === RSResult.E.Error) {
+    if (!discreteResult.ok) {
       return discreteResult;
     }
-    const continuous = continuousResult._0;
-    const discrete = discreteResult._0;
-    return RSResult.Ok(
+    const continuous = continuousResult.value;
+    const discrete = discreteResult.value;
+    return Result.Ok(
       new MixedShape({
         discrete,
         continuous,
@@ -350,14 +350,14 @@ export const combineAlgebraically = (
 export const combinePointwise = <E>(
   t1: MixedShape,
   t2: MixedShape,
-  fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
+  fn: (v1: number, v2: number) => Result.result<number, E>,
   integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
     undefined,
   integralCachesFn: (
     v1: ContinuousShape,
     v2: ContinuousShape
   ) => ContinuousShape | undefined = () => undefined
-): RSResult.rsResult<MixedShape, E> => {
+): Result.result<MixedShape, E> => {
   const isDefined = <T>(argument: T | undefined): argument is T => {
     return argument !== undefined;
   };
@@ -386,8 +386,8 @@ export const combinePointwise = <E>(
     t2.integralCache
   );
 
-  return RSResult.fmap(
-    RSResult.merge(reducedContinuous, reducedDiscrete),
+  return Result.fmap(
+    Result.merge(reducedContinuous, reducedDiscrete),
     ([continuous, discrete]) =>
       new MixedShape({
         continuous,

@@ -37,7 +37,7 @@ export type DistributionChartSettings = yup.InferType<
 
 export function makePlot(record: SqRecord): Plot | void {
   const plotResult = parsePlot(record);
-  if (plotResult.tag === "Ok") {
+  if (plotResult.ok) {
     return plotResult.value;
   }
 }
@@ -69,7 +69,7 @@ export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
     )
   );
 
-  if (shapes.tag === "Error") {
+  if (!shapes.ok) {
     return (
       <ErrorAlert heading="Distribution Error">
         {shapes.value.toString()}
@@ -207,7 +207,7 @@ const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
   const unwrapResult = (
     x: result<number, SqDistributionError>
   ): React.ReactNode => {
-    if (x.tag === "Ok") {
+    if (x.ok) {
       return <NumberShower number={x.value} />;
     } else {
       return (

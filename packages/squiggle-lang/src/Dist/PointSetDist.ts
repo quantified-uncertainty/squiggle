@@ -4,7 +4,7 @@ import { ContinuousShape } from "../PointSet/Continuous";
 import { MixedShape } from "../PointSet/Mixed";
 
 import * as magicNumbers from "../magicNumbers";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import * as Sparklines from "../Sparklines";
 
 import * as PointSet from "../PointSet/PointSet";
@@ -58,12 +58,12 @@ export class PointSetDist<
   truncate(
     left: number | undefined,
     right: number | undefined
-  ): RSResult.rsResult<PointSetDist, DistError> {
+  ): Result.result<PointSetDist, DistError> {
     if (left === undefined && right === undefined) {
-      return RSResult.Ok(this);
+      return Result.Ok(this);
     }
 
-    return RSResult.Ok(
+    return Result.Ok(
       new PointSetDist(this.pointSet.truncate(left, right).normalize())
     );
   }
@@ -76,9 +76,9 @@ export class PointSetDist<
     return this.pointSet.integralEndY();
   }
 
-  pdf(f: number): RSResult.rsResult<number, DistError> {
+  pdf(f: number): Result.result<number, DistError> {
     const mixedPoint = this.pointSet.xToY(f);
-    return RSResult.Ok(mixedPoint.continuous + mixedPoint.discrete);
+    return Result.Ok(mixedPoint.continuous + mixedPoint.discrete);
   }
   inv(f: number) {
     return this.pointSet.integralYtoX(f);
@@ -87,37 +87,37 @@ export class PointSetDist<
     return this.pointSet.integralXtoY(f);
   }
 
-  toPointSetDist(): RSResult.rsResult<PointSetDist, DistError> {
+  toPointSetDist(): Result.result<PointSetDist, DistError> {
     // TODO: If env.xyPointLength is different from what it has, it should change.
-    return RSResult.Ok(this);
+    return Result.Ok(this);
   }
 
-  toSparkline(bucketCount: number): RSResult.rsResult<string, DistError> {
+  toSparkline(bucketCount: number): Result.result<string, DistError> {
     const continuous = this.pointSet.toContinuous();
     if (!continuous) {
-      return RSResult.Error(
+      return Result.Error(
         sparklineError("Cannot find the sparkline of a discrete distribution")
       );
     }
     const downsampled = continuous.downsampleEquallyOverX(bucketCount);
-    return RSResult.Ok(Sparklines.create(Continuous.getShape(downsampled).ys));
+    return Result.Ok(Sparklines.create(Continuous.getShape(downsampled).ys));
   }
 
   // PointSet-only methods
 
   mapYResult<E>(
-    fn: (y: number) => RSResult.rsResult<number, E>,
+    fn: (y: number) => Result.result<number, E>,
     integralSumCacheFn: undefined | ((sum: number) => number | undefined),
     integralCacheFn:
       | undefined
       | ((cache: ContinuousShape) => ContinuousShape | undefined)
-  ): RSResult.rsResult<PointSetDist, E> {
-    return RSResult.fmap(
+  ): Result.result<PointSetDist, E> {
+    return Result.fmap(
       this.pointSet.mapYResult(
         fn,
         integralSumCacheFn,
         integralCacheFn
-      ) as RSResult.rsResult<AnyPointSet, E>,
+      ) as Result.result<AnyPointSet, E>,
       (pointSet) => new PointSetDist(pointSet)
     );
   }
@@ -137,15 +137,15 @@ export const combineAlgebraically = (
 export const combinePointwise = <E>(
   t1: PointSetDist,
   t2: PointSetDist,
-  fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
+  fn: (v1: number, v2: number) => Result.result<number, E>,
   integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
     undefined,
   integralCachesFn: (
     s1: ContinuousShape,
     s2: ContinuousShape
   ) => ContinuousShape | undefined = () => undefined
-): RSResult.rsResult<PointSetDist, E> => {
-  return RSResult.fmap(
+): Result.result<PointSetDist, E> => {
+  return Result.fmap(
     PointSet.combinePointwise(
       t1.pointSet,
       t2.pointSet,

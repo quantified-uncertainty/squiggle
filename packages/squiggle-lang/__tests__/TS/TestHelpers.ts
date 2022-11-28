@@ -26,7 +26,7 @@ export function testRun(x: string) {
     },
   });
 
-  if (result.tag === "Ok") {
+  if (result.ok) {
     return result.value;
   } else {
     throw new Error(

@@ -1,7 +1,7 @@
 import { SqError } from "../SqError";
 import { SqRecord } from "../SqRecord";
 import { SqValue, wrapValue } from "../SqValue";
-import { Error_, result, resultMap } from "../types";
+import * as Result from "../../utility/result";
 import { SqValueLocation } from "../SqValueLocation";
 import * as ProjectItem from "./ProjectItem";
 import * as Topology from "./Topology";
@@ -142,7 +142,7 @@ export class SqProject {
     this.getSourceIds().forEach((id) => this.cleanResults(id));
   }
 
-  getIncludes(sourceId: string): result<string[], SqError> {
+  getIncludes(sourceId: string): Result.result<string[], SqError> {
     return this.getItem(sourceId).includes;
   }
 
@@ -173,16 +173,18 @@ export class SqProject {
     return this.getItem(sourceId).result;
   }
 
-  private getRSResult(sourceId: string) {
+  private getInternalResult(sourceId: string) {
     const result = this.getResultOption(sourceId);
     return (
       result ??
-      Error_(new SqError(IError.errorFromMessage(IError.Message.needToRun())))
+      Result.Error(
+        new SqError(IError.errorFromMessage(IError.Message.needToRun()))
+      )
     );
   }
 
   getResult(sourceId: string) {
-    return resultMap(this.getRSResult(sourceId), (v) =>
+    return Result.fmap(this.getInternalResult(sourceId), (v) =>
       wrapValue(
         v,
         new SqValueLocation(this, sourceId, {
@@ -193,7 +195,10 @@ export class SqProject {
     );
   }
 
-  private setResult(sourceId: string, value: result<Value, SqError>): void {
+  private setResult(
+    sourceId: string,
+    value: Result.result<Value, SqError>
+  ): void {
     const newItem = ProjectItem.setResult(this.getItem(sourceId), value);
     this.setItem(sourceId, newItem);
   }
@@ -235,8 +240,8 @@ export class SqProject {
       this.getStdLib(),
       ...pastChain.map((id) => this.getRawBindings(id)),
       ...pastChain.map((id) => {
-        const result = this.getRSResult(id);
-        if (result.tag === "Error") {
+        const result = this.getInternalResult(id);
+        if (!result.ok) {
           throw result.value;
         }
         return Namespace.fromArray([["__result__", result.value]]);
@@ -271,20 +276,20 @@ export class SqProject {
       const cachedResult = this.getResultOption(sourceId);
       if (cachedResult) {
         // already ran
-        if (cachedResult.tag === "Error") {
+        if (!cachedResult.ok) {
           error = cachedResult.value;
         }
         continue;
       }
 
       if (error) {
-        this.setResult(sourceId, Error_(error));
+        this.setResult(sourceId, Result.Error(error));
         continue;
       }
 
       this.doLinkAndRun(sourceId);
       const result = this.getResultOption(sourceId);
-      if (result?.tag === "Error") {
+      if (result && !result.ok) {
         error = result.value;
       }
     }
@@ -304,7 +309,7 @@ export class SqProject {
 // Shortcut for running a single piece of code without creating a project
 export const evaluate = (
   sourceCode: string
-): [result<SqValue, SqError>, SqRecord] => {
+): [Result.result<SqValue, SqError>, SqRecord] => {
   let project = SqProject.create();
   project.setSource("main", sourceCode);
   project.runAll();

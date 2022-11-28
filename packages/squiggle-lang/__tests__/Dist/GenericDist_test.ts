@@ -2,8 +2,8 @@ import { BaseDist } from "../../src/Dist/BaseDist";
 import { DistError } from "../../src/Dist/DistError";
 import { SampleSetDist } from "../../src/Dist/SampleSetDist/SampleSetDist";
 import { Env } from "../../src/js";
-import * as RSResult from "../../src/rsResult";
-import { Ok } from "../../src/rsResult";
+import * as Result from "../../src/utility/result";
+import { Ok } from "../../src/utility/result";
 import { unpackResult } from "../TestHelpers";
 
 const env: Env = {
@@ -24,7 +24,7 @@ import {
 
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {
-    const result = RSResult.fmap(normalDist5.toPointSetDist(env), (p) =>
+    const result = Result.fmap(normalDist5.toPointSetDist(env), (p) =>
       p.mean()
     );
 
@@ -32,8 +32,8 @@ describe("toPointSet", () => {
   });
 
   const pointSet = unpackResult(
-    RSResult.bind(
-      RSResult.bind(normalDist5.toPointSetDist(env), (pointSet) =>
+    Result.bind(
+      Result.bind(normalDist5.toPointSetDist(env), (pointSet) =>
         SampleSetDist.fromDist(pointSet, env)
       ),
       (sampleSet) => sampleSet.toPointSetDist(env)
@@ -56,7 +56,7 @@ describe("sparkline", () => {
   let runTest = (
     name: string,
     dist: BaseDist,
-    expected: RSResult.rsResult<string, DistError>
+    expected: Result.result<string, DistError>
   ) => {
     test(name, () => {
       const result = dist.toSparkline(20, env);

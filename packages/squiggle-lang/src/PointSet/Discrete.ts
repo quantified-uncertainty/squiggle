@@ -1,5 +1,5 @@
 import * as Continuous from "./Continuous";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import * as MixedPoint from "./MixedPoint";
 import * as Common from "./Common";
 import { ContinuousShape } from "./Continuous";
@@ -99,30 +99,29 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
   }
 
   mapYResult<E>(
-    fn: (y: number) => RSResult.rsResult<number, E>,
+    fn: (y: number) => Result.result<number, E>,
     integralSumCacheFn: ((sum: number) => number | undefined) | undefined,
     integralCacheFn:
       | ((cache: ContinuousShape) => ContinuousShape | undefined)
       | undefined
-  ): RSResult.rsResult<DiscreteShape, E> {
+  ): Result.result<DiscreteShape, E> {
     const result = XYShape.T.mapYResult(this.xyShape, fn);
-    if (result.TAG === RSResult.E.Ok) {
-      return RSResult.Ok(
-        new DiscreteShape({
-          xyShape: result._0,
-          integralSumCache:
-            this.integralSumCache === undefined
-              ? undefined
-              : integralSumCacheFn?.(this.integralSumCache),
-          integralCache:
-            this.integralCache === undefined
-              ? undefined
-              : integralCacheFn?.(this.integralCache),
-        })
-      );
-    } else {
+    if (!result.ok) {
       return result;
     }
+    return Result.Ok(
+      new DiscreteShape({
+        xyShape: result.value,
+        integralSumCache:
+          this.integralSumCache === undefined
+            ? undefined
+            : integralSumCacheFn?.(this.integralSumCache),
+        integralCache:
+          this.integralCache === undefined
+            ? undefined
+            : integralCacheFn?.(this.integralCache),
+      })
+    );
   }
 
   updateIntegralCache(
@@ -252,10 +251,10 @@ export const getShape = (t: DiscreteShape) => t.xyShape;
 export const combinePointwise = <E>(
   t1: DiscreteShape,
   t2: DiscreteShape,
-  fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
+  fn: (v1: number, v2: number) => Result.result<number, E>,
   integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
     undefined
-): RSResult.rsResult<DiscreteShape, E> => {
+): Result.result<DiscreteShape, E> => {
   const combiner = XYShape.PointwiseCombination.combine;
 
   // const combinedIntegralSum = Common.combineIntegralSums(
@@ -267,7 +266,7 @@ export const combinePointwise = <E>(
   // TODO: does it ever make sense to pointwise combine the integrals here?
   // It could be done for pointwise additions, but is that ever needed?
 
-  return RSResult.fmap(
+  return Result.fmap(
     combiner(XYShape.XtoY.discreteInterpolator, fn, t1.xyShape, t2.xyShape),
     (x) => new DiscreteShape({ xyShape: x })
   );
@@ -275,19 +274,19 @@ export const combinePointwise = <E>(
 
 export const reduce = <E>(
   shapes: DiscreteShape[],
-  fn: (v1: number, v2: number) => RSResult.rsResult<number, E>,
+  fn: (v1: number, v2: number) => Result.result<number, E>,
   integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
     undefined
-): RSResult.rsResult<DiscreteShape, E> => {
+): Result.result<DiscreteShape, E> => {
   let acc = empty();
   for (const shape of shapes) {
     const result = combinePointwise(acc, shape, fn, integralSumCachesFn);
-    if (result.TAG === RSResult.E.Error) {
+    if (!result.ok) {
       return result;
     }
-    acc = result._0;
+    acc = result.value;
   }
-  return RSResult.Ok(acc);
+  return Result.Ok(acc);
 };
 
 /* This multiples all of the data points together and creates a new discrete distribution from the results.

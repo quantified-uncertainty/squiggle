@@ -14,7 +14,7 @@ import {
 import { FnFactory } from "../library/registry/helpers";
 import { makeOtherError } from "../OperationError";
 import * as IError from "../reducer/IError";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import { Value, vDist } from "../value";
 
 const maker = new FnFactory({
@@ -24,10 +24,10 @@ const maker = new FnFactory({
 
 const makeSampleSet = (d: BaseDist, env: Env) => {
   const result = toSampleSetDist(d, env);
-  if (result.TAG === RSResult.E.Error) {
-    return IError.Message.throw(IError.REDistributionError(result._0));
+  if (!result.ok) {
+    return IError.Message.throw(IError.REDistributionError(result.value));
   }
-  return result._0;
+  return result.value;
 };
 
 const twoVarSample = (
@@ -37,14 +37,13 @@ const twoVarSample = (
   fn: (
     v1: number,
     v2: number
-  ) => RSResult.rsResult<SymbolicDist.SymbolicDist, string>
-): RSResult.rsResult<Value, IError.Message> => {
-  const repack = (
-    r: RSResult.rsResult<SampleSetDist.SampleSetDist, DistError>
-  ) => RSResult.fmap(RSResult.errMap(r, IError.REDistributionError), vDist);
+  ) => Result.result<SymbolicDist.SymbolicDist, string>
+): Result.result<Value, IError.Message> => {
+  const repack = (r: Result.result<SampleSetDist.SampleSetDist, DistError>) =>
+    Result.fmap(Result.errMap(r, IError.REDistributionError), vDist);
 
   const sampleFn = (a: number, b: number) =>
-    RSResult.fmap2(
+    Result.fmap2(
       fn(a, b),
       (d) => d.sample(),
       (e) => makeOtherError(e)
@@ -67,7 +66,7 @@ const twoVarSample = (
     const s2 = makeSampleSet(v2, env);
     return repack(s2.samplesMap((a) => sampleFn(v1, a)));
   } else if (typeof v1 === "number" && typeof v2 === "number") {
-    return RSResult.fmap2(fn(v1, v2), vDist, IError.REOther);
+    return Result.fmap2(fn(v1, v2), vDist, IError.REOther);
   }
   return IError.Message.throw(IError.REOther("Impossible branch"));
 };
@@ -77,7 +76,7 @@ const makeTwoArgsDist = (
   fn: (
     v1: number,
     v2: number
-  ) => RSResult.rsResult<SymbolicDist.SymbolicDist, string>
+  ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
   return makeDefinition(
     name,
@@ -91,7 +90,7 @@ const makeP5P95Dist = (
   fn: (
     p5: number,
     p95: number
-  ) => RSResult.rsResult<SymbolicDist.SymbolicDist, string>
+  ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
   return makeDefinition(
     name,
@@ -105,7 +104,7 @@ const makeMeanStdevDist = (
   fn: (
     mean: number,
     stdev: number
-  ) => RSResult.rsResult<SymbolicDist.SymbolicDist, string>
+  ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
   return makeDefinition(
     name,
@@ -117,15 +116,14 @@ const makeMeanStdevDist = (
 
 const makeOneArgDist = (
   name: string,
-  fn: (v: number) => RSResult.rsResult<SymbolicDist.SymbolicDist, string>
+  fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
   return makeDefinition(name, [frDistOrNumber], ([v], { environment }) => {
-    const repack = (
-      r: RSResult.rsResult<SampleSetDist.SampleSetDist, DistError>
-    ) => RSResult.fmap(RSResult.errMap(r, IError.REDistributionError), vDist);
+    const repack = (r: Result.result<SampleSetDist.SampleSetDist, DistError>) =>
+      Result.fmap(Result.errMap(r, IError.REDistributionError), vDist);
 
     const sampleFn = (a: number) =>
-      RSResult.fmap2(
+      Result.fmap2(
         fn(a),
         (d) => d.sample(),
         (e) => makeOtherError(e)
@@ -135,7 +133,7 @@ const makeOneArgDist = (
       const s = makeSampleSet(v, environment);
       return repack(s.samplesMap(sampleFn));
     } else if (typeof v === "number") {
-      return RSResult.fmap2(fn(v), vDist, IError.REOther);
+      return Result.fmap2(fn(v), vDist, IError.REOther);
     }
     return IError.Message.throw(IError.REOther("Impossible branch"));
   });

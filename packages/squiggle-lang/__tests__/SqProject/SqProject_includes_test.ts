@@ -17,7 +17,7 @@ x=1`
   });
   test("getIncludes", () => {
     const mainIncludes = project.getIncludes("main");
-    if (mainIncludes.tag === "Ok") {
+    if (mainIncludes.ok) {
       expect(mainIncludes.value).toEqual(["common"]);
     } else {
       fail(mainIncludes.value.toString());
@@ -52,7 +52,7 @@ x=1`
 
   test("getIncludes", () => {
     const mainIncludes = project.getIncludes("main");
-    if (mainIncludes.tag === "Ok") {
+    if (mainIncludes.ok) {
       expect(mainIncludes.value).toEqual(["common", "myModule"]);
     } else {
       fail(mainIncludes.value.toString());
@@ -97,7 +97,7 @@ x=1`
   });
   test("getIncludes", () => {
     const mainIncludes = project.getIncludes("main");
-    if (mainIncludes.tag === "Ok") {
+    if (mainIncludes.ok) {
       expect(mainIncludes.value).toEqual(["common", "common2", "myModule"]);
     } else {
       fail(mainIncludes.value.toString());

@@ -1,6 +1,5 @@
 import * as fc from "fast-check";
 
-import * as RSResult from "../../src/rsResult";
 import { BinaryOperations } from "../../src/Dist/DistOperations";
 import { env, mkExponential, mkNormal, unpackResult } from "../TestHelpers";
 import { SimpleOperationError } from "../../src/OperationError";
@@ -36,8 +35,8 @@ describe("dotSubtract", () => {
             mkExponential(rate),
             { env }
           );
-          if (dotDifferenceR.TAG === RSResult.E.Error) {
-            const err = dotDifferenceR._0;
+          if (!dotDifferenceR.ok) {
+            const err = dotDifferenceR.value;
             return (
               err.type === "OperationError" &&
               err.value.type === "enum" &&
@@ -45,7 +44,7 @@ describe("dotSubtract", () => {
             );
           }
 
-          const dotDifference = dotDifferenceR._0;
+          const dotDifference = dotDifferenceR.value;
 
           const meanValue = dotDifference.mean();
           // according to algebra or random variables,

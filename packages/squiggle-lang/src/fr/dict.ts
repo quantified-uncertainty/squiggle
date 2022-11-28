@@ -9,7 +9,7 @@ import {
 } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
 import { doLambdaCall } from "../reducer/Lambda";
-import { Ok } from "../rsResult";
+import { Ok } from "../utility/result";
 import { ImmutableMap } from "../utility/immutableMap";
 import { vArray, vRecord, vString } from "../value";
 

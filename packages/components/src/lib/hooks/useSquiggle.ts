@@ -90,10 +90,7 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
   const { onChange } = args;
 
   useEffect(() => {
-    onChange?.(
-      result.result.tag === "Ok" ? result.result.value : undefined,
-      sourceName
-    );
+    onChange?.(result.result.ok ? result.result.value : undefined, sourceName);
   }, [result, onChange, sourceName]);
 
   useEffect(() => {

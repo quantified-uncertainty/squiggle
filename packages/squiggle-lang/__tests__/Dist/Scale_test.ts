@@ -4,7 +4,7 @@ import {
   DivisionByZeroError,
   NegativeInfinityError,
 } from "../../src/OperationError";
-import * as RSResult from "../../src/rsResult";
+import * as Result from "../../src/utility/result";
 import { env, mkExponential, mkUniform } from "../TestHelpers";
 
 describe("Scale logarithm", () => {
@@ -17,14 +17,14 @@ describe("Scale logarithm", () => {
       env,
     });
 
-    const meanResult = RSResult.fmap(scalelog, (d) => d.mean());
+    const meanResult = Result.fmap(scalelog, (d) => d.mean());
 
     // expected value of log of exponential distribution.
     const meanAnalytical = Math.log(rate) + 1;
-    if (meanResult.TAG === RSResult.E.Error) {
-      expect(meanResult._0).toEqual(operationDistError(DivisionByZeroError));
+    if (!meanResult.ok) {
+      expect(meanResult.value).toEqual(operationDistError(DivisionByZeroError));
     } else {
-      expect(meanResult._0).toBeCloseTo(meanAnalytical);
+      expect(meanResult.value).toBeCloseTo(meanAnalytical);
     }
   });
   const low = 10.0;
@@ -33,13 +33,15 @@ describe("Scale logarithm", () => {
 
   test("mean of the base 2 scalar logarithm of a uniform(10, 100)", () => {
     //For uniform pdf `_ => 1 / (b - a)`, the expected value of log of uniform is `integral from a to b of x * log(1 / (b -a)) dx`
-    const meanResult = RSResult.fmap(scalelog, (d) => d.mean());
+    const meanResult = Result.fmap(scalelog, (d) => d.mean());
     const meanAnalytical =
       (-Math.log2(high - low) / 2) * (high ** 2 - low ** 2);
-    if (meanResult.TAG === RSResult.E.Error) {
-      expect(meanResult._0).toEqual(operationDistError(NegativeInfinityError));
+    if (!meanResult.ok) {
+      expect(meanResult.value).toEqual(
+        operationDistError(NegativeInfinityError)
+      );
     } else {
-      expect(meanResult._0).toBeCloseTo(meanAnalytical);
+      expect(meanResult.value).toBeCloseTo(meanAnalytical);
     }
   });
 });

@@ -2,7 +2,7 @@ import * as Lambda from "../reducer/Lambda";
 import { SqError } from "./SqError";
 import { SqValue } from "./SqValue";
 import { SqValueLocation } from "./SqValueLocation";
-import { result } from "./types";
+import { result } from "../utility/result";
 
 export class SqLambda {
   constructor(

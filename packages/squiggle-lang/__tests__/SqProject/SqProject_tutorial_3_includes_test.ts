@@ -32,7 +32,7 @@ Here we will finally proceed to a real life scenario. */
     test("getIncludes", () => {
       /* Parse includes has set the includes */
       const includes = project.getIncludes("main");
-      if (includes.tag === "Ok") {
+      if (includes.ok) {
         expect(includes.value).toEqual(["common"]);
       } else {
         fail(includes.value.toString());
@@ -91,7 +91,7 @@ Here we will finally proceed to a real life scenario. */
           /* Let's parse the includes and dive into them */
           project.parseIncludes(sourceName);
           const rIncludes = project.getIncludes(sourceName);
-          if (rIncludes.tag === "Error") {
+          if (!rIncludes.ok) {
             /* Maybe there is an include syntax error */
             throw new Error(rIncludes.value.toString());
           }
@@ -177,7 +177,7 @@ Here we will finally proceed to a real life scenario. */
     });
     test("getIncludes", () => {
       const includes = project.getIncludes("main");
-      if (includes.tag === "Ok") {
+      if (includes.ok) {
         expect(includes.value).toEqual(["common"]);
       } else {
         fail(includes.value.toString());

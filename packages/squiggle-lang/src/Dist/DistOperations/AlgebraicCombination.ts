@@ -6,8 +6,8 @@ import {
   unreachableError,
 } from "../DistError";
 import * as magicNumbers from "../../magicNumbers";
-import { rsResult } from "../../rsResult";
-import * as RSResult from "../../rsResult";
+import { result } from "../../utility/result";
+import * as Result from "../../utility/result";
 import * as Operation from "../../operation";
 import { BaseDist } from "../BaseDist";
 import { AlgebraicOperation } from "../../operation";
@@ -72,19 +72,19 @@ const StrategyCallOnValidatedInputs = {
     arithmeticOperation: Operation.ConvolutionOperation,
     t1: BaseDist,
     t2: BaseDist
-  ): rsResult<PointSetDist.PointSetDist, DistError> => {
+  ): result<PointSetDist.PointSetDist, DistError> => {
     const p1r = t1.toPointSetDist(env);
     const p2r = t2.toPointSetDist(env);
-    if (p1r.TAG === RSResult.E.Error) {
+    if (!p1r.ok) {
       return p1r;
     }
-    if (p2r.TAG === RSResult.E.Error) {
+    if (!p2r.ok) {
       return p2r;
     }
-    const p1 = p1r._0;
-    const p2 = p2r._0;
+    const p1 = p1r.value;
+    const p2 = p2r.value;
 
-    return RSResult.Ok(
+    return Result.Ok(
       PointSetDist.combineAlgebraically(arithmeticOperation, p1, p2)
     );
   },
@@ -94,19 +94,19 @@ const StrategyCallOnValidatedInputs = {
     arithmeticOperation: AlgebraicOperation,
     t1: BaseDist,
     t2: BaseDist
-  ): rsResult<SampleSetDist.SampleSetDist, DistError> {
+  ): result<SampleSetDist.SampleSetDist, DistError> {
     const fn = (a: number, b: number) =>
       Operation.Algebraic.toFn(arithmeticOperation, a, b);
     const s1r = SampleSetDist.SampleSetDist.fromDist(t1, env);
     const s2r = SampleSetDist.SampleSetDist.fromDist(t2, env);
-    if (s1r.TAG === RSResult.E.Error) {
+    if (!s1r.ok) {
       return s1r;
     }
-    if (s2r.TAG === RSResult.E.Error) {
+    if (!s2r.ok) {
       return s2r;
     }
-    const s1 = s1r._0;
-    const s2 = s2r._0;
+    const s1 = s1r.value;
+    const s2 = s2r.value;
     return SampleSetDist.map2({ fn, t1: s1, t2: s2 });
   },
 
@@ -114,7 +114,7 @@ const StrategyCallOnValidatedInputs = {
     arithmeticOperation: AlgebraicOperation,
     t1: BaseDist,
     t2: BaseDist
-  ): rsResult<SymbolicDist.SymbolicDist, OperationError> | undefined {
+  ): result<SymbolicDist.SymbolicDist, OperationError> | undefined {
     if (
       t1 instanceof SymbolicDist.SymbolicDist &&
       t2 instanceof SymbolicDist.SymbolicDist
@@ -191,7 +191,7 @@ const runStrategyOnValidatedInputs = ({
   arithmeticOperation: AlgebraicOperation;
   strategy: SpecificStrategy;
   env: Env;
-}): rsResult<BaseDist, DistError> => {
+}): result<BaseDist, DistError> => {
   switch (strategy) {
     case "AsMonteCarlo":
       return StrategyCallOnValidatedInputs.monteCarlo(
@@ -207,17 +207,17 @@ const runStrategyOnValidatedInputs = ({
         t2
       );
       if (result === undefined) {
-        return RSResult.Error(unreachableError());
+        return Result.Error(unreachableError());
       }
-      if (result.TAG === RSResult.E.Error) {
-        return RSResult.Error(operationDistError(result._0));
+      if (!result.ok) {
+        return Result.Error(operationDistError(result.value));
       }
       return result;
     case "AsConvolution":
       const convOp =
         Operation.Convolution.fromAlgebraicOperation(arithmeticOperation);
       if (convOp === undefined) {
-        return RSResult.Error(unreachableError());
+        return Result.Error(unreachableError());
       }
       return StrategyCallOnValidatedInputs.convolution(env, convOp, t1, t2);
   }
@@ -236,11 +236,11 @@ const run = (
     arithmeticOperation: AlgebraicOperation;
     t2: BaseDist;
   }
-): rsResult<BaseDist, DistError> => {
+): result<BaseDist, DistError> => {
   const invalidOperationError = InputValidator.run(t1, t2, arithmeticOperation);
 
   if (invalidOperationError !== undefined) {
-    return RSResult.Error(invalidOperationError);
+    return Result.Error(invalidOperationError);
   }
 
   switch (strategy) {
@@ -271,12 +271,12 @@ const run = (
         t2
       );
       if (result === undefined) {
-        return RSResult.Error(
+        return Result.Error(
           requestedStrategyInvalidError(`No analytic solution for inputs`)
         );
       }
-      if (result.TAG === RSResult.E.Error) {
-        return RSResult.Error(operationDistError(result._0));
+      if (!result.ok) {
+        return Result.Error(operationDistError(result.value));
       }
       return result;
     case AsAlgebraicCombinationStrategy.AsConvolution:
@@ -286,7 +286,7 @@ const run = (
         const errString = `Convolution not supported for ${Operation.Algebraic.toString(
           arithmeticOperation
         )}`;
-        return RSResult.Error(requestedStrategyInvalidError(errString));
+        return Result.Error(requestedStrategyInvalidError(errString));
       } else {
         return StrategyCallOnValidatedInputs.convolution(env, convOp, t1, t2);
       }

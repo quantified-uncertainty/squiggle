@@ -1,15 +1,14 @@
 import * as XYShape from "../src/XYShape";
-import * as RSResult from "../src/rsResult";
 
 const makeAndGetErrorString = (
   xs: number[],
   ys: number[]
 ): string | undefined => {
   const result = XYShape.T.make(xs, ys);
-  if (result.TAG === RSResult.E.Ok) {
+  if (result.ok) {
     return undefined;
   }
-  return XYShape.XYShapeError.toString(result._0);
+  return XYShape.XYShapeError.toString(result.value);
 };
 
 describe("XYShapes", () => {
@@ -45,10 +44,10 @@ describe("XYShapes", () => {
   describe("integrateWithTriangles", () => {
     test("integrates correctly", () => {
       const shape = XYShape.T.make([1, 4, 8], [0.2, 0.4, 0.8]);
-      if (shape.TAG === RSResult.E.Error) {
+      if (!shape.ok) {
         throw new Error("make failed");
       }
-      expect(XYShape.Range.integrateWithTriangles(shape._0)).toEqual({
+      expect(XYShape.Range.integrateWithTriangles(shape.value)).toEqual({
         xs: [1, 4, 8],
         ys: [0.0, 0.9000000000000001, 3.3000000000000007],
       });

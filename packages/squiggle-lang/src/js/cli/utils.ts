@@ -43,7 +43,7 @@ const _run = (args: { src: string; filename?: string; environment?: Env }) => {
   const loadIncludesRecursively = (sourceId: string) => {
     project.parseIncludes(sourceId);
     const includes = project.getIncludes(sourceId);
-    if (includes.tag === "Error") {
+    if (!includes.ok) {
       throw new Error(`Failed to parse includes from ${sourceId}`);
     }
     includes.value.forEach((includeId) => {
@@ -88,7 +88,7 @@ export const run = (args: RunArgs) => {
     lines.forEach((line) => console.log(line));
   };
 
-  if (result.tag === "Error") {
+  if (!result.ok) {
     printLines(red("Error:"), result.value.toStringWithStackTrace());
   } else {
     switch (args.output) {

@@ -1,12 +1,6 @@
 import { parseIncludes as parseIncludes_ } from "./parseIncludes";
-import {
-  Error_,
-  fromRSResult,
-  Ok,
-  result,
-  resultMap,
-  resultMapError,
-} from "../types";
+import * as Result from "../../utility/result";
+import { result, Ok } from "../../utility/result";
 import { Resolver } from "./Resolver";
 import { AST, parse, ParseError } from "../../ast/parse";
 import { errorFromException, fromParseError } from "../../reducer/IError";
@@ -142,7 +136,7 @@ export const clean = (t: t): t => {
 };
 
 export const getImmediateDependencies = (t: t): string[] => {
-  if (t.includes.tag === "Error") {
+  if (!t.includes.ok) {
     return [];
   }
   return [...t.includes.value, ...t.continues];
@@ -163,7 +157,7 @@ const setIncludes = (t: t, includes: ProjectItem["includes"]): t => ({
 
 export const parseIncludes = (t: t, resolver: Resolver): t => {
   const rRawImportAsVariables = parseIncludes_(t.source);
-  if (rRawImportAsVariables.tag === "Error") {
+  if (!rRawImportAsVariables.ok) {
     return setIncludes(resetIncludes(t), rRawImportAsVariables);
   } else {
     // ok
@@ -192,8 +186,8 @@ export const rawParse = (t: t): t => {
   if (t.rawParse) {
     return t;
   }
-  const rawParse = resultMapError(
-    fromRSResult(parse(t.source, t.sourceId)),
+  const rawParse = Result.errMap(
+    parse(t.source, t.sourceId),
     (e: ParseError) => new SqError(fromParseError(e))
   );
   return setRawParse(t, rawParse);
@@ -208,12 +202,12 @@ const buildExpression = (t: t): t => {
     // rawParse() guarantees that the rawParse is set
     throw new Error("Internal logic error");
   }
-  const expression = resultMap(t.rawParse, (node) => expressionFromAst(node));
+  const expression = Result.fmap(t.rawParse, (node) => expressionFromAst(node));
   return setExpression(t, expression);
 };
 
 const failRun = (t: t, e: SqError): t =>
-  setBindings(setResult(t, Error_(e)), Namespace.make());
+  setBindings(setResult(t, Result.Error(e)), Namespace.make());
 
 export const run = (t: t, context: ReducerContext): t => {
   t = buildExpression(t);
@@ -226,7 +220,7 @@ export const run = (t: t, context: ReducerContext): t => {
     throw new Error("Internal logic error");
   }
 
-  if (t.expression.tag === "Error") {
+  if (!t.expression.ok) {
     return failRun(t, t.expression.value);
   }
 

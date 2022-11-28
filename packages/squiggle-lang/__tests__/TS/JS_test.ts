@@ -1,10 +1,6 @@
 import { run, SqProject } from "../../src/js";
 import { testRun } from "./TestHelpers";
 
-function Ok<b>(x: b) {
-  return { tag: "Ok", value: x };
-}
-
 describe("Simple calculations and results", () => {
   test("mean(normal(5,2))", () => {
     const result = testRun("mean(normal(5,2))"); // FIXME
@@ -44,7 +40,7 @@ describe("Continues", () => {
     project.setContinues("p2", ["p1"]);
     project.run("main");
     const result = project.getResult("main");
-    expect(result.tag).toEqual("Ok");
+    expect(result.ok).toEqual(true);
     expect(result.value.toString()).toEqual("10");
   });
   test("Can merge bindings from three partials", () => {
@@ -56,7 +52,7 @@ describe("Continues", () => {
     project.setContinues("main", ["p1", "p2", "p3"]);
     project.run("main");
     const result = project.getResult("main");
-    expect(result.tag).toEqual("Ok");
+    expect(result.ok).toEqual(true);
     expect(result.value.toString()).toEqual("6");
   });
 });
@@ -73,7 +69,7 @@ describe("Distribution", () => {
     const { result } = run(src, {
       environment: env,
     });
-    if (result.tag !== "Ok") {
+    if (!result.ok) {
       throw new Error(
         `Failed to build SampleSet: from ${src}: ${result.value}`
       );

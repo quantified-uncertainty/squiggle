@@ -14,8 +14,8 @@ import * as Context from "./Context";
 import * as Lambda from "./Lambda";
 import * as IError from "./IError";
 import { ImmutableMap } from "../utility/immutableMap";
-import { Ok, rsResult } from "../rsResult";
-import * as RSResult from "../rsResult";
+import { Ok, result } from "../utility/result";
+import * as Result from "../utility/result";
 import { stdLib } from "../library";
 import { defaultEnv } from "../Dist/env";
 import { parse } from "../ast/parse";
@@ -186,23 +186,23 @@ const createDefaultContext = () => Context.createContext(stdLib, defaultEnv);
 
 export const evaluateExpressionToResult = (
   expression: Expression
-): rsResult<Value, IError.IError> => {
+): result<Value, IError.IError> => {
   const context = createDefaultContext();
   try {
     const [value] = evaluate(expression, context);
     return Ok(value);
   } catch (e) {
-    return RSResult.Error(IError.errorFromException(e));
+    return Result.Error(IError.errorFromException(e));
   }
 };
 
 export const evaluateStringToResult = (
   code: string
-): rsResult<Value, IError.IError> => {
-  const exprR = RSResult.fmap(parse(code, "main"), expressionFromAst);
+): result<Value, IError.IError> => {
+  const exprR = Result.fmap(parse(code, "main"), expressionFromAst);
 
-  return RSResult.bind(
-    RSResult.errMap(exprR, IError.fromParseError),
+  return Result.bind(
+    Result.errMap(exprR, IError.fromParseError),
     evaluateExpressionToResult
   );
 };

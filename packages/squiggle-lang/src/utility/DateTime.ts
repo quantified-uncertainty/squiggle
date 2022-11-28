@@ -1,5 +1,5 @@
-import { Ok, rsResult } from "../rsResult";
-import * as RSResult from "../rsResult";
+import { Ok, result } from "./result";
+import * as Result from "./result";
 
 // Stores in Unix milliseconds
 export type Duration = number;
@@ -51,11 +51,11 @@ export const DateModule = {
   fmap(t: Date, fn: (v: number) => number): Date {
     return new Date(fn(t.getTime()));
   },
-  subtract(t1: Date, t2: Date): rsResult<Duration, string> {
+  subtract(t1: Date, t2: Date): result<Duration, string> {
     const [f1, f2] = [t1.getTime(), t2.getTime()];
     const diff = f1 - f2;
     if (diff < 0) {
-      return RSResult.Error(
+      return Result.Error(
         "Cannot subtract a date by one that is in its future"
       );
     } else {
@@ -69,18 +69,18 @@ export const DateModule = {
     return DateModule.fmap(t, (t) => t - duration);
   },
 
-  makeWithYearInt(y: number): rsResult<Date, string> {
+  makeWithYearInt(y: number): result<Date, string> {
     if (y < 100) {
-      return RSResult.Error("Year must be over 100");
+      return Result.Error("Year must be over 100");
     } else if (y > 200000) {
-      return RSResult.Error("Year must be less than 200000");
+      return Result.Error("Year must be less than 200000");
     } else {
       return Ok(new Date(y, 0));
     }
   },
-  makeFromYear(year: number): rsResult<Date, string> {
+  makeFromYear(year: number): result<Date, string> {
     const floor = Math.floor(year);
-    return RSResult.fmap(DateModule.makeWithYearInt(floor), (earlyDate) => {
+    return Result.fmap(DateModule.makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
       return DateModule.addDuration(earlyDate, diff * Duration.year);
     });

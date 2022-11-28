@@ -61,9 +61,9 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   const result1 = fn.call([settings.start]);
   const result2 = fn.call([settings.stop]);
   const getValidResult = () => {
-    if (result1.tag === "Ok") {
+    if (result1.ok) {
       return result1;
-    } else if (result2.tag === "Ok") {
+    } else if (result2.ok) {
       return result2;
     } else {
       return result1;
@@ -71,7 +71,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   };
   const validResult = getValidResult();
 
-  if (validResult.tag === "Error") {
+  if (!validResult.ok) {
     return <FunctionCallErrorAlert error={validResult.value} />;
   }
 

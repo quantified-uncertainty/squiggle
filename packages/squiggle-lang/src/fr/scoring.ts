@@ -3,7 +3,7 @@ import { frDist, frDistOrNumber, frRecord } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
 import { vNumber } from "../value";
 import * as IError from "../reducer/IError";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import * as DistOperations from "../Dist/DistOperations";
 import { BaseDist } from "../Dist/BaseDist";
 import { Env } from "../Dist/env";
@@ -19,7 +19,7 @@ const runScoringScalarAnswer = (
   prior: BaseDist | undefined,
   env: Env
 ) => {
-  return RSResult.fmap2(
+  return Result.fmap2(
     DistOperations.logScoreScalarAnswer({ estimate, answer, prior, env }),
     vNumber,
     IError.REDistributionError
@@ -32,7 +32,7 @@ const runScoringDistAnswer = (
   prior: BaseDist | undefined,
   env: Env
 ) => {
-  return RSResult.fmap2(
+  return Result.fmap2(
     DistOperations.logScoreDistAnswer({ estimate, answer, prior, env }),
     vNumber,
     IError.REDistributionError

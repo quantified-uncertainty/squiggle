@@ -2,7 +2,7 @@ import * as Namespace from "../reducer/Namespace";
 import * as Lambda from "../reducer/Lambda";
 import * as IError from "../reducer/IError";
 import { vLambda } from "../value";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import { makeMathConstants } from "./math";
 import { makeVersionConstant } from "./version";
 import * as registry from "./registry";
@@ -73,11 +73,10 @@ const makeStdLib = (): Namespace.Namespace => {
       vLambda(
         Lambda.makeFFILambda(name, (args, context, reducer) => {
           const result = registry.call(name, args, context, reducer);
-          if (result.TAG === RSResult.E.Ok) {
-            return result._0;
-          } else {
-            return IError.Message.throw(result._0);
+          if (!result.ok) {
+            return IError.Message.throw(result.value);
           }
+          return result.value;
         })
       )
     );

@@ -10,7 +10,7 @@ import {
   unpackResult,
 } from "../TestHelpers";
 import * as SymbolicDist from "../../src/Dist/SymbolicDist";
-import * as RSResult from "../../src/rsResult";
+import * as Result from "../../src/utility/result";
 import * as E_A_Floats from "../../src/utility/E_A_Floats";
 import * as E_A from "../../src/utility/E_A";
 import * as Sparklines from "../../src/Sparklines";
@@ -83,7 +83,7 @@ describe("(Symbolic) mean", () => {
     [0, 0],
   ])("bad beta distributions", (alpha, beta) => {
     const r = SymbolicDist.Beta.make({ alpha, beta });
-    expect(RSResult.getError(r)).toBe(
+    expect(Result.getError(r)).toBe(
       "Beta distribution parameters must be positive"
     );
   });
@@ -116,7 +116,7 @@ describe("(Symbolic) mean", () => {
     [-1e8, -1e4],
   ])("bad lognormal distributions", (mu, sigma) => {
     const r = SymbolicDist.Lognormal.make({ mu, sigma });
-    expect(RSResult.getError(r)).toBe(
+    expect(Result.getError(r)).toBe(
       "Lognormal standard deviation must be larger than 0"
     );
   });

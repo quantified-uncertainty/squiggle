@@ -2,11 +2,12 @@ import { SampleSetDist } from "../Dist/SampleSetDist/SampleSetDist";
 import { Env } from "../Dist/env";
 import { SqDistributionError } from "./SqDistributionError";
 import { wrapPointSet } from "./SqPointSet";
-import { fromRSResult, Ok, result, resultMap2 } from "./types";
+import * as Result from "../utility/result";
 import { BaseDist } from "../Dist/BaseDist";
 import { DistError } from "../Dist/DistError";
 import { SymbolicDist } from "../Dist/SymbolicDist";
 import { PointSetDist } from "../Dist/PointSetDist";
+import { Ok, result } from "../utility/result";
 
 export enum SqDistributionTag {
   PointSet = "PointSet",
@@ -31,8 +32,8 @@ abstract class SqAbstractDistribution<T extends BaseDist> {
   constructor(protected _value: T) {}
 
   pointSet(env: Env) {
-    const innerResult = fromRSResult(this._value.toPointSetDist(env));
-    return resultMap2(
+    const innerResult = this._value.toPointSetDist(env);
+    return Result.fmap2(
       innerResult,
       (dist) => wrapPointSet(dist.pointSet),
       (e: DistError) => new SqDistributionError(e)
@@ -48,8 +49,8 @@ abstract class SqAbstractDistribution<T extends BaseDist> {
   }
 
   pdf(env: Env, n: number) {
-    return resultMap2(
-      fromRSResult(this._value.pdf(n, { env })),
+    return Result.fmap2(
+      this._value.pdf(n, { env }),
       (v: number) => v,
       (e: DistError) => new SqDistributionError(e)
     );
@@ -64,8 +65,8 @@ abstract class SqAbstractDistribution<T extends BaseDist> {
   }
 
   stdev(env: Env) {
-    return resultMap2(
-      fromRSResult(this._value.stdev()),
+    return Result.fmap2(
+      this._value.stdev(),
       (v: number) => v,
       (e: DistError) => new SqDistributionError(e)
     );

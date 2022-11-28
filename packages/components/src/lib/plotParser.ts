@@ -14,11 +14,11 @@ export type Plot = {
 };
 
 function error<a, b>(err: b): result<a, b> {
-  return { tag: "Error", value: err };
+  return { ok: false, value: err };
 }
 
 function ok<a, b>(x: a): result<a, b> {
-  return { tag: "Ok", value: x };
+  return { ok: true, value: x };
 }
 
 const schema = yup

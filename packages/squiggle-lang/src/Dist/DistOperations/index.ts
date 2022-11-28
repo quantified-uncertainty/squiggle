@@ -1,6 +1,6 @@
 import { AlgebraicOperation } from "../../operation";
-import { rsResult } from "../../rsResult";
-import * as RSResult from "../../rsResult";
+import { result } from "../../utility/result";
+import * as Result from "../../utility/result";
 import * as Operation from "../../operation";
 import * as E_A_Floats from "../../utility/E_A_Floats";
 import * as PointSetDist from "../PointSetDist";
@@ -35,16 +35,16 @@ export const logScoreDistAnswer = ({
   answer: BaseDist;
   prior: BaseDist | undefined;
   env: Env;
-}): rsResult<number, DistError> => {
-  return RSResult.bind(estimate.toPointSetDist(env), (estimate2) => {
-    return RSResult.bind(answer.toPointSetDist(env), (answer2) => {
+}): result<number, DistError> => {
+  return Result.bind(estimate.toPointSetDist(env), (estimate2) => {
+    return Result.bind(answer.toPointSetDist(env), (answer2) => {
       const prior2 = prior?.toPointSetDist(env);
       if (prior2) {
-        if (prior2.TAG === RSResult.E.Error) {
+        if (!prior2.ok) {
           return prior2;
         } else {
-          const prior3 = prior2._0;
-          return RSResult.errMap(
+          const prior3 = prior2.value;
+          return Result.errMap(
             PointSetDist_Scoring.WithDistAnswer.sumWithPrior({
               estimate: estimate2.pointSet,
               answer: answer2.pointSet,
@@ -54,7 +54,7 @@ export const logScoreDistAnswer = ({
           );
         }
       } else {
-        return RSResult.errMap(
+        return Result.errMap(
           PointSetDist_Scoring.WithDistAnswer.sum({
             estimate: estimate2.pointSet,
             answer: answer2.pointSet,
@@ -76,15 +76,15 @@ export const logScoreScalarAnswer = ({
   answer: number;
   prior: BaseDist | undefined;
   env: Env;
-}): rsResult<number, DistError> => {
-  return RSResult.bind(estimate.toPointSetDist(env), (estimate2) => {
+}): result<number, DistError> => {
+  return Result.bind(estimate.toPointSetDist(env), (estimate2) => {
     const prior2 = prior?.toPointSetDist(env);
     if (prior2) {
-      if (prior2.TAG === RSResult.E.Error) {
+      if (!prior2.ok) {
         return prior2;
       } else {
-        const prior3 = prior2._0;
-        return RSResult.errMap(
+        const prior3 = prior2.value;
+        return Result.errMap(
           PointSetDist_Scoring.WithScalarAnswer.scoreWithPrior({
             estimate: estimate2.pointSet,
             answer,
@@ -94,7 +94,7 @@ export const logScoreScalarAnswer = ({
         );
       }
     } else {
-      return RSResult.errMap(
+      return Result.errMap(
         PointSetDist_Scoring.WithScalarAnswer.score({
           estimate: estimate2.pointSet,
           answer,
@@ -117,25 +117,25 @@ const pointwiseCombination = (
     algebraicCombination: AlgebraicOperation;
     t2: BaseDist;
   }
-): rsResult<BaseDist, DistError> => {
+): result<BaseDist, DistError> => {
   const p1r = t1.toPointSetDist(env);
   const p2r = t2.toPointSetDist(env);
-  if (p1r.TAG === RSResult.E.Error) {
+  if (!p1r.ok) {
     return p1r;
   }
-  if (p2r.TAG === RSResult.E.Error) {
+  if (!p2r.ok) {
     return p2r;
   }
-  const p1 = p1r._0;
-  const p2 = p2r._0;
+  const p1 = p1r.value;
+  const p2 = p2r.value;
 
   const result = PointSetDist.combinePointwise(p1, p2, (a: number, b: number) =>
     Operation.Algebraic.toFn(algebraicCombination, a, b)
   );
-  if (result.TAG === RSResult.E.Ok) {
+  if (result.ok) {
     return result;
   } else {
-    return RSResult.Error(operationDistError(result._0));
+    return Result.Error(operationDistError(result.value));
   }
 };
 
@@ -150,16 +150,16 @@ export const pointwiseCombinationFloat = (
     algebraicCombination: AlgebraicOperation;
     f: number;
   }
-): rsResult<BaseDist, DistError> => {
+): result<BaseDist, DistError> => {
   const executeCombination = (arithOp: Operation.ScaleOperation) =>
-    RSResult.bind(t.toPointSetDist(env), (t) => {
+    Result.bind(t.toPointSetDist(env), (t) => {
       // TODO: Move to PointSet codebase
       // FIXME: performance issues
       const integralSumCacheFn = Operation.Scale.toIntegralSumCacheFn(arithOp);
       const integralCacheFn =
         Operation.Scale.toIntegralCacheFn(arithOp) ??
         ((a: number, b: ContinuousShape) => undefined);
-      return RSResult.errMap(
+      return Result.errMap(
         t.mapYResult<OperationError>(
           (y) => Operation.Scale.toFn(arithOp, y, f),
           (v) => integralSumCacheFn?.(f, v),
@@ -170,7 +170,7 @@ export const pointwiseCombinationFloat = (
     });
 
   if (algebraicCombination === "Add" || algebraicCombination === "Subtract") {
-    return RSResult.Error(distributionVerticalShiftIsInvalid());
+    return Result.Error(distributionVerticalShiftIsInvalid());
   } else if (
     algebraicCombination === "Multiply" ||
     algebraicCombination === "Divide" ||
@@ -193,7 +193,7 @@ export const scaleLog = (t: BaseDist, f: number, { env }: { env: Env }) =>
 export const mixture = (
   values: [BaseDist, number][],
   { env }: { env: Env }
-): rsResult<BaseDist, DistError> => {
+): result<BaseDist, DistError> => {
   const scaleMultiplyFn = (dist: BaseDist, weight: number) =>
     pointwiseCombinationFloat(dist, {
       env,
@@ -212,7 +212,7 @@ export const mixture = (
     v.every(([t]) => t instanceof SampleSetDist.SampleSetDist);
 
   if (values.length < 1) {
-    return RSResult.Error(
+    return Result.Error(
       otherError("Mixture error: mixture must have at least 1 element")
     );
   } else if (allValuesAreSampleSet(values)) {
@@ -231,21 +231,21 @@ export const mixture = (
     const properlyWeightedValues: BaseDist[] = [];
     for (const [dist, weight] of values) {
       const r = scaleMultiplyFn(dist, weight / totalWeight);
-      if (r.TAG === RSResult.E.Error) {
+      if (!r.ok) {
         return r;
       }
-      properlyWeightedValues.push(r._0);
+      properlyWeightedValues.push(r.value);
     }
 
     let answer = properlyWeightedValues[0];
     for (const dist of properlyWeightedValues.slice(1)) {
       const r = pointwiseAddFn(answer, dist);
-      if (r.TAG === RSResult.E.Error) {
+      if (!r.ok) {
         return r;
       }
-      answer = r._0;
+      answer = r.value;
     }
-    return RSResult.Ok(answer);
+    return Result.Ok(answer);
   }
 };
 
@@ -253,7 +253,7 @@ export type BinaryOperation = (
   t1: BaseDist,
   t2: BaseDist,
   opts: { env: Env }
-) => rsResult<BaseDist, DistError>;
+) => result<BaseDist, DistError>;
 
 // private helpers
 const algebraic = (

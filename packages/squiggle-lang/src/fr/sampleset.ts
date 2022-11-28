@@ -13,7 +13,7 @@ import {
   repackDistResult,
   unpackDistResult,
 } from "../library/registry/helpers";
-import { Ok } from "../rsResult";
+import { Ok } from "../utility/result";
 import { vArray, vNumber } from "../value";
 import * as IError from "../reducer/IError";
 import { BaseDist } from "../Dist/BaseDist";

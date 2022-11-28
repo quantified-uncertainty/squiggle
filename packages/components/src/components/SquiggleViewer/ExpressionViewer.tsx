@@ -68,7 +68,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                 value={value}
                 onChange={onChange}
                 disableLogX={
-                  shape.tag === "Ok" && hasMassBelowZero(shape.value.asShape())
+                  shape.ok && hasMassBelowZero(shape.value.asShape())
                 }
                 withFunctionSettings={false}
               />
@@ -203,8 +203,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               let disableLogX = plot.distributions.some((x) => {
                 let pointSet = x.distribution.pointSet(environment);
                 return (
-                  pointSet.tag === "Ok" &&
-                  hasMassBelowZero(pointSet.value.asShape())
+                  pointSet.ok && hasMassBelowZero(pointSet.value.asShape())
                 );
               });
               return (

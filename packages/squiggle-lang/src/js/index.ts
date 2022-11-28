@@ -3,7 +3,7 @@ import { SqProject } from "./SqProject";
 import { SqValue } from "./SqValue";
 
 export { SqValueLocation } from "./SqValueLocation";
-export { result } from "./types";
+export { result, fmap as resultMap } from "../utility/result";
 export { SqDistribution, SqDistributionTag } from "./SqDistribution";
 export { SqDistributionError } from "./SqDistributionError";
 export { SqRecord } from "./SqRecord";
@@ -16,8 +16,6 @@ export { defaultEnv as defaultEnvironment } from "../Dist/env";
 export { SqProject, SqValue };
 export { Env };
 export { LocationRange as SqLocation } from "peggy";
-
-export { resultMap } from "./types";
 
 export const run = (
   code: string,

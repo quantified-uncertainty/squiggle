@@ -1,10 +1,10 @@
 import * as DateTime from "../utility/DateTime";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import * as IError from "../reducer/IError";
 import { FnFactory } from "../library/registry/helpers";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import { vDate, vDuration, vNumber, vString, vTimeDuration } from "../value";
-import { Ok } from "../rsResult";
+import { Ok } from "../utility/result";
 import { frDate, frNumber, frTimeDuration } from "../library/registry/frTypes";
 
 const maker = new FnFactory({
@@ -42,7 +42,7 @@ export const library = [
   ),
   maker.fromDefinition(
     makeDefinition("makeDateFromYear", [frNumber], ([year]) => {
-      return RSResult.fmap2(
+      return Result.fmap2(
         DateTime.Date.makeFromYear(year),
         vDate,
         IError.REOther
@@ -59,7 +59,7 @@ export const library = [
   ),
   maker.fromDefinition(
     makeDefinition("subtract", [frDate, frDate], ([d1, d2]) =>
-      RSResult.fmap2(
+      Result.fmap2(
         DateTime.Date.subtract(d1, d2),
         vTimeDuration,
         IError.REOther

@@ -1,6 +1,5 @@
 import * as SymbolicDist from "../src/Dist/SymbolicDist";
-import { rsResult } from "../src/rsResult";
-import * as RSResult from "../src/rsResult";
+import * as Result from "../src/utility/result";
 import { defaultEnv, Env } from "../src/Dist/env";
 
 /*
@@ -35,11 +34,11 @@ export const expectErrorToBeBounded = (
 
 export const env: Env = defaultEnv;
 
-export const unpackResult = <T>(x: rsResult<T, unknown>): T => {
-  if (x.TAG === RSResult.E.Error) {
+export const unpackResult = <T>(x: Result.result<T, unknown>): T => {
+  if (!x.ok) {
     throw new Error("failed");
   }
-  return x._0;
+  return x.value;
 };
 
 // let unreachableInTestFileMessage = "Should be impossible to reach (This error is in test file)"

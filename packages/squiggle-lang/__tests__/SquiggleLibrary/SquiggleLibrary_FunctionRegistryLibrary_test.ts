@@ -2,7 +2,6 @@ import { registry } from "../../src/library/registry";
 import { allExamplesWithFns } from "../../src/library/registry/core";
 import { evaluateStringToResult } from "../../src/reducer";
 import { testEvalToBe } from "../reducerTestHelpers";
-import * as RSResult from "../../src/rsResult";
 
 // let registry = FunctionRegistry_Library.registry
 // let examples = E.A.to_list(FunctionRegistry_Core.Registry.allExamples(registry))
@@ -138,14 +137,14 @@ describe("FunctionRegistry Library", () => {
       "tests of example $example",
       ({ fn, example }) => {
         const result = evaluateStringToResult(example);
-        expect(result.TAG).toBe(RSResult.E.Ok);
+        expect(result.ok).toBe(true);
 
-        if (result.TAG !== RSResult.E.Ok) {
+        if (!result.ok) {
           throw new Error("Can't test type");
         }
 
         if (fn.output !== undefined) {
-          expect(result._0.type).toEqual(fn.output);
+          expect(result.value.type).toEqual(fn.output);
         }
       }
     );

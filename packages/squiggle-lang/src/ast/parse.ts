@@ -1,6 +1,6 @@
 import { LocationRange } from "peggy";
-import { rsResult } from "../rsResult";
-import * as RSResult from "../rsResult";
+import { result } from "../utility/result";
+import * as Result from "../utility/result";
 import { AnyPeggyNode } from "./peggyHelpers";
 
 import {
@@ -23,14 +23,14 @@ export const makeParseError = (
   location,
 });
 
-type ParseResult = rsResult<AST, ParseError>;
+type ParseResult = result<AST, ParseError>;
 
 export const parse = (expr: string, source: string): ParseResult => {
   try {
-    return RSResult.Ok(peggyParse(expr, { grammarSource: source }));
+    return Result.Ok(peggyParse(expr, { grammarSource: source }));
   } catch (e) {
     if (e instanceof PeggySyntaxError) {
-      return RSResult.Error({
+      return Result.Error({
         type: "SyntaxError",
         location: (e as any).location,
         message: (e as any).message,
@@ -113,9 +113,8 @@ export const toStringError = (error: ParseError): string => {
 };
 
 export const nodeResultToString = (r: ParseResult): string => {
-  if (r.TAG === RSResult.E.Error) {
-    return toStringError(r._0);
-  } else {
-    return nodeToString(r._0);
+  if (!r.ok) {
+    return toStringError(r.value);
   }
+  return nodeToString(r.value);
 };

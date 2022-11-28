@@ -1,7 +1,7 @@
 import { ReducerContext } from "../../reducer/Context";
 import { Lambda } from "../../reducer/Lambda";
 import { ReducerFn, Value } from "../../value";
-import { rsResult } from "../../rsResult";
+import { result } from "../../utility/result";
 import * as IError from "../../reducer/IError";
 import * as core from "./core";
 
@@ -44,7 +44,7 @@ export const call = (
   args: Value[],
   context: ReducerContext,
   reducer: ReducerFn
-): rsResult<Value, IError.Message> => {
+): result<Value, IError.Message> => {
   return core.call(registry, fnName, args, context, reducer);
 };
 

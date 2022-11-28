@@ -10,7 +10,7 @@ import { ReducerContext } from "../reducer/Context";
 import * as Lambda from "../reducer/Lambda";
 import * as IError from "../reducer/IError";
 import * as E_A from "../utility/E_A";
-import { Ok, rsResult } from "../rsResult";
+import { Ok, result } from "../utility/result";
 import { ReducerFn, Value, vArray, vNumber } from "../value";
 
 const maker = new FnFactory({
@@ -56,7 +56,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   numIntegrationPoints: number,
   context: ReducerContext,
   reducer: ReducerFn
-): rsResult<Value, IError.Message> => {
+): result<Value, IError.Message> => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
     // Defined here so that it has access to context, reducer
     const result = Lambda.doLambdaCall(

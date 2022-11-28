@@ -4,7 +4,7 @@ import {
   OperationError,
   PdfInvalidError,
 } from "../OperationError";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import { MixedPoint } from "./MixedPoint";
 import {
   AnyPointSet,
@@ -20,11 +20,11 @@ const minusScaledLogOfQuotient = ({
 }: {
   esti: number;
   answ: number;
-}): RSResult.rsResult<number, OperationError> => {
+}): Result.result<number, OperationError> => {
   const quot = esti / answ;
   return quot < 0.0
-    ? RSResult.Error(ComplexNumberError)
-    : RSResult.Ok(-answ * logFn(quot));
+    ? Result.Error(ComplexNumberError)
+    : Result.Ok(-answ * logFn(quot));
 };
 
 export const WithDistAnswer = {
@@ -32,12 +32,12 @@ export const WithDistAnswer = {
   integrand(
     estimateElement: number,
     answerElement: number
-  ): RSResult.rsResult<number, OperationError> {
+  ): Result.result<number, OperationError> {
     // We decided that 0.0, not an error at answerElement = 0.0, is a desirable value.
     if (answerElement === 0) {
-      return RSResult.Ok(0);
+      return Result.Ok(0);
     } else if (estimateElement === 0) {
-      return RSResult.Ok(Infinity);
+      return Result.Ok(Infinity);
     } else {
       return minusScaledLogOfQuotient({
         esti: estimateElement,
@@ -52,9 +52,9 @@ export const WithDistAnswer = {
   }: {
     estimate: AnyPointSet;
     answer: AnyPointSet;
-  }): RSResult.rsResult<number, OperationError> {
+  }): Result.result<number, OperationError> {
     const combineAndIntegrate = (estimate: AnyPointSet, answer: AnyPointSet) =>
-      RSResult.fmap(
+      Result.fmap(
         combinePointwise(estimate, answer, WithDistAnswer.integrand),
         (t) => t.integralEndY()
       );
@@ -62,7 +62,7 @@ export const WithDistAnswer = {
     const getMixedSums = (
       estimate: AnyPointSet,
       answer: AnyPointSet
-    ): RSResult.rsResult<[number, number], OperationError> => {
+    ): Result.result<[number, number], OperationError> => {
       const esti = estimate.toMixed();
       const answ = answer.toMixed();
       const estiContinuousPart = esti.toContinuous();
@@ -75,12 +75,12 @@ export const WithDistAnswer = {
         answContinuousPart &&
         answDiscretePart
       ) {
-        return RSResult.merge(
+        return Result.merge(
           combineAndIntegrate(estiDiscretePart, answDiscretePart),
           combineAndIntegrate(estiContinuousPart, answContinuousPart)
         );
       } else {
-        return RSResult.Error(makeOtherError("unreachable state"));
+        return Result.Error(makeOtherError("unreachable state"));
       }
     };
 
@@ -90,7 +90,7 @@ export const WithDistAnswer = {
     ) {
       return combineAndIntegrate(estimate, answer);
     } else {
-      return RSResult.fmap(
+      return Result.fmap(
         getMixedSums(estimate, answer),
         ([discretePart, continuousPart]) => discretePart + continuousPart
       );
@@ -105,7 +105,7 @@ export const WithDistAnswer = {
     estimate: AnyPointSet;
     answer: AnyPointSet;
     prior: AnyPointSet;
-  }): RSResult.rsResult<number, OperationError> {
+  }): Result.result<number, OperationError> {
     let kl1 = WithDistAnswer.sum({
       estimate,
       answer,
@@ -114,7 +114,7 @@ export const WithDistAnswer = {
       estimate: prior,
       answer,
     });
-    return RSResult.fmap(RSResult.merge(kl1, kl2), ([v1, v2]) => v1 - v2);
+    return Result.fmap(Result.merge(kl1, kl2), ([v1, v2]) => v1 - v2);
   },
 };
 
@@ -128,21 +128,21 @@ export const WithScalarAnswer = {
   }: {
     estimate: AnyPointSet;
     answer: number;
-  }): RSResult.rsResult<number, OperationError> {
+  }): Result.result<number, OperationError> {
     const _score = (
       estimatePdf: (x: number) => number | undefined,
       answer: number
-    ): RSResult.rsResult<number, OperationError> => {
+    ): Result.result<number, OperationError> => {
       const density = estimatePdf(answer);
       if (density === undefined) {
-        return RSResult.Error(PdfInvalidError);
+        return Result.Error(PdfInvalidError);
       } else {
         if (density < 0) {
-          return RSResult.Error(PdfInvalidError);
+          return Result.Error(PdfInvalidError);
         } else if (density === 0) {
-          return RSResult.Ok(Infinity);
+          return Result.Ok(Infinity);
         } else {
-          return RSResult.Ok(-logFn(density));
+          return Result.Ok(-logFn(density));
         }
       }
     };
@@ -163,9 +163,9 @@ export const WithScalarAnswer = {
     estimate: AnyPointSet;
     answer: number;
     prior: AnyPointSet;
-  }): RSResult.rsResult<number, OperationError> {
-    return RSResult.fmap(
-      RSResult.merge(
+  }): Result.result<number, OperationError> {
+    return Result.fmap(
+      Result.merge(
         WithScalarAnswer.score({ estimate, answer }),
         WithScalarAnswer.score({ estimate: prior, answer })
       ),

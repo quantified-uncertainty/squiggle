@@ -1,4 +1,4 @@
-import { result } from "./types";
+import { result } from "../utility/result";
 import { wrapDistribution } from "./SqDistribution";
 import { SqLambda } from "./SqLambda";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
@@ -156,5 +156,5 @@ export type SqValue =
   | SqVoidValue;
 
 export const toStringResult = (result: result<SqValue, SqError>) => {
-  return `${result.tag}(${result.value.toString()})`;
+  return `${result.ok ? "Ok" : "Error"}(${result.value.toString()})`;
 };

@@ -1,7 +1,6 @@
 import { BaseDist } from "../../../src/Dist/BaseDist";
 import { distErrorToString } from "../../../src/Dist/DistError";
 import { logScoreDistAnswer, mixture } from "../../../src/Dist/DistOperations";
-import * as RSResult from "../../../src/rsResult";
 import { env, mkNormal, mkUniform, unpackResult } from "../../TestHelpers";
 import {
   floatDist,
@@ -20,11 +19,11 @@ const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
     prior: undefined,
     env,
   });
-  if (result.TAG === RSResult.E.Error) {
-    console.log(distErrorToString(result._0));
+  if (!result.ok) {
+    console.log(distErrorToString(result.value));
     throw new Error("logScore failed");
   }
-  return result._0;
+  return result.value;
 };
 
 // integral from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx

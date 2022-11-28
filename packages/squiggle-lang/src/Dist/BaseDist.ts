@@ -1,5 +1,5 @@
-import { rsResult } from "../rsResult";
-import * as RSResult from "../rsResult";
+import { result } from "../utility/result";
+import * as Result from "../utility/result";
 import { DistError, notYetImplemented } from "./DistError";
 import { PointSetDist } from "./PointSetDist";
 import * as magicNumbers from "../magicNumbers";
@@ -22,29 +22,29 @@ export abstract class BaseDist {
     left: number | undefined,
     right: number | undefined,
     opts?: { env: Env } // needed for SymbolicDists
-  ): rsResult<BaseDist, DistError>;
+  ): result<BaseDist, DistError>;
 
   abstract integralEndY(): number;
 
-  abstract pdf(x: number, opts: { env: Env }): rsResult<number, DistError>;
+  abstract pdf(x: number, opts: { env: Env }): result<number, DistError>;
   abstract cdf(x: number): number;
   abstract inv(x: number): number;
 
-  stdev(): rsResult<number, DistError> {
-    return RSResult.Error(notYetImplemented());
+  stdev(): result<number, DistError> {
+    return Result.Error(notYetImplemented());
   }
-  variance(): rsResult<number, DistError> {
-    return RSResult.Error(notYetImplemented());
+  variance(): result<number, DistError> {
+    return Result.Error(notYetImplemented());
   }
-  mode(): rsResult<number, DistError> {
-    return RSResult.Error(notYetImplemented());
+  mode(): result<number, DistError> {
+    return Result.Error(notYetImplemented());
   }
 
-  abstract toPointSetDist(env: Env): rsResult<PointSetDist, DistError>;
+  abstract toPointSetDist(env: Env): result<PointSetDist, DistError>;
   abstract toSparkline(
     bucketCount: number,
     env: Env
-  ): rsResult<string, DistError>;
+  ): result<string, DistError>;
 
   expectedConvolutionCost() {
     return magicNumbers.OpCost.wildcardCost;

@@ -6,8 +6,8 @@ import {
   frNumber,
 } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
-import { Ok } from "../rsResult";
-import * as RSResult from "../rsResult";
+import { Ok } from "../utility/result";
+import * as Result from "../utility/result";
 import { vArray, vNumber } from "../value";
 import * as E_A_Floats from "../utility/E_A_Floats";
 import { REOther } from "../reducer/IError";
@@ -59,7 +59,7 @@ export const library = [
     definitions: [
       makeDefinition("first", [frArray(frAny)], ([array]) => {
         if (!array.length) {
-          return RSResult.Error(REOther("No first element"));
+          return Result.Error(REOther("No first element"));
         } else {
           return Ok(array[0]);
         }
@@ -72,7 +72,7 @@ export const library = [
     definitions: [
       makeDefinition("last", [frArray(frAny)], ([array]) => {
         if (!array.length) {
-          return RSResult.Error(REOther("No last element"));
+          return Result.Error(REOther("No last element"));
         } else {
           return Ok(array[array.length - 1]);
         }

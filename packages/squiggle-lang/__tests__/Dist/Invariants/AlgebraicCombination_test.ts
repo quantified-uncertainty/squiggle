@@ -5,7 +5,7 @@ when things substantially change.
 Also, there are some open comments in https://github.com/quantified-uncertainty/squiggle/pull/232 that haven't been addressed.
 */
 
-import * as RSResult from "../../../src/rsResult";
+import * as Result from "../../../src/utility/result";
 import {
   normalDist5, // mean=5, stdev=2
   normalDist10, // mean=10, stdev=2
@@ -67,7 +67,7 @@ describe("(Algebraic) addition of distributions", () => {
       (x) => {
         const received = unpackResult(normalDist10.pdf(x)); // this should be normal(10, sqrt(8))
         const calculated: number = unpackResult(
-          RSResult.bind(algebraicAdd(normalDist5, normalDist5, { env }), (d) =>
+          Result.bind(algebraicAdd(normalDist5, normalDist5, { env }), (d) =>
             d.pdf(x, { env })
           )
         );
@@ -79,7 +79,7 @@ describe("(Algebraic) addition of distributions", () => {
     test("(normal(mean=10) + normal(mean=10)).pdf(1.9e1)", () => {
       const received = unpackResult(normalDist20.pdf(1.9e1));
       const calculated: number = unpackResult(
-        RSResult.bind(algebraicAdd(normalDist10, normalDist10, { env }), (d) =>
+        Result.bind(algebraicAdd(normalDist10, normalDist10, { env }), (d) =>
           d.pdf(1.9e1, { env })
         )
       );
@@ -88,7 +88,7 @@ describe("(Algebraic) addition of distributions", () => {
     });
     test("(uniform(low=9, high=10) + beta(alpha=2, beta=5)).pdf(10)", () => {
       const received: number = unpackResult(
-        RSResult.bind(algebraicAdd(uniformDist, betaDist, { env }), (d) =>
+        Result.bind(algebraicAdd(uniformDist, betaDist, { env }), (d) =>
           d.pdf(1e1, { env })
         )
       );
@@ -100,7 +100,7 @@ describe("(Algebraic) addition of distributions", () => {
     });
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).pdf(10)", () => {
       const received = unpackResult(
-        RSResult.bind(algebraicAdd(betaDist, uniformDist, { env }), (d) =>
+        Result.bind(algebraicAdd(betaDist, uniformDist, { env }), (d) =>
           d.pdf(1e1, { env })
         )
       );

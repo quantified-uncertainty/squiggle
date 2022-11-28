@@ -17,9 +17,8 @@ import {
 import { PointSetDist } from "../Dist/PointSetDist";
 import { vDist, vNumber } from "../value";
 import * as XYShape from "../XYShape";
-import * as RSResult from "../rsResult";
 import { xyShapeDistError } from "../Dist/DistError";
-import { Ok } from "../rsResult";
+import { Ok } from "../utility/result";
 
 const maker = new FnFactory({
   nameSpace: "PointSet",
@@ -30,12 +29,12 @@ const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
   const result = XYShape.T.makeFromZipped(
     inputs.map(({ x, y }) => [x, y] as const)
   );
-  if (result.TAG === RSResult.E.Error) {
+  if (!result.ok) {
     return IError.Message.throw(
-      IError.REDistributionError(xyShapeDistError(result._0))
+      IError.REDistributionError(xyShapeDistError(result.value))
     );
   }
-  return result._0;
+  return result.value;
 };
 
 export const library = [

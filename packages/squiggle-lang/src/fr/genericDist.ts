@@ -2,13 +2,13 @@ import { FRFunction } from "../library/registry/core";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers";
 import * as IError from "../reducer/IError";
 import * as SymbolicDist from "../Dist/SymbolicDist";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import * as magicNumbers from "../magicNumbers";
 import { DistError, otherError } from "../Dist/DistError";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import { Value, vArray, vDist, vNumber } from "../value";
 import { frDist, frNumber } from "../library/registry/frTypes";
-import { Ok } from "../rsResult";
+import { Ok } from "../utility/result";
 import {
   BinaryOperation,
   BinaryOperations,
@@ -23,9 +23,9 @@ const maker = new FnFactory({
 });
 
 const toValueResult = (
-  result: RSResult.rsResult<BaseDist, DistError>
-): RSResult.rsResult<Value, IError.Message> => {
-  return RSResult.fmap2(result, vDist, (e) => IError.REDistributionError(e));
+  result: Result.result<BaseDist, DistError>
+): Result.result<Value, IError.Message> => {
+  return Result.fmap2(result, vDist, (e) => IError.REDistributionError(e));
 };
 
 type OpPair = [string, BinaryOperation];
@@ -118,7 +118,7 @@ export const library: FRFunction[] = [
       "triangular",
       [frNumber, frNumber, frNumber],
       ([low, medium, high]) =>
-        RSResult.fmap2(
+        Result.fmap2(
           SymbolicDist.Triangular.make({ low, medium, high }),
           vDist,
           (e) => IError.REDistributionError(otherError(e))

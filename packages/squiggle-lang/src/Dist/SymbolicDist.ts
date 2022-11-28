@@ -1,14 +1,14 @@
 import { BaseDist } from "./BaseDist";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import jstat from "jstat";
 import * as E_A_Floats from "../utility/E_A_Floats";
 import * as XYShape from "../XYShape";
 import * as magicNumbers from "../magicNumbers";
 import * as Operation from "../operation";
 import { PointSetDist } from "./PointSetDist";
-import { Ok, rsResult } from "../rsResult";
+import { Ok, result } from "../utility/result";
 import { ContinuousShape } from "../PointSet/Continuous";
-import { DistError, notYetImplemented, xyShapeDistError } from "./DistError";
+import { DistError, xyShapeDistError } from "./DistError";
 import { OperationError } from "../OperationError";
 import { DiscreteShape } from "../PointSet/Discrete";
 import { Env } from "./env";
@@ -30,11 +30,8 @@ export abstract class SymbolicDist extends BaseDist {
   abstract toString(): string;
 
   // FIXME - copy-pasted from SampleSetDist
-  toSparkline(
-    bucketCount: number,
-    env: Env
-  ): RSResult.rsResult<string, DistError> {
-    return RSResult.bind(
+  toSparkline(bucketCount: number, env: Env): Result.result<string, DistError> {
+    return Result.bind(
       this.toPointSetDist(
         {
           // In this process we want the xyPointLength to be a bit longer than the eventual toSparkline downsampling. 3 is fairly arbitrarily.
@@ -58,7 +55,7 @@ export abstract class SymbolicDist extends BaseDist {
   // without result wrapper, guaranteed to work on symbolic dists
   protected abstract simplePdf(f: number): number;
 
-  pdf(f: number): RSResult.rsResult<number, DistError> {
+  pdf(f: number): Result.result<number, DistError> {
     return Ok(this.simplePdf(f));
   }
 
@@ -87,7 +84,7 @@ export abstract class SymbolicDist extends BaseDist {
   toPointSetDist(
     env: Env,
     xSelection: PointsetXSelection = "ByWeight"
-  ): rsResult<PointSetDist, DistError> {
+  ): result<PointSetDist, DistError> {
     const xs = this.interpolateXs({
       xSelection,
       points: env.xyPointLength,
@@ -95,15 +92,15 @@ export abstract class SymbolicDist extends BaseDist {
     });
     const ys = xs.map((x) => this.simplePdf(x));
     const xyShapeR = XYShape.T.make(xs, ys);
-    if (xyShapeR.TAG === RSResult.E.Error) {
-      return RSResult.Error(xyShapeDistError(xyShapeR._0));
+    if (!xyShapeR.ok) {
+      return Result.Error(xyShapeDistError(xyShapeR.value));
     }
 
     return Ok(
       new PointSetDist(
         new ContinuousShape({
           integralSumCache: 1.0,
-          xyShape: xyShapeR._0,
+          xyShape: xyShapeR.value,
         })
       )
     );
@@ -113,19 +110,19 @@ export abstract class SymbolicDist extends BaseDist {
     left: number | undefined,
     right: number | undefined,
     opts?: { env: Env }
-  ): rsResult<BaseDist, DistError> {
+  ): result<BaseDist, DistError> {
     if (!opts) {
       throw new Error("env is necessary for truncating a symbolic dist");
     }
     if (left === undefined && right === undefined) {
-      return RSResult.Ok(this);
+      return Result.Ok(this);
     }
 
     const pointSetDistR = this.toPointSetDist(opts.env);
-    if (pointSetDistR.TAG === RSResult.E.Error) {
+    if (!pointSetDistR.ok) {
       return pointSetDistR;
     }
-    return pointSetDistR._0.truncate(left, right);
+    return pointSetDistR.value.truncate(left, right);
   }
 
   min() {
@@ -169,9 +166,9 @@ export class Normal extends SymbolicDist {
   }: {
     mean: number;
     stdev: number;
-  }): rsResult<Normal, string> {
+  }): result<Normal, string> {
     if (stdev <= 0) {
-      return RSResult.Error(
+      return Result.Error(
         "Standard deviation of normal distribution must be larger than 0"
       );
     }
@@ -202,7 +199,7 @@ export class Normal extends SymbolicDist {
     return jstat.normal.mean(this._mean, this._stdev);
   }
 
-  static from90PercentCI(low: number, high: number): rsResult<Normal, string> {
+  static from90PercentCI(low: number, high: number): result<Normal, string> {
     const mean = E_A_Floats.mean([low, high]);
     const stdev = (high - low) / (2 * normal95confidencePoint);
     return Normal.make({ mean, stdev });
@@ -289,9 +286,9 @@ export class Exponential extends SymbolicDist {
     this.rate = rate;
   }
 
-  static make(rate: number): rsResult<Exponential, string> {
+  static make(rate: number): result<Exponential, string> {
     if (rate <= 0) {
-      return RSResult.Error(
+      return Result.Error(
         "Exponential distributions rate must be larger than 0."
       );
     }
@@ -334,11 +331,11 @@ export class Cauchy extends SymbolicDist {
   }: {
     local: number;
     scale: number;
-  }): rsResult<Cauchy, string> {
+  }): result<Cauchy, string> {
     if (scale > 0) {
       return Ok(new Cauchy({ local, scale }));
     } else {
-      return RSResult.Error(
+      return Result.Error(
         "Cauchy distribution scale parameter must larger than 0."
       );
     }
@@ -393,11 +390,11 @@ export class Triangular extends SymbolicDist {
     low: number;
     medium: number;
     high: number;
-  }): rsResult<Triangular, string> {
+  }): result<Triangular, string> {
     if (low < medium && medium < high) {
       return Ok(new Triangular({ low, medium, high }));
     }
-    return RSResult.Error("Triangular values must be increasing order.");
+    return Result.Error("Triangular values must be increasing order.");
   }
 
   toString() {
@@ -443,11 +440,11 @@ export class Beta extends SymbolicDist {
   }: {
     alpha: number;
     beta: number;
-  }): rsResult<Beta, string> {
+  }): result<Beta, string> {
     if (alpha > 0 && beta > 0) {
       return Ok(new Beta({ alpha, beta }));
     } else {
-      return RSResult.Error("Beta distribution parameters must be positive");
+      return Result.Error("Beta distribution parameters must be positive");
     }
   }
 
@@ -481,7 +478,7 @@ export class Beta extends SymbolicDist {
   }: {
     mean: number;
     sampleSize: number;
-  }): rsResult<Beta, string> {
+  }): result<Beta, string> {
     // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_sample_size
     const alpha = mean * sampleSize;
     const beta = (1 - mean) * sampleSize;
@@ -494,12 +491,12 @@ export class Beta extends SymbolicDist {
   }: {
     mean: number;
     stdev: number;
-  }): rsResult<Beta, string> {
+  }): result<Beta, string> {
     // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
     if (!(0 < stdev && stdev <= 0.5)) {
-      return RSResult.Error("Stdev must be in in between 0 and 0.5.");
+      return Result.Error("Stdev must be in in between 0 and 0.5.");
     } else if (!(0 <= mean && mean <= 1)) {
-      return RSResult.Error("Mean must be in between 0 and 1.0.");
+      return Result.Error("Mean must be in between 0 and 1.0.");
     } else {
       const variance = stdev * stdev;
       const sampleSize = (mean * (1 - mean)) / variance - 1;
@@ -524,11 +521,9 @@ export class Lognormal extends SymbolicDist {
   }: {
     mu: number;
     sigma: number;
-  }): rsResult<Lognormal, string> {
+  }): result<Lognormal, string> {
     if (sigma <= 0) {
-      return RSResult.Error(
-        "Lognormal standard deviation must be larger than 0"
-      );
+      return Result.Error("Lognormal standard deviation must be larger than 0");
     }
     return Ok(new Lognormal({ mu, sigma }));
   }
@@ -566,15 +561,13 @@ export class Lognormal extends SymbolicDist {
   }: {
     mean: number;
     stdev: number;
-  }): rsResult<Lognormal, string> {
+  }): result<Lognormal, string> {
     // https://math.stackexchange.com/questions/2501783/parameters-of-a-lognormal-distribution
     // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Generation_and_parameters
     if (mean <= 0) {
-      return RSResult.Error("Lognormal mean must be larger than 0");
+      return Result.Error("Lognormal mean must be larger than 0");
     } else if (stdev <= 0) {
-      return RSResult.Error(
-        "Lognormal standard deviation must be larger than 0"
-      );
+      return Result.Error("Lognormal standard deviation must be larger than 0");
     } else {
       const variance = stdev ** 2;
       const meanSquared = mean ** 2;
@@ -661,11 +654,11 @@ export class Uniform extends SymbolicDist {
   }: {
     low: number;
     high: number;
-  }): rsResult<Uniform, string> {
+  }): result<Uniform, string> {
     if (high > low) {
       return Ok(new Uniform({ low, high }));
     } else {
-      return RSResult.Error("High must be larger than low");
+      return Result.Error("High must be larger than low");
     }
   }
 
@@ -720,7 +713,7 @@ export class Uniform extends SymbolicDist {
   truncate(
     left: number | undefined,
     right: number | undefined
-  ): rsResult<Uniform, DistError> {
+  ): result<Uniform, DistError> {
     //todo: add check
     const newLow = Math.max(left ?? -Infinity, this.low);
     const newHigh = Math.min(right ?? Infinity, this.high);
@@ -749,11 +742,11 @@ export class Logistic extends SymbolicDist {
   }: {
     location: number;
     scale: number;
-  }): rsResult<Logistic, string> {
+  }): result<Logistic, string> {
     if (scale > 0) {
       return Ok(new Logistic({ location, scale }));
     } else {
-      return RSResult.Error("Scale must be positive");
+      return Result.Error("Scale must be positive");
     }
   }
 
@@ -786,12 +779,12 @@ export class Logistic extends SymbolicDist {
     return this.location;
   }
 
-  stdev(): RSResult.rsResult<number, DistError> {
-    return RSResult.Ok(Math.sqrt((square(this.scale) * square(Math.PI)) / 3));
+  stdev(): Result.result<number, DistError> {
+    return Result.Ok(Math.sqrt((square(this.scale) * square(Math.PI)) / 3));
   }
 
-  variance(): RSResult.rsResult<number, DistError> {
-    return RSResult.Ok((square(this.scale) * square(Math.PI)) / 3);
+  variance(): Result.result<number, DistError> {
+    return Result.Ok((square(this.scale) * square(Math.PI)) / 3);
   }
 }
 
@@ -802,11 +795,11 @@ export class Bernoulli extends SymbolicDist {
     this.p = p;
   }
 
-  static make(p: number): rsResult<Bernoulli, string> {
+  static make(p: number): result<Bernoulli, string> {
     if (p >= 0.0 && p <= 1.0) {
       return Ok(new Bernoulli(p));
     } else {
-      return RSResult.Error("Bernoulli parameter must be between 0 and 1");
+      return Result.Error("Bernoulli parameter must be between 0 and 1");
     }
   }
 
@@ -843,14 +836,14 @@ export class Bernoulli extends SymbolicDist {
     return this.p === 0 ? 0 : 1;
   }
 
-  stdev(): RSResult.rsResult<number, DistError> {
+  stdev(): Result.result<number, DistError> {
     return Ok(Math.sqrt(this.p * (1 - this.p)));
   }
-  variance(): RSResult.rsResult<number, DistError> {
+  variance(): Result.result<number, DistError> {
     return Ok(this.p * (1 - this.p));
   }
 
-  toPointSetDist(): rsResult<PointSetDist, DistError> {
+  toPointSetDist(): result<PointSetDist, DistError> {
     return Ok(
       new PointSetDist(
         new DiscreteShape({
@@ -877,12 +870,12 @@ export class Gamma extends SymbolicDist {
   }: {
     shape: number;
     scale: number;
-  }): rsResult<Gamma, string> {
+  }): result<Gamma, string> {
     if (shape <= 0) {
-      return RSResult.Error("shape must be larger than 0");
+      return Result.Error("shape must be larger than 0");
     }
     if (scale <= 0) {
-      return RSResult.Error("scale must be larger than 0");
+      return Result.Error("scale must be larger than 0");
     }
     return Ok(new Gamma({ shape, scale }));
   }
@@ -915,11 +908,11 @@ export class Float extends SymbolicDist {
   toString() {
     return `PointMass(${this.t})`;
   }
-  static make(t: number): rsResult<Float, string> {
+  static make(t: number): result<Float, string> {
     if (isFinite(t)) {
       return Ok(new Float(t));
     } else {
-      return RSResult.Error("Float must be finite");
+      return Result.Error("Float must be finite");
     }
   }
 
@@ -953,7 +946,7 @@ export class Float extends SymbolicDist {
   isFloat(): boolean {
     return true;
   }
-  toPointSetDist(): rsResult<PointSetDist, DistError> {
+  toPointSetDist(): result<PointSetDist, DistError> {
     return Ok(
       new PointSetDist(
         new DiscreteShape({
@@ -966,14 +959,14 @@ export class Float extends SymbolicDist {
 }
 
 export const From90thPercentile = {
-  make(low: number, high: number): rsResult<SymbolicDist, string> {
+  make(low: number, high: number): result<SymbolicDist, string> {
     if (low <= 0 && low < high) {
       return Normal.from90PercentCI(low, high);
     }
     if (low < high) {
       return Lognormal.from90PercentCI(low, high);
     }
-    return RSResult.Error("Low value must be less than high value.");
+    return Result.Error("Low value must be less than high value.");
   },
 };
 
@@ -986,9 +979,9 @@ export const tryAnalyticalSimplification = (
   d1: SymbolicDist,
   d2: SymbolicDist,
   op: Operation.AlgebraicOperation
-): rsResult<SymbolicDist, OperationError> | undefined => {
+): result<SymbolicDist, OperationError> | undefined => {
   if (d1 instanceof Float && d2 instanceof Float) {
-    return RSResult.fmap(
+    return Result.fmap(
       Operation.Algebraic.toFn(op, d1.t, d2.t),
       (v) => new Float(v)
     );

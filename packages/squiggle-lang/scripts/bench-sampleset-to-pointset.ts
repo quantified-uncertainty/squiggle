@@ -27,7 +27,7 @@ for (let p = 0; p <= maxP; p++) {
     project.run("main");
   });
   const result = project.getResult("main");
-  if (result.tag != "Ok") {
+  if (!result.ok) {
     throw new Error("Code failed: " + result.value.toString());
   }
   console.log(`1e${p}`, "\t", time);

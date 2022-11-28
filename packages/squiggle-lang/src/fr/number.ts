@@ -1,9 +1,9 @@
 import { FnDefinition, makeDefinition } from "../library/registry/fnDefinition";
 import { frArray, frNumber } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
-import * as RSResult from "../rsResult";
+import * as Result from "../utility/result";
 import * as E_A_Floats from "../utility/E_A_Floats";
-import { Ok } from "../rsResult";
+import { Ok } from "../utility/result";
 import { Value, vArray, vNumber } from "../value";
 import { Message, REOther } from "../reducer/IError";
 
@@ -12,8 +12,8 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const emptyList = (): RSResult.rsResult<Value, Message> =>
-  RSResult.Error(REOther("List is empty"));
+const emptyList = (): Result.result<Value, Message> =>
+  Result.Error(REOther("List is empty"));
 
 const makeNumberArrayToNumberDefinition = (
   name: string,

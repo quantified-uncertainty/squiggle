@@ -1,4 +1,3 @@
-import * as RSResult from "../../src/rsResult";
 import * as IError from "../../src/reducer/IError";
 import { evaluateStringToResult } from "../../src/reducer";
 import {
@@ -117,10 +116,10 @@ describe("stacktraces", () => {
   h(x) = g(x)
   h(5)
 `);
-    if (result.TAG !== RSResult.E.Error) {
+    if (result.ok) {
       throw new Error("Expected code to fail");
     }
-    const error = IError.errorToStringWithStackTrace(result._0);
+    const error = IError.errorToStringWithStackTrace(result.value);
 
     expect(error)
       .toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]

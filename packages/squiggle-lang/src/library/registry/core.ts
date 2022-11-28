@@ -1,7 +1,7 @@
 import { ReducerContext } from "../../reducer/Context";
 import * as IError from "../../reducer/IError";
-import { rsResult } from "../../rsResult";
-import * as RSResult from "../../rsResult";
+import { result } from "../../utility/result";
+import * as Result from "../../utility/result";
 import { ReducerFn, Value } from "../../value";
 import {
   FnDefinition,
@@ -73,10 +73,10 @@ export const call = (
   args: Value[],
   context: ReducerContext,
   reducer: ReducerFn
-): rsResult<Value, IError.Message> => {
+): result<Value, IError.Message> => {
   const definitions = registry.fnNameDict.get(fnName);
   if (definitions === undefined) {
-    return RSResult.Error(IError.RESymbolNotFound(fnName));
+    return Result.Error(IError.RESymbolNotFound(fnName));
   }
   const showNameMatchDefinitions = () => {
     const defsString = definitions
@@ -92,5 +92,5 @@ export const call = (
       return callResult;
     }
   }
-  return RSResult.Error(IError.REOther(showNameMatchDefinitions()));
+  return Result.Error(IError.REOther(showNameMatchDefinitions()));
 };
