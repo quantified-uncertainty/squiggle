@@ -21,7 +21,7 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "set",
-    // ~output=EvtRecord,
+    output: "Record",
     examples: [`Dict.set({a: 1, b: 2}, "c", 3)`],
     definitions: [
       makeDefinition(
@@ -33,7 +33,7 @@ export const library = [
   }),
   maker.make({
     name: "merge",
-    // ~output=EvtRecord,
+    output: "Record",
     examples: [`Dict.merge({a: 1, b: 2}, {c: 3, d: 4})`],
     definitions: [
       makeDefinition("merge", [frDict(frAny), frDict(frAny)], ([d1, d2]) =>
@@ -43,7 +43,7 @@ export const library = [
   }),
   maker.make({
     name: "mergeMany",
-    // ~output=EvtRecord,
+    output: "Record",
     examples: [`Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}])`],
     definitions: [
       makeDefinition("mergeMany", [frArray(frDict(frAny))], ([dicts]) =>
@@ -57,7 +57,7 @@ export const library = [
   }),
   maker.make({
     name: "keys",
-    // ~output=EvtArray,
+    output: "Array",
     examples: [`Dict.keys({a: 1, b: 2})`],
     definitions: [
       makeDefinition("keys", [frDict(frAny)], ([d1]) =>
@@ -67,7 +67,7 @@ export const library = [
   }),
   maker.make({
     name: "values",
-    // output:EvtArray,
+    output: "Array",
     examples: [`Dict.values({a: 1, b: 2})`],
     definitions: [
       makeDefinition("values", [frDict(frAny)], ([d1]) =>
@@ -77,7 +77,7 @@ export const library = [
   }),
   maker.make({
     name: "toList",
-    // ~output=EvtArray,
+    output: "Array",
     examples: [`Dict.toList({a: 1, b: 2})`],
     definitions: [
       makeDefinition("toList", [frDict(frAny)], ([dict]) =>
@@ -87,7 +87,7 @@ export const library = [
   }),
   maker.make({
     name: "fromList",
-    // ~output=EvtRecord,
+    output: "Record",
     examples: [`Dict.fromList([["a", 1], ["b", 2]])`],
     definitions: [
       makeDefinition(
@@ -99,7 +99,7 @@ export const library = [
   }),
   maker.make({
     name: "map",
-    // ~output=EvtRecord,
+    output: "Record",
     examples: [`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
     definitions: [
       makeDefinition(

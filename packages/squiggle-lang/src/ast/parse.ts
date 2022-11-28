@@ -108,11 +108,11 @@ const nodeToString = (node: AnyPeggyNode): string => {
   }
 };
 
-const toStringError = (error: ParseError): string => {
+export const toStringError = (error: ParseError): string => {
   return `Syntax Error: ${error.message}}`;
 };
 
-const toStringResult = (r: ParseResult): string => {
+export const nodeResultToString = (r: ParseResult): string => {
   if (r.TAG === RSResult.E.Error) {
     return toStringError(r._0);
   } else {

@@ -39,7 +39,7 @@ const combinatoricsLibrary: FRFunction[] = [
   }),
   maker.make({
     name: "binomial",
-    //   ~output=EvtNumber,
+    output: "Number",
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
       makeDefinition("binomial", [frNumber, frNumber, frNumber], ([n, k, p]) =>
@@ -132,7 +132,7 @@ const integrationLibrary: FRFunction[] = [
   maker.make({
     name: "integrateFunctionBetweenWithNumIntegrationPoints",
     requiresNamespace: false,
-    //   ~output=EvtNumber,
+    output: "Number",
     examples: [
       `Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`,
     ],
@@ -171,7 +171,7 @@ const integrationLibrary: FRFunction[] = [
   maker.make({
     name: "integrateFunctionBetweenWithEpsilon",
     requiresNamespace: false,
-    //   ~output=EvtNumber,
+    output: "Number",
     examples: [
       `Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`,
     ],
@@ -213,7 +213,7 @@ const findBiggestElementIndex = (xs: number[]) =>
 const diminishingReturnsLibrary = [
   maker.make({
     name: "optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
-    //   ~output=EvtArray,
+    output: "Array",
     requiresNamespace: false,
     examples: [
       `Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions([{|x| x+1}, {|y| 10}], 100, 0.01)`,

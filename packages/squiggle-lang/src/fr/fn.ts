@@ -17,7 +17,7 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "declare",
-    // ~output=EvtDeclaration,
+    output: "Declaration",
     description:
       "Adds metadata to a function of the input ranges. Works now for numeric and date inputs. This is useful when making predictions. It allows you to limit the domain that your prediction will be used and scored within.",
     examples: [

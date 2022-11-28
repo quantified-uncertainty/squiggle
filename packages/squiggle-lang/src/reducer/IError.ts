@@ -172,7 +172,7 @@ export const Message = {
         return `Math Error: ${operationErrorToString(err.err)}`;
       case "REJavaScriptExn": {
         let answer = "JS Exception:";
-        if (err.name !== undefined) answer += ` ${err.name}`;
+        if (err.name !== undefined) answer += ` ${err.name}:`;
         if (err.msg !== undefined) answer += ` ${err.msg}`;
         return answer;
       }
@@ -229,7 +229,7 @@ class IException extends Error {
   }
 }
 
-const fromMessageWithFrameStack = (
+export const fromMessageWithFrameStack = (
   message: Message,
   frameStack: FrameStack.FrameStack
 ): IError => ({

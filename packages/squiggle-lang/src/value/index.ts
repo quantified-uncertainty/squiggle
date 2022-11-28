@@ -116,7 +116,7 @@ export const valueToString = (v: Value): string => {
     case "Lambda": {
       switch (v.value.type) {
         case "Lambda":
-          return `lambda(${v.value.parameters.join(",")})=>internal code)`;
+          return `lambda(${v.value.parameters.join(",")}=>internal code)`;
         case "Builtin":
           return "Builtin function";
         default:

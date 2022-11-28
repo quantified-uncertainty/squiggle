@@ -38,7 +38,7 @@ const fnList: core.FRFunction[] = [
   ...listLibrary,
 ];
 
-const registry = core.make(fnList);
+export const registry = core.make(fnList);
 export const call = (
   fnName: string,
   args: Value[],

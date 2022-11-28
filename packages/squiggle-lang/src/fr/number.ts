@@ -46,52 +46,45 @@ export const library = [
     fn: Math.floor,
   }),
   maker.n2n({
-    name: "ceiling",
-    // ~output=EvtNumber,
+    name: "ceil",
     examples: ["ceil(3.5)"],
     fn: Math.ceil,
   }),
   maker.n2n({
     name: "abs",
     description: "absolute value",
-    // output:EvtNumber,
     examples: [`abs(3.5)`],
     fn: Math.abs,
   }),
   maker.n2n({
     name: "exp",
     description: "exponent",
-    // ~output=EvtNumber,
     examples: [`exp(3.5)`],
     fn: Math.exp,
   }),
   maker.n2n({
     name: "log",
-    // ~output=EvtNumber,
     examples: [`log(3.5)`],
     fn: Math.log,
   }),
   maker.n2n({
     name: "log10",
-    // ~output=EvtNumber,
     examples: [`log10(3.5)`],
     fn: Math.log10,
   }),
   maker.n2n({
     name: "log2",
-    // ~output=EvtNumber,
     examples: [`log2(3.5)`],
     fn: Math.log2,
   }),
   maker.n2n({
     name: "round",
-    // ~output=EvtNumber,
     examples: [`round(3.5)`],
     fn: Math.round,
   }),
   maker.make({
     name: "sum",
-    // output=EvtNumber,
+    output: "Number",
     examples: [`sum([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition("sum", (arr) => E_A_Floats.sum(arr)),
@@ -99,7 +92,7 @@ export const library = [
   }),
   maker.make({
     name: "product",
-    //   output=EvtNumber,
+    output: "Number",
     examples: [`product([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition("product", (arr) =>
@@ -109,7 +102,7 @@ export const library = [
   }),
   maker.make({
     name: "min",
-    //   ~output=EvtNumber,
+    output: "Number",
     examples: [`min([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition("min", (arr) => Math.min(...arr)),
@@ -117,7 +110,7 @@ export const library = [
   }),
   maker.make({
     name: "max",
-    //   ~output=EvtNumber,
+    output: "Number",
     examples: [`max([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition("max", (arr) => Math.max(...arr)),
@@ -125,7 +118,7 @@ export const library = [
   }),
   maker.make({
     name: "mean",
-    //   output=EvtNumber,
+    output: "Number",
     examples: [`mean([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition("mean", (arr) => E_A_Floats.mean(arr)),
@@ -134,7 +127,7 @@ export const library = [
   maker.make({
     name: "geomean",
     description: "geometric mean",
-    //   output:EvtNumber,
+    output: "Number",
     examples: [`geomean([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition("geomean", (arr) =>
@@ -145,7 +138,7 @@ export const library = [
   maker.make({
     name: "stdev",
     description: "standard deviation",
-    //   output=EvtNumber,
+    output: "Number",
     examples: [`stdev([3,5,2,3,5])`],
     definitions: [
       makeNumberArrayToNumberDefinition("stdev", (arr) =>
@@ -155,7 +148,7 @@ export const library = [
   }),
   maker.make({
     name: "variance",
-    //   output=EvtNumber,
+    output: "Number",
     examples: [`variance([3,5,2,3,5])`],
     definitions: [
       makeNumberArrayToNumberDefinition("variance", (arr) =>
@@ -165,7 +158,7 @@ export const library = [
   }),
   maker.make({
     name: "sort",
-    // ~output=EvtArray,
+    output: "Array",
     examples: [`sort([3,5,2,3,5])`],
     definitions: [
       makeNumberArrayToNumberArrayDefinition("sort", (arr) =>
@@ -175,7 +168,7 @@ export const library = [
   }),
   maker.make({
     name: "cumsum",
-    //   output=EvtArray,
+    output: "Array",
     description: "cumulative sum",
     examples: [`cumsum([3,5,2,3,5])`],
     definitions: [
@@ -185,7 +178,7 @@ export const library = [
   maker.make({
     name: "cumprod",
     description: "cumulative product",
-    //   ~output=EvtArray,
+    output: "Array",
     examples: [`cumprod([3,5,2,3,5])`],
     definitions: [
       makeNumberArrayToNumberArrayDefinition("cumprod", E_A_Floats.cumProd),
@@ -193,7 +186,7 @@ export const library = [
   }),
   maker.make({
     name: "diff",
-    //   output=EvtArray,
+    output: "Array",
     examples: [`diff([3,5,2,3,5])`],
     definitions: [
       makeNumberArrayToNumberArrayDefinition("diff", E_A_Floats.diff),

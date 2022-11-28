@@ -40,13 +40,12 @@ const baseLibrary = [
   maker.d2d({
     name: "fromDist",
     examples: [`SampleSet.fromDist(normal(5,2))`],
-    //   ~output=Reducer_Value.EvtDistribution,
     fn: (dist, env) => unpackDistResult(toSampleSetDist(dist, env)),
   }),
   maker.make({
     name: "fromList",
     examples: [`SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
-    //   output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition("fromList", [frArray(frNumber)], ([numbers]) =>
         repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
@@ -56,7 +55,7 @@ const baseLibrary = [
   maker.make({
     name: "toList",
     examples: [`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
-    //   output=Reducer_Value.EvtArray,
+    output: "Array",
     definitions: [
       makeDefinition("toList", [frDist], ([dist]) => {
         sampleSetAssert(dist);
@@ -67,7 +66,7 @@ const baseLibrary = [
   maker.make({
     name: "fromFn",
     examples: [`SampleSet.fromFn({|| sample(normal(5,2))})`],
-    //   output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition("fromFn", [frLambda], ([lambda], context, reducer) =>
         repackDistResult(
@@ -81,7 +80,7 @@ const baseLibrary = [
   maker.make({
     name: "map",
     examples: [`SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`],
-    //   output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition(
         "map",
@@ -102,7 +101,7 @@ const baseLibrary = [
     examples: [
       `SampleSet.map2(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), {|x, y| x + y})`,
     ],
-    //   ~output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition(
         "map2",
@@ -134,7 +133,7 @@ const baseLibrary = [
     examples: [
       `SampleSet.map3(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), {|x, y, z| max([x,y,z])})`,
     ],
-    //   ~output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition(
         "map3",
@@ -168,7 +167,7 @@ const baseLibrary = [
     examples: [
       `SampleSet.mapN([SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2))], {|x| max(x)})`,
     ],
-    //   ~output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition(
         "mapN",
@@ -211,7 +210,7 @@ const mkComparison = (
       `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), 3.0)`,
       `SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`,
     ],
-    //   ~output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition(name, [frDist, frDist], ([dist1, dist2]) => {
         sampleSetAssert(dist1);

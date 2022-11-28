@@ -1,5 +1,4 @@
-open Jest
-open Reducer_TestHelpers
+import { testEvalToBe } from "../reducerTestHelpers";
 
 /*
     You can wrap around any expression with inspect(expr) to log the value of that expression.
@@ -10,6 +9,6 @@ open Reducer_TestHelpers
     inspectPerformace(expr, label) will print out the value of expr, the label, and the time it took to evaluate expr.
 */
 describe("Debugging", () => {
-  testEvalToBe("inspect(1)", "Ok(1)")
-  testEvalToBe("inspect(1, \"one\")", "Ok(1)")
-})
+  testEvalToBe("inspect(1)", "1");
+  testEvalToBe('inspect(1, "one")', "1");
+});

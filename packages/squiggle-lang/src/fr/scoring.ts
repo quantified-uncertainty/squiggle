@@ -42,7 +42,7 @@ const runScoringDistAnswer = (
 export const library = [
   maker.make({
     name: "logScore",
-    // ~output=EvtNumber,
+    output: "Number",
     examples: [
       "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1), prior: normal(5.5,3)})",
       "Dist.logScore({estimate: normal(5,2), answer: normal(5.2,1)})",
@@ -105,7 +105,7 @@ export const library = [
   }),
   maker.make({
     name: "klDivergence",
-    // ~output=EvtNumber,
+    output: "Number",
     examples: ["Dist.klDivergence(normal(5,2), normal(5,1.5))"],
     definitions: [
       makeDefinition(

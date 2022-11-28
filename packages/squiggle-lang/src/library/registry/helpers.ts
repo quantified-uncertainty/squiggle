@@ -40,6 +40,7 @@ export class FnFactory {
   }: ArgsWithoutDefinitions & { fn: (x: number) => number }): FRFunction {
     return this.make({
       ...args,
+      output: "Number",
       definitions: [
         makeDefinition(args.name, [frNumber], ([x]) => Ok(vNumber(fn(x)))),
       ],
@@ -54,6 +55,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "Number",
       definitions: [
         makeDefinition(args.name, [frNumber, frNumber], ([x, y]) =>
           Ok(vNumber(fn(x, y)))
@@ -70,6 +72,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "Bool",
       definitions: [
         makeDefinition(args.name, [frNumber, frNumber], ([x, y]) =>
           Ok(vBool(fn(x, y)))
@@ -86,6 +89,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "Bool",
       definitions: [
         makeDefinition(args.name, [frBool, frBool], ([x, y]) =>
           Ok(vBool(fn(x, y)))
@@ -102,6 +106,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "String",
       definitions: [
         makeDefinition(args.name, [frDist], ([dist], { environment }) =>
           Ok(vString(fn(dist, environment)))
@@ -118,6 +123,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "String",
       definitions: [
         makeDefinition(
           args.name,
@@ -136,6 +142,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "Number",
       definitions: [
         makeDefinition(args.name, [frDist], ([x], { environment }) =>
           Ok(vNumber(fn(x, environment)))
@@ -152,6 +159,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "Bool",
       definitions: [
         makeDefinition(args.name, [frDist], ([x], { environment }) =>
           Ok(vBool(fn(x, environment)))
@@ -168,6 +176,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "Dist",
       definitions: [
         makeDefinition(args.name, [frDist], ([dist], { environment }) =>
           Ok(vDist(fn(dist, environment)))
@@ -184,6 +193,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "Dist",
       definitions: [
         makeDefinition(
           args.name,
@@ -202,6 +212,7 @@ export class FnFactory {
   }): FRFunction {
     return this.make({
       ...args,
+      output: "Number",
       definitions: [
         makeDefinition(
           args.name,

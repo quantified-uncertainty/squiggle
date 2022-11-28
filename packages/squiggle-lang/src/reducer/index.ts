@@ -6,20 +6,27 @@ import {
   vRecord,
   vVoid,
   valueToString,
+  Value,
 } from "../value";
 import { Expression } from "../expression";
 import * as FrameStack from "./FrameStack";
 import * as Context from "./Context";
 import * as Lambda from "./Lambda";
-import * as SqError from "./IError";
+import * as IError from "./IError";
 import { ImmutableMap } from "../utility/immutableMap";
+import { Ok, rsResult } from "../rsResult";
+import * as RSResult from "../rsResult";
+import { stdLib } from "../library";
+import { defaultEnv } from "../Dist/env";
+import { parse } from "../ast/parse";
+import { expressionFromAst } from "../ast/toExpression";
 
 const throwFrom = (
-  error: SqError.Message,
+  error: IError.Message,
   expression: Expression,
   context: Context.ReducerContext
 ): never => {
-  return SqError.throwMessageWithFrameStack(
+  return IError.throwMessageWithFrameStack(
     error,
     FrameStack.extend(
       context.frameStack,
@@ -73,7 +80,7 @@ export const evaluate: ReducerFn = (expression, context) => {
             const [key] = evaluate(eKey, context);
             if (key.type !== "String") {
               return throwFrom(
-                SqError.REOther("Record keys must be strings"),
+                IError.REOther("Record keys must be strings"),
                 expression,
                 context
               );
@@ -103,7 +110,7 @@ export const evaluate: ReducerFn = (expression, context) => {
       const value = Bindings.get(context.bindings, name);
       if (value === undefined) {
         return throwFrom(
-          SqError.RESymbolNotFound(expression.value),
+          IError.RESymbolNotFound(expression.value),
           expression,
           context
         );
@@ -124,7 +131,7 @@ export const evaluate: ReducerFn = (expression, context) => {
         );
       } else {
         return throwFrom(
-          SqError.REExpectedType("Boolean", ""),
+          IError.REExpectedType("Boolean", ""),
           expression,
           context
         );
@@ -164,7 +171,7 @@ export const evaluate: ReducerFn = (expression, context) => {
           return [result, context];
         default:
           return throwFrom(
-            SqError.RENotAFunction(valueToString(lambda)),
+            IError.RENotAFunction(valueToString(lambda)),
             expression,
             context
           );
@@ -173,4 +180,29 @@ export const evaluate: ReducerFn = (expression, context) => {
     default:
       throw new Error("Unreachable");
   }
+};
+
+const createDefaultContext = () => Context.createContext(stdLib, defaultEnv);
+
+export const evaluateExpressionToResult = (
+  expression: Expression
+): rsResult<Value, IError.IError> => {
+  const context = createDefaultContext();
+  try {
+    const [value] = evaluate(expression, context);
+    return Ok(value);
+  } catch (e) {
+    return RSResult.Error(IError.errorFromException(e));
+  }
+};
+
+export const evaluateStringToResult = (
+  code: string
+): rsResult<Value, IError.IError> => {
+  const exprR = RSResult.fmap(parse(code, "main"), expressionFromAst);
+
+  return RSResult.bind(
+    RSResult.errMap(exprR, IError.fromParseError),
+    evaluateExpressionToResult
+  );
 };

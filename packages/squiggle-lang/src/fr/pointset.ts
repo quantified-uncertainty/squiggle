@@ -42,7 +42,7 @@ export const library = [
   maker.make({
     name: "fromDist",
     examples: [`PointSet.fromDist(normal(5,2))`],
-    // ~output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition("fromDist", [frDist], ([dist], context) =>
         repackDistResult(dist.toPointSetDist(context.environment))
@@ -52,7 +52,7 @@ export const library = [
   maker.make({
     name: "mapY",
     examples: [`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
-    // ~output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition(
         "mapY",
@@ -85,7 +85,7 @@ export const library = [
         {x: 3, y: 0.2}
       ])`,
     ],
-    // ~output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition(
         "makeContinuous",
@@ -112,7 +112,7 @@ export const library = [
         {x: 3, y: 0.2}
       ])`,
     ],
-    // ~output=Reducer_Value.EvtDistribution,
+    output: "Dist",
     definitions: [
       makeDefinition(
         "makeDiscrete",

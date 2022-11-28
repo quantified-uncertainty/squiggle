@@ -21,7 +21,7 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "length",
-    // output: EvtNumber,
+    output: "Number",
     examples: [`List.length([1,4,5])`],
     definitions: [
       makeDefinition("length", [frArray(frAny)], ([values]) =>
@@ -31,7 +31,7 @@ export const library = [
   }),
   maker.make({
     name: "make",
-    //   output: EvtArray,
+    output: "Array",
     examples: [`List.make(2, "testValue")`],
     definitions: [
       // TODO: If the second item is a function with no args, it could be nice to run this function and return the result.
@@ -43,7 +43,7 @@ export const library = [
   }),
   maker.make({
     name: "upTo",
-    //   ~output=EvtArray,
+    output: "Array",
     examples: [`List.upTo(1,4)`],
     definitions: [
       makeDefinition("upTo", [frNumber, frNumber], ([low, high]) =>
@@ -81,7 +81,7 @@ export const library = [
   }),
   maker.make({
     name: "reverse",
-    //   ~output=EvtArray,
+    output: "Array",
     requiresNamespace: false,
     examples: [`List.reverse([1,4,5])`],
     definitions: [
@@ -92,7 +92,7 @@ export const library = [
   }),
   maker.make({
     name: "map",
-    //   ~output=EvtArray,
+    output: "Array",
     requiresNamespace: false,
     examples: [`List.map([1,4,5], {|x| x+1})`],
     definitions: [

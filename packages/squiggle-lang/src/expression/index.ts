@@ -1,5 +1,9 @@
+/*
+  An expression is an intermediate representation of a Squiggle code.
+  Expressions are evaluated by `Reducer_Expression.evaluate` function.
+*/
 import { AST } from "../ast/parse";
-import { Value, vBool, vNumber, vString, vVoid } from "../value";
+import { Value, valueToString, vBool, vNumber, vString, vVoid } from "../value";
 
 export type ExpressionContent =
   | {
@@ -143,3 +147,43 @@ export const eVoid = (): ExpressionContent => ({
   type: "Value",
   value: vVoid(),
 });
+
+/*
+  Converts the expression to String
+*/
+const toString = (expression: Expression): string => {
+  switch (expression.type) {
+    case "Block":
+      return `{${expression.value.map(toString).join("; ")}}`;
+    case "Program":
+      return expression.value.map(toString).join("; ");
+    case "Array":
+      return `[${expression.value.map(toString).join(", ")}]`;
+    case "Record":
+      return `{${expression.value
+        .map(([key, value]) => `${toString(key)}: ${toString(value)}`)
+        .join(", ")}}`;
+    case "Symbol":
+      return expression.value;
+    case "Ternary":
+      return `${toString(expression.condition)} ? (${toString(
+        expression.ifTrue
+      )}) : (${toString(expression.ifFalse)})`;
+    case "Assign":
+      return `${expression.left} = ${toString(expression.right)}`;
+    case "Call":
+      return `(${toString(expression.fn)})(${expression.args
+        .map(toString)
+        .join(", ")})`;
+    case "Lambda":
+      return `{|${expression.parameters.join(", ")}| ${toString(
+        expression.body
+      )}}`;
+    case "Value":
+      return valueToString(expression.value);
+    default:
+      return `Unknown expression ${expression}`;
+  }
+};
+
+export { toString as expressionToString };

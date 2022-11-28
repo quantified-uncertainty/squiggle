@@ -9,89 +9,35 @@ import {
   tryCallFnDefinition,
 } from "./fnDefinition";
 
-type InternalExpressionValueType = unknown;
-
 export type FRFunction = {
   name: string;
   nameSpace: string;
   requiresNamespace: boolean;
   definitions: FnDefinition[];
-  output?: InternalExpressionValueType;
+  output?: Value["type"];
   examples?: string[];
   description?: string;
   isExperimental?: boolean;
 };
 
-// module FRType = {
-//   let rec matchWithValue = (t: t, r: Reducer_T.value): bool =>
-//     switch (t, r) {
-//     | (FRTypeRecord(recordParams), IEvRecord(map)) =>
-//       recordParams->E.A.every(((name, input)) => {
-//         switch map->Belt.Map.String.get(name) {
-//         | Some(v) => matchWithValue(input, v)
-//         | None => false
-//         }
-//       })
-//     | _ => false
-//     }
-
-//   let matchWithValueArray = (inputs: array<t>, args: array<Reducer_T.value>): bool => {
-//     let isSameLength = E.A.length(inputs) == E.A.length(args)
-//     if !isSameLength {
-//       false
-//     } else {
-//       E.A.zip(inputs, args)->E.A.every(((input, arg)) => matchWithValue(input, arg))
-//     }
-//   }
-// }
-
-//   type functionJson = {
-//     name: string,
-//     definitions: array<string>,
-//     examples: array<string>,
-//     description: option<string>,
-//     isExperimental: bool,
-//   }
-
-//   let make = (
-//     ~name,
-//     ~nameSpace,
-//     ~requiresNamespace,
-//     ~definitions,
-//     ~examples=?,
-//     ~output=?,
-//     ~description=?,
-//     ~isExperimental=false,
-//     (),
-//   ): t => {
-//     name,
-//     nameSpace,
-//     definitions,
-//     output,
-//     examples: examples->E.O.default([]),
-//     isExperimental,
-//     requiresNamespace,
-//     description,
-//   }
-
-//   let toJson = (t: t): functionJson => {
-//     name: t.name,
-//     definitions: t.definitions->E.A.fmap(FnDefinition.toString),
-//     examples: t.examples,
-//     description: t.description,
-//     isExperimental: t.isExperimental,
-//   }
-// }
-
-//   let toJson = (r: registry) => r.functions->E.A.fmap(Function.toJson)
-//   let allExamples = (r: registry) => r.functions->E.A.fmap(r => r.examples)->E.A.concatMany
-//   let allExamplesWithFns = (r: registry) =>
-//     r.functions->E.A.fmap(fn => fn.examples->E.A.fmap(example => (fn, example)))->E.A.concatMany
-
 type FnNameDict = Map<string, FnDefinition[]>;
 type Registry = {
   functions: FRFunction[];
   fnNameDict: FnNameDict;
+};
+
+export const allExamplesWithFns = (
+  r: Registry
+): { fn: FRFunction; example: string }[] => {
+  return r.functions
+    .map(
+      (fn) =>
+        fn.examples?.map((example) => ({
+          fn,
+          example,
+        })) ?? []
+    )
+    .flat();
 };
 
 export const allNames = (r: Registry): string[] => [...r.fnNameDict.keys()];
