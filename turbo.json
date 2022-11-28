@@ -13,13 +13,7 @@
     },
     "@quri/squiggle-lang#build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        "__tests__/**/*.bs.js",
-        "benchmark/**/*.bs.js",
-        "src/rescript/**/*.js",
-        "src/rescript/**/*.gen.tsx",
-        "dist/**"
-      ]
+      "outputs": ["src/**/*.js", "dist/**"]
     },
     "format": {},
     "lint": {

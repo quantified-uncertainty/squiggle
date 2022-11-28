@@ -10,7 +10,7 @@
     "build:typescript": "tsc",
     "bundle": "webpack",
     "start": "tsc -w",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm -f src/js/SqProject/IncludeParser.js",
     "benchmark": "ts-node benchmark/conversion_tests.ts",
     "test:reducer": "jest __tests__/Reducer*/",
     "test": "jest",
@@ -54,6 +54,6 @@
   "main": "./dist/src/js/index.js",
   "types": "./dist/src/js/index.d.ts",
   "bin": {
-    "squiggle": "./dist/src/cli/index.js"
+    "squiggle": "./dist/src/js/cli/index.js"
   }
 }
