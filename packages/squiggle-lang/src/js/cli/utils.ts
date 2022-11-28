@@ -4,7 +4,6 @@ import isFinite from "lodash/isFinite";
 
 import { Env } from "..";
 import { SqProject } from "../SqProject";
-import { SqValueTag } from "../SqValue";
 
 export const red = (str: string) => `\x1b[31;1m${str}\x1b[0m`;
 export const bold = (str: string) => `\x1b[1m${str}\x1b[0m`;
@@ -94,7 +93,7 @@ export const run = (args: RunArgs) => {
   } else {
     switch (args.output) {
       case "RESULT_OR_BINDINGS":
-        if (result.value.tag === SqValueTag.Void) {
+        if (result.value.tag === "Void") {
           printLines(bindings.toString());
         } else {
           printLines(result.value.toString());

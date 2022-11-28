@@ -1,8 +1,3 @@
-import * as RSError from "../../rescript/SqError.gen";
-import * as RSReducerT from "../../rescript/Reducer/Reducer_T.gen";
-import * as RSReducerNamespace from "../../rescript/Reducer/Reducer_Namespace.gen";
-import * as RSReducerContext from "../../rescript/Reducer/Reducer_Context.gen";
-import * as RSSquiggleLibraryStdLib from "../../rescript/SquiggleLibrary/SquiggleLibrary_StdLib.gen";
 import { SqError } from "../SqError";
 import { SqRecord } from "../SqRecord";
 import { SqValue, wrapValue } from "../SqValue";
@@ -12,6 +7,11 @@ import * as ProjectItem from "./ProjectItem";
 import * as Topology from "./Topology";
 import { Resolver } from "./Resolver";
 import { defaultEnv, Env } from "../../Dist/env";
+import * as IError from "../../reducer/IError";
+import * as Namespace from "../../reducer/Namespace";
+import * as Library from "../../library";
+import { Value } from "../../value";
+import { createContext } from "../../reducer/Context";
 
 type Options = {
   resolver?: Resolver;
@@ -20,14 +20,14 @@ type Options = {
 // TODO: Auto clean project based on topology
 export class SqProject {
   private readonly items: Map<string, ProjectItem.ProjectItem>;
-  private stdLib: RSReducerT.namespace;
+  private stdLib: Namespace.Namespace;
   private environment: Env;
   private previousRunOrder: string[];
   private resolver?: Resolver; // if not present, includes are forbidden
 
   constructor(options?: Options) {
     this.items = new Map();
-    this.stdLib = RSSquiggleLibraryStdLib.stdLib;
+    this.stdLib = Library.stdLib;
     this.environment = defaultEnv;
     this.previousRunOrder = [];
     this.resolver = options?.resolver;
@@ -45,11 +45,11 @@ export class SqProject {
     return this.environment;
   }
 
-  getStdLib(): RSReducerT.namespace {
+  getStdLib(): Namespace.Namespace {
     return this.stdLib;
   }
 
-  setStdLib(value: RSReducerT.namespace) {
+  setStdLib(value: Namespace.Namespace) {
     this.stdLib = value;
   }
 
@@ -177,7 +177,7 @@ export class SqProject {
     const result = this.getResultOption(sourceId);
     return (
       result ??
-      Error_(new SqError(RSError.fromMessage(RSError.Message_needToRun)))
+      Error_(new SqError(IError.errorFromMessage(IError.Message.needToRun())))
     );
   }
 
@@ -193,10 +193,7 @@ export class SqProject {
     );
   }
 
-  private setResult(
-    sourceId: string,
-    value: result<RSReducerT.value, SqError>
-  ): void {
+  private setResult(sourceId: string, value: result<Value, SqError>): void {
     const newItem = ProjectItem.setResult(this.getItem(sourceId), value);
     this.setItem(sourceId, newItem);
   }
@@ -218,13 +215,13 @@ export class SqProject {
     this.setItem(sourceId, newItem);
   }
 
-  private getRawBindings(sourceId: string): RSReducerT.namespace {
+  private getRawBindings(sourceId: string): Namespace.Namespace {
     return this.getItem(sourceId).bindings;
   }
 
   getBindings(sourceId: string): SqRecord {
     return new SqRecord(
-      RSReducerNamespace.toMap(this.getRawBindings(sourceId)),
+      this.getRawBindings(sourceId),
       new SqValueLocation(this, sourceId, {
         root: "bindings",
         items: [],
@@ -232,9 +229,9 @@ export class SqProject {
     );
   }
 
-  private linkDependencies(sourceId: string): RSReducerT.namespace {
+  private linkDependencies(sourceId: string): Namespace.Namespace {
     const pastChain = this.getPastChain(sourceId);
-    const namespace = RSReducerNamespace.mergeMany([
+    const namespace = Namespace.mergeMany([
       this.getStdLib(),
       ...pastChain.map((id) => this.getRawBindings(id)),
       ...pastChain.map((id) => {
@@ -242,24 +239,24 @@ export class SqProject {
         if (result.tag === "Error") {
           throw result.value;
         }
-        return RSReducerNamespace.fromArray([["__result__", result.value]]);
+        return Namespace.fromArray([["__result__", result.value]]);
       }),
     ]);
 
     const includesAsVariables = this.getIncludesAsVariables(sourceId);
     return includesAsVariables.reduce(
       (acc, [variable, includeFile]) =>
-        RSReducerNamespace.set(
+        Namespace.set(
           acc,
           variable,
-          RSReducerNamespace.toRecord(this.getRawBindings(includeFile))
+          Namespace.toRecord(this.getRawBindings(includeFile))
         ),
       namespace
     );
   }
 
   private doLinkAndRun(sourceId: string): void {
-    const context = RSReducerContext.createContext(
+    const context = createContext(
       this.linkDependencies(sourceId),
       this.getEnvironment()
     );

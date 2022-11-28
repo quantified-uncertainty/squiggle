@@ -1,4 +1,4 @@
-import { testRun, expectErrorToBeBounded, SqValueTag } from "./TestHelpers";
+import { testRun, expectErrorToBeBounded } from "./TestHelpers";
 import * as fc from "fast-check";
 
 describe("Mean of mixture is weighted average of means", () => {
@@ -19,7 +19,7 @@ describe("Mean of mixture is weighted average of means", () => {
           let lognormalWeight = y / weightDenom;
           let betaMean = 1 / (1 + b / a);
           let lognormalMean = m + s ** 2 / 2;
-          if (res.tag === SqValueTag.Number) {
+          if (res.tag === "Number") {
             expectErrorToBeBounded(
               res.value,
               betaWeight * betaMean + lognormalWeight * lognormalMean,

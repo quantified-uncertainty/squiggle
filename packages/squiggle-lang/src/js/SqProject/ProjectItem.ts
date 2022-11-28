@@ -1,25 +1,33 @@
-import { node } from "../../rescript/Reducer/Reducer_Peggy/Reducer_Peggy_Parse.gen";
-import * as RSError from "../../rescript/SqError.gen";
-import * as RSReducerT from "../../rescript/Reducer/Reducer_T.gen";
-import * as RSReducerNamespace from "../../rescript/Reducer/Reducer_Namespace.gen";
-import * as RSReducerBindings from "../../rescript/Reducer/Reducer_Bindings.gen";
-import * as RSReducerExpression from "../../rescript/Reducer/Reducer_Expression/Reducer_Expression.gen";
-import * as RSReducerPeggyParse from "../../rescript/Reducer/Reducer_Peggy/Reducer_Peggy_Parse.gen";
-import * as RSReducerPeggyToExpression from "../../rescript/Reducer/Reducer_Peggy/Reducer_Peggy_ToExpression.gen";
 import { parseIncludes as parseIncludes_ } from "./parseIncludes";
-import { SqError } from "../SqError";
-import { Error_, Ok, result, resultMap, resultMapError } from "../types";
+import {
+  Error_,
+  fromRSResult,
+  Ok,
+  result,
+  resultMap,
+  resultMapError,
+} from "../types";
 import { Resolver } from "./Resolver";
+import { AST, parse, ParseError } from "../../ast/parse";
+import { errorFromException, fromParseError } from "../../reducer/IError";
+import { Expression } from "../../expression";
+import * as Namespace from "../../reducer/Namespace";
+import * as Bindings from "../../reducer/Bindings";
+import { Value } from "../../value";
+import { SqError } from "../SqError";
+import { expressionFromAst } from "../../ast/toExpression";
+import { ReducerContext } from "../../reducer/Context";
+import { evaluate } from "../../reducer";
 
 // source -> rawParse -> includes -> expression -> bindings & result
 
 export type ProjectItem = Readonly<{
   sourceId: string;
   source: string;
-  rawParse?: result<node, SqError>;
-  expression?: result<RSReducerT.expression, SqError>;
-  bindings: RSReducerT.namespace;
-  result?: result<RSReducerT.value, SqError>;
+  rawParse?: result<AST, SqError>;
+  expression?: result<Expression, SqError>;
+  bindings: Namespace.Namespace;
+  result?: result<Value, SqError>;
   continues: string[];
   includes: result<string[], SqError>; // For loader
   includeAsVariables: [string, string][]; // For linker
@@ -31,7 +39,7 @@ type t = ProjectItem;
 export const emptyItem = (sourceId: string): t => ({
   sourceId,
   source: "",
-  bindings: RSReducerNamespace.make(),
+  bindings: Namespace.make(),
   continues: [],
   includes: Ok([]),
   directIncludes: [],
@@ -104,7 +112,7 @@ const setExpression = (
   return touchExpression({ ...t, expression: expression });
 };
 
-const setBindings = (t: t, bindings: RSReducerT.namespace): t => {
+const setBindings = (t: t, bindings: Namespace.Namespace): t => {
   return {
     ...t,
     bindings,
@@ -185,9 +193,8 @@ export const rawParse = (t: t): t => {
     return t;
   }
   const rawParse = resultMapError(
-    RSReducerPeggyParse.parse(t.source, t.sourceId),
-    (e: RSReducerPeggyParse.ParseError_t) =>
-      new SqError(RSError.fromParseError(e))
+    fromRSResult(parse(t.source, t.sourceId)),
+    (e: ParseError) => new SqError(fromParseError(e))
   );
   return setRawParse(t, rawParse);
 };
@@ -201,16 +208,14 @@ const buildExpression = (t: t): t => {
     // rawParse() guarantees that the rawParse is set
     throw new Error("Internal logic error");
   }
-  const expression = resultMap(t.rawParse, (node) =>
-    RSReducerPeggyToExpression.fromNode(node)
-  );
+  const expression = resultMap(t.rawParse, (node) => expressionFromAst(node));
   return setExpression(t, expression);
 };
 
 const failRun = (t: t, e: SqError): t =>
-  setBindings(setResult(t, Error_(e)), RSReducerNamespace.make());
+  setBindings(setResult(t, Error_(e)), Namespace.make());
 
-export const run = (t: t, context: RSReducerT.context): t => {
+export const run = (t: t, context: ReducerContext): t => {
   t = buildExpression(t);
   if (t.result) {
     return t;
@@ -226,28 +231,15 @@ export const run = (t: t, context: RSReducerT.context): t => {
   }
 
   try {
-    const [result, contextAfterEvaluation] = RSReducerExpression.evaluate(
+    const [result, contextAfterEvaluation] = evaluate(
       t.expression.value,
       context
     );
     return setBindings(
       setResult(t, Ok(result)),
-      RSReducerBindings.locals(contextAfterEvaluation.bindings)
+      Bindings.locals(contextAfterEvaluation.bindings)
     );
   } catch (e: unknown) {
-    // genType doesn't support exception types, so RSError.fromException is impossible to call directly
-    // this is a temporary hack while we transition from Rescript
-    if (
-      typeof e === "object" &&
-      (e as any).RE_EXN_ID &&
-      (e as any).RE_EXN_ID.startsWith("SqError-QuriSquiggleLang.SqException/")
-    ) {
-      // looks like SqError.SqException, let's unwrap it
-      const error: RSError.t = (e as any)._1;
-      return failRun(t, new SqError(error));
-    } else {
-      // oh well; hope this doesn't happen too often
-      return failRun(t, SqError.createOtherError(String(e)));
-    }
+    return failRun(t, new SqError(errorFromException(e)));
   }
 };

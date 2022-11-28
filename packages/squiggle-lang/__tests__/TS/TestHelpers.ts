@@ -1,5 +1,4 @@
-import { run, SqValueTag } from "../../src/js";
-export { SqValueTag };
+import { run } from "../../src/js";
 
 expect.extend({
   toEqualSqValue(x, y) {

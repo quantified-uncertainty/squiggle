@@ -1,6 +1,4 @@
-import * as RSValue from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue.gen";
 import { result } from "./types";
-import { squiggleValueTag as Tag } from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_tag";
 import { wrapDistribution } from "./SqDistribution";
 import { SqLambda } from "./SqLambda";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
@@ -8,136 +6,141 @@ import { SqRecord } from "./SqRecord";
 import { SqArray } from "./SqArray";
 import { SqValueLocation } from "./SqValueLocation";
 import { SqError } from "./SqError";
-import { BaseDist } from "../Dist/BaseDist";
+import { Value, valueToString } from "../value";
 
-export { Tag as SqValueTag };
+type Tag = Value["type"];
 
-type T = RSValue.squiggleValue;
+export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
+  const tag = value.type;
 
-export const wrapValue = (value: T, location: SqValueLocation): SqValue => {
-  const tag = RSValue.getTag(value);
-
-  return new tagToClass[tag](value, location);
+  switch (value.type) {
+    case "Array":
+      return new SqArrayValue(value, location);
+    case "Bool":
+      return new SqBoolValue(value, location);
+    case "Date":
+      return new SqDateValue(value, location);
+    case "Declaration":
+      return new SqDeclarationValue(value, location);
+    case "Dist":
+      return new SqDistributionValue(value, location);
+    case "Lambda":
+      return new SqLambdaValue(value, location);
+    case "Number":
+      return new SqNumberValue(value, location);
+    case "Record":
+      return new SqRecordValue(value, location);
+    case "String":
+      return new SqStringValue(value, location);
+    case "TimeDuration":
+      return new SqTimeDurationValue(value, location);
+    case "Void":
+      return new SqVoidValue(value, location);
+    default:
+      throw new Error(`Unknown value ${JSON.stringify(value)}`);
+  }
 };
 
-export abstract class SqAbstractValue {
-  abstract tag: Tag;
+export abstract class SqAbstractValue<T> {
+  abstract tag: T;
 
-  constructor(private _value: T, public location: SqValueLocation) {}
-
-  protected valueMethod = <IR>(rsMethod: (v: T) => IR) => {
-    const value = rsMethod(this._value);
-    return value;
-  };
+  constructor(
+    protected _value: Extract<Value, { type: T }>,
+    public location: SqValueLocation
+  ) {}
 
   toString() {
-    return RSValue.toString(this._value);
+    return valueToString(this._value);
   }
 }
 
-export class SqArrayValue extends SqAbstractValue {
-  tag = Tag.Array as const;
+export class SqArrayValue extends SqAbstractValue<"Array"> {
+  tag = "Array" as const;
 
   get value() {
-    return new SqArray(this.valueMethod(RSValue.getArray), this.location);
+    return new SqArray(this._value.value, this.location);
   }
 }
 
-export class SqBoolValue extends SqAbstractValue {
-  tag = Tag.Bool as const;
+export class SqBoolValue extends SqAbstractValue<"Bool"> {
+  tag = "Bool" as const;
+
+  get value(): boolean {
+    return this._value.value;
+  }
+}
+
+export class SqDateValue extends SqAbstractValue<"Date"> {
+  tag = "Date" as const;
+
+  get value(): Date {
+    return this._value.value;
+  }
+}
+
+export class SqDeclarationValue extends SqAbstractValue<"Declaration"> {
+  tag = "Declaration" as const;
 
   get value() {
-    return this.valueMethod(RSValue.getBool);
+    return new SqLambdaDeclaration(this._value.value);
   }
 }
 
-export class SqDateValue extends SqAbstractValue {
-  tag = Tag.Date as const;
+export class SqDistributionValue extends SqAbstractValue<"Dist"> {
+  tag = "Dist" as const;
 
   get value() {
-    return this.valueMethod(RSValue.getDate);
+    return wrapDistribution(this._value.value);
   }
 }
 
-export class SqDeclarationValue extends SqAbstractValue {
-  tag = Tag.Declaration as const;
+export class SqLambdaValue extends SqAbstractValue<"Lambda"> {
+  tag = "Lambda" as const;
 
   get value() {
-    return new SqLambdaDeclaration(this.valueMethod(RSValue.getDeclaration));
+    return new SqLambda(this._value.value, this.location);
   }
 }
 
-export class SqDistributionValue extends SqAbstractValue {
-  tag = Tag.Distribution as const;
+export class SqNumberValue extends SqAbstractValue<"Number"> {
+  tag = "Number" as const;
+
+  get value(): number {
+    return this._value.value;
+  }
+}
+
+export class SqRecordValue extends SqAbstractValue<"Record"> {
+  tag = "Record" as const;
 
   get value() {
-    return wrapDistribution(
-      this.valueMethod(RSValue.getDistribution) as unknown as BaseDist
-    );
+    return new SqRecord(this._value.value, this.location);
   }
 }
 
-export class SqLambdaValue extends SqAbstractValue {
-  tag = Tag.Lambda as const;
-
-  get value() {
-    return new SqLambda(this.valueMethod(RSValue.getLambda), this.location);
-  }
-}
-
-export class SqNumberValue extends SqAbstractValue {
-  tag = Tag.Number as const;
-
-  get value() {
-    return this.valueMethod(RSValue.getNumber);
-  }
-}
-
-export class SqRecordValue extends SqAbstractValue {
-  tag = Tag.Record as const;
-
-  get value() {
-    return new SqRecord(this.valueMethod(RSValue.getRecord), this.location);
-  }
-}
-
-export class SqStringValue extends SqAbstractValue {
-  tag = Tag.String as const;
+export class SqStringValue extends SqAbstractValue<"String"> {
+  tag = "String" as const;
 
   get value(): string {
-    return this.valueMethod(RSValue.getString);
+    return this._value.value;
   }
 }
 
-export class SqTimeDurationValue extends SqAbstractValue {
-  tag = Tag.TimeDuration as const;
+export class SqTimeDurationValue extends SqAbstractValue<"TimeDuration"> {
+  tag = "TimeDuration" as const;
 
   get value() {
-    return this.valueMethod(RSValue.getTimeDuration);
+    return this._value.value;
   }
 }
 
-export class SqVoidValue extends SqAbstractValue {
-  tag = Tag.Void as const;
+export class SqVoidValue extends SqAbstractValue<"Void"> {
+  tag = "Void" as const;
 
   get value() {
     return null;
   }
 }
-
-const tagToClass = {
-  [Tag.Array]: SqArrayValue,
-  [Tag.Bool]: SqBoolValue,
-  [Tag.Date]: SqDateValue,
-  [Tag.Declaration]: SqDeclarationValue,
-  [Tag.Distribution]: SqDistributionValue,
-  [Tag.Lambda]: SqLambdaValue,
-  [Tag.Number]: SqNumberValue,
-  [Tag.Record]: SqRecordValue,
-  [Tag.String]: SqStringValue,
-  [Tag.TimeDuration]: SqTimeDurationValue,
-  [Tag.Void]: SqVoidValue,
-} as const;
 
 // FIXME
 // type SqValue = typeof tagToClass[keyof typeof tagToClass];

@@ -1,0 +1,132 @@
+import { makeDefinition } from "../library/registry/fnDefinition";
+import {
+  frArray,
+  frDist,
+  frLambda,
+  frNumber,
+  frRecord,
+} from "../library/registry/frTypes";
+import * as IError from "../reducer/IError";
+import * as Continuous from "../PointSet/Continuous";
+import * as Discrete from "../PointSet/Discrete";
+import {
+  doNumberLambdaCall,
+  FnFactory,
+  repackDistResult,
+} from "../library/registry/helpers";
+import { PointSetDist } from "../Dist/PointSetDist";
+import { vDist, vNumber } from "../value";
+import * as XYShape from "../XYShape";
+import * as RSResult from "../rsResult";
+import { xyShapeDistError } from "../Dist/DistError";
+import { Ok } from "../rsResult";
+
+const maker = new FnFactory({
+  nameSpace: "PointSet",
+  requiresNamespace: true,
+});
+
+const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
+  const result = XYShape.T.makeFromZipped(
+    inputs.map(({ x, y }) => [x, y] as const)
+  );
+  if (result.TAG === RSResult.E.Error) {
+    return IError.Message.throw(
+      IError.REDistributionError(xyShapeDistError(result._0))
+    );
+  }
+  return result._0;
+};
+
+export const library = [
+  maker.make({
+    name: "fromDist",
+    examples: [`PointSet.fromDist(normal(5,2))`],
+    // ~output=Reducer_Value.EvtDistribution,
+    definitions: [
+      makeDefinition("fromDist", [frDist], ([dist], context) =>
+        repackDistResult(dist.toPointSetDist(context.environment))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "mapY",
+    examples: [`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
+    // ~output=Reducer_Value.EvtDistribution,
+    definitions: [
+      makeDefinition(
+        "mapY",
+        [frDist, frLambda],
+        ([dist, lambda], context, reducer) => {
+          if (!(dist instanceof PointSetDist)) {
+            return IError.Message.throw(
+              IError.REExpectedType("PointSetDist", dist.toString())
+            );
+          }
+          return repackDistResult(
+            dist.mapYResult(
+              (y) =>
+                Ok(doNumberLambdaCall(lambda, [vNumber(y)], context, reducer)),
+              undefined,
+              undefined
+            )
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "makeContinuous",
+    examples: [
+      `PointSet.makeContinuous([
+        {x: 0, y: 0.2},
+        {x: 1, y: 0.7},
+        {x: 2, y: 0.8},
+        {x: 3, y: 0.2}
+      ])`,
+    ],
+    // ~output=Reducer_Value.EvtDistribution,
+    definitions: [
+      makeDefinition(
+        "makeContinuous",
+        [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
+        ([arr]) => {
+          return Ok(
+            vDist(
+              new PointSetDist(
+                new Continuous.ContinuousShape({ xyShape: argsToXYShape(arr) })
+              )
+            )
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "makeDiscrete",
+    examples: [
+      `PointSet.makeDiscrete([
+        {x: 0, y: 0.2},
+        {x: 1, y: 0.7},
+        {x: 2, y: 0.8},
+        {x: 3, y: 0.2}
+      ])`,
+    ],
+    // ~output=Reducer_Value.EvtDistribution,
+    definitions: [
+      makeDefinition(
+        "makeDiscrete",
+        [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
+        ([arr]) => {
+          return Ok(
+            vDist(
+              new PointSetDist(
+                new Discrete.DiscreteShape({ xyShape: argsToXYShape(arr) })
+              )
+            )
+          );
+        }
+      ),
+    ],
+  }),
+];

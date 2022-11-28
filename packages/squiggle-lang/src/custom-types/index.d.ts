@@ -76,4 +76,6 @@ declare module "jstat" {
     export function sample(shape: number, scale: number): number;
     export function mean(shape: number, scale: number): number;
   }
+
+  export function factorial(x: number): number;
 }

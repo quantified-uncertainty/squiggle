@@ -1,7 +1,5 @@
 // Temporary; to be removed after Rescript conversion is done.
 
-import { A } from "./rescript/Utility/E.bs";
-
 export enum E {
   Ok = 0,
   Error = 1,
@@ -33,6 +31,18 @@ export function fmap<T, T2, E>(
     return Ok(fn(r._0));
   } else {
     return r;
+  }
+}
+
+export function fmap2<T, T2, E, E2>(
+  r: rsResult<T, E>,
+  fn1: (v: T) => T2,
+  fn2: (v: E) => E2
+): rsResult<T2, E2> {
+  if (r.TAG === E.Ok) {
+    return Ok(fn1(r._0));
+  } else {
+    return Error(fn2(r._0));
   }
 }
 

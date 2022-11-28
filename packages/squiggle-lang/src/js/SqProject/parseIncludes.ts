@@ -1,12 +1,13 @@
+import { LocationRange } from "peggy";
+import { makeParseError } from "../../ast/parse";
+import { fromParseError } from "../../reducer/IError";
 import { SqError } from "../SqError";
 import { Error_, Ok, result } from "../types";
 import { parse } from "./IncludeParser";
-import * as RSReducerPeggyParse from "../../rescript/Reducer/Reducer_Peggy/Reducer_Peggy_Parse.gen";
-import * as RSError from "../../rescript/SqError.gen";
 
 type PeggySyntaxError = {
   message: string;
-  location: RSReducerPeggyParse.location;
+  location: LocationRange;
 };
 
 export const parseIncludes = (
@@ -21,12 +22,7 @@ export const parseIncludes = (
     const peggyError = e as PeggySyntaxError;
     return Error_(
       new SqError(
-        RSError.fromParseError(
-          RSReducerPeggyParse.ParseError_make(
-            peggyError.message,
-            peggyError.location
-          )
-        )
+        fromParseError(makeParseError(peggyError.message, peggyError.location))
       )
     );
   }

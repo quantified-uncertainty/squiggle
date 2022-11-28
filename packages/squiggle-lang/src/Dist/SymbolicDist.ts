@@ -202,10 +202,10 @@ export class Normal extends SymbolicDist {
     return jstat.normal.mean(this._mean, this._stdev);
   }
 
-  static from90PercentCI(low: number, high: number): Normal {
+  static from90PercentCI(low: number, high: number): rsResult<Normal, string> {
     const mean = E_A_Floats.mean([low, high]);
     const stdev = (high - low) / (2 * normal95confidencePoint);
-    return new Normal({ mean, stdev });
+    return Normal.make({ mean, stdev });
   }
 
   static add(n1: Normal, n2: Normal) {
@@ -558,7 +558,7 @@ export class Lognormal extends SymbolicDist {
     const logHigh = Math.log(high);
     const mu = E_A_Floats.mean([logLow, logHigh]);
     const sigma = (logHigh - logLow) / (2 * normal95confidencePoint);
-    return new Lognormal({ mu, sigma });
+    return Lognormal.make({ mu, sigma });
   }
   static fromMeanAndStdev({
     mean,
@@ -968,10 +968,10 @@ export class Float extends SymbolicDist {
 export const From90thPercentile = {
   make(low: number, high: number): rsResult<SymbolicDist, string> {
     if (low <= 0 && low < high) {
-      return Ok(Normal.from90PercentCI(low, high));
+      return Normal.from90PercentCI(low, high);
     }
     if (low < high) {
-      return Ok(Lognormal.from90PercentCI(low, high));
+      return Lognormal.from90PercentCI(low, high);
     }
     return RSResult.Error("Low value must be less than high value.");
   },

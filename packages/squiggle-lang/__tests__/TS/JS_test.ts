@@ -1,4 +1,4 @@
-import { run, SqProject, SqValueTag } from "../../src/js";
+import { run, SqProject } from "../../src/js";
 import { testRun } from "./TestHelpers";
 
 function Ok<b>(x: b) {
@@ -79,7 +79,7 @@ describe("Distribution", () => {
       );
     }
     const dist = result.value;
-    if (dist.tag !== SqValueTag.Distribution) {
+    if (dist.tag !== "Dist") {
       throw new Error("Expected Distribution");
     }
     return dist.value;

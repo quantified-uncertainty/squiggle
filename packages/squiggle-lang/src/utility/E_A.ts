@@ -29,7 +29,9 @@ export const accumulate = <A>(items: A[], fn: (x: A, y: A) => A): A[] => {
   return result;
 };
 
-export const unzip = <A, B>(items: [A, B][]): [A[], B[]] => {
+export const unzip = <A, B>(
+  items: readonly (readonly [A, B])[]
+): [A[], B[]] => {
   // based on Belt.Array.unzip
   const len = items.length;
   const a1 = new Array(len);
@@ -53,10 +55,21 @@ export const toRanges = <T>(items: T[]): result<[T, T][], string> => {
   }
 };
 
-export const pairwise = <T, R>(items: T[], fn: (v1: T, v2: T) => R): R[] => {
+export const pairwise = <T, R>(
+  items: readonly T[],
+  fn: (v1: T, v2: T) => R
+): R[] => {
   const result: R[] = [];
   for (let i = 1; i < items.length; i++) {
     result.push(fn(items[i - 1], items[i]));
+  }
+  return result;
+};
+
+export const makeBy = <T>(n: number, fn: (i: number) => T): T[] => {
+  const result: T[] = [];
+  for (let i = 0; i < n; i++) {
+    result.push(fn(i));
   }
   return result;
 };

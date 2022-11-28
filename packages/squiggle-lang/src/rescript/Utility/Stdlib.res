@@ -1,3 +1,3 @@
 module Math = {
-  @module("../../js/math") external factorial: float => float = "factorial"
+  @module("../../utility/math") external factorial: float => float = "factorial"
 }

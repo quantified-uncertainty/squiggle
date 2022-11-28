@@ -260,7 +260,7 @@ export const T = {
     }
   },
 
-  makeFromZipped(values: [number, number][]) {
+  makeFromZipped(values: readonly (readonly [number, number])[]) {
     const [xs, ys] = E_A.unzip(values);
     return T.make(xs, ys);
   },
@@ -277,10 +277,7 @@ const Ts = {
     return E_A_Floats.range(Ts.minX(t), Ts.maxX(t), newLength);
   },
   allXs(t: XYShape[]): number[] {
-    return t
-      .map((s) => s.xs)
-      .flat()
-      .sort();
+    return E_A_Floats.sort(t.map((s) => s.xs).flat());
   },
 };
 

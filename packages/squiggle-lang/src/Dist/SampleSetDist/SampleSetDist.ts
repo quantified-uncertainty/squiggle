@@ -37,6 +37,18 @@ export class SampleSetDist extends BaseDist {
     }
   }
 
+  static fromFn(
+    fn: (i: number) => number,
+    env: Env
+  ): RSResult.rsResult<SampleSetDist, DistError> {
+    const sampleCount = env.sampleCount;
+    const samples: number[] = [];
+    for (let i = 0; i < env.sampleCount; i++) {
+      samples.push(fn(i));
+    }
+    return SampleSetDist.make(samples);
+  }
+
   toString() {
     return "Sample Set Distribution";
   }
@@ -330,16 +342,26 @@ export const mixture = (
   return SampleSetDist.make(samples);
 };
 
-export const minOfTwo = (t1: SampleSetDist, t2: SampleSetDist) => {
+export type CompareTwoDistsFn = (
+  t1: SampleSetDist,
+  t2: SampleSetDist
+) => RSResult.rsResult<SampleSetDist, DistError>;
+
+export type CompareDistWithFloatFn = (
+  t: SampleSetDist,
+  f: number
+) => RSResult.rsResult<SampleSetDist, DistError>;
+
+export const minOfTwo: CompareTwoDistsFn = (t1, t2) => {
   return map2({ fn: (a, b) => RSResult.Ok(Math.min(a, b)), t1, t2 });
 };
-export const maxOfTwo = (t1: SampleSetDist, t2: SampleSetDist) => {
+export const maxOfTwo: CompareTwoDistsFn = (t1, t2) => {
   return map2({ fn: (a, b) => RSResult.Ok(Math.max(a, b)), t1, t2 });
 };
 
-export const minOfFloat = (t: SampleSetDist, f: number) => {
+export const minOfFloat: CompareDistWithFloatFn = (t, f) => {
   return t.samplesMap((a) => RSResult.Ok(Math.min(a, f)));
 };
-export const maxOfFloat = (t: SampleSetDist, f: number) => {
+export const maxOfFloat: CompareDistWithFloatFn = (t, f) => {
   return t.samplesMap((a) => RSResult.Ok(Math.max(a, f)));
 };

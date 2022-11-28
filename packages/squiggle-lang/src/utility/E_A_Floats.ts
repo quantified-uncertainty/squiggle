@@ -1,4 +1,5 @@
 import isInteger from "lodash/isInteger";
+import * as E_A from "./E_A";
 
 class RangeError extends Error {}
 
@@ -50,12 +51,32 @@ export const sum = (t: readonly number[]): number => {
   return sum;
 };
 
+export const product = (t: readonly number[]): number => {
+  // based on jstat.product
+  let prod = 1;
+  let i = t.length;
+  while (--i >= 0) {
+    prod *= t[i];
+  }
+  return prod;
+};
+
 export const mean = (t: readonly number[]): number => {
   return sum(t) / t.length; // TODO - handle empty arrays?
 };
 
+// geometric mean
+// based on jstat.geomean
+export const geomean = (t: readonly number[]): number => {
+  return Math.pow(product(t), 1 / t.length);
+};
+
 export const percentile = (t: readonly number[]): number => {
   return sum(t) / t.length; // TODO - handle empty arrays?
+};
+
+export const sort = (t: readonly number[]): number[] => {
+  return Array.from(new Float64Array(t).sort());
 };
 
 export const sorted = (t: readonly number[]): number[] => {
@@ -79,3 +100,35 @@ export const variance = (xs: readonly number[]) => {
 };
 
 export const stdev = (t: readonly number[]) => Math.sqrt(variance(t));
+
+// This is like map, but
+//[1,2,3]->accumulate((a,b) => a + b) => [1, 3, 6]
+const accumulate = (
+  items: readonly number[],
+  fn: (a: number, b: number) => number
+) => {
+  const length = items.length;
+  const result: number[] = new Array(length);
+  for (let i = 0; i < length; i++) {
+    if (i === 0) {
+      result[i] = items[0];
+    } else {
+      result[i] = fn(items[i], result[i - 1]);
+    }
+  }
+  return result;
+};
+
+export const cumSum = (t: readonly number[]): number[] => {
+  return accumulate(t, (a, b) => a + b);
+};
+
+export const cumProd = (t: readonly number[]): number[] => {
+  return accumulate(t, (a, b) => a * b);
+};
+
+// Gives an array with all the differences between values
+// diff([1,5,3,7]) = [4,-2,4]
+export const diff = (t: readonly number[]): number[] => {
+  return E_A.pairwise(t, (left, right) => right - left);
+};

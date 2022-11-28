@@ -1,16 +1,17 @@
-import * as RSLambda from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_Lambda.gen";
+import * as Lambda from "../reducer/Lambda";
 import { SqError } from "./SqError";
 import { SqValue } from "./SqValue";
 import { SqValueLocation } from "./SqValueLocation";
 import { result } from "./types";
 
-type T = RSLambda.squiggleValue_Lambda;
-
 export class SqLambda {
-  constructor(private _value: T, public location: SqValueLocation) {}
+  constructor(
+    private _value: Lambda.Lambda,
+    public location: SqValueLocation
+  ) {}
 
   parameters() {
-    return RSLambda.parameters(this._value);
+    return Lambda.parameters(this._value);
   }
 
   call(args: (number | string)[]): result<SqValue, SqError> {

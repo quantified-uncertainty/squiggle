@@ -1,26 +1,21 @@
-import * as RSRecord from "../rescript/ForTS/ForTS_SquiggleValue/ForTS_SquiggleValue_Record.gen";
+import { ValueMap, valueMapToString, vRecord } from "../value";
 import { SqRecordValue, wrapValue } from "./SqValue";
 import { SqValueLocation } from "./SqValueLocation";
 
-type T = RSRecord.squiggleValue_Record;
-
 export class SqRecord {
-  constructor(private _value: T, public location: SqValueLocation) {}
+  constructor(private _value: ValueMap, public location: SqValueLocation) {}
 
   entries() {
-    return RSRecord.getKeyValuePairs(this._value).map(
+    [...this._value.entries()].map(
       ([k, v]) => [k, wrapValue(v, this.location.extend(k))] as const
     );
   }
 
   toString() {
-    return RSRecord.toString(this._value);
+    return valueMapToString(this._value);
   }
 
   asValue() {
-    return new SqRecordValue(
-      RSRecord.toSquiggleValue(this._value),
-      this.location
-    );
+    return new SqRecordValue(vRecord(this._value), this.location);
   }
 }

@@ -1,4 +1,4 @@
-import { expectErrorToBeBounded, testRun, SqValueTag } from "./TestHelpers";
+import { expectErrorToBeBounded, testRun } from "./TestHelpers";
 import * as fc from "fast-check";
 
 // Beware: float64Array makes it appear in an infinite loop.
@@ -19,7 +19,7 @@ let arrayGen = () =>
 let makeSampleSet = (samples: number[]) => {
   let sampleList = samples.map((x) => x.toFixed(20)).join(",");
   let result = testRun(`SampleSet.fromList([${sampleList}])`);
-  if (result.tag === SqValueTag.Distribution) {
+  if (result.tag === "Dist") {
     return result.value;
   } else {
     fail("Expected to be distribution");

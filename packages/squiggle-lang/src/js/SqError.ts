@@ -1,32 +1,35 @@
-import * as RSError from "../rescript/SqError.gen";
-import * as RSReducerT from "../rescript/Reducer/Reducer_T.gen";
-
-import * as RSFrameStack from "../rescript/Reducer/Reducer_FrameStack.gen";
-
-export { location as SqLocation } from "../rescript/Reducer/Reducer_Peggy/Reducer_Peggy_Parse.gen";
+import {
+  createOtherError,
+  errorToString,
+  errorToStringWithStackTrace,
+  getFrameArray,
+  getTopFrame,
+  IError,
+} from "../reducer/IError";
+import { Frame } from "../reducer/FrameStack";
 
 export class SqError {
-  constructor(private _value: RSError.t) {}
+  constructor(private _value: IError) {}
 
   toString() {
-    return RSError.toString(this._value);
+    return errorToString(this._value);
   }
 
   toStringWithStackTrace() {
-    return RSError.toStringWithStackTrace(this._value);
+    return errorToStringWithStackTrace(this._value);
   }
 
   static createOtherError(v: string) {
-    return new SqError(RSError.createOtherError(v));
+    return new SqError(createOtherError(v));
   }
 
   getTopFrame(): SqFrame | undefined {
-    const frame = RSFrameStack.getTopFrame(RSError.getFrameStack(this._value));
+    const frame = getTopFrame(this._value);
     return frame ? new SqFrame(frame) : undefined;
   }
 
   getFrameArray(): SqFrame[] {
-    const frames = RSError.getFrameArray(this._value);
+    const frames = getFrameArray(this._value);
     return frames.map((frame) => new SqFrame(frame));
   }
 
@@ -36,13 +39,13 @@ export class SqError {
 }
 
 export class SqFrame {
-  constructor(private _value: RSReducerT.frame) {}
+  constructor(private _value: Frame) {}
 
   name(): string {
-    return RSFrameStack.Frame.getName(this._value);
+    return this._value.name;
   }
 
   location() {
-    return RSFrameStack.Frame.getLocation(this._value);
+    return this._value.location;
   }
 }
