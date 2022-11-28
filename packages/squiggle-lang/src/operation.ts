@@ -21,7 +21,6 @@ export type AlgebraicOperation =
     };
 
 export type ConvolutionOperation = "Add" | "Multiply" | "Subtract";
-// type PointwiseOperation = "Add" | "Multiply" | "Power";
 
 export const Convolution = {
   //Only a selection of operations are supported by convolution.
@@ -135,21 +134,7 @@ export const Algebraic = {
       throw new Error(`Unknown operation ${x}`);
     }
   },
-
-  // let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
 };
-
-// module Pointwise = {
-//   type t = pointwiseOperation
-//   let toString = x =>
-//     switch x {
-//     | #Add => "+"
-//     | #Power => "**"
-//     | #Multiply => "*"
-//     }
-
-//   let format = (a, b, c) => b ++ (" " ++ (toString(a) ++ (" " ++ c)))
-// }
 
 export type ScaleOperation =
   | "Multiply"
@@ -160,7 +145,6 @@ export type ScaleOperation =
 
 // // Note that different logarithms don't really do anything.
 export const Scale = {
-  //   type t = scaleOperation
   toFn(
     x: ScaleOperation,
     a: number,
@@ -184,14 +168,7 @@ export const Scale = {
       throw new Error(`Unknown scale operation ${x}`);
     }
   },
-  //   let format = (operation: t, value, scaleBy) =>
-  //     switch operation {
-  //     | #Multiply => j`verticalMultiply($value, $scaleBy) `
-  //     | #Divide => j`verticalDivide($value, $scaleBy) `
-  //     | #Power => j`verticalPower($value, $scaleBy) `
-  //     | #Logarithm => j`verticalLog($value, $scaleBy) `
-  //     | #LogarithmWithThreshold(eps) => j`verticalLog($value, $scaleBy, epsilon=$eps) `
-  //     }
+
   toIntegralSumCacheFn(
     x: ScaleOperation
   ): ((a: number, b: number) => number) | undefined {

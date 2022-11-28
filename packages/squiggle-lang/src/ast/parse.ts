@@ -44,12 +44,6 @@ export const parse = (expr: string, source: string): ParseResult => {
 export type AST = AnyPeggyNode;
 
 const nodeToString = (node: AnyPeggyNode): string => {
-  // let argsToString = (args: array<nodeIdentifier>): string =>
-  //   args->E.A.fmap(arg => arg->nodeIdentifierToAST->pgToString)->Js.Array2.toString
-
-  // let pgNodesToStringUsingSeparator = (nodes: array<ast>, separator: string): string =>
-  //   nodes->E.A.fmap(pgToString)->Extra.Array.intersperse(separator)->Js.String.concatMany("")
-
   switch (node.type) {
     case "Block":
     case "Program":

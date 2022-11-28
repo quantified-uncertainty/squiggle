@@ -3,9 +3,6 @@ import { allExamplesWithFns } from "../../src/library/registry/core";
 import { evaluateStringToResult } from "../../src/reducer";
 import { testEvalToBe } from "../reducerTestHelpers";
 
-// let registry = FunctionRegistry_Library.registry
-// let examples = E.A.to_list(FunctionRegistry_Core.Registry.allExamples(registry))
-
 describe("FunctionRegistry Library", () => {
   describe("Regular tests", () => {
     testEvalToBe("List.length([3,5,8])", "3");

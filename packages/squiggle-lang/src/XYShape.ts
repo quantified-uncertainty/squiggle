@@ -750,30 +750,6 @@ export const Range = {
 
     return { xs: newXs, ys: newYs };
   },
-
-  // // TODO: I think this isn't needed by any functions anymore.
-  // let stepsToContinuous = t => {
-  //   // TODO: It would be nicer if this the diff didn't change the first element, and also maybe if there were a more elegant way of doing this.
-  //   let diff = T.xTotalRange(t)->(r => r *. MagicNumbers.Epsilon.five)
-  //   let items = switch E.A.toRanges(E.A.zip(t.xs, t.ys)) {
-  //   | Ok(items) =>
-  //     Some(
-  //       items
-  //       ->E.A.fmap(rangePointAssumingSteps)
-  //       ->T.fromZippedArray
-  //       ->PointwiseCombination.intersperse(t->T.mapX(e => e +. diff), _),
-  //     )
-  //   | _ => Some(t)
-  //   }
-  //   let first = items->E.O.fmap(T.zip)->E.O.bind(E.A.get(_, 0))
-  //   switch (items, first) {
-  //   | (Some(items), Some((0.0, _))) => Some(items)
-  //   | (Some(items), Some((firstX, _))) =>
-  //     let all = E.A.concat([(firstX, 0.0)], items->T.zip)
-  //     all->T.fromZippedArray->E.O.some
-  //   | _ => None
-  //   }
-  // }
 };
 
 export const Analysis = {
