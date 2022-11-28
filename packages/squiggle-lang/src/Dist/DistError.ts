@@ -1,60 +1,28 @@
 import { OperationError, operationErrorToString } from "../OperationError";
 import { XYShapeError } from "../XYShape";
 
+type SimpleError<S extends String> = { type: S };
+type StringError<S extends String> = { type: S; message: string };
+type ValueError<S extends String, V> = { type: S; value: V };
+
 export type DistError =
-  | {
-      type: "NotYetImplemented";
-    }
-  | {
-      type: "Unreachable";
-    }
-  | {
-      type: "DistributionVerticalShiftIsInvalid";
-    }
-  | {
-      type: "TooFewSamples"; // SampleSetDist.Error.TooFewSamples
-    }
-  | {
-      type: "NonNumericInput"; // SampleSetDist.Error.NonNumericInput
-      message: string;
-    }
-  | {
-      type: "ArgumentError";
-      message: string;
-    }
-  | {
-      type: "OperationError";
-      value: OperationError;
-    }
-  | {
-      type: "PointSetConversionError";
-      message: "TooFewSamples";
-    }
-  | {
-      type: "SparklineError";
-      message: string;
-    }
-  | {
-      type: "RequestedStrategyInvalidError";
-      message: string;
-    }
-  | {
-      type: "LogarithmOfDistributionError";
-      message: string;
-    }
-  | {
-      type: "OtherError";
-      message: string;
-    }
-  | {
-      type: "XYShapeError";
-      value: XYShapeError;
-    };
+  | SimpleError<"NotYetImplemented">
+  | SimpleError<"Unreachable">
+  | SimpleError<"DistributionVerticalShiftIsInvalid">
+  | SimpleError<"TooFewSamples"> // SampleSetDist.Error.TooFewSamples
+  | SimpleError<"TooFewSamplesForConversionToPointSet">
+  | StringError<"NonNumericInput"> // SampleSetDist.Error.NonNumericInput
+  | StringError<"ArgumentError">
+  | StringError<"SparklineError">
+  | StringError<"RequestedStrategyInvalidError">
+  | StringError<"LogarithmOfDistributionError">
+  | StringError<"OtherError">
+  | ValueError<"OperationError", OperationError>
+  | ValueError<"XYShapeError", XYShapeError>;
 
 export const TooFewSamplesForConversionToPointSet = (): DistError => {
   return {
-    type: "PointSetConversionError",
-    message: "TooFewSamples",
+    type: "TooFewSamplesForConversionToPointSet",
   };
 };
 
@@ -83,8 +51,8 @@ export const distErrorToString = (e: DistError): string => {
       return `Found a non-number in input: ${e.message}`;
     case "OperationError":
       return operationErrorToString(e.value);
-    case "PointSetConversionError":
-      return "Too Few Samples to convert to point set"; // always "TooFewSamples"
+    case "TooFewSamplesForConversionToPointSet":
+      return "Too Few Samples to convert to point set";
     case "SparklineError":
       return e.message;
     case "RequestedStrategyInvalidError":

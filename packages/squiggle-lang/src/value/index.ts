@@ -14,51 +14,20 @@ export type ReducerFn = (
 
 export type ValueMap = ImmutableMap<Value>; // TODO - immutable.js or other implementation
 
-export type Value = Readonly<
-  | {
-      type: "Array";
-      value: Value[];
-    }
-  | {
-      type: "Bool";
-      value: boolean;
-    }
-  | {
-      type: "Date";
-      value: Date;
-    }
-  | {
-      type: "Declaration";
-      value: LambdaDeclaration;
-    }
-  | {
-      type: "Dist";
-      value: BaseDist;
-    }
-  | {
-      type: "Lambda";
-      value: Lambda;
-    }
-  | {
-      type: "Number";
-      value: number;
-    }
-  | {
-      type: "Record";
-      value: ValueMap;
-    }
-  | {
-      type: "String";
-      value: string;
-    }
-  | {
-      type: "TimeDuration";
-      value: number;
-    }
-  | {
-      type: "Void";
-    }
->;
+type KV<T extends string, V> = Readonly<{ type: T; value: V }>;
+
+export type Value =
+  | KV<"Array", Value[]>
+  | KV<"Bool", boolean>
+  | KV<"Date", Date>
+  | KV<"Declaration", LambdaDeclaration>
+  | KV<"Dist", BaseDist>
+  | KV<"Lambda", Lambda>
+  | KV<"Number", number>
+  | KV<"String", string>
+  | KV<"Record", ValueMap>
+  | KV<"TimeDuration", number>
+  | { type: "Void" };
 
 export const vBool = (value: boolean): Value => ({ type: "Bool", value });
 export const vNumber = (value: number): Value => ({ type: "Number", value });

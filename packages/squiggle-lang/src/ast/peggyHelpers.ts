@@ -38,92 +38,58 @@ type Node = {
   location: LocationRange;
 };
 
-type NodeBlock = Node & {
-  type: "Block";
-  statements: AnyPeggyNode[];
-};
+type N<T extends string, V extends {}> = Node & { type: T } & V;
 
-type NodeProgram = Node & {
-  type: "Program";
-  statements: AnyPeggyNode[];
-};
+type NodeBlock = N<"Block", { statements: AnyPeggyNode[] }>;
 
-type NodeArray = Node & {
-  type: "Array";
-  elements: AnyPeggyNode[];
-};
+type NodeProgram = N<"Program", { statements: AnyPeggyNode[] }>;
 
-type NodeRecord = Node & {
-  type: "Record";
-  elements: NodeKeyValue[];
-};
+type NodeArray = N<"Array", { elements: AnyPeggyNode[] }>;
 
-type NodeCall = Node & {
-  type: "Call";
-  fn: AnyPeggyNode;
-  args: AnyPeggyNode[];
-};
+type NodeRecord = N<"Record", { elements: NodeKeyValue[] }>;
 
-type NodeFloat = Node & {
-  type: "Float";
-  value: number;
-};
+type NodeCall = N<"Call", { fn: AnyPeggyNode; args: AnyPeggyNode[] }>;
 
-type NodeInteger = Node & {
-  type: "Integer";
-  value: number;
-};
+type NodeFloat = N<"Float", { value: number }>;
 
-type NodeIdentifier = Node & {
-  type: "Identifier";
-  value: string;
-};
+type NodeInteger = N<"Integer", { value: number }>;
 
-type NodeModuleIdentifier = Node & {
-  type: "ModuleIdentifier";
-  value: string;
-};
+type NodeIdentifier = N<"Identifier", { value: string }>;
 
-type NodeLetStatement = Node & {
-  type: "LetStatement";
-  variable: NodeIdentifier;
-  value: AnyPeggyNode;
-};
+type NodeModuleIdentifier = N<"ModuleIdentifier", { value: string }>;
 
-type NodeLambda = Node & {
-  type: "Lambda";
-  args: AnyPeggyNode[];
-  body: AnyPeggyNode;
-  name?: string;
-};
+type NodeLetStatement = N<
+  "LetStatement",
+  { variable: NodeIdentifier; value: AnyPeggyNode }
+>;
 
-type NodeTernary = Node & {
-  type: "Ternary";
-  condition: AnyPeggyNode;
-  trueExpression: AnyPeggyNode;
-  falseExpression: AnyPeggyNode;
-};
+type NodeLambda = N<
+  "Lambda",
+  { args: AnyPeggyNode[]; body: AnyPeggyNode; name?: string }
+>;
 
-type NodeKeyValue = Node & {
-  type: "KeyValue";
-  key: AnyPeggyNode;
-  value: AnyPeggyNode;
-};
+type NodeTernary = N<
+  "Ternary",
+  {
+    condition: AnyPeggyNode;
+    trueExpression: AnyPeggyNode;
+    falseExpression: AnyPeggyNode;
+  }
+>;
 
-type NodeString = Node & {
-  type: "String";
-  value: string;
-  location?: LocationRange;
-};
+type NodeKeyValue = N<
+  "KeyValue",
+  {
+    key: AnyPeggyNode;
+    value: AnyPeggyNode;
+  }
+>;
 
-type NodeBoolean = Node & {
-  type: "Boolean";
-  value: boolean;
-};
+type NodeString = N<"String", { value: string }>;
 
-type NodeVoid = Node & {
-  type: "Void";
-};
+type NodeBoolean = N<"Boolean", { value: boolean }>;
+
+type NodeVoid = N<"Void", {}>;
 
 export type AnyPeggyNode =
   | NodeArray
