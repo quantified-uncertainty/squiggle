@@ -90,14 +90,16 @@ export const frTuple2 = <T1, T2>(
   };
 };
 
-export const frDict = <T>(itemType: FRType<T>): FRType<ImmutableMap<T>> => {
+export const frDict = <T>(
+  itemType: FRType<T>
+): FRType<ImmutableMap<string, T>> => {
   return {
     unpack: (v: Value) => {
       if (v.type !== "Record") {
         return undefined;
       }
       // TODO - skip loop and copying if itemType is `any`
-      let unpackedMap: ImmutableMap<T> = ImmutableMap.make();
+      let unpackedMap: ImmutableMap<string, T> = ImmutableMap();
       for (const [key, value] of v.value.entries()) {
         const unpackedItem = itemType.unpack(value);
         if (unpackedItem === undefined) {

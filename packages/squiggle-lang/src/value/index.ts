@@ -12,7 +12,7 @@ export type ReducerFn = (
   context: ReducerContext
 ) => [Value, ReducerContext];
 
-export type ValueMap = ImmutableMap<Value>; // TODO - immutable.js or other implementation
+export type ValueMap = ImmutableMap<string, Value>;
 
 type KV<T extends string, V> = Readonly<{ type: T; value: V }>;
 

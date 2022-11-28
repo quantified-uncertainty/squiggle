@@ -75,7 +75,7 @@ export const evaluate: ReducerFn = (expression, context) => {
 
     case "Record": {
       const value = vRecord(
-        ImmutableMap.fromArray(
+        ImmutableMap(
           expression.value.map(([eKey, eValue]) => {
             const [key] = evaluate(eKey, context);
             if (key.type !== "String") {

@@ -6,9 +6,9 @@ import { Value, valueToString, vRecord } from "../value";
   The full context of variables accessible to Squiggle is called "bindings"; see Bindings.ts module for details on it.
 */
 
-export type Namespace = ImmutableMap<Value>;
+export type Namespace = ImmutableMap<string, Value>;
 
-export const make = (): Namespace => ImmutableMap.make();
+export const make = (): Namespace => ImmutableMap();
 
 export const get = (t: Namespace, id: string): Value | undefined => t.get(id);
 
@@ -43,7 +43,7 @@ export const toString = (namespace: Namespace): string => {
 };
 
 export const fromArray = (a: [string, Value][]): Namespace => {
-  return ImmutableMap.fromArray(a);
+  return ImmutableMap(a);
 };
 
 export const toRecord = (namespace: Namespace): Value => {

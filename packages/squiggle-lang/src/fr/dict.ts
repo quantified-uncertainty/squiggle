@@ -37,7 +37,7 @@ export const library = [
     examples: [`Dict.merge({a: 1, b: 2}, {c: 3, d: 4})`],
     definitions: [
       makeDefinition("merge", [frDict(frAny), frDict(frAny)], ([d1, d2]) =>
-        Ok(vRecord(ImmutableMap.fromArray([...d1.entries(), ...d2.entries()])))
+        Ok(vRecord(ImmutableMap([...d1.entries(), ...d2.entries()])))
       ),
     ],
   }),
@@ -47,11 +47,7 @@ export const library = [
     examples: [`Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}])`],
     definitions: [
       makeDefinition("mergeMany", [frArray(frDict(frAny))], ([dicts]) =>
-        Ok(
-          vRecord(
-            ImmutableMap.fromArray(dicts.map((d) => [...d.entries()]).flat())
-          )
-        )
+        Ok(vRecord(ImmutableMap(dicts.map((d) => [...d.entries()]).flat())))
       ),
     ],
   }),
@@ -93,7 +89,7 @@ export const library = [
       makeDefinition(
         "fromList",
         [frArray(frTuple2(frString, frAny))],
-        ([items]) => Ok(vRecord(ImmutableMap.fromArray(items)))
+        ([items]) => Ok(vRecord(ImmutableMap(items)))
       ),
     ],
   }),
@@ -108,7 +104,7 @@ export const library = [
         ([dict, lambda], context, reducer) => {
           return Ok(
             vRecord(
-              ImmutableMap.fromArray(
+              ImmutableMap(
                 [...dict.entries()].map(([key, value]) => {
                   const mappedValue = doLambdaCall(
                     lambda,
