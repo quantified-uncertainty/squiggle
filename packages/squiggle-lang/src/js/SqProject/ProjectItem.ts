@@ -12,7 +12,7 @@ import { AST, parse, ParseError } from "../../ast/parse";
 import { errorFromException, fromParseError } from "../../reducer/IError";
 import { Expression } from "../../expression";
 import * as Namespace from "../../reducer/Namespace";
-import * as Bindings from "../../reducer/Bindings";
+import * as Bindings from "../../reducer/bindings";
 import { Value } from "../../value";
 import { SqError } from "../SqError";
 import { expressionFromAst } from "../../ast/toExpression";

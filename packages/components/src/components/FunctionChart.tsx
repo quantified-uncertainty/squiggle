@@ -1,11 +1,6 @@
 import * as React from "react";
 import * as yup from "yup";
-import {
-  SqLambda,
-  environment,
-  SqValueTag,
-  SqError,
-} from "@quri/squiggle-lang";
+import { SqLambda, Env, SqError } from "@quri/squiggle-lang";
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
 import { MessageAlert } from "./Alert";
@@ -26,7 +21,7 @@ type FunctionChartProps = {
   fn: SqLambda;
   settings: FunctionChartSettings;
   distributionChartSettings: DistributionChartSettings;
-  environment: environment;
+  environment: Env;
   height: number;
 };
 
@@ -81,7 +76,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   }
 
   switch (validResult.value.tag) {
-    case SqValueTag.Distribution:
+    case "Dist":
       return (
         <FunctionChart1Dist
           fn={fn}
@@ -91,7 +86,7 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
           distributionChartSettings={distributionChartSettings}
         />
       );
-    case SqValueTag.Number:
+    case "Number":
       return (
         <FunctionChart1Number fn={fn} settings={settings} height={height} />
       );

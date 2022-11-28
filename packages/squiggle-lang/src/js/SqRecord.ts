@@ -6,7 +6,7 @@ export class SqRecord {
   constructor(private _value: ValueMap, public location: SqValueLocation) {}
 
   entries() {
-    [...this._value.entries()].map(
+    return [...this._value.entries()].map(
       ([k, v]) => [k, wrapValue(v, this.location.extend(k))] as const
     );
   }

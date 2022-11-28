@@ -1,5 +1,5 @@
 import React from "react";
-import { SqDistributionTag, SqValue, SqValueTag } from "@quri/squiggle-lang";
+import { SqDistributionTag, SqValue } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
 import { DistributionChart } from "../DistributionChart";
 import { MultiDistributionChart, makePlot } from "../MultiDistributionChart";
@@ -39,7 +39,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
   const environment = value.location.project.getEnvironment();
 
   switch (value.tag) {
-    case SqValueTag.Number:
+    case "Number":
       return (
         <VariableBox value={value} heading="Number">
           {() => (
@@ -49,7 +49,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           )}
         </VariableBox>
       );
-    case SqValueTag.Distribution: {
+    case "Dist": {
       const distType = value.value.tag;
       return (
         <VariableBox
@@ -88,7 +88,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         </VariableBox>
       );
     }
-    case SqValueTag.String:
+    case "String":
       return (
         <VariableBox value={value} heading="String">
           {() => (
@@ -102,32 +102,32 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           )}
         </VariableBox>
       );
-    case SqValueTag.Bool:
+    case "Bool":
       return (
         <VariableBox value={value} heading="Boolean">
           {() => value.value.toString()}
         </VariableBox>
       );
-    case SqValueTag.Date:
+    case "Date":
       return (
         <VariableBox value={value} heading="Date">
           {() => value.value.toDateString()}
         </VariableBox>
       );
-    case SqValueTag.Void:
+    case "Void":
       return (
         <VariableBox value={value} heading="Void">
           {() => "Void"}
         </VariableBox>
       );
-    case SqValueTag.TimeDuration: {
+    case "TimeDuration": {
       return (
         <VariableBox value={value} heading="Time Duration">
           {() => <NumberShower precision={3} number={value.value} />}
         </VariableBox>
       );
     }
-    case SqValueTag.Lambda:
+    case "Lambda":
       return (
         <VariableBox
           value={value}
@@ -161,7 +161,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           )}
         </VariableBox>
       );
-    case SqValueTag.Declaration: {
+    case "Declaration": {
       return (
         <VariableBox
           value={value}
@@ -192,7 +192,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         </VariableBox>
       );
     }
-    case SqValueTag.Record:
+    case "Record":
       const plot = makePlot(value.value);
       if (plot) {
         return (
@@ -244,7 +244,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           </VariableList>
         );
       }
-    case SqValueTag.Array:
+    case "Array":
       return (
         <VariableList value={value} heading="Array">
           {(_) =>

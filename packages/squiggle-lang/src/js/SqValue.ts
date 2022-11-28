@@ -8,8 +8,6 @@ import { SqValueLocation } from "./SqValueLocation";
 import { SqError } from "./SqError";
 import { Value, valueToString } from "../value";
 
-type Tag = Value["type"];
-
 export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
   const tag = value.type;
 

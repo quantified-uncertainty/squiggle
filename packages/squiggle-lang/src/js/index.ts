@@ -15,6 +15,7 @@ export { parse } from "./parse";
 export { defaultEnv as defaultEnvironment } from "../Dist/env";
 export { SqProject, SqValue };
 export { Env };
+export { LocationRange as SqLocation } from "peggy";
 
 export { resultMap } from "./types";
 

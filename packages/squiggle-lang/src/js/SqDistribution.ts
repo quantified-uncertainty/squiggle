@@ -59,7 +59,7 @@ abstract class SqAbstractDistribution<T extends BaseDist> {
     return Ok(this._value.cdf(n));
   }
 
-  inv(env: Env, n: number) {
+  inv(env: Env, n: number): result<number, SqDistributionError> {
     return Ok(this._value.inv(n));
   }
 
@@ -84,7 +84,7 @@ export class SqSampleSetDistribution extends SqAbstractDistribution<SampleSetDis
   tag = SqDistributionTag.SampleSet as const;
 
   value(): SampleSetDist {
-    return (this._value as any)._0;
+    return this._value;
   }
 }
 

@@ -1,7 +1,7 @@
 import { BaseDist } from "../Dist/BaseDist";
 import { Env } from "../Dist/env";
 import * as SymbolicDist from "../Dist/SymbolicDist";
-import * as Lambda from "../reducer/lambda";
+import * as Lambda from "../reducer/Lambda";
 import * as IError from "../reducer/IError";
 import * as RSResult from "../rsResult";
 import * as E_A from "../utility/E_A";

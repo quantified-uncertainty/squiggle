@@ -1,7 +1,7 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import { result, SqLambda, SqValueTag } from "@quri/squiggle-lang";
+import { result, SqLambda } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as lineChartSpec from "../vega-specs/spec-line-chart.json";
 import { ErrorAlert } from "./Alert";
@@ -42,7 +42,7 @@ let getFunctionImage = ({
   let chartPointsData: point[] = chartPointsToRender.map((x) => {
     let result = fn.call([x]);
     if (result.tag === "Ok") {
-      if (result.value.tag === SqValueTag.Number) {
+      if (result.value.tag === "Number") {
         return { x, value: { tag: "Ok", value: result.value.value } };
       } else {
         return {

@@ -7,7 +7,7 @@ import {
   result,
   SqDistributionError,
   SqDistribution,
-  environment,
+  Env,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
 import { ErrorAlert } from "./Alert";
@@ -44,7 +44,7 @@ export function makePlot(record: SqRecord): Plot | void {
 
 export type MultiDistributionChartProps = {
   plot: Plot;
-  environment: environment;
+  environment: Env;
   chartHeight?: number;
   settings: DistributionChartSettings;
 };
@@ -81,7 +81,7 @@ export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
   const samples: number[] = [];
   for (const { distribution } of distributions) {
     if (distribution.tag === SqDistributionTag.SampleSet) {
-      samples.push(...distribution.value());
+      samples.push(...distribution.value().samples);
     }
   }
 
@@ -146,7 +146,7 @@ const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 type SummaryTableProps = {
   plot: Plot;
-  environment: environment;
+  environment: Env;
 };
 
 const SummaryTable: React.FC<SummaryTableProps> = ({ plot, environment }) => {
@@ -185,7 +185,7 @@ type SummaryTableRowProps = {
   distribution: SqDistribution;
   name: string;
   showName: boolean;
-  environment: environment;
+  environment: Env;
 };
 
 const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
@@ -220,7 +220,7 @@ const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
   return (
     <tr>
       {showName && <Cell>{name}</Cell>}
-      <Cell>{unwrapResult(mean)}</Cell>
+      <Cell>{mean}</Cell>
       <Cell>{unwrapResult(stdev)}</Cell>
       <Cell>{unwrapResult(p5)}</Cell>
       <Cell>{unwrapResult(p10)}</Cell>

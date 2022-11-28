@@ -4,7 +4,7 @@ import {
   SqProject,
   SqRecord,
   SqValue,
-  environment,
+  Env,
 } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
@@ -13,7 +13,7 @@ import * as uuid from "uuid";
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
   /** The amount of points returned to draw the distribution, not needed if using a project */
-  environment?: environment;
+  environment?: Env;
 };
 
 // Props needed when executing inside a project.

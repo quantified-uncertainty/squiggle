@@ -5,10 +5,9 @@ import {
   SqDistribution,
   result,
   SqLambda,
-  environment,
+  Env,
   SqError,
   SqValue,
-  SqValueTag,
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
@@ -42,7 +41,7 @@ type FunctionChart1DistProps = {
   fn: SqLambda;
   settings: FunctionChartSettings;
   distributionChartSettings: DistributionChartSettings;
-  environment: environment;
+  environment: Env;
   height: number;
 };
 
@@ -79,7 +78,7 @@ let getPercentiles = ({
 }: {
   settings: FunctionChartSettings;
   fn: SqLambda;
-  environment: environment;
+  environment: Env;
 }) => {
   let chartPointsToRender = _rangeByCount(
     settings.start,
@@ -90,7 +89,7 @@ let getPercentiles = ({
   let chartPointsData: point[] = chartPointsToRender.map((x) => {
     let result = fn.call([x]);
     if (result.tag === "Ok") {
-      if (result.value.tag === SqValueTag.Distribution) {
+      if (result.value.tag === "Dist") {
         return { x, value: { tag: "Ok", value: result.value.value } };
       } else {
         return {
@@ -175,8 +174,7 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
         ),
       };
   let showChart =
-    mouseItem.tag === "Ok" &&
-    mouseItem.value.tag === SqValueTag.Distribution ? (
+    mouseItem.tag === "Ok" && mouseItem.value.tag === "Dist" ? (
       <DistributionChart
         distribution={mouseItem.value.value}
         environment={environment}

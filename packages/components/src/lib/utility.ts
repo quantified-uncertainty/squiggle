@@ -1,4 +1,4 @@
-import { result, resultMap, SqValueTag } from "@quri/squiggle-lang";
+import { result, resultMap } from "@quri/squiggle-lang";
 import { ResultAndBindings } from "./hooks/useSquiggle";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
@@ -39,7 +39,7 @@ export function some(arr: boolean[]): boolean {
 
 export function getValueToRender({ result, bindings }: ResultAndBindings) {
   return resultMap(result, (value) =>
-    value.tag === SqValueTag.Void ? bindings.asValue() : value
+    value.tag === "Void" ? bindings.asValue() : value
   );
 }
 
