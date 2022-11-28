@@ -21,7 +21,5 @@ yarn-error.log
 _coverage
 coverage
 .nyc_output/
-src/rescript/Reducer/Reducer_Peggy/Reducer_Peggy_GeneratedParser.js
-src/rescript/Reducer/Reducer_Peggy/helpers.js
-src/rescript/ReducerProject/ReducerProject_IncludeParser.js
+src/ast/peggyParser.js
 src/js/SqProject/IncludeParser.js
