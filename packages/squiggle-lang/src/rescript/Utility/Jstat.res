@@ -1,8 +1,0 @@
-@module("jstat") external sum: array<float> => float = "sum"
-@module("jstat") external product: array<float> => float = "product"
-@module("jstat") external mean: array<float> => float = "mean"
-@module("jstat") external geomean: array<float> => float = "geomean"
-@module("jstat") external mode: array<float> => float = "mode"
-@module("jstat") external variance: array<float> => float = "variance"
-@module("jstat") external stdev: array<float> => float = "stdev"
-@module("jstat") external percentile: (array<float>, float, bool) => float = "percentile"

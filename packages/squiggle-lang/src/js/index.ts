@@ -3,7 +3,7 @@ import { SqProject } from "./SqProject";
 import { SqValue } from "./SqValue";
 
 export { SqValueLocation } from "./SqValueLocation";
-export { result } from "../rescript/ForTS/ForTS_Result_tag";
+export { result } from "./types";
 export { SqDistribution, SqDistributionTag } from "./SqDistribution";
 export { SqDistributionError } from "./SqDistributionError";
 export { SqRecord } from "./SqRecord";

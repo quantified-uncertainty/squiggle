@@ -1,6 +1,11 @@
-import { result } from "../rescript/ForTS/ForTS_Result_tag";
+export type result<A, B> =
+  | {
+      tag: "Ok";
+      value: A;
+    }
+  | { tag: "Error"; value: B };
+
 import { rsResult } from "../rsResult";
-export { result };
 
 export function resultMap<a, b, c>(
   r: result<a, b>,

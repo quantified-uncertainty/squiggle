@@ -1,2 +1,0 @@
-@genType.opaque
-type genericDist
