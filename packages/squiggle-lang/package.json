@@ -24,7 +24,7 @@
     "format": "yarn format:prettier",
     "prepack": "yarn build && yarn test && yarn bundle",
     "all": "yarn build && yarn bundle && yarn test",
-    "cli": "node ./dist/src/js/cli/index.js"
+    "cli": "node ./dist/src/cli/index.js"
   },
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
@@ -51,10 +51,10 @@
     "webpack": "^5.75.0",
     "webpack-cli": "^4.10.0"
   },
-  "source": "./src/js/index.ts",
-  "main": "./dist/src/js/index.js",
-  "types": "./dist/src/js/index.d.ts",
+  "source": "./src/index.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "bin": {
-    "squiggle": "./dist/src/js/cli/index.js"
+    "squiggle": "./dist/src/cli/index.js"
   }
 }
