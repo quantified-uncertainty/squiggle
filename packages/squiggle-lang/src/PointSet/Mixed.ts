@@ -224,15 +224,8 @@ export class MixedShape implements PointSet<MixedShape> {
   mean(): number {
     const discreteMean = this.discrete.mean();
     const continuousMean = this.continuous.mean();
-    // the combined mean is the weighted sum of the two:
-    const discreteIntegralSum = this.discrete.integralEndY();
-    const continuousIntegralSum = this.continuous.integralEndY();
-    const totalIntegralSum = discreteIntegralSum + continuousIntegralSum;
-    return (
-      (discreteMean * discreteIntegralSum +
-        continuousMean * continuousIntegralSum) /
-      totalIntegralSum
-    );
+    // means are already weighted by subshape probabilities
+    return (discreteMean + continuousMean) / this.integralEndY();
   }
   variance(): number {
     // the combined mean is the weighted sum of the two:
