@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { SqProject } from "../src/js";
+import { SqProject } from "../src";
 import { measure } from "../src/cli/utils";
 
 const maxP = 7;

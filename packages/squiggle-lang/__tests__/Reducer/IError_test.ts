@@ -1,5 +1,5 @@
-import * as IError from "../src/reducer/IError";
-import * as FrameStack from "../src/reducer/FrameStack";
+import * as IError from "../../src/reducer/IError";
+import * as FrameStack from "../../src/reducer/FrameStack";
 
 describe("IError.Message", () => {
   test("toString", () => {

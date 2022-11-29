@@ -1,5 +1,5 @@
-import { run, SqProject } from "../../src/js";
-import { testRun } from "./TestHelpers";
+import { run, SqProject } from "../src";
+import { testRun } from "./TS/TestHelpers";
 
 describe("Simple calculations and results", () => {
   test("mean(normal(5,2))", () => {
@@ -7,13 +7,13 @@ describe("Simple calculations and results", () => {
     expect(result.toString()).toEqual("5");
   });
   test("10+10", () => {
-    let result = testRun("10 + 10");
+    const result = testRun("10 + 10");
     expect(result.toString()).toEqual("20");
   });
 });
 describe("Log function", () => {
   test("log(1) = 0", () => {
-    let foo = testRun("log(1)");
+    const foo = testRun("log(1)");
     expect(foo.toString()).toEqual("0");
   });
 });

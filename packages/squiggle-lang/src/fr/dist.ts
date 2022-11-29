@@ -3,7 +3,7 @@ import { DistError } from "../Dist/DistError";
 import { toSampleSetDist } from "../Dist/DistOperations";
 import * as SampleSetDist from "../Dist/SampleSetDist/SampleSetDist";
 import * as SymbolicDist from "../Dist/SymbolicDist";
-import { Env } from "../js";
+import { Env } from "..";
 import { FRFunction } from "../library/registry/core";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import {

@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 
 import { BinaryOperations } from "../../src/Dist/DistOperations";
-import { env, mkExponential, mkNormal, unpackResult } from "../TestHelpers";
+import { env, mkExponential, mkNormal, unpackResult } from "./distTestHelpers";
 import { SimpleOperationError } from "../../src/OperationError";
 
 describe("dotSubtract", () => {

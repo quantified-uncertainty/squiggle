@@ -20,7 +20,7 @@ import {
   mkTriangular,
   mkUniform,
   unpackResult,
-} from "../../TestHelpers";
+} from "../distTestHelpers";
 import {
   BinaryOperations,
   BinaryOperation,

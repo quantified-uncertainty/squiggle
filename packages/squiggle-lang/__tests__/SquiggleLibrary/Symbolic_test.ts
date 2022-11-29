@@ -1,4 +1,4 @@
-import { testRun } from "./TestHelpers";
+import { testRun } from "../TS/TestHelpers";
 import * as fc from "fast-check";
 
 describe("Symbolic mean", () => {

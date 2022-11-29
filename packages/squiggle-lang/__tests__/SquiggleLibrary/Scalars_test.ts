@@ -1,14 +1,14 @@
 // import { errorValueToString } from "../../src/js/index";
-import { testRun } from "./TestHelpers";
+import { testRun } from "../TS/TestHelpers";
 import * as fc from "fast-check";
 
 describe("Scalar manipulation is well-modeled by javascript math", () => {
   test("in the case of natural logarithms", () => {
     fc.assert(
       fc.property(fc.nat(), (x) => {
-        let squiggleString = `log(${x})`;
-        let squiggleResult = testRun(squiggleString);
-        if (x == 0) {
+        const squiggleString = `log(${x})`;
+        const squiggleResult = testRun(squiggleString);
+        if (x === 0) {
           expect(squiggleResult.value).toEqual(-Infinity);
         } else {
           expect(squiggleResult.value).toEqual(Math.log(x));

@@ -1,5 +1,5 @@
-import { SqProject } from "../../src/js";
-import { toStringResult } from "../../src/js/SqValue";
+import { SqProject } from "../../src";
+import { toStringResult } from "../../src/public/SqValue";
 
 describe("ReducerProject Tutorial", () => {
   /* Case: Includes

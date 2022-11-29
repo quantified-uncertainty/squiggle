@@ -3,7 +3,7 @@ import fs from "fs";
 import isFinite from "lodash/isFinite";
 
 import { Env } from "../Dist/env";
-import { SqProject } from "../js/SqProject";
+import { SqProject } from "../public/SqProject";
 
 export const red = (str: string) => `\x1b[31;1m${str}\x1b[0m`;
 export const bold = (str: string) => `\x1b[1m${str}\x1b[0m`;

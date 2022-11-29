@@ -20,7 +20,7 @@ import {
 } from "../fixtures";
 
 import { BinaryOperations } from "../../../src/Dist/DistOperations";
-import { env, unpackResult } from "../../TestHelpers";
+import { env, unpackResult } from "../distTestHelpers";
 const {
   algebraicAdd,
   algebraicMultiply,

@@ -1,5 +1,5 @@
 import * as fc from "fast-check";
-import { testRun } from "./TestHelpers";
+import { testRun } from "./TS/TestHelpers";
 
 describe("cumulative density function of a normal distribution", () => {
   test("at 3 stdevs to the right of the mean is near 1", () => {

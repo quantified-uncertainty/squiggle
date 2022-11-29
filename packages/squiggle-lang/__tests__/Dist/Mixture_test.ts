@@ -7,7 +7,7 @@ import {
   mkNormal,
   mkUniform,
   unpackResult,
-} from "../TestHelpers";
+} from "./distTestHelpers";
 
 describe("mixture", () => {
   test.each([

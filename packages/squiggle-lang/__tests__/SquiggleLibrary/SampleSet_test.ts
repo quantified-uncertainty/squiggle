@@ -1,4 +1,4 @@
-import { expectErrorToBeBounded, testRun } from "./TestHelpers";
+import { expectErrorToBeBounded, testRun } from "../TS/TestHelpers";
 import * as fc from "fast-check";
 
 // Beware: float64Array makes it appear in an infinite loop.

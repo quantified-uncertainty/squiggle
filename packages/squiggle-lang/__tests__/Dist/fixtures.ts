@@ -1,5 +1,5 @@
 import * as SymbolicDist from "../../src/Dist/SymbolicDist";
-import { unpackResult } from "../TestHelpers";
+import { unpackResult } from "./distTestHelpers";
 
 export const normalDist5 = unpackResult(
   SymbolicDist.Normal.make({ mean: 5, stdev: 2 })

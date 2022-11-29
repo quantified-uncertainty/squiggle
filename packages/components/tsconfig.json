@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "paths": {
-      "@quri/squiggle-lang": ["../squiggle-lang/src/js"]
+      "@quri/squiggle-lang": ["../squiggle-lang/src"]
     },
     "module": "commonjs",
     "jsx": "react",

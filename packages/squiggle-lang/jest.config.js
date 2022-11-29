@@ -4,12 +4,9 @@ module.exports = {
   testEnvironment: "node",
   testPathIgnorePatterns: [
     "fixtures.ts",
-    ".*Fixtures.bs.js",
     "/node_modules/",
-    ".*Helpers.bs.js",
     ".*Helpers.ts",
     ".*Reducer_Type.*",
-    ".*_type_test.bs.js",
     ".*_type_test.ts",
     "/dist",
   ],

@@ -1,4 +1,4 @@
-import { run } from "../../src/js";
+import { run } from "../../src";
 
 expect.extend({
   toEqualSqValue(x, y) {

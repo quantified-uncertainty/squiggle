@@ -5,7 +5,7 @@ import {
   NegativeInfinityError,
 } from "../../src/OperationError";
 import * as Result from "../../src/utility/result";
-import { env, mkExponential, mkUniform } from "../TestHelpers";
+import { env, mkExponential, mkUniform } from "./distTestHelpers";
 
 describe("Scale logarithm", () => {
   /* These tests may not be important, because scalelog isn't normalized

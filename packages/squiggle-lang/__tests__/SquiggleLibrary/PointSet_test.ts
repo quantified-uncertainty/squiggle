@@ -1,4 +1,4 @@
-import { testRun, expectErrorToBeBounded } from "./TestHelpers";
+import { testRun, expectErrorToBeBounded } from "../TS/TestHelpers";
 import * as fc from "fast-check";
 
 describe("Mean of mixture is weighted average of means", () => {

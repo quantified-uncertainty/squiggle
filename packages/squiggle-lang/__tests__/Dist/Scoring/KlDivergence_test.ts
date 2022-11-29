@@ -1,7 +1,7 @@
 import { BaseDist } from "../../../src/Dist/BaseDist";
 import { distErrorToString } from "../../../src/Dist/DistError";
 import { logScoreDistAnswer, mixture } from "../../../src/Dist/DistOperations";
-import { env, mkNormal, mkUniform, unpackResult } from "../../TestHelpers";
+import { env, mkNormal, mkUniform, unpackResult } from "../distTestHelpers";
 import {
   floatDist,
   normalDist10,
