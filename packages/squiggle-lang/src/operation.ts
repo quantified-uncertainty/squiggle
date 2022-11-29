@@ -23,7 +23,7 @@ export type AlgebraicOperation =
 export type ConvolutionOperation = "Add" | "Multiply" | "Subtract";
 
 export const Convolution = {
-  //Only a selection of operations are supported by convolution.
+  // Only a selection of operations are supported by convolution.
   fromAlgebraicOperation(
     op: AlgebraicOperation
   ): ConvolutionOperation | undefined {
@@ -49,7 +49,9 @@ export const Convolution = {
   },
 };
 
-export const power = (a: number, b: number): result<number, OperationError> => {
+type OperationFn = (a: number, b: number) => result<number, OperationError>;
+
+const power: OperationFn = (a, b) => {
   if (a >= 0) {
     return Ok(a ** b);
   } else {
@@ -57,10 +59,13 @@ export const power = (a: number, b: number): result<number, OperationError> => {
   }
 };
 
-export const divide = (
-  a: number,
-  b: number
-): result<number, OperationError> => {
+const add: OperationFn = (a, b) => Ok(a + b);
+
+const subtract: OperationFn = (a, b) => Ok(a - b);
+
+const multiply: OperationFn = (a, b) => Ok(a * b);
+
+const divide: OperationFn = (a, b) => {
   if (b !== 0) {
     return Ok(a / b);
   } else {
@@ -68,10 +73,7 @@ export const divide = (
   }
 };
 
-export const logarithm = (
-  a: number,
-  b: number
-): result<number, OperationError> => {
+const logarithm: OperationFn = (a, b) => {
   if (b === 1) {
     return Result.Error(DivisionByZeroError);
   } else if (b === 0) {
@@ -85,30 +87,33 @@ export const logarithm = (
   }
 };
 
-export const Algebraic = {
-  toFn(
-    x: AlgebraicOperation,
-    a: number,
-    b: number
-  ): result<number, OperationError> {
-    if (x === "Add") {
-      return Ok(a + b);
-    } else if (x === "Subtract") {
-      return Ok(a - b);
-    } else if (x === "Multiply") {
-      return Ok(a * b);
-    } else if (x === "Power") {
-      return power(a, b);
-    } else if (x === "Divide") {
-      return divide(a, b);
-    } else if (x === "Logarithm") {
+const buildLogarithmWithThreshold = (threshold: number) => {
+  const fn: OperationFn = (a, b) => {
+    if (a < threshold) {
+      return Ok(0);
+    } else {
       return logarithm(a, b);
+    }
+  };
+  return fn;
+};
+
+export const Algebraic = {
+  toFn(x: AlgebraicOperation): OperationFn {
+    if (x === "Add") {
+      return add;
+    } else if (x === "Subtract") {
+      return subtract;
+    } else if (x === "Multiply") {
+      return multiply;
+    } else if (x === "Power") {
+      return power;
+    } else if (x === "Divide") {
+      return divide;
+    } else if (x === "Logarithm") {
+      return logarithm;
     } else if (x.NAME === "LogarithmWithThreshold") {
-      if (a < x.VAL) {
-        return Ok(0);
-      } else {
-        return logarithm(a, b);
-      }
+      return buildLogarithmWithThreshold(x.VAL);
     } else {
       throw new Error(`Unknown operation ${x}`);
     }
@@ -145,25 +150,17 @@ export type ScaleOperation =
 
 // // Note that different logarithms don't really do anything.
 export const Scale = {
-  toFn(
-    x: ScaleOperation,
-    a: number,
-    b: number
-  ): result<number, OperationError> {
+  toFn(x: ScaleOperation): OperationFn {
     if (x === "Multiply") {
-      return Ok(a * b);
+      return multiply;
     } else if (x === "Divide") {
-      return divide(a, b);
+      return divide;
     } else if (x === "Power") {
-      return power(a, b);
+      return power;
     } else if (x === "Logarithm") {
-      return logarithm(a, b);
+      return logarithm;
     } else if (x.NAME === "LogarithmWithThreshold") {
-      if (a < x.VAL) {
-        return Ok(0);
-      } else {
-        return logarithm(a, b);
-      }
+      return buildLogarithmWithThreshold(x.VAL);
     } else {
       throw new Error(`Unknown scale operation ${x}`);
     }

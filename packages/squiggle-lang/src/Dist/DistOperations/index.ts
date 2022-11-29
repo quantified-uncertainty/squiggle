@@ -129,8 +129,10 @@ const pointwiseCombination = (
   const p1 = p1r.value;
   const p2 = p2r.value;
 
-  const result = PointSetDist.combinePointwise(p1, p2, (a: number, b: number) =>
-    Operation.Algebraic.toFn(algebraicCombination, a, b)
+  const result = PointSetDist.combinePointwise(
+    p1,
+    p2,
+    Operation.Algebraic.toFn(algebraicCombination)
   );
   if (result.ok) {
     return result;
@@ -159,9 +161,11 @@ export const pointwiseCombinationFloat = (
       const integralCacheFn =
         Operation.Scale.toIntegralCacheFn(arithOp) ??
         ((a: number, b: ContinuousShape) => undefined);
+
+      const opFn = Operation.Scale.toFn(arithOp);
       return Result.errMap(
         t.mapYResult<OperationError>(
-          (y) => Operation.Scale.toFn(arithOp, y, f),
+          (y) => opFn(y, f),
           (v) => integralSumCacheFn?.(f, v),
           (v) => integralCacheFn(f, v)
         ),

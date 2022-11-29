@@ -982,7 +982,7 @@ export const tryAnalyticalSimplification = (
 ): result<SymbolicDist, OperationError> | undefined => {
   if (d1 instanceof Float && d2 instanceof Float) {
     return Result.fmap(
-      Operation.Algebraic.toFn(op, d1.t, d2.t),
+      Operation.Algebraic.toFn(op)(d1.t, d2.t),
       (v) => new Float(v)
     );
   } else if (d1 instanceof Normal && d2 instanceof Normal) {

@@ -95,8 +95,7 @@ const StrategyCallOnValidatedInputs = {
     t1: BaseDist,
     t2: BaseDist
   ): result<SampleSetDist.SampleSetDist, DistError> {
-    const fn = (a: number, b: number) =>
-      Operation.Algebraic.toFn(arithmeticOperation, a, b);
+    const fn = Operation.Algebraic.toFn(arithmeticOperation);
     const s1r = SampleSetDist.SampleSetDist.fromDist(t1, env);
     const s2r = SampleSetDist.SampleSetDist.fromDist(t2, env);
     if (!s1r.ok) {
