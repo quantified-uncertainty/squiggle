@@ -159,12 +159,9 @@ describe("mean is mean", () => {
           let myEnv = { sampleCount: 2 * n, xyPointLength: 4 * n };
           let mean = dist.mean(myEnv);
           if (typeof mean === "number") {
-            expectErrorToBeBounded(
-              mean,
-              xs.reduce((a, b) => a + b, 0.0) / n,
-              5e-1,
-              1
-            );
+            expectErrorToBeBounded(mean, xs.reduce((a, b) => a + b, 0.0) / n, {
+              epsilon: 5e-1,
+            });
           } else {
             fail();
           }
@@ -184,12 +181,9 @@ describe("mean is mean", () => {
           let myEnv = { sampleCount: Math.floor(n / 2), xyPointLength: 4 * n };
           let mean = dist.mean(myEnv);
           if (typeof mean === "number") {
-            expectErrorToBeBounded(
-              mean,
-              xs.reduce((a, b) => a + b, 0.0) / n,
-              5e-1,
-              1
-            );
+            expectErrorToBeBounded(mean, xs.reduce((a, b) => a + b, 0.0) / n, {
+              epsilon: 5e-1,
+            });
           } else {
             fail();
           }

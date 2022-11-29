@@ -19,7 +19,7 @@ expect.extend({
 });
 
 export function testRun(x: string) {
-  const { result, bindings } = run(x, {
+  const { result } = run(x, {
     environment: {
       sampleCount: 1000,
       xyPointLength: 100,
@@ -42,14 +42,11 @@ export function testRun(x: string) {
 export function expectErrorToBeBounded(
   received: number,
   expected: number,
-  epsilon: number,
-  digits: number
+  { epsilon }: { epsilon: number }
 ) {
-  let distance = Math.abs(received - expected);
-  let expectedAbs = Math.abs(expected);
-  let normalizingDenom = Math.max(expectedAbs, 1);
-  let error = distance / normalizingDenom;
-  expect(Math.round(10 ** digits * error) / 10 ** digits).toBeLessThanOrEqual(
-    epsilon
-  );
+  const distance = Math.abs(received - expected);
+  const expectedAbs = Math.abs(expected);
+  const normalizingDenom = Math.max(expectedAbs, 1);
+  const error = distance / normalizingDenom;
+  expect(error).toBeLessThanOrEqual(epsilon);
 }

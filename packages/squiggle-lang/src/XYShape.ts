@@ -758,7 +758,7 @@ export const Analysis = {
     mean: (t: T) => number,
     getMeanOfSquares: (t: T) => number
   ): number {
-    const meanSquared = mean(t) ** 2.0;
+    const meanSquared = mean(t) ** 2;
     const meanOfSquares = getMeanOfSquares(t);
     return meanOfSquares - meanSquared;
   },

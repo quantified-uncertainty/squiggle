@@ -296,10 +296,10 @@ export const combineAlgebraically = (
   t1: DiscreteShape,
   t2: DiscreteShape
 ): DiscreteShape => {
-  let t1s = t1.xyShape;
-  let t2s = t2.xyShape;
-  let t1n = XYShape.T.length(t1s);
-  let t2n = XYShape.T.length(t2s);
+  const t1s = t1.xyShape;
+  const t2s = t2.xyShape;
+  const t1n = XYShape.T.length(t1s);
+  const t2n = XYShape.T.length(t2s);
 
   const combinedIntegralSum = Common.combineIntegralSums(
     (s1, s2) => s1 * s2,
