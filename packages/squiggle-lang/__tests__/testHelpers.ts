@@ -1,4 +1,4 @@
-import { run } from "../../src";
+import { run } from "../src";
 
 expect.extend({
   toEqualSqValue(x, y) {
@@ -35,10 +35,17 @@ export function testRun(x: string) {
   }
 }
 
-/**
- * This appears also in `TestHelpers.res`. According to https://www.math.net/percent-error, it computes
- * absolute error when numerical stability concerns make me not want to compute relative error.
- * */
+/*
+This encodes the expression for percent error
+The test says "the percent error of received against expected is bounded by epsilon"
+
+However, the semantics are degraded by catching some numerical instability:
+when expected is too small, the return of this function might blow up to infinity.
+So we capture that by taking the max of abs(expected) against a 1.
+
+A sanity check of this function would be welcome, in general it is a better way of approaching 
+squiggle-lang tests than toBeSoCloseTo.
+*/
 export function expectErrorToBeBounded(
   received: number,
   expected: number,

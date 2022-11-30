@@ -40,21 +40,6 @@ let expectExpressionToBe = (expr: string, answer: string, v?: string) => {
 export const testToExpression = (expr: string, answer: string, v?: string) =>
   test(expr, () => expectExpressionToBe(expr, answer, v));
 
-// module MySkip = {
-//   let testParse = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
-//   let testToExpression = (expr, answer, ~v="_", ()) =>
-//     Skip.test(expr, () => expectExpressionToBe(expr, answer, ~v, ()))
-// }
-
-// module MySkip = {
-//   let testParseToBe = (expr, answer) => Skip.test(expr, () => expectParseToBe(expr, answer))
-//   let testEvalToBe = (expr, answer) => Skip.test(expr, () => expectEvalToBe(expr, answer))
-// }
-
-// let testParseToBe = (expr, answer) => test(expr, () => expectParseToBe(expr, answer))
-// let testDescriptionParseToBe = (desc, expr, answer) =>
-//   test(desc, () => expectParseToBe(expr, answer))
-
 const expectEvalError = (code: string) => {
   expect(resultToString(evaluateStringToResult(code))).toMatch(/Error\(/);
 };

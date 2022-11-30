@@ -402,12 +402,6 @@ export const reduce = <E>(
   return Result.Ok(acc);
 };
 
-// let isNormalized = (t: t): bool => {
-//   let areaUnderIntegral = t->updateIntegralCache(Some(T.integral(t)))->T.integralEndY
-//   areaUnderIntegral < 1. +. MagicNumbers.Epsilon.seven &&
-//     areaUnderIntegral > 1. -. MagicNumbers.Epsilon.seven
-// }
-
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
 export const combineAlgebraicallyWithDiscrete = (

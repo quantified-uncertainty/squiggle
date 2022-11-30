@@ -1,5 +1,5 @@
 // import { errorValueToString } from "../../src/js/index";
-import { testRun } from "../TS/TestHelpers";
+import { testRun } from "../testHelpers";
 import * as fc from "fast-check";
 
 describe("Scalar manipulation is well-modeled by javascript math", () => {

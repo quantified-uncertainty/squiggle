@@ -2,29 +2,6 @@ import * as SymbolicDist from "../../src/Dist/SymbolicDist";
 import * as Result from "../../src/utility/result";
 import { defaultEnv, Env } from "../../src/Dist/env";
 
-/*
-This encodes the expression for percent error
-The test says "the percent error of received against expected is bounded by epsilon"
-
-However, the semantics are degraded by catching some numerical instability:
-when expected is too small, the return of this function might blow up to infinity.
-So we capture that by taking the max of abs(expected) against a 1.
-
-A sanity check of this function would be welcome, in general it is a better way of approaching 
-squiggle-lang tests than toBeSoCloseTo.
-*/
-export const expectErrorToBeBounded = (
-  received: number,
-  expected: number,
-  { epsilon }: { epsilon: number }
-) => {
-  const distance = Math.abs(received - expected);
-  const expectedAbs = Math.abs(expected);
-  const normalizingDenom = Math.max(expectedAbs, 1);
-  const error = distance / normalizingDenom;
-  return expect(error).toBeLessThan(epsilon);
-};
-
 export const env: Env = defaultEnv;
 
 export const unpackResult = <T>(x: Result.result<T, unknown>): T => {

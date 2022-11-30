@@ -659,31 +659,12 @@ export const PointwiseCombination = {
     }
     return result.value;
   },
-
-  // let combineEvenXs = (~fn, ~xToYSelection, sampleCount, t1: T.t, t2: T.t) =>
-  //   switch (E.A.length(t1.xs), E.A.length(t2.xs)) {
-  //   | (0, 0) => T.empty
-  //   | (0, _) => t2
-  //   | (_, 0) => t1
-  //   | (_, _) =>
-  //     let allXs = Ts.equallyDividedXs([t1, t2], sampleCount)
-
-  //     let allYs = allXs->E.A.fmap(x => fn(xToYSelection(x, t1), xToYSelection(x, t2)))
-
-  //     T.fromArrays(allXs, allYs)
-  //   }
-
-  // // TODO: I'd bet this is pretty slow. Maybe it would be faster to intersperse Xs and Ys separately.
-  // intersperse(t1: XYShape, t2: XYShape): XYShape {
-  //   return T.fromZippedArray(E_A.intersperse(T.zip(t1), T.zip(t2)));
-  // },
 };
 
 // I'm really not sure this part is actually what we want at this point.
 // ((lastX, lastY), (nextX, nextY))
 type ZippedRange = [[number, number], [number, number]];
 export const Range = {
-  // let toT = T.fromZippedArray
   nextX([, [nextX]]: ZippedRange) {
     return nextX;
   },

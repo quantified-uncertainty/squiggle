@@ -173,22 +173,3 @@ export const WithScalarAnswer = {
     );
   },
 };
-
-// let twoGenericDistsToTwoPointSetDists = (~toPointSetFn, estimate, answer): result<
-//   (pointSetDist, pointSetDist),
-//   'e,
-// > => E.R.merge(toPointSetFn(estimate, ()), toPointSetFn(answer, ()))
-
-// let logScore = (args: scoreArgs, ~combineFn, ~integrateFn, ~toMixedFn): result<
-//   score,
-//   Operation.Error.t,
-// > =>
-//   switch args {
-//   | DistAnswer({estimate, answer, prior: None}) =>
-//     WithDistAnswer.sum(~estimate, ~answer, ~integrateFn, ~combineFn, ~toMixedFn)
-//   | DistAnswer({estimate, answer, prior: Some(prior)}) =>
-//     WithDistAnswer.sumWithPrior(~estimate, ~answer, ~prior, ~integrateFn, ~combineFn, ~toMixedFn)
-//   | ScalarAnswer({estimate, answer, prior: None}) => WithScalarAnswer.score(~estimate, ~answer)
-//   | ScalarAnswer({estimate, answer, prior: Some(prior)}) =>
-//     WithScalarAnswer.scoreWithPrior(~estimate, ~answer, ~prior)
-//   }

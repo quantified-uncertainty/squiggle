@@ -39,8 +39,6 @@ describe("(Algebraic) addition of distributions", () => {
     });
 
     test("uniform(low=9, high=10) + beta(alpha=2, beta=5)", () => {
-      // let uniformMean = (9.0 +. 10.0) /. 2.0
-      // let betaMean = 1.0 /. (1.0 +. 5.0 /. 2.0)
       const received = unpackResult(
         algebraicAdd(uniformDist, betaDist, { env })
       ).mean();
@@ -49,15 +47,13 @@ describe("(Algebraic) addition of distributions", () => {
       expect(received).toBeCloseTo(9.786831807237022, 1); // (uniformMean +. betaMean)
     });
     test("beta(alpha=2, beta=5) + uniform(low=9, high=10)", () => {
-      // let uniformMean = (9.0 +. 10.0) /. 2.0
-      // let betaMean = 1.0 /. (1.0 +. 5.0 /. 2.0)
       const received = unpackResult(
         algebraicAdd(betaDist, uniformDist, { env })
       ).mean();
 
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
-      expect(received).toBeCloseTo(9.784290207736126, 1); // (uniformMean +. betaMean)
+      expect(received).toBeCloseTo(9.784290207736126, 1);
     });
   });
   describe("pdf", () => {

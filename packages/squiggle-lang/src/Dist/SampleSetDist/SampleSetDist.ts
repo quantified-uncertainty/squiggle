@@ -227,17 +227,12 @@ export const Error = {
   },
 };
 
-// let length = (t: t) => get(t)->E.A.length
-
 type SamplingInputs = {
   sampleCount: number; // int
   outputXYPoints: number; // int
   kernelWidth?: number;
   pointSetDistLength: number; // int
 };
-
-// let _fromSampleResultArray = (samples: array<result<float, QuriSquiggleLang.Operation.Error.t>>) =>
-//   E.A.R.firstErrorOrOpen(samples)->E.R.errMap(Error.fromOperationError)->E.R.bind(make)
 
 const buildSampleSetFromFn = (
   n: number,

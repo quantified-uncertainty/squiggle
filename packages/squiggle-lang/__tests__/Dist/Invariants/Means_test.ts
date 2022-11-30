@@ -11,7 +11,6 @@ Note: epsilon of 1e3 means the invariants are, in general, not being satisfied.
 import { BaseDist } from "../../../src/Dist/BaseDist";
 import {
   env,
-  expectErrorToBeBounded,
   mkBeta,
   mkDelta,
   mkExponential,
@@ -26,6 +25,7 @@ import {
   BinaryOperation,
 } from "../../../src/Dist/DistOperations";
 import { Env } from "../../../src/Dist/env";
+import { expectErrorToBeBounded } from "../../testHelpers";
 
 const epsilon = 5e1;
 

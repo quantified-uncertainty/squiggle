@@ -157,12 +157,6 @@ export const combinePointwise = <E>(
   );
 };
 
-// let isFloat = (t: t) =>
-//   switch t {
-//   | Discrete(d) => Discrete.isFloat(d)
-//   | _ => false
-//   }
-
 export const expectedConvolutionCost = (d: PointSetDist): number => {
   if (PointSet.isContinuous(d.pointSet)) {
     return magicNumbers.OpCost.continuousCost;

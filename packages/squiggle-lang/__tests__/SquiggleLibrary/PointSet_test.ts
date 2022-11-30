@@ -1,4 +1,4 @@
-import { testRun, expectErrorToBeBounded } from "../TS/TestHelpers";
+import { testRun, expectErrorToBeBounded } from "../testHelpers";
 import * as fc from "fast-check";
 
 // via fast-check hint
