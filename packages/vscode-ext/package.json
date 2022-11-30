@@ -3,7 +3,7 @@
   "displayName": "Squiggle",
   "description": "Squiggle language support",
   "license": "MIT",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "publisher": "QURI",
   "repository": {
     "type": "git",
@@ -136,10 +136,10 @@
     "vsce": "^2.14.0"
   },
   "dependencies": {
+    "@quri/squiggle-components": "*",
+    "@quri/squiggle-lang": "*",
     "vscode-languageclient": "^8.0.2",
     "vscode-languageserver": "^8.0.2",
-    "vscode-languageserver-textdocument": "^1.0.7",
-    "@quri/squiggle-lang": "*",
-    "@quri/squiggle-components": "*"
+    "vscode-languageserver-textdocument": "^1.0.7"
   }
 }
