@@ -272,9 +272,6 @@ module Make = {
   Q: Does this approach scale?
   A: It's good enough for most cases, and we can fall back on raw `Function.make` if necessary. We should figure out the better API powered by parameterized types, but it's hard (and might require PPX).
 
-  Q: What about `frValue` types?
-  A: I hope we'll get rid of them soon.
-
   Q: What about polymorphic functions with multiple definitions? Why ~fn is not an array?
   A: We often define the same function in multiple `FR_*` files, so that doesn't work well anyway. In 90%+ cases there's a single definition. And having to write `name` twice is annoying.
  */

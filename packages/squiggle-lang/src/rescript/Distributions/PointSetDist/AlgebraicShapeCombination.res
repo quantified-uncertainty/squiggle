@@ -244,7 +244,6 @@ let combineShapesContinuousDiscrete = (
             continuousShape.ys[i] *. discreteShape.ys[j] /. Js.Math.abs_float(discreteShape.xs[j]),
           ),
         )->ignore
-        ()
       }
       Belt.Array.set(outXYShapes, j, dxyShape)->ignore
     }

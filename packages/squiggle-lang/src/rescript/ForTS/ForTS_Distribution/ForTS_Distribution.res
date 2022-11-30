@@ -58,31 +58,26 @@ let getSymbolic = (variant: distribution): option<symbolicDistribution> =>
   }
 
 @genType
-let mean = DistributionOperation.Constructors.mean
+let mean = GenericDist.mean
+@genType
+let stdev = GenericDist.stdev
+@genType
+let variance = GenericDist.variance
+@genType
+let sample = GenericDist.sample
+@genType
+let cdf = GenericDist.cdf
+@genType
+let inv = GenericDist.inv
+@genType
+let pdf = GenericDist.pdf
 
 @genType
-let stdev = DistributionOperation.Constructors.stdev
-@genType
-let variance = DistributionOperation.Constructors.variance
-@genType
-let sample = DistributionOperation.Constructors.sample
-@genType
-let cdf = DistributionOperation.Constructors.cdf
-@genType
-let inv = DistributionOperation.Constructors.inv
-@genType
-let pdf = DistributionOperation.Constructors.pdf
-@genType
-let normalize = DistributionOperation.Constructors.normalize
+let normalize = GenericDist.normalize
 
 @genType
 let toPointSet = (variant: distribution, env: environment) =>
-  GenericDist.toPointSet(
-    variant,
-    ~sampleCount=env.sampleCount,
-    ~xyPointLength=env.xyPointLength,
-    (),
-  )
+  GenericDist.toPointSet(variant, ~env, ())
 
 @genType
 let toString = (variant: distribution) => GenericDist.toString(variant)

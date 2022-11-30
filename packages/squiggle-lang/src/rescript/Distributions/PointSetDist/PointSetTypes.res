@@ -1,14 +1,3 @@
-type domainLimit = {
-  xPoint: float,
-  excludingProbabilityMass: float,
-}
-
-type domain =
-  | Complete
-  | LeftLimited(domainLimit)
-  | RightLimited(domainLimit)
-  | LeftAndRightLimited(domainLimit, domainLimit)
-
 type distributionType = [
   | #PDF
   | #CDF
@@ -16,8 +5,6 @@ type distributionType = [
 
 type xyShape = XYShape.xyShape
 type interpolationStrategy = XYShape.interpolationStrategy
-type extrapolationStrategy = XYShape.extrapolationStrategy
-type interpolator = XYShape.extrapolationStrategy
 
 @genType
 type rec continuousShape = {
@@ -42,33 +29,11 @@ type mixedShape = {
   integralCache: option<continuousShape>,
 }
 
-type pointSetDistMonad<'a, 'b, 'c> =
-  | Mixed('a)
-  | Discrete('b)
-  | Continuous('c)
-
 @genType.opaque
-type pointSetDist = pointSetDistMonad<mixedShape, discreteShape, continuousShape>
-
-module ShapeMonad = {
-  let fmap = (t: pointSetDistMonad<'a, 'b, 'c>, (fn1, fn2, fn3)): pointSetDistMonad<'d, 'e, 'f> =>
-    switch t {
-    | Mixed(m) => Mixed(fn1(m))
-    | Discrete(m) => Discrete(fn2(m))
-    | Continuous(m) => Continuous(fn3(m))
-    }
-}
-
-type generationSource =
-  | SquiggleString(string)
-  | Shape(pointSetDist)
-
-@genType
-type distPlus = {
-  pointSetDist: pointSetDist,
-  integralCache: continuousShape,
-  squiggleString: option<string>,
-}
+type pointSetDist =
+  | Mixed(mixedShape)
+  | Discrete(discreteShape)
+  | Continuous(continuousShape)
 
 type mixedPoint = {
   continuous: float,

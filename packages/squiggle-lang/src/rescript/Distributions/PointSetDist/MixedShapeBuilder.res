@@ -1,13 +1,3 @@
-type assumption =
-  | ADDS_TO_1
-  | ADDS_TO_CORRECT_PROBABILITY
-
-type assumptions = {
-  continuous: assumption,
-  discrete: assumption,
-  discreteProbabilityMass: option<float>,
-}
-
 let buildSimple = (
   ~continuous: option<PointSetTypes.continuousShape>,
   ~discrete: option<PointSetTypes.discreteShape>,

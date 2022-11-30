@@ -15,8 +15,6 @@ open TestHelpers
 module Internals = {
   let epsilon = 5e1
 
-  let mean = DistributionTypes.Constructors.UsingDists.mean
-
   let expectImpossiblePath: string => assertion = algebraicOp =>
     `${algebraicOp} has`->expect->toEqual("failed")
 
@@ -39,7 +37,7 @@ module Internals = {
   let pairsOfDifferentDistributions = combinations2(distributions)
 
   let runMean: DistributionTypes.genericDist => float = dist => {
-    dist->mean->run->toFloat->E.O.toExn("Shouldn't see this because we trust testcase input")
+    dist->GenericDist.mean(~env)->unpackResult
   }
 
   let testOperationMean = (
@@ -55,17 +53,12 @@ module Internals = {
   ) => {
     let dist1 = dist1'->DistributionTypes.Symbolic
     let dist2 = dist2'->DistributionTypes.Symbolic
-    let received =
-      distOp(dist1, dist2)
-      ->E.R.fmap(mean)
-      ->E.R.fmap(run)
-      ->E.R.fmap(toFloat)
-      ->E.R.toExn("Expected float")
+
+    let received = distOp(dist1, dist2)->E.R.toExn(`Failed: ${description}`)->runMean
+
     let expected = floatOp(runMean(dist1), runMean(dist2))
-    switch received {
-    | None => expectImpossiblePath(description)
-    | Some(x) => expectErrorToBeBounded(x, expected, ~epsilon)
-    }
+
+    expectErrorToBeBounded(received, expected, ~epsilon)
   }
 }
 
@@ -76,7 +69,7 @@ let {
   algebraicSubtract,
   algebraicLogarithm,
   algebraicPower,
-} = module(DistributionOperation.Constructors)
+} = module(GenericDist.Operations)
 
 let algebraicAdd = algebraicAdd(~env)
 let algebraicMultiply = algebraicMultiply(~env)

@@ -56,7 +56,6 @@ export const FunctionChart: React.FC<FunctionChartProps> = ({
   distributionChartSettings,
   height,
 }) => {
-  console.log(fn.parameters().length);
   if (fn.parameters().length !== 1) {
     return (
       <MessageAlert heading="Function Display Not Supported">

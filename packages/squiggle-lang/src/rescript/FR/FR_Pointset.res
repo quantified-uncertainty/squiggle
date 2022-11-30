@@ -23,8 +23,8 @@ let inputsToDist = (inputs: array<Reducer_T.value>, xyShapeToPointSetDist) => {
       | _ => impossibleError->SqError.Message.throw
       }
     )
-    ->Ok
-    ->E.R.bind(r => r->XYShape.T.makeFromZipped->E.R.errMap(XYShape.Error.toString))
+    ->XYShape.T.makeFromZipped
+    ->E.R.errMap(XYShape.Error.toString)
     ->E.R.fmap(r => Reducer_T.IEvDistribution(PointSet(r->xyShapeToPointSetDist)))
   | _ => impossibleError->SqError.Message.throw
   }
@@ -65,12 +65,7 @@ let library = [
         ~run=(inputs, context, _) =>
           switch inputs {
           | [IEvDistribution(dist)] =>
-            GenericDist.toPointSet(
-              dist,
-              ~xyPointLength=context.environment.xyPointLength,
-              ~sampleCount=context.environment.sampleCount,
-              (),
-            )
+            GenericDist.toPointSet(dist, ~env=context.environment, ())
             ->E.R.fmap(Wrappers.pointSet)
             ->E.R.fmap(Wrappers.evDistribution)
             ->E.R.errMap(e => SqError.Message.REDistributionError(e))

@@ -10,11 +10,13 @@ import {
 export type LabeledDistribution = {
   name: string;
   distribution: SqDistribution;
-  color?: string;
+  opacity: number;
 };
 
 export type Plot = {
   distributions: LabeledDistribution[];
+  showLegend: boolean;
+  colorScheme: string;
 };
 
 function error<a, b>(err: b): result<a, b> {
@@ -28,17 +30,22 @@ function ok<a, b>(x: a): result<a, b> {
 const schema = yup
   .object()
   .noUnknown()
-  .strict()
   .shape({
     distributions: yup
       .array()
       .required()
       .of(
-        yup.object().required().shape({
-          name: yup.string().required(),
-          distribution: yup.mixed().required(),
-        })
+        yup
+          .object()
+          .required()
+          .shape({
+            name: yup.string().required(),
+            distribution: yup.mixed().required(),
+            opacity: yup.number().default(0.3),
+          })
       ),
+    showLegend: yup.boolean().default(true),
+    colorScheme: yup.string().default("category10"),
   });
 
 type JsonObject =
@@ -69,9 +76,14 @@ function toJsonRecord(val: SqRecord): JsonObject {
 
 export function parsePlot(record: SqRecord): result<Plot, string> {
   try {
-    const plotRecord = schema.validateSync(toJsonRecord(record));
+    const r = toJsonRecord(record);
+    const plotRecord = schema.validateSync(r);
     if (plotRecord.distributions) {
-      return ok({ distributions: plotRecord.distributions.map((x) => x) });
+      return ok({
+        distributions: plotRecord.distributions.map((x) => x),
+        showLegend: plotRecord.showLegend,
+        colorScheme: plotRecord.colorScheme,
+      });
     } else {
       // I have no idea why yup's typings thinks this is possible
       return error("no distributions field. Should never get here");
