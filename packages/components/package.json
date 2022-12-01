@@ -3,7 +3,7 @@
   "version": "0.5.1",
   "license": "MIT",
   "dependencies": {
-    "@floating-ui/react-dom": "^1.0.0",
+    "@floating-ui/react-dom": "^1.0.1",
     "@floating-ui/react-dom-interactions": "^0.10.3",
     "@headlessui/react": "^1.7.4",
     "@heroicons/react": "^1.0.6",
