@@ -4890,10 +4890,10 @@
     "@types/history" "^4.7.11"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@17.0.43", "@types/react@^18.0.21":
-  version "17.0.43"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.43.tgz#4adc142887dd4a2601ce730bc56c3436fdb07a55"
-  integrity sha512-8Q+LNpdxf057brvPu1lMtC5Vn7J119xrP1aq4qiaefNioQUYANF/CYeK4NsKorSZyUGJ66g0IM+4bbjwx45o2A==
+"@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
+  version "18.0.25"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.25.tgz#8b1dcd7e56fe7315535a4af25435e0bb55c8ae44"
+  integrity sha512-xD6c0KDT4m7n9uD4ZHi02lzskaiqcBxf4zi+tXZY98a04wvc0hi/TcCPC2FOESZi51Nd7tlUeOJY8RofL799/g==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -9793,10 +9793,10 @@ fragment-cache@^0.2.1:
   dependencies:
     map-cache "^0.2.2"
 
-framer-motion@^7.6.6:
-  version "7.6.6"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-7.6.6.tgz#50e0d3bc29b899a79dbafb6085e398fb53a2f04a"
-  integrity sha512-7ti5mEzhTRBFCMlKs8Zxu9dWtVattpj2jPCNc4jaz4d7bDFekClALaBzmi1pGOKzsOWJsKMeV5ckIkD1DLI9lw==
+framer-motion@^7.6.15:
+  version "7.6.15"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-7.6.15.tgz#2990cf9792e2bc9d63474ccee4000564d86780cc"
+  integrity sha512-z3LPTWWq3zlmtxtZyCHWyucNRHg8iXXeLo9cFQwCIgOT8mp3gWFzU+KrGQ9h3QJFx79G9MVqAcuIN6dVhhuFQQ==
   dependencies:
     "@motionone/dom" "10.13.1"
     framesync "6.1.2"
@@ -15761,7 +15761,7 @@ react-vega@^7.6.0:
     prop-types "^15.8.1"
     vega-embed "^6.5.1"
 
-react@^18.1.0:
+react@^18.0.0, react@^18.1.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
