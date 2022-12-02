@@ -5,7 +5,6 @@ import { ReducerContext } from "../reducer/Context";
 import { declarationToString, LambdaDeclaration } from "../reducer/Declaration";
 import { Lambda } from "../reducer/Lambda";
 import * as DateTime from "../utility/DateTime";
-import { ImmutableMap } from "../utility/immutableMap";
 
 // TODO - move these types to reducer/
 export type ReducerFn = (
@@ -83,14 +82,7 @@ export const valueToString = (v: Value): string => {
     case "Dist":
       return v.value.toString();
     case "Lambda": {
-      switch (v.value.type) {
-        case "Lambda":
-          return `lambda(${v.value.parameters.join(",")}=>internal code)`;
-        case "Builtin":
-          return "Builtin function";
-        default:
-          throw new Error("Unreachable");
-      }
+      return v.value.toString();
     }
     case "Number":
       return String(v.value);

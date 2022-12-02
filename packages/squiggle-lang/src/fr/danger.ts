@@ -7,8 +7,8 @@ import { makeDefinition } from "../library/registry/fnDefinition";
 import { frArray, frLambda, frNumber } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
 import { ReducerContext } from "../reducer/Context";
-import * as Lambda from "../reducer/Lambda";
 import * as IError from "../reducer/IError";
+import { Lambda } from "../reducer/Lambda";
 import * as E_A from "../utility/E_A";
 import { Ok, result } from "../utility/result";
 import { ReducerFn, Value, vArray, vNumber } from "../value";
@@ -50,7 +50,7 @@ const combinatoricsLibrary: FRFunction[] = [
 ];
 
 const integrateFunctionBetweenWithNumIntegrationPoints = (
-  lambda: Lambda.Lambda,
+  lambda: Lambda,
   min: number,
   max: number,
   numIntegrationPoints: number,
@@ -59,12 +59,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
 ): result<Value, IError.Message> => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
     // Defined here so that it has access to context, reducer
-    const result = Lambda.doLambdaCall(
-      lambda,
-      [vNumber(point)],
-      context,
-      reducer
-    );
+    const result = lambda.call([vNumber(point)], context, reducer);
     if (result.type === "Number") {
       return result.value;
     }
@@ -270,13 +265,9 @@ const diminishingReturnsLibrary = [
               )
             );
           }
-          const applyFunctionAtPoint = (
-            lambda: Lambda.Lambda,
-            point: number
-          ) => {
+          const applyFunctionAtPoint = (lambda: Lambda, point: number) => {
             // Defined here so that it has access to context, reducer
-            const lambdaResult = Lambda.doLambdaCall(
-              lambda,
+            const lambdaResult = lambda.call(
               [vNumber(point)],
               context,
               reducer

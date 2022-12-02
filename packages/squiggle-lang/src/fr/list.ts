@@ -11,7 +11,6 @@ import * as Result from "../utility/result";
 import { vArray, vNumber } from "../value";
 import * as E_A_Floats from "../utility/E_A_Floats";
 import { REOther } from "../reducer/IError";
-import { doLambdaCall } from "../reducer/Lambda";
 
 const maker = new FnFactory({
   nameSpace: "List",
@@ -101,11 +100,7 @@ export const library = [
         [frArray(frAny), frLambda],
         ([array, lambda], context, reducer) => {
           return Ok(
-            vArray(
-              array.map((value) =>
-                doLambdaCall(lambda, [value], context, reducer)
-              )
-            )
+            vArray(array.map((value) => lambda.call([value], context, reducer)))
           );
         }
       ),
@@ -122,8 +117,7 @@ export const library = [
         ([array, initialValue, lambda], context, reducer) =>
           Ok(
             array.reduce(
-              (acc, elem) =>
-                doLambdaCall(lambda, [acc, elem], context, reducer),
+              (acc, elem) => lambda.call([acc, elem], context, reducer),
               initialValue
             )
           )
@@ -143,8 +137,7 @@ export const library = [
             [...array]
               .reverse()
               .reduce(
-                (acc, elem) =>
-                  doLambdaCall(lambda, [acc, elem], context, reducer),
+                (acc, elem) => lambda.call([acc, elem], context, reducer),
                 initialValue
               )
           )
@@ -163,7 +156,7 @@ export const library = [
           Ok(
             vArray(
               array.filter((elem) => {
-                const result = doLambdaCall(lambda, [elem], context, reducer);
+                const result = lambda.call([elem], context, reducer);
                 return result.type === "Bool" && result.value;
               })
             )

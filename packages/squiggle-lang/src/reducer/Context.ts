@@ -1,13 +1,13 @@
 import { Env } from "../Dist/env";
 import { Bindings, Namespace } from "./bindings";
 import * as FrameStack from "./FrameStack";
-import * as Lambda from "./Lambda";
+import { Lambda } from "./Lambda";
 
 export type ReducerContext = Readonly<{
   bindings: Bindings;
   environment: Env;
   frameStack: FrameStack.FrameStack;
-  inFunction?: Lambda.Lambda;
+  inFunction?: Lambda;
 }>;
 
 export const createContext = (
@@ -22,5 +22,5 @@ export const createContext = (
 export const currentFunctionName = (t: ReducerContext): string => {
   return t.inFunction === undefined
     ? FrameStack.topFrameName
-    : Lambda.getName(t.inFunction);
+    : t.inFunction.getName();
 };

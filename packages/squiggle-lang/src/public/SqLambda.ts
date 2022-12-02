@@ -1,17 +1,14 @@
-import * as Lambda from "../reducer/Lambda";
 import { SqError } from "./SqError";
 import { SqValue } from "./SqValue";
 import { SqValueLocation } from "./SqValueLocation";
 import { result } from "../utility/result";
+import { Lambda } from "../reducer/Lambda";
 
 export class SqLambda {
-  constructor(
-    private _value: Lambda.Lambda,
-    public location: SqValueLocation
-  ) {}
+  constructor(private _value: Lambda, public location: SqValueLocation) {}
 
   parameters() {
-    return Lambda.parameters(this._value);
+    return this._value.getParameters();
   }
 
   call(args: (number | string)[]): result<SqValue, SqError> {

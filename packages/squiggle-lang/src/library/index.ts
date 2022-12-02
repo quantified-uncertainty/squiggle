@@ -1,10 +1,10 @@
-import * as Lambda from "../reducer/Lambda";
 import * as IError from "../reducer/IError";
 import { Value, vLambda } from "../value";
 import { makeMathConstants } from "./math";
 import { makeVersionConstant } from "./version";
 import * as registry from "./registry";
 import { Namespace, NamespaceMap } from "../reducer/bindings";
+import { BuiltinLambda } from "../reducer/Lambda";
 
 const makeStdLib = (): Namespace => {
   let res = NamespaceMap<string, Value>();
@@ -17,7 +17,7 @@ const makeStdLib = (): Namespace => {
   res = res.set(
     "$_atIndex_$",
     vLambda(
-      Lambda.makeFFILambda("$_atIndex_$", (inputs) => {
+      new BuiltinLambda("$_atIndex_$", (inputs) => {
         if (
           inputs.length === 2 &&
           inputs[0].type === "Array" &&
@@ -68,7 +68,9 @@ const makeStdLib = (): Namespace => {
     res = res.set(
       name,
       vLambda(
-        Lambda.makeFFILambda(name, (args, context, reducer) => {
+        new BuiltinLambda(name, (args, context, reducer) => {
+          // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
+          // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
           const result = registry.call(name, args, context, reducer);
           if (!result.ok) {
             return IError.Message.throw(result.value);

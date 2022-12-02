@@ -10,7 +10,6 @@ import {
 import { Expression } from "../expression";
 import * as FrameStack from "./FrameStack";
 import * as Context from "./Context";
-import * as Lambda from "./Lambda";
 import * as IError from "./IError";
 import { ImmutableMap } from "../utility/immutableMap";
 import { Ok, result } from "../utility/result";
@@ -19,6 +18,7 @@ import { stdLib } from "../library";
 import { defaultEnv } from "../Dist/env";
 import { parse } from "../ast/parse";
 import { expressionFromAst } from "../ast/toExpression";
+import { SquiggleLambda } from "./Lambda";
 
 const throwFrom = (
   error: IError.Message,
@@ -146,7 +146,7 @@ export const evaluate: ReducerFn = (expression, context) => {
     case "Lambda": {
       return [
         vLambda(
-          Lambda.makeLambda(
+          new SquiggleLambda(
             expression.name,
             expression.parameters,
             context.bindings,
@@ -166,8 +166,7 @@ export const evaluate: ReducerFn = (expression, context) => {
       });
       switch (lambda.type) {
         case "Lambda":
-          const result = Lambda.doLambdaCallFrom(
-            lambda.value,
+          const result = lambda.value.callFrom(
             argValues,
             context,
             evaluate,

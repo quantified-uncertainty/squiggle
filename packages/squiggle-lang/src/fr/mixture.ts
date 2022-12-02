@@ -1,7 +1,6 @@
 import { BaseDist } from "../Dist/BaseDist";
 import { Env } from "../Dist/env";
 import * as SymbolicDist from "../Dist/SymbolicDist";
-import * as Lambda from "../reducer/Lambda";
 import * as IError from "../reducer/IError";
 import * as Result from "../utility/result";
 import * as E_A from "../utility/E_A";
@@ -9,6 +8,7 @@ import * as DistOperations from "../Dist/DistOperations";
 import { Value, vDist } from "../value";
 import { argumentError, DistError } from "../Dist/DistError";
 import { unpackDistResult } from "../library/registry/helpers";
+import { BuiltinLambda } from "../reducer/Lambda";
 
 const raiseArgumentError = (message: string) =>
   IError.Message.throw(IError.REDistributionError(argumentError(message)));
@@ -89,6 +89,6 @@ const mixture = (args: Value[], env: Env) => {
 };
 
 // impossible to implement with FR due to arbitrary parameters length
-export const mxLambda = Lambda.makeFFILambda("mx", (inputs, context) => {
+export const mxLambda = new BuiltinLambda("mx", (inputs, context) => {
   return vDist(unpackDistResult(mixture(inputs, context.environment)));
 });

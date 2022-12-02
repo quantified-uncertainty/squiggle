@@ -8,7 +8,6 @@ import {
   frTuple2,
 } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
-import { doLambdaCall } from "../reducer/Lambda";
 import { Ok } from "../utility/result";
 import { ImmutableMap } from "../utility/immutableMap";
 import { vArray, vRecord, vString } from "../value";
@@ -106,12 +105,7 @@ export const library = [
             vRecord(
               ImmutableMap(
                 [...dict.entries()].map(([key, value]) => {
-                  const mappedValue = doLambdaCall(
-                    lambda,
-                    [value],
-                    context,
-                    reducer
-                  );
+                  const mappedValue = lambda.call([value], context, reducer);
                   return [key, mappedValue];
                 })
               )

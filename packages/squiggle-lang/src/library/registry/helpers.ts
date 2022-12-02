@@ -251,7 +251,7 @@ export const doNumberLambdaCall = (
   context: ReducerContext,
   reducer: ReducerFn
 ) => {
-  const value = Lambda.doLambdaCall(lambda, args, context, reducer);
+  const value = lambda.call(args, context, reducer);
   if (value.type === "Number") {
     return value.value;
   }
