@@ -239,6 +239,7 @@ export const empty = () =>
     integralCache: emptyIntegral(),
   });
 
+// unused
 export const isFloat = (t: DiscreteShape): boolean => {
   if (t.xyShape.ys.length === 1 && t.xyShape.ys[0] === 1) {
     return true;

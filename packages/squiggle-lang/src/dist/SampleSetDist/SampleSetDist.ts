@@ -18,6 +18,7 @@ import {
 } from "../DistError";
 import { Env } from "../env";
 import { samplesToPointSetDist } from "./samplesToPointSetDist";
+import { buildMixedShape } from "../../PointSet/Mixed";
 
 export class SampleSetDist extends BaseDist {
   samples: readonly number[];
@@ -165,7 +166,7 @@ sample everything.
       undefined
     );
 
-    const result = MixedShapeBuilder.buildSimple({
+    const result = buildMixedShape({
       continuous: dists.continuousDist
         ? new ContinuousShape({ xyShape: dists.continuousDist })
         : undefined,

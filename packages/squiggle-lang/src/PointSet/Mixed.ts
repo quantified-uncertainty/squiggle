@@ -4,6 +4,7 @@ import * as Discrete from "./Discrete";
 import * as MixedPoint from "./MixedPoint";
 import * as Result from "../utility/result";
 import * as Common from "./Common";
+import { AnyPointSet } from "./PointSet";
 import { ContinuousShape } from "./Continuous";
 import { DiscreteShape } from "./Discrete";
 import { ConvolutionOperation, PointSet } from "./PointSet";
@@ -389,4 +390,33 @@ export const combinePointwise = <E>(
         integralCache: combinedIntegral,
       })
   );
+};
+
+export const buildMixedShape = ({
+  continuous,
+  discrete,
+}: {
+  continuous?: ContinuousShape;
+  discrete?: DiscreteShape;
+}): AnyPointSet | undefined => {
+  continuous ??= new ContinuousShape({
+    integralSumCache: 0,
+    xyShape: { xs: [], ys: [] },
+  });
+  discrete ??= new DiscreteShape({
+    integralSumCache: 0,
+    xyShape: { xs: [], ys: [] },
+  });
+  const cLength = continuous.xyShape.xs.length;
+  const dLength = discrete.xyShape.xs.length;
+  if (cLength < 2 && dLength == 0) {
+    return undefined;
+  } else if (cLength < 2) {
+    return discrete;
+  } else if (dLength == 0) {
+    return continuous;
+  } else {
+    const mixedDist = new MixedShape({ continuous, discrete });
+    return mixedDist;
+  }
 };

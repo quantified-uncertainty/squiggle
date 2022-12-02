@@ -1,5 +1,5 @@
 import { IError } from "../../src/reducer/IError";
-import { FrameStack } from "../../src/reducer/FrameStack";
+import { FrameStack } from "../../src/reducer/frameStack";
 import { ErrorMessage, REOther } from "../../src/reducer/ErrorMessage";
 
 describe("ErrorMessage", () => {

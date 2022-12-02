@@ -4,6 +4,8 @@ import * as Result from "./result";
 // Stores in Unix milliseconds
 export type Duration = number;
 
+// TODO - should we just use date-fns instead? Dates are hard to implement correctly.
+
 export const Duration = {
   minute: 60 * 1000,
   hour: 60 * 60 * 1000,
