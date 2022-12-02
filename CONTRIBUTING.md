@@ -1,15 +1,13 @@
 # Contributing to Squiggle
 
-We welcome contributions from developers, especially people in React/TypeScript, Rescript, and interpreters/parsers. We also are keen to hear issues filed by users!
+We welcome contributions from developers, especially people in React/TypeScript, and interpreters/parsers. We also are keen to hear issues filed by users!
 
 Squiggle is currently in "Early Access" mode.
 
 # Quick links
 
-- [Roadmap to the alpha](https://github.com/orgs/quantified-uncertainty/projects/1)
-- The team presently communicates via the **EA Forecasting and Epistemics** slack (channels `#squiggle-dev` and `#squiggle-ops`), you can track down an invite by reaching out to Ozzie Gooen
 - [Squiggle documentation](https://www.squiggle-language.com/docs/Language)
-- [Rescript documentation](https://rescript-lang.org/docs/manual/latest/introduction)
+- The team presently communicates via the **EA Forecasting and Epistemics** slack (channels `#squiggle-dev` and `#squiggle-ops`), you can track down an invite by reaching out to Ozzie Gooen
 - You can email `slava@quantifieduncertainty.org` if you need assistance in onboarding or if you have questions
 
 # Bug reports
@@ -55,76 +53,6 @@ Autopings are set up: if you are not autopinged, you are welcome to comment, but
 - If you submit a PR that is under a 7, for some reason, describe the reasoning for this in the PR.
 
 * This quality score is subjective.
-
-# Rescript Style
-
-**Use `->` instead of `|>`**
-
-**Use `x -> y -> z` instead of `let foo = y(x); let bar = z(foo)`**
-
-**Don't use anonymous functions with over three lines**
-Bad:
-
-```rescript
-  foo
-  -> E.O.fmap(r => {
-    let a = 34;
-    let b = 35;
-    let c = 48;
-    r + a + b + c
-  }
-```
-
-Good:
-
-```rescript
-  let addingFn = (r => {
-    let a = 34;
-    let b = 35;
-    let c = 48;
-    r + a + b + c
-  }
-  foo -> addingFn
-```
-
-**Use the Rescript optional default syntax**
-Rescript is clever about function inputs. There's custom syntax for default and optional arguments. In the cases where this applies, use it.
-
-From https://rescript-lang.org/docs/manual/latest/function:
-
-```rescript
-// radius can be omitted
-let drawCircle = (~color, ~radius=?, ()) => {
-  setColor(color)
-  switch radius {
-  | None => startAt(1, 1)
-  | Some(r_) => startAt(r_, r_)
-  }
-}
-```
-
-**Use named arguments**
-If a function is called externally (in a different file), and has either:
-
-1. Two arguments of the same type
-2. Three paramaters or more.
-
-**Module naming: Use x_y as module names**
-For example: `Myname_Myproject_Add.res`. Rescript/Ocaml both require files to have unique names, so long names are needed to keep different parts separate from each other.
-
-See [this page](https://dev.to/yawaramin/a-modular-ocaml-project-structure-1ikd) for more information. (Though note that they use two underscores, and we do one. We might refactor that later.
-
-**Module naming: Don't rename modules**
-We have some of this in the Reducer code, but generally discourage it.
-
-**Use interface files (.resi) for files with very public interfaces**
-
-### Recommended Rescript resources
-
-- https://dev.to/yawaramin/a-modular-ocaml-project-structure-1ikd
-- https://github.com/avohq/reasonml-code-style-guide
-- https://cs.brown.edu/courses/cs017/content/docs/reasonml-style.pdf
-- https://github.com/ostera/reason-design-patterns/
 
 # TypeScript style
 

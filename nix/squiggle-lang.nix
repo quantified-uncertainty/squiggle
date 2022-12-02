@@ -15,36 +15,13 @@ rec {
     src = ../packages/squiggle-lang;
     packageJSON = langPackageJson;
     yarnLock = ../yarn.lock;
-    pkgConfig = {
-      rescript = {
-        buildInputs = common.which
-          ++ (if pkgs.system != "i686-linux" then [ pkgs.gcc_multi ] else [ ]);
-        postInstall = ''
-          echo "PATCHELF'ING RESCRIPT EXECUTABLES (INCL NINJA)"
-          # Patching interpreter for linux/*.exe's
-          THE_LD=$(patchelf --print-interpreter $(which mkdir))
-          patchelf --set-interpreter $THE_LD linux/*.exe && echo "- patched interpreter for linux/*.exe's"
-
-          # Replacing needed shared library for linux/ninja.exe
-          THE_SO=$(find /nix/store/*/lib64 -name libstdc++.so.6 | head -n 1)
-          patchelf --replace-needed libstdc++.so.6 $THE_SO linux/ninja.exe && echo "- replaced needed for linux/ninja.exe"
-        '';
-      };
-      gentype = {
-        postInstall = ''
-          mv gentype.exe ELFLESS-gentype.exe
-          cp ${gentypeOutputFn pkgs}/src/GenType.exe gentype.exe
-        '';
-      };
-    };
   };
   lint = pkgs.stdenv.mkDerivation {
     name = "squiggle-lang-lint";
     src = yarn-source + "/libexec/@quri/squiggle-lang/deps/@quri/squiggle-lang";
     buildInputs = common.buildInputs ++ common.prettier;
     buildPhase = ''
-      yarn lint:prettier
-      yarn lint:rescript
+      yarn lint
     '';
     installPhase = "mkdir -p $out";
   };
@@ -59,17 +36,12 @@ rec {
 
       pushd deps/@quri/squiggle-lang
       yarn --offline build:peggy
-      yarn --offline build:rescript
       yarn --offline build:typescript
 
       # custom gitignore so that the flake keeps build artefacts
       mv .gitignore GITIGNORE
-      sed -i /Reducer_Peggy_GeneratedParser.js/d GITIGNORE
-      sed -i /ReducerProject_IncludeParser.js/d GITIGNORE
-      sed -i /\*.bs.js/d GITIGNORE
-      sed -i /\*.gen.ts/d GITIGNORE
-      sed -i /\*.gen.tsx/d GITIGNORE
-      sed -i /\*.gen.js/d GITIGNORE
+      sed -i /peggyParser.js/d GITIGNORE
+      sed -i /IncludeParser.js/d GITIGNORE
       sed -i /helpers.js/d GITIGNORE
 
       popd

@@ -8,7 +8,6 @@
     "build": "yarn build:peggy && yarn build:typescript",
     "build:peggy": "find . -type f -name *.peggy -exec yarn peggy {} \\;",
     "build:typescript": "tsc",
-    "bundle": "webpack",
     "start": "tsc -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm -f src/js/SqProject/IncludeParser.js",
     "benchmark": "ts-node benchmark/conversion_tests.ts",
@@ -22,8 +21,8 @@
     "lint": "yarn lint:prettier",
     "format:prettier": "prettier --write .",
     "format": "yarn format:prettier",
-    "prepack": "yarn build && yarn test && yarn bundle",
-    "all": "yarn build && yarn bundle && yarn test",
+    "prepack": "yarn build && yarn test",
+    "all": "yarn build && yarn test",
     "cli": "node ./dist/src/cli/index.js"
   },
   "author": "Quantified Uncertainty Research Institute",
