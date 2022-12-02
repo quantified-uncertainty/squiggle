@@ -1,4 +1,3 @@
-import * as Bindings from "./bindings";
 import {
   ReducerFn,
   vArray,
@@ -45,7 +44,7 @@ export const evaluate: ReducerFn = (expression, context) => {
     case "Block": {
       let currentContext: Context.ReducerContext = {
         ...context,
-        bindings: Bindings.extend(context.bindings),
+        bindings: context.bindings.extend(),
       };
       let currentValue = vVoid();
       for (const statement of expression.value) {
@@ -100,14 +99,14 @@ export const evaluate: ReducerFn = (expression, context) => {
         vVoid(),
         {
           ...context,
-          bindings: Bindings.set(context.bindings, expression.left, result),
+          bindings: context.bindings.set(expression.left, result),
         },
       ];
     }
 
     case "Symbol": {
       const name = expression.value;
-      const value = Bindings.get(context.bindings, name);
+      const value = context.bindings.get(name);
       if (value === undefined) {
         return throwFrom(
           IError.RESymbolNotFound(expression.value),

@@ -1,46 +1,42 @@
 import { vNumber } from "../../src/value";
-import * as Bindings from "../../src/reducer/bindings";
+import { Bindings } from "../../src/reducer/bindings";
 import * as Namespace from "../../src/reducer/Namespace";
 
 describe("Bindings", () => {
   const value = vNumber(1967);
-  const bindings = Bindings.set(Bindings.make(), "value", value);
+  const bindings = Bindings.make().set("value", value);
   test("get", () => {
-    expect(Bindings.get(bindings, "value")).toEqual(value);
+    expect(bindings.get("value")).toEqual(value);
   });
 
   test("get nonexisting value", () => {
-    expect(Bindings.get(bindings, "nosuchvalue")).toEqual(undefined);
+    expect(bindings.get("nosuchvalue")).toEqual(undefined);
   });
 
   test("get on extended", () => {
-    expect(Bindings.get(Bindings.extend(bindings), "value")).toEqual(value);
+    expect(bindings.extend().get("value")).toEqual(value);
   });
 
   test("locals", () => {
-    expect(Namespace.get(Bindings.locals(bindings), "value")).toEqual(value);
+    expect(Namespace.get(bindings.locals(), "value")).toEqual(value);
   });
 
   test("locals on extendeed", () => {
-    expect(
-      Namespace.get(Bindings.locals(Bindings.extend(bindings)), "value")
-    ).toEqual(undefined);
+    expect(Namespace.get(bindings.extend().locals(), "value")).toEqual(
+      undefined
+    );
   });
 
   describe("extend", () => {
     const value2 = vNumber(5);
-    const extendedBindings = Bindings.set(
-      Bindings.extend(bindings),
-      "value",
-      value2
-    );
+    const extendedBindings = bindings.extend().set("value", value2);
 
     test("get on extended", () => {
-      expect(Bindings.get(extendedBindings, "value")).toEqual(value2);
+      expect(extendedBindings.get("value")).toEqual(value2);
     });
 
     test("get on original", () => {
-      expect(Bindings.get(bindings, "value")).toEqual(value);
+      expect(bindings.get("value")).toEqual(value);
     });
   });
 });

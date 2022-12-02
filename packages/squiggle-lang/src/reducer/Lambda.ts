@@ -1,7 +1,7 @@
 import { LocationRange } from "peggy";
 import { Expression } from "../expression";
 import { ReducerFn, Value } from "../value";
-import * as Bindings from "./bindings";
+import { Bindings } from "./bindings";
 import * as Namespace from "./Namespace";
 import * as Context from "./Context";
 import { ReducerContext } from "./Context";
@@ -37,7 +37,7 @@ export const getName = (t: Lambda): string => {
 export const makeLambda = (
   name: string | undefined,
   parameters: string[],
-  bindings: Bindings.Bindings,
+  bindings: Bindings,
   body: Expression,
   location: LocationRange
 ): Lambda => {
@@ -55,8 +55,7 @@ export const makeLambda = (
     }
 
     // create new bindings scope
-    const localBindings = Bindings.extendWith(
-      bindings,
+    const localBindings = bindings.extendWith(
       Namespace.fromArray(
         parameters.map((parameter, i) => [parameter, args[i]])
       )

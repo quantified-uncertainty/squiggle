@@ -227,13 +227,6 @@ export const Error = {
   },
 };
 
-type SamplingInputs = {
-  sampleCount: number; // int
-  outputXYPoints: number; // int
-  kernelWidth?: number;
-  pointSetDistLength: number; // int
-};
-
 const buildSampleSetFromFn = (
   n: number,
   fn: (i: number) => Result.result<number, OperationError>

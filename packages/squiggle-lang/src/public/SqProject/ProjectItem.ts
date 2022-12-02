@@ -6,7 +6,6 @@ import { AST, parse, ParseError } from "../../ast/parse";
 import { errorFromException, fromParseError } from "../../reducer/IError";
 import { Expression } from "../../expression";
 import * as Namespace from "../../reducer/Namespace";
-import * as Bindings from "../../reducer/bindings";
 import { Value } from "../../value";
 import { SqError } from "../SqError";
 import { expressionFromAst } from "../../ast/toExpression";
@@ -231,7 +230,7 @@ export const run = (t: t, context: ReducerContext): t => {
     );
     return setBindings(
       setResult(t, Ok(result)),
-      Bindings.locals(contextAfterEvaluation.bindings)
+      contextAfterEvaluation.bindings.locals()
     );
   } catch (e: unknown) {
     return failRun(t, new SqError(errorFromException(e)));

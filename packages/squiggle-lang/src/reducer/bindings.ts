@@ -7,55 +7,54 @@
 import { Value } from "../value";
 import * as Namespace from "./Namespace";
 
-export type Bindings = {
-  namespace: Namespace.Namespace;
-  parent?: Bindings;
-};
+export class Bindings {
+  private constructor(
+    private readonly namespace: Namespace.Namespace,
+    private readonly parent?: Bindings
+  ) {}
 
-export const get = (t: Bindings, id: string): Value | undefined => {
-  const local = Namespace.get(t.namespace, id);
-  if (local !== undefined) {
-    return local;
+  static make(): Bindings {
+    return new Bindings(Namespace.make(), undefined);
   }
-  return t.parent ? get(t.parent, id) : undefined;
-};
 
-export const set = (t: Bindings, id: string, value: Value): Bindings => {
-  return {
-    ...t,
-    namespace: Namespace.set(t.namespace, id, value),
-  };
-};
+  static fromNamespace(namespace: Namespace.Namespace): Bindings {
+    return new Bindings(namespace, undefined);
+  }
 
-export const toString = (t: Bindings): string => {
-  const pairs = Namespace.toString(t.namespace);
+  get(id: string): Value | undefined {
+    const local = Namespace.get(this.namespace, id);
+    if (local !== undefined) {
+      return local;
+    }
+    return this.parent?.get(id);
+  }
 
-  return `{${pairs}}` + (t.parent ? `/ ${toString(t.parent)}` : "");
-};
+  set(id: string, value: Value) {
+    return new Bindings(Namespace.set(this.namespace, id, value), this.parent);
+  }
 
-export const extend = (t: Bindings): Bindings => ({
-  namespace: Namespace.make(),
-  parent: t,
-});
+  toString(): string {
+    const pairs = Namespace.toString(this.namespace);
 
-export const extendWith = (t: Bindings, ns: Namespace.Namespace): Bindings => ({
-  namespace: ns,
-  parent: t,
-});
+    return `{${pairs}}` + (this.parent ? `/ ${this.toString()}` : "");
+  }
 
-export const make = (): Bindings => ({
-  namespace: Namespace.make(),
-  parent: undefined,
-});
+  extend(): Bindings {
+    return new Bindings(Namespace.make(), this);
+  }
 
-export const removeResult = (t: Bindings): Bindings => ({
-  ...t,
-  namespace: Namespace.remove(t.namespace, "__result__"),
-});
+  extendWith(ns: Namespace.Namespace): Bindings {
+    return new Bindings(ns, this);
+  }
 
-export const locals = (t: Bindings): Namespace.Namespace => t.namespace;
+  removeResult(): Bindings {
+    return new Bindings(
+      Namespace.remove(this.namespace, "__result__"),
+      this.parent
+    );
+  }
 
-export const fromNamespace = (namespace: Namespace.Namespace): Bindings => ({
-  namespace,
-  parent: undefined,
-});
+  locals(): Namespace.Namespace {
+    return this.namespace;
+  }
+}

@@ -1,11 +1,11 @@
 import { Env } from "../Dist/env";
-import * as Bindings from "./bindings";
+import { Bindings } from "./bindings";
 import * as FrameStack from "./FrameStack";
 import * as Lambda from "./Lambda";
 import { Namespace } from "./Namespace";
 
 export type ReducerContext = Readonly<{
-  bindings: Bindings.Bindings;
+  bindings: Bindings;
   environment: Env;
   frameStack: FrameStack.FrameStack;
   inFunction?: Lambda.Lambda;
@@ -16,7 +16,7 @@ export const createContext = (
   environment: Env
 ): ReducerContext => ({
   frameStack: FrameStack.make(),
-  bindings: Bindings.extend(Bindings.fromNamespace(stdLib)),
+  bindings: Bindings.fromNamespace(stdLib).extend(),
   environment,
 });
 
