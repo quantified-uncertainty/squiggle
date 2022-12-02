@@ -12,7 +12,7 @@ import {
 import { parse } from "@quri/squiggle-lang";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { SqParseError } from "@quri/squiggle-lang/dist/src/js/parse";
+import { SqParseError } from "@quri/squiggle-lang";
 
 // Documentation:
 // - https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
