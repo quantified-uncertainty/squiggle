@@ -44,7 +44,13 @@ export const evaluate: ReducerFn = (expression, context) => {
     case "Block": {
       let currentContext: Context.ReducerContext = {
         ...context,
-        bindings: context.bindings.extend(),
+        /*
+        We could call `bindings.extend()` here, but we don't, since scopes are costly and bindings are immutable anyway.
+        So we just have to be careful to throw away block's bindings at the end of a block scope and return the original context.
+        Note: We'll have to remove this optimization if we add any kind of `locals()` (like in Python) function or debugging utilities.
+        See also: similar note in `makeLambda()` function in `lambda.ts`.
+        */
+        // bindings: context.bindings.extend(),
       };
       let currentValue = vVoid();
       for (const statement of expression.value) {

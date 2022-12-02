@@ -53,10 +53,12 @@ export const makeLambda = (
       );
     }
 
-    // create new bindings scope
-    const localBindings = bindings.extendWith(
-      NamespaceMap(parameters.map((parameter, i) => [parameter, args[i]]))
-    );
+    // We could call bindings.extend() here to create a new local scope, but we don't,
+    // since bindings are immutable anyway, and scopes are costly (lookups to upper scopes are O(depth)).
+    let localBindings = bindings;
+    for (let i = 0; i < parametersLength; i++) {
+      localBindings = localBindings.set(parameters[i], args[i]);
+    }
 
     const lambdaContext: ReducerContext = {
       bindings: localBindings, // based on bindings at the moment of lambda creation
