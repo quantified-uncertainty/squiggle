@@ -1,12 +1,12 @@
-import { SampleSetDist } from "../Dist/SampleSetDist/SampleSetDist";
-import { Env } from "../Dist/env";
+import { SampleSetDist } from "../dist/SampleSetDist/SampleSetDist";
+import { Env } from "../dist/env";
 import { SqDistributionError } from "./SqDistributionError";
 import { wrapPointSet } from "./SqPointSet";
 import * as Result from "../utility/result";
-import { BaseDist } from "../Dist/BaseDist";
-import { DistError } from "../Dist/DistError";
-import { SymbolicDist } from "../Dist/SymbolicDist";
-import { PointSetDist } from "../Dist/PointSetDist";
+import { BaseDist } from "../dist/BaseDist";
+import { DistError } from "../dist/DistError";
+import { SymbolicDist } from "../dist/SymbolicDist";
+import { PointSetDist } from "../dist/PointSetDist";
 import { Ok, result } from "../utility/result";
 
 export enum SqDistributionTag {

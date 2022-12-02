@@ -19,7 +19,7 @@ import {
   exponentialDist, // rate=2
 } from "../fixtures";
 
-import { BinaryOperations } from "../../../src/Dist/DistOperations";
+import { BinaryOperations } from "../../../src/dist/DistOperations";
 import { env, unpackResult } from "../distTestHelpers";
 const {
   algebraicAdd,

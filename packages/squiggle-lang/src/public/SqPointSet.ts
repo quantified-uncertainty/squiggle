@@ -4,7 +4,7 @@ import { ContinuousShape } from "../PointSet/Continuous";
 import { DiscreteShape } from "../PointSet/Discrete";
 import { MixedShape } from "../PointSet/Mixed";
 import { AnyPointSet } from "../PointSet/PointSet";
-import { PointSetDist } from "../Dist/PointSetDist";
+import { PointSetDist } from "../dist/PointSetDist";
 
 enum Tag {
   Mixed = "Mixed",

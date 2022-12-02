@@ -1,5 +1,5 @@
-import { operationDistError } from "../../src/Dist/DistError";
-import * as DistOperations from "../../src/Dist/DistOperations";
+import { operationDistError } from "../../src/dist/DistError";
+import * as DistOperations from "../../src/dist/DistOperations";
 import {
   DivisionByZeroError,
   NegativeInfinityError,

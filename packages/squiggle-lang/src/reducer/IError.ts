@@ -3,7 +3,7 @@
 
 import { object } from "fast-check";
 import { ParseError } from "../ast/parse";
-import { DistError, distErrorToString } from "../Dist/DistError";
+import { DistError, distErrorToString } from "../dist/DistError";
 import { OperationError, operationErrorToString } from "../OperationError";
 import { Frame, FrameStack } from "./FrameStack";
 

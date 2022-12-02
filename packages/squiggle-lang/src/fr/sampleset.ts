@@ -1,5 +1,5 @@
-import { toSampleSetDist } from "../Dist/DistOperations";
-import * as SampleSetDist from "../Dist/SampleSetDist/SampleSetDist";
+import { toSampleSetDist } from "../dist/DistOperations";
+import * as SampleSetDist from "../dist/SampleSetDist/SampleSetDist";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import {
   frArray,
@@ -16,7 +16,7 @@ import {
 import { Ok } from "../utility/result";
 import { vArray, vNumber } from "../value";
 import * as IError from "../reducer/IError";
-import { BaseDist } from "../Dist/BaseDist";
+import { BaseDist } from "../dist/BaseDist";
 
 const maker = new FnFactory({
   nameSpace: "SampleSet",

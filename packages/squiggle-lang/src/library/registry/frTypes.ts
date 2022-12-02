@@ -1,4 +1,4 @@
-import { BaseDist } from "../../Dist/BaseDist";
+import { BaseDist } from "../../dist/BaseDist";
 import { Lambda } from "../../reducer/Lambda";
 import { ImmutableMap } from "../../utility/immutableMap";
 import { Value } from "../../value";

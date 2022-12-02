@@ -8,7 +8,7 @@ Details in https://squiggle-language.com/docs/internal/invariants/
 Note: epsilon of 1e3 means the invariants are, in general, not being satisfied. 
 */
 
-import { BaseDist } from "../../../src/Dist/BaseDist";
+import { BaseDist } from "../../../src/dist/BaseDist";
 import {
   env,
   mkBeta,
@@ -23,8 +23,8 @@ import {
 import {
   BinaryOperations,
   BinaryOperation,
-} from "../../../src/Dist/DistOperations";
-import { Env } from "../../../src/Dist/env";
+} from "../../../src/dist/DistOperations";
+import { Env } from "../../../src/dist/env";
 import { expectErrorToBeBounded } from "../../testHelpers";
 
 const epsilon = 5e1;

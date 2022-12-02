@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import isFinite from "lodash/isFinite";
 
-import { Env } from "../Dist/env";
+import { Env } from "../dist/env";
 import { SqProject } from "../public/SqProject";
 import { bold, red } from "./colors";
 

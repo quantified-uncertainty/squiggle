@@ -14,10 +14,10 @@ import {
   FnFactory,
   repackDistResult,
 } from "../library/registry/helpers";
-import { PointSetDist } from "../Dist/PointSetDist";
+import { PointSetDist } from "../dist/PointSetDist";
 import { vDist, vNumber } from "../value";
 import * as XYShape from "../XYShape";
-import { xyShapeDistError } from "../Dist/DistError";
+import { xyShapeDistError } from "../dist/DistError";
 import { Ok } from "../utility/result";
 
 const maker = new FnFactory({

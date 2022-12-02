@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { BinaryOperations } from "../../src/Dist/DistOperations";
+import { BinaryOperations } from "../../src/dist/DistOperations";
 import { env, mkExponential, mkNormal, unpackResult } from "./distTestHelpers";
 import { SimpleOperationError } from "../../src/OperationError";
 

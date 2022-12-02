@@ -1,4 +1,4 @@
-import { Env } from "./Dist/env";
+import { Env } from "./dist/env";
 import { SqProject } from "./public/SqProject";
 import { SqValue } from "./public/SqValue";
 
@@ -12,7 +12,7 @@ export { SqError, SqFrame } from "./public/SqError";
 export { SqShape } from "./public/SqPointSet";
 export { SqParseError, parse } from "./public/parse";
 
-export { defaultEnv as defaultEnvironment } from "./Dist/env";
+export { defaultEnv as defaultEnvironment } from "./dist/env";
 export { SqProject, SqValue };
 export { Env };
 export { LocationRange as SqLocation } from "peggy";

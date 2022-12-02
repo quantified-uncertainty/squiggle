@@ -9,11 +9,11 @@ import {
   mkTriangular,
   unpackResult,
 } from "./distTestHelpers";
-import * as SymbolicDist from "../../src/Dist/SymbolicDist";
+import * as SymbolicDist from "../../src/dist/SymbolicDist";
 import * as Result from "../../src/utility/result";
 import * as E_A_Floats from "../../src/utility/E_A_Floats";
 import * as E_A from "../../src/utility/E_A";
-import * as Sparklines from "../../src/Sparklines";
+import { createSparkline } from "../../src/utility/sparklines";
 
 describe("(Symbolic) normalize", () => {
   test.each([-1e8, -1e-2, 0.0, 1e-4, 1e16])(
@@ -156,20 +156,20 @@ describe("Normal distribution with sparklines", () => {
     const pdfNormalDistAtMean5 = (x: number) =>
       unpackResult(normalDistAtMean5.pdf(x));
     const sparklineMean5 = range20Float.map(pdfNormalDistAtMean5);
-    expect(Sparklines.create(sparklineMean5)).toEqual(`▁▂▃▆██▇▅▂▁▁▁▁▁▁▁▁▁▁▁`);
+    expect(createSparkline(sparklineMean5)).toEqual(`▁▂▃▆██▇▅▂▁▁▁▁▁▁▁▁▁▁▁`);
   });
 
   test("parameter-wise addition of two normal distributions", () => {
     const sparklineMean15 = range20Float.map(
       parameterWiseAdditionPdf(normalDistAtMean5, normalDistAtMean10)
     );
-    expect(Sparklines.create(sparklineMean15)).toEqual(`▁▁▁▁▁▁▁▁▁▂▃▄▆███▇▅▄▂`);
+    expect(createSparkline(sparklineMean15)).toEqual(`▁▁▁▁▁▁▁▁▁▂▃▄▆███▇▅▄▂`);
   });
 
   test("mean=10 cdf", () => {
     const cdfNormalDistAtMean10 = (x: number) => normalDistAtMean10.cdf(x);
     const sparklineMean10 = range20Float.map(cdfNormalDistAtMean10);
-    expect(Sparklines.create(sparklineMean10)).toEqual(`▁▁▁▁▁▁▁▁▂▄▅▇████████`);
+    expect(createSparkline(sparklineMean10)).toEqual(`▁▁▁▁▁▁▁▁▂▄▅▇████████`);
   });
 });
 

@@ -1,8 +1,8 @@
-import { BaseDist } from "../Dist/BaseDist";
-import { DistError } from "../Dist/DistError";
-import { toSampleSetDist } from "../Dist/DistOperations";
-import * as SampleSetDist from "../Dist/SampleSetDist/SampleSetDist";
-import * as SymbolicDist from "../Dist/SymbolicDist";
+import { BaseDist } from "../dist/BaseDist";
+import { DistError } from "../dist/DistError";
+import { toSampleSetDist } from "../dist/DistOperations";
+import * as SampleSetDist from "../dist/SampleSetDist/SampleSetDist";
+import * as SymbolicDist from "../dist/SymbolicDist";
 import { Env } from "..";
 import { FRFunction } from "../library/registry/core";
 import { makeDefinition } from "../library/registry/fnDefinition";

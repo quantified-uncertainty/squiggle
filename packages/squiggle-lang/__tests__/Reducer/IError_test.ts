@@ -1,5 +1,5 @@
 import * as IError from "../../src/reducer/IError";
-import * as FrameStack from "../../src/reducer/FrameStack";
+import { FrameStack } from "../../src/reducer/FrameStack";
 
 describe("IError.Message", () => {
   test("toString", () => {
@@ -25,11 +25,9 @@ describe("IError", () => {
     ).toBe("Error: test error"));
 
   test("toStringWithStackTrace", () => {
-    const frameStack = FrameStack.extend(
-      FrameStack.extend(FrameStack.make(), "frame1", undefined),
-      "frame2",
-      undefined
-    );
+    const frameStack = FrameStack.make()
+      .extend("frame1", undefined)
+      .extend("frame2", undefined);
 
     expect(
       IError.errorToStringWithStackTrace(

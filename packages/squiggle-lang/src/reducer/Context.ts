@@ -1,4 +1,4 @@
-import { Env } from "../Dist/env";
+import { Env } from "../dist/env";
 import { Bindings, Namespace } from "./bindings";
 import { FrameStack, topFrameName } from "./FrameStack";
 import { Lambda } from "./Lambda";

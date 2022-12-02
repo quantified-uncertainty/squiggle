@@ -4,7 +4,6 @@ import { ReducerFn, Value } from "../value";
 import { Bindings } from "./bindings";
 import * as Context from "./Context";
 import { ReducerContext } from "./Context";
-import * as FrameStack from "./FrameStack";
 import * as SqError from "./IError";
 
 type LambdaBody = (

@@ -2,7 +2,7 @@ import range from "lodash/range";
 import flatten from "lodash/flatten";
 import fc from "fast-check";
 
-import { splitContinuousAndDiscrete as split } from "../../src/Dist/SampleSetDist/SplitContinuousAndDiscrete";
+import { splitContinuousAndDiscrete as split } from "../../src/dist/SampleSetDist/SplitContinuousAndDiscrete";
 
 const makeTest = (params: {
   name: string;

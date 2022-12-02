@@ -1,5 +1,5 @@
-import { BaseDist } from "../../Dist/BaseDist";
-import { Env } from "../../Dist/env";
+import { BaseDist } from "../../dist/BaseDist";
+import { Env } from "../../dist/env";
 import { Ok } from "../../utility/result";
 import * as Lambda from "../../reducer/Lambda";
 import { ReducerFn, Value, vBool, vDist, vNumber, vString } from "../../value";
@@ -8,7 +8,7 @@ import { FnDefinition, makeDefinition } from "./fnDefinition";
 import { frBool, frDist, frNumber } from "./frTypes";
 import * as Result from "../../utility/result";
 import * as IError from "../../reducer/IError";
-import { DistError } from "../../Dist/DistError";
+import { DistError } from "../../dist/DistError";
 import { ReducerContext } from "../../reducer/Context";
 import { SampleMapNeedsNtoNFunction } from "../../OperationError";
 

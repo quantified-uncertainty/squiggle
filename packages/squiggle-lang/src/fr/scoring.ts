@@ -4,9 +4,9 @@ import { FnFactory } from "../library/registry/helpers";
 import { vNumber } from "../value";
 import * as IError from "../reducer/IError";
 import * as Result from "../utility/result";
-import * as DistOperations from "../Dist/DistOperations";
-import { BaseDist } from "../Dist/BaseDist";
-import { Env } from "../Dist/env";
+import * as DistOperations from "../dist/DistOperations";
+import { BaseDist } from "../dist/BaseDist";
+import { Env } from "../dist/env";
 
 const maker = new FnFactory({
   nameSpace: "Dist",

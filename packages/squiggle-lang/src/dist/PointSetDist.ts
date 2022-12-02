@@ -5,13 +5,13 @@ import { MixedShape } from "../PointSet/Mixed";
 
 import * as magicNumbers from "../magicNumbers";
 import * as Result from "../utility/result";
-import * as Sparklines from "../Sparklines";
 
 import * as PointSet from "../PointSet/PointSet";
 
 import { BaseDist } from "./BaseDist";
 import { AnyPointSet } from "../PointSet/PointSet";
 import { DistError, sparklineError } from "./DistError";
+import { createSparkline } from "../utility/sparklines";
 
 export class PointSetDist<
   T extends AnyPointSet = AnyPointSet
@@ -100,7 +100,7 @@ export class PointSetDist<
       );
     }
     const downsampled = continuous.downsampleEquallyOverX(bucketCount);
-    return Result.Ok(Sparklines.create(Continuous.getShape(downsampled).ys));
+    return Result.Ok(createSparkline(Continuous.getShape(downsampled).ys));
   }
 
   // PointSet-only methods

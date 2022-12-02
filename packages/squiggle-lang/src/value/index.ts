@@ -1,4 +1,4 @@
-import { BaseDist } from "../Dist/BaseDist";
+import { BaseDist } from "../dist/BaseDist";
 import { Expression } from "../expression";
 import { Namespace } from "../reducer/bindings";
 import { ReducerContext } from "../reducer/Context";

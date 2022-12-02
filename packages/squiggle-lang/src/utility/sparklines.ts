@@ -12,7 +12,7 @@ const _heightToTickIndex = (maximum: number, v: number) => {
   return Math.max(suggestedTickIndex, 0);
 };
 
-export const create = (
+export const createSparkline = (
   relativeHeights: number[],
   maximum: number | undefined = undefined
 ): string => {

@@ -1,6 +1,6 @@
-import { BaseDist } from "../../src/Dist/BaseDist";
-import { DistError } from "../../src/Dist/DistError";
-import { SampleSetDist } from "../../src/Dist/SampleSetDist/SampleSetDist";
+import { BaseDist } from "../../src/dist/BaseDist";
+import { DistError } from "../../src/dist/DistError";
+import { SampleSetDist } from "../../src/dist/SampleSetDist/SampleSetDist";
 import { Env } from "../../src";
 import * as Result from "../../src/utility/result";
 import { Ok } from "../../src/utility/result";

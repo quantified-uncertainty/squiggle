@@ -6,7 +6,7 @@ import { SqValueLocation } from "../SqValueLocation";
 import * as ProjectItem from "./ProjectItem";
 import * as Topology from "./Topology";
 import { Resolver } from "./Resolver";
-import { defaultEnv, Env } from "../../Dist/env";
+import { defaultEnv, Env } from "../../dist/env";
 import * as IError from "../../reducer/IError";
 import * as Library from "../../library";
 import { Value, vRecord } from "../../value";

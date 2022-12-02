@@ -1,6 +1,6 @@
-import * as SymbolicDist from "../../src/Dist/SymbolicDist";
+import * as SymbolicDist from "../../src/dist/SymbolicDist";
 import * as Result from "../../src/utility/result";
-import { defaultEnv, Env } from "../../src/Dist/env";
+import { defaultEnv, Env } from "../../src/dist/env";
 
 export const env: Env = defaultEnv;
 

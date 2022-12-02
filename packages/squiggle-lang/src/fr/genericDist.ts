@@ -1,10 +1,10 @@
 import { FRFunction } from "../library/registry/core";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers";
 import * as IError from "../reducer/IError";
-import * as SymbolicDist from "../Dist/SymbolicDist";
+import * as SymbolicDist from "../dist/SymbolicDist";
 import * as Result from "../utility/result";
 import * as magicNumbers from "../magicNumbers";
-import { DistError, otherError } from "../Dist/DistError";
+import { DistError, otherError } from "../dist/DistError";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import { Value, vArray, vDist, vNumber } from "../value";
 import { frDist, frNumber } from "../library/registry/frTypes";
@@ -14,8 +14,8 @@ import {
   BinaryOperations,
   pointwiseCombinationFloat,
   scaleLog,
-} from "../Dist/DistOperations";
-import { BaseDist } from "../Dist/BaseDist";
+} from "../dist/DistOperations";
+import { BaseDist } from "../dist/BaseDist";
 
 const maker = new FnFactory({
   nameSpace: "",

@@ -1,7 +1,7 @@
 import {
   logScoreScalarAnswer,
   mixture,
-} from "../../../src/Dist/DistOperations";
+} from "../../../src/dist/DistOperations";
 import { env, mkDelta, unpackResult } from "../distTestHelpers";
 
 describe("WithScalarAnswer: discrete -> scalar -> score", () => {
