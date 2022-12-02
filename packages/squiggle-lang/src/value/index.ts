@@ -3,7 +3,7 @@ import { Expression } from "../expression";
 import { Namespace } from "../reducer/bindings";
 import { ReducerContext } from "../reducer/Context";
 import { declarationToString, LambdaDeclaration } from "../reducer/Declaration";
-import { Lambda } from "../reducer/Lambda";
+import { Lambda } from "../reducer/lambda";
 import * as DateTime from "../utility/DateTime";
 
 // TODO - move these types to reducer/

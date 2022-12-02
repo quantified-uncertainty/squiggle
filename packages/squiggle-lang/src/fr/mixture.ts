@@ -7,7 +7,7 @@ import * as DistOperations from "../dist/DistOperations";
 import { Value, vDist } from "../value";
 import { argumentError, DistError } from "../dist/DistError";
 import { unpackDistResult } from "../library/registry/helpers";
-import { BuiltinLambda } from "../reducer/Lambda";
+import { BuiltinLambda } from "../reducer/lambda";
 import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage";
 
 const raiseArgumentError = (message: string) =>

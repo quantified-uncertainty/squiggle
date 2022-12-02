@@ -1,7 +1,7 @@
 import { BaseDist } from "../../dist/BaseDist";
 import { Env } from "../../dist/env";
 import { Ok } from "../../utility/result";
-import * as Lambda from "../../reducer/Lambda";
+import { Lambda } from "../../reducer/lambda";
 import { ReducerFn, Value, vBool, vDist, vNumber, vString } from "../../value";
 import { FRFunction } from "./core";
 import { FnDefinition, makeDefinition } from "./fnDefinition";
@@ -250,7 +250,7 @@ export const repackDistResult = (
 };
 
 export const doNumberLambdaCall = (
-  lambda: Lambda.Lambda,
+  lambda: Lambda,
   args: Value[],
   context: ReducerContext,
   reducer: ReducerFn

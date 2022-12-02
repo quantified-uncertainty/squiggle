@@ -1,5 +1,5 @@
 import { ReducerContext } from "../../reducer/Context";
-import { Lambda } from "../../reducer/Lambda";
+import { Lambda } from "../../reducer/lambda";
 import { ReducerFn, Value } from "../../value";
 import { result } from "../../utility/result";
 import * as core from "./core";

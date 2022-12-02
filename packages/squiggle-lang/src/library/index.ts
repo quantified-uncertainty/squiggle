@@ -3,7 +3,7 @@ import { makeMathConstants } from "./math";
 import { makeVersionConstant } from "./version";
 import * as registry from "./registry";
 import { Namespace, NamespaceMap } from "../reducer/bindings";
-import { BuiltinLambda } from "../reducer/Lambda";
+import { BuiltinLambda } from "../reducer/lambda";
 import {
   ErrorMessage,
   REArrayIndexNotFound,

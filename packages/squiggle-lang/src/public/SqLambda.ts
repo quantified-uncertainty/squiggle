@@ -2,7 +2,7 @@ import { SqError } from "./SqError";
 import { SqValue } from "./SqValue";
 import { SqValueLocation } from "./SqValueLocation";
 import { result } from "../utility/result";
-import { Lambda } from "../reducer/Lambda";
+import { Lambda } from "../reducer/lambda";
 
 export class SqLambda {
   constructor(private _value: Lambda, public location: SqValueLocation) {}

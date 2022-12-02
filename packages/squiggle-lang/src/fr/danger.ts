@@ -8,7 +8,7 @@ import { frArray, frLambda, frNumber } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
 import { ReducerContext } from "../reducer/Context";
 import { ErrorMessage, REOther } from "../reducer/ErrorMessage";
-import { Lambda } from "../reducer/Lambda";
+import { Lambda } from "../reducer/lambda";
 import * as E_A from "../utility/E_A";
 import { Ok, result } from "../utility/result";
 import { ReducerFn, Value, vArray, vNumber } from "../value";
