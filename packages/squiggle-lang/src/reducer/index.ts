@@ -27,8 +27,7 @@ const throwFrom = (
 ): never => {
   return IError.throwMessageWithFrameStack(
     error,
-    FrameStack.extend(
-      context.frameStack,
+    context.frameStack.extend(
       Context.currentFunctionName(context),
       expression.ast.location
     )

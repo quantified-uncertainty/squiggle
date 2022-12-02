@@ -5,7 +5,7 @@ import { object } from "fast-check";
 import { ParseError } from "../ast/parse";
 import { DistError, distErrorToString } from "../Dist/DistError";
 import { OperationError, operationErrorToString } from "../OperationError";
-import * as FrameStack from "./FrameStack";
+import { Frame, FrameStack } from "./FrameStack";
 
 // because they will be caught and rewrapped by Reducer_Lambda code.
 export type Message =
@@ -217,7 +217,7 @@ export const Message = {
 
 export type IError = {
   message: Message;
-  frameStack: FrameStack.FrameStack;
+  frameStack: FrameStack;
 };
 
 class IException extends Error {
@@ -231,7 +231,7 @@ class IException extends Error {
 
 export const fromMessageWithFrameStack = (
   message: Message,
-  frameStack: FrameStack.FrameStack
+  frameStack: FrameStack
 ): IError => ({
   message,
   frameStack,
@@ -248,22 +248,20 @@ export const fromParseError = ({ message, location }: ParseError) =>
     FrameStack.makeSingleFrameStack(location)
   );
 
-export const getTopFrame = (t: IError): FrameStack.Frame | undefined =>
-  FrameStack.getTopFrame(t.frameStack);
+export const getTopFrame = (t: IError): Frame | undefined =>
+  t.frameStack.getTopFrame();
 
 export const errorToString = (t: IError): string => Message.toString(t.message);
 
 export const createOtherError = (v: string): IError =>
   errorFromMessage(REOther(v));
 
-export const getFrameArray = (t: IError): FrameStack.Frame[] =>
-  FrameStack.toFrameArray(t.frameStack);
+export const getFrameArray = (t: IError): Frame[] =>
+  t.frameStack.toFrameArray();
 
 export const errorToStringWithStackTrace = (t: IError): string =>
   errorToString(t) +
-  (FrameStack.isEmpty(t.frameStack)
-    ? ""
-    : "\nStack trace:\n" + FrameStack.toString(t.frameStack));
+  (t.frameStack.isEmpty() ? "" : "\nStack trace:\n" + t.frameStack.toString());
 
 const sqThrow = (t: IError): never => {
   throw new IException(t);
@@ -271,7 +269,7 @@ const sqThrow = (t: IError): never => {
 
 export const throwMessageWithFrameStack = (
   message: Message,
-  frameStack: FrameStack.FrameStack
+  frameStack: FrameStack
 ): never => {
   return sqThrow(fromMessageWithFrameStack(message, frameStack));
 };
@@ -297,7 +295,7 @@ export const errorFromException = (exn: unknown) => {
 // already converted exceptions won't be affected
 export const rethrowWithFrameStack = <T>(
   fn: () => T,
-  frameStack: FrameStack.FrameStack
+  frameStack: FrameStack
 ): T => {
   try {
     return fn();

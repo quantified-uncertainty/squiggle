@@ -28,8 +28,7 @@ export abstract class Lambda {
   ): Value {
     const newContext: ReducerContext = {
       ...context,
-      frameStack: FrameStack.extend(
-        context.frameStack,
+      frameStack: context.frameStack.extend(
         Context.currentFunctionName(context),
         location
       ),
